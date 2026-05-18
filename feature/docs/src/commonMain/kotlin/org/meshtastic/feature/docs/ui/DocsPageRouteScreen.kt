@@ -54,6 +54,7 @@ import org.meshtastic.core.ui.icon.ArrowBack
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.feature.docs.model.AIDocAssistantSessionState
 import org.meshtastic.feature.docs.model.DocPageContent
+import org.meshtastic.feature.docs.model.TranslationSource
 import org.meshtastic.core.resources.Res as CoreRes
 
 /** Routes a page ID to the appropriate page renderer surface. */
@@ -64,6 +65,8 @@ fun DocsPageRouteScreen(
     pageId: String,
     content: DocPageContent?,
     isLoading: Boolean,
+    translationSource: TranslationSource = TranslationSource.BUNDLED,
+    isNonEnglish: Boolean = false,
     isAiSupported: Boolean = false,
     showChirpy: Boolean = false,
     chirpyState: AIDocAssistantSessionState = AIDocAssistantSessionState(),
@@ -79,7 +82,26 @@ fun DocsPageRouteScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(content?.page?.title ?: "Documentation") },
+                title = {
+                    Column {
+                        Text(
+                            text = content?.page?.title ?: "Documentation",
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        if (isNonEnglish && !isLoading && content != null) {
+                            Text(
+                                text =
+                                when (translationSource) {
+                                    TranslationSource.ML_KIT -> "Auto-translated"
+                                    TranslationSource.BUNDLED -> "Community translated"
+                                },
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(imageVector = MeshtasticIcons.ArrowBack, contentDescription = "Navigate back")

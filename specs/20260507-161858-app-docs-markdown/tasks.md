@@ -6,7 +6,7 @@ description: "Task list for feature: App Documentation (Android/KMP)"
 
 **Input**: Design documents from `specs/003-app-docs-markdown/`  
 **Prerequisites**: `spec.md`, `plan.md`, `research.md`, `data-model.md`, `contracts/`, `quickstart.md`  
-**Status**: Complete (Phases 0–13)
+**Status**: Complete (Phases 0–14)
 
 ## Format: `[ID] [P?] [Story] Description`
 
@@ -386,3 +386,44 @@ description: "Task list for feature: App Documentation (Android/KMP)"
 - [X] T390 [US3] Build, detekt, spotless, and all tests pass. Deployed and verified on Pixel 9 Pro.
 
 **Checkpoint**: Chirpy chat fully aligned with messaging module conventions — NodeChip-style sender label, MessageInput-style text field, markdown rendering, and Firebase AI hybrid inference.
+
+---
+
+## Phase 14: Translation Cascade (Crowdin → ML Kit → English)
+
+**Purpose**: Enable runtime translation of bundled docs for users whose locale lacks Crowdin coverage.
+
+### Translation Service Interface & Implementations
+
+- [X] T400 [P] [US1] Create `DocTranslationService` interface in `feature/docs/src/commonMain/kotlin/org/meshtastic/feature/docs/translation/` with `translatePage()`, `isLanguageAvailable()`, `downloadLanguageModel()` and sealed result types.
+- [X] T401 [P] [US1] Create `NoOpDocTranslator` for F-Droid/Desktop/iOS that returns `Unavailable`.
+- [X] T402 [P] [US1] Create `MlKitDocTranslator` in `androidApp/src/google/kotlin/org/meshtastic/app/translation/` with auto model download, segment-and-translate pattern, and proper `suspendCancellableCoroutine` bridging.
+
+### Markdown-Aware Translation
+
+- [X] T410 [P] [US1] Create `MarkdownTranslationSegmenter` that extracts translatable text from markdown while preserving code blocks, links, images, frontmatter, and HTML blocks.
+- [X] T411 [P] [US1] Create `DocTranslationCache` with Okio file-based caching, MD5 content keying, Mutex-guarded concurrency, atomic writes, and access-time eviction at 50MB.
+
+### Cascade Integration
+
+- [X] T420 [US1] Add `hasTranslatedResource()` to `DocBundleLoader` to detect Crowdin-provided locale-qualified bundles.
+- [X] T421 [US1] Wire cascade into `DocsPageScreen`: show English content immediately, attempt ML Kit translation in background only when Crowdin bundle is absent, auto-download model on first use.
+- [X] T422 [US1] Add `TranslationSource` model enum and UI indicator (subtitle in TopAppBar: "Community translated" or "Auto-translated").
+- [X] T423 [US1] Add `ioDispatcher` hop and locale-keyed `LaunchedEffect` for correct threading and reactivity.
+
+### DI & Platform Wiring
+
+- [X] T430 [P] [US1] Bind `DocTranslationService` → `MlKitDocTranslator` in `GoogleAiModule`.
+- [X] T431 [P] [US1] Bind `DocTranslationService` → `NoOpDocTranslator` in `DesktopKoinModule`.
+
+### Testing
+
+- [X] T440 [P] [US1] Create `MarkdownTranslationSegmenterTest` (15 tests covering paragraphs, headings, code, links, images, frontmatter, lists, tables, HTML blocks).
+- [X] T441 [P] [US1] Create `DocTranslationCacheTest` (8 tests covering cache miss/hit, stale hash, locale isolation, clear, size, eviction, hash consistency).
+- [X] T442 [P] [US1] Create `TranslationCascadeTest` (8 tests covering NoOp behavior, fake translator variations, sealed hierarchy).
+
+### CI
+
+- [X] T450 [US1] Add `docs/**/*.md` to `scheduled-updates.yml` `add-paths`.
+
+**Checkpoint**: Translation cascade complete — Crowdin bundled translations served automatically by CMP, ML Kit auto-translates on Google flavor when Crowdin unavailable, graceful English fallback on all other platforms.

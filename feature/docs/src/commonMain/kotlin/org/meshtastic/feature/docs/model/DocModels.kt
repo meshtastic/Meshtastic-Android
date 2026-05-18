@@ -151,3 +151,12 @@ enum class ChirpyRole {
     ASSISTANT,
     SYSTEM,
 }
+
+/** Indicates the source of displayed page content for translation attribution. */
+enum class TranslationSource {
+    /** English source or Crowdin community translation. */
+    BUNDLED,
+
+    /** ML Kit on-device auto-translation (Google flavor only). */
+    ML_KIT,
+}

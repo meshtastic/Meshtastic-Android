@@ -47,6 +47,7 @@ import org.meshtastic.feature.docs.model.ChirpyRole
 import org.meshtastic.feature.docs.model.DocPage
 import org.meshtastic.feature.docs.model.DocPageContent
 import org.meshtastic.feature.docs.model.SourceRef
+import org.meshtastic.feature.docs.model.TranslationSource
 import org.meshtastic.feature.docs.translation.DocTranslationService
 import org.meshtastic.feature.docs.translation.TranslationResult
 import org.meshtastic.feature.docs.ui.DocsBrowserScreen
@@ -216,7 +217,12 @@ private fun DocsPageScreen(pageId: String, backStack: NavBackStack<NavKey>, chir
         isLoading = true
         val loaded = withContext(ioDispatcher) { bundleLoader.readPage(pageId) }
         if (loaded != null && locale != "en" && !bundleLoader.hasTranslatedResource(pageId, locale)) {
-            // No Crowdin translation bundled for this locale — attempt ML Kit runtime translation
+            // Show English content immediately while translation runs
+            content = loaded
+            translationSource = TranslationSource.BUNDLED
+            isLoading = false
+
+            // Attempt ML Kit runtime translation in background
             val result =
                 withContext(ioDispatcher) { translationService.translatePage(pageId, loaded.markdown ?: "", locale) }
             when (result) {
@@ -226,15 +232,14 @@ private fun DocsPageScreen(pageId: String, backStack: NavBackStack<NavKey>, chir
                 }
 
                 else -> {
-                    content = loaded
-                    translationSource = TranslationSource.BUNDLED
+                    /* Keep English content already displayed */
                 }
             }
         } else {
             content = loaded
             translationSource = if (locale != "en") TranslationSource.BUNDLED else TranslationSource.BUNDLED
+            isLoading = false
         }
-        isLoading = false
     }
 
     val backHandlerState = rememberNavigationEventState(NavigationEventInfo.None)
@@ -244,6 +249,8 @@ private fun DocsPageScreen(pageId: String, backStack: NavBackStack<NavKey>, chir
         pageId = pageId,
         content = content,
         isLoading = isLoading,
+        translationSource = translationSource,
+        isNonEnglish = locale != "en",
         isAiSupported = chirpy.isSupported,
         showChirpy = chirpy.showSheet,
         chirpyState = chirpy.sessionState,
@@ -258,12 +265,6 @@ private fun DocsPageScreen(pageId: String, backStack: NavBackStack<NavKey>, chir
 }
 
 // ── Constants & helpers ─────────────────────────────────────────────────────────
-
-/** Indicates the source of the displayed page content. */
-private enum class TranslationSource {
-    BUNDLED,
-    ML_KIT,
-}
 
 /** How often to re-check AI model availability while waiting for download. */
 private const val AI_SUPPORT_CHECK_INTERVAL_MS = 3_000L

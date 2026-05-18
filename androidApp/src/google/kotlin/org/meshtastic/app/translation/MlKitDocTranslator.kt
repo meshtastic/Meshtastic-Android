@@ -53,9 +53,16 @@ class MlKitDocTranslator(private val cache: DocTranslationCache) : DocTranslatio
         // Check if language is supported by ML Kit
         val targetLang = TranslateLanguage.fromLanguageTag(targetLocale) ?: return TranslationResult.Unavailable
 
-        // Check if model is downloaded
+        // Auto-download model if not present
         if (!isModelDownloaded(targetLang)) {
-            return TranslationResult.ModelDownloadRequired(targetLocale, ESTIMATED_MODEL_SIZE_MB)
+            Logger.i(tag = "MlKitDocTranslator") {
+                "Downloading model for $targetLocale (~${ESTIMATED_MODEL_SIZE_MB}MB)"
+            }
+            val downloadResult = downloadLanguageModel(targetLocale)
+            if (downloadResult is DownloadResult.Failed) {
+                Logger.w(tag = "MlKitDocTranslator") { "Model download failed: ${downloadResult.reason}" }
+                return TranslationResult.ModelDownloadRequired(targetLocale, ESTIMATED_MODEL_SIZE_MB)
+            }
         }
 
         // Perform translation
