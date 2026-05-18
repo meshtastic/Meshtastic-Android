@@ -152,13 +152,13 @@ jobs:
           # See: https://github.com/meshtastic/Meshtastic-Android/issues/3231
 
           echo "── Step 1: Verify aboutlibraries.json determinism ──"
-          rm -f app/src/main/resources/aboutlibraries.json
-          ./gradlew :app:exportLibraryDefinitions -Pci=true --no-configuration-cache
-          cp app/src/main/resources/aboutlibraries.json /tmp/aboutlibraries-run1.json
+          rm -f androidApp/src/main/resources/aboutlibraries.json
+          ./gradlew :androidApp:exportLibraryDefinitions -Pci=true --no-configuration-cache
+          cp androidApp/src/main/resources/aboutlibraries.json /tmp/aboutlibraries-run1.json
 
-          rm -f app/src/main/resources/aboutlibraries.json
-          ./gradlew :app:exportLibraryDefinitions -Pci=true --no-configuration-cache --rerun-tasks
-          cp app/src/main/resources/aboutlibraries.json /tmp/aboutlibraries-run2.json
+          rm -f androidApp/src/main/resources/aboutlibraries.json
+          ./gradlew :androidApp:exportLibraryDefinitions -Pci=true --no-configuration-cache --rerun-tasks
+          cp androidApp/src/main/resources/aboutlibraries.json /tmp/aboutlibraries-run2.json
 
           if ! diff -q /tmp/aboutlibraries-run1.json /tmp/aboutlibraries-run2.json; then
             echo "::error::aboutlibraries.json is NOT deterministic across runs!"
@@ -168,9 +168,9 @@ jobs:
           echo "✅ aboutlibraries.json is deterministic"
 
           echo "── Step 2: Build fdroid release APK ──"
-          ./gradlew :app:assembleFdroidRelease -Pci=true -Pmeshtastic.disableAbiSplits=true --no-configuration-cache
+          ./gradlew :androidApp:assembleFdroidRelease -Pci=true -Pmeshtastic.disableAbiSplits=true --no-configuration-cache
 
-          APK=$(find app/build/outputs/apk/fdroid/release -name "*.apk" | head -1)
+          APK=$(find androidApp/build/outputs/apk/fdroid/release -name "*.apk" | head -1)
           if [ -z "$APK" ]; then
             echo "::error::No fdroid release APK found"
             exit 1
@@ -359,17 +359,17 @@ jobs:
               :feature:settings:koverXmlReport
           - name: shard-app
             tasks: >-
-              :app:testFdroidDebugUnitTest
-              :app:testGoogleDebugUnitTest
-              :desktop:test
+              :androidApp:testFdroidDebugUnitTest
+              :androidApp:testGoogleDebugUnitTest
+              :desktopApp:test
               :core:barcode:testFdroidDebugUnitTest
               :core:barcode:testGoogleDebugUnitTest
             kover: >-
-              :app:koverXmlReportFdroidDebug
-              :app:koverXmlReportGoogleDebug
+              :androidApp:koverXmlReportFdroidDebug
+              :androidApp:koverXmlReportGoogleDebug
               :core:barcode:koverXmlReportFdroidDebug
               :core:barcode:koverXmlReportGoogleDebug
-              :desktop:koverXmlReport
+              :desktopApp:koverXmlReport
 
     steps:
       - name: Checkout code
@@ -454,7 +454,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: app-debug-apks
-          path: app/build/outputs/apk/*/debug/*.apk
+          path: androidApp/build/outputs/apk/*/debug/*.apk
           retention-days: 7
 
       - name: Report App Size
@@ -463,8 +463,47 @@ jobs:
           echo "### App Size Report" >> $GITHUB_STEP_SUMMARY
           echo "| Artifact | Size |" >> $GITHUB_STEP_SUMMARY
           echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
-          find app/build/outputs/apk -name "*.apk" -exec du -h {} + | awk '{print "| " $2 " | " $1 " |"}' >> $GITHUB_STEP_SUMMARY
+          find androidApp/build/outputs/apk -name "*.apk" -exec du -h {} + | awk '{print "| " $2 " | " $1 " |"}' >> $GITHUB_STEP_SUMMARY
 
+  # ── Desktop Build ───────────────────────────────────────────────────
+  build-desktop:
+    name: Build Desktop Debug (${{ matrix.os }})
+    if: inputs.run_desktop_builds == true
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+    timeout-minutes: 60
+    needs: lint-check
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-24.04, ubuntu-24.04-arm]
+    env:
+      VERSION_CODE: ${{ needs.lint-check.outputs.version_code }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          submodules: true
+
+      - name: Gradle Setup
+        uses: ./.github/actions/gradle-setup
+        with:
+          gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          cache_read_only: ${{ needs.lint-check.outputs.cache_read_only }}
+
+      - name: Build Desktop
+        run: ./gradlew :desktopApp:createDistributable -Pci=true --scan
+
+      - name: Upload Desktop artifact
+        if: ${{ inputs.upload_artifacts }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: desktop-app-${{ runner.os }}-${{ runner.arch }}
+          path: desktopApp/build/compose/binaries/main/app/
+          retention-days: 7
 
   # ── Flatpak Sources ───────────────────────────────────────────────────
   build-flatpak-src:
@@ -494,23 +533,8 @@ jobs:
         with:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           cache_read_only: true
-      
-      - name: Python Setup
-        uses: actions/setup-python@v6
-        with:
-          python-version: '3.x'
-
-      - name: Install ast-grep
-        run: pip install ast-grep-cli
-
-      # Remove Android/iOS targets and other non-desktop bits
-      # that would break the flatpakGradleGenerator
-      - name: Prepare Offline Desktop Build
-        run: ./scripts/desktop-only-prep.sh
 
       - name: Generate Flatpak Sources
-        env:
-          DESKTOP_ONLY: true
         run: >
           ./gradlew :build-logic:convention:flatpakGradleGenerator flatpakGradleGenerator
           --no-configuration-cache --refresh-dependencies --no-parallel

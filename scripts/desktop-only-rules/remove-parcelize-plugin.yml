@@ -1,7 +1,0 @@
-id: remove-parcelize-plugin
-language: kotlin
-severity: warning
-message: "Remove parcelize plugin for desktop-only build"
-rule:
-  pattern: "alias(libs.plugins.kotlin.parcelize)"
-fix: "// [desktop-only] alias(libs.plugins.kotlin.parcelize)"

@@ -36,17 +36,6 @@ import java.util.Properties
 private const val MAX_TEST_RETRIES = 2
 private const val MAX_TEST_FAILURES = 10
 
-/**
- * `true` when the build should only configure JVM (desktop) targets, skipping Android and iOS.
- *
- * Activate via environment variable (`DESKTOP_ONLY=true`) or Gradle property (`-Pdesktop.only=true`). This allows
- * building in environments without the Android SDK (e.g. Flatpak sandboxes).
- */
-val Project.isDesktopOnly: Boolean
-    get() =
-        providers.gradleProperty("desktop.only").orNull?.toBoolean() == true ||
-            providers.environmentVariable("DESKTOP_ONLY").orNull?.toBoolean() == true
-
 val Project.libs
     get(): VersionCatalog = extensions.getByType<VersionCatalogsExtension>().named("libs")
 

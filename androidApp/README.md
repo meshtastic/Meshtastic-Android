@@ -1,7 +1,7 @@
-# `:app`
+# `:androidApp`
 
 ## Overview
-The `:app` module is the entry point for the Meshtastic Android application. It orchestrates the various feature modules, manages global state, and provides the main UI shell.
+The `:androidApp` module is the entry point for the Meshtastic Android application. It orchestrates the various feature modules, manages global state, and provides the main UI shell.
 
 ## Key Components
 
@@ -9,7 +9,7 @@ The `:app` module is the entry point for the Meshtastic Android application. It 
 The single Activity of the application. It hosts the shared `MeshtasticNavDisplay` navigation shell and manages the root UI structure (Navigation Bar, Rail, etc.).
 
 ### 2. `MeshService`
-The core background service that manages long-running communication with the mesh radio. While it is declared in the `:app` manifest for system visibility, its implementation resides in the `:core:service` module. It runs as a **Foreground Service** to ensure reliable communication even when the app is in the background.
+The core background service that manages long-running communication with the mesh radio. While it is declared in the `:androidApp` manifest for system visibility, its implementation resides in the `:core:service` module. It runs as a **Foreground Service** to ensure reliable communication even when the app is in the background.
 
 ### 3. Koin Application
 `MeshUtilApplication` is the Koin entry point, providing the global dependency injection container.
@@ -24,34 +24,34 @@ The module primarily serves as a "glue" layer, connecting:
 <!--region graph-->
 ```mermaid
 graph TB
-  :app[app]:::android-application
-  :app -.-> :core:ble
-  :app -.-> :core:common
-  :app -.-> :core:data
-  :app -.-> :core:database
-  :app -.-> :core:datastore
-  :app -.-> :core:di
-  :app -.-> :core:domain
-  :app -.-> :core:model
-  :app -.-> :core:navigation
-  :app -.-> :core:network
-  :app -.-> :core:nfc
-  :app -.-> :core:prefs
-  :app -.-> :core:proto
-  :app -.-> :core:service
-  :app -.-> :core:resources
-  :app -.-> :core:ui
-  :app -.-> :core:barcode
-  :app -.-> :core:takserver
-  :app -.-> :feature:intro
-  :app -.-> :feature:messaging
-  :app -.-> :feature:connections
-  :app -.-> :feature:map
-  :app -.-> :feature:node
-  :app -.-> :feature:settings
-  :app -.-> :feature:firmware
-  :app -.-> :feature:wifi-provision
-  :app -.-> :feature:widget
+  :androidApp[androidApp]:::android-application
+  :androidApp -.-> :core:ble
+  :androidApp -.-> :core:common
+  :androidApp -.-> :core:data
+  :androidApp -.-> :core:database
+  :androidApp -.-> :core:datastore
+  :androidApp -.-> :core:di
+  :androidApp -.-> :core:domain
+  :androidApp -.-> :core:model
+  :androidApp -.-> :core:navigation
+  :androidApp -.-> :core:network
+  :androidApp -.-> :core:nfc
+  :androidApp -.-> :core:prefs
+  :androidApp -.-> :core:proto
+  :androidApp -.-> :core:service
+  :androidApp -.-> :core:resources
+  :androidApp -.-> :core:ui
+  :androidApp -.-> :core:barcode
+  :androidApp -.-> :core:takserver
+  :androidApp -.-> :feature:intro
+  :androidApp -.-> :feature:messaging
+  :androidApp -.-> :feature:connections
+  :androidApp -.-> :feature:map
+  :androidApp -.-> :feature:node
+  :androidApp -.-> :feature:settings
+  :androidApp -.-> :feature:firmware
+  :androidApp -.-> :feature:wifi-provision
+  :androidApp -.-> :feature:widget
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

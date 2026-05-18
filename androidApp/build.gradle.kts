@@ -116,7 +116,7 @@ configure<ApplicationExtension> {
     }
 
     // Disable ABI splits for bundle builds or when explicitly requested via Gradle property.
-    // Usage: ./gradlew :app:bundleGoogleRelease -Pmeshtastic.disableAbiSplits=true
+    // Usage: ./gradlew :androidApp:bundleGoogleRelease -Pmeshtastic.disableAbiSplits=true
     val disableSplits = providers.gradleProperty("meshtastic.disableAbiSplits").map { it.toBoolean() }.getOrElse(false)
 
     // Enable ABI splits to generate smaller APKs per architecture for F-Droid/IzzyOnDroid

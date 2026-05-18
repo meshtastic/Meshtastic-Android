@@ -30,9 +30,9 @@ jobs:
               - '.github/workflows/**'
               - '.github/actions/**'
               # Product modules validated by reusable-check
-              - 'app/**'
+              - 'androidApp/**'
               - 'baselineprofile/**'
-              - 'desktop/**'
+              - 'desktopApp/**'
               - 'core/**'
               - 'feature/**'
               - 'screenshot-tests/**'
@@ -95,9 +95,9 @@ jobs:
           PY
 
   # 2. VALIDATION & BUILD: Delegate to reusable-check.yml
-  # We disable coverage for PRs to keep feedback fast (< 10 mins).
-  # Desktop compilation is covered by :desktop:test in the shard-app test shard.
-  # Native desktop packaging (createDistributable) only runs in release.yml.
+  # We disable coverage and desktop builds for PRs to keep feedback fast
+  # (< 10 mins). Desktop compilation is already covered by the :desktopApp:test
+  # task in the shard-app test shard.
   validate-and-build:
     needs: check-changes
     if: needs.check-changes.outputs.android == 'true'

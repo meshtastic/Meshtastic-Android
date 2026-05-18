@@ -18,7 +18,7 @@ git submodule update --init
 ./gradlew :core:data:allTests
 
 # Single module tests (Android-only module like :app)
-./gradlew :app:testFdroidDebugUnitTest
+./gradlew :androidApp:testFdroidDebugUnitTest
 
 # Cross-platform compilation check (no tests)
 ./gradlew kmpSmokeCompile
@@ -46,7 +46,7 @@ KMP modules have different task names than pure-Android modules. Using the wrong
 
 ## Quick Reference
 
-- **Architecture**: KMP project (Android, Desktop, iOS). Business logic in `commonMain`; platform shells (`app/`, `desktop/`) wire DI and host UI. See `AGENTS.md` and `.skills/kmp-architecture/`.
+- **Architecture**: KMP project (Android, Desktop, iOS). Business logic in `commonMain`; platform shells (`androidApp/`, `desktopApp/`) wire DI and host UI. See `AGENTS.md` and `.skills/kmp-architecture/`.
 - **Flavors**: `fdroid` (OSS) / `google` (Maps + DataDog). Only one installable at a time (different signing keys).
 - **Verify before push**: Run `./gradlew spotlessApply detekt assembleDebug test allTests`, then confirm CI with `gh pr checks <PR>`.
 - **Strings**: `stringResource(Res.string.key)` — run `python3 scripts/sort-strings.py` after adding strings.

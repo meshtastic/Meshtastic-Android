@@ -21,9 +21,7 @@ plugins {
 }
 
 kotlin {
-    androidLibrary {
-        withHostTest {}
-    }
+    androidLibrary { withHostTest {} }
 
     sourceSets {
         commonMain.dependencies {

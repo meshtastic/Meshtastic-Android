@@ -22,9 +22,7 @@ plugins {
 }
 
 kotlin {
-    androidLibrary {
-        withHostTest { isIncludeAndroidResources = true }
-    }
+    androidLibrary { withHostTest { isIncludeAndroidResources = true } }
 
     sourceSets {
         commonMain.dependencies {

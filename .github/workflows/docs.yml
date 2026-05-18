@@ -8,10 +8,10 @@ on:
       - main
     paths:
       # Only rebuild docs when source code changes (Dokka generates from KDoc)
-      - 'app/src/**'
+      - 'androidApp/src/**'
       - 'core/**/src/**'
       - 'feature/**/src/**'
-      - 'desktop/src/**'
+      - 'desktopApp/src/**'
       - 'build-logic/**'
       - 'build.gradle.kts'
       - 'settings.gradle.kts'
