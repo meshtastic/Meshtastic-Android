@@ -142,7 +142,7 @@ abstract class GenerateDocsBundleTask : DefaultTask() {
         }
 
         // Process Crowdin locale directories: docs/{locale}/user/*.md
-        val localePattern = Regex("^[a-z]{2}$")
+        val localePattern = Regex("^[a-z]{2}(-[A-Z]{2})?$")
         src.listFiles { f -> f.isDirectory && localePattern.matches(f.name) }
             ?.sortedBy { it.name }
             ?.forEach { localeDir ->

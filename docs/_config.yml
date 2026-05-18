@@ -39,17 +39,36 @@ defaults:
       layout: default
   # Locale-translated pages are excluded from main nav but still rendered.
   # They use a dedicated locale layout with a back-link to the English version.
+  # Auto-generated from Android app locales (values-* resource dirs).
   - scope:
-      path: "es"
+      path: "ar"
     values:
       layout: locale_page
-      locale: es
+      locale: ar
       nav_exclude: true
   - scope:
-      path: "fr"
+      path: "be"
     values:
       layout: locale_page
-      locale: fr
+      locale: be
+      nav_exclude: true
+  - scope:
+      path: "bg"
+    values:
+      layout: locale_page
+      locale: bg
+      nav_exclude: true
+  - scope:
+      path: "ca"
+    values:
+      layout: locale_page
+      locale: ca
+      nav_exclude: true
+  - scope:
+      path: "cs"
+    values:
+      layout: locale_page
+      locale: cs
       nav_exclude: true
   - scope:
       path: "de"
@@ -58,10 +77,76 @@ defaults:
       locale: de
       nav_exclude: true
   - scope:
-      path: "pt"
+      path: "el"
     values:
       layout: locale_page
-      locale: pt
+      locale: el
+      nav_exclude: true
+  - scope:
+      path: "es"
+    values:
+      layout: locale_page
+      locale: es
+      nav_exclude: true
+  - scope:
+      path: "et"
+    values:
+      layout: locale_page
+      locale: et
+      nav_exclude: true
+  - scope:
+      path: "fi"
+    values:
+      layout: locale_page
+      locale: fi
+      nav_exclude: true
+  - scope:
+      path: "fr"
+    values:
+      layout: locale_page
+      locale: fr
+      nav_exclude: true
+  - scope:
+      path: "ga"
+    values:
+      layout: locale_page
+      locale: ga
+      nav_exclude: true
+  - scope:
+      path: "gl"
+    values:
+      layout: locale_page
+      locale: gl
+      nav_exclude: true
+  - scope:
+      path: "he"
+    values:
+      layout: locale_page
+      locale: he
+      nav_exclude: true
+  - scope:
+      path: "hr"
+    values:
+      layout: locale_page
+      locale: hr
+      nav_exclude: true
+  - scope:
+      path: "ht"
+    values:
+      layout: locale_page
+      locale: ht
+      nav_exclude: true
+  - scope:
+      path: "hu"
+    values:
+      layout: locale_page
+      locale: hu
+      nav_exclude: true
+  - scope:
+      path: "is"
+    values:
+      layout: locale_page
+      locale: is
       nav_exclude: true
   - scope:
       path: "it"
@@ -82,10 +167,46 @@ defaults:
       locale: ko
       nav_exclude: true
   - scope:
-      path: "zh"
+      path: "lt"
     values:
       layout: locale_page
-      locale: zh
+      locale: lt
+      nav_exclude: true
+  - scope:
+      path: "nl"
+    values:
+      layout: locale_page
+      locale: nl
+      nav_exclude: true
+  - scope:
+      path: "no"
+    values:
+      layout: locale_page
+      locale: no
+      nav_exclude: true
+  - scope:
+      path: "pl"
+    values:
+      layout: locale_page
+      locale: pl
+      nav_exclude: true
+  - scope:
+      path: "pt"
+    values:
+      layout: locale_page
+      locale: pt
+      nav_exclude: true
+  - scope:
+      path: "pt-BR"
+    values:
+      layout: locale_page
+      locale: pt-BR
+      nav_exclude: true
+  - scope:
+      path: "ro"
+    values:
+      layout: locale_page
+      locale: ro
       nav_exclude: true
   - scope:
       path: "ru"
@@ -94,16 +215,58 @@ defaults:
       locale: ru
       nav_exclude: true
   - scope:
+      path: "sk"
+    values:
+      layout: locale_page
+      locale: sk
+      nav_exclude: true
+  - scope:
+      path: "sl"
+    values:
+      layout: locale_page
+      locale: sl
+      nav_exclude: true
+  - scope:
+      path: "sq"
+    values:
+      layout: locale_page
+      locale: sq
+      nav_exclude: true
+  - scope:
+      path: "sr"
+    values:
+      layout: locale_page
+      locale: sr
+      nav_exclude: true
+  - scope:
+      path: "sv"
+    values:
+      layout: locale_page
+      locale: sv
+      nav_exclude: true
+  - scope:
       path: "tr"
     values:
       layout: locale_page
       locale: tr
       nav_exclude: true
   - scope:
-      path: "ar"
+      path: "uk"
     values:
       layout: locale_page
-      locale: ar
+      locale: uk
+      nav_exclude: true
+  - scope:
+      path: "zh-CN"
+    values:
+      layout: locale_page
+      locale: zh-CN
+      nav_exclude: true
+  - scope:
+      path: "zh-TW"
+    values:
+      layout: locale_page
+      locale: zh-TW
       nav_exclude: true
 
 # Callouts (just-the-docs v0.11+)
