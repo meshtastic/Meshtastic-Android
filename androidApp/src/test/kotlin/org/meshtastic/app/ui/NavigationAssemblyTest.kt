@@ -43,7 +43,7 @@ class NavigationAssemblyTest {
     @Test
     fun verifyNavigationGraphsAssembleWithoutCrashing() = runComposeUiTest {
         setContent {
-            val backStack = rememberNavBackStack(NodesRoute.NodesGraph)
+            val backStack = rememberNavBackStack(NodesRoute.Nodes)
             entryProvider<NavKey> {
                 contactsGraph(backStack, emptyFlow())
                 nodesGraph(backStack = backStack, scrollToTopEvents = emptyFlow())

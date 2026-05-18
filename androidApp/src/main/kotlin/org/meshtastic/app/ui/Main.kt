@@ -60,7 +60,7 @@ fun MainScreen() {
         if (viewModel.currentDeviceAddressFlow.value.isNullOrSelectedNone()) {
             TopLevelDestination.Connections.route
         } else {
-            NodesRoute.NodesGraph
+            NodesRoute.Nodes
         }
     val multiBackstack = rememberMultiBackstack(initialTab)
     val backStack = multiBackstack.activeBackStack
