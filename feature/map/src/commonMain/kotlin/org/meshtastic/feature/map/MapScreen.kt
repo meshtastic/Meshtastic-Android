@@ -61,6 +61,7 @@ import org.meshtastic.feature.map.component.MapEmptyState
 import org.meshtastic.feature.map.component.MapFilterDropdown
 import org.meshtastic.feature.map.component.MapStyleSelector
 import org.meshtastic.feature.map.component.MaplibreMapContent
+import org.meshtastic.feature.map.component.NodeInfoSheet
 import org.meshtastic.feature.map.model.MapStyle
 import org.meshtastic.feature.map.util.computeBoundingBox
 import org.meshtastic.feature.map.util.toGeoPositionOrNull
@@ -103,6 +104,9 @@ fun MapScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     var filterMenuExpanded by remember { mutableStateOf(false) }
+
+    // Node info sheet state
+    var selectedNodeNum by remember { mutableStateOf<Int?>(null) }
 
     // Waypoint dialog state
     var showWaypointDialog by remember { mutableStateOf(false) }
@@ -184,7 +188,7 @@ fun MapScreen(
                 showWaypoints = filterState.showWaypoints,
                 showPrecisionCircle = filterState.showPrecisionCircle,
                 showHillshade = selectedMapStyle == MapStyle.Terrain,
-                onNodeClick = { nodeNum -> navigateToNodeDetails(nodeNum) },
+                onNodeClick = { nodeNum -> selectedNodeNum = nodeNum },
                 onMapLongClick = { position ->
                     longPressPosition = position
                     editingWaypointId = null
@@ -357,6 +361,19 @@ fun MapScreen(
             initialLocked = (editingWaypoint?.locked_to ?: 0) != 0,
             isEditing = editingWaypoint != null,
             position = longPressPosition,
+        )
+    }
+
+    // Node info bottom sheet
+    val selectedNode = selectedNodeNum?.let { num -> filteredNodes.find { it.num == num } }
+    if (selectedNode != null) {
+        NodeInfoSheet(
+            node = selectedNode,
+            onDismiss = { selectedNodeNum = null },
+            onViewDetails = { nodeNum ->
+                selectedNodeNum = null
+                navigateToNodeDetails(nodeNum)
+            },
         )
     }
 }

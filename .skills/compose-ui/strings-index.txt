@@ -1375,6 +1375,7 @@ uv_lux
 via_api
 via_mqtt
 via_udp
+view_details
 view_on_map
 view_release
 voltage
