@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.map.component
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -74,7 +75,6 @@ import org.meshtastic.feature.map.util.nodesToFeatureCollection
 import org.meshtastic.feature.map.util.waypointsToFeatureCollection
 import org.maplibre.spatialk.geojson.Position as GeoPosition
 
-private val NodeMarkerColor = Color(0xFF6750A4)
 private val OnlineStrokeColor = Color(0xFF4CAF50) // Green — node heard within online threshold
 private val OfflineStrokeColor = Color(0xFF9E9E9E) // Gray — node not heard recently
 private const val CLUSTER_RADIUS = 50
@@ -194,6 +194,11 @@ private fun NodeMarkerLayers(
     val coroutineScope = rememberCoroutineScope()
     val featureCollection = remember(nodes, myNodeNum) { nodesToFeatureCollection(nodes, myNodeNum) }
 
+    // Read M3 semantic colors for map layers (recomposes on theme change)
+    val clusterColor = MaterialTheme.colorScheme.primary
+    val labelColor = MaterialTheme.colorScheme.onSurfaceVariant
+    val clusterLabelColor = MaterialTheme.colorScheme.onPrimary
+
     val nodesSource =
         rememberGeoJsonSource(
             data = GeoJsonData.Features(featureCollection),
@@ -207,10 +212,10 @@ private fun NodeMarkerLayers(
         source = nodesSource,
         filter = feature.has("cluster"),
         radius = const(20.dp),
-        color = const(NodeMarkerColor), // Material primary
+        color = const(clusterColor),
         opacity = const(CLUSTER_OPACITY),
         strokeWidth = const(MARKER_STROKE_WIDTH),
-        strokeColor = const(Color.White),
+        strokeColor = const(clusterLabelColor),
         onClick = { features ->
             val cluster = features.firstOrNull() ?: return@CircleLayer ClickResult.Pass
             val target = (cluster.geometry as? Point)?.coordinates ?: return@CircleLayer ClickResult.Pass
@@ -232,7 +237,7 @@ private fun NodeMarkerLayers(
         source = nodesSource,
         filter = feature.has("cluster"),
         textField = feature["point_count"].asString(),
-        textColor = const(Color.White),
+        textColor = const(clusterLabelColor),
         textSize = const(1.2f.em),
     )
 
@@ -242,7 +247,7 @@ private fun NodeMarkerLayers(
         source = nodesSource,
         filter = !feature.has("cluster"),
         radius = const(NODE_MARKER_RADIUS),
-        color = feature["background_color"].convertToColor(const(NodeMarkerColor)),
+        color = feature["background_color"].convertToColor(const(clusterColor)),
         strokeWidth = const(MARKER_STROKE_WIDTH),
         strokeColor =
         switch(
@@ -279,7 +284,7 @@ private fun NodeMarkerLayers(
         ),
         textSize = const(0.9f.em),
         textOffset = offset(0f.em, LABEL_OFFSET_EM.em),
-        textColor = const(Color.DarkGray),
+        textColor = const(labelColor),
         textAllowOverlap = const(true),
         iconAllowOverlap = const(true),
     )
@@ -301,13 +306,13 @@ private fun NodeMarkerLayers(
             radius = (feature["precision_meters"].convertToNumber(const(0f)) * metersToPixels).dp,
             color =
             feature["background_color"].convertToColor(
-                const(NodeMarkerColor.copy(alpha = PRECISION_CIRCLE_FILL_ALPHA)),
+                const(clusterColor.copy(alpha = PRECISION_CIRCLE_FILL_ALPHA)),
             ),
             opacity = const(PRECISION_CIRCLE_FILL_ALPHA),
             strokeWidth = const(1.dp),
             strokeColor =
             feature["background_color"].convertToColor(
-                const(NodeMarkerColor.copy(alpha = PRECISION_CIRCLE_STROKE_ALPHA)),
+                const(clusterColor.copy(alpha = PRECISION_CIRCLE_STROKE_ALPHA)),
             ),
             strokeOpacity = const(PRECISION_CIRCLE_STROKE_ALPHA),
         )

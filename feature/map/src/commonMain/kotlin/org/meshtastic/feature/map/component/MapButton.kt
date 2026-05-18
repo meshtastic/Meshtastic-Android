@@ -16,15 +16,23 @@
  */
 package org.meshtastic.feature.map.component
 
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.PlainTooltip
+import androidx.compose.material3.Text
+import androidx.compose.material3.TooltipAnchorPosition
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 
-/** A compact icon button used in map control overlays. Uses [FilledIconButton] for a consistent, compact appearance. */
+/** A compact icon button used in map control overlays. Uses [FilledIconButton] with a hover tooltip for desktop. */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun MapButton(
     icon: ImageVector,
@@ -33,11 +41,17 @@ internal fun MapButton(
     modifier: Modifier = Modifier,
     iconTint: Color? = null,
 ) {
-    FilledIconButton(onClick = onClick, modifier = modifier) {
-        Icon(
-            imageVector = icon,
-            contentDescription = contentDescription,
-            tint = iconTint ?: IconButtonDefaults.filledIconButtonColors().contentColor,
-        )
+    TooltipBox(
+        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
+        tooltip = { PlainTooltip { Text(contentDescription) } },
+        state = rememberTooltipState(),
+    ) {
+        FilledIconButton(onClick = onClick, modifier = modifier) {
+            Icon(
+                imageVector = icon,
+                contentDescription = contentDescription,
+                tint = iconTint ?: IconButtonDefaults.filledIconButtonColors().contentColor,
+            )
+        }
     }
 }

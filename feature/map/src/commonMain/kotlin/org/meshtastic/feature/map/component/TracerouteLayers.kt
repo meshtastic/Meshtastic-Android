@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.map.component
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -52,9 +53,9 @@ import org.meshtastic.feature.map.util.toGeoPositionOrNull
 import org.meshtastic.feature.map.util.typedFeatureCollection
 import org.maplibre.spatialk.geojson.Position as GeoPosition
 
-private val ForwardRouteColor = Color(0xFF4CAF50)
-private val ReturnRouteColor = Color(0xFFF44336)
-private val HopMarkerColor = Color(0xFF9C27B0)
+private val ForwardRouteColor = Color(0xFF4CAF50) // Success green — forward path
+private val ReturnRouteColor = Color(0xFFF44336) // Error red — return path
+private val HopMarkerColor = Color(0xFF9C27B0) // Tertiary purple — hop points
 private const val HEX_RADIX = 16
 private const val ROUTE_OPACITY = 0.8f
 
@@ -72,6 +73,8 @@ internal fun TracerouteLayers(
     if (overlay == null) return
 
     val unknownNodeName = stringResource(Res.string.unknown)
+    val labelColor = MaterialTheme.colorScheme.onSurfaceVariant
+    val markerStrokeColor = MaterialTheme.colorScheme.surface
 
     // Build route line features
     val routeData =
@@ -123,7 +126,7 @@ internal fun TracerouteLayers(
             radius = const(NODE_MARKER_RADIUS),
             color = const(HopMarkerColor), // Purple
             strokeWidth = const(MARKER_STROKE_WIDTH),
-            strokeColor = const(Color.White),
+            strokeColor = const(markerStrokeColor),
         )
         SymbolLayer(
             id = "traceroute-hop-labels",
@@ -131,7 +134,7 @@ internal fun TracerouteLayers(
             textField = feature["short_name"].asString(),
             textSize = const(1.em),
             textOffset = offset(0f.em, -2f.em),
-            textColor = const(Color.DarkGray),
+            textColor = const(labelColor),
         )
     }
 }

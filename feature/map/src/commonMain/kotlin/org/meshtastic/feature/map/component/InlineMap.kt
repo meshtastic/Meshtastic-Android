@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.map.component
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
@@ -62,6 +63,8 @@ fun InlineMap(node: Node, modifier: Modifier = Modifier) {
     val position = node.validPosition ?: return
     val geoPos = toGeoPositionOrNull(position.latitude_i, position.longitude_i) ?: return
 
+    val labelColor = MaterialTheme.colorScheme.onSurfaceVariant
+
     // Adaptive zoom: zoom out for imprecise positions so the precision circle is visible
     val precisionMeters = precisionBitsToMeters(position.precision_bits)
     val zoom = if (precisionMeters > PRECISION_THRESHOLD_METERS) LOW_PRECISION_ZOOM else DEFAULT_ZOOM
@@ -103,7 +106,7 @@ fun InlineMap(node: Node, modifier: Modifier = Modifier) {
                     textSize = const(0.9f.em),
                     textOffset = offset(0f.em, LABEL_OFFSET.em),
                     textAnchor = const(SymbolAnchor.Bottom),
-                    textColor = const(Color.DarkGray),
+                    textColor = const(labelColor),
                 )
             }
 
