@@ -115,8 +115,8 @@ val syncTranslatedDocsToComposeResources by
         val targetBase = layout.projectDirectory.dir("src/commonMain/composeResources")
 
         from(docsDir) {
-            // Only include locale directories (2-char or region-qualified like pt-BR)
-            // Exclude source directories and Jekyll internals
+            // Include locale directories: 2-char (es) or region-qualified (pt-BR, zh-CN)
+            // The glob * matches any single path segment including hyphenated ones
             include("*/user/**/*.md")
             exclude("user/**")
             exclude("developer/**")
