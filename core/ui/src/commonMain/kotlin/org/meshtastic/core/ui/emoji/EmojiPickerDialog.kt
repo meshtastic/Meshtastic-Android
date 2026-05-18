@@ -43,6 +43,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -57,6 +58,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -73,6 +75,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
+import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.resources.Res
@@ -91,6 +94,7 @@ private const val RECENTS_HEADER_KEY = "header_recents"
 private const val RECENTS_KEY_PREFIX = "recent_"
 private const val MAX_RECENTS = 30
 private const val DEFAULT_QUICK_REACTION_COUNT = 6
+private const val SEARCH_DEBOUNCE_MS = 150L
 
 /** Default quick-reaction emoji used when the user has no recents. */
 private val DEFAULT_QUICK_REACTIONS = listOf("👍", "❤️", "😂", "😮", "😢", "🙏")
@@ -118,8 +122,21 @@ fun EmojiPickerDialog(
     onConfirm: (String) -> Unit,
 ) {
     val viewModel: EmojiPickerViewModel = koinViewModel()
+    val isLoaded by viewModel.isLoaded.collectAsState()
     var searchQuery by rememberSaveable { mutableStateOf("") }
+    var debouncedQuery by remember { mutableStateOf("") }
     var selectedCategoryIndex by rememberSaveable { mutableStateOf(0) }
+    val preferredSkinToneIndex by viewModel.preferredSkinToneIndex.collectAsState()
+
+    // Debounce search input to avoid per-keystroke filtering of 1870 emojis
+    LaunchedEffect(searchQuery) {
+        if (searchQuery.isBlank()) {
+            debouncedQuery = ""
+        } else {
+            delay(SEARCH_DEBOUNCE_MS)
+            debouncedQuery = searchQuery
+        }
+    }
 
     val recentEmojis by
         remember(viewModel.customEmojiFrequency) { derivedStateOf { parseRecents(viewModel.customEmojiFrequency) } }
@@ -128,19 +145,30 @@ fun EmojiPickerDialog(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
     ) {
-        EmojiPickerContent(
-            searchQuery = searchQuery,
-            onSearchQueryChange = { searchQuery = it },
-            selectedCategoryIndex = selectedCategoryIndex,
-            onCategorySelected = { selectedCategoryIndex = it },
-            selectedEmojis = selectedEmojis,
-            recentEmojis = recentEmojis,
-            onEmojiSelected = { emoji ->
-                recordSelection(emoji, viewModel)
-                onDismiss()
-                onConfirm(emoji)
-            },
-        )
+        if (isLoaded) {
+            EmojiPickerContent(
+                searchQuery = searchQuery,
+                debouncedQuery = debouncedQuery,
+                onSearchQueryChange = { searchQuery = it },
+                selectedCategoryIndex = selectedCategoryIndex,
+                onCategorySelected = { selectedCategoryIndex = it },
+                selectedEmojis = selectedEmojis,
+                recentEmojis = recentEmojis,
+                categories = viewModel.categories,
+                allEmojis = viewModel.allEmojis,
+                preferredSkinToneIndex = preferredSkinToneIndex,
+                onSkinToneSelect = { viewModel.setPreferredSkinTone(it) },
+                onEmojiSelected = { emoji ->
+                    recordSelection(emoji, viewModel)
+                    onDismiss()
+                    onConfirm(emoji)
+                },
+            )
+        } else {
+            Box(modifier = Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        }
     }
 }
 
@@ -176,11 +204,16 @@ fun rememberQuickReactions(count: Int = DEFAULT_QUICK_REACTION_COUNT): List<Stri
 @Suppress("LongParameterList")
 private fun EmojiPickerContent(
     searchQuery: String,
+    debouncedQuery: String,
     onSearchQueryChange: (String) -> Unit,
     selectedCategoryIndex: Int,
     onCategorySelected: (Int) -> Unit,
     selectedEmojis: Set<String>,
     recentEmojis: List<String>,
+    categories: List<EmojiCategory>,
+    allEmojis: List<Emoji>,
+    preferredSkinToneIndex: Int,
+    onSkinToneSelect: (Int) -> Unit,
     onEmojiSelected: (String) -> Unit,
 ) {
     Column {
@@ -191,15 +224,20 @@ private fun EmojiPickerContent(
                 selectedIndex = selectedCategoryIndex,
                 onCategorySelected = onCategorySelected,
                 hasRecents = recentEmojis.isNotEmpty(),
+                categories = categories,
             )
         }
 
         EmojiGrid(
-            searchQuery = searchQuery,
+            searchQuery = debouncedQuery,
             selectedCategoryIndex = selectedCategoryIndex,
             onCategoryChanged = onCategorySelected,
             selectedEmojis = selectedEmojis,
             recentEmojis = recentEmojis,
+            categories = categories,
+            allEmojis = allEmojis,
+            preferredSkinToneIndex = preferredSkinToneIndex,
+            onSkinToneSelect = onSkinToneSelect,
             onEmojiSelected = onEmojiSelected,
         )
     }
@@ -251,9 +289,14 @@ private fun SearchBar(query: String, onQueryChange: (String) -> Unit) {
 // ── Category Tabs ──────────────────────────────────────────────────────────────
 
 @Composable
-private fun CategoryTabStrip(selectedIndex: Int, onCategorySelected: (Int) -> Unit, hasRecents: Boolean) {
+private fun CategoryTabStrip(
+    selectedIndex: Int,
+    onCategorySelected: (Int) -> Unit,
+    hasRecents: Boolean,
+    categories: List<EmojiCategory>,
+) {
     val tabOffset = if (hasRecents) 1 else 0
-    val totalTabs = EmojiData.categories.size + tabOffset
+    val totalTabs = categories.size + tabOffset
 
     PrimaryScrollableTabRow(
         selectedTabIndex = selectedIndex,
@@ -268,10 +311,7 @@ private fun CategoryTabStrip(selectedIndex: Int, onCategorySelected: (Int) -> Un
                 selected = selectedIndex == index,
                 onClick = { onCategorySelected(index) },
                 text = {
-                    Text(
-                        text = if (isRecents) "\uD83D\uDD50" else EmojiData.categories[index - tabOffset].icon,
-                        fontSize = 18.sp,
-                    )
+                    Text(text = if (isRecents) "\uD83D\uDD50" else categories[index - tabOffset].icon, fontSize = 18.sp)
                 },
             )
         }
@@ -288,13 +328,20 @@ private fun EmojiGrid(
     onCategoryChanged: (Int) -> Unit,
     selectedEmojis: Set<String>,
     recentEmojis: List<String>,
+    categories: List<EmojiCategory>,
+    allEmojis: List<Emoji>,
+    preferredSkinToneIndex: Int,
+    onSkinToneSelect: (Int) -> Unit,
     onEmojiSelected: (String) -> Unit,
 ) {
     val gridState = rememberLazyGridState()
     val hasRecents = recentEmojis.isNotEmpty()
     val tabOffset = if (hasRecents) 1 else 0
 
-    val gridItems: List<GridItem> = remember(searchQuery, recentEmojis) { buildGridItems(searchQuery, recentEmojis) }
+    val gridItems: List<GridItem> =
+        remember(searchQuery, recentEmojis, categories, allEmojis) {
+            buildGridItems(searchQuery, recentEmojis, categories, allEmojis)
+        }
     var animationTargetIndex by remember { mutableStateOf<Int?>(null) }
 
     // Scroll to category when tab changes
@@ -307,7 +354,7 @@ private fun EmojiGrid(
                 RECENTS_HEADER_KEY
             } else {
                 val catIndex = selectedCategoryIndex - tabOffset
-                if (catIndex in EmojiData.categories.indices) {
+                if (catIndex in categories.indices) {
                     CATEGORY_HEADER_KEY_PREFIX + catIndex
                 } else {
                     null
@@ -368,6 +415,8 @@ private fun EmojiGrid(
                         EmojiCellWithSkinTone(
                             emoji = item.emoji,
                             isSelected = selectedEmojis.contains(item.emoji.base),
+                            preferredSkinToneIndex = preferredSkinToneIndex,
+                            onSkinToneSelect = onSkinToneSelect,
                             onSelect = onEmojiSelected,
                         )
                     }
@@ -397,11 +446,15 @@ private sealed class GridItem(open val key: String) {
 }
 
 @Suppress("CyclomaticComplexMethod")
-private fun buildGridItems(searchQuery: String, recentEmojis: List<String>): List<GridItem> = buildList {
+private fun buildGridItems(
+    searchQuery: String,
+    recentEmojis: List<String>,
+    categories: List<EmojiCategory>,
+    allEmojis: List<Emoji>,
+): List<GridItem> = buildList {
     if (searchQuery.isNotBlank()) {
         val query = searchQuery.lowercase()
-        val results =
-            EmojiData.all.filter { emoji -> emoji.keywords.any { it.contains(query) } || emoji.base.contains(query) }
+        val results = rankSearchResults(query, allEmojis, recentEmojis)
         results.forEachIndexed { i, emoji -> add(GridItem.EmojiCell(emoji, "search_$i")) }
     } else {
         if (recentEmojis.isNotEmpty()) {
@@ -410,13 +463,54 @@ private fun buildGridItems(searchQuery: String, recentEmojis: List<String>): Lis
                 add(GridItem.EmojiCell(Emoji(emojiStr), "$RECENTS_KEY_PREFIX$i"))
             }
         }
-        EmojiData.categories.forEachIndexed { catIndex, category ->
+        categories.forEachIndexed { catIndex, category ->
             add(GridItem.Header(category.name, "$CATEGORY_HEADER_KEY_PREFIX$catIndex"))
             category.emojis.forEachIndexed { emojiIndex, emoji ->
                 add(GridItem.EmojiCell(emoji, "cat_${catIndex}_$emojiIndex"))
             }
         }
     }
+}
+
+/**
+ * Ranks search results using prefix-weighted scoring (inspired by Signal's approach). Exact keyword matches score
+ * highest, then prefix matches, then substring matches. Recently-used emoji matching the query get a boost.
+ */
+private fun rankSearchResults(query: String, allEmojis: List<Emoji>, recentEmojis: List<String>): List<Emoji> {
+    val recentSet = recentEmojis.toSet()
+
+    data class ScoredEmoji(val emoji: Emoji, val score: Float)
+
+    return allEmojis
+        .mapNotNull { emoji ->
+            val score = scoreEmoji(emoji, query, recentSet)
+            if (score > 0f) ScoredEmoji(emoji, score) else null
+        }
+        .sortedByDescending { it.score }
+        .map { it.emoji }
+}
+
+private const val SCORE_EXACT_MATCH = 10f
+private const val SCORE_PREFIX_MATCH = 4f
+private const val SCORE_SUBSTRING_MATCH = 1f
+private const val SCORE_BASE_CONTAINS = 0.5f
+private const val SCORE_RECENT_BOOST = 3f
+
+private fun scoreEmoji(emoji: Emoji, query: String, recentSet: Set<String>): Float {
+    var score = 0f
+
+    for (keyword in emoji.keywords) {
+        when {
+            keyword == query -> score += SCORE_EXACT_MATCH
+            keyword.startsWith(query) -> score += SCORE_PREFIX_MATCH
+            keyword.contains(query) -> score += SCORE_SUBSTRING_MATCH
+        }
+    }
+
+    if (emoji.base.contains(query)) score += SCORE_BASE_CONTAINS
+    if (score > 0f && emoji.base in recentSet) score += SCORE_RECENT_BOOST
+
+    return score
 }
 
 // ── Cell Components ────────────────────────────────────────────────────────────
@@ -433,14 +527,23 @@ private fun SectionHeader(title: String) {
 
 /**
  * An emoji grid cell that supports:
- * - **Tap** → select the emoji (with default skin tone)
+ * - **Tap** → select the emoji with the user's preferred skin tone applied
  * - **Long-press** → if the emoji supports skin tones, show a popup with 6 Fitzpatrick variants
  * - **Selected highlight** → tinted background when the emoji is in [isSelected]
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun EmojiCellWithSkinTone(emoji: Emoji, isSelected: Boolean, onSelect: (String) -> Unit) {
+@Suppress("LongParameterList")
+private fun EmojiCellWithSkinTone(
+    emoji: Emoji,
+    isSelected: Boolean,
+    preferredSkinToneIndex: Int,
+    onSkinToneSelect: (Int) -> Unit,
+    onSelect: (String) -> Unit,
+) {
     var showSkinTonePopup by rememberSaveable { mutableStateOf(false) }
+    val preferredTone = SkinTone.entries.getOrElse(preferredSkinToneIndex) { SkinTone.DEFAULT }
+    val displayEmoji = if (emoji.supportsSkinTone) emoji.withSkinTone(preferredTone) else emoji.base
 
     Box {
         Box(
@@ -455,7 +558,7 @@ private fun EmojiCellWithSkinTone(emoji: Emoji, isSelected: Boolean, onSelect: (
                     },
                 )
                 .combinedClickable(
-                    onClick = { onSelect(emoji.base) },
+                    onClick = { onSelect(displayEmoji) },
                     onLongClick =
                     if (emoji.supportsSkinTone) {
                         { showSkinTonePopup = true }
@@ -465,7 +568,7 @@ private fun EmojiCellWithSkinTone(emoji: Emoji, isSelected: Boolean, onSelect: (
                 ),
             contentAlignment = Alignment.Center,
         ) {
-            Text(text = emoji.base, fontSize = EMOJI_FONT_SIZE.sp, textAlign = TextAlign.Center)
+            Text(text = displayEmoji, fontSize = EMOJI_FONT_SIZE.sp, textAlign = TextAlign.Center)
             // Small dot indicator for skin-tone-capable emoji
             if (emoji.supportsSkinTone) {
                 Box(
@@ -481,8 +584,9 @@ private fun EmojiCellWithSkinTone(emoji: Emoji, isSelected: Boolean, onSelect: (
         if (showSkinTonePopup) {
             SkinTonePopup(
                 emoji = emoji,
-                onSelect = { variant ->
+                onSelect = { variant, toneIndex ->
                     showSkinTonePopup = false
+                    onSkinToneSelect(toneIndex)
                     onSelect(variant)
                 },
                 onDismiss = { showSkinTonePopup = false },
@@ -494,7 +598,7 @@ private fun EmojiCellWithSkinTone(emoji: Emoji, isSelected: Boolean, onSelect: (
 // ── Skin Tone Popup ────────────────────────────────────────────────────────────
 
 @Composable
-private fun SkinTonePopup(emoji: Emoji, onSelect: (String) -> Unit, onDismiss: () -> Unit) {
+private fun SkinTonePopup(emoji: Emoji, onSelect: (String, Int) -> Unit, onDismiss: () -> Unit) {
     Popup(alignment = Alignment.TopCenter, onDismissRequest = onDismiss) {
         Surface(
             shape = RoundedCornerShape(12.dp),
@@ -504,10 +608,11 @@ private fun SkinTonePopup(emoji: Emoji, onSelect: (String) -> Unit, onDismiss: (
             modifier = Modifier.widthIn(max = 280.dp),
         ) {
             Row(modifier = Modifier.padding(6.dp), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                SkinTone.entries.forEach { tone ->
+                SkinTone.entries.forEachIndexed { index, tone ->
                     val variant = emoji.withSkinTone(tone)
                     Box(
-                        modifier = Modifier.size(40.dp).clip(RoundedCornerShape(8.dp)).clickable { onSelect(variant) },
+                        modifier =
+                        Modifier.size(40.dp).clip(RoundedCornerShape(8.dp)).clickable { onSelect(variant, index) },
                         contentAlignment = Alignment.Center,
                     ) {
                         Text(text = variant, fontSize = 22.sp)
