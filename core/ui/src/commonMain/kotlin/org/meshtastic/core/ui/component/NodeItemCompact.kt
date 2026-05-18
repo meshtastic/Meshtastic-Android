@@ -21,13 +21,8 @@ package org.meshtastic.core.ui.component
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Card
@@ -35,10 +30,8 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -64,11 +57,9 @@ import org.meshtastic.core.ui.icon.DeviceSleep
 import org.meshtastic.core.ui.icon.ElectricPower
 import org.meshtastic.core.ui.icon.Favorite
 import org.meshtastic.core.ui.icon.MeshtasticIcons
-import org.meshtastic.core.ui.icon.MqttConnected
 import org.meshtastic.core.ui.icon.PinDrop
 import org.meshtastic.core.ui.icon.Success
 import org.meshtastic.core.ui.icon.Temperature
-import org.meshtastic.core.ui.icon.Unmessageable
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 import org.meshtastic.proto.Config
 
@@ -167,25 +158,16 @@ fun NodeItemCompact(
                 onLongClick = onLongClick,
             )
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 2.dp),
+                .padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            // Column 1: NodeChip + optional battery
-            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-                NodeChip(node = thatNode)
-                if (showPower && thatNode.batteryLevel != null) {
-                    MaterialBatteryInfo(
-                        level = thatNode.batteryLevel ?: 0,
-                        voltage = thatNode.voltage ?: 0f,
-                        contentColor = contentColor,
-                    )
-                }
-            }
+            // Leading: NodeChip avatar
+            NodeChip(node = thatNode)
 
-            // Column 2: Content rows
+            // Content rows
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                // Row 1: Name (always visible)
+                // Row 1: Identity — name + PKC + favorite
                 CompactNameRow(
                     thatNode = thatNode,
                     longName = longName,
@@ -194,50 +176,26 @@ fun NodeItemCompact(
                     isFavorite = isFavorite,
                 )
 
-                // Row 2: Last heard (toggle-dependent)
-                if (showLastHeard && thatNode.lastHeard > 0 && !isFutureDate(thatNode.lastHeard)) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    ) {
-                        Icon(
-                            imageVector =
-                            if (thatNode.isOnline) MeshtasticIcons.Success else MeshtasticIcons.DeviceSleep,
-                            contentDescription = null,
-                            modifier = Modifier.size(COMPACT_ICON_SIZE_DP.dp),
-                            tint =
-                            if (thatNode.isOnline) {
-                                MaterialTheme.colorScheme.tertiary
-                            } else {
-                                MaterialTheme.colorScheme.outline
-                            },
-                        )
-                        LastHeardInfo(
-                            lastHeard = thatNode.lastHeard,
-                            showLabel = false,
-                            relative = lastHeardIsRelative,
-                            contentColor = contentColor,
-                        )
-                    }
-                }
-
-                // Row 3: Position + Signal (mirrors Complete rows 3-4)
-                CompactPositionSignalRow(
+                // Row 2: Glanceable health — online + last heard + battery + distance + signal
+                CompactHealthRow(
                     thatNode = thatNode,
                     isThisNode = isThisNode,
                     distance = distance,
-                    system = system,
+                    showPower = showPower,
+                    showLastHeard = showLastHeard,
+                    lastHeardIsRelative = lastHeardIsRelative,
                     showLocation = showLocation,
-                    showHops = showHops,
                     showSignal = showSignal,
-                    showChannel = showChannel,
                     contentColor = contentColor,
                 )
 
-                // Row 4: Device + Telemetry (mirrors Complete rows 5-6)
-                CompactDeviceRow(
+                // Row 3: Tertiary metadata — hardware · role · hops · channel · telemetry
+                CompactFooterRow(
                     thatNode = thatNode,
+                    isThisNode = isThisNode,
                     unmessageable = unmessageable,
+                    showHops = showHops,
+                    showChannel = showChannel,
                     showRole = showRole,
                     showTelemetry = showTelemetry,
                     contentColor = contentColor,
@@ -287,166 +245,165 @@ private fun CompactNameRow(
 
 @Composable
 @Suppress("LongParameterList", "CyclomaticComplexMethod", "LongMethod")
-private fun CompactPositionSignalRow(
+private fun CompactHealthRow(
     thatNode: Node,
     isThisNode: Boolean,
     distance: String?,
-    system: Config.DisplayConfig.DisplayUnits,
+    showPower: Boolean,
+    showLastHeard: Boolean,
+    lastHeardIsRelative: Boolean,
     showLocation: Boolean,
-    showHops: Boolean,
     showSignal: Boolean,
-    showChannel: Boolean,
     contentColor: Color,
 ) {
-    val items =
-        buildList<Pair<String, @Composable () -> Unit>> {
-            // Distance
-            if (showLocation && distance != null && !isThisNode) {
-                add("distance" to { DistanceInfo(distance = distance, contentColor = contentColor) })
-            }
-
-            // Elevation
-            if (showLocation && thatNode.validPosition?.altitude != null && thatNode.validPosition!!.altitude != 0) {
-                val position = thatNode.validPosition!!
-                add(
-                    "elevation" to
-                        {
-                            ElevationInfo(
-                                altitude = position.altitude ?: 0,
-                                system = system,
-                                contentColor = contentColor,
-                            )
-                        },
-                )
-            }
-
-            // Hops Away (only when hopsAway > 0)
-            if (showHops && thatNode.hopsAway > 0) {
-                add("hops" to { HopsInfo(hops = thatNode.hopsAway, contentColor = contentColor) })
-            }
-
-            // Signal (direct only: hopsAway == 0, snr valid, not via MQTT)
-            val hasDirectSignal =
-                thatNode.hopsAway == 0 && thatNode.snr < 100f && !thatNode.viaMqtt && thatNode.rssi < 0
-            if (showSignal && hasDirectSignal) {
-                val quality = determineSignalQuality(thatNode.snr, thatNode.rssi)
-                add(
-                    "signal" to
-                        {
-                            IconInfo(
-                                icon = vectorResource(quality.icon),
-                                contentDescription = stringResource(quality.nameRes),
-                                contentColor = quality.color.invoke(),
-                                text = stringResource(quality.nameRes),
-                            )
-                        },
-                )
-            }
-
-            // Channel (only when > 0)
-            if (showChannel && thatNode.channel > 0) {
-                add("channel" to { ChannelInfo(channel = thatNode.channel, contentColor = contentColor) })
-            }
-
-            // Satellite count
-            val satCount = thatNode.validPosition?.sats_in_view ?: 0
-            if (showLocation && satCount > 0) {
-                add("sats" to { SatelliteCountInfo(satCount = satCount, contentColor = contentColor) })
-            }
+    val segments = buildList {
+        // Online indicator + Last heard
+        if (showLastHeard && thatNode.lastHeard > 0 && !isFutureDate(thatNode.lastHeard)) {
+            add(
+                @Composable {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(3.dp),
+                    ) {
+                        Icon(
+                            imageVector =
+                            if (thatNode.isOnline) MeshtasticIcons.Success else MeshtasticIcons.DeviceSleep,
+                            contentDescription = null,
+                            modifier = Modifier.size(COMPACT_ICON_SIZE_DP.dp),
+                            tint =
+                            if (thatNode.isOnline) {
+                                MaterialTheme.colorScheme.tertiary
+                            } else {
+                                MaterialTheme.colorScheme.outline
+                            },
+                        )
+                        LastHeardInfo(
+                            lastHeard = thatNode.lastHeard,
+                            showLabel = false,
+                            relative = lastHeardIsRelative,
+                            contentColor = contentColor,
+                        )
+                    }
+                },
+            )
         }
 
-    if (items.isNotEmpty()) {
-        @OptIn(ExperimentalLayoutApi::class)
-        FlowRow(
+        // Battery
+        if (showPower && thatNode.batteryLevel != null) {
+            add(
+                @Composable {
+                    MaterialBatteryInfo(
+                        level = thatNode.batteryLevel ?: 0,
+                        voltage = thatNode.voltage ?: 0f,
+                        contentColor = contentColor,
+                    )
+                },
+            )
+        }
+
+        // Distance
+        if (showLocation && distance != null && !isThisNode) {
+            add(@Composable { DistanceInfo(distance = distance, contentColor = contentColor) })
+        }
+
+        // Signal quality
+        val hasDirectSignal = thatNode.hopsAway == 0 && thatNode.snr < 100f && !thatNode.viaMqtt && thatNode.rssi < 0
+        if (showSignal && hasDirectSignal) {
+            val quality = determineSignalQuality(thatNode.snr, thatNode.rssi)
+            add(
+                @Composable {
+                    IconInfo(
+                        icon = vectorResource(quality.icon),
+                        contentDescription = stringResource(quality.nameRes),
+                        contentColor = quality.color.invoke(),
+                        text = stringResource(quality.nameRes),
+                    )
+                },
+            )
+        }
+    }
+
+    if (segments.isNotEmpty()) {
+        Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            verticalArrangement = Arrangement.spacedBy(2.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            items.forEachIndexed { index, (itemKey, content) ->
+            segments.forEachIndexed { index, content ->
                 if (index > 0) {
-                    Row(modifier = Modifier.height(IntrinsicSize.Min), verticalAlignment = Alignment.CenterVertically) {
-                        VerticalDivider(modifier = Modifier.fillMaxHeight())
-                    }
+                    Text(
+                        text = "·",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = contentColor.copy(alpha = 0.5f),
+                    )
                 }
-                key(itemKey) { content() }
+                content()
             }
         }
     }
 }
 
 @Composable
-@Suppress("LongParameterList", "LongMethod")
-private fun CompactDeviceRow(
+@Suppress("LongParameterList", "CyclomaticComplexMethod")
+private fun CompactFooterRow(
     thatNode: Node,
+    isThisNode: Boolean,
     unmessageable: Boolean,
+    showHops: Boolean,
+    showChannel: Boolean,
     showRole: Boolean,
     showTelemetry: Boolean,
     contentColor: Color,
 ) {
-    val items =
-        buildList<Pair<String, @Composable () -> Unit>> {
-            // Hardware model
-            if (showRole) {
-                add("hardware" to { HardwareInfo(hwModel = thatNode.user.hw_model.name, contentColor = contentColor) })
-            }
+    val tertiaryColor = contentColor.copy(alpha = 0.7f)
+    val segments = buildList {
+        // Hardware model
+        if (showRole) {
+            add(thatNode.user.hw_model.name)
+        }
 
-            // Device Role with conditional icons (unmessageable, MQTT)
-            if (showRole) {
-                add(
-                    "role" to
-                        {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(2.dp),
-                            ) {
-                                RoleInfo(role = thatNode.user.role, contentColor = contentColor)
-                                if (unmessageable) {
-                                    Icon(
-                                        imageVector = MeshtasticIcons.Unmessageable,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(COMPACT_ICON_SIZE_DP.dp),
-                                        tint = contentColor,
-                                    )
-                                }
-                                if (thatNode.viaMqtt) {
-                                    Icon(
-                                        imageVector = MeshtasticIcons.MqttConnected,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(COMPACT_ICON_SIZE_DP.dp),
-                                        tint = contentColor,
-                                    )
-                                }
-                            }
-                        },
+        // Role + badges
+        if (showRole) {
+            val roleName = thatNode.user.role.name
+            val badges = buildString {
+                append(roleName)
+                if (unmessageable) append(" ✗")
+                if (thatNode.viaMqtt) append(" ⌁")
+            }
+            add(badges)
+        }
+
+        // Hops
+        if (showHops && thatNode.hopsAway > 0 && !isThisNode) {
+            add("${thatNode.hopsAway} hop${if (thatNode.hopsAway > 1) "s" else ""}")
+        }
+
+        // Channel
+        if (showChannel && thatNode.channel > 0) {
+            add("Ch ${thatNode.channel}")
+        }
+    }
+
+    if (segments.isNotEmpty() || (showTelemetry && hasTelemetryData(thatNode))) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            if (segments.isNotEmpty()) {
+                Text(
+                    text = segments.joinToString(" · "),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = tertiaryColor,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false),
                 )
             }
 
-            // Node ID
-            if (showRole) {
-                val id = thatNode.user.id.ifEmpty { "???" }
-                add("nodeId" to { NodeIdInfo(id = id, contentColor = contentColor) })
-            }
-
-            // Telemetry indicator icons
+            // Telemetry presence icons (trailing)
             if (showTelemetry && hasTelemetryData(thatNode)) {
-                add("telemetry" to { CompactTelemetryIcons(thatNode = thatNode, contentColor = contentColor) })
-            }
-        }
-
-    if (items.isNotEmpty()) {
-        @OptIn(ExperimentalLayoutApi::class)
-        FlowRow(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            verticalArrangement = Arrangement.spacedBy(2.dp),
-        ) {
-            items.forEachIndexed { index, (itemKey, content) ->
-                if (index > 0) {
-                    Row(modifier = Modifier.height(IntrinsicSize.Min), verticalAlignment = Alignment.CenterVertically) {
-                        VerticalDivider(modifier = Modifier.fillMaxHeight())
-                    }
-                }
-                key(itemKey) { content() }
+                CompactTelemetryIcons(thatNode = thatNode, contentColor = tertiaryColor)
             }
         }
     }
