@@ -57,6 +57,8 @@ import org.meshtastic.core.resources.lockdown_incorrect_passphrase
 import org.meshtastic.core.resources.lockdown_lock_reason
 import org.meshtastic.core.resources.lockdown_passphrase
 import org.meshtastic.core.resources.lockdown_passphrases_do_not_match
+import org.meshtastic.core.resources.lockdown_session_minutes
+import org.meshtastic.core.resources.lockdown_session_minutes_help
 import org.meshtastic.core.resources.lockdown_set_passphrase
 import org.meshtastic.core.resources.lockdown_show_passphrase
 import org.meshtastic.core.resources.lockdown_submit
@@ -75,7 +77,7 @@ import org.meshtastic.core.ui.icon.VisibilityOff
 @Composable
 fun LockdownDialog(
     lockdownState: LockdownState,
-    onSubmit: (passphrase: String, boots: Int, hours: Int) -> Unit,
+    onSubmit: (passphrase: String, boots: Int, hours: Int, sessionMinutes: Int) -> Unit,
     onDisconnect: () -> Unit,
 ) {
     val shouldShow =
@@ -93,6 +95,7 @@ fun LockdownDialog(
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
     var boots by rememberSaveable { mutableIntStateOf(LockdownPassphraseStore.DEFAULT_BOOTS) }
     var hours by rememberSaveable { mutableIntStateOf(0) }
+    var sessionMinutes by rememberSaveable { mutableIntStateOf(0) }
 
     val isProvisioning = lockdownState is LockdownState.NeedsProvision
     val title =
@@ -208,10 +211,20 @@ fun LockdownDialog(
                         modifier = Modifier.weight(1f),
                     )
                 }
+                Spacer(modifier = Modifier.height(SPACING_DP.dp))
+                OutlinedTextField(
+                    value = sessionMinutes.toString(),
+                    onValueChange = { str -> str.toIntOrNull()?.let { sessionMinutes = it.coerceAtLeast(0) } },
+                    label = { Text(stringResource(Res.string.lockdown_session_minutes)) },
+                    supportingText = { Text(stringResource(Res.string.lockdown_session_minutes_help)) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }
         },
         confirmButton = {
-            TextButton(onClick = { onSubmit(passphrase, boots, hours) }, enabled = isValid) {
+            TextButton(onClick = { onSubmit(passphrase, boots, hours, sessionMinutes) }, enabled = isValid) {
                 Text(stringResource(Res.string.lockdown_submit))
             }
         },

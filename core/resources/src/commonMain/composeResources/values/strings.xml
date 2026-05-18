@@ -623,6 +623,8 @@
     <string name="lockdown_passphrases_do_not_match">Passphrases do not match</string>
     <string name="lockdown_session_boots_remaining">Session: %1$d reboots remaining</string>
     <string name="lockdown_session_expires">Expires %1$s</string>
+    <string name="lockdown_session_minutes">Session cap (minutes)</string>
+    <string name="lockdown_session_minutes_help">Per-boot uptime cap. 0 = unlimited.</string>
     <string name="lockdown_session_no_time_limit">No time limit</string>
     <string name="lockdown_set_passphrase">Set Passphrase</string>
     <string name="lockdown_show_passphrase">Show</string>

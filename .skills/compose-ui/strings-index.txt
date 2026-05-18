@@ -599,6 +599,8 @@ lockdown_passphrase
 lockdown_passphrases_do_not_match
 lockdown_session_boots_remaining
 lockdown_session_expires
+lockdown_session_minutes
+lockdown_session_minutes_help
 lockdown_session_no_time_limit
 lockdown_set_passphrase
 lockdown_show_passphrase

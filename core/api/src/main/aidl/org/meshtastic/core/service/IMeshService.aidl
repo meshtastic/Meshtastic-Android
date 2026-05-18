@@ -206,7 +206,7 @@ interface IMeshService {
     void requestRebootOta(in int requestId, in int destNum, in int mode, in byte []hash);
 
     /// Send a lockdown passphrase to authenticate with a TAK-locked device
-    void sendLockdownUnlock(in String passphrase, in int bootTtl, in int hourTtl);
+    void sendLockdownUnlock(in String passphrase, in int bootTtl, in int hourTtl, in int maxSessionSeconds);
 
     /// Send a Lock Now command to the connected TAK-enabled device
     void sendLockNow();

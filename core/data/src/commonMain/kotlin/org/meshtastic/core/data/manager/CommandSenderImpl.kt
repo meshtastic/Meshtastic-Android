@@ -375,7 +375,7 @@ class CommandSenderImpl(
         }
     }
 
-    override fun sendLockdownPassphrase(passphrase: String, boots: Int, hours: Int) {
+    override fun sendLockdownPassphrase(passphrase: String, boots: Int, hours: Int, maxSessionSeconds: Int) {
         val validUntilEpoch =
             if (hours > 0) {
                 (nowMillis / MILLIS_PER_SECOND + hours.toLong() * SECONDS_PER_HOUR).toInt()
@@ -387,6 +387,7 @@ class CommandSenderImpl(
                 passphrase = passphrase.encodeToByteArray().toByteString(),
                 boots_remaining = boots.coerceAtLeast(0),
                 valid_until_epoch = validUntilEpoch,
+                max_session_seconds = maxSessionSeconds.coerceAtLeast(0),
             )
         sendLockdownAdmin(AdminMessage(lockdown_auth = lockdownAuth))
     }

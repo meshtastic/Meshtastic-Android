@@ -43,7 +43,7 @@ interface LockdownCoordinator {
     fun handleLockdownStatus(status: LockdownStatus)
 
     /** Submits a passphrase to authenticate with the locked device. */
-    fun submitPassphrase(passphrase: String, boots: Int, hours: Int)
+    fun submitPassphrase(passphrase: String, boots: Int, hours: Int, maxSessionSeconds: Int = 0)
 
     /** Sends a Lock Now command to the connected device. */
     fun lockNow()

@@ -71,9 +71,15 @@ class LockdownPassphraseStoreImpl : LockdownPassphraseStore {
         }
     }
 
-    override fun savePassphrase(deviceAddress: String, passphrase: String, boots: Int, hours: Int) {
+    override fun savePassphrase(
+        deviceAddress: String,
+        passphrase: String,
+        boots: Int,
+        hours: Int,
+        maxSessionSeconds: Int,
+    ) {
         val key = masterKey ?: error("Lockdown: Cannot save passphrase - keystore unavailable")
-        val plaintext = serialize(passphrase, boots, hours)
+        val plaintext = serialize(passphrase, boots, hours, maxSessionSeconds)
         val encrypted = encrypt(key, plaintext)
         entryFile(deviceAddress).writeBytes(encrypted)
     }
@@ -114,24 +120,42 @@ class LockdownPassphraseStoreImpl : LockdownPassphraseStore {
 
     // region Serialization (simple line-based to avoid adding kotlinx-serialization dependency)
 
-    private fun serialize(passphrase: String, boots: Int, hours: Int): ByteArray =
-        "$boots\n$hours\n$passphrase".encodeToByteArray()
+    // Format v2: "boots\nhours\nmaxSessionSeconds\npassphrase" (4 lines).
+    // Backward-compat: legacy 3-line entries (no maxSessionSeconds) decode with maxSessionSeconds=0.
+    private fun serialize(passphrase: String, boots: Int, hours: Int, maxSessionSeconds: Int): ByteArray =
+        "$boots\n$hours\n$maxSessionSeconds\n$passphrase".encodeToByteArray()
 
     @Suppress("ReturnCount")
     private fun deserialize(plaintext: ByteArray): StoredPassphrase? {
         val text = plaintext.decodeToString()
-        val lines = text.split("\n", limit = 3)
-        if (lines.size < SERIALIZED_LINE_COUNT) {
+        // Try v2 (4-line) format first.
+        val v2 = text.split("\n", limit = 4)
+        if (v2.size == SERIALIZED_LINE_COUNT_V2) {
+            val boots = v2[0].toIntOrNull()
+            val hours = v2[1].toIntOrNull()
+            val maxSession = v2[2].toIntOrNull()
+            if (boots != null && hours != null && maxSession != null) {
+                return StoredPassphrase(
+                    passphrase = v2[3],
+                    boots = boots,
+                    hours = hours,
+                    maxSessionSeconds = maxSession,
+                )
+            }
+        }
+        // Fall back to v1 (3-line, no maxSessionSeconds).
+        val v1 = text.split("\n", limit = 3)
+        if (v1.size < SERIALIZED_LINE_COUNT_V1) {
             Logger.w { "Lockdown: Invalid passphrase entry format" }
             return null
         }
-        val boots = lines[0].toIntOrNull()
-        val hours = lines[1].toIntOrNull()
+        val boots = v1[0].toIntOrNull()
+        val hours = v1[1].toIntOrNull()
         if (boots == null || hours == null) {
             Logger.w { "Lockdown: Invalid passphrase entry metadata" }
             return null
         }
-        return StoredPassphrase(passphrase = lines[2], boots = boots, hours = hours)
+        return StoredPassphrase(passphrase = v1[2], boots = boots, hours = hours)
     }
 
     // endregion
@@ -172,6 +196,7 @@ class LockdownPassphraseStoreImpl : LockdownPassphraseStore {
         private const val AES_KEY_BITS = 256
         private const val GCM_TAG_BITS = 128
         private const val BYTE_MASK = 0xFF
-        private const val SERIALIZED_LINE_COUNT = 3
+        private const val SERIALIZED_LINE_COUNT_V1 = 3
+        private const val SERIALIZED_LINE_COUNT_V2 = 4
     }
 }

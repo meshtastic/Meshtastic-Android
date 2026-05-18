@@ -141,8 +141,13 @@ class UIViewModel(
     val lockdownState = serviceRepository.lockdownState
     val lockdownTokenInfo = serviceRepository.lockdownTokenInfo
 
-    fun sendLockdownUnlock(passphrase: String, bootTtl: Int = DEFAULT_BOOT_TTL, hourTtl: Int = 0) {
-        viewModelScope.launch { radioController.sendLockdownUnlock(passphrase, bootTtl, hourTtl) }
+    fun sendLockdownUnlock(
+        passphrase: String,
+        bootTtl: Int = DEFAULT_BOOT_TTL,
+        hourTtl: Int = 0,
+        maxSessionSeconds: Int = 0,
+    ) {
+        viewModelScope.launch { radioController.sendLockdownUnlock(passphrase, bootTtl, hourTtl, maxSessionSeconds) }
     }
 
     fun sendLockNow() {

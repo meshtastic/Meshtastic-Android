@@ -56,6 +56,8 @@ class LockdownCoordinatorImpl(
 
     @Volatile private var pendingHours: Int = 0
 
+    @Volatile private var pendingMaxSessionSeconds: Int = 0
+
     override fun onConnect() {
         serviceRepository.setSessionAuthorized(false)
         resetTransientState()
@@ -108,7 +110,12 @@ class LockdownCoordinatorImpl(
             if (stored != null) {
                 Logger.i { "Lockdown: Auto-unlocking with stored passphrase" }
                 wasAutoAttempt = true
-                commandSender.sendLockdownPassphrase(stored.passphrase, stored.boots, stored.hours)
+                commandSender.sendLockdownPassphrase(
+                    stored.passphrase,
+                    stored.boots,
+                    stored.hours,
+                    stored.maxSessionSeconds,
+                )
                 return
             }
         }
@@ -126,7 +133,13 @@ class LockdownCoordinatorImpl(
         // Only save on manual submit — auto-unlock already has a stored passphrase.
         if (deviceAddress != null && passphrase != null) {
             try {
-                passphraseStore.savePassphrase(deviceAddress, passphrase, pendingBoots, pendingHours)
+                passphraseStore.savePassphrase(
+                    deviceAddress,
+                    passphrase,
+                    pendingBoots,
+                    pendingHours,
+                    pendingMaxSessionSeconds,
+                )
                 Logger.i { "Lockdown: Saved passphrase for device" }
             } catch (e: Exception) {
                 Logger.e(e) { "Lockdown: Failed to persist passphrase (session still unlocked)" }
@@ -174,14 +187,15 @@ class LockdownCoordinatorImpl(
         }
     }
 
-    override fun submitPassphrase(passphrase: String, boots: Int, hours: Int) {
+    override fun submitPassphrase(passphrase: String, boots: Int, hours: Int, maxSessionSeconds: Int) {
         pendingPassphrase = passphrase
         pendingBoots = boots
         pendingHours = hours
+        pendingMaxSessionSeconds = maxSessionSeconds
         wasAutoAttempt = false
         wasLockNow = false
         serviceRepository.setLockdownState(LockdownState.None)
-        commandSender.sendLockdownPassphrase(passphrase, boots, hours)
+        commandSender.sendLockdownPassphrase(passphrase, boots, hours, maxSessionSeconds)
     }
 
     override fun lockNow() {
@@ -195,5 +209,6 @@ class LockdownCoordinatorImpl(
         pendingPassphrase = null
         pendingBoots = LockdownPassphraseStore.DEFAULT_BOOTS
         pendingHours = 0
+        pendingMaxSessionSeconds = 0
     }
 }

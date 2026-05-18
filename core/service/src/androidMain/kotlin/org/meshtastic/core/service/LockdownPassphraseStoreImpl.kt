@@ -61,23 +61,36 @@ class LockdownPassphraseStoreImpl(app: Application) : LockdownPassphraseStore {
         val passphrase = p.getString("${key}_passphrase", null) ?: return null
         val boots = p.getInt("${key}_boots", LockdownPassphraseStore.DEFAULT_BOOTS)
         val hours = p.getInt("${key}_hours", 0)
-        return StoredPassphrase(passphrase, boots, hours)
+        val maxSessionSeconds = p.getInt("${key}_maxSessionSeconds", 0)
+        return StoredPassphrase(passphrase, boots, hours, maxSessionSeconds)
     }
 
-    override fun savePassphrase(deviceAddress: String, passphrase: String, boots: Int, hours: Int) {
+    override fun savePassphrase(
+        deviceAddress: String,
+        passphrase: String,
+        boots: Int,
+        hours: Int,
+        maxSessionSeconds: Int,
+    ) {
         val p = requirePrefs()
         val key = sanitizeKey(deviceAddress)
         p.edit()
             .putString("${key}_passphrase", passphrase)
             .putInt("${key}_boots", boots)
             .putInt("${key}_hours", hours)
+            .putInt("${key}_maxSessionSeconds", maxSessionSeconds)
             .apply()
     }
 
     override fun clearPassphrase(deviceAddress: String) {
         val p = requirePrefs()
         val key = sanitizeKey(deviceAddress)
-        p.edit().remove("${key}_passphrase").remove("${key}_boots").remove("${key}_hours").apply()
+        p.edit()
+            .remove("${key}_passphrase")
+            .remove("${key}_boots")
+            .remove("${key}_hours")
+            .remove("${key}_maxSessionSeconds")
+            .apply()
     }
 
     private fun sanitizeKey(address: String): String = address.replace(":", "_")

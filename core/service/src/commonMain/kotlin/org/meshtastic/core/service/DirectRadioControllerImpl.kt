@@ -235,8 +235,8 @@ class DirectRadioControllerImpl(
         radioInterfaceService.setDeviceAddress(address)
     }
 
-    override suspend fun sendLockdownUnlock(passphrase: String, bootTtl: Int, hourTtl: Int) {
-        actionHandler.handleSendLockdownUnlock(passphrase, bootTtl, hourTtl)
+    override suspend fun sendLockdownUnlock(passphrase: String, bootTtl: Int, hourTtl: Int, maxSessionSeconds: Int) {
+        actionHandler.handleSendLockdownUnlock(passphrase, bootTtl, hourTtl, maxSessionSeconds)
     }
 
     override suspend fun sendLockNow() {
