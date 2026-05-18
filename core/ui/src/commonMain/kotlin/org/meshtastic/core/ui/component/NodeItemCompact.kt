@@ -21,6 +21,8 @@ package org.meshtastic.core.ui.component
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -354,14 +356,17 @@ private fun CompactPositionSignalRow(
         }
 
     if (items.isNotEmpty()) {
-        Row(
-            modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
+        @OptIn(ExperimentalLayoutApi::class)
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(6.dp),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
             items.forEachIndexed { index, (itemKey, content) ->
                 if (index > 0) {
-                    VerticalDivider(modifier = Modifier.fillMaxHeight())
+                    Row(modifier = Modifier.height(IntrinsicSize.Min), verticalAlignment = Alignment.CenterVertically) {
+                        VerticalDivider(modifier = Modifier.fillMaxHeight())
+                    }
                 }
                 key(itemKey) { content() }
             }
@@ -370,7 +375,7 @@ private fun CompactPositionSignalRow(
 }
 
 @Composable
-@Suppress("LongParameterList")
+@Suppress("LongParameterList", "LongMethod")
 private fun CompactDeviceRow(
     thatNode: Node,
     unmessageable: Boolean,
@@ -429,14 +434,17 @@ private fun CompactDeviceRow(
         }
 
     if (items.isNotEmpty()) {
-        Row(
-            modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
+        @OptIn(ExperimentalLayoutApi::class)
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(6.dp),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
             items.forEachIndexed { index, (itemKey, content) ->
                 if (index > 0) {
-                    VerticalDivider(modifier = Modifier.fillMaxHeight())
+                    Row(modifier = Modifier.height(IntrinsicSize.Min), verticalAlignment = Alignment.CenterVertically) {
+                        VerticalDivider(modifier = Modifier.fillMaxHeight())
+                    }
                 }
                 key(itemKey) { content() }
             }
