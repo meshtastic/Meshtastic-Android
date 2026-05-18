@@ -22,7 +22,6 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ListItem
@@ -49,27 +48,19 @@ fun SwitchPreference(
     loading: Boolean = false,
 ) {
     val defaultColors = ListItemDefaults.colors()
-
-    @Suppress("DEPRECATION")
     val currentColors =
-        if (enabled) {
-            defaultColors
+        if (containerColor != null) {
+            defaultColors.copy(containerColor = containerColor)
         } else {
-            defaultColors.copy(
-                headlineColor = defaultColors.headlineColor.copy(alpha = 0.5f),
-                supportingTextColor = defaultColors.supportingTextColor.copy(alpha = 0.5f),
-            )
+            defaultColors
         }
-            .let { if (containerColor != null) it.copy(containerColor = containerColor) else it }
 
     ListItem(
+        checked = checked,
+        onCheckedChange = onCheckedChange,
+        modifier = padding?.let { Modifier.padding(it) } ?: modifier,
+        enabled = enabled,
         colors = currentColors,
-        modifier =
-        (padding?.let { Modifier.padding(it) } ?: modifier).toggleable(
-            value = checked,
-            enabled = enabled,
-            onValueChange = onCheckedChange,
-        ),
         trailingContent = {
             AnimatedContent(targetState = loading) { loading ->
                 if (loading) {
@@ -84,7 +75,7 @@ fun SwitchPreference(
                 Text(text = summary)
             }
         },
-        headlineContent = { Text(text = title) },
+        content = { Text(text = title) },
     )
 }
 
