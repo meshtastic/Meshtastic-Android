@@ -22,6 +22,7 @@ import kotlinx.coroutines.sync.withLock
 import okio.FileSystem
 import okio.IOException
 import okio.Path
+import okio.Path.Companion.toPath
 import okio.buffer
 
 /**
@@ -104,6 +105,7 @@ class DocTranslationCache(
         fileSystem
             .listRecursively(cacheRoot)
             .filter { fileSystem.metadata(it).isRegularFile }
+            .filter { it.name.endsWith(".md") }
             .sumOf { fileSystem.metadata(it).size ?: 0L }
     } catch (e: IOException) {
         Logger.w(tag = TAG) { "Cache size calculation failed: ${e.message}" }
@@ -111,13 +113,12 @@ class DocTranslationCache(
     }
 
     private fun touchFile(file: Path) {
-        // Re-write to update mtime — Okio doesn't have a direct touch API
+        // Write a tiny sidecar file to track last access time for eviction ordering.
+        // The sidecar's own mtime serves as the access timestamp.
         try {
-            val source = fileSystem.source(file).buffer()
-            val content = source.readUtf8()
-            source.close()
-            val sink = fileSystem.sink(file).buffer()
-            sink.writeUtf8(content)
+            val accessFile = "$file.access".toPath()
+            val sink = fileSystem.sink(accessFile).buffer()
+            sink.writeUtf8("1")
             sink.close()
         } catch (_: IOException) {
             // Non-fatal: eviction order may be slightly off
@@ -137,8 +138,16 @@ class DocTranslationCache(
                 fileSystem
                     .listRecursively(cacheRoot)
                     .filter { fileSystem.metadata(it).isRegularFile }
-                    .filter { !it.name.endsWith(".tmp") }
-                    .sortedBy { fileSystem.metadata(it).lastModifiedAtMillis ?: 0L }
+                    .filter { it.name.endsWith(".md") }
+                    .sortedBy { file ->
+                        // Use sidecar access file mtime if available, else cache file mtime
+                        val accessFile = "$file.access".toPath()
+                        if (fileSystem.exists(accessFile)) {
+                            fileSystem.metadata(accessFile).lastModifiedAtMillis ?: 0L
+                        } else {
+                            fileSystem.metadata(file).lastModifiedAtMillis ?: 0L
+                        }
+                    }
                     .toList()
 
             var currentSize = sizeBytesInternal()
@@ -146,6 +155,13 @@ class DocTranslationCache(
                 if (currentSize <= maxCacheSizeBytes * EVICTION_TARGET_PERCENT / PERCENT_DIVISOR) break
                 val fileSize = fileSystem.metadata(file).size ?: 0L
                 fileSystem.delete(file)
+                // Also delete sidecar access file
+                val accessFile = "$file.access".toPath()
+                try {
+                    fileSystem.delete(accessFile)
+                } catch (_: IOException) {
+                    /* ignore */
+                }
                 currentSize -= fileSize
             }
         } catch (e: IOException) {

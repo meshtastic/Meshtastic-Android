@@ -57,7 +57,7 @@ class DocTranslationCacheTest {
     }
 
     @Test
-    fun `different hash returns null (stale cache)`() = runTest {
+    fun `different hash returns null - stale cache`() = runTest {
         cache.put("onboarding", "es", "hash1", "# Bienvenido")
         val result = cache.get("onboarding", "es", "hash2")
         assertNull(result)

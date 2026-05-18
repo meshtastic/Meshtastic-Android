@@ -82,6 +82,7 @@ interface DocBundleLoader {
  * No cross-locale caching — the bundle rebuilds on each [load] call (~1 ms) so locale changes take effect immediately.
  */
 @Single(binds = [DocBundleLoader::class])
+@Suppress("TooManyFunctions")
 class DefaultDocBundleLoader : DocBundleLoader {
 
     private var lastPages: List<DocPage> = emptyList()
@@ -111,6 +112,26 @@ class DefaultDocBundleLoader : DocBundleLoader {
         return DocPageContent(page = page, markdown = markdown, cssPath = null)
     }
 
+    /**
+     * Load page content with locale awareness. Tries locale-qualified Crowdin resource first, falls back to English.
+     * Returns a pair of (content, wasLocalized) for cascade decision.
+     */
+    @Suppress("ReturnCount")
+    suspend fun readPageLocalized(pageId: String, locale: String): Pair<DocPageContent?, Boolean> {
+        val bundle = load()
+        val page = bundle.pageIndex[pageId] ?: return null to false
+
+        if (locale != "en") {
+            val localizedMarkdown = loadLocalizedMarkdownContent(page, locale)
+            if (localizedMarkdown != null) {
+                return DocPageContent(page = page, markdown = localizedMarkdown, cssPath = null) to true
+            }
+        }
+
+        val markdown = loadMarkdownContent(page)
+        return DocPageContent(page = page, markdown = markdown, cssPath = null) to false
+    }
+
     override suspend fun hasTranslatedResource(pageId: String, locale: String): Boolean {
         val bundle = load()
         val page = bundle.pageIndex[pageId] ?: return false
@@ -126,6 +147,22 @@ class DefaultDocBundleLoader : DocBundleLoader {
             true
         } catch (_: Exception) {
             false
+        }
+    }
+
+    private suspend fun loadLocalizedMarkdownContent(page: DocPage, locale: String): String? {
+        val section =
+            when (page.section) {
+                DocSection.UserGuide -> "user"
+                DocSection.DeveloperGuide -> "developer"
+            }
+        val localePath = "files-$locale/docs/$section/${page.id}.md"
+        return try {
+            val bytes = Res.readBytes(localePath)
+            val raw = bytes.decodeToString()
+            stripFrontmatter(raw)
+        } catch (_: Exception) {
+            null
         }
     }
 

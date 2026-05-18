@@ -242,12 +242,12 @@ object MarkdownTranslationSegmenter {
                 }
             }
             .let { assembled ->
-                // Batch-translate: extract all translatable text, translate as one unit for context
+                // Check if there's anything to translate (text segments or link text)
                 val translatableText = segments.filterIsInstance<Segment.Translatable>().joinToString("") { it.text }
-                if (translatableText.isBlank()) return@let assembled
+                val hasTranslatableLinks = segments.any { it is Segment.Link && it.text.isNotBlank() }
+                if (translatableText.isBlank() && !hasTranslatableLinks) return@let assembled
 
-                // For simplicity and better translation quality, translate the whole line
-                // but reconstruct with preserved inline elements
+                // Translate with preserved inline elements (handles both text and link text)
                 translateWithPreservedInlines(segments, translate)
             }
     }

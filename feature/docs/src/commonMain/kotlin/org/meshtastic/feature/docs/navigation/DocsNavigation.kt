@@ -39,6 +39,7 @@ import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.feature.docs.ai.AIDocAssistant
 import org.meshtastic.feature.docs.ai.ChirpySessionHolder
+import org.meshtastic.feature.docs.data.DefaultDocBundleLoader
 import org.meshtastic.feature.docs.data.DocBundleLoader
 import org.meshtastic.feature.docs.data.KeywordSearchEngine
 import org.meshtastic.feature.docs.model.AIDocAssistantResult
@@ -202,6 +203,7 @@ private fun DocsHelpScreen(backStack: NavBackStack<NavKey>, chirpy: ChirpyUiStat
     )
 }
 
+@Suppress("LongMethod")
 @Composable
 private fun DocsPageScreen(pageId: String, backStack: NavBackStack<NavKey>, chirpy: ChirpyUiState) {
     val bundleLoader = koinInject<DocBundleLoader>()
@@ -215,34 +217,53 @@ private fun DocsPageScreen(pageId: String, backStack: NavBackStack<NavKey>, chir
 
     LaunchedEffect(pageId, locale) {
         isLoading = true
-        val loaded = withContext(ioDispatcher) { bundleLoader.readPage(pageId) }
-        val needsMlKit =
-            loaded != null &&
-                locale != "en" &&
-                !withContext(ioDispatcher) { bundleLoader.hasTranslatedResource(pageId, locale) }
-        if (needsMlKit && loaded != null) {
-            // Show English content immediately while translation runs
-            content = loaded
-            translationSource = TranslationSource.BUNDLED
-            isLoading = false
+        val loader = bundleLoader as? DefaultDocBundleLoader
 
-            // Attempt ML Kit runtime translation in background
-            val result =
-                withContext(ioDispatcher) { translationService.translatePage(pageId, loaded.markdown ?: "", locale) }
-            when (result) {
-                is TranslationResult.Success -> {
-                    content = loaded.copy(markdown = result.translatedMarkdown)
-                    translationSource = TranslationSource.ML_KIT
-                }
+        // Try locale-aware loading: Crowdin bundle first, then English fallback
+        val (loaded, wasCrowdinLocalized) =
+            if (loader != null) {
+                withContext(ioDispatcher) { loader.readPageLocalized(pageId, locale) }
+            } else {
+                withContext(ioDispatcher) { bundleLoader.readPage(pageId) } to false
+            }
 
-                else -> {
-                    /* Keep English content already displayed */
+        when {
+            // Crowdin provided a localized version — use it directly
+            wasCrowdinLocalized && loaded != null -> {
+                content = loaded
+                translationSource = TranslationSource.BUNDLED
+                isLoading = false
+            }
+
+            // Non-English with no Crowdin — attempt ML Kit runtime translation
+            locale != "en" && loaded != null -> {
+                // Show English content immediately while translation runs
+                content = loaded
+                translationSource = TranslationSource.BUNDLED
+                isLoading = false
+
+                val result =
+                    withContext(ioDispatcher) {
+                        translationService.translatePage(pageId, loaded.markdown ?: "", locale)
+                    }
+                when (result) {
+                    is TranslationResult.Success -> {
+                        content = loaded.copy(markdown = result.translatedMarkdown)
+                        translationSource = TranslationSource.ML_KIT
+                    }
+
+                    else -> {
+                        /* Keep English content already displayed */
+                    }
                 }
             }
-        } else {
-            content = loaded
-            translationSource = if (locale != "en") TranslationSource.BUNDLED else TranslationSource.BUNDLED
-            isLoading = false
+
+            // English locale or load failure
+            else -> {
+                content = loaded
+                translationSource = TranslationSource.BUNDLED
+                isLoading = false
+            }
         }
     }
 
