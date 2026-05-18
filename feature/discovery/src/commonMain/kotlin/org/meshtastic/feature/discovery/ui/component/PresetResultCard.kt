@@ -34,9 +34,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.database.entity.DiscoveredNodeEntity
 import org.meshtastic.core.database.entity.DiscoveryPresetResultEntity
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.discovery_stat_avg_airtime_rate
+import org.meshtastic.core.resources.discovery_stat_avg_channel_utilization
+import org.meshtastic.core.resources.discovery_stat_direct
+import org.meshtastic.core.resources.discovery_stat_mesh
+import org.meshtastic.core.resources.discovery_stat_messages
+import org.meshtastic.core.resources.discovery_stat_sensor_pkts
+import org.meshtastic.core.resources.discovery_stat_unique_nodes
 import org.meshtastic.feature.discovery.ui.StatRow
 import org.meshtastic.feature.discovery.ui.formatDuration
 
@@ -112,28 +121,47 @@ private fun PresetHeader(result: DiscoveryPresetResultEntity, rank: Int?, isTied
 @Composable
 private fun StatsGrid(result: DiscoveryPresetResultEntity) {
     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        StatRow(label = "Unique nodes", value = result.uniqueNodes.toString())
+        StatRow(label = stringResource(Res.string.discovery_stat_unique_nodes), value = result.uniqueNodes.toString())
         StatRow(
-            label = "Avg channel utilization",
+            label = stringResource(Res.string.discovery_stat_avg_channel_utilization),
             value = "${NumberFormatter.format(result.avgChannelUtilization, 1)}%",
         )
-        StatRow(label = "Avg airtime rate", value = "${NumberFormatter.format(result.avgAirtimeRate, 1)}%")
+        StatRow(
+            label = stringResource(Res.string.discovery_stat_avg_airtime_rate),
+            value = "${NumberFormatter.format(result.avgAirtimeRate, 1)}%",
+        )
     }
 }
 
 @Composable
 private fun NodeBreakdown(result: DiscoveryPresetResultEntity) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-        MetricChip(label = "Direct", value = result.directNeighborCount.toString(), modifier = Modifier.weight(1f))
-        MetricChip(label = "Mesh", value = result.meshNeighborCount.toString(), modifier = Modifier.weight(1f))
+        MetricChip(
+            label = stringResource(Res.string.discovery_stat_direct),
+            value = result.directNeighborCount.toString(),
+            modifier = Modifier.weight(1f),
+        )
+        MetricChip(
+            label = stringResource(Res.string.discovery_stat_mesh),
+            value = result.meshNeighborCount.toString(),
+            modifier = Modifier.weight(1f),
+        )
     }
 }
 
 @Composable
 private fun MessageBreakdown(result: DiscoveryPresetResultEntity) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-        MetricChip(label = "Messages", value = result.messageCount.toString(), modifier = Modifier.weight(1f))
-        MetricChip(label = "Sensor pkts", value = result.sensorPacketCount.toString(), modifier = Modifier.weight(1f))
+        MetricChip(
+            label = stringResource(Res.string.discovery_stat_messages),
+            value = result.messageCount.toString(),
+            modifier = Modifier.weight(1f),
+        )
+        MetricChip(
+            label = stringResource(Res.string.discovery_stat_sensor_pkts),
+            value = result.sensorPacketCount.toString(),
+            modifier = Modifier.weight(1f),
+        )
     }
 }
 

@@ -81,6 +81,9 @@ import org.meshtastic.core.resources.discovery_scan_history
 import org.meshtastic.core.resources.discovery_scan_progress
 import org.meshtastic.core.resources.discovery_shifting_to
 import org.meshtastic.core.resources.discovery_start_scan
+import org.meshtastic.core.resources.discovery_start_scan_disabled
+import org.meshtastic.core.resources.discovery_start_scan_reason_no_presets
+import org.meshtastic.core.resources.discovery_start_scan_reason_not_connected
 import org.meshtastic.core.resources.discovery_stop_scan
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.icon.ArrowBack
@@ -344,13 +347,14 @@ private fun ScanButton(
         val isEnabled = isConnected && hasPresetsSelected
         val disabledReason =
             when {
-                !isConnected -> "device not connected"
-                !hasPresetsSelected -> "no presets selected"
+                !isConnected -> stringResource(Res.string.discovery_start_scan_reason_not_connected)
+                !hasPresetsSelected -> stringResource(Res.string.discovery_start_scan_reason_no_presets)
                 else -> ""
             }
+        val disabledDescription = stringResource(Res.string.discovery_start_scan_disabled, disabledReason)
         val buttonModifier =
             if (!isEnabled) {
-                modifier.fillMaxWidth().semantics { contentDescription = "Start Scan button disabled. $disabledReason" }
+                modifier.fillMaxWidth().semantics { contentDescription = disabledDescription }
             } else {
                 modifier.fillMaxWidth()
             }

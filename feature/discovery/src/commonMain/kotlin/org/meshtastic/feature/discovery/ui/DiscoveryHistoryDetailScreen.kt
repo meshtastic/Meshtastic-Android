@@ -47,6 +47,13 @@ import org.meshtastic.core.database.entity.DiscoverySessionEntity
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.back
 import org.meshtastic.core.resources.discovery_session_detail
+import org.meshtastic.core.resources.discovery_stat_home_preset
+import org.meshtastic.core.resources.discovery_stat_preset_results
+import org.meshtastic.core.resources.discovery_stat_presets_scanned
+import org.meshtastic.core.resources.discovery_stat_status
+import org.meshtastic.core.resources.discovery_stat_total_dwell_time
+import org.meshtastic.core.resources.discovery_stat_total_messages
+import org.meshtastic.core.resources.discovery_stat_unique_nodes
 import org.meshtastic.core.resources.discovery_view_map
 import org.meshtastic.core.ui.icon.ArrowBack
 import org.meshtastic.core.ui.icon.Map
@@ -101,7 +108,10 @@ fun DiscoveryHistoryDetailScreen(
             session?.let { s -> SessionMetadataCard(s) }
 
             if (presetResults.isNotEmpty()) {
-                Text(text = "Preset Results", style = MaterialTheme.typography.titleMedium)
+                Text(
+                    text = stringResource(Res.string.discovery_stat_preset_results),
+                    style = MaterialTheme.typography.titleMedium,
+                )
                 presetResults.forEach { result ->
                     PresetResultCard(result = result, nodes = nodesByPreset[result.id].orEmpty())
                 }
@@ -119,12 +129,18 @@ private fun SessionMetadataCard(session: DiscoverySessionEntity) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(text = formatTimestamp(session.timestamp), style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(8.dp))
-            MetadataRow("Status", session.completionStatus.replaceFirstChar { it.uppercase() })
-            MetadataRow("Presets scanned", session.presetsScanned)
-            MetadataRow("Home preset", session.homePreset)
-            MetadataRow("Unique nodes", session.totalUniqueNodes.toString())
-            MetadataRow("Total messages", session.totalMessages.toString())
-            MetadataRow("Total dwell time", formatDuration(session.totalDwellSeconds))
+            MetadataRow(
+                stringResource(Res.string.discovery_stat_status),
+                session.completionStatus.replaceFirstChar { it.uppercase() },
+            )
+            MetadataRow(stringResource(Res.string.discovery_stat_presets_scanned), session.presetsScanned)
+            MetadataRow(stringResource(Res.string.discovery_stat_home_preset), session.homePreset)
+            MetadataRow(stringResource(Res.string.discovery_stat_unique_nodes), session.totalUniqueNodes.toString())
+            MetadataRow(stringResource(Res.string.discovery_stat_total_messages), session.totalMessages.toString())
+            MetadataRow(
+                stringResource(Res.string.discovery_stat_total_dwell_time),
+                formatDuration(session.totalDwellSeconds),
+            )
             session.aiSummary?.let { summary ->
                 Spacer(Modifier.height(8.dp))
                 HorizontalDivider()

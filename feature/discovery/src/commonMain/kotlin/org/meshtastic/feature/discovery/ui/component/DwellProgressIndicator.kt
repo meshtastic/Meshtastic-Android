@@ -34,6 +34,8 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.discovery_dwell_progress
+import org.meshtastic.core.resources.discovery_stat_dwelling_on
+import org.meshtastic.core.resources.discovery_time_remaining
 
 @Suppress("MagicNumber")
 private val CONTENT_PADDING = 8.dp
@@ -66,10 +68,13 @@ fun DwellProgressIndicator(
             progressBarRangeInfo = ProgressBarRangeInfo(progress, 0f..1f)
         },
     ) {
-        Text(text = "Dwelling on $presetName", style = MaterialTheme.typography.titleSmall)
+        Text(
+            text = stringResource(Res.string.discovery_stat_dwelling_on, presetName),
+            style = MaterialTheme.typography.titleSmall,
+        )
         LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth().clearAndSetSemantics {})
         Text(
-            text = "$timeText remaining",
+            text = stringResource(Res.string.discovery_time_remaining, timeText),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = CONTENT_PADDING / 2),

@@ -41,6 +41,8 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.discovery_lora_presets
 import org.meshtastic.core.resources.discovery_lora_presets_description
 import org.meshtastic.core.resources.discovery_preset_home_label
+import org.meshtastic.core.resources.discovery_stat_selected
+import org.meshtastic.core.resources.discovery_stat_unselected
 import org.meshtastic.core.ui.icon.Check
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 
@@ -89,13 +91,15 @@ fun PresetPickerCard(
                         } else {
                             preset.displayName()
                         }
+                    val selectedDesc = stringResource(Res.string.discovery_stat_selected)
+                    val unselectedDesc = stringResource(Res.string.discovery_stat_unselected)
                     FilterChip(
                         selected = selected,
                         onClick = { onTogglePreset(preset) },
                         label = { Text(label) },
                         enabled = enabled,
                         modifier =
-                        Modifier.semantics { stateDescription = if (selected) "Selected" else "Not selected" },
+                        Modifier.semantics { stateDescription = if (selected) selectedDesc else unselectedDesc },
                         leadingIcon =
                         if (selected) {
                             {

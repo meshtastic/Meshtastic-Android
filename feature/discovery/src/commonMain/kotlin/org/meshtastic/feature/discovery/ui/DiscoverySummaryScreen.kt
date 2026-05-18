@@ -57,6 +57,14 @@ import org.meshtastic.core.resources.back
 import org.meshtastic.core.resources.discovery_export_report
 import org.meshtastic.core.resources.discovery_rerun_analysis
 import org.meshtastic.core.resources.discovery_scan_summary
+import org.meshtastic.core.resources.discovery_stat_analysis
+import org.meshtastic.core.resources.discovery_stat_channel_utilization
+import org.meshtastic.core.resources.discovery_stat_date
+import org.meshtastic.core.resources.discovery_stat_session_overview
+import org.meshtastic.core.resources.discovery_stat_status
+import org.meshtastic.core.resources.discovery_stat_total_dwell_time
+import org.meshtastic.core.resources.discovery_stat_total_unique_nodes
+import org.meshtastic.core.resources.discovery_summary_not_available
 import org.meshtastic.core.resources.discovery_view_map
 import org.meshtastic.core.ui.icon.ArrowBack
 import org.meshtastic.core.ui.icon.Map
@@ -208,15 +216,31 @@ private fun SessionOverviewCard(session: DiscoverySessionEntity) {
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = "Session Overview", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Text(
+                text = stringResource(Res.string.discovery_stat_session_overview),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+            )
             Spacer(modifier = Modifier.height(8.dp))
 
-            StatRow(label = "Date", value = DateFormatter.formatDateTime(session.timestamp))
-            StatRow(label = "Total unique nodes", value = session.totalUniqueNodes.toString())
-            StatRow(label = "Total dwell time", value = formatDuration(session.totalDwellSeconds))
-            StatRow(label = "Status", value = session.completionStatus.replaceFirstChar { it.uppercase() })
             StatRow(
-                label = "Channel utilization",
+                label = stringResource(Res.string.discovery_stat_date),
+                value = DateFormatter.formatDateTime(session.timestamp),
+            )
+            StatRow(
+                label = stringResource(Res.string.discovery_stat_total_unique_nodes),
+                value = session.totalUniqueNodes.toString(),
+            )
+            StatRow(
+                label = stringResource(Res.string.discovery_stat_total_dwell_time),
+                value = formatDuration(session.totalDwellSeconds),
+            )
+            StatRow(
+                label = stringResource(Res.string.discovery_stat_status),
+                value = session.completionStatus.replaceFirstChar { it.uppercase() },
+            )
+            StatRow(
+                label = stringResource(Res.string.discovery_stat_channel_utilization),
                 value = "${NumberFormatter.format(session.avgChannelUtilization, 1)}%",
             )
         }
@@ -240,7 +264,11 @@ private fun AiSummaryCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(text = "Analysis", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text(
+                    text = stringResource(Res.string.discovery_stat_analysis),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                )
                 if (isGenerating) {
                     CircularProgressIndicator(modifier = Modifier.padding(4.dp), strokeWidth = 2.dp)
                 } else {
@@ -255,7 +283,8 @@ private fun AiSummaryCard(
             }
             Spacer(modifier = Modifier.height(8.dp))
 
-            val summaryText = aiSummary ?: algorithmicSummary ?: "AI analysis not available"
+            val summaryText =
+                aiSummary ?: algorithmicSummary ?: stringResource(Res.string.discovery_summary_not_available)
 
             Text(
                 text = summaryText,
