@@ -262,43 +262,39 @@ private fun NodeBatteryPositionRow(
     }
 }
 
+@Suppress("CyclomaticComplexMethod")
 @Composable
 private fun NodeSignalRow(thatNode: Node, isThisNode: Boolean, contentColor: Color) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        if (isThisNode) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                IconInfo(
-                    icon = MeshtasticIcons.ChannelUtilization,
-                    contentDescription = stringResource(Res.string.channel_utilization),
-                    label = stringResource(Res.string.channel_utilization),
-                    text = MetricFormatter.percent(thatNode.deviceMetrics.channel_utilization ?: 0f),
-                    contentColor = contentColor,
-                )
-                IconInfo(
-                    icon = MeshtasticIcons.AirUtilization,
-                    contentDescription = stringResource(Res.string.air_utilization),
-                    label = stringResource(Res.string.air_utilization),
-                    text = MetricFormatter.percent(thatNode.deviceMetrics.air_util_tx ?: 0f),
-                    contentColor = contentColor,
-                )
-            }
-        } else {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+    val items =
+        buildList<@Composable () -> Unit> {
+            if (isThisNode) {
+                add {
+                    IconInfo(
+                        icon = MeshtasticIcons.ChannelUtilization,
+                        contentDescription = stringResource(Res.string.channel_utilization),
+                        label = stringResource(Res.string.channel_utilization),
+                        text = MetricFormatter.percent(thatNode.deviceMetrics.channel_utilization ?: 0f),
+                        contentColor = contentColor,
+                    )
+                }
+                add {
+                    IconInfo(
+                        icon = MeshtasticIcons.AirUtilization,
+                        contentDescription = stringResource(Res.string.air_utilization),
+                        label = stringResource(Res.string.air_utilization),
+                        text = MetricFormatter.percent(thatNode.deviceMetrics.air_util_tx ?: 0f),
+                        contentColor = contentColor,
+                    )
+                }
+            } else {
                 if (thatNode.hopsAway > 0) {
-                    HopsInfo(hops = thatNode.hopsAway, contentColor = contentColor)
+                    add { HopsInfo(hops = thatNode.hopsAway, contentColor = contentColor) }
                 } else if (thatNode.hopsAway == 0 && !thatNode.viaMqtt) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        if (thatNode.snr < 100f) Snr(thatNode.snr)
-                        if (thatNode.rssi < 0) Rssi(thatNode.rssi)
-                        if (thatNode.snr < 100f && thatNode.rssi < 0) {
-                            val quality = determineSignalQuality(thatNode.snr, thatNode.rssi)
+                    if (thatNode.snr < 100f) add { Snr(thatNode.snr) }
+                    if (thatNode.rssi < 0) add { Rssi(thatNode.rssi) }
+                    if (thatNode.snr < 100f && thatNode.rssi < 0) {
+                        val quality = determineSignalQuality(thatNode.snr, thatNode.rssi)
+                        add {
                             IconInfo(
                                 icon = vectorResource(quality.icon),
                                 contentDescription = stringResource(Res.string.signal_quality),
@@ -309,17 +305,18 @@ private fun NodeSignalRow(thatNode: Node, isThisNode: Boolean, contentColor: Col
                     }
                 }
                 if (thatNode.channel > 0) {
-                    ChannelInfo(channel = thatNode.channel, contentColor = contentColor)
+                    add { ChannelInfo(channel = thatNode.channel, contentColor = contentColor) }
                 }
+            }
+
+            val satCount = thatNode.validPosition?.sats_in_view ?: 0
+            if (satCount > 0) {
+                add { SatelliteCountInfo(satCount = satCount, contentColor = contentColor) }
             }
         }
 
-        val satCount = thatNode.validPosition?.sats_in_view ?: 0
-        if (satCount > 0) {
-            SatelliteCountInfo(satCount = satCount, contentColor = contentColor)
-        } else {
-            Spacer(Modifier)
-        }
+    if (items.isNotEmpty()) {
+        MetricsGrid(items)
     }
 }
 
@@ -393,7 +390,16 @@ private fun MetricsGrid(items: List<@Composable () -> Unit>) {
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         val remainder = items.size % GRID_COLUMNS
-        items.forEach { item -> Box(Modifier.weight(1f)) { item() } }
+        items.forEachIndexed { index, item ->
+            val columnIndex = index % GRID_COLUMNS
+            val alignment =
+                when (columnIndex) {
+                    GRID_COLUMNS - 1 -> Alignment.CenterEnd
+                    0 -> Alignment.CenterStart
+                    else -> Alignment.Center
+                }
+            Box(Modifier.weight(1f), contentAlignment = alignment) { item() }
+        }
         if (remainder != 0) {
             repeat(GRID_COLUMNS - remainder) { Spacer(Modifier.weight(1f)) }
         }
