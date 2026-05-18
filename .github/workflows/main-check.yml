@@ -21,6 +21,5 @@ jobs:
     with:
       run_lint: true
       run_unit_tests: false
-      run_desktop_builds: false
       upload_artifacts: true
     secrets: inherit
