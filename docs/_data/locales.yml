@@ -1,0 +1,37 @@
+# Supported documentation locales.
+# Each entry maps a Crowdin 2-letter code to its native name.
+# Pages land at docs/{code}/user/*.md via Crowdin sync.
+
+es:
+  name: "Español"
+  dir: ltr
+fr:
+  name: "Français"
+  dir: ltr
+de:
+  name: "Deutsch"
+  dir: ltr
+pt:
+  name: "Português"
+  dir: ltr
+it:
+  name: "Italiano"
+  dir: ltr
+ja:
+  name: "日本語"
+  dir: ltr
+ko:
+  name: "한국어"
+  dir: ltr
+zh:
+  name: "中文"
+  dir: ltr
+ru:
+  name: "Русский"
+  dir: ltr
+tr:
+  name: "Türkçe"
+  dir: ltr
+ar:
+  name: "العربية"
+  dir: rtl

@@ -37,6 +37,74 @@ defaults:
     values:
       parent: Developer Guide
       layout: default
+  # Locale-translated pages are excluded from main nav but still rendered.
+  # They use a dedicated locale layout with a back-link to the English version.
+  - scope:
+      path: "es"
+    values:
+      layout: locale_page
+      locale: es
+      nav_exclude: true
+  - scope:
+      path: "fr"
+    values:
+      layout: locale_page
+      locale: fr
+      nav_exclude: true
+  - scope:
+      path: "de"
+    values:
+      layout: locale_page
+      locale: de
+      nav_exclude: true
+  - scope:
+      path: "pt"
+    values:
+      layout: locale_page
+      locale: pt
+      nav_exclude: true
+  - scope:
+      path: "it"
+    values:
+      layout: locale_page
+      locale: it
+      nav_exclude: true
+  - scope:
+      path: "ja"
+    values:
+      layout: locale_page
+      locale: ja
+      nav_exclude: true
+  - scope:
+      path: "ko"
+    values:
+      layout: locale_page
+      locale: ko
+      nav_exclude: true
+  - scope:
+      path: "zh"
+    values:
+      layout: locale_page
+      locale: zh
+      nav_exclude: true
+  - scope:
+      path: "ru"
+    values:
+      layout: locale_page
+      locale: ru
+      nav_exclude: true
+  - scope:
+      path: "tr"
+    values:
+      layout: locale_page
+      locale: tr
+      nav_exclude: true
+  - scope:
+      path: "ar"
+    values:
+      layout: locale_page
+      locale: ar
+      nav_exclude: true
 
 # Callouts (just-the-docs v0.11+)
 callouts:

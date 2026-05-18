@@ -100,7 +100,7 @@ abstract class GenerateDocsBundleTask : DefaultTask() {
         val indexEntries = mutableListOf<String>()
         var pageCount = 0
 
-        // Process user and developer directories
+        // Process English user and developer directories
         listOf("user", "developer").forEach { section ->
             val sectionDir = File(src, section)
             if (!sectionDir.exists()) return@forEach
@@ -118,7 +118,7 @@ abstract class GenerateDocsBundleTask : DefaultTask() {
                 val htmlDir = File(out, "docs/$section")
                 htmlDir.mkdirs()
                 val htmlFile = File(htmlDir, "$id.html")
-                htmlFile.writeText(generateHtml(mdFile, title))
+                htmlFile.writeText(generateHtml(mdFile, title, "en"))
 
                 // Build index entry
                 val keywordsJson = keywords.joinToString(", ") { "\"$it\"" }
@@ -128,6 +128,7 @@ abstract class GenerateDocsBundleTask : DefaultTask() {
                     |    "id": "$id",
                     |    "title": "$title",
                     |    "section": "$section",
+                    |    "locale": "en",
                     |    "resourcePath": "docs/$section/$id.html",
                     |    "navOrder": $navOrder,
                     |    "keywords": [$keywordsJson],
@@ -140,6 +141,52 @@ abstract class GenerateDocsBundleTask : DefaultTask() {
             }
         }
 
+        // Process Crowdin locale directories: docs/{locale}/user/*.md
+        val localePattern = Regex("^[a-z]{2}$")
+        src.listFiles { f -> f.isDirectory && localePattern.matches(f.name) }
+            ?.sortedBy { it.name }
+            ?.forEach { localeDir ->
+                val locale = localeDir.name
+                listOf("user").forEach { section ->
+                    val localeSectionDir = File(localeDir, section)
+                    if (!localeSectionDir.exists()) return@forEach
+
+                    localeSectionDir.listFiles { f -> f.extension == "md" }?.sortedBy { it.name }?.forEach { mdFile ->
+                        val frontmatter = parseFrontmatter(mdFile)
+                        val id = mdFile.nameWithoutExtension
+                        val title = frontmatter["title"]
+                            ?: id.replace("-", " ").replaceFirstChar { it.uppercase() }
+                        val navOrder = frontmatter["nav_order"]?.toIntOrNull() ?: 999
+                        val keywords = extractKeywords(mdFile, title)
+                        val charCount = mdFile.readText().length
+
+                        // Generate locale-qualified HTML
+                        val htmlDir = File(out, "docs/$locale/$section")
+                        htmlDir.mkdirs()
+                        val htmlFile = File(htmlDir, "$id.html")
+                        htmlFile.writeText(generateHtml(mdFile, title, locale))
+
+                        // Build locale index entry
+                        val keywordsJson = keywords.joinToString(", ") { "\"$it\"" }
+                        indexEntries.add("""
+                            |  {
+                            |    "id": "$id",
+                            |    "title": "$title",
+                            |    "section": "$section",
+                            |    "locale": "$locale",
+                            |    "resourcePath": "docs/$locale/$section/$id.html",
+                            |    "navOrder": $navOrder,
+                            |    "keywords": [$keywordsJson],
+                            |    "aliases": [],
+                            |    "charCount": $charCount
+                            |  }
+                        """.trimMargin())
+
+                        pageCount++
+                    }
+                }
+            }
+
         // Write index.json
         val indexFile = File(out, "index.json")
         indexFile.writeText("[\n${indexEntries.joinToString(",\n")}\n]")
@@ -149,7 +196,13 @@ abstract class GenerateDocsBundleTask : DefaultTask() {
         cssDir.mkdirs()
         File(cssDir, "docs.css").writeText(generateCss())
 
-        logger.lifecycle("Generated docs bundle: $pageCount pages, channel=${channel.get()}, version=${version.get()}")
+        // Write locales manifest (for consumers that need to know available translations)
+        val localesManifest = src.listFiles { f -> f.isDirectory && localePattern.matches(f.name) }
+            ?.map { it.name }?.sorted() ?: emptyList()
+        val manifestFile = File(out, "locales.json")
+        manifestFile.writeText(localesManifest.joinToString(", ", "[", "]") { "\"$it\"" })
+
+        logger.lifecycle("Generated docs bundle: $pageCount pages (${localesManifest.size} locales), channel=${channel.get()}, version=${version.get()}")
     }
 
     private fun parseFrontmatter(file: File): Map<String, String> {
@@ -198,21 +251,22 @@ abstract class GenerateDocsBundleTask : DefaultTask() {
         return keywords.toList().take(30)
     }
 
-    private fun generateHtml(mdFile: File, title: String): String {
+    private fun generateHtml(mdFile: File, title: String, locale: String = "en"): String {
         val content = mdFile.readText()
             // Strip frontmatter
             .replace(Regex("^---[\\s\\S]*?---\\s*", RegexOption.MULTILINE), "")
             .replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        val dir = if (locale == "ar") "rtl" else "ltr"
         return """
             |<!DOCTYPE html>
-            |<html lang="en">
+            |<html lang="$locale" dir="$dir">
             |<head>
             |  <meta charset="UTF-8">
             |  <meta name="viewport" content="width=device-width, initial-scale=1.0">
             |  <title>$title</title>
             |  <link rel="stylesheet" href="../styles/docs.css">
             |</head>
-            |<body data-page="${mdFile.nameWithoutExtension}">
+            |<body data-page="${mdFile.nameWithoutExtension}" data-locale="$locale">
             |<pre class="markdown-content">$content</pre>
             |</body>
             |</html>

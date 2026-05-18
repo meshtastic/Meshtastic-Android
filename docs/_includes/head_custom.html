@@ -91,6 +91,67 @@
 
   /* Smooth anchor scroll */
   html { scroll-behavior: smooth; }
+
+  /* Language switcher */
+  .language-switcher {
+    display: inline-block;
+    position: relative;
+    margin-left: 8px;
+  }
+
+  .language-switcher-btn {
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 500;
+    font-family: var(--font-sans);
+    list-style: none;
+    padding: 4px 10px;
+    border: 1px solid var(--border-color, #D5D6E0);
+    border-radius: 16px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: background-color 0.2s ease;
+  }
+
+  .language-switcher-btn:hover {
+    background-color: rgba(128, 128, 128, 0.1);
+  }
+
+  .language-switcher[open] .language-switcher-list {
+    display: block;
+  }
+
+  .language-switcher-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 100;
+    list-style: none;
+    padding: 8px 0;
+    margin: 4px 0 0;
+    min-width: 140px;
+    background: var(--body-background-color, #fff);
+    border: 1px solid var(--border-color, #D5D6E0);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+
+  .language-switcher-list li {
+    padding: 0;
+  }
+
+  .language-switcher-list a {
+    display: block;
+    padding: 6px 16px;
+    text-decoration: none;
+    font-size: 0.85rem;
+    color: inherit;
+  }
+
+  .language-switcher-list a:hover {
+    background-color: rgba(103, 234, 148, 0.15);
+  }
 </style>
 
 <script>

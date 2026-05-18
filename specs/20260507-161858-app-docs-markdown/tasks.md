@@ -427,3 +427,35 @@ description: "Task list for feature: App Documentation (Android/KMP)"
 - [X] T450 [US1] Add `docs/**/*.md` to `scheduled-updates.yml` `add-paths`.
 
 **Checkpoint**: Translation cascade complete — Crowdin bundled translations served automatically by CMP, ML Kit auto-translates on Google flavor when Crowdin unavailable, graceful English fallback on all other platforms.
+
+---
+
+## Phase 15: Web i18n — Crowdin Translations on GitHub Pages
+
+**Purpose**: Ensure in-repo Crowdin translations flow to web consumers (GH Pages docs site), not just the in-app bundle.
+
+### Jekyll Configuration
+
+- [X] T500 [P] Add `_data/locales.yml` with all supported locale metadata (name, text direction).
+- [X] T501 [P] Add scope defaults in `_config.yml` for each locale path (`es`, `fr`, `de`, etc.) with `layout: locale_page` and `nav_exclude: true`.
+- [X] T502 [P] Create `_layouts/locale_page.html` — wraps content with locale banner, language tag, RTL support, and link back to English.
+
+### Language Switcher UI
+
+- [X] T510 [P] Create `_includes/language_switcher.html` — detects available translations for current page from `site.pages`, renders dropdown with locale links.
+- [X] T511 [P] Add language switcher CSS to `_includes/head_custom.html` (dropdown, hover states, dark-mode compatible).
+- [X] T512 [P] Wire language switcher into `_includes/header_custom.html` alongside theme toggle.
+
+### DocsTasks Locale Generation
+
+- [X] T520 [P] Extend `GenerateDocsBundleTask` to discover `docs/{locale}/user/` directories and generate locale-qualified HTML + index entries.
+- [X] T521 [P] Add `locales.json` manifest output listing all detected translation locales.
+- [X] T522 [P] Add `locale` field to index.json entries for locale-aware consumers.
+- [X] T523 [P] Set `lang` and `dir` attributes on generated HTML for locale pages.
+
+### Content & Navigation
+
+- [X] T530 [P] Create `docs/translations.md` — lists all available languages with links, Crowdin CTA, contribution instructions.
+- [X] T531 [P] Crowdin config (`crowdin.yml`) already maps `docs/index.md` → `docs/{locale}/index.md` — locale landing pages auto-generated.
+
+**Checkpoint**: Crowdin-contributed translations serve to web consumers via Jekyll GH Pages with locale routing, language switcher, and proper locale/RTL HTML attributes. Same markdown source serves both in-app (CMP bundle) and web (Jekyll) consumers.
