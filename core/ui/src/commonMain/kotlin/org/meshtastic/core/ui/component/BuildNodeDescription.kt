@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.node.component
+package org.meshtastic.core.ui.component
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
@@ -30,7 +30,6 @@ import org.meshtastic.core.resources.a11y_node_offline
 import org.meshtastic.core.resources.a11y_node_online
 import org.meshtastic.core.resources.a11y_node_role
 import org.meshtastic.core.resources.a11y_node_signal
-import org.meshtastic.core.ui.component.determineSignalQuality
 import org.meshtastic.core.ui.util.formatAgo
 
 private const val MILLIS_PER_SECOND = 1000L

@@ -16,7 +16,7 @@
  */
 @file:Suppress("MagicNumber")
 
-package org.meshtastic.feature.node.component
+package org.meshtastic.core.ui.component
 
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -66,31 +66,6 @@ import org.meshtastic.core.resources.node_list_long_click_label
 import org.meshtastic.core.resources.signal_quality
 import org.meshtastic.core.resources.unknown_username
 import org.meshtastic.core.resources.voltage
-import org.meshtastic.core.ui.component.AirQualityInfo
-import org.meshtastic.core.ui.component.ChannelInfo
-import org.meshtastic.core.ui.component.DistanceInfo
-import org.meshtastic.core.ui.component.ElevationInfo
-import org.meshtastic.core.ui.component.HardwareInfo
-import org.meshtastic.core.ui.component.HopsInfo
-import org.meshtastic.core.ui.component.HumidityInfo
-import org.meshtastic.core.ui.component.IconInfo
-import org.meshtastic.core.ui.component.LastHeardInfo
-import org.meshtastic.core.ui.component.MaterialBatteryInfo
-import org.meshtastic.core.ui.component.NodeChip
-import org.meshtastic.core.ui.component.NodeIdInfo
-import org.meshtastic.core.ui.component.NodeKeyStatusIcon
-import org.meshtastic.core.ui.component.PaxcountInfo
-import org.meshtastic.core.ui.component.PowerInfo
-import org.meshtastic.core.ui.component.PressureInfo
-import org.meshtastic.core.ui.component.RoleInfo
-import org.meshtastic.core.ui.component.Rssi
-import org.meshtastic.core.ui.component.SatelliteCountInfo
-import org.meshtastic.core.ui.component.Snr
-import org.meshtastic.core.ui.component.SoilMoistureInfo
-import org.meshtastic.core.ui.component.SoilTemperatureInfo
-import org.meshtastic.core.ui.component.TemperatureInfo
-import org.meshtastic.core.ui.component.TransportIcon
-import org.meshtastic.core.ui.component.determineSignalQuality
 import org.meshtastic.core.ui.icon.AirUtilization
 import org.meshtastic.core.ui.icon.ChannelUtilization
 import org.meshtastic.core.ui.icon.DeviceSleep
@@ -110,10 +85,10 @@ fun NodeItem(
     thatNode: Node,
     distanceUnits: Int,
     tempInFahrenheit: Boolean,
+    connectionState: ConnectionState,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
     onLongClick: (() -> Unit)? = null,
-    connectionState: ConnectionState,
     deviceType: DeviceType? = null,
     isActive: Boolean = false,
 ) {

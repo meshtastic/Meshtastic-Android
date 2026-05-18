@@ -72,6 +72,8 @@ import org.meshtastic.core.resources.nodes_empty_searching_title
 import org.meshtastic.core.resources.set_up_connection
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MeshtasticImportFAB
+import org.meshtastic.core.ui.component.NodeItem
+import org.meshtastic.core.ui.component.NodeItemCompact
 import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.core.ui.component.smartScrollToTop
 import org.meshtastic.core.ui.icon.Info
@@ -80,8 +82,6 @@ import org.meshtastic.core.ui.icon.NoDevice
 import org.meshtastic.core.ui.icon.Nodes
 import org.meshtastic.feature.node.component.NodeContextMenu
 import org.meshtastic.feature.node.component.NodeFilterTextField
-import org.meshtastic.feature.node.component.NodeItem
-import org.meshtastic.feature.node.component.NodeItemCompact
 import org.meshtastic.feature.node.component.NodeListHelp
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")

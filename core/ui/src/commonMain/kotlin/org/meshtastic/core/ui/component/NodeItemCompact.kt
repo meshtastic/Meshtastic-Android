@@ -16,7 +16,7 @@
  */
 @file:Suppress("MagicNumber")
 
-package org.meshtastic.feature.node.component
+package org.meshtastic.core.ui.component
 
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -58,16 +58,6 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.node_list_click_label
 import org.meshtastic.core.resources.node_list_long_click_label
 import org.meshtastic.core.resources.unknown_username
-import org.meshtastic.core.ui.component.ChannelInfo
-import org.meshtastic.core.ui.component.DistanceInfo
-import org.meshtastic.core.ui.component.HopsInfo
-import org.meshtastic.core.ui.component.IconInfo
-import org.meshtastic.core.ui.component.LastHeardInfo
-import org.meshtastic.core.ui.component.MaterialBatteryInfo
-import org.meshtastic.core.ui.component.NodeChip
-import org.meshtastic.core.ui.component.NodeKeyStatusIcon
-import org.meshtastic.core.ui.component.RoleInfo
-import org.meshtastic.core.ui.component.determineSignalQuality
 import org.meshtastic.core.ui.icon.DeviceSleep
 import org.meshtastic.core.ui.icon.ElectricPower
 import org.meshtastic.core.ui.icon.Favorite
