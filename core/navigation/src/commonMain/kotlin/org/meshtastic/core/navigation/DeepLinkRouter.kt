@@ -159,9 +159,9 @@ object DeepLinkRouter {
             val pageIdSegmentIndex = if (destNum != null) 3 else 2
             return if (segments.size > pageIdSegmentIndex) {
                 val pageId = segments[pageIdSegmentIndex]
-                listOf(SettingsRoute.SettingsGraph(destNum), SettingsRoute.HelpDocs, SettingsRoute.HelpDocPage(pageId))
+                listOf(SettingsRoute.Settings(destNum), SettingsRoute.HelpDocs, SettingsRoute.HelpDocPage(pageId))
             } else {
-                listOf(SettingsRoute.SettingsGraph(destNum), SettingsRoute.HelpDocs)
+                listOf(SettingsRoute.Settings(destNum), SettingsRoute.HelpDocs)
             }
         }
 

@@ -29,8 +29,7 @@ expect fun getSystemMeasurementSystem(): MeasurementSystem
 expect fun currentLocaleCode(): String
 
 /**
- * Returns the device locale as a CMP resource qualifier string.
- * Examples: "pt-rBR", "zh-rCN", "fr" (no region when not specified).
- * Use this to construct locale-qualified file resource paths like "files-$qualifier/docs/...".
+ * Returns the device locale as a CMP resource qualifier string. Examples: "pt-rBR", "zh-rCN", "fr" (no region when not
+ * specified). Use this to construct locale-qualified file resource paths like "files-$qualifier/docs/...".
  */
 expect fun currentLocaleQualifier(): String

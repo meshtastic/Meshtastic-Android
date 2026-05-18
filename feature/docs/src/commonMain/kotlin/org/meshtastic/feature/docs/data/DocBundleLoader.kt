@@ -20,6 +20,7 @@ import meshtasticandroid.feature.docs.generated.resources.Res
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.util.currentLocaleQualifier
 import org.meshtastic.core.resources.doc_keywords_connections
 import org.meshtastic.core.resources.doc_keywords_desktop
 import org.meshtastic.core.resources.doc_keywords_discovery
@@ -54,7 +55,6 @@ import org.meshtastic.core.resources.doc_title_tak
 import org.meshtastic.core.resources.doc_title_telemetry
 import org.meshtastic.core.resources.doc_title_translate
 import org.meshtastic.core.resources.doc_title_units
-import org.meshtastic.core.common.util.currentLocaleQualifier
 import org.meshtastic.feature.docs.model.DocBundle
 import org.meshtastic.feature.docs.model.DocPage
 import org.meshtastic.feature.docs.model.DocPageContent
@@ -173,9 +173,8 @@ class DefaultDocBundleLoader : DocBundleLoader {
     }
 
     /**
-     * Produces CMP resource qualifier candidates in specificity order.
-     * Tries region-qualified first (e.g. "pt-rBR"), then language-only ("pt").
-     * Deduplicates when device has no region (both would be "fr").
+     * Produces CMP resource qualifier candidates in specificity order. Tries region-qualified first (e.g. "pt-rBR"),
+     * then language-only ("pt"). Deduplicates when device has no region (both would be "fr").
      */
     private fun localeQualifiers(language: String): List<String> {
         val fullQualifier = currentLocaleQualifier()
