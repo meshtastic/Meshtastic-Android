@@ -73,9 +73,9 @@ import org.meshtastic.feature.settings.radio.component.UserConfigScreen
 import kotlin.reflect.KClass
 
 @Composable
-fun getRadioConfigViewModel(backStack: NavBackStack<NavKey>): RadioConfigViewModel {
-    val destNum =
-        remember(backStack.toList()) {
+fun getRadioConfigViewModel(backStack: NavBackStack<NavKey>, destNumOverride: Int? = null): RadioConfigViewModel {
+    val destNum = destNumOverride
+        ?: remember(backStack.toList()) {
             backStack.lastOrNull { it is SettingsRoute.Settings }?.let { (it as SettingsRoute.Settings).destNum }
                 ?: backStack
                     .lastOrNull { it is SettingsRoute.SettingsGraph }
@@ -88,19 +88,19 @@ fun getRadioConfigViewModel(backStack: NavBackStack<NavKey>): RadioConfigViewMod
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
-    entry<SettingsRoute.SettingsGraph> {
+    entry<SettingsRoute.SettingsGraph> { args ->
         SettingsMainScreen(
             settingsViewModel = koinViewModel(),
-            radioConfigViewModel = getRadioConfigViewModel(backStack),
+            radioConfigViewModel = getRadioConfigViewModel(backStack, destNumOverride = args.destNum),
             onClickNodeChip = { backStack.add(NodesRoute.NodeDetail(it)) },
             onNavigate = { backStack.add(it) },
         )
     }
 
-    entry<SettingsRoute.Settings> {
+    entry<SettingsRoute.Settings> { args ->
         SettingsMainScreen(
             settingsViewModel = koinViewModel(),
-            radioConfigViewModel = getRadioConfigViewModel(backStack),
+            radioConfigViewModel = getRadioConfigViewModel(backStack, destNumOverride = args.destNum),
             onClickNodeChip = { backStack.add(NodesRoute.NodeDetail(it)) },
             onNavigate = { backStack.add(it) },
             onBack = dropUnlessResumed { backStack.removeLastOrNull() },
