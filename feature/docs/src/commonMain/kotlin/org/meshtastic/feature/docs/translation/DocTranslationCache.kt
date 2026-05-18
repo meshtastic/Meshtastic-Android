@@ -23,7 +23,6 @@ import okio.FileSystem
 import okio.IOException
 import okio.Path
 import okio.buffer
-import org.koin.core.annotation.Single
 
 /**
  * File-based cache for ML Kit translated markdown pages.
@@ -31,7 +30,6 @@ import org.koin.core.annotation.Single
  * Cache key: `{pageId}#{locale}#{md5(sourceContent)}` When the English source changes, the md5 changes and the old
  * cache entry becomes stale. Eviction by oldest-access at [maxCacheSizeBytes] (default 50MB).
  */
-@Single
 class DocTranslationCache(
     private val cacheDir: Path,
     private val fileSystem: FileSystem = FileSystem.SYSTEM,

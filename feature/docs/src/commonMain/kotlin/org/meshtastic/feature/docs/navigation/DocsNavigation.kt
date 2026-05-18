@@ -216,7 +216,11 @@ private fun DocsPageScreen(pageId: String, backStack: NavBackStack<NavKey>, chir
     LaunchedEffect(pageId, locale) {
         isLoading = true
         val loaded = withContext(ioDispatcher) { bundleLoader.readPage(pageId) }
-        if (loaded != null && locale != "en" && !bundleLoader.hasTranslatedResource(pageId, locale)) {
+        val needsMlKit =
+            loaded != null &&
+                locale != "en" &&
+                !withContext(ioDispatcher) { bundleLoader.hasTranslatedResource(pageId, locale) }
+        if (needsMlKit && loaded != null) {
             // Show English content immediately while translation runs
             content = loaded
             translationSource = TranslationSource.BUNDLED
