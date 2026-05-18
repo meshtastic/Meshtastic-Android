@@ -95,9 +95,9 @@ jobs:
           PY
 
   # 2. VALIDATION & BUILD: Delegate to reusable-check.yml
-  # We disable coverage and desktop builds for PRs to keep feedback fast
-  # (< 10 mins). Desktop compilation is already covered by the :desktop:test
-  # task in the shard-app test shard.
+  # We disable coverage for PRs to keep feedback fast (< 10 mins).
+  # Desktop compilation is covered by :desktop:test in the shard-app test shard.
+  # Native desktop packaging (createDistributable) only runs in release.yml.
   validate-and-build:
     needs: check-changes
     if: needs.check-changes.outputs.android == 'true'
@@ -106,7 +106,6 @@ jobs:
       run_lint: true
       run_unit_tests: true
       run_coverage: false
-      run_desktop_builds: false
       upload_artifacts: true
     secrets: inherit
 
