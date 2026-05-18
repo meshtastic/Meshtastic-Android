@@ -26,14 +26,18 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 import org.maplibre.compose.camera.CameraPosition
 import org.maplibre.compose.camera.CameraState
 import org.maplibre.compose.expressions.dsl.asString
@@ -107,6 +111,8 @@ private const val HILLSHADE_EXAGGERATION = 0.5f
 private const val PULSE_DURATION_MS = 1500
 private const val PULSE_MAX_RADIUS_DP = 14f
 private const val PULSE_START_OPACITY = 0.5f
+private const val PULSE_WINDOW_SECONDS = 5L
+private const val PULSE_TICK_INTERVAL_MS = 1000L
 
 /** Free Terrain Tiles (Terrarium encoding) hosted on AWS. No API key required. */
 private val TERRAIN_TILES = listOf("https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png")
@@ -202,14 +208,25 @@ private fun NodeMarkerLayers(
     onNodeClick: (Int) -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val featureCollection = remember(nodes, myNodeNum) { nodesToFeatureCollection(nodes, myNodeNum) }
+
+    // Tick current time to expire pulse animations after PULSE_WINDOW_SECONDS
+    var nowEpochSeconds by remember { mutableStateOf(Clock.System.now().epochSeconds) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(PULSE_TICK_INTERVAL_MS)
+            nowEpochSeconds = Clock.System.now().epochSeconds
+        }
+    }
+
+    val featureCollection =
+        remember(nodes, myNodeNum, nowEpochSeconds) { nodesToFeatureCollection(nodes, myNodeNum, nowEpochSeconds) }
 
     // Read M3 semantic colors for map layers (recomposes on theme change)
     val clusterColor = MaterialTheme.colorScheme.primary
     val labelColor = MaterialTheme.colorScheme.onSurfaceVariant
     val clusterLabelColor = MaterialTheme.colorScheme.onPrimary
 
-    // Pulsing ring animation for online nodes
+    // Pulsing ring animation for recently-heard nodes
     val pulseTransition = rememberInfiniteTransition(label = "node-pulse")
     val pulseProgress by
         pulseTransition.animateFloat(
@@ -261,13 +278,13 @@ private fun NodeMarkerLayers(
         textSize = const(1.2f.em),
     )
 
-    // Pulsing ring behind online nodes — animated radius expanding outward with fading opacity
+    // Pulsing ring behind recently-heard nodes — indicates new packet received
     val pulseRadius = (NODE_MARKER_RADIUS.value + (PULSE_MAX_RADIUS_DP - NODE_MARKER_RADIUS.value) * pulseProgress).dp
     val pulseOpacity = PULSE_START_OPACITY * (1f - pulseProgress)
     CircleLayer(
         id = "node-pulse-ring",
         source = nodesSource,
-        filter = feature["is_online"].convertToBoolean(),
+        filter = feature["recently_heard"].convertToBoolean(),
         radius = const(pulseRadius),
         color = const(OnlineStrokeColor),
         opacity = const(pulseOpacity),

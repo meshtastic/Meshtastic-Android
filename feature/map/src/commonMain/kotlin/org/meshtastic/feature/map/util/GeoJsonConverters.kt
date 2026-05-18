@@ -29,15 +29,24 @@ import org.meshtastic.core.model.Node
 
 private const val MIN_PRECISION_BITS = 10
 private const val MAX_PRECISION_BITS = 19
+private const val RECENTLY_HEARD_WINDOW_SECONDS = 5
 
 /** Convert a list of nodes to a GeoJSON [FeatureCollection] for map rendering. */
-internal fun nodesToFeatureCollection(nodes: List<Node>, myNodeNum: Int? = null): FeatureCollection<Point, JsonObject> {
+internal fun nodesToFeatureCollection(
+    nodes: List<Node>,
+    myNodeNum: Int? = null,
+    nowEpochSeconds: Long = 0L,
+): FeatureCollection<Point, JsonObject> {
     val features =
         nodes.mapNotNull { node ->
             val pos = node.validPosition ?: return@mapNotNull null
             val geoPos = toGeoPositionOrNull(pos.latitude_i, pos.longitude_i) ?: return@mapNotNull null
 
             val colors = node.colors
+            val recentlyHeard =
+                nowEpochSeconds > 0L &&
+                    node.lastHeard > 0 &&
+                    (nowEpochSeconds - node.lastHeard) <= RECENTLY_HEARD_WINDOW_SECONDS
             val props = buildJsonObject {
                 put("node_num", node.num)
                 put("short_name", node.user.short_name)
@@ -46,6 +55,7 @@ internal fun nodesToFeatureCollection(nodes: List<Node>, myNodeNum: Int? = null)
                 put("is_favorite", node.isFavorite)
                 put("is_my_node", node.num == myNodeNum)
                 put("is_online", node.isOnline)
+                put("recently_heard", recentlyHeard)
                 put("battery_level", node.batteryLevel ?: -1)
                 put("hops_away", node.hopsAway)
                 put("via_mqtt", node.viaMqtt)
