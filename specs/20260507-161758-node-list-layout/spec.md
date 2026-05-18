@@ -2,7 +2,7 @@
 
 **Feature Branch**: `002-node-list-layout`
 **Created**: 2026-05-07
-**Status**: Not Started
+**Status**: Implemented
 **Input**: Node layout engine with complete and compact views for Compose Multiplatform
 
 ## Summary
@@ -171,8 +171,8 @@ flowchart TD
 |-----------|---------------|---------|
 | `NodeListDensity` | `feature/node/model/` | Enum: `COMPLETE` / `COMPACT` |
 | `NodeListLayoutPreferences` | `core/prefs/ui/` | DataStore keys for density + 9 compact toggles |
-| `NodeItemCompact` | `feature/node/component/` | Compact row composable with toggle-driven visibility |
-| `NodeItem` | `feature/node/component/` | Complete row composable — no toggles, all data shown |
+| `NodeItemCompact` | `core/ui/component/` | Compact row composable with toggle-driven visibility |
+| `NodeItem` | `core/ui/component/` | Complete row composable — no toggles, all data shown |
 | `NodeLayoutSettings` | `feature/settings/` | Density picker (SegmentedButton) + compact toggles + live preview |
 | `NodeListScreen` | `feature/node/list/` | Parent composable — reads density, delegates to correct item |
 | `NodeListHelp` | `feature/node/component/` | Help bottom sheet with signal legend + quality indicator docs |
@@ -198,7 +198,7 @@ flowchart TD
 - **FR-005**: All toggles MUST default to `true` (enabled) except "Relative Last Heard Time" which defaults to `false`.
 - **FR-006**: The "Relative Last Heard Time" toggle MUST be disabled (grayed out via `enabled = false`) when "Last Heard Time" is toggled off.
 - **FR-007**: When "Complete" is selected, the toggle section MUST be replaced with descriptive text: "The Complete layout displays all available node data. Fields with no data are automatically hidden."
-- **FR-008**: A live preview MUST render below the toggles using a representative node from Room KMP, reflecting the current density and toggle state in real time via `collectAsState()`.
+- **FR-008**: A live preview MUST render below the toggles using a hardcoded representative sample node, reflecting the current density and toggle state in real time. The sample node populates all fields (battery, signal, position, hops, channel, role, environment metrics, PKC key, favorite) so users can observe the effect of every toggle.
 - **FR-009**: The compact layout MUST render as a two-column `Row`: Column 1 (fixed width: `NodeChip` + battery), Column 2 (`Modifier.weight(1f)`: `Column` of up to 3 content rows).
 - **FR-010**: The short name MUST always render as a `NodeChip` composable in compact mode, maintaining consistent card styling at all sizes.
 - **FR-011**: The chip height MUST scale adaptively: `max(36.dp, min(70.dp, 24.dp × lineCount))` where `lineCount` counts active row groups (1 base + 1 if last-heard enabled + 1 if any combined-row toggle is enabled). The chip MUST use `Modifier.defaultMinSize()` rather than hard `Modifier.size()` to allow growth when system font scaling exceeds 100%.
@@ -271,7 +271,7 @@ Signal quality is determined by `determineSignalQuality(snr, rssi)` using absolu
 - The node list data model (`Node` in `core:model`, backed by `NodeEntity` in `core:database`) is fully populated by the packet processing pipeline. The layout engine only reads — it never writes to the model.
 - `NodeChip`, `MaterialBatteryInfo`, `HopsInfo`, `DistanceInfo`, `LoraSignalIndicator`, and `LastHeardInfo` are pre-existing reusable components in `core:ui`. The layout engine composes them but does not modify them.
 - `determineSignalQuality(snr, rssi)` uses absolute SNR/RSSI thresholds (not modem-preset-relative). The `Quality` enum (`GOOD`, `FAIR`, `BAD`, `NONE`) drives icon color for both layouts.
-- The live preview uses the first node from a Room KMP query sorted by `lastHeard` descending — it requires at least one node in the database to render.
+- The live preview uses a hardcoded sample node with all fields populated. This avoids a database dependency in settings and guarantees the preview always renders regardless of mesh state.
 - The Complete layout is intentionally not configurable — its purpose is to show everything, acting as the baseline reference.
 - All business logic and UI composables reside in `commonMain` source set. No platform-specific code is required for this feature.
 - String resources for toggle labels and help text are added to `core/resources/src/commonMain/composeResources/values/strings.xml` using `stringResource(Res.string.key)`.
