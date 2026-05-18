@@ -26,6 +26,12 @@ import org.meshtastic.feature.settings.component.NodeLayoutSettingsCompactPrevie
 import org.meshtastic.feature.settings.component.NodeLayoutSettingsCompletePreview
 import org.meshtastic.feature.settings.component.NotificationSectionPreview
 import org.meshtastic.feature.settings.component.PersistenceSectionPreview
+import org.meshtastic.feature.settings.component.SampleNodeCompactAllFieldsPreview
+import org.meshtastic.feature.settings.component.SampleNodeCompactNameOnlyPreview
+import org.meshtastic.feature.settings.component.SampleNodeCompactSignalOnlyPreview
+import org.meshtastic.feature.settings.component.SampleNodeCompleteFahrenheitPreview
+import org.meshtastic.feature.settings.component.SampleNodeCompleteImperialPreview
+import org.meshtastic.feature.settings.component.SampleNodeCompletePreview
 import org.meshtastic.feature.settings.radio.component.TakConfigCardPreview
 import org.meshtastic.feature.settings.radio.component.TakServerSectionDisabledPreview
 import org.meshtastic.feature.settings.radio.component.TakServerSectionEnabledPreview
@@ -126,4 +132,50 @@ fun ScreenshotNodeLayoutSettingsComplete() {
 @Composable
 fun ScreenshotNodeLayoutSettingsCompactMinimal() {
     NodeLayoutSettingsCompactMinimalPreview()
+}
+
+// ---------------------------------------------------------------------------
+// Isolated sample node screenshots
+// ---------------------------------------------------------------------------
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotSampleNodeComplete() {
+    SampleNodeCompletePreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotSampleNodeCompactAllFields() {
+    SampleNodeCompactAllFieldsPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotSampleNodeCompactSignalOnly() {
+    SampleNodeCompactSignalOnlyPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotSampleNodeCompactNameOnly() {
+    SampleNodeCompactNameOnlyPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotSampleNodeCompleteFahrenheit() {
+    SampleNodeCompleteFahrenheitPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotSampleNodeCompleteImperial() {
+    SampleNodeCompleteImperialPreview()
 }

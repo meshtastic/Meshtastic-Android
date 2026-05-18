@@ -16,10 +16,18 @@
  */
 package org.meshtastic.feature.settings.component
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.dp
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.NodeListDensity
+import org.meshtastic.core.ui.component.NodeItem
+import org.meshtastic.core.ui.component.NodeItemCompact
 import org.meshtastic.core.ui.theme.AppTheme
 
 @PreviewLightDark
@@ -112,6 +120,139 @@ fun NodeLayoutSettingsCompactMinimalPreview() {
                 showTelemetry = false,
                 onShowTelemetryChange = {},
             )
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Isolated sample node previews — the preview node used in settings
+// ---------------------------------------------------------------------------
+
+private val sampleNode = previewSampleNode()
+
+/** Sample node rendered in Complete density (all fields visible). */
+@Suppress("PreviewPublic")
+@PreviewLightDark
+@Composable
+fun SampleNodeCompletePreview() {
+    AppTheme {
+        Surface {
+            Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+                NodeItem(
+                    thisNode = null,
+                    thatNode = sampleNode,
+                    distanceUnits = 0,
+                    tempInFahrenheit = false,
+                    connectionState = ConnectionState.Connected,
+                )
+            }
+        }
+    }
+}
+
+/** Sample node rendered in Compact density with all fields enabled. */
+@Suppress("PreviewPublic")
+@PreviewLightDark
+@Composable
+fun SampleNodeCompactAllFieldsPreview() {
+    AppTheme {
+        Surface {
+            Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+                NodeItemCompact(thisNode = null, thatNode = sampleNode, distanceUnits = 0)
+            }
+        }
+    }
+}
+
+/** Sample node in Compact with only signal + last heard (absolute time). */
+@Suppress("PreviewPublic")
+@PreviewLightDark
+@Composable
+fun SampleNodeCompactSignalOnlyPreview() {
+    AppTheme {
+        Surface {
+            Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+                NodeItemCompact(
+                    thisNode = null,
+                    thatNode = sampleNode,
+                    distanceUnits = 0,
+                    showPower = false,
+                    showLastHeard = true,
+                    lastHeardIsRelative = false,
+                    showLocation = false,
+                    showHops = false,
+                    showSignal = true,
+                    showChannel = false,
+                    showRole = false,
+                    showTelemetry = false,
+                )
+            }
+        }
+    }
+}
+
+/** Sample node in Compact with no optional fields — name row only. */
+@Suppress("PreviewPublic")
+@PreviewLightDark
+@Composable
+fun SampleNodeCompactNameOnlyPreview() {
+    AppTheme {
+        Surface {
+            Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+                NodeItemCompact(
+                    thisNode = null,
+                    thatNode = sampleNode,
+                    distanceUnits = 0,
+                    showPower = false,
+                    showLastHeard = false,
+                    showLocation = false,
+                    showHops = false,
+                    showSignal = false,
+                    showChannel = false,
+                    showRole = false,
+                    showTelemetry = false,
+                )
+            }
+        }
+    }
+}
+
+/** Sample node in Complete density with Fahrenheit temperature. */
+@Suppress("PreviewPublic")
+@PreviewLightDark
+@Composable
+fun SampleNodeCompleteFahrenheitPreview() {
+    AppTheme {
+        Surface {
+            Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+                NodeItem(
+                    thisNode = null,
+                    thatNode = sampleNode,
+                    distanceUnits = 0,
+                    tempInFahrenheit = true,
+                    connectionState = ConnectionState.Connected,
+                )
+            }
+        }
+    }
+}
+
+/** Sample node in Complete density with Imperial units. */
+@Suppress("PreviewPublic")
+@PreviewLightDark
+@Composable
+fun SampleNodeCompleteImperialPreview() {
+    AppTheme {
+        Surface {
+            Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+                NodeItem(
+                    thisNode = null,
+                    thatNode = sampleNode,
+                    distanceUnits = 1,
+                    tempInFahrenheit = true,
+                    connectionState = ConnectionState.Connected,
+                )
+            }
         }
     }
 }

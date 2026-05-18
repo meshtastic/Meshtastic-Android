@@ -209,7 +209,7 @@ fun NodeLayoutSettings(
 }
 
 @Suppress("MagicNumber")
-private fun previewSampleNode(): Node = Node(
+internal fun previewSampleNode(): Node = Node(
     num = 0x1A2B3C4D,
     user =
     User(
