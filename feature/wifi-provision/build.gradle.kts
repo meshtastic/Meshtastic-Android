@@ -20,9 +20,8 @@ plugins {
 }
 
 kotlin {
-    android {
+    androidLibrary {
         namespace = "org.meshtastic.feature.wifiprovision"
-        androidResources.enable = false
         withHostTest {}
     }
 

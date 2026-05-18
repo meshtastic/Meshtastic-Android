@@ -21,8 +21,7 @@ plugins {
 }
 
 kotlin {
-    android {
-        androidResources.enable = false
+    androidLibrary {
         withHostTest {}
     }
 

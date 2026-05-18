@@ -25,10 +25,7 @@ plugins {
 }
 
 kotlin {
-    jvm()
-
-    android {
-        namespace = "org.meshtastic.core.database"
+    androidLibrary {
         withHostTest { isIncludeAndroidResources = true }
         withDeviceTest { instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner" }
     }

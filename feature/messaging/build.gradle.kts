@@ -21,11 +21,6 @@ plugins {
 }
 
 kotlin {
-    android {
-        namespace = "org.meshtastic.feature.messaging"
-        androidResources.enable = false
-    }
-
     sourceSets {
         commonMain.dependencies {
             implementation(libs.compose.multiplatform.foundation)

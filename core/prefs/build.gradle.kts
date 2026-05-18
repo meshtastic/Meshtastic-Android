@@ -21,9 +21,7 @@ plugins {
 }
 
 kotlin {
-    android {
-        namespace = "org.meshtastic.core.prefs"
-        androidResources.enable = false
+    androidLibrary {
         withHostTest {}
     }
 

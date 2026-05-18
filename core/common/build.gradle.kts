@@ -24,10 +24,7 @@ plugins {
 }
 
 kotlin {
-    jvm()
-
-    android {
-        androidResources.enable = false
+    androidLibrary {
         withHostTest { isIncludeAndroidResources = true }
     }
 

@@ -22,11 +22,7 @@ plugins {
 }
 
 kotlin {
-    jvm()
-
-    android {
-        namespace = "org.meshtastic.core.datastore"
-        androidResources.enable = false
+    androidLibrary {
         withHostTest {}
     }
 

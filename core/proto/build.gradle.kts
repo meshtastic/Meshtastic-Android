@@ -24,7 +24,7 @@ plugins {
 
 kotlin {
     // Override minSdk for ATAK compatibility (standard is 26)
-    android { minSdk = 21 }
+    androidLibrary { minSdk = 21 }
 
     sourceSets {
         commonMain.dependencies {

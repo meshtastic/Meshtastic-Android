@@ -93,6 +93,11 @@ internal fun Project.configureKotlinMultiplatform() {
                     compileSdk = configProperties.getProperty("COMPILE_SDK").toInt()
                     minSdk = configProperties.getProperty("MIN_SDK").toInt()
 
+                    // Default: disable Android resources for most KMP modules.
+                    // Modules that need resources (e.g. core:resources) override this
+                    // explicitly in their build.gradle.kts androidLibrary {} block.
+                    androidResources.enable = false
+
                     // Set the namespace automatically if not already set
                     if (namespace == null) {
                         val pkg = this@configureKotlinMultiplatform.path.removePrefix(":").replace(":", ".")
@@ -275,9 +280,7 @@ private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() {
     if (isPublishedModule) {
         val toolchains = extensions.getByType(JavaToolchainService::class.java)
         tasks.withType<Test>().configureEach {
-            javaLauncher.set(
-                toolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(APP_JDK)) }
-            )
+            javaLauncher.set(toolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(APP_JDK)) })
         }
     }
 }

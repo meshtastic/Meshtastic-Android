@@ -18,9 +18,7 @@
 plugins { alias(libs.plugins.meshtastic.kmp.library) }
 
 kotlin {
-    android {
-        namespace = "org.meshtastic.core.testing"
-        androidResources.enable = false
+    androidLibrary {
         withHostTest {}
     }
 
