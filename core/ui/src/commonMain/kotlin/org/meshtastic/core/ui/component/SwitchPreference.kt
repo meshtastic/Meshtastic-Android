@@ -48,13 +48,7 @@ fun SwitchPreference(
     containerColor: Color? = null,
     loading: Boolean = false,
 ) {
-    val defaultColors = ListItemDefaults.colors()
-    val currentColors =
-        if (containerColor != null) {
-            defaultColors.copy(containerColor = containerColor)
-        } else {
-            defaultColors
-        }
+    val currentColors = ListItemDefaults.colors(containerColor = containerColor ?: Color.Unspecified)
 
     ListItem(
         checked = checked,
