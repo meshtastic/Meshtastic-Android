@@ -689,6 +689,7 @@ map_empty_state
 map_filter
 map_layer_formats
 map_load_error
+map_location_unavailable
 map_node_popup_details
 map_offline_manager
 map_purge_fail

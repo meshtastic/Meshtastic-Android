@@ -719,6 +719,7 @@
     <string name="map_filter">Map Filter\n</string>
     <string name="map_layer_formats">Map layers support .kml, .kmz, or GeoJSON formats.</string>
     <string name="map_load_error">Map failed to load</string>
+    <string name="map_location_unavailable">Location permission required for tracking</string>
     <string name="map_node_popup_details">%1$s&lt;br&gt;Last heard: %2$s&lt;br&gt;Last position: %3$s&lt;br&gt;Battery: %4$s</string>
     <string name="map_offline_manager">Offline Manager</string>
     <string name="map_purge_fail">SQL Cache purge failed, see logcat for details</string>

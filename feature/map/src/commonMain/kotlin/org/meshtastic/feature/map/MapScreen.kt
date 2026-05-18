@@ -51,6 +51,7 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.map
 import org.meshtastic.core.resources.map_empty_state
 import org.meshtastic.core.resources.map_load_error
+import org.meshtastic.core.resources.map_location_unavailable
 import org.meshtastic.core.resources.waypoint_deleted
 import org.meshtastic.core.resources.waypoint_sent
 import org.meshtastic.core.ui.component.MainAppBar
@@ -112,6 +113,7 @@ fun MapScreen(
 
     // Snackbar messages for map load error
     val mapLoadErrorMsg = stringResource(Res.string.map_load_error)
+    val locationUnavailableMsg = stringResource(Res.string.map_location_unavailable)
     val waypointSentMsg = stringResource(Res.string.waypoint_sent)
     val waypointDeletedMsg = stringResource(Res.string.waypoint_deleted)
 
@@ -263,7 +265,9 @@ fun MapScreen(
                 isLocationTrackingEnabled = isLocationTrackingEnabled,
                 isTrackingBearing = bearingUpdate == BearingUpdate.TRACK_LOCATION,
                 onToggleLocationTracking = {
-                    if (!isLocationTrackingEnabled) {
+                    if (!locationAvailable) {
+                        scope.launch { snackbarHostState.showSnackbar(locationUnavailableMsg) }
+                    } else if (!isLocationTrackingEnabled) {
                         // Off → Track with bearing
                         bearingUpdate = BearingUpdate.TRACK_LOCATION
                         isLocationTrackingEnabled = true
