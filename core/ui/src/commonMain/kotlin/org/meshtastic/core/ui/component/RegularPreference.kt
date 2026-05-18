@@ -73,13 +73,6 @@ fun RegularPreference(
     trailingIcon: ImageVector? = null,
     dropdownMenu: @Composable () -> Unit = {},
 ) {
-    val color =
-        if (enabled) {
-            MaterialTheme.colorScheme.onSurface
-        } else {
-            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-        }
-
     ListItem(
         onClick = onClick,
         modifier = modifier,
@@ -88,22 +81,20 @@ fun RegularPreference(
         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
         trailingContent = {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(text = subtitle, style = MaterialTheme.typography.bodyLarge, color = color)
+                Text(text = subtitle, style = MaterialTheme.typography.bodyLarge)
                 if (trailingIcon != null) {
                     Box {
                         Icon(
                             imageVector = trailingIcon,
                             contentDescription = null,
                             modifier = Modifier.padding(start = 8.dp).wrapContentWidth(Alignment.End),
-                            tint = color,
                         )
                         dropdownMenu()
                     }
                 }
             }
         },
-        supportingContent =
-        summary?.let { { Text(text = it, style = MaterialTheme.typography.bodyMedium, color = color) } },
+        supportingContent = summary?.let { { Text(text = it, style = MaterialTheme.typography.bodyMedium) } },
         content = { Text(text = title, style = MaterialTheme.typography.bodyLarge) },
     )
 }
