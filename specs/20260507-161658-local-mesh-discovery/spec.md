@@ -1,9 +1,11 @@
 # Feature Specification: Local Mesh Discovery
 
-**Feature Branch**: `001-local-mesh-discovery`  
+**Feature Branch**: `feat/discovery`  
 **Created**: 2026-05-07  
-**Status**: Not Started  
-**Input**: User description: "Local Mesh Discovery — a high-fidelity diagnostic and community-mapping tool that cycles through modem presets to audit the local RF environment"
+**Updated**: 2026-05-18  
+**Status**: Implementation Complete (pending final verification D048)  
+**Input**: User description: "Local Mesh Discovery — a high-fidelity diagnostic and community-mapping tool that cycles through modem presets to audit the local RF environment"  
+**Cross-Platform Pair**: `meshtastic/Meshtastic-Apple:specs/001-local-mesh-discovery/` (Status: ✅ Merged to main)
 
 ## Summary
 
@@ -359,3 +361,114 @@ If two presets still tie after all heuristics, the UI labels them as tied and av
 - `core/navigation/src/commonMain/kotlin/org/meshtastic/core/navigation/Routes.kt`
 - `core/navigation/src/commonMain/kotlin/org/meshtastic/core/navigation/DeepLinkRouter.kt`
 - `core/database/src/commonMain/kotlin/org/meshtastic/core/database/MeshtasticDatabase.kt`
+
+---
+
+## Implementation Status (2026-05-18)
+
+### User Story Completion
+
+| User Story | Status | Notes |
+|---|---|---|
+| US1 — Multi-Preset Scan | ✅ Complete | Full state machine, reconnect, dwell, advancement |
+| US2 — Map Visualization | ✅ Complete | CompositionLocal map, preset filter, topology overlay, direct/mesh color-coding |
+| US3 — Summary + AI | ✅ Complete (AI fallback only) | Deterministic 6-level ranking, per-preset AI summaries field, Gemini Nano provider stubbed (delegates to algorithmic) |
+| US4 — Persistence & History | ✅ Complete | Room KMP, cascade delete, history list, detail view |
+| US5 — 2.4 GHz Gating | ⚠️ Logic only | `Check24GhzCapability` implemented + tested; not wired to PresetPickerCard UI gates |
+| Export/Share | ⚠️ Partial | `PdfDiscoveryExporter` + `TextDiscoveryExporter` implemented; UI hookup pending |
+
+### Implementation Divergences from Original Spec
+
+The implementation evolved beyond the original spec in several areas. This section documents the actual state:
+
+#### Data Model — Simplified Entity Structure
+
+The actual Room entities use a simpler schema than `data-model.md` proposed:
+
+- **`DiscoverySessionEntity`** uses auto-generated `Long` PK (not String UUID), fewer fields, and includes `userLatitude`/`userLongitude` (not in original spec).
+- **`DiscoveryPresetResultEntity`** uses `presetName: String` (not `presetKey` + `presetIndex`), and adds full RF health fields: `numPacketsTx`, `numPacketsRx`, `numPacketsRxBad`, `numRxDupe`, `numTxRelay`, `numTxRelayCanceled`, `numOnlineNodes`, `numTotalNodes`, `uptimeSeconds`, `avgChannelUtilization`, `avgAirtimeRate`, `packetSuccessRate`, `packetFailureRate`, `aiSummary`.
+- **`DiscoveredNodeEntity`** adds `neighborType: String` ("direct"/"mesh") and `messageCount`/`sensorPacketCount` — not in original spec but aligning with Apple implementation.
+- A unified `DiscoveryDao` serves all queries (rather than 3 separate DAOs as proposed).
+
+#### RF Health & LocalStats — Fully Implemented
+
+The implementation captures full `LocalStats` proto fields per-preset (Apple FR-008/FR-012/FR-024 equivalent):
+- `numPacketsTx`, `numPacketsRx`, `numPacketsRxBad`, `numRxDupe`
+- `packetSuccessRate`, `packetFailureRate`
+- `avgChannelUtilization` (from `DeviceMetrics.channel_utilization`)
+- `avgAirtimeRate` (from delta `air_util_tx` via 2-Packet Rule)
+
+UI: `RfHealthSection.kt` renders these in the preset result cards.
+
+#### Direct vs. Mesh Node Classification — Implemented
+
+Nodes are classified as `"direct"` (seen via their own packets) or `"mesh"` (discovered only through `NeighborInfo` from another node). Map visualization uses `DiscoveryNeighborType.DIRECT`/`MESH` for color differentiation — aligning with Apple's green/blue color-coding.
+
+#### Per-Preset AI Summaries — Field Present
+
+`DiscoveryPresetResultEntity.aiSummary` stores per-preset summaries (Apple FR-021 equivalent). The summary generator populates these with algorithmic descriptions; the field is ready for Gemini Nano output when integrated.
+
+#### State Machine Implementation Names
+
+| Spec Name | Implementation Name | Notes |
+|---|---|---|
+| WaitingForReconnect | Reconnecting | Semantic equivalent |
+| SwitchingPreset | Shifting | Matches "Shifting to [preset]" UX text |
+| Completed (terminal) | Complete | Differentiated by `completionStatus` on session entity |
+
+---
+
+## Cross-Platform Alignment with Meshtastic-Apple
+
+The Apple implementation (`meshtastic/Meshtastic-Apple`) is merged to `main` and provides the cross-platform reference. This section documents alignment and intentional differences.
+
+### Fully Aligned Areas
+
+| Feature | Android | Apple | Status |
+|---|---|---|---|
+| Core scan concept | Cycle presets → dwell → collect → summarize | Same | ✅ Aligned |
+| Entity triad | Session / PresetResult / DiscoveredNode | Same | ✅ Aligned |
+| Minimum dwell | 15 minutes | 15 minutes | ✅ Aligned |
+| 2.4 GHz gating approach | DeviceHardwareRepository tag check | DeviceHardwareEntity tags | ✅ Aligned |
+| Home preset snapshot + restore | Before first switch, restore on end | Same | ✅ Aligned |
+| NeighborInfo pipeline reuse | Existing handler | Same | ✅ Aligned |
+| BLE reconnect reuse | BleReconnectPolicy | Existing BLE actor | ✅ Aligned |
+| Deep link slug | `localMeshDiscovery` | `localMeshDiscovery` | ✅ Aligned |
+| RF Health metrics | All LocalStats fields | Same | ✅ Aligned |
+| Direct/mesh node classification | `neighborType` field | Same | ✅ Aligned |
+| User position on session | `userLatitude`/`userLongitude` | Same | ✅ Aligned |
+| Channel utilization + airtime | 2-Packet Rule computation | Same | ✅ Aligned |
+| Per-preset AI summary field | `aiSummary` on PresetResult | Same | ✅ Aligned |
+| Export | PDF primary, text fallback | PDF via UIGraphicsPDFRenderer | ✅ Aligned |
+
+### Intentional Differences (Android Advantages)
+
+| Feature | Android | Apple | Rationale |
+|---|---|---|---|
+| Navigation location | Settings > Advanced (production) | Settings > Developers (DEBUG only) | Android treats this as a power-user feature, not debug-only |
+| Two-level state machine | Session + Preset-level states | Single-level | Better partial-session tracking, per-preset SKIPPED state |
+| `isPartial` flag | Explicit bool on session | `completionStatus` string only | Clearer query semantics |
+| `medianSnr` | On PresetResult | Not stored | Richer ranking input |
+| `reconnectCount` | Per-preset | Not tracked | Useful for reliability analysis |
+| `actualDwellSeconds` | Separate from planned | Not stored | Shows reconnect-time loss |
+| KMP + Desktop | Full commonMain logic + JVM Desktop shell | iOS-only | Architectural requirement |
+| `bestPresetKey` + `recommendationSource` | Stored on session | Computed at render time | Faster history list rendering |
+
+### Known Divergences (Potential Future Alignment)
+
+| Feature | Apple Has | Android Status | Priority |
+|---|---|---|---|
+| Radar sweep animation | `RadarSweepView` at 60fps | Not planned | 🟡 Low — cosmetic, high battery cost |
+| Node social/sensor icon classification | `person.2.fill` vs `thermometer` | Data available (`messageCount`/`sensorPacketCount`) but no icon rule defined | 🟡 Medium — could add |
+| Map auto-zoom (1.6×, 0.005° min, 0.8s ease) | Specified | Uses platform map default auto-fit | 🟡 Low — platform maps handle this differently |
+| Dwell picker specific values | `[1, 5, 15, 30, 45, 60, 90, 120, 180]` min | Slider with 15-min minimum | 🟡 Low — UX preference |
+| Historical sessions fed to AI | Trend/cross-session analysis | Session-level only currently | 🟡 Medium — future enhancement |
+| Reconnect timeout default | 60 seconds explicit | Configurable, no spec'd default | 🟢 Low — uses BleReconnectPolicy defaults |
+
+### Design Repo Status
+
+The `meshtastic/design` repo (`standards/audits/cross-platform-spec-audit.md`) confirms:
+- Android: 50/51 tasks complete on `feat/discovery` — remaining: D048 full verification
+- Apple: ✅ Implemented on main
+- No feature-level design spec exists (design repo is visual standards only)
+- Design standard color palette (Success green `#3FB86D`, Info blue `#5C6BC0`) should be used for direct/mesh node map colors
