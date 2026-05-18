@@ -219,16 +219,23 @@ fun NodeItemCompact(
                     }
                 }
 
-                // Row 3: Combined icons (toggle-dependent)
-                CompactCombinedRow(
+                // Row 3: Position + Signal (mirrors Complete rows 3-4)
+                CompactPositionSignalRow(
                     thatNode = thatNode,
                     isThisNode = isThisNode,
                     distance = distance,
-                    unmessageable = unmessageable,
+                    system = system,
                     showLocation = showLocation,
                     showHops = showHops,
                     showSignal = showSignal,
                     showChannel = showChannel,
+                    contentColor = contentColor,
+                )
+
+                // Row 4: Device + Telemetry (mirrors Complete rows 5-6)
+                CompactDeviceRow(
+                    thatNode = thatNode,
+                    unmessageable = unmessageable,
                     showRole = showRole,
                     showTelemetry = showTelemetry,
                     contentColor = contentColor,
@@ -278,24 +285,37 @@ private fun CompactNameRow(
 
 @Composable
 @Suppress("LongParameterList", "CyclomaticComplexMethod", "LongMethod")
-private fun CompactCombinedRow(
+private fun CompactPositionSignalRow(
     thatNode: Node,
     isThisNode: Boolean,
     distance: String?,
-    unmessageable: Boolean,
+    system: Config.DisplayConfig.DisplayUnits,
     showLocation: Boolean,
     showHops: Boolean,
     showSignal: Boolean,
     showChannel: Boolean,
-    showRole: Boolean,
-    showTelemetry: Boolean,
     contentColor: Color,
 ) {
     val items =
         buildList<Pair<String, @Composable () -> Unit>> {
-            // Distance + Bearing
+            // Distance
             if (showLocation && distance != null && !isThisNode) {
                 add("distance" to { DistanceInfo(distance = distance, contentColor = contentColor) })
+            }
+
+            // Elevation
+            if (showLocation && thatNode.validPosition?.altitude != null && thatNode.validPosition!!.altitude != 0) {
+                val position = thatNode.validPosition!!
+                add(
+                    "elevation" to
+                        {
+                            ElevationInfo(
+                                altitude = position.altitude ?: 0,
+                                system = system,
+                                contentColor = contentColor,
+                            )
+                        },
+                )
             }
 
             // Hops Away (only when hopsAway > 0)
@@ -324,6 +344,45 @@ private fun CompactCombinedRow(
             // Channel (only when > 0)
             if (showChannel && thatNode.channel > 0) {
                 add("channel" to { ChannelInfo(channel = thatNode.channel, contentColor = contentColor) })
+            }
+
+            // Satellite count
+            val satCount = thatNode.validPosition?.sats_in_view ?: 0
+            if (showLocation && satCount > 0) {
+                add("sats" to { SatelliteCountInfo(satCount = satCount, contentColor = contentColor) })
+            }
+        }
+
+    if (items.isNotEmpty()) {
+        Row(
+            modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            items.forEachIndexed { index, (itemKey, content) ->
+                if (index > 0) {
+                    VerticalDivider(modifier = Modifier.fillMaxHeight())
+                }
+                key(itemKey) { content() }
+            }
+        }
+    }
+}
+
+@Composable
+@Suppress("LongParameterList")
+private fun CompactDeviceRow(
+    thatNode: Node,
+    unmessageable: Boolean,
+    showRole: Boolean,
+    showTelemetry: Boolean,
+    contentColor: Color,
+) {
+    val items =
+        buildList<Pair<String, @Composable () -> Unit>> {
+            // Hardware model
+            if (showRole) {
+                add("hardware" to { HardwareInfo(hwModel = thatNode.user.hw_model.name, contentColor = contentColor) })
             }
 
             // Device Role with conditional icons (unmessageable, MQTT)
@@ -357,7 +416,13 @@ private fun CompactCombinedRow(
                 )
             }
 
-            // Telemetry log icons
+            // Node ID
+            if (showRole) {
+                val id = thatNode.user.id.ifEmpty { "???" }
+                add("nodeId" to { NodeIdInfo(id = id, contentColor = contentColor) })
+            }
+
+            // Telemetry indicator icons
             if (showTelemetry && hasTelemetryData(thatNode)) {
                 add("telemetry" to { CompactTelemetryIcons(thatNode = thatNode, contentColor = contentColor) })
             }
