@@ -1,8 +1,0 @@
-id: remove-ksp-android
-language: kotlin
-severity: warning
-message: "Remove kspAndroid configuration for desktop-only build"
-rule:
-  kind: call_expression
-  regex: "^\"kspAndroid"
-fix: "// [desktop-only] kspAndroid config removed"

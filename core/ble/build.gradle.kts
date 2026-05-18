@@ -22,13 +22,7 @@ plugins {
 }
 
 kotlin {
-    jvm()
-
-    android {
-        namespace = "org.meshtastic.core.ble"
-        androidResources.enable = false
-        withHostTest { isIncludeAndroidResources = true }
-    }
+    androidLibrary { withHostTest { isIncludeAndroidResources = true } }
 
     sourceSets {
         commonMain.dependencies {

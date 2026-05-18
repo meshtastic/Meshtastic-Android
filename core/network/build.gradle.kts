@@ -23,11 +23,7 @@ plugins {
 }
 
 kotlin {
-    android {
-        namespace = "org.meshtastic.core.network"
-        androidResources.enable = false
-        withHostTest { isIncludeAndroidResources = true }
-    }
+    androidLibrary { withHostTest { isIncludeAndroidResources = true } }
 
     sourceSets {
         commonMain.dependencies {

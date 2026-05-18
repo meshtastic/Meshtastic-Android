@@ -21,7 +21,6 @@ import org.meshtastic.buildlogic.configureDokkaAggregation
 import org.meshtastic.buildlogic.configureGraphTasks
 import org.meshtastic.buildlogic.configureKover
 import org.meshtastic.buildlogic.configureKoverAggregation
-import org.meshtastic.buildlogic.isDesktopOnly
 
 /**
  * Root convention plugin applied to the top-level project.
@@ -66,9 +65,7 @@ private fun Project.registerKmpSmokeCompileTask() {
 
         kmp.forEach { path ->
             dependsOn("$path:compileKotlinJvm")
-            if (!isDesktopOnly) {
-                dependsOn("$path:compileKotlinIosSimulatorArm64")
-            }
+            dependsOn("$path:compileKotlinIosSimulatorArm64")
         }
     }
 }
@@ -76,7 +73,7 @@ private fun Project.registerKmpSmokeCompileTask() {
 /** All modules included in `settings.gradle.kts`. Update this list when adding or removing modules. */
 private val ALL_MODULES_FULL =
     listOf(
-        ":app",
+        ":androidApp",
         ":core:api",
         ":core:barcode",
         ":core:ble",
@@ -107,17 +104,16 @@ private val ALL_MODULES_FULL =
         ":feature:firmware",
         ":feature:wifi-provision",
         ":feature:widget",
-        ":desktop",
+        ":desktopApp",
     )
 
-/** Android-only modules excluded in desktop-only builds. */
-private val ANDROID_ONLY_MODULES = setOf(":app", ":core:api", ":core:barcode", ":feature:widget")
+/** Android-only modules that don't apply the KMP plugin. */
+private val ANDROID_ONLY_MODULES = setOf(":androidApp", ":core:api", ":core:barcode", ":feature:widget")
 
-private fun Project.allModules(): List<String> =
-    if (isDesktopOnly) ALL_MODULES_FULL.filter { it !in ANDROID_ONLY_MODULES } else ALL_MODULES_FULL
+private fun allModules(): List<String> = ALL_MODULES_FULL
 
 /**
- * Modules that apply the KMP plugin and should be compiled for JVM + iOS targets. Excludes pure-Android modules (:app,
- * :core:api, :core:barcode, :feature:widget) and the desktop JVM-only module.
+ * Modules that apply the KMP plugin and should be compiled for JVM + iOS targets. Excludes pure-Android modules
+ * (:androidApp, :core:api, :core:barcode, :feature:widget) and the desktop JVM-only module.
  */
-private fun Project.kmpModules(): List<String> = allModules().filter { it !in ANDROID_ONLY_MODULES + ":desktop" }
+private fun kmpModules(): List<String> = allModules().filter { it !in ANDROID_ONLY_MODULES + ":desktopApp" }

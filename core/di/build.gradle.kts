@@ -21,13 +21,6 @@ plugins {
 }
 
 kotlin {
-    jvm()
-
-    android {
-        namespace = "org.meshtastic.core.di"
-        androidResources.enable = false
-    }
-
     sourceSets {
         commonMain.dependencies {
             implementation(projects.core.common)

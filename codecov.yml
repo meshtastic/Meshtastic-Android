@@ -52,11 +52,11 @@ component_management:
     - component_id: app
       name: App
       paths:
-        - app/**
+        - androidApp/**
     - component_id: desktop
       name: Desktop
       paths:
-        - desktop/**
+        - desktopApp/**
 
 ignore:
   - "**/build/**"

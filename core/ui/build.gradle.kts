@@ -23,11 +23,6 @@ plugins {
 }
 
 kotlin {
-    android {
-        namespace = "org.meshtastic.core.ui"
-        androidResources.enable = false
-    }
-
     sourceSets {
         commonMain.dependencies {
             implementation(projects.core.common)

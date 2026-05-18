@@ -18,11 +18,7 @@
 plugins { alias(libs.plugins.meshtastic.kmp.feature) }
 
 kotlin {
-    android {
-        namespace = "org.meshtastic.feature.connections"
-        androidResources.enable = false
-        withHostTest { isIncludeAndroidResources = true }
-    }
+    androidLibrary { withHostTest { isIncludeAndroidResources = true } }
 
     sourceSets {
         commonMain.dependencies {

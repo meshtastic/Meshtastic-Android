@@ -25,12 +25,6 @@ pluginManagement {
     }
 }
 
-// Desktop-only mode: skip Android-only modules when ANDROID_HOME is unavailable (e.g. Flatpak builds).
-// Activate via: DESKTOP_ONLY=true ./gradlew :desktop:packageUberJarForCurrentOS
-val desktopOnly =
-    providers.gradleProperty("desktop.only").orNull?.toBoolean() == true ||
-        System.getenv("DESKTOP_ONLY")?.toBoolean() == true
-
 plugins {
     id("org.gradle.toolchains.foojay-resolver") version "1.0.0"
     id("com.gradle.develocity") version "4.4.1"
@@ -112,15 +106,10 @@ include(
     ":feature:settings",
     ":feature:firmware",
     ":feature:wifi-provision",
-    ":desktop",
+    ":desktopApp",
+    ":androidApp",
+    ":core:api",
+    ":core:barcode",
+    ":feature:widget",
+    ":screenshot-tests",
 )
-
-if (!desktopOnly) {
-    include(
-        ":app",
-        ":core:api",
-        ":core:barcode",
-        ":feature:widget",
-        ":screenshot-tests",
-    )
-}

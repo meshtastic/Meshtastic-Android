@@ -137,7 +137,7 @@ fun Project.configureGraphTasks() {
                                 pluginManager.hasPlugin("meshtastic.android.application.compose") ->
                                 PluginType.AndroidApplication
 
-                            targetProjectPath.startsWith(":desktop") -> PluginType.ComposeDesktopApplication
+                            targetProjectPath.startsWith(":desktopApp") -> PluginType.ComposeDesktopApplication
 
                             pluginManager.hasPlugin("meshtastic.kmp.feature") -> PluginType.KmpFeature
 

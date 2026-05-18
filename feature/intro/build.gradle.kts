@@ -21,11 +21,7 @@ plugins {
 }
 
 kotlin {
-    android {
-        namespace = "org.meshtastic.feature.intro"
-        androidResources.enable = false
-        withHostTest { isIncludeAndroidResources = true }
-    }
+    androidLibrary { withHostTest { isIncludeAndroidResources = true } }
 
     sourceSets {
         commonMain.dependencies {

@@ -21,11 +21,6 @@ plugins {
 }
 
 kotlin {
-    android {
-        namespace = "org.meshtastic.feature.messaging"
-        androidResources.enable = false
-    }
-
     sourceSets {
         commonMain.dependencies {
             implementation(libs.compose.multiplatform.foundation)
@@ -61,11 +56,11 @@ kotlin {
 }
 
 // Gradle's KMP variant resolution follows `available-at` redirects in module
-// metadata and needs android variant `.module` files for disambiguation, even
-// when building desktop-only offline. The androidCompileClasspath configuration
-// can't be resolved by the flatpak generator due to AGP variant ambiguity on
-// project dependencies, so we capture android KMP metadata via a dedicated
-// configuration that only holds external dependencies.
+// metadata and needs android variant `.module` files for disambiguation. The
+// androidCompileClasspath configuration can't be resolved by the flatpak
+// generator due to AGP variant ambiguity on project dependencies, so we capture
+// android KMP metadata via a dedicated configuration that only holds external
+// dependencies.
 val flatpakKmpAndroidMeta by
     configurations.creating {
         isCanBeResolved = true

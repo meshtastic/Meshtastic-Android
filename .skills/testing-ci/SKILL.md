@@ -17,7 +17,7 @@ Run in a single invocation for routine changes to ensure code formatting, analys
 > In KMP modules, the `test` task name is **ambiguous**. Gradle matches both `testAndroid` and
 > `testAndroidHostTest` and refuses to run either, silently skipping KMP modules.
 > `allTests` is the `KotlinTestReport` lifecycle task registered by the KMP plugin.
-> Conversely, `allTests` does **not** cover pure-Android modules (`:app`, `:core:api`, etc.), which is why both `test` and `allTests` are needed.
+> Conversely, `allTests` does **not** cover pure-Android modules (`:androidApp`, `:core:api`, etc.), which is why both `test` and `allTests` are needed.
 
 *Note: If testing Compose UI on the JVM (Robolectric) with Java 21, pin tests to `@Config(sdk = [34])` to avoid SDK 35 compatibility crashes.*
 

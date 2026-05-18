@@ -1,4 +1,4 @@
-# `:desktop` — Meshtastic Desktop
+# `:desktopApp` — Meshtastic Desktop
 
 A Compose Desktop application target — the first full non-Android target for the shared KMP module graph. This module serves as:
 
@@ -11,21 +11,21 @@ A Compose Desktop application target — the first full non-Android target for t
 
 ```bash
 # Run the desktop app
-./gradlew :desktop:run
+./gradlew :desktopApp:run
 
 # Run tests
-./gradlew :desktop:test
+./gradlew :desktopApp:test
 
 # Package native distribution (DMG/MSI/DEB) — debug (no ProGuard)
-./gradlew :desktop:packageDistributionForCurrentOS
+./gradlew :desktopApp:packageDistributionForCurrentOS
 
 # Package native distribution (DMG/MSI/DEB) — release (ProGuard minified)
-./gradlew :desktop:packageReleaseDistributionForCurrentOS
+./gradlew :desktopApp:packageReleaseDistributionForCurrentOS
 ```
 
 ## ProGuard / Minification
 
-Release builds use ProGuard for tree-shaking (unused code removal), significantly reducing distribution size. Obfuscation is disabled since the project is open-source. Rules are aligned with the Android R8 rules in `app/proguard-rules.pro` — both targets share the same anti-class-merging philosophy.
+Release builds use ProGuard for tree-shaking (unused code removal), significantly reducing distribution size. Obfuscation is disabled since the project is open-source. Rules are aligned with the Android R8 rules in `androidApp/proguard-rules.pro` — both targets share the same anti-class-merging philosophy.
 
 **Configuration:**
 - `build.gradle.kts` — `buildTypes.release.proguard` block enables ProGuard with `optimize.set(true)` and `obfuscate.set(false)`.
@@ -36,10 +36,10 @@ Release builds use ProGuard for tree-shaking (unused code removal), significantl
 - **Room KMP** — Uses `androidx.room3` package path (Room KMP 3.x).
 
 **Troubleshooting ProGuard issues:**
-- If the release build crashes at runtime with `ClassNotFoundException` or `NoSuchMethodError`, a library is loading classes via reflection that ProGuard stripped. Add a `-keep` rule in `proguard-rules.pro` **and** the corresponding rule in `app/proguard-rules.pro` to keep both targets aligned.
-- To debug which classes ProGuard removes, temporarily add `-printusage proguard-usage.txt` to the rules file and inspect the output in `desktop/proguard-usage.txt`.
+- If the release build crashes at runtime with `ClassNotFoundException` or `NoSuchMethodError`, a library is loading classes via reflection that ProGuard stripped. Add a `-keep` rule in `proguard-rules.pro` **and** the corresponding rule in `androidApp/proguard-rules.pro` to keep both targets aligned.
+- To debug which classes ProGuard removes, temporarily add `-printusage proguard-usage.txt` to the rules file and inspect the output in `desktopApp/proguard-usage.txt`.
 - To see the full mapping of optimizations applied, add `-printseeds proguard-seeds.txt`.
-- Run `./gradlew :desktop:runRelease` for a quick smoke-test of the minified app before packaging.
+- Run `./gradlew :desktopApp:runRelease` for a quick smoke-test of the minified app before packaging.
 
 ## Architecture
 

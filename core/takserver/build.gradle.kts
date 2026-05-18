@@ -24,13 +24,7 @@ plugins {
 
 kotlin {
     @Suppress("UnstableApiUsage")
-    android {
-        namespace = "org.meshtastic.core.takserver"
-        androidResources.enable = false
-        withHostTest { isIncludeAndroidResources = true }
-    }
-
-    jvm {}
+    androidLibrary { withHostTest { isIncludeAndroidResources = true } }
 
     sourceSets {
         commonMain.dependencies {
