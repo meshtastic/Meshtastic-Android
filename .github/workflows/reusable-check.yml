@@ -295,7 +295,7 @@ jobs:
   # Tests are split into 3 shards that run in parallel:
   #   shard-core:    core:* KMP module tests (allTests)
   #   shard-feature: feature:* KMP module tests (allTests)
-  #   shard-app:     Pure-Android/JVM tests (app, desktop, core:barcode, etc.)
+  #   shard-app:     Pure-Android/JVM tests (androidApp, desktopApp, core:barcode, etc.)
   test-shards:
     runs-on: ubuntu-24.04
     permissions:
@@ -447,7 +447,7 @@ jobs:
           cache_read_only: ${{ needs.lint-check.outputs.cache_read_only }}
 
       - name: Build Android APKs
-        run: ./gradlew app:assembleFdroidDebug app:assembleGoogleDebug -Pci=true --parallel --configuration-cache --continue --scan
+        run: ./gradlew androidApp:assembleFdroidDebug androidApp:assembleGoogleDebug -Pci=true --parallel --configuration-cache --continue --scan
 
       - name: Upload debug artifact
         if: ${{ inputs.upload_artifacts }}
