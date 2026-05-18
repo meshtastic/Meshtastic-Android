@@ -88,6 +88,8 @@ actual fun getSystemMeasurementSystem(): MeasurementSystem =
         else -> MeasurementSystem.METRIC
     }
 
+actual fun currentLocaleCode(): String = Locale.getDefault().language
+
 actual fun String?.isValidAddress(): Boolean {
     val value = this?.trim()
     return when {

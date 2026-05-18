@@ -20,9 +20,13 @@ import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
 import org.meshtastic.feature.docs.ai.AIDocAssistant
 import org.meshtastic.feature.docs.ai.KeywordFallbackAssistant
+import org.meshtastic.feature.docs.translation.DocTranslationService
+import org.meshtastic.feature.docs.translation.NoOpDocTranslator
 
 /** Provides keyword-only fallback AI assistant for the F-Droid flavor (no on-device model). */
 @Module
 class FdroidAiModule {
     @Single fun aiDocAssistant(fallback: KeywordFallbackAssistant): AIDocAssistant = fallback
+
+    @Single fun docTranslationService(): DocTranslationService = NoOpDocTranslator()
 }

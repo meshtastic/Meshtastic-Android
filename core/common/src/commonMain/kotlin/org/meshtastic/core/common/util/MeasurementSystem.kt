@@ -24,3 +24,6 @@ enum class MeasurementSystem {
 
 /** returns the system's preferred measurement system. */
 expect fun getSystemMeasurementSystem(): MeasurementSystem
+
+/** Returns the device's current locale as a 2-letter ISO 639-1 language code (e.g. "en", "es", "fr"). */
+expect fun currentLocaleCode(): String

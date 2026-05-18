@@ -16,12 +16,17 @@
  */
 package org.meshtastic.app.di
 
+import android.content.Context
+import okio.Path.Companion.toOkioPath
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
 import org.meshtastic.app.ai.GeminiNanoDocAssistant
+import org.meshtastic.app.translation.MlKitDocTranslator
 import org.meshtastic.feature.docs.ai.AIDocAssistant
 import org.meshtastic.feature.docs.data.DocBundleLoader
 import org.meshtastic.feature.docs.data.KeywordSearchEngine
+import org.meshtastic.feature.docs.translation.DocTranslationCache
+import org.meshtastic.feature.docs.translation.DocTranslationService
 
 /** Provides the on-device Gemini Nano AI assistant for the Google flavor. */
 @Module
@@ -29,4 +34,10 @@ class GoogleAiModule {
     @Single
     fun aiDocAssistant(searchEngine: KeywordSearchEngine, bundleLoader: DocBundleLoader): AIDocAssistant =
         GeminiNanoDocAssistant(searchEngine, bundleLoader)
+
+    @Single
+    fun docTranslationCache(context: Context): DocTranslationCache =
+        DocTranslationCache(cacheDir = context.cacheDir.toOkioPath())
+
+    @Single fun docTranslationService(cache: DocTranslationCache): DocTranslationService = MlKitDocTranslator(cache)
 }

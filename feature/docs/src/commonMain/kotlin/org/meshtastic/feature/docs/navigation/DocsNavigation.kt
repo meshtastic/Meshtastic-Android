@@ -33,6 +33,7 @@ import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
+import org.meshtastic.core.common.util.currentLocaleCode
 import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.feature.docs.ai.AIDocAssistant
 import org.meshtastic.feature.docs.ai.ChirpySessionHolder
@@ -44,6 +45,8 @@ import org.meshtastic.feature.docs.model.ChirpyRole
 import org.meshtastic.feature.docs.model.DocPage
 import org.meshtastic.feature.docs.model.DocPageContent
 import org.meshtastic.feature.docs.model.SourceRef
+import org.meshtastic.feature.docs.translation.DocTranslationService
+import org.meshtastic.feature.docs.translation.TranslationResult
 import org.meshtastic.feature.docs.ui.DocsBrowserScreen
 import org.meshtastic.feature.docs.ui.DocsPageRouteScreen
 import kotlin.uuid.ExperimentalUuidApi
@@ -199,12 +202,34 @@ private fun DocsHelpScreen(backStack: NavBackStack<NavKey>, chirpy: ChirpyUiStat
 @Composable
 private fun DocsPageScreen(pageId: String, backStack: NavBackStack<NavKey>, chirpy: ChirpyUiState) {
     val bundleLoader = koinInject<DocBundleLoader>()
+    val translationService = koinInject<DocTranslationService>()
 
     var content by remember { mutableStateOf<DocPageContent?>(null) }
     var isLoading by remember { mutableStateOf(true) }
+    var translationSource by remember { mutableStateOf<TranslationSource>(TranslationSource.BUNDLED) }
 
     LaunchedEffect(pageId) {
-        content = bundleLoader.readPage(pageId)
+        isLoading = true
+        val loaded = bundleLoader.readPage(pageId)
+        if (loaded != null && currentLocaleCode() != "en") {
+            // CMP may have already resolved a Crowdin translation (locale-qualified resource).
+            // Attempt ML Kit translation as fallback — if Crowdin translation was served,
+            // it's already in the loaded content. ML Kit only runs if we're on English source.
+            val result = translationService.translatePage(pageId, loaded.markdown ?: "", currentLocaleCode())
+            when (result) {
+                is TranslationResult.Success -> {
+                    content = loaded.copy(markdown = result.translatedMarkdown)
+                    translationSource = TranslationSource.ML_KIT
+                }
+
+                else -> {
+                    content = loaded
+                    translationSource = TranslationSource.BUNDLED
+                }
+            }
+        } else {
+            content = loaded
+        }
         isLoading = false
     }
 
@@ -229,6 +254,12 @@ private fun DocsPageScreen(pageId: String, backStack: NavBackStack<NavKey>, chir
 }
 
 // ── Constants & helpers ─────────────────────────────────────────────────────────
+
+/** Indicates the source of the displayed page content. */
+private enum class TranslationSource {
+    BUNDLED,
+    ML_KIT,
+}
 
 /** How often to re-check AI model availability while waiting for download. */
 private const val AI_SUPPORT_CHECK_INTERVAL_MS = 3_000L
