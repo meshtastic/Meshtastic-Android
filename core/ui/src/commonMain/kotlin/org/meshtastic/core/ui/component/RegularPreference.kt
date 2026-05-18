@@ -32,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
@@ -83,6 +84,7 @@ fun RegularPreference(
         onClick = onClick,
         modifier = modifier,
         enabled = enabled,
+        shapes = ListItemDefaults.shapes(shape = RectangleShape),
         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
         trailingContent = {
             Row(verticalAlignment = Alignment.CenterVertically) {

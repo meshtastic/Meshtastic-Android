@@ -30,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.Clipboard
 import androidx.compose.ui.platform.LocalClipboard
@@ -139,6 +140,7 @@ fun BasicListItem(
             modifier = modifier,
             enabled = enabled,
             onLongClick = onLongClick,
+            shapes = ListItemDefaults.shapes(shape = RectangleShape),
             colors = ListItemDefaults.colors(containerColor = Color.Transparent),
             leadingContent = leadingIcon.icon(leadingIconTint),
             trailingContent = trailingContent,

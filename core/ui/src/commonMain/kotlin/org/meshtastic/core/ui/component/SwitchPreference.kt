@@ -31,6 +31,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.meshtastic.core.ui.theme.AppTheme
@@ -60,6 +61,7 @@ fun SwitchPreference(
         onCheckedChange = onCheckedChange,
         modifier = padding?.let { Modifier.padding(it) } ?: modifier,
         enabled = enabled,
+        shapes = ListItemDefaults.shapes(shape = RectangleShape),
         colors = currentColors,
         trailingContent = {
             AnimatedContent(targetState = loading) { loading ->
