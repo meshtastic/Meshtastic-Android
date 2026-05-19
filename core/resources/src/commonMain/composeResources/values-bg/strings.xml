@@ -262,6 +262,13 @@
     <string name="distance_measurements">Измервания на разстояния</string>
     <string name="distance_measurements_description">Показване на разстоянието между вашия телефон и други възли на Meshtastic с позиции.</string>
     <string name="dns">DNS</string>
+    <!-- DOC -->
+    <string name="doc_clear_search">Изчистване на търсенето</string>
+    <string name="doc_title_connections">Връзки</string>
+    <string name="doc_title_discovery">Откриване</string>
+    <string name="doc_title_mqtt">MQTT</string>
+    <string name="doc_title_nodes">Възли</string>
+    <string name="doc_title_onboarding">Първи стъпки</string>
     <string name="done">Готово</string>
     <string name="dont_show_again_for_device">Да не се показва отново за това устройство</string>
     <string name="downlink_enabled">Downlink активиран</string>

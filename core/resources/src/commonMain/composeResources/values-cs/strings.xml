@@ -287,6 +287,12 @@
     <string name="distance_filters_description">Filtrovat seznam uzlů a mesh mapu podle vzdálenosti od vašeho telefonu.</string>
     <string name="distance_measurements">Měření vzdálenosti</string>
     <string name="distance_measurements_description">Zobrazí vzdálenost mezi vaším telefonem a ostatními uzly Meshtastic s určenou polohou.</string>
+    <!-- DOC -->
+    <string name="doc_clear_search">Vymazat hledání</string>
+    <string name="doc_title_connections">Připojení</string>
+    <string name="doc_title_discovery">Objevujte</string>
+    <string name="doc_title_mqtt">MQTT</string>
+    <string name="doc_title_nodes">Uzly</string>
     <string name="done">Hotovo</string>
     <string name="double_tap_as_button_press">Dvojité klepnutí jako stisk tlačítka</string>
     <string name="downlink_enabled">Stahování povoleno</string>

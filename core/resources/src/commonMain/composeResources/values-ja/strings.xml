@@ -192,6 +192,12 @@
     <string name="display_units">表示単位</string>
     <!-- DISTANCE -->
     <string name="distance">距離</string>
+    <!-- DOC -->
+    <string name="doc_clear_search">検索をクリア</string>
+    <string name="doc_title_connections">コネクション</string>
+    <string name="doc_title_discovery">ディスカバリー</string>
+    <string name="doc_title_mqtt">MQTT</string>
+    <string name="doc_title_nodes">ノード</string>
     <string name="downlink_enabled">ダウンリンクの有効化</string>
     <string name="dynamic">動的</string>
     <string name="echo_enabled">Echoを有効化</string>

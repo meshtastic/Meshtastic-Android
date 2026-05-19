@@ -142,6 +142,9 @@
     <string name="display">Приказ</string>
     <!-- DISTANCE -->
     <string name="distance">Раздаљина</string>
+    <!-- DOC -->
+    <string name="doc_title_firmware">Ажурирања фирмвера</string>
+    <string name="doc_title_nodes">Чворови</string>
     <string name="double_tap_as_button_press">Двоструки додир као дугме</string>
     <string name="edit">Измени</string>
     <string name="eight_hours">8 Сати</string>

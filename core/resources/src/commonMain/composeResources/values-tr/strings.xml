@@ -159,6 +159,11 @@
     <string name="distance_filters">Mesafe Filtresi</string>
     <string name="distance_measurements">Uzaklık Ölçüsü</string>
     <string name="dns">DNS</string>
+    <!-- DOC -->
+    <string name="doc_clear_search">Aramayı sil</string>
+    <string name="doc_title_connections">Bağlantılar</string>
+    <string name="doc_title_mqtt">MQTT</string>
+    <string name="doc_title_nodes">Nodelar</string>
     <string name="downlink_enabled">Aşağı bağlantı etkinleştirildi</string>
     <string name="download">İndir</string>
     <string name="dynamic">Dinamik</string>

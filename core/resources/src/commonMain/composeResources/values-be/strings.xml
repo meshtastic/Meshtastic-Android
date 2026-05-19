@@ -85,6 +85,9 @@
     <string name="display">Экран</string>
     <!-- DISTANCE -->
     <string name="distance">Адлегласць</string>
+    <!-- DOC -->
+    <string name="doc_title_mqtt">MQTT</string>
+    <string name="doc_title_onboarding">Начало работы</string>
     <string name="download">Сцягнуць</string>
     <string name="edit">Змяніць</string>
     <string name="eight_hours">8 Гадзін</string>

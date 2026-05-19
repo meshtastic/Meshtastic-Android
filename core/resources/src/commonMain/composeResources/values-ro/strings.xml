@@ -300,6 +300,11 @@
     <string name="distance_measurements">Măsurătorile distanței</string>
     <string name="distance_measurements_description">Afișează distanța dintre telefonul dvs. și alte noduri Meshtastice cu poziții.</string>
     <string name="dns">DNS</string>
+    <!-- DOC -->
+    <string name="doc_clear_search">Ștergeți căutarea</string>
+    <string name="doc_title_discovery">Descoperiți</string>
+    <string name="doc_title_mqtt">MQTT</string>
+    <string name="doc_title_nodes">Noduri</string>
     <string name="done">Gata</string>
     <string name="double_tap_as_button_press">Apăsare dublă ca buton</string>
     <string name="downlink_enabled">Downlink activat</string>

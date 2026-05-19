@@ -120,6 +120,8 @@
     <string name="display_units">Geef eenheden weer</string>
     <!-- DISTANCE -->
     <string name="distance">Afstand</string>
+    <!-- DOC -->
+    <string name="doc_title_mqtt">MQTT</string>
     <string name="downlink_enabled">Downlink ingeschakeld</string>
     <string name="dynamic">Dynamisch</string>
     <string name="echo_enabled">Echo ingeschakeld</string>

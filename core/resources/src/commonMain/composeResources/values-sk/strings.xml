@@ -130,6 +130,9 @@
     <string name="display">Obrazovka</string>
     <!-- DISTANCE -->
     <string name="distance">Vzdialenosť</string>
+    <!-- DOC -->
+    <string name="doc_clear_search">Vymazať vyhľadávanie</string>
+    <string name="doc_title_mqtt">MQTT</string>
     <string name="edit">Upraviť</string>
     <string name="eight_hours">8 Hodín</string>
     <!-- ENCRYPTION -->

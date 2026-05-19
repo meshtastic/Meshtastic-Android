@@ -49,6 +49,7 @@ graph TB
   :androidApp -.-> :feature:map
   :androidApp -.-> :feature:node
   :androidApp -.-> :feature:settings
+  :androidApp -.-> :feature:docs
   :androidApp -.-> :feature:firmware
   :androidApp -.-> :feature:wifi-provision
   :androidApp -.-> :feature:widget
