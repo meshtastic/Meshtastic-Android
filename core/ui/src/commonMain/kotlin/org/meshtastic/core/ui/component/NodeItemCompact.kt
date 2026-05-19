@@ -363,7 +363,7 @@ private fun CompactHealthRow(
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceEvenly,
+            horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             segments.forEach { content -> content() }
         }
@@ -479,7 +479,7 @@ private fun CompactMetricsRow(thatNode: Node, tempInFahrenheit: Boolean, content
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceEvenly,
+            horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             segments.forEach { content -> content() }
         }
@@ -492,7 +492,7 @@ private fun SegmentedRow(segments: List<@Composable () -> Unit>) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceEvenly,
+        horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         segments.forEach { content -> content() }
     }
