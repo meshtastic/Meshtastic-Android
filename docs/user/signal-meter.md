@@ -52,10 +52,10 @@ Here is exactly how the app decides how many bars (or what color) to show you:
 
 | Level | Bars | Criteria | Meaning |
 |-------|------|----------|---------|
-| Good | 3 | RSSI better than `-115 dBm` **AND** SNR above the baseline limit for your preset | Signal is both loud and clear — healthy connection. |
-| Fair | 2 | Falls between Good and Bad | Signal getting quieter or noisier, but the radio understands the message fine. |
-| Bad | 1 | RSSI drops to `-120 dBm` or worse, **OR** SNR within `5.5 dB` of your preset's absolute breaking point | Barely hanging on — at the edge of range or heavy interference. |
-| None | 0 | RSSI worse than `-126 dBm` **AND** SNR has fallen `7.5 dB` below the ideal limit | Transmission completely buried in static. |
+| Good | 3 | RSSI better than `-115 dBm` **AND** SNR better than `-7 dB` | Signal is both loud and clear — healthy connection. |
+| Fair | 2 | RSSI better than `-126 dBm` with good SNR, **OR** SNR better than `-15 dB` with good RSSI | Signal getting quieter or noisier, but still decodable. |
+| Bad | 1 | Falls between Fair and None thresholds | At the edge of range or experiencing interference. |
+| None | 0 | RSSI worse than `-126 dBm` **AND** SNR worse than `-15 dB` | Transmission completely buried in noise. |
 
 ---
 
