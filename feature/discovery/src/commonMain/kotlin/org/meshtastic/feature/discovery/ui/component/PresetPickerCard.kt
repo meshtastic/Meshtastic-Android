@@ -54,6 +54,9 @@ private val CARD_PADDING = 16.dp
 internal fun ChannelOption.displayName(): String =
     name.split("_").joinToString(" ") { word -> word.lowercase().replaceFirstChar { it.uppercase() } }
 
+/** Deprecated modem presets that should not appear in the discovery picker. */
+private val DEPRECATED_PRESETS = setOf(ChannelOption.VERY_LONG_SLOW, ChannelOption.LONG_SLOW)
+
 /** A card containing a [FlowRow] of [FilterChip] items for preset selection. */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -82,38 +85,42 @@ fun PresetPickerCard(
                 verticalArrangement = Arrangement.spacedBy(CHIP_SPACING),
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                ChannelOption.entries.forEach { preset ->
-                    val selected = preset in selectedPresets
-                    val isHome = preset == homePreset
-                    val label =
-                        if (isHome) {
-                            stringResource(Res.string.discovery_preset_home_label, preset.displayName())
-                        } else {
-                            preset.displayName()
-                        }
-                    val selectedDesc = stringResource(Res.string.discovery_stat_selected)
-                    val unselectedDesc = stringResource(Res.string.discovery_stat_unselected)
-                    FilterChip(
-                        selected = selected,
-                        onClick = { onTogglePreset(preset) },
-                        label = { Text(label) },
-                        enabled = enabled,
-                        modifier =
-                        Modifier.semantics { stateDescription = if (selected) selectedDesc else unselectedDesc },
-                        leadingIcon =
-                        if (selected) {
-                            {
-                                Icon(
-                                    imageVector = MeshtasticIcons.Check,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(FilterChipDefaults.IconSize),
-                                )
+                ChannelOption.entries
+                    .filter { it !in DEPRECATED_PRESETS }
+                    .forEach { preset ->
+                        val selected = preset in selectedPresets
+                        val isHome = preset == homePreset
+                        val label =
+                            if (isHome) {
+                                stringResource(Res.string.discovery_preset_home_label, preset.displayName())
+                            } else {
+                                preset.displayName()
                             }
-                        } else {
-                            null
-                        },
-                    )
-                }
+                        val selectedDesc = stringResource(Res.string.discovery_stat_selected)
+                        val unselectedDesc = stringResource(Res.string.discovery_stat_unselected)
+                        FilterChip(
+                            selected = selected,
+                            onClick = { onTogglePreset(preset) },
+                            label = { Text(label) },
+                            enabled = enabled,
+                            modifier =
+                            Modifier.semantics {
+                                stateDescription = if (selected) selectedDesc else unselectedDesc
+                            },
+                            leadingIcon =
+                            if (selected) {
+                                {
+                                    Icon(
+                                        imageVector = MeshtasticIcons.Check,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(FilterChipDefaults.IconSize),
+                                    )
+                                }
+                            } else {
+                                null
+                            },
+                        )
+                    }
             }
         }
     }

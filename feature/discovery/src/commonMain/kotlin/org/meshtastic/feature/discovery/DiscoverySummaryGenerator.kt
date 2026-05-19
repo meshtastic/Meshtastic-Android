@@ -65,7 +65,7 @@ class DiscoverySummaryGenerator {
                 append(" (congested)")
             }
         }
-        if (result.messageCount > 0 || result.sensorPacketCount > 0) {
+        if (result.messageCount + result.sensorPacketCount >= TRAFFIC_MIN_PACKET_THRESHOLD) {
             val dominant = if (result.messageCount >= result.sensorPacketCount) "chat" else "sensor"
             append(", $dominant-dominated traffic")
         }
@@ -159,8 +159,10 @@ class DiscoverySummaryGenerator {
     }
 
     private fun buildTrafficMixNote(results: List<DiscoveryPresetResultEntity>): String? {
-        val chatDominant = results.filter { it.messageCount > it.sensorPacketCount }
-        val sensorDominant = results.filter { it.sensorPacketCount > it.messageCount }
+        val significantResults =
+            results.filter { it.messageCount + it.sensorPacketCount >= TRAFFIC_MIN_PACKET_THRESHOLD }
+        val chatDominant = significantResults.filter { it.messageCount > it.sensorPacketCount }
+        val sensorDominant = significantResults.filter { it.sensorPacketCount > it.messageCount }
         val parts = buildList {
             if (chatDominant.isNotEmpty()) {
                 add("chat-dominated on ${chatDominant.joinToString { it.presetName }}")
@@ -193,5 +195,6 @@ class DiscoverySummaryGenerator {
         private const val HIGH_UTIL_THRESHOLD = 75.0
         private const val HIGH_CONGESTION_THRESHOLD = 25.0
         private const val PERCENT_MULTIPLIER = 100.0
+        private const val TRAFFIC_MIN_PACKET_THRESHOLD = 5
     }
 }

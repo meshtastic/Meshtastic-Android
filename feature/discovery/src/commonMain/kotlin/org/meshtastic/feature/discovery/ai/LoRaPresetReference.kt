@@ -104,6 +104,38 @@ internal object LoRaPresetReference {
                     "140dB",
                     "Maximum speed, minimum range. Only for very dense, close-proximity deployments.",
                 ),
+            "Lite Fast" to
+                PresetInfo(
+                    "500kHz",
+                    "SF9",
+                    "7.03kbps",
+                    "148dB",
+                    "2.4 GHz band. Fast with moderate range; requires SX1280 hardware.",
+                ),
+            "Lite Slow" to
+                PresetInfo(
+                    "250kHz",
+                    "SF11",
+                    "1.07kbps",
+                    "153dB",
+                    "2.4 GHz band. Longer range at lower speed; requires SX1280 hardware.",
+                ),
+            "Narrow Fast" to
+                PresetInfo(
+                    "125kHz",
+                    "SF7",
+                    "5.47kbps",
+                    "146dB",
+                    "2.4 GHz band. Narrow bandwidth, fast speed; requires SX1280 hardware.",
+                ),
+            "Narrow Slow" to
+                PresetInfo(
+                    "125kHz",
+                    "SF11",
+                    "0.54kbps",
+                    "155.5dB",
+                    "2.4 GHz band. Narrow bandwidth, max range; requires SX1280 hardware.",
+                ),
         )
 
     /** Get reference data for a preset, matching by substring (e.g. "Long Fast" matches "Long Fast"). */

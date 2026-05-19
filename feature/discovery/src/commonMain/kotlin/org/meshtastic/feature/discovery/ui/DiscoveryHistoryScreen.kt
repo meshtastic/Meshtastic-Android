@@ -51,10 +51,8 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.common.util.toInstant
+import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.database.entity.DiscoverySessionEntity
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.back
@@ -226,10 +224,4 @@ private fun DeleteConfirmationDialog(onConfirm: () -> Unit, onDismiss: () -> Uni
 }
 
 @Suppress("MagicNumber")
-internal fun formatTimestamp(epochMillis: Long): String {
-    val instant = epochMillis.toInstant()
-    val local = instant.toLocalDateTime(TimeZone.currentSystemDefault())
-    return "${local.year}-${local.monthNumber.toString().padStart(2, '0')}-" +
-        "${local.dayOfMonth.toString().padStart(2, '0')} " +
-        "${local.hour.toString().padStart(2, '0')}:${local.minute.toString().padStart(2, '0')}"
-}
+internal fun formatTimestamp(epochMillis: Long): String = DateFormatter.formatDateTimeShort(epochMillis)

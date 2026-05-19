@@ -146,6 +146,13 @@ class DiscoverySummaryGeneratorTest {
     }
 
     @Test
+    fun lowTrafficCountsNoMixNote() {
+        val lowTraffic = preset(name = "LongFast", messageCount = 3, sensorPacketCount = 1)
+        val result = generator.generateSessionSummary(session(), listOf(lowTraffic))
+        assertFalse(result.contains("dominated"), "Should not classify traffic mix below threshold")
+    }
+
+    @Test
     fun equalTrafficMixNoNote() {
         val balanced = preset(name = "LongFast", messageCount = 0, sensorPacketCount = 0)
         val result = generator.generateSessionSummary(session(), listOf(balanced))
@@ -292,13 +299,14 @@ class DiscoverySummaryGeneratorTest {
 
     @Test
     fun presetPromptContainsMetrics() {
-        val p = preset(
-            name = "LongFast",
-            uniqueNodes = 6,
-            directNeighborCount = 4,
-            meshNeighborCount = 2,
-            avgChannelUtilization = 18.0,
-        )
+        val p =
+            preset(
+                name = "LongFast",
+                uniqueNodes = 6,
+                directNeighborCount = 4,
+                meshNeighborCount = 2,
+                avgChannelUtilization = 18.0,
+            )
         val result = generator.buildPresetPrompt(p)
         assertContains(result, "Nodes: 6")
         assertContains(result, "Direct: 4")
