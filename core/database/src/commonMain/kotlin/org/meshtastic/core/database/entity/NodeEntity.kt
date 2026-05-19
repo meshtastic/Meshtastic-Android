@@ -43,8 +43,8 @@ import org.meshtastic.proto.Position as WirePosition
 
 data class NodeWithRelations(
     @Embedded val node: NodeEntity,
-    @Relation(entity = MetadataEntity::class, parentColumn = "num", entityColumn = "num")
-    val metadata: MetadataEntity? = null,
+    @Relation(entity = MetadataEntity::class, parentColumns = ["num"], entityColumns = ["num"])
+    val metadata: MetadataEntity?,
 ) {
     fun toModel() = with(node) {
         Node(
