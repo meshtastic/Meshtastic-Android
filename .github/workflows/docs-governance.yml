@@ -170,7 +170,7 @@ jobs:
           node-version: "24"
 
       - name: Validate internal links
-        run: node scripts/validate-doc-links.js docs
+        run: node scripts/validate-doc-links.js docs/en
 
       - name: Check doc coverage
         run: node scripts/check-doc-coverage.js .

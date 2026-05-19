@@ -37,8 +37,8 @@ const IMAGE_EXTENSIONS = new Set([".png", ".jpg", ".jpeg", ".gif", ".svg", ".web
 const ANDROID_REPO_ROOT = positionalArgs.length > 0
     ? path.resolve(positionalArgs[0])
     : path.resolve(__dirname, "..");
-const SRC_DOCS_DIR = path.join(ANDROID_REPO_ROOT, "docs");
-const SRC_SCREENSHOTS_DIR = path.join(SRC_DOCS_DIR, "assets", "screenshots");
+const SRC_DOCS_DIR = path.join(ANDROID_REPO_ROOT, "docs", "en");
+const SRC_SCREENSHOTS_DIR = path.join(ANDROID_REPO_ROOT, "docs", "assets", "screenshots");
 
 if (!fs.existsSync(SRC_DOCS_DIR)) {
     console.error(`Error: docs directory not found at ${SRC_DOCS_DIR}`);

@@ -13,7 +13,7 @@ const { parseFrontmatter, forEachDocPage } = require("./lib/frontmatter");
 
 const args = process.argv.slice(2);
 const positional = args.filter(a => !a.startsWith("--"));
-const DOCS_DIR = path.resolve(positional[0] || "docs");
+const DOCS_DIR = path.resolve(positional[0] || path.join("docs", "en"));
 
 const maxAgeArg = args.find(a => a.startsWith("--max-age-days="));
 const MAX_AGE_DAYS = maxAgeArg ? parseInt(maxAgeArg.split("=")[1], 10) : 180;

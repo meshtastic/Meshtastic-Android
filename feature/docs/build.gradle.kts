@@ -124,8 +124,8 @@ val syncTranslatedDocsToComposeResources by
             if (segments.size >= 3) {
                 val qualifier = segments[0]
                 val rest = segments.drop(1).joinToString("/")
-                // Inject source metadata comment pointing back to the English source
-                val enSource = "docs/en/$rest"
+                // Output: files/{locale}/docs/user/page.md
+                // English source lives at: docs/en/$rest
                 path = "$qualifier/docs/$rest"
             }
         }

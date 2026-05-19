@@ -12,7 +12,7 @@ const path = require("path");
 const { forEachDocPage } = require("./lib/frontmatter");
 
 const REPO_ROOT = path.resolve(process.argv[2] || ".");
-const DOCS_DIR = path.join(REPO_ROOT, "docs");
+const DOCS_DIR = path.join(REPO_ROOT, "docs", "en");
 
 // Map of feature module directory names to expected doc page slugs.
 // Modules not listed here are considered internal (no user-facing docs required).
