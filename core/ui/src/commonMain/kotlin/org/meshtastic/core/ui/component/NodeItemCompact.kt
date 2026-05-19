@@ -67,6 +67,7 @@ import org.meshtastic.core.ui.icon.Pressure
 import org.meshtastic.core.ui.icon.Success
 import org.meshtastic.core.ui.icon.Temperature
 import org.meshtastic.core.ui.icon.Unmessageable
+import org.meshtastic.core.ui.icon.role
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 import org.meshtastic.proto.Config
 
@@ -391,15 +392,10 @@ private fun CompactFooterRow(
     contentColor: Color,
 ) {
     val tertiaryColor = contentColor.copy(alpha = 0.7f)
-    val segments = buildList {
+    val textSegments = buildList {
         // Hardware model
         if (showRole) {
             add(thatNode.user.hw_model.name)
-        }
-
-        // Role
-        if (showRole) {
-            add(thatNode.user.role.name)
         }
 
         // Hops
@@ -413,15 +409,25 @@ private fun CompactFooterRow(
         }
     }
 
-    if (segments.isNotEmpty() || (showRole && thatNode.viaMqtt)) {
+    if (textSegments.isNotEmpty() || showRole) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            if (segments.isNotEmpty()) {
+            if (textSegments.isNotEmpty()) {
                 Text(
-                    text = segments.joinToString(" · "),
+                    text = textSegments.joinToString(" · "),
                     style = MaterialTheme.typography.labelSmall,
                     color = tertiaryColor,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
+                )
+            }
+
+            // Role icon
+            if (showRole) {
+                Icon(
+                    imageVector = MeshtasticIcons.role(thatNode.user.role),
+                    contentDescription = thatNode.user.role.name,
+                    modifier = Modifier.size(COMPACT_ICON_SIZE_DP.dp),
+                    tint = tertiaryColor,
                 )
             }
 
