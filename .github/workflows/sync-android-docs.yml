@@ -34,7 +34,7 @@ jobs:
         run: node /tmp/Meshtastic-Android/scripts/sync-android-docs.js /tmp/Meshtastic-Android --convert-webp
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "docs: sync latest Android app documentation"
