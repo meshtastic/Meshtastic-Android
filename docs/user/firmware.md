@@ -78,6 +78,8 @@ If the update appears frozen:
 - If truly stuck, power-cycle the radio
 - Attempt the update again
 
+![Firmware update error](/assets/screenshots/firmware_error.png)
+
 ### Device Won't Boot After Update
 
 If your device fails to boot:

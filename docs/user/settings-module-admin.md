@@ -21,6 +21,10 @@ Module settings use a card-based layout with toggle switches, dropdowns, text fi
 
 ![Dropdown selector](/assets/screenshots/settings_dropdown.png)
 
+![Text field](/assets/screenshots/settings_text_field.png)
+
+![Settings card layout](/assets/screenshots/settings_titled_card.png)
+
 ## Module Configuration
 
 ### MQTT Module

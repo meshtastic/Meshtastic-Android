@@ -42,6 +42,10 @@ Channels support multiple encryption levels:
 3. Configure the channel name and encryption key.
 4. Share the channel URL/QR code with others who need access.
 
+Tapping a channel shows its details and sharing options:
+
+![Channel info and sharing](/assets/screenshots/messages_channel_info.png)
+
 ## Direct Messages
 
 Direct messages (DMs) are point-to-point encrypted communications between two specific nodes.

@@ -133,6 +133,8 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 | NTP Server | Time synchronization server |
 | Syslog Server | Remote logging server |
 
+![IP address field](/assets/screenshots/settings_ipv4_field.png)
+
 ### Bluetooth Config
 
 | Setting | Description |
@@ -151,6 +153,8 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 | Admin Channel Enabled | Allow admin commands via channel |
 | Serial Enabled | Enable serial console access (moved from Device Config) |
 | Managed Mode | Restrict non-admin channel changes |
+
+![Password field](/assets/screenshots/settings_password_field.png)
 
 Settings use standard preference controls — dropdowns, toggles, and sliders:
 

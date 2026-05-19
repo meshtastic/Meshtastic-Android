@@ -103,6 +103,20 @@ The Desktop app uses the same Compose Multiplatform UI with adaptations for larg
 
 The Desktop app provides in-app toggles for controlling which notifications are shown — messages, new nodes, and low battery alerts. Access these from **Settings → Notifications** within the app.
 
+## Built-in Documentation Browser
+
+The Desktop app includes a built-in documentation browser for quick access to help content without leaving the application.
+
+![Docs browser with table of contents](/assets/screenshots/docs-browser_toc.png)
+
+The browser supports full-text search across all documentation:
+
+![Searching the docs browser](/assets/screenshots/docs-browser_search.png)
+
+Individual doc pages render with full formatting:
+
+![A documentation page](/assets/screenshots/docs-browser_page.png)
+
 ## Building from Source
 
 ```bash
