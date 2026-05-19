@@ -96,12 +96,9 @@ A successful connection is confirmed with a status indicator:
 - Testing with a simulated radio
 - Environments where Bluetooth has interference issues
 
-## Connection Priority
+## Reconnection Behavior
 
-The app attempts connections in this order:
-1. Last successful Bluetooth device
-2. USB (if detected)
-3. Manual TCP (if configured)
+The app reconnects to the **last selected device** on startup. You can manually switch transports from the connections screen at any time.
 
 To disconnect from a radio, use the disconnect button on the connections screen:
 

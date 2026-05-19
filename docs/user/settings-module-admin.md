@@ -116,7 +116,7 @@ Pre-configured messages accessible from the device's physical buttons (for radio
 
 | Setting | Description |
 |---------|-------------|
-| ~~Enabled~~ | ⚠️ **Deprecated** — module is always active when messages are configured |
+| ~~Enabled~~ | ⚠️ **Deprecated** — current firmware may ignore this toggle |
 | Messages | Newline-separated list of messages |
 | Send Bell | Play bell sound on send |
 | Rotary Encoder | Enable rotary encoder input |

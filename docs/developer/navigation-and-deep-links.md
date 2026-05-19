@@ -105,17 +105,5 @@ Deep link routing is tested in:
 core/navigation/src/commonTest/kotlin/org/meshtastic/core/navigation/DeepLinkRouterTest.kt
 ```
 
-Example of how a deep link test would look:
-```kotlin
-@Test
-fun `help docs deep link routes correctly`() {
-    val result = DeepLinkRouter.route(CommonUri.parse("meshtastic://meshtastic/settings/helpDocs"))
-    assertEquals(
-        listOf(SettingsRoute.Settings(null), SettingsRoute.HelpDocs),
-        result,
-    )
-}
-```
-
 ---
 

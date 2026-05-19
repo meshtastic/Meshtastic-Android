@@ -61,9 +61,10 @@ Direct messages (DMs) are point-to-point encrypted communications between two sp
 | Queued | ⏳ | Message waiting to be sent |
 | En route | ✓ | Delivered to the radio, awaiting acknowledgment |
 | Delivered | ✓✓ | Acknowledgment received from recipient |
+| Received | ✓ | Message received from the mesh (incoming) |
+| S&F Routing | 🔗 | Store & Forward: message being routed through an S&F node |
+| S&F Confirmed | 🔗 | Store & Forward: delivery confirmed via S&F node |
 | Error | ✗ | Delivery failed after retries |
-
-> **Note:** Received messages from other nodes and internal routing states (SFPP routing/confirmed) also exist but aren't shown as outgoing status indicators.
 
 ### Delivery Errors
 
