@@ -34,7 +34,7 @@ Bridges mesh messages to and from an MQTT broker for internet connectivity. This
 | Username | Authentication username |
 | Password | Authentication password |
 | Encryption | Encrypt MQTT payloads |
-| JSON Output | Also publish in JSON format |
+| ~~JSON Output~~ | ⚠️ **Deprecated** — JSON support removed from firmware; field is ignored |
 | TLS | Use secure connection |
 | Root Topic | Base MQTT topic path |
 | Map Report | Publish position for public map |
@@ -112,7 +112,7 @@ Pre-configured messages accessible from the device's physical buttons (for radio
 
 | Setting | Description |
 |---------|-------------|
-| Enabled | Activate canned messages |
+| ~~Enabled~~ | ⚠️ **Deprecated** — module is always active when messages are configured |
 | Messages | Newline-separated list of messages |
 | Send Bell | Play bell sound on send |
 | Rotary Encoder | Enable rotary encoder input |

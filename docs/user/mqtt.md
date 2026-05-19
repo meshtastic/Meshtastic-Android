@@ -2,7 +2,7 @@
 title: MQTT
 nav_order: 11
 last_updated: 2026-05-13
-description: Bridge your mesh to the internet — MQTT broker setup, encryption layers, JSON output, and map reporting.
+description: Bridge your mesh to the internet — MQTT broker setup, encryption layers, and map reporting.
 aliases:
   - mqtt
   - internet-bridge
@@ -46,7 +46,7 @@ A gateway node with internet access (WiFi or Ethernet) publishes mesh messages t
 | Password | Broker authentication | large4cats |
 | Root Topic | Base topic for messages | msh |
 | Encryption | Encrypt MQTT payload | Enabled |
-| JSON Output | Publish JSON alongside protobuf | Disabled |
+| ~~JSON Output~~ | ⚠️ **Deprecated** — JSON packet support has been removed from firmware; this field is ignored | Disabled |
 | TLS | Secure connection to broker | Disabled |
 | Map Reporting | Report position to public map | Disabled |
 
@@ -83,14 +83,13 @@ Configure per-channel which directions are active to control message flow and ai
 
 ## Message Formats
 
-MQTT supports two message formats:
+MQTT uses protobuf message format:
 
 | Format | Description | Use case |
 |--------|-------------|----------|
-| **Protobuf** (default) | Binary Meshtastic protobuf encoding | Node-to-node mesh bridging |
-| **JSON** | Human-readable JSON encoding | Home automation, logging, custom integrations |
+| **Protobuf** | Binary Meshtastic protobuf encoding | Node-to-node mesh bridging |
 
-When **JSON Output** is enabled, the gateway publishes both protobuf and JSON versions of each message to separate topics.
+> ⚠️ **Note:** JSON output support was removed from firmware. The `json_enabled` setting is still visible in the app for legacy compatibility but has no effect on current firmware versions.
 
 ## Encryption & Privacy
 
