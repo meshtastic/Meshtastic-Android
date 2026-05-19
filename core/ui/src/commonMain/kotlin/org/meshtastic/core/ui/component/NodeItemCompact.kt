@@ -178,6 +178,7 @@ fun NodeItemCompact(
                     style = style,
                     isIgnored = isIgnored,
                     isFavorite = isFavorite,
+                    unmessageable = unmessageable,
                 )
 
                 // Row 2: Glanceable health — online + last heard + battery + distance + signal
@@ -197,7 +198,6 @@ fun NodeItemCompact(
                 CompactFooterRow(
                     thatNode = thatNode,
                     isThisNode = isThisNode,
-                    unmessageable = unmessageable,
                     showHops = showHops,
                     showChannel = showChannel,
                     showRole = showRole,
@@ -216,6 +216,7 @@ private fun CompactNameRow(
     style: FontStyle,
     isIgnored: Boolean,
     isFavorite: Boolean,
+    unmessageable: Boolean,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -236,6 +237,14 @@ private fun CompactNameRow(
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),
         )
+        if (unmessageable) {
+            Icon(
+                imageVector = MeshtasticIcons.Unmessageable,
+                contentDescription = null,
+                modifier = Modifier.size(18.dp),
+                tint = MaterialTheme.colorScheme.outline,
+            )
+        }
         if (isFavorite) {
             Icon(
                 imageVector = MeshtasticIcons.Favorite,
@@ -355,7 +364,6 @@ private fun CompactHealthRow(
 private fun CompactFooterRow(
     thatNode: Node,
     isThisNode: Boolean,
-    unmessageable: Boolean,
     showHops: Boolean,
     showChannel: Boolean,
     showRole: Boolean,
@@ -397,15 +405,7 @@ private fun CompactFooterRow(
                 )
             }
 
-            // Status icons (unmessageable, MQTT)
-            if (showRole && unmessageable) {
-                Icon(
-                    imageVector = MeshtasticIcons.Unmessageable,
-                    contentDescription = null,
-                    modifier = Modifier.size(COMPACT_ICON_SIZE_DP.dp),
-                    tint = tertiaryColor,
-                )
-            }
+            // Status icons (MQTT)
             if (showRole && thatNode.viaMqtt) {
                 Icon(
                     imageVector = MeshtasticIcons.MqttConnected,
