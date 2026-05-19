@@ -13,7 +13,7 @@ lifecycle = "2.10.0"
 jetbrains-lifecycle = "2.11.0-beta01"
 navigation3 = "1.1.1"
 paging = "3.5.0"
-room = "3.0.0-alpha04"
+room = "3.0.0-alpha05"
 koin = "4.2.1"
 koin-plugin = "1.0.0-RC2"
 
