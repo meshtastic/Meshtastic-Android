@@ -414,6 +414,13 @@ private class InMemoryDiscoveryDao : DiscoveryDao {
         .maxOrNull()
 
     override suspend fun getSessionWithResults(sessionId: Long) = sessions[sessionId]
-}
 
-// endregion
+    override suspend fun markInterruptedSessions() {
+        sessions.keys.toList().forEach { key ->
+            val session = sessions[key]!!
+            if (session.completionStatus == "in_progress") {
+                sessions[key] = session.copy(completionStatus = "interrupted")
+            }
+        }
+    }
+}

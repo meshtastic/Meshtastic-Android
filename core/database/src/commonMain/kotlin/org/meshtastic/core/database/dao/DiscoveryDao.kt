@@ -48,6 +48,9 @@ interface DiscoveryDao {
     @Query("DELETE FROM discovery_session WHERE id = :sessionId")
     suspend fun deleteSession(sessionId: Long)
 
+    @Query("UPDATE discovery_session SET completion_status = 'interrupted' WHERE completion_status = 'in_progress'")
+    suspend fun markInterruptedSessions()
+
     // endregion
 
     // region Preset result operations

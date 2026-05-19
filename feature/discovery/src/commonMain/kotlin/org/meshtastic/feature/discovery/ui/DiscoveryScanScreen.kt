@@ -82,6 +82,7 @@ import org.meshtastic.core.resources.discovery_scan_progress
 import org.meshtastic.core.resources.discovery_shifting_to
 import org.meshtastic.core.resources.discovery_start_scan
 import org.meshtastic.core.resources.discovery_start_scan_disabled
+import org.meshtastic.core.resources.discovery_start_scan_reason_default_key
 import org.meshtastic.core.resources.discovery_start_scan_reason_no_presets
 import org.meshtastic.core.resources.discovery_start_scan_reason_not_connected
 import org.meshtastic.core.resources.discovery_stop_scan
@@ -118,6 +119,7 @@ fun DiscoveryScanScreen(
     val selectedPresets by viewModel.selectedPresets.collectAsStateWithLifecycle()
     val dwellMinutes by viewModel.dwellDurationMinutes.collectAsStateWithLifecycle()
     val isConnected by viewModel.isConnected.collectAsStateWithLifecycle()
+    val usesDefaultKey by viewModel.usesDefaultKey.collectAsStateWithLifecycle()
     val currentSession by viewModel.currentSession.collectAsStateWithLifecycle()
     val homePreset by viewModel.homePreset.collectAsStateWithLifecycle()
 
@@ -174,6 +176,7 @@ fun DiscoveryScanScreen(
                         scanState = scanState,
                         isConnected = isConnected,
                         hasPresetsSelected = selectedPresets.isNotEmpty(),
+                        usesDefaultKey = usesDefaultKey,
                         onStart = viewModel::startScan,
                         onStop = viewModel::stopScan,
                     )
@@ -329,6 +332,7 @@ private fun ScanButton(
     scanState: DiscoveryScanState,
     isConnected: Boolean,
     hasPresetsSelected: Boolean,
+    usesDefaultKey: Boolean,
     onStart: () -> Unit,
     onStop: () -> Unit,
     modifier: Modifier = Modifier,
@@ -344,10 +348,11 @@ private fun ScanButton(
             Text(stringResource(Res.string.discovery_stop_scan), modifier = Modifier.padding(start = 8.dp))
         }
     } else {
-        val isEnabled = isConnected && hasPresetsSelected
+        val isEnabled = isConnected && hasPresetsSelected && !usesDefaultKey
         val disabledReason =
             when {
                 !isConnected -> stringResource(Res.string.discovery_start_scan_reason_not_connected)
+                usesDefaultKey -> stringResource(Res.string.discovery_start_scan_reason_default_key)
                 !hasPresetsSelected -> stringResource(Res.string.discovery_start_scan_reason_no_presets)
                 else -> ""
             }

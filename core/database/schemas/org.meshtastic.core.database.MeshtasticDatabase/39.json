@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 39,
-    "identityHash": "e39ee4f34ed8da08f3cb21bfd4a5165c",
+    "identityHash": "90335dadf5ace3b9f23b3818bd257f35",
     "entities": [
       {
         "tableName": "my_node",
@@ -1149,7 +1149,7 @@
       },
       {
         "tableName": "discovery_preset_result",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `session_id` INTEGER NOT NULL, `preset_name` TEXT NOT NULL, `dwell_duration_seconds` INTEGER NOT NULL DEFAULT 0, `unique_nodes` INTEGER NOT NULL DEFAULT 0, `direct_neighbor_count` INTEGER NOT NULL DEFAULT 0, `mesh_neighbor_count` INTEGER NOT NULL DEFAULT 0, `message_count` INTEGER NOT NULL DEFAULT 0, `sensor_packet_count` INTEGER NOT NULL DEFAULT 0, `avg_channel_utilization` REAL NOT NULL DEFAULT 0.0, `avg_airtime_rate` REAL NOT NULL DEFAULT 0.0, `packet_success_rate` REAL NOT NULL DEFAULT 0.0, `packet_failure_rate` REAL NOT NULL DEFAULT 0.0, `ai_summary` TEXT, `num_packets_tx` INTEGER NOT NULL DEFAULT 0, `num_packets_rx` INTEGER NOT NULL DEFAULT 0, `num_packets_rx_bad` INTEGER NOT NULL DEFAULT 0, `num_rx_dupe` INTEGER NOT NULL DEFAULT 0, `num_tx_relay` INTEGER NOT NULL DEFAULT 0, `num_tx_relay_canceled` INTEGER NOT NULL DEFAULT 0, `num_online_nodes` INTEGER NOT NULL DEFAULT 0, `num_total_nodes` INTEGER NOT NULL DEFAULT 0, `uptime_seconds` INTEGER NOT NULL DEFAULT 0, FOREIGN KEY(`session_id`) REFERENCES `discovery_session`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `session_id` INTEGER NOT NULL, `preset_name` TEXT NOT NULL, `dwell_duration_seconds` INTEGER NOT NULL DEFAULT 0, `unique_nodes` INTEGER NOT NULL DEFAULT 0, `direct_neighbor_count` INTEGER NOT NULL DEFAULT 0, `mesh_neighbor_count` INTEGER NOT NULL DEFAULT 0, `infrastructure_node_count` INTEGER NOT NULL DEFAULT 0, `message_count` INTEGER NOT NULL DEFAULT 0, `sensor_packet_count` INTEGER NOT NULL DEFAULT 0, `avg_channel_utilization` REAL NOT NULL DEFAULT 0.0, `avg_airtime_rate` REAL NOT NULL DEFAULT 0.0, `packet_success_rate` REAL NOT NULL DEFAULT 0.0, `packet_failure_rate` REAL NOT NULL DEFAULT 0.0, `ai_summary` TEXT, `num_packets_tx` INTEGER NOT NULL DEFAULT 0, `num_packets_rx` INTEGER NOT NULL DEFAULT 0, `num_packets_rx_bad` INTEGER NOT NULL DEFAULT 0, `num_rx_dupe` INTEGER NOT NULL DEFAULT 0, `num_tx_relay` INTEGER NOT NULL DEFAULT 0, `num_tx_relay_canceled` INTEGER NOT NULL DEFAULT 0, `num_online_nodes` INTEGER NOT NULL DEFAULT 0, `num_total_nodes` INTEGER NOT NULL DEFAULT 0, `uptime_seconds` INTEGER NOT NULL DEFAULT 0, FOREIGN KEY(`session_id`) REFERENCES `discovery_session`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -1193,6 +1193,13 @@
           {
             "fieldPath": "meshNeighborCount",
             "columnName": "mesh_neighbor_count",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "infrastructureNodeCount",
+            "columnName": "infrastructure_node_count",
             "affinity": "INTEGER",
             "notNull": true,
             "defaultValue": "0"
@@ -1341,7 +1348,7 @@
       },
       {
         "tableName": "discovered_node",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `preset_result_id` INTEGER NOT NULL, `node_num` INTEGER NOT NULL, `short_name` TEXT, `long_name` TEXT, `neighbor_type` TEXT NOT NULL DEFAULT 'direct', `latitude` REAL, `longitude` REAL, `distance_from_user` REAL, `hop_count` INTEGER NOT NULL DEFAULT 0, `snr` REAL NOT NULL DEFAULT 0, `rssi` INTEGER NOT NULL DEFAULT 0, `message_count` INTEGER NOT NULL DEFAULT 0, `sensor_packet_count` INTEGER NOT NULL DEFAULT 0, FOREIGN KEY(`preset_result_id`) REFERENCES `discovery_preset_result`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `preset_result_id` INTEGER NOT NULL, `node_num` INTEGER NOT NULL, `short_name` TEXT, `long_name` TEXT, `neighbor_type` TEXT NOT NULL DEFAULT 'direct', `latitude` REAL, `longitude` REAL, `distance_from_user` REAL, `hop_count` INTEGER NOT NULL DEFAULT 0, `snr` REAL NOT NULL DEFAULT 0, `rssi` INTEGER NOT NULL DEFAULT 0, `message_count` INTEGER NOT NULL DEFAULT 0, `sensor_packet_count` INTEGER NOT NULL DEFAULT 0, `is_infrastructure` INTEGER NOT NULL DEFAULT 0, FOREIGN KEY(`preset_result_id`) REFERENCES `discovery_preset_result`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -1427,6 +1434,13 @@
             "affinity": "INTEGER",
             "notNull": true,
             "defaultValue": "0"
+          },
+          {
+            "fieldPath": "isInfrastructure",
+            "columnName": "is_infrastructure",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
           }
         ],
         "primaryKey": {
@@ -1472,7 +1486,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e39ee4f34ed8da08f3cb21bfd4a5165c')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '90335dadf5ace3b9f23b3818bd257f35')"
     ]
   }
 }

@@ -43,6 +43,7 @@ data class DiscoveryPresetResultEntity(
     @ColumnInfo(name = "unique_nodes", defaultValue = "0") val uniqueNodes: Int = 0,
     @ColumnInfo(name = "direct_neighbor_count", defaultValue = "0") val directNeighborCount: Int = 0,
     @ColumnInfo(name = "mesh_neighbor_count", defaultValue = "0") val meshNeighborCount: Int = 0,
+    @ColumnInfo(name = "infrastructure_node_count", defaultValue = "0") val infrastructureNodeCount: Int = 0,
     @ColumnInfo(name = "message_count", defaultValue = "0") val messageCount: Int = 0,
     @ColumnInfo(name = "sensor_packet_count", defaultValue = "0") val sensorPacketCount: Int = 0,
     @ColumnInfo(name = "avg_channel_utilization", defaultValue = "0.0") val avgChannelUtilization: Double = 0.0,

@@ -50,4 +50,5 @@ data class DiscoveredNodeEntity(
     @ColumnInfo(name = "rssi", defaultValue = "0") val rssi: Int = 0,
     @ColumnInfo(name = "message_count", defaultValue = "0") val messageCount: Int = 0,
     @ColumnInfo(name = "sensor_packet_count", defaultValue = "0") val sensorPacketCount: Int = 0,
+    @ColumnInfo(name = "is_infrastructure", defaultValue = "0") val isInfrastructure: Boolean = false,
 )

@@ -129,6 +129,7 @@ class DiscoveryScanEngine(
         var hopCount: Int = 0,
         var messageCount: Int = 0,
         var sensorPacketCount: Int = 0,
+        var isInfrastructure: Boolean = false,
     )
 
     private data class DeviceMetricsEntry(val timestamp: Long, val channelUtil: Double, val airUtilTx: Double)
@@ -250,7 +251,7 @@ class DiscoveryScanEngine(
         }
     }
 
-    /** Backfills name and position from the local NodeDB when not yet received over-the-air. */
+    /** Backfills name, position, and infrastructure role from the local NodeDB when not yet received over-the-air. */
     private fun enrichNodeFromDb(node: CollectedNodeData) {
         val dbNode = nodeRepository.nodeDBbyNum.value[node.nodeNum.toInt()] ?: return
         if (node.shortName == null || node.longName == null) {
@@ -263,6 +264,7 @@ class DiscoveryScanEngine(
             if (dbLat != null && dbLat != 0) node.latitude = dbLat.toDouble() / POSITION_DIVISOR
             if (dbLon != null && dbLon != 0) node.longitude = dbLon.toDouble() / POSITION_DIVISOR
         }
+        node.isInfrastructure = dbNode.user.role in INFRASTRUCTURE_ROLES
     }
 
     // endregion
@@ -482,6 +484,7 @@ class DiscoveryScanEngine(
         val (avgChannelUtil, avgAirUtil) = computeAverageMetrics()
         val directCount = collectedNodes.values.count { it.neighborType == "direct" }
         val meshCount = collectedNodes.values.count { it.neighborType == "mesh" }
+        val infraCount = collectedNodes.values.count { it.isInfrastructure }
 
         val packetsRx = lastLocalStats?.num_packets_rx ?: 0
         val packetsRxBad = lastLocalStats?.num_packets_rx_bad ?: 0
@@ -495,6 +498,7 @@ class DiscoveryScanEngine(
                 uniqueNodes = collectedNodes.size,
                 directNeighborCount = directCount,
                 meshNeighborCount = meshCount,
+                infrastructureNodeCount = infraCount,
                 messageCount = collectedNodes.values.sumOf { it.messageCount },
                 sensorPacketCount = collectedNodes.values.sumOf { it.sensorPacketCount },
                 avgChannelUtilization = avgChannelUtil,
@@ -559,6 +563,7 @@ class DiscoveryScanEngine(
             rssi = rssi,
             messageCount = messageCount,
             sensorPacketCount = sensorPacketCount,
+            isInfrastructure = isInfrastructure,
         )
     }
 
@@ -660,5 +665,13 @@ class DiscoveryScanEngine(
         private const val POSITION_DIVISOR = 1e7
         private const val MIN_DEVICE_METRICS_PACKETS = 2
         private const val PERCENT_MULTIPLIER = 100.0
+
+        /** Node roles that indicate infrastructure (Router, RouterLate, ClientBase). */
+        private val INFRASTRUCTURE_ROLES =
+            setOf(
+                Config.DeviceConfig.Role.ROUTER,
+                Config.DeviceConfig.Role.ROUTER_LATE,
+                Config.DeviceConfig.Role.CLIENT_BASE,
+            )
     }
 }
