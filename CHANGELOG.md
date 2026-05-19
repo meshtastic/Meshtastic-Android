@@ -9,6 +9,10 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
+* chore(deps): update compose-multiplatform to v1.11.2 (#5497) by @renovate[bot] in [`619897de8`](https://github.com/meshtastic/Meshtastic-Android/commit/619897de85616eb9bebedf850970abd24571f705)
+* fix(ci): unblock Dokka documentation generation (#5496) by @James Rich in [`228765a15`](https://github.com/meshtastic/Meshtastic-Android/commit/228765a159b6f1498566d3fe6005f91b470761b4)
+* fix(docs): use locale subdirectory inside files/ instead of qualifier (#5494) by @James Rich in [`418861d35`](https://github.com/meshtastic/Meshtastic-Android/commit/418861d356f1edf5ac0c4b00f3bfc761ad34e609)
+* docs: update CHANGELOG.md (#5473) by @github-actions[bot] in [`3121ea09a`](https://github.com/meshtastic/Meshtastic-Android/commit/3121ea09a3abb43713f0a090dac5147b6ae76f84)
 * chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5465) by @James Rich in [`83bb1a31f`](https://github.com/meshtastic/Meshtastic-Android/commit/83bb1a31f75bfd2717428f2fed287eb1e830302f)
 * chore(deps): update peter-evans/create-pull-request action to v8 (#5493) by @renovate[bot] in [`a141df437`](https://github.com/meshtastic/Meshtastic-Android/commit/a141df437298b039086e9084ec234f925ffa09b2)
 * chore(deps): update node to v24 (#5491) by @renovate[bot] in [`cdf57ced8`](https://github.com/meshtastic/Meshtastic-Android/commit/cdf57ced8e9d6a6ce66a88f10da304a41b0ab4c1)
