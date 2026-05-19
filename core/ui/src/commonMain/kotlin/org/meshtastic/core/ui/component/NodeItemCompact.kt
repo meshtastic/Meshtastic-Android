@@ -21,6 +21,8 @@ package org.meshtastic.core.ui.component
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -326,20 +328,23 @@ private fun CompactHealthRow(
     }
 
     if (segments.isNotEmpty()) {
-        Row(
+        @OptIn(ExperimentalLayoutApi::class)
+        FlowRow(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalArrangement = Arrangement.spacedBy(2.dp),
             horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             segments.forEachIndexed { index, content ->
-                if (index > 0) {
-                    Text(
-                        text = "·",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = contentColor.copy(alpha = 0.5f),
-                    )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (index > 0) {
+                        Text(
+                            text = "· ",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = contentColor.copy(alpha = 0.5f),
+                        )
+                    }
+                    content()
                 }
-                content()
             }
         }
     }
@@ -381,7 +386,7 @@ private fun CompactFooterRow(
     }
 
     if (segments.isNotEmpty() || (showTelemetry && hasTelemetryData(thatNode))) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             if (segments.isNotEmpty()) {
                 Text(
                     text = segments.joinToString(" · "),
