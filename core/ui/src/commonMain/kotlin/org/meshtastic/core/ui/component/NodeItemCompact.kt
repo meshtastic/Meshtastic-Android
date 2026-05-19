@@ -57,9 +57,11 @@ import org.meshtastic.core.ui.icon.DeviceSleep
 import org.meshtastic.core.ui.icon.ElectricPower
 import org.meshtastic.core.ui.icon.Favorite
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.MqttConnected
 import org.meshtastic.core.ui.icon.PinDrop
 import org.meshtastic.core.ui.icon.Success
 import org.meshtastic.core.ui.icon.Temperature
+import org.meshtastic.core.ui.icon.Unmessageable
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 import org.meshtastic.proto.Config
 
@@ -362,15 +364,9 @@ private fun CompactFooterRow(
             add(thatNode.user.hw_model.name)
         }
 
-        // Role + badges
+        // Role
         if (showRole) {
-            val roleName = thatNode.user.role.name
-            val badges = buildString {
-                append(roleName)
-                if (unmessageable) append(" ✗")
-                if (thatNode.viaMqtt) append(" ⌁")
-            }
-            add(badges)
+            add(thatNode.user.role.name)
         }
 
         // Hops
@@ -385,11 +381,7 @@ private fun CompactFooterRow(
     }
 
     if (segments.isNotEmpty() || (showTelemetry && hasTelemetryData(thatNode))) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             if (segments.isNotEmpty()) {
                 Text(
                     text = segments.joinToString(" · "),
@@ -397,7 +389,24 @@ private fun CompactFooterRow(
                     color = tertiaryColor,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f, fill = false),
+                )
+            }
+
+            // Status icons (unmessageable, MQTT)
+            if (showRole && unmessageable) {
+                Icon(
+                    imageVector = MeshtasticIcons.Unmessageable,
+                    contentDescription = null,
+                    modifier = Modifier.size(COMPACT_ICON_SIZE_DP.dp),
+                    tint = tertiaryColor,
+                )
+            }
+            if (showRole && thatNode.viaMqtt) {
+                Icon(
+                    imageVector = MeshtasticIcons.MqttConnected,
+                    contentDescription = null,
+                    modifier = Modifier.size(COMPACT_ICON_SIZE_DP.dp),
+                    tint = tertiaryColor,
                 )
             }
 
