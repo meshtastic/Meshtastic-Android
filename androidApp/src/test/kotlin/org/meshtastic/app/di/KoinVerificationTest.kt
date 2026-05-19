@@ -60,6 +60,8 @@ class KoinVerificationTest {
                     // declared as known types even though they're never resolved from the graph.
                     BleLogLevel::class,
                     BleLogFormat::class,
+                    okio.Path::class,
+                    okio.FileSystem::class,
                 ),
                 injections =
                 injectedParameters(
