@@ -9,6 +9,12 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
+* chore(deps): update room to v3.0.0-alpha05 (#5498) by @renovate[bot] in [`59499e827`](https://github.com/meshtastic/Meshtastic-Android/commit/59499e82723bdef4f1116ae5996814d59ab85595)
+* chore(deps): update org.junit.platform:junit-platform-launcher to v6.1.0 (#5502) by @renovate[bot] in [`2b7621221`](https://github.com/meshtastic/Meshtastic-Android/commit/2b76212217122604eeb14ba02ea45d93809773a0)
+* chore(deps): update org.junit.vintage:junit-vintage-engine to v6.1.0 (#5503) by @renovate[bot] in [`ae127a1e1`](https://github.com/meshtastic/Meshtastic-Android/commit/ae127a1e15bdbbae6395a4c21da6440297cdb13b)
+* docs: move English sources into docs/en/ locale folder (#5501) by @James Rich in [`11bc37c96`](https://github.com/meshtastic/Meshtastic-Android/commit/11bc37c96878cd1d9a822c1dad658f43c9be6604)
+* fix(ci): exclude pre-release tags from docs-release workflow (#5499) by @James Rich in [`92cfbaee9`](https://github.com/meshtastic/Meshtastic-Android/commit/92cfbaee9b8819804571ae15fd0815b8ab785bce)
+* docs: update CHANGELOG.md (#5495) by @github-actions[bot] in [`51d2c7b15`](https://github.com/meshtastic/Meshtastic-Android/commit/51d2c7b15cf1b3520cfbef13b8dbcff0b72748e4)
 * chore(deps): update compose-multiplatform to v1.11.2 (#5497) by @renovate[bot] in [`619897de8`](https://github.com/meshtastic/Meshtastic-Android/commit/619897de85616eb9bebedf850970abd24571f705)
 * fix(ci): unblock Dokka documentation generation (#5496) by @James Rich in [`228765a15`](https://github.com/meshtastic/Meshtastic-Android/commit/228765a159b6f1498566d3fe6005f91b470761b4)
 * fix(docs): use locale subdirectory inside files/ instead of qualifier (#5494) by @James Rich in [`418861d35`](https://github.com/meshtastic/Meshtastic-Android/commit/418861d356f1edf5ac0c4b00f3bfc761ad34e609)
