@@ -18,6 +18,7 @@ package org.meshtastic.app.ai
 
 import co.touchlab.kermit.Logger
 import com.google.firebase.Firebase
+import com.google.firebase.ai.Chat
 import com.google.firebase.ai.DownloadStatus
 import com.google.firebase.ai.InferenceMode
 import com.google.firebase.ai.OnDeviceConfig
@@ -51,7 +52,7 @@ import org.meshtastic.feature.docs.model.DocsAiError
 class GeminiNanoDocAssistant(private val searchEngine: KeywordSearchEngine, private val bundleLoader: DocBundleLoader) :
     AIDocAssistant {
 
-    /** On-device model for fast offline answers grounded in bundled docs. */
+    /** On-device model for fast first-message answers grounded in bundled docs. */
     private val onDeviceModel by lazy {
         Firebase.ai(backend = GenerativeBackend.googleAI())
             .generativeModel(
@@ -70,6 +71,10 @@ class GeminiNanoDocAssistant(private val searchEngine: KeywordSearchEngine, priv
                 tools = listOf(Tool.urlContext()),
             )
     }
+
+    /** Active multi-turn chat session. Maintains conversation history across messages. */
+    private var chatSession: Chat? = null
+    private var messageCount = 0
 
     override suspend fun isSupported(): Boolean = try {
         // Always supported on Google flavor — cloud model with Google Search grounding is always available.
@@ -129,9 +134,10 @@ class GeminiNanoDocAssistant(private val searchEngine: KeywordSearchEngine, priv
         }
 
         val prompt = buildPrompt(question, contextResult.parts)
-        Logger.d(tag = TAG) { "Prompt: ${prompt.length} chars" }
+        Logger.d(tag = TAG) { "Prompt: ${prompt.length} chars, message #$messageCount" }
 
-        val answer = generateWithFallback(prompt, contextResult, currentPageId, queryTerms, rankedPages, allContent)
+        val answer = generateWithChat(prompt)
+        messageCount++
         Logger.d(tag = TAG) { "Response (${answer.length} chars): ${answer.take(200)}" }
 
         // Merge context pages with any pages mentioned by title in the response (à la Meshtastic-Apple).
@@ -142,7 +148,7 @@ class GeminiNanoDocAssistant(private val searchEngine: KeywordSearchEngine, priv
         val allSourcePages =
             contextResult.usedPageIds.mapNotNull { id -> bundle.pages.find { it.id == id } } + mentionedPages
 
-        AIDocAssistantResult.Success(answer = answer, sourcePages = allSourcePages, usedOnDeviceModel = true)
+        AIDocAssistantResult.Success(answer = answer, sourcePages = allSourcePages, usedOnDeviceModel = false)
     } catch (e: Exception) {
         Logger.w(tag = TAG) { "Inference failed: ${e.message}" }
         val errorType =
@@ -157,51 +163,47 @@ class GeminiNanoDocAssistant(private val searchEngine: KeywordSearchEngine, priv
         AIDocAssistantResult.Error(reason = errorType, suggestedPages = fallbackPages)
     }
 
+    override fun resetSession() {
+        chatSession = null
+        messageCount = 0
+        Logger.d(tag = TAG) { "Chat session reset" }
+    }
+
     /**
-     * Attempts on-device inference first, then falls back to cloud with Google Search grounding if on-device fails or
-     * returns a low-confidence "not in docs" response.
+     * Uses the Chat API for multi-turn conversation. First message tries on-device for speed; all messages also go
+     * through the cloud chat session to maintain conversation history for follow-ups.
      */
-    private suspend fun generateWithFallback(
-        prompt: String,
-        contextResult: ContextResult,
-        currentPageId: String?,
-        queryTerms: List<String>,
-        rankedPages: List<Pair<DocPage, Int>>,
-        allContent: Map<DocPage, String>,
-    ): String {
-        // Try on-device first (fast, offline, private).
-        val onDeviceAnswer =
-            try {
-                val response = onDeviceModel.generateContent(prompt)
-                response.text?.trimEnd()
-            } catch (e: Exception) {
-                Logger.d(tag = TAG) { "On-device inference failed, will try cloud: ${e.message}" }
-                null
-            }
+    private suspend fun generateWithChat(prompt: String): String {
+        val chat = chatSession ?: groundedModel.startChat().also { chatSession = it }
 
-        // If on-device gave a good answer, use it.
-        if (onDeviceAnswer != null && !looksLikeNoAnswer(onDeviceAnswer)) {
-            return onDeviceAnswer
-        }
+        // First message: try on-device in parallel for speed, use cloud chat as primary.
+        if (messageCount == 0) {
+            val onDeviceAnswer =
+                try {
+                    val response = onDeviceModel.generateContent(prompt)
+                    response.text?.trimEnd()
+                } catch (e: Exception) {
+                    Logger.d(tag = TAG) { "On-device inference failed: ${e.message}" }
+                    null
+                }
 
-        // Fall back to cloud with Google Search grounding for broader knowledge.
-        Logger.d(tag = TAG) { "Falling back to grounded cloud model" }
-        return try {
-            val groundedPrompt = prompt + MESHTASTIC_URL_HINT
-            val response = groundedModel.generateContent(groundedPrompt)
-            response.text?.trimEnd() ?: onDeviceAnswer ?: "I wasn't able to generate a response."
-        } catch (e: Exception) {
-            Logger.w(tag = TAG) { "Cloud grounded model also failed: ${e.message}" }
-            // Last resort: retry on-device with reduced context.
-            if (contextResult.parts.size > 1) {
-                val reduced = buildContext(currentPageId, queryTerms, rankedPages, allContent, RETRY_CONTEXT_CHARS)
-                val retryPrompt = buildPrompt(reduced.parts.firstOrNull().orEmpty(), reduced.parts)
-                val retryResponse = onDeviceModel.generateContent(retryPrompt)
-                retryResponse.text?.trimEnd() ?: "I wasn't able to generate a response."
-            } else {
-                onDeviceAnswer ?: throw e
+            // If on-device gave a good answer, send it to chat as history context and return it.
+            if (onDeviceAnswer != null && !looksLikeNoAnswer(onDeviceAnswer)) {
+                // Still send to cloud chat so it has context for follow-ups (fire and forget).
+                try {
+                    val groundedPrompt = prompt + MESHTASTIC_URL_HINT
+                    chat.sendMessage(groundedPrompt)
+                } catch (e: Exception) {
+                    Logger.d(tag = TAG) { "Cloud chat seeding failed (non-fatal): ${e.message}" }
+                }
+                return onDeviceAnswer
             }
         }
+
+        // Use cloud chat (maintains full conversation history for follow-ups).
+        val groundedPrompt = prompt + MESHTASTIC_URL_HINT
+        val response = chat.sendMessage(groundedPrompt)
+        return response.text?.trimEnd() ?: "I wasn't able to generate a response."
     }
 
     /** Heuristic: detect when the model says it can't find the answer in the provided docs. */
@@ -395,9 +397,6 @@ Guidelines:
 
         /** Total context char budget — sized for on-device Nano (~4K tokens ≈ 10K chars for context + prompt). */
         private const val MAX_CONTEXT_CHARS = 8_000
-
-        /** Reduced context budget for retry after on-device context overflow. */
-        private const val RETRY_CONTEXT_CHARS = 3_000
 
         /** Max chars for the current page (gets priority). */
         private const val MAX_PAGE_CHARS = 4_000

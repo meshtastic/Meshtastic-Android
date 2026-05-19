@@ -111,6 +111,7 @@ private fun rememberChirpyState(
     // Auto-introduce Chirpy when the sheet first opens.
     LaunchedEffect(holder.showSheet) {
         if (holder.showSheet && holder.sessionState.messages.isEmpty() && !holder.sessionState.isLoading) {
+            aiAssistant.resetSession()
             holder.sessionState = holder.sessionState.copy(isLoading = true)
             val result = aiAssistant.answer(CHIRPY_INTRO_PROMPT, currentPageId = currentPageId)
             val introMsg = chirpyResultToMessage(result)

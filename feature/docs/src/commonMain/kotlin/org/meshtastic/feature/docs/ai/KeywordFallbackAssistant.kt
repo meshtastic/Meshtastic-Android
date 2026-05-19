@@ -37,4 +37,8 @@ class KeywordFallbackAssistant(private val searchEngine: KeywordSearchEngine) : 
             AIDocAssistantResult.Error(reason = org.meshtastic.feature.docs.model.DocsAiError.UnsupportedPlatform)
         }
     }
+
+    override fun resetSession() {
+        /* No-op for keyword fallback */
+    }
 }

@@ -32,4 +32,7 @@ interface AIDocAssistant {
 
     /** Answer a user question about Meshtastic using bundled documentation context. */
     suspend fun answer(question: String, currentPageId: String? = null): AIDocAssistantResult
+
+    /** Reset the conversation session. Call when starting a new conversation thread. */
+    fun resetSession()
 }
