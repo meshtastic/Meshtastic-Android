@@ -455,6 +455,7 @@ Guidelines:
             "\n\nFor additional context, you may reference these official sources:" +
                 "\n- https://meshtastic.org/docs/" +
                 "\n- https://github.com/meshtastic/Meshtastic-Android" +
-                "\n- https://github.com/meshtastic/firmware"
+                "\n- https://github.com/meshtastic/firmware" +
+                "\n- https://github.com/meshtastic/protobufs"
     }
 }
