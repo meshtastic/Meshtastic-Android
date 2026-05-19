@@ -46,7 +46,7 @@ compose-multiplatform-material3 = "1.11.0-alpha07"
 # current `compose-multiplatform` release maps to (see CMP release notes).
 # AndroidCompose.kt's resolutionStrategy force-aligns these groups to *this* version
 # at resolution time, so it is the source of truth for the Android target.
-androidx-compose-bom-aligned = "1.11.1"
+androidx-compose-bom-aligned = "1.11.2"
 # `androidx-compose-material` (M2) is independent of CMP. Pinned because
 # maps-compose-widgets requests `androidx.compose.material:material` without
 # a version (relying on a BOM that we exclude). M2 is frozen at 1.7.8.
