@@ -28,12 +28,12 @@ color_scheme: meshtastic
 # Default front-matter for pages in subdirectories
 defaults:
   - scope:
-      path: "user/"
+      path: "en/user/"
     values:
       parent: User Guide
       layout: default
   - scope:
-      path: "developer/"
+      path: "en/developer/"
     values:
       parent: Developer Guide
       layout: default
@@ -285,5 +285,6 @@ exclude:
   - Gemfile
   - Gemfile.lock
   - assets/screenshots/.gitkeep
+  - README.md
   - "*.sh"
 

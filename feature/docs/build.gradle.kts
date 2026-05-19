@@ -59,24 +59,16 @@ kotlin {
  */
 val syncDocsToComposeResources by
     tasks.registering(Sync::class) {
-        description = "Syncs docs/ markdown source into composeResources for in-app bundling"
+        description = "Syncs docs/en/ markdown source into composeResources for in-app bundling"
         group = "docs"
 
-        val docsSourceDir = rootProject.layout.projectDirectory.dir("docs")
+        val docsEnDir = rootProject.layout.projectDirectory.dir("docs/en")
         val screenshotsDir = rootProject.layout.projectDirectory.dir("docs/screenshots")
         val composeResourcesTarget = layout.projectDirectory.dir("src/commonMain/composeResources/files/docs")
 
-        from(docsSourceDir) {
+        from(docsEnDir) {
             include("user/**/*.md")
             include("developer/**/*.md")
-            // Exclude Jekyll/site-only files that are not needed in-app
-            exclude("_config.yml")
-            exclude("_data/**")
-            exclude("_includes/**")
-            exclude("_layouts/**")
-            exclude("index.md")
-            exclude("assets/**")
-            exclude("Gemfile*")
         }
 
         // FR-038: Bundle screenshots into assets/screenshots/ to match markdown image paths.
@@ -117,8 +109,7 @@ val syncTranslatedDocsToComposeResources by
         from(docsDir) {
             // Crowdin outputs dirs in Android qualifier format (fr, pt-rBR, zh-rCN)
             include("*/user/**/*.md")
-            exclude("user/**")
-            exclude("developer/**")
+            exclude("en/**")
             exclude("_*/**")
             exclude("assets/**")
             exclude("screenshots/**")
@@ -133,6 +124,8 @@ val syncTranslatedDocsToComposeResources by
             if (segments.size >= 3) {
                 val qualifier = segments[0]
                 val rest = segments.drop(1).joinToString("/")
+                // Inject source metadata comment pointing back to the English source
+                val enSource = "docs/en/$rest"
                 path = "$qualifier/docs/$rest"
             }
         }
