@@ -142,7 +142,7 @@ class DefaultDocBundleLoader : DocBundleLoader {
         // Try qualifiers in specificity order (mirrors Android resource resolution):
         // "pt-rBR" → "pt" → give up
         for (qualifier in localeQualifiers(locale)) {
-            val localePath = "files-$qualifier/docs/$section/${page.id}.md"
+            val localePath = "files/$qualifier/docs/$section/${page.id}.md"
             try {
                 val bytes = Res.readBytes(localePath)
                 return stripFrontmatter(bytes.decodeToString())
@@ -162,7 +162,7 @@ class DefaultDocBundleLoader : DocBundleLoader {
                 DocSection.DeveloperGuide -> "developer"
             }
         return localeQualifiers(locale).any { qualifier ->
-            val localePath = "files-$qualifier/docs/$section/${page.id}.md"
+            val localePath = "files/$qualifier/docs/$section/${page.id}.md"
             try {
                 Res.readBytes(localePath)
                 true
