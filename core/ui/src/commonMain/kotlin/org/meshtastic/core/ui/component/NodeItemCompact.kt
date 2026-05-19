@@ -117,6 +117,15 @@ fun NodeItemCompact(
         }
     val distance =
         remember(thisNode, thatNode) { thisNode?.distance(thatNode)?.takeIf { it > 0 }?.toDistanceString(system) }
+    val bearingDegrees = remember(thisNode, thatNode) { thisNode?.bearing(thatNode) }
+    val distanceWithBearing =
+        remember(distance, bearingDegrees) {
+            when {
+                distance == null -> null
+                bearingDegrees != null -> "$distance ${degreesToCompass(bearingDegrees)}"
+                else -> distance
+            }
+        }
     val unmessageable =
         remember(thatNode) {
             when {
@@ -195,7 +204,7 @@ fun NodeItemCompact(
             CompactHealthRow(
                 thatNode = thatNode,
                 isThisNode = isThisNode,
-                distance = distance,
+                distance = distanceWithBearing,
                 showPower = showPower,
                 showLastHeard = showLastHeard,
                 lastHeardIsRelative = lastHeardIsRelative,
@@ -516,4 +525,11 @@ private fun isFutureDate(lastHeard: Int): Boolean {
     val nowSeconds = org.meshtastic.core.common.util.nowSeconds.toInt()
     val oneYearSeconds = 365 * 24 * 60 * 60
     return lastHeard > nowSeconds + oneYearSeconds
+}
+
+@Suppress("MagicNumber")
+internal fun degreesToCompass(degrees: Int): String {
+    val directions = arrayOf("N", "NE", "E", "SE", "S", "SW", "W", "NW")
+    val index = ((degrees + 22) / 45) % 8
+    return directions[index]
 }

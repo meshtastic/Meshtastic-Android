@@ -105,6 +105,15 @@ fun NodeItem(
         }
     val distance =
         remember(thisNode, thatNode) { thisNode?.distance(thatNode)?.takeIf { it > 0 }?.toDistanceString(system) }
+    val bearingDegrees = remember(thisNode, thatNode) { thisNode?.bearing(thatNode) }
+    val distanceWithBearing =
+        remember(distance, bearingDegrees) {
+            when {
+                distance == null -> null
+                bearingDegrees != null -> "$distance ${degreesToCompass(bearingDegrees)}"
+                else -> distance
+            }
+        }
 
     var contentColor = MaterialTheme.colorScheme.onSurface
     val cardColors =
@@ -212,7 +221,7 @@ fun NodeItem(
 
             NodeBatteryPositionRow(
                 thatNode = thatNode,
-                distance = distance,
+                distance = distanceWithBearing,
                 system = system,
                 contentColor = contentColor,
             )
