@@ -1,6 +1,6 @@
 ---
 title: Units, Measurement & Locale
-parent: User Guide
+parent: Руководство пользователя
 nav_order: 16
 last_updated: 2026-05-12
 ---
@@ -11,7 +11,7 @@ The Meshtastic app automatically displays temperatures, distances, speeds, and t
 
 ---
 
-## How It Works
+## Как это работает
 
 Meshtastic radios always transmit data in **metric units** (meters, °C, km/h, hPa, etc.). When the app receives this data, it uses the `MetricFormatter` utility to convert and display values in whatever unit system your device's locale specifies.
 
@@ -99,7 +99,7 @@ Some units are international standards and are displayed the same way regardless
 
 All timestamps throughout the app — last heard, message times, telemetry logs, chart axes — follow your device's date and time preferences.
 
-| Setting          | What It Controls | Example                                          |
+| Настройка        | What It Controls | Example                                          |
 | ---------------- | ---------------- | ------------------------------------------------ |
 | **24-Hour Time** | Clock format     | 14:30 vs 2:30 PM |
 | **Date Format**  | Date ordering    | 09/05/2026 vs 05/09/2026                         |

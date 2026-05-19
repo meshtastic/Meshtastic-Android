@@ -1,5 +1,5 @@
 ---
-title: TAK Integration
+title: Интеграция TAK
 nav_order: 10
 last_updated: 2026-05-13
 description: Interoperate with ATAK and WinTAK — CoT position sharing, TAK roles, and plugin setup.
@@ -9,11 +9,11 @@ aliases:
   - team-awareness-kit
 ---
 
-# TAK Integration
+# Интеграция TAK
 
 Meshtastic integrates with the Team Awareness Kit (TAK) ecosystem, enabling interoperability between Meshtastic mesh devices and TAK applications like ATAK and WinTAK.
 
-## Overview
+## Обзор
 
 The TAK module allows Meshtastic nodes to:
 
@@ -37,7 +37,7 @@ The TAK module allows Meshtastic nodes to:
 
 ![Module toggle switch](/assets/screenshots/settings_switch.png)
 
-| Setting      | Описание                   |
+| Настройка    | Описание                   |
 | ------------ | -------------------------- |
 | Включено     | Activate TAK interop       |
 | Режим обмена | TAK-compatible output mode |
@@ -67,11 +67,11 @@ TAK messages use the Cursor on Target XML format — a military standard for sha
 
 When using TAK roles, your node broadcasts identity information that appears on TAK maps:
 
-| Setting  | Описание                                                                                                         |
-| -------- | ---------------------------------------------------------------------------------------------------------------- |
-| Team     | Your team color on the TAK map (e.g., Blue, Red, Cyan, Green) |
-| Роль     | Your operational role (Team Member, Team Lead, HQ, Medic, RTO, etc.)          |
-| Callsign | Your TAK callsign (defaults to your Meshtastic long name)                                     |
+| Настройка | Описание                                                                                                         |
+| --------- | ---------------------------------------------------------------------------------------------------------------- |
+| Team      | Your team color on the TAK map (e.g., Blue, Red, Cyan, Green) |
+| Роль      | Your operational role (Team Member, Team Lead, HQ, Medic, RTO, etc.)          |
+| Callsign  | Your TAK callsign (defaults to your Meshtastic long name)                                     |
 
 These settings appear in **Settings → Module Config → TAK** when the TAK module is enabled.
 

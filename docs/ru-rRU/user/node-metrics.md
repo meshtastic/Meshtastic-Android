@@ -1,5 +1,5 @@
 ---
-title: Node Metrics
+title: Метрики ноды
 nav_order: 5
 last_updated: 2026-05-13
 description: Telemetry dashboards for each mesh node — device health, environment sensors, signal quality, power, traceroute, and position history.
@@ -10,7 +10,7 @@ aliases:
   - signal
 ---
 
-# Node Metrics
+# Метрики ноды
 
 The node detail screen provides comprehensive telemetry and metrics for each node on your mesh.
 

@@ -2,7 +2,7 @@
 title: Соединения
 nav_order: 2
 last_updated: 2026-05-13
-description: Connect your phone or desktop to a Meshtastic radio via Bluetooth, USB, or TCP/IP.
+description: Подключите ваш телефон или компьютер к устройству Meshtastic через Bluetooth, USB или TCP/IP.
 aliases:
   - bluetooth
   - usb
@@ -12,38 +12,38 @@ aliases:
 
 # Соединения
 
-Meshtastic supports multiple transport methods to communicate between your phone/desktop and a radio node.
+Meshtastic поддерживает несколько способов передачи данных между вашим телефоном/компьютером и радионодой.
 
 ## Bluetooth (BLE)
 
-Bluetooth Low Energy is the default and most common connection method on Android.
+Bluetooth Low Energy является наиболее распространенным методом подключения на Android.
 
-### Pairing a Device
+### Привязка устройства
 
-1. Ensure your Meshtastic radio is powered on and in pairing mode.
-2. Open the app and navigate to **Connections**.
-3. Tap **Scan for Devices** — nearby Meshtastic radios will appear.
-4. Select your device from the list.
-5. Accept the Bluetooth pairing prompt if shown.
+1. Убедитесь, что устройство Meshtastic включено и находится в режиме сопряжения.
+2. Откройте приложение и перейдите в **Соединения**.
+3. Нажмите **Сканировать устройства** — появятся ближайшие устройства Meshtastic.
+4. Выберите ваше устройство из списка.
+5. Примите запрос на соединение Bluetooth, если показано.
 
-![Device list item](/assets/screenshots/connections_bluetooth_scan.png)
+![Элемент списка устройств](/assets/screenshots/connections_bluetooth_scan.png)
 
-You can filter devices by transport type using the filter chips at the top:
+Вы можете отфильтровать устройства по типу передачи данных, используя функцию фильтра сверху:
 
 ![Transport filter chips](/assets/screenshots/connections_transport_filters.png)
 
-> 💡 **Tip:** If your device doesn't appear, check that Bluetooth and Location permissions are granted, and that the radio is not already connected to another device.
+> 💡 **Подсказка:** Если ваше радио Meshtastic не отображается, проверьте, предоставлены ли разрешения на Bluetooth и геолокацию, а также не подключено ли ваше радио к другому устройству.
 
-### Connection Status
+### Статус подключения
 
-| Icon | State          | Описание                      |
-| ---- | -------------- | ----------------------------- |
-| 🟢   | Подключено     | Active radio link established |
-| 🟡   | Подключение    | Handshake in progress         |
-| 🔴   | Отключено      | No active connection          |
-| ⚪    | Not configured | Устройство не выбрано         |
+| Иконка | Состояние      | Описание                 |
+| ------ | -------------- | ------------------------ |
+| 🟢     | Подключено     | Подключение активно      |
+| 🟡     | Подключение    | Выполняется рукопожатие  |
+| 🔴     | Отключено      | Нет активного соединения |
+| ⚪      | Not configured | Устройство не выбрано    |
 
-When connecting, a status indicator shows the current connection state:
+При подключении индикатор состояния показывает текущее состояние соединения:
 
 ![Connecting status](/assets/screenshots/connections_connecting.png)
 

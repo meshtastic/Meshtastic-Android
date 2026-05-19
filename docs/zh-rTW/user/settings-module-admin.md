@@ -186,7 +186,7 @@ Turns your node into a motion or door sensor alert system. When a GPIO pin detec
 
 People counter using WiFi and BLE probe requests. Counts nearby devices by passively listening for probe requests that phones and laptops emit when scanning for networks. Available only on ESP32 devices.
 
-| Setting 設定                             | 描述說明                       |
+| 設定                                     | 描述說明                       |
 | -------------------------------------- | -------------------------- |
 | 已啟用                                    | Activate people counting   |
 | Update Interval (s) | How often to report counts |

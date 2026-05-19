@@ -1,5 +1,5 @@
 ---
-title: Getting Started
+title: Начало работы
 nav_order: 1
 last_updated: 2026-05-13
 description: First-launch setup — permissions, onboarding flow, and next steps after connecting your radio.
@@ -9,7 +9,7 @@ aliases:
   - intro
 ---
 
-# Getting Started
+# Начало работы
 
 Welcome to Meshtastic! This guide walks you through the initial setup of the Meshtastic Android app.
 
