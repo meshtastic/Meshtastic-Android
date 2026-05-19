@@ -38,6 +38,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
@@ -57,9 +58,21 @@ import org.meshtastic.core.resources.distance
 import org.meshtastic.core.resources.node_list_click_label
 import org.meshtastic.core.resources.node_list_long_click_label
 import org.meshtastic.core.resources.unknown_username
+import org.meshtastic.core.ui.icon.Channel
+import org.meshtastic.core.ui.icon.Counter0
+import org.meshtastic.core.ui.icon.Counter1
+import org.meshtastic.core.ui.icon.Counter2
+import org.meshtastic.core.ui.icon.Counter3
+import org.meshtastic.core.ui.icon.Counter4
+import org.meshtastic.core.ui.icon.Counter5
+import org.meshtastic.core.ui.icon.Counter6
+import org.meshtastic.core.ui.icon.Counter7
+import org.meshtastic.core.ui.icon.Counter8
 import org.meshtastic.core.ui.icon.DeviceSleep
 import org.meshtastic.core.ui.icon.Distance
 import org.meshtastic.core.ui.icon.Favorite
+import org.meshtastic.core.ui.icon.HardwareModel
+import org.meshtastic.core.ui.icon.HopCount
 import org.meshtastic.core.ui.icon.Humidity
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.MqttConnected
@@ -76,7 +89,7 @@ private const val INACTIVE_ALPHA = 0.2f
 private const val COMPACT_ICON_SIZE_DP = 16
 
 @Composable
-@Suppress("LongMethod", "LongParameterList", "CyclomaticComplexMethod", "UnusedParameter")
+@Suppress("LongMethod", "LongParameterList", "CyclomaticComplexMethod")
 fun NodeItemCompact(
     thisNode: Node?,
     thatNode: Node,
@@ -392,56 +405,59 @@ private fun CompactFooterRow(
     contentColor: Color,
 ) {
     val tertiaryColor = contentColor.copy(alpha = 0.7f)
-    val textSegments = buildList {
-        // Hardware model
-        if (showRole) {
-            add(thatNode.user.hw_model.name)
-        }
-
-        // Hops
-        if (showHops && thatNode.hopsAway > 0 && !isThisNode) {
-            add("${thatNode.hopsAway} hop${if (thatNode.hopsAway > 1) "s" else ""}")
-        }
-
-        // Channel
-        if (showChannel && thatNode.channel > 0) {
-            add("Ch ${thatNode.channel}")
-        }
-    }
-
-    if (textSegments.isNotEmpty() || showRole) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            if (textSegments.isNotEmpty()) {
-                Text(
-                    text = textSegments.joinToString(" · "),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = tertiaryColor,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-
-            // Role icon
+    val segments =
+        buildList<@Composable () -> Unit> {
             if (showRole) {
-                Icon(
-                    imageVector = MeshtasticIcons.role(thatNode.user.role),
-                    contentDescription = thatNode.user.role.name,
-                    modifier = Modifier.size(COMPACT_ICON_SIZE_DP.dp),
-                    tint = tertiaryColor,
-                )
+                add {
+                    IconInfo(
+                        icon = MeshtasticIcons.HardwareModel,
+                        contentDescription = thatNode.user.hw_model.name,
+                        contentColor = tertiaryColor,
+                        text = thatNode.user.hw_model.name,
+                    )
+                }
+                add {
+                    Icon(
+                        imageVector = MeshtasticIcons.role(thatNode.user.role),
+                        contentDescription = thatNode.user.role.name,
+                        modifier = Modifier.size(COMPACT_ICON_SIZE_DP.dp),
+                        tint = tertiaryColor,
+                    )
+                }
             }
-
-            // MQTT status icon
+            if (showHops && thatNode.hopsAway > 0 && !isThisNode) {
+                add {
+                    IconInfo(
+                        icon = MeshtasticIcons.HopCount,
+                        contentDescription = "${thatNode.hopsAway} hops",
+                        contentColor = tertiaryColor,
+                        text = thatNode.hopsAway.toString(),
+                    )
+                }
+            }
+            if (showChannel && thatNode.channel > 0) {
+                add {
+                    Icon(
+                        imageVector = channelIcon(thatNode.channel),
+                        contentDescription = "Channel ${thatNode.channel}",
+                        modifier = Modifier.size(COMPACT_ICON_SIZE_DP.dp),
+                        tint = tertiaryColor,
+                    )
+                }
+            }
             if (showRole && thatNode.viaMqtt) {
-                Icon(
-                    imageVector = MeshtasticIcons.MqttConnected,
-                    contentDescription = null,
-                    modifier = Modifier.size(COMPACT_ICON_SIZE_DP.dp),
-                    tint = tertiaryColor,
-                )
+                add {
+                    Icon(
+                        imageVector = MeshtasticIcons.MqttConnected,
+                        contentDescription = null,
+                        modifier = Modifier.size(COMPACT_ICON_SIZE_DP.dp),
+                        tint = tertiaryColor,
+                    )
+                }
             }
         }
-    }
+
+    SegmentedRow(segments, tertiaryColor)
 }
 
 @Composable
@@ -504,6 +520,37 @@ private fun CompactMetricsRow(thatNode: Node, tempInFahrenheit: Boolean, content
             }
         }
     }
+}
+
+@Composable
+private fun SegmentedRow(segments: List<@Composable () -> Unit>, separatorColor: Color) {
+    if (segments.isEmpty()) return
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        segments.forEachIndexed { index, content ->
+            if (index > 0) {
+                Text(
+                    text = "·",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = separatorColor.copy(alpha = 0.5f),
+                )
+            }
+            content()
+        }
+    }
+}
+
+@Composable
+private fun channelIcon(channel: Int): ImageVector = when (channel) {
+    0 -> MeshtasticIcons.Counter0
+    1 -> MeshtasticIcons.Counter1
+    2 -> MeshtasticIcons.Counter2
+    3 -> MeshtasticIcons.Counter3
+    4 -> MeshtasticIcons.Counter4
+    5 -> MeshtasticIcons.Counter5
+    6 -> MeshtasticIcons.Counter6
+    7 -> MeshtasticIcons.Counter7
+    8 -> MeshtasticIcons.Counter8
+    else -> MeshtasticIcons.Channel
 }
 
 private fun isFutureDate(lastHeard: Int): Boolean {
