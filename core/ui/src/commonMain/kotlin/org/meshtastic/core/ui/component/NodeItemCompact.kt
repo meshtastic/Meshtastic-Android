@@ -171,7 +171,7 @@ fun NodeItemCompact(
         },
         colors = cardColors,
     ) {
-        Row(
+        Column(
             modifier =
             Modifier.combinedClickable(
                 onClickLabel = stringResource(Res.string.node_list_click_label),
@@ -181,56 +181,45 @@ fun NodeItemCompact(
             )
                 .fillMaxWidth()
                 .padding(horizontal = 12.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
-            // Leading: NodeChip avatar
-            NodeChip(node = thatNode)
+            // Row 1: Identity — chip + name + PKC + favorite
+            CompactNameRow(
+                thatNode = thatNode,
+                longName = longName,
+                style = style,
+                isIgnored = isIgnored,
+                isFavorite = isFavorite,
+                unmessageable = unmessageable,
+            )
 
-            // Content rows
-            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                // Row 1: Identity — name + PKC + favorite
-                CompactNameRow(
-                    thatNode = thatNode,
-                    longName = longName,
-                    style = style,
-                    isIgnored = isIgnored,
-                    isFavorite = isFavorite,
-                    unmessageable = unmessageable,
-                )
+            // Row 2: Glanceable health — online + last heard + battery + distance + signal
+            CompactHealthRow(
+                thatNode = thatNode,
+                isThisNode = isThisNode,
+                distance = distance,
+                showPower = showPower,
+                showLastHeard = showLastHeard,
+                lastHeardIsRelative = lastHeardIsRelative,
+                showLocation = showLocation,
+                showSignal = showSignal,
+                contentColor = contentColor,
+            )
 
-                // Row 2: Glanceable health — online + last heard + battery + distance + signal
-                CompactHealthRow(
-                    thatNode = thatNode,
-                    isThisNode = isThisNode,
-                    distance = distance,
-                    showPower = showPower,
-                    showLastHeard = showLastHeard,
-                    lastHeardIsRelative = lastHeardIsRelative,
-                    showLocation = showLocation,
-                    showSignal = showSignal,
-                    contentColor = contentColor,
-                )
-
-                // Row 3: Environment metrics — temp · humidity · pressure (icon + value only)
-                if (showTelemetry) {
-                    CompactMetricsRow(
-                        thatNode = thatNode,
-                        tempInFahrenheit = tempInFahrenheit,
-                        contentColor = contentColor,
-                    )
-                }
-
-                // Row 4: Tertiary metadata — hardware · role · hops · channel
-                CompactFooterRow(
-                    thatNode = thatNode,
-                    isThisNode = isThisNode,
-                    showHops = showHops,
-                    showChannel = showChannel,
-                    showRole = showRole,
-                    contentColor = contentColor,
-                )
+            // Row 3: Environment metrics — temp · humidity · pressure (icon + value only)
+            if (showTelemetry) {
+                CompactMetricsRow(thatNode = thatNode, tempInFahrenheit = tempInFahrenheit, contentColor = contentColor)
             }
+
+            // Row 4: Tertiary metadata — hardware · role · hops · channel
+            CompactFooterRow(
+                thatNode = thatNode,
+                isThisNode = isThisNode,
+                showHops = showHops,
+                showChannel = showChannel,
+                showRole = showRole,
+                contentColor = contentColor,
+            )
         }
     }
 }
@@ -247,8 +236,9 @@ private fun CompactNameRow(
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
+        NodeChip(node = thatNode)
         NodeKeyStatusIcon(
             hasPKC = thatNode.hasPKC,
             mismatchKey = thatNode.mismatchKey,
