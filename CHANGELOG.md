@@ -47,6 +47,9 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 * chore(deps): update room to v3.0.0-alpha05 (#5498) by renovate[bot] (@renovate[bot]) in [`59499e827`](https://github.com/meshtastic/Meshtastic-Android/commit/59499e82723bdef4f1116ae5996814d59ab85595)
 * docs: update CHANGELOG.md (#5500) by github-actions[bot] (@github-actions[bot]) in [`6c51c1ac1`](https://github.com/meshtastic/Meshtastic-Android/commit/6c51c1ac18cd61f3ab381335ecada8c9d614b7cb)
 * fix(ci): use GitHub compare API for changelog author resolution (#5504) by James Rich (@jamesarich) in [`4ff6f23c5`](https://github.com/meshtastic/Meshtastic-Android/commit/4ff6f23c5e5d074f319736a74e563f28bf65c127)
+* docs: update CHANGELOG.md (#5505) by github-actions[bot] (@github-actions[bot]) in [`f38536ae6`](https://github.com/meshtastic/Meshtastic-Android/commit/f38536ae61c8eaa99bcb315b4953bbfd90b7979c)
+* fix(database): update @Relation annotations for Room 3.0.0-alpha05 (#5507) by James Rich (@jamesarich) in [`01d32e15c`](https://github.com/meshtastic/Meshtastic-Android/commit/01d32e15c00c952ca5933fb3d29c08d3a3989c59)
+* chore(deps): update plugin flatpak-gradle-generator to v1.8.0 (#5506) by renovate[bot] (@renovate[bot]) in [`9260033e0`](https://github.com/meshtastic/Meshtastic-Android/commit/9260033e04f604a8f15bb3efce611bedc695d40b)
 
 ### Open Beta (v2.7.14-open.9)
 Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.13):
