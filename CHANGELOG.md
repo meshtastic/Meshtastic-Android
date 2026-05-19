@@ -9,89 +9,34 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
-* chore(deps): update spotless to v8.5.0 (#5458) by @renovate[bot] in [`cfa9206de`](https://github.com/meshtastic/Meshtastic-Android/commit/cfa9206de96fe5323d5882cd0bf59820403c90c1)
-* chore(deps): update takpacket.sdk to v0.2.3 (#5464) by @renovate[bot] in [`427471c51`](https://github.com/meshtastic/Meshtastic-Android/commit/427471c51e200a6753c9a1e131ae8fb71e04738c)
-* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5460) by @James Rich in [`b32aa1b9f`](https://github.com/meshtastic/Meshtastic-Android/commit/b32aa1b9f20d4c742a162921a6c22c2546d88861)
-* docs: update CHANGELOG.md (#5462) by @github-actions[bot] in [`dc1c93e12`](https://github.com/meshtastic/Meshtastic-Android/commit/dc1c93e12c7df0137dd5125834f7353021156efc)
-* fix: TAKPacket-SDK proto ownership and desktop/flatpak CI fixes (#5459) by @James Rich in [`6edac97d5`](https://github.com/meshtastic/Meshtastic-Android/commit/6edac97d5fcee38eabdd43f2898c11873807d78f)
-* docs: update CHANGELOG.md (#5456) by @github-actions[bot] in [`d8b183a41`](https://github.com/meshtastic/Meshtastic-Android/commit/d8b183a41408f53c74595e16ac40fc9bb780ec58)
-* chore(deps): update ktor to v3.5.0 (#5450) by @renovate[bot] in [`63e8f1587`](https://github.com/meshtastic/Meshtastic-Android/commit/63e8f15872ff0a0ccc4429108f8c1f77567bdbe3)
-* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5455) by @James Rich in [`33184fef9`](https://github.com/meshtastic/Meshtastic-Android/commit/33184fef99befdac1ad7d1aea1706a9e142dba85)
-* docs: update CHANGELOG.md (#5453) by @github-actions[bot] in [`6a9391022`](https://github.com/meshtastic/Meshtastic-Android/commit/6a939102213dcbf4bcbc4718f334a28fd0e346e7)
-* chore(deps): update com.github.luben:zstd-jni to v1.5.7-8 (#5454) by @renovate[bot] in [`f1c793db5`](https://github.com/meshtastic/Meshtastic-Android/commit/f1c793db5de3df9e987de16ddcda23f3757ba3db)
-* feat: TAK v2 protocol integration with zstd compression and full CoT type support (#5434) by @Ben Meadors in [`a04a261b8`](https://github.com/meshtastic/Meshtastic-Android/commit/a04a261b80b7d617447651af1fd67ec623775efa)
-* docs: update CHANGELOG.md (#5452) by @github-actions[bot] in [`0ef3072f3`](https://github.com/meshtastic/Meshtastic-Android/commit/0ef3072f3c28a44c1f0e18ad4b1c617aaff706b0)
-* chore(deps): update dd.sdk.android to v3.10.0 (#5451) by @renovate[bot] in [`a71ac210f`](https://github.com/meshtastic/Meshtastic-Android/commit/a71ac210f76a28a133056bec4502fc4b0984cb1d)
-* docs: update CHANGELOG.md (#5448) by @github-actions[bot] in [`c0b690974`](https://github.com/meshtastic/Meshtastic-Android/commit/c0b69097419a7d9c90527729747fc91135628282)
-* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5438) by @James Rich in [`13865e7c8`](https://github.com/meshtastic/Meshtastic-Android/commit/13865e7c8b7f9a47cd3b572bd44d8ec355b2d3a9)
-* chore(deps): update com.juul.kable:kable-core to v0.43.0 (#5449) by @renovate[bot] in [`8d61d22e9`](https://github.com/meshtastic/Meshtastic-Android/commit/8d61d22e93bec5afae021fdf2d64bca58dc57d67)
-* chore(deps): batch bump KSP, Wire, CMP, Material (#5447) by @James Rich in [`550c517d7`](https://github.com/meshtastic/Meshtastic-Android/commit/550c517d70ca2ed472ac1a5c3b203c69e12a1707)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5465) by @James Rich in [`83bb1a31f`](https://github.com/meshtastic/Meshtastic-Android/commit/83bb1a31f75bfd2717428f2fed287eb1e830302f)
+* chore(deps): update peter-evans/create-pull-request action to v8 (#5493) by @renovate[bot] in [`a141df437`](https://github.com/meshtastic/Meshtastic-Android/commit/a141df437298b039086e9084ec234f925ffa09b2)
+* chore(deps): update node to v24 (#5491) by @renovate[bot] in [`cdf57ced8`](https://github.com/meshtastic/Meshtastic-Android/commit/cdf57ced8e9d6a6ce66a88f10da304a41b0ab4c1)
+* chore(deps): update compose-multiplatform to v1.3.0-beta01 (#5490) by @renovate[bot] in [`3bfaa466a`](https://github.com/meshtastic/Meshtastic-Android/commit/3bfaa466afc01fe03cc69ba7437610441ba8bcf7)
+* fix(ci): disable configuration cache for Dokka build (#5492) by @James Rich in [`fe2cbae87`](https://github.com/meshtastic/Meshtastic-Android/commit/fe2cbae8756c4af9f1daacd842ab0fde097ffab6)
+* docs: comprehensive accuracy audit and CI fix (#5489) by @James Rich in [`ece771edb`](https://github.com/meshtastic/Meshtastic-Android/commit/ece771edb06f0110050baac322a093214b89f6c8)
+* chore(deps): update actions/setup-java action to v5 (#5484) by @renovate[bot] in [`bbdc4a300`](https://github.com/meshtastic/Meshtastic-Android/commit/bbdc4a300406ae417ad7a70fb4cdd826debb5cb3)
+* chore(deps): update actions/upload-pages-artifact action to v5 (#5487) by @renovate[bot] in [`4afa1a032`](https://github.com/meshtastic/Meshtastic-Android/commit/4afa1a032fc465464e7408ef36d0505876ce9d61)
+* chore(deps): update gradle/actions action to v6 (#5488) by @renovate[bot] in [`21993b6cc`](https://github.com/meshtastic/Meshtastic-Android/commit/21993b6cc7eba8776262c3805942ddc460ab0c5b)
+* chore(deps): update actions/setup-node action to v6 (#5486) by @renovate[bot] in [`733cb92ae`](https://github.com/meshtastic/Meshtastic-Android/commit/733cb92aecb51deab11edb2e9c3e198f9579304c)
+* chore(deps): update io.nlopez.compose.rules:detekt to v0.5.9 (#5485) by @renovate[bot] in [`4eb7ed8fe`](https://github.com/meshtastic/Meshtastic-Android/commit/4eb7ed8fe0853850a8056524403d4da3d8c36de3)
+* chore(deps): update actions/github-script action to v9 (#5483) by @renovate[bot] in [`f8a5f894a`](https://github.com/meshtastic/Meshtastic-Android/commit/f8a5f894a86b6145b86143888f7ea1fe3d9ccbb6)
+* chore(deps): update actions/deploy-pages action to v5 (#5482) by @renovate[bot] in [`d7cccd0db`](https://github.com/meshtastic/Meshtastic-Android/commit/d7cccd0dba442d8c8892a4aac8124f565563434a)
+* chore(deps): update actions/checkout action to v6 (#5481) by @renovate[bot] in [`2e484e219`](https://github.com/meshtastic/Meshtastic-Android/commit/2e484e219c132b89597ffa939e1801765a5d5352)
+* feat(docs): In-app documentation browser with Jekyll site and Docusaurus sync (#5445) by @James Rich in [`fc0df1a79`](https://github.com/meshtastic/Meshtastic-Android/commit/fc0df1a79ad1d8ce355803f5ac6eb4a1f2ec78c3)
+* feat: adopt Material 3 Expressive design system (M3-native APIs only) (#5479) by @James Rich in [`f5128798a`](https://github.com/meshtastic/Meshtastic-Android/commit/f5128798a808219a28e9ee0916c079edcb203744)
+* chore(deps): update core/proto/src/main/proto digest to 59cb394 (#5480) by @renovate[bot] in [`72436e70b`](https://github.com/meshtastic/Meshtastic-Android/commit/72436e70bc1db9373581bc53e8cc62548e596744)
+* fix(nav): remote admin nodenum + Nav3 consolidation and improvements (#5478) by @James Rich in [`df4f10c4d`](https://github.com/meshtastic/Meshtastic-Android/commit/df4f10c4d64a273688aa9dbe5284ac3737756310)
+* chore(deps): update markdownrenderer to v0.41.0 (#5471) by @renovate[bot] in [`f6587a123`](https://github.com/meshtastic/Meshtastic-Android/commit/f6587a12364cc490b5872ed7bc77cfeed9e414a6)
+* fix(settings): add input validation for BLE PIN, LoRa modem, and ambient lighting (#5477) by @James Rich in [`1dd47bc09`](https://github.com/meshtastic/Meshtastic-Android/commit/1dd47bc09032fe0972af7eed6a7554e61be7a02b)
+* refactor(build): rename entry modules and remove DESKTOP_ONLY mode (#5476) by @James Rich in [`f4b6b02ac`](https://github.com/meshtastic/Meshtastic-Android/commit/f4b6b02acecdd8855408db7d92757f2495fbc11f)
+* ci: remove desktop build job from reusable-check to cut macOS runner costs (#5475) by @James Rich in [`d24fc9ac9`](https://github.com/meshtastic/Meshtastic-Android/commit/d24fc9ac9245b69718e2cb2a6c3a872e36d8c28c)
+* fix(database): make withDb retry logic resilient to varying close messages (#5474) by @James Rich in [`057d5bb77`](https://github.com/meshtastic/Meshtastic-Android/commit/057d5bb778a72cf4359abc7fae904d587cdc90a2)
+* chore(deps): update wire to v6.4.0 (#5466) by @renovate[bot] in [`f0e12695b`](https://github.com/meshtastic/Meshtastic-Android/commit/f0e12695bbf3df16b043476ff98856b727d6a2f7)
+* chore(deps): update spotless to v8.5.1 (#5468) by @renovate[bot] in [`c91219d8b`](https://github.com/meshtastic/Meshtastic-Android/commit/c91219d8b0411975c059c7a5ae6eb370386954f6)
+* chore(deps): update vico to v3.2.0-next.5 (#5470) by @renovate[bot] in [`4bacff81c`](https://github.com/meshtastic/Meshtastic-Android/commit/4bacff81c5abad536b40f7370ae5d302b74a11fe)
 
-### Internal (v2.7.14-internal.91)
-Changes since [`v2.7.14-open.8`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14-open.8):
-
-* docs: update CHANGELOG.md (#5437) by @github-actions[bot] in [`fc8f3bff3`](https://github.com/meshtastic/Meshtastic-Android/commit/fc8f3bff3c9e582ea1f434a760981ee523a25262)
-* refactor: use immutable destNum in RadioConfigViewModel (#5436) by @James Rich in [`1976808a3`](https://github.com/meshtastic/Meshtastic-Android/commit/1976808a361942f2c358329807d3605b8898e36d)
-* docs: update CHANGELOG.md (#5431) by @github-actions[bot] in [`57b0200b6`](https://github.com/meshtastic/Meshtastic-Android/commit/57b0200b6123e87f5037b12128411b69eee2ad23)
-* Flatpak: Add Maven/Gradle mirror URLs (#5433) by @Austin in [`ada16f4f5`](https://github.com/meshtastic/Meshtastic-Android/commit/ada16f4f5f2e859624ad8588ff07cdbff945aac0)
-* fix: update screenshots (#5435) by @James Rich in [`cf0a7cdab`](https://github.com/meshtastic/Meshtastic-Android/commit/cf0a7cdabff85e97accf4522709dfcb0fd5d4298)
-* chore: clean up brownfield specs and migrate to timestamp naming (#5432) by @James Rich in [`73469b415`](https://github.com/meshtastic/Meshtastic-Android/commit/73469b415e742a6601790b9574e1cf8a4a43a52c)
-* revert: Update retry settings in gradle-wrapper.properties (#5430) by @James Rich in [`ff9d6881c`](https://github.com/meshtastic/Meshtastic-Android/commit/ff9d6881c01b8e9ec7654179bfa559e93bea9974)
-* docs: update CHANGELOG.md (#5427) by @github-actions[bot] in [`1b902ba07`](https://github.com/meshtastic/Meshtastic-Android/commit/1b902ba07c7a6f5b41bba9f4cb439e7de0925e4c)
-* chore(deps): update gradle to v9.5.1 (#5429) by @renovate[bot] in [`010ff358d`](https://github.com/meshtastic/Meshtastic-Android/commit/010ff358d0cf5c586b557af186ffdd1ef719be81)
-* fix: clarify position precision as ± radius (#5428) by @James Rich in [`dcb147163`](https://github.com/meshtastic/Meshtastic-Android/commit/dcb147163c3a5c8dada885ee6e84790fcc24f651)
-* fix(desktop): keep Vico package to prevent bytecode verification errors (#5424) by @James Rich in [`ab4589c06`](https://github.com/meshtastic/Meshtastic-Android/commit/ab4589c06a849743268f926bbe52723c833add3d)
-* build: conditionalize JitPack repository for desktop-only builds (#5426) by @James Rich in [`fcf0b5074`](https://github.com/meshtastic/Meshtastic-Android/commit/fcf0b507461796ff2e84265de728283ed5537073)
-* docs: update CHANGELOG.md (#5422) by @github-actions[bot] in [`3bfc66eb2`](https://github.com/meshtastic/Meshtastic-Android/commit/3bfc66eb29c438c3f2d68a9225eba9fb3d2c2e25)
-* fix: enhance uniqueness check for Flatpak source files in release workflow. (#5423) by @Austin in [`a2dd4d18a`](https://github.com/meshtastic/Meshtastic-Android/commit/a2dd4d18aab2ed1a9000e4ac3ed53260658a4734)
-* chore(deps): update core/proto/src/main/proto digest to 1c62540 (#5421) by @renovate[bot] in [`05b1ea918`](https://github.com/meshtastic/Meshtastic-Android/commit/05b1ea918ef3f14b48f1777402e645df900dd337)
-* docs: update CHANGELOG.md (#5420) by @github-actions[bot] in [`827535ad4`](https://github.com/meshtastic/Meshtastic-Android/commit/827535ad45778e1eb5b369be70c955b300678a37)
-* fix: clamp future lastHeard timestamps to current time on ingestion (#5418) by @James Rich in [`0f2b1c064`](https://github.com/meshtastic/Meshtastic-Android/commit/0f2b1c064aa9b77685ac8a7d05fe81af89655027)
-* fix(ci): resolve flatpak source merge race condition (#5419) by @James Rich in [`6f42f0788`](https://github.com/meshtastic/Meshtastic-Android/commit/6f42f078878258b334ae5b234c08caf76d2fa817)
-* docs: update CHANGELOG.md (#5417) by @github-actions[bot] in [`b96515e7d`](https://github.com/meshtastic/Meshtastic-Android/commit/b96515e7d048a0850f29cc5381326fd796a07e2c)
-* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5416) by @James Rich in [`09a0d123b`](https://github.com/meshtastic/Meshtastic-Android/commit/09a0d123bed0e79415a8297c5cba92bab636d79e)
-* chore(deps): update core/proto/src/main/proto digest to 1c62540 (#5413) by @renovate[bot] in [`56077db6d`](https://github.com/meshtastic/Meshtastic-Android/commit/56077db6d93fd76ca2fa585f49eb63d2e91ad400)
-* chore(deps): update actions/checkout action to v6 (#5414) by @renovate[bot] in [`d4ff10ef3`](https://github.com/meshtastic/Meshtastic-Android/commit/d4ff10ef3b1551637e016e1f4bee4e5c2a98d645)
-* Actions: fix Flatpak source file patterns for jq (#5415) by @Austin in [`1c418a57e`](https://github.com/meshtastic/Meshtastic-Android/commit/1c418a57ea09b0c6af6fde22e9d0ddee16b53e7a)
-* docs: update CHANGELOG.md (#5412) by @github-actions[bot] in [`bce8bba90`](https://github.com/meshtastic/Meshtastic-Android/commit/bce8bba90a74bdc64353e28b5abeb11474017b74)
-* feat: add Compose Preview Screenshot Testing infrastructure (#5410) by @James Rich in [`85c840de3`](https://github.com/meshtastic/Meshtastic-Android/commit/85c840de32096a00aa7fac42fca0d3a5417d3961)
-* fix(ci): prevent literal 'false' task name in desktop release build (#5411) by @James Rich in [`7202994ab`](https://github.com/meshtastic/Meshtastic-Android/commit/7202994abee99dc16a54f38d34a7607c2a573663)
-* docs: update CHANGELOG.md (#5409) by @github-actions[bot] in [`1373bd330`](https://github.com/meshtastic/Meshtastic-Android/commit/1373bd330b4829ac29d37b0e1e088d21b66dc037)
-* feat(api): add hasAnyEntries method to local data sources and improve… (#5406) by @James Rich in [`10c5b5db2`](https://github.com/meshtastic/Meshtastic-Android/commit/10c5b5db2e5b23c52a3a5689205bfc42285b7b0a)
-* Update notification intents and deep link URI format (#5408) by @James Rich in [`82135df86`](https://github.com/meshtastic/Meshtastic-Android/commit/82135df865c4595d3ee509ac3535b86e343874b6)
-* docs: update CHANGELOG.md (#5399) by @github-actions[bot] in [`fd0e2c090`](https://github.com/meshtastic/Meshtastic-Android/commit/fd0e2c0904d21df2a962bd18ee138afabf869e98)
-* chore(deps): update core/proto/src/main/proto digest to 1c62540 (#5404) by @renovate[bot] in [`d84781848`](https://github.com/meshtastic/Meshtastic-Android/commit/d847818487787a854b59e06e29b7831aef45b514)
-* chore(deps): update ruby to v4.0.4 (#5407) by @renovate[bot] in [`84cc8ad0d`](https://github.com/meshtastic/Meshtastic-Android/commit/84cc8ad0debf620c614617cf32fcce971d48a87d)
-* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5400) by @James Rich in [`313dc1c2f`](https://github.com/meshtastic/Meshtastic-Android/commit/313dc1c2f7734284a2c6822e2a62dc10c597bfb1)
-* fix: graceful HTTP error handling in scheduled-updates workflow (#5405) by @Copilot in [`b33738728`](https://github.com/meshtastic/Meshtastic-Android/commit/b337387287c8c4e0e3ec3c48cbf19ca39de1ea36)
-* feat(desktop): fix mac notifications, new desktop icons (#5403) by @James Rich in [`c77e03c5c`](https://github.com/meshtastic/Meshtastic-Android/commit/c77e03c5c1b49d9ce6684042dca684fca68a1e99)
-* Brownfield gap remediation: 28 tasks + intro commonMain migration (#5401) by @James Rich in [`95c3bc0bc`](https://github.com/meshtastic/Meshtastic-Android/commit/95c3bc0bce4a0d30228d9c411c76cedb818afc91)
-* ci: disable Flatpak source generation for PR and merge queue checks (#5402) by @James Rich in [`6eacee626`](https://github.com/meshtastic/Meshtastic-Android/commit/6eacee626b42133c742d8ca935590d7a4c94e3ee)
-* chore(deps): update core/proto/src/main/proto digest to b302d92 (#5398) by @renovate[bot] in [`f89fdaf99`](https://github.com/meshtastic/Meshtastic-Android/commit/f89fdaf99dccb46517458e7fecf840bcc9c86f44)
-* docs: update CHANGELOG.md (#5387) by @github-actions[bot] in [`8c0ced2ad`](https://github.com/meshtastic/Meshtastic-Android/commit/8c0ced2adcbd7a93aba109aeaab7405df57b03dd)
-* Gradle: Add flatpakGradleGenerator task (#5369) by @Austin in [`484518195`](https://github.com/meshtastic/Meshtastic-Android/commit/484518195e7dbf980de6b951410f23ebac11c237)
-* chore(deps): update core/proto/src/main/proto digest to 03eb534 (#5397) by @renovate[bot] in [`2d5bcc1e5`](https://github.com/meshtastic/Meshtastic-Android/commit/2d5bcc1e5093f21dbd73befe6dcfad4dac6b1cb6)
-* Release: Add MacOS ReleaseUberJar target (#5389) by @Austin in [`234a78a56`](https://github.com/meshtastic/Meshtastic-Android/commit/234a78a5640eb3979172b8523d49a1b35750e49c)
-* chore(deps): update vico to v3.2.0-next.4 (#5395) by @renovate[bot] in [`39c765c63`](https://github.com/meshtastic/Meshtastic-Android/commit/39c765c63e35afafb1b788d4ca3150b35c814348)
-* chore(deps): update fastlane to v2.234.0 (#5396) by @renovate[bot] in [`880e98abf`](https://github.com/meshtastic/Meshtastic-Android/commit/880e98abf05300a01f678bdee472b22b52d78058)
-* chore(deps): update org.jetbrains.kotlinx:kotlinx-datetime to v0.8.0-0.6.x-compat (#5382) by @renovate[bot] in [`879e147ef`](https://github.com/meshtastic/Meshtastic-Android/commit/879e147ef0a018b9d7b5214b70ec8e36a80e3d11)
-* chore(deps): update kotlinx.coroutines.android to v1.11.0 (#5393) by @renovate[bot] in [`78f9a8940`](https://github.com/meshtastic/Meshtastic-Android/commit/78f9a8940cdf4cbd83d78796ccc3a8aef4c4e5ac)
-* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5383) by @James Rich in [`443de4a34`](https://github.com/meshtastic/Meshtastic-Android/commit/443de4a34d54d33a8e7d7ec46606b5fa70921a36)
-* docs: Update specs and governance for Android M3 accessibility (#5392) by @James Rich in [`0d195ead5`](https://github.com/meshtastic/Meshtastic-Android/commit/0d195ead53d5f88f73e581a7ee005f65bdceccfa)
-* docs(specs): add feature specs for discovery, node-list-layout, and app-docs (#5388) by @James Rich in [`c0d95d6ac`](https://github.com/meshtastic/Meshtastic-Android/commit/c0d95d6ac4196fcbc705f2d3f174c7d9c46a77b2)
-* chore(deps): update com.google.firebase:firebase-bom to v34.13.0 (#5385) by @renovate[bot] in [`934e687bc`](https://github.com/meshtastic/Meshtastic-Android/commit/934e687bc5c14b605797d2ca8f78c231fdfd5210)
-* docs: comprehensive copilot instructions & spec-kit setup (#5386) by @James Rich in [`031f25ced`](https://github.com/meshtastic/Meshtastic-Android/commit/031f25cedaf994b09bff014245ee8ab448aafa2a)
-* docs: update CHANGELOG.md (#5381) by @github-actions[bot] in [`aeff0a6ce`](https://github.com/meshtastic/Meshtastic-Android/commit/aeff0a6ce1b3a61669d55029ee04863c94711bc6)
-* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5378) by @James Rich in [`924f8a507`](https://github.com/meshtastic/Meshtastic-Android/commit/924f8a507b257829ec15ac446ff31c26f1ecb6ac)
-* chore(deps): update aboutlibraries to v14.2.0 (#5380) by @renovate[bot] in [`d68aada1b`](https://github.com/meshtastic/Meshtastic-Android/commit/d68aada1ba9142efd088d9e205341322e267936d)
-* docs: update CHANGELOG.md (#5377) by @github-actions[bot] in [`3dd985d7d`](https://github.com/meshtastic/Meshtastic-Android/commit/3dd985d7dfaa53891eca4dcdc90f0330044d5106)
-* refactor(firmware): replace PlatformBackHandler with NavigationBackHandler (#5376) by @James Rich in [`213c38051`](https://github.com/meshtastic/Meshtastic-Android/commit/213c380514438e1e208f0a0439437d6e62b041f1)
-* docs: update CHANGELOG.md (#5374) by @github-actions[bot] in [`8d621bc6f`](https://github.com/meshtastic/Meshtastic-Android/commit/8d621bc6f48e167c3bdda1add22e2938dadf0bd5)
-* chore(deps): update paging to v3.5.0 (#5375) by @renovate[bot] in [`0b75fd414`](https://github.com/meshtastic/Meshtastic-Android/commit/0b75fd4140ed5643806fc8f1a6eb8c3dfaaeb049)
-* chore(deps): update compose-multiplatform to v1.11.1 (#5371) by @renovate[bot] in [`d28d684d0`](https://github.com/meshtastic/Meshtastic-Android/commit/d28d684d054fa1d82ec84ed0c2ecb3ddf4705766)
-* chore(deps): update androidx.camera.viewfinder:viewfinder-compose to v1.6.1 (#5370) by @renovate[bot] in [`2f2a71587`](https://github.com/meshtastic/Meshtastic-Android/commit/2f2a71587dd5ff36da025e5761159ff182371b81)
-
-### Open Beta (v2.7.14-open.8)
+### Open Beta (v2.7.14-open.9)
 Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.13):
 
 #### 🏗️ Features
@@ -172,6 +117,12 @@ Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/relea
 * fix(connections): improve BLE scan reliability and UI lifecycle by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5329
 * feat: event firmware easter egg with ambient branding by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5354
 * feat: align theme with Design Standards v1.3, remove contrast setting by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5355
+* feat(desktop): fix mac notifications, new desktop icons by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5403
+* Update notification intents and deep link URI format by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5408
+* fix: clarify position precision as ± radius  by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5428
+* feat: TAK v2 protocol integration with zstd compression and full CoT type support by @thebentern in https://github.com/meshtastic/Meshtastic-Android/pull/5434
+#### 🖥️ Desktop
+* fix(desktop): keep Vico package to prevent bytecode verification errors by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5424
 #### 🛠️ Fixes
 * fix(strings): replace plurals by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/4596
 * fix: replace fdroid map_style_selection string by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/4598
@@ -277,6 +228,9 @@ Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/relea
 * fix(data): default new-node notifications off for event firmware by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5323
 * fix(network): resolve empty MQTT address and enforce TLS on default server by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5333
 * fix(mqtt): harden TLS enforcement, add user CA trust, and improve error diagnostics by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5365
+* fix: clamp future lastHeard timestamps to current time on ingestion by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5418
+* revert: Update retry settings in gradle-wrapper.properties by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5430
+* fix: update screenshots by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5435
 #### 📝 Other Changes
 * refactor(ui): compose resources, domain layer by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/4628
 * Add per-message transport method icons for new message format by @Kealper in https://github.com/meshtastic/Meshtastic-Android/pull/4643
