@@ -57,7 +57,7 @@ jobs:
 
       - name: Post warning comment
         if: steps.changed.outputs.stale == 'true'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const viewsChanged = `${{ steps.changed.outputs.views_changed }}`.trim();
@@ -124,7 +124,7 @@ jobs:
 
       - name: Dismiss stale comment when docs are updated
         if: steps.changed.outputs.stale == 'false'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const { data: comments } = await github.rest.issues.listComments({
@@ -267,7 +267,7 @@ jobs:
 
       - name: Post preview advisory
         if: steps.changed.outputs.preview_stale == 'true'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const uiChanged = `${{ steps.changed.outputs.ui_changed }}`.trim();
@@ -325,7 +325,7 @@ jobs:
 
       - name: Post screenshot advisory
         if: steps.changed.outputs.screenshot_stale == 'true'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const previewChanged = `${{ steps.changed.outputs.preview_changed }}`.trim();
@@ -379,7 +379,7 @@ jobs:
         if: >-
           steps.changed.outputs.preview_stale == 'false'
           && steps.changed.outputs.screenshot_stale == 'false'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const { data: comments } = await github.rest.issues.listComments({
