@@ -177,6 +177,7 @@ jobs:
             fastlane/metadata/android/**
             **/strings.xml
             **/README.md
+            docs/**/*.md
           labels: |
             automation
             l10n

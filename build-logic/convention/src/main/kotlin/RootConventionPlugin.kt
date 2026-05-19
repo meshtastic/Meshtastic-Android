@@ -67,8 +67,15 @@ private fun Project.registerKmpSmokeCompileTask() {
             dependsOn("$path:compileKotlinJvm")
             dependsOn("$path:compileKotlinIosSimulatorArm64")
         }
+
+        // Compile androidDeviceTest sources so instrumented test breakages are caught early.
+        // These tests require a device/emulator to *run*, but compilation alone is cheap.
+        DEVICE_TEST_MODULES.forEach { path -> dependsOn("$path:compileAndroidDeviceTest") }
     }
 }
+
+/** KMP modules that declare `withDeviceTest {}` and therefore have `compileAndroidDeviceTest` tasks. */
+private val DEVICE_TEST_MODULES = listOf(":core:database", ":core:model")
 
 /** All modules included in `settings.gradle.kts`. Update this list when adding or removing modules. */
 private val ALL_MODULES_FULL =

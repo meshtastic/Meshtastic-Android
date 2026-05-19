@@ -1,0 +1,119 @@
+# Supported documentation locales.
+# Each entry maps a Crowdin 2-letter code to its native name.
+# Pages land at docs/{code}/user/*.md via Crowdin sync.
+# Synced with Android app locales (values-* resource dirs).
+
+ar:
+  name: "العربية"
+  dir: rtl
+be:
+  name: "Беларуская"
+  dir: ltr
+bg:
+  name: "Български"
+  dir: ltr
+ca:
+  name: "Català"
+  dir: ltr
+cs:
+  name: "Čeština"
+  dir: ltr
+de:
+  name: "Deutsch"
+  dir: ltr
+el:
+  name: "Ελληνικά"
+  dir: ltr
+es:
+  name: "Español"
+  dir: ltr
+et:
+  name: "Eesti"
+  dir: ltr
+fi:
+  name: "Suomi"
+  dir: ltr
+fr:
+  name: "Français"
+  dir: ltr
+ga:
+  name: "Gaeilge"
+  dir: ltr
+gl:
+  name: "Galego"
+  dir: ltr
+he:
+  name: "עברית"
+  dir: rtl
+hr:
+  name: "Hrvatski"
+  dir: ltr
+ht:
+  name: "Kreyòl Ayisyen"
+  dir: ltr
+hu:
+  name: "Magyar"
+  dir: ltr
+is:
+  name: "Íslenska"
+  dir: ltr
+it:
+  name: "Italiano"
+  dir: ltr
+ja:
+  name: "日本語"
+  dir: ltr
+ko:
+  name: "한국어"
+  dir: ltr
+lt:
+  name: "Lietuvių"
+  dir: ltr
+nl:
+  name: "Nederlands"
+  dir: ltr
+"no":
+  name: "Norsk"
+  dir: ltr
+pl:
+  name: "Polski"
+  dir: ltr
+pt:
+  name: "Português"
+  dir: ltr
+pt-rBR:
+  name: "Português (Brasil)"
+  dir: ltr
+ro:
+  name: "Română"
+  dir: ltr
+ru:
+  name: "Русский"
+  dir: ltr
+sk:
+  name: "Slovenčina"
+  dir: ltr
+sl:
+  name: "Slovenščina"
+  dir: ltr
+sq:
+  name: "Shqip"
+  dir: ltr
+sr:
+  name: "Српски"
+  dir: ltr
+sv:
+  name: "Svenska"
+  dir: ltr
+tr:
+  name: "Türkçe"
+  dir: ltr
+uk:
+  name: "Українська"
+  dir: ltr
+zh-rCN:
+  name: "中文 (简体)"
+  dir: ltr
+zh-rTW:
+  name: "中文 (繁體)"
+  dir: ltr

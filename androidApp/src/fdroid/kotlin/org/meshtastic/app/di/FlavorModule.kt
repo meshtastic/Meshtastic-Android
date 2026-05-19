@@ -18,5 +18,5 @@ package org.meshtastic.app.di
 
 import org.koin.core.annotation.Module
 
-@Module(includes = [FDroidNetworkModule::class])
+@Module(includes = [FDroidNetworkModule::class, FdroidAiModule::class])
 class FlavorModule

@@ -40,6 +40,7 @@ plugins {
     alias(libs.plugins.test.retry) apply false
     alias(libs.plugins.flatpak.gradle.generator)
     alias(libs.plugins.meshtastic.root)
+    id("meshtastic.docs")
 }
 
 dependencies {

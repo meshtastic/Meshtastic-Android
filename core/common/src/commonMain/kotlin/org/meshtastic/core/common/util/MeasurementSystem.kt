@@ -24,3 +24,12 @@ enum class MeasurementSystem {
 
 /** returns the system's preferred measurement system. */
 expect fun getSystemMeasurementSystem(): MeasurementSystem
+
+/** Returns the device's current locale as a 2-letter ISO 639-1 language code (e.g. "en", "es", "fr"). */
+expect fun currentLocaleCode(): String
+
+/**
+ * Returns the device locale as a CMP resource qualifier string. Examples: "pt-rBR", "zh-rCN", "fr" (no region when not
+ * specified). Use this to construct locale-qualified file resource paths like "files-$qualifier/docs/...".
+ */
+expect fun currentLocaleQualifier(): String

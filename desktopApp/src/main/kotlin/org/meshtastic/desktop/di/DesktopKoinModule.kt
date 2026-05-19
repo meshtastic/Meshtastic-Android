@@ -78,6 +78,10 @@ import org.meshtastic.desktop.stub.NoopMeshWorkerManager
 import org.meshtastic.desktop.stub.NoopPhoneLocationProvider
 import org.meshtastic.desktop.stub.NoopPlatformAnalytics
 import org.meshtastic.desktop.stub.NoopServiceBroadcasts
+import org.meshtastic.feature.docs.ai.AIDocAssistant
+import org.meshtastic.feature.docs.ai.KeywordFallbackAssistant
+import org.meshtastic.feature.docs.translation.DocTranslationService
+import org.meshtastic.feature.docs.translation.NoOpDocTranslator
 import org.meshtastic.feature.node.compass.CompassHeadingProvider
 import org.meshtastic.feature.node.compass.MagneticFieldProvider
 import org.meshtastic.feature.node.compass.PhoneLocationProvider
@@ -96,6 +100,7 @@ import org.meshtastic.core.takserver.di.module as coreTakServerModule
 import org.meshtastic.core.ui.di.module as coreUiModule
 import org.meshtastic.desktop.di.module as desktopDiModule
 import org.meshtastic.feature.connections.di.module as featureConnectionsModule
+import org.meshtastic.feature.docs.di.module as featureDocsModule
 import org.meshtastic.feature.firmware.di.module as featureFirmwareModule
 import org.meshtastic.feature.intro.di.module as featureIntroModule
 import org.meshtastic.feature.map.di.module as featureMapModule
@@ -137,6 +142,7 @@ fun desktopModule() = module {
         org.meshtastic.feature.connections.di.FeatureConnectionsModule().featureConnectionsModule(),
         org.meshtastic.feature.map.di.FeatureMapModule().featureMapModule(),
         org.meshtastic.feature.firmware.di.FeatureFirmwareModule().featureFirmwareModule(),
+        org.meshtastic.feature.docs.di.FeatureDocsModule().featureDocsModule(),
         org.meshtastic.feature.intro.di.FeatureIntroModule().featureIntroModule(),
         org.meshtastic.feature.wifiprovision.di.FeatureWifiProvisionModule().featureWifiProvisionModule(),
         org.meshtastic.desktop.di.DesktopDiModule().desktopDiModule(),
@@ -191,6 +197,10 @@ private fun desktopPlatformStubsModule() = module {
     single<CompassHeadingProvider> { NoopCompassHeadingProvider() }
     single<PhoneLocationProvider> { NoopPhoneLocationProvider() }
     single<MagneticFieldProvider> { NoopMagneticFieldProvider() }
+
+    // AI assistant: keyword-only fallback on desktop (no on-device model)
+    single<AIDocAssistant> { get<KeywordFallbackAssistant>() }
+    single<DocTranslationService> { NoOpDocTranslator() }
 
     // Desktop uses the real ApiService implementation (no flavor stub needed)
     single<ApiService> { ApiServiceImpl(client = get()) }

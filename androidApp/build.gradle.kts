@@ -221,6 +221,7 @@ dependencies {
     implementation(projects.feature.map)
     implementation(projects.feature.node)
     implementation(projects.feature.settings)
+    implementation(projects.feature.docs)
     implementation(projects.feature.firmware)
     implementation(projects.feature.wifiProvision)
     implementation(projects.feature.widget)
@@ -277,6 +278,9 @@ dependencies {
     googleImplementation(platform(libs.firebase.bom))
     googleImplementation(libs.firebase.analytics)
     googleImplementation(libs.firebase.crashlytics)
+    googleImplementation(libs.firebase.ai)
+    googleImplementation(libs.firebase.ai.ondevice)
+    googleImplementation(libs.mlkit.translate)
 
     fdroidImplementation(libs.osmdroid.android)
     fdroidImplementation(libs.osmdroid.geopackage) { exclude(group = "com.j256.ormlite") }

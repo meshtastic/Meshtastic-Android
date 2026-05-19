@@ -1,0 +1,289 @@
+title: Meshtastic Android
+description: "User and developer documentation for the Meshtastic Android, Desktop, and iOS applications."
+baseurl: ""
+url: ""
+
+# just-the-docs theme
+# Local builds use `gem "just-the-docs"` from Gemfile.
+# GitHub Pages uses remote_theme for hosted builds.
+theme: just-the-docs
+remote_theme: just-the-docs/just-the-docs@v0.11.0
+
+# Plugins
+plugins:
+  - jekyll-remote-theme
+  - jekyll-redirect-from
+
+# Navigation
+nav_enabled: true
+search_enabled: true
+search_tokenizer_separator: /[\s\-/]+/
+
+# Heading anchors (clickable § links)
+heading_anchors: true
+
+# Color scheme — loads _sass/color_schemes/meshtastic.scss
+color_scheme: meshtastic
+
+# Default front-matter for pages in subdirectories
+defaults:
+  - scope:
+      path: "user"
+    values:
+      parent: User Guide
+      layout: default
+  - scope:
+      path: "developer"
+    values:
+      parent: Developer Guide
+      layout: default
+  # Locale-translated pages are excluded from main nav but still rendered.
+  # They use a dedicated locale layout with a back-link to the English version.
+  # Auto-generated from Android app locales (values-* resource dirs).
+  - scope:
+      path: "ar"
+    values:
+      layout: locale_page
+      locale: ar
+      nav_exclude: true
+  - scope:
+      path: "be"
+    values:
+      layout: locale_page
+      locale: be
+      nav_exclude: true
+  - scope:
+      path: "bg"
+    values:
+      layout: locale_page
+      locale: bg
+      nav_exclude: true
+  - scope:
+      path: "ca"
+    values:
+      layout: locale_page
+      locale: ca
+      nav_exclude: true
+  - scope:
+      path: "cs"
+    values:
+      layout: locale_page
+      locale: cs
+      nav_exclude: true
+  - scope:
+      path: "de"
+    values:
+      layout: locale_page
+      locale: de
+      nav_exclude: true
+  - scope:
+      path: "el"
+    values:
+      layout: locale_page
+      locale: el
+      nav_exclude: true
+  - scope:
+      path: "es"
+    values:
+      layout: locale_page
+      locale: es
+      nav_exclude: true
+  - scope:
+      path: "et"
+    values:
+      layout: locale_page
+      locale: et
+      nav_exclude: true
+  - scope:
+      path: "fi"
+    values:
+      layout: locale_page
+      locale: fi
+      nav_exclude: true
+  - scope:
+      path: "fr"
+    values:
+      layout: locale_page
+      locale: fr
+      nav_exclude: true
+  - scope:
+      path: "ga"
+    values:
+      layout: locale_page
+      locale: ga
+      nav_exclude: true
+  - scope:
+      path: "gl"
+    values:
+      layout: locale_page
+      locale: gl
+      nav_exclude: true
+  - scope:
+      path: "he"
+    values:
+      layout: locale_page
+      locale: he
+      nav_exclude: true
+  - scope:
+      path: "hr"
+    values:
+      layout: locale_page
+      locale: hr
+      nav_exclude: true
+  - scope:
+      path: "ht"
+    values:
+      layout: locale_page
+      locale: ht
+      nav_exclude: true
+  - scope:
+      path: "hu"
+    values:
+      layout: locale_page
+      locale: hu
+      nav_exclude: true
+  - scope:
+      path: "is"
+    values:
+      layout: locale_page
+      locale: is
+      nav_exclude: true
+  - scope:
+      path: "it"
+    values:
+      layout: locale_page
+      locale: it
+      nav_exclude: true
+  - scope:
+      path: "ja"
+    values:
+      layout: locale_page
+      locale: ja
+      nav_exclude: true
+  - scope:
+      path: "ko"
+    values:
+      layout: locale_page
+      locale: ko
+      nav_exclude: true
+  - scope:
+      path: "lt"
+    values:
+      layout: locale_page
+      locale: lt
+      nav_exclude: true
+  - scope:
+      path: "nl"
+    values:
+      layout: locale_page
+      locale: nl
+      nav_exclude: true
+  - scope:
+      path: "no"
+    values:
+      layout: locale_page
+      locale: no
+      nav_exclude: true
+  - scope:
+      path: "pl"
+    values:
+      layout: locale_page
+      locale: pl
+      nav_exclude: true
+  - scope:
+      path: "pt"
+    values:
+      layout: locale_page
+      locale: pt
+      nav_exclude: true
+  - scope:
+      path: "pt-rBR"
+    values:
+      layout: locale_page
+      locale: pt-rBR
+      nav_exclude: true
+  - scope:
+      path: "ro"
+    values:
+      layout: locale_page
+      locale: ro
+      nav_exclude: true
+  - scope:
+      path: "ru"
+    values:
+      layout: locale_page
+      locale: ru
+      nav_exclude: true
+  - scope:
+      path: "sk"
+    values:
+      layout: locale_page
+      locale: sk
+      nav_exclude: true
+  - scope:
+      path: "sl"
+    values:
+      layout: locale_page
+      locale: sl
+      nav_exclude: true
+  - scope:
+      path: "sq"
+    values:
+      layout: locale_page
+      locale: sq
+      nav_exclude: true
+  - scope:
+      path: "sr"
+    values:
+      layout: locale_page
+      locale: sr
+      nav_exclude: true
+  - scope:
+      path: "sv"
+    values:
+      layout: locale_page
+      locale: sv
+      nav_exclude: true
+  - scope:
+      path: "tr"
+    values:
+      layout: locale_page
+      locale: tr
+      nav_exclude: true
+  - scope:
+      path: "uk"
+    values:
+      layout: locale_page
+      locale: uk
+      nav_exclude: true
+  - scope:
+      path: "zh-rCN"
+    values:
+      layout: locale_page
+      locale: zh-rCN
+      nav_exclude: true
+  - scope:
+      path: "zh-rTW"
+    values:
+      layout: locale_page
+      locale: zh-rTW
+      nav_exclude: true
+
+# Callouts (just-the-docs v0.11+)
+callouts:
+  tip:
+    title: Tip
+    color: green
+  note:
+    title: Note
+    color: blue
+  warning:
+    title: Warning
+    color: yellow
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - assets/screenshots/.gitkeep
+  - "*.sh"
+

@@ -51,6 +51,12 @@ docs/screenshots/
 build-and-install-android.sh
 wireless-install.sh
 
+# Generated docs artifacts
+docs/_site/
+docs/.jekyll-cache/
+docs/.jekyll-metadata
+docs/Gemfile.lock
+
 # Git worktrees
 .worktrees/
 /firebase-debug.log.jdk/
@@ -63,6 +69,13 @@ firebase-debug.log
 /coil/
 /kable/
 .opencode/
+# Synced docs in composeResources (generated from docs/ source by syncDocsToComposeResources task)
+feature/docs/src/commonMain/composeResources/files/docs/user/
+feature/docs/src/commonMain/composeResources/files/docs/developer/
+feature/docs/src/commonMain/composeResources/files/docs/assets/
+
 /desktop/bin/
 /build-logic/convention/bin/
 /.specify/extensions/.cache/
+# Jekyll local config (comments out remote_theme for local builds)
+docs/_config_local.yml

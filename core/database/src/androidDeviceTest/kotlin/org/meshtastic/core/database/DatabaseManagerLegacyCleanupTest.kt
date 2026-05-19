@@ -18,6 +18,9 @@ package org.meshtastic.core.database
 
 import android.app.Application
 import android.content.Context
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.Dispatchers
@@ -27,6 +30,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.meshtastic.core.common.ContextServices
 import org.meshtastic.core.di.CoroutineDispatchers
 
 @RunWith(AndroidJUnit4::class)
@@ -34,10 +38,13 @@ class DatabaseManagerLegacyCleanupTest {
     @Test
     fun deletes_legacy_db_on_switch_when_flag_not_set() = runBlocking {
         val app = ApplicationProvider.getApplicationContext<Application>()
-        val prefs = app.getSharedPreferences("db-manager-prefs", Context.MODE_PRIVATE)
+        ContextServices.app = app
+        val datastoreName = "db-manager-prefs-test-${System.nanoTime()}"
+        val datastore = createDatabaseDataStore(datastoreName)
 
         // Reset the one-time flag
-        prefs.edit().remove(DatabaseConstants.LEGACY_DB_CLEANED_KEY).apply()
+        val legacyCleanedKey = booleanPreferencesKey(DatabaseConstants.LEGACY_DB_CLEANED_KEY)
+        datastore.edit { it.remove(legacyCleanedKey) }
 
         // Ensure legacy DB file exists
         val legacyName = DatabaseConstants.LEGACY_DB_NAME
@@ -48,7 +55,7 @@ class DatabaseManagerLegacyCleanupTest {
 
         val testDispatchers =
             CoroutineDispatchers(io = Dispatchers.IO, main = Dispatchers.Main, default = Dispatchers.Default)
-        val manager = DatabaseManager(app, testDispatchers)
+        val manager = DatabaseManager(datastore, testDispatchers)
 
         // Switch to a non-null address so active DB != legacy
         manager.switchActiveDatabase("01:23:45:67:89:AB")
@@ -61,5 +68,8 @@ class DatabaseManagerLegacyCleanupTest {
         }
 
         assertFalse("Legacy DB should be deleted after switch", legacyFile.exists())
+
+        // Clean up
+        app.preferencesDataStoreFile(datastoreName).delete()
     }
 }

@@ -132,6 +132,7 @@ object DeepLinkRouter {
         }
     }
 
+    @Suppress("ReturnCount", "MagicNumber")
     private fun routeSettings(segments: List<String>): List<NavKey> {
         var destNum: Int? = null
         var subRouteStr: String? = null
@@ -151,6 +152,17 @@ object DeepLinkRouter {
 
         if (subRouteStr == null) {
             return listOf(SettingsRoute.Settings(destNum))
+        }
+
+        // Handle helpDocs/{pageId} pattern
+        if (subRouteStr == "helpdocs" || subRouteStr == "help-docs") {
+            val pageIdSegmentIndex = if (destNum != null) 3 else 2
+            return if (segments.size > pageIdSegmentIndex) {
+                val pageId = segments[pageIdSegmentIndex]
+                listOf(SettingsRoute.Settings(destNum), SettingsRoute.HelpDocs, SettingsRoute.HelpDocPage(pageId))
+            } else {
+                listOf(SettingsRoute.Settings(destNum), SettingsRoute.HelpDocs)
+            }
         }
 
         val subRoute = settingsSubRoutes[subRouteStr]
@@ -210,6 +222,8 @@ object DeepLinkRouter {
             "debug-panel" to SettingsRoute.DebugPanel,
             "about" to SettingsRoute.About,
             "filter-settings" to SettingsRoute.FilterSettings,
+            "helpdocs" to SettingsRoute.HelpDocs,
+            "help-docs" to SettingsRoute.HelpDocs,
         )
 
     private val nodeDetailSubRoutes: Map<String, (Int) -> Route> =

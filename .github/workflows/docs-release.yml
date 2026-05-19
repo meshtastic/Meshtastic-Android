@@ -1,0 +1,82 @@
+name: Docs Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: docs-release
+  cancel-in-progress: false
+
+jobs:
+  release-docs:
+    runs-on: ubuntu-24.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          submodules: true
+          fetch-depth: 0
+
+      - name: Extract Version
+        id: version
+        run: |
+          TAG=${GITHUB_REF#refs/tags/v}
+          echo "version=$TAG" >> $GITHUB_OUTPUT
+          echo "Deploying docs for version: $TAG"
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: true
+
+      - name: Generate Docs Bundle
+        run: ./gradlew generateDocsBundle -Pdocs.channel=release -Pdocs.version=${{ steps.version.outputs.version }} -Pci=true
+
+      - name: Validate Docs Bundle
+        run: ./gradlew validateDocsBundle -Pdocs.version=${{ steps.version.outputs.version }} -Pci=true
+
+      - name: Generate Site Artifact
+        run: ./gradlew publishDocsSite -Pdocs.channel=release -Pdocs.version=${{ steps.version.outputs.version }} -Pci=true
+
+      - name: Update Versions Manifest
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+          # Prepend new version entry to versions.yml
+          cat <<EOF > /tmp/new_version.yml
+          - name: "$VERSION"
+            url: /v$VERSION/
+            prerelease: false
+            current: true
+          EOF
+          # Mark existing entries as not current
+          sed -i 's/current: true/current: false/' docs/_data/versions.yml
+          # Prepend new entry
+          cat /tmp/new_version.yml docs/_data/versions.yml > /tmp/versions_merged.yml
+          mv /tmp/versions_merged.yml docs/_data/versions.yml
+
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/_site/
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
