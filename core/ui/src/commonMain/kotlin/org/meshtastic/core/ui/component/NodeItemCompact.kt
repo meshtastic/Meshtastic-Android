@@ -35,6 +35,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
@@ -72,6 +73,7 @@ import org.meshtastic.core.ui.icon.Favorite
 import org.meshtastic.core.ui.icon.HardwareModel
 import org.meshtastic.core.ui.icon.HopCount
 import org.meshtastic.core.ui.icon.Humidity
+import org.meshtastic.core.ui.icon.MapCompass
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.MqttConnected
 import org.meshtastic.core.ui.icon.Pressure
@@ -118,14 +120,6 @@ fun NodeItemCompact(
     val distance =
         remember(thisNode, thatNode) { thisNode?.distance(thatNode)?.takeIf { it > 0 }?.toDistanceString(system) }
     val bearingDegrees = remember(thisNode, thatNode) { thisNode?.bearing(thatNode) }
-    val distanceWithBearing =
-        remember(distance, bearingDegrees) {
-            when {
-                distance == null -> null
-                bearingDegrees != null -> "$distance ${degreesToCompass(bearingDegrees)}"
-                else -> distance
-            }
-        }
     val unmessageable =
         remember(thatNode) {
             when {
@@ -204,7 +198,8 @@ fun NodeItemCompact(
             CompactHealthRow(
                 thatNode = thatNode,
                 isThisNode = isThisNode,
-                distance = distanceWithBearing,
+                distance = distance,
+                bearingDegrees = bearingDegrees,
                 showPower = showPower,
                 showLastHeard = showLastHeard,
                 lastHeardIsRelative = lastHeardIsRelative,
@@ -285,6 +280,7 @@ private fun CompactHealthRow(
     thatNode: Node,
     isThisNode: Boolean,
     distance: String?,
+    bearingDegrees: Int?,
     showPower: Boolean,
     showLastHeard: Boolean,
     lastHeardIsRelative: Boolean,
@@ -346,6 +342,20 @@ private fun CompactHealthRow(
                         contentDescription = stringResource(Res.string.distance),
                         contentColor = contentColor,
                         text = distance,
+                    )
+                },
+            )
+        }
+
+        // Bearing (rotated compass arrow)
+        if (showLocation && bearingDegrees != null && !isThisNode) {
+            add(
+                @Composable {
+                    Icon(
+                        imageVector = MeshtasticIcons.MapCompass,
+                        contentDescription = "$bearingDegrees°",
+                        modifier = Modifier.size(COMPACT_ICON_SIZE_DP.dp).rotate(bearingDegrees.toFloat()),
+                        tint = contentColor,
                     )
                 },
             )
@@ -525,11 +535,4 @@ private fun isFutureDate(lastHeard: Int): Boolean {
     val nowSeconds = org.meshtastic.core.common.util.nowSeconds.toInt()
     val oneYearSeconds = 365 * 24 * 60 * 60
     return lastHeard > nowSeconds + oneYearSeconds
-}
-
-@Suppress("MagicNumber")
-internal fun degreesToCompass(degrees: Int): String {
-    val directions = arrayOf("N", "NE", "E", "SE", "S", "SW", "W", "NW")
-    val index = ((degrees + 22) / 45) % 8
-    return directions[index]
 }

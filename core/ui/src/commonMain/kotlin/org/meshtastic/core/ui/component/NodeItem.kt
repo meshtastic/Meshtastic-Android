@@ -39,6 +39,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -69,6 +70,7 @@ import org.meshtastic.core.resources.voltage
 import org.meshtastic.core.ui.icon.AirUtilization
 import org.meshtastic.core.ui.icon.ChannelUtilization
 import org.meshtastic.core.ui.icon.DeviceSleep
+import org.meshtastic.core.ui.icon.MapCompass
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Notes
 import org.meshtastic.core.ui.icon.Success
@@ -106,14 +108,6 @@ fun NodeItem(
     val distance =
         remember(thisNode, thatNode) { thisNode?.distance(thatNode)?.takeIf { it > 0 }?.toDistanceString(system) }
     val bearingDegrees = remember(thisNode, thatNode) { thisNode?.bearing(thatNode) }
-    val distanceWithBearing =
-        remember(distance, bearingDegrees) {
-            when {
-                distance == null -> null
-                bearingDegrees != null -> "$distance ${degreesToCompass(bearingDegrees)}"
-                else -> distance
-            }
-        }
 
     var contentColor = MaterialTheme.colorScheme.onSurface
     val cardColors =
@@ -221,7 +215,8 @@ fun NodeItem(
 
             NodeBatteryPositionRow(
                 thatNode = thatNode,
-                distance = distanceWithBearing,
+                distance = distance,
+                bearingDegrees = bearingDegrees,
                 system = system,
                 contentColor = contentColor,
             )
@@ -244,6 +239,7 @@ fun NodeItem(
 private fun NodeBatteryPositionRow(
     thatNode: Node,
     distance: String?,
+    bearingDegrees: Int?,
     system: Config.DisplayConfig.DisplayUnits,
     contentColor: Color,
 ) {
@@ -261,6 +257,14 @@ private fun NodeBatteryPositionRow(
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
             if (distance != null) {
                 DistanceInfo(distance = distance, contentColor = contentColor)
+            }
+            if (bearingDegrees != null) {
+                Icon(
+                    imageVector = MeshtasticIcons.MapCompass,
+                    contentDescription = "$bearingDegrees°",
+                    modifier = Modifier.size(16.dp).rotate(bearingDegrees.toFloat()),
+                    tint = contentColor,
+                )
             }
             thatNode.validPosition?.let { position ->
                 ElevationInfo(
