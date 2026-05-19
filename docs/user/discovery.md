@@ -96,7 +96,7 @@ The node list itself is a powerful discovery tool when you use its filtering and
 
 ### Infrastructure Audit
 
-- Disable **Exclude infrastructure** to see Router, Repeater, and Router Client nodes.
+- Disable **Exclude infrastructure** to see Router, Repeater, Router Late, and Client Base nodes.
 - Check their signal quality and last-heard times to verify your infrastructure nodes are healthy.
 
 See [Nodes](nodes) for full details on filtering and sorting options.

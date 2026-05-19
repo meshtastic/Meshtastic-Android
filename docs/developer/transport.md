@@ -24,9 +24,9 @@ App ← RadioController → Transport (BLE | Serial | TCP)
 ## Bluetooth Low Energy (BLE)
 
 **Module:** `core:ble`  
-**Platforms:** Android, (planned: iOS)
+**Platforms:** Android, Desktop (JVM via Kable), iOS (planned)
 
-The primary transport for Android mobile devices:
+The primary transport for mobile devices and also available on desktop:
 - Service discovery for Meshtastic GATT services
 - Characteristic-based read/write for protobuf packets
 - Connection state management and automatic reconnection
@@ -35,7 +35,7 @@ The primary transport for Android mobile devices:
 ### Key Classes
 
 - `core/ble/` — BLE scanning, connection, and GATT operations
-- Platform-specific implementations in `androidMain`
+- Platform-specific implementations in `androidMain` and `jvmMain` (Kable)
 
 ## USB Serial
 
@@ -51,7 +51,7 @@ Serial communication over USB:
 ### Key Classes
 
 - Serial prober and transport factory in `core/network`
-- Desktop-specific serial in `desktop/src/main/kotlin/.../radio/`
+- Desktop-specific serial in `desktopApp/src/main/kotlin/.../radio/`
 
 ## TCP/IP
 
@@ -70,13 +70,17 @@ The `RadioTransportFactory` interface abstracts transport creation:
 
 ```kotlin
 interface RadioTransportFactory {
-    fun createTransport(config: TransportConfig): RadioTransport
+    val supportedDeviceTypes: List<DeviceType>
+    fun createTransport(address: String, service: RadioInterfaceService): RadioTransport
+    fun isMockTransport(): Boolean
+    fun isAddressValid(address: String?): Boolean
+    fun toInterfaceAddress(interfaceId: InterfaceId, rest: String): String
 }
 ```
 
 Platform-specific implementations:
 - **Android:** Supports BLE + USB + TCP
-- **Desktop:** Supports USB + TCP (no BLE)
+- **Desktop:** Supports BLE (Kable) + USB + TCP
 - **iOS:** Planned BLE + TCP
 
 ## Connection Lifecycle

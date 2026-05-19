@@ -42,6 +42,8 @@ Channels support multiple encryption levels:
 3. Configure the channel name and encryption key.
 4. Share the channel URL/QR code with others who need access.
 
+Tapping a channel shows its details and sharing options.
+
 ## Direct Messages
 
 Direct messages (DMs) are point-to-point encrypted communications between two specific nodes.
@@ -57,8 +59,11 @@ Direct messages (DMs) are point-to-point encrypted communications between two sp
 | State | Icon | Meaning |
 |-------|------|---------|
 | Queued | ⏳ | Message waiting to be sent |
-| Sent | ✓ | Message transmitted to mesh |
+| En route | ✓ | Delivered to the radio, awaiting acknowledgment |
 | Delivered | ✓✓ | Acknowledgment received from recipient |
+| Received | ✓ | Message received from the mesh (incoming) |
+| S&F Routing | 🔗 | Store & Forward: message being routed through an S&F node |
+| S&F Confirmed | 🔗 | Store & Forward: delivery confirmed via S&F node |
 | Error | ✗ | Delivery failed after retries |
 
 ### Delivery Errors
@@ -92,9 +97,7 @@ Pre-configured messages for rapid communication:
 
 ![Quick chat option](/assets/screenshots/messages_quick_chat.png)
 
-The channel list shows each channel with its latest message preview:
-
-![Channel list item showing channel name and last message](/assets/screenshots/messages-and-channels_channel_list.png)
+The channel list shows each channel with its latest message preview.
 
 ### Message Bubbles
 

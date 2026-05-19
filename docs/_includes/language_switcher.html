@@ -15,44 +15,56 @@
 {% assign locales = site.data.locales %}
 
 {% if locales and current_path %}
+{% assign path_parts = current_path | split: "/" %}
+{% assign first_segment = path_parts[0] %}
+
+{% comment %} Build the list of available translations first {% endcomment %}
+{% assign has_translations = false %}
+
+{% if locales[first_segment] %}
+  {% comment %} We're on a translated page — English link is always available {% endcomment %}
+  {% assign has_translations = true %}
+  {% assign remaining_parts = path_parts | slice: 1, path_parts.size %}
+  {% assign en_path = remaining_parts | join: "/" | replace: ".md", "" %}
+{% else %}
+  {% comment %} Check if any translated version exists {% endcomment %}
+  {% assign en_relative = current_path | replace: ".md", "" %}
+  {% for locale in locales %}
+    {% assign locale_code = locale[0] %}
+    {% assign locale_file = locale_code | append: "/" | append: en_relative | append: ".md" %}
+    {% for p in site.pages %}
+      {% if p.path == locale_file %}
+        {% assign has_translations = true %}
+        {% break %}
+      {% endif %}
+    {% endfor %}
+    {% if has_translations %}{% break %}{% endif %}
+  {% endfor %}
+{% endif %}
+
+{% if has_translations %}
 <details class="language-switcher" aria-label="Language options">
   <summary class="language-switcher-btn" title="View in another language">
     🌐 <span class="lang-current">English</span>
   </summary>
   <ul class="language-switcher-list">
-    {% comment %} Always show English link back to source {% endcomment %}
-    {% assign path_parts = current_path | split: "/" %}
-    {% assign first_segment = path_parts[0] %}
-
-    {% comment %} Detect if we're currently IN a locale subdir {% endcomment %}
     {% if locales[first_segment] %}
-      {% comment %} We're on a translated page — link back to English {% endcomment %}
-      {% assign remaining_parts = path_parts | slice: 1, path_parts.size %}
-      {% assign en_path = remaining_parts | join: "/" | replace: ".md", "" %}
       <li><a href="{{ en_path | relative_url }}" lang="en">English</a></li>
     {% endif %}
 
-    {% comment %} Show all available locale versions {% endcomment %}
     {% for locale in locales %}
       {% assign locale_code = locale[0] %}
       {% assign locale_info = locale[1] %}
 
       {% if locales[first_segment] %}
-        {% comment %} We're already on a translated page {% endcomment %}
         {% if locale_code == first_segment %}
           {% continue %}
         {% endif %}
         {% assign locale_path = locale_code | append: "/" | append: en_path %}
       {% else %}
-        {% comment %} We're on an English page {% endcomment %}
-        {% assign en_relative = current_path | replace: ".md", "" %}
         {% assign locale_path = locale_code | append: "/" | append: en_relative %}
       {% endif %}
 
-      {% comment %}
-        Check if the translated file actually exists.
-        Jekyll doesn't have a file_exists filter, so we check site.pages.
-      {% endcomment %}
       {% assign locale_file = locale_path | append: ".md" %}
       {% assign page_exists = false %}
       {% for p in site.pages %}
@@ -68,4 +80,5 @@
     {% endfor %}
   </ul>
 </details>
+{% endif %}
 {% endif %}

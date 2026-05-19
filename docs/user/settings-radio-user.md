@@ -28,8 +28,6 @@ Configure your radio hardware and user identity parameters.
 
 After modifying settings, tap **Save** to write the configuration to your radio. The device may reboot to apply changes.
 
-![Settings appearance section](/assets/screenshots/settings-radio-user_lora_config.png)
-
 ## Radio Configuration
 
 ### Device Config
@@ -37,8 +35,6 @@ After modifying settings, tap **Save** to write the configuration to your radio.
 | Setting | Description | Default |
 |---------|-------------|---------|
 | Role | Node behavior (Client, Router, etc.) | Client |
-| Serial Output | Enable serial console output | Disabled |
-| Debug Log | Enable verbose debug logging | Disabled |
 | Rebroadcast Mode | How the node retransmits messages | All |
 | Node Info Broadcast (s) | Interval for broadcasting node info | 10800 |
 | Double-tap Button | Action for double-tap button press | Disabled |
@@ -62,11 +58,18 @@ After modifying settings, tap **Save** to write the configuration to your radio.
 |--------|-------|-------|-----------|----------|
 | Short Turbo | ~1 km | 21.9 kbps | −5 dB | Dense urban with line-of-sight; data-heavy applications |
 | Short Fast | ~3 km | 10.9 kbps | −7.5 dB | Urban neighborhoods; buildings within a few blocks |
+| Short Slow | ~5 km | 5.5 kbps | −10 dB | Suburban short-range; moderate building density |
 | Medium Fast | ~5 km | 5.5 kbps | −10 dB | Suburban areas; moderate building density |
+| Medium Slow | ~8 km | 1.1 kbps | −12.5 dB | Suburban/rural; moderate range with slower speed |
+| Long Turbo | ~10 km | 4.4 kbps | −10 dB | Similar range to Long Fast but with 500 kHz bandwidth; faster throughput |
 | Long Fast | ~10 km | 1.1 kbps | −12.5 dB | **General use (default)** — balanced range and speed |
 | Long Moderate | ~20 km | 0.34 kbps | −15 dB | Rural with some terrain; occasional use |
-| Long Slow | ~30 km | 0.18 kbps | −17.5 dB | Sparse rural; maximum reliable range |
-| Very Long Slow | ~40+ km | 0.09 kbps | −20 dB | Extreme range experiments; very slow throughput |
+| Lite Fast | ~5 km | 5.5 kbps | −10 dB | EU 866 MHz SRD band (125 kHz BW); comparable to Medium Fast |
+| Lite Slow | ~10 km | 1.1 kbps | −12.5 dB | EU 866 MHz SRD band (125 kHz BW); comparable to Long Fast |
+| Narrow Fast | ~5 km | 2.7 kbps | −10 dB | EU 868 MHz band (62.5 kHz BW); avoids interference with other devices |
+| Narrow Slow | ~10 km | 1.1 kbps | −12.5 dB | EU 868 MHz band (62.5 kHz BW); comparable to Long Fast |
+| ~~Long Slow~~ | ~30 km | 0.18 kbps | −17.5 dB | ⚠️ **Deprecated** — still selectable but may be removed in a future firmware release |
+| ~~Very Long Slow~~ | ~40+ km | 0.09 kbps | −20 dB | ⚠️ **Deprecated** — still selectable but may be removed in a future firmware release |
 
 #### Choosing a Modem Preset
 
@@ -78,8 +81,9 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 **Practical guidance:**
 
 - **Urban mesh (many nodes, short distances):** Use **Long Fast** (default) or **Short Fast**. Higher speed means less airtime congestion when many nodes share the channel.
-- **Rural/sparse mesh (few nodes, long distances):** Use **Long Moderate** or **Long Slow**. Range matters more than speed when nodes are far apart.
-- **Fixed infrastructure links:** Use **Short Turbo** for dedicated point-to-point links with good antennas and line-of-sight.
+- **Rural/sparse mesh (few nodes, long distances):** Use **Long Moderate**. Range matters more than speed when nodes are far apart.
+- **EU 866/868 MHz regulatory compliance:** Use **Lite Fast**, **Lite Slow**, **Narrow Fast**, or **Narrow Slow** — these are optimized for the EU SRD/868 MHz bands with narrower bandwidths.
+- **Fixed infrastructure links:** Use **Short Turbo** or **Long Turbo** for dedicated point-to-point links with good antennas and line-of-sight.
 - **Mixed environments:** Stick with **Long Fast** — it's the community default and ensures compatibility with others in your area.
 
 > ⚠️ **Important:** All nodes on the same channel **must** use the same modem preset. Nodes with mismatched presets cannot communicate even if they share the same frequency and encryption key.
@@ -92,9 +96,9 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 |---------|-------------|
 | Screen Timeout | Time before display sleeps |
 | Display Units | Metric or Imperial |
-| GPS Format | DMS, Decimal, UTM, MGRS, OLC |
 | OLED Type | Auto, SSD1306, SH1106, SH1107 |
-| Compass North | True North or Magnetic North |
+| Compass Orientation | Rotation offset for compass display (0°, 90°, 180°, 270°) |
+| ~~Compass North~~ | ⚠️ **Deprecated** — replaced by Compass Orientation; still visible in older firmware |
 
 ### Position Config
 
@@ -126,6 +130,8 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 | NTP Server | Time synchronization server |
 | Syslog Server | Remote logging server |
 
+![IP address field](/assets/screenshots/settings_ipv4_field.png)
+
 ### Bluetooth Config
 
 | Setting | Description |
@@ -142,7 +148,11 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 | Admin Key | Key for remote administration |
 | Private Key | Your node's private key (handle securely) |
 | Admin Channel Enabled | Allow admin commands via channel |
+| Debug Log | Output live debug logging over serial/bluetooth | 
+| Serial Enabled | Enable serial console access (moved from Device Config) |
 | Managed Mode | Restrict non-admin channel changes |
+
+![Password field](/assets/screenshots/settings_password_field.png)
 
 Settings use standard preference controls — dropdowns, toggles, and sliders:
 

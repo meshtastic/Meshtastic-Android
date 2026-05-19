@@ -16,7 +16,7 @@ The Meshtastic Android/Desktop/iOS application follows a modular Kotlin Multipla
 
 ```
 ┌─────────────────────────────────────────────┐
-│                   app / desktop              │  Platform entry points
+│          androidApp / desktopApp            │  Platform entry points
 ├─────────────────────────────────────────────┤
 │              feature/* modules               │  UI + Business Logic
 ├─────────────────────────────────────────────┤
@@ -28,7 +28,7 @@ The Meshtastic Android/Desktop/iOS application follows a modular Kotlin Multipla
 
 ## Module Categories
 
-### `app/` — Android Application
+### `androidApp/` — Android Application
 
 The Android application entry point:
 - Activity, Application, and Manifest definitions
@@ -36,13 +36,13 @@ The Android application entry point:
 - Flavor-specific bindings (`google/`, `fdroid/`)
 - Android-only integrations (widgets, services)
 
-### `desktop/` — Desktop JVM Application
+### `desktopApp/` — Desktop JVM Application
 
 The Desktop (Linux/macOS/Windows) entry point:
 - Compose Desktop window management
 - Desktop-specific DI (`DesktopKoinModule`)
 - Platform stubs for Android-only capabilities
-- Serial transport implementation
+- BLE (Kable), Serial, and TCP transport implementations
 
 ### `feature/*` — Feature Modules
 

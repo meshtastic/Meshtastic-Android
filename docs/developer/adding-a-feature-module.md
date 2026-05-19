@@ -23,15 +23,10 @@ mkdir -p feature/my-feature/src/{commonMain,commonTest,androidMain,jvmMain,iosMa
 ```kotlin
 plugins {
     alias(libs.plugins.meshtastic.kmp.feature)
-    alias(libs.plugins.meshtastic.kotlinx.serialization)
-    id("meshtastic.kmp.jvm.android")
 }
 
 kotlin {
-    android {
-        namespace = "org.meshtastic.feature.myfeature"
-        androidResources.enable = false
-    }
+    androidLibrary { withHostTest { } }
 
     sourceSets {
         commonMain.dependencies {
@@ -82,8 +77,8 @@ class FeatureMyFeatureModule
 ## 5. Register DI in App/Desktop
 
 Add your module to:
-- `app/src/main/kotlin/org/meshtastic/app/di/AppKoinModule.kt`
-- `desktop/src/main/kotlin/org/meshtastic/desktop/di/DesktopKoinModule.kt`
+- `androidApp/src/main/kotlin/org/meshtastic/app/di/AppKoinModule.kt`
+- `desktopApp/src/main/kotlin/org/meshtastic/desktop/di/DesktopKoinModule.kt`
 
 ## 6. Add Navigation Routes
 

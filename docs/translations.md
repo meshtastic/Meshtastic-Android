@@ -10,14 +10,17 @@ This documentation is translated by the community via [Crowdin](https://crowdin.
 
 ## Available Languages
 
+{% assign any_locale_exists = false %}
 {% for locale in site.data.locales %}
 {% assign locale_code = locale[0] %}
 {% assign locale_info = locale[1] %}
-{% assign locale_index = locale_code | append: "/index.md" %}
+{% assign locale_prefix = locale_code | append: "/" %}
 {% assign has_content = false %}
 {% for p in site.pages %}
-  {% if p.path contains locale_code %}
+  {% assign page_path_check = p.path | slice: 0, locale_prefix.size %}
+  {% if page_path_check == locale_prefix %}
     {% assign has_content = true %}
+    {% assign any_locale_exists = true %}
     {% break %}
   {% endif %}
 {% endfor %}
@@ -25,19 +28,6 @@ This documentation is translated by the community via [Crowdin](https://crowdin.
 {% if has_content %}
 - [{{ locale_info.name }}]({{ locale_code }}/) ({{ locale_code }})
 {% endif %}
-{% endfor %}
-
-{% comment %} Show notice if no translations exist yet {% endcomment %}
-{% assign any_locale_exists = false %}
-{% for locale in site.data.locales %}
-  {% assign locale_code = locale[0] %}
-  {% for p in site.pages %}
-    {% if p.path contains locale_code %}
-      {% assign any_locale_exists = true %}
-      {% break %}
-    {% endif %}
-  {% endfor %}
-  {% if any_locale_exists %}{% break %}{% endif %}
 {% endfor %}
 
 {% unless any_locale_exists %}

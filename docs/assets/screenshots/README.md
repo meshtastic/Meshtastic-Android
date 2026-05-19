@@ -30,7 +30,6 @@ Then copy the relevant light-mode PNGs from the reference directory. The
 Examples:
 - `onboarding_welcome.png`
 - `connections_bluetooth_scan.png`
-- `messages-and-channels_channel_list.png`
 - `firmware_disclaimer.png`
 
 ## Guidelines

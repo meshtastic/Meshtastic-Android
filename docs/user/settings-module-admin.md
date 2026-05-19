@@ -21,6 +21,10 @@ Module settings use a card-based layout with toggle switches, dropdowns, text fi
 
 ![Dropdown selector](/assets/screenshots/settings_dropdown.png)
 
+![Text field](/assets/screenshots/settings_text_field.png)
+
+![Settings card layout](/assets/screenshots/settings_titled_card.png)
+
 ## Module Configuration
 
 ### MQTT Module
@@ -34,7 +38,7 @@ Bridges mesh messages to and from an MQTT broker for internet connectivity. This
 | Username | Authentication username |
 | Password | Authentication password |
 | Encryption | Encrypt MQTT payloads |
-| JSON Output | Also publish in JSON format |
+| ~~JSON Output~~ | ⚠️ **Deprecated** — JSON support removed from firmware; field is ignored |
 | TLS | Use secure connection |
 | Root Topic | Base MQTT topic path |
 | Map Report | Publish position for public map |
@@ -112,7 +116,7 @@ Pre-configured messages accessible from the device's physical buttons (for radio
 
 | Setting | Description |
 |---------|-------------|
-| Enabled | Activate canned messages |
+| ~~Enabled~~ | ⚠️ **Deprecated** — current firmware may ignore this toggle |
 | Messages | Newline-separated list of messages |
 | Send Bell | Play bell sound on send |
 | Rotary Encoder | Enable rotary encoder input |

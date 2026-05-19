@@ -14,15 +14,26 @@ Guidelines for contributing to the Meshtastic Android/Desktop/iOS project.
 
 ## Branch Naming
 
-Feature branches follow the pattern:
-```
-{issue-number}-{short-description}
-```
+Branches use conventional-commit style prefixes:
+
+| Prefix | Use for |
+|--------|---------|
+| `feat/<scope>` | New user-visible behavior |
+| `fix/<scope>` | Bug fixes |
+| `refactor/<scope>` | Code structure changes |
+| `chore/<scope>` | Tooling, deps, CI, cleanup |
+| `docs/<scope>` | Documentation only |
+| `build/<scope>` | Build system changes |
+| `ci/<scope>` | CI workflow changes |
+| `test/<scope>` | Test additions or fixes |
+| `deps/<scope>` | Dependency updates |
+
+Numeric spec prefixes (e.g., `003-app-docs-markdown`) are also valid for spec-driven work.
 
 Examples:
-- `003-app-docs-markdown`
-- `001-local-mesh-discovery`
+- `feat/desktop-ble-transport`
 - `fix/bluetooth-reconnect`
+- `003-app-docs-markdown`
 
 ## Development Workflow
 

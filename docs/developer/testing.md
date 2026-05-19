@@ -55,12 +55,12 @@ Located in `commonTest` or `jvmTest` source sets.
 
 ### Screenshot Tests
 
-Preferred: **Roborazzi** (Gradle-native, Ubuntu CI compatible)  
-Fallback: **Paparazzi** (Android-view-centric)
+Uses Android Gradle Plugin's native screenshot testing framework:
 
 ```bash
-./gradlew recordDocsScreenshots    # Record golden images
-./gradlew verifyDocsScreenshots    # Compare against goldens
+./gradlew :screenshot-tests:updateDebugScreenshotTest    # Record golden images
+./gradlew :screenshot-tests:validateDebugScreenshotTest  # Compare against goldens
+./gradlew :screenshot-tests:copyDocsScreenshots          # Copy reference images to docs pipeline
 ```
 
 ## Test Organization

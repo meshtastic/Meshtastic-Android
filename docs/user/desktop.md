@@ -24,7 +24,7 @@ The Desktop app shares its core codebase with the Android app through Kotlin Mul
 ### Linux
 
 - Download the `.deb` or `.AppImage` package from the releases page
-- Or build from source using `./gradlew :desktop:run`
+- Or build from source using `./gradlew :desktopApp:run`
 
 ### macOS
 
@@ -53,9 +53,13 @@ For network-connected radios:
 1. Enter the radio's IP address and port (default: 4403).
 2. Click **Connect**.
 
-### Bluetooth
+### Bluetooth (BLE)
 
-> ⚠️ **Note:** Bluetooth is not currently supported on the Desktop app. Use USB or TCP connections.
+Bluetooth Low Energy is supported on Desktop via the [Kable](https://github.com/JuulLabs/kable) library:
+
+1. Ensure your system has a Bluetooth adapter.
+2. The app scans for nearby Meshtastic radios automatically.
+3. Select your device from the connections screen.
 
 ## Feature Parity
 
@@ -65,7 +69,7 @@ For network-connected radios:
 | Node List | ✓ | ✓ | Full parity |
 | Map | ✓ | ✓ | Full parity |
 | Settings | ✓ | ✓ | Full parity |
-| Bluetooth | ✓ | ✗ | USB/TCP on desktop |
+| Bluetooth (BLE) | ✓ | ✓ | Via Kable on desktop |
 | Firmware Update OTA | ✓ | ✗ | Use web flasher |
 | Notifications | ✓ | ✓ | Native OS notifications |
 | Widgets | ✓ | ✗ | Android-only |
@@ -99,13 +103,27 @@ The Desktop app uses the same Compose Multiplatform UI with adaptations for larg
 
 The Desktop app provides in-app toggles for controlling which notifications are shown — messages, new nodes, and low battery alerts. Access these from **Settings → Notifications** within the app.
 
+## Built-in Documentation Browser
+
+The Desktop app includes a built-in documentation browser for quick access to help content without leaving the application.
+
+![Docs browser with table of contents](/assets/screenshots/docs-browser_toc.png)
+
+The browser supports full-text search across all documentation:
+
+![Searching the docs browser](/assets/screenshots/docs-browser_search.png)
+
+Individual doc pages render with full formatting:
+
+![A documentation page](/assets/screenshots/docs-browser_page.png)
+
 ## Building from Source
 
 ```bash
 git clone https://github.com/meshtastic/Meshtastic-Android.git
 cd Meshtastic-Android
 git submodule update --init
-./gradlew :desktop:run
+./gradlew :desktopApp:run
 ```
 
 Requirements:
@@ -114,10 +132,10 @@ Requirements:
 
 ## Known Limitations
 
-- No Bluetooth support
 - No OTA firmware updates (use web flasher)
 - Some Android-specific features (widgets, specific notification channels) are unavailable
 - Performance may vary on low-spec hardware running Compose Desktop
+- BLE bonding is not yet supported on desktop (pairing works without bonding)
 
 ## Related Topics
 

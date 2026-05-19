@@ -80,25 +80,36 @@ Some Meshtastic radios support WiFi connectivity, allowing TCP-based connections
 3. Enter the radio's IP address and port (default: 4403).
 4. Tap **Connect**.
 
+![WiFi scanning for devices](/assets/screenshots/connections_wifi_scanning.png)
+
+When a device is found, it appears in the connection list:
+
+![WiFi device found](/assets/screenshots/connections_wifi_device_found.png)
+
+A successful connection is confirmed with a status indicator:
+
+![WiFi connection success](/assets/screenshots/connections_wifi_success.png)
+
 ### When to Use TCP
 
 - Radio is on the same local network
 - Testing with a simulated radio
 - Environments where Bluetooth has interference issues
 
-## Connection Priority
+## Reconnection Behavior
 
-The app attempts connections in this order:
-1. Last successful Bluetooth device
-2. USB (if detected)
-3. Manual TCP (if configured)
+The app reconnects to the **last selected device** on startup. You can manually switch transports from the connections screen at any time.
+
+To disconnect from a radio, use the disconnect button on the connections screen:
+
+![Disconnect from radio](/assets/screenshots/connections_disconnect.png)
 
 ## Desktop Connections
 
 On Desktop (Linux/macOS/Windows), the app supports:
-- **USB Serial** — primary connection method
+- **Bluetooth (BLE)** — via the Kable library; works on macOS, Linux, and Windows
+- **USB Serial** — primary wired connection method
 - **TCP/IP** — for network-connected radios
-- Bluetooth is **not** currently supported on Desktop
 
 See [Desktop App](desktop) for platform-specific details and keyboard shortcuts.
 

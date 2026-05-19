@@ -61,7 +61,7 @@ class DocsTasks : Plugin<Project> {
             bundleDir.set(outputDir.map { it.dir("common") })
             schemaFile.set(
                 project.rootProject.layout.projectDirectory
-                    .file("specs/003-app-docs-markdown/contracts/keyword-index-schema.json")
+                    .file("specs/20260507-161858-app-docs-markdown/contracts/keyword-index-schema.json")
             )
         }
 

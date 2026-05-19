@@ -24,7 +24,7 @@ interface Graph : Route            // Graph roots for navigation hierarchies
 
 @Serializable
 sealed interface SettingsRoute : Route {
-    @Serializable data class SettingsGraph(val destNum: Int?) : SettingsRoute, Graph
+    @Serializable data class Settings(val destNum: Int? = null) : SettingsRoute, Graph
     @Serializable data object DeviceConfiguration : SettingsRoute
     @Serializable data object HelpDocs : SettingsRoute
     @Serializable data class HelpDocPage(val pageId: String) : SettingsRoute
@@ -54,7 +54,7 @@ meshtastic://meshtastic/{path}
 
 | URI Path | Route | Notes |
 |----------|-------|-------|
-| `/settings` | `SettingsRoute.SettingsGraph(null)` | Settings root |
+| `/settings` | `SettingsRoute.Settings(null)` | Settings root |
 | `/settings/helpDocs` | `SettingsRoute.HelpDocs` | Docs browser |
 | `/settings/helpDocs/{pageId}` | `SettingsRoute.HelpDocPage(pageId)` | Specific doc page |
 | `/settings/help-docs` | `SettingsRoute.HelpDocs` | Compatibility alias |
@@ -70,7 +70,7 @@ Deep links synthesize a full backstack, not just the target screen:
 ```kotlin
 // /settings/helpDocs/messages-and-channels produces:
 listOf(
-    SettingsRoute.SettingsGraph(null),
+    SettingsRoute.Settings(null),
     SettingsRoute.HelpDocs,
     SettingsRoute.HelpDocPage("messages-and-channels"),
 )
@@ -90,9 +90,9 @@ This ensures the user can navigate "up" correctly.
 Each feature module provides entries via an extension function:
 
 ```kotlin
-fun EntryProviderScope<*>.docsEntries(backStack: NavBackStack) {
+fun EntryProviderScope<NavKey>.docsEntries(backStack: NavBackStack<NavKey>) {
     entry<SettingsRoute.HelpDocs> { DocsBrowserScreen(backStack) }
-    entry<SettingsRoute.HelpDocPage> { DocsPageRouteScreen(it.pageId, backStack) }
+    entry<SettingsRoute.HelpDocPage> { route -> DocsPageRouteScreen(route.pageId, backStack) }
 }
 ```
 
@@ -103,18 +103,6 @@ These are called from the settings navigation composition.
 Deep link routing is tested in:
 ```
 core/navigation/src/commonTest/kotlin/org/meshtastic/core/navigation/DeepLinkRouterTest.kt
-```
-
-Example:
-```kotlin
-@Test
-fun `help docs deep link routes correctly`() {
-    val result = DeepLinkRouter.route(CommonUri.parse("meshtastic://meshtastic/settings/helpDocs"))
-    assertEquals(
-        listOf(SettingsRoute.SettingsGraph(null), SettingsRoute.HelpDocs),
-        result,
-    )
-}
 ```
 
 ---
