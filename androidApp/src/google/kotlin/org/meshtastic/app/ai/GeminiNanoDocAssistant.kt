@@ -61,13 +61,13 @@ class GeminiNanoDocAssistant(private val searchEngine: KeywordSearchEngine, priv
             )
     }
 
-    /** Cloud model with Google Search grounding — accesses meshtastic.org and other web resources. */
+    /** Cloud model with Google Search and URL context grounding — accesses meshtastic.org and other web resources. */
     private val groundedModel by lazy {
         Firebase.ai(backend = GenerativeBackend.googleAI())
             .generativeModel(
                 modelName = MODEL_NAME,
                 systemInstruction = content { text(SYSTEM_INSTRUCTION) },
-                tools = listOf(Tool.googleSearch()),
+                tools = listOf(Tool.googleSearch(), Tool.urlContext()),
             )
     }
 
@@ -187,7 +187,8 @@ class GeminiNanoDocAssistant(private val searchEngine: KeywordSearchEngine, priv
         // Fall back to cloud with Google Search grounding for broader knowledge.
         Logger.d(tag = TAG) { "Falling back to grounded cloud model" }
         return try {
-            val response = groundedModel.generateContent(prompt)
+            val groundedPrompt = prompt + MESHTASTIC_URL_HINT
+            val response = groundedModel.generateContent(groundedPrompt)
             response.text?.trimEnd() ?: onDeviceAnswer ?: "I wasn't able to generate a response."
         } catch (e: Exception) {
             Logger.w(tag = TAG) { "Cloud grounded model also failed: ${e.message}" }
@@ -368,7 +369,9 @@ class GeminiNanoDocAssistant(private val searchEngine: KeywordSearchEngine, priv
 
     companion object {
         private const val TAG = "ChirpyAI"
-        private const val MODEL_NAME = "gemini-2.5-flash-lite"
+
+        /** Gemini 3.1 Flash-Lite — latest stable model (2026-05-07), free tier, supports grounding. */
+        private const val MODEL_NAME = "gemini-3.1-flash-lite"
 
         private const val SYSTEM_INSTRUCTION =
             """You are Chirpy, the friendly AI assistant built into the Meshtastic Android app. You help users understand mesh networking, configure their Meshtastic nodes, troubleshoot connectivity issues, and get the most out of the Meshtastic ecosystem.
@@ -444,5 +447,9 @@ Guidelines:
             "Meshtastic is an open-source mesh networking platform for LoRa radios. " +
                 "The app connects to Meshtastic devices via Bluetooth or WiFi to send messages, " +
                 "share location, and manage mesh network settings like channels, nodes, and modules."
+
+        /** URL hint appended to prompts for the grounded cloud model to leverage URL context tool. */
+        private const val MESHTASTIC_URL_HINT =
+            "\n\nFor additional context, refer to https://meshtastic.org/docs/ if needed."
     }
 }
