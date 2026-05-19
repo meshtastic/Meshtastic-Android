@@ -14,7 +14,7 @@ aliases:
 
 Meshtastic nodes can collect and share sensor data across the mesh network.
 
-## Overview
+## Обзор
 
 Telemetry allows nodes equipped with sensors to broadcast environmental, power, and device health information. This data is visible on the node detail screen and can be logged over time.
 

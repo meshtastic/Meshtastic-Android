@@ -1,5 +1,5 @@
 ---
-title: Firmware Updates
+title: Обновления прошивки
 nav_order: 13
 last_updated: 2026-05-13
 description: Update your radio firmware over Bluetooth — OTA process, version channels, pre-flight checks, and recovery.
@@ -10,7 +10,7 @@ aliases:
   - flash
 ---
 
-# Firmware Updates
+# Обновления прошивки
 
 Keep your Meshtastic radio up to date with the latest firmware for new features, bug fixes, and security improvements.
 

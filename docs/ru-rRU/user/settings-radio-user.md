@@ -134,7 +134,7 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 
 ### Настройка Bluetooth
 
-| Setting               | Описание                                                                  |
+| Настройка             | Описание                                                                  |
 | --------------------- | ------------------------------------------------------------------------- |
 | Bluetooth Enabled     | Enable/disable BLE radio                                                  |
 | Pairing Mode          | Fixed PIN, Random PIN, or No PIN                                          |
@@ -142,7 +142,7 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 
 ### Настройки безопасности
 
-| Setting               | Описание                                                                   |
+| Настройка             | Описание                                                                   |
 | --------------------- | -------------------------------------------------------------------------- |
 | Публичный ключ        | Your node's public key (read-only)                      |
 | Ключ администратора   | Key for remote administration                                              |
