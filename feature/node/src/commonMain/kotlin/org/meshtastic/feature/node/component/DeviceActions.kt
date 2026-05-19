@@ -26,10 +26,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedIconToggleButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -136,7 +136,7 @@ private fun PrimaryActionsRow(node: Node, isLocal: Boolean, onAction: (NodeDetai
         }
 
         if (!isLocal) {
-            IconToggleButton(
+            OutlinedIconToggleButton(
                 checked = node.isFavorite,
                 onCheckedChange = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.Favorite(node))) },
             ) {

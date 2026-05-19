@@ -42,7 +42,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -363,11 +362,7 @@ private fun hasChannelData(voltage: Float?, current: Float?): Boolean = voltage 
 @Composable
 private fun PowerChannelColumn(titleRes: StringResource, voltage: Float, current: Float) {
     Column {
-        Text(
-            text = stringResource(titleRes),
-            style = TextStyle(fontWeight = FontWeight.Bold),
-            fontSize = MaterialTheme.typography.labelLarge.fontSize,
-        )
+        Text(text = stringResource(titleRes), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
         MetricValueRow(color = PowerMetric.VOLTAGE.color, text = MetricFormatter.voltage(voltage))
         MetricValueRow(color = PowerMetric.CURRENT.color, text = MetricFormatter.current(current))
     }

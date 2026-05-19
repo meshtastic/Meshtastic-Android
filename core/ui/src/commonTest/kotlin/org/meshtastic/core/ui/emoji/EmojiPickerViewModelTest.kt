@@ -33,12 +33,15 @@ class EmojiPickerViewModelTest {
 
     private lateinit var viewModel: EmojiPickerViewModel
     private val customEmojiPrefs: CustomEmojiPrefs = mock(MockMode.autofill)
+    private val emojiRepository = EmojiRepository()
     private val frequencyFlow = MutableStateFlow<String?>(null)
+    private val skinToneFlow = MutableStateFlow(0)
 
     @BeforeTest
     fun setUp() {
         every { customEmojiPrefs.customEmojiFrequency } returns frequencyFlow
-        viewModel = EmojiPickerViewModel(customEmojiPrefs)
+        every { customEmojiPrefs.preferredSkinToneIndex } returns skinToneFlow
+        viewModel = EmojiPickerViewModel(customEmojiPrefs, emojiRepository)
     }
 
     @Test

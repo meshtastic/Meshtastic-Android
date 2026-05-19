@@ -14,6 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+
 package org.meshtastic.feature.settings.filter
 
 import androidx.compose.foundation.layout.Arrangement
@@ -26,6 +28,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -121,7 +124,7 @@ private fun FilterEnableCard(enabled: Boolean, onToggle: (Boolean) -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(stringResource(Res.string.filter_enable), style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(Res.string.filter_enable), style = MaterialTheme.typography.titleMediumEmphasized)
                 Text(
                     stringResource(Res.string.filter_enable_summary),
                     style = MaterialTheme.typography.bodySmall,
@@ -137,7 +140,7 @@ private fun FilterEnableCard(enabled: Boolean, onToggle: (Boolean) -> Unit) {
 private fun FilterWordsInputCard(newWord: String, onNewWordChange: (String) -> Unit, onAddWord: () -> Unit) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(stringResource(Res.string.filter_words), style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(Res.string.filter_words), style = MaterialTheme.typography.titleMediumEmphasized)
             Text(
                 stringResource(Res.string.filter_words_summary),
                 style = MaterialTheme.typography.bodySmall,

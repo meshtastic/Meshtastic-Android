@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @file:Suppress("TooManyFunctions", "LongMethod")
 
 package org.meshtastic.feature.wifiprovision.ui
@@ -55,7 +56,7 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconToggleButton
-import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.LoadingIndicator
@@ -200,7 +201,7 @@ fun WifiProvisionScreen(
         Column(modifier = Modifier.padding(padding).fillMaxSize().animateContentSize()) {
             // Indeterminate progress bar for active operations
             if (uiState.phase.isLoading) {
-                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                LinearWavyProgressIndicator(modifier = Modifier.fillMaxWidth())
             } else {
                 Spacer(Modifier.height(4.dp))
             }

@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @file:Suppress("TooManyFunctions")
 
 package org.meshtastic.feature.firmware
@@ -39,7 +40,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -337,7 +337,7 @@ private fun FirmwareUpdateContent(
 
 @Composable
 internal fun VerifyingState() {
-    CircularProgressIndicator(modifier = Modifier.size(64.dp))
+    CircularWavyProgressIndicator(modifier = Modifier.size(64.dp))
     Spacer(Modifier.height(24.dp))
     Text(stringResource(Res.string.firmware_update_verifying), style = MaterialTheme.typography.titleMedium)
     Spacer(Modifier.height(8.dp))
@@ -352,7 +352,7 @@ internal fun VerifyingState() {
 
 @Composable
 internal fun CheckingState() {
-    CircularProgressIndicator(modifier = Modifier.size(64.dp))
+    CircularWavyProgressIndicator(modifier = Modifier.size(64.dp))
     Spacer(Modifier.height(24.dp))
     Text(stringResource(Res.string.firmware_update_checking), style = MaterialTheme.typography.bodyLarge)
 }
@@ -763,7 +763,7 @@ private fun AwaitingFileSaveState(state: FirmwareUpdateState.AwaitingFileSave, o
         )
     }
 
-    CircularProgressIndicator(modifier = Modifier.size(64.dp))
+    CircularWavyProgressIndicator(modifier = Modifier.size(64.dp))
     Spacer(Modifier.height(24.dp))
     Text(
         stringResource(Res.string.firmware_update_save_dfu_file),

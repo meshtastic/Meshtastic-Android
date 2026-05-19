@@ -43,7 +43,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.DpOffset
@@ -129,7 +128,8 @@ fun DebugPresetFilters(
     Column(modifier = modifier) {
         Text(
             text = stringResource(Res.string.debug_filter_preset_title),
-            style = TextStyle(fontWeight = FontWeight.Bold),
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(vertical = 4.dp),
         )
         FlowRow(
@@ -185,7 +185,8 @@ fun DebugFilterBar(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = stringResource(Res.string.debug_filters),
-                        style = TextStyle(fontWeight = FontWeight.Bold),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold,
                     )
                     Icon(
                         imageVector =
@@ -245,7 +246,8 @@ fun DebugActiveFilters(
             ) {
                 Text(
                     text = stringResource(Res.string.debug_active_filters),
-                    style = TextStyle(fontWeight = FontWeight.Bold),
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold,
                 )
                 TextButton(
                     onClick = {

@@ -14,6 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+
 package org.meshtastic.feature.node.component
 
 import androidx.compose.foundation.background
@@ -31,8 +33,9 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuGroup
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -227,67 +230,69 @@ private fun NodeSortButton(
         onDismissRequest = { expanded = false },
         modifier = Modifier.background(MaterialTheme.colorScheme.background.copy(alpha = 1f)),
     ) {
-        DropdownMenuTitle(text = stringResource(Res.string.node_sort_title))
+        DropdownMenuGroup(shapes = MenuDefaults.groupShapes()) {
+            DropdownMenuTitle(text = stringResource(Res.string.node_sort_title))
 
-        NodeSortOption.entries.forEach { sort ->
-            DropdownMenuRadio(
-                text = stringResource(sort.stringRes),
-                selected = sort == currentSortOption,
-                onClick = { onSortSelect(sort) },
-            )
+            NodeSortOption.entries.forEach { sort ->
+                DropdownMenuRadio(
+                    text = stringResource(sort.stringRes),
+                    selected = sort == currentSortOption,
+                    onClick = { onSortSelect(sort) },
+                )
+            }
         }
 
-        HorizontalDivider(modifier = Modifier.padding(MenuDefaults.DropdownMenuItemContentPadding))
+        DropdownMenuGroup(shapes = MenuDefaults.groupShapes()) {
+            DropdownMenuTitle(text = stringResource(Res.string.node_filter_title))
 
-        DropdownMenuTitle(text = stringResource(Res.string.node_filter_title))
+            DropdownMenuCheck(
+                text = stringResource(Res.string.node_filter_exclude_infrastructure),
+                checked = toggles.excludeInfrastructure,
+                onClick = toggles.onToggleExcludeInfrastructure,
+            )
 
-        DropdownMenuCheck(
-            text = stringResource(Res.string.node_filter_exclude_infrastructure),
-            checked = toggles.excludeInfrastructure,
-            onClick = toggles.onToggleExcludeInfrastructure,
-        )
+            DropdownMenuCheck(
+                text = stringResource(Res.string.node_filter_include_unknown),
+                checked = toggles.includeUnknown,
+                onClick = toggles.onToggleIncludeUnknown,
+            )
 
-        DropdownMenuCheck(
-            text = stringResource(Res.string.node_filter_include_unknown),
-            checked = toggles.includeUnknown,
-            onClick = toggles.onToggleIncludeUnknown,
-        )
+            DropdownMenuCheck(
+                text = stringResource(Res.string.node_filter_only_online),
+                checked = toggles.onlyOnline,
+                onClick = toggles.onToggleOnlyOnline,
+            )
 
-        DropdownMenuCheck(
-            text = stringResource(Res.string.node_filter_only_online),
-            checked = toggles.onlyOnline,
-            onClick = toggles.onToggleOnlyOnline,
-        )
+            DropdownMenuCheck(
+                text = stringResource(Res.string.node_filter_only_direct),
+                checked = toggles.onlyDirect,
+                onClick = toggles.onToggleOnlyDirect,
+            )
 
-        DropdownMenuCheck(
-            text = stringResource(Res.string.node_filter_only_direct),
-            checked = toggles.onlyDirect,
-            onClick = toggles.onToggleOnlyDirect,
-        )
+            DropdownMenuCheck(
+                text = stringResource(Res.string.node_filter_show_ignored),
+                checked = toggles.showIgnored,
+                onClick = toggles.onToggleShowIgnored,
+                trailing =
+                if (toggles.ignoredNodeCount > 0) {
+                    {
+                        Text(
+                            text = " (${toggles.ignoredNodeCount})",
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(start = 4.dp),
+                        )
+                    }
+                } else {
+                    null
+                },
+            )
 
-        DropdownMenuCheck(
-            text = stringResource(Res.string.node_filter_show_ignored),
-            checked = toggles.showIgnored,
-            onClick = toggles.onToggleShowIgnored,
-            trailing =
-            if (toggles.ignoredNodeCount > 0) {
-                {
-                    Text(
-                        text = " (${toggles.ignoredNodeCount})",
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(start = 4.dp),
-                    )
-                }
-            } else {
-                null
-            },
-        )
-
-        DropdownMenuCheck(
-            text = stringResource(Res.string.node_filter_exclude_mqtt),
-            checked = toggles.excludeMqtt,
-            onClick = toggles.onToggleExcludeMqtt,
-        )
+            DropdownMenuCheck(
+                text = stringResource(Res.string.node_filter_exclude_mqtt),
+                checked = toggles.excludeMqtt,
+                onClick = toggles.onToggleExcludeMqtt,
+            )
+        }
     }
 }
 

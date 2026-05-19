@@ -14,6 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+
 package org.meshtastic.feature.messaging.ui.contact
 
 import androidx.compose.foundation.layout.Box
@@ -27,8 +29,9 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.RadioButton
@@ -501,7 +504,7 @@ private fun ContactListViewPaged(
     val haptic = LocalHapticFeedback.current
     Box(modifier = modifier.fillMaxSize()) {
         if (contacts.loadState.refresh is LoadState.Loading && contacts.itemCount == 0) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            CircularWavyProgressIndicator(modifier = Modifier.align(Alignment.Center))
         } else {
             ContactListContentInternal(
                 contacts = contacts,
@@ -621,7 +624,7 @@ private fun LazyListScope.contactListAppendLoadingItem(contacts: LazyPagingItems
     if (contacts.loadState.append is LoadState.Loading) {
         item {
             Box(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                CircularWavyProgressIndicator(modifier = Modifier.align(Alignment.Center))
             }
         }
     }
