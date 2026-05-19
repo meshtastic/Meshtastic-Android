@@ -96,9 +96,9 @@ The app attempts connections in this order:
 ## Desktop Connections
 
 On Desktop (Linux/macOS/Windows), the app supports:
-- **USB Serial** — primary connection method
+- **Bluetooth (BLE)** — via the Kable library; works on macOS, Linux, and Windows
+- **USB Serial** — primary wired connection method
 - **TCP/IP** — for network-connected radios
-- Bluetooth is **not** currently supported on Desktop
 
 See [Desktop App](desktop) for platform-specific details and keyboard shortcuts.
 

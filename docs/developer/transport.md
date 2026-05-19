@@ -24,9 +24,9 @@ App ← RadioController → Transport (BLE | Serial | TCP)
 ## Bluetooth Low Energy (BLE)
 
 **Module:** `core:ble`  
-**Platforms:** Android, (planned: iOS)
+**Platforms:** Android, Desktop (JVM via Kable), iOS (planned)
 
-The primary transport for Android mobile devices:
+The primary transport for mobile devices and also available on desktop:
 - Service discovery for Meshtastic GATT services
 - Characteristic-based read/write for protobuf packets
 - Connection state management and automatic reconnection
@@ -76,7 +76,7 @@ interface RadioTransportFactory {
 
 Platform-specific implementations:
 - **Android:** Supports BLE + USB + TCP
-- **Desktop:** Supports USB + TCP (no BLE)
+- **Desktop:** Supports BLE (Kable) + USB + TCP
 - **iOS:** Planned BLE + TCP
 
 ## Connection Lifecycle

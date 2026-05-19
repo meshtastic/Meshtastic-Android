@@ -16,11 +16,11 @@ Repository layout, namespacing conventions, and build system overview.
 
 ```
 Meshtastic-Android/
-├── app/                    # Android application module
+├── androidApp/                 # Android application module
 │   ├── src/main/           # Shared Android code
 │   ├── src/google/         # Google Play flavor (Gemini, proprietary)
 │   └── src/fdroid/         # F-Droid flavor (FOSS-only)
-├── desktop/                # Desktop JVM application
+├── desktopApp/                # Desktop JVM application
 ├── feature/                # Feature modules (KMP)
 │   ├── intro/
 │   ├── messaging/
@@ -115,7 +115,7 @@ Located in `build-logic/convention/src/main/kotlin/org/meshtastic/buildlogic/`:
 ./gradlew assembleGoogleDebug assembleFdroidDebug
 
 # Desktop run
-./gradlew :desktop:run
+./gradlew :desktopApp:run
 ```
 
 ## Version Catalog Highlights
