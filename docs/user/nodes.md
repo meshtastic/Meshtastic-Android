@@ -40,14 +40,41 @@ Nodes can be configured with different roles that affect their mesh behavior:
 |------|-------------|
 | Client | Standard end-user device |
 | Client Mute | Receives but doesn't retransmit |
-| Router | Prioritizes message forwarding |
+| Client Hidden | Like Client Mute, plus hides from node list |
+| Router | Prioritizes message forwarding; stays awake to relay |
 | Router Client | Routes and operates as a client |
 | Repeater | Retransmits only; no user interface |
-| Tracker | Optimized for position reporting |
+| Tracker | Optimized for position reporting at regular intervals |
 | Sensor | Optimized for telemetry reporting |
-| TAK | Interoperates with TAK systems |
-| TAK Tracker | TAK position reporting |
-| Lost & Found | Continuous position beacon |
+| TAK | Interoperates with TAK systems (sends/receives CoT) |
+| TAK Tracker | TAK position reporting only |
+| Lost & Found | Continuous position beacon for recovery |
+
+### Choosing a Role
+
+Most users should keep the default **Client** role. Consider a different role when:
+
+- **Router** — You have a node in a fixed, elevated location with reliable power (rooftop, hilltop). Routers stay awake continuously to relay messages for others and are essential for extending mesh coverage. Don't use Router on battery-powered handheld devices.
+- **Router Client** — Like Router, but the device is also used as a personal client. Good for a home base station that you also send messages from.
+- **Client Mute** — You want to receive mesh traffic but not contribute to relaying. Useful for monitoring-only devices or to reduce congestion in dense areas.
+- **Repeater** — A dedicated relay node with no screen or user interaction. Optimized purely for forwarding; lowest power consumption of the relay roles.
+- **Tracker** — An unattended device whose sole purpose is broadcasting its GPS position (e.g., a vehicle, pet, or asset). Sleeps between broadcasts to conserve battery.
+- **Sensor** — An unattended device reporting environmental telemetry (temperature, humidity, air quality). Similar power profile to Tracker.
+- **TAK / TAK Tracker** — Only needed if interoperating with ATAK/WinTAK systems. See [TAK Integration](tak) for details.
+
+> 💡 **Tip:** The mesh works best when most nodes are **Client** or **Router**. Too many Mute nodes reduces mesh resilience; too many Routers in a dense area can cause congestion. A good rule of thumb: one Router per 5–10 Clients in your area.
+
+### Encryption Indicators
+
+Nodes display encryption status icons next to their name:
+
+| Icon | Meaning |
+|------|---------|
+| 🔒 Locked | Communication uses PKI (public key infrastructure) — end-to-end encrypted with verified identity |
+| 🔓 Unlocked | Communication uses shared channel PSK — encrypted but identity not individually verified |
+| ⚠️ Mismatch | Public key mismatch — the node's key has changed since last seen (investigate before trusting) |
+
+> 💡 **Tip:** PKI encryption (firmware 2.5+) provides stronger security than channel PSK because each node has a unique key pair. If you see a key mismatch warning, the node may have been reset or compromised.
 
 ## Quick Actions
 

@@ -24,13 +24,16 @@ Every Meshtastic device comes with a default **LongFast** channel. This is an un
 
 ### Channel Security
 
-| Security Level | Description |
-|----------------|-------------|
-| None (default) | Messages are readable by any node on the same channel preset |
-| PSK (Pre-Shared Key) | Only nodes with the matching key can decrypt messages |
-| Admin Key | Required for remote administration commands |
+Channels support multiple encryption levels:
 
-> 🔒 **Security Tip:** Always configure a unique PSK for private communications. The default channel is intentionally open.
+| Icon | Security Level | Description |
+|------|----------------|-------------|
+| 🔒 | PSK (256-bit AES) | Fully encrypted with a strong pre-shared key. Only nodes with the matching key can read messages. |
+| 🔐 | PSK (128-bit AES) | Encrypted with a shorter key. Secure for most uses but 256-bit is preferred for sensitive data. |
+| 🔓 | Default / Open | Uses the well-known default key. **Any Meshtastic device** on the same preset can read these messages. |
+| ⚠️ | Insecure + Position | Open channel that also broadcasts your GPS position. Use with caution in public meshes. |
+
+> 🔒 **Security Tip:** Always configure a unique PSK for private communications. The default channel is intentionally open so new users can discover the mesh — but you should create a separate encrypted channel for anything sensitive.
 
 ### Adding a Channel
 
@@ -57,6 +60,25 @@ Direct messages (DMs) are point-to-point encrypted communications between two sp
 | Sent | ✓ | Message transmitted to mesh |
 | Delivered | ✓✓ | Acknowledgment received from recipient |
 | Error | ✗ | Delivery failed after retries |
+
+### Delivery Errors
+
+When a message fails to deliver, the error indicator shows what went wrong:
+
+| Error | Meaning | What to Do |
+|-------|---------|------------|
+| No Route | No path exists to the destination node | The recipient may be offline or out of mesh range. Try later or move closer. |
+| Got NAK | The next-hop node refused to relay | The relay node may be congested. Wait and retry. |
+| Timeout | No acknowledgment within retry window | The recipient may be just out of range. Try increasing hop limit or moving to a better position. |
+| No Interface | No radio interface available to send | Check that your radio is connected and the channel is configured. |
+| Max Retransmit | All retry attempts exhausted | The mesh path is unreliable. Try a different channel or wait for conditions to improve. |
+| No Channel | The destination channel doesn't exist | Verify both nodes share the same channel configuration. |
+| Too Large | Message exceeds maximum payload size | Shorten your message (max ~230 characters). |
+| No Response | Node received message but didn't respond | The recipient's radio may be busy or in low-power sleep mode. |
+| Duty Cycle Limit | Regional airtime limit reached | Your radio has used its allowed transmit time. Wait for the duty cycle window to reset (typically 1 hour in EU regions). |
+| Bad Request | Malformed or invalid message | This usually indicates a software bug. Try restarting the app. |
+
+> 💡 **Tip:** Most delivery errors resolve themselves. If a node is intermittently reachable, the mesh will retry. For persistent "No Route" errors, check that intermediate Router nodes are online.
 
 ## Message Features
 

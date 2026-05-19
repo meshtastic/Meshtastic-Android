@@ -62,6 +62,31 @@ Nodes configured with TAK-related roles behave differently from standard clients
 
 TAK messages use the Cursor on Target XML format — a military standard for sharing situational awareness data. Meshtastic converts its internal protobuf messages to CoT format when bridging to TAK systems, so no manual format conversion is needed.
 
+## TAK Identity
+
+When using TAK roles, your node broadcasts identity information that appears on TAK maps:
+
+| Setting | Description |
+|---------|-------------|
+| Team | Your team color on the TAK map (e.g., Blue, Red, Cyan, Green) |
+| Role | Your operational role (Team Member, Team Lead, HQ, Medic, RTO, etc.) |
+| Callsign | Your TAK callsign (defaults to your Meshtastic long name) |
+
+These settings appear in **Settings → Module Config → TAK** when the TAK module is enabled.
+
+> 💡 **Tip:** Team/role colors are the standard TAK affiliation colors. Coordinate with your TAK team to use consistent team assignments.
+
+## Wire Format (V1 / V2)
+
+Meshtastic supports two TAK wire formats:
+
+| Format | Compatibility | Features |
+|--------|--------------|----------|
+| V1 (Legacy) | ATAK Plugin v1.x, older firmware | Basic CoT position sharing only |
+| V2 (Current) | ATAK Plugin v2.x, firmware 2.3+ | Full CoT support including chat, routes, zstd compression |
+
+The app automatically selects V2 when both sides support it. No manual configuration needed — the TAK module negotiates format based on firmware capabilities.
+
 ## Usage with ATAK
 
 Once configured:
@@ -71,6 +96,16 @@ Once configured:
 - TAK Tracker nodes broadcast PLI automatically — their positions appear on ATAK maps without any ATAK-side configuration
 
 > ⚠️ **Note:** TAK integration requires specific node roles and module configuration. Standard client nodes don't automatically participate in TAK operations.
+
+## Troubleshooting
+
+| Problem | Cause | Solution |
+|---------|-------|----------|
+| Node doesn't appear on ATAK map | TAK module disabled or wrong role | Verify TAK module is enabled and node role is TAK or TAK Tracker |
+| Position updates are stale | GPS fix lost or interval too long | Check GPS status; reduce position broadcast interval in Position Config |
+| ATAK plugin shows "disconnected" | BLE connection lost or plugin crashed | Reconnect Bluetooth in Meshtastic app, then restart ATAK plugin |
+| Chat messages not bridging | V1 format doesn't support chat | Ensure both nodes run firmware 2.3+ for V2 wire format |
+| CoT data not flowing | Channel mismatch | All TAK nodes must be on the same channel with matching encryption |
 
 ## Security Considerations
 

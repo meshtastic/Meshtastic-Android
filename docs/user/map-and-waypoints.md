@@ -66,10 +66,10 @@ Waypoints are shared geographic points of interest that all mesh members can see
 ### Waypoint Expiration
 
 Waypoints can be set to expire automatically:
-- **Never** (expire = 0) — waypoint remains until manually deleted
-- **Timed** — waypoint is automatically removed after the specified duration
-- **Boundary** — a waypoint whose expiration time equals the current time is treated as expired
-- The map filters out expired waypoints so they don't clutter the display
+- **Never** (default) — waypoint remains until manually deleted
+- **Timed** — waypoint is automatically removed after the specified duration (e.g., "remove after 2 hours"). Useful for temporary markers like rally points, hazards, or meeting locations.
+
+Expired waypoints are automatically hidden from the map so they don't clutter the display. The expiration countdown begins when the waypoint is created, not when other nodes receive it.
 
 ### Managing Waypoints
 

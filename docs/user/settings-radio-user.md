@@ -50,7 +50,7 @@ After modifying settings, tap **Save** to write the configuration to your radio.
 | Region | Regulatory region for frequency bands | Unset (must configure) |
 | Modem Preset | Speed/range tradeoff | LongFast |
 | Hop Limit | Maximum retransmit hops | 3 |
-| TX Power | Transmission power (dBm) | 0 (max for region) |
+| TX Power | Transmission power (dBm); 0 = max allowed for region | 0 (region max) |
 | Frequency Offset | Fine-tune frequency (MHz) | 0 |
 | Channel Bandwidth | Bandwidth setting | Default for preset |
 
@@ -58,15 +58,33 @@ After modifying settings, tap **Save** to write the configuration to your radio.
 
 ### Modem Presets
 
-| Preset | Range | Speed | Use Case |
-|--------|-------|-------|----------|
-| Short Turbo | Shortest | Fastest | Dense urban |
-| Short Fast | Short | Fast | Urban areas |
-| Medium Fast | Medium | Fast | Suburban |
-| Long Fast | Long | Moderate | General use (default) |
-| Long Moderate | Longer | Slower | Rural |
-| Long Slow | Longest | Slowest | Maximum range |
-| Very Long Slow | Very Long | Very Slow | Extreme range |
+| Preset | Range | Speed | SNR Limit | Best For |
+|--------|-------|-------|-----------|----------|
+| Short Turbo | ~1 km | 21.9 kbps | −5 dB | Dense urban with line-of-sight; data-heavy applications |
+| Short Fast | ~3 km | 10.9 kbps | −7.5 dB | Urban neighborhoods; buildings within a few blocks |
+| Medium Fast | ~5 km | 5.5 kbps | −10 dB | Suburban areas; moderate building density |
+| Long Fast | ~10 km | 1.1 kbps | −12.5 dB | **General use (default)** — balanced range and speed |
+| Long Moderate | ~20 km | 0.34 kbps | −15 dB | Rural with some terrain; occasional use |
+| Long Slow | ~30 km | 0.18 kbps | −17.5 dB | Sparse rural; maximum reliable range |
+| Very Long Slow | ~40+ km | 0.09 kbps | −20 dB | Extreme range experiments; very slow throughput |
+
+#### Choosing a Modem Preset
+
+The modem preset controls the fundamental tradeoff between **range** and **data rate**:
+
+- **Slower presets** use more spreading, making signals decodable at weaker signal levels (lower SNR limit). This means longer range but fewer bytes per second.
+- **Faster presets** pack more data per transmission but require a stronger signal to decode.
+
+**Practical guidance:**
+
+- **Urban mesh (many nodes, short distances):** Use **Long Fast** (default) or **Short Fast**. Higher speed means less airtime congestion when many nodes share the channel.
+- **Rural/sparse mesh (few nodes, long distances):** Use **Long Moderate** or **Long Slow**. Range matters more than speed when nodes are far apart.
+- **Fixed infrastructure links:** Use **Short Turbo** for dedicated point-to-point links with good antennas and line-of-sight.
+- **Mixed environments:** Stick with **Long Fast** — it's the community default and ensures compatibility with others in your area.
+
+> ⚠️ **Important:** All nodes on the same channel **must** use the same modem preset. Nodes with mismatched presets cannot communicate even if they share the same frequency and encryption key.
+
+> 💡 **Tip:** The range estimates above assume flat terrain and modest antennas. Elevation advantage (hilltop, rooftop) dramatically increases effective range. A well-placed Router with Long Fast can often outperform a ground-level node with Long Slow.
 
 ### Display Config
 
