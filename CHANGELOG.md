@@ -9,6 +9,12 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
+* ci: reduce flatpak source generation thrash (#5513) by James Rich (@jamesarich) in [`3f64b5a0e`](https://github.com/meshtastic/Meshtastic-Android/commit/3f64b5a0ecf7cc9ed6e81068ab3067033a7f74f4)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5511) by James Rich (@jamesarich) in [`1dcb7b9d1`](https://github.com/meshtastic/Meshtastic-Android/commit/1dcb7b9d1a29fcdfad214fe74360130c597ee989)
+
+### Internal (v2.7.14-internal.93)
+Changes since [`v2.7.14-open.9`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14-open.9):
+
 * chore(deps): update vico to v3.2.0-next.5 (#5470) by renovate[bot] (@renovate[bot]) in [`4bacff81c`](https://github.com/meshtastic/Meshtastic-Android/commit/4bacff81c5abad536b40f7370ae5d302b74a11fe)
 * chore(deps): update spotless to v8.5.1 (#5468) by renovate[bot] (@renovate[bot]) in [`c91219d8b`](https://github.com/meshtastic/Meshtastic-Android/commit/c91219d8b0411975c059c7a5ae6eb370386954f6)
 * chore(deps): update wire to v6.4.0 (#5466) by renovate[bot] (@renovate[bot]) in [`f0e12695b`](https://github.com/meshtastic/Meshtastic-Android/commit/f0e12695bbf3df16b043476ff98856b727d6a2f7)
@@ -50,6 +56,9 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 * docs: update CHANGELOG.md (#5505) by github-actions[bot] (@github-actions[bot]) in [`f38536ae6`](https://github.com/meshtastic/Meshtastic-Android/commit/f38536ae61c8eaa99bcb315b4953bbfd90b7979c)
 * fix(database): update @Relation annotations for Room 3.0.0-alpha05 (#5507) by James Rich (@jamesarich) in [`01d32e15c`](https://github.com/meshtastic/Meshtastic-Android/commit/01d32e15c00c952ca5933fb3d29c08d3a3989c59)
 * chore(deps): update plugin flatpak-gradle-generator to v1.8.0 (#5506) by renovate[bot] (@renovate[bot]) in [`9260033e0`](https://github.com/meshtastic/Meshtastic-Android/commit/9260033e04f604a8f15bb3efce611bedc695d40b)
+* docs: update CHANGELOG.md (#5508) by github-actions[bot] (@github-actions[bot]) in [`6fb3776e0`](https://github.com/meshtastic/Meshtastic-Android/commit/6fb3776e0c2588392111fb4da89780f8bf597eb5)
+* build: reorder Maven repos to reduce flatpak generator 404s (#5509) by James Rich (@jamesarich) in [`930dee09e`](https://github.com/meshtastic/Meshtastic-Android/commit/930dee09e5b3f23d02d0dc5aae3eeea61974bada)
+* chore(deps): migrate takpacket-sdk to Maven Central coordinates (#5512) by James Rich (@jamesarich) in [`5c3b22584`](https://github.com/meshtastic/Meshtastic-Android/commit/5c3b22584e4d5d71c6813842033bd2ae17b0041b)
 
 ### Open Beta (v2.7.14-open.9)
 Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.13):
