@@ -63,7 +63,7 @@ jobs:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
 
       - name: Build Dokka HTML documentation
-        run: ./gradlew dokkaGeneratePublicationHtml
+        run: ./gradlew dokkaGeneratePublicationHtml --no-configuration-cache
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5
