@@ -122,8 +122,8 @@ internal fun Project.configureKotlinMultiplatform() {
         }
     }
 
-    // TAKPacket-SDK doesn't publish iOS metadata JARs on JitPack (the .klib exists but
-    // the metadata .jar returns 404). iOS native compilation resolves fine via .klib, but
+    // TAKPacket-SDK doesn't publish iOS metadata JARs (the .klib exists but the metadata
+    // .jar returns 404). iOS native compilation resolves fine via .klib, but
     // `transformCommonMainDependenciesMetadata` (triggered by Dokka/publishing) fails.
     // Exclude the SDK only from the CompilationDependenciesMetadata configs that feed
     // the metadata transform — NOT from Implementation/Resolvable configs which feed the
@@ -134,7 +134,7 @@ internal fun Project.configureKotlinMultiplatform() {
     )
     configurations.configureEach {
         if (name in iosMetadataConfigs) {
-            exclude(mapOf("group" to "com.github.meshtastic.TAKPacket-SDK", "module" to "takpacket-sdk"))
+            exclude(mapOf("group" to "org.meshtastic", "module" to "takpacket-sdk"))
         }
     }
 
