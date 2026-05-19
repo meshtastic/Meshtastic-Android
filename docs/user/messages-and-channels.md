@@ -57,7 +57,7 @@ Direct messages (DMs) are point-to-point encrypted communications between two sp
 | State | Icon | Meaning |
 |-------|------|---------|
 | Queued | ⏳ | Message waiting to be sent |
-| Sent | ✓ | Message transmitted to mesh |
+| En route | ✓ | Delivered to the radio, awaiting acknowledgment |
 | Delivered | ✓✓ | Acknowledgment received from recipient |
 | Error | ✗ | Delivery failed after retries |
 

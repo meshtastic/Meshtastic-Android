@@ -35,7 +35,7 @@ The primary transport for mobile devices and also available on desktop:
 ### Key Classes
 
 - `core/ble/` — BLE scanning, connection, and GATT operations
-- Platform-specific implementations in `androidMain`
+- Platform-specific implementations in `androidMain` and `jvmMain` (Kable)
 
 ## USB Serial
 
@@ -51,7 +51,7 @@ Serial communication over USB:
 ### Key Classes
 
 - Serial prober and transport factory in `core/network`
-- Desktop-specific serial in `desktop/src/main/kotlin/.../radio/`
+- Desktop-specific serial in `desktopApp/src/main/kotlin/.../radio/`
 
 ## TCP/IP
 
@@ -70,7 +70,9 @@ The `RadioTransportFactory` interface abstracts transport creation:
 
 ```kotlin
 interface RadioTransportFactory {
-    fun createTransport(config: TransportConfig): RadioTransport
+    val supportedDeviceTypes: List<DeviceType>
+    fun createTransport(address: String, service: RadioInterfaceService): RadioTransport
+    fun isMockTransport(): Boolean
 }
 ```
 

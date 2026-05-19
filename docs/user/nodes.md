@@ -39,10 +39,12 @@ Nodes can be configured with different roles that affect their mesh behavior:
 | Role | Description |
 |------|-------------|
 | Client | Standard end-user device |
+| Client Base | Treats favorited-node traffic as Router Late priority; all other traffic as Client |
 | Client Mute | Receives but doesn't retransmit |
 | Client Hidden | Like Client Mute, plus hides from node list |
 | Router | Prioritizes message forwarding; stays awake to relay |
 | Router Client | Routes and operates as a client |
+| Router Late | Infrastructure node that rebroadcasts once, but only after all other modes (provides supplemental coverage) |
 | Repeater | Retransmits only; no user interface |
 | Tracker | Optimized for position reporting at regular intervals |
 | Sensor | Optimized for telemetry reporting |
@@ -56,6 +58,8 @@ Most users should keep the default **Client** role. Consider a different role wh
 
 - **Router** — You have a node in a fixed, elevated location with reliable power (rooftop, hilltop). Routers stay awake continuously to relay messages for others and are essential for extending mesh coverage. Don't use Router on battery-powered handheld devices.
 - **Router Client** — Like Router, but the device is also used as a personal client. Good for a home base station that you also send messages from.
+- **Router Late** — An infrastructure node that always rebroadcasts packets once but only after all other routing modes have had their turn. Provides supplemental coverage for local clusters without competing with primary routers.
+- **Client Base** — Treats traffic from/to your favorited nodes with Router Late priority (ensuring those messages get extra relay coverage) while handling everything else as a normal Client.
 - **Client Mute** — You want to receive mesh traffic but not contribute to relaying. Useful for monitoring-only devices or to reduce congestion in dense areas.
 - **Repeater** — A dedicated relay node with no screen or user interaction. Optimized purely for forwarding; lowest power consumption of the relay roles.
 - **Tracker** — An unattended device whose sole purpose is broadcasting its GPS position (e.g., a vehicle, pet, or asset). Sleeps between broadcasts to conserve battery.

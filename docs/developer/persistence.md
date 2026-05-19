@@ -35,11 +35,19 @@ The primary structured data store:
 
 | Entity | Description |
 |--------|-------------|
-| Nodes | All known mesh nodes and metadata |
-| Messages | Message history (channel and direct) |
-| Waypoints | Shared geographic points |
-| Telemetry | Device, environment, power metrics |
-| Channels | Channel configurations |
+| `NodeEntity` | All known mesh nodes and their metadata |
+| `MyNodeEntity` | The local node's own info |
+| `Packet` | Message history (channel and direct), waypoints, and telemetry data |
+| `ContactSettings` | Per-contact mute and read-state |
+| `ReactionEntity` | Emoji reactions on messages |
+| `MeshLog` | Raw mesh protocol logs |
+| `MetadataEntity` | Device metadata (firmware version, hardware model) |
+| `QuickChatAction` | User-configured quick-chat messages |
+| `DeviceHardwareEntity` | Cached device hardware catalog |
+| `FirmwareReleaseEntity` | Cached firmware release info |
+| `TracerouteNodePositionEntity` | Traceroute hop position data |
+
+> 💡 **Note:** Waypoints, telemetry, and channel data are stored within the `Packet` entity (using the `port_num` field to distinguish packet types) rather than in separate tables.
 
 ## DataStore Preferences
 
