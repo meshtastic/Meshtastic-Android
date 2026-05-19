@@ -29,9 +29,11 @@ import org.meshtastic.feature.settings.component.PersistenceSectionPreview
 import org.meshtastic.feature.settings.component.SampleNodeCompactAllFieldsPreview
 import org.meshtastic.feature.settings.component.SampleNodeCompactNameOnlyPreview
 import org.meshtastic.feature.settings.component.SampleNodeCompactSignalOnlyPreview
+import org.meshtastic.feature.settings.component.SampleNodeCompactToggleMatrixPreview
 import org.meshtastic.feature.settings.component.SampleNodeCompleteFahrenheitPreview
 import org.meshtastic.feature.settings.component.SampleNodeCompleteImperialPreview
 import org.meshtastic.feature.settings.component.SampleNodeCompletePreview
+import org.meshtastic.feature.settings.component.SampleNodeCompleteToggleMatrixPreview
 import org.meshtastic.feature.settings.radio.component.TakConfigCardPreview
 import org.meshtastic.feature.settings.radio.component.TakServerSectionDisabledPreview
 import org.meshtastic.feature.settings.radio.component.TakServerSectionEnabledPreview
@@ -178,4 +180,18 @@ fun ScreenshotSampleNodeCompleteFahrenheit() {
 @Composable
 fun ScreenshotSampleNodeCompleteImperial() {
     SampleNodeCompleteImperialPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotSampleNodeCompactToggleMatrix() {
+    SampleNodeCompactToggleMatrixPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotSampleNodeCompleteToggleMatrix() {
+    SampleNodeCompleteToggleMatrixPreview()
 }

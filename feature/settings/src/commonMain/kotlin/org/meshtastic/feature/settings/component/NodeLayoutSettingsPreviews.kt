@@ -16,10 +16,14 @@
  */
 package org.meshtastic.feature.settings.component
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -215,6 +219,124 @@ fun SampleNodeCompactNameOnlyPreview() {
                 )
             }
         }
+    }
+}
+
+/**
+ * Matrix view showing compact node item in various toggle states. Each row: label describing active toggles → rendered
+ * node item.
+ */
+@Suppress("PreviewPublic", "LongMethod")
+@PreviewLightDark
+@Composable
+fun SampleNodeCompactToggleMatrixPreview() {
+    val node = previewSampleNode(hopsAway = 0)
+    val local = previewLocalNode()
+    AppTheme {
+        Surface {
+            Column(modifier = Modifier.fillMaxWidth().padding(8.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                MatrixRow("All fields") { NodeItemCompact(thisNode = local, thatNode = node, distanceUnits = 0) }
+                MatrixRow("Health only") {
+                    NodeItemCompact(
+                        thisNode = local,
+                        thatNode = node,
+                        distanceUnits = 0,
+                        showHops = false,
+                        showChannel = false,
+                        showRole = false,
+                        showTelemetry = false,
+                    )
+                }
+                MatrixRow("No metrics") {
+                    NodeItemCompact(thisNode = local, thatNode = node, distanceUnits = 0, showTelemetry = false)
+                }
+                MatrixRow("No footer") {
+                    NodeItemCompact(
+                        thisNode = local,
+                        thatNode = node,
+                        distanceUnits = 0,
+                        showHops = false,
+                        showChannel = false,
+                        showRole = false,
+                    )
+                }
+                MatrixRow("Metrics + footer") {
+                    NodeItemCompact(
+                        thisNode = local,
+                        thatNode = node,
+                        distanceUnits = 0,
+                        showPower = false,
+                        showLastHeard = false,
+                        showLocation = false,
+                        showSignal = false,
+                    )
+                }
+                MatrixRow("Minimal (name only)") {
+                    NodeItemCompact(
+                        thisNode = local,
+                        thatNode = node,
+                        distanceUnits = 0,
+                        showPower = false,
+                        showLastHeard = false,
+                        showLocation = false,
+                        showHops = false,
+                        showSignal = false,
+                        showChannel = false,
+                        showRole = false,
+                        showTelemetry = false,
+                    )
+                }
+            }
+        }
+    }
+}
+
+/** Matrix view showing complete node item with/without metrics toggle. */
+@Suppress("PreviewPublic")
+@PreviewLightDark
+@Composable
+fun SampleNodeCompleteToggleMatrixPreview() {
+    val node = previewSampleNode()
+    val local = previewLocalNode()
+    AppTheme {
+        Surface {
+            Column(modifier = Modifier.fillMaxWidth().padding(8.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                MatrixRow("With metrics") {
+                    NodeItem(
+                        thisNode = local,
+                        thatNode = node,
+                        distanceUnits = 0,
+                        tempInFahrenheit = false,
+                        connectionState = ConnectionState.Connected,
+                        showTelemetry = true,
+                    )
+                }
+                MatrixRow("Without metrics") {
+                    NodeItem(
+                        thisNode = local,
+                        thatNode = node,
+                        distanceUnits = 0,
+                        tempInFahrenheit = false,
+                        connectionState = ConnectionState.Connected,
+                        showTelemetry = false,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun MatrixRow(label: String, content: @Composable () -> Unit) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.padding(start = 4.dp, bottom = 2.dp),
+        )
+        content()
+        HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
     }
 }
 
