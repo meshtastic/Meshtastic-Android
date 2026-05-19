@@ -61,13 +61,13 @@ class GeminiNanoDocAssistant(private val searchEngine: KeywordSearchEngine, priv
             )
     }
 
-    /** Cloud model with Google Search and URL context grounding — accesses meshtastic.org and other web resources. */
+    /** Cloud model with URL context — fetches only from meshtastic.org and github.com/meshtastic. */
     private val groundedModel by lazy {
         Firebase.ai(backend = GenerativeBackend.googleAI())
             .generativeModel(
                 modelName = MODEL_NAME,
                 systemInstruction = content { text(SYSTEM_INSTRUCTION) },
-                tools = listOf(Tool.googleSearch(), Tool.urlContext()),
+                tools = listOf(Tool.urlContext()),
             )
     }
 
@@ -380,13 +380,15 @@ Personality: Helpful, concise, enthusiastic about mesh networking. Use short par
 
 Knowledge sources (in priority order):
 1. Bundled app documentation provided as context below
-2. Your training knowledge about Meshtastic (meshtastic.org, GitHub repos, community forums)
-3. General LoRa/mesh networking knowledge
+2. Official Meshtastic documentation at meshtastic.org/docs
+3. Official Meshtastic GitHub repositories (github.com/meshtastic)
+4. General LoRa/mesh networking knowledge
 
 Guidelines:
 - Answer the user's question directly and helpfully
 - When the bundled docs cover the topic, cite them
-- When the bundled docs don't cover it, use your broader Meshtastic knowledge — don't refuse to help
+- When the bundled docs don't cover it, use your knowledge of official Meshtastic sources — don't refuse to help
+- Only reference official Meshtastic sources (meshtastic.org, github.com/meshtastic) — never cite random forums, blogs, or third-party sites
 - For firmware-specific or hardware-specific questions beyond app scope, point users to meshtastic.org/docs
 - Keep answers concise (2-4 short paragraphs max) unless the user asks for detail
 - If you're truly unsure about something Meshtastic-specific, say so honestly rather than guessing"""
@@ -448,8 +450,11 @@ Guidelines:
                 "The app connects to Meshtastic devices via Bluetooth or WiFi to send messages, " +
                 "share location, and manage mesh network settings like channels, nodes, and modules."
 
-        /** URL hint appended to prompts for the grounded cloud model to leverage URL context tool. */
+        /** URLs appended to prompts for the cloud model to leverage URL context tool. Only official sources. */
         private const val MESHTASTIC_URL_HINT =
-            "\n\nFor additional context, refer to https://meshtastic.org/docs/ if needed."
+            "\n\nFor additional context, you may reference these official sources:" +
+                "\n- https://meshtastic.org/docs/" +
+                "\n- https://github.com/meshtastic/Meshtastic-Android" +
+                "\n- https://github.com/meshtastic/firmware"
     }
 }
