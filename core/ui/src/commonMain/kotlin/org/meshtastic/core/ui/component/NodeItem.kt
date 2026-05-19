@@ -91,6 +91,7 @@ fun NodeItem(
     onLongClick: (() -> Unit)? = null,
     deviceType: DeviceType? = null,
     isActive: Boolean = false,
+    showTelemetry: Boolean = true,
 ) {
     val originalLongName = thatNode.user.long_name.ifEmpty { stringResource(Res.string.unknown_username) }
     val isMuted = remember(thatNode) { thatNode.isMuted }
@@ -218,9 +219,11 @@ fun NodeItem(
 
             NodeSignalRow(thatNode = thatNode, isThisNode = isThisNode, contentColor = contentColor)
 
-            val sensorItems = gatherSensors(thatNode, tempInFahrenheit, contentColor)
-            if (sensorItems.isNotEmpty()) {
-                MetricsGrid(sensorItems)
+            if (showTelemetry) {
+                val sensorItems = gatherSensors(thatNode, tempInFahrenheit, contentColor)
+                if (sensorItems.isNotEmpty()) {
+                    MetricsGrid(sensorItems)
+                }
             }
 
             NodeItemFooter(thatNode = thatNode, contentColor = contentColor)

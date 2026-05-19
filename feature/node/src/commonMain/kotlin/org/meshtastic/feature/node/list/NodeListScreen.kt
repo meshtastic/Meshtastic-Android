@@ -240,6 +240,7 @@ fun NodeListScreen(
                                     connectionState = connectionState,
                                     deviceType = deviceType,
                                     isActive = isActive,
+                                    showTelemetry = showTelemetry,
                                 )
 
                             NodeListDensity.COMPACT ->

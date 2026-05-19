@@ -862,7 +862,7 @@
     <string name="node_layout_help_signal_none">No usable signal detected. Below all quality thresholds.</string>
     <string name="node_layout_hops_away">Hops Away</string>
     <string name="node_layout_last_heard_time">Last Heard Time</string>
-    <string name="node_layout_log_icons">Log Icons</string>
+    <string name="node_layout_log_icons">Environment Metrics</string>
     <string name="node_layout_no_preview_available">No nodes available for preview.</string>
     <string name="node_layout_power">Power</string>
     <string name="node_layout_preview">Preview</string>
