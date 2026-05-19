@@ -119,7 +119,7 @@ private val ANDROID_ONLY_MODULES = setOf(":androidApp", ":core:api", ":core:barc
 
 /**
  * Modules excluded from Dokka aggregation. :core:proto contains only auto-generated Wire classes (no KDoc value) and
- * its TAKPacket-SDK dependency doesn't publish iOS metadata JARs to JitPack, causing
+ * its TAKPacket-SDK dependency doesn't publish iOS metadata JARs, causing
  * `transformCommonMainDependenciesMetadata` to fail during Dokka resolution.
  */
 private val DOKKA_EXCLUDED_MODULES = setOf(":core:proto")
