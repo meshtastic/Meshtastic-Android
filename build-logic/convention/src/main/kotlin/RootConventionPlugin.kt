@@ -37,7 +37,7 @@ class RootConventionPlugin : Plugin<Project> {
             val modules = allModules()
 
             apply(plugin = "org.jetbrains.dokka")
-            configureDokkaAggregation(modules)
+            configureDokkaAggregation(modules.filter { it !in DOKKA_EXCLUDED_MODULES })
 
             apply(plugin = "org.jetbrains.kotlinx.kover")
             configureKover()
@@ -116,6 +116,13 @@ private val ALL_MODULES_FULL =
 
 /** Android-only modules that don't apply the KMP plugin. */
 private val ANDROID_ONLY_MODULES = setOf(":androidApp", ":core:api", ":core:barcode", ":feature:widget")
+
+/**
+ * Modules excluded from Dokka aggregation. :core:proto contains only auto-generated Wire classes (no KDoc value) and
+ * its TAKPacket-SDK dependency doesn't publish iOS metadata JARs to JitPack, causing
+ * `transformCommonMainDependenciesMetadata` to fail during Dokka resolution.
+ */
+private val DOKKA_EXCLUDED_MODULES = setOf(":core:proto")
 
 private fun allModules(): List<String> = ALL_MODULES_FULL
 

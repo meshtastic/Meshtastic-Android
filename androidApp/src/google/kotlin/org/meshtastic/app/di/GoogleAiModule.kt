@@ -17,6 +17,7 @@
 package org.meshtastic.app.di
 
 import android.content.Context
+import okio.FileSystem
 import okio.Path.Companion.toOkioPath
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
@@ -37,7 +38,7 @@ class GoogleAiModule {
 
     @Single
     fun docTranslationCache(context: Context): DocTranslationCache =
-        DocTranslationCache(cacheDir = context.cacheDir.toOkioPath())
+        DocTranslationCache(cacheDir = context.cacheDir.toOkioPath(), fileSystem = FileSystem.SYSTEM)
 
     @Single fun docTranslationService(cache: DocTranslationCache): DocTranslationService = MlKitDocTranslator(cache)
 }
