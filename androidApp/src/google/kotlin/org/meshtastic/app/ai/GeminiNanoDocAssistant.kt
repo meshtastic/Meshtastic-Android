@@ -136,19 +136,23 @@ class GeminiNanoDocAssistant(private val searchEngine: KeywordSearchEngine, priv
         val prompt = buildPrompt(question, contextResult.parts)
         Logger.d(tag = TAG) { "Prompt: ${prompt.length} chars, message #$messageCount" }
 
-        val answer = generateWithChat(prompt)
+        val chatResult = generateWithChat(prompt)
         messageCount++
-        Logger.d(tag = TAG) { "Response (${answer.length} chars): ${answer.take(200)}" }
+        Logger.d(tag = TAG) { "Response (${chatResult.answer.length} chars): ${chatResult.answer.take(200)}" }
 
         // Merge context pages with any pages mentioned by title in the response (à la Meshtastic-Apple).
         val mentionedPages =
             bundle.pages.filter { page ->
-                page.id !in contextResult.usedPageIds && answer.contains(page.title, ignoreCase = true)
+                page.id !in contextResult.usedPageIds && chatResult.answer.contains(page.title, ignoreCase = true)
             }
         val allSourcePages =
             contextResult.usedPageIds.mapNotNull { id -> bundle.pages.find { it.id == id } } + mentionedPages
 
-        AIDocAssistantResult.Success(answer = answer, sourcePages = allSourcePages, usedOnDeviceModel = false)
+        AIDocAssistantResult.Success(
+            answer = chatResult.answer,
+            sourcePages = allSourcePages,
+            usedOnDeviceModel = chatResult.usedOnDevice,
+        )
     } catch (e: Exception) {
         Logger.w(tag = TAG) { "Inference failed: ${e.message}" }
         val errorType =
@@ -169,11 +173,14 @@ class GeminiNanoDocAssistant(private val searchEngine: KeywordSearchEngine, priv
         Logger.d(tag = TAG) { "Chat session reset" }
     }
 
+    /** Result from [generateWithChat] indicating which model produced the answer. */
+    private data class ChatResult(val answer: String, val usedOnDevice: Boolean)
+
     /**
      * Uses the Chat API for multi-turn conversation. First message tries on-device for speed; all messages also go
      * through the cloud chat session to maintain conversation history for follow-ups.
      */
-    private suspend fun generateWithChat(prompt: String): String {
+    private suspend fun generateWithChat(prompt: String): ChatResult {
         val chat = chatSession ?: groundedModel.startChat().also { chatSession = it }
 
         // First message: try on-device in parallel for speed, use cloud chat as primary.
@@ -196,14 +203,17 @@ class GeminiNanoDocAssistant(private val searchEngine: KeywordSearchEngine, priv
                 } catch (e: Exception) {
                     Logger.d(tag = TAG) { "Cloud chat seeding failed (non-fatal): ${e.message}" }
                 }
-                return onDeviceAnswer
+                return ChatResult(answer = onDeviceAnswer, usedOnDevice = true)
             }
         }
 
         // Use cloud chat (maintains full conversation history for follow-ups).
         val groundedPrompt = prompt + MESHTASTIC_URL_HINT
         val response = chat.sendMessage(groundedPrompt)
-        return response.text?.trimEnd() ?: "I wasn't able to generate a response."
+        return ChatResult(
+            answer = response.text?.trimEnd() ?: "I wasn't able to generate a response.",
+            usedOnDevice = false,
+        )
     }
 
     /** Heuristic: detect when the model says it can't find the answer in the provided docs. */
