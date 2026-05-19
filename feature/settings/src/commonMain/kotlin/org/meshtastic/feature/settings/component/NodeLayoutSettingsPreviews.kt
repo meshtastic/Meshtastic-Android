@@ -175,11 +175,11 @@ fun SampleNodeCompactSignalOnlyPreview() {
             Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
                 NodeItemCompact(
                     thisNode = localNode,
-                    thatNode = sampleNode,
+                    thatNode = previewSampleNode(hopsAway = 0),
                     distanceUnits = 0,
                     showPower = false,
                     showLastHeard = true,
-                    lastHeardIsRelative = false,
+                    lastHeardIsRelative = true,
                     showLocation = false,
                     showHops = false,
                     showSignal = true,

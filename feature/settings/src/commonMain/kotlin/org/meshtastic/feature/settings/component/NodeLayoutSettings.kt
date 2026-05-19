@@ -210,7 +210,7 @@ fun NodeLayoutSettings(
 }
 
 @Suppress("MagicNumber")
-internal fun previewSampleNode(): Node = Node(
+internal fun previewSampleNode(hopsAway: Int = 1): Node = Node(
     num = 0x1A2B3C4D,
     user =
     User(
@@ -237,7 +237,7 @@ internal fun previewSampleNode(): Node = Node(
     environmentMetrics =
     EnvironmentMetrics(temperature = 24.5F, relative_humidity = 45.0F, barometric_pressure = 1013.25F),
     isFavorite = true,
-    hopsAway = 1,
+    hopsAway = hopsAway,
 )
 
 /** Local device node used as reference point for distance calculation in previews. */
