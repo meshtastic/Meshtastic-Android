@@ -28,8 +28,6 @@ Configure your radio hardware and user identity parameters.
 
 After modifying settings, tap **Save** to write the configuration to your radio. The device may reboot to apply changes.
 
-![Settings appearance section](/assets/screenshots/settings-radio-user_lora_config.png)
-
 ## Radio Configuration
 
 ### Device Config

@@ -42,9 +42,7 @@ Channels support multiple encryption levels:
 3. Configure the channel name and encryption key.
 4. Share the channel URL/QR code with others who need access.
 
-Tapping a channel shows its details and sharing options:
-
-![Channel info and sharing](/assets/screenshots/messages_channel_info.png)
+Tapping a channel shows its details and sharing options.
 
 ## Direct Messages
 
@@ -96,9 +94,7 @@ Pre-configured messages for rapid communication:
 
 ![Quick chat option](/assets/screenshots/messages_quick_chat.png)
 
-The channel list shows each channel with its latest message preview:
-
-![Channel list item showing channel name and last message](/assets/screenshots/messages-and-channels_channel_list.png)
+The channel list shows each channel with its latest message preview.
 
 ### Message Bubbles
 
