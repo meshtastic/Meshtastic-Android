@@ -28,12 +28,12 @@ color_scheme: meshtastic
 # Default front-matter for pages in subdirectories
 defaults:
   - scope:
-      path: "user/"
+      path: "en/user/"
     values:
       parent: User Guide
       layout: default
   - scope:
-      path: "developer/"
+      path: "en/developer/"
     values:
       parent: Developer Guide
       layout: default
@@ -41,229 +41,229 @@ defaults:
   # They use a dedicated locale layout with a back-link to the English version.
   # Auto-generated from Android app locales (values-* resource dirs).
   - scope:
-      path: "ar/"
+      path: "ar"
     values:
       layout: locale_page
       locale: ar
       nav_exclude: true
   - scope:
-      path: "be/"
+      path: "be"
     values:
       layout: locale_page
       locale: be
       nav_exclude: true
   - scope:
-      path: "bg/"
+      path: "bg"
     values:
       layout: locale_page
       locale: bg
       nav_exclude: true
   - scope:
-      path: "ca/"
+      path: "ca"
     values:
       layout: locale_page
       locale: ca
       nav_exclude: true
   - scope:
-      path: "cs/"
+      path: "cs"
     values:
       layout: locale_page
       locale: cs
       nav_exclude: true
   - scope:
-      path: "de/"
+      path: "de"
     values:
       layout: locale_page
       locale: de
       nav_exclude: true
   - scope:
-      path: "el/"
+      path: "el"
     values:
       layout: locale_page
       locale: el
       nav_exclude: true
   - scope:
-      path: "es/"
+      path: "es"
     values:
       layout: locale_page
       locale: es
       nav_exclude: true
   - scope:
-      path: "et/"
+      path: "et"
     values:
       layout: locale_page
       locale: et
       nav_exclude: true
   - scope:
-      path: "fi/"
+      path: "fi"
     values:
       layout: locale_page
       locale: fi
       nav_exclude: true
   - scope:
-      path: "fr/"
+      path: "fr"
     values:
       layout: locale_page
       locale: fr
       nav_exclude: true
   - scope:
-      path: "ga/"
+      path: "ga"
     values:
       layout: locale_page
       locale: ga
       nav_exclude: true
   - scope:
-      path: "gl/"
+      path: "gl"
     values:
       layout: locale_page
       locale: gl
       nav_exclude: true
   - scope:
-      path: "he/"
+      path: "he"
     values:
       layout: locale_page
       locale: he
       nav_exclude: true
   - scope:
-      path: "hr/"
+      path: "hr"
     values:
       layout: locale_page
       locale: hr
       nav_exclude: true
   - scope:
-      path: "ht/"
+      path: "ht"
     values:
       layout: locale_page
       locale: ht
       nav_exclude: true
   - scope:
-      path: "hu/"
+      path: "hu"
     values:
       layout: locale_page
       locale: hu
       nav_exclude: true
   - scope:
-      path: "is/"
+      path: "is"
     values:
       layout: locale_page
       locale: is
       nav_exclude: true
   - scope:
-      path: "it/"
+      path: "it"
     values:
       layout: locale_page
       locale: it
       nav_exclude: true
   - scope:
-      path: "ja/"
+      path: "ja"
     values:
       layout: locale_page
       locale: ja
       nav_exclude: true
   - scope:
-      path: "ko/"
+      path: "ko"
     values:
       layout: locale_page
       locale: ko
       nav_exclude: true
   - scope:
-      path: "lt/"
+      path: "lt"
     values:
       layout: locale_page
       locale: lt
       nav_exclude: true
   - scope:
-      path: "nl/"
+      path: "nl"
     values:
       layout: locale_page
       locale: nl
       nav_exclude: true
   - scope:
-      path: "no/"
+      path: "no"
     values:
       layout: locale_page
       locale: no
       nav_exclude: true
   - scope:
-      path: "pl/"
+      path: "pl"
     values:
       layout: locale_page
       locale: pl
       nav_exclude: true
   - scope:
-      path: "pt/"
+      path: "pt"
     values:
       layout: locale_page
       locale: pt
       nav_exclude: true
   - scope:
-      path: "pt-rBR/"
+      path: "pt-rBR"
     values:
       layout: locale_page
       locale: pt-rBR
       nav_exclude: true
   - scope:
-      path: "ro/"
+      path: "ro"
     values:
       layout: locale_page
       locale: ro
       nav_exclude: true
   - scope:
-      path: "ru/"
+      path: "ru"
     values:
       layout: locale_page
       locale: ru
       nav_exclude: true
   - scope:
-      path: "sk/"
+      path: "sk"
     values:
       layout: locale_page
       locale: sk
       nav_exclude: true
   - scope:
-      path: "sl/"
+      path: "sl"
     values:
       layout: locale_page
       locale: sl
       nav_exclude: true
   - scope:
-      path: "sq/"
+      path: "sq"
     values:
       layout: locale_page
       locale: sq
       nav_exclude: true
   - scope:
-      path: "sr/"
+      path: "sr"
     values:
       layout: locale_page
       locale: sr
       nav_exclude: true
   - scope:
-      path: "sv/"
+      path: "sv"
     values:
       layout: locale_page
       locale: sv
       nav_exclude: true
   - scope:
-      path: "tr/"
+      path: "tr"
     values:
       layout: locale_page
       locale: tr
       nav_exclude: true
   - scope:
-      path: "uk/"
+      path: "uk"
     values:
       layout: locale_page
       locale: uk
       nav_exclude: true
   - scope:
-      path: "zh-rCN/"
+      path: "zh-rCN"
     values:
       layout: locale_page
       locale: zh-rCN
       nav_exclude: true
   - scope:
-      path: "zh-rTW/"
+      path: "zh-rTW"
     values:
       layout: locale_page
       locale: zh-rTW
@@ -285,5 +285,6 @@ exclude:
   - Gemfile
   - Gemfile.lock
   - assets/screenshots/.gitkeep
+  - README.md
   - "*.sh"
 

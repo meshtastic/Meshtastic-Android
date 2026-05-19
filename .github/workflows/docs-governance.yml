@@ -39,7 +39,7 @@ jobs:
             '^feature/.*/src/commonMain/.*/(ui|component|screen)/|^feature/.*/src/androidMain/.*/ui/|^core/ui/src/commonMain/' \
             | grep -v 'Test\|Preview\|__Snapshots__' || true)
 
-          docs_changed=$(echo "$changed" | grep -E '^docs/(user|developer)/' || true)
+          docs_changed=$(echo "$changed" | grep -E '^docs/en/(user|developer)/' || true)
 
           echo "views_changed<<EOF" >> "$GITHUB_OUTPUT"
           echo "$views_changed" >> "$GITHUB_OUTPUT"
@@ -64,9 +64,9 @@ jobs:
             const body = [
               '## 📄 Docs staleness check — advisory',
               '',
-              'This PR modifies user-facing UI source files but does not update any page under `docs/user/` or `docs/developer/`.',
+              'This PR modifies user-facing UI source files but does not update any page under `docs/en/user/` or `docs/en/developer/`.',
               '',
-              '> ⚠️ Doc changes propagate to **3 consumers**: in-app docs browser, Jekyll site (GitHub Pages), and meshtastic.org (Docusaurus sync). Updating a page in `docs/` automatically flows to all three.',
+              '> ⚠️ Doc changes propagate to **3 consumers**: in-app docs browser, Jekyll site (GitHub Pages), and meshtastic.org (Docusaurus sync). Updating a page in `docs/en/` automatically flows to all three.',
               '',
               '**Changed source files:**',
               '```',
@@ -76,19 +76,19 @@ jobs:
               '**What to check:**',
               '| Changed area | Likely doc page |',
               '|---|---|',
-              '| `feature/messaging/` | `docs/user/messages-and-channels.md` |',
-              '| `feature/node/` | `docs/user/nodes.md` or `docs/user/node-metrics.md` |',
-              '| `feature/map/` | `docs/user/map-and-waypoints.md` |',
-              '| `feature/connections/` | `docs/user/connections.md` |',
-              '| `feature/settings/` | `docs/user/settings-radio-user.md` or `docs/user/settings-module-admin.md` |',
-              '| `feature/firmware/` | `docs/user/firmware.md` |',
-              '| `feature/intro/` | `docs/user/onboarding.md` |',
-              '| `feature/discovery/` | `docs/user/discovery.md` |',
+              '| `feature/messaging/` | `docs/en/user/messages-and-channels.md` |',
+              '| `feature/node/` | `docs/en/user/nodes.md` or `docs/en/user/node-metrics.md` |',
+              '| `feature/map/` | `docs/en/user/map-and-waypoints.md` |',
+              '| `feature/connections/` | `docs/en/user/connections.md` |',
+              '| `feature/settings/` | `docs/en/user/settings-radio-user.md` or `docs/en/user/settings-module-admin.md` |',
+              '| `feature/firmware/` | `docs/en/user/firmware.md` |',
+              '| `feature/intro/` | `docs/en/user/onboarding.md` |',
+              '| `feature/discovery/` | `docs/en/user/discovery.md` |',
               '| `feature/docs/` | Internal docs infrastructure |',
-              '| `core/ui/` | `docs/developer/codebase.md` or component-specific user pages |',
+              '| `core/ui/` | `docs/en/developer/codebase.md` or component-specific user pages |',
               '',
               '**New page checklist** (if adding a new doc page):',
-              '1. Create the `.md` file in `docs/user/` or `docs/developer/` with `last_updated` frontmatter',
+              '1. Create the `.md` file in `docs/en/user/` or `docs/en/developer/` with `last_updated` frontmatter',
               '2. Register in `DocBundleLoader.kt` with string resources (in-app browser)',
               '3. Jekyll and Docusaurus sync pick up new pages automatically — no config change needed',
               '',
@@ -141,14 +141,14 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 comment_id: existing.id,
-                body: '## ✅ Docs staleness check passed\n\nThis PR includes updates to `docs/` alongside the source changes. Thank you!',
+                body: '## ✅ Docs staleness check passed\n\nThis PR includes updates to `docs/en/` alongside the source changes. Thank you!',
               });
             }
 
       - name: Advisory status
         if: steps.changed.outputs.stale == 'true'
         run: |
-          echo "::warning::UI source files changed without corresponding docs/ updates."
+          echo "::warning::UI source files changed without corresponding docs/en/ updates."
           echo "Add the 'skip-docs-check' label if this PR does not require a doc update."
           echo "NOTE: This check is advisory while docs coverage matures across platforms."
           echo "To upgrade to blocking, change this step to 'exit 1'."
@@ -170,7 +170,7 @@ jobs:
           node-version: "24"
 
       - name: Validate internal links
-        run: node scripts/validate-doc-links.js docs
+        run: node scripts/validate-doc-links.js docs/en
 
       - name: Check doc coverage
         run: node scripts/check-doc-coverage.js .
@@ -179,7 +179,7 @@ jobs:
         run: |
           loader="feature/docs/src/commonMain/kotlin/org/meshtastic/feature/docs/data/DocBundleLoader.kt"
           missing=0
-          for f in docs/user/*.md docs/developer/*.md; do
+          for f in docs/en/user/*.md docs/en/developer/*.md; do
             slug=$(basename "$f" .md)
             if ! grep -q "\"$slug\"" "$loader"; then
               echo "ERROR: $slug not registered in DocBundleLoader.kt"

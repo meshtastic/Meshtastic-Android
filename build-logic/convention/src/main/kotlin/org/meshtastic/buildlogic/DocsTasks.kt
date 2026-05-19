@@ -100,9 +100,10 @@ abstract class GenerateDocsBundleTask : DefaultTask() {
         val indexEntries = mutableListOf<String>()
         var pageCount = 0
 
-        // Process English user and developer directories
+        // Process English user and developer directories (under docs/en/)
+        val enDir = File(src, "en")
         listOf("user", "developer").forEach { section ->
-            val sectionDir = File(src, section)
+            val sectionDir = File(enDir, section)
             if (!sectionDir.exists()) return@forEach
 
             sectionDir.listFiles { f -> f.extension == "md" }?.sortedBy { it.name }?.forEach { mdFile ->
@@ -143,8 +144,9 @@ abstract class GenerateDocsBundleTask : DefaultTask() {
 
         // Process Crowdin locale directories: docs/{qualifier}/user/*.md
         // Crowdin %android_code% produces: fr, pt-rBR, zh-rCN, zh-rTW
+        // Skip "en" since English sources are handled above.
         val localePattern = Regex("^[a-z]{2,3}(-r[A-Z]{2})?$")
-        src.listFiles { f -> f.isDirectory && localePattern.matches(f.name) }
+        src.listFiles { f -> f.isDirectory && localePattern.matches(f.name) && f.name != "en" }
             ?.sortedBy { it.name }
             ?.forEach { localeDir ->
                 val locale = localeDir.name
@@ -198,7 +200,7 @@ abstract class GenerateDocsBundleTask : DefaultTask() {
         File(cssDir, "docs.css").writeText(generateCss())
 
         // Write locales manifest (for consumers that need to know available translations)
-        val localesManifest = src.listFiles { f -> f.isDirectory && localePattern.matches(f.name) }
+        val localesManifest = src.listFiles { f -> f.isDirectory && localePattern.matches(f.name) && f.name != "en" }
             ?.map { it.name }?.sorted() ?: emptyList()
         val manifestFile = File(out, "locales.json")
         manifestFile.writeText(localesManifest.joinToString(", ", "[", "]") { "\"$it\"" })
@@ -258,7 +260,7 @@ abstract class GenerateDocsBundleTask : DefaultTask() {
             .replace(Regex("^---[\\s\\S]*?---\\s*", RegexOption.MULTILINE), "")
             .replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
         val dir = if (locale == "ar") "rtl" else "ltr"
-        // Locale pages are one level deeper: docs/{locale}/user/foo.html vs docs/user/foo.html
+        // Locale pages are one level deeper: docs/{locale}/user/foo.html vs docs/en/user/foo.html
         val cssPath = if (locale != "en") "../../styles/docs.css" else "../styles/docs.css"
         return """
             |<!DOCTYPE html>

@@ -7,7 +7,8 @@ layout: default
 {% assign page_path = page.path %}
 {% assign path_parts = page_path | split: "/" %}
 {% assign remaining_parts = path_parts | slice: 1, path_parts.size %}
-{% assign en_path = remaining_parts | join: "/" | replace: ".md", "" %}
+{% assign en_relative = remaining_parts | join: "/" | replace: ".md", "" %}
+{% assign en_path = "en/" | append: en_relative %}
 
 <div class="locale-page-banner" {% if locale_info.dir == "rtl" %}dir="rtl"{% endif %}>
   <p class="locale-notice">

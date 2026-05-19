@@ -11,7 +11,9 @@ const fs = require("fs");
 const path = require("path");
 const { discoverSlugs, forEachDocPage } = require("./lib/frontmatter");
 
-const DOCS_DIR = path.resolve(process.argv[2] || "docs");
+const DOCS_DIR = path.resolve(process.argv[2] || path.join("docs", "en"));
+// Assets (screenshots) live at docs/ root, not inside the en/ locale folder
+const DOCS_ROOT = path.resolve(DOCS_DIR, "..");
 const IMAGE_EXTS = new Set([".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp"]);
 
 // Collect known page slugs from both sections
@@ -64,7 +66,7 @@ forEachDocPage(DOCS_DIR, (filePath, slug, section) => {
             if (/^https?:/.test(imgPath)) continue;
 
             const resolved = imgPath.startsWith("/")
-                ? path.join(DOCS_DIR, imgPath)
+                ? path.join(DOCS_ROOT, imgPath)
                 : path.resolve(path.dirname(filePath), imgPath);
             if (!fs.existsSync(resolved)) {
                 console.log(`  ERROR: ${section}/${slug}.md:${lineNum} — missing image '${imgPath}'`);
