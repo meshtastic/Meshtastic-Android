@@ -58,13 +58,10 @@ import org.meshtastic.core.resources.node_list_long_click_label
 import org.meshtastic.core.resources.unknown_username
 import org.meshtastic.core.ui.icon.DeviceSleep
 import org.meshtastic.core.ui.icon.Distance
-import org.meshtastic.core.ui.icon.ElectricPower
 import org.meshtastic.core.ui.icon.Favorite
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.MqttConnected
-import org.meshtastic.core.ui.icon.PinDrop
 import org.meshtastic.core.ui.icon.Success
-import org.meshtastic.core.ui.icon.Temperature
 import org.meshtastic.core.ui.icon.Unmessageable
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 import org.meshtastic.proto.Config
@@ -74,7 +71,7 @@ private const val INACTIVE_ALPHA = 0.2f
 private const val COMPACT_ICON_SIZE_DP = 16
 
 @Composable
-@Suppress("LongMethod", "LongParameterList", "CyclomaticComplexMethod")
+@Suppress("LongMethod", "LongParameterList", "CyclomaticComplexMethod", "UnusedParameter")
 fun NodeItemCompact(
     thisNode: Node?,
     thatNode: Node,
@@ -203,7 +200,6 @@ fun NodeItemCompact(
                     showHops = showHops,
                     showChannel = showChannel,
                     showRole = showRole,
-                    showTelemetry = showTelemetry,
                     contentColor = contentColor,
                 )
             }
@@ -378,7 +374,6 @@ private fun CompactFooterRow(
     showHops: Boolean,
     showChannel: Boolean,
     showRole: Boolean,
-    showTelemetry: Boolean,
     contentColor: Color,
 ) {
     val tertiaryColor = contentColor.copy(alpha = 0.7f)
@@ -404,7 +399,7 @@ private fun CompactFooterRow(
         }
     }
 
-    if (segments.isNotEmpty() || (showTelemetry && hasTelemetryData(thatNode))) {
+    if (segments.isNotEmpty() || (showRole && thatNode.viaMqtt)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             if (segments.isNotEmpty()) {
                 Text(
@@ -416,7 +411,7 @@ private fun CompactFooterRow(
                 )
             }
 
-            // Status icons (MQTT)
+            // MQTT status icon
             if (showRole && thatNode.viaMqtt) {
                 Icon(
                     imageVector = MeshtasticIcons.MqttConnected,
@@ -425,47 +420,9 @@ private fun CompactFooterRow(
                     tint = tertiaryColor,
                 )
             }
-
-            // Telemetry presence icons (trailing)
-            if (showTelemetry && hasTelemetryData(thatNode)) {
-                CompactTelemetryIcons(thatNode = thatNode, contentColor = tertiaryColor)
-            }
         }
     }
 }
-
-@Composable
-private fun CompactTelemetryIcons(thatNode: Node, contentColor: Color) {
-    Row(horizontalArrangement = Arrangement.spacedBy(2.dp), verticalAlignment = Alignment.CenterVertically) {
-        if (thatNode.validPosition != null) {
-            Icon(
-                imageVector = MeshtasticIcons.PinDrop,
-                contentDescription = null,
-                modifier = Modifier.size(COMPACT_ICON_SIZE_DP.dp),
-                tint = contentColor,
-            )
-        }
-        if (thatNode.hasEnvironmentMetrics) {
-            Icon(
-                imageVector = MeshtasticIcons.Temperature,
-                contentDescription = null,
-                modifier = Modifier.size(COMPACT_ICON_SIZE_DP.dp),
-                tint = contentColor,
-            )
-        }
-        if (thatNode.hasPowerMetrics) {
-            Icon(
-                imageVector = MeshtasticIcons.ElectricPower,
-                contentDescription = null,
-                modifier = Modifier.size(COMPACT_ICON_SIZE_DP.dp),
-                tint = contentColor,
-            )
-        }
-    }
-}
-
-private fun hasTelemetryData(node: Node): Boolean =
-    node.validPosition != null || node.hasEnvironmentMetrics || node.hasPowerMetrics
 
 private fun isFutureDate(lastHeard: Int): Boolean {
     val nowSeconds = org.meshtastic.core.common.util.nowSeconds.toInt()
