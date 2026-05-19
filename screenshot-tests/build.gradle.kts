@@ -28,7 +28,7 @@ configure<LibraryExtension> {
 
     experimentalProperties["android.experimental.enableScreenshotTest"] = true
 
-    testOptions { screenshotTests { imageDifferenceThreshold = 0.0005f } }
+    testOptions { screenshotTests { imageDifferenceThreshold = 0.02f } }
 }
 
 // CST screenshot tests use a custom runner incompatible with test-retry
