@@ -101,10 +101,14 @@ jobs:
               | sed -e :a -e '/^\n*$/{$d;N;ba}'
           }
 
-          # Helper: generate notes using git log (works between any two refs)
+          # Helper: generate notes using GitHub compare API (works between any two refs)
           generate_notes_git() {
             local from_ref="$1" to_ref="$2"
-            git log --no-merges --format="* %s by @%an in [\`%h\`](https://github.com/${REPO}/commit/%H)" "$from_ref".."$to_ref" 2>/dev/null || true
+            gh api "repos/${REPO}/compare/${from_ref}...${to_ref}" \
+              --jq '.commits[]
+                | select(.parents | length == 1)
+                | "* \(.commit.message | split("\n")[0]) by \(.commit.author.name) (@\(.author.login // .commit.author.name)) in [`\(.sha[0:9])`](https://github.com/'"${REPO}"'/commit/\(.sha))"' \
+              2>/dev/null || true
           }
 
           # Helper: demote ### headings to #### for nesting under channel sections
