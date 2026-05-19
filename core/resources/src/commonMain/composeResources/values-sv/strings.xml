@@ -303,6 +303,12 @@
     <string name="distance_measurements">Avståndsmätning</string>
     <string name="distance_measurements_description">Visa avståndet mellan din telefon och andra Meshtastic noder med kända positioner.</string>
     <string name="dns">DNS</string>
+    <!-- DOC -->
+    <string name="doc_clear_search">Rensa sökning</string>
+    <string name="doc_title_discovery">Upptäckt</string>
+    <string name="doc_title_mqtt">MQTT</string>
+    <string name="doc_title_nodes">Noder</string>
+    <string name="doc_title_onboarding">Kom igång</string>
     <string name="done">Klart</string>
     <string name="dont_show_again_for_device">Visa inte igen för denna enhet</string>
     <string name="double_tap_as_button_press">Dubbeltryck som knapptryck</string>

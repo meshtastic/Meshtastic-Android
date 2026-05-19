@@ -324,6 +324,12 @@
     <string name="distance_measurements">Etäisyyden mittaukset</string>
     <string name="distance_measurements_description">Näytä etäisyys puhelimen ja muiden sijainnin jakavien Meshtastic laitteiden välillä.</string>
     <string name="dns">DNS</string>
+    <!-- DOC -->
+    <string name="doc_clear_search">Tyhjennä haku</string>
+    <string name="doc_title_connections">Yhteydet</string>
+    <string name="doc_title_discovery">Haku</string>
+    <string name="doc_title_mqtt">MQTT</string>
+    <string name="doc_title_nodes">Laitteet</string>
     <string name="done">Valmis</string>
     <string name="dont_show_again_for_device">Älä näytä enää tälle laitteelle</string>
     <string name="double_tap_as_button_press">Kaksoisnapautus painikkeena</string>

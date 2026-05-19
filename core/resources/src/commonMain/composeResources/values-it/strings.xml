@@ -276,6 +276,12 @@
     <string name="distance_measurements">Misure di distanza</string>
     <string name="distance_measurements_description">Visualizza la distanza tra il telefono e gli altri nodi Meshtastic con posizione attiva.</string>
     <string name="dns">DNS</string>
+    <!-- DOC -->
+    <string name="doc_clear_search">Azzera ricerca</string>
+    <string name="doc_title_connections">Connessioni</string>
+    <string name="doc_title_mqtt">MQTT</string>
+    <string name="doc_title_nodes">Nodi</string>
+    <string name="doc_title_onboarding">Come iniziare</string>
     <string name="done">Fatto</string>
     <string name="double_tap_as_button_press">Doppio tocco come pressione pulsante</string>
     <string name="downlink_enabled">Downlink attivato</string>

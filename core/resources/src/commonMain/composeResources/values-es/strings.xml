@@ -250,6 +250,12 @@
     <string name="distance_measurements">Mediciones de Distancia</string>
     <string name="distance_measurements_description">Muestra la distancia entre tu teléfono y otros nodos Meshtastic posicionados.</string>
     <string name="dns">DNS</string>
+    <!-- DOC -->
+    <string name="doc_clear_search">Borrar búsqueda</string>
+    <string name="doc_title_connections">Conexiones</string>
+    <string name="doc_title_mqtt">MQTT</string>
+    <string name="doc_title_nodes">Nodos</string>
+    <string name="doc_title_onboarding">Primeros Pasos</string>
     <string name="done">Hecho</string>
     <string name="double_tap_as_button_press">Doble pulsación como botón</string>
     <string name="downlink_enabled">Baja de Paquetes Permitida</string>

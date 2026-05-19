@@ -81,6 +81,8 @@
     <string name="display">Οθόνη</string>
     <!-- DISTANCE -->
     <string name="distance">Απόσταση</string>
+    <!-- DOC -->
+    <string name="doc_title_mqtt">MQTT</string>
     <string name="edit">Επεξεργασία</string>
     <string name="eight_hours">8 Ώρες</string>
     <!-- ENCRYPTION -->

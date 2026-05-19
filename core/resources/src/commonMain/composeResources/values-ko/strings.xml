@@ -148,6 +148,9 @@
     <!-- DISTANCE -->
     <string name="distance">거리</string>
     <string name="dns">DNS</string>
+    <!-- DOC -->
+    <string name="doc_title_mqtt">MQTT</string>
+    <string name="doc_title_nodes">노드</string>
     <string name="downlink_enabled">다운링크 활성화</string>
     <string name="download">다운로드</string>
     <string name="echo_enabled">에코 활성화</string>

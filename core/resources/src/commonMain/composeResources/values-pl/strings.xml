@@ -226,6 +226,10 @@
     <!-- DISTANCE -->
     <string name="distance">Odległość</string>
     <string name="dns">DNS</string>
+    <!-- DOC -->
+    <string name="doc_clear_search">Wyczyść wyszukiwanie</string>
+    <string name="doc_title_mqtt">MQTT</string>
+    <string name="doc_title_nodes">Węzły</string>
     <string name="done">Wykonano</string>
     <string name="double_tap_as_button_press">Podwójne dotknięcie jako naciśnięcie przycisku</string>
     <string name="downlink_enabled">Odbiór włączony</string>
