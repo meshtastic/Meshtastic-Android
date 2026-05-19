@@ -54,9 +54,11 @@ The primary structured data store:
 **Module:** `core:datastore`
 
 For lightweight key-value preferences:
-- Connection state
-- Last connected device
-- UI preferences
+- Local radio configuration (LocalConfig proto)
+- Module configuration (ModuleConfig proto)
+- Channel set data
+- Local statistics
+- Recently connected device addresses
 
 ## Core Prefs
 

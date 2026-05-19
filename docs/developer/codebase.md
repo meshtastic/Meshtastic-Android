@@ -33,22 +33,27 @@ Meshtastic-Android/
 │   ├── wifi-provision/
 │   └── widget/
 ├── core/                   # Core infrastructure modules (KMP)
+│   ├── api/
+│   ├── barcode/
+│   ├── ble/
 │   ├── common/
-│   ├── navigation/
-│   ├── ui/
-│   ├── resources/
-│   ├── model/
 │   ├── data/
 │   ├── database/
 │   ├── datastore/
-│   ├── prefs/
-│   ├── repository/
-│   ├── service/
 │   ├── di/
+│   ├── domain/
+│   ├── model/
+│   ├── navigation/
 │   ├── network/
-│   ├── ble/
+│   ├── nfc/
+│   ├── prefs/
 │   ├── proto/
-│   └── testing/
+│   ├── repository/
+│   ├── resources/
+│   ├── service/
+│   ├── takserver/
+│   ├── testing/
+│   └── ui/
 ├── build-logic/            # Convention plugins and build helpers
 │   └── convention/
 ├── docs/                   # Documentation source (markdown)

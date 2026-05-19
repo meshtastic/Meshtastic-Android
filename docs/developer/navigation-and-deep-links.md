@@ -105,7 +105,7 @@ Deep link routing is tested in:
 core/navigation/src/commonTest/kotlin/org/meshtastic/core/navigation/DeepLinkRouterTest.kt
 ```
 
-Example:
+Example of how a deep link test would look:
 ```kotlin
 @Test
 fun `help docs deep link routes correctly`() {

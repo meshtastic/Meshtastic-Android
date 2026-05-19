@@ -73,6 +73,8 @@ interface RadioTransportFactory {
     val supportedDeviceTypes: List<DeviceType>
     fun createTransport(address: String, service: RadioInterfaceService): RadioTransport
     fun isMockTransport(): Boolean
+    fun isAddressValid(address: String?): Boolean
+    fun toInterfaceAddress(interfaceId: InterfaceId, rest: String): String
 }
 ```
 

@@ -35,7 +35,6 @@ After modifying settings, tap **Save** to write the configuration to your radio.
 | Setting | Description | Default |
 |---------|-------------|---------|
 | Role | Node behavior (Client, Router, etc.) | Client |
-| Debug Log | Enable verbose debug logging | Disabled |
 | Rebroadcast Mode | How the node retransmits messages | All |
 | Node Info Broadcast (s) | Interval for broadcasting node info | 10800 |
 | Double-tap Button | Action for double-tap button press | Disabled |
@@ -149,6 +148,7 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 | Admin Key | Key for remote administration |
 | Private Key | Your node's private key (handle securely) |
 | Admin Channel Enabled | Allow admin commands via channel |
+| Debug Log | Output live debug logging over serial/bluetooth | 
 | Serial Enabled | Enable serial console access (moved from Device Config) |
 | Managed Mode | Restrict non-admin channel changes |
 

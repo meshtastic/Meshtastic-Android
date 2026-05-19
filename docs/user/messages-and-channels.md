@@ -63,6 +63,8 @@ Direct messages (DMs) are point-to-point encrypted communications between two sp
 | Delivered | ✓✓ | Acknowledgment received from recipient |
 | Error | ✗ | Delivery failed after retries |
 
+> **Note:** Received messages from other nodes and internal routing states (SFPP routing/confirmed) also exist but aren't shown as outgoing status indicators.
+
 ### Delivery Errors
 
 When a message fails to deliver, the error indicator shows what went wrong:
