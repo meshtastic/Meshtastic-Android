@@ -18,8 +18,6 @@
 pluginManagement {
     includeBuild("build-logic")
     repositories {
-        mavenCentral()
-        gradlePluginPortal()
         google {
             content {
                 includeGroupByRegex("com\\.android.*")
@@ -27,6 +25,8 @@ pluginManagement {
                 includeGroupByRegex("androidx.*")
             }
         }
+        mavenCentral()
+        gradlePluginPortal()
         maven { url = uri("./offline-repository") }
     }
 }
@@ -43,7 +43,6 @@ dependencyResolutionManagement {
     repositories {
         // Only enable mavenLocal for local JitPack testing; never in CI.
         if (providers.gradleProperty("useMavenLocal").isPresent) mavenLocal()
-        mavenCentral()
         google {
             content {
                 includeGroupByRegex("com\\.android.*")
@@ -51,6 +50,7 @@ dependencyResolutionManagement {
                 includeGroupByRegex("androidx.*")
             }
         }
+        mavenCentral()
         maven {
             url = uri("https://central.sonatype.com/repository/maven-snapshots/")
             mavenContent { snapshotsOnly() }
