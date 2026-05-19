@@ -38,9 +38,9 @@ import org.meshtastic.feature.docs.model.DocsAiError
 /**
  * Gemini on-device AI assistant for the Google flavor.
  *
- * Uses Firebase AI Logic hybrid SDK with [InferenceMode.PREFER_ON_DEVICE] — runs inference on-device via AICore when
- * available, falls back to cloud otherwise. Supported on Pixel 9+, Samsung Galaxy S25/S26, OnePlus 13/15, and other
- * devices with AICore.
+ * Uses Firebase AI Logic hybrid SDK with [InferenceMode.ONLY_ON_DEVICE] for fast first-message answers, and a cloud
+ * model with URL context grounding for follow-up conversation. Supported on Pixel 9+, Samsung Galaxy S25/S26, OnePlus
+ * 13/15, and other devices with AICore.
  *
  * Context strategy: extracts only the **most relevant paragraphs** from each page (those containing query terms),
  * strips markdown formatting to maximize information density, and fits within the on-device token budget (~4K tokens).
@@ -58,7 +58,7 @@ class GeminiNanoDocAssistant(private val searchEngine: KeywordSearchEngine, priv
             .generativeModel(
                 modelName = MODEL_NAME,
                 systemInstruction = content { text(SYSTEM_INSTRUCTION) },
-                onDeviceConfig = OnDeviceConfig(mode = InferenceMode.PREFER_ON_DEVICE),
+                onDeviceConfig = OnDeviceConfig(mode = InferenceMode.ONLY_ON_DEVICE),
             )
     }
 
