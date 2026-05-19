@@ -52,10 +52,12 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.isUnmessageableRole
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.distance
 import org.meshtastic.core.resources.node_list_click_label
 import org.meshtastic.core.resources.node_list_long_click_label
 import org.meshtastic.core.resources.unknown_username
 import org.meshtastic.core.ui.icon.DeviceSleep
+import org.meshtastic.core.ui.icon.Distance
 import org.meshtastic.core.ui.icon.ElectricPower
 import org.meshtastic.core.ui.icon.Favorite
 import org.meshtastic.core.ui.icon.MeshtasticIcons
@@ -316,7 +318,16 @@ private fun CompactHealthRow(
 
         // Distance
         if (showLocation && distance != null && !isThisNode) {
-            add(@Composable { DistanceInfo(distance = distance, contentColor = contentColor) })
+            add(
+                @Composable {
+                    IconInfo(
+                        icon = MeshtasticIcons.Distance,
+                        contentDescription = stringResource(Res.string.distance),
+                        contentColor = contentColor,
+                        text = distance,
+                    )
+                },
+            )
         }
 
         // Signal quality
