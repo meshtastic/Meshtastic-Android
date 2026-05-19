@@ -261,6 +261,7 @@ fun NodeListScreen(
                                     showChannel = showChannel,
                                     showRole = showRole,
                                     showTelemetry = showTelemetry,
+                                    tempInFahrenheit = state.tempInFahrenheit,
                                 )
                         }
                         val isThisNode = remember(node) { ourNode?.num == node.num }

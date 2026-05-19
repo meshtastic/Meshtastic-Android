@@ -48,6 +48,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
+import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.isUnmessageableRole
 import org.meshtastic.core.model.util.toDistanceString
@@ -59,9 +60,12 @@ import org.meshtastic.core.resources.unknown_username
 import org.meshtastic.core.ui.icon.DeviceSleep
 import org.meshtastic.core.ui.icon.Distance
 import org.meshtastic.core.ui.icon.Favorite
+import org.meshtastic.core.ui.icon.Humidity
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.MqttConnected
+import org.meshtastic.core.ui.icon.Pressure
 import org.meshtastic.core.ui.icon.Success
+import org.meshtastic.core.ui.icon.Temperature
 import org.meshtastic.core.ui.icon.Unmessageable
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 import org.meshtastic.proto.Config
@@ -89,6 +93,7 @@ fun NodeItemCompact(
     showChannel: Boolean = true,
     showRole: Boolean = true,
     showTelemetry: Boolean = true,
+    tempInFahrenheit: Boolean = false,
 ) {
     val longName = thatNode.user.long_name.ifEmpty { stringResource(Res.string.unknown_username) }
     val isFavorite = thatNode.isFavorite
@@ -193,7 +198,16 @@ fun NodeItemCompact(
                     contentColor = contentColor,
                 )
 
-                // Row 3: Tertiary metadata — hardware · role · hops · channel · telemetry
+                // Row 3: Environment metrics — temp · humidity · pressure (icon + value only)
+                if (showTelemetry) {
+                    CompactMetricsRow(
+                        thatNode = thatNode,
+                        tempInFahrenheit = tempInFahrenheit,
+                        contentColor = contentColor,
+                    )
+                }
+
+                // Row 4: Tertiary metadata — hardware · role · hops · channel
                 CompactFooterRow(
                     thatNode = thatNode,
                     isThisNode = isThisNode,
@@ -419,6 +433,68 @@ private fun CompactFooterRow(
                     modifier = Modifier.size(COMPACT_ICON_SIZE_DP.dp),
                     tint = tertiaryColor,
                 )
+            }
+        }
+    }
+}
+
+@Composable
+@Suppress("CyclomaticComplexMethod")
+private fun CompactMetricsRow(thatNode: Node, tempInFahrenheit: Boolean, contentColor: Color) {
+    val env = thatNode.environmentMetrics
+    val segments =
+        buildList<@Composable () -> Unit> {
+            if ((env.temperature ?: 0f) != 0f) {
+                val temp = MetricFormatter.temperature(env.temperature ?: 0f, tempInFahrenheit)
+                add {
+                    IconInfo(
+                        icon = MeshtasticIcons.Temperature,
+                        contentDescription = "Temperature",
+                        contentColor = contentColor,
+                        text = temp,
+                    )
+                }
+            }
+            if ((env.relative_humidity ?: 0f) != 0f) {
+                add {
+                    IconInfo(
+                        icon = MeshtasticIcons.Humidity,
+                        contentDescription = "Humidity",
+                        contentColor = contentColor,
+                        text = MetricFormatter.humidity(env.relative_humidity ?: 0f),
+                    )
+                }
+            }
+            if ((env.barometric_pressure ?: 0f) != 0f) {
+                add {
+                    IconInfo(
+                        icon = MeshtasticIcons.Pressure,
+                        contentDescription = "Pressure",
+                        contentColor = contentColor,
+                        text = MetricFormatter.pressure(env.barometric_pressure ?: 0f),
+                    )
+                }
+            }
+        }
+
+    if (segments.isNotEmpty()) {
+        @OptIn(ExperimentalLayoutApi::class)
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+            segments.forEachIndexed { index, content ->
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (index > 0) {
+                        Text(
+                            text = "· ",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = contentColor.copy(alpha = 0.5f),
+                        )
+                    }
+                    content()
+                }
             }
         }
     }
