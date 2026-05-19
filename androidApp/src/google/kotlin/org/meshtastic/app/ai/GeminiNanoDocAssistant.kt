@@ -25,6 +25,8 @@ import com.google.firebase.ai.OnDeviceModelStatus
 import com.google.firebase.ai.ai
 import com.google.firebase.ai.type.GenerativeBackend
 import com.google.firebase.ai.type.PublicPreviewAPI
+import com.google.firebase.ai.type.Tool
+import com.google.firebase.ai.type.content
 import org.meshtastic.feature.docs.ai.AIDocAssistant
 import org.meshtastic.feature.docs.data.DocBundleLoader
 import org.meshtastic.feature.docs.data.KeywordSearchEngine
@@ -49,16 +51,30 @@ import org.meshtastic.feature.docs.model.DocsAiError
 class GeminiNanoDocAssistant(private val searchEngine: KeywordSearchEngine, private val bundleLoader: DocBundleLoader) :
     AIDocAssistant {
 
-    private val model by lazy {
+    /** On-device model for fast offline answers grounded in bundled docs. */
+    private val onDeviceModel by lazy {
         Firebase.ai(backend = GenerativeBackend.googleAI())
             .generativeModel(
                 modelName = MODEL_NAME,
+                systemInstruction = content { text(SYSTEM_INSTRUCTION) },
                 onDeviceConfig = OnDeviceConfig(mode = InferenceMode.PREFER_ON_DEVICE),
             )
     }
 
+    /** Cloud model with Google Search grounding — accesses meshtastic.org and other web resources. */
+    private val groundedModel by lazy {
+        Firebase.ai(backend = GenerativeBackend.googleAI())
+            .generativeModel(
+                modelName = MODEL_NAME,
+                systemInstruction = content { text(SYSTEM_INSTRUCTION) },
+                tools = listOf(Tool.googleSearch()),
+            )
+    }
+
     override suspend fun isSupported(): Boolean = try {
-        val ext = model.onDeviceExtension
+        // Always supported on Google flavor — cloud model with Google Search grounding is always available.
+        // On-device model provides faster/offline answers when available; check status to trigger download.
+        val ext = onDeviceModel.onDeviceExtension
         val status = ext?.checkStatus()
         Logger.d(tag = TAG) { "On-device model status: $status" }
         when (status) {
@@ -87,11 +103,11 @@ class GeminiNanoDocAssistant(private val searchEngine: KeywordSearchEngine, priv
                 true
             }
 
-            else -> false
+            else -> true // Cloud grounded model is always available even without on-device support.
         }
     } catch (e: Exception) {
-        Logger.w(tag = TAG) { "isSupported() check failed: ${e.message}" }
-        false
+        Logger.w(tag = TAG) { "isSupported() check failed, using cloud only: ${e.message}" }
+        true // Cloud grounded model is always available.
     }
 
     @Suppress("TooGenericExceptionCaught")
@@ -115,27 +131,7 @@ class GeminiNanoDocAssistant(private val searchEngine: KeywordSearchEngine, priv
         val prompt = buildPrompt(question, contextResult.parts)
         Logger.d(tag = TAG) { "Prompt: ${prompt.length} chars" }
 
-        val answer =
-            try {
-                val response = model.generateContent(prompt)
-                response.text?.trimEnd() ?: "I wasn't able to generate a response."
-            } catch (e: Exception) {
-                // Retry with reduced context (top 1 page only) — handles on-device context overflow.
-                if (contextResult.parts.size > 1) {
-                    Logger.w(tag = TAG) { "First attempt failed — retrying with reduced context: ${e.message}" }
-                    val reduced =
-                        buildContext(currentPageId, queryTerms, rankedPages, allContent, RETRY_CONTEXT_CHARS)
-                    val retryPrompt = buildPrompt(question, reduced.parts)
-                    Logger.d(tag = TAG) {
-                        "Retry prompt: ${retryPrompt.length} chars (${reduced.parts.size} pages)"
-                    }
-                    val retryResponse = model.generateContent(retryPrompt)
-                    retryResponse.text?.trimEnd() ?: "I wasn't able to generate a response."
-                } else {
-                    throw e
-                }
-            }
-
+        val answer = generateWithFallback(prompt, contextResult, currentPageId, queryTerms, rankedPages, allContent)
         Logger.d(tag = TAG) { "Response (${answer.length} chars): ${answer.take(200)}" }
 
         // Merge context pages with any pages mentioned by title in the response (à la Meshtastic-Apple).
@@ -159,6 +155,62 @@ class GeminiNanoDocAssistant(private val searchEngine: KeywordSearchEngine, priv
             }
         val fallbackPages = searchEngine.selectForTokenBudget(question, maxChars = MAX_CONTEXT_CHARS)
         AIDocAssistantResult.Error(reason = errorType, suggestedPages = fallbackPages)
+    }
+
+    /**
+     * Attempts on-device inference first, then falls back to cloud with Google Search grounding if on-device fails or
+     * returns a low-confidence "not in docs" response.
+     */
+    private suspend fun generateWithFallback(
+        prompt: String,
+        contextResult: ContextResult,
+        currentPageId: String?,
+        queryTerms: List<String>,
+        rankedPages: List<Pair<DocPage, Int>>,
+        allContent: Map<DocPage, String>,
+    ): String {
+        // Try on-device first (fast, offline, private).
+        val onDeviceAnswer =
+            try {
+                val response = onDeviceModel.generateContent(prompt)
+                response.text?.trimEnd()
+            } catch (e: Exception) {
+                Logger.d(tag = TAG) { "On-device inference failed, will try cloud: ${e.message}" }
+                null
+            }
+
+        // If on-device gave a good answer, use it.
+        if (onDeviceAnswer != null && !looksLikeNoAnswer(onDeviceAnswer)) {
+            return onDeviceAnswer
+        }
+
+        // Fall back to cloud with Google Search grounding for broader knowledge.
+        Logger.d(tag = TAG) { "Falling back to grounded cloud model" }
+        return try {
+            val response = groundedModel.generateContent(prompt)
+            response.text?.trimEnd() ?: onDeviceAnswer ?: "I wasn't able to generate a response."
+        } catch (e: Exception) {
+            Logger.w(tag = TAG) { "Cloud grounded model also failed: ${e.message}" }
+            // Last resort: retry on-device with reduced context.
+            if (contextResult.parts.size > 1) {
+                val reduced = buildContext(currentPageId, queryTerms, rankedPages, allContent, RETRY_CONTEXT_CHARS)
+                val retryPrompt = buildPrompt(reduced.parts.firstOrNull().orEmpty(), reduced.parts)
+                val retryResponse = onDeviceModel.generateContent(retryPrompt)
+                retryResponse.text?.trimEnd() ?: "I wasn't able to generate a response."
+            } else {
+                onDeviceAnswer ?: throw e
+            }
+        }
+    }
+
+    /** Heuristic: detect when the model says it can't find the answer in the provided docs. */
+    private fun looksLikeNoAnswer(answer: String): Boolean {
+        val lower = answer.lowercase()
+        return lower.contains("not in the docs") ||
+            lower.contains("not found in") ||
+            lower.contains("i don't have information") ||
+            lower.contains("i couldn't find") ||
+            lower.contains("not covered in the documentation")
     }
 
     private data class ContextResult(val parts: List<String>, val usedPageIds: Set<String>, val totalChars: Int)
@@ -306,15 +358,10 @@ class GeminiNanoDocAssistant(private val searchEngine: KeywordSearchEngine, priv
                 FALLBACK_CONTEXT
             }
         return """
-            |You are Chirpy, the friendly AI assistant for the Meshtastic Android app.
-            |You are helpful, concise, and enthusiastic about mesh networking.
-            |Answer the user's question based on the documentation below.
-            |If the answer is not in the docs, say so briefly and suggest which doc page to check.
-            |
-            |Docs:
+            |Bundled app documentation:
             |$context
             |
-            |Q: $question
+            |User question: $question
         """
             .trimMargin()
     }
@@ -322,6 +369,24 @@ class GeminiNanoDocAssistant(private val searchEngine: KeywordSearchEngine, priv
     companion object {
         private const val TAG = "ChirpyAI"
         private const val MODEL_NAME = "gemini-2.5-flash-lite"
+
+        private const val SYSTEM_INSTRUCTION =
+            """You are Chirpy, the friendly AI assistant built into the Meshtastic Android app. You help users understand mesh networking, configure their Meshtastic nodes, troubleshoot connectivity issues, and get the most out of the Meshtastic ecosystem.
+
+Personality: Helpful, concise, enthusiastic about mesh networking. Use short paragraphs. Include relevant emoji sparingly (📡 🔋 📍).
+
+Knowledge sources (in priority order):
+1. Bundled app documentation provided as context below
+2. Your training knowledge about Meshtastic (meshtastic.org, GitHub repos, community forums)
+3. General LoRa/mesh networking knowledge
+
+Guidelines:
+- Answer the user's question directly and helpfully
+- When the bundled docs cover the topic, cite them
+- When the bundled docs don't cover it, use your broader Meshtastic knowledge — don't refuse to help
+- For firmware-specific or hardware-specific questions beyond app scope, point users to meshtastic.org/docs
+- Keep answers concise (2-4 short paragraphs max) unless the user asks for detail
+- If you're truly unsure about something Meshtastic-specific, say so honestly rather than guessing"""
 
         /** Total context char budget — sized for on-device Nano (~4K tokens ≈ 10K chars for context + prompt). */
         private const val MAX_CONTEXT_CHARS = 8_000
