@@ -509,7 +509,7 @@ class TAKMeshIntegration(
                 """<precisionLocation[^>]*/>""", // iTAK camelCase variant
                 """<precisionLocation[^>]*>.*?</precisionLocation>""",
             )
-                .map { Regex(it, RegexOption.DOT_MATCHES_ALL) }
+                .map { Regex("(?s)$it") }
 
         // Strip any attribute with value "???" — unknown/placeholder metadata
         private val UNKNOWN_ATTR_PATTERN = Regex("""\s+\w+\s*=\s*"[?]{3}"""")

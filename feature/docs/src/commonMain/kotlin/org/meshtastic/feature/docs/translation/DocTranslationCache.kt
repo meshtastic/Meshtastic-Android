@@ -33,7 +33,7 @@ import okio.buffer
  */
 class DocTranslationCache(
     private val cacheDir: Path,
-    private val fileSystem: FileSystem = FileSystem.SYSTEM,
+    private val fileSystem: FileSystem,
     private val maxCacheSizeBytes: Long = MAX_CACHE_SIZE_BYTES,
 ) {
     companion object {
