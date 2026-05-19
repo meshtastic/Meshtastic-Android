@@ -21,8 +21,6 @@ package org.meshtastic.core.ui.component
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -362,24 +360,12 @@ private fun CompactHealthRow(
     }
 
     if (segments.isNotEmpty()) {
-        @OptIn(ExperimentalLayoutApi::class)
-        FlowRow(
+        Row(
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(2.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceEvenly,
         ) {
-            segments.forEachIndexed { index, content ->
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    if (index > 0) {
-                        Text(
-                            text = "· ",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = contentColor.copy(alpha = 0.5f),
-                        )
-                    }
-                    content()
-                }
-            }
+            segments.forEach { content -> content() }
         }
     }
 }
@@ -447,7 +433,7 @@ private fun CompactFooterRow(
             }
         }
 
-    SegmentedRow(segments, tertiaryColor)
+    SegmentedRow(segments)
 }
 
 @Composable
@@ -490,42 +476,25 @@ private fun CompactMetricsRow(thatNode: Node, tempInFahrenheit: Boolean, content
         }
 
     if (segments.isNotEmpty()) {
-        @OptIn(ExperimentalLayoutApi::class)
-        FlowRow(
+        Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-            verticalArrangement = Arrangement.spacedBy(2.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceEvenly,
         ) {
-            segments.forEachIndexed { index, content ->
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    if (index > 0) {
-                        Text(
-                            text = "· ",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = contentColor.copy(alpha = 0.5f),
-                        )
-                    }
-                    content()
-                }
-            }
+            segments.forEach { content -> content() }
         }
     }
 }
 
 @Composable
-private fun SegmentedRow(segments: List<@Composable () -> Unit>, separatorColor: Color) {
+private fun SegmentedRow(segments: List<@Composable () -> Unit>) {
     if (segments.isEmpty()) return
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-        segments.forEachIndexed { index, content ->
-            if (index > 0) {
-                Text(
-                    text = "·",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = separatorColor.copy(alpha = 0.5f),
-                )
-            }
-            content()
-        }
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceEvenly,
+    ) {
+        segments.forEach { content -> content() }
     }
 }
 
