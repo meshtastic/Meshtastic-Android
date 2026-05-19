@@ -156,6 +156,10 @@ When documentation-relevant UI or workflow changes merge to `main`, GitHub Actio
 - **FR-045**: All docs CI checks (staleness, link validation, coverage, freshness, registry validation) MUST be consolidated into a single governance workflow with separate jobs for staleness detection and quality gates.
 - **FR-046**: The governance workflow MUST include an advisory preview-staleness job that detects UI composable changes (`feature/*/ui/`, `core/ui/`) without corresponding `*Previews.kt` updates. The check MUST be bypassable via a `skip-preview-check` label.
 - **FR-047**: The governance workflow MUST include an advisory screenshot-reference-staleness job that detects `*Previews.kt` changes without updates to reference images in `screenshot-tests/src/screenshotTestDebug/reference/`. The advisory MUST include the `updateDebugScreenshotTest` command.
+- **FR-048**: User Guide documentation MUST support a three-tier translation cascade: (1) **Crowdin bundled** — community-translated markdown shipped with the app via Crowdin `%android_code%` locale directories synced to CMP `files-{qualifier}/` resources; (2) **ML Kit runtime** — on-device translation via `DocTranslationService` on supported Android `google` flavor devices when no Crowdin translation exists; (3) **English fallback** — the default `files/docs/` content used when neither bundled nor runtime translation is available. The `fdroid` flavor, Desktop, and iOS MUST use a `NoOpDocTranslator` that skips ML Kit and falls back to English. Developer Guide pages remain English-only. The locale resolution chain MUST try region-qualified (`files-pt-rBR/`) then language-only (`files-pt/`) before English.
+- **FR-049**: The `crowdin.yml` configuration MUST use the `%android_code%` placeholder for docs translation paths so that Crowdin outputs locale directories in CMP resource qualifier format (e.g., `pt-rBR`, `zh-rCN`) with zero format conversion needed at build or runtime. The `syncTranslatedDocsToComposeResources` Gradle task MUST copy translated docs into `composeResources/files-{locale}/docs/` without locale format transformation.
+- **FR-050**: The Jekyll documentation site MUST support locale-qualified paths using Android resource qualifier format (`docs/pt-rBR/user/*.md`) with a `_data/locales.yml` registry of supported locales including native names and text direction (LTR/RTL). The site MUST include a language switcher component.
+- **FR-051**: A `currentLocaleQualifier()` expect/actual function in `core:common` MUST return the device locale in CMP resource qualifier format (e.g., `"pt-rBR"` or `"fr"`). This function is used by `DocBundleLoader` to resolve locale-qualified resource paths at runtime.
 - **FR-038**: The Compose Multiplatform markdown renderer (`multiplatform-markdown-renderer-m3`) used by `DocsPageRouteScreen` on non-WebView targets MUST be configured with a custom `ImageTransformer` that resolves relative image paths (e.g., `assets/screenshots/*.png`) to bundled Compose resource URIs via `Res.getUri()` and loads them asynchronously using Coil 3 (`rememberAsyncImagePainter`). The default `NoOpImageTransformerImpl` MUST NOT be used for docs rendering. The `syncDocsToComposeResources` task MUST include screenshot assets alongside markdown files so that images are available at runtime. The `copyDocsScreenshots` task from `screenshot-tests/` MUST be wired as a dependency of `syncDocsToComposeResources` to ensure generated screenshots are available before resource bundling.
 
 ### Key Entities
@@ -191,6 +195,10 @@ When documentation-relevant UI or workflow changes merge to `main`, GitHub Actio
 - **SC-019**: Sync script slug discovery is filesystem-derived — adding a new `.md` file under `docs/` requires no hardcoded string updates in scripts.
 - **SC-020**: PRs that modify UI composables without updating previews receive an advisory PR comment with a checklist. The check is bypassable via `skip-preview-check` label.
 - **SC-021**: PRs that modify previews without updating screenshot reference images receive an advisory PR comment with the regeneration command.
+- **SC-022**: The `crowdin.yml` docs entries use `%android_code%` placeholders and the sync task copies translations into CMP resources with zero locale format conversion.
+- **SC-023**: `DocBundleLoader` resolves locale-qualified docs resources using a region → language → English fallback chain driven by `currentLocaleQualifier()`.
+- **SC-024**: On Google-flavor Android devices, ML Kit runtime translation is available as a fallback when no Crowdin bundled translation exists for the user's locale.
+- **SC-025**: The Jekyll site supports 38 locale paths with a language switcher, and all locale directories use Android resource qualifier format (`pt-rBR`, not `pt-BR`).
 
 ## Clarifications
 
@@ -275,3 +283,14 @@ Extended governance to cover preview composables and screenshot testing:
 2. **Screenshot reference staleness advisory** — Same job detects preview changes without reference image updates. Posts advisory with `updateDebugScreenshotTest` command (FR-047).
 3. **Workflow renamed** — `Docs Governance` → `UI & Docs Governance` to reflect expanded scope.
 4. **Contributing checklist** — `docs/developer.md` updated with preview/screenshot maintenance guidance.
+
+### Session 2026-05-18
+
+Translation cascade and locale pipeline implementation:
+
+1. **Scope change** — Translating User Guide docs is now in scope. Crowdin provides community translations bundled with the app; ML Kit provides runtime fallback on Google flavor. Developer Guide remains English-only.
+2. **Zero-conversion locale pipeline** — Crowdin `%android_code%` outputs locale directories in CMP resource qualifier format (`pt-rBR`, `fr`). The sync task just prepends `files-` — no format conversion at build or runtime.
+3. **Locale resolution chain** — `DocBundleLoader.localeQualifiers()` tries region-qualified (`files-pt-rBR/`) → language-only (`files-pt/`) → English default (`files/`).
+4. **Platform actuals** — `currentLocaleQualifier()` expect/actual in `core:common` returns CMP qualifier format on all platforms.
+5. **ML Kit translation** — `DocTranslationService` interface with `MlKitDocTranslator` (google), `NoOpDocTranslator` (fdroid/desktop/iOS). `DocTranslationCache` provides file-backed caching. `MarkdownTranslationSegmenter` splits docs into translatable segments preserving markdown structure.
+6. **Web i18n** — Jekyll `_config.yml` and `_data/locales.yml` support 38 locales with Android qualifier paths. Language switcher included.
