@@ -9,11 +9,9 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
-* ci: unify GitHub Pages deployment (Dokka + docs site) (#5523) by James Rich (@jamesarich) in [`a6523acbb`](https://github.com/meshtastic/Meshtastic-Android/commit/a6523acbb88766c6a1401f13d4b23ab679bf3af7)
-* chore(deps): update koin.plugin to v1.0.0 (#5524) by renovate[bot] (@renovate[bot]) in [`8de0a1f16`](https://github.com/meshtastic/Meshtastic-Android/commit/8de0a1f167e498ccef999d3917023e1f34640a8c)
-* chore(flatpak): optimize CI source generation and clean up redundant tasks (#5525) by James Rich (@jamesarich) in [`7ae1b2681`](https://github.com/meshtastic/Meshtastic-Android/commit/7ae1b2681313da5a07217ea6e04a0c3dc4b79946)
+* build(flatpak): overhaul and automate flatpak offline manifest generation (#5529) by James Rich (@jamesarich) in [`99b5688b0`](https://github.com/meshtastic/Meshtastic-Android/commit/99b5688b00e5810467769ae57e6ee33ea3d3360c)
 
-### Internal (v2.7.14-internal.94)
+### Internal (v2.7.14-internal.95)
 Changes since [`v2.7.14-open.9`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14-open.9):
 
 * chore(deps): update vico to v3.2.0-next.5 (#5470) by renovate[bot] (@renovate[bot]) in [`4bacff81c`](https://github.com/meshtastic/Meshtastic-Android/commit/4bacff81c5abad536b40f7370ae5d302b74a11fe)
@@ -69,6 +67,11 @@ Changes since [`v2.7.14-open.9`](https://github.com/meshtastic/Meshtastic-Androi
 * fix(ci): exclude kotlinNativeBundleConfiguration from flatpak source generation (#5517) by James Rich (@jamesarich) in [`e13a4359e`](https://github.com/meshtastic/Meshtastic-Android/commit/e13a4359e188bbf02087cdb6253ea2b70c8200ed)
 * docs: update CHANGELOG.md (#5518) by github-actions[bot] (@github-actions[bot]) in [`54fafd225`](https://github.com/meshtastic/Meshtastic-Android/commit/54fafd225bddfee446cfea01dee6887e082acc79)
 * fix(ci): downgrade Ruby to 4.0.4 for ubuntu-24.04 compatibility (#5519) by James Rich (@jamesarich) in [`199827755`](https://github.com/meshtastic/Meshtastic-Android/commit/1998277555d2d3ac9f01f8af9f6c4a0652c169ad)
+* ci: unify GitHub Pages deployment (Dokka + docs site) (#5523) by James Rich (@jamesarich) in [`a6523acbb`](https://github.com/meshtastic/Meshtastic-Android/commit/a6523acbb88766c6a1401f13d4b23ab679bf3af7)
+* chore(deps): update koin.plugin to v1.0.0 (#5524) by renovate[bot] (@renovate[bot]) in [`8de0a1f16`](https://github.com/meshtastic/Meshtastic-Android/commit/8de0a1f167e498ccef999d3917023e1f34640a8c)
+* chore(flatpak): optimize CI source generation and clean up redundant tasks (#5525) by James Rich (@jamesarich) in [`7ae1b2681`](https://github.com/meshtastic/Meshtastic-Android/commit/7ae1b2681313da5a07217ea6e04a0c3dc4b79946)
+* fix(docs): compile Jekyll docs site and add root redirect in CI (#5526) by James Rich (@jamesarich) in [`f94358551`](https://github.com/meshtastic/Meshtastic-Android/commit/f94358551c7e41a2ea07ca97185fa8331b19f09c)
+* docs: update CHANGELOG.md (#5520) by github-actions[bot] (@github-actions[bot]) in [`95df50014`](https://github.com/meshtastic/Meshtastic-Android/commit/95df500142abd44f7b4d2d75ba28ab72f1fe77ac)
 
 ### Open Beta (v2.7.14-open.9)
 Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.13):
