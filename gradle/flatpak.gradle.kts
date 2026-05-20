@@ -62,13 +62,27 @@ abstract class GenerateFlatpakSourcesTask : DefaultTask() {
 
                             val sha256 = calculateSha256(file)
 
-                            val primaryUrl = "https://repo.maven.apache.org/maven2/$mavenPath"
-                            val mirrorUrls = listOf(
-                                "https://dl.google.com/dl/android/maven2/$mavenPath",
-                                "https://plugins.gradle.org/m2/$mavenPath",
-                                "https://maven-central.storage-download.googleapis.com/maven2/$mavenPath",
-                                "https://maven.aliyun.com/repository/public/$mavenPath"
-                            )
+                            val isJitpack = group.startsWith("com.github.")
+                            val primaryUrl = if (isJitpack) {
+                                "https://jitpack.io/$mavenPath"
+                            } else {
+                                "https://repo.maven.apache.org/maven2/$mavenPath"
+                            }
+
+                            val mirrorUrls = if (isJitpack) {
+                                listOf(
+                                    "https://repo.maven.apache.org/maven2/$mavenPath",
+                                    "https://maven-central.storage-download.googleapis.com/maven2/$mavenPath",
+                                    "https://maven.aliyun.com/repository/public/$mavenPath"
+                                )
+                            } else {
+                                listOf(
+                                    "https://dl.google.com/dl/android/maven2/$mavenPath",
+                                    "https://plugins.gradle.org/m2/$mavenPath",
+                                    "https://maven-central.storage-download.googleapis.com/maven2/$mavenPath",
+                                    "https://maven.aliyun.com/repository/public/$mavenPath"
+                                )
+                            }
 
                             entries.add(
                                 mapOf(
