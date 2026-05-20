@@ -1,5 +1,6 @@
 ---
 title: Settings — Radio & User
+parent: User Guide
 nav_order: 7
 last_updated: 2026-05-13
 description: Configure your radio hardware, LoRa presets, user profile, position sharing, power management, and security.

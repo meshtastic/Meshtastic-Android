@@ -1,5 +1,6 @@
 ---
 title: Codebase
+parent: Developer Guide
 nav_order: 2
 last_updated: 2026-05-13
 aliases:
