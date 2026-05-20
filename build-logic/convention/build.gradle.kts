@@ -61,21 +61,6 @@ dependencies {
     // Self-updating embedded Gradle Kotlin version
     val gradleKotlinVersion = KotlinVersion.CURRENT.toString()
 
-    /** Registers a dependency to be captured for the Flatpak offline repository. */
-    fun flatpakDep(dependency: Any) {
-        flatpakOfflineDeps(dependency)
-    }
-
-    /** Registers a Gradle embedded dependency to be captured for Flatpak offline. */
-    fun flatpakEmbeddedDep(dependency: Any) {
-        flatpakOfflineEmbeddedDeps(dependency)
-    }
-
-    /** Registers an older dependency to be captured for Flatpak offline. */
-    fun flatpakOlderDep(dependency: Any) {
-        flatpakOfflineOlderDeps(dependency)
-    }
-
     // ── Convention plugin compile dependencies ──────────────────────────────
     // These are standard compile-time dependencies. Since flatpakGradleGenerator includes
     // "compileClasspath", they are automatically captured along with all their transitives offline.
@@ -116,52 +101,52 @@ dependencies {
     }
 
     // Other non-plugin dependencies needed explicitly for offline builds
-    flatpakDep(libs.screenshot.validation.api)
+    flatpakOfflineDeps(libs.screenshot.validation.api)
 
     // ── Kotlin build tooling (resolved at task execution time by kotlin-dsl) ─
-    flatpakDep("${libs.kotlin.build.tools.compat.get().module}:$gradleKotlinVersion")
-    flatpakDep("${libs.kotlin.build.tools.impl.get().module}:$gradleKotlinVersion")
-    flatpakDep("${libs.kotlin.scripting.compiler.embeddable.get().module}:$gradleKotlinVersion")
-    flatpakDep("${libs.kotlin.sam.with.receiver.compiler.plugin.embeddable.get().module}:$gradleKotlinVersion")
-    flatpakDep("${libs.kotlin.assignment.compiler.plugin.embeddable.get().module}:$gradleKotlinVersion")
-    flatpakDep(libs.kotlin.build.tools.compat)
-    flatpakDep(libs.kotlin.build.tools.impl)
-    flatpakDep(libs.kotlin.scripting.compiler.embeddable)
+    flatpakOfflineDeps("${libs.kotlin.build.tools.compat.get().module}:$gradleKotlinVersion")
+    flatpakOfflineDeps("${libs.kotlin.build.tools.impl.get().module}:$gradleKotlinVersion")
+    flatpakOfflineDeps("${libs.kotlin.scripting.compiler.embeddable.get().module}:$gradleKotlinVersion")
+    flatpakOfflineDeps("${libs.kotlin.sam.with.receiver.compiler.plugin.embeddable.get().module}:$gradleKotlinVersion")
+    flatpakOfflineDeps("${libs.kotlin.assignment.compiler.plugin.embeddable.get().module}:$gradleKotlinVersion")
+    flatpakOfflineDeps(libs.kotlin.build.tools.compat)
+    flatpakOfflineDeps(libs.kotlin.build.tools.impl)
+    flatpakOfflineDeps(libs.kotlin.scripting.compiler.embeddable)
     // Gradle-embedded compiler versions (2.3.20) required to compile precompiled scripts in offline mode
     // We register these in a separate configuration so that Gradle does not version-align/upgrade them
     // to our project's newer Kotlin version (2.3.21) during flatpak offline source generation.
-    flatpakEmbeddedDep(libs.gradle.kotlin.build.tools.compat)
-    flatpakEmbeddedDep(libs.gradle.kotlin.build.tools.impl)
-    flatpakEmbeddedDep(libs.gradle.kotlin.scripting.compiler.embeddable)
-    flatpakEmbeddedDep(libs.gradle.kotlin.sam.with.receiver.compiler.plugin.embeddable)
-    flatpakEmbeddedDep(libs.gradle.kotlin.assignment.compiler.plugin.embeddable)
+    flatpakOfflineEmbeddedDeps(libs.gradle.kotlin.build.tools.compat)
+    flatpakOfflineEmbeddedDeps(libs.gradle.kotlin.build.tools.impl)
+    flatpakOfflineEmbeddedDeps(libs.gradle.kotlin.scripting.compiler.embeddable)
+    flatpakOfflineEmbeddedDeps(libs.gradle.kotlin.sam.with.receiver.compiler.plugin.embeddable)
+    flatpakOfflineEmbeddedDeps(libs.gradle.kotlin.assignment.compiler.plugin.embeddable)
 
     // ── Compiler plugins resolved at task execution time ────────────────────
-    flatpakDep(libs.koin.compiler.plugin)
-    flatpakDep(libs.kotlin.compose.compiler.plugin.embeddable)
-    flatpakDep(libs.kotlin.serialization.compiler.plugin.embeddable)
+    flatpakOfflineDeps(libs.koin.compiler.plugin)
+    flatpakOfflineDeps(libs.kotlin.compose.compiler.plugin.embeddable)
+    flatpakOfflineDeps(libs.kotlin.serialization.compiler.plugin.embeddable)
 
     // ── Transitive deps not on standard classpaths ──────────────────────────
-    flatpakDep(libs.compose.material.ripple)
-    flatpakDep(libs.savedstate.compose)
-    flatpakDep(libs.androidx.paging.common)
+    flatpakOfflineDeps(libs.compose.material.ripple)
+    flatpakOfflineDeps(libs.savedstate.compose)
+    flatpakOfflineDeps(libs.androidx.paging.common)
 
     // ── Compose Desktop packaging (proguardReleaseJars task) ────────────────
-    flatpakDep(libs.proguard.gradle)
-    flatpakDep(libs.kotlin.stdlib)
-    flatpakDep(libs.kotlin.stdlib.common)
+    flatpakOfflineDeps(libs.proguard.gradle)
+    flatpakOfflineDeps(libs.kotlin.stdlib)
+    flatpakOfflineDeps(libs.kotlin.stdlib.common)
 
     detektPlugins(libs.detekt.formatting)
 
     // ── Older transitive versions needed for plugin resolution metadata ─────
     // We register these in a separate configuration so they don't get upgraded to newer versions
     // by Gradle's dependency conflict resolution strategy.
-    flatpakOlderDep(libs.old.kotlin.gradle.plugin)
-    flatpakOlderDep(libs.old.kotlin.stdlib.jdk8)
-    flatpakOlderDep(libs.old.guava)
-    flatpakOlderDep(libs.old.guava.parent)
-    flatpakOlderDep(libs.old.kotlinx.serialization.core)
-    flatpakOlderDep(libs.old.kotlinx.serialization.core.jvm)
+    flatpakOfflineOlderDeps(libs.old.kotlin.gradle.plugin)
+    flatpakOfflineOlderDeps(libs.old.kotlin.stdlib.jdk8)
+    flatpakOfflineOlderDeps(libs.old.guava)
+    flatpakOfflineOlderDeps(libs.old.guava.parent)
+    flatpakOfflineOlderDeps(libs.old.kotlinx.serialization.core)
+    flatpakOfflineOlderDeps(libs.old.kotlinx.serialization.core.jvm)
 }
 
 tasks {
