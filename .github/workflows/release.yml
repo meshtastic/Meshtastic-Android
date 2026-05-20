@@ -372,7 +372,7 @@ jobs:
 
       - name: Generate Flatpak Sources
         run: >
-          ./gradlew :combineFlatpakSources
+          ./gradlew :desktopApp:assemble :generateFlatpakSourcesFromCache
           --no-configuration-cache
 
       - name: List Flatpak source files
@@ -405,7 +405,7 @@ jobs:
 
       - name: Combine Flatpak source files
         run: >
-          jq -s 'add | unique_by(.dest + "/" + .["dest-filename"] + "/" + (.["only-arches"] | tostring))'
+          jq -s 'add | unique_by(.dest + "/" + .["dest-filename"])'
           flatpak-multisrc/*/flatpak-sources.json
           > flatpak-sources.json
 

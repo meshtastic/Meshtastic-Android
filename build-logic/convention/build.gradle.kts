@@ -22,7 +22,6 @@ plugins {
     `kotlin-dsl`
     alias(libs.plugins.spotless)
     alias(libs.plugins.detekt)
-    alias(libs.plugins.flatpak.gradle.generator)
 }
 
 group = "org.meshtastic.buildlogic"
@@ -36,11 +35,6 @@ java {
 
 kotlin { compilerOptions { jvmTarget = JvmTarget.JVM_21 } }
 
-val flatpakOfflineDeps by configurations.creating {
-    isCanBeResolved = true
-    isCanBeConsumed = false
-}
-
 dependencies {
     // This allows the use of the 'libs' type-safe accessor in the Kotlin source of the plugins
     implementation(files(libs.javaClass.superclass.protectionDomain.codeSource.location))
@@ -48,14 +42,8 @@ dependencies {
     // Self-updating embedded Gradle Kotlin version
     val gradleKotlinVersion = KotlinVersion.CURRENT.toString()
 
-    /** Registers a dependency to be captured for the Flatpak offline repository. */
-    fun flatpakDep(dependency: Any) {
-        flatpakOfflineDeps(dependency)
-    }
-
     // ── Convention plugin compile dependencies ──────────────────────────────
-    // These are standard compile-time dependencies. Since flatpakGradleGenerator includes
-    // "compileClasspath", they are automatically captured along with all their transitives offline.
+    // These are standard compile-time dependencies used by our convention plugins.
     compileOnly(libs.android.gradleApiPlugin)
     compileOnly(libs.serialization.gradlePlugin)
     compileOnly(libs.android.tools.common)
@@ -77,58 +65,7 @@ dependencies {
     compileOnly(libs.test.retry.gradlePlugin)
     compileOnly(libs.aboutlibraries.gradlePlugin)
 
-    // ── Dynamic plugin marker artifacts from Version Catalog ────────────────
-    // This loop dynamically resolves and registers all plugin marker artifacts declared in the catalog.
-    // Since Develocity, Custom User Data, and Foojay Resolver are defined in libs.versions.toml,
-    // they are automatically resolved and registered here!
-    val versionCatalog = project.extensions.getByType<VersionCatalogsExtension>().named("libs")
-    versionCatalog.pluginAliases.forEach { alias ->
-        versionCatalog.findPlugin(alias).ifPresent { pluginProvider ->
-            val plugin = pluginProvider.get()
-            val version = plugin.version?.requiredVersion
-            if (!version.isNullOrEmpty()) {
-                flatpakOfflineDeps("${plugin.pluginId}:${plugin.pluginId}.gradle.plugin:$version")
-            }
-        }
-    }
-
-    // Other non-plugin dependencies needed explicitly for offline builds
-    flatpakDep(libs.screenshot.validation.api)
-
-    // ── Kotlin build tooling (resolved at task execution time by kotlin-dsl) ─
-    flatpakDep("${libs.kotlin.build.tools.compat.get().module}:$gradleKotlinVersion")
-    flatpakDep("${libs.kotlin.build.tools.impl.get().module}:$gradleKotlinVersion")
-    flatpakDep("${libs.kotlin.scripting.compiler.embeddable.get().module}:$gradleKotlinVersion")
-    flatpakDep("${libs.kotlin.sam.with.receiver.compiler.plugin.embeddable.get().module}:$gradleKotlinVersion")
-    flatpakDep("${libs.kotlin.assignment.compiler.plugin.embeddable.get().module}:$gradleKotlinVersion")
-    flatpakDep(libs.kotlin.build.tools.compat)
-    flatpakDep(libs.kotlin.build.tools.impl)
-    flatpakDep(libs.kotlin.scripting.compiler.embeddable)
-
-    // ── Compiler plugins resolved at task execution time ────────────────────
-    flatpakDep(libs.koin.compiler.plugin)
-    flatpakDep(libs.kotlin.compose.compiler.plugin.embeddable)
-    flatpakDep(libs.kotlin.serialization.compiler.plugin.embeddable)
-
-    // ── Transitive deps not on standard classpaths ──────────────────────────
-    flatpakDep(libs.compose.material.ripple)
-    flatpakDep(libs.savedstate.compose)
-    flatpakDep(libs.androidx.paging.common)
-
-    // ── Compose Desktop packaging (proguardReleaseJars task) ────────────────
-    flatpakDep(libs.proguard.gradle)
-    flatpakDep(libs.kotlin.stdlib)
-    flatpakDep(libs.kotlin.stdlib.common)
-
     detektPlugins(libs.detekt.formatting)
-
-    // ── Older transitive versions needed for plugin resolution metadata ─────
-    flatpakDep(libs.old.kotlin.gradle.plugin)
-    flatpakDep(libs.old.kotlin.stdlib.jdk8)
-    flatpakDep(libs.old.guava)
-    flatpakDep(libs.old.guava.parent)
-    flatpakDep(libs.old.kotlinx.serialization.core)
-    flatpakDep(libs.old.kotlinx.serialization.core.jvm)
 }
 
 tasks {
@@ -164,12 +101,6 @@ detekt {
     allRules = false
     baseline = file("detekt-baseline.xml")
     source.setFrom(files("src/main/java", "src/main/kotlin"))
-}
-
-tasks.flatpakGradleGenerator {
-    outputFile = file("../../flatpak-sources-convention.json")
-    downloadDirectory.set("./offline-repository")
-    includeConfigurations.set(setOf("compileClasspath", "flatpakOfflineDeps"))
 }
 
 gradlePlugin {
