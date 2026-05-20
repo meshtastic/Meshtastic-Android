@@ -46,7 +46,6 @@ import org.meshtastic.core.resources.config_security_public_key
 import org.meshtastic.core.resources.config_security_serial_enabled
 import org.meshtastic.core.resources.debug_log_api_enabled
 import org.meshtastic.core.resources.direct_message_key
-import org.meshtastic.core.resources.legacy_admin_channel
 import org.meshtastic.core.resources.logs
 import org.meshtastic.core.resources.managed_mode
 import org.meshtastic.core.resources.private_key
@@ -202,14 +201,6 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                     checked = formState.value.is_managed,
                     enabled = state.connected && formState.value.admin_key.isNotEmpty(),
                     onCheckedChange = { formState.value = formState.value.copy(is_managed = it) },
-                    containerColor = CardDefaults.cardColors().containerColor,
-                )
-                HorizontalDivider()
-                SwitchPreference(
-                    title = stringResource(Res.string.legacy_admin_channel),
-                    checked = formState.value.admin_channel_enabled,
-                    enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy(admin_channel_enabled = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
             }
