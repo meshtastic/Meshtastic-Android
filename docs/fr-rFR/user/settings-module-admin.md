@@ -17,13 +17,13 @@ Configure optional feature modules and perform device administration. Modules ex
 
 Module settings use a card-based layout with toggle switches, dropdowns, text fields, and sliders:
 
-![Toggle switch](/assets/screenshots/settings_switch.png)
+![Toggle switch](../../assets/screenshots/settings_switch.png)
 
-![Dropdown selector](/assets/screenshots/settings_dropdown.png)
+![Dropdown selector](../../assets/screenshots/settings_dropdown.png)
 
-![Text field](/assets/screenshots/settings_text_field.png)
+![Text field](../../assets/screenshots/settings_text_field.png)
 
-![Settings card layout](/assets/screenshots/settings_titled_card.png)
+![Settings card layout](../../assets/screenshots/settings_titled_card.png)
 
 ## Configuration du module
 

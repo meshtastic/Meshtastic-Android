@@ -108,15 +108,15 @@ The Desktop app provides in-app toggles for controlling which notifications are 
 
 The Desktop app includes a built-in documentation browser for quick access to help content without leaving the application.
 
-![Docs browser with table of contents](/assets/screenshots/docs-browser_toc.png)
+![Docs browser with table of contents](../../assets/screenshots/docs-browser_toc.png)
 
 The browser supports full-text search across all documentation:
 
-![Searching the docs browser](/assets/screenshots/docs-browser_search.png)
+![Searching the docs browser](../../assets/screenshots/docs-browser_search.png)
 
 Individual doc pages render with full formatting:
 
-![A documentation page](/assets/screenshots/docs-browser_page.png)
+![A documentation page](../../assets/screenshots/docs-browser_page.png)
 
 ## Building from Source
 

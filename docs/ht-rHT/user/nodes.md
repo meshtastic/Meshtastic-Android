@@ -124,21 +124,21 @@ Type in the search field to filter nodes by name or short name. The filter updat
 
 Tapping a node opens the detail view with comprehensive information. See [Node Metrics](node-metrics) for full details on metrics and telemetry.
 
-![Node detail view](/assets/screenshots/nodes_node_list.png)
+![Node detail view](../../assets/screenshots/nodes_node_list.png)
 
 The detail screen includes device info, position, and action buttons:
 
-![Node detail section](/assets/screenshots/nodes_detail_section.png)
+![Node detail section](../../assets/screenshots/nodes_detail_section.png)
 
 Inline status indicators show key metrics at a glance:
 
 | Indicator          | Screenshot                                               |
 | ------------------ | -------------------------------------------------------- |
-| Signal quality     | ![Signal](/assets/screenshots/nodes_signal_info.png)     |
-| Battery level      | ![Battery](/assets/screenshots/nodes_battery_info.png)   |
-| Hop count          | ![Hops](/assets/screenshots/nodes_hops_info.png)         |
-| Dènye fwa li tande | ![Last heard](/assets/screenshots/nodes_last_heard.png)  |
-| Distans            | ![Distance](/assets/screenshots/nodes_distance_info.png) |
+| Signal quality     | ![Signal](../../assets/screenshots/nodes_signal_info.png)     |
+| Battery level      | ![Battery](../../assets/screenshots/nodes_battery_info.png)   |
+| Hop count          | ![Hops](../../assets/screenshots/nodes_hops_info.png)         |
+| Dènye fwa li tande | ![Last heard](../../assets/screenshots/nodes_last_heard.png)  |
+| Distans            | ![Distance](../../assets/screenshots/nodes_distance_info.png) |
 
 ## Related Topics
 

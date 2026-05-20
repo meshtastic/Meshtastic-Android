@@ -27,11 +27,11 @@ Bluetooth Low Energy is the default and most common connection method on Android
 4. Select your device from the list.
 5. Accept the Bluetooth pairing prompt if shown.
 
-![Device list item](/assets/screenshots/connections_bluetooth_scan.png)
+![Device list item](../../assets/screenshots/connections_bluetooth_scan.png)
 
 You can filter devices by transport type using the filter chips at the top:
 
-![Transport filter chips](/assets/screenshots/connections_transport_filters.png)
+![Transport filter chips](../../assets/screenshots/connections_transport_filters.png)
 
 > 💡 **Tip:** If your device doesn't appear, check that Bluetooth and Location permissions are granted, and that the radio is not already connected to another device.
 
@@ -46,11 +46,11 @@ You can filter devices by transport type using the filter chips at the top:
 
 When connecting, a status indicator shows the current connection state:
 
-![Connecting status](/assets/screenshots/connections_connecting.png)
+![Connecting status](../../assets/screenshots/connections_connecting.png)
 
 If no devices are found, the app shows an empty state with instructions:
 
-![No devices found](/assets/screenshots/connections_empty_state.png)
+![No devices found](../../assets/screenshots/connections_empty_state.png)
 
 ### Troubleshooting Bluetooth
 
@@ -81,15 +81,15 @@ Some Meshtastic radios support WiFi connectivity, allowing TCP-based connections
 3. Enter the radio's IP address and port (default: 4403).
 4. Tap **Connect**.
 
-![WiFi scanning for devices](/assets/screenshots/connections_wifi_scanning.png)
+![WiFi scanning for devices](../../assets/screenshots/connections_wifi_scanning.png)
 
 When a device is found, it appears in the connection list:
 
-![WiFi device found](/assets/screenshots/connections_wifi_device_found.png)
+![WiFi device found](../../assets/screenshots/connections_wifi_device_found.png)
 
 A successful connection is confirmed with a status indicator:
 
-![WiFi connection success](/assets/screenshots/connections_wifi_success.png)
+![WiFi connection success](../../assets/screenshots/connections_wifi_success.png)
 
 ### When to Use TCP
 
@@ -103,7 +103,7 @@ The app reconnects to the **last selected device** on startup. You can manually 
 
 To disconnect from a radio, use the disconnect button on the connections screen:
 
-![Disconnect from radio](/assets/screenshots/connections_disconnect.png)
+![Disconnect from radio](../../assets/screenshots/connections_disconnect.png)
 
 ## Desktop Connections
 

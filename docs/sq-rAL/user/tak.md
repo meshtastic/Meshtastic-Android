@@ -35,7 +35,7 @@ The TAK module allows Meshtastic nodes to:
 2. Enable the TAK module.
 3. Configure the TAK team/group settings:
 
-![Module toggle switch](/assets/screenshots/settings_switch.png)
+![Module toggle switch](../../assets/screenshots/settings_switch.png)
 
 | Setting | Përshkrimi                 |
 | ------- | -------------------------- |

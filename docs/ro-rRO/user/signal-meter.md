@@ -77,5 +77,5 @@ In the app, signal data is shown in several places:
 - **Traceroute** — per-hop signal quality for each relay node
 - **Signal metrics** — historical SNR and RSSI data in the metrics charts
 
-![Node entry showing SNR, RSSI values and colored signal bars](/assets/screenshots/nodes_signal_info.png)
+![Node entry showing SNR, RSSI values and colored signal bars](../../assets/screenshots/nodes_signal_info.png)
 
