@@ -3,6 +3,12 @@
 # Do NOT edit or remove previous entries — stale state claims cause agent confusion.
 # Format: ## YYYY-MM-DD — <summary>
 
+## 2026-05-20 — Optimized GenerateFlatpakSourcesTask for performance and correctness
+- Optimized `GenerateFlatpakSourcesTask` in `gradle/flatpak.gradle.kts` by implementing single-pass Maven metadata XML pre-indexing ($O(1)$ lookups) and deferred SHA-256 calculation (executing digests only on deduplicated, finalized resources).
+- Refactored loose map structures into strongly-typed Gradle-compliant internal data classes (`SnapshotVersion`, `SnapshotMetadata`, and `FlatpakSourceCandidate`) to improve type safety and maintainability.
+- Verified output correctness: the optimized manifest output `flatpak-sources.json` is 100% character-for-character identical to the original unoptimized output.
+- Successfully passed all static analysis and code quality checks with `./gradlew spotlessCheck detekt` (100% green).
+
 ## 2026-05-20 — Implemented dynamic Gradle cache SNAPSHOT metadata resolution for Flatpak offline builds
 - Overhauled `GenerateFlatpakSourcesTask` in `gradle/flatpak.gradle.kts` to identify `-SNAPSHOT` dependencies, parse local cached `maven-metadata.xml` in `resources-2.1`, and dynamically map them to remote timestamped snapshot URLs (e.g. Sonatype Snapshots) while preserving their original non-timestamped file names as `dest-filename`.
 - Created a pure JDK XML parser within the task to parse the `<snapshotVersions>` block from cached XML files.

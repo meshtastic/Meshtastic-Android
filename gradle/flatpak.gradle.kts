@@ -3,6 +3,7 @@ import java.io.File
 import java.security.MessageDigest
 import javax.xml.parsers.DocumentBuilderFactory
 import org.w3c.dom.Element
+import org.w3c.dom.NodeList
 
 // Abstract Task Definition for Configuration Cache compatibility and clean code separation
 abstract class GenerateFlatpakSourcesTask : DefaultTask() {
@@ -20,126 +21,147 @@ abstract class GenerateFlatpakSourcesTask : DefaultTask() {
         outputs.upToDateWhen { false }
     }
 
+    private data class SnapshotVersion(
+        val extension: String,
+        val classifier: String?,
+        val value: String
+    )
+
+    private data class SnapshotMetadata(
+        val snapshotVersions: List<SnapshotVersion>,
+        val fallbackValue: String?
+    )
+
+    private data class FlatpakSourceCandidate(
+        val file: File,
+        val group: String,
+        val name: String,
+        val version: String,
+        val ext: String,
+        val dest: String,
+        val destFilename: String,
+        val primaryUrl: String,
+        val mirrorUrls: List<String>
+    )
+
+    private var metadataCache: Map<String, SnapshotMetadata>? = null
+
     @TaskAction
     fun generate() {
-        val cacheFolder = cacheDir.orNull?.asFile
-        if (cacheFolder == null || !cacheFolder.exists()) {
-            throw GradleException(
-                "Gradle cache directory does not exist or is not configured correctly: ${cacheFolder?.absolutePath}. " +
-                "Please run a build first to populate the cache."
-            )
-        }
+        val cacheFolder = cacheDir.orNull?.asFile ?: throw GradleException(
+            "Gradle cache directory does not exist or is not configured correctly. Please run a build first to populate the cache."
+        )
 
         val outputSourcesFile = outputFile.get().asFile
         logger.lifecycle("Scanning Gradle cache directory: ${cacheFolder.absolutePath}")
 
         val allowedExtensions = setOf("jar", "aar", "pom", "module")
-        val entries = mutableListOf<Map<String, Any>>()
 
-        cacheFolder.walkTopDown().forEach { file ->
-            if (file.isFile) {
+        // Scan the cache using a clean functional sequence pipeline
+        val candidates = cacheFolder.walkTopDown()
+            .filter { it.isFile }
+            .filter { it.extension.lowercase() in allowedExtensions }
+            .filterNot { it.name.endsWith("-sources.jar") || it.name.endsWith("-javadoc.jar") }
+            .mapNotNull { file ->
                 val ext = file.extension.lowercase()
-                if (ext in allowedExtensions) {
-                    val filename = file.name
-                    if (!filename.endsWith("-sources.jar") && !filename.endsWith("-javadoc.jar")) {
-                        val relativePath = file.relativeTo(cacheFolder).path.replace('\\', '/')
-                        val parts = relativePath.split('/')
-                        if (parts.size == 5) {
-                            val group = parts[0]
-                            val name = parts[1]
-                            val version = parts[2]
+                val filename = file.name
+                val relativePath = file.relativeTo(cacheFolder).path.replace('\\', '/')
+                val parts = relativePath.split('/')
 
-                            val groupPath = group.replace('.', '/')
+                if (parts.size != 5) return@mapNotNull null
 
-                            // Reconstruct correct Maven filename if Gradle cache renamed it locally (e.g. animation.aar -> animation-android-1.10.0.aar)
-                            val standardPrefix = "$name-$version"
-                            val isSnapshot = version.endsWith("-SNAPSHOT") || version.contains("-SNAPSHOT")
-                            val classifier = if (isSnapshot) {
-                                val prefix = "$name-$version-"
-                                if (filename.startsWith(prefix)) {
-                                    filename.substring(prefix.length, filename.length - ext.length - 1)
-                                } else {
-                                    null
-                                }
-                            } else {
-                                null
-                            }
+                val (group, name, version) = parts
+                val groupPath = group.replace('.', '/')
+                val standardPrefix = "$name-$version"
+                val isSnapshot = version.endsWith("-SNAPSHOT") || version.contains("-SNAPSHOT")
 
-                            val resolvedVersion = if (isSnapshot) {
-                                val resourcesFolder = File(cacheFolder.parentFile, "resources-2.1")
-                                findSnapshotValue(resourcesFolder, group, name, ext, classifier) ?: version
-                            } else {
-                                version
-                            }
-
-                            val serverFilename = if (isSnapshot) {
-                                if (classifier != null) {
-                                    "$name-$resolvedVersion-$classifier.$ext"
-                                } else {
-                                    "$name-$resolvedVersion.$ext"
-                                }
-                            } else if (filename.startsWith(standardPrefix)) {
-                                filename
-                            } else {
-                                "$name-$version.$ext"
-                            }
-
-                            val mavenPath = "$groupPath/$name/$version/$serverFilename"
-                            val dest = "offline-repository/$groupPath/$name/$version"
-
-                            val sha256 = calculateSha256(file)
-
-                            val isJitpack = group.startsWith("com.github.")
-                            val primaryUrl = if (isSnapshot) {
-                                "https://central.sonatype.com/repository/maven-snapshots/$mavenPath"
-                            } else if (isJitpack) {
-                                "https://jitpack.io/$mavenPath"
-                            } else {
-                                "https://repo.maven.apache.org/maven2/$mavenPath"
-                            }
-
-                            val mirrorUrls = if (isSnapshot) {
-                                listOf(
-                                    "https://oss.sonatype.org/content/repositories/snapshots/$mavenPath"
-                                )
-                            } else if (isJitpack) {
-                                listOf(
-                                    "https://repo.maven.apache.org/maven2/$mavenPath",
-                                    "https://maven-central.storage-download.googleapis.com/maven2/$mavenPath",
-                                    "https://maven.aliyun.com/repository/public/$mavenPath"
-                                )
-                            } else {
-                                listOf(
-                                    "https://dl.google.com/dl/android/maven2/$mavenPath",
-                                    "https://plugins.gradle.org/m2/$mavenPath",
-                                    "https://maven-central.storage-download.googleapis.com/maven2/$mavenPath",
-                                    "https://maven.aliyun.com/repository/public/$mavenPath"
-                                )
-                            }
-
-                            entries.add(
-                                mapOf(
-                                    "type" to "file",
-                                    "url" to primaryUrl,
-                                    "sha256" to sha256,
-                                    "dest" to dest,
-                                    "dest-filename" to filename, // Save using the cached name expected by offline Gradle
-                                    "mirror-urls" to mirrorUrls
-                                )
-                            )
-                        }
-                    }
+                val classifier = if (isSnapshot) {
+                    val prefix = "$name-$version-"
+                    filename.takeIf { it.startsWith(prefix) }
+                        ?.removePrefix(prefix)
+                        ?.removeSuffix(".$ext")
+                } else {
+                    null
                 }
-            }
+
+                val resolvedVersion = if (isSnapshot) {
+                    val resourcesFolder = File(cacheFolder.parentFile, "resources-2.1")
+                    findSnapshotValue(resourcesFolder, group, name, ext, classifier) ?: version
+                } else {
+                    version
+                }
+
+                val serverFilename = when {
+                    isSnapshot -> {
+                        val suffix = classifier?.let { "-$it" } ?: ""
+                        "$name-$resolvedVersion$suffix.$ext"
+                    }
+                    filename.startsWith(standardPrefix) -> filename
+                    else -> "$name-$version.$ext"
+                }
+
+                val mavenPath = "$groupPath/$name/$version/$serverFilename"
+                val dest = "offline-repository/$groupPath/$name/$version"
+
+                val isJitpack = group.startsWith("com.github.")
+                val primaryUrl = if (isSnapshot) {
+                    "https://central.sonatype.com/repository/maven-snapshots/$mavenPath"
+                } else if (isJitpack) {
+                    "https://jitpack.io/$mavenPath"
+                } else {
+                    "https://repo.maven.apache.org/maven2/$mavenPath"
+                }
+
+                val mirrorUrls = when {
+                    isSnapshot -> listOf(
+                        "https://oss.sonatype.org/content/repositories/snapshots/$mavenPath"
+                    )
+                    isJitpack -> listOf(
+                        "https://repo.maven.apache.org/maven2/$mavenPath",
+                        "https://maven-central.storage-download.googleapis.com/maven2/$mavenPath",
+                        "https://maven.aliyun.com/repository/public/$mavenPath"
+                    )
+                    else -> listOf(
+                        "https://dl.google.com/dl/android/maven2/$mavenPath",
+                        "https://plugins.gradle.org/m2/$mavenPath",
+                        "https://maven-central.storage-download.googleapis.com/maven2/$mavenPath",
+                        "https://maven.aliyun.com/repository/public/$mavenPath"
+                    )
+                }
+
+                FlatpakSourceCandidate(
+                    file = file,
+                    group = group,
+                    name = name,
+                    version = version,
+                    ext = ext,
+                    dest = dest,
+                    destFilename = filename,
+                    primaryUrl = primaryUrl,
+                    mirrorUrls = mirrorUrls
+                )
+            }.toList()
+
+        // Deduplicate and sort by unique destination path + file
+        val deduplicated = candidates.groupBy { "${it.dest}/${it.destFilename}" }
+            .map { (_, groupCandidates) -> groupCandidates.first() }
+            .sortedBy { "${it.dest}/${it.destFilename}" }
+
+        logger.lifecycle("Calculating checksums for ${deduplicated.size} unique sources...")
+
+        val finalEntries = deduplicated.map { candidate ->
+            mapOf(
+                "type" to "file",
+                "url" to candidate.primaryUrl,
+                "sha256" to calculateSha256(candidate.file),
+                "dest" to candidate.dest,
+                "dest-filename" to candidate.destFilename,
+                "mirror-urls" to candidate.mirrorUrls
+            )
         }
 
-        // Deduplicate and sort
-        val deduplicated = entries.groupBy { "${it["dest"]}/${it["dest-filename"]}" }
-            .map { (_, group) -> group.first() }
-            .sortedBy { "${it["dest"]}/${it["dest-filename"]}" }
-
-        outputSourcesFile.writeText(JsonOutput.prettyPrint(JsonOutput.toJson(deduplicated)))
-        logger.lifecycle("Successfully scanned cache and generated ${outputSourcesFile.name} containing ${deduplicated.size} entries.")
+        outputSourcesFile.writeText(JsonOutput.prettyPrint(JsonOutput.toJson(finalEntries)))
+        logger.lifecycle("Successfully scanned cache and generated ${outputSourcesFile.name} containing ${finalEntries.size} entries.")
     }
 
     private fun calculateSha256(file: File): String {
@@ -163,8 +185,24 @@ abstract class GenerateFlatpakSourcesTask : DefaultTask() {
         return String(hexChars)
     }
 
-    private fun findSnapshotValue(resourcesFolder: File, group: String, name: String, extension: String, classifier: String?): String? {
-        if (!resourcesFolder.exists()) return null
+    // Modern helper extension to query DOM child element text safely
+    private fun Element.getChildText(tagName: String): String? =
+        getElementsByTagName(tagName).item(0)?.textContent
+
+    // Modern helper extension to iterate DOM elements cleanly
+    private fun NodeList.forEachElement(action: (Element) -> Unit) {
+        for (i in 0 until length) {
+            val node = item(i)
+            if (node is Element) {
+                action(node)
+            }
+        }
+    }
+
+    private fun populateMetadataCache(resourcesFolder: File) {
+        if (metadataCache != null || !resourcesFolder.exists()) return
+        val cache = mutableMapOf<String, SnapshotMetadata>()
+
         resourcesFolder.walkTopDown().forEach { file ->
             if (file.isFile && file.name == "maven-metadata.xml") {
                 try {
@@ -174,53 +212,66 @@ abstract class GenerateFlatpakSourcesTask : DefaultTask() {
                     doc.documentElement.normalize()
 
                     val root = doc.documentElement
-                    val fileGroup = root.getElementsByTagName("groupId").item(0)?.textContent
-                    val fileArtifact = root.getElementsByTagName("artifactId").item(0)?.textContent
+                    val group = root.getChildText("groupId") ?: return@forEach
+                    val name = root.getChildText("artifactId") ?: return@forEach
 
-                    if (fileGroup == group && fileArtifact == name) {
-                        val snapshotVersions = root.getElementsByTagName("snapshotVersion")
-                        for (i in 0 until snapshotVersions.length) {
-                            val element = snapshotVersions.item(i) as Element
-                            val ext = element.getElementsByTagName("extension").item(0)?.textContent
-                            val value = element.getElementsByTagName("value").item(0)?.textContent
-                            val classif = element.getElementsByTagName("classifier").item(0)?.textContent
+                    val key = "$group:$name"
+                    val snapshotVersions = mutableListOf<SnapshotVersion>()
+                    root.getElementsByTagName("snapshotVersion").forEachElement { element ->
+                        val ext = element.getChildText("extension") ?: return@forEachElement
+                        val value = element.getChildText("value") ?: return@forEachElement
+                        val classif = element.getChildText("classifier")
 
-                            if (ext == extension) {
-                                if (classifier == null && classif == null) {
-                                    return value
-                                }
-                                if (classifier != null && classifier == classif) {
-                                    return value
-                                }
-                            }
-                        }
+                        snapshotVersions.add(SnapshotVersion(ext, classif, value))
+                    }
 
-                        val snapshotNode = root.getElementsByTagName("snapshot").item(0) as? Element
-                        if (snapshotNode != null) {
-                            val timestamp = snapshotNode.getElementsByTagName("timestamp").item(0)?.textContent
-                            val buildNumber = snapshotNode.getElementsByTagName("buildNumber").item(0)?.textContent
-                            val version = root.getElementsByTagName("version").item(0)?.textContent
-                            if (timestamp != null && buildNumber != null && version != null) {
-                                val baseVersion = version.substringBefore("-SNAPSHOT")
-                                return "$baseVersion-$timestamp-$buildNumber"
-                            }
+                    var fallbackValue: String? = null
+                    val snapshotNode = root.getElementsByTagName("snapshot").item(0) as? Element
+                    if (snapshotNode != null) {
+                        val timestamp = snapshotNode.getChildText("timestamp")
+                        val buildNumber = snapshotNode.getChildText("buildNumber")
+                        val version = root.getChildText("version")
+                        if (timestamp != null && buildNumber != null && version != null) {
+                            val baseVersion = version.substringBefore("-SNAPSHOT")
+                            fallbackValue = "$baseVersion-$timestamp-$buildNumber"
                         }
                     }
+
+                    cache[key] = SnapshotMetadata(snapshotVersions, fallbackValue)
                 } catch (e: Exception) {
                     // Ignore parsing errors for individual files
                 }
             }
         }
-        return null
+        metadataCache = cache
+    }
+
+    private fun findSnapshotValue(resourcesFolder: File, group: String, name: String, extension: String, classifier: String?): String? {
+        populateMetadataCache(resourcesFolder)
+        val metadata = metadataCache?.get("$group:$name") ?: return null
+
+        for (version in metadata.snapshotVersions) {
+            if (version.extension == extension) {
+                if (classifier == null && version.classifier == null) {
+                    return version.value
+                }
+                if (classifier != null && classifier == version.classifier) {
+                    return version.value
+                }
+            }
+        }
+
+        return metadata.fallbackValue
     }
 }
 
 tasks.register<GenerateFlatpakSourcesTask>("generateFlatpakSourcesFromCache") {
-    val customCachePath = providers.gradleProperty("flatpak.cache.dir").orNull
-    if (customCachePath != null) {
-        cacheDir.set(layout.projectDirectory.dir(customCachePath))
-    } else {
-        cacheDir.set(layout.dir(providers.provider { File(gradle.gradleUserHomeDir, "caches/modules-2/files-2.1") }))
-    }
+    val customCachePath = providers.gradleProperty("flatpak.cache.dir")
+    val defaultCacheDir = layout.dir(providers.provider { File(gradle.gradleUserHomeDir, "caches/modules-2/files-2.1") })
+
+    cacheDir.set(customCachePath.map { path ->
+        layout.projectDirectory.dir(path)
+    }.orElse(defaultCacheDir))
+
     outputFile.set(layout.projectDirectory.file("flatpak-sources.json"))
 }
