@@ -83,15 +83,13 @@ private val CurrentTabSaver =
             TopLevelDestination.entries.indexOfFirst { it.route::class == state.value::class }.takeIf { it >= 0 }
         },
         restore = { ordinal ->
-            mutableStateOf(
-                TopLevelDestination.entries.getOrNull(ordinal)?.route ?: TopLevelDestination.Connections.route,
-            )
+            mutableStateOf(TopLevelDestination.entries.getOrNull(ordinal)?.route ?: TopLevelDestination.Connect.route)
         },
     )
 
 /** Remembers a [MultiBackstack] for managing independent tab navigation histories with Navigation 3. */
 @Composable
-fun rememberMultiBackstack(initialTab: NavKey = TopLevelDestination.Connections.route): MultiBackstack {
+fun rememberMultiBackstack(initialTab: NavKey = TopLevelDestination.Connect.route): MultiBackstack {
     val stacks = mutableMapOf<NavKey, NavBackStack<NavKey>>()
 
     TopLevelDestination.entries.forEach { dest ->

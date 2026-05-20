@@ -30,8 +30,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 
 /**
- * Keeps Desktop top-level destinations aligned with Android top-level navigation (Conversations, Nodes, Map, Settings,
- * Connections).
+ * Keeps Desktop top-level destinations aligned with Android top-level navigation (Messages, Nodes, Map, Settings,
+ * Connect).
  */
 class DesktopTopLevelDestinationParityTest {
 

@@ -57,6 +57,14 @@ KMP modules have different task names than pure-Android modules. Using the wrong
 - **Protos**: `core/proto/` is a read-only git submodule. Never modify proto files.
 - **Branches**: Must start with `feat/`, `fix/`, `chore/`, `docs/`, `build/`, `ci/`, `refactor/`, `test/`, `deps/`, or a numeric spec prefix. Always branch off `origin/main`.
 
+<!-- SPECKIT START -->
+## Active Plan
+
+- **Feature**: Reorder Bottom Navigation Tab Labels
+- **Plan**: `specs/20260520-153412-nav-tab-labels/plan.md`
+- **Branch**: `jamesarich/issue-5543-alignment-reorder-bottom-navigation-tab-91d55d`
+<!-- SPECKIT END -->
+
 ## Deeper Guidance
 
 Consult `.skills/` for detailed playbooks:
