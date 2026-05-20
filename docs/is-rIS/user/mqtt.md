@@ -38,7 +38,7 @@ A gateway node with internet access (WiFi or Ethernet) publishes mesh messages t
 2. Enable the MQTT module.
 3. Configure the broker connection:
 
-![MQTT toggle switch](/assets/screenshots/settings_switch.png)
+![MQTT toggle switch](../../assets/screenshots/settings_switch.png)
 
 | Setting         | Lýsing                                                                                        | Default                                             |
 | --------------- | --------------------------------------------------------------------------------------------- | --------------------------------------------------- |

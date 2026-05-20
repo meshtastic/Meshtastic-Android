@@ -130,7 +130,7 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 | NTP-server    | Time synchronization server                          |
 | Syslog Server | Remote logging server                                |
 
-![IP address field](/assets/screenshots/settings_ipv4_field.png)
+![IP address field](../../assets/screenshots/settings_ipv4_field.png)
 
 ### Bluetooth-inställningar
 
@@ -152,15 +152,15 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 | Serial Enabled        | Enable serial console access (moved from Device Config) |
 | Hanterat läge         | Restrict non-admin channel changes                                         |
 
-![Password field](/assets/screenshots/settings_password_field.png)
+![Password field](../../assets/screenshots/settings_password_field.png)
 
 Settings use standard preference controls — dropdowns, toggles, and sliders:
 
 | Control  | Screenshot                                             |
 | -------- | ------------------------------------------------------ |
-| Dropdown | ![Dropdown](/assets/screenshots/settings_dropdown.png) |
-| Toggle   | ![Toggle](/assets/screenshots/settings_switch.png)     |
-| Slider   | ![Slider](/assets/screenshots/settings_slider.png)     |
+| Dropdown | ![Dropdown](../../assets/screenshots/settings_dropdown.png) |
+| Toggle   | ![Toggle](../../assets/screenshots/settings_switch.png)     |
+| Slider   | ![Slider](../../assets/screenshots/settings_slider.png)     |
 
 ## Related Topics
 

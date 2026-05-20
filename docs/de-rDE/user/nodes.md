@@ -124,21 +124,21 @@ Type in the search field to filter nodes by name or short name. The filter updat
 
 Tapping a node opens the detail view with comprehensive information. See [Node Metrics](node-metrics) for full details on metrics and telemetry.
 
-![Node detail view](/assets/screenshots/nodes_node_list.png)
+![Node detail view](../../assets/screenshots/nodes_node_list.png)
 
 The detail screen includes device info, position, and action buttons:
 
-![Node detail section](/assets/screenshots/nodes_detail_section.png)
+![Node detail section](../../assets/screenshots/nodes_detail_section.png)
 
 Inline status indicators show key metrics at a glance:
 
 | Indicator      | Bildschirmfoto                                           |
 | -------------- | -------------------------------------------------------- |
-| Signal quality | ![Signal](/assets/screenshots/nodes_signal_info.png)     |
-| Akkustand      | ![Battery](/assets/screenshots/nodes_battery_info.png)   |
-| Hop count      | ![Hops](/assets/screenshots/nodes_hops_info.png)         |
-| Zuletzt gehört | ![Last heard](/assets/screenshots/nodes_last_heard.png)  |
-| Distanz        | ![Distance](/assets/screenshots/nodes_distance_info.png) |
+| Signal quality | ![Signal](../../assets/screenshots/nodes_signal_info.png)     |
+| Akkustand      | ![Battery](../../assets/screenshots/nodes_battery_info.png)   |
+| Hop count      | ![Hops](../../assets/screenshots/nodes_hops_info.png)         |
+| Zuletzt gehört | ![Last heard](../../assets/screenshots/nodes_last_heard.png)  |
+| Distanz        | ![Distance](../../assets/screenshots/nodes_distance_info.png) |
 
 ## Related Topics
 
