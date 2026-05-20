@@ -2,7 +2,7 @@
 title: Codebase
 parent: Developer Guide
 nav_order: 2
-last_updated: 2026-05-13
+last_updated: 2026-05-20
 aliases:
   - repository-layout
   - project-structure
@@ -56,7 +56,8 @@ Meshtastic-Android/
 │   ├── testing/
 │   └── ui/
 ├── build-logic/            # Convention plugins and build helpers
-│   └── convention/
+│   ├── convention/
+│   └── flatpak/
 ├── docs/                   # Documentation source (markdown)
 │   ├── user/
 │   └── developer/

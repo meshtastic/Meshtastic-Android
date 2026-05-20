@@ -14,11 +14,7 @@ aliases:
 
 # Desktop App
 
-The Meshtastic Desktop application provides the same mesh communication features on Linux, macOS, and Windows.
-
-## Overview
-
-The Desktop app shares its core codebase with the Android app through Kotlin Multiplatform (KMP). Most features work identically across platforms.
+The Meshtastic Desktop application shares its core codebase with Android via Kotlin Multiplatform. Most features work identically on Linux, macOS, and Windows.
 
 ## Installation
 
@@ -45,7 +41,7 @@ The most reliable connection method on Desktop:
 
 1. Connect your Meshtastic radio via USB cable.
 2. The app should detect the serial port automatically.
-3. If not detected, select the correct serial port from the connections menu.
+3. If not detected, select the correct serial port from the Connect menu.
 
 ### TCP/IP
 
@@ -60,7 +56,7 @@ Bluetooth Low Energy is supported on Desktop via the [Kable](https://github.com/
 
 1. Ensure your system has a Bluetooth adapter.
 2. The app scans for nearby Meshtastic radios automatically.
-3. Select your device from the connections screen.
+3. Select your device from the Connect screen.
 
 ## Feature Parity
 

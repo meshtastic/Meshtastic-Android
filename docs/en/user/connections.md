@@ -99,9 +99,9 @@ A successful connection is confirmed with a status indicator:
 
 ## Reconnection Behavior
 
-The app reconnects to the **last selected device** on startup. You can manually switch transports from the connections screen at any time.
+The app reconnects to the **last selected device** on startup. You can switch transports from the Connect screen at any time.
 
-To disconnect from a radio, use the disconnect button on the connections screen:
+To disconnect, tap the disconnect button on the Connect screen:
 
 ![Disconnect from radio](../../assets/screenshots/connections_disconnect.png)
 
