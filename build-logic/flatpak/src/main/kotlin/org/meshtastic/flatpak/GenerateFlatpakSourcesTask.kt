@@ -38,10 +38,15 @@ abstract class GenerateFlatpakSourcesTask : DefaultTask() {
 
     @get:OutputFile abstract val outputFile: RegularFileProperty
 
+    /** Base URL of the Maven snapshot repository (no trailing slash). */
+    @get:Internal
+    val snapshotRepoUrl: org.gradle.api.provider.Property<String> =
+        project.objects.property(String::class.java)
+            .convention("https://central.sonatype.com/repository/maven-snapshots")
+
     init {
         group = "flatpak"
         description = "Generates a complete flatpak-sources.json manifest from the local Gradle cache directory."
-        // Ensure the task always runs when executed
         outputs.upToDateWhen { false }
     }
 
@@ -72,6 +77,7 @@ abstract class GenerateFlatpakSourcesTask : DefaultTask() {
                 )
 
         val outputSourcesFile = outputFile.get().asFile
+        val snapshotBase = snapshotRepoUrl.get()
         logger.lifecycle("Scanning Gradle cache directory: ${cacheFolder.absolutePath}")
 
         val allowedExtensions = setOf("jar", "aar", "pom", "module")
@@ -98,7 +104,7 @@ abstract class GenerateFlatpakSourcesTask : DefaultTask() {
 
                     val resolvedVersion =
                         if (isSnapshot) {
-                            resolveSnapshotVersion(groupPath, name, version, ext) ?: version
+                            resolveSnapshotVersion(snapshotBase, groupPath, name, version, ext) ?: version
                         } else {
                             version
                         }
@@ -117,7 +123,7 @@ abstract class GenerateFlatpakSourcesTask : DefaultTask() {
                     val primaryUrl =
                         when {
                             isSnapshot ->
-                                "https://central.sonatype.com/repository/maven-snapshots/$mavenPath"
+                                "$snapshotBase/$mavenPath"
 
                             isJitpack ->
                                 "https://jitpack.io/$mavenPath"
@@ -192,6 +198,7 @@ abstract class GenerateFlatpakSourcesTask : DefaultTask() {
      * filename — they require the unique timestamped coordinate (e.g. `0.2.4-20260520.043744-2`).
      */
     private fun resolveSnapshotVersion(
+        snapshotBase: String,
         groupPath: String,
         artifactId: String,
         version: String,
@@ -202,8 +209,7 @@ abstract class GenerateFlatpakSourcesTask : DefaultTask() {
             return findMatchingVersion(remoteMetadataCache[cacheKey], extension)
         }
 
-        val metadataUrl =
-            "https://central.sonatype.com/repository/maven-snapshots/$groupPath/$artifactId/$version/maven-metadata.xml"
+        val metadataUrl = "$snapshotBase/$groupPath/$artifactId/$version/maven-metadata.xml"
 
         val metadata = fetchAndParseMetadata(metadataUrl)
         remoteMetadataCache[cacheKey] = metadata

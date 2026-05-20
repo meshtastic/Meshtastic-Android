@@ -34,8 +34,11 @@ class FlatpakConventionPlugin : Plugin<Project> {
                 }
                 outputFile.set(layout.projectDirectory.file("flatpak-sources.json"))
 
-                // Ensure the desktop app is assembled first so the Gradle cache is fully populated
-                dependsOn(":desktopApp:assemble")
+                // Configurable prerequisite task ensures the Gradle cache is populated.
+                // Defaults to :desktopApp:assemble; override with -Pflatpak.assemble.task
+                val assembleTask = providers.gradleProperty("flatpak.assemble.task")
+                    .orElse(":desktopApp:assemble")
+                dependsOn(assembleTask)
             }
         }
     }
