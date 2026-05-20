@@ -9,12 +9,11 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
-* fix: prevent node details hang when device hardware API is unreachable (#5514) by James Rich (@jamesarich) in [`877909fa9`](https://github.com/meshtastic/Meshtastic-Android/commit/877909fa94b55758be9dd91e2bd11e160b3822ed)
-* chore(deps): update ruby to v4.0.5 (#5515) by renovate[bot] (@renovate[bot]) in [`d37e08fcc`](https://github.com/meshtastic/Meshtastic-Android/commit/d37e08fccdabd3f673e3eccf90ab1538f02fe867)
-* docs: update CHANGELOG.md (#5516) by github-actions[bot] (@github-actions[bot]) in [`f5e5fb6da`](https://github.com/meshtastic/Meshtastic-Android/commit/f5e5fb6da63ee85e64dbbe19a519a5a3deccd408)
-* fix(ci): exclude kotlinNativeBundleConfiguration from flatpak source generation (#5517) by James Rich (@jamesarich) in [`e13a4359e`](https://github.com/meshtastic/Meshtastic-Android/commit/e13a4359e188bbf02087cdb6253ea2b70c8200ed)
+* ci: unify GitHub Pages deployment (Dokka + docs site) (#5523) by James Rich (@jamesarich) in [`a6523acbb`](https://github.com/meshtastic/Meshtastic-Android/commit/a6523acbb88766c6a1401f13d4b23ab679bf3af7)
+* chore(deps): update koin.plugin to v1.0.0 (#5524) by renovate[bot] (@renovate[bot]) in [`8de0a1f16`](https://github.com/meshtastic/Meshtastic-Android/commit/8de0a1f167e498ccef999d3917023e1f34640a8c)
+* chore(flatpak): optimize CI source generation and clean up redundant tasks (#5525) by James Rich (@jamesarich) in [`7ae1b2681`](https://github.com/meshtastic/Meshtastic-Android/commit/7ae1b2681313da5a07217ea6e04a0c3dc4b79946)
 
-### Internal (v2.7.14-internal.93)
+### Internal (v2.7.14-internal.94)
 Changes since [`v2.7.14-open.9`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14-open.9):
 
 * chore(deps): update vico to v3.2.0-next.5 (#5470) by renovate[bot] (@renovate[bot]) in [`4bacff81c`](https://github.com/meshtastic/Meshtastic-Android/commit/4bacff81c5abad536b40f7370ae5d302b74a11fe)
@@ -64,6 +63,12 @@ Changes since [`v2.7.14-open.9`](https://github.com/meshtastic/Meshtastic-Androi
 * ci: reduce flatpak source generation thrash (#5513) by James Rich (@jamesarich) in [`3f64b5a0e`](https://github.com/meshtastic/Meshtastic-Android/commit/3f64b5a0ecf7cc9ed6e81068ab3067033a7f74f4)
 * chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5511) by James Rich (@jamesarich) in [`1dcb7b9d1`](https://github.com/meshtastic/Meshtastic-Android/commit/1dcb7b9d1a29fcdfad214fe74360130c597ee989)
 * docs: update CHANGELOG.md (#5510) by github-actions[bot] (@github-actions[bot]) in [`0803dd3ae`](https://github.com/meshtastic/Meshtastic-Android/commit/0803dd3ae8d6970ae8218dcfd6d0bb9b63866da9)
+* fix: prevent node details hang when device hardware API is unreachable (#5514) by James Rich (@jamesarich) in [`877909fa9`](https://github.com/meshtastic/Meshtastic-Android/commit/877909fa94b55758be9dd91e2bd11e160b3822ed)
+* chore(deps): update ruby to v4.0.5 (#5515) by renovate[bot] (@renovate[bot]) in [`d37e08fcc`](https://github.com/meshtastic/Meshtastic-Android/commit/d37e08fccdabd3f673e3eccf90ab1538f02fe867)
+* docs: update CHANGELOG.md (#5516) by github-actions[bot] (@github-actions[bot]) in [`f5e5fb6da`](https://github.com/meshtastic/Meshtastic-Android/commit/f5e5fb6da63ee85e64dbbe19a519a5a3deccd408)
+* fix(ci): exclude kotlinNativeBundleConfiguration from flatpak source generation (#5517) by James Rich (@jamesarich) in [`e13a4359e`](https://github.com/meshtastic/Meshtastic-Android/commit/e13a4359e188bbf02087cdb6253ea2b70c8200ed)
+* docs: update CHANGELOG.md (#5518) by github-actions[bot] (@github-actions[bot]) in [`54fafd225`](https://github.com/meshtastic/Meshtastic-Android/commit/54fafd225bddfee446cfea01dee6887e082acc79)
+* fix(ci): downgrade Ruby to 4.0.4 for ubuntu-24.04 compatibility (#5519) by James Rich (@jamesarich) in [`199827755`](https://github.com/meshtastic/Meshtastic-Android/commit/1998277555d2d3ac9f01f8af9f6c4a0652c169ad)
 
 ### Open Beta (v2.7.14-open.9)
 Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.13):
