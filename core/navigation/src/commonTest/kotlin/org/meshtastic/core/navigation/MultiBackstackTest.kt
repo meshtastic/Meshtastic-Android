@@ -85,21 +85,21 @@ class MultiBackstackTest {
 
     @Test
     fun `goBack on root of non-start tab returns to start tab`() {
-        val startTab = TopLevelDestination.Connections.route
+        val startTab = TopLevelDestination.Connect.route
         val multiBackstack = createMultiBackstack(startTab)
 
         val mapStack = NavBackStack<NavKey>().apply { addAll(listOf(TopLevelDestination.Map.route)) }
-        val connectionsStack = NavBackStack<NavKey>().apply { addAll(listOf(TopLevelDestination.Connections.route)) }
+        val connectStack = NavBackStack<NavKey>().apply { addAll(listOf(TopLevelDestination.Connect.route)) }
 
         multiBackstack.backStacks =
-            mapOf(TopLevelDestination.Map.route to mapStack, TopLevelDestination.Connections.route to connectionsStack)
+            mapOf(TopLevelDestination.Map.route to mapStack, TopLevelDestination.Connect.route to connectStack)
 
         multiBackstack.navigateTopLevel(TopLevelDestination.Map.route)
         assertEquals(TopLevelDestination.Map.route, multiBackstack.currentTabRoute)
 
         multiBackstack.goBack()
 
-        assertEquals(TopLevelDestination.Connections.route, multiBackstack.currentTabRoute)
+        assertEquals(TopLevelDestination.Connect.route, multiBackstack.currentTabRoute)
     }
 
     @Test
@@ -120,21 +120,18 @@ class MultiBackstackTest {
 
     @Test
     fun `handleDeepLink from different tab switches tab and sets stack`() {
-        // Start on Connections tab
-        val startTab = TopLevelDestination.Connections.route
+        // Start on Connect tab
+        val startTab = TopLevelDestination.Connect.route
         val multiBackstack = createMultiBackstack(startTab)
 
-        val connectionsStack = NavBackStack<NavKey>().apply { addAll(listOf(TopLevelDestination.Connections.route)) }
+        val connectStack = NavBackStack<NavKey>().apply { addAll(listOf(TopLevelDestination.Connect.route)) }
         val nodesStack = NavBackStack<NavKey>().apply { addAll(listOf(TopLevelDestination.Nodes.route)) }
 
         multiBackstack.backStacks =
-            mapOf(
-                TopLevelDestination.Connections.route to connectionsStack,
-                TopLevelDestination.Nodes.route to nodesStack,
-            )
+            mapOf(TopLevelDestination.Connect.route to connectStack, TopLevelDestination.Nodes.route to nodesStack)
 
-        // Verify we start on Connections
-        assertEquals(TopLevelDestination.Connections.route, multiBackstack.currentTabRoute)
+        // Verify we start on Connect
+        assertEquals(TopLevelDestination.Connect.route, multiBackstack.currentTabRoute)
 
         // Deep-link to a TracerouteMap on the Nodes tab (this is the exact pattern
         // MeshtasticAppShell uses for traceroute alert "View on Map")

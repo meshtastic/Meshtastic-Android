@@ -285,7 +285,7 @@ private fun ApplicationScope.MeshtasticWindow(
         rememberMultiBackstack(
             // Land on Connections for first-run / no-device-selected; otherwise on Nodes.
             if (uiViewModel.currentDeviceAddressFlow.value.let { it.isNullOrBlank() || it == "n" }) {
-                TopLevelDestination.Connections.route
+                TopLevelDestination.Connect.route
             } else {
                 TopLevelDestination.Nodes.route
             },
@@ -360,7 +360,7 @@ private fun handleKeyboardShortcut(
         }
 
         Key.One -> {
-            multiBackstack.navigateTopLevel(TopLevelDestination.Conversations.route)
+            multiBackstack.navigateTopLevel(TopLevelDestination.Messages.route)
             true
         }
 
@@ -375,7 +375,7 @@ private fun handleKeyboardShortcut(
         }
 
         Key.Four -> {
-            multiBackstack.navigateTopLevel(TopLevelDestination.Connections.route)
+            multiBackstack.navigateTopLevel(TopLevelDestination.Connect.route)
             true
         }
 

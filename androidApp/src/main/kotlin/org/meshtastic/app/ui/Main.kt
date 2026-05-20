@@ -59,7 +59,7 @@ fun MainScreen() {
     // from the StateFlow (seeded from persisted prefs) so the initial tab is set in one shot.
     val initialTab =
         if (viewModel.currentDeviceAddressFlow.value.isNullOrSelectedNone()) {
-            TopLevelDestination.Connections.route
+            TopLevelDestination.Connect.route
         } else {
             NodesRoute.Nodes
         }
@@ -82,7 +82,7 @@ fun MainScreen() {
                         scrollToTopEvents = viewModel.scrollToTopEventFlow,
                         onHandleDeepLink = viewModel::handleDeepLink,
                         onNavigateToConnections = {
-                            multiBackstack.navigateTopLevel(TopLevelDestination.Connections.route)
+                            multiBackstack.navigateTopLevel(TopLevelDestination.Connect.route)
                         },
                     )
                     mapGraph(backStack)
