@@ -170,12 +170,12 @@ object DeepLinkRouter {
             val sessionId = segments[3].toLongOrNull()
             return if (sessionId != null) {
                 listOf(
-                    SettingsRoute.SettingsGraph(destNum),
+                    SettingsRoute.Settings(destNum),
                     DiscoveryRoute.DiscoveryGraph,
                     DiscoveryRoute.DiscoverySummary(sessionId),
                 )
             } else {
-                listOf(SettingsRoute.SettingsGraph(destNum), DiscoveryRoute.DiscoveryGraph)
+                listOf(SettingsRoute.Settings(destNum), DiscoveryRoute.DiscoveryGraph)
             }
         }
 
