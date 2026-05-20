@@ -8,10 +8,7 @@
     <ID>MagicNumber:GenerateFlatpakSourcesTask.kt:GenerateFlatpakSourcesTask$4</ID>
     <ID>MagicNumber:GenerateFlatpakSourcesTask.kt:GenerateFlatpakSourcesTask$5</ID>
     <ID>MagicNumber:GenerateFlatpakSourcesTask.kt:GenerateFlatpakSourcesTask$8192</ID>
-    <ID>MaxLineLength:GenerateFlatpakSourcesTask.kt:GenerateFlatpakSourcesTask$"Gradle cache directory does not exist or is not configured correctly. Please run a build first to populate the cache."</ID>
     <ID>MaxLineLength:GenerateFlatpakSourcesTask.kt:GenerateFlatpakSourcesTask$"Successfully scanned cache and generated ${outputSourcesFile.name} containing ${finalEntries.size} entries."</ID>
-    <ID>NestedBlockDepth:GenerateFlatpakSourcesTask.kt:GenerateFlatpakSourcesTask$private fun populateMetadataCache</ID>
-    <ID>ReturnCount:GenerateFlatpakSourcesTask.kt:GenerateFlatpakSourcesTask$private fun findSnapshotValue: String?</ID>
     <ID>SwallowedException:GenerateFlatpakSourcesTask.kt:GenerateFlatpakSourcesTask$e: Exception</ID>
     <ID>TooGenericExceptionCaught:GenerateFlatpakSourcesTask.kt:GenerateFlatpakSourcesTask$e: Exception</ID>
   </CurrentIssues>

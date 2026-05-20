@@ -17,15 +17,14 @@ Previously, this logic was mixed in loose scripts or monolithic build convention
 
 ## Key Features
 
-### 1. Snapshot Metadata Harvesting
-Standard Maven snapshot repositories (e.g., Sonatype Snapshots) return `404` errors when fetching non-timestamped `-SNAPSHOT` dependencies directly. This plugin dynamically locates and parses local cached `maven-metadata.xml` files inside Gradle's cached directories, resolves the unique timestamped snapshot coordinate, and constructs exact, direct download URLs while preserving local filename bindings.
+### 1. Remote Snapshot Metadata Resolution
+Standard Maven snapshot repositories (e.g., Sonatype Snapshots) return `404` errors when fetching non-timestamped `-SNAPSHOT` dependencies directly. This plugin fetches `maven-metadata.xml` from the remote snapshot repository at generation time, resolves the unique timestamped snapshot coordinate (e.g., `0.2.4-20260520.043744-2`), and constructs exact, direct download URLs while preserving local filename bindings.
 
 ### 2. JitPack URL Routing
 Automatically identifies external dependencies belonging to the `com.github.*` group (hosted on JitPack) and routes their `primaryUrl` to `https://jitpack.io` instead of attempting standard Maven Central lookup, preventing sandboxed download failures.
 
-### 3. High-Performance Optimizations
-* **Single-Pass Metadata Indexing**: Scans cached metadata files exactly once on-demand, caching them in an in-memory `$O(1)$` lookup map.
-* **Deferred Cryptographic Hashing**: Defers expensive SHA-256 calculation until after candidate files are fully deduplicated and sorted.
+### 3. Automatic Cache Population
+The task automatically depends on `:desktopApp:assemble`, ensuring the Gradle dependency cache is fully populated before scanning. No manual pre-build step is required.
 
 ---
 
@@ -39,6 +38,23 @@ plugins {
 }
 ```
 
+### Configuration (DSL)
+
+All options have sensible defaults. Override as needed:
+
+```kotlin
+flatpak {
+    // Snapshot repository to fetch maven-metadata.xml from
+    snapshotRepoUrl.set("https://central.sonatype.com/repository/maven-snapshots")
+    // Task that populates the Gradle cache before scanning
+    assembleTask.set(":desktopApp:assemble")
+    // Custom Gradle cache directory (defaults to ~/.gradle/caches/modules-2/files-2.1)
+    cacheDir.set(layout.projectDirectory.dir("my-cache"))
+    // Output manifest path
+    outputFile.set(layout.projectDirectory.file("flatpak-sources.json"))
+}
+```
+
 ### Running the Generator Task
 
 Execute the registered custom task to sweep your Gradle local modules cache and generate/overwrite the root `flatpak-sources.json`:
@@ -47,17 +63,10 @@ Execute the registered custom task to sweep your Gradle local modules cache and 
 ./gradlew :generateFlatpakSourcesFromCache
 ```
 
-### Custom Cache Directory
-
-By default, the task scans the standard Gradle user home caches directory (`~/.gradle/caches/modules-2/files-2.1`). You can supply a custom cache directory using the `flatpak.cache.dir` Gradle property:
-
-```bash
-./gradlew :generateFlatpakSourcesFromCache -Pflatpak.cache.dir="/custom/cache/path"
-```
-
 ---
 
 ## Architecture
 
-* **[FlatpakConventionPlugin.kt](src/main/kotlin/FlatpakConventionPlugin.kt)**: Registers the `generateFlatpakSourcesFromCache` task using lazy provider configuration.
-* **[GenerateFlatpakSourcesTask.kt](src/main/kotlin/org/meshtastic/flatpak/GenerateFlatpakSourcesTask.kt)**: The native JVM-based custom task responsible for Gradle files scanning, metadata harvesting, and JSON generation.
+* **[FlatpakPlugin.kt](src/main/kotlin/org/meshtastic/flatpak/FlatpakPlugin.kt)**: Registers the `flatpak {}` DSL extension and the `generateFlatpakSourcesFromCache` task using lazy provider configuration.
+* **[FlatpakExtension.kt](src/main/kotlin/org/meshtastic/flatpak/FlatpakExtension.kt)**: DSL extension interface defining all configurable properties.
+* **[GenerateFlatpakSourcesTask.kt](src/main/kotlin/org/meshtastic/flatpak/GenerateFlatpakSourcesTask.kt)**: The custom task responsible for Gradle files scanning, remote metadata resolution, and JSON generation.

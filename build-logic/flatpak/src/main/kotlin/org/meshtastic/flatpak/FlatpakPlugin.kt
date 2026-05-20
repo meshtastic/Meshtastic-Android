@@ -14,25 +14,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+package org.meshtastic.flatpak
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.meshtastic.flatpak.GenerateFlatpakSourcesTask
 import java.io.File
 
-class FlatpakConventionPlugin : Plugin<Project> {
+class FlatpakPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
+            val extension = extensions.create("flatpak", FlatpakExtension::class.java).apply {
+                cacheDir.convention(
+                    layout.dir(providers.provider { File(gradle.gradleUserHomeDir, "caches/modules-2/files-2.1") }),
+                )
+                outputFile.convention(layout.projectDirectory.file("flatpak-sources.json"))
+                snapshotRepoUrl.convention("https://central.sonatype.com/repository/maven-snapshots")
+                assembleTask.convention(":desktopApp:assemble")
+            }
+
             tasks.register("generateFlatpakSourcesFromCache", GenerateFlatpakSourcesTask::class.java) {
-                val customCachePath = providers.gradleProperty("flatpak.cache.dir").orNull
-                if (customCachePath != null) {
-                    cacheDir.set(layout.projectDirectory.dir(customCachePath))
-                } else {
-                    cacheDir.set(
-                        layout.dir(providers.provider { File(gradle.gradleUserHomeDir, "caches/modules-2/files-2.1") }),
-                    )
-                }
-                outputFile.set(layout.projectDirectory.file("flatpak-sources.json"))
+                cacheDir.set(extension.cacheDir)
+                outputFile.set(extension.outputFile)
+                snapshotRepoUrl.set(extension.snapshotRepoUrl)
+                dependsOn(extension.assembleTask)
             }
         }
     }
