@@ -334,5 +334,5 @@ tasks.flatpakGradleGenerator {
     outputFile = file("../flatpak-sources-desktop-$arch.json")
     downloadDirectory.set("./offline-repository")
     onlyArches = arch
-    includeConfigurations.set(listOf("runtimeClasspath"))
+    includeConfigurations.set(setOf("runtimeClasspath", "compileClasspath", "kotlinCompilerPluginClasspath"))
 }

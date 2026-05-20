@@ -372,18 +372,18 @@ jobs:
 
       - name: Generate Flatpak Sources
         run: >
-          ./gradlew :build-logic:convention:flatpakGradleGenerator :desktopApp:flatpakGradleGenerator
+          ./gradlew :combineFlatpakSources
           --no-configuration-cache
 
       - name: List Flatpak source files
-        run: ls -R flatpak-sources-*.json
+        run: ls -R flatpak-sources.json
 
       - name: Upload Flatpak source artifacts
         if: always()
         uses: actions/upload-artifact@v7
         with:
           name: flatpak-multisrc-${{ runner.arch }}
-          path: flatpak-sources-*.json
+          path: flatpak-sources.json
           retention-days: 1
 
   release-flatpak-src:
@@ -401,24 +401,12 @@ jobs:
         run: ls -R flatpak-multisrc/
 
       - name: Validate Flatpak source files
-        run: jq empty flatpak-multisrc/*/*.json
+        run: jq empty flatpak-multisrc/*/flatpak-sources.json
 
       - name: Combine Flatpak source files
         run: >
           jq -s 'add | unique_by(.dest + "/" + .["dest-filename"] + "/" + (.["only-arches"] | tostring))'
-          flatpak-multisrc/*/*.json
-          > flatpak-sources-combined.json
-      
-      - name: Add mirror-urls for Maven Central
-        run: >
-          jq '[.[] | if (.url | test("^https://repo\\.maven\\.apache\\.org/maven2/")) then . + {"mirror-urls": [(.url | sub("^https://repo\\.maven\\.apache\\.org/maven2/"; "https://maven-central.storage-download.googleapis.com/maven2/"))]} else . end]'
-          flatpak-sources-combined.json
-          > flatpak-sources-central.json
-
-      - name: Add mirror-urls for Gradle Plugin Portal
-        run: >
-          jq '[.[] | if (.url | test("^https://plugins\\.gradle\\.org/m2/")) then . + {"mirror-urls": [(.url | sub("^https://plugins\\.gradle\\.org/m2/"; "https://maven.aliyun.com/repository/gradle-plugin/"))]} else . end]'
-          flatpak-sources-central.json
+          flatpak-multisrc/*/flatpak-sources.json
           > flatpak-sources.json
 
       - name: Upload combined Flatpak source artifact
