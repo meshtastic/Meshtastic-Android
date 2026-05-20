@@ -83,7 +83,7 @@
 ### Implementation for User Story 2
 
 - [x] NL-T019 [US2] Implement Row 2 (toggle: `shouldShowLastHeard`) in `NodeItemCompact.kt`: online/offline icon (green checkmark / orange moon) + timestamp via `LastHeardInfo`, with relative time support via `lastHeardIsRelative`. Guard with future date filter (> 1 year) (FR-013, FR-028).
-- [x] NL-T020 [US2] Implement Row 3 combined icons in `NodeItemCompact.kt` as `Row(horizontalArrangement = spacedBy(6.dp), modifier = Modifier.height(IntrinsicSize.Min))` with `VerticalDivider(modifier = Modifier.fillMaxHeight())` separators (FR-014, audit §1.4). Render in order: Distance+Bearing, Hops Away, Signal, Channel, Device Role, Log Icons — each gated by its toggle AND data conditions.
+- [x] NL-T020 [US2] Implement Row 3 combined metrics in `NodeItemCompact.kt` as `FlowRow(horizontalArrangement = Arrangement.SpaceBetween)` spanning full card width — no separators (FR-014, FR-033). Render in order: Distance+Bearing, Hops Away, Signal, Channel, Device Role, Log Icons — each gated by its toggle AND data conditions.
 - [x] NL-T021 [US2] Implement Distance+Bearing rendering in Row 3: gate on `shouldShowLocation` toggle + node has positions + node is not connected node + valid location data for both user and node. Use `NumberFormatter.format()` for float values (FR-015, FR-028).
 - [x] NL-T022 [US2] Implement Hops Away rendering in Row 3: gate on `shouldShowHops` toggle + `node.hopsAway > 0` (FR-016).
 - [x] NL-T023 [US2] Implement Signal rendering in Row 3: gate on `shouldShowSignal` toggle + `node.hopsAway == 0` + `node.snr != 0` + `!node.viaMqtt`. Icon color via `determineSignalQuality(snr, rssi)`. **MUST** include `contentDescription = stringResource(quality.nameRes)` (e.g., "Signal: Good") for WCAG 1.4.1 — no color-only information (FR-017, audit §2.6).
@@ -171,7 +171,7 @@
 ### Critical Path
 
 ```
-Phase 1 → Phase 2 → Phase 3 (US1) → Phase 4 (US2) → Phase 5 (US3) → Phase 7
+Phase 1 → Phase 2 → Phase 3 (US1) → Phase 4 (US2) → Phase 5 (US3) → Phase 8 (M3 Expressive) → Phase 7
 ```
 
 ### Parallel Opportunities
@@ -257,7 +257,7 @@ With multiple developers:
 
 - [ ] NL-T049 [P] **Add node-color `BorderStroke`** to both card composables. Border uses `BorderStroke(1.5.dp, Color(node.colors.second).copy(alpha = if (isActive) 0.5f else 0.2f))`. Pass to `Card(border = ...)`. (FR-030)
 
-- [ ] NL-T050 **Implement packet-received glow animation** in a shared `NodeCardGlow` composable or modifier extension. Uses `remember { Animatable(0f) }` + `LaunchedEffect(node.lastHeard)` to trigger bloom (`fastSpatialSpec`) → decay (`slowSpatialSpec`). Applies `Modifier.shadow(elevation = 8.dp * glowAlpha, shape = cardShape, ambientColor = nodeColor.copy(alpha = glowAlpha), spotColor = nodeColor.copy(alpha = glowAlpha))`. Integrate into both `NodeItem` and `NodeItemCompact` outer Card modifier. (FR-031, NFR-005)
+- [ ] NL-T050 **Implement packet-received glow animation** in a shared `NodeCardGlow` composable or modifier extension in `core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/component/`. Uses `remember { Animatable(0f) }` + `LaunchedEffect(node.lastHeard)` to trigger bloom (`fastSpatialSpec`) → decay (`slowSpatialSpec`). Applies `Modifier.shadow(elevation = 8.dp * glowAlpha, shape = cardShape, ambientColor = nodeColor.copy(alpha = glowAlpha), spotColor = nodeColor.copy(alpha = glowAlpha))`. Integrate into both `NodeItem` and `NodeItemCompact` outer Card modifier. (FR-031, NFR-005)
 
 - [ ] NL-T051 [P] **Replace alpha-based text emphasis with M3 color roles** across both layouts. Audit and replace all instances of `contentColor.copy(alpha = 0.7f)`, `contentColor.copy(alpha = 0.55f)`, `contentColor.copy(alpha = 0.65f)` etc. with:
   - Primary text → `MaterialTheme.colorScheme.onSurface`
@@ -265,9 +265,9 @@ With multiple developers:
   - Tertiary/metadata → `MaterialTheme.colorScheme.outline`
   (FR-032)
 
-- [ ] NL-T052 **Restore two-column layout in compact mode**. Restructure `NodeItemCompact` from `Column { NameRow(chip inline), HealthRow, MetricsRow, FooterRow }` back to `Row { Column1(chip + battery), Column2(weight=1f, rows) }` per spec FR-009. Battery moves from health row to below chip in Column 1. Content rows span Column 2 only. (FR-009, FR-011)
+- [ ] NL-T052 **Restore two-column layout in compact mode** (regression fix). During Phase 4–5 iteration, the compact layout was refactored to inline NodeChip into the name row. Restructure back to `Row { Column1(chip + battery), Column2(weight=1f, rows) }` per spec FR-009. Battery moves from health row to below chip in Column 1. Content rows span Column 2 only. Verify adaptive chip sizing (NL-T032) still applies after restructure. (FR-009, FR-011)
 
-- [ ] NL-T053 [P] **Implement adaptive chip sizing formula**. Apply `max(36.dp, min(70.dp, 24.dp * lineCount))` where `lineCount` counts active row groups. Use `Modifier.defaultMinSize()` not hard `Modifier.size()`. (FR-011)
+- [ ] NL-T053 [P] **Implement bearing as rotated MapCompass icon**. Use `MeshtasticIcons.MapCompass` with `Modifier.rotate(bearingDegrees.toFloat())` for direction indicator in both compact (Row 3, after distance) and complete (battery/position row). Bearing is null if either node lacks valid position. (FR-034)
 
 - [ ] NL-T054 [P] **Add `HorizontalDivider` before footer in Complete mode**. Use `HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))` between the metrics section and the footer (hw model + role + node ID). (Layout structure — Complete)
 

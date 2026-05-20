@@ -244,6 +244,7 @@ flowchart TD
 | `NodeSignalQuality` | `core/ui/component/LoraSignalIndicator.kt` | SNR + RSSI + quality in FlowRow (Complete mode) |
 | `NodeKeyStatusIcon` | `core/ui/component/NodeKeyStatusIcon.kt` | PKC/key status icon |
 | `NodeStatusIcons` | `feature/node/component/NodeStatusIcons.kt` | Favorite, muted, unmessageable, connection status icons |
+| `NodeCardGlow` | `core/ui/component/` | Packet-received glow animation modifier (M3 Expressive springs) |
 
 ## Requirements *(mandatory)*
 
@@ -262,7 +263,7 @@ flowchart TD
 - **FR-011**: The chip height MUST scale adaptively: `max(36.dp, min(70.dp, 24.dp × lineCount))` where `lineCount` counts active row groups (1 base + 1 if last-heard enabled + 1 if any combined-row toggle is enabled). The chip MUST use `Modifier.defaultMinSize()` rather than hard `Modifier.size()` to allow growth when system font scaling exceeds 100%.
 - **FR-012**: Row 1 (name) MUST always display: `NodeKeyStatusIcon` (PKC/key status icon from MeshtasticIcons), long name, and favorite star (if favorited). This row is not toggleable.
 - **FR-013**: Row 2 (last heard) MUST display when the "Last Heard Time" toggle is on and the node has a valid `lastHeard` timestamp (non-zero, not more than 1 year in the future). It shows an online (green checkmark) or offline (orange moon) icon plus the formatted timestamp via `LastHeardInfo`.
-- **FR-014**: Row 3 (combined icons) MUST display as a `Row(horizontalArrangement = spacedBy(6.dp), modifier = Modifier.height(IntrinsicSize.Min))` with `VerticalDivider(modifier = Modifier.fillMaxHeight())` between groups, in this order: Distance+Bearing, Hops Away, Signal, Channel, Device Role, Log Icons.
+- **FR-014**: Row 3 (combined icons) MUST display as a `FlowRow(horizontalArrangement = Arrangement.SpaceBetween)` spanning full card width, in this order: Distance+Bearing, Hops Away, Signal, Channel, Device Role, Log Icons. Each segment renders as icon + value (no separators). See FR-033 for separator rule.
 - **FR-015**: Distance and Bearing MUST only render when the toggle is on, the node has positions, the node is not the connected node, and valid location data is available for both the user and the node.
 - **FR-016**: Hops Away MUST only render when the toggle is on and `node.hopsAway > 0`.
 - **FR-017**: Signal MUST only render when the toggle is on, `node.hopsAway == 0`, `node.snr != 0`, and `node.viaMqtt == false`. The icon color MUST use the `Quality` enum from `determineSignalQuality(snr, rssi)`. The signal icon MUST include `contentDescription = stringResource(quality.nameRes)` (e.g., "Signal: Good") to satisfy WCAG 1.4.1 (no color-only information).
@@ -348,3 +349,4 @@ Signal quality is determined by `determineSignalQuality(snr, rssi)` using absolu
 - All business logic and UI composables reside in `commonMain` source set. No platform-specific code is required for this feature.
 - String resources for toggle labels and help text are added to `core/resources/src/commonMain/composeResources/values/strings.xml` using `stringResource(Res.string.key)`.
 - This feature does not log or expose PII, location data, or cryptographic keys. Node data is displayed read-only from the existing database — no new data collection or network calls are introduced.
+- **Cross-platform spec exemption (Constitution V)**: This is a display-only UI feature with no behavioral changes affecting other platforms. The information architecture is already aligned with `meshtastic/Meshtastic-Apple:specs/002-node-list-layout` (identical field order and toggle keys). M3 Expressive card styling (border, glow, color roles) is Android/Desktop-specific visual treatment with no cross-platform behavioral contract needed.
