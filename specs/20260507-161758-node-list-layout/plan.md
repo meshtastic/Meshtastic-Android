@@ -148,8 +148,13 @@ No new routes needed. The settings section is embedded within the existing `Sett
 - Use `SwitchPreference` (`core:ui`) for settings toggles — not raw `Switch`. Provides M3 `ListItem` integration and `toggleable` semantics
 - Use `titleMediumEmphasized` (M3 Expressive) for node names in both layouts for consistency
 - Help button must use `IconButton` (not `Icon` + `clickable`) for 48dp minimum touch target
-- `VerticalDivider` in compact Row 3 must use `Modifier.fillMaxHeight()` inside a `Row(Modifier.height(IntrinsicSize.Min))` — not hardcoded height
+- Compact Row 3 uses `Arrangement.SpaceBetween` — no `VerticalDivider` separators (FR-033)
 - Compact 2.dp spacing is an intentional M3 deviation documented in spec (FR-026/FR-027)
+- Card background MUST be `MaterialTheme.colorScheme.surface` (neutral) — no node-color tinting (FR-029, Design Standards §1)
+- Node identity expressed via `BorderStroke` in node color + transient glow animation (FR-030, FR-031)
+- Text hierarchy via M3 color roles (`onSurface` → `onSurfaceVariant` → `outline`), not alpha (FR-032)
+- Glow animation uses `MaterialTheme.motionScheme.fastSpatialSpec()` (bloom) and `slowSpatialSpec()` (decay) — M3 Expressive spring physics
+- Bearing displayed as rotated `MeshtasticIcons.MapCompass` icon (FR-034)
 
 ### Accessibility Constraints
 
@@ -171,10 +176,12 @@ No new routes needed. The settings section is embedded within the existing `Sett
 | String resource conflicts | Low | Low | Run `python3 scripts/sort-strings.py` after adding strings (NL-T005) |
 | TalkBack regression in existing NodeItem | High | High | Existing `NodeItem` has no row-level semantics merge (8-12 focus stops per row). NL-T006 is HIGH priority to fix before shipping compact variant. |
 | Font scaling clips compact chip text | Medium | Medium | Use `defaultMinSize()` not hard `size()` for adaptive growth (NL-T032) |
+| Glow animation causes frame drops in LazyColumn | Medium | High | Scope `Animatable` per-item; use `graphicsLayer` for shadow (draw phase only, no recomposition). Benchmark with 200+ nodes (NFR-005). |
+| Colored shadows invisible on dark node colors | Low | Low | Enforce minimum lightness/saturation floor on glow color; fallback to `primary` if node color luminance < 0.2 |
 
 ## Phase Alignment with Tasks
 
-The implementation is structured across 7 phases (47 tasks) as defined in `tasks.md`:
+The implementation is structured across 8 phases (47 existing + new M3 Expressive tasks) as defined in `tasks.md`:
 
 | Phase | Purpose | Key Tasks | Dependencies |
 |-------|---------|-----------|--------------|
@@ -185,14 +192,29 @@ The implementation is structured across 7 phases (47 tasks) as defined in `tasks
 | 5. US3 — Adaptive Sizing | lineCount + adaptive chip sizing | NL-T031–T033 | Phase 4 |
 | 6. US4 — Help Sheet | Signal strength documentation | NL-T034–T037 | Phase 1 (parallel with 3–5) |
 | 7. Polish | Performance, edge cases, tests, verification | NL-T038–T047 | Phases 3–6 |
+| **8. M3 Expressive** | **Neutral bg, color border, glow animation, typography roles, bearing icon, layout alignment** | **NL-T048–T055** | **Phases 3–5** |
 
 ### Critical Path
 
 ```
-Phase 1 → Phase 2 → Phase 3 (US1) → Phase 4 (US2) → Phase 5 (US3) → Phase 7
+Phase 1 → Phase 2 → Phase 3 (US1) → Phase 4 (US2) → Phase 5 (US3) → Phase 8 (M3 Expressive) → Phase 7
 ```
 
-Phase 6 (US4) runs in parallel off the critical path, converging at Phase 7 (Polish).
+Phase 6 (US4) runs in parallel off the critical path. Phase 8 (M3 Expressive) can begin after Phase 3 and converges before Phase 7 (Polish).
+
+### Phase 8: M3 Expressive Card Redesign
+
+**Goal**: Align card styling with Design Standards v1.4 §1 (neutral background, color in chip only) while adding M3 Expressive motion and typography patterns for a modern, mesh-native feel.
+
+**Key changes**:
+1. Remove node-color background tinting from both `NodeItem` and `NodeItemCompact`
+2. Add `BorderStroke` with node color (alpha modulated by online state)
+3. Add packet-received glow animation using M3 Expressive spring physics
+4. Replace alpha-based text emphasis with M3 color roles
+5. Restore two-column layout (chip LEFT, content RIGHT) per spec
+6. Implement adaptive chip sizing formula
+7. Add bearing as rotated MapCompass icon
+8. Add `HorizontalDivider` before footer in Complete mode
 
 ## Complexity Tracking
 

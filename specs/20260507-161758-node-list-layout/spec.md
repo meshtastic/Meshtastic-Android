@@ -108,42 +108,100 @@ A user sees colored signal indicators on their node list and wants to understand
 
 ## Architecture
 
+### M3 Expressive Card Treatment
+
+Both density layouts share a unified card styling system that complies with Design Standards v1.4 §1 (neutral background) while preserving node identity via color accents:
+
+#### Card Border (Always Visible)
+- Node's computed color (`node.colors.second`) applied as a `BorderStroke(1.5.dp, nodeColor.copy(alpha))`
+- **Online/active nodes**: border alpha = `0.5f` (prominent)
+- **Offline/inactive nodes**: border alpha = `0.2f` (subtle)
+- Background remains `MaterialTheme.colorScheme.surface` (neutral, WCAG AA compliant)
+
+#### Packet-Received Glow Animation
+When a packet is received from a node (detected via `lastHeard` timestamp change), the card emits a transient colored glow using M3 Expressive spring physics:
+
+1. **Bloom phase**: `Animatable(0f → 0.6f)` using `MaterialTheme.motionScheme.fastSpatialSpec()` — spring overshoot creates visible "pop"
+2. **Decay phase**: `Animatable(0.6f → 0f)` using `MaterialTheme.motionScheme.slowSpatialSpec()` — gentle fade back to rest
+
+Implementation via `Modifier.shadow()`:
+```kotlin
+val glowAlpha = remember { Animatable(0f) }
+LaunchedEffect(node.lastHeard) {
+    if (node.lastHeard > 0L) {
+        glowAlpha.animateTo(0.6f, motionScheme.fastSpatialSpec())
+        glowAlpha.animateTo(0f, motionScheme.slowSpatialSpec())
+    }
+}
+Modifier.shadow(
+    elevation = 8.dp * glowAlpha.value,
+    shape = cardShape,
+    ambientColor = nodeColor.copy(alpha = glowAlpha.value),
+    spotColor = nodeColor.copy(alpha = glowAlpha.value),
+)
+```
+
+#### Typography Hierarchy (M3 Expressive)
+| Role | Style | Color Role | Usage |
+|------|-------|-----------|-------|
+| Primary (name) | `titleMediumEmphasized` (16sp Bold) | `onSurface` | Node long name |
+| Secondary (values) | `labelLarge` (14sp Medium) | `onSurfaceVariant` | Metric values (battery %, distance, time) |
+| Tertiary (labels) | `labelSmall` (11sp Medium) | `outline` | Footer metadata (hardware, role, node ID) |
+
+**No alpha hacks**: Replace all `contentColor.copy(alpha = 0.7f)` with semantic M3 color roles (`onSurfaceVariant`, `outline`).
+
+#### Card Shape
+- Uniform `RoundedCornerShape(12.dp)` for both densities
+- Card uses `CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)`
+
+---
+
 ### Layout Structure — Compact
 
 ```
-┌──────────────────────────────────────────────────────┐
-│ ┌──────────┐  Row 1: 🔑 Long Name          ★ (fav)  │
-│ │ NodeChip  │  Row 2: ● Last Heard Time              │
-│ │  (Short)  │  Row 3: [dist] [hops|signal] [ch]      │
-│ │  Battery  │         [role] [telemetry icons]        │
-│ └──────────┘                                          │
-└──────────────────────────────────────────────────────┘
+    node-color border (always) ─────────── pulse glow on packet received
+    ┌─────────────────────────────────────────────────────────────┐
+    │                                                             │
+    │  ┌────────┐                                                 │
+    │  │  AB    │  🔑 Long Node Name              ★  🔇  📡      │
+    │  │        │  ● 3m ago                                       │
+    │  │ 🔋 72% │  📍 1.2km  ↗  🐇 2  📶  📻 1  👤  🌡 23°C    │
+    │  └────────┘                                                 │
+    │                                                             │
+    └─────────────────────────────────────────────────────────────┘
 ```
 
 - **Column 1** (fixed width): `NodeChip` composable (adaptive size) + optional `MaterialBatteryInfo`
 - **Column 2** (weight 1f): `Column(verticalArrangement = spacedBy(2.dp))` with up to 3 rows
-  - Row 1 (always visible): `NodeKeyStatusIcon`, long name, favorite star
+  - Row 1 (always visible): `NodeKeyStatusIcon`, long name, favorite star, status icons
   - Row 2 (toggle: Last Heard Time): Online/offline icon + timestamp via `LastHeardInfo`
-  - Row 3 (toggle: any of Distance/Hops/Signal/Channel/Role/Telemetry): Combined `Row` of chips separated by `VerticalDivider(height = 15.dp)`
+  - Row 3 (toggle: any of Distance/Hops/Signal/Channel/Role/Telemetry): Combined `FlowRow` of icon+value segments with `Arrangement.SpaceBetween`
 
 ### Layout Structure — Complete
 
 ```
-┌──────────────────────────────────────────────────────┐
-│ ┌──────────┐  Row 1: 🔑 Long Name          ★ (fav)  │
-│ │ NodeChip  │  Row 2: 📡 Connected (if direct)       │
-│ │  (Short)  │  Row 3: ● Last Heard (always shown)    │
-│ │  Battery  │  Row 4: 👤 Role: <name>                │
-│ └──────────┘  Row 5: 📏 Distance + Bearing           │
-│               Row 6: Channel + MQTT                   │
-│               Row 7: 📜 Logs: [icons]                 │
-│               Row 8: 🐇 Hops Away OR Signal Quality   │
-└──────────────────────────────────────────────────────┘
+    node-color border (always) ─────────── pulse glow on packet received
+    ┌─────────────────────────────────────────────────────────────┐
+    │                                                             │
+    │  ┌────────┐  🔑 Long Node Name              ★  🔇  📡     │
+    │  │  AB    │  📡 Connected · Direct                          │
+    │  │        │  ● Last heard: 3 minutes ago                    │
+    │  │ 🔋 72% │  👤 Role: Client                                │
+    │  │ 3.7v   │  📍 1.2km ↗ · Alt 342m                         │
+    │  └────────┘  📻 Channel 1 · MQTT                            │
+    │              📜 🌡 23°C  💧 68%  🔽 1013hPa                  │
+    │              📶 SNR: -4.5dB · RSSI: -98 · Good              │
+    │                                                             │
+    │  ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─  │
+    │  HELTEC V3          Client          !abc123de               │
+    │                                                             │
+    └─────────────────────────────────────────────────────────────┘
 ```
 
 - No user-configurable toggles — all fields shown when data exists
 - Signal shown as `LoraSignalIndicator` / `NodeSignalQuality` composable (icon + SNR/RSSI text with quality color)
 - Chip is fixed at 70.dp
+- Footer separated by subtle `HorizontalDivider` with `outline` color
 
 ### Data Flow
 
@@ -222,6 +280,19 @@ flowchart TD
 - **FR-026**: Compact rows MUST use `Column(verticalArrangement = spacedBy(2.dp))` for consistent tight inter-row spacing. *(Intentional deviation from M3's 4-8dp guideline — compact mode explicitly trades spacing for density.)*
 - **FR-027**: Compact rows MUST have 2.dp top and bottom padding. Complete rows MUST have 3.dp top and bottom padding. *(Intentional deviation from M3's 8-16dp list item padding — complete mode uses the existing 12.dp internal padding within the Card.)*
 - **FR-028**: Any floating-point values displayed in the UI (e.g., distance, SNR) MUST be pre-formatted using `NumberFormatter.format()` before rendering, per CMP string formatting constraints.
+- **FR-029**: Card backgrounds MUST use `MaterialTheme.colorScheme.surface` (neutral). Node identity color MUST NOT be used as a background wash or tint. *(Design Standards v1.4 §1 — Circle Standard.)*
+- **FR-030**: Both layouts MUST display a `BorderStroke` using the node's computed color (`node.colors.second`) with alpha modulated by online status: `0.5f` when active/online, `0.2f` when inactive/offline.
+- **FR-031**: Both layouts MUST animate a transient colored glow (`Modifier.shadow`) when a packet is received from that node (detected via `lastHeard` timestamp change). The animation MUST use M3 Expressive spring physics:
+  - Bloom: `Animatable(0f → 0.6f)` with `MaterialTheme.motionScheme.fastSpatialSpec()` (spring overshoot)
+  - Decay: `Animatable(0.6f → 0f)` with `MaterialTheme.motionScheme.slowSpatialSpec()` (gentle fade)
+  - Shadow color: node's computed color at `glowAlpha` opacity
+  - Shadow elevation: `8.dp * glowAlpha`
+- **FR-032**: Text emphasis MUST use M3 color roles instead of alpha manipulation:
+  - Primary text (node name): `MaterialTheme.colorScheme.onSurface`
+  - Secondary text (metric values): `MaterialTheme.colorScheme.onSurfaceVariant`
+  - Tertiary text (footer metadata): `MaterialTheme.colorScheme.outline`
+- **FR-033**: The compact layout Row 3 (combined metrics) MUST use `Arrangement.SpaceBetween` for even distribution across full card width, without dot separators or `VerticalDivider`.
+- **FR-034**: Bearing MUST be displayed as a `MeshtasticIcons.MapCompass` icon rotated by the computed bearing degrees (`Modifier.rotate(bearingDegrees.toFloat())`), not as text.
 
 ### Non-Functional Requirements
 
@@ -229,6 +300,7 @@ flowchart TD
 - **NFR-002**: The compact layout MUST render smoothly at 60fps when scrolling a `LazyColumn` of 200+ nodes.
 - **NFR-003**: DataStore preference keys MUST use the `NodeListLayoutPreferences` enum values to prevent key string drift.
 - **NFR-004**: The compact view MUST use `LazyColumn` with stable `key` parameters for efficient rendering and item reuse.
+- **NFR-005**: Glow animations MUST NOT cause frame drops during scrolling. The `Animatable` MUST be scoped per-item (not a shared state) and MUST NOT trigger recomposition of sibling items. Use `graphicsLayer` for shadow rendering to keep animations in the draw phase only.
 
 ### Signal Quality Thresholds
 

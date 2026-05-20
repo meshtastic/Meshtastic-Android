@@ -208,8 +208,9 @@ Phase 1 (Setup)
   ├──→ Phase 2 (Foundational: NodeItem a11y + ViewModel) ──→ Phase 3 (US1: Density Switch)
   │                                                            └──→ Phase 4 (US2: Field Toggles)
   │                                                                   └──→ Phase 5 (US3: Adaptive Sizing)
-  │                                                                          └──→ Phase 7 (Polish)
-  └──→ Phase 6 (US4: Help Sheet) ──────────────────────────────────────────────→ Phase 7 (Polish)
+  │                                                                          └──→ Phase 8 (M3 Expressive)
+  │                                                                                 └──→ Phase 7 (Polish)
+  └──→ Phase 6 (US4: Help Sheet) ──────────────────────────────────────────────────────→ Phase 7 (Polish)
 ```
 
 ---
@@ -231,7 +232,8 @@ Phase 1 (Setup)
 3. Phase 4: US2 → All 9 field toggles work → Full compact experience
 4. Phase 5: US3 → Adaptive chip sizing → Visual polish
 5. Phase 6: US4 → Help documentation → Feature complete
-6. Phase 7 → Tests + verification → Merge-ready
+6. Phase 8: M3 Expressive → Neutral bg, color border, glow animation → Design-standards compliant
+7. Phase 7 → Tests + verification → Merge-ready
 
 ### Parallel Team Strategy
 
@@ -242,3 +244,35 @@ With multiple developers:
    - Developer A: US1 (Phase 3) → US2 (Phase 4) → US3 (Phase 5) *(critical path)*
    - Developer B: US4 (Phase 6) *(independent, can start after Phase 1)*
 3. Both converge at Phase 7 (Testing)
+
+---
+
+## Phase 8: M3 Expressive Card Redesign (FR-029 – FR-034, NFR-005)
+
+**Purpose**: Align card styling with Design Standards v1.4 §1, add M3 Expressive motion personality via packet-received glow animation, replace alpha-based text emphasis with semantic color roles, and finalize layout structure per cross-platform spec.
+
+**Prerequisites**: Phases 3–5 complete (card scaffold exists, toggles work, chip sizing works).
+
+- [ ] NL-T048 [P] **Remove node-color card background tinting** from both `NodeItemCompact` (`core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/component/NodeItemCompact.kt`) and `NodeItem` (`core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/component/NodeItem.kt`). Replace `CardDefaults.cardColors().copy(containerColor = Color(it).copy(alpha))` with `CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)`. Remove `ACTIVE_ALPHA` / `INACTIVE_ALPHA` constants. (FR-029)
+
+- [ ] NL-T049 [P] **Add node-color `BorderStroke`** to both card composables. Border uses `BorderStroke(1.5.dp, Color(node.colors.second).copy(alpha = if (isActive) 0.5f else 0.2f))`. Pass to `Card(border = ...)`. (FR-030)
+
+- [ ] NL-T050 **Implement packet-received glow animation** in a shared `NodeCardGlow` composable or modifier extension. Uses `remember { Animatable(0f) }` + `LaunchedEffect(node.lastHeard)` to trigger bloom (`fastSpatialSpec`) → decay (`slowSpatialSpec`). Applies `Modifier.shadow(elevation = 8.dp * glowAlpha, shape = cardShape, ambientColor = nodeColor.copy(alpha = glowAlpha), spotColor = nodeColor.copy(alpha = glowAlpha))`. Integrate into both `NodeItem` and `NodeItemCompact` outer Card modifier. (FR-031, NFR-005)
+
+- [ ] NL-T051 [P] **Replace alpha-based text emphasis with M3 color roles** across both layouts. Audit and replace all instances of `contentColor.copy(alpha = 0.7f)`, `contentColor.copy(alpha = 0.55f)`, `contentColor.copy(alpha = 0.65f)` etc. with:
+  - Primary text → `MaterialTheme.colorScheme.onSurface`
+  - Secondary text/values → `MaterialTheme.colorScheme.onSurfaceVariant`
+  - Tertiary/metadata → `MaterialTheme.colorScheme.outline`
+  (FR-032)
+
+- [ ] NL-T052 **Restore two-column layout in compact mode**. Restructure `NodeItemCompact` from `Column { NameRow(chip inline), HealthRow, MetricsRow, FooterRow }` back to `Row { Column1(chip + battery), Column2(weight=1f, rows) }` per spec FR-009. Battery moves from health row to below chip in Column 1. Content rows span Column 2 only. (FR-009, FR-011)
+
+- [ ] NL-T053 [P] **Implement adaptive chip sizing formula**. Apply `max(36.dp, min(70.dp, 24.dp * lineCount))` where `lineCount` counts active row groups. Use `Modifier.defaultMinSize()` not hard `Modifier.size()`. (FR-011)
+
+- [ ] NL-T054 [P] **Add `HorizontalDivider` before footer in Complete mode**. Use `HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))` between the metrics section and the footer (hw model + role + node ID). (Layout structure — Complete)
+
+- [ ] NL-T055 **Performance validation of glow animation**. Benchmark scrolling with 200+ nodes in `LazyColumn` while glow animations fire. Verify no frame drops (use `FrameMetrics` or Compose `recomposition highlighter`). If degraded: move shadow to `graphicsLayer` draw phase, or debounce rapid `lastHeard` updates. (NFR-005)
+
+**Dependencies**: NL-T048 and NL-T049 are parallel (both modify card colors/border independently). NL-T050 depends on NL-T048 (needs neutral background to see glow). NL-T051 is independent (text colors, no card dependency). NL-T052 depends on NL-T048 (layout restructure after color change). NL-T053 depends on NL-T052 (chip sizing needs two-column layout). NL-T054 is independent. NL-T055 depends on NL-T050 (tests the glow).
+
+**Checkpoint**: Cards use neutral backgrounds with node-color borders, glow pulses on packet received, text uses semantic M3 roles, layout matches cross-platform spec.
