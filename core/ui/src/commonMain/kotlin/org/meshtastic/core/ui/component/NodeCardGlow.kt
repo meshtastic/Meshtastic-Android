@@ -23,6 +23,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -47,13 +48,14 @@ fun Modifier.nodeCardGlow(lastHeard: Int, nodeColor: Color): Modifier {
     val decaySpec = MaterialTheme.motionScheme.slowSpatialSpec<Float>()
     val cardShape = CardDefaults.shape
 
+    // Track previous value to distinguish initial composition from actual changes
+    val previousLastHeard = remember { mutableIntStateOf(lastHeard) }
     LaunchedEffect(lastHeard) {
-        if (lastHeard > 0) {
-            // Bloom: fast ramp up to full glow
+        if (lastHeard > 0 && lastHeard != previousLastHeard.intValue) {
             glowAlpha.animateTo(targetValue = 1f, animationSpec = bloomSpec)
-            // Decay: slow fade out
             glowAlpha.animateTo(targetValue = 0f, animationSpec = decaySpec)
         }
+        previousLastHeard.intValue = lastHeard
     }
 
     val alpha = glowAlpha.value
