@@ -22,7 +22,6 @@ plugins {
     `kotlin-dsl`
     alias(libs.plugins.spotless)
     alias(libs.plugins.detekt)
-    alias(libs.plugins.flatpak.gradle.generator)
 }
 
 group = "org.meshtastic.buildlogic"
@@ -36,24 +35,6 @@ java {
 
 kotlin { compilerOptions { jvmTarget = JvmTarget.JVM_21 } }
 
-val flatpakOfflineDeps by
-    configurations.creating {
-        isCanBeResolved = true
-        isCanBeConsumed = false
-    }
-
-val flatpakOfflineEmbeddedDeps by
-    configurations.creating {
-        isCanBeResolved = true
-        isCanBeConsumed = false
-    }
-
-val flatpakOfflineOlderDeps by
-    configurations.creating {
-        isCanBeResolved = true
-        isCanBeConsumed = false
-    }
-
 dependencies {
     // This allows the use of the 'libs' type-safe accessor in the Kotlin source of the plugins
     implementation(files(libs.javaClass.superclass.protectionDomain.codeSource.location))
@@ -62,8 +43,7 @@ dependencies {
     val gradleKotlinVersion = KotlinVersion.CURRENT.toString()
 
     // ── Convention plugin compile dependencies ──────────────────────────────
-    // These are standard compile-time dependencies. Since flatpakGradleGenerator includes
-    // "compileClasspath", they are automatically captured along with all their transitives offline.
+    // These are standard compile-time dependencies used by our convention plugins.
     compileOnly(libs.android.gradleApiPlugin)
     compileOnly(libs.serialization.gradlePlugin)
     compileOnly(libs.android.tools.common)
@@ -85,68 +65,7 @@ dependencies {
     compileOnly(libs.test.retry.gradlePlugin)
     compileOnly(libs.aboutlibraries.gradlePlugin)
 
-    // ── Dynamic plugin marker artifacts from Version Catalog ────────────────
-    // This loop dynamically resolves and registers all plugin marker artifacts declared in the catalog.
-    // Since Develocity, Custom User Data, and Foojay Resolver are defined in libs.versions.toml,
-    // they are automatically resolved and registered here!
-    val versionCatalog = project.extensions.getByType<VersionCatalogsExtension>().named("libs")
-    versionCatalog.pluginAliases.forEach { alias ->
-        versionCatalog.findPlugin(alias).ifPresent { pluginProvider ->
-            val plugin = pluginProvider.get()
-            val version = plugin.version?.requiredVersion
-            if (!version.isNullOrEmpty()) {
-                flatpakOfflineDeps("${plugin.pluginId}:${plugin.pluginId}.gradle.plugin:$version")
-            }
-        }
-    }
-
-    // Other non-plugin dependencies needed explicitly for offline builds
-    flatpakOfflineDeps(libs.screenshot.validation.api)
-
-    // ── Kotlin build tooling (resolved at task execution time by kotlin-dsl) ─
-    flatpakOfflineDeps("${libs.kotlin.build.tools.compat.get().module}:$gradleKotlinVersion")
-    flatpakOfflineDeps("${libs.kotlin.build.tools.impl.get().module}:$gradleKotlinVersion")
-    flatpakOfflineDeps("${libs.kotlin.scripting.compiler.embeddable.get().module}:$gradleKotlinVersion")
-    flatpakOfflineDeps("${libs.kotlin.sam.with.receiver.compiler.plugin.embeddable.get().module}:$gradleKotlinVersion")
-    flatpakOfflineDeps("${libs.kotlin.assignment.compiler.plugin.embeddable.get().module}:$gradleKotlinVersion")
-    flatpakOfflineDeps(libs.kotlin.build.tools.compat)
-    flatpakOfflineDeps(libs.kotlin.build.tools.impl)
-    flatpakOfflineDeps(libs.kotlin.scripting.compiler.embeddable)
-    // Gradle-embedded compiler versions (2.3.20) required to compile precompiled scripts in offline mode
-    // We register these in a separate configuration so that Gradle does not version-align/upgrade them
-    // to our project's newer Kotlin version (2.3.21) during flatpak offline source generation.
-    flatpakOfflineEmbeddedDeps(libs.gradle.kotlin.build.tools.compat)
-    flatpakOfflineEmbeddedDeps(libs.gradle.kotlin.build.tools.impl)
-    flatpakOfflineEmbeddedDeps(libs.gradle.kotlin.scripting.compiler.embeddable)
-    flatpakOfflineEmbeddedDeps(libs.gradle.kotlin.sam.with.receiver.compiler.plugin.embeddable)
-    flatpakOfflineEmbeddedDeps(libs.gradle.kotlin.assignment.compiler.plugin.embeddable)
-
-    // ── Compiler plugins resolved at task execution time ────────────────────
-    flatpakOfflineDeps(libs.koin.compiler.plugin)
-    flatpakOfflineDeps(libs.kotlin.compose.compiler.plugin.embeddable)
-    flatpakOfflineDeps(libs.kotlin.serialization.compiler.plugin.embeddable)
-
-    // ── Transitive deps not on standard classpaths ──────────────────────────
-    flatpakOfflineDeps(libs.compose.material.ripple)
-    flatpakOfflineDeps(libs.savedstate.compose)
-    flatpakOfflineDeps(libs.androidx.paging.common)
-
-    // ── Compose Desktop packaging (proguardReleaseJars task) ────────────────
-    flatpakOfflineDeps(libs.proguard.gradle)
-    flatpakOfflineDeps(libs.kotlin.stdlib)
-    flatpakOfflineDeps(libs.kotlin.stdlib.common)
-
     detektPlugins(libs.detekt.formatting)
-
-    // ── Older transitive versions needed for plugin resolution metadata ─────
-    // We register these in a separate configuration so they don't get upgraded to newer versions
-    // by Gradle's dependency conflict resolution strategy.
-    flatpakOfflineOlderDeps(libs.old.kotlin.gradle.plugin)
-    flatpakOfflineOlderDeps(libs.old.kotlin.stdlib.jdk8)
-    flatpakOfflineOlderDeps(libs.old.guava)
-    flatpakOfflineOlderDeps(libs.old.guava.parent)
-    flatpakOfflineOlderDeps(libs.old.kotlinx.serialization.core)
-    flatpakOfflineOlderDeps(libs.old.kotlinx.serialization.core.jvm)
 }
 
 tasks {
@@ -182,14 +101,6 @@ detekt {
     allRules = false
     baseline = file("detekt-baseline.xml")
     source.setFrom(files("src/main/java", "src/main/kotlin"))
-}
-
-tasks.flatpakGradleGenerator {
-    outputFile = file("../../flatpak-sources-convention.json")
-    downloadDirectory.set("./offline-repository")
-    includeConfigurations.set(
-        setOf("compileClasspath", "flatpakOfflineDeps", "flatpakOfflineEmbeddedDeps", "flatpakOfflineOlderDeps"),
-    )
 }
 
 gradlePlugin {

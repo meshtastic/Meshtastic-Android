@@ -90,17 +90,11 @@ jmdns = "3.6.3"
 qrcode-kotlin = "4.5.0"
 takpacket-sdk = "0.2.4-SNAPSHOT"
 
-# Flatpak Offline Build Overrides & Tooling
-gradle-kotlin = "2.3.20"
+# Gradle Enterprise & Toolchains Plugins
 develocity = "4.4.1"
 custom-user-data = "2.6.0"
 foojay-resolver = "1.0.0"
-proguard-gradle = "7.7.0"
-savedstate-compose = "1.3.6"
-old-kotlin-transitive = "2.2.21"
-old-kotlin-stdlib-jdk8 = "1.9.20"
-old-kotlinx-serialization = "1.9.0"
-old-guava = "32.1.3-jre"
+
 
 [libraries]
 xmlutil-core = { module = "io.github.pdvrieze.xmlutil:core", version.ref = "xmlutil" }
@@ -293,33 +287,6 @@ jna = { module = "net.java.dev.jna:jna", version = "5.18.1" }
 takpacket-sdk-kmp = { module = "org.meshtastic:takpacket-sdk", version.ref = "takpacket-sdk" }
 takpacket-sdk-jvm = { module = "org.meshtastic:takpacket-sdk-jvm", version.ref = "takpacket-sdk" }
 
-# Flatpak Offline Build Overrides & Tooling
-gradle-kotlin-build-tools-compat = { module = "org.jetbrains.kotlin:kotlin-build-tools-compat", version.ref = "gradle-kotlin" }
-gradle-kotlin-build-tools-impl = { module = "org.jetbrains.kotlin:kotlin-build-tools-impl", version.ref = "gradle-kotlin" }
-gradle-kotlin-scripting-compiler-embeddable = { module = "org.jetbrains.kotlin:kotlin-scripting-compiler-embeddable", version.ref = "gradle-kotlin" }
-gradle-kotlin-sam-with-receiver-compiler-plugin-embeddable = { module = "org.jetbrains.kotlin:kotlin-sam-with-receiver-compiler-plugin-embeddable", version.ref = "gradle-kotlin" }
-gradle-kotlin-assignment-compiler-plugin-embeddable = { module = "org.jetbrains.kotlin:kotlin-assignment-compiler-plugin-embeddable", version.ref = "gradle-kotlin" }
-proguard-gradle = { module = "com.guardsquare:proguard-gradle", version.ref = "proguard-gradle" }
-savedstate-compose = { module = "org.jetbrains.androidx.savedstate:savedstate-compose", version.ref = "savedstate-compose" }
-old-guava = { module = "com.google.guava:guava", version.ref = "old-guava" }
-old-guava-parent = { module = "com.google.guava:guava-parent", version.ref = "old-guava" }
-old-kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "old-kotlin-transitive" }
-old-kotlin-stdlib-jdk8 = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version.ref = "old-kotlin-stdlib-jdk8" }
-old-kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "old-kotlinx-serialization" }
-old-kotlinx-serialization-core-jvm = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core-jvm", version.ref = "old-kotlinx-serialization" }
-
-kotlin-build-tools-compat = { module = "org.jetbrains.kotlin:kotlin-build-tools-compat", version.ref = "kotlin" }
-kotlin-build-tools-impl = { module = "org.jetbrains.kotlin:kotlin-build-tools-impl", version.ref = "kotlin" }
-kotlin-scripting-compiler-embeddable = { module = "org.jetbrains.kotlin:kotlin-scripting-compiler-embeddable", version.ref = "kotlin" }
-kotlin-sam-with-receiver-compiler-plugin-embeddable = { module = "org.jetbrains.kotlin:kotlin-sam-with-receiver-compiler-plugin-embeddable", version.ref = "kotlin" }
-kotlin-assignment-compiler-plugin-embeddable = { module = "org.jetbrains.kotlin:kotlin-assignment-compiler-plugin-embeddable", version.ref = "kotlin" }
-kotlin-compose-compiler-plugin-embeddable = { module = "org.jetbrains.kotlin:kotlin-compose-compiler-plugin-embeddable", version.ref = "kotlin" }
-kotlin-serialization-compiler-plugin-embeddable = { module = "org.jetbrains.kotlin:kotlin-serialization-compiler-plugin-embeddable", version.ref = "kotlin" }
-kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
-kotlin-stdlib-common = { module = "org.jetbrains.kotlin:kotlin-stdlib-common", version.ref = "kotlin" }
-
-koin-compiler-plugin = { module = "io.insert-koin:koin-compiler-plugin", version.ref = "koin-plugin" }
-compose-material-ripple = { module = "org.jetbrains.compose.material:material-ripple", version.ref = "compose-multiplatform" }
 
 [plugins]
 # Android
@@ -356,7 +323,7 @@ wire = { id = "com.squareup.wire", version.ref = "wire" }
 room = { id = "androidx.room3", version.ref = "room" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 test-retry = { id = "org.gradle.test-retry", version.ref = "testRetry" }
-flatpak-gradle-generator = { id = "io.github.jwharm.flatpak-gradle-generator", version = "1.8.0" }
+
 develocity = { id = "com.gradle.develocity", version.ref = "develocity" }
 custom-user-data = { id = "com.gradle.common-custom-user-data-gradle-plugin", version.ref = "custom-user-data" }
 foojay-resolver = { id = "org.gradle.toolchains.foojay-resolver", version.ref = "foojay-resolver" }

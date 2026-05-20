@@ -536,7 +536,7 @@ jobs:
 
       - name: Generate Flatpak Sources
         run: >
-          ./gradlew :combineFlatpakSources
+          ./gradlew :desktopApp:assemble :generateFlatpakSourcesFromCache
           --no-configuration-cache --refresh-dependencies
       
       - run: ls -lah flatpak-sources.json
