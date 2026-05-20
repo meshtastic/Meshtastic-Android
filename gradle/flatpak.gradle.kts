@@ -48,7 +48,16 @@ abstract class GenerateFlatpakSourcesTask : DefaultTask() {
                             val version = parts[2]
 
                             val groupPath = group.replace('.', '/')
-                            val mavenPath = "$groupPath/$name/$version/$filename"
+
+                            // Reconstruct correct Maven filename if Gradle cache renamed it locally (e.g. animation.aar -> animation-android-1.10.0.aar)
+                            val standardPrefix = "$name-$version"
+                            val serverFilename = if (filename.startsWith(standardPrefix)) {
+                                filename
+                            } else {
+                                "$name-$version.$ext"
+                            }
+
+                            val mavenPath = "$groupPath/$name/$version/$serverFilename"
                             val dest = "offline-repository/$groupPath/$name/$version"
 
                             val sha256 = calculateSha256(file)
@@ -67,7 +76,7 @@ abstract class GenerateFlatpakSourcesTask : DefaultTask() {
                                     "url" to primaryUrl,
                                     "sha256" to sha256,
                                     "dest" to dest,
-                                    "dest-filename" to filename,
+                                    "dest-filename" to serverFilename,
                                     "mirror-urls" to mirrorUrls
                                 )
                             )
