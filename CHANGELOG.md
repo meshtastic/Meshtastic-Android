@@ -11,6 +11,8 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 * build(flatpak): overhaul offline source generation with native cache scanner (#5533) by James Rich (@jamesarich) in [`811316783`](https://github.com/meshtastic/Meshtastic-Android/commit/81131678333bd7121022371f315c1237d0b6f7e1)
 * chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5532) by James Rich (@jamesarich) in [`0076be3a2`](https://github.com/meshtastic/Meshtastic-Android/commit/0076be3a240ae56f300406497e236adeaa5167c5)
+* docs: update CHANGELOG.md (#5534) by github-actions[bot] (@github-actions[bot]) in [`19d10a18c`](https://github.com/meshtastic/Meshtastic-Android/commit/19d10a18cd5bb678ab9ed0f6e9029571da2a68d8)
+* docs(nav): fix sidebar nesting, dynamic language switcher, and delete translations page (#5535) by James Rich (@jamesarich) in [`89fe2b58d`](https://github.com/meshtastic/Meshtastic-Android/commit/89fe2b58d7aa6f0af30af91e2ccf72f365c80bc7)
 
 ### Internal (v2.7.14-internal.96)
 Changes since [`v2.7.14-open.9`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14-open.9):
