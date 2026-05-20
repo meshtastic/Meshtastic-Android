@@ -85,11 +85,12 @@ From the node list, you can:
 
 - **Tap** a node to view its detail page
 - **Long-press** for quick actions:
+  - Mark/remove favorite
+  - Mute/unmute notifications
   - Send a direct message
-  - Vaata kaardil
-  - Küsi asukohta
-  - Mark as favorite
-  - Marsruudi
+  - Trace route
+  - Ignore/unignore
+  - Remove node
 
 ## Filtering & Sorting
 

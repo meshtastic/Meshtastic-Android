@@ -2,7 +2,7 @@
 title: Settings — Modules & Admin
 parent: User Guide
 nav_order: 8
-last_updated: 2026-05-13
+last_updated: 2026-05-20
 description: Configure optional feature modules (MQTT, telemetry, canned messages, TAK, and more) and perform device administration.
 aliases:
   - modules
@@ -234,7 +234,7 @@ View detailed diagnostic information:
 
 - **"No response from target node"** — the target may be out of range, offline, or have a mismatched admin key. Verify the admin key matches on both nodes.
 - **Changes not applying** — some settings require a reboot to take effect. Try the Reboot action after saving.
-- **Can't see remote settings** — ensure your node has the admin key for the target node and that Admin Channel is enabled in Security Config.
+- **Can't see remote settings** — ensure your node has the admin key for the target node. The admin channel is configured automatically when an admin key is set.
 
 ## Related Topics
 

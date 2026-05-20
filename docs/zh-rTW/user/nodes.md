@@ -85,11 +85,12 @@ From the node list, you can:
 
 - **Tap** a node to view its detail page
 - **Long-press** for quick actions:
+  - Mark/remove favorite
+  - Mute/unmute notifications
   - Send a direct message
-  - 在地圖上檢視
-  - 要求位置
-  - Mark as favorite
-  - 路由追蹤
+  - Trace route
+  - Ignore/unignore
+  - Remove node
 
 ## Filtering & Sorting
 

@@ -85,11 +85,12 @@ From the node list, you can:
 
 - **Tap** a node to view its detail page
 - **Long-press** for quick actions:
+  - Mark/remove favorite
+  - Mute/unmute notifications
   - Send a direct message
-  - Вижте на картата
-  - Поискване на позиция
-  - Mark as favorite
-  - Трасиране на маршрут
+  - Trace route
+  - Ignore/unignore
+  - Remove node
 
 ## Filtering & Sorting
 

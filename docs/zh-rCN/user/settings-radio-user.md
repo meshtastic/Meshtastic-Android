@@ -147,7 +147,7 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 | 公钥                    | Your node's public key (read-only)                      |
 | 管理员密钥                 | Key for remote administration                                              |
 | 私钥                    | Your node's private key (handle securely)               |
-| Admin Channel Enabled | Allow admin commands via channel                                           |
+| ~~Admin Channel Enabled~~ | ⚠️ **Removed** — this toggle has been removed from the UI; admin channel behavior is now handled automatically |
 | Debug Log             | Output live debug logging over serial/bluetooth                            |
 | Serial Enabled        | Enable serial console access (moved from Device Config) |
 | 管理模式                  | Restrict non-admin channel changes                                         |

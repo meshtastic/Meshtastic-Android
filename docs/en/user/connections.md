@@ -2,7 +2,7 @@
 title: Connections
 parent: User Guide
 nav_order: 2
-last_updated: 2026-05-13
+last_updated: 2026-05-20
 description: Connect your phone or desktop to a Meshtastic radio via Bluetooth, USB, or TCP/IP.
 aliases:
   - bluetooth
@@ -22,7 +22,7 @@ Bluetooth Low Energy is the default and most common connection method on Android
 ### Pairing a Device
 
 1. Ensure your Meshtastic radio is powered on and in pairing mode.
-2. Open the app and navigate to **Connections**.
+2. Open the app and navigate to the **Connect** tab.
 3. Tap **Scan for Devices** — nearby Meshtastic radios will appear.
 4. Select your device from the list.
 5. Accept the Bluetooth pairing prompt if shown.
@@ -77,7 +77,7 @@ Some Meshtastic radios support WiFi connectivity, allowing TCP-based connections
 ### Configuration
 
 1. Connect your radio to a WiFi network via the radio's web interface or settings.
-2. In the app, go to **Connections → TCP**.
+2. In the app, go to **Connect → TCP**.
 3. Enter the radio's IP address and port (default: 4403).
 4. Tap **Connect**.
 

@@ -147,7 +147,7 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 | Clé publique          | Your node's public key (read-only)                      |
 | Clé Admin             | Key for remote administration                                              |
 | Clé privée            | Your node's private key (handle securely)               |
-| Admin Channel Enabled | Allow admin commands via channel                                           |
+| ~~Admin Channel Enabled~~ | ⚠️ **Removed** — this toggle has been removed from the UI; admin channel behavior is now handled automatically |
 | Debug Log             | Output live debug logging over serial/bluetooth                            |
 | Serial Enabled        | Enable serial console access (moved from Device Config) |
 | Mode géré             | Restrict non-admin channel changes                                         |
