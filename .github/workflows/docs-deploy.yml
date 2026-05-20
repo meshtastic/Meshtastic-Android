@@ -1,13 +1,24 @@
-name: Docs Deploy (Beta)
+name: Deploy Documentation
 
 on:
   push:
     branches: [main]
     paths:
+      # Dokka sources (KDoc in source files)
+      - 'androidApp/src/**'
+      - 'core/**/src/**'
+      - 'feature/**/src/**'
+      - 'desktopApp/src/**'
+      # Docs site sources
       - 'docs/**'
       - 'feature/docs/**'
-      - 'build-logic/convention/src/main/kotlin/org/meshtastic/buildlogic/DocsTasks.kt'
+      # Build infrastructure
+      - 'build-logic/**'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
       - '.github/workflows/docs-deploy.yml'
+
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -15,16 +26,13 @@ permissions:
   id-token: write
 
 concurrency:
-  group: docs-deploy
+  group: pages
   cancel-in-progress: true
 
 jobs:
-  build-and-deploy:
+  build:
+    if: github.repository == 'meshtastic/Meshtastic-Android'
     runs-on: ubuntu-24.04
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -32,31 +40,35 @@ jobs:
           submodules: true
           fetch-depth: 0
 
-      - name: Set up JDK 21
-        uses: actions/setup-java@v5
+      - name: Gradle Setup
+        uses: ./.github/actions/gradle-setup
         with:
-          java-version: '21'
-          distribution: 'temurin'
+          gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v6
-        with:
-          cache-read-only: false
+      - name: Build Dokka HTML documentation
+        run: ./gradlew dokkaGeneratePublicationHtml --no-configuration-cache
 
-      - name: Generate Docs Bundle
-        run: ./gradlew generateDocsBundle -Pdocs.channel=beta -Pci=true
+      - name: Generate Docs Site
+        run: ./gradlew generateDocsBundle validateDocsBundle publishDocsSite -Pdocs.channel=root -Pci=true
 
-      - name: Validate Docs Bundle
-        run: ./gradlew validateDocsBundle -Pdocs.channel=beta -Pci=true
-
-      - name: Generate Site Artifact
-        run: ./gradlew publishDocsSite -Pdocs.channel=beta -Pci=true
+      - name: Assemble Pages artifact
+        run: |
+          # Copy Dokka output into _site/api/
+          cp -r build/dokka/html build/_site/api
 
       - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v5
         with:
           path: build/_site/
 
+  deploy:
+    if: github.repository == 'meshtastic/Meshtastic-Android'
+    needs: build
+    runs-on: ubuntu-24.04-arm
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
