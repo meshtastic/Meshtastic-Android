@@ -3,6 +3,12 @@
 # Do NOT edit or remove previous entries — stale state claims cause agent confusion.
 # Format: ## YYYY-MM-DD — <summary>
 
+## 2026-05-20 — Extracted GenerateFlatpakSourcesTask to precompiled build-logic convention plugin
+- Audited the Flatpak build structure and successfully extracted the entire task logic, data classes, and extension helpers from loose script files to a precompiled compiled Kotlin class: `build-logic/convention/src/main/kotlin/org/meshtastic/buildlogic/GenerateFlatpakSourcesTask.kt`.
+- Registered the task directly within `RootConventionPlugin.kt` and removed the legacy `gradle/flatpak.gradle.kts` script block from the root `build.gradle.kts` file entirely.
+- Resolved and fixed an implicit Gradle non-serializable property capture inside the lazy property mappings, ensuring full compliance with the Gradle Configuration Cache and restoring successful cache storage with zero errors.
+- Validated with complete clean building (`./gradlew clean`) and static code analysis (`./gradlew spotlessCheck detekt`), completing with 100% green passes.
+
 ## 2026-05-20 — Optimized GenerateFlatpakSourcesTask for performance and correctness
 - Optimized `GenerateFlatpakSourcesTask` in `gradle/flatpak.gradle.kts` by implementing single-pass Maven metadata XML pre-indexing ($O(1)$ lookups) and deferred SHA-256 calculation (executing digests only on deduplicated, finalized resources).
 - Refactored loose map structures into strongly-typed Gradle-compliant internal data classes (`SnapshotVersion`, `SnapshotMetadata`, and `FlatpakSourceCandidate`) to improve type safety and maintainability.
