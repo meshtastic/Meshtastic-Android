@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
+import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeSortOption
@@ -36,6 +37,7 @@ import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.node.detail.NodeManagementActions
+import org.meshtastic.feature.node.detail.NodeRequestActions
 import org.meshtastic.feature.node.domain.usecase.GetFilteredNodesUseCase
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.Config
@@ -50,6 +52,7 @@ class NodeListViewModel(
     private val radioController: RadioController,
     private val radioInterfaceService: RadioInterfaceService,
     val nodeManagementActions: NodeManagementActions,
+    private val nodeRequestActions: NodeRequestActions,
     private val getFilteredNodesUseCase: GetFilteredNodesUseCase,
     val nodeFilterPreferences: NodeFilterPreferences,
 ) : ViewModel() {
@@ -148,6 +151,19 @@ class NodeListViewModel(
     fun muteNode(node: Node) = nodeManagementActions.requestMuteNode(viewModelScope, node)
 
     fun removeNode(node: Node) = nodeManagementActions.requestRemoveNode(viewModelScope, node)
+
+    /** Returns the contact key for navigating to a direct message conversation with this node. */
+    fun getDirectMessageRoute(node: Node): String {
+        val ourNode = ourNodeInfo.value
+        val hasPKC = ourNode?.hasPKC == true && node.hasPKC
+        val channel = if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else node.channel
+        return "${channel}${node.user.id}"
+    }
+
+    /** Initiates a trace route request to the specified node. */
+    fun traceRoute(node: Node) {
+        nodeRequestActions.requestTraceroute(viewModelScope, node.num, node.user.long_name)
+    }
 
     companion object {
         private const val KEY_FILTER_TEXT = "filter_text"

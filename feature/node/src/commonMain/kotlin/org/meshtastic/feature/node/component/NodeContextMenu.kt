@@ -34,22 +34,26 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.add_favorite
 import org.meshtastic.core.resources.ignore
-import org.meshtastic.core.resources.mute_always
+import org.meshtastic.core.resources.message
+import org.meshtastic.core.resources.mute_notifications
 import org.meshtastic.core.resources.remove
 import org.meshtastic.core.resources.remove_favorite
 import org.meshtastic.core.resources.remove_ignored
+import org.meshtastic.core.resources.trace_route
 import org.meshtastic.core.resources.unmute
 import org.meshtastic.core.ui.icon.DeleteNode
 import org.meshtastic.core.ui.icon.DoDisturb
 import org.meshtastic.core.ui.icon.Favorite
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Message
 import org.meshtastic.core.ui.icon.NotFavorite
+import org.meshtastic.core.ui.icon.Route
 import org.meshtastic.core.ui.icon.VolumeOff
 import org.meshtastic.core.ui.icon.VolumeUp
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 
 /**
- * Shared context menu for node actions (favorite, ignore, mute, remove).
+ * Shared context menu for node actions (favorite, mute, message, trace route, ignore, remove).
  *
  * Used by both Android and Desktop adaptive node list screens.
  */
@@ -58,8 +62,10 @@ fun NodeContextMenu(
     expanded: Boolean,
     node: Node,
     onFavorite: () -> Unit,
-    onIgnore: () -> Unit,
     onMute: () -> Unit,
+    onMessage: () -> Unit,
+    onTraceRoute: () -> Unit,
+    onIgnore: () -> Unit,
     onRemove: () -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -69,6 +75,8 @@ fun NodeContextMenu(
             if (node.capabilities.canMuteNode) {
                 MuteMenuItem(node, onMute, onDismiss)
             }
+            MessageMenuItem(node, onMessage, onDismiss)
+            TraceRouteMenuItem(node, onTraceRoute, onDismiss)
         }
         DropdownMenuGroup(shapes = MenuDefaults.groupShapes()) {
             IgnoreMenuItem(node, onIgnore, onDismiss)
@@ -134,7 +142,43 @@ private fun MuteMenuItem(node: Node, onMute: () -> Unit, onDismiss: () -> Unit) 
                 contentDescription = null,
             )
         },
-        text = { Text(text = stringResource(if (isMuted) Res.string.unmute else Res.string.mute_always)) },
+        text = { Text(text = stringResource(if (isMuted) Res.string.unmute else Res.string.mute_notifications)) },
+    )
+}
+
+@Composable
+private fun MessageMenuItem(node: Node, onMessage: () -> Unit, onDismiss: () -> Unit) {
+    DropdownMenuItem(
+        onClick = {
+            onMessage()
+            onDismiss()
+        },
+        enabled = !node.isIgnored,
+        leadingIcon = {
+            Icon(
+                imageVector = MeshtasticIcons.Message,
+                contentDescription = null,
+            )
+        },
+        text = { Text(text = stringResource(Res.string.message)) },
+    )
+}
+
+@Composable
+private fun TraceRouteMenuItem(node: Node, onTraceRoute: () -> Unit, onDismiss: () -> Unit) {
+    DropdownMenuItem(
+        onClick = {
+            onTraceRoute()
+            onDismiss()
+        },
+        enabled = !node.isIgnored,
+        leadingIcon = {
+            Icon(
+                imageVector = MeshtasticIcons.Route,
+                contentDescription = null,
+            )
+        },
+        text = { Text(text = stringResource(Res.string.trace_route)) },
     )
 }
 
