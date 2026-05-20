@@ -21,6 +21,7 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
@@ -40,9 +41,7 @@ abstract class GenerateFlatpakSourcesTask : DefaultTask() {
 
     /** Base URL of the Maven snapshot repository (no trailing slash). */
     @get:Internal
-    val snapshotRepoUrl: org.gradle.api.provider.Property<String> =
-        project.objects.property(String::class.java)
-            .convention("https://central.sonatype.com/repository/maven-snapshots")
+    abstract val snapshotRepoUrl: Property<String>
 
     init {
         group = "flatpak"

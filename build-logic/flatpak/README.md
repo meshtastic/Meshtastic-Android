@@ -38,6 +38,23 @@ plugins {
 }
 ```
 
+### Configuration (DSL)
+
+All options have sensible defaults. Override as needed:
+
+```kotlin
+flatpak {
+    // Snapshot repository to fetch maven-metadata.xml from
+    snapshotRepoUrl.set("https://central.sonatype.com/repository/maven-snapshots")
+    // Task that populates the Gradle cache before scanning
+    assembleTask.set(":desktopApp:assemble")
+    // Custom Gradle cache directory (defaults to ~/.gradle/caches/modules-2/files-2.1)
+    cacheDir.set(layout.projectDirectory.dir("my-cache"))
+    // Output manifest path
+    outputFile.set(layout.projectDirectory.file("flatpak-sources.json"))
+}
+```
+
 ### Running the Generator Task
 
 Execute the registered custom task to sweep your Gradle local modules cache and generate/overwrite the root `flatpak-sources.json`:
@@ -46,17 +63,10 @@ Execute the registered custom task to sweep your Gradle local modules cache and 
 ./gradlew :generateFlatpakSourcesFromCache
 ```
 
-### Custom Cache Directory
-
-By default, the task scans the standard Gradle user home caches directory (`~/.gradle/caches/modules-2/files-2.1`). You can supply a custom cache directory using the `flatpak.cache.dir` Gradle property:
-
-```bash
-./gradlew :generateFlatpakSourcesFromCache -Pflatpak.cache.dir="/custom/cache/path"
-```
-
 ---
 
 ## Architecture
 
-* **[FlatpakConventionPlugin.kt](src/main/kotlin/FlatpakConventionPlugin.kt)**: Registers the `generateFlatpakSourcesFromCache` task using lazy provider configuration.
-* **[GenerateFlatpakSourcesTask.kt](src/main/kotlin/org/meshtastic/flatpak/GenerateFlatpakSourcesTask.kt)**: The native JVM-based custom task responsible for Gradle files scanning, metadata harvesting, and JSON generation.
+* **[FlatpakConventionPlugin.kt](src/main/kotlin/FlatpakConventionPlugin.kt)**: Registers the `flatpak {}` DSL extension and the `generateFlatpakSourcesFromCache` task using lazy provider configuration.
+* **[FlatpakExtension.kt](src/main/kotlin/org/meshtastic/flatpak/FlatpakExtension.kt)**: DSL extension interface defining all configurable properties.
+* **[GenerateFlatpakSourcesTask.kt](src/main/kotlin/org/meshtastic/flatpak/GenerateFlatpakSourcesTask.kt)**: The custom task responsible for Gradle files scanning, remote metadata resolution, and JSON generation.

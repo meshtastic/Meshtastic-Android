@@ -17,28 +17,27 @@
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.meshtastic.flatpak.FlatpakExtension
 import org.meshtastic.flatpak.GenerateFlatpakSourcesTask
 import java.io.File
 
 class FlatpakConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
-            tasks.register("generateFlatpakSourcesFromCache", GenerateFlatpakSourcesTask::class.java) {
-                val customCachePath = providers.gradleProperty("flatpak.cache.dir").orNull
-                if (customCachePath != null) {
-                    cacheDir.set(layout.projectDirectory.dir(customCachePath))
-                } else {
-                    cacheDir.set(
-                        layout.dir(providers.provider { File(gradle.gradleUserHomeDir, "caches/modules-2/files-2.1") }),
-                    )
-                }
-                outputFile.set(layout.projectDirectory.file("flatpak-sources.json"))
+            val extension = extensions.create("flatpak", FlatpakExtension::class.java).apply {
+                cacheDir.convention(
+                    layout.dir(providers.provider { File(gradle.gradleUserHomeDir, "caches/modules-2/files-2.1") }),
+                )
+                outputFile.convention(layout.projectDirectory.file("flatpak-sources.json"))
+                snapshotRepoUrl.convention("https://central.sonatype.com/repository/maven-snapshots")
+                assembleTask.convention(":desktopApp:assemble")
+            }
 
-                // Configurable prerequisite task ensures the Gradle cache is populated.
-                // Defaults to :desktopApp:assemble; override with -Pflatpak.assemble.task
-                val assembleTask = providers.gradleProperty("flatpak.assemble.task")
-                    .orElse(":desktopApp:assemble")
-                dependsOn(assembleTask)
+            tasks.register("generateFlatpakSourcesFromCache", GenerateFlatpakSourcesTask::class.java) {
+                cacheDir.set(extension.cacheDir)
+                outputFile.set(extension.outputFile)
+                snapshotRepoUrl.set(extension.snapshotRepoUrl)
+                dependsOn(extension.assembleTask)
             }
         }
     }
