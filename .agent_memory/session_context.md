@@ -3,6 +3,15 @@
 # Do NOT edit or remove previous entries — stale state claims cause agent confusion.
 # Format: ## YYYY-MM-DD — <summary>
 
+## 2026-05-20 — Decoupled and Isolated Flatpak manifest generation logic to build-logic/flatpak
+- Isolated the optimized `GenerateFlatpakSourcesTask` from monolithic `build-logic/convention` into its own specialized, lightweight `:flatpak` subproject under `build-logic`.
+- Created `:flatpak` configuration and registered the formal plugin ID `"meshtastic.flatpak"` implemented by `FlatpakPlugin`.
+- Cleaned up `:convention` by removing the redundant class and registration imports from `RootConventionPlugin.kt`.
+- Applied the new plugin in the root `build.gradle.kts` using `id("meshtastic.flatpak")`.
+- Verified 100% compliant spotless and detekt formatting checks (`./gradlew spotlessCheck detekt` is green).
+- Successfully committed and pushed the branch `fix/flatpak-snapshot-resolution` to remote `jamesarich` with proper `GITHUB_TOKEN` environment bypass.
+- Consolidated and updated GitHub PR #5542's description to comprehensively document the correctness, performance, and modular isolation of the Flatpak generator.
+
 ## 2026-05-20 — Extracted GenerateFlatpakSourcesTask to precompiled build-logic convention plugin
 - Audited the Flatpak build structure and successfully extracted the entire task logic, data classes, and extension helpers from loose script files to a precompiled compiled Kotlin class: `build-logic/convention/src/main/kotlin/org/meshtastic/buildlogic/GenerateFlatpakSourcesTask.kt`.
 - Registered the task directly within `RootConventionPlugin.kt` and removed the legacy `gradle/flatpak.gradle.kts` script block from the root `build.gradle.kts` file entirely.
