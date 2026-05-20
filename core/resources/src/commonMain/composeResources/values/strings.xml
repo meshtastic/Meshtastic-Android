@@ -1301,7 +1301,7 @@
     <string name="tx_power_dbm">Transmit Power</string>
     <string name="type">Type</string>
     <string name="type_a_message">Type a message</string>
-    <string name="udp_enabled">Enabled</string>
+    <string name="udp_enabled">UDP broadcasting</string>
     <!-- UNKNOWN -->
     <string name="unknown">Unknown</string>
     <string name="unknown_age">Unknown Age</string>
