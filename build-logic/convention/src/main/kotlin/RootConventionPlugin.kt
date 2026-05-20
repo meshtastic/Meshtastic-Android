@@ -18,7 +18,6 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.register
-import org.meshtastic.buildlogic.GenerateFlatpakSourcesTask
 import org.meshtastic.buildlogic.configureDokkaAggregation
 import org.meshtastic.buildlogic.configureGraphTasks
 import org.meshtastic.buildlogic.configureKover
@@ -47,21 +46,6 @@ class RootConventionPlugin : Plugin<Project> {
 
             // Register graph tasks on the root project itself
             configureGraphTasks()
-
-            // Register Flatpak source manifest generation task
-            tasks.register<GenerateFlatpakSourcesTask>("generateFlatpakSourcesFromCache") {
-                val customCachePath = providers.gradleProperty("flatpak.cache.dir").orNull
-                val defaultCachePath = java.io.File(gradle.gradleUserHomeDir, "caches/modules-2/files-2.1")
-
-                if (customCachePath != null) {
-                    cacheDir.set(layout.projectDirectory.dir(customCachePath))
-                } else {
-                    cacheDir.set(defaultCachePath)
-                }
-
-                outputFile.set(layout.projectDirectory.file("flatpak-sources.json"))
-            }
-
             registerKmpSmokeCompileTask()
         }
     }
@@ -135,8 +119,8 @@ private val ANDROID_ONLY_MODULES = setOf(":androidApp", ":core:api", ":core:barc
 
 /**
  * Modules excluded from Dokka aggregation. :core:proto contains only auto-generated Wire classes (no KDoc value) and
- * its TAKPacket-SDK dependency doesn't publish iOS metadata JARs, causing
- * `transformCommonMainDependenciesMetadata` to fail during Dokka resolution.
+ * its TAKPacket-SDK dependency doesn't publish iOS metadata JARs, causing `transformCommonMainDependenciesMetadata` to
+ * fail during Dokka resolution.
  */
 private val DOKKA_EXCLUDED_MODULES = setOf(":core:proto")
 
