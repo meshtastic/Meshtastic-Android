@@ -40,10 +40,9 @@ plugins {
     alias(libs.plugins.test.retry) apply false
     alias(libs.plugins.meshtastic.root)
     id("meshtastic.docs")
+    id("meshtastic.flatpak")
 }
 
 dependencies {
     dokkaPlugin(libs.dokka.android.documentation.plugin)
 }
-
-apply(from = "gradle/flatpak.gradle.kts")

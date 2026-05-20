@@ -3,6 +3,34 @@
 # Do NOT edit or remove previous entries — stale state claims cause agent confusion.
 # Format: ## YYYY-MM-DD — <summary>
 
+## 2026-05-20 — Decoupled and Isolated Flatpak manifest generation logic to build-logic/flatpak
+- Isolated the optimized `GenerateFlatpakSourcesTask` from monolithic `build-logic/convention` into its own specialized, lightweight `:flatpak` subproject under `build-logic`.
+- Created `:flatpak` configuration and registered the formal plugin ID `"meshtastic.flatpak"` implemented by `FlatpakConventionPlugin` inside the default package namespace (perfectly matching project-wide plugin architectures).
+- Implemented modern, configuration-cache-safe lazy provider directory evaluation for the default Gradle user home cache.
+- Cleaned up `:convention` by removing the redundant class and registration imports from `RootConventionPlugin.kt`.
+- Applied the new plugin in the root `build.gradle.kts` using `id("meshtastic.flatpak")`.
+- Verified 100% compliant spotless and detekt formatting checks (`./gradlew spotlessCheck detekt` is green).
+- Successfully committed and pushed the branch `fix/flatpak-snapshot-resolution` to remote `jamesarich` with proper `GITHUB_TOKEN` environment bypass.
+- Consolidated and updated GitHub PR #5542's description to comprehensively document the correctness, performance, and modular isolation of the Flatpak generator.
+
+## 2026-05-20 — Extracted GenerateFlatpakSourcesTask to precompiled build-logic convention plugin
+- Audited the Flatpak build structure and successfully extracted the entire task logic, data classes, and extension helpers from loose script files to a precompiled compiled Kotlin class: `build-logic/convention/src/main/kotlin/org/meshtastic/buildlogic/GenerateFlatpakSourcesTask.kt`.
+- Registered the task directly within `RootConventionPlugin.kt` and removed the legacy `gradle/flatpak.gradle.kts` script block from the root `build.gradle.kts` file entirely.
+- Resolved and fixed an implicit Gradle non-serializable property capture inside the lazy property mappings, ensuring full compliance with the Gradle Configuration Cache and restoring successful cache storage with zero errors.
+- Validated with complete clean building (`./gradlew clean`) and static code analysis (`./gradlew spotlessCheck detekt`), completing with 100% green passes.
+
+## 2026-05-20 — Optimized GenerateFlatpakSourcesTask for performance and correctness
+- Optimized `GenerateFlatpakSourcesTask` in `gradle/flatpak.gradle.kts` by implementing single-pass Maven metadata XML pre-indexing ($O(1)$ lookups) and deferred SHA-256 calculation (executing digests only on deduplicated, finalized resources).
+- Refactored loose map structures into strongly-typed Gradle-compliant internal data classes (`SnapshotVersion`, `SnapshotMetadata`, and `FlatpakSourceCandidate`) to improve type safety and maintainability.
+- Verified output correctness: the optimized manifest output `flatpak-sources.json` is 100% character-for-character identical to the original unoptimized output.
+- Successfully passed all static analysis and code quality checks with `./gradlew spotlessCheck detekt` (100% green).
+
+## 2026-05-20 — Implemented dynamic Gradle cache SNAPSHOT metadata resolution for Flatpak offline builds
+- Overhauled `GenerateFlatpakSourcesTask` in `gradle/flatpak.gradle.kts` to identify `-SNAPSHOT` dependencies, parse local cached `maven-metadata.xml` in `resources-2.1`, and dynamically map them to remote timestamped snapshot URLs (e.g. Sonatype Snapshots) while preserving their original non-timestamped file names as `dest-filename`.
+- Created a pure JDK XML parser within the task to parse the `<snapshotVersions>` block from cached XML files.
+- Verified that compiling the desktopApp and running the flatpak generator task successfully maps snapshot dependencies (such as `org.meshtastic:takpacket-sdk-jvm:0.2.4-SNAPSHOT`) to their remote unique snapshot URLs in `flatpak-sources.json`.
+- Ran quality and validation checks: `./gradlew spotlessCheck detekt` (100% SUCCESSFUL with zero issues).
+
 ## 2026-05-20 — Resolved Flatpak jitpack.io dependency download 404s in sandboxed offline builds
 - Modified `GenerateFlatpakSourcesTask` in `gradle/flatpak.gradle.kts` to dynamically detect dependency groups starting with `com.github.` (which are hosted on JitPack).
 - Configured the generation of `primaryUrl` for these dependencies to resolve directly from `https://jitpack.io` and created custom high-availability fallback lists.
