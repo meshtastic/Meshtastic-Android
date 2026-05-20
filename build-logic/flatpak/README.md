@@ -67,6 +67,6 @@ Execute the registered custom task to sweep your Gradle local modules cache and 
 
 ## Architecture
 
-* **[FlatpakConventionPlugin.kt](src/main/kotlin/FlatpakConventionPlugin.kt)**: Registers the `flatpak {}` DSL extension and the `generateFlatpakSourcesFromCache` task using lazy provider configuration.
+* **[FlatpakPlugin.kt](src/main/kotlin/org/meshtastic/flatpak/FlatpakPlugin.kt)**: Registers the `flatpak {}` DSL extension and the `generateFlatpakSourcesFromCache` task using lazy provider configuration.
 * **[FlatpakExtension.kt](src/main/kotlin/org/meshtastic/flatpak/FlatpakExtension.kt)**: DSL extension interface defining all configurable properties.
 * **[GenerateFlatpakSourcesTask.kt](src/main/kotlin/org/meshtastic/flatpak/GenerateFlatpakSourcesTask.kt)**: The custom task responsible for Gradle files scanning, remote metadata resolution, and JSON generation.

@@ -14,14 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+package org.meshtastic.flatpak
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.meshtastic.flatpak.FlatpakExtension
-import org.meshtastic.flatpak.GenerateFlatpakSourcesTask
 import java.io.File
 
-class FlatpakConventionPlugin : Plugin<Project> {
+class FlatpakPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             val extension = extensions.create("flatpak", FlatpakExtension::class.java).apply {

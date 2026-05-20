@@ -77,7 +77,7 @@ gradlePlugin {
     plugins {
         register("meshtasticFlatpak") {
             id = "meshtastic.flatpak"
-            implementationClass = "FlatpakConventionPlugin"
+            implementationClass = "org.meshtastic.flatpak.FlatpakPlugin"
         }
     }
 }

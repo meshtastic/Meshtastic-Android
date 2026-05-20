@@ -18,12 +18,15 @@ package org.meshtastic.flatpak
 
 import groovy.json.JsonOutput
 import org.gradle.api.DefaultTask
-import org.gradle.api.GradleException
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.tasks.Internal
+import org.gradle.work.DisableCachingByDefault
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.OutputFile
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.w3c.dom.Element
 import org.w3c.dom.NodeList
@@ -33,14 +36,17 @@ import java.security.MessageDigest
 import javax.xml.parsers.DocumentBuilderFactory
 
 /** Generates a complete flatpak-sources.json manifest from the local Gradle cache directory. */
+@DisableCachingByDefault(because = "Resolves remote snapshot metadata that may change between runs")
 abstract class GenerateFlatpakSourcesTask : DefaultTask() {
 
-    @get:Internal abstract val cacheDir: DirectoryProperty
+    @get:InputDirectory
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val cacheDir: DirectoryProperty
 
     @get:OutputFile abstract val outputFile: RegularFileProperty
 
     /** Base URL of the Maven snapshot repository (no trailing slash). */
-    @get:Internal
+    @get:Input
     abstract val snapshotRepoUrl: Property<String>
 
     init {
@@ -69,11 +75,7 @@ abstract class GenerateFlatpakSourcesTask : DefaultTask() {
 
     @TaskAction
     fun generate() {
-        val cacheFolder =
-            cacheDir.orNull?.asFile
-                ?: throw GradleException(
-                    "Gradle cache directory does not exist or is not configured correctly. Please run a build first to populate the cache.",
-                )
+        val cacheFolder = cacheDir.get().asFile
 
         val outputSourcesFile = outputFile.get().asFile
         val snapshotBase = snapshotRepoUrl.get()
