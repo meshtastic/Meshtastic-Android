@@ -1,5 +1,6 @@
 ---
 title: TAK Integration
+parent: Ръководство за потребители
 nav_order: 10
 last_updated: 2026-05-13
 description: Interoperate with ATAK and WinTAK — CoT position sharing, TAK roles, and plugin setup.

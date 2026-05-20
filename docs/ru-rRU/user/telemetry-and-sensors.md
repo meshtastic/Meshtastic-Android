@@ -1,5 +1,6 @@
 ---
 title: Telemetry & Sensors
+parent: Руководство пользователя
 nav_order: 9
 last_updated: 2026-05-13
 description: Sensor data on the mesh — supported environment, air quality, and power sensors, plus configuration and viewing guides.

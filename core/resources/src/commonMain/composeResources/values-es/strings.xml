@@ -823,6 +823,7 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="timestamp">Fecha</string>
     <string name="tls_enabled">TLS activado</string>
     <string name="toggle_my_position">Cambiar mi posición</string>
+    <string name="trace_route">Trazar ruta</string>
     <!-- TRACEROUTE -->
     <string name="traceroute">Traceroute</string>
     <string name="traceroute_diff">Salta hacia %1$d Salta de vuelta %2$d</string>
@@ -847,7 +848,6 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="tx_power_dbm">Potencia de transmisión</string>
     <string name="type">Tipo</string>
     <string name="type_a_message">Escribe un mensaje</string>
-    <string name="udp_enabled">Habilitado</string>
     <!-- UNKNOWN -->
     <string name="unknown">Desconocido</string>
     <string name="unknown_age">Edad desconocida</string>

@@ -740,6 +740,7 @@
     <string name="timestamp">Znacznik czasu</string>
     <string name="tls_enabled">Włącz TLS</string>
     <string name="toggle_my_position">Pokaż moją pozycję</string>
+    <string name="trace_route">Śledzenie trasy</string>
     <!-- TRACEROUTE -->
     <string name="traceroute">Pokaż trasę</string>
     <string name="traceroute_diff">Skoki do: %1$d. Skoki od: %2$d</string>
@@ -769,7 +770,6 @@
     <string name="tx_enabled">Nadawanie włączone</string>
     <string name="tx_power_dbm">Moc nadawania</string>
     <string name="type">Typ</string>
-    <string name="udp_enabled">Włączony</string>
     <!-- UNKNOWN -->
     <string name="unknown">Nieznany</string>
     <string name="unknown_age">Unknown Age</string>

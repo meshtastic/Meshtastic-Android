@@ -1,5 +1,6 @@
 ---
 title: Yhteydet
+parent: User Guide
 nav_order: 2
 last_updated: 2026-05-13
 description: Connect your phone or desktop to a Meshtastic radio via Bluetooth, USB, or TCP/IP.

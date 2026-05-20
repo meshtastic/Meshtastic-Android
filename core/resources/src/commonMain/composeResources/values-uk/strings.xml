@@ -1125,7 +1125,6 @@
     <string name="tx_power_dbm">Потужність передачі</string>
     <string name="type">Тип</string>
     <string name="type_a_message">Введіть повідомлення</string>
-    <string name="udp_enabled">Увімкнено</string>
     <!-- UNKNOWN -->
     <string name="unknown">Невідомий</string>
     <string name="unknown_age">Невідомий вік</string>

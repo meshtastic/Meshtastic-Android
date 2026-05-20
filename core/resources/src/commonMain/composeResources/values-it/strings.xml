@@ -927,6 +927,7 @@
     <string name="timestamp">Data e ora</string>
     <string name="tls_enabled">TLS abilitato</string>
     <string name="toggle_my_position">Attiva/disattiva posizione</string>
+    <string name="trace_route">Trace Route</string>
     <!-- TRACEROUTE -->
     <string name="traceroute">Traceroute</string>
     <string name="traceroute_diff">Hops verso di lui %1$d Hops di ritorno %2$d</string>
@@ -959,7 +960,6 @@
     <string name="tx_power_dbm">Potenza di Trasmissione</string>
     <string name="type">Tipo</string>
     <string name="type_a_message">Inserisci un messaggio</string>
-    <string name="udp_enabled">Abilitato</string>
     <!-- UNKNOWN -->
     <string name="unknown">Sconosciuto</string>
     <string name="unknown_age">Età sconosciuta</string>

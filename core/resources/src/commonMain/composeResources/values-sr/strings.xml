@@ -446,6 +446,7 @@
     <string name="time_zone">Временска зона</string>
     <string name="timeout">Isteklo vreme</string>
     <string name="timestamp">Временска ознака</string>
+    <string name="trace_route">Праћење руте</string>
     <!-- TRACEROUTE -->
     <string name="traceroute">Праћење руте</string>
     <string name="traceroute_diff">Skokova ka %1$d Skokova nazad %2$d</string>
@@ -464,7 +465,6 @@
     <string name="two_days">48 Сати</string>
     <string name="two_weeks">2n</string>
     <string name="tx_enabled">Трансмитер укључен</string>
-    <string name="udp_enabled">Омогућено</string>
     <!-- UNKNOWN -->
     <string name="unknown">Непознато</string>
     <string name="unknown_age">Непозната старост</string>

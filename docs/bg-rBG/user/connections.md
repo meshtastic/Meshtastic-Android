@@ -1,8 +1,9 @@
 ---
 title: Връзки
+parent: Ръководство за потребители
 nav_order: 2
 last_updated: 2026-05-13
-description: Connect your phone or desktop to a Meshtastic radio via Bluetooth, USB, or TCP/IP.
+description: Свържете телефона или настолния си компютър с Meshtastic радио чрез Bluetooth, USB или TCP/IP.
 aliases:
   - bluetooth
   - usb
@@ -12,7 +13,7 @@ aliases:
 
 # Връзки
 
-Meshtastic supports multiple transport methods to communicate between your phone/desktop and a radio node.
+Meshtastic поддържа множество транспортни методи за за комуникация между вашия телефон/настолен компютър и радио възел.
 
 ## Bluetooth (BLE)
 
@@ -36,12 +37,12 @@ You can filter devices by transport type using the filter chips at the top:
 
 ### Connection Status
 
-| Icon | State             | Описание                      |
-| ---- | ----------------- | ----------------------------- |
-| 🟢   | Свързано          | Active radio link established |
-| 🟡   | Свързване         | Handshake in progress         |
-| 🔴   | Прекъсната връзка | No active connection          |
-| ⚪    | Not configured    | Няма избрано устройство       |
+| Икона | Състояние         | Описание                      |
+| ----- | ----------------- | ----------------------------- |
+| 🟢    | Свързано          | Active radio link established |
+| 🟡    | Свързване         | Handshake in progress         |
+| 🔴    | Прекъсната връзка | No active connection          |
+| ⚪     | Not configured    | Няма избрано устройство       |
 
 When connecting, a status indicator shows the current connection state:
 

@@ -1,5 +1,6 @@
 ---
 title: Come iniziare
+parent: User Guide
 nav_order: 1
 last_updated: 2026-05-13
 description: First-launch setup — permissions, onboarding flow, and next steps after connecting your radio.

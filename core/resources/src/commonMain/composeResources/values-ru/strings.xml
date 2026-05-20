@@ -1252,6 +1252,7 @@
     <string name="timestamp">Отметка времени</string>
     <string name="tls_enabled">TLS включен</string>
     <string name="toggle_my_position">Переключить мою позицию</string>
+    <string name="trace_route">Трассировка маршрута</string>
     <!-- TRACEROUTE -->
     <string name="traceroute">Трассировка маршрута</string>
     <string name="traceroute_diff">Нод к %1$d нод назад от %2$d</string>
@@ -1306,7 +1307,6 @@
     <string name="tx_power_dbm">Мощность передатчика</string>
     <string name="type">Тип</string>
     <string name="type_a_message">Написать сообщение</string>
-    <string name="udp_enabled">Включено</string>
     <!-- UNKNOWN -->
     <string name="unknown">Неизвестно</string>
     <string name="unknown_age">Неизвестный возраст</string>

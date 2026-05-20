@@ -1142,6 +1142,7 @@
     <string name="timestamp">時間戳記</string>
     <string name="tls_enabled">TLS已啟用</string>
     <string name="toggle_my_position">切換我的位置</string>
+    <string name="trace_route">路由追蹤</string>
     <!-- TRACEROUTE -->
     <string name="traceroute">路由追蹤</string>
     <string name="traceroute_diff">跳轉數 往程 %1$d 次，返程 %2$d 次</string>
@@ -1192,7 +1193,6 @@
     <string name="tx_power_dbm">發射功率</string>
     <string name="type">類別</string>
     <string name="type_a_message">請輸入訊息</string>
-    <string name="udp_enabled">已啟用</string>
     <!-- UNKNOWN -->
     <string name="unknown">不明</string>
     <string name="unknown_age">未知年齡</string>

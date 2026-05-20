@@ -1,5 +1,6 @@
 ---
 title: Метрики ноды
+parent: Руководство пользователя
 nav_order: 5
 last_updated: 2026-05-13
 description: Telemetry dashboards for each mesh node — device health, environment sensors, signal quality, power, traceroute, and position history.

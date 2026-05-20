@@ -1,5 +1,6 @@
 ---
 title: Обновления прошивки
+parent: Руководство пользователя
 nav_order: 13
 last_updated: 2026-05-13
 description: Update your radio firmware over Bluetooth — OTA process, version channels, pre-flight checks, and recovery.

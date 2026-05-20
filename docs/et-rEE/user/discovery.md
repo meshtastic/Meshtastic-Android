@@ -1,5 +1,6 @@
 ---
 title: Avastamine
+parent: User Guide
 nav_order: 12
 last_updated: 2026-05-13
 description: Explore your mesh network — traceroute paths, neighbor maps, and node discovery tools.

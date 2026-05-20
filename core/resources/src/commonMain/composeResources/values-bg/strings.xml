@@ -981,6 +981,7 @@
     <string name="time_zone">Часова зона</string>
     <string name="timestamp">Времево клеймо</string>
     <string name="tls_enabled">TLS е активиран</string>
+    <string name="trace_route">Проследяване на маршрута</string>
     <!-- TRACEROUTE -->
     <string name="traceroute">Трасиране на маршрут</string>
     <string name="traceroute_diff">Отскоци към %1$d Отскоци на връщане %2$d</string>
@@ -1011,7 +1012,6 @@
     <string name="tx_power_dbm">Мощност на предаване</string>
     <string name="type">Тип</string>
     <string name="type_a_message">Въведете съобщение</string>
-    <string name="udp_enabled">Активиран</string>
     <!-- UNKNOWN -->
     <string name="unknown">Неизвестно</string>
     <string name="unknown_age">Неизвестна възраст</string>
@@ -1069,6 +1069,7 @@
     <string name="wifi_provision_connect_failed">Не можа да се свърже: %1$s</string>
     <string name="wifi_provision_description">Предоставете идентификационни данни за Wi-Fi на вашето mPWRD-OS устройство чрез Bluetooth.</string>
     <string name="wifi_provision_device_found_detail">Готово за сканиране за WiFi мрежи.</string>
+    <string name="wifi_provision_hidden_network">Скрита мрежа</string>
     <string name="wifi_provision_mpwrd_disclaimer">Научете повече за проекта mPWRD-OS \nhttps://github.com/mPWRD-OS</string>
     <string name="wifi_provision_no_networks">Няма намерени мрежи</string>
     <string name="wifi_provision_scan_failed">Неуспешно сканиране за WiFi мрежи: %1$s</string>

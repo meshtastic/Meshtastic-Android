@@ -1205,6 +1205,7 @@
     <string name="timestamp">Zeitstempel</string>
     <string name="tls_enabled">TLS aktiviert</string>
     <string name="toggle_my_position">Standort einschalten</string>
+    <string name="trace_route">Route verfolgen</string>
     <!-- TRACEROUTE -->
     <string name="traceroute">Traceroute</string>
     <string name="traceroute_diff">%1$d Sprünge vorwärts %2$d Sprünge zurück</string>
@@ -1257,7 +1258,6 @@
     <string name="tx_power_dbm">Sendeleistung</string>
     <string name="type">Typ</string>
     <string name="type_a_message">Eine Nachricht schreiben</string>
-    <string name="udp_enabled">Aktiviert</string>
     <!-- UNKNOWN -->
     <string name="unknown">Unbekannt</string>
     <string name="unknown_age">Alter unbekannt</string>

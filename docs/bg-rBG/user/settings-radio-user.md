@@ -1,5 +1,6 @@
 ---
 title: Settings — Radio & User
+parent: Ръководство за потребители
 nav_order: 7
 last_updated: 2026-05-13
 description: Configure your radio hardware, LoRa presets, user profile, position sharing, power management, and security.
@@ -156,8 +157,8 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 
 Settings use standard preference controls — dropdowns, toggles, and sliders:
 
-| Control  | Екранна снимка                                         |
-| -------- | ------------------------------------------------------ |
+| Control  | Екранна снимка                                              |
+| -------- | ----------------------------------------------------------- |
 | Dropdown | ![Dropdown](../../assets/screenshots/settings_dropdown.png) |
 | Toggle   | ![Toggle](../../assets/screenshots/settings_switch.png)     |
 | Slider   | ![Slider](../../assets/screenshots/settings_slider.png)     |
