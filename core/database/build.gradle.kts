@@ -93,6 +93,7 @@ tasks.flatpakGradleGenerator {
             "androidDeviceTestLintChecksClasspath",
             "androidDeviceTestCompileClasspath",
             "androidCompileClasspath",
+            "kotlinNativeBundleConfiguration",
             "testCompileClasspath",
             "testRuntimeClasspath",
         ),
