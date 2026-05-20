@@ -9,9 +9,10 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
-* build(flatpak): overhaul and automate flatpak offline manifest generation (#5529) by James Rich (@jamesarich) in [`99b5688b0`](https://github.com/meshtastic/Meshtastic-Android/commit/99b5688b00e5810467769ae57e6ee33ea3d3360c)
+* build(flatpak): overhaul offline source generation with native cache scanner (#5533) by James Rich (@jamesarich) in [`811316783`](https://github.com/meshtastic/Meshtastic-Android/commit/81131678333bd7121022371f315c1237d0b6f7e1)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5532) by James Rich (@jamesarich) in [`0076be3a2`](https://github.com/meshtastic/Meshtastic-Android/commit/0076be3a240ae56f300406497e236adeaa5167c5)
 
-### Internal (v2.7.14-internal.95)
+### Internal (v2.7.14-internal.96)
 Changes since [`v2.7.14-open.9`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14-open.9):
 
 * chore(deps): update vico to v3.2.0-next.5 (#5470) by renovate[bot] (@renovate[bot]) in [`4bacff81c`](https://github.com/meshtastic/Meshtastic-Android/commit/4bacff81c5abad536b40f7370ae5d302b74a11fe)
@@ -72,6 +73,8 @@ Changes since [`v2.7.14-open.9`](https://github.com/meshtastic/Meshtastic-Androi
 * chore(flatpak): optimize CI source generation and clean up redundant tasks (#5525) by James Rich (@jamesarich) in [`7ae1b2681`](https://github.com/meshtastic/Meshtastic-Android/commit/7ae1b2681313da5a07217ea6e04a0c3dc4b79946)
 * fix(docs): compile Jekyll docs site and add root redirect in CI (#5526) by James Rich (@jamesarich) in [`f94358551`](https://github.com/meshtastic/Meshtastic-Android/commit/f94358551c7e41a2ea07ca97185fa8331b19f09c)
 * docs: update CHANGELOG.md (#5520) by github-actions[bot] (@github-actions[bot]) in [`95df50014`](https://github.com/meshtastic/Meshtastic-Android/commit/95df500142abd44f7b4d2d75ba28ab72f1fe77ac)
+* build(flatpak): overhaul and automate flatpak offline manifest generation (#5529) by James Rich (@jamesarich) in [`99b5688b0`](https://github.com/meshtastic/Meshtastic-Android/commit/99b5688b00e5810467769ae57e6ee33ea3d3360c)
+* docs: update CHANGELOG.md (#5527) by github-actions[bot] (@github-actions[bot]) in [`cd0b9d666`](https://github.com/meshtastic/Meshtastic-Android/commit/cd0b9d6668e25f3c048a349414943a21c158d17e)
 
 ### Open Beta (v2.7.14-open.9)
 Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.13):
