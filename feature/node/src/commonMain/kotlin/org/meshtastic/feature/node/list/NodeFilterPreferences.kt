@@ -27,6 +27,7 @@ open class NodeFilterPreferences constructor(private val uiPrefs: UiPrefs) {
     open val excludeInfrastructure = uiPrefs.excludeInfrastructure
     open val onlyOnline = uiPrefs.onlyOnline
     open val onlyDirect = uiPrefs.onlyDirect
+    open val onlyOwned = uiPrefs.onlyOwned
     open val showIgnored = uiPrefs.showIgnored
     open val excludeMqtt = uiPrefs.excludeMqtt
 
@@ -51,6 +52,10 @@ open class NodeFilterPreferences constructor(private val uiPrefs: UiPrefs) {
 
     open fun toggleOnlyDirect() {
         uiPrefs.setOnlyDirect(!onlyDirect.value)
+    }
+
+    open fun toggleOnlyOwned() {
+        uiPrefs.setOnlyOwned(!onlyOwned.value)
     }
 
     open fun toggleShowIgnored() {

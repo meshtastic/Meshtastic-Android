@@ -62,6 +62,7 @@ data class Node(
     val publicKey: ByteString? = null,
     val notes: String = "",
     val manuallyVerified: Boolean = false,
+    val isOwned: Boolean = false,
     val nodeStatus: String? = null,
     /** The transport mechanism this node was last heard over (see [MeshPacket.TransportMechanism]). */
     val lastTransport: Int = 0,

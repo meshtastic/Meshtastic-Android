@@ -44,12 +44,14 @@ import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.datastore.LocalStatsDataSource
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.GlobalNodeConfig
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeSortOption
 import org.meshtastic.core.model.util.onlineTimeThreshold
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.LocalStats
 import org.meshtastic.proto.User
@@ -63,6 +65,7 @@ class NodeRepositoryImpl(
     private val nodeInfoWriteDataSource: NodeInfoWriteDataSource,
     private val dispatchers: CoroutineDispatchers,
     private val localStatsDataSource: LocalStatsDataSource,
+    private val uiPrefs: UiPrefs,
 ) : NodeRepository {
     /** Hardware info about our local device (can be null if not connected). */
     override val myNodeInfo: StateFlow<MyNodeInfo?> =
@@ -99,12 +102,28 @@ class NodeRepositoryImpl(
 
     /** A reactive map from nodeNum to [Node] objects, representing the entire mesh. */
     override val nodeDBbyNum: StateFlow<Map<Int, Node>> =
-        nodeInfoReadDataSource
-            .nodeDBbyNumFlow()
-            .mapLatest { map -> map.mapValues { (_, it) -> it.toModel() } }
+        combine(nodeInfoReadDataSource.nodeDBbyNumFlow(), uiPrefs.allGlobalNodeConfigs) { map, globalConfigs ->
+            map.mapValues { (_, it) ->
+                val node = it.toModel()
+                applyGlobalConfig(node, globalConfigs[node.user.id])
+            }
+        }
             .flowOn(dispatchers.io)
             .conflate()
             .stateIn(processLifecycle.coroutineScope, SharingStarted.Eagerly, emptyMap())
+
+    private fun applyGlobalConfig(node: Node, globalConfig: GlobalNodeConfig?): Node {
+        if (globalConfig == null) return node
+        return node.copy(
+            isFavorite = node.isFavorite || globalConfig.isFavorite,
+            isOwned = globalConfig.isOwned,
+            user =
+            node.user.copy(
+                long_name = globalConfig.customLongName ?: node.user.long_name,
+                short_name = globalConfig.customShortName ?: node.user.short_name,
+            ),
+        )
+    }
 
     init {
         // Backfill denormalized name columns for existing nodes on startup
@@ -178,15 +197,21 @@ class NodeRepositoryImpl(
         includeUnknown: Boolean,
         onlyOnline: Boolean,
         onlyDirect: Boolean,
-    ): Flow<List<Node>> = nodeInfoReadDataSource
-        .getNodesFlow(
+    ): Flow<List<Node>> = combine(
+        nodeInfoReadDataSource.getNodesFlow(
             sort = sort.sqlValue,
             filter = filter,
             includeUnknown = includeUnknown,
             hopsAwayMax = if (onlyDirect) 0 else -1,
             lastHeardMin = if (onlyOnline) onlineTimeThreshold() else -1,
-        )
-        .mapLatest { list -> list.map { it.toModel() } }
+        ),
+        uiPrefs.allGlobalNodeConfigs,
+    ) { list, globalConfigs ->
+        list.map {
+            val node = it.toModel()
+            applyGlobalConfig(node, globalConfigs[node.user.id])
+        }
+    }
         .flowOn(dispatchers.io)
         .conflate()
 
@@ -227,6 +252,24 @@ class NodeRepositoryImpl(
     /** Persists hardware metadata for a node. */
     override suspend fun insertMetadata(nodeNum: Int, metadata: DeviceMetadata) =
         withContext(dispatchers.io) { nodeInfoWriteDataSource.upsert(MetadataEntity(nodeNum, metadata)) }
+
+    override fun getOwnedNodes(): Flow<List<Node>> = uiPrefs.allGlobalNodeConfigs.map { configs ->
+        configs.values
+            .filter { it.isOwned }
+            .map { config ->
+                // Try to find the node in the current DB, otherwise create a fallback
+                nodeDBbyNum.value.values.find { it.user.id == config.id }
+                    ?: Node(
+                        num = DataPacket.idToDefaultNodeNum(config.id) ?: 0,
+                        user =
+                        User(
+                            id = config.id,
+                            long_name = config.customLongName ?: "Unknown",
+                            short_name = config.customShortName ?: "Unk",
+                        ),
+                    )
+            }
+    }
 
     /** Flow emitting the count of nodes currently considered "online". */
     override val onlineNodeCount: Flow<Int> =

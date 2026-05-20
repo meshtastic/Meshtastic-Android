@@ -22,6 +22,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import kotlinx.atomicfu.atomic
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.CoroutineScope
@@ -31,9 +32,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.model.GlobalNodeConfig
 import org.meshtastic.core.prefs.cachedFlow
 import org.meshtastic.core.repository.UiPrefs
 
@@ -47,6 +51,9 @@ class UiPrefsImpl(
 
     // Maps nodeNum to a flow for the for the "provide-location-nodeNum" pref
     private val provideNodeLocationFlows = atomic(persistentMapOf<Int, Lazy<StateFlow<Boolean>>>())
+
+    // Maps nodeId to a flow for the "global-node-config-nodeId" pref
+    private val globalNodeConfigFlows = atomic(persistentMapOf<String, Lazy<StateFlow<GlobalNodeConfig?>>>())
 
     override val appIntroCompleted: StateFlow<Boolean> =
         dataStore.data.map { it[KEY_APP_INTRO_COMPLETED] ?: false }.stateIn(scope, SharingStarted.Eagerly, false)
@@ -102,6 +109,13 @@ class UiPrefsImpl(
 
     override fun setOnlyDirect(value: Boolean) {
         scope.launch { dataStore.edit { it[KEY_ONLY_DIRECT] = value } }
+    }
+
+    override val onlyOwned: StateFlow<Boolean> =
+        dataStore.data.map { it[KEY_ONLY_OWNED] ?: false }.stateIn(scope, SharingStarted.Lazily, false)
+
+    override fun setOnlyOwned(value: Boolean) {
+        scope.launch { dataStore.edit { it[KEY_ONLY_OWNED] = value } }
     }
 
     override val showIgnored: StateFlow<Boolean> =
@@ -179,7 +193,64 @@ class UiPrefsImpl(
         scope.launch { dataStore.edit { it[booleanPreferencesKey(provideLocationKey(nodeNum))] = provide } }
     }
 
+    override fun getGlobalNodeConfig(nodeId: String): StateFlow<GlobalNodeConfig?> =
+        cachedFlow(globalNodeConfigFlows, nodeId) {
+            val key = stringPreferencesKey(globalNodeConfigKey(nodeId))
+            dataStore.data
+                .map {
+                    it[key]?.let { json ->
+                        try {
+                            Json.decodeFromString<GlobalNodeConfig>(json)
+                        } catch (e: kotlinx.serialization.SerializationException) {
+                            co.touchlab.kermit.Logger.w(e) { "Failed to decode GlobalNodeConfig for $nodeId" }
+                            null
+                        } catch (e: IllegalArgumentException) {
+                            co.touchlab.kermit.Logger.w(e) { "Invalid GlobalNodeConfig JSON for $nodeId" }
+                            null
+                        }
+                    }
+                }
+                .stateIn(scope, SharingStarted.Eagerly, null)
+        }
+
+    override fun setGlobalNodeConfig(config: GlobalNodeConfig) {
+        scope.launch {
+            val key = stringPreferencesKey(globalNodeConfigKey(config.id))
+            val json = Json.encodeToString(config)
+            dataStore.edit {
+                it[key] = json
+                val currentIds = it[KEY_GLOBAL_NODE_IDS] ?: emptySet()
+                if (config.id !in currentIds) {
+                    it[KEY_GLOBAL_NODE_IDS] = currentIds + config.id
+                }
+            }
+        }
+    }
+
+    override val allGlobalNodeConfigs: StateFlow<Map<String, GlobalNodeConfig>> =
+        dataStore.data
+            .map { prefs ->
+                val ids = prefs[KEY_GLOBAL_NODE_IDS] ?: emptySet()
+                ids.mapNotNull { id ->
+                    prefs[stringPreferencesKey(globalNodeConfigKey(id))]?.let { json ->
+                        try {
+                            id to Json.decodeFromString<GlobalNodeConfig>(json)
+                    } catch (e: kotlinx.serialization.SerializationException) {
+                        co.touchlab.kermit.Logger.w(e) { "Failed to decode GlobalNodeConfig for $id in map" }
+                        null
+                    } catch (e: IllegalArgumentException) {
+                        co.touchlab.kermit.Logger.w(e) { "Invalid GlobalNodeConfig JSON for $id in map" }
+                            null
+                        }
+                    }
+                }
+                    .toMap()
+            }
+            .stateIn(scope, SharingStarted.Eagerly, emptyMap())
+
     private fun provideLocationKey(nodeNum: Int) = "provide-location-$nodeNum"
+
+    private fun globalNodeConfigKey(nodeId: String) = "global-node-config-$nodeId"
 
     companion object {
         val KEY_HAS_SHOWN_NOT_PAIRED_WARNING_PREF = booleanPreferencesKey("has_shown_not_paired_warning")
@@ -193,6 +264,7 @@ class UiPrefsImpl(
         val KEY_EXCLUDE_INFRASTRUCTURE = booleanPreferencesKey("exclude-infrastructure")
         val KEY_ONLY_ONLINE = booleanPreferencesKey("only-online")
         val KEY_ONLY_DIRECT = booleanPreferencesKey("only-direct")
+        val KEY_ONLY_OWNED = booleanPreferencesKey("only-owned")
         val KEY_SHOW_IGNORED = booleanPreferencesKey("show-ignored")
         val KEY_EXCLUDE_MQTT = booleanPreferencesKey("exclude-mqtt")
         val KEY_BLE_AUTO_SCAN = booleanPreferencesKey("ble-auto-scan")
@@ -200,5 +272,7 @@ class UiPrefsImpl(
         val KEY_SHOW_BLE_TRANSPORT = booleanPreferencesKey("show-ble-transport")
         val KEY_SHOW_NETWORK_TRANSPORT = booleanPreferencesKey("show-network-transport")
         val KEY_SHOW_USB_TRANSPORT = booleanPreferencesKey("show-usb-transport")
+
+        val KEY_GLOBAL_NODE_IDS = stringSetPreferencesKey("global-node-ids")
     }
 }

@@ -18,6 +18,9 @@ package org.meshtastic.core.testing
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import org.meshtastic.core.model.GlobalNodeConfig
 import org.meshtastic.core.repository.AnalyticsPrefs
 import org.meshtastic.core.repository.AppPreferences
 import org.meshtastic.core.repository.CustomEmojiPrefs
@@ -125,6 +128,12 @@ class FakeUiPrefs : UiPrefs {
         onlyDirect.value = value
     }
 
+    override val onlyOwned = MutableStateFlow(false)
+
+    override fun setOnlyOwned(value: Boolean) {
+        onlyOwned.value = value
+    }
+
     override val showIgnored = MutableStateFlow(false)
 
     override fun setShowIgnored(value: Boolean) {
@@ -186,6 +195,19 @@ class FakeUiPrefs : UiPrefs {
 
     override fun setShouldProvideNodeLocation(nodeNum: Int, provide: Boolean) {
         nodeLocationEnabled.getOrPut(nodeNum) { MutableStateFlow(provide) }.value = provide
+    }
+
+    private val _allGlobalNodeConfigs = MutableStateFlow(emptyMap<String, GlobalNodeConfig>())
+    override val allGlobalNodeConfigs = _allGlobalNodeConfigs.asStateFlow()
+
+    private val globalNodeConfigs = mutableMapOf<String, MutableStateFlow<GlobalNodeConfig?>>()
+
+    override fun getGlobalNodeConfig(nodeId: String): StateFlow<GlobalNodeConfig?> =
+        globalNodeConfigs.getOrPut(nodeId) { MutableStateFlow(_allGlobalNodeConfigs.value[nodeId]) }
+
+    override fun setGlobalNodeConfig(config: GlobalNodeConfig) {
+        _allGlobalNodeConfigs.update { it + (config.id to config) }
+        globalNodeConfigs.getOrPut(config.id) { MutableStateFlow(config) }.value = config
     }
 }
 

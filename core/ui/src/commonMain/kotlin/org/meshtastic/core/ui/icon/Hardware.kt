@@ -27,6 +27,7 @@ import org.meshtastic.core.resources.ic_cached
 import org.meshtastic.core.resources.ic_display_settings
 import org.meshtastic.core.resources.ic_memory
 import org.meshtastic.core.resources.ic_nfc
+import org.meshtastic.core.resources.ic_router
 import org.meshtastic.core.resources.ic_settings_input_antenna
 import org.meshtastic.core.resources.ic_speaker_phone
 import org.meshtastic.core.resources.ic_terminal
@@ -60,3 +61,5 @@ val MeshtasticIcons.Memory: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_memory)
 val MeshtasticIcons.DisplaySettings: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_display_settings)
+val MeshtasticIcons.Router: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_router)

@@ -28,6 +28,7 @@ import org.meshtastic.core.common.util.ignoreExceptionSuspend
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.GlobalNodeConfig
 import org.meshtastic.core.model.MeshUser
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Position
@@ -119,14 +120,20 @@ class MeshActionHandlerImpl(
 
     private fun handleFavorite(action: ServiceAction.Favorite, myNodeNum: Int) {
         val node = action.node
+        val newFavoriteStatus = !node.isFavorite
+
+        // Update global config
+        val currentGlobal = uiPrefs.getGlobalNodeConfig(node.user.id).value ?: GlobalNodeConfig(id = node.user.id)
+        uiPrefs.setGlobalNodeConfig(currentGlobal.copy(isFavorite = newFavoriteStatus))
+
         commandSender.sendAdmin(myNodeNum) {
-            if (node.isFavorite) {
-                AdminMessage(remove_favorite_node = node.num)
-            } else {
+            if (newFavoriteStatus) {
                 AdminMessage(set_favorite_node = node.num)
+            } else {
+                AdminMessage(remove_favorite_node = node.num)
             }
         }
-        nodeManager.updateNode(node.num) { it.copy(isFavorite = !node.isFavorite) }
+        nodeManager.updateNode(node.num) { it.copy(isFavorite = newFavoriteStatus) }
     }
 
     private fun handleIgnore(action: ServiceAction.Ignore, myNodeNum: Int) {
@@ -201,6 +208,13 @@ class MeshActionHandlerImpl(
     override fun handleSetOwner(u: MeshUser, myNodeNum: Int) {
         Logger.d { "Setting owner: longName=${u.longName}, shortName=${u.shortName}" }
         val newUser = User(id = u.id, long_name = u.longName, short_name = u.shortName, is_licensed = u.isLicensed)
+
+        // Update global config for our own node too
+        val currentGlobal = uiPrefs.getGlobalNodeConfig(u.id).value ?: GlobalNodeConfig(id = u.id)
+        uiPrefs.setGlobalNodeConfig(
+            currentGlobal.copy(customLongName = u.longName, customShortName = u.shortName, isOwned = true),
+        )
+
         commandSender.sendAdmin(myNodeNum) { AdminMessage(set_owner = newUser) }
         nodeManager.handleReceivedUser(myNodeNum, newUser)
     }
@@ -237,6 +251,13 @@ class MeshActionHandlerImpl(
 
     override fun handleSetRemoteOwner(id: Int, destNum: Int, payload: ByteArray) {
         val u = User.ADAPTER.decode(payload)
+
+        // Update global config if we are setting a remote owner (likely one of our other nodes)
+        val currentGlobal = uiPrefs.getGlobalNodeConfig(u.id).value ?: GlobalNodeConfig(id = u.id)
+        uiPrefs.setGlobalNodeConfig(
+            currentGlobal.copy(customLongName = u.long_name, customShortName = u.short_name, isOwned = true),
+        )
+
         commandSender.sendAdmin(destNum, id) { AdminMessage(set_owner = u) }
         nodeManager.handleReceivedUser(destNum, u)
     }

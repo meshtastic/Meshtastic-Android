@@ -77,14 +77,16 @@ class NodeListViewModel(
             nodeFilterPreferences.excludeInfrastructure,
             nodeFilterPreferences.onlyOnline,
             nodeFilterPreferences.onlyDirect,
+            nodeFilterPreferences.onlyOwned,
             nodeFilterPreferences.showIgnored,
-        ) { includeUnknown, excludeInfrastructure, onlyOnline, onlyDirect, showIgnored ->
+        ) { includeUnknown, excludeInfrastructure, online, direct, owned, ignored ->
             NodeFilterToggles(
                 includeUnknown = includeUnknown,
                 excludeInfrastructure = excludeInfrastructure,
-                onlyOnline = onlyOnline,
-                onlyDirect = onlyDirect,
-                showIgnored = showIgnored,
+                onlyOnline = online,
+                onlyDirect = direct,
+                onlyOwned = owned,
+                showIgnored = ignored,
             )
         }
 
@@ -100,6 +102,7 @@ class NodeListViewModel(
                 excludeInfrastructure = filterToggles.excludeInfrastructure,
                 onlyOnline = filterToggles.onlyOnline,
                 onlyDirect = filterToggles.onlyDirect,
+                onlyOwned = filterToggles.onlyOwned,
                 showIgnored = filterToggles.showIgnored,
                 excludeMqtt = excludeMqtt,
             )
@@ -167,12 +170,13 @@ data class NodeFilterState(
     val excludeInfrastructure: Boolean = false,
     val onlyOnline: Boolean = false,
     val onlyDirect: Boolean = false,
+    val onlyOwned: Boolean = false,
     val showIgnored: Boolean = false,
     val excludeMqtt: Boolean = false,
 ) {
     /** True if any user-applied filter is narrowing the visible node set. */
     val isActive: Boolean
-        get() = filterText.isNotEmpty() || excludeInfrastructure || onlyOnline || onlyDirect || excludeMqtt
+        get() = filterText.isNotEmpty() || excludeInfrastructure || onlyOnline || onlyDirect || onlyOwned || excludeMqtt
 }
 
 data class NodeFilterToggles(
@@ -180,5 +184,6 @@ data class NodeFilterToggles(
     val excludeInfrastructure: Boolean = false,
     val onlyOnline: Boolean = false,
     val onlyDirect: Boolean = false,
+    val onlyOwned: Boolean = false,
     val showIgnored: Boolean = false,
 )

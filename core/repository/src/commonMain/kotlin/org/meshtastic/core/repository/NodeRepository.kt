@@ -174,4 +174,7 @@ interface NodeRepository {
      * @param metadata The [DeviceMetadata] to save.
      */
     suspend fun insertMetadata(nodeNum: Int, metadata: DeviceMetadata)
+
+    /** Returns all nodes marked as "Owned" globally. */
+    fun getOwnedNodes(): Flow<List<Node>>
 }

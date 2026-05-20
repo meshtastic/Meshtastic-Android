@@ -289,6 +289,9 @@ class UIViewModel(
         serviceRepository.clearNeighborInfoResponse()
     }
 
+    val favoriteNodes: Flow<List<org.meshtastic.core.model.Node>> =
+        nodeDB.nodeDBbyNum.map { it.values.filter { node -> node.isFavorite } }
+
     val appIntroCompleted: StateFlow<Boolean> = uiPrefs.appIntroCompleted
 
     fun onAppIntroCompleted() {

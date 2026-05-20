@@ -69,6 +69,9 @@ import org.meshtastic.core.ui.viewmodel.UIViewModel
  * This implementation uses the [MultiBackstack] state holder to manage independent histories for each tab, aligning
  * with Navigation 3 best practices for state preservation during tab switching.
  */
+private const val MAX_FAVORITES_IN_NAV = 3
+
+@Suppress("LongMethod")
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun MeshtasticNavigationSuite(
@@ -82,6 +85,7 @@ fun MeshtasticNavigationSuite(
     val selectedDevice by uiViewModel.currentDeviceAddressFlow.collectAsStateWithLifecycle()
 
     val adaptiveInfo = currentWindowAdaptiveInfoV2()
+    val favorites by uiViewModel.favoriteNodes.collectAsStateWithLifecycle(emptyList())
 
     val currentTabRoute = multiBackstack.currentTabRoute
     val topLevelDestination = TopLevelDestination.fromNavKey(currentTabRoute)
@@ -111,6 +115,27 @@ fun MeshtasticNavigationSuite(
                     label =
                     if (showLabels) {
                         { Text(stringResource(destination.label)) }
+                    } else {
+                        null
+                    },
+                )
+            }
+            favorites.take(MAX_FAVORITES_IN_NAV).forEach { node ->
+                val route = NodesRoute.NodeDetail(node.num)
+                val isSelected = multiBackstack.activeBackStack.lastOrNull() == route
+                item(
+                    selected = isSelected,
+                    onClick = { multiBackstack.navigateTopLevel(route) },
+                    icon = {
+                        Icon(
+                            imageVector = vectorResource(Res.drawable.ic_nodes),
+                            contentDescription = node.user.long_name,
+                            tint = if (isSelected) colorScheme.primary else LocalContentColor.current,
+                        )
+                    },
+                    label =
+                    if (showLabels) {
+                        { Text(node.user.short_name) }
                     } else {
                         null
                     },

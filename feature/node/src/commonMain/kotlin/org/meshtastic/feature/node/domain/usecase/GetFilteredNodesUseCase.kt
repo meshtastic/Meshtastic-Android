@@ -37,6 +37,7 @@ open class GetFilteredNodesUseCase constructor(private val nodeRepository: NodeR
             onlyOnline = filter.onlyOnline,
             onlyDirect = filter.onlyDirect,
         )
+        .map { list -> if (filter.onlyOwned) list.filter { node -> node.isOwned } else list }
         .map { list ->
             list
                 .filter { node -> node.isIgnored == filter.showIgnored }

@@ -151,6 +151,19 @@ interface UiPrefs {
     fun shouldProvideNodeLocation(nodeNum: Int): StateFlow<Boolean>
 
     fun setShouldProvideNodeLocation(nodeNum: Int, provide: Boolean)
+
+    val onlyOwned: StateFlow<Boolean>
+
+    fun setOnlyOwned(value: Boolean)
+
+    /** Returns the global configuration for the given [nodeId] (hex string). */
+    fun getGlobalNodeConfig(nodeId: String): StateFlow<org.meshtastic.core.model.GlobalNodeConfig?>
+
+    /** Updates the global configuration for the given [nodeId]. */
+    fun setGlobalNodeConfig(config: org.meshtastic.core.model.GlobalNodeConfig)
+
+    /** Returns all global node configurations. */
+    val allGlobalNodeConfigs: StateFlow<Map<String, org.meshtastic.core.model.GlobalNodeConfig>>
 }
 
 /** Reactive interface for notification preferences. */

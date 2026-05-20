@@ -40,6 +40,7 @@ import org.meshtastic.core.domain.usecase.settings.SetNotificationSettingsUseCas
 import org.meshtastic.core.domain.usecase.settings.SetProvideLocationUseCase
 import org.meshtastic.core.domain.usecase.settings.SetThemeUseCase
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.GlobalNodeConfig
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.RadioController
@@ -118,6 +119,18 @@ class SettingsViewModel(
         get() = buildConfigProvider.versionName
 
     val isOtaCapable: StateFlow<Boolean> = isOtaCapableUseCase().stateInWhileSubscribed(initialValue = false)
+
+    val ownedNodes = nodeRepository.getOwnedNodes()
+
+    fun bulkRenameFleet(prefix: String, startIndex: Int) {
+        val nodes = ownedNodes.value
+        nodes.forEachIndexed { index, node ->
+            val num = startIndex + index
+            val newName = "$prefix$num"
+            val currentGlobal = uiPrefs.getGlobalNodeConfig(node.user.id).value ?: GlobalNodeConfig(id = node.user.id)
+            uiPrefs.setGlobalNodeConfig(currentGlobal.copy(customLongName = newName, customShortName = newName))
+        }
+    }
 
     // Device DB cache limit (bounded by DatabaseConstants)
     val dbCacheLimit: StateFlow<Int> = databaseManager.cacheLimit

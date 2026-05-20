@@ -99,6 +99,8 @@ fun NodeFilterTextField(
     ignoredNodeCount: Int,
     excludeMqtt: Boolean,
     onToggleExcludeMqtt: () -> Unit,
+    onlyOwned: Boolean,
+    onToggleOnlyOwned: () -> Unit,
 ) {
     Column(modifier = modifier.background(MaterialTheme.colorScheme.background)) {
         Row {
@@ -123,6 +125,8 @@ fun NodeFilterTextField(
                     ignoredNodeCount = ignoredNodeCount,
                     excludeMqtt = excludeMqtt,
                     onToggleExcludeMqtt = onToggleExcludeMqtt,
+                    onlyOwned = onlyOwned,
+                    onToggleOnlyOwned = onToggleOnlyOwned,
                 ),
             )
         }
@@ -160,6 +164,8 @@ data class NodeFilterToggles(
     val ignoredNodeCount: Int,
     val excludeMqtt: Boolean,
     val onToggleExcludeMqtt: () -> Unit,
+    val onlyOwned: Boolean,
+    val onToggleOnlyOwned: () -> Unit,
 )
 
 @Composable
@@ -249,6 +255,12 @@ private fun NodeSortButton(
                 text = stringResource(Res.string.node_filter_exclude_infrastructure),
                 checked = toggles.excludeInfrastructure,
                 onClick = toggles.onToggleExcludeInfrastructure,
+            )
+
+            DropdownMenuCheck(
+                text = stringResource(Res.string.node_filter_only_owned),
+                checked = toggles.onlyOwned,
+                onClick = toggles.onToggleOnlyOwned,
             )
 
             DropdownMenuCheck(
