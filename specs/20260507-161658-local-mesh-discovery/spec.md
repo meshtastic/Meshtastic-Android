@@ -374,8 +374,8 @@ If two presets still tie after all heuristics, the UI labels them as tied and av
 | US2 — Map Visualization | ✅ Complete | CompositionLocal map, preset filter, topology overlay, direct/mesh color-coding |
 | US3 — Summary + AI | ✅ Complete (AI fallback only) | Deterministic 6-level ranking, per-preset AI summaries field, Gemini Nano provider stubbed (delegates to algorithmic) |
 | US4 — Persistence & History | ✅ Complete | Room KMP, cascade delete, history list, detail view |
-| US5 — 2.4 GHz Gating | ⚠️ Logic only | `Check24GhzCapability` implemented + tested; not wired to PresetPickerCard UI gates |
-| Export/Share | ⚠️ Partial | `PdfDiscoveryExporter` + `TextDiscoveryExporter` implemented; UI hookup pending |
+| US5 — 2.4 GHz Gating | ✅ Complete | `Check24GhzCapability` checks hardware; ViewModel exposes `is24GhzBlocked`/`isLora24Region`; scan button disabled when region is LORA_24 on unsupported hardware |
+| Export/Share | ✅ Complete | `PdfDiscoveryExporter` (Android) + `TextDiscoveryExporter` (Desktop); `rememberExportSaver` wires platform file-save (SAF on Android, JFileChooser on Desktop) |
 
 ### Implementation Divergences from Original Spec
 
@@ -415,6 +415,21 @@ Nodes are classified as `"direct"` (seen via their own packets) or `"mesh"` (dis
 | WaitingForReconnect | Reconnecting | Semantic equivalent |
 | SwitchingPreset | Shifting | Matches "Shifting to [preset]" UX text |
 | Completed (terminal) | Complete | Differentiated by `completionStatus` on session entity |
+
+#### Additional Implemented Features (Not in Original Spec)
+
+These features were added during implementation for safety, reliability, and cross-platform parity:
+
+| Feature | Description | File(s) |
+|---|---|---|
+| Default PSK safety check | `usesDefaultKey: StateFlow<Boolean>` blocks scanning when primary channel uses default/cleartext encryption. Prevents exposing network topology on unprotected channels. | `DiscoveryViewModel.kt` |
+| Interrupted session recovery | `markInterruptedSessions()` DAO query on ViewModel init marks any lingering `in_progress` sessions as `interrupted`. Handles app process death mid-scan. | `DiscoveryDao.kt`, `DiscoveryViewModel.kt` |
+| Paused scan state | `DiscoveryScanState.Paused` provides a recoverable grace period during BLE reconnect before transitioning to `Failed`. Original spec only had direct `WaitingForReconnect → Failed`. | `DiscoveryScanState.kt` |
+| Infrastructure node classification | Nodes with `ROUTER`, `ROUTER_LATE`, or `CLIENT_BASE` roles flagged via `isInfrastructure` on entity. `infrastructureNodeCount` aggregated per preset result. Aligns with Apple's relay/infrastructure tracking. | `DiscoveryScanEngine.kt`, `DiscoveredNodeEntity.kt`, `DiscoveryPresetResultEntity.kt` |
+| Active NeighborInfo request | Engine actively requests `NeighborInfo` at dwell start and mid-dwell via `radioController.requestNeighborInfo()`. Original spec mentioned only passive collection. | `DiscoveryScanEngine.kt` |
+| Deprecated preset filtering | `VERY_LONG_SLOW` and `LONG_SLOW` presets hidden from picker per meshtastic/design standards deprecation. | `PresetPickerCard.kt` |
+| LoRa preset reference data | `LoRaPresetReference.kt` contains static range/throughput/capacity characteristics for all LoRa presets used by the deterministic summary generator. | `ai/LoRaPresetReference.kt` |
+| Traffic minimum threshold | `TRAFFIC_MIN_PACKET_THRESHOLD = 5` prevents noise in traffic-mix classification when packet counts are too low. | `DiscoverySummaryGenerator.kt` |
 
 ---
 
@@ -464,11 +479,14 @@ The Apple implementation (`meshtastic/Meshtastic-Apple`) is merged to `main` and
 | Dwell picker specific values | `[1, 5, 15, 30, 45, 60, 90, 120, 180]` min | Slider with 15-min minimum | 🟡 Low — UX preference |
 | Historical sessions fed to AI | Trend/cross-session analysis | Session-level only currently | 🟡 Medium — future enhancement |
 | Reconnect timeout default | 60 seconds explicit | Configurable, no spec'd default | 🟢 Low — uses BleReconnectPolicy defaults |
+| Map filter chips in UI | Rendered in map toolbar | ViewModel has filter logic; UI not yet rendering filter chips | 🟡 Medium |
+| Topology overlay toggle | Toggle in map settings | ViewModel has toggle; UI not yet wired | 🟡 Medium |
+| Node detail sheet on map tap | Bottom sheet on marker tap | Markers rendered without tap callbacks | 🟡 Medium |
 
 ### Design Repo Status
 
 The `meshtastic/design` repo (`standards/audits/cross-platform-spec-audit.md`) confirms:
-- Android: 50/51 tasks complete on `feat/discovery` — remaining: D048 full verification
+- Android: All user stories complete on `feat/discovery`
 - Apple: ✅ Implemented on main
 - No feature-level design spec exists (design repo is visual standards only)
 - Design standard color palette (Success green `#3FB86D`, Info blue `#5C6BC0`) should be used for direct/mesh node map colors

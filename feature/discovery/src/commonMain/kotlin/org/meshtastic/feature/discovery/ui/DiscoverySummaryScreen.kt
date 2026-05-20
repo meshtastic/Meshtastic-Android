@@ -73,6 +73,7 @@ import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.core.ui.icon.Share
 import org.meshtastic.feature.discovery.DiscoverySummaryViewModel
 import org.meshtastic.feature.discovery.export.ExportResult
+import org.meshtastic.feature.discovery.export.rememberExportSaver
 import org.meshtastic.feature.discovery.scan.PresetRanking
 import org.meshtastic.feature.discovery.ui.component.PresetResultCard
 
@@ -91,11 +92,12 @@ fun DiscoverySummaryScreen(
     val presetAiSummaries by viewModel.presetAiSummaries.collectAsStateWithLifecycle()
     val isGeneratingAi by viewModel.isGeneratingAi.collectAsStateWithLifecycle()
     val exportResult by viewModel.exportResult.collectAsStateWithLifecycle()
+    val exportSaver = rememberExportSaver()
 
     LaunchedEffect(exportResult) {
-        when (exportResult) {
+        when (val result = exportResult) {
             is ExportResult.Success -> {
-                // TODO: Wire platform share intent (Android) / file-save dialog (Desktop)
+                exportSaver.save(result)
                 viewModel.clearExportResult()
             }
 

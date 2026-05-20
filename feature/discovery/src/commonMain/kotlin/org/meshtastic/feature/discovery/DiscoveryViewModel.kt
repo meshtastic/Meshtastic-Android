@@ -32,12 +32,16 @@ import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
+import org.meshtastic.feature.discovery.scan.Check24GhzCapability
+import org.meshtastic.feature.discovery.scan.HardwareCapabilityResult
+import org.meshtastic.proto.Config.LoRaConfig.RegionCode
 
 @KoinViewModel
 class DiscoveryViewModel(
     private val scanEngine: DiscoveryScanEngine,
     private val serviceRepository: ServiceRepository,
     private val discoveryPrefs: DiscoveryPrefs,
+    private val check24GhzCapability: Check24GhzCapability,
     radioConfigRepository: RadioConfigRepository,
     discoveryDao: DiscoveryDao,
 ) : ViewModel() {
@@ -53,6 +57,16 @@ class DiscoveryViewModel(
                 ChannelOption.entries.firstOrNull { it.modemPreset == presetEnum } ?: ChannelOption.DEFAULT
             }
             .stateInWhileSubscribed(initialValue = ChannelOption.DEFAULT)
+
+    /** True when the radio is configured for LORA_24 region but hardware doesn't support 2.4 GHz. */
+    private val _is24GhzBlocked = MutableStateFlow(false)
+    val is24GhzBlocked: StateFlow<Boolean> = _is24GhzBlocked.asStateFlow()
+
+    /** True when the radio is on the LORA_24 region. */
+    val isLora24Region: StateFlow<Boolean> =
+        radioConfigRepository.localConfigFlow
+            .map { it.lora?.region == RegionCode.LORA_24 }
+            .stateInWhileSubscribed(initialValue = false)
 
     private val _selectedPresets = MutableStateFlow<Set<ChannelOption>>(restoreSelectedPresets())
     val selectedPresets: StateFlow<Set<ChannelOption>> = _selectedPresets.asStateFlow()
@@ -79,6 +93,11 @@ class DiscoveryViewModel(
 
     init {
         safeLaunch(tag = "markInterruptedSessions") { discoveryDao.markInterruptedSessions() }
+        safeLaunch(tag = "check24GhzCapability") {
+            val result = check24GhzCapability()
+            _is24GhzBlocked.value =
+                result is HardwareCapabilityResult.Unsupported || result is HardwareCapabilityResult.Unknown
+        }
     }
 
     fun togglePreset(preset: ChannelOption) {
