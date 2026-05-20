@@ -18,6 +18,7 @@ package org.meshtastic.core.data.repository
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.safeCatching
@@ -47,8 +48,8 @@ class DeviceHardwareRepositoryImpl(
      *
      * Pipeline:
      * 1. If the local DB is empty, seed it from the bundled JSON asset (instant baseline).
-     * 2. If the cached entry is stale or missing, refresh from the remote API.
-     * 3. Return the best available data from the DB.
+     * 2. If the cached entry is stale or missing, refresh from the remote API with a timeout.
+     * 3. Return the best available data from the DB (never blocks longer than [NETWORK_REFRESH_TIMEOUT_MS]).
      */
     override suspend fun getDeviceHardwareByModel(
         hwModel: Int,
@@ -75,7 +76,7 @@ class DeviceHardwareRepositoryImpl(
         // 2. Check cache; refresh from network if stale, empty, or forced.
         var entities = lookupEntities(hwModel, target)
         if (forceRefresh || entities.isEmpty() || entities.any { it.isStale() }) {
-            refreshFromNetwork()
+            refreshFromNetworkWithTimeout()
             entities = lookupEntities(hwModel, target)
         }
 
@@ -99,14 +100,27 @@ class DeviceHardwareRepositoryImpl(
             .onFailure { e -> Logger.w(e) { "DeviceHardwareRepository: failed to seed cache from bundled JSON" } }
     }
 
-    private suspend fun refreshFromNetwork() {
+    /**
+     * Attempts a network refresh with a bounded timeout so a slow/unresponsive API
+     * never blocks the UI. Falls back gracefully to cached or bundled data on timeout.
+     */
+    private suspend fun refreshFromNetworkWithTimeout() {
         safeCatching {
-            Logger.d { "DeviceHardwareRepository: fetching from remote API" }
-            val remoteHardware = remoteDataSource.getAllDeviceHardware()
-            Logger.d { "DeviceHardwareRepository: remote returned ${remoteHardware.size} entries" }
-            localDataSource.insertAllDeviceHardware(remoteHardware)
+            val completed = withTimeoutOrNull(NETWORK_REFRESH_TIMEOUT_MS) {
+                refreshFromNetwork()
+            }
+            if (completed == null) {
+                Logger.w { "DeviceHardwareRepository: network refresh timed out after ${NETWORK_REFRESH_TIMEOUT_MS}ms" }
+            }
         }
             .onFailure { e -> Logger.w(e) { "DeviceHardwareRepository: network refresh failed" } }
+    }
+
+    private suspend fun refreshFromNetwork() {
+        Logger.d { "DeviceHardwareRepository: fetching from remote API" }
+        val remoteHardware = remoteDataSource.getAllDeviceHardware()
+        Logger.d { "DeviceHardwareRepository: remote returned ${remoteHardware.size} entries" }
+        localDataSource.insertAllDeviceHardware(remoteHardware)
     }
 
     private fun disambiguate(entities: List<DeviceHardwareEntity>, target: String?): DeviceHardwareEntity? =
@@ -159,5 +173,8 @@ class DeviceHardwareRepositoryImpl(
 
     companion object {
         private val CACHE_EXPIRATION_TIME_MS = TimeConstants.ONE_DAY.inWholeMilliseconds
+
+        /** Maximum time to wait for the remote API before falling back to cached/bundled data. */
+        private const val NETWORK_REFRESH_TIMEOUT_MS = 5_000L
     }
 }

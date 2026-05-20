@@ -19,6 +19,7 @@ package org.meshtastic.core.data.repository
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.safeCatching
@@ -82,10 +83,15 @@ open class FirmwareReleaseRepositoryImpl(
 
     private suspend fun refreshFromNetwork() {
         safeCatching {
-            Logger.d { "Fetching fresh firmware releases from remote API." }
-            val networkReleases = remoteDataSource.getFirmwareReleases()
-            localDataSource.insertFirmwareReleases(networkReleases.releases.stable, FirmwareReleaseType.STABLE)
-            localDataSource.insertFirmwareReleases(networkReleases.releases.alpha, FirmwareReleaseType.ALPHA)
+            val completed = withTimeoutOrNull(NETWORK_REFRESH_TIMEOUT_MS) {
+                Logger.d { "Fetching fresh firmware releases from remote API." }
+                val networkReleases = remoteDataSource.getFirmwareReleases()
+                localDataSource.insertFirmwareReleases(networkReleases.releases.stable, FirmwareReleaseType.STABLE)
+                localDataSource.insertFirmwareReleases(networkReleases.releases.alpha, FirmwareReleaseType.ALPHA)
+            }
+            if (completed == null) {
+                Logger.w { "FirmwareReleaseRepository: network refresh timed out after ${NETWORK_REFRESH_TIMEOUT_MS}ms" }
+            }
         }
             .onFailure { e -> Logger.w(e) { "FirmwareReleaseRepository: network refresh failed" } }
     }
@@ -108,5 +114,8 @@ open class FirmwareReleaseRepositoryImpl(
 
     companion object {
         private val CACHE_EXPIRATION_TIME_MS = TimeConstants.ONE_HOUR.inWholeMilliseconds
+
+        /** Maximum time to wait for the remote API before falling back to cached/bundled data. */
+        private const val NETWORK_REFRESH_TIMEOUT_MS = 5_000L
     }
 }
