@@ -17,15 +17,14 @@ Previously, this logic was mixed in loose scripts or monolithic build convention
 
 ## Key Features
 
-### 1. Snapshot Metadata Harvesting
-Standard Maven snapshot repositories (e.g., Sonatype Snapshots) return `404` errors when fetching non-timestamped `-SNAPSHOT` dependencies directly. This plugin dynamically locates and parses local cached `maven-metadata.xml` files inside Gradle's cached directories, resolves the unique timestamped snapshot coordinate, and constructs exact, direct download URLs while preserving local filename bindings.
+### 1. Remote Snapshot Metadata Resolution
+Standard Maven snapshot repositories (e.g., Sonatype Snapshots) return `404` errors when fetching non-timestamped `-SNAPSHOT` dependencies directly. This plugin fetches `maven-metadata.xml` from the remote snapshot repository at generation time, resolves the unique timestamped snapshot coordinate (e.g., `0.2.4-20260520.043744-2`), and constructs exact, direct download URLs while preserving local filename bindings.
 
 ### 2. JitPack URL Routing
 Automatically identifies external dependencies belonging to the `com.github.*` group (hosted on JitPack) and routes their `primaryUrl` to `https://jitpack.io` instead of attempting standard Maven Central lookup, preventing sandboxed download failures.
 
-### 3. High-Performance Optimizations
-* **Single-Pass Metadata Indexing**: Scans cached metadata files exactly once on-demand, caching them in an in-memory `$O(1)$` lookup map.
-* **Deferred Cryptographic Hashing**: Defers expensive SHA-256 calculation until after candidate files are fully deduplicated and sorted.
+### 3. Automatic Cache Population
+The task automatically depends on `:desktopApp:assemble`, ensuring the Gradle dependency cache is fully populated before scanning. No manual pre-build step is required.
 
 ---
 

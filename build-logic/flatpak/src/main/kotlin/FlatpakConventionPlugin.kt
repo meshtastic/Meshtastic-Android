@@ -33,6 +33,9 @@ class FlatpakConventionPlugin : Plugin<Project> {
                     )
                 }
                 outputFile.set(layout.projectDirectory.file("flatpak-sources.json"))
+
+                // Ensure the desktop app is assembled first so the Gradle cache is fully populated
+                dependsOn(":desktopApp:assemble")
             }
         }
     }

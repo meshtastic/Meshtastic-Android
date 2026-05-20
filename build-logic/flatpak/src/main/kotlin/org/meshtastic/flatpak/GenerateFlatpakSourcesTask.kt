@@ -27,6 +27,7 @@ import org.gradle.api.tasks.TaskAction
 import org.w3c.dom.Element
 import org.w3c.dom.NodeList
 import java.io.File
+import java.net.URI
 import java.security.MessageDigest
 import javax.xml.parsers.DocumentBuilderFactory
 
@@ -60,7 +61,7 @@ abstract class GenerateFlatpakSourcesTask : DefaultTask() {
         val mirrorUrls: List<String>,
     )
 
-    private var metadataCache: Map<String, SnapshotMetadata>? = null
+    private val remoteMetadataCache = mutableMapOf<String, SnapshotMetadata?>()
 
     @TaskAction
     fun generate() {
@@ -93,33 +94,19 @@ abstract class GenerateFlatpakSourcesTask : DefaultTask() {
                     val (group, name, version) = parts
                     val groupPath = group.replace('.', '/')
                     val standardPrefix = "$name-$version"
-                    val isSnapshot = version.endsWith("-SNAPSHOT") || version.contains("-SNAPSHOT")
-
-                    val classifier =
-                        if (isSnapshot) {
-                            val prefix = "$name-$version-"
-                            filename.takeIf { it.startsWith(prefix) }?.removePrefix(prefix)?.removeSuffix(".$ext")
-                        } else {
-                            null
-                        }
+                    val isSnapshot = version.endsWith("-SNAPSHOT")
 
                     val resolvedVersion =
                         if (isSnapshot) {
-                            val resourcesFolder = File(cacheFolder.parentFile, "resources-2.1")
-                            findSnapshotValue(resourcesFolder, group, name, ext, classifier) ?: version
+                            resolveSnapshotVersion(groupPath, name, version, ext) ?: version
                         } else {
                             version
                         }
 
                     val serverFilename =
                         when {
-                            isSnapshot -> {
-                                val suffix = classifier?.let { "-$it" } ?: ""
-                                "$name-$resolvedVersion$suffix.$ext"
-                            }
-
+                            isSnapshot -> "$name-$resolvedVersion.$ext"
                             filename.startsWith(standardPrefix) -> filename
-
                             else -> "$name-$version.$ext"
                         }
 
@@ -128,31 +115,30 @@ abstract class GenerateFlatpakSourcesTask : DefaultTask() {
 
                     val isJitpack = group.startsWith("com.github.")
                     val primaryUrl =
-                        if (isSnapshot) {
-                            "https://central.sonatype.com/repository/maven-snapshots/$mavenPath"
-                        } else if (isJitpack) {
-                            "https://jitpack.io/$mavenPath"
-                        } else {
-                            "https://repo.maven.apache.org/maven2/$mavenPath"
+                        when {
+                            isSnapshot ->
+                                "https://central.sonatype.com/repository/maven-snapshots/$mavenPath"
+
+                            isJitpack ->
+                                "https://jitpack.io/$mavenPath"
+
+                            else ->
+                                "https://repo.maven.apache.org/maven2/$mavenPath"
                         }
 
                     val mirrorUrls =
                         when {
-                            isSnapshot -> listOf("https://oss.sonatype.org/content/repositories/snapshots/$mavenPath")
+                            isSnapshot -> listOf(
+                                "https://s01.oss.sonatype.org/content/repositories/snapshots/$mavenPath",
+                            )
 
-                            isJitpack ->
-                                listOf(
-                                    "https://repo.maven.apache.org/maven2/$mavenPath",
-                                    "https://maven-central.storage-download.googleapis.com/maven2/$mavenPath",
-                                    "https://maven.aliyun.com/repository/public/$mavenPath",
-                                )
+                            isJitpack -> emptyList()
 
                             else ->
                                 listOf(
                                     "https://dl.google.com/dl/android/maven2/$mavenPath",
                                     "https://plugins.gradle.org/m2/$mavenPath",
                                     "https://maven-central.storage-download.googleapis.com/maven2/$mavenPath",
-                                    "https://maven.aliyun.com/repository/public/$mavenPath",
                                 )
                         }
 
@@ -181,20 +167,97 @@ abstract class GenerateFlatpakSourcesTask : DefaultTask() {
 
         val finalEntries =
             deduplicated.map { candidate ->
-                mapOf(
+                val entry = mutableMapOf<String, Any>(
                     "type" to "file",
                     "url" to candidate.primaryUrl,
                     "sha256" to calculateSha256(candidate.file),
                     "dest" to candidate.dest,
                     "dest-filename" to candidate.destFilename,
-                    "mirror-urls" to candidate.mirrorUrls,
                 )
+                if (candidate.mirrorUrls.isNotEmpty()) {
+                    entry["mirror-urls"] = candidate.mirrorUrls
+                }
+                entry
             }
 
         outputSourcesFile.writeText(JsonOutput.prettyPrint(JsonOutput.toJson(finalEntries)))
         logger.lifecycle(
             "Successfully scanned cache and generated ${outputSourcesFile.name} containing ${finalEntries.size} entries.",
         )
+    }
+
+    /**
+     * Resolves the timestamped snapshot version by fetching maven-metadata.xml from the remote
+     * snapshot repository. Maven snapshot repos do not serve artifacts at the generic `-SNAPSHOT`
+     * filename — they require the unique timestamped coordinate (e.g. `0.2.4-20260520.043744-2`).
+     */
+    private fun resolveSnapshotVersion(
+        groupPath: String,
+        artifactId: String,
+        version: String,
+        extension: String,
+    ): String? {
+        val cacheKey = "$groupPath:$artifactId:$version"
+        if (cacheKey in remoteMetadataCache) {
+            return findMatchingVersion(remoteMetadataCache[cacheKey], extension)
+        }
+
+        val metadataUrl =
+            "https://central.sonatype.com/repository/maven-snapshots/$groupPath/$artifactId/$version/maven-metadata.xml"
+
+        val metadata = fetchAndParseMetadata(metadataUrl)
+        remoteMetadataCache[cacheKey] = metadata
+        return findMatchingVersion(metadata, extension)
+    }
+
+    private fun findMatchingVersion(metadata: SnapshotMetadata?, extension: String): String? {
+        if (metadata == null) return null
+        return metadata.snapshotVersions
+            .firstOrNull { it.extension == extension && it.classifier == null }
+            ?.value
+            ?: metadata.fallbackValue
+    }
+
+    private fun fetchAndParseMetadata(url: String): SnapshotMetadata? {
+        try {
+            logger.info("Fetching snapshot metadata: $url")
+            val connection = URI(url).toURL().openConnection()
+            connection.connectTimeout = TIMEOUT_MS
+            connection.readTimeout = TIMEOUT_MS
+
+            val doc = connection.getInputStream().use { stream ->
+                val dbFactory = DocumentBuilderFactory.newInstance()
+                val dBuilder = dbFactory.newDocumentBuilder()
+                dBuilder.parse(stream)
+            }
+            doc.documentElement.normalize()
+
+            val root = doc.documentElement
+            val snapshotVersions = mutableListOf<SnapshotVersion>()
+            root.getElementsByTagName("snapshotVersion").forEachElement { element ->
+                val ext = element.getChildText("extension") ?: return@forEachElement
+                val value = element.getChildText("value") ?: return@forEachElement
+                val classif = element.getChildText("classifier")
+                snapshotVersions.add(SnapshotVersion(ext, classif, value))
+            }
+
+            var fallbackValue: String? = null
+            val snapshotNode = root.getElementsByTagName("snapshot").item(0) as? Element
+            if (snapshotNode != null) {
+                val timestamp = snapshotNode.getChildText("timestamp")
+                val buildNumber = snapshotNode.getChildText("buildNumber")
+                val metaVersion = root.getChildText("version")
+                if (timestamp != null && buildNumber != null && metaVersion != null) {
+                    val baseVersion = metaVersion.substringBefore("-SNAPSHOT")
+                    fallbackValue = "$baseVersion-$timestamp-$buildNumber"
+                }
+            }
+
+            return SnapshotMetadata(snapshotVersions, fallbackValue)
+        } catch (e: Exception) {
+            logger.warn("Failed to fetch snapshot metadata from $url: ${e.message}")
+            return null
+        }
     }
 
     private fun calculateSha256(file: File): String {
@@ -218,10 +281,8 @@ abstract class GenerateFlatpakSourcesTask : DefaultTask() {
         return String(hexChars)
     }
 
-    // Modern helper extension to query DOM child element text safely
     private fun Element.getChildText(tagName: String): String? = getElementsByTagName(tagName).item(0)?.textContent
 
-    // Modern helper extension to iterate DOM elements cleanly
     private fun NodeList.forEachElement(action: (Element) -> Unit) {
         for (i in 0 until length) {
             val node = item(i)
@@ -231,74 +292,7 @@ abstract class GenerateFlatpakSourcesTask : DefaultTask() {
         }
     }
 
-    private fun populateMetadataCache(resourcesFolder: File) {
-        if (metadataCache != null || !resourcesFolder.exists()) return
-        val cache = mutableMapOf<String, SnapshotMetadata>()
-
-        resourcesFolder.walkTopDown().forEach { file ->
-            if (file.isFile && file.name == "maven-metadata.xml") {
-                try {
-                    val dbFactory = DocumentBuilderFactory.newInstance()
-                    val dBuilder = dbFactory.newDocumentBuilder()
-                    val doc = dBuilder.parse(file)
-                    doc.documentElement.normalize()
-
-                    val root = doc.documentElement
-                    val group = root.getChildText("groupId") ?: return@forEach
-                    val name = root.getChildText("artifactId") ?: return@forEach
-
-                    val key = "$group:$name"
-                    val snapshotVersions = mutableListOf<SnapshotVersion>()
-                    root.getElementsByTagName("snapshotVersion").forEachElement { element ->
-                        val ext = element.getChildText("extension") ?: return@forEachElement
-                        val value = element.getChildText("value") ?: return@forEachElement
-                        val classif = element.getChildText("classifier")
-
-                        snapshotVersions.add(SnapshotVersion(ext, classif, value))
-                    }
-
-                    var fallbackValue: String? = null
-                    val snapshotNode = root.getElementsByTagName("snapshot").item(0) as? Element
-                    if (snapshotNode != null) {
-                        val timestamp = snapshotNode.getChildText("timestamp")
-                        val buildNumber = snapshotNode.getChildText("buildNumber")
-                        val version = root.getChildText("version")
-                        if (timestamp != null && buildNumber != null && version != null) {
-                            val baseVersion = version.substringBefore("-SNAPSHOT")
-                            fallbackValue = "$baseVersion-$timestamp-$buildNumber"
-                        }
-                    }
-
-                    cache[key] = SnapshotMetadata(snapshotVersions, fallbackValue)
-                } catch (e: Exception) {
-                    // Ignore parsing errors for individual files
-                }
-            }
-        }
-        metadataCache = cache
-    }
-
-    private fun findSnapshotValue(
-        resourcesFolder: File,
-        group: String,
-        name: String,
-        extension: String,
-        classifier: String?,
-    ): String? {
-        populateMetadataCache(resourcesFolder)
-        val metadata = metadataCache?.get("$group:$name") ?: return null
-
-        for (version in metadata.snapshotVersions) {
-            if (version.extension == extension) {
-                if (classifier == null && version.classifier == null) {
-                    return version.value
-                }
-                if (classifier != null && classifier == version.classifier) {
-                    return version.value
-                }
-            }
-        }
-
-        return metadata.fallbackValue
+    private companion object {
+        private const val TIMEOUT_MS = 10_000
     }
 }
