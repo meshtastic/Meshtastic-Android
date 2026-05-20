@@ -327,9 +327,12 @@ dependencies {
 
 // Must be run on each architecture to generate separate flatpak-sources.
 tasks.flatpakGradleGenerator {
-    val arch = System.getProperty("os.arch").let { if (it == "amd64") "x86_64" else it }
+    val arch =
+        providers
+            .gradleProperty("flatpak.arch")
+            .getOrElse(System.getProperty("os.arch").let { if (it == "amd64") "x86_64" else it })
     outputFile = file("../flatpak-sources-desktop-$arch.json")
     downloadDirectory.set("./offline-repository")
     onlyArches = arch
-    excludeConfigurations.set(listOf("testCompileClasspath", "testRuntimeClasspath"))
+    includeConfigurations.set(listOf("runtimeClasspath"))
 }

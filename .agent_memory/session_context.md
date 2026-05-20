@@ -3,6 +3,13 @@
 # Do NOT edit or remove previous entries — stale state claims cause agent confusion.
 # Format: ## YYYY-MM-DD — <summary>
 
+## 2026-05-20 — Optimized slow Flatpak CI jobs
+- Restrained flatpakGradleGenerator to target only the runtimeClasspath configuration in desktopApp and build-logic:convention modules.
+- Updated release.yml and reusable-check.yml to invoke only targeted tasks (:desktopApp:flatpakGradleGenerator and :build-logic:convention:flatpakGradleGenerator) instead of running the task on the root and all subprojects.
+- Retained Matrix architecture runner configuration for build validity, as Skiko/Compose Desktop native artifacts are resolved dynamically based on host architecture.
+- Cleaned up leftover speed-up workarounds: completely removed the Flatpak Gradle Generator plugin application and tasks from the root project and all other library/feature subprojects (`core:ble`, `core:common`, `core:database`, `core:model`, `core:navigation`, `core:proto`, and `feature:messaging`), including deleting the unused `flatpakKmpAndroidMeta` configuration from `feature:messaging`.
+- Verified that local execution of `:desktopApp:flatpakGradleGenerator` runtimeClasspath resolution speed dropped from 46 seconds to 12 seconds, and all Spotless and Detekt linting checks passed.
+
 ## 2026-05-12 — Implemented Apple alignment for docs feature (FR-038)
 - Branch: `feat/20260507-161858-app-docs-markdown`
 - Gap analysis against `meshtastic-apple` completed. Implemented 4 alignment items:

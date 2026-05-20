@@ -100,7 +100,7 @@ detekt {
 tasks.flatpakGradleGenerator {
     outputFile = file("../../flatpak-sources-convention.json")
     downloadDirectory.set("./offline-repository")
-    excludeConfigurations.set(listOf("testCompileClasspath", "testRuntimeClasspath"))
+    includeConfigurations.set(listOf("runtimeClasspath"))
 }
 
 gradlePlugin {

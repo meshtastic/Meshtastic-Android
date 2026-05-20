@@ -20,7 +20,6 @@ plugins {
     alias(libs.plugins.kotlin.parcelize)
     id("meshtastic.kmp.jvm.android")
     id("meshtastic.koin")
-    alias(libs.plugins.flatpak.gradle.generator)
 }
 
 kotlin {
@@ -39,19 +38,4 @@ kotlin {
 
         commonTest.dependencies { implementation(libs.kotlinx.coroutines.test) }
     }
-}
-
-tasks.flatpakGradleGenerator {
-    outputFile = file("../../flatpak-sources-core-common.json")
-    downloadDirectory.set("./offline-repository")
-    excludeConfigurations.set(
-        listOf(
-            "androidHostTestCompileClasspath",
-            "androidHostTestLintChecksClasspath",
-            "androidHostTestRuntimeClasspath",
-            "kotlinNativeBundleConfiguration",
-            "testCompileClasspath",
-            "testRuntimeClasspath",
-        ),
-    )
 }
