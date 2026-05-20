@@ -3,6 +3,25 @@
 # Do NOT edit or remove previous entries — stale state claims cause agent confusion.
 # Format: ## YYYY-MM-DD — <summary>
 
+## 2026-05-20 — Replaced standalone translations landing page with dynamic global header language switcher dropdown
+- Deleted redundant standalone page `docs/en/translations.md` and updated `docs/README.md` to reflect layout change.
+- Completely re-engineered `docs/_includes/language_switcher.html` to:
+  1. Dynamically parse active page paths and locales, matching default English pages with translated variants.
+  2. Bind button text to native active language names (e.g., displaying "Беларуская" instead of hardcoded "English").
+  3. Pre-verify file existence in `site.pages` to only render valid translation links, preventing any 404 errors.
+  4. Automatically hide the language switcher on English pages that do not have translations available yet.
+- Modified custom CSS styles in `docs/_includes/head_custom.html` to use `right: 0; left: auto;` layout alignment, preventing dropdown menu overflows on smaller screens.
+- Successfully built and verified live documentation pages in the browser using the browser subagent, confirming fully operational dynamic swappers.
+- Ran quality and validation checks: `./gradlew generateDocsBundle validateDocsBundle spotlessCheck detekt` (100% SUCCESSFUL).
+
+## 2026-05-20 — Fixed Jekyll documentation site left navigation nesting and sub-page visibility
+- Cleaned up redundant and brittle dynamic default scope parent settings in `docs/_config.yml`.
+- Added explicit `parent: User Guide` front-matter fields to all 17 English user guide markdown files under `docs/en/user/`.
+- Added explicit `parent: Developer Guide` front-matter fields to all 9 English developer guide markdown files under `docs/en/developer/`.
+- Run and verified Gradle documentation bundle compilation: `./gradlew generateDocsBundle validateDocsBundle` (PASSED: 672 pages).
+- Validated formatting and static analysis rules: `./gradlew spotlessApply spotlessCheck detekt` (100% green).
+- Successfully completed full baseline compilation checks with `./gradlew assembleDebug`.
+
 ## 2026-05-20 — Completely overhauled, simplified, and pushed Flatpak offline source automation
 - Completely retired the third-party `flatpak-gradle-generator` plugin and its associated complex configuration and library overrides (removed ~150 lines of boilerplate).
 - Implemented a native JVM-based custom Gradle task `GenerateFlatpakSourcesTask` inside `gradle/flatpak.gradle.kts` which walks the post-compilation Gradle cache and generates a perfectly sorted, deduplicated `flatpak-sources.json` in under 3 seconds.

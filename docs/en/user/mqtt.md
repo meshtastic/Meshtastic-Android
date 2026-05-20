@@ -1,5 +1,6 @@
 ---
 title: MQTT
+parent: User Guide
 nav_order: 11
 last_updated: 2026-05-13
 description: Bridge your mesh to the internet — MQTT broker setup, encryption layers, and map reporting.

@@ -17,8 +17,7 @@ docs/
 │   ├── developer/                            ← Developer Guide pages
 │   ├── index.md                              ← Site home page
 │   ├── user.md                               ← User Guide nav parent
-│   ├── developer.md                          ← Developer Guide nav parent
-│   └── translations.md                       ← Translations landing page
+│   └── developer.md                          ← Developer Guide nav parent
 ├── fr-rFR/                                   ← French (Crowdin-generated)
 │   └── user/                                 ← Translated user guide
 ├── de-rDE/                                   ← German (Crowdin-generated)
