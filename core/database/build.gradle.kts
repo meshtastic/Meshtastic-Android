@@ -21,6 +21,7 @@ plugins {
     alias(libs.plugins.meshtastic.kotlinx.serialization)
     alias(libs.plugins.kotlin.parcelize)
     id("meshtastic.koin")
+    alias(libs.plugins.flatpak.gradle.generator)
 }
 
 kotlin {
@@ -76,4 +77,13 @@ dependencies {
     "kspJvm"("com.google.devtools.ksp:symbol-processing-aa-embeddable:${libs.versions.devtools.ksp.get()}")
     "kspAndroidHostTest"(libs.androidx.room.compiler)
     "kspAndroidDeviceTest"(libs.androidx.room.compiler)
+}
+
+// Only kspKotlinJvmProcessorClasspath is needed here — it captures Room compiler
+// and KSP processor deps that are module-scoped and invisible to desktopApp.
+// All other JVM deps are captured transitively by desktopApp's runtimeClasspath.
+tasks.flatpakGradleGenerator {
+    outputFile = file("../../flatpak-sources-core-database.json")
+    downloadDirectory.set("./offline-repository")
+    includeConfigurations.set(setOf("kspKotlinJvmProcessorClasspath"))
 }

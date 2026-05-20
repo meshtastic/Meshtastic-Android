@@ -3,6 +3,22 @@
 # Do NOT edit or remove previous entries — stale state claims cause agent confusion.
 # Format: ## YYYY-MM-DD — <summary>
 
+## 2026-05-20 — Overhauled and Bulletproofed Flatpak Source Generation
+- Overhauled and streamlined `build-logic/convention/build.gradle.kts` to dynamically query and resolve all 25+ Version Catalog plugin marker coordinates in a type-safe dynamic loop.
+- Replaced the hardcoded embedded Gradle Kotlin compiler version with dynamic standard library detection: `KotlinVersion.CURRENT.toString()`.
+- Implemented root Gradle consolidator task `:combineFlatpakSources` using JVM-native Json Slurper/Output, deduplicating 2222 entries and injecting Google/Aliyun backup `mirror-urls`.
+- Streamlined reusable-check and release CI workflows, replacing complex `jq` hacks with a simple, single gradle task invocation.
+- Verified `spotlessCheck`, `detekt`, and end-to-end completely offline package builds (`--offline`) completed with 100% success.
+
+## 2026-05-20 — Refactored and polished Flatpak dependency manifests to modern Gradle standards
+- Polished the Flatpak generator tasks and convention setup following a comprehensive audit:
+  1. Centralized version definitions to reference the central `libs.versions` catalog (`kotlin`, `koin.plugin`, etc.) instead of hardcoded strings.
+  2. Documented every single dependency override and compiler-plugin helper with clear, inline comments (`// why: ...`).
+  3. Cleaned out legacy dependencies and streamlined `core:database` to only capture `kspKotlinJvmProcessorClasspath`.
+  4. Changed includeConfigurations to use type-safe `setOf` instead of `listOf` to align with Gradle's `SetProperty` APIs.
+- Verified that all static analysis checks pass successfully: `./gradlew spotlessCheck detekt` is 100% green.
+- Validated end-to-end correctness by successfully compiling the app completely offline (`--offline`) and packaging the release UberJar.
+
 ## 2026-05-20 — Fixed Jekyll documentation site build and deployment in CI
 - Created `docs/index.html` to automatically redirect root path requests (`/`) to the English directory (`/en/`).
 - Updated `.github/workflows/docs-deploy.yml` to compile the Jekyll root site using `--baseurl /${{ github.event.repository.name }}` and setup Ruby with version `4.0.4` to match project release workflow conventions.
