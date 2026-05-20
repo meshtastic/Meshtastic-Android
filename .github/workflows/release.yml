@@ -372,7 +372,7 @@ jobs:
 
       - name: Generate Flatpak Sources
         run: >
-          ./gradlew :build-logic:convention:flatpakGradleGenerator flatpakGradleGenerator
+          ./gradlew :build-logic:convention:flatpakGradleGenerator :desktopApp:flatpakGradleGenerator
           --no-configuration-cache
 
       - name: List Flatpak source files

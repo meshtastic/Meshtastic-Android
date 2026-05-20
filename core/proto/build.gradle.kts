@@ -19,7 +19,6 @@ plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.wire)
     id("meshtastic.publishing")
-    alias(libs.plugins.flatpak.gradle.generator)
 }
 
 kotlin {
@@ -132,16 +131,4 @@ publishing {
             artifactId = baseId.replace("proto-", "meshtastic-android-proto-")
         }
     }
-}
-
-tasks.flatpakGradleGenerator {
-    outputFile = file("../../flatpak-sources-core-proto.json")
-    downloadDirectory.set("./offline-repository")
-    excludeConfigurations.set(
-        listOf(
-            "kotlinNativeBundleConfiguration",
-            "testCompileClasspath",
-            "testRuntimeClasspath",
-        ),
-    )
 }
