@@ -5,7 +5,8 @@
 
 ## 2026-05-20 — Decoupled and Isolated Flatpak manifest generation logic to build-logic/flatpak
 - Isolated the optimized `GenerateFlatpakSourcesTask` from monolithic `build-logic/convention` into its own specialized, lightweight `:flatpak` subproject under `build-logic`.
-- Created `:flatpak` configuration and registered the formal plugin ID `"meshtastic.flatpak"` implemented by `FlatpakPlugin`.
+- Created `:flatpak` configuration and registered the formal plugin ID `"meshtastic.flatpak"` implemented by `FlatpakConventionPlugin` inside the default package namespace (perfectly matching project-wide plugin architectures).
+- Implemented modern, configuration-cache-safe lazy provider directory evaluation for the default Gradle user home cache.
 - Cleaned up `:convention` by removing the redundant class and registration imports from `RootConventionPlugin.kt`.
 - Applied the new plugin in the root `build.gradle.kts` using `id("meshtastic.flatpak")`.
 - Verified 100% compliant spotless and detekt formatting checks (`./gradlew spotlessCheck detekt` is green).
