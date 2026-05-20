@@ -17,6 +17,39 @@
 
 pluginManagement {
     includeBuild("build-logic")
+
+    // Read versions from gradle/libs.versions.toml to use the catalog as the source of truth
+    val tomlFile = file("gradle/libs.versions.toml")
+    val catalogVersions = mutableMapOf<String, String>()
+    if (tomlFile.exists()) {
+        var inVersions = false
+        tomlFile.useLines { lines ->
+            for (line in lines) {
+                val trimmed = line.trim()
+                if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+                    inVersions = trimmed == "[versions]"
+                    continue
+                }
+                if (inVersions && trimmed.contains("=")) {
+                    val parts = trimmed.split('=', limit = 2)
+                    val key = parts[0].trim()
+                    val value = parts[1].trim().removeSurrounding("\"")
+                    catalogVersions[key] = value
+                }
+            }
+        }
+    }
+
+    val foojayResolverVersion = catalogVersions["foojay-resolver"] ?: "1.0.0"
+    val develocityVersion = catalogVersions["develocity"] ?: "4.4.1"
+    val customUserDataVersion = catalogVersions["custom-user-data"] ?: "2.6.0"
+
+    plugins {
+        id("org.gradle.toolchains.foojay-resolver") version foojayResolverVersion
+        id("com.gradle.develocity") version develocityVersion
+        id("com.gradle.common-custom-user-data-gradle-plugin") version customUserDataVersion
+    }
+
     repositories {
         google {
             content {
@@ -32,9 +65,9 @@ pluginManagement {
 }
 
 plugins {
-    id("org.gradle.toolchains.foojay-resolver") version "1.0.0"
-    id("com.gradle.develocity") version "4.4.1"
-    id("com.gradle.common-custom-user-data-gradle-plugin") version "2.6.0"
+    id("org.gradle.toolchains.foojay-resolver")
+    id("com.gradle.develocity")
+    id("com.gradle.common-custom-user-data-gradle-plugin")
 }
 
 @Suppress("UnstableApiUsage")
