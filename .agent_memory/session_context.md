@@ -3,6 +3,12 @@
 # Do NOT edit or remove previous entries — stale state claims cause agent confusion.
 # Format: ## YYYY-MM-DD — <summary>
 
+## 2026-05-20 — Implemented dynamic Gradle cache SNAPSHOT metadata resolution for Flatpak offline builds
+- Overhauled `GenerateFlatpakSourcesTask` in `gradle/flatpak.gradle.kts` to identify `-SNAPSHOT` dependencies, parse local cached `maven-metadata.xml` in `resources-2.1`, and dynamically map them to remote timestamped snapshot URLs (e.g. Sonatype Snapshots) while preserving their original non-timestamped file names as `dest-filename`.
+- Created a pure JDK XML parser within the task to parse the `<snapshotVersions>` block from cached XML files.
+- Verified that compiling the desktopApp and running the flatpak generator task successfully maps snapshot dependencies (such as `org.meshtastic:takpacket-sdk-jvm:0.2.4-SNAPSHOT`) to their remote unique snapshot URLs in `flatpak-sources.json`.
+- Ran quality and validation checks: `./gradlew spotlessCheck detekt` (100% SUCCESSFUL with zero issues).
+
 ## 2026-05-20 — Resolved Flatpak jitpack.io dependency download 404s in sandboxed offline builds
 - Modified `GenerateFlatpakSourcesTask` in `gradle/flatpak.gradle.kts` to dynamically detect dependency groups starting with `com.github.` (which are hosted on JitPack).
 - Configured the generation of `primaryUrl` for these dependencies to resolve directly from `https://jitpack.io` and created custom high-availability fallback lists.

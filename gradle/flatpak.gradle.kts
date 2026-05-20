@@ -1,6 +1,8 @@
 import groovy.json.JsonOutput
 import java.io.File
 import java.security.MessageDigest
+import javax.xml.parsers.DocumentBuilderFactory
+import org.w3c.dom.Element
 
 // Abstract Task Definition for Configuration Cache compatibility and clean code separation
 abstract class GenerateFlatpakSourcesTask : DefaultTask() {
@@ -51,7 +53,32 @@ abstract class GenerateFlatpakSourcesTask : DefaultTask() {
 
                             // Reconstruct correct Maven filename if Gradle cache renamed it locally (e.g. animation.aar -> animation-android-1.10.0.aar)
                             val standardPrefix = "$name-$version"
-                            val serverFilename = if (filename.startsWith(standardPrefix)) {
+                            val isSnapshot = version.endsWith("-SNAPSHOT") || version.contains("-SNAPSHOT")
+                            val classifier = if (isSnapshot) {
+                                val prefix = "$name-$version-"
+                                if (filename.startsWith(prefix)) {
+                                    filename.substring(prefix.length, filename.length - ext.length - 1)
+                                } else {
+                                    null
+                                }
+                            } else {
+                                null
+                            }
+
+                            val resolvedVersion = if (isSnapshot) {
+                                val resourcesFolder = File(cacheFolder.parentFile, "resources-2.1")
+                                findSnapshotValue(resourcesFolder, group, name, ext, classifier) ?: version
+                            } else {
+                                version
+                            }
+
+                            val serverFilename = if (isSnapshot) {
+                                if (classifier != null) {
+                                    "$name-$resolvedVersion-$classifier.$ext"
+                                } else {
+                                    "$name-$resolvedVersion.$ext"
+                                }
+                            } else if (filename.startsWith(standardPrefix)) {
                                 filename
                             } else {
                                 "$name-$version.$ext"
@@ -63,13 +90,19 @@ abstract class GenerateFlatpakSourcesTask : DefaultTask() {
                             val sha256 = calculateSha256(file)
 
                             val isJitpack = group.startsWith("com.github.")
-                            val primaryUrl = if (isJitpack) {
+                            val primaryUrl = if (isSnapshot) {
+                                "https://central.sonatype.com/repository/maven-snapshots/$mavenPath"
+                            } else if (isJitpack) {
                                 "https://jitpack.io/$mavenPath"
                             } else {
                                 "https://repo.maven.apache.org/maven2/$mavenPath"
                             }
 
-                            val mirrorUrls = if (isJitpack) {
+                            val mirrorUrls = if (isSnapshot) {
+                                listOf(
+                                    "https://oss.sonatype.org/content/repositories/snapshots/$mavenPath"
+                                )
+                            } else if (isJitpack) {
                                 listOf(
                                     "https://repo.maven.apache.org/maven2/$mavenPath",
                                     "https://maven-central.storage-download.googleapis.com/maven2/$mavenPath",
@@ -90,7 +123,7 @@ abstract class GenerateFlatpakSourcesTask : DefaultTask() {
                                     "url" to primaryUrl,
                                     "sha256" to sha256,
                                     "dest" to dest,
-                                    "dest-filename" to serverFilename,
+                                    "dest-filename" to filename, // Save using the cached name expected by offline Gradle
                                     "mirror-urls" to mirrorUrls
                                 )
                             )
@@ -128,6 +161,57 @@ abstract class GenerateFlatpakSourcesTask : DefaultTask() {
             hexChars[i * 2 + 1] = hexDigits[v and 0x0F]
         }
         return String(hexChars)
+    }
+
+    private fun findSnapshotValue(resourcesFolder: File, group: String, name: String, extension: String, classifier: String?): String? {
+        if (!resourcesFolder.exists()) return null
+        resourcesFolder.walkTopDown().forEach { file ->
+            if (file.isFile && file.name == "maven-metadata.xml") {
+                try {
+                    val dbFactory = DocumentBuilderFactory.newInstance()
+                    val dBuilder = dbFactory.newDocumentBuilder()
+                    val doc = dBuilder.parse(file)
+                    doc.documentElement.normalize()
+
+                    val root = doc.documentElement
+                    val fileGroup = root.getElementsByTagName("groupId").item(0)?.textContent
+                    val fileArtifact = root.getElementsByTagName("artifactId").item(0)?.textContent
+
+                    if (fileGroup == group && fileArtifact == name) {
+                        val snapshotVersions = root.getElementsByTagName("snapshotVersion")
+                        for (i in 0 until snapshotVersions.length) {
+                            val element = snapshotVersions.item(i) as Element
+                            val ext = element.getElementsByTagName("extension").item(0)?.textContent
+                            val value = element.getElementsByTagName("value").item(0)?.textContent
+                            val classif = element.getElementsByTagName("classifier").item(0)?.textContent
+
+                            if (ext == extension) {
+                                if (classifier == null && classif == null) {
+                                    return value
+                                }
+                                if (classifier != null && classifier == classif) {
+                                    return value
+                                }
+                            }
+                        }
+
+                        val snapshotNode = root.getElementsByTagName("snapshot").item(0) as? Element
+                        if (snapshotNode != null) {
+                            val timestamp = snapshotNode.getElementsByTagName("timestamp").item(0)?.textContent
+                            val buildNumber = snapshotNode.getElementsByTagName("buildNumber").item(0)?.textContent
+                            val version = root.getElementsByTagName("version").item(0)?.textContent
+                            if (timestamp != null && buildNumber != null && version != null) {
+                                val baseVersion = version.substringBefore("-SNAPSHOT")
+                                return "$baseVersion-$timestamp-$buildNumber"
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    // Ignore parsing errors for individual files
+                }
+            }
+        }
+        return null
     }
 }
 
