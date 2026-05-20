@@ -91,6 +91,7 @@ qrcode-kotlin = "4.5.0"
 takpacket-sdk = "0.2.4-SNAPSHOT"
 
 # Flatpak Offline Build Overrides & Tooling
+gradle-kotlin = "2.3.20"
 develocity = "4.4.1"
 custom-user-data = "2.6.0"
 foojay-resolver = "1.0.0"
@@ -293,6 +294,11 @@ takpacket-sdk-kmp = { module = "org.meshtastic:takpacket-sdk", version.ref = "ta
 takpacket-sdk-jvm = { module = "org.meshtastic:takpacket-sdk-jvm", version.ref = "takpacket-sdk" }
 
 # Flatpak Offline Build Overrides & Tooling
+gradle-kotlin-build-tools-compat = { module = "org.jetbrains.kotlin:kotlin-build-tools-compat", version.ref = "gradle-kotlin" }
+gradle-kotlin-build-tools-impl = { module = "org.jetbrains.kotlin:kotlin-build-tools-impl", version.ref = "gradle-kotlin" }
+gradle-kotlin-scripting-compiler-embeddable = { module = "org.jetbrains.kotlin:kotlin-scripting-compiler-embeddable", version.ref = "gradle-kotlin" }
+gradle-kotlin-sam-with-receiver-compiler-plugin-embeddable = { module = "org.jetbrains.kotlin:kotlin-sam-with-receiver-compiler-plugin-embeddable", version.ref = "gradle-kotlin" }
+gradle-kotlin-assignment-compiler-plugin-embeddable = { module = "org.jetbrains.kotlin:kotlin-assignment-compiler-plugin-embeddable", version.ref = "gradle-kotlin" }
 proguard-gradle = { module = "com.guardsquare:proguard-gradle", version.ref = "proguard-gradle" }
 savedstate-compose = { module = "org.jetbrains.androidx.savedstate:savedstate-compose", version.ref = "savedstate-compose" }
 old-guava = { module = "com.google.guava:guava", version.ref = "old-guava" }

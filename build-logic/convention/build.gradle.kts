@@ -36,10 +36,23 @@ java {
 
 kotlin { compilerOptions { jvmTarget = JvmTarget.JVM_21 } }
 
-val flatpakOfflineDeps by configurations.creating {
-    isCanBeResolved = true
-    isCanBeConsumed = false
-}
+val flatpakOfflineDeps by
+    configurations.creating {
+        isCanBeResolved = true
+        isCanBeConsumed = false
+    }
+
+val flatpakOfflineEmbeddedDeps by
+    configurations.creating {
+        isCanBeResolved = true
+        isCanBeConsumed = false
+    }
+
+val flatpakOfflineOlderDeps by
+    configurations.creating {
+        isCanBeResolved = true
+        isCanBeConsumed = false
+    }
 
 dependencies {
     // This allows the use of the 'libs' type-safe accessor in the Kotlin source of the plugins
@@ -51,6 +64,16 @@ dependencies {
     /** Registers a dependency to be captured for the Flatpak offline repository. */
     fun flatpakDep(dependency: Any) {
         flatpakOfflineDeps(dependency)
+    }
+
+    /** Registers a Gradle embedded dependency to be captured for Flatpak offline. */
+    fun flatpakEmbeddedDep(dependency: Any) {
+        flatpakOfflineEmbeddedDeps(dependency)
+    }
+
+    /** Registers an older dependency to be captured for Flatpak offline. */
+    fun flatpakOlderDep(dependency: Any) {
+        flatpakOfflineOlderDeps(dependency)
     }
 
     // ── Convention plugin compile dependencies ──────────────────────────────
@@ -104,6 +127,14 @@ dependencies {
     flatpakDep(libs.kotlin.build.tools.compat)
     flatpakDep(libs.kotlin.build.tools.impl)
     flatpakDep(libs.kotlin.scripting.compiler.embeddable)
+    // Gradle-embedded compiler versions (2.3.20) required to compile precompiled scripts in offline mode
+    // We register these in a separate configuration so that Gradle does not version-align/upgrade them
+    // to our project's newer Kotlin version (2.3.21) during flatpak offline source generation.
+    flatpakEmbeddedDep(libs.gradle.kotlin.build.tools.compat)
+    flatpakEmbeddedDep(libs.gradle.kotlin.build.tools.impl)
+    flatpakEmbeddedDep(libs.gradle.kotlin.scripting.compiler.embeddable)
+    flatpakEmbeddedDep(libs.gradle.kotlin.sam.with.receiver.compiler.plugin.embeddable)
+    flatpakEmbeddedDep(libs.gradle.kotlin.assignment.compiler.plugin.embeddable)
 
     // ── Compiler plugins resolved at task execution time ────────────────────
     flatpakDep(libs.koin.compiler.plugin)
@@ -123,12 +154,14 @@ dependencies {
     detektPlugins(libs.detekt.formatting)
 
     // ── Older transitive versions needed for plugin resolution metadata ─────
-    flatpakDep(libs.old.kotlin.gradle.plugin)
-    flatpakDep(libs.old.kotlin.stdlib.jdk8)
-    flatpakDep(libs.old.guava)
-    flatpakDep(libs.old.guava.parent)
-    flatpakDep(libs.old.kotlinx.serialization.core)
-    flatpakDep(libs.old.kotlinx.serialization.core.jvm)
+    // We register these in a separate configuration so they don't get upgraded to newer versions
+    // by Gradle's dependency conflict resolution strategy.
+    flatpakOlderDep(libs.old.kotlin.gradle.plugin)
+    flatpakOlderDep(libs.old.kotlin.stdlib.jdk8)
+    flatpakOlderDep(libs.old.guava)
+    flatpakOlderDep(libs.old.guava.parent)
+    flatpakOlderDep(libs.old.kotlinx.serialization.core)
+    flatpakOlderDep(libs.old.kotlinx.serialization.core.jvm)
 }
 
 tasks {
@@ -169,7 +202,9 @@ detekt {
 tasks.flatpakGradleGenerator {
     outputFile = file("../../flatpak-sources-convention.json")
     downloadDirectory.set("./offline-repository")
-    includeConfigurations.set(setOf("compileClasspath", "flatpakOfflineDeps"))
+    includeConfigurations.set(
+        setOf("compileClasspath", "flatpakOfflineDeps", "flatpakOfflineEmbeddedDeps", "flatpakOfflineOlderDeps"),
+    )
 }
 
 gradlePlugin {
