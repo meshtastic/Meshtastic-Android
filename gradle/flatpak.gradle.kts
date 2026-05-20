@@ -61,16 +61,26 @@ abstract class GenerateFlatpakSourcesTask : DefaultTask() {
                                 "https://maven.aliyun.com/repository/public/$mavenPath"
                             )
 
-                            entries.add(
-                                mapOf(
-                                    "type" to "file",
-                                    "url" to primaryUrl,
-                                    "sha256" to sha256,
-                                    "dest" to dest,
-                                    "dest-filename" to filename,
-                                    "mirror-urls" to mirrorUrls
-                                )
+                            val pathLower = relativePath.lowercase()
+                            val onlyArches = when {
+                                pathLower.contains("x64") || pathLower.contains("x86_64") || pathLower.contains("amd64") -> listOf("x86_64")
+                                pathLower.contains("arm64") || pathLower.contains("aarch64") -> listOf("aarch64")
+                                else -> null
+                            }
+
+                            val entry = mutableMapOf<String, Any>(
+                                "type" to "file",
+                                "url" to primaryUrl,
+                                "sha256" to sha256,
+                                "dest" to dest,
+                                "dest-filename" to filename,
+                                "mirror-urls" to mirrorUrls
                             )
+                            if (onlyArches != null) {
+                                entry["only-arches"] = onlyArches
+                            }
+
+                            entries.add(entry)
                         }
                     }
                 }
