@@ -380,8 +380,12 @@ abstract class PublishDocsSiteTask : DefaultTask() {
     @TaskAction
     fun publish() {
         val siteDir = siteOutputDir.get().asFile
-        val channelPath = if (channel.get() == "release") "v${version.get()}" else channel.get()
-        val outDir = File(siteDir, channelPath)
+        val channelPath = when (channel.get()) {
+            "release" -> "v${version.get()}"
+            "root" -> ""
+            else -> channel.get()
+        }
+        val outDir = if (channelPath.isEmpty()) siteDir else File(siteDir, channelPath)
         outDir.mkdirs()
 
         // Copy generated bundle to site output
