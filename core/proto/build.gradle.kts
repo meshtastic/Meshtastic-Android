@@ -137,5 +137,11 @@ publishing {
 tasks.flatpakGradleGenerator {
     outputFile = file("../../flatpak-sources-core-proto.json")
     downloadDirectory.set("./offline-repository")
-    excludeConfigurations.set(listOf("testCompileClasspath", "testRuntimeClasspath"))
+    excludeConfigurations.set(
+        listOf(
+            "kotlinNativeBundleConfiguration",
+            "testCompileClasspath",
+            "testRuntimeClasspath",
+        ),
+    )
 }
