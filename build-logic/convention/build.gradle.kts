@@ -45,21 +45,12 @@ dependencies {
     // This allows the use of the 'libs' type-safe accessor in the Kotlin source of the plugins
     implementation(files(libs.javaClass.superclass.protectionDomain.codeSource.location))
 
-    // Version shortcuts for offline dependency declarations
-    val kotlinVersion = libs.versions.kotlin.get()
-    val koinPluginVersion = libs.versions.koin.plugin.get()
     // Self-updating embedded Gradle Kotlin version
     val gradleKotlinVersion = KotlinVersion.CURRENT.toString()
 
     /** Registers a dependency to be captured for the Flatpak offline repository. */
     fun flatpakDep(dependency: Any) {
         flatpakOfflineDeps(dependency)
-    }
-
-    /** Extracts a version-catalog plugin's marker coordinate and registers it for Flatpak offline. */
-    fun flatpakPlugin(pluginProvider: Provider<org.gradle.plugin.use.PluginDependency>) {
-        val plugin = pluginProvider.get()
-        flatpakOfflineDeps("${plugin.pluginId}:${plugin.pluginId}.gradle.plugin:${plugin.version.requiredVersion}")
     }
 
     // ── Convention plugin compile dependencies ──────────────────────────────
@@ -86,15 +77,10 @@ dependencies {
     compileOnly(libs.test.retry.gradlePlugin)
     compileOnly(libs.aboutlibraries.gradlePlugin)
 
-    // ── Settings plugin marker artifacts (applied in settings.gradle.kts) ───
-    flatpakDep("com.gradle.develocity:com.gradle.develocity.gradle.plugin:4.4.1")
-    flatpakDep(
-        "com.gradle.common-custom-user-data-gradle-plugin:" +
-            "com.gradle.common-custom-user-data-gradle-plugin.gradle.plugin:2.6.0"
-    )
-    flatpakDep("org.gradle.toolchains.foojay-resolver:org.gradle.toolchains.foojay-resolver.gradle.plugin:1.0.0")
-
     // ── Dynamic plugin marker artifacts from Version Catalog ────────────────
+    // This loop dynamically resolves and registers all plugin marker artifacts declared in the catalog.
+    // Since Develocity, Custom User Data, and Foojay Resolver are defined in libs.versions.toml,
+    // they are automatically resolved and registered here!
     val versionCatalog = project.extensions.getByType<VersionCatalogsExtension>().named("libs")
     versionCatalog.pluginAliases.forEach { alias ->
         versionCatalog.findPlugin(alias).ifPresent { pluginProvider ->
@@ -110,39 +96,39 @@ dependencies {
     flatpakDep(libs.screenshot.validation.api)
 
     // ── Kotlin build tooling (resolved at task execution time by kotlin-dsl) ─
-    flatpakDep("org.jetbrains.kotlin:kotlin-build-tools-compat:$gradleKotlinVersion")
-    flatpakDep("org.jetbrains.kotlin:kotlin-build-tools-impl:$gradleKotlinVersion")
-    flatpakDep("org.jetbrains.kotlin:kotlin-scripting-compiler-embeddable:$gradleKotlinVersion")
-    flatpakDep("org.jetbrains.kotlin:kotlin-sam-with-receiver-compiler-plugin-embeddable:$gradleKotlinVersion")
-    flatpakDep("org.jetbrains.kotlin:kotlin-assignment-compiler-plugin-embeddable:$gradleKotlinVersion")
-    flatpakDep("org.jetbrains.kotlin:kotlin-build-tools-compat:$kotlinVersion")
-    flatpakDep("org.jetbrains.kotlin:kotlin-build-tools-impl:$kotlinVersion")
-    flatpakDep("org.jetbrains.kotlin:kotlin-scripting-compiler-embeddable:$kotlinVersion")
+    flatpakDep("${libs.kotlin.build.tools.compat.get().module}:$gradleKotlinVersion")
+    flatpakDep("${libs.kotlin.build.tools.impl.get().module}:$gradleKotlinVersion")
+    flatpakDep("${libs.kotlin.scripting.compiler.embeddable.get().module}:$gradleKotlinVersion")
+    flatpakDep("${libs.kotlin.sam.with.receiver.compiler.plugin.embeddable.get().module}:$gradleKotlinVersion")
+    flatpakDep("${libs.kotlin.assignment.compiler.plugin.embeddable.get().module}:$gradleKotlinVersion")
+    flatpakDep(libs.kotlin.build.tools.compat)
+    flatpakDep(libs.kotlin.build.tools.impl)
+    flatpakDep(libs.kotlin.scripting.compiler.embeddable)
 
     // ── Compiler plugins resolved at task execution time ────────────────────
-    flatpakDep("io.insert-koin:koin-compiler-plugin:$koinPluginVersion")
-    flatpakDep("org.jetbrains.kotlin:kotlin-compose-compiler-plugin-embeddable:$kotlinVersion")
-    flatpakDep("org.jetbrains.kotlin:kotlin-serialization-compiler-plugin-embeddable:$kotlinVersion")
+    flatpakDep(libs.koin.compiler.plugin)
+    flatpakDep(libs.kotlin.compose.compiler.plugin.embeddable)
+    flatpakDep(libs.kotlin.serialization.compiler.plugin.embeddable)
 
     // ── Transitive deps not on standard classpaths ──────────────────────────
-    flatpakDep("org.jetbrains.compose.material:material-ripple:1.11.0-beta03")
-    flatpakDep("org.jetbrains.androidx.savedstate:savedstate-compose:1.3.6")
-    flatpakDep("androidx.paging:paging-common:3.4.2")
+    flatpakDep(libs.compose.material.ripple)
+    flatpakDep(libs.savedstate.compose)
+    flatpakDep(libs.androidx.paging.common)
 
     // ── Compose Desktop packaging (proguardReleaseJars task) ────────────────
-    flatpakDep("com.guardsquare:proguard-gradle:7.7.0")
-    flatpakDep("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
-    flatpakDep("org.jetbrains.kotlin:kotlin-stdlib-common:2.1.0")
+    flatpakDep(libs.proguard.gradle)
+    flatpakDep(libs.kotlin.stdlib)
+    flatpakDep(libs.kotlin.stdlib.common)
 
     detektPlugins(libs.detekt.formatting)
 
     // ── Older transitive versions needed for plugin resolution metadata ─────
-    flatpakDep("org.jetbrains.kotlin:kotlin-gradle-plugin:2.2.21")
-    flatpakDep("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.20")
-    flatpakDep("com.google.guava:guava:32.1.3-jre")
-    flatpakDep("com.google.guava:guava-parent:32.1.3-jre")
-    flatpakDep("org.jetbrains.kotlinx:kotlinx-serialization-core:1.9.0")
-    flatpakDep("org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.9.0")
+    flatpakDep(libs.old.kotlin.gradle.plugin)
+    flatpakDep(libs.old.kotlin.stdlib.jdk8)
+    flatpakDep(libs.old.guava)
+    flatpakDep(libs.old.guava.parent)
+    flatpakDep(libs.old.kotlinx.serialization.core)
+    flatpakDep(libs.old.kotlinx.serialization.core.jvm)
 }
 
 tasks {
