@@ -1,5 +1,6 @@
 ---
 title: Чворови
+parent: User Guide
 nav_order: 4
 last_updated: 2026-05-13
 description: Browse, filter, and sort mesh nodes — view details, signal quality, roles, and quick actions.
@@ -132,8 +133,8 @@ The detail screen includes device info, position, and action buttons:
 
 Inline status indicators show key metrics at a glance:
 
-| Indicator          | Screenshot                                               |
-| ------------------ | -------------------------------------------------------- |
+| Indicator          | Screenshot                                                    |
+| ------------------ | ------------------------------------------------------------- |
 | Signal quality     | ![Signal](../../assets/screenshots/nodes_signal_info.png)     |
 | Battery level      | ![Battery](../../assets/screenshots/nodes_battery_info.png)   |
 | Hop count          | ![Hops](../../assets/screenshots/nodes_hops_info.png)         |

@@ -1037,6 +1037,7 @@
     <string name="timestamp">Tidsstämpel</string>
     <string name="tls_enabled">TLS är aktiverat</string>
     <string name="toggle_my_position">Växla min position</string>
+    <string name="trace_route">Spåra rutt</string>
     <!-- TRACEROUTE -->
     <string name="traceroute">Traceroute (spåra rutt)</string>
     <string name="traceroute_diff">Hopp mot %1$d Hopp tillbaka %2$d</string>
@@ -1070,7 +1071,6 @@
     <string name="tx_power_dbm">Sändningseffekt</string>
     <string name="type">Typ</string>
     <string name="type_a_message">Skriv ett meddelande</string>
-    <string name="udp_enabled">Aktiverad</string>
     <!-- UNKNOWN -->
     <string name="unknown">Okänd</string>
     <string name="unknown_age">Okänd ålder</string>

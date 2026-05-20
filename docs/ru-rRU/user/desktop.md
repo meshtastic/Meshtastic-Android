@@ -1,5 +1,6 @@
 ---
 title: Настольное приложение
+parent: Руководство пользователя
 nav_order: 14
 last_updated: 2026-05-13
 description: Install and use the Meshtastic Desktop app on Linux, macOS, and Windows — connections, feature parity, and keyboard shortcuts.

@@ -1,5 +1,6 @@
 ---
 title: 節點
+parent: User Guide
 nav_order: 4
 last_updated: 2026-05-13
 description: Browse, filter, and sort mesh nodes — view details, signal quality, roles, and quick actions.
@@ -132,8 +133,8 @@ The detail screen includes device info, position, and action buttons:
 
 Inline status indicators show key metrics at a glance:
 
-| Indicator      | 螢幕截圖                                                     |
-| -------------- | -------------------------------------------------------- |
+| Indicator      | 螢幕截圖                                                          |
+| -------------- | ------------------------------------------------------------- |
 | Signal quality | ![Signal](../../assets/screenshots/nodes_signal_info.png)     |
 | 電池電量           | ![Battery](../../assets/screenshots/nodes_battery_info.png)   |
 | Hop count      | ![Hops](../../assets/screenshots/nodes_hops_info.png)         |

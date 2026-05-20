@@ -1204,6 +1204,7 @@
     <string name="timestamp">Aikaleima</string>
     <string name="tls_enabled">TLS käytössä</string>
     <string name="toggle_my_position">Kytke sijainti päälle</string>
+    <string name="trace_route">Reitinselvitys</string>
     <!-- TRACEROUTE -->
     <string name="traceroute">Reitinselvitys</string>
     <string name="traceroute_diff">Reititettyjä hyppyjä %1$d, joista %2$d hyppyä takaisin</string>
@@ -1256,7 +1257,6 @@
     <string name="tx_power_dbm">Lähetysteho</string>
     <string name="type">Kirjoita</string>
     <string name="type_a_message">Kirjoita viesti</string>
-    <string name="udp_enabled">Käytössä</string>
     <!-- UNKNOWN -->
     <string name="unknown">Tuntematon</string>
     <string name="unknown_age">Tuntematon ikä</string>

@@ -539,6 +539,7 @@
     <string name="timestamp">타임스탬프</string>
     <string name="tls_enabled">TLS 사용</string>
     <string name="toggle_my_position">내 위치 토글</string>
+    <string name="trace_route">추적 루트</string>
     <!-- TRACEROUTE -->
     <string name="traceroute">추적 루트</string>
     <string name="traceroute_diff">Hops towards %1$d Hops back %2$d</string>
@@ -556,7 +557,6 @@
     <string name="tx_enabled">전송 활성화</string>
     <string name="tx_power_dbm">전송 출력</string>
     <string name="type">타입</string>
-    <string name="udp_enabled">활성화</string>
     <!-- UNKNOWN -->
     <string name="unknown">알 수 없는</string>
     <string name="unknown_age">수명 확인 되지 않음</string>

@@ -1,5 +1,6 @@
 ---
 title: Ноды
+parent: Руководство пользователя
 nav_order: 4
 last_updated: 2026-05-13
 description: Просматривайте, фильтруйте и сортируйте ноды сети — просматривайте подробности, качество сигнала, роли и быстрые действия.
@@ -132,8 +133,8 @@ The detail screen includes device info, position, and action buttons:
 
 Inline status indicators show key metrics at a glance:
 
-| Indicator              | Screenshot                                               |
-| ---------------------- | -------------------------------------------------------- |
+| Indicator              | Screenshot                                                    |
+| ---------------------- | ------------------------------------------------------------- |
 | Signal quality         | ![Signal](../../assets/screenshots/nodes_signal_info.png)     |
 | Уровень заряда батареи | ![Battery](../../assets/screenshots/nodes_battery_info.png)   |
 | Hop count              | ![Hops](../../assets/screenshots/nodes_hops_info.png)         |

@@ -1,5 +1,6 @@
 ---
 title: How the Meshtastic Signal Meter Works
+parent: Ръководство за потребители
 nav_order: 15
 last_updated: 2026-05-13
 description: How the signal meter calculates quality from RSSI and SNR — LoRa spread spectrum, presets, and what the bars really mean.

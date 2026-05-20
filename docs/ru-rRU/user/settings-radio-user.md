@@ -1,5 +1,6 @@
 ---
 title: Настройки - Радио и пользователь
+parent: Руководство пользователя
 nav_order: 7
 last_updated: 2026-05-13
 description: Настройте ваше радиоустройство, пресеты LoRa, пользовательский профиль, обмен местоположением, управление питанием и безопасность.
@@ -156,8 +157,8 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 
 Settings use standard preference controls — dropdowns, toggles, and sliders:
 
-| Control  | Screenshot                                             |
-| -------- | ------------------------------------------------------ |
+| Control  | Screenshot                                                  |
+| -------- | ----------------------------------------------------------- |
 | Dropdown | ![Dropdown](../../assets/screenshots/settings_dropdown.png) |
 | Toggle   | ![Toggle](../../assets/screenshots/settings_switch.png)     |
 | Slider   | ![Slider](../../assets/screenshots/settings_slider.png)     |

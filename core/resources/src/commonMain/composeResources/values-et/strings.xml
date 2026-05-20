@@ -326,10 +326,28 @@
     <string name="dns">DNS</string>
     <!-- DOC -->
     <string name="doc_clear_search">Puhasta otsing</string>
+    <string name="doc_keywords_connections">bluetooth,usb,tcp,pairing,serial,wifi</string>
+    <string name="doc_keywords_desktop">desktop,linux,macos,windows,serial</string>
+    <string name="doc_search_placeholder">Otsi dokumentatsiooni…</string>
+    <string name="doc_section_developer">Arendaja juhis</string>
+    <string name="doc_section_user">Kasutaja juhis</string>
     <string name="doc_title_connections">Ühendus</string>
+    <string name="doc_title_desktop">Töölauarakendus</string>
     <string name="doc_title_discovery">Avastamine</string>
+    <string name="doc_title_firmware">Püsivara värskendused</string>
+    <string name="doc_title_map">Kaart &amp; Teekonnapunktid</string>
+    <string name="doc_title_messages">Sõnumid &amp; Kanalid</string>
     <string name="doc_title_mqtt">MQTT</string>
+    <string name="doc_title_node_metrics">Sõlme mõõdikud</string>
     <string name="doc_title_nodes">Sõlmed</string>
+    <string name="doc_title_onboarding">Alustamine</string>
+    <string name="doc_title_settings_module">Sätted — Moodulid &amp; Administraator</string>
+    <string name="doc_title_settings_radio">Sätted — Raadio &amp; Kasutaja</string>
+    <string name="doc_title_signal_meter">Signaalimõõtur</string>
+    <string name="doc_title_tak">TAK integratsioon</string>
+    <string name="doc_title_telemetry">Telemeetria &amp; Sensorid</string>
+    <string name="doc_title_translate">Tõlgi rakendus</string>
+    <string name="doc_title_units">Ühikud &amp; Asukoht</string>
     <string name="done">Valmis</string>
     <string name="dont_show_again_for_device">Ära selle seadme puhul enam kuva</string>
     <string name="double_tap_as_button_press">Topeltpuudutus nupuna</string>
@@ -508,6 +526,7 @@
     <string name="hardware_model">Seadme mudel</string>
     <string name="heading">Päis</string>
     <string name="heartbeat">Südamelöögid</string>
+    <string name="help_and_documentation">Abi &amp; Dokumentatsioon</string>
     <string name="hide_layer">Peida kiht</string>
     <string name="hide_password">Peida parool</string>
     <string name="history_return_max">Ajalookirjete maksimaalne arv</string>
@@ -1255,7 +1274,6 @@
     <string name="tx_power_dbm">Saatevõimsus</string>
     <string name="type">Tüüp</string>
     <string name="type_a_message">Sisesta sõnum</string>
-    <string name="udp_enabled">Lubatud</string>
     <!-- UNKNOWN -->
     <string name="unknown">Tundmatu</string>
     <string name="unknown_age">Tundmatu vanus</string>

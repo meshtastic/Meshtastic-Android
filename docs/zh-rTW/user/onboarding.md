@@ -1,5 +1,6 @@
 ---
 title: 新手入門
+parent: User Guide
 nav_order: |-
   1.  **Overview**
 

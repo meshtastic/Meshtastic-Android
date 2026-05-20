@@ -1069,6 +1069,7 @@
     <string name="timestamp">时间戳</string>
     <string name="tls_enabled">启用TLS</string>
     <string name="toggle_my_position">切换我的位置</string>
+    <string name="trace_route">追踪路径</string>
     <!-- TRACEROUTE -->
     <string name="traceroute">追踪器</string>
     <string name="traceroute_diff">越点数：去程 %1$d，回程 %2$d</string>
@@ -1116,7 +1117,6 @@
     <string name="tx_power_dbm">发送强度</string>
     <string name="type">类型</string>
     <string name="type_a_message">输入一条消息</string>
-    <string name="udp_enabled">启用</string>
     <!-- UNKNOWN -->
     <string name="unknown">未知</string>
     <string name="unknown_age">未知时长</string>
