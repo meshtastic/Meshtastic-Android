@@ -253,25 +253,25 @@ With multiple developers:
 
 **Prerequisites**: Phases 3–5 complete (card scaffold exists, toggles work, chip sizing works).
 
-- [ ] NL-T048 [P] **Remove node-color card background tinting** from both `NodeItemCompact` (`core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/component/NodeItemCompact.kt`) and `NodeItem` (`core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/component/NodeItem.kt`). Replace `CardDefaults.cardColors().copy(containerColor = Color(it).copy(alpha))` with `CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)`. Remove `ACTIVE_ALPHA` / `INACTIVE_ALPHA` constants. (FR-029)
+- [x] NL-T048 [P] **Remove node-color card background tinting** from both `NodeItemCompact` (`core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/component/NodeItemCompact.kt`) and `NodeItem` (`core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/component/NodeItem.kt`). Replace `CardDefaults.cardColors().copy(containerColor = Color(it).copy(alpha))` with `CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)`. Remove `ACTIVE_ALPHA` / `INACTIVE_ALPHA` constants. (FR-029)
 
-- [ ] NL-T049 [P] **Add node-color `BorderStroke`** to both card composables. Border uses `BorderStroke(1.5.dp, Color(node.colors.second).copy(alpha = if (isActive) 0.5f else 0.2f))`. Pass to `Card(border = ...)`. (FR-030)
+- [x] NL-T049 [P] **Add node-color `BorderStroke`** to both card composables. Border uses `BorderStroke(1.5.dp, Color(node.colors.second).copy(alpha = if (isActive) 0.5f else 0.2f))`. Pass to `Card(border = ...)`. (FR-030)
 
-- [ ] NL-T050 **Implement packet-received glow animation** in a shared `NodeCardGlow` composable or modifier extension in `core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/component/`. Uses `remember { Animatable(0f) }` + `LaunchedEffect(node.lastHeard)` to trigger bloom (`fastSpatialSpec`) → decay (`slowSpatialSpec`). Applies `Modifier.shadow(elevation = 8.dp * glowAlpha, shape = cardShape, ambientColor = nodeColor.copy(alpha = glowAlpha), spotColor = nodeColor.copy(alpha = glowAlpha))`. Integrate into both `NodeItem` and `NodeItemCompact` outer Card modifier. (FR-031, NFR-005)
+- [x] NL-T050 **Implement packet-received glow animation** in a shared `NodeCardGlow` composable or modifier extension in `core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/component/`. Uses `remember { Animatable(0f) }` + `LaunchedEffect(node.lastHeard)` to trigger bloom (`fastSpatialSpec`) → decay (`slowSpatialSpec`). Applies `Modifier.shadow(elevation = 8.dp * glowAlpha, shape = cardShape, ambientColor = nodeColor.copy(alpha = glowAlpha), spotColor = nodeColor.copy(alpha = glowAlpha))`. Integrate into both `NodeItem` and `NodeItemCompact` outer Card modifier. (FR-031, NFR-005)
 
-- [ ] NL-T051 [P] **Replace alpha-based text emphasis with M3 color roles** across both layouts. Audit and replace all instances of `contentColor.copy(alpha = 0.7f)`, `contentColor.copy(alpha = 0.55f)`, `contentColor.copy(alpha = 0.65f)` etc. with:
+- [x] NL-T051 [P] **Replace alpha-based text emphasis with M3 color roles** across both layouts. Audit and replace all instances of `contentColor.copy(alpha = 0.7f)`, `contentColor.copy(alpha = 0.55f)`, `contentColor.copy(alpha = 0.65f)` etc. with:
   - Primary text → `MaterialTheme.colorScheme.onSurface`
   - Secondary text/values → `MaterialTheme.colorScheme.onSurfaceVariant`
   - Tertiary/metadata → `MaterialTheme.colorScheme.outline`
   (FR-032)
 
-- [ ] NL-T052 **Restore two-column layout in compact mode** (regression fix). During Phase 4–5 iteration, the compact layout was refactored to inline NodeChip into the name row. Restructure back to `Row { Column1(chip + battery), Column2(weight=1f, rows) }` per spec FR-009. Battery moves from health row to below chip in Column 1. Content rows span Column 2 only. Verify adaptive chip sizing (NL-T032) still applies after restructure. (FR-009, FR-011)
+- [x] NL-T052 **Restore two-column layout in compact mode** (regression fix). During Phase 4–5 iteration, the compact layout was refactored to inline NodeChip into the name row. Restructure back to `Row { Column1(chip + battery), Column2(weight=1f, rows) }` per spec FR-009. Battery moves from health row to below chip in Column 1. Content rows span Column 2 only. Verify adaptive chip sizing (NL-T032) still applies after restructure. (FR-009, FR-011)
 
-- [ ] NL-T053 [P] **Implement bearing as rotated MapCompass icon**. Use `MeshtasticIcons.MapCompass` with `Modifier.rotate(bearingDegrees.toFloat())` for direction indicator in both compact (Row 3, after distance) and complete (battery/position row). Bearing is null if either node lacks valid position. (FR-034)
+- [x] NL-T053 [P] **Implement bearing as rotated MapCompass icon**. Use `MeshtasticIcons.MapCompass` with `Modifier.rotate(bearingDegrees.toFloat())` for direction indicator in both compact (Row 3, after distance) and complete (battery/position row). Bearing is null if either node lacks valid position. (FR-034)
 
-- [ ] NL-T054 [P] **Add `HorizontalDivider` before footer in Complete mode**. Use `HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))` between the metrics section and the footer (hw model + role + node ID). (Layout structure — Complete)
+- [x] NL-T054 [P] **Add `HorizontalDivider` before footer in Complete mode**. Use `HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))` between the metrics section and the footer (hw model + role + node ID). (Layout structure — Complete)
 
-- [ ] NL-T055 **Performance validation of glow animation**. Benchmark scrolling with 200+ nodes in `LazyColumn` while glow animations fire. Verify no frame drops (use `FrameMetrics` or Compose `recomposition highlighter`). If degraded: move shadow to `graphicsLayer` draw phase, or debounce rapid `lastHeard` updates. (NFR-005)
+- [x] NL-T055 **Performance validation of glow animation**. Benchmark scrolling with 200+ nodes in `LazyColumn` while glow animations fire. Verify no frame drops (use `FrameMetrics` or Compose `recomposition highlighter`). If degraded: move shadow to `graphicsLayer` draw phase, or debounce rapid `lastHeard` updates. (NFR-005)
 
 **Dependencies**: NL-T048 and NL-T049 are parallel (both modify card colors/border independently). NL-T050 depends on NL-T048 (needs neutral background to see glow). NL-T051 is independent (text colors, no card dependency). NL-T052 depends on NL-T048 (layout restructure after color change). NL-T053 depends on NL-T052 (chip sizing needs two-column layout). NL-T054 is independent. NL-T055 depends on NL-T050 (tests the glow).
 

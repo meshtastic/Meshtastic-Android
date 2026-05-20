@@ -18,6 +18,7 @@
 
 package org.meshtastic.core.ui.component
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -30,7 +31,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -84,8 +84,8 @@ import org.meshtastic.core.ui.icon.role
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 import org.meshtastic.proto.Config
 
-private const val ACTIVE_ALPHA = 0.5f
-private const val INACTIVE_ALPHA = 0.2f
+private const val ACTIVE_BORDER_ALPHA = 0.5f
+private const val INACTIVE_BORDER_ALPHA = 0.2f
 private const val COMPACT_ICON_SIZE_DP = 16
 
 @Composable
@@ -128,19 +128,11 @@ fun NodeItemCompact(
             }
         }
 
-    var contentColor = MaterialTheme.colorScheme.onSurface
-    val cardColors =
-        if (isThisNode) {
-            thisNode?.colors?.second
-        } else {
-            thatNode.colors.second
-        }
-            ?.let {
-                val alpha = if (isActive) ACTIVE_ALPHA else INACTIVE_ALPHA
-                val containerColor = Color(it).copy(alpha = alpha)
-                contentColor = contentColorFor(containerColor)
-                CardDefaults.cardColors().copy(containerColor = containerColor, contentColor = contentColor)
-            } ?: CardDefaults.cardColors()
+    val contentColor = MaterialTheme.colorScheme.onSurface
+    val cardColors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    val borderColor = (if (isThisNode) thisNode?.colors?.second else thatNode.colors.second)
+        ?.let { Color(it).copy(alpha = if (isActive) ACTIVE_BORDER_ALPHA else INACTIVE_BORDER_ALPHA) }
+    val cardBorder = borderColor?.let { BorderStroke(1.5.dp, it) }
 
     val style = if (thatNode.isUnknownUser) FontStyle.Italic else FontStyle.Normal
 
@@ -164,15 +156,22 @@ fun NodeItemCompact(
             )
         }
 
+    val nodeColor = (if (isThisNode) thisNode?.colors?.second else thatNode.colors.second)
+        ?.let { Color(it) } ?: Color.Transparent
+
     Card(
         modifier =
-        modifier.fillMaxWidth().semantics(mergeDescendants = true) {
-            contentDescription = nodeDescription
-            role = Role.Button
-        },
+        modifier
+            .nodeCardGlow(lastHeard = thatNode.lastHeard, nodeColor = nodeColor)
+            .fillMaxWidth()
+            .semantics(mergeDescendants = true) {
+                contentDescription = nodeDescription
+                role = Role.Button
+            },
         colors = cardColors,
+        border = cardBorder,
     ) {
-        Column(
+        Row(
             modifier =
             Modifier.combinedClickable(
                 onClickLabel = stringResource(Res.string.node_list_click_label),
@@ -182,46 +181,71 @@ fun NodeItemCompact(
             )
                 .fillMaxWidth()
                 .padding(horizontal = 12.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(2.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalAlignment = Alignment.Top,
         ) {
-            // Row 1: Identity — chip + name + PKC + favorite
-            CompactNameRow(
-                thatNode = thatNode,
-                longName = longName,
-                style = style,
-                isIgnored = isIgnored,
-                isFavorite = isFavorite,
-                unmessageable = unmessageable,
-            )
-
-            // Row 2: Glanceable health — online + last heard + battery + distance + signal
-            CompactHealthRow(
-                thatNode = thatNode,
-                isThisNode = isThisNode,
-                distance = distance,
-                bearingDegrees = bearingDegrees,
-                showPower = showPower,
-                showLastHeard = showLastHeard,
-                lastHeardIsRelative = lastHeardIsRelative,
-                showLocation = showLocation,
-                showSignal = showSignal,
-                contentColor = contentColor,
-            )
-
-            // Row 3: Environment metrics — temp · humidity · pressure (icon + value only)
-            if (showTelemetry) {
-                CompactMetricsRow(thatNode = thatNode, tempInFahrenheit = tempInFahrenheit, contentColor = contentColor)
+            // Column 1: Chip + Battery (fixed width)
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                NodeChip(node = thatNode)
+                if (showPower && thatNode.batteryLevel != null) {
+                    MaterialBatteryInfo(
+                        level = thatNode.batteryLevel ?: 0,
+                        voltage = thatNode.voltage ?: 0f,
+                        contentColor = contentColor,
+                    )
+                }
             }
 
-            // Row 4: Tertiary metadata — hardware · role · hops · channel
-            CompactFooterRow(
-                thatNode = thatNode,
-                isThisNode = isThisNode,
-                showHops = showHops,
-                showChannel = showChannel,
-                showRole = showRole,
-                contentColor = contentColor,
-            )
+            // Column 2: Content rows (fills remaining width)
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+            ) {
+                // Row 1: Identity — name + PKC + favorite
+                CompactNameRow(
+                    thatNode = thatNode,
+                    longName = longName,
+                    style = style,
+                    isIgnored = isIgnored,
+                    isFavorite = isFavorite,
+                    unmessageable = unmessageable,
+                )
+
+                // Row 2: Glanceable health — online + last heard + distance + signal
+                CompactHealthRow(
+                    thatNode = thatNode,
+                    isThisNode = isThisNode,
+                    distance = distance,
+                    bearingDegrees = bearingDegrees,
+                    showPower = showPower,
+                    showLastHeard = showLastHeard,
+                    lastHeardIsRelative = lastHeardIsRelative,
+                    showLocation = showLocation,
+                    showSignal = showSignal,
+                    contentColor = contentColor,
+                )
+
+                // Row 3: Environment metrics — temp · humidity · pressure (icon + value only)
+                if (showTelemetry) {
+                    CompactMetricsRow(
+                        thatNode = thatNode,
+                        tempInFahrenheit = tempInFahrenheit,
+                        contentColor = contentColor,
+                    )
+                }
+
+                // Row 4: Tertiary metadata — hardware · role · hops · channel
+                CompactFooterRow(
+                    thatNode = thatNode,
+                    isThisNode = isThisNode,
+                    showHops = showHops,
+                    showChannel = showChannel,
+                    showRole = showRole,
+                )
+            }
         }
     }
 }
@@ -240,7 +264,6 @@ private fun CompactNameRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        NodeChip(node = thatNode)
         NodeKeyStatusIcon(
             hasPKC = thatNode.hasPKC,
             mismatchKey = thatNode.mismatchKey,
@@ -397,9 +420,8 @@ private fun CompactFooterRow(
     showHops: Boolean,
     showChannel: Boolean,
     showRole: Boolean,
-    contentColor: Color,
 ) {
-    val tertiaryColor = contentColor.copy(alpha = 0.7f)
+    val tertiaryColor = MaterialTheme.colorScheme.outline
     val segments =
         buildList<@Composable () -> Unit> {
             if (showRole) {

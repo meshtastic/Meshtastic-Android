@@ -18,6 +18,7 @@
 
 package org.meshtastic.core.ui.component
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,10 +32,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -76,8 +77,8 @@ import org.meshtastic.core.ui.icon.Notes
 import org.meshtastic.core.ui.icon.Success
 import org.meshtastic.proto.Config
 
-private const val ACTIVE_ALPHA = 0.5f
-private const val INACTIVE_ALPHA = 0.2f
+private const val ACTIVE_BORDER_ALPHA = 0.5f
+private const val INACTIVE_BORDER_ALPHA = 0.2f
 private const val GRID_COLUMNS = 3
 
 @Composable
@@ -109,19 +110,11 @@ fun NodeItem(
         remember(thisNode, thatNode) { thisNode?.distance(thatNode)?.takeIf { it > 0 }?.toDistanceString(system) }
     val bearingDegrees = remember(thisNode, thatNode) { thisNode?.bearing(thatNode) }
 
-    var contentColor = MaterialTheme.colorScheme.onSurface
-    val cardColors =
-        if (isThisNode) {
-            thisNode?.colors?.second
-        } else {
-            thatNode.colors.second
-        }
-            ?.let {
-                val alpha = if (isActive) ACTIVE_ALPHA else INACTIVE_ALPHA
-                val containerColor = Color(it).copy(alpha = alpha)
-                contentColor = contentColorFor(containerColor)
-                CardDefaults.cardColors().copy(containerColor = containerColor, contentColor = contentColor)
-            } ?: (CardDefaults.cardColors())
+    val contentColor = MaterialTheme.colorScheme.onSurface
+    val cardColors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    val borderColor = (if (isThisNode) thisNode?.colors?.second else thatNode.colors.second)
+        ?.let { Color(it).copy(alpha = if (isActive) ACTIVE_BORDER_ALPHA else INACTIVE_BORDER_ALPHA) }
+    val cardBorder = borderColor?.let { BorderStroke(1.5.dp, it) }
 
     val style =
         if (thatNode.isUnknownUser) {
@@ -157,13 +150,20 @@ fun NodeItem(
             )
         }
 
+    val nodeColor = (if (isThisNode) thisNode?.colors?.second else thatNode.colors.second)
+        ?.let { Color(it) } ?: Color.Transparent
+
     Card(
         modifier =
-        modifier.fillMaxWidth().semantics(mergeDescendants = true) {
-            contentDescription = nodeDescription
-            role = Role.Button
-        },
+        modifier
+            .nodeCardGlow(lastHeard = thatNode.lastHeard, nodeColor = nodeColor)
+            .fillMaxWidth()
+            .semantics(mergeDescendants = true) {
+                contentDescription = nodeDescription
+                role = Role.Button
+            },
         colors = cardColors,
+        border = cardBorder,
     ) {
         Column(
             modifier =
@@ -201,7 +201,7 @@ fun NodeItem(
                         imageVector = MeshtasticIcons.Notes,
                         contentDescription = null,
                         modifier = Modifier.size(16.dp),
-                        tint = contentColor.copy(alpha = 0.7f),
+                        tint = MaterialTheme.colorScheme.outline,
                     )
                     Text(
                         text = status,
@@ -229,6 +229,8 @@ fun NodeItem(
                     MetricsGrid(sensorItems)
                 }
             }
+
+            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
 
             NodeItemFooter(thatNode = thatNode, contentColor = contentColor)
         }
