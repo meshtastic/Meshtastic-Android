@@ -45,5 +45,3 @@ plugins {
 dependencies {
     dokkaPlugin(libs.dokka.android.documentation.plugin)
 }
-
-apply(from = "gradle/flatpak.gradle.kts")
