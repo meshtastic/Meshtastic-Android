@@ -9,8 +9,8 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
-* ci: reduce flatpak source generation thrash (#5513) by James Rich (@jamesarich) in [`3f64b5a0e`](https://github.com/meshtastic/Meshtastic-Android/commit/3f64b5a0ecf7cc9ed6e81068ab3067033a7f74f4)
-* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5511) by James Rich (@jamesarich) in [`1dcb7b9d1`](https://github.com/meshtastic/Meshtastic-Android/commit/1dcb7b9d1a29fcdfad214fe74360130c597ee989)
+* fix: prevent node details hang when device hardware API is unreachable (#5514) by James Rich (@jamesarich) in [`877909fa9`](https://github.com/meshtastic/Meshtastic-Android/commit/877909fa94b55758be9dd91e2bd11e160b3822ed)
+* chore(deps): update ruby to v4.0.5 (#5515) by renovate[bot] (@renovate[bot]) in [`d37e08fcc`](https://github.com/meshtastic/Meshtastic-Android/commit/d37e08fccdabd3f673e3eccf90ab1538f02fe867)
 
 ### Internal (v2.7.14-internal.93)
 Changes since [`v2.7.14-open.9`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14-open.9):
@@ -59,6 +59,9 @@ Changes since [`v2.7.14-open.9`](https://github.com/meshtastic/Meshtastic-Androi
 * docs: update CHANGELOG.md (#5508) by github-actions[bot] (@github-actions[bot]) in [`6fb3776e0`](https://github.com/meshtastic/Meshtastic-Android/commit/6fb3776e0c2588392111fb4da89780f8bf597eb5)
 * build: reorder Maven repos to reduce flatpak generator 404s (#5509) by James Rich (@jamesarich) in [`930dee09e`](https://github.com/meshtastic/Meshtastic-Android/commit/930dee09e5b3f23d02d0dc5aae3eeea61974bada)
 * chore(deps): migrate takpacket-sdk to Maven Central coordinates (#5512) by James Rich (@jamesarich) in [`5c3b22584`](https://github.com/meshtastic/Meshtastic-Android/commit/5c3b22584e4d5d71c6813842033bd2ae17b0041b)
+* ci: reduce flatpak source generation thrash (#5513) by James Rich (@jamesarich) in [`3f64b5a0e`](https://github.com/meshtastic/Meshtastic-Android/commit/3f64b5a0ecf7cc9ed6e81068ab3067033a7f74f4)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5511) by James Rich (@jamesarich) in [`1dcb7b9d1`](https://github.com/meshtastic/Meshtastic-Android/commit/1dcb7b9d1a29fcdfad214fe74360130c597ee989)
+* docs: update CHANGELOG.md (#5510) by github-actions[bot] (@github-actions[bot]) in [`0803dd3ae`](https://github.com/meshtastic/Meshtastic-Android/commit/0803dd3ae8d6970ae8218dcfd6d0bb9b63866da9)
 
 ### Open Beta (v2.7.14-open.9)
 Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.13):
