@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import org.koin.core.annotation.Single
 import org.meshtastic.core.database.entity.FirmwareRelease
+import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
@@ -113,7 +114,18 @@ constructor(
                 IdentityGroup(ourNode, myInfo, profile)
             }
 
-        // 3. Metadata & Request Timestamps
+        // 3. Device Hardware — non-blocking Flow derived from stable (hwModel, pioEnv) key.
+        val hardwareFlow: Flow<DeviceHardware?> =
+            combine(nodeFlow, identityFlow) { node, identity ->
+                val isLocal = node.num == identity.ourNode?.num
+                val pioEnv = if (isLocal) identity.myInfo?.pioEnv else null
+                HardwareKey(node.user.hw_model.value, pioEnv)
+            }
+                .distinctUntilChanged()
+                .flatMapLatest { key -> deviceHardwareRepository.observeDeviceHardware(key.hwModel, key.target) }
+                .onStart { emit(null) }
+
+        // 4. Metadata & Request Timestamps
         val metadataFlow =
             combine(
                 meshLogRepository
@@ -129,7 +141,7 @@ constructor(
                 MetadataGroup(edition = edition, stable = stable, alpha = alpha, trTime = trTime, niTime = niTime)
             }
 
-        // 4. Requests History (we still query request logs by the target nodeId)
+        // 5. Requests History (we still query request logs by the target nodeId)
         val requestsFlow =
             combine(
                 meshLogRepository.getRequestLogs(nodeId, PortNum.TRACEROUTE_APP).onStart { emit(emptyList()) },
@@ -139,17 +151,25 @@ constructor(
             }
 
         // Assemble final UI state
-        return combine(nodeFlow, metricsLogsFlow, identityFlow, metadataFlow, requestsFlow) {
-                node,
-                logs,
-                identity,
-                metadata,
-                requests,
-            ->
+        return combine(
+            nodeFlow,
+            metricsLogsFlow,
+            identityFlow,
+            metadataFlow,
+            requestsFlow,
+            hardwareFlow,
+        ) { args: Array<Any?> ->
+            @Suppress("UNCHECKED_CAST")
+            val node = args[NODE_INDEX] as Node
+            val logs = args[LOGS_INDEX] as LogsGroup
+            val identity = args[IDENTITY_INDEX] as IdentityGroup
+            val metadata = args[METADATA_INDEX] as MetadataGroup
+            val requests = args[REQUESTS_INDEX] as Pair<List<MeshLog>, List<MeshLog>>
+            val hw = args[HARDWARE_INDEX] as DeviceHardware?
+
             val (trReqs, niReqs) = requests
             val isLocal = node.num == identity.ourNode?.num
             val pioEnv = if (isLocal) identity.myInfo?.pioEnv else null
-            val hw = deviceHardwareRepository.getDeviceHardwareByModel(node.user.hw_model.value, pioEnv).getOrNull()
 
             val moduleConfig = identity.profile.module_config
             val displayUnits = identity.profile.config?.display?.units ?: Config.DisplayConfig.DisplayUnits.METRIC
@@ -215,6 +235,8 @@ constructor(
         }
     }
 
+    private data class HardwareKey(val hwModel: Int, val target: String?)
+
     private data class LogsGroup(
         val telemetry: List<Telemetry>,
         val packets: List<MeshPacket>,
@@ -233,4 +255,13 @@ constructor(
         val trTime: Long?,
         val niTime: Long?,
     )
+
+    private companion object {
+        const val NODE_INDEX = 0
+        const val LOGS_INDEX = 1
+        const val IDENTITY_INDEX = 2
+        const val METADATA_INDEX = 3
+        const val REQUESTS_INDEX = 4
+        const val HARDWARE_INDEX = 5
+    }
 }
