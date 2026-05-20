@@ -49,5 +49,5 @@ You are an expert Android/KMP engineer. Maintain architectural boundaries, use M
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan
-at `specs/20260513-160000-m3-expressive-adoption/plan.md`
+at `specs/20260520-153428-remove-admin-channel-toggle/plan.md`
 <!-- SPECKIT END -->
