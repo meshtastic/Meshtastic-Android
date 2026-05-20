@@ -1207,6 +1207,7 @@ timeout
 timestamp
 tls_enabled
 toggle_my_position
+trace_route
 ### TRACEROUTE ###
 traceroute
 traceroute_diff

@@ -87,6 +87,7 @@ fun NodeListScreen(
     navigateToNodeDetails: (Int) -> Unit,
     viewModel: NodeListViewModel,
     onNavigateToChannels: () -> Unit = {},
+    navigateToMessages: (String) -> Unit = {},
     scrollToTopEvents: Flow<ScrollToTopEvent>? = null,
     activeNodeId: Int? = null,
     onHandleDeepLink: (org.meshtastic.core.common.util.CommonUri, onInvalid: () -> Unit) -> Unit = { _, _ -> },
@@ -215,8 +216,13 @@ fun NodeListScreen(
                                 expanded = expanded,
                                 node = node,
                                 onFavorite = { viewModel.favoriteNode(node) },
-                                onIgnore = { viewModel.ignoreNode(node) },
                                 onMute = { viewModel.muteNode(node) },
+                                onMessage = {
+                                    val route = viewModel.getDirectMessageRoute(node)
+                                    navigateToMessages(route)
+                                },
+                                onTraceRoute = { viewModel.traceRoute(node) },
+                                onIgnore = { viewModel.ignoreNode(node) },
                                 onRemove = { viewModel.removeNode(node) },
                                 onDismiss = { expanded = false },
                             )
