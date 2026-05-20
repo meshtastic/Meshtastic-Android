@@ -3,6 +3,13 @@
 # Do NOT edit or remove previous entries — stale state claims cause agent confusion.
 # Format: ## YYYY-MM-DD — <summary>
 
+## 2026-05-20 — Rebased Flatpak Optimization Branch onto upstream/main
+- Successfully rebased the working branch `fix/flatpak-sources-automation` onto the latest fetched `origin/main` (upstream).
+- Resolved potential rebase history divergence by preserving only our unique conflict-bypassing override commit and skipping squash-merged commits.
+- Updated git submodules to track the new upstream base commit.
+- Re-ran all baseline quality and static analysis checks (`spotlessCheck`, `detekt`) and confirmed 100% success.
+- Validated end-to-end correctness by running `:combineFlatpakSources` to verify complete and correct generation of the consolidated `flatpak-sources.json` manifest with 2,339 unique resources.
+
 ## 2026-05-20 — Overhauled and Bulletproofed Flatpak Source Generation
 - Overhauled and streamlined `build-logic/convention/build.gradle.kts` to dynamically query and resolve all 25+ Version Catalog plugin marker coordinates in a type-safe dynamic loop.
 - Replaced the hardcoded embedded Gradle Kotlin compiler version with dynamic standard library detection: `KotlinVersion.CURRENT.toString()`.
