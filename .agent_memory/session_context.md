@@ -3,6 +3,12 @@
 # Do NOT edit or remove previous entries — stale state claims cause agent confusion.
 # Format: ## YYYY-MM-DD — <summary>
 
+## 2026-05-20 — Resolved Flatpak jitpack.io dependency download 404s in sandboxed offline builds
+- Modified `GenerateFlatpakSourcesTask` in `gradle/flatpak.gradle.kts` to dynamically detect dependency groups starting with `com.github.` (which are hosted on JitPack).
+- Configured the generation of `primaryUrl` for these dependencies to resolve directly from `https://jitpack.io` and created custom high-availability fallback lists.
+- Verified that compiling the desktopApp and running the flatpak generator task (`./gradlew :desktopApp:assemble :generateFlatpakSourcesFromCache --no-configuration-cache`) successfully produces a valid 10MB `flatpak-sources.json` containing correctly mapped JitPack URLs.
+- Ran quality and validation checks: `./gradlew spotlessCheck detekt` (100% SUCCESSFUL with zero issues).
+
 ## 2026-05-20 — Replaced standalone translations landing page with dynamic global header language switcher dropdown
 - Deleted redundant standalone page `docs/en/translations.md` and updated `docs/README.md` to reflect layout change.
 - Completely re-engineered `docs/_includes/language_switcher.html` to:
