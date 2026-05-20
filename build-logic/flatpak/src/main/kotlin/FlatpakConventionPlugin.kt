@@ -14,25 +14,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.flatpak
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.kotlin.dsl.register
+import org.meshtastic.flatpak.GenerateFlatpakSourcesTask
+import java.io.File
 
-class FlatpakPlugin : Plugin<Project> {
+class FlatpakConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
-            tasks.register<GenerateFlatpakSourcesTask>("generateFlatpakSourcesFromCache") {
+            tasks.register("generateFlatpakSourcesFromCache", GenerateFlatpakSourcesTask::class.java) {
                 val customCachePath = providers.gradleProperty("flatpak.cache.dir").orNull
-                val defaultCachePath = java.io.File(gradle.gradleUserHomeDir, "caches/modules-2/files-2.1")
-
                 if (customCachePath != null) {
                     cacheDir.set(layout.projectDirectory.dir(customCachePath))
                 } else {
-                    cacheDir.set(defaultCachePath)
+                    cacheDir.set(
+                        layout.dir(providers.provider { File(gradle.gradleUserHomeDir, "caches/modules-2/files-2.1") }),
+                    )
                 }
-
                 outputFile.set(layout.projectDirectory.file("flatpak-sources.json"))
             }
         }
