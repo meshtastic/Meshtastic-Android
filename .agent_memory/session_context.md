@@ -3,6 +3,12 @@
 # Do NOT edit or remove previous entries — stale state claims cause agent confusion.
 # Format: ## YYYY-MM-DD — <summary>
 
+## 2026-05-20 — Fixed Jekyll documentation site build and deployment in CI
+- Created `docs/index.html` to automatically redirect root path requests (`/`) to the English directory (`/en/`).
+- Updated `.github/workflows/docs-deploy.yml` to compile the Jekyll root site using `--baseurl /${{ github.event.repository.name }}` and setup Ruby with version `4.0.4` to match project release workflow conventions.
+- Updated `.github/workflows/docs-release.yml` to compile both versioned and root Jekyll sites, assemble them into `build/final_site/` with Dokka HTML references, configure correct baseurls respectively, and setup Ruby with version `4.0.4`.
+- Verified that local Gradle docs tasks (`generateDocsBundle`, `validateDocsBundle`, `publishDocsSite`) compile successfully and the redirect file is correctly populated in the output.
+
 ## 2026-05-20 — Optimized slow Flatpak CI jobs
 - Restrained flatpakGradleGenerator to target only the runtimeClasspath configuration in desktopApp and build-logic:convention modules.
 - Updated release.yml and reusable-check.yml to invoke only targeted tasks (:desktopApp:flatpakGradleGenerator and :build-logic:convention:flatpakGradleGenerator) instead of running the task on the root and all subprojects.
