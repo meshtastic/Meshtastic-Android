@@ -11,6 +11,8 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 * fix: prevent node details hang when device hardware API is unreachable (#5514) by James Rich (@jamesarich) in [`877909fa9`](https://github.com/meshtastic/Meshtastic-Android/commit/877909fa94b55758be9dd91e2bd11e160b3822ed)
 * chore(deps): update ruby to v4.0.5 (#5515) by renovate[bot] (@renovate[bot]) in [`d37e08fcc`](https://github.com/meshtastic/Meshtastic-Android/commit/d37e08fccdabd3f673e3eccf90ab1538f02fe867)
+* docs: update CHANGELOG.md (#5516) by github-actions[bot] (@github-actions[bot]) in [`f5e5fb6da`](https://github.com/meshtastic/Meshtastic-Android/commit/f5e5fb6da63ee85e64dbbe19a519a5a3deccd408)
+* fix(ci): exclude kotlinNativeBundleConfiguration from flatpak source generation (#5517) by James Rich (@jamesarich) in [`e13a4359e`](https://github.com/meshtastic/Meshtastic-Android/commit/e13a4359e188bbf02087cdb6253ea2b70c8200ed)
 
 ### Internal (v2.7.14-internal.93)
 Changes since [`v2.7.14-open.9`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14-open.9):
