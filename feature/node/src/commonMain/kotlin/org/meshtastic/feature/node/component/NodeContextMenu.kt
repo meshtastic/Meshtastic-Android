@@ -154,12 +154,7 @@ private fun MessageMenuItem(node: Node, onMessage: () -> Unit, onDismiss: () -> 
             onDismiss()
         },
         enabled = !node.isIgnored,
-        leadingIcon = {
-            Icon(
-                imageVector = MeshtasticIcons.Message,
-                contentDescription = null,
-            )
-        },
+        leadingIcon = { Icon(imageVector = MeshtasticIcons.Message, contentDescription = null) },
         text = { Text(text = stringResource(Res.string.message)) },
     )
 }
@@ -172,12 +167,7 @@ private fun TraceRouteMenuItem(node: Node, onTraceRoute: () -> Unit, onDismiss: 
             onDismiss()
         },
         enabled = !node.isIgnored,
-        leadingIcon = {
-            Icon(
-                imageVector = MeshtasticIcons.Route,
-                contentDescription = null,
-            )
-        },
+        leadingIcon = { Icon(imageVector = MeshtasticIcons.Route, contentDescription = null) },
         text = { Text(text = stringResource(Res.string.trace_route)) },
     )
 }
