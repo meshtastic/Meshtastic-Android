@@ -97,7 +97,7 @@ foojay-resolver = "1.0.0"
 proguard-gradle = "7.7.0"
 savedstate-compose = "1.3.6"
 old-kotlin-transitive = "2.2.21"
-old-kotlin-stdlib-jdk8 = "1.9.20"
+old-kotlin-stdlib-jdk8 = "1.9.25"
 old-kotlinx-serialization = "1.9.0"
 old-guava = "32.1.3-jre"
 
