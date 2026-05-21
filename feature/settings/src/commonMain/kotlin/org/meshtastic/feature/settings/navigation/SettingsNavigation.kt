@@ -20,7 +20,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.navigation3.runtime.EntryProviderScope
@@ -80,7 +79,7 @@ fun getRadioConfigViewModel(backStack: NavBackStack<NavKey>, destNumOverride: In
                 backStack.lastOrNull { it is SettingsRoute.Settings }?.let { (it as SettingsRoute.Settings).destNum }
             }
     return koinViewModel<RadioConfigViewModel>(key = destNum?.toString()) {
-        parametersOf(SavedStateHandle(mapOf("destNum" to destNum)))
+        parametersOf(destNum)
     }
 }
 
