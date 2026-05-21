@@ -2,7 +2,7 @@
 title: Nodes
 parent: User Guide
 nav_order: 4
-last_updated: 2026-05-13
+last_updated: 2026-05-20
 description: Browse, filter, and sort mesh nodes — view details, signal quality, roles, and quick actions.
 aliases:
   - node-list
@@ -84,11 +84,12 @@ Nodes display encryption status icons next to their name:
 From the node list, you can:
 - **Tap** a node to view its detail page
 - **Long-press** for quick actions:
+  - Mark/remove favorite
+  - Mute/unmute notifications
   - Send a direct message
-  - View on map
-  - Request position
-  - Mark as favorite
-  - Traceroute
+  - Trace route
+  - Ignore/unignore
+  - Remove node
 
 ## Filtering & Sorting
 

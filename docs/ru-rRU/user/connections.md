@@ -77,7 +77,7 @@ Some Meshtastic radios support WiFi connectivity, allowing TCP-based connections
 ### Настройки
 
 1. Connect your radio to a WiFi network via the radio's web interface or settings.
-2. In the app, go to **Connections → TCP**.
+2. In the app, go to **Connect → TCP**.
 3. Enter the radio's IP address and port (default: 4403).
 4. Tap **Connect**.
 
@@ -99,9 +99,9 @@ A successful connection is confirmed with a status indicator:
 
 ## Reconnection Behavior
 
-The app reconnects to the **last selected device** on startup. You can manually switch transports from the connections screen at any time.
+The app reconnects to the **last selected device** on startup. You can switch transports from the Connect screen at any time.
 
-To disconnect from a radio, use the disconnect button on the connections screen:
+To disconnect from a radio, tap the disconnect button on the Connect screen:
 
 ![Disconnect from radio](../../assets/screenshots/connections_disconnect.png)
 

@@ -148,7 +148,7 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 | Öffentlicher Schlüssel                          | Your node's public key (read-only)                      |
 | Administrativer Schlüssel                       | Key for remote administration                                              |
 | Privater Schlüssel                              | Your node's private key (handle securely)               |
-| Administrativer Kanal aktiviert                 | Allow admin commands via channel                                           |
+| ~~Admin Channel Enabled~~ | ⚠️ **Removed** — this toggle has been removed from the UI; admin channel behavior is now handled automatically |
 | Fehlersuchprotokolle (Debug) | Output live debug logging over serial/bluetooth                            |
 | Serial Enabled                                  | Enable serial console access (moved from Device Config) |
 | Verwalteter Modus                               | Restrict non-admin channel changes                                         |

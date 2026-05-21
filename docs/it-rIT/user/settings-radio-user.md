@@ -148,7 +148,7 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 | Chiave Pubblica                 | Your node's public key (read-only)                      |
 | Chiave Amministratore           | Key for remote administration                                              |
 | Chiave Privata                  | Your node's private key (handle securely)               |
-| Canale Amministratore Abilitato | Allow admin commands via channel                                           |
+| ~~Admin Channel Enabled~~ | ⚠️ **Removed** — this toggle has been removed from the UI; admin channel behavior is now handled automatically |
 | Log di debug                    | Output live debug logging over serial/bluetooth                            |
 | Serial Enabled                  | Enable serial console access (moved from Device Config) |
 | Modalità Gestita                | Restrict non-admin channel changes                                         |
