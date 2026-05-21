@@ -111,7 +111,7 @@ fun NodeItem(
     val bearingDegrees = remember(thisNode, thatNode) { thisNode?.bearing(thatNode) }
 
     val contentColor = MaterialTheme.colorScheme.onSurface
-    val cardColors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    val cardColors = CardDefaults.cardColors()
     val borderColor =
         (if (isThisNode) thisNode?.colors?.second else thatNode.colors.second)?.let {
             Color(it).copy(alpha = if (isActive) ACTIVE_BORDER_ALPHA else INACTIVE_BORDER_ALPHA)
