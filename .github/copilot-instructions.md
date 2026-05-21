@@ -1,6 +1,6 @@
 # Meshtastic Android — Copilot Instructions
 
-> **Full rules**: `AGENTS.md` is the source of truth. This file is a compact quick-reference for build commands and task naming. For architecture, conventions, and workflow details, consult `AGENTS.md` and the `.skills/` playbooks listed at the bottom.
+> **Full rules**: `AGENTS.md` is the source of truth. This file is a compact quick-reference for build commands and task naming. For architecture, conventions, and workflow details, consult `AGENTS.md` and the `.skills/` playbooks.
 
 ## Build, Test & Lint
 
@@ -46,33 +46,14 @@ KMP modules have different task names than pure-Android modules. Using the wrong
 
 ## Quick Reference
 
-- **Architecture**: KMP project (Android, Desktop, iOS). Business logic in `commonMain`; platform shells (`androidApp/`, `desktopApp/`) wire DI and host UI. See `AGENTS.md` and `.skills/kmp-architecture/`.
+- **Architecture**: KMP project (Android, Desktop, iOS). Business logic in `commonMain`; platform shells (`androidApp/`, `desktopApp/`) wire DI and host UI.
 - **Flavors**: `fdroid` (OSS) / `google` (Maps + DataDog). Only one installable at a time (different signing keys).
-- **Verify before push**: Run `./gradlew spotlessApply detekt assembleDebug test allTests`, then confirm CI with `gh pr checks <PR>`.
-- **Strings**: `stringResource(Res.string.key)` — run `python3 scripts/sort-strings.py` after adding strings.
-- **Icons**: `MeshtasticIcons` (from `core/ui/icon/`), not `material.icons.Icons`.
-- **Error handling**: `safeCatching {}` (not `runCatching {}`) in coroutine code.
-- **Dispatchers**: `org.meshtastic.core.common.util.ioDispatcher`, not `Dispatchers.IO`.
-- **Navigation**: `MeshtasticNavDisplay` + `NavigationBackHandler` (not Android `BackHandler`).
-- **Protos**: `core/proto/` is a read-only git submodule. Never modify proto files.
-- **Branches**: Must start with `feat/`, `fix/`, `chore/`, `docs/`, `build/`, `ci/`, `refactor/`, `test/`, `deps/`, or a numeric spec prefix. Always branch off `origin/main`.
+
+> See `AGENTS.md` for full rules (verify before push, branch naming, protos, coding conventions).
+> Contextual `.github/instructions/` files enforce conventions scoped to relevant source sets.
 
 <!-- SPECKIT START -->
-## Active Plan
-
-- **Feature**: Reorder Bottom Navigation Tab Labels
-- **Plan**: `specs/20260520-153412-nav-tab-labels/plan.md`
-- **Branch**: `jamesarich/issue-5543-alignment-reorder-bottom-navigation-tab-91d55d`
+For additional context about technologies to be used, project structure,
+shell commands, and other important information, read the current plan
 <!-- SPECKIT END -->
 
-## Deeper Guidance
-
-Consult `.skills/` for detailed playbooks:
-- `.skills/project-overview/` — Full codebase map and bootstrap
-- `.skills/kmp-architecture/` — Source-set rules, expect/actual
-- `.skills/compose-ui/` — Adaptive UI, string resources
-- `.skills/navigation-and-di/` — Nav 3 & Koin patterns
-- `.skills/testing-ci/` — CI architecture, verification matrix
-- `.skills/implement-feature/` — Feature development workflow
-- `.skills/code-review/` — PR hygiene checklist
-- `.skills/speckit/` — Spec Kit SDD workflow, slash commands, constitution
