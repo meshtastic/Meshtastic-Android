@@ -50,5 +50,6 @@ dependencies {
 
     testImplementation(libs.androidx.car.app.testing)
     testImplementation(libs.koin.test)
-    testImplementation(kotlin("test"))
+    testImplementation(kotlin("test-junit"))
+    testRuntimeOnly(libs.junit.vintage.engine)
 }
