@@ -71,7 +71,7 @@ internal fun DeviceHeroSection(
         modifier = modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        DeviceAvatar(bgColor, deviceHardware, size = 64)
+        DeviceAvatar(bgColor, deviceHardware, size = 80)
 
         Spacer(Modifier.width(16.dp))
 
