@@ -37,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.Role
@@ -135,7 +136,12 @@ fun NodeItemCompact(
         }
 
     val contentColor = MaterialTheme.colorScheme.onSurface
-    val cardColors = CardDefaults.cardColors()
+    val nodeColor =
+        (if (isThisNode) thisNode?.colors?.second else thatNode.colors.second)?.let { Color(it) } ?: Color.Transparent
+    val cardContainerColor = CardDefaults.cardColors().containerColor
+    val tintedContainerColor =
+        if (nodeColor == Color.Transparent) cardContainerColor else lerp(cardContainerColor, nodeColor, 0.05f)
+    val cardColors = CardDefaults.cardColors(containerColor = tintedContainerColor)
     val borderColor =
         (if (isThisNode) thisNode?.colors?.second else thatNode.colors.second)?.let {
             Color(it).copy(alpha = if (isActive) ACTIVE_BORDER_ALPHA else INACTIVE_BORDER_ALPHA)
@@ -163,9 +169,6 @@ fun NodeItemCompact(
                 lastHeardIsRelative = lastHeardIsRelative,
             )
         }
-
-    val nodeColor =
-        (if (isThisNode) thisNode?.colors?.second else thatNode.colors.second)?.let { Color(it) } ?: Color.Transparent
 
     Card(
         modifier =

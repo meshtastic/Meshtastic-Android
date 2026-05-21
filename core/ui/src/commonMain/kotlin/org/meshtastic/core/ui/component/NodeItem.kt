@@ -42,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
@@ -81,7 +82,7 @@ private const val INACTIVE_BORDER_ALPHA = 0.2f
 private const val GRID_COLUMNS = 3
 
 @Composable
-@Suppress("LongMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 fun NodeItem(
     thisNode: Node?,
     thatNode: Node,
@@ -111,7 +112,12 @@ fun NodeItem(
     val bearingDegrees = remember(thisNode, thatNode) { thisNode?.bearing(thatNode) }
 
     val contentColor = MaterialTheme.colorScheme.onSurface
-    val cardColors = CardDefaults.cardColors()
+    val nodeColor =
+        (if (isThisNode) thisNode?.colors?.second else thatNode.colors.second)?.let { Color(it) } ?: Color.Transparent
+    val cardContainerColor = CardDefaults.cardColors().containerColor
+    val tintedContainerColor =
+        if (nodeColor == Color.Transparent) cardContainerColor else lerp(cardContainerColor, nodeColor, 0.05f)
+    val cardColors = CardDefaults.cardColors(containerColor = tintedContainerColor)
     val borderColor =
         (if (isThisNode) thisNode?.colors?.second else thatNode.colors.second)?.let {
             Color(it).copy(alpha = if (isActive) ACTIVE_BORDER_ALPHA else INACTIVE_BORDER_ALPHA)
@@ -151,9 +157,6 @@ fun NodeItem(
                 strings = a11yStrings,
             )
         }
-
-    val nodeColor =
-        (if (isThisNode) thisNode?.colors?.second else thatNode.colors.second)?.let { Color(it) } ?: Color.Transparent
 
     Card(
         modifier =
