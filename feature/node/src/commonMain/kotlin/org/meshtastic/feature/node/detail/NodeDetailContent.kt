@@ -41,7 +41,6 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.loading
 import org.meshtastic.feature.node.component.AdministrationSection
 import org.meshtastic.feature.node.component.DeviceActions
-import org.meshtastic.feature.node.component.DeviceDetailsSection
 import org.meshtastic.feature.node.component.NodeDetailsSection
 import org.meshtastic.feature.node.component.NotesSection
 import org.meshtastic.feature.node.model.NodeDetailAction
@@ -103,7 +102,13 @@ fun NodeDetailList(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp),
     ) {
-        item { NodeDetailsSection(node) }
+        item {
+            NodeDetailsSection(
+                node = node,
+                deviceHardware = uiState.metricsState.deviceHardware,
+                reportedTarget = uiState.metricsState.reportedTarget,
+            )
+        }
         item {
             DeviceActions(
                 node = node,
@@ -116,9 +121,6 @@ fun NodeDetailList(
                 isFahrenheit = uiState.metricsState.isFahrenheit,
                 isLocal = uiState.metricsState.isLocal,
             )
-        }
-        if (uiState.metricsState.deviceHardware != null) {
-            item { DeviceDetailsSection(uiState.metricsState) }
         }
         item { NotesSection(node = node, onSaveNotes = onSaveNotes) }
         if (!uiState.metricsState.isManaged) {

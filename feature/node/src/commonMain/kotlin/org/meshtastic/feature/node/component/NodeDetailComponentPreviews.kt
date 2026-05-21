@@ -166,3 +166,20 @@ fun NodeDetailsSectionPreview() {
     val node = previewData.mickeyMouse
     AppTheme { Surface { NodeDetailsSection(node = node) } }
 }
+
+@PreviewLightDark
+@Composable
+private fun NodeDetailsSectionWithDeviceHeroPreview() {
+    val node = previewData.mickeyMouse
+    val deviceHardware =
+        org.meshtastic.core.model.DeviceHardware(
+            displayName = "Heltec V3",
+            activelySupported = true,
+            images = listOf("heltec-v3.svg", "heltec-v3-case.svg"),
+            hwModel = 43,
+            hwModelSlug = "heltecV3",
+        )
+    AppTheme {
+        Surface { NodeDetailsSection(node = node, deviceHardware = deviceHardware, reportedTarget = "heltec-v3") }
+    }
+}
