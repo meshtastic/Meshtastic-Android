@@ -2,7 +2,7 @@
 title: Ноды
 parent: Руководство пользователя
 nav_order: 4
-last_updated: 2026-05-13
+last_updated: 2026-05-20
 description: Просматривайте, фильтруйте и сортируйте ноды сети — просматривайте подробности, качество сигнала, роли и быстрые действия.
 aliases:
   - node-list
@@ -91,7 +91,7 @@ From the node list, you can:
   - Send a direct message
   - Trace route
   - Ignore/unignore
-  - Remove node
+  - Удалить ноду
 
 ## Filtering & Sorting
 

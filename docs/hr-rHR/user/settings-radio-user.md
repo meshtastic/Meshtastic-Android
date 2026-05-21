@@ -2,7 +2,7 @@
 title: Settings — Radio & User
 parent: User Guide
 nav_order: 7
-last_updated: 2026-05-13
+last_updated: 2026-05-20
 description: Configure your radio hardware, LoRa presets, user profile, position sharing, power management, and security.
 aliases:
   - settings
@@ -143,15 +143,15 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 
 ### Security Config
 
-| Setting               | Opis                                                                       |
-| --------------------- | -------------------------------------------------------------------------- |
-| Public Key            | Your node's public key (read-only)                      |
-| Admin Key             | Key for remote administration                                              |
-| Private Key           | Your node's private key (handle securely)               |
-| ~~Admin Channel Enabled~~ | ⚠️ **Removed** — this toggle has been removed from the UI; admin channel behavior is now handled automatically |
-| Debug Log             | Output live debug logging over serial/bluetooth                            |
-| Serial Enabled        | Enable serial console access (moved from Device Config) |
-| Managed Mode          | Restrict non-admin channel changes                                         |
+| Setting                   | Opis                                                                       |
+| ------------------------- | -------------------------------------------------------------------------- |
+| Public Key                | Your node's public key (read-only)                      |
+| Admin Key                 | Key for remote administration                                              |
+| Private Key               | Your node's private key (handle securely)               |
+| ~~Admin Channel Enabled~~ | ⚠️ Removed — now configured automatically when an admin key is set         |
+| Debug Log                 | Output live debug logging over serial/bluetooth                            |
+| Serial Enabled            | Enable serial console access (moved from Device Config) |
+| Managed Mode              | Restrict non-admin channel changes                                         |
 
 ![Password field](../../assets/screenshots/settings_password_field.png)
 

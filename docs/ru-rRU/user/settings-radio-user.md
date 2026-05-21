@@ -2,7 +2,7 @@
 title: Настройки - Радио и пользователь
 parent: Руководство пользователя
 nav_order: 7
-last_updated: 2026-05-13
+last_updated: 2026-05-20
 description: Настройте ваше радиоустройство, пресеты LoRa, пользовательский профиль, обмен местоположением, управление питанием и безопасность.
 aliases:
   - настройки
@@ -143,15 +143,15 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 
 ### Настройки безопасности
 
-| Настройка             | Описание                                                                   |
-| --------------------- | -------------------------------------------------------------------------- |
-| Публичный ключ        | Your node's public key (read-only)                      |
-| Ключ администратора   | Key for remote administration                                              |
-| Приватный ключ        | Your node's private key (handle securely)               |
-| ~~Admin Channel Enabled~~ | ⚠️ **Removed** — this toggle has been removed from the UI; admin channel behavior is now handled automatically |
-| Журнал отладки        | Output live debug logging over serial/bluetooth                            |
-| Serial Enabled        | Enable serial console access (moved from Device Config) |
-| Управляемый режим     | Restrict non-admin channel changes                                         |
+| Настройка                 | Описание                                                                   |
+| ------------------------- | -------------------------------------------------------------------------- |
+| Публичный ключ            | Your node's public key (read-only)                      |
+| Ключ администратора       | Key for remote administration                                              |
+| Приватный ключ            | Your node's private key (handle securely)               |
+| ~~Admin Channel Enabled~~ | ⚠️ Removed — now configured automatically when an admin key is set         |
+| Журнал отладки            | Output live debug logging over serial/bluetooth                            |
+| Serial Enabled            | Enable serial console access (moved from Device Config) |
+| Управляемый режим         | Restrict non-admin channel changes                                         |
 
 ![Password field](../../assets/screenshots/settings_password_field.png)
 
