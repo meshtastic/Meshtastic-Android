@@ -177,6 +177,9 @@ fun ScreenshotNodeItemCompleteOnlineRemote() {
     NodeItemCompleteOnlineRemotePreview()
 }
 
+@PreviewTest
+@PreviewLightDark
+@Composable
 fun ScreenshotNodeDetailContentMinimal() {
     NodeDetailContentMinimalPreview()
 }

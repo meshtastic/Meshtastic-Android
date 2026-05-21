@@ -90,9 +90,8 @@ import org.meshtastic.feature.node.component.NodeListHelp
 fun NodeListScreen(
     navigateToNodeDetails: (Int) -> Unit,
     viewModel: NodeListViewModel,
-    onNavigateToChannels: () -> Unit = {},
-    navigateToMessages: (String) -> Unit = {},
     modifier: Modifier = Modifier,
+    navigateToMessages: (String) -> Unit = {},
     scrollToTopEvents: Flow<ScrollToTopEvent>? = null,
     activeNodeId: Int? = null,
     onHandleDeepLink: (org.meshtastic.core.common.util.CommonUri, onInvalid: () -> Unit) -> Unit = { _, _ -> },
