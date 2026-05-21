@@ -20,13 +20,13 @@
 
 **Purpose**: Create the `feature/car` module structure, Gradle configuration, and version catalog entries
 
-- [ ] T001 Add Car App Library version catalog entries in gradle/libs.versions.toml (car-app version, 4 library entries)
-- [ ] T002 Add `include(":feature:car")` to settings.gradle.kts
-- [ ] T003 Create module build file at feature/car/build.gradle.kts with android-library, flavors, koin plugins, and all dependencies per contracts/manifest-declarations.md
-- [ ] T004 [P] Add `"googleImplementation"(projects.feature.car)` dependency in androidApp/build.gradle.kts
-- [ ] T005 [P] Create AndroidManifest.xml at feature/car/src/main/AndroidManifest.xml with CarAppService, MESSAGING category, and minCarApiLevel 8 meta-data
-- [ ] T006 [P] Create AAOS descriptor at feature/car/src/main/res/xml/automotive_app_desc.xml
-- [ ] T007 [P] Create car-specific strings file at feature/car/src/main/res/values/strings.xml with initial string resources
+- [x] T001 Add Car App Library version catalog entries in gradle/libs.versions.toml (car-app version, 4 library entries)
+- [x] T002 Add `include(":feature:car")` to settings.gradle.kts
+- [x] T003 Create module build file at feature/car/build.gradle.kts with android-library, flavors, koin plugins, and all dependencies per contracts/manifest-declarations.md
+- [x] T004 [P] Add `"googleImplementation"(projects.feature.car)` dependency in androidApp/build.gradle.kts
+- [x] T005 [P] Create AndroidManifest.xml at feature/car/src/main/AndroidManifest.xml with CarAppService, MESSAGING category, and minCarApiLevel 8 meta-data
+- [x] T006 [P] Create AAOS descriptor at feature/car/src/main/res/xml/automotive_app_desc.xml
+- [x] T007 [P] Create car-specific strings file at feature/car/src/main/res/values/strings.xml with initial string resources
 
 ---
 
@@ -36,14 +36,14 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T008 Create Koin DI module at feature/car/src/main/kotlin/org/meshtastic/feature/car/di/FeatureCarModule.kt declaring MeshtasticCarSession (factory), EmergencyHandler (singleton), CrashlyticsCarTagger (singleton)
-- [ ] T009 Register FeatureCarModule in androidApp google flavor Koin configuration (androidApp/src/google/ Koin app module graph)
-- [ ] T010 [P] Create CrashlyticsCarTagger utility at feature/car/src/main/kotlin/org/meshtastic/feature/car/util/CrashlyticsCarTagger.kt implementing car_session custom key set/clear
-- [ ] T011 [P] Create TemplateBuilders helper extensions at feature/car/src/main/kotlin/org/meshtastic/feature/car/util/TemplateBuilders.kt with reusable CAL template construction helpers
-- [ ] T012 Create MeshtasticCarAppService at feature/car/src/main/kotlin/org/meshtastic/feature/car/service/MeshtasticCarAppService.kt extending CarAppService, creating sessions via Koin
-- [ ] T013 Create MeshtasticCarSession at feature/car/src/main/kotlin/org/meshtastic/feature/car/service/MeshtasticCarSession.kt with onCreateScreen (returns HomeScreen), onNewIntent, onCarConfigurationChanged, Crashlytics tagging, 300ms invalidation debouncing
-- [ ] T014 Create presentation state models (CarSessionState, ConnectionStatus, MessagingUiState, ChannelUi, ConversationUi, NodeDashboardUiState, NodeUi, SignalQuality, TopologyHeader, EmergencyAlert) at feature/car/src/main/kotlin/org/meshtastic/feature/car/model/CarUiModels.kt
-- [ ] T015 Create HomeScreen (TabTemplate with Messages/Nodes tabs; Map tab placeholder deferred) at feature/car/src/main/kotlin/org/meshtastic/feature/car/screens/HomeScreen.kt
+- [x] T008 Create Koin DI module at feature/car/src/main/kotlin/org/meshtastic/feature/car/di/FeatureCarModule.kt declaring MeshtasticCarSession (factory), EmergencyHandler (singleton), CrashlyticsCarTagger (singleton)
+- [x] T009 Register FeatureCarModule in androidApp google flavor Koin configuration (androidApp/src/google/ Koin app module graph)
+- [x] T010 [P] Create CrashlyticsCarTagger utility at feature/car/src/main/kotlin/org/meshtastic/feature/car/util/CrashlyticsCarTagger.kt implementing car_session custom key set/clear
+- [x] T011 [P] Create TemplateBuilders helper extensions at feature/car/src/main/kotlin/org/meshtastic/feature/car/util/TemplateBuilders.kt with reusable CAL template construction helpers
+- [x] T012 Create MeshtasticCarAppService at feature/car/src/main/kotlin/org/meshtastic/feature/car/service/MeshtasticCarAppService.kt extending CarAppService, creating sessions via Koin
+- [x] T013 Create MeshtasticCarSession at feature/car/src/main/kotlin/org/meshtastic/feature/car/service/MeshtasticCarSession.kt with onCreateScreen (returns HomeScreen), onNewIntent, onCarConfigurationChanged, Crashlytics tagging, 300ms invalidation debouncing
+- [x] T014 Create presentation state models (CarSessionState, ConnectionStatus, MessagingUiState, ChannelUi, ConversationUi, NodeDashboardUiState, NodeUi, SignalQuality, TopologyHeader, EmergencyAlert) at feature/car/src/main/kotlin/org/meshtastic/feature/car/model/CarUiModels.kt
+- [x] T015 Create HomeScreen (TabTemplate with Messages/Nodes tabs; Map tab placeholder deferred) at feature/car/src/main/kotlin/org/meshtastic/feature/car/screens/HomeScreen.kt
 
 **Checkpoint**: Foundation ready — CarAppService binds, session creates, HomeScreen renders tabs. User story implementation can now begin in parallel.
 
@@ -57,12 +57,12 @@
 
 ### Implementation for User Story 1
 
-- [ ] T016 [P] [US1] Create MessagingScreen at feature/car/src/main/kotlin/org/meshtastic/feature/car/screens/MessagingScreen.kt with ListTemplate, channel Chips header, Section Headers grouping conversations, ConversationItem list (max 10), 300ms debounced invalidation, favorites/recent DM grouping
-- [ ] T017 [P] [US1] Create ConversationScreen at feature/car/src/main/kotlin/org/meshtastic/feature/car/screens/ConversationScreen.kt with MessageTemplate showing messages (max 5 per conversation), voice reply action via CAL built-in ConversationItem voice input, quick-reply action list from QuickChatActionRepository, read-aloud TTS action
-- [ ] T018 [US1] Reuse `FuzzyNameResolver` from `core/data/commonMain` (shared with AppFunctions feature) for voice-initiated DM node name matching — inject via Koin from existing `core/data` module. If AppFunctions branch not yet merged, temporarily duplicate LCS algorithm in feature/car/src/main/kotlin/org/meshtastic/feature/car/util/FuzzyNodeNameResolver.kt with TODO to consolidate post-merge
-- [ ] T019 [US1] Implement message filtering logic in MessagingScreen — exclude emoji-only and admin messages from display (FR-017), enforce 237-byte outgoing limit with user feedback (FR-018)
-- [ ] T020 [US1] Implement session-start batch loading of up to 50 unread messages in MeshtasticCarSession (FR-021) and post MessagingStyle notifications for read-back support
-- [ ] T021 [US1] Implement notification-based messaging (NotificationCompat.MessagingStyle with reply and mark-as-read Actions) at feature/car/src/main/kotlin/org/meshtastic/feature/car/service/CarNotificationManager.kt (FR-022)
+- [x] T016 [P] [US1] Create MessagingScreen at feature/car/src/main/kotlin/org/meshtastic/feature/car/screens/MessagingScreen.kt with ListTemplate, channel Chips header, Section Headers grouping conversations, ConversationItem list (max 10), 300ms debounced invalidation, favorites/recent DM grouping
+- [x] T017 [P] [US1] Create ConversationScreen at feature/car/src/main/kotlin/org/meshtastic/feature/car/screens/ConversationScreen.kt with MessageTemplate showing messages (max 5 per conversation), voice reply action via CAL built-in ConversationItem voice input, quick-reply action list from QuickChatActionRepository, read-aloud TTS action
+- [x] T018 [US1] Reuse `FuzzyNameResolver` from `core/data/commonMain` (shared with AppFunctions feature) for voice-initiated DM node name matching — inject via Koin from existing `core/data` module. If AppFunctions branch not yet merged, temporarily duplicate LCS algorithm in feature/car/src/main/kotlin/org/meshtastic/feature/car/util/FuzzyNodeNameResolver.kt with TODO to consolidate post-merge
+- [x] T019 [US1] Implement message filtering logic in MessagingScreen — exclude emoji-only and admin messages from display (FR-017), enforce 237-byte outgoing limit with user feedback (FR-018)
+- [x] T020 [US1] Implement session-start batch loading of up to 50 unread messages in MeshtasticCarSession (FR-021) and post MessagingStyle notifications for read-back support
+- [x] T021 [US1] Implement notification-based messaging (NotificationCompat.MessagingStyle with reply and mark-as-read Actions) at feature/car/src/main/kotlin/org/meshtastic/feature/car/service/CarNotificationManager.kt (FR-022)
 
 **Checkpoint**: Messaging fully functional — driver can see messages, switch channels, voice reply, use quick-reply templates, and receive MessagingStyle notifications
 
@@ -76,10 +76,10 @@
 
 ### Implementation for User Story 2
 
-- [ ] T022 [P] [US2] Create EmergencyHandler at feature/car/src/main/kotlin/org/meshtastic/feature/car/alerts/EmergencyHandler.kt observing PacketRepository flow for emergency-priority packets, triggering Banner via AppManager.showAlert(), managing active emergency list, stacking multiple banners chronologically
-- [ ] T023 [US2] Implement emergency audio alert playback in EmergencyHandler using NotificationManager on USAGE_NOTIFICATION audio channel (NFR-008), not media channel
-- [ ] T024 [US2] Integrate Spotlight Section in MessagingScreen for active emergencies — display EmergencyAlert items at top of messaging list when activeEmergencies is non-empty (FR-006). **Depends on T016 (MessagingScreen must exist first)**
-- [ ] T025 [US2] Wire EmergencyHandler into MeshtasticCarSession lifecycle — start collecting on onCreateScreen, stop on session destroy
+- [x] T022 [P] [US2] Create EmergencyHandler at feature/car/src/main/kotlin/org/meshtastic/feature/car/alerts/EmergencyHandler.kt observing PacketRepository flow for emergency-priority packets, triggering Banner via AppManager.showAlert(), managing active emergency list, stacking multiple banners chronologically
+- [x] T023 [US2] Implement emergency audio alert playback in EmergencyHandler using NotificationManager on USAGE_NOTIFICATION audio channel (NFR-008), not media channel
+- [x] T024 [US2] Integrate Spotlight Section in MessagingScreen for active emergencies — display EmergencyAlert items at top of messaging list when activeEmergencies is non-empty (FR-006). **Depends on T016 (MessagingScreen must exist first)**
+- [x] T025 [US2] Wire EmergencyHandler into MeshtasticCarSession lifecycle — start collecting on onCreateScreen, stop on session destroy
 
 **Checkpoint**: Emergency alerts fully operational — banners overlay any screen within 1s, audio plays, Spotlight Section shows in messaging view
 
@@ -93,8 +93,8 @@
 
 ### Implementation for User Story 3
 
-- [ ] T026 [P] [US3] Create NodeDashboardScreen at feature/car/src/main/kotlin/org/meshtastic/feature/car/screens/NodeDashboardScreen.kt with ListTemplate, Expanded Header Layout (mesh topology summary: online/total), Condensed Items for each node (name, signal quality, battery), online-first sorting with offline dimmed at bottom
-- [ ] T027 [P] [US3] Create NodeDetailScreen at feature/car/src/main/kotlin/org/meshtastic/feature/car/screens/NodeDetailScreen.kt with PaneTemplate showing last heard, distance, hardware model, battery, SNR, and "Message" action to push ConversationScreen for DM
+- [x] T026 [P] [US3] Create NodeDashboardScreen at feature/car/src/main/kotlin/org/meshtastic/feature/car/screens/NodeDashboardScreen.kt with ListTemplate, Expanded Header Layout (mesh topology summary: online/total), Condensed Items for each node (name, signal quality, battery), online-first sorting with offline dimmed at bottom
+- [x] T027 [P] [US3] Create NodeDetailScreen at feature/car/src/main/kotlin/org/meshtastic/feature/car/screens/NodeDetailScreen.kt with PaneTemplate showing last heard, distance, hardware model, battery, SNR, and "Message" action to push ConversationScreen for DM
 
 **Checkpoint**: Node dashboard shows 6+ nodes without scrolling via Condensed Items, detail drill-down works, DM action connects to messaging
 
@@ -108,7 +108,7 @@
 
 ### Implementation for User Story 4
 
-- [ ] T028 [US4] Implement channel Chip actions with unread badge indicators in MessagingScreen header — single-tap switches selectedChannelIndex, triggers message list re-filter within 1s (FR-008, FR-016)
+- [x] T028 [US4] Implement channel Chip actions with unread badge indicators in MessagingScreen header — single-tap switches selectedChannelIndex, triggers message list re-filter within 1s (FR-008, FR-016)
 
 **Checkpoint**: Channel chips render with unread counts, tapping switches view to that channel's conversations immediately
 
@@ -132,8 +132,8 @@
 
 ### Implementation for User Story 6
 
-- [ ] T030 [US6] Create MeshStatusPanel at feature/car/src/main/kotlin/org/meshtastic/feature/car/panels/MeshStatusPanel.kt implementing Minimized Control Panel — connectionStatusIcon, "{N} nodes online" title, "Last msg: {timeAgo}" subtitle, onClickListener expanding to full detail (mesh name, own battery, firmware version)
-- [ ] T031 [US6] Register MeshStatusPanel in MeshtasticCarSession lifecycle — attach to session on creation, observe BleConnectionState + NodeRepository for live updates, show "Disconnected" with warning icon on radio disconnect (FR-010, FR-011)
+- [x] T030 [US6] Create MeshStatusPanel at feature/car/src/main/kotlin/org/meshtastic/feature/car/panels/MeshStatusPanel.kt implementing Minimized Control Panel — connectionStatusIcon, "{N} nodes online" title, "Last msg: {timeAgo}" subtitle, onClickListener expanding to full detail (mesh name, own battery, firmware version)
+- [x] T031 [US6] Register MeshStatusPanel in MeshtasticCarSession lifecycle — attach to session on creation, observe BleConnectionState + NodeRepository for live updates, show "Disconnected" with warning icon on radio disconnect (FR-010, FR-011)
 
 **Checkpoint**: Persistent mini-panel visible across all screens, updates in real-time, expands on tap
 
@@ -147,8 +147,8 @@
 
 ### Implementation for User Story 7
 
-- [ ] T032 [US7] Implement TTS read-aloud action in ConversationScreen using Android built-in TTS engine — reads sender name + message content on tap of "Read Aloud" action
-- [ ] T033 [US7] Wire FuzzyNodeNameResolver into node detail "Message" action flow — when initiating DM from NodeDashboard, voice input is default composition method with resolved node context
+- [x] T032 [US7] Implement TTS read-aloud action in ConversationScreen using Android built-in TTS engine — reads sender name + message content on tap of "Read Aloud" action
+- [x] T033 [US7] Wire FuzzyNodeNameResolver into node detail "Message" action flow — when initiating DM from NodeDashboard, voice input is default composition method with resolved node context
 
 **Checkpoint**: Voice reply works end-to-end, TTS reads messages clearly, node-initiated DMs use voice by default
 
@@ -158,13 +158,13 @@
 
 **Purpose**: Error handling, degraded states, compliance, and verification
 
-- [ ] T034 [P] Implement BLE disconnection Banner + graceful degradation to cached read-only data across all screens (FR-011, FR-015)
-- [ ] T035 [P] Implement empty/error states: no channels configured → onboarding PaneTemplate, no nodes → "No nodes heard", no positions → "No positions reported" (per error contracts)
-- [ ] T036 [P] Add ProGuard/R8 keep rule for MeshtasticCarAppService in feature/car/proguard-rules.pro
-- [ ] T037 [P] Confirm no logs, telemetry, or config changes expose PII, location data, secrets, or modify `core/proto`
-- [ ] T038 [P] Review all screens against automotive HMI distraction guidelines — verify ≤ 2 taps for all primary actions (NFR-001)
-- [ ] T039 Run constitution-required verification: `./gradlew spotlessApply :feature:car:spotlessCheck :feature:car:detekt :feature:car:testGoogleDebugUnitTest`
-- [ ] T040 Validate quickstart.md developer workflow documentation is accurate for the implemented module
+- [x] T034 [P] Implement BLE disconnection Banner + graceful degradation to cached read-only data across all screens (FR-011, FR-015)
+- [x] T035 [P] Implement empty/error states: no channels configured → onboarding PaneTemplate, no nodes → "No nodes heard", no positions → "No positions reported" (per error contracts)
+- [x] T036 [P] Add ProGuard/R8 keep rule for MeshtasticCarAppService in feature/car/proguard-rules.pro
+- [x] T037 [P] Confirm no logs, telemetry, or config changes expose PII, location data, secrets, or modify `core/proto`
+- [x] T038 [P] Review all screens against automotive HMI distraction guidelines — verify ≤ 2 taps for all primary actions (NFR-001)
+- [x] T039 Run constitution-required verification: `./gradlew spotlessApply :feature:car:spotlessCheck :feature:car:detekt :feature:car:testGoogleDebugUnitTest`
+- [x] T040 Validate quickstart.md developer workflow documentation is accurate for the implemented module
 
 ---
 
