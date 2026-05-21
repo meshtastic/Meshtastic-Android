@@ -4,6 +4,7 @@
     <string name="car_tab_messages">Messages</string>
     <string name="car_tab_nodes">Nodes</string>
     <string name="car_disconnected">Disconnected</string>
+    <string name="car_reconnecting">Radio connection lost. Will reconnect automatically.</string>
     <string name="car_connecting">Connecting…</string>
     <string name="car_no_channels">No channels configured</string>
     <string name="car_no_nodes">No nodes heard</string>

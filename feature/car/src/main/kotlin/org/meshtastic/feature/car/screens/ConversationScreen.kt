@@ -26,13 +26,12 @@ import androidx.car.app.model.ListTemplate
 import androidx.car.app.model.Row
 import androidx.car.app.model.Template
 import org.meshtastic.feature.car.R
-
-data class MessageUi(val id: Int, val senderName: String, val text: String, val timestamp: Long, val isFromMe: Boolean)
+import org.meshtastic.feature.car.service.MessageSnapshot
 
 class ConversationScreen(
     carContext: CarContext,
     private val conversationName: String,
-    private val messagesProvider: () -> List<MessageUi>,
+    private val messagesProvider: () -> List<MessageSnapshot>,
     private val onVoiceReply: () -> Unit,
     private val onQuickReply: (String) -> Unit,
     private val onReadAloud: () -> Unit,

@@ -20,15 +20,20 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import okio.ByteString.Companion.toByteString
 import org.koin.core.annotation.Factory
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.QuickChatActionRepository
@@ -43,18 +48,31 @@ import org.meshtastic.feature.car.model.NodeDashboardUiState
 import org.meshtastic.feature.car.model.NodeUi
 import org.meshtastic.feature.car.model.SignalQuality
 import org.meshtastic.feature.car.model.TopologyHeader
+import org.meshtastic.feature.car.util.CarTtsEngine
+
+/** Snapshot of a message for car display (avoids leaking domain models to UI). */
+data class MessageSnapshot(
+    val id: Int,
+    val senderName: String,
+    val text: String,
+    val timestamp: Long,
+    val isFromMe: Boolean,
+)
 
 /**
  * Bridges repository data flows to car screen presentation state. Created per car session — destroyed when session
  * ends.
  */
 @Factory
+@Suppress("TooManyFunctions")
 class CarStateCoordinator(
     private val nodeRepository: NodeRepository,
     private val packetRepository: PacketRepository,
     private val serviceRepository: ServiceRepository,
     private val radioConfigRepository: RadioConfigRepository,
     private val quickChatActionRepository: QuickChatActionRepository,
+    private val commandSender: CommandSender,
+    private val ttsEngine: CarTtsEngine,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
@@ -100,6 +118,56 @@ class CarStateCoordinator(
     fun selectChannel(index: Int) {
         selectedChannelIndex = index
         _messagingState.value = _messagingState.value.copy(selectedChannelIndex = index)
+    }
+
+    suspend fun getMessagesFlow(contactKey: String): Flow<List<MessageSnapshot>> = packetRepository
+        .getMessagesFrom(
+            contact = contactKey,
+            limit = MAX_MESSAGES_PER_CONVERSATION,
+            includeFiltered = false,
+            getNode = { nodeId -> resolveNode(nodeId) },
+        )
+        .map { messages ->
+            messages.map { msg ->
+                MessageSnapshot(
+                    id = msg.packetId,
+                    senderName = msg.node.user.long_name.ifEmpty { "Unknown" },
+                    text = msg.text,
+                    timestamp = msg.receivedTime,
+                    isFromMe = msg.fromLocal,
+                )
+            }
+        }
+
+    fun sendMessage(contactKey: String, text: String) {
+        val packet =
+            DataPacket(
+                to = contactKey,
+                bytes = text.encodeToByteArray().toByteString(),
+                dataType = DATA_TYPE_TEXT,
+                channel = selectedChannelIndex,
+            )
+        commandSender.sendData(packet)
+    }
+
+    fun readMessagesAloud(contactKey: String) {
+        val messages = messagesCache[contactKey] ?: return
+        messages.takeLast(READ_ALOUD_LIMIT).forEach { msg ->
+            if (!msg.isFromMe) {
+                ttsEngine.readAloud(msg.senderName, msg.text)
+            }
+        }
+    }
+
+    private val messagesCache = mutableMapOf<String, List<MessageSnapshot>>()
+
+    fun cacheMessages(contactKey: String, messages: List<MessageSnapshot>) {
+        messagesCache[contactKey] = messages
+    }
+
+    private suspend fun resolveNode(nodeId: String?): Node {
+        val nodes = nodeRepository.nodeDBbyNum.value
+        return nodes.values.find { it.user.id == nodeId } ?: Node(num = 0)
     }
 
     fun destroy() {
@@ -211,6 +279,9 @@ class CarStateCoordinator(
 
     companion object {
         private const val MAX_CONVERSATIONS = 10
+        private const val MAX_MESSAGES_PER_CONVERSATION = 20
+        private const val READ_ALOUD_LIMIT = 3
+        private const val DATA_TYPE_TEXT = 1
         private const val SECONDS_TO_MILLIS = 1000L
         private const val BATTERY_MAX_PERCENT = 100
         private const val SNR_EXCELLENT = 10f

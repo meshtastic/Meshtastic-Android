@@ -19,8 +19,11 @@ package org.meshtastic.feature.car.screens
 import androidx.car.app.CarContext
 import androidx.car.app.Screen
 import androidx.car.app.model.Action
+import androidx.car.app.model.Header
 import androidx.car.app.model.ItemList
 import androidx.car.app.model.ListTemplate
+import androidx.car.app.model.Pane
+import androidx.car.app.model.PaneTemplate
 import androidx.car.app.model.Row
 import androidx.car.app.model.Tab
 import androidx.car.app.model.TabContents
@@ -32,8 +35,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import org.meshtastic.feature.car.R
+import org.meshtastic.feature.car.model.ConnectionStatus
 import org.meshtastic.feature.car.model.NodeUi
 import org.meshtastic.feature.car.model.SignalQuality
 import org.meshtastic.feature.car.service.CarStateCoordinator
@@ -60,9 +65,19 @@ class HomeScreen(carContext: CarContext, private val stateCoordinator: CarStateC
     private fun observeState() {
         scope.launch { stateCoordinator.messagingState.collect { invalidate() } }
         scope.launch { stateCoordinator.nodeDashboardState.collect { invalidate() } }
+        scope.launch { stateCoordinator.sessionState.collect { invalidate() } }
     }
 
+    @Suppress("ReturnCount")
     override fun onGetTemplate(): Template {
+        val connectionStatus = stateCoordinator.sessionState.value.connectionStatus
+        if (connectionStatus == ConnectionStatus.DISCONNECTED) {
+            return buildDisconnectedTemplate()
+        }
+        val messaging = stateCoordinator.messagingState.value
+        if (messaging.channels.isEmpty()) {
+            return buildOnboardingTemplate()
+        }
         val messagingTab =
             Tab.Builder()
                 .setContentId(TAB_ID_MESSAGES)
@@ -112,24 +127,30 @@ class HomeScreen(carContext: CarContext, private val stateCoordinator: CarStateC
                         .setTitle(conversation.displayName)
                         .addText(conversation.lastMessage)
                         .setBrowsable(true)
-                        .setOnClickListener {
-                            screenManager.push(
-                                ConversationScreen(
-                                    carContext = carContext,
-                                    conversationName = conversation.displayName,
-                                    messagesProvider = { emptyList() },
-                                    onVoiceReply = {},
-                                    onQuickReply = {},
-                                    onReadAloud = {},
-                                ),
-                            )
-                        }
+                        .setOnClickListener { openConversation(conversation.contactKey, conversation.displayName) }
                         .build(),
                 )
             }
         }
 
         return ListTemplate.Builder().setSingleList(listBuilder.build()).build()
+    }
+
+    private fun openConversation(contactKey: String, displayName: String) {
+        scope.launch {
+            val messages = stateCoordinator.getMessagesFlow(contactKey).firstOrNull() ?: emptyList()
+            stateCoordinator.cacheMessages(contactKey, messages)
+            screenManager.push(
+                ConversationScreen(
+                    carContext = carContext,
+                    conversationName = displayName,
+                    messagesProvider = { messages },
+                    onVoiceReply = { /* Voice input requires CarContext intent — deferred to DHU testing */ },
+                    onQuickReply = { text -> stateCoordinator.sendMessage(contactKey, text) },
+                    onReadAloud = { stateCoordinator.readMessagesAloud(contactKey) },
+                ),
+            )
+        }
     }
 
     private fun buildNodeList(): Template {
@@ -171,6 +192,42 @@ class HomeScreen(carContext: CarContext, private val stateCoordinator: CarStateC
         val status = if (!node.isOnline) " • Offline" else ""
         return "$signal$battery$status"
     }
+
+    private fun buildDisconnectedTemplate(): Template = PaneTemplate.Builder(
+        Pane.Builder()
+            .addRow(
+                Row.Builder()
+                    .setTitle(carContext.getString(R.string.car_disconnected))
+                    .addText(carContext.getString(R.string.car_reconnecting))
+                    .build(),
+            )
+            .build(),
+    )
+        .setHeader(
+            Header.Builder()
+                .setTitle(carContext.getString(R.string.car_app_name))
+                .setStartHeaderAction(Action.APP_ICON)
+                .build(),
+        )
+        .build()
+
+    private fun buildOnboardingTemplate(): Template = PaneTemplate.Builder(
+        Pane.Builder()
+            .addRow(
+                Row.Builder()
+                    .setTitle(carContext.getString(R.string.car_onboarding_title))
+                    .addText(carContext.getString(R.string.car_onboarding_text))
+                    .build(),
+            )
+            .build(),
+    )
+        .setHeader(
+            Header.Builder()
+                .setTitle(carContext.getString(R.string.car_app_name))
+                .setStartHeaderAction(Action.APP_ICON)
+                .build(),
+        )
+        .build()
 
     companion object {
         private const val TAB_ID_MESSAGES = "messages"
