@@ -24,7 +24,6 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(libs.jetbrains.navigation3.ui)
             implementation(libs.kotlinx.collections.immutable)
             implementation(projects.core.data)
             implementation(projects.core.database)

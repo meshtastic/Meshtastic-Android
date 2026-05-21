@@ -505,14 +505,18 @@ private fun EnvironmentMetricsCard(
 }
 
 @Composable
-private fun EnvironmentMetricsContent(telemetry: Telemetry, environmentDisplayFahrenheit: Boolean) {
+private fun EnvironmentMetricsContent(
+    telemetry: Telemetry,
+    environmentDisplayFahrenheit: Boolean,
+    timeTextOverride: String? = null,
+) {
     val envMetrics = telemetry.environment_metrics ?: org.meshtastic.proto.EnvironmentMetrics()
     val time = telemetry.time.toLong() * MS_PER_SEC
     Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
         /* Time and Temperature */
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(
-                text = DateFormatter.formatDateTime(time),
+                text = timeTextOverride ?: DateFormatter.formatDateTime(time),
                 style = MaterialTheme.typography.titleMediumEmphasized,
                 fontWeight = FontWeight.Bold,
             )
@@ -563,5 +567,13 @@ fun PreviewEnvironmentMetricsContent() {
             rainfall_24h = 12.3f,
         )
     val fakeTelemetry = Telemetry(time = 1700000000, environment_metrics = fakeEnvMetrics)
-    AppTheme { Surface { EnvironmentMetricsContent(telemetry = fakeTelemetry, environmentDisplayFahrenheit = false) } }
+    AppTheme {
+        Surface {
+            EnvironmentMetricsContent(
+                telemetry = fakeTelemetry,
+                environmentDisplayFahrenheit = false,
+                timeTextOverride = "2023-11-14 22:13",
+            )
+        }
+    }
 }

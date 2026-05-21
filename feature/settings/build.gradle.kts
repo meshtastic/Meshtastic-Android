@@ -42,7 +42,6 @@ kotlin {
 
             implementation(libs.kotlinx.collections.immutable)
             implementation(libs.aboutlibraries.compose.m3)
-            implementation(libs.jetbrains.navigation3.ui)
         }
 
         androidMain.dependencies {
