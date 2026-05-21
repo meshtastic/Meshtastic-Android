@@ -44,4 +44,25 @@ interface AiFunctionProvider {
      * @return Current connection state, node counts, and local device info.
      */
     suspend fun getMeshStatus(): MeshStatusResult
+
+    /**
+     * List all nodes currently visible on the mesh network.
+     *
+     * @return Success with list of nodes, or failure if not connected.
+     */
+    suspend fun getNodeList(): GetNodeListResult
+
+    /**
+     * List all available mesh channels and their configurations.
+     *
+     * @return Success with list of channels, or failure if not connected.
+     */
+    suspend fun getChannelInfo(): GetChannelInfoResult
+
+    /**
+     * Get status and metrics of the local mesh radio device.
+     *
+     * @return Success with device status, or failure if device unavailable.
+     */
+    suspend fun getDeviceStatus(): GetDeviceStatusResult
 }

@@ -113,4 +113,127 @@ class MeshtasticAppFunctions(private val provider: AiFunctionProvider) {
             localNodeName = status.localNodeName,
         )
     }
+
+    /**
+     * List all nodes currently visible on the Meshtastic mesh network.
+     *
+     * Returns detailed information about each node including name, battery level, and last heard time. Nodes are sorted
+     * by most recently heard first.
+     *
+     * @param context The app function invocation context provided by the system.
+     * @return A list of nodes with their current status and metrics.
+     */
+    @AppFunction(isDescribedByKDoc = true)
+    suspend fun getNodeList(context: AppFunctionContext): GetNodeListResponse {
+        val result =
+            try {
+                provider.getNodeList()
+            } catch (_: TimeoutCancellationException) {
+                throw AppFunctionInvalidArgumentException(
+                    "Request timed out. Ensure the mesh is connected and try again.",
+                )
+            }
+
+        return when (result) {
+            is org.meshtastic.core.data.ai.GetNodeListResult.Success ->
+                GetNodeListResponse(
+                    nodes =
+                    result.nodes.map {
+                        NodeInfo(
+                            id = it.id,
+                            name = it.name,
+                            batteryLevel = it.batteryLevel,
+                            lastHeard = it.lastHeard,
+                            isOnline = it.isOnline,
+                        )
+                    },
+                )
+
+            is org.meshtastic.core.data.ai.GetNodeListResult.NotConnected ->
+                throw AppFunctionInvalidArgumentException(result.message)
+
+            is org.meshtastic.core.data.ai.GetNodeListResult.Error ->
+                throw AppFunctionInvalidArgumentException(result.reason)
+        }
+    }
+
+    /**
+     * List all available Meshtastic mesh channels and their configurations.
+     *
+     * Returns details about each channel including name, index, primary status, and uplink/downlink settings.
+     *
+     * @param context The app function invocation context provided by the system.
+     * @return A list of channels with their current configuration.
+     */
+    @AppFunction(isDescribedByKDoc = true)
+    suspend fun getChannelInfo(context: AppFunctionContext): GetChannelInfoResponse {
+        val result =
+            try {
+                provider.getChannelInfo()
+            } catch (_: TimeoutCancellationException) {
+                throw AppFunctionInvalidArgumentException(
+                    "Request timed out. Ensure the mesh is connected and try again.",
+                )
+            }
+
+        return when (result) {
+            is org.meshtastic.core.data.ai.GetChannelInfoResult.Success ->
+                GetChannelInfoResponse(
+                    channels =
+                    result.channels.map {
+                        ChannelInfo(
+                            index = it.index,
+                            name = it.name,
+                            isPrimary = it.isPrimary,
+                            uplinkEnabled = it.uplinkEnabled,
+                            downlinkEnabled = it.downlinkEnabled,
+                        )
+                    },
+                )
+
+            is org.meshtastic.core.data.ai.GetChannelInfoResult.NotConnected ->
+                throw AppFunctionInvalidArgumentException(result.message)
+
+            is org.meshtastic.core.data.ai.GetChannelInfoResult.Error ->
+                throw AppFunctionInvalidArgumentException(result.reason)
+        }
+    }
+
+    /**
+     * Get the status and metrics of the local Meshtastic radio device.
+     *
+     * Returns hardware model, firmware version, battery level, charging status, and current radio state.
+     *
+     * @param context The app function invocation context provided by the system.
+     * @return Device status with current metrics and configuration.
+     */
+    @AppFunction(isDescribedByKDoc = true)
+    suspend fun getDeviceStatus(context: AppFunctionContext): GetDeviceStatusResponse {
+        val result =
+            try {
+                provider.getDeviceStatus()
+            } catch (_: TimeoutCancellationException) {
+                throw AppFunctionInvalidArgumentException(
+                    "Request timed out. Ensure the device is initialized and try again.",
+                )
+            }
+
+        return when (result) {
+            is org.meshtastic.core.data.ai.GetDeviceStatusResult.Success ->
+                GetDeviceStatusResponse(
+                    model = result.device.model,
+                    firmwareVersion = result.device.firmwareVersion,
+                    batteryLevel = result.device.batteryLevel,
+                    chargingStatus = result.device.chargingStatus,
+                    deviceName = result.device.deviceName,
+                    isActive = result.device.isActive,
+                )
+
+            is org.meshtastic.core.data.ai.GetDeviceStatusResult.NotAvailable ->
+                throw AppFunctionInvalidArgumentException(result.message)
+
+            is org.meshtastic.core.data.ai.GetDeviceStatusResult.Error ->
+                throw AppFunctionInvalidArgumentException(result.reason)
+        }
+    }
 }

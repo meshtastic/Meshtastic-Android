@@ -110,6 +110,77 @@ class AiFunctionProviderImpl(
         )
     }
 
+    @Suppress("ReturnCount", "TooGenericExceptionCaught")
+    override suspend fun getNodeList(): GetNodeListResult = withTimeout(OPERATION_TIMEOUT) {
+        if (serviceRepository.connectionState.value != ConnectionState.Connected) {
+            return@withTimeout GetNodeListResult.NotConnected("Not connected to a Meshtastic radio.")
+        }
+
+        try {
+            val nodeMap = nodeRepository.nodeDBbyNum.first()
+            val nodes =
+                nodeMap.values.map { node ->
+                    val elapsedTimeMs = clock.now().toEpochMilliseconds() - node.lastHeard.toLong() * MS_PER_SEC
+                    NodeSummary(
+                        id = "!${node.num.toString(HEX_RADIX)}",
+                        name = node.user.long_name.takeIf { it.isNotBlank() } ?: "Node ${node.num}",
+                        batteryLevel = node.deviceMetrics.battery_level?.coerceIn(0, MAX_BATTERY_LEVEL),
+                        lastHeard = node.lastHeard.toLong() * MS_PER_SEC,
+                        isOnline = elapsedTimeMs < ONLINE_THRESHOLD_MS,
+                    )
+                }
+            GetNodeListResult.Success(nodes.sortedByDescending { it.lastHeard })
+        } catch (ex: Exception) {
+            GetNodeListResult.Error("Failed to retrieve node list: ${ex.message}")
+        }
+    }
+
+    @Suppress("ReturnCount", "TooGenericExceptionCaught")
+    override suspend fun getChannelInfo(): GetChannelInfoResult = withTimeout(OPERATION_TIMEOUT) {
+        if (serviceRepository.connectionState.value != ConnectionState.Connected) {
+            return@withTimeout GetChannelInfoResult.NotConnected("Not connected to a Meshtastic radio.")
+        }
+
+        try {
+            val channelSet = radioConfigRepository.channelSetFlow.first()
+            val channels =
+                channelSet.settings.mapIndexed { index, channel ->
+                    ChannelSummary(
+                        index = index,
+                        name = channel.name.takeIf { it.isNotBlank() } ?: "Channel $index",
+                        isPrimary = index == 0,
+                        uplinkEnabled = channel.uplink_enabled,
+                        downlinkEnabled = channel.downlink_enabled,
+                    )
+                }
+            GetChannelInfoResult.Success(channels)
+        } catch (ex: Exception) {
+            GetChannelInfoResult.Error("Failed to retrieve channel info: ${ex.message}")
+        }
+    }
+
+    @Suppress("ReturnCount", "TooGenericExceptionCaught")
+    override suspend fun getDeviceStatus(): GetDeviceStatusResult = withTimeout(OPERATION_TIMEOUT) {
+        try {
+            val ourNode =
+                nodeRepository.ourNodeInfo.value
+                    ?: return@withTimeout GetDeviceStatusResult.NotAvailable("Device not yet initialized.")
+
+            val deviceStatus =
+                DeviceStatus(
+                    model = ourNode.metadata?.hw_model?.name ?: "Unknown",
+                    firmwareVersion = ourNode.metadata?.firmware_version ?: "Unknown",
+                    batteryLevel = ourNode.deviceMetrics.battery_level?.coerceIn(0, MAX_BATTERY_LEVEL),
+                    chargingStatus = "UNKNOWN",
+                    deviceName = ourNode.user.long_name.takeIf { it.isNotBlank() },
+                    isActive = serviceRepository.connectionState.value == ConnectionState.Connected,
+                )
+            GetDeviceStatusResult.Success(deviceStatus)
+        } catch (ex: Exception) {
+            GetDeviceStatusResult.Error("Failed to retrieve device status: ${ex.message}")
+        }
+    }
+
     @Suppress("ReturnCount")
     private suspend fun resolveContactKey(recipientName: String?, channelName: String?): ResolvedContact? {
         // Direct message to a specific node
@@ -163,6 +234,9 @@ class AiFunctionProviderImpl(
     companion object {
         private val OPERATION_TIMEOUT = 5.seconds
         private const val MAX_BATTERY_LEVEL = 100
+        private const val ONLINE_THRESHOLD_MS = 30_000L
+        private const val HEX_RADIX = 16
+        private const val MS_PER_SEC = 1000L
 
         /** Standard Meshtastic message payload limit (bytes). */
         const val MAX_MESSAGE_LENGTH = 237
