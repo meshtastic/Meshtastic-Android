@@ -202,6 +202,9 @@ class AiFunctionProviderImpl(
                 return@withTimeout GetNodeDetailsResult.NotFound("Node not found: $nodeId")
             }
 
+            // Check if position is valid (both coords zero AND time zero indicates no position fix)
+            val hasValidPosition = node.latitude != 0.0 || node.longitude != 0.0 || node.position.time > 0
+
             val details =
                 NodeDetails(
                     id = "!${node.num.toString(HEX_RADIX)}",
@@ -218,8 +221,8 @@ class AiFunctionProviderImpl(
                     lastHeard = node.lastHeard.toLong() * MS_PER_SEC,
                     userRole = node.user.role.name,
                     isLicensed = node.user.is_licensed,
-                    latitude = node.latitude.takeIf { it != 0.0 },
-                    longitude = node.longitude.takeIf { it != 0.0 },
+                    latitude = node.latitude.takeIf { hasValidPosition },
+                    longitude = node.longitude.takeIf { hasValidPosition },
                 )
             GetNodeDetailsResult.Success(details)
         } catch (ex: Exception) {
@@ -255,14 +258,23 @@ class AiFunctionProviderImpl(
                     else -> (HEALTH_SCORE_BASE + (HEALTH_SCORE_ONLINE_RATIO * onlineCount) / totalCount).toInt()
                 }
 
+            // Find most recent packet: max lastHeard across all nodes (convert seconds to ms)
+            val mostRecentPacketTimeMs =
+                nodeMap.values.maxOfOrNull { it.lastHeard }?.toLong()?.times(MS_PER_SEC)
+                    ?: clock.now().toEpochMilliseconds()
+
+            // Get local device uptime from its DeviceMetrics (node #0 is typically the local device)
+            val localNode = nodeMap.values.find { it.num == 0 } ?: nodeMap.values.firstOrNull()
+            val meshUptimeSeconds = localNode?.deviceMetrics?.uptime_seconds?.toLong() ?: 0L
+
             val metrics =
                 MeshMetrics(
                     totalNodeCount = totalCount,
                     onlineNodeCount = onlineCount,
                     averageBatteryLevel = avgBattery,
                     meshHealthScore = healthScore.coerceIn(0, HEALTH_SCORE_MAX),
-                    mostRecentPacketTime = clock.now().toEpochMilliseconds(),
-                    meshUptimeSeconds = clock.now().toEpochMilliseconds() / 1000L,
+                    mostRecentPacketTime = mostRecentPacketTimeMs,
+                    meshUptimeSeconds = meshUptimeSeconds,
                     channelUtilizationPercent = null, // Could compute from radioConfigRepository if needed
                 )
             GetMeshMetricsResult.Success(metrics)
