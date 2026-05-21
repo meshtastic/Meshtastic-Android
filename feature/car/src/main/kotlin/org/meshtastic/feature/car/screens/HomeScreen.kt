@@ -26,6 +26,13 @@ import androidx.car.app.model.Tab
 import androidx.car.app.model.TabContents
 import androidx.car.app.model.TabTemplate
 import androidx.car.app.model.Template
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import org.meshtastic.feature.car.R
 import org.meshtastic.feature.car.model.NodeUi
 import org.meshtastic.feature.car.model.SignalQuality
@@ -34,6 +41,26 @@ import org.meshtastic.feature.car.service.CarStateCoordinator
 class HomeScreen(carContext: CarContext, private val stateCoordinator: CarStateCoordinator) : Screen(carContext) {
 
     private var selectedTabId: String = TAB_ID_MESSAGES
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+
+    init {
+        lifecycle.addObserver(
+            object : DefaultLifecycleObserver {
+                override fun onStart(owner: LifecycleOwner) {
+                    observeState()
+                }
+
+                override fun onDestroy(owner: LifecycleOwner) {
+                    scope.cancel()
+                }
+            },
+        )
+    }
+
+    private fun observeState() {
+        scope.launch { stateCoordinator.messagingState.collect { invalidate() } }
+        scope.launch { stateCoordinator.nodeDashboardState.collect { invalidate() } }
+    }
 
     override fun onGetTemplate(): Template {
         val messagingTab =
