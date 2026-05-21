@@ -20,14 +20,12 @@ import groovy.json.JsonOutput
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.provider.Property
-import org.gradle.work.DisableCachingByDefault
-import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
+import org.gradle.work.DisableCachingByDefault
 import org.w3c.dom.Element
 import org.w3c.dom.NodeList
 import java.io.File
@@ -44,10 +42,6 @@ abstract class GenerateFlatpakSourcesTask : DefaultTask() {
     abstract val cacheDir: DirectoryProperty
 
     @get:OutputFile abstract val outputFile: RegularFileProperty
-
-    /** Base URL of the Maven snapshot repository (no trailing slash). */
-    @get:Input
-    abstract val snapshotRepoUrl: Property<String>
 
     init {
         group = "flatpak"
@@ -78,7 +72,7 @@ abstract class GenerateFlatpakSourcesTask : DefaultTask() {
         val cacheFolder = cacheDir.get().asFile
 
         val outputSourcesFile = outputFile.get().asFile
-        val snapshotBase = snapshotRepoUrl.get()
+        val snapshotBase = SNAPSHOT_REPO_URL
         logger.lifecycle("Scanning Gradle cache directory: ${cacheFolder.absolutePath}")
 
         val allowedExtensions = setOf("jar", "aar", "pom", "module")
@@ -121,32 +115,45 @@ abstract class GenerateFlatpakSourcesTask : DefaultTask() {
                     val dest = "offline-repository/$groupPath/$name/$version"
 
                     val isJitpack = group.startsWith("com.github.")
+                    val isGoogleArtifact =
+                        group.startsWith("androidx.") ||
+                            group.startsWith("com.google.") ||
+                            group.startsWith("com.android.")
+                    val isGradlePlugin = group.endsWith(".gradle.plugin") || group.startsWith("org.gradle.")
+
                     val primaryUrl =
                         when {
-                            isSnapshot ->
-                                "$snapshotBase/$mavenPath"
-
-                            isJitpack ->
-                                "https://jitpack.io/$mavenPath"
-
-                            else ->
-                                "https://repo.maven.apache.org/maven2/$mavenPath"
+                            isSnapshot -> "$snapshotBase/$mavenPath"
+                            isJitpack -> "https://jitpack.io/$mavenPath"
+                            isGoogleArtifact -> "https://dl.google.com/dl/android/maven2/$mavenPath"
+                            isGradlePlugin -> "https://plugins.gradle.org/m2/$mavenPath"
+                            else -> "https://repo.maven.apache.org/maven2/$mavenPath"
                         }
+
+                    val mavenCentralMirrors =
+                        listOf(
+                            "https://repo1.maven.org/maven2/$mavenPath",
+                            "https://maven-central.storage-download.googleapis.com/maven2/$mavenPath",
+                            "https://maven.aliyun.com/repository/public/$mavenPath",
+                        )
 
                     val mirrorUrls =
                         when {
-                            isSnapshot -> listOf(
-                                "https://s01.oss.sonatype.org/content/repositories/snapshots/$mavenPath",
-                            )
+                            isSnapshot ->
+                                listOf("https://s01.oss.sonatype.org/content/repositories/snapshots/$mavenPath")
 
-                            isJitpack -> emptyList()
+                            isJitpack ->
+                                buildList {
+                                    // Many com.github.* artifacts migrated to Maven Central
+                                    add("https://repo.maven.apache.org/maven2/$mavenPath")
+                                    addAll(mavenCentralMirrors)
+                                }
 
                             else ->
-                                listOf(
-                                    "https://dl.google.com/dl/android/maven2/$mavenPath",
-                                    "https://plugins.gradle.org/m2/$mavenPath",
-                                    "https://maven-central.storage-download.googleapis.com/maven2/$mavenPath",
-                                )
+                                buildList {
+                                    add("https://repo.maven.apache.org/maven2/$mavenPath")
+                                    addAll(mavenCentralMirrors)
+                                }
                         }
 
                     FlatpakSourceCandidate(
@@ -174,13 +181,14 @@ abstract class GenerateFlatpakSourcesTask : DefaultTask() {
 
         val finalEntries =
             deduplicated.map { candidate ->
-                val entry = mutableMapOf<String, Any>(
-                    "type" to "file",
-                    "url" to candidate.primaryUrl,
-                    "sha256" to calculateSha256(candidate.file),
-                    "dest" to candidate.dest,
-                    "dest-filename" to candidate.destFilename,
-                )
+                val entry =
+                    mutableMapOf<String, Any>(
+                        "type" to "file",
+                        "url" to candidate.primaryUrl,
+                        "sha256" to calculateSha256(candidate.file),
+                        "dest" to candidate.dest,
+                        "dest-filename" to candidate.destFilename,
+                    )
                 if (candidate.mirrorUrls.isNotEmpty()) {
                     entry["mirror-urls"] = candidate.mirrorUrls
                 }
@@ -194,9 +202,9 @@ abstract class GenerateFlatpakSourcesTask : DefaultTask() {
     }
 
     /**
-     * Resolves the timestamped snapshot version by fetching maven-metadata.xml from the remote
-     * snapshot repository. Maven snapshot repos do not serve artifacts at the generic `-SNAPSHOT`
-     * filename — they require the unique timestamped coordinate (e.g. `0.2.4-20260520.043744-2`).
+     * Resolves the timestamped snapshot version by fetching maven-metadata.xml from the remote snapshot repository.
+     * Maven snapshot repos do not serve artifacts at the generic `-SNAPSHOT` filename — they require the unique
+     * timestamped coordinate (e.g. `0.2.4-20260520.043744-2`).
      */
     private fun resolveSnapshotVersion(
         snapshotBase: String,
@@ -219,9 +227,7 @@ abstract class GenerateFlatpakSourcesTask : DefaultTask() {
 
     private fun findMatchingVersion(metadata: SnapshotMetadata?, extension: String): String? {
         if (metadata == null) return null
-        return metadata.snapshotVersions
-            .firstOrNull { it.extension == extension && it.classifier == null }
-            ?.value
+        return metadata.snapshotVersions.firstOrNull { it.extension == extension && it.classifier == null }?.value
             ?: metadata.fallbackValue
     }
 
@@ -232,11 +238,12 @@ abstract class GenerateFlatpakSourcesTask : DefaultTask() {
             connection.connectTimeout = TIMEOUT_MS
             connection.readTimeout = TIMEOUT_MS
 
-            val doc = connection.getInputStream().use { stream ->
-                val dbFactory = DocumentBuilderFactory.newInstance()
-                val dBuilder = dbFactory.newDocumentBuilder()
-                dBuilder.parse(stream)
-            }
+            val doc =
+                connection.getInputStream().use { stream ->
+                    val dbFactory = DocumentBuilderFactory.newInstance()
+                    val dBuilder = dbFactory.newDocumentBuilder()
+                    dBuilder.parse(stream)
+                }
             doc.documentElement.normalize()
 
             val root = doc.documentElement
@@ -301,5 +308,6 @@ abstract class GenerateFlatpakSourcesTask : DefaultTask() {
 
     private companion object {
         private const val TIMEOUT_MS = 10_000
+        private const val SNAPSHOT_REPO_URL = "https://central.sonatype.com/repository/maven-snapshots"
     }
 }

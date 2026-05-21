@@ -23,19 +23,18 @@ import java.io.File
 class FlatpakPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
-            val extension = extensions.create("flatpak", FlatpakExtension::class.java).apply {
-                cacheDir.convention(
-                    layout.dir(providers.provider { File(gradle.gradleUserHomeDir, "caches/modules-2/files-2.1") }),
-                )
-                outputFile.convention(layout.projectDirectory.file("flatpak-sources.json"))
-                snapshotRepoUrl.convention("https://central.sonatype.com/repository/maven-snapshots")
-                assembleTask.convention(":desktopApp:assemble")
-            }
+            val extension =
+                extensions.create("flatpak", FlatpakExtension::class.java).apply {
+                    cacheDir.convention(
+                        layout.dir(providers.provider { File(gradle.gradleUserHomeDir, "caches/modules-2/files-2.1") }),
+                    )
+                    outputFile.convention(layout.projectDirectory.file("flatpak-sources.json"))
+                    assembleTask.convention(":desktopApp:assemble")
+                }
 
             tasks.register("generateFlatpakSourcesFromCache", GenerateFlatpakSourcesTask::class.java) {
                 cacheDir.set(extension.cacheDir)
                 outputFile.set(extension.outputFile)
-                snapshotRepoUrl.set(extension.snapshotRepoUrl)
                 dependsOn(extension.assembleTask)
             }
         }
