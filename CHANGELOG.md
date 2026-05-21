@@ -9,12 +9,21 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
-* build(flatpak): overhaul offline source generation with native cache scanner (#5533) by James Rich (@jamesarich) in [`811316783`](https://github.com/meshtastic/Meshtastic-Android/commit/81131678333bd7121022371f315c1237d0b6f7e1)
-* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5532) by James Rich (@jamesarich) in [`0076be3a2`](https://github.com/meshtastic/Meshtastic-Android/commit/0076be3a240ae56f300406497e236adeaa5167c5)
-* docs: update CHANGELOG.md (#5534) by github-actions[bot] (@github-actions[bot]) in [`19d10a18c`](https://github.com/meshtastic/Meshtastic-Android/commit/19d10a18cd5bb678ab9ed0f6e9029571da2a68d8)
-* docs(nav): fix sidebar nesting, dynamic language switcher, and delete translations page (#5535) by James Rich (@jamesarich) in [`89fe2b58d`](https://github.com/meshtastic/Meshtastic-Android/commit/89fe2b58d7aa6f0af30af91e2ccf72f365c80bc7)
+* Remove admin_channel_enabled toggle from Security Config screen (#5547) by James Rich (@jamesarich) in [`676be2646`](https://github.com/meshtastic/Meshtastic-Android/commit/676be264608f077c9cbbc0a18ee0f4ad7d37c58f)
+* fix(settings): rename UDP toggle label for cross-platform audit alignment (#5549) by James Rich (@jamesarich) in [`4c588b73f`](https://github.com/meshtastic/Meshtastic-Android/commit/4c588b73f8c3be322e977c4ae04d81dafc6b91b2)
+* fix: use single-shot low battery notifications (#5550) by James Rich (@jamesarich) in [`4c09377ba`](https://github.com/meshtastic/Meshtastic-Android/commit/4c09377ba5867efda23065fc2c1ff617ffb748c0)
+* fix(docs): use relative_url for screenshot paths on GitHub Pages (#5553) by James Rich (@jamesarich) in [`11437fb6f`](https://github.com/meshtastic/Meshtastic-Android/commit/11437fb6f4e7458480e43e444a5d9659cb1396f6)
+* fix(flatpak): modernize snapshot URL resolution in source generator (#5552) by James Rich (@jamesarich) in [`6a53022a5`](https://github.com/meshtastic/Meshtastic-Android/commit/6a53022a50fb0c151b61c92bc2ddee4ade287d54)
+* feat: align node list context menu to canonical 6-item order (#5548) by James Rich (@jamesarich) in [`9d5e20c74`](https://github.com/meshtastic/Meshtastic-Android/commit/9d5e20c7429f7d4fb10bdda60df9384a81e3ff8d)
+* feat(nav): rename tab labels to canonical order (#5551) by James Rich (@jamesarich) in [`ea85b906e`](https://github.com/meshtastic/Meshtastic-Android/commit/ea85b906e86c00261ec91f9ad7cf4a601417d135)
+* ci: optimize CI pipeline for faster PR feedback (#5554) by James Rich (@jamesarich) in [`aa980a443`](https://github.com/meshtastic/Meshtastic-Android/commit/aa980a443829e21a206c9c3f481bc61971f2720d)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5537) by James Rich (@jamesarich) in [`4eae950ba`](https://github.com/meshtastic/Meshtastic-Android/commit/4eae950ba133fcec369066d174ba73c90ceb28cb)
+* docs: audit and fix stale references from recent changes (#5555) by James Rich (@jamesarich) in [`3c70523e6`](https://github.com/meshtastic/Meshtastic-Android/commit/3c70523e69d3de715e3e02cbf58dac7340d1e0ec)
+* chore(deps): update com.github.luben:zstd-jni to v1.5.7-9 (#5556) by renovate[bot] (@renovate[bot]) in [`6ffb32009`](https://github.com/meshtastic/Meshtastic-Android/commit/6ffb320099086586a1ebc8aca409c3a63354e97d)
+* feat: enable WAL connection pool for parallel reads (#5372) by James Rich (@jamesarich) in [`e67ebb7a0`](https://github.com/meshtastic/Meshtastic-Android/commit/e67ebb7a0d6a1fd0fd4f878ba9dba62a89557d97)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5557) by James Rich (@jamesarich) in [`05679ec27`](https://github.com/meshtastic/Meshtastic-Android/commit/05679ec276b98c668d4433c0cf5331a15cea63a8)
 
-### Internal (v2.7.14-internal.96)
+### Internal (v2.7.14-internal.100)
 Changes since [`v2.7.14-open.9`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14-open.9):
 
 * chore(deps): update vico to v3.2.0-next.5 (#5470) by renovate[bot] (@renovate[bot]) in [`4bacff81c`](https://github.com/meshtastic/Meshtastic-Android/commit/4bacff81c5abad536b40f7370ae5d302b74a11fe)
@@ -77,6 +86,14 @@ Changes since [`v2.7.14-open.9`](https://github.com/meshtastic/Meshtastic-Androi
 * docs: update CHANGELOG.md (#5520) by github-actions[bot] (@github-actions[bot]) in [`95df50014`](https://github.com/meshtastic/Meshtastic-Android/commit/95df500142abd44f7b4d2d75ba28ab72f1fe77ac)
 * build(flatpak): overhaul and automate flatpak offline manifest generation (#5529) by James Rich (@jamesarich) in [`99b5688b0`](https://github.com/meshtastic/Meshtastic-Android/commit/99b5688b00e5810467769ae57e6ee33ea3d3360c)
 * docs: update CHANGELOG.md (#5527) by github-actions[bot] (@github-actions[bot]) in [`cd0b9d666`](https://github.com/meshtastic/Meshtastic-Android/commit/cd0b9d6668e25f3c048a349414943a21c158d17e)
+* build(flatpak): overhaul offline source generation with native cache scanner (#5533) by James Rich (@jamesarich) in [`811316783`](https://github.com/meshtastic/Meshtastic-Android/commit/81131678333bd7121022371f315c1237d0b6f7e1)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5532) by James Rich (@jamesarich) in [`0076be3a2`](https://github.com/meshtastic/Meshtastic-Android/commit/0076be3a240ae56f300406497e236adeaa5167c5)
+* docs: update CHANGELOG.md (#5534) by github-actions[bot] (@github-actions[bot]) in [`19d10a18c`](https://github.com/meshtastic/Meshtastic-Android/commit/19d10a18cd5bb678ab9ed0f6e9029571da2a68d8)
+* docs(nav): fix sidebar nesting, dynamic language switcher, and delete translations page (#5535) by James Rich (@jamesarich) in [`89fe2b58d`](https://github.com/meshtastic/Meshtastic-Android/commit/89fe2b58d7aa6f0af30af91e2ccf72f365c80bc7)
+* docs: update CHANGELOG.md (#5536) by github-actions[bot] (@github-actions[bot]) in [`0724ebf20`](https://github.com/meshtastic/Meshtastic-Android/commit/0724ebf20b099a2bf7c07029b64e7fccc95b80c2)
+* feat(flatpak): reconstruct standard maven filenames from local Gradle cache (#5538) by James Rich (@jamesarich) in [`32df44fba`](https://github.com/meshtastic/Meshtastic-Android/commit/32df44fbaac633186dfde50ba0a0b522fde169a1)
+* fix(flatpak): route JitPack com.github group to jitpack.io primaryUrl (#5541) by James Rich (@jamesarich) in [`0fccf5446`](https://github.com/meshtastic/Meshtastic-Android/commit/0fccf54462a2476c40357113a8c0f4e2df6dc542)
+* fix(flatpak): resolve unique snapshot timestamp URLs from local cached maven-metadata (#5542) by James Rich (@jamesarich) in [`91ad5dbb8`](https://github.com/meshtastic/Meshtastic-Android/commit/91ad5dbb81f851c72cf0d195188ecc47f731dd60)
 
 ### Open Beta (v2.7.14-open.9)
 Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.13):
