@@ -126,7 +126,7 @@ data class GetDeviceStatusResponse(
  * @property userId User ID string for this node.
  * @property name Display name of the node.
  * @property batteryLevel Battery percentage (0-100), or null if unavailable.
- * @property voltage Supply voltage in millivolts, or null if unavailable.
+ * @property voltage Supply voltage in volts, or null if unavailable.
  * @property hardwareModel Hardware model string.
  * @property firmwareVersion Firmware version string.
  * @property snr Signal-to-noise ratio of strongest signal.

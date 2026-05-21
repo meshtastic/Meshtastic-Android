@@ -25,6 +25,7 @@ import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.usecase.SendMessageUseCase
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.seconds
 
@@ -131,6 +132,7 @@ class AiFunctionProviderImpl(
                 }
             GetNodeListResult.Success(nodes.sortedByDescending { it.lastHeard })
         } catch (ex: Exception) {
+            if (ex is CancellationException) throw ex
             GetNodeListResult.Error("Failed to retrieve node list: ${ex.message}")
         }
     }
@@ -155,6 +157,7 @@ class AiFunctionProviderImpl(
                 }
             GetChannelInfoResult.Success(channels)
         } catch (ex: Exception) {
+            if (ex is CancellationException) throw ex
             GetChannelInfoResult.Error("Failed to retrieve channel info: ${ex.message}")
         }
     }
@@ -177,6 +180,7 @@ class AiFunctionProviderImpl(
                 )
             GetDeviceStatusResult.Success(deviceStatus)
         } catch (ex: Exception) {
+            if (ex is CancellationException) throw ex
             GetDeviceStatusResult.Error("Failed to retrieve device status: ${ex.message}")
         }
     }
@@ -226,6 +230,7 @@ class AiFunctionProviderImpl(
                 )
             GetNodeDetailsResult.Success(details)
         } catch (ex: Exception) {
+            if (ex is CancellationException) throw ex
             GetNodeDetailsResult.Error("Failed to retrieve node details: ${ex.message}")
         }
     }
@@ -260,10 +265,7 @@ class AiFunctionProviderImpl(
 
             // Find most recent packet: max lastHeard across all nodes (convert seconds to ms)
             val mostRecentPacketTimeMs =
-                nodeMap.values.maxOfOrNull { it.lastHeard }
-                    ?.takeIf { it > 0 }
-                    ?.toLong()
-                    ?.times(MS_PER_SEC)
+                nodeMap.values.maxOfOrNull { it.lastHeard }?.takeIf { it > 0 }?.toLong()?.times(MS_PER_SEC)
                     ?: clock.now().toEpochMilliseconds()
 
             // Get local device uptime from its DeviceMetrics (node #0 is typically the local device)
@@ -282,6 +284,7 @@ class AiFunctionProviderImpl(
                 )
             GetMeshMetricsResult.Success(metrics)
         } catch (ex: Exception) {
+            if (ex is CancellationException) throw ex
             GetMeshMetricsResult.Error("Failed to retrieve mesh metrics: ${ex.message}")
         }
     }

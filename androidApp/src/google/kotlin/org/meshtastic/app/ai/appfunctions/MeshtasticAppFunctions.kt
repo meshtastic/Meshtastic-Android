@@ -248,7 +248,14 @@ class MeshtasticAppFunctions(private val provider: AiFunctionProvider) {
      */
     @AppFunction(isDescribedByKDoc = true)
     suspend fun getNodeDetails(context: AppFunctionContext, nodeId: String): GetNodeDetailsResponse {
-        val result = provider.getNodeDetails(nodeId)
+        val result =
+            try {
+                provider.getNodeDetails(nodeId)
+            } catch (_: TimeoutCancellationException) {
+                throw AppFunctionInvalidArgumentException(
+                    "Request timed out. Ensure the mesh is connected and try again.",
+                )
+            }
         return when (result) {
             is org.meshtastic.core.data.ai.GetNodeDetailsResult.Success ->
                 GetNodeDetailsResponse(
@@ -291,7 +298,14 @@ class MeshtasticAppFunctions(private val provider: AiFunctionProvider) {
      */
     @AppFunction(isDescribedByKDoc = true)
     suspend fun getMeshMetrics(context: AppFunctionContext): GetMeshMetricsResponse {
-        val result = provider.getMeshMetrics()
+        val result =
+            try {
+                provider.getMeshMetrics()
+            } catch (_: TimeoutCancellationException) {
+                throw AppFunctionInvalidArgumentException(
+                    "Request timed out. Ensure the mesh is connected and try again.",
+                )
+            }
         return when (result) {
             is org.meshtastic.core.data.ai.GetMeshMetricsResult.Success ->
                 GetMeshMetricsResponse(

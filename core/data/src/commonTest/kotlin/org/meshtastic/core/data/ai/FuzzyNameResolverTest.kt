@@ -55,7 +55,7 @@ class FuzzyNameResolverTest {
     }
 
     // NodeNameResult / ChannelNameResult sealed classes are tested indirectly via
-    // the full integration in AiFunctionProviderImplTest, but we verify basic structure here.
+    // the integration with AiFunctionProviderImpl, but we verify basic structure here.
 
     @Test
     fun nodeNameResult_found_carries_data() {

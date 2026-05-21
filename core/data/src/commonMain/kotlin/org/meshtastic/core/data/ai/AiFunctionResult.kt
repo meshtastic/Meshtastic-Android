@@ -153,7 +153,7 @@ data class NodeDetails(
     val name: String,
     /** Battery level (0-100), or null if unavailable. */
     val batteryLevel: Int?,
-    /** Supply voltage in millivolts, or null if unavailable. */
+    /** Supply voltage in volts, or null if unavailable. */
     val voltage: Float?,
     /** Hardware model (e.g., "Meshtastic nRF52840"). */
     val hardwareModel: String,
