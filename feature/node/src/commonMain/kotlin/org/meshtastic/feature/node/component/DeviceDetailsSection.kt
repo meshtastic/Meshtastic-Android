@@ -67,33 +67,33 @@ internal fun DeviceHeroSection(
     reportedTarget: String?,
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier = modifier.fillMaxWidth().padding(vertical = 16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
+    Row(
+        modifier = modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        DeviceAvatar(bgColor, deviceHardware)
+        DeviceAvatar(bgColor, deviceHardware, size = 64)
 
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.width(16.dp))
 
-        val deviceText = reportedTarget?.let { "${deviceHardware.displayName} ($it)" } ?: deviceHardware.displayName
-        Text(
-            text = deviceText,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
-            color = colorScheme.onSurface,
-        )
-
-        Spacer(Modifier.height(4.dp))
-
-        SupportStatusBadge(deviceHardware.activelySupported)
+        Column {
+            val deviceText = reportedTarget?.let { "${deviceHardware.displayName} ($it)" } ?: deviceHardware.displayName
+            Text(
+                text = deviceText,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = colorScheme.onSurface,
+            )
+            Spacer(Modifier.height(4.dp))
+            SupportStatusBadge(deviceHardware.activelySupported)
+        }
     }
 }
 
 @Composable
-private fun DeviceAvatar(bgColor: Long, deviceHardware: DeviceHardware) {
+private fun DeviceAvatar(bgColor: Long, deviceHardware: DeviceHardware, size: Int = 64) {
     Box(
         modifier =
-        Modifier.size(100.dp)
+        Modifier.size(size.dp)
             .clip(CircleShape)
             .background(color = Color(bgColor).copy(alpha = .5f), shape = CircleShape),
         contentAlignment = Alignment.Center,
