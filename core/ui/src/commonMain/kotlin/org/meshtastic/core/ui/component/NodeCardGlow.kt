@@ -35,8 +35,8 @@ private const val GLOW_MAX_ELEVATION_DP = 8
 /**
  * A modifier that applies a glow animation to a node card when a packet is received.
  *
- * The glow blooms quickly using [MaterialTheme.motionScheme.fastSpatialSpec] and decays slowly
- * using [MaterialTheme.motionScheme.slowSpatialSpec], creating an M3 Expressive motion effect.
+ * The glow blooms quickly using [MaterialTheme.motionScheme.fastSpatialSpec] and decays slowly using
+ * [MaterialTheme.motionScheme.slowSpatialSpec], creating an M3 Expressive motion effect.
  *
  * @param lastHeard The node's lastHeard timestamp. Changes trigger the glow animation.
  * @param nodeColor The color used for the glow shadow (typically the node's assigned color).

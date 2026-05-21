@@ -44,6 +44,7 @@ kotlin {
             implementation(libs.compose.multiplatform.foundation)
             api(libs.compose.multiplatform.ui.tooling.preview)
 
+            implementation(libs.coil)
             implementation(libs.kermit)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.koin.compose.viewmodel)

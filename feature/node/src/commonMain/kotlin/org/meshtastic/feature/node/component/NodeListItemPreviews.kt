@@ -14,11 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-@file:Suppress("TooManyFunctions", "MagicNumber")
+@file:Suppress("TooManyFunctions", "MagicNumber", "PreviewPublic")
 
 package org.meshtastic.feature.node.component
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -144,17 +143,12 @@ fun NodeItemCompactActivePreview() {
 @PreviewLightDark
 @Composable
 fun NodeItemCompactOnlineRemotePreview() {
-    val onlineNode = previewNodes.minnieMouse.copy(
-        lastHeard = (org.meshtastic.core.common.util.nowSeconds - 300).toInt(),
-    )
+    val onlineNode =
+        previewNodes.minnieMouse.copy(lastHeard = (org.meshtastic.core.common.util.nowSeconds - 300).toInt())
     AppTheme {
         Surface {
             Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-                NodeItemCompact(
-                    thisNode = previewNodes.mickeyMouse,
-                    thatNode = onlineNode,
-                    distanceUnits = 0,
-                )
+                NodeItemCompact(thisNode = previewNodes.mickeyMouse, thatNode = onlineNode, distanceUnits = 0)
             }
         }
     }
@@ -163,9 +157,8 @@ fun NodeItemCompactOnlineRemotePreview() {
 @PreviewLightDark
 @Composable
 fun NodeItemCompleteOnlineRemotePreview() {
-    val onlineNode = previewNodes.minnieMouse.copy(
-        lastHeard = (org.meshtastic.core.common.util.nowSeconds - 300).toInt(),
-    )
+    val onlineNode =
+        previewNodes.minnieMouse.copy(lastHeard = (org.meshtastic.core.common.util.nowSeconds - 300).toInt())
     AppTheme {
         Surface {
             Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {

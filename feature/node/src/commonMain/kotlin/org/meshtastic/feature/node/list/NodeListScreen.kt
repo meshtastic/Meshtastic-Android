@@ -107,6 +107,7 @@ fun NodeListScreen(
     val onlineNodeCount by viewModel.onlineNodeCount.collectAsStateWithLifecycle(0)
     val totalNodeCount by viewModel.totalNodeCount.collectAsStateWithLifecycle(0)
     val unfilteredNodes by viewModel.unfilteredNodeList.collectAsStateWithLifecycle()
+    val deviceImageUrls by viewModel.deviceImageUrls.collectAsStateWithLifecycle()
     val ignoredNodeCount = unfilteredNodes.count { it.isIgnored }
 
     val listState = rememberLazyListState()
@@ -241,6 +242,7 @@ fun NodeListScreen(
                                     deviceType = deviceType,
                                     isActive = isActive,
                                     showTelemetry = showTelemetry,
+                                    deviceImageUrl = deviceImageUrls[node.user.hw_model.value],
                                 )
 
                             NodeListDensity.COMPACT ->
@@ -262,6 +264,7 @@ fun NodeListScreen(
                                     showRole = showRole,
                                     showTelemetry = showTelemetry,
                                     tempInFahrenheit = state.tempInFahrenheit,
+                                    deviceImageUrl = deviceImageUrls[node.user.hw_model.value],
                                 )
                         }
                         val isThisNode = remember(node) { ourNode?.num == node.num }

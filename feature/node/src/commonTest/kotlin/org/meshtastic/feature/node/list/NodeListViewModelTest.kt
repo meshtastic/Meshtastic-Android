@@ -30,6 +30,7 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeSortOption
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.testing.FakeDeviceHardwareRepository
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.core.testing.FakeRadioInterfaceService
@@ -85,6 +86,7 @@ class NodeListViewModelTest {
         serviceRepository = serviceRepository,
         radioController = radioController,
         radioInterfaceService = radioInterfaceService,
+        deviceHardwareRepository = FakeDeviceHardwareRepository(),
         nodeManagementActions = nodeManagementActions,
         nodeRequestActions = nodeRequestActions,
         getFilteredNodesUseCase = getFilteredNodesUseCase,

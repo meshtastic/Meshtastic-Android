@@ -94,6 +94,7 @@ fun NodeItem(
     deviceType: DeviceType? = null,
     isActive: Boolean = false,
     showTelemetry: Boolean = true,
+    deviceImageUrl: String? = null,
 ) {
     val originalLongName = thatNode.user.long_name.ifEmpty { stringResource(Res.string.unknown_username) }
     val isMuted = remember(thatNode) { thatNode.isMuted }
@@ -111,8 +112,10 @@ fun NodeItem(
 
     val contentColor = MaterialTheme.colorScheme.onSurface
     val cardColors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-    val borderColor = (if (isThisNode) thisNode?.colors?.second else thatNode.colors.second)
-        ?.let { Color(it).copy(alpha = if (isActive) ACTIVE_BORDER_ALPHA else INACTIVE_BORDER_ALPHA) }
+    val borderColor =
+        (if (isThisNode) thisNode?.colors?.second else thatNode.colors.second)?.let {
+            Color(it).copy(alpha = if (isActive) ACTIVE_BORDER_ALPHA else INACTIVE_BORDER_ALPHA)
+        }
     val cardBorder = borderColor?.let { BorderStroke(1.5.dp, it) }
 
     val style =
@@ -149,18 +152,17 @@ fun NodeItem(
             )
         }
 
-    val nodeColor = (if (isThisNode) thisNode?.colors?.second else thatNode.colors.second)
-        ?.let { Color(it) } ?: Color.Transparent
+    val nodeColor =
+        (if (isThisNode) thisNode?.colors?.second else thatNode.colors.second)?.let { Color(it) } ?: Color.Transparent
 
     Card(
         modifier =
-        modifier
-            .nodeCardGlow(lastHeard = thatNode.lastHeard, nodeColor = nodeColor)
-            .fillMaxWidth()
-            .semantics(mergeDescendants = true) {
-                contentDescription = nodeDescription
-                role = Role.Button
-            },
+        modifier.nodeCardGlow(lastHeard = thatNode.lastHeard, nodeColor = nodeColor).fillMaxWidth().semantics(
+            mergeDescendants = true,
+        ) {
+            contentDescription = nodeDescription
+            role = Role.Button
+        },
         colors = cardColors,
         border = cardBorder,
     ) {
@@ -231,7 +233,7 @@ fun NodeItem(
 
             HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
 
-            NodeItemFooter(thatNode = thatNode, contentColor = contentColor)
+            NodeItemFooter(thatNode = thatNode, contentColor = contentColor, deviceImageUrl = deviceImageUrl)
         }
     }
 }
@@ -472,11 +474,12 @@ private fun NodeItemHeader(
                 )
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                val statusColor = if (!isThisNode && thatNode.isOnline) {
-                    MaterialTheme.colorScheme.StatusGreen
-                } else {
-                    contentColor
-                }
+                val statusColor =
+                    if (!isThisNode && thatNode.isOnline) {
+                        MaterialTheme.colorScheme.StatusGreen
+                    } else {
+                        contentColor
+                    }
                 LastHeardInfo(lastHeard = thatNode.lastHeard, showLabel = false, contentColor = statusColor)
             }
         }
@@ -494,16 +497,18 @@ private fun NodeItemHeader(
 }
 
 @Composable
-private fun NodeItemFooter(thatNode: Node, contentColor: Color) {
+private fun NodeItemFooter(thatNode: Node, contentColor: Color, deviceImageUrl: String?) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        HardwareInfo(hwModel = thatNode.user.hw_model.name, contentColor = contentColor)
+        HardwareInfo(
+            hwModel = thatNode.user.hw_model.name,
+            deviceImageUrl = deviceImageUrl,
+            contentColor = contentColor,
+        )
         RoleInfo(role = thatNode.user.role, contentColor = contentColor)
         NodeIdInfo(id = thatNode.user.id.ifEmpty { "???" }, contentColor = contentColor)
     }
 }
-
-

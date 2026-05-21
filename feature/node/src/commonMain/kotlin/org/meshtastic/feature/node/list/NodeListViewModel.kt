@@ -20,7 +20,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
@@ -32,6 +34,7 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeListDensity
 import org.meshtastic.core.model.NodeSortOption
 import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioInterfaceService
@@ -52,6 +55,7 @@ class NodeListViewModel(
     private val serviceRepository: ServiceRepository,
     private val radioController: RadioController,
     private val radioInterfaceService: RadioInterfaceService,
+    private val deviceHardwareRepository: DeviceHardwareRepository,
     val nodeManagementActions: NodeManagementActions,
     private val nodeRequestActions: NodeRequestActions,
     private val getFilteredNodesUseCase: GetFilteredNodesUseCase,
@@ -142,6 +146,30 @@ class NodeListViewModel(
     val unfilteredNodeList: StateFlow<List<Node>> =
         nodeRepository.getNodes().stateInWhileSubscribed(initialValue = emptyList())
 
+    private val _deviceImageUrls = MutableStateFlow<Map<Int, String>>(emptyMap())
+
+    /** Maps hw_model int value → device image URL from the flasher CDN. */
+    val deviceImageUrls: StateFlow<Map<Int, String>> = _deviceImageUrls.asStateFlow()
+
+    init {
+        // Resolve device image URLs as nodes arrive
+        viewModelScope.launch {
+            nodeList.collect { nodes ->
+                val newModels = nodes.map { it.user.hw_model.value }.distinct().filter { it !in _deviceImageUrls.value }
+                for (hwModel in newModels) {
+                    resolveDeviceImageUrl(hwModel)
+                }
+            }
+        }
+    }
+
+    private suspend fun resolveDeviceImageUrl(hwModel: Int) {
+        val hw = deviceHardwareRepository.getDeviceHardwareByModel(hwModel).getOrNull() ?: return
+        val imageFile = hw.images?.getOrNull(1) ?: hw.images?.getOrNull(0) ?: return
+        val url = "$FLASHER_DEVICE_IMAGE_BASE_URL$imageFile"
+        _deviceImageUrls.value = _deviceImageUrls.value + (hwModel to url)
+    }
+
     var nodeFilterText: String
         get() = _nodeFilterText.value
         set(value) {
@@ -183,6 +211,7 @@ class NodeListViewModel(
 
     companion object {
         private const val KEY_FILTER_TEXT = "filter_text"
+        private const val FLASHER_DEVICE_IMAGE_BASE_URL = "https://flasher.meshtastic.org/img/devices/"
     }
 }
 

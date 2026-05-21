@@ -38,14 +38,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.common.util.MetricFormatter
@@ -54,6 +59,7 @@ import org.meshtastic.core.model.isUnmessageableRole
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.distance
+import org.meshtastic.core.resources.ic_memory
 import org.meshtastic.core.resources.node_list_click_label
 import org.meshtastic.core.resources.node_list_long_click_label
 import org.meshtastic.core.resources.unknown_username
@@ -107,6 +113,7 @@ fun NodeItemCompact(
     showRole: Boolean = true,
     showTelemetry: Boolean = true,
     tempInFahrenheit: Boolean = false,
+    deviceImageUrl: String? = null,
 ) {
     val longName = thatNode.user.long_name.ifEmpty { stringResource(Res.string.unknown_username) }
     val isFavorite = thatNode.isFavorite
@@ -129,8 +136,10 @@ fun NodeItemCompact(
 
     val contentColor = MaterialTheme.colorScheme.onSurface
     val cardColors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-    val borderColor = (if (isThisNode) thisNode?.colors?.second else thatNode.colors.second)
-        ?.let { Color(it).copy(alpha = if (isActive) ACTIVE_BORDER_ALPHA else INACTIVE_BORDER_ALPHA) }
+    val borderColor =
+        (if (isThisNode) thisNode?.colors?.second else thatNode.colors.second)?.let {
+            Color(it).copy(alpha = if (isActive) ACTIVE_BORDER_ALPHA else INACTIVE_BORDER_ALPHA)
+        }
     val cardBorder = borderColor?.let { BorderStroke(1.5.dp, it) }
 
     val style = if (thatNode.isUnknownUser) FontStyle.Italic else FontStyle.Normal
@@ -155,18 +164,17 @@ fun NodeItemCompact(
             )
         }
 
-    val nodeColor = (if (isThisNode) thisNode?.colors?.second else thatNode.colors.second)
-        ?.let { Color(it) } ?: Color.Transparent
+    val nodeColor =
+        (if (isThisNode) thisNode?.colors?.second else thatNode.colors.second)?.let { Color(it) } ?: Color.Transparent
 
     Card(
         modifier =
-        modifier
-            .nodeCardGlow(lastHeard = thatNode.lastHeard, nodeColor = nodeColor)
-            .fillMaxWidth()
-            .semantics(mergeDescendants = true) {
-                contentDescription = nodeDescription
-                role = Role.Button
-            },
+        modifier.nodeCardGlow(lastHeard = thatNode.lastHeard, nodeColor = nodeColor).fillMaxWidth().semantics(
+            mergeDescendants = true,
+        ) {
+            contentDescription = nodeDescription
+            role = Role.Button
+        },
         colors = cardColors,
         border = cardBorder,
     ) {
@@ -199,10 +207,7 @@ fun NodeItemCompact(
             }
 
             // Column 2: Content rows (fills remaining width)
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(2.dp),
-            ) {
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 // Row 1: Identity — name + PKC + favorite
                 CompactNameRow(
                     thatNode = thatNode,
@@ -242,6 +247,7 @@ fun NodeItemCompact(
                     showHops = showHops,
                     showChannel = showChannel,
                     showRole = showRole,
+                    deviceImageUrl = deviceImageUrl,
                 )
             }
         }
@@ -313,11 +319,12 @@ private fun CompactHealthRow(
         if (showLastHeard && thatNode.lastHeard > 0 && !isFutureDate(thatNode.lastHeard)) {
             add(
                 @Composable {
-                    val statusColor = if (thatNode.isOnline) {
-                        MaterialTheme.colorScheme.StatusGreen
-                    } else {
-                        contentColor
-                    }
+                    val statusColor =
+                        if (thatNode.isOnline) {
+                            MaterialTheme.colorScheme.StatusGreen
+                        } else {
+                            contentColor
+                        }
                     LastHeardInfo(
                         lastHeard = thatNode.lastHeard,
                         showLabel = false,
@@ -392,17 +399,17 @@ private fun CompactFooterRow(
     showHops: Boolean,
     showChannel: Boolean,
     showRole: Boolean,
+    deviceImageUrl: String?,
 ) {
     val tertiaryColor = MaterialTheme.colorScheme.outline
     val segments =
         buildList<@Composable () -> Unit> {
             if (showRole) {
                 add {
-                    IconInfo(
-                        icon = MeshtasticIcons.HardwareModel,
-                        contentDescription = thatNode.user.hw_model.name,
+                    HardwareModelInfo(
+                        hwModelName = thatNode.user.hw_model.name,
+                        deviceImageUrl = deviceImageUrl,
                         contentColor = tertiaryColor,
-                        text = thatNode.user.hw_model.name,
                     )
                 }
                 add {
@@ -529,4 +536,34 @@ private fun isFutureDate(lastHeard: Int): Boolean {
     val nowSeconds = org.meshtastic.core.common.util.nowSeconds.toInt()
     val oneYearSeconds = 365 * 24 * 60 * 60
     return lastHeard > nowSeconds + oneYearSeconds
+}
+
+@Composable
+private fun HardwareModelInfo(hwModelName: String, deviceImageUrl: String?, contentColor: Color) {
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+        if (deviceImageUrl != null) {
+            AsyncImage(
+                model = deviceImageUrl,
+                contentDescription = hwModelName,
+                modifier = Modifier.size(COMPACT_ICON_SIZE_DP.dp),
+                contentScale = ContentScale.Fit,
+                fallback = painterResource(Res.drawable.ic_memory),
+                error = painterResource(Res.drawable.ic_memory),
+            )
+        } else {
+            Icon(
+                imageVector = MeshtasticIcons.HardwareModel,
+                contentDescription = hwModelName,
+                modifier = Modifier.size(COMPACT_ICON_SIZE_DP.dp),
+                tint = contentColor.copy(alpha = 0.65f),
+            )
+        }
+        Text(
+            text = hwModelName,
+            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold, fontSize = 12.sp),
+            color = contentColor.copy(alpha = 0.95f),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
 }
