@@ -16,7 +16,7 @@ The `MeshtasticCarAppService` is the entry point for Android Auto and AAOS hosts
     <intent-filter>
         <action android:name="androidx.car.app.CarAppService" />
         <category android:name="androidx.car.app.category.MESSAGING" />
-        <category android:name="androidx.car.app.category.POI" />
+        <!-- Secondary category (POI or NAVIGATION) deferred pending map strategy decision -->
     </intent-filter>
 </service>
 ```
@@ -26,7 +26,7 @@ The `MeshtasticCarAppService` is the entry point for Android Auto and AAOS hosts
 | Category | Purpose | Justification |
 |----------|---------|---------------|
 | `MESSAGING` | Primary — enables ConversationItem, voice reply | Core use case: read/reply to mesh messages |
-| `POI` | Secondary — enables PlaceListMapTemplate | Node map with static pins (not navigation) |
+| ~~`POI`~~ | ~~Secondary — enables PlaceListMapTemplate~~ | **DEFERRED** — pending NAVIGATION vs POI decision |
 
 ### Car API Level
 
@@ -75,10 +75,8 @@ class MeshtasticCarSession(private val sessionInfo: SessionInfo) : Session() {
 HomeScreen (root, never popped)
   ├── MessagingScreen (tab 1)
   │     └── ConversationScreen (push on conversation tap)
-  ├── NodeDashboardScreen (tab 2)
-  │     └── NodeDetailScreen (push on node tap)
-  └── MapScreen (tab 3)
-        └── NodeDetailScreen (push on map item tap)
+  └── NodeDashboardScreen (tab 2)
+        └── NodeDetailScreen (push on node tap)
 ```
 
 Maximum screen depth: 3 (compliant with CAL template depth limits).
@@ -92,7 +90,6 @@ TabTemplate {
     tabs: [
         Tab("Messages", messagingIcon),
         Tab("Nodes", nodeIcon),
-        Tab("Map", mapIcon),
     ]
     headerAction: Action.APP_ICON
 }
@@ -170,25 +167,9 @@ PaneTemplate {
 }
 ```
 
-### MapScreen → PlaceListMapTemplate
+### ~~MapScreen → PlaceListMapTemplate~~ (DEFERRED)
 
-```
-PlaceListMapTemplate {
-    title: "Node Map"
-    itemList: ItemList {
-        items: [
-            Row(
-                title: node.name,
-                text: "Updated {timeAgo} • {distanceFormatted}",
-                metadata: Place(LatLng(lat, lng)),
-                onClickListener: → push NodeDetailScreen
-            ) for each node with position
-        ]
-    }
-    anchor: LatLng(ownLat, ownLng)  // if own position available
-    isCurrentLocationEnabled: true
-}
-```
+> Map implementation deferred pending NAVIGATION vs POI category decision. Template contract will be defined when map strategy is resolved.
 
 ### MeshStatusPanel → Minimized Control Panel
 
@@ -224,7 +205,7 @@ AppManager.showAlert(
 | BLE disconnected | Banner shown; screens degrade to cached data (read-only) |
 | No channels configured | Show onboarding PaneTemplate directing to phone app |
 | No nodes in range | Empty state in NodeDashboard: "No nodes heard" |
-| No positions available | MapScreen shows empty map with "No positions reported" |
+| No positions available | ~~MapScreen shows empty map~~ (DEFERRED with map feature) |
 | Template item limit exceeded | Paginate with "Load more" action row |
 | Voice input fails | Fall back to quick-reply template list |
 | Session crash | Crashlytics captures with `car_session` tag; session restarts cleanly |

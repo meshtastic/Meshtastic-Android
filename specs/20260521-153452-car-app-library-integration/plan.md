@@ -85,12 +85,11 @@ feature/car/
 │   │   │   │   ├── MeshtasticCarAppService.kt    # CarAppService entry point
 │   │   │   │   └── MeshtasticCarSession.kt       # Session lifecycle, screen manager
 │   │   │   ├── screens/
-│   │   │   │   ├── HomeScreen.kt                 # Tab-based entry (messaging, nodes, map)
+│   │   │   │   ├── HomeScreen.kt                 # Tab-based entry (messaging, nodes)
 │   │   │   │   ├── MessagingScreen.kt            # ConversationItem list, channel chips
 │   │   │   │   ├── ConversationScreen.kt         # Single conversation with voice reply
 │   │   │   │   ├── NodeDashboardScreen.kt        # Condensed Items node grid
 │   │   │   │   ├── NodeDetailScreen.kt           # Expanded node info
-│   │   │   │   ├── MapScreen.kt                  # PlaceListMapTemplate
 │   │   │   │   └── ChannelManagementScreen.kt    # Channel selection/switching
 │   │   │   ├── alerts/
 │   │   │   │   └── EmergencyHandler.kt           # Banner management for emergencies
@@ -110,8 +109,7 @@ feature/car/
 │           │   └── MeshtasticCarSessionTest.kt
 │           ├── screens/
 │           │   ├── MessagingScreenTest.kt
-│           │   ├── NodeDashboardScreenTest.kt
-│           │   └── MapScreenTest.kt
+│           │   └── NodeDashboardScreenTest.kt
 │           └── alerts/
 │               └── EmergencyHandlerTest.kt
 

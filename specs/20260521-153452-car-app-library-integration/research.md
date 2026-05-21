@@ -90,24 +90,28 @@ The existing `SendMessageUseCase` in `core/repository` accepts `(text, contactKe
 - Custom speech recognition → Rejected: CAL handles this automatically; would duplicate system capabilities
 - Google Assistant App Actions → Rejected: Separate concern handled by AppFunctions feature
 
-## R6: PlaceListMapTemplate for Node Map (POI Category)
+## R6: Map Template Strategy (UNDER REVIEW)
 
-**Decision**: Use `PlaceListMapTemplate` under POI category for static node position display
+**Status**: ⚠️ **Decision deferred** — pending further research on NAVIGATION vs POI implications.
 
-**Rationale**: POI category avoids NAVIGATION category requirements (turn-by-turn guidance, active routing), which would trigger additional Play Store review burden and potential conflicts with navigation apps. `PlaceListMapTemplate` renders a map with place items (pins) + a scrollable list — perfect for showing node positions.
+**Options under consideration**:
 
-**Implementation approach**:
-- Each node with known GPS position becomes a `Place` item with `LatLng`
-- List items show node name + distance + last update time
-- Map auto-zooms to fit all visible pins
-- Tap a list item → NodeDetailScreen with message option
-- Refresh interval: 5 seconds (matches NFR map update latency requirement)
+| Option | Template | Pros | Cons |
+|--------|----------|------|------|
+| POI | `PlaceListMapTemplate` | Simple, no nav conflicts, static pins | 6-item cap, limited interactivity |
+| NAVIGATION | `MapWithContentTemplate` | Full map control, live tracking | Exclusive with Google Maps/Waze, stricter review |
 
-**Limitation**: No live tracking line or animated position updates (NAVIGATION category feature, deferred to v2)
+**Previous analysis** (preserved for reference):
+- POI category avoids NAVIGATION requirements (turn-by-turn guidance, active routing), which would trigger additional Play Store review burden and conflicts with navigation apps
+- `PlaceListMapTemplate` renders a map with place items (pins) + a scrollable list — suitable for showing node positions
+- MapWithContentTemplate offers richer UX but requires NAVIGATION category declaration
 
-**Alternatives considered**:
-- MapWithContentTemplate + NAVIGATION category → Rejected by spec decision; deferred to v2
-- No map at all → Rejected: Location awareness is core Meshtastic differentiator
+**Open questions**:
+1. Does NAVIGATION category preclude simultaneous Google Maps use on car display?
+2. Would Google Maps SDK for AAOS (announced I/O 2026) change the calculus?
+3. Is 6-item cap on PlaceListMapTemplate acceptable for typical mesh networks?
+
+**Implementation approach**: TBD after decision is made
 
 ## R7: Koin DI Integration for Car Module
 

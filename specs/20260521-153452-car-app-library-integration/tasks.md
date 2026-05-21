@@ -24,7 +24,7 @@
 - [ ] T002 Add `include(":feature:car")` to settings.gradle.kts
 - [ ] T003 Create module build file at feature/car/build.gradle.kts with android-library, flavors, koin plugins, and all dependencies per contracts/manifest-declarations.md
 - [ ] T004 [P] Add `"googleImplementation"(projects.feature.car)` dependency in androidApp/build.gradle.kts
-- [ ] T005 [P] Create AndroidManifest.xml at feature/car/src/main/AndroidManifest.xml with CarAppService, MESSAGING+POI categories, and minCarApiLevel 8 meta-data
+- [ ] T005 [P] Create AndroidManifest.xml at feature/car/src/main/AndroidManifest.xml with CarAppService, MESSAGING category, and minCarApiLevel 8 meta-data
 - [ ] T006 [P] Create AAOS descriptor at feature/car/src/main/res/xml/automotive_app_desc.xml
 - [ ] T007 [P] Create car-specific strings file at feature/car/src/main/res/values/strings.xml with initial string resources
 
@@ -42,7 +42,7 @@
 - [ ] T011 [P] Create TemplateBuilders helper extensions at feature/car/src/main/kotlin/org/meshtastic/feature/car/util/TemplateBuilders.kt with reusable CAL template construction helpers
 - [ ] T012 Create MeshtasticCarAppService at feature/car/src/main/kotlin/org/meshtastic/feature/car/service/MeshtasticCarAppService.kt extending CarAppService, creating sessions via Koin
 - [ ] T013 Create MeshtasticCarSession at feature/car/src/main/kotlin/org/meshtastic/feature/car/service/MeshtasticCarSession.kt with onCreateScreen (returns HomeScreen), onNewIntent, onCarConfigurationChanged, Crashlytics tagging, 300ms invalidation debouncing
-- [ ] T014 Create presentation state models (CarSessionState, ConnectionStatus, MessagingUiState, ChannelUi, ConversationUi, NodeDashboardUiState, NodeUi, SignalQuality, TopologyHeader, MapUiState, NodePlace, LatLngWrapper, EmergencyAlert) at feature/car/src/main/kotlin/org/meshtastic/feature/car/model/CarUiModels.kt
+- [ ] T014 Create presentation state models (CarSessionState, ConnectionStatus, MessagingUiState, ChannelUi, ConversationUi, NodeDashboardUiState, NodeUi, SignalQuality, TopologyHeader, EmergencyAlert) at feature/car/src/main/kotlin/org/meshtastic/feature/car/model/CarUiModels.kt
 - [ ] T015 Create HomeScreen (TabTemplate with Messages/Nodes tabs; Map tab placeholder deferred) at feature/car/src/main/kotlin/org/meshtastic/feature/car/screens/HomeScreen.kt
 
 **Checkpoint**: Foundation ready — CarAppService binds, session creates, HomeScreen renders tabs. User story implementation can now begin in parallel.
@@ -245,7 +245,7 @@ Task: T031 "Register panel in session"
 1. Setup + Foundational → Module compiles and binds to Android Auto
 2. Add US1 (Messaging) → Core value delivered (MVP!)
 3. Add US2 (Emergency) → Safety-critical alerts operational
-4. Add US3 + US5 (Nodes + Map) → Location awareness complete
+4. Add US3 (Nodes) → Node awareness complete
 5. Add US4 (Channels) → Multi-channel workflows enabled
 6. Add US6 + US7 (Panel + Voice) → Polish and hands-free refinement
 7. Each increment is independently testable with the Desktop Head Unit (DHU)
@@ -254,8 +254,8 @@ Task: T031 "Register panel in session"
 
 With multiple developers after Phase 2:
 - Developer A: US1 (Messaging) → US4 (Channels) → US7 (Voice)
-- Developer B: US3 (Nodes) → US5 (Map)
-- Developer C: US2 (Emergency) + US6 (Status Panel)
+- Developer B: US3 (Nodes) + US6 (Status Panel)
+- Developer C: US2 (Emergency)
 
 ---
 

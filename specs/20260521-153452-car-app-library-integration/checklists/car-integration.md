@@ -31,7 +31,7 @@
 
 ## Requirement Consistency
 
-- [ ] CHK020 — Do FR-009 (PlaceListMapTemplate under POI) and Non-Goals (NAVIGATION deferred to v2) consistently align with map update latency requirement SC-009 (< 5s)? [Consistency, Spec §FR-009, §SC-009]
+- [x] CHK020 — ~~Do FR-009 (PlaceListMapTemplate under POI) and Non-Goals (NAVIGATION deferred to v2) consistently align with map update latency requirement SC-009 (< 5s)?~~ N/A — FR-009 and SC-009 deferred with map feature [Consistency]
 - [ ] CHK021 — Are voice input requirements consistent between US-1 (reply), US-7 (in-context), and FR-003 (primary method)? [Consistency]
 - [ ] CHK022 — Does "no parked-mode differentiation" (Clarifications) conflict with any acceptance scenario implying driving-only behavior? [Consistency, Spec §Edge Cases]
 - [ ] CHK023 — Are emergency handling requirements consistent between FR-005 (banner), FR-006 (spotlight), and US-2 (all scenarios)? [Consistency]
@@ -44,7 +44,7 @@
 - [ ] CHK027 — Is SC-010 ("zero crashes in 2-hour session") sufficient as a release gate — what about ANRs, OOM, or session drops? [Measurability, Spec §SC-010]
 - [ ] CHK028 — Is SC-007 ("passes Android Auto App Quality review") measurable before actual store submission? [Measurability, Spec §SC-007]
 - [ ] CHK029 — Is SC-001 ("15 seconds total interaction time") measured from notification appearance or screen wake? [Measurability, Spec §SC-001]
-- [ ] CHK030 — Are acceptance scenarios for US-5 (map) testable on DHU given DHU's limited map rendering capabilities? [Measurability, Spec §US-5]
+- [x] CHK030 — ~~Are acceptance scenarios for US-5 (map) testable on DHU?~~ N/A — US-5 deferred [Measurability]
 
 ## Scenario Coverage
 
@@ -58,12 +58,12 @@
 
 ## Edge Case Coverage
 
-- [ ] CHK038 — Is behavior defined when PlaceListMapTemplate's item limit is reached (max 6 items per CAL docs)? [Edge Case, Spec §FR-009]
+- [x] CHK038 — ~~Is behavior defined when PlaceListMapTemplate's item limit is reached?~~ N/A — map deferred [Edge Case]
 - [ ] CHK039 — Is behavior defined when a channel has zero messages (empty state for messaging screen per channel)? [Edge Case, Gap]
 - [ ] CHK040 — Are requirements defined for handling very long node names that exceed Condensed Item text bounds? [Edge Case, Spec §FR-007]
 - [ ] CHK041 — Is behavior defined when voice recognition returns empty/null result or times out? [Edge Case, Spec §FR-003]
 - [ ] CHK042 — Is behavior defined for rapid consecutive emergency alerts from multiple nodes? [Edge Case, Spec §Edge Cases]
-- [ ] CHK043 — Are requirements defined for handling GPS-less nodes on the map screen (nodes without position data)? [Edge Case, Spec §FR-009]
+- [x] CHK043 — ~~Are requirements defined for handling GPS-less nodes on the map screen?~~ N/A — map deferred [Edge Case]
 - [ ] CHK044 — Is behavior defined when the message being composed via voice exceeds mesh packet size limit (228 bytes)? [Edge Case, Gap]
 - [ ] CHK045 — Is behavior defined when Minimized Control Panel data sources become stale (BLE connected but no mesh traffic)? [Edge Case, Spec §FR-010]
 

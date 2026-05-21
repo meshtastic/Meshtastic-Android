@@ -139,10 +139,11 @@ data class TopologyHeader(
 
 **Source**: `NodeRepository.nodeDBbyNum`, `NodeRepository.onlineNodeCount`
 
-### MapUiState
+### ~~MapUiState~~ (DEFERRED)
 
-State for the PlaceListMapTemplate.
+> Map models deferred pending NAVIGATION vs POI category decision. These models will be defined when map strategy is resolved.
 
+<!--
 ```kotlin
 data class MapUiState(
     val places: List<NodePlace>,
@@ -165,6 +166,7 @@ data class LatLngWrapper(
 ```
 
 **Source**: `NodeRepository.nodeDBbyNum` filtered to nodes with valid positions
+-->
 
 ### EmergencyAlert
 

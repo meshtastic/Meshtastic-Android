@@ -15,7 +15,7 @@ Integrate the Android Car App Library 1.9.0-alpha01 into Meshtastic-Android to d
 ### Session 2026-05-21
 
 - Q: How should voice commands be implemented — CAL built-in voice input, full Assistant App Actions, or both? → A: CAL built-in voice input only (tap reply → dictate → send). System-level "Hey Google" commands are handled separately by the AppFunctions feature (`specs/20260521-091500-app-functions/`), which exposes `sendMessage`, `getMeshStatus`, `listNodes`, `getRecentMessages`, and `getNodePosition` to Android system AI (Gemini) automatically — including on car displays.
-- Q: Should the app declare NAVIGATION category for MapWithContentTemplate, or use PlaceListMapTemplate under POI? → A: Stay with POI category, use PlaceListMapTemplate (static pin list, refreshable). Avoids nav app conflicts and Play Store review burden. Live position tracking under NAVIGATION category deferred to v2.
+- Q: Should the app declare NAVIGATION category for MapWithContentTemplate, or use PlaceListMapTemplate under POI? → A: **DECISION DEFERRED** — originally selected POI/PlaceListMapTemplate but reopened for further research. See US-5 deferral note for open questions on NAVIGATION vs POI implications.
 - Q: Should the CarAppService maintain an independent BLE connection or share the phone app's existing connection? → A: Shared connection — single Application-scoped BleConnectionManager instance via Koin. CarAppService keeps the process alive via Android Auto host; BLE connection persists at the Service/Application level, not Activity level.
 - Q: What observability approach should the car module use? → A: Reuse existing Crashlytics with `car_session` custom key tagging for car-specific filtering. No new observability infrastructure; tag existing analytics paths.
 - Q: Should the car app unlock additional features when the vehicle is parked? → A: No parked-mode differentiation. Templated messaging apps provide a uniform experience regardless of driving state. Voice reply is built into ConversationItem. The Android Auto host enforces its own driving restrictions; the app just provides templates.
@@ -225,7 +225,7 @@ A driver uses CAL's built-in voice input to compose messages and perform actions
 | MeshtasticCarAppService | `feature/car/service/` | CAL Session host, entry point for Android Auto/AAOS |
 | MessagingScreen | `feature/car/screens/` | Message list with channel chips, voice reply, quick-reply |
 | NodeDashboardScreen | `feature/car/screens/` | Condensed Items grid of all mesh nodes |
-| MapScreen | `feature/car/screens/` | PlaceListMapTemplate showing node positions as place items |
+| ~~MapScreen~~ | ~~`feature/car/screens/`~~ | ~~PlaceListMapTemplate showing node positions~~ — **DEFERRED** |
 | EmergencyHandler | `feature/car/alerts/` | Banner management for emergency messages |
 | MeshStatusPanel | `feature/car/panels/` | Minimized Control Panel with mesh health |
 | CarMessageRepository | `core/data/` | Existing message repository (reused) |
@@ -313,7 +313,7 @@ A driver uses CAL's built-in voice input to compose messages and perform actions
 - The `google` build flavor is the distribution target; F-Droid/GitHub flavors do not include car support
 - Quick-reply templates are configurable via the phone app's settings; the car app consumes them read-only
 - Voice input quality depends on the car's microphone hardware; the app delegates to Android's speech recognition system
-- MapWithContentTemplate availability depends on NAVIGATION category declaration (deferred to v2); v1 uses PlaceListMapTemplate under POI which is widely supported
+- Map template strategy (POI vs NAVIGATION category) is deferred; no map screen in initial implementation
 - Minimum Car API Level 8 is required; older Android Auto hosts will not show the app (graceful absence, not crash)
 - Koin dependency injection is used consistently with Koin Annotations for the new module
 - TTS (text-to-speech) for reading messages aloud uses Android's built-in TTS engine
@@ -453,7 +453,7 @@ ConversationItem.Builder()
 **Android-exclusive features (exceeding Apple):**
 - Node dashboard with Condensed Items (Apple has no node visibility)
 - Emergency Banner overlays with audio alerts (Apple shows emergencies as regular messages)
-- Map integration via PlaceListMapTemplate (Apple has no map)
+- ~~Map integration~~ (DEFERRED pending NAVIGATION vs POI decision)
 - Channel Chips for instant switching (Apple requires tab navigation)
 - Quick-reply templates (Apple only offers Siri voice)
 - Visual hierarchy via Spotlight/Section Headers/Expanded Headers

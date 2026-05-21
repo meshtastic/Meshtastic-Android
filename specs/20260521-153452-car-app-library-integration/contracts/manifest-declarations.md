@@ -17,7 +17,7 @@
             <intent-filter>
                 <action android:name="androidx.car.app.CarAppService" />
                 <category android:name="androidx.car.app.category.MESSAGING" />
-                <category android:name="androidx.car.app.category.POI" />
+                <!-- POI or NAVIGATION category deferred pending map strategy decision -->
             </intent-filter>
         </service>
 
