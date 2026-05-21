@@ -77,8 +77,8 @@ import org.meshtastic.core.ui.icon.Notes
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.proto.Config
 
-private const val ACTIVE_BORDER_ALPHA = 0.5f
-private const val INACTIVE_BORDER_ALPHA = 0.2f
+private const val ACTIVE_BORDER_ALPHA = 0.65f
+private const val INACTIVE_BORDER_ALPHA = 0.3f
 private const val GRID_COLUMNS = 3
 
 @Composable
@@ -116,7 +116,7 @@ fun NodeItem(
         (if (isThisNode) thisNode?.colors?.second else thatNode.colors.second)?.let { Color(it) } ?: Color.Transparent
     val cardContainerColor = CardDefaults.cardColors().containerColor
     val tintedContainerColor =
-        if (nodeColor == Color.Transparent) cardContainerColor else lerp(cardContainerColor, nodeColor, 0.05f)
+        if (nodeColor == Color.Transparent) cardContainerColor else lerp(cardContainerColor, nodeColor, 0.08f)
     val cardColors = CardDefaults.cardColors(containerColor = tintedContainerColor)
     val borderColor =
         (if (isThisNode) thisNode?.colors?.second else thatNode.colors.second)?.let {
