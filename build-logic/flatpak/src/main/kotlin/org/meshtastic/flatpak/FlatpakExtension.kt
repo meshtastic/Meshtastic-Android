@@ -25,7 +25,6 @@ import org.gradle.api.provider.Property
  *
  * ```kotlin
  * flatpak {
- *     snapshotRepoUrl.set("https://central.sonatype.com/repository/maven-snapshots")
  *     assembleTask.set(":desktopApp:assemble")
  * }
  * ```
@@ -37,9 +36,6 @@ abstract class FlatpakExtension {
 
     /** Output path for the generated flatpak-sources.json manifest. */
     abstract val outputFile: RegularFileProperty
-
-    /** Base URL of the Maven snapshot repository (no trailing slash). */
-    abstract val snapshotRepoUrl: Property<String>
 
     /** Task path to depend on, ensuring the cache is fully populated before scanning. */
     abstract val assembleTask: Property<String>

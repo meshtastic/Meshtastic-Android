@@ -44,8 +44,6 @@ All options have sensible defaults. Override as needed:
 
 ```kotlin
 flatpak {
-    // Snapshot repository to fetch maven-metadata.xml from
-    snapshotRepoUrl.set("https://central.sonatype.com/repository/maven-snapshots")
     // Task that populates the Gradle cache before scanning
     assembleTask.set(":desktopApp:assemble")
     // Custom Gradle cache directory (defaults to ~/.gradle/caches/modules-2/files-2.1)
