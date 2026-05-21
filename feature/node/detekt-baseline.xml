@@ -78,6 +78,11 @@
     <ID>PreviewPublic:NodeDetailPreviews.kt:@PreviewLightDark @Composable fun NodeDetailContentLoadingPreview</ID>
     <ID>PreviewPublic:NodeDetailPreviews.kt:@PreviewLightDark @Composable fun NodeDetailContentLocalPreview</ID>
     <ID>PreviewPublic:NodeDetailPreviews.kt:@PreviewLightDark @Composable fun NodeDetailContentRemotePreview</ID>
+    <ID>PreviewPublic:NodeListItemPreviews.kt:@PreviewLightDark @Composable fun NodeItemCompactActivePreview</ID>
+    <ID>PreviewPublic:NodeListItemPreviews.kt:@PreviewLightDark @Composable fun NodeItemCompactAllFieldsPreview</ID>
+    <ID>PreviewPublic:NodeListItemPreviews.kt:@PreviewLightDark @Composable fun NodeItemCompactMinimalPreview</ID>
+    <ID>PreviewPublic:NodeListItemPreviews.kt:@PreviewLightDark @Composable fun NodeItemCompleteActivePreview</ID>
+    <ID>PreviewPublic:NodeListItemPreviews.kt:@PreviewLightDark @Composable fun NodeItemCompletePreview</ID>
     <ID>TooGenericExceptionCaught:MetricsViewModel.kt:MetricsViewModel$e: Exception</ID>
     <ID>TooGenericExceptionCaught:NodeManagementActions.kt:NodeManagementActions$ex: Exception</ID>
     <ID>ViewModelForwarding:NodeDetailScreens.kt:NodeDetailScaffold( modifier = modifier, uiState = uiState, viewModel = viewModel, navigateToMessages = navigateToMessages, onNavigate = onNavigate, onNavigateUp = onNavigateUp, compassViewModel = compassViewModel, )</ID>

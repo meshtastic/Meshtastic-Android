@@ -181,6 +181,98 @@ class UiPrefsImpl(
 
     private fun provideLocationKey(nodeNum: Int) = "provide-location-$nodeNum"
 
+    // Node list layout preferences
+
+    override val nodeListDensity: StateFlow<String> =
+        dataStore.data
+            .map { it[NodeListLayoutPreferences.KEY_DENSITY] ?: NodeListLayoutPreferences.DEFAULT_DENSITY }
+            .stateIn(scope, SharingStarted.Eagerly, NodeListLayoutPreferences.DEFAULT_DENSITY)
+
+    override fun setNodeListDensity(value: String) {
+        scope.launch { dataStore.edit { it[NodeListLayoutPreferences.KEY_DENSITY] = value } }
+    }
+
+    override val shouldShowPower: StateFlow<Boolean> =
+        dataStore.data
+            .map { it[NodeListLayoutPreferences.KEY_SHOW_POWER] ?: true }
+            .stateIn(scope, SharingStarted.Eagerly, true)
+
+    override fun setShouldShowPower(value: Boolean) {
+        scope.launch { dataStore.edit { it[NodeListLayoutPreferences.KEY_SHOW_POWER] = value } }
+    }
+
+    override val shouldShowLastHeard: StateFlow<Boolean> =
+        dataStore.data
+            .map { it[NodeListLayoutPreferences.KEY_SHOW_LAST_HEARD] ?: true }
+            .stateIn(scope, SharingStarted.Eagerly, true)
+
+    override fun setShouldShowLastHeard(value: Boolean) {
+        scope.launch { dataStore.edit { it[NodeListLayoutPreferences.KEY_SHOW_LAST_HEARD] = value } }
+    }
+
+    override val lastHeardIsRelative: StateFlow<Boolean> =
+        dataStore.data
+            .map { it[NodeListLayoutPreferences.KEY_LAST_HEARD_RELATIVE] ?: false }
+            .stateIn(scope, SharingStarted.Eagerly, false)
+
+    override fun setLastHeardIsRelative(value: Boolean) {
+        scope.launch { dataStore.edit { it[NodeListLayoutPreferences.KEY_LAST_HEARD_RELATIVE] = value } }
+    }
+
+    override val shouldShowLocation: StateFlow<Boolean> =
+        dataStore.data
+            .map { it[NodeListLayoutPreferences.KEY_SHOW_LOCATION] ?: true }
+            .stateIn(scope, SharingStarted.Eagerly, true)
+
+    override fun setShouldShowLocation(value: Boolean) {
+        scope.launch { dataStore.edit { it[NodeListLayoutPreferences.KEY_SHOW_LOCATION] = value } }
+    }
+
+    override val shouldShowHops: StateFlow<Boolean> =
+        dataStore.data
+            .map { it[NodeListLayoutPreferences.KEY_SHOW_HOPS] ?: true }
+            .stateIn(scope, SharingStarted.Eagerly, true)
+
+    override fun setShouldShowHops(value: Boolean) {
+        scope.launch { dataStore.edit { it[NodeListLayoutPreferences.KEY_SHOW_HOPS] = value } }
+    }
+
+    override val shouldShowSignal: StateFlow<Boolean> =
+        dataStore.data
+            .map { it[NodeListLayoutPreferences.KEY_SHOW_SIGNAL] ?: true }
+            .stateIn(scope, SharingStarted.Eagerly, true)
+
+    override fun setShouldShowSignal(value: Boolean) {
+        scope.launch { dataStore.edit { it[NodeListLayoutPreferences.KEY_SHOW_SIGNAL] = value } }
+    }
+
+    override val shouldShowChannel: StateFlow<Boolean> =
+        dataStore.data
+            .map { it[NodeListLayoutPreferences.KEY_SHOW_CHANNEL] ?: true }
+            .stateIn(scope, SharingStarted.Eagerly, true)
+
+    override fun setShouldShowChannel(value: Boolean) {
+        scope.launch { dataStore.edit { it[NodeListLayoutPreferences.KEY_SHOW_CHANNEL] = value } }
+    }
+
+    override val shouldShowRole: StateFlow<Boolean> =
+        dataStore.data
+            .map { it[NodeListLayoutPreferences.KEY_SHOW_ROLE] ?: true }
+            .stateIn(scope, SharingStarted.Eagerly, true)
+
+    override fun setShouldShowRole(value: Boolean) {
+        scope.launch { dataStore.edit { it[NodeListLayoutPreferences.KEY_SHOW_ROLE] = value } }
+    }
+
+    override val shouldShowTelemetry: StateFlow<Boolean> =
+        dataStore.data
+            .map { it[NodeListLayoutPreferences.KEY_SHOW_TELEMETRY] ?: true }
+            .stateIn(scope, SharingStarted.Eagerly, true)
+
+    override fun setShouldShowTelemetry(value: Boolean) {
+        scope.launch { dataStore.edit { it[NodeListLayoutPreferences.KEY_SHOW_TELEMETRY] = value } }
+    }
+
     companion object {
         val KEY_HAS_SHOWN_NOT_PAIRED_WARNING_PREF = booleanPreferencesKey("has_shown_not_paired_warning")
         val KEY_SHOW_QUICK_CHAT_PREF = booleanPreferencesKey("show-quick-chat")

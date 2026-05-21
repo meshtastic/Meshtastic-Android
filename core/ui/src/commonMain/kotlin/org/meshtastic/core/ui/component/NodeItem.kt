@@ -16,8 +16,9 @@
  */
 @file:Suppress("MagicNumber")
 
-package org.meshtastic.feature.node.component
+package org.meshtastic.core.ui.component
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,15 +32,21 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
@@ -57,57 +64,38 @@ import org.meshtastic.core.resources.air_utilization
 import org.meshtastic.core.resources.channel_utilization
 import org.meshtastic.core.resources.current
 import org.meshtastic.core.resources.elevation_suffix
+import org.meshtastic.core.resources.node_list_click_label
+import org.meshtastic.core.resources.node_list_long_click_label
 import org.meshtastic.core.resources.signal_quality
 import org.meshtastic.core.resources.unknown_username
 import org.meshtastic.core.resources.voltage
-import org.meshtastic.core.ui.component.AirQualityInfo
-import org.meshtastic.core.ui.component.ChannelInfo
-import org.meshtastic.core.ui.component.DistanceInfo
-import org.meshtastic.core.ui.component.ElevationInfo
-import org.meshtastic.core.ui.component.HardwareInfo
-import org.meshtastic.core.ui.component.HopsInfo
-import org.meshtastic.core.ui.component.HumidityInfo
-import org.meshtastic.core.ui.component.IconInfo
-import org.meshtastic.core.ui.component.LastHeardInfo
-import org.meshtastic.core.ui.component.MaterialBatteryInfo
-import org.meshtastic.core.ui.component.NodeChip
-import org.meshtastic.core.ui.component.NodeIdInfo
-import org.meshtastic.core.ui.component.NodeKeyStatusIcon
-import org.meshtastic.core.ui.component.PaxcountInfo
-import org.meshtastic.core.ui.component.PowerInfo
-import org.meshtastic.core.ui.component.PressureInfo
-import org.meshtastic.core.ui.component.RoleInfo
-import org.meshtastic.core.ui.component.Rssi
-import org.meshtastic.core.ui.component.SatelliteCountInfo
-import org.meshtastic.core.ui.component.Snr
-import org.meshtastic.core.ui.component.SoilMoistureInfo
-import org.meshtastic.core.ui.component.SoilTemperatureInfo
-import org.meshtastic.core.ui.component.TemperatureInfo
-import org.meshtastic.core.ui.component.TransportIcon
-import org.meshtastic.core.ui.component.determineSignalQuality
 import org.meshtastic.core.ui.icon.AirUtilization
 import org.meshtastic.core.ui.icon.ChannelUtilization
+import org.meshtastic.core.ui.icon.MapCompass
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Notes
+import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.proto.Config
 
-private const val ACTIVE_ALPHA = 0.5f
-private const val INACTIVE_ALPHA = 0.2f
+private const val ACTIVE_BORDER_ALPHA = 0.65f
+private const val INACTIVE_BORDER_ALPHA = 0.3f
 private const val GRID_COLUMNS = 3
 
 @Composable
-@Suppress("LongMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 fun NodeItem(
     thisNode: Node?,
     thatNode: Node,
     distanceUnits: Int,
     tempInFahrenheit: Boolean,
+    connectionState: ConnectionState,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
     onLongClick: (() -> Unit)? = null,
-    connectionState: ConnectionState,
     deviceType: DeviceType? = null,
     isActive: Boolean = false,
+    showTelemetry: Boolean = true,
+    deviceImageUrl: String? = null,
 ) {
     val originalLongName = thatNode.user.long_name.ifEmpty { stringResource(Res.string.unknown_username) }
     val isMuted = remember(thatNode) { thatNode.isMuted }
@@ -121,20 +109,20 @@ fun NodeItem(
         }
     val distance =
         remember(thisNode, thatNode) { thisNode?.distance(thatNode)?.takeIf { it > 0 }?.toDistanceString(system) }
+    val bearingDegrees = remember(thisNode, thatNode) { thisNode?.bearing(thatNode) }
 
-    var contentColor = MaterialTheme.colorScheme.onSurface
-    val cardColors =
-        if (isThisNode) {
-            thisNode?.colors?.second
-        } else {
-            thatNode.colors.second
+    val contentColor = MaterialTheme.colorScheme.onSurface
+    val nodeColor =
+        (if (isThisNode) thisNode?.colors?.second else thatNode.colors.second)?.let { Color(it) } ?: Color.Transparent
+    val cardContainerColor = CardDefaults.cardColors().containerColor
+    val tintedContainerColor =
+        if (nodeColor == Color.Transparent) cardContainerColor else lerp(cardContainerColor, nodeColor, 0.08f)
+    val cardColors = CardDefaults.cardColors(containerColor = tintedContainerColor)
+    val borderColor =
+        (if (isThisNode) thisNode?.colors?.second else thatNode.colors.second)?.let {
+            Color(it).copy(alpha = if (isActive) ACTIVE_BORDER_ALPHA else INACTIVE_BORDER_ALPHA)
         }
-            ?.let {
-                val alpha = if (isActive) ACTIVE_ALPHA else INACTIVE_ALPHA
-                val containerColor = Color(it).copy(alpha = alpha)
-                contentColor = contentColorFor(containerColor)
-                CardDefaults.cardColors().copy(containerColor = containerColor, contentColor = contentColor)
-            } ?: (CardDefaults.cardColors())
+    val cardBorder = borderColor?.let { BorderStroke(1.5.dp, it) }
 
     val style =
         if (thatNode.isUnknownUser) {
@@ -151,10 +139,46 @@ fun NodeItem(
             }
         }
 
-    Card(modifier = modifier.fillMaxWidth(), colors = cardColors) {
+    val a11yStrings = rememberNodeDescriptionStrings()
+    val nodeDescription =
+        remember(thatNode, a11yStrings) {
+            buildNodeDescription(
+                name = originalLongName,
+                isOnline = thatNode.isOnline,
+                isFavorite = isFavorite,
+                lastHeard = thatNode.lastHeard,
+                role = thatNode.user.role.name,
+                hopsAway = thatNode.hopsAway,
+                batteryLevel = thatNode.batteryLevel,
+                distance = distance,
+                snr = thatNode.snr,
+                rssi = thatNode.rssi,
+                viaMqtt = thatNode.viaMqtt,
+                strings = a11yStrings,
+            )
+        }
+
+    Card(
+        modifier =
+        modifier.nodeCardGlow(lastHeard = thatNode.lastHeard, nodeColor = nodeColor).fillMaxWidth().semantics(
+            mergeDescendants = true,
+        ) {
+            contentDescription = nodeDescription
+            role = Role.Button
+        },
+        colors = cardColors,
+        border = cardBorder,
+    ) {
         Column(
             modifier =
-            Modifier.combinedClickable(onClick = onClick, onLongClick = onLongClick).fillMaxWidth().padding(12.dp),
+            Modifier.combinedClickable(
+                onClickLabel = stringResource(Res.string.node_list_click_label),
+                onClick = onClick,
+                onLongClickLabel = stringResource(Res.string.node_list_long_click_label),
+                onLongClick = onLongClick,
+            )
+                .fillMaxWidth()
+                .padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             NodeItemHeader(
@@ -181,7 +205,7 @@ fun NodeItem(
                         imageVector = MeshtasticIcons.Notes,
                         contentDescription = null,
                         modifier = Modifier.size(16.dp),
-                        tint = contentColor.copy(alpha = 0.7f),
+                        tint = MaterialTheme.colorScheme.outline,
                     )
                     Text(
                         text = status,
@@ -196,18 +220,23 @@ fun NodeItem(
             NodeBatteryPositionRow(
                 thatNode = thatNode,
                 distance = distance,
+                bearingDegrees = bearingDegrees,
                 system = system,
                 contentColor = contentColor,
             )
 
             NodeSignalRow(thatNode = thatNode, isThisNode = isThisNode, contentColor = contentColor)
 
-            val sensorItems = gatherSensors(thatNode, tempInFahrenheit, contentColor)
-            if (sensorItems.isNotEmpty()) {
-                MetricsGrid(sensorItems)
+            if (showTelemetry) {
+                val sensorItems = gatherSensors(thatNode, tempInFahrenheit, contentColor)
+                if (sensorItems.isNotEmpty()) {
+                    MetricsGrid(sensorItems)
+                }
             }
 
-            NodeItemFooter(thatNode = thatNode, contentColor = contentColor)
+            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+
+            NodeItemFooter(thatNode = thatNode, contentColor = contentColor, deviceImageUrl = deviceImageUrl)
         }
     }
 }
@@ -216,6 +245,7 @@ fun NodeItem(
 private fun NodeBatteryPositionRow(
     thatNode: Node,
     distance: String?,
+    bearingDegrees: Int?,
     system: Config.DisplayConfig.DisplayUnits,
     contentColor: Color,
 ) {
@@ -234,6 +264,14 @@ private fun NodeBatteryPositionRow(
             if (distance != null) {
                 DistanceInfo(distance = distance, contentColor = contentColor)
             }
+            if (bearingDegrees != null) {
+                Icon(
+                    imageVector = MeshtasticIcons.MapCompass,
+                    contentDescription = "$bearingDegrees°",
+                    modifier = Modifier.size(16.dp).rotate(bearingDegrees.toFloat()),
+                    tint = contentColor,
+                )
+            }
             thatNode.validPosition?.let { position ->
                 ElevationInfo(
                     altitude = position.altitude ?: 0,
@@ -246,43 +284,39 @@ private fun NodeBatteryPositionRow(
     }
 }
 
+@Suppress("CyclomaticComplexMethod")
 @Composable
 private fun NodeSignalRow(thatNode: Node, isThisNode: Boolean, contentColor: Color) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        if (isThisNode) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                IconInfo(
-                    icon = MeshtasticIcons.ChannelUtilization,
-                    contentDescription = stringResource(Res.string.channel_utilization),
-                    label = stringResource(Res.string.channel_utilization),
-                    text = MetricFormatter.percent(thatNode.deviceMetrics.channel_utilization ?: 0f),
-                    contentColor = contentColor,
-                )
-                IconInfo(
-                    icon = MeshtasticIcons.AirUtilization,
-                    contentDescription = stringResource(Res.string.air_utilization),
-                    label = stringResource(Res.string.air_utilization),
-                    text = MetricFormatter.percent(thatNode.deviceMetrics.air_util_tx ?: 0f),
-                    contentColor = contentColor,
-                )
-            }
-        } else {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+    val items =
+        buildList<@Composable () -> Unit> {
+            if (isThisNode) {
+                add {
+                    IconInfo(
+                        icon = MeshtasticIcons.ChannelUtilization,
+                        contentDescription = stringResource(Res.string.channel_utilization),
+                        label = stringResource(Res.string.channel_utilization),
+                        text = MetricFormatter.percent(thatNode.deviceMetrics.channel_utilization ?: 0f),
+                        contentColor = contentColor,
+                    )
+                }
+                add {
+                    IconInfo(
+                        icon = MeshtasticIcons.AirUtilization,
+                        contentDescription = stringResource(Res.string.air_utilization),
+                        label = stringResource(Res.string.air_utilization),
+                        text = MetricFormatter.percent(thatNode.deviceMetrics.air_util_tx ?: 0f),
+                        contentColor = contentColor,
+                    )
+                }
+            } else {
                 if (thatNode.hopsAway > 0) {
-                    HopsInfo(hops = thatNode.hopsAway, contentColor = contentColor)
+                    add { HopsInfo(hops = thatNode.hopsAway, contentColor = contentColor) }
                 } else if (thatNode.hopsAway == 0 && !thatNode.viaMqtt) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        if (thatNode.snr < 100f) Snr(thatNode.snr)
-                        if (thatNode.rssi < 0) Rssi(thatNode.rssi)
-                        if (thatNode.snr < 100f && thatNode.rssi < 0) {
-                            val quality = determineSignalQuality(thatNode.snr, thatNode.rssi)
+                    if (thatNode.snr < 100f) add { Snr(thatNode.snr) }
+                    if (thatNode.rssi < 0) add { Rssi(thatNode.rssi) }
+                    if (thatNode.snr < 100f && thatNode.rssi < 0) {
+                        val quality = determineSignalQuality(thatNode.snr, thatNode.rssi)
+                        add {
                             IconInfo(
                                 icon = vectorResource(quality.icon),
                                 contentDescription = stringResource(Res.string.signal_quality),
@@ -293,17 +327,18 @@ private fun NodeSignalRow(thatNode: Node, isThisNode: Boolean, contentColor: Col
                     }
                 }
                 if (thatNode.channel > 0) {
-                    ChannelInfo(channel = thatNode.channel, contentColor = contentColor)
+                    add { ChannelInfo(channel = thatNode.channel, contentColor = contentColor) }
                 }
+            }
+
+            val satCount = thatNode.validPosition?.sats_in_view ?: 0
+            if (satCount > 0) {
+                add { SatelliteCountInfo(satCount = satCount, contentColor = contentColor) }
             }
         }
 
-        val satCount = thatNode.validPosition?.sats_in_view ?: 0
-        if (satCount > 0) {
-            SatelliteCountInfo(satCount = satCount, contentColor = contentColor)
-        } else {
-            Spacer(Modifier)
-        }
+    if (items.isNotEmpty()) {
+        MetricsGrid(items)
     }
 }
 
@@ -377,7 +412,16 @@ private fun MetricsGrid(items: List<@Composable () -> Unit>) {
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         val remainder = items.size % GRID_COLUMNS
-        items.forEach { item -> Box(Modifier.weight(1f)) { item() } }
+        items.forEachIndexed { index, item ->
+            val columnIndex = index % GRID_COLUMNS
+            val alignment =
+                when (columnIndex) {
+                    GRID_COLUMNS - 1 -> Alignment.CenterEnd
+                    0 -> Alignment.CenterStart
+                    else -> Alignment.Center
+                }
+            Box(Modifier.weight(1f), contentAlignment = alignment) { item() }
+        }
         if (remainder != 0) {
             repeat(GRID_COLUMNS - remainder) { Spacer(Modifier.weight(1f)) }
         }
@@ -432,7 +476,15 @@ private fun NodeItemHeader(
                     modifier = Modifier.size(16.dp),
                 )
             }
-            LastHeardInfo(lastHeard = thatNode.lastHeard, showLabel = false, contentColor = contentColor)
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                val statusColor =
+                    if (!isThisNode && thatNode.isOnline) {
+                        MaterialTheme.colorScheme.StatusGreen
+                    } else {
+                        contentColor
+                    }
+                LastHeardInfo(lastHeard = thatNode.lastHeard, showLabel = false, contentColor = statusColor)
+            }
         }
 
         NodeStatusIcons(
@@ -448,13 +500,17 @@ private fun NodeItemHeader(
 }
 
 @Composable
-private fun NodeItemFooter(thatNode: Node, contentColor: Color) {
+private fun NodeItemFooter(thatNode: Node, contentColor: Color, deviceImageUrl: String?) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        HardwareInfo(hwModel = thatNode.user.hw_model.name, contentColor = contentColor)
+        HardwareInfo(
+            hwModel = thatNode.user.hw_model.name,
+            deviceImageUrl = deviceImageUrl,
+            contentColor = contentColor,
+        )
         RoleInfo(role = thatNode.user.role, contentColor = contentColor)
         NodeIdInfo(id = thatNode.user.id.ifEmpty { "???" }, contentColor = contentColor)
     }

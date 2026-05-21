@@ -151,6 +151,49 @@ interface UiPrefs {
     fun shouldProvideNodeLocation(nodeNum: Int): StateFlow<Boolean>
 
     fun setShouldProvideNodeLocation(nodeNum: Int, provide: Boolean)
+
+    // Node list layout preferences
+
+    /** Active density mode stored as the enum name (e.g. "COMPLETE", "COMPACT"). */
+    val nodeListDensity: StateFlow<String>
+
+    fun setNodeListDensity(value: String)
+
+    val shouldShowPower: StateFlow<Boolean>
+
+    fun setShouldShowPower(value: Boolean)
+
+    val shouldShowLastHeard: StateFlow<Boolean>
+
+    fun setShouldShowLastHeard(value: Boolean)
+
+    val lastHeardIsRelative: StateFlow<Boolean>
+
+    fun setLastHeardIsRelative(value: Boolean)
+
+    val shouldShowLocation: StateFlow<Boolean>
+
+    fun setShouldShowLocation(value: Boolean)
+
+    val shouldShowHops: StateFlow<Boolean>
+
+    fun setShouldShowHops(value: Boolean)
+
+    val shouldShowSignal: StateFlow<Boolean>
+
+    fun setShouldShowSignal(value: Boolean)
+
+    val shouldShowChannel: StateFlow<Boolean>
+
+    fun setShouldShowChannel(value: Boolean)
+
+    val shouldShowRole: StateFlow<Boolean>
+
+    fun setShouldShowRole(value: Boolean)
+
+    val shouldShowTelemetry: StateFlow<Boolean>
+
+    fun setShouldShowTelemetry(value: Boolean)
 }
 
 /** Reactive interface for notification preferences. */
