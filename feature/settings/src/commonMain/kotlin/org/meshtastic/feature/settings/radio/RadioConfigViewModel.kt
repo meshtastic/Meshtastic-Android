@@ -16,7 +16,6 @@
  */
 package org.meshtastic.feature.settings.radio
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
@@ -115,7 +114,7 @@ data class RadioConfigState(
 @KoinViewModel
 @Suppress("LongParameterList")
 open class RadioConfigViewModel(
-    @InjectedParam savedStateHandle: SavedStateHandle,
+    @InjectedParam private val destNum: Int?,
     private val radioConfigRepository: RadioConfigRepository,
     private val packetRepository: PacketRepository,
     private val serviceRepository: ServiceRepository,
@@ -183,8 +182,6 @@ open class RadioConfigViewModel(
         probeJob?.cancel()
         _mqttProbeStatus.value = null
     }
-
-    private val destNum: Int? = savedStateHandle.get<Int>("destNum")
 
     private val _destNode = MutableStateFlow<Node?>(null)
     val destNode: StateFlow<Node?>

@@ -16,7 +16,6 @@
  */
 package org.meshtastic.feature.settings.radio
 
-import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import dev.mokkery.MockMode
 import dev.mokkery.answering.calls
@@ -140,7 +139,7 @@ class RadioConfigViewModelTest {
     }
 
     private fun createViewModel() = RadioConfigViewModel(
-        savedStateHandle = SavedStateHandle(),
+        destNum = null,
         radioConfigRepository = radioConfigRepository,
         packetRepository = packetRepository,
         serviceRepository = serviceRepository,
@@ -407,7 +406,7 @@ class RadioConfigViewModelTest {
         nodeRepository.setNodes(listOf(node))
         viewModel =
             RadioConfigViewModel(
-                savedStateHandle = SavedStateHandle(mapOf("destNum" to 456)),
+                destNum = 456,
                 radioConfigRepository = radioConfigRepository,
                 packetRepository = packetRepository,
                 serviceRepository = serviceRepository,
