@@ -821,6 +821,7 @@ node_filter_title
 node_id
 node_layout_channel
 node_layout_compact
+node_layout_compact_fields_header
 node_layout_complete
 node_layout_complete_description
 node_layout_device_role

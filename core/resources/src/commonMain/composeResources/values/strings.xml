@@ -851,9 +851,10 @@
     <string name="node_id">Node ID</string>
     <string name="node_layout_channel">Channel</string>
     <string name="node_layout_compact">Compact</string>
+    <string name="node_layout_compact_fields_header">Compact Fields</string>
     <string name="node_layout_complete">Complete</string>
     <string name="node_layout_complete_description">The Complete layout displays all available node data. Fields with no data are automatically hidden.</string>
-    <string name="node_layout_device_role">Device Role</string>
+    <string name="node_layout_device_role">Device &amp; Role</string>
     <string name="node_layout_distance_and_bearing">Distance and Bearing</string>
     <string name="node_layout_help_signal_bad">Signal is poor. SNR is above −18 dB and RSSI is above −125 dBm.</string>
     <string name="node_layout_help_signal_fair">Signal is moderate. SNR is above −12 dB and RSSI is above −120 dBm.</string>

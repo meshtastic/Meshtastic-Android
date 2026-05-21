@@ -16,6 +16,8 @@
  */
 package org.meshtastic.feature.settings.component
 
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -36,6 +38,7 @@ import org.meshtastic.core.model.NodeListDensity
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.node_layout_channel
 import org.meshtastic.core.resources.node_layout_compact
+import org.meshtastic.core.resources.node_layout_compact_fields_header
 import org.meshtastic.core.resources.node_layout_complete
 import org.meshtastic.core.resources.node_layout_complete_description
 import org.meshtastic.core.resources.node_layout_device_role
@@ -104,6 +107,55 @@ fun NodeLayoutSettings(
             }
         }
 
+        // Live preview — positioned above toggles so it doesn't jump with list size changes
+        Text(
+            text = stringResource(Res.string.node_layout_preview),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 4.dp),
+        )
+
+        val previewNode = remember { previewSampleNode() }
+        val localNode = remember { previewLocalNode() }
+
+        Box(modifier = Modifier.animateContentSize()) {
+            when (density) {
+                NodeListDensity.COMPLETE ->
+                    NodeItem(
+                        thisNode = localNode,
+                        thatNode = previewNode,
+                        distanceUnits = 0,
+                        tempInFahrenheit = false,
+                        connectionState = ConnectionState.Connected,
+                        showTelemetry = showTelemetry,
+                    )
+
+                NodeListDensity.COMPACT ->
+                    NodeItemCompact(
+                        thisNode = localNode,
+                        thatNode = previewNode,
+                        distanceUnits = 0,
+                        showPower = showPower,
+                        showLastHeard = showLastHeard,
+                        lastHeardIsRelative = lastHeardIsRelative,
+                        showLocation = showLocation,
+                        showHops = showHops,
+                        showSignal = showSignal,
+                        showChannel = showChannel,
+                        showRole = showRole,
+                        showTelemetry = showTelemetry,
+                    )
+            }
+        }
+
+        // Shared toggle — applies to both layouts
+        SwitchPreference(
+            title = stringResource(Res.string.node_layout_log_icons),
+            checked = showTelemetry,
+            enabled = true,
+            onCheckedChange = onShowTelemetryChange,
+        )
+
         if (density == NodeListDensity.COMPLETE) {
             Text(
                 text = stringResource(Res.string.node_layout_complete_description),
@@ -112,7 +164,13 @@ fun NodeLayoutSettings(
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
             )
         } else {
-            // Compact toggles ordered by layout position
+            // Compact-specific toggles
+            Text(
+                text = stringResource(Res.string.node_layout_compact_fields_header),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 16.dp, top = 12.dp, bottom = 4.dp),
+            )
             SwitchPreference(
                 title = stringResource(Res.string.node_layout_power),
                 checked = showPower,
@@ -161,50 +219,6 @@ fun NodeLayoutSettings(
                 enabled = true,
                 onCheckedChange = onShowRoleChange,
             )
-            SwitchPreference(
-                title = stringResource(Res.string.node_layout_log_icons),
-                checked = showTelemetry,
-                enabled = true,
-                onCheckedChange = onShowTelemetryChange,
-            )
-        }
-
-        // Live preview
-        Text(
-            text = stringResource(Res.string.node_layout_preview),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 4.dp),
-        )
-
-        val previewNode = remember { previewSampleNode() }
-        val localNode = remember { previewLocalNode() }
-
-        when (density) {
-            NodeListDensity.COMPLETE ->
-                NodeItem(
-                    thisNode = localNode,
-                    thatNode = previewNode,
-                    distanceUnits = 0,
-                    tempInFahrenheit = false,
-                    connectionState = ConnectionState.Connected,
-                )
-
-            NodeListDensity.COMPACT ->
-                NodeItemCompact(
-                    thisNode = localNode,
-                    thatNode = previewNode,
-                    distanceUnits = 0,
-                    showPower = showPower,
-                    showLastHeard = showLastHeard,
-                    lastHeardIsRelative = lastHeardIsRelative,
-                    showLocation = showLocation,
-                    showHops = showHops,
-                    showSignal = showSignal,
-                    showChannel = showChannel,
-                    showRole = showRole,
-                    showTelemetry = showTelemetry,
-                )
         }
     }
 }
