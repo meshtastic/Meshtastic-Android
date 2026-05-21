@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">Nachricht von %1$s: %2$s</string>
     <string name="accept">Akzeptieren</string>
@@ -138,6 +139,7 @@
     <string name="channel_url">Kanal URL</string>
     <string name="channel_utilization">Kanalauslastung</string>
     <string name="channels">Kanäle</string>
+    <!-- CHIRPY -->
     <string name="chirpy">Chirpy</string>
     <string name="choose_contrast">Kontrast</string>
     <string name="choose_theme">Design auswählen</string>
@@ -787,6 +789,11 @@
     <string name="node_filter_show_ignored">Nur ignorierte Knoten anzeigen</string>
     <string name="node_filter_title">Filtern nach</string>
     <string name="node_id">Knoten-ID</string>
+    <string name="node_layout_channel">Kanal</string>
+    <string name="node_layout_compact">Kompakt</string>
+    <string name="node_layout_hops_away">Hops Entfernt</string>
+    <string name="node_layout_log_icons">Umweltdaten</string>
+    <string name="node_layout_power">Leistung</string>
     <string name="node_number">Knotennummer</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_button">Sortieroptionen</string>

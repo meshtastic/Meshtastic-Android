@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">Sõnum saatjalt %1$s: %2$s</string>
     <string name="accept">Nõustu</string>
@@ -138,6 +139,7 @@
     <string name="channel_url">Kanali URL</string>
     <string name="channel_utilization">Kanali kasutus</string>
     <string name="channels">Kanal</string>
+    <!-- CHIRPY -->
     <string name="chirpy">Chirpy</string>
     <string name="choose_contrast">Kontrastsuse tase</string>
     <string name="choose_theme">Vali teema</string>
@@ -804,6 +806,10 @@
     <string name="node_filter_show_ignored">Näita ainult ignoreeritud sõlmi</string>
     <string name="node_filter_title">Filtreeri </string>
     <string name="node_id">Sõlme ID</string>
+    <string name="node_layout_channel">Kanal</string>
+    <string name="node_layout_hops_away">Hüppe kaugusel</string>
+    <string name="node_layout_log_icons">Keskkonnamõõdikud</string>
+    <string name="node_layout_power">Toide</string>
     <string name="node_number">Sõlme number</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_button">Sõlmede filter</string>
@@ -1222,6 +1228,7 @@
     <string name="timestamp">Ajatempel</string>
     <string name="tls_enabled">TLS lubatud</string>
     <string name="toggle_my_position">Lülita asukoht sisse</string>
+    <string name="trace_route">Trace Route</string>
     <!-- TRACEROUTE -->
     <string name="traceroute">Marsruudi</string>
     <string name="traceroute_diff">%1$d hüpet sõlmeni, %2$d hüpet tagasi</string>
@@ -1274,6 +1281,7 @@
     <string name="tx_power_dbm">Saatevõimsus</string>
     <string name="type">Tüüp</string>
     <string name="type_a_message">Sisesta sõnum</string>
+    <string name="udp_enabled">UDP levitamine</string>
     <!-- UNKNOWN -->
     <string name="unknown">Tundmatu</string>
     <string name="unknown_age">Tundmatu vanus</string>

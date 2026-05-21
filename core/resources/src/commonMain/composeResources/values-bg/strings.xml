@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">Съобщение от %1$s: %2$s</string>
     <string name="accept">Приеми</string>
@@ -113,6 +114,7 @@
     <string name="channel_name">Име на канал</string>
     <string name="channel_utilization">Използване на канала</string>
     <string name="channels">Канали</string>
+    <!-- CHIRPY -->
     <string name="chirpy">Чирпи</string>
     <string name="choose_contrast">Ниво на контраста</string>
     <string name="choose_theme">Избор на тема</string>
@@ -651,6 +653,10 @@
     <string name="node_filter_show_ignored">Показване само на игнорираните възли</string>
     <string name="node_filter_title">Филтриране по</string>
     <string name="node_id">ID на възела</string>
+    <string name="node_layout_channel">Канал</string>
+    <string name="node_layout_hops_away">Брой отскоци</string>
+    <string name="node_layout_log_icons">Показатели на околната среда</string>
+    <string name="node_layout_power">Захранване</string>
     <string name="node_number">Номер на възела</string>
     <string name="node_sort_alpha">А-Я</string>
     <string name="node_sort_button">Опции за сортиране на възлите</string>

@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">Повідомлення від %1$s: %2$s</string>
     <string name="accept">Прийняти</string>
@@ -123,6 +124,7 @@
     <string name="channel_name">Ім'я каналу</string>
     <string name="channel_utilization">Завантаженість каналу</string>
     <string name="channels">Канали</string>
+    <!-- CHIRPY -->
     <string name="chirpy">Chirpy</string>
     <string name="choose_contrast">Рівень контрасту</string>
     <string name="choose_theme">Оберіть тему</string>
@@ -701,6 +703,10 @@
     <string name="node_filter_show_ignored">Показати лише ігноровані вузли</string>
     <string name="node_filter_title">Фільтрувати за</string>
     <string name="node_id">ID вузла</string>
+    <string name="node_layout_channel">Канал</string>
+    <string name="node_layout_hops_away">Кількість стрибків повідомлення</string>
+    <string name="node_layout_log_icons">Показники довкілля</string>
+    <string name="node_layout_power">Живлення</string>
     <string name="node_number">Номер вузла</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_button">Опції сортування вузлів</string>

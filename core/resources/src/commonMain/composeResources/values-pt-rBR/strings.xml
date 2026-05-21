@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
     <string name="accept">Aceitar</string>
     <!-- ACTION -->
     <string name="action_delete_message">Excluir %1$s mensagem</string>
@@ -88,6 +89,7 @@
     <string name="channel_label">Canal</string>
     <string name="channel_name">Nome do canal</string>
     <string name="channels">Canais</string>
+    <!-- CHIRPY -->
     <string name="choose_theme">Escolher tema</string>
     <!-- CLEAN -->
     <string name="clean_node_database_confirmation">Isto irá remover %1$d nós de seu banco de dados. Esta ação não pode ser desfeita.</string>
@@ -415,6 +417,9 @@
     <string name="node_filter_only_online">Ocultar nós offline</string>
     <string name="node_filter_placeholder">Filtro</string>
     <string name="node_id">ID do Nó</string>
+    <string name="node_layout_channel">Canal</string>
+    <string name="node_layout_hops_away">Qtd de saltos</string>
+    <string name="node_layout_power">Energia</string>
     <string name="node_number">Número do Nó</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_button">Opções de ordenação do nó</string>

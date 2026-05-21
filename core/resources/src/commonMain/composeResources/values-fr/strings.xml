@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">Message de %1$s: %2$s</string>
     <string name="accept">Accepter</string>
@@ -138,6 +139,7 @@
     <string name="channel_url">URL du canal</string>
     <string name="channel_utilization">UtilCanal</string>
     <string name="channels">Canaux</string>
+    <!-- CHIRPY -->
     <string name="chirpy">Chirpy</string>
     <string name="choose_contrast">Niveau de contraste</string>
     <string name="choose_theme">Choisir un thème</string>
@@ -775,6 +777,10 @@
     <string name="node_filter_show_ignored">Afficher uniquement les nœuds ignorés</string>
     <string name="node_filter_title">Filtrer par</string>
     <string name="node_id">Identifiant (ID) du nœud</string>
+    <string name="node_layout_channel">Canal</string>
+    <string name="node_layout_hops_away">Sauts</string>
+    <string name="node_layout_log_icons">Métriques d'environnement</string>
+    <string name="node_layout_power">Alimentation</string>
     <string name="node_number">Numéro de nœud</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_button">Options de tri des nœuds</string>

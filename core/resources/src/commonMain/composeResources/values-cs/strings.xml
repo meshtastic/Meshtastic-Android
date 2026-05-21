@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">Zpráva od %1$s: %2$s</string>
     <string name="accept">Přijmout</string>
@@ -123,6 +124,7 @@
     <string name="channel_url">URL kanálu</string>
     <string name="channel_utilization">ChUtil</string>
     <string name="channels">Kanály</string>
+    <!-- CHIRPY -->
     <string name="choose_contrast">Úroveň kontrastu</string>
     <string name="choose_theme">Vyberte vzhled</string>
     <!-- CLEAN -->
@@ -656,6 +658,10 @@
     <string name="node_filter_show_ignored">Zobrazit jen ignorované uzly</string>
     <string name="node_filter_title">Filtrovat podle</string>
     <string name="node_id">Identifikátor uzlu</string>
+    <string name="node_layout_channel">Kanál</string>
+    <string name="node_layout_hops_away">Počet skoků</string>
+    <string name="node_layout_log_icons">Metriky prostředí</string>
+    <string name="node_layout_power">Napájení</string>
     <string name="node_number">Číslo uzlu</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_button">Možnosti řazení uzlů</string>

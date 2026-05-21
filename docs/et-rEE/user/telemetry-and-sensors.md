@@ -23,7 +23,7 @@ Telemetry allows nodes equipped with sensors to broadcast environmental, power, 
 
 All Meshtastic nodes report basic device telemetry:
 
-| Metric             | Kirjeldus                      | Typical Range                                                      |
+| Metric             | Kirjeldus                      | Tüüpiline ulatus                                                   |
 | ------------------ | ------------------------------ | ------------------------------------------------------------------ |
 | Battery Level      | Charge percentage              | 0–100%                                                             |
 | Vool               | Battery voltage                | 3.0–4.2V (LiPo) |
