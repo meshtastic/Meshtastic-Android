@@ -1,7 +1,7 @@
 name: UI & Docs Governance
 
 on:
-  pull_request:
+  pull_request_target:
     branches: [main]
     types: [opened, synchronize, reopened, labeled, unlabeled]
   schedule:
@@ -18,13 +18,14 @@ jobs:
     name: Docs staleness check
     runs-on: ubuntu-24.04-arm
     if: >-
-      github.event_name == 'pull_request'
+      github.event.pull_request != null
       && !contains(github.event.pull_request.labels.*.name, 'skip-docs-check')
 
     steps:
       - name: Checkout
         uses: actions/checkout@v6
         with:
+          ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
 
       - name: Detect changed files
@@ -162,6 +163,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 1
 
       - name: Setup Node.js
@@ -203,13 +205,14 @@ jobs:
     name: Preview staleness check
     runs-on: ubuntu-24.04-arm
     if: >-
-      github.event_name == 'pull_request'
+      github.event.pull_request != null
       && !contains(github.event.pull_request.labels.*.name, 'skip-preview-check')
 
     steps:
       - name: Checkout
         uses: actions/checkout@v6
         with:
+          ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
 
       - name: Detect changed files
