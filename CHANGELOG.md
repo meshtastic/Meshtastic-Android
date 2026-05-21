@@ -10,6 +10,9 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 ### Unreleased (not yet in any build)
 
 * fix(flatpak): improve mirror URL strategy for offline builds (#5558) by James Rich (@jamesarich) in [`d6e440c78`](https://github.com/meshtastic/Meshtastic-Android/commit/d6e440c783a8a943a42206a1678754cb2fff6ace)
+* docs: update CHANGELOG.md (#5559) by github-actions[bot] (@github-actions[bot]) in [`89311e187`](https://github.com/meshtastic/Meshtastic-Android/commit/89311e187538e5dad1642b4d139f2137f7c125c8)
+* fix(settings): remote admin always showed local node config (#5560) by James Rich (@jamesarich) in [`41e368641`](https://github.com/meshtastic/Meshtastic-Android/commit/41e368641b22d8a6bf0b265c0dac762909479da0)
+* chore(deps): update actions/stale action to v10.3.0 (#5562) by renovate[bot] (@renovate[bot]) in [`2fc427350`](https://github.com/meshtastic/Meshtastic-Android/commit/2fc427350f6e4d38f92a7d2f7874f0464115781a)
 
 ### Internal (v2.7.14-internal.101)
 Changes since [`v2.7.14-open.9`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14-open.9):
