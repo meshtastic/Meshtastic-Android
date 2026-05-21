@@ -26,7 +26,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -34,11 +33,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -68,7 +70,6 @@ import org.meshtastic.core.resources.message_status_queued
 import org.meshtastic.core.resources.message_status_unknown
 import org.meshtastic.core.resources.react
 import org.meshtastic.core.resources.you
-import org.meshtastic.core.ui.component.BottomSheetDialog
 import org.meshtastic.core.ui.component.Rssi
 import org.meshtastic.core.ui.component.Snr
 import org.meshtastic.core.ui.emoji.EmojiPickerDialog
@@ -187,6 +188,7 @@ internal fun AddReactionButton(modifier: Modifier = Modifier, onSendReaction: (S
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Suppress("LongMethod", "CyclomaticComplexity", "CyclomaticComplexMethod")
 @Composable
 internal fun ReactionDialog(
@@ -194,7 +196,10 @@ internal fun ReactionDialog(
     onDismiss: () -> Unit = {},
     myId: String? = null,
     onResend: (Reaction) -> Unit = {},
-) = BottomSheetDialog(onDismiss = onDismiss, modifier = Modifier.fillMaxHeight(fraction = .3f)) {
+) = ModalBottomSheet(
+    onDismissRequest = onDismiss,
+    sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+) {
     val groupedEmojis = reactions.groupBy { it.emoji }
     var selectedEmoji by remember { mutableStateOf<String?>(null) }
     val filteredReactions = selectedEmoji?.let { groupedEmojis[it] ?: emptyList() } ?: reactions

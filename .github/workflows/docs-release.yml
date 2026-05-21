@@ -1,0 +1,111 @@
+name: Docs Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+      - '!v*-*'
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.repository == 'meshtastic/Meshtastic-Android'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          submodules: true
+          fetch-depth: 0
+
+      - name: Extract Version
+        id: version
+        run: |
+          TAG=${GITHUB_REF#refs/tags/v}
+          echo "version=$TAG" >> $GITHUB_OUTPUT
+          echo "Deploying docs for version: $TAG"
+
+      - name: Gradle Setup
+        uses: ./.github/actions/gradle-setup
+        with:
+          gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '4.0.4'
+          bundler-cache: true
+          working-directory: docs
+
+      # Build root docs site (/ on Pages)
+      - name: Build Root Docs Site
+        run: ./gradlew generateDocsBundle publishDocsSite -Pdocs.channel=root -Pci=true
+
+      # Build versioned docs (/vX.Y.Z/ on Pages)
+      - name: Build Versioned Docs
+        run: ./gradlew generateDocsBundle publishDocsSite -Pdocs.channel=release -Pdocs.version=${{ steps.version.outputs.version }} -Pci=true
+
+      # Build Dokka API reference (/api/ on Pages)
+      - name: Build Dokka HTML documentation
+        run: ./gradlew dokkaGeneratePublicationHtml --no-configuration-cache
+
+      - name: Compile Jekyll Sites
+        run: |
+          # Build versioned Jekyll site
+          BUNDLE_GEMFILE=docs/Gemfile bundle exec jekyll build \
+            --source build/_site/v${{ steps.version.outputs.version }} \
+            --destination build/jekyll_release \
+            --baseurl /${{ github.event.repository.name }}/v${{ steps.version.outputs.version }}
+          
+          # Move versioned source folder out of root source folder to avoid nested build issues
+          mv build/_site/v${{ steps.version.outputs.version }} build/v_temp
+
+          # Build root Jekyll site
+          BUNDLE_GEMFILE=docs/Gemfile bundle exec jekyll build \
+            --source build/_site \
+            --destination build/jekyll_root \
+            --baseurl /${{ github.event.repository.name }}
+
+      - name: Assemble Pages artifact
+        run: |
+          # Create final site directory
+          mkdir -p build/final_site
+          
+          # Copy root compiled site
+          cp -r build/jekyll_root/* build/final_site/
+          
+          # Copy release compiled site to vX.Y.Z/
+          mkdir -p build/final_site/v${{ steps.version.outputs.version }}
+          cp -r build/jekyll_release/* build/final_site/v${{ steps.version.outputs.version }}/
+          
+          # Copy Dokka output into final_site/api/
+          cp -r build/dokka/html build/final_site/api
+          
+          # Disable GitHub Pages' own Jekyll build
+          touch build/final_site/.nojekyll
+
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: build/final_site/
+
+  deploy:
+    if: github.repository == 'meshtastic/Meshtastic-Android'
+    needs: build
+    runs-on: ubuntu-24.04-arm
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
+

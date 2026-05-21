@@ -64,9 +64,14 @@ class FakeFilterPrefs : FilterPrefs {
 
 class FakeCustomEmojiPrefs : CustomEmojiPrefs {
     override val customEmojiFrequency = MutableStateFlow<String?>(null)
+    override val preferredSkinToneIndex = MutableStateFlow(0)
 
     override fun setCustomEmojiFrequency(frequency: String?) {
         customEmojiFrequency.value = frequency
+    }
+
+    override fun setPreferredSkinToneIndex(index: Int) {
+        preferredSkinToneIndex.value = index
     }
 }
 

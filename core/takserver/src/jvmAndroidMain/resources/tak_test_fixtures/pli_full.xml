@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<event version="2.0" uid="ANDROID-0000000000000002" type="a-f-G-U-C" how="h-e" time="2026-03-15T15:30:00Z" start="2026-03-15T15:30:00Z" stale="2026-03-15T15:30:45Z">
+  <point lat="12.00000" lon="91.00000" hae="-29.667" ce="32.2" le="9999999"/>
+  <detail><takv os="34" version="4.12.0.1 (00000000)[playstore].0000000000-CIV" device="Simulator" platform="ATAK-CIV"/><contact endpoint="*:-1:stcp" phone="+15550000001" callsign="TESTNODE-01"/><uid Droid="TESTNODE-01"/><precisionlocation altsrc="GPS" geopointsrc="GPS"/><__group role="Team Member" name="Cyan"/><status battery="88"/><track course="142.75" speed="1.2"/><_flow-tags_ TAK-Server-00000000000000000000000000000001="2026-03-15T15:30:00Z"/></detail>
+</event>

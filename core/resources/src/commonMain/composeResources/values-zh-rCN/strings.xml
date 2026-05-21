@@ -302,6 +302,13 @@
     <string name="distance_measurements">距离测量</string>
     <string name="distance_measurements_description">显示您的手机和其他带有位置的 Meshtastic 节点之间的距离。</string>
     <string name="dns">DNS</string>
+    <!-- DOC -->
+    <string name="doc_clear_search">清除搜索</string>
+    <string name="doc_title_connections">连接数</string>
+    <string name="doc_title_discovery">发现</string>
+    <string name="doc_title_firmware">固件升级</string>
+    <string name="doc_title_mqtt">MQTT</string>
+    <string name="doc_title_nodes">节点</string>
     <string name="done">完成</string>
     <string name="double_tap_as_button_press">双击作为按钮</string>
     <string name="downlink_enabled">启用下行</string>
@@ -1032,6 +1039,7 @@
     <string name="tak_role_teamlead">团队组长</string>
     <string name="tak_role_teammember">团队成员</string>
     <string name="tak_role_unspecified">未指定</string>
+    <string name="tak_server_section">服务器</string>
     <string name="tak_team">队伍颜色</string>
     <string name="tak_team_blue">蓝</string>
     <string name="tak_team_brown">棕色</string>

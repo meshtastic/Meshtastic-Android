@@ -16,13 +16,19 @@
  */
 package org.meshtastic.core.ui.component
 
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButtonMenu
 import androidx.compose.material3.FloatingActionButtonMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
 import androidx.compose.material3.ToggleFloatingActionButton
 import androidx.compose.material3.ToggleFloatingActionButtonDefaults
+import androidx.compose.material3.TooltipAnchorPosition
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,7 +38,7 @@ import org.meshtastic.core.ui.icon.Close
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.OfflineShare
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun MenuFAB(
     expanded: Boolean,
@@ -46,15 +52,21 @@ fun MenuFAB(
         modifier = modifier.then(if (testTag != null) Modifier.testTag(testTag) else Modifier),
         expanded = expanded,
         button = {
-            ToggleFloatingActionButton(
-                checked = expanded,
-                onCheckedChange = onExpandedChange,
-                content = {
-                    val imageVector = if (expanded) MeshtasticIcons.Close else MeshtasticIcons.OfflineShare
-                    Icon(imageVector = imageVector, contentDescription = contentDescription)
-                },
-                containerColor = ToggleFloatingActionButtonDefaults.containerColor(),
-            )
+            TooltipBox(
+                positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
+                tooltip = { contentDescription?.let { PlainTooltip { Text(it) } } },
+                state = rememberTooltipState(),
+            ) {
+                ToggleFloatingActionButton(
+                    checked = expanded,
+                    onCheckedChange = onExpandedChange,
+                    content = {
+                        val imageVector = if (expanded) MeshtasticIcons.Close else MeshtasticIcons.OfflineShare
+                        Icon(imageVector = imageVector, contentDescription = contentDescription)
+                    },
+                    containerColor = ToggleFloatingActionButtonDefaults.containerColor(),
+                )
+            }
         },
         horizontalAlignment = Alignment.End,
     ) {

@@ -142,6 +142,9 @@
     <string name="display">Приказ</string>
     <!-- DISTANCE -->
     <string name="distance">Udaljenost</string>
+    <!-- DOC -->
+    <string name="doc_title_firmware">Ажурирања фирмвера</string>
+    <string name="doc_title_nodes">Чворови</string>
     <string name="double_tap_as_button_press">Двоструки додир као дугме</string>
     <string name="edit">Измени</string>
     <string name="eight_hours">8 Сати</string>
@@ -431,6 +434,7 @@
     <string name="supported">Подржан</string>
     <string name="sx126x_rx_boosted_gain">Појачање пријемника</string>
     <!-- TAK -->
+    <string name="tak_server_section">Сервер</string>
     <string name="telemetry">Телеметрија (сензори)</string>
     <string name="telemetry_config">Конфигурација телеметрије</string>
     <string name="temperature">Темп.</string>

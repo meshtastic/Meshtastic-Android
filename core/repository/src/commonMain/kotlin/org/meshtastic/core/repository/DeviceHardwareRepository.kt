@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.repository
 
+import kotlinx.coroutines.flow.Flow
 import org.meshtastic.core.model.DeviceHardware
 
 interface DeviceHardwareRepository {
@@ -32,4 +33,15 @@ interface DeviceHardwareRepository {
         target: String? = null,
         forceRefresh: Boolean = false,
     ): Result<DeviceHardware?>
+
+    /**
+     * Observes device hardware information as a non-blocking [Flow].
+     *
+     * Emits cached/bundled data immediately and refreshes from the network in the background if stale. Suitable for use
+     * inside Flow `combine` transforms where suspending would block the UI.
+     *
+     * @param hwModel The hardware model identifier.
+     * @param target Optional PlatformIO target environment name to disambiguate multiple variants.
+     */
+    fun observeDeviceHardware(hwModel: Int, target: String? = null): Flow<DeviceHardware?>
 }

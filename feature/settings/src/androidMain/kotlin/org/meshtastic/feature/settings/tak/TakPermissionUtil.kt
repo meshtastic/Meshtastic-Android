@@ -17,6 +17,8 @@
 package org.meshtastic.feature.settings.tak
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import org.meshtastic.core.ui.util.isLocalNetworkPermissionGranted
 import org.meshtastic.core.ui.util.rememberRequestLocalNetworkPermission
 
 @Composable
@@ -26,13 +28,21 @@ actual fun TakPermissionHandler(isTakServerEnabled: Boolean, onPermissionResult:
     // when targetSdk >= 37, and is requested up-front from the Connections screen, so it will usually
     // already be granted by the time the user enables TAK. This composable handles the standalone case
     // (e.g. user opens TAK settings before ever tapping the network-scan toggle).
+    val isPermissionGranted = isLocalNetworkPermissionGranted()
     val requestPermission =
         rememberRequestLocalNetworkPermission(
             onGranted = { onPermissionResult(true) },
             onDenied = { onPermissionResult(false) },
         )
 
-    if (isTakServerEnabled) {
-        requestPermission()
+    // The launcher must run as a post-composition side effect — invoking it directly in the composition
+    // body crashes with "Launcher has not been initialized" because the underlying
+    // ActivityResultLauncherHolder is not linked to the activity until composition completes. Keying on
+    // both inputs also guarantees we only re-prompt when state actually transitions, not on every
+    // recomposition.
+    LaunchedEffect(isTakServerEnabled, isPermissionGranted) {
+        if (isTakServerEnabled && !isPermissionGranted) {
+            requestPermission()
+        }
     }
 }

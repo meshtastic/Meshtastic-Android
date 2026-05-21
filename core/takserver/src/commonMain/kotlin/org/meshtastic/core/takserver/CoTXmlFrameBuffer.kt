@@ -85,6 +85,10 @@ internal class CoTXmlFrameBuffer(private val maxMessageSize: Long = DEFAULT_MAX_
     companion object {
         private val EVENT_START_BYTES = "<event".encodeUtf8()
         private val EVENT_END_BYTES = "</event>".encodeUtf8()
-        private const val DEFAULT_MAX_TAK_MESSAGE_SIZE = 8L * 1024 * 1024
+
+        // 256KB is still 25× larger than any realistic CoT event (~10KB max). Using 8MB
+        // would allow a TAK client with the shared cert to exhaust memory on mobile
+        // devices by opening N connections × 8MB per frame buffer.
+        private const val DEFAULT_MAX_TAK_MESSAGE_SIZE = 256L * 1024
     }
 }

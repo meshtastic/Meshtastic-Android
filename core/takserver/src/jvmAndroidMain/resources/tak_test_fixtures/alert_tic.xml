@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<event version="2.0" uid="alert-b3c4d5e6" type="b-a-o-opn" how="h-e" time="2026-03-15T20:30:00Z" start="2026-03-15T20:30:00Z" stale="2026-03-15T20:35:00Z">
+  <point lat="18.00000" lon="140.00000" hae="150" ce="15" le="15"/>
+  <detail>
+    <contact callsign="ALPHA-6"/>
+    <remarks>Troops in contact, requesting support at grid reference</remarks>
+  </detail>
+</event>

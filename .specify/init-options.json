@@ -1,6 +1,6 @@
 {
   "ai": "opencode",
-  "branch_numbering": "sequential",
+  "branch_numbering": "timestamp",
   "context_file": "AGENTS.md",
   "here": true,
   "integration": "opencode",

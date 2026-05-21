@@ -18,18 +18,18 @@
 pluginManagement {
     includeBuild("build-logic")
     repositories {
-        google()
+        google {
+            content {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
+            }
+        }
         mavenCentral()
         gradlePluginPortal()
         maven { url = uri("./offline-repository") }
     }
 }
-
-// Desktop-only mode: skip Android-only modules when ANDROID_HOME is unavailable (e.g. Flatpak builds).
-// Activate via: DESKTOP_ONLY=true ./gradlew :desktop:packageUberJarForCurrentOS
-val desktopOnly =
-    providers.gradleProperty("desktop.only").orNull?.toBoolean() == true ||
-        System.getenv("DESKTOP_ONLY")?.toBoolean() == true
 
 plugins {
     id("org.gradle.toolchains.foojay-resolver") version "1.0.0"
@@ -55,12 +55,10 @@ dependencyResolutionManagement {
             url = uri("https://central.sonatype.com/repository/maven-snapshots/")
             mavenContent { snapshotsOnly() }
         }
-        if (!desktopOnly) {
-            maven {
-                url = uri("https://jitpack.io")
-                content {
-                    includeGroupByRegex("com\\.github\\..*")
-                }
+        maven {
+            url = uri("https://jitpack.io")
+            content {
+                includeGroupByRegex("com\\.github\\..*")
             }
         }
         maven { url = uri("./offline-repository") }
@@ -112,17 +110,13 @@ include(
     ":feature:map",
     ":feature:node",
     ":feature:settings",
+    ":feature:docs",
     ":feature:firmware",
     ":feature:wifi-provision",
-    ":desktop",
+    ":desktopApp",
+    ":androidApp",
+    ":core:api",
+    ":core:barcode",
+    ":feature:widget",
+    ":screenshot-tests",
 )
-
-if (!desktopOnly) {
-    include(
-        ":app",
-        ":core:api",
-        ":core:barcode",
-        ":feature:widget",
-        ":screenshot-tests",
-    )
-}

@@ -150,6 +150,10 @@
     <string name="display_units">Unidade de visualização</string>
     <!-- DISTANCE -->
     <string name="distance">Distância</string>
+    <!-- DOC -->
+    <string name="doc_title_connections">Ligações</string>
+    <string name="doc_title_mqtt">MQTT</string>
+    <string name="doc_title_nodes">Nodes</string>
     <string name="downlink_enabled">Downlink ativado</string>
     <string name="dynamic">Dinâmico</string>
     <string name="echo_enabled">Eco ativado</string>
@@ -503,6 +507,7 @@
     <string name="state_broadcast_seconds">Transmissão de estado (segundos)</string>
     <string name="supported">Suportado</string>
     <!-- TAK -->
+    <string name="tak_server_section">Servidor</string>
     <string name="tak_team_blue">Azul</string>
     <string name="tak_team_green">Verde</string>
     <string name="tak_team_red">Vermelho</string>

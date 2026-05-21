@@ -23,8 +23,8 @@ When reviewing code, meticulously verify the following categories. Flag any devi
 - [ ] **Compose Multiplatform Resources:** Ensure NO hardcoded strings. Must use `core:resources` (e.g., `stringResource(Res.string.key)` or asynchronous `getStringSuspend(Res.string.key)` for ViewModels/Coroutines). NEVER use blocking `getString()` in a coroutine.
 - [ ] **String Formatting:** CMP only supports `%N$s` and `%N$d`. Flag any float formats (`%N$.1f`) in Compose string resources; they must be pre-formatted using `NumberFormatter.format()` from `core:common`. Use `MetricFormatter` for metric-specific displays (temperature, voltage, current, percent, humidity, pressure, SNR, RSSI).
 - [ ] **Centralized Dialogs & Alerts:** Flag inline alert-rendering logic. Mandate the use of `AlertHost(alertManager)` or `SharedDialogs` from `core:ui/commonMain`.
-- [ ] **Placeholders:** Require `PlaceholderScreen(name)` from `core:ui/commonMain` for unimplemented desktop/JVM features. No inline placeholders in feature modules.
-- [ ] **Adaptive Layouts:** Verify use of `currentWindowAdaptiveInfo(supportLargeAndXLargeWidth = true)` to support desktop/tablet breakpoints (≥ 1200dp).
+- [ ] **Placeholders:** Require `PlaceholderScreen(name)` from `core:ui/commonMain` for unimplemented desktopApp/JVM features. No inline placeholders in feature modules.
+- [ ] **Adaptive Layouts:** Verify use of `currentWindowAdaptiveInfo(supportLargeAndXLargeWidth = true)` to support desktopApp/tablet breakpoints (≥ 1200dp).
 
 ### 3. Navigation & State
 - [ ] **Shared Navigation Graphs:** Feature navigation graphs must be defined as extension functions on `EntryProviderScope<NavKey>` in `commonMain` (e.g., `fun EntryProviderScope<NavKey>.settingsGraph(...)`). Flag any graphs defined in platform-specific source sets.
@@ -56,8 +56,8 @@ When reviewing code, meticulously verify the following categories. Flag any devi
 - [ ] **Robolectric Configuration:** Check that Compose UI tests running via Robolectric on JVM are pinned to `@Config(sdk = [34])` to prevent Java 21 / SDK 35 compatibility issues.
 
 ### 8. ProGuard / R8 Rules
-- [ ] **New Dependencies:** If a new reflection-heavy dependency is added (DI, serialization, JNI, ServiceLoader), verify keep rules exist in **both** `app/proguard-rules.pro` (R8) and `desktop/proguard-rules.pro` (ProGuard). The two files must stay aligned.
-- [ ] **Release Smoke-Test:** For dependency or ProGuard rule changes, verify `assembleRelease` and `./gradlew :desktop:runRelease` succeed.
+- [ ] **New Dependencies:** If a new reflection-heavy dependency is added (DI, serialization, JNI, ServiceLoader), verify keep rules exist in **both** `androidApp/proguard-rules.pro` (R8) and `desktopApp/proguard-rules.pro` (ProGuard). The two files must stay aligned.
+- [ ] **Release Smoke-Test:** For dependency or ProGuard rule changes, verify `assembleRelease` and `./gradlew :desktopApp:runRelease` succeed.
 
 ## Review Output Guidelines
 1. **Be Specific & Constructive:** Provide exact file references and code snippets illustrating the required project pattern.

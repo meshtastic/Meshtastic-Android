@@ -60,7 +60,7 @@ object DeepLinkRouter {
             "quickchat",
             -> routeContacts(uri, pathSegments)
 
-            "connections" -> listOf(ConnectionsRoute.ConnectionsGraph)
+            "connections" -> listOf(ConnectionsRoute.Connections)
 
             "map" -> routeMap(uri, pathSegments)
 
@@ -68,7 +68,7 @@ object DeepLinkRouter {
 
             "settings" -> routeSettings(pathSegments)
 
-            "channels" -> listOf(ChannelsRoute.ChannelsGraph)
+            "channels" -> listOf(ChannelsRoute.Channels)
 
             "firmware" -> routeFirmware(pathSegments)
 
@@ -86,27 +86,24 @@ object DeepLinkRouter {
         return when (firstSegment) {
             "share" -> {
                 val message = uri.getQueryParameter("message") ?: ""
-                listOf(ContactsRoute.ContactsGraph, ContactsRoute.Share(message))
+                listOf(ContactsRoute.Contacts, ContactsRoute.Share(message))
             }
 
             "quickchat" -> {
-                listOf(ContactsRoute.ContactsGraph, ContactsRoute.QuickChat)
+                listOf(ContactsRoute.Contacts, ContactsRoute.QuickChat)
             }
 
             "messages" -> {
                 val contactKey = if (segments.size > 1) segments[1] else uri.getQueryParameter("contactKey") ?: ""
                 val message = uri.getQueryParameter("message") ?: ""
                 if (contactKey.isNotBlank()) {
-                    listOf(
-                        ContactsRoute.ContactsGraph,
-                        ContactsRoute.Messages(contactKey = contactKey, message = message),
-                    )
+                    listOf(ContactsRoute.Contacts, ContactsRoute.Messages(contactKey = contactKey, message = message))
                 } else {
-                    listOf(ContactsRoute.ContactsGraph)
+                    listOf(ContactsRoute.Contacts)
                 }
             }
 
-            else -> listOf(ContactsRoute.ContactsGraph)
+            else -> listOf(ContactsRoute.Contacts)
         }
     }
 
@@ -121,20 +118,21 @@ object DeepLinkRouter {
         val destNum = destNumStr?.toIntOrNull()
 
         return if (destNum == null) {
-            listOf(NodesRoute.NodesGraph)
+            listOf(NodesRoute.Nodes)
         } else if (segments.size > 2) {
             val subRouteStr = segments[2].lowercase()
             val detailRouteFn = nodeDetailSubRoutes[subRouteStr]
             if (detailRouteFn != null) {
-                listOf(NodesRoute.NodesGraph, NodesRoute.NodeDetailGraph(destNum), detailRouteFn(destNum))
+                listOf(NodesRoute.Nodes, NodesRoute.NodeDetail(destNum), detailRouteFn(destNum))
             } else {
-                listOf(NodesRoute.NodesGraph, NodesRoute.NodeDetail(destNum))
+                listOf(NodesRoute.Nodes, NodesRoute.NodeDetail(destNum))
             }
         } else {
-            listOf(NodesRoute.NodesGraph, NodesRoute.NodeDetail(destNum))
+            listOf(NodesRoute.Nodes, NodesRoute.NodeDetail(destNum))
         }
     }
 
+    @Suppress("ReturnCount", "MagicNumber")
     private fun routeSettings(segments: List<String>): List<NavKey> {
         var destNum: Int? = null
         var subRouteStr: String? = null
@@ -153,14 +151,25 @@ object DeepLinkRouter {
         }
 
         if (subRouteStr == null) {
-            return listOf(SettingsRoute.SettingsGraph(destNum))
+            return listOf(SettingsRoute.Settings(destNum))
+        }
+
+        // Handle helpDocs/{pageId} pattern
+        if (subRouteStr == "helpdocs" || subRouteStr == "help-docs") {
+            val pageIdSegmentIndex = if (destNum != null) 3 else 2
+            return if (segments.size > pageIdSegmentIndex) {
+                val pageId = segments[pageIdSegmentIndex]
+                listOf(SettingsRoute.Settings(destNum), SettingsRoute.HelpDocs, SettingsRoute.HelpDocPage(pageId))
+            } else {
+                listOf(SettingsRoute.Settings(destNum), SettingsRoute.HelpDocs)
+            }
         }
 
         val subRoute = settingsSubRoutes[subRouteStr]
         return if (subRoute != null) {
-            listOf(SettingsRoute.SettingsGraph(destNum), subRoute)
+            listOf(SettingsRoute.Settings(destNum), subRoute)
         } else {
-            listOf(SettingsRoute.SettingsGraph(destNum))
+            listOf(SettingsRoute.Settings(destNum))
         }
     }
 
@@ -213,6 +222,8 @@ object DeepLinkRouter {
             "debug-panel" to SettingsRoute.DebugPanel,
             "about" to SettingsRoute.About,
             "filter-settings" to SettingsRoute.FilterSettings,
+            "helpdocs" to SettingsRoute.HelpDocs,
+            "help-docs" to SettingsRoute.HelpDocs,
         )
 
     private val nodeDetailSubRoutes: Map<String, (Int) -> Route> =

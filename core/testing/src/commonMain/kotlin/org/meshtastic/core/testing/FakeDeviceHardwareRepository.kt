@@ -16,6 +16,8 @@
  */
 package org.meshtastic.core.testing
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.repository.DeviceHardwareRepository
 
@@ -50,6 +52,11 @@ class FakeDeviceHardwareRepository :
     ): Result<DeviceHardware?> {
         calls.add(Triple(hwModel, target, forceRefresh))
         return hardware[hwModel to target] ?: hardware[hwModel to null] ?: Result.success(null)
+    }
+
+    override fun observeDeviceHardware(hwModel: Int, target: String?): Flow<DeviceHardware?> {
+        val result = hardware[hwModel to target] ?: hardware[hwModel to null] ?: Result.success(null)
+        return flowOf(result.getOrNull())
     }
 
     /** Seeds a successful lookup for the given model/target pair. */

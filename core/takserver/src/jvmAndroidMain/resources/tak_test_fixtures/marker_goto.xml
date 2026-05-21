@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<event version="2.0" uid="goto-01" type="b-m-p-w-GOTO" time="2026-03-15T14:22:10Z" start="2026-03-15T14:22:10Z" stale="2026-03-16T14:22:10Z" how="h-e">
+  <point lat="33.12840" lon="-107.25280" hae="9999999.0" ce="9999999.0" le="9999999.0"/>
+  <detail>
+    <contact callsign="GoTo-1"/>
+    <remarks/>
+    <archive/>
+    <color argb="-16711936"/>
+    <precisionlocation altsrc="???"/>
+    <link uid="ANDROID-0000000000000001" type="a-f-G-U-C" parent_callsign="SIM-01" relation="p-p"/>
+  </detail>
+</event>

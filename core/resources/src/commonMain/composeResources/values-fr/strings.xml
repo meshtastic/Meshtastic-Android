@@ -321,6 +321,12 @@
     <string name="distance_measurements">Mesures de distance</string>
     <string name="distance_measurements_description">Afficher la distance entre votre téléphone et les autres nœuds Meshtastic avec des positions.</string>
     <string name="dns">DNS</string>
+    <!-- DOC -->
+    <string name="doc_clear_search">Effacer la recherche</string>
+    <string name="doc_title_connections">Connexions</string>
+    <string name="doc_title_discovery">Découverte</string>
+    <string name="doc_title_mqtt">MQTT</string>
+    <string name="doc_title_nodes">Nœuds</string>
     <string name="done">Terminé</string>
     <string name="dont_show_again_for_device">Ne plus afficher pour cet appareil</string>
     <string name="double_tap_as_button_press">Double clic comme appui sur le bouton</string>
@@ -1145,7 +1151,7 @@
     <string name="tak_role_teammember">Membre de l'équipe</string>
     <string name="tak_role_unspecified">Non spécifié</string>
     <string name="tak_server_enabled">Activer le serveur TAK local</string>
-    <string name="tak_server_enabled_desc">Démarre un serveur TCP sur le port 8089 pour les connexions ATAK</string>
+    <string name="tak_server_section">Serveur</string>
     <string name="tak_team">Couleur de l'équipe</string>
     <string name="tak_team_blue">Bleu</string>
     <string name="tak_team_brown">Marron</string>

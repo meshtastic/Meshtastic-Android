@@ -58,6 +58,13 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
     /** Support for TAK (ATAK) module configuration. Supported since firmware v2.7.19. */
     val supportsTakConfig = atLeast(V2_7_19)
 
+    /**
+     * Support for the v2 TAK port (ATAK_PLUGIN_V2 = 78) with TAKPacketV2 + zstd dictionary compression. Supported since
+     * firmware v2.8.0. Firmware v2.7.x and earlier only support the legacy ATAK_PLUGIN port (72) with the original
+     * TAKPacket schema (PLI + GeoChat only, no compression), so the bridge falls back to that path for older nodes.
+     */
+    val supportsTakV2 = atLeast(V2_8_0)
+
     /** Support for location sharing on secondary channels. Supported since firmware v2.6.10. */
     val supportsSecondaryChannelLocation = atLeast(V2_6_10)
 

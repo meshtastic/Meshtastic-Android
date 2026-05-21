@@ -16,11 +16,12 @@
  */
 package org.meshtastic.core.domain.usecase.settings
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import org.koin.core.annotation.Single
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.RadioController
@@ -37,6 +38,7 @@ interface IsOtaCapableUseCase {
     operator fun invoke(): Flow<Boolean>
 }
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @Single
 class IsOtaCapableUseCaseImpl(
     private val nodeRepository: NodeRepository,
@@ -52,17 +54,13 @@ class IsOtaCapableUseCaseImpl(
                 if (node == null || connectionState != ConnectionState.Connected) {
                     flowOf(false)
                 } else if (radioPrefs.isBle() || radioPrefs.isSerial() || radioPrefs.isTcp()) {
-                    flow {
-                        val hwModel = node.user.hw_model
-                        val hw = deviceHardwareRepository.getDeviceHardwareByModel(hwModel.value).getOrNull()
-                        // If we have hardware info, check if it's an architecture known to support OTA/DFU
-                        val isOtaCapable =
-                            hw?.let {
-                                it.isEsp32Arc ||
-                                    it.architecture.contains("nrf", ignoreCase = true) ||
-                                    it.requiresDfu == true
-                            } ?: (hwModel != HardwareModel.UNSET)
-                        emit(isOtaCapable)
+                    val hwModel = node.user.hw_model
+                    deviceHardwareRepository.observeDeviceHardware(hwModel.value).map { hw ->
+                        hw?.let {
+                            it.isEsp32Arc ||
+                                it.architecture.contains("nrf", ignoreCase = true) ||
+                                it.requiresDfu == true
+                        } ?: (hwModel != HardwareModel.UNSET)
                     }
                 } else {
                     flowOf(false)

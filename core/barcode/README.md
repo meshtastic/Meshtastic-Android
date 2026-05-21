@@ -30,7 +30,7 @@ src/
 ## Usage
 
 ```kotlin
-// In a Composable (typically wired via LocalBarcodeScannerProvider in app/)
+// In a Composable (typically wired via LocalBarcodeScannerProvider in androidApp/)
 val scanner = rememberBarcodeScanner { result ->
     // Handle scanned QR code string (or null on dismiss)
 }

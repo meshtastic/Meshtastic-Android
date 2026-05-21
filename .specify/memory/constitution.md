@@ -1,19 +1,17 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version change: 1.1.1 → 1.2.0
+Version change: 1.2.0 → 1.3.0
 Modified principles:
-  - V. Design Standards Compliance (expanded to require cross-platform behavior spec
-    from meshtastic/design/features/ for multi-platform features)
-Added sections: None.
+  - VI. Verify Before Push → renumbered to VII.
+Added sections:
+  - VI. Documentation Freshness (new principle requiring last_updated frontmatter,
+    blocking staleness check, link validation, coverage checks, freshness warnings)
 Removed sections: None.
 Templates requiring updates:
-  ✅ .specify/templates/spec-template.md — Added Cross-Platform Spec metadata field and
-    cross-platform check guidance in Summary comment.
-  ✅ .specify/templates/plan-template.md — Constitution Check V updated to require upstream
-    spec link for cross-platform features.
-  ✅ .specify/templates/checklist-template.md — CHK005 updated to include cross-platform spec check.
-Follow-up TODOs: None.
+  - .specify/templates/checklist-template.md — Add CHK006 for documentation freshness
+  - .specify/templates/plan-template.md — Constitution Check VII for docs freshness
+Follow-up TODOs: Update AGENTS.md with docs governance reference.
 -->
 
 # Meshtastic Android (KMP) Constitution
@@ -90,7 +88,41 @@ All user-facing UI MUST conform to the Meshtastic Client Design Standards:
   users have a predictable experience regardless of platform. The design standards are
   maintained collaboratively across all Meshtastic client teams.
 
-### VI. Verify Before Push
+### VI. Documentation Freshness
+
+In-app documentation MUST remain accurate and current as the codebase evolves.
+Documentation changes propagate to **three consumers** — all three MUST be considered:
+
+1. **In-app docs browser** — `syncDocsToComposeResources` copies `docs/` into Compose
+   Resources at build time. Changes are bundled into the app automatically.
+2. **Jekyll site** (GitHub Pages) — `docs/` is served directly. The `docs-deploy.yml`
+   workflow rebuilds on push to `main`.
+3. **Docusaurus site** (meshtastic.org) — `scripts/sync-android-docs.js` transforms
+   `docs/` for the external site. Runs weekly via the `meshtastic/meshtastic` repo.
+
+Governance rules:
+
+- Every doc page MUST include a `last_updated` frontmatter field (YYYY-MM-DD).
+  Update this field whenever page content changes.
+- PRs that modify user-facing UI source files MUST update the corresponding doc page(s)
+  or apply the `skip-docs-check` label with justification. The docs staleness check is a
+  **blocking** CI gate.
+- Internal cross-references between doc pages and image paths MUST be validated; broken
+  links fail the `docs-governance` workflow.
+- Every user-facing feature module MUST have corresponding documentation in `docs/user/`
+  or `docs/developer/`. Coverage is checked by `scripts/check-doc-coverage.js`.
+- Pages older than 180 days without updates trigger an advisory freshness warning.
+- New doc pages MUST be registered in `DocBundleLoader.kt` (in-app index), and added to
+  the `KNOWN_*_SLUGS` sets in `sync-android-docs.js` (Docusaurus link resolution).
+  Jekyll picks up new pages automatically via `_config.yml` scope-based defaults.
+- Image references MUST use root-relative paths (`/assets/screenshots/filename.png`) so
+  they resolve correctly in both Jekyll and the in-app renderer. The sync script rewrites
+  these to Docusaurus paths automatically.
+- Rationale: Documentation that drifts from the implementation misleads users, increases
+  support burden, and undermines the in-app help experience. Three distinct consumers
+  means a single source change must be verified across all delivery channels.
+
+### VII. Verify Before Push
 
 Local verification MUST complete successfully before any `git push`:
 
@@ -162,7 +194,7 @@ This constitution supersedes all other practices, coding guidelines, and agent i
 - PATCH: Clarifications, wording fixes, or non-semantic refinements.
 
 **Compliance Review**: Every implementation plan and PR description MUST include a
-Constitution Check confirming all six principles were evaluated. Complexity violations
+Constitution Check confirming all seven principles were evaluated. Complexity violations
 require explicit justification in the Complexity Tracking table of the plan document.
 
-**Version**: 1.2.0 | **Ratified**: 2026-05-07 | **Last Amended**: 2026-05-12
+**Version**: 1.3.0 | **Ratified**: 2026-05-07 | **Last Amended**: 2026-05-13

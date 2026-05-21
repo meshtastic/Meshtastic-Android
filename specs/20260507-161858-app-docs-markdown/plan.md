@@ -104,6 +104,7 @@ specs/003-app-docs-markdown/
 │   ├── ui/DocsBrowserScreen.kt
 │   ├── ui/DocsSearchBar.kt
 │   ├── ui/DocsPageRouteScreen.kt
+│   ├── ui/ComposeResourceImageTransformer.kt
 │   ├── ui/ChirpyAssistantSheet.kt
 │   ├── navigation/DocsNavigation.kt
 │   ├── di/FeatureDocsModule.kt
@@ -221,6 +222,54 @@ Possible internal task breakdown:
 - Avoid committing generated HTML into source directories.
 - Keep the same content pipeline for both website and in-app docs.
 - Support Android WebView without forcing every target to use assets.
+
+### Screenshot image adapter for Compose renderer (FR-038)
+
+The `DocsPageRouteScreen` on Desktop/iOS uses `com.mikepenz.markdown.m3.Markdown` for rendering. By default it uses `NoOpImageTransformerImpl`, which silently drops all `![alt](path)` image references. Two changes are needed to render screenshots inline:
+
+**1. Bundle screenshots into Compose resources**
+
+The `syncDocsToComposeResources` task must include `assets/screenshots/**/*.png` alongside `user/**/*.md` and `developer/**/*.md`. The `:screenshot-tests:copyDocsScreenshots` task must run first to populate `docs/screenshots/`, which is then synced as `assets/screenshots/` into compose resources. Task dependency: `syncDocsToComposeResources.dependsOn(":screenshot-tests:copyDocsScreenshots")`.
+
+**2. Custom `ImageTransformer` using `Res.getUri()` + Coil3**
+
+The CMP generated `Res` object provides two APIs:
+- `suspend fun readBytes(path: String): ByteArray` — cannot be used in `@Composable`
+- `fun getUri(path: String): String` — **synchronous**, returns a platform URI
+
+Since `ImageTransformer.transform(link: String)` is `@Composable` (not suspend), we CANNOT use `Res.readBytes()` directly. Instead, use `Res.getUri()` to resolve the local resource URI, then pass it to Coil3's `rememberAsyncImagePainter()`:
+
+```kotlin
+// ComposeResourceImageTransformer.kt
+class ComposeResourceImageTransformer : ImageTransformer {
+    @Composable
+    override fun transform(link: String): ImageData? {
+        if (link.startsWith("http://") || link.startsWith("https://")) return null
+        val resourcePath = "files/docs/$link" // e.g., "files/docs/assets/screenshots/foo.png"
+        val uri = Res.getUri(resourcePath)
+        val painter = rememberAsyncImagePainter(
+            model = ImageRequest.Builder(LocalPlatformContext.current)
+                .data(uri)
+                .size(coil3.size.Size.ORIGINAL)
+                .build()
+        )
+        return ImageData(painter)
+    }
+}
+```
+
+**Why Coil3 after all?** The `ImageTransformer.transform()` is `@Composable`, not `suspend`. `Res.readBytes()` is a suspend function and cannot be called in composition. `Res.getUri()` gives us a synchronous local URI that Coil3 can load asynchronously via `rememberAsyncImagePainter`. Since the project already has Coil 3.4.0 in the version catalog, this is the correct approach — it handles the composable→async bridge that CMP resources require.
+
+**Dependencies**: Add `libs.coil` to `feature/docs/build.gradle.kts` commonMain dependencies.
+
+Wire into the renderer in `DocsPageRouteScreen.kt`:
+```kotlin
+Markdown(
+    content = markdownText,
+    imageTransformer = ComposeResourceImageTransformer(),
+    modifier = ...
+)
+```
 
 ## Navigation Plan
 
@@ -359,6 +408,9 @@ Update `feature/settings/.../SettingsNavigation.kt` so Help & Documentation appe
 7. **Phase 6 – AI assistant**: Android Google flavor Gemini implementation + fallbacks.
 8. **Phase 7 – CI automation**: deploy/release workflows, screenshot PR bot.
 9. **Phase 8 – Polish**: accessibility, dark mode, edge cases, documentation cleanup.
+10. **Phase 9 – Apple alignment**: per-page TOC icons, signal-meter/units-locale pages, staleness CI.
+11. **Phase 10 – Docusaurus sync & content gaps**: meshtastic.org sync script + workflow, WebP optimization, translate page, developer measurement page.
+12. **Phase 11 – Governance consolidation**: shared frontmatter library, filesystem-derived slugs, workflow merge, 3-consumer propagation model, preview & screenshot staleness advisories.
 
 ## Validation Matrix
 
@@ -379,3 +431,7 @@ Update `feature/settings/.../SettingsNavigation.kt` so Help & Documentation appe
 - Gemini Nano assistant works on supported Android Google devices and gracefully falls back everywhere else.
 - CI enforces schema, size, and deployment correctness.
 - Documentation and assets remain under the configured bundle-size ceiling.
+- Android docs are synced to meshtastic.org via automated workflow under `docs/software/android/`.
+- A "Translate the App" user page and a developer measurement page exist.
+- All docs CI checks are consolidated into a single `docs-governance.yml` workflow.
+- Governance scripts share a common frontmatter library with filesystem-derived slug discovery.

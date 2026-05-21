@@ -86,4 +86,77 @@ class CoTXmlParserTest {
         assertEquals("a-f-G-U-C", message.type)
         assertEquals("m-g", message.how)
     }
+
+    @Test
+    fun `parsedDetailXml preserves structural elements from unmapped types`() {
+        // Simulates ATAK emitting a user-drawn circle (u-d-c-c) — parsedDetailXml keeps
+        // contact/group/status (sent by the receiver's structured fields too, but
+        // preserved here for raw_detail fallback fidelity). The <shape>, <labels_on>,
+        // and <color> bloat is stripped by CoTDetailStripper so the packet has any
+        // chance of fitting in a LoRa MTU.
+        val shapeXml =
+            """
+            <event version="2.0" uid="circle-1" type="u-d-c-c" time="2025-01-01T12:00:00Z" start="2025-01-01T12:00:00Z" stale="2025-01-01T12:05:00Z" how="h-e">
+                <point lat="45.0" lon="-90.0" hae="0" ce="10.0" le="10.0"/>
+                <detail>
+                    <contact callsign="TestUser"/>
+                    <shape>
+                        <ellipse major="500" minor="500" angle="0"/>
+                        <link line="#ff0000" width="3"/>
+                    </shape>
+                    <labels_on value="false"/>
+                    <color argb="-65536"/>
+                </detail>
+            </event>
+            """
+                .trimIndent()
+
+        val result = CoTXmlParser(shapeXml).parse()
+        assertTrue(result.isSuccess)
+        val message = result.getOrNull()!!
+
+        assertEquals("u-d-c-c", message.type)
+        val detail = message.parsedDetailXml
+        assertTrue(detail != null, "parsedDetailXml must be populated for unmapped types")
+        // Preserved: anything the stripper doesn't explicitly match, including contact.
+        assertTrue(detail.contains("<contact"), "contact must survive stripping")
+        // Stripped: see CoTDetailStripper for the full list.
+        assertTrue(!detail.contains("<shape"), "shape must be stripped from parsedDetailXml")
+        assertTrue(!detail.contains("<labels_on"), "labels_on must be stripped")
+        assertTrue(!detail.contains("<color"), "color must be stripped")
+    }
+
+    @Test
+    fun `sourceEventXml captures the complete original event verbatim`() {
+        val xml =
+            """
+            <event version="2.0" uid="circle-1" type="u-d-c-c" time="2025-01-01T12:00:00Z" start="2025-01-01T12:00:00Z" stale="2025-01-01T12:05:00Z" how="h-e">
+                <point lat="45.0" lon="-90.0" hae="0" ce="10.0" le="10.0"/>
+                <detail>
+                    <shape><ellipse major="500" minor="500" angle="0"/></shape>
+                </detail>
+            </event>
+            """
+                .trimIndent()
+        val message = CoTXmlParser(xml).parse().getOrNull()!!
+        // sourceEventXml is used for diagnostic logging only — it must be the exact
+        // bytes we received so operators can see what ATAK actually sent.
+        assertEquals(xml, message.sourceEventXml)
+        // And it MUST still contain the stripped elements (since it is untouched).
+        assertTrue(message.sourceEventXml!!.contains("<shape>"), "sourceEventXml must be verbatim")
+    }
+
+    @Test
+    fun `parsedDetailXml is null for self-closed detail element`() {
+        val xml =
+            """
+            <event version="2.0" uid="x" type="a-f-G-U-C" time="2025-01-01T12:00:00Z" start="2025-01-01T12:00:00Z" stale="2025-01-01T12:05:00Z" how="m-g">
+                <point lat="0.0" lon="0.0" hae="0" ce="0" le="0"/>
+                <detail/>
+            </event>
+            """
+                .trimIndent()
+        val message = CoTXmlParser(xml).parse().getOrNull()!!
+        assertEquals(null, message.parsedDetailXml)
+    }
 }

@@ -66,20 +66,19 @@ import org.meshtastic.feature.settings.radio.component.SerialConfigScreen
 import org.meshtastic.feature.settings.radio.component.StatusMessageConfigScreen
 import org.meshtastic.feature.settings.radio.component.StoreForwardConfigScreen
 import org.meshtastic.feature.settings.radio.component.TAKConfigScreen
+import org.meshtastic.feature.settings.radio.component.TakServerScreen
 import org.meshtastic.feature.settings.radio.component.TelemetryConfigScreen
 import org.meshtastic.feature.settings.radio.component.TrafficManagementConfigScreen
 import org.meshtastic.feature.settings.radio.component.UserConfigScreen
 import kotlin.reflect.KClass
 
 @Composable
-fun getRadioConfigViewModel(backStack: NavBackStack<NavKey>): RadioConfigViewModel {
+fun getRadioConfigViewModel(backStack: NavBackStack<NavKey>, destNumOverride: Int? = null): RadioConfigViewModel {
     val destNum =
-        remember(backStack.toList()) {
-            backStack.lastOrNull { it is SettingsRoute.Settings }?.let { (it as SettingsRoute.Settings).destNum }
-                ?: backStack
-                    .lastOrNull { it is SettingsRoute.SettingsGraph }
-                    ?.let { (it as SettingsRoute.SettingsGraph).destNum }
-        }
+        destNumOverride
+            ?: remember(backStack.toList()) {
+                backStack.lastOrNull { it is SettingsRoute.Settings }?.let { (it as SettingsRoute.Settings).destNum }
+            }
     return koinViewModel<RadioConfigViewModel>(key = destNum?.toString()) {
         parametersOf(SavedStateHandle(mapOf("destNum" to destNum)))
     }
@@ -87,22 +86,14 @@ fun getRadioConfigViewModel(backStack: NavBackStack<NavKey>): RadioConfigViewMod
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
-    entry<SettingsRoute.SettingsGraph> {
+    entry<SettingsRoute.Settings> { args ->
+        val isTabRoot = backStack.firstOrNull() == args
         SettingsMainScreen(
             settingsViewModel = koinViewModel(),
-            radioConfigViewModel = getRadioConfigViewModel(backStack),
+            radioConfigViewModel = getRadioConfigViewModel(backStack, destNumOverride = args.destNum),
             onClickNodeChip = { backStack.add(NodesRoute.NodeDetail(it)) },
             onNavigate = { backStack.add(it) },
-        )
-    }
-
-    entry<SettingsRoute.Settings> {
-        SettingsMainScreen(
-            settingsViewModel = koinViewModel(),
-            radioConfigViewModel = getRadioConfigViewModel(backStack),
-            onClickNodeChip = { backStack.add(NodesRoute.NodeDetail(it)) },
-            onNavigate = { backStack.add(it) },
-            onBack = dropUnlessResumed { backStack.removeLastOrNull() },
+            onBack = if (isTabRoot) null else dropUnlessResumed { backStack.removeLastOrNull() },
         )
     }
 
@@ -234,6 +225,8 @@ fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
             }
         }
     }
+
+    entry<SettingsRoute.TakServer> { TakServerScreen(onBack = dropUnlessResumed { backStack.removeLastOrNull() }) }
 
     entry<SettingsRoute.DebugPanel> {
         val viewModel: DebugViewModel = koinViewModel()

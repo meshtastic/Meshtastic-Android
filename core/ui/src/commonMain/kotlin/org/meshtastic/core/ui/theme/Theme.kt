@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 @file:Suppress("MatchingDeclarationName")
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
 
 package org.meshtastic.core.ui.theme
 
@@ -127,12 +128,9 @@ fun AppTheme(
             null
         } ?: if (darkTheme) darkScheme else lightScheme
 
-    MaterialExpressiveTheme(
-        colorScheme = colorScheme,
-        typography = AppTypography,
-        motionScheme = expressive(),
-        content = content,
-    )
+    MaterialExpressiveTheme(colorScheme = colorScheme, typography = AppTypography, motionScheme = expressive()) {
+        content()
+    }
 }
 
 const val MODE_DYNAMIC = 6969420

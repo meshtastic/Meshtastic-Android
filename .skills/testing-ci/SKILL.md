@@ -17,9 +17,31 @@ Run in a single invocation for routine changes to ensure code formatting, analys
 > In KMP modules, the `test` task name is **ambiguous**. Gradle matches both `testAndroid` and
 > `testAndroidHostTest` and refuses to run either, silently skipping KMP modules.
 > `allTests` is the `KotlinTestReport` lifecycle task registered by the KMP plugin.
-> Conversely, `allTests` does **not** cover pure-Android modules (`:app`, `:core:api`, etc.), which is why both `test` and `allTests` are needed.
+> Conversely, `allTests` does **not** cover pure-Android modules (`:androidApp`, `:core:api`, etc.), which is why both `test` and `allTests` are needed.
 
 *Note: If testing Compose UI on the JVM (Robolectric) with Java 21, pin tests to `@Config(sdk = [34])` to avoid SDK 35 compatibility crashes.*
+
+### SharedFlow + backgroundScope in `runTest`
+
+When testing long-lived coroutines (e.g., `Flow.collect` loops launched in `backgroundScope`), **use `runTest(UnconfinedTestDispatcher())`** instead of plain `runTest`:
+
+```kotlin
+// ❌ BAD — SharedFlow emissions silently never reach collectors
+@Test fun `inbound packet is forwarded`() = runTest {
+    backgroundScope.launch { sut.start(backgroundScope) }
+    sharedFlow.emit(packet)
+    // assertion fails — collector never receives the emission
+}
+
+// ✅ GOOD — UnconfinedTestDispatcher eagerly dispatches subscriber resumptions
+@Test fun `inbound packet is forwarded`() = runTest(UnconfinedTestDispatcher()) {
+    backgroundScope.launch { sut.start(backgroundScope) }
+    sharedFlow.emit(packet)
+    // assertion passes — collector receives emission immediately
+}
+```
+
+**Why:** `backgroundScope` uses `StandardTestDispatcher` by default, which does **not** eagerly dispatch `SharedFlow` subscriber resumptions. Even `advanceUntilIdle()` won't trigger delivery. `UnconfinedTestDispatcher()` fixes this by dispatching eagerly. This affects any test where a coroutine in `backgroundScope` collects from a `SharedFlow` or `MutableSharedFlow`.
 
 ## 2) Change-type verification matrix
 

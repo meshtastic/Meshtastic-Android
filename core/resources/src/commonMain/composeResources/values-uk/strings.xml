@@ -287,6 +287,10 @@
     <string name="distance_filters">Фільтри відстані</string>
     <string name="distance_measurements">Вимірювання відстані</string>
     <string name="dns">DNS</string>
+    <!-- DOC -->
+    <string name="doc_clear_search">Очистити пошук</string>
+    <string name="doc_title_mqtt">MQTT</string>
+    <string name="doc_title_nodes">Вузли</string>
     <string name="done">Готово</string>
     <string name="double_tap_as_button_press">Подвійний дотик як натискання кнопки</string>
     <string name="downlink_enabled">Прийом увімкнений</string>
@@ -1055,6 +1059,7 @@
     <string name="tak_role_teamlead">Лідер команди</string>
     <string name="tak_role_teammember">Член команди</string>
     <string name="tak_role_unspecified">Невизначений</string>
+    <string name="tak_server_section">Сервер</string>
     <string name="tak_team_blue">Синій</string>
     <string name="tak_team_brown">Коричневий</string>
     <string name="tak_team_cyan">Ціановий</string>

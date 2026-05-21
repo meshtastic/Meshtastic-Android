@@ -324,6 +324,12 @@
     <string name="distance_measurements">Etäisyyden mittaukset</string>
     <string name="distance_measurements_description">Näytä etäisyys puhelimen ja muiden sijainnin jakavien Meshtastic laitteiden välillä.</string>
     <string name="dns">DNS</string>
+    <!-- DOC -->
+    <string name="doc_clear_search">Tyhjennä haku</string>
+    <string name="doc_title_connections">Yhteydet</string>
+    <string name="doc_title_discovery">Haku</string>
+    <string name="doc_title_mqtt">MQTT</string>
+    <string name="doc_title_nodes">Laitteet</string>
     <string name="done">Valmis</string>
     <string name="dont_show_again_for_device">Älä näytä enää tälle laitteelle</string>
     <string name="double_tap_as_button_press">Kaksoisnapautus painikkeena</string>
@@ -1156,8 +1162,19 @@
     <string name="tak_role_teamlead">Joukkueen johtaja</string>
     <string name="tak_role_teammember">Tiimin jäsen</string>
     <string name="tak_role_unspecified">Määrittelemätön</string>
+    <string name="tak_server">TAK palvelin</string>
     <string name="tak_server_enabled">Ota paikallinen TAK-palvelin käyttöön</string>
-    <string name="tak_server_enabled_desc">Käynnistää TCP-palvelimen porttiin 8089 ATAK-yhteyksiä varten</string>
+    <string name="tak_server_enabled_desc">Avaa paikallisen salatun TLS-palvelinyhteyden porttiin 8089, jotta ATAK/iTAK voi yhdistää siihen</string>
+    <string name="tak_server_export_data_package_desc">Luo .zip-asetustiedosto ATAK/iTAK-sovellukselle, jotta se voi yhdistää tähän palvelimeen</string>
+    <string name="tak_server_loading">…</string>
+    <string name="tak_server_section">Palvelin</string>
+    <string name="tak_server_test_card_title">TAK Mesh -testitila (debug)</string>
+    <string name="tak_server_test_idle">Lähetä kaikki %1$d testisanomat mesh-verkkoon</string>
+    <string name="tak_server_test_result_bytes">%1$dB ✓</string>
+    <string name="tak_server_test_result_unknown_error">✗</string>
+    <string name="tak_server_test_results">%1$d onnistui, %2$d epäonnistui yhteensä %3$d/%4$d testistä</string>
+    <string name="tak_server_test_run">Suorita</string>
+    <string name="tak_server_test_running">Käynnissä: %1$s</string>
     <string name="tak_team">Tiimin väri</string>
     <string name="tak_team_blue">Sininen</string>
     <string name="tak_team_brown">Ruskea</string>

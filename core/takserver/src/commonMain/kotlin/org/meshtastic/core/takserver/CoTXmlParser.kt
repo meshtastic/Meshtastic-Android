@@ -14,8 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:Suppress("ReturnCount")
+
 package org.meshtastic.core.takserver
 
+import co.touchlab.kermit.Logger
 import nl.adaptivity.xmlutil.serialization.XML
 import kotlin.time.Clock
 import kotlin.time.Instant
@@ -59,7 +62,35 @@ class CoTXmlParser(private val xml: String) {
             track = detail?.track?.let { CoTTrack(speed = it.speed, course = it.course) },
             chat = buildChat(detail),
             remarks = buildRemarks(detail),
+            // Stripped version used as the raw_detail protobuf payload: drops bloat
+            // elements (colors, icons, archives, shapes, etc.) so unmapped CoT types
+            // have any chance of fitting in a LoRa mesh packet. See [CoTDetailStripper].
+            parsedDetailXml = extractDetailInnerXml(xml)?.let(CoTDetailStripper::strip),
+            // Verbatim original event XML kept for diagnostic logging only — never
+            // goes on the wire.
+            sourceEventXml = xml,
         )
+    }
+
+    /**
+     * Extract the exact content between `<detail>` and `</detail>` from the original XML string. Used as the
+     * `raw_detail` fallback payload when we can't map the CoT type to a structured [org.meshtastic.proto.TAKPacketV2]
+     * payload. Preserves any extension elements the xmlutil parser discarded as "unknown children".
+     *
+     * Returns null for self-closed `<detail/>` or when no detail element is present.
+     */
+    private fun extractDetailInnerXml(xml: String): String? {
+        // Match `<detail ...>` (not `<detail/>`) through its matching close tag.
+        val openIdx = xml.indexOf("<detail")
+        if (openIdx < 0) return null
+        val openEnd = xml.indexOf('>', openIdx)
+        if (openEnd < 0) return null
+        // Self-closed tag like `<detail/>` has no content.
+        if (xml[openEnd - 1] == '/') return null
+        val closeIdx = xml.indexOf("</detail>", openEnd)
+        if (closeIdx < 0) return null
+        val inner = xml.substring(openEnd + 1, closeIdx).trim()
+        return inner.ifEmpty { null }
     }
 
     private fun buildContact(detail: CoTDetailXml?): CoTContact? = detail?.contact?.let {
@@ -107,7 +138,8 @@ class CoTXmlParser(private val xml: String) {
                 val cleaned = dateString.replace(Regex("""\.\d+"""), "").replace("Z", "+00:00")
                 Instant.parse(cleaned)
             } catch (ignoredInner: IllegalArgumentException) {
-                Clock.System.now() // Return now as fallback
+                Logger.w { "Unparseable CoT date '$dateString', falling back to now()" }
+                Clock.System.now()
             }
         }
     }

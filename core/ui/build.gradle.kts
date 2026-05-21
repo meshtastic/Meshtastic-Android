@@ -18,16 +18,12 @@
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.meshtastic.kmp.library.compose)
+    alias(libs.plugins.meshtastic.kotlinx.serialization)
     id("meshtastic.kmp.jvm.android")
     id("meshtastic.koin")
 }
 
 kotlin {
-    android {
-        namespace = "org.meshtastic.core.ui"
-        androidResources.enable = false
-    }
-
     sourceSets {
         commonMain.dependencies {
             implementation(projects.core.common)
@@ -49,6 +45,7 @@ kotlin {
             api(libs.compose.multiplatform.ui.tooling.preview)
 
             implementation(libs.kermit)
+            implementation(libs.kotlinx.serialization.json)
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.qrcode.kotlin)
             implementation(libs.jetbrains.compose.material3.adaptive)

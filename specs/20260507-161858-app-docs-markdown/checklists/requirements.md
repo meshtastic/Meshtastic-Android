@@ -19,6 +19,7 @@
 - [x] Edge cases cover missing assets, unsupported AI environments, stale deep links, and degraded screenshot automation.
 - [x] The deep-link contract, keyword-index schema, and CI workflow contract are defined as separate artifacts.
 - [x] Search and AI fallback behavior are specified for unsupported targets and flavors.
+- [x] Screenshot asset bundling and inline rendering via custom `ImageTransformer` are specified (FR-038).
 
 ## Android/KMP Adaptation Checks
 

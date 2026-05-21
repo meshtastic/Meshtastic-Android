@@ -147,6 +147,20 @@ When documentation-relevant UI or workflow changes merge to `main`, GitHub Actio
 - **FR-035**: Chirpy branding MUST use a shared SVG or vector drawable sourced from the Meshtastic design system and bundled as a scalable asset that renders crisply across Android, Desktop, and iOS.
 - **FR-036**: Connection-state icon captures and inline docs illustrations MUST use `MeshtasticIcons` equivalents and Material 3 semantic colors so they remain legible in both light and dark themes without relying on ad-hoc color inversion.
 - **FR-037**: Lock and security icon captures using `MeshtasticIcons.Lock`, `MeshtasticIcons.LockOpen`, `MeshtasticIcons.KeyOff`, or their final equivalents MUST preserve portrait aspect ratio at the shared 44dp reference height and MUST avoid canvas squashing in generated docs assets.
+- **FR-039**: A sync script and GitHub Actions workflow MUST exist to export Android in-app docs into the `meshtastic/meshtastic` Docusaurus site under `docs/software/android/`. The script MUST handle relative link resolution (sibling `.md` links, image paths) and produce Docusaurus-compatible frontmatter. The workflow MUST open a PR in `meshtastic/meshtastic` rather than pushing directly, matching the pattern established by Apple's `sync-apple-docs.yml`.
+- **FR-040**: The docs site sync pipeline SHOULD convert screenshot PNGs to WebP format before publishing to the Docusaurus site. A `--convert-webp` flag or equivalent MUST be supported. Original PNGs remain canonical in-repo; WebP is a site-publishing optimization only.
+- **FR-041**: A `docs/user/translate.md` page MUST explain how contributors can translate the Android app via Crowdin. The page MUST link to the Crowdin project, describe which resource files are translatable (composeResources strings, user guide markdown), and provide step-by-step contribution instructions. This is a contributor guide, not a runtime translation feature.
+- **FR-042**: A `docs/developer/measurement.md` page MUST document the `MetricFormatter` API, locale-aware unit conversion patterns, and how to add new measurement types. This provides developer-facing guidance complementing the user-facing `units-and-locale.md`.
+- **FR-043**: Documentation governance MUST enforce a 3-consumer propagation model: every doc page automatically flows to (1) the in-app docs browser via `syncDocsToComposeResources`, (2) the Jekyll/GitHub Pages site via `docs-deploy.yml`, and (3) the Docusaurus meshtastic.org site via `sync-android-docs.js`. CI MUST validate that every `docs/**/*.md` page slug is registered in `DocBundleLoader.kt` for in-app discovery.
+- **FR-044**: Doc governance scripts MUST share a common frontmatter parsing library (`scripts/lib/frontmatter.js`) to avoid duplication across link validation, freshness checks, coverage checks, and sync scripts. Slug discovery MUST be filesystem-derived, not hardcoded.
+- **FR-045**: All docs CI checks (staleness, link validation, coverage, freshness, registry validation) MUST be consolidated into a single governance workflow with separate jobs for staleness detection and quality gates.
+- **FR-046**: The governance workflow MUST include an advisory preview-staleness job that detects UI composable changes (`feature/*/ui/`, `core/ui/`) without corresponding `*Previews.kt` updates. The check MUST be bypassable via a `skip-preview-check` label.
+- **FR-047**: The governance workflow MUST include an advisory screenshot-reference-staleness job that detects `*Previews.kt` changes without updates to reference images in `screenshot-tests/src/screenshotTestDebug/reference/`. The advisory MUST include the `updateDebugScreenshotTest` command.
+- **FR-048**: User Guide documentation MUST support a three-tier translation cascade: (1) **Crowdin bundled** — community-translated markdown shipped with the app via Crowdin `%android_code%` locale directories synced to CMP `files-{qualifier}/` resources; (2) **ML Kit runtime** — on-device translation via `DocTranslationService` on supported Android `google` flavor devices when no Crowdin translation exists; (3) **English fallback** — the default `files/docs/` content used when neither bundled nor runtime translation is available. The `fdroid` flavor, Desktop, and iOS MUST use a `NoOpDocTranslator` that skips ML Kit and falls back to English. Developer Guide pages remain English-only. The locale resolution chain MUST try region-qualified (`files-pt-rBR/`) then language-only (`files-pt/`) before English.
+- **FR-049**: The `crowdin.yml` configuration MUST use the `%android_code%` placeholder for docs translation paths so that Crowdin outputs locale directories in CMP resource qualifier format (e.g., `pt-rBR`, `zh-rCN`) with zero format conversion needed at build or runtime. The `syncTranslatedDocsToComposeResources` Gradle task MUST copy translated docs into `composeResources/files-{locale}/docs/` without locale format transformation.
+- **FR-050**: The Jekyll documentation site MUST support locale-qualified paths using Android resource qualifier format (`docs/pt-rBR/user/*.md`) with a `_data/locales.yml` registry of supported locales including native names and text direction (LTR/RTL). The site MUST include a language switcher component.
+- **FR-051**: A `currentLocaleQualifier()` expect/actual function in `core:common` MUST return the device locale in CMP resource qualifier format (e.g., `"pt-rBR"` or `"fr"`). This function is used by `DocBundleLoader` to resolve locale-qualified resource paths at runtime.
+- **FR-038**: The Compose Multiplatform markdown renderer (`multiplatform-markdown-renderer-m3`) used by `DocsPageRouteScreen` on non-WebView targets MUST be configured with a custom `ImageTransformer` that resolves relative image paths (e.g., `assets/screenshots/*.png`) to bundled Compose resource URIs via `Res.getUri()` and loads them asynchronously using Coil 3 (`rememberAsyncImagePainter`). The default `NoOpImageTransformerImpl` MUST NOT be used for docs rendering. The `syncDocsToComposeResources` task MUST include screenshot assets alongside markdown files so that images are available at runtime. The `copyDocsScreenshots` task from `screenshot-tests/` MUST be wired as a dependency of `syncDocsToComposeResources` to ensure generated screenshots are available before resource bundling.
 
 ### Key Entities
 
@@ -174,6 +188,17 @@ When documentation-relevant UI or workflow changes merge to `main`, GitHub Actio
 - **SC-012**: Icon/state screenshot coverage exists for connection state, security/lock state, node status, and at least one docs-browser rendering case.
 - **SC-013**: The Chirpy assistant appears as a chat interface with a bundled vector asset and preserves per-session message history while the browser is open.
 - **SC-014**: Connection and security icon assets remain legible in light and dark modes and preserve expected aspect ratio in generated docs output.
+- **SC-015**: Android docs are published on meshtastic.org under `docs/software/android/` and stay current via automated sync workflow.
+- **SC-016**: A "Translate the App" page exists in the User Guide and links to the Crowdin project with step-by-step contribution instructions.
+- **SC-017**: A developer measurement/locale page exists documenting `MetricFormatter` internals and locale-aware patterns.
+- **SC-018**: All docs CI checks (staleness, links, coverage, freshness, registry) run in a single consolidated `docs-governance.yml` workflow with no duplicate validation steps across workflows.
+- **SC-019**: Sync script slug discovery is filesystem-derived — adding a new `.md` file under `docs/` requires no hardcoded string updates in scripts.
+- **SC-020**: PRs that modify UI composables without updating previews receive an advisory PR comment with a checklist. The check is bypassable via `skip-preview-check` label.
+- **SC-021**: PRs that modify previews without updating screenshot reference images receive an advisory PR comment with the regeneration command.
+- **SC-022**: The `crowdin.yml` docs entries use `%android_code%` placeholders and the sync task copies translations into CMP resources with zero locale format conversion.
+- **SC-023**: `DocBundleLoader` resolves locale-qualified docs resources using a region → language → English fallback chain driven by `currentLocaleQualifier()`.
+- **SC-024**: On Google-flavor Android devices, ML Kit runtime translation is available as a fallback when no Crowdin bundled translation exists for the user's locale.
+- **SC-025**: The Jekyll site supports 38 locale paths with a language switcher, and all locale directories use Android resource qualifier format (`pt-rBR`, not `pt-BR`).
 
 ## Clarifications
 
@@ -202,3 +227,70 @@ When documentation-relevant UI or workflow changes merge to `main`, GitHub Actio
 - Gemini Nano availability is gated at runtime and may vary by hardware, region, downloaded models, and Google/AICore rollout. Unsupported environments must gracefully fall back to keyword search.
 - The `google` flavor can host AI bindings; `fdroid` must remain functional without requiring proprietary AI integrations.
 - Chirpy branding will be sourced from the Meshtastic design repository and packaged as a vector-compatible asset for all KMP targets.
+
+## Apple Alignment (Cross-Platform Parity)
+
+### Session 2026-05-12
+
+Gap analysis against `meshtastic-apple` identified these alignment items for Android:
+
+**Implemented:**
+1. **Per-page TOC icons** — Apple uses SF Symbols per `DocPage`; Android now maps `iconId` to `MeshtasticIcons` via `DocPageIconResolver.kt`.
+2. **Signal meter user guide page** — `docs/user/signal-meter.md` explains RSSI vs SNR, bar-level criteria, and LoRa-specific signal concepts. Adapted from Apple equivalent for Android signal surfaces.
+3. **Units & locale user guide page** — `docs/user/units-and-locale.md` explains automatic metric/imperial formatting via `MetricFormatter`. Adapted from Apple equivalent for Android/KMP stack.
+4. **Docs staleness CI workflow** — `.github/workflows/docs-staleness.yml` posts advisory PR comments when user-facing UI files change without corresponding `docs/` updates. Adapted from Apple's workflow for KMP feature/core paths.
+
+**Skipped (platform-specific to Apple):**
+- `docs/user/watch.md` — watchOS-only
+- `docs/user/carplay.md` — iOS CarPlay only
+- `docs/developer/carplay.md` — iOS CarPlay architecture only
+- `docs/developer/swiftdata.md` — Android has `persistence.md` (Room KMP)
+- `docs/developer/deep-links.md` — Android has `navigation-and-deep-links.md`
+- TipKit contextual tips — iOS TipKit has no direct KMP equivalent; contextual help is deferred
+
+**Corrected (previously skipped, now implemented or planned):**
+- `docs/user/translate.md` — Previously marked "iOS Translate framework only" but is actually a **Crowdin contribution guide** applicable to all platforms. Android equivalent planned as FR-041.
+- `docs/developer/measurement.md` — Previously marked "covered by user page" but Apple version provides developer-facing API guidance. Android equivalent planned as FR-042.
+
+### Session 2026-05-13
+
+Gap analysis against PR [meshtastic/meshtastic#2393](https://github.com/meshtastic/meshtastic/pull/2393) (Apple docs sync to Docusaurus) and `meshtastic-apple` `specs/003-app-docs-markdown/` identified these additional alignment items:
+
+**Planned (Phase 10):**
+1. **Docusaurus sync script + workflow** — Apple has `sync-apple-docs.js` + `sync-apple-docs.yml` syncing in-app docs to meshtastic.org under `docs/software/apple/`. Android needs an equivalent `sync-android-docs.js` publishing to `docs/software/android/` (FR-039).
+2. **WebP image optimization** — Apple converts PNGs to WebP for the docs site via `--convert-webp` flag. Android should add the same optimization (FR-040).
+3. **Translate the App page** — `docs/user/translate.md` contributor guide for Crowdin (FR-041).
+4. **Developer measurement page** — `docs/developer/measurement.md` for MetricFormatter API docs (FR-042).
+
+**Confirmed non-goals:**
+- `docs/user/watch.md`, `docs/user/carplay.md`, `docs/developer/carplay.md` — remain Apple-only.
+
+**Implemented (Phase 11 — Governance & Consolidation):**
+
+Audit of docs infrastructure identified duplication across 4 JS scripts, 3 CI workflows, and hardcoded slug registries. Consolidation implemented:
+
+1. **Shared frontmatter library** — `scripts/lib/frontmatter.js` provides `parseFrontmatter()`, `discoverSlugs()`, and `forEachDocPage()` used by all governance scripts. Eliminated 4 independent frontmatter parsers (FR-044).
+2. **Filesystem-derived slugs** — `sync-android-docs.js` now auto-discovers page slugs from `docs/user/` and `docs/developer/` instead of maintaining hardcoded `KNOWN_*_SLUGS` sets (26 strings eliminated). The slug registry CI check is no longer needed (FR-044).
+3. **Workflow consolidation** — `docs-staleness.yml` merged into `docs-governance.yml` as a parallel `staleness` job alongside the existing `validate` job. Duplicate link validation removed from `docs-deploy.yml` (FR-045).
+4. **3-consumer propagation** — Constitution principle VI updated to explicitly name in-app, Jekyll, and Docusaurus consumers with propagation rules. Staleness check comment includes new-page checklist (FR-043).
+5. **Duplicate script removal** — `sync-android-docs.js` copy removed from meshtastic/meshtastic PR #2405 since the workflow runs from the Android repo clone.
+
+**Implemented (Phase 11 continued — Preview & Screenshot Governance):**
+
+Extended governance to cover preview composables and screenshot testing:
+
+1. **Preview staleness advisory** — `preview-staleness` job detects UI composable changes without `*Previews.kt` updates. Posts advisory PR comment with checklist. Bypassable via `skip-preview-check` label (FR-046).
+2. **Screenshot reference staleness advisory** — Same job detects preview changes without reference image updates. Posts advisory with `updateDebugScreenshotTest` command (FR-047).
+3. **Workflow renamed** — `Docs Governance` → `UI & Docs Governance` to reflect expanded scope.
+4. **Contributing checklist** — `docs/developer.md` updated with preview/screenshot maintenance guidance.
+
+### Session 2026-05-18
+
+Translation cascade and locale pipeline implementation:
+
+1. **Scope change** — Translating User Guide docs is now in scope. Crowdin provides community translations bundled with the app; ML Kit provides runtime fallback on Google flavor. Developer Guide remains English-only.
+2. **Zero-conversion locale pipeline** — Crowdin `%android_code%` outputs locale directories in CMP resource qualifier format (`pt-rBR`, `fr`). The sync task just prepends `files-` — no format conversion at build or runtime.
+3. **Locale resolution chain** — `DocBundleLoader.localeQualifiers()` tries region-qualified (`files-pt-rBR/`) → language-only (`files-pt/`) → English default (`files/`).
+4. **Platform actuals** — `currentLocaleQualifier()` expect/actual in `core:common` returns CMP qualifier format on all platforms.
+5. **ML Kit translation** — `DocTranslationService` interface with `MlKitDocTranslator` (google), `NoOpDocTranslator` (fdroid/desktop/iOS). `DocTranslationCache` provides file-backed caching. `MarkdownTranslationSegmenter` splits docs into translatable segments preserving markdown structure.
+6. **Web i18n** — Jekyll `_config.yml` and `_data/locales.yml` support 38 locales with Android qualifier paths. Language switcher included.

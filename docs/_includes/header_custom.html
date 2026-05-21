@@ -1,0 +1,45 @@
+<div class="theme-toggle-wrap">
+  <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle light/dark theme" onclick="toggleMeshtasticTheme()">
+    <span id="theme-icon">🌙</span>
+    <span id="theme-label">Dark</span>
+  </button>
+  {% include language_switcher.html %}
+</div>
+
+<script>
+function toggleMeshtasticTheme() {
+  var current = localStorage.getItem('jtd-theme') || 'meshtastic';
+  var next = (current === 'meshtastic-dark') ? 'meshtastic' : 'meshtastic-dark';
+  if (typeof jtd !== 'undefined' && typeof jtd.setTheme === 'function') {
+    jtd.setTheme(next);
+  }
+  localStorage.setItem('jtd-theme', next);
+  var icon = document.getElementById('theme-icon');
+  var label = document.getElementById('theme-label');
+  if (icon && label) {
+    icon.textContent = (next === 'meshtastic-dark') ? '☀️' : '🌙';
+    label.textContent = (next === 'meshtastic-dark') ? 'Light' : 'Dark';
+  }
+}
+
+// Apply stored/OS theme on page load
+(function() {
+  var theme = localStorage.getItem('jtd-theme') || 'meshtastic';
+  // Sync toggle label immediately
+  var icon = document.getElementById('theme-icon');
+  var label = document.getElementById('theme-label');
+  if (icon && label) {
+    icon.textContent = (theme === 'meshtastic-dark') ? '☀️' : '🌙';
+    label.textContent = (theme === 'meshtastic-dark') ? 'Light' : 'Dark';
+  }
+  // Apply theme once jtd is ready
+  function tryApply() {
+    if (typeof jtd !== 'undefined' && typeof jtd.setTheme === 'function') {
+      jtd.setTheme(theme);
+    } else {
+      setTimeout(tryApply, 50);
+    }
+  }
+  tryApply();
+})();
+</script>

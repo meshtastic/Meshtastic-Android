@@ -319,6 +319,13 @@
     <string name="distance_measurements">距離量測</string>
     <string name="distance_measurements_description">顯示您手機與其他有定位資訊的 Meshtastic 節點之間的距離。</string>
     <string name="dns">DNS</string>
+    <!-- DOC -->
+    <string name="doc_clear_search">清除搜尋結果</string>
+    <string name="doc_title_connections">連線</string>
+    <string name="doc_title_discovery">尋找</string>
+    <string name="doc_title_mqtt">MQTT</string>
+    <string name="doc_title_nodes">節點</string>
+    <string name="doc_title_onboarding"># 入門指南</string>
     <string name="done">完成</string>
     <string name="double_tap_as_button_press">雙擊觸發按鈕功能</string>
     <string name="downlink_enabled">已啓用下行</string>
@@ -1105,7 +1112,7 @@
     <string name="tak_role_teammember">隊伍成員</string>
     <string name="tak_role_unspecified">未指定</string>
     <string name="tak_server_enabled">啓用本地 TAK 伺服器</string>
-    <string name="tak_server_enabled_desc">在 8089 埠啟動一個用於 ATAK 連線的 TCP 伺服器</string>
+    <string name="tak_server_section">伺服器</string>
     <string name="tak_team">隊伍顏色</string>
     <string name="tak_team_blue">Blue - 藍色</string>
     <string name="tak_team_brown">咖啡色</string>

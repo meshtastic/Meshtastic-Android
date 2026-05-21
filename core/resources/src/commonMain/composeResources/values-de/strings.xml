@@ -324,6 +324,14 @@
     <string name="distance_measurements">Entfernungsmessungen</string>
     <string name="distance_measurements_description">Zeigt den Abstand zwischen Ihrem Telefon und anderen Meshtastic Knoten mit einem Standort an.</string>
     <string name="dns">DNS</string>
+    <!-- DOC -->
+    <string name="doc_clear_search">Neue Suche</string>
+    <string name="doc_title_connections">Verbindungen</string>
+    <string name="doc_title_discovery">Entdecken</string>
+    <string name="doc_title_firmware">Firmwareaktualisierungen</string>
+    <string name="doc_title_mqtt">MQTT</string>
+    <string name="doc_title_nodes">Knoten</string>
+    <string name="doc_title_onboarding">Erste Schritte</string>
     <string name="done">Fertig</string>
     <string name="dont_show_again_for_device">Für dieses Gerät nicht erneut anzeigen</string>
     <string name="double_tap_as_button_press">Doppelklick als Taste</string>
@@ -731,6 +739,7 @@
     <string name="mute_always">Immer</string>
     <string name="mute_notifications">Benachrichtigungen stummschalten</string>
     <string name="mute_remove">Benachrichtigungen für '%1$s ' einschalten?</string>
+    <string name="mute_selected">Auswahl stumm schalten</string>
     <string name="mute_status_always">Immer stumm</string>
     <string name="mute_status_muted_for_days">Stumm für %1$d Tage, %2$s Stunden</string>
     <string name="mute_status_muted_for_hours">Stumm für %1$s Stunden</string>
@@ -1135,6 +1144,7 @@
     <string name="store_forward_config">Speichern &amp; Weiterleiten Einstellungen</string>
     <string name="store_forward_enabled">Speichern &amp; Weiterleiten aktiviert</string>
     <string name="subnet">Subnet</string>
+    <string name="success">Erfolgreich</string>
     <string name="super_deep_sleep_duration_seconds">Dauer Supertiefschlaf</string>
     <string name="supported">Unterstützt</string>
     <string name="supported_by_community">Unterstützt von der Meshtastic Gemeinschaft</string>
@@ -1153,8 +1163,19 @@
     <string name="tak_role_teamlead">Teamleiter</string>
     <string name="tak_role_teammember">Teammitglied</string>
     <string name="tak_role_unspecified">Unspecified</string>
+    <string name="tak_server">TAK Server</string>
     <string name="tak_server_enabled">Lokalen TAK Server aktivieren</string>
-    <string name="tak_server_enabled_desc">Startet einen TCP Server auf Port 8089 für ATAK Verbindungen</string>
+    <string name="tak_server_enabled_desc">Startet einen lokalen TLS-Server auf Port 8089 für ATAK/iTAK Verbindungen</string>
+    <string name="tak_server_export_data_package_desc">Erstelle .zip für ATAK/iTAK um sich mit diesem Server zu verbinden</string>
+    <string name="tak_server_loading">…</string>
+    <string name="tak_server_section">Server</string>
+    <string name="tak_server_test_card_title">TAK Mesh Test (Debug)</string>
+    <string name="tak_server_test_idle">Alle %1$d Tests an das Netz senden</string>
+    <string name="tak_server_test_result_bytes">%1$dB ✓</string>
+    <string name="tak_server_test_result_unknown_error">✗</string>
+    <string name="tak_server_test_results">%1$d bestanden, %2$d fehlgeschlagen von %3$d/%4$d</string>
+    <string name="tak_server_test_run">Ausführen</string>
+    <string name="tak_server_test_running">Ausführen: %1$s</string>
     <string name="tak_team">Teamfarbe</string>
     <string name="tak_team_blue">Blau</string>
     <string name="tak_team_brown">Braun</string>
@@ -1247,6 +1268,7 @@
     <string name="unmessageable">Nicht erreichbar</string>
     <string name="unmonitored_or_infrastructure">Unbeaufsichtigt oder Infrastruktur</string>
     <string name="unmute">Stummschaltung aufheben</string>
+    <string name="unmute_selected">Auswahl aktivieren</string>
     <string name="unrecognized">Unbekannt</string>
     <string name="unset">Nicht gesetzt - 0</string>
     <string name="up_down_select_input_enabled">Up/Down/Select Eingang aktiviert</string>
@@ -1302,6 +1324,7 @@
     <string name="wifi_provision_description">Stellen Sie Ihrem mPWRD-OS Gerät WLAN Zugangsdaten über Bluetooth zur Verfügung.</string>
     <string name="wifi_provision_device_found">Gerät gefunden</string>
     <string name="wifi_provision_device_found_detail">Bereit zur Suche nach WLAN Netzwerken.</string>
+    <string name="wifi_provision_hidden_network">Verstecktes Netzwerk</string>
     <string name="wifi_provision_mpwrd_disclaimer">Erfahren Sie mehr über das mPWRD-OS Projekt\nhttps://github.com/mPWRD-OS</string>
     <string name="wifi_provision_no_networks">Keine Netzwerke gefunden</string>
     <string name="wifi_provision_scan_failed">Suche nach WLAN Netzwerken fehlgeschlagen: %1$s</string>

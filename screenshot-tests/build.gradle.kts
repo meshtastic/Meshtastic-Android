@@ -50,6 +50,8 @@ dependencies {
     implementation(project(":feature:settings"))
     implementation(project(":feature:firmware"))
     implementation(project(":feature:intro"))
+    implementation(project(":feature:map"))
+    implementation(project(":feature:docs"))
 
     implementation(libs.compose.multiplatform.foundation)
     implementation(libs.compose.multiplatform.material3)
@@ -65,14 +67,42 @@ tasks.register<Copy>("copyDocsScreenshots") {
 
     val referenceDir = layout.projectDirectory.dir("src/screenshotTestDebug/reference")
     val manifestFile = layout.projectDirectory.file("docs-screenshots-manifest.txt")
+    val aliasFile = layout.projectDirectory.file("docs-screenshot-aliases.properties")
     val outputDir = rootProject.layout.projectDirectory.dir("docs/screenshots")
 
-    from(referenceDir)
+    // Read manifest patterns at configuration time so Copy task can resolve includes
+    val manifestPatterns =
+        manifestFile.asFile.let { file ->
+            if (file.exists()) {
+                file.readLines().map { it.trim() }.filter { it.isNotEmpty() && !it.startsWith("#") }
+            } else {
+                emptyList()
+            }
+        }
+
+    from(referenceDir) { include(manifestPatterns) }
     into(outputDir)
 
-    // Flatten directory structure: just the filename
-    eachFile { path = name }
-    duplicatesStrategy = DuplicatesStrategy.FAIL
+    // Build reverse alias map (CST name → semantic name) for renaming during copy.
+    val reverseAliases: Map<String, String> by lazy {
+        val file = aliasFile.asFile
+        if (!file.exists()) return@lazy emptyMap()
+        file
+            .readLines()
+            .map { it.trim() }
+            .filter { it.isNotEmpty() && !it.startsWith("#") && it.contains('=') }
+            .associate { line ->
+                val (semantic, cst) = line.split('=', limit = 2)
+                cst.trim() to semantic.trim()
+            }
+    }
+
+    // Flatten directory structure and apply alias renaming
+    eachFile {
+        val alias = reverseAliases[name]
+        path = alias ?: name
+    }
+    duplicatesStrategy = DuplicatesStrategy.WARN
     includeEmptyDirs = false
 
     doFirst {
@@ -81,25 +111,20 @@ tasks.register<Copy>("copyDocsScreenshots") {
             "Reference screenshot directory not found: ${refDir.absolutePath}. " +
                 "Run :screenshot-tests:updateDebugScreenshotTest first."
         }
-        val file = manifestFile.asFile
-        require(file.exists()) {
-            "Screenshot manifest not found: ${file.absolutePath}. " +
-                "This file lists which reference screenshots to copy for the docs pipeline."
+        if (manifestPatterns.isEmpty()) {
+            logger.warn("Screenshot manifest is empty — no files will be copied.")
         }
-        val patterns = file.readLines().map { it.trim() }.filter { it.isNotEmpty() && !it.startsWith("#") }
-        if (patterns.isEmpty()) {
-            logger.warn("Screenshot manifest is empty — no files will be copied: ${file.absolutePath}")
-        }
-        include(patterns)
     }
 
     doLast {
-        val copied = outputs.files.files.filter { it.isFile }
-        if (copied.isEmpty()) {
+        val copiedFiles = outputDir.asFile.listFiles()?.filter { it.isFile && it.extension == "png" } ?: emptyList()
+        if (copiedFiles.isEmpty()) {
             logger.warn(
                 "copyDocsScreenshots: manifest patterns matched no files in ${referenceDir.asFile.absolutePath}. " +
                     "Check pattern spelling in ${manifestFile.asFile.name}.",
             )
+        } else {
+            logger.lifecycle("copyDocsScreenshots: copied ${copiedFiles.size} screenshots to ${outputDir.asFile.path}")
         }
     }
 }

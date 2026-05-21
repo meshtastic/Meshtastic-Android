@@ -13,9 +13,9 @@ lifecycle = "2.10.0"
 jetbrains-lifecycle = "2.11.0-beta01"
 navigation3 = "1.1.1"
 paging = "3.5.0"
-room = "3.0.0-alpha04"
+room = "3.0.0-alpha05"
 koin = "4.2.1"
-koin-plugin = "1.0.0-RC2"
+koin-plugin = "1.0.0"
 
 # Kotlin
 kotlin = "2.3.21"
@@ -26,8 +26,8 @@ ktlint = "1.7.1"
 ktfmt = "0.61"
 kover = "0.9.8"
 mokkery = "3.3.0"
-junit5 = "6.0.3"
-junit-platform = "6.0.3" # aligned with junit5 — JUnit Platform uses 1.x scheme
+junit5 = "6.1.0"
+junit-platform = "6.1.0" # aligned with junit5 — JUnit Platform uses 1.x scheme
 kotest = "6.1.11"
 testRetry = "1.6.4"
 turbine = "1.2.1"
@@ -36,7 +36,7 @@ turbine = "1.2.1"
 compose-screenshot = "0.0.1-alpha14"
 
 # Compose Multiplatform
-compose-multiplatform = "1.11.0-rc01"
+compose-multiplatform = "1.11.0"
 compose-multiplatform-material3 = "1.11.0-alpha07"
 # `androidx-compose-bom-aligned` tracks androidx.compose.{runtime,ui,foundation,animation}
 # artifacts that ship in lockstep with CMP. Kept as a separate version ref so Renovate
@@ -46,47 +46,60 @@ compose-multiplatform-material3 = "1.11.0-alpha07"
 # current `compose-multiplatform` release maps to (see CMP release notes).
 # AndroidCompose.kt's resolutionStrategy force-aligns these groups to *this* version
 # at resolution time, so it is the source of truth for the Android target.
-androidx-compose-bom-aligned = "1.11.1"
+androidx-compose-bom-aligned = "1.11.2"
 # `androidx-compose-material` (M2) is independent of CMP. Pinned because
 # maps-compose-widgets requests `androidx.compose.material:material` without
 # a version (relying on a BOM that we exclude). M2 is frozen at 1.7.8.
 androidx-compose-material = "1.7.8"
-jetbrains-adaptive = "1.3.0-alpha07"
+jetbrains-adaptive = "1.3.0-beta01"
 
 # Google
 maps-compose = "8.3.0"
 
 # ML Kit
 mlkit-barcode-scanning = "17.3.0"
+mlkit-translate = "17.0.3"
 
 # CameraX
 camerax = "1.6.1"
 
 # Networking
-ktor = "3.4.3"
+ktor = "3.5.0"
 
 # Other
 aboutlibraries = "14.2.0"
 jserialcomm = "2.11.4"
 coil = "3.4.0"
 datadog-gradle = "1.26.0"
-dd-sdk-android = "3.9.1"
+dd-sdk-android = "3.10.0"
 detekt = "2.0.0-alpha.3"
 dokka = "2.2.0"
-devtools-ksp = "2.3.7"
+devtools-ksp = "2.3.8"
 firebase-crashlytics-gradle = "3.0.7"
 google-services-gradle = "4.4.4"
-markdownRenderer = "0.40.2"
+markdownRenderer = "0.41.0"
 okio = "3.17.0"
 uri-kmp = "0.0.21"
 osmdroid-android = "6.1.20"
-spotless = "8.4.0"
-wire = "6.2.0"
-vico = "3.2.0-next.4"
-kable = "0.42.0"
+spotless = "8.5.1"
+wire = "6.4.0"
+vico = "3.2.0-next.5"
+kable = "0.43.0"
 mqttastic = "0.3.6"
 jmdns = "3.6.3"
 qrcode-kotlin = "4.5.0"
+takpacket-sdk = "0.2.4-SNAPSHOT"
+
+# Flatpak Offline Build Overrides & Tooling
+develocity = "4.4.1"
+custom-user-data = "2.6.0"
+foojay-resolver = "1.0.0"
+proguard-gradle = "7.7.0"
+savedstate-compose = "1.3.6"
+old-kotlin-transitive = "2.2.21"
+old-kotlin-stdlib-jdk8 = "1.9.20"
+old-kotlinx-serialization = "1.9.0"
+old-guava = "32.1.3-jre"
 
 [libraries]
 xmlutil-core = { module = "io.github.pdvrieze.xmlutil:core", version.ref = "xmlutil" }
@@ -155,6 +168,8 @@ jetbrains-compose-material3-adaptive-navigation3 = { module = "org.jetbrains.com
 jetbrains-compose-material3-adaptive-navigation-suite = { module = "org.jetbrains.compose.material3:material3-adaptive-navigation-suite", version.ref = "compose-multiplatform-material3" }
 
 # Google
+firebase-ai = { module = "com.google.firebase:firebase-ai" }
+firebase-ai-ondevice = { module = "com.google.firebase:firebase-ai-ondevice", version = "16.0.0-beta02" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version = "34.13.0" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
@@ -169,6 +184,7 @@ maps-compose = { module = "com.google.maps.android:maps-compose", version.ref = 
 maps-compose-utils = { module = "com.google.maps.android:maps-compose-utils", version.ref = "maps-compose" }
 maps-compose-widgets = { module = "com.google.maps.android:maps-compose-widgets", version.ref = "maps-compose" }
 mlkit-barcode-scanning = { module = "com.google.mlkit:barcode-scanning", version.ref = "mlkit-barcode-scanning" }
+mlkit-translate = { module = "com.google.mlkit:translate", version.ref = "mlkit-translate" }
 play-services-maps = { module = "com.google.android.gms:play-services-maps", version = "20.0.0" }
 wire-runtime = { module = "com.squareup.wire:wire-runtime", version.ref = "wire" }
 zxing-core = { module = "com.google.zxing:core", version = "3.5.4" }
@@ -229,7 +245,7 @@ dokka-android-documentation-plugin = { module = "org.jetbrains.dokka:android-doc
 markdown-renderer = { module = "com.mikepenz:multiplatform-markdown-renderer", version.ref = "markdownRenderer" }
 markdown-renderer-m3 = { module = "com.mikepenz:multiplatform-markdown-renderer-m3", version.ref = "markdownRenderer" }
 markdown-renderer-android = { module = "com.mikepenz:multiplatform-markdown-renderer-android", version.ref = "markdownRenderer" }
-material = { module = "com.google.android.material:material", version = "1.13.0" }
+material = { module = "com.google.android.material:material", version = "1.14.0" }
 
 kable-core = { module = "com.juul.kable:kable-core", version.ref = "kable" }
 meshtastic-mqtt-client = { module = "org.meshtastic:mqtt-client", version.ref = "mqttastic" }
@@ -256,7 +272,7 @@ androidx-room-gradlePlugin = { module = "androidx.room3:room3-gradle-plugin", ve
 compose-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 compose-multiplatform-gradlePlugin = { module = "org.jetbrains.compose:compose-gradle-plugin", version.ref = "compose-multiplatform" }
 datadog-gradlePlugin = { module = "com.datadoghq.dd-sdk-android-gradle-plugin:com.datadoghq.dd-sdk-android-gradle-plugin.gradle.plugin", version.ref = "datadog-gradle" }
-detekt-compose = { module = "io.nlopez.compose.rules:detekt", version = "0.5.8" }
+detekt-compose = { module = "io.nlopez.compose.rules:detekt", version = "0.5.9" }
 detekt-formatting = { module = "dev.detekt:detekt-rules-ktlint-wrapper", version.ref = "detekt" }
 detekt-gradlePlugin = { module = "dev.detekt:detekt-gradle-plugin", version.ref = "detekt" }
 firebase-crashlytics-gradlePlugin = { module = "com.google.firebase:firebase-crashlytics-gradle", version.ref = "firebase-crashlytics-gradle" }
@@ -272,6 +288,33 @@ aboutlibraries-gradlePlugin = { module = "com.mikepenz.aboutlibraries.plugin:abo
 
 jmdns = { module = "org.jmdns:jmdns", version.ref = "jmdns" }
 jna = { module = "net.java.dev.jna:jna", version = "5.18.1" }
+
+# TAK
+takpacket-sdk-kmp = { module = "org.meshtastic:takpacket-sdk", version.ref = "takpacket-sdk" }
+takpacket-sdk-jvm = { module = "org.meshtastic:takpacket-sdk-jvm", version.ref = "takpacket-sdk" }
+
+# Flatpak Offline Build Overrides & Tooling
+proguard-gradle = { module = "com.guardsquare:proguard-gradle", version.ref = "proguard-gradle" }
+savedstate-compose = { module = "org.jetbrains.androidx.savedstate:savedstate-compose", version.ref = "savedstate-compose" }
+old-guava = { module = "com.google.guava:guava", version.ref = "old-guava" }
+old-guava-parent = { module = "com.google.guava:guava-parent", version.ref = "old-guava" }
+old-kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "old-kotlin-transitive" }
+old-kotlin-stdlib-jdk8 = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version.ref = "old-kotlin-stdlib-jdk8" }
+old-kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "old-kotlinx-serialization" }
+old-kotlinx-serialization-core-jvm = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core-jvm", version.ref = "old-kotlinx-serialization" }
+
+kotlin-build-tools-compat = { module = "org.jetbrains.kotlin:kotlin-build-tools-compat", version.ref = "kotlin" }
+kotlin-build-tools-impl = { module = "org.jetbrains.kotlin:kotlin-build-tools-impl", version.ref = "kotlin" }
+kotlin-scripting-compiler-embeddable = { module = "org.jetbrains.kotlin:kotlin-scripting-compiler-embeddable", version.ref = "kotlin" }
+kotlin-sam-with-receiver-compiler-plugin-embeddable = { module = "org.jetbrains.kotlin:kotlin-sam-with-receiver-compiler-plugin-embeddable", version.ref = "kotlin" }
+kotlin-assignment-compiler-plugin-embeddable = { module = "org.jetbrains.kotlin:kotlin-assignment-compiler-plugin-embeddable", version.ref = "kotlin" }
+kotlin-compose-compiler-plugin-embeddable = { module = "org.jetbrains.kotlin:kotlin-compose-compiler-plugin-embeddable", version.ref = "kotlin" }
+kotlin-serialization-compiler-plugin-embeddable = { module = "org.jetbrains.kotlin:kotlin-serialization-compiler-plugin-embeddable", version.ref = "kotlin" }
+kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
+kotlin-stdlib-common = { module = "org.jetbrains.kotlin:kotlin-stdlib-common", version.ref = "kotlin" }
+
+koin-compiler-plugin = { module = "io.insert-koin:koin-compiler-plugin", version.ref = "koin-plugin" }
+compose-material-ripple = { module = "org.jetbrains.compose.material:material-ripple", version.ref = "compose-multiplatform" }
 
 [plugins]
 # Android
@@ -308,7 +351,10 @@ wire = { id = "com.squareup.wire", version.ref = "wire" }
 room = { id = "androidx.room3", version.ref = "room" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 test-retry = { id = "org.gradle.test-retry", version.ref = "testRetry" }
-flatpak-gradle-generator = { id = "io.github.jwharm.flatpak-gradle-generator", version = "1.7.0" }
+flatpak-gradle-generator = { id = "io.github.jwharm.flatpak-gradle-generator", version = "1.8.0" }
+develocity = { id = "com.gradle.develocity", version.ref = "develocity" }
+custom-user-data = { id = "com.gradle.common-custom-user-data-gradle-plugin", version.ref = "custom-user-data" }
+foojay-resolver = { id = "org.gradle.toolchains.foojay-resolver", version.ref = "foojay-resolver" }
 
 # Meshtastic
 meshtastic-android-application = { id = "meshtastic.android.application" }

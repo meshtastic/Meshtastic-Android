@@ -52,7 +52,7 @@ The standard SDD cycle for a new feature:
 
 ```text
 1. /speckit.specify "Feature description here"
-   → Creates specs/<NNN>-feature-name/spec.md
+   → Creates specs/<YYYYMMDD-HHMMSS>-feature-name/spec.md
    → Auto-creates feature branch via git hook
 
 2. /speckit.clarify
@@ -85,11 +85,11 @@ This runs: specify → (review gate) → plan → (review gate) → tasks → im
 
 ## File Structure
 
-Spec Kit produces files under `specs/<NNN>-feature-name/`:
+Spec Kit produces files under `specs/<YYYYMMDD-HHMMSS>-feature-name/`:
 
 ```
 specs/
-└── 001-feature-name/
+└── 20260513-160000-feature-name/
     ├── spec.md              # Feature specification (FRs, NFRs, SCs, user stories)
     ├── plan.md              # Implementation plan (architecture, phases)
     ├── tasks.md             # Dependency-ordered task list

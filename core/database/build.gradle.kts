@@ -25,10 +25,7 @@ plugins {
 }
 
 kotlin {
-    jvm()
-
-    android {
-        namespace = "org.meshtastic.core.database"
+    androidLibrary {
         withHostTest { isIncludeAndroidResources = true }
         withDeviceTest { instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner" }
     }
@@ -82,22 +79,11 @@ dependencies {
     "kspAndroidDeviceTest"(libs.androidx.room.compiler)
 }
 
+// Only kspKotlinJvmProcessorClasspath is needed here — it captures Room compiler
+// and KSP processor deps that are module-scoped and invisible to desktopApp.
+// All other JVM deps are captured transitively by desktopApp's runtimeClasspath.
 tasks.flatpakGradleGenerator {
     outputFile = file("../../flatpak-sources-core-database.json")
     downloadDirectory.set("./offline-repository")
-    excludeConfigurations.set(
-        listOf(
-            "androidRuntimeClasspath",
-            "androidMainLintChecksClasspath",
-            "androidHostTestRuntimeClasspath",
-            "androidHostTestLintChecksClasspath",
-            "androidHostTestCompileClasspath",
-            "androidDeviceTestRuntimeClasspath",
-            "androidDeviceTestLintChecksClasspath",
-            "androidDeviceTestCompileClasspath",
-            "androidCompileClasspath",
-            "testCompileClasspath",
-            "testRuntimeClasspath",
-        ),
-    )
+    includeConfigurations.set(setOf("kspKotlinJvmProcessorClasspath"))
 }

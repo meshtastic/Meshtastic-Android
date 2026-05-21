@@ -254,6 +254,10 @@
     <string name="distance_filters_description">Szűrd a csomópont-listát és a mesh térképet a telefon közelsége alapján.</string>
     <string name="distance_measurements">Távolságmérés</string>
     <string name="distance_measurements_description">Megjeleníti a távolságot a telefonod és más, pozícióval rendelkező Meshtastic csomópontok között.</string>
+    <!-- DOC -->
+    <string name="doc_clear_search">Keresés törlése</string>
+    <string name="doc_title_mqtt">MQTT</string>
+    <string name="doc_title_nodes">Csomópontok</string>
     <string name="double_tap_as_button_press">Dupla koppintás mint gomb</string>
     <string name="downlink_enabled">Letöltés engedélyezve</string>
     <string name="downlink_feature_description">A nyilvános internetes átjáróból érkező üzenetek továbbításra kerülnek a helyi mesh hálózatra. A zéró-ugrási szabály miatt az alapértelmezett MQTT szerver forgalma nem terjed tovább ennél az eszköznél.</string>
@@ -809,6 +813,7 @@
     <string name="sx126x_rx_boosted_gain">RX fokozott erősítés</string>
     <string name="system_settings">Rendszerbeállítások</string>
     <!-- TAK -->
+    <string name="tak_server_section">Szerver</string>
     <string name="tak_team_blue">Kék</string>
     <string name="tak_team_green">Zöld</string>
     <string name="tak_team_red">Piros</string>

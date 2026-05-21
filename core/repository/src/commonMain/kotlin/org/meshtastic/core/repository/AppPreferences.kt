@@ -65,8 +65,11 @@ interface MeshLogPrefs {
 /** Reactive interface for emoji preferences. */
 interface CustomEmojiPrefs {
     val customEmojiFrequency: StateFlow<String?>
+    val preferredSkinToneIndex: StateFlow<Int>
 
     fun setCustomEmojiFrequency(frequency: String?)
+
+    fun setPreferredSkinToneIndex(index: Int)
 }
 
 /** Reactive interface for general UI preferences. */

@@ -22,7 +22,7 @@ jobs:
       - name: Update firmware releases list
         id: firmware
         run: |
-          firmware_file_path="app/src/main/assets/firmware_releases.json"
+          firmware_file_path="androidApp/src/main/assets/firmware_releases.json"
           temp_firmware_file="/tmp/new_firmware_releases.json"
 
           echo "Fetching latest firmware releases..."
@@ -51,7 +51,7 @@ jobs:
       - name: Update hardware list
         id: hardware
         run: |
-          hardware_file_path="app/src/main/assets/device_hardware.json"
+          hardware_file_path="androidApp/src/main/assets/device_hardware.json"
           temp_hardware_file="/tmp/new_device_hardware.json"
 
           echo "Fetching latest device hardware data..."
@@ -172,11 +172,12 @@ jobs:
           base: 'main'
           delete-branch: true
           add-paths: |
-            app/src/main/assets/firmware_releases.json
-            app/src/main/assets/device_hardware.json
+            androidApp/src/main/assets/firmware_releases.json
+            androidApp/src/main/assets/device_hardware.json
             fastlane/metadata/android/**
             **/strings.xml
             **/README.md
+            docs/**/*.md
           labels: |
             automation
             l10n

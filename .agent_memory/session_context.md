@@ -3,6 +3,50 @@
 # Do NOT edit or remove previous entries — stale state claims cause agent confusion.
 # Format: ## YYYY-MM-DD — <summary>
 
+## 2026-05-20 — Overhauled and Bulletproofed Flatpak Source Generation
+- Overhauled and streamlined `build-logic/convention/build.gradle.kts` to dynamically query and resolve all 25+ Version Catalog plugin marker coordinates in a type-safe dynamic loop.
+- Replaced the hardcoded embedded Gradle Kotlin compiler version with dynamic standard library detection: `KotlinVersion.CURRENT.toString()`.
+- Implemented root Gradle consolidator task `:combineFlatpakSources` using JVM-native Json Slurper/Output, deduplicating 2222 entries and injecting Google/Aliyun backup `mirror-urls`.
+- Streamlined reusable-check and release CI workflows, replacing complex `jq` hacks with a simple, single gradle task invocation.
+- Verified `spotlessCheck`, `detekt`, and end-to-end completely offline package builds (`--offline`) completed with 100% success.
+
+## 2026-05-20 — Refactored and polished Flatpak dependency manifests to modern Gradle standards
+- Polished the Flatpak generator tasks and convention setup following a comprehensive audit:
+  1. Centralized version definitions to reference the central `libs.versions` catalog (`kotlin`, `koin.plugin`, etc.) instead of hardcoded strings.
+  2. Documented every single dependency override and compiler-plugin helper with clear, inline comments (`// why: ...`).
+  3. Cleaned out legacy dependencies and streamlined `core:database` to only capture `kspKotlinJvmProcessorClasspath`.
+  4. Changed includeConfigurations to use type-safe `setOf` instead of `listOf` to align with Gradle's `SetProperty` APIs.
+- Verified that all static analysis checks pass successfully: `./gradlew spotlessCheck detekt` is 100% green.
+- Validated end-to-end correctness by successfully compiling the app completely offline (`--offline`) and packaging the release UberJar.
+
+## 2026-05-20 — Fixed Jekyll documentation site build and deployment in CI
+- Created `docs/index.html` to automatically redirect root path requests (`/`) to the English directory (`/en/`).
+- Updated `.github/workflows/docs-deploy.yml` to compile the Jekyll root site using `--baseurl /${{ github.event.repository.name }}` and setup Ruby with version `4.0.4` to match project release workflow conventions.
+- Updated `.github/workflows/docs-release.yml` to compile both versioned and root Jekyll sites, assemble them into `build/final_site/` with Dokka HTML references, configure correct baseurls respectively, and setup Ruby with version `4.0.4`.
+- Verified that local Gradle docs tasks (`generateDocsBundle`, `validateDocsBundle`, `publishDocsSite`) compile successfully and the redirect file is correctly populated in the output.
+
+## 2026-05-20 — Optimized slow Flatpak CI jobs
+- Restrained flatpakGradleGenerator to target only the runtimeClasspath configuration in desktopApp and build-logic:convention modules.
+- Updated release.yml and reusable-check.yml to invoke only targeted tasks (:desktopApp:flatpakGradleGenerator and :build-logic:convention:flatpakGradleGenerator) instead of running the task on the root and all subprojects.
+- Retained Matrix architecture runner configuration for build validity, as Skiko/Compose Desktop native artifacts are resolved dynamically based on host architecture.
+- Cleaned up leftover speed-up workarounds: completely removed the Flatpak Gradle Generator plugin application and tasks from the root project and all other library/feature subprojects (`core:ble`, `core:common`, `core:database`, `core:model`, `core:navigation`, `core:proto`, and `feature:messaging`), including deleting the unused `flatpakKmpAndroidMeta` configuration from `feature:messaging`.
+- Verified that local execution of `:desktopApp:flatpakGradleGenerator` runtimeClasspath resolution speed dropped from 46 seconds to 12 seconds, and all Spotless and Detekt linting checks passed.
+
+## 2026-05-12 — Implemented Apple alignment for docs feature (FR-038)
+- Branch: `feat/20260507-161858-app-docs-markdown`
+- Gap analysis against `meshtastic-apple` completed. Implemented 4 alignment items:
+  1. Per-page TOC icons via `DocPageIconResolver.kt` mapping `iconId` to `MeshtasticIcons`
+  2. New `docs/user/signal-meter.md` (RSSI vs SNR, bar-level criteria, LoRa signal concepts)
+  3. New `docs/user/units-and-locale.md` (automatic metric/imperial via `MetricFormatter`)
+  4. New `.github/workflows/docs-staleness.yml` (advisory PR comments for UI changes without doc updates)
+- Added `iconId: String?` field to `DocPage` and `KeywordIndexEntry` models
+- Updated `DocBundleLoader` with iconId for all 24 pages plus 2 new entries (signal-meter, units-and-locale)
+- Updated `DocsBrowserScreen` to show leading icons in TOC list items
+- Marked T061-T085 as completed in tasks.md (were implemented in prior session)
+- Added Phase 9 (T200-T206) for Apple alignment tasks — all marked complete
+- Skipped Apple-only features: watch, carplay, translate, TipKit, SwiftData docs
+- Verified: `spotlessApply`, `detekt`, `assembleDebug`, `compileKotlinJvm` — all green
+
 ## 2026-05-11 — Migrated feature/intro UI to commonMain
 - Moved intro onboarding UI composables and nav graph from `feature/intro/src/androidMain/` into `feature/intro/src/commonMain/`, adding shared `IntroPermissions` and `IntroSettingsNavigator` interfaces plus a common `introGraph` Navigation 3 extension.
 - Refactored `AppIntroductionScreen` into a thin Android host that provides Android permission/settings adapters via composition locals, and added `AndroidIntroPermissions`, `AndroidIntroSettingsNavigator`, and JVM desktop no-op stubs.
