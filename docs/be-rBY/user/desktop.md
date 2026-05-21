@@ -2,7 +2,7 @@
 title: Desktop App
 parent: User Guide
 nav_order: 14
-last_updated: 2026-05-13
+last_updated: 2026-05-20
 description: Install and use the Meshtastic Desktop app on Linux, macOS, and Windows — connections, feature parity, and keyboard shortcuts.
 aliases:
   - desktop
@@ -14,11 +14,7 @@ aliases:
 
 # Desktop App
 
-The Meshtastic Desktop application provides the same mesh communication features on Linux, macOS, and Windows.
-
-## Абзор
-
-The Desktop app shares its core codebase with the Android app through Kotlin Multiplatform (KMP). Most features work identically across platforms.
+The Meshtastic Desktop application shares its core codebase with Android via Kotlin Multiplatform. Most features work identically on Linux, macOS, and Windows.
 
 ## Установка
 
@@ -84,14 +80,14 @@ The Desktop app uses the same Compose Multiplatform UI with adaptations for larg
 
 ### Keyboard Shortcuts
 
-| Shortcut            | Action                      |
-| ------------------- | --------------------------- |
-| **⌘Q** / **Ctrl+Q** | Quit the application        |
-| **⌘,** / **Ctrl+,** | Open Settings               |
+| Shortcut            | Action                 |
+| ------------------- | ---------------------- |
+| **⌘Q** / **Ctrl+Q** | Quit the application   |
+| **⌘,** / **Ctrl+,** | Open Settings          |
 | **⌘1** / **Ctrl+1** | Switch to Messages tab |
-| **⌘2** / **Ctrl+2** | Switch to Nodes tab         |
-| **⌘3** / **Ctrl+3** | Switch to Map tab           |
-| **⌘4** / **Ctrl+4** | Switch to Connect tab   |
+| **⌘2** / **Ctrl+2** | Switch to Nodes tab    |
+| **⌘3** / **Ctrl+3** | Switch to Map tab      |
+| **⌘4** / **Ctrl+4** | Switch to Connect tab  |
 
 ### Window & System Tray
 

@@ -2,7 +2,7 @@
 title: Връзки
 parent: Ръководство за потребители
 nav_order: 2
-last_updated: 2026-05-13
+last_updated: 2026-05-20
 description: Свържете телефона или настолния си компютър с Meshtastic радио чрез Bluetooth, USB или TCP/IP.
 aliases:
   - bluetooth
@@ -101,7 +101,7 @@ A successful connection is confirmed with a status indicator:
 
 The app reconnects to the **last selected device** on startup. You can switch transports from the Connect screen at any time.
 
-To disconnect from a radio, tap the disconnect button on the Connect screen:
+To disconnect, tap the disconnect button on the Connect screen:
 
 ![Disconnect from radio](../../assets/screenshots/connections_disconnect.png)
 
