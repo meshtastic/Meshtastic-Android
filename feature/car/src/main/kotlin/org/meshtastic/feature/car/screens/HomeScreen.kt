@@ -27,8 +27,11 @@ import androidx.car.app.model.TabContents
 import androidx.car.app.model.TabTemplate
 import androidx.car.app.model.Template
 import org.meshtastic.feature.car.R
+import org.meshtastic.feature.car.model.NodeUi
+import org.meshtastic.feature.car.model.SignalQuality
+import org.meshtastic.feature.car.service.CarStateCoordinator
 
-class HomeScreen(carContext: CarContext) : Screen(carContext) {
+class HomeScreen(carContext: CarContext, private val stateCoordinator: CarStateCoordinator) : Screen(carContext) {
 
     private var selectedTabId: String = TAB_ID_MESSAGES
 
@@ -60,11 +63,86 @@ class HomeScreen(carContext: CarContext) : Screen(carContext) {
     }
 
     private fun getTabContents(): TabContents {
-        val placeholder =
-            ListTemplate.Builder()
-                .setSingleList(ItemList.Builder().addItem(Row.Builder().setTitle("Loading...").build()).build())
-                .build()
-        return TabContents.Builder(placeholder).build()
+        val template =
+            when (selectedTabId) {
+                TAB_ID_MESSAGES -> buildMessagingList()
+                TAB_ID_NODES -> buildNodeList()
+                else -> buildMessagingList()
+            }
+        return TabContents.Builder(template).build()
+    }
+
+    private fun buildMessagingList(): Template {
+        val state = stateCoordinator.messagingState.value
+        val listBuilder = ItemList.Builder()
+
+        if (state.conversations.isEmpty()) {
+            listBuilder.setNoItemsMessage(carContext.getString(R.string.car_no_messages))
+        } else {
+            state.conversations.forEach { conversation ->
+                listBuilder.addItem(
+                    Row.Builder()
+                        .setTitle(conversation.displayName)
+                        .addText(conversation.lastMessage)
+                        .setBrowsable(true)
+                        .setOnClickListener {
+                            screenManager.push(
+                                ConversationScreen(
+                                    carContext = carContext,
+                                    conversationName = conversation.displayName,
+                                    messagesProvider = { emptyList() },
+                                    onVoiceReply = {},
+                                    onQuickReply = {},
+                                    onReadAloud = {},
+                                ),
+                            )
+                        }
+                        .build(),
+                )
+            }
+        }
+
+        return ListTemplate.Builder().setSingleList(listBuilder.build()).build()
+    }
+
+    private fun buildNodeList(): Template {
+        val state = stateCoordinator.nodeDashboardState.value
+        val listBuilder = ItemList.Builder()
+
+        if (state.nodes.isEmpty()) {
+            listBuilder.setNoItemsMessage(carContext.getString(R.string.car_no_nodes))
+        } else {
+            state.nodes.forEach { node ->
+                listBuilder.addItem(
+                    Row.Builder()
+                        .setTitle(node.longName)
+                        .addText(formatNodeSubtitle(node))
+                        .setBrowsable(true)
+                        .setOnClickListener {
+                            screenManager.push(
+                                NodeDetailScreen(carContext = carContext, nodeProvider = { node }, onMessageClick = {}),
+                            )
+                        }
+                        .build(),
+                )
+            }
+        }
+
+        return ListTemplate.Builder().setSingleList(listBuilder.build()).build()
+    }
+
+    private fun formatNodeSubtitle(node: NodeUi): String {
+        val signal =
+            when (node.signalQuality) {
+                SignalQuality.EXCELLENT -> "Excellent"
+                SignalQuality.GOOD -> "Good"
+                SignalQuality.FAIR -> "Fair"
+                SignalQuality.POOR -> "Poor"
+                SignalQuality.UNKNOWN -> "Unknown"
+            }
+        val battery = node.batteryPercent?.let { " • $it%" } ?: ""
+        val status = if (!node.isOnline) " • Offline" else ""
+        return "$signal$battery$status"
     }
 
     companion object {

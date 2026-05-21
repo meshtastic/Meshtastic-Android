@@ -30,10 +30,12 @@ class MeshtasticCarSession :
     KoinComponent {
 
     private val crashlyticsCarTagger: CrashlyticsCarTagger by inject()
+    private val stateCoordinator: CarStateCoordinator by inject()
 
     override fun onCreateScreen(intent: Intent): Screen {
         crashlyticsCarTagger.setCarSession(true)
-        return HomeScreen(carContext)
+        stateCoordinator.start()
+        return HomeScreen(carContext, stateCoordinator)
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -45,6 +47,7 @@ class MeshtasticCarSession :
     }
 
     fun destroy() {
+        stateCoordinator.destroy()
         crashlyticsCarTagger.setCarSession(false)
     }
 }
