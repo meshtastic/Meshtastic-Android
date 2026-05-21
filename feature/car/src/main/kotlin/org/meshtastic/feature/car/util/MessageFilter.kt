@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.car.util
 
 import org.koin.core.annotation.Factory
@@ -22,12 +21,8 @@ import org.koin.core.annotation.Factory
 @Factory
 class MessageFilter {
 
-    fun shouldDisplay(message: String, dataType: Int): Boolean {
-        if (dataType != DATA_TYPE_TEXT) return false
-        if (message.isBlank()) return false
-        if (isEmojiOnly(message)) return false
-        return true
-    }
+    fun shouldDisplay(message: String, dataType: Int): Boolean =
+        dataType == DATA_TYPE_TEXT && message.isNotBlank() && !isEmojiOnly(message)
 
     fun validateOutgoing(message: String): ValidationResult {
         val bytes = message.toByteArray(Charsets.UTF_8)
@@ -45,6 +40,7 @@ class MessageFilter {
 
     sealed class ValidationResult {
         data object Valid : ValidationResult()
+
         data class TooLong(val actualBytes: Int, val maxBytes: Int) : ValidationResult()
     }
 

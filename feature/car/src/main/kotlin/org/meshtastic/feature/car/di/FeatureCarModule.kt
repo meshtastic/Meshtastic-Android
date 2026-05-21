@@ -14,11 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.app.di
+package org.meshtastic.feature.car.di
 
+import org.koin.core.annotation.ComponentScan
 import org.koin.core.annotation.Module
-import org.meshtastic.app.map.prefs.di.GoogleMapsKoinModule
-import org.meshtastic.feature.car.di.FeatureCarModule
 
-@Module(includes = [GoogleNetworkModule::class, GoogleMapsKoinModule::class, GoogleAiModule::class, FeatureCarModule::class])
-class FlavorModule
+@Module
+@ComponentScan("org.meshtastic.feature.car")
+class FeatureCarModule

@@ -14,11 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.app.di
+package org.meshtastic.feature.car.service
 
-import org.koin.core.annotation.Module
-import org.meshtastic.app.map.prefs.di.GoogleMapsKoinModule
-import org.meshtastic.feature.car.di.FeatureCarModule
+import androidx.car.app.CarAppService
+import androidx.car.app.Session
+import androidx.car.app.SessionInfo
+import androidx.car.app.validation.HostValidator
 
-@Module(includes = [GoogleNetworkModule::class, GoogleMapsKoinModule::class, GoogleAiModule::class, FeatureCarModule::class])
-class FlavorModule
+class MeshtasticCarAppService : CarAppService() {
+
+    override fun createHostValidator(): HostValidator = HostValidator.ALLOW_ALL_HOSTS_VALIDATOR
+
+    override fun onCreateSession(sessionInfo: SessionInfo): Session = MeshtasticCarSession()
+}

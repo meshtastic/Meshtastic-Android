@@ -14,19 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.car.alerts
 
 import kotlinx.coroutines.flow.Flow
 import org.meshtastic.feature.car.model.EmergencyAlert
 
 /**
- * Encapsulates the wiring of EmergencyHandler into the car session lifecycle.
- * Call [attach] in onCreateScreen and [detach] in onDestroy.
+ * Encapsulates the wiring of EmergencyHandler into the car session lifecycle. Call [attach] in onCreateScreen and
+ * [detach] in onDestroy.
  */
-class EmergencySessionWiring(
-    private val emergencyHandler: EmergencyHandler,
-) {
+class EmergencySessionWiring(private val emergencyHandler: EmergencyHandler) {
     fun attach(emergencyFlow: Flow<EmergencyAlert>) {
         emergencyHandler.startCollecting(emergencyFlow)
     }

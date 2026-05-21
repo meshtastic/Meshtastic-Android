@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.car.screens
 
 import androidx.car.app.CarContext
@@ -34,42 +33,37 @@ class HomeScreen(carContext: CarContext) : Screen(carContext) {
     private var selectedTabId: String = TAB_ID_MESSAGES
 
     override fun onGetTemplate(): Template {
-        val messagingTab = Tab.Builder()
-            .setContentId(TAB_ID_MESSAGES)
-            .setTitle(carContext.getString(R.string.car_tab_messages))
-            .build()
+        val messagingTab =
+            Tab.Builder()
+                .setContentId(TAB_ID_MESSAGES)
+                .setTitle(carContext.getString(R.string.car_tab_messages))
+                .build()
 
-        val nodesTab = Tab.Builder()
-            .setContentId(TAB_ID_NODES)
-            .setTitle(carContext.getString(R.string.car_tab_nodes))
-            .build()
+        val nodesTab =
+            Tab.Builder().setContentId(TAB_ID_NODES).setTitle(carContext.getString(R.string.car_tab_nodes)).build()
 
-        return TabTemplate.Builder(object : TabTemplate.TabCallback {
-            override fun onTabSelected(tabContentId: String) {
-                selectedTabId = tabContentId
-                invalidate()
+        return TabTemplate.Builder(
+            object : TabTemplate.TabCallback {
+                override fun onTabSelected(tabContentId: String) {
+                    selectedTabId = tabContentId
+                    invalidate()
+                }
+            },
+        )
+            .apply {
+                setHeaderAction(Action.APP_ICON)
+                addTab(messagingTab)
+                addTab(nodesTab)
+                setTabContents(getTabContents())
             }
-        }).apply {
-            setHeaderAction(Action.APP_ICON)
-            addTab(messagingTab)
-            addTab(nodesTab)
-            setActiveTab(selectedTabId)
-            setTabContents(getTabContents())
-        }.build()
+            .build()
     }
 
     private fun getTabContents(): TabContents {
-        val placeholder = ListTemplate.Builder()
-            .setSingleList(
-                ItemList.Builder()
-                    .addItem(
-                        Row.Builder()
-                            .setTitle("Loading...")
-                            .build()
-                    )
-                    .build()
-            )
-            .build()
+        val placeholder =
+            ListTemplate.Builder()
+                .setSingleList(ItemList.Builder().addItem(Row.Builder().setTitle("Loading...").build()).build())
+                .build()
         return TabContents.Builder(placeholder).build()
     }
 

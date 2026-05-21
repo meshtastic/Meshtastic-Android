@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.car.service
 
 import android.app.NotificationChannel
@@ -38,85 +37,64 @@ class CarNotificationManager(private val context: Context) {
 
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                CHANNEL_ID,
-                "Mesh Messages",
-                NotificationManager.IMPORTANCE_HIGH,
-            ).apply {
-                description = "Messages from Meshtastic mesh network"
-            }
+            val channel =
+                NotificationChannel(CHANNEL_ID, "Mesh Messages", NotificationManager.IMPORTANCE_HIGH).apply {
+                    description = "Messages from Meshtastic mesh network"
+                }
             val manager = context.getSystemService(NotificationManager::class.java)
             manager.createNotificationChannel(channel)
         }
     }
 
-    fun postMessagingNotification(
-        conversationId: String,
-        senderName: String,
-        messages: List<Pair<String, Long>>,
-    ) {
-        val person = Person.Builder()
-            .setName(senderName)
-            .build()
+    fun postMessagingNotification(conversationId: String, senderName: String, messages: List<Pair<String, Long>>) {
+        val person = Person.Builder().setName(senderName).build()
 
-        val messagingStyle = NotificationCompat.MessagingStyle(
-            Person.Builder().setName("Me").build()
-        ).apply {
-            conversationTitle = senderName
-            messages.forEach { (text, timestamp) ->
-                addMessage(text, timestamp, person)
-            }
-        }
+        val messagingStyle = NotificationCompat.MessagingStyle(Person.Builder().setName("Me").build())
+        messagingStyle.setConversationTitle(senderName)
+        messages.forEach { (text, timestamp) -> messagingStyle.addMessage(text, timestamp, person) }
 
         val replyAction = buildReplyAction(conversationId)
         val markReadAction = buildMarkReadAction(conversationId)
 
-        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.ic_dialog_email)
-            .setStyle(messagingStyle)
-            .addAction(replyAction)
-            .addAction(markReadAction)
-            .setCategory(NotificationCompat.CATEGORY_MESSAGE)
-            .build()
+        val notification =
+            NotificationCompat.Builder(context, CHANNEL_ID)
+                .setSmallIcon(android.R.drawable.ic_dialog_email)
+                .setStyle(messagingStyle)
+                .addAction(replyAction)
+                .addAction(markReadAction)
+                .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+                .build()
 
-        NotificationManagerCompat.from(context).notify(
-            conversationId.hashCode(),
-            notification,
-        )
+        NotificationManagerCompat.from(context).notify(conversationId.hashCode(), notification)
     }
 
     private fun buildReplyAction(conversationId: String): NotificationCompat.Action {
-        val remoteInput = RemoteInput.Builder(KEY_TEXT_REPLY)
-            .setLabel("Reply")
+        val remoteInput = RemoteInput.Builder(KEY_TEXT_REPLY).setLabel("Reply").build()
+
+        val replyIntent =
+            PendingIntent.getBroadcast(
+                context,
+                conversationId.hashCode(),
+                Intent(ACTION_REPLY).putExtra(EXTRA_CONVERSATION_ID, conversationId),
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE,
+            )
+
+        return NotificationCompat.Action.Builder(android.R.drawable.ic_menu_send, "Reply", replyIntent)
+            .addRemoteInput(remoteInput)
             .build()
-
-        val replyIntent = PendingIntent.getBroadcast(
-            context,
-            conversationId.hashCode(),
-            Intent(ACTION_REPLY).putExtra(EXTRA_CONVERSATION_ID, conversationId),
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE,
-        )
-
-        return NotificationCompat.Action.Builder(
-            android.R.drawable.ic_menu_send,
-            "Reply",
-            replyIntent,
-        ).addRemoteInput(remoteInput).build()
     }
 
     private fun buildMarkReadAction(conversationId: String): NotificationCompat.Action {
-        val markReadIntent = PendingIntent.getBroadcast(
-            context,
-            conversationId.hashCode() + 1,
-            Intent(ACTION_MARK_READ).putExtra(EXTRA_CONVERSATION_ID, conversationId),
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-        )
+        val markReadIntent =
+            PendingIntent.getBroadcast(
+                context,
+                conversationId.hashCode() + 1,
+                Intent(ACTION_MARK_READ).putExtra(EXTRA_CONVERSATION_ID, conversationId),
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
 
-        return NotificationCompat.Action.Builder(
-            android.R.drawable.ic_menu_view,
-            "Mark as Read",
-            markReadIntent,
-        ).build()
+        return NotificationCompat.Action.Builder(android.R.drawable.ic_menu_view, "Mark as Read", markReadIntent)
+            .build()
     }
 
     companion object {

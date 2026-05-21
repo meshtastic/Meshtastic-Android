@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.car.model
 
 data class CarSessionState(
@@ -38,11 +37,7 @@ data class MessagingUiState(
     val emergencySpotlight: List<EmergencyAlert>?,
 )
 
-data class ChannelUi(
-    val index: Int,
-    val name: String,
-    val unreadCount: Int,
-)
+data class ChannelUi(val index: Int, val name: String, val unreadCount: Int)
 
 data class ConversationUi(
     val contactKey: String,
@@ -53,10 +48,7 @@ data class ConversationUi(
     val isEmergency: Boolean,
 )
 
-data class NodeDashboardUiState(
-    val nodes: List<NodeUi>,
-    val topologyHeader: TopologyHeader,
-)
+data class NodeDashboardUiState(val nodes: List<NodeUi>, val topologyHeader: TopologyHeader)
 
 data class NodeUi(
     val nodeNum: Int,
@@ -69,13 +61,15 @@ data class NodeUi(
     val hasPosition: Boolean,
 )
 
-enum class SignalQuality { EXCELLENT, GOOD, FAIR, POOR, UNKNOWN }
+enum class SignalQuality {
+    EXCELLENT,
+    GOOD,
+    FAIR,
+    POOR,
+    UNKNOWN,
+}
 
-data class TopologyHeader(
-    val totalNodes: Int,
-    val onlineNodes: Int,
-    val meshName: String?,
-)
+data class TopologyHeader(val totalNodes: Int, val onlineNodes: Int, val meshName: String?)
 
 data class EmergencyAlert(
     val nodeNum: Int,

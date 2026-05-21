@@ -14,22 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.car.service
 
 import org.koin.core.annotation.Factory
 
 /**
- * Loads up to MAX_BATCH_SIZE unread messages on car session start
- * for immediate display and MessagingStyle notification posting.
+ * Loads up to MAX_BATCH_SIZE unread messages on car session start for immediate display and MessagingStyle notification
+ * posting.
  */
 @Factory
 class BatchMessageLoader {
 
-    data class BatchResult(
-        val messages: List<UnreadMessage>,
-        val totalUnread: Int,
-    )
+    data class BatchResult(val messages: List<UnreadMessage>, val totalUnread: Int)
 
     data class UnreadMessage(
         val contactKey: String,
@@ -39,15 +35,10 @@ class BatchMessageLoader {
         val channelIndex: Int,
     )
 
-    fun loadUnreadBatch(
-        allMessages: List<UnreadMessage>,
-    ): BatchResult {
+    fun loadUnreadBatch(allMessages: List<UnreadMessage>): BatchResult {
         val sorted = allMessages.sortedByDescending { it.timestamp }
         val batch = sorted.take(MAX_BATCH_SIZE)
-        return BatchResult(
-            messages = batch,
-            totalUnread = allMessages.size,
-        )
+        return BatchResult(messages = batch, totalUnread = allMessages.size)
     }
 
     companion object {

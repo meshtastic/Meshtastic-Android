@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.car.screens
 
 import android.os.Handler
@@ -43,10 +42,13 @@ class MessagingScreen(
     fun requestInvalidation() {
         if (!invalidationPending) {
             invalidationPending = true
-            handler.postDelayed({
-                invalidationPending = false
-                invalidate()
-            }, DEBOUNCE_MS)
+            handler.postDelayed(
+                {
+                    invalidationPending = false
+                    invalidate()
+                },
+                DEBOUNCE_MS,
+            )
         }
     }
 
@@ -62,18 +64,19 @@ class MessagingScreen(
                     .addText(conversation.lastMessage)
                     .setBrowsable(true)
                     .setOnClickListener { onConversationClick(conversation.contactKey) }
-                    .build()
+                    .build(),
             )
         }
 
-        val templateBuilder = ListTemplate.Builder()
-            .setSingleList(listBuilder.build())
-            .setHeader(
-                Header.Builder()
-                    .setTitle(carContext.getString(R.string.car_tab_messages))
-                    .setStartHeaderAction(Action.BACK)
-                    .build()
-            )
+        val templateBuilder =
+            ListTemplate.Builder()
+                .setSingleList(listBuilder.build())
+                .setHeader(
+                    Header.Builder()
+                        .setTitle(carContext.getString(R.string.car_tab_messages))
+                        .setStartHeaderAction(Action.BACK)
+                        .build(),
+                )
 
         if (state.conversations.isEmpty()) {
             templateBuilder.setLoading(false)

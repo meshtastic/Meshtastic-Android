@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.car.alerts
 
 import android.media.AudioManager
@@ -32,8 +31,7 @@ import org.koin.core.annotation.Single
 import org.meshtastic.feature.car.model.EmergencyAlert
 
 /**
- * Manages emergency alert state for the car display.
- * Observes incoming packets for emergency-priority messages,
+ * Manages emergency alert state for the car display. Observes incoming packets for emergency-priority messages,
  * maintains active alert list, and triggers audio notifications.
  */
 @Single
@@ -61,9 +59,8 @@ class EmergencyHandler {
     }
 
     fun dismissAlert(nodeNum: Int) {
-        _activeAlerts.value = _activeAlerts.value.map { alert ->
-            if (alert.nodeNum == nodeNum) alert.copy(isActive = false) else alert
-        }
+        _activeAlerts.value =
+            _activeAlerts.value.map { alert -> if (alert.nodeNum == nodeNum) alert.copy(isActive = false) else alert }
     }
 
     fun clearAll() {
@@ -85,10 +82,7 @@ class EmergencyHandler {
     private fun playEmergencyTone() {
         try {
             if (toneGenerator == null) {
-                toneGenerator = ToneGenerator(
-                    AudioManager.STREAM_NOTIFICATION,
-                    TONE_VOLUME,
-                )
+                toneGenerator = ToneGenerator(AudioManager.STREAM_NOTIFICATION, TONE_VOLUME)
             }
             toneGenerator?.startTone(ToneGenerator.TONE_PROP_BEEP, TONE_DURATION_MS)
         } catch (_: Exception) {

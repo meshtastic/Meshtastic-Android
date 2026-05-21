@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.car.util
 
 import androidx.car.app.model.Action
@@ -25,35 +24,23 @@ import androidx.car.app.model.ItemList
 import androidx.car.app.model.Row
 import androidx.core.graphics.drawable.IconCompat
 
-/**
- * Helper extensions for building CAL templates with less boilerplate.
- */
-
-fun buildHeader(title: String, startAction: Action? = null): Header {
-    return Header.Builder().apply {
+/** Helper extensions for building CAL templates with less boilerplate. */
+fun buildHeader(title: String, startAction: Action? = null): Header = Header.Builder()
+    .apply {
         setTitle(title)
         startAction?.let { setStartHeaderAction(it) }
-    }.build()
-}
+    }
+    .build()
 
-fun buildItemList(block: ItemList.Builder.() -> Unit): ItemList {
-    return ItemList.Builder().apply(block).build()
-}
+fun buildItemList(block: ItemList.Builder.() -> Unit): ItemList = ItemList.Builder().apply(block).build()
 
-fun buildRow(
-    title: String,
-    text: String? = null,
-    onClickListener: (() -> Unit)? = null,
-): Row {
-    return Row.Builder().apply {
+fun buildRow(title: String, text: String? = null, onClickListener: (() -> Unit)? = null): Row = Row.Builder()
+    .apply {
         setTitle(title)
         text?.let { addText(it) }
         onClickListener?.let { setOnClickListener(it) }
-    }.build()
-}
+    }
+    .build()
 
-fun buildCarIcon(iconCompat: IconCompat, tint: CarColor? = null): CarIcon {
-    return CarIcon.Builder(iconCompat).apply {
-        tint?.let { setTint(it) }
-    }.build()
-}
+fun buildCarIcon(iconCompat: IconCompat, tint: CarColor? = null): CarIcon =
+    CarIcon.Builder(iconCompat).apply { tint?.let { setTint(it) } }.build()

@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.car.screens
 
 import androidx.car.app.CarContext
@@ -28,13 +27,7 @@ import androidx.car.app.model.Row
 import androidx.car.app.model.Template
 import org.meshtastic.feature.car.R
 
-data class MessageUi(
-    val id: Int,
-    val senderName: String,
-    val text: String,
-    val timestamp: Long,
-    val isFromMe: Boolean,
-)
+data class MessageUi(val id: Int, val senderName: String, val text: String, val timestamp: Long, val isFromMe: Boolean)
 
 class ConversationScreen(
     carContext: CarContext,
@@ -50,37 +43,28 @@ class ConversationScreen(
 
         val listBuilder = ItemList.Builder()
         messages.forEach { msg ->
-            listBuilder.addItem(
-                Row.Builder()
-                    .setTitle(msg.senderName)
-                    .addText(msg.text)
-                    .build()
-            )
+            listBuilder.addItem(Row.Builder().setTitle(msg.senderName).addText(msg.text).build())
         }
 
-        val actionStrip = ActionStrip.Builder()
-            .addAction(
-                Action.Builder()
-                    .setTitle(carContext.getString(R.string.car_voice_reply))
-                    .setOnClickListener { onVoiceReply() }
-                    .build()
-            )
-            .addAction(
-                Action.Builder()
-                    .setTitle(carContext.getString(R.string.car_read_aloud))
-                    .setOnClickListener { onReadAloud() }
-                    .build()
-            )
-            .build()
+        val actionStrip =
+            ActionStrip.Builder()
+                .addAction(
+                    Action.Builder()
+                        .setTitle(carContext.getString(R.string.car_voice_reply))
+                        .setOnClickListener { onVoiceReply() }
+                        .build(),
+                )
+                .addAction(
+                    Action.Builder()
+                        .setTitle(carContext.getString(R.string.car_read_aloud))
+                        .setOnClickListener { onReadAloud() }
+                        .build(),
+                )
+                .build()
 
         return ListTemplate.Builder()
             .setSingleList(listBuilder.build())
-            .setHeader(
-                Header.Builder()
-                    .setTitle(conversationName)
-                    .setStartHeaderAction(Action.BACK)
-                    .build()
-            )
+            .setHeader(Header.Builder().setTitle(conversationName).setStartHeaderAction(Action.BACK).build())
             .setActionStrip(actionStrip)
             .build()
     }
