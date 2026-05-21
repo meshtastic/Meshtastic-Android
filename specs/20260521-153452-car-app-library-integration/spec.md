@@ -109,20 +109,24 @@ A driver participating in multiple mesh channels (e.g., "Convoy", "Emergency", "
 
 ---
 
-### User Story 5 - View Node Locations on Map (Priority: P2)
+### User Story 5 - View Node Locations on Map (Priority: DEFERRED)
+
+> **⚠️ DEFERRED:** Map implementation is deferred pending further research and discussion on whether to pursue POI category (PlaceListMapTemplate, limited but simpler) or NAVIGATION category (MapWithContentTemplate, full-featured but triggers stricter Play Store review and conflicts with active nav apps). This decision has significant architectural and distribution implications that warrant dedicated analysis.
 
 A driver in a convoy scenario views the locations of all mesh nodes on a map to understand relative positions and navigate toward or away from group members.
 
-**Why this priority**: Location awareness is a core differentiator of Meshtastic and maps are natural for automotive interfaces.
+**Why deferred**: The choice between POI (static pins, 6-item cap, no routing conflicts) and NAVIGATION (live tracking, full map control, but exclusive with Google Maps/Waze) fundamentally shapes the UX and distribution strategy. More research needed on:
+- Google Maps SDK availability for AAOS (announced I/O 2026, timeline unclear)
+- NAVIGATION category Play Store review requirements and timeline
+- Whether Meshtastic's convoy use case justifies NAVIGATION exclusivity
+- User expectations (passive awareness vs. active routing toward nodes)
 
-**Independent Test**: Can be tested by having 2+ nodes reporting GPS positions and verifying pins appear at correct locations on the car map.
+**Acceptance Scenarios** (to be finalized after map strategy decision):
 
-**Acceptance Scenarios**:
-
-1. **Given** nodes are reporting GPS positions, **When** the driver opens the map screen, **Then** node locations appear as labeled items in a PlaceListMapTemplate with pins on the map
-2. **Given** the map is displayed with node pins, **When** the driver taps a node item in the list, **Then** a detail panel shows node name, distance, last update time, and option to send a direct message
+1. **Given** nodes are reporting GPS positions, **When** the driver opens the map screen, **Then** node locations are displayed with correct positions
+2. **Given** the map is displayed, **When** the driver selects a node, **Then** a detail view shows node name, distance, last update time, and option to send a direct message
 3. **Given** the driver's own position is available, **When** viewing the map, **Then** their position is shown distinctly from other nodes
-4. **Given** a node's position updates, **When** the map is visible, **Then** the pin moves to the new position within 5 seconds
+4. **Given** a node's position updates, **When** the map is visible, **Then** the display updates within 5 seconds
 
 ---
 
@@ -183,12 +187,12 @@ A driver uses CAL's built-in voice input to compose messages and perform actions
 - **FR-006**: System MUST present emergency messages in a Spotlight Section when viewing the messaging screen
 - **FR-007**: System MUST display all known mesh nodes as Condensed Items showing name, signal quality, and battery level
 - **FR-008**: System MUST support channel switching via Chips displayed at the top of the messaging screen
-- **FR-009**: System MUST render node positions on a map using PlaceListMapTemplate under the POI category (static pin list, refreshable; NAVIGATION category with MapWithContentTemplate deferred to v2)
+- **FR-009**: ~~DEFERRED~~ — Map implementation deferred pending NAVIGATION vs POI category decision. See User Story 5.
 - **FR-010**: System MUST maintain a persistent Minimized Control Panel showing radio status, online node count, and last message time
 - **FR-011**: System MUST display a Banner when the Bluetooth connection to the radio is lost
 - **FR-012**: System MUST support expanding node details on tap (last heard, distance, hardware model)
 - **FR-013**: System MUST use Expanded Header Layout for the node dashboard showing mesh topology summary
-- **FR-014**: System MUST declare MESSAGING as the primary category and POI as secondary
+- **FR-014**: System MUST declare MESSAGING as the primary category. POI or NAVIGATION as secondary category is deferred pending map strategy decision.
 - **FR-015**: System MUST gracefully degrade to cached/read-only data when the mesh radio is disconnected
 - **FR-016**: System MUST support unread message indicators on channel Chips
 - **FR-017**: System MUST filter emoji-only and admin messages from the car display (only text messages shown)
@@ -295,7 +299,7 @@ A driver uses CAL's built-in voice input to compose messages and perform actions
 - **SC-006**: Channel switching completes (chip tap to new message list rendered) within 1 second
 - **SC-007**: App passes Android Auto App Quality review criteria for the MESSAGING category
 - **SC-008**: 95% of voice-initiated replies complete successfully without fallback to touch input
-- **SC-009**: Map displays node positions with < 5-second update latency when positions change
+- **SC-009**: ~~DEFERRED~~ — Map latency criterion deferred with map implementation
 - **SC-010**: Zero crashes or ANRs attributed to the car module during a 2-hour continuous driving session
 
 ## Assumptions

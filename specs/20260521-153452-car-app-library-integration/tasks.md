@@ -43,7 +43,7 @@
 - [ ] T012 Create MeshtasticCarAppService at feature/car/src/main/kotlin/org/meshtastic/feature/car/service/MeshtasticCarAppService.kt extending CarAppService, creating sessions via Koin
 - [ ] T013 Create MeshtasticCarSession at feature/car/src/main/kotlin/org/meshtastic/feature/car/service/MeshtasticCarSession.kt with onCreateScreen (returns HomeScreen), onNewIntent, onCarConfigurationChanged, Crashlytics tagging, 300ms invalidation debouncing
 - [ ] T014 Create presentation state models (CarSessionState, ConnectionStatus, MessagingUiState, ChannelUi, ConversationUi, NodeDashboardUiState, NodeUi, SignalQuality, TopologyHeader, MapUiState, NodePlace, LatLngWrapper, EmergencyAlert) at feature/car/src/main/kotlin/org/meshtastic/feature/car/model/CarUiModels.kt
-- [ ] T015 Create HomeScreen (TabTemplate with Messages/Nodes/Map tabs) at feature/car/src/main/kotlin/org/meshtastic/feature/car/screens/HomeScreen.kt
+- [ ] T015 Create HomeScreen (TabTemplate with Messages/Nodes tabs; Map tab placeholder deferred) at feature/car/src/main/kotlin/org/meshtastic/feature/car/screens/HomeScreen.kt
 
 **Checkpoint**: Foundation ready — CarAppService binds, session creates, HomeScreen renders tabs. User story implementation can now begin in parallel.
 
@@ -114,17 +114,13 @@
 
 ---
 
-## Phase 7: User Story 5 — View Node Locations on Map (Priority: P2)
+## Phase 7: User Story 5 — View Node Locations on Map (DEFERRED)
 
-**Goal**: Nodes with GPS positions displayed as place items on a PlaceListMapTemplate with auto-zoom and detail drill-down
+> **⚠️ DEFERRED:** Map implementation deferred pending NAVIGATION vs POI category decision. The choice between PlaceListMapTemplate (POI, 6-item cap, no nav conflicts) and MapWithContentTemplate (NAVIGATION, full-featured, exclusive with Google Maps) requires further research and discussion. See spec User Story 5 for open questions.
 
-**Independent Test**: Have 2+ nodes reporting GPS → open map → pins at correct locations → tap list item → node detail with distance and DM option
+~~- [ ] T029 [US5] Create MapScreen~~
 
-### Implementation for User Story 5
-
-- [ ] T029 [US5] Create MapScreen at feature/car/src/main/kotlin/org/meshtastic/feature/car/screens/MapScreen.kt with PlaceListMapTemplate under POI category, node Place items with LatLng from NodeRepository (filtered to valid positions), distance + last update in row text, own position as anchor, onClickListener pushing NodeDetailScreen, 5-second refresh interval. **Cap at 6 Place items per CAL PlaceListMapTemplate limit — prioritize by distance (nearest first), then recency**
-
-**Checkpoint**: Map displays node pins, auto-zooms to fit, list items show distance, tap navigates to node detail
+**Checkpoint**: SKIPPED — revisit after map strategy decision
 
 ---
 
@@ -182,7 +178,7 @@
 - **Phase 4 (US2 - Emergency)**: Depends on Phase 2; integrates with MessagingScreen (Phase 3 T016)
 - **Phase 5 (US3 - Nodes)**: Depends on Phase 2 — independent of messaging
 - **Phase 6 (US4 - Channels)**: Depends on Phase 3 (modifies MessagingScreen)
-- **Phase 7 (US5 - Map)**: Depends on Phase 5 (reuses NodeDetailScreen from T027)
+- **Phase 7 (US5 - Map)**: **DEFERRED** — pending NAVIGATION vs POI category decision
 - **Phase 8 (US6 - Status Panel)**: Depends on Phase 2 — independent
 - **Phase 9 (US7 - Voice)**: Depends on Phase 3 (ConversationScreen T017, FuzzyNodeNameResolver T018)
 - **Phase 10 (Polish)**: Depends on all user story phases
@@ -193,7 +189,7 @@
 - **US2 (Emergency, P1)**: Can start after Phase 2 — integrates with US1's MessagingScreen (T016) for Spotlight Section (T024)
 - **US3 (Nodes, P2)**: Can start after Phase 2 — fully independent
 - **US4 (Channels, P2)**: Depends on US1 (extends MessagingScreen)
-- **US5 (Map, P2)**: Depends on US3 (reuses NodeDetailScreen)
+- **US5 (Map, DEFERRED)**: Pending NAVIGATION vs POI category decision — requires further research
 - **US6 (Status Panel, P3)**: Can start after Phase 2 — fully independent
 - **US7 (Voice, P3)**: Depends on US1 (extends ConversationScreen)
 
