@@ -109,7 +109,7 @@ fun NodeLayoutSettingsCompactMinimalPreview() {
                 onShowPowerChange = {},
                 showLastHeard = true,
                 onShowLastHeardChange = {},
-                lastHeardIsRelative = false,
+                lastHeardIsRelative = true,
                 onLastHeardIsRelativeChange = {},
                 showLocation = false,
                 onShowLocationChange = {},
