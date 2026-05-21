@@ -140,21 +140,21 @@ private fun rememberChirpyState(
             scope.launch {
                 var assistantMsgId: String? = null
 
-                fun updateAssistantMessage(text: String, sources: List<DocPage>) {
+                fun updateAssistant(text: String, pages: List<DocPage>, role: ChirpyRole = ChirpyRole.ASSISTANT) {
                     val msgId = assistantMsgId ?: Uuid.random().toString().also { assistantMsgId = it }
-                    val updatedMsg =
+                    val msg =
                         ChirpyMessage(
                             id = msgId,
-                            role = ChirpyRole.ASSISTANT,
+                            role = role,
                             text = text,
-                            sources = sources.map { SourceRef(id = it.id, title = it.title) },
+                            sources = pages.map { SourceRef(id = it.id, title = it.title) },
                         )
                     val currentList = holder.sessionState.messages
                     val newList =
                         if (currentList.any { it.id == msgId }) {
-                            currentList.map { if (it.id == msgId) updatedMsg else it }
+                            currentList.map { if (it.id == msgId) msg else it }
                         } else {
-                            currentList + updatedMsg
+                            currentList + msg
                         }
                     holder.sessionState = holder.sessionState.copy(messages = newList)
                 }
@@ -162,23 +162,24 @@ private fun rememberChirpyState(
                 aiAssistant.answerStream(question, currentPageId = currentPageId).collect { result ->
                     when (result) {
                         is AIDocAssistantResult.Partial -> {
-                            updateAssistantMessage(result.answer, result.sourcePages)
+                            updateAssistant(result.answer, result.sourcePages)
                         }
 
                         is AIDocAssistantResult.Success -> {
-                            updateAssistantMessage(result.answer, result.sourcePages)
+                            updateAssistant(result.answer, result.sourcePages)
                             holder.sessionState = holder.sessionState.copy(isLoading = false)
                         }
 
-                        is AIDocAssistantResult.Fallback,
-                        is AIDocAssistantResult.Error,
-                        -> {
+                        is AIDocAssistantResult.Fallback -> {
                             val finalMsg = chirpyResultToMessage(result)
-                            holder.sessionState =
-                                holder.sessionState.copy(
-                                    messages = holder.sessionState.messages + finalMsg,
-                                    isLoading = false,
-                                )
+                            updateAssistant(finalMsg.text, result.suggestedPages, finalMsg.role)
+                            holder.sessionState = holder.sessionState.copy(isLoading = false)
+                        }
+
+                        is AIDocAssistantResult.Error -> {
+                            val finalMsg = chirpyResultToMessage(result)
+                            updateAssistant(finalMsg.text, result.suggestedPages, finalMsg.role)
+                            holder.sessionState = holder.sessionState.copy(isLoading = false)
                         }
                     }
                 }

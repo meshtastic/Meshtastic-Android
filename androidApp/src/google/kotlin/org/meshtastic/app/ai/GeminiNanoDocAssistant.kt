@@ -42,7 +42,8 @@ import org.meshtastic.feature.docs.model.DocsAiError
  * Samsung Galaxy S25/S26, OnePlus 13/15, and other devices with AICore.
  *
  * Context strategy: extracts only the **most relevant paragraphs** from each page (those containing query terms),
- * strips markdown formatting to maximize information density, and fits within the on-device token budget (~4K tokens).
+ * strips markdown formatting to maximize information density, and fits within the on-device token budget (optimized for
+ * modern Nano v4 with up to 32K tokens / 32,000 characters context).
  *
  * Multi-turn history is supported locally by formatting the past conversation turns directly into the prompt.
  *
@@ -137,21 +138,21 @@ class GeminiNanoDocAssistant(
 
             val contextPages = contextResult.usedPageIds.mapNotNull { id -> bundle.pages.find { it.id == id } }
 
-            var accumulatedText = ""
+            val accumulatedText = StringBuilder()
             onDeviceModel.generateContentStream(prompt).collect { chunk ->
                 val text = chunk.text
                 if (!text.isNullOrEmpty()) {
-                    accumulatedText += text
+                    accumulatedText.append(text)
                     emit(
                         AIDocAssistantResult.Partial(
-                            answer = accumulatedText,
+                            answer = accumulatedText.toString(),
                             sourcePages = contextPages,
                             usedOnDeviceModel = true,
                         ),
                     )
                 }
             }
-            val onDeviceAnswer = accumulatedText.trimEnd()
+            val onDeviceAnswer = accumulatedText.toString().trimEnd()
 
             val mentionedPages =
                 bundle.pages.filter { page ->
@@ -159,8 +160,11 @@ class GeminiNanoDocAssistant(
                 }
             val allSourcePages = contextPages + mentionedPages
 
-            // Record this turn in the conversation history
+            // Record this turn in the conversation history, keeping only the last 4 turns to avoid memory leaks
             history.add(question to onDeviceAnswer)
+            if (history.size > 4) {
+                history.removeAt(0)
+            }
 
             emit(
                 AIDocAssistantResult.Success(
@@ -419,7 +423,7 @@ class GeminiNanoDocAssistant(
     companion object {
         private const val TAG = "ChirpyAI"
 
-        /** Gemini 3.1 Flash-Lite — latest stable model (2026-05-07), free tier, supports grounding. */
+        /** Gemini Nano v4 — local on-device LLM model supporting larger 32K token context window. */
         private const val MODEL_NAME = "nano-v4-full"
 
         private const val SYSTEM_INSTRUCTION =

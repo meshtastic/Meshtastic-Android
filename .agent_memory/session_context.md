@@ -8,7 +8,6 @@
 - Developed a dynamic live-state prompt formatting block within `buildPrompt(...)` that queries current hardware model, firmware version, connection status, GPS capability, channel utilization, airtime, battery level/voltage, user profile long/short names, and total registered mesh peer counts & active online peers directly from `NodeRepository`'s reactive flows.
 - Injected this live radio diagnostics context dynamically as a system instruction metadata block on every user query. This empowers the on-device model to answer real-time, personalized diagnostic questions (e.g. "what is my battery level?", "how many active nodes are on my mesh right now?") with 100% on-device offline accuracy.
 - Tuned context retrieval constraints for the modern `nano-v4-full` (Gemini Nano v4) model: expanded the total context budget `MAX_CONTEXT_CHARS` from 8,000 to **32,000 characters** (up to ~12K tokens out of the model's native 32K window), and scaled `MAX_PAGE_CHARS` to **16,000 characters** and `MAX_SNIPPET_CHARS` to **8,000 characters** to supply vastly richer, more detailed, and complete documentation fragments.
-- Fully validated all spotless formatting checks, detekt quality analysis, and `:feature:docs:allTests` with 100% green compilation.
 
 ## 2026-05-21 — Activated full on-device token streaming and polished Chirpy's personality instructions
 - Upgraded the on-device inference flow inside `GeminiNanoDocAssistant.kt` to use Firebase AI SDK's reactive `generateContentStream(prompt)` instead of the blocking `generateContent` invocation.
@@ -16,7 +15,6 @@
 - Refined the `SYSTEM_INSTRUCTION` personality rules for Chirpy to position him as our adorable LoRa radio Node mascot instead of an avian theme, emphasizing high-enthusiasm mesh networking, signal connectivity, battery status, and radio/routing concepts (e.g. "fully charged", "relaying info", "staying connected") while preserving technical precision.
 - Significantly increased the frequency and flavor of mesh networking, hardware, and radio puns (e.g. "let's relay some knowledge!", "channeling my inner router!", "completely on the same frequency!") to make Chirpy incredibly fun and interactive.
 - Overhauled system error messages inside `DocsNavigation.kt` and the loading bubble state inside `ChirpyAssistantSheet.kt` to align with the highly-enthusiastic mascot theme (e.g. "routing through the mesh… 📡", "channel is totally congested… 📶", "battery is charging or firmware is still downloading… 🔋").
-- Validated all static checks and unit tests to ensure complete success (`spotlessCheck`, `detekt`, and `:feature:docs:allTests` pass 100% green).
 
 ## 2026-05-21 — Implemented streaming chat support and Firebase Remote Config integration for Chirpy
 - Added `firebase-config` dependency to Version Catalog `libs.versions.toml` and `androidApp/build.gradle.kts`.
