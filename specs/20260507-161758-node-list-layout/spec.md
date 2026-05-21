@@ -45,7 +45,7 @@ A Meshtastic user with a large mesh (100+ nodes) wants a denser node list to red
 
 ### User Story 2 — Configure Compact Layout Fields (Priority: P1)
 
-A user in Compact mode wants to hide fields they don't care about (e.g., environment metrics) and keep only what matters (e.g., last heard time and signal). They open Settings > Node Layout, see toggles for each compact field ordered to match the visual layout, and flip individual switches. The live preview node at the bottom of the settings section updates in real time.
+A user in Compact mode wants to hide fields they don't care about (e.g., environment metrics) and keep only what matters (e.g., last heard time and signal). They open Settings > Node Layout, see a shared "Environment Metrics" toggle plus compact-specific toggles ordered to match the visual layout, and flip individual switches. The live preview node below the density picker updates in real time.
 
 **Why this priority**: Per-field toggles are the primary value proposition of the compact layout — without them, compact is just a fixed alternative.
 
@@ -60,7 +60,7 @@ A user in Compact mode wants to hide fields they don't care about (e.g., environ
 5. **Given** "Signal (Direct Only)" is toggled off, **When** a direct node has SNR data, **Then** the color-coded signal quality indicator is hidden from the health row.
 6. **Given** "Channel" is toggled off, **When** a node is on channel > 0, **Then** the channel number icon is hidden from the footer row.
 7. **Given** "Device Role" is toggled off, **When** the node list renders, **Then** the role icon, hardware model info, and MQTT icon are hidden from the footer row.
-8. **Given** "Telemetry" is toggled off, **When** a node has environment metrics, **Then** the temperature, humidity, and pressure row is hidden.
+8. **Given** "Environment Metrics" is toggled off, **When** a node has environment metrics, **Then** the temperature, humidity, and pressure row is hidden in both compact and complete previews/list items.
 9. **Given** "Relative Last Heard Time" is toggled on and "Last Heard Time" is on, **When** the row renders, **Then** the timestamp shows relative format (e.g., "2 hours ago") instead of absolute date/time.
 10. **Given** "Last Heard Time" is toggled off, **When** the user views the "Relative Last Heard Time" toggle, **Then** it is disabled (grayed out).
 
@@ -248,7 +248,7 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A["DataStore: nodeListDensity"] --> B{Density?}
+    A["DataStore: node-list-density"] --> B{Density?}
     B -->|Complete| C[NodeItem]
     B -->|Compact| D[NodeItemCompact]
     D --> E["DataStore: compact toggles (9 keys)"]
@@ -258,7 +258,7 @@ flowchart TD
     H --> K["Row 3: Metrics — temp + humidity + pressure"]
     H --> L["Row 4: Footer — hardware + role + hops + channel"]
     
-    M[NodeLayoutSettings] --> N["Toggle UI — ordered by layout position"]
+    M[NodeLayoutSettings] --> N["Toggle UI — shared telemetry + compact fields"]
     N --> E
     N --> O[Live preview node]
     
@@ -275,7 +275,7 @@ flowchart TD
 | `NodeListLayoutPreferences` | `core/prefs/ui/` | DataStore keys for density + 9 compact toggles |
 | `NodeItemCompact` | `core/ui/component/` | Compact row composable with toggle-driven visibility (4-row layout) |
 | `NodeItem` | `core/ui/component/` | Complete row composable — full data with MetricsGrid for sensors/signal |
-| `NodeLayoutSettings` | `feature/settings/component/` | Density picker (SegmentedButton) + compact toggles + live preview |
+| `NodeLayoutSettings` | `feature/settings/component/` | Density picker + preview + shared telemetry toggle + compact-specific toggles |
 | `NodeListScreen` | `feature/node/list/` | Parent composable — reads density, delegates to correct item |
 | `NodeListViewModel` | `feature/node/list/` | Manages filtered node list + device image URL resolution |
 | `NodeListHelp` | `feature/node/component/` | Help bottom sheet with signal legend + quality indicator docs |
@@ -303,13 +303,13 @@ flowchart TD
 ### Functional Requirements
 
 - **FR-001**: The system MUST provide a "Node Layout" section in App Settings with a `SegmentedButton` offering "Complete" and "Compact" density options.
-- **FR-002**: The selected density MUST persist across app launches via DataStore using the `nodeListDensity` preference key in `core:prefs`.
-- **FR-003**: When "Compact" is selected, the system MUST display 9 toggles using `SwitchPreference` (from `core:ui`) in the order they appear in the compact layout: Power, Last Heard Time, Relative Last Heard Time, Distance and Bearing, Hops Away, Signal (Direct Only), Channel, Device Role, Telemetry.
+- **FR-002**: The selected density MUST persist across app launches via DataStore using the `node-list-density` preference key in `core:prefs`.
+- **FR-003**: The settings UI MUST display one shared toggle for both density modes (`Environment Metrics`) and, when "Compact" is selected, 8 additional compact-specific toggles in layout order: Power, Last Heard Time, Relative Last Heard Time, Distance and Bearing, Hops Away, Signal (Direct Only), Channel, Device & Role.
 - **FR-004**: Each toggle MUST persist its state via DataStore using the corresponding `NodeListLayoutPreferences` key.
 - **FR-005**: All toggles MUST default to `true` (enabled) except "Relative Last Heard Time" which defaults to `false`.
 - **FR-006**: The "Relative Last Heard Time" toggle MUST be disabled (grayed out via `enabled = false`) when "Last Heard Time" is toggled off.
-- **FR-007**: When "Complete" is selected, the toggle section MUST be replaced with descriptive text: "The Complete layout displays all available node data. Fields with no data are automatically hidden."
-- **FR-008**: A live preview MUST render below the toggles using a hardcoded representative sample node, reflecting the current density and toggle state in real time. The sample node populates all fields (battery, signal, position, hops, channel, role, environment metrics, PKC key, favorite) so users can observe the effect of every toggle.
+- **FR-007**: When "Complete" is selected, the settings section MUST show the shared `Environment Metrics` toggle plus descriptive text: "The Complete layout displays all available node data. Fields with no data are automatically hidden."
+- **FR-008**: A live preview MUST render below the density picker (above the toggle list) using a hardcoded representative sample node, reflecting the current density and toggle state in real time. The sample node populates all fields (battery, signal, position, hops, channel, role, environment metrics, PKC key, favorite) so users can observe the effect of every toggle.
 - **FR-009**: The compact layout MUST render as a two-column `Row`: Column 1 (fixed width: `NodeChip` + battery, `spacedBy(4.dp)`), Column 2 (`Modifier.weight(1f)`: `Column` of up to 4 content rows, `spacedBy(2.dp)`).
 - **FR-010**: The short name MUST always render as a `NodeChip` composable in compact mode, maintaining consistent card styling using `IntrinsicSize.Min` width with `defaultMinSize(minWidth = 64.dp, minHeight = 28.dp)`.
 - **FR-011**: Row 1 (name) MUST always display: `NodeKeyStatusIcon` (PKC/key status icon from MeshtasticIcons), long name (weight 1f, ellipsis overflow), optional unmessageable icon, optional favorite star. This row is not toggleable.
@@ -332,15 +332,15 @@ flowchart TD
   - The node name in compact mode MUST use `titleMediumEmphasized` (M3 Expressive) to match the complete layout typography.
 - **FR-026**: Compact rows MUST use `Column(verticalArrangement = spacedBy(2.dp))` for consistent tight inter-row spacing. The outer Row MUST use `padding(horizontal = 12.dp, vertical = 8.dp)` with `spacedBy(10.dp)` between columns.
 - **FR-027**: Any floating-point values displayed in the UI (e.g., distance, SNR, temperature) MUST be pre-formatted using `MetricFormatter` methods before rendering, per CMP string formatting constraints.
-- **FR-028**: Card backgrounds MUST use `CardDefaults.cardColors()` (M3 default: `surfaceContainerLow`). Node identity color MUST NOT be used as a background wash or tint.
-- **FR-029**: Both layouts MUST display a `BorderStroke` using the node's computed color (`node.colors.second`) with alpha modulated by online status: `0.5f` when active/online, `0.2f` when inactive/offline.
+- **FR-028**: Card backgrounds MUST use `CardDefaults.cardColors()` as the base (`surfaceContainerLow`) with a very subtle node identity tint applied (`lerp(base, nodeColor, 0.08f)` when color is available).
+- **FR-029**: Both layouts MUST display a `BorderStroke` using the node's computed color (`node.colors.second`) with alpha modulated by active-state emphasis: `0.65f` when active, `0.3f` when inactive.
 - **FR-030**: Both layouts MUST animate a transient colored glow (`Modifier.nodeCardGlow()`) when a packet is received from that node (detected via `lastHeard` timestamp change, deduplicated against previous value). The animation MUST use M3 Expressive spring physics:
   - Bloom: `Animatable(0f → 1f)` with `MaterialTheme.motionScheme.fastSpatialSpec()` (spring overshoot)
   - Decay: `Animatable(1f → 0f)` with `MaterialTheme.motionScheme.slowSpatialSpec()` (gentle fade)
   - Shadow color: node's computed color at `glowAlpha` opacity
   - Shadow elevation: `8.dp * glowAlpha`
   - No-op when alpha is 0 (avoids unnecessary draw calls during scrolling)
-- **FR-031**: Text emphasis MUST use M3 color roles instead of alpha manipulation:
+- **FR-031**: Text emphasis MUST primarily use M3 color roles (limited alpha deemphasis is acceptable for compact metadata):
   - Primary text (node name): `MaterialTheme.colorScheme.onSurface`
   - Secondary text (metric values): `MaterialTheme.colorScheme.onSurfaceVariant` or `onSurface` (contextual)
   - Tertiary text (footer metadata): `MaterialTheme.colorScheme.outline`
@@ -394,8 +394,8 @@ Signal quality is determined by `determineSignalQuality(snr, rssi)` using absolu
 | Hops Away | `node-layout-show-hops` | `true` | Row 4 (footer) | `hopsAway > 0` + not connected node |
 | Signal (Direct Only) | `node-layout-show-signal` | `true` | Row 2 (health), position 4 | `hopsAway == 0` + `snr < 100f` + `rssi < 0` + `!viaMqtt` |
 | Channel | `node-layout-show-channel` | `true` | Row 4 (footer) | `channel > 0` |
-| Device Role | `node-layout-show-role` | `true` | Row 4 (footer) | Always (controls hardware model, role icon, MQTT icon) |
-| Telemetry | `node-layout-show-telemetry` | `true` | Row 3 (metrics) | Node has environment data (temp/humidity/pressure ≠ 0) |
+| Device & Role | `node-layout-show-role` | `true` | Row 4 (footer) | Always (controls hardware model, role icon, MQTT icon) |
+| Environment Metrics (shared) | `node-layout-show-telemetry` | `true` | Row 3 (metrics in compact) / telemetry grid (complete) | Node has environment data (temp/humidity/pressure ≠ 0) |
 
 ## Assumptions
 
