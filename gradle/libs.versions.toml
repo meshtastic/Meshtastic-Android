@@ -33,7 +33,7 @@ testRetry = "1.6.4"
 turbine = "1.2.1"
 
 # Compose Screenshot Testing
-compose-screenshot = "0.0.1-alpha14"
+compose-screenshot = "0.0.1-alpha15"
 
 # Compose Multiplatform
 compose-multiplatform = "1.11.0"
