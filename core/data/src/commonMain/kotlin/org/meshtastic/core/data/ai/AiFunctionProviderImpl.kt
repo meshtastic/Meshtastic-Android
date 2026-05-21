@@ -260,7 +260,10 @@ class AiFunctionProviderImpl(
 
             // Find most recent packet: max lastHeard across all nodes (convert seconds to ms)
             val mostRecentPacketTimeMs =
-                nodeMap.values.maxOfOrNull { it.lastHeard }?.toLong()?.times(MS_PER_SEC)
+                nodeMap.values.maxOfOrNull { it.lastHeard }
+                    ?.takeIf { it > 0 }
+                    ?.toLong()
+                    ?.times(MS_PER_SEC)
                     ?: clock.now().toEpochMilliseconds()
 
             // Get local device uptime from its DeviceMetrics (node #0 is typically the local device)
