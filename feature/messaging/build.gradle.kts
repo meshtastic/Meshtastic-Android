@@ -20,7 +20,6 @@ plugins { alias(libs.plugins.meshtastic.kmp.feature) }
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation(libs.compose.multiplatform.foundation)
             implementation(projects.core.common)
             implementation(projects.core.data)
             implementation(projects.core.database)
@@ -33,7 +32,6 @@ kotlin {
             implementation(projects.core.service)
             implementation(projects.core.ui)
 
-            implementation(libs.jetbrains.navigation3.ui)
             implementation(libs.androidx.paging.common)
             implementation(libs.androidx.paging.compose)
 

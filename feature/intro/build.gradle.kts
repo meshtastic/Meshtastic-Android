@@ -30,8 +30,6 @@ kotlin {
             implementation(projects.core.repository)
             implementation(projects.core.ui)
             implementation(projects.core.resources)
-
-            implementation(libs.jetbrains.navigation3.ui)
         }
         androidMain.dependencies { implementation(projects.core.service) }
     }

@@ -43,7 +43,11 @@ class KmpFeatureConventionPlugin : Plugin<Project> {
                 sourceSets.getByName("commonMain").dependencies {
                     // Compose Multiplatform UI
                     implementation(libs.library("compose-multiplatform-animation"))
+                    implementation(libs.library("compose-multiplatform-foundation"))
                     implementation(libs.library("compose-multiplatform-material3"))
+
+                    // Navigation 3 (JetBrains KMP fork — safe in commonMain)
+                    implementation(libs.library("jetbrains-navigation3-ui"))
 
                     // Lifecycle & ViewModel (JetBrains KMP forks — safe in commonMain)
                     implementation(libs.library("jetbrains-lifecycle-viewmodel-compose"))
