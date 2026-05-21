@@ -126,13 +126,12 @@ class AiFunctionProviderImpl(
             val nodeMap = nodeRepository.nodeDBbyNum.first()
             val nodes =
                 nodeMap.values.map { node ->
-                    val elapsedTimeMs = clock.now().toEpochMilliseconds() - node.lastHeard.toLong() * MS_PER_SEC
                     NodeSummary(
                         id = "!${node.num.toString(HEX_RADIX)}",
                         name = node.user.long_name.takeIf { it.isNotBlank() } ?: "Node ${node.num}",
                         batteryLevel = node.deviceMetrics.battery_level?.coerceIn(0, MAX_BATTERY_LEVEL),
                         lastHeard = node.lastHeard.toLong() * MS_PER_SEC,
-                        isOnline = elapsedTimeMs < ONLINE_THRESHOLD_MS,
+                        isOnline = node.isOnline,
                     )
                 }
             GetNodeListResult.Success(nodes.sortedByDescending { it.lastHeard })
@@ -347,7 +346,6 @@ class AiFunctionProviderImpl(
     companion object {
         private val OPERATION_TIMEOUT = 5.seconds
         private const val MAX_BATTERY_LEVEL = 100
-        private const val ONLINE_THRESHOLD_MS = 30_000L
         private const val HEX_RADIX = 16
         private const val MS_PER_SEC = 1000L
         private const val HEALTH_SCORE_BASE = 50
