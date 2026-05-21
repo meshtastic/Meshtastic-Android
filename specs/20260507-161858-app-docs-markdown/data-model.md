@@ -211,7 +211,14 @@ Shared abstraction over the platform-specific docs assistant.
 
 ```kotlin
 interface AIDocAssistant {
-    suspend fun answer(question: String): AIDocAssistantResult
+    /** Answer a user question about Meshtastic using bundled documentation context. */
+    suspend fun answer(question: String, currentPageId: String? = null): AIDocAssistantResult
+
+    /** Answer a user question about Meshtastic, streaming the results as they arrive. */
+    fun answerStream(
+        question: String,
+        currentPageId: String? = null,
+    ): kotlinx.coroutines.flow.Flow<AIDocAssistantResult>
 }
 ```
 
@@ -219,6 +226,12 @@ Possible runtime result model:
 
 ```kotlin
 sealed interface AIDocAssistantResult {
+    data class Partial(
+        val answer: String,
+        val sourcePages: List<DocPage>,
+        val usedOnDeviceModel: Boolean,
+    ) : AIDocAssistantResult
+
     data class Success(
         val answer: String,
         val sourcePages: List<DocPage>,
@@ -268,11 +281,17 @@ data class AIDocAssistantSessionState(
 )
 
 @Serializable
+data class SourceRef(
+    val id: String,
+    val title: String,
+)
+
+@Serializable
 data class ChirpyMessage(
     val id: String,
     val role: ChirpyRole,
     val text: String,
-    val sourcePageIds: List<String> = emptyList(),
+    val sources: List<SourceRef> = emptyList(),
 )
 
 @Serializable
