@@ -83,11 +83,11 @@ class AiFunctionProviderImpl(
 
             val key = (contactKey as ResolvedContact.Resolved).contactKey
 
-            // Send via existing use case
-            sendMessageUseCase.invoke(text, key)
+            // Send via existing use case and capture the generated messageId
+            val messageId = sendMessageUseCase.invoke(text, key)
 
             SendMessageResult.Success(
-                messageId = 0, // ID is generated internally by SendMessageUseCase
+                messageId = messageId,
                 channel = contactKey.channelName,
                 timestamp = clock.now().toEpochMilliseconds(),
             )

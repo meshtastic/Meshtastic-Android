@@ -27,7 +27,9 @@ import kotlin.time.Instant
  * Sliding-window rate limiter for AI-triggered operations.
  *
  * Tracks the last [maxCalls] invocation timestamps. A new call is permitted only if fewer than [maxCalls] occurred
- * within the [windowDuration]. This prevents AI agents from flooding the mesh network.
+ * within the [windowDuration]. This prevents aggregate AI traffic from flooding the mesh network.
+ *
+ * The limiter is intentionally process-scoped and global so concurrent AI surfaces share a single airtime budget.
  */
 @Single
 class RateLimiter(private val clock: Clock) {

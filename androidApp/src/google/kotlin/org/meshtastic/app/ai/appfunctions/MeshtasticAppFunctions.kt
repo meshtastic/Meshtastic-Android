@@ -19,6 +19,7 @@ package org.meshtastic.app.ai.appfunctions
 import androidx.appfunctions.AppFunctionContext
 import androidx.appfunctions.AppFunctionInvalidArgumentException
 import androidx.appfunctions.service.AppFunction
+import kotlinx.coroutines.TimeoutCancellationException
 import org.meshtastic.core.data.ai.AiFunctionProvider
 import org.meshtastic.core.data.ai.SendMessageResult
 
@@ -49,7 +50,14 @@ class MeshtasticAppFunctions(private val provider: AiFunctionProvider) {
         recipientName: String? = null,
         channelName: String? = null,
     ): SendMessageResponse {
-        val result = provider.sendMessage(text, recipientName, channelName)
+        val result =
+            try {
+                provider.sendMessage(text, recipientName, channelName)
+            } catch (_: TimeoutCancellationException) {
+                throw AppFunctionInvalidArgumentException(
+                    "Request timed out. Ensure the mesh is connected and try again.",
+                )
+            }
 
         return when (result) {
             is SendMessageResult.Success ->
@@ -88,7 +96,14 @@ class MeshtasticAppFunctions(private val provider: AiFunctionProvider) {
      */
     @AppFunction(isDescribedByKDoc = true)
     suspend fun getMeshStatus(context: AppFunctionContext): MeshStatusResponse {
-        val status = provider.getMeshStatus()
+        val status =
+            try {
+                provider.getMeshStatus()
+            } catch (_: TimeoutCancellationException) {
+                throw AppFunctionInvalidArgumentException(
+                    "Request timed out. Ensure the mesh is connected and try again.",
+                )
+            }
 
         return MeshStatusResponse(
             connectionState = status.connectionState,

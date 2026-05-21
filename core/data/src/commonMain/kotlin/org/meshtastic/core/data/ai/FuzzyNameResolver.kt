@@ -78,6 +78,7 @@ class FuzzyNameResolver(
         return when {
             scored.isEmpty() -> ChannelNameResult.NotFound
             scored.size == 1 -> ChannelNameResult.Found(scored[0].first.index, scored[0].first.name)
+            scored[0].second > scored[1].second -> ChannelNameResult.Found(scored[0].first.index, scored[0].first.name)
             else -> ChannelNameResult.Ambiguous(scored.map { it.first.name })
         }
     }
