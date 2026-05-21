@@ -16,14 +16,9 @@
  */
 package org.meshtastic.screenshots.feature
 
-import android.app.Application
-import android.content.Context
-import android.content.ContextWrapper
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.android.tools.screenshot.PreviewTest
-import org.meshtastic.core.common.ContextServices
 import org.meshtastic.feature.node.component.DeviceActionsLocalPreview
 import org.meshtastic.feature.node.component.DeviceActionsRemotePreview
 import org.meshtastic.feature.node.component.NodeDetailsSectionPreview
@@ -37,18 +32,6 @@ import org.meshtastic.feature.node.detail.NodeDetailContentRemotePreview
 import org.meshtastic.feature.node.metrics.DeviceMetricsCardPreview
 import org.meshtastic.feature.node.metrics.LegendPreview
 import org.meshtastic.feature.node.metrics.PreviewEnvironmentMetricsContent
-
-@Composable
-private fun initializeContextServicesAppForPreview() {
-    val appContext = LocalContext.current.applicationContext
-    val app =
-        Application().also {
-            val attachBaseContext = ContextWrapper::class.java.getDeclaredMethod("attachBaseContext", Context::class.java)
-            attachBaseContext.isAccessible = true
-            attachBaseContext.invoke(it, appContext)
-        }
-    ContextServices.app = app
-}
 
 @PreviewTest
 @PreviewLightDark
@@ -124,7 +107,6 @@ fun ScreenshotLegend() {
 @PreviewLightDark
 @Composable
 fun ScreenshotDeviceMetricsCard() {
-    initializeContextServicesAppForPreview()
     DeviceMetricsCardPreview()
 }
 
@@ -132,7 +114,6 @@ fun ScreenshotDeviceMetricsCard() {
 @PreviewLightDark
 @Composable
 fun ScreenshotEnvironmentMetricsContent() {
-    initializeContextServicesAppForPreview()
     PreviewEnvironmentMetricsContent()
 }
 
