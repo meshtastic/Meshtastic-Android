@@ -23,6 +23,7 @@ import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
 import org.meshtastic.app.ai.GeminiNanoDocAssistant
 import org.meshtastic.app.translation.MlKitDocTranslator
+import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.feature.docs.ai.AIDocAssistant
 import org.meshtastic.feature.docs.data.DocBundleLoader
 import org.meshtastic.feature.docs.data.KeywordSearchEngine
@@ -33,8 +34,11 @@ import org.meshtastic.feature.docs.translation.DocTranslationService
 @Module
 class GoogleAiModule {
     @Single
-    fun aiDocAssistant(searchEngine: KeywordSearchEngine, bundleLoader: DocBundleLoader): AIDocAssistant =
-        GeminiNanoDocAssistant(searchEngine, bundleLoader)
+    fun aiDocAssistant(
+        searchEngine: KeywordSearchEngine,
+        bundleLoader: DocBundleLoader,
+        nodeRepository: NodeRepository,
+    ): AIDocAssistant = GeminiNanoDocAssistant(searchEngine, bundleLoader, nodeRepository)
 
     @Single
     fun docTranslationCache(context: Context): DocTranslationCache =

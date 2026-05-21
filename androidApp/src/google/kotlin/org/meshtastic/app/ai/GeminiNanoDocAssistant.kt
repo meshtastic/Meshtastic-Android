@@ -18,7 +18,6 @@ package org.meshtastic.app.ai
 
 import co.touchlab.kermit.Logger
 import com.google.firebase.Firebase
-import com.google.firebase.ai.Chat
 import com.google.firebase.ai.DownloadStatus
 import com.google.firebase.ai.InferenceMode
 import com.google.firebase.ai.OnDeviceConfig
@@ -26,8 +25,9 @@ import com.google.firebase.ai.OnDeviceModelStatus
 import com.google.firebase.ai.ai
 import com.google.firebase.ai.type.GenerativeBackend
 import com.google.firebase.ai.type.PublicPreviewAPI
-import com.google.firebase.ai.type.Tool
 import com.google.firebase.ai.type.content
+import kotlinx.coroutines.flow.first
+import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.feature.docs.ai.AIDocAssistant
 import org.meshtastic.feature.docs.data.DocBundleLoader
 import org.meshtastic.feature.docs.data.KeywordSearchEngine
@@ -38,21 +38,25 @@ import org.meshtastic.feature.docs.model.DocsAiError
 /**
  * Gemini on-device AI assistant for the Google flavor.
  *
- * Uses Firebase AI Logic hybrid SDK with [InferenceMode.ONLY_ON_DEVICE] for fast first-message answers, and a cloud
- * model with URL context grounding for follow-up conversation. Supported on Pixel 9+, Samsung Galaxy S25/S26, OnePlus
- * 13/15, and other devices with AICore.
+ * Runs entirely on-device using the Firebase AI Logic SDK with [InferenceMode.ONLY_ON_DEVICE]. Supported on Pixel 9+,
+ * Samsung Galaxy S25/S26, OnePlus 13/15, and other devices with AICore.
  *
  * Context strategy: extracts only the **most relevant paragraphs** from each page (those containing query terms),
- * strips markdown formatting to maximize information density, and fits within the on-device token budget (~4K tokens).
- * This ensures fast, offline-capable answers even without cloud fallback.
+ * strips markdown formatting to maximize information density, and fits within the on-device token budget (optimized for
+ * modern Nano v4 with up to 32K tokens / 32,000 characters context).
+ *
+ * Multi-turn history is supported locally by formatting the past conversation turns directly into the prompt.
  *
  * @see <a href="https://firebase.google.com/docs/ai-logic/hybrid/android/get-started">Firebase AI Logic Hybrid</a>
  */
 @OptIn(PublicPreviewAPI::class)
-class GeminiNanoDocAssistant(private val searchEngine: KeywordSearchEngine, private val bundleLoader: DocBundleLoader) :
-    AIDocAssistant {
+class GeminiNanoDocAssistant(
+    private val searchEngine: KeywordSearchEngine,
+    private val bundleLoader: DocBundleLoader,
+    private val nodeRepository: NodeRepository,
+) : AIDocAssistant {
 
-    /** On-device model for fast first-message answers grounded in bundled docs. */
+    /** On-device model for fast, local answers grounded in bundled docs. */
     private val onDeviceModel by lazy {
         Firebase.ai(backend = GenerativeBackend.googleAI())
             .generativeModel(
@@ -62,23 +66,10 @@ class GeminiNanoDocAssistant(private val searchEngine: KeywordSearchEngine, priv
             )
     }
 
-    /** Cloud model with URL context — fetches only from meshtastic.org and github.com/meshtastic. */
-    private val groundedModel by lazy {
-        Firebase.ai(backend = GenerativeBackend.googleAI())
-            .generativeModel(
-                modelName = MODEL_NAME,
-                systemInstruction = content { text(SYSTEM_INSTRUCTION) },
-                tools = listOf(Tool.urlContext()),
-            )
-    }
-
-    /** Active multi-turn chat session. Maintains conversation history across messages. */
-    private var chatSession: Chat? = null
-    private var messageCount = 0
+    /** Conversation history stored as list of (Question, Answer) pairs. */
+    private val history = mutableListOf<Pair<String, String>>()
 
     override suspend fun isSupported(): Boolean = try {
-        // Always supported on Google flavor — cloud model with Google Search grounding is always available.
-        // On-device model provides faster/offline answers when available; check status to trigger download.
         val ext = onDeviceModel.onDeviceExtension
         val status = ext?.checkStatus()
         Logger.d(tag = TAG) { "On-device model status: $status" }
@@ -108,122 +99,99 @@ class GeminiNanoDocAssistant(private val searchEngine: KeywordSearchEngine, priv
                 true
             }
 
-            else -> true // Cloud grounded model is always available even without on-device support.
+            else -> false
         }
     } catch (e: Exception) {
-        Logger.w(tag = TAG) { "isSupported() check failed, using cloud only: ${e.message}" }
-        true // Cloud grounded model is always available.
+        if (e is kotlinx.coroutines.CancellationException) throw e
+        Logger.w(tag = TAG) { "isSupported() check failed: ${e.message}" }
+        false
     }
 
+    override suspend fun answer(question: String, currentPageId: String?): AIDocAssistantResult =
+        answerStream(question, currentPageId).first { it !is AIDocAssistantResult.Partial }
+
     @Suppress("TooGenericExceptionCaught")
-    override suspend fun answer(question: String, currentPageId: String?): AIDocAssistantResult = try {
-        val bundle = bundleLoader.load()
-        val queryTerms = extractQueryTerms(question)
+    override fun answerStream(
+        question: String,
+        currentPageId: String?,
+    ): kotlinx.coroutines.flow.Flow<AIDocAssistantResult> = kotlinx.coroutines.flow.flow {
+        try {
+            val bundle = bundleLoader.load()
+            val queryTerms = extractQueryTerms(question)
 
-        // Load all page content for full-text search ranking.
-        val allContent = bundle.pages.associateWith { page -> bundleLoader.readPage(page.id)?.markdown.orEmpty() }
+            // Load all page content for full-text search ranking.
+            val allContent =
+                bundle.pages.associateWith { page -> bundleLoader.readPage(page.id)?.markdown.orEmpty() }
 
-        // Rank pages by relevance: full-text content search + keyword/title matching.
-        val rankedPages = rankPagesByRelevance(queryTerms, bundle.pages, allContent)
-        Logger.d(tag = TAG) { "Ranked pages: ${rankedPages.take(5).map { "${it.first.id}(${it.second})" }}" }
+            // Rank pages by relevance: full-text content search + keyword/title matching.
+            val rankedPages = rankPagesByRelevance(queryTerms, bundle.pages, allContent)
+            Logger.d(tag = TAG) { "Ranked pages: ${rankedPages.take(5).map { "${it.first.id}(${it.second})" }}" }
 
-        // Build compact context by extracting only relevant paragraphs.
-        val contextResult = buildContext(currentPageId, queryTerms, rankedPages, allContent, MAX_CONTEXT_CHARS)
-        Logger.d(tag = TAG) {
-            "Context: ${contextResult.parts.size} pages, ${contextResult.totalChars} chars (budget $MAX_CONTEXT_CHARS)"
+            // Build compact context by extracting only relevant paragraphs.
+            val contextResult = buildContext(currentPageId, queryTerms, rankedPages, allContent, MAX_CONTEXT_CHARS)
+            Logger.d(tag = TAG) {
+                "Context: ${contextResult.parts.size} pages, ${contextResult.totalChars} chars (budget $MAX_CONTEXT_CHARS)"
+            }
+
+            val prompt = buildPrompt(question, contextResult.parts)
+            Logger.d(tag = TAG) { "Prompt: ${prompt.length} chars, history count: ${history.size}" }
+
+            val contextPages = contextResult.usedPageIds.mapNotNull { id -> bundle.pages.find { it.id == id } }
+
+            val accumulatedText = StringBuilder()
+            onDeviceModel.generateContentStream(prompt).collect { chunk ->
+                val text = chunk.text
+                if (!text.isNullOrEmpty()) {
+                    accumulatedText.append(text)
+                    emit(
+                        AIDocAssistantResult.Partial(
+                            answer = accumulatedText.toString(),
+                            sourcePages = contextPages,
+                            usedOnDeviceModel = true,
+                        ),
+                    )
+                }
+            }
+            val onDeviceAnswer = accumulatedText.toString().trimEnd()
+
+            val mentionedPages =
+                bundle.pages.filter { page ->
+                    page.id !in contextResult.usedPageIds && onDeviceAnswer.contains(page.title, ignoreCase = true)
+                }
+            val allSourcePages = contextPages + mentionedPages
+
+            // Record this turn in the conversation history, keeping only the last 4 turns to avoid memory leaks
+            history.add(question to onDeviceAnswer)
+            if (history.size > 4) {
+                history.removeAt(0)
+            }
+
+            emit(
+                AIDocAssistantResult.Success(
+                    answer = onDeviceAnswer,
+                    sourcePages = allSourcePages,
+                    usedOnDeviceModel = true,
+                ),
+            )
+        } catch (e: Exception) {
+            if (e is kotlinx.coroutines.CancellationException) throw e
+            Logger.w(tag = TAG) { "On-device inference failed: ${e.message}" }
+            val errorType =
+                when {
+                    e.message?.contains("BUSY", ignoreCase = true) == true -> DocsAiError.Busy
+                    e.message?.contains("BATTERY", ignoreCase = true) == true -> DocsAiError.Busy
+                    e.message?.contains("BACKGROUND", ignoreCase = true) == true -> DocsAiError.Busy
+                    e.message?.contains("UNAVAILABLE", ignoreCase = true) == true -> DocsAiError.ModelUnavailable
+                    else -> DocsAiError.Unknown
+                }
+            val fallbackPages = searchEngine.selectForTokenBudget(question, maxChars = MAX_CONTEXT_CHARS)
+            emit(AIDocAssistantResult.Error(reason = errorType, suggestedPages = fallbackPages))
         }
-
-        val prompt = buildPrompt(question, contextResult.parts)
-        Logger.d(tag = TAG) { "Prompt: ${prompt.length} chars, message #$messageCount" }
-
-        val chatResult = generateWithChat(prompt)
-        messageCount++
-        Logger.d(tag = TAG) { "Response (${chatResult.answer.length} chars): ${chatResult.answer.take(200)}" }
-
-        // Merge context pages with any pages mentioned by title in the response (à la Meshtastic-Apple).
-        val mentionedPages =
-            bundle.pages.filter { page ->
-                page.id !in contextResult.usedPageIds && chatResult.answer.contains(page.title, ignoreCase = true)
-            }
-        val allSourcePages =
-            contextResult.usedPageIds.mapNotNull { id -> bundle.pages.find { it.id == id } } + mentionedPages
-
-        AIDocAssistantResult.Success(
-            answer = chatResult.answer,
-            sourcePages = allSourcePages,
-            usedOnDeviceModel = chatResult.usedOnDevice,
-        )
-    } catch (e: Exception) {
-        Logger.w(tag = TAG) { "Inference failed: ${e.message}" }
-        val errorType =
-            when {
-                e.message?.contains("BUSY", ignoreCase = true) == true -> DocsAiError.Busy
-                e.message?.contains("BATTERY", ignoreCase = true) == true -> DocsAiError.Busy
-                e.message?.contains("BACKGROUND", ignoreCase = true) == true -> DocsAiError.Busy
-                e.message?.contains("UNAVAILABLE", ignoreCase = true) == true -> DocsAiError.ModelUnavailable
-                else -> DocsAiError.Unknown
-            }
-        val fallbackPages = searchEngine.selectForTokenBudget(question, maxChars = MAX_CONTEXT_CHARS)
-        AIDocAssistantResult.Error(reason = errorType, suggestedPages = fallbackPages)
     }
 
     override fun resetSession() {
-        chatSession = null
-        messageCount = 0
+        history.clear()
         Logger.d(tag = TAG) { "Chat session reset" }
-    }
-
-    /** Result from [generateWithChat] indicating which model produced the answer. */
-    private data class ChatResult(val answer: String, val usedOnDevice: Boolean)
-
-    /**
-     * Uses the Chat API for multi-turn conversation. First message tries on-device for speed; all messages also go
-     * through the cloud chat session to maintain conversation history for follow-ups.
-     */
-    private suspend fun generateWithChat(prompt: String): ChatResult {
-        val chat = chatSession ?: groundedModel.startChat().also { chatSession = it }
-
-        // First message: try on-device in parallel for speed, use cloud chat as primary.
-        if (messageCount == 0) {
-            val onDeviceAnswer =
-                try {
-                    val response = onDeviceModel.generateContent(prompt)
-                    response.text?.trimEnd()
-                } catch (e: Exception) {
-                    Logger.d(tag = TAG) { "On-device inference failed: ${e.message}" }
-                    null
-                }
-
-            // If on-device gave a good answer, send it to chat as history context and return it.
-            if (onDeviceAnswer != null && !looksLikeNoAnswer(onDeviceAnswer)) {
-                // Still send to cloud chat so it has context for follow-ups (fire and forget).
-                try {
-                    val groundedPrompt = prompt + MESHTASTIC_URL_HINT
-                    chat.sendMessage(groundedPrompt)
-                } catch (e: Exception) {
-                    Logger.d(tag = TAG) { "Cloud chat seeding failed (non-fatal): ${e.message}" }
-                }
-                return ChatResult(answer = onDeviceAnswer, usedOnDevice = true)
-            }
-        }
-
-        // Use cloud chat (maintains full conversation history for follow-ups).
-        val groundedPrompt = prompt + MESHTASTIC_URL_HINT
-        val response = chat.sendMessage(groundedPrompt)
-        return ChatResult(
-            answer = response.text?.trimEnd() ?: "I wasn't able to generate a response.",
-            usedOnDevice = false,
-        )
-    }
-
-    /** Heuristic: detect when the model says it can't find the answer in the provided docs. */
-    private fun looksLikeNoAnswer(answer: String): Boolean {
-        val lower = answer.lowercase()
-        return lower.contains("not in the docs") ||
-            lower.contains("not found in") ||
-            lower.contains("i don't have information") ||
-            lower.contains("i couldn't find") ||
-            lower.contains("not covered in the documentation")
     }
 
     private data class ContextResult(val parts: List<String>, val usedPageIds: Set<String>, val totalChars: Int)
@@ -370,11 +338,84 @@ class GeminiNanoDocAssistant(private val searchEngine: KeywordSearchEngine, priv
             } else {
                 FALLBACK_CONTEXT
             }
+
+        val myNode = nodeRepository.myNodeInfo.value
+        val ourNode = nodeRepository.ourNodeInfo.value
+        val nodeDb = nodeRepository.nodeDBbyNum.value
+
+        val hardwareInfo =
+            if (myNode != null) {
+                """
+            |- Connected Hardware: ${myNode.model ?: "Unknown model"} (Firmware: ${myNode.firmwareVersion ?: "Unknown"})
+            |- Local Node Number: ${myNode.myNodeNum}
+            |- GPS Capabilities: ${if (myNode.hasGPS) "Equipped/Active" else "No GPS"}
+            |- WiFi Enabled: ${if (myNode.hasWifi) "Yes" else "No"}
+            |- Channel Utilization: ${myNode.channelUtilization}%
+            |- Airtime Tx: ${myNode.airUtilTx}%
+            """
+                    .trimIndent()
+            } else {
+                "- Connected Hardware: No local node connected right now (user should pair their radio over Bluetooth)."
+            }
+
+        val metricsInfo =
+            if (ourNode != null) {
+                val battery = ourNode.batteryLevel
+                val batteryStr = if (battery != null && battery in 1..100) "$battery%" else "Unknown (External Power)"
+                val voltage = ourNode.voltage
+                val voltStr = if (voltage != null && voltage > 0f) "${voltage}V" else "Unknown"
+
+                """
+            |- Node Battery Status: $batteryStr ($voltStr)
+            |- User Identity: ${ourNode.user.short_name} (${ourNode.user.long_name})
+            |- Position: ${if (ourNode.isUnknownUser) "Unknown user" else "Valid user profile synced"}
+            """
+                    .trimIndent()
+            } else {
+                "- Node Status: Unknown user identity (no radio profile synced yet)"
+            }
+
+        val meshInfo =
+            if (nodeDb.isNotEmpty()) {
+                val totalNodes = nodeDb.size
+                val onlineNodes = nodeDb.values.count { it.isOnline }
+                """
+            |- Mesh Network Size: $totalNodes nodes registered in local DB
+            |- Active Peers Online: $onlineNodes nodes currently active on the air
+            """
+                    .trimIndent()
+            } else {
+                "- Mesh Network: Empty node database (offline or newly installed app)"
+            }
+
+        val liveStatusContext =
+            """
+            |Active Live Radio Node & Mesh Network Status:
+            |$hardwareInfo
+            |$metricsInfo
+            |$meshInfo
+        """
+                .trimMargin()
+
+        val historyStr =
+            if (history.isNotEmpty()) {
+                "Previous conversation history:\n" +
+                    history.takeLast(4).joinToString("\n") { (q, a) -> "User: $q\nAssistant: $a" } +
+                    "\n\n"
+            } else {
+                ""
+            }
+
         return """
+            |System Instruction:
+            |$SYSTEM_INSTRUCTION
+            |
+            |$liveStatusContext
+            |
             |Bundled app documentation:
             |$context
             |
-            |User question: $question
+            |${historyStr}User question: $question
         """
             .trimMargin()
     }
@@ -382,13 +423,13 @@ class GeminiNanoDocAssistant(private val searchEngine: KeywordSearchEngine, priv
     companion object {
         private const val TAG = "ChirpyAI"
 
-        /** Gemini 3.1 Flash-Lite — latest stable model (2026-05-07), free tier, supports grounding. */
-        private const val MODEL_NAME = "gemini-3.1-flash-lite"
+        /** Gemini Nano v4 — local on-device LLM model supporting larger 32K token context window. */
+        private const val MODEL_NAME = "nano-v4-full"
 
         private const val SYSTEM_INSTRUCTION =
-            """You are Chirpy, the friendly AI assistant built into the Meshtastic Android app. You help users understand mesh networking, configure their Meshtastic nodes, troubleshoot connectivity issues, and get the most out of the Meshtastic ecosystem.
+            """You are Chirpy, the friendly AI assistant and official Node mascot built into the Meshtastic Android app. You help users understand mesh networking, configure their Meshtastic nodes, troubleshoot connectivity issues, and get the most out of the Meshtastic ecosystem.
 
-Personality: Helpful, concise, enthusiastic about mesh networking. Use short paragraphs. Include relevant emoji sparingly (📡 🔋 📍).
+Personality: Helpful, concise, cheerful, and highly enthusiastic about mesh networking. You represent a cute, helpful little LoRa radio node! Use short paragraphs. Include relevant emoji (📡 🔋 📍 📱 📶 🔌). Always refer to yourself as Chirpy. Never call yourself Gemma or Gemini. Keep a light, highly energetic, and friendly tone, actively packing your responses with fun, clever radio, hardware, and mesh networking puns! Work them in naturally but frequently (e.g., "staying connected!", "fully charged and ready to assist!", "let's relay some knowledge!", "time to hop to it!", "we're totally on the same frequency!", "attenuation got you down?", "let's boost that signal!", "channeling my inner router!"). Balance your cheerful node humor with clear, technically accurate help first and foremost!
 
 Knowledge sources (in priority order):
 1. Bundled app documentation provided as context below
@@ -405,14 +446,14 @@ Guidelines:
 - Keep answers concise (2-4 short paragraphs max) unless the user asks for detail
 - If you're truly unsure about something Meshtastic-specific, say so honestly rather than guessing"""
 
-        /** Total context char budget — sized for on-device Nano (~4K tokens ≈ 10K chars for context + prompt). */
-        private const val MAX_CONTEXT_CHARS = 8_000
+        /** Total context char budget — optimized for modern on-device Nano v4 (~32K tokens context window). */
+        private const val MAX_CONTEXT_CHARS = 32_000
 
         /** Max chars for the current page (gets priority). */
-        private const val MAX_PAGE_CHARS = 4_000
+        private const val MAX_PAGE_CHARS = 16_000
 
         /** Max chars per additional page snippet. */
-        private const val MAX_SNIPPET_CHARS = 2_000
+        private const val MAX_SNIPPET_CHARS = 8_000
 
         /** Minimum useful snippet size — don't bother with tiny fragments. */
         private const val MIN_USEFUL_SNIPPET = 100
@@ -458,13 +499,5 @@ Guidelines:
             "Meshtastic is an open-source mesh networking platform for LoRa radios. " +
                 "The app connects to Meshtastic devices via Bluetooth or WiFi to send messages, " +
                 "share location, and manage mesh network settings like channels, nodes, and modules."
-
-        /** URLs appended to prompts for the cloud model to leverage URL context tool. Only official sources. */
-        private const val MESHTASTIC_URL_HINT =
-            "\n\nFor additional context, you may reference these official sources:" +
-                "\n- https://meshtastic.org/docs/" +
-                "\n- https://github.com/meshtastic/Meshtastic-Android" +
-                "\n- https://github.com/meshtastic/firmware" +
-                "\n- https://github.com/meshtastic/protobufs"
     }
 }

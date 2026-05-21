@@ -102,6 +102,9 @@ data class DocSearchResult(val page: DocPage, val score: Int, val matchedTerms: 
 
 /** AI assistant result model. */
 sealed interface AIDocAssistantResult {
+    data class Partial(val answer: String, val sourcePages: List<DocPage>, val usedOnDeviceModel: Boolean) :
+        AIDocAssistantResult
+
     data class Success(val answer: String, val sourcePages: List<DocPage>, val usedOnDeviceModel: Boolean) :
         AIDocAssistantResult
 
