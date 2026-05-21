@@ -18,8 +18,11 @@ package org.meshtastic.feature.settings.component
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -118,7 +121,7 @@ fun NodeLayoutSettings(
         val previewNode = remember { previewSampleNode() }
         val localNode = remember { previewLocalNode() }
 
-        Box(modifier = Modifier.animateContentSize()) {
+        Box(modifier = Modifier.animateContentSize().padding(bottom = 8.dp)) {
             when (density) {
                 NodeListDensity.COMPLETE ->
                     NodeItem(
@@ -148,6 +151,9 @@ fun NodeLayoutSettings(
             }
         }
 
+        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+        Spacer(modifier = Modifier.height(4.dp))
+
         // Shared toggle — applies to both layouts
         SwitchPreference(
             title = stringResource(Res.string.node_layout_log_icons),
@@ -165,6 +171,7 @@ fun NodeLayoutSettings(
             )
         } else {
             // Compact-specific toggles
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp))
             Text(
                 text = stringResource(Res.string.node_layout_compact_fields_header),
                 style = MaterialTheme.typography.labelMedium,
