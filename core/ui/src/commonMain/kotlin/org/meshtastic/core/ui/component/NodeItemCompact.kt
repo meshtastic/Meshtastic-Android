@@ -67,7 +67,6 @@ import org.meshtastic.core.ui.icon.Counter5
 import org.meshtastic.core.ui.icon.Counter6
 import org.meshtastic.core.ui.icon.Counter7
 import org.meshtastic.core.ui.icon.Counter8
-import org.meshtastic.core.ui.icon.DeviceSleep
 import org.meshtastic.core.ui.icon.Distance
 import org.meshtastic.core.ui.icon.Favorite
 import org.meshtastic.core.ui.icon.HardwareModel
@@ -77,7 +76,6 @@ import org.meshtastic.core.ui.icon.MapCompass
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.MqttConnected
 import org.meshtastic.core.ui.icon.Pressure
-import org.meshtastic.core.ui.icon.Success
 import org.meshtastic.core.ui.icon.Temperature
 import org.meshtastic.core.ui.icon.Unmessageable
 import org.meshtastic.core.ui.icon.role
@@ -310,33 +308,21 @@ private fun CompactHealthRow(
     contentColor: Color,
 ) {
     val segments = buildList {
-        // Online indicator + Last heard
+        // Last heard (tinted by online status)
         if (showLastHeard && thatNode.lastHeard > 0 && !isFutureDate(thatNode.lastHeard)) {
             add(
                 @Composable {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(3.dp),
-                    ) {
-                        Icon(
-                            imageVector =
-                            if (thatNode.isOnline) MeshtasticIcons.Success else MeshtasticIcons.DeviceSleep,
-                            contentDescription = null,
-                            modifier = Modifier.size(COMPACT_ICON_SIZE_DP.dp),
-                            tint =
-                            if (thatNode.isOnline) {
-                                MaterialTheme.colorScheme.tertiary
-                            } else {
-                                MaterialTheme.colorScheme.outline
-                            },
-                        )
-                        LastHeardInfo(
-                            lastHeard = thatNode.lastHeard,
-                            showLabel = false,
-                            relative = lastHeardIsRelative,
-                            contentColor = contentColor,
-                        )
+                    val statusColor = if (thatNode.isOnline) {
+                        MaterialTheme.colorScheme.tertiary
+                    } else {
+                        MaterialTheme.colorScheme.outline
                     }
+                    LastHeardInfo(
+                        lastHeard = thatNode.lastHeard,
+                        showLabel = false,
+                        relative = lastHeardIsRelative,
+                        contentColor = statusColor,
+                    )
                 },
             )
         }
