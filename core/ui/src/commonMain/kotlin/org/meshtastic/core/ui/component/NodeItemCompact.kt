@@ -220,7 +220,6 @@ fun NodeItemCompact(
                     isThisNode = isThisNode,
                     distance = distance,
                     bearingDegrees = bearingDegrees,
-                    showPower = showPower,
                     showLastHeard = showLastHeard,
                     lastHeardIsRelative = lastHeardIsRelative,
                     showLocation = showLocation,
@@ -304,7 +303,6 @@ private fun CompactHealthRow(
     isThisNode: Boolean,
     distance: String?,
     bearingDegrees: Int?,
-    showPower: Boolean,
     showLastHeard: Boolean,
     lastHeardIsRelative: Boolean,
     showLocation: Boolean,
@@ -339,19 +337,6 @@ private fun CompactHealthRow(
                             contentColor = contentColor,
                         )
                     }
-                },
-            )
-        }
-
-        // Battery
-        if (showPower && thatNode.batteryLevel != null) {
-            add(
-                @Composable {
-                    MaterialBatteryInfo(
-                        level = thatNode.batteryLevel ?: 0,
-                        voltage = thatNode.voltage ?: 0f,
-                        contentColor = contentColor,
-                    )
                 },
             )
         }
