@@ -127,3 +127,84 @@ data class DeviceStatus(
     /** Whether the radio is currently transmitting or receiving. */
     val isActive: Boolean,
 )
+
+/** Result of a [AiFunctionProvider.getNodeDetails] invocation. */
+sealed class GetNodeDetailsResult {
+    /** Successfully retrieved node details. */
+    data class Success(val node: NodeDetails) : GetNodeDetailsResult()
+
+    /** Device is not connected to a Meshtastic radio. */
+    data class NotConnected(val message: String) : GetNodeDetailsResult()
+
+    /** Node with given ID not found. */
+    data class NotFound(val message: String) : GetNodeDetailsResult()
+
+    /** An error occurred retrieving node details. */
+    data class Error(val reason: String) : GetNodeDetailsResult()
+}
+
+/** Detailed telemetry and status for a specific node. */
+data class NodeDetails(
+    /** Node ID in Meshtastic hex format (e.g., "!abc12345"). */
+    val id: String,
+    /** User ID string for this node. */
+    val userId: String,
+    /** Display name of the node. */
+    val name: String,
+    /** Battery level (0-100), or null if unavailable. */
+    val batteryLevel: Int?,
+    /** Supply voltage in millivolts, or null if unavailable. */
+    val voltage: Float?,
+    /** Hardware model (e.g., "Meshtastic nRF52840"). */
+    val hardwareModel: String,
+    /** Firmware version string. */
+    val firmwareVersion: String,
+    /** Signal-to-noise ratio of the strongest received signal. */
+    val snr: Float,
+    /** Received signal strength indicator in dB. */
+    val rssi: Int,
+    /** Number of hops away from the local node (-1 if unknown). */
+    val hopsAway: Int,
+    /** Channel index this node is on. */
+    val channel: Int,
+    /** Last time this node was heard from (milliseconds since epoch). */
+    val lastHeard: Long,
+    /** User role or device type (e.g., "CLIENT", "REPEATER"). */
+    val userRole: String,
+    /** Whether user is licensed to operate this hardware. */
+    val isLicensed: Boolean,
+    /** Latitude (degrees), or null if not available. */
+    val latitude: Double?,
+    /** Longitude (degrees), or null if not available. */
+    val longitude: Double?,
+)
+
+/** Result of a [AiFunctionProvider.getMeshMetrics] invocation. */
+sealed class GetMeshMetricsResult {
+    /** Successfully retrieved mesh metrics. */
+    data class Success(val metrics: MeshMetrics) : GetMeshMetricsResult()
+
+    /** Device is not connected to a Meshtastic radio. */
+    data class NotConnected(val message: String) : GetMeshMetricsResult()
+
+    /** An error occurred retrieving mesh metrics. */
+    data class Error(val reason: String) : GetMeshMetricsResult()
+}
+
+/** Aggregate network metrics and statistics for the entire mesh. */
+data class MeshMetrics(
+    /** Total number of nodes known to this device. */
+    val totalNodeCount: Int,
+    /** Number of nodes that are currently online. */
+    val onlineNodeCount: Int,
+    /** Average battery level across all nodes, or null if unknown. */
+    val averageBatteryLevel: Int?,
+    /** Estimated mesh health score (0-100), based on connectivity and node activity. */
+    val meshHealthScore: Int,
+    /** Timestamp of the most recent packet received (milliseconds since epoch). */
+    val mostRecentPacketTime: Long,
+    /** Mesh uptime since local node startup (seconds). */
+    val meshUptimeSeconds: Long,
+    /** Estimated channel utilization percentage (0-100), or null if unavailable. */
+    val channelUtilizationPercent: Int?,
+)

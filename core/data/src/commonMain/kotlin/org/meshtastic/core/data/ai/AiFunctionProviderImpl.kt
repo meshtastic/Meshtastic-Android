@@ -181,6 +181,96 @@ class AiFunctionProviderImpl(
         }
     }
 
+    @Suppress("ReturnCount", "TooGenericExceptionCaught")
+    override suspend fun getNodeDetails(nodeId: String): GetNodeDetailsResult = withTimeout(OPERATION_TIMEOUT) {
+        if (serviceRepository.connectionState.value != ConnectionState.Connected) {
+            return@withTimeout GetNodeDetailsResult.NotConnected("Not connected to a Meshtastic radio.")
+        }
+
+        try {
+            val node =
+                if (nodeId.startsWith("!")) {
+                    // Hex format: extract number and search
+                    val nodeNum = nodeId.drop(1).toInt(HEX_RADIX)
+                    nodeRepository.nodeDBbyNum.first()[nodeNum]
+                } else {
+                    // User ID format
+                    nodeRepository.getNode(nodeId)
+                }
+
+            if (node == null) {
+                return@withTimeout GetNodeDetailsResult.NotFound("Node not found: $nodeId")
+            }
+
+            val details =
+                NodeDetails(
+                    id = "!${node.num.toString(HEX_RADIX)}",
+                    userId = node.user.id,
+                    name = node.user.long_name.takeIf { it.isNotBlank() } ?: "Node ${node.num}",
+                    batteryLevel = node.deviceMetrics.battery_level?.coerceIn(0, MAX_BATTERY_LEVEL),
+                    voltage = node.deviceMetrics.voltage,
+                    hardwareModel = node.metadata?.hw_model?.name ?: "Unknown",
+                    firmwareVersion = node.metadata?.firmware_version ?: "Unknown",
+                    snr = node.snr,
+                    rssi = node.rssi,
+                    hopsAway = node.hopsAway,
+                    channel = node.channel,
+                    lastHeard = node.lastHeard.toLong() * MS_PER_SEC,
+                    userRole = node.user.role.name,
+                    isLicensed = node.user.is_licensed,
+                    latitude = node.latitude.takeIf { it != 0.0 },
+                    longitude = node.longitude.takeIf { it != 0.0 },
+                )
+            GetNodeDetailsResult.Success(details)
+        } catch (ex: Exception) {
+            GetNodeDetailsResult.Error("Failed to retrieve node details: ${ex.message}")
+        }
+    }
+
+    @Suppress("ReturnCount", "TooGenericExceptionCaught")
+    override suspend fun getMeshMetrics(): GetMeshMetricsResult = withTimeout(OPERATION_TIMEOUT) {
+        if (serviceRepository.connectionState.value != ConnectionState.Connected) {
+            return@withTimeout GetMeshMetricsResult.NotConnected("Not connected to a Meshtastic radio.")
+        }
+
+        try {
+            val totalCount = nodeRepository.totalNodeCount.first()
+            val onlineCount = nodeRepository.onlineNodeCount.first()
+
+            // Calculate average battery level
+            val nodeMap = nodeRepository.nodeDBbyNum.first()
+            val batteryLevels = nodeMap.values.mapNotNull { it.deviceMetrics.battery_level }
+            val avgBattery =
+                if (batteryLevels.isNotEmpty()) {
+                    (batteryLevels.sum() / batteryLevels.size).coerceIn(0, MAX_BATTERY_LEVEL)
+                } else {
+                    null
+                }
+
+            // Mesh health score: 0-100 based on online ratio and recent activity
+            val healthScore =
+                when {
+                    totalCount == 0 -> 0
+                    onlineCount == 0 -> HEALTH_SCORE_DEGRADED
+                    else -> (HEALTH_SCORE_BASE + (HEALTH_SCORE_ONLINE_RATIO * onlineCount) / totalCount).toInt()
+                }
+
+            val metrics =
+                MeshMetrics(
+                    totalNodeCount = totalCount,
+                    onlineNodeCount = onlineCount,
+                    averageBatteryLevel = avgBattery,
+                    meshHealthScore = healthScore.coerceIn(0, HEALTH_SCORE_MAX),
+                    mostRecentPacketTime = clock.now().toEpochMilliseconds(),
+                    meshUptimeSeconds = clock.now().toEpochMilliseconds() / 1000L,
+                    channelUtilizationPercent = null, // Could compute from radioConfigRepository if needed
+                )
+            GetMeshMetricsResult.Success(metrics)
+        } catch (ex: Exception) {
+            GetMeshMetricsResult.Error("Failed to retrieve mesh metrics: ${ex.message}")
+        }
+    }
+
     @Suppress("ReturnCount")
     private suspend fun resolveContactKey(recipientName: String?, channelName: String?): ResolvedContact? {
         // Direct message to a specific node
@@ -237,6 +327,10 @@ class AiFunctionProviderImpl(
         private const val ONLINE_THRESHOLD_MS = 30_000L
         private const val HEX_RADIX = 16
         private const val MS_PER_SEC = 1000L
+        private const val HEALTH_SCORE_BASE = 50
+        private const val HEALTH_SCORE_ONLINE_RATIO = 50
+        private const val HEALTH_SCORE_DEGRADED = 10
+        private const val HEALTH_SCORE_MAX = 100
 
         /** Standard Meshtastic message payload limit (bytes). */
         const val MAX_MESSAGE_LENGTH = 237

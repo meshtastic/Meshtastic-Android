@@ -236,4 +236,79 @@ class MeshtasticAppFunctions(private val provider: AiFunctionProvider) {
                 throw AppFunctionInvalidArgumentException(result.reason)
         }
     }
+
+    /**
+     * Retrieve detailed telemetry and status for a specific mesh node.
+     *
+     * Returns per-node metrics including battery level, signal strength, hardware model, and location data.
+     *
+     * @param context The app function invocation context provided by the system.
+     * @param nodeId The target node ID (e.g., '!abc12345' or user ID).
+     * @return A [GetNodeDetailsResponse] with detailed node information.
+     */
+    @AppFunction(isDescribedByKDoc = true)
+    suspend fun getNodeDetails(context: AppFunctionContext, nodeId: String): GetNodeDetailsResponse {
+        val result = provider.getNodeDetails(nodeId)
+        return when (result) {
+            is org.meshtastic.core.data.ai.GetNodeDetailsResult.Success ->
+                GetNodeDetailsResponse(
+                    id = result.node.id,
+                    userId = result.node.userId,
+                    name = result.node.name,
+                    batteryLevel = result.node.batteryLevel,
+                    voltage = result.node.voltage,
+                    hardwareModel = result.node.hardwareModel,
+                    firmwareVersion = result.node.firmwareVersion,
+                    snr = result.node.snr,
+                    rssi = result.node.rssi,
+                    hopsAway = result.node.hopsAway,
+                    channel = result.node.channel,
+                    lastHeard = result.node.lastHeard,
+                    userRole = result.node.userRole,
+                    isLicensed = result.node.isLicensed,
+                    latitude = result.node.latitude,
+                    longitude = result.node.longitude,
+                )
+
+            is org.meshtastic.core.data.ai.GetNodeDetailsResult.NotConnected ->
+                throw AppFunctionInvalidArgumentException(result.message)
+
+            is org.meshtastic.core.data.ai.GetNodeDetailsResult.NotFound ->
+                throw AppFunctionInvalidArgumentException(result.message)
+
+            is org.meshtastic.core.data.ai.GetNodeDetailsResult.Error ->
+                throw AppFunctionInvalidArgumentException(result.reason)
+        }
+    }
+
+    /**
+     * Retrieve aggregate network metrics and statistics for the entire mesh.
+     *
+     * Returns mesh-wide analytics including total node count, online nodes, average battery level, and health score.
+     *
+     * @param context The app function invocation context provided by the system.
+     * @return A [GetMeshMetricsResponse] with mesh-wide statistics.
+     */
+    @AppFunction(isDescribedByKDoc = true)
+    suspend fun getMeshMetrics(context: AppFunctionContext): GetMeshMetricsResponse {
+        val result = provider.getMeshMetrics()
+        return when (result) {
+            is org.meshtastic.core.data.ai.GetMeshMetricsResult.Success ->
+                GetMeshMetricsResponse(
+                    totalNodeCount = result.metrics.totalNodeCount,
+                    onlineNodeCount = result.metrics.onlineNodeCount,
+                    averageBatteryLevel = result.metrics.averageBatteryLevel,
+                    meshHealthScore = result.metrics.meshHealthScore,
+                    mostRecentPacketTime = result.metrics.mostRecentPacketTime,
+                    meshUptimeSeconds = result.metrics.meshUptimeSeconds,
+                    channelUtilizationPercent = result.metrics.channelUtilizationPercent,
+                )
+
+            is org.meshtastic.core.data.ai.GetMeshMetricsResult.NotConnected ->
+                throw AppFunctionInvalidArgumentException(result.message)
+
+            is org.meshtastic.core.data.ai.GetMeshMetricsResult.Error ->
+                throw AppFunctionInvalidArgumentException(result.reason)
+        }
+    }
 }

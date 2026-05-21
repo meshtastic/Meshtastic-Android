@@ -65,4 +65,19 @@ interface AiFunctionProvider {
      * @return Success with device status, or failure if device unavailable.
      */
     suspend fun getDeviceStatus(): GetDeviceStatusResult
+
+    /**
+     * Get detailed telemetry and status for a specific mesh node.
+     *
+     * @param nodeId The target node ID (in Meshtastic format: "!hex" or user ID).
+     * @return Success with node details, or failure if not connected or node not found.
+     */
+    suspend fun getNodeDetails(nodeId: String): GetNodeDetailsResult
+
+    /**
+     * Get aggregate network metrics and statistics for the entire mesh.
+     *
+     * @return Success with mesh metrics, or failure if not connected.
+     */
+    suspend fun getMeshMetrics(): GetMeshMetricsResult
 }
