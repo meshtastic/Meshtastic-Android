@@ -25,7 +25,9 @@ import org.meshtastic.feature.node.component.NodeDetailsSectionPreview
 import org.meshtastic.feature.node.component.NodeItemCompactActivePreview
 import org.meshtastic.feature.node.component.NodeItemCompactAllFieldsPreview
 import org.meshtastic.feature.node.component.NodeItemCompactMinimalPreview
+import org.meshtastic.feature.node.component.NodeItemCompactOnlineRemotePreview
 import org.meshtastic.feature.node.component.NodeItemCompleteActivePreview
+import org.meshtastic.feature.node.component.NodeItemCompleteOnlineRemotePreview
 import org.meshtastic.feature.node.component.NodeItemCompletePreview
 import org.meshtastic.feature.node.component.PositionInlineContentPreview
 import org.meshtastic.feature.node.component.TelemetricActionsSectionEmptyPreview
@@ -164,6 +166,17 @@ fun ScreenshotNodeItemCompactActive() {
 @PreviewTest
 @PreviewLightDark
 @Composable
+fun ScreenshotNodeItemCompactOnlineRemote() {
+    NodeItemCompactOnlineRemotePreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotNodeItemCompleteOnlineRemote() {
+    NodeItemCompleteOnlineRemotePreview()
+}
+
 fun ScreenshotNodeDetailContentMinimal() {
     NodeDetailContentMinimalPreview()
 }

@@ -73,6 +73,7 @@ import org.meshtastic.core.ui.icon.ChannelUtilization
 import org.meshtastic.core.ui.icon.MapCompass
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Notes
+import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.proto.Config
 
 private const val ACTIVE_BORDER_ALPHA = 0.5f
@@ -472,9 +473,7 @@ private fun NodeItemHeader(
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 val statusColor = if (!isThisNode && thatNode.isOnline) {
-                    MaterialTheme.colorScheme.tertiary
-                } else if (!isThisNode) {
-                    MaterialTheme.colorScheme.outline
+                    MaterialTheme.colorScheme.StatusGreen
                 } else {
                     contentColor
                 }

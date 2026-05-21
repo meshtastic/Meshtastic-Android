@@ -79,6 +79,7 @@ import org.meshtastic.core.ui.icon.Pressure
 import org.meshtastic.core.ui.icon.Temperature
 import org.meshtastic.core.ui.icon.Unmessageable
 import org.meshtastic.core.ui.icon.role
+import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 import org.meshtastic.proto.Config
 
@@ -313,9 +314,9 @@ private fun CompactHealthRow(
             add(
                 @Composable {
                     val statusColor = if (thatNode.isOnline) {
-                        MaterialTheme.colorScheme.tertiary
+                        MaterialTheme.colorScheme.StatusGreen
                     } else {
-                        MaterialTheme.colorScheme.outline
+                        contentColor
                     }
                     LastHeardInfo(
                         lastHeard = thatNode.lastHeard,

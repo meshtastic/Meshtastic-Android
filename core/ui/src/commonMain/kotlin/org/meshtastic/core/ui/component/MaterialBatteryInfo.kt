@@ -105,12 +105,13 @@ fun MaterialBatteryInfo(
                     val availableWidth = size.width - (insetLeft + insetRight)
                     val availableHeight = size.height - (insetVertical * 2)
 
-                    // Fill (grow from left to right)
+                    // Fill grows from right (flat end) toward left (terminal)
                     val fillWidth = availableWidth * (level / 100f)
+                    val fillX = insetLeft + availableWidth - fillWidth
 
                     drawRect(
                         color = fillColor,
-                        topLeft = Offset(insetLeft, insetVertical),
+                        topLeft = Offset(fillX, insetVertical),
                         size = Size(fillWidth, availableHeight),
                     )
                 },

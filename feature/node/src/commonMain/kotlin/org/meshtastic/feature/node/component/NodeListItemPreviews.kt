@@ -140,3 +140,43 @@ fun NodeItemCompactActivePreview() {
         }
     }
 }
+
+@PreviewLightDark
+@Composable
+fun NodeItemCompactOnlineRemotePreview() {
+    val onlineNode = previewNodes.minnieMouse.copy(
+        lastHeard = (org.meshtastic.core.common.util.nowSeconds - 300).toInt(),
+    )
+    AppTheme {
+        Surface {
+            Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+                NodeItemCompact(
+                    thisNode = previewNodes.mickeyMouse,
+                    thatNode = onlineNode,
+                    distanceUnits = 0,
+                )
+            }
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
+fun NodeItemCompleteOnlineRemotePreview() {
+    val onlineNode = previewNodes.minnieMouse.copy(
+        lastHeard = (org.meshtastic.core.common.util.nowSeconds - 300).toInt(),
+    )
+    AppTheme {
+        Surface {
+            Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+                NodeItem(
+                    thisNode = previewNodes.mickeyMouse,
+                    thatNode = onlineNode,
+                    distanceUnits = 0,
+                    tempInFahrenheit = false,
+                    connectionState = ConnectionState.Connected,
+                )
+            }
+        }
+    }
+}
