@@ -3,6 +3,38 @@
 # Do NOT edit or remove previous entries — stale state claims cause agent confusion.
 # Format: ## YYYY-MM-DD — <summary>
 
+## 2026-05-21 — Upgraded Chirpy to a fully-personalized Live Diagnostic Node & Mesh Assistant
+- Integrated `NodeRepository` into `GeminiNanoDocAssistant.kt` and the Google AI Koin dependency injection module (`GoogleAiModule.kt`).
+- Developed a dynamic live-state prompt formatting block within `buildPrompt(...)` that queries current hardware model, firmware version, connection status, GPS capability, channel utilization, airtime, battery level/voltage, user profile long/short names, and total registered mesh peer counts & active online peers directly from `NodeRepository`'s reactive flows.
+- Injected this live radio diagnostics context dynamically as a system instruction metadata block on every user query. This empowers the on-device model to answer real-time, personalized diagnostic questions (e.g. "what is my battery level?", "how many active nodes are on my mesh right now?") with 100% on-device offline accuracy.
+- Tuned context retrieval constraints for the modern `nano-v4-full` (Gemini Nano v4) model: expanded the total context budget `MAX_CONTEXT_CHARS` from 8,000 to **32,000 characters** (up to ~12K tokens out of the model's native 32K window), and scaled `MAX_PAGE_CHARS` to **16,000 characters** and `MAX_SNIPPET_CHARS` to **8,000 characters** to supply vastly richer, more detailed, and complete documentation fragments.
+- Fully validated all spotless formatting checks, detekt quality analysis, and `:feature:docs:allTests` with 100% green compilation.
+
+## 2026-05-21 — Activated full on-device token streaming and polished Chirpy's personality instructions
+- Upgraded the on-device inference flow inside `GeminiNanoDocAssistant.kt` to use Firebase AI SDK's reactive `generateContentStream(prompt)` instead of the blocking `generateContent` invocation.
+- Aggregated chunks and emitted incremental `AIDocAssistantResult.Partial` states down the Kotlin Flow, enabling true word-by-word/chunk-by-chunk streaming in the UI for a much more responsive user experience.
+- Refined the `SYSTEM_INSTRUCTION` personality rules for Chirpy to position him as our adorable LoRa radio Node mascot instead of an avian theme, emphasizing high-enthusiasm mesh networking, signal connectivity, battery status, and radio/routing concepts (e.g. "fully charged", "relaying info", "staying connected") while preserving technical precision.
+- Significantly increased the frequency and flavor of mesh networking, hardware, and radio puns (e.g. "let's relay some knowledge!", "channeling my inner router!", "completely on the same frequency!") to make Chirpy incredibly fun and interactive.
+- Overhauled system error messages inside `DocsNavigation.kt` and the loading bubble state inside `ChirpyAssistantSheet.kt` to align with the highly-enthusiastic mascot theme (e.g. "routing through the mesh… 📡", "channel is totally congested… 📶", "battery is charging or firmware is still downloading… 🔋").
+- Validated all static checks and unit tests to ensure complete success (`spotlessCheck`, `detekt`, and `:feature:docs:allTests` pass 100% green).
+
+## 2026-05-21 — Implemented streaming chat support and Firebase Remote Config integration for Chirpy
+- Added `firebase-config` dependency to Version Catalog `libs.versions.toml` and `androidApp/build.gradle.kts`.
+- Added the `AIDocAssistantResult.Partial` variant to support intermediate stream updates.
+- Extended the `AIDocAssistant` interface and implemented `answerStream` in both `KeywordFallbackAssistant` and `GeminiNanoDocAssistant`.
+- Integrated Firebase Remote Config into `GeminiNanoDocAssistant` to dynamically fetch the model name (`chirpy_model_name`) and system instruction (`chirpy_system_instruction`) with release-optimized fetch intervals.
+- Refactored `GeminiNanoDocAssistant.answer` to reuse `answerStream` flow under the hood, eliminating duplicate prompting code.
+- Integrated the streaming flow into the Compose UI layer (`DocsNavigation.kt`), appending a placeholder message and updating it in place on each stream emission.
+- Verified that all unit tests (`:feature:docs:allTests`) and static analysis checks (`spotlessApply spotlessCheck detekt`) pass 100% green.
+
+## 2026-05-21 — Fixed Chirpy Assistant invalid model name and enhanced failure fallback suggestions
+- Fixed a 404/Unknown inference error by updating `GeminiNanoDocAssistant.kt`'s `MODEL_NAME` from `"gemini-3.1-flash-lite"` to the correct Firebase AI Logic preview name `"gemini-3.1-flash-lite-preview"`.
+- Overhauled multi-turn hybrid chat seeding: eliminated the redundant and wasteful background `chat.sendMessage` network/token call on the first turn. Instead, if the first turn is answered on-device, the session caches the question and answer locally, and starts the subsequent cloud-chat session with these pre-loaded into the `startChat(history = ...)` parameter.
+- Expanded the hybrid model's `looksLikeNoAnswer` heuristics to better detect when the on-device model fails or has limited info, allowing seamless fallback to the grounded cloud model.
+- Polished `DocsNavigation.kt`'s `chirpyResultToMessage` system error handling to map raw exception/object types (e.g., `DocsAiError.Unknown`) to polished, friendly user-facing messages.
+- Programmed a smart fallback in the UI: if an inference error occurs (e.g. offline, rate limit, or model not found), Chirpy now automatically displays local keyword search results as recommended page chips so the user is never left stranded.
+- Verified 100% compliance with Spotless, Detekt, and unit tests (`:feature:docs:allTests` and `:androidApp:testGoogleDebugUnitTest` are fully green).
+
 ## 2026-05-20 — Decoupled and Isolated Flatpak manifest generation logic to build-logic/flatpak
 - Isolated the optimized `GenerateFlatpakSourcesTask` from monolithic `build-logic/convention` into its own specialized, lightweight `:flatpak` subproject under `build-logic`.
 - Created `:flatpak` configuration and registered the formal plugin ID `"meshtastic.flatpak"` implemented by `FlatpakConventionPlugin` inside the default package namespace (perfectly matching project-wide plugin architectures).

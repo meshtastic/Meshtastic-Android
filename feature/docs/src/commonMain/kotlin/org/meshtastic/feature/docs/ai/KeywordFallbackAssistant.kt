@@ -38,6 +38,12 @@ class KeywordFallbackAssistant(private val searchEngine: KeywordSearchEngine) : 
         }
     }
 
+    override fun answerStream(
+        question: String,
+        currentPageId: String?,
+    ): kotlinx.coroutines.flow.Flow<AIDocAssistantResult> =
+        kotlinx.coroutines.flow.flow { emit(answer(question, currentPageId)) }
+
     override fun resetSession() {
         /* No-op for keyword fallback */
     }

@@ -33,6 +33,12 @@ interface AIDocAssistant {
     /** Answer a user question about Meshtastic using bundled documentation context. */
     suspend fun answer(question: String, currentPageId: String? = null): AIDocAssistantResult
 
+    /** Answer a user question about Meshtastic, streaming the results as they arrive. */
+    fun answerStream(
+        question: String,
+        currentPageId: String? = null,
+    ): kotlinx.coroutines.flow.Flow<AIDocAssistantResult>
+
     /** Reset the conversation session. Call when starting a new conversation thread. */
     fun resetSession()
 }

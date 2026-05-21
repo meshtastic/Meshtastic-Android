@@ -67,6 +67,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.mikepenz.markdown.m3.Markdown
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.resources.chirpy_assistant_title
+import org.meshtastic.core.resources.chirpy_search_placeholder
+import org.meshtastic.core.resources.chirpy_thinking
 import org.meshtastic.core.resources.img_chirpy
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Send
@@ -94,7 +98,7 @@ fun ChirpyAssistantSheet(
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState, modifier = modifier) {
         Column(modifier = Modifier.fillMaxSize().imePadding().padding(16.dp)) {
             Text(
-                text = "Chirpy Assistant",
+                text = stringResource(CoreRes.string.chirpy_assistant_title),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(bottom = 12.dp),
             )
@@ -126,7 +130,7 @@ fun ChirpyAssistantSheet(
             OutlinedTextField(
                 value = state.draftQuestion,
                 onValueChange = onDraftChange,
-                placeholder = { Text("Ask about Meshtastic…") },
+                placeholder = { Text(stringResource(CoreRes.string.chirpy_search_placeholder)) },
                 singleLine = false,
                 maxLines = 3,
                 shape = RoundedCornerShape(INPUT_CORNER_PERCENT),
@@ -307,7 +311,7 @@ private fun ThinkingBubble(modifier: Modifier = Modifier) {
             modifier = Modifier.padding(horizontal = 8.dp),
         ) {
             Text(
-                text = "Chirpy is thinking…",
+                text = stringResource(CoreRes.string.chirpy_thinking),
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp).alpha(alpha),
             )
