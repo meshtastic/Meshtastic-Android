@@ -14,6 +14,11 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 * chore(deps): update compose.screenshot to v0.0.1-alpha15 (#5565) by renovate[bot] (@renovate[bot]) in [`9daf42708`](https://github.com/meshtastic/Meshtastic-Android/commit/9daf427082f2ddf0ffe3623574cdf74fea2eec91)
 * chore(build): centralize feature CMP dependency wiring (#5567) by James Rich (@jamesarich) in [`a871dad7c`](https://github.com/meshtastic/Meshtastic-Android/commit/a871dad7c1a3d1f3866e1bd87bbebfc5d209b1d7)
 * ai: Add spec kit agent governance extension and related files (#5568) by James Rich (@jamesarich) in [`c32d370f6`](https://github.com/meshtastic/Meshtastic-Android/commit/c32d370f6ad7ac37d7793c91d871efdf2fc52a47)
+* docs: update CHANGELOG.md (#5566) by github-actions[bot] (@github-actions[bot]) in [`f57f7d475`](https://github.com/meshtastic/Meshtastic-Android/commit/f57f7d4753907074c2155a447381fbc00f734f4d)
+* ci: disable automatic AI triage workflows (#5569) by James Rich (@jamesarich) in [`45608ced7`](https://github.com/meshtastic/Meshtastic-Android/commit/45608ced70f78f1254736081086674df864429b0)
+* feat: node list density switching with compact layout and field toggles (#5444) by James Rich (@jamesarich) in [`5d9e71da3`](https://github.com/meshtastic/Meshtastic-Android/commit/5d9e71da39d7f85082a610633a81e185ab23c622)
+* chore(deps): update core/proto/src/main/proto digest to 59cb394 (#5571) by renovate[bot] (@renovate[bot]) in [`c56432bf0`](https://github.com/meshtastic/Meshtastic-Android/commit/c56432bf020968b52079e3324e28be735a3258a3)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5563) by James Rich (@jamesarich) in [`479ed4f7f`](https://github.com/meshtastic/Meshtastic-Android/commit/479ed4f7fcb4b2a6a1d189c1c4d62557880c4e51)
 
 ### Open Beta (v2.7.14-open.10)
 Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.13):
