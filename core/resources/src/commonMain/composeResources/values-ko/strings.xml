@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
     <string name="accept">수락</string>
     <!-- ACTION -->
     <string name="actions">작업</string>
@@ -84,6 +85,7 @@
     <string name="channel_label">채널</string>
     <string name="channel_name">채널명</string>
     <string name="channels">채널</string>
+    <!-- CHIRPY -->
     <string name="choose_theme">테마 선택</string>
     <!-- CLEAN -->
     <string name="clear">삭제</string>
@@ -338,6 +340,9 @@
     <string name="node_filter_placeholder">필터</string>
     <string name="node_filter_title">필터</string>
     <string name="node_id">노드 ID</string>
+    <string name="node_layout_channel">채널</string>
+    <string name="node_layout_hops_away">Hops 수</string>
+    <string name="node_layout_power">전원</string>
     <string name="node_number">노드 번호</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_button">노드 정렬</string>

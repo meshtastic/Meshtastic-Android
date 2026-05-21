@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">Meddelande från %1$s: %2$s</string>
     <string name="accept">Acceptera</string>
@@ -128,6 +129,7 @@
     <string name="channel_name">Kanalnamn</string>
     <string name="channel_url">Kanal-URL</string>
     <string name="channels">Kanaler</string>
+    <!-- CHIRPY -->
     <string name="chirpy">Chirpy</string>
     <string name="choose_contrast">Kontrastnivå</string>
     <string name="choose_theme">Välj tema</string>
@@ -672,6 +674,10 @@
     <string name="node_filter_show_ignored">Visa endast ignorerade noder</string>
     <string name="node_filter_title">Filtrera på</string>
     <string name="node_id">Nod-ID</string>
+    <string name="node_layout_channel">Kanal</string>
+    <string name="node_layout_hops_away">Hopp bort</string>
+    <string name="node_layout_log_icons">Miljövärden</string>
+    <string name="node_layout_power">Ström</string>
     <string name="node_number">Nodnummer</string>
     <string name="node_sort_alpha">A-Ö</string>
     <string name="node_sort_button">Sorteringsalternativ för noder</string>

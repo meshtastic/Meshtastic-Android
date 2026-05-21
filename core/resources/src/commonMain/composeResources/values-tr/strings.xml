@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
     <string name="accept">Kabul et</string>
     <!-- ACTION -->
     <string name="action_delete_message">Mesajı sil</string>
@@ -89,6 +90,7 @@
     <string name="channel_label">Kanal</string>
     <string name="channel_name">Kanal Adı</string>
     <string name="channels">Kanallar</string>
+    <!-- CHIRPY -->
     <string name="choose_theme">Tema seçin</string>
     <!-- CLEAN -->
     <string name="clear">Temizle</string>
@@ -348,6 +350,9 @@
     <string name="node_filter_include_unknown">Bilinmeyenleri dahil et</string>
     <string name="node_filter_placeholder">Filtre</string>
     <string name="node_id">Düğüm ID</string>
+    <string name="node_layout_channel">Kanal</string>
+    <string name="node_layout_hops_away">Atlama Üzerinden</string>
+    <string name="node_layout_power">Güç</string>
     <string name="node_number">Düğüm Numarası</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_button">Düğüm sıralama seçenekleri</string>

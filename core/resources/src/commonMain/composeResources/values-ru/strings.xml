@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">От %1$s: %2$s</string>
     <string name="accept">Принять</string>
@@ -138,6 +139,7 @@
     <string name="channel_url">URL канала</string>
     <string name="channel_utilization">ChUtil</string>
     <string name="channels">Каналы</string>
+    <!-- CHIRPY -->
     <string name="chirpy">Щебетун</string>
     <string name="choose_contrast">Уровень контрастности</string>
     <string name="choose_theme">Выберите тему</string>
@@ -826,6 +828,10 @@
     <string name="node_filter_show_ignored">Показать только игнорируемые ноды</string>
     <string name="node_filter_title">Фильтр по</string>
     <string name="node_id">ID ноды</string>
+    <string name="node_layout_channel">Канал</string>
+    <string name="node_layout_hops_away">Прыжков</string>
+    <string name="node_layout_log_icons">Метрики окружения</string>
+    <string name="node_layout_power">Питание</string>
     <string name="node_number">Номер ноды</string>
     <string name="node_sort_alpha">А-Я</string>
     <string name="node_sort_button">Варианты сортировки нод</string>

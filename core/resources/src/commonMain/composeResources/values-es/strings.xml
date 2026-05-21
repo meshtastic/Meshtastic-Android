@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
     <string name="accept">Aceptar</string>
     <string name="acknowledgements">Agradecimientos</string>
     <!-- ACTION -->
@@ -109,6 +110,7 @@
     <string name="channel_label">Canal</string>
     <string name="channel_name">Nombre del canal</string>
     <string name="channels">Canales</string>
+    <!-- CHIRPY -->
     <string name="choose_theme">Elegir tema</string>
     <!-- CLEAN -->
     <string name="clean_node_database_confirmation">Esto eliminará los nodos %1$d de su base de datos. Esta acción no se puede deshacer.</string>
@@ -538,6 +540,10 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="node_filter_show_ignored">Solo mostrar nodos ignorados</string>
     <string name="node_filter_title">Filtrar por</string>
     <string name="node_id">Identificación del nodo</string>
+    <string name="node_layout_channel">Canal</string>
+    <string name="node_layout_hops_away">Saltos de distancia</string>
+    <string name="node_layout_log_icons">Métricas de Entorno</string>
+    <string name="node_layout_power">Consumo</string>
     <string name="node_number">Número del nodo</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_button">Opciones de orden de Nodos</string>
