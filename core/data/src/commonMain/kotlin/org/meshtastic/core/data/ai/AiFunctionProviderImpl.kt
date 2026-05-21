@@ -85,13 +85,18 @@ class AiFunctionProviderImpl(
             val key = (contactKey as ResolvedContact.Resolved).contactKey
 
             // Send via existing use case and capture the generated messageId
-            val messageId = sendMessageUseCase.invoke(text, key)
+            try {
+                val messageId = sendMessageUseCase.invoke(text, key)
 
-            SendMessageResult.Success(
-                messageId = messageId,
-                channel = contactKey.channelName,
-                timestamp = clock.now().toEpochMilliseconds(),
-            )
+                SendMessageResult.Success(
+                    messageId = messageId,
+                    channel = contactKey.channelName,
+                    timestamp = clock.now().toEpochMilliseconds(),
+                )
+            } catch (@Suppress("TooGenericExceptionCaught") ex: Exception) {
+                if (ex is CancellationException) throw ex
+                SendMessageResult.InvalidArgument("Failed to send message: ${ex.message}")
+            }
         }
 
     override suspend fun getMeshStatus(): MeshStatusResult = withTimeout(OPERATION_TIMEOUT) {

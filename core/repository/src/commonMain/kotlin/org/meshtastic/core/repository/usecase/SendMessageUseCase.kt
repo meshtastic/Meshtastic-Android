@@ -129,6 +129,7 @@ class SendMessageUseCaseImpl(
             messageQueue.enqueue(packetId)
         } catch (ex: Exception) {
             Logger.e(ex) { "Failed to enqueue message packet" }
+            throw ex
         }
 
         return packetId
