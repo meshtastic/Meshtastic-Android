@@ -16,17 +16,14 @@
  */
 package org.meshtastic.feature.docs.ui
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -48,15 +45,12 @@ import com.mikepenz.markdown.compose.elements.MarkdownTableHeader
 import com.mikepenz.markdown.compose.elements.MarkdownTableRow
 import com.mikepenz.markdown.m3.Markdown
 import com.mikepenz.markdown.model.markdownDimens
-import org.jetbrains.compose.resources.painterResource
-import org.meshtastic.core.resources.img_chirpy
 import org.meshtastic.core.ui.icon.ArrowBack
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.feature.docs.model.AIDocAssistantSessionState
 import org.meshtastic.feature.docs.model.DocPageContent
 import org.meshtastic.feature.docs.model.ModelReadiness
 import org.meshtastic.feature.docs.model.TranslationSource
-import org.meshtastic.core.resources.Res as CoreRes
 
 /** Routes a page ID to the appropriate page renderer surface. */
 @Suppress("LongMethod", "LongParameterList")
@@ -113,13 +107,7 @@ fun DocsPageRouteScreen(
         },
         floatingActionButton = {
             if (isAiSupported) {
-                FloatingActionButton(onClick = onChirpyToggle) {
-                    Image(
-                        painter = painterResource(CoreRes.drawable.img_chirpy),
-                        contentDescription = "Ask Chirpy",
-                        modifier = Modifier.size(32.dp),
-                    )
-                }
+                ChirpyFab(modelReadiness = modelReadiness, onClick = onChirpyToggle)
             }
         },
         modifier = modifier,

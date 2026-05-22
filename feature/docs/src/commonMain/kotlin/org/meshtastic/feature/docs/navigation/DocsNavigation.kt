@@ -116,9 +116,9 @@ private fun rememberChirpyState(
     // Trigger initial availability check and model download.
     LaunchedEffect(Unit) { isSupported = aiAssistant.isSupported() }
 
-    // Update isSupported when modelReadiness changes to Available.
+    // Show FAB for any non-Unavailable state so the expressive FAB can communicate progress.
     LaunchedEffect(modelReadiness) {
-        if (modelReadiness is ModelReadiness.Available) {
+        if (modelReadiness !is ModelReadiness.Unavailable) {
             isSupported = true
         }
     }
@@ -221,8 +221,15 @@ private fun AutoIntroduceChirpy(
     val currentOnUpdateSessionState by androidx.compose.runtime.rememberUpdatedState(onUpdateSessionState)
     val currentSessionState by androidx.compose.runtime.rememberUpdatedState(sessionState)
 
-    LaunchedEffect(showSheet) {
-        if (showSheet && currentSessionState.messages.isEmpty() && !currentSessionState.isLoading) {
+    val modelStatus by aiAssistant.modelStatus.collectAsState()
+
+    LaunchedEffect(showSheet, modelStatus) {
+        if (
+            showSheet &&
+            modelStatus is ModelReadiness.Available &&
+            currentSessionState.messages.isEmpty() &&
+            !currentSessionState.isLoading
+        ) {
             aiAssistant.resetSession()
             currentOnUpdateSessionState(currentSessionState.copy(isLoading = true))
             val result = aiAssistant.answer(CHIRPY_INTRO_PROMPT, currentPageId = currentPageId)

@@ -71,6 +71,9 @@ import com.mikepenz.markdown.m3.Markdown
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.chirpy_assistant_title
+import org.meshtastic.core.resources.chirpy_checking
+import org.meshtastic.core.resources.chirpy_downloading
+import org.meshtastic.core.resources.chirpy_downloading_subtitle
 import org.meshtastic.core.resources.chirpy_search_placeholder
 import org.meshtastic.core.resources.chirpy_thinking
 import org.meshtastic.core.resources.img_chirpy
@@ -188,7 +191,7 @@ private fun ChirpyCheckingSheet(onDismiss: () -> Unit, modifier: Modifier = Modi
         Column(modifier = Modifier.fillMaxWidth().padding(32.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             CircularProgressIndicator(modifier = Modifier.size(32.dp))
             Spacer(modifier = Modifier.height(16.dp))
-            Text("Checking Chirpy availability…", style = MaterialTheme.typography.bodyMedium)
+            Text(stringResource(CoreRes.string.chirpy_checking), style = MaterialTheme.typography.bodyMedium)
         }
     }
 }
@@ -210,7 +213,7 @@ private fun ChirpyDownloadingSheet(
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                "Chirpy is downloading… 📡",
+                stringResource(CoreRes.string.chirpy_downloading),
                 style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Center,
             )
@@ -232,7 +235,7 @@ private fun ChirpyDownloadingSheet(
             }
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                "This only happens once. Chirpy will be ready soon!",
+                stringResource(CoreRes.string.chirpy_downloading_subtitle),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,

@@ -203,17 +203,23 @@ class GeminiNanoDocAssistant(
             }
             try {
                 val accumulatedText = StringBuilder()
+                var lastEmitTime = 0L
                 onDeviceModel.generateContentStream(prompt).collect { chunk ->
                     val text = chunk.text
                     if (!text.isNullOrEmpty()) {
                         accumulatedText.append(text)
-                        emit(
-                            AIDocAssistantResult.Partial(
-                                answer = cleanResponse(accumulatedText.toString()),
-                                sourcePages = contextPages,
-                                usedOnDeviceModel = true,
-                            ),
-                        )
+                        val now = System.nanoTime()
+                        val elapsedMs = (now - lastEmitTime) / 1_000_000
+                        if (elapsedMs >= STREAM_THROTTLE_MS) {
+                            lastEmitTime = now
+                            emit(
+                                AIDocAssistantResult.Partial(
+                                    answer = cleanResponse(accumulatedText.toString()),
+                                    sourcePages = contextPages,
+                                    usedOnDeviceModel = true,
+                                ),
+                            )
+                        }
                     }
                     // Log token usage from last chunk
                     chunk.usageMetadata?.let { meta ->
@@ -222,6 +228,14 @@ class GeminiNanoDocAssistant(
                         }
                     }
                 }
+                // Emit final partial to ensure UI has the complete text before Success
+                emit(
+                    AIDocAssistantResult.Partial(
+                        answer = cleanResponse(accumulatedText.toString()),
+                        sourcePages = contextPages,
+                        usedOnDeviceModel = true,
+                    ),
+                )
                 val onDeviceAnswer = cleanResponse(accumulatedText.toString().trimEnd())
 
                 val mentionedPages =
@@ -573,6 +587,9 @@ Guidelines:
 
         /** Initial backoff delay in milliseconds (doubles each retry). */
         private const val INITIAL_BACKOFF_MS = 500L
+
+        /** Minimum interval between partial stream emissions to avoid UI jank. */
+        private const val STREAM_THROTTLE_MS = 80L
 
         // Scoring weights for page ranking
         private const val CONTENT_MATCH_SCORE = 3
