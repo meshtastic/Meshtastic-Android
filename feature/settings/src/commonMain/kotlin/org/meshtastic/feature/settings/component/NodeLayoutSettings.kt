@@ -23,6 +23,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
@@ -171,7 +173,12 @@ fun NodeLayoutSettings(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(start = 16.dp, top = 12.dp, bottom = 8.dp),
             )
-            Column(modifier = Modifier.fillMaxWidth()) {
+            Card(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                ),
+            ) {
                 SwitchPreference(
                     title = stringResource(Res.string.node_layout_power),
                     checked = state.showPower,
@@ -221,6 +228,7 @@ fun NodeLayoutSettings(
                     onCheckedChange = onShowRoleChange,
                 )
             }
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }

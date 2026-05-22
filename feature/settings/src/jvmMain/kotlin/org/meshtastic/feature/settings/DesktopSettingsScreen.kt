@@ -52,6 +52,7 @@ import org.meshtastic.core.resources.help_and_documentation
 import org.meshtastic.core.resources.info
 import org.meshtastic.core.resources.modules_already_unlocked
 import org.meshtastic.core.resources.modules_unlocked
+import org.meshtastic.core.resources.node_layout_section_title
 import org.meshtastic.core.resources.preferences_language
 import org.meshtastic.core.resources.remotely_administrating
 import org.meshtastic.core.resources.theme
