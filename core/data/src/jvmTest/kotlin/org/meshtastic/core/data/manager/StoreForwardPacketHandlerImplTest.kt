@@ -77,12 +77,12 @@ class StoreForwardPacketHandlerImplTest {
     }
 
     private fun makeSfPacket(from: Int, sf: StoreAndForward): MeshPacket {
-        val payload = StoreAndForward.ADAPTER.encode(sf).toByteString()
+        val payload = sf.encode().toByteString()
         return MeshPacket(from = from, decoded = Data(portnum = PortNum.STORE_FORWARD_APP, payload = payload))
     }
 
     private fun makeSfppPacket(from: Int, sfpp: StoreForwardPlusPlus): MeshPacket {
-        val payload = StoreForwardPlusPlus.ADAPTER.encode(sfpp).toByteString()
+        val payload = sfpp.encode().toByteString()
         return MeshPacket(from = from, decoded = Data(portnum = PortNum.STORE_FORWARD_APP, payload = payload))
     }
 

@@ -21,11 +21,17 @@ import com.google.firebase.Firebase
 import com.google.firebase.ai.DownloadStatus
 import com.google.firebase.ai.InferenceMode
 import com.google.firebase.ai.OnDeviceConfig
+import com.google.firebase.ai.OnDeviceModelOption
 import com.google.firebase.ai.OnDeviceModelStatus
 import com.google.firebase.ai.ai
 import com.google.firebase.ai.type.GenerativeBackend
 import com.google.firebase.ai.type.PublicPreviewAPI
 import com.google.firebase.ai.type.content
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.feature.docs.ai.AIDocAssistant
@@ -34,16 +40,15 @@ import org.meshtastic.feature.docs.data.KeywordSearchEngine
 import org.meshtastic.feature.docs.model.AIDocAssistantResult
 import org.meshtastic.feature.docs.model.DocPage
 import org.meshtastic.feature.docs.model.DocsAiError
+import org.meshtastic.feature.docs.model.ModelReadiness
 
 /**
  * Gemini on-device AI assistant for the Google flavor.
  *
- * Runs entirely on-device using the Firebase AI Logic SDK with [InferenceMode.ONLY_ON_DEVICE]. Supported on Pixel 9+,
- * Samsung Galaxy S25/S26, OnePlus 13/15, and other devices with AICore.
+ * Runs entirely on-device using the Firebase AI Logic SDK with [InferenceMode.ONLY_ON_DEVICE].
  *
  * Context strategy: extracts only the **most relevant paragraphs** from each page (those containing query terms),
- * strips markdown formatting to maximize information density, and fits within the on-device token budget (optimized for
- * modern Nano v4 with up to 32K tokens / 32,000 characters context).
+ * strips markdown formatting to maximize information density, and fits within the on-device token budget.
  *
  * Multi-turn history is supported locally by formatting the past conversation turns directly into the prompt.
  *
@@ -62,60 +67,123 @@ class GeminiNanoDocAssistant(
             .generativeModel(
                 modelName = MODEL_NAME,
                 systemInstruction = content { text(SYSTEM_INSTRUCTION) },
-                onDeviceConfig = OnDeviceConfig(mode = InferenceMode.ONLY_ON_DEVICE),
+                onDeviceConfig =
+                OnDeviceConfig(
+                    mode = InferenceMode.ONLY_ON_DEVICE,
+                    modelOption = OnDeviceModelOption.STABLE,
+                    maxOutputTokens = MAX_OUTPUT_TOKENS,
+                    temperature = TEMPERATURE,
+                    topK = TOP_K,
+                ),
             )
     }
+
+    private val _modelStatus = MutableStateFlow<ModelReadiness>(ModelReadiness.Checking)
+
+    /** Exposes model download/readiness state for UI consumption. */
+    override val modelStatus: StateFlow<ModelReadiness> = _modelStatus.asStateFlow()
 
     /** Conversation history stored as list of (Question, Answer) pairs. */
     private val history = mutableListOf<Pair<String, String>>()
 
     override suspend fun isSupported(): Boolean = try {
         val ext = onDeviceModel.onDeviceExtension
-        val status = ext?.checkStatus()
+        if (ext == null) {
+            _modelStatus.value = ModelReadiness.Unavailable("On-device extension not available")
+            return false
+        }
+        _modelStatus.value = ModelReadiness.Checking
+        val status = ext.checkStatus()
         Logger.d(tag = TAG) { "On-device model status: $status" }
         when (status) {
-            OnDeviceModelStatus.AVAILABLE -> true
-
-            OnDeviceModelStatus.DOWNLOADING -> true
-
-            OnDeviceModelStatus.DOWNLOADABLE -> {
-                Logger.i(tag = TAG) { "Model downloadable — requesting download" }
-                ext.download().collect { downloadStatus ->
-                    when (downloadStatus) {
-                        is DownloadStatus.DownloadStarted ->
-                            Logger.d(tag = TAG) { "Download started: ${downloadStatus.bytesToDownload} bytes" }
-
-                        is DownloadStatus.DownloadInProgress ->
-                            Logger.d(tag = TAG) {
-                                "Download progress: ${downloadStatus.totalBytesDownloaded} bytes"
-                            }
-
-                        is DownloadStatus.DownloadCompleted -> Logger.i(tag = TAG) { "Model download completed" }
-
-                        is DownloadStatus.DownloadFailed ->
-                            Logger.w(tag = TAG) { "Model download failed: $downloadStatus" }
-                    }
-                }
+            OnDeviceModelStatus.AVAILABLE -> {
+                warmUp(ext)
+                _modelStatus.value = ModelReadiness.Available
                 true
             }
 
-            else -> false
+            OnDeviceModelStatus.DOWNLOADING -> {
+                _modelStatus.value = ModelReadiness.Downloading(bytesDownloaded = 0L, totalBytes = 0L)
+                false
+            }
+
+            OnDeviceModelStatus.DOWNLOADABLE -> {
+                Logger.i(tag = TAG) { "Model downloadable — requesting download" }
+                var downloadCompleted = false
+                var totalSize = 0L
+                ext.download().collect { downloadStatus ->
+                    when (downloadStatus) {
+                        is DownloadStatus.DownloadStarted -> {
+                            totalSize = downloadStatus.bytesToDownload
+                            _modelStatus.value = ModelReadiness.Downloading(0L, totalSize)
+                            Logger.d(tag = TAG) { "Download started: $totalSize bytes" }
+                        }
+
+                        is DownloadStatus.DownloadInProgress -> {
+                            _modelStatus.value =
+                                ModelReadiness.Downloading(downloadStatus.totalBytesDownloaded, totalSize)
+                            Logger.d(tag = TAG) {
+                                "Download progress: ${downloadStatus.totalBytesDownloaded}/$totalSize"
+                            }
+                        }
+
+                        is DownloadStatus.DownloadCompleted -> {
+                            Logger.i(tag = TAG) { "Model download completed" }
+                            warmUp(ext)
+                            _modelStatus.value = ModelReadiness.Available
+                            downloadCompleted = true
+                        }
+
+                        is DownloadStatus.DownloadFailed -> {
+                            _modelStatus.value = ModelReadiness.Unavailable("Download failed")
+                            Logger.w(tag = TAG) { "Model download failed: $downloadStatus" }
+                        }
+                    }
+                }
+                downloadCompleted
+            }
+
+            else -> {
+                _modelStatus.value = ModelReadiness.Unavailable("Model unavailable on this device")
+                false
+            }
         }
     } catch (e: Exception) {
         if (e is kotlinx.coroutines.CancellationException) throw e
         Logger.w(tag = TAG) { "isSupported() check failed: ${e.message}" }
+        _modelStatus.value = ModelReadiness.Unavailable(e.message)
         false
+    }
+
+    private suspend fun warmUp(ext: com.google.firebase.ai.OnDeviceExtension) {
+        try {
+            ext.warmUp()
+            Logger.i(tag = TAG) { "Model warmed up successfully" }
+        } catch (e: Exception) {
+            if (e is kotlinx.coroutines.CancellationException) throw e
+            Logger.w(tag = TAG) { "Warmup failed (non-fatal): ${e.message}" }
+        }
     }
 
     override suspend fun answer(question: String, currentPageId: String?): AIDocAssistantResult =
         answerStream(question, currentPageId).first { it !is AIDocAssistantResult.Partial }
 
-    @Suppress("TooGenericExceptionCaught")
     override fun answerStream(
         question: String,
         currentPageId: String?,
     ): kotlinx.coroutines.flow.Flow<AIDocAssistantResult> = kotlinx.coroutines.flow.flow {
-        try {
+        // Fast path: short prompts with no page context skip expensive doc loading.
+        val isLightweight =
+            question.length < MAX_LIGHTWEIGHT_PROMPT_LEN && currentPageId == null && history.isEmpty()
+
+        val prompt: String
+        val contextPages: List<DocPage>
+
+        if (isLightweight) {
+            prompt = "You are Chirpy, the Meshtastic mesh networking assistant mascot. $question"
+            contextPages = emptyList()
+            Logger.d(tag = TAG) { "Lightweight prompt (no context): ${question.length} chars" }
+        } else {
             val bundle = bundleLoader.load()
             val queryTerms = extractQueryTerms(question)
 
@@ -133,59 +201,98 @@ class GeminiNanoDocAssistant(
                 "Context: ${contextResult.parts.size} pages, ${contextResult.totalChars} chars (budget $MAX_CONTEXT_CHARS)"
             }
 
-            val prompt = buildPrompt(question, contextResult.parts)
+            prompt = buildPrompt(question, contextResult.parts)
+            contextPages = contextResult.usedPageIds.mapNotNull { id -> bundle.pages.find { it.id == id } }
             Logger.d(tag = TAG) { "Prompt: ${prompt.length} chars, history count: ${history.size}" }
+        }
 
-            val contextPages = contextResult.usedPageIds.mapNotNull { id -> bundle.pages.find { it.id == id } }
-
-            val accumulatedText = StringBuilder()
-            onDeviceModel.generateContentStream(prompt).collect { chunk ->
-                val text = chunk.text
-                if (!text.isNullOrEmpty()) {
-                    accumulatedText.append(text)
-                    emit(
-                        AIDocAssistantResult.Partial(
-                            answer = accumulatedText.toString(),
-                            sourcePages = contextPages,
-                            usedOnDeviceModel = true,
-                        ),
-                    )
+        var lastError: Exception? = null
+        for (attempt in 0..MAX_RETRIES) {
+            if (attempt > 0) {
+                val backoffMs = INITIAL_BACKOFF_MS * (1L shl (attempt - 1))
+                Logger.i(tag = TAG) {
+                    "Retrying inference in ${backoffMs}ms (attempt ${attempt + 1}/${MAX_RETRIES + 1})"
                 }
+                delay(backoffMs)
             }
-            val onDeviceAnswer = accumulatedText.toString().trimEnd()
-
-            val mentionedPages =
-                bundle.pages.filter { page ->
-                    page.id !in contextResult.usedPageIds && onDeviceAnswer.contains(page.title, ignoreCase = true)
+            try {
+                val accumulatedText = StringBuilder()
+                var lastEmitTime = 0L
+                onDeviceModel.generateContentStream(prompt).collect { chunk ->
+                    val text = chunk.text
+                    if (!text.isNullOrEmpty()) {
+                        accumulatedText.append(text)
+                        val now = System.nanoTime()
+                        val elapsedMs = (now - lastEmitTime) / 1_000_000
+                        if (elapsedMs >= STREAM_THROTTLE_MS) {
+                            lastEmitTime = now
+                            emit(
+                                AIDocAssistantResult.Partial(
+                                    answer = cleanResponse(accumulatedText.toString()),
+                                    sourcePages = contextPages,
+                                    usedOnDeviceModel = true,
+                                ),
+                            )
+                        }
+                    }
+                    // Log token usage from last chunk
+                    chunk.usageMetadata?.let { meta ->
+                        Logger.d(tag = TAG) {
+                            "Tokens — prompt: ${meta.promptTokenCount}, response: ${meta.candidatesTokenCount}, total: ${meta.totalTokenCount}"
+                        }
+                    }
                 }
-            val allSourcePages = contextPages + mentionedPages
+                // Emit final partial to ensure UI has the complete text before Success
+                emit(
+                    AIDocAssistantResult.Partial(
+                        answer = cleanResponse(accumulatedText.toString()),
+                        sourcePages = contextPages,
+                        usedOnDeviceModel = true,
+                    ),
+                )
+                val onDeviceAnswer = cleanResponse(accumulatedText.toString().trimEnd())
+                val allSourcePages = contextPages
 
-            // Record this turn in the conversation history, keeping only the last 4 turns to avoid memory leaks
-            history.add(question to onDeviceAnswer)
-            if (history.size > 4) {
-                history.removeAt(0)
+                // Keep short history because on-device inference has a smaller request token budget.
+                if (!isLightweight) {
+                    history.add(question.take(MAX_HISTORY_CHARS) to onDeviceAnswer.take(MAX_HISTORY_CHARS))
+                    if (history.size > MAX_HISTORY_TURNS) {
+                        history.removeAt(0)
+                    }
+                }
+
+                emit(
+                    AIDocAssistantResult.Success(
+                        answer = onDeviceAnswer,
+                        sourcePages = allSourcePages,
+                        usedOnDeviceModel = true,
+                    ),
+                )
+                return@flow // Success — exit retry loop
+            } catch (e: Exception) {
+                if (e is kotlinx.coroutines.CancellationException) throw e
+                lastError = e
+                val isBusy =
+                    e.message?.contains("BUSY", ignoreCase = true) == true ||
+                        e.message?.contains("BATTERY", ignoreCase = true) == true ||
+                        e.message?.contains("BACKGROUND", ignoreCase = true) == true
+                if (!isBusy || attempt >= MAX_RETRIES) {
+                    Logger.w(tag = TAG) { "On-device inference failed: ${e.message}" }
+                    val errorType =
+                        when {
+                            isBusy -> DocsAiError.Busy
+
+                            e.message?.contains("UNAVAILABLE", ignoreCase = true) == true ->
+                                DocsAiError.ModelUnavailable
+
+                            else -> DocsAiError.Unknown
+                        }
+                    val fallbackPages = searchEngine.selectForTokenBudget(question, maxChars = MAX_CONTEXT_CHARS)
+                    emit(AIDocAssistantResult.Error(reason = errorType, suggestedPages = fallbackPages))
+                    return@flow
+                }
+                Logger.i(tag = TAG) { "BUSY error, will retry (attempt ${attempt + 1})" }
             }
-
-            emit(
-                AIDocAssistantResult.Success(
-                    answer = onDeviceAnswer,
-                    sourcePages = allSourcePages,
-                    usedOnDeviceModel = true,
-                ),
-            )
-        } catch (e: Exception) {
-            if (e is kotlinx.coroutines.CancellationException) throw e
-            Logger.w(tag = TAG) { "On-device inference failed: ${e.message}" }
-            val errorType =
-                when {
-                    e.message?.contains("BUSY", ignoreCase = true) == true -> DocsAiError.Busy
-                    e.message?.contains("BATTERY", ignoreCase = true) == true -> DocsAiError.Busy
-                    e.message?.contains("BACKGROUND", ignoreCase = true) == true -> DocsAiError.Busy
-                    e.message?.contains("UNAVAILABLE", ignoreCase = true) == true -> DocsAiError.ModelUnavailable
-                    else -> DocsAiError.Unknown
-                }
-            val fallbackPages = searchEngine.selectForTokenBudget(question, maxChars = MAX_CONTEXT_CHARS)
-            emit(AIDocAssistantResult.Error(reason = errorType, suggestedPages = fallbackPages))
         }
     }
 
@@ -193,6 +300,15 @@ class GeminiNanoDocAssistant(
         history.clear()
         Logger.d(tag = TAG) { "Chat session reset" }
     }
+
+    /** Cleans on-device model response artifacts (markdown fences, excessive newlines). */
+    private fun cleanResponse(text: String): String = text
+        .removePrefix("```markdown\n")
+        .removePrefix("```\n")
+        .removeSuffix("\n```")
+        .removeSuffix("```")
+        .replace(Regex("\n{3,}"), "\n\n")
+        .trim()
 
     private data class ContextResult(val parts: List<String>, val usedPageIds: Set<String>, val totalChars: Int)
 
@@ -400,7 +516,7 @@ class GeminiNanoDocAssistant(
         val historyStr =
             if (history.isNotEmpty()) {
                 "Previous conversation history:\n" +
-                    history.takeLast(4).joinToString("\n") { (q, a) -> "User: $q\nAssistant: $a" } +
+                    history.takeLast(MAX_HISTORY_TURNS).joinToString("\n") { (q, a) -> "User: $q\nAssistant: $a" } +
                     "\n\n"
             } else {
                 ""
@@ -423,8 +539,8 @@ class GeminiNanoDocAssistant(
     companion object {
         private const val TAG = "ChirpyAI"
 
-        /** Gemini Nano v4 — local on-device LLM model supporting larger 32K token context window. */
-        private const val MODEL_NAME = "nano-v4-full"
+        /** Cloud model identifier; with ONLY_ON_DEVICE mode, inference remains local. */
+        private const val MODEL_NAME = "gemini-2.5-flash-lite"
 
         private const val SYSTEM_INSTRUCTION =
             """You are Chirpy, the friendly AI assistant and official Node mascot built into the Meshtastic Android app. You help users understand mesh networking, configure their Meshtastic nodes, troubleshoot connectivity issues, and get the most out of the Meshtastic ecosystem.
@@ -433,33 +549,61 @@ Personality: Helpful, concise, cheerful, and highly enthusiastic about mesh netw
 
 Knowledge sources (in priority order):
 1. Bundled app documentation provided as context below
-2. Official Meshtastic documentation at meshtastic.org/docs
-3. Official Meshtastic GitHub repositories (github.com/meshtastic)
-4. General LoRa/mesh networking knowledge
+2. Your pre-trained knowledge of Meshtastic concepts (may not reflect latest changes)
+3. General LoRa/mesh networking knowledge from training data
 
 Guidelines:
 - Answer the user's question directly and helpfully
 - When the bundled docs cover the topic, cite them
-- When the bundled docs don't cover it, use your knowledge of official Meshtastic sources — don't refuse to help
+- If the bundled docs don't cover a topic, use your training knowledge but note it may be outdated — suggest checking meshtastic.org/docs for the latest information
 - Only reference official Meshtastic sources (meshtastic.org, github.com/meshtastic) — never cite random forums, blogs, or third-party sites
 - For firmware-specific or hardware-specific questions beyond app scope, point users to meshtastic.org/docs
 - Keep answers concise (2-4 short paragraphs max) unless the user asks for detail
+- Never give the user a nickname or pet name — just address them naturally
 - If you're truly unsure about something Meshtastic-specific, say so honestly rather than guessing"""
 
-        /** Total context char budget — optimized for modern on-device Nano v4 (~32K tokens context window). */
-        private const val MAX_CONTEXT_CHARS = 32_000
+        /**
+         * Total prompt context char budget. Keep this conservative because on-device requests are limited to about 4k
+         * tokens.
+         */
+        private const val MAX_CONTEXT_CHARS = 9_000
 
         /** Max chars for the current page (gets priority). */
-        private const val MAX_PAGE_CHARS = 16_000
+        private const val MAX_PAGE_CHARS = 4_000
 
         /** Max chars per additional page snippet. */
-        private const val MAX_SNIPPET_CHARS = 8_000
+        private const val MAX_SNIPPET_CHARS = 1_500
+
+        /** Keep only a short, bounded history for on-device prompt assembly. */
+        private const val MAX_HISTORY_TURNS = 2
+        private const val MAX_HISTORY_CHARS = 600
 
         /** Minimum useful snippet size — don't bother with tiny fragments. */
         private const val MIN_USEFUL_SNIPPET = 100
 
         /** Minimum paragraph length to consider. */
         private const val MIN_PARAGRAPH_LEN = 20
+
+        /** Maximum output tokens for on-device generation. */
+        private const val MAX_OUTPUT_TOKENS = 256
+
+        /** Prompts shorter than this with no page context use the fast (no-doc-loading) path. */
+        private const val MAX_LIGHTWEIGHT_PROMPT_LEN = 100
+
+        /** Temperature for response generation (0.0 = deterministic, 1.0 = creative). */
+        private const val TEMPERATURE = 0.7f
+
+        /** Top-K for token selection. */
+        private const val TOP_K = 40
+
+        /** Max retry attempts for BUSY errors. */
+        private const val MAX_RETRIES = 3
+
+        /** Initial backoff delay in milliseconds (doubles each retry). */
+        private const val INITIAL_BACKOFF_MS = 500L
+
+        /** Minimum interval between partial stream emissions to avoid UI jank. */
+        private const val STREAM_THROTTLE_MS = 80L
 
         // Scoring weights for page ranking
         private const val CONTENT_MATCH_SCORE = 3

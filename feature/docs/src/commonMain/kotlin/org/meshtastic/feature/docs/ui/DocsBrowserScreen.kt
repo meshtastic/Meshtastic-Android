@@ -16,7 +16,6 @@
  */
 package org.meshtastic.feature.docs.ui
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -24,12 +23,10 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -46,14 +43,12 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import org.jetbrains.compose.resources.painterResource
-import org.meshtastic.core.resources.img_chirpy
 import org.meshtastic.core.ui.icon.ArrowBack
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.feature.docs.model.AIDocAssistantSessionState
 import org.meshtastic.feature.docs.model.DocPage
 import org.meshtastic.feature.docs.model.DocSection
-import org.meshtastic.core.resources.Res as CoreRes
+import org.meshtastic.feature.docs.model.ModelReadiness
 
 /** Main documentation browser screen showing a grouped TOC. */
 @Suppress("LongMethod", "LongParameterList")
@@ -68,6 +63,7 @@ fun DocsBrowserScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     isAiSupported: Boolean = false,
+    modelReadiness: ModelReadiness = ModelReadiness.Checking,
     showFab: Boolean = false,
     showChirpy: Boolean = false,
     chirpyState: AIDocAssistantSessionState = AIDocAssistantSessionState(),
@@ -90,13 +86,7 @@ fun DocsBrowserScreen(
         },
         floatingActionButton = {
             if (isAiSupported && showFab) {
-                FloatingActionButton(onClick = onChirpyToggle) {
-                    Image(
-                        painter = painterResource(CoreRes.drawable.img_chirpy),
-                        contentDescription = "Ask Chirpy",
-                        modifier = Modifier.size(32.dp),
-                    )
-                }
+                ChirpyFab(modelReadiness = modelReadiness, onClick = onChirpyToggle)
             }
         },
         modifier = modifier,
@@ -146,7 +136,7 @@ fun DocsBrowserScreen(
         if (showChirpy) {
             ChirpyAssistantSheet(
                 state = chirpyState,
-                isSupported = isAiSupported,
+                modelReadiness = modelReadiness,
                 onDraftChange = onChirpyDraftChange,
                 onSubmit = onChirpySubmit,
                 onDismiss = onChirpyDismiss,

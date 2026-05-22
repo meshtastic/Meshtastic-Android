@@ -20,6 +20,7 @@ import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -56,6 +57,7 @@ import org.meshtastic.feature.docs.model.ChirpyRole
 import org.meshtastic.feature.docs.model.DocPage
 import org.meshtastic.feature.docs.model.DocPageContent
 import org.meshtastic.feature.docs.model.DocsAiError
+import org.meshtastic.feature.docs.model.ModelReadiness
 import org.meshtastic.feature.docs.model.SourceRef
 import org.meshtastic.feature.docs.model.TranslationSource
 import org.meshtastic.feature.docs.translation.DocTranslationService
@@ -86,6 +88,7 @@ fun EntryProviderScope<NavKey>.docsEntries(backStack: NavBackStack<NavKey>) {
 /** All Chirpy UI state needed by screen composables. */
 class ChirpyUiState(
     val isSupported: Boolean,
+    val modelReadiness: ModelReadiness,
     val showFab: Boolean,
     val showSheet: Boolean,
     val sessionState: org.meshtastic.feature.docs.model.AIDocAssistantSessionState,
@@ -107,14 +110,16 @@ private fun rememberChirpyState(
     val holder = koinInject<ChirpySessionHolder>()
     val scope = rememberCoroutineScope()
 
+    val modelReadiness by aiAssistant.modelStatus.collectAsState()
     var isSupported by remember { mutableStateOf(false) }
 
-    // Poll for AI availability.
-    LaunchedEffect(Unit) {
-        repeat(AI_SUPPORT_CHECK_RETRIES) {
-            isSupported = aiAssistant.isSupported()
-            if (isSupported) return@LaunchedEffect
-            kotlinx.coroutines.delay(AI_SUPPORT_CHECK_INTERVAL_MS)
+    // Trigger initial availability check and model download.
+    LaunchedEffect(Unit) { isSupported = aiAssistant.isSupported() }
+
+    // Show FAB for any non-Unavailable state so the expressive FAB can communicate progress.
+    LaunchedEffect(modelReadiness) {
+        if (modelReadiness !is ModelReadiness.Unavailable) {
+            isSupported = true
         }
     }
 
@@ -123,7 +128,6 @@ private fun rememberChirpyState(
         showSheet = holder.showSheet,
         sessionState = holder.sessionState,
         aiAssistant = aiAssistant,
-        currentPageId = currentPageId,
         onUpdateSessionState = { holder.sessionState = it },
     )
 
@@ -189,6 +193,7 @@ private fun rememberChirpyState(
 
     return ChirpyUiState(
         isSupported = isSupported,
+        modelReadiness = modelReadiness,
         showFab = showFab,
         showSheet = holder.showSheet,
         sessionState = holder.sessionState,
@@ -209,17 +214,23 @@ private fun AutoIntroduceChirpy(
     showSheet: Boolean,
     sessionState: org.meshtastic.feature.docs.model.AIDocAssistantSessionState,
     aiAssistant: AIDocAssistant,
-    currentPageId: String?,
     onUpdateSessionState: (org.meshtastic.feature.docs.model.AIDocAssistantSessionState) -> Unit,
 ) {
     val currentOnUpdateSessionState by androidx.compose.runtime.rememberUpdatedState(onUpdateSessionState)
     val currentSessionState by androidx.compose.runtime.rememberUpdatedState(sessionState)
 
-    LaunchedEffect(showSheet) {
-        if (showSheet && currentSessionState.messages.isEmpty() && !currentSessionState.isLoading) {
+    val modelStatus by aiAssistant.modelStatus.collectAsState()
+
+    LaunchedEffect(showSheet, modelStatus) {
+        if (
+            showSheet &&
+            modelStatus is ModelReadiness.Available &&
+            currentSessionState.messages.isEmpty() &&
+            !currentSessionState.isLoading
+        ) {
             aiAssistant.resetSession()
             currentOnUpdateSessionState(currentSessionState.copy(isLoading = true))
-            val result = aiAssistant.answer(CHIRPY_INTRO_PROMPT, currentPageId = currentPageId)
+            val result = aiAssistant.answer(CHIRPY_INTRO_PROMPT, currentPageId = null)
             val introMsg = chirpyResultToMessage(result)
             currentOnUpdateSessionState(
                 currentSessionState.copy(messages = currentSessionState.messages + introMsg, isLoading = false),
@@ -266,6 +277,7 @@ private fun DocsHelpScreen(backStack: NavBackStack<NavKey>, chirpy: ChirpyUiStat
         onSelectPage = { pageId -> backStack.add(SettingsRoute.HelpDocPage(pageId)) },
         onBack = { backStack.removeLastOrNull() },
         isAiSupported = chirpy.isSupported,
+        modelReadiness = chirpy.modelReadiness,
         showFab = chirpy.showFab,
         showChirpy = chirpy.showSheet,
         chirpyState = chirpy.sessionState,
@@ -351,6 +363,7 @@ private fun DocsPageScreen(pageId: String, backStack: NavBackStack<NavKey>, chir
         translationSource = translationSource,
         isNonEnglish = locale != "en",
         isAiSupported = chirpy.isSupported,
+        modelReadiness = chirpy.modelReadiness,
         showChirpy = chirpy.showSheet,
         chirpyState = chirpy.sessionState,
         onChirpyToggle = chirpy.onToggle,
@@ -365,14 +378,10 @@ private fun DocsPageScreen(pageId: String, backStack: NavBackStack<NavKey>, chir
 
 // ── Constants & helpers ─────────────────────────────────────────────────────────
 
-/** How often to re-check AI model availability while waiting for download. */
-private const val AI_SUPPORT_CHECK_INTERVAL_MS = 3_000L
-
-/** Maximum number of AI support checks before giving up. */
-private const val AI_SUPPORT_CHECK_RETRIES = 15
-
-/** Prompt sent automatically when the Chirpy sheet opens to generate a natural introduction. */
-private const val CHIRPY_INTRO_PROMPT = "Introduce yourself briefly. Who are you and what can you help with?"
+/** Short intro prompt — kept minimal to skip heavy context ranking and generate in <1s. */
+private const val CHIRPY_INTRO_PROMPT =
+    "Say hi in 1-2 sentences. State your name is Chirpy and you help with Meshtastic. " +
+        "Do not give the user a nickname. Be punchy and fun."
 
 /** Maps an [AIDocAssistantResult] to a [ChirpyMessage]. */
 @OptIn(ExperimentalUuidApi::class)

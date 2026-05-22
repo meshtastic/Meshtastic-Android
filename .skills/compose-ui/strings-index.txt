@@ -133,12 +133,18 @@ channels
 ### CHIRPY ###
 chirpy
 chirpy_assistant_title
+chirpy_checking
+chirpy_downloading
+chirpy_downloading_progress
+chirpy_downloading_subtitle
 chirpy_error_busy
 chirpy_error_model_unavailable
 chirpy_error_token_budget_exceeded
 chirpy_error_unknown
 chirpy_error_unsupported_flavor
 chirpy_error_unsupported_platform
+chirpy_intro
+chirpy_ready
 chirpy_search_placeholder
 chirpy_suggested_pages_help
 chirpy_thinking

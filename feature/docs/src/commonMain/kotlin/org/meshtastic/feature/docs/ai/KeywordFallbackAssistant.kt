@@ -16,13 +16,18 @@
  */
 package org.meshtastic.feature.docs.ai
 
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import org.koin.core.annotation.Single
 import org.meshtastic.feature.docs.data.KeywordSearchEngine
 import org.meshtastic.feature.docs.model.AIDocAssistantResult
+import org.meshtastic.feature.docs.model.ModelReadiness
 
 /** Keyword-search-only fallback AI assistant implementation. Used on Desktop, iOS, and Android fdroid flavor. */
 @Single(binds = [])
 class KeywordFallbackAssistant(private val searchEngine: KeywordSearchEngine) : AIDocAssistant {
+
+    override val modelStatus: StateFlow<ModelReadiness> = MutableStateFlow(ModelReadiness.Unavailable(null))
 
     override suspend fun isSupported(): Boolean = false
 
