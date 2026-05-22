@@ -74,6 +74,38 @@ The app follows modern Android development practices, built on top of a shared K
 ### Bluetooth Low Energy (BLE)
 The BLE stack uses a multiplatform interface-driven architecture. Platform-agnostic interfaces live in `commonMain`, utilizing the **Kable** multiplatform BLE library to handle device communication across all supported targets (Android, Desktop). This provides a robust, Coroutine-based architecture for reliable device communication while remaining fully KMP compatible. See [core/ble/README.md](core/ble/README.md) for details.
 
+### Module Documentation
+
+Each module has its own README with details on its responsibilities, API surface, and internal design.
+
+| Module | Description |
+|---|---|
+| [core/api](core/api/README.md) | AIDL service API for third-party integrations |
+| [core/ble](core/ble/README.md) | Multiplatform BLE transport (Kable) |
+| [core/network](core/network/README.md) | Internet comms: firmware metadata, map tiles, radio transports |
+| [core/data](core/data/README.md) | Repository layer — orchestrates DB, network, and service data |
+| [core/database](core/database/README.md) | Room KMP local persistence |
+| [core/datastore](core/datastore/README.md) | DataStore preferences |
+| [core/service](core/service/README.md) | Meshtastic Android service abstractions |
+| [core/navigation](core/navigation/README.md) | Type-safe Navigation 3 route model |
+| [core/resources](core/resources/README.md) | Centralised CMP string & drawable resources |
+| [core/model](core/model/README.md) | Shared domain models |
+| [core/ui](core/ui/README.md) | Shared UI components |
+| [core/common](core/common/README.md) | Common utilities |
+| [core/di](core/di/README.md) | Koin DI modules |
+| [core/testing](core/testing/README.md) | Shared test fakes & utilities |
+| [core/nfc](core/nfc/README.md) | NFC support |
+| [core/prefs](core/prefs/README.md) | Legacy preference helpers |
+| [core/barcode](core/barcode/README.md) | Barcode / QR scanning |
+| [core/proto](core/proto/README.md) | Protobuf submodule wrapper |
+| [feature/messaging](feature/messaging/README.md) | Messaging UI feature |
+| [feature/map](feature/map/README.md) | Map UI feature |
+| [feature/node](feature/node/README.md) | Node detail UI feature |
+| [feature/settings](feature/settings/README.md) | Settings UI feature |
+| [feature/firmware](feature/firmware/README.md) | Firmware update UI feature |
+| [feature/intro](feature/intro/README.md) | Onboarding / intro UI feature |
+| [feature/wifi-provision](feature/wifi-provision/README.md) | Wi-Fi provisioning UI feature |
+
 ## Translations
 
 You can help translate the app into your native language using [Crowdin](https://crowdin.meshtastic.org/android).
