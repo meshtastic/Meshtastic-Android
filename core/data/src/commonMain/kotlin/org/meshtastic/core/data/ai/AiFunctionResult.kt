@@ -208,3 +208,60 @@ data class MeshMetrics(
     /** Estimated channel utilization percentage (0-100), or null if unavailable. */
     val channelUtilizationPercent: Int?,
 )
+
+/** Result of a [AiFunctionProvider.getRecentMessages] invocation. */
+sealed class GetRecentMessagesResult {
+    /** Successfully retrieved recent messages. */
+    data class Success(val messages: List<MessageSummary>) : GetRecentMessagesResult()
+
+    /** The specified contact was not found via fuzzy matching. */
+    data class ContactNotFound(val message: String) : GetRecentMessagesResult()
+
+    /** An error occurred retrieving messages. */
+    data class Error(val reason: String) : GetRecentMessagesResult()
+}
+
+/** Summary of a single mesh message suitable for AI consumption. */
+data class MessageSummary(
+    /** Display name of the message sender. */
+    val senderName: String,
+    /** The message text content. */
+    val text: String,
+    /** Channel or contact name this message belongs to. */
+    val contactName: String,
+    /** When the message was received (milliseconds since epoch). */
+    val receivedTime: Long,
+    /** Whether this message was sent by the local user. */
+    val fromLocal: Boolean,
+    /** Whether this message has been read. */
+    val read: Boolean,
+)
+
+/** Result of a [AiFunctionProvider.getUnreadSummary] invocation. */
+sealed class GetUnreadSummaryResult {
+    /** Successfully retrieved unread summary. */
+    data class Success(val summary: UnreadSummary) : GetUnreadSummaryResult()
+
+    /** An error occurred retrieving unread summary. */
+    data class Error(val reason: String) : GetUnreadSummaryResult()
+}
+
+/** Unread message summary across all contacts. */
+data class UnreadSummary(
+    /** Total number of unread messages across all contacts. */
+    val totalUnreadCount: Int,
+    /** Per-contact breakdown of unread messages (excludes muted contacts). */
+    val contacts: List<ContactUnread>,
+)
+
+/** Unread info for a single contact or channel. */
+data class ContactUnread(
+    /** Display name of the contact or channel. */
+    val name: String,
+    /** Number of unread messages from this contact. */
+    val unreadCount: Int,
+    /** Preview of the last message text, or null if none. */
+    val lastMessagePreview: String?,
+    /** Timestamp of the last message (milliseconds since epoch), or null if none. */
+    val lastMessageTime: Long?,
+)

@@ -325,4 +325,89 @@ class MeshtasticAppFunctions(private val provider: AiFunctionProvider) {
                 throw AppFunctionInvalidArgumentException(result.reason)
         }
     }
+
+    /**
+     * Retrieve recent messages received over the Meshtastic mesh radio network.
+     *
+     * Returns a list of recent messages from the local message history. Messages are stored locally and do not require
+     * an active mesh connection. Useful for catching up on conversations or reviewing recent communications.
+     *
+     * @param context The app function invocation context provided by the system.
+     * @param contactName Optional name of a node or channel to filter messages from. If omitted, returns messages from
+     *   all contacts sorted by most recent.
+     * @param limit Maximum number of messages to return (1–50). Defaults to 20.
+     * @return A [GetRecentMessagesResponse] containing the list of recent messages.
+     */
+    @AppFunction(isDescribedByKDoc = true)
+    suspend fun getRecentMessages(
+        context: AppFunctionContext,
+        contactName: String? = null,
+        limit: Int = AiFunctionProvider.DEFAULT_MESSAGE_LIMIT,
+    ): GetRecentMessagesResponse {
+        val result =
+            try {
+                provider.getRecentMessages(contactName, limit)
+            } catch (_: TimeoutCancellationException) {
+                throw AppFunctionInvalidArgumentException("Request timed out. Try again or reduce the message limit.")
+            }
+        return when (result) {
+            is org.meshtastic.core.data.ai.GetRecentMessagesResult.Success ->
+                GetRecentMessagesResponse(
+                    messages =
+                    result.messages.map { msg ->
+                        MessageInfo(
+                            senderName = msg.senderName,
+                            text = msg.text,
+                            contactName = msg.contactName,
+                            receivedTime = msg.receivedTime,
+                            fromLocal = msg.fromLocal,
+                            read = msg.read,
+                        )
+                    },
+                )
+
+            is org.meshtastic.core.data.ai.GetRecentMessagesResult.ContactNotFound ->
+                throw AppFunctionInvalidArgumentException(result.message)
+
+            is org.meshtastic.core.data.ai.GetRecentMessagesResult.Error ->
+                throw AppFunctionInvalidArgumentException(result.reason)
+        }
+    }
+
+    /**
+     * Get a summary of unread messages across all Meshtastic mesh contacts.
+     *
+     * Returns the total unread count and a per-contact breakdown showing who sent unread messages, how many are unread,
+     * and a preview of the last message. Muted contacts are excluded. Does not require an active mesh connection.
+     *
+     * @param context The app function invocation context provided by the system.
+     * @return A [GetUnreadSummaryResponse] with the total unread count and per-contact details.
+     */
+    @AppFunction(isDescribedByKDoc = true)
+    suspend fun getUnreadSummary(context: AppFunctionContext): GetUnreadSummaryResponse {
+        val result =
+            try {
+                provider.getUnreadSummary()
+            } catch (_: TimeoutCancellationException) {
+                throw AppFunctionInvalidArgumentException("Request timed out. Try again.")
+            }
+        return when (result) {
+            is org.meshtastic.core.data.ai.GetUnreadSummaryResult.Success ->
+                GetUnreadSummaryResponse(
+                    totalUnreadCount = result.summary.totalUnreadCount,
+                    contacts =
+                    result.summary.contacts.map { contact ->
+                        ContactUnreadInfo(
+                            name = contact.name,
+                            unreadCount = contact.unreadCount,
+                            lastMessagePreview = contact.lastMessagePreview,
+                            lastMessageTime = contact.lastMessageTime,
+                        )
+                    },
+                )
+
+            is org.meshtastic.core.data.ai.GetUnreadSummaryResult.Error ->
+                throw AppFunctionInvalidArgumentException(result.reason)
+        }
+    }
 }

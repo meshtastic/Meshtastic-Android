@@ -180,3 +180,56 @@ data class GetMeshMetricsResponse(
     val meshUptimeSeconds: Long,
     val channelUtilizationPercent: Int?,
 )
+
+/**
+ * Response containing recent messages from the mesh network.
+ *
+ * @property messages List of recent messages ordered by most recent first.
+ */
+@AppFunctionSerializable(isDescribedByKDoc = true)
+data class GetRecentMessagesResponse(val messages: List<MessageInfo>)
+
+/**
+ * Information about a single mesh message.
+ *
+ * @property senderName Display name of the message sender.
+ * @property text The message text content.
+ * @property contactName Name of the channel or contact the message belongs to.
+ * @property receivedTime Timestamp when the message was received (ms since epoch).
+ * @property fromLocal True if this message was sent by the local user.
+ * @property read True if this message has been read by the user.
+ */
+@AppFunctionSerializable(isDescribedByKDoc = true)
+data class MessageInfo(
+    val senderName: String,
+    val text: String,
+    val contactName: String,
+    val receivedTime: Long,
+    val fromLocal: Boolean,
+    val read: Boolean,
+)
+
+/**
+ * Response containing a summary of unread messages across all contacts.
+ *
+ * @property totalUnreadCount Total number of unread messages across all non-muted contacts.
+ * @property contacts Per-contact breakdown of unread messages, sorted by most recent.
+ */
+@AppFunctionSerializable(isDescribedByKDoc = true)
+data class GetUnreadSummaryResponse(val totalUnreadCount: Int, val contacts: List<ContactUnreadInfo>)
+
+/**
+ * Unread message details for a single contact or channel.
+ *
+ * @property name Display name of the contact or channel.
+ * @property unreadCount Number of unread messages from this contact.
+ * @property lastMessagePreview Preview text of the most recent message (up to 100 chars), or null if unavailable.
+ * @property lastMessageTime Timestamp of the most recent message (ms since epoch), or null if unavailable.
+ */
+@AppFunctionSerializable(isDescribedByKDoc = true)
+data class ContactUnreadInfo(
+    val name: String,
+    val unreadCount: Int,
+    val lastMessagePreview: String?,
+    val lastMessageTime: Long?,
+)

@@ -26,6 +26,7 @@ import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.usecase.SendMessageUseCase
@@ -46,6 +47,7 @@ class AiFunctionProviderImplTest {
     private val radioConfigRepository: RadioConfigRepository = mock(MockMode.autofill)
     private val sendMessageUseCase: SendMessageUseCase = mock(MockMode.autofill)
     private val fuzzyNameResolver = FuzzyNameResolver(nodeRepository, radioConfigRepository)
+    private val packetRepository: PacketRepository = mock(MockMode.autofill)
     private val clock = TestClock(Instant.fromEpochSeconds(1_700_000_000))
     private val rateLimiter = RateLimiter(clock)
 
@@ -55,6 +57,7 @@ class AiFunctionProviderImplTest {
         radioConfigRepository = radioConfigRepository,
         sendMessageUseCase = sendMessageUseCase,
         fuzzyNameResolver = fuzzyNameResolver,
+        packetRepository = packetRepository,
         rateLimiter = rateLimiter,
         clock = clock,
     )
@@ -232,6 +235,35 @@ class AiFunctionProviderImplTest {
 
         val result = provider.sendMessage("hello", null, null)
         assertIs<SendMessageResult.RateLimited>(result)
+    }
+
+    // --- getRecentMessages tests ---
+
+    @Test
+    fun getRecentMessages_contact_not_found() = runTest {
+        val nodeMap = MutableStateFlow(emptyMap<Int, Node>())
+        every { nodeRepository.nodeDBbyNum } returns nodeMap
+        every { radioConfigRepository.channelSetFlow } returns flowOf(org.meshtastic.proto.ChannelSet())
+
+        val provider = createProvider()
+        val result = provider.getRecentMessages("NonExistent", 10)
+        assertIs<GetRecentMessagesResult.ContactNotFound>(result)
+    }
+
+    // --- getUnreadSummary tests ---
+
+    @Test
+    fun getUnreadSummary_returns_empty_when_no_unread() = runTest {
+        every { packetRepository.getContacts() } returns flowOf(emptyMap())
+        every { packetRepository.getContactSettings() } returns flowOf(emptyMap())
+        every { radioConfigRepository.channelSetFlow } returns flowOf(org.meshtastic.proto.ChannelSet())
+        every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(emptyMap())
+
+        val provider = createProvider()
+        val result = provider.getUnreadSummary()
+        assertIs<GetUnreadSummaryResult.Success>(result)
+        assertEquals(0, result.summary.totalUnreadCount)
+        assertEquals(0, result.summary.contacts.size)
     }
 }
 

@@ -80,4 +80,33 @@ interface AiFunctionProvider {
      * @return Success with mesh metrics, or failure if not connected.
      */
     suspend fun getMeshMetrics(): GetMeshMetricsResult
+
+    /**
+     * Get recent messages from the mesh network.
+     *
+     * Messages are returned from the local cache — an active radio connection is not required.
+     *
+     * @param contactName Optional contact/channel name to filter by. Uses fuzzy matching.
+     * @param limit Maximum number of messages to return (default 20, max 50).
+     * @return Success with list of messages, or failure if contact not found.
+     */
+    suspend fun getRecentMessages(
+        contactName: String? = null,
+        limit: Int = DEFAULT_MESSAGE_LIMIT,
+    ): GetRecentMessagesResult
+
+    /**
+     * Get a summary of unread messages grouped by contact.
+     *
+     * Returns the total unread count and a per-contact breakdown with the last message preview. Muted contacts are
+     * excluded.
+     *
+     * @return Unread summary with per-contact breakdown.
+     */
+    suspend fun getUnreadSummary(): GetUnreadSummaryResult
+
+    companion object {
+        const val DEFAULT_MESSAGE_LIMIT = 20
+        const val MAX_MESSAGE_LIMIT = 50
+    }
 }

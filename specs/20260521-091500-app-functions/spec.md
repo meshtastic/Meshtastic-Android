@@ -229,14 +229,85 @@ androidApp/ (Google flavor)
 1. **Exact rate limit values**: Is 5 messages/60 seconds the right threshold, or should it align with a specific radio duty-cycle calculation?
 2. **Background invocation**: Can App Functions be invoked when the app is in the background but the service is running? (Likely yes, since `AppFunctionService` runs in the app process)
 
-## Future Considerations (Phase 2+)
+## Future Considerations (Phase 3+)
 
-- **listNodes**: "Who's on the mesh?" → return online nodes with names and last-heard
-- **getRecentMessages**: "Any new messages?" → return unread messages with sender/text/time
 - **getNodePosition**: "Where is Jake?" → return GPS coordinates (gated by privacy settings)
 - **Waypoint management**: Create/delete waypoints via AI
 - **Traceroute**: "Can I reach node X?" → invoke traceroute and return hop count
-- **Channel info**: "What channels am I on?" → list configured channels
-- **Device telemetry**: "How's my radio's battery?" → return device metrics
 - **Location sharing**: "Share my location on the mesh" → trigger position broadcast
+- **requestTraceroute**: Non-destructive route diagnostic via fuzzy node name
+- **sendQuickChat**: Voice-triggered pre-configured message shortcuts
+- **findNearbyNodes**: Location-aware proximity query sorted by distance
+- **requestNodePosition**: Ask a specific node to share its GPS coordinates
 - **Desktop/iOS parity**: Implement `AiFunctionProvider` via local MCP server (Desktop) or App Intents (iOS)
+
+---
+
+## Phase 3: Message History Functions
+
+### User Story 6 - Read Recent Messages via AI (Priority: P1)
+
+As a user returning from an activity, I want to ask "What messages did I miss?" and get a summary of recent mesh messages without opening the app.
+
+**Why this priority**: "Catch me up" is the #1 voice query pattern for communication apps. Mesh messages arrive asynchronously during hikes/outdoor activities where the phone is pocketed.
+
+**Independent Test**: Invoke `getRecentMessages` and confirm returned messages match the app's message list.
+
+**Acceptance Scenarios**:
+
+1. **Given** the device is connected and messages exist, **When** the AI invokes `getRecentMessages` without filters, **Then** the most recent messages (up to limit) are returned with sender name, text, channel, and timestamp
+2. **Given** a contactName is provided, **When** the AI invokes `getRecentMessages` with that filter, **Then** only messages from that contact/channel are returned
+3. **Given** no messages exist, **When** the AI invokes `getRecentMessages`, **Then** an empty list is returned (not an error)
+4. **Given** the device is disconnected, **When** the AI invokes `getRecentMessages`, **Then** cached messages are still returned (message history is local)
+
+---
+
+### User Story 7 - Unread Message Summary via AI (Priority: P1)
+
+As a user, I want to ask "Do I have unread messages?" and get a per-contact breakdown showing who messaged me and a preview of their last message.
+
+**Why this priority**: Unread summaries let users decide whether to open the app, reducing unnecessary screen time during outdoor activities.
+
+**Independent Test**: Invoke `getUnreadSummary` and confirm counts match the app's contact list badges.
+
+**Acceptance Scenarios**:
+
+1. **Given** unread messages exist from multiple contacts, **When** the AI invokes `getUnreadSummary`, **Then** the total unread count and per-contact breakdown (name, unread count, last message preview) are returned
+2. **Given** no unread messages exist, **When** the AI invokes `getUnreadSummary`, **Then** totalUnreadCount is 0 and the contacts list is empty
+3. **Given** a contact has been muted, **When** the AI invokes `getUnreadSummary`, **Then** muted contacts are excluded from the breakdown
+
+---
+
+### Functional Requirements (Phase 3)
+
+- **FR-012**: `getRecentMessages` MUST return recent messages sorted newest-first, limited to a configurable count (default 20, max 50)
+- **FR-013**: `getRecentMessages` MUST support optional `contactName` filter using the existing `FuzzyNameResolver`
+- **FR-014**: `getRecentMessages` MUST NOT require an active radio connection (messages are cached locally)
+- **FR-015**: `getUnreadSummary` MUST return total unread count and per-contact breakdown with last message preview
+- **FR-016**: `getUnreadSummary` MUST exclude muted contacts from the breakdown
+- **FR-017**: Both functions MUST respect the 5-second timeout constraint (NFR-002)
+
+### Architecture Addition
+
+```
+commonMain/ai/
+├── AiFunctionProvider.kt      # + getRecentMessages(), getUnreadSummary()
+├── AiFunctionResult.kt        # + GetRecentMessagesResult, GetUnreadSummaryResult
+
+androidApp/ (Google flavor)
+├── appfunctions/
+│   ├── MeshtasticAppFunctions.kt  # + getRecentMessages, getUnreadSummary
+│   └── AppFunctionModels.kt       # + MessageInfo, UnreadSummaryResponse, ContactUnreadInfo
+```
+
+### Data Flow (Message History)
+
+```
+AiFunctionProvider.getRecentMessages()
+    ↓
+PacketRepository.getMessagesFrom() / getContacts()
+    ↓
+NodeRepository (resolve sender names)
+    ↓
+Return MessageInfo list
+```

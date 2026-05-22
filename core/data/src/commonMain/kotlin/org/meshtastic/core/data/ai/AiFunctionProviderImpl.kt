@@ -22,6 +22,7 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.usecase.SendMessageUseCase
@@ -33,11 +34,13 @@ import kotlin.time.Duration.Companion.seconds
  * Implementation of [AiFunctionProvider] that bridges AI function invocations to existing Meshtastic repositories and
  * use cases.
  */
+@Suppress("TooManyFunctions")
 @Single(binds = [AiFunctionProvider::class])
 class AiFunctionProviderImpl(
     private val serviceRepository: ServiceRepository,
     private val nodeRepository: NodeRepository,
     private val radioConfigRepository: RadioConfigRepository,
+    private val packetRepository: PacketRepository,
     private val sendMessageUseCase: SendMessageUseCase,
     private val fuzzyNameResolver: FuzzyNameResolver,
     private val rateLimiter: RateLimiter,
@@ -293,6 +296,159 @@ class AiFunctionProviderImpl(
         }
     }
 
+    @Suppress("ReturnCount", "TooGenericExceptionCaught")
+    override suspend fun getRecentMessages(contactName: String?, limit: Int): GetRecentMessagesResult =
+        withTimeout(OPERATION_TIMEOUT) {
+            try {
+                val effectiveLimit = limit.coerceIn(1, AiFunctionProvider.MAX_MESSAGE_LIMIT)
+
+                // Resolve contact key if a name filter is provided
+                val contactKey =
+                    if (contactName != null) {
+                        resolveContactKeyForRead(contactName)
+                            ?: return@withTimeout GetRecentMessagesResult.ContactNotFound(
+                                "Contact not found: $contactName",
+                            )
+                    } else {
+                        null
+                    }
+
+                val messages =
+                    if (contactKey != null) {
+                        // Fetch messages from a specific contact
+                        packetRepository
+                            .getMessagesFrom(
+                                contact = contactKey,
+                                limit = effectiveLimit,
+                                includeFiltered = false,
+                                getNode = { userId -> nodeRepository.getNode(userId ?: "") },
+                            )
+                            .first()
+                    } else {
+                        // Fetch recent messages across all contacts
+                        val contacts = packetRepository.getContacts().first()
+                        contacts.keys
+                            .flatMap { key ->
+                                packetRepository
+                                    .getMessagesFrom(
+                                        contact = key,
+                                        limit = MESSAGES_PER_CONTACT,
+                                        includeFiltered = false,
+                                        getNode = { userId -> nodeRepository.getNode(userId ?: "") },
+                                    )
+                                    .first()
+                            }
+                            .sortedByDescending { it.receivedTime }
+                            .take(effectiveLimit)
+                    }
+
+                val channelSet = radioConfigRepository.channelSetFlow.first()
+                val summaries =
+                    messages.map { msg ->
+                        MessageSummary(
+                            senderName = msg.node.user.long_name.takeIf { it.isNotBlank() } ?: "Node ${msg.node.num}",
+                            text = msg.text,
+                            contactName = resolveContactDisplayName(msg, channelSet),
+                            receivedTime = msg.receivedTime,
+                            fromLocal = msg.fromLocal,
+                            read = msg.read,
+                        )
+                    }
+
+                GetRecentMessagesResult.Success(summaries)
+            } catch (ex: Exception) {
+                if (ex is CancellationException) throw ex
+                GetRecentMessagesResult.Error("Failed to retrieve messages: ${ex.message}")
+            }
+        }
+
+    @Suppress("TooGenericExceptionCaught")
+    override suspend fun getUnreadSummary(): GetUnreadSummaryResult = withTimeout(OPERATION_TIMEOUT) {
+        try {
+            val contacts = packetRepository.getContacts().first()
+            val settings = packetRepository.getContactSettings().first()
+            val channelSet = radioConfigRepository.channelSetFlow.first()
+            val nodeMap = nodeRepository.nodeDBbyNum.first()
+
+            val nonMutedContacts = contacts.filter { (key, _) -> settings[key]?.isMuted != true }
+
+            val contactUnreads =
+                nonMutedContacts.mapNotNull { (contactKey, lastPacket) ->
+                    val unreadCount = packetRepository.getUnreadCount(contactKey)
+                    if (unreadCount <= 0) return@mapNotNull null
+
+                    val isBroadcast = lastPacket.to == DataPacket.ID_BROADCAST
+                    val displayName =
+                        if (isBroadcast) {
+                            val channelIndex = contactKey.firstOrNull()?.digitToIntOrNull() ?: 0
+                            channelSet.settings.getOrNull(channelIndex)?.name?.ifBlank { "Channel $channelIndex" }
+                                ?: "Channel $channelIndex"
+                        } else {
+                            val userId = lastPacket.from ?: ""
+                            val node = nodeMap.values.find { it.user.id == userId }
+                            node?.user?.long_name?.takeIf { it.isNotBlank() } ?: "Unknown"
+                        }
+
+                    ContactUnread(
+                        name = displayName,
+                        unreadCount = unreadCount,
+                        lastMessagePreview = lastPacket.text?.take(MESSAGE_PREVIEW_MAX_LENGTH),
+                        lastMessageTime = lastPacket.time.takeIf { it > 0 },
+                    )
+                }
+
+            val totalUnread = contactUnreads.sumOf { it.unreadCount }
+
+            GetUnreadSummaryResult.Success(
+                UnreadSummary(
+                    totalUnreadCount = totalUnread,
+                    contacts = contactUnreads.sortedByDescending { it.lastMessageTime },
+                ),
+            )
+        } catch (ex: Exception) {
+            if (ex is CancellationException) throw ex
+            GetUnreadSummaryResult.Error("Failed to retrieve unread summary: ${ex.message}")
+        }
+    }
+
+    /**
+     * Resolve a contact name (node or channel) to a contact key for reading messages. Returns null if the name cannot
+     * be resolved.
+     */
+    @Suppress("ReturnCount")
+    private suspend fun resolveContactKeyForRead(name: String): String? {
+        // Try node name first
+        when (val nodeResult = fuzzyNameResolver.resolveNodeName(name)) {
+            is NodeNameResult.Found -> {
+                val channelIndex = DataPacket.PKC_CHANNEL_INDEX
+                return "${channelIndex}${nodeResult.userId}"
+            }
+
+            is NodeNameResult.Ambiguous -> return null
+
+            is NodeNameResult.NotFound -> {
+                /* fall through to channel */
+            }
+        }
+
+        // Try channel name
+        return when (val channelResult = fuzzyNameResolver.resolveChannelName(name)) {
+            is ChannelNameResult.Found -> "${channelResult.channelIndex}${DataPacket.ID_BROADCAST}"
+            is ChannelNameResult.Ambiguous -> null
+            is ChannelNameResult.NotFound -> null
+        }
+    }
+
+    private fun resolveContactDisplayName(
+        msg: org.meshtastic.core.model.Message,
+        channelSet: org.meshtastic.proto.ChannelSet,
+    ): String {
+        // For broadcast messages, use channel name
+        val channelIndex = msg.node.channel
+        return channelSet.settings.getOrNull(channelIndex)?.name?.ifBlank { "Channel $channelIndex" }
+            ?: "Channel $channelIndex"
+    }
+
     @Suppress("ReturnCount")
     private suspend fun resolveContactKey(recipientName: String?, channelName: String?): ResolvedContact? {
         // Direct message to a specific node
@@ -352,6 +508,8 @@ class AiFunctionProviderImpl(
         private const val HEALTH_SCORE_ONLINE_RATIO = 50
         private const val HEALTH_SCORE_DEGRADED = 10
         private const val HEALTH_SCORE_MAX = 100
+        private const val MESSAGES_PER_CONTACT = 5
+        private const val MESSAGE_PREVIEW_MAX_LENGTH = 100
 
         /** Standard Meshtastic message payload limit (bytes). */
         const val MAX_MESSAGE_LENGTH = 237
