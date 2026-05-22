@@ -43,6 +43,7 @@ import org.meshtastic.core.domain.usecase.settings.SetThemeUseCase
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.NodeListDensity
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.MeshLogPrefs
@@ -235,7 +236,7 @@ class SettingsViewModel(
             shouldShowLocation,
         ) { density, power, lastHeard, heardRelative, location ->
             NodeListSettingsState(
-                density = org.meshtastic.core.model.NodeListDensity.fromName(density),
+                density = NodeListDensity.fromName(density),
                 showPower = power,
                 showLastHeard = lastHeard,
                 lastHeardIsRelative = heardRelative,
@@ -270,7 +271,7 @@ class SettingsViewModel(
 
 /** Aggregated state for node list display settings to reduce recomposition overhead. */
 data class NodeListSettingsState(
-    val density: org.meshtastic.core.model.NodeListDensity = org.meshtastic.core.model.NodeListDensity.COMPLETE,
+    val density: NodeListDensity = NodeListDensity.COMPLETE,
     val showPower: Boolean = false,
     val showLastHeard: Boolean = false,
     val lastHeardIsRelative: Boolean = false,
