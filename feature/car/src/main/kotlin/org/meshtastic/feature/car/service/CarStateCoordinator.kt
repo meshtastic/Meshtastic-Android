@@ -49,6 +49,7 @@ import org.meshtastic.feature.car.model.NodeUi
 import org.meshtastic.feature.car.model.SignalQuality
 import org.meshtastic.feature.car.model.TopologyHeader
 import org.meshtastic.feature.car.util.CarTtsEngine
+import java.util.concurrent.ConcurrentHashMap
 
 /** Snapshot of a message for car display (avoids leaking domain models to UI). */
 data class MessageSnapshot(
@@ -106,7 +107,7 @@ class CarStateCoordinator(
     private val _quickChatActions = MutableStateFlow<List<String>>(emptyList())
     val quickChatActions: StateFlow<List<String>> = _quickChatActions.asStateFlow()
 
-    private var selectedChannelIndex = 0
+    private val selectedChannel = MutableStateFlow(0)
 
     fun start() {
         collectConnectionState()
@@ -116,7 +117,7 @@ class CarStateCoordinator(
     }
 
     fun selectChannel(index: Int) {
-        selectedChannelIndex = index
+        selectedChannel.value = index
         _messagingState.value = _messagingState.value.copy(selectedChannelIndex = index)
     }
 
@@ -145,7 +146,7 @@ class CarStateCoordinator(
                 to = contactKey,
                 bytes = text.encodeToByteArray().toByteString(),
                 dataType = DATA_TYPE_TEXT,
-                channel = selectedChannelIndex,
+                channel = selectedChannel.value,
             )
         commandSender.sendData(packet)
     }
@@ -159,7 +160,7 @@ class CarStateCoordinator(
         }
     }
 
-    private val messagesCache = mutableMapOf<String, List<MessageSnapshot>>()
+    private val messagesCache = ConcurrentHashMap<String, List<MessageSnapshot>>()
 
     fun cacheMessages(contactKey: String, messages: List<MessageSnapshot>) {
         messagesCache[contactKey] = messages
@@ -172,6 +173,7 @@ class CarStateCoordinator(
 
     fun destroy() {
         scope.cancel()
+        ttsEngine.shutdown()
     }
 
     private fun collectConnectionState() {
@@ -243,7 +245,7 @@ class CarStateCoordinator(
                 _messagingState.value =
                     MessagingUiState(
                         channels = channels,
-                        selectedChannelIndex = selectedChannelIndex,
+                        selectedChannelIndex = selectedChannel.value,
                         conversations = conversations,
                         emergencySpotlight = null,
                     )

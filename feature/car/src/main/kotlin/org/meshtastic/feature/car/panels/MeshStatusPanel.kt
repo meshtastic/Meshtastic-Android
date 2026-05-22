@@ -16,10 +16,6 @@
  */
 package org.meshtastic.feature.car.panels
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -34,7 +30,6 @@ import org.meshtastic.feature.car.model.ConnectionStatus
 @Single
 class MeshStatusPanel {
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private val _state =
         MutableStateFlow(
             CarSessionState(
@@ -84,10 +79,6 @@ class MeshStatusPanel {
                 else -> "${elapsed / MILLIS_PER_DAY}d ago"
             }
         return "Last msg: $timeAgo"
-    }
-
-    fun destroy() {
-        scope.cancel()
     }
 
     companion object {

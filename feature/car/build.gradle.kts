@@ -24,6 +24,8 @@ plugins {
 android {
     namespace = "org.meshtastic.feature.car"
 
+    buildFeatures { buildConfig = true }
+
     defaultConfig {
         minSdk = 23
         consumerProguardFiles("proguard-rules.pro")

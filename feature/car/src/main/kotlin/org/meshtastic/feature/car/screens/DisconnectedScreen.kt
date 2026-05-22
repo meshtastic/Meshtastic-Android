@@ -37,13 +37,13 @@ class DisconnectedScreen(carContext: CarContext) : Screen(carContext) {
             .addRow(
                 Row.Builder()
                     .setTitle(carContext.getString(R.string.car_disconnected))
-                    .addText("Radio connection lost. Showing cached data.")
+                    .addText(carContext.getString(R.string.car_disconnected_body))
                     .build(),
             )
             .addRow(
                 Row.Builder()
-                    .setTitle("Reconnecting...")
-                    .addText("The app will automatically reconnect when the radio is available.")
+                    .setTitle(carContext.getString(R.string.car_reconnecting_title))
+                    .addText(carContext.getString(R.string.car_reconnecting_body))
                     .build(),
             )
             .build(),

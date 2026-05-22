@@ -45,6 +45,5 @@ class MeshStatusSessionWiring(private val panel: MeshStatusPanel) {
         connectionJob?.cancel()
         nodeCountJob?.cancel()
         messageTimeJob?.cancel()
-        panel.destroy()
     }
 }

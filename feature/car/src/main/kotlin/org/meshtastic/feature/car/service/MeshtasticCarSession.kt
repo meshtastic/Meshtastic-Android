@@ -20,6 +20,8 @@ import android.content.Intent
 import android.content.res.Configuration
 import androidx.car.app.Screen
 import androidx.car.app.Session
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import kotlinx.coroutines.flow.emptyFlow
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -42,6 +44,15 @@ class MeshtasticCarSession :
         stateCoordinator.start()
         // Emergency flow wired to emptyFlow() until emergency packet detection is implemented
         emergencyWiring.attach(emptyFlow())
+
+        lifecycle.addObserver(
+            object : DefaultLifecycleObserver {
+                override fun onDestroy(owner: LifecycleOwner) {
+                    destroy()
+                }
+            },
+        )
+
         return HomeScreen(carContext, stateCoordinator)
     }
 
@@ -53,7 +64,7 @@ class MeshtasticCarSession :
         // Handle theme/density changes — templates auto-update
     }
 
-    fun destroy() {
+    private fun destroy() {
         emergencyWiring.detach()
         stateCoordinator.destroy()
         crashlyticsCarTagger.setCarSession(false)

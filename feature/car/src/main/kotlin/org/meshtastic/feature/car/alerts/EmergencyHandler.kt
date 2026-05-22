@@ -37,23 +37,28 @@ import org.meshtastic.feature.car.model.EmergencyAlert
 @Single
 class EmergencyHandler {
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    private var scope: CoroutineScope? = null
     private val _activeAlerts = MutableStateFlow<List<EmergencyAlert>>(emptyList())
     val activeAlerts: StateFlow<List<EmergencyAlert>> = _activeAlerts.asStateFlow()
 
     private var toneGenerator: ToneGenerator? = null
 
     fun startCollecting(emergencyFlow: Flow<EmergencyAlert>) {
-        scope.launch {
-            emergencyFlow.collect { alert ->
-                addAlert(alert)
-                playEmergencyTone()
+        scope?.cancel()
+        scope =
+            CoroutineScope(SupervisorJob() + Dispatchers.Main).also { newScope ->
+                newScope.launch {
+                    emergencyFlow.collect { alert ->
+                        addAlert(alert)
+                        playEmergencyTone()
+                    }
+                }
             }
-        }
     }
 
     fun stopCollecting() {
-        scope.cancel()
+        scope?.cancel()
+        scope = null
         toneGenerator?.release()
         toneGenerator = null
     }

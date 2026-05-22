@@ -39,15 +39,38 @@ class NodeDetailScreen(
 
         val paneBuilder = Pane.Builder()
 
-        paneBuilder.addRow(Row.Builder().setTitle("Signal").addText(formatSignal(node.signalQuality)).build())
+        paneBuilder.addRow(
+            Row.Builder()
+                .setTitle(carContext.getString(R.string.car_status_signal))
+                .addText(formatSignal(node.signalQuality))
+                .build(),
+        )
 
         node.batteryPercent?.let { battery ->
-            paneBuilder.addRow(Row.Builder().setTitle("Battery").addText("$battery%").build())
+            paneBuilder.addRow(
+                Row.Builder().setTitle(carContext.getString(R.string.car_status_battery)).addText("$battery%").build(),
+            )
         }
 
-        paneBuilder.addRow(Row.Builder().setTitle("Last Heard").addText(formatLastHeard(node.lastHeard)).build())
+        paneBuilder.addRow(
+            Row.Builder()
+                .setTitle(carContext.getString(R.string.car_status_last_heard))
+                .addText(formatLastHeard(node.lastHeard))
+                .build(),
+        )
 
-        paneBuilder.addRow(Row.Builder().setTitle("Status").addText(if (node.isOnline) "Online" else "Offline").build())
+        paneBuilder.addRow(
+            Row.Builder()
+                .setTitle(carContext.getString(R.string.car_status_status))
+                .addText(
+                    if (node.isOnline) {
+                        carContext.getString(R.string.car_status_online)
+                    } else {
+                        carContext.getString(R.string.car_status_offline)
+                    },
+                )
+                .build(),
+        )
 
         paneBuilder.addAction(
             Action.Builder()
@@ -61,10 +84,18 @@ class NodeDetailScreen(
             .build()
     }
 
-    private fun buildErrorTemplate(): Template =
-        PaneTemplate.Builder(Pane.Builder().addRow(Row.Builder().setTitle("Node not found").build()).build())
-            .setHeader(Header.Builder().setTitle("Error").setStartHeaderAction(Action.BACK).build())
-            .build()
+    private fun buildErrorTemplate(): Template = PaneTemplate.Builder(
+        Pane.Builder()
+            .addRow(Row.Builder().setTitle(carContext.getString(R.string.car_node_not_found)).build())
+            .build(),
+    )
+        .setHeader(
+            Header.Builder()
+                .setTitle(carContext.getString(R.string.car_error))
+                .setStartHeaderAction(Action.BACK)
+                .build(),
+        )
+        .build()
 
     private fun formatSignal(quality: SignalQuality): String = when (quality) {
         SignalQuality.EXCELLENT -> carContext.getString(R.string.car_signal_excellent)
@@ -75,13 +106,18 @@ class NodeDetailScreen(
     }
 
     private fun formatLastHeard(epochMillis: Long): String {
-        if (epochMillis == 0L) return "Never"
+        if (epochMillis == 0L) return carContext.getString(R.string.car_time_never)
         val elapsed = System.currentTimeMillis() - epochMillis
         return when {
-            elapsed < MILLIS_PER_MINUTE -> "Just now"
-            elapsed < MILLIS_PER_HOUR -> "${elapsed / MILLIS_PER_MINUTE}m ago"
-            elapsed < MILLIS_PER_DAY -> "${elapsed / MILLIS_PER_HOUR}h ago"
-            else -> "${elapsed / MILLIS_PER_DAY}d ago"
+            elapsed < MILLIS_PER_MINUTE -> carContext.getString(R.string.car_time_just_now)
+
+            elapsed < MILLIS_PER_HOUR ->
+                carContext.getString(R.string.car_time_minutes_ago, (elapsed / MILLIS_PER_MINUTE).toInt())
+
+            elapsed < MILLIS_PER_DAY ->
+                carContext.getString(R.string.car_time_hours_ago, (elapsed / MILLIS_PER_HOUR).toInt())
+
+            else -> carContext.getString(R.string.car_time_days_ago, (elapsed / MILLIS_PER_DAY).toInt())
         }
     }
 
