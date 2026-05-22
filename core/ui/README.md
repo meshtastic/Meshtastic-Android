@@ -48,4 +48,34 @@ MeshtasticResourceDialog(
 ## Dependency Graph
 
 <!--region graph-->
+```mermaid
+graph TB
+  :core:ui[ui]:::kmp-library-compose
+  :core:ui -.-> :core:common
+  :core:ui -.-> :core:data
+  :core:ui -.-> :core:database
+  :core:ui -.-> :core:datastore
+  :core:ui -.-> :core:model
+  :core:ui -.-> :core:navigation
+  :core:ui -.-> :core:prefs
+  :core:ui -.-> :core:proto
+  :core:ui -.-> :core:repository
+  :core:ui -.-> :core:resources
+  :core:ui -.-> :core:service
+  :core:ui -.-> :core:testing
+
+classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
+classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
+classDef compose-desktop-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
+classDef android-feature fill:#FFD6A5,stroke:#000,stroke-width:2px,color:#000;
+classDef android-library fill:#9BF6FF,stroke:#000,stroke-width:2px,color:#000;
+classDef android-library-compose fill:#9BF6FF,stroke:#000,stroke-width:2px,color:#000;
+classDef android-test fill:#A0C4FF,stroke:#000,stroke-width:2px,color:#000;
+classDef jvm-library fill:#BDB2FF,stroke:#000,stroke-width:2px,color:#000;
+classDef kmp-feature fill:#FFD6A5,stroke:#000,stroke-width:2px,color:#000;
+classDef kmp-library-compose fill:#FFC1CC,stroke:#000,stroke-width:2px,color:#000;
+classDef kmp-library fill:#FFC1CC,stroke:#000,stroke-width:2px,color:#000;
+classDef unknown fill:#FFADAD,stroke:#000,stroke-width:2px,color:#000;
+
+```
 <!--endregion-->

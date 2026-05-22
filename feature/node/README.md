@@ -24,4 +24,37 @@ Provides a compass interface to show the relative direction and distance to othe
 ## Dependency Graph
 
 <!--region graph-->
+```mermaid
+graph TB
+  :feature:node[node]:::kmp-feature
+  :feature:node -.-> :core:common
+  :feature:node -.-> :core:data
+  :feature:node -.-> :core:database
+  :feature:node -.-> :core:datastore
+  :feature:node -.-> :core:domain
+  :feature:node -.-> :core:model
+  :feature:node -.-> :core:navigation
+  :feature:node -.-> :core:proto
+  :feature:node -.-> :core:repository
+  :feature:node -.-> :core:resources
+  :feature:node -.-> :core:service
+  :feature:node -.-> :core:ui
+  :feature:node -.-> :core:di
+  :feature:node -.-> :feature:map
+  :feature:node -.-> :core:testing
+
+classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
+classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
+classDef compose-desktop-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
+classDef android-feature fill:#FFD6A5,stroke:#000,stroke-width:2px,color:#000;
+classDef android-library fill:#9BF6FF,stroke:#000,stroke-width:2px,color:#000;
+classDef android-library-compose fill:#9BF6FF,stroke:#000,stroke-width:2px,color:#000;
+classDef android-test fill:#A0C4FF,stroke:#000,stroke-width:2px,color:#000;
+classDef jvm-library fill:#BDB2FF,stroke:#000,stroke-width:2px,color:#000;
+classDef kmp-feature fill:#FFD6A5,stroke:#000,stroke-width:2px,color:#000;
+classDef kmp-library-compose fill:#FFC1CC,stroke:#000,stroke-width:2px,color:#000;
+classDef kmp-library fill:#FFC1CC,stroke:#000,stroke-width:2px,color:#000;
+classDef unknown fill:#FFADAD,stroke:#000,stroke-width:2px,color:#000;
+
+```
 <!--endregion-->
