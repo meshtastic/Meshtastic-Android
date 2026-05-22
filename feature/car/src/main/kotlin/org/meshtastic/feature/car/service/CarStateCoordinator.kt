@@ -288,12 +288,12 @@ class CarStateCoordinator(
 
         @Suppress("MagicNumber")
         private fun determineSignalQuality(snr: Float, rssi: Int): SignalQuality = when {
-            snr == Float.MAX_VALUE || rssi == Int.MAX_VALUE -> SignalQuality.UNKNOWN
+            snr == Float.MAX_VALUE || rssi == Int.MAX_VALUE -> SignalQuality.NONE
             snr > SNR_GOOD_THRESHOLD && rssi > RSSI_GOOD_THRESHOLD -> SignalQuality.EXCELLENT
             snr > SNR_GOOD_THRESHOLD && rssi > RSSI_FAIR_THRESHOLD -> SignalQuality.GOOD
             snr > SNR_FAIR_THRESHOLD && rssi > RSSI_GOOD_THRESHOLD -> SignalQuality.GOOD
             snr > SNR_FAIR_THRESHOLD -> SignalQuality.FAIR
-            else -> SignalQuality.POOR
+            else -> SignalQuality.BAD
         }
     }
 }

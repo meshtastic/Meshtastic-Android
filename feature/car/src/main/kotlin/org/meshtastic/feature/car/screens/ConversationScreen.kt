@@ -25,6 +25,7 @@ import androidx.car.app.model.ItemList
 import androidx.car.app.model.ListTemplate
 import androidx.car.app.model.Row
 import androidx.car.app.model.Template
+import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.feature.car.R
 import org.meshtastic.feature.car.service.MessageSnapshot
 
@@ -42,7 +43,13 @@ class ConversationScreen(
 
         val listBuilder = ItemList.Builder()
         messages.forEach { msg ->
-            listBuilder.addItem(Row.Builder().setTitle(msg.senderName).addText(msg.text).build())
+            val timeText =
+                if (msg.timestamp != 0L) {
+                    " • ${DateFormatter.formatRelativeTime(msg.timestamp)}"
+                } else {
+                    ""
+                }
+            listBuilder.addItem(Row.Builder().setTitle(msg.senderName).addText("${msg.text}$timeText").build())
         }
 
         val actionStrip =

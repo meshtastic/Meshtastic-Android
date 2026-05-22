@@ -61,8 +61,8 @@ enum class SignalQuality {
     EXCELLENT,
     GOOD,
     FAIR,
-    POOR,
-    UNKNOWN,
+    BAD,
+    NONE,
 }
 
 data class TopologyHeader(val totalNodes: Int, val onlineNodes: Int, val meshName: String?)

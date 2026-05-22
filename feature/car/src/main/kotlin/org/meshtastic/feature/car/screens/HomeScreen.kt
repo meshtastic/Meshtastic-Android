@@ -39,6 +39,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.feature.car.R
 import org.meshtastic.feature.car.model.NodeUi
@@ -197,12 +198,18 @@ class HomeScreen(carContext: CarContext, private val stateCoordinator: CarStateC
                 SignalQuality.EXCELLENT -> carContext.getString(R.string.car_signal_excellent)
                 SignalQuality.GOOD -> carContext.getString(R.string.car_signal_good)
                 SignalQuality.FAIR -> carContext.getString(R.string.car_signal_fair)
-                SignalQuality.POOR -> carContext.getString(R.string.car_signal_poor)
-                SignalQuality.UNKNOWN -> carContext.getString(R.string.car_signal_unknown)
+                SignalQuality.BAD -> carContext.getString(R.string.car_signal_bad)
+                SignalQuality.NONE -> carContext.getString(R.string.car_signal_none)
             }
         val battery = node.batteryPercent?.let { " • $it%" } ?: ""
+        val lastHeard =
+            if (node.lastHeard != 0L) {
+                " • ${DateFormatter.formatRelativeTime(node.lastHeard)}"
+            } else {
+                ""
+            }
         val status = if (!node.isOnline) " • ${carContext.getString(R.string.car_status_offline)}" else ""
-        return "$signal$battery$status"
+        return "$signal$battery$lastHeard$status"
     }
 
     private fun buildDisconnectedTemplate(): Template = PaneTemplate.Builder(

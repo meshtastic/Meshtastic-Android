@@ -23,11 +23,11 @@
     <string name="car_reconnecting">Radio connection lost. Will reconnect automatically.</string>
     <string name="car_reconnecting_title">Reconnecting…</string>
     <string name="car_reconnecting_body">The app will automatically reconnect when the radio is available.</string>
+    <string name="car_signal_bad">Bad</string>
     <string name="car_signal_excellent">Excellent</string>
     <string name="car_signal_fair">Fair</string>
     <string name="car_signal_good">Good</string>
-    <string name="car_signal_poor">Poor</string>
-    <string name="car_signal_unknown">Unknown</string>
+    <string name="car_signal_none">None</string>
     <string name="car_status_battery">Battery</string>
     <string name="car_status_last_heard">Last Heard</string>
     <string name="car_status_offline">Offline</string>
