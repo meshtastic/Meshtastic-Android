@@ -8,7 +8,7 @@ The entire release process is managed by a single, manually-triggered GitHub Act
 
 -   **Trigger:** To start a new release or promote an existing one, a developer manually runs the workflow from the GitHub Actions tab.
 -   **Inputs:** The workflow requires the following inputs:
-    1.  `version`: The base version number you are releasing (e.g., `2.4.0`).
+    1.  `version`: The base version number you are releasing (e.g., `2.7.0`).
     2.  `channel`: The release channel you are targeting (`internal`, `closed`, `open`, or `production`).
     3.  `build_desktop`: Whether to build and attach Desktop native installers (default: `false`).
 -   **Automation:** The workflow handles everything automatically:
@@ -27,14 +27,14 @@ The entire release process is managed by a single, manually-triggered GitHub Act
 1.  Navigate to the **Actions** tab in the GitHub repository.
 2.  Select the **`Create or Promote Release`** workflow.
 3.  Click the **"Run workflow"** dropdown.
-4.  Enter the base `version` (e.g., `2.4.0`).
+4.  Enter the base `version` (e.g., `2.7.0`).
 5.  Select the `internal` channel.
 6.  Check **`build_desktop`** if you want Desktop installers included in this release.
 7.  Click **"Run workflow"**.
 
 The workflow will:
 1.  **Create a new commit** on the current branch containing updated assets, translations, and the new changelog.
-2.  **Tag** that commit with an incremental internal tag (e.g., `v2.4.0-internal.1`).
+2.  **Tag** that commit with an incremental internal tag (e.g., `v2.7.0-internal.1`).
 3.  **Build & Deploy** the verified Android artifact to the Play Store Internal track.
 4.  **Build Desktop** *(if enabled)* native installers on macOS, Windows, and Linux runners.
 5.  Publish a **draft** pre-release on GitHub with all artifacts attached.
@@ -45,7 +45,7 @@ Once an internal build has been verified, you can promote it to a wider audience
 
 1.  Run the **`Create or Promote Release`** workflow again with the same base `version`.
 2.  Select the next channel in the sequence (e.g., `closed`, then `open`).
-3.  The workflow will create a new incremental tag for that channel (e.g., `v2.4.0-closed.1`) and create a **published** pre-release on GitHub.
+3.  The workflow will create a new incremental tag for that channel (e.g., `v2.7.0-closed.1`) and create a **published** pre-release on GitHub.
 
 ### 3. Promote to Production
 
@@ -54,7 +54,7 @@ After testing is complete on all pre-release channels, you can create the final 
 1.  Run the **`Create or Promote Release`** workflow one last time.
 2.  Use the same base `version`.
 3.  Select the `production` channel.
-4.  The workflow will create a clean version tag (e.g., `v2.4.0`) and create a **published, stable** (non-prerelease) release on GitHub.
+4.  The workflow will create a clean version tag (e.g., `v2.7.0`) and create a **published, stable** (non-prerelease) release on GitHub.
 
 ### 4. Post-Release
 

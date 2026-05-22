@@ -13,12 +13,16 @@ Provides named `DataStore<Preferences>` singletons for each preference domain (a
 - **`UiPrefs`**: Manages UI preferences (e.g., theme selection, unit systems).
 - **`MapPrefs`**: Manages mapping preferences (e.g., preferred map provider).
 
-## Module dependency graph
+
+## Dependency Graph
 
 <!--region graph-->
 ```mermaid
 graph TB
   :core:prefs[prefs]:::kmp-library
+  :core:prefs -.-> :core:repository
+  :core:prefs -.-> :core:common
+  :core:prefs -.-> :core:di
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

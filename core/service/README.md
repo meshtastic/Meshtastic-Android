@@ -1,6 +1,9 @@
 # `:core:service`
 
 ## Overview
+
+**Targets:** Android · JVM (Desktop) · iOS
+
 The `:core:service` module contains the abstractions and client-side logic for interacting with the main Meshtastic Android Service.
 
 ## Key Components
@@ -17,12 +20,27 @@ An enum representing the current state of the radio connection (`Connected`, `Di
 ### 4. `ServiceAction`
 Defines Intent actions for starting, stopping, and interacting with the background service.
 
-## Module dependency graph
+
+## Dependency Graph
 
 <!--region graph-->
 ```mermaid
 graph TB
   :core:service[service]:::kmp-library
+  :core:service -.-> :core:testing
+  :core:service --> :core:api
+  :core:service --> :core:repository
+  :core:service -.-> :core:common
+  :core:service -.-> :core:data
+  :core:service -.-> :core:database
+  :core:service -.-> :core:di
+  :core:service -.-> :core:model
+  :core:service -.-> :core:navigation
+  :core:service -.-> :core:network
+  :core:service -.-> :core:ble
+  :core:service -.-> :core:prefs
+  :core:service -.-> :core:proto
+  :core:service -.-> :core:takserver
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
