@@ -143,6 +143,7 @@ chirpy_error_token_budget_exceeded
 chirpy_error_unknown
 chirpy_error_unsupported_flavor
 chirpy_error_unsupported_platform
+chirpy_intro
 chirpy_ready
 chirpy_search_placeholder
 chirpy_suggested_pages_help

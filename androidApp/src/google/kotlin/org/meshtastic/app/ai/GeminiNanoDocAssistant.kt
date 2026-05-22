@@ -172,25 +172,39 @@ class GeminiNanoDocAssistant(
         question: String,
         currentPageId: String?,
     ): kotlinx.coroutines.flow.Flow<AIDocAssistantResult> = kotlinx.coroutines.flow.flow {
-        val bundle = bundleLoader.load()
-        val queryTerms = extractQueryTerms(question)
+        // Fast path: short prompts with no page context skip expensive doc loading.
+        val isLightweight =
+            question.length < MAX_LIGHTWEIGHT_PROMPT_LEN && currentPageId == null && history.isEmpty()
 
-        // Load all page content for full-text search ranking.
-        val allContent = bundle.pages.associateWith { page -> bundleLoader.readPage(page.id)?.markdown.orEmpty() }
+        val prompt: String
+        val contextPages: List<DocPage>
 
-        // Rank pages by relevance: full-text content search + keyword/title matching.
-        val rankedPages = rankPagesByRelevance(queryTerms, bundle.pages, allContent)
-        Logger.d(tag = TAG) { "Ranked pages: ${rankedPages.take(5).map { "${it.first.id}(${it.second})" }}" }
+        if (isLightweight) {
+            prompt = "You are Chirpy, the Meshtastic mesh networking assistant mascot. $question"
+            contextPages = emptyList()
+            Logger.d(tag = TAG) { "Lightweight prompt (no context): ${question.length} chars" }
+        } else {
+            val bundle = bundleLoader.load()
+            val queryTerms = extractQueryTerms(question)
 
-        // Build compact context by extracting only relevant paragraphs.
-        val contextResult = buildContext(currentPageId, queryTerms, rankedPages, allContent, MAX_CONTEXT_CHARS)
-        Logger.d(tag = TAG) {
-            "Context: ${contextResult.parts.size} pages, ${contextResult.totalChars} chars (budget $MAX_CONTEXT_CHARS)"
+            // Load all page content for full-text search ranking.
+            val allContent =
+                bundle.pages.associateWith { page -> bundleLoader.readPage(page.id)?.markdown.orEmpty() }
+
+            // Rank pages by relevance: full-text content search + keyword/title matching.
+            val rankedPages = rankPagesByRelevance(queryTerms, bundle.pages, allContent)
+            Logger.d(tag = TAG) { "Ranked pages: ${rankedPages.take(5).map { "${it.first.id}(${it.second})" }}" }
+
+            // Build compact context by extracting only relevant paragraphs.
+            val contextResult = buildContext(currentPageId, queryTerms, rankedPages, allContent, MAX_CONTEXT_CHARS)
+            Logger.d(tag = TAG) {
+                "Context: ${contextResult.parts.size} pages, ${contextResult.totalChars} chars (budget $MAX_CONTEXT_CHARS)"
+            }
+
+            prompt = buildPrompt(question, contextResult.parts)
+            contextPages = contextResult.usedPageIds.mapNotNull { id -> bundle.pages.find { it.id == id } }
+            Logger.d(tag = TAG) { "Prompt: ${prompt.length} chars, history count: ${history.size}" }
         }
-
-        val prompt = buildPrompt(question, contextResult.parts)
-        Logger.d(tag = TAG) { "Prompt: ${prompt.length} chars, history count: ${history.size}" }
-        val contextPages = contextResult.usedPageIds.mapNotNull { id -> bundle.pages.find { it.id == id } }
 
         var lastError: Exception? = null
         for (attempt in 0..MAX_RETRIES) {
@@ -237,18 +251,14 @@ class GeminiNanoDocAssistant(
                     ),
                 )
                 val onDeviceAnswer = cleanResponse(accumulatedText.toString().trimEnd())
-
-                val mentionedPages =
-                    bundle.pages.filter { page ->
-                        page.id !in contextResult.usedPageIds &&
-                            onDeviceAnswer.contains(page.title, ignoreCase = true)
-                    }
-                val allSourcePages = contextPages + mentionedPages
+                val allSourcePages = contextPages
 
                 // Keep short history because on-device inference has a smaller request token budget.
-                history.add(question.take(MAX_HISTORY_CHARS) to onDeviceAnswer.take(MAX_HISTORY_CHARS))
-                if (history.size > MAX_HISTORY_TURNS) {
-                    history.removeAt(0)
+                if (!isLightweight) {
+                    history.add(question.take(MAX_HISTORY_CHARS) to onDeviceAnswer.take(MAX_HISTORY_CHARS))
+                    if (history.size > MAX_HISTORY_TURNS) {
+                        history.removeAt(0)
+                    }
                 }
 
                 emit(
@@ -549,6 +559,7 @@ Guidelines:
 - Only reference official Meshtastic sources (meshtastic.org, github.com/meshtastic) — never cite random forums, blogs, or third-party sites
 - For firmware-specific or hardware-specific questions beyond app scope, point users to meshtastic.org/docs
 - Keep answers concise (2-4 short paragraphs max) unless the user asks for detail
+- Never give the user a nickname or pet name — just address them naturally
 - If you're truly unsure about something Meshtastic-specific, say so honestly rather than guessing"""
 
         /**
@@ -575,6 +586,9 @@ Guidelines:
 
         /** Maximum output tokens for on-device generation. */
         private const val MAX_OUTPUT_TOKENS = 256
+
+        /** Prompts shorter than this with no page context use the fast (no-doc-loading) path. */
+        private const val MAX_LIGHTWEIGHT_PROMPT_LEN = 100
 
         /** Temperature for response generation (0.0 = deterministic, 1.0 = creative). */
         private const val TEMPERATURE = 0.7f

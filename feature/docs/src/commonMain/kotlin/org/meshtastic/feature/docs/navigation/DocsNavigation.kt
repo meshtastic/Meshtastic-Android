@@ -128,7 +128,6 @@ private fun rememberChirpyState(
         showSheet = holder.showSheet,
         sessionState = holder.sessionState,
         aiAssistant = aiAssistant,
-        currentPageId = currentPageId,
         onUpdateSessionState = { holder.sessionState = it },
     )
 
@@ -215,7 +214,6 @@ private fun AutoIntroduceChirpy(
     showSheet: Boolean,
     sessionState: org.meshtastic.feature.docs.model.AIDocAssistantSessionState,
     aiAssistant: AIDocAssistant,
-    currentPageId: String?,
     onUpdateSessionState: (org.meshtastic.feature.docs.model.AIDocAssistantSessionState) -> Unit,
 ) {
     val currentOnUpdateSessionState by androidx.compose.runtime.rememberUpdatedState(onUpdateSessionState)
@@ -232,7 +230,7 @@ private fun AutoIntroduceChirpy(
         ) {
             aiAssistant.resetSession()
             currentOnUpdateSessionState(currentSessionState.copy(isLoading = true))
-            val result = aiAssistant.answer(CHIRPY_INTRO_PROMPT, currentPageId = currentPageId)
+            val result = aiAssistant.answer(CHIRPY_INTRO_PROMPT, currentPageId = null)
             val introMsg = chirpyResultToMessage(result)
             currentOnUpdateSessionState(
                 currentSessionState.copy(messages = currentSessionState.messages + introMsg, isLoading = false),
@@ -380,8 +378,10 @@ private fun DocsPageScreen(pageId: String, backStack: NavBackStack<NavKey>, chir
 
 // ── Constants & helpers ─────────────────────────────────────────────────────────
 
-/** Prompt sent automatically when the Chirpy sheet opens to generate a natural introduction. */
-private const val CHIRPY_INTRO_PROMPT = "Introduce yourself briefly. Who are you and what can you help with?"
+/** Short intro prompt — kept minimal to skip heavy context ranking and generate in <1s. */
+private const val CHIRPY_INTRO_PROMPT =
+    "Say hi in 1-2 sentences. State your name is Chirpy and you help with Meshtastic. " +
+    "Do not give the user a nickname. Be punchy and fun."
 
 /** Maps an [AIDocAssistantResult] to a [ChirpyMessage]. */
 @OptIn(ExperimentalUuidApi::class)
