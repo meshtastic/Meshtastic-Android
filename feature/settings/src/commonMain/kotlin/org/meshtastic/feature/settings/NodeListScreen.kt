@@ -31,7 +31,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.model.NodeListDensity
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.node_layout_section_title
 import org.meshtastic.core.ui.component.MainAppBar
@@ -76,25 +75,16 @@ fun NodeListScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             NodeLayoutSettings(
-                density = settings.density,
+                state = settings,
                 onDensityChange = { settingsViewModel.setNodeListDensity(it.name) },
-                showPower = settings.showPower,
                 onShowPowerChange = { settingsViewModel.setShouldShowPower(it) },
-                showLastHeard = settings.showLastHeard,
                 onShowLastHeardChange = { settingsViewModel.setShouldShowLastHeard(it) },
-                lastHeardIsRelative = settings.lastHeardIsRelative,
                 onLastHeardIsRelativeChange = { settingsViewModel.setLastHeardIsRelative(it) },
-                showLocation = settings.showLocation,
                 onShowLocationChange = { settingsViewModel.setShouldShowLocation(it) },
-                showHops = settings.showHops,
                 onShowHopsChange = { settingsViewModel.setShouldShowHops(it) },
-                showSignal = settings.showSignal,
                 onShowSignalChange = { settingsViewModel.setShouldShowSignal(it) },
-                showChannel = settings.showChannel,
                 onShowChannelChange = { settingsViewModel.setShouldShowChannel(it) },
-                showRole = settings.showRole,
                 onShowRoleChange = { settingsViewModel.setShouldShowRole(it) },
-                showTelemetry = settings.showTelemetry,
                 onShowTelemetryChange = { settingsViewModel.setShouldShowTelemetry(it) },
             )
         }

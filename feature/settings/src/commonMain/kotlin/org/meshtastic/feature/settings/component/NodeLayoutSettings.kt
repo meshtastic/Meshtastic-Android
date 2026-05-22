@@ -19,7 +19,6 @@ package org.meshtastic.feature.settings.component
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -59,6 +58,7 @@ import org.meshtastic.core.resources.node_layout_signal_direct_only
 import org.meshtastic.core.ui.component.NodeItem
 import org.meshtastic.core.ui.component.NodeItemCompact
 import org.meshtastic.core.ui.component.SwitchPreference
+import org.meshtastic.feature.settings.NodeListSettingsState
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceMetrics
 import org.meshtastic.proto.EnvironmentMetrics
@@ -70,25 +70,16 @@ import org.meshtastic.proto.User
 @Composable
 @Suppress("LongParameterList", "LongMethod")
 fun NodeLayoutSettings(
-    density: NodeListDensity,
+    state: NodeListSettingsState,
     onDensityChange: (NodeListDensity) -> Unit,
-    showPower: Boolean,
     onShowPowerChange: (Boolean) -> Unit,
-    showLastHeard: Boolean,
     onShowLastHeardChange: (Boolean) -> Unit,
-    lastHeardIsRelative: Boolean,
     onLastHeardIsRelativeChange: (Boolean) -> Unit,
-    showLocation: Boolean,
     onShowLocationChange: (Boolean) -> Unit,
-    showHops: Boolean,
     onShowHopsChange: (Boolean) -> Unit,
-    showSignal: Boolean,
     onShowSignalChange: (Boolean) -> Unit,
-    showChannel: Boolean,
     onShowChannelChange: (Boolean) -> Unit,
-    showRole: Boolean,
     onShowRoleChange: (Boolean) -> Unit,
-    showTelemetry: Boolean,
     onShowTelemetryChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -106,7 +97,7 @@ fun NodeLayoutSettings(
                 SegmentedButton(
                     shape = SegmentedButtonDefaults.itemShape(index, NodeListDensity.entries.size),
                     onClick = { onDensityChange(option) },
-                    selected = density == option,
+                    selected = state.density == option,
                     label = { Text(label) },
                 )
             }
@@ -124,7 +115,7 @@ fun NodeLayoutSettings(
         val localNode = remember { previewLocalNode() }
 
         Box(modifier = Modifier.animateContentSize().padding(bottom = 8.dp)) {
-            when (density) {
+            when (state.density) {
                 NodeListDensity.COMPLETE ->
                     NodeItem(
                         thisNode = localNode,
@@ -132,7 +123,7 @@ fun NodeLayoutSettings(
                         distanceUnits = 0,
                         tempInFahrenheit = false,
                         connectionState = ConnectionState.Connected,
-                        showTelemetry = showTelemetry,
+                        showTelemetry = state.showTelemetry,
                     )
 
                 NodeListDensity.COMPACT ->
@@ -140,15 +131,15 @@ fun NodeLayoutSettings(
                         thisNode = localNode,
                         thatNode = previewNode,
                         distanceUnits = 0,
-                        showPower = showPower,
-                        showLastHeard = showLastHeard,
-                        lastHeardIsRelative = lastHeardIsRelative,
-                        showLocation = showLocation,
-                        showHops = showHops,
-                        showSignal = showSignal,
-                        showChannel = showChannel,
-                        showRole = showRole,
-                        showTelemetry = showTelemetry,
+                        showPower = state.showPower,
+                        showLastHeard = state.showLastHeard,
+                        lastHeardIsRelative = state.lastHeardIsRelative,
+                        showLocation = state.showLocation,
+                        showHops = state.showHops,
+                        showSignal = state.showSignal,
+                        showChannel = state.showChannel,
+                        showRole = state.showRole,
+                        showTelemetry = state.showTelemetry,
                     )
             }
         }
@@ -159,12 +150,12 @@ fun NodeLayoutSettings(
         // Shared toggle — applies to both layouts
         SwitchPreference(
             title = stringResource(Res.string.node_layout_log_icons),
-            checked = showTelemetry,
+            checked = state.showTelemetry,
             enabled = true,
             onCheckedChange = onShowTelemetryChange,
         )
 
-        if (density == NodeListDensity.COMPLETE) {
+        if (state.density == NodeListDensity.COMPLETE) {
             Text(
                 text = stringResource(Res.string.node_layout_complete_description),
                 style = MaterialTheme.typography.bodyMedium,
@@ -180,52 +171,52 @@ fun NodeLayoutSettings(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(start = 16.dp, top = 12.dp, bottom = 8.dp),
             )
-            Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(0.dp)) {
+            Column(modifier = Modifier.fillMaxWidth()) {
                 SwitchPreference(
                     title = stringResource(Res.string.node_layout_power),
-                    checked = showPower,
+                    checked = state.showPower,
                     enabled = true,
                     onCheckedChange = onShowPowerChange,
                 )
                 SwitchPreference(
                     title = stringResource(Res.string.node_layout_last_heard_time),
-                    checked = showLastHeard,
+                    checked = state.showLastHeard,
                     enabled = true,
                     onCheckedChange = onShowLastHeardChange,
                 )
                 SwitchPreference(
                     title = stringResource(Res.string.node_layout_relative_last_heard),
-                    checked = lastHeardIsRelative,
-                    enabled = showLastHeard,
+                    checked = state.lastHeardIsRelative,
+                    enabled = state.showLastHeard,
                     onCheckedChange = onLastHeardIsRelativeChange,
                 )
                 SwitchPreference(
                     title = stringResource(Res.string.node_layout_distance_and_bearing),
-                    checked = showLocation,
+                    checked = state.showLocation,
                     enabled = true,
                     onCheckedChange = onShowLocationChange,
                 )
                 SwitchPreference(
                     title = stringResource(Res.string.node_layout_hops_away),
-                    checked = showHops,
+                    checked = state.showHops,
                     enabled = true,
                     onCheckedChange = onShowHopsChange,
                 )
                 SwitchPreference(
                     title = stringResource(Res.string.node_layout_signal_direct_only),
-                    checked = showSignal,
+                    checked = state.showSignal,
                     enabled = true,
                     onCheckedChange = onShowSignalChange,
                 )
                 SwitchPreference(
                     title = stringResource(Res.string.node_layout_channel),
-                    checked = showChannel,
+                    checked = state.showChannel,
                     enabled = true,
                     onCheckedChange = onShowChannelChange,
                 )
                 SwitchPreference(
                     title = stringResource(Res.string.node_layout_device_role),
-                    checked = showRole,
+                    checked = state.showRole,
                     enabled = true,
                     onCheckedChange = onShowRoleChange,
                 )

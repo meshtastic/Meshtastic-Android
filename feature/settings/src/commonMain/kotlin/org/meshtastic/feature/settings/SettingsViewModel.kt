@@ -225,30 +225,45 @@ class SettingsViewModel(
 
     fun setShouldShowTelemetry(value: Boolean) = uiPrefs.setShouldShowTelemetry(value)
 
-    // Aggregated node list settings to avoid 10 separate state collections
+    // Aggregated node list settings — nested combines because typed overloads max at 5 args
     val nodeListSettings = combine(
-        nodeListDensity,
-        shouldShowPower,
-        shouldShowLastHeard,
-        lastHeardIsRelative,
-        shouldShowLocation,
-        shouldShowHops,
-        shouldShowSignal,
-        shouldShowChannel,
-        shouldShowRole,
-        shouldShowTelemetry,
-    ) { densityName, power, lastHeard, heardRelative, location, hops, signal, channel, role, telemetry ->
-        NodeListSettingsState(
-            density = org.meshtastic.core.model.NodeListDensity.fromName(densityName),
-            showPower = power,
-            showLastHeard = lastHeard,
-            lastHeardIsRelative = heardRelative,
-            showLocation = location,
-            showHops = hops,
-            showSignal = signal,
-            showChannel = channel,
-            showRole = role,
-            showTelemetry = telemetry,
+        combine(
+            nodeListDensity,
+            shouldShowPower,
+            shouldShowLastHeard,
+            lastHeardIsRelative,
+            shouldShowLocation,
+        ) { density, power, lastHeard, heardRelative, location ->
+            NodeListSettingsState(
+                density = org.meshtastic.core.model.NodeListDensity.fromName(density),
+                showPower = power,
+                showLastHeard = lastHeard,
+                lastHeardIsRelative = heardRelative,
+                showLocation = location,
+            )
+        },
+        combine(
+            shouldShowHops,
+            shouldShowSignal,
+            shouldShowChannel,
+            shouldShowRole,
+            shouldShowTelemetry,
+        ) { hops, signal, channel, role, telemetry ->
+            NodeListSettingsState(
+                showHops = hops,
+                showSignal = signal,
+                showChannel = channel,
+                showRole = role,
+                showTelemetry = telemetry,
+            )
+        },
+    ) { first, second ->
+        first.copy(
+            showHops = second.showHops,
+            showSignal = second.showSignal,
+            showChannel = second.showChannel,
+            showRole = second.showRole,
+            showTelemetry = second.showTelemetry,
         )
     }.stateInWhileSubscribed(initialValue = NodeListSettingsState())
 }

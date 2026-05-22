@@ -33,6 +33,7 @@ import org.meshtastic.core.model.NodeListDensity
 import org.meshtastic.core.ui.component.NodeItem
 import org.meshtastic.core.ui.component.NodeItemCompact
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.feature.settings.NodeListSettingsState
 
 @PreviewLightDark
 @Composable
@@ -40,25 +41,27 @@ fun NodeLayoutSettingsCompactPreview() {
     AppTheme {
         Surface {
             NodeLayoutSettings(
-                density = NodeListDensity.COMPACT,
+                state = NodeListSettingsState(
+                    density = NodeListDensity.COMPACT,
+                    showPower = true,
+                    showLastHeard = true,
+                    lastHeardIsRelative = true,
+                    showLocation = true,
+                    showHops = true,
+                    showSignal = true,
+                    showChannel = false,
+                    showRole = true,
+                    showTelemetry = true,
+                ),
                 onDensityChange = {},
-                showPower = true,
                 onShowPowerChange = {},
-                showLastHeard = true,
                 onShowLastHeardChange = {},
-                lastHeardIsRelative = true,
                 onLastHeardIsRelativeChange = {},
-                showLocation = true,
                 onShowLocationChange = {},
-                showHops = true,
                 onShowHopsChange = {},
-                showSignal = true,
                 onShowSignalChange = {},
-                showChannel = false,
                 onShowChannelChange = {},
-                showRole = true,
                 onShowRoleChange = {},
-                showTelemetry = true,
                 onShowTelemetryChange = {},
             )
         }
@@ -71,25 +74,27 @@ fun NodeLayoutSettingsCompletePreview() {
     AppTheme {
         Surface {
             NodeLayoutSettings(
-                density = NodeListDensity.COMPLETE,
+                state = NodeListSettingsState(
+                    density = NodeListDensity.COMPLETE,
+                    showPower = true,
+                    showLastHeard = true,
+                    lastHeardIsRelative = true,
+                    showLocation = true,
+                    showHops = true,
+                    showSignal = true,
+                    showChannel = true,
+                    showRole = true,
+                    showTelemetry = true,
+                ),
                 onDensityChange = {},
-                showPower = true,
                 onShowPowerChange = {},
-                showLastHeard = true,
                 onShowLastHeardChange = {},
-                lastHeardIsRelative = true,
                 onLastHeardIsRelativeChange = {},
-                showLocation = true,
                 onShowLocationChange = {},
-                showHops = true,
                 onShowHopsChange = {},
-                showSignal = true,
                 onShowSignalChange = {},
-                showChannel = true,
                 onShowChannelChange = {},
-                showRole = true,
                 onShowRoleChange = {},
-                showTelemetry = true,
                 onShowTelemetryChange = {},
             )
         }
@@ -103,25 +108,27 @@ fun NodeLayoutSettingsCompactMinimalPreview() {
     AppTheme {
         Surface {
             NodeLayoutSettings(
-                density = NodeListDensity.COMPACT,
+                state = NodeListSettingsState(
+                    density = NodeListDensity.COMPACT,
+                    showPower = false,
+                    showLastHeard = true,
+                    lastHeardIsRelative = true,
+                    showLocation = false,
+                    showHops = false,
+                    showSignal = true,
+                    showChannel = false,
+                    showRole = false,
+                    showTelemetry = false,
+                ),
                 onDensityChange = {},
-                showPower = false,
                 onShowPowerChange = {},
-                showLastHeard = true,
                 onShowLastHeardChange = {},
-                lastHeardIsRelative = true,
                 onLastHeardIsRelativeChange = {},
-                showLocation = false,
                 onShowLocationChange = {},
-                showHops = false,
                 onShowHopsChange = {},
-                showSignal = true,
                 onShowSignalChange = {},
-                showChannel = false,
                 onShowChannelChange = {},
-                showRole = false,
                 onShowRoleChange = {},
-                showTelemetry = false,
                 onShowTelemetryChange = {},
             )
         }
