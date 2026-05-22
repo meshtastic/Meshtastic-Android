@@ -54,6 +54,7 @@ import org.meshtastic.core.ui.icon.ArrowBack
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.feature.docs.model.AIDocAssistantSessionState
 import org.meshtastic.feature.docs.model.DocPageContent
+import org.meshtastic.feature.docs.model.ModelReadiness
 import org.meshtastic.feature.docs.model.TranslationSource
 import org.meshtastic.core.resources.Res as CoreRes
 
@@ -68,6 +69,7 @@ fun DocsPageRouteScreen(
     translationSource: TranslationSource = TranslationSource.BUNDLED,
     isNonEnglish: Boolean = false,
     isAiSupported: Boolean = false,
+    modelReadiness: ModelReadiness = ModelReadiness.Checking,
     showChirpy: Boolean = false,
     chirpyState: AIDocAssistantSessionState = AIDocAssistantSessionState(),
     onChirpyToggle: () -> Unit = {},
@@ -202,6 +204,7 @@ fun DocsPageRouteScreen(
             ChirpyAssistantSheet(
                 state = chirpyState,
                 isSupported = isAiSupported,
+                modelReadiness = modelReadiness,
                 onDraftChange = onChirpyDraftChange,
                 onSubmit = onChirpySubmit,
                 onDismiss = onChirpyDismiss,

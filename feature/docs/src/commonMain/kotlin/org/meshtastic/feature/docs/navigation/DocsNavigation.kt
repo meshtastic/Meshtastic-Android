@@ -20,6 +20,7 @@ import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -55,6 +56,7 @@ import org.meshtastic.feature.docs.model.ChirpyMessage
 import org.meshtastic.feature.docs.model.ChirpyRole
 import org.meshtastic.feature.docs.model.DocPage
 import org.meshtastic.feature.docs.model.DocPageContent
+import org.meshtastic.feature.docs.model.ModelReadiness
 import org.meshtastic.feature.docs.model.DocsAiError
 import org.meshtastic.feature.docs.model.SourceRef
 import org.meshtastic.feature.docs.model.TranslationSource
@@ -86,6 +88,7 @@ fun EntryProviderScope<NavKey>.docsEntries(backStack: NavBackStack<NavKey>) {
 /** All Chirpy UI state needed by screen composables. */
 class ChirpyUiState(
     val isSupported: Boolean,
+    val modelReadiness: ModelReadiness,
     val showFab: Boolean,
     val showSheet: Boolean,
     val sessionState: org.meshtastic.feature.docs.model.AIDocAssistantSessionState,
@@ -107,14 +110,18 @@ private fun rememberChirpyState(
     val holder = koinInject<ChirpySessionHolder>()
     val scope = rememberCoroutineScope()
 
+    val modelReadiness by aiAssistant.modelStatus.collectAsState()
     var isSupported by remember { mutableStateOf(false) }
 
-    // Poll for AI availability.
+    // Trigger initial availability check and model download.
     LaunchedEffect(Unit) {
-        repeat(AI_SUPPORT_CHECK_RETRIES) {
-            isSupported = aiAssistant.isSupported()
-            if (isSupported) return@LaunchedEffect
-            kotlinx.coroutines.delay(AI_SUPPORT_CHECK_INTERVAL_MS)
+        isSupported = aiAssistant.isSupported()
+    }
+
+    // Update isSupported when modelReadiness changes to Available.
+    LaunchedEffect(modelReadiness) {
+        if (modelReadiness is ModelReadiness.Available) {
+            isSupported = true
         }
     }
 
@@ -189,6 +196,7 @@ private fun rememberChirpyState(
 
     return ChirpyUiState(
         isSupported = isSupported,
+        modelReadiness = modelReadiness,
         showFab = showFab,
         showSheet = holder.showSheet,
         sessionState = holder.sessionState,
@@ -266,6 +274,7 @@ private fun DocsHelpScreen(backStack: NavBackStack<NavKey>, chirpy: ChirpyUiStat
         onSelectPage = { pageId -> backStack.add(SettingsRoute.HelpDocPage(pageId)) },
         onBack = { backStack.removeLastOrNull() },
         isAiSupported = chirpy.isSupported,
+        modelReadiness = chirpy.modelReadiness,
         showFab = chirpy.showFab,
         showChirpy = chirpy.showSheet,
         chirpyState = chirpy.sessionState,
@@ -351,6 +360,7 @@ private fun DocsPageScreen(pageId: String, backStack: NavBackStack<NavKey>, chir
         translationSource = translationSource,
         isNonEnglish = locale != "en",
         isAiSupported = chirpy.isSupported,
+        modelReadiness = chirpy.modelReadiness,
         showChirpy = chirpy.showSheet,
         chirpyState = chirpy.sessionState,
         onChirpyToggle = chirpy.onToggle,
@@ -364,12 +374,6 @@ private fun DocsPageScreen(pageId: String, backStack: NavBackStack<NavKey>, chir
 }
 
 // ── Constants & helpers ─────────────────────────────────────────────────────────
-
-/** How often to re-check AI model availability while waiting for download. */
-private const val AI_SUPPORT_CHECK_INTERVAL_MS = 3_000L
-
-/** Maximum number of AI support checks before giving up. */
-private const val AI_SUPPORT_CHECK_RETRIES = 15
 
 /** Prompt sent automatically when the Chirpy sheet opens to generate a natural introduction. */
 private const val CHIRPY_INTRO_PROMPT = "Introduce yourself briefly. Who are you and what can you help with?"

@@ -44,9 +44,11 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
@@ -77,6 +79,7 @@ import org.meshtastic.core.ui.icon.Send
 import org.meshtastic.feature.docs.model.AIDocAssistantSessionState
 import org.meshtastic.feature.docs.model.ChirpyMessage
 import org.meshtastic.feature.docs.model.ChirpyRole
+import org.meshtastic.feature.docs.model.ModelReadiness
 import org.meshtastic.core.resources.Res as CoreRes
 
 /** Chirpy AI Assistant bottom sheet with chat UI. Hidden entirely when the assistant reports unsupported. */
@@ -85,13 +88,75 @@ import org.meshtastic.core.resources.Res as CoreRes
 fun ChirpyAssistantSheet(
     state: AIDocAssistantSessionState,
     isSupported: Boolean,
+    modelReadiness: ModelReadiness,
     onDraftChange: (String) -> Unit,
     onSubmit: () -> Unit,
     onDismiss: () -> Unit,
     onNavigateToPage: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    if (!isSupported) return
+    when (modelReadiness) {
+        is ModelReadiness.Unavailable -> return
+        is ModelReadiness.Checking -> {
+            ModalBottomSheet(onDismissRequest = onDismiss, modifier = modifier) {
+                Column(
+                    modifier = Modifier.fillMaxWidth().padding(32.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    CircularProgressIndicator(modifier = Modifier.size(32.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("Checking Chirpy availability…", style = MaterialTheme.typography.bodyMedium)
+                }
+            }
+            return
+        }
+        is ModelReadiness.Downloading -> {
+            val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+            ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState, modifier = modifier) {
+                Column(
+                    modifier = Modifier.fillMaxWidth().padding(32.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Image(
+                        painter = painterResource(CoreRes.drawable.img_chirpy),
+                        contentDescription = null,
+                        modifier = Modifier.size(64.dp),
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        "Chirpy is downloading… 📡",
+                        style = MaterialTheme.typography.titleMedium,
+                        textAlign = TextAlign.Center,
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    val progress = modelReadiness.progress
+                    if (progress != null) {
+                        LinearProgressIndicator(
+                            progress = { progress },
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp),
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            "${(progress * 100).toInt()}%",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    } else {
+                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp))
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        "This only happens once. Chirpy will be ready soon!",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                    )
+                }
+            }
+            return
+        }
+        is ModelReadiness.Available -> { /* Fall through to normal chat UI below */ }
+    }
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 

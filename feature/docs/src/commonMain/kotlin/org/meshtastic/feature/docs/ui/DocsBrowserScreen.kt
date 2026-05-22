@@ -53,6 +53,7 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.feature.docs.model.AIDocAssistantSessionState
 import org.meshtastic.feature.docs.model.DocPage
 import org.meshtastic.feature.docs.model.DocSection
+import org.meshtastic.feature.docs.model.ModelReadiness
 import org.meshtastic.core.resources.Res as CoreRes
 
 /** Main documentation browser screen showing a grouped TOC. */
@@ -68,6 +69,7 @@ fun DocsBrowserScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     isAiSupported: Boolean = false,
+    modelReadiness: ModelReadiness = ModelReadiness.Checking,
     showFab: Boolean = false,
     showChirpy: Boolean = false,
     chirpyState: AIDocAssistantSessionState = AIDocAssistantSessionState(),
@@ -147,6 +149,7 @@ fun DocsBrowserScreen(
             ChirpyAssistantSheet(
                 state = chirpyState,
                 isSupported = isAiSupported,
+                modelReadiness = modelReadiness,
                 onDraftChange = onChirpyDraftChange,
                 onSubmit = onChirpySubmit,
                 onDismiss = onChirpyDismiss,
