@@ -128,6 +128,25 @@ sealed interface DocsAiError {
     data object Unknown : DocsAiError
 }
 
+/** Model readiness state for download/lifecycle UX. */
+sealed interface ModelReadiness {
+    /** Initial status check in progress. */
+    data object Checking : ModelReadiness
+
+    /** Model is downloading. [totalBytes] of 0 means indeterminate progress. */
+    data class Downloading(val bytesDownloaded: Long, val totalBytes: Long) : ModelReadiness {
+        /** Download progress as a fraction (0.0 to 1.0), or null if indeterminate. */
+        val progress: Float?
+            get() = if (totalBytes > 0) (bytesDownloaded.toFloat() / totalBytes).coerceIn(0f, 1f) else null
+    }
+
+    /** Model is ready for inference. */
+    data object Available : ModelReadiness
+
+    /** Model is not available on this device. */
+    data class Unavailable(val reason: String?) : ModelReadiness
+}
+
 /** Chirpy assistant session state. */
 data class AIDocAssistantSessionState(
     val messages: List<ChirpyMessage> = emptyList(),
