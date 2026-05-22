@@ -84,7 +84,7 @@ class MeshMessageProcessorImplTest {
         processor = createProcessor(backgroundScope)
         val logRecord = LogRecord(message = "test log")
         val fromRadio = FromRadio(log_record = logRecord)
-        val bytes = FromRadio.ADAPTER.encode(fromRadio)
+        val bytes = fromRadio.encode()
 
         processor.handleFromRadio(bytes, myNodeNum)
         advanceUntilIdle()
@@ -98,7 +98,7 @@ class MeshMessageProcessorImplTest {
         // Encode a raw LogRecord (not wrapped in FromRadio) — first decode as FromRadio fails,
         // fallback decode as LogRecord succeeds
         val logRecord = LogRecord(message = "fallback log")
-        val bytes = LogRecord.ADAPTER.encode(logRecord)
+        val bytes = logRecord.encode()
 
         processor.handleFromRadio(bytes, myNodeNum)
         advanceUntilIdle()
@@ -346,7 +346,7 @@ class MeshMessageProcessorImplTest {
         processor = createProcessor(backgroundScope)
         val logRecord = LogRecord(message = "device log")
         val fromRadio = FromRadio(log_record = logRecord)
-        val bytes = FromRadio.ADAPTER.encode(fromRadio)
+        val bytes = fromRadio.encode()
 
         processor.handleFromRadio(bytes, myNodeNum)
         advanceUntilIdle()

@@ -381,7 +381,7 @@ private fun DocsPageScreen(pageId: String, backStack: NavBackStack<NavKey>, chir
 /** Short intro prompt — kept minimal to skip heavy context ranking and generate in <1s. */
 private const val CHIRPY_INTRO_PROMPT =
     "Say hi in 1-2 sentences. State your name is Chirpy and you help with Meshtastic. " +
-    "Do not give the user a nickname. Be punchy and fun."
+        "Do not give the user a nickname. Be punchy and fun."
 
 /** Maps an [AIDocAssistantResult] to a [ChirpyMessage]. */
 @OptIn(ExperimentalUuidApi::class)

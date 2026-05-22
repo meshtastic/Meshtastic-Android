@@ -60,7 +60,7 @@ class AdminPacketHandlerImplTest {
     }
 
     private fun makePacket(from: Int, adminMessage: AdminMessage): MeshPacket {
-        val payload = AdminMessage.ADAPTER.encode(adminMessage).toByteString()
+        val payload = adminMessage.encode().toByteString()
         return MeshPacket(from = from, decoded = Data(portnum = PortNum.ADMIN_APP, payload = payload))
     }
 

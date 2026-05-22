@@ -67,7 +67,7 @@ class TelemetryPacketHandlerImplTest {
     }
 
     private fun makeTelemetryPacket(from: Int, telemetry: Telemetry): MeshPacket {
-        val payload = Telemetry.ADAPTER.encode(telemetry).toByteString()
+        val payload = telemetry.encode().toByteString()
         return MeshPacket(
             from = from,
             decoded = Data(portnum = PortNum.TELEMETRY_APP, payload = payload),
