@@ -41,7 +41,6 @@ import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.feature.car.model.CarSessionState
 import org.meshtastic.feature.car.model.ChannelUi
-import org.meshtastic.feature.car.model.ConnectionStatus
 import org.meshtastic.feature.car.model.ConversationUi
 import org.meshtastic.feature.car.model.MessagingUiState
 import org.meshtastic.feature.car.model.NodeDashboardUiState
@@ -80,7 +79,7 @@ class CarStateCoordinator(
     private val _sessionState =
         MutableStateFlow(
             CarSessionState(
-                connectionStatus = ConnectionStatus.DISCONNECTED,
+                connectionStatus = ConnectionState.Disconnected,
                 onlineNodeCount = 0,
                 lastMessageTime = null,
                 activeEmergencies = emptyList(),
@@ -179,13 +178,7 @@ class CarStateCoordinator(
     private fun collectConnectionState() {
         scope.launch {
             serviceRepository.connectionState.collect { state ->
-                val status =
-                    when (state) {
-                        ConnectionState.Connected -> ConnectionStatus.CONNECTED
-                        ConnectionState.Connecting -> ConnectionStatus.CONNECTING
-                        else -> ConnectionStatus.DISCONNECTED
-                    }
-                _sessionState.value = _sessionState.value.copy(connectionStatus = status)
+                _sessionState.value = _sessionState.value.copy(connectionStatus = state)
             }
         }
     }
@@ -272,7 +265,7 @@ class CarStateCoordinator(
         nodeNum = num,
         longName = user.long_name.ifEmpty { "Unknown" },
         shortName = user.short_name.ifEmpty { "?" },
-        signalQuality = snrToSignalQuality(snr),
+        signalQuality = determineSignalQuality(snr, rssi),
         batteryPercent = batteryLevel?.takeIf { it in 1..BATTERY_MAX_PERCENT },
         isOnline = isOnline,
         lastHeard = lastHeard.toLong() * SECONDS_TO_MILLIS,
@@ -286,15 +279,20 @@ class CarStateCoordinator(
         private const val DATA_TYPE_TEXT = 1
         private const val SECONDS_TO_MILLIS = 1000L
         private const val BATTERY_MAX_PERCENT = 100
-        private const val SNR_EXCELLENT = 10f
-        private const val SNR_GOOD = 5f
-        private const val SNR_FAIR = 0f
 
-        private fun snrToSignalQuality(snr: Float): SignalQuality = when {
-            snr == Float.MAX_VALUE -> SignalQuality.UNKNOWN
-            snr >= SNR_EXCELLENT -> SignalQuality.EXCELLENT
-            snr >= SNR_GOOD -> SignalQuality.GOOD
-            snr >= SNR_FAIR -> SignalQuality.FAIR
+        // Thresholds aligned with core/ui LoraSignalIndicator.kt
+        private const val SNR_GOOD_THRESHOLD = -7f
+        private const val SNR_FAIR_THRESHOLD = -15f
+        private const val RSSI_GOOD_THRESHOLD = -115
+        private const val RSSI_FAIR_THRESHOLD = -126
+
+        @Suppress("MagicNumber")
+        private fun determineSignalQuality(snr: Float, rssi: Int): SignalQuality = when {
+            snr == Float.MAX_VALUE || rssi == Int.MAX_VALUE -> SignalQuality.UNKNOWN
+            snr > SNR_GOOD_THRESHOLD && rssi > RSSI_GOOD_THRESHOLD -> SignalQuality.EXCELLENT
+            snr > SNR_GOOD_THRESHOLD && rssi > RSSI_FAIR_THRESHOLD -> SignalQuality.GOOD
+            snr > SNR_FAIR_THRESHOLD && rssi > RSSI_GOOD_THRESHOLD -> SignalQuality.GOOD
+            snr > SNR_FAIR_THRESHOLD -> SignalQuality.FAIR
             else -> SignalQuality.POOR
         }
     }

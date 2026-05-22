@@ -20,8 +20,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.util.DateFormatter
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.feature.car.model.CarSessionState
-import org.meshtastic.feature.car.model.ConnectionStatus
 
 /**
  * Manages persistent mesh status state for the car display. Provides connection status, node count, and last message
@@ -33,7 +34,7 @@ class MeshStatusPanel {
     private val _state =
         MutableStateFlow(
             CarSessionState(
-                connectionStatus = ConnectionStatus.DISCONNECTED,
+                connectionStatus = ConnectionState.Disconnected,
                 onlineNodeCount = 0,
                 lastMessageTime = null,
                 activeEmergencies = emptyList(),
@@ -42,7 +43,7 @@ class MeshStatusPanel {
         )
     val state: StateFlow<CarSessionState> = _state.asStateFlow()
 
-    fun updateConnectionStatus(status: ConnectionStatus) {
+    fun updateConnectionStatus(status: ConnectionState) {
         _state.value = _state.value.copy(connectionStatus = status)
     }
 
@@ -61,29 +62,15 @@ class MeshStatusPanel {
     fun getStatusTitle(): String {
         val state = _state.value
         return when (state.connectionStatus) {
-            ConnectionStatus.CONNECTED -> "${state.onlineNodeCount} nodes online"
-            ConnectionStatus.CONNECTING -> "Connecting..."
-            ConnectionStatus.DISCONNECTED -> "Disconnected"
+            ConnectionState.Connected -> "${state.onlineNodeCount} nodes online"
+            ConnectionState.Connecting -> "Connecting..."
+            else -> "Disconnected"
         }
     }
 
     fun getStatusSubtitle(): String? {
         val state = _state.value
-        val lastMsg = state.lastMessageTime ?: return null
-        val elapsed = System.currentTimeMillis() - lastMsg
-        val timeAgo =
-            when {
-                elapsed < MILLIS_PER_MINUTE -> "just now"
-                elapsed < MILLIS_PER_HOUR -> "${elapsed / MILLIS_PER_MINUTE}m ago"
-                elapsed < MILLIS_PER_DAY -> "${elapsed / MILLIS_PER_HOUR}h ago"
-                else -> "${elapsed / MILLIS_PER_DAY}d ago"
-            }
-        return "Last msg: $timeAgo"
-    }
-
-    companion object {
-        private const val MILLIS_PER_MINUTE = 60_000L
-        private const val MILLIS_PER_HOUR = 3_600_000L
-        private const val MILLIS_PER_DAY = 86_400_000L
+        val lastMsg = state.lastMessageTime?.takeIf { it != 0L } ?: return null
+        return "Last msg: ${DateFormatter.formatRelativeTime(lastMsg)}"
     }
 }

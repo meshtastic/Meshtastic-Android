@@ -24,6 +24,7 @@ import androidx.car.app.model.Pane
 import androidx.car.app.model.PaneTemplate
 import androidx.car.app.model.Row
 import androidx.car.app.model.Template
+import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.feature.car.R
 import org.meshtastic.feature.car.model.NodeUi
 import org.meshtastic.feature.car.model.SignalQuality
@@ -107,23 +108,6 @@ class NodeDetailScreen(
 
     private fun formatLastHeard(epochMillis: Long): String {
         if (epochMillis == 0L) return carContext.getString(R.string.car_time_never)
-        val elapsed = System.currentTimeMillis() - epochMillis
-        return when {
-            elapsed < MILLIS_PER_MINUTE -> carContext.getString(R.string.car_time_just_now)
-
-            elapsed < MILLIS_PER_HOUR ->
-                carContext.getString(R.string.car_time_minutes_ago, (elapsed / MILLIS_PER_MINUTE).toInt())
-
-            elapsed < MILLIS_PER_DAY ->
-                carContext.getString(R.string.car_time_hours_ago, (elapsed / MILLIS_PER_HOUR).toInt())
-
-            else -> carContext.getString(R.string.car_time_days_ago, (elapsed / MILLIS_PER_DAY).toInt())
-        }
-    }
-
-    companion object {
-        private const val MILLIS_PER_MINUTE = 60_000L
-        private const val MILLIS_PER_HOUR = 3_600_000L
-        private const val MILLIS_PER_DAY = 86_400_000L
+        return DateFormatter.formatRelativeTime(epochMillis)
     }
 }

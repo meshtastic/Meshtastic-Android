@@ -39,8 +39,8 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.feature.car.R
-import org.meshtastic.feature.car.model.ConnectionStatus
 import org.meshtastic.feature.car.model.NodeUi
 import org.meshtastic.feature.car.model.SignalQuality
 import org.meshtastic.feature.car.service.CarStateCoordinator
@@ -73,7 +73,7 @@ class HomeScreen(carContext: CarContext, private val stateCoordinator: CarStateC
     @Suppress("ReturnCount")
     override fun onGetTemplate(): Template {
         val connectionStatus = stateCoordinator.sessionState.value.connectionStatus
-        if (connectionStatus == ConnectionStatus.DISCONNECTED) {
+        if (connectionStatus == ConnectionState.Disconnected || connectionStatus == ConnectionState.DeviceSleep) {
             return buildDisconnectedTemplate()
         }
         val messaging = stateCoordinator.messagingState.value

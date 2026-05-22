@@ -16,19 +16,15 @@
  */
 package org.meshtastic.feature.car.model
 
+import org.meshtastic.core.model.ConnectionState
+
 data class CarSessionState(
-    val connectionStatus: ConnectionStatus,
+    val connectionStatus: ConnectionState,
     val onlineNodeCount: Int,
     val lastMessageTime: Long?,
     val activeEmergencies: List<EmergencyAlert>,
     val meshName: String?,
 )
-
-enum class ConnectionStatus {
-    CONNECTED,
-    CONNECTING,
-    DISCONNECTED,
-}
 
 data class MessagingUiState(
     val channels: List<ChannelUi>,

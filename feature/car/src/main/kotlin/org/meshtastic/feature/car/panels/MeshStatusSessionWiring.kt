@@ -20,7 +20,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
-import org.meshtastic.feature.car.model.ConnectionStatus
+import org.meshtastic.core.model.ConnectionState
 
 /** Wires MeshStatusPanel to data sources during a car session. Attach in onCreateScreen, detach in onDestroy. */
 class MeshStatusSessionWiring(private val panel: MeshStatusPanel) {
@@ -30,7 +30,7 @@ class MeshStatusSessionWiring(private val panel: MeshStatusPanel) {
 
     fun attach(
         scope: CoroutineScope,
-        connectionFlow: Flow<ConnectionStatus>,
+        connectionFlow: Flow<ConnectionState>,
         nodeCountFlow: Flow<Int>,
         lastMessageTimeFlow: Flow<Long>,
         meshNameFlow: Flow<String?>,

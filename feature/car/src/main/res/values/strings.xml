@@ -36,10 +36,6 @@
     <string name="car_status_status">Status</string>
     <string name="car_tab_messages">Messages</string>
     <string name="car_tab_nodes">Nodes</string>
-    <string name="car_time_days_ago">%dd ago</string>
-    <string name="car_time_hours_ago">%dh ago</string>
-    <string name="car_time_just_now">Just now</string>
-    <string name="car_time_minutes_ago">%dm ago</string>
     <string name="car_time_never">Never</string>
     <string name="car_unread_badge">%d unread</string>
     <string name="car_voice_reply">Reply</string>
