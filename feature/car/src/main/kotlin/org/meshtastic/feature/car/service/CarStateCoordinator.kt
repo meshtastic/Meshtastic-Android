@@ -261,16 +261,21 @@ class CarStateCoordinator(
         }
     }
 
-    private fun Node.toNodeUi(): NodeUi = NodeUi(
-        nodeNum = num,
-        longName = user.long_name.ifEmpty { "Unknown" },
-        shortName = user.short_name.ifEmpty { "?" },
-        signalQuality = determineSignalQuality(snr, rssi),
-        batteryPercent = batteryLevel?.takeIf { it in 1..BATTERY_MAX_PERCENT },
-        isOnline = isOnline,
-        lastHeard = lastHeard.toLong() * SECONDS_TO_MILLIS,
-        hasPosition = validPosition != null,
-    )
+    private fun Node.toNodeUi(): NodeUi {
+        val (textColor, bgColor) = colors
+        return NodeUi(
+            nodeNum = num,
+            longName = user.long_name.ifEmpty { "Unknown" },
+            shortName = user.short_name.ifEmpty { "?" },
+            signalQuality = determineSignalQuality(snr, rssi),
+            batteryPercent = batteryLevel?.takeIf { it in 1..BATTERY_MAX_PERCENT },
+            isOnline = isOnline,
+            lastHeard = lastHeard.toLong() * SECONDS_TO_MILLIS,
+            hasPosition = validPosition != null,
+            chipColor = bgColor,
+            chipTextColor = textColor,
+        )
+    }
 
     companion object {
         private const val MAX_CONVERSATIONS = 10

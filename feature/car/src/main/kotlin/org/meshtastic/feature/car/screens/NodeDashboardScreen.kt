@@ -16,11 +16,15 @@
  */
 package org.meshtastic.feature.car.screens
 
+import android.text.Spannable
+import android.text.SpannableString
 import androidx.car.app.CarContext
 import androidx.car.app.Screen
 import androidx.car.app.model.Action
 import androidx.car.app.model.CarColor
 import androidx.car.app.model.CarIcon
+import androidx.car.app.model.CarText
+import androidx.car.app.model.ForegroundCarColorSpan
 import androidx.car.app.model.Header
 import androidx.car.app.model.ItemList
 import androidx.car.app.model.ListTemplate
@@ -69,7 +73,7 @@ class NodeDashboardScreen(
         state.nodes.forEach { node ->
             listBuilder.addItem(
                 Row.Builder()
-                    .setTitle(node.longName)
+                    .setTitle(formatNodeTitle(node))
                     .addText(formatNodeSubtitle(node))
                     .setImage(if (node.isOnline) onlineIcon else offlineIcon, Row.IMAGE_TYPE_ICON)
                     .setBrowsable(true)
@@ -84,15 +88,17 @@ class NodeDashboardScreen(
             .build()
     }
 
-    private fun formatNodeSubtitle(node: NodeUi): String {
-        val signal =
-            when (node.signalQuality) {
-                SignalQuality.EXCELLENT -> carContext.getString(R.string.car_signal_excellent)
-                SignalQuality.GOOD -> carContext.getString(R.string.car_signal_good)
-                SignalQuality.FAIR -> carContext.getString(R.string.car_signal_fair)
-                SignalQuality.BAD -> carContext.getString(R.string.car_signal_bad)
-                SignalQuality.NONE -> carContext.getString(R.string.car_signal_none)
-            }
+    private fun formatNodeTitle(node: NodeUi): CarText {
+        val chip = "[${node.shortName}] "
+        val full = "$chip${node.longName}"
+        val spannable = SpannableString(full)
+        val chipColor = CarColor.createCustom(node.chipColor, node.chipColor)
+        spannable.setSpan(ForegroundCarColorSpan.create(chipColor), 0, chip.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+        return CarText.Builder(spannable).build()
+    }
+
+    private fun formatNodeSubtitle(node: NodeUi): CarText {
+        val signalLabel = signalLabel(node.signalQuality)
         val battery = node.batteryPercent?.let { " • $it%" } ?: ""
         val lastHeard =
             if (node.lastHeard != 0L) {
@@ -101,6 +107,32 @@ class NodeDashboardScreen(
                 ""
             }
         val status = if (!node.isOnline) " • ${carContext.getString(R.string.car_status_offline)}" else ""
-        return "$signal$battery$lastHeard$status"
+        val full = "$signalLabel$battery$lastHeard$status"
+
+        val spannable = SpannableString(full)
+        val signalColor = signalColor(node.signalQuality)
+        spannable.setSpan(
+            ForegroundCarColorSpan.create(signalColor),
+            0,
+            signalLabel.length,
+            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE,
+        )
+        return CarText.Builder(spannable).build()
+    }
+
+    private fun signalLabel(quality: SignalQuality): String = when (quality) {
+        SignalQuality.EXCELLENT -> carContext.getString(R.string.car_signal_excellent)
+        SignalQuality.GOOD -> carContext.getString(R.string.car_signal_good)
+        SignalQuality.FAIR -> carContext.getString(R.string.car_signal_fair)
+        SignalQuality.BAD -> carContext.getString(R.string.car_signal_bad)
+        SignalQuality.NONE -> carContext.getString(R.string.car_signal_none)
+    }
+
+    private fun signalColor(quality: SignalQuality): CarColor = when (quality) {
+        SignalQuality.EXCELLENT -> CarColor.GREEN
+        SignalQuality.GOOD -> CarColor.GREEN
+        SignalQuality.FAIR -> CarColor.YELLOW
+        SignalQuality.BAD -> CarColor.RED
+        SignalQuality.NONE -> CarColor.SECONDARY
     }
 }
