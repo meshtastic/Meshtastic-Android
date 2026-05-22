@@ -79,9 +79,7 @@ fun getRadioConfigViewModel(backStack: NavBackStack<NavKey>, destNumOverride: In
             ?: remember(backStack.toList()) {
                 backStack.lastOrNull { it is SettingsRoute.Settings }?.let { (it as SettingsRoute.Settings).destNum }
             }
-    return koinViewModel<RadioConfigViewModel>(key = destNum?.toString()) {
-        parametersOf(destNum)
-    }
+    return koinViewModel<RadioConfigViewModel>(key = destNum?.toString()) { parametersOf(destNum) }
 }
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")

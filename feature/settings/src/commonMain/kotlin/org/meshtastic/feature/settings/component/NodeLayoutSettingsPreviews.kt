@@ -41,7 +41,8 @@ fun NodeLayoutSettingsCompactPreview() {
     AppTheme {
         Surface {
             NodeLayoutSettings(
-                state = NodeListSettingsState(
+                state =
+                NodeListSettingsState(
                     density = NodeListDensity.COMPACT,
                     showPower = true,
                     showLastHeard = true,
@@ -74,7 +75,8 @@ fun NodeLayoutSettingsCompletePreview() {
     AppTheme {
         Surface {
             NodeLayoutSettings(
-                state = NodeListSettingsState(
+                state =
+                NodeListSettingsState(
                     density = NodeListDensity.COMPLETE,
                     showPower = true,
                     showLastHeard = true,
@@ -108,7 +110,8 @@ fun NodeLayoutSettingsCompactMinimalPreview() {
     AppTheme {
         Surface {
             NodeLayoutSettings(
-                state = NodeListSettingsState(
+                state =
+                NodeListSettingsState(
                     density = NodeListDensity.COMPACT,
                     showPower = false,
                     showLastHeard = true,

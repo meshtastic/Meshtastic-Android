@@ -37,8 +37,8 @@ import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.feature.settings.component.NodeLayoutSettings
 
 /**
- * Dedicated settings screen for node list display options (density and field visibility).
- * Provides a focused interface for customizing how nodes are rendered in the list view.
+ * Dedicated settings screen for node list display options (density and field visibility). Provides a focused interface
+ * for customizing how nodes are rendered in the list view.
  *
  * Material 3 expressive design highlights:
  * - **Section organization**: NodeLayoutSettings component handles grouped layout with cards
@@ -51,13 +51,11 @@ import org.meshtastic.feature.settings.component.NodeLayoutSettings
  * @param onNavigateUp Callback when user requests navigation back (back button in app bar)
  */
 @Composable
-fun NodeListScreen(
-    settingsViewModel: SettingsViewModel,
-    onNavigateUp: () -> Unit,
-) {
+fun NodeListScreen(settingsViewModel: SettingsViewModel, onNavigateUp: () -> Unit, modifier: Modifier = Modifier) {
     val settings by settingsViewModel.nodeListSettings.collectAsStateWithLifecycle()
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             MainAppBar(
                 title = stringResource(Res.string.node_layout_section_title),
