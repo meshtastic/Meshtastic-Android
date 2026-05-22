@@ -19,6 +19,7 @@ package org.meshtastic.feature.car.screens
 import androidx.car.app.CarContext
 import androidx.car.app.Screen
 import androidx.car.app.model.Action
+import androidx.car.app.model.CarIcon
 import androidx.car.app.model.Header
 import androidx.car.app.model.ItemList
 import androidx.car.app.model.ListTemplate
@@ -29,6 +30,7 @@ import androidx.car.app.model.Tab
 import androidx.car.app.model.TabContents
 import androidx.car.app.model.TabTemplate
 import androidx.car.app.model.Template
+import androidx.core.graphics.drawable.IconCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import kotlinx.coroutines.CoroutineScope
@@ -82,10 +84,15 @@ class HomeScreen(carContext: CarContext, private val stateCoordinator: CarStateC
             Tab.Builder()
                 .setContentId(TAB_ID_MESSAGES)
                 .setTitle(carContext.getString(R.string.car_tab_messages))
+                .setIcon(CarIcon.Builder(IconCompat.createWithResource(carContext, R.drawable.ic_car_message)).build())
                 .build()
 
         val nodesTab =
-            Tab.Builder().setContentId(TAB_ID_NODES).setTitle(carContext.getString(R.string.car_tab_nodes)).build()
+            Tab.Builder()
+                .setContentId(TAB_ID_NODES)
+                .setTitle(carContext.getString(R.string.car_tab_nodes))
+                .setIcon(CarIcon.Builder(IconCompat.createWithResource(carContext, R.drawable.ic_car_nodes)).build())
+                .build()
 
         return TabTemplate.Builder(
             object : TabTemplate.TabCallback {
@@ -121,11 +128,14 @@ class HomeScreen(carContext: CarContext, private val stateCoordinator: CarStateC
         if (state.conversations.isEmpty()) {
             listBuilder.setNoItemsMessage(carContext.getString(R.string.car_no_messages))
         } else {
+            val personIcon =
+                CarIcon.Builder(IconCompat.createWithResource(carContext, R.drawable.ic_car_person)).build()
             state.conversations.forEach { conversation ->
                 listBuilder.addItem(
                     Row.Builder()
                         .setTitle(conversation.displayName)
                         .addText(conversation.lastMessage)
+                        .setImage(personIcon)
                         .setBrowsable(true)
                         .setOnClickListener { openConversation(conversation.contactKey, conversation.displayName) }
                         .build(),
@@ -160,11 +170,13 @@ class HomeScreen(carContext: CarContext, private val stateCoordinator: CarStateC
         if (state.nodes.isEmpty()) {
             listBuilder.setNoItemsMessage(carContext.getString(R.string.car_no_nodes))
         } else {
+            val nodeIcon = CarIcon.Builder(IconCompat.createWithResource(carContext, R.drawable.ic_car_nodes)).build()
             state.nodes.forEach { node ->
                 listBuilder.addItem(
                     Row.Builder()
                         .setTitle(node.longName)
                         .addText(formatNodeSubtitle(node))
+                        .setImage(nodeIcon)
                         .setBrowsable(true)
                         .setOnClickListener {
                             screenManager.push(
@@ -182,14 +194,14 @@ class HomeScreen(carContext: CarContext, private val stateCoordinator: CarStateC
     private fun formatNodeSubtitle(node: NodeUi): String {
         val signal =
             when (node.signalQuality) {
-                SignalQuality.EXCELLENT -> "Excellent"
-                SignalQuality.GOOD -> "Good"
-                SignalQuality.FAIR -> "Fair"
-                SignalQuality.POOR -> "Poor"
-                SignalQuality.UNKNOWN -> "Unknown"
+                SignalQuality.EXCELLENT -> carContext.getString(R.string.car_signal_excellent)
+                SignalQuality.GOOD -> carContext.getString(R.string.car_signal_good)
+                SignalQuality.FAIR -> carContext.getString(R.string.car_signal_fair)
+                SignalQuality.POOR -> carContext.getString(R.string.car_signal_poor)
+                SignalQuality.UNKNOWN -> carContext.getString(R.string.car_signal_unknown)
             }
         val battery = node.batteryPercent?.let { " • $it%" } ?: ""
-        val status = if (!node.isOnline) " • Offline" else ""
+        val status = if (!node.isOnline) " • ${carContext.getString(R.string.car_status_offline)}" else ""
         return "$signal$battery$status"
     }
 
@@ -199,6 +211,10 @@ class HomeScreen(carContext: CarContext, private val stateCoordinator: CarStateC
                 Row.Builder()
                     .setTitle(carContext.getString(R.string.car_disconnected))
                     .addText(carContext.getString(R.string.car_reconnecting))
+                    .setImage(
+                        CarIcon.Builder(IconCompat.createWithResource(carContext, R.drawable.ic_car_warning))
+                            .build(),
+                    )
                     .build(),
             )
             .build(),
@@ -217,6 +233,10 @@ class HomeScreen(carContext: CarContext, private val stateCoordinator: CarStateC
                 Row.Builder()
                     .setTitle(carContext.getString(R.string.car_onboarding_title))
                     .addText(carContext.getString(R.string.car_onboarding_text))
+                    .setImage(
+                        CarIcon.Builder(IconCompat.createWithResource(carContext, R.drawable.ic_car_meshtastic))
+                            .build(),
+                    )
                     .build(),
             )
             .build(),

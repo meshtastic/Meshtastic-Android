@@ -19,11 +19,13 @@ package org.meshtastic.feature.car.screens
 import androidx.car.app.CarContext
 import androidx.car.app.Screen
 import androidx.car.app.model.Action
+import androidx.car.app.model.CarIcon
 import androidx.car.app.model.Header
 import androidx.car.app.model.ItemList
 import androidx.car.app.model.ListTemplate
 import androidx.car.app.model.Row
 import androidx.car.app.model.Template
+import androidx.core.graphics.drawable.IconCompat
 import org.meshtastic.feature.car.R
 import org.meshtastic.feature.car.model.NodeDashboardUiState
 import org.meshtastic.feature.car.model.NodeUi
@@ -54,17 +56,18 @@ class NodeDashboardScreen(
         }
 
         val header = state.topologyHeader
-        val headerTitle = "${header.onlineNodes}/${header.totalNodes} nodes online"
+        val headerTitle = carContext.getString(R.string.car_nodes_online, header.onlineNodes)
 
+        val nodeIcon = CarIcon.Builder(IconCompat.createWithResource(carContext, R.drawable.ic_car_nodes)).build()
         val listBuilder = ItemList.Builder()
-        val sortedNodes =
-            state.nodes.sortedWith(compareByDescending<NodeUi> { it.isOnline }.thenByDescending { it.lastHeard })
 
-        sortedNodes.forEach { node ->
+        // Nodes already sorted by CarStateCoordinator (online-first, then by lastHeard)
+        state.nodes.forEach { node ->
             listBuilder.addItem(
                 Row.Builder()
                     .setTitle(node.longName)
                     .addText(formatNodeSubtitle(node))
+                    .setImage(nodeIcon)
                     .setBrowsable(true)
                     .setOnClickListener { onNodeClick(node.nodeNum) }
                     .build(),
@@ -87,7 +90,7 @@ class NodeDashboardScreen(
                 SignalQuality.UNKNOWN -> carContext.getString(R.string.car_signal_unknown)
             }
         val battery = node.batteryPercent?.let { " • $it%" } ?: ""
-        val status = if (!node.isOnline) " • Offline" else ""
+        val status = if (!node.isOnline) " • ${carContext.getString(R.string.car_status_offline)}" else ""
         return "$signal$battery$status"
     }
 }

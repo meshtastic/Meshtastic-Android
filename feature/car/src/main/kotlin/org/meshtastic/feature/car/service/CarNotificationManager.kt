@@ -27,6 +27,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.Person
 import androidx.core.app.RemoteInput
 import org.koin.core.annotation.Single
+import org.meshtastic.feature.car.R
 
 @Single
 class CarNotificationManager(private val context: Context) {
@@ -58,7 +59,7 @@ class CarNotificationManager(private val context: Context) {
 
         val notification =
             NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(android.R.drawable.ic_dialog_email)
+                .setSmallIcon(R.drawable.ic_car_meshtastic)
                 .setStyle(messagingStyle)
                 .addAction(replyAction)
                 .addAction(markReadAction)
