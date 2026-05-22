@@ -131,3 +131,8 @@ feature:docs
   ├── compose.material3.adaptive, compose.material3.adaptive.navigation3
   └── kotlinx.collections.immutable
 ```
+
+## Dependency Graph
+
+<!--region graph-->
+<!--endregion-->

@@ -16,3 +16,8 @@ The `:core:datastore` module manages structured, asynchronous data storage using
 ### 2. Serializers
 Uses **Kotlin Serialization** to convert between Protobuf/JSON and the underlying DataStore storage.
 
+
+## Dependency Graph
+
+<!--region graph-->
+<!--endregion-->

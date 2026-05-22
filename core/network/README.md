@@ -19,3 +19,8 @@ The module uses **Ktor** as its primary HTTP client for high-performance, asynch
 
 > **BLE transport** lives in [`:core:ble`](../ble/README.md), not here. `BaseRadioTransportFactory` delegates to it when an address with the `x` prefix is resolved.
 
+
+## Dependency Graph
+
+<!--region graph-->
+<!--endregion-->

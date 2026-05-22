@@ -20,3 +20,8 @@ A security-focused utility that detects and transforms homoglyphs (visually simi
 - **Message Reactions**: Support for reacting to messages with emojis.
 - **Delivery Status**: Indicators for "Sent", "Received", and "Read" (ACK/NACK).
 
+
+## Dependency Graph
+
+<!--region graph-->
+<!--endregion-->

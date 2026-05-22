@@ -19,3 +19,8 @@ Displays version information, licenses, and project links.
 - **Node Database Management**: Options to clear or prune the local and remote node databases.
 - **App Preferences**: Theme selection, unit system (metric/imperial), and notification settings.
 
+
+## Dependency Graph
+
+<!--region graph-->
+<!--endregion-->

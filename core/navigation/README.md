@@ -32,3 +32,8 @@ fun openNodeDetail(backStack: NavBackStack<NavKey>, destNum: Int) {
 }
 ```
 
+
+## Dependency Graph
+
+<!--region graph-->
+<!--endregion-->

@@ -107,3 +107,8 @@ core:domain
 ## DI
 
 All use cases are registered via Koin component scan on `org.meshtastic.core.domain`. No manual binding is needed — annotate a new use case with `@Single` and it is picked up automatically.
+
+## Dependency Graph
+
+<!--region graph-->
+<!--endregion-->

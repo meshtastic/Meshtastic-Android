@@ -11,3 +11,8 @@ A Composable side-effect that manages Android NFC adapter state and listens for 
 ### 2. `LocalNfcScannerProvider` (core:ui/commonMain)
 The shared capability contract for NFC scanning, injected via `CompositionLocalProvider` from the app layer.
 
+
+## Dependency Graph
+
+<!--region graph-->
+<!--endregion-->

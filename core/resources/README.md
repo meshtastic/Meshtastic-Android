@@ -19,3 +19,8 @@ import org.meshtastic.core.resources.your_string_key
 Text(text = stringResource(Res.string.your_string_key))
 ```
 
+
+## Dependency Graph
+
+<!--region graph-->
+<!--endregion-->

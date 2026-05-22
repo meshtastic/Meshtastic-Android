@@ -42,3 +42,8 @@ sequenceDiagram
 - `NymeaPacketCodec.kt`: Chunked BLE packet encoder/decoder with reassembly.
 - `NymeaProtocol.kt`: JSON serialization for Nymea network manager commands and responses.
 - `ProvisionStatusCard.kt`: Inline status feedback card (idle/success/failed) with Material 3 colors.
+
+## Dependency Graph
+
+<!--region graph-->
+<!--endregion-->

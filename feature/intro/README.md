@@ -17,3 +17,8 @@ Dedicated screens for explaining and requesting specific permissions:
 - `BluetoothScreen`: Necessary for connecting to radios.
 - `NotificationsScreen`: Necessary for foreground service and message alerts.
 
+
+## Dependency Graph
+
+<!--region graph-->
+<!--endregion-->

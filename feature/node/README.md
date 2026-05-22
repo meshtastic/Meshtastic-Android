@@ -20,3 +20,8 @@ Manages the retrieval and display of telemetry data (e.g., battery, SNR, environ
 ### 4. `CompassViewModel`
 Provides a compass interface to show the relative direction and distance to other nodes.
 
+
+## Dependency Graph
+
+<!--region graph-->
+<!--endregion-->

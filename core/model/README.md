@@ -26,3 +26,8 @@ implementation(projects.core.model)
 - **`androidMain`**: Contains Android-specific utilities and implementations for `expect` declarations.
 - **`androidUnitTest`**: Contains unit tests that require Android-specific features (like `Parcel` testing via Robolectric).
 
+
+## Dependency Graph
+
+<!--region graph-->
+<!--endregion-->

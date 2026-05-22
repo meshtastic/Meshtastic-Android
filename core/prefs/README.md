@@ -13,3 +13,8 @@ Provides named `DataStore<Preferences>` singletons for each preference domain (a
 - **`UiPrefs`**: Manages UI preferences (e.g., theme selection, unit systems).
 - **`MapPrefs`**: Manages mapping preferences (e.g., preferred map provider).
 
+
+## Dependency Graph
+
+<!--region graph-->
+<!--endregion-->

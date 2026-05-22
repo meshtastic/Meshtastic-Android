@@ -122,3 +122,8 @@ feature:connections
   ├── feature:settings             (RadioConfigViewModel)
   └── usb-serial-android           (Android only)
 ```
+
+## Dependency Graph
+
+<!--region graph-->
+<!--endregion-->

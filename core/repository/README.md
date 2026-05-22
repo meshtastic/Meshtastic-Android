@@ -148,3 +148,8 @@ core:repository
   ├── core:database
   └── kotlinx.coroutines, kermit, androidx.paging.common
 ```
+
+## Dependency Graph
+
+<!--region graph-->
+<!--endregion-->

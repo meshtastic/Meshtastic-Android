@@ -133,3 +133,8 @@ core:takserver
 ## Local TAK Server Feature
 
 The Local TAK Server can be enabled from the app's Settings screen. When running, ATAK/iTAK clients on the same network can connect to `<device-ip>:8089` and their position reports are automatically bridged onto the mesh. Mesh node positions are broadcast to all connected TAK clients in real time.
+
+## Dependency Graph
+
+<!--region graph-->
+<!--endregion-->

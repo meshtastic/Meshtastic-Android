@@ -38,3 +38,8 @@ All providers are injected via `CompositionLocal` in `MainActivity.kt` and consu
 - **Traceroute Visualization**: Dedicated map view showing route segments between mesh nodes.
 - **Offline Maps**: Support for pre-downloaded map tiles (via `osmdroid`).
 
+
+## Dependency Graph
+
+<!--region graph-->
+<!--endregion-->

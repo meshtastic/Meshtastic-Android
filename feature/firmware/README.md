@@ -90,3 +90,8 @@ sequenceDiagram
 - `SecureDfuTransport.kt`: BLE transport layer for Secure DFU using Kable (control/data point characteristics, PRN flow control).
 - `DfuZipParser.kt`: Parses Nordic DFU ZIP archives (manifest, init packet, firmware binary).
 - `UsbUpdateHandler.kt`: Handles USB/UF2 firmware updates across platforms.
+
+## Dependency Graph
+
+<!--region graph-->
+<!--endregion-->

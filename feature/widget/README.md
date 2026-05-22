@@ -120,3 +120,8 @@ feature:widget (Android only)
   ├── androidx.glance.appwidget, glance.material3, glance.preview
   └── compose.multiplatform.ui (LocalConfiguration, LocalDensity)
 ```
+
+## Dependency Graph
+
+<!--region graph-->
+<!--endregion-->

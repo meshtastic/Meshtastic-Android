@@ -17,3 +17,8 @@ Provides a wrapper for standard Kotlin `CoroutineDispatchers` (`IO`, `Default`, 
 ### 3. `ProcessLifecycle.kt`
 Exposes the application's global process lifecycle as a Koin binding, enabling components to react to the app entering the foreground or background.
 
+
+## Dependency Graph
+
+<!--region graph-->
+<!--endregion-->

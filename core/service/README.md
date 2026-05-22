@@ -20,3 +20,8 @@ An enum representing the current state of the radio connection (`Connected`, `Di
 ### 4. `ServiceAction`
 Defines Intent actions for starting, stopping, and interacting with the background service.
 
+
+## Dependency Graph
+
+<!--region graph-->
+<!--endregion-->

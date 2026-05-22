@@ -19,3 +19,8 @@ This module is a low-level dependency for any module that needs to encode or dec
 implementation(projects.core.proto)
 ```
 
+
+## Dependency Graph
+
+<!--region graph-->
+<!--endregion-->

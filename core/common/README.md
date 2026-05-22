@@ -20,3 +20,8 @@ Centralized utility for display strings — temperature, voltage, current, perce
 ### 3. `BuildConfigProvider.kt`
 An interface for accessing build-time configuration in a multiplatform-friendly way.
 
+
+## Dependency Graph
+
+<!--region graph-->
+<!--endregion-->

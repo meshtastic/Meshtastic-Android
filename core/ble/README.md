@@ -58,3 +58,8 @@ The module follows a clean multiplatform architecture approach:
 ## Testing
 
 The module includes unit tests for key components, utilizing Kable's architecture and standard coroutine testing tools to ensure logic correctness.
+
+## Dependency Graph
+
+<!--region graph-->
+<!--endregion-->
