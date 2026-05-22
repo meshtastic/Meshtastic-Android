@@ -81,6 +81,9 @@ Each module has its own README with details on its responsibilities, API surface
 | Module | Description |
 |---|---|
 | [core/api](core/api/README.md) | AIDL service API for third-party integrations |
+| [core/domain](core/domain/README.md) | Business-logic use cases (radio config, sessions, exports) |
+| [core/repository](core/repository/README.md) | Data & infrastructure contracts (RadioTransport, NodeRepository, ServiceRepository) |
+| [core/takserver](core/takserver/README.md) | Meshtastic ↔ TAK (ATAK/iTAK) bridge — CoT server & conversion |
 | [core/ble](core/ble/README.md) | Multiplatform BLE transport (Kable) |
 | [core/network](core/network/README.md) | Internet comms: firmware metadata, map tiles, radio transports |
 | [core/data](core/data/README.md) | Repository layer — orchestrates DB, network, and service data |
@@ -105,6 +108,9 @@ Each module has its own README with details on its responsibilities, API surface
 | [feature/firmware](feature/firmware/README.md) | Firmware update UI feature |
 | [feature/intro](feature/intro/README.md) | Onboarding / intro UI feature |
 | [feature/wifi-provision](feature/wifi-provision/README.md) | Wi-Fi provisioning UI feature |
+| [feature/connections](feature/connections/README.md) | Device discovery & connection management (BLE / USB / TCP) |
+| [feature/docs](feature/docs/README.md) | In-app documentation browser with Chirpy AI assistant |
+| [feature/widget](feature/widget/README.md) | Android home-screen Glance widget (live mesh stats) |
 
 ## Translations
 
