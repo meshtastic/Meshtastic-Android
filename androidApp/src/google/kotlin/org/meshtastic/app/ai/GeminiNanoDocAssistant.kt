@@ -24,7 +24,6 @@ import com.google.firebase.ai.OnDeviceConfig
 import com.google.firebase.ai.OnDeviceModelOption
 import com.google.firebase.ai.OnDeviceModelStatus
 import com.google.firebase.ai.ai
-import com.google.firebase.ai.type.FirebaseAIException
 import com.google.firebase.ai.type.GenerativeBackend
 import com.google.firebase.ai.type.PublicPreviewAPI
 import com.google.firebase.ai.type.content
@@ -68,7 +67,8 @@ class GeminiNanoDocAssistant(
             .generativeModel(
                 modelName = MODEL_NAME,
                 systemInstruction = content { text(SYSTEM_INSTRUCTION) },
-                onDeviceConfig = OnDeviceConfig(
+                onDeviceConfig =
+                OnDeviceConfig(
                     mode = InferenceMode.ONLY_ON_DEVICE,
                     modelOption = OnDeviceModelOption.STABLE,
                     maxOutputTokens = MAX_OUTPUT_TOKENS,
@@ -120,10 +120,11 @@ class GeminiNanoDocAssistant(
                         }
 
                         is DownloadStatus.DownloadInProgress -> {
-                            _modelStatus.value = ModelReadiness.Downloading(
-                                downloadStatus.totalBytesDownloaded, totalSize
-                            )
-                            Logger.d(tag = TAG) { "Download progress: ${downloadStatus.totalBytesDownloaded}/$totalSize" }
+                            _modelStatus.value =
+                                ModelReadiness.Downloading(downloadStatus.totalBytesDownloaded, totalSize)
+                            Logger.d(tag = TAG) {
+                                "Download progress: ${downloadStatus.totalBytesDownloaded}/$totalSize"
+                            }
                         }
 
                         is DownloadStatus.DownloadCompleted -> {
@@ -175,8 +176,7 @@ class GeminiNanoDocAssistant(
         val queryTerms = extractQueryTerms(question)
 
         // Load all page content for full-text search ranking.
-        val allContent =
-            bundle.pages.associateWith { page -> bundleLoader.readPage(page.id)?.markdown.orEmpty() }
+        val allContent = bundle.pages.associateWith { page -> bundleLoader.readPage(page.id)?.markdown.orEmpty() }
 
         // Rank pages by relevance: full-text content search + keyword/title matching.
         val rankedPages = rankPagesByRelevance(queryTerms, bundle.pages, allContent)
@@ -196,7 +196,9 @@ class GeminiNanoDocAssistant(
         for (attempt in 0..MAX_RETRIES) {
             if (attempt > 0) {
                 val backoffMs = INITIAL_BACKOFF_MS * (1L shl (attempt - 1))
-                Logger.i(tag = TAG) { "Retrying inference in ${backoffMs}ms (attempt ${attempt + 1}/${MAX_RETRIES + 1})" }
+                Logger.i(tag = TAG) {
+                    "Retrying inference in ${backoffMs}ms (attempt ${attempt + 1}/${MAX_RETRIES + 1})"
+                }
                 delay(backoffMs)
             }
             try {
@@ -224,7 +226,8 @@ class GeminiNanoDocAssistant(
 
                 val mentionedPages =
                     bundle.pages.filter { page ->
-                        page.id !in contextResult.usedPageIds && onDeviceAnswer.contains(page.title, ignoreCase = true)
+                        page.id !in contextResult.usedPageIds &&
+                            onDeviceAnswer.contains(page.title, ignoreCase = true)
                     }
                 val allSourcePages = contextPages + mentionedPages
 
@@ -245,16 +248,21 @@ class GeminiNanoDocAssistant(
             } catch (e: Exception) {
                 if (e is kotlinx.coroutines.CancellationException) throw e
                 lastError = e
-                val isBusy = e.message?.contains("BUSY", ignoreCase = true) == true ||
-                    e.message?.contains("BATTERY", ignoreCase = true) == true ||
-                    e.message?.contains("BACKGROUND", ignoreCase = true) == true
+                val isBusy =
+                    e.message?.contains("BUSY", ignoreCase = true) == true ||
+                        e.message?.contains("BATTERY", ignoreCase = true) == true ||
+                        e.message?.contains("BACKGROUND", ignoreCase = true) == true
                 if (!isBusy || attempt >= MAX_RETRIES) {
                     Logger.w(tag = TAG) { "On-device inference failed: ${e.message}" }
-                    val errorType = when {
-                        isBusy -> DocsAiError.Busy
-                        e.message?.contains("UNAVAILABLE", ignoreCase = true) == true -> DocsAiError.ModelUnavailable
-                        else -> DocsAiError.Unknown
-                    }
+                    val errorType =
+                        when {
+                            isBusy -> DocsAiError.Busy
+
+                            e.message?.contains("UNAVAILABLE", ignoreCase = true) == true ->
+                                DocsAiError.ModelUnavailable
+
+                            else -> DocsAiError.Unknown
+                        }
                     val fallbackPages = searchEngine.selectForTokenBudget(question, maxChars = MAX_CONTEXT_CHARS)
                     emit(AIDocAssistantResult.Error(reason = errorType, suggestedPages = fallbackPages))
                     return@flow
@@ -271,8 +279,10 @@ class GeminiNanoDocAssistant(
 
     /** Cleans on-device model response artifacts (markdown fences, excessive newlines). */
     private fun cleanResponse(text: String): String = text
-        .removePrefix("```markdown\n").removePrefix("```\n")
-        .removeSuffix("\n```").removeSuffix("```")
+        .removePrefix("```markdown\n")
+        .removePrefix("```\n")
+        .removeSuffix("\n```")
+        .removeSuffix("```")
         .replace(Regex("\n{3,}"), "\n\n")
         .trim()
 
@@ -528,8 +538,8 @@ Guidelines:
 - If you're truly unsure about something Meshtastic-specific, say so honestly rather than guessing"""
 
         /**
-         * Total prompt context char budget.
-         * Keep this conservative because on-device requests are limited to about 4k tokens.
+         * Total prompt context char budget. Keep this conservative because on-device requests are limited to about 4k
+         * tokens.
          */
         private const val MAX_CONTEXT_CHARS = 9_000
 

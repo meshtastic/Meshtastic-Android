@@ -148,7 +148,6 @@ fun DocsBrowserScreen(
         if (showChirpy) {
             ChirpyAssistantSheet(
                 state = chirpyState,
-                isSupported = isAiSupported,
                 modelReadiness = modelReadiness,
                 onDraftChange = onChirpyDraftChange,
                 onSubmit = onChirpySubmit,

@@ -87,7 +87,6 @@ import org.meshtastic.core.resources.Res as CoreRes
 @Composable
 fun ChirpyAssistantSheet(
     state: AIDocAssistantSessionState,
-    isSupported: Boolean,
     modelReadiness: ModelReadiness,
     onDraftChange: (String) -> Unit,
     onSubmit: () -> Unit,
@@ -96,68 +95,35 @@ fun ChirpyAssistantSheet(
     modifier: Modifier = Modifier,
 ) {
     when (modelReadiness) {
-        is ModelReadiness.Unavailable -> return
-        is ModelReadiness.Checking -> {
-            ModalBottomSheet(onDismissRequest = onDismiss, modifier = modifier) {
-                Column(
-                    modifier = Modifier.fillMaxWidth().padding(32.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    CircularProgressIndicator(modifier = Modifier.size(32.dp))
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text("Checking Chirpy availability…", style = MaterialTheme.typography.bodyMedium)
-                }
-            }
-            return
-        }
-        is ModelReadiness.Downloading -> {
-            val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
-            ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState, modifier = modifier) {
-                Column(
-                    modifier = Modifier.fillMaxWidth().padding(32.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Image(
-                        painter = painterResource(CoreRes.drawable.img_chirpy),
-                        contentDescription = null,
-                        modifier = Modifier.size(64.dp),
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        "Chirpy is downloading… 📡",
-                        style = MaterialTheme.typography.titleMedium,
-                        textAlign = TextAlign.Center,
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    val progress = modelReadiness.progress
-                    if (progress != null) {
-                        LinearProgressIndicator(
-                            progress = { progress },
-                            modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp),
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            "${(progress * 100).toInt()}%",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    } else {
-                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp))
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        "This only happens once. Chirpy will be ready soon!",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center,
-                    )
-                }
-            }
-            return
-        }
-        is ModelReadiness.Available -> { /* Fall through to normal chat UI below */ }
-    }
+        is ModelReadiness.Unavailable -> Unit
 
+        is ModelReadiness.Checking -> ChirpyCheckingSheet(onDismiss = onDismiss, modifier = modifier)
+
+        is ModelReadiness.Downloading ->
+            ChirpyDownloadingSheet(readiness = modelReadiness, onDismiss = onDismiss, modifier = modifier)
+
+        is ModelReadiness.Available ->
+            ChirpyChatSheet(
+                state = state,
+                onDraftChange = onDraftChange,
+                onSubmit = onSubmit,
+                onDismiss = onDismiss,
+                onNavigateToPage = onNavigateToPage,
+                modifier = modifier,
+            )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ChirpyChatSheet(
+    state: AIDocAssistantSessionState,
+    onDraftChange: (String) -> Unit,
+    onSubmit: () -> Unit,
+    onDismiss: () -> Unit,
+    onNavigateToPage: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState, modifier = modifier) {
@@ -208,6 +174,68 @@ fun ChirpyAssistantSheet(
                     }
                 },
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+            )
+        }
+    }
+}
+
+private const val PERCENT_MULTIPLIER = 100
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ChirpyCheckingSheet(onDismiss: () -> Unit, modifier: Modifier = Modifier) {
+    ModalBottomSheet(onDismissRequest = onDismiss, modifier = modifier) {
+        Column(modifier = Modifier.fillMaxWidth().padding(32.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            CircularProgressIndicator(modifier = Modifier.size(32.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+            Text("Checking Chirpy availability…", style = MaterialTheme.typography.bodyMedium)
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ChirpyDownloadingSheet(
+    readiness: ModelReadiness.Downloading,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState, modifier = modifier) {
+        Column(modifier = Modifier.fillMaxWidth().padding(32.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            Image(
+                painter = painterResource(CoreRes.drawable.img_chirpy),
+                contentDescription = null,
+                modifier = Modifier.size(64.dp),
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                "Chirpy is downloading… 📡",
+                style = MaterialTheme.typography.titleMedium,
+                textAlign = TextAlign.Center,
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            val progress = readiness.progress
+            if (progress != null) {
+                LinearProgressIndicator(
+                    progress = { progress },
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp),
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    "${(progress * PERCENT_MULTIPLIER).toInt()}%",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            } else {
+                LinearProgressIndicator(modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp))
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                "This only happens once. Chirpy will be ready soon!",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
             )
         }
     }

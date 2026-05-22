@@ -27,8 +27,7 @@ import org.meshtastic.feature.docs.model.ModelReadiness
 @Single(binds = [])
 class KeywordFallbackAssistant(private val searchEngine: KeywordSearchEngine) : AIDocAssistant {
 
-    override val modelStatus: StateFlow<ModelReadiness> =
-        MutableStateFlow(ModelReadiness.Unavailable(null))
+    override val modelStatus: StateFlow<ModelReadiness> = MutableStateFlow(ModelReadiness.Unavailable(null))
 
     override suspend fun isSupported(): Boolean = false
 

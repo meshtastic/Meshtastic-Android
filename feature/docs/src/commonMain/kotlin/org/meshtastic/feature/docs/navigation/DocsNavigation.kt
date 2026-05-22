@@ -56,8 +56,8 @@ import org.meshtastic.feature.docs.model.ChirpyMessage
 import org.meshtastic.feature.docs.model.ChirpyRole
 import org.meshtastic.feature.docs.model.DocPage
 import org.meshtastic.feature.docs.model.DocPageContent
-import org.meshtastic.feature.docs.model.ModelReadiness
 import org.meshtastic.feature.docs.model.DocsAiError
+import org.meshtastic.feature.docs.model.ModelReadiness
 import org.meshtastic.feature.docs.model.SourceRef
 import org.meshtastic.feature.docs.model.TranslationSource
 import org.meshtastic.feature.docs.translation.DocTranslationService
@@ -114,9 +114,7 @@ private fun rememberChirpyState(
     var isSupported by remember { mutableStateOf(false) }
 
     // Trigger initial availability check and model download.
-    LaunchedEffect(Unit) {
-        isSupported = aiAssistant.isSupported()
-    }
+    LaunchedEffect(Unit) { isSupported = aiAssistant.isSupported() }
 
     // Update isSupported when modelReadiness changes to Available.
     LaunchedEffect(modelReadiness) {

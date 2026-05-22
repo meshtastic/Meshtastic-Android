@@ -30,6 +30,10 @@ import org.meshtastic.feature.docs.data.KeywordSearchEngine
 import org.meshtastic.feature.docs.translation.DocTranslationCache
 import org.meshtastic.feature.docs.translation.DocTranslationService
 
+// TODO: Enable Firebase App Check (with Play Integrity provider) if hybrid/cloud
+//  fallback is ever adopted. App Check only gates cloud proxy requests — on-device
+//  inference (ONLY_ON_DEVICE mode) bypasses it entirely, so no action needed today.
+
 /** Provides the on-device Gemini Nano AI assistant for the Google flavor. */
 @Module
 class GoogleAiModule {
