@@ -46,6 +46,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.nodeColorsFromNum
 import org.meshtastic.feature.car.R
 import org.meshtastic.feature.car.model.NodeUi
 import org.meshtastic.feature.car.model.SignalQuality
@@ -178,14 +179,14 @@ class HomeScreen(carContext: CarContext, private val stateCoordinator: CarStateC
             listBuilder.setNoItemsMessage(carContext.getString(R.string.car_no_nodes))
         } else {
             val baseIcon = IconCompat.createWithResource(carContext, R.drawable.ic_car_nodes)
-            val onlineIcon = CarIcon.Builder(baseIcon).setTint(CarColor.GREEN).build()
-            val offlineIcon = CarIcon.Builder(baseIcon).build()
             state.nodes.forEach { node ->
+                val (_, nodeColor) = nodeColorsFromNum(node.nodeNum)
+                val tintedIcon = CarIcon.Builder(baseIcon).setTint(CarColor.createCustom(nodeColor, nodeColor)).build()
                 listBuilder.addItem(
                     Row.Builder()
-                        .setTitle(formatNodeTitle(node))
+                        .setTitle(node.longName)
                         .addText(formatNodeSubtitle(node))
-                        .setImage(if (node.isOnline) onlineIcon else offlineIcon, Row.IMAGE_TYPE_ICON)
+                        .setImage(tintedIcon, Row.IMAGE_TYPE_ICON)
                         .setBrowsable(true)
                         .setOnClickListener {
                             screenManager.push(
@@ -198,17 +199,6 @@ class HomeScreen(carContext: CarContext, private val stateCoordinator: CarStateC
         }
 
         return ListTemplate.Builder().setSingleList(listBuilder.build()).build()
-    }
-
-    private fun formatNodeTitle(node: NodeUi): CarText {
-        // Fake a "chip" — colored short name prefix like "[JA] Long Name"
-        val chip = "[${node.shortName}] "
-        val full = "$chip${node.longName}"
-        val spannable = SpannableString(full)
-        // Use the node's unique color (derived from node number, same as main app NodeChip)
-        val chipColor = CarColor.createCustom(node.chipColor, node.chipColor)
-        spannable.setSpan(ForegroundCarColorSpan.create(chipColor), 0, chip.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-        return CarText.Builder(spannable).build()
     }
 
     private fun formatNodeSubtitle(node: NodeUi): CarText {

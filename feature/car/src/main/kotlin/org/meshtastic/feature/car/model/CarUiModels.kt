@@ -55,8 +55,6 @@ data class NodeUi(
     val isOnline: Boolean,
     val lastHeard: Long,
     val hasPosition: Boolean,
-    val chipColor: Int,
-    val chipTextColor: Int,
 )
 
 enum class SignalQuality {
