@@ -45,20 +45,27 @@ If you encounter any problems or have questions, [ask us on the discord](https:/
 
 ## Documentation
 
-The project's documentation is generated with [Dokka](https://kotlinlang.org/docs/dokka-introduction.html) and hosted on GitHub Pages. It is automatically updated on every push to the `main` branch.
+Both sites are deployed to GitHub Pages automatically on every push to `main`.
 
-[**View Documentation**](https://meshtastic.github.io/Meshtastic-Android/)
+| Site | URL | Contents |
+|---|---|---|
+| **User & Developer Docs** | [meshtastic.github.io/Meshtastic-Android](https://meshtastic.github.io/Meshtastic-Android/) | Jekyll site — user guide, developer guide, in-app doc content |
+| **API Reference** | [meshtastic.github.io/Meshtastic-Android/api](https://meshtastic.github.io/Meshtastic-Android/api/) | Dokka-generated KDoc for all public APIs |
 
 ### Generating Locally
 
-You can generate the documentation locally to preview your changes.
+**User & Developer Docs (Jekyll):**
+```bash
+./gradlew generateDocsBundle publishDocsSite
+BUNDLE_GEMFILE=docs/Gemfile bundle exec jekyll serve \
+  --source build/_site --baseurl ""
+```
 
-1.  **Run the Dokka task:**
-    ```bash
-    ./gradlew dokkaGeneratePublicationHtml
-    ```
-2.  **View the output:**
-    The generated HTML files will be located in the `build/dokka/html` directory. You can open the `index.html` file in your browser to view the documentation.
+**API Reference (Dokka):**
+```bash
+./gradlew dokkaGeneratePublicationHtml
+# Output: build/dokka/html/index.html
+```
 
 ## Architecture
 
