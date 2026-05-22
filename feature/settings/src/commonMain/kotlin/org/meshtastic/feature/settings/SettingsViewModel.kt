@@ -20,6 +20,7 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -223,4 +224,45 @@ class SettingsViewModel(
     fun setShouldShowRole(value: Boolean) = uiPrefs.setShouldShowRole(value)
 
     fun setShouldShowTelemetry(value: Boolean) = uiPrefs.setShouldShowTelemetry(value)
+
+    // Aggregated node list settings to avoid 10 separate state collections
+    val nodeListSettings = combine(
+        nodeListDensity,
+        shouldShowPower,
+        shouldShowLastHeard,
+        lastHeardIsRelative,
+        shouldShowLocation,
+        shouldShowHops,
+        shouldShowSignal,
+        shouldShowChannel,
+        shouldShowRole,
+        shouldShowTelemetry,
+    ) { densityName, power, lastHeard, heardRelative, location, hops, signal, channel, role, telemetry ->
+        NodeListSettingsState(
+            density = org.meshtastic.core.model.NodeListDensity.fromName(densityName),
+            showPower = power,
+            showLastHeard = lastHeard,
+            lastHeardIsRelative = heardRelative,
+            showLocation = location,
+            showHops = hops,
+            showSignal = signal,
+            showChannel = channel,
+            showRole = role,
+            showTelemetry = telemetry,
+        )
+    }.stateInWhileSubscribed(initialValue = NodeListSettingsState())
 }
+
+/** Aggregated state for node list display settings to reduce recomposition overhead. */
+data class NodeListSettingsState(
+    val density: org.meshtastic.core.model.NodeListDensity = org.meshtastic.core.model.NodeListDensity.COMPLETE,
+    val showPower: Boolean = false,
+    val showLastHeard: Boolean = false,
+    val lastHeardIsRelative: Boolean = false,
+    val showLocation: Boolean = false,
+    val showHops: Boolean = false,
+    val showSignal: Boolean = false,
+    val showChannel: Boolean = false,
+    val showRole: Boolean = false,
+    val showTelemetry: Boolean = false,
+)

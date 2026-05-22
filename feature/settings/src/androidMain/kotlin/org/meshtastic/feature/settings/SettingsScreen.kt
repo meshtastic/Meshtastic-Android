@@ -62,7 +62,6 @@ import org.meshtastic.core.ui.icon.Wifi
 import org.meshtastic.feature.settings.component.AppInfoSection
 import org.meshtastic.feature.settings.component.AppearanceSection
 import org.meshtastic.feature.settings.component.ExpressiveSection
-import org.meshtastic.feature.settings.component.NodeLayoutSettings
 import org.meshtastic.feature.settings.component.PersistenceSection
 import org.meshtastic.feature.settings.component.PrivacySection
 import org.meshtastic.feature.settings.component.ThemePickerDialog
@@ -241,39 +240,14 @@ fun SettingsScreen(
                     onShowThemePicker = { showThemePickerDialog = true },
                 )
 
-                val densityName by settingsViewModel.nodeListDensity.collectAsStateWithLifecycle()
-                val density = org.meshtastic.core.model.NodeListDensity.fromName(densityName)
-                val showPower by settingsViewModel.shouldShowPower.collectAsStateWithLifecycle()
-                val showLastHeard by settingsViewModel.shouldShowLastHeard.collectAsStateWithLifecycle()
-                val lastHeardRelative by settingsViewModel.lastHeardIsRelative.collectAsStateWithLifecycle()
-                val showLocation by settingsViewModel.shouldShowLocation.collectAsStateWithLifecycle()
-                val showHops by settingsViewModel.shouldShowHops.collectAsStateWithLifecycle()
-                val showSignal by settingsViewModel.shouldShowSignal.collectAsStateWithLifecycle()
-                val showChannel by settingsViewModel.shouldShowChannel.collectAsStateWithLifecycle()
-                val showRole by settingsViewModel.shouldShowRole.collectAsStateWithLifecycle()
-                val showTelemetry by settingsViewModel.shouldShowTelemetry.collectAsStateWithLifecycle()
-                NodeLayoutSettings(
-                    density = density,
-                    onDensityChange = { settingsViewModel.setNodeListDensity(it.name) },
-                    showPower = showPower,
-                    onShowPowerChange = { settingsViewModel.setShouldShowPower(it) },
-                    showLastHeard = showLastHeard,
-                    onShowLastHeardChange = { settingsViewModel.setShouldShowLastHeard(it) },
-                    lastHeardIsRelative = lastHeardRelative,
-                    onLastHeardIsRelativeChange = { settingsViewModel.setLastHeardIsRelative(it) },
-                    showLocation = showLocation,
-                    onShowLocationChange = { settingsViewModel.setShouldShowLocation(it) },
-                    showHops = showHops,
-                    onShowHopsChange = { settingsViewModel.setShouldShowHops(it) },
-                    showSignal = showSignal,
-                    onShowSignalChange = { settingsViewModel.setShouldShowSignal(it) },
-                    showChannel = showChannel,
-                    onShowChannelChange = { settingsViewModel.setShouldShowChannel(it) },
-                    showRole = showRole,
-                    onShowRoleChange = { settingsViewModel.setShouldShowRole(it) },
-                    showTelemetry = showTelemetry,
-                    onShowTelemetryChange = { settingsViewModel.setShouldShowTelemetry(it) },
-                )
+                ExpressiveSection(title = stringResource(Res.string.node_layout_section_title)) {
+                    ListItem(
+                        text = stringResource(Res.string.node_layout_section_title),
+                        leadingIcon = MeshtasticIcons.List,
+                    ) {
+                        onNavigate(SettingsRoute.NodeList)
+                    }
+                }
 
                 ExpressiveSection(title = stringResource(Res.string.wifi_devices)) {
                     ListItem(text = stringResource(Res.string.wifi_devices), leadingIcon = MeshtasticIcons.Wifi) {

@@ -34,6 +34,7 @@ import org.meshtastic.feature.settings.AboutScreen
 import org.meshtastic.feature.settings.AdministrationScreen
 import org.meshtastic.feature.settings.DeviceConfigurationScreen
 import org.meshtastic.feature.settings.ModuleConfigurationScreen
+import org.meshtastic.feature.settings.NodeListScreen
 import org.meshtastic.feature.settings.SettingsViewModel
 import org.meshtastic.feature.settings.debugging.DebugScreen
 import org.meshtastic.feature.settings.debugging.DebugViewModel
@@ -242,6 +243,14 @@ fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
     entry<SettingsRoute.FilterSettings> {
         val viewModel: FilterSettingsViewModel = koinViewModel()
         FilterSettingsScreen(viewModel = viewModel, onBack = dropUnlessResumed { backStack.removeLastOrNull() })
+    }
+
+    entry<SettingsRoute.NodeList> {
+        val settingsViewModel: SettingsViewModel = koinViewModel()
+        NodeListScreen(
+            settingsViewModel = settingsViewModel,
+            onNavigateUp = dropUnlessResumed { backStack.removeLastOrNull() },
+        )
     }
 }
 

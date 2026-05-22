@@ -18,6 +18,8 @@ package org.meshtastic.feature.settings.component
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -176,56 +178,58 @@ fun NodeLayoutSettings(
                 text = stringResource(Res.string.node_layout_compact_fields_header),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = 16.dp, top = 12.dp, bottom = 4.dp),
+                modifier = Modifier.padding(start = 16.dp, top = 12.dp, bottom = 8.dp),
             )
-            SwitchPreference(
-                title = stringResource(Res.string.node_layout_power),
-                checked = showPower,
-                enabled = true,
-                onCheckedChange = onShowPowerChange,
-            )
-            SwitchPreference(
-                title = stringResource(Res.string.node_layout_last_heard_time),
-                checked = showLastHeard,
-                enabled = true,
-                onCheckedChange = onShowLastHeardChange,
-            )
-            SwitchPreference(
-                title = stringResource(Res.string.node_layout_relative_last_heard),
-                checked = lastHeardIsRelative,
-                enabled = showLastHeard,
-                onCheckedChange = onLastHeardIsRelativeChange,
-            )
-            SwitchPreference(
-                title = stringResource(Res.string.node_layout_distance_and_bearing),
-                checked = showLocation,
-                enabled = true,
-                onCheckedChange = onShowLocationChange,
-            )
-            SwitchPreference(
-                title = stringResource(Res.string.node_layout_hops_away),
-                checked = showHops,
-                enabled = true,
-                onCheckedChange = onShowHopsChange,
-            )
-            SwitchPreference(
-                title = stringResource(Res.string.node_layout_signal_direct_only),
-                checked = showSignal,
-                enabled = true,
-                onCheckedChange = onShowSignalChange,
-            )
-            SwitchPreference(
-                title = stringResource(Res.string.node_layout_channel),
-                checked = showChannel,
-                enabled = true,
-                onCheckedChange = onShowChannelChange,
-            )
-            SwitchPreference(
-                title = stringResource(Res.string.node_layout_device_role),
-                checked = showRole,
-                enabled = true,
-                onCheckedChange = onShowRoleChange,
-            )
+            Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(0.dp)) {
+                SwitchPreference(
+                    title = stringResource(Res.string.node_layout_power),
+                    checked = showPower,
+                    enabled = true,
+                    onCheckedChange = onShowPowerChange,
+                )
+                SwitchPreference(
+                    title = stringResource(Res.string.node_layout_last_heard_time),
+                    checked = showLastHeard,
+                    enabled = true,
+                    onCheckedChange = onShowLastHeardChange,
+                )
+                SwitchPreference(
+                    title = stringResource(Res.string.node_layout_relative_last_heard),
+                    checked = lastHeardIsRelative,
+                    enabled = showLastHeard,
+                    onCheckedChange = onLastHeardIsRelativeChange,
+                )
+                SwitchPreference(
+                    title = stringResource(Res.string.node_layout_distance_and_bearing),
+                    checked = showLocation,
+                    enabled = true,
+                    onCheckedChange = onShowLocationChange,
+                )
+                SwitchPreference(
+                    title = stringResource(Res.string.node_layout_hops_away),
+                    checked = showHops,
+                    enabled = true,
+                    onCheckedChange = onShowHopsChange,
+                )
+                SwitchPreference(
+                    title = stringResource(Res.string.node_layout_signal_direct_only),
+                    checked = showSignal,
+                    enabled = true,
+                    onCheckedChange = onShowSignalChange,
+                )
+                SwitchPreference(
+                    title = stringResource(Res.string.node_layout_channel),
+                    checked = showChannel,
+                    enabled = true,
+                    onCheckedChange = onShowChannelChange,
+                )
+                SwitchPreference(
+                    title = stringResource(Res.string.node_layout_device_role),
+                    checked = showRole,
+                    enabled = true,
+                    onCheckedChange = onShowRoleChange,
+                )
+            }
         }
     }
 }
