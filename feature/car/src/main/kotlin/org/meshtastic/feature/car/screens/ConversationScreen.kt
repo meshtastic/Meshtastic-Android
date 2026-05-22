@@ -18,6 +18,7 @@ package org.meshtastic.feature.car.screens
 
 import androidx.car.app.CarContext
 import androidx.car.app.Screen
+import androidx.car.app.constraints.ConstraintManager
 import androidx.car.app.model.Action
 import androidx.car.app.model.ActionStrip
 import androidx.car.app.model.Header
@@ -39,7 +40,11 @@ class ConversationScreen(
 ) : Screen(carContext) {
 
     override fun onGetTemplate(): Template {
-        val messages = messagesProvider().takeLast(MAX_MESSAGES)
+        val listLimit =
+            carContext
+                .getCarService(ConstraintManager::class.java)
+                .getContentLimit(ConstraintManager.CONTENT_LIMIT_TYPE_LIST)
+        val messages = messagesProvider().takeLast(listLimit.coerceAtMost(MAX_MESSAGES))
 
         val listBuilder = ItemList.Builder()
         messages.forEach { msg ->

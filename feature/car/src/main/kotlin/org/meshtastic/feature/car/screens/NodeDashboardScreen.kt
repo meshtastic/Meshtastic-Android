@@ -19,6 +19,7 @@ package org.meshtastic.feature.car.screens
 import androidx.car.app.CarContext
 import androidx.car.app.Screen
 import androidx.car.app.model.Action
+import androidx.car.app.model.CarColor
 import androidx.car.app.model.CarIcon
 import androidx.car.app.model.Header
 import androidx.car.app.model.ItemList
@@ -59,7 +60,9 @@ class NodeDashboardScreen(
         val header = state.topologyHeader
         val headerTitle = carContext.getString(R.string.car_nodes_online, header.onlineNodes)
 
-        val nodeIcon = CarIcon.Builder(IconCompat.createWithResource(carContext, R.drawable.ic_car_nodes)).build()
+        val baseIcon = IconCompat.createWithResource(carContext, R.drawable.ic_car_nodes)
+        val onlineIcon = CarIcon.Builder(baseIcon).setTint(CarColor.GREEN).build()
+        val offlineIcon = CarIcon.Builder(baseIcon).build()
         val listBuilder = ItemList.Builder()
 
         // Nodes already sorted by CarStateCoordinator (online-first, then by lastHeard)
@@ -68,7 +71,7 @@ class NodeDashboardScreen(
                 Row.Builder()
                     .setTitle(node.longName)
                     .addText(formatNodeSubtitle(node))
-                    .setImage(nodeIcon)
+                    .setImage(if (node.isOnline) onlineIcon else offlineIcon, Row.IMAGE_TYPE_ICON)
                     .setBrowsable(true)
                     .setOnClickListener { onNodeClick(node.nodeNum) }
                     .build(),

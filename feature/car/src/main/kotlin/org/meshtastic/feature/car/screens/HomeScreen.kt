@@ -19,6 +19,7 @@ package org.meshtastic.feature.car.screens
 import androidx.car.app.CarContext
 import androidx.car.app.Screen
 import androidx.car.app.model.Action
+import androidx.car.app.model.CarColor
 import androidx.car.app.model.CarIcon
 import androidx.car.app.model.Header
 import androidx.car.app.model.ItemList
@@ -136,7 +137,7 @@ class HomeScreen(carContext: CarContext, private val stateCoordinator: CarStateC
                     Row.Builder()
                         .setTitle(conversation.displayName)
                         .addText(conversation.lastMessage)
-                        .setImage(personIcon)
+                        .setImage(personIcon, Row.IMAGE_TYPE_ICON)
                         .setBrowsable(true)
                         .setOnClickListener { openConversation(conversation.contactKey, conversation.displayName) }
                         .build(),
@@ -171,13 +172,15 @@ class HomeScreen(carContext: CarContext, private val stateCoordinator: CarStateC
         if (state.nodes.isEmpty()) {
             listBuilder.setNoItemsMessage(carContext.getString(R.string.car_no_nodes))
         } else {
-            val nodeIcon = CarIcon.Builder(IconCompat.createWithResource(carContext, R.drawable.ic_car_nodes)).build()
+            val baseIcon = IconCompat.createWithResource(carContext, R.drawable.ic_car_nodes)
+            val onlineIcon = CarIcon.Builder(baseIcon).setTint(CarColor.GREEN).build()
+            val offlineIcon = CarIcon.Builder(baseIcon).build()
             state.nodes.forEach { node ->
                 listBuilder.addItem(
                     Row.Builder()
                         .setTitle(node.longName)
                         .addText(formatNodeSubtitle(node))
-                        .setImage(nodeIcon)
+                        .setImage(if (node.isOnline) onlineIcon else offlineIcon, Row.IMAGE_TYPE_ICON)
                         .setBrowsable(true)
                         .setOnClickListener {
                             screenManager.push(
