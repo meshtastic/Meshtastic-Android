@@ -19,6 +19,12 @@
     <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">От %1$s: %2$s</string>
+    <string name="a11y_node_battery">заряд батареи %1$d%%</string>
+    <string name="a11y_node_favorite">избранный</string>
+    <string name="a11y_node_offline">оффлайн</string>
+    <string name="a11y_node_online">онлайн</string>
+    <string name="a11y_node_role">роль %1$s</string>
+    <string name="a11y_node_signal">сигнал %1$s</string>
     <string name="accept">Принять</string>
     <string name="acknowledgements">Подтверждения</string>
     <!-- ACTION -->
@@ -141,6 +147,7 @@
     <string name="channels">Каналы</string>
     <!-- CHIRPY -->
     <string name="chirpy">Щебетун</string>
+    <string name="chirpy_assistant_title">Весёлый помощник</string>
     <string name="choose_contrast">Уровень контрастности</string>
     <string name="choose_theme">Выберите тему</string>
     <!-- CLEAN -->
