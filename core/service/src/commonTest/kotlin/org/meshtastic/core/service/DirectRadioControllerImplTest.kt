@@ -49,6 +49,7 @@ import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.proto.ClientNotification
+import org.meshtastic.proto.SharedContact
 import org.meshtastic.proto.User
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -281,6 +282,72 @@ class DirectRadioControllerImplTest {
 
         verifySuspend { nodeManager.removeByNodenum(55) }
         // No admin message sent when disconnected
+        verifySuspend(atLeast(0)) { commandSender.sendAdmin(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun rebootSendsAdminMessageWithDelay() = runTest {
+        val controller = createController()
+
+        controller.reboot(destNum = 101, packetId = 7)
+
+        verifySuspend { commandSender.sendAdmin(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun shutdownSendsAdminMessage() = runTest {
+        val controller = createController()
+
+        controller.shutdown(destNum = 101, packetId = 8)
+
+        verifySuspend { commandSender.sendAdmin(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun factoryResetSendsAdminMessage() = runTest {
+        val controller = createController()
+
+        controller.factoryReset(destNum = 101, packetId = 9)
+
+        verifySuspend { commandSender.sendAdmin(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun nodedbResetSendsAdminMessage() = runTest {
+        val controller = createController()
+
+        controller.nodedbReset(destNum = 101, packetId = 10, preserveFavorites = true)
+
+        verifySuspend { commandSender.sendAdmin(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun refreshMetadataSendsAdminWithWantResponse() = runTest {
+        val controller = createController()
+
+        controller.refreshMetadata(destNum = 101)
+
+        verifySuspend { commandSender.sendAdmin(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun importContactSendsAdminAndUpdatesNodeManager() = runTest {
+        val controller = createController()
+        val contact = SharedContact(node_num = 42, user = User(id = "!0000002a", long_name = "Test"))
+
+        controller.importContact(contact)
+
+        verifySuspend { commandSender.sendAdmin(any(), any(), any(), any()) }
+        verify { nodeManager.handleReceivedUser(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun importContactReturnsEarlyWhenDisconnected() = runTest {
+        val controller = createController(myNodeNum = null)
+        val contact = SharedContact(node_num = 42, user = User(id = "!0000002a"))
+
+        controller.importContact(contact)
+
         verifySuspend(atLeast(0)) { commandSender.sendAdmin(any(), any(), any(), any()) }
     }
 }

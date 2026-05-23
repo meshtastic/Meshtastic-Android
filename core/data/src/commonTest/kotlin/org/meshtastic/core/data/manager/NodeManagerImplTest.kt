@@ -17,10 +17,14 @@
 package org.meshtastic.core.data.manager
 
 import dev.mokkery.MockMode
+import dev.mokkery.answering.returns
+import dev.mokkery.every
 import dev.mokkery.mock
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
+import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.repository.NodeRepository
@@ -327,5 +331,112 @@ class NodeManagerImplTest {
         val result = nodeManager.nodeDBbyNodeNum[nodeNum]!!
         assertEquals(ByteString.EMPTY, result.publicKey)
         assertEquals(ByteString.EMPTY, result.user.public_key)
+    }
+
+    @Test
+    fun `getMyNodeInfo returns null when repository has no info`() {
+        every { nodeRepository.myNodeInfo } returns MutableStateFlow(null)
+
+        val result = nodeManager.getMyNodeInfo()
+
+        assertNull(result)
+    }
+
+    @Test
+    fun `getMyNodeInfo synthesizes from repository and nodeDB`() {
+        val myNum = 1234
+        val repoInfo =
+            MyNodeInfo(
+                myNodeNum = myNum,
+                hasGPS = false,
+                model = "tbeam",
+                firmwareVersion = "2.5.0",
+                couldUpdate = false,
+                shouldUpdate = false,
+                currentPacketId = 100L,
+                messageTimeoutMsec = 5000,
+                minAppVersion = 30000,
+                maxChannels = 8,
+                hasWifi = false,
+                channelUtilization = 0f,
+                airUtilTx = 0f,
+                deviceId = null,
+            )
+        every { nodeRepository.myNodeInfo } returns MutableStateFlow(repoInfo)
+
+        // Add node with position (non-zero lat → hasGPS = true)
+        nodeManager.handleReceivedPosition(myNum, myNum, ProtoPosition(latitude_i = 100), 0)
+        nodeManager.updateNode(myNum) { it.copy(user = it.user.copy(id = "!mydevice", hw_model = HardwareModel.TBEAM)) }
+
+        val result = nodeManager.getMyNodeInfo()
+
+        assertNotNull(result)
+        assertEquals(myNum, result.myNodeNum)
+        assertTrue(result.hasGPS)
+        assertEquals("tbeam", result.model)
+        assertEquals("!mydevice", result.deviceId)
+    }
+
+    @Test
+    fun `getMyNodeInfo falls back to nodeDB model when repository model is null`() {
+        val myNum = 1234
+        val repoInfo =
+            MyNodeInfo(
+                myNodeNum = myNum,
+                hasGPS = false,
+                model = null,
+                firmwareVersion = "2.5.0",
+                couldUpdate = false,
+                shouldUpdate = false,
+                currentPacketId = 100L,
+                messageTimeoutMsec = 5000,
+                minAppVersion = 30000,
+                maxChannels = 8,
+                hasWifi = false,
+                channelUtilization = 0f,
+                airUtilTx = 0f,
+                deviceId = null,
+            )
+        every { nodeRepository.myNodeInfo } returns MutableStateFlow(repoInfo)
+
+        nodeManager.updateNode(myNum) { it.copy(user = it.user.copy(hw_model = HardwareModel.HELTEC_V3)) }
+
+        val result = nodeManager.getMyNodeInfo()
+
+        assertNotNull(result)
+        assertEquals("HELTEC_V3", result.model)
+    }
+
+    @Test
+    fun `handleReceivedTelemetry with null metrics does not crash`() {
+        val nodeNum = 1234
+        nodeManager.updateNode(nodeNum) { it.copy(lastHeard = 1000) }
+
+        // Telemetry with no metrics at all
+        val telemetry = Telemetry(time = 3000)
+
+        nodeManager.handleReceivedTelemetry(nodeNum, telemetry)
+
+        val result = nodeManager.nodeDBbyNodeNum[nodeNum]
+        assertNotNull(result)
+        assertEquals(3000, result.lastHeard)
+    }
+
+    @Test
+    fun `getMyId returns empty when disconnected`() {
+        every { nodeRepository.myNodeInfo } returns MutableStateFlow(null)
+
+        val result = nodeManager.getMyId()
+        assertEquals("", result)
+    }
+
+    @Test
+    fun `getMyId returns user ID when connected`() {
+        val myNum = 1234
+        nodeManager.setMyNodeNum(myNum)
+        nodeManager.updateNode(myNum) { it.copy(user = it.user.copy(id = "!mynode42")) }
+
+        val result = nodeManager.getMyId()
+        assertEquals("!mynode42", result)
     }
 }
