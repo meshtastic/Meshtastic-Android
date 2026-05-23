@@ -18,6 +18,8 @@ package org.meshtastic.feature.car.alerts
 
 import android.media.AudioManager
 import android.media.ToneGenerator
+import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -46,10 +48,14 @@ class EmergencyHandler {
 
     private var toneGenerator: ToneGenerator? = null
 
+    private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
+        Logger.e(tag = "EmergencyHandler", throwable = throwable) { "Emergency flow collection failed" }
+    }
+
     fun startCollecting(emergencyFlow: Flow<EmergencyAlert>) {
         scope?.cancel()
         scope =
-            CoroutineScope(SupervisorJob() + Dispatchers.Main).also { newScope ->
+            CoroutineScope(SupervisorJob() + Dispatchers.Main + exceptionHandler).also { newScope ->
                 newScope.launch {
                     emergencyFlow.collect { alert ->
                         addAlert(alert)
@@ -88,14 +94,15 @@ class EmergencyHandler {
         _activeAlerts.value = current
     }
 
+    @Suppress("TooGenericExceptionCaught") // ToneGenerator may throw various runtime exceptions
     private fun playEmergencyTone() {
         try {
             if (toneGenerator == null) {
                 toneGenerator = ToneGenerator(AudioManager.STREAM_NOTIFICATION, TONE_VOLUME)
             }
             toneGenerator?.startTone(ToneGenerator.TONE_PROP_BEEP, TONE_DURATION_MS)
-        } catch (_: Exception) {
-            // Audio playback is best-effort; don't crash the car session
+        } catch (e: RuntimeException) {
+            Logger.w(tag = "EmergencyHandler", throwable = e) { "Emergency tone playback failed" }
         }
     }
 

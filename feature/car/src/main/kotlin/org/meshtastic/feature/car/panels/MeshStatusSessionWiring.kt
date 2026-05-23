@@ -27,6 +27,7 @@ class MeshStatusSessionWiring(private val panel: MeshStatusPanel) {
     private var connectionJob: Job? = null
     private var nodeCountJob: Job? = null
     private var messageTimeJob: Job? = null
+    private var meshNameJob: Job? = null
 
     fun attach(
         scope: CoroutineScope,
@@ -38,12 +39,13 @@ class MeshStatusSessionWiring(private val panel: MeshStatusPanel) {
         connectionJob = scope.launch { connectionFlow.collect { panel.updateConnectionStatus(it) } }
         nodeCountJob = scope.launch { nodeCountFlow.collect { panel.updateNodeCount(it) } }
         messageTimeJob = scope.launch { lastMessageTimeFlow.collect { panel.updateLastMessageTime(it) } }
-        scope.launch { meshNameFlow.collect { panel.updateMeshName(it) } }
+        meshNameJob = scope.launch { meshNameFlow.collect { panel.updateMeshName(it) } }
     }
 
     fun detach() {
         connectionJob?.cancel()
         nodeCountJob?.cancel()
         messageTimeJob?.cancel()
+        meshNameJob?.cancel()
     }
 }

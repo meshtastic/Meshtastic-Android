@@ -18,6 +18,7 @@ package org.meshtastic.feature.car.util
 
 import android.content.Context
 import android.speech.tts.TextToSpeech
+import co.touchlab.kermit.Logger
 import org.koin.core.annotation.Single
 import java.util.Locale
 import java.util.UUID
@@ -35,12 +36,17 @@ class CarTtsEngine(context: Context) {
                 if (status == TextToSpeech.SUCCESS) {
                     tts?.language = Locale.getDefault()
                     isReady = true
+                } else {
+                    Logger.w(tag = "CarTtsEngine") { "TTS initialization failed with status: $status" }
                 }
             }
     }
 
     fun readAloud(senderName: String, messageText: String) {
-        if (!isReady) return
+        if (!isReady) {
+            Logger.d(tag = "CarTtsEngine") { "TTS not ready, skipping readAloud" }
+            return
+        }
         val utterance = "$senderName says: $messageText"
         tts?.speak(utterance, TextToSpeech.QUEUE_ADD, null, UUID.randomUUID().toString())
     }

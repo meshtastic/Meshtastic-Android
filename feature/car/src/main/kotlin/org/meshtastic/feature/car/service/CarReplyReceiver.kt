@@ -40,7 +40,7 @@ class CarReplyReceiver : BroadcastReceiver() {
         val remoteInput = RemoteInput.getResultsFromIntent(intent)
         val replyText = remoteInput?.getCharSequence(CarNotificationManager.KEY_TEXT_REPLY)?.toString() ?: return
 
-        Logger.d(tag = TAG) { "Reply to $conversationId: $replyText" }
+        Logger.d(tag = TAG) { "Reply to conversation: $conversationId (${replyText.length} chars)" }
         // TODO: Wire to message send repository once car messaging send is implemented
     }
 

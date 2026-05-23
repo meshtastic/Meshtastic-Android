@@ -62,17 +62,7 @@ class ConversationScreen(
         .addAction(
             Action.Builder()
                 .setTitle(carContext.getString(R.string.car_voice_reply))
-                .setOnClickListener(
-                    ParkedOnlyOnClickListener.create {
-                        onVoiceReply()
-                        CarToast.makeText(
-                            carContext,
-                            carContext.getString(R.string.car_message_sent),
-                            CarToast.LENGTH_SHORT,
-                        )
-                            .show()
-                    },
-                )
+                .setOnClickListener(ParkedOnlyOnClickListener.create { onVoiceReply() })
                 .build(),
         )
         .addAction(
@@ -80,10 +70,9 @@ class ConversationScreen(
                 .setTitle(carContext.getString(R.string.car_quick_reply))
                 .setOnClickListener(
                     ParkedOnlyOnClickListener.create {
-                        onQuickReply("")
                         CarToast.makeText(
                             carContext,
-                            carContext.getString(R.string.car_message_sent),
+                            carContext.getString(R.string.car_quick_reply_coming_soon),
                             CarToast.LENGTH_SHORT,
                         )
                             .show()
@@ -133,7 +122,7 @@ class ConversationScreen(
     }
 
     companion object {
-        private const val MAX_MESSAGES = 5
+        private const val MAX_MESSAGES = 20
         private const val MAX_LIST_MESSAGES = 5
     }
 }

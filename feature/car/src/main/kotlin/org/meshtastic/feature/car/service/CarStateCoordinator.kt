@@ -16,8 +16,11 @@
  */
 package org.meshtastic.feature.car.service
 
+import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
@@ -48,6 +51,7 @@ import org.meshtastic.feature.car.model.NodeUi
 import org.meshtastic.feature.car.model.SignalQuality
 import org.meshtastic.feature.car.model.TopologyHeader
 import org.meshtastic.feature.car.util.CarTtsEngine
+import org.meshtastic.feature.car.util.MessageFilter
 import java.util.concurrent.ConcurrentHashMap
 
 /** Snapshot of a message for car display (avoids leaking domain models to UI). */
@@ -73,8 +77,14 @@ class CarStateCoordinator(
     private val quickChatActionRepository: QuickChatActionRepository,
     private val commandSender: CommandSender,
     private val ttsEngine: CarTtsEngine,
+    private val messageFilter: MessageFilter,
 ) {
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
+        Logger.e(tag = "CarStateCoordinator", throwable = throwable) { "Unhandled error in car state flow" }
+    }
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate + exceptionHandler)
+    private var nodeJob: Job? = null
+    private var messagingJob: Job? = null
 
     private val _sessionState =
         MutableStateFlow(
@@ -116,6 +126,8 @@ class CarStateCoordinator(
     }
 
     fun refresh() {
+        nodeJob?.cancel()
+        messagingJob?.cancel()
         collectNodeData()
         collectMessagingData()
     }
@@ -144,7 +156,11 @@ class CarStateCoordinator(
             }
         }
 
-    fun sendMessage(contactKey: String, text: String) {
+    fun sendMessage(contactKey: String, text: String): Boolean {
+        val validation = messageFilter.validateOutgoing(text)
+        if (validation is MessageFilter.ValidationResult.TooLong) {
+            return false
+        }
         val packet =
             DataPacket(
                 to = contactKey,
@@ -153,6 +169,7 @@ class CarStateCoordinator(
                 channel = selectedChannel.value,
             )
         commandSender.sendData(packet)
+        return true
     }
 
     fun readMessagesAloud(contactKey: String) {
@@ -189,73 +206,81 @@ class CarStateCoordinator(
     }
 
     private fun collectNodeData() {
-        scope.launch {
-            combine(nodeRepository.nodeDBbyNum, nodeRepository.onlineNodeCount) { nodeMap, onlineCount ->
-                val nodes =
-                    nodeMap.values
-                        .map { node -> node.toNodeUi() }
-                        .sortedWith(compareByDescending<NodeUi> { it.isOnline }.thenByDescending { it.lastHeard })
-                val totalCount = nodeMap.size
-                val meshName = nodeRepository.myNodeInfo.value?.firmwareVersion
+        nodeJob =
+            scope.launch {
+                combine(nodeRepository.nodeDBbyNum, nodeRepository.onlineNodeCount) { nodeMap, onlineCount ->
+                    val nodes =
+                        nodeMap.values
+                            .map { node -> node.toNodeUi() }
+                            .sortedWith(
+                                compareByDescending<NodeUi> { it.isOnline }.thenByDescending { it.lastHeard },
+                            )
+                    val totalCount = nodeMap.size
+                    val meshName = nodeRepository.myNodeInfo.value?.firmwareVersion
 
-                _nodeDashboardState.value =
-                    NodeDashboardUiState(
-                        nodes = nodes,
-                        topologyHeader =
-                        TopologyHeader(totalNodes = totalCount, onlineNodes = onlineCount, meshName = meshName),
-                    )
-                _sessionState.value = _sessionState.value.copy(onlineNodeCount = onlineCount)
+                    _nodeDashboardState.value =
+                        NodeDashboardUiState(
+                            nodes = nodes,
+                            topologyHeader =
+                            TopologyHeader(
+                                totalNodes = totalCount,
+                                onlineNodes = onlineCount,
+                                meshName = meshName,
+                            ),
+                        )
+                    _sessionState.value = _sessionState.value.copy(onlineNodeCount = onlineCount)
+                }
+                    .collect {}
             }
-                .collect {}
-        }
     }
 
     private fun collectMessagingData() {
-        scope.launch {
-            combine(packetRepository.getContacts(), radioConfigRepository.channelSetFlow) { contacts, channelSet ->
-                val channels =
-                    channelSet.settings.mapIndexed { index, settings ->
-                        val channel = Channel(settings = settings)
-                        ChannelUi(
-                            index = index,
-                            name = channel.name,
-                            unreadCount = 0, // will be updated per-channel
-                        )
-                    }
-
-                val conversations =
-                    contacts.entries
-                        .take(MAX_CONVERSATIONS)
-                        .map { (contactKey, packet) ->
-                            val senderNode =
-                                nodeRepository.nodeDBbyNum.value.values.find { it.user.id == packet.from }
-                            ConversationUi(
-                                contactKey = contactKey,
-                                displayName = senderNode?.user?.long_name ?: contactKey,
-                                lastMessage = packet.bytes?.utf8() ?: "",
-                                lastMessageTime = packet.time,
-                                unreadCount = 0,
-                                isEmergency = false,
+        messagingJob =
+            scope.launch {
+                combine(packetRepository.getContacts(), radioConfigRepository.channelSetFlow) { contacts, channelSet ->
+                    val channels =
+                        channelSet.settings.mapIndexed { index, settings ->
+                            val channel = Channel(settings = settings)
+                            ChannelUi(
+                                index = index,
+                                name = channel.name,
+                                unreadCount = 0, // will be updated per-channel
                             )
                         }
-                        .sortedByDescending { it.lastMessageTime }
 
-                _messagingState.value =
-                    MessagingUiState(
-                        channels = channels,
-                        selectedChannelIndex = selectedChannel.value,
-                        conversations = conversations,
-                        emergencySpotlight = null,
-                    )
+                    val conversations =
+                        contacts.entries
+                            .take(MAX_CONVERSATIONS)
+                            .map { (contactKey, packet) ->
+                                val senderNode =
+                                    nodeRepository.nodeDBbyNum.value.values.find { it.user.id == packet.from }
+                                ConversationUi(
+                                    contactKey = contactKey,
+                                    displayName = senderNode?.user?.long_name ?: contactKey,
+                                    lastMessage = packet.bytes?.utf8() ?: "",
+                                    lastMessageTime = packet.time,
+                                    unreadCount = 0,
+                                    isEmergency = false,
+                                )
+                            }
+                            .sortedByDescending { it.lastMessageTime }
 
-                // Update last message time in session state
-                val lastTime = conversations.maxOfOrNull { it.lastMessageTime }
-                if (lastTime != null) {
-                    _sessionState.value = _sessionState.value.copy(lastMessageTime = lastTime)
+                    _messagingState.value =
+                        MessagingUiState(
+                            channels = channels,
+                            selectedChannelIndex = selectedChannel.value,
+                            conversations = conversations,
+                            emergencySpotlight = null,
+                        )
+
+                    // Update last message time in session state
+                    val lastTime = conversations.maxOfOrNull { it.lastMessageTime }
+                    if (lastTime != null) {
+                        _sessionState.value = _sessionState.value.copy(lastMessageTime = lastTime)
+                    }
                 }
+                    .collect {}
             }
-                .collect {}
-        }
     }
 
     private fun collectQuickChat() {

@@ -26,7 +26,6 @@ import kotlinx.coroutines.flow.emptyFlow
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.meshtastic.feature.car.alerts.EmergencyHandler
-import org.meshtastic.feature.car.alerts.EmergencySessionWiring
 import org.meshtastic.feature.car.screens.HomeScreen
 import org.meshtastic.feature.car.util.CrashlyticsCarTagger
 
@@ -37,13 +36,12 @@ class MeshtasticCarSession :
     private val crashlyticsCarTagger: CrashlyticsCarTagger by inject()
     private val stateCoordinator: CarStateCoordinator by inject()
     private val emergencyHandler: EmergencyHandler by inject()
-    private val emergencyWiring = EmergencySessionWiring(emergencyHandler)
 
     override fun onCreateScreen(intent: Intent): Screen {
         crashlyticsCarTagger.setCarSession(true)
         stateCoordinator.start()
         // Emergency flow wired to emptyFlow() until emergency packet detection is implemented
-        emergencyWiring.attach(emptyFlow())
+        emergencyHandler.startCollecting(emptyFlow())
 
         lifecycle.addObserver(
             object : DefaultLifecycleObserver {
@@ -65,7 +63,7 @@ class MeshtasticCarSession :
     }
 
     private fun destroy() {
-        emergencyWiring.detach()
+        emergencyHandler.stopCollecting()
         stateCoordinator.destroy()
         crashlyticsCarTagger.setCarSession(false)
     }
