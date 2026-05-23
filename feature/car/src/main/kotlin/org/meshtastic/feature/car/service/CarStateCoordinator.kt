@@ -115,6 +115,11 @@ class CarStateCoordinator(
         collectQuickChat()
     }
 
+    fun refresh() {
+        collectNodeData()
+        collectMessagingData()
+    }
+
     fun selectChannel(index: Int) {
         selectedChannel.value = index
         _messagingState.value = _messagingState.value.copy(selectedChannelIndex = index)

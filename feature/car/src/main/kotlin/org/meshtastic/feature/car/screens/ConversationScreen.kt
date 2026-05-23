@@ -17,6 +17,7 @@
 package org.meshtastic.feature.car.screens
 
 import androidx.car.app.CarContext
+import androidx.car.app.CarToast
 import androidx.car.app.Screen
 import androidx.car.app.constraints.ConstraintManager
 import androidx.car.app.model.Action
@@ -24,6 +25,8 @@ import androidx.car.app.model.ActionStrip
 import androidx.car.app.model.Header
 import androidx.car.app.model.ItemList
 import androidx.car.app.model.ListTemplate
+import androidx.car.app.model.LongMessageTemplate
+import androidx.car.app.model.ParkedOnlyOnClickListener
 import androidx.car.app.model.Row
 import androidx.car.app.model.Template
 import org.meshtastic.core.common.util.DateFormatter
@@ -46,6 +49,57 @@ class ConversationScreen(
                 .getContentLimit(ConstraintManager.CONTENT_LIMIT_TYPE_LIST)
         val messages = messagesProvider().takeLast(listLimit.coerceAtMost(MAX_MESSAGES))
 
+        val actionStrip = buildActionStrip()
+
+        if (messages.size > MAX_LIST_MESSAGES) {
+            return buildLongMessageTemplate(messages, actionStrip)
+        }
+
+        return buildListTemplate(messages, actionStrip)
+    }
+
+    private fun buildActionStrip(): ActionStrip = ActionStrip.Builder()
+        .addAction(
+            Action.Builder()
+                .setTitle(carContext.getString(R.string.car_voice_reply))
+                .setOnClickListener(
+                    ParkedOnlyOnClickListener.create {
+                        onVoiceReply()
+                        CarToast.makeText(
+                            carContext,
+                            carContext.getString(R.string.car_message_sent),
+                            CarToast.LENGTH_SHORT,
+                        )
+                            .show()
+                    },
+                )
+                .build(),
+        )
+        .addAction(
+            Action.Builder()
+                .setTitle(carContext.getString(R.string.car_quick_reply))
+                .setOnClickListener(
+                    ParkedOnlyOnClickListener.create {
+                        onQuickReply("")
+                        CarToast.makeText(
+                            carContext,
+                            carContext.getString(R.string.car_message_sent),
+                            CarToast.LENGTH_SHORT,
+                        )
+                            .show()
+                    },
+                )
+                .build(),
+        )
+        .addAction(
+            Action.Builder()
+                .setTitle(carContext.getString(R.string.car_read_aloud))
+                .setOnClickListener { onReadAloud() }
+                .build(),
+        )
+        .build()
+
+    private fun buildListTemplate(messages: List<MessageSnapshot>, actionStrip: ActionStrip): Template {
         val listBuilder = ItemList.Builder()
         messages.forEach { msg ->
             val timeText =
@@ -57,22 +111,6 @@ class ConversationScreen(
             listBuilder.addItem(Row.Builder().setTitle(msg.senderName).addText("${msg.text}$timeText").build())
         }
 
-        val actionStrip =
-            ActionStrip.Builder()
-                .addAction(
-                    Action.Builder()
-                        .setTitle(carContext.getString(R.string.car_voice_reply))
-                        .setOnClickListener { onVoiceReply() }
-                        .build(),
-                )
-                .addAction(
-                    Action.Builder()
-                        .setTitle(carContext.getString(R.string.car_read_aloud))
-                        .setOnClickListener { onReadAloud() }
-                        .build(),
-                )
-                .build()
-
         return ListTemplate.Builder()
             .setSingleList(listBuilder.build())
             .setHeader(Header.Builder().setTitle(conversationName).setStartHeaderAction(Action.BACK).build())
@@ -80,7 +118,22 @@ class ConversationScreen(
             .build()
     }
 
+    private fun buildLongMessageTemplate(messages: List<MessageSnapshot>, actionStrip: ActionStrip): Template {
+        val fullText =
+            messages.joinToString("\n\n") { msg ->
+                val time = if (msg.timestamp != 0L) DateFormatter.formatRelativeTime(msg.timestamp) else ""
+                "${msg.senderName} • $time\n${msg.text}"
+            }
+
+        return LongMessageTemplate.Builder(fullText)
+            .setTitle(conversationName)
+            .setHeaderAction(Action.BACK)
+            .setActionStrip(actionStrip)
+            .build()
+    }
+
     companion object {
         private const val MAX_MESSAGES = 5
+        private const val MAX_LIST_MESSAGES = 5
     }
 }

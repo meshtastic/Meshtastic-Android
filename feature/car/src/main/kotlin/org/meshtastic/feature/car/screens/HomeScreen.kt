@@ -18,9 +18,13 @@ package org.meshtastic.feature.car.screens
 
 import android.text.Spannable
 import android.text.SpannableString
+import androidx.car.app.AppManager
 import androidx.car.app.CarContext
+import androidx.car.app.CarToast
 import androidx.car.app.Screen
 import androidx.car.app.model.Action
+import androidx.car.app.model.Alert
+import androidx.car.app.model.AlertCallback
 import androidx.car.app.model.CarColor
 import androidx.car.app.model.CarIcon
 import androidx.car.app.model.CarText
@@ -48,15 +52,21 @@ import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.nodeColorsFromNum
 import org.meshtastic.feature.car.R
+import org.meshtastic.feature.car.alerts.EmergencyHandler
 import org.meshtastic.feature.car.model.NodeUi
 import org.meshtastic.feature.car.model.SignalQuality
 import org.meshtastic.feature.car.service.CarStateCoordinator
 
 @Suppress("TooManyFunctions")
-class HomeScreen(carContext: CarContext, private val stateCoordinator: CarStateCoordinator) : Screen(carContext) {
+class HomeScreen(
+    carContext: CarContext,
+    private val stateCoordinator: CarStateCoordinator,
+    private val emergencyHandler: EmergencyHandler,
+) : Screen(carContext) {
 
     private var selectedTabId: String = TAB_ID_MESSAGES
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    private var previousConnectionState: ConnectionState = ConnectionState.Disconnected
 
     init {
         lifecycle.addObserver(
@@ -75,7 +85,54 @@ class HomeScreen(carContext: CarContext, private val stateCoordinator: CarStateC
     private fun observeState() {
         scope.launch { stateCoordinator.messagingState.collect { invalidate() } }
         scope.launch { stateCoordinator.nodeDashboardState.collect { invalidate() } }
-        scope.launch { stateCoordinator.sessionState.collect { invalidate() } }
+        scope.launch {
+            stateCoordinator.sessionState.collect { state ->
+                val newState = state.connectionStatus
+                if (previousConnectionState == ConnectionState.Disconnected && newState == ConnectionState.Connected) {
+                    CarToast.makeText(carContext, carContext.getString(R.string.car_reconnected), CarToast.LENGTH_SHORT)
+                        .show()
+                }
+                previousConnectionState = newState
+                invalidate()
+            }
+        }
+        scope.launch {
+            emergencyHandler.latestAlert.collect { alert ->
+                if (alert != null && alert.isActive) {
+                    showEmergencyAlert(alert.nodeNum, alert.nodeName, alert.message)
+                }
+            }
+        }
+    }
+
+    private fun showEmergencyAlert(nodeNum: Int, nodeName: String, message: String) {
+        val alert =
+            Alert.Builder(
+                nodeNum,
+                CarText.create(carContext.getString(R.string.car_emergency_from, nodeName)),
+                ALERT_DURATION_MS.toLong(),
+            )
+                .setSubtitle(CarText.create(message))
+                .addAction(
+                    Action.Builder()
+                        .setTitle(carContext.getString(R.string.car_dismiss))
+                        .setOnClickListener { emergencyHandler.dismissAlert(nodeNum) }
+                        .build(),
+                )
+                .setCallback(
+                    object : AlertCallback {
+                        override fun onCancel(reason: Int) {
+                            emergencyHandler.dismissAlert(nodeNum)
+                        }
+
+                        override fun onDismiss() {
+                            emergencyHandler.dismissAlert(nodeNum)
+                        }
+                    },
+                )
+                .build()
+
+        carContext.getCarService(AppManager::class.java).showAlert(alert)
     }
 
     @Suppress("ReturnCount")
@@ -212,17 +269,27 @@ class HomeScreen(carContext: CarContext, private val stateCoordinator: CarStateC
             }
         val status = if (!node.isOnline) " • ${carContext.getString(R.string.car_status_offline)}" else ""
         val full = "$signalLabel$battery$lastHeard$status"
+        val short = "$signalLabel$battery"
 
-        val spannable = SpannableString(full)
-        // Colorize the signal portion
         val signalColor = signalColor(node.signalQuality)
-        spannable.setSpan(
+
+        val fullSpannable = SpannableString(full)
+        fullSpannable.setSpan(
             ForegroundCarColorSpan.create(signalColor),
             0,
             signalLabel.length,
             Spannable.SPAN_EXCLUSIVE_EXCLUSIVE,
         )
-        return CarText.Builder(spannable).build()
+
+        val shortSpannable = SpannableString(short)
+        shortSpannable.setSpan(
+            ForegroundCarColorSpan.create(signalColor),
+            0,
+            signalLabel.length,
+            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE,
+        )
+
+        return CarText.Builder(fullSpannable).addVariant(shortSpannable).build()
     }
 
     private fun signalLabel(quality: SignalQuality): String = when (quality) {
@@ -288,5 +355,6 @@ class HomeScreen(carContext: CarContext, private val stateCoordinator: CarStateC
     companion object {
         private const val TAB_ID_MESSAGES = "messages"
         private const val TAB_ID_NODES = "nodes"
+        private const val ALERT_DURATION_MS = 10_000
     }
 }

@@ -53,7 +53,7 @@ class MeshtasticCarSession :
             },
         )
 
-        return HomeScreen(carContext, stateCoordinator)
+        return HomeScreen(carContext, stateCoordinator, emergencyHandler)
     }
 
     override fun onNewIntent(intent: Intent) {

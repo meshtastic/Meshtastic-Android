@@ -21,6 +21,7 @@ import android.text.SpannableString
 import androidx.car.app.CarContext
 import androidx.car.app.Screen
 import androidx.car.app.model.Action
+import androidx.car.app.model.ActionStrip
 import androidx.car.app.model.CarColor
 import androidx.car.app.model.CarIcon
 import androidx.car.app.model.CarText
@@ -42,6 +43,7 @@ class NodeDashboardScreen(
     carContext: CarContext,
     private val stateProvider: () -> NodeDashboardUiState,
     private val onNodeClick: (Int) -> Unit,
+    private val onRefresh: () -> Unit,
 ) : Screen(carContext) {
 
     override fun onGetTemplate(): Template {
@@ -86,6 +88,19 @@ class NodeDashboardScreen(
         return ListTemplate.Builder()
             .setSingleList(listBuilder.build())
             .setHeader(Header.Builder().setTitle(headerTitle).setStartHeaderAction(Action.BACK).build())
+            .setActionStrip(
+                ActionStrip.Builder()
+                    .addAction(
+                        Action.Builder()
+                            .setTitle(carContext.getString(R.string.car_refresh))
+                            .setOnClickListener {
+                                onRefresh()
+                                invalidate()
+                            }
+                            .build(),
+                    )
+                    .build(),
+            )
             .build()
     }
 
@@ -100,16 +115,27 @@ class NodeDashboardScreen(
             }
         val status = if (!node.isOnline) " • ${carContext.getString(R.string.car_status_offline)}" else ""
         val full = "$signalLabel$battery$lastHeard$status"
+        val short = "$signalLabel$battery"
 
-        val spannable = SpannableString(full)
         val signalColor = signalColor(node.signalQuality)
-        spannable.setSpan(
+
+        val fullSpannable = SpannableString(full)
+        fullSpannable.setSpan(
             ForegroundCarColorSpan.create(signalColor),
             0,
             signalLabel.length,
             Spannable.SPAN_EXCLUSIVE_EXCLUSIVE,
         )
-        return CarText.Builder(spannable).build()
+
+        val shortSpannable = SpannableString(short)
+        shortSpannable.setSpan(
+            ForegroundCarColorSpan.create(signalColor),
+            0,
+            signalLabel.length,
+            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE,
+        )
+
+        return CarText.Builder(fullSpannable).addVariant(shortSpannable).build()
     }
 
     private fun signalLabel(quality: SignalQuality): String = when (quality) {

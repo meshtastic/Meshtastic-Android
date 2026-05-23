@@ -41,6 +41,9 @@ class EmergencyHandler {
     private val _activeAlerts = MutableStateFlow<List<EmergencyAlert>>(emptyList())
     val activeAlerts: StateFlow<List<EmergencyAlert>> = _activeAlerts.asStateFlow()
 
+    private val _latestAlert = MutableStateFlow<EmergencyAlert?>(null)
+    val latestAlert: StateFlow<EmergencyAlert?> = _latestAlert.asStateFlow()
+
     private var toneGenerator: ToneGenerator? = null
 
     fun startCollecting(emergencyFlow: Flow<EmergencyAlert>) {
@@ -50,6 +53,7 @@ class EmergencyHandler {
                 newScope.launch {
                     emergencyFlow.collect { alert ->
                         addAlert(alert)
+                        _latestAlert.value = alert
                         playEmergencyTone()
                     }
                 }
