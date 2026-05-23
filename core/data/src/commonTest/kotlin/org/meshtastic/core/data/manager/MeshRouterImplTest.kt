@@ -19,14 +19,7 @@ package org.meshtastic.core.data.manager
 import dev.mokkery.MockMode
 import dev.mokkery.mock
 import dev.mokkery.verify
-import dev.mokkery.verifySuspend
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.test.runTest
-import org.meshtastic.core.model.DataPacket
-import org.meshtastic.core.model.Node
-import org.meshtastic.core.model.Position
-import org.meshtastic.core.model.service.ServiceAction
-import org.meshtastic.core.repository.MeshActionHandler
 import org.meshtastic.core.repository.MeshConfigFlowManager
 import org.meshtastic.core.repository.MeshConfigHandler
 import org.meshtastic.core.repository.MeshDataHandler
@@ -47,7 +40,6 @@ class MeshRouterImplTest {
     private val neighborInfoHandler = mock<NeighborInfoHandler>(MockMode.autofill)
     private val configFlowManager = mock<MeshConfigFlowManager>(MockMode.autofill)
     private val mqttManager = mock<MqttManager>(MockMode.autofill)
-    private val actionHandler = mock<MeshActionHandler>(MockMode.autofill)
     private val xmodemManager = mock<XModemManager>(MockMode.autofill)
 
     private val configHandler =
@@ -70,7 +62,6 @@ class MeshRouterImplTest {
     private lateinit var neighborInfoHandlerLazy: TrackingLazy<NeighborInfoHandler>
     private lateinit var configFlowManagerLazy: TrackingLazy<MeshConfigFlowManager>
     private lateinit var mqttManagerLazy: TrackingLazy<MqttManager>
-    private lateinit var actionHandlerLazy: TrackingLazy<MeshActionHandler>
     private lateinit var xmodemManagerLazy: TrackingLazy<XModemManager>
 
     private lateinit var router: MeshRouterImpl
@@ -83,7 +74,6 @@ class MeshRouterImplTest {
         neighborInfoHandlerLazy = TrackingLazy { neighborInfoHandler }
         configFlowManagerLazy = TrackingLazy { configFlowManager }
         mqttManagerLazy = TrackingLazy { mqttManager }
-        actionHandlerLazy = TrackingLazy { actionHandler }
         xmodemManagerLazy = TrackingLazy { xmodemManager }
 
         router =
@@ -94,34 +84,8 @@ class MeshRouterImplTest {
                 neighborInfoHandlerLazy = neighborInfoHandlerLazy,
                 configFlowManagerLazy = configFlowManagerLazy,
                 mqttManagerLazy = mqttManagerLazy,
-                actionHandlerLazy = actionHandlerLazy,
                 xmodemManagerLazy = xmodemManagerLazy,
             )
-    }
-
-    @Test
-    fun `send message routing uses the action handler lazily`() {
-        val packet = DataPacket(to = "!deadbeef", dataType = 1, bytes = null, channel = 0)
-
-        assertAllHandlersUninitialized()
-
-        router.actionHandler.handleSend(packet, 12345)
-
-        assertTrue(actionHandlerLazy.isInitialized())
-        assertFalse(dataHandlerLazy.isInitialized())
-        assertFalse(tracerouteHandlerLazy.isInitialized())
-        verify { actionHandler.handleSend(packet, 12345) }
-    }
-
-    @Test
-    fun `request position routing uses the action handler lazily`() {
-        val position = Position(latitude = 37.7749, longitude = -122.4194, altitude = 10)
-
-        router.actionHandler.handleRequestPosition(destNum = 67890, position = position, myNodeNum = 12345)
-
-        assertTrue(actionHandlerLazy.isInitialized())
-        assertFalse(tracerouteHandlerLazy.isInitialized())
-        verify { actionHandler.handleRequestPosition(67890, position, 12345) }
     }
 
     @Test
@@ -131,31 +95,22 @@ class MeshRouterImplTest {
         router.tracerouteHandler.recordStartTime(77)
 
         assertTrue(tracerouteHandlerLazy.isInitialized())
-        assertFalse(actionHandlerLazy.isInitialized())
+        assertFalse(dataHandlerLazy.isInitialized())
         verify { tracerouteHandler.recordStartTime(77) }
     }
 
     @Test
-    fun `admin command routing uses the action handler lazily`() {
+    fun `handlers are initialized independently`() {
         assertAllHandlersUninitialized()
 
-        router.actionHandler.handleGetRemoteConfig(id = 42, destNum = 67890, config = 7)
-
-        assertTrue(actionHandlerLazy.isInitialized())
+        router.dataHandler
+        assertTrue(dataHandlerLazy.isInitialized())
         assertFalse(configHandlerLazy.isInitialized())
-        verify { actionHandler.handleGetRemoteConfig(42, 67890, 7) }
-    }
-
-    @Test
-    fun `service actions are passed through unchanged to the action handler`() = runTest {
-        val action = ServiceAction.Favorite(Node(num = 67890))
-
-        router.actionHandler.onServiceAction(action)
-
-        assertTrue(actionHandlerLazy.isInitialized())
-        assertFalse(dataHandlerLazy.isInitialized())
         assertFalse(tracerouteHandlerLazy.isInitialized())
-        verifySuspend { actionHandler.onServiceAction(action) }
+
+        router.configHandler
+        assertTrue(configHandlerLazy.isInitialized())
+        assertFalse(tracerouteHandlerLazy.isInitialized())
     }
 
     private fun assertAllHandlersUninitialized() {
@@ -165,7 +120,6 @@ class MeshRouterImplTest {
         assertFalse(neighborInfoHandlerLazy.isInitialized())
         assertFalse(configFlowManagerLazy.isInitialized())
         assertFalse(mqttManagerLazy.isInitialized())
-        assertFalse(actionHandlerLazy.isInitialized())
         assertFalse(xmodemManagerLazy.isInitialized())
     }
 

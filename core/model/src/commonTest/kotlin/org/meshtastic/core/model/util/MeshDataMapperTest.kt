@@ -17,8 +17,8 @@
 package org.meshtastic.core.model.util
 
 import okio.ByteString.Companion.encodeUtf8
-import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MeshUser
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.DeviceMetrics
@@ -104,7 +104,7 @@ class MeshDataMapperTest {
         val mapped = mapper.toDataPacket(packet)
 
         assertNotNull(mapped)
-        assertEquals(DataPacket.PKC_CHANNEL_INDEX, mapped.channel)
+        assertEquals(NodeAddress.PKC_CHANNEL_INDEX, mapped.channel)
     }
 
     @Test
@@ -281,6 +281,6 @@ class MeshDataMapperTest {
     }
 
     private class TestNodeIdLookup : NodeIdLookup {
-        override fun toNodeID(nodeNum: Int): String = DataPacket.nodeNumToDefaultId(nodeNum)
+        override fun toNodeID(nodeNum: Int): String = NodeAddress.numToDefaultId(nodeNum)
     }
 }

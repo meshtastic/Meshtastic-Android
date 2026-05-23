@@ -84,6 +84,16 @@ class FakeRadioController :
         return true
     }
 
+    override suspend fun ignoreNode(nodeNum: Int) {}
+
+    override suspend fun muteNode(nodeNum: Int) {}
+
+    override suspend fun sendReaction(emoji: String, replyId: Int, contactKey: String) {}
+
+    override suspend fun importContact(contact: org.meshtastic.proto.SharedContact) {}
+
+    override suspend fun refreshMetadata(nodeNum: Int) {}
+
     override suspend fun setLocalConfig(config: Config) {}
 
     override suspend fun setLocalChannel(channel: Channel) {}

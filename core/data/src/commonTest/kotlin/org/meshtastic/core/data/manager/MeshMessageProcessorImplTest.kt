@@ -251,7 +251,7 @@ class MeshMessageProcessorImplTest {
         advanceUntilIdle()
 
         // Should have called updateNode for myNodeNum (lastHeard update)
-        verify { nodeManager.updateNode(myNodeNum, withBroadcast = true, any(), any()) }
+        verify { nodeManager.updateNode(myNodeNum, any(), any()) }
     }
 
     @Test
@@ -273,7 +273,7 @@ class MeshMessageProcessorImplTest {
         advanceUntilIdle()
 
         // Should have called updateNode for the sender
-        verify { nodeManager.updateNode(senderNode, withBroadcast = false, any(), any()) }
+        verify { nodeManager.updateNode(senderNode, any(), any()) }
     }
 
     // ---------- handleReceivedMeshPacket: null decoded ----------

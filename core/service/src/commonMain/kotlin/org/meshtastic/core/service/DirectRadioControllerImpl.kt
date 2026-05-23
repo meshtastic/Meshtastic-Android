@@ -16,182 +16,368 @@
  */
 package org.meshtastic.core.service
 
+import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import okio.ByteString
+import okio.ByteString.Companion.toByteString
+import org.meshtastic.core.common.database.DatabaseManager
+import org.meshtastic.core.common.util.handledLaunch
+import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.MessageStatus
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.RadioController
-import org.meshtastic.core.model.service.ServiceAction
+import org.meshtastic.core.model.Reaction
 import org.meshtastic.core.repository.CommandSender
+import org.meshtastic.core.repository.DataPair
+import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.MeshLocationManager
-import org.meshtastic.core.repository.MeshRouter
+import org.meshtastic.core.repository.MeshMessageProcessor
+import org.meshtastic.core.repository.MeshPrefs
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.NotificationManager
+import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.repository.PlatformAnalytics
+import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.UiPrefs
+import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.ModuleConfig
+import org.meshtastic.proto.OTAMode
+import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.SharedContact
 import org.meshtastic.proto.User
 
 /**
- * Platform-agnostic [RadioController] implementation that delegates directly to service-layer handlers.
+ * Platform-agnostic [RadioController] implementation modeled after the SDK's `AdminApiImpl` pattern.
  *
- * Unlike [AndroidRadioControllerImpl], which routes every call through the AIDL [IMeshService] binder, this
- * implementation talks directly to [CommandSender], [MeshRouter.actionHandler], [ServiceRepository], and [NodeManager].
+ * This class is the single composition root for all radio commands. It builds [AdminMessage] protos directly and
+ * delegates to [CommandSender] for packet construction and transport — no intermediate handler layer, no ByteArray
+ * encode/decode boundaries. Business logic (optimistic persistence, node state updates, analytics) lives here.
+ *
  * This is the correct implementation for any target where the service runs in-process (Desktop, iOS, or Android in
  * single-process mode).
- *
- * This eliminates the need for [NoopRadioController] on non-Android targets.
  */
 @Suppress("TooManyFunctions", "LongParameterList")
 class DirectRadioControllerImpl(
     private val serviceRepository: ServiceRepository,
     private val nodeRepository: NodeRepository,
     private val commandSender: CommandSender,
-    private val router: MeshRouter,
     private val nodeManager: NodeManager,
     private val radioInterfaceService: RadioInterfaceService,
     private val locationManager: MeshLocationManager,
+    private val packetRepository: Lazy<PacketRepository>,
+    private val dataHandler: Lazy<MeshDataHandler>,
+    private val analytics: PlatformAnalytics,
+    private val meshPrefs: MeshPrefs,
+    private val uiPrefs: UiPrefs,
+    private val databaseManager: DatabaseManager,
+    private val notificationManager: NotificationManager,
+    private val messageProcessor: Lazy<MeshMessageProcessor>,
+    private val radioConfigRepository: RadioConfigRepository,
+    private val scope: CoroutineScope,
+    private val onDeviceAddressChanged: (() -> Unit)? = null,
 ) : RadioController {
 
-    private val actionHandler
-        get() = router.actionHandler
+    companion object {
+        private const val DEFAULT_REBOOT_DELAY = 5
+        private const val EMOJI_INDICATOR = 1
+    }
 
     private val myNodeNum: Int
         get() = nodeManager.myNodeNum.value ?: 0
 
-    /** Delegates to [ServiceRepository.connectionState] — the canonical app-level source of truth. */
+    // ── Connection State ────────────────────────────────────────────────────
+
     override val connectionState: StateFlow<ConnectionState>
         get() = serviceRepository.connectionState
 
     override val clientNotification: StateFlow<ClientNotification?>
         get() = serviceRepository.clientNotification
 
-    override suspend fun sendMessage(packet: DataPacket) {
-        actionHandler.handleSend(packet, myNodeNum)
-    }
-
     override fun clearClientNotification() {
         serviceRepository.clearClientNotification()
     }
 
-    override suspend fun favoriteNode(nodeNum: Int) {
-        val nodeDef = nodeRepository.getNode(DataPacket.nodeNumToDefaultId(nodeNum))
-        serviceRepository.onServiceAction(ServiceAction.Favorite(nodeDef))
+    // ── Messaging ───────────────────────────────────────────────────────────
+
+    override suspend fun sendMessage(packet: DataPacket) {
+        commandSender.sendData(packet)
+        dataHandler.value.rememberDataPacket(packet, myNodeNum, false)
+        val bytes = packet.bytes ?: ByteString.EMPTY
+        analytics.track("data_send", DataPair("num_bytes", bytes.size), DataPair("type", packet.dataType))
     }
+
+    override suspend fun sendReaction(emoji: String, replyId: Int, contactKey: String) {
+        val myNum = nodeManager.myNodeNum.value ?: return
+        val channel = contactKey[0].digitToInt()
+        val destId = contactKey.substring(1)
+        val dataPacket =
+            DataPacket(
+                to = destId,
+                dataType = PortNum.TEXT_MESSAGE_APP.value,
+                bytes = emoji.encodeToByteArray().toByteString(),
+                channel = channel,
+                replyId = replyId,
+                wantAck = true,
+                emoji = EMOJI_INDICATOR,
+            )
+                .apply { from = nodeManager.getMyId().takeIf { it.isNotEmpty() } ?: NodeAddress.ID_LOCAL }
+        commandSender.sendData(dataPacket)
+        val user = nodeManager.nodeDBbyNodeNum[myNum]?.user ?: User(id = nodeManager.getMyId())
+        packetRepository.value.insertReaction(
+            Reaction(
+                replyId = replyId,
+                user = user,
+                emoji = emoji,
+                timestamp = nowMillis,
+                snr = 0f,
+                rssi = 0,
+                hopsAway = 0,
+                packetId = dataPacket.id,
+                status = MessageStatus.QUEUED,
+                to = destId,
+                channel = channel,
+            ),
+            myNum,
+        )
+    }
+
+    // ── Node Management ─────────────────────────────────────────────────────
+
+    override suspend fun favoriteNode(nodeNum: Int) {
+        val myNum = nodeManager.myNodeNum.value ?: return
+        val node = nodeManager.nodeDBbyNodeNum[nodeNum] ?: return
+        commandSender.sendAdmin(myNum) {
+            if (node.isFavorite) {
+                AdminMessage(remove_favorite_node = node.num)
+            } else {
+                AdminMessage(set_favorite_node = node.num)
+            }
+        }
+        nodeManager.updateNode(node.num) { it.copy(isFavorite = !node.isFavorite) }
+    }
+
+    override suspend fun ignoreNode(nodeNum: Int) {
+        val myNum = nodeManager.myNodeNum.value ?: return
+        val node = nodeManager.nodeDBbyNodeNum[nodeNum] ?: return
+        val newIgnored = !node.isIgnored
+        commandSender.sendAdmin(myNum) {
+            if (newIgnored) AdminMessage(set_ignored_node = node.num) else AdminMessage(remove_ignored_node = node.num)
+        }
+        nodeManager.updateNode(node.num) { it.copy(isIgnored = newIgnored) }
+        scope.handledLaunch { packetRepository.value.updateFilteredBySender(node.user.id, newIgnored) }
+    }
+
+    override suspend fun muteNode(nodeNum: Int) {
+        val myNum = nodeManager.myNodeNum.value ?: return
+        val node = nodeManager.nodeDBbyNodeNum[nodeNum] ?: return
+        commandSender.sendAdmin(myNum) { AdminMessage(toggle_muted_node = node.num) }
+        nodeManager.updateNode(node.num) { it.copy(isMuted = !node.isMuted) }
+    }
+
+    override suspend fun removeByNodenum(packetId: Int, nodeNum: Int) {
+        nodeManager.removeByNodenum(nodeNum)
+        val myNum = nodeManager.myNodeNum.value ?: return
+        commandSender.sendAdmin(myNum, packetId) { AdminMessage(remove_by_nodenum = nodeNum) }
+    }
+
+    // ── Contacts ────────────────────────────────────────────────────────────
 
     override suspend fun sendSharedContact(nodeNum: Int): Boolean {
-        val nodeDef = nodeRepository.getNode(DataPacket.nodeNumToDefaultId(nodeNum))
+        val myNum = nodeManager.myNodeNum.value ?: return false
+        val nodeDef = nodeRepository.getNode(NodeAddress.numToDefaultId(nodeNum))
         val contact =
             SharedContact(node_num = nodeDef.num, user = nodeDef.user, manually_verified = nodeDef.manuallyVerified)
-        val action = ServiceAction.SendContact(contact)
-        serviceRepository.onServiceAction(action)
-        return action.result.await()
+        return safeCatching { commandSender.sendAdminAwait(myNum) { AdminMessage(add_contact = contact) } }
+            .getOrDefault(false)
     }
 
-    override suspend fun setLocalConfig(config: Config) {
-        actionHandler.handleSetConfig(config.encode(), myNodeNum)
+    override suspend fun importContact(contact: SharedContact) {
+        val myNum = nodeManager.myNodeNum.value ?: return
+        val verified = contact.copy(manually_verified = true)
+        commandSender.sendAdmin(myNum) { AdminMessage(add_contact = verified) }
+        nodeManager.handleReceivedUser(verified.node_num, verified.user ?: User(), manuallyVerified = true)
     }
 
-    override suspend fun setLocalChannel(channel: Channel) {
-        actionHandler.handleSetChannel(channel.encode(), myNodeNum)
+    // ── Device Metadata ─────────────────────────────────────────────────────
+
+    override suspend fun refreshMetadata(destNum: Int) {
+        commandSender.sendAdmin(destNum, wantResponse = true) { AdminMessage(get_device_metadata_request = true) }
     }
+
+    // ── Owner ───────────────────────────────────────────────────────────────
 
     override suspend fun setOwner(destNum: Int, user: User, packetId: Int) {
-        actionHandler.handleSetRemoteOwner(packetId, destNum, user.encode())
+        commandSender.sendAdmin(destNum, packetId) { AdminMessage(set_owner = user) }
+        nodeManager.handleReceivedUser(destNum, user)
+    }
+
+    override suspend fun getOwner(destNum: Int, packetId: Int) {
+        commandSender.sendAdmin(destNum, packetId, wantResponse = true) { AdminMessage(get_owner_request = true) }
+    }
+
+    // ── Configuration ───────────────────────────────────────────────────────
+    // Config and channel writes use fire-and-forget persistence (handledLaunch) intentionally.
+    // The device is the source of truth — it re-sends its full config on every connection.
+    // Local persistence is a cache optimization, not a correctness requirement.
+
+    override suspend fun setLocalConfig(config: Config) {
+        commandSender.sendAdmin(myNodeNum) { AdminMessage(set_config = config) }
+        scope.handledLaunch { radioConfigRepository.setLocalConfig(config) }
     }
 
     override suspend fun setConfig(destNum: Int, config: Config, packetId: Int) {
-        actionHandler.handleSetRemoteConfig(packetId, destNum, config.encode())
+        commandSender.sendAdmin(destNum, packetId) { AdminMessage(set_config = config) }
+        if (destNum == myNodeNum) {
+            scope.handledLaunch { radioConfigRepository.setLocalConfig(config) }
+        }
+    }
+
+    override suspend fun getConfig(destNum: Int, configType: Int, packetId: Int) {
+        commandSender.sendAdmin(destNum, packetId, wantResponse = true) {
+            if (configType == AdminMessage.ConfigType.SESSIONKEY_CONFIG.value) {
+                AdminMessage(get_device_metadata_request = true)
+            } else {
+                AdminMessage(get_config_request = AdminMessage.ConfigType.fromValue(configType))
+            }
+        }
     }
 
     override suspend fun setModuleConfig(destNum: Int, config: ModuleConfig, packetId: Int) {
-        actionHandler.handleSetModuleConfig(packetId, destNum, config.encode())
+        commandSender.sendAdmin(destNum, packetId) { AdminMessage(set_module_config = config) }
+        config.statusmessage?.let { sm -> nodeManager.updateNodeStatus(destNum, sm.node_status) }
+        if (destNum == myNodeNum) {
+            scope.handledLaunch { radioConfigRepository.setLocalModuleConfig(config) }
+        }
+    }
+
+    override suspend fun getModuleConfig(destNum: Int, moduleConfigType: Int, packetId: Int) {
+        commandSender.sendAdmin(destNum, packetId, wantResponse = true) {
+            AdminMessage(get_module_config_request = AdminMessage.ModuleConfigType.fromValue(moduleConfigType))
+        }
+    }
+
+    // ── Channels ────────────────────────────────────────────────────────────
+
+    override suspend fun setLocalChannel(channel: Channel) {
+        commandSender.sendAdmin(myNodeNum) { AdminMessage(set_channel = channel) }
+        scope.handledLaunch { radioConfigRepository.updateChannelSettings(channel) }
     }
 
     override suspend fun setRemoteChannel(destNum: Int, channel: Channel, packetId: Int) {
-        actionHandler.handleSetRemoteChannel(packetId, destNum, channel.encode())
+        commandSender.sendAdmin(destNum, packetId) { AdminMessage(set_channel = channel) }
+        if (destNum == myNodeNum) {
+            scope.handledLaunch { radioConfigRepository.updateChannelSettings(channel) }
+        }
     }
+
+    override suspend fun getChannel(destNum: Int, index: Int, packetId: Int) {
+        commandSender.sendAdmin(destNum, packetId, wantResponse = true) {
+            AdminMessage(get_channel_request = index + 1)
+        }
+    }
+
+    // ── Ringtone & Canned Messages ─────────────────────────────────────────
+
+    override suspend fun setRingtone(destNum: Int, ringtone: String) {
+        commandSender.sendAdmin(destNum) { AdminMessage(set_ringtone_message = ringtone) }
+    }
+
+    override suspend fun getRingtone(destNum: Int, packetId: Int) {
+        commandSender.sendAdmin(destNum, packetId, wantResponse = true) { AdminMessage(get_ringtone_request = true) }
+    }
+
+    override suspend fun setCannedMessages(destNum: Int, messages: String) {
+        commandSender.sendAdmin(destNum) { AdminMessage(set_canned_message_module_messages = messages) }
+    }
+
+    override suspend fun getCannedMessages(destNum: Int, packetId: Int) {
+        commandSender.sendAdmin(destNum, packetId, wantResponse = true) {
+            AdminMessage(get_canned_message_module_messages_request = true)
+        }
+    }
+
+    // ── Position ────────────────────────────────────────────────────────────
 
     override suspend fun setFixedPosition(destNum: Int, position: Position) {
         commandSender.setFixedPosition(destNum, position)
     }
 
-    override suspend fun setRingtone(destNum: Int, ringtone: String) {
-        actionHandler.handleSetRingtone(destNum, ringtone)
+    override suspend fun requestPosition(destNum: Int, currentPosition: Position) {
+        if (destNum == myNodeNum) return
+        val provideLocation = uiPrefs.shouldProvideNodeLocation(myNodeNum).value
+        val resolvedPosition =
+            when {
+                provideLocation && currentPosition.isValid() -> currentPosition
+
+                provideLocation ->
+                    nodeManager.nodeDBbyNodeNum[myNodeNum]?.position?.let { Position(it) }?.takeIf { it.isValid() }
+                        ?: Position(0.0, 0.0, 0)
+
+                else -> Position(0.0, 0.0, 0)
+            }
+        commandSender.requestPosition(destNum, resolvedPosition)
     }
 
-    override suspend fun setCannedMessages(destNum: Int, messages: String) {
-        actionHandler.handleSetCannedMessages(destNum, messages)
-    }
-
-    override suspend fun getOwner(destNum: Int, packetId: Int) {
-        actionHandler.handleGetRemoteOwner(packetId, destNum)
-    }
-
-    override suspend fun getConfig(destNum: Int, configType: Int, packetId: Int) {
-        actionHandler.handleGetRemoteConfig(packetId, destNum, configType)
-    }
-
-    override suspend fun getModuleConfig(destNum: Int, moduleConfigType: Int, packetId: Int) {
-        actionHandler.handleGetModuleConfig(packetId, destNum, moduleConfigType)
-    }
-
-    override suspend fun getChannel(destNum: Int, index: Int, packetId: Int) {
-        actionHandler.handleGetRemoteChannel(packetId, destNum, index)
-    }
-
-    override suspend fun getRingtone(destNum: Int, packetId: Int) {
-        actionHandler.handleGetRingtone(packetId, destNum)
-    }
-
-    override suspend fun getCannedMessages(destNum: Int, packetId: Int) {
-        actionHandler.handleGetCannedMessages(packetId, destNum)
-    }
+    // ── Device Status & Lifecycle ───────────────────────────────────────────
 
     override suspend fun getDeviceConnectionStatus(destNum: Int, packetId: Int) {
-        actionHandler.handleGetDeviceConnectionStatus(packetId, destNum)
-    }
-
-    override suspend fun reboot(destNum: Int, packetId: Int) {
-        actionHandler.handleRequestReboot(packetId, destNum)
-    }
-
-    override suspend fun rebootToDfu(nodeNum: Int) {
-        actionHandler.handleRebootToDfu(nodeNum)
-    }
-
-    override suspend fun requestRebootOta(requestId: Int, destNum: Int, mode: Int, hash: ByteArray?) {
-        actionHandler.handleRequestRebootOta(requestId, destNum, mode, hash)
-    }
-
-    override suspend fun shutdown(destNum: Int, packetId: Int) {
-        actionHandler.handleRequestShutdown(packetId, destNum)
-    }
-
-    override suspend fun factoryReset(destNum: Int, packetId: Int) {
-        actionHandler.handleRequestFactoryReset(packetId, destNum)
-    }
-
-    override suspend fun nodedbReset(destNum: Int, packetId: Int, preserveFavorites: Boolean) {
-        actionHandler.handleRequestNodedbReset(packetId, destNum, preserveFavorites)
-    }
-
-    override suspend fun removeByNodenum(packetId: Int, nodeNum: Int) {
-        val myNode = nodeManager.myNodeNum.value
-        if (myNode != null) {
-            actionHandler.handleRemoveByNodenum(nodeNum, packetId, myNode)
-        } else {
-            nodeManager.removeByNodenum(nodeNum)
+        commandSender.sendAdmin(destNum, packetId, wantResponse = true) {
+            AdminMessage(get_device_connection_status_request = true)
         }
     }
 
-    override suspend fun requestPosition(destNum: Int, currentPosition: Position) {
-        actionHandler.handleRequestPosition(destNum, currentPosition, myNodeNum)
+    override suspend fun reboot(destNum: Int, packetId: Int) {
+        Logger.i { "Reboot requested for node $destNum" }
+        commandSender.sendAdmin(destNum, packetId) { AdminMessage(reboot_seconds = DEFAULT_REBOOT_DELAY) }
     }
+
+    override suspend fun rebootToDfu(nodeNum: Int) {
+        commandSender.sendAdmin(nodeNum) { AdminMessage(enter_dfu_mode_request = true) }
+    }
+
+    override suspend fun requestRebootOta(requestId: Int, destNum: Int, mode: Int, hash: ByteArray?) {
+        val otaMode = OTAMode.fromValue(mode) ?: OTAMode.NO_REBOOT_OTA
+        val otaEvent =
+            AdminMessage.OTAEvent(reboot_ota_mode = otaMode, ota_hash = hash?.toByteString() ?: ByteString.EMPTY)
+        commandSender.sendAdmin(destNum, requestId) { AdminMessage(ota_request = otaEvent) }
+    }
+
+    override suspend fun shutdown(destNum: Int, packetId: Int) {
+        commandSender.sendAdmin(destNum, packetId) { AdminMessage(shutdown_seconds = DEFAULT_REBOOT_DELAY) }
+    }
+
+    override suspend fun factoryReset(destNum: Int, packetId: Int) {
+        Logger.i { "Factory reset requested for node $destNum" }
+        commandSender.sendAdmin(destNum, packetId) { AdminMessage(factory_reset_device = 1) }
+    }
+
+    override suspend fun nodedbReset(destNum: Int, packetId: Int, preserveFavorites: Boolean) {
+        commandSender.sendAdmin(destNum, packetId) { AdminMessage(nodedb_reset = preserveFavorites) }
+    }
+
+    // ── Edit Settings (transactional) ───────────────────────────────────────
+
+    override suspend fun beginEditSettings(destNum: Int) {
+        commandSender.sendAdmin(destNum) { AdminMessage(begin_edit_settings = true) }
+    }
+
+    override suspend fun commitEditSettings(destNum: Int) {
+        commandSender.sendAdmin(destNum) { AdminMessage(commit_edit_settings = true) }
+    }
+
+    // ── Telemetry & Discovery ───────────────────────────────────────────────
 
     override suspend fun requestUserInfo(destNum: Int) {
         if (destNum != myNodeNum) {
@@ -204,34 +390,45 @@ class DirectRadioControllerImpl(
     }
 
     override suspend fun requestTelemetry(requestId: Int, destNum: Int, typeValue: Int) {
-        actionHandler.handleRequestTelemetry(requestId, destNum, typeValue)
+        commandSender.requestTelemetry(requestId, destNum, typeValue)
     }
 
     override suspend fun requestNeighborInfo(requestId: Int, destNum: Int) {
-        actionHandler.handleRequestNeighborInfo(requestId, destNum)
+        commandSender.requestNeighborInfo(requestId, destNum)
     }
 
-    override suspend fun beginEditSettings(destNum: Int) {
-        actionHandler.handleBeginEditSettings(destNum)
-    }
-
-    override suspend fun commitEditSettings(destNum: Int) {
-        actionHandler.handleCommitEditSettings(destNum)
-    }
+    // ── Packet ID & Location ────────────────────────────────────────────────
 
     override fun getPacketId(): Int = commandSender.generatePacketId()
 
     override fun startProvideLocation() {
-        // Location provision requires a scope — typically managed by the orchestrator.
-        // On platforms without GPS hardware (desktop), this is a no-op via the injected locationManager.
+        locationManager.restart()
     }
 
     override fun stopProvideLocation() {
         locationManager.stop()
     }
 
+    // ── Device Address ──────────────────────────────────────────────────────
+
     override fun setDeviceAddress(address: String) {
-        actionHandler.handleUpdateLastAddress(address)
-        radioInterfaceService.setDeviceAddress(address)
+        scope.launch {
+            switchDevice(address)
+            radioInterfaceService.setDeviceAddress(address)
+            onDeviceAddressChanged?.invoke()
+        }
+    }
+
+    private suspend fun switchDevice(deviceAddr: String) {
+        val currentAddr = meshPrefs.deviceAddress.value
+        if (deviceAddr != currentAddr) {
+            Logger.i { "Device address changed, switching database and clearing node DB" }
+            meshPrefs.setDeviceAddress(deviceAddr)
+            nodeManager.clear()
+            messageProcessor.value.clearEarlyPackets()
+            databaseManager.switchActiveDatabase(deviceAddr)
+            notificationManager.cancelAll()
+            nodeManager.loadCachedNodeDB()
+        }
     }
 }

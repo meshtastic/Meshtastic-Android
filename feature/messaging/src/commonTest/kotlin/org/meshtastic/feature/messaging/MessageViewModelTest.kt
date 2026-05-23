@@ -27,7 +27,6 @@ import dev.mokkery.mock
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -35,7 +34,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.ContactSettings
-import org.meshtastic.core.model.service.ServiceAction
+import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.CustomEmojiPrefs
 import org.meshtastic.core.repository.HomoglyphPrefs
 import org.meshtastic.core.repository.PacketRepository
@@ -65,6 +64,7 @@ class MessageViewModelTest {
     private val quickChatActionRepository: QuickChatActionRepository = mock(MockMode.autofill)
     private val packetRepository: PacketRepository = mock(MockMode.autofill)
     private val serviceRepository: ServiceRepository = mock(MockMode.autofill)
+    private val radioController: RadioController = mock(MockMode.autofill)
     private val sendMessageUseCase: SendMessageUseCase = mock(MockMode.autofill)
     private val customEmojiPrefs: CustomEmojiPrefs = mock(MockMode.autofill)
     private val homoglyphPrefs: HomoglyphPrefs = mock(MockMode.autofill)
@@ -95,7 +95,6 @@ class MessageViewModelTest {
         every { radioConfigRepository.moduleConfigFlow } returns MutableStateFlow(LocalModuleConfig())
         every { radioConfigRepository.deviceProfileFlow } returns MutableStateFlow(DeviceProfile())
 
-        every { serviceRepository.serviceAction } returns emptyFlow<ServiceAction>()
         every { serviceRepository.connectionState } returns connectionStateFlow
 
         every { customEmojiPrefs.customEmojiFrequency } returns customEmojiFrequencyFlow
@@ -119,6 +118,7 @@ class MessageViewModelTest {
                 quickChatActionRepository = quickChatActionRepository,
                 packetRepository = packetRepository,
                 serviceRepository = serviceRepository,
+                radioController = radioController,
                 sendMessageUseCase = sendMessageUseCase,
                 customEmojiPrefs = customEmojiPrefs,
                 homoglyphEncodingPrefs = homoglyphPrefs,
@@ -192,13 +192,13 @@ class MessageViewModelTest {
 
     @Test
     fun testSendReaction() = runTest {
-        everySuspend { serviceRepository.onServiceAction(any()) } returns Unit
+        everySuspend { radioController.sendReaction(any(), any(), any()) } returns Unit
 
         viewModel.sendReaction("❤️", 123, "0!12345678")
 
         advanceUntilIdle()
 
-        verifySuspend { serviceRepository.onServiceAction(ServiceAction.Reaction("❤️", 123, "0!12345678")) }
+        verifySuspend { radioController.sendReaction("❤️", 123, "0!12345678") }
     }
 
     @Test

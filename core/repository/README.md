@@ -51,7 +51,6 @@ src/
 │   ├── RadioConfigRepository.kt
 │   ├── RadioInterfaceService.kt
 │   ├── RadioTransportCallback.kt / RadioTransportFactory.kt
-│   ├── ServiceBroadcasts.kt
 │   ├── StoreForwardPacketHandler.kt
 │   ├── TelemetryPacketHandler.kt
 │   ├── TracerouteHandler.kt / TracerouteSnapshotRepository.kt

@@ -17,7 +17,6 @@
 package org.meshtastic.core.data.manager
 
 import org.koin.core.annotation.Single
-import org.meshtastic.core.repository.MeshActionHandler
 import org.meshtastic.core.repository.MeshConfigFlowManager
 import org.meshtastic.core.repository.MeshConfigHandler
 import org.meshtastic.core.repository.MeshDataHandler
@@ -37,7 +36,6 @@ class MeshRouterImpl(
     private val neighborInfoHandlerLazy: Lazy<NeighborInfoHandler>,
     private val configFlowManagerLazy: Lazy<MeshConfigFlowManager>,
     private val mqttManagerLazy: Lazy<MqttManager>,
-    private val actionHandlerLazy: Lazy<MeshActionHandler>,
     private val xmodemManagerLazy: Lazy<XModemManager>,
 ) : MeshRouter {
     override val dataHandler: MeshDataHandler
@@ -57,9 +55,6 @@ class MeshRouterImpl(
 
     override val mqttManager: MqttManager
         get() = mqttManagerLazy.value
-
-    override val actionHandler: MeshActionHandler
-        get() = actionHandlerLazy.value
 
     override val xmodemManager: XModemManager
         get() = xmodemManagerLazy.value

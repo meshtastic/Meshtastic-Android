@@ -217,10 +217,8 @@ class MeshMessageProcessorImpl(
         myNodeNum?.let { myNum ->
             val from = packet.from
             val isOtherNode = myNum != from
-            nodeManager.updateNode(myNum, withBroadcast = isOtherNode) { node: Node ->
-                node.copy(lastHeard = nowSeconds.toInt())
-            }
-            nodeManager.updateNode(from, withBroadcast = false, channel = packet.channel) { node: Node ->
+            nodeManager.updateNode(myNum) { node: Node -> node.copy(lastHeard = nowSeconds.toInt()) }
+            nodeManager.updateNode(from, channel = packet.channel) { node: Node ->
                 val viaMqtt = packet.via_mqtt == true
                 val isDirect = packet.hop_start == packet.hop_limit
 
@@ -284,7 +282,7 @@ class MeshMessageProcessorImpl(
         lastLocalNodeRefreshMs = now
 
         val myNum = nodeManager.myNodeNum.value ?: return
-        nodeManager.updateNode(myNum, withBroadcast = false) { node: Node -> node.copy(lastHeard = nowSeconds.toInt()) }
+        nodeManager.updateNode(myNum) { node: Node -> node.copy(lastHeard = nowSeconds.toInt()) }
     }
 
     private fun insertMeshLog(log: MeshLog): Job = scope.handledLaunch { meshLogRepository.value.insert(log) }

@@ -8,8 +8,8 @@ The `:core:service` module contains the abstractions and client-side logic for i
 
 ## Key Components
 
-### 1. `ServiceClient`
-The main entry point for other parts of the app (or third-party apps) to bind to and interact with the mesh service via AIDL.
+### 1. `MeshService`
+Android foreground service entry point that hosts the orchestrator lifecycle.
 
 ### 2. `ServiceRepository`
 A high-level repository that wraps the service connection and exposes reactive `Flow`s for connection status and data arrival.
@@ -28,7 +28,6 @@ Defines Intent actions for starting, stopping, and interacting with the backgrou
 graph TB
   :core:service[service]:::kmp-library
   :core:service -.-> :core:testing
-  :core:service --> :core:api
   :core:service --> :core:repository
   :core:service -.-> :core:common
   :core:service -.-> :core:data

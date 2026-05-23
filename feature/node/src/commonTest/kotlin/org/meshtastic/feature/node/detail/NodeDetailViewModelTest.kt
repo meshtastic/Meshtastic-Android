@@ -40,9 +40,9 @@ import org.meshtastic.core.domain.usecase.session.EnsureRemoteAdminSessionUseCas
 import org.meshtastic.core.domain.usecase.session.EnsureSessionResult
 import org.meshtastic.core.domain.usecase.session.ObserveRemoteAdminSessionStatusUseCase
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.model.SessionStatus
 import org.meshtastic.core.navigation.SettingsRoute
-import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.connect_radio_for_remote_admin
@@ -64,7 +64,7 @@ class NodeDetailViewModelTest {
     private lateinit var viewModel: NodeDetailViewModel
     private val nodeManagementActions: NodeManagementActions = mock()
     private val nodeRequestActions: NodeRequestActions = mock()
-    private val serviceRepository: ServiceRepository = mock()
+    private val radioController: RadioController = mock()
     private val getNodeDetailsUseCase: GetNodeDetailsUseCase = mock()
     private val ensureRemoteAdminSession: EnsureRemoteAdminSessionUseCase = mock()
     private val observeRemoteAdminSessionStatus: ObserveRemoteAdminSessionStatusUseCase = mock()
@@ -97,7 +97,7 @@ class NodeDetailViewModelTest {
         savedStateHandle = SavedStateHandle(if (nodeId != null) mapOf("destNum" to nodeId) else emptyMap()),
         nodeManagementActions = nodeManagementActions,
         nodeRequestActions = nodeRequestActions,
-        serviceRepository = serviceRepository,
+        radioController = radioController,
         getNodeDetailsUseCase = getNodeDetailsUseCase,
         ensureRemoteAdminSession = ensureRemoteAdminSession,
         observeRemoteAdminSessionStatus = observeRemoteAdminSessionStatus,
@@ -158,11 +158,11 @@ class NodeDetailViewModelTest {
     @Test
     fun `handleNodeMenuAction delegates to nodeRequestActions for Traceroute`() = runTest(testDispatcher) {
         val node = Node(num = 1234, user = User(id = "!1234", long_name = "Test Node"))
-        every { nodeRequestActions.requestTraceroute(any(), any(), any()) } returns Unit
+        everySuspend { nodeRequestActions.requestTraceroute(any(), any()) } returns Unit
 
         viewModel.handleNodeMenuAction(NodeMenuAction.TraceRoute(node))
 
-        verify { nodeRequestActions.requestTraceroute(any(), 1234, "Test Node") }
+        verifySuspend { nodeRequestActions.requestTraceroute(1234, "Test Node") }
     }
 
     @Test

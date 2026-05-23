@@ -51,9 +51,9 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.Base64Factory
 import org.meshtastic.core.common.util.MetricFormatter
-import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.a11y_label_value
@@ -214,7 +214,7 @@ private fun NodeIdentificationRow(node: Node) {
     Row(modifier = Modifier.fillMaxWidth()) {
         InfoItem(
             label = stringResource(Res.string.node_id),
-            value = DataPacket.nodeNumToDefaultId(node.num),
+            value = NodeAddress.numToDefaultId(node.num),
             icon = MeshtasticIcons.DeviceNumbers,
             modifier = Modifier.weight(1f),
         )

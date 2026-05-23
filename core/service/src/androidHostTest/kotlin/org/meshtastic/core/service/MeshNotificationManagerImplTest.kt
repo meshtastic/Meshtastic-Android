@@ -33,7 +33,7 @@ import kotlin.test.assertNull
 
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [34])
-class MeshServiceNotificationsImplTest {
+class MeshNotificationManagerImplTest {
 
     private lateinit var context: Context
     private lateinit var systemNotificationManager: NotificationManager
@@ -55,7 +55,7 @@ class MeshServiceNotificationsImplTest {
         NotificationChannels.LEGACY_CATEGORY_IDS.forEach(::createChannel)
 
         val notifications =
-            MeshServiceNotificationsImpl(
+            MeshNotificationManagerImpl(
                 context = context,
                 packetRepository = lazy<PacketRepository> { error("Not used in this test") },
                 nodeRepository = lazy<NodeRepository> { error("Not used in this test") },

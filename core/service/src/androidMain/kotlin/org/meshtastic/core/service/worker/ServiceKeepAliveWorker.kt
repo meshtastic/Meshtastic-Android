@@ -26,7 +26,7 @@ import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 import co.touchlab.kermit.Logger
 import org.koin.android.annotation.KoinWorker
-import org.meshtastic.core.repository.MeshServiceNotifications
+import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.SERVICE_NOTIFY_ID
 import org.meshtastic.core.resources.R.drawable
 import org.meshtastic.core.service.MeshService
@@ -41,7 +41,7 @@ import org.meshtastic.core.service.startService
 class ServiceKeepAliveWorker(
     appContext: Context,
     workerParams: WorkerParameters,
-    private val serviceNotifications: MeshServiceNotifications,
+    private val serviceNotifications: MeshNotificationManager,
 ) : CoroutineWorker(appContext, workerParams) {
 
     override suspend fun getForegroundInfo(): ForegroundInfo {
@@ -78,7 +78,7 @@ class ServiceKeepAliveWorker(
         serviceNotifications.initChannels()
 
         // We create a generic "Resuming" notification.
-        // We use "my_service" which matches NotificationType.ServiceState.channelId in MeshServiceNotificationsImpl
+        // We use "my_service" which matches NotificationType.ServiceState.channelId in MeshNotificationManagerImpl
 
         return NotificationCompat.Builder(applicationContext, "my_service")
             .setSmallIcon(drawable.meshtastic_ic_notification)

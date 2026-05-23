@@ -14,7 +14,7 @@ Models in this module use the `CommonParcelable` and `CommonParcelize` abstracti
 - **`Channel`**: Represents a mesh channel configuration.
 
 ## Usage
-This module is a core dependency of `core:api` and most feature modules.
+This module is a core dependency of most feature modules.
 
 ```kotlin
 // In commonMain

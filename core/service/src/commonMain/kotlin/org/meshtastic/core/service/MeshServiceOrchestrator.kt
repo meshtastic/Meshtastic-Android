@@ -31,8 +31,8 @@ import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MeshMessageProcessor
+import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.MeshRouter
-import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceRepository
@@ -56,7 +56,7 @@ class MeshServiceOrchestrator(
     private val nodeManager: NodeManager,
     private val messageProcessor: MeshMessageProcessor,
     private val router: MeshRouter,
-    private val serviceNotifications: MeshServiceNotifications,
+    private val serviceNotifications: MeshNotificationManager,
     private val takServerManager: TAKServerManager,
     private val takMeshIntegration: TAKMeshIntegration,
     private val takPrefs: TakPrefs,
@@ -127,13 +127,6 @@ class MeshServiceOrchestrator(
 
         radioInterfaceService.connectionError
             .onEach { errorMessage -> serviceRepository.setErrorMessage(errorMessage, Severity.Warn) }
-            .launchIn(newScope)
-
-        // Each action is dispatched in its own supervised coroutine so that a failure in one
-        // action (e.g. a timeout in sendAdminAwait) cannot terminate the collector and silently
-        // drop all subsequent service actions for the rest of the session.
-        serviceRepository.serviceAction
-            .onEach { action -> newScope.handledLaunch { router.actionHandler.onServiceAction(action) } }
             .launchIn(newScope)
 
         nodeManager.loadCachedNodeDB()

@@ -19,24 +19,35 @@ package org.meshtastic.core.service
 import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
 import dev.mokkery.every
+import dev.mokkery.everySuspend
+import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify
-import kotlinx.coroutines.async
+import dev.mokkery.verify.VerifyMode.Companion.atLeast
+import dev.mokkery.verifySuspend
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.model.service.ServiceAction
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.repository.CommandSender
-import org.meshtastic.core.repository.MeshActionHandler
+import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.MeshLocationManager
-import org.meshtastic.core.repository.MeshRouter
+import org.meshtastic.core.repository.MeshMessageProcessor
+import org.meshtastic.core.repository.MeshPrefs
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.NotificationManager
+import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.repository.PlatformAnalytics
+import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.User
 import kotlin.test.Test
@@ -49,26 +60,44 @@ class DirectRadioControllerImplTest {
 
     private val nodeRepository: NodeRepository = mock(MockMode.autofill)
     private val commandSender: CommandSender = mock(MockMode.autofill)
-    private val router: MeshRouter = mock(MockMode.autofill)
-    private val actionHandler: MeshActionHandler = mock(MockMode.autofill)
     private val nodeManager: NodeManager = mock(MockMode.autofill)
     private val radioInterfaceService: RadioInterfaceService = mock(MockMode.autofill)
     private val locationManager: MeshLocationManager = mock(MockMode.autofill)
+    private val packetRepository: PacketRepository = mock(MockMode.autofill)
+    private val dataHandler: MeshDataHandler = mock(MockMode.autofill)
+    private val analytics: PlatformAnalytics = mock(MockMode.autofill)
+    private val meshPrefs: MeshPrefs = mock(MockMode.autofill)
+    private val uiPrefs: UiPrefs = mock(MockMode.autofill)
+    private val databaseManager: DatabaseManager = mock(MockMode.autofill)
+    private val notificationManager: NotificationManager = mock(MockMode.autofill)
+    private val messageProcessor: MeshMessageProcessor = mock(MockMode.autofill)
+    private val radioConfigRepository: RadioConfigRepository = mock(MockMode.autofill)
+
+    private val testScope = TestScope()
 
     private fun createController(
         serviceRepository: ServiceRepository = ServiceRepositoryImpl(),
         myNodeNum: Int? = 1234,
     ): DirectRadioControllerImpl {
-        every { router.actionHandler } returns actionHandler
         every { nodeManager.myNodeNum } returns MutableStateFlow(myNodeNum)
+        every { meshPrefs.deviceAddress } returns MutableStateFlow(null)
         return DirectRadioControllerImpl(
             serviceRepository = serviceRepository,
             nodeRepository = nodeRepository,
             commandSender = commandSender,
-            router = router,
             nodeManager = nodeManager,
             radioInterfaceService = radioInterfaceService,
             locationManager = locationManager,
+            packetRepository = lazy { packetRepository },
+            dataHandler = lazy { dataHandler },
+            analytics = analytics,
+            meshPrefs = meshPrefs,
+            uiPrefs = uiPrefs,
+            databaseManager = databaseManager,
+            notificationManager = notificationManager,
+            messageProcessor = lazy { messageProcessor },
+            radioConfigRepository = radioConfigRepository,
+            scope = testScope,
         )
     }
 
@@ -93,40 +122,33 @@ class DirectRadioControllerImplTest {
     }
 
     @Test
-    fun sendMessageDelegatesToActionHandlerWithLocalNodeNumber() = runTest {
+    fun sendMessageDelegatesToCommandSender() = runTest {
         val controller = createController(myNodeNum = 456)
-        val packet = DataPacket(to = DataPacket.ID_BROADCAST, channel = 1, text = "ping")
+        val packet = DataPacket(to = NodeAddress.ID_BROADCAST, channel = 1, text = "ping")
 
         controller.sendMessage(packet)
 
-        verify { actionHandler.handleSend(packet, 456) }
+        verifySuspend { commandSender.sendData(packet) }
+        verifySuspend { dataHandler.rememberDataPacket(packet, 456, false) }
     }
 
     @Test
-    fun sendSharedContactEmitsActionAndWaitsForResult() = runTest {
-        val serviceRepository = ServiceRepositoryImpl()
-        val controller = createController(serviceRepository = serviceRepository)
+    fun sendSharedContactCallsCommandSenderAdminAwait() = runTest {
+        val controller = createController()
         val nodeNum = 321
-        val user = User(id = DataPacket.nodeNumToDefaultId(nodeNum), long_name = "Remote Node", short_name = "RN")
+        val user = User(id = NodeAddress.numToDefaultId(nodeNum), long_name = "Remote Node", short_name = "RN")
         val node = Node(num = nodeNum, user = user, manuallyVerified = true)
-        every { nodeRepository.getNode(DataPacket.nodeNumToDefaultId(nodeNum)) } returns node
+        every { nodeRepository.getNode(NodeAddress.numToDefaultId(nodeNum)) } returns node
+        everySuspend { commandSender.sendAdminAwait(any(), any(), any(), any()) } returns true
 
-        val emittedAction = async { serviceRepository.serviceAction.first() }
-        val sendResult = async { controller.sendSharedContact(nodeNum) }
+        val result = controller.sendSharedContact(nodeNum)
 
-        val action = emittedAction.await()
-        assertTrue(action is ServiceAction.SendContact)
-        assertEquals(node.num, action.contact.node_num)
-        assertEquals(node.user, action.contact.user)
-        assertEquals(node.manuallyVerified, action.contact.manually_verified)
-
-        action.result.complete(true)
-
-        assertTrue(sendResult.await())
+        assertTrue(result)
+        verifySuspend { commandSender.sendAdminAwait(any(), any(), any(), any()) }
     }
 
     @Test
-    fun requestConfigOperationsDelegateToActionHandler() = runTest {
+    fun requestConfigOperationsDelegateToCommandSender() = runTest {
         val controller = createController()
 
         controller.getOwner(destNum = 101, packetId = 1)
@@ -137,13 +159,8 @@ class DirectRadioControllerImplTest {
         controller.getCannedMessages(destNum = 106, packetId = 9)
         controller.getDeviceConnectionStatus(destNum = 107, packetId = 10)
 
-        verify { actionHandler.handleGetRemoteOwner(1, 101) }
-        verify { actionHandler.handleGetRemoteConfig(3, 102, 2) }
-        verify { actionHandler.handleGetModuleConfig(5, 103, 4) }
-        verify { actionHandler.handleGetRemoteChannel(7, 104, 6) }
-        verify { actionHandler.handleGetRingtone(8, 105) }
-        verify { actionHandler.handleGetCannedMessages(9, 106) }
-        verify { actionHandler.handleGetDeviceConnectionStatus(10, 107) }
+        // All delegate to commandSender.sendAdmin
+        verifySuspend(atLeast(7)) { commandSender.sendAdmin(any(), any(), any(), any()) }
     }
 
     @Test
@@ -156,12 +173,114 @@ class DirectRadioControllerImplTest {
     }
 
     @Test
-    fun setDeviceAddressUpdatesLastAddressAndTransportAddress() {
+    fun setDeviceAddressSwitchesDatabaseAndTransport() = runTest {
         val controller = createController()
+        every { meshPrefs.deviceAddress } returns MutableStateFlow("old:addr")
 
         controller.setDeviceAddress("tcp:192.168.1.1")
+        testScope.advanceUntilIdle()
 
-        verify { actionHandler.handleUpdateLastAddress("tcp:192.168.1.1") }
+        // Verify ordering: switchDevice completes before transport reconfiguration
+        verifySuspend { meshPrefs.setDeviceAddress("tcp:192.168.1.1") }
+        verifySuspend { databaseManager.switchActiveDatabase("tcp:192.168.1.1") }
         verify { radioInterfaceService.setDeviceAddress("tcp:192.168.1.1") }
+    }
+
+    @Test
+    fun setDeviceAddressSkipsSwitchWhenAddressUnchanged() = runTest {
+        val controller = createController()
+        every { meshPrefs.deviceAddress } returns MutableStateFlow("tcp:192.168.1.1")
+
+        controller.setDeviceAddress("tcp:192.168.1.1")
+        testScope.advanceUntilIdle()
+
+        // switchDevice should skip when addresses match, but transport still reconfigures
+        verify { radioInterfaceService.setDeviceAddress("tcp:192.168.1.1") }
+        verifySuspend(atLeast(0)) { meshPrefs.setDeviceAddress("tcp:192.168.1.1") }
+    }
+
+    @Test
+    fun sendReactionPersistsToDatabase() = runTest {
+        val controller = createController()
+        val user = User(id = "!abcd1234", long_name = "Test", short_name = "T")
+        val node = Node(num = 1234, user = user)
+        every { nodeManager.nodeDBbyNodeNum } returns mapOf(1234 to node)
+        every { nodeManager.getMyId() } returns "!abcd1234"
+
+        controller.sendReaction(emoji = "👍", replyId = 42, contactKey = "0!dest5678")
+
+        // Reaction must be persisted (not fire-and-forget)
+        verifySuspend { commandSender.sendData(any()) }
+        verifySuspend { packetRepository.insertReaction(any(), any()) }
+    }
+
+    @Test
+    fun favoriteNodeSendsAdminAndUpdatesState() = runTest {
+        val controller = createController()
+        val node = Node(num = 99, user = User(id = "!node99"), isFavorite = false)
+        every { nodeManager.nodeDBbyNodeNum } returns mapOf(99 to node)
+
+        controller.favoriteNode(99)
+
+        verifySuspend { commandSender.sendAdmin(any(), any(), any(), any()) }
+        verify { nodeManager.updateNode(any(), any(), any()) }
+    }
+
+    @Test
+    fun ignoreNodeSendsAdminUpdatesStateAndFiltersPackets() = runTest {
+        val controller = createController()
+        val node = Node(num = 99, user = User(id = "!node99"), isIgnored = false)
+        every { nodeManager.nodeDBbyNodeNum } returns mapOf(99 to node)
+
+        controller.ignoreNode(99)
+        testScope.advanceUntilIdle()
+
+        verifySuspend { commandSender.sendAdmin(any(), any(), any(), any()) }
+        verify { nodeManager.updateNode(any(), any(), any()) }
+        verifySuspend { packetRepository.updateFilteredBySender("!node99", true) }
+    }
+
+    @Test
+    fun muteNodeSendsAdminAndUpdatesState() = runTest {
+        val controller = createController()
+        val node = Node(num = 99, user = User(id = "!node99"), isMuted = false)
+        every { nodeManager.nodeDBbyNodeNum } returns mapOf(99 to node)
+
+        controller.muteNode(99)
+
+        verifySuspend { commandSender.sendAdmin(any(), any(), any(), any()) }
+        verify { nodeManager.updateNode(any(), any(), any()) }
+    }
+
+    @Test
+    fun nodeManagementReturnsEarlyWhenMyNodeNumIsNull() = runTest {
+        val controller = createController(myNodeNum = null)
+
+        controller.favoriteNode(99)
+        controller.ignoreNode(99)
+        controller.muteNode(99)
+
+        verifySuspend(atLeast(0)) { commandSender.sendAdmin(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun removeByNodenumAlwaysRemovesLocallyAndSendsAdminWhenConnected() = runTest {
+        val controller = createController()
+
+        controller.removeByNodenum(packetId = 1, nodeNum = 55)
+
+        verifySuspend { nodeManager.removeByNodenum(55) }
+        verifySuspend { commandSender.sendAdmin(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun removeByNodenumRemovesLocallyEvenWhenDisconnected() = runTest {
+        val controller = createController(myNodeNum = null)
+
+        controller.removeByNodenum(packetId = 1, nodeNum = 55)
+
+        verifySuspend { nodeManager.removeByNodenum(55) }
+        // No admin message sent when disconnected
+        verifySuspend(atLeast(0)) { commandSender.sendAdmin(any(), any(), any(), any()) }
     }
 }

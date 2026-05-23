@@ -33,8 +33,8 @@ import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.domain.usecase.session.EnsureRemoteAdminSessionUseCase
 import org.meshtastic.core.domain.usecase.session.ObserveRemoteAdminSessionStatusUseCase
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.model.SessionStatus
-import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.ui.util.SnackbarManager
 import org.meshtastic.feature.node.component.NodeMenuAction
 import org.meshtastic.feature.node.domain.usecase.GetNodeDetailsUseCase
@@ -51,7 +51,7 @@ class HandleNodeActionTest {
     private val testDispatcher = UnconfinedTestDispatcher()
     private val nodeManagementActions: NodeManagementActions = mock()
     private val nodeRequestActions: NodeRequestActions = mock()
-    private val serviceRepository: ServiceRepository = mock()
+    private val radioController: RadioController = mock()
     private val getNodeDetailsUseCase: GetNodeDetailsUseCase = mock()
     private val ensureRemoteAdminSession: EnsureRemoteAdminSessionUseCase = mock()
     private val observeRemoteAdminSessionStatus: ObserveRemoteAdminSessionStatusUseCase = mock()
@@ -93,7 +93,7 @@ class HandleNodeActionTest {
         savedStateHandle = SavedStateHandle(mapOf("destNum" to 1234)),
         nodeManagementActions = nodeManagementActions,
         nodeRequestActions = nodeRequestActions,
-        serviceRepository = serviceRepository,
+        radioController = radioController,
         getNodeDetailsUseCase = getNodeDetailsUseCase,
         ensureRemoteAdminSession = ensureRemoteAdminSession,
         observeRemoteAdminSessionStatus = observeRemoteAdminSessionStatus,

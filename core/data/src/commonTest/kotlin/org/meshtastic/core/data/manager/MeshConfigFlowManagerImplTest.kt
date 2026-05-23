@@ -41,7 +41,6 @@ import org.meshtastic.core.repository.NotificationPrefs
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
-import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.FileInfo
@@ -61,7 +60,6 @@ class MeshConfigFlowManagerImplTest {
     private val nodeRepository = mock<NodeRepository>(MockMode.autofill)
     private val radioConfigRepository = mock<RadioConfigRepository>(MockMode.autofill)
     private val serviceRepository = mock<ServiceRepository>(MockMode.autofill)
-    private val serviceBroadcasts = mock<ServiceBroadcasts>(MockMode.autofill)
     private val analytics = mock<PlatformAnalytics>(MockMode.autofill)
     private val commandSender = mock<CommandSender>(MockMode.autofill)
     private val packetHandler = mock<PacketHandler>(MockMode.autofill)
@@ -101,7 +99,6 @@ class MeshConfigFlowManagerImplTest {
                 nodeRepository = nodeRepository,
                 radioConfigRepository = radioConfigRepository,
                 serviceRepository = serviceRepository,
-                serviceBroadcasts = serviceBroadcasts,
                 analytics = analytics,
                 commandSender = commandSender,
                 heartbeatSender = DataLayerHeartbeatSender(packetHandler),
@@ -306,11 +303,10 @@ class MeshConfigFlowManagerImplTest {
         manager.handleConfigComplete(HandshakeConstants.NODE_INFO_NONCE)
         advanceUntilIdle()
 
-        verify { nodeManager.installNodeInfo(any(), withBroadcast = false) }
+        verify { nodeManager.installNodeInfo(any()) }
         verify { nodeManager.setNodeDbReady(true) }
         verify { nodeManager.setAllowNodeDbWrites(true) }
-        verify { serviceBroadcasts.broadcastConnection() }
-        verify { connectionManager.onNodeDbReady() }
+        verifySuspend { connectionManager.onNodeDbReady() }
     }
 
     @Test
@@ -334,7 +330,7 @@ class MeshConfigFlowManagerImplTest {
         advanceUntilIdle()
 
         verify { nodeManager.setNodeDbReady(true) }
-        verify { connectionManager.onNodeDbReady() }
+        verifySuspend { connectionManager.onNodeDbReady() }
     }
 
     // ---------- Unknown config_complete_id ----------
@@ -402,7 +398,7 @@ class MeshConfigFlowManagerImplTest {
         advanceUntilIdle()
 
         verify { nodeManager.setNodeDbReady(true) }
-        verify { connectionManager.onNodeDbReady() }
+        verifySuspend { connectionManager.onNodeDbReady() }
 
         // After complete, newNodeCount should be 0 (state is Complete)
         assertEquals(0, manager.newNodeCount)

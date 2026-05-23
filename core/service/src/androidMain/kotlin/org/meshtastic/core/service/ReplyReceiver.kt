@@ -28,7 +28,7 @@ import org.koin.core.component.inject
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.RadioController
-import org.meshtastic.core.repository.MeshServiceNotifications
+import org.meshtastic.core.repository.MeshNotificationManager
 
 /**
  * A [BroadcastReceiver] that handles inline replies from notifications.
@@ -42,7 +42,7 @@ class ReplyReceiver :
     KoinComponent {
     private val radioController: RadioController by inject()
 
-    private val meshServiceNotifications: MeshServiceNotifications by inject()
+    private val meshServiceNotifications: MeshNotificationManager by inject()
 
     private val dispatchers: CoroutineDispatchers by inject()
 

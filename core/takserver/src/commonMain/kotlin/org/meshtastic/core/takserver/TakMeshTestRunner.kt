@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.proto.PortNum
 
@@ -178,13 +179,15 @@ class TakMeshTestRunner(private val commandSender: CommandSender) {
         try {
             val dataPacket =
                 DataPacket(
-                    to = DataPacket.ID_BROADCAST,
+                    to = NodeAddress.ID_BROADCAST,
                     bytes = wirePayload.toByteString(),
                     dataType = PortNum.ATAK_PLUGIN_V2.value,
                 )
             commandSender.sendData(dataPacket)
             Logger.i { "TAK Test: $name → ${wirePayload.size}B (xml=${xml.length}B)" }
             return TakTestResult(name, xml.length, wirePayload.size, true)
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             Logger.w(e) { "TAK Test: $name send failed: ${e.message}" }
             return TakTestResult(name, xml.length, wirePayload.size, false, "Send failed: ${e.message}")

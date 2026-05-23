@@ -28,9 +28,9 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
-import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.NodeListDensity
 import org.meshtastic.core.model.NodeSortOption
 import org.meshtastic.core.model.RadioController
@@ -200,13 +200,13 @@ class NodeListViewModel(
     fun getDirectMessageRoute(node: Node): String {
         val ourNode = ourNodeInfo.value
         val hasPKC = ourNode?.hasPKC == true && node.hasPKC
-        val channel = if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else node.channel
+        val channel = if (hasPKC) NodeAddress.PKC_CHANNEL_INDEX else node.channel
         return "${channel}${node.user.id}"
     }
 
     /** Initiates a trace route request to the specified node. */
     fun traceRoute(node: Node) {
-        nodeRequestActions.requestTraceroute(viewModelScope, node.num, node.user.long_name)
+        viewModelScope.launch { nodeRequestActions.requestTraceroute(node.num, node.user.long_name) }
     }
 
     companion object {

@@ -18,7 +18,7 @@ package org.meshtastic.desktop.notification
 
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.repository.MeshServiceNotifications
+import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.Notification
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.resources.Res
@@ -31,7 +31,7 @@ import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Telemetry
 
 /**
- * Desktop implementation of [MeshServiceNotifications].
+ * Desktop implementation of [MeshNotificationManager].
  *
  * Converts mesh-layer notification events into domain [Notification] objects and dispatches them through
  * [NotificationManager], which ultimately surfaces them as Compose Desktop tray notifications.
@@ -42,7 +42,7 @@ import org.meshtastic.proto.Telemetry
  * `@ComponentScan("org.meshtastic.desktop")` in [DesktopDiModule][org.meshtastic.desktop.di.DesktopDiModule].
  */
 @Suppress("TooManyFunctions")
-class DesktopMeshServiceNotifications(private val notificationManager: NotificationManager) : MeshServiceNotifications {
+class DesktopMeshNotificationManager(private val notificationManager: NotificationManager) : MeshNotificationManager {
     override fun clearNotifications() {
         notificationManager.cancelAll()
     }

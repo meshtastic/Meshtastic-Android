@@ -21,11 +21,10 @@ import dev.mokkery.mock
 import kotlinx.coroutines.test.TestScope
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
-import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NotificationManager
-import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.proto.DeviceMetrics
 import org.meshtastic.proto.EnvironmentMetrics
 import org.meshtastic.proto.HardwareModel
@@ -43,7 +42,6 @@ import org.meshtastic.proto.Position as ProtoPosition
 class NodeManagerImplTest {
 
     private val nodeRepository: NodeRepository = mock(MockMode.autofill)
-    private val serviceBroadcasts: ServiceBroadcasts = mock(MockMode.autofill)
     private val notificationManager: NotificationManager = mock(MockMode.autofill)
     private val testScope = TestScope()
 
@@ -51,7 +49,7 @@ class NodeManagerImplTest {
 
     @BeforeTest
     fun setUp() {
-        nodeManager = NodeManagerImpl(nodeRepository, serviceBroadcasts, notificationManager, testScope)
+        nodeManager = NodeManagerImpl(nodeRepository, notificationManager, testScope)
     }
 
     @Test
@@ -62,7 +60,7 @@ class NodeManagerImplTest {
         assertNotNull(result)
         assertEquals(nodeNum, result.num)
         assertTrue(result.user.long_name.startsWith("Meshtastic"))
-        assertEquals(DataPacket.nodeNumToDefaultId(nodeNum), result.user.id)
+        assertEquals(NodeAddress.numToDefaultId(nodeNum), result.user.id)
     }
 
     @Test
@@ -192,20 +190,20 @@ class NodeManagerImplTest {
         nodeManager.clear()
 
         assertTrue(nodeManager.nodeDBbyNodeNum.isEmpty())
-        assertTrue(nodeManager.nodeDBbyID.isEmpty())
+        assertNull(nodeManager.getNodeById("!000004d2"))
         assertNull(nodeManager.myNodeNum.value)
     }
 
     @Test
     fun `toNodeID returns broadcast ID for broadcast nodeNum`() {
-        val result = nodeManager.toNodeID(DataPacket.NODENUM_BROADCAST)
-        assertEquals(DataPacket.ID_BROADCAST, result)
+        val result = nodeManager.toNodeID(NodeAddress.NODENUM_BROADCAST)
+        assertEquals(NodeAddress.ID_BROADCAST, result)
     }
 
     @Test
     fun `toNodeID returns default hex ID for unknown node`() {
         val result = nodeManager.toNodeID(0x1234)
-        assertEquals(DataPacket.nodeNumToDefaultId(0x1234), result)
+        assertEquals(NodeAddress.numToDefaultId(0x1234), result)
     }
 
     @Test
@@ -218,18 +216,18 @@ class NodeManagerImplTest {
     }
 
     @Test
-    fun `removeByNodenum removes node from both maps`() {
+    fun `removeByNodenum removes node from map`() {
         val nodeNum = 1234
         nodeManager.updateNode(nodeNum) {
             Node(num = nodeNum, user = User(id = "!testnode", long_name = "Test", short_name = "T"))
         }
         assertTrue(nodeManager.nodeDBbyNodeNum.containsKey(nodeNum))
-        assertTrue(nodeManager.nodeDBbyID.containsKey("!testnode"))
+        assertNotNull(nodeManager.getNodeById("!testnode"))
 
         nodeManager.removeByNodenum(nodeNum)
 
         assertTrue(!nodeManager.nodeDBbyNodeNum.containsKey(nodeNum))
-        assertTrue(!nodeManager.nodeDBbyID.containsKey("!testnode"))
+        assertNull(nodeManager.getNodeById("!testnode"))
     }
 
     @Test

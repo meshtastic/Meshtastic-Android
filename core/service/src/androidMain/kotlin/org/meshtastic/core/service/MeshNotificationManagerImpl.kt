@@ -42,12 +42,12 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.ConnectionState
-import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
-import org.meshtastic.core.repository.MeshServiceNotifications
+import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.SERVICE_NOTIFY_ID
@@ -106,11 +106,11 @@ import kotlin.time.Duration.Companion.minutes
  */
 @Suppress("TooManyFunctions", "LongParameterList", "LargeClass")
 @Single
-class MeshServiceNotificationsImpl(
+class MeshNotificationManagerImpl(
     private val context: Context,
     private val packetRepository: Lazy<PacketRepository>,
     private val nodeRepository: Lazy<NodeRepository>,
-) : MeshServiceNotifications {
+) : MeshNotificationManager {
 
     private val notificationManager =
         checkNotNull(context.getSystemService<NotificationManager>()) { "NotificationManager not found" }
@@ -121,7 +121,7 @@ class MeshServiceNotificationsImpl(
         private const val MAX_HISTORY_MESSAGES = 10
         private const val MIN_CONTEXT_MESSAGES = 3
         private const val SNIPPET_LENGTH = 30
-        private const val GROUP_KEY_MESSAGES = "com.geeksville.mesh.GROUP_MESSAGES"
+        private const val GROUP_KEY_MESSAGES = "org.meshtastic.app.GROUP_MESSAGES"
         private const val SUMMARY_ID = 1
         private const val PERSON_ICON_SIZE = 128
         private const val PERSON_ICON_TEXT_SIZE_RATIO = 0.5f
@@ -420,7 +420,7 @@ class MeshServiceNotificationsImpl(
         val history =
             packetRepository.value
                 .getMessagesFrom(contactKey, includeFiltered = false) { nodeId ->
-                    if (nodeId == DataPacket.ID_LOCAL) {
+                    if (nodeId == NodeAddress.ID_LOCAL) {
                         ourNode ?: nodeRepository.value.getNode(nodeId)
                     } else {
                         nodeRepository.value.getNode(nodeId.orEmpty())
@@ -461,7 +461,7 @@ class MeshServiceNotificationsImpl(
         val me =
             Person.Builder()
                 .setName(meName)
-                .setKey(ourNode?.user?.id ?: DataPacket.ID_LOCAL)
+                .setKey(ourNode?.user?.id ?: NodeAddress.ID_LOCAL)
                 .apply { ourNode?.let { setIcon(createPersonIcon(meName, it.colors.second, it.colors.first)) } }
                 .build()
 
@@ -573,7 +573,7 @@ class MeshServiceNotificationsImpl(
         val me =
             Person.Builder()
                 .setName(meName)
-                .setKey(ourNode?.user?.id ?: DataPacket.ID_LOCAL)
+                .setKey(ourNode?.user?.id ?: NodeAddress.ID_LOCAL)
                 .apply { ourNode?.let { setIcon(createPersonIcon(meName, it.colors.second, it.colors.first)) } }
                 .build()
 

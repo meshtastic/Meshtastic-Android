@@ -26,12 +26,7 @@ import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
-import org.meshtastic.core.model.DeviceMetrics
-import org.meshtastic.core.model.EnvironmentMetrics
-import org.meshtastic.core.model.MeshUser
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.model.NodeInfo
-import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.util.onlineTimeThreshold
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.HardwareModel
@@ -46,32 +41,7 @@ data class NodeWithRelations(
     @Relation(entity = MetadataEntity::class, parentColumns = ["num"], entityColumns = ["num"])
     val metadata: MetadataEntity?,
 ) {
-    fun toModel() = with(node) {
-        Node(
-            num = num,
-            metadata = metadata?.proto,
-            user = user,
-            position = position,
-            snr = snr,
-            rssi = rssi,
-            lastHeard = lastHeard,
-            deviceMetrics = deviceMetrics ?: org.meshtastic.proto.DeviceMetrics(),
-            channel = channel,
-            viaMqtt = viaMqtt,
-            hopsAway = hopsAway,
-            isFavorite = isFavorite,
-            isIgnored = isIgnored,
-            isMuted = isMuted,
-            environmentMetrics = environmentMetrics ?: org.meshtastic.proto.EnvironmentMetrics(),
-            powerMetrics = powerMetrics ?: org.meshtastic.proto.PowerMetrics(),
-            paxcounter = paxcounter,
-            publicKey = publicKey ?: user.public_key,
-            notes = notes,
-            manuallyVerified = manuallyVerified,
-            nodeStatus = nodeStatus,
-            lastTransport = lastTransport,
-        )
-    }
+    fun toModel() = node.toModel().copy(metadata = metadata?.proto, manuallyVerified = node.manuallyVerified)
 
     fun toEntity() = with(node) {
         NodeEntity(
@@ -210,50 +180,5 @@ data class NodeEntity(
         notes = notes,
         nodeStatus = nodeStatus,
         lastTransport = lastTransport,
-    )
-
-    fun toNodeInfo() = NodeInfo(
-        num = num,
-        user =
-        MeshUser(
-            id = user.id,
-            longName = user.long_name,
-            shortName = user.short_name,
-            hwModel = user.hw_model,
-            role = user.role.value,
-        )
-            .takeIf { user.id.isNotEmpty() },
-        position =
-        Position(
-            latitude = latitude,
-            longitude = longitude,
-            altitude = position.altitude ?: 0,
-            time = position.time,
-            satellitesInView = position.sats_in_view,
-            groundSpeed = position.ground_speed ?: 0,
-            groundTrack = position.ground_track ?: 0,
-            precisionBits = position.precision_bits,
-        )
-            .takeIf { it.isValid() },
-        snr = snr,
-        rssi = rssi,
-        lastHeard = lastHeard,
-        deviceMetrics =
-        DeviceMetrics(
-            time = deviceTelemetry.time,
-            batteryLevel = deviceMetrics?.battery_level ?: 0,
-            voltage = deviceMetrics?.voltage ?: 0f,
-            channelUtilization = deviceMetrics?.channel_utilization ?: 0f,
-            airUtilTx = deviceMetrics?.air_util_tx ?: 0f,
-            uptimeSeconds = deviceMetrics?.uptime_seconds ?: 0,
-        ),
-        channel = channel,
-        environmentMetrics =
-        EnvironmentMetrics.fromTelemetryProto(
-            environmentTelemetry.environment_metrics ?: org.meshtastic.proto.EnvironmentMetrics(),
-            environmentTelemetry.time,
-        ),
-        hopsAway = hopsAway,
-        nodeStatus = nodeStatus,
     )
 }

@@ -129,7 +129,6 @@ include(
     ":feature:wifi-provision",
     ":desktopApp",
     ":androidApp",
-    ":core:api",
     ":core:barcode",
     ":feature:widget",
     ":screenshot-tests",

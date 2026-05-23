@@ -21,12 +21,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 import org.koin.core.annotation.Single
-import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.RadioController
-import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.repository.NodeRepository
-import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.favorite
 import org.meshtastic.core.resources.favorite_add
@@ -41,12 +38,12 @@ import org.meshtastic.core.resources.remove
 import org.meshtastic.core.resources.remove_node_text
 import org.meshtastic.core.resources.unmute
 import org.meshtastic.core.ui.util.AlertManager
+import kotlin.coroutines.cancellation.CancellationException
 
 @Single
 open class NodeManagementActions
 constructor(
     private val nodeRepository: NodeRepository,
-    private val serviceRepository: ServiceRepository,
     private val radioController: RadioController,
     private val alertManager: AlertManager,
 ) {
@@ -55,19 +52,17 @@ constructor(
             titleRes = Res.string.remove,
             messageRes = Res.string.remove_node_text,
             onConfirm = {
-                removeNode(scope, node.num)
+                scope.launch { removeNode(node.num) }
                 onAfterRemove()
             },
         )
     }
 
-    open fun removeNode(scope: CoroutineScope, nodeNum: Int) {
-        scope.launch(ioDispatcher) {
-            Logger.i { "Removing node '$nodeNum'" }
-            val packetId = radioController.getPacketId()
-            radioController.removeByNodenum(packetId, nodeNum)
-            nodeRepository.deleteNode(nodeNum)
-        }
+    open suspend fun removeNode(nodeNum: Int) {
+        Logger.i { "Removing node '$nodeNum'" }
+        val packetId = radioController.getPacketId()
+        radioController.removeByNodenum(packetId, nodeNum)
+        nodeRepository.deleteNode(nodeNum)
     }
 
     open fun requestIgnoreNode(scope: CoroutineScope, node: Node) {
@@ -77,13 +72,13 @@ constructor(
             alertManager.showAlert(
                 titleRes = Res.string.ignore,
                 message = message,
-                onConfirm = { ignoreNode(scope, node) },
+                onConfirm = { scope.launch { ignoreNode(node.num) } },
             )
         }
     }
 
-    open fun ignoreNode(scope: CoroutineScope, node: Node) {
-        scope.launch(ioDispatcher) { serviceRepository.onServiceAction(ServiceAction.Ignore(node)) }
+    open suspend fun ignoreNode(nodeNum: Int) {
+        radioController.ignoreNode(nodeNum)
     }
 
     open fun requestMuteNode(scope: CoroutineScope, node: Node) {
@@ -93,13 +88,13 @@ constructor(
             alertManager.showAlert(
                 titleRes = if (node.isMuted) Res.string.unmute else Res.string.mute_notifications,
                 message = message,
-                onConfirm = { muteNode(scope, node) },
+                onConfirm = { scope.launch { muteNode(node.num) } },
             )
         }
     }
 
-    open fun muteNode(scope: CoroutineScope, node: Node) {
-        scope.launch(ioDispatcher) { serviceRepository.onServiceAction(ServiceAction.Mute(node)) }
+    open suspend fun muteNode(nodeNum: Int) {
+        radioController.muteNode(nodeNum)
     }
 
     open fun requestFavoriteNode(scope: CoroutineScope, node: Node) {
@@ -112,22 +107,22 @@ constructor(
             alertManager.showAlert(
                 titleRes = Res.string.favorite,
                 message = message,
-                onConfirm = { favoriteNode(scope, node) },
+                onConfirm = { scope.launch { favoriteNode(node.num) } },
             )
         }
     }
 
-    open fun favoriteNode(scope: CoroutineScope, node: Node) {
-        scope.launch(ioDispatcher) { serviceRepository.onServiceAction(ServiceAction.Favorite(node)) }
+    open suspend fun favoriteNode(nodeNum: Int) {
+        radioController.favoriteNode(nodeNum)
     }
 
-    open fun setNodeNotes(scope: CoroutineScope, nodeNum: Int, notes: String) {
-        scope.launch(ioDispatcher) {
-            try {
-                nodeRepository.setNodeNotes(nodeNum, notes)
-            } catch (ex: Exception) {
-                Logger.e(ex) { "Set node notes error" }
-            }
+    open suspend fun setNodeNotes(nodeNum: Int, notes: String) {
+        try {
+            nodeRepository.setNodeNotes(nodeNum, notes)
+        } catch (ex: CancellationException) {
+            throw ex
+        } catch (ex: Exception) {
+            Logger.e(ex) { "Set node notes error" }
         }
     }
 }

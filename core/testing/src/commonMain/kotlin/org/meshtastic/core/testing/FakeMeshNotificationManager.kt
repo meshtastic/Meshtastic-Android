@@ -18,13 +18,13 @@ package org.meshtastic.core.testing
 
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.repository.MeshServiceNotifications
+import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Telemetry
 
-/** A test double for [MeshServiceNotifications] that provides a no-op implementation. */
+/** A test double for [MeshNotificationManager] that provides a no-op implementation. */
 @Suppress("TooManyFunctions", "EmptyFunctionBlock")
-class FakeMeshServiceNotifications : MeshServiceNotifications {
+class FakeMeshNotificationManager : MeshNotificationManager {
     override fun clearNotifications() {}
 
     override fun initChannels() {}

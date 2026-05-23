@@ -87,6 +87,7 @@ import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.calculating
 import org.meshtastic.core.resources.cancel
@@ -433,7 +434,7 @@ fun MapView(
         }
     }
 
-    fun getUsername(id: String?) = if (id == DataPacket.ID_LOCAL || (myId != null && id == myId)) {
+    fun getUsername(id: String?) = if (id == NodeAddress.ID_LOCAL || (myId != null && id == myId)) {
         getString(Res.string.you)
     } else {
         mapViewModel.getUser(id).long_name

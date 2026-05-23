@@ -72,8 +72,8 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.HomoglyphCharacterStringTransformer
 import org.meshtastic.core.database.entity.QuickChatAction
 import org.meshtastic.core.model.ConnectionState
-import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.util.getChannel
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.message_input_label
@@ -162,14 +162,14 @@ fun MessageScreen(
     val title =
         remember(nodeId, channelName, viewModel) {
             when (nodeId) {
-                DataPacket.ID_BROADCAST -> channelName
+                NodeAddress.ID_BROADCAST -> channelName
                 else -> viewModel.getUser(nodeId).long_name
             }
         }
 
     val isMismatchKey =
         remember(channelIndex, nodeId, viewModel) {
-            channelIndex == DataPacket.PKC_CHANNEL_INDEX && viewModel.getNode(nodeId).mismatchKey
+            channelIndex == NodeAddress.PKC_CHANNEL_INDEX && viewModel.getNode(nodeId).mismatchKey
         }
 
     val inSelectionMode by remember { derivedStateOf { selectedMessageIds.value.isNotEmpty() } }

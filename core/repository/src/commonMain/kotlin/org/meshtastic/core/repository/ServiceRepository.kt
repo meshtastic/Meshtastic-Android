@@ -20,7 +20,6 @@ import co.touchlab.kermit.Severity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.model.ConnectionState
-import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.model.service.TracerouteResponse
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.MeshPacket
@@ -160,14 +159,4 @@ interface ServiceRepository {
 
     /** Clears the current neighbor info response. */
     fun clearNeighborInfoResponse()
-
-    /** Flow of service actions requested by the UI (e.g., "Favorite Node", "Mute Node"). */
-    val serviceAction: Flow<ServiceAction>
-
-    /**
-     * Dispatches a service action to be handled by the background service.
-     *
-     * @param action The [ServiceAction] to perform.
-     */
-    suspend fun onServiceAction(action: ServiceAction)
 }

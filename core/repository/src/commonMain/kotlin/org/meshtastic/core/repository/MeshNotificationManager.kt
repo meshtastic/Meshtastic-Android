@@ -24,7 +24,7 @@ import org.meshtastic.proto.Telemetry
 const val SERVICE_NOTIFY_ID = 101
 
 @Suppress("TooManyFunctions")
-interface MeshServiceNotifications {
+interface MeshNotificationManager {
     fun clearNotifications()
 
     fun initChannels()

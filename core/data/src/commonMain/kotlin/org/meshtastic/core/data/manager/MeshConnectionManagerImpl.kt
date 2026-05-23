@@ -42,7 +42,7 @@ import org.meshtastic.core.repository.HandshakeConstants
 import org.meshtastic.core.repository.HistoryManager
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MeshLocationManager
-import org.meshtastic.core.repository.MeshServiceNotifications
+import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.MeshWorkerManager
 import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.NodeManager
@@ -52,7 +52,6 @@ import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioInterfaceService
-import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.SessionManager
 import org.meshtastic.core.repository.UiPrefs
@@ -70,8 +69,7 @@ import kotlin.time.DurationUnit
 class MeshConnectionManagerImpl(
     private val radioInterfaceService: RadioInterfaceService,
     private val serviceRepository: ServiceRepository,
-    private val serviceBroadcasts: ServiceBroadcasts,
-    private val serviceNotifications: MeshServiceNotifications,
+    private val serviceNotifications: MeshNotificationManager,
     private val uiPrefs: UiPrefs,
     private val packetHandler: PacketHandler,
     private val nodeRepository: NodeRepository,
@@ -200,7 +198,6 @@ class MeshConnectionManagerImpl(
         if (serviceRepository.connectionState.value != ConnectionState.Connected) {
             serviceRepository.setConnectionState(ConnectionState.Connecting)
         }
-        serviceBroadcasts.broadcastConnection()
         connectTimeMsec = nowMillis
 
         // Send a wake-up heartbeat before the config request. The firmware may be in a
@@ -276,8 +273,6 @@ class MeshConnectionManagerImpl(
                     Logger.d { "device sleep timeout cancelled" }
                 }
             }
-
-        serviceBroadcasts.broadcastConnection()
     }
 
     private fun handleDisconnected() {
@@ -290,8 +285,6 @@ class MeshConnectionManagerImpl(
             DataPair(KEY_NUM_ONLINE, nodeManager.nodeDBbyNodeNum.values.count { it.isOnline }),
         )
         analytics.track(EVENT_NUM_NODES, DataPair(KEY_NUM_NODES, nodeManager.nodeDBbyNodeNum.size))
-
-        serviceBroadcasts.broadcastConnection()
     }
 
     override fun startConfigOnly() {
@@ -319,7 +312,7 @@ class MeshConnectionManagerImpl(
         }
     }
 
-    override fun onNodeDbReady() {
+    override suspend fun onNodeDbReady() {
         handshakeTimeout?.cancel()
         handshakeTimeout = null
 

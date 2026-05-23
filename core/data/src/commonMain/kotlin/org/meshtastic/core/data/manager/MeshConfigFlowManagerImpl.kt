@@ -34,7 +34,6 @@ import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NotificationPrefs
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
-import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.FileInfo
@@ -52,7 +51,6 @@ class MeshConfigFlowManagerImpl(
     private val nodeRepository: NodeRepository,
     private val radioConfigRepository: RadioConfigRepository,
     private val serviceRepository: ServiceRepository,
-    private val serviceBroadcasts: ServiceBroadcasts,
     private val analytics: PlatformAnalytics,
     private val commandSender: CommandSender,
     private val heartbeatSender: DataLayerHeartbeatSender,
@@ -177,7 +175,7 @@ class MeshConfigFlowManagerImpl(
 
         val entities =
             state.nodes.mapNotNull { nodeInfo ->
-                nodeManager.installNodeInfo(nodeInfo, withBroadcast = false)
+                nodeManager.installNodeInfo(nodeInfo)
                 nodeManager.nodeDBbyNodeNum[nodeInfo.num]
                     ?: run {
                         Logger.w { "Node ${nodeInfo.num} missing from DB after installNodeInfo; skipping" }
@@ -191,7 +189,6 @@ class MeshConfigFlowManagerImpl(
             nodeManager.setNodeDbReady(true)
             nodeManager.setAllowNodeDbWrites(true)
             serviceRepository.setConnectionState(ConnectionState.Connected)
-            serviceBroadcasts.broadcastConnection()
             connectionManager.value.onNodeDbReady()
         }
     }
