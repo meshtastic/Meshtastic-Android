@@ -168,6 +168,22 @@
 
 ---
 
+## Phase 11: UX Polish & Advanced CAL APIs
+
+**Purpose**: Leverage advanced Car App Library APIs for richer UX — transient feedback, pull-to-refresh, modal alerts, responsive text, full conversation view, and safety-gated actions
+
+- [x] T041 [P] [FR-023] Add CarToast feedback to ConversationScreen (voice reply sent, quick-reply sent) and HomeScreen (reconnection events) — use `CarToast.makeText(carContext, msg, LENGTH_SHORT).show()` in action callbacks
+- [x] T042 [P] [FR-024] Implement OnContentRefreshListener on HomeScreen messaging tab and NodeDashboardScreen — call `stateCoordinator.refresh()` and `invalidate()` on trigger
+- [x] T043 [P] [FR-025] Upgrade EmergencyHandler to use CAL Alert API — present modal `Alert.Builder()` for new SOS alerts requiring explicit dismiss/acknowledge, replacing passive spotlight rows for active alerts
+- [x] T044 [FR-026] Upgrade ConversationScreen to LongMessageTemplate for full conversation view — concatenate all messages into a formatted long-text body with sender/timestamp prefixes when message count exceeds list limit
+- [x] T045 [P] [FR-027] Add CarText.addVariant() responsive text to node subtitles in HomeScreen and NodeDashboardScreen — short variant (signal icon only) for narrow displays, full variant (signal + battery + last heard) for wide
+- [x] T046 [P] [FR-028] Add ParkedOnlyOnClickListener to voice reply and quick-reply actions in ConversationScreen — allows voice compose only when vehicle is parked per CAL safety guidelines
+- [x] T047 Run verification: `./gradlew spotlessApply :feature:car:spotlessCheck :feature:car:detekt :feature:car:compileFdroidDebugKotlin`
+
+**Checkpoint**: Advanced CAL APIs integrated — transient feedback, pull-to-refresh, modal alerts, responsive text, safety-gated actions all functional
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies
@@ -182,6 +198,7 @@
 - **Phase 8 (US6 - Status Panel)**: Depends on Phase 2 — independent
 - **Phase 9 (US7 - Voice)**: Depends on Phase 3 (ConversationScreen T017, FuzzyNodeNameResolver T018)
 - **Phase 10 (Polish)**: Depends on all user story phases
+- **Phase 11 (Advanced APIs)**: Depends on Phase 10 — enhances existing screens with advanced CAL APIs
 
 ### User Story Dependencies
 

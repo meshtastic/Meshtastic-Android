@@ -201,6 +201,12 @@ A driver uses CAL's built-in voice input to compose messages and perform actions
 - **FR-020**: System MUST group direct message contacts into "Favorites" (nodes marked favorite) and "Recent" sections using Section Headers
 - **FR-021**: System MUST load up to 50 unread messages across conversations on session start, most recent first
 - **FR-022**: System MUST also implement notification-based messaging (NotificationCompat.MessagingStyle with reply and mark-as-read Actions) as required by templated messaging apps
+- **FR-023**: System MUST display transient CarToast feedback for user actions (message sent, message failed, reconnection events)
+- **FR-024**: System MUST support pull-to-refresh (OnContentRefreshListener) on message and node list screens
+- **FR-025**: System MUST present emergency alerts as modal Alert dialogs (CAL Alert API) requiring explicit acknowledgment
+- **FR-026**: System SHOULD use LongMessageTemplate for viewing full conversation history beyond the 5-message list limit
+- **FR-027**: System SHOULD provide responsive text variants (CarText.addVariant) for narrow vs wide head unit displays
+- **FR-028**: System SHOULD restrict message composition actions to parked state via ParkedOnlyOnClickListener
 
 ### Non-Functional Requirements
 
