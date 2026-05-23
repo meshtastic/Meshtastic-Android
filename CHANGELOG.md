@@ -9,6 +9,11 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5583) by James Rich (@jamesarich) in [`e167b5861`](https://github.com/meshtastic/Meshtastic-Android/commit/e167b58615cb1e28994f2d9eaa0702d8c618bff7)
+
+### Internal (v2.7.14-internal.103)
+Changes since [`v2.7.14-open.10`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14-open.10):
+
 * docs: update CHANGELOG.md (#5561) by github-actions[bot] (@github-actions[bot]) in [`165323c98`](https://github.com/meshtastic/Meshtastic-Android/commit/165323c98b6d7cecef5a5a60ae4f92b8f2df3028)
 * feat(docs): upgrade Chirpy assistant with streaming and live diagnostics (#5564) by James Rich (@jamesarich) in [`c26ef946b`](https://github.com/meshtastic/Meshtastic-Android/commit/c26ef946b1015a602721c5d862c2d66fde6b5f0f)
 * chore(deps): update compose.screenshot to v0.0.1-alpha15 (#5565) by renovate[bot] (@renovate[bot]) in [`9daf42708`](https://github.com/meshtastic/Meshtastic-Android/commit/9daf427082f2ddf0ffe3623574cdf74fea2eec91)
@@ -26,6 +31,7 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 * chore(deps): update tuist/xcodeproj to v9 (#5582) by renovate[bot] (@renovate[bot]) in [`0a44b948e`](https://github.com/meshtastic/Meshtastic-Android/commit/0a44b948ec0573dc62ec68c19e46e62d40fcd1a3)
 * chore(deps): update testretry to v1.6.5 (#5581) by renovate[bot] (@renovate[bot]) in [`0bc6b76aa`](https://github.com/meshtastic/Meshtastic-Android/commit/0bc6b76aa98c3398390802a79e342076411fe3e8)
 * chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5577) by James Rich (@jamesarich) in [`4b42e2c76`](https://github.com/meshtastic/Meshtastic-Android/commit/4b42e2c76cbc54f8b7b493b6f69fdc61cce6cabe)
+* docs: update CHANGELOG.md (#5573) by github-actions[bot] (@github-actions[bot]) in [`c02670fbb`](https://github.com/meshtastic/Meshtastic-Android/commit/c02670fbbddfa0018ff34371803bea0ce2cd04c3)
 
 ### Open Beta (v2.7.14-open.10)
 Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.13):
