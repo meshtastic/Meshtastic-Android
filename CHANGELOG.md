@@ -10,6 +10,7 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 ### Unreleased (not yet in any build)
 
 * chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5583) by James Rich (@jamesarich) in [`e167b5861`](https://github.com/meshtastic/Meshtastic-Android/commit/e167b58615cb1e28994f2d9eaa0702d8c618bff7)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5588) by James Rich (@jamesarich) in [`2d60e384b`](https://github.com/meshtastic/Meshtastic-Android/commit/2d60e384b0afcbe45e8e6bab045546f2710db9cb)
 
 ### Internal (v2.7.14-internal.103)
 Changes since [`v2.7.14-open.10`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14-open.10):
