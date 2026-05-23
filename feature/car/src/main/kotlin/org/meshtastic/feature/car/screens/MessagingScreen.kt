@@ -25,8 +25,10 @@ import androidx.car.app.model.Header
 import androidx.car.app.model.ItemList
 import androidx.car.app.model.ListTemplate
 import androidx.car.app.model.Row
+import androidx.car.app.model.SectionedItemList
 import androidx.car.app.model.Template
 import org.meshtastic.feature.car.R
+import org.meshtastic.feature.car.model.EmergencyAlert
 import org.meshtastic.feature.car.model.MessagingUiState
 
 class MessagingScreen(
@@ -34,6 +36,7 @@ class MessagingScreen(
     private val stateProvider: () -> MessagingUiState,
     private val onConversationClick: (String) -> Unit,
     private val onChannelSelected: (Int) -> Unit,
+    private val onEmergencyClick: (EmergencyAlert) -> Unit,
 ) : Screen(carContext) {
 
     private val handler = Handler(Looper.getMainLooper())
@@ -54,11 +57,22 @@ class MessagingScreen(
 
     override fun onGetTemplate(): Template {
         val state = stateProvider()
+        val activeAlerts = state.emergencySpotlight?.filter { it.isActive }.orEmpty()
 
-        val listBuilder = ItemList.Builder()
+        val templateBuilder = ListTemplate.Builder()
 
+        // Emergency spotlight section (shown at top when active alerts exist)
+        if (activeAlerts.isNotEmpty()) {
+            val emergencyList = EmergencySpotlightBuilder.buildEmergencyRows(activeAlerts, onEmergencyClick)
+            templateBuilder.addSectionedList(
+                SectionedItemList.create(emergencyList, carContext.getString(R.string.car_emergency_alerts)),
+            )
+        }
+
+        // Conversations section
+        val conversationListBuilder = ItemList.Builder()
         state.conversations.take(MAX_CONVERSATIONS).forEach { conversation ->
-            listBuilder.addItem(
+            conversationListBuilder.addItem(
                 Row.Builder()
                     .setTitle(conversation.displayName)
                     .addText(conversation.lastMessage)
@@ -68,17 +82,32 @@ class MessagingScreen(
             )
         }
 
-        val templateBuilder =
-            ListTemplate.Builder()
-                .setSingleList(listBuilder.build())
-                .setHeader(
-                    Header.Builder()
-                        .setTitle(carContext.getString(R.string.car_tab_messages))
-                        .setStartHeaderAction(Action.BACK)
-                        .build(),
-                )
+        if (activeAlerts.isNotEmpty()) {
+            templateBuilder.addSectionedList(
+                SectionedItemList.create(
+                    conversationListBuilder.build(),
+                    carContext.getString(R.string.car_tab_messages),
+                ),
+            )
+        } else {
+            templateBuilder.setSingleList(conversationListBuilder.build())
+        }
 
-        if (state.conversations.isEmpty()) {
+        // Channel chips as action strip
+        if (state.channels.size > 1) {
+            templateBuilder.setActionStrip(
+                ChannelChipBuilder.buildChannelActionStrip(state.channels, onChannelSelected),
+            )
+        }
+
+        templateBuilder.setHeader(
+            Header.Builder()
+                .setTitle(carContext.getString(R.string.car_tab_messages))
+                .setStartHeaderAction(Action.BACK)
+                .build(),
+        )
+
+        if (state.conversations.isEmpty() && activeAlerts.isEmpty()) {
             templateBuilder.setLoading(false)
         }
 

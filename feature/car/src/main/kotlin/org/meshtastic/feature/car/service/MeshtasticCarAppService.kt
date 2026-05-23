@@ -20,12 +20,14 @@ import androidx.car.app.CarAppService
 import androidx.car.app.Session
 import androidx.car.app.SessionInfo
 import androidx.car.app.validation.HostValidator
+import co.touchlab.kermit.Logger
 import org.meshtastic.feature.car.BuildConfig
 import org.meshtastic.feature.car.R
 
 class MeshtasticCarAppService : CarAppService() {
 
     override fun createHostValidator(): HostValidator = if (BuildConfig.DEBUG) {
+        Logger.w(tag = "CarAppService") { "Using ALLOW_ALL_HOSTS_VALIDATOR — debug build only" }
         HostValidator.ALLOW_ALL_HOSTS_VALIDATOR
     } else {
         HostValidator.Builder(applicationContext).addAllowedHosts(R.array.car_hosts_allowlist).build()

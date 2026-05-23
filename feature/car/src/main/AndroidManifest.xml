@@ -11,6 +11,10 @@
             </intent-filter>
         </service>
 
+        <receiver
+            android:name="org.meshtastic.feature.car.service.CarReplyReceiver"
+            android:exported="false" />
+
         <meta-data
             android:name="androidx.car.app.minCarApiLevel"
             android:value="8" />

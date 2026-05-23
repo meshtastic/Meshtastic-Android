@@ -76,7 +76,9 @@ class CarNotificationManager(private val context: Context) {
             PendingIntent.getBroadcast(
                 context,
                 conversationId.hashCode(),
-                Intent(ACTION_REPLY).putExtra(EXTRA_CONVERSATION_ID, conversationId),
+                Intent(context, CarReplyReceiver::class.java)
+                    .setAction(ACTION_REPLY)
+                    .putExtra(EXTRA_CONVERSATION_ID, conversationId),
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE,
             )
 
@@ -90,7 +92,9 @@ class CarNotificationManager(private val context: Context) {
             PendingIntent.getBroadcast(
                 context,
                 conversationId.hashCode() + 1,
-                Intent(ACTION_MARK_READ).putExtra(EXTRA_CONVERSATION_ID, conversationId),
+                Intent(context, CarReplyReceiver::class.java)
+                    .setAction(ACTION_MARK_READ)
+                    .putExtra(EXTRA_CONVERSATION_ID, conversationId),
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
             )
 

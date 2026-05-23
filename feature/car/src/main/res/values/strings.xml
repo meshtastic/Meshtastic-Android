@@ -6,6 +6,7 @@
     <string name="car_disconnected">Disconnected</string>
     <string name="car_disconnected_body">Radio connection lost. Showing cached data.</string>
     <string name="car_emergency_alert">Emergency Alert</string>
+    <string name="car_emergency_alerts">Emergency Alerts</string>
     <string name="car_error">Error</string>
     <string name="car_last_heard">Last heard: %s</string>
     <string name="car_last_message">Last msg: %s</string>
