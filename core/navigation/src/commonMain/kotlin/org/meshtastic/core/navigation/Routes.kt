@@ -166,6 +166,8 @@ sealed interface SettingsRoute : Route {
 
     @Serializable data object FilterSettings : SettingsRoute
 
+    @Serializable data object NodeList : SettingsRoute
+
     // endregion
 
     // region help & documentation routes
