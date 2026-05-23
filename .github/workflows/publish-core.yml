@@ -45,7 +45,7 @@ jobs:
           fi
 
       - name: Publish to GitHub Packages
-        run: ./gradlew :core:api:publish :core:model:publish :core:proto:publish
+        run: ./gradlew :core:model:publish :core:proto:publish
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

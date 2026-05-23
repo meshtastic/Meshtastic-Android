@@ -112,7 +112,7 @@ jobs:
 
       - name: Lint, Analysis & KMP Smoke Compile
         if: inputs.run_lint == true
-        run: ./gradlew spotlessCheck detekt androidApp:lintFdroidDebug androidApp:lintGoogleDebug core:barcode:lintFdroidDebug core:barcode:lintGoogleDebug core:api:lintDebug kmpSmokeCompile -Pci=true --continue
+        run: ./gradlew spotlessCheck detekt androidApp:lintFdroidDebug androidApp:lintGoogleDebug core:barcode:lintFdroidDebug core:barcode:lintGoogleDebug kmpSmokeCompile -Pci=true --continue
 
       - name: KMP Smoke Compile (lint skipped)
         if: inputs.run_lint == false

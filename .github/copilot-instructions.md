@@ -33,7 +33,7 @@ git submodule update --init
 
 KMP modules have different task names than pure-Android modules. Using the wrong name silently skips tests or fails resolution.
 
-| Intent | KMP modules (`core:*`, `feature:*`) | Android-only (`app`, `core:api`, `core:barcode`) |
+| Intent | KMP modules (`core:*`, `feature:*`) | Android-only (`app`, `core:barcode`) |
 |--------|--------------------------------------|--------------------------------------------------|
 | Run tests | `:module:allTests` | `:module:testFdroidDebugUnitTest` |
 | Detekt | `:module:detekt` (lifecycle task) | `:module:detekt` |
