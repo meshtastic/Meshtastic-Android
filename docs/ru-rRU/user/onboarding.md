@@ -3,7 +3,7 @@ title: Начало работы
 parent: Руководство пользователя
 nav_order: 1
 last_updated: 2026-05-13
-description: First-launch setup — permissions, onboarding flow, and next steps after connecting your radio.
+description: Настройка при первом запуске — разрешения, процесс знакомства с приложением и следующие шаги после подключения твоей радиостанции.
 aliases:
   - first-launch
   - setup
@@ -12,9 +12,9 @@ aliases:
 
 # Начало работы
 
-Welcome to Meshtastic! This guide walks you through the initial setup of the Meshtastic Android app.
+Добро пожаловать в Meshtastic! Это руководство проведет тебя через начальную настройку приложения Meshtastic для Android.
 
-## First Launch
+## Первый запуск
 
 When you open the app for the first time, you'll be guided through an introductory flow that helps configure essential permissions and settings. Each step can be completed in order, or you can skip and configure permissions later in Android settings.
 
