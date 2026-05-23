@@ -19,6 +19,13 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 * feat: node list density switching with compact layout and field toggles (#5444) by James Rich (@jamesarich) in [`5d9e71da3`](https://github.com/meshtastic/Meshtastic-Android/commit/5d9e71da39d7f85082a610633a81e185ab23c622)
 * chore(deps): update core/proto/src/main/proto digest to 59cb394 (#5571) by renovate[bot] (@renovate[bot]) in [`c56432bf0`](https://github.com/meshtastic/Meshtastic-Android/commit/c56432bf020968b52079e3324e28be735a3258a3)
 * chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5563) by James Rich (@jamesarich) in [`479ed4f7f`](https://github.com/meshtastic/Meshtastic-Android/commit/479ed4f7fcb4b2a6a1d189c1c4d62557880c4e51)
+* docs: update CHANGELOG.md (#5570) by github-actions[bot] (@github-actions[bot]) in [`97ce3cd27`](https://github.com/meshtastic/Meshtastic-Android/commit/97ce3cd27f7edc7f2480bc0c8bc4fb572d2d3fc1)
+* docs: comprehensive documentation audit and refresh (#5572) by James Rich (@jamesarich) in [`5ec6d80f6`](https://github.com/meshtastic/Meshtastic-Android/commit/5ec6d80f61e897713473219fd5db569678b04810)
+* feat(ai): upgrade Chirpy on-device AI with proper APIs, download UX, and streaming (#5579) by James Rich (@jamesarich) in [`d870141b7`](https://github.com/meshtastic/Meshtastic-Android/commit/d870141b7cc92d3dcbbe427a2cb7708a54f85c38)
+* Extract node list display settings to dedicated screen (#5580) by James Rich (@jamesarich) in [`a67927818`](https://github.com/meshtastic/Meshtastic-Android/commit/a67927818b6af66a5b3bbba7dc31ba1b98e1cee8)
+* chore(deps): update tuist/xcodeproj to v9 (#5582) by renovate[bot] (@renovate[bot]) in [`0a44b948e`](https://github.com/meshtastic/Meshtastic-Android/commit/0a44b948ec0573dc62ec68c19e46e62d40fcd1a3)
+* chore(deps): update testretry to v1.6.5 (#5581) by renovate[bot] (@renovate[bot]) in [`0bc6b76aa`](https://github.com/meshtastic/Meshtastic-Android/commit/0bc6b76aa98c3398390802a79e342076411fe3e8)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5577) by James Rich (@jamesarich) in [`4b42e2c76`](https://github.com/meshtastic/Meshtastic-Android/commit/4b42e2c76cbc54f8b7b493b6f69fdc61cce6cabe)
 
 ### Open Beta (v2.7.14-open.10)
 Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.13):
