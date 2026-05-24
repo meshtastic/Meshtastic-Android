@@ -11,6 +11,9 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 * chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5583) by James Rich (@jamesarich) in [`e167b5861`](https://github.com/meshtastic/Meshtastic-Android/commit/e167b58615cb1e28994f2d9eaa0702d8c618bff7)
 * chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5588) by James Rich (@jamesarich) in [`2d60e384b`](https://github.com/meshtastic/Meshtastic-Android/commit/2d60e384b0afcbe45e8e6bab045546f2710db9cb)
+* docs: update CHANGELOG.md (#5584) by github-actions[bot] (@github-actions[bot]) in [`d9cf91a60`](https://github.com/meshtastic/Meshtastic-Android/commit/d9cf91a60b63207656bab073af963a43082b8a80)
+* docs: update CHANGELOG.md (#5589) by github-actions[bot] (@github-actions[bot]) in [`0d07df735`](https://github.com/meshtastic/Meshtastic-Android/commit/0d07df735db9e038918bd06a384b130f66869658)
+* chore(deps): update aboutlibraries to v14.2.1 (#5590) by renovate[bot] (@renovate[bot]) in [`05fb69c17`](https://github.com/meshtastic/Meshtastic-Android/commit/05fb69c17987392a8e504db5f802a2c97052458c)
 
 ### Internal (v2.7.14-internal.103)
 Changes since [`v2.7.14-open.10`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14-open.10):
