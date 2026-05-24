@@ -2,7 +2,7 @@
 title: Settings — Radio & User
 parent: User Guide
 nav_order: 7
-last_updated: 2026-05-20
+last_updated: 2026-05-24
 description: Configure your radio hardware, LoRa presets, user profile, position sharing, power management, and security.
 aliases:
   - settings
@@ -52,6 +52,12 @@ After modifying settings, tap **Save** to write the configuration to your radio.
 | Channel Bandwidth | Bandwidth setting | Default for preset |
 
 > ⚠️ **Important:** You **must** set your region before transmitting. Operating without the correct region may violate local radio regulations. See the [region configuration guide](https://meshtastic.org/docs/getting-started/initial-config) on meshtastic.org for details.
+
+#### Mesh Discovery Beacons
+
+When compatible firmware sends mesh discovery beacons nearby, the app can show them at the top of **LoRa Config**. Each beacon summarizes the transmitting node, primary channel name, frequency, bandwidth, spreading factor, coding rate, and forwarding hint.
+
+Discovery beacons are informational only. Review them as nearby mesh context; the app does not automatically change your radio configuration from a received beacon.
 
 ### Modem Presets
 
@@ -171,4 +177,3 @@ Settings use standard preference controls — dropdowns, toggles, and sliders:
 - [Initial configuration](https://meshtastic.org/docs/getting-started/initial-config) — region setup guide on meshtastic.org
 
 ---
-
