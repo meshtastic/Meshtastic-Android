@@ -1,53 +1,53 @@
 ---
-title: Units, Measurement & Locale
+title: Единицы измерения и локаль
 parent: Руководство пользователя
 nav_order: 16
 last_updated: 2026-05-12
 ---
 
-# Units, Measurement & Locale
+# Единицы измерения и локаль
 
-The Meshtastic app automatically displays temperatures, distances, speeds, and times in the units your device is configured to use — no settings to change inside the app.
+Приложение Meshtastic автоматически отображает температуру, расстояние, скорость и время в единицах, настроенных на вашем устройстве — никаких настроек внутри приложения менять не нужно.
 
 ---
 
 ## Как это работает
 
-Meshtastic radios always transmit data in **metric units** (meters, °C, km/h, hPa, etc.). When the app receives this data, it uses the `MetricFormatter` utility to convert and display values in whatever unit system your device's locale specifies.
+Радиостанции Meshtastic всегда передают данные в **метрических единицах** (метры, °C, км/ч, гПа и т.д.). Когда приложение получает эти данные, оно использует утилиту `MetricFormatter` для преобразования и отображения значений в той системе единиц, которую задают региональные настройки устройства.
 
-On Android, your measurement preferences are determined by your system **Language & Region** settings. On Desktop (JVM), the app uses the JVM's default `Locale`.
+На Android твои предпочтения единиц измерений определяются настройками системы **Язык и регион**. На настольном компьютере (JVM) приложение использует стандартную `Locale` JVM.
 
-> **Tip — You never need to toggle units inside the app.** Change your system measurement preferences and every screen in Meshtastic updates automatically — node details, telemetry charts, weather, altitude, and more.
+> **Совет — вам никогда не нужно переключать единицы измерения внутри приложения.** Измените системные настройки единиц измерений, и все отображения в Meshtastic обновятся автоматически — детали ноды, графики телеметрии, погода, высота и многое другое.
 
 ---
 
 ## Температура
 
-Temperature values from environment sensors are transmitted as **°C** and displayed based on your device's temperature unit preference.
+Значения температуры от датчиков окружающей среды передаются в **°C** и отображаются в соответствии с предпочтительным единицами температуры твоего устройства.
 
-![Environment metrics with temperature](../../assets/screenshots/nodes_environment_metrics.png)
+![Метрики окружающей среды с температурой](../../assets/screenshots/nodes_environment_metrics.png)
 
-| Your Setting | You See |
-| ------------ | ------- |
-| Celsius      | 22°C    |
-| Fahrenheit   | 72°F    |
+| Твои настройки | Ты видишь |
+| -------------- | --------- |
+| Цельсий        | 22°C      |
+| Фаренгейт      | 72°F      |
 
-This affects all temperature displays throughout the app: node environment telemetry, soil temperature, dew point, and telemetry chart axes.
+Это влияет на все отображения температуры в приложении: телеметрия окружающей среды ноды, температура почвы, точка росы и оси диаграммы телеметрии.
 
-## Distance & Altitude
+## Расстояние и высота
 
-Distances between nodes and GPS altitudes are transmitted as **meters** and automatically scaled and converted.
+Расстояния между нодами и высоты GPS передаются в **метрах** и автоматически масштабируются и преобразуются.
 
-![Distance info display](../../assets/screenshots/nodes_distance_info.png)
+![Отображение информации о расстоянии](../../assets/screenshots/nodes_distance_info.png)
 
-| Your Setting                     | Small Distance | Large Distance         | Высота   |
-| -------------------------------- | -------------- | ---------------------- | -------- |
-| Metric                           | 350 m          | 2.5 km | 1,200 m  |
-| Imperial (US) | 1,148 ft       | 1.6 mi | 3,937 ft |
+| Твои настройки | Небольшое расстояние | Дальнее расстояние | Высота  |
+| -------------- | -------------------- | ------------------ | ------- |
+| Метрическая    | 350 м                | 2,5 км             | 1200 м  |
+| Имперская      | 1148 фт              | 1,6 миль           | 3937 фт |
 
-The app uses natural scaling — short distances stay in meters or feet, while longer distances switch to kilometres or miles automatically.
+Приложение использует естественное масштабирование — небольшие расстояния остаются в метрах или футах, а более дальние автоматически переключаются на километры или мили.
 
-### Where these appear
+### Где они появляются
 
 - **Node list** — distance and bearing to each node
 - **Node detail** — altitude, distance from your position
