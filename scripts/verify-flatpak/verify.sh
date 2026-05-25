@@ -7,7 +7,7 @@
 # Requirements:
 #   - Docker (Docker Desktop on macOS is fine; needs ~10GB free + ability to run --privileged)
 #   - This Meshtastic-Android checkout has produced flatpak-sources.json
-#     (run `./gradlew :generateFlatpakSourcesFromCache` first, or this script will do it)
+#     (run `./gradlew :desktopApp:assemble :captureFlatpakSources` first, or this script will do it)
 #
 # Usage:
 #   scripts/verify-flatpak/verify.sh                 # full build, x86_64
@@ -52,7 +52,8 @@ command -v docker >/dev/null 2>&1 || fail "docker is required; install Docker De
 
 step "Ensuring flatpak-sources.json is fresh"
 if [[ ! -f "$SOURCES_JSON" ]]; then
-    (cd "$REPO_ROOT" && ./gradlew :generateFlatpakSourcesFromCache)
+    (cd "$REPO_ROOT" && ./gradlew --no-build-cache --no-configuration-cache :desktopApp:assemble :captureFlatpakSources)
+    cp "$REPO_ROOT/build/flatpak-ops-sources.json" "$SOURCES_JSON"
 fi
 
 step "Preparing workspace at $WORK"

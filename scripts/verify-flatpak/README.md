@@ -5,7 +5,7 @@ can validate `flatpak-sources.json` end-to-end without round-tripping through hi
 
 ## What it tests that our CI doesn't
 
-Our CI (`generateFlatpakSourcesFromCache`) only proves the manifest can be *generated*.
+Our CI (`:desktopApp:assemble :captureFlatpakSources`) only proves the manifest can be *generated*.
 Vid's CI is where the manifest actually gets *consumed* by `flatpak-builder`. This script
 runs that step locally:
 
@@ -29,7 +29,7 @@ instead of waiting on cross-repo CI.
   bubblewrap; that's enabled by default).
 - ~10 GB free disk for the SDK + Gradle cache.
 - A populated Gradle cache (`./gradlew :desktopApp:assemble` must have run; the script
-  does this implicitly via `:generateFlatpakSourcesFromCache`).
+  does this implicitly via `:captureFlatpakSources`).
 
 ## Usage
 
@@ -48,10 +48,9 @@ scripts/verify-flatpak/verify.sh --shell
 
 | Symptom                                                          | Likely cause                                                                                              |
 | ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| `Error downloading mirror: ... 404` on `repo.maven.apache.org`   | An artifact is classified as Maven Central but actually lives elsewhere (Google, JitPack). Fix repo spec. |
-| `sha256 mismatch`                                                | Stale `flatpak-sources.json`; re-run `:generateFlatpakSourcesFromCache`.                                  |
-| `No repository spec matched <group>:<name>`                      | New group not covered by the default `MavenRepoSpec` table; add to `FlatpakPlugin.DEFAULT_REPOSITORIES`.  |
-| Gradle: `Could not resolve all artifacts ... offline mode`       | Missing dep in the manifest — usually a compiler plugin or BOM that the cache walk skipped.               |
+| `Error downloading mirror: ... 404` on `repo.maven.apache.org`   | URL captured by the listener was wrong or artifact moved. Check the source repo hosting it.               |
+| `sha256 mismatch`                                                | Stale `flatpak-sources.json`; re-run `:desktopApp:assemble :captureFlatpakSources`.                       |
+| Gradle: `Could not resolve all artifacts ... offline mode`       | Missing dep in the manifest — usually a compiler plugin or BOM that wasn't downloaded during capture.     |
 
 ## Files
 

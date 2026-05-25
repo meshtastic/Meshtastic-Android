@@ -60,6 +60,5 @@ apply(from = "../gradle/develocity.settings.gradle")
 
 rootProject.name = "build-logic"
 include(":convention")
-include(":flatpak")
 include(":flatpak-ops")
 

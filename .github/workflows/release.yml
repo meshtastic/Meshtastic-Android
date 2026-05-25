@@ -370,13 +370,21 @@ jobs:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           cache_read_only: 'true'
 
+      # Uses an isolated Gradle user home so every artifact actually traverses the
+      # network — meshtastic.flatpak-ops captures URLs via BuildOperationListener and
+      # only sees ExternalResourceReadBuildOperation events for cache misses. With the
+      # shared cache, downloads would be skipped and the manifest would be (nearly) empty.
       - name: Generate Flatpak Sources
         run: >
-          ./gradlew :desktopApp:assemble :generateFlatpakSourcesFromCache
-          --no-configuration-cache
+          ./gradlew --no-build-cache --no-configuration-cache
+          -Dgradle.user.home=${{ runner.temp }}/flatpak-gradle-home
+          :desktopApp:assemble :captureFlatpakSources
+
+      - name: Stage manifest
+        run: cp build/flatpak-ops-sources.json flatpak-sources.json
 
       - name: List Flatpak source files
-        run: ls -R flatpak-sources.json
+        run: ls -l flatpak-sources.json
 
       - name: Upload Flatpak source artifacts
         if: always()
