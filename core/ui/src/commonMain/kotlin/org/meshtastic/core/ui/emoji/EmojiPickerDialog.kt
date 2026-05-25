@@ -125,6 +125,7 @@ fun EmojiPickerDialog(
 ) {
     val viewModel: EmojiPickerViewModel = koinViewModel()
     val isLoaded by viewModel.isLoaded.collectAsState()
+    val loadError by viewModel.loadError.collectAsState()
     var searchQuery by rememberSaveable { mutableStateOf("") }
     var debouncedQuery by remember { mutableStateOf("") }
     var selectedCategoryIndex by rememberSaveable { mutableStateOf(0) }
@@ -147,7 +148,15 @@ fun EmojiPickerDialog(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
     ) {
-        if (isLoaded) {
+        if (loadError) {
+            Box(modifier = Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) {
+                Text(
+                    text = "Unable to load emoji",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        } else if (isLoaded) {
             EmojiPickerContent(
                 searchQuery = searchQuery,
                 debouncedQuery = debouncedQuery,
