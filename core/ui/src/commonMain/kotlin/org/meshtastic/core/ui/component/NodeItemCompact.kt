@@ -200,7 +200,7 @@ fun NodeItemCompact(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 NodeChip(node = thatNode)
-                if (showPower && thatNode.batteryLevel != null) {
+                if (showPower && (thatNode.batteryLevel ?: 0) > 0) {
                     MaterialBatteryInfo(
                         level = thatNode.batteryLevel ?: 0,
                         voltage = thatNode.voltage ?: 0f,
