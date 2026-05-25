@@ -9,35 +9,12 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
-* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5583) by James Rich (@jamesarich) in [`e167b5861`](https://github.com/meshtastic/Meshtastic-Android/commit/e167b58615cb1e28994f2d9eaa0702d8c618bff7)
-* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5588) by James Rich (@jamesarich) in [`2d60e384b`](https://github.com/meshtastic/Meshtastic-Android/commit/2d60e384b0afcbe45e8e6bab045546f2710db9cb)
-* docs: update CHANGELOG.md (#5584) by github-actions[bot] (@github-actions[bot]) in [`d9cf91a60`](https://github.com/meshtastic/Meshtastic-Android/commit/d9cf91a60b63207656bab073af963a43082b8a80)
-* docs: update CHANGELOG.md (#5589) by github-actions[bot] (@github-actions[bot]) in [`0d07df735`](https://github.com/meshtastic/Meshtastic-Android/commit/0d07df735db9e038918bd06a384b130f66869658)
-* chore(deps): update aboutlibraries to v14.2.1 (#5590) by renovate[bot] (@renovate[bot]) in [`05fb69c17`](https://github.com/meshtastic/Meshtastic-Android/commit/05fb69c17987392a8e504db5f802a2c97052458c)
+* fix: hide battery indicator when level is 0 (never reported) (#5595) by James Rich (@jamesarich) in [`684c4a967`](https://github.com/meshtastic/Meshtastic-Android/commit/684c4a9678a1239389f984f415d858f39372b6e0)
+* fix: consistent column width for compact node list items (#5596) by James Rich (@jamesarich) in [`55e7f8f3d`](https://github.com/meshtastic/Meshtastic-Android/commit/55e7f8f3de1b8f9106695ff211379cf058ea3b77)
+* fix(emoji): enable androidResources for core:ui to package emoji-data.json (#5597) by James Rich (@jamesarich) in [`f17c38bf6`](https://github.com/meshtastic/Meshtastic-Android/commit/f17c38bf64dcd629641d1e310876871a2f8bfdac)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5598) by James Rich (@jamesarich) in [`184d547c7`](https://github.com/meshtastic/Meshtastic-Android/commit/184d547c7878f9e125007765196b55f71c65fc9b)
 
-### Internal (v2.7.14-internal.103)
-Changes since [`v2.7.14-open.10`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14-open.10):
-
-* docs: update CHANGELOG.md (#5561) by github-actions[bot] (@github-actions[bot]) in [`165323c98`](https://github.com/meshtastic/Meshtastic-Android/commit/165323c98b6d7cecef5a5a60ae4f92b8f2df3028)
-* feat(docs): upgrade Chirpy assistant with streaming and live diagnostics (#5564) by James Rich (@jamesarich) in [`c26ef946b`](https://github.com/meshtastic/Meshtastic-Android/commit/c26ef946b1015a602721c5d862c2d66fde6b5f0f)
-* chore(deps): update compose.screenshot to v0.0.1-alpha15 (#5565) by renovate[bot] (@renovate[bot]) in [`9daf42708`](https://github.com/meshtastic/Meshtastic-Android/commit/9daf427082f2ddf0ffe3623574cdf74fea2eec91)
-* chore(build): centralize feature CMP dependency wiring (#5567) by James Rich (@jamesarich) in [`a871dad7c`](https://github.com/meshtastic/Meshtastic-Android/commit/a871dad7c1a3d1f3866e1bd87bbebfc5d209b1d7)
-* ai: Add spec kit agent governance extension and related files (#5568) by James Rich (@jamesarich) in [`c32d370f6`](https://github.com/meshtastic/Meshtastic-Android/commit/c32d370f6ad7ac37d7793c91d871efdf2fc52a47)
-* docs: update CHANGELOG.md (#5566) by github-actions[bot] (@github-actions[bot]) in [`f57f7d475`](https://github.com/meshtastic/Meshtastic-Android/commit/f57f7d4753907074c2155a447381fbc00f734f4d)
-* ci: disable automatic AI triage workflows (#5569) by James Rich (@jamesarich) in [`45608ced7`](https://github.com/meshtastic/Meshtastic-Android/commit/45608ced70f78f1254736081086674df864429b0)
-* feat: node list density switching with compact layout and field toggles (#5444) by James Rich (@jamesarich) in [`5d9e71da3`](https://github.com/meshtastic/Meshtastic-Android/commit/5d9e71da39d7f85082a610633a81e185ab23c622)
-* chore(deps): update core/proto/src/main/proto digest to 59cb394 (#5571) by renovate[bot] (@renovate[bot]) in [`c56432bf0`](https://github.com/meshtastic/Meshtastic-Android/commit/c56432bf020968b52079e3324e28be735a3258a3)
-* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5563) by James Rich (@jamesarich) in [`479ed4f7f`](https://github.com/meshtastic/Meshtastic-Android/commit/479ed4f7fcb4b2a6a1d189c1c4d62557880c4e51)
-* docs: update CHANGELOG.md (#5570) by github-actions[bot] (@github-actions[bot]) in [`97ce3cd27`](https://github.com/meshtastic/Meshtastic-Android/commit/97ce3cd27f7edc7f2480bc0c8bc4fb572d2d3fc1)
-* docs: comprehensive documentation audit and refresh (#5572) by James Rich (@jamesarich) in [`5ec6d80f6`](https://github.com/meshtastic/Meshtastic-Android/commit/5ec6d80f61e897713473219fd5db569678b04810)
-* feat(ai): upgrade Chirpy on-device AI with proper APIs, download UX, and streaming (#5579) by James Rich (@jamesarich) in [`d870141b7`](https://github.com/meshtastic/Meshtastic-Android/commit/d870141b7cc92d3dcbbe427a2cb7708a54f85c38)
-* Extract node list display settings to dedicated screen (#5580) by James Rich (@jamesarich) in [`a67927818`](https://github.com/meshtastic/Meshtastic-Android/commit/a67927818b6af66a5b3bbba7dc31ba1b98e1cee8)
-* chore(deps): update tuist/xcodeproj to v9 (#5582) by renovate[bot] (@renovate[bot]) in [`0a44b948e`](https://github.com/meshtastic/Meshtastic-Android/commit/0a44b948ec0573dc62ec68c19e46e62d40fcd1a3)
-* chore(deps): update testretry to v1.6.5 (#5581) by renovate[bot] (@renovate[bot]) in [`0bc6b76aa`](https://github.com/meshtastic/Meshtastic-Android/commit/0bc6b76aa98c3398390802a79e342076411fe3e8)
-* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5577) by James Rich (@jamesarich) in [`4b42e2c76`](https://github.com/meshtastic/Meshtastic-Android/commit/4b42e2c76cbc54f8b7b493b6f69fdc61cce6cabe)
-* docs: update CHANGELOG.md (#5573) by github-actions[bot] (@github-actions[bot]) in [`c02670fbb`](https://github.com/meshtastic/Meshtastic-Android/commit/c02670fbbddfa0018ff34371803bea0ce2cd04c3)
-
-### Open Beta (v2.7.14-open.10)
+### Open Beta (v2.7.14-open.11)
 Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.13):
 
 #### 🏗️ Features
@@ -126,6 +103,8 @@ Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/relea
 * fix: use single-shot low battery notifications by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5550
 * feat: align node list context menu to canonical 6-item order by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5548
 * feat: enable WAL connection pool for parallel reads by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5372
+* feat: node list density switching with compact layout and field toggles by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5444
+* feat(ai): upgrade Chirpy on-device AI with proper APIs, download UX, and streaming by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5579
 #### 🖥️ Desktop
 * fix(desktop): keep Vico package to prevent bytecode verification errors by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5424
 #### 🛠️ Fixes
@@ -267,6 +246,7 @@ Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/relea
 * Revert "diag(r8): disable minify for release builds (animation-freeze diagnostic)" by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5176
 * Fix node-details remove action to preserve confirmation flow by @Copilot in https://github.com/meshtastic/Meshtastic-Android/pull/5192
 * Change default ContrastLevel from STANDARD to MEDIUM by @somenice in https://github.com/meshtastic/Meshtastic-Android/pull/5325
+* Extract node list display settings to dedicated screen by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5580
 
 ## New Contributors
 * @nreisbeck made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/4607
