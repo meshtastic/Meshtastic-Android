@@ -41,6 +41,7 @@ plugins {
     alias(libs.plugins.meshtastic.root)
     id("meshtastic.docs")
     id("meshtastic.flatpak")
+    id("meshtastic.flatpak-ops")
 }
 
 dependencies {
