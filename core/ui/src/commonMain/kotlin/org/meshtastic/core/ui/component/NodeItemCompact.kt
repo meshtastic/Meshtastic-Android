@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -196,7 +197,8 @@ fun NodeItemCompact(
         ) {
             // Column 1: Chip + Battery (fixed width)
             Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.widthIn(min = 90.dp),
+                horizontalAlignment = Alignment.Start,
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 NodeChip(node = thatNode)
