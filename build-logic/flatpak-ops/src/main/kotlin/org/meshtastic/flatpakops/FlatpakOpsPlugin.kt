@@ -63,16 +63,17 @@ class FlatpakOpsPlugin : Plugin<Project> {
             group = "flatpak"
             description = "Emit flatpak-sources.json from URLs captured via BuildOperationListener."
             outputs.upToDateWhen { false }
+            // Must run AFTER the task that triggers resolution. Without this, Gradle's scheduler
+            // may interleave/parallelize this task with :desktopApp:assemble, causing us to write
+            // the file before the downloads we want to capture have happened.
+            mustRunAfter(":desktopApp:assemble")
             val proj = target
             val urlsRef = capturedUrls
             val outFile = outputProvider
-            val mgr = manager
-            val lst = listener
-            doLast {
-                writeSources(proj, urlsRef.toList(), outFile.get().asFile)
-                runCatching { mgr.removeListener(lst) }
-            }
+            doLast { writeSources(proj, urlsRef.toList(), outFile.get().asFile) }
         }
+        // Listener is intentionally NOT removed on task completion; it stays attached until JVM
+        // exit. Removal is unsafe when our task races against other resolution-emitting tasks.
     }
 
     private class OpListener(private val urls: MutableSet<String>) : BuildOperationListener {
@@ -123,18 +124,23 @@ class FlatpakOpsPlugin : Plugin<Project> {
 
     /**
      * Last three URL path segments are artifact/version/filename (Maven 2 spec; present in every Maven URL). Gradle's
-     * files-2.1 layout is group/artifact/version/content-sha1/filename. The (artifact, version, filename) triple is
-     * globally unique, so probing files-2.1 / * / artifact / version / * / filename yields exactly one match. The group
-     * is then read from the cache directory itself, not reconstructed.
+     * files-2.1 layout is `<group-with-dots>/<artifact>/<version>/<content-sha1>/<filename>`. The (artifact, version,
+     * filename) triple is NOT unique across groups (e.g. androidx.annotation:annotation:1.10.0.module collides with
+     * org.jetbrains.compose.annotation-internal:annotation:1.10.0.module), so the group MUST be derived from the URL
+     * path. We probe every suffix of the path's leading segments against the cache layout — the longest match wins
+     * (strips arbitrary repo prefixes like `/maven2/`, `/dl/android/maven2/`, `/m2/` without hardcoding them).
      */
     private fun locateCacheFile(filesRoot: File, url: String): File? {
         val path = URI(url).path.trimEnd('/').split('/').filter { it.isNotEmpty() }
         val tail = path.takeLast(URL_TRAILING_SEGMENTS)
         if (!filesRoot.isDirectory || tail.size < URL_TRAILING_SEGMENTS) return null
         val (artifact, version, filename) = tail
-        val groupDirs = filesRoot.listFiles { f -> f.isDirectory }.orEmpty()
-        return groupDirs.firstNotNullOfOrNull { groupDir ->
-            File(groupDir, "$artifact/$version")
+        val groupCandidates = path.dropLast(URL_TRAILING_SEGMENTS)
+        // files-2.1 uses dot-joined group as a SINGLE directory, e.g. `androidx.annotation/`,
+        // not `androidx/annotation/`. So join URL segments with '.' here.
+        return groupCandidates.indices.firstNotNullOfOrNull { start ->
+            val groupDir = groupCandidates.drop(start).joinToString(".")
+            File(filesRoot, "$groupDir/$artifact/$version")
                 .takeIf(File::isDirectory)
                 ?.listFiles { f -> f.isDirectory }
                 ?.map { shaDir -> File(shaDir, filename) }

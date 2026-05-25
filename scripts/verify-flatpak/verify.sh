@@ -90,6 +90,7 @@ if [[ $DROP_TO_SHELL -eq 1 ]]; then
         -v "$WORK/org.meshtastic.desktop:/work" \
         -w /work \
         --platform "$DOCKER_PLATFORM" \
+        --security-opt seccomp=unconfined \
         "$BUILDER_IMAGE" bash
 fi
 
@@ -98,12 +99,17 @@ docker run --rm --privileged \
     -v "$WORK/org.meshtastic.desktop:/work" \
     -w /work \
     --platform "$DOCKER_PLATFORM" \
+    --security-opt seccomp=unconfined \
     "$BUILDER_IMAGE" \
     bash -c "set -e
         flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+        # --download-only verifies every source URL + sha256 and exits before the bwrap
+        # sandbox phase. We do this because nested bwrap fails inside Docker Desktop on
+        # macOS (prctl(PR_SET_SECCOMP) EINVAL). For full sandbox build, run on Linux directly
+        # — or rely on vid's GHA CI which uses bare ubuntu-24.04 runners.
         flatpak-builder --user --repo=repo --install-deps-from=flathub --force-clean \
-            --disable-rofiles-fuse \
+            --disable-rofiles-fuse --download-only \
             builddir org.meshtastic.desktop.yaml
         echo
-        echo '=== Offline build SUCCEEDED ==='
+        echo '=== All sources downloaded and sha256-verified successfully ==='
     "
