@@ -116,10 +116,13 @@ abstract class GenerateFlatpakSourcesTask : DefaultTask() {
 
                     val isJitpack = group.startsWith("com.github.")
                     val isGoogleArtifact =
-                        group.startsWith("androidx.") ||
-                            group.startsWith("com.google.") ||
-                            group.startsWith("com.android.")
-                    val isGradlePlugin = group.endsWith(".gradle.plugin") || group.startsWith("org.gradle.")
+                        listOf("androidx", "com.google", "com.android").any {
+                            group == it || group.startsWith("$it.")
+                        }
+                    val isGradlePlugin =
+                        group.endsWith(".gradle.plugin") ||
+                            group == "org.gradle" ||
+                            group.startsWith("org.gradle.")
 
                     val primaryUrl =
                         when {
@@ -139,8 +142,9 @@ abstract class GenerateFlatpakSourcesTask : DefaultTask() {
 
                     val mirrorUrls =
                         when {
-                            isSnapshot ->
-                                listOf("https://s01.oss.sonatype.org/content/repositories/snapshots/$mavenPath")
+                            // Timestamped snapshot URL on central.sonatype.com is authoritative;
+                            // legacy s01.oss.sonatype.org was retired in 2024.
+                            isSnapshot -> emptyList()
 
                             isJitpack ->
                                 buildList {
@@ -148,6 +152,9 @@ abstract class GenerateFlatpakSourcesTask : DefaultTask() {
                                     add("https://repo.maven.apache.org/maven2/$mavenPath")
                                     addAll(mavenCentralMirrors)
                                 }
+
+                            isGoogleArtifact ->
+                                listOf("https://maven.google.com/$mavenPath")
 
                             else ->
                                 buildList {
