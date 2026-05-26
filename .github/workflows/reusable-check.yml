@@ -575,11 +575,16 @@ jobs:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           cache_read_only: true
 
+      # Isolated Gradle user home — see explanation in release.yml.
       - name: Generate Flatpak Sources
         run: >
-          ./gradlew :desktopApp:assemble :generateFlatpakSourcesFromCache
-          --no-configuration-cache --refresh-dependencies
-      
+          ./gradlew --no-build-cache --no-configuration-cache
+          -Dgradle.user.home=${{ runner.temp }}/flatpak-gradle-home
+          :desktopApp:assemble :captureFlatpakSources
+
+      - name: Stage manifest
+        run: cp build/flatpak-ops-sources.json flatpak-sources.json
+
       - run: ls -lah flatpak-sources.json
 
       - name: Upload Flatpak Sources

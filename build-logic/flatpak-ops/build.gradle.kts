@@ -23,7 +23,7 @@ plugins {
     alias(libs.plugins.detekt)
 }
 
-group = "org.meshtastic.flatpak"
+group = "org.meshtastic.flatpakops"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_21
@@ -33,7 +33,6 @@ java {
 kotlin { compilerOptions { jvmTarget = JvmTarget.JVM_21 } }
 
 dependencies {
-    // Allows type-safe accessors for libs in plugin build script
     implementation(files(libs.javaClass.superclass.protectionDomain.codeSource.location))
     detektPlugins(libs.detekt.formatting)
 }
@@ -69,15 +68,14 @@ detekt {
     config.setFrom(rootProject.file("../config/detekt/detekt.yml"))
     buildUponDefaultConfig = true
     allRules = false
-    baseline = file("detekt-baseline.xml")
     source.setFrom(files("src/main/java", "src/main/kotlin"))
 }
 
 gradlePlugin {
     plugins {
-        register("meshtasticFlatpak") {
-            id = "meshtastic.flatpak"
-            implementationClass = "org.meshtastic.flatpak.FlatpakPlugin"
+        register("meshtasticFlatpakOps") {
+            id = "meshtastic.flatpak-ops"
+            implementationClass = "org.meshtastic.flatpakops.FlatpakOpsPlugin"
         }
     }
 }

@@ -40,7 +40,7 @@ plugins {
     alias(libs.plugins.test.retry) apply false
     alias(libs.plugins.meshtastic.root)
     id("meshtastic.docs")
-    id("meshtastic.flatpak")
+    id("meshtastic.flatpak-ops")
 }
 
 dependencies {
