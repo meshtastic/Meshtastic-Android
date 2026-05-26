@@ -91,7 +91,7 @@ qrcode-kotlin = "4.5.0"
 takpacket-sdk = "0.2.4-SNAPSHOT"
 
 # Gradle Enterprise & Toolchains Plugins
-develocity = "4.4.1"
+develocity = "4.4.2"
 custom-user-data = "2.6.0"
 foojay-resolver = "1.0.0"
 
