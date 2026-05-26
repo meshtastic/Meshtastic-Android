@@ -4,26 +4,26 @@ layout: default
 nav_order: 0
 ---
 
-# Meshtastic Android App Documentation
+# Документация за приложението Meshtastic за Android
 
-User and developer documentation for the Meshtastic Android, Desktop, and iOS applications powered by KMP (Kotlin Multiplatform).
+Документация за потребители и разработчици за приложенията Meshtastic за Android, настолни компютри и iOS, задвижвани от KMP (Kotlin Multiplatform).
 
-Use the sidebar navigation to browse the **User Guide** for app features and the **Developer Guide** for contributing to the project.
+Използвайте страничната лента за навигация, за да разгледате **Ръководството за потребителя** за функциите на приложението и **Ръководството за разработчици** за участие в проекта.
 
 ---
 
-## Quick Links
+## Бързи връзки
 
-| Guide                                                                 | Описание                                                       |
-| --------------------------------------------------------------------- | -------------------------------------------------------------- |
-| [Getting Started](user/onboarding)                                    | Connect your first radio and send a message                    |
-| [Messages & Channels](user/messages-and-channels) | Channel broadcasts, direct messages, reactions, and encryption |
-| [Nodes](user/nodes)                                                   | Understanding the mesh network node list                       |
-| [Signal Meter](user/signal-meter)                                     | How the LoRa signal quality meter works                        |
-| [Units & Locale](user/units-and-locale)           | How temperatures, distances, and times adapt to your region    |
-| [Desktop App](user/desktop)                                           | Linux, macOS, and Windows desktop usage                        |
-| [Architecture](developer/architecture)                                | App architecture overview for contributors                     |
-| [Contributing](developer/contributing)                                | Branch naming, PR workflow, and verification commands          |
+| Ръководство                                                          | Описание                                                       |
+| -------------------------------------------------------------------- | -------------------------------------------------------------- |
+| [Първи стъпки](user/onboarding)                                      | Свържете първото си радио и изпратете съобщение                |
+| [Съобщения & Канали](user/messages-and-channels) | Channel broadcasts, direct messages, reactions, and encryption |
+| [Възли](user/nodes)                                                  | Understanding the mesh network node list                       |
+| [Измервател на сигнала](user/signal-meter)                           | Как работи измервателят на качеството на LoRa сигнала          |
+| [Единици & Локация](user/units-and-locale)       | How temperatures, distances, and times adapt to your region    |
+| [Настолно приложение](user/desktop)                                  | Използване на настолни компютри на Linux, macOS и Windows      |
+| [Архитектура](developer/architecture)                                | App architecture overview for contributors                     |
+| [Допринасяне](developer/contributing)                                | Branch naming, PR workflow, and verification commands          |
 
 ---
 
