@@ -68,17 +68,19 @@ modules:
       - install -Dm644 -t /app/share/icons/hicolor/scalable/apps org.meshtastic.desktop.svg
       - install -Dm644 -t /app/share/applications org.meshtastic.desktop.desktop
       - install -Dm644 -t /app/share/metainfo org.meshtastic.desktop.metainfo.xml
+      # Redirect the Gradle wrapper to the bundled distribution (no network).
+      - sed -i 's|distributionUrl=.*|distributionUrl=gradle-all.zip|' gradle/wrapper/gradle-wrapper.properties
       - echo "org.gradle.java.installations.auto-detect=false" >> gradle.properties
       - echo "org.gradle.java.installations.auto-download=false" >> gradle.properties
       - echo "org.gradle.java.installations.paths=/usr/lib/sdk/openjdk21/jvm/openjdk-21,/usr/lib/sdk/openjdk17/jvm/openjdk-17" >> gradle.properties
       - >
         sed -i
         's/^\(\s*\)vendor\.set(JvmVendorSpec\.JETBRAINS)/\1\/\/ vendor.set(JvmVendorSpec.JETBRAINS)/'
-        desktop/build.gradle.kts
+        desktopApp/build.gradle.kts
       # Force Gradle to resolve from the bundled offline-repository ONLY (true offline test).
-      - ./gradlew --offline :desktop:packageUberJarForCurrentOS
+      - ./gradlew --offline :desktopApp:packageUberJarForCurrentOS
       - >
-        JAR_FILE=$(find desktop/build/compose/jars/ -name "*.jar" -type f | head -1)
+        JAR_FILE=$(find desktopApp/build/compose/jars/ -name "*.jar" -type f | head -1)
         && install -Dm755 "$JAR_FILE" /app/lib/meshtastic-desktop.jar
     sources:
       - type: file
@@ -90,8 +92,10 @@ modules:
       - type: dir
         path: meshtastic-android
       - type: file
-        url: https://services.gradle.org/distributions/gradle-9.4.1-bin.zip
-        sha256: 2ab2958f2a1e51120c326cad6f385153bb11ee93b3c216c5fccebfdfbb7ec6cb
+        # Must match the version in gradle/wrapper/gradle-wrapper.properties.
+        # Bumping the wrapper? Update both the URL and sha256 here.
+        url: https://services.gradle.org/distributions/gradle-9.5.1-all.zip
+        sha256: c72fb9991f6025cbe337d52ba77e531b3faf62bdd3e348fe1ccee9f51c71adb0
         dest: "gradle/wrapper"
-        dest-filename: "gradle-bin.zip"
+        dest-filename: "gradle-all.zip"
       - flatpak-sources.json
