@@ -68,6 +68,25 @@ internal fun Project.configureKotlinAndroid(commonExtension: CommonExtension) {
     configureKotlin<KotlinAndroidProjectExtension>()
 }
 
+/**
+ * Whether the current build host can run the Kotlin/Native compiler.
+ *
+ * Kotlin/Native supports linux-x86_64, windows-x86_64, macos-arm64, and macos-x86_64. Other hosts (notably
+ * linux-aarch64 CI runners) must skip Apple-target registration to avoid configuration-time crashes when KSP / Dokka
+ * introspect the iOS compilations.
+ */
+private fun supportsKotlinNative(): Boolean {
+    val os = System.getProperty("os.name").orEmpty().lowercase()
+    val arch = System.getProperty("os.arch").orEmpty().lowercase()
+    val isX64 = arch == "amd64" || arch == "x86_64"
+    return when {
+        os.contains("mac") || os.contains("darwin") -> true
+        os.contains("linux") -> isX64
+        os.contains("windows") -> isX64
+        else -> false
+    }
+}
+
 /** Configure Kotlin Multiplatform options */
 internal fun Project.configureKotlinMultiplatform() {
     // Note: we used to force `org.jetbrains.skiko` to a hard-coded version here to
@@ -81,9 +100,15 @@ internal fun Project.configureKotlinMultiplatform() {
         // Standard KMP targets for Meshtastic
         jvm()
 
-        // iOS targets for compile-only validation
-        iosArm64()
-        iosSimulatorArm64()
+        // iOS targets for compile-only validation. Only register on hosts where
+        // Kotlin/Native can run — KSP attaches to every Kotlin target's compilation
+        // and crashes at configuration time on unsupported hosts (e.g. linux-aarch64)
+        // with "Could not create task ':…:kspKotlinIosArm64' > Unknown host target".
+        // Supported set: https://kotlinlang.org/docs/native-target-support.html
+        if (supportsKotlinNative()) {
+            iosArm64()
+            iosSimulatorArm64()
+        }
 
         // Configure the Android target if the plugin is applied
         pluginManager.withPlugin("com.android.kotlin.multiplatform.library") {
@@ -128,10 +153,8 @@ internal fun Project.configureKotlinMultiplatform() {
     // Exclude the SDK only from the CompilationDependenciesMetadata configs that feed
     // the metadata transform — NOT from Implementation/Resolvable configs which feed the
     // actual compiler classpath.
-    val iosMetadataConfigs = setOf(
-        "iosArm64CompilationDependenciesMetadata",
-        "iosSimulatorArm64CompilationDependenciesMetadata",
-    )
+    val iosMetadataConfigs =
+        setOf("iosArm64CompilationDependenciesMetadata", "iosSimulatorArm64CompilationDependenciesMetadata")
     configurations.configureEach {
         if (name in iosMetadataConfigs) {
             exclude(mapOf("group" to "org.meshtastic", "module" to "takpacket-sdk"))
