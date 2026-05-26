@@ -15,6 +15,9 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 * docs: update CHANGELOG.md (#5605) by github-actions[bot] (@github-actions[bot]) in [`c55d6e0ac`](https://github.com/meshtastic/Meshtastic-Android/commit/c55d6e0ac49455a5513067e36e8e338c7204d995)
 * fix(flatpak): generate complete offline-buildable manifest for desktopApp (#5610) by James Rich (@jamesarich) in [`a4522f9f4`](https://github.com/meshtastic/Meshtastic-Android/commit/a4522f9f4db01c55dc55cce0e0ced13ac8ff0d1d)
 * chore(deps): update devtools.ksp to v2.3.9 (#5611) by renovate[bot] (@renovate[bot]) in [`dad5e41c7`](https://github.com/meshtastic/Meshtastic-Android/commit/dad5e41c7a00af1461beb21a5c9d6293a3e50e1a)
+* docs: update CHANGELOG.md (#5612) by github-actions[bot] (@github-actions[bot]) in [`4866b38a8`](https://github.com/meshtastic/Meshtastic-Android/commit/4866b38a84f3593505c6a1de00e8b02fc1441c4d)
+* ci: always build desktop on internal releases (#5613) by James Rich (@jamesarich) in [`7bdd0d5c7`](https://github.com/meshtastic/Meshtastic-Android/commit/7bdd0d5c788b158e9f19fb9272d5b694405e3b7e)
+* fix(kmp): skip iOS targets on hosts where Kotlin/Native is unsupported (#5615) by James Rich (@jamesarich) in [`30dfa374a`](https://github.com/meshtastic/Meshtastic-Android/commit/30dfa374aef8903e5a6caf8b82e44d6082932409)
 
 ### Open Beta (v2.7.14-open.12)
 Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.13):
