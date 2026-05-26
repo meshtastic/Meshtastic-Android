@@ -12,6 +12,9 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 * chore(deps): update takpacket.sdk to v0.2.6 (#5609) by renovate[bot] (@renovate[bot]) in [`86e329b75`](https://github.com/meshtastic/Meshtastic-Android/commit/86e329b752957a547339233eb76d9cce8d6e340c)
 * chore(deps): update core/proto/src/main/proto digest to e4219a0 (#5608) by renovate[bot] (@renovate[bot]) in [`5431ba87c`](https://github.com/meshtastic/Meshtastic-Android/commit/5431ba87c485c4896469ba22ea86cb31a048bd0b)
 * chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5607) by James Rich (@jamesarich) in [`212270ebf`](https://github.com/meshtastic/Meshtastic-Android/commit/212270ebf0e2c441ff338a737d7d50e5550e8a63)
+* docs: update CHANGELOG.md (#5605) by github-actions[bot] (@github-actions[bot]) in [`c55d6e0ac`](https://github.com/meshtastic/Meshtastic-Android/commit/c55d6e0ac49455a5513067e36e8e338c7204d995)
+* fix(flatpak): generate complete offline-buildable manifest for desktopApp (#5610) by James Rich (@jamesarich) in [`a4522f9f4`](https://github.com/meshtastic/Meshtastic-Android/commit/a4522f9f4db01c55dc55cce0e0ced13ac8ff0d1d)
+* chore(deps): update devtools.ksp to v2.3.9 (#5611) by renovate[bot] (@renovate[bot]) in [`dad5e41c7`](https://github.com/meshtastic/Meshtastic-Android/commit/dad5e41c7a00af1461beb21a5c9d6293a3e50e1a)
 
 ### Open Beta (v2.7.14-open.12)
 Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.13):
