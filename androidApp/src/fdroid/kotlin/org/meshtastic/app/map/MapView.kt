@@ -52,6 +52,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -825,15 +826,15 @@ private fun FdroidMainMapFilterDropdown(
 
 @Composable
 private fun MapStyleDialog(selectedMapStyle: Int, onDismiss: () -> Unit, onSelectMapStyle: (Int) -> Unit) {
-    val selected = remember { mutableStateOf(selectedMapStyle) }
+    val selected = remember { mutableIntStateOf(selectedMapStyle) }
 
     MapsDialog(onDismiss = onDismiss) {
         CustomTileSource.mTileSources.values.forEachIndexed { index, style ->
             ListItem(
                 text = style,
-                trailingIcon = if (index == selected.value) MeshtasticIcons.Check else null,
+                trailingIcon = if (index == selected.intValue) MeshtasticIcons.Check else null,
                 onClick = {
-                    selected.value = index
+                    selected.intValue = index
                     onSelectMapStyle(index)
                     onDismiss()
                 },
@@ -886,7 +887,7 @@ private fun PurgeTileSourceDialog(onDismiss: () -> Unit) {
     val context = LocalContext.current
     val cache = SqlTileWriterExt()
 
-    val sourceList by derivedStateOf { cache.sources.map { it.source as String } }
+    val sourceList by remember { derivedStateOf { cache.sources.map { it.source as String } } }
 
     val selected = remember { mutableStateListOf<Int>() }
 
