@@ -32,7 +32,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -56,13 +55,14 @@ import co.touchlab.kermit.Logger
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.asExecutor
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.close
 import org.meshtastic.core.ui.icon.Close
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.util.BarcodeScanner
-import java.util.concurrent.Executors
 
 @Composable
 fun rememberBarcodeScanner(onResult: (String?) -> Unit): BarcodeScanner {
@@ -179,10 +179,8 @@ private fun ScannerReticule() {
 private fun ScannerView(onResult: (String?) -> Unit, onCameraReady: (Boolean) -> Unit) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    val cameraExecutor = remember { Executors.newSingleThreadExecutor() }
+    val cameraExecutor = remember { Dispatchers.Default.asExecutor() }
     var surfaceRequest by remember { mutableStateOf<SurfaceRequest?>(null) }
-
-    DisposableEffect(Unit) { onDispose { cameraExecutor.shutdown() } }
 
     LaunchedEffect(Unit) {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)

@@ -284,7 +284,6 @@ jna = { module = "net.java.dev.jna:jna", version = "5.18.1" }
 
 # TAK
 takpacket-sdk-kmp = { module = "org.meshtastic:takpacket-sdk", version.ref = "takpacket-sdk" }
-takpacket-sdk-jvm = { module = "org.meshtastic:takpacket-sdk-jvm", version.ref = "takpacket-sdk" }
 
 
 [plugins]
