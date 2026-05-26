@@ -9,12 +9,11 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
-* fix: hide battery indicator when level is 0 (never reported) (#5595) by James Rich (@jamesarich) in [`684c4a967`](https://github.com/meshtastic/Meshtastic-Android/commit/684c4a9678a1239389f984f415d858f39372b6e0)
-* fix: consistent column width for compact node list items (#5596) by James Rich (@jamesarich) in [`55e7f8f3d`](https://github.com/meshtastic/Meshtastic-Android/commit/55e7f8f3de1b8f9106695ff211379cf058ea3b77)
-* fix(emoji): enable androidResources for core:ui to package emoji-data.json (#5597) by James Rich (@jamesarich) in [`f17c38bf6`](https://github.com/meshtastic/Meshtastic-Android/commit/f17c38bf64dcd629641d1e310876871a2f8bfdac)
-* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5598) by James Rich (@jamesarich) in [`184d547c7`](https://github.com/meshtastic/Meshtastic-Android/commit/184d547c7878f9e125007765196b55f71c65fc9b)
+* chore(deps): update takpacket.sdk to v0.2.6 (#5609) by renovate[bot] (@renovate[bot]) in [`86e329b75`](https://github.com/meshtastic/Meshtastic-Android/commit/86e329b752957a547339233eb76d9cce8d6e340c)
+* chore(deps): update core/proto/src/main/proto digest to e4219a0 (#5608) by renovate[bot] (@renovate[bot]) in [`5431ba87c`](https://github.com/meshtastic/Meshtastic-Android/commit/5431ba87c485c4896469ba22ea86cb31a048bd0b)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5607) by James Rich (@jamesarich) in [`212270ebf`](https://github.com/meshtastic/Meshtastic-Android/commit/212270ebf0e2c441ff338a737d7d50e5550e8a63)
 
-### Open Beta (v2.7.14-open.11)
+### Open Beta (v2.7.14-open.12)
 Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.13):
 
 #### 🏗️ Features
@@ -221,6 +220,9 @@ Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/relea
 * fix(database): update @Relation annotations for Room 3.0.0-alpha05 by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5507
 * fix: prevent node details hang when device hardware API is unreachable by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5514
 * fix(settings): remote admin always showed local node config by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5560
+* fix: hide battery indicator when level is 0 (never reported) by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5595
+* fix: consistent column width for compact node list items by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5596
+* fix(emoji): enable androidResources for core:ui to package emoji-data.json by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5597
 #### 📝 Other Changes
 * refactor(ui): compose resources, domain layer by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/4628
 * Add per-message transport method icons for new message format by @Kealper in https://github.com/meshtastic/Meshtastic-Android/pull/4643
