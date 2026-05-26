@@ -77,11 +77,17 @@ class DatabaseManagerWithDbRetryTest {
         val result = async {
             manager.withDb { db ->
                 visitedDbs += db
-                when (++attempts) {
-                    1 -> {
-                        started.complete(Unit)
-                        continueFirstAttempt.await()
-                    }
+                if (++attempts == 1) {
+                    started.complete(Unit)
+                    continueFirstAttempt.await()
+                    // Simulate the race the retry path is supposed to handle: oldDb's pool
+                    // was closed between when we captured it and when we read from it. The
+                    // previous version of this test triggered this by calling oldDb.close()
+                    // and racing against the resumed read — which flapped in CI because
+                    // Room's close() is not strictly ordered against in-flight reads.
+                    // Throwing the representative exception directly makes the retry path
+                    // deterministic; isDbClosedException matches "closed" + ("pool"|…).
+                    error("Connection pool is closed")
                 }
                 db.nodeInfoDao().getMyNodeInfo().first()?.myNodeNum
             }
@@ -93,7 +99,6 @@ class DatabaseManagerWithDbRetryTest {
         val newDb = manager.currentDb.value
         newDb.nodeInfoDao().setMyNodeInfo(newMyNodeInfo)
 
-        oldDb.close()
         continueFirstAttempt.complete(Unit)
 
         assertEquals(newMyNodeInfo.myNodeNum, result.await())

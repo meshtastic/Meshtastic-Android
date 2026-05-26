@@ -17,6 +17,7 @@
 package org.meshtastic.flatpakops
 
 import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.internal.project.ProjectInternal
@@ -37,8 +38,9 @@ import java.util.concurrent.ConcurrentHashMap
  * Captures every external resource URL Gradle reads via the internal BuildOperationListener API and emits a
  * Flathub-compliant flatpak-sources.json at build finish.
  *
- * No heuristics: URL is authoritative (taken straight from the build op), the on-disk file is found via Gradle's
- * documented files-2.1 layout, and SHA-256 is computed from that exact file.
+ * URL is authoritative (taken straight from the build op); the on-disk file is found via Gradle's files-2.1 layout,
+ * with a Module-Metadata-aware fallback for jars whose cache name differs from their URL name; SHA-256 is computed from
+ * that exact file.
  *
  * Internal APIs touched (acceptable trade-off; same path flatpak-gradle-generator uses):
  * - org.gradle.internal.operations.BuildOperationListener / BuildOperationListenerManager
@@ -50,12 +52,25 @@ class FlatpakOpsPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         check(target == target.rootProject) { "meshtastic.flatpak-ops must be applied to the root project" }
 
-        val capturedUrls: MutableSet<String> = ConcurrentHashMap.newKeySet()
-        val manager: BuildOperationListenerManager =
-            (target as ProjectInternal).services.get(BuildOperationListenerManager::class.java)
-
-        val listener = OpListener(capturedUrls)
-        manager.addListener(listener)
+        // Prefer the URL set populated by gradle/init-scripts/flatpak-ops.init.gradle.kts.
+        // The init script attaches its listener BEFORE any plugin/project resolution, so it
+        // captures bootstrap downloads (kotlin-dsl plugin marker, build-logic deps) that a
+        // listener registered here would miss. If the init script wasn't passed via -I, we
+        // fall back to a locally-attached listener — incomplete for build-logic deps but
+        // useful for developer debugging. No buildFinished cleanup here: this plugin loads in
+        // every normal build, and gradle.buildFinished is incompatible with the configuration
+        // cache. The fallback is rarely used and the per-build leak is benign.
+        @Suppress("UNCHECKED_CAST")
+        val capturedUrls: MutableSet<String> =
+            (target.gradle.extensions.findByName("flatpakOpsCapturedUrls") as? MutableSet<String>)
+                ?: ConcurrentHashMap.newKeySet<String>().also { fallback ->
+                    val manager = (target as ProjectInternal).services.get(BuildOperationListenerManager::class.java)
+                    manager.addListener(OpListener(fallback))
+                    target.logger.warn(
+                        "flatpak-ops: init script not loaded; build-logic bootstrap URLs will be missing. " +
+                            "Pass -I gradle/init-scripts/flatpak-ops.init.gradle.kts for a complete manifest.",
+                    )
+                }
 
         val outputProvider = target.layout.buildDirectory.file("flatpak-ops-sources.json")
 
@@ -63,21 +78,14 @@ class FlatpakOpsPlugin : Plugin<Project> {
             group = "flatpak"
             description = "Emit flatpak-sources.json from URLs captured via BuildOperationListener."
             outputs.upToDateWhen { false }
-            // Must run AFTER the task that triggers resolution. Without this, Gradle's scheduler
-            // may interleave/parallelize this task with :desktopApp:assemble, causing us to write
-            // the file before the downloads we want to capture have happened.
-            mustRunAfter(":desktopApp:assemble")
+            // Order after the resolution-emitting tasks so we don't snapshot capturedUrls before
+            // their downloads happen. mustRunAfter is conditional — only the scheduled task enforces.
+            mustRunAfter(":desktopApp:assemble", ":desktopApp:packageUberJarForCurrentOS")
             val proj = target
             val urlsRef = capturedUrls
             val outFile = outputProvider
             doLast { writeSources(proj, urlsRef.toList(), outFile.get().asFile) }
         }
-        // Listener is intentionally NOT removed on task completion; it stays attached until JVM
-        // exit. Removal is unsafe when our task races against other resolution-emitting tasks.
-        // Known limitation: in a long-lived Gradle daemon, capturedUrls accumulates across builds.
-        // We can't clear it at task start (that would erase what was captured during assemble).
-        // The CI workflow uses a fresh isolated GRADLE_USER_HOME, so this only affects local
-        // developer use — and re-emitting a superset of URLs is harmless.
     }
 
     private class OpListener(private val urls: MutableSet<String>) : BuildOperationListener {
@@ -118,15 +126,17 @@ class FlatpakOpsPlugin : Plugin<Project> {
                     val group = rel[0]
                     val artifact = rel[1]
                     val version = rel[2]
-                    val onDiskFilename = rel.last()
                     val groupPath = group.replace('.', '/')
+                    // dest-filename tracks the URL, not the cache: Gradle Module Metadata can declare
+                    // files[].name ≠ files[].url, and the offline repo must serve at the URL path.
+                    val urlFilename = URI(url).path.trimEnd('/').substringAfterLast('/')
                     val entry =
                         mutableMapOf<String, Any>(
                             "type" to "file",
                             "url" to url,
                             "sha256" to sha256(cacheFile),
                             "dest" to "offline-repository/$groupPath/$artifact/$version",
-                            "dest-filename" to onDiskFilename,
+                            "dest-filename" to urlFilename,
                         )
                     mirrorsFor(url).takeIf { it.isNotEmpty() }?.let { entry["mirror-urls"] = it }
                     entry
@@ -142,12 +152,16 @@ class FlatpakOpsPlugin : Plugin<Project> {
     }
 
     /**
-     * Last three URL path segments are artifact/version/filename (Maven 2 spec; present in every Maven URL). Gradle's
-     * files-2.1 layout is `<group-with-dots>/<artifact>/<version>/<content-sha1>/<filename>`. The (artifact, version,
-     * filename) triple is NOT unique across groups (e.g. androidx.annotation:annotation:1.10.0.module collides with
-     * org.jetbrains.compose.annotation-internal:annotation:1.10.0.module), so the group MUST be derived from the URL
-     * path. We probe every suffix of the path's leading segments against the cache layout — the longest match wins
-     * (strips arbitrary repo prefixes like `/maven2/`, `/dl/android/maven2/`, `/m2/` without hardcoding them).
+     * Map a Maven URL to its file in Gradle's files-2.1 cache (layout:
+     * `<group-with-dots>/<artifact>/<version>/<content-sha1>/<filename>`). Group is derived from the URL path —
+     * `(artifact, version, filename)` is not unique across groups (e.g. androidx.annotation:annotation:1.10.0 collides
+     * with org.jetbrains.compose.annotation-internal:annotation:1.10.0), so we probe every suffix of the leading path
+     * segments and the longest match wins (this also strips arbitrary repo prefixes like `/maven2/`, `/m2/`).
+     *
+     * Two-tier lookup: the fast path assumes the cache filename matches the URL filename (true for pom/module always,
+     * and most jars). For jars where Gradle Module Metadata renames the artifact locally (files[].name ≠ files[].url —
+     * e.g. com.mikepenz:aboutlibraries-compose-core-jvm publishes aboutlibraries-compose-core-jvm-14.2.1.jar but caches
+     * it as aboutlibraries-compose-jvm.jar) we parse the sibling .module file to resolve the real cache path.
      */
     private fun locateCacheFile(filesRoot: File, url: String): File? {
         val path = URI(url).path.trimEnd('/').split('/').filter { it.isNotEmpty() }
@@ -155,16 +169,34 @@ class FlatpakOpsPlugin : Plugin<Project> {
         if (!filesRoot.isDirectory || tail.size < URL_TRAILING_SEGMENTS) return null
         val (artifact, version, filename) = tail
         val groupCandidates = path.dropLast(URL_TRAILING_SEGMENTS)
-        // files-2.1 uses dot-joined group as a SINGLE directory, e.g. `androidx.annotation/`,
-        // not `androidx/annotation/`. So join URL segments with '.' here.
+        // files-2.1 uses dot-joined group as a SINGLE directory, e.g. `androidx.annotation/`, not
+        // `androidx/annotation/` — so join with '.' here.
         return groupCandidates.indices.firstNotNullOfOrNull { start ->
             val groupDir = groupCandidates.drop(start).joinToString(".")
-            File(filesRoot, "$groupDir/$artifact/$version")
-                .takeIf(File::isDirectory)
-                ?.listFiles { f -> f.isDirectory }
-                ?.map { shaDir -> File(shaDir, filename) }
-                ?.firstOrNull { it.isFile }
+            val versionDir =
+                File(filesRoot, "$groupDir/$artifact/$version").takeIf(File::isDirectory)
+                    ?: return@firstNotNullOfOrNull null
+            val shaDirs = versionDir.listFiles { f -> f.isDirectory } ?: return@firstNotNullOfOrNull null
+            shaDirs.map { shaDir -> File(shaDir, filename) }.firstOrNull { it.isFile }
+                ?: filename.takeIf { it.endsWith(".jar") }?.let { resolveJarViaModuleMetadata(versionDir, shaDirs, it) }
         }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun resolveJarViaModuleMetadata(versionDir: File, shaDirs: Array<File>, urlFilename: String): File? {
+        val moduleFile =
+            shaDirs.firstNotNullOfOrNull { dir ->
+                dir.listFiles()?.firstOrNull { it.isFile && it.name.endsWith(".module") }
+            }
+        val entry =
+            moduleFile
+                ?.let { runCatching { JsonSlurper().parse(it) as? Map<String, Any?> }.getOrNull() }
+                ?.let { it["variants"] as? List<Map<String, Any?>> }
+                ?.flatMap { (it["files"] as? List<Map<String, Any?>>).orEmpty() }
+                ?.firstOrNull { it["url"] == urlFilename }
+        val name = entry?.get("name") as? String
+        val sha1 = entry?.get("sha1") as? String
+        return if (name != null && sha1 != null) File(versionDir, "$sha1/$name").takeIf(File::isFile) else null
     }
 
     /**

@@ -5,7 +5,7 @@ can validate `flatpak-sources.json` end-to-end without round-tripping through hi
 
 ## What it tests that our CI doesn't
 
-Our CI (`:desktopApp:assemble :captureFlatpakSources`) only proves the manifest can be *generated*.
+Our CI (`:desktopApp:packageUberJarForCurrentOS :captureFlatpakSources`) only proves the manifest can be *generated*.
 Vid's CI is where the manifest actually gets *consumed* by `flatpak-builder`. This script
 runs that step locally:
 
@@ -28,14 +28,27 @@ instead of waiting on cross-repo CI.
 - Docker (Docker Desktop on macOS works — the container needs `--privileged` to use
   bubblewrap; that's enabled by default).
 - ~10 GB free disk for the SDK + Gradle cache.
-- A populated Gradle cache (`./gradlew :desktopApp:assemble` must have run; the script
-  does this implicitly via `:captureFlatpakSources`).
+- A populated Gradle cache (`./gradlew :desktopApp:packageUberJarForCurrentOS` must have
+  run; the script does this implicitly via `:captureFlatpakSources`).
 
 ## Usage
 
 ```bash
-# Full offline build (~10–20 min the first time, faster after — Docker image is cached)
+# Full offline build — Linux host required (~15–30 min first time)
 scripts/verify-flatpak/verify.sh
+
+# URLs + sha256 verification only; skips the Gradle build phase.
+# Works on macOS where nested bwrap fails under Docker Desktop's seccomp.
+scripts/verify-flatpak/verify.sh --download-only
+
+# Reuse an already-generated flatpak-sources.json (don't re-run Gradle)
+scripts/verify-flatpak/verify.sh --skip-regen
+
+# Tight iteration loop after a failed run: refresh overlay yaml + manifest
+# only, then re-run flatpak-builder. Skips Gradle regen, vid-repo fetch,
+# and Meshtastic-Android rsync. Use when you've just patched the YAML
+# overlay or regenerated flatpak-sources.json by hand.
+scripts/verify-flatpak/verify.sh --rebuild-only
 
 # Cross-arch test via QEMU emulation (slower)
 scripts/verify-flatpak/verify.sh --arch aarch64
@@ -44,12 +57,20 @@ scripts/verify-flatpak/verify.sh --arch aarch64
 scripts/verify-flatpak/verify.sh --shell
 ```
 
+### macOS limitation
+
+`flatpak-builder` runs the build phase inside `bwrap` (bubblewrap). Nested
+bwrap fails inside Docker Desktop on macOS with
+`prctl(PR_SET_SECCOMP) EINVAL`. The script refuses to run a full build on
+macOS by default — pass `--download-only` to validate URLs + sha256s without
+executing the Gradle build, or run the full script on a Linux host.
+
 ## Interpreting failures
 
 | Symptom                                                          | Likely cause                                                                                              |
 | ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
 | `Error downloading mirror: ... 404` on `repo.maven.apache.org`   | URL captured by the listener was wrong or artifact moved. Check the source repo hosting it.               |
-| `sha256 mismatch`                                                | Stale `flatpak-sources.json`; re-run `:desktopApp:assemble :captureFlatpakSources`.                       |
+| `sha256 mismatch`                                                | Stale `flatpak-sources.json`; re-run `:desktopApp:packageUberJarForCurrentOS :captureFlatpakSources`.                       |
 | Gradle: `Could not resolve all artifacts ... offline mode`       | Missing dep in the manifest — usually a compiler plugin or BOM that wasn't downloaded during capture.     |
 
 ## Files
