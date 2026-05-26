@@ -20,11 +20,6 @@ on:
         required: true
         type: boolean
         default: false
-      build_desktop:
-        description: 'Whether to build the desktop distribution'
-        required: true
-        type: boolean
-        default: false
 
 permissions:
   contents: write
@@ -130,8 +125,8 @@ jobs:
       tag_name: ${{ needs.determine-tags.outputs.final_tag }}
       channel: ${{ inputs.channel }}
       base_version: ${{ inputs.base_version }}
-      build_desktop: ${{ inputs.build_desktop }}
-      build_flatpak_src: ${{ inputs.build_desktop }}
+      build_desktop: true
+      build_flatpak_src: true
     secrets: inherit
 
   call-promote-workflow:
