@@ -48,7 +48,7 @@ import java.util.concurrent.ConcurrentHashMap
 class FlatpakOpsPlugin : Plugin<Project> {
 
     override fun apply(target: Project) {
-        require(target == target.rootProject) { "meshtastic.flatpak-ops must be applied to the root project" }
+        check(target == target.rootProject) { "meshtastic.flatpak-ops must be applied to the root project" }
 
         val capturedUrls: MutableSet<String> = ConcurrentHashMap.newKeySet()
         val manager: BuildOperationListenerManager =
@@ -74,6 +74,10 @@ class FlatpakOpsPlugin : Plugin<Project> {
         }
         // Listener is intentionally NOT removed on task completion; it stays attached until JVM
         // exit. Removal is unsafe when our task races against other resolution-emitting tasks.
+        // Known limitation: in a long-lived Gradle daemon, capturedUrls accumulates across builds.
+        // We can't clear it at task start (that would erase what was captured during assemble).
+        // The CI workflow uses a fresh isolated GRADLE_USER_HOME, so this only affects local
+        // developer use — and re-emitting a superset of URLs is harmless.
     }
 
     private class OpListener(private val urls: MutableSet<String>) : BuildOperationListener {
@@ -84,6 +88,9 @@ class FlatpakOpsPlugin : Plugin<Project> {
         override fun finished(op: BuildOperationDescriptor, e: OperationFinishEvent) {
             val details = op.details as? ExternalResourceReadBuildOperationType.Details ?: return
             if (e.failure != null) return
+            // No host/scheme filtering here: non-Maven URLs (distribution zips, repo listings, etc.)
+            // naturally drop out in writeSources() when locateCacheFile() can't find them under
+            // files-2.1. Keeping this listener permissive avoids hardcoding repo allowlists.
             urls.add(details.location)
         }
     }
@@ -91,27 +98,39 @@ class FlatpakOpsPlugin : Plugin<Project> {
     private fun writeSources(project: Project, urls: List<String>, output: File) {
         val filesRoot = File(project.gradle.gradleUserHomeDir, "caches/modules-2/files-2.1")
         val entries: List<Map<String, Any>> =
-            urls.distinct().sorted().mapNotNull { url ->
-                val cacheFile = locateCacheFile(filesRoot, url)
-                if (cacheFile == null) {
-                    project.logger.info("flatpak-ops: no cache file for {} (skipped)", url)
-                    return@mapNotNull null
+            urls
+                .distinct()
+                .filterNot { url ->
+                    // Exclude sources/javadoc jars: they're not needed for an offline build and
+                    // inflate the manifest. Match on URL filename, not cache-relative path.
+                    val tail = url.substringAfterLast('/')
+                    tail.endsWith("-sources.jar") || tail.endsWith("-javadoc.jar")
                 }
-                val rel = cacheFile.relativeTo(filesRoot).path.replace('\\', '/').split('/')
-                if (rel.size < CACHE_PATH_SEGMENTS) return@mapNotNull null
-                val group = rel[0]
-                val artifact = rel[1]
-                val version = rel[2]
-                val onDiskFilename = rel.last()
-                val groupPath = group.replace('.', '/')
-                mapOf(
-                    "type" to "file",
-                    "url" to url,
-                    "sha256" to sha256(cacheFile),
-                    "dest" to "offline-repository/$groupPath/$artifact/$version",
-                    "dest-filename" to onDiskFilename,
-                )
-            }
+                .sorted()
+                .mapNotNull { url ->
+                    val cacheFile = locateCacheFile(filesRoot, url)
+                    if (cacheFile == null) {
+                        project.logger.info("flatpak-ops: no cache file for {} (skipped)", url)
+                        return@mapNotNull null
+                    }
+                    val rel = cacheFile.relativeTo(filesRoot).path.replace('\\', '/').split('/')
+                    if (rel.size < CACHE_PATH_SEGMENTS) return@mapNotNull null
+                    val group = rel[0]
+                    val artifact = rel[1]
+                    val version = rel[2]
+                    val onDiskFilename = rel.last()
+                    val groupPath = group.replace('.', '/')
+                    val entry =
+                        mutableMapOf<String, Any>(
+                            "type" to "file",
+                            "url" to url,
+                            "sha256" to sha256(cacheFile),
+                            "dest" to "offline-repository/$groupPath/$artifact/$version",
+                            "dest-filename" to onDiskFilename,
+                        )
+                    mirrorsFor(url).takeIf { it.isNotEmpty() }?.let { entry["mirror-urls"] = it }
+                    entry
+                }
         output.parentFile?.mkdirs()
         output.writeText(JsonOutput.prettyPrint(JsonOutput.toJson(entries)))
         project.logger.lifecycle(
@@ -148,6 +167,24 @@ class FlatpakOpsPlugin : Plugin<Project> {
         }
     }
 
+    /**
+     * Derive fallback mirror URLs from the primary URL's host. Only Maven Central has well-known public mirrors; for
+     * everything else (Google, JitPack, Gradle plugin portal, snapshot repos), we trust the primary URL since these
+     * hosts don't have stable mirrors anyway. The URL itself is authoritative — we just rewrite the host while
+     * preserving the path.
+     */
+    private fun mirrorsFor(url: String): List<String> {
+        val uri = runCatching { URI(url) }.getOrNull()
+        val host = uri?.host
+        val path = uri?.rawPath
+        return if (host != null && path != null && host in MAVEN_CENTRAL_HOSTS) {
+            MAVEN_CENTRAL_HOSTS.filter { it != host }.map { "https://$it$path" } +
+                "https://maven-central.storage-download.googleapis.com$path"
+        } else {
+            emptyList()
+        }
+    }
+
     private fun sha256(file: File): String {
         val md = MessageDigest.getInstance("SHA-256")
         file.inputStream().use { stream ->
@@ -173,6 +210,7 @@ class FlatpakOpsPlugin : Plugin<Project> {
     }
 
     private companion object {
+        private val MAVEN_CENTRAL_HOSTS = listOf("repo.maven.apache.org", "repo1.maven.org")
         private const val BUFFER_SIZE = 8192
         private const val CACHE_PATH_SEGMENTS = 5
         private const val URL_TRAILING_SEGMENTS = 3
