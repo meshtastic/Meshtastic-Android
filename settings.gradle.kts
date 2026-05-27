@@ -32,6 +32,7 @@ pluginManagement {
 }
 
 plugins {
+    id("com.gradle.develocity") version "4.4.2"
     id("org.gradle.toolchains.foojay-resolver") version "1.0.0"
     id("org.meshtastic.flatpak.sources.settings")
 }
@@ -71,6 +72,20 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 // Build Cache configuration (HTTP remote cache + local)
 apply(from = "gradle/build-cache.settings.gradle")
+
+// Build Scans — publish in CI only for debugging and performance profiling.
+develocity {
+    buildScan {
+        capture {
+            fileFingerprints = true
+        }
+        val isCi = providers.environmentVariable("CI").isPresent
+        publishing.onlyIf { isCi }
+        uploadInBackground = !isCi
+        termsOfUseUrl = "https://gradle.com/help/legal-terms-of-use"
+        termsOfUseAgree = "yes"
+    }
+}
 
 @Suppress("UnstableApiUsage")
 toolchainManagement {

@@ -90,7 +90,8 @@ jmdns = "3.6.3"
 qrcode-kotlin = "4.5.0"
 takpacket-sdk = "0.2.6"
 
-# Gradle Toolchains Plugins
+# Gradle Plugins
+develocity = "4.4.2"
 foojay-resolver = "1.0.0"
 
 
@@ -322,6 +323,7 @@ room = { id = "androidx.room3", version.ref = "room" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 test-retry = { id = "org.gradle.test-retry", version.ref = "testRetry" }
 
+develocity = { id = "com.gradle.develocity", version.ref = "develocity" }
 foojay-resolver = { id = "org.gradle.toolchains.foojay-resolver", version.ref = "foojay-resolver" }
 
 # Meshtastic
