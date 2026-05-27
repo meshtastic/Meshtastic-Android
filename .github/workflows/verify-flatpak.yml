@@ -1,0 +1,77 @@
+name: Verify Flatpak Offline Build
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'build-logic/flatpak-ops/**'
+      - 'scripts/verify-flatpak/**'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - '.github/workflows/verify-flatpak.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: flatpak-verify-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify-flatpak:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Generate flatpak-sources.json
+        run: |
+          ./gradlew --no-build-cache --no-configuration-cache \
+            -Dgradle.user.home="$RUNNER_TEMP/flatpak-gradle-home" \
+            :desktopApp:packageUberJarForCurrentOS :captureFlatpakSources
+          cp build/flatpak-ops-sources.json flatpak-sources.json
+          echo "### Flatpak Sources Summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "- URLs captured: $(jq length flatpak-sources.json)" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Clone vid's flatpak repo
+        run: |
+          git clone --depth 1 --recurse-submodules \
+            https://github.com/vidplace7/org.meshtastic.desktop.git \
+            "$RUNNER_TEMP/org.meshtastic.desktop"
+
+      - name: Wire overlay manifest + sources
+        run: |
+          cp scripts/verify-flatpak/desktop-offline.yaml \
+            "$RUNNER_TEMP/org.meshtastic.desktop/org.meshtastic.desktop.yaml"
+          cp flatpak-sources.json \
+            "$RUNNER_TEMP/org.meshtastic.desktop/flatpak-sources.json"
+          rsync -a --delete \
+            --exclude='/build/' --exclude='/.gradle/' \
+            --exclude='*/build/' --exclude='*/.gradle/' \
+            --exclude='/.idea/' --exclude='/local.properties' \
+            ./ "$RUNNER_TEMP/org.meshtastic.desktop/meshtastic-android/"
+
+      - name: Install flatpak-builder
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq flatpak flatpak-builder
+          flatpak remote-add --user --if-not-exists flathub \
+            https://dl.flathub.org/repo/flathub.flatpakrepo
+
+      - name: Verify offline build
+        working-directory: ${{ runner.temp }}/org.meshtastic.desktop
+        run: |
+          flatpak-builder --user --repo=repo --install-deps-from=flathub \
+            --force-clean --disable-rofiles-fuse \
+            builddir org.meshtastic.desktop.yaml
+          echo "### ✅ Full offline Flatpak build succeeded" >> "$GITHUB_STEP_SUMMARY"
