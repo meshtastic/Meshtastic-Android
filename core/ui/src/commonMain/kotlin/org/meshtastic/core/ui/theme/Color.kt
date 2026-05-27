@@ -18,81 +18,43 @@ package org.meshtastic.core.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// ─── Meshtastic Design Standards v1.3 ───
-// Primary: Green 700 #2D8F52 | Secondary: Neutral 600 #555668
-// Tertiary: Blue 700 #2855A8 | Neutral: #2C2D3C | Neutral Variant: #303245
-// See: standards/meshtastic_design_standards_v1_3.md §8
+// ─── KV Field Console Palette ───
+// Primary (Brass): #C9B06B | Background: #0B0B0D | Surface: #16161A
+// On Background (warm off-white): #E8E4DA | Secondary text (muted grey): #8A857A
 
-// ─── Light Scheme (§8.2) ───
-val primaryLight = Color(0xFF2D8F52) // Green 700
-val onPrimaryLight = Color(0xFFFFFFFF)
-val primaryContainerLight = Color(0xFFB5F5CE) // Green 300
-val onPrimaryContainerLight = Color(0xFF002E13) // Green 950
-val secondaryLight = Color(0xFF555668) // Neutral 600
-val onSecondaryLight = Color(0xFFFFFFFF)
-val secondaryContainerLight = Color(0xFFD5D6E0) // Neutral 200
-val onSecondaryContainerLight = Color(0xFF2C2D3C) // Neutral 800
-val tertiaryLight = Color(0xFF2855A8) // Blue 700
-val onTertiaryLight = Color(0xFFFFFFFF)
-val tertiaryContainerLight = Color(0xFFE8EAF6) // Blue 50
-val onTertiaryContainerLight = Color(0xFF001849) // Blue 950
-val errorLight = Color(0xFFBA1A1A) // Error 600 (WCAG-safe on white)
-val onErrorLight = Color(0xFFFFFFFF)
-val errorContainerLight = Color(0xFFFDEAEA) // Error 100
-val onErrorContainerLight = Color(0xFF410002) // Error 900
-val backgroundLight = Color(0xFFF5F6FA) // Neutral 50
-val onBackgroundLight = Color(0xFF2C2D3C) // Neutral 800
-val surfaceLight = Color(0xFFF5F6FA) // Neutral 50
-val onSurfaceLight = Color(0xFF2C2D3C) // Neutral 800
-val surfaceVariantLight = Color(0xFFDADBE7) // NV 200
-val onSurfaceVariantLight = Color(0xFF5C5E78) // NV 600
-val outlineLight = Color(0xFF767892) // NV 500
-val outlineVariantLight = Color(0xFFBDBFCF) // NV 300
-val scrimLight = Color(0xFF000000)
-val inverseSurfaceLight = Color(0xFF3D3E50) // Neutral 700
-val inverseOnSurfaceLight = Color(0xFFECEDF3) // Neutral 100
-val inversePrimaryLight = Color(0xFF67EA94) // Green 500
-val surfaceDimLight = Color(0xFFD5D6E0) // Neutral 200
-val surfaceBrightLight = Color(0xFFF5F6FA) // Neutral 50
-val surfaceContainerLowestLight = Color(0xFFFFFFFF)
-val surfaceContainerLowLight = Color(0xFFF5F6FA) // Neutral 50
-val surfaceContainerLight = Color(0xFFECEDF3) // Neutral 100
-val surfaceContainerHighLight = Color(0xFFE0E1EB) // Interpolated 100↔200
-val surfaceContainerHighestLight = Color(0xFFD5D6E0) // Neutral 200
-
-// ─── Dark Scheme (§8.3) ───
-val primaryDark = Color(0xFF67EA94) // Green 500
-val onPrimaryDark = Color(0xFF0F1017) // Neutral 950
-val primaryContainerDark = Color(0xFF2D8F52) // Green 700
-val onPrimaryContainerDark = Color(0xFFB5F5CE) // Green 300
-val secondaryDark = Color(0xFFB8BAC8) // Neutral 300
-val onSecondaryDark = Color(0xFF1A1B26) // Neutral 900
-val secondaryContainerDark = Color(0xFF3D3E50) // Neutral 700
-val onSecondaryContainerDark = Color(0xFFD5D6E0) // Neutral 200
-val tertiaryDark = Color(0xFFB0BFF0) // Blue 300
-val onTertiaryDark = Color(0xFF001849) // Blue 950
-val tertiaryContainerDark = Color(0xFF2855A8) // Blue 700
-val onTertiaryContainerDark = Color(0xFFE8EAF6) // Blue 50
-val errorDark = Color(0xFFFFB4AB) // Error 300
-val onErrorDark = Color(0xFF690005) // Error 800
-val errorContainerDark = Color(0xFF93000A) // Error 700
-val onErrorContainerDark = Color(0xFFFDEAEA) // Error 100
-val backgroundDark = Color(0xFF1A1B26) // Neutral 900
-val onBackgroundDark = Color(0xFFECEDF3) // Neutral 100
-val surfaceDark = Color(0xFF1A1B26) // Neutral 900
-val onSurfaceDark = Color(0xFFECEDF3) // Neutral 100
-val surfaceVariantDark = Color(0xFF444660) // NV 700
-val onSurfaceVariantDark = Color(0xFFBDBFCF) // NV 300
-val outlineDark = Color(0xFF767892) // NV 500
-val outlineVariantDark = Color(0xFF444660) // NV 700
+// ─── Dark Scheme (forced — light scheme removed) ───
+val primaryDark = Color(0xFFC9B06B) // Brass — buttons, highlights, active states
+val onPrimaryDark = Color(0xFF0B0B0D) // Near-black on brass
+val primaryContainerDark = Color(0xFF3D3018) // Dark brass container
+val onPrimaryContainerDark = Color(0xFFF5E6C0) // Light brass tint on dark container
+val secondaryDark = Color(0xFF8A857A) // Muted warm grey — labels, hints
+val onSecondaryDark = Color(0xFF0B0B0D)
+val secondaryContainerDark = Color(0xFF2A2A2E) // Slightly lifted surface
+val onSecondaryContainerDark = Color(0xFFE8E4DA) // Warm off-white
+val tertiaryDark = Color(0xFFA89050) // Darker brass accent
+val onTertiaryDark = Color(0xFF0B0B0D)
+val tertiaryContainerDark = Color(0xFF2A2010)
+val onTertiaryContainerDark = Color(0xFFF5E6C0)
+val errorDark = Color(0xFFCF6679)
+val onErrorDark = Color(0xFF0B0B0D)
+val errorContainerDark = Color(0xFF4D0019)
+val onErrorContainerDark = Color(0xFFFFDAD9)
+val backgroundDark = Color(0xFF0B0B0D) // Near-black app background
+val onBackgroundDark = Color(0xFFE8E4DA) // Warm off-white primary text
+val surfaceDark = Color(0xFF16161A) // Slightly lifted near-black — cards, sheets
+val onSurfaceDark = Color(0xFFE8E4DA)
+val surfaceVariantDark = Color(0xFF2A2A2E)
+val onSurfaceVariantDark = Color(0xFF8A857A) // Muted warm grey
+val outlineDark = Color(0xFF8A857A)
+val outlineVariantDark = Color(0xFF3A3A3F)
 val scrimDark = Color(0xFF000000)
-val inverseSurfaceDark = Color(0xFFECEDF3) // Neutral 100
-val inverseOnSurfaceDark = Color(0xFF2C2D3C) // Neutral 800
-val inversePrimaryDark = Color(0xFF2D8F52) // Green 700
-val surfaceDimDark = Color(0xFF0F1017) // Neutral 950
-val surfaceBrightDark = Color(0xFF3D3E50) // Neutral 700
-val surfaceContainerLowestDark = Color(0xFF0F1017) // Neutral 950
-val surfaceContainerLowDark = Color(0xFF1A1B26) // Neutral 900
-val surfaceContainerDark = Color(0xFF242533) // Interpolated 900↔800
-val surfaceContainerHighDark = Color(0xFF2C2D3C) // Neutral 800
-val surfaceContainerHighestDark = Color(0xFF3D3E50) // Neutral 700
+val inverseSurfaceDark = Color(0xFFE8E4DA)
+val inverseOnSurfaceDark = Color(0xFF0B0B0D)
+val inversePrimaryDark = Color(0xFF5A4A1A) // Dark brass for inverse contexts
+val surfaceDimDark = Color(0xFF0B0B0D)
+val surfaceBrightDark = Color(0xFF2A2A2E)
+val surfaceContainerLowestDark = Color(0xFF080809)
+val surfaceContainerLowDark = Color(0xFF0F0F12)
+val surfaceContainerDark = Color(0xFF16161A)
+val surfaceContainerHighDark = Color(0xFF1F1F24)
+val surfaceContainerHighestDark = Color(0xFF2A2A2E)

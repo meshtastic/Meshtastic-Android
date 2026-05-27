@@ -360,22 +360,17 @@ private fun handleKeyboardShortcut(
         }
 
         Key.One -> {
-            multiBackstack.navigateTopLevel(TopLevelDestination.Messages.route)
-            true
-        }
-
-        Key.Two -> {
             multiBackstack.navigateTopLevel(TopLevelDestination.Nodes.route)
             true
         }
 
-        Key.Three -> {
-            multiBackstack.navigateTopLevel(TopLevelDestination.Map.route)
+        Key.Two -> {
+            multiBackstack.navigateTopLevel(TopLevelDestination.Connect.route)
             true
         }
 
-        Key.Four -> {
-            multiBackstack.navigateTopLevel(TopLevelDestination.Connect.route)
+        Key.Three -> {
+            multiBackstack.navigateTopLevel(TopLevelDestination.Settings.route)
             true
         }
 

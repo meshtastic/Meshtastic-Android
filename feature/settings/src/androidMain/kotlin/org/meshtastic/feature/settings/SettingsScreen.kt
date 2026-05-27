@@ -42,30 +42,16 @@ import org.meshtastic.core.common.util.toDate
 import org.meshtastic.core.common.util.toInstant
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
-import org.meshtastic.core.navigation.WifiProvisionRoute
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.bottom_nav_settings
 import org.meshtastic.core.resources.export_configuration
-import org.meshtastic.core.resources.filter_settings
-import org.meshtastic.core.resources.help_and_documentation
 import org.meshtastic.core.resources.import_configuration
-import org.meshtastic.core.resources.node_layout_section_title
 import org.meshtastic.core.resources.preferences_language
 import org.meshtastic.core.resources.remotely_administrating
-import org.meshtastic.core.resources.wifi_devices
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MeshtasticDialog
-import org.meshtastic.core.ui.icon.FilterList
-import org.meshtastic.core.ui.icon.HelpOutline
-import org.meshtastic.core.ui.icon.List
-import org.meshtastic.core.ui.icon.MeshtasticIcons
-import org.meshtastic.core.ui.icon.Wifi
 import org.meshtastic.feature.settings.component.AppInfoSection
-import org.meshtastic.feature.settings.component.AppearanceSection
-import org.meshtastic.feature.settings.component.ExpressiveSection
-import org.meshtastic.feature.settings.component.PersistenceSection
-import org.meshtastic.feature.settings.component.PrivacySection
 import org.meshtastic.feature.settings.component.ThemePickerDialog
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.ModuleRoute
@@ -223,55 +209,16 @@ fun SettingsScreen(
                 onNavigate = onNavigate,
             )
 
-            // App-local settings are only relevant when configuring the local node
+            // KV Phase 3: Only AppInfoSection visible (device info + About / attribution link).
+            // Privacy, appearance, node layout, Wi-Fi devices, filter, persistence, and help sections
+            // are hidden for the demo build — their logic is intact, just not shown in the UI.
             if (state.isLocal) {
-                PrivacySection(
-                    analyticsAvailable = state.analyticsAvailable,
-                    analyticsEnabled = viewModel.analyticsAllowedFlow.collectAsStateWithLifecycle(true).value,
-                    onToggleAnalytics = { viewModel.toggleAnalyticsAllowed() },
-                    provideLocation = settingsViewModel.provideLocation.collectAsStateWithLifecycle().value,
-                    onToggleLocation = { settingsViewModel.setProvideLocation(it) },
-                    homoglyphEnabled = viewModel.homoglyphEncodingEnabledFlow.collectAsStateWithLifecycle(false).value,
-                    onToggleHomoglyph = { viewModel.toggleHomoglyphCharactersEncodingEnabled() },
-                    startProvideLocation = { settingsViewModel.startProvidingLocation() },
-                    stopProvideLocation = { settingsViewModel.stopProvidingLocation() },
-                )
-
-                AppearanceSection(
-                    onShowLanguagePicker = { showLanguagePickerDialog = true },
-                    onShowThemePicker = { showThemePickerDialog = true },
-                )
-
-                ExpressiveSection(title = stringResource(Res.string.node_layout_section_title)) {
-                    ListItem(
-                        text = stringResource(Res.string.node_layout_section_title),
-                        leadingIcon = MeshtasticIcons.List,
-                    ) {
-                        onNavigate(SettingsRoute.NodeList)
-                    }
-                }
-
-                ExpressiveSection(title = stringResource(Res.string.wifi_devices)) {
-                    ListItem(text = stringResource(Res.string.wifi_devices), leadingIcon = MeshtasticIcons.Wifi) {
-                        onNavigate(WifiProvisionRoute.WifiProvision())
-                    }
-                }
-
-                ExpressiveSection(title = stringResource(Res.string.filter_settings)) {
-                    ListItem(
-                        text = stringResource(Res.string.filter_settings),
-                        leadingIcon = MeshtasticIcons.FilterList,
-                    ) {
-                        onNavigate(SettingsRoute.FilterSettings)
-                    }
-                }
-
-                PersistenceSection(
-                    cacheLimit = settingsViewModel.dbCacheLimit.collectAsStateWithLifecycle().value,
-                    onSetCacheLimit = { settingsViewModel.setDbCacheLimit(it) },
-                    nodeShortName = ourNode?.user?.short_name ?: "",
-                    onExportData = { settingsViewModel.saveDataCsv(it.toKmpUri()) },
-                )
+                // if (false) { PrivacySection(...) }
+                // if (false) { AppearanceSection(...) }
+                // if (false) { Node Layout section }
+                // if (false) { Wi-Fi Devices section }
+                // if (false) { Filter Settings section }
+                // if (false) { PersistenceSection(...) }
 
                 AppInfoSection(
                     appVersionName = settingsViewModel.appVersionName,
@@ -282,14 +229,7 @@ fun SettingsScreen(
                 )
             }
 
-            ExpressiveSection(title = stringResource(Res.string.help_and_documentation)) {
-                ListItem(
-                    text = stringResource(Res.string.help_and_documentation),
-                    leadingIcon = MeshtasticIcons.HelpOutline,
-                ) {
-                    onNavigate(SettingsRoute.HelpDocs)
-                }
-            }
+            // if (false) { Help & Documentation section }
         }
     }
 }

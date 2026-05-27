@@ -19,56 +19,16 @@
 
 package org.meshtastic.core.ui.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialExpressiveTheme
 import androidx.compose.material3.MotionScheme.Companion.expressive
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 
-private val lightScheme =
-    lightColorScheme(
-        primary = primaryLight,
-        onPrimary = onPrimaryLight,
-        primaryContainer = primaryContainerLight,
-        onPrimaryContainer = onPrimaryContainerLight,
-        secondary = secondaryLight,
-        onSecondary = onSecondaryLight,
-        secondaryContainer = secondaryContainerLight,
-        onSecondaryContainer = onSecondaryContainerLight,
-        tertiary = tertiaryLight,
-        onTertiary = onTertiaryLight,
-        tertiaryContainer = tertiaryContainerLight,
-        onTertiaryContainer = onTertiaryContainerLight,
-        error = errorLight,
-        onError = onErrorLight,
-        errorContainer = errorContainerLight,
-        onErrorContainer = onErrorContainerLight,
-        background = backgroundLight,
-        onBackground = onBackgroundLight,
-        surface = surfaceLight,
-        onSurface = onSurfaceLight,
-        surfaceVariant = surfaceVariantLight,
-        onSurfaceVariant = onSurfaceVariantLight,
-        outline = outlineLight,
-        outlineVariant = outlineVariantLight,
-        scrim = scrimLight,
-        inverseSurface = inverseSurfaceLight,
-        inverseOnSurface = inverseOnSurfaceLight,
-        inversePrimary = inversePrimaryLight,
-        surfaceDim = surfaceDimLight,
-        surfaceBright = surfaceBrightLight,
-        surfaceContainerLowest = surfaceContainerLowestLight,
-        surfaceContainerLow = surfaceContainerLowLight,
-        surfaceContainer = surfaceContainerLight,
-        surfaceContainerHigh = surfaceContainerHighLight,
-        surfaceContainerHighest = surfaceContainerHighestLight,
-    )
-
-private val darkScheme =
+// KV Field Console always uses the dark scheme. Dynamic color and light theme are disabled.
+private val kvDarkScheme =
     darkColorScheme(
         primary = primaryDark,
         onPrimary = onPrimaryDark,
@@ -115,20 +75,13 @@ val unspecified_scheme = ColorFamily(Color.Unspecified, Color.Unspecified, Color
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AppTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
+    darkTheme: Boolean = true,
+    dynamicColor: Boolean = false,
     content:
     @Composable()
     () -> Unit,
 ) {
-    val colorScheme =
-        if (dynamicColor) {
-            dynamicColorScheme(darkTheme)
-        } else {
-            null
-        } ?: if (darkTheme) darkScheme else lightScheme
-
-    MaterialExpressiveTheme(colorScheme = colorScheme, typography = AppTypography, motionScheme = expressive()) {
+    MaterialExpressiveTheme(colorScheme = kvDarkScheme, typography = AppTypography, motionScheme = expressive()) {
         content()
     }
 }

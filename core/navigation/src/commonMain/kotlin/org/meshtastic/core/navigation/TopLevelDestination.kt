@@ -21,22 +21,18 @@ import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.bottom_nav_settings
 import org.meshtastic.core.resources.connect
-import org.meshtastic.core.resources.map
-import org.meshtastic.core.resources.messages
 import org.meshtastic.core.resources.nodes
 
 /**
  * Shared top-level destinations for the application shell.
  *
- * Defines the canonical set of destinations and their corresponding labels and routes, ensuring parity between Android
- * and Desktop navigation shells.
+ * KV Phase 3: Reduced to three destinations for demo build. Messages and Map are intentionally excluded from the bottom
+ * nav. Their nav graphs remain registered in Main.kt for deep link safety.
  */
 enum class TopLevelDestination(val label: StringResource, val route: Route) {
-    Messages(Res.string.messages, ContactsRoute.Contacts),
     Nodes(Res.string.nodes, NodesRoute.Nodes),
-    Map(Res.string.map, MapRoute.Map()),
-    Settings(Res.string.bottom_nav_settings, SettingsRoute.Settings()),
     Connect(Res.string.connect, ConnectionsRoute.Connections),
+    Settings(Res.string.bottom_nav_settings, SettingsRoute.Settings()),
     ;
 
     companion object {

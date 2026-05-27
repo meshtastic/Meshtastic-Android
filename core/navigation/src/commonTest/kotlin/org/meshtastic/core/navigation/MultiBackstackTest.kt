@@ -36,17 +36,17 @@ class MultiBackstackTest {
 
         val nodesStack =
             NavBackStack<NavKey>().apply { addAll(listOf(TopLevelDestination.Nodes.route, NodesRoute.Nodes)) }
-        val mapStack = NavBackStack<NavKey>().apply { addAll(listOf(TopLevelDestination.Map.route)) }
+        val mapStack = NavBackStack<NavKey>().apply { addAll(listOf(TopLevelDestination.Connect.route)) }
 
         multiBackstack.backStacks =
-            mapOf(TopLevelDestination.Nodes.route to nodesStack, TopLevelDestination.Map.route to mapStack)
+            mapOf(TopLevelDestination.Nodes.route to nodesStack, TopLevelDestination.Connect.route to mapStack)
 
         assertEquals(TopLevelDestination.Nodes.route, multiBackstack.currentTabRoute)
         assertEquals(2, multiBackstack.activeBackStack.size)
 
-        multiBackstack.navigateTopLevel(TopLevelDestination.Map.route)
+        multiBackstack.navigateTopLevel(TopLevelDestination.Connect.route)
 
-        assertEquals(TopLevelDestination.Map.route, multiBackstack.currentTabRoute)
+        assertEquals(TopLevelDestination.Connect.route, multiBackstack.currentTabRoute)
         assertEquals(1, multiBackstack.activeBackStack.size)
         assertEquals(2, nodesStack.size)
     }
@@ -88,14 +88,14 @@ class MultiBackstackTest {
         val startTab = TopLevelDestination.Connect.route
         val multiBackstack = createMultiBackstack(startTab)
 
-        val mapStack = NavBackStack<NavKey>().apply { addAll(listOf(TopLevelDestination.Map.route)) }
+        val mapStack = NavBackStack<NavKey>().apply { addAll(listOf(TopLevelDestination.Connect.route)) }
         val connectStack = NavBackStack<NavKey>().apply { addAll(listOf(TopLevelDestination.Connect.route)) }
 
         multiBackstack.backStacks =
-            mapOf(TopLevelDestination.Map.route to mapStack, TopLevelDestination.Connect.route to connectStack)
+            mapOf(TopLevelDestination.Connect.route to mapStack, TopLevelDestination.Connect.route to connectStack)
 
-        multiBackstack.navigateTopLevel(TopLevelDestination.Map.route)
-        assertEquals(TopLevelDestination.Map.route, multiBackstack.currentTabRoute)
+        multiBackstack.navigateTopLevel(TopLevelDestination.Connect.route)
+        assertEquals(TopLevelDestination.Connect.route, multiBackstack.currentTabRoute)
 
         multiBackstack.goBack()
 

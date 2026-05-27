@@ -80,19 +80,15 @@ fun RadioConfigItemList(
     val enabled = state.connected && !state.responseState.isWaiting() && !isManaged
 
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        // KV Phase 3: Shows USER, LORA (region), CHANNELS (preset), SECURITY — demo-appropriate subset.
         RadioConfigSection(isManaged, enabled, onRouteClick)
-        DeviceConfigSection(isManaged, enabled, onNavigate)
-        ModuleSettingsSection(isManaged, enabled, onNavigate)
 
-        if (state.isLocal) {
-            BackupRestoreSection(isManaged, enabled, onImport, onExport)
-        }
-
-        AdministrationSection(enabled, onNavigate)
-
-        if (state.isLocal) {
-            AdvancedSection(isManaged, isOtaCapable, enabled, onNavigate)
-        }
+        // KV Phase 3: Hidden for demo build — advanced device config not shown in demo.
+        // DeviceConfigSection(isManaged, enabled, onNavigate)
+        // ModuleSettingsSection(isManaged, enabled, onNavigate)
+        // if (state.isLocal) { BackupRestoreSection(isManaged, enabled, onImport, onExport) }
+        // AdministrationSection(enabled, onNavigate)
+        // if (state.isLocal) { AdvancedSection(isManaged, isOtaCapable, enabled, onNavigate) }
     }
 }
 

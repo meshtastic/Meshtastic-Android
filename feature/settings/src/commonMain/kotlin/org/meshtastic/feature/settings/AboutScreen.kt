@@ -18,10 +18,13 @@
 
 package org.meshtastic.feature.settings
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
@@ -32,6 +35,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
 import com.mikepenz.aboutlibraries.ui.compose.produceLibraries
@@ -112,7 +116,64 @@ fun AboutScreen(onNavigateUp: () -> Unit, jsonProvider: suspend () -> String) {
 
 @Composable
 private fun AboutHeader() {
-    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp)) {
+    val uriHandler = LocalUriHandler.current
+    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 16.dp)) {
+        Text(
+            text = "KV Field Console",
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.primary,
+        )
+        Text(
+            text = "Version 0.1.0-demo",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 2.dp),
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            text = "Based on Meshtastic for Android",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onBackground,
+        )
+        Text(
+            text = "github.com/meshtastic/Meshtastic-Android",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.primary,
+            modifier =
+            Modifier.padding(top = 2.dp).clickable {
+                uriHandler.openUri("https://github.com/meshtastic/Meshtastic-Android")
+            },
+        )
+        Text(
+            text = "Licensed under GNU GPL v3.0",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 4.dp),
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            text = "Source code for this fork:",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onBackground,
+        )
+        Text(
+            text = "github.com/sam4rth/kv-field-console",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.primary,
+            modifier =
+            Modifier.padding(top = 2.dp).clickable {
+                uriHandler.openUri("https://github.com/sam4rth/kv-field-console")
+            },
+        )
+        Text(
+            text = "Modifications © 2026 Krath Veil",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 4.dp),
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        HorizontalDivider()
+        Spacer(modifier = Modifier.height(12.dp))
         Text(
             text = stringResource(Res.string.open_source_libraries),
             style = MaterialTheme.typography.titleMediumEmphasized,

@@ -16,15 +16,8 @@
  */
 package org.meshtastic.core.ui.component
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.Row
-import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -42,16 +35,12 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
-import org.meshtastic.core.navigation.ContactsRoute
 import org.meshtastic.core.navigation.MultiBackstack
 import org.meshtastic.core.navigation.NodesRoute
 import org.meshtastic.core.navigation.TopLevelDestination
@@ -78,7 +67,6 @@ fun MeshtasticNavigationSuite(
     content: @Composable () -> Unit,
 ) {
     val connectionState by uiViewModel.connectionState.collectAsStateWithLifecycle()
-    val unreadMessageCount by uiViewModel.unreadMessageCount.collectAsStateWithLifecycle()
     val selectedDevice by uiViewModel.currentDeviceAddressFlow.collectAsStateWithLifecycle()
 
     val adaptiveInfo = currentWindowAdaptiveInfoV2()
@@ -103,7 +91,6 @@ fun MeshtasticNavigationSuite(
                             destination = destination,
                             isSelected = isSelected,
                             connectionState = connectionState,
-                            unreadMessageCount = unreadMessageCount,
                             selectedDevice = selectedDevice,
                             uiViewModel = uiViewModel,
                         )
@@ -150,15 +137,6 @@ private fun handleNavigation(
                 }
             }
 
-            TopLevelDestination.Messages -> {
-                val onConversationsList = currentKey is ContactsRoute.Contacts
-                if (!onConversationsList) {
-                    multiBackstack.navigateTopLevel(destination.route)
-                } else {
-                    uiViewModel.emitScrollToTopEvent(ScrollToTopEvent.ConversationsTabPressed)
-                }
-            }
-
             else -> {
                 if (currentKey != destination.route) {
                     multiBackstack.navigateTopLevel(destination.route)
@@ -176,7 +154,6 @@ private fun NavigationIconContent(
     destination: TopLevelDestination,
     isSelected: Boolean,
     connectionState: ConnectionState,
-    unreadMessageCount: Int,
     selectedDevice: String?,
     uiViewModel: UIViewModel,
 ) {
@@ -209,30 +186,12 @@ private fun NavigationIconContent(
                 meshActivityFlow = uiViewModel.meshActivity,
             )
         } else {
-            BadgedBox(
-                badge = {
-                    if (destination == TopLevelDestination.Messages) {
-                        var lastNonZeroCount by remember { mutableIntStateOf(unreadMessageCount) }
-                        if (unreadMessageCount > 0) {
-                            lastNonZeroCount = unreadMessageCount
-                        }
-                        AnimatedVisibility(
-                            visible = unreadMessageCount > 0,
-                            enter = scaleIn() + fadeIn(),
-                            exit = scaleOut() + fadeOut(),
-                        ) {
-                            Badge { Text(lastNonZeroCount.toString()) }
-                        }
-                    }
-                },
-            ) {
-                Crossfade(isSelected, label = "BottomBarIcon") { isSelectedState ->
-                    Icon(
-                        imageVector = vectorResource(destination.icon),
-                        contentDescription = stringResource(destination.label),
-                        tint = if (isSelectedState) colorScheme.primary else LocalContentColor.current,
-                    )
-                }
+            Crossfade(isSelected, label = "BottomBarIcon") { isSelectedState ->
+                Icon(
+                    imageVector = vectorResource(destination.icon),
+                    contentDescription = stringResource(destination.label),
+                    tint = if (isSelectedState) colorScheme.primary else LocalContentColor.current,
+                )
             }
         }
     }
