@@ -30,11 +30,6 @@ pluginManagement {
     }
 }
 
-// Version mirrored in libs.versions.toml for Renovate tracking.
-plugins {
-    id("com.gradle.develocity") version "4.4.2"
-}
-
 dependencyResolutionManagement {
     repositories {
         mavenCentral()
@@ -55,10 +50,9 @@ dependencyResolutionManagement {
     }
 }
 
-// Shared Develocity and Build Cache configuration
-apply(from = "../gradle/develocity.settings.gradle")
+// Build Cache configuration (HTTP remote cache + local)
+apply(from = "../gradle/build-cache.settings.gradle")
 
 rootProject.name = "build-logic"
 include(":convention")
 include(":flatpak-ops")
-

@@ -1,14 +1,14 @@
 /*
  * Copyright (c) 2026 Meshtastic LLC
  *
- * Init script for meshtastic.flatpak-ops. Attaches a BuildOperationListener
+ * Init script for org.meshtastic.flatpak.sources. Attaches a BuildOperationListener
  * BEFORE any project or plugin resolution happens — which is necessary because
- * the flatpak-ops plugin itself lives in build-logic, and any artifacts pulled
+ * the flatpak-sources plugin itself lives in build-logic, and any artifacts pulled
  * to bootstrap build-logic (kotlin-dsl plugin marker, detekt, etc.) would be
  * invisible to a listener registered later from a root-project plugin.
  *
  * Captured URLs are stored on `gradle.extensions` under the key below; the
- * captureFlatpakSources task (registered by FlatpakOpsPlugin) reads them.
+ * captureFlatpakSources task (registered by FlatpakSourcesPlugin) reads them.
  *
  * Pass to Gradle via:
  *   ./gradlew -I gradle/init-scripts/flatpak-ops.init.gradle.kts ...
@@ -26,7 +26,7 @@ import org.gradle.internal.resource.ExternalResourceReadBuildOperationType
 import java.util.concurrent.ConcurrentHashMap
 
 val capturedUrls: MutableSet<String> = ConcurrentHashMap.newKeySet()
-gradle.extensions.add("flatpakOpsCapturedUrls", capturedUrls)
+gradle.extensions.add("flatpakSourcesCapturedUrls", capturedUrls)
 
 val manager =
     (gradle as GradleInternal).services.get(BuildOperationListenerManager::class.java)

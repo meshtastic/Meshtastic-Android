@@ -78,11 +78,10 @@ fi
 if [[ $SKIP_REGEN -eq 0 ]]; then
     step "Regenerating flatpak-sources.json via isolated Gradle home"
     rm -rf "$GRADLE_HOME_ISOLATED"
-    # Drive the same task the in-flatpak build runs so runtime-classpath deps (skiko, ktor-cio,
-    # datastore-proto, etc.) are resolved and captured — :assemble only triggers compileClasspath.
+    # The settings plugin (org.meshtastic.flatpak.sources.settings) captures URLs from
+    # build start — no init script or -I flag needed.
     (cd "$REPO_ROOT" && ./gradlew --no-build-cache --no-configuration-cache \
         -Dgradle.user.home="$GRADLE_HOME_ISOLATED" \
-        -I gradle/init-scripts/flatpak-ops.init.gradle.kts \
         :desktopApp:packageUberJarForCurrentOS :captureFlatpakSources)
     cp "$REPO_ROOT/build/flatpak-ops-sources.json" "$SOURCES_JSON"
 elif [[ ! -f "$SOURCES_JSON" ]]; then

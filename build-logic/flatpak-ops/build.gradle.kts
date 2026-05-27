@@ -73,9 +73,13 @@ detekt {
 
 gradlePlugin {
     plugins {
-        register("meshtasticFlatpakOps") {
-            id = "meshtastic.flatpak-ops"
-            implementationClass = "org.meshtastic.flatpakops.FlatpakOpsPlugin"
+        register("flatpakSources") {
+            id = "org.meshtastic.flatpak.sources"
+            implementationClass = "org.meshtastic.flatpak.sources.FlatpakSourcesPlugin"
+        }
+        register("flatpakSourcesSettings") {
+            id = "org.meshtastic.flatpak.sources.settings"
+            implementationClass = "org.meshtastic.flatpak.sources.FlatpakSourcesSettingsPlugin"
         }
     }
 }
