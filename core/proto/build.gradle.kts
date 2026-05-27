@@ -118,6 +118,8 @@ wire {
     prune("meshtastic.CotHow")
     prune("meshtastic.CotType")
     prune("meshtastic.GeoPointSource")
+    prune("meshtastic.TakTalkMessage")
+    prune("meshtastic.TakTalkRoomData")
 }
 
 // Modern KMP publication uses the project name as the artifactId by default.
