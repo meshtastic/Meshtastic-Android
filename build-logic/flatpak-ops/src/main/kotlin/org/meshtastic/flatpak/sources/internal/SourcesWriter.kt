@@ -67,11 +67,7 @@ internal class SourcesWriter(
         return buildRemoteEntry(url)
     }
 
-    private fun buildCachedEntry(
-        url: String,
-        cacheFile: File,
-        rel: List<String>,
-    ): Map<String, Any> {
+    private fun buildCachedEntry(url: String, cacheFile: File, rel: List<String>): Map<String, Any> {
         val group = rel[0]
         val artifact = rel[1]
         val version = rel[2]
@@ -93,17 +89,18 @@ internal class SourcesWriter(
 
     private fun buildRemoteEntry(url: String): Map<String, Any>? {
         // Strip the repo base URL to get the Maven-relative path (group/artifact/version/file)
-        val mavenPath = repoUrls.firstNotNullOfOrNull { repo ->
-            if (url.startsWith(repo)) url.removePrefix(repo).trimStart('/')
-            else null
-        }
+        val mavenPath =
+            repoUrls.firstNotNullOfOrNull { repo ->
+                if (url.startsWith(repo)) url.removePrefix(repo).trimStart('/') else null
+            }
 
-        val segments = if (mavenPath != null) {
-            mavenPath.split('/').filter { it.isNotEmpty() }
-        } else {
-            // Fallback: use full URL path (may include repo prefix)
-            URI(url).path.trimEnd('/').split('/').filter { it.isNotEmpty() }
-        }
+        val segments =
+            if (mavenPath != null) {
+                mavenPath.split('/').filter { it.isNotEmpty() }
+            } else {
+                // Fallback: use full URL path (may include repo prefix)
+                URI(url).path.trimEnd('/').split('/').filter { it.isNotEmpty() }
+            }
 
         if (segments.size < URL_MIN_SEGMENTS) {
             logger.info("flatpak-sources: cannot derive path for {} (skipped)", url)
@@ -129,55 +126,37 @@ internal class SourcesWriter(
         return entry
     }
 
-    private fun downloadAndHash(url: String): String? =
-        try {
-            val md = MessageDigest.getInstance("SHA-256")
-            URI(url).toURL().openStream().use { stream ->
-                val buf = ByteArray(BUFFER_SIZE)
-                while (true) {
-                    val n = stream.read(buf)
-                    if (n <= 0) break
-                    md.update(buf, 0, n)
-                }
-            }
-            val hash = hex(md.digest())
-            logger.lifecycle("flatpak-sources: downloaded {} (sha256:{})", url, hash.take(HASH_PREFIX_LEN))
-            hash
-        } catch (e: Exception) {
-            logger.warn("flatpak-sources: failed to download {} — {}", url, e.message)
-            null
-        }
+    private fun sha256(file: File): String = hashStream(file.inputStream())
 
-    private fun sha256(file: File): String {
+    private fun downloadAndHash(url: String): String? = try {
+        val conn = URI(url).toURL().openConnection() as java.net.HttpURLConnection
+        conn.connectTimeout = DOWNLOAD_CONNECT_TIMEOUT_MS
+        conn.readTimeout = DOWNLOAD_READ_TIMEOUT_MS
+        val hash = hashStream(conn.inputStream).also { conn.disconnect() }
+        logger.lifecycle("flatpak-sources: downloaded {} (sha256:{})", url, hash.take(HASH_PREFIX_LEN))
+        hash
+    } catch (e: Exception) {
+        logger.warn("flatpak-sources: failed to download {} — {}", url, e.message)
+        null
+    }
+
+    private fun hashStream(stream: java.io.InputStream): String {
         val md = MessageDigest.getInstance("SHA-256")
-        file.inputStream().use { stream ->
+        stream.use {
             val buf = ByteArray(BUFFER_SIZE)
             while (true) {
-                val n = stream.read(buf)
+                val n = it.read(buf)
                 if (n <= 0) break
                 md.update(buf, 0, n)
             }
         }
-        return hex(md.digest())
-    }
-
-    private fun hex(bytes: ByteArray): String {
-        val digits = "0123456789abcdef"
-        val chars = CharArray(bytes.size * HEX_CHARS_PER_BYTE)
-        for (i in bytes.indices) {
-            val v = bytes[i].toInt() and BYTE_MASK
-            chars[i * HEX_CHARS_PER_BYTE] = digits[v ushr NIBBLE_BITS]
-            chars[i * HEX_CHARS_PER_BYTE + 1] = digits[v and NIBBLE_MASK]
-        }
-        return String(chars)
+        return md.digest().joinToString("") { "%02x".format(it.toInt() and 0xFF) }
     }
 
     private companion object {
         private const val BUFFER_SIZE = 8192
-        private const val HEX_CHARS_PER_BYTE = 2
-        private const val BYTE_MASK = 0xFF
-        private const val NIBBLE_BITS = 4
-        private const val NIBBLE_MASK = 0x0F
+        private const val DOWNLOAD_CONNECT_TIMEOUT_MS = 30_000
+        private const val DOWNLOAD_READ_TIMEOUT_MS = 60_000
         private const val URL_MIN_SEGMENTS = 3
         private const val HASH_PREFIX_LEN = 12
     }

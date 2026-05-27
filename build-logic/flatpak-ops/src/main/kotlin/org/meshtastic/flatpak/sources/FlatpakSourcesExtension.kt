@@ -58,22 +58,18 @@ abstract class FlatpakSourcesExtension @Inject constructor(objects: ObjectFactor
     val capturedUrlsExtensionName: Property<String> =
         objects.property(String::class.java).convention("flatpakSourcesCapturedUrls")
 
-    /** Where the init script should be installed (relative to project root). */
-    val initScriptFile: RegularFileProperty = objects.fileProperty()
-
     /**
-     * Platform targets whose native artifacts should be force-resolved during capture.
-     * Use for platform-specific dependencies not resolved on the generation host OS
-     * (e.g., building manifest on macOS but targeting a Linux Flatpak).
+     * Platform targets whose native artifacts should be force-resolved during capture. Use for platform-specific
+     * dependencies not resolved on the generation host OS (e.g., building manifest on macOS but targeting a Linux
+     * Flatpak).
      *
      * Values are Compose/Skiko platform identifiers: `linux-x64`, `linux-arm64`, etc.
      */
     val targetPlatforms: SetProperty<String> = objects.setProperty(String::class.java)
 
     /**
-     * Platform-specific dependencies to force-resolve for the target platforms.
-     * Each entry is a Maven coordinate template with `{platform}` placeholder:
-     * e.g., `org.jetbrains.skiko:skiko-awt-runtime-{platform}:0.144.6`
+     * Platform-specific dependencies to force-resolve for the target platforms. Each entry is a Maven coordinate
+     * template with `{platform}` placeholder: e.g., `org.jetbrains.skiko:skiko-awt-runtime-{platform}:0.144.6`
      *
      * The `{platform}` token is replaced with each value in [targetPlatforms].
      */

@@ -40,7 +40,7 @@ import java.util.concurrent.ConcurrentHashMap
  *
  * For complete captures (including build-logic bootstrap downloads), pair with the init script:
  * ```
- * ./gradlew -I gradle/init-scripts/flatpak-sources.init.gradle.kts ...
+ * ./gradlew -I gradle/init-scripts/flatpak-ops.init.gradle.kts ...
  * ```
  *
  * Internal APIs used (acceptable trade-off — same approach as flatpak-gradle-generator):
@@ -76,6 +76,7 @@ class FlatpakSourcesPlugin : Plugin<Project> {
             group = "flatpak"
             description = "Emit flatpak-sources.json from URLs captured via BuildOperationListener."
             outputs.upToDateWhen { false }
+            outputs.file(extension.outputFile)
 
             val afterTasks = extension.mustRunAfterTasks.get()
             if (afterTasks.isNotEmpty()) {
@@ -94,16 +95,20 @@ class FlatpakSourcesPlugin : Plugin<Project> {
 
             doLast {
                 // Force-resolve platform-specific native dependencies not resolved on this host
-                val platformUrls = resolvePlatformArtifacts(proj, platforms.getOrElse(emptySet()), platformDeps.getOrElse(emptySet()))
+                val platformUrls =
+                    resolvePlatformArtifacts(proj, platforms.getOrElse(emptySet()), platformDeps.getOrElse(emptySet()))
 
                 // Scan the Gradle cache for artifacts missed by the listener
                 // (e.g. build-logic plugin resolution that happened before listener attached)
                 @Suppress("UNCHECKED_CAST")
-                val repoUrls = proj.gradle.extensions.findByName("flatpakSourcesRepoUrls") as? List<String>
-                    ?: emptyList()
-                val cacheUrls = if (repoUrls.isNotEmpty()) {
-                    scanCacheForMissingArtifacts(filesRoot, urlsRef, repoUrls, proj.logger)
-                } else emptyList()
+                val repoUrls =
+                    proj.gradle.extensions.findByName("flatpakSourcesRepoUrls") as? List<String> ?: emptyList()
+                val cacheUrls =
+                    if (repoUrls.isNotEmpty()) {
+                        scanCacheForMissingArtifacts(filesRoot, urlsRef, repoUrls, proj.logger)
+                    } else {
+                        emptyList()
+                    }
 
                 val allUrls = urlsRef.toList() + platformUrls + cacheUrls
                 val writer =
@@ -134,9 +139,8 @@ class FlatpakSourcesPlugin : Plugin<Project> {
 
     companion object {
         /**
-         * Force-resolves platform-specific dependencies that wouldn't normally resolve on the
-         * current host OS. Downloads them into the standard Gradle cache so [SourcesWriter] can
-         * find them via [CacheFileLocator].
+         * Force-resolves platform-specific dependencies that wouldn't normally resolve on the current host OS.
+         * Downloads them into the standard Gradle cache so [SourcesWriter] can find them via [CacheFileLocator].
          *
          * @return URLs reconstructed from the resolved artifact coordinates and repositories.
          */
@@ -147,20 +151,22 @@ class FlatpakSourcesPlugin : Plugin<Project> {
         ): List<String> {
             if (platforms.isEmpty() || dependencyTemplates.isEmpty()) return emptyList()
 
-            val deps = platforms.flatMap { platform ->
-                dependencyTemplates.map { template ->
-                    project.dependencies.create(template.replace("{platform}", platform))
+            val deps =
+                platforms.flatMap { platform ->
+                    dependencyTemplates.map { template ->
+                        project.dependencies.create(template.replace("{platform}", platform))
+                    }
                 }
-            }
 
             val config = project.configurations.detachedConfiguration(*deps.toTypedArray())
             config.isTransitive = false
 
             val urls = mutableListOf<String>()
-            val repoUrls = project.repositories
-                .filterIsInstance<org.gradle.api.artifacts.repositories.MavenArtifactRepository>()
-                .map { it.url.toString().trimEnd('/') }
-                .filter { !it.startsWith("file:") }
+            val repoUrls =
+                project.repositories
+                    .filterIsInstance<org.gradle.api.artifacts.repositories.MavenArtifactRepository>()
+                    .map { it.url.toString().trimEnd('/') }
+                    .filter { !it.startsWith("file:") }
 
             try {
                 config.resolvedConfiguration.resolvedArtifacts.forEach { artifact ->
@@ -186,9 +192,8 @@ class FlatpakSourcesPlugin : Plugin<Project> {
         }
 
         /**
-         * Scans the Gradle file cache for artifacts not already in [capturedUrls].
-         * This picks up artifacts resolved during included build configuration
-         * (e.g. build-logic's kotlin-dsl plugin) that our listener missed.
+         * Scans the Gradle file cache for artifacts not already in [capturedUrls]. This picks up artifacts resolved
+         * during included build configuration (e.g. build-logic's kotlin-dsl plugin) that our listener missed.
          *
          * Uses HEAD checks to validate URLs before emitting.
          */
@@ -202,60 +207,68 @@ class FlatpakSourcesPlugin : Plugin<Project> {
             val urls = mutableListOf<String>()
             var scanned = 0
 
-            filesRoot.listFiles { f -> f.isDirectory }?.forEach { groupDir ->
-                val group = groupDir.name
-                val groupPath = group.replace('.', '/')
-                groupDir.listFiles { f -> f.isDirectory }?.forEach { artifactDir ->
-                    val artifact = artifactDir.name
-                    artifactDir.listFiles { f -> f.isDirectory }?.forEach { versionDir ->
-                        val version = versionDir.name
-                        val files = versionDir.listFiles { f -> f.isDirectory }
-                            ?.flatMap { hashDir ->
-                                hashDir.listFiles()?.filter { it.isFile }?.toList() ?: emptyList()
-                            } ?: emptyList()
+            filesRoot
+                .listFiles { f -> f.isDirectory }
+                ?.forEach { groupDir ->
+                    val group = groupDir.name
+                    val groupPath = group.replace('.', '/')
+                    groupDir
+                        .listFiles { f -> f.isDirectory }
+                        ?.forEach { artifactDir ->
+                            val artifact = artifactDir.name
+                            artifactDir
+                                .listFiles { f -> f.isDirectory }
+                                ?.forEach { versionDir ->
+                                    val version = versionDir.name
+                                    val files =
+                                        versionDir
+                                            .listFiles { f -> f.isDirectory }
+                                            ?.flatMap { hashDir ->
+                                                hashDir.listFiles()?.filter { it.isFile }?.toList() ?: emptyList()
+                                            } ?: emptyList()
 
-                        for (file in files) {
-                            val filename = file.name
-                            // Skip if already captured by the listener from any repo
-                            val alreadyCaptured = repoUrls.any { repo ->
-                                capturedUrls.contains("$repo/$groupPath/$artifact/$version/$filename")
-                            }
-                            if (alreadyCaptured) continue
+                                    for (file in files) {
+                                        val filename = file.name
+                                        // Skip if already captured by the listener from any repo
+                                        val alreadyCaptured =
+                                            repoUrls.any { repo ->
+                                                capturedUrls.contains("$repo/$groupPath/$artifact/$version/$filename")
+                                            }
+                                        if (alreadyCaptured) continue
 
-                            // HEAD-check to find the correct repo
-                            for (repoUrl in repoUrls) {
-                                val fileUrl = "$repoUrl/$groupPath/$artifact/$version/$filename"
-                                if (headCheck(fileUrl)) {
-                                    urls.add(fileUrl)
-                                    scanned++
-                                    break
+                                        // HEAD-check to find the correct repo
+                                        for (repoUrl in repoUrls) {
+                                            val fileUrl = "$repoUrl/$groupPath/$artifact/$version/$filename"
+                                            if (headCheck(fileUrl)) {
+                                                urls.add(fileUrl)
+                                                scanned++
+                                                break
+                                            }
+                                        }
+                                    }
                                 }
-                            }
                         }
-                    }
                 }
-            }
             if (scanned > 0) {
                 logger.lifecycle("flatpak-sources: cache scan found {} additional URLs", scanned)
             }
             return urls
         }
 
-        private fun headCheck(url: String): Boolean =
-            try {
-                val conn = java.net.URI(url).toURL().openConnection() as java.net.HttpURLConnection
-                conn.requestMethod = "HEAD"
-                conn.connectTimeout = HEAD_TIMEOUT_MS
-                conn.readTimeout = HEAD_TIMEOUT_MS
-                conn.instanceFollowRedirects = true
-                val code = conn.responseCode
-                conn.disconnect()
-                code in HTTP_OK_RANGE
-            } catch (_: Exception) {
-                false
-            }
+        private fun headCheck(url: String): Boolean = try {
+            val conn = java.net.URI(url).toURL().openConnection() as java.net.HttpURLConnection
+            conn.requestMethod = "HEAD"
+            conn.connectTimeout = HEAD_TIMEOUT_MS
+            conn.readTimeout = HEAD_TIMEOUT_MS
+            conn.instanceFollowRedirects = true
+            val code = conn.responseCode
+            conn.disconnect()
+            code in HTTP_OK_RANGE
+        } catch (_: Exception) {
+            false
+        }
 
         private const val HEAD_TIMEOUT_MS = 5_000
-        private val HTTP_OK_RANGE = 200..399
+        private val HTTP_OK_RANGE = 200..299
     }
 }
