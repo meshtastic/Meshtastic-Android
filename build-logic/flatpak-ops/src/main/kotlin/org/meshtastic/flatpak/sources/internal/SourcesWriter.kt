@@ -28,6 +28,7 @@ internal class SourcesWriter(
     private val destPrefix: String,
     private val excludeSuffixes: Set<String>,
     private val generateMirrors: Boolean,
+    private val repoUrls: List<String>,
     private val logger: Logger,
 ) {
     /**
@@ -91,7 +92,19 @@ internal class SourcesWriter(
     }
 
     private fun buildRemoteEntry(url: String): Map<String, Any>? {
-        val segments = URI(url).path.trimEnd('/').split('/').filter { it.isNotEmpty() }
+        // Strip the repo base URL to get the Maven-relative path (group/artifact/version/file)
+        val mavenPath = repoUrls.firstNotNullOfOrNull { repo ->
+            if (url.startsWith(repo)) url.removePrefix(repo).trimStart('/')
+            else null
+        }
+
+        val segments = if (mavenPath != null) {
+            mavenPath.split('/').filter { it.isNotEmpty() }
+        } else {
+            // Fallback: use full URL path (may include repo prefix)
+            URI(url).path.trimEnd('/').split('/').filter { it.isNotEmpty() }
+        }
+
         if (segments.size < URL_MIN_SEGMENTS) {
             logger.info("flatpak-sources: cannot derive path for {} (skipped)", url)
             return null

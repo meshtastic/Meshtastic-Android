@@ -112,6 +112,7 @@ class FlatpakSourcesPlugin : Plugin<Project> {
                         destPrefix = destPrefix.get(),
                         excludeSuffixes = excludeSuffixes.get(),
                         generateMirrors = generateMirrors.get(),
+                        repoUrls = repoUrls,
                         logger = proj.logger,
                     )
                 writer.write(allUrls, outFile.get().asFile)
