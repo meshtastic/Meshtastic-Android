@@ -54,26 +54,24 @@ class FlatpakSourcesSettingsPlugin : Plugin<Settings> {
 
     override fun apply(settings: Settings) {
         val capturedUrls: MutableSet<String> = ConcurrentHashMap.newKeySet()
-        settings.gradle.extensions.add("flatpakSourcesCapturedUrls", capturedUrls)
+        settings.gradle.extensions.add(FlatpakSourcesPlugin.CAPTURED_URLS_KEY, capturedUrls)
 
-        // Register BuildService listener via BuildEventListenerRegistryInternal.
         val serviceProvider: Provider<UrlCaptureBuildService> =
             settings.gradle.sharedServices.registerIfAbsent(
                 "flatpakSourcesUrlCapture",
                 UrlCaptureBuildService::class.java,
             ) {}
-
         serviceProvider.get().capturedUrls = capturedUrls
 
-        val registry = (settings.gradle as GradleInternal).services.get(BuildEventListenerRegistryInternal::class.java)
-
+        val registry =
+            (settings.gradle as GradleInternal).services.get(BuildEventListenerRegistryInternal::class.java)
         registry.onOperationCompletion(serviceProvider)
 
         // Defer repo URL collection to rootProject{} so dependencyResolutionManagement.repositories
         // is fully populated (it's configured after plugins{} in settings.gradle.kts).
         settings.gradle.rootProject {
             val repoUrls = collectRepoUrls(settings)
-            settings.gradle.extensions.add("flatpakSourcesRepoUrls", repoUrls)
+            settings.gradle.extensions.add(FlatpakSourcesPlugin.REPO_URLS_KEY, repoUrls)
             plugins.apply(FlatpakSourcesPlugin::class.java)
         }
     }
@@ -97,21 +95,17 @@ class FlatpakSourcesSettingsPlugin : Plugin<Settings> {
             .filter { !it.startsWith("file:") }
             .forEach(::addIfAbsent)
 
-        // Also include project-dependency repos (jitpack, snapshots, etc.) so the cache scan
-        // can find artifacts resolved from dependencyResolutionManagement.repositories.
         settings.dependencyResolutionManagement.repositories
             .filterIsInstance<org.gradle.api.artifacts.repositories.MavenArtifactRepository>()
             .map { it.url.toString().trimEnd('/') }
             .filter { !it.startsWith("file:") }
             .forEach(::addIfAbsent)
 
-        // Ensure well-known repos are included (build-logic typically uses these)
         listOf(
             "https://repo1.maven.org/maven2",
             "https://plugins.gradle.org/m2",
             "https://dl.google.com/dl/android/maven2",
-        )
-            .forEach(::addIfAbsent)
+        ).forEach(::addIfAbsent)
 
         return repos
     }

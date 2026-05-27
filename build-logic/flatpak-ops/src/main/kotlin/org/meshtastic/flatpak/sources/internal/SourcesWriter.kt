@@ -88,20 +88,7 @@ internal class SourcesWriter(
     }
 
     private fun buildRemoteEntry(url: String): Map<String, Any>? {
-        // Strip the repo base URL to get the Maven-relative path (group/artifact/version/file)
-        val mavenPath =
-            repoUrls.firstNotNullOfOrNull { repo ->
-                if (url.startsWith(repo)) url.removePrefix(repo).trimStart('/') else null
-            }
-
-        val segments =
-            if (mavenPath != null) {
-                mavenPath.split('/').filter { it.isNotEmpty() }
-            } else {
-                // Fallback: use full URL path (may include repo prefix)
-                URI(url).path.trimEnd('/').split('/').filter { it.isNotEmpty() }
-            }
-
+        val segments = deriveSegments(url)
         if (segments.size < URL_MIN_SEGMENTS) {
             logger.info("flatpak-sources: cannot derive path for {} (skipped)", url)
             return null
@@ -109,36 +96,50 @@ internal class SourcesWriter(
         val filename = segments.last()
         val version = segments[segments.size - 2]
         val artifact = segments[segments.size - URL_MIN_SEGMENTS]
-        val groupSegments = segments.dropLast(URL_MIN_SEGMENTS)
-        val groupPath = groupSegments.joinToString("/")
-        val hash = downloadAndHash(url) ?: return null
-        val entry =
-            mutableMapOf<String, Any>(
-                "type" to "file",
-                "url" to url,
-                "sha256" to hash,
-                "dest" to "$destPrefix/$groupPath/$artifact/$version",
-                "dest-filename" to filename,
-            )
-        if (generateMirrors) {
-            MirrorGenerator.mirrorsFor(url).takeIf { it.isNotEmpty() }?.let { entry["mirror-urls"] = it }
+        val groupPath = segments.dropLast(URL_MIN_SEGMENTS).joinToString("/")
+        return downloadAndHash(url)?.let { hash ->
+            val entry =
+                mutableMapOf<String, Any>(
+                    "type" to "file",
+                    "url" to url,
+                    "sha256" to hash,
+                    "dest" to "$destPrefix/$groupPath/$artifact/$version",
+                    "dest-filename" to filename,
+                )
+            if (generateMirrors) {
+                MirrorGenerator.mirrorsFor(url).takeIf { it.isNotEmpty() }?.let { entry["mirror-urls"] = it }
+            }
+            entry
         }
-        return entry
+    }
+
+    private fun deriveSegments(url: String): List<String> {
+        val mavenPath =
+            repoUrls.firstNotNullOfOrNull { repo ->
+                if (url.startsWith(repo)) url.removePrefix(repo).trimStart('/') else null
+            }
+        return if (mavenPath != null) {
+            mavenPath.split('/').filter { it.isNotEmpty() }
+        } else {
+            URI(url).path.trimEnd('/').split('/').filter { it.isNotEmpty() }
+        }
     }
 
     private fun sha256(file: File): String = hashStream(file.inputStream())
 
-    private fun downloadAndHash(url: String): String? = try {
-        val conn = URI(url).toURL().openConnection() as java.net.HttpURLConnection
-        conn.connectTimeout = DOWNLOAD_CONNECT_TIMEOUT_MS
-        conn.readTimeout = DOWNLOAD_READ_TIMEOUT_MS
-        val hash = hashStream(conn.inputStream).also { conn.disconnect() }
-        logger.lifecycle("flatpak-sources: downloaded {} (sha256:{})", url, hash.take(HASH_PREFIX_LEN))
-        hash
-    } catch (e: Exception) {
-        logger.warn("flatpak-sources: failed to download {} — {}", url, e.message)
-        null
-    }
+    @Suppress("TooGenericExceptionCaught")
+    private fun downloadAndHash(url: String): String? =
+        try {
+            val conn = URI(url).toURL().openConnection() as java.net.HttpURLConnection
+            conn.connectTimeout = DOWNLOAD_CONNECT_TIMEOUT_MS
+            conn.readTimeout = DOWNLOAD_READ_TIMEOUT_MS
+            val hash = hashStream(conn.inputStream).also { conn.disconnect() }
+            logger.lifecycle("flatpak-sources: downloaded {} (sha256:{})", url, hash.take(HASH_PREFIX_LEN))
+            hash
+        } catch (e: Exception) {
+            logger.warn("flatpak-sources: failed to download {} — {}", url, e.message)
+            null
+        }
 
     private fun hashStream(stream: java.io.InputStream): String {
         val md = MessageDigest.getInstance("SHA-256")
@@ -150,11 +151,12 @@ internal class SourcesWriter(
                 md.update(buf, 0, n)
             }
         }
-        return md.digest().joinToString("") { "%02x".format(it.toInt() and 0xFF) }
+        return md.digest().joinToString("") { "%02x".format(it.toInt() and BYTE_MASK) }
     }
 
     private companion object {
         private const val BUFFER_SIZE = 8192
+        private const val BYTE_MASK = 0xFF
         private const val DOWNLOAD_CONNECT_TIMEOUT_MS = 30_000
         private const val DOWNLOAD_READ_TIMEOUT_MS = 60_000
         private const val URL_MIN_SEGMENTS = 3

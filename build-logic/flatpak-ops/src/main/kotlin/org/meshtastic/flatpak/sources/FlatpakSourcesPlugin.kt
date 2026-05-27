@@ -18,6 +18,7 @@ package org.meshtastic.flatpak.sources
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.artifacts.ModuleVersionIdentifier
 import org.gradle.api.internal.project.ProjectInternal
 import org.gradle.internal.operations.BuildOperationDescriptor
 import org.gradle.internal.operations.BuildOperationListener
@@ -35,18 +36,11 @@ import java.util.concurrent.ConcurrentHashMap
  * Captures every external resource URL Gradle reads via the internal BuildOperationListener API and emits a
  * Flathub-compliant flatpak-sources.json at build finish.
  *
- * No heuristics: URL is authoritative (taken straight from the build op), the on-disk file is found via Gradle's
- * documented files-2.1 layout, and SHA-256 is computed from that exact file.
- *
- * For complete captures (including build-logic bootstrap downloads), pair with the init script:
+ * Apply the companion settings plugin in `settings.gradle.kts` for complete capture from build start:
+ * ```kotlin
+ * plugins { id("org.meshtastic.flatpak.sources.settings") version "..." }
  * ```
- * ./gradlew -I gradle/init-scripts/flatpak-ops.init.gradle.kts ...
- * ```
- *
- * Internal APIs used (acceptable trade-off — same approach as flatpak-gradle-generator):
- * - org.gradle.internal.operations.BuildOperationListener / BuildOperationListenerManager
- * - org.gradle.internal.resource.ExternalResourceReadBuildOperationType
- * - org.gradle.api.internal.project.ProjectInternal (for .services)
+ * The settings plugin auto-applies this plugin to the root project; there is no need to apply both.
  */
 class FlatpakSourcesPlugin : Plugin<Project> {
 
@@ -56,19 +50,18 @@ class FlatpakSourcesPlugin : Plugin<Project> {
         val extension = target.extensions.create("flatpakSources", FlatpakSourcesExtension::class.java)
         extension.outputFile.convention(target.layout.buildDirectory.file("flatpak-sources.json"))
 
-        // Prefer the URL set populated by the companion init script.
-        // The init script attaches its listener BEFORE any plugin/project resolution, so it
-        // captures bootstrap downloads (kotlin-dsl plugin marker, build-logic deps) that a
-        // listener registered here would miss.
+        // The settings plugin registers this URL set before any resolution happens. If it isn't present
+        // (plugin applied directly without the settings plugin), register a fallback listener.
+        // It won't capture bootstrap downloads but will get everything from this point forward.
         @Suppress("UNCHECKED_CAST")
         val capturedUrls: MutableSet<String> =
-            (target.gradle.extensions.findByName(extension.capturedUrlsExtensionName.get()) as? MutableSet<String>)
+            (target.gradle.extensions.findByName(CAPTURED_URLS_KEY) as? MutableSet<String>)
                 ?: ConcurrentHashMap.newKeySet<String>().also { fallback ->
                     val manager = (target as ProjectInternal).services.get(BuildOperationListenerManager::class.java)
                     manager.addListener(OpListener(fallback))
                     target.logger.warn(
-                        "flatpak-sources: init script not loaded; build-logic bootstrap URLs will be missing. " +
-                            "Pass -I <path-to-init-script> for a complete manifest.",
+                        "flatpak-sources: settings plugin not applied — bootstrap downloads will be missing. " +
+                            "Add id(\"org.meshtastic.flatpak.sources.settings\") to settings.gradle.kts.",
                     )
                 }
 
@@ -79,9 +72,7 @@ class FlatpakSourcesPlugin : Plugin<Project> {
             outputs.file(extension.outputFile)
 
             val afterTasks = extension.mustRunAfterTasks.get()
-            if (afterTasks.isNotEmpty()) {
-                mustRunAfter(afterTasks)
-            }
+            if (afterTasks.isNotEmpty()) mustRunAfter(afterTasks)
 
             val proj = target
             val urlsRef = capturedUrls
@@ -94,15 +85,12 @@ class FlatpakSourcesPlugin : Plugin<Project> {
             val filesRoot = File(target.gradle.gradleUserHomeDir, "caches/modules-2/files-2.1")
 
             doLast {
-                // Force-resolve platform-specific native dependencies not resolved on this host
                 val platformUrls =
                     resolvePlatformArtifacts(proj, platforms.getOrElse(emptySet()), platformDeps.getOrElse(emptySet()))
 
-                // Scan the Gradle cache for artifacts missed by the listener
-                // (e.g. build-logic plugin resolution that happened before listener attached)
                 @Suppress("UNCHECKED_CAST")
                 val repoUrls =
-                    proj.gradle.extensions.findByName("flatpakSourcesRepoUrls") as? List<String> ?: emptyList()
+                    proj.gradle.extensions.findByName(REPO_URLS_KEY) as? List<String> ?: emptyList()
                 val cacheUrls =
                     if (repoUrls.isNotEmpty()) {
                         scanCacheForMissingArtifacts(filesRoot, urlsRef, repoUrls, proj.logger)
@@ -127,9 +115,7 @@ class FlatpakSourcesPlugin : Plugin<Project> {
 
     private class OpListener(private val urls: MutableSet<String>) : BuildOperationListener {
         override fun started(op: BuildOperationDescriptor, e: OperationStartEvent) = Unit
-
         override fun progress(id: OperationIdentifier, e: OperationProgressEvent) = Unit
-
         override fun finished(op: BuildOperationDescriptor, e: OperationFinishEvent) {
             val details = op.details as? ExternalResourceReadBuildOperationType.Details ?: return
             if (e.failure != null) return
@@ -138,9 +124,12 @@ class FlatpakSourcesPlugin : Plugin<Project> {
     }
 
     companion object {
+        internal const val CAPTURED_URLS_KEY = "flatpakSourcesCapturedUrls"
+        internal const val REPO_URLS_KEY = "flatpakSourcesRepoUrls"
+
         /**
          * Force-resolves platform-specific dependencies that wouldn't normally resolve on the current host OS.
-         * Downloads them into the standard Gradle cache so [SourcesWriter] can find them via [CacheFileLocator].
+         * Downloads them into the standard Gradle cache so [SourcesWriter] can find them via the cache locator.
          *
          * @return URLs reconstructed from the resolved artifact coordinates and repositories.
          */
@@ -158,42 +147,50 @@ class FlatpakSourcesPlugin : Plugin<Project> {
                     }
                 }
 
-            val config = project.configurations.detachedConfiguration(*deps.toTypedArray())
+            val config = project.configurations.detachedConfiguration()
+            deps.forEach { config.dependencies.add(it) }
             config.isTransitive = false
 
-            val urls = mutableListOf<String>()
             val repoUrls =
                 project.repositories
                     .filterIsInstance<org.gradle.api.artifacts.repositories.MavenArtifactRepository>()
                     .map { it.url.toString().trimEnd('/') }
                     .filter { !it.startsWith("file:") }
 
-            try {
-                config.resolvedConfiguration.resolvedArtifacts.forEach { artifact ->
+            return try {
+                config.resolvedConfiguration.resolvedArtifacts.flatMap { artifact ->
                     val mid = artifact.moduleVersion.id
-                    val groupPath = mid.group.replace('.', '/')
-                    val filename = artifact.file.name
-                    for (repoUrl in repoUrls) {
-                        val base = "$repoUrl/$groupPath/${mid.name}/${mid.version}"
-                        urls.add("$base/$filename")
-                        // Include POM for offline resolution
-                        val pomFile = "${mid.name}-${mid.version}.pom"
-                        if (filename != pomFile) urls.add("$base/$pomFile")
-                    }
                     project.logger.lifecycle(
                         "flatpak-sources: force-resolved {} (platform artifact)",
                         "${mid.group}:${mid.name}:${mid.version}",
                     )
+                    artifactToUrls(mid, artifact.file.name, repoUrls)
                 }
-            } catch (e: Exception) {
+            } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
                 project.logger.warn("flatpak-sources: platform resolution failed — {}", e.message)
+                emptyList()
             }
-            return urls
+        }
+
+        private fun artifactToUrls(
+            mid: ModuleVersionIdentifier,
+            filename: String,
+            repoUrls: List<String>,
+        ): List<String> {
+            val groupPath = mid.group.replace('.', '/')
+            val pomFile = "${mid.name}-${mid.version}.pom"
+            return repoUrls.flatMap { repoUrl ->
+                val base = "$repoUrl/$groupPath/${mid.name}/${mid.version}"
+                buildList {
+                    add("$base/$filename")
+                    if (filename != pomFile) add("$base/$pomFile")
+                }
+            }
         }
 
         /**
-         * Scans the Gradle file cache for artifacts not already in [capturedUrls]. This picks up artifacts resolved
-         * during included build configuration (e.g. build-logic's kotlin-dsl plugin) that our listener missed.
+         * Scans the Gradle file cache for artifacts not already in [capturedUrls]. Picks up artifacts resolved
+         * during included build configuration (e.g. build-logic's kotlin-dsl plugin) that the listener missed.
          *
          * Uses HEAD checks to validate URLs before emitting.
          */
@@ -205,68 +202,65 @@ class FlatpakSourcesPlugin : Plugin<Project> {
         ): List<String> {
             if (!filesRoot.isDirectory) return emptyList()
             val urls = mutableListOf<String>()
-            var scanned = 0
 
-            filesRoot
-                .listFiles { f -> f.isDirectory }
-                ?.forEach { groupDir ->
-                    val group = groupDir.name
-                    val groupPath = group.replace('.', '/')
-                    groupDir
-                        .listFiles { f -> f.isDirectory }
-                        ?.forEach { artifactDir ->
-                            val artifact = artifactDir.name
-                            artifactDir
-                                .listFiles { f -> f.isDirectory }
-                                ?.forEach { versionDir ->
-                                    val version = versionDir.name
-                                    val files =
-                                        versionDir
-                                            .listFiles { f -> f.isDirectory }
-                                            ?.flatMap { hashDir ->
-                                                hashDir.listFiles()?.filter { it.isFile }?.toList() ?: emptyList()
-                                            } ?: emptyList()
-
-                                    for (file in files) {
-                                        val filename = file.name
-                                        // Skip if already captured by the listener from any repo
-                                        val alreadyCaptured =
-                                            repoUrls.any { repo ->
-                                                capturedUrls.contains("$repo/$groupPath/$artifact/$version/$filename")
-                                            }
-                                        if (alreadyCaptured) continue
-
-                                        // HEAD-check to find the correct repo
-                                        for (repoUrl in repoUrls) {
-                                            val fileUrl = "$repoUrl/$groupPath/$artifact/$version/$filename"
-                                            if (headCheck(fileUrl)) {
-                                                urls.add(fileUrl)
-                                                scanned++
-                                                break
-                                            }
-                                        }
-                                    }
-                                }
-                        }
+            filesRoot.listFiles { f -> f.isDirectory }?.forEach { groupDir ->
+                val groupPath = groupDir.name.replace('.', '/')
+                groupDir.listFiles { f -> f.isDirectory }?.forEach { artifactDir ->
+                    artifactDir.listFiles { f -> f.isDirectory }?.forEach { versionDir ->
+                        urls.addAll(scanVersionDir(versionDir, groupPath, artifactDir.name, capturedUrls, repoUrls))
+                    }
                 }
-            if (scanned > 0) {
-                logger.lifecycle("flatpak-sources: cache scan found {} additional URLs", scanned)
+            }
+
+            if (urls.isNotEmpty()) {
+                logger.lifecycle("flatpak-sources: cache scan found {} additional URLs", urls.size)
             }
             return urls
         }
 
-        private fun headCheck(url: String): Boolean = try {
-            val conn = java.net.URI(url).toURL().openConnection() as java.net.HttpURLConnection
-            conn.requestMethod = "HEAD"
-            conn.connectTimeout = HEAD_TIMEOUT_MS
-            conn.readTimeout = HEAD_TIMEOUT_MS
-            conn.instanceFollowRedirects = true
-            val code = conn.responseCode
-            conn.disconnect()
-            code in HTTP_OK_RANGE
-        } catch (_: Exception) {
-            false
+        private fun scanVersionDir(
+            versionDir: File,
+            groupPath: String,
+            artifact: String,
+            capturedUrls: Set<String>,
+            repoUrls: List<String>,
+        ): List<String> {
+            val version = versionDir.name
+            val files =
+                versionDir.listFiles { f -> f.isDirectory }
+                    ?.flatMap { hashDir -> hashDir.listFiles()?.filter { it.isFile }?.toList() ?: emptyList() }
+                    ?: emptyList()
+
+            val result = mutableListOf<String>()
+            for (file in files) {
+                val filename = file.name
+                val alreadyCaptured =
+                    repoUrls.any { repo -> capturedUrls.contains("$repo/$groupPath/$artifact/$version/$filename") }
+                if (alreadyCaptured) continue
+                for (repoUrl in repoUrls) {
+                    val fileUrl = "$repoUrl/$groupPath/$artifact/$version/$filename"
+                    if (headCheck(fileUrl)) {
+                        result.add(fileUrl)
+                        break
+                    }
+                }
+            }
+            return result
         }
+
+        private fun headCheck(url: String): Boolean =
+            try {
+                val conn = java.net.URI(url).toURL().openConnection() as java.net.HttpURLConnection
+                conn.requestMethod = "HEAD"
+                conn.connectTimeout = HEAD_TIMEOUT_MS
+                conn.readTimeout = HEAD_TIMEOUT_MS
+                conn.instanceFollowRedirects = true
+                val code = conn.responseCode
+                conn.disconnect()
+                code in HTTP_OK_RANGE
+            } catch (_: Exception) {
+                false
+            }
 
         private const val HEAD_TIMEOUT_MS = 5_000
         private val HTTP_OK_RANGE = 200..299
