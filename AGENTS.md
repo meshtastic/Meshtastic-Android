@@ -40,6 +40,7 @@ You are an expert Android/KMP engineer. Maintain architectural boundaries, use M
 - **Verify Before Push:** Treat any "push" as verify-then-push. CI has failed repeatedly due to skipped local checks.
 - **Never Touch Protos or Secrets:** `core/proto` is an upstream submodule. Secrets are git-ignored.
 - **Privacy First:** Never log or expose PII, location, or cryptographic keys.
+- **Sanitize TAK test fixtures.** When adding XML fixtures under `core/takserver/src/jvmAndroidMain/resources/tak_test_fixtures/` (or anywhere else): NEVER paste an unredacted ATAK capture. Sanitize first — real GPS coords → public landmarks (e.g. `38.8895,-77.0353` Washington Monument) or established synthetic ranges like `33.128,-107.252` (NM, already used); real `ANDROID-[16 hex]` device IDs → sequential placeholders `ANDROID-0000000000000001`; RFC 1918 private IPs → RFC 5737 docs range (`192.0.2.1`); real operator names → `ALPHA-1` / `BRAVO-2`. The repo's existing synthetic coords (33.x/-107.x, 12.x/9x.x) are the convention to extend, not replace. Before committing a fixture, sanity-grep: `grep -nE '\b\d{1,3}\.\d{5,}\b\|ANDROID-[0-9a-f]{12,}\|\b(192\.168\|10\.\|172\.(1[6-9]\|2[0-9]\|3[01]))\.[0-9]+\.[0-9]+\b' <file>` — any hit that isn't a known synthetic range or `ANDROID-0+\d+` placeholder means it isn't sanitized yet.
 </rules>
 
 <documentation_sync>

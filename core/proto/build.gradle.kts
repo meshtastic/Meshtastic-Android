@@ -115,6 +115,8 @@ wire {
     prune("meshtastic.TAKEnvironment")
     prune("meshtastic.SensorFov")
     prune("meshtastic.SensorFov.SensorType")
+    prune("meshtastic.TakTalkMessage")
+    prune("meshtastic.TakTalkRoomData")
     prune("meshtastic.CotHow")
     prune("meshtastic.CotType")
     prune("meshtastic.GeoPointSource")
