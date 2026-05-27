@@ -29,27 +29,18 @@ import org.gradle.internal.operations.OperationFinishEvent
 import org.gradle.internal.operations.OperationIdentifier
 import org.gradle.internal.operations.OperationProgressEvent
 import org.gradle.internal.operations.OperationStartEvent
-import org.gradle.internal.operations.notify.BuildOperationFinishedNotification
-import org.gradle.internal.operations.notify.BuildOperationNotificationListener
-import org.gradle.internal.operations.notify.BuildOperationNotificationListenerRegistrar
-import org.gradle.internal.operations.notify.BuildOperationProgressNotification
-import org.gradle.internal.operations.notify.BuildOperationStartedNotification
 import org.gradle.internal.resource.ExternalResourceReadBuildOperationType
 import java.util.concurrent.ConcurrentHashMap
 
 /**
- * Settings plugin that captures external resource URLs from the very start of the build.
+ * Settings plugin that captures external resource URLs throughout the entire build.
  *
- * **Strategy (two tiers):**
+ * Uses [BuildEventListenerRegistryInternal.onOperationCompletion] with a [BuildService] —
+ * the same pattern as `gradle/github-dependency-graph-gradle-plugin`. Supports unlimited
+ * concurrent listeners and coexists with Develocity or any other build tooling.
  *
- * 1. Attempts [BuildOperationNotificationListenerRegistrar] — a replay-buffered registrar
- *    that delivers ALL build operations from JVM start for 100% capture. Only one listener
- *    is allowed; if Develocity (or another tool) claims it first, we proceed to tier 2.
- *
- * 2. Falls back to [BuildEventListenerRegistryInternal.onOperationCompletion] — the same
- *    API used by GitHub's dependency-submission action. Supports multiple listeners (coexists
- *    with Develocity), proper BuildService lifecycle, but no replay. Paired with settings
- *    classpath introspection to reconstruct URLs for downloads that occurred before attach.
+ * Settings classpath introspection fills the gap for downloads that occurred before the
+ * listener attached (pluginManagement resolution, settings plugin bootstrap).
  *
  * ```kotlin
  * // settings.gradle.kts
@@ -64,15 +55,23 @@ class FlatpakSourcesSettingsPlugin : Plugin<Settings> {
         val capturedUrls: MutableSet<String> = ConcurrentHashMap.newKeySet()
         settings.gradle.extensions.add("flatpakSourcesCapturedUrls", capturedUrls)
 
-        val services = (settings.gradle as GradleInternal).services
-        val replayRegistered = tryReplayRegistrar(services, capturedUrls)
+        // Register BuildService listener via BuildEventListenerRegistryInternal.
+        val serviceProvider: Provider<UrlCaptureBuildService> =
+            settings.gradle.sharedServices.registerIfAbsent(
+                "flatpakSourcesUrlCapture",
+                UrlCaptureBuildService::class.java,
+            ) {}
 
-        if (!replayRegistered) {
-            // Tier 2: BuildEventListenerRegistryInternal (multi-listener, no replay).
-            // Same pattern as gradle/github-dependency-graph-gradle-plugin.
-            registerViaBuildEventRegistry(settings, capturedUrls)
-            introspectSettingsClasspath(settings, capturedUrls)
-        }
+        serviceProvider.get().capturedUrls = capturedUrls
+
+        val registry = (settings.gradle as GradleInternal)
+            .services
+            .get(BuildEventListenerRegistryInternal::class.java)
+
+        registry.onOperationCompletion(serviceProvider)
+
+        // Reconstruct URLs for downloads that occurred before our listener attached.
+        introspectSettingsClasspath(settings, capturedUrls)
 
         // Auto-apply the project plugin to the root project.
         settings.gradle.rootProject {
@@ -81,57 +80,9 @@ class FlatpakSourcesSettingsPlugin : Plugin<Settings> {
     }
 
     /**
-     * Tier 1: Replay-buffered [BuildOperationNotificationListenerRegistrar].
-     * Returns true if successful, false if the slot is already occupied.
-     */
-    private fun tryReplayRegistrar(
-        services: org.gradle.internal.service.ServiceRegistry,
-        urls: MutableSet<String>,
-    ): Boolean {
-        return try {
-            val registrar = services.get(BuildOperationNotificationListenerRegistrar::class.java)
-            registrar.register(
-                object : BuildOperationNotificationListener {
-                    override fun started(notification: BuildOperationStartedNotification) = Unit
-                    override fun progress(notification: BuildOperationProgressNotification) = Unit
-                    override fun finished(notification: BuildOperationFinishedNotification) {
-                        val details = notification.notificationOperationDetails
-                            as? ExternalResourceReadBuildOperationType.Details ?: return
-                        if (notification.notificationOperationFailure != null) return
-                        urls.add(details.location)
-                    }
-                },
-            )
-            true
-        } catch (_: IllegalStateException) {
-            false
-        }
-    }
-
-    /**
-     * Tier 2: Register via [BuildEventListenerRegistryInternal.onOperationCompletion].
-     * Uses a [BuildService] for proper lifecycle and supports multiple concurrent listeners.
-     */
-    private fun registerViaBuildEventRegistry(settings: Settings, urls: MutableSet<String>) {
-        val serviceProvider: Provider<UrlCaptureBuildService> =
-            settings.gradle.sharedServices.registerIfAbsent(
-                "flatpakSourcesUrlCapture",
-                UrlCaptureBuildService::class.java,
-            ) {}
-
-        // Inject the shared URL set into the service instance.
-        serviceProvider.get().capturedUrls = urls
-
-        val registry = (settings.gradle as GradleInternal)
-            .services
-            .get(BuildEventListenerRegistryInternal::class.java)
-
-        registry.onOperationCompletion(serviceProvider)
-    }
-
-    /**
      * Enumerates artifacts already resolved in the settings buildscript classpath.
-     * Reconstructs download URLs for events that occurred before our listener attached.
+     * Reconstructs download URLs for pluginManagement resolution and settings plugins
+     * that downloaded before our BuildService listener was active.
      */
     private fun introspectSettingsClasspath(settings: Settings, urls: MutableSet<String>) {
         val repos = settings.pluginManagement.repositories
@@ -173,17 +124,16 @@ class FlatpakSourcesSettingsPlugin : Plugin<Settings> {
 }
 
 /**
- * BuildService that implements [BuildOperationListener] for use with
+ * BuildService implementing [BuildOperationListener] for use with
  * [BuildEventListenerRegistryInternal.onOperationCompletion].
  *
- * This is the same pattern used by `gradle/github-dependency-graph-gradle-plugin`.
- * Multiple services can be registered simultaneously — coexists with Develocity.
+ * Same pattern as `gradle/github-dependency-graph-gradle-plugin`.
+ * Supports multiple concurrent listeners — coexists with Develocity.
  */
 abstract class UrlCaptureBuildService :
     BuildService<BuildServiceParameters.None>,
     BuildOperationListener {
 
-    /** Injected by the settings plugin after registration. */
     internal lateinit var capturedUrls: MutableSet<String>
 
     override fun started(op: BuildOperationDescriptor, e: OperationStartEvent) = Unit
