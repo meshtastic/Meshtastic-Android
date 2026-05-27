@@ -19,6 +19,15 @@
     <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">Nachricht von %1$s: %2$s</string>
+    <string name="a11y_node_battery">Akku %1$d%%</string>
+    <string name="a11y_node_distance_away">%1$s Abwesend</string>
+    <string name="a11y_node_favorite">Favorit</string>
+    <string name="a11y_node_hops_away">%1$d Sprünge entfernt</string>
+    <string name="a11y_node_last_heard">Zuletzt gehört %1$s</string>
+    <string name="a11y_node_offline">Offline</string>
+    <string name="a11y_node_online">Online</string>
+    <string name="a11y_node_role">Rolle %1$s</string>
+    <string name="a11y_node_signal">Signal %1$s</string>
     <string name="accept">Akzeptieren</string>
     <string name="acknowledgements">Danksagungen</string>
     <!-- ACTION -->
@@ -141,6 +150,20 @@
     <string name="channels">Kanäle</string>
     <!-- CHIRPY -->
     <string name="chirpy">Chirpy</string>
+    <string name="chirpy_assistant_title">Chirpy Assistent</string>
+    <string name="chirpy_checking">Chirpy Verfügbarkeit…</string>
+    <string name="chirpy_downloading">Chirpy wird heruntergeladen…</string>
+    <string name="chirpy_downloading_progress">Chirpy Modell herunterladen: %1$d%%</string>
+    <string name="chirpy_downloading_subtitle">Dies geschieht nur einmal. Chirpy wird bald bereit sein!</string>
+    <string name="chirpy_error_busy">Whoa! Der Kanal ist gerade völlig überlastet – hier herrscht reger Datenverkehr! 📶 Lassen Sie uns auf ein freies Zeitfenster warten und die Übertragung dann erneut versuchen.</string>
+    <string name="chirpy_error_model_unavailable">Meine Batterie lädt gerade, oder meine Firmware wird noch heruntergeladen! 🔋 Geben Sie mir ein paar Augenblicke, um mich zu synchronisieren und hochzufahren!</string>
+    <string name="chirpy_error_token_budget_exceeded">Diese Nutzlast ist zu groß für mein Übertragungsbudget! 📱 Versuchen Sie bitte, ihre Nachricht zu kürzen, damit wir sie reibungslos weiterleiten können.</string>
+    <string name="chirpy_error_unknown">Hoppla! Wir sind auf starken Paketverlust oder Signalstörungen gestoßen! 📡 Lassen Sie uns die Anfrage noch einmal senden und schauen, ob wir diesmal durchkommen.</string>
+    <string name="chirpy_error_unsupported_flavor">Ich operiere in dieser App-Variante nur mit eingeschränkter Frequenz! 🔌 Versuchen Sie es stattdessen mit einer Version, die über eine vollständige KI Integration verfügt.</string>
+    <string name="chirpy_error_unsupported_platform">Oh nein! Meine Antenne scheint auf dieser Plattform keine Verbindung herstellen zu können. 📡 Bitte überprüfen Sie noch einmal die Kompatibilität Ihrer Hardware!</string>
+    <string name="chirpy_intro">Hallo! 📡 Ich bin Chirpy, ihr lokaler Meshtastic Assistent! Ich kann Ihnen bei der Einrichtung, Konfiguration, Fehlerbehebung und mit Tipps rund um das Mesh-Netzwerk helfen. Wobei kann ich Ihnen behilflich sein?</string>
+    <string name="chirpy_ready">Fragen Sie Chirpy</string>
+    <string name="chirpy_search_placeholder">Fragen Sie nach Meshtastic…</string>
     <string name="choose_contrast">Kontrast</string>
     <string name="choose_theme">Design auswählen</string>
     <!-- CLEAN -->
@@ -328,12 +351,30 @@
     <string name="dns">DNS</string>
     <!-- DOC -->
     <string name="doc_clear_search">Neue Suche</string>
+    <string name="doc_keywords_telemetry">Telemetrie,Sensor,Temperatur,Luftfeuchtigkeit,Druck, Energie</string>
+    <string name="doc_keywords_translate">Übersetzen,Crowdin,Lokalisierung,Sprache,i18n,Mitmachen</string>
+    <string name="doc_keywords_units">Einheiten, Sprache, Metrische, Imperiale, Temperatur, Distanz</string>
+    <string name="doc_search_placeholder">Dokumentation durchsuchen</string>
+    <string name="doc_section_developer">Entwicklerhandbuch</string>
+    <string name="doc_section_user">Benutzerhandbuch</string>
     <string name="doc_title_connections">Verbindungen</string>
+    <string name="doc_title_desktop">Desktop App</string>
     <string name="doc_title_discovery">Entdecken</string>
     <string name="doc_title_firmware">Firmwareaktualisierungen</string>
+    <string name="doc_title_map">Karte &amp; Wegpunkte</string>
+    <string name="doc_title_measurement">Messen &amp; Formatierung</string>
+    <string name="doc_title_messages">Nachrichten &amp; Kanäle</string>
     <string name="doc_title_mqtt">MQTT</string>
+    <string name="doc_title_node_metrics">Knoten Kenndaten</string>
     <string name="doc_title_nodes">Knoten</string>
     <string name="doc_title_onboarding">Erste Schritte</string>
+    <string name="doc_title_settings_module">Einstellungen — Module &amp; Administration</string>
+    <string name="doc_title_settings_radio">Einstellungen — Radio &amp; Benutzer</string>
+    <string name="doc_title_signal_meter">Signalmesser</string>
+    <string name="doc_title_tak">TAK Integration</string>
+    <string name="doc_title_telemetry">Telemetrie &amp; Sensoren</string>
+    <string name="doc_title_translate">Die App übersetzen</string>
+    <string name="doc_title_units">Einheiten &amp; Sprache</string>
     <string name="done">Fertig</string>
     <string name="dont_show_again_for_device">Für dieses Gerät nicht erneut anzeigen</string>
     <string name="double_tap_as_button_press">Doppelklick als Taste</string>
@@ -512,6 +553,7 @@
     <string name="hardware_model">Geräte-Modell</string>
     <string name="heading">Überschrift</string>
     <string name="heartbeat">Puls</string>
+    <string name="help_and_documentation">Hilfe &amp; Dokumentation</string>
     <string name="hide_layer">Ebene ausblenden</string>
     <string name="hide_password">Passwort verbergen</string>
     <string name="history_return_max">Verlauf Rückgabewert maximal</string>
@@ -791,9 +833,30 @@
     <string name="node_id">Knoten-ID</string>
     <string name="node_layout_channel">Kanal</string>
     <string name="node_layout_compact">Kompakt</string>
+    <string name="node_layout_compact_fields_header">Kompakte Felder</string>
+    <string name="node_layout_complete">Fertig</string>
+    <string name="node_layout_complete_description">Das vollständige Layout zeigt alle verfügbaren Knotendaten an. Felder ohne Daten werden automatisch ausgeblendet.</string>
+    <string name="node_layout_device_role">Gerät &amp; Rolle</string>
+    <string name="node_layout_distance_and_bearing">Entfernung und Peilung</string>
+    <string name="node_layout_help_signal_bad">Das Signal ist schlecht, das Signal-Rauschverhältnis ist über −18 dB und die Signalstärke ist über −125 dBm.</string>
+    <string name="node_layout_help_signal_fair">Das Signal ist mäßig, das Signal-Rauschverhältnis ist über −12 dB und die Signalstärke ist über −120 dBm.</string>
+    <string name="node_layout_help_signal_good">Das Signal ist stark, das Signal-Rauschverhältnis ist über −7 dB und die Signalstärke ist über −115 dBm.</string>
+    <string name="node_layout_help_signal_indicator">Kombiniert SNR und RSSI zu einem Qualitätsniveau, das als farbiges Symbol mit einer Beschreibung angezeigt wird.</string>
+    <string name="node_layout_help_signal_none">Kein nutzbares Signal erkannt. Unterhalb aller Qualitätsgrenzen.</string>
     <string name="node_layout_hops_away">Hops Entfernt</string>
+    <string name="node_layout_last_heard_time">Zuletzt gesehen</string>
     <string name="node_layout_log_icons">Umweltdaten</string>
+    <string name="node_layout_no_preview_available">Keine Knoten für die Vorschau vorhanden.</string>
     <string name="node_layout_power">Leistung</string>
+    <string name="node_layout_preview">Vorschau</string>
+    <string name="node_layout_relative_last_heard">Relative Zeit zuletzt gesehen</string>
+    <string name="node_layout_section_title">Knotenlayout</string>
+    <string name="node_layout_signal_direct_only">Signal (nur direkt)</string>
+    <string name="node_layout_signal_quality_indicator">Signalqualität</string>
+    <string name="node_list_click_label">Knotendetails öffnen</string>
+    <string name="node_list_help_node_details">Knotendetails</string>
+    <string name="node_list_help_title">Hilfe Knotenliste</string>
+    <string name="node_list_long_click_label">Knoten Einstellungen</string>
     <string name="node_number">Knotennummer</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_button">Sortieroptionen</string>
@@ -1265,6 +1328,7 @@
     <string name="tx_power_dbm">Sendeleistung</string>
     <string name="type">Typ</string>
     <string name="type_a_message">Eine Nachricht schreiben</string>
+    <string name="udp_enabled">UDP Übertragung</string>
     <!-- UNKNOWN -->
     <string name="unknown">Unbekannt</string>
     <string name="unknown_age">Alter unbekannt</string>
