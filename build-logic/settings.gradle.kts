@@ -55,3 +55,4 @@ apply(from = "../gradle/build-cache.settings.gradle")
 
 rootProject.name = "build-logic"
 include(":convention")
+include(":flatpak-ops")

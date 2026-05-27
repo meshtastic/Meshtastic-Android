@@ -27,7 +27,6 @@ pluginManagement {
         }
         mavenCentral()
         gradlePluginPortal()
-        maven("https://central.sonatype.com/repository/maven-snapshots/")
         maven { url = uri("./offline-repository") }
     }
 }
@@ -35,7 +34,7 @@ pluginManagement {
 plugins {
     id("com.gradle.develocity") version "4.4.2"
     id("org.gradle.toolchains.foojay-resolver") version "1.0.0"
-    id("org.meshtastic.flatpak.sources.settings") version "0.1.0-SNAPSHOT"
+    id("org.meshtastic.flatpak.sources.settings")
 }
 
 @Suppress("UnstableApiUsage")
