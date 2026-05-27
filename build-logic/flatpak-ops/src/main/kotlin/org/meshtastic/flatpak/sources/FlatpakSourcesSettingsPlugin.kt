@@ -30,8 +30,6 @@ import org.gradle.internal.operations.OperationIdentifier
 import org.gradle.internal.operations.OperationProgressEvent
 import org.gradle.internal.operations.OperationStartEvent
 import org.gradle.internal.resource.ExternalResourceReadBuildOperationType
-import java.net.HttpURLConnection
-import java.net.URI
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -41,8 +39,9 @@ import java.util.concurrent.ConcurrentHashMap
  * the same pattern as `gradle/github-dependency-graph-gradle-plugin`. Supports unlimited
  * concurrent listeners and coexists with Develocity or any other build tooling.
  *
- * Settings classpath introspection fills the gap for downloads that occurred before the
- * listener attached (pluginManagement resolution, settings plugin bootstrap).
+ * A post-build cache scan (executed during the `captureFlatpakSources` task) fills gaps
+ * for downloads that occurred before the listener attached — namely included build
+ * plugin resolution (e.g. build-logic's kotlin-dsl) and settings plugin bootstrap.
  *
  * ```kotlin
  * // settings.gradle.kts
@@ -72,8 +71,9 @@ class FlatpakSourcesSettingsPlugin : Plugin<Settings> {
 
         registry.onOperationCompletion(serviceProvider)
 
-        // Reconstruct URLs for downloads that occurred before our listener attached.
-        introspectSettingsClasspath(settings, capturedUrls)
+        // Collect repo URLs from root settings (available now) for the cache scan at task time.
+        val repoUrls = collectRepoUrls(settings)
+        settings.gradle.extensions.add("flatpakSourcesRepoUrls", repoUrls)
 
         // Auto-apply the project plugin to the root project.
         settings.gradle.rootProject {
@@ -82,74 +82,27 @@ class FlatpakSourcesSettingsPlugin : Plugin<Settings> {
     }
 
     /**
-     * Enumerates artifacts already resolved in the settings buildscript classpath.
-     * Reconstructs download URLs for pluginManagement resolution and settings plugins
-     * that downloaded before our BuildService listener was active.
-     *
-     * For each artifact, we probe candidate URLs with a HEAD request to avoid emitting
-     * invalid URLs (e.g. Develocity JAR against Google Maven) that would cause
-     * flatpak-builder to fail with a 404.
+     * Collects all Maven repository URLs from root settings and well-known repos.
+     * No network calls — just reads configuration. Used at task time for cache scan.
      */
-    private fun introspectSettingsClasspath(settings: Settings, urls: MutableSet<String>) {
+    private fun collectRepoUrls(settings: Settings): List<String> {
         val repos = settings.pluginManagement.repositories
             .filterIsInstance<org.gradle.api.artifacts.repositories.MavenArtifactRepository>()
             .map { it.url.toString().trimEnd('/') }
             .filter { !it.startsWith("file:") }
+            .toMutableList()
 
-        val classpath = settings.buildscript.configurations.findByName("classpath") ?: return
-        if (!classpath.isCanBeResolved) return
-
-        classpath.resolvedConfiguration.resolvedArtifacts.forEach { artifact ->
-            val mid = artifact.moduleVersion.id
-            val group = mid.group
-            val name = mid.name
-            val version = mid.version
-            val filename = artifact.file.name
-
-            if (version == "unspecified") return@forEach
-
-            val groupPath = group.replace('.', '/')
-            val markerGroup = "$group.$name"
-            val markerGroupPath = markerGroup.replace('.', '/')
-            val markerPom = "$markerGroup.gradle.plugin-$version.pom"
-
-            for (repoUrl in repos) {
-                val basePath = "$repoUrl/$groupPath/$name/$version"
-                val jarUrl = "$basePath/$filename"
-
-                // Validate the primary artifact URL exists before emitting any URLs for this repo
-                if (!headCheck(jarUrl)) continue
-
-                urls.add(jarUrl)
-                val pomFile = "$name-$version.pom"
-                val moduleFile = "$name-$version.module"
-                if (filename != pomFile) urls.add("$basePath/$pomFile")
-                if (filename != moduleFile) urls.add("$basePath/$moduleFile")
-
-                val markerPath = "$repoUrl/$markerGroupPath/$markerGroup.gradle.plugin/$version"
-                urls.add("$markerPath/$markerPom")
-            }
-        }
-    }
-
-    /** Quick HEAD check to verify a URL is reachable (2xx/3xx). */
-    private fun headCheck(url: String): Boolean =
-        try {
-            val conn = URI(url).toURL().openConnection() as HttpURLConnection
-            conn.requestMethod = "HEAD"
-            conn.connectTimeout = HEAD_TIMEOUT_MS
-            conn.readTimeout = HEAD_TIMEOUT_MS
-            conn.instanceFollowRedirects = true
-            val code = conn.responseCode
-            conn.disconnect()
-            code in HTTP_OK_RANGE
-        } catch (_: Exception) {
-            false
+        // Ensure well-known repos are included (build-logic typically uses these)
+        val wellKnown = listOf(
+            "https://repo1.maven.org/maven2",
+            "https://plugins.gradle.org/m2",
+            "https://dl.google.com/dl/android/maven2",
+        )
+        for (repo in wellKnown) {
+            if (repo !in repos) repos.add(repo)
         }
 
-    private companion object {
-        private const val HEAD_TIMEOUT_MS = 5_000
-        private val HTTP_OK_RANGE = 200..399
+        return repos.distinct()
     }
 }
 
