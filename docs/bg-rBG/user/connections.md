@@ -35,14 +35,14 @@ You can filter devices by transport type using the filter chips at the top:
 
 > 💡 **Tip:** If your device doesn't appear, check that Bluetooth and Location permissions are granted, and that the radio is not already connected to another device.
 
-### Connection Status
+### Състояние на връзката
 
-| Икона | Състояние         | Описание                      |
-| ----- | ----------------- | ----------------------------- |
-| 🟢    | Свързано          | Active radio link established |
-| 🟡    | Свързване         | Handshake in progress         |
-| 🔴    | Прекъсната връзка | No active connection          |
-| ⚪     | Not configured    | Няма избрано устройство       |
+| Икона | Състояние          | Описание                       |
+| ----- | ------------------ | ------------------------------ |
+| 🟢    | Свързано           | Установена активна радиовръзка |
+| 🟡    | Свързване          | Handshake in progress          |
+| 🔴    | Прекъсната връзка  | Няма активна връзка            |
+| ⚪     | Не е конфигурирано | Няма избрано устройство        |
 
 When connecting, a status indicator shows the current connection state:
 
@@ -62,7 +62,7 @@ If no devices are found, the app shows an empty state with instructions:
 
 USB connections provide a wired alternative, useful for desktop or when Bluetooth is unavailable.
 
-### Setup
+### Настройка
 
 1. Connect your radio via USB cable to your device.
 2. The app will prompt for USB permission — tap **Allow**.

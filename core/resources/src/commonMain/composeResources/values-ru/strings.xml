@@ -21,6 +21,7 @@
     <string name="a11y_message_from">От %1$s: %2$s</string>
     <string name="a11y_node_battery">заряд батареи %1$d%%</string>
     <string name="a11y_node_favorite">избранный</string>
+    <string name="a11y_node_last_heard">последний раз услышан %1$s</string>
     <string name="a11y_node_offline">оффлайн</string>
     <string name="a11y_node_online">онлайн</string>
     <string name="a11y_node_role">роль %1$s</string>
@@ -148,6 +149,21 @@
     <!-- CHIRPY -->
     <string name="chirpy">Щебетун</string>
     <string name="chirpy_assistant_title">Весёлый помощник</string>
+    <string name="chirpy_checking">Проверка доступности Chirpy…</string>
+    <string name="chirpy_downloading">Chirpy загружается…</string>
+    <string name="chirpy_downloading_progress">Загрузка модели Chirpy: %1$d%%</string>
+    <string name="chirpy_downloading_subtitle">Это произошло только один раз. Chirpy скоро будет готов!</string>
+    <string name="chirpy_error_busy">Ух ё! Канал сейчас совершенно перегружен из-за сильного трафика! 📶 Давай подождём свободного промежутка и попробуем передать снова.</string>
+    <string name="chirpy_error_model_unavailable">Моя батарея заряжается или моя прошивка всё ещё загружается! 🔋 Дай мне немного времени, чтобы синхронизироваться и загрузиться!</string>
+    <string name="chirpy_error_token_budget_exceeded">Эта нагрузка слишком велика для моего бюджета передачи! 📱 Попробуй сократить сообщение, чтобы я мог передать его без проблем.</string>
+    <string name="chirpy_error_unknown">Упс! Произошла сильная потеря пакетов или помехи сигнала! 📡 Давай повторно отправим этот запрос и посмотрим, сможет ли он пройти.</string>
+    <string name="chirpy_error_unsupported_flavor">Я работаю на ограниченной частоте в этой версии приложения! 🔌 Попробуй использовать версию с полной интеграцией ИИ-ядра.</string>
+    <string name="chirpy_error_unsupported_platform">О нет! Похоже, моя антенна не может установить соединение на этой платформе. 📡 Пожалуйста, дважды проверь совместимость своего оборудования!</string>
+    <string name="chirpy_intro">Привет! 📡 Я Chirpy - твой помощник по Meshtastic на устройстве! Я могу помочь с настройкой, конфигурацией, устранением неполадок и советами по mesh-сетям. Чем я могу тебе помочь?</string>
+    <string name="chirpy_ready">Спроси Chirpy</string>
+    <string name="chirpy_search_placeholder">Спроси о Meshtastic…</string>
+    <string name="chirpy_suggested_pages_help">Вот несколько страниц документации, которые могут помочь:</string>
+    <string name="chirpy_thinking">Chirpy прокладывает маршрут через сеть… 📡</string>
     <string name="choose_contrast">Уровень контрастности</string>
     <string name="choose_theme">Выберите тему</string>
     <!-- CLEAN -->
