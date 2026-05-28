@@ -12,13 +12,12 @@
   <description>
     <p>
       Meshtastic is an open-source, off-grid mesh networking project that lets
-      you send messages and share your location over long distances without
+      you send messages and view node locations over long distances without
       cellular service or the internet, using inexpensive LoRa radio hardware.
     </p>
     <p>Features include:</p>
     <ul>
       <li>Text messaging between nodes on the mesh network</li>
-      <li>Real-time GPS position sharing on a map</li>
       <li>Encrypted channels for private group communication</li>
       <li>Node management and device configuration</li>
       <li>Works entirely offline — no internet required</li>
