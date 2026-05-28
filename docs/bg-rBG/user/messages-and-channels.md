@@ -1,5 +1,6 @@
 ---
 title: Messages & Channels
+parent: Ръководство за потребители
 nav_order: 3
 last_updated: 2026-05-13
 description: Send and receive messages, manage channels, configure encryption, and use quick chat, reactions, and message actions.
@@ -96,7 +97,7 @@ Pre-configured messages for rapid communication:
 - Customize quick chat messages in **Settings → Quick Chat**
 - Useful when typing is impractical (gloves, small screen, urgent)
 
-![Quick chat option](/assets/screenshots/messages_quick_chat.png)
+![Quick chat option](../../assets/screenshots/messages_quick_chat.png)
 
 The channel list shows each channel with its latest message preview.
 
@@ -114,7 +115,7 @@ React to messages with emoji:
 - Multiple users can react to the same message
 - React to your own messages or others' messages
 
-![Emoji reaction badges displayed beneath a message](/assets/screenshots/messages_reaction.png)
+![Emoji reaction badges displayed beneath a message](../../assets/screenshots/messages_reaction.png)
 
 > 💡 **Tip:** Reactions are lightweight — they use minimal mesh bandwidth compared to full text messages.
 

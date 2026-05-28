@@ -1,5 +1,15 @@
+### A11Y ###
 a11y_label_value
 a11y_message_from
+a11y_node_battery
+a11y_node_distance_away
+a11y_node_favorite
+a11y_node_hops_away
+a11y_node_last_heard
+a11y_node_offline
+a11y_node_online
+a11y_node_role
+a11y_node_signal
 accept
 acknowledgements
 ### ACTION ###
@@ -120,7 +130,24 @@ channel_name
 channel_url
 channel_utilization
 channels
+### CHIRPY ###
 chirpy
+chirpy_assistant_title
+chirpy_checking
+chirpy_downloading
+chirpy_downloading_progress
+chirpy_downloading_subtitle
+chirpy_error_busy
+chirpy_error_model_unavailable
+chirpy_error_token_budget_exceeded
+chirpy_error_unknown
+chirpy_error_unsupported_flavor
+chirpy_error_unsupported_platform
+chirpy_intro
+chirpy_ready
+chirpy_search_placeholder
+chirpy_suggested_pages_help
+chirpy_thinking
 choose_contrast
 choose_theme
 ### CLEAN ###
@@ -818,6 +845,32 @@ node_filter_placeholder
 node_filter_show_ignored
 node_filter_title
 node_id
+node_layout_channel
+node_layout_compact
+node_layout_compact_fields_header
+node_layout_complete
+node_layout_complete_description
+node_layout_device_role
+node_layout_distance_and_bearing
+node_layout_help_signal_bad
+node_layout_help_signal_fair
+node_layout_help_signal_good
+node_layout_help_signal_indicator
+node_layout_help_signal_none
+node_layout_hops_away
+node_layout_last_heard_time
+node_layout_log_icons
+node_layout_no_preview_available
+node_layout_power
+node_layout_preview
+node_layout_relative_last_heard
+node_layout_section_title
+node_layout_signal_direct_only
+node_layout_signal_quality_indicator
+node_list_click_label
+node_list_help_node_details
+node_list_help_title
+node_list_long_click_label
 node_number
 node_sort_alpha
 node_sort_button
@@ -1227,6 +1280,7 @@ timeout
 timestamp
 tls_enabled
 toggle_my_position
+trace_route
 ### TRACEROUTE ###
 traceroute
 traceroute_diff

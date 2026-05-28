@@ -1,7 +1,8 @@
 ---
 title: 节点
+parent: User Guide
 nav_order: 4
-last_updated: 2026-05-13
+last_updated: 2026-05-20
 description: Browse, filter, and sort mesh nodes — view details, signal quality, roles, and quick actions.
 aliases:
   - node-list
@@ -85,11 +86,12 @@ From the node list, you can:
 
 - **Tap** a node to view its detail page
 - **Long-press** for quick actions:
+  - Mark/remove favorite
+  - Mute/unmute notifications
   - Send a direct message
-  - 查看地图
-  - 请求位置
-  - Mark as favorite
-  - 追踪器
+  - Trace route
+  - Ignore/unignore
+  - 删除节点
 
 ## Filtering & Sorting
 
@@ -124,21 +126,21 @@ Type in the search field to filter nodes by name or short name. The filter updat
 
 Tapping a node opens the detail view with comprehensive information. See [Node Metrics](node-metrics) for full details on metrics and telemetry.
 
-![Node detail view](/assets/screenshots/nodes_node_list.png)
+![Node detail view](../../assets/screenshots/nodes_node_list.png)
 
 The detail screen includes device info, position, and action buttons:
 
-![Node detail section](/assets/screenshots/nodes_detail_section.png)
+![Node detail section](../../assets/screenshots/nodes_detail_section.png)
 
 Inline status indicators show key metrics at a glance:
 
-| Indicator      | Screenshot                                               |
-| -------------- | -------------------------------------------------------- |
-| Signal quality | ![Signal](/assets/screenshots/nodes_signal_info.png)     |
-| 电池电量           | ![Battery](/assets/screenshots/nodes_battery_info.png)   |
-| Hop count      | ![Hops](/assets/screenshots/nodes_hops_info.png)         |
-| 最后听到           | ![Last heard](/assets/screenshots/nodes_last_heard.png)  |
-| 距离             | ![Distance](/assets/screenshots/nodes_distance_info.png) |
+| Indicator      | Screenshot                                                    |
+| -------------- | ------------------------------------------------------------- |
+| Signal quality | ![Signal](../../assets/screenshots/nodes_signal_info.png)     |
+| 电池电量           | ![Battery](../../assets/screenshots/nodes_battery_info.png)   |
+| Hop count      | ![Hops](../../assets/screenshots/nodes_hops_info.png)         |
+| 最后听到           | ![Last heard](../../assets/screenshots/nodes_last_heard.png)  |
+| 距离             | ![Distance](../../assets/screenshots/nodes_distance_info.png) |
 
 ## Related Topics
 

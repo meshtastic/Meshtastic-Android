@@ -1,16 +1,17 @@
 ---
-title: Telemetry & Sensors
+title: Телеметрия & Сензори
+parent: Ръководство за потребители
 nav_order: 9
 last_updated: 2026-05-13
 description: Sensor data on the mesh — supported environment, air quality, and power sensors, plus configuration and viewing guides.
 aliases:
-  - sensors
-  - environment
-  - weather
+  - сензори
+  - околна среда
+  - времето
   - power-metrics
 ---
 
-# Telemetry & Sensors
+# Телеметрия & Сензори
 
 Meshtastic nodes can collect and share sensor data across the mesh network.
 
@@ -22,29 +23,29 @@ Telemetry allows nodes equipped with sensors to broadcast environmental, power, 
 
 All Meshtastic nodes report basic device telemetry:
 
-| Метрични             | Описание                       | Typical Range                                                      |
+| Метрични             | Описание                       | Типичен диапазон                                                   |
 | -------------------- | ------------------------------ | ------------------------------------------------------------------ |
-| Battery Level        | Charge percentage              | 0–100%                                                             |
-| Напрежение           | Battery voltage                | 3.0–4.2V (LiPo) |
+| Ниво на батерията    | Charge percentage              | 0–100%                                                             |
+| Напрежение           | Напрежение на батерията        | 3.0–4.2V (LiPo) |
 | Използване на канала | % of airtime used locally      | 0–100%                                                             |
 | Air Utilization TX   | % of airtime used by this node | 0–100%                                                             |
 | Време на работа      | Seconds since last boot        | Varies                                                             |
 
-## Environment Sensors
+## Сензори за околна среда
 
-Supported environmental sensors:
+Поддържани сензори за околна среда:
 
-### Temperature & Humidity
+### Температура & Влажност
 
-| Сензор  | Температура | Влажност | Налягане | Бележки                 |
-| ------- | ----------- | -------- | -------- | ----------------------- |
-| BME280  | ✓           | ✓        | ✓        | Recommended all-in-one  |
-| BME680  | ✓           | ✓        | ✓        | Adds gas resistance/IAQ |
-| SHT31   | ✓           | ✓        | —        | High accuracy           |
-| MCP9808 | ✓           | —        | —        | Precision temperature   |
-| LPS22   | —           | —        | ✓        | Pressure only           |
+| Сензор  | Температура | Влажност | Налягане | Бележки                                     |
+| ------- | ----------- | -------- | -------- | ------------------------------------------- |
+| BME280  | ✓           | ✓        | ✓        | Препоръчително многофункционално устройство |
+| BME680  | ✓           | ✓        | ✓        | Adds gas resistance/IAQ                     |
+| SHT31   | ✓           | ✓        | —        | Висока точност                              |
+| MCP9808 | ✓           | —        | —        | Прецизна температура                        |
+| LPS22   | —           | —        | ✓        | Само налягане                               |
 
-### Air Quality
+### Качество на въздуха
 
 | Сензор   | Метрични                                           | Бележки                    |
 | -------- | -------------------------------------------------- | -------------------------- |
@@ -52,13 +53,13 @@ Supported environmental sensors:
 | PMSA003I | PM1.0, PM2.5, PM10 | Particulate matter         |
 | SEN55    | PM, NOx, VOC, Temp, Humidity                       | Multi-sensor               |
 
-### Light & UV
+### Светлина & UV
 
-| Сензор   | Метрични                               |
-| -------- | -------------------------------------- |
-| OPT3001  | Ambient light (lux) |
-| VEML7700 | Ambient light (lux) |
-| LTR390   | UV index                               |
+| Сензор   | Метрични                                 |
+| -------- | ---------------------------------------- |
+| OPT3001  | Околна светлина (lux) |
+| VEML7700 | Околна светлина (lux) |
+| LTR390   | UV индекс                                |
 
 ## Показатели на мощност
 
@@ -86,7 +87,7 @@ Useful for monitoring solar charging or battery health on remote nodes.
 | ------------------------------------------ | ----------------------------- | ---------------------------------- |
 | Urban mesh (many nodes) | 3600                          | 3600                               |
 | Rural mesh (few nodes)  | 900                           | 900                                |
-| Weather station                            | 900                           | 300                                |
+| Метеорологична станция                     | 900                           | 300                                |
 | Battery conservation                       | 7200                          | 7200                               |
 
 > ⚠️ **Note:** Shorter intervals increase airtime usage and battery drain across the mesh.
@@ -100,7 +101,7 @@ Useful for monitoring solar charging or battery health on remote nodes.
    - Power Metrics (if INA sensor present)
 3. Historical graphs show trends over time.
 
-![Telemetry actions](/assets/screenshots/node-metrics_telemetric_actions.png)
+![Telemetry actions](../../assets/screenshots/node-metrics_telemetric_actions.png)
 
 ## Отстраняване на неизправности
 

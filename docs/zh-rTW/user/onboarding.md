@@ -1,5 +1,6 @@
 ---
 title: 新手入門
+parent: User Guide
 nav_order: |-
   1.  **Overview**
 
@@ -165,7 +166,7 @@ The welcome screen introduces Meshtastic and its core capabilities:
 
 Tap **Get Started** to proceed through the setup flow.
 
-![Welcome screen](/assets/screenshots/onboarding_welcome.png)
+![Welcome screen](../../assets/screenshots/onboarding_welcome.png)
 
 ## Permissions
 

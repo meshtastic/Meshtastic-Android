@@ -1,5 +1,6 @@
 ---
 title: Primeros Pasos
+parent: User Guide
 nav_order: 1
 last_updated: 2026-05-13
 description: First-launch setup — permissions, onboarding flow, and next steps after connecting your radio.
@@ -27,7 +28,7 @@ The welcome screen introduces Meshtastic and its core capabilities:
 
 Tap **Get Started** to proceed through the setup flow.
 
-![Welcome screen](/assets/screenshots/onboarding_welcome.png)
+![Welcome screen](../../assets/screenshots/onboarding_welcome.png)
 
 ## Permissions
 

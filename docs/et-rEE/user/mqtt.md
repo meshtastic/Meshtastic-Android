@@ -1,5 +1,6 @@
 ---
 title: MQTT
+parent: User Guide
 nav_order: 11
 last_updated: 2026-05-13
 description: Bridge your mesh to the internet — MQTT broker setup, encryption layers, and map reporting.
@@ -38,7 +39,7 @@ A gateway node with internet access (WiFi or Ethernet) publishes mesh messages t
 2. Enable the MQTT module.
 3. Configure the broker connection:
 
-![MQTT toggle switch](/assets/screenshots/settings_switch.png)
+![MQTT toggle switch](../../assets/screenshots/settings_switch.png)
 
 | Setting         | Kirjeldus                                                                                     | Vaikimisi                                           |
 | --------------- | --------------------------------------------------------------------------------------------- | --------------------------------------------------- |

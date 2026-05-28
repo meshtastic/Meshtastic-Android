@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">來自 %1$s 的訊息：%2$s</string>
     <string name="accept">接受</string>
@@ -135,6 +136,7 @@
     <string name="channel_url">頻道網址</string>
     <string name="channel_utilization">頻道利用率</string>
     <string name="channels">頻道</string>
+    <!-- CHIRPY -->
     <string name="chirpy">Chirpy</string>
     <string name="choose_contrast">對比度等級</string>
     <string name="choose_theme">選擇主題</string>
@@ -756,6 +758,11 @@
     <string name="node_filter_show_ignored">僅顯示已忽略的節點</string>
     <string name="node_filter_title">篩選條件</string>
     <string name="node_id">節點 ID</string>
+    <string name="node_layout_channel">頻道</string>
+    <string name="node_layout_compact">精巧</string>
+    <string name="node_layout_hops_away">節點距</string>
+    <string name="node_layout_log_icons">環境計量資料</string>
+    <string name="node_layout_power">電力</string>
     <string name="node_number">節點編號</string>
     <string name="node_sort_alpha">依名字排序</string>
     <string name="node_sort_button">節點排序選項</string>
@@ -1142,6 +1149,7 @@
     <string name="timestamp">時間戳記</string>
     <string name="tls_enabled">TLS已啟用</string>
     <string name="toggle_my_position">切換我的位置</string>
+    <string name="trace_route">路由追蹤</string>
     <!-- TRACEROUTE -->
     <string name="traceroute">路由追蹤</string>
     <string name="traceroute_diff">跳轉數 往程 %1$d 次，返程 %2$d 次</string>
@@ -1192,7 +1200,6 @@
     <string name="tx_power_dbm">發射功率</string>
     <string name="type">類別</string>
     <string name="type_a_message">請輸入訊息</string>
-    <string name="udp_enabled">已啟用</string>
     <!-- UNKNOWN -->
     <string name="unknown">不明</string>
     <string name="unknown_age">未知年齡</string>

@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">来自 %1$s: %2$s 的消息</string>
     <string name="accept">接受</string>
@@ -128,6 +129,7 @@
     <string name="channel_url">频道URL</string>
     <string name="channel_utilization">ChUtil</string>
     <string name="channels">频道</string>
+    <!-- CHIRPY -->
     <string name="chirpy">Chirpy</string>
     <string name="choose_theme">选择主题</string>
     <!-- CLEAN -->
@@ -711,6 +713,10 @@
     <string name="node_filter_show_ignored">仅显示忽略的节点</string>
     <string name="node_filter_title">筛选条件</string>
     <string name="node_id">节点ID</string>
+    <string name="node_layout_channel">频道</string>
+    <string name="node_layout_hops_away">跃点数</string>
+    <string name="node_layout_log_icons">传感器指标</string>
+    <string name="node_layout_power">电源</string>
     <string name="node_number">节点编号</string>
     <string name="node_sort_alpha">字母顺序</string>
     <string name="node_sort_button">节点排序选项</string>
@@ -1069,6 +1075,7 @@
     <string name="timestamp">时间戳</string>
     <string name="tls_enabled">启用TLS</string>
     <string name="toggle_my_position">切换我的位置</string>
+    <string name="trace_route">追踪路径</string>
     <!-- TRACEROUTE -->
     <string name="traceroute">追踪器</string>
     <string name="traceroute_diff">越点数：去程 %1$d，回程 %2$d</string>
@@ -1116,7 +1123,6 @@
     <string name="tx_power_dbm">发送强度</string>
     <string name="type">类型</string>
     <string name="type_a_message">输入一条消息</string>
-    <string name="udp_enabled">启用</string>
     <!-- UNKNOWN -->
     <string name="unknown">未知</string>
     <string name="unknown_age">未知时长</string>

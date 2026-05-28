@@ -1,6 +1,6 @@
 # Meshtastic Android — Copilot Instructions
 
-> **Full rules**: `AGENTS.md` is the source of truth. This file is a compact quick-reference for build commands and task naming. For architecture, conventions, and workflow details, consult `AGENTS.md` and the `.skills/` playbooks listed at the bottom.
+> **Full rules**: `AGENTS.md` is the source of truth. This file is a compact quick-reference for build commands and task naming. For architecture, conventions, and workflow details, consult `AGENTS.md` and the `.skills/` playbooks.
 
 ## Build, Test & Lint
 
@@ -46,25 +46,58 @@ KMP modules have different task names than pure-Android modules. Using the wrong
 
 ## Quick Reference
 
-- **Architecture**: KMP project (Android, Desktop, iOS). Business logic in `commonMain`; platform shells (`androidApp/`, `desktopApp/`) wire DI and host UI. See `AGENTS.md` and `.skills/kmp-architecture/`.
+- **Architecture**: KMP project (Android, Desktop, iOS). Business logic in `commonMain`; platform shells (`androidApp/`, `desktopApp/`) wire DI and host UI.
 - **Flavors**: `fdroid` (OSS) / `google` (Maps + DataDog). Only one installable at a time (different signing keys).
-- **Verify before push**: Run `./gradlew spotlessApply detekt assembleDebug test allTests`, then confirm CI with `gh pr checks <PR>`.
-- **Strings**: `stringResource(Res.string.key)` — run `python3 scripts/sort-strings.py` after adding strings.
-- **Icons**: `MeshtasticIcons` (from `core/ui/icon/`), not `material.icons.Icons`.
-- **Error handling**: `safeCatching {}` (not `runCatching {}`) in coroutine code.
-- **Dispatchers**: `org.meshtastic.core.common.util.ioDispatcher`, not `Dispatchers.IO`.
-- **Navigation**: `MeshtasticNavDisplay` + `NavigationBackHandler` (not Android `BackHandler`).
-- **Protos**: `core/proto/` is a read-only git submodule. Never modify proto files.
-- **Branches**: Must start with `feat/`, `fix/`, `chore/`, `docs/`, `build/`, `ci/`, `refactor/`, `test/`, `deps/`, or a numeric spec prefix. Always branch off `origin/main`.
 
-## Deeper Guidance
+> See `AGENTS.md` for full rules (verify before push, branch naming, protos, coding conventions).
+> Contextual `.github/instructions/` files enforce conventions scoped to relevant source sets.
 
-Consult `.skills/` for detailed playbooks:
-- `.skills/project-overview/` — Full codebase map and bootstrap
-- `.skills/kmp-architecture/` — Source-set rules, expect/actual
-- `.skills/compose-ui/` — Adaptive UI, string resources
-- `.skills/navigation-and-di/` — Nav 3 & Koin patterns
-- `.skills/testing-ci/` — CI architecture, verification matrix
-- `.skills/implement-feature/` — Feature development workflow
-- `.skills/code-review/` — PR hygiene checklist
-- `.skills/speckit/` — Spec Kit SDD workflow, slash commands, constitution
+## Agent Behavior Rules
+
+### Code quality — do it right the first time
+
+When refactoring or improving code, implement the correct solution fully. Do not defer improvements as "too large", "out of scope", or "a separate refactoring". Research proper APIs and patterns before implementing — take the correct approach, not the simple one.
+
+### Git hygiene — preserve commit history
+
+Always make new commits. Never `--amend`, `rebase -i`, squash, or `--force-with-lease` unless the user explicitly requests it. Commit history is rollback safety — destroying it without permission is unacceptable.
+
+### Workflow scope push limitation
+
+The Copilot CLI OAuth token cannot push changes to `.github/workflows/` files (requires `workflow` scope). If a push fails with a permission/scope error on workflow files, immediately tell the user to push manually (`gh auth refresh -s workflow && git push`). Do not retry or attempt workarounds.
+
+### Parallel agents — no destructive git operations
+
+When dispatching parallel agents on a shared worktree, agents must never run `git reset --hard`, `git clean`, or `git checkout -- .`. Commit work immediately before running any git operations that could affect the index or working tree.
+
+### Audit before applying
+
+When porting, migrating, or applying external code/patterns, audit each change for relevance and correctness in our context. Do not blindly copy — evaluate whether each piece is appropriate and worth keeping.
+
+## Context & Cost Efficiency
+
+### Compact before research phases
+
+When a session shifts from implementation to open-ended research or exploration (e.g., "do deep research on…", "check documentation for…"), proactively compact the session first. Research generates high-volume tool output that inflates context rapidly.
+
+### Split sessions at phase boundaries
+
+Do not keep a single session alive across multiple discrete deliverables. When a phase completes (PR opened, spec finalized, implementation merged), suggest starting a fresh session for the next phase. A compact summary in the new session's first message is far cheaper than carrying forward accumulated checkpoint history.
+
+### Avoid redundant skill-context re-injection
+
+If a skill's context has already been injected in the current session, do not re-inject the full payload on subsequent invocations. Reference the earlier context instead. If compaction occurred since the last injection, a brief summary is sufficient — not the full skill document again.
+
+### Agent-merge check-ins belong in their own session
+
+PR lifecycle check-ins (merge condition checks, CI status polling) should run in a dedicated short-lived session, not in the development session. They only need PR metadata and CI status — not the accumulated dev context.
+
+### Compact by turn 12 in exploratory sessions
+
+Any session that passes ~10-12 turns without compaction should be compacted. Context cost grows with every turn — later turns pay for the full accumulated history of all prior turns. Don't let sessions run 15+ turns uncompacted.
+
+<!-- SPECKIT START -->
+For additional context about technologies to be used, project structure,
+shell commands, and other important information, read the current plan
+<!-- SPECKIT END -->
+

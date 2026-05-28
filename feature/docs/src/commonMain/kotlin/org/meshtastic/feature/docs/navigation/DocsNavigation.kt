@@ -20,6 +20,7 @@ import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,10 +34,18 @@ import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.jetbrains.compose.resources.getString
 import org.koin.compose.koinInject
 import org.meshtastic.core.common.util.currentLocaleCode
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.navigation.SettingsRoute
+import org.meshtastic.core.resources.chirpy_error_busy
+import org.meshtastic.core.resources.chirpy_error_model_unavailable
+import org.meshtastic.core.resources.chirpy_error_token_budget_exceeded
+import org.meshtastic.core.resources.chirpy_error_unknown
+import org.meshtastic.core.resources.chirpy_error_unsupported_flavor
+import org.meshtastic.core.resources.chirpy_error_unsupported_platform
+import org.meshtastic.core.resources.chirpy_suggested_pages_help
 import org.meshtastic.feature.docs.ai.AIDocAssistant
 import org.meshtastic.feature.docs.ai.ChirpySessionHolder
 import org.meshtastic.feature.docs.data.DefaultDocBundleLoader
@@ -47,6 +56,8 @@ import org.meshtastic.feature.docs.model.ChirpyMessage
 import org.meshtastic.feature.docs.model.ChirpyRole
 import org.meshtastic.feature.docs.model.DocPage
 import org.meshtastic.feature.docs.model.DocPageContent
+import org.meshtastic.feature.docs.model.DocsAiError
+import org.meshtastic.feature.docs.model.ModelReadiness
 import org.meshtastic.feature.docs.model.SourceRef
 import org.meshtastic.feature.docs.model.TranslationSource
 import org.meshtastic.feature.docs.translation.DocTranslationService
@@ -55,6 +66,7 @@ import org.meshtastic.feature.docs.ui.DocsBrowserScreen
 import org.meshtastic.feature.docs.ui.DocsPageRouteScreen
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
+import org.meshtastic.core.resources.Res as CoreRes
 
 /** Registers docs navigation entries into the Settings navigation graph. */
 @OptIn(ExperimentalUuidApi::class, ExperimentalMaterial3AdaptiveApi::class)
@@ -76,6 +88,7 @@ fun EntryProviderScope<NavKey>.docsEntries(backStack: NavBackStack<NavKey>) {
 /** All Chirpy UI state needed by screen composables. */
 class ChirpyUiState(
     val isSupported: Boolean,
+    val modelReadiness: ModelReadiness,
     val showFab: Boolean,
     val showSheet: Boolean,
     val sessionState: org.meshtastic.feature.docs.model.AIDocAssistantSessionState,
@@ -97,28 +110,26 @@ private fun rememberChirpyState(
     val holder = koinInject<ChirpySessionHolder>()
     val scope = rememberCoroutineScope()
 
+    val modelReadiness by aiAssistant.modelStatus.collectAsState()
     var isSupported by remember { mutableStateOf(false) }
 
-    // Poll for AI availability.
-    LaunchedEffect(Unit) {
-        repeat(AI_SUPPORT_CHECK_RETRIES) {
-            isSupported = aiAssistant.isSupported()
-            if (isSupported) return@LaunchedEffect
-            kotlinx.coroutines.delay(AI_SUPPORT_CHECK_INTERVAL_MS)
+    // Trigger initial availability check and model download.
+    LaunchedEffect(Unit) { isSupported = aiAssistant.isSupported() }
+
+    // Show FAB for any non-Unavailable state so the expressive FAB can communicate progress.
+    LaunchedEffect(modelReadiness) {
+        if (modelReadiness !is ModelReadiness.Unavailable) {
+            isSupported = true
         }
     }
 
     // Auto-introduce Chirpy when the sheet first opens.
-    LaunchedEffect(holder.showSheet) {
-        if (holder.showSheet && holder.sessionState.messages.isEmpty() && !holder.sessionState.isLoading) {
-            aiAssistant.resetSession()
-            holder.sessionState = holder.sessionState.copy(isLoading = true)
-            val result = aiAssistant.answer(CHIRPY_INTRO_PROMPT, currentPageId = currentPageId)
-            val introMsg = chirpyResultToMessage(result)
-            holder.sessionState =
-                holder.sessionState.copy(messages = holder.sessionState.messages + introMsg, isLoading = false)
-        }
-    }
+    AutoIntroduceChirpy(
+        showSheet = holder.showSheet,
+        sessionState = holder.sessionState,
+        aiAssistant = aiAssistant,
+        onUpdateSessionState = { holder.sessionState = it },
+    )
 
     fun submit() {
         val question = holder.sessionState.draftQuestion.trim()
@@ -131,16 +142,58 @@ private fun rememberChirpyState(
                     isLoading = true,
                 )
             scope.launch {
-                val result = aiAssistant.answer(question, currentPageId = currentPageId)
-                val responseMsg = chirpyResultToMessage(result)
-                holder.sessionState =
-                    holder.sessionState.copy(messages = holder.sessionState.messages + responseMsg, isLoading = false)
+                var assistantMsgId: String? = null
+
+                fun updateAssistant(text: String, pages: List<DocPage>, role: ChirpyRole = ChirpyRole.ASSISTANT) {
+                    val msgId = assistantMsgId ?: Uuid.random().toString().also { assistantMsgId = it }
+                    val msg =
+                        ChirpyMessage(
+                            id = msgId,
+                            role = role,
+                            text = text,
+                            sources = pages.map { SourceRef(id = it.id, title = it.title) },
+                        )
+                    val currentList = holder.sessionState.messages
+                    val newList =
+                        if (currentList.any { it.id == msgId }) {
+                            currentList.map { if (it.id == msgId) msg else it }
+                        } else {
+                            currentList + msg
+                        }
+                    holder.sessionState = holder.sessionState.copy(messages = newList)
+                }
+
+                aiAssistant.answerStream(question, currentPageId = currentPageId).collect { result ->
+                    when (result) {
+                        is AIDocAssistantResult.Partial -> {
+                            updateAssistant(result.answer, result.sourcePages)
+                        }
+
+                        is AIDocAssistantResult.Success -> {
+                            updateAssistant(result.answer, result.sourcePages)
+                            holder.sessionState = holder.sessionState.copy(isLoading = false)
+                        }
+
+                        is AIDocAssistantResult.Fallback -> {
+                            val finalMsg = chirpyResultToMessage(result)
+                            updateAssistant(finalMsg.text, result.suggestedPages, finalMsg.role)
+                            holder.sessionState = holder.sessionState.copy(isLoading = false)
+                        }
+
+                        is AIDocAssistantResult.Error -> {
+                            val finalMsg = chirpyResultToMessage(result)
+                            updateAssistant(finalMsg.text, result.suggestedPages, finalMsg.role)
+                            holder.sessionState = holder.sessionState.copy(isLoading = false)
+                        }
+                    }
+                }
             }
         }
     }
 
     return ChirpyUiState(
         isSupported = isSupported,
+        modelReadiness = modelReadiness,
         showFab = showFab,
         showSheet = holder.showSheet,
         sessionState = holder.sessionState,
@@ -153,6 +206,37 @@ private fun rememberChirpyState(
             backStack.add(SettingsRoute.HelpDocPage(pageId))
         },
     )
+}
+
+@OptIn(ExperimentalUuidApi::class)
+@Composable
+private fun AutoIntroduceChirpy(
+    showSheet: Boolean,
+    sessionState: org.meshtastic.feature.docs.model.AIDocAssistantSessionState,
+    aiAssistant: AIDocAssistant,
+    onUpdateSessionState: (org.meshtastic.feature.docs.model.AIDocAssistantSessionState) -> Unit,
+) {
+    val currentOnUpdateSessionState by androidx.compose.runtime.rememberUpdatedState(onUpdateSessionState)
+    val currentSessionState by androidx.compose.runtime.rememberUpdatedState(sessionState)
+
+    val modelStatus by aiAssistant.modelStatus.collectAsState()
+
+    LaunchedEffect(showSheet, modelStatus) {
+        if (
+            showSheet &&
+            modelStatus is ModelReadiness.Available &&
+            currentSessionState.messages.isEmpty() &&
+            !currentSessionState.isLoading
+        ) {
+            aiAssistant.resetSession()
+            currentOnUpdateSessionState(currentSessionState.copy(isLoading = true))
+            val result = aiAssistant.answer(CHIRPY_INTRO_PROMPT, currentPageId = null)
+            val introMsg = chirpyResultToMessage(result)
+            currentOnUpdateSessionState(
+                currentSessionState.copy(messages = currentSessionState.messages + introMsg, isLoading = false),
+            )
+        }
+    }
 }
 
 // ── Screen composables ──────────────────────────────────────────────────────────
@@ -193,6 +277,7 @@ private fun DocsHelpScreen(backStack: NavBackStack<NavKey>, chirpy: ChirpyUiStat
         onSelectPage = { pageId -> backStack.add(SettingsRoute.HelpDocPage(pageId)) },
         onBack = { backStack.removeLastOrNull() },
         isAiSupported = chirpy.isSupported,
+        modelReadiness = chirpy.modelReadiness,
         showFab = chirpy.showFab,
         showChirpy = chirpy.showSheet,
         chirpyState = chirpy.sessionState,
@@ -278,6 +363,7 @@ private fun DocsPageScreen(pageId: String, backStack: NavBackStack<NavKey>, chir
         translationSource = translationSource,
         isNonEnglish = locale != "en",
         isAiSupported = chirpy.isSupported,
+        modelReadiness = chirpy.modelReadiness,
         showChirpy = chirpy.showSheet,
         chirpyState = chirpy.sessionState,
         onChirpyToggle = chirpy.onToggle,
@@ -292,18 +378,22 @@ private fun DocsPageScreen(pageId: String, backStack: NavBackStack<NavKey>, chir
 
 // ── Constants & helpers ─────────────────────────────────────────────────────────
 
-/** How often to re-check AI model availability while waiting for download. */
-private const val AI_SUPPORT_CHECK_INTERVAL_MS = 3_000L
-
-/** Maximum number of AI support checks before giving up. */
-private const val AI_SUPPORT_CHECK_RETRIES = 15
-
-/** Prompt sent automatically when the Chirpy sheet opens to generate a natural introduction. */
-private const val CHIRPY_INTRO_PROMPT = "Introduce yourself briefly. Who are you and what can you help with?"
+/** Short intro prompt — kept minimal to skip heavy context ranking and generate in <1s. */
+private const val CHIRPY_INTRO_PROMPT =
+    "Say hi in 1-2 sentences. State your name is Chirpy and you help with Meshtastic. " +
+        "Do not give the user a nickname. Be punchy and fun."
 
 /** Maps an [AIDocAssistantResult] to a [ChirpyMessage]. */
 @OptIn(ExperimentalUuidApi::class)
-private fun chirpyResultToMessage(result: AIDocAssistantResult): ChirpyMessage = when (result) {
+private suspend fun chirpyResultToMessage(result: AIDocAssistantResult): ChirpyMessage = when (result) {
+    is AIDocAssistantResult.Partial ->
+        ChirpyMessage(
+            id = Uuid.random().toString(),
+            role = ChirpyRole.ASSISTANT,
+            text = result.answer,
+            sources = result.sourcePages.map { SourceRef(id = it.id, title = it.title) },
+        )
+
     is AIDocAssistantResult.Success ->
         ChirpyMessage(
             id = Uuid.random().toString(),
@@ -320,10 +410,27 @@ private fun chirpyResultToMessage(result: AIDocAssistantResult): ChirpyMessage =
             sources = result.suggestedPages.map { SourceRef(id = it.id, title = it.title) },
         )
 
-    is AIDocAssistantResult.Error ->
+    is AIDocAssistantResult.Error -> {
+        val errorMessage =
+            when (result.reason) {
+                DocsAiError.UnsupportedPlatform -> getString(CoreRes.string.chirpy_error_unsupported_platform)
+                DocsAiError.UnsupportedFlavor -> getString(CoreRes.string.chirpy_error_unsupported_flavor)
+                DocsAiError.ModelUnavailable -> getString(CoreRes.string.chirpy_error_model_unavailable)
+                DocsAiError.Busy -> getString(CoreRes.string.chirpy_error_busy)
+                DocsAiError.TokenBudgetExceeded -> getString(CoreRes.string.chirpy_error_token_budget_exceeded)
+                DocsAiError.Unknown -> getString(CoreRes.string.chirpy_error_unknown)
+            }
+        val text =
+            if (result.suggestedPages.isNotEmpty()) {
+                "$errorMessage ${getString(CoreRes.string.chirpy_suggested_pages_help)}"
+            } else {
+                errorMessage
+            }
         ChirpyMessage(
             id = Uuid.random().toString(),
             role = ChirpyRole.SYSTEM,
-            text = "Sorry, I couldn't answer that. ${result.reason}",
+            text = text,
+            sources = result.suggestedPages.map { SourceRef(id = it.id, title = it.title) },
         )
+    }
 }

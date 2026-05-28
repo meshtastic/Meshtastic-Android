@@ -338,7 +338,7 @@ class TAKMeshIntegration(
                     .replace("""<?xml version="1.0" encoding="UTF-8"?>""", "")
                     .replace(Regex("""\s*\n\s*"""), "")
                     .trim()
-            // Logger.d { "RAW CoT IN (mesh): $xml" }
+            Logger.d { "RAW CoT IN (mesh): $xml" }
             // Routes: ATAK ignores b-m-r CoT events over TCP streaming.
             // Convert to a KML data package and write to ATAK's auto-import dir.
             if (xml.contains("""type="b-m-r"""")) {
@@ -489,10 +489,16 @@ class TAKMeshIntegration(
             listOf(
                 """<takv[^>]*/>""", // TAK version (self-closing)
                 """<takv[^>]*>.*?</takv>""", // TAK version (paired)
-                """<voice[^>]*/>""", // voice chat state
-                """<voice[^>]*>.*?</voice>""",
-                """<marti[^>]*/>""", // empty marti
-                """<marti[^>]*>.*?</marti>""",
+                // NOTE: <voice/>, <voice_profile_id*>, and <marti> are
+                // intentionally NOT stripped here. SDK v0.3.2 carries them
+                // end-to-end so TAKTALK receivers can:
+                //   * fire TTS playback on <voice/> + <marti><dest callsign=ME>
+                //   * recognize TAKTALK-origin chats via <voice_profile_id>
+                // Stripping these saves ~10-20B per packet but breaks TAKTALK
+                // voice messaging and directed-chat routing on the receiver —
+                // an unacceptable tradeoff. The previous broad pattern
+                // `<voice[^>]*/>` ALSO matched `<voice_profile_id/>`, which is
+                // why TAKTALK b-t-f chats lost their TAKTALK-origin marker too.
                 """<__geofence[^>]*/>""", // geofence config
                 """<__geofence[^>]*>.*?</__geofence>""",
                 """<tog[^>]*/>""", // toggle state

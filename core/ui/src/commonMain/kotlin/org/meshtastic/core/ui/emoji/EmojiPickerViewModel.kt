@@ -18,9 +18,11 @@ package org.meshtastic.core.ui.emoji
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.MissingResourceException
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.repository.CustomEmojiPrefs
 
@@ -41,10 +43,21 @@ internal class EmojiPickerViewModel(
     val allEmojis: List<Emoji>
         get() = emojiRepository.all
 
+    private val _loadError = MutableStateFlow(false)
+    val loadError: StateFlow<Boolean> = _loadError
+
     init {
         viewModelScope.launch {
-            emojiRepository.preload()
-            _isLoaded.value = true
+            try {
+                emojiRepository.preload()
+                _isLoaded.value = true
+            } catch (e: MissingResourceException) {
+                Logger.e("EmojiPickerViewModel", e) { "Failed to load emoji data" }
+                _loadError.value = true
+            } catch (e: IllegalStateException) {
+                Logger.e("EmojiPickerViewModel", e) { "Failed to load emoji data" }
+                _loadError.value = true
+            }
         }
     }
 

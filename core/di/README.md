@@ -1,6 +1,9 @@
 # `:core:di`
 
 ## Overview
+
+**Targets:** Android · JVM (Desktop) · iOS
+
 The `:core:di` module defines the core Koin modules and provides standard dependencies that are shared across all other modules.
 
 ## Key Components
@@ -14,12 +17,14 @@ Provides a wrapper for standard Kotlin `CoroutineDispatchers` (`IO`, `Default`, 
 ### 3. `ProcessLifecycle.kt`
 Exposes the application's global process lifecycle as a Koin binding, enabling components to react to the app entering the foreground or background.
 
-## Module dependency graph
+
+## Dependency Graph
 
 <!--region graph-->
 ```mermaid
 graph TB
   :core:di[di]:::kmp-library
+  :core:di -.-> :core:common
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

@@ -1,5 +1,6 @@
 ---
 title: Map & Waypoints
+parent: Руководство пользователя
 nav_order: 6
 last_updated: 2026-05-13
 description: View node positions on the map, create and share waypoints, and manage position sharing and privacy.
@@ -42,7 +43,7 @@ Node markers on the map indicate:
 
 The floating toolbar provides quick access to compass, layer switching, node filters, refresh, and location tracking. Tap the compass to reorient north-up, or tap the location button to center on your current position.
 
-![Map controls overlay](/assets/screenshots/map_controls_overlay.png)
+![Map controls overlay](../../assets/screenshots/map_controls_overlay.png)
 
 ## Waypoints
 

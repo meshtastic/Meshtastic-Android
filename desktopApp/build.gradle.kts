@@ -30,7 +30,6 @@ plugins {
     alias(libs.plugins.meshtastic.koin)
     id("meshtastic.kover")
     id("meshtastic.aboutlibraries")
-    alias(libs.plugins.flatpak.gradle.generator)
 }
 
 configureGraphTasks()
@@ -323,16 +322,4 @@ dependencies {
     testImplementation(libs.koin.test)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(kotlin("test"))
-}
-
-// Must be run on each architecture to generate separate flatpak-sources.
-tasks.flatpakGradleGenerator {
-    val arch =
-        providers
-            .gradleProperty("flatpak.arch")
-            .getOrElse(System.getProperty("os.arch").let { if (it == "amd64") "x86_64" else it })
-    outputFile = file("../flatpak-sources-desktop-$arch.json")
-    downloadDirectory.set("./offline-repository")
-    onlyArches = arch
-    includeConfigurations.set(setOf("runtimeClasspath", "compileClasspath", "kotlinCompilerPluginClasspath"))
 }

@@ -16,8 +16,18 @@
   -->
 
 <resources>
+    <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">Message from %1$s: %2$s</string>
+    <string name="a11y_node_battery">battery %1$d%%</string>
+    <string name="a11y_node_distance_away">%1$s away</string>
+    <string name="a11y_node_favorite">favorite</string>
+    <string name="a11y_node_hops_away">%1$d hops away</string>
+    <string name="a11y_node_last_heard">last heard %1$s</string>
+    <string name="a11y_node_offline">offline</string>
+    <string name="a11y_node_online">online</string>
+    <string name="a11y_node_role">role %1$s</string>
+    <string name="a11y_node_signal">signal %1$s</string>
     <string name="accept">Accept</string>
     <string name="acknowledgements">Acknowledgements</string>
     <!-- ACTION -->
@@ -138,7 +148,24 @@
     <string name="channel_url">Channel URL</string>
     <string name="channel_utilization">ChUtil</string>
     <string name="channels">Channels</string>
+    <!-- CHIRPY -->
     <string name="chirpy">Chirpy</string>
+    <string name="chirpy_assistant_title">Chirpy Assistant</string>
+    <string name="chirpy_checking">Checking Chirpy availability…</string>
+    <string name="chirpy_downloading">Chirpy is downloading…</string>
+    <string name="chirpy_downloading_progress">Downloading Chirpy model: %1$d%%</string>
+    <string name="chirpy_downloading_subtitle">This only happens once. Chirpy will be ready soon!</string>
+    <string name="chirpy_error_busy">Whoa! The channel is totally congested right now with heavy traffic! 📶 Let's wait for a clear slot and retry our transmission.</string>
+    <string name="chirpy_error_model_unavailable">My battery is charging or my firmware is still downloading! 🔋 Give me a few moments to sync up and boot!</string>
+    <string name="chirpy_error_token_budget_exceeded">That payload is too large for my transmission budget! 📱 Try shortening your message so we can route it smoothly.</string>
+    <string name="chirpy_error_unknown">Oops! We hit some heavy packet loss or signal interference! 📡 Let's re-transmit that query and see if we can get through.</string>
+    <string name="chirpy_error_unsupported_flavor">I'm operating on a limited frequency on this app flavor! 🔌 Try using a version with full AI Core integration.</string>
+    <string name="chirpy_error_unsupported_platform">Oh no! My antenna can't seem to establish a connection on this platform. 📡 Please double-check your hardware compatibility!</string>
+    <string name="chirpy_intro">Hey there! 📡 I\'m Chirpy, your on-device Meshtastic assistant! I can help with setup, configuration, troubleshooting, and mesh networking tips. What can I help you with?</string>
+    <string name="chirpy_ready">Ask Chirpy</string>
+    <string name="chirpy_search_placeholder">Ask about Meshtastic…</string>
+    <string name="chirpy_suggested_pages_help">Here are some documentation pages that might help:</string>
+    <string name="chirpy_thinking">Chirpy is routing through the mesh… 📡</string>
     <string name="choose_contrast">Contrast level</string>
     <string name="choose_theme">Choose theme</string>
     <!-- CLEAN -->
@@ -848,6 +875,32 @@
     <string name="node_filter_show_ignored">Only show ignored Nodes</string>
     <string name="node_filter_title">Filter by</string>
     <string name="node_id">Node ID</string>
+    <string name="node_layout_channel">Channel</string>
+    <string name="node_layout_compact">Compact</string>
+    <string name="node_layout_compact_fields_header">Compact Fields</string>
+    <string name="node_layout_complete">Complete</string>
+    <string name="node_layout_complete_description">The Complete layout displays all available node data. Fields with no data are automatically hidden.</string>
+    <string name="node_layout_device_role">Device &amp; Role</string>
+    <string name="node_layout_distance_and_bearing">Distance and Bearing</string>
+    <string name="node_layout_help_signal_bad">Signal is poor. SNR is above −18 dB and RSSI is above −125 dBm.</string>
+    <string name="node_layout_help_signal_fair">Signal is moderate. SNR is above −12 dB and RSSI is above −120 dBm.</string>
+    <string name="node_layout_help_signal_good">Signal is strong. SNR is above −7 dB and RSSI is above −115 dBm.</string>
+    <string name="node_layout_help_signal_indicator">Combines SNR and RSSI into a quality level shown as a colored icon with description. Displayed in the Complete layout only.</string>
+    <string name="node_layout_help_signal_none">No usable signal detected. Below all quality thresholds.</string>
+    <string name="node_layout_hops_away">Hops Away</string>
+    <string name="node_layout_last_heard_time">Last Heard Time</string>
+    <string name="node_layout_log_icons">Environment Metrics</string>
+    <string name="node_layout_no_preview_available">No nodes available for preview.</string>
+    <string name="node_layout_power">Power</string>
+    <string name="node_layout_preview">Preview</string>
+    <string name="node_layout_relative_last_heard">Relative Last Heard Time</string>
+    <string name="node_layout_section_title">Node Layout</string>
+    <string name="node_layout_signal_direct_only">Signal (Direct Only)</string>
+    <string name="node_layout_signal_quality_indicator">Signal Quality Indicator</string>
+    <string name="node_list_click_label">Open node details</string>
+    <string name="node_list_help_node_details">Node Details</string>
+    <string name="node_list_help_title">Node List Help</string>
+    <string name="node_list_long_click_label">Node options</string>
     <string name="node_number">Node Number</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_button">Node sorting options</string>
@@ -1269,6 +1322,7 @@
     <string name="timestamp">Timestamp</string>
     <string name="tls_enabled">TLS enabled</string>
     <string name="toggle_my_position">Toggle my position</string>
+    <string name="trace_route">Trace Route</string>
     <!-- TRACEROUTE -->
     <string name="traceroute">Traceroute</string>
     <string name="traceroute_diff">Hops towards %1$d Hops back %2$d</string>
@@ -1321,7 +1375,7 @@
     <string name="tx_power_dbm">Transmit Power</string>
     <string name="type">Type</string>
     <string name="type_a_message">Type a message</string>
-    <string name="udp_enabled">Enabled</string>
+    <string name="udp_enabled">UDP broadcasting</string>
     <!-- UNKNOWN -->
     <string name="unknown">Unknown</string>
     <string name="unknown_age">Unknown Age</string>

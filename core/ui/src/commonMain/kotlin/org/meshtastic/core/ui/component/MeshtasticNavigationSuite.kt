@@ -150,7 +150,7 @@ private fun handleNavigation(
                 }
             }
 
-            TopLevelDestination.Conversations -> {
+            TopLevelDestination.Messages -> {
                 val onConversationsList = currentKey is ContactsRoute.Contacts
                 if (!onConversationsList) {
                     multiBackstack.navigateTopLevel(destination.route)
@@ -180,7 +180,7 @@ private fun NavigationIconContent(
     selectedDevice: String?,
     uiViewModel: UIViewModel,
 ) {
-    val isConnectionsRoute = destination == TopLevelDestination.Connections
+    val isConnectionsRoute = destination == TopLevelDestination.Connect
 
     TooltipBox(
         positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
@@ -211,7 +211,7 @@ private fun NavigationIconContent(
         } else {
             BadgedBox(
                 badge = {
-                    if (destination == TopLevelDestination.Conversations) {
+                    if (destination == TopLevelDestination.Messages) {
                         var lastNonZeroCount by remember { mutableIntStateOf(unreadMessageCount) }
                         if (unreadMessageCount > 0) {
                             lastNonZeroCount = unreadMessageCount

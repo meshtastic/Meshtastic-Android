@@ -34,7 +34,6 @@ kotlin {
             implementation(projects.core.resources)
             implementation(projects.core.ui)
 
-            implementation(libs.jetbrains.navigation3.ui)
             implementation(libs.kotlinx.serialization.json)
         }
     }

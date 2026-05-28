@@ -41,7 +41,6 @@ kotlin {
             implementation(projects.core.di)
             implementation(projects.feature.map)
 
-            implementation(libs.jetbrains.navigation3.ui)
             implementation(libs.markdown.renderer)
             implementation(libs.markdown.renderer.m3)
             implementation(libs.vico.compose)

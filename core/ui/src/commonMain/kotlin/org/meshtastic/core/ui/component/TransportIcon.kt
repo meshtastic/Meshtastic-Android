@@ -17,6 +17,7 @@
 package org.meshtastic.core.ui.component
 
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,7 +35,12 @@ import org.meshtastic.core.ui.icon.Udp
 import org.meshtastic.proto.MeshPacket
 
 @Composable
-fun TransportIcon(transport: Int, viaMqtt: Boolean, modifier: Modifier = Modifier) {
+fun TransportIcon(
+    transport: Int,
+    viaMqtt: Boolean,
+    modifier: Modifier = Modifier,
+    tint: Color = LocalContentColor.current,
+) {
     val (icon, description) =
         when {
             viaMqtt || transport == MeshPacket.TransportMechanism.TRANSPORT_MQTT.value ->
@@ -51,5 +57,5 @@ fun TransportIcon(transport: Int, viaMqtt: Boolean, modifier: Modifier = Modifie
 
             else -> return
         }
-    Icon(icon, contentDescription = description, modifier = modifier, tint = Color.White)
+    Icon(icon, contentDescription = description, modifier = modifier, tint = tint)
 }

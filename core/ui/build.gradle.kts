@@ -24,6 +24,10 @@ plugins {
 }
 
 kotlin {
+    // Required for CMP files/ resources (emoji-data.json) to be packaged as Android assets.
+    // Without this, Res.readBytes() throws MissingResourceException at runtime.
+    androidLibrary { androidResources.enable = true }
+
     sourceSets {
         commonMain.dependencies {
             implementation(projects.core.common)
@@ -44,6 +48,7 @@ kotlin {
             implementation(libs.compose.multiplatform.foundation)
             api(libs.compose.multiplatform.ui.tooling.preview)
 
+            implementation(libs.coil)
             implementation(libs.kermit)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.koin.compose.viewmodel)

@@ -1,5 +1,6 @@
 ---
 title: Navigation & Deep Links
+parent: Developer Guide
 nav_order: 4
 last_updated: 2026-05-13
 aliases:

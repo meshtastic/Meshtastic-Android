@@ -399,7 +399,12 @@ private fun DeviceMetricsChartPreview() {
 
 @Composable
 @Suppress("LongMethod")
-private fun DeviceMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick: () -> Unit) {
+private fun DeviceMetricsCard(
+    telemetry: Telemetry,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    timeTextOverride: String? = null,
+) {
     val deviceMetrics = telemetry.device_metrics
     val time = telemetry.time.toLong() * MS_PER_SEC
     val channelUtilizationLabel = stringResource(Res.string.channel_utilization)
@@ -412,7 +417,7 @@ private fun DeviceMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick
             /* Time, Battery, and Voltage */
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(
-                    text = DateFormatter.formatDateTime(time),
+                    text = timeTextOverride ?: DateFormatter.formatDateTime(time),
                     style = MaterialTheme.typography.titleMediumEmphasized,
                     fontWeight = FontWeight.Bold,
                 )
@@ -490,7 +495,14 @@ fun DeviceMetricsCardPreview() {
                 uptime_seconds = 7200,
             ),
         )
-    AppTheme { DeviceMetricsCard(telemetry = telemetry, isSelected = false, onClick = {}) }
+    AppTheme {
+        DeviceMetricsCard(
+            telemetry = telemetry,
+            isSelected = false,
+            onClick = {},
+            timeTextOverride = "2023-11-14 22:13",
+        )
+    }
 }
 
 @PreviewLightDark

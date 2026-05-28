@@ -1,5 +1,6 @@
 ---
 title: Adding a Feature Module
+parent: Developer Guide
 nav_order: 3
 last_updated: 2026-05-13
 aliases:

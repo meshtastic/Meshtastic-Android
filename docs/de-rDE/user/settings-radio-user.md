@@ -1,7 +1,8 @@
 ---
 title: Settings — Radio & User
+parent: User Guide
 nav_order: 7
-last_updated: 2026-05-13
+last_updated: 2026-05-20
 description: Configure your radio hardware, LoRa presets, user profile, position sharing, power management, and security.
 aliases:
   - Einstellungen
@@ -130,7 +131,7 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 | NTP Server     | Time synchronization server                          |
 | Syslog Server  | Remote logging server                                |
 
-![IP address field](/assets/screenshots/settings_ipv4_field.png)
+![IP address field](../../assets/screenshots/settings_ipv4_field.png)
 
 ### Bluetooth Einstellungen
 
@@ -147,20 +148,20 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 | Öffentlicher Schlüssel                          | Your node's public key (read-only)                      |
 | Administrativer Schlüssel                       | Key for remote administration                                              |
 | Privater Schlüssel                              | Your node's private key (handle securely)               |
-| Administrativer Kanal aktiviert                 | Allow admin commands via channel                                           |
+| ~~Admin Channel Enabled~~                       | ⚠️ Removed — now configured automatically when an admin key is set         |
 | Fehlersuchprotokolle (Debug) | Output live debug logging over serial/bluetooth                            |
 | Serial Enabled                                  | Enable serial console access (moved from Device Config) |
 | Verwalteter Modus                               | Restrict non-admin channel changes                                         |
 
-![Password field](/assets/screenshots/settings_password_field.png)
+![Password field](../../assets/screenshots/settings_password_field.png)
 
 Settings use standard preference controls — dropdowns, toggles, and sliders:
 
-| Control  | Bildschirmfoto                                         |
-| -------- | ------------------------------------------------------ |
-| Dropdown | ![Dropdown](/assets/screenshots/settings_dropdown.png) |
-| Toggle   | ![Toggle](/assets/screenshots/settings_switch.png)     |
-| Slider   | ![Slider](/assets/screenshots/settings_slider.png)     |
+| Control  | Bildschirmfoto                                              |
+| -------- | ----------------------------------------------------------- |
+| Dropdown | ![Dropdown](../../assets/screenshots/settings_dropdown.png) |
+| Toggle   | ![Toggle](../../assets/screenshots/settings_switch.png)     |
+| Slider   | ![Slider](../../assets/screenshots/settings_slider.png)     |
 
 ## Related Topics
 

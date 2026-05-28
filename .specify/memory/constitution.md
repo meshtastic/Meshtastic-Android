@@ -1,17 +1,14 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version change: 1.2.0 → 1.3.0
+Version change: 1.3.1 → 1.3.2
 Modified principles:
-  - VI. Verify Before Push → renumbered to VII.
-Added sections:
-  - VI. Documentation Freshness (new principle requiring last_updated frontmatter,
-    blocking staleness check, link validation, coverage checks, freshness warnings)
+  - I–VII: Rationale blocks compressed into HTML comments (no semantic change)
+Modified sections: None.
+Added sections: None.
 Removed sections: None.
-Templates requiring updates:
-  - .specify/templates/checklist-template.md — Add CHK006 for documentation freshness
-  - .specify/templates/plan-template.md — Constitution Check VII for docs freshness
-Follow-up TODOs: Update AGENTS.md with docs governance reference.
+Templates requiring updates: None (no principle renumbering).
+Follow-up TODOs: None.
 -->
 
 # Meshtastic Android (KMP) Constitution
@@ -28,9 +25,7 @@ MUST be used in place of JVM/Android-specific APIs:
 - MUST NOT import `java.*` or `android.*` in any `commonMain` module.
 - Platform-specific implementations belong in `androidMain`/`desktopMain` actual
   declarations only.
-- Rationale: The project goal is multi-platform parity (Android, Desktop, iOS). Framework
-  bleed in `commonMain` breaks compilability on non-Android targets and undermines the
-  entire decoupling effort.
+<!-- Rationale: Multi-platform parity (Android, Desktop, iOS). Framework bleed in commonMain breaks compilability on non-Android targets. -->
 
 ### II. Zero Lint Tolerance
 
@@ -39,8 +34,7 @@ All code contributions MUST pass static analysis before merge:
 - `./gradlew spotlessApply` MUST be run and `spotlessCheck` MUST pass with no violations.
 - `detekt` MUST pass with no new violations introduced.
 - A task or PR is considered incomplete if either check fails.
-- Rationale: Consistent code style and static analysis gates prevent technical debt
-  accumulation and catch bugs that tests alone miss.
+<!-- Rationale: Consistent code style and static analysis gates prevent technical debt accumulation. -->
 
 ### III. Compose Multiplatform UI
 
@@ -51,8 +45,7 @@ All UI MUST use JetBrains Compose Multiplatform, not Android-only Jetpack Compos
 - Floats MUST be pre-formatted using `NumberFormatter.format()` before display in any
   composable.
 - UI MUST compile and render correctly on all supported targets (Android, Compose Desktop).
-- Rationale: Compose Multiplatform ensures UI consistency across platforms and enforces the
-  project's multi-platform architecture goal.
+<!-- Rationale: Compose Multiplatform ensures UI consistency across platforms. -->
 
 ### IV. Privacy First
 
@@ -65,8 +58,7 @@ times:
   circumstances.
 - `core/proto` is a read-only upstream submodule (`meshtastic/protobufs`). MUST NOT modify
   `.proto` files directly; proto changes require an upstream issue labeled `upstream`.
-- Rationale: Meshtastic users rely on the mesh for private, off-grid communications. Data
-  leaks could endanger users in sensitive or adversarial deployments.
+<!-- Rationale: Meshtastic users rely on the mesh for private, off-grid communications. Data leaks could endanger users in sensitive deployments. -->
 
 ### V. Design Standards Compliance
 
@@ -74,8 +66,8 @@ All user-facing UI MUST conform to the Meshtastic Client Design Standards:
 
 - The canonical reference lives at:
   `https://raw.githubusercontent.com/meshtastic/design/refs/heads/master/standards/meshtastic_design_standards_latest.md`
-- New screens and significant UI changes MUST be reviewed against the design standards
-  before merge.
+- New screens and significant UI changes (any screen with ≥3 composables or a new
+  navigation destination) MUST be reviewed against the design standards before merge.
 - Deviations from the design standards require explicit justification in the PR description
   with a rationale for why the standard cannot or should not be followed.
 - Features that affect multiple platforms (messaging, settings, telemetry, etc.) MUST
@@ -84,9 +76,7 @@ All user-facing UI MUST conform to the Meshtastic Client Design Standards:
   or create one using the `TEMPLATE.md` in that directory before writing the
   Android implementation spec. Platform-specific-only features (e.g., Android widget,
   Wear OS tile) may mark the `Cross-Platform Spec` field as N/A with justification.
-- Rationale: Consistent cross-platform UX across Android, iOS, and other clients ensures
-  users have a predictable experience regardless of platform. The design standards are
-  maintained collaboratively across all Meshtastic client teams.
+<!-- Rationale: Consistent cross-platform UX ensures users have a predictable experience regardless of platform. -->
 
 ### VI. Documentation Freshness
 
@@ -118,9 +108,7 @@ Governance rules:
 - Image references MUST use root-relative paths (`/assets/screenshots/filename.png`) so
   they resolve correctly in both Jekyll and the in-app renderer. The sync script rewrites
   these to Docusaurus paths automatically.
-- Rationale: Documentation that drifts from the implementation misleads users, increases
-  support burden, and undermines the in-app help experience. Three distinct consumers
-  means a single source change must be verified across all delivery channels.
+<!-- Rationale: Documentation drift misleads users and increases support burden. Three distinct consumers means changes must be verified across all delivery channels. -->
 
 ### VII. Verify Before Push
 
@@ -131,26 +119,15 @@ Local verification MUST complete successfully before any `git push`:
 - After pushing, CI status MUST be confirmed via `gh pr checks <PR>` or
   `gh run list --branch <branch> --limit 5`. Phrases like "CI should be green" are
   explicitly prohibited.
-- Rationale: CI has failed repeatedly due to skipped local checks. Verification is a hard
-  gate, not an optimistic assumption.
+<!-- Rationale: Verification is a hard gate, not an optimistic assumption. Skipped local checks are the leading cause of CI failures. -->
 
 ## Development Workflow
 
-The following workflow steps are non-negotiable for all contributors and agents:
-
-- **Bootstrap First**: The mandatory bootstrap steps in `.skills/project-overview/SKILL.md`
-  MUST be executed before any build operation in a new session.
-- **Baseline Verification**: Before any PR is opened or pushed, run:
-  `./gradlew spotlessApply spotlessCheck detekt assembleDebug test allTests`
-- **String Resources**: After adding any string resource, run
-  `python3 scripts/sort-strings.py` to maintain alphabetical organization and regenerate
-  `strings-index.txt`. Consult `strings-index.txt` before reading large string files.
-- **Memory Persistence**: `.agent_memory/session_context.md` MUST be updated at the end of
-  every agent session or major task to preserve context across sessions.
-- **Plan Before Execution**: Complex refactors MUST have a plan written in `.agent_plans/`
-  (git-ignored) before execution begins.
-- **Context Discipline**: Agents MUST NOT read binary files (PNG, MP3, etc.) or vacuum the
-  entire codebase for localized fixes. Limit context reads to relevant modules.
+Non-negotiable workflow steps are defined in `AGENTS.md` `<process_essentials>`. Key
+requirements: bootstrap before build, baseline verification before push, sort-strings after
+adding resources, update `.agent_memory/session_context.md` per session, plan complex
+refactors (touching ≥3 modules or >200 LOC changed) in `.agent_plans/`, limit context
+reads to relevant modules.
 
 ## Architecture Constraints
 
@@ -170,12 +147,27 @@ The following module boundaries and technology choices are fixed for this projec
 - **Language & Toolchain**: Kotlin 2.3+ targeting JDK 21. Java source files MUST NOT be
   introduced in KMP modules.
 
+## Operational Standards
+
+The following coding standards are enforced by contextual instruction files
+(`.github/instructions/`) scoped to relevant source sets. They are acknowledged by this
+constitution but defined and maintained in their respective files:
+
+- `safeCatching {}` over `runCatching {}` in coroutine/suspend contexts
+- `org.meshtastic.core.common.util.ioDispatcher` over `Dispatchers.IO`
+- `MeshtasticIcons` (from `core/ui/icon/`) over `material.icons.Icons`
+- `MetricFormatter` for display strings (temperature, voltage, percent, signal)
+- `stringResource(Res.string.key)` with `python3 scripts/sort-strings.py` after additions
+- `kotlinx.coroutines.CancellationException` (not `kotlin.coroutines.cancellation.*`)
+- Branch naming: `feat/`, `fix/`, `chore/`, `docs/`, `build/`, `ci/`, `refactor/`,
+  `test/`, `deps/`, or numeric spec prefix; always off `origin/main`
+
 ## Governance
 
-This constitution supersedes all other practices, coding guidelines, and agent instructions.
-`AGENTS.md` is the authoritative source of truth. The files
-`.github/copilot-instructions.md`, `CLAUDE.md`, and `GEMINI.md` MUST redirect to
-`AGENTS.md` and MUST NOT diverge from it.
+This constitution is the canonical governance document and supersedes all other practices,
+coding guidelines, and agent instructions. `AGENTS.md` is the agent-facing operational
+summary derived from this constitution. The files `.github/copilot-instructions.md`,
+`CLAUDE.md`, and `GEMINI.md` MUST redirect to `AGENTS.md` and MUST NOT diverge from it.
 
 **Amendment Procedure**:
 1. Propose the amendment with rationale and a migration plan in a PR description.
@@ -197,4 +189,4 @@ This constitution supersedes all other practices, coding guidelines, and agent i
 Constitution Check confirming all seven principles were evaluated. Complexity violations
 require explicit justification in the Complexity Tracking table of the plan document.
 
-**Version**: 1.3.0 | **Ratified**: 2026-05-07 | **Last Amended**: 2026-05-13
+**Version**: 1.3.2 | **Ratified**: 2026-05-07 | **Last Amended**: 2026-05-21

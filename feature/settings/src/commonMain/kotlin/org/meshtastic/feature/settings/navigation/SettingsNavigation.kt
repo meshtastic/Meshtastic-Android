@@ -20,7 +20,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.navigation3.runtime.EntryProviderScope
@@ -35,6 +34,7 @@ import org.meshtastic.feature.settings.AboutScreen
 import org.meshtastic.feature.settings.AdministrationScreen
 import org.meshtastic.feature.settings.DeviceConfigurationScreen
 import org.meshtastic.feature.settings.ModuleConfigurationScreen
+import org.meshtastic.feature.settings.NodeListScreen
 import org.meshtastic.feature.settings.SettingsViewModel
 import org.meshtastic.feature.settings.debugging.DebugScreen
 import org.meshtastic.feature.settings.debugging.DebugViewModel
@@ -79,9 +79,7 @@ fun getRadioConfigViewModel(backStack: NavBackStack<NavKey>, destNumOverride: In
             ?: remember(backStack.toList()) {
                 backStack.lastOrNull { it is SettingsRoute.Settings }?.let { (it as SettingsRoute.Settings).destNum }
             }
-    return koinViewModel<RadioConfigViewModel>(key = destNum?.toString()) {
-        parametersOf(SavedStateHandle(mapOf("destNum" to destNum)))
-    }
+    return koinViewModel<RadioConfigViewModel>(key = destNum?.toString()) { parametersOf(destNum) }
 }
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
@@ -243,6 +241,14 @@ fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
     entry<SettingsRoute.FilterSettings> {
         val viewModel: FilterSettingsViewModel = koinViewModel()
         FilterSettingsScreen(viewModel = viewModel, onBack = dropUnlessResumed { backStack.removeLastOrNull() })
+    }
+
+    entry<SettingsRoute.NodeList> {
+        val settingsViewModel: SettingsViewModel = koinViewModel()
+        NodeListScreen(
+            settingsViewModel = settingsViewModel,
+            onNavigateUp = dropUnlessResumed { backStack.removeLastOrNull() },
+        )
     }
 }
 

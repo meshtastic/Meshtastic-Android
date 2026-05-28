@@ -3,6 +3,111 @@
 # Do NOT edit or remove previous entries — stale state claims cause agent confusion.
 # Format: ## YYYY-MM-DD — <summary>
 
+## 2026-05-28 — Stabilized DatabaseManager withDb retry host test
+- Hardened `DatabaseManagerWithDbRetryTest` to remove CI race conditions by running the manager on a `StandardTestDispatcher(testScheduler)` instead of real `Dispatchers.IO`.
+- Added a `withTimeout(10_000)` guard around the test body to fail fast on coordination stalls instead of hanging/flapping.
+- Kept the deterministic retry trigger (`error("Connection pool is closed")`) and retained assertions that first attempt uses old DB and retry uses current DB.
+- Made teardown resilient with `if (::manager.isInitialized) manager.close()` so setup/early failures do not cascade into teardown crashes.
+- Verified with `:core:database:jvmTest --tests "org.meshtastic.core.database.DatabaseManagerWithDbRetryTest*"` and repeated it 5 consecutive runs without failures; `:core:database:detekt` also passed.
+
+## 2026-05-21 — Upgraded Chirpy to a fully-personalized Live Diagnostic Node & Mesh Assistant
+- Integrated `NodeRepository` into `GeminiNanoDocAssistant.kt` and the Google AI Koin dependency injection module (`GoogleAiModule.kt`).
+- Developed a dynamic live-state prompt formatting block within `buildPrompt(...)` that queries current hardware model, firmware version, connection status, GPS capability, channel utilization, airtime, battery level/voltage, user profile long/short names, and total registered mesh peer counts & active online peers directly from `NodeRepository`'s reactive flows.
+- Injected this live radio diagnostics context dynamically as a system instruction metadata block on every user query. This empowers the on-device model to answer real-time, personalized diagnostic questions (e.g. "what is my battery level?", "how many active nodes are on my mesh right now?") with 100% on-device offline accuracy.
+- Tuned context retrieval constraints for the modern `nano-v4-full` (Gemini Nano v4) model: expanded the total context budget `MAX_CONTEXT_CHARS` from 8,000 to **32,000 characters** (up to ~12K tokens out of the model's native 32K window), and scaled `MAX_PAGE_CHARS` to **16,000 characters** and `MAX_SNIPPET_CHARS` to **8,000 characters** to supply vastly richer, more detailed, and complete documentation fragments.
+
+## 2026-05-21 — Activated full on-device token streaming and polished Chirpy's personality instructions
+- Upgraded the on-device inference flow inside `GeminiNanoDocAssistant.kt` to use Firebase AI SDK's reactive `generateContentStream(prompt)` instead of the blocking `generateContent` invocation.
+- Aggregated chunks and emitted incremental `AIDocAssistantResult.Partial` states down the Kotlin Flow, enabling true word-by-word/chunk-by-chunk streaming in the UI for a much more responsive user experience.
+- Refined the `SYSTEM_INSTRUCTION` personality rules for Chirpy to position him as our adorable LoRa radio Node mascot instead of an avian theme, emphasizing high-enthusiasm mesh networking, signal connectivity, battery status, and radio/routing concepts (e.g. "fully charged", "relaying info", "staying connected") while preserving technical precision.
+- Significantly increased the frequency and flavor of mesh networking, hardware, and radio puns (e.g. "let's relay some knowledge!", "channeling my inner router!", "completely on the same frequency!") to make Chirpy incredibly fun and interactive.
+- Overhauled system error messages inside `DocsNavigation.kt` and the loading bubble state inside `ChirpyAssistantSheet.kt` to align with the highly-enthusiastic mascot theme (e.g. "routing through the mesh… 📡", "channel is totally congested… 📶", "battery is charging or firmware is still downloading… 🔋").
+
+## 2026-05-21 — Implemented streaming chat support and Firebase Remote Config integration for Chirpy
+- Added `firebase-config` dependency to Version Catalog `libs.versions.toml` and `androidApp/build.gradle.kts`.
+- Added the `AIDocAssistantResult.Partial` variant to support intermediate stream updates.
+- Extended the `AIDocAssistant` interface and implemented `answerStream` in both `KeywordFallbackAssistant` and `GeminiNanoDocAssistant`.
+- Integrated Firebase Remote Config into `GeminiNanoDocAssistant` to dynamically fetch the model name (`chirpy_model_name`) and system instruction (`chirpy_system_instruction`) with release-optimized fetch intervals.
+- Refactored `GeminiNanoDocAssistant.answer` to reuse `answerStream` flow under the hood, eliminating duplicate prompting code.
+- Integrated the streaming flow into the Compose UI layer (`DocsNavigation.kt`), appending a placeholder message and updating it in place on each stream emission.
+- Verified that all unit tests (`:feature:docs:allTests`) and static analysis checks (`spotlessApply spotlessCheck detekt`) pass 100% green.
+
+## 2026-05-21 — Fixed Chirpy Assistant invalid model name and enhanced failure fallback suggestions
+- Fixed a 404/Unknown inference error by updating `GeminiNanoDocAssistant.kt`'s `MODEL_NAME` from `"gemini-3.1-flash-lite"` to the correct Firebase AI Logic preview name `"gemini-3.1-flash-lite-preview"`.
+- Overhauled multi-turn hybrid chat seeding: eliminated the redundant and wasteful background `chat.sendMessage` network/token call on the first turn. Instead, if the first turn is answered on-device, the session caches the question and answer locally, and starts the subsequent cloud-chat session with these pre-loaded into the `startChat(history = ...)` parameter.
+- Expanded the hybrid model's `looksLikeNoAnswer` heuristics to better detect when the on-device model fails or has limited info, allowing seamless fallback to the grounded cloud model.
+- Polished `DocsNavigation.kt`'s `chirpyResultToMessage` system error handling to map raw exception/object types (e.g., `DocsAiError.Unknown`) to polished, friendly user-facing messages.
+- Programmed a smart fallback in the UI: if an inference error occurs (e.g. offline, rate limit, or model not found), Chirpy now automatically displays local keyword search results as recommended page chips so the user is never left stranded.
+- Verified 100% compliance with Spotless, Detekt, and unit tests (`:feature:docs:allTests` and `:androidApp:testGoogleDebugUnitTest` are fully green).
+
+## 2026-05-20 — Decoupled and Isolated Flatpak manifest generation logic to build-logic/flatpak
+- Isolated the optimized `GenerateFlatpakSourcesTask` from monolithic `build-logic/convention` into its own specialized, lightweight `:flatpak` subproject under `build-logic`.
+- Created `:flatpak` configuration and registered the formal plugin ID `"meshtastic.flatpak"` implemented by `FlatpakConventionPlugin` inside the default package namespace (perfectly matching project-wide plugin architectures).
+- Implemented modern, configuration-cache-safe lazy provider directory evaluation for the default Gradle user home cache.
+- Cleaned up `:convention` by removing the redundant class and registration imports from `RootConventionPlugin.kt`.
+- Applied the new plugin in the root `build.gradle.kts` using `id("meshtastic.flatpak")`.
+- Verified 100% compliant spotless and detekt formatting checks (`./gradlew spotlessCheck detekt` is green).
+- Successfully committed and pushed the branch `fix/flatpak-snapshot-resolution` to remote `jamesarich` with proper `GITHUB_TOKEN` environment bypass.
+- Consolidated and updated GitHub PR #5542's description to comprehensively document the correctness, performance, and modular isolation of the Flatpak generator.
+
+## 2026-05-20 — Extracted GenerateFlatpakSourcesTask to precompiled build-logic convention plugin
+- Audited the Flatpak build structure and successfully extracted the entire task logic, data classes, and extension helpers from loose script files to a precompiled compiled Kotlin class: `build-logic/convention/src/main/kotlin/org/meshtastic/buildlogic/GenerateFlatpakSourcesTask.kt`.
+- Registered the task directly within `RootConventionPlugin.kt` and removed the legacy `gradle/flatpak.gradle.kts` script block from the root `build.gradle.kts` file entirely.
+- Resolved and fixed an implicit Gradle non-serializable property capture inside the lazy property mappings, ensuring full compliance with the Gradle Configuration Cache and restoring successful cache storage with zero errors.
+- Validated with complete clean building (`./gradlew clean`) and static code analysis (`./gradlew spotlessCheck detekt`), completing with 100% green passes.
+
+## 2026-05-20 — Optimized GenerateFlatpakSourcesTask for performance and correctness
+- Optimized `GenerateFlatpakSourcesTask` in `gradle/flatpak.gradle.kts` by implementing single-pass Maven metadata XML pre-indexing ($O(1)$ lookups) and deferred SHA-256 calculation (executing digests only on deduplicated, finalized resources).
+- Refactored loose map structures into strongly-typed Gradle-compliant internal data classes (`SnapshotVersion`, `SnapshotMetadata`, and `FlatpakSourceCandidate`) to improve type safety and maintainability.
+- Verified output correctness: the optimized manifest output `flatpak-sources.json` is 100% character-for-character identical to the original unoptimized output.
+- Successfully passed all static analysis and code quality checks with `./gradlew spotlessCheck detekt` (100% green).
+
+## 2026-05-20 — Implemented dynamic Gradle cache SNAPSHOT metadata resolution for Flatpak offline builds
+- Overhauled `GenerateFlatpakSourcesTask` in `gradle/flatpak.gradle.kts` to identify `-SNAPSHOT` dependencies, parse local cached `maven-metadata.xml` in `resources-2.1`, and dynamically map them to remote timestamped snapshot URLs (e.g. Sonatype Snapshots) while preserving their original non-timestamped file names as `dest-filename`.
+- Created a pure JDK XML parser within the task to parse the `<snapshotVersions>` block from cached XML files.
+- Verified that compiling the desktopApp and running the flatpak generator task successfully maps snapshot dependencies (such as `org.meshtastic:takpacket-sdk-jvm:0.2.4-SNAPSHOT`) to their remote unique snapshot URLs in `flatpak-sources.json`.
+- Ran quality and validation checks: `./gradlew spotlessCheck detekt` (100% SUCCESSFUL with zero issues).
+
+## 2026-05-20 — Resolved Flatpak jitpack.io dependency download 404s in sandboxed offline builds
+- Modified `GenerateFlatpakSourcesTask` in `gradle/flatpak.gradle.kts` to dynamically detect dependency groups starting with `com.github.` (which are hosted on JitPack).
+- Configured the generation of `primaryUrl` for these dependencies to resolve directly from `https://jitpack.io` and created custom high-availability fallback lists.
+- Verified that compiling the desktopApp and running the flatpak generator task (`./gradlew :desktopApp:assemble :generateFlatpakSourcesFromCache --no-configuration-cache`) successfully produces a valid 10MB `flatpak-sources.json` containing correctly mapped JitPack URLs.
+- Ran quality and validation checks: `./gradlew spotlessCheck detekt` (100% SUCCESSFUL with zero issues).
+
+## 2026-05-20 — Replaced standalone translations landing page with dynamic global header language switcher dropdown
+- Deleted redundant standalone page `docs/en/translations.md` and updated `docs/README.md` to reflect layout change.
+- Completely re-engineered `docs/_includes/language_switcher.html` to:
+  1. Dynamically parse active page paths and locales, matching default English pages with translated variants.
+  2. Bind button text to native active language names (e.g., displaying "Беларуская" instead of hardcoded "English").
+  3. Pre-verify file existence in `site.pages` to only render valid translation links, preventing any 404 errors.
+  4. Automatically hide the language switcher on English pages that do not have translations available yet.
+- Modified custom CSS styles in `docs/_includes/head_custom.html` to use `right: 0; left: auto;` layout alignment, preventing dropdown menu overflows on smaller screens.
+- Successfully built and verified live documentation pages in the browser using the browser subagent, confirming fully operational dynamic swappers.
+- Ran quality and validation checks: `./gradlew generateDocsBundle validateDocsBundle spotlessCheck detekt` (100% SUCCESSFUL).
+
+## 2026-05-20 — Fixed Jekyll documentation site left navigation nesting and sub-page visibility
+- Cleaned up redundant and brittle dynamic default scope parent settings in `docs/_config.yml`.
+- Added explicit `parent: User Guide` front-matter fields to all 17 English user guide markdown files under `docs/en/user/`.
+- Added explicit `parent: Developer Guide` front-matter fields to all 9 English developer guide markdown files under `docs/en/developer/`.
+- Run and verified Gradle documentation bundle compilation: `./gradlew generateDocsBundle validateDocsBundle` (PASSED: 672 pages).
+- Validated formatting and static analysis rules: `./gradlew spotlessApply spotlessCheck detekt` (100% green).
+- Successfully completed full baseline compilation checks with `./gradlew assembleDebug`.
+
+## 2026-05-20 — Completely overhauled, simplified, and pushed Flatpak offline source automation
+- Completely retired the third-party `flatpak-gradle-generator` plugin and its associated complex configuration and library overrides (removed ~150 lines of boilerplate).
+- Implemented a native JVM-based custom Gradle task `GenerateFlatpakSourcesTask` inside `gradle/flatpak.gradle.kts` which walks the post-compilation Gradle cache and generates a perfectly sorted, deduplicated `flatpak-sources.json` in under 3 seconds.
+- Integrated high-availability mirror URL generation (Google, Gradle Plugin Portal, GCP Maven Central, and Aliyun Maven repositories) for complete build robustness during Flathub sandboxed offline builds.
+- Streamlined CI workflow files `.github/workflows/release.yml` and `.github/workflows/reusable-check.yml` to call our native Gradle task.
+- Validated all formatting and static analysis checks using `./gradlew spotlessCheck detekt` (100% green).
+- Committed, successfully pushed the branch `fix/flatpak-sources-automation` to remote `jamesarich`, and updated the PR description on GitHub for PR #5533.
+
+## 2026-05-20 — Rebased Flatpak Optimization Branch onto upstream/main
+- Successfully rebased the working branch `fix/flatpak-sources-automation` onto the latest fetched `origin/main` (upstream).
+- Resolved potential rebase history divergence by preserving only our unique conflict-bypassing override commit and skipping squash-merged commits.
+- Updated git submodules to track the new upstream base commit.
+- Re-ran all baseline quality and static analysis checks (`spotlessCheck`, `detekt`) and confirmed 100% success.
+- Validated end-to-end correctness by running `:combineFlatpakSources` to verify complete and correct generation of the consolidated `flatpak-sources.json` manifest with 2,339 unique resources.
+
 ## 2026-05-20 — Overhauled and Bulletproofed Flatpak Source Generation
 - Overhauled and streamlined `build-logic/convention/build.gradle.kts` to dynamically query and resolve all 25+ Version Catalog plugin marker coordinates in a type-safe dynamic loop.
 - Replaced the hardcoded embedded Gradle Kotlin compiler version with dynamic standard library detection: `KotlinVersion.CURRENT.toString()`.

@@ -95,8 +95,8 @@ jobs:
             echo "$body" \
               | sed '/^<!-- .* -->/d' \
               | sed '/^## What'\''s Changed$/d' \
+              | sed '/^## New Contributors$/,$d' \
               | sed '/^\*\*Full Changelog\*\*/d' \
-              | sed '/^## New Contributors$/,$ { /^## New Contributors$/! { /^\*/!d; }; }' \
               | sed '/./,$!d' \
               | sed -e :a -e '/^\n*$/{$d;N;ba}'
           }
@@ -107,6 +107,7 @@ jobs:
             gh api "repos/${REPO}/compare/${from_ref}...${to_ref}" \
               --jq '.commits[]
                 | select(.parents | length == 1)
+                | select((.commit.message | split("\n")[0] | ascii_downcase | test("update changelog(\\.md)?")) | not)
                 | "* \(.commit.message | split("\n")[0]) by \(.commit.author.name) (@\(.author.login // .commit.author.name)) in [`\(.sha[0:9])`](https://github.com/'"${REPO}"'/commit/\(.sha))"' \
               2>/dev/null || true
           }
@@ -125,7 +126,11 @@ jobs:
 
           CONTRIBUTORS=""
           if echo "$FULL_NOTES" | grep -q '## New Contributors'; then
-            CONTRIBUTORS=$(echo "$FULL_NOTES" | sed -n '/^## New Contributors$/,$ p')
+            CONTRIBUTORS=$(echo "$FULL_NOTES" | awk '
+              /^## New Contributors$/ { capture=1 }
+              capture && /^\*\*Full Changelog\*\*/ { exit }
+              capture { print }
+            ')
           fi
 
           # === Build ordered segment chain by commit ancestry ===

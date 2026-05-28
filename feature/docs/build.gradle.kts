@@ -36,7 +36,7 @@ kotlin {
             implementation(projects.core.di)
 
             implementation(libs.kotlinx.collections.immutable)
-            implementation(libs.jetbrains.navigation3.ui)
+            implementation(libs.jetbrains.compose.material3.adaptive)
             implementation(libs.jetbrains.compose.material3.adaptive.navigation3)
             implementation(libs.coil)
             implementation(libs.markdown.renderer)

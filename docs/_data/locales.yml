@@ -1,114 +1,117 @@
 # Supported documentation locales.
-# Each entry maps a Crowdin 2-letter code to its native name.
+# Each entry maps a regional qualifier code to its native name.
 # Pages land at docs/{code}/user/*.md via Crowdin sync.
 # Synced with Android app locales (values-* resource dirs).
 
-ar:
+ar-rSA:
   name: "العربية"
   dir: rtl
-be:
+be-rBY:
   name: "Беларуская"
   dir: ltr
-bg:
+bg-rBG:
   name: "Български"
   dir: ltr
-ca:
+ca-rES:
   name: "Català"
   dir: ltr
-cs:
+cs-rCZ:
   name: "Čeština"
   dir: ltr
-de:
+de-rDE:
   name: "Deutsch"
   dir: ltr
-el:
+el-rGR:
   name: "Ελληνικά"
   dir: ltr
-es:
+es-rES:
   name: "Español"
   dir: ltr
-et:
+et-rEE:
   name: "Eesti"
   dir: ltr
-fi:
+fi-rFI:
   name: "Suomi"
   dir: ltr
-fr:
+fr-rFR:
   name: "Français"
   dir: ltr
-ga:
+ga-rIE:
   name: "Gaeilge"
   dir: ltr
-gl:
+gl-rES:
   name: "Galego"
   dir: ltr
-he:
+iw-rIL:
   name: "עברית"
   dir: rtl
-hr:
+hr-rHR:
   name: "Hrvatski"
   dir: ltr
-ht:
+ht-rHT:
   name: "Kreyòl Ayisyen"
   dir: ltr
-hu:
+hu-rHU:
   name: "Magyar"
   dir: ltr
-is:
+is-rIS:
   name: "Íslenska"
   dir: ltr
-it:
+it-rIT:
   name: "Italiano"
   dir: ltr
-ja:
+ja-rJP:
   name: "日本語"
   dir: ltr
-ko:
+ko-rKR:
   name: "한국어"
   dir: ltr
-lt:
+lt-rLT:
   name: "Lietuvių"
   dir: ltr
-nl:
+nl-rNL:
   name: "Nederlands"
   dir: ltr
-"no":
+no-rNO:
   name: "Norsk"
   dir: ltr
-pl:
+pl-rPL:
   name: "Polski"
-  dir: ltr
-pt:
-  name: "Português"
   dir: ltr
 pt-rBR:
   name: "Português (Brasil)"
   dir: ltr
-ro:
+pt-rPT:
+  name: "Português"
+  dir: ltr
+ro-rRO:
   name: "Română"
   dir: ltr
-ru:
+ru-rRU:
   name: "Русский"
   dir: ltr
-sk:
+sk-rSK:
   name: "Slovenčina"
   dir: ltr
-sl:
+sl-rSI:
   name: "Slovenščina"
   dir: ltr
-sq:
+sq-rAL:
   name: "Shqip"
   dir: ltr
-sr:
-  name: "Српски"
+sr-rLatn:
+  name: "Српски (Latinica)"
   dir: ltr
-sv:
+srp:
+  name: "Српски (Ћирилица)"
+  dir: ltr
+sv-rSE:
   name: "Svenska"
   dir: ltr
-tr:
+tr-rTR:
   name: "Türkçe"
   dir: ltr
-uk:
+uk-rUA:
   name: "Українська"
   dir: ltr
 zh-rCN:

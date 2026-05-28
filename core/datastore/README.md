@@ -1,6 +1,9 @@
 # `:core:datastore`
 
 ## Overview
+
+**Targets:** Android · JVM (Desktop) · iOS
+
 The `:core:datastore` module manages structured, asynchronous data storage using **Jetpack DataStore**. It is primarily used for storing complex configuration objects like radio channel sets and local device configurations.
 
 ## Key Components
@@ -13,12 +16,16 @@ The `:core:datastore` module manages structured, asynchronous data storage using
 ### 2. Serializers
 Uses **Kotlin Serialization** to convert between Protobuf/JSON and the underlying DataStore storage.
 
-## Module dependency graph
+
+## Dependency Graph
 
 <!--region graph-->
 ```mermaid
 graph TB
   :core:datastore[datastore]:::kmp-library
+  :core:datastore -.-> :core:common
+  :core:datastore -.-> :core:model
+  :core:datastore -.-> :core:proto
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

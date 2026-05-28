@@ -1,7 +1,8 @@
 ---
 title: Settings — Radio & User
+parent: User Guide
 nav_order: 7
-last_updated: 2026-05-13
+last_updated: 2026-05-20
 description: Configure your radio hardware, LoRa presets, user profile, position sharing, power management, and security.
 aliases:
   - 設定
@@ -130,7 +131,7 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 | NTP 伺服器       | Time synchronization server                          |
 | Syslog Server | Remote logging server                                |
 
-![IP address field](/assets/screenshots/settings_ipv4_field.png)
+![IP address field](../../assets/screenshots/settings_ipv4_field.png)
 
 ### 藍牙配置
 
@@ -142,25 +143,25 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 
 ### 安全性設定
 
-| 設定                               | 描述說明                                                                       |
-| -------------------------------- | -------------------------------------------------------------------------- |
-| 公鑰                               | Your node's public key (read-only)                      |
-| 管理金鑰                             | Key for remote administration                                              |
-| 私鑰                               | Your node's private key (handle securely)               |
-| Admin Channel Enabled - 管理員頻道已啟用 | Allow admin commands via channel                                           |
-| 除錯日誌                             | Output live debug logging over serial/bluetooth                            |
-| Serial Enabled                   | Enable serial console access (moved from Device Config) |
-| 管理模式                             | Restrict non-admin channel changes                                         |
+| 設定                        | 描述說明                                                                       |
+| ------------------------- | -------------------------------------------------------------------------- |
+| 公鑰                        | Your node's public key (read-only)                      |
+| 管理金鑰                      | Key for remote administration                                              |
+| 私鑰                        | Your node's private key (handle securely)               |
+| ~~Admin Channel Enabled~~ | ⚠️ Removed — now configured automatically when an admin key is set         |
+| 除錯日誌                      | Output live debug logging over serial/bluetooth                            |
+| Serial Enabled            | Enable serial console access (moved from Device Config) |
+| 管理模式                      | Restrict non-admin channel changes                                         |
 
-![Password field](/assets/screenshots/settings_password_field.png)
+![Password field](../../assets/screenshots/settings_password_field.png)
 
 Settings use standard preference controls — dropdowns, toggles, and sliders:
 
-| Control  | 螢幕截圖                                                   |
-| -------- | ------------------------------------------------------ |
-| Dropdown | ![Dropdown](/assets/screenshots/settings_dropdown.png) |
-| Toggle   | ![Toggle](/assets/screenshots/settings_switch.png)     |
-| Slider   | ![Slider](/assets/screenshots/settings_slider.png)     |
+| Control  | 螢幕截圖                                                        |
+| -------- | ----------------------------------------------------------- |
+| Dropdown | ![Dropdown](../../assets/screenshots/settings_dropdown.png) |
+| Toggle   | ![Toggle](../../assets/screenshots/settings_switch.png)     |
+| Slider   | ![Slider](../../assets/screenshots/settings_slider.png)     |
 
 ## Related Topics
 

@@ -1,5 +1,6 @@
 ---
 title: Node Metrics
+parent: User Guide
 nav_order: 5
 last_updated: 2026-05-13
 description: Telemetry dashboards for each mesh node — device health, environment sensors, signal quality, power, traceroute, and position history.
@@ -109,11 +110,11 @@ Shows which nodes a given node can directly hear, useful for understanding mesh 
 2. Tap the node you want to inspect.
 3. Select the metric category from the detail tabs.
 
-![Node detail — local device](/assets/screenshots/nodes_detail_local.png)
+![Node detail — local device](../../assets/screenshots/nodes_detail_local.png)
 
 The position tab shows location data for nodes that share GPS:
 
-![Position inline content](/assets/screenshots/nodes_position.png)
+![Position inline content](../../assets/screenshots/nodes_position.png)
 
 > ⚠️ **Note:** Metrics are only available when they have been reported by the remote node. Metrics update at intervals configured on each node's telemetry settings.
 

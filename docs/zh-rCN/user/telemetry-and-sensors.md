@@ -1,5 +1,6 @@
 ---
 title: Telemetry & Sensors
+parent: User Guide
 nav_order: 9
 last_updated: 2026-05-13
 description: Sensor data on the mesh — supported environment, air quality, and power sensors, plus configuration and viewing guides.
@@ -100,7 +101,7 @@ Useful for monitoring solar charging or battery health on remote nodes.
    - Power Metrics (if INA sensor present)
 3. Historical graphs show trends over time.
 
-![Telemetry actions](/assets/screenshots/node-metrics_telemetric_actions.png)
+![Telemetry actions](../../assets/screenshots/node-metrics_telemetric_actions.png)
 
 ## 问题排查
 

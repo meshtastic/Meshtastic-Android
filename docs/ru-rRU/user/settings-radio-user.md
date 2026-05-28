@@ -1,7 +1,8 @@
 ---
 title: Настройки - Радио и пользователь
+parent: Руководство пользователя
 nav_order: 7
-last_updated: 2026-05-13
+last_updated: 2026-05-20
 description: Настройте ваше радиоустройство, пресеты LoRa, пользовательский профиль, обмен местоположением, управление питанием и безопасность.
 aliases:
   - настройки
@@ -130,7 +131,7 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 | NTP-сервер    | Сервер синхронизации времени                                    |
 | Syslog-сервер | Удалённый сервер логирования                                    |
 
-![IP address field](/assets/screenshots/settings_ipv4_field.png)
+![IP address field](../../assets/screenshots/settings_ipv4_field.png)
 
 ### Настройка Bluetooth
 
@@ -142,25 +143,25 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 
 ### Настройки безопасности
 
-| Настройка             | Описание                                                                   |
-| --------------------- | -------------------------------------------------------------------------- |
-| Публичный ключ        | Your node's public key (read-only)                      |
-| Ключ администратора   | Key for remote administration                                              |
-| Приватный ключ        | Your node's private key (handle securely)               |
-| Admin Channel Enabled | Allow admin commands via channel                                           |
-| Журнал отладки        | Output live debug logging over serial/bluetooth                            |
-| Serial Enabled        | Enable serial console access (moved from Device Config) |
-| Управляемый режим     | Restrict non-admin channel changes                                         |
+| Настройка                 | Описание                                                                   |
+| ------------------------- | -------------------------------------------------------------------------- |
+| Публичный ключ            | Your node's public key (read-only)                      |
+| Ключ администратора       | Key for remote administration                                              |
+| Приватный ключ            | Your node's private key (handle securely)               |
+| ~~Admin Channel Enabled~~ | ⚠️ Removed — now configured automatically when an admin key is set         |
+| Журнал отладки            | Output live debug logging over serial/bluetooth                            |
+| Serial Enabled            | Enable serial console access (moved from Device Config) |
+| Управляемый режим         | Restrict non-admin channel changes                                         |
 
-![Password field](/assets/screenshots/settings_password_field.png)
+![Password field](../../assets/screenshots/settings_password_field.png)
 
 Settings use standard preference controls — dropdowns, toggles, and sliders:
 
-| Control  | Screenshot                                             |
-| -------- | ------------------------------------------------------ |
-| Dropdown | ![Dropdown](/assets/screenshots/settings_dropdown.png) |
-| Toggle   | ![Toggle](/assets/screenshots/settings_switch.png)     |
-| Slider   | ![Slider](/assets/screenshots/settings_slider.png)     |
+| Control  | Screenshot                                                  |
+| -------- | ----------------------------------------------------------- |
+| Dropdown | ![Dropdown](../../assets/screenshots/settings_dropdown.png) |
+| Toggle   | ![Toggle](../../assets/screenshots/settings_switch.png)     |
+| Slider   | ![Slider](../../assets/screenshots/settings_slider.png)     |
 
 ## Related Topics
 

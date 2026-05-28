@@ -1,5 +1,6 @@
 ---
-title: Firmware Updates
+title: Актуализации на фърмуера
+parent: Ръководство за потребители
 nav_order: 13
 last_updated: 2026-05-13
 description: Update your radio firmware over Bluetooth — OTA process, version channels, pre-flight checks, and recovery.
@@ -10,21 +11,21 @@ aliases:
   - flash
 ---
 
-# Firmware Updates
+# Актуализации на фърмуера
 
-Keep your Meshtastic radio up to date with the latest firmware for new features, bug fixes, and security improvements.
+Поддържайте вашето Meshtastic радио актуално с най-новия фърмуер за нови функции, корекции на грешки и подобрения в сигурността.
 
-## Checking for Updates
+## Проверка за актуализации
 
-1. Navigate to **Settings → Firmware Update** or tap the firmware notification if shown.
-2. The app checks for available firmware versions.
+1. Отидете до **Настройки → Актуализация на фърмуера** или докоснете известието за фърмуера, ако е показано.
+2. Приложението проверява за налични версии на фърмуера.
 3. Available updates show the version number and changelog summary.
 
-## Update Methods
+## Методи за актуализиране
 
-### OTA (Over-The-Air) via Bluetooth
+### OTA (Over-The-Air) чрез Bluetooth
 
-The most common update method for Android users:
+Най-често срещаният метод за актуализиране за потребителите на Android:
 
 1. Ensure your radio is connected via Bluetooth.
 2. Navigate to the Firmware Update screen.
@@ -32,11 +33,11 @@ The most common update method for Android users:
 4. Tap **Update** to begin the OTA process.
 5. Wait for the update to complete — **do not disconnect** during the update.
 
-![Firmware checking for updates](/assets/screenshots/firmware_checking.png)
+![Firmware checking for updates](../../assets/screenshots/firmware_checking.png)
 
 > ⚠️ **Warning:** Interrupting a firmware update can brick your device. Ensure your radio has sufficient battery (>50% recommended) and maintain Bluetooth proximity during the entire process.
 
-![Firmware disclaimer](/assets/screenshots/firmware_disclaimer.png)
+![Firmware disclaimer](../../assets/screenshots/firmware_disclaimer.png)
 
 ### USB Flashing
 
@@ -47,10 +48,10 @@ For recovery or when OTA is unavailable:
 
 ## Version Channels
 
-| Канал    | Описание                                    |
-| -------- | ------------------------------------------- |
-| Стабилен | Recommended for most users; tested releases |
-| Алфа     | Preview releases; may contain bugs          |
+| Канал    | Описание                                               |
+| -------- | ------------------------------------------------------ |
+| Стабилен | Препоръчва се за повечето потребители; тествани версии |
+| Алфа     | Предварителни издания; може да съдържат грешки         |
 
 ## Pre-Update Checklist
 
@@ -70,7 +71,7 @@ After a successful update:
 - Verify your settings are intact
 - Check the firmware version in **Settings → About**
 
-![Firmware update success](/assets/screenshots/firmware_success.png)
+![Firmware update success](../../assets/screenshots/firmware_success.png)
 
 ## Отстраняване на неизправности
 
@@ -82,7 +83,7 @@ If the update appears frozen:
 - If truly stuck, power-cycle the radio
 - Attempt the update again
 
-![Firmware update error](/assets/screenshots/firmware_error.png)
+![Firmware update error](../../assets/screenshots/firmware_error.png)
 
 ### Device Won't Boot After Update
 

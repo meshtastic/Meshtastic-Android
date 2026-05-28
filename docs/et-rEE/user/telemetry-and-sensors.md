@@ -1,5 +1,6 @@
 ---
 title: Telemetry & Sensors
+parent: User Guide
 nav_order: 9
 last_updated: 2026-05-13
 description: Sensor data on the mesh — supported environment, air quality, and power sensors, plus configuration and viewing guides.
@@ -22,7 +23,7 @@ Telemetry allows nodes equipped with sensors to broadcast environmental, power, 
 
 All Meshtastic nodes report basic device telemetry:
 
-| Metric             | Kirjeldus                      | Typical Range                                                      |
+| Metric             | Kirjeldus                      | Tüüpiline ulatus                                                   |
 | ------------------ | ------------------------------ | ------------------------------------------------------------------ |
 | Battery Level      | Charge percentage              | 0–100%                                                             |
 | Vool               | Battery voltage                | 3.0–4.2V (LiPo) |
@@ -100,7 +101,7 @@ Useful for monitoring solar charging or battery health on remote nodes.
    - Power Metrics (if INA sensor present)
 3. Historical graphs show trends over time.
 
-![Telemetry actions](/assets/screenshots/node-metrics_telemetric_actions.png)
+![Telemetry actions](../../assets/screenshots/node-metrics_telemetric_actions.png)
 
 ## Troubleshooting
 

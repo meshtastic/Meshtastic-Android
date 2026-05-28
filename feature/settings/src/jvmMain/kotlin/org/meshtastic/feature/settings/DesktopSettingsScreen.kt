@@ -52,6 +52,7 @@ import org.meshtastic.core.resources.help_and_documentation
 import org.meshtastic.core.resources.info
 import org.meshtastic.core.resources.modules_already_unlocked
 import org.meshtastic.core.resources.modules_unlocked
+import org.meshtastic.core.resources.node_layout_section_title
 import org.meshtastic.core.resources.preferences_language
 import org.meshtastic.core.resources.remotely_administrating
 import org.meshtastic.core.resources.theme
@@ -65,6 +66,7 @@ import org.meshtastic.core.ui.icon.FormatPaint
 import org.meshtastic.core.ui.icon.HelpOutline
 import org.meshtastic.core.ui.icon.Info
 import org.meshtastic.core.ui.icon.Language
+import org.meshtastic.core.ui.icon.List
 import org.meshtastic.core.ui.icon.Memory
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Wifi
@@ -200,6 +202,15 @@ fun DesktopSettingsScreen(
                         onItemSelected = { selected -> settingsViewModel.setDbCacheLimit(selected.toInt()) },
                         summary = stringResource(Res.string.device_db_cache_limit_summary),
                     )
+                }
+
+                ExpressiveSection(title = stringResource(Res.string.node_layout_section_title)) {
+                    ListItem(
+                        text = stringResource(Res.string.node_layout_section_title),
+                        leadingIcon = MeshtasticIcons.List,
+                    ) {
+                        onNavigate(SettingsRoute.NodeList)
+                    }
                 }
 
                 ExpressiveSection(title = stringResource(Res.string.wifi_devices)) {

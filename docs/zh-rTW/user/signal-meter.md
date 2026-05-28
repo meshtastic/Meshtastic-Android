@@ -1,5 +1,6 @@
 ---
 title: How the Meshtastic Signal Meter Works
+parent: User Guide
 nav_order: 15
 last_updated: 2026-05-13
 description: How the signal meter calculates quality from RSSI and SNR — LoRa spread spectrum, presets, and what the bars really mean.
@@ -221,5 +222,5 @@ In the app, signal data is shown in several places:
 - **Traceroute** — per-hop signal quality for each relay node
 - **Signal metrics** — historical SNR and RSSI data in the metrics charts
 
-![Node entry showing SNR, RSSI values and colored signal bars](/assets/screenshots/nodes_signal_info.png)
+![Node entry showing SNR, RSSI values and colored signal bars](../../assets/screenshots/nodes_signal_info.png)
 

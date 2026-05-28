@@ -17,6 +17,7 @@
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
+import org.gradle.kotlin.dsl.register
 import org.meshtastic.buildlogic.configureDokkaAggregation
 import org.meshtastic.buildlogic.configureGraphTasks
 import org.meshtastic.buildlogic.configureKover
@@ -45,7 +46,6 @@ class RootConventionPlugin : Plugin<Project> {
 
             // Register graph tasks on the root project itself
             configureGraphTasks()
-
             registerKmpSmokeCompileTask()
         }
     }
@@ -119,8 +119,8 @@ private val ANDROID_ONLY_MODULES = setOf(":androidApp", ":core:api", ":core:barc
 
 /**
  * Modules excluded from Dokka aggregation. :core:proto contains only auto-generated Wire classes (no KDoc value) and
- * its TAKPacket-SDK dependency doesn't publish iOS metadata JARs, causing
- * `transformCommonMainDependenciesMetadata` to fail during Dokka resolution.
+ * its TAKPacket-SDK dependency doesn't publish iOS metadata JARs, causing `transformCommonMainDependenciesMetadata` to
+ * fail during Dokka resolution.
  */
 private val DOKKA_EXCLUDED_MODULES = setOf(":core:proto")
 

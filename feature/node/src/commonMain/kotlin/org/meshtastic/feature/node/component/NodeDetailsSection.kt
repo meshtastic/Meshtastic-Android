@@ -18,6 +18,7 @@
 
 package org.meshtastic.feature.node.component
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
@@ -51,6 +52,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.Base64Factory
 import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.resources.Res
@@ -92,12 +94,25 @@ import org.meshtastic.core.ui.util.createClipEntry
 import org.meshtastic.core.ui.util.formatAgo
 
 @Composable
-fun NodeDetailsSection(node: Node, modifier: Modifier = Modifier) {
+fun NodeDetailsSection(
+    node: Node,
+    modifier: Modifier = Modifier,
+    deviceHardware: DeviceHardware? = null,
+    reportedTarget: String? = null,
+) {
     SectionCard(title = Res.string.details, modifier = modifier) {
-        Column {
+        Column(modifier = Modifier.animateContentSize()) {
             if (node.mismatchKey) {
                 MismatchKeyWarning(Modifier.padding(horizontal = 16.dp))
                 Spacer(Modifier.height(16.dp))
+            }
+            if (deviceHardware != null) {
+                DeviceHeroSection(
+                    bgColor = node.colors.second.toLong(),
+                    deviceHardware = deviceHardware,
+                    reportedTarget = reportedTarget,
+                )
+                SectionDivider()
             }
             MainNodeDetails(node)
         }

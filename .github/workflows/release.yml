@@ -370,13 +370,24 @@ jobs:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           cache_read_only: 'true'
 
+      # Uses an isolated Gradle user home so every artifact actually traverses the
+      # network — the flatpak-sources plugin captures URLs via BuildOperationListener and
+      # only sees ExternalResourceReadBuildOperation events for cache misses. With the
+      # shared cache, downloads would be skipped and the manifest would be (nearly) empty.
+      # We drive packageUberJarForCurrentOS — the same task the in-flatpak build invokes —
+      # so the runtime classpath is fully resolved (skiko, ktor-cio, kable-btleplug-ffi, …
+      # are runtime-only and would be missed by :assemble).
       - name: Generate Flatpak Sources
         run: >
-          ./gradlew :combineFlatpakSources
-          --no-configuration-cache
+          ./gradlew --no-build-cache --no-configuration-cache
+          -Dgradle.user.home=${{ runner.temp }}/flatpak-gradle-home
+          :desktopApp:packageUberJarForCurrentOS :captureFlatpakSources
+
+      - name: Stage manifest
+        run: cp build/flatpak-sources.json flatpak-sources.json
 
       - name: List Flatpak source files
-        run: ls -R flatpak-sources.json
+        run: ls -l flatpak-sources.json
 
       - name: Upload Flatpak source artifacts
         if: always()
@@ -405,7 +416,7 @@ jobs:
 
       - name: Combine Flatpak source files
         run: >
-          jq -s 'add | unique_by(.dest + "/" + .["dest-filename"] + "/" + (.["only-arches"] | tostring))'
+          jq -s 'add | unique_by(.dest + "/" + .["dest-filename"])'
           flatpak-multisrc/*/flatpak-sources.json
           > flatpak-sources.json
 

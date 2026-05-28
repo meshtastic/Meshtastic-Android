@@ -22,7 +22,6 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(libs.compose.multiplatform.foundation)
             implementation(projects.core.common)
             implementation(projects.core.data)
             implementation(projects.core.database)
@@ -39,8 +38,6 @@ kotlin {
             implementation(projects.core.ble)
             implementation(projects.core.network)
             implementation(projects.feature.settings)
-
-            implementation(libs.jetbrains.navigation3.ui)
         }
 
         androidMain.dependencies { implementation(libs.usb.serial.android) }

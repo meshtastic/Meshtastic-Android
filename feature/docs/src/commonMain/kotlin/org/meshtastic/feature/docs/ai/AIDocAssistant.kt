@@ -16,7 +16,9 @@
  */
 package org.meshtastic.feature.docs.ai
 
+import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.feature.docs.model.AIDocAssistantResult
+import org.meshtastic.feature.docs.model.ModelReadiness
 
 /**
  * Shared abstraction over the platform-specific docs AI assistant.
@@ -30,8 +32,17 @@ interface AIDocAssistant {
     /** Whether the AI assistant is available on the current platform/device. */
     suspend fun isSupported(): Boolean
 
+    /** Current model readiness state for lifecycle/download UX. */
+    val modelStatus: StateFlow<ModelReadiness>
+
     /** Answer a user question about Meshtastic using bundled documentation context. */
     suspend fun answer(question: String, currentPageId: String? = null): AIDocAssistantResult
+
+    /** Answer a user question about Meshtastic, streaming the results as they arrive. */
+    fun answerStream(
+        question: String,
+        currentPageId: String? = null,
+    ): kotlinx.coroutines.flow.Flow<AIDocAssistantResult>
 
     /** Reset the conversation session. Call when starting a new conversation thread. */
     fun resetSession()

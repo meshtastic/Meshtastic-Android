@@ -49,6 +49,7 @@ import org.meshtastic.core.resources.export_configuration
 import org.meshtastic.core.resources.filter_settings
 import org.meshtastic.core.resources.help_and_documentation
 import org.meshtastic.core.resources.import_configuration
+import org.meshtastic.core.resources.node_layout_section_title
 import org.meshtastic.core.resources.preferences_language
 import org.meshtastic.core.resources.remotely_administrating
 import org.meshtastic.core.resources.wifi_devices
@@ -57,6 +58,7 @@ import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.icon.FilterList
 import org.meshtastic.core.ui.icon.HelpOutline
+import org.meshtastic.core.ui.icon.List
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Wifi
 import org.meshtastic.feature.settings.component.AppInfoSection
@@ -239,6 +241,15 @@ fun SettingsScreen(
                     onShowLanguagePicker = { showLanguagePickerDialog = true },
                     onShowThemePicker = { showThemePickerDialog = true },
                 )
+
+                ExpressiveSection(title = stringResource(Res.string.node_layout_section_title)) {
+                    ListItem(
+                        text = stringResource(Res.string.node_layout_section_title),
+                        leadingIcon = MeshtasticIcons.List,
+                    ) {
+                        onNavigate(SettingsRoute.NodeList)
+                    }
+                }
 
                 ExpressiveSection(title = stringResource(Res.string.wifi_devices)) {
                     ListItem(text = stringResource(Res.string.wifi_devices), leadingIcon = MeshtasticIcons.Wifi) {

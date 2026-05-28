@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">Viesti käyttäjältä %1$s: %2$s</string>
     <string name="accept">Hyväksy</string>
@@ -138,6 +139,7 @@
     <string name="channel_url">Kanavan URL-osoite</string>
     <string name="channel_utilization">Kanavan käyttöaste</string>
     <string name="channels">Kanavat</string>
+    <!-- CHIRPY -->
     <string name="chirpy">Chirpy</string>
     <string name="choose_contrast">Kontrastin taso</string>
     <string name="choose_theme">Valitse teema</string>
@@ -786,6 +788,10 @@
     <string name="node_filter_show_ignored">Näytä vain huomioimattomat solmut</string>
     <string name="node_filter_title">Suodata otsikon mukaan</string>
     <string name="node_id">Laiteen ID</string>
+    <string name="node_layout_channel">Kanava</string>
+    <string name="node_layout_hops_away">Hyppyjä</string>
+    <string name="node_layout_log_icons">Ympäristöarvot</string>
+    <string name="node_layout_power">Virta</string>
     <string name="node_number">Laitteen numero</string>
     <string name="node_sort_alpha">A-Ö</string>
     <string name="node_sort_button">Lajitteluvaihtoehdot</string>
@@ -1204,6 +1210,7 @@
     <string name="timestamp">Aikaleima</string>
     <string name="tls_enabled">TLS käytössä</string>
     <string name="toggle_my_position">Kytke sijainti päälle</string>
+    <string name="trace_route">Reitinselvitys</string>
     <!-- TRACEROUTE -->
     <string name="traceroute">Reitinselvitys</string>
     <string name="traceroute_diff">Reititettyjä hyppyjä %1$d, joista %2$d hyppyä takaisin</string>
@@ -1256,7 +1263,6 @@
     <string name="tx_power_dbm">Lähetysteho</string>
     <string name="type">Kirjoita</string>
     <string name="type_a_message">Kirjoita viesti</string>
-    <string name="udp_enabled">Käytössä</string>
     <!-- UNKNOWN -->
     <string name="unknown">Tuntematon</string>
     <string name="unknown_age">Tuntematon ikä</string>

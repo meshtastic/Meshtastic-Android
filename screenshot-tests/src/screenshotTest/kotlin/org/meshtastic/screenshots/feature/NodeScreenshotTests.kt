@@ -22,6 +22,13 @@ import com.android.tools.screenshot.PreviewTest
 import org.meshtastic.feature.node.component.DeviceActionsLocalPreview
 import org.meshtastic.feature.node.component.DeviceActionsRemotePreview
 import org.meshtastic.feature.node.component.NodeDetailsSectionPreview
+import org.meshtastic.feature.node.component.NodeItemCompactActivePreview
+import org.meshtastic.feature.node.component.NodeItemCompactAllFieldsPreview
+import org.meshtastic.feature.node.component.NodeItemCompactMinimalPreview
+import org.meshtastic.feature.node.component.NodeItemCompactOnlineRemotePreview
+import org.meshtastic.feature.node.component.NodeItemCompleteActivePreview
+import org.meshtastic.feature.node.component.NodeItemCompleteOnlineRemotePreview
+import org.meshtastic.feature.node.component.NodeItemCompletePreview
 import org.meshtastic.feature.node.component.PositionInlineContentPreview
 import org.meshtastic.feature.node.component.TelemetricActionsSectionEmptyPreview
 import org.meshtastic.feature.node.component.TelemetricActionsSectionPreview
@@ -115,6 +122,59 @@ fun ScreenshotDeviceMetricsCard() {
 @Composable
 fun ScreenshotEnvironmentMetricsContent() {
     PreviewEnvironmentMetricsContent()
+}
+
+// ---------------------------------------------------------------------------
+// Node list item screenshots (Complete + Compact densities)
+// ---------------------------------------------------------------------------
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotNodeItemComplete() {
+    NodeItemCompletePreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotNodeItemCompleteActive() {
+    NodeItemCompleteActivePreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotNodeItemCompactAllFields() {
+    NodeItemCompactAllFieldsPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotNodeItemCompactMinimal() {
+    NodeItemCompactMinimalPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotNodeItemCompactActive() {
+    NodeItemCompactActivePreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotNodeItemCompactOnlineRemote() {
+    NodeItemCompactOnlineRemotePreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotNodeItemCompleteOnlineRemote() {
+    NodeItemCompleteOnlineRemotePreview()
 }
 
 @PreviewTest

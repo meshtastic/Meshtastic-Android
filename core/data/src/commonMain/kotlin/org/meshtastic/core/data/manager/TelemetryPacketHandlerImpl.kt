@@ -24,7 +24,6 @@ import kotlinx.coroutines.sync.withLock
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.clampTimestampToNow
-import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.decodeOrNull
@@ -55,7 +54,7 @@ class TelemetryPacketHandlerImpl(
 ) : TelemetryPacketHandler {
 
     private val batteryMutex = Mutex()
-    private val batteryPercentCooldowns = mutableMapOf<Int, Long>()
+    private val notifiedNodes = mutableSetOf<Int>()
 
     @Suppress("LongMethod", "CyclomaticComplexMethod")
     override fun handleTelemetry(packet: MeshPacket, dataPacket: DataPacket, myNodeNum: Int) {
@@ -107,11 +106,7 @@ class TelemetryPacketHandlerImpl(
                             }
                         } else {
                             scope.launch {
-                                batteryMutex.withLock {
-                                    if (batteryPercentCooldowns.containsKey(fromNum)) {
-                                        batteryPercentCooldowns.remove(fromNum)
-                                    }
-                                }
+                                batteryMutex.withLock { notifiedNodes.remove(fromNum) }
                                 notificationManager.cancel(nextNode.num)
                             }
                         }
@@ -129,43 +124,17 @@ class TelemetryPacketHandlerImpl(
         }
     }
 
-    @Suppress("ReturnCount")
+    @Suppress("UnusedParameter")
     private suspend fun shouldBatteryNotificationShow(fromNum: Int, t: Telemetry, myNodeNum: Int): Boolean {
-        val isRemote = (fromNum != myNodeNum)
-        var shouldDisplay = false
-        var forceDisplay = false
-        val metrics = t.device_metrics ?: return false
-        val batteryLevel = metrics.battery_level ?: 0
-        when {
-            batteryLevel <= BATTERY_PERCENT_CRITICAL_THRESHOLD -> {
-                shouldDisplay = true
-                forceDisplay = true
-            }
-
-            batteryLevel == BATTERY_PERCENT_LOW_THRESHOLD -> shouldDisplay = true
-
-            batteryLevel.mod(BATTERY_PERCENT_LOW_DIVISOR) == 0 && !isRemote -> shouldDisplay = true
-
-            isRemote -> shouldDisplay = true
+        batteryMutex.withLock {
+            if (fromNum in notifiedNodes) return false
+            notifiedNodes.add(fromNum)
         }
-        if (shouldDisplay) {
-            val now = nowSeconds
-            batteryMutex.withLock {
-                if (!batteryPercentCooldowns.containsKey(fromNum)) batteryPercentCooldowns[fromNum] = 0L
-                if ((now - batteryPercentCooldowns[fromNum]!!) >= BATTERY_PERCENT_COOLDOWN_SECONDS || forceDisplay) {
-                    batteryPercentCooldowns[fromNum] = now
-                    return true
-                }
-            }
-        }
-        return false
+        return true
     }
 
     companion object {
         private const val BATTERY_PERCENT_UNSUPPORTED = 0.0
         private const val BATTERY_PERCENT_LOW_THRESHOLD = 20
-        private const val BATTERY_PERCENT_LOW_DIVISOR = 5
-        private const val BATTERY_PERCENT_CRITICAL_THRESHOLD = 5
-        private const val BATTERY_PERCENT_COOLDOWN_SECONDS = 1500
     }
 }

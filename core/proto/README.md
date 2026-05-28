@@ -1,6 +1,9 @@
 # `:core:proto`
 
 ## Overview
+
+**Targets:** Android · JVM (Desktop) · iOS
+
 This module contains the generated Kotlin and Java code from the Meshtastic Protobuf definitions. It uses the [Wire](https://github.com/square/wire) library for efficient and clean model generation.
 
 ## Key Components
@@ -16,7 +19,8 @@ This module is a low-level dependency for any module that needs to encode or dec
 implementation(projects.core.proto)
 ```
 
-## Module dependency graph
+
+## Dependency Graph
 
 <!--region graph-->
 ```mermaid

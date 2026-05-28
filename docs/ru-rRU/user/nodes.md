@@ -1,7 +1,8 @@
 ---
 title: Ноды
+parent: Руководство пользователя
 nav_order: 4
-last_updated: 2026-05-13
+last_updated: 2026-05-20
 description: Просматривайте, фильтруйте и сортируйте ноды сети — просматривайте подробности, качество сигнала, роли и быстрые действия.
 aliases:
   - node-list
@@ -85,11 +86,12 @@ From the node list, you can:
 
 - **Tap** a node to view its detail page
 - **Long-press** for quick actions:
+  - Mark/remove favorite
+  - Mute/unmute notifications
   - Send a direct message
-  - Показать на карте
-  - Запросить позицию
-  - Mark as favorite
-  - Трассировка маршрута
+  - Trace route
+  - Ignore/unignore
+  - Удалить ноду
 
 ## Filtering & Sorting
 
@@ -124,21 +126,21 @@ Type in the search field to filter nodes by name or short name. The filter updat
 
 Tapping a node opens the detail view with comprehensive information. See [Node Metrics](node-metrics) for full details on metrics and telemetry.
 
-![Node detail view](/assets/screenshots/nodes_node_list.png)
+![Node detail view](../../assets/screenshots/nodes_node_list.png)
 
 The detail screen includes device info, position, and action buttons:
 
-![Node detail section](/assets/screenshots/nodes_detail_section.png)
+![Node detail section](../../assets/screenshots/nodes_detail_section.png)
 
 Inline status indicators show key metrics at a glance:
 
-| Indicator              | Screenshot                                               |
-| ---------------------- | -------------------------------------------------------- |
-| Signal quality         | ![Signal](/assets/screenshots/nodes_signal_info.png)     |
-| Уровень заряда батареи | ![Battery](/assets/screenshots/nodes_battery_info.png)   |
-| Hop count              | ![Hops](/assets/screenshots/nodes_hops_info.png)         |
-| Последний раз слышен   | ![Last heard](/assets/screenshots/nodes_last_heard.png)  |
-| Расстояние             | ![Distance](/assets/screenshots/nodes_distance_info.png) |
+| Indicator              | Screenshot                                                    |
+| ---------------------- | ------------------------------------------------------------- |
+| Signal quality         | ![Signal](../../assets/screenshots/nodes_signal_info.png)     |
+| Уровень заряда батареи | ![Battery](../../assets/screenshots/nodes_battery_info.png)   |
+| Hop count              | ![Hops](../../assets/screenshots/nodes_hops_info.png)         |
+| Последний раз слышен   | ![Last heard](../../assets/screenshots/nodes_last_heard.png)  |
+| Расстояние             | ![Distance](../../assets/screenshots/nodes_distance_info.png) |
 
 ## Related Topics
 

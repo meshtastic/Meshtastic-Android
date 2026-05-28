@@ -84,3 +84,5 @@ docs/_config_local.yml
 flatpak-sources-*.json
 flatpak-sources.json
 offline-repository/
+.claude/
+build-scan-*.scan

@@ -13,13 +13,13 @@
 
 This is a tool for using Android (and Compose Desktop) with open-source mesh radios. For more information see our webpage: [meshtastic.org](https://www.meshtastic.org). If you are looking for the device side code, see [here](https://github.com/meshtastic/firmware).
 
-This project is currently beta testing across various providers. If you have questions or feedback please [Join our discussion forum](https://github.com/orgs/meshtastic/discussions) or the [Discord Group](https://discord.gg/meshtastic) . We would love to hear from you!
+If you have questions or feedback please [Join our discussion forum](https://github.com/orgs/meshtastic/discussions) or the [Discord Group](https://discord.gg/meshtastic). We would love to hear from you!
 
 
 
 ## Get Meshtastic
 
-The easiest, and fastest way to get the latest beta releases is to use our [github releases](https://github.com/meshtastic/Meshtastic-Android/releases). It is recommend to use these with [Obtainium](https://github.com/ImranR98/Obtainium) to get the latest updates.
+The easiest and fastest way to get the latest releases is to use our [GitHub releases](https://github.com/meshtastic/Meshtastic-Android/releases). It is recommended to use these with [Obtainium](https://github.com/ImranR98/Obtainium) to get the latest updates automatically.
 
 Alternatively, these other providers are also available, but may be slower to update. 
 
@@ -45,20 +45,27 @@ If you encounter any problems or have questions, [ask us on the discord](https:/
 
 ## Documentation
 
-The project's documentation is generated with [Dokka](https://kotlinlang.org/docs/dokka-introduction.html) and hosted on GitHub Pages. It is automatically updated on every push to the `main` branch.
+Both sites are deployed to GitHub Pages automatically on every push to `main`.
 
-[**View Documentation**](https://meshtastic.github.io/Meshtastic-Android/)
+| Site | URL | Contents |
+|---|---|---|
+| **User & Developer Docs** | [meshtastic.github.io/Meshtastic-Android](https://meshtastic.github.io/Meshtastic-Android/) | Jekyll site — user guide, developer guide, in-app doc content |
+| **API Reference** | [meshtastic.github.io/Meshtastic-Android/api](https://meshtastic.github.io/Meshtastic-Android/api/) | Dokka-generated KDoc for all public APIs |
 
 ### Generating Locally
 
-You can generate the documentation locally to preview your changes.
+**User & Developer Docs (Jekyll):**
+```bash
+./gradlew generateDocsBundle publishDocsSite
+BUNDLE_GEMFILE=docs/Gemfile bundle exec jekyll serve \
+  --source build/_site --baseurl ""
+```
 
-1.  **Run the Dokka task:**
-    ```bash
-    ./gradlew dokkaGeneratePublicationHtml
-    ```
-2.  **View the output:**
-    The generated HTML files will be located in the `build/dokka/html` directory. You can open the `index.html` file in your browser to view the documentation.
+**API Reference (Dokka):**
+```bash
+./gradlew dokkaGeneratePublicationHtml
+# Output: build/dokka/html/index.html
+```
 
 ## Architecture
 
@@ -73,6 +80,44 @@ The app follows modern Android development practices, built on top of a shared K
 
 ### Bluetooth Low Energy (BLE)
 The BLE stack uses a multiplatform interface-driven architecture. Platform-agnostic interfaces live in `commonMain`, utilizing the **Kable** multiplatform BLE library to handle device communication across all supported targets (Android, Desktop). This provides a robust, Coroutine-based architecture for reliable device communication while remaining fully KMP compatible. See [core/ble/README.md](core/ble/README.md) for details.
+
+### Module Documentation
+
+Each module has its own README with details on its responsibilities, API surface, and internal design.
+
+| Module | Description |
+|---|---|
+| [core/api](core/api/README.md) | AIDL service API for third-party integrations |
+| [core/domain](core/domain/README.md) | Business-logic use cases (radio config, sessions, exports) |
+| [core/repository](core/repository/README.md) | Data & infrastructure contracts (RadioTransport, NodeRepository, ServiceRepository) |
+| [core/takserver](core/takserver/README.md) | Meshtastic ↔ TAK (ATAK/iTAK) bridge — CoT server & conversion |
+| [core/ble](core/ble/README.md) | Multiplatform BLE transport (Kable) |
+| [core/network](core/network/README.md) | Internet comms: firmware metadata, map tiles, radio transports |
+| [core/data](core/data/README.md) | Repository layer — orchestrates DB, network, and service data |
+| [core/database](core/database/README.md) | Room KMP local persistence |
+| [core/datastore](core/datastore/README.md) | DataStore preferences |
+| [core/service](core/service/README.md) | Meshtastic Android service abstractions |
+| [core/navigation](core/navigation/README.md) | Type-safe Navigation 3 route model |
+| [core/resources](core/resources/README.md) | Centralised CMP string & drawable resources |
+| [core/model](core/model/README.md) | Shared domain models |
+| [core/ui](core/ui/README.md) | Shared UI components |
+| [core/common](core/common/README.md) | Common utilities |
+| [core/di](core/di/README.md) | Koin DI modules |
+| [core/testing](core/testing/README.md) | Shared test fakes & utilities |
+| [core/nfc](core/nfc/README.md) | NFC support |
+| [core/prefs](core/prefs/README.md) | Legacy preference helpers |
+| [core/barcode](core/barcode/README.md) | Barcode / QR scanning |
+| [core/proto](core/proto/README.md) | Protobuf submodule wrapper |
+| [feature/messaging](feature/messaging/README.md) | Messaging UI feature |
+| [feature/map](feature/map/README.md) | Map UI feature |
+| [feature/node](feature/node/README.md) | Node detail UI feature |
+| [feature/settings](feature/settings/README.md) | Settings UI feature |
+| [feature/firmware](feature/firmware/README.md) | Firmware update UI feature |
+| [feature/intro](feature/intro/README.md) | Onboarding / intro UI feature |
+| [feature/wifi-provision](feature/wifi-provision/README.md) | Wi-Fi provisioning UI feature |
+| [feature/connections](feature/connections/README.md) | Device discovery & connection management (BLE / USB / TCP) |
+| [feature/docs](feature/docs/README.md) | In-app documentation browser with Chirpy AI assistant |
+| [feature/widget](feature/widget/README.md) | Android home-screen Glance widget (live mesh stats) |
 
 ## Translations
 

@@ -1,5 +1,6 @@
 ---
 title: TAK Integration
+parent: User Guide
 nav_order: 10
 last_updated: 2026-05-13
 description: Interoperate with ATAK and WinTAK — CoT position sharing, TAK roles, and plugin setup.
@@ -35,7 +36,7 @@ The TAK module allows Meshtastic nodes to:
 2. Enable the TAK module.
 3. Configure the TAK team/group settings:
 
-![Module toggle switch](/assets/screenshots/settings_switch.png)
+![Module toggle switch](../../assets/screenshots/settings_switch.png)
 
 | Setting | Aprašymas                  |
 | ------- | -------------------------- |

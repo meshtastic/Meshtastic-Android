@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">Meddelande från %1$s: %2$s</string>
     <string name="accept">Acceptera</string>
@@ -128,6 +129,7 @@
     <string name="channel_name">Kanalnamn</string>
     <string name="channel_url">Kanal-URL</string>
     <string name="channels">Kanaler</string>
+    <!-- CHIRPY -->
     <string name="chirpy">Chirpy</string>
     <string name="choose_contrast">Kontrastnivå</string>
     <string name="choose_theme">Välj tema</string>
@@ -672,6 +674,10 @@
     <string name="node_filter_show_ignored">Visa endast ignorerade noder</string>
     <string name="node_filter_title">Filtrera på</string>
     <string name="node_id">Nod-ID</string>
+    <string name="node_layout_channel">Kanal</string>
+    <string name="node_layout_hops_away">Hopp bort</string>
+    <string name="node_layout_log_icons">Miljövärden</string>
+    <string name="node_layout_power">Ström</string>
     <string name="node_number">Nodnummer</string>
     <string name="node_sort_alpha">A-Ö</string>
     <string name="node_sort_button">Sorteringsalternativ för noder</string>
@@ -1037,6 +1043,7 @@
     <string name="timestamp">Tidsstämpel</string>
     <string name="tls_enabled">TLS är aktiverat</string>
     <string name="toggle_my_position">Växla min position</string>
+    <string name="trace_route">Spåra rutt</string>
     <!-- TRACEROUTE -->
     <string name="traceroute">Traceroute (spåra rutt)</string>
     <string name="traceroute_diff">Hopp mot %1$d Hopp tillbaka %2$d</string>
@@ -1070,7 +1077,6 @@
     <string name="tx_power_dbm">Sändningseffekt</string>
     <string name="type">Typ</string>
     <string name="type_a_message">Skriv ett meddelande</string>
-    <string name="udp_enabled">Aktiverad</string>
     <!-- UNKNOWN -->
     <string name="unknown">Okänd</string>
     <string name="unknown_age">Okänd ålder</string>
