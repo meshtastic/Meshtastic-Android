@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Meshtastic
+GenericName=Mesh Network Communicator
+Comment=Communicate off-grid with Meshtastic mesh radio devices
+Exec=meshtastic-desktop
+Icon=org.meshtastic.desktop
+Type=Application
+Categories=Network;Chat;HamRadio;
+Keywords=mesh;LoRa;radio;off-grid;
+StartupNotify=true
