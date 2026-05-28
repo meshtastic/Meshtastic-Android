@@ -661,12 +661,12 @@ lockdown_confirm_passphrase
 lockdown_disable
 lockdown_disable_message
 lockdown_enable
+lockdown_enable_ack
+lockdown_enable_warning
 lockdown_enter_passphrase
 lockdown_hide_passphrase
 lockdown_hours_until_expiry
 lockdown_incorrect_passphrase
-lockdown_irreversible_ack
-lockdown_irreversible_warning
 lockdown_lock_now
 lockdown_lock_reason
 lockdown_mode

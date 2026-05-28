@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -33,6 +34,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.util.encodeToString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.admin_key
@@ -78,6 +80,8 @@ expect fun ExportSecurityConfigButton(
 @Suppress("LongMethod")
 fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
+    val firmwareVersion = state.metadata?.firmware_version
+    val capabilities = remember(firmwareVersion) { Capabilities(firmwareVersion) }
     val securityConfig = state.radioConfig.security ?: Config.SecurityConfig()
     val formState = rememberConfigState(initialValue = securityConfig)
 
@@ -208,6 +212,7 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                 val lockdownState by viewModel.lockdownState.collectAsStateWithLifecycle()
                 val tokenInfo by viewModel.lockdownTokenInfo.collectAsStateWithLifecycle()
                 LockdownModeSetting(
+                    supported = capabilities.supportsLockdown,
                     lockdownState = lockdownState,
                     tokenInfo = tokenInfo,
                     connected = state.connected,

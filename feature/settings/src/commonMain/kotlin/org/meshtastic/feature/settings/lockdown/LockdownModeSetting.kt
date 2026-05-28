@@ -58,10 +58,10 @@ import org.meshtastic.core.resources.lockdown_confirm_passphrase
 import org.meshtastic.core.resources.lockdown_disable
 import org.meshtastic.core.resources.lockdown_disable_message
 import org.meshtastic.core.resources.lockdown_enable
+import org.meshtastic.core.resources.lockdown_enable_ack
+import org.meshtastic.core.resources.lockdown_enable_warning
 import org.meshtastic.core.resources.lockdown_hide_passphrase
 import org.meshtastic.core.resources.lockdown_hours_until_expiry
-import org.meshtastic.core.resources.lockdown_irreversible_ack
-import org.meshtastic.core.resources.lockdown_irreversible_warning
 import org.meshtastic.core.resources.lockdown_lock_now
 import org.meshtastic.core.resources.lockdown_mode
 import org.meshtastic.core.resources.lockdown_mode_setting_up
@@ -90,11 +90,12 @@ import org.meshtastic.feature.settings.radio.component.NodeActionButton
  *   read-only here.
  * - [LockdownState.Unlocked] → ON; turning OFF opens the disable dialog, plus a "Lock now" affordance and session info.
  *
- * When [lockdownState] is [LockdownState.None] the device is not lockdown-capable (it never sent a `lockdown_status`),
- * so nothing is rendered.
+ * Visibility is gated on [supported] — the firmware-version capability from `Capabilities.supportsLockdown` (lockdown
+ * ships in firmware v2.8.0). [lockdownState] drives the switch position once a `LockdownStatus` arrives.
  */
 @Composable
 fun ColumnScope.LockdownModeSetting(
+    supported: Boolean,
     lockdownState: LockdownState,
     tokenInfo: LockdownTokenInfo?,
     connected: Boolean,
@@ -104,7 +105,7 @@ fun ColumnScope.LockdownModeSetting(
     onLockNow: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    if (lockdownState is LockdownState.None) return
+    if (!supported) return
 
     var showEnableDialog by rememberSaveable { mutableStateOf(false) }
     var showDisableDialog by rememberSaveable { mutableStateOf(false) }
@@ -190,8 +191,8 @@ private fun EnableLockdownDialog(
         text = {
             Column {
                 Text(
-                    text = stringResource(Res.string.lockdown_irreversible_warning),
-                    color = MaterialTheme.colorScheme.error,
+                    text = stringResource(Res.string.lockdown_enable_warning),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Spacer(modifier = Modifier.height(SPACING_DP.dp))
                 PassphraseField(
@@ -250,7 +251,7 @@ private fun EnableLockdownDialog(
                 Spacer(modifier = Modifier.height(SPACING_DP.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(checked = acknowledged, onCheckedChange = { acknowledged = it })
-                    Text(stringResource(Res.string.lockdown_irreversible_ack))
+                    Text(stringResource(Res.string.lockdown_enable_ack))
                 }
             }
         },

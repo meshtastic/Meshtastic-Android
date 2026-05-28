@@ -71,6 +71,13 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
     /** Support for ESP32 Unified OTA. Supported since firmware v2.7.18. */
     val supportsEsp32Ota = atLeast(V2_7_18)
 
+    /**
+     * Support for runtime lockdown mode (per-connection passphrase auth). Supported since firmware v2.8.0. Note:
+     * lockdown is also hardware-gated (nRF52 only) — the device advertises real support by sending a `LockdownStatus`,
+     * which is the authoritative signal and drives the actual UI state.
+     */
+    val supportsLockdown = atLeast(V2_8_0)
+
     companion object {
         private val V2_6_8 = DeviceVersion("2.6.8")
         private val V2_6_9 = DeviceVersion("2.6.9")

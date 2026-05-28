@@ -685,12 +685,12 @@
     <string name="lockdown_disable">Disable lockdown</string>
     <string name="lockdown_disable_message">Enter your passphrase to turn off lockdown. The device will decrypt its storage and reboot.</string>
     <string name="lockdown_enable">Enable lockdown</string>
+    <string name="lockdown_enable_ack">I understand</string>
+    <string name="lockdown_enable_warning">Heads up: enabling lockdown locks the debug port (SWD) on supported hardware. You can turn lockdown off any time with your passphrase, and a full device erase restores everything if needed.</string>
     <string name="lockdown_enter_passphrase">Enter Passphrase</string>
     <string name="lockdown_hide_passphrase">Hide</string>
     <string name="lockdown_hours_until_expiry">Hours until expiry</string>
     <string name="lockdown_incorrect_passphrase">Incorrect passphrase.</string>
-    <string name="lockdown_irreversible_ack">I understand this cannot be undone</string>
-    <string name="lockdown_irreversible_warning">Enabling lockdown permanently locks the debug port (SWD) on supported hardware. Recovery then requires a full erase. This cannot be undone.</string>
     <string name="lockdown_lock_now">Lock Now</string>
     <string name="lockdown_lock_reason">Reason: %1$s</string>
     <string name="lockdown_mode">Lockdown mode</string>
