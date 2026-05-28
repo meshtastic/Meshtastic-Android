@@ -34,6 +34,8 @@ import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeSortOption
 import org.meshtastic.core.model.Position
+import org.meshtastic.core.model.service.LockdownState
+import org.meshtastic.core.model.service.LockdownTokenInfo
 import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.model.service.TracerouteResponse
 import org.meshtastic.core.repository.CommandSender
@@ -146,6 +148,16 @@ class TAKMeshIntegrationTest {
         override fun requestTelemetry(requestId: Int, destNum: Int, typeValue: Int) {}
 
         override fun requestNeighborInfo(requestId: Int, destNum: Int) {}
+
+        override fun sendLockdownPassphrase(
+            passphrase: String,
+            boots: Int,
+            hours: Int,
+            maxSessionSeconds: Int,
+            disable: Boolean,
+        ) {}
+
+        override fun sendLockNow() {}
     }
 
     private class FakeServiceRepository : ServiceRepository {
@@ -191,6 +203,20 @@ class TAKMeshIntegrationTest {
         override val serviceAction: Flow<ServiceAction> = MutableSharedFlow()
 
         override suspend fun onServiceAction(action: ServiceAction) {}
+
+        override val lockdownState: StateFlow<LockdownState> = MutableStateFlow(LockdownState.None)
+
+        override fun setLockdownState(state: LockdownState) {}
+
+        override fun clearLockdownState() {}
+
+        override val lockdownTokenInfo: StateFlow<LockdownTokenInfo?> = MutableStateFlow(null)
+
+        override fun setLockdownTokenInfo(info: LockdownTokenInfo?) {}
+
+        override val sessionAuthorized: StateFlow<Boolean> = MutableStateFlow(false)
+
+        override fun setSessionAuthorized(authorized: Boolean) {}
     }
 
     private class FakeMeshConfigHandler : MeshConfigHandler {

@@ -53,9 +53,15 @@ class LockdownCoordinatorImplTest {
             return saved[deviceAddress]
         }
 
-        override fun savePassphrase(deviceAddress: String, passphrase: String, boots: Int, hours: Int) {
+        override fun savePassphrase(
+            deviceAddress: String,
+            passphrase: String,
+            boots: Int,
+            hours: Int,
+            maxSessionSeconds: Int,
+        ) {
             saveThrows?.let { throw it }
-            saved[deviceAddress] = StoredPassphrase(passphrase, boots, hours)
+            saved[deviceAddress] = StoredPassphrase(passphrase, boots, hours, maxSessionSeconds)
         }
 
         override fun clearPassphrase(deviceAddress: String) {
@@ -521,7 +527,7 @@ class LockdownCoordinatorImplTest {
     // region DISABLED
 
     @Test
-    fun `DISABLED sets Disabled state, clears authorization, token, and stored passphrase`() {
+    fun `DISABLED sets Disabled state and clears authorization token and stored passphrase`() {
         radioService.setDeviceAddress(testDeviceAddress)
         passphraseStore.saved[testDeviceAddress] = StoredPassphrase("stale", 50, 0)
 
