@@ -42,7 +42,7 @@ jobs:
           echo "### Flatpak Sources Summary" >> "$GITHUB_STEP_SUMMARY"
           echo "- URLs captured: $(jq length flatpak-sources.json)" >> "$GITHUB_STEP_SUMMARY"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: flatpak-sources
           path: flatpak-sources.json
@@ -60,7 +60,7 @@ jobs:
         with:
           submodules: recursive
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: flatpak-sources
 
@@ -105,7 +105,7 @@ jobs:
             --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo
           echo "### ✅ Offline Flatpak build succeeded ($ARCH)" >> "$GITHUB_STEP_SUMMARY"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: meshtastic-desktop-flatpak-${{ matrix.arch }}
           path: ${{ runner.temp }}/org.meshtastic.desktop/org.meshtastic.desktop.${{ matrix.arch }}.flatpak
