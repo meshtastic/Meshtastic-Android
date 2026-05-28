@@ -31,6 +31,7 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 * repo: Add Meshtastic Desktop icon SVGs (#5623) by Austin (@vidplace7) in [`321b73e72`](https://github.com/meshtastic/Meshtastic-Android/commit/321b73e7266bc4c970fcb9a5570dae90be247025)
 * Enhance TAKTALK support with message and room handling, update SDK to v0.3.2 (#5634) by Ben Meadors (@thebentern) in [`a5e6894fe`](https://github.com/meshtastic/Meshtastic-Android/commit/a5e6894fe8934aefce5036458407a69fc96ca541)
 * chore(deps): update takpacket.sdk to v0.3.3 (#5642) by renovate[bot] (@renovate[bot]) in [`bfece155f`](https://github.com/meshtastic/Meshtastic-Android/commit/bfece155fb0b58dd3a13a8719f26b074ed02ad41)
+* fix(ble): stop BLE scan on background and downgrade connection priority (#5644) by James Rich (@jamesarich) in [`1d221e2dd`](https://github.com/meshtastic/Meshtastic-Android/commit/1d221e2ddeeb0746f5965649640542975a28b416)
 
 ### Open Beta (v2.7.14-open.13)
 Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.13):
