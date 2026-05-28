@@ -534,6 +534,7 @@ jobs:
         with:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           cache_read_only: ${{ needs.setup.outputs.cache_read_only }}
+          install_jetbrains_jdk: 'true'
 
       - name: Build Desktop
         run: ./gradlew :desktopApp:createDistributable -Pci=true
@@ -574,6 +575,7 @@ jobs:
         with:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           cache_read_only: true
+          install_jetbrains_jdk: 'true'
 
       # Isolated Gradle user home — see explanation in release.yml.
       # packageUberJarForCurrentOS is what the in-flatpak build invokes; it resolves the FULL
