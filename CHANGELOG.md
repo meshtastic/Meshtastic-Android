@@ -25,6 +25,8 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 * chore(deps): update takpacket.sdk to v0.3.2 (#5632) by renovate[bot] (@renovate[bot]) in [`de3d65a10`](https://github.com/meshtastic/Meshtastic-Android/commit/de3d65a10a9339cfe243f044527f0244137e551d)
 * docs(governance): add agent behavior and cost efficiency rules (#5636) by James Rich (@jamesarich) in [`3fe21e173`](https://github.com/meshtastic/Meshtastic-Android/commit/3fe21e1736a49a11a277e7ff7491a461785286d3)
 * fix(database): stabilize flaky DatabaseManagerWithDbRetryTest (#5635) by James Rich (@jamesarich) in [`d892f43e0`](https://github.com/meshtastic/Meshtastic-Android/commit/d892f43e0083d8bfbbc10c44355873910fb96301)
+* ci(changelog): exclude changelog commits and fix contributor duplication (#5638) by James Rich (@jamesarich) in [`d125d955f`](https://github.com/meshtastic/Meshtastic-Android/commit/d125d955f297c7fc0f351aae7086deea06fb0fb2)
+* chore(deps): update plugin org.meshtastic.flatpak.sources.settings to v0.1.2 (#5637) by renovate[bot] (@renovate[bot]) in [`73a2d9f62`](https://github.com/meshtastic/Meshtastic-Android/commit/73a2d9f62465ad09a380c10edbf06622208ed349)
 
 ### Open Beta (v2.7.14-open.13)
 Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.13):
@@ -276,22 +278,6 @@ Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/relea
 * @riddlemd made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/5265
 * @elagin made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/5284
 * @somenice made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/5325
-
-## New Contributors
-* @nreisbeck made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/4607
-* @ujade made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/4630
-* @alecperkins made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/4620
-* @skobkin made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/4809
-* @VictorioBerra made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/4825
-* @theKorzh made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/4877
-* @Klavionik made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/4957
-* @jdogg172 made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/5207
-* @zt64 made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/5226
-* @riddlemd made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/5265
-* @elagin made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/5284
-* @somenice made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/5325
-
-**Full Changelog**: https://github.com/meshtastic/Meshtastic-Android/compare/v2.7.13...unreleased
 <!-- UNRELEASED_END -->
 
 <!-- RELEASED_START -->
