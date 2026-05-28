@@ -4,7 +4,6 @@ on:
   pull_request:
     branches: [ main ]
     paths:
-      - 'build-logic/flatpak-ops/**'
       - 'scripts/verify-flatpak/**'
       - 'build.gradle.kts'
       - 'settings.gradle.kts'
@@ -39,7 +38,7 @@ jobs:
           ./gradlew --no-build-cache --no-configuration-cache \
             -Dgradle.user.home="$RUNNER_TEMP/flatpak-gradle-home" \
             :desktopApp:packageUberJarForCurrentOS :captureFlatpakSources
-          cp build/flatpak-ops-sources.json flatpak-sources.json
+          cp build/flatpak-sources.json flatpak-sources.json
           echo "### Flatpak Sources Summary" >> "$GITHUB_STEP_SUMMARY"
           echo "- URLs captured: $(jq length flatpak-sources.json)" >> "$GITHUB_STEP_SUMMARY"
 

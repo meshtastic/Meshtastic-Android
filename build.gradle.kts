@@ -44,7 +44,7 @@ plugins {
 
 plugins.withId("org.meshtastic.flatpak.sources") {
     extensions.configure<org.meshtastic.flatpak.sources.FlatpakSourcesExtension> {
-        outputFile.set(layout.buildDirectory.file("flatpak-ops-sources.json"))
+        outputFile.set(layout.buildDirectory.file("flatpak-sources.json"))
         mustRunAfterTasks.set(listOf(":desktopApp:assemble", ":desktopApp:packageUberJarForCurrentOS"))
         // Force-resolve platform-specific native artifacts not resolved on the generation host
         targetPlatforms.set(setOf("linux-x64", "linux-arm64"))
