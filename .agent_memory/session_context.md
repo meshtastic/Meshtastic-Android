@@ -3,6 +3,13 @@
 # Do NOT edit or remove previous entries — stale state claims cause agent confusion.
 # Format: ## YYYY-MM-DD — <summary>
 
+## 2026-05-28 — Stabilized DatabaseManager withDb retry host test
+- Hardened `DatabaseManagerWithDbRetryTest` to remove CI race conditions by running the manager on a `StandardTestDispatcher(testScheduler)` instead of real `Dispatchers.IO`.
+- Added a `withTimeout(10_000)` guard around the test body to fail fast on coordination stalls instead of hanging/flapping.
+- Kept the deterministic retry trigger (`error("Connection pool is closed")`) and retained assertions that first attempt uses old DB and retry uses current DB.
+- Made teardown resilient with `if (::manager.isInitialized) manager.close()` so setup/early failures do not cascade into teardown crashes.
+- Verified with `:core:database:jvmTest --tests "org.meshtastic.core.database.DatabaseManagerWithDbRetryTest*"` and repeated it 5 consecutive runs without failures; `:core:database:detekt` also passed.
+
 ## 2026-05-21 — Upgraded Chirpy to a fully-personalized Live Diagnostic Node & Mesh Assistant
 - Integrated `NodeRepository` into `GeminiNanoDocAssistant.kt` and the Google AI Koin dependency injection module (`GoogleAiModule.kt`).
 - Developed a dynamic live-state prompt formatting block within `buildPrompt(...)` that queries current hardware model, firmware version, connection status, GPS capability, channel utilization, airtime, battery level/voltage, user profile long/short names, and total registered mesh peer counts & active online peers directly from `NodeRepository`'s reactive flows.
