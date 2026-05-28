@@ -371,27 +371,9 @@ class BleRadioTransport(
                 val maxLen = bleConnection.maximumWriteValueLength(BleWriteType.WITHOUT_RESPONSE)
                 Logger.i { "[$address] BLE Radio Session Ready. Max write length (WITHOUT_RESPONSE): $maxLen bytes" }
 
-                // Ask the platform for a low-latency / high-throughput connection interval
-                // (~7.5 ms on Android). The Meshtastic firmware happily accepts this and it
-                // materially speeds up the initial config drain and any bulk fromRadio reads.
-                if (bleConnection.requestHighConnectionPriority()) {
-                    Logger.d { "[$address] Requested high BLE connection priority" }
-                    // Wait for the connection parameter update to succeed before starting the heavy traffic
-                    // in onConnect(). Otherwise, the Android BLE stack may disconnect with GATT 147.
-                    delay(1.seconds)
-                }
+                requestHighPriorityAndScheduleDowngrade()
 
                 this@BleRadioTransport.callback.onConnect()
-
-                // Downgrade to balanced priority after the initial config drain completes.
-                // High priority (7.5 ms interval) is only needed for the burst of fromRadio packets;
-                // keeping it indefinitely wastes battery on both phone and radio.
-                launch {
-                    delay(PRIORITY_DOWNGRADE_DELAY)
-                    if (bleConnection.requestBalancedConnectionPriority()) {
-                        Logger.d { "[$address] Downgraded to balanced BLE connection priority" }
-                    }
-                }
             }
         } catch (e: CancellationException) {
             // Scope was cancelled externally — still ensure GATT cleanup runs so we don't
@@ -414,6 +396,24 @@ class BleRadioTransport(
                 } catch (ignored: Exception) {
                     Logger.w(ignored) { "[$address] disconnect() failed after profile error" }
                 }
+            }
+        }
+    }
+
+    /**
+     * Requests high BLE connection priority for the initial config burst, then schedules a downgrade to balanced
+     * priority after [PRIORITY_DOWNGRADE_DELAY] to conserve battery.
+     */
+    private suspend fun CoroutineScope.requestHighPriorityAndScheduleDowngrade() {
+        if (bleConnection.requestHighConnectionPriority()) {
+            Logger.d { "[$address] Requested high BLE connection priority" }
+            // Wait for the connection parameter update before starting heavy traffic.
+            delay(1.seconds)
+        }
+        launch {
+            delay(PRIORITY_DOWNGRADE_DELAY)
+            if (bleConnection.requestBalancedConnectionPriority()) {
+                Logger.d { "[$address] Downgraded to balanced BLE connection priority" }
             }
         }
     }
