@@ -286,7 +286,11 @@ class HomeScreen(
                                     onMessageClick = { contactKey ->
                                         screenManager.pop()
                                         selectedTabId = TAB_ID_MESSAGES
-                                        stateCoordinator.ensureDmConversation(contactKey, node.longName)
+                                        stateCoordinator.ensureDmConversation(
+                                            contactKey,
+                                            node.longName,
+                                            carContext.getString(R.string.car_new_conversation),
+                                        )
                                         invalidate()
                                     },
                                 ),

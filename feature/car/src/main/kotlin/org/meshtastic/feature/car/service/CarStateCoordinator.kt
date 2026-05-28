@@ -33,7 +33,6 @@ import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
-import org.meshtastic.core.repository.QuickChatActionRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.usecase.SendMessageUseCase
@@ -67,7 +66,6 @@ class CarStateCoordinator(
     private val packetRepository: PacketRepository,
     private val serviceRepository: ServiceRepository,
     private val radioConfigRepository: RadioConfigRepository,
-    private val quickChatActionRepository: QuickChatActionRepository,
     private val sendMessageUseCase: SendMessageUseCase,
     private val messageFilter: MessageFilter,
 ) {
@@ -105,9 +103,6 @@ class CarStateCoordinator(
         MutableStateFlow(NodeDashboardUiState(nodes = emptyList(), topologyHeader = TopologyHeader(0, 0, null)))
     val nodeDashboardState: StateFlow<NodeDashboardUiState> = _nodeDashboardState.asStateFlow()
 
-    private val _quickChatActions = MutableStateFlow<List<String>>(emptyList())
-    val quickChatActions: StateFlow<List<String>> = _quickChatActions.asStateFlow()
-
     private val _localStatsState = MutableStateFlow(CarLocalStats())
     val localStatsState: StateFlow<CarLocalStats> = _localStatsState.asStateFlow()
 
@@ -117,7 +112,6 @@ class CarStateCoordinator(
         collectConnectionState()
         collectNodeData()
         collectMessagingData()
-        collectQuickChat()
         collectLocalStats()
     }
 
@@ -155,14 +149,14 @@ class CarStateCoordinator(
      * Ensures a DM conversation appears in the messaging list for the given [contactKey]. If the contact doesn't have
      * an existing conversation, adds a placeholder entry so the ConversationItem is visible for voice reply.
      */
-    fun ensureDmConversation(contactKey: String, displayName: String) {
+    fun ensureDmConversation(contactKey: String, displayName: String, placeholderMessage: String) {
         val current = _messagingState.value
         if (current.conversations.any { it.contactKey == contactKey }) return
         val placeholder =
             ConversationUi(
                 contactKey = contactKey,
                 displayName = displayName,
-                lastMessage = "Tap to send a message",
+                lastMessage = placeholderMessage,
                 lastMessageTime = System.currentTimeMillis(),
                 unreadCount = 0,
                 isEmergency = false,
@@ -255,14 +249,6 @@ class CarStateCoordinator(
             }
     }
 
-    private fun collectQuickChat() {
-        scope.launch {
-            quickChatActionRepository.getAllActions().collect { actions ->
-                _quickChatActions.value = actions.map { action -> action.message }
-            }
-        }
-    }
-
     private fun collectLocalStats() {
         scope.launch {
             combine(nodeRepository.localStats, nodeRepository.nodeDBbyNum) { stats, nodeMap ->
@@ -274,6 +260,4 @@ class CarStateCoordinator(
                 .collect { _localStatsState.value = it }
         }
     }
-
-    companion object
 }
