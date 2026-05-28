@@ -197,7 +197,7 @@ class Esp32OtaUpdateHandler(
      * Disconnect the mesh service BLE connection to free up the GATT for OTA. Setting device address to "n" (NOP
      * interface) cleanly disconnects without reconnection attempts.
      */
-    private fun disconnectMeshService() {
+    private suspend fun disconnectMeshService() {
         Logger.i { "ESP32 OTA: Disconnecting mesh service for OTA" }
         radioController.setDeviceAddress("n")
     }

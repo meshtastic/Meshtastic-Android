@@ -198,7 +198,7 @@ class UIViewModel(
     }
 
     fun setDeviceAddress(address: String) {
-        radioController.setDeviceAddress(address)
+        safeLaunch(tag = "setDeviceAddress") { radioController.setDeviceAddress(address) }
     }
 
     val unreadMessageCount =

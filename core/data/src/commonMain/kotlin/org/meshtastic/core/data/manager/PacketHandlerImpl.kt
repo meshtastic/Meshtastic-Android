@@ -103,6 +103,12 @@ class PacketHandlerImpl(
         }
     }
 
+    /**
+     * Enqueue [packet] for transmission. Order is preserved for sequential calls from the same coroutine (mutex
+     * acquisition is uncontested between sequential calls). Transactional sequences that require strict ordering across
+     * multiple calls — e.g. `beginEditSettings` → … → `commitEditSettings` — MUST be issued from a single coroutine;
+     * concurrent senders share FIFO only at the per-call grain.
+     */
     override suspend fun sendToRadio(packet: MeshPacket) {
         queueMutex.withLock {
             queueStopped = false

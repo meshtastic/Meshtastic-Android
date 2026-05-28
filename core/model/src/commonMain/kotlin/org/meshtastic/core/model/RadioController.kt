@@ -78,7 +78,11 @@ interface RadioController :
     /**
      * Changes the device address (e.g., BLE MAC, IP address) we are communicating with.
      *
+     * Suspends until the database has been switched, the in-memory node DB cleared, and the transport reconfigured.
+     * Callers that depend on the device switch being effective before their next call (e.g. OTA disconnect-then-delay
+     * sequences) can rely on this ordering.
+     *
      * @param address The new device identifier.
      */
-    fun setDeviceAddress(address: String)
+    suspend fun setDeviceAddress(address: String)
 }

@@ -287,7 +287,7 @@ open class ScannerViewModel(
 
     fun changeDeviceAddress(address: String) {
         Logger.i { "Attempting to change device address to ${address.anonymize()}" }
-        radioController.setDeviceAddress(address)
+        safeLaunch(tag = "changeDeviceAddress") { radioController.setDeviceAddress(address) }
     }
 
     fun addRecentAddress(address: String, name: String) {

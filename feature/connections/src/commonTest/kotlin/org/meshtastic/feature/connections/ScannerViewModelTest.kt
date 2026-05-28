@@ -141,8 +141,9 @@ class ScannerViewModelTest {
     }
 
     @Test
-    fun `changeDeviceAddress calls radioController`() {
+    fun `changeDeviceAddress calls radioController`() = runTest {
         viewModel.changeDeviceAddress("test_address")
+        testScheduler.advanceUntilIdle()
 
         assertEquals("test_address", radioController.lastSetDeviceAddress)
     }

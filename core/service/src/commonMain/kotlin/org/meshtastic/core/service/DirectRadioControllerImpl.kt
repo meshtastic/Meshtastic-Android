@@ -19,7 +19,6 @@ package org.meshtastic.core.service
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.database.DatabaseManager
@@ -416,12 +415,10 @@ class DirectRadioControllerImpl(
 
     // ── Device Address ──────────────────────────────────────────────────────
 
-    override fun setDeviceAddress(address: String) {
-        scope.launch {
-            switchDevice(address)
-            radioInterfaceService.setDeviceAddress(address)
-            onDeviceAddressChanged?.invoke()
-        }
+    override suspend fun setDeviceAddress(address: String) {
+        switchDevice(address)
+        radioInterfaceService.setDeviceAddress(address)
+        onDeviceAddressChanged?.invoke()
     }
 
     private suspend fun switchDevice(deviceAddr: String) {

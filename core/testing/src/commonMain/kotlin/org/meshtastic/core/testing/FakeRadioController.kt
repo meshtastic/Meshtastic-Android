@@ -168,7 +168,7 @@ class FakeRadioController :
         stopProvideLocationCalled = true
     }
 
-    override fun setDeviceAddress(address: String) {
+    override suspend fun setDeviceAddress(address: String) {
         lastSetDeviceAddress = address
     }
 
