@@ -9,6 +9,11 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
+* chore(deps): update actions/cache action to v5 (#5652) by renovate[bot] (@renovate[bot]) in [`0dad4273d`](https://github.com/meshtastic/Meshtastic-Android/commit/0dad4273d20bd4c54811d55845ae33ce4613a139)
+
+### Internal (v2.7.14-internal.109)
+Changes since [`v2.7.14-open.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14-open.13):
+
 * chore(deps): update spotless to v8.6.0 (#5618) by renovate[bot] (@renovate[bot]) in [`c29f7ce29`](https://github.com/meshtastic/Meshtastic-Android/commit/c29f7ce29194930da3be65545fc2fa11683715fa)
 * chore(deps): update core/proto/src/main/proto digest to 9ab4a1d (#5617) by renovate[bot] (@renovate[bot]) in [`7df0ee08e`](https://github.com/meshtastic/Meshtastic-Android/commit/7df0ee08e520a0c9846d20ffbcd643c6b6dee6ec)
 * chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5616) by James Rich (@jamesarich) in [`562ac7390`](https://github.com/meshtastic/Meshtastic-Android/commit/562ac739019bd29dec520aeda99ced9b8f018f60)
