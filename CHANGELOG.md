@@ -32,6 +32,9 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 * Enhance TAKTALK support with message and room handling, update SDK to v0.3.2 (#5634) by Ben Meadors (@thebentern) in [`a5e6894fe`](https://github.com/meshtastic/Meshtastic-Android/commit/a5e6894fe8934aefce5036458407a69fc96ca541)
 * chore(deps): update takpacket.sdk to v0.3.3 (#5642) by renovate[bot] (@renovate[bot]) in [`bfece155f`](https://github.com/meshtastic/Meshtastic-Android/commit/bfece155fb0b58dd3a13a8719f26b074ed02ad41)
 * fix(ble): stop BLE scan on background and downgrade connection priority (#5644) by James Rich (@jamesarich) in [`1d221e2dd`](https://github.com/meshtastic/Meshtastic-Android/commit/1d221e2ddeeb0746f5965649640542975a28b416)
+* fix(ci): pre-install JetBrains JDK 21 for Compose Desktop builds (#5646) by James Rich (@jamesarich) in [`f10f36580`](https://github.com/meshtastic/Meshtastic-Android/commit/f10f36580d89eeedbee81f06ddf39f7f1009d697)
+* chore(deps): update com.google.firebase:firebase-bom to v34.14.0 (#5647) by renovate[bot] (@renovate[bot]) in [`2e7100ca8`](https://github.com/meshtastic/Meshtastic-Android/commit/2e7100ca8e41097144fea3aab2f327b279d12179)
+* fix(ci): install JetBrains JDK 21 for lint-check job (#5649) by James Rich (@jamesarich) in [`ccd7fcd45`](https://github.com/meshtastic/Meshtastic-Android/commit/ccd7fcd45b45665a2c6fa59cf7ed61618e1be6c7)
 
 ### Open Beta (v2.7.14-open.13)
 Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.13):
