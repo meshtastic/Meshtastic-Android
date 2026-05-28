@@ -64,6 +64,15 @@ class TakMeshTestRunner(private val commandSender: CommandSender) {
         /** All bundled fixture filenames. */
         val FIXTURE_NAMES =
             listOf(
+                // TAK-Talk sanity test — first in the list so the operator's
+                // initial "Send Test CoTs" tap immediately exercises the
+                // most-stress-tested path on the receiver: m-t-t with
+                // <voice/> push-to-talk marker + <marti> directed routing.
+                // If the receiver's TAKTALK plugin plays a TTS clip for this
+                // single send, the v0.3.2 round-trip pipeline (sender callsign
+                // implicit, marti carried, no spurious <contact>) is wired
+                // end-to-end on both ends of the mesh.
+                "taktalk_sanity.xml",
                 "aircraft_adsb.xml",
                 "aircraft_hostile.xml",
                 "alert_tic.xml",

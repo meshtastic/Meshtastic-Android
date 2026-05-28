@@ -185,7 +185,7 @@ internal class TAKClientConnection(
         // Emitted at debug level so it's always available in logcat for field
         // debugging without needing a release rebuild. Not truncated — the
         // reader of this log needs the complete event to reproduce issues.
-        // Logger.d { "RAW CoT IN (TCP ${currentClientInfo.id}): $xmlString" }
+        Logger.d { "RAW CoT IN (TCP ${currentClientInfo.id}): $xmlString" }
 
         val parser = CoTXmlParser(xmlString)
         val result = parser.parse()
@@ -246,7 +246,7 @@ internal class TAKClientConnection(
         // CoTMessage → XML round trip. This is the exact bytes the client
         // will receive, so logging here closes the debugging loop with the
         // matching RAW CoT IN line on the receiver.
-        // Logger.d { "RAW CoT OUT (TCP ${currentClientInfo.id}): $xml" }
+        Logger.d { "RAW CoT OUT (TCP ${currentClientInfo.id}): $xml" }
         sendXmlInternal(xml)
     }
 
@@ -264,7 +264,7 @@ internal class TAKClientConnection(
      * preserve shape detail elements.
      */
     fun sendRawXml(xml: String) {
-        // Logger.d { "RAW CoT OUT (TCP ${currentClientInfo.id}): [raw] $xml" }
+        Logger.d { "RAW CoT OUT (TCP ${currentClientInfo.id}): [raw] $xml" }
         sendXmlInternal(xml)
     }
 
