@@ -561,9 +561,7 @@ internal actual object TakV2Compressor {
             // and directed b-t-f DMs. Encode an explicit Marti only when
             // there is at least one destination — the wrapper costs wire
             // bytes for no benefit on broadcast packets.
-            marti = data.marti
-                .takeIf { it.isNotEmpty() }
-                ?.let { org.meshtastic.proto.Marti(dest_callsign = it) },
+            marti = data.marti.takeIf { it.isNotEmpty() }?.let { org.meshtastic.proto.Marti(dest_callsign = it) },
         )
     }
 }

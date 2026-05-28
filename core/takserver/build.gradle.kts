@@ -76,5 +76,13 @@ kotlin {
             implementation(libs.kotest.assertions)
             implementation(libs.kotest.property)
         }
+
+        val androidHostTest by getting {
+            dependencies {
+                // Host-JVM tests need the platform JAR (not AAR) for zstd native
+                // libs — the @aar from androidMain only ships ARM/x86 .so files.
+                implementation("com.github.luben:zstd-jni:1.5.7-9")
+            }
+        }
     }
 }
