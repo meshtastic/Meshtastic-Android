@@ -196,6 +196,7 @@ class MeshService : Service() {
         Logger.i { "Mesh service: onTaskRemoved" }
     }
 
+    // Required by Service — this is a started service (not bound), so always returns null.
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {

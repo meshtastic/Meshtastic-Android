@@ -37,7 +37,6 @@ import org.meshtastic.core.repository.MeshConfigHandler
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MeshMessageProcessor
 import org.meshtastic.core.repository.MeshNotificationManager
-import org.meshtastic.core.repository.MeshRouter
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioInterfaceService
@@ -58,7 +57,6 @@ class MeshServiceOrchestratorTest {
 
     private val messageProcessor: MeshMessageProcessor = mock(MockMode.autofill)
     private val commandSender: CommandSender = mock(MockMode.autofill)
-    private val router: MeshRouter = mock(MockMode.autofill)
     private val meshConfigHandler: MeshConfigHandler = mock(MockMode.autofill)
     private val serviceNotifications: MeshNotificationManager = mock(MockMode.autofill)
     private val takServerManager: TAKServerManager = mock(MockMode.autofill)
@@ -103,7 +101,6 @@ class MeshServiceOrchestratorTest {
             serviceRepository = serviceRepository,
             nodeManager = nodeManager,
             messageProcessor = messageProcessor,
-            router = router,
             serviceNotifications = serviceNotifications,
             takServerManager = takServerManager,
             takMeshIntegration = takMeshIntegration,

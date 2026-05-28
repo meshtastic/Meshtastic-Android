@@ -33,7 +33,6 @@ import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MeshMessageProcessor
 import org.meshtastic.core.repository.MeshNotificationManager
-import org.meshtastic.core.repository.MeshRouter
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceRepository
@@ -56,7 +55,6 @@ class MeshServiceOrchestrator(
     private val serviceRepository: ServiceRepository,
     private val nodeManager: NodeManager,
     private val messageProcessor: MeshMessageProcessor,
-    private val router: MeshRouter,
     private val serviceNotifications: MeshNotificationManager,
     private val takServerManager: TAKServerManager,
     private val takMeshIntegration: TAKMeshIntegration,
@@ -79,7 +77,7 @@ class MeshServiceOrchestrator(
      * Starts the mesh service components and wires up data flows.
      *
      * This is the KMP equivalent of `MeshService.onCreate()`. It connects to the radio and wires incoming radio data to
-     * the message processor and service actions to the router's action handler.
+     * the message processor.
      */
     fun start() {
         val newScope = CoroutineScope(SupervisorJob() + dispatchers.default)
