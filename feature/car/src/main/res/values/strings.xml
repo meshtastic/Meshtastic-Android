@@ -5,6 +5,7 @@
     <string name="car_disconnected">Disconnected</string>
     <string name="car_emergency_from">⚠️ Emergency from %s</string>
     <string name="car_error">Error</string>
+    <string name="car_message_node">Message</string>
     <string name="car_no_messages">No messages yet</string>
     <string name="car_no_nodes">No nodes heard</string>
     <string name="car_node_not_found">Node not found</string>

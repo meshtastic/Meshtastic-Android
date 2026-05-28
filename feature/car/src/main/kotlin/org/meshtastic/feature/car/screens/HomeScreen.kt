@@ -279,7 +279,18 @@ class HomeScreen(
                         .setImage(tintedIcon, Row.IMAGE_TYPE_ICON)
                         .setBrowsable(true)
                         .setOnClickListener {
-                            screenManager.push(NodeDetailScreen(carContext = carContext, nodeProvider = { node }))
+                            screenManager.push(
+                                NodeDetailScreen(
+                                    carContext = carContext,
+                                    nodeProvider = { node },
+                                    onMessageClick = { contactKey ->
+                                        screenManager.pop()
+                                        selectedTabId = TAB_ID_MESSAGES
+                                        stateCoordinator.ensureDmConversation(contactKey, node.longName)
+                                        invalidate()
+                                    },
+                                ),
+                            )
                         }
                         .build(),
                 )

@@ -151,6 +151,25 @@ class CarStateCoordinator(
         }
     }
 
+    /**
+     * Ensures a DM conversation appears in the messaging list for the given [contactKey]. If the contact doesn't have
+     * an existing conversation, adds a placeholder entry so the ConversationItem is visible for voice reply.
+     */
+    fun ensureDmConversation(contactKey: String, displayName: String) {
+        val current = _messagingState.value
+        if (current.conversations.any { it.contactKey == contactKey }) return
+        val placeholder =
+            ConversationUi(
+                contactKey = contactKey,
+                displayName = displayName,
+                lastMessage = "Tap to send a message",
+                lastMessageTime = System.currentTimeMillis(),
+                unreadCount = 0,
+                isEmergency = false,
+            )
+        _messagingState.value = current.copy(conversations = listOf(placeholder) + current.conversations)
+    }
+
     fun destroy() {
         scope.cancel()
     }

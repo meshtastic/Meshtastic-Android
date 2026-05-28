@@ -33,20 +33,21 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
 import org.meshtastic.core.model.DataPacket
-import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.nodeColorsFromNum
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.feature.car.util.PersonIconFactory
 
 /**
- * Publishes dynamic shortcuts for favorited nodes and active channels so that Android Auto can surface Meshtastic
+ * Publishes dynamic shortcuts for active DM conversations and channels so that Android Auto can surface Meshtastic
  * conversations as messaging destinations and link notifications to template conversations via [LocusIdCompat].
  */
 @Single
 class ConversationShortcutManager(
     private val context: Context,
     private val nodeRepository: NodeRepository,
+    private val packetRepository: PacketRepository,
     private val radioConfigRepository: RadioConfigRepository,
 ) {
 
@@ -56,10 +57,15 @@ class ConversationShortcutManager(
         observeJob?.cancel()
         observeJob =
             scope.launch {
-                val favoritesFlow =
-                    nodeRepository.nodeDBbyNum
-                        .map { nodes ->
-                            nodes.values.filter { it.isFavorite && !it.isIgnored }.sortedBy { it.user.long_name }
+                val dmContactsFlow =
+                    packetRepository
+                        .getContacts()
+                        .map { contacts ->
+                            // DM contacts are those whose key does NOT contain the broadcast ID
+                            contacts.entries
+                                .filter { (key, _) -> !key.contains(DataPacket.ID_BROADCAST) }
+                                .sortedByDescending { (_, packet) -> packet.time }
+                                .map { (key, packet) -> DmContact(key, packet.from.orEmpty(), packet.time) }
                         }
                         .distinctUntilChanged()
 
@@ -76,8 +82,8 @@ class ConversationShortcutManager(
                         }
                         .distinctUntilChanged()
 
-                combine(favoritesFlow, channelsFlow) { favorites, channels -> favorites to channels }
-                    .collect { (favorites, channels) -> publishShortcuts(favorites, channels) }
+                combine(dmContactsFlow, channelsFlow) { dms, channels -> dms to channels }
+                    .collect { (dms, channels) -> publishShortcuts(dms, channels) }
             }
     }
 
@@ -86,10 +92,9 @@ class ConversationShortcutManager(
         observeJob = null
     }
 
-    private fun publishShortcuts(favorites: List<Node>, channels: List<Pair<Int, String>>) {
-        val myNodeNum = nodeRepository.myNodeInfo.value?.myNodeNum
+    private fun publishShortcuts(dmContacts: List<DmContact>, channels: List<Pair<Int, String>>) {
         val shortcuts =
-            favorites.filter { it.num != myNodeNum }.map { buildFavoriteShortcut(it) } +
+            dmContacts.mapNotNull { buildDmShortcut(it) } +
                 channels.map { (index, name) -> buildChannelShortcut(index, name) }
 
         try {
@@ -110,24 +115,23 @@ class ConversationShortcutManager(
         }
     }
 
-    private fun buildFavoriteShortcut(node: Node): ShortcutInfoCompat {
-        val contactKey = "0${node.user.id}"
-        val label = node.user.long_name.ifEmpty { node.user.short_name }
-        val (foregroundColor, backgroundColor) = nodeColorsFromNum(node.num)
-        val person =
-            Person.Builder()
-                .setName(label)
-                .setKey(node.user.id)
-                .setIcon(PersonIconFactory.create(node.user.short_name, backgroundColor, foregroundColor))
-                .build()
-        return ShortcutInfoCompat.Builder(context, contactKey)
+    private fun buildDmShortcut(dm: DmContact): ShortcutInfoCompat? {
+        val node = nodeRepository.nodeDBbyNum.value.values.find { it.user.id == dm.userId }
+        val label = node?.user?.long_name?.ifEmpty { node.user.short_name } ?: dm.contactKey
+        val personBuilder = Person.Builder().setName(label).setKey(dm.contactKey)
+        if (node != null) {
+            val (foregroundColor, backgroundColor) = nodeColorsFromNum(node.num)
+            personBuilder.setIcon(PersonIconFactory.create(node.user.short_name, backgroundColor, foregroundColor))
+        }
+        val person = personBuilder.build()
+        return ShortcutInfoCompat.Builder(context, dm.contactKey)
             .setShortLabel(label)
             .setLongLabel(label)
-            .setLocusId(LocusIdCompat(contactKey))
+            .setLocusId(LocusIdCompat(dm.contactKey))
             .setPerson(person)
             .setLongLived(true)
             .setCategories(setOf(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION))
-            .setIntent(conversationIntent(contactKey))
+            .setIntent(conversationIntent(dm.contactKey))
             .build()
     }
 
@@ -157,9 +161,7 @@ class ConversationShortcutManager(
      */
     fun ensureConversationShortcut(contactKey: String, displayName: String) {
         val alreadyPublished = ShortcutManagerCompat.getDynamicShortcuts(context).any { it.id == contactKey }
-        if (alreadyPublished) {
-            return
-        }
+        if (alreadyPublished) return
         val person = Person.Builder().setName(displayName).setKey(contactKey).build()
         val shortcut =
             ShortcutInfoCompat.Builder(context, contactKey)
@@ -179,6 +181,8 @@ class ConversationShortcutManager(
             Logger.e(tag = TAG, throwable = e) { "Failed to publish on-demand shortcut $contactKey" }
         }
     }
+
+    private data class DmContact(val contactKey: String, val userId: String, val lastMessageTime: Long)
 
     companion object {
         private const val TAG = "ConversationShortcuts"

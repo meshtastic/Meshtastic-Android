@@ -48,6 +48,7 @@ internal object CarScreenDataBuilder {
     /** Converts a [Node] to a [NodeUi] for car display. */
     fun buildNodeUi(node: Node): NodeUi = NodeUi(
         nodeNum = node.num,
+        userId = node.user.id,
         longName = node.user.long_name.ifEmpty { "Unknown" },
         shortName = node.user.short_name.ifEmpty { "?" },
         signalQuality = determineSignalQuality(node.snr, node.rssi),

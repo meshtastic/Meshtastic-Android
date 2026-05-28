@@ -48,6 +48,7 @@ data class NodeDashboardUiState(val nodes: List<NodeUi>, val topologyHeader: Top
 
 data class NodeUi(
     val nodeNum: Int,
+    val userId: String,
     val longName: String,
     val shortName: String,
     val signalQuality: SignalQuality,

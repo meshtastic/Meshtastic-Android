@@ -29,7 +29,11 @@ import org.meshtastic.feature.car.R
 import org.meshtastic.feature.car.model.NodeUi
 import org.meshtastic.feature.car.model.SignalQuality
 
-class NodeDetailScreen(carContext: CarContext, private val nodeProvider: () -> NodeUi?) : Screen(carContext) {
+class NodeDetailScreen(
+    carContext: CarContext,
+    private val nodeProvider: () -> NodeUi?,
+    private val onMessageClick: (String) -> Unit,
+) : Screen(carContext) {
 
     override fun onGetTemplate(): Template {
         val node = nodeProvider() ?: return buildErrorTemplate()
@@ -66,6 +70,14 @@ class NodeDetailScreen(carContext: CarContext, private val nodeProvider: () -> N
                         carContext.getString(R.string.car_status_offline)
                     },
                 )
+                .build(),
+        )
+
+        // Direct message action — constructs contactKey "0<userId>" for DM
+        paneBuilder.addAction(
+            Action.Builder()
+                .setTitle(carContext.getString(R.string.car_message_node))
+                .setOnClickListener { onMessageClick("0${node.userId}") }
                 .build(),
         )
 
