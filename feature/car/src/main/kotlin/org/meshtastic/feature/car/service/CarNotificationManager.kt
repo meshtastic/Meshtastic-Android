@@ -26,11 +26,12 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.Person
 import androidx.core.app.RemoteInput
+import androidx.core.content.LocusIdCompat
 import org.koin.core.annotation.Single
 import org.meshtastic.feature.car.R
 
 @Single
-class CarNotificationManager(private val context: Context) {
+class CarNotificationManager(private val context: Context, private val shortcutManager: ConversationShortcutManager) {
 
     init {
         createNotificationChannel()
@@ -48,6 +49,8 @@ class CarNotificationManager(private val context: Context) {
     }
 
     fun postMessagingNotification(conversationId: String, senderName: String, messages: List<Pair<String, Long>>) {
+        shortcutManager.ensureConversationShortcut(conversationId, senderName)
+
         val person = Person.Builder().setName(senderName).build()
 
         val messagingStyle = NotificationCompat.MessagingStyle(Person.Builder().setName("Me").build())
@@ -64,6 +67,8 @@ class CarNotificationManager(private val context: Context) {
                 .addAction(replyAction)
                 .addAction(markReadAction)
                 .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+                .setShortcutId(conversationId)
+                .setLocusId(LocusIdCompat(conversationId))
                 .build()
 
         NotificationManagerCompat.from(context).notify(conversationId.hashCode(), notification)
@@ -84,6 +89,8 @@ class CarNotificationManager(private val context: Context) {
 
         return NotificationCompat.Action.Builder(android.R.drawable.ic_menu_send, "Reply", replyIntent)
             .addRemoteInput(remoteInput)
+            .setSemanticAction(NotificationCompat.Action.SEMANTIC_ACTION_REPLY)
+            .setShowsUserInterface(false)
             .build()
     }
 
@@ -99,6 +106,8 @@ class CarNotificationManager(private val context: Context) {
             )
 
         return NotificationCompat.Action.Builder(android.R.drawable.ic_menu_view, "Mark as Read", markReadIntent)
+            .setSemanticAction(NotificationCompat.Action.SEMANTIC_ACTION_MARK_AS_READ)
+            .setShowsUserInterface(false)
             .build()
     }
 

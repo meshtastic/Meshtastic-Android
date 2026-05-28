@@ -74,3 +74,15 @@ data class EmergencyAlert(
     val timestamp: Long,
     val isActive: Boolean,
 )
+
+data class CarLocalStats(
+    val batteryLevel: Int = 0,
+    val hasBattery: Boolean = false,
+    val channelUtilization: Float = 0f,
+    val airUtilization: Float = 0f,
+    val totalNodes: Int = 0,
+    val onlineNodes: Int = 0,
+    val uptimeSeconds: Int = 0,
+    val numPacketsTx: Int = 0,
+    val numPacketsRx: Int = 0,
+)

@@ -4,7 +4,8 @@
     <application>
         <service
             android:name="org.meshtastic.feature.car.service.MeshtasticCarAppService"
-            android:exported="true">
+            android:exported="true"
+            android:permission="androidx.car.app.CarAppService">
             <intent-filter>
                 <action android:name="androidx.car.app.CarAppService" />
                 <category android:name="androidx.car.app.category.MESSAGING" />
@@ -17,6 +18,6 @@
 
         <meta-data
             android:name="androidx.car.app.minCarApiLevel"
-            android:value="8" />
+            android:value="7" />
     </application>
 </manifest>

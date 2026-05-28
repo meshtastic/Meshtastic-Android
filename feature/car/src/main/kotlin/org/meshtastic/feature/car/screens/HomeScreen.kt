@@ -20,6 +20,9 @@ import androidx.car.app.AppManager
 import androidx.car.app.CarContext
 import androidx.car.app.CarToast
 import androidx.car.app.Screen
+import androidx.car.app.messaging.model.CarMessage
+import androidx.car.app.messaging.model.ConversationCallback
+import androidx.car.app.messaging.model.ConversationItem
 import androidx.car.app.model.Action
 import androidx.car.app.model.Alert
 import androidx.car.app.model.AlertCallback
@@ -36,21 +39,26 @@ import androidx.car.app.model.Tab
 import androidx.car.app.model.TabContents
 import androidx.car.app.model.TabTemplate
 import androidx.car.app.model.Template
+import androidx.core.app.Person
 import androidx.core.graphics.drawable.IconCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.nodeColorsFromNum
 import org.meshtastic.feature.car.R
 import org.meshtastic.feature.car.alerts.EmergencyHandler
+import org.meshtastic.feature.car.model.ConversationUi
 import org.meshtastic.feature.car.service.CarStateCoordinator
+import org.meshtastic.feature.car.util.CarScreenDataBuilder
 import org.meshtastic.feature.car.util.NodeSubtitleFormatter
+import java.util.Locale
 
 @Suppress("TooManyFunctions")
 class HomeScreen(
@@ -80,6 +88,7 @@ class HomeScreen(
     private fun observeState() {
         scope.launch { stateCoordinator.messagingState.collect { invalidate() } }
         scope.launch { stateCoordinator.nodeDashboardState.collect { invalidate() } }
+        scope.launch { stateCoordinator.localStatsState.collect { invalidate() } }
         scope.launch {
             stateCoordinator.sessionState.collect { state ->
                 val newState = state.connectionStatus
@@ -101,6 +110,11 @@ class HomeScreen(
     }
 
     private fun showEmergencyAlert(nodeNum: Int, nodeName: String, message: String) {
+        if (carContext.carAppApiLevel < MIN_ALERT_CAR_API_LEVEL) {
+            Logger.w(tag = "HomeScreen") { "Alert API unavailable on car API ${carContext.carAppApiLevel}" }
+            return
+        }
+
         val alert =
             Alert.Builder(
                 nodeNum,
@@ -154,6 +168,13 @@ class HomeScreen(
                 .setIcon(CarIcon.Builder(IconCompat.createWithResource(carContext, R.drawable.ic_car_nodes)).build())
                 .build()
 
+        val statusTab =
+            Tab.Builder()
+                .setContentId(TAB_ID_STATUS)
+                .setTitle(carContext.getString(R.string.car_tab_status))
+                .setIcon(CarIcon.Builder(IconCompat.createWithResource(carContext, R.drawable.ic_car_status)).build())
+                .build()
+
         return TabTemplate.Builder(
             object : TabTemplate.TabCallback {
                 override fun onTabSelected(tabContentId: String) {
@@ -166,6 +187,7 @@ class HomeScreen(
                 setHeaderAction(Action.APP_ICON)
                 addTab(messagingTab)
                 addTab(nodesTab)
+                addTab(statusTab)
                 setTabContents(getTabContents())
             }
             .build()
@@ -176,6 +198,7 @@ class HomeScreen(
             when (selectedTabId) {
                 TAB_ID_MESSAGES -> buildMessagingList()
                 TAB_ID_NODES -> buildNodeList()
+                TAB_ID_STATUS -> buildStatusList()
                 else -> buildMessagingList()
             }
         return TabContents.Builder(template).build()
@@ -188,39 +211,57 @@ class HomeScreen(
         if (state.conversations.isEmpty()) {
             listBuilder.setNoItemsMessage(carContext.getString(R.string.car_no_messages))
         } else {
-            val personIcon =
-                CarIcon.Builder(IconCompat.createWithResource(carContext, R.drawable.ic_car_person)).build()
-            state.conversations.forEach { conversation ->
-                listBuilder.addItem(
-                    Row.Builder()
-                        .setTitle(conversation.displayName)
-                        .addText(conversation.lastMessage)
-                        .setImage(personIcon, Row.IMAGE_TYPE_ICON)
-                        .setBrowsable(true)
-                        .setOnClickListener { openConversation(conversation.contactKey, conversation.displayName) }
-                        .build(),
-                )
+            val selfPerson = buildSelfPerson()
+            state.conversations.take(CarScreenDataBuilder.MAX_CONVERSATIONS).forEach { conversation ->
+                listBuilder.addItem(buildConversationItem(conversation, selfPerson))
             }
         }
 
         return ListTemplate.Builder().setSingleList(listBuilder.build()).build()
     }
 
-    private fun openConversation(contactKey: String, displayName: String) {
-        scope.launch {
-            val messages = stateCoordinator.getMessagesFlow(contactKey).firstOrNull() ?: emptyList()
-            stateCoordinator.cacheMessages(contactKey, messages)
-            screenManager.push(
-                ConversationScreen(
-                    carContext = carContext,
-                    conversationName = displayName,
-                    messagesProvider = { messages },
-                    onVoiceReply = { /* Voice input requires CarContext intent — deferred to DHU testing */ },
-                    onQuickReply = { text -> stateCoordinator.sendMessage(contactKey, text) },
-                    onReadAloud = { stateCoordinator.readMessagesAloud(contactKey) },
-                ),
-            )
-        }
+    private fun buildSelfPerson(): Person {
+        val myName = stateCoordinator.sessionState.value.meshName ?: "Me"
+        return Person.Builder().setName(myName).setKey("self").build()
+    }
+
+    private fun buildConversationItem(conversation: ConversationUi, selfPerson: Person): ConversationItem {
+        val senderPerson = Person.Builder().setName(conversation.displayName).setKey(conversation.contactKey).build()
+
+        val messages = buildCarMessages(conversation, senderPerson)
+
+        val callback =
+            object : ConversationCallback {
+                override fun onMarkAsRead() {
+                    stateCoordinator.markAsRead(conversation.contactKey)
+                }
+
+                override fun onTextReply(replyText: String) {
+                    stateCoordinator.sendMessage(conversation.contactKey, replyText)
+                }
+            }
+
+        return ConversationItem.Builder()
+            .setId(conversation.contactKey)
+            .setTitle(CarText.create(conversation.displayName))
+            .setMessages(messages)
+            .setSelf(selfPerson)
+            .setConversationCallback(callback)
+            .setGroupConversation(conversation.contactKey.contains(DataPacket.ID_BROADCAST))
+            .build()
+    }
+
+    private fun buildCarMessages(conversation: ConversationUi, senderPerson: Person): List<CarMessage> {
+        if (conversation.lastMessage.isEmpty()) return emptyList()
+
+        return listOf(
+            CarMessage.Builder()
+                .setSender(senderPerson)
+                .setBody(CarText.create(conversation.lastMessage))
+                .setReceivedTimeEpochMillis(conversation.lastMessageTime)
+                .setRead(conversation.unreadCount == 0)
+                .build(),
+        )
     }
 
     private fun buildNodeList(): Template {
@@ -249,6 +290,57 @@ class HomeScreen(
                 )
             }
         }
+
+        return ListTemplate.Builder().setSingleList(listBuilder.build()).build()
+    }
+
+    private fun buildStatusList(): Template {
+        val stats = stateCoordinator.localStatsState.value
+        val listBuilder = ItemList.Builder()
+
+        if (stats.hasBattery) {
+            listBuilder.addItem(
+                Row.Builder()
+                    .setTitle(carContext.getString(R.string.car_stat_battery))
+                    .addText("${stats.batteryLevel}%")
+                    .build(),
+            )
+        }
+
+        listBuilder.addItem(
+            Row.Builder()
+                .setTitle(carContext.getString(R.string.car_stat_channel_util))
+                .addText(String.format(Locale.getDefault(), "%.1f%%", stats.channelUtilization))
+                .build(),
+        )
+
+        listBuilder.addItem(
+            Row.Builder()
+                .setTitle(carContext.getString(R.string.car_stat_air_util))
+                .addText(String.format(Locale.getDefault(), "%.1f%%", stats.airUtilization))
+                .build(),
+        )
+
+        listBuilder.addItem(
+            Row.Builder()
+                .setTitle(carContext.getString(R.string.car_stat_nodes))
+                .addText("${stats.onlineNodes} / ${stats.totalNodes}")
+                .build(),
+        )
+
+        listBuilder.addItem(
+            Row.Builder()
+                .setTitle(carContext.getString(R.string.car_stat_uptime))
+                .addText(CarScreenDataBuilder.formatUptime(stats.uptimeSeconds))
+                .build(),
+        )
+
+        listBuilder.addItem(
+            Row.Builder()
+                .setTitle(carContext.getString(R.string.car_stat_packets))
+                .addText("TX: ${stats.numPacketsTx} / RX: ${stats.numPacketsRx}")
+                .build(),
+        )
 
         return ListTemplate.Builder().setSingleList(listBuilder.build()).build()
     }
@@ -300,6 +392,8 @@ class HomeScreen(
     companion object {
         private const val TAB_ID_MESSAGES = "messages"
         private const val TAB_ID_NODES = "nodes"
+        private const val TAB_ID_STATUS = "status"
+        private const val MIN_ALERT_CAR_API_LEVEL = 8
         private const val ALERT_DURATION_MS = 10_000
     }
 }

@@ -22,9 +22,6 @@
     <string name="car_nodes_online">%d nodes online</string>
     <string name="car_onboarding_text">Open Meshtastic on your phone to configure channels and connect to a radio.</string>
     <string name="car_onboarding_title">Setup Required</string>
-    <string name="car_quick_reply">Quick Reply</string>
-    <string name="car_quick_reply_coming_soon">Quick replies coming soon</string>
-    <string name="car_read_aloud">Read Aloud</string>
     <string name="car_reconnected">Reconnected to radio</string>
     <string name="car_reconnecting">Radio connection lost. Will reconnect automatically.</string>
     <string name="car_reconnecting_title">Reconnecting…</string>
@@ -41,9 +38,15 @@
     <string name="car_status_online">Online</string>
     <string name="car_status_signal">Signal</string>
     <string name="car_status_status">Status</string>
+    <string name="car_stat_air_util">Air Utilization</string>
+    <string name="car_stat_battery">Battery</string>
+    <string name="car_stat_channel_util">Channel Utilization</string>
+    <string name="car_stat_nodes">Nodes Online</string>
+    <string name="car_stat_packets">Packets</string>
+    <string name="car_stat_uptime">Uptime</string>
     <string name="car_tab_messages">Messages</string>
     <string name="car_tab_nodes">Nodes</string>
+    <string name="car_tab_status">Status</string>
     <string name="car_time_never">Never</string>
     <string name="car_unread_badge">%d unread</string>
-    <string name="car_voice_reply">Reply</string>
 </resources>
