@@ -181,9 +181,9 @@ class NodeDetailViewModel(
      * snackbar with the appropriate guidance on [EnsureSessionResult.Disconnected] or [EnsureSessionResult.Timeout].
      */
     fun openRemoteAdmin(destNum: Int) {
-        if (isEnsuringSession.value) return
+        // Atomic check-and-flip prevents a double-tap from queuing two passkey exchanges + two navigation events.
+        if (!isEnsuringSession.compareAndSet(expect = false, update = true)) return
         viewModelScope.launch {
-            isEnsuringSession.value = true
             try {
                 when (ensureRemoteAdminSession(destNum)) {
                     EnsureSessionResult.AlreadyActive,

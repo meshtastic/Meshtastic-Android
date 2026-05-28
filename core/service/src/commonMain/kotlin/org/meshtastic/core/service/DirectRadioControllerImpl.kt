@@ -27,6 +27,7 @@ import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.ContactKey
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.NodeAddress
@@ -120,8 +121,9 @@ class DirectRadioControllerImpl(
 
     override suspend fun sendReaction(emoji: String, replyId: Int, contactKey: String) {
         val myNum = nodeManager.myNodeNum.value ?: return
-        val channel = contactKey[0].digitToInt()
-        val destId = contactKey.substring(1)
+        val parsedKey = ContactKey(contactKey)
+        val channel = parsedKey.channel
+        val destId = parsedKey.addressString
         val dataPacket =
             DataPacket(
                 to = destId,
@@ -205,9 +207,13 @@ class DirectRadioControllerImpl(
 
     override suspend fun importContact(contact: SharedContact) {
         val myNum = nodeManager.myNodeNum.value ?: return
-        val verified = contact.copy(manually_verified = true)
-        commandSender.sendAdmin(myNum) { AdminMessage(add_contact = verified) }
-        nodeManager.handleReceivedUser(verified.node_num, verified.user ?: User(), manuallyVerified = true)
+        val user = contact.user
+        if (contact.node_num == 0 || user == null) {
+            Logger.w { "importContact rejected: missing node_num or user (node_num=${contact.node_num})" }
+            return
+        }
+        commandSender.sendAdmin(myNum) { AdminMessage(add_contact = contact) }
+        nodeManager.handleReceivedUser(contact.node_num, user, manuallyVerified = contact.manually_verified)
     }
 
     // ── Device Metadata ─────────────────────────────────────────────────────
@@ -239,7 +245,7 @@ class DirectRadioControllerImpl(
 
     override suspend fun setConfig(destNum: Int, config: Config, packetId: Int) {
         commandSender.sendAdmin(destNum, packetId) { AdminMessage(set_config = config) }
-        if (destNum == myNodeNum) {
+        if (destNum == nodeManager.myNodeNum.value) {
             scope.handledLaunch { radioConfigRepository.setLocalConfig(config) }
         }
     }
@@ -256,8 +262,8 @@ class DirectRadioControllerImpl(
 
     override suspend fun setModuleConfig(destNum: Int, config: ModuleConfig, packetId: Int) {
         commandSender.sendAdmin(destNum, packetId) { AdminMessage(set_module_config = config) }
-        config.statusmessage?.let { sm -> nodeManager.updateNodeStatus(destNum, sm.node_status) }
-        if (destNum == myNodeNum) {
+        if (destNum == nodeManager.myNodeNum.value) {
+            config.statusmessage?.let { sm -> nodeManager.updateNodeStatus(destNum, sm.node_status) }
             scope.handledLaunch { radioConfigRepository.setLocalModuleConfig(config) }
         }
     }
@@ -277,7 +283,7 @@ class DirectRadioControllerImpl(
 
     override suspend fun setRemoteChannel(destNum: Int, channel: Channel, packetId: Int) {
         commandSender.sendAdmin(destNum, packetId) { AdminMessage(set_channel = channel) }
-        if (destNum == myNodeNum) {
+        if (destNum == nodeManager.myNodeNum.value) {
             scope.handledLaunch { radioConfigRepository.updateChannelSettings(channel) }
         }
     }
@@ -315,17 +321,16 @@ class DirectRadioControllerImpl(
     }
 
     override suspend fun requestPosition(destNum: Int, currentPosition: Position) {
-        if (destNum == myNodeNum) return
+        if (destNum == nodeManager.myNodeNum.value) return
         val provideLocation = uiPrefs.shouldProvideNodeLocation(myNodeNum).value
+        // Position(0.0, 0.0, 0) is the protocol-level "no position" sentinel.
         val resolvedPosition =
-            when {
-                provideLocation && currentPosition.isValid() -> currentPosition
-
-                provideLocation ->
-                    nodeManager.nodeDBbyNodeNum[myNodeNum]?.position?.let { Position(it) }?.takeIf { it.isValid() }
-                        ?: Position(0.0, 0.0, 0)
-
-                else -> Position(0.0, 0.0, 0)
+            if (provideLocation) {
+                currentPosition.takeIf { it.isValid() }
+                    ?: nodeManager.nodeDBbyNodeNum[myNodeNum]?.position?.let { Position(it) }?.takeIf { it.isValid() }
+                    ?: Position(0.0, 0.0, 0)
+            } else {
+                Position(0.0, 0.0, 0)
             }
         commandSender.requestPosition(destNum, resolvedPosition)
     }
@@ -380,7 +385,7 @@ class DirectRadioControllerImpl(
     // ── Telemetry & Discovery ───────────────────────────────────────────────
 
     override suspend fun requestUserInfo(destNum: Int) {
-        if (destNum != myNodeNum) {
+        if (destNum != nodeManager.myNodeNum.value) {
             commandSender.requestUserInfo(destNum)
         }
     }

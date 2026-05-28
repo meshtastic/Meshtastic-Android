@@ -110,10 +110,11 @@ class MessageViewModel(
         get() =
             customEmojiPrefs.customEmojiFrequency.value
                 ?.split(",")
-                ?.associate { entry ->
-                    entry.split("=", limit = 2).takeIf { it.size == 2 }?.let { it[0] to it[1].toInt() } ?: ("" to 0)
+                ?.mapNotNull { entry ->
+                    val parts = entry.split("=", limit = 2)
+                    val count = parts.getOrNull(1)?.toIntOrNull()
+                    if (parts.size == 2 && parts[0].isNotEmpty() && count != null) parts[0] to count else null
                 }
-                ?.toList()
                 ?.sortedByDescending { it.second }
                 ?.map { it.first }
                 ?.take(6) ?: listOf("👍", "👎", "😂", "🔥", "❤️", "😮")

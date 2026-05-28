@@ -73,8 +73,13 @@ class AndroidMeshLocationManager(private val context: Application, private val l
     }
 
     override fun restart() {
-        val fn = sendPositionFn ?: return
-        if (!::scope.isInitialized) return
+        val fn = sendPositionFn
+        if (fn == null || !::scope.isInitialized) {
+            // start() hasn't been called yet — the connection manager wires us up on first myNodeInfo emission via
+            // the shouldProvideNodeLocation pref. Nothing to restart until that happens.
+            Logger.d { "restart() before start() — no-op until MeshConnectionManagerImpl wires location" }
+            return
+        }
         start(scope, fn)
     }
 

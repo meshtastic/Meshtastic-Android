@@ -69,24 +69,22 @@ sealed class NodeAddress {
         /** Parse a legacy string address into a typed [NodeAddress]. */
         fun fromString(id: String?): NodeAddress = when {
             id == null || id == ID_BROADCAST -> Broadcast
-
             id == ID_LOCAL -> Local
-
-            id.startsWith(NODE_ID_PREFIX) -> {
-                val num = idToNum(id.removePrefix(NODE_ID_PREFIX))
-                if (num != null) ByNum(num) else ById(id)
-            }
-
+            id.startsWith(NODE_ID_PREFIX) -> idToNum(id)?.let(::ByNum) ?: ById(id)
             else -> ById(id)
         }
 
         /** Convert a node number to its canonical hex string ID (e.g. `"!a1b2c3d4"`). */
         fun numToDefaultId(n: Int): String = formatString("!%08x", n)
 
-        /** Parse a hex node ID string (with or without `!` prefix) to its integer value, or null. */
+        /**
+         * Parse a hex node ID string (with or without `!` prefix) to its integer value, or null if the input is not a
+         * valid 32-bit hex value. Values larger than `0xFFFFFFFF` return null rather than silently truncating, so a
+         * malformed `!100000000` won't be misclassified as node `0`.
+         */
         @Suppress("MagicNumber")
         fun idToNum(id: String?): Int? =
-            runCatching { id?.removePrefix(NODE_ID_PREFIX)?.toLong(HEX_RADIX)?.toInt() }.getOrNull()
+            id?.removePrefix(NODE_ID_PREFIX)?.toLongOrNull(HEX_RADIX)?.takeIf { it in 0L..0xFFFFFFFFL }?.toInt()
     }
 }
 
@@ -97,13 +95,13 @@ sealed class NodeAddress {
  */
 @JvmInline
 value class ContactKey(val value: String) {
-    /** The channel index (first character). */
+    /** The channel index (first character). Returns 0 if the key is empty or the first char is not a digit. */
     val channel: Int
-        get() = value[0].digitToInt()
+        get() = value.firstOrNull()?.takeIf { it.isDigit() }?.digitToInt() ?: 0
 
-    /** The node address portion (everything after the channel digit). */
+    /** The node address portion (everything after the channel digit). Empty if the key is empty. */
     val addressString: String
-        get() = value.substring(1)
+        get() = if (value.isEmpty()) "" else value.substring(1)
 
     /** Parsed [NodeAddress] for the contact. */
     val address: NodeAddress
