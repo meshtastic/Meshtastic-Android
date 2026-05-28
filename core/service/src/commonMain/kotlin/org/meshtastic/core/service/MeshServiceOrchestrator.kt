@@ -90,8 +90,12 @@ class MeshServiceOrchestrator(
                 Logger.d { "start() called while already running, ignoring" }
                 return
             }
-            // The slot held a dead scope (post-stop). Replace it.
-            scopeRef.value = newScope
+            // The slot held a dead scope (post-stop). CAS-replace it to avoid racing with another caller.
+            if (!scopeRef.compareAndSet(expect = existing, update = newScope)) {
+                Logger.d { "start() lost race replacing dead scope, ignoring" }
+                newScope.cancel()
+                return
+            }
         }
 
         Logger.i { "Starting mesh service orchestrator" }

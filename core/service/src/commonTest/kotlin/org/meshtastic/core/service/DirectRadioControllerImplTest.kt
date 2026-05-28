@@ -24,6 +24,7 @@ import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify
 import dev.mokkery.verify.VerifyMode.Companion.atLeast
+import dev.mokkery.verify.VerifyMode.Companion.exactly
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
@@ -197,7 +198,7 @@ class DirectRadioControllerImplTest {
 
         // switchDevice should skip when addresses match, but transport still reconfigures
         verify { radioInterfaceService.setDeviceAddress("tcp:192.168.1.1") }
-        verifySuspend(atLeast(0)) { meshPrefs.setDeviceAddress("tcp:192.168.1.1") }
+        verifySuspend(exactly(0)) { meshPrefs.setDeviceAddress("tcp:192.168.1.1") }
     }
 
     @Test
@@ -261,7 +262,7 @@ class DirectRadioControllerImplTest {
         controller.ignoreNode(99)
         controller.muteNode(99)
 
-        verifySuspend(atLeast(0)) { commandSender.sendAdmin(any(), any(), any(), any()) }
+        verifySuspend(exactly(0)) { commandSender.sendAdmin(any(), any(), any(), any()) }
     }
 
     @Test
@@ -282,7 +283,7 @@ class DirectRadioControllerImplTest {
 
         verifySuspend { nodeManager.removeByNodenum(55) }
         // No admin message sent when disconnected
-        verifySuspend(atLeast(0)) { commandSender.sendAdmin(any(), any(), any(), any()) }
+        verifySuspend(exactly(0)) { commandSender.sendAdmin(any(), any(), any(), any()) }
     }
 
     @Test
@@ -348,6 +349,6 @@ class DirectRadioControllerImplTest {
 
         controller.importContact(contact)
 
-        verifySuspend(atLeast(0)) { commandSender.sendAdmin(any(), any(), any(), any()) }
+        verifySuspend(exactly(0)) { commandSender.sendAdmin(any(), any(), any(), any()) }
     }
 }

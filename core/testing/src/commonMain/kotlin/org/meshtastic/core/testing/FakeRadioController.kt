@@ -36,7 +36,7 @@ class FakeRadioController :
     RadioController {
 
     /** Canonical app-level connection state, mirroring [ServiceRepository][connectionState] semantics. */
-    private val _connectionState = mutableStateFlow<ConnectionState>(ConnectionState.Connected)
+    private val _connectionState = mutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
     override val connectionState: StateFlow<ConnectionState> = _connectionState
 
     private val _clientNotification = mutableStateFlow<ClientNotification?>(null)
@@ -92,7 +92,7 @@ class FakeRadioController :
 
     override suspend fun importContact(contact: org.meshtastic.proto.SharedContact) {}
 
-    override suspend fun refreshMetadata(nodeNum: Int) {}
+    override suspend fun refreshMetadata(destNum: Int) {}
 
     override suspend fun setLocalConfig(config: Config) {}
 

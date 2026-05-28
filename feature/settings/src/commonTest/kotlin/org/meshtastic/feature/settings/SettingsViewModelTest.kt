@@ -137,15 +137,15 @@ class SettingsViewModelTest {
     @Test
     fun `isConnected flow emits updates using Turbine`() = runTest {
         viewModel.isConnected.test {
-            expectMostRecentItem() shouldBe true // Default in FakeRadioController is Connected (true)
-
-            radioController.setConnectionState(ConnectionState.Disconnected)
-            runCurrent()
-            expectMostRecentItem() shouldBe false
+            expectMostRecentItem() shouldBe false // Default in FakeRadioController is Disconnected
 
             radioController.setConnectionState(ConnectionState.Connected)
             runCurrent()
             expectMostRecentItem() shouldBe true
+
+            radioController.setConnectionState(ConnectionState.Disconnected)
+            runCurrent()
+            expectMostRecentItem() shouldBe false
             cancelAndIgnoreRemainingEvents()
         }
     }
