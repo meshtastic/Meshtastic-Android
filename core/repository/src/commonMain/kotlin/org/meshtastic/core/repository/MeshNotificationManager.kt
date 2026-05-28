@@ -23,6 +23,12 @@ import org.meshtastic.proto.Telemetry
 
 const val SERVICE_NOTIFY_ID = 101
 
+/**
+ * Mesh-domain notification builder. Provides high-level operations for the message arrival, waypoint, reaction, new
+ * node, low-battery, and client notification flows specific to this app. Implementations are expected to render the
+ * platform notification themselves; the generic dispatch primitive is [NotificationManager] (which posts/cancels opaque
+ * [Notification] records and is *not* domain-aware).
+ */
 @Suppress("TooManyFunctions")
 interface MeshNotificationManager {
     fun clearNotifications()

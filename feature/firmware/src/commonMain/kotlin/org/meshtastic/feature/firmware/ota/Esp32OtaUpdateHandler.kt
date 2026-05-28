@@ -29,8 +29,8 @@ import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceHardware
-import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.firmware_update_connecting_attempt

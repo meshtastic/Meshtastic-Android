@@ -24,8 +24,8 @@ import kotlinx.coroutines.flow.update
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.Position
-import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.model.TelemetryType
+import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.neighbor_info

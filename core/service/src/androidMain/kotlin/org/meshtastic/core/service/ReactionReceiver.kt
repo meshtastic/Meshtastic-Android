@@ -26,7 +26,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.repository.RadioController
 import kotlin.coroutines.cancellation.CancellationException
 
 /**

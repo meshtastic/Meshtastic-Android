@@ -40,7 +40,6 @@ import org.meshtastic.core.data.datasource.FirmwareReleaseJsonDataSource
 import org.meshtastic.core.model.BootloaderOtaQuirk
 import org.meshtastic.core.model.NetworkDeviceHardware
 import org.meshtastic.core.model.NetworkFirmwareReleases
-import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.network.HttpClientDefaults
 import org.meshtastic.core.network.KermitHttpLogger
 import org.meshtastic.core.network.repository.MQTTRepository
@@ -54,6 +53,7 @@ import org.meshtastic.core.repository.MeshWorkerManager
 import org.meshtastic.core.repository.MessageQueue
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PlatformAnalytics
+import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.RadioTransportFactory
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.service.DirectRadioControllerImpl

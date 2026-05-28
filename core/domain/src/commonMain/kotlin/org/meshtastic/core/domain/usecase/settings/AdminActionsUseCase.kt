@@ -17,8 +17,8 @@
 package org.meshtastic.core.domain.usecase.settings
 
 import org.koin.core.annotation.Single
-import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.RadioController
 
 /**
  * Use case for performing administrative and destructive actions on mesh nodes.

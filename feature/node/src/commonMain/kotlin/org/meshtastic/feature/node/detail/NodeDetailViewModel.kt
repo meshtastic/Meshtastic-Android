@@ -36,10 +36,10 @@ import org.meshtastic.core.domain.usecase.session.EnsureSessionResult
 import org.meshtastic.core.domain.usecase.session.ObserveRemoteAdminSessionStatusUseCase
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
-import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.model.SessionStatus
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
+import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.connect_radio_for_remote_admin

@@ -22,13 +22,16 @@ import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.datastore.RecentAddressesDataSource
 import org.meshtastic.core.network.repository.DiscoveredService
 import org.meshtastic.core.network.repository.NetworkRepository
@@ -40,6 +43,7 @@ import org.meshtastic.core.testing.FakeServiceRepository
 import org.meshtastic.feature.connections.model.DeviceListEntry
 import org.meshtastic.feature.connections.model.DiscoveredDevices
 import org.meshtastic.feature.connections.model.GetDiscoveredDevicesUseCase
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -48,6 +52,7 @@ import kotlin.test.assertNotNull
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class ScannerViewModelTest {
 
+    private val testDispatcher = UnconfinedTestDispatcher()
     private lateinit var viewModel: ScannerViewModel
     private val serviceRepository = FakeServiceRepository()
     private val radioController = FakeRadioController()
@@ -79,6 +84,8 @@ class ScannerViewModelTest {
 
     @BeforeTest
     fun setUp() {
+        Dispatchers.setMain(testDispatcher)
+
         every { radioInterfaceService.isMockTransport() } returns false
         every { radioInterfaceService.currentDeviceAddressFlow } returns MutableStateFlow(null)
 
@@ -101,13 +108,18 @@ class ScannerViewModelTest {
                 networkRepository = networkRepository,
                 dispatchers =
                 org.meshtastic.core.di.CoroutineDispatchers(
-                    io = UnconfinedTestDispatcher(),
-                    main = UnconfinedTestDispatcher(),
-                    default = UnconfinedTestDispatcher(),
+                    io = testDispatcher,
+                    main = testDispatcher,
+                    default = testDispatcher,
                 ),
                 uiPrefs = uiPrefs,
                 bleScanner = bleScanner,
             )
+    }
+
+    @AfterTest
+    fun tearDown() {
+        Dispatchers.resetMain()
     }
 
     @Test

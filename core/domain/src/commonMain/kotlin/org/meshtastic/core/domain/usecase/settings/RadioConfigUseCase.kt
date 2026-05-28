@@ -18,7 +18,7 @@ package org.meshtastic.core.domain.usecase.settings
 
 import org.koin.core.annotation.Single
 import org.meshtastic.core.model.Position
-import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.repository.RadioController
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.User

@@ -29,8 +29,8 @@ import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.model.ConnectionState
-import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.model.SessionStatus
+import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.SessionManager
 import kotlin.time.Duration.Companion.seconds

@@ -27,8 +27,8 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DataPacket
-import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.MeshNotificationManager
+import org.meshtastic.core.repository.RadioController
 
 /**
  * A [BroadcastReceiver] that handles inline replies from notifications.

@@ -34,8 +34,8 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import okio.ByteString
 import org.meshtastic.core.model.ConnectionState
-import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.model.SessionStatus
+import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.SessionManager
 import kotlin.test.Test

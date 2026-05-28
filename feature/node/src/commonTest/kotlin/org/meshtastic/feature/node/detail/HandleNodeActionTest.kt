@@ -33,8 +33,8 @@ import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.domain.usecase.session.EnsureRemoteAdminSessionUseCase
 import org.meshtastic.core.domain.usecase.session.ObserveRemoteAdminSessionStatusUseCase
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.model.SessionStatus
+import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.ui.util.SnackbarManager
 import org.meshtastic.feature.node.component.NodeMenuAction
 import org.meshtastic.feature.node.domain.usecase.GetNodeDetailsUseCase
