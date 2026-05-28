@@ -27,6 +27,9 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 * fix(database): stabilize flaky DatabaseManagerWithDbRetryTest (#5635) by James Rich (@jamesarich) in [`d892f43e0`](https://github.com/meshtastic/Meshtastic-Android/commit/d892f43e0083d8bfbbc10c44355873910fb96301)
 * ci(changelog): exclude changelog commits and fix contributor duplication (#5638) by James Rich (@jamesarich) in [`d125d955f`](https://github.com/meshtastic/Meshtastic-Android/commit/d125d955f297c7fc0f351aae7086deea06fb0fb2)
 * chore(deps): update plugin org.meshtastic.flatpak.sources.settings to v0.1.2 (#5637) by renovate[bot] (@renovate[bot]) in [`73a2d9f62`](https://github.com/meshtastic/Meshtastic-Android/commit/73a2d9f62465ad09a380c10edbf06622208ed349)
+* docs: add settings validation reference (#5218) by Copilot (@Copilot) in [`a5d176d4d`](https://github.com/meshtastic/Meshtastic-Android/commit/a5d176d4d50513f2bc36063ba59dc31192163083)
+* repo: Add Meshtastic Desktop icon SVGs (#5623) by Austin (@vidplace7) in [`321b73e72`](https://github.com/meshtastic/Meshtastic-Android/commit/321b73e7266bc4c970fcb9a5570dae90be247025)
+* Enhance TAKTALK support with message and room handling, update SDK to v0.3.2 (#5634) by Ben Meadors (@thebentern) in [`a5e6894fe`](https://github.com/meshtastic/Meshtastic-Android/commit/a5e6894fe8934aefce5036458407a69fc96ca541)
 
 ### Open Beta (v2.7.14-open.13)
 Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.13):
