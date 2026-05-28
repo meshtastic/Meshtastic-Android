@@ -14,6 +14,9 @@ Handles the complex logic of reading and writing configuration to the Meshtastic
 ### 3. `AboutScreen`
 Displays version information, licenses, and project links.
 
+## Validation Reference
+- See [settings-validation.md](settings-validation.md) for detailed radio/module settings validation rules used by this module.
+
 ## Features
 - **Channel Configuration**: Manage encryption keys, channel names, and radio frequency settings.
 - **Node Database Management**: Options to clear or prune the local and remote node databases.
