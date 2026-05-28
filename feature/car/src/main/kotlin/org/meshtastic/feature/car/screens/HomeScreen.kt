@@ -208,11 +208,12 @@ class HomeScreen(
         val state = stateCoordinator.messagingState.value
         val listBuilder = ItemList.Builder()
 
-        if (state.conversations.isEmpty()) {
+        val validConversations = state.conversations.filter { it.lastMessage.isNotEmpty() }
+        if (validConversations.isEmpty()) {
             listBuilder.setNoItemsMessage(carContext.getString(R.string.car_no_messages))
         } else {
             val selfPerson = buildSelfPerson()
-            state.conversations.take(CarScreenDataBuilder.MAX_CONVERSATIONS).forEach { conversation ->
+            validConversations.take(CarScreenDataBuilder.MAX_CONVERSATIONS).forEach { conversation ->
                 listBuilder.addItem(buildConversationItem(conversation, selfPerson))
             }
         }
@@ -251,18 +252,14 @@ class HomeScreen(
             .build()
     }
 
-    private fun buildCarMessages(conversation: ConversationUi, senderPerson: Person): List<CarMessage> {
-        if (conversation.lastMessage.isEmpty()) return emptyList()
-
-        return listOf(
-            CarMessage.Builder()
-                .setSender(senderPerson)
-                .setBody(CarText.create(conversation.lastMessage))
-                .setReceivedTimeEpochMillis(conversation.lastMessageTime)
-                .setRead(conversation.unreadCount == 0)
-                .build(),
-        )
-    }
+    private fun buildCarMessages(conversation: ConversationUi, senderPerson: Person): List<CarMessage> = listOf(
+        CarMessage.Builder()
+            .setSender(senderPerson)
+            .setBody(CarText.create(conversation.lastMessage))
+            .setReceivedTimeEpochMillis(conversation.lastMessageTime)
+            .setRead(conversation.unreadCount == 0)
+            .build(),
+    )
 
     private fun buildNodeList(): Template {
         val state = stateCoordinator.nodeDashboardState.value
@@ -282,9 +279,7 @@ class HomeScreen(
                         .setImage(tintedIcon, Row.IMAGE_TYPE_ICON)
                         .setBrowsable(true)
                         .setOnClickListener {
-                            screenManager.push(
-                                NodeDetailScreen(carContext = carContext, nodeProvider = { node }, onMessageClick = {}),
-                            )
+                            screenManager.push(NodeDetailScreen(carContext = carContext, nodeProvider = { node }))
                         }
                         .build(),
                 )

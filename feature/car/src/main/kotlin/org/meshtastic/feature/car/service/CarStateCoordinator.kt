@@ -31,7 +31,6 @@ import kotlinx.coroutines.launch
 import org.koin.core.annotation.Factory
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.ConnectionState
-import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.QuickChatActionRepository
@@ -152,11 +151,6 @@ class CarStateCoordinator(
         }
     }
 
-    private suspend fun resolveNode(nodeId: String?): Node {
-        val nodes = nodeRepository.nodeDBbyNum.value
-        return nodes.values.find { it.user.id == nodeId } ?: Node(num = 0)
-    }
-
     fun destroy() {
         scope.cancel()
     }
@@ -262,8 +256,5 @@ class CarStateCoordinator(
         }
     }
 
-    companion object {
-        private const val MAX_MESSAGES_PER_CONVERSATION = 20
-        private const val READ_ALOUD_LIMIT = 3
-    }
+    companion object
 }

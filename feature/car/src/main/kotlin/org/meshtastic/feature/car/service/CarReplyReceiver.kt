@@ -31,8 +31,8 @@ import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.usecase.SendMessageUseCase
 
 /**
- * Handles inline reply and mark-read actions from car messaging notifications. Uses explicit intent targeting to
- * prevent interception by other apps.
+ * Handles inline reply and mark-read actions from car messaging notifications. Uses [goAsync] to keep the receiver
+ * alive while the coroutine completes, preventing premature process kill.
  */
 class CarReplyReceiver :
     BroadcastReceiver(),
@@ -40,34 +40,37 @@ class CarReplyReceiver :
 
     private val sendMessageUseCase: SendMessageUseCase by inject()
     private val packetRepository: PacketRepository by inject()
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun onReceive(context: Context, intent: Intent) {
-        when (intent.action) {
-            CarNotificationManager.ACTION_REPLY -> handleReply(intent)
-            CarNotificationManager.ACTION_MARK_READ -> handleMarkRead(intent)
+        val pendingResult = goAsync()
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+        scope.launch {
+            try {
+                when (intent.action) {
+                    CarNotificationManager.ACTION_REPLY -> handleReply(intent)
+                    CarNotificationManager.ACTION_MARK_READ -> handleMarkRead(intent)
+                }
+            } finally {
+                pendingResult.finish()
+            }
         }
     }
 
-    private fun handleReply(intent: Intent) {
+    private suspend fun handleReply(intent: Intent) {
         val conversationId = intent.getStringExtra(CarNotificationManager.EXTRA_CONVERSATION_ID) ?: return
         val remoteInput = RemoteInput.getResultsFromIntent(intent)
         val replyText = remoteInput?.getCharSequence(CarNotificationManager.KEY_TEXT_REPLY)?.toString() ?: return
 
         Logger.d(tag = TAG) { "Reply to conversation: $conversationId (${replyText.length} chars)" }
-        scope.launch {
-            runCatching { sendMessageUseCase(replyText, conversationId) }
-                .onFailure { error -> Logger.e(tag = TAG, throwable = error) { "Failed to send reply" } }
-        }
+        runCatching { sendMessageUseCase(replyText, conversationId) }
+            .onFailure { error -> Logger.e(tag = TAG, throwable = error) { "Failed to send reply" } }
     }
 
-    private fun handleMarkRead(intent: Intent) {
+    private suspend fun handleMarkRead(intent: Intent) {
         val conversationId = intent.getStringExtra(CarNotificationManager.EXTRA_CONVERSATION_ID) ?: return
         Logger.d(tag = TAG) { "Mark read: $conversationId" }
-        scope.launch {
-            runCatching { packetRepository.clearUnreadCount(conversationId, System.currentTimeMillis()) }
-                .onFailure { error -> Logger.e(tag = TAG, throwable = error) { "Failed to mark as read" } }
-        }
+        runCatching { packetRepository.clearUnreadCount(conversationId, System.currentTimeMillis()) }
+            .onFailure { error -> Logger.e(tag = TAG, throwable = error) { "Failed to mark as read" } }
     }
 
     companion object {
