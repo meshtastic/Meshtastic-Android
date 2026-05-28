@@ -23,12 +23,14 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.repository.FromRadioPacketHandler
-import org.meshtastic.core.repository.MeshRouter
+import org.meshtastic.core.repository.MeshConfigFlowManager
+import org.meshtastic.core.repository.MeshConfigHandler
 import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.Notification
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.XModemManager
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.client_notification
 import org.meshtastic.core.resources.duplicated_public_key_title
@@ -44,7 +46,9 @@ import org.meshtastic.proto.FromRadio
 @Single
 class FromRadioPacketHandlerImpl(
     private val serviceRepository: ServiceRepository,
-    private val router: Lazy<MeshRouter>,
+    private val configFlowManager: Lazy<MeshConfigFlowManager>,
+    private val configHandler: Lazy<MeshConfigHandler>,
+    private val xmodemManager: Lazy<XModemManager>,
     private val mqttManager: MqttManager,
     private val packetHandler: PacketHandler,
     private val notificationManager: NotificationManager,
@@ -71,34 +75,34 @@ class FromRadioPacketHandlerImpl(
         val xmodemPacket = proto.xmodemPacket
 
         when {
-            myInfo != null -> router.value.configFlowManager.handleMyInfo(myInfo)
+            myInfo != null -> configFlowManager.value.handleMyInfo(myInfo)
 
             // deviceuiConfig arrives immediately after my_info (STATE_SEND_UIDATA). It carries
             // the device's display, theme, node-filter, and other UI preferences.
-            deviceUIConfig != null -> router.value.configHandler.handleDeviceUIConfig(deviceUIConfig)
+            deviceUIConfig != null -> configHandler.value.handleDeviceUIConfig(deviceUIConfig)
 
-            metadata != null -> router.value.configFlowManager.handleLocalMetadata(metadata)
+            metadata != null -> configFlowManager.value.handleLocalMetadata(metadata)
 
             nodeInfo != null -> {
-                router.value.configFlowManager.handleNodeInfo(nodeInfo)
-                serviceRepository.setConnectionProgress("Nodes (${router.value.configFlowManager.newNodeCount})")
+                configFlowManager.value.handleNodeInfo(nodeInfo)
+                serviceRepository.setConnectionProgress("Nodes (${configFlowManager.value.newNodeCount})")
             }
 
-            configCompleteId != null -> router.value.configFlowManager.handleConfigComplete(configCompleteId)
+            configCompleteId != null -> configFlowManager.value.handleConfigComplete(configCompleteId)
 
             mqttProxyMessage != null -> mqttManager.handleMqttProxyMessage(mqttProxyMessage)
 
             queueStatus != null -> packetHandler.handleQueueStatus(queueStatus)
 
-            config != null -> router.value.configHandler.handleDeviceConfig(config)
+            config != null -> configHandler.value.handleDeviceConfig(config)
 
-            moduleConfig != null -> router.value.configHandler.handleModuleConfig(moduleConfig)
+            moduleConfig != null -> configHandler.value.handleModuleConfig(moduleConfig)
 
-            channel != null -> router.value.configHandler.handleChannel(channel)
+            channel != null -> configHandler.value.handleChannel(channel)
 
-            fileInfo != null -> router.value.configFlowManager.handleFileInfo(fileInfo)
+            fileInfo != null -> configFlowManager.value.handleFileInfo(fileInfo)
 
-            xmodemPacket != null -> router.value.xmodemManager.handleIncomingXModem(xmodemPacket)
+            xmodemPacket != null -> xmodemManager.value.handleIncomingXModem(xmodemPacket)
 
             clientNotification != null -> handleClientNotification(clientNotification)
 
@@ -106,7 +110,7 @@ class FromRadioPacketHandlerImpl(
             // Re-handshake immediately rather than waiting for the 30s stall guard.
             proto.rebooted != null -> {
                 Logger.w { "Firmware rebooted (rebooted=${proto.rebooted}), re-initiating handshake" }
-                router.value.configFlowManager.triggerWantConfig()
+                configFlowManager.value.triggerWantConfig()
             }
         }
     }

@@ -36,9 +36,9 @@ import org.meshtastic.core.model.util.isLora
 import org.meshtastic.core.model.util.toOneLineString
 import org.meshtastic.core.model.util.toPIIString
 import org.meshtastic.core.repository.FromRadioPacketHandler
+import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.MeshMessageProcessor
-import org.meshtastic.core.repository.MeshRouter
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.FromRadio
@@ -55,7 +55,7 @@ class MeshMessageProcessorImpl(
     private val nodeManager: NodeManager,
     private val serviceRepository: ServiceRepository,
     private val meshLogRepository: Lazy<MeshLogRepository>,
-    private val router: Lazy<MeshRouter>,
+    private val dataHandler: Lazy<MeshDataHandler>,
     private val fromRadioDispatcher: FromRadioPacketHandler,
     @Named("ServiceScope") private val scope: CoroutineScope,
 ) : MeshMessageProcessor {
@@ -253,7 +253,7 @@ class MeshMessageProcessorImpl(
             }
 
             try {
-                router.value.dataHandler.handleReceivedData(packet, myNum, log.uuid, logJob)
+                dataHandler.value.handleReceivedData(packet, myNum, log.uuid, logJob)
             } finally {
                 scope.launch {
                     mapsMutex.withLock {
