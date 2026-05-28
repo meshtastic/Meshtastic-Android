@@ -41,7 +41,32 @@ data class NodeWithRelations(
     @Relation(entity = MetadataEntity::class, parentColumns = ["num"], entityColumns = ["num"])
     val metadata: MetadataEntity?,
 ) {
-    fun toModel() = node.toModel().copy(metadata = metadata?.proto, manuallyVerified = node.manuallyVerified)
+    // Direct construction avoids the previous `node.toModel().copy(metadata = …, manuallyVerified = …)` pattern,
+    // which allocated the Node twice per DB row (once from toModel, once from copy). Hot path on every DB emission.
+    fun toModel() = Node(
+        num = node.num,
+        user = node.user,
+        position = node.position,
+        snr = node.snr,
+        rssi = node.rssi,
+        lastHeard = node.lastHeard,
+        deviceMetrics = node.deviceMetrics ?: org.meshtastic.proto.DeviceMetrics(),
+        channel = node.channel,
+        viaMqtt = node.viaMqtt,
+        hopsAway = node.hopsAway,
+        isFavorite = node.isFavorite,
+        isIgnored = node.isIgnored,
+        isMuted = node.isMuted,
+        environmentMetrics = node.environmentMetrics ?: org.meshtastic.proto.EnvironmentMetrics(),
+        powerMetrics = node.powerMetrics ?: org.meshtastic.proto.PowerMetrics(),
+        paxcounter = node.paxcounter,
+        publicKey = node.publicKey ?: node.user.public_key,
+        notes = node.notes,
+        nodeStatus = node.nodeStatus,
+        lastTransport = node.lastTransport,
+        metadata = metadata?.proto,
+        manuallyVerified = node.manuallyVerified,
+    )
 
     fun toEntity() = with(node) {
         NodeEntity(

@@ -39,6 +39,9 @@ data class EnvironmentMetrics(
         fun fromTelemetryProto(proto: org.meshtastic.proto.EnvironmentMetrics, time: Int): EnvironmentMetrics =
             EnvironmentMetrics(
                 temperature = proto.temperature?.takeIf { !it.isNaN() },
+                // 0%RH is treated as "no reading" — firmware emits 0 when the humidity sensor isn't fitted and a real
+                // outdoor reading of exactly 0%RH is physically implausible. Other fields don't get this guard because
+                // their natural zero values (0 V, 0 A, 0°C) are meaningful sensor data.
                 relativeHumidity = proto.relative_humidity?.takeIf { !it.isNaN() && it != 0.0f },
                 soilTemperature = proto.soil_temperature?.takeIf { !it.isNaN() },
                 soilMoisture = proto.soil_moisture?.takeIf { it != Int.MIN_VALUE },

@@ -19,6 +19,7 @@ package org.meshtastic.core.data.manager
 import co.touchlab.kermit.Logger
 import kotlinx.atomicfu.atomic
 import kotlinx.atomicfu.update
+import kotlinx.collections.immutable.PersistentMap
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -58,12 +59,53 @@ class NodeManagerImpl(
     @Named("ServiceScope") private val scope: CoroutineScope,
 ) : NodeManager {
 
-    private val _nodeDBbyNodeNum = atomic(persistentMapOf<Int, Node>())
+    // Two indices over the same node set: byNum is the canonical store (mesh-level identifier), byId is a secondary
+    // O(1) lookup for the user-facing hex string. Both are held in a single atomic ref so updates are observed
+    // consistently — concurrent readers never see an entry present in one index but not the other.
+    private data class NodeIndex(
+        val byNum: PersistentMap<Int, Node> = persistentMapOf(),
+        val byId: PersistentMap<String, Node> = persistentMapOf(),
+    ) {
+        fun put(num: Int, node: Node): NodeIndex {
+            val previous = byNum[num]
+            var nextById = byId
+            // If the user.id changed (e.g. firmware reassigned the hex id) drop the stale id entry.
+            if (previous != null && previous.user.id.isNotEmpty() && previous.user.id != node.user.id) {
+                nextById = nextById.remove(previous.user.id)
+            }
+            if (node.user.id.isNotEmpty()) {
+                nextById = nextById.put(node.user.id, node)
+            }
+            return NodeIndex(byNum = byNum.put(num, node), byId = nextById)
+        }
+
+        fun remove(num: Int): NodeIndex {
+            val previous = byNum[num] ?: return this
+            return NodeIndex(
+                byNum = byNum.remove(num),
+                byId = if (previous.user.id.isNotEmpty()) byId.remove(previous.user.id) else byId,
+            )
+        }
+
+        companion object {
+            fun fromByNum(nodes: Map<Int, Node>): NodeIndex {
+                var byNum = persistentMapOf<Int, Node>()
+                var byId = persistentMapOf<String, Node>()
+                for ((num, node) in nodes) {
+                    byNum = byNum.put(num, node)
+                    if (node.user.id.isNotEmpty()) byId = byId.put(node.user.id, node)
+                }
+                return NodeIndex(byNum, byId)
+            }
+        }
+    }
+
+    private val nodeIndex = atomic(NodeIndex())
 
     override val nodeDBbyNodeNum: Map<Int, Node>
-        get() = _nodeDBbyNodeNum.value
+        get() = nodeIndex.value.byNum
 
-    override fun getNodeById(id: String): Node? = _nodeDBbyNodeNum.value.values.firstOrNull { it.user.id == id }
+    override fun getNodeById(id: String): Node? = nodeIndex.value.byId[id]
 
     override val isNodeDbReady = MutableStateFlow(false)
     override val allowNodeDbWrites = MutableStateFlow(false)
@@ -95,7 +137,7 @@ class NodeManagerImpl(
     override fun loadCachedNodeDB() {
         scope.handledLaunch {
             val nodes = nodeRepository.nodeDBbyNum.first()
-            _nodeDBbyNodeNum.value = persistentMapOf<Int, Node>().putAll(nodes)
+            nodeIndex.value = NodeIndex.fromByNum(nodes)
             if (myNodeNum.value == null) {
                 myNodeNum.value = nodeRepository.myNodeInfo.value?.myNodeNum
             }
@@ -103,7 +145,7 @@ class NodeManagerImpl(
     }
 
     override fun clear() {
-        _nodeDBbyNodeNum.value = persistentMapOf()
+        nodeIndex.value = NodeIndex()
         isNodeDbReady.value = false
         allowNodeDbWrites.value = false
         myNodeNum.value = null
@@ -112,7 +154,7 @@ class NodeManagerImpl(
 
     override fun getMyNodeInfo(): MyNodeInfo? {
         val mi = nodeRepository.myNodeInfo.value ?: return null
-        val myNode = _nodeDBbyNodeNum.value[mi.myNodeNum]
+        val myNode = nodeIndex.value.byNum[mi.myNodeNum]
         return MyNodeInfo(
             myNodeNum = mi.myNodeNum,
             hasGPS = (myNode?.position?.latitude_i ?: 0) != 0,
@@ -133,14 +175,14 @@ class NodeManagerImpl(
 
     override fun getMyId(): String {
         val num = myNodeNum.value ?: nodeRepository.myNodeInfo.value?.myNodeNum ?: return ""
-        return _nodeDBbyNodeNum.value[num]?.user?.id ?: ""
+        return nodeIndex.value.byNum[num]?.user?.id ?: ""
     }
 
     override fun removeByNodenum(nodeNum: Int) {
-        _nodeDBbyNodeNum.update { it.remove(nodeNum) }
+        nodeIndex.update { it.remove(nodeNum) }
     }
 
-    internal fun getOrCreateNode(n: Int, channel: Int = 0): Node = _nodeDBbyNodeNum.value[n]
+    internal fun getOrCreateNode(n: Int, channel: Int = 0): Node = nodeIndex.value.byNum[n]
         ?: run {
             val userId = NodeAddress.numToDefaultId(n)
             val defaultUser =
@@ -159,11 +201,11 @@ class NodeManagerImpl(
         // Without this, concurrent calls for the same nodeNum could read the same snapshot
         // and the last writer would silently overwrite the other's changes.
         var next: Node? = null
-        _nodeDBbyNodeNum.update { map ->
-            val current = map[nodeNum] ?: getOrCreateNode(nodeNum, channel)
+        nodeIndex.update { index ->
+            val current = index.byNum[nodeNum] ?: getOrCreateNode(nodeNum, channel)
             val transformed = transform(current)
             next = transformed
-            map.put(nodeNum, transformed)
+            index.put(nodeNum, transformed)
         }
         val result = next ?: return
 
@@ -309,6 +351,6 @@ class NodeManagerImpl(
     override fun toNodeID(nodeNum: Int): String = if (nodeNum == NodeAddress.NODENUM_BROADCAST) {
         NodeAddress.ID_BROADCAST
     } else {
-        _nodeDBbyNodeNum.value[nodeNum]?.user?.id ?: NodeAddress.numToDefaultId(nodeNum)
+        nodeIndex.value.byNum[nodeNum]?.user?.id ?: NodeAddress.numToDefaultId(nodeNum)
     }
 }

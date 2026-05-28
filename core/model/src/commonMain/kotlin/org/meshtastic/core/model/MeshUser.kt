@@ -41,14 +41,20 @@ data class MeshUser(
     ) : this(p.id, p.long_name, p.short_name, p.hw_model, p.is_licensed, p.role.value)
 
     /**
-     * a string version of the hardware model, converted into pretty lowercase and changing _ to -, and p to dot or null
-     * if unset
+     * A pretty lowercase rendering of the hardware model: underscores → dashes, version markers `<digit>p<digit>` →
+     * `<digit>.<digit>` (e.g. `RAK4631_V1P0` → `rak4631-v1.0`). Returns null when the model is unset. The
+     * version-marker substitution is constrained to digit-p-digit so model names containing a literal 'p' (e.g.
+     * `HELTEC_WIRELESS_PAPER`) are preserved correctly.
      */
     val hwModelString: String?
         get() =
             if (hwModel == HardwareModel.UNSET) {
                 null
             } else {
-                hwModel.name.replace('_', '-').replace('p', '.').lowercase()
+                hwModel.name.replace('_', '-').replace(VERSION_P_REGEX, "$1.$2").lowercase()
             }
+
+    companion object {
+        private val VERSION_P_REGEX = Regex("(\\d)p(\\d)", RegexOption.IGNORE_CASE)
+    }
 }

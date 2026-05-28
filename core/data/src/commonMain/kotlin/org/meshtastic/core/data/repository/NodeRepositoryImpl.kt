@@ -152,14 +152,17 @@ class NodeRepositoryImpl(
         }
 
         val fallbackId = userId.takeLast(last4)
+        // Single equality check replaces two NodeAddress.fromString calls — getUser is called per paged contact
+        // and per text-message arrival, so the parser allocations add up.
+        val isLocal = userId == NodeAddress.ID_LOCAL
         val defaultLong =
-            if (NodeAddress.fromString(userId) is NodeAddress.Local) {
+            if (isLocal) {
                 ourNodeInfo.value?.user?.long_name?.takeIf { it.isNotBlank() } ?: "Local"
             } else {
                 "Meshtastic $fallbackId"
             }
         val defaultShort =
-            if (NodeAddress.fromString(userId) is NodeAddress.Local) {
+            if (isLocal) {
                 ourNodeInfo.value?.user?.short_name?.takeIf { it.isNotBlank() } ?: "Local"
             } else {
                 fallbackId
