@@ -46,7 +46,6 @@ import org.meshtastic.core.resources.config_security_public_key
 import org.meshtastic.core.resources.config_security_serial_enabled
 import org.meshtastic.core.resources.debug_log_api_enabled
 import org.meshtastic.core.resources.direct_message_key
-import org.meshtastic.core.resources.lockdown_lock_now
 import org.meshtastic.core.resources.logs
 import org.meshtastic.core.resources.managed_mode
 import org.meshtastic.core.resources.private_key
@@ -63,7 +62,7 @@ import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Warning
-import org.meshtastic.feature.settings.lockdown.LockdownSessionStatus
+import org.meshtastic.feature.settings.lockdown.LockdownModeSetting
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.Config
 import kotlin.random.Random
@@ -206,16 +205,25 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
+                val lockdownState by viewModel.lockdownState.collectAsStateWithLifecycle()
                 val tokenInfo by viewModel.lockdownTokenInfo.collectAsStateWithLifecycle()
-                val authorized by viewModel.sessionAuthorized.collectAsStateWithLifecycle()
-                if (authorized) {
-                    LockdownSessionStatus(tokenInfo = tokenInfo)
-                }
-                NodeActionButton(
-                    modifier = Modifier.padding(horizontal = 8.dp),
-                    title = stringResource(Res.string.lockdown_lock_now),
-                    enabled = state.connected && authorized,
-                    onClick = { viewModel.sendLockNow() },
+                LockdownModeSetting(
+                    lockdownState = lockdownState,
+                    tokenInfo = tokenInfo,
+                    connected = state.connected,
+                    containerColor = CardDefaults.cardColors().containerColor,
+                    onEnable = { passphrase, boots, hours, sessionMinutes ->
+                        viewModel.submitLockdownPassphrase(
+                            passphrase = passphrase,
+                            boots = boots,
+                            hours = hours,
+                            maxSessionSeconds = sessionMinutes * SECONDS_PER_MINUTE,
+                        )
+                    },
+                    onDisable = { passphrase ->
+                        viewModel.submitLockdownPassphrase(passphrase = passphrase, disable = true)
+                    },
+                    onLockNow = { viewModel.sendLockNow() },
                 )
             }
         }
@@ -249,3 +257,5 @@ fun PrivateKeyRegenerateDialog(
         )
     }
 }
+
+private const val SECONDS_PER_MINUTE = 60

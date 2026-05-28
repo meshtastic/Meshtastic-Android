@@ -455,12 +455,14 @@ class MeshService : Service() {
                 bootTtl: Int,
                 hourTtl: Int,
                 maxSessionSeconds: Int,
+                disable: Boolean,
             ) = toRemoteExceptions {
                 router.actionHandler.handleSendLockdownUnlock(
                     passphrase.orEmpty(),
                     bootTtl,
                     hourTtl,
                     maxSessionSeconds,
+                    disable,
                 )
             }
 

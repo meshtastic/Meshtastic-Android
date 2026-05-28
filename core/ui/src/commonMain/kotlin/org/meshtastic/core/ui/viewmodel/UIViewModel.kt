@@ -146,8 +146,11 @@ class UIViewModel(
         bootTtl: Int = DEFAULT_BOOT_TTL,
         hourTtl: Int = 0,
         maxSessionSeconds: Int = 0,
+        disable: Boolean = false,
     ) {
-        viewModelScope.launch { radioController.sendLockdownUnlock(passphrase, bootTtl, hourTtl, maxSessionSeconds) }
+        viewModelScope.launch {
+            radioController.sendLockdownUnlock(passphrase, bootTtl, hourTtl, maxSessionSeconds, disable)
+        }
     }
 
     fun sendLockNow() {

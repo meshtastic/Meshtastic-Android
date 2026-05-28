@@ -80,8 +80,26 @@ class LockdownCoordinatorImpl(
             LockdownStatus.State.LOCKED -> handleLocked(status.lock_reason)
             LockdownStatus.State.UNLOCKED -> handleUnlocked(status)
             LockdownStatus.State.UNLOCK_FAILED -> handleUnlockFailed(status.backoff_seconds)
+            LockdownStatus.State.DISABLED -> handleDisabled()
             LockdownStatus.State.STATE_UNSPECIFIED -> Logger.w { "Lockdown: Received STATE_UNSPECIFIED from firmware" }
         }
+    }
+
+    @Suppress("TooGenericExceptionCaught")
+    private fun handleDisabled() {
+        // Lockdown-capable but currently OFF. Drop any stale stored passphrase so we don't try to auto-unlock later.
+        val deviceAddress = radioInterfaceService.getDeviceAddress()
+        if (deviceAddress != null) {
+            try {
+                passphraseStore.clearPassphrase(deviceAddress)
+            } catch (e: Exception) {
+                Logger.e(e) { "Lockdown: Failed to clear stored passphrase on DISABLED" }
+            }
+        }
+        resetTransientState()
+        serviceRepository.setSessionAuthorized(false)
+        serviceRepository.setLockdownTokenInfo(null)
+        serviceRepository.setLockdownState(LockdownState.Disabled)
     }
 
     private fun handleLockNowAcknowledged() {
@@ -187,15 +205,36 @@ class LockdownCoordinatorImpl(
         }
     }
 
-    override fun submitPassphrase(passphrase: String, boots: Int, hours: Int, maxSessionSeconds: Int) {
-        pendingPassphrase = passphrase
-        pendingBoots = boots
-        pendingHours = hours
-        pendingMaxSessionSeconds = maxSessionSeconds
+    @Suppress("TooGenericExceptionCaught")
+    override fun submitPassphrase(
+        passphrase: String,
+        boots: Int,
+        hours: Int,
+        maxSessionSeconds: Int,
+        disable: Boolean,
+    ) {
         wasAutoAttempt = false
         wasLockNow = false
+        if (disable) {
+            // Turning lockdown OFF: the device will reboot to DISABLED, so there is nothing to re-save. Drop any
+            // stored passphrase now so a later reconnect doesn't auto-unlock a device the user just disabled.
+            pendingPassphrase = null
+            val deviceAddress = radioInterfaceService.getDeviceAddress()
+            if (deviceAddress != null) {
+                try {
+                    passphraseStore.clearPassphrase(deviceAddress)
+                } catch (e: Exception) {
+                    Logger.e(e) { "Lockdown: Failed to clear stored passphrase while disabling" }
+                }
+            }
+        } else {
+            pendingPassphrase = passphrase
+            pendingBoots = boots
+            pendingHours = hours
+            pendingMaxSessionSeconds = maxSessionSeconds
+        }
         serviceRepository.setLockdownState(LockdownState.None)
-        commandSender.sendLockdownPassphrase(passphrase, boots, hours, maxSessionSeconds)
+        commandSender.sendLockdownPassphrase(passphrase, boots, hours, maxSessionSeconds, disable)
     }
 
     override fun lockNow() {

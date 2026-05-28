@@ -32,6 +32,7 @@ import org.meshtastic.proto.LockdownStatus
 import org.meshtastic.proto.Telemetry
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -67,12 +68,22 @@ class LockdownCoordinatorImplTest {
         var lastPassphrase: String? = null
         var lastBoots: Int = 0
         var lastHours: Int = 0
+        var lastMaxSessionSeconds: Int = 0
+        var lastDisable: Boolean = false
         var lockNowCalled = false
 
-        override fun sendLockdownPassphrase(passphrase: String, boots: Int, hours: Int) {
+        override fun sendLockdownPassphrase(
+            passphrase: String,
+            boots: Int,
+            hours: Int,
+            maxSessionSeconds: Int,
+            disable: Boolean,
+        ) {
             lastPassphrase = passphrase
             lastBoots = boots
             lastHours = hours
+            lastMaxSessionSeconds = maxSessionSeconds
+            lastDisable = disable
         }
 
         override fun sendLockNow() {
@@ -486,6 +497,40 @@ class LockdownCoordinatorImplTest {
         radioService.setDeviceAddress(testDeviceAddress)
         coordinator.handleLockdownStatus(LockdownStatus(state = LockdownStatus.State.LOCKED))
         assertIs<LockdownState.Locked>(serviceRepo.lockdownState.value)
+    }
+
+    @Test
+    fun `submitPassphrase with disable forwards disable flag and clears stored passphrase`() {
+        radioService.setDeviceAddress(testDeviceAddress)
+        passphraseStore.saved[testDeviceAddress] = StoredPassphrase("original", 50, 0)
+
+        coordinator.submitPassphrase("original", boots = 0, hours = 0, disable = true)
+
+        assertTrue(commandSender.lastDisable)
+        assertTrue(passphraseStore.saved.isEmpty())
+    }
+
+    @Test
+    fun `submitPassphrase without disable does not set disable flag`() {
+        coordinator.submitPassphrase("p", boots = 5, hours = 0)
+        assertFalse(commandSender.lastDisable)
+    }
+
+    // endregion
+
+    // region DISABLED
+
+    @Test
+    fun `DISABLED sets Disabled state, clears authorization, token, and stored passphrase`() {
+        radioService.setDeviceAddress(testDeviceAddress)
+        passphraseStore.saved[testDeviceAddress] = StoredPassphrase("stale", 50, 0)
+
+        coordinator.handleLockdownStatus(LockdownStatus(state = LockdownStatus.State.DISABLED))
+
+        assertIs<LockdownState.Disabled>(serviceRepo.lockdownState.value)
+        assertFalse(serviceRepo.sessionAuthorized.value)
+        assertNull(serviceRepo.lockdownTokenInfo.value)
+        assertTrue(passphraseStore.saved.isEmpty())
     }
 
     // endregion

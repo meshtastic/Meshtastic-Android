@@ -117,8 +117,17 @@ interface MeshActionHandler {
     /** Updates the last used device address. */
     fun handleUpdateLastAddress(deviceAddr: String?)
 
-    /** Submits a lockdown passphrase to authenticate with a TAK-locked device. */
-    fun handleSendLockdownUnlock(passphrase: String, bootTtl: Int, hourTtl: Int, maxSessionSeconds: Int = 0)
+    /**
+     * Submits a lockdown passphrase to authenticate with a locked device, or (when [disable] is `true`) to turn
+     * lockdown OFF.
+     */
+    fun handleSendLockdownUnlock(
+        passphrase: String,
+        bootTtl: Int,
+        hourTtl: Int,
+        maxSessionSeconds: Int = 0,
+        disable: Boolean = false,
+    )
 
     /** Sends a Lock Now command to the connected TAK-enabled device. */
     fun handleSendLockNow()

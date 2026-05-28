@@ -32,6 +32,9 @@ sealed class LockdownState {
 
     data object Unlocked : LockdownState()
 
+    /** Device is lockdown-capable but lockdown is currently OFF. The toggle shows OFF. */
+    data object Disabled : LockdownState()
+
     /** Lock Now ACK received — client should disconnect immediately, no dialog. */
     data object LockNowAcknowledged : LockdownState()
 

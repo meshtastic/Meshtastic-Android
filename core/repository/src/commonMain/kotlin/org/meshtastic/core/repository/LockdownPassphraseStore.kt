@@ -19,16 +19,10 @@ package org.meshtastic.core.repository
 /**
  * Stored passphrase entry with associated TTL parameters.
  *
- * @param maxSessionSeconds Per-boot uptime cap, in seconds. 0 = unlimited.
- *   Non-zero is firmware-side enforcement: the device revokes auth and reboots
- *   after this many seconds of uptime even if the boot-count TTL is still valid.
+ * @param maxSessionSeconds Per-boot uptime cap, in seconds. 0 = unlimited. Non-zero is firmware-side enforcement: the
+ *   device revokes auth and reboots after this many seconds of uptime even if the boot-count TTL is still valid.
  */
-data class StoredPassphrase(
-    val passphrase: String,
-    val boots: Int,
-    val hours: Int,
-    val maxSessionSeconds: Int = 0,
-) {
+data class StoredPassphrase(val passphrase: String, val boots: Int, val hours: Int, val maxSessionSeconds: Int = 0) {
     init {
         require(passphrase.isNotEmpty()) { "passphrase must not be empty" }
     }
@@ -46,13 +40,7 @@ interface LockdownPassphraseStore {
     fun getPassphrase(deviceAddress: String): StoredPassphrase?
 
     /** Saves the passphrase and TTL parameters for the given device address. */
-    fun savePassphrase(
-        deviceAddress: String,
-        passphrase: String,
-        boots: Int,
-        hours: Int,
-        maxSessionSeconds: Int = 0,
-    )
+    fun savePassphrase(deviceAddress: String, passphrase: String, boots: Int, hours: Int, maxSessionSeconds: Int = 0)
 
     /** Clears the stored passphrase for the given device address. */
     fun clearPassphrase(deviceAddress: String)

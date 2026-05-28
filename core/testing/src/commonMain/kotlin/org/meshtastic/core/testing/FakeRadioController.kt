@@ -162,7 +162,13 @@ class FakeRadioController :
         lastSetDeviceAddress = address
     }
 
-    override suspend fun sendLockdownUnlock(passphrase: String, bootTtl: Int, hourTtl: Int, maxSessionSeconds: Int) {}
+    override suspend fun sendLockdownUnlock(
+        passphrase: String,
+        bootTtl: Int,
+        hourTtl: Int,
+        maxSessionSeconds: Int,
+        disable: Boolean,
+    ) {}
 
     override suspend fun sendLockNow() {}
 

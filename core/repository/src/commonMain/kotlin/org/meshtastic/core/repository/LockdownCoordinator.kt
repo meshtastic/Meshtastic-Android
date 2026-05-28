@@ -42,8 +42,19 @@ interface LockdownCoordinator {
     /** Routes an incoming typed [LockdownStatus] from FromRadio. */
     fun handleLockdownStatus(status: LockdownStatus)
 
-    /** Submits a passphrase to authenticate with the locked device. */
-    fun submitPassphrase(passphrase: String, boots: Int, hours: Int, maxSessionSeconds: Int = 0)
+    /**
+     * Submits a passphrase to authenticate with the locked device.
+     *
+     * @param disable when `true`, turns lockdown OFF (decrypt storage back to plaintext); the device reboots and
+     *   reconnects reporting `DISABLED`.
+     */
+    fun submitPassphrase(
+        passphrase: String,
+        boots: Int,
+        hours: Int,
+        maxSessionSeconds: Int = 0,
+        disable: Boolean = false,
+    )
 
     /** Sends a Lock Now command to the connected device. */
     fun lockNow()

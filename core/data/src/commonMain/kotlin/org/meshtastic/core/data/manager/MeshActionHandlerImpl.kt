@@ -404,8 +404,14 @@ class MeshActionHandlerImpl(
         }
     }
 
-    override fun handleSendLockdownUnlock(passphrase: String, bootTtl: Int, hourTtl: Int, maxSessionSeconds: Int) {
-        lockdownCoordinator.submitPassphrase(passphrase, bootTtl, hourTtl, maxSessionSeconds)
+    override fun handleSendLockdownUnlock(
+        passphrase: String,
+        bootTtl: Int,
+        hourTtl: Int,
+        maxSessionSeconds: Int,
+        disable: Boolean,
+    ) {
+        lockdownCoordinator.submitPassphrase(passphrase, bootTtl, hourTtl, maxSessionSeconds, disable)
     }
 
     override fun handleSendLockNow() {
