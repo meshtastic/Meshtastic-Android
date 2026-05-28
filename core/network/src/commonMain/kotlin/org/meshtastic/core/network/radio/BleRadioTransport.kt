@@ -79,6 +79,16 @@ private val SCAN_TIMEOUT = 5.seconds
 private val GATT_CLEANUP_TIMEOUT = 5.seconds
 
 /**
+ * Delay after onConnect before downgrading BLE connection priority to Balanced.
+ *
+ * The initial config drain (fromRadio burst) typically completes within 2–5 seconds on most devices, but slower radios
+ * (ESP32 with large node databases, many channels, or dense position history) can take significantly longer. 30 seconds
+ * provides generous margin while still ensuring we don't sustain the 7.5 ms connection interval indefinitely, which
+ * significantly increases battery draw on both the phone and the radio.
+ */
+private val PRIORITY_DOWNGRADE_DELAY = 30.seconds
+
+/**
  * A [RadioTransport] implementation for BLE devices using the common BLE abstractions (which are powered by Kable).
  *
  * This class handles the high-level connection lifecycle for Meshtastic radios over BLE, including:
@@ -372,6 +382,16 @@ class BleRadioTransport(
                 }
 
                 this@BleRadioTransport.callback.onConnect()
+
+                // Downgrade to balanced priority after the initial config drain completes.
+                // High priority (7.5 ms interval) is only needed for the burst of fromRadio packets;
+                // keeping it indefinitely wastes battery on both phone and radio.
+                launch {
+                    delay(PRIORITY_DOWNGRADE_DELAY)
+                    if (bleConnection.requestBalancedConnectionPriority()) {
+                        Logger.d { "[$address] Downgraded to balanced BLE connection priority" }
+                    }
+                }
             }
         } catch (e: CancellationException) {
             // Scope was cancelled externally — still ensure GATT cleanup runs so we don't
