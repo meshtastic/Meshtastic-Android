@@ -82,7 +82,8 @@ object TAKPacketV2Conversion {
                 battery = battery,
                 geo_src = GeoPointSource.GeoPointSource_GPS,
                 alt_src = GeoPointSource.GeoPointSource_GPS,
-                pli = true,
+                // v0.4.0: PLI is implicit — no payload_variant is set (the bool pli
+                // oneof arm was removed). An a-f-* packet with no variant IS a PLI.
             )
         }
 
@@ -170,8 +171,14 @@ object TAKPacketV2Conversion {
         val timeNow = Clock.System.now()
         val (senderUid, messageId) = TakConversionHelpers.parseDeviceCallsign(rawDeviceCallsign)
 
-        // PLI
-        if (pli != null) {
+        // PLI — v0.4.0: implicit (the `bool pli` oneof arm was removed). A packet
+        // with NO typed payload_variant arm set is a position report. Every typed
+        // arm must be excluded so a shape/marker/route/etc. isn't mis-rendered as a
+        // PLI dot if it ever reaches this fallback path.
+        if (chat == null && taktalk == null && taktalk_room == null && aircraft == null &&
+            shape == null && marker == null && rab == null && route == null &&
+            casevac == null && emergency == null && task == null && raw_detail == null
+        ) {
             val staleMinutes = if (stale_seconds > 0) (stale_seconds / 60) else DEFAULT_TAK_STALE_MINUTES
             // Restore the original CoT type and how from the packet — pli() defaults to
             // DEFAULT_PLI_COT_TYPE/"m-g" but the sending node may have been hostile (a-h-*),

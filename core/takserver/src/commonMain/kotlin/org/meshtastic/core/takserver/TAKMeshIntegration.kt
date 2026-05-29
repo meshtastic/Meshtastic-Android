@@ -39,6 +39,7 @@ import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.TAKPacket
 import org.meshtastic.proto.Team
+import org.meshtastic.tak.CotMeshSanitizer
 import kotlin.concurrent.Volatile
 import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
@@ -330,15 +331,11 @@ class TAKMeshIntegration(
             // app's own CoTXmlParser would strip. Forward the SDK-generated XML
             // directly to TAK clients without re-parsing.
             val rawXml = TakV2Compressor.decompressToXml(wirePayload)
-            // Strip the XML declaration and collapse whitespace — ATAK's TCP
-            // streaming parser expects bare <event>...</event> on a single
-            // line, not a formatted XML document with <?xml ...?> prologue.
-            val xml =
-                rawXml
-                    .replace("""<?xml version="1.0" encoding="UTF-8"?>""", "")
-                    .replace(Regex("""\s*\n\s*"""), "")
-                    .trim()
-            Logger.d { "RAW CoT IN (mesh): $xml" }
+            // Normalize for the TAK TCP stream — drop the <?xml ...?> prologue
+            // and collapse inter-tag whitespace so ATAK's streaming parser sees
+            // bare <event>...</event> on a single line. Centralized in the SDK.
+            val xml = CotMeshSanitizer.normalizeCotXml(rawXml)
+            // Logger.d { "RAW CoT IN (mesh): $xml" }
             // Routes: ATAK ignores b-m-r CoT events over TCP streaming.
             // Convert to a KML data package and write to ATAK's auto-import dir.
             if (xml.contains("""type="b-m-r"""")) {
@@ -481,78 +478,14 @@ class TAKMeshIntegration(
         }
 
         /**
-         * Strip non-essential XML elements before mesh compression to save wire bytes. These elements add 100-200 bytes
-         * but aren't needed for rendering shapes, routes, chats, markers, PLI, or any other payload on the receiving
-         * end.
+         * Strip non-essential CoT detail before mesh compression to save wire
+         * bytes. Delegates to the SDK's [CotMeshSanitizer] so the strip rules
+         * live in ONE golden-tested place shared by every consumer (Android,
+         * Apple, …) and can't drift between sides. Drift here once silently
+         * stripped TAK-Talk `<voice>` / `<marti>` and broke the feature
+         * end-to-end — guarded by the strip-preservation test in
+         * TAKMeshIntegrationTest and by CotMeshSanitizerTest in the SDK.
          */
-        private val STRIP_PATTERNS =
-            listOf(
-                """<takv[^>]*/>""", // TAK version (self-closing)
-                """<takv[^>]*>.*?</takv>""", // TAK version (paired)
-                // NOTE: <voice/>, <voice_profile_id*>, and <marti> are
-                // intentionally NOT stripped here. SDK v0.3.2 carries them
-                // end-to-end so TAKTALK receivers can:
-                //   * fire TTS playback on <voice/> + <marti><dest callsign=ME>
-                //   * recognize TAKTALK-origin chats via <voice_profile_id>
-                // Stripping these saves ~10-20B per packet but breaks TAKTALK
-                // voice messaging and directed-chat routing on the receiver —
-                // an unacceptable tradeoff. The previous broad pattern
-                // `<voice[^>]*/>` ALSO matched `<voice_profile_id/>`, which is
-                // why TAKTALK b-t-f chats lost their TAKTALK-origin marker too.
-                """<__geofence[^>]*/>""", // geofence config
-                """<__geofence[^>]*>.*?</__geofence>""",
-                """<tog[^>]*/>""", // toggle state
-                """<archive[^>]*/>""", // archive marker
-                """<__shapeExtras[^>]*/>""", // shape extras
-                """<__shapeExtras[^>]*>.*?</__shapeExtras>""",
-                """<creator[^>]*/>""", // creator info
-                """<creator[^>]*>.*?</creator>""",
-                """<remarks[^>]*/>""", // empty remarks (self-closing)
-                """<remarks[^>]*></remarks>""", // empty remarks (paired)
-                """<strokeStyle[^>]*/>""", // stroke style (SDK uses color fields)
-                """<precisionlocation[^>]*/>""", // precision location metadata
-                """<precisionlocation[^>]*>.*?</precisionlocation>""",
-                """<precisionLocation[^>]*/>""", // iTAK camelCase variant
-                """<precisionLocation[^>]*>.*?</precisionLocation>""",
-            )
-                .map { Regex("(?s)$it") }
-
-        // Strip any attribute with value "???" — unknown/placeholder metadata
-        private val UNKNOWN_ATTR_PATTERN = Regex("""\s+\w+\s*=\s*"[?]{3}"""")
-
-        // Strip specific named attributes that the SDK doesn't use (display-only)
-        private val STRIP_ATTR_PATTERNS =
-            listOf(
-                """\s+routetype\s*=\s*"[^"]*"""", // route display type (SDK doesn't use)
-                """\s+order\s*=\s*"[^"]*"""", // checkpoint order label (SDK doesn't use)
-                """\s+color\s*=\s*"[^"]*"""", // link_attr color (SDK uses strokeColor instead)
-                """\s+access\s*=\s*"[^"]*"""", // access control (not relevant for mesh)
-                """\s+callsign\s*=\s*""""", // empty callsign attributes (e.g. checkpoints)
-                """\s+phone\s*=\s*""""", // empty phone attributes
-            )
-                .map { Regex(it) }
-
-        // Route waypoint UID stripping — UIDs are full 36-char UUIDs that cost
-        // ~40 bytes each in the proto wire format. The receiving TAK client derives
-        // its own UIDs, so these are pure overhead. Only targets <link> elements
-        // with a point= attribute (route waypoints / shape vertices).
-        private val ROUTE_LINK_ELEM_RE = Regex("""<link\s[^>]*\bpoint="[^"]*"[^>]*/>""")
-        private val LINK_UID_ATTR_RE = Regex("""\s+uid="[^"]*"""")
-
-        fun stripNonEssentialElements(xml: String): String {
-            var result = xml
-            for (pattern in STRIP_PATTERNS) {
-                result = pattern.replace(result, "")
-            }
-            // Strip ??? attributes from remaining elements
-            result = UNKNOWN_ATTR_PATTERN.replace(result, "")
-            // Strip specific display-only attributes
-            for (pattern in STRIP_ATTR_PATTERNS) {
-                result = pattern.replace(result, "")
-            }
-            // Strip uid from route waypoint <link> elements (receiver derives UIDs)
-            result = ROUTE_LINK_ELEM_RE.replace(result) { LINK_UID_ATTR_RE.replace(it.value, "") }
-            return result
-        }
+        fun stripNonEssentialElements(xml: String): String = CotMeshSanitizer.stripNonEssentialForMesh(xml)
     }
 }
