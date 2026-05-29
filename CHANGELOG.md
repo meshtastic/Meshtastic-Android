@@ -10,6 +10,14 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 ### Unreleased (not yet in any build)
 
 * chore(deps): update actions/cache action to v5 (#5652) by renovate[bot] (@renovate[bot]) in [`0dad4273d`](https://github.com/meshtastic/Meshtastic-Android/commit/0dad4273d20bd4c54811d55845ae33ce4613a139)
+* chore(deps): update core/proto/src/main/proto digest to dd6c3f8 (#5654) by renovate[bot] (@renovate[bot]) in [`0cc18cd7d`](https://github.com/meshtastic/Meshtastic-Android/commit/0cc18cd7dd8f6201fb73e1f9830548f2d1212a4d)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5657) by James Rich (@jamesarich) in [`6646f31f4`](https://github.com/meshtastic/Meshtastic-Android/commit/6646f31f4ad664b9a3be410af90290454e7fc705)
+* feat(takserver): Upgrade TAKPacket-SDK to v0.5.0 and delegate sanitization to SDK (#5658) by Ben Meadors (@thebentern) in [`8bdb0916b`](https://github.com/meshtastic/Meshtastic-Android/commit/8bdb0916b4c2e51d197153d2b22074d1754cc72e)
+* fix(takserver): emit *:-1:stcp contact endpoint so directed TAK-Talk/GeoChat routes over the mesh; SDK v0.5.1 by Ben Meadors (@thebentern) in [`0047e4d15`](https://github.com/meshtastic/Meshtastic-Android/commit/0047e4d15278b2877d7be3f488e22155f82050db)
+* Revert "fix(takserver): emit *:-1:stcp contact endpoint so directed TAK-Talk/GeoChat routes over the mesh; SDK v0.5.1" by Ben Meadors (@thebentern) in [`f92f5d576`](https://github.com/meshtastic/Meshtastic-Android/commit/f92f5d576952ffb58e84157da0fae82eb9c42aa6)
+* fix: remove Android Auto manifest entry causing Play Store rejection (#5662) by James Rich (@jamesarich) in [`2aa49b08d`](https://github.com/meshtastic/Meshtastic-Android/commit/2aa49b08ded17a93d364fd047cca236702721f58)
+* chore(deps): update org.jetbrains.kotlinx:atomicfu to v0.33.0 (#5663) by renovate[bot] (@renovate[bot]) in [`da2938f2e`](https://github.com/meshtastic/Meshtastic-Android/commit/da2938f2eb122fb1f5b884d46b76b7b79a4394bf)
+* fix(takserver): emit *:-1:stcp contact endpoint so directed TAK-Talk/GeoChat routes over the mesh (#5661) by Ben Meadors (@thebentern) in [`4888592e0`](https://github.com/meshtastic/Meshtastic-Android/commit/4888592e07a38bdb21bd70ce1449501054a3e594)
 
 ### Internal (v2.7.14-internal.109)
 Changes since [`v2.7.14-open.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14-open.13):
