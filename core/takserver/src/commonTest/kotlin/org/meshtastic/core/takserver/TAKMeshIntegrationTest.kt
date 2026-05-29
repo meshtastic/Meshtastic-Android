@@ -378,7 +378,8 @@ class TAKMeshIntegrationTest {
                 <marti><dest callsign="ETHEL"/></marti>
               </detail>
             </event>
-            """.trimIndent()
+            """
+                .trimIndent()
 
         val stripped = TAKMeshIntegration.stripNonEssentialElements(mtt)
 

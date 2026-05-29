@@ -478,13 +478,11 @@ class TAKMeshIntegration(
         }
 
         /**
-         * Strip non-essential CoT detail before mesh compression to save wire
-         * bytes. Delegates to the SDK's [CotMeshSanitizer] so the strip rules
-         * live in ONE golden-tested place shared by every consumer (Android,
-         * Apple, …) and can't drift between sides. Drift here once silently
-         * stripped TAK-Talk `<voice>` / `<marti>` and broke the feature
-         * end-to-end — guarded by the strip-preservation test in
-         * TAKMeshIntegrationTest and by CotMeshSanitizerTest in the SDK.
+         * Strip non-essential CoT detail before mesh compression to save wire bytes. Delegates to the SDK's
+         * [CotMeshSanitizer] so the strip rules live in ONE golden-tested place shared by every consumer (Android,
+         * Apple, …) and can't drift between sides. Drift here once silently stripped TAK-Talk `<voice>` / `<marti>` and
+         * broke the feature end-to-end — guarded by the strip-preservation test in TAKMeshIntegrationTest and by
+         * CotMeshSanitizerTest in the SDK.
          */
         fun stripNonEssentialElements(xml: String): String = CotMeshSanitizer.stripNonEssentialForMesh(xml)
     }
