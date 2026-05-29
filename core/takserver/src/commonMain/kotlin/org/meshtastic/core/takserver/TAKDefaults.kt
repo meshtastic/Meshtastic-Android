@@ -24,13 +24,7 @@ import org.meshtastic.proto.User
 // a single exported data package (containing truststore.p12 + client.p12) works for
 // both Meshtastic-iOS and Meshtastic-Android without reconfiguration in ATAK/iTAK.
 internal const val DEFAULT_TAK_PORT = 8089
-
-// Default contact endpoint for mesh peers (the real endpoint is never carried over
-// LoRa). MUST be the TAK "reply via this server" form `*:-1:stcp`: it makes ATAK route
-// directed GeoChat / TAK-Talk (`<marti>`) back down the Meshtastic server stream. A
-// concrete host (e.g. `0.0.0.0:4242:tcp`) makes ATAK attempt a dead direct connection,
-// so directed messages never reach the mesh while broadcast PLI still works.
-internal const val DEFAULT_TAK_ENDPOINT = "*:-1:stcp"
+internal const val DEFAULT_TAK_ENDPOINT = "0.0.0.0:4242:tcp"
 
 // Bundled certificate password — matches iOS (`"meshtastic"`). Used for the
 // server.p12 / client.p12 PKCS#12 files shipped under `tak_certs/` on the classpath.
