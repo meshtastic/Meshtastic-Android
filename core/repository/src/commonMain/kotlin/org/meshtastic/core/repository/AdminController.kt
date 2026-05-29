@@ -115,9 +115,36 @@ interface AdminController {
 
     // ── Batch edit ──────────────────────────────────────────────────────────
 
-    /** Signals the start of a batch configuration session. */
-    suspend fun beginEditSettings(destNum: Int)
+    /**
+     * Runs [block] inside a begin/commit edit-settings transaction on [destNum].
+     *
+     * The session is opened before [block] runs and committed after it returns normally, so callers can neither forget
+     * to commit nor leak a half-open session. Operations inside the block target [destNum] implicitly. Mirrors the
+     * SDK's `AdminApi.editSettings { }`.
+     *
+     * All admin packets for the session — begin, the [block]'s writes, and commit — are issued from the calling
+     * coroutine, which is required for the firmware to associate them with one transaction.
+     */
+    suspend fun editSettings(destNum: Int, block: suspend AdminEditScope.() -> Unit)
+}
 
-    /** Commits all pending configuration changes in a batch session. */
-    suspend fun commitEditSettings(destNum: Int)
+/**
+ * Configuration operations valid inside an [AdminController.editSettings] transaction, scoped to a single destination
+ * node so callers don't repeat the node number or manage packet IDs. Mirrors the SDK's `AdminEdit`.
+ */
+interface AdminEditScope {
+    /** Updates the owner (user info) on the session's node. */
+    suspend fun setOwner(user: User)
+
+    /** Updates the general configuration on the session's node. */
+    suspend fun setConfig(config: Config)
+
+    /** Updates a module configuration on the session's node. */
+    suspend fun setModuleConfig(config: ModuleConfig)
+
+    /** Updates a channel configuration on the session's node. */
+    suspend fun setChannel(channel: Channel)
+
+    /** Sets a fixed position on the session's node. */
+    suspend fun setFixedPosition(position: Position)
 }

@@ -32,6 +32,7 @@ import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.Reaction
+import org.meshtastic.core.repository.AdminEditScope
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.DataPair
 import org.meshtastic.core.repository.MeshDataHandler
@@ -379,12 +380,24 @@ class DirectRadioControllerImpl(
 
     // ── Edit Settings (transactional) ───────────────────────────────────────
 
-    override suspend fun beginEditSettings(destNum: Int) {
+    override suspend fun editSettings(destNum: Int, block: suspend AdminEditScope.() -> Unit) {
         commandSender.sendAdmin(destNum) { AdminMessage(begin_edit_settings = true) }
+        EditSettingsSession(destNum).block()
+        commandSender.sendAdmin(destNum) { AdminMessage(commit_edit_settings = true) }
     }
 
-    override suspend fun commitEditSettings(destNum: Int) {
-        commandSender.sendAdmin(destNum) { AdminMessage(commit_edit_settings = true) }
+    /** Binds the [AdminEditScope] operations to a fixed destination, delegating to the controller's set* methods. */
+    private inner class EditSettingsSession(private val destNum: Int) : AdminEditScope {
+        override suspend fun setOwner(user: User) = setOwner(destNum, user, getPacketId())
+
+        override suspend fun setConfig(config: Config) = setConfig(destNum, config, getPacketId())
+
+        override suspend fun setModuleConfig(config: ModuleConfig) = setModuleConfig(destNum, config, getPacketId())
+
+        override suspend fun setChannel(channel: Channel) = setRemoteChannel(destNum, channel, getPacketId())
+
+        override suspend fun setFixedPosition(position: Position) =
+            this@DirectRadioControllerImpl.setFixedPosition(destNum, position)
     }
 
     // ── Telemetry & Discovery ───────────────────────────────────────────────

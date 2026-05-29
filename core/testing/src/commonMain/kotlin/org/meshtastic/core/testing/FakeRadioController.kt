@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Position
+import org.meshtastic.core.repository.AdminEditScope
 import org.meshtastic.core.repository.RadioController
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ClientNotification
@@ -47,8 +48,7 @@ class FakeRadioController :
     val sentSharedContacts = mutableListOf<Int>()
     var throwOnSend: Boolean = false
     var lastSetDeviceAddress: String? = null
-    var beginEditSettingsCalled = false
-    var commitEditSettingsCalled = false
+    var editSettingsCalled = false
     var startProvideLocationCalled = false
     var stopProvideLocationCalled = false
 
@@ -59,8 +59,7 @@ class FakeRadioController :
             sentSharedContacts.clear()
             throwOnSend = false
             lastSetDeviceAddress = null
-            beginEditSettingsCalled = false
-            commitEditSettingsCalled = false
+            editSettingsCalled = false
             startProvideLocationCalled = false
             stopProvideLocationCalled = false
         }
@@ -150,12 +149,23 @@ class FakeRadioController :
 
     override suspend fun requestNeighborInfo(requestId: Int, destNum: Int) {}
 
-    override suspend fun beginEditSettings(destNum: Int) {
-        beginEditSettingsCalled = true
-    }
+    override suspend fun editSettings(destNum: Int, block: suspend AdminEditScope.() -> Unit) {
+        editSettingsCalled = true
+        val scope =
+            object : AdminEditScope {
+                override suspend fun setOwner(user: User) = setOwner(destNum, user, getPacketId())
 
-    override suspend fun commitEditSettings(destNum: Int) {
-        commitEditSettingsCalled = true
+                override suspend fun setConfig(config: Config) = setConfig(destNum, config, getPacketId())
+
+                override suspend fun setModuleConfig(config: ModuleConfig) =
+                    setModuleConfig(destNum, config, getPacketId())
+
+                override suspend fun setChannel(channel: Channel) = setRemoteChannel(destNum, channel, getPacketId())
+
+                override suspend fun setFixedPosition(position: Position) =
+                    this@FakeRadioController.setFixedPosition(destNum, position)
+            }
+        scope.block()
     }
 
     override fun getPacketId(): Int = 1
