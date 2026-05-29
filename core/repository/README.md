@@ -29,17 +29,20 @@ src/
 │   ├── AppWidgetUpdater.kt            ← interface: trigger widget refresh
 │   ├── LocationRepository.kt
 │   ├── LocationService.kt
+│   ├── RadioController.kt             ← interface: composite radio command API
+│   ├── AdminController.kt             ← config, channels, owner, device lifecycle, editSettings
+│   ├── MessagingController.kt         ← send packets, reactions, contacts
+│   ├── NodeController.kt              ← favorite, ignore, mute, remove nodes
+│   ├── RequestController.kt           ← telemetry, traceroute, position queries
 │   ├── CommandSender.kt
 │   ├── AdminPacketHandler.kt
 │   ├── FromRadioPacketHandler.kt
-│   ├── MeshActionHandler.kt
 │   ├── MeshConfigFlowManager.kt
 │   ├── MeshConfigHandler.kt
 │   ├── MeshDataHandler.kt
 │   ├── MeshLocationManager.kt
 │   ├── MeshLogRepository.kt
 │   ├── MeshMessageProcessor.kt
-│   ├── MeshRouter.kt
 │   ├── MessageFilter.kt
 │   ├── MessageQueue.kt
 │   ├── MqttManager.kt
@@ -90,14 +93,18 @@ interface ServiceRepository {
     val errorMessage: StateFlow<String?>
     val connectionProgress: StateFlow<String?>
     val meshPacketFlow: Flow<MeshPacket>
-    val tracerouteResponse: Flow<...>
-    val neighborInfoResponse: Flow<...>
-    val serviceAction: Flow<ServiceAction>
+    val tracerouteResponse: StateFlow<TracerouteResponse?>
+    val neighborInfoResponse: StateFlow<String?>
 
     fun setConnectionState(state: ConnectionState)
-    fun emitMeshPacket(packet: MeshPacket)
-    fun onServiceAction(action: ServiceAction)
+    suspend fun emitMeshPacket(packet: MeshPacket)
+    fun setClientNotification(notification: ClientNotification?)
+    fun setTracerouteResponse(value: TracerouteResponse?)
+    // …setters/clearers for error, progress, neighbor-info
 }
+
+Radio commands are issued through `RadioController` (a composite of `AdminController`,
+`MessagingController`, `NodeController`, `RequestController`) rather than an action/intent bus.
 ```
 
 ### `NodeRepository`
@@ -119,7 +126,7 @@ interface NodeRepository {
     suspend fun clearNodeDB(preserveFavorites: Boolean = false)
     suspend fun deleteNode(num: Int)
     suspend fun insertMetadata(nodeNum: Int, metadata: DeviceMetadata)
-    suspend fun installConfig(mi: MyNodeInfo, nodes: List<NodeInfo>)
+    suspend fun installConfig(mi: MyNodeInfo, nodes: List<Node>)
 }
 ```
 

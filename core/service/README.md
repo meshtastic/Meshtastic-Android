@@ -15,10 +15,10 @@ Android foreground service entry point that hosts the orchestrator lifecycle.
 A high-level repository that wraps the service connection and exposes reactive `Flow`s for connection status and data arrival.
 
 ### 3. `ConnectionState`
-An enum representing the current state of the radio connection (`Connected`, `Disconnected`, `DeviceSleep`, etc.).
+Represents the current state of the radio connection (`Connected`, `Disconnected`, `DeviceSleep`, etc.).
 
-### 4. `ServiceAction`
-Defines Intent actions for starting, stopping, and interacting with the background service.
+### 4. `DirectRadioControllerImpl`
+The in-process `RadioController` composition root (Desktop, iOS, and single-process Android). It assembles four focused sub-controllers — `AdminControllerImpl`, `MessagingControllerImpl`, `NodeControllerImpl`, `RequestControllerImpl` — via Kotlin interface delegation, and owns the cross-cutting concerns (connection state, packet-id, location, device-address switching). Commands are direct suspend calls to `CommandSender`; admin sends are fire-and-forget (the device is the source of truth). Config writes use the `editSettings { }` transaction.
 
 
 ## Dependency Graph
