@@ -193,6 +193,29 @@ class NodeAddressTest {
     }
 
     @Test
+    fun contactKey_channelOrNull_returnsDigitForPrefixedKey() {
+        assertEquals(2, ContactKey("2!abcdef01").channelOrNull)
+        assertEquals(0, ContactKey("0^all").channelOrNull)
+    }
+
+    @Test
+    fun contactKey_unprefixedKey_signalsNoChannelAndKeepsWholeAddress() {
+        // A legacy direct-message key has no leading channel digit. channelOrNull must stay null so
+        // callers can distinguish it from channel 0, and addressString must keep the whole string.
+        val key = ContactKey("!abcdef01")
+        assertNull(key.channelOrNull)
+        assertEquals(0, key.channel)
+        assertEquals("!abcdef01", key.addressString)
+    }
+
+    @Test
+    fun contactKey_emptyKey_isSafe() {
+        val key = ContactKey("")
+        assertNull(key.channelOrNull)
+        assertEquals("", key.addressString)
+    }
+
+    @Test
     fun contactKey_address_parsesCorrectly() {
         val key = ContactKey("0^local")
         assertEquals(NodeAddress.Local, key.address)

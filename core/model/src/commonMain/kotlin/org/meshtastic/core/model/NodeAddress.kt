@@ -95,13 +95,24 @@ sealed class NodeAddress {
  */
 @JvmInline
 value class ContactKey(val value: String) {
-    /** The channel index (first character). Returns 0 if the key is empty or the first char is not a digit. */
-    val channel: Int
-        get() = value.firstOrNull()?.takeIf { it.isDigit() }?.digitToInt() ?: 0
+    /**
+     * The channel index if the key carries a leading channel digit, or `null` for a legacy unprefixed direct-message
+     * key. Callers that must distinguish "channel 0" from "no channel prefix" (e.g. PKI vs legacy DM routing) need this
+     * rather than [channel].
+     */
+    val channelOrNull: Int?
+        get() = value.firstOrNull()?.takeIf { it.isDigit() }?.digitToInt()
 
-    /** The node address portion (everything after the channel digit). Empty if the key is empty. */
+    /** The channel index (first character). Returns 0 if the key is empty or has no channel digit. */
+    val channel: Int
+        get() = channelOrNull ?: 0
+
+    /**
+     * The node address portion: everything after the channel digit, or the whole key when there is no channel prefix.
+     * Empty if the key is empty.
+     */
     val addressString: String
-        get() = if (value.isEmpty()) "" else value.substring(1)
+        get() = if (channelOrNull != null) value.substring(1) else value
 
     /** Parsed [NodeAddress] for the contact. */
     val address: NodeAddress

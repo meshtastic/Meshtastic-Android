@@ -20,6 +20,7 @@ import co.touchlab.kermit.Logger
 import org.meshtastic.core.common.util.HomoglyphCharacterStringTransformer
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.Capabilities
+import org.meshtastic.core.model.ContactKey
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Node
@@ -66,8 +67,9 @@ class SendMessageUseCaseImpl(
      */
     @Suppress("NestedBlockDepth", "LongMethod", "CyclomaticComplexMethod")
     override suspend operator fun invoke(text: String, contactKey: String, replyId: Int?) {
-        val channel = contactKey[0].digitToIntOrNull()
-        val dest = if (channel != null) contactKey.substring(1) else contactKey
+        val parsedKey = ContactKey(contactKey)
+        val channel = parsedKey.channelOrNull
+        val dest = parsedKey.addressString
 
         val ourNode = nodeRepository.ourNodeInfo.value
         val fromId = ourNode?.user?.id ?: NodeAddress.ID_LOCAL

@@ -72,6 +72,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.HomoglyphCharacterStringTransformer
 import org.meshtastic.core.database.entity.QuickChatAction
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.ContactKey
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.util.getChannel
@@ -150,8 +151,9 @@ fun MessageScreen(
     // Derived state, memoized for performance
     val channelInfo =
         remember(contactKey, channels) {
-            val index = contactKey.firstOrNull()?.digitToIntOrNull()
-            val id = contactKey.substring(1)
+            val parsedKey = ContactKey(contactKey)
+            val index = parsedKey.channelOrNull
+            val id = parsedKey.addressString
             val name = index?.let { channels.getChannel(it)?.name } // channels can be null initially
             Triple(index, id, name)
         }

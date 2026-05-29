@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.mapLatest
 import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.nowSeconds
+import org.meshtastic.core.model.ContactKey
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
@@ -152,10 +153,8 @@ open class BaseMapViewModel(
 
     fun sendWaypoint(wpt: Waypoint, contactKey: String = "0${NodeAddress.ID_BROADCAST}") {
         // contactKey: unique contact key filter (channel)+(nodeId)
-        val channel = contactKey[0].digitToIntOrNull()
-        val dest = if (channel != null) contactKey.substring(1) else contactKey
-
-        val p = DataPacket(dest, channel ?: 0, wpt)
+        val parsedKey = ContactKey(contactKey)
+        val p = DataPacket(parsedKey.addressString, parsedKey.channel, wpt)
         if (wpt.id != 0) sendDataPacket(p)
     }
 

@@ -122,6 +122,4 @@ data class DataPacket(
 
     val hopsAway: Int
         get() = if (hopStart == 0 || (hopLimit > hopStart)) -1 else hopStart - hopLimit
-
-    companion object
 }
