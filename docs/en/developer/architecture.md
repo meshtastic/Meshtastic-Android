@@ -140,6 +140,24 @@ because the device is the source of truth (local persistence is an optimistic ca
 shape mirrors the [meshtastic-sdk](https://github.com/meshtastic/meshtastic-sdk)
 `AdminApi`/`TelemetryApi` design to ease a future SDK migration.
 
+## Service Repository
+
+`ServiceRepository` is the reactive bridge between the mesh service and all feature/UI layers.
+It is decomposed into focused provider interfaces following the Interface Segregation Principle:
+
+| Interface | Responsibility |
+|-----------|---------------|
+| `ConnectionStateProvider` | Read-only `connectionState: StateFlow<ConnectionState>` |
+| `TracerouteResponseProvider` | Traceroute response state + clear |
+| `NeighborInfoResponseProvider` | Neighbor info response state + clear |
+| `ServiceStateWriter` | Write-side for handlers (set*, emit*, clear*) |
+
+`ServiceRepository` extends all four interfaces — consumers inject the narrowest interface
+they actually need. For example, `ContactsViewModel` injects only `ConnectionStateProvider`
+rather than the entire `ServiceRepository`, preventing accidental access to write operations
+from UI code. `RadioController` also extends `ConnectionStateProvider` so VMs that already
+inject a controller sub-interface can read connection state without a separate dependency.
+
 ## Navigation
 
 Navigation uses **Navigation 3** with typed routes:
