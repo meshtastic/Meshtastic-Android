@@ -18,6 +18,7 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 * fix: remove Android Auto manifest entry causing Play Store rejection (#5662) by James Rich (@jamesarich) in [`2aa49b08d`](https://github.com/meshtastic/Meshtastic-Android/commit/2aa49b08ded17a93d364fd047cca236702721f58)
 * chore(deps): update org.jetbrains.kotlinx:atomicfu to v0.33.0 (#5663) by renovate[bot] (@renovate[bot]) in [`da2938f2e`](https://github.com/meshtastic/Meshtastic-Android/commit/da2938f2eb122fb1f5b884d46b76b7b79a4394bf)
 * fix(takserver): emit *:-1:stcp contact endpoint so directed TAK-Talk/GeoChat routes over the mesh (#5661) by Ben Meadors (@thebentern) in [`4888592e0`](https://github.com/meshtastic/Meshtastic-Android/commit/4888592e07a38bdb21bd70ce1449501054a3e594)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5660) by James Rich (@jamesarich) in [`8ec0f65b6`](https://github.com/meshtastic/Meshtastic-Android/commit/8ec0f65b6985a14ed1284e171da0bf7f3d0668e0)
 
 ### Internal (v2.7.14-internal.109)
 Changes since [`v2.7.14-open.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14-open.13):
