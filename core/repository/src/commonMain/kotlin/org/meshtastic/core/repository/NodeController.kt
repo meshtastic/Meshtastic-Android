@@ -26,14 +26,23 @@ package org.meshtastic.core.repository
  */
 interface NodeController {
 
-    /** Toggles the favorite status of a node on the radio. */
-    suspend fun favoriteNode(nodeNum: Int)
+    /**
+     * Sets the favorite status of a node on the radio.
+     *
+     * Idempotent: a no-op if the node is already in the requested state. Mirrors the SDK's `setFavorite(NodeId,
+     * Boolean)` — an explicit target state rather than a toggle, so concurrent callers can't race a read-modify-write.
+     */
+    suspend fun setFavorite(nodeNum: Int, favorite: Boolean)
 
-    /** Toggles the ignore status of a node on the radio. */
-    suspend fun ignoreNode(nodeNum: Int)
+    /**
+     * Sets the ignore status of a node on the radio.
+     *
+     * Idempotent, like [setFavorite]. Mirrors the SDK's `setIgnored(NodeId, Boolean)`.
+     */
+    suspend fun setIgnored(nodeNum: Int, ignored: Boolean)
 
-    /** Toggles the mute status of a node on the radio. */
-    suspend fun muteNode(nodeNum: Int)
+    /** Toggles the mute status of a node on the radio. Mirrors the SDK's `toggleMuted(NodeId)`. */
+    suspend fun toggleMuted(nodeNum: Int)
 
     /** Removes a node from the mesh by its node number. */
     suspend fun removeByNodenum(packetId: Int, nodeNum: Int)

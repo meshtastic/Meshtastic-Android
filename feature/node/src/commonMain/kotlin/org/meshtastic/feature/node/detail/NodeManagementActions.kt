@@ -72,13 +72,13 @@ constructor(
             alertManager.showAlert(
                 titleRes = Res.string.ignore,
                 message = message,
-                onConfirm = { scope.launch { ignoreNode(node.num) } },
+                onConfirm = { scope.launch { setIgnored(node.num, !node.isIgnored) } },
             )
         }
     }
 
-    open suspend fun ignoreNode(nodeNum: Int) {
-        radioController.ignoreNode(nodeNum)
+    open suspend fun setIgnored(nodeNum: Int, ignored: Boolean) {
+        radioController.setIgnored(nodeNum, ignored)
     }
 
     open fun requestMuteNode(scope: CoroutineScope, node: Node) {
@@ -88,13 +88,13 @@ constructor(
             alertManager.showAlert(
                 titleRes = if (node.isMuted) Res.string.unmute else Res.string.mute_notifications,
                 message = message,
-                onConfirm = { scope.launch { muteNode(node.num) } },
+                onConfirm = { scope.launch { toggleMuted(node.num) } },
             )
         }
     }
 
-    open suspend fun muteNode(nodeNum: Int) {
-        radioController.muteNode(nodeNum)
+    open suspend fun toggleMuted(nodeNum: Int) {
+        radioController.toggleMuted(nodeNum)
     }
 
     open fun requestFavoriteNode(scope: CoroutineScope, node: Node) {
@@ -107,13 +107,13 @@ constructor(
             alertManager.showAlert(
                 titleRes = Res.string.favorite,
                 message = message,
-                onConfirm = { scope.launch { favoriteNode(node.num) } },
+                onConfirm = { scope.launch { setFavorite(node.num, !node.isFavorite) } },
             )
         }
     }
 
-    open suspend fun favoriteNode(nodeNum: Int) {
-        radioController.favoriteNode(nodeNum)
+    open suspend fun setFavorite(nodeNum: Int, favorite: Boolean) {
+        radioController.setFavorite(nodeNum, favorite)
     }
 
     open suspend fun setNodeNotes(nodeNum: Int, notes: String) {

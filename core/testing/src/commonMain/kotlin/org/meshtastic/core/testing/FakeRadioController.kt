@@ -75,8 +75,8 @@ class FakeRadioController :
         _clientNotification.value = null
     }
 
-    override suspend fun favoriteNode(nodeNum: Int) {
-        favoritedNodes.add(nodeNum)
+    override suspend fun setFavorite(nodeNum: Int, favorite: Boolean) {
+        if (favorite) favoritedNodes.add(nodeNum) else favoritedNodes.remove(nodeNum)
     }
 
     override suspend fun sendSharedContact(nodeNum: Int): Boolean {
@@ -84,9 +84,9 @@ class FakeRadioController :
         return true
     }
 
-    override suspend fun ignoreNode(nodeNum: Int) {}
+    override suspend fun setIgnored(nodeNum: Int, ignored: Boolean) {}
 
-    override suspend fun muteNode(nodeNum: Int) {}
+    override suspend fun toggleMuted(nodeNum: Int) {}
 
     override suspend fun sendReaction(emoji: String, replyId: Int, contactKey: String) {}
 

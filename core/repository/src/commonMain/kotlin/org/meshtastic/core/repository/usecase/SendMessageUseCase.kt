@@ -133,7 +133,7 @@ class SendMessageUseCaseImpl(
 
     private suspend fun favoriteNode(node: Node) {
         try {
-            radioController.favoriteNode(node.num)
+            radioController.setFavorite(node.num, favorite = true)
         } catch (ex: Exception) {
             Logger.e(ex) { "Favorite node error" }
         }

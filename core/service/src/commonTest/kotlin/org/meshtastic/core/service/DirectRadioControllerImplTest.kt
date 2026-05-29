@@ -217,24 +217,36 @@ class DirectRadioControllerImplTest {
     }
 
     @Test
-    fun favoriteNodeSendsAdminAndUpdatesState() = runTest {
+    fun setFavoriteSendsAdminAndUpdatesState() = runTest {
         val controller = createController()
         val node = Node(num = 99, user = User(id = "!node99"), isFavorite = false)
         every { nodeManager.nodeDBbyNodeNum } returns mapOf(99 to node)
 
-        controller.favoriteNode(99)
+        controller.setFavorite(99, favorite = true)
 
         verifySuspend { commandSender.sendAdmin(any(), any(), any(), any()) }
         verify { nodeManager.updateNode(any(), any(), any()) }
     }
 
     @Test
-    fun ignoreNodeSendsAdminUpdatesStateAndFiltersPackets() = runTest {
+    fun setFavoriteIsNoOpWhenAlreadyInRequestedState() = runTest {
+        val controller = createController()
+        val node = Node(num = 99, user = User(id = "!node99"), isFavorite = true)
+        every { nodeManager.nodeDBbyNodeNum } returns mapOf(99 to node)
+
+        controller.setFavorite(99, favorite = true)
+
+        verifySuspend(exactly(0)) { commandSender.sendAdmin(any(), any(), any(), any()) }
+        verify(exactly(0)) { nodeManager.updateNode(any(), any(), any()) }
+    }
+
+    @Test
+    fun setIgnoredSendsAdminUpdatesStateAndFiltersPackets() = runTest {
         val controller = createController()
         val node = Node(num = 99, user = User(id = "!node99"), isIgnored = false)
         every { nodeManager.nodeDBbyNodeNum } returns mapOf(99 to node)
 
-        controller.ignoreNode(99)
+        controller.setIgnored(99, ignored = true)
         testScope.advanceUntilIdle()
 
         verifySuspend { commandSender.sendAdmin(any(), any(), any(), any()) }
@@ -243,12 +255,12 @@ class DirectRadioControllerImplTest {
     }
 
     @Test
-    fun muteNodeSendsAdminAndUpdatesState() = runTest {
+    fun toggleMutedSendsAdminAndUpdatesState() = runTest {
         val controller = createController()
         val node = Node(num = 99, user = User(id = "!node99"), isMuted = false)
         every { nodeManager.nodeDBbyNodeNum } returns mapOf(99 to node)
 
-        controller.muteNode(99)
+        controller.toggleMuted(99)
 
         verifySuspend { commandSender.sendAdmin(any(), any(), any(), any()) }
         verify { nodeManager.updateNode(any(), any(), any()) }
@@ -258,9 +270,9 @@ class DirectRadioControllerImplTest {
     fun nodeManagementReturnsEarlyWhenMyNodeNumIsNull() = runTest {
         val controller = createController(myNodeNum = null)
 
-        controller.favoriteNode(99)
-        controller.ignoreNode(99)
-        controller.muteNode(99)
+        controller.setFavorite(99, favorite = true)
+        controller.setIgnored(99, ignored = true)
+        controller.toggleMuted(99)
 
         verifySuspend(exactly(0)) { commandSender.sendAdmin(any(), any(), any(), any()) }
     }

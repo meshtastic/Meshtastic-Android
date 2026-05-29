@@ -156,31 +156,34 @@ class DirectRadioControllerImpl(
 
     // ── Node Management ─────────────────────────────────────────────────────
 
-    override suspend fun favoriteNode(nodeNum: Int) {
+    override suspend fun setFavorite(nodeNum: Int, favorite: Boolean) {
         val myNum = nodeManager.myNodeNum.value ?: return
         val node = nodeManager.nodeDBbyNodeNum[nodeNum] ?: return
-        commandSender.sendAdmin(myNum) {
-            if (node.isFavorite) {
-                AdminMessage(remove_favorite_node = node.num)
-            } else {
-                AdminMessage(set_favorite_node = node.num)
+        if (node.isFavorite != favorite) {
+            commandSender.sendAdmin(myNum) {
+                if (favorite) {
+                    AdminMessage(set_favorite_node = node.num)
+                } else {
+                    AdminMessage(remove_favorite_node = node.num)
+                }
             }
+            nodeManager.updateNode(node.num) { it.copy(isFavorite = favorite) }
         }
-        nodeManager.updateNode(node.num) { it.copy(isFavorite = !node.isFavorite) }
     }
 
-    override suspend fun ignoreNode(nodeNum: Int) {
+    override suspend fun setIgnored(nodeNum: Int, ignored: Boolean) {
         val myNum = nodeManager.myNodeNum.value ?: return
         val node = nodeManager.nodeDBbyNodeNum[nodeNum] ?: return
-        val newIgnored = !node.isIgnored
-        commandSender.sendAdmin(myNum) {
-            if (newIgnored) AdminMessage(set_ignored_node = node.num) else AdminMessage(remove_ignored_node = node.num)
+        if (node.isIgnored != ignored) {
+            commandSender.sendAdmin(myNum) {
+                if (ignored) AdminMessage(set_ignored_node = node.num) else AdminMessage(remove_ignored_node = node.num)
+            }
+            nodeManager.updateNode(node.num) { it.copy(isIgnored = ignored) }
+            scope.handledLaunch { packetRepository.value.updateFilteredBySender(node.user.id, ignored) }
         }
-        nodeManager.updateNode(node.num) { it.copy(isIgnored = newIgnored) }
-        scope.handledLaunch { packetRepository.value.updateFilteredBySender(node.user.id, newIgnored) }
     }
 
-    override suspend fun muteNode(nodeNum: Int) {
+    override suspend fun toggleMuted(nodeNum: Int) {
         val myNum = nodeManager.myNodeNum.value ?: return
         val node = nodeManager.nodeDBbyNodeNum[nodeNum] ?: return
         commandSender.sendAdmin(myNum) { AdminMessage(toggle_muted_node = node.num) }
