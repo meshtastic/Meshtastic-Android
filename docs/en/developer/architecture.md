@@ -2,11 +2,12 @@
 title: Architecture
 parent: Developer Guide
 nav_order: 1
-last_updated: 2026-05-13
+last_updated: 2026-05-29
 aliases:
   - layers
   - module-architecture
   - kmp
+  - radio-control
 ---
 
 # Architecture
@@ -118,6 +119,26 @@ The project uses **Koin** with annotation processing:
 - `@ComponentScan` for automatic registration
 - Feature modules export their own `Feature*Module` class
 - App/Desktop compose all modules in their root DI configuration
+
+## Radio Control
+
+Features issue radio commands through `RadioController` (`core:repository`), a composite of four
+focused sub-interfaces so callers can depend on just the slice they need:
+
+| Sub-interface | Responsibility |
+|---------------|---------------|
+| `AdminController` | Config, channels, owner, device lifecycle, `editSettings { }` transactions |
+| `MessagingController` | Send packets, reactions, shared contacts |
+| `NodeController` | Favorite, ignore, mute, remove nodes |
+| `RequestController` | Telemetry, traceroute, position/user-info queries |
+
+`DirectRadioControllerImpl` (`core:service`) is the in-process composition root for all targets
+(Desktop, iOS, single-process Android). It assembles the four sub-controllers via Kotlin interface
+delegation and adds the cross-cutting concerns (connection state, packet-id, location,
+device-address switching). Commands are direct suspend calls; admin writes are fire-and-forget
+because the device is the source of truth (local persistence is an optimistic cache). The layered
+shape mirrors the [meshtastic-sdk](https://github.com/meshtastic/meshtastic-sdk)
+`AdminApi`/`TelemetryApi` design to ease a future SDK migration.
 
 ## Navigation
 
