@@ -17,6 +17,7 @@
 package org.meshtastic.core.repository
 
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.proto.SharedContact
 
 /**
  * Messaging operations — sending data packets, reactions, and shared contacts.
@@ -35,7 +36,7 @@ interface MessagingController {
     suspend fun sendReaction(emoji: String, replyId: Int, contactKey: String)
 
     /** Imports a shared contact into the firmware's NodeDB. */
-    suspend fun importContact(contact: org.meshtastic.proto.SharedContact)
+    suspend fun importContact(contact: SharedContact)
 
     /**
      * Sends our shared contact information (identity and public key) to the firmware's NodeDB.

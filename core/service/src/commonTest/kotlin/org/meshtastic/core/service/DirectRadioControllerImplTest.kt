@@ -334,12 +334,14 @@ class DirectRadioControllerImplTest {
     @Test
     fun importContactSendsAdminAndUpdatesNodeManager() = runTest {
         val controller = createController()
+        // A QR-scanned contact arrives with manually_verified = false (proto default).
         val contact = SharedContact(node_num = 42, user = User(id = "!0000002a", long_name = "Test"))
 
         controller.importContact(contact)
 
         verifySuspend { commandSender.sendAdmin(any(), any(), any(), any()) }
-        verify { nodeManager.handleReceivedUser(any(), any(), any(), any()) }
+        // Importing is an act of manual verification, so the node is recorded as verified.
+        verify { nodeManager.handleReceivedUser(42, any(), any(), true) }
     }
 
     @Test

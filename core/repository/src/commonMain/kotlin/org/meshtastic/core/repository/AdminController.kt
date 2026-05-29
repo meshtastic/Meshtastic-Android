@@ -17,6 +17,10 @@
 package org.meshtastic.core.repository
 
 import org.meshtastic.core.model.Position
+import org.meshtastic.proto.Channel
+import org.meshtastic.proto.Config
+import org.meshtastic.proto.ModuleConfig
+import org.meshtastic.proto.User
 
 /**
  * Device configuration and control operations.
@@ -38,24 +42,24 @@ interface AdminController {
      * Fire-and-forget by design: the device is the source of truth. Local persistence is an optimistic cache that will
      * self-heal on next config refresh.
      */
-    suspend fun setLocalConfig(config: org.meshtastic.proto.Config)
+    suspend fun setLocalConfig(config: Config)
 
     /** Updates a local radio channel. Same fire-and-forget contract as [setLocalConfig]. */
-    suspend fun setLocalChannel(channel: org.meshtastic.proto.Channel)
+    suspend fun setLocalChannel(channel: Channel)
 
     // ── Remote configuration ────────────────────────────────────────────────
 
     /** Updates the owner (user info) on a remote node. */
-    suspend fun setOwner(destNum: Int, user: org.meshtastic.proto.User, packetId: Int)
+    suspend fun setOwner(destNum: Int, user: User, packetId: Int)
 
     /** Updates the general configuration on a remote node. */
-    suspend fun setConfig(destNum: Int, config: org.meshtastic.proto.Config, packetId: Int)
+    suspend fun setConfig(destNum: Int, config: Config, packetId: Int)
 
     /** Updates a module configuration on a remote node. */
-    suspend fun setModuleConfig(destNum: Int, config: org.meshtastic.proto.ModuleConfig, packetId: Int)
+    suspend fun setModuleConfig(destNum: Int, config: ModuleConfig, packetId: Int)
 
     /** Updates a channel configuration on a remote node. */
-    suspend fun setRemoteChannel(destNum: Int, channel: org.meshtastic.proto.Channel, packetId: Int)
+    suspend fun setRemoteChannel(destNum: Int, channel: Channel, packetId: Int)
 
     /** Sets a fixed position on a remote node. */
     suspend fun setFixedPosition(destNum: Int, position: Position)
