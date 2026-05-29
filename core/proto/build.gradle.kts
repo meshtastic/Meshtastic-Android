@@ -120,6 +120,9 @@ wire {
     prune("meshtastic.GeoPointSource")
     prune("meshtastic.TakTalkMessage")
     prune("meshtastic.TakTalkRoomData")
+    // Marti is also shipped by the TAKPacket-SDK jar (org.meshtastic.proto.Marti),
+    // so it must be pruned here too or R8 fails with a duplicate-class error at
+    // release minify. (Team/MemberRole are NOT shipped by the SDK, so they stay.)
     prune("meshtastic.Marti")
 }
 

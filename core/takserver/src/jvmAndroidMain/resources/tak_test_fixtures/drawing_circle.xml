@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <event version="2.0" uid="6d09b6f6-720a-4eef-a197-183012512316" type="u-d-c-c" time="2026-03-15T14:22:10Z" start="2026-03-15T14:22:10Z" stale="2026-03-16T14:22:10Z" how="h-e">
-  <point lat="33.12840" lon="-107.25280" hae="9999999.0" ce="9999999.0" le="9999999.0"/>
+  <point lat="33.12578" lon="-107.26380" hae="9999999.0" ce="9999999.0" le="9999999.0"/>
   <detail>
     <shape>
       <ellipse major="226.98" minor="226.98" angle="360"/>
