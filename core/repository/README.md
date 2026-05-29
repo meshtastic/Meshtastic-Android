@@ -36,7 +36,7 @@ src/
 │   ├── AdminController.kt             ← config, channels, owner, device lifecycle, editSettings
 │   ├── MessagingController.kt         ← send packets, reactions, contacts
 │   ├── NodeController.kt              ← favorite, ignore, mute, remove nodes
-│   ├── RequestController.kt           ← telemetry, traceroute, position queries
+│   ├── QueryController.kt           ← telemetry, traceroute, position queries
 │   ├── CommandSender.kt
 │   ├── AdminPacketHandler.kt
 │   ├── FromRadioPacketHandler.kt
@@ -130,7 +130,7 @@ connection state). Handlers inject `ServiceStateWriter` for mutations. The full
 `ServiceRepository` union is still available for backward compatibility.
 
 Radio commands are issued through `RadioController` (a composite of `AdminController`,
-`MessagingController`, `NodeController`, `RequestController`) rather than an action/intent bus.
+`MessagingController`, `NodeController`, `QueryController`) rather than an action/intent bus.
 
 ### `NodeRepository`
 

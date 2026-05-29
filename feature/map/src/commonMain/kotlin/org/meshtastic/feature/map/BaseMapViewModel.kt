@@ -162,7 +162,7 @@ open class BaseMapViewModel(
         safeLaunch(context = ioDispatcher, tag = "sendDataPacket") { radioController.sendMessage(p) }
     }
 
-    fun generatePacketId(): Int = radioController.getPacketId()
+    fun generatePacketId(): Int = radioController.generatePacketId()
 
     data class MapFilterState(
         val onlyFavorites: Boolean,

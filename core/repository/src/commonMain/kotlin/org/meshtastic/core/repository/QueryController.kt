@@ -19,14 +19,14 @@ package org.meshtastic.core.repository
 import org.meshtastic.core.model.Position
 
 /**
- * Mesh request operations — position, traceroute, telemetry, user info, and metadata queries.
+ * Mesh query operations — position, traceroute, telemetry, user info, and metadata.
  *
  * These are "pull" operations that request data from remote nodes. When the SDK is adopted, implementations delegate to
  * `RadioClient.telemetry` and `RadioClient.routing` sub-APIs.
  *
  * @see RadioController which extends this interface for backward compatibility
  */
-interface RequestController {
+interface QueryController {
 
     /** Requests device metadata from a remote node. */
     suspend fun refreshMetadata(destNum: Int)

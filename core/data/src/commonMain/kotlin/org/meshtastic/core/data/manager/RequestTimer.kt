@@ -42,14 +42,14 @@ internal class RequestTimer {
 
     /**
      * Consumes the start time recorded for [requestId] and appends a `Duration: N s` line to [text], logging completion
-     * under [label]. Returns [text] unchanged when no start time was recorded for the id.
+     * under [logLabel]. Returns [text] unchanged when no start time was recorded for the id.
      */
-    fun appendDuration(requestId: Int, text: String, label: String): String {
+    fun appendDuration(requestId: Int, text: String, logLabel: String): String {
         val start = startTimes.value[requestId]
         startTimes.update { it.remove(requestId) }
         if (start == null) return text
         val seconds = (nowMillis - start) / MILLIS_PER_SECOND
-        Logger.i { "$label $requestId complete in $seconds s" }
+        Logger.i { "$logLabel $requestId complete in $seconds s" }
         return "$text\n\nDuration: ${NumberFormatter.format(seconds, 1)} s"
     }
 

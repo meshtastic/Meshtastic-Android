@@ -42,7 +42,7 @@ import org.meshtastic.proto.User
 /**
  * [MessagingController] implementation: sends data packets, reactions, and shared contacts.
  *
- * Focused collaborator of [DirectRadioControllerImpl]. Mirrors the SDK's `RadioClient.send*` surface — when the SDK is
+ * Focused collaborator of [RadioControllerImpl]. Mirrors the SDK's `RadioClient.send*` surface — when the SDK is
  * adopted this becomes a thin adapter over `RadioClient`.
  */
 internal class MessagingControllerImpl(

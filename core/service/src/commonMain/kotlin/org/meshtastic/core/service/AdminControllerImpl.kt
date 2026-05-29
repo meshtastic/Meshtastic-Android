@@ -38,10 +38,10 @@ import org.meshtastic.proto.User
  * [AdminController] implementation: local/remote configuration, channels, owner, device lifecycle, and the
  * [editSettings] transaction.
  *
- * Focused collaborator of [DirectRadioControllerImpl]. Builds [AdminMessage] protos directly and delegates to
- * [CommandSender] for transport, mirroring the SDK's `AdminApiImpl` pattern. Config/channel writes use fire-and-forget
- * optimistic local persistence ([handledLaunch]): the device is the source of truth and re-sends its full config on
- * every connection, so persistence is a cache optimization, not a correctness requirement.
+ * Focused collaborator of [RadioControllerImpl]. Builds [AdminMessage] protos directly and delegates to [CommandSender]
+ * for transport, mirroring the SDK's `AdminApiImpl` pattern. Config/channel writes use fire-and-forget optimistic local
+ * persistence ([handledLaunch]): the device is the source of truth and re-sends its full config on every connection, so
+ * persistence is a cache optimization, not a correctness requirement.
  */
 @Suppress("TooManyFunctions")
 internal class AdminControllerImpl(
@@ -159,7 +159,7 @@ internal class AdminControllerImpl(
 
     override suspend fun reboot(destNum: Int, packetId: Int) {
         Logger.i { "Reboot requested for node $destNum" }
-        commandSender.sendAdmin(destNum, packetId) { AdminMessage(reboot_seconds = DEFAULT_REBOOT_DELAY) }
+        commandSender.sendAdmin(destNum, packetId) { AdminMessage(reboot_seconds = DEFAULT_DELAY_SECONDS) }
     }
 
     override suspend fun rebootToDfu(nodeNum: Int) {
@@ -174,7 +174,7 @@ internal class AdminControllerImpl(
     }
 
     override suspend fun shutdown(destNum: Int, packetId: Int) {
-        commandSender.sendAdmin(destNum, packetId) { AdminMessage(shutdown_seconds = DEFAULT_REBOOT_DELAY) }
+        commandSender.sendAdmin(destNum, packetId) { AdminMessage(shutdown_seconds = DEFAULT_DELAY_SECONDS) }
     }
 
     override suspend fun factoryReset(destNum: Int, packetId: Int) {
@@ -211,6 +211,6 @@ internal class AdminControllerImpl(
     }
 
     private companion object {
-        private const val DEFAULT_REBOOT_DELAY = 5
+        private const val DEFAULT_DELAY_SECONDS = 5
     }
 }

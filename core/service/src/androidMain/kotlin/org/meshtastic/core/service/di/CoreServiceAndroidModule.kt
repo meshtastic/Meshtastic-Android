@@ -36,14 +36,14 @@ import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
+import org.meshtastic.core.repository.QueryController
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.RadioInterfaceService
-import org.meshtastic.core.repository.RequestController
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
-import org.meshtastic.core.service.DirectRadioControllerImpl
 import org.meshtastic.core.service.MeshService
+import org.meshtastic.core.service.RadioControllerImpl
 import org.meshtastic.core.service.startService
 
 @Module
@@ -57,7 +57,7 @@ class CoreServiceAndroidModule {
             AdminController::class,
             MessagingController::class,
             NodeController::class,
-            RequestController::class,
+            QueryController::class,
         ],
     )
     fun radioController(
@@ -78,7 +78,7 @@ class CoreServiceAndroidModule {
         messageProcessor: Lazy<MeshMessageProcessor>,
         radioConfigRepository: RadioConfigRepository,
         @Named("ServiceScope") scope: CoroutineScope,
-    ): RadioController = DirectRadioControllerImpl(
+    ): RadioController = RadioControllerImpl(
         serviceRepository = serviceRepository,
         nodeRepository = nodeRepository,
         commandSender = commandSender,

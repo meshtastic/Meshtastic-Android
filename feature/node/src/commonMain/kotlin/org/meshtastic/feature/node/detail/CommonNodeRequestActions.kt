@@ -67,7 +67,7 @@ constructor(
 
     override suspend fun requestNeighborInfo(destNum: Int, longName: String) {
         Logger.i { "Requesting NeighborInfo for '$destNum'" }
-        val packetId = radioController.getPacketId()
+        val packetId = radioController.generatePacketId()
         radioController.requestNeighborInfo(packetId, destNum)
         _lastRequestNeighborTimes.update { it + (destNum to nowMillis) }
         showFeedback(UiText.Resource(Res.string.requesting_from, Res.string.neighbor_info, longName))
@@ -81,7 +81,7 @@ constructor(
 
     override suspend fun requestTelemetry(destNum: Int, longName: String, type: TelemetryType) {
         Logger.i { "Requesting telemetry for '$destNum'" }
-        val packetId = radioController.getPacketId()
+        val packetId = radioController.generatePacketId()
         radioController.requestTelemetry(packetId, destNum, type.ordinal)
 
         val typeRes =
@@ -100,7 +100,7 @@ constructor(
 
     override suspend fun requestTraceroute(destNum: Int, longName: String) {
         Logger.i { "Requesting traceroute for '$destNum'" }
-        val packetId = radioController.getPacketId()
+        val packetId = radioController.generatePacketId()
         radioController.requestTraceroute(packetId, destNum)
         _lastTracerouteTime.value = nowMillis
         showFeedback(UiText.Resource(Res.string.requesting_from, Res.string.traceroute, longName))

@@ -27,8 +27,8 @@ import org.meshtastic.proto.AdminMessage
 /**
  * [NodeController] implementation: favorite, ignore, mute, and remove nodes.
  *
- * Focused collaborator of [DirectRadioControllerImpl]. Favorite/ignore are idempotent (no-op when already in the
- * requested state), mirroring the SDK's `AdminApi.setFavorite`/`setIgnored`.
+ * Focused collaborator of [RadioControllerImpl]. Favorite/ignore are idempotent (no-op when already in the requested
+ * state), mirroring the SDK's `AdminApi.setFavorite`/`setIgnored`.
  */
 internal class NodeControllerImpl(
     private val commandSender: CommandSender,

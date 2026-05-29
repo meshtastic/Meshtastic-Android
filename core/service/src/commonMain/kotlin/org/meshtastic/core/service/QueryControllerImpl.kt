@@ -19,20 +19,20 @@ package org.meshtastic.core.service
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.NodeManager
-import org.meshtastic.core.repository.RequestController
+import org.meshtastic.core.repository.QueryController
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.proto.AdminMessage
 
 /**
- * [RequestController] implementation: position, traceroute, telemetry, user info, and metadata "pull" queries.
+ * [QueryController] implementation: position, traceroute, telemetry, user info, and metadata "pull" queries.
  *
- * Focused collaborator of [DirectRadioControllerImpl]. Mirrors the SDK's `TelemetryApi`/`RoutingApi` surface.
+ * Focused collaborator of [RadioControllerImpl]. Mirrors the SDK's `TelemetryApi`/`RoutingApi` surface.
  */
-internal class RequestControllerImpl(
+internal class QueryControllerImpl(
     private val commandSender: CommandSender,
     private val nodeManager: NodeManager,
     private val uiPrefs: UiPrefs,
-) : RequestController {
+) : QueryController {
 
     private val myNodeNum: Int
         get() = nodeManager.myNodeNum.value ?: 0

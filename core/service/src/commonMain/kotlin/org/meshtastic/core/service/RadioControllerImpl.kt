@@ -34,10 +34,10 @@ import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
+import org.meshtastic.core.repository.QueryController
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.RadioInterfaceService
-import org.meshtastic.core.repository.RequestController
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.proto.ClientNotification
@@ -48,7 +48,7 @@ import org.meshtastic.proto.ClientNotification
  *
  * Rather than implementing every command itself, this class **assembles** four focused collaborators — one per
  * sub-interface — and delegates to them via Kotlin interface delegation, mirroring the SDK's layered API design
- * ([AdminController] → `AdminApi`, [MessagingController] → `RadioClient.send*`, [NodeController]/[RequestController] →
+ * ([AdminController] → `AdminApi`, [MessagingController] → `RadioClient.send*`, [NodeController]/[QueryController] →
  * `AdminApi`/`TelemetryApi`/`RoutingApi`). When the SDK is adopted, each collaborator becomes a thin adapter and this
  * class is the seam where they are wired together.
  *
@@ -56,7 +56,7 @@ import org.meshtastic.proto.ClientNotification
  * surfacing, packet-id generation, location provisioning, and device-address switching.
  */
 @Suppress("LongParameterList")
-class DirectRadioControllerImpl(
+class RadioControllerImpl(
     private val serviceRepository: ServiceRepository,
     nodeRepository: NodeRepository,
     private val commandSender: CommandSender,
@@ -85,7 +85,7 @@ class DirectRadioControllerImpl(
         packetRepository,
     ),
     NodeController by NodeControllerImpl(commandSender, nodeManager, packetRepository, scope),
-    RequestController by RequestControllerImpl(commandSender, nodeManager, uiPrefs) {
+    QueryController by QueryControllerImpl(commandSender, nodeManager, uiPrefs) {
 
     // ── Connection State ────────────────────────────────────────────────────
 
@@ -101,7 +101,7 @@ class DirectRadioControllerImpl(
 
     // ── Packet ID & Location ────────────────────────────────────────────────
 
-    override fun getPacketId(): Int = commandSender.generatePacketId()
+    override fun generatePacketId(): Int = commandSender.generatePacketId()
 
     override fun startProvideLocation() {
         locationManager.restart()

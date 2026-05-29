@@ -39,7 +39,7 @@ constructor(
      * @return The packet ID of the request.
      */
     open suspend fun reboot(destNum: Int): Int {
-        val packetId = radioController.getPacketId()
+        val packetId = radioController.generatePacketId()
         radioController.reboot(destNum, packetId)
         return packetId
     }
@@ -51,7 +51,7 @@ constructor(
      * @return The packet ID of the request.
      */
     open suspend fun shutdown(destNum: Int): Int {
-        val packetId = radioController.getPacketId()
+        val packetId = radioController.generatePacketId()
         radioController.shutdown(destNum, packetId)
         return packetId
     }
@@ -64,7 +64,7 @@ constructor(
      * @return The packet ID of the request.
      */
     open suspend fun factoryReset(destNum: Int, isLocal: Boolean): Int {
-        val packetId = radioController.getPacketId()
+        val packetId = radioController.generatePacketId()
         radioController.factoryReset(destNum, packetId)
 
         if (isLocal) {
@@ -84,7 +84,7 @@ constructor(
      * @return The packet ID of the request.
      */
     open suspend fun nodedbReset(destNum: Int, preserveFavorites: Boolean, isLocal: Boolean): Int {
-        val packetId = radioController.getPacketId()
+        val packetId = radioController.generatePacketId()
         radioController.nodedbReset(destNum, packetId, preserveFavorites)
 
         if (isLocal) {

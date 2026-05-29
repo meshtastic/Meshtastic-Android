@@ -130,9 +130,9 @@ focused sub-interfaces so callers can depend on just the slice they need:
 | `AdminController` | Config, channels, owner, device lifecycle, `editSettings { }` transactions |
 | `MessagingController` | Send packets, reactions, shared contacts |
 | `NodeController` | Favorite, ignore, mute, remove nodes |
-| `RequestController` | Telemetry, traceroute, position/user-info queries |
+| `QueryController` | Telemetry, traceroute, position/user-info queries |
 
-`DirectRadioControllerImpl` (`core:service`) is the in-process composition root for all targets
+`RadioControllerImpl` (`core:service`) is the in-process composition root for all targets
 (Desktop, iOS, single-process Android). It assembles the four sub-controllers via Kotlin interface
 delegation and adds the cross-cutting concerns (connection state, packet-id, location,
 device-address switching). Commands are direct suspend calls; admin writes are fire-and-forget

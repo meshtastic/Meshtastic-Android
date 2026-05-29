@@ -58,13 +58,13 @@ import org.meshtastic.core.repository.NeighborInfoResponseProvider
 import org.meshtastic.core.repository.NodeController
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PlatformAnalytics
+import org.meshtastic.core.repository.QueryController
 import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.RadioTransportFactory
-import org.meshtastic.core.repository.RequestController
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.ServiceStateWriter
 import org.meshtastic.core.repository.TracerouteResponseProvider
-import org.meshtastic.core.service.DirectRadioControllerImpl
+import org.meshtastic.core.service.RadioControllerImpl
 import org.meshtastic.core.service.ServiceRepositoryImpl
 import org.meshtastic.desktop.DesktopBuildConfig
 import org.meshtastic.desktop.DesktopNotificationManager
@@ -177,7 +177,7 @@ private fun desktopPlatformStubsModule() = module {
         )
     }
     single<RadioController> {
-        DirectRadioControllerImpl(
+        RadioControllerImpl(
             serviceRepository = get(),
             nodeRepository = get(),
             commandSender = get(),
@@ -199,7 +199,7 @@ private fun desktopPlatformStubsModule() = module {
     single<AdminController> { get<RadioController>() }
     single<MessagingController> { get<RadioController>() }
     single<NodeController> { get<RadioController>() }
-    single<RequestController> { get<RadioController>() }
+    single<QueryController> { get<RadioController>() }
     single<NativeNotificationSender> {
         when (DesktopOS.current()) {
             DesktopOS.Linux -> LinuxNotificationSender()

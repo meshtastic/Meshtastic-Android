@@ -26,7 +26,7 @@ class RequestTimerTest {
     fun appendDuration_withoutStart_returnsTextUnchanged() {
         val timer = RequestTimer()
 
-        assertEquals("base", timer.appendDuration(requestId = 1, text = "base", label = "Test"))
+        assertEquals("base", timer.appendDuration(requestId = 1, text = "base", logLabel = "Test"))
     }
 
     @Test
@@ -34,7 +34,7 @@ class RequestTimerTest {
         val timer = RequestTimer()
         timer.start(requestId = 7)
 
-        val result = timer.appendDuration(requestId = 7, text = "base", label = "Test")
+        val result = timer.appendDuration(requestId = 7, text = "base", logLabel = "Test")
 
         assertTrue(result.startsWith("base\n\nDuration: "), "expected a duration suffix, got: $result")
         assertTrue(result.endsWith(" s"))
@@ -45,9 +45,9 @@ class RequestTimerTest {
         val timer = RequestTimer()
         timer.start(requestId = 7)
 
-        timer.appendDuration(requestId = 7, text = "first", label = "Test")
+        timer.appendDuration(requestId = 7, text = "first", logLabel = "Test")
         // The start time is single-use; a second response for the same id gets no duration.
-        assertEquals("second", timer.appendDuration(requestId = 7, text = "second", label = "Test"))
+        assertEquals("second", timer.appendDuration(requestId = 7, text = "second", logLabel = "Test"))
     }
 
     @Test
@@ -57,7 +57,7 @@ class RequestTimerTest {
         timer.start(requestId = 2)
 
         // Consuming one id must not affect the other.
-        timer.appendDuration(requestId = 1, text = "a", label = "Test")
-        assertTrue(timer.appendDuration(requestId = 2, text = "b", label = "Test").contains("Duration: "))
+        timer.appendDuration(requestId = 1, text = "a", logLabel = "Test")
+        assertTrue(timer.appendDuration(requestId = 2, text = "b", logLabel = "Test").contains("Duration: "))
     }
 }

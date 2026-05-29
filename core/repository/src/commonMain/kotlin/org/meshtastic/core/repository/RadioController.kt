@@ -30,7 +30,7 @@ import org.meshtastic.proto.ClientNotification
  * - [AdminController] — config, channels, owner, device lifecycle (→ SDK `AdminApi`)
  * - [MessagingController] — send packets, reactions, contacts (→ SDK `RadioClient.send*`)
  * - [NodeController] — favorite, ignore, mute, remove nodes (→ SDK `AdminApi` node ops)
- * - [RequestController] — telemetry, traceroute, position queries (→ SDK `TelemetryApi` / `RoutingApi`)
+ * - [QueryController] — telemetry, traceroute, position queries (→ SDK `TelemetryApi` / `RoutingApi`)
  *
  * When migrating to the SDK, each sub-interface becomes a thin adapter over the corresponding SDK API. The composite
  * [RadioController] can then be deprecated and consumers migrated to the narrower interfaces one at a time.
@@ -39,7 +39,7 @@ interface RadioController :
     AdminController,
     MessagingController,
     NodeController,
-    RequestController,
+    QueryController,
     ConnectionStateProvider {
     /**
      * Flow of notifications from the radio client.
@@ -56,7 +56,7 @@ interface RadioController :
      *
      * @return A unique 32-bit integer.
      */
-    fun getPacketId(): Int
+    fun generatePacketId(): Int
 
     /** Starts providing the phone's location to the mesh. */
     fun startProvideLocation()

@@ -58,7 +58,7 @@ import kotlin.test.assertNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
-class DirectRadioControllerImplTest {
+class RadioControllerImplTest {
 
     private val nodeRepository: NodeRepository = mock(MockMode.autofill)
     private val commandSender: CommandSender = mock(MockMode.autofill)
@@ -80,10 +80,10 @@ class DirectRadioControllerImplTest {
     private fun createController(
         serviceRepository: ServiceRepository = ServiceRepositoryImpl(),
         myNodeNum: Int? = 1234,
-    ): DirectRadioControllerImpl {
+    ): RadioControllerImpl {
         every { nodeManager.myNodeNum } returns MutableStateFlow(myNodeNum)
         every { meshPrefs.deviceAddress } returns MutableStateFlow(null)
-        return DirectRadioControllerImpl(
+        return RadioControllerImpl(
             serviceRepository = serviceRepository,
             nodeRepository = nodeRepository,
             commandSender = commandSender,

@@ -153,14 +153,15 @@ class FakeRadioController :
         editSettingsCalled = true
         val scope =
             object : AdminEditScope {
-                override suspend fun setOwner(user: User) = setOwner(destNum, user, getPacketId())
+                override suspend fun setOwner(user: User) = setOwner(destNum, user, generatePacketId())
 
-                override suspend fun setConfig(config: Config) = setConfig(destNum, config, getPacketId())
+                override suspend fun setConfig(config: Config) = setConfig(destNum, config, generatePacketId())
 
                 override suspend fun setModuleConfig(config: ModuleConfig) =
-                    setModuleConfig(destNum, config, getPacketId())
+                    setModuleConfig(destNum, config, generatePacketId())
 
-                override suspend fun setChannel(channel: Channel) = setRemoteChannel(destNum, channel, getPacketId())
+                override suspend fun setChannel(channel: Channel) =
+                    setRemoteChannel(destNum, channel, generatePacketId())
 
                 override suspend fun setFixedPosition(position: Position) =
                     this@FakeRadioController.setFixedPosition(destNum, position)
@@ -168,7 +169,7 @@ class FakeRadioController :
         scope.block()
     }
 
-    override fun getPacketId(): Int = 1
+    override fun generatePacketId(): Int = 1
 
     override fun startProvideLocation() {
         startProvideLocationCalled = true

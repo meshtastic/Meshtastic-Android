@@ -35,7 +35,7 @@ open class RadioConfigUseCase constructor(private val radioController: RadioCont
      * @return The packet ID of the request.
      */
     open suspend fun setOwner(destNum: Int, user: User): Int {
-        val packetId = radioController.getPacketId()
+        val packetId = radioController.generatePacketId()
         radioController.setOwner(destNum, user, packetId)
         return packetId
     }
@@ -47,7 +47,7 @@ open class RadioConfigUseCase constructor(private val radioController: RadioCont
      * @return The packet ID of the request.
      */
     open suspend fun getOwner(destNum: Int): Int {
-        val packetId = radioController.getPacketId()
+        val packetId = radioController.generatePacketId()
         radioController.getOwner(destNum, packetId)
         return packetId
     }
@@ -60,7 +60,7 @@ open class RadioConfigUseCase constructor(private val radioController: RadioCont
      * @return The packet ID of the request.
      */
     open suspend fun setConfig(destNum: Int, config: Config): Int {
-        val packetId = radioController.getPacketId()
+        val packetId = radioController.generatePacketId()
         radioController.setConfig(destNum, config, packetId)
         return packetId
     }
@@ -73,7 +73,7 @@ open class RadioConfigUseCase constructor(private val radioController: RadioCont
      * @return The packet ID of the request.
      */
     open suspend fun getConfig(destNum: Int, configType: Int): Int {
-        val packetId = radioController.getPacketId()
+        val packetId = radioController.generatePacketId()
         radioController.getConfig(destNum, configType, packetId)
         return packetId
     }
@@ -86,7 +86,7 @@ open class RadioConfigUseCase constructor(private val radioController: RadioCont
      * @return The packet ID of the request.
      */
     open suspend fun setModuleConfig(destNum: Int, config: ModuleConfig): Int {
-        val packetId = radioController.getPacketId()
+        val packetId = radioController.generatePacketId()
         radioController.setModuleConfig(destNum, config, packetId)
         return packetId
     }
@@ -99,7 +99,7 @@ open class RadioConfigUseCase constructor(private val radioController: RadioCont
      * @return The packet ID of the request.
      */
     open suspend fun getModuleConfig(destNum: Int, moduleConfigType: Int): Int {
-        val packetId = radioController.getPacketId()
+        val packetId = radioController.generatePacketId()
         radioController.getModuleConfig(destNum, moduleConfigType, packetId)
         return packetId
     }
@@ -112,7 +112,7 @@ open class RadioConfigUseCase constructor(private val radioController: RadioCont
      * @return The packet ID of the request.
      */
     open suspend fun getChannel(destNum: Int, index: Int): Int {
-        val packetId = radioController.getPacketId()
+        val packetId = radioController.generatePacketId()
         radioController.getChannel(destNum, index, packetId)
         return packetId
     }
@@ -125,7 +125,7 @@ open class RadioConfigUseCase constructor(private val radioController: RadioCont
      * @return The packet ID of the request.
      */
     open suspend fun setRemoteChannel(destNum: Int, channel: org.meshtastic.proto.Channel): Int {
-        val packetId = radioController.getPacketId()
+        val packetId = radioController.generatePacketId()
         radioController.setRemoteChannel(destNum, channel, packetId)
         return packetId
     }
@@ -152,7 +152,7 @@ open class RadioConfigUseCase constructor(private val radioController: RadioCont
      * @return The packet ID of the request.
      */
     open suspend fun getRingtone(destNum: Int): Int {
-        val packetId = radioController.getPacketId()
+        val packetId = radioController.generatePacketId()
         radioController.getRingtone(destNum, packetId)
         return packetId
     }
@@ -169,7 +169,7 @@ open class RadioConfigUseCase constructor(private val radioController: RadioCont
      * @return The packet ID of the request.
      */
     open suspend fun getCannedMessages(destNum: Int): Int {
-        val packetId = radioController.getPacketId()
+        val packetId = radioController.generatePacketId()
         radioController.getCannedMessages(destNum, packetId)
         return packetId
     }
@@ -181,7 +181,7 @@ open class RadioConfigUseCase constructor(private val radioController: RadioCont
      * @return The packet ID of the request.
      */
     open suspend fun getDeviceConnectionStatus(destNum: Int): Int {
-        val packetId = radioController.getPacketId()
+        val packetId = radioController.generatePacketId()
         radioController.getDeviceConnectionStatus(destNum, packetId)
         return packetId
     }
