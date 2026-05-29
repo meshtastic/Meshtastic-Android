@@ -3,6 +3,15 @@
 # Do NOT edit or remove previous entries — stale state claims cause agent confusion.
 # Format: ## YYYY-MM-DD — <summary>
 
+## 2026-05-29 — Removed AIDL/broadcast service layer; modernized RadioController; deferred R4/R5
+- AIDL bound-service + broadcast (`core:api`, `IMeshService`, `ServiceBroadcasts`, `ServiceAction`, `MeshActionHandler`, `MeshRouter`) removed; replaced with direct suspend-based `RadioController`.
+- `RadioController` split into `AdminController`/`MessagingController`/`NodeController`/`RequestController`, composed in `DirectRadioControllerImpl` via Kotlin `by` delegation to four focused impls (`AdminControllerImpl` etc., core/service commonMain).
+- Typed addressing: `NodeAddress` (sealed) + `ContactKey` (value class) in core/model; 6 hand-rolled contact-key parsers consolidated onto `ContactKey.channelOrNull`/`addressString`.
+- Idempotent node ops: `setFavorite`/`setIgnored(Boolean)` + `toggleMuted` (fixed a latent toggle bug in `SendMessageUseCase`); `editSettings { }` DSL (`AdminEditScope`) replaced begin/commitEditSettings.
+- Shared `RequestTimer` extracted from Traceroute/NeighborInfo handlers. `formatAgo` runBlocking removed. Contact import re-marks `manually_verified=true` (review-fix regression).
+- Admin sends are intentionally fire-and-forget (device = source of truth).
+- R4 (`AdminResult<T>`) and R5 (`NodeId` value class) investigated and DEFERRED to the SDK migration — do not build standalone. Rationale in `.agent_plans/post-aidl-modernization.md`.
+
 ## 2026-05-21 — Upgraded Chirpy to a fully-personalized Live Diagnostic Node & Mesh Assistant
 - Integrated `NodeRepository` into `GeminiNanoDocAssistant.kt` and the Google AI Koin dependency injection module (`GoogleAiModule.kt`).
 - Developed a dynamic live-state prompt formatting block within `buildPrompt(...)` that queries current hardware model, firmware version, connection status, GPS capability, channel utilization, airtime, battery level/voltage, user profile long/short names, and total registered mesh peer counts & active online peers directly from `NodeRepository`'s reactive flows.
