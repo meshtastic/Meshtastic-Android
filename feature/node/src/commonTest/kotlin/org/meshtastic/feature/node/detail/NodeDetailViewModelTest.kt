@@ -42,7 +42,7 @@ import org.meshtastic.core.domain.usecase.session.ObserveRemoteAdminSessionStatu
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.SessionStatus
 import org.meshtastic.core.navigation.SettingsRoute
-import org.meshtastic.core.repository.RadioController
+import org.meshtastic.core.repository.RequestController
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.connect_radio_for_remote_admin
@@ -64,7 +64,7 @@ class NodeDetailViewModelTest {
     private lateinit var viewModel: NodeDetailViewModel
     private val nodeManagementActions: NodeManagementActions = mock()
     private val nodeRequestActions: NodeRequestActions = mock()
-    private val radioController: RadioController = mock()
+    private val requestController: RequestController = mock()
     private val getNodeDetailsUseCase: GetNodeDetailsUseCase = mock()
     private val ensureRemoteAdminSession: EnsureRemoteAdminSessionUseCase = mock()
     private val observeRemoteAdminSessionStatus: ObserveRemoteAdminSessionStatusUseCase = mock()
@@ -97,7 +97,7 @@ class NodeDetailViewModelTest {
         savedStateHandle = SavedStateHandle(if (nodeId != null) mapOf("destNum" to nodeId) else emptyMap()),
         nodeManagementActions = nodeManagementActions,
         nodeRequestActions = nodeRequestActions,
-        radioController = radioController,
+        requestController = requestController,
         getNodeDetailsUseCase = getNodeDetailsUseCase,
         ensureRemoteAdminSession = ensureRemoteAdminSession,
         observeRemoteAdminSessionStatus = observeRemoteAdminSessionStatus,

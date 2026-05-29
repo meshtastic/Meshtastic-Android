@@ -39,7 +39,11 @@ import org.meshtastic.proto.MeshPacket
  * @see RadioInterfaceService.connectionState
  */
 @Suppress("TooManyFunctions")
-interface ServiceRepository {
+interface ServiceRepository :
+    ConnectionStateProvider,
+    TracerouteResponseProvider,
+    NeighborInfoResponseProvider,
+    ServiceStateWriter {
     /**
      * Canonical app-level connection state.
      *
@@ -55,7 +59,7 @@ interface ServiceRepository {
      *
      * @see RadioInterfaceService.connectionState
      */
-    val connectionState: StateFlow<ConnectionState>
+    override val connectionState: StateFlow<ConnectionState>
 
     /**
      * Updates the canonical app-level connection state.
@@ -65,7 +69,7 @@ interface ServiceRepository {
      *
      * @param connectionState The new [ConnectionState].
      */
-    fun setConnectionState(connectionState: ConnectionState)
+    override fun setConnectionState(connectionState: ConnectionState)
 
     /**
      * Reactive flow of high-level client notifications.
@@ -79,10 +83,10 @@ interface ServiceRepository {
      *
      * @param notification The [ClientNotification] to display or act upon.
      */
-    fun setClientNotification(notification: ClientNotification?)
+    override fun setClientNotification(notification: ClientNotification?)
 
     /** Clears the current client notification. */
-    fun clearClientNotification()
+    override fun clearClientNotification()
 
     /**
      * Reactive flow of human-readable error messages.
@@ -97,10 +101,10 @@ interface ServiceRepository {
      * @param text The error message text.
      * @param severity The [Severity] level of the error.
      */
-    fun setErrorMessage(text: String, severity: Severity = Severity.Error)
+    override fun setErrorMessage(text: String, severity: Severity)
 
     /** Clears the current error message. */
-    fun clearErrorMessage()
+    override fun clearErrorMessage()
 
     /**
      * Reactive flow of connection progress messages.
@@ -114,7 +118,7 @@ interface ServiceRepository {
      *
      * @param text The progress description (e.g., "Downloading Node DB...").
      */
-    fun setConnectionProgress(text: String)
+    override fun setConnectionProgress(text: String)
 
     /**
      * Flow of all raw [MeshPacket] objects received from the mesh.
@@ -132,31 +136,31 @@ interface ServiceRepository {
      *
      * @param packet The received [MeshPacket].
      */
-    suspend fun emitMeshPacket(packet: MeshPacket)
+    override suspend fun emitMeshPacket(packet: MeshPacket)
 
     /** Reactive flow of the most recent traceroute result. */
-    val tracerouteResponse: StateFlow<TracerouteResponse?>
+    override val tracerouteResponse: StateFlow<TracerouteResponse?>
 
     /**
      * Sets the traceroute response.
      *
      * @param value The [TracerouteResponse] result.
      */
-    fun setTracerouteResponse(value: TracerouteResponse?)
+    override fun setTracerouteResponse(value: TracerouteResponse?)
 
     /** Clears the current traceroute response. */
-    fun clearTracerouteResponse()
+    override fun clearTracerouteResponse()
 
     /** Reactive flow of the most recent neighbor info response (formatted string). */
-    val neighborInfoResponse: StateFlow<String?>
+    override val neighborInfoResponse: StateFlow<String?>
 
     /**
      * Sets the neighbor info response.
      *
      * @param value The human-readable neighbor info string.
      */
-    fun setNeighborInfoResponse(value: String?)
+    override fun setNeighborInfoResponse(value: String?)
 
     /** Clears the current neighbor info response. */
-    fun clearNeighborInfoResponse()
+    override fun clearNeighborInfoResponse()
 }

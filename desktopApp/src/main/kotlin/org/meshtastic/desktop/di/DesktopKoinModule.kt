@@ -45,17 +45,25 @@ import org.meshtastic.core.network.KermitHttpLogger
 import org.meshtastic.core.network.repository.MQTTRepository
 import org.meshtastic.core.network.service.ApiService
 import org.meshtastic.core.network.service.ApiServiceImpl
+import org.meshtastic.core.repository.AdminController
 import org.meshtastic.core.repository.AppWidgetUpdater
+import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.LocationRepository
 import org.meshtastic.core.repository.MeshLocationManager
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.MeshWorkerManager
 import org.meshtastic.core.repository.MessageQueue
+import org.meshtastic.core.repository.MessagingController
+import org.meshtastic.core.repository.NeighborInfoResponseProvider
+import org.meshtastic.core.repository.NodeController
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.RadioTransportFactory
+import org.meshtastic.core.repository.RequestController
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.ServiceStateWriter
+import org.meshtastic.core.repository.TracerouteResponseProvider
 import org.meshtastic.core.service.DirectRadioControllerImpl
 import org.meshtastic.core.service.ServiceRepositoryImpl
 import org.meshtastic.desktop.DesktopBuildConfig
@@ -156,6 +164,10 @@ fun desktopModule() = module {
 @Suppress("LongMethod")
 private fun desktopPlatformStubsModule() = module {
     single<ServiceRepository> { ServiceRepositoryImpl() }
+    single<ConnectionStateProvider> { get<ServiceRepository>() }
+    single<TracerouteResponseProvider> { get<ServiceRepository>() }
+    single<NeighborInfoResponseProvider> { get<ServiceRepository>() }
+    single<ServiceStateWriter> { get<ServiceRepository>() }
     single<RadioTransportFactory> {
         DesktopRadioTransportFactory(
             dispatchers = get(),
@@ -184,6 +196,10 @@ private fun desktopPlatformStubsModule() = module {
             scope = get(qualifier = named("ServiceScope")),
         )
     }
+    single<AdminController> { get<RadioController>() }
+    single<MessagingController> { get<RadioController>() }
+    single<NodeController> { get<RadioController>() }
+    single<RequestController> { get<RadioController>() }
     single<NativeNotificationSender> {
         when (DesktopOS.current()) {
             DesktopOS.Linux -> LinuxNotificationSender()

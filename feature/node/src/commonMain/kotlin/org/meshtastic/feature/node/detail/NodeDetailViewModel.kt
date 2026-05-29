@@ -39,7 +39,7 @@ import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.SessionStatus
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
-import org.meshtastic.core.repository.RadioController
+import org.meshtastic.core.repository.RequestController
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.connect_radio_for_remote_admin
@@ -81,7 +81,7 @@ class NodeDetailViewModel(
     private val savedStateHandle: SavedStateHandle,
     private val nodeManagementActions: NodeManagementActions,
     private val nodeRequestActions: NodeRequestActions,
-    private val radioController: RadioController,
+    private val requestController: RequestController,
     private val getNodeDetailsUseCase: GetNodeDetailsUseCase,
     private val ensureRemoteAdminSession: EnsureRemoteAdminSessionUseCase,
     private val observeRemoteAdminSessionStatus: ObserveRemoteAdminSessionStatusUseCase,
@@ -174,7 +174,7 @@ class NodeDetailViewModel(
     /**
      * Re-fetch device metadata (firmware/edition/role) for [destNum]. Refreshes the session passkey as a side effect.
      */
-    fun refreshMetadata(destNum: Int) = viewModelScope.launch { radioController.refreshMetadata(destNum) }
+    fun refreshMetadata(destNum: Int) = viewModelScope.launch { requestController.refreshMetadata(destNum) }
 
     /**
      * Ensure a remote-admin session passkey is fresh, then request navigation to the remote-admin screen. Surfaces a

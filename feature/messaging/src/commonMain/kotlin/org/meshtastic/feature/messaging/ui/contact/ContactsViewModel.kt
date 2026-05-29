@@ -36,10 +36,10 @@ import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.isBroadcast
 import org.meshtastic.core.model.isFromLocal
 import org.meshtastic.core.model.util.getChannel
+import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
-import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.ChannelSet
@@ -50,11 +50,11 @@ class ContactsViewModel(
     private val nodeRepository: NodeRepository,
     private val packetRepository: PacketRepository,
     radioConfigRepository: RadioConfigRepository,
-    serviceRepository: ServiceRepository,
+    connectionStateProvider: ConnectionStateProvider,
 ) : ViewModel() {
     val ourNodeInfo = nodeRepository.ourNodeInfo
 
-    val connectionState = serviceRepository.connectionState
+    val connectionState = connectionStateProvider.connectionState
 
     val unreadCountTotal = packetRepository.getUnreadCountTotal().stateInWhileSubscribed(0)
 

@@ -52,7 +52,7 @@ import org.meshtastic.core.model.util.UnitConversions
 import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.NodeRepository
-import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.TracerouteResponseProvider
 import org.meshtastic.core.repository.TracerouteSnapshotRepository
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.okay
@@ -81,7 +81,7 @@ open class MetricsViewModel(
     @InjectedParam val destNum: Int,
     protected val dispatchers: CoroutineDispatchers,
     private val meshLogRepository: MeshLogRepository,
-    private val serviceRepository: ServiceRepository,
+    private val tracerouteResponseProvider: TracerouteResponseProvider,
     private val nodeRepository: NodeRepository,
     private val tracerouteSnapshotRepository: TracerouteSnapshotRepository,
     private val nodeRequestActions: NodeRequestActions,
@@ -192,7 +192,7 @@ open class MetricsViewModel(
         if (cached != null) return cached
 
         val overlay =
-            serviceRepository.tracerouteResponse.value
+            tracerouteResponseProvider.tracerouteResponse.value
                 ?.takeIf { it.requestId == requestId }
                 ?.let { response ->
                     TracerouteOverlay(
@@ -212,7 +212,7 @@ open class MetricsViewModel(
 
     fun tracerouteSnapshotPositions(logUuid: String) = tracerouteSnapshotRepository.getSnapshotPositions(logUuid)
 
-    fun clearTracerouteResponse() = serviceRepository.clearTracerouteResponse()
+    fun clearTracerouteResponse() = tracerouteResponseProvider.clearTracerouteResponse()
 
     fun positionedNodeNums(): Set<Int> =
         nodeRepository.nodeDBbyNum.value.values.filter { it.validPosition != null }.numSet()
@@ -221,7 +221,7 @@ open class MetricsViewModel(
 
     init {
         safeLaunch(tag = "tracerouteCollector") {
-            serviceRepository.tracerouteResponse.filterNotNull().collect { response ->
+            tracerouteResponseProvider.tracerouteResponse.filterNotNull().collect { response ->
                 val overlay =
                     TracerouteOverlay(
                         requestId = response.requestId,

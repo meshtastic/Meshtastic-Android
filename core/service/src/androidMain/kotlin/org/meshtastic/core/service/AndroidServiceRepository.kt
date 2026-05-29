@@ -17,8 +17,21 @@
 package org.meshtastic.core.service
 
 import org.koin.core.annotation.Single
+import org.meshtastic.core.repository.ConnectionStateProvider
+import org.meshtastic.core.repository.NeighborInfoResponseProvider
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.ServiceStateWriter
+import org.meshtastic.core.repository.TracerouteResponseProvider
 
 /** Android DI binding of the shared [ServiceRepositoryImpl]. */
-@Single(binds = [ServiceRepository::class])
+@Single(
+    binds =
+    [
+        ServiceRepository::class,
+        ConnectionStateProvider::class,
+        TracerouteResponseProvider::class,
+        NeighborInfoResponseProvider::class,
+        ServiceStateWriter::class,
+    ],
+)
 class AndroidServiceRepository : ServiceRepositoryImpl()

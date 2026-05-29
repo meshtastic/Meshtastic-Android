@@ -33,12 +33,12 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.NodeListDensity
 import org.meshtastic.core.model.NodeSortOption
+import org.meshtastic.core.repository.AdminController
+import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
-import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.RadioInterfaceService
-import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.node.detail.NodeManagementActions
 import org.meshtastic.feature.node.detail.NodeRequestActions
@@ -52,8 +52,8 @@ class NodeListViewModel(
     private val savedStateHandle: SavedStateHandle,
     private val nodeRepository: NodeRepository,
     private val radioConfigRepository: RadioConfigRepository,
-    private val serviceRepository: ServiceRepository,
-    private val radioController: RadioController,
+    private val connectionStateProvider: ConnectionStateProvider,
+    private val adminController: AdminController,
     private val radioInterfaceService: RadioInterfaceService,
     private val deviceHardwareRepository: DeviceHardwareRepository,
     val nodeManagementActions: NodeManagementActions,
@@ -68,7 +68,7 @@ class NodeListViewModel(
 
     val totalNodeCount = nodeRepository.totalNodeCount.stateInWhileSubscribed(initialValue = 0)
 
-    val connectionState = serviceRepository.connectionState
+    val connectionState = connectionStateProvider.connectionState
 
     val deviceType: StateFlow<DeviceType?> =
         radioInterfaceService.currentDeviceAddressFlow
@@ -184,7 +184,7 @@ class NodeListViewModel(
         radioConfigRepository.replaceAllSettings(channelSet.settings)
         val newLoraConfig = channelSet.lora_config
         if (newLoraConfig != null) {
-            radioController.setLocalConfig(Config(lora = newLoraConfig))
+            adminController.setLocalConfig(Config(lora = newLoraConfig))
         }
     }
 

@@ -37,15 +37,15 @@ import org.meshtastic.core.model.ContactSettings
 import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
+import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.CustomEmojiPrefs
 import org.meshtastic.core.repository.HomoglyphPrefs
+import org.meshtastic.core.repository.MessagingController
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.QuickChatActionRepository
 import org.meshtastic.core.repository.RadioConfigRepository
-import org.meshtastic.core.repository.RadioController
-import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.repository.usecase.SendMessageUseCase
 import org.meshtastic.core.ui.viewmodel.safeLaunch
@@ -59,8 +59,8 @@ class MessageViewModel(
     private val nodeRepository: NodeRepository,
     radioConfigRepository: RadioConfigRepository,
     quickChatActionRepository: QuickChatActionRepository,
-    private val serviceRepository: ServiceRepository,
-    private val radioController: RadioController,
+    private val connectionStateProvider: ConnectionStateProvider,
+    private val messagingController: MessagingController,
     private val packetRepository: PacketRepository,
     private val uiPrefs: UiPrefs,
     private val customEmojiPrefs: CustomEmojiPrefs,
@@ -73,7 +73,7 @@ class MessageViewModel(
 
     val ourNodeInfo = nodeRepository.ourNodeInfo
 
-    val connectionState = serviceRepository.connectionState
+    val connectionState = connectionStateProvider.connectionState
 
     val nodeList: StateFlow<List<Node>> = nodeRepository.getNodes().stateInWhileSubscribed(initialValue = emptyList())
 
@@ -219,7 +219,7 @@ class MessageViewModel(
     }
 
     fun sendReaction(emoji: String, replyId: Int, contactKey: String) =
-        safeLaunch(tag = "sendReaction") { radioController.sendReaction(emoji, replyId, contactKey) }
+        safeLaunch(tag = "sendReaction") { messagingController.sendReaction(emoji, replyId, contactKey) }
 
     fun deleteMessages(uuidList: List<Long>) =
         safeLaunch(context = ioDispatcher, tag = "deleteMessages") { packetRepository.deleteMessages(uuidList) }

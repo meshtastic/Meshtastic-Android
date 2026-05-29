@@ -23,11 +23,14 @@ import org.koin.core.annotation.Module
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.database.DatabaseManager
+import org.meshtastic.core.repository.AdminController
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.MeshLocationManager
 import org.meshtastic.core.repository.MeshMessageProcessor
 import org.meshtastic.core.repository.MeshPrefs
+import org.meshtastic.core.repository.MessagingController
+import org.meshtastic.core.repository.NodeController
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NotificationManager
@@ -36,6 +39,7 @@ import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RequestController
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.service.DirectRadioControllerImpl
@@ -46,7 +50,16 @@ import org.meshtastic.core.service.startService
 @ComponentScan("org.meshtastic.core.service")
 class CoreServiceAndroidModule {
     @Suppress("LongParameterList")
-    @Single
+    @Single(
+        binds =
+        [
+            RadioController::class,
+            AdminController::class,
+            MessagingController::class,
+            NodeController::class,
+            RequestController::class,
+        ],
+    )
     fun radioController(
         context: Context,
         serviceRepository: ServiceRepository,

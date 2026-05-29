@@ -17,7 +17,6 @@
 package org.meshtastic.core.repository
 
 import kotlinx.coroutines.flow.StateFlow
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.proto.ClientNotification
 
 /**
@@ -40,19 +39,8 @@ interface RadioController :
     AdminController,
     MessagingController,
     NodeController,
-    RequestController {
-    /**
-     * Canonical app-level connection state, delegated from [ServiceRepository][connectionState].
-     *
-     * This exposes the same single source of truth as `ServiceRepository.connectionState`, surfaced through the
-     * controller interface for convenience in feature modules and ViewModels that depend on [RadioController] rather
-     * than [ServiceRepository] directly.
-     *
-     * This is **not** the transport-level state — it reflects the fully reconciled app-level state including handshake
-     * progress and device sleep policy.
-     */
-    val connectionState: StateFlow<ConnectionState>
-
+    RequestController,
+    ConnectionStateProvider {
     /**
      * Flow of notifications from the radio client.
      *

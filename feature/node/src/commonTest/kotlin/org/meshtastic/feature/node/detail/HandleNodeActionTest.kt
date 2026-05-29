@@ -34,7 +34,7 @@ import org.meshtastic.core.domain.usecase.session.EnsureRemoteAdminSessionUseCas
 import org.meshtastic.core.domain.usecase.session.ObserveRemoteAdminSessionStatusUseCase
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.SessionStatus
-import org.meshtastic.core.repository.RadioController
+import org.meshtastic.core.repository.RequestController
 import org.meshtastic.core.ui.util.SnackbarManager
 import org.meshtastic.feature.node.component.NodeMenuAction
 import org.meshtastic.feature.node.domain.usecase.GetNodeDetailsUseCase
@@ -51,7 +51,7 @@ class HandleNodeActionTest {
     private val testDispatcher = UnconfinedTestDispatcher()
     private val nodeManagementActions: NodeManagementActions = mock()
     private val nodeRequestActions: NodeRequestActions = mock()
-    private val radioController: RadioController = mock()
+    private val requestController: RequestController = mock()
     private val getNodeDetailsUseCase: GetNodeDetailsUseCase = mock()
     private val ensureRemoteAdminSession: EnsureRemoteAdminSessionUseCase = mock()
     private val observeRemoteAdminSessionStatus: ObserveRemoteAdminSessionStatusUseCase = mock()
@@ -93,7 +93,7 @@ class HandleNodeActionTest {
         savedStateHandle = SavedStateHandle(mapOf("destNum" to 1234)),
         nodeManagementActions = nodeManagementActions,
         nodeRequestActions = nodeRequestActions,
-        radioController = radioController,
+        requestController = requestController,
         getNodeDetailsUseCase = getNodeDetailsUseCase,
         ensureRemoteAdminSession = ensureRemoteAdminSession,
         observeRemoteAdminSessionStatus = observeRemoteAdminSessionStatus,

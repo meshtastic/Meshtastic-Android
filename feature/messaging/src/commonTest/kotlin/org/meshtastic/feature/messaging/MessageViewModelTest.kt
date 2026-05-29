@@ -34,13 +34,13 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.ContactSettings
+import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.CustomEmojiPrefs
 import org.meshtastic.core.repository.HomoglyphPrefs
+import org.meshtastic.core.repository.MessagingController
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.QuickChatActionRepository
 import org.meshtastic.core.repository.RadioConfigRepository
-import org.meshtastic.core.repository.RadioController
-import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.repository.usecase.SendMessageUseCase
 import org.meshtastic.core.testing.FakeNodeRepository
@@ -63,8 +63,8 @@ class MessageViewModelTest {
     private val radioConfigRepository: RadioConfigRepository = mock(MockMode.autofill)
     private val quickChatActionRepository: QuickChatActionRepository = mock(MockMode.autofill)
     private val packetRepository: PacketRepository = mock(MockMode.autofill)
-    private val serviceRepository: ServiceRepository = mock(MockMode.autofill)
-    private val radioController: RadioController = mock(MockMode.autofill)
+    private val connectionStateProvider: ConnectionStateProvider = mock(MockMode.autofill)
+    private val messagingController: MessagingController = mock(MockMode.autofill)
     private val sendMessageUseCase: SendMessageUseCase = mock(MockMode.autofill)
     private val customEmojiPrefs: CustomEmojiPrefs = mock(MockMode.autofill)
     private val homoglyphPrefs: HomoglyphPrefs = mock(MockMode.autofill)
@@ -95,7 +95,7 @@ class MessageViewModelTest {
         every { radioConfigRepository.moduleConfigFlow } returns MutableStateFlow(LocalModuleConfig())
         every { radioConfigRepository.deviceProfileFlow } returns MutableStateFlow(DeviceProfile())
 
-        every { serviceRepository.connectionState } returns connectionStateFlow
+        every { connectionStateProvider.connectionState } returns connectionStateFlow
 
         every { customEmojiPrefs.customEmojiFrequency } returns customEmojiFrequencyFlow
         every { homoglyphPrefs.homoglyphEncodingEnabled } returns MutableStateFlow(false)
@@ -116,9 +116,9 @@ class MessageViewModelTest {
                 nodeRepository = nodeRepository,
                 radioConfigRepository = radioConfigRepository,
                 quickChatActionRepository = quickChatActionRepository,
+                connectionStateProvider = connectionStateProvider,
+                messagingController = messagingController,
                 packetRepository = packetRepository,
-                serviceRepository = serviceRepository,
-                radioController = radioController,
                 sendMessageUseCase = sendMessageUseCase,
                 customEmojiPrefs = customEmojiPrefs,
                 homoglyphEncodingPrefs = homoglyphPrefs,
@@ -192,13 +192,13 @@ class MessageViewModelTest {
 
     @Test
     fun testSendReaction() = runTest {
-        everySuspend { radioController.sendReaction(any(), any(), any()) } returns Unit
+        everySuspend { messagingController.sendReaction(any(), any(), any()) } returns Unit
 
         viewModel.sendReaction("❤️", 123, "0!12345678")
 
         advanceUntilIdle()
 
-        verifySuspend { radioController.sendReaction("❤️", 123, "0!12345678") }
+        verifySuspend { messagingController.sendReaction("❤️", 123, "0!12345678") }
     }
 
     @Test
