@@ -66,7 +66,8 @@ class TakV2CompressorTaktalkTest {
         assertEquals("1", decompressed.taktalk!!.chatroom_id)
         assertEquals("English", decompressed.taktalk!!.lang)
         assertTrue(decompressed.taktalk!!.from_voice, "<voice/> marker must survive")
-        assertNull(decompressed.pli, "must not fall back to Pli payload")
+        // v0.4.0+: `bool pli` was removed (PLI is implicit). A populated `taktalk`
+        // arm already proves this did not degrade to an (implicit) PLI.
     }
 
     @Test
