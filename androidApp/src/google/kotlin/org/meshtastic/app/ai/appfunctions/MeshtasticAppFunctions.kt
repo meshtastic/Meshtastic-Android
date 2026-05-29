@@ -17,7 +17,10 @@
 package org.meshtastic.app.ai.appfunctions
 
 import androidx.appfunctions.AppFunctionContext
+import androidx.appfunctions.AppFunctionElementNotFoundException
+import androidx.appfunctions.AppFunctionIntValueConstraint
 import androidx.appfunctions.AppFunctionInvalidArgumentException
+import androidx.appfunctions.AppFunctionNotSupportedException
 import androidx.appfunctions.service.AppFunction
 import kotlinx.coroutines.TimeoutCancellationException
 import org.meshtastic.core.data.ai.AiFunctionProvider
@@ -67,7 +70,7 @@ class MeshtasticAppFunctions(private val provider: AiFunctionProvider) {
                     timestamp = result.timestamp,
                 )
 
-            is SendMessageResult.NotConnected -> throw AppFunctionInvalidArgumentException(result.message)
+            is SendMessageResult.NotConnected -> throw AppFunctionNotSupportedException(result.message)
 
             is SendMessageResult.AmbiguousName -> {
                 val names = result.candidates.joinToString()
@@ -150,7 +153,7 @@ class MeshtasticAppFunctions(private val provider: AiFunctionProvider) {
                 )
 
             is org.meshtastic.core.data.ai.GetNodeListResult.NotConnected ->
-                throw AppFunctionInvalidArgumentException(result.message)
+                throw AppFunctionNotSupportedException(result.message)
 
             is org.meshtastic.core.data.ai.GetNodeListResult.Error ->
                 throw AppFunctionInvalidArgumentException(result.reason)
@@ -192,7 +195,7 @@ class MeshtasticAppFunctions(private val provider: AiFunctionProvider) {
                 )
 
             is org.meshtastic.core.data.ai.GetChannelInfoResult.NotConnected ->
-                throw AppFunctionInvalidArgumentException(result.message)
+                throw AppFunctionNotSupportedException(result.message)
 
             is org.meshtastic.core.data.ai.GetChannelInfoResult.Error ->
                 throw AppFunctionInvalidArgumentException(result.reason)
@@ -230,7 +233,7 @@ class MeshtasticAppFunctions(private val provider: AiFunctionProvider) {
                 )
 
             is org.meshtastic.core.data.ai.GetDeviceStatusResult.NotAvailable ->
-                throw AppFunctionInvalidArgumentException(result.message)
+                throw AppFunctionNotSupportedException(result.message)
 
             is org.meshtastic.core.data.ai.GetDeviceStatusResult.Error ->
                 throw AppFunctionInvalidArgumentException(result.reason)
@@ -278,10 +281,10 @@ class MeshtasticAppFunctions(private val provider: AiFunctionProvider) {
                 )
 
             is org.meshtastic.core.data.ai.GetNodeDetailsResult.NotConnected ->
-                throw AppFunctionInvalidArgumentException(result.message)
+                throw AppFunctionNotSupportedException(result.message)
 
             is org.meshtastic.core.data.ai.GetNodeDetailsResult.NotFound ->
-                throw AppFunctionInvalidArgumentException(result.message)
+                throw AppFunctionElementNotFoundException(result.message)
 
             is org.meshtastic.core.data.ai.GetNodeDetailsResult.Error ->
                 throw AppFunctionInvalidArgumentException(result.reason)
@@ -319,7 +322,7 @@ class MeshtasticAppFunctions(private val provider: AiFunctionProvider) {
                 )
 
             is org.meshtastic.core.data.ai.GetMeshMetricsResult.NotConnected ->
-                throw AppFunctionInvalidArgumentException(result.message)
+                throw AppFunctionNotSupportedException(result.message)
 
             is org.meshtastic.core.data.ai.GetMeshMetricsResult.Error ->
                 throw AppFunctionInvalidArgumentException(result.reason)
@@ -342,6 +345,7 @@ class MeshtasticAppFunctions(private val provider: AiFunctionProvider) {
     suspend fun getRecentMessages(
         context: AppFunctionContext,
         contactName: String? = null,
+        @AppFunctionIntValueConstraint(enumValues = [1, 5, 10, 20, 50])
         limit: Int = AiFunctionProvider.DEFAULT_MESSAGE_LIMIT,
     ): GetRecentMessagesResponse {
         val result =
@@ -367,7 +371,7 @@ class MeshtasticAppFunctions(private val provider: AiFunctionProvider) {
                 )
 
             is org.meshtastic.core.data.ai.GetRecentMessagesResult.ContactNotFound ->
-                throw AppFunctionInvalidArgumentException(result.message)
+                throw AppFunctionElementNotFoundException(result.message)
 
             is org.meshtastic.core.data.ai.GetRecentMessagesResult.Error ->
                 throw AppFunctionInvalidArgumentException(result.reason)

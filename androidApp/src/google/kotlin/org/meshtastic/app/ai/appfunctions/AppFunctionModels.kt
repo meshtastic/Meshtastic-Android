@@ -16,7 +16,9 @@
  */
 package org.meshtastic.app.ai.appfunctions
 
+import androidx.appfunctions.AppFunctionIntValueConstraint
 import androidx.appfunctions.AppFunctionSerializable
+import androidx.appfunctions.AppFunctionStringValueConstraint
 
 /** Response returned when a message is successfully sent via the mesh network. */
 @AppFunctionSerializable(isDescribedByKDoc = true)
@@ -33,6 +35,7 @@ data class SendMessageResponse(
 @AppFunctionSerializable(isDescribedByKDoc = true)
 data class MeshStatusResponse(
     /** The current radio connection state (e.g., CONNECTED, DISCONNECTED). */
+    @property:AppFunctionStringValueConstraint(enumValues = ["CONNECTED", "DISCONNECTED", "DEVICE_SLEEP"])
     val connectionState: String,
     /** The number of nodes currently online (heard within the last 2 hours). */
     val onlineNodeCount: Int,
@@ -70,7 +73,7 @@ data class GetNodeListResponse(
 @AppFunctionSerializable(isDescribedByKDoc = true)
 data class ChannelInfo(
     /** The channel index (0-7). */
-    val index: Int,
+    @property:AppFunctionIntValueConstraint(enumValues = [0, 1, 2, 3, 4, 5, 6, 7]) val index: Int,
     /** The human-readable name of the channel. */
     val name: String,
     /** Whether this is the primary/default channel. */
@@ -98,6 +101,7 @@ data class GetDeviceStatusResponse(
     /** The device battery percentage (0-100), or null if not battery-powered. */
     val batteryLevel: Int?,
     /** The charging state (CHARGING, NOT_CHARGING, or UNKNOWN). */
+    @property:AppFunctionStringValueConstraint(enumValues = ["CHARGING", "NOT_CHARGING", "UNKNOWN"])
     val chargingStatus: String,
     /** The display name of the device, or null if not set. */
     val deviceName: String?,
