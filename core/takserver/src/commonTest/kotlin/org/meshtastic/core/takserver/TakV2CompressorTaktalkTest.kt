@@ -66,7 +66,6 @@ class TakV2CompressorTaktalkTest {
         assertEquals("1", decompressed.taktalk!!.chatroom_id)
         assertEquals("English", decompressed.taktalk!!.lang)
         assertTrue(decompressed.taktalk!!.from_voice, "<voice/> marker must survive")
-        assertNull(decompressed.pli, "must not fall back to Pli payload")
     }
 
     @Test

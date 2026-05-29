@@ -64,7 +64,6 @@ class TAKPacketV2RawDetailTest {
 
         // raw_detail must be populated; structured payloads must be null.
         assertNotNull(takPacketV2.raw_detail, "raw_detail must hold the detail bytes")
-        assertNull(takPacketV2.pli, "PLI payload must not be set for u-d-c-c")
         assertNull(takPacketV2.chat, "chat payload must not be set for u-d-c-c")
         assertEquals("u-d-c-c", takPacketV2.cot_type_str.ifEmpty { "u-d-c-c" })
         // Stripping must have fired: the raw_detail bytes must NOT contain the

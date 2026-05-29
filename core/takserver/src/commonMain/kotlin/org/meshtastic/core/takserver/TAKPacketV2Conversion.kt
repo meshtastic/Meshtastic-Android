@@ -82,7 +82,7 @@ object TAKPacketV2Conversion {
                 battery = battery,
                 geo_src = GeoPointSource.GeoPointSource_GPS,
                 alt_src = GeoPointSource.GeoPointSource_GPS,
-                pli = true,
+                // PLI is now implicit: no payload_variant set = position report.
             )
         }
 
@@ -170,31 +170,6 @@ object TAKPacketV2Conversion {
         val timeNow = Clock.System.now()
         val (senderUid, messageId) = TakConversionHelpers.parseDeviceCallsign(rawDeviceCallsign)
 
-        // PLI
-        if (pli != null) {
-            val staleMinutes = if (stale_seconds > 0) (stale_seconds / 60) else DEFAULT_TAK_STALE_MINUTES
-            // Restore the original CoT type and how from the packet — pli() defaults to
-            // DEFAULT_PLI_COT_TYPE/"m-g" but the sending node may have been hostile (a-h-*),
-            // neutral (a-n-*), unknown (a-u-*), etc.
-            val resolvedType =
-                cot_type_str.ifEmpty { TakV2TypeMapper.cotTypeToString(cot_type_id) ?: DEFAULT_PLI_COT_TYPE }
-            val resolvedHow = TakV2TypeMapper.cotHowToString(how) ?: "m-g"
-            return CoTMessage.pli(
-                uid = senderUid.ifEmpty { uid },
-                callsign = senderCallsign,
-                latitude = latitude_i.toDouble() / TAK_COORDINATE_SCALE,
-                longitude = longitude_i.toDouble() / TAK_COORDINATE_SCALE,
-                altitude = altitude.toDouble(),
-                speed = speed.toDouble() / 100.0, // cm/s -> m/s
-                course = course.toDouble() / 100.0, // deg*100 -> deg
-                team = TakConversionHelpers.teamToColorName(team),
-                role = TakConversionHelpers.roleToName(role),
-                battery = battery,
-                staleMinutes = staleMinutes,
-            )
-                .copy(type = resolvedType, how = resolvedHow)
-        }
-
         // GeoChat
         val localChat = chat
         if (localChat != null) {
@@ -264,7 +239,25 @@ object TAKPacketV2Conversion {
             )
         }
 
-        Logger.w { "Cannot convert TAKPacketV2 to CoTMessage: no PLI, chat, or raw_detail payload" }
-        return null
+        // PLI (implicit: no payload_variant set = position report).
+        // All typed variants checked above returned early; reaching here means
+        // the packet is a bare position beacon.
+        val staleMinutes = if (stale_seconds > 0) (stale_seconds / 60) else DEFAULT_TAK_STALE_MINUTES
+        val resolvedType = cot_type_str.ifEmpty { TakV2TypeMapper.cotTypeToString(cot_type_id) ?: DEFAULT_PLI_COT_TYPE }
+        val resolvedHow = TakV2TypeMapper.cotHowToString(how) ?: "m-g"
+        return CoTMessage.pli(
+            uid = senderUid.ifEmpty { uid },
+            callsign = senderCallsign,
+            latitude = latitude_i.toDouble() / TAK_COORDINATE_SCALE,
+            longitude = longitude_i.toDouble() / TAK_COORDINATE_SCALE,
+            altitude = altitude.toDouble(),
+            speed = speed.toDouble() / 100.0, // cm/s -> m/s
+            course = course.toDouble() / 100.0, // deg*100 -> deg
+            team = TakConversionHelpers.teamToColorName(team),
+            role = TakConversionHelpers.roleToName(role),
+            battery = battery,
+            staleMinutes = staleMinutes,
+        )
+            .copy(type = resolvedType, how = resolvedHow)
     }
 }
