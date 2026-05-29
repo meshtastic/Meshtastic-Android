@@ -21,14 +21,14 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.repository.NeighborInfoHandler
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
-import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.ServiceStateWriter
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.NeighborInfo
 
 @Single
 class NeighborInfoHandlerImpl(
     private val nodeManager: NodeManager,
-    private val serviceRepository: ServiceRepository,
+    private val serviceStateWriter: ServiceStateWriter,
     private val nodeRepository: NodeRepository,
 ) : NeighborInfoHandler {
 
@@ -64,6 +64,6 @@ class NeighborInfoHandlerImpl(
 
         val responseText = requestTimer.appendDuration(requestId, formatted, "Neighbor info")
 
-        serviceRepository.setNeighborInfoResponse(responseText)
+        serviceStateWriter.setNeighborInfoResponse(responseText)
     }
 }

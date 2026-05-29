@@ -40,7 +40,7 @@ import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.MeshMessageProcessor
 import org.meshtastic.core.repository.NodeManager
-import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.ServiceStateWriter
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.LogRecord
 import org.meshtastic.proto.MeshPacket
@@ -53,7 +53,7 @@ import kotlin.uuid.Uuid
 @Single
 class MeshMessageProcessorImpl(
     private val nodeManager: NodeManager,
-    private val serviceRepository: ServiceRepository,
+    private val serviceStateWriter: ServiceStateWriter,
     private val meshLogRepository: Lazy<MeshLogRepository>,
     private val dataHandler: Lazy<MeshDataHandler>,
     private val fromRadioDispatcher: FromRadioPacketHandler,
@@ -212,7 +212,7 @@ class MeshMessageProcessorImpl(
             }
         }
 
-        scope.handledLaunch { serviceRepository.emitMeshPacket(packet) }
+        scope.handledLaunch { serviceStateWriter.emitMeshPacket(packet) }
 
         myNodeNum?.let { myNum ->
             val from = packet.from

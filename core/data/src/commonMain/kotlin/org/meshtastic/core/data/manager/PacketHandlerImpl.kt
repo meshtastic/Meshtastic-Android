@@ -41,11 +41,11 @@ import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.RadioNotConnectedException
 import org.meshtastic.core.model.util.toOneLineString
 import org.meshtastic.core.model.util.toPIIString
+import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioInterfaceService
-import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.QueueStatus
@@ -60,7 +60,7 @@ class PacketHandlerImpl(
     private val packetRepository: Lazy<PacketRepository>,
     private val radioInterfaceService: RadioInterfaceService,
     private val meshLogRepository: Lazy<MeshLogRepository>,
-    private val serviceRepository: ServiceRepository,
+    private val connectionStateProvider: ConnectionStateProvider,
     @Named("ServiceScope") private val scope: CoroutineScope,
 ) : PacketHandler {
 
@@ -191,7 +191,7 @@ class PacketHandlerImpl(
         queueJob =
             scope.handledLaunch {
                 try {
-                    while (serviceRepository.connectionState.value == ConnectionState.Connected) {
+                    while (connectionStateProvider.connectionState.value == ConnectionState.Connected) {
                         val packet = queueMutex.withLock { queuedPackets.removeFirstOrNull() } ?: break
                         @Suppress("TooGenericExceptionCaught", "SwallowedException")
                         try {
@@ -250,7 +250,7 @@ class PacketHandlerImpl(
         // Reuse a deferred pre-registered by sendToRadioAndAwait, or create a new one.
         val deferred = responseMutex.withLock { queueResponse.getOrPut(packet.id) { CompletableDeferred() } }
         try {
-            if (serviceRepository.connectionState.value != ConnectionState.Connected) {
+            if (connectionStateProvider.connectionState.value != ConnectionState.Connected) {
                 throw RadioNotConnectedException()
             }
             sendToRadio(ToRadio(packet = packet))

@@ -25,7 +25,7 @@ import org.meshtastic.core.model.fullRouteDiscovery
 import org.meshtastic.core.model.getTracerouteResponse
 import org.meshtastic.core.model.service.TracerouteResponse
 import org.meshtastic.core.repository.NodeRepository
-import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.ServiceStateWriter
 import org.meshtastic.core.repository.TracerouteHandler
 import org.meshtastic.core.repository.TracerouteSnapshotRepository
 import org.meshtastic.core.resources.Res
@@ -36,7 +36,7 @@ import org.meshtastic.proto.MeshPacket
 
 @Single
 class TracerouteHandlerImpl(
-    private val serviceRepository: ServiceRepository,
+    private val serviceStateWriter: ServiceStateWriter,
     private val tracerouteSnapshotRepository: TracerouteSnapshotRepository,
     private val nodeRepository: NodeRepository,
     @Named("ServiceScope") private val scope: CoroutineScope,
@@ -81,7 +81,7 @@ class TracerouteHandlerImpl(
 
             val destination = forwardRoute.firstOrNull() ?: returnRoute.lastOrNull() ?: 0
 
-            serviceRepository.setTracerouteResponse(
+            serviceStateWriter.setTracerouteResponse(
                 TracerouteResponse(
                     message = responseText,
                     destinationNodeNum = destination,

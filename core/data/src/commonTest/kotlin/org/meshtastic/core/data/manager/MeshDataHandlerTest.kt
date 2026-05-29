@@ -93,7 +93,7 @@ class MeshDataHandlerTest {
             MeshDataHandlerImpl(
                 nodeManager = nodeManager,
                 packetHandler = packetHandler,
-                serviceRepository = serviceRepository,
+                serviceStateWriter = serviceRepository,
                 packetRepository = lazy { packetRepository },
                 notificationManager = notificationManager,
                 serviceNotifications = serviceNotifications,

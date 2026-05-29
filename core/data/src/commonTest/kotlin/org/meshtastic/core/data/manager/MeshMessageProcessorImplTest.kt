@@ -67,7 +67,7 @@ class MeshMessageProcessorImplTest {
 
     private fun createProcessor(scope: CoroutineScope): MeshMessageProcessorImpl = MeshMessageProcessorImpl(
         nodeManager = nodeManager,
-        serviceRepository = serviceRepository,
+        serviceStateWriter = serviceRepository,
         meshLogRepository = lazy { meshLogRepository },
         dataHandler = lazy { dataHandler },
         fromRadioDispatcher = fromRadioDispatcher,

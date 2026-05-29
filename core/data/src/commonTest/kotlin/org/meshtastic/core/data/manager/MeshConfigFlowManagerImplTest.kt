@@ -98,7 +98,7 @@ class MeshConfigFlowManagerImplTest {
                 connectionManager = lazy { connectionManager },
                 nodeRepository = nodeRepository,
                 radioConfigRepository = radioConfigRepository,
-                serviceRepository = serviceRepository,
+                serviceStateWriter = serviceRepository,
                 analytics = analytics,
                 commandSender = commandSender,
                 heartbeatSender = DataLayerHeartbeatSender(packetHandler),

@@ -29,7 +29,7 @@ import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.Notification
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PacketHandler
-import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.ServiceStateWriter
 import org.meshtastic.core.repository.XModemManager
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.client_notification
@@ -45,7 +45,7 @@ import org.meshtastic.proto.FromRadio
 /** Implementation of [FromRadioPacketHandler] that dispatches [FromRadio] variants to specialized handlers. */
 @Single
 class FromRadioPacketHandlerImpl(
-    private val serviceRepository: ServiceRepository,
+    private val serviceStateWriter: ServiceStateWriter,
     private val configFlowManager: Lazy<MeshConfigFlowManager>,
     private val configHandler: Lazy<MeshConfigHandler>,
     private val xmodemManager: Lazy<XModemManager>,
@@ -85,7 +85,7 @@ class FromRadioPacketHandlerImpl(
 
             nodeInfo != null -> {
                 configFlowManager.value.handleNodeInfo(nodeInfo)
-                serviceRepository.setConnectionProgress("Nodes (${configFlowManager.value.newNodeCount})")
+                serviceStateWriter.setConnectionProgress("Nodes (${configFlowManager.value.newNodeCount})")
             }
 
             configCompleteId != null -> configFlowManager.value.handleConfigComplete(configCompleteId)
@@ -116,7 +116,7 @@ class FromRadioPacketHandlerImpl(
     }
 
     private fun handleClientNotification(cn: ClientNotification) {
-        serviceRepository.setClientNotification(cn)
+        serviceStateWriter.setClientNotification(cn)
 
         scope.handledLaunch {
             val inform = cn.key_verification_number_inform

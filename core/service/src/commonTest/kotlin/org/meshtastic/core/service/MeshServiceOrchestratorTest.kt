@@ -98,7 +98,7 @@ class MeshServiceOrchestratorTest {
 
         return MeshServiceOrchestrator(
             radioInterfaceService = radioInterfaceService,
-            serviceRepository = serviceRepository,
+            serviceStateWriter = serviceRepository,
             nodeManager = nodeManager,
             messageProcessor = messageProcessor,
             serviceNotifications = serviceNotifications,

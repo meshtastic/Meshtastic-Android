@@ -35,7 +35,7 @@ import org.meshtastic.core.repository.MeshMessageProcessor
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.RadioInterfaceService
-import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.ServiceStateWriter
 import org.meshtastic.core.repository.TakPrefs
 import org.meshtastic.core.takserver.TAKMeshIntegration
 import org.meshtastic.core.takserver.TAKServerManager
@@ -52,7 +52,7 @@ import org.meshtastic.core.takserver.TAKServerManager
 @Single
 class MeshServiceOrchestrator(
     private val radioInterfaceService: RadioInterfaceService,
-    private val serviceRepository: ServiceRepository,
+    private val serviceStateWriter: ServiceStateWriter,
     private val nodeManager: NodeManager,
     private val messageProcessor: MeshMessageProcessor,
     private val serviceNotifications: MeshNotificationManager,
@@ -136,7 +136,7 @@ class MeshServiceOrchestrator(
             .launchIn(newScope)
 
         radioInterfaceService.connectionError
-            .onEach { errorMessage -> serviceRepository.setErrorMessage(errorMessage, Severity.Warn) }
+            .onEach { errorMessage -> serviceStateWriter.setErrorMessage(errorMessage, Severity.Warn) }
             .launchIn(newScope)
 
         nodeManager.loadCachedNodeDB()

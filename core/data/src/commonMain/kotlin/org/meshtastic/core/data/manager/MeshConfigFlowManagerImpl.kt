@@ -34,7 +34,7 @@ import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NotificationPrefs
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
-import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.ServiceStateWriter
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.FileInfo
 import org.meshtastic.proto.FirmwareEdition
@@ -50,7 +50,7 @@ class MeshConfigFlowManagerImpl(
     private val connectionManager: Lazy<MeshConnectionManager>,
     private val nodeRepository: NodeRepository,
     private val radioConfigRepository: RadioConfigRepository,
-    private val serviceRepository: ServiceRepository,
+    private val serviceStateWriter: ServiceStateWriter,
     private val analytics: PlatformAnalytics,
     private val commandSender: CommandSender,
     private val heartbeatSender: DataLayerHeartbeatSender,
@@ -188,7 +188,7 @@ class MeshConfigFlowManagerImpl(
             analytics.setDeviceAttributes(info.firmwareVersion ?: "unknown", info.model ?: "unknown")
             nodeManager.setNodeDbReady(true)
             nodeManager.setAllowNodeDbWrites(true)
-            serviceRepository.setConnectionState(ConnectionState.Connected)
+            serviceStateWriter.setConnectionState(ConnectionState.Connected)
             connectionManager.value.onNodeDbReady()
         }
     }
