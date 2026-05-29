@@ -17,12 +17,7 @@
 package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
-import kotlinx.atomicfu.atomic
-import kotlinx.atomicfu.update
-import kotlinx.collections.immutable.persistentMapOf
 import org.koin.core.annotation.Single
-import org.meshtastic.core.common.util.NumberFormatter
-import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.repository.NeighborInfoHandler
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
@@ -37,13 +32,11 @@ class NeighborInfoHandlerImpl(
     private val nodeRepository: NodeRepository,
 ) : NeighborInfoHandler {
 
-    private val startTimes = atomic(persistentMapOf<Int, Long>())
+    private val requestTimer = RequestTimer()
 
     override var lastNeighborInfo: NeighborInfo? = null
 
-    override fun recordStartTime(requestId: Int) {
-        startTimes.update { it.put(requestId, nowMillis) }
-    }
+    override fun recordStartTime(requestId: Int) = requestTimer.start(requestId)
 
     override fun handleNeighborInfo(packet: MeshPacket) {
         val payload = packet.decoded?.payload ?: return
@@ -58,8 +51,6 @@ class NeighborInfoHandlerImpl(
 
         // Format for UI response
         val requestId = packet.decoded?.request_id ?: 0
-        val start = startTimes.value[requestId]
-        startTimes.update { it.remove(requestId) }
 
         val neighbors =
             ni.neighbors.joinToString("\n") { n ->
@@ -71,20 +62,8 @@ class NeighborInfoHandlerImpl(
         val fromUser = nodeRepository.getUser(from)
         val formatted = "Neighbors of ${fromUser.long_name}:\n$neighbors"
 
-        val responseText =
-            if (start != null) {
-                val elapsedMs = nowMillis - start
-                val seconds = elapsedMs / MILLIS_PER_SECOND
-                Logger.i { "Neighbor info $requestId complete in $seconds s" }
-                "$formatted\n\nDuration: ${NumberFormatter.format(seconds, 1)} s"
-            } else {
-                formatted
-            }
+        val responseText = requestTimer.appendDuration(requestId, formatted, "Neighbor info")
 
         serviceRepository.setNeighborInfoResponse(responseText)
-    }
-
-    companion object {
-        private const val MILLIS_PER_SECOND = 1000.0
     }
 }
