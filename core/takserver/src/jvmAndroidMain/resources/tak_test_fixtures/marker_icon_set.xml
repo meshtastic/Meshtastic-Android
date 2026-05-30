@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <event version="2.0" uid="4a0f4f84-240c-4ff9-b7b0-d08beec900b3" type="a-u-G" time="2026-03-15T14:22:10Z" start="2026-03-15T14:22:10Z" stale="2026-03-16T14:22:10Z" how="h-g-i-g-o">
-  <point lat="33.12840" lon="-107.25280" hae="9999999.0" ce="9999999.0" le="9999999.0"/>
+  <point lat="33.13353" lon="-107.24224" hae="9999999.0" ce="9999999.0" le="9999999.0"/>
   <detail>
     <status readiness="true"/>
     <archive/>

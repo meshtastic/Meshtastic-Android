@@ -7,6 +7,9 @@ inputs:
   jdk_distribution:
     description: 'JDK distribution (temurin or jetbrains)'
     default: 'temurin'
+  install_jetbrains_jdk:
+    description: 'Also install JetBrains JDK 21 for Compose Desktop toolchain resolution'
+    default: 'false'
   gradle_encryption_key:
     description: 'Encryption key for Gradle remote cache'
     required: false
@@ -25,6 +28,22 @@ runs:
       with:
         java-version: '21'
         distribution: ${{ inputs.jdk_distribution }}
+        token: ${{ github.token }}
+
+    - name: Restore cached JetBrains JDK 21
+      if: inputs.install_jetbrains_jdk == 'true'
+      id: cache-jbr
+      uses: actions/cache@v5
+      with:
+        path: ${{ runner.tool_cache }}/Java_JetBrains_jdk
+        key: jbr-21-${{ runner.os }}-${{ runner.arch }}
+
+    - name: Set up JetBrains JDK 21 (for Compose Desktop)
+      if: inputs.install_jetbrains_jdk == 'true'
+      uses: actions/setup-java@v5
+      with:
+        java-version: '21'
+        distribution: 'jetbrains'
         token: ${{ github.token }}
 
     - name: Setup Gradle

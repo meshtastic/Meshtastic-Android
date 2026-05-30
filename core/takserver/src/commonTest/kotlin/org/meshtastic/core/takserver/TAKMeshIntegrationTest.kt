@@ -385,6 +385,39 @@ class TAKMeshIntegrationTest {
         assertTrue(h.commandSender.sentPackets.isEmpty())
     }
 
+    // ── TAK-Talk strip preservation (regression) ────────────────────────────
+
+    @Test
+    fun `stripNonEssentialElements preserves TAK-Talk voice and marti`() {
+        // Regression guard: <voice/> (push-to-talk marker) and <marti><dest .../>
+        // </marti> (directed routing) were once added to STRIP_PATTERNS, which
+        // silently broke TAK-Talk end-to-end — ATAK received the m-t-t CoT but its
+        // plugin could neither play (no <voice/>) nor route (no <marti/>) it. Both
+        // MUST survive the send-side strip.
+        val mtt =
+            """
+            <event version="2.0" uid="TAKTALK-MESSAGE-test" type="m-t-t" how="null" time="t" start="t" stale="t">
+              <point lat="0.0" lon="0.0" hae="9999999.0" ce="9999999.0" le="9999999.0"/>
+              <detail>
+                <callsign>ASPEN</callsign><lang>English</lang><text>Testing 123</text>
+                <chatroom-id>1</chatroom-id><takv version="x"/><voice/>
+                <marti><dest callsign="ETHEL"/></marti>
+              </detail>
+            </event>
+            """
+                .trimIndent()
+
+        val stripped = TAKMeshIntegration.stripNonEssentialElements(mtt)
+
+        assertTrue(stripped.contains("<voice/>"), "TAK-Talk <voice/> PTT marker must survive strip")
+        assertTrue(
+            stripped.contains("<marti>") && stripped.contains("dest callsign=\"ETHEL\""),
+            "TAK-Talk <marti> directed-routing must survive strip",
+        )
+        // Sanity: genuinely non-essential elements are still stripped.
+        assertTrue(!stripped.contains("<takv"), "non-essential <takv> should still be stripped")
+    }
+
     // ── Inbound mesh → TAK client (V1) ──────────────────────────────────────
 
     @Test

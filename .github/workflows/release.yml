@@ -286,6 +286,7 @@ jobs:
         with:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           cache_read_only: 'false'
+          install_jetbrains_jdk: 'true'
 
       - name: Install dependencies for AppImage
         if: runner.os == 'Linux'
@@ -369,6 +370,7 @@ jobs:
         with:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           cache_read_only: 'true'
+          install_jetbrains_jdk: 'true'
 
       # Uses an isolated Gradle user home so every artifact actually traverses the
       # network — the flatpak-sources plugin captures URLs via BuildOperationListener and

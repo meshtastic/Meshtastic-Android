@@ -16,36 +16,36 @@ aliases:
 
 ## Первый запуск
 
-When you open the app for the first time, you'll be guided through an introductory flow that helps configure essential permissions and settings. Each step can be completed in order, or you can skip and configure permissions later in Android settings.
+Когда ты запускаешь приложение впервые, то будет предложено пройти через начальный процесс, который поможет настроить основные разрешения и параметры. Каждый шаг нужно выполнить по порядку, или же можешь пропустить его и настроить разрешения позже в настройках Android.
 
-### Welcome Screen
+### Экран приветствия
 
-The welcome screen introduces Meshtastic and its core capabilities:
+Экран приветствия представляет Meshtastic и его основные возможности:
 
-- Off-grid mesh communication
-- No cellular or internet required
-- End-to-end encrypted messaging
+- Автономная mesh-связь
+- Не требуется мобильная связь или интернет
+- Сквозное шифрование сообщений
 
-Tap **Get Started** to proceed through the setup flow.
+Нажми **Начать** для перехода к настройке.
 
-![Welcome screen](../../assets/screenshots/onboarding_welcome.png)
+![Экран приветствия](../../assets/screenshots/onboarding_welcome.png)
 
-## Permissions
+## Разрешения
 
-The app requests several permissions during setup. Each one serves a specific purpose, and some are required for core functionality.
+Приложение запрашивает несколько разрешений во время настройки. Каждое из них служит определенной цели, и некоторые необходимы для основной функциональности.
 
-### Bluetooth Permission
+### Разрешения Bluetooth
 
-Bluetooth is the primary connection method between your phone and Meshtastic radio:
+Bluetooth является основным методом соединения между телефоном и радиостанцией Meshtastic:
 
-- **Bluetooth scanning** — discover nearby Meshtastic radios
-- **Bluetooth connect** — establish and maintain connections with paired radios
+- **Сканирование Bluetooth** — обнаружение ближайших радиостанций Meshtastic
+- **Подключение по Bluetooth** — установка и поддержание соединения с сопряжёнными радиоустройствами
 
-Grant both permissions when prompted. Without Bluetooth, you'll need to use USB or TCP connections instead.
+Предоставь оба разрешения при запросе. Без Bluetooth тебе придется использовать USB или TCP соединения.
 
-### Location Permission
+### Разрешение на доступ к местоположению
 
-> ⚠️ **Why is location required for Bluetooth?** Android requires location permission to discover nearby Bluetooth Low Energy devices. This is an Android system requirement, not a Meshtastic-specific choice.
+> ⚠️ **Почему для Bluetooth требуется местоположение?** Android требует разрешение на определение местоположения для обнаружения устройств Bluetooth Low Energy поблизости. Это требование системы Android, а не специфический выбор Meshtastic.
 
 Meshtastic also uses your location for:
 

@@ -189,6 +189,12 @@
   },
   "pullRequests": [
     {
+      "id": "10578",
+      "title": "PR: Fix has_module_settings flag inconsistency in channel updates",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10578",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
       "id": "10569",
       "title": "feat: add RockBase IoT NM-EPD-420 board support",
       "page_url": "https://github.com/meshtastic/firmware/pull/10569",

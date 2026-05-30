@@ -97,8 +97,6 @@ internal actual object TakV2Compressor {
 
         val payload =
             when {
-                packet.pli != null -> TakPacketV2Data.Payload.Pli(true)
-
                 packet.chat != null ->
                     TakPacketV2Data.Payload.Chat(
                         message = packet.chat!!.message,
@@ -174,11 +172,14 @@ internal actual object TakV2Compressor {
                         fillColor = s.fill_color.value,
                         fillArgb = s.fill_argb,
                         labelsOn = s.labels_on,
+                        // v0.4.0: vertices are two packed sint32 delta columns
+                        // (vertex_lat_deltas / vertex_lon_deltas), zigzag deltas
+                        // from the event anchor; SDK data stores absolute lat/lon.
                         vertices =
-                        s.vertices.map { v ->
+                        s.vertex_lat_deltas.zip(s.vertex_lon_deltas) { latD, lonD ->
                             TakPacketV2Data.Payload.Vertex(
-                                latI = packet.latitude_i + v.lat_delta_i,
-                                lonI = packet.longitude_i + v.lon_delta_i,
+                                latI = packet.latitude_i + latD,
+                                lonI = packet.longitude_i + lonD,
                             )
                         },
                         truncated = s.truncated,
@@ -284,7 +285,10 @@ internal actual object TakV2Compressor {
 
                 packet.raw_detail != null -> TakPacketV2Data.Payload.RawDetail(packet.raw_detail!!.toByteArray())
 
-                else -> TakPacketV2Data.Payload.None
+                // v0.4.0: PLI is implicit — a packet with no payload_variant set
+                // is a position report (the bool pli oneof arm was removed).
+                // Mirrors the SDK serializer's toData default.
+                else -> TakPacketV2Data.Payload.Pli(true)
             }
 
         return TakPacketV2Data(
@@ -359,7 +363,8 @@ internal actual object TakV2Compressor {
             tak_os = data.takOs,
             endpoint = data.endpoint,
             phone = data.phone,
-            pli = if (data.payload is TakPacketV2Data.Payload.Pli) true else null,
+            // v0.4.0: PLI is implicit — no payload_variant is set for a PLI (the
+            // bool pli oneof arm was removed). Pli/None simply set no oneof field.
             chat =
             (data.payload as? TakPacketV2Data.Payload.Chat)?.let { chat ->
                 WireGeoChat(
@@ -409,14 +414,10 @@ internal actual object TakV2Compressor {
                     fill_color = WireTeam.fromValue(s.fillColor) ?: WireTeam.Unspecifed_Color,
                     fill_argb = s.fillArgb,
                     labels_on = s.labelsOn,
-                    // Delta-encode vertices relative to the event anchor.
-                    vertices =
-                    s.vertices.map { v ->
-                        WireCotGeoPoint(
-                            lat_delta_i = v.latI - data.latitudeI,
-                            lon_delta_i = v.lonI - data.longitudeI,
-                        )
-                    },
+                    // v0.4.0: delta-encode vertices into two packed sint32 columns
+                    // relative to the event anchor (was repeated CotGeoPoint).
+                    vertex_lat_deltas = s.vertices.map { it.latI - data.latitudeI },
+                    vertex_lon_deltas = s.vertices.map { it.lonI - data.longitudeI },
                     truncated = s.truncated,
                     bullseye_distance_dm = s.bullseyeDistanceDm,
                     bullseye_bearing_ref = s.bullseyeBearingRef,
