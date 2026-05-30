@@ -82,6 +82,11 @@ class TAKMeshIntegration(
 
     @Volatile private var currentRole: MemberRole = MemberRole.Unspecifed
 
+    // Drops CoT the bridge has already injected within a short window — guards against the
+    // same mesh message arriving via multiple LoRa relay paths or a retransmit. Touched only
+    // from the single meshPacketFlow collector coroutine (handleMeshPacket), so no locking.
+    private val deliveryDedup = CotDeliveryDedup()
+
     fun start(scope: CoroutineScope) {
         if (!isRunning.compareAndSet(expectedValue = false, newValue = true)) return
 
@@ -335,6 +340,13 @@ class TAKMeshIntegration(
             // and collapse inter-tag whitespace so ATAK's streaming parser sees
             // bare <event>...</event> on a single line. Centralized in the SDK.
             val xml = CotMeshSanitizer.normalizeCotXml(rawXml)
+            // Drop exact duplicates the mesh delivered more than once (multi-path relay or
+            // retransmit) so ATAK doesn't surface doubled chat / TAK-Talk messages. Genuine
+            // updates (new PLI position, moved marker, …) differ in content and pass through.
+            if (!deliveryDedup.admit(xml)) {
+                Logger.d { "Dropped duplicate CoT from mesh (already delivered within dedup window)" }
+                return
+            }
             // Logger.d { "RAW CoT IN (mesh): $xml" }
             // Routes: ATAK ignores b-m-r CoT events over TCP streaming.
             // Convert to a KML data package and write to ATAK's auto-import dir.
