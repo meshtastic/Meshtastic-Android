@@ -335,4 +335,18 @@ class StoreForwardPacketHandlerImplTest {
 
         verifySuspend { packetRepository.updateSFPPStatus(any(), any(), any(), any(), any(), any(), any()) }
     }
+
+    // ---------- Legacy S&F: malformed proto ----------
+
+    @Test
+    fun `handleStoreAndForward with malformed payload does not crash`() = testScope.runTest {
+        val malformedPayload = ByteString.of(0xFF.toByte(), 0xFE.toByte(), 0x07, 0x0E)
+        val packet =
+            MeshPacket(from = 999, decoded = Data(portnum = PortNum.STORE_FORWARD_APP, payload = malformedPayload))
+        val dataPacket = makeDataPacket(999)
+
+        // Should not throw — the handler catches the IOException from proto decoding
+        handler.handleStoreAndForward(packet, dataPacket, myNodeNum)
+        advanceUntilIdle()
+    }
 }

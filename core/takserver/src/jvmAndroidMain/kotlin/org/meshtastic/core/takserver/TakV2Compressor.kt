@@ -28,6 +28,8 @@ import org.meshtastic.proto.GeoChat as WireGeoChat
 import org.meshtastic.proto.Marker as WireMarker
 import org.meshtastic.proto.RangeAndBearing as WireRangeAndBearing
 import org.meshtastic.proto.Route as WireRoute
+import org.meshtastic.proto.TakTalkMessage as WireTakTalkMessage
+import org.meshtastic.proto.TakTalkRoomData as WireTakTalkRoomData
 import org.meshtastic.proto.TaskRequest as WireTaskRequest
 import org.meshtastic.proto.Team as WireTeam
 import org.meshtastic.tak.TakCompressor as SdkCompressor
@@ -95,8 +97,6 @@ internal actual object TakV2Compressor {
 
         val payload =
             when {
-                packet.pli != null -> TakPacketV2Data.Payload.Pli(true)
-
                 packet.chat != null ->
                     TakPacketV2Data.Payload.Chat(
                         message = packet.chat!!.message,
@@ -104,6 +104,41 @@ internal actual object TakV2Compressor {
                         toCallsign = packet.chat!!.to_callsign,
                         receiptForUid = packet.chat!!.receipt_for_uid,
                         receiptType = packet.chat!!.receipt_type.value,
+                        // TAKTALK sidecars (proto3 optional → wire nullable).
+                        // Empty string = empty `<Ea/>` / `<roomId/>` in source XML;
+                        // null on the wire = field absent.  The SDK's Chat data class
+                        // uses "" for absent, so map null → "".  voice_profile_id has
+                        // a present-vs-empty-marker distinction tracked separately
+                        // via hasVoiceProfile.
+                        lang = packet.chat!!.lang ?: "",
+                        roomId = packet.chat!!.room_id ?: "",
+                        voiceProfileId = packet.chat!!.voice_profile_id ?: "",
+                        hasVoiceProfile = packet.chat!!.voice_profile_id != null,
+                    )
+
+                // TAKTALK voice/text message (m-t-t).  Without this branch,
+                // m-t-t events fall through to Payload.None and the receiver
+                // can't rebuild the CoT event, so TTS playback never fires.
+                packet.taktalk != null ->
+                    TakPacketV2Data.Payload.TakTalk(
+                        text = packet.taktalk!!.text,
+                        chatroomId = packet.taktalk!!.chatroom_id,
+                        lang = packet.taktalk!!.lang,
+                        fromVoice = packet.taktalk!!.from_voice,
+                    )
+
+                // TAKTALK room/membership broadcast (y-).
+                packet.taktalk_room != null ->
+                    @Suppress("DEPRECATION")
+                    TakPacketV2Data.Payload.TakTalkRoom(
+                        // sender_callsign deprecated in SDK v0.3.2 — sender
+                        // identity is now in envelope packet.callsign;
+                        // v0.3.1 packets still populate the legacy field so
+                        // we forward it for source-compat readers.
+                        senderCallsign = packet.taktalk_room!!.sender_callsign,
+                        roomId = packet.taktalk_room!!.room_id,
+                        roomName = packet.taktalk_room!!.room_name,
+                        participants = packet.taktalk_room!!.participants.toList(),
                     )
 
                 packet.aircraft != null ->
@@ -137,11 +172,14 @@ internal actual object TakV2Compressor {
                         fillColor = s.fill_color.value,
                         fillArgb = s.fill_argb,
                         labelsOn = s.labels_on,
+                        // v0.4.0: vertices are two packed sint32 delta columns
+                        // (vertex_lat_deltas / vertex_lon_deltas), zigzag deltas
+                        // from the event anchor; SDK data stores absolute lat/lon.
                         vertices =
-                        s.vertices.map { v ->
+                        s.vertex_lat_deltas.zip(s.vertex_lon_deltas) { latD, lonD ->
                             TakPacketV2Data.Payload.Vertex(
-                                latI = packet.latitude_i + v.lat_delta_i,
-                                lonI = packet.longitude_i + v.lon_delta_i,
+                                latI = packet.latitude_i + latD,
+                                lonI = packet.longitude_i + lonD,
                             )
                         },
                         truncated = s.truncated,
@@ -247,7 +285,10 @@ internal actual object TakV2Compressor {
 
                 packet.raw_detail != null -> TakPacketV2Data.Payload.RawDetail(packet.raw_detail!!.toByteArray())
 
-                else -> TakPacketV2Data.Payload.None
+                // v0.4.0: PLI is implicit — a packet with no payload_variant set
+                // is a position report (the bool pli oneof arm was removed).
+                // Mirrors the SDK serializer's toData default.
+                else -> TakPacketV2Data.Payload.Pli(true)
             }
 
         return TakPacketV2Data(
@@ -274,6 +315,12 @@ internal actual object TakV2Compressor {
             takOs = packet.tak_os,
             endpoint = packet.endpoint,
             phone = packet.phone,
+            // Directed-routing recipient callsigns (<marti><dest …/>…</marti>).
+            // Empty list = broadcast (default); populated for TAKTALK m-t-t,
+            // directed b-t-f DMs, and any other CoT shape that ATAK addresses
+            // to specific peers. Without this field the receive-side rebuild
+            // drops <marti>, breaking TAKTALK voice TTS.
+            marti = packet.marti?.dest_callsign?.toList() ?: emptyList(),
             payload = payload,
         )
     }
@@ -316,7 +363,8 @@ internal actual object TakV2Compressor {
             tak_os = data.takOs,
             endpoint = data.endpoint,
             phone = data.phone,
-            pli = if (data.payload is TakPacketV2Data.Payload.Pli) true else null,
+            // v0.4.0: PLI is implicit — no payload_variant is set for a PLI (the
+            // bool pli oneof arm was removed). Pli/None simply set no oneof field.
             chat =
             (data.payload as? TakPacketV2Data.Payload.Chat)?.let { chat ->
                 WireGeoChat(
@@ -327,6 +375,13 @@ internal actual object TakV2Compressor {
                     receipt_type =
                     WireGeoChat.ReceiptType.fromValue(chat.receiptType)
                         ?: WireGeoChat.ReceiptType.ReceiptType_None,
+                    // TAKTALK sidecars.  Empty SDK string → wire null (field absent)
+                    // so non-TAKTALK chats don't carry empty sidecar bytes on every
+                    // mesh packet.  voice_profile_id stays present-but-empty when
+                    // hasVoiceProfile=true so the receiver can re-emit `<voice_profile_id/>`.
+                    lang = chat.lang.ifEmpty { null },
+                    room_id = chat.roomId.ifEmpty { null },
+                    voice_profile_id = if (chat.hasVoiceProfile) chat.voiceProfileId else null,
                 )
             },
             aircraft =
@@ -359,14 +414,10 @@ internal actual object TakV2Compressor {
                     fill_color = WireTeam.fromValue(s.fillColor) ?: WireTeam.Unspecifed_Color,
                     fill_argb = s.fillArgb,
                     labels_on = s.labelsOn,
-                    // Delta-encode vertices relative to the event anchor.
-                    vertices =
-                    s.vertices.map { v ->
-                        WireCotGeoPoint(
-                            lat_delta_i = v.latI - data.latitudeI,
-                            lon_delta_i = v.lonI - data.longitudeI,
-                        )
-                    },
+                    // v0.4.0: delta-encode vertices into two packed sint32 columns
+                    // relative to the event anchor (was repeated CotGeoPoint).
+                    vertex_lat_deltas = s.vertices.map { it.latI - data.latitudeI },
+                    vertex_lon_deltas = s.vertices.map { it.lonI - data.longitudeI },
                     truncated = s.truncated,
                     bullseye_distance_dm = s.bullseyeDistanceDm,
                     bullseye_bearing_ref = s.bullseyeBearingRef,
@@ -476,6 +527,42 @@ internal actual object TakV2Compressor {
                 )
             },
             raw_detail = (data.payload as? TakPacketV2Data.Payload.RawDetail)?.bytes?.toByteString(),
+            // TAKTALK voice/text message (m-t-t).  Without this, m-t-t events
+            // would compress with no payload set, the receiver's wireToSdkData
+            // would fall through to Payload.None, and TAKTALK plugin would
+            // never see the rebuilt CoT event for TTS playback.
+            taktalk =
+            (data.payload as? TakPacketV2Data.Payload.TakTalk)?.let { tt ->
+                WireTakTalkMessage(
+                    text = tt.text,
+                    chatroom_id = tt.chatroomId,
+                    lang = tt.lang,
+                    from_voice = tt.fromVoice,
+                )
+            },
+            // TAKTALK room/membership broadcast (y-).  Required for receivers
+            // to resolve TAKTALK room UUIDs to friendly names + rosters.
+            taktalk_room =
+            (data.payload as? TakPacketV2Data.Payload.TakTalkRoom)?.let { room ->
+                @Suppress("DEPRECATION")
+                WireTakTalkRoomData(
+                    // sender_callsign deprecated in SDK v0.3.2 — the SDK
+                    // builder reconstitutes <sender-callsign> from envelope
+                    // packet.callsign, so we stop emitting the duplicate
+                    // wire byte. Field stays present for one release so
+                    // v0.3.1 receivers continue decoding cleanly.
+                    sender_callsign = "",
+                    room_id = room.roomId,
+                    room_name = room.roomName,
+                    participants = room.participants.toList(),
+                )
+            },
+            // Directed-routing recipient list (<marti><dest …/>…</marti>).
+            // Empty list = broadcast (default); populated for TAKTALK m-t-t
+            // and directed b-t-f DMs. Encode an explicit Marti only when
+            // there is at least one destination — the wrapper costs wire
+            // bytes for no benefit on broadcast packets.
+            marti = data.marti.takeIf { it.isNotEmpty() }?.let { org.meshtastic.proto.Marti(dest_callsign = it) },
         )
     }
 }

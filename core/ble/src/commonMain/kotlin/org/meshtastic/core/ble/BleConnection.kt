@@ -78,6 +78,13 @@ interface BleConnection {
      * Default implementation returns `false` for platforms that don't support it.
      */
     fun requestHighConnectionPriority(): Boolean = false
+
+    /**
+     * Requests the platform to return to balanced BLE connection priority (default ~30–50 ms interval). Call after
+     * latency-sensitive operations (initial config drain, DFU) to reduce ongoing battery draw. Default implementation
+     * returns `false` for platforms that don't support it.
+     */
+    fun requestBalancedConnectionPriority(): Boolean = false
 }
 
 /** Represents a BLE service for commonMain. */

@@ -245,6 +245,8 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
 
     override fun requestHighConnectionPriority(): Boolean = peripheral?.requestHighConnectionPriority() == true
 
+    override fun requestBalancedConnectionPriority(): Boolean = peripheral?.requestBalancedConnectionPriority() == true
+
     /** Ensures the previous peripheral's GATT resources are fully released. */
     private suspend fun cleanUpPeripheral(tag: String) {
         withContext(NonCancellable) { safeClosePeripheral(tag) }

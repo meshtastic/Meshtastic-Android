@@ -9,17 +9,13 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
-* chore(deps): update takpacket.sdk to v0.2.6 (#5609) by renovate[bot] (@renovate[bot]) in [`86e329b75`](https://github.com/meshtastic/Meshtastic-Android/commit/86e329b752957a547339233eb76d9cce8d6e340c)
-* chore(deps): update core/proto/src/main/proto digest to e4219a0 (#5608) by renovate[bot] (@renovate[bot]) in [`5431ba87c`](https://github.com/meshtastic/Meshtastic-Android/commit/5431ba87c485c4896469ba22ea86cb31a048bd0b)
-* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5607) by James Rich (@jamesarich) in [`212270ebf`](https://github.com/meshtastic/Meshtastic-Android/commit/212270ebf0e2c441ff338a737d7d50e5550e8a63)
-* docs: update CHANGELOG.md (#5605) by github-actions[bot] (@github-actions[bot]) in [`c55d6e0ac`](https://github.com/meshtastic/Meshtastic-Android/commit/c55d6e0ac49455a5513067e36e8e338c7204d995)
-* fix(flatpak): generate complete offline-buildable manifest for desktopApp (#5610) by James Rich (@jamesarich) in [`a4522f9f4`](https://github.com/meshtastic/Meshtastic-Android/commit/a4522f9f4db01c55dc55cce0e0ced13ac8ff0d1d)
-* chore(deps): update devtools.ksp to v2.3.9 (#5611) by renovate[bot] (@renovate[bot]) in [`dad5e41c7`](https://github.com/meshtastic/Meshtastic-Android/commit/dad5e41c7a00af1461beb21a5c9d6293a3e50e1a)
-* docs: update CHANGELOG.md (#5612) by github-actions[bot] (@github-actions[bot]) in [`4866b38a8`](https://github.com/meshtastic/Meshtastic-Android/commit/4866b38a84f3593505c6a1de00e8b02fc1441c4d)
-* ci: always build desktop on internal releases (#5613) by James Rich (@jamesarich) in [`7bdd0d5c7`](https://github.com/meshtastic/Meshtastic-Android/commit/7bdd0d5c788b158e9f19fb9272d5b694405e3b7e)
-* fix(kmp): skip iOS targets on hosts where Kotlin/Native is unsupported (#5615) by James Rich (@jamesarich) in [`30dfa374a`](https://github.com/meshtastic/Meshtastic-Android/commit/30dfa374aef8903e5a6caf8b82e44d6082932409)
+* fix(ci): use fastlane supply for Play promotion with changesNotSentForReview (#5665) by James Rich (@jamesarich) in [`df2c7a00b`](https://github.com/meshtastic/Meshtastic-Android/commit/df2c7a00bd1b789658ead53270d86b78486429dd)
+* repo: Delete symlink by James Rich (@jamesarich) in [`6b440e57e`](https://github.com/meshtastic/Meshtastic-Android/commit/6b440e57e64de18d0b2bf59a52ec387e8b7cf2b8)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5668) by James Rich (@jamesarich) in [`ce0174311`](https://github.com/meshtastic/Meshtastic-Android/commit/ce01743118fffacc56fe6287b398d160d102c504)
+* fix(takserver): drop CoT the mesh delivers more than once (#5667) by Ben Meadors (@thebentern) in [`ad6144189`](https://github.com/meshtastic/Meshtastic-Android/commit/ad6144189fe655062efa9403ca3b786aec70147c)
+* fix: address top Crashlytics crashes in beta 2.7.14 (#5672) by James Rich (@jamesarich) in [`c7fbc6e9d`](https://github.com/meshtastic/Meshtastic-Android/commit/c7fbc6e9d3e9fdd2d57de9ac22a8d088651c6fbd)
 
-### Open Beta (v2.7.14-open.12)
+### Open Beta (v2.7.14-open.14)
 Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.13):
 
 #### 🏗️ Features
@@ -229,6 +225,11 @@ Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/relea
 * fix: hide battery indicator when level is 0 (never reported) by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5595
 * fix: consistent column width for compact node list items by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5596
 * fix(emoji): enable androidResources for core:ui to package emoji-data.json by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5597
+* fix(proto): prune TakTalkMessage and TakTalkRoomData from Wire codegen by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5624
+* fix(database): stabilize flaky DatabaseManagerWithDbRetryTest by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5635
+* fix(ble): stop BLE scan on background and downgrade connection priority by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5644
+* fix: remove Android Auto manifest entry causing Play Store rejection by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5662
+* fix(takserver): emit *:-1:stcp contact endpoint so directed TAK-Talk/GeoChat routes over the mesh by @thebentern in https://github.com/meshtastic/Meshtastic-Android/pull/5661
 #### 📝 Other Changes
 * refactor(ui): compose resources, domain layer by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/4628
 * Add per-message transport method icons for new message format by @Kealper in https://github.com/meshtastic/Meshtastic-Android/pull/4643
@@ -255,6 +256,9 @@ Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/relea
 * Fix node-details remove action to preserve confirmation flow by @Copilot in https://github.com/meshtastic/Meshtastic-Android/pull/5192
 * Change default ContrastLevel from STANDARD to MEDIUM by @somenice in https://github.com/meshtastic/Meshtastic-Android/pull/5325
 * Extract node list display settings to dedicated screen by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5580
+* Upgrade takpacket-sdk to version 0.3.0 by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5621
+* repo: Add Meshtastic Desktop icon SVGs by @vidplace7 in https://github.com/meshtastic/Meshtastic-Android/pull/5623
+* Enhance TAKTALK support with message and room handling, update SDK to v0.3.2 by @thebentern in https://github.com/meshtastic/Meshtastic-Android/pull/5634
 
 ## New Contributors
 * @nreisbeck made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/4607
@@ -269,22 +273,6 @@ Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/relea
 * @riddlemd made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/5265
 * @elagin made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/5284
 * @somenice made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/5325
-
-## New Contributors
-* @nreisbeck made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/4607
-* @ujade made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/4630
-* @alecperkins made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/4620
-* @skobkin made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/4809
-* @VictorioBerra made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/4825
-* @theKorzh made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/4877
-* @Klavionik made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/4957
-* @jdogg172 made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/5207
-* @zt64 made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/5226
-* @riddlemd made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/5265
-* @elagin made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/5284
-* @somenice made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/5325
-
-**Full Changelog**: https://github.com/meshtastic/Meshtastic-Android/compare/v2.7.13...unreleased
 <!-- UNRELEASED_END -->
 
 <!-- RELEASED_START -->

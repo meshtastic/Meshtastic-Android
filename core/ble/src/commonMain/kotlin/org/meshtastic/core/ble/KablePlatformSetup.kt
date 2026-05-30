@@ -38,3 +38,9 @@ internal expect fun Peripheral.negotiatedMaxWriteLength(): Int?
  * no-op returning `false`. Used by latency-sensitive flows such as DFU firmware streaming.
  */
 internal expect fun Peripheral.requestHighConnectionPriority(): Boolean
+
+/**
+ * Requests balanced BLE connection priority (default ~30–50 ms interval) to reduce battery draw after latency-sensitive
+ * operations complete. On platforms without an equivalent API (JVM/iOS) this is a no-op.
+ */
+internal expect fun Peripheral.requestBalancedConnectionPriority(): Boolean
