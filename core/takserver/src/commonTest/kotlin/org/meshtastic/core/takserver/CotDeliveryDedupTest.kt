@@ -28,7 +28,7 @@ class CotDeliveryDedupTest {
     private var clock = Instant.fromEpochSeconds(1_000_000)
 
     @Test
-    fun `first sighting admitted, immediate exact repeat dropped`() {
+    fun `first sighting admitted then immediate exact repeat dropped`() {
         val dedup = CotDeliveryDedup(ttl = 2.minutes, now = { clock })
         val xml = """<event uid="TAKTALK-MESSAGE-abc" type="m-t-t"><detail><text>hi</text></detail></event>"""
         assertTrue(dedup.admit(xml), "first copy delivered")
