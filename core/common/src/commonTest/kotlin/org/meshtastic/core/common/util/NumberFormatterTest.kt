@@ -35,4 +35,17 @@ class NumberFormatterTest {
         assertEquals("1", NumberFormatter.format(1.23, 0))
         assertEquals("-1", NumberFormatter.format(-1.23, 0))
     }
+
+    @Test
+    fun testFormatNaN() {
+        assertEquals("—", NumberFormatter.format(Double.NaN, 2))
+        assertEquals("—", NumberFormatter.format(Float.NaN, 1))
+    }
+
+    @Test
+    fun testFormatInfinity() {
+        assertEquals("—", NumberFormatter.format(Double.POSITIVE_INFINITY, 2))
+        assertEquals("—", NumberFormatter.format(Double.NEGATIVE_INFINITY, 2))
+        assertEquals("—", NumberFormatter.format(Float.POSITIVE_INFINITY, 1))
+    }
 }

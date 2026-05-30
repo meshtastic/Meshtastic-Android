@@ -17,14 +17,12 @@
 package org.meshtastic.app.map.component
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.savedstate.compose.LocalSavedStateRegistryOwner
-import androidx.savedstate.findViewTreeSavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.google.maps.android.clustering.Cluster
 import com.google.maps.android.clustering.view.DefaultClusterRenderer
@@ -54,15 +52,18 @@ fun NodeClusterMarkers(
     // If that view is not attached to the hierarchy (which it often isn't during rendering),
     // it fails to find the Lifecycle and SavedState owners. We propagate them to the root view
     // so the internal snapshot view can find them when walking up the tree.
-    // We do this in a SideEffect to ensure it happens before or during composition of children.
-    SideEffect {
+    // DisposableEffect runs at composition time (not post-composition like SideEffect),
+    // ensuring owners are set before the Clustering composable triggers marker rendering.
+    DisposableEffect(lifecycleOwner, savedStateRegistryOwner) {
         val root = view.rootView
-        if (root.findViewTreeLifecycleOwner() == null) {
-            root.setViewTreeLifecycleOwner(lifecycleOwner)
+        root.setViewTreeLifecycleOwner(lifecycleOwner)
+        root.setViewTreeSavedStateRegistryOwner(savedStateRegistryOwner)
+        // Also set on the view itself in case the internal renderer walks from a child
+        if (view !== root) {
+            view.setViewTreeLifecycleOwner(lifecycleOwner)
+            view.setViewTreeSavedStateRegistryOwner(savedStateRegistryOwner)
         }
-        if (root.findViewTreeSavedStateRegistryOwner() == null) {
-            root.setViewTreeSavedStateRegistryOwner(savedStateRegistryOwner)
-        }
+        onDispose { }
     }
 
     Clustering(
