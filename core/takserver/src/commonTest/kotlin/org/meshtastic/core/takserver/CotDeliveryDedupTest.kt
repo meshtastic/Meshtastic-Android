@@ -63,7 +63,7 @@ class CotDeliveryDedupTest {
     }
 
     @Test
-    fun `cache is bounded by maxEntries, evicting oldest`() {
+    fun `cache is bounded by maxEntries and evicts oldest`() {
         val dedup = CotDeliveryDedup(ttl = 60.minutes, maxEntries = 2, now = { clock })
         assertTrue(dedup.admit("a"))
         assertTrue(dedup.admit("b"))

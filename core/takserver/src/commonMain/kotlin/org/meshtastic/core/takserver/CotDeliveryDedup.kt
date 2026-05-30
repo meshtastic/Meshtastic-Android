@@ -24,19 +24,17 @@ import kotlin.time.Instant
 /**
  * Suppresses duplicate CoT events before they are injected into the local TAK client.
  *
- * The mesh can hand the bridge the same logical CoT more than once — a packet relayed over
- * several LoRa paths, or a sender that retransmits — which makes ATAK show duplicate chat /
- * TAK-Talk messages. This is a small TTL cache keyed by the exact, already-normalized CoT
- * XML: an identical event seen within [ttl] is dropped, while genuine updates (a PLI with a
- * new position, a moved marker, …) differ in content and pass through untouched.
+ * The mesh can hand the bridge the same logical CoT more than once — a packet relayed over several LoRa paths, or a
+ * sender that retransmits — which makes ATAK show duplicate chat / TAK-Talk messages. This is a small TTL cache keyed
+ * by the exact, already-normalized CoT XML: an identical event seen within [ttl] is dropped, while genuine updates (a
+ * PLI with a new position, a moved marker, …) differ in content and pass through untouched.
  *
- * Scope: this only dedupes what the *bridge* injects. It cannot see copies the TAK client
- * also receives over another transport (e.g. Wi-Fi network SA); for those the client dedupes
- * by `uid`, which is why the SDK preserves the original uid/timestamps across the mesh
- * round-trip so the two copies collapse client-side.
+ * Scope: this only dedupes what the *bridge* injects. It cannot see copies the TAK client also receives over another
+ * transport (e.g. Wi-Fi network SA); for those the client dedupes by `uid`, which is why the SDK preserves the original
+ * uid/timestamps across the mesh round-trip so the two copies collapse client-side.
  *
- * Not thread-safe by design: it is confined to the single mesh-packet collector coroutine
- * (`meshPacketFlow.collect { handleMeshPacket(it) }`), which processes packets sequentially.
+ * Not thread-safe by design: it is confined to the single mesh-packet collector coroutine (`meshPacketFlow.collect {
+ * handleMeshPacket(it) }`), which processes packets sequentially.
  */
 internal class CotDeliveryDedup(
     private val ttl: Duration = DEFAULT_TTL,
@@ -48,8 +46,8 @@ internal class CotDeliveryDedup(
     private val seen = LinkedHashMap<String, Instant>()
 
     /**
-     * @return true if [normalizedXml] should be delivered (it is new, or its previous copy has
-     *   aged past [ttl]); false if it is a duplicate already delivered within [ttl] (drop it).
+     * @return true if [normalizedXml] should be delivered (it is new, or its previous copy has aged past [ttl]); false
+     *   if it is a duplicate already delivered within [ttl] (drop it).
      */
     fun admit(normalizedXml: String): Boolean {
         val t = now()
