@@ -10,49 +10,12 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 ### Unreleased (not yet in any build)
 
 * fix(ci): use fastlane supply for Play promotion with changesNotSentForReview (#5665) by James Rich (@jamesarich) in [`df2c7a00b`](https://github.com/meshtastic/Meshtastic-Android/commit/df2c7a00bd1b789658ead53270d86b78486429dd)
+* repo: Delete symlink by James Rich (@jamesarich) in [`6b440e57e`](https://github.com/meshtastic/Meshtastic-Android/commit/6b440e57e64de18d0b2bf59a52ec387e8b7cf2b8)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5668) by James Rich (@jamesarich) in [`ce0174311`](https://github.com/meshtastic/Meshtastic-Android/commit/ce01743118fffacc56fe6287b398d160d102c504)
+* fix(takserver): drop CoT the mesh delivers more than once (#5667) by Ben Meadors (@thebentern) in [`ad6144189`](https://github.com/meshtastic/Meshtastic-Android/commit/ad6144189fe655062efa9403ca3b786aec70147c)
+* fix: address top Crashlytics crashes in beta 2.7.14 (#5672) by James Rich (@jamesarich) in [`c7fbc6e9d`](https://github.com/meshtastic/Meshtastic-Android/commit/c7fbc6e9d3e9fdd2d57de9ac22a8d088651c6fbd)
 
-### Internal (v2.7.14-internal.110)
-Changes since [`v2.7.14-open.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14-open.13):
-
-* chore(deps): update spotless to v8.6.0 (#5618) by renovate[bot] (@renovate[bot]) in [`c29f7ce29`](https://github.com/meshtastic/Meshtastic-Android/commit/c29f7ce29194930da3be65545fc2fa11683715fa)
-* chore(deps): update core/proto/src/main/proto digest to 9ab4a1d (#5617) by renovate[bot] (@renovate[bot]) in [`7df0ee08e`](https://github.com/meshtastic/Meshtastic-Android/commit/7df0ee08e520a0c9846d20ffbcd643c6b6dee6ec)
-* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5616) by James Rich (@jamesarich) in [`562ac7390`](https://github.com/meshtastic/Meshtastic-Android/commit/562ac739019bd29dec520aeda99ced9b8f018f60)
-* Upgrade takpacket-sdk to version 0.3.0 (#5621) by James Rich (@jamesarich) in [`29345709e`](https://github.com/meshtastic/Meshtastic-Android/commit/29345709e953c5fdbb8993c5cd34a4970a6d2d7b)
-* fix(proto): prune TakTalkMessage and TakTalkRoomData from Wire codegen (#5624) by James Rich (@jamesarich) in [`fda8f97f3`](https://github.com/meshtastic/Meshtastic-Android/commit/fda8f97f32be261c07a6a9da95dd2a54e1c209c3)
-* feat: adopt gradle-flatpak-sources plugin for offline Flatpak builds (#5619) by James Rich (@jamesarich) in [`b9315d4b3`](https://github.com/meshtastic/Meshtastic-Android/commit/b9315d4b3ffa04346993f8a9459f4b3c2ec8f108)
-* chore(deps): update takpacket.sdk to v0.3.1 (#5626) by renovate[bot] (@renovate[bot]) in [`8c9c94294`](https://github.com/meshtastic/Meshtastic-Android/commit/8c9c9429497c821b2b1755e407881a5a7409db0a)
-* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5625) by James Rich (@jamesarich) in [`2277aae6e`](https://github.com/meshtastic/Meshtastic-Android/commit/2277aae6e94b65b244ed2ef73f40018b76d82dd2)
-* chore(deps): update actions/setup-java action to v5 (#5627) by renovate[bot] (@renovate[bot]) in [`837f5596f`](https://github.com/meshtastic/Meshtastic-Android/commit/837f5596f8644089c0ce39c22b4336cd9052eb1a)
-* chore(deps): update github artifact actions (major) (#5628) by renovate[bot] (@renovate[bot]) in [`10569eb9d`](https://github.com/meshtastic/Meshtastic-Android/commit/10569eb9dd9909272e5277c40be6e4823fa3b851)
-* chore(deps): update gradle/actions action to v6 (#5630) by renovate[bot] (@renovate[bot]) in [`1a7b34392`](https://github.com/meshtastic/Meshtastic-Android/commit/1a7b343924ec6246ad6a4200ce4c1fb57866a9e4)
-* chore(deps): update core/proto/src/main/proto digest to e3c8af5 (#5629) by renovate[bot] (@renovate[bot]) in [`19ea164f9`](https://github.com/meshtastic/Meshtastic-Android/commit/19ea164f93bd48dd556d5232d66869b5cb0b2f40)
-* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5631) by James Rich (@jamesarich) in [`a79e30e69`](https://github.com/meshtastic/Meshtastic-Android/commit/a79e30e698c8c19329570f92edc216b1eeb3f300)
-* chore(deps): update takpacket.sdk to v0.3.2 (#5632) by renovate[bot] (@renovate[bot]) in [`de3d65a10`](https://github.com/meshtastic/Meshtastic-Android/commit/de3d65a10a9339cfe243f044527f0244137e551d)
-* docs(governance): add agent behavior and cost efficiency rules (#5636) by James Rich (@jamesarich) in [`3fe21e173`](https://github.com/meshtastic/Meshtastic-Android/commit/3fe21e1736a49a11a277e7ff7491a461785286d3)
-* fix(database): stabilize flaky DatabaseManagerWithDbRetryTest (#5635) by James Rich (@jamesarich) in [`d892f43e0`](https://github.com/meshtastic/Meshtastic-Android/commit/d892f43e0083d8bfbbc10c44355873910fb96301)
-* ci(changelog): exclude changelog commits and fix contributor duplication (#5638) by James Rich (@jamesarich) in [`d125d955f`](https://github.com/meshtastic/Meshtastic-Android/commit/d125d955f297c7fc0f351aae7086deea06fb0fb2)
-* chore(deps): update plugin org.meshtastic.flatpak.sources.settings to v0.1.2 (#5637) by renovate[bot] (@renovate[bot]) in [`73a2d9f62`](https://github.com/meshtastic/Meshtastic-Android/commit/73a2d9f62465ad09a380c10edbf06622208ed349)
-* docs: add settings validation reference (#5218) by Copilot (@Copilot) in [`a5d176d4d`](https://github.com/meshtastic/Meshtastic-Android/commit/a5d176d4d50513f2bc36063ba59dc31192163083)
-* repo: Add Meshtastic Desktop icon SVGs (#5623) by Austin (@vidplace7) in [`321b73e72`](https://github.com/meshtastic/Meshtastic-Android/commit/321b73e7266bc4c970fcb9a5570dae90be247025)
-* Enhance TAKTALK support with message and room handling, update SDK to v0.3.2 (#5634) by Ben Meadors (@thebentern) in [`a5e6894fe`](https://github.com/meshtastic/Meshtastic-Android/commit/a5e6894fe8934aefce5036458407a69fc96ca541)
-* chore(deps): update takpacket.sdk to v0.3.3 (#5642) by renovate[bot] (@renovate[bot]) in [`bfece155f`](https://github.com/meshtastic/Meshtastic-Android/commit/bfece155fb0b58dd3a13a8719f26b074ed02ad41)
-* fix(ble): stop BLE scan on background and downgrade connection priority (#5644) by James Rich (@jamesarich) in [`1d221e2dd`](https://github.com/meshtastic/Meshtastic-Android/commit/1d221e2ddeeb0746f5965649640542975a28b416)
-* fix(ci): pre-install JetBrains JDK 21 for Compose Desktop builds (#5646) by James Rich (@jamesarich) in [`f10f36580`](https://github.com/meshtastic/Meshtastic-Android/commit/f10f36580d89eeedbee81f06ddf39f7f1009d697)
-* chore(deps): update com.google.firebase:firebase-bom to v34.14.0 (#5647) by renovate[bot] (@renovate[bot]) in [`2e7100ca8`](https://github.com/meshtastic/Meshtastic-Android/commit/2e7100ca8e41097144fea3aab2f327b279d12179)
-* fix(ci): install JetBrains JDK 21 for lint-check job (#5649) by James Rich (@jamesarich) in [`ccd7fcd45`](https://github.com/meshtastic/Meshtastic-Android/commit/ccd7fcd45b45665a2c6fa59cf7ed61618e1be6c7)
-* fix(ci): cache JetBrains JDK and simplify daemon JVM config (#5650) by James Rich (@jamesarich) in [`00f3b38f8`](https://github.com/meshtastic/Meshtastic-Android/commit/00f3b38f880d3ee6ddece9fd08a9afdc03685336)
-* chore(deps): update actions/cache action to v5 (#5652) by renovate[bot] (@renovate[bot]) in [`0dad4273d`](https://github.com/meshtastic/Meshtastic-Android/commit/0dad4273d20bd4c54811d55845ae33ce4613a139)
-* chore(deps): update core/proto/src/main/proto digest to dd6c3f8 (#5654) by renovate[bot] (@renovate[bot]) in [`0cc18cd7d`](https://github.com/meshtastic/Meshtastic-Android/commit/0cc18cd7dd8f6201fb73e1f9830548f2d1212a4d)
-* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5657) by James Rich (@jamesarich) in [`6646f31f4`](https://github.com/meshtastic/Meshtastic-Android/commit/6646f31f4ad664b9a3be410af90290454e7fc705)
-* feat(takserver): Upgrade TAKPacket-SDK to v0.5.0 and delegate sanitization to SDK (#5658) by Ben Meadors (@thebentern) in [`8bdb0916b`](https://github.com/meshtastic/Meshtastic-Android/commit/8bdb0916b4c2e51d197153d2b22074d1754cc72e)
-* fix(takserver): emit *:-1:stcp contact endpoint so directed TAK-Talk/GeoChat routes over the mesh; SDK v0.5.1 by Ben Meadors (@thebentern) in [`0047e4d15`](https://github.com/meshtastic/Meshtastic-Android/commit/0047e4d15278b2877d7be3f488e22155f82050db)
-* Revert "fix(takserver): emit *:-1:stcp contact endpoint so directed TAK-Talk/GeoChat routes over the mesh; SDK v0.5.1" by Ben Meadors (@thebentern) in [`f92f5d576`](https://github.com/meshtastic/Meshtastic-Android/commit/f92f5d576952ffb58e84157da0fae82eb9c42aa6)
-* fix: remove Android Auto manifest entry causing Play Store rejection (#5662) by James Rich (@jamesarich) in [`2aa49b08d`](https://github.com/meshtastic/Meshtastic-Android/commit/2aa49b08ded17a93d364fd047cca236702721f58)
-* chore(deps): update org.jetbrains.kotlinx:atomicfu to v0.33.0 (#5663) by renovate[bot] (@renovate[bot]) in [`da2938f2e`](https://github.com/meshtastic/Meshtastic-Android/commit/da2938f2eb122fb1f5b884d46b76b7b79a4394bf)
-* fix(takserver): emit *:-1:stcp contact endpoint so directed TAK-Talk/GeoChat routes over the mesh (#5661) by Ben Meadors (@thebentern) in [`4888592e0`](https://github.com/meshtastic/Meshtastic-Android/commit/4888592e07a38bdb21bd70ce1449501054a3e594)
-* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5660) by James Rich (@jamesarich) in [`8ec0f65b6`](https://github.com/meshtastic/Meshtastic-Android/commit/8ec0f65b6985a14ed1284e171da0bf7f3d0668e0)
-
-### Open Beta (v2.7.14-open.13)
+### Open Beta (v2.7.14-open.14)
 Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.13):
 
 #### 🏗️ Features
@@ -262,6 +225,11 @@ Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/relea
 * fix: hide battery indicator when level is 0 (never reported) by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5595
 * fix: consistent column width for compact node list items by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5596
 * fix(emoji): enable androidResources for core:ui to package emoji-data.json by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5597
+* fix(proto): prune TakTalkMessage and TakTalkRoomData from Wire codegen by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5624
+* fix(database): stabilize flaky DatabaseManagerWithDbRetryTest by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5635
+* fix(ble): stop BLE scan on background and downgrade connection priority by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5644
+* fix: remove Android Auto manifest entry causing Play Store rejection by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5662
+* fix(takserver): emit *:-1:stcp contact endpoint so directed TAK-Talk/GeoChat routes over the mesh by @thebentern in https://github.com/meshtastic/Meshtastic-Android/pull/5661
 #### 📝 Other Changes
 * refactor(ui): compose resources, domain layer by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/4628
 * Add per-message transport method icons for new message format by @Kealper in https://github.com/meshtastic/Meshtastic-Android/pull/4643
@@ -288,6 +256,9 @@ Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/relea
 * Fix node-details remove action to preserve confirmation flow by @Copilot in https://github.com/meshtastic/Meshtastic-Android/pull/5192
 * Change default ContrastLevel from STANDARD to MEDIUM by @somenice in https://github.com/meshtastic/Meshtastic-Android/pull/5325
 * Extract node list display settings to dedicated screen by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5580
+* Upgrade takpacket-sdk to version 0.3.0 by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5621
+* repo: Add Meshtastic Desktop icon SVGs by @vidplace7 in https://github.com/meshtastic/Meshtastic-Android/pull/5623
+* Enhance TAKTALK support with message and room handling, update SDK to v0.3.2 by @thebentern in https://github.com/meshtastic/Meshtastic-Android/pull/5634
 
 ## New Contributors
 * @nreisbeck made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/4607
