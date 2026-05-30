@@ -3,6 +3,13 @@
 # Do NOT edit or remove previous entries — stale state claims cause agent confusion.
 # Format: ## YYYY-MM-DD — <summary>
 
+## 2026-05-30 — Merged main into remove-aidl-api branch; resolved conflicts; PR #5586 mergeable
+- `git merge origin/main` (branch was 40 behind / 31 ahead). 12 files flagged; git auto-resolved 11. Only real conflict: this append-only `session_context.md` (both sides added top entries — kept both in date order).
+- AIDL removal preserved through the merge (main still ships `IMeshService.aidl`/`FakeIMeshService` etc.; our deletions held). Manifest `MeshService` now `exported=false` with no AIDL bind filter; main's Android Auto removal (#5662) carried through.
+- proto submodule advanced to v2.7.24 (dd6c3f8) per main #5654; synced working tree. main dep bumps merged: takpacket-sdk 0.5.1, firebase-bom 34.14.0, atomicfu 0.33.0.
+- Validated: `assembleDebug`, `spotlessCheck`, `detekt`, `:core:data:jvmTest`, `:core:takserver:allTests` all green (the two conflicted feature modules). Pushed; PR #5586 → MERGEABLE, CI re-running.
+- Aside (separate repo): meshtastic-sdk PR #3 was superseded by main's PR #1; extracted only the toolchain bump into SDK PR #4 (Kotlin 2.3.21 / SKIE 0.10.12 / Wire 6.4.0 / Ktor 3.5.0 / coroutines stable).
+
 ## 2026-05-29 — Removed AIDL/broadcast service layer; modernized RadioController; deferred R4/R5
 - AIDL bound-service + broadcast (`core:api`, `IMeshService`, `ServiceBroadcasts`, `ServiceAction`, `MeshActionHandler`, `MeshRouter`) removed; replaced with direct suspend-based `RadioController`.
 - `RadioController` split into `AdminController`/`MessagingController`/`NodeController`/`RequestController`, composed in `DirectRadioControllerImpl` via Kotlin `by` delegation to four focused impls (`AdminControllerImpl` etc., core/service commonMain).
