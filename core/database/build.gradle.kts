@@ -38,7 +38,7 @@ kotlin {
             api(projects.core.common)
             implementation(projects.core.di)
             api(projects.core.model)
-            implementation(projects.core.proto)
+            implementation(libs.meshtastic.protobufs)
             implementation(projects.core.resources)
             implementation(libs.androidx.room.paging)
             implementation(libs.kotlinx.serialization.json)

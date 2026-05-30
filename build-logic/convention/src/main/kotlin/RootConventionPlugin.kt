@@ -95,7 +95,6 @@ private val ALL_MODULES_FULL =
         ":core:network",
         ":core:nfc",
         ":core:prefs",
-        ":core:proto",
         ":core:repository",
         ":core:service",
         ":core:resources",
@@ -118,11 +117,10 @@ private val ALL_MODULES_FULL =
 private val ANDROID_ONLY_MODULES = setOf(":androidApp", ":core:api", ":core:barcode", ":feature:widget")
 
 /**
- * Modules excluded from Dokka aggregation. :core:proto contains only auto-generated Wire classes (no KDoc value) and
- * its TAKPacket-SDK dependency doesn't publish iOS metadata JARs, causing `transformCommonMainDependenciesMetadata` to
- * fail during Dokka resolution.
+ * Modules excluded from Dokka aggregation. Empty now that :core:proto has been replaced by
+ * the external org.meshtastic:protobufs SDK.
  */
-private val DOKKA_EXCLUDED_MODULES = setOf(":core:proto")
+private val DOKKA_EXCLUDED_MODULES = emptySet<String>()
 
 private fun allModules(): List<String> = ALL_MODULES_FULL
 

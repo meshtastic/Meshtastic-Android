@@ -31,7 +31,11 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            api(projects.core.proto)
+            api(libs.meshtastic.protobufs)
+            api(libs.takpacket.sdk.kmp.get().toString()) {
+                exclude(group = "com.github.luben", module = "zstd-jni")
+                exclude(group = "org.ogce", module = "xpp3")
+            }
             api(projects.core.common)
             api(projects.core.resources)
 

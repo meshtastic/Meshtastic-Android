@@ -82,13 +82,13 @@ okio = "3.17.0"
 uri-kmp = "0.0.21"
 osmdroid-android = "6.1.20"
 spotless = "8.6.0"
-wire = "6.4.0"
 vico = "3.2.2"
 kable = "0.43.0"
 mqttastic = "0.3.6"
 jmdns = "3.6.3"
 qrcode-kotlin = "4.5.0"
 takpacket-sdk = "0.5.1"
+meshtastic-protobufs = "2.7.25-SNAPSHOT"
 
 # Gradle Plugins
 develocity = "4.4.2"
@@ -179,7 +179,6 @@ maps-compose-widgets = { module = "com.google.maps.android:maps-compose-widgets"
 mlkit-barcode-scanning = { module = "com.google.mlkit:barcode-scanning", version.ref = "mlkit-barcode-scanning" }
 mlkit-translate = { module = "com.google.mlkit:translate", version.ref = "mlkit-translate" }
 play-services-maps = { module = "com.google.android.gms:play-services-maps", version = "20.0.0" }
-wire-runtime = { module = "com.squareup.wire:wire-runtime", version.ref = "wire" }
 zxing-core = { module = "com.google.zxing:core", version = "3.5.4" }
 qrcode-kotlin = { module = "io.github.g0dkar:qrcode-kotlin", version.ref = "qrcode-kotlin" }
 
@@ -286,6 +285,9 @@ jna = { module = "net.java.dev.jna:jna", version = "5.19.0" }
 takpacket-sdk-kmp = { module = "org.meshtastic:takpacket-sdk", version.ref = "takpacket-sdk" }
 takpacket-sdk-jvm = { module = "org.meshtastic:takpacket-sdk-jvm", version.ref = "takpacket-sdk" }
 
+# Meshtastic Protobufs SDK (Wire-generated KMP models from meshtastic/protobufs)
+meshtastic-protobufs = { module = "org.meshtastic:protobufs", version.ref = "meshtastic-protobufs" }
+
 
 [plugins]
 # Android
@@ -318,7 +320,6 @@ aboutlibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "abo
 datadog = { id = "com.datadoghq.dd-sdk-android-gradle-plugin", version.ref = "datadog-gradle" }
 detekt = { id = "dev.detekt", version.ref = "detekt" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
-wire = { id = "com.squareup.wire", version.ref = "wire" }
 room = { id = "androidx.room3", version.ref = "room" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 test-retry = { id = "org.gradle.test-retry", version.ref = "testRetry" }
