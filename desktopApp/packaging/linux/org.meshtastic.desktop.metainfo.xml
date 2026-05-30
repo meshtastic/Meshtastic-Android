@@ -6,7 +6,7 @@
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0-or-later</project_license>
 
-  <name>Meshtastic</name>
+  <name>Meshtastic Desktop</name>
   <summary>Communicate off-grid with Meshtastic mesh radio devices</summary>
 
   <description>
