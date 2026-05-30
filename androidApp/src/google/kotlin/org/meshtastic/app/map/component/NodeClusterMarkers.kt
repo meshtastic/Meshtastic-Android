@@ -63,7 +63,7 @@ fun NodeClusterMarkers(
             view.setViewTreeLifecycleOwner(lifecycleOwner)
             view.setViewTreeSavedStateRegistryOwner(savedStateRegistryOwner)
         }
-        onDispose { }
+        onDispose {}
     }
 
     Clustering(
