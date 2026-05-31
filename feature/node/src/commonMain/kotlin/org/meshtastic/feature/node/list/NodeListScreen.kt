@@ -216,10 +216,13 @@ fun NodeListScreen(
 
                 items(nodes, key = { it.num }) { node ->
                     var expanded by remember { mutableStateOf(false) }
+                    val isThisNode = ourNode?.num == node.num
 
-                    Box(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
+                    // animateItem() must be on the root composable for LazyColumn
+                    // item animations to work correctly.
+                    Box(modifier = Modifier.animateItem().padding(horizontal = 8.dp, vertical = 4.dp)) {
                         val longClick =
-                            if (node.num != ourNode?.num) {
+                            if (!isThisNode) {
                                 { expanded = true }
                             } else {
                                 null
@@ -230,7 +233,6 @@ fun NodeListScreen(
                         when (density) {
                             NodeListDensity.COMPLETE ->
                                 NodeItem(
-                                    modifier = Modifier.animateItem(),
                                     thisNode = ourNode,
                                     thatNode = node,
                                     distanceUnits = state.distanceUnits,
@@ -246,7 +248,6 @@ fun NodeListScreen(
 
                             NodeListDensity.COMPACT ->
                                 NodeItemCompact(
-                                    modifier = Modifier.animateItem(),
                                     thisNode = ourNode,
                                     thatNode = node,
                                     distanceUnits = state.distanceUnits,
@@ -266,22 +267,26 @@ fun NodeListScreen(
                                     deviceImageUrl = deviceImageUrls[node.user.hw_model.value],
                                 )
                         }
-                        val isThisNode = remember(node) { ourNode?.num == node.num }
                         if (!isThisNode) {
-                            NodeContextMenu(
-                                expanded = expanded,
-                                node = node,
-                                onFavorite = { viewModel.favoriteNode(node) },
-                                onMute = { viewModel.muteNode(node) },
-                                onMessage = {
-                                    val route = viewModel.getDirectMessageRoute(node)
-                                    navigateToMessages(route)
-                                },
-                                onTraceRoute = { viewModel.traceRoute(node) },
-                                onIgnore = { viewModel.ignoreNode(node) },
-                                onRemove = { viewModel.removeNode(node) },
-                                onDismiss = { expanded = false },
-                            )
+                            // matchParentSize() gives the DropdownMenu a properly-sized
+                            // popup anchor that survives ListDetailSceneStrategy pane
+                            // transitions (known Popup anchoring issue in adaptive layouts).
+                            Box(modifier = Modifier.matchParentSize()) {
+                                NodeContextMenu(
+                                    expanded = expanded,
+                                    node = node,
+                                    onFavorite = { viewModel.favoriteNode(node) },
+                                    onMute = { viewModel.muteNode(node) },
+                                    onMessage = {
+                                        val route = viewModel.getDirectMessageRoute(node)
+                                        navigateToMessages(route)
+                                    },
+                                    onTraceRoute = { viewModel.traceRoute(node) },
+                                    onIgnore = { viewModel.ignoreNode(node) },
+                                    onRemove = { viewModel.removeNode(node) },
+                                    onDismiss = { expanded = false },
+                                )
+                            }
                         }
                     }
                 }
