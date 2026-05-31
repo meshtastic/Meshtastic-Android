@@ -147,8 +147,7 @@ fun MessageScreen(
 
     // Sync text field changes back to ViewModel draft
     LaunchedEffect(messageInputState) {
-        snapshotFlow { messageInputState.text.toString() }
-            .collect { text -> viewModel.setDraftMessage(text) }
+        snapshotFlow { messageInputState.text.toString() }.collect { text -> viewModel.setDraftMessage(text) }
     }
 
     // Prevent the message TextField from stealing focus when the screen opens
