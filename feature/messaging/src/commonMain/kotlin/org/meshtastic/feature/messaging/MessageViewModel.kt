@@ -70,6 +70,19 @@ class MessageViewModel(
     private val _title = MutableStateFlow("")
     val title: StateFlow<String> = _title.asStateFlow()
 
+    private val _draftMessage = MutableStateFlow(savedStateHandle.get<String>("draftMessage") ?: "")
+    val draftMessage: StateFlow<String> = _draftMessage.asStateFlow()
+
+    fun setDraftMessage(text: String) {
+        _draftMessage.value = text
+        savedStateHandle["draftMessage"] = text
+    }
+
+    fun clearDraftMessage() {
+        _draftMessage.value = ""
+        savedStateHandle["draftMessage"] = ""
+    }
+
     val ourNodeInfo = nodeRepository.ourNodeInfo
 
     val connectionState = serviceRepository.connectionState
