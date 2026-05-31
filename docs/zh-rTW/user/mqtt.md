@@ -1,9 +1,9 @@
 ---
 title: MQTT
-parent: User Guide
+parent: 使用者指南
 nav_order: 11
 last_updated: 2026-05-13
-description: Bridge your mesh to the internet — MQTT broker setup, encryption layers, and map reporting.
+description: 將您的 mesh 網路橋接至網際網路 — MQTT 代理伺服器設定、加密層級與地圖回報。
 aliases:
   - MQTT
   - internet-bridge
@@ -12,127 +12,127 @@ aliases:
 
 # MQTT
 
-MQTT bridges your Meshtastic mesh network to the internet, enabling long-range communication beyond radio range.
+MQTT 將您的 Meshtastic mesh 網路橋接至網際網路，實現超越無線電範圍的長距離通訊。
 
 ## 概觀
 
-The MQTT module connects your node to an MQTT broker, allowing:
+MQTT 模組可將您的節點連接至 MQTT 代理伺服器，實現以下功能：
 
-- Messages to reach nodes on different physical meshes via the internet
-- Integration with home automation and monitoring systems
-- Publishing node positions to the public Meshtastic map
-- Custom data pipelines for logging and alerting
+- 透過網際網路傳送訊息至不同實體 mesh 網路上的節點
+- 與智慧家庭自動化及監控系統整合
+- 將節點位置發布至公開的 Meshtastic 地圖
+- 自訂資料管線，用於記錄與警示通知
 
 ## 運作方式
 
 ```
-[Your Node] → Radio → [Gateway Node with WiFi] → MQTT Broker → [Remote Gateway] → Radio → [Remote Node]
+〔您的節點〕→ 無線電 → 〔具備 Wi-Fi 的閘道節點〕→ MQTT 代理伺服器 → 〔遠端閘道〕→ 無線電 → 〔遠端節點〕
 ```
 
-A gateway node with internet access (WiFi or Ethernet) publishes mesh messages to an MQTT topic. Remote gateways subscribed to the same topic inject those messages into their local mesh.
+具備網際網路連線（Wi-Fi 或乙太網路）的閘道節點，將 mesh 訊息發布至 MQTT 主題。 訂閱相同主題的遠端閘道，將這些訊息注入其本地 mesh 網路。
 
 ## 設定
 
 ### 啟用 MQTT
 
-1. Navigate to **Settings → Module Config → MQTT**.
-2. Enable the MQTT module.
-3. Configure the broker connection:
+1. 前往「設定 → 模組設定 → MQTT」。
+2. 啟用 MQTT 模組。
+3. 設定代理伺服器連線：
 
 ![MQTT toggle switch](../../assets/screenshots/settings_switch.png)
 
-| 設定              | 描述說明                                                                                          | 默認                                                  |
-| --------------- | --------------------------------------------------------------------------------------------- | --------------------------------------------------- |
-| 伺服器位址           | MQTT broker hostname                                                                          | mqtt.meshtastic.org |
-| 使用者名稱           | Broker authentication                                                                         | meshdev                                             |
-| 密碼              | Broker authentication                                                                         | large4cats                                          |
-| 根主題             | Base topic for messages                                                                       | msh                                                 |
-| 加密              | Encrypt MQTT payload                                                                          | 已啟用                                                 |
-| ~~JSON Output~~ | ⚠️ **Deprecated** — JSON packet support has been removed from firmware; this field is ignored | Disabled                                            |
-| TLS             | Secure connection to broker                                                                   | Disabled                                            |
-| Map Reporting   | Report position to public map                                                                 | Disabled                                            |
+| 設定          | 描述說明                            | 默認                                                  |
+| ----------- | ------------------------------- | --------------------------------------------------- |
+| 伺服器位址       | MQTT 代理伺服器主機名稱                  | mqtt.meshtastic.org |
+| 使用者名稱       | 代理伺服器驗證                         | meshdev                                             |
+| 密碼          | 代理伺服器驗證                         | large4cats                                          |
+| 根主題         | 訊息的基礎主題                         | msh                                                 |
+| 加密          | 加密 MQTT 承載內容                    | 已啟用                                                 |
+| ~~JSON 輸出~~ | ⚠️ 已棄用——韌體已移除 JSON 封包支援；此欄位將被忽略 | 已停用                                                 |
+| TLS         | 與代理伺服器的安全連線                     | 已停用                                                 |
+| 地圖回報        | 將位置回報至公開地圖                      | 已停用                                                 |
 
-### Default Meshtastic Broker
+### 預設 Meshtastic 代理伺服器
 
-The community maintains a public broker at `mqtt.meshtastic.org`. This is intended for general use and testing.
+社群在 mqtt.meshtastic.org 維護一個公開的代理伺服器。 此伺服器供一般使用與測試之用。
 
-> 🔒 **Privacy:** Messages on the public broker are readable by anyone subscribed. Always use channel encryption for private communications.
+> 🔒 隱私：公開代理伺服器上的訊息，任何訂閱者均可讀取。 私人通訊請務必啟用頻道加密。
 
-### Private Broker
+### 私有代理伺服器
 
-For better privacy and control, you can run your own MQTT broker:
+為了獲得更好的隱私保護與控制權，您可以自行架設 MQTT 代理伺服器：
 
-- Mosquitto (lightweight, open-source)
+- Mosquitto（輕量、開放原始碼）
 - HiveMQ
 - EMQX
 
-Configure your node to point to your private broker with appropriate credentials.
+請將您的節點設定為指向私有代理伺服器，並輸入相應的登入憑證。
 
-## Map Reporting
+## 地圖回報
 
-When Map Reporting is enabled, your node publishes its position to the Meshtastic community map:
+啟用地圖回報後，您的節點將把位置發布至 Meshtastic 社群地圖：
 
-- Visible at [meshmap.net](https://meshmap.net) and similar community map services
-- Only position and node info are shared
-- Disable this if you don't want your location publicly visible
+- 可在〔meshmap.net〕(https://meshmap.net) 及類似的社群地圖服務上查看
+- 僅分享位置與節點資訊
+- 若不希望位置公開顯示，請停用此功能
 
-## Uplink vs Downlink
+## 上行 vs 下行
 
-| Direction    | 描述說明                             |
-| ------------ | -------------------------------- |
-| **Uplink**   | Messages from mesh → MQTT broker |
-| **Downlink** | Messages from MQTT broker → mesh |
+| 方向 | 描述說明                     |
+| -- | ------------------------ |
+| 上行 | 訊息從 mesh 網路 → MQTT 代理伺服器 |
+| 下行 | 訊息從 MQTT 代理伺服器 → mesh 網路 |
 
-Configure per-channel which directions are active to control message flow and airtime usage.
+可依頻道設定哪些方向為啟用狀態，以控制訊息流向與無線電佔用時間。
 
-## Message Formats
+## 訊息格式
 
-MQTT uses protobuf message format:
+MQTT 使用 protobuf 訊息格式：
 
-| Format       | 描述說明                                | Use case                   |
-| ------------ | ----------------------------------- | -------------------------- |
-| **Protobuf** | Binary Meshtastic protobuf encoding | Node-to-node mesh bridging |
+| 格式           | 描述說明                       | 使用情境        |
+| ------------ | -------------------------- | ----------- |
+| **Protobuf** | 二進位 Meshtastic protobuf 編碼 | 節點間 mesh 橋接 |
 
-> ⚠️ **Note:** JSON output support was removed from firmware. The `json_enabled` setting is still visible in the app for legacy compatibility but has no effect on current firmware versions.
+> ⚠️ 注意：韌體已移除 JSON 輸出支援。 Json_enabled 設定在應用程式中仍會顯示，以維持舊版相容性，但對目前的韌體版本不會產生任何效果。
 
-## Encryption & Privacy
+## 加密與隱私
 
-Understanding the layered encryption model:
+了解分層加密模型：
 
-1. **Channel encryption** happens on the mesh _before_ MQTT. If your channel has a PSK, the MQTT payload is already encrypted — the broker and any subscribers see only the ciphertext.
-2. **MQTT encryption** (the module setting) adds an additional encryption layer for transit to the broker. This protects metadata and routing information.
-3. **TLS** encrypts the TCP connection to the broker itself, preventing network-level eavesdropping.
+1. 頻道加密在 mesh 網路上進行，發生於 MQTT 傳輸之前。 若您的頻道已設定 PSK，MQTT 承載內容將已加密——代理伺服器及任何訂閱者只能看到密文。
+2. MQTT 加密（模組設定）在傳輸至代理伺服器的過程中新增額外的加密層。 此設定可保護中繼資料與路由資訊。
+3. TLS 對連接至代理伺服器的 TCP 連線進行加密，防止網路層級的竊聽。
 
-> 🔒 **Important:** The default public channel has a well-known key. Messages on the default channel sent via MQTT are effectively **unencrypted** — anyone can decode them. Always use a custom PSK for private communications.
+> 🔒 重要：預設公開頻道使用眾所周知的金鑰。 透過 MQTT 傳送的預設頻道訊息實際上等同於未加密 — 任何人均可解碼。 私人通訊請務必使用自訂 PSK。
 
 ## 最佳實踐
 
-- Use channel-level encryption (PSK) on channels that bridge to MQTT
-- Don't enable MQTT on nodes without internet access (it will buffer and waste memory)
-- Use a private broker for sensitive deployments
-- Be mindful of airtime when downlinking messages from busy MQTT topics — every downlinked message consumes radio airtime on your local mesh
-- Consider enabling uplink-only if you only need to monitor your mesh remotely without injecting messages back
+- 在橋接至 MQTT 的頻道上使用頻道層級加密（PSK）
+- 請勿在無法連接網際網路的節點上啟用 MQTT（這將導致緩衝堆積並浪費記憶體）
+- 敏感部署環境請使用私有代理伺服器
+- 從繁忙的 MQTT 主題下行訊息時，請留意無線電佔用時間——每則下行訊息都會消耗本地 mesh 網路的無線電佔用時間
+- 若僅需遠端監控 mesh 網路而不需注入訊息，建議僅啟用上行模式
 
 ## 故障排除
 
-### MQTT Not Connecting
+### MQTT 無法連線
 
-- **Check WiFi** — the gateway node must have an active internet connection (WiFi or Ethernet). MQTT does not work over the LoRa radio link itself.
-- **Verify credentials** — incorrect username or password will silently fail on most brokers. Double-check for trailing spaces.
-- **Firewall** — port 1883 (MQTT) or 8883 (MQTT+TLS) must be open. Some networks block non-standard ports.
-- **DNS resolution** — if using a custom broker hostname, verify the node can resolve it. Try the broker's IP address directly.
+- 檢查 Wi-Fi——閘道節點必須具備有效的網際網路連線（Wi-Fi 或乙太網路）。 MQTT 無法直接透過 LoRa 無線電連結運作。
+- 確認登入憑證 — 帳號或密碼錯誤在大多數代理伺服器上會靜默失敗，不顯示錯誤訊息。 請仔細確認是否有多餘的尾端空白字元。
+- 防火牆 — 連接埠 1883（MQTT）或 8883（MQTT+TLS）必須開放。 部分網路會封鎖非標準連接埠。
+- DNS 解析 — 若使用自訂代理伺服器主機名稱，請確認節點能夠正確解析該名稱。 請嘗試直接使用代理伺服器的 IP 位址進行連線。
 
-### Messages Not Bridging
+### 訊息未正常橋接
 
-- **Check uplink/downlink settings** — if only uplink is enabled, messages flow from mesh to MQTT but not back. Enable downlink on the receiving gateway.
-- **Channel mismatch** — both gateways must share the same channel with the same PSK. A mismatch means messages are encrypted with different keys and appear as garbage.
-- **Topic mismatch** — ensure both gateways use the same root topic. The default `msh` works for the public broker.
+- 檢查上行／下行設定 — 若僅啟用上行，訊息只會從 mesh 網路流向 MQTT，不會反向傳送。 請在接收端閘道上啟用下行功能。
+- 頻道不符 — 兩個閘道必須使用相同頻道且具備相同的 PSK。 不符時，訊息將以不同金鑰加密，導致對方收到的內容為亂碼。
+- 主題不符 — 請確認兩個閘道使用相同的根主題。 預設的 msh 適用於公開代理伺服器。
 
-## Related Topics
+## 相關主題
 
-- [Settings — Modules & Admin](settings-module-admin) — MQTT module configuration reference
-- [Messages & Channels](messages-and-channels) — channel encryption and PSK setup
-- [MQTT integration guide](https://meshtastic.org/docs/software/integrations/mqtt) — detailed MQTT documentation on meshtastic.org
+- 〔設定 — 模組與管理〕(settings-module-admin) — MQTT 模組設定參考
+- 〔訊息與頻道〕(messages-and-channels) — 頻道加密與 PSK 設定
+- 〔MQTT 整合指南〕(https://meshtastic.org/docs/software/integrations/mqtt) — meshtastic.org 上的完整 MQTT 說明文件
 
 ---
 
