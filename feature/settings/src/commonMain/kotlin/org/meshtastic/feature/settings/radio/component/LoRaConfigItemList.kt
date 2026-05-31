@@ -67,21 +67,6 @@ import org.meshtastic.proto.Config
 private val SPREAD_FACTOR_RANGE = 7..12
 private val CODING_RATE_RANGE = 5..8
 
-/** Valid LoRa bandwidth codes mapped to their display labels (kHz). */
-private val BANDWIDTH_OPTIONS: List<Pair<Int, String>> =
-    listOf(
-        8 to "7.8 kHz",
-        10 to "10.4 kHz",
-        16 to "15.6 kHz",
-        21 to "20.8 kHz",
-        31 to "31.25 kHz",
-        42 to "41.7 kHz",
-        62 to "62.5 kHz",
-        125 to "125 kHz",
-        250 to "250 kHz",
-        500 to "500 kHz",
-    )
-
 @Composable
 fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
@@ -260,12 +245,12 @@ private fun ManualModemSettings(
     onConfigChange: (Config.LoRaConfig) -> Unit,
 ) {
     androidx.compose.foundation.layout.Column {
-        DropDownPreference(
+        EditTextPreference(
             title = stringResource(Res.string.bandwidth),
+            value = config.bandwidth,
             enabled = enabled,
-            items = BANDWIDTH_OPTIONS,
-            selectedItem = config.bandwidth,
-            onItemSelected = { onConfigChange(config.copy(bandwidth = it)) },
+            keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+            onValueChanged = { onConfigChange(config.copy(bandwidth = it)) },
         )
         HorizontalDivider()
         EditTextPreference(
