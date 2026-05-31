@@ -16,6 +16,7 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 * feat: replace LoRa bandwidth text input with constrained dropdown (#5687) by James Rich (@jamesarich) in [`ccf984e4b`](https://github.com/meshtastic/Meshtastic-Android/commit/ccf984e4b1ea208941d491841e79f62ac84b573a)
 * chore(deps): update core/proto/src/main/proto digest to c4540bb (#5688) by renovate[bot] (@renovate[bot]) in [`0e068053b`](https://github.com/meshtastic/Meshtastic-Android/commit/0e068053bce224de4871cc3d8cc05a9719ad88db)
 * Revert "feat: replace LoRa bandwidth text input with constrained dropdown" (#5691) by James Rich (@jamesarich) in [`c430eacaa`](https://github.com/meshtastic/Meshtastic-Android/commit/c430eacaace8b1f05c15dc11673a2debf294eb81)
+* feat: Save unsent chat message as draft (#5686) by Copilot (@Copilot) in [`a36b60e55`](https://github.com/meshtastic/Meshtastic-Android/commit/a36b60e5510469ee6c78898a363b739963119b9b)
 
 ### Open Beta (v2.7.14-open.15)
 Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.13):
