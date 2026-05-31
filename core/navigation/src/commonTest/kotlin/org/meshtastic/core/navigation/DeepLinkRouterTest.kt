@@ -392,11 +392,7 @@ class DeepLinkRouterTest {
     fun `discovery session deep link resolves session ID`() {
         val result = route("/settings/local-mesh-discovery/session/42")
         assertEquals(
-            listOf(
-                SettingsRoute.Settings(null),
-                DiscoveryRoute.DiscoveryGraph,
-                DiscoveryRoute.DiscoverySummary(42L),
-            ),
+            listOf(SettingsRoute.Settings(null), DiscoveryRoute.DiscoveryGraph, DiscoveryRoute.DiscoverySummary(42L)),
             result,
         )
     }
@@ -405,11 +401,7 @@ class DeepLinkRouterTest {
     fun `discovery alias localmeshdiscovery resolves session ID`() {
         val result = route("/settings/localmeshdiscovery/session/99")
         assertEquals(
-            listOf(
-                SettingsRoute.Settings(null),
-                DiscoveryRoute.DiscoveryGraph,
-                DiscoveryRoute.DiscoverySummary(99L),
-            ),
+            listOf(SettingsRoute.Settings(null), DiscoveryRoute.DiscoveryGraph, DiscoveryRoute.DiscoverySummary(99L)),
             result,
         )
     }
