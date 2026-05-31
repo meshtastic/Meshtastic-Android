@@ -139,8 +139,7 @@ fun MessageScreen(
     var showDeleteDialog by rememberSaveable { mutableStateOf(false) }
     var sharedContact by rememberSaveable { mutableStateOf<Node?>(null) }
     val selectedMessageIds = rememberSaveable { mutableStateOf(emptySet<Long>()) }
-    val draft by viewModel.draftMessage.collectAsStateWithLifecycle()
-    val messageInputState = rememberTextFieldState(message.ifEmpty { draft })
+    val messageInputState = rememberTextFieldState(message.ifEmpty { viewModel.draftMessage.value })
     val showQuickChat by viewModel.showQuickChat.collectAsStateWithLifecycle()
     val filteredCount by viewModel.filteredCount.collectAsStateWithLifecycle()
     val showFiltered by viewModel.showFiltered.collectAsStateWithLifecycle()

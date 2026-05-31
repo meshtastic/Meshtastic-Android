@@ -55,7 +55,7 @@ import org.meshtastic.proto.ChannelSet
 @Suppress("LongParameterList", "TooManyFunctions")
 @KoinViewModel
 class MessageViewModel(
-    savedStateHandle: SavedStateHandle,
+    private val savedStateHandle: SavedStateHandle,
     private val nodeRepository: NodeRepository,
     radioConfigRepository: RadioConfigRepository,
     quickChatActionRepository: QuickChatActionRepository,
