@@ -385,7 +385,7 @@ class DeepLinkRouterTest {
     @Test
     fun `discovery settings sub-route navigates to discovery graph`() {
         val result = route("/settings/local-mesh-discovery")
-        assertEquals(listOf(SettingsRoute.SettingsGraph(null), DiscoveryRoute.DiscoveryGraph), result)
+        assertEquals(listOf(SettingsRoute.Settings(null), DiscoveryRoute.DiscoveryGraph), result)
     }
 
     @Test
@@ -393,7 +393,7 @@ class DeepLinkRouterTest {
         val result = route("/settings/local-mesh-discovery/session/42")
         assertEquals(
             listOf(
-                SettingsRoute.SettingsGraph(null),
+                SettingsRoute.Settings(null),
                 DiscoveryRoute.DiscoveryGraph,
                 DiscoveryRoute.DiscoverySummary(42L),
             ),
@@ -406,7 +406,7 @@ class DeepLinkRouterTest {
         val result = route("/settings/localmeshdiscovery/session/99")
         assertEquals(
             listOf(
-                SettingsRoute.SettingsGraph(null),
+                SettingsRoute.Settings(null),
                 DiscoveryRoute.DiscoveryGraph,
                 DiscoveryRoute.DiscoverySummary(99L),
             ),
@@ -417,7 +417,7 @@ class DeepLinkRouterTest {
     @Test
     fun `discovery session with invalid ID falls back to graph`() {
         val result = route("/settings/local-mesh-discovery/session/notanumber")
-        assertEquals(listOf(SettingsRoute.SettingsGraph(null), DiscoveryRoute.DiscoveryGraph), result)
+        assertEquals(listOf(SettingsRoute.Settings(null), DiscoveryRoute.DiscoveryGraph), result)
     }
 
     // endregion

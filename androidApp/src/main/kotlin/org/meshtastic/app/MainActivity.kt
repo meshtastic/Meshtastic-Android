@@ -181,7 +181,6 @@ class MainActivity : AppCompatActivity() {
 
     @Suppress("LongMethod")
     @Composable
-    @Suppress("LongMethod")
     private fun AppCompositionLocals(content: @Composable () -> Unit) {
         val eventEdition by model.eventEdition.collectAsStateWithLifecycle()
         CompositionLocalProvider(
