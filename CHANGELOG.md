@@ -17,6 +17,7 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 * fix(flatpak): source desktop metadata from in-repo packaging dir (#5673) by James Rich (@jamesarich) in [`5c0fe4e84`](https://github.com/meshtastic/Meshtastic-Android/commit/5c0fe4e845d0e18a945b810ce3717924256769d5)
 * Rename Desktop application to 'Meshtastic Desktop' (#5677) by James Rich (@jamesarich) in [`e48c394fd`](https://github.com/meshtastic/Meshtastic-Android/commit/e48c394fd2229f0d0ba4172786aa2644b79ee0be)
 * chore(deps): update core/proto/src/main/proto digest to a0a2239 (#5676) by renovate[bot] (@renovate[bot]) in [`dee5c3d0d`](https://github.com/meshtastic/Meshtastic-Android/commit/dee5c3d0dc6a7ffd2d17a14eed0502a72843912f)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5678) by James Rich (@jamesarich) in [`fac416499`](https://github.com/meshtastic/Meshtastic-Android/commit/fac41649948fef61a28941c2ee3d5767acff5f4e)
 
 ### Open Beta (v2.7.14-open.14)
 Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.13):
