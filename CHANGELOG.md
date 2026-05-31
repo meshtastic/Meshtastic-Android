@@ -11,6 +11,7 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 * chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5682) by James Rich (@jamesarich) in [`ba163c40a`](https://github.com/meshtastic/Meshtastic-Android/commit/ba163c40a9d2ff7e49845c7f1410c1fff8368cc3)
 * chore(deps): update vico to v3.2.0-next.6 (#5683) by renovate[bot] (@renovate[bot]) in [`93faeabbc`](https://github.com/meshtastic/Meshtastic-Android/commit/93faeabbc6bd2e23770f5b03706beea1e0d7bdab)
+* fix: address top Crashlytics crashes and non-fatals for build 29320984 (#5684) by James Rich (@jamesarich) in [`cca7c274b`](https://github.com/meshtastic/Meshtastic-Android/commit/cca7c274b98dbe224c3df6f511da7f3263c697ab)
 
 ### Open Beta (v2.7.14-open.15)
 Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.13):
