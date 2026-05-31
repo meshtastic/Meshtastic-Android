@@ -17,7 +17,7 @@
 package org.meshtastic.core.database.dao
 
 import androidx.room3.Room
-import androidx.test.core.app.ApplicationProvider
+import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -39,7 +39,7 @@ import kotlin.test.assertTrue
 /**
  * Migration coverage for discovery tables (D011).
  *
- * Verifies that the discovery schema (version 38→39 auto-migration) creates the expected tables, supports CRUD
+ * Verifies that the discovery schema (version 39→40 auto-migration) creates the expected tables, supports CRUD
  * operations, enforces foreign key cascade behavior, and respects column defaults.
  */
 @RunWith(AndroidJUnit4::class)
@@ -51,12 +51,9 @@ class DiscoveryMigrationTest {
 
     @Before
     fun createDb() {
-        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
         database =
-            Room.inMemoryDatabaseBuilder<MeshtasticDatabase>(
-                context = context,
-                factory = { MeshtasticDatabaseConstructor.initialize() },
-            )
+            Room.inMemoryDatabaseBuilder<MeshtasticDatabase>(factory = { MeshtasticDatabaseConstructor.initialize() })
+                .setDriver(BundledSQLiteDriver())
                 .build()
         discoveryDao = database.discoveryDao()
     }
