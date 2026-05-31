@@ -20,11 +20,11 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.withContext
 import okio.ByteString.Companion.toByteString
 import org.koin.core.annotation.Single
@@ -91,7 +91,9 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
         dbManager.currentDb.flatMapLatest { db -> db.packetDao().getUnreadCountTotal() }
 
     override suspend fun clearUnreadCount(contact: String, timestamp: Long) =
-        withContext(dispatchers.io + NonCancellable) { dbManager.currentDb.value.packetDao().clearUnreadCount(contact, timestamp) }
+        withContext(dispatchers.io + NonCancellable) {
+            dbManager.currentDb.value.packetDao().clearUnreadCount(contact, timestamp)
+        }
 
     override suspend fun clearAllUnreadCounts() =
         withContext(dispatchers.io + NonCancellable) { dbManager.currentDb.value.packetDao().clearAllUnreadCounts() }
