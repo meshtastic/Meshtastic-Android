@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.withContext
 import okio.ByteString.Companion.toByteString
 import org.koin.core.annotation.Single
@@ -90,13 +91,13 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
         dbManager.currentDb.flatMapLatest { db -> db.packetDao().getUnreadCountTotal() }
 
     override suspend fun clearUnreadCount(contact: String, timestamp: Long) =
-        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().clearUnreadCount(contact, timestamp) }
+        withContext(dispatchers.io + NonCancellable) { dbManager.currentDb.value.packetDao().clearUnreadCount(contact, timestamp) }
 
     override suspend fun clearAllUnreadCounts() =
-        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().clearAllUnreadCounts() }
+        withContext(dispatchers.io + NonCancellable) { dbManager.currentDb.value.packetDao().clearAllUnreadCounts() }
 
     override suspend fun updateLastReadMessage(contact: String, messageUuid: Long, lastReadTimestamp: Long) =
-        withContext(dispatchers.io) {
+        withContext(dispatchers.io + NonCancellable) {
             val dao = dbManager.currentDb.value.packetDao()
             val current = dao.getContactSettings(contact)
             val existingTimestamp = current?.lastReadMessageTimestamp ?: Long.MIN_VALUE
@@ -116,7 +117,7 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
     }
 
     suspend fun insertRoomPacket(packet: RoomPacket) =
-        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().insert(packet) }
+        withContext(dispatchers.io + NonCancellable) { dbManager.currentDb.value.packetDao().insert(packet) }
 
     override suspend fun savePacket(
         myNodeNum: Int,
