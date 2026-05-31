@@ -38,6 +38,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
@@ -314,11 +315,19 @@ open class DatabaseManager(
      * historical messages.
      */
     private suspend fun backfillSearchIndexIfNeeded(db: MeshtasticDatabase) {
-        val count = db.packetDao().backfillMessageTexts()
-        if (count == 0) return
-        Logger.i { "Backfilled $count messages for FTS search index" }
-        db.packetDao().rebuildFtsIndex()
-        Logger.i { "FTS search index rebuild complete" }
+        val needsBackfill = db.packetDao().countPacketsNeedingBackfill() > 0
+        if (!needsBackfill) return
+
+        // Perform the write operations inside NonCancellable to prevent
+        // connection pool leaks due to coroutine cancellation.
+        withContext(NonCancellable) {
+            val count = db.packetDao().backfillMessageTexts()
+            if (count > 0) {
+                Logger.i { "Backfilled $count messages for FTS search index" }
+                db.packetDao().rebuildFtsIndex()
+                Logger.i { "FTS search index rebuild complete" }
+            }
+        }
     }
 
     /** Closes all open databases and cancels background work. */

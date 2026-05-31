@@ -569,6 +569,13 @@ interface PacketDao {
     suspend fun updateMessageText(uuid: Long, text: String)
 
     @Query(
+        "SELECT COUNT(*) FROM packet " +
+            "WHERE port_num = 1 AND (message_text IS NULL OR message_text = '') " +
+            "AND json_extract(data, '\$.text') IS NOT NULL",
+    )
+    suspend fun countPacketsNeedingBackfill(): Int
+
+    @Query(
         "UPDATE packet SET message_text = json_extract(data, '\$.text') " +
             "WHERE port_num = 1 AND (message_text IS NULL OR message_text = '') " +
             "AND json_extract(data, '\$.text') IS NOT NULL",
