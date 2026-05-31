@@ -143,7 +143,7 @@ configuration settings screen. Constraints are sourced from two layers:
 | `region` | Enum | Dropdown: `RegionInfo` entries | Regional frequency plans |
 | `use_preset` | Boolean | Toggle | Controls manual vs preset LoRa settings visibility |
 | `modem_preset` | Enum | Dropdown: `ChannelOption` entries | Visible only when `use_preset = true` |
-| `bandwidth` | Integer | Numeric input | Visible only when `use_preset = false` |
+| `bandwidth` | Integer | Dropdown: valid LoRa bandwidths (7.8–500 kHz) | Visible only when `use_preset = false` |
 | `spread_factor` | Integer | Numeric input | Visible only when `use_preset = false` |
 | `coding_rate` | Integer | Numeric input | Visible only when `use_preset = false` |
 | `hop_limit` | Integer | Dropdown: 0–7 | — |
