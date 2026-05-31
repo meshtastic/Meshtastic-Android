@@ -24,8 +24,8 @@ import com.juul.kable.logs.LogEngine
  * operations) appear in the standard app logs rather than going to [System.out] via Kable's default
  * [com.juul.kable.logs.SystemLogEngine].
  *
- * Kable logs connection failures and disconnections at error level, but these are expected BLE operational events —
- * not application bugs. We downgrade error/assert to warn so these don't trigger non-fatal exception recording in
+ * Kable logs connection failures and disconnections at error level, but these are expected BLE operational events — not
+ * application bugs. We downgrade error/assert to warn so these don't trigger non-fatal exception recording in
  * Crashlytics (which records any Kermit Error-level log with a throwable as a non-fatal).
  */
 internal object KermitLogEngine : LogEngine {
