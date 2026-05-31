@@ -14,6 +14,9 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 * chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5668) by James Rich (@jamesarich) in [`ce0174311`](https://github.com/meshtastic/Meshtastic-Android/commit/ce01743118fffacc56fe6287b398d160d102c504)
 * fix(takserver): drop CoT the mesh delivers more than once (#5667) by Ben Meadors (@thebentern) in [`ad6144189`](https://github.com/meshtastic/Meshtastic-Android/commit/ad6144189fe655062efa9403ca3b786aec70147c)
 * fix: address top Crashlytics crashes in beta 2.7.14 (#5672) by James Rich (@jamesarich) in [`c7fbc6e9d`](https://github.com/meshtastic/Meshtastic-Android/commit/c7fbc6e9d3e9fdd2d57de9ac22a8d088651c6fbd)
+* fix(flatpak): source desktop metadata from in-repo packaging dir (#5673) by James Rich (@jamesarich) in [`5c0fe4e84`](https://github.com/meshtastic/Meshtastic-Android/commit/5c0fe4e845d0e18a945b810ce3717924256769d5)
+* Rename Desktop application to 'Meshtastic Desktop' (#5677) by James Rich (@jamesarich) in [`e48c394fd`](https://github.com/meshtastic/Meshtastic-Android/commit/e48c394fd2229f0d0ba4172786aa2644b79ee0be)
+* chore(deps): update core/proto/src/main/proto digest to a0a2239 (#5676) by renovate[bot] (@renovate[bot]) in [`dee5c3d0d`](https://github.com/meshtastic/Meshtastic-Android/commit/dee5c3d0dc6a7ffd2d17a14eed0502a72843912f)
 
 ### Open Beta (v2.7.14-open.14)
 Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.13):
