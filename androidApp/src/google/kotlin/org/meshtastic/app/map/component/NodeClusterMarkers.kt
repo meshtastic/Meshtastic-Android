@@ -18,9 +18,12 @@ package org.meshtastic.app.map.component
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.currentStateAsState
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.savedstate.compose.LocalSavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
@@ -45,6 +48,7 @@ fun NodeClusterMarkers(
     val view = LocalView.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val savedStateRegistryOwner = LocalSavedStateRegistryOwner.current
+    val lifecycleState by lifecycleOwner.lifecycle.currentStateAsState()
 
     // Workaround for https://github.com/googlemaps/android-maps-compose/issues/858
     // and https://github.com/googlemaps/android-maps-compose/issues/875
@@ -65,6 +69,10 @@ fun NodeClusterMarkers(
         }
         onDispose {}
     }
+
+    // Guard against the cluster renderer's async Handler trying to render markers
+    // after the lifecycle has stopped — the internal ComposeView requires an active lifecycle.
+    if (!lifecycleState.isAtLeast(Lifecycle.State.STARTED)) return
 
     Clustering(
         items = nodeClusterItems,
