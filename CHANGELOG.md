@@ -9,17 +9,10 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
-* fix(ci): use fastlane supply for Play promotion with changesNotSentForReview (#5665) by James Rich (@jamesarich) in [`df2c7a00b`](https://github.com/meshtastic/Meshtastic-Android/commit/df2c7a00bd1b789658ead53270d86b78486429dd)
-* repo: Delete symlink by James Rich (@jamesarich) in [`6b440e57e`](https://github.com/meshtastic/Meshtastic-Android/commit/6b440e57e64de18d0b2bf59a52ec387e8b7cf2b8)
-* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5668) by James Rich (@jamesarich) in [`ce0174311`](https://github.com/meshtastic/Meshtastic-Android/commit/ce01743118fffacc56fe6287b398d160d102c504)
-* fix(takserver): drop CoT the mesh delivers more than once (#5667) by Ben Meadors (@thebentern) in [`ad6144189`](https://github.com/meshtastic/Meshtastic-Android/commit/ad6144189fe655062efa9403ca3b786aec70147c)
-* fix: address top Crashlytics crashes in beta 2.7.14 (#5672) by James Rich (@jamesarich) in [`c7fbc6e9d`](https://github.com/meshtastic/Meshtastic-Android/commit/c7fbc6e9d3e9fdd2d57de9ac22a8d088651c6fbd)
-* fix(flatpak): source desktop metadata from in-repo packaging dir (#5673) by James Rich (@jamesarich) in [`5c0fe4e84`](https://github.com/meshtastic/Meshtastic-Android/commit/5c0fe4e845d0e18a945b810ce3717924256769d5)
-* Rename Desktop application to 'Meshtastic Desktop' (#5677) by James Rich (@jamesarich) in [`e48c394fd`](https://github.com/meshtastic/Meshtastic-Android/commit/e48c394fd2229f0d0ba4172786aa2644b79ee0be)
-* chore(deps): update core/proto/src/main/proto digest to a0a2239 (#5676) by renovate[bot] (@renovate[bot]) in [`dee5c3d0d`](https://github.com/meshtastic/Meshtastic-Android/commit/dee5c3d0dc6a7ffd2d17a14eed0502a72843912f)
-* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5678) by James Rich (@jamesarich) in [`fac416499`](https://github.com/meshtastic/Meshtastic-Android/commit/fac41649948fef61a28941c2ee3d5767acff5f4e)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5682) by James Rich (@jamesarich) in [`ba163c40a`](https://github.com/meshtastic/Meshtastic-Android/commit/ba163c40a9d2ff7e49845c7f1410c1fff8368cc3)
+* chore(deps): update vico to v3.2.0-next.6 (#5683) by renovate[bot] (@renovate[bot]) in [`93faeabbc`](https://github.com/meshtastic/Meshtastic-Android/commit/93faeabbc6bd2e23770f5b03706beea1e0d7bdab)
 
-### Open Beta (v2.7.14-open.14)
+### Open Beta (v2.7.14-open.15)
 Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.13):
 
 #### 🏗️ Features
@@ -234,6 +227,10 @@ Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/relea
 * fix(ble): stop BLE scan on background and downgrade connection priority by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5644
 * fix: remove Android Auto manifest entry causing Play Store rejection by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5662
 * fix(takserver): emit *:-1:stcp contact endpoint so directed TAK-Talk/GeoChat routes over the mesh by @thebentern in https://github.com/meshtastic/Meshtastic-Android/pull/5661
+* fix(takserver): drop CoT the mesh delivers more than once by @thebentern in https://github.com/meshtastic/Meshtastic-Android/pull/5667
+* fix: address top Crashlytics crashes in beta 2.7.14 by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5672
+* fix(flatpak): source desktop metadata from in-repo packaging dir by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5673
+* Rename Desktop application to 'Meshtastic Desktop' by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5677
 #### 📝 Other Changes
 * refactor(ui): compose resources, domain layer by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/4628
 * Add per-message transport method icons for new message format by @Kealper in https://github.com/meshtastic/Meshtastic-Android/pull/4643
