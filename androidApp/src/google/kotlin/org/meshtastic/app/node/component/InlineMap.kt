@@ -26,8 +26,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.savedstate.compose.LocalSavedStateRegistryOwner
+import androidx.savedstate.findViewTreeSavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -55,20 +57,28 @@ fun InlineMap(node: Node, modifier: Modifier = Modifier) {
             else -> ComposeMapColorScheme.LIGHT
         }
 
-    // Workaround for maps-compose issue where MarkerComposable's internal ComposeView
-    // cannot find ViewTreeLifecycleOwner, causing crash on bitmap rendering.
+    // Workaround for a maps-compose issue where MarkerComposable's internal ComposeView cannot find a
+    // ViewTreeLifecycleOwner, causing a crash on bitmap rendering. We attach the current owners to the
+    // window root view for the lifetime of the map.
+    //
+    // IMPORTANT: capture and restore the previous owners on dispose. This InlineMap is hosted inside the
+    // node-detail NavEntry, whose LocalLifecycleOwner is a transient, entry-scoped lifecycle. Leaving it
+    // attached to the activity root view after the entry is destroyed (e.g. navigating back to the node
+    // list) would make every subsequently opened Popup/DropdownMenu inherit a DESTROYED lifecycle and
+    // render at 0x0 (invisible). See the node-list popup regression.
     val view = LocalView.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val savedStateRegistryOwner = LocalSavedStateRegistryOwner.current
     DisposableEffect(lifecycleOwner, savedStateRegistryOwner) {
         val root = view.rootView
+        val prevRootLifecycleOwner = root.findViewTreeLifecycleOwner()
+        val prevRootSavedStateRegistryOwner = root.findViewTreeSavedStateRegistryOwner()
         root.setViewTreeLifecycleOwner(lifecycleOwner)
         root.setViewTreeSavedStateRegistryOwner(savedStateRegistryOwner)
-        if (view !== root) {
-            view.setViewTreeLifecycleOwner(lifecycleOwner)
-            view.setViewTreeSavedStateRegistryOwner(savedStateRegistryOwner)
+        onDispose {
+            root.setViewTreeLifecycleOwner(prevRootLifecycleOwner)
+            root.setViewTreeSavedStateRegistryOwner(prevRootSavedStateRegistryOwner)
         }
-        onDispose {}
     }
 
     key(node.num) {

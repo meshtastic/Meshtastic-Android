@@ -24,8 +24,10 @@ import androidx.compose.ui.platform.LocalView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.currentStateAsState
+import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.savedstate.compose.LocalSavedStateRegistryOwner
+import androidx.savedstate.findViewTreeSavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.google.maps.android.clustering.Cluster
 import com.google.maps.android.clustering.view.DefaultClusterRenderer
@@ -58,16 +60,31 @@ fun NodeClusterMarkers(
     // so the internal snapshot view can find them when walking up the tree.
     // DisposableEffect runs at composition time (not post-composition like SideEffect),
     // ensuring owners are set before the Clustering composable triggers marker rendering.
+    // Capture and restore the previous owners on dispose. The owners here are NavEntry-scoped
+    // (transient) lifecycles; leaving one attached to the activity root view after this screen is
+    // destroyed makes subsequently opened Popups/DropdownMenus inherit a DESTROYED lifecycle and
+    // render at 0x0 (invisible). See the node-list popup regression and InlineMap.
     DisposableEffect(lifecycleOwner, savedStateRegistryOwner) {
         val root = view.rootView
+        val prevRootLifecycleOwner = root.findViewTreeLifecycleOwner()
+        val prevRootSavedStateRegistryOwner = root.findViewTreeSavedStateRegistryOwner()
         root.setViewTreeLifecycleOwner(lifecycleOwner)
         root.setViewTreeSavedStateRegistryOwner(savedStateRegistryOwner)
         // Also set on the view itself in case the internal renderer walks from a child
+        val prevViewLifecycleOwner = view.findViewTreeLifecycleOwner()
+        val prevViewSavedStateRegistryOwner = view.findViewTreeSavedStateRegistryOwner()
         if (view !== root) {
             view.setViewTreeLifecycleOwner(lifecycleOwner)
             view.setViewTreeSavedStateRegistryOwner(savedStateRegistryOwner)
         }
-        onDispose {}
+        onDispose {
+            root.setViewTreeLifecycleOwner(prevRootLifecycleOwner)
+            root.setViewTreeSavedStateRegistryOwner(prevRootSavedStateRegistryOwner)
+            if (view !== root) {
+                view.setViewTreeLifecycleOwner(prevViewLifecycleOwner)
+                view.setViewTreeSavedStateRegistryOwner(prevViewSavedStateRegistryOwner)
+            }
+        }
     }
 
     // Guard against the cluster renderer's async Handler trying to render markers
