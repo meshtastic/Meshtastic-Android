@@ -71,7 +71,21 @@ private val CODING_RATE_RANGE = 5..8
 fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val loraConfig = state.radioConfig.lora ?: Config.LoRaConfig()
-    val primarySettings = state.channelList.getOrNull(0) ?: return
+    val primarySettings = state.channelList.getOrNull(0)
+
+    if (primarySettings == null) {
+        RadioConfigScreenList(
+            title = stringResource(Res.string.lora),
+            onBack = onBack,
+            configState = rememberConfigState(initialValue = loraConfig),
+            enabled = false,
+            responseState = state.responseState,
+            onDismissPacketResponse = viewModel::clearPacketResponse,
+            onSave = {},
+        ) {}
+        return
+    }
+
     val formState = rememberConfigState(initialValue = loraConfig)
 
     val primaryChannel = remember(formState.value) { Channel(primarySettings, formState.value) }
