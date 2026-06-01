@@ -64,6 +64,8 @@ firebase-debug.log
 .agent_plans/
 .agent_refs/
 .agent_artifacts/
+# Firebase Studio / Antigravity auto-provisioned skills — not used by this project
+.agents/
 
 # Local library development clones
 /coil/
@@ -84,5 +86,8 @@ docs/_config_local.yml
 flatpak-sources-*.json
 flatpak-sources.json
 offline-repository/
-.claude/
+# Share team-wide Claude config (token-guard deny rules + subagents); keep per-user local settings ignored
+.claude/*
+!.claude/settings.json
+!.claude/agents/
 build-scan-*.scan
