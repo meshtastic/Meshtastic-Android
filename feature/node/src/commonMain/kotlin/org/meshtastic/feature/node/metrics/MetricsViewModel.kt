@@ -431,6 +431,7 @@ open class MetricsViewModel(
         }
     }
 
+    @Suppress("CyclomaticComplexMethod")
     fun saveAirQualityMetricsCSV(uri: CommonUri, data: List<Telemetry>) {
         exportCsv(
             uri = uri,

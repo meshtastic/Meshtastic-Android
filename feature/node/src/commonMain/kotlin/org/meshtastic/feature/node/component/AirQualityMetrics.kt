@@ -37,8 +37,8 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.feature.node.model.VectorMetricInfo
 
 /**
- * Displays air quality info cards for a node showing PM1.0, PM2.5, PM10 and CO₂ values.
- * Cards with zero values are hidden. CO₂ value text is color-coded by severity.
+ * Displays air quality info cards for a node showing PM1.0, PM2.5, PM10 and CO₂ values. Cards with zero values are
+ * hidden. CO₂ value text is color-coded by severity.
  */
 @Composable
 internal fun AirQualityInfoCards(node: Node) {
@@ -80,11 +80,12 @@ internal fun AirQualityInfoCards(node: Node) {
         verticalArrangement = Arrangement.SpaceEvenly,
     ) {
         cards.forEach { metric ->
-            val valueColor = if (metric.label == Res.string.co2 && co2Color != null) {
-                co2Color
-            } else {
-                MaterialTheme.colorScheme.onSurface
-            }
+            val valueColor =
+                if (metric.label == Res.string.co2 && co2Color != null) {
+                    co2Color
+                } else {
+                    MaterialTheme.colorScheme.onSurface
+                }
             InfoCard(
                 icon = metric.icon,
                 text = stringResource(metric.label),

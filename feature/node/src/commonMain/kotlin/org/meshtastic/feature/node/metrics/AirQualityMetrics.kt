@@ -69,9 +69,7 @@ import org.meshtastic.core.ui.theme.GraphColors.Red
 import org.meshtastic.core.ui.util.rememberSaveFileLauncher
 import org.meshtastic.proto.Telemetry
 
-/**
- * Selectable chart metric enum for air quality data series.
- */
+/** Selectable chart metric enum for air quality data series. */
 private enum class AirQuality(val labelRes: StringResource, val unit: String, val color: Color) {
     PM1_0(Res.string.pm1_0, "µg/m³", Blue),
     PM2_5(Res.string.pm2_5, "µg/m³", Cyan),
@@ -90,13 +88,12 @@ private enum class AirQuality(val labelRes: StringResource, val unit: String, va
     }
 }
 
-private val LEGEND_DATA = AirQuality.entries.map { metric ->
-    LegendData(nameRes = metric.labelRes, color = metric.color, isLine = true)
-}
+private val LEGEND_DATA =
+    AirQuality.entries.map { metric -> LegendData(nameRes = metric.labelRes, color = metric.color, isLine = true) }
 
 @Suppress("LongMethod")
 @Composable
-fun AirQualityMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
+fun AirQualityMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit, modifier: Modifier = Modifier) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val timeFrame by viewModel.timeFrame.collectAsStateWithLifecycle()
     val availableTimeFrames by viewModel.availableTimeFrames.collectAsStateWithLifecycle()
@@ -104,9 +101,8 @@ fun AirQualityMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Uni
 
     val exportLauncher = rememberSaveFileLauncher { uri -> viewModel.saveAirQualityMetricsCSV(uri, data) }
 
-    val availableMetrics = remember(data) {
-        AirQuality.entries.filter { metric -> data.any { metric.getValue(it) != null } }
-    }
+    val availableMetrics =
+        remember(data) { AirQuality.entries.filter { metric -> data.any { metric.getValue(it) != null } } }
     var selectedMetrics by rememberSaveable { mutableStateOf(setOf(AirQuality.PM2_5, AirQuality.CO2)) }
 
     BaseMetricScreen(
@@ -128,19 +124,20 @@ fun AirQualityMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Uni
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
-                        .horizontalScroll(rememberScrollState()),
+                    modifier =
+                    Modifier.fillMaxWidth().padding(horizontal = 16.dp).horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     availableMetrics.forEach { metric ->
                         FilterChip(
                             selected = metric in selectedMetrics,
                             onClick = {
-                                selectedMetrics = if (metric in selectedMetrics) {
-                                    selectedMetrics - metric
-                                } else {
-                                    selectedMetrics + metric
-                                }
+                                selectedMetrics =
+                                    if (metric in selectedMetrics) {
+                                        selectedMetrics - metric
+                                    } else {
+                                        selectedMetrics + metric
+                                    }
                             },
                             label = { Text(stringResource(metric.labelRes)) },
                         )
@@ -150,12 +147,12 @@ fun AirQualityMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Uni
         },
         chartPart = { modifier, selectedX, vicoScrollState, onPointSelected ->
             AirQualityChart(
-                modifier = modifier,
                 telemetries = data.reversed(),
                 selectedMetrics = selectedMetrics,
                 vicoScrollState = vicoScrollState,
                 selectedX = selectedX,
-                onPointSelected = onPointSelected,
+                onSelectPoint = onPointSelected,
+                modifier = modifier,
             )
         },
         listPart = { modifier, selectedX, lazyListState, onCardClick ->
@@ -172,37 +169,41 @@ fun AirQualityMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Uni
     )
 }
 
+@Suppress("LongMethod")
 @Composable
 private fun AirQualityChart(
-    modifier: Modifier = Modifier,
     telemetries: List<Telemetry>,
     selectedMetrics: Set<AirQuality>,
     vicoScrollState: VicoScrollState,
     selectedX: Double?,
-    onPointSelected: (Double) -> Unit,
+    onSelectPoint: (Double) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val activeMetrics = AirQuality.entries.filter { it in selectedMetrics }
+    val metricLabels = activeMetrics.associateWith { stringResource(it.labelRes) }
     MetricChartScaffold(
         isEmpty = telemetries.isEmpty() || activeMetrics.isEmpty(),
         legendData = LEGEND_DATA.filter { ld -> activeMetrics.any { it.labelRes == ld.nameRes } },
         modifier = modifier,
     ) { modelProducer, chartModifier ->
-        val marker = ChartStyling.rememberMarker(
-            valueFormatter = ChartStyling.createColoredMarkerValueFormatter { value, color ->
-                val metric = activeMetrics.firstOrNull { it.color == color }
-                if (metric != null) {
-                    "${stringResource(metric.labelRes)}: ${NumberFormatter.format(value.toFloat(), 0)} ${metric.unit}"
-                } else {
-                    NumberFormatter.format(value.toFloat(), 0)
-                }
-            },
-        )
+        val marker =
+            ChartStyling.rememberMarker(
+                valueFormatter =
+                ChartStyling.createColoredMarkerValueFormatter { value, color ->
+                    val metric = activeMetrics.firstOrNull { it.color == color }
+                    if (metric != null) {
+                        val label = metricLabels[metric] ?: ""
+                        "$label: ${NumberFormatter.format(value.toFloat(), 0)} ${metric.unit}"
+                    } else {
+                        NumberFormatter.format(value.toFloat(), 0)
+                    }
+                },
+            )
 
-        val metricDataSets = remember(telemetries, activeMetrics) {
-            activeMetrics.map { metric ->
-                telemetries.filter { metric.getValue(it) != null }
+        val metricDataSets =
+            remember(telemetries, activeMetrics) {
+                activeMetrics.map { metric -> telemetries.filter { metric.getValue(it) != null } }
             }
-        }
 
         LaunchedEffect(telemetries, activeMetrics) {
             modelProducer.runTransaction {
@@ -210,35 +211,35 @@ private fun AirQualityChart(
                     val metricData = metricDataSets[index]
                     if (metricData.isNotEmpty()) {
                         lineSeries {
-                            series(
-                                x = metricData.map { it.time },
-                                y = metricData.map { metric.getValue(it) ?: 0f },
-                            )
+                            series(x = metricData.map { it.time }, y = metricData.map { metric.getValue(it) ?: 0f })
                         }
                     }
                 }
             }
         }
 
-        val layers = remember(activeMetrics, metricDataSets) {
-            activeMetrics.mapIndexedNotNull { index, metric ->
-                if (metricDataSets[index].isNotEmpty()) {
-                    metric to metricDataSets[index]
-                } else {
-                    null
+        val layers =
+            remember(activeMetrics, metricDataSets) {
+                activeMetrics.mapIndexedNotNull { index, metric ->
+                    if (metricDataSets[index].isNotEmpty()) {
+                        metric to metricDataSets[index]
+                    } else {
+                        null
+                    }
                 }
             }
-        }
 
-        val chartLayers = layers.map { (metric, _) ->
-            rememberConditionalLayer(
-                hasData = true,
-                lineProvider = LineCartesianLayer.LineProvider.series(
-                    ChartStyling.createStyledLine(metric.color, ChartStyling.THIN_LINE_WIDTH_DP),
-                ),
-                verticalAxisPosition = Axis.Position.Vertical.Start,
-            )
-        }
+        val chartLayers =
+            layers.map { (metric, _) ->
+                rememberConditionalLayer(
+                    hasData = true,
+                    lineProvider =
+                    LineCartesianLayer.LineProvider.series(
+                        ChartStyling.createStyledLine(metric.color, ChartStyling.THIN_LINE_WIDTH_DP),
+                    ),
+                    verticalAxisPosition = Axis.Position.Vertical.Start,
+                )
+            }
 
         val nonNullLayers = remember(chartLayers) { chartLayers.filterNotNull() }
 
@@ -249,7 +250,7 @@ private fun AirQualityChart(
                 layers = nonNullLayers,
                 marker = marker,
                 selectedX = selectedX,
-                onPointSelected = onPointSelected,
+                onPointSelected = onSelectPoint,
                 vicoScrollState = vicoScrollState,
             )
         }
@@ -257,13 +258,9 @@ private fun AirQualityChart(
 }
 
 @Composable
-private fun AirQualityMetricsCard(
-    telemetry: Telemetry,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-) {
+private fun AirQualityMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick: () -> Unit) {
     val aq = telemetry.air_quality_metrics ?: return
-    val time = DateFormatter.formatShort(telemetry.time.toLong() * MS_PER_SEC)
+    val time = DateFormatter.formatDateTime(telemetry.time.toLong() * MS_PER_SEC)
 
     SelectableMetricCard(isSelected = isSelected, onClick = onClick) {
         Text(
@@ -272,31 +269,30 @@ private fun AirQualityMetricsCard(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(modifier = Modifier.height(4.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Column {
-                aq.pm10_standard?.takeIf { it != 0 }?.let {
-                    Text("PM1.0: $it µg/m³", style = MaterialTheme.typography.bodySmall)
-                }
-                aq.pm25_standard?.takeIf { it != 0 }?.let {
-                    Text("PM2.5: $it µg/m³", style = MaterialTheme.typography.bodySmall)
-                }
-                aq.pm100_standard?.takeIf { it != 0 }?.let {
-                    Text("PM10: $it µg/m³", style = MaterialTheme.typography.bodySmall)
-                }
+                aq.pm10_standard
+                    ?.takeIf { it != 0 }
+                    ?.let { Text("PM1.0: $it µg/m³", style = MaterialTheme.typography.bodySmall) }
+                aq.pm25_standard
+                    ?.takeIf { it != 0 }
+                    ?.let { Text("PM2.5: $it µg/m³", style = MaterialTheme.typography.bodySmall) }
+                aq.pm100_standard
+                    ?.takeIf { it != 0 }
+                    ?.let { Text("PM10: $it µg/m³", style = MaterialTheme.typography.bodySmall) }
             }
             Column {
-                aq.co2?.takeIf { it != 0 }?.let { co2 ->
-                    val severity = Co2Severity.fromPpm(co2)
-                    Text(
-                        text = "CO₂: $co2 ppm",
-                        style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.Medium,
-                        color = severity?.color ?: MaterialTheme.colorScheme.onSurface,
-                    )
-                }
+                aq.co2
+                    ?.takeIf { it != 0 }
+                    ?.let { co2 ->
+                        val severity = Co2Severity.fromPpm(co2)
+                        Text(
+                            text = "CO₂: $co2 ppm",
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.Medium,
+                            color = severity?.color ?: MaterialTheme.colorScheme.onSurface,
+                        )
+                    }
             }
         }
     }
