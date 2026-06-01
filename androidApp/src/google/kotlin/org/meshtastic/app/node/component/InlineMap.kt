@@ -18,17 +18,9 @@ package org.meshtastic.app.node.component
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalView
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.findViewTreeLifecycleOwner
-import androidx.lifecycle.setViewTreeLifecycleOwner
-import androidx.savedstate.compose.LocalSavedStateRegistryOwner
-import androidx.savedstate.findViewTreeSavedStateRegistryOwner
-import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.Circle
@@ -52,31 +44,6 @@ fun InlineMap(node: Node, modifier: Modifier = Modifier) {
             true -> ComposeMapColorScheme.DARK
             else -> ComposeMapColorScheme.LIGHT
         }
-
-    // Defensive workaround: propagate ViewTreeLifecycleOwner to the root view so that
-    // any internal maps-compose ComposeView (e.g., info windows) can find the lifecycle
-    // when walking up the view tree.
-    //
-    // IMPORTANT: capture and restore the previous owners on dispose. This InlineMap is hosted inside the
-    // node-detail NavEntry, whose LocalLifecycleOwner is a transient, entry-scoped lifecycle. Leaving it
-    // attached to the activity root view after the entry is destroyed (e.g. navigating back to the node
-    // list) would make subsequently opened Popups/DropdownMenus inherit a DESTROYED lifecycle and
-    // render at 0x0 (invisible). See the node-list popup regression.
-    val view = LocalView.current
-    val lifecycleOwner = LocalLifecycleOwner.current
-    val savedStateRegistryOwner = LocalSavedStateRegistryOwner.current
-    DisposableEffect(lifecycleOwner, savedStateRegistryOwner) {
-        val root = view.rootView
-        val prevRootLifecycleOwner = root.findViewTreeLifecycleOwner()
-        val prevRootSavedStateRegistryOwner = root.findViewTreeSavedStateRegistryOwner()
-        root.setViewTreeLifecycleOwner(lifecycleOwner)
-        root.setViewTreeSavedStateRegistryOwner(savedStateRegistryOwner)
-        onDispose {
-            root.setViewTreeLifecycleOwner(prevRootLifecycleOwner)
-            root.setViewTreeSavedStateRegistryOwner(prevRootSavedStateRegistryOwner)
-        }
-    }
-
     key(node.num) {
         val location = LatLng(node.latitude, node.longitude)
         val cameraState = rememberCameraPositionState {
