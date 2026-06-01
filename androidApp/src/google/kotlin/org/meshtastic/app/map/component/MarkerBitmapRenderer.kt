@@ -46,8 +46,9 @@ private const val EMOJI_PADDING_DP = 2f
 @Composable
 fun rememberNodeChipDescriptor(node: Node): BitmapDescriptor {
     val density = LocalDensity.current.density
-    return remember(node.num, node.user.short_name, node.colors) {
-        renderNodeChipBitmap(node, density)
+    val fontScale = LocalDensity.current.fontScale
+    return remember(node.num, node.user.short_name, node.colors, node.isIgnored) {
+        renderNodeChipBitmap(node, density, fontScale)
     }
 }
 
@@ -57,19 +58,22 @@ fun rememberNodeChipDescriptor(node: Node): BitmapDescriptor {
 @Composable
 fun rememberEmojiMarkerDescriptor(codePoint: Int): BitmapDescriptor {
     val density = LocalDensity.current.density
+    val fontScale = LocalDensity.current.fontScale
     return remember(codePoint) {
-        renderEmojiBitmap(codePoint, density)
+        renderEmojiBitmap(codePoint, density, fontScale)
     }
 }
 
-private fun renderNodeChipBitmap(node: Node, density: Float): BitmapDescriptor {
+private fun renderNodeChipBitmap(node: Node, density: Float, fontScale: Float): BitmapDescriptor {
     val (textColorInt, nodeColorInt) = node.colors
+    val scaledDensity = density * fontScale
 
     val textPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
-        textSize = CHIP_TEXT_SIZE_SP * density
+        textSize = CHIP_TEXT_SIZE_SP * scaledDensity
         typeface = Typeface.DEFAULT_BOLD
         color = textColorInt
         textAlign = Paint.Align.CENTER
+        isStrikeThruText = node.isIgnored
     }
     val label = node.user.short_name.ifEmpty { "???" }
 
@@ -100,9 +104,10 @@ private fun renderNodeChipBitmap(node: Node, density: Float): BitmapDescriptor {
     return BitmapDescriptorFactory.fromBitmap(bitmap)
 }
 
-private fun renderEmojiBitmap(codePoint: Int, density: Float): BitmapDescriptor {
+private fun renderEmojiBitmap(codePoint: Int, density: Float, fontScale: Float): BitmapDescriptor {
+    val scaledDensity = density * fontScale
     val textPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
-        textSize = EMOJI_TEXT_SIZE_SP * density
+        textSize = EMOJI_TEXT_SIZE_SP * scaledDensity
         textAlign = Paint.Align.CENTER
     }
     val emoji = String(Character.toChars(codePoint))
