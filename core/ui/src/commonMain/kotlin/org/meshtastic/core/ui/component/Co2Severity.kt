@@ -29,12 +29,12 @@ import androidx.compose.ui.graphics.Color
  * - Evacuate: 30000+ ppm
  */
 @Suppress("MagicNumber")
-enum class Co2Severity(val color: Color, val label: String, val range: IntRange) {
-    GOOD(Color(0xFF4CAF50), "Good", 0..999),
-    STUFFY(Color(0xFFFFC107), "Stuffy", 1000..1999),
-    POOR(Color(0xFFFF9800), "Poor", 2000..4999),
-    UNSAFE(Color(0xFFF44336), "Unsafe", 5000..29999),
-    EVACUATE(Color(0xFFB71C1C), "Evacuate", 30000..Int.MAX_VALUE),
+enum class Co2Severity(val color: Color, val label: String) {
+    GOOD(Color(0xFF4CAF50), "Good"),
+    STUFFY(Color(0xFFFFC107), "Stuffy"),
+    POOR(Color(0xFFFF9800), "Poor"),
+    UNSAFE(Color(0xFFF44336), "Unsafe"),
+    EVACUATE(Color(0xFFB71C1C), "Evacuate"),
     ;
 
     companion object {

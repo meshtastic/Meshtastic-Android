@@ -144,7 +144,7 @@ data class NodeEntity(
     @ColumnInfo(name = "environment_metrics", typeAffinity = ColumnInfo.BLOB)
     var environmentTelemetry: Telemetry = Telemetry(),
     @ColumnInfo(name = "power_metrics", typeAffinity = ColumnInfo.BLOB) var powerTelemetry: Telemetry = Telemetry(),
-    @ColumnInfo(name = "air_quality_metrics", typeAffinity = ColumnInfo.BLOB)
+    @ColumnInfo(name = "air_quality_metrics", typeAffinity = ColumnInfo.BLOB, defaultValue = "x''")
     var airQualityTelemetry: Telemetry = Telemetry(),
     @ColumnInfo(typeAffinity = ColumnInfo.BLOB) var paxcounter: Paxcount = Paxcount(),
     @ColumnInfo(name = "public_key") var publicKey: ByteString? = null,

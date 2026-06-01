@@ -118,7 +118,9 @@ class TelemetryPacketHandlerImpl(
                 power != null -> nextNode = nextNode.copy(powerMetrics = power)
 
                 t.air_quality_metrics != null -> {
-                    nextNode = nextNode.copy(airQualityMetrics = t.air_quality_metrics!!)
+                    t.air_quality_metrics?.let { aq ->
+                        nextNode = nextNode.copy(airQualityMetrics = aq)
+                    }
                 }
             }
 
