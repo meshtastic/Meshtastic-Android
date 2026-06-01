@@ -9,12 +9,10 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
-* chore(deps): update vico to v3.2.1 (#5696) by renovate[bot] (@renovate[bot]) in [`d264b4086`](https://github.com/meshtastic/Meshtastic-Android/commit/d264b408622b670f807152f5125ed02d43d96360)
-* fix(node): restore view-tree owners on map dispose so node-list popups aren't invisible (#5699) by James Rich (@jamesarich) in [`63ff12dac`](https://github.com/meshtastic/Meshtastic-Android/commit/63ff12dac345135d952c92d93d9063737300f9ce)
-* fix: show loading overlay immediately for remote config sub-screens (#5694) by James Rich (@jamesarich) in [`baa66e687`](https://github.com/meshtastic/Meshtastic-Android/commit/baa66e6877c22cc9841f4aa04ee9f2e7bebceb70)
-* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5698) by James Rich (@jamesarich) in [`c590fe467`](https://github.com/meshtastic/Meshtastic-Android/commit/c590fe467606a023e2cf9248965dbd6f91a9dc81)
+* fix(firmware): surface error state when BLE OTA connection attempts are exhausted (#5700) by James Rich (@jamesarich) in [`cc3b88d00`](https://github.com/meshtastic/Meshtastic-Android/commit/cc3b88d005636dc500c0bb3c1450346f05d22c36)
+* fix(map): replace MarkerComposable with Canvas-rendered bitmaps (#5702) by James Rich (@jamesarich) in [`60feec646`](https://github.com/meshtastic/Meshtastic-Android/commit/60feec646b8d3ada85c8dcf8893fcb7b2ebb3170)
 
-### Open Beta (v2.7.14-open.16)
+### Open Beta (v2.7.14-open.17)
 Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.13):
 
 #### 🏗️ Features
@@ -236,6 +234,8 @@ Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/relea
 * fix(flatpak): source desktop metadata from in-repo packaging dir by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5673
 * Rename Desktop application to 'Meshtastic Desktop' by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5677
 * fix: address top Crashlytics crashes and non-fatals for build 29320984 by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5684
+* fix: show loading overlay immediately for remote config sub-screens by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5694
+* fix(node): restore view-tree owners on map dispose so node-list popups aren't invisible by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5699
 #### 📝 Other Changes
 * refactor(ui): compose resources, domain layer by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/4628
 * Add per-message transport method icons for new message format by @Kealper in https://github.com/meshtastic/Meshtastic-Android/pull/4643
