@@ -9,15 +9,10 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
-* fix(map): remove manual ViewTree lifecycle owner workarounds (#5704) by James Rich (@jamesarich) in [`be6f2cfb7`](https://github.com/meshtastic/Meshtastic-Android/commit/be6f2cfb71c3a37ba1a1e5bbd92211a36dbe96b2)
+* chore(agents): prune governance cruft and add Claude token guards (#5706) by James Rich (@jamesarich) in [`813acee71`](https://github.com/meshtastic/Meshtastic-Android/commit/813acee71604686dc4c98b43cf692fe4586cb5c5)
+* fix(map): scope cluster-renderer ViewTreeLifecycleOwner to map host view (#5708) by James Rich (@jamesarich) in [`1b661739e`](https://github.com/meshtastic/Meshtastic-Android/commit/1b661739e346f6d64ff06731ee2ac0bc80501d19)
 
-### Internal (v2.7.14-internal.114)
-Changes since [`v2.7.14-open.17`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14-open.17):
-
-* fix(firmware): surface error state when BLE OTA connection attempts are exhausted (#5700) by James Rich (@jamesarich) in [`cc3b88d00`](https://github.com/meshtastic/Meshtastic-Android/commit/cc3b88d005636dc500c0bb3c1450346f05d22c36)
-* fix(map): replace MarkerComposable with Canvas-rendered bitmaps (#5702) by James Rich (@jamesarich) in [`60feec646`](https://github.com/meshtastic/Meshtastic-Android/commit/60feec646b8d3ada85c8dcf8893fcb7b2ebb3170)
-
-### Open Beta (v2.7.14-open.17)
+### Open Beta (v2.7.14-open.18)
 Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.13):
 
 #### 🏗️ Features
@@ -241,6 +236,9 @@ Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/relea
 * fix: address top Crashlytics crashes and non-fatals for build 29320984 by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5684
 * fix: show loading overlay immediately for remote config sub-screens by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5694
 * fix(node): restore view-tree owners on map dispose so node-list popups aren't invisible by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5699
+* fix(firmware): surface error state when BLE OTA connection attempts are exhausted by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5700
+* fix(map): replace MarkerComposable with Canvas-rendered bitmaps by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5702
+* fix(map): remove manual ViewTree lifecycle owner workarounds by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5704
 #### 📝 Other Changes
 * refactor(ui): compose resources, domain layer by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/4628
 * Add per-message transport method icons for new message format by @Kealper in https://github.com/meshtastic/Meshtastic-Android/pull/4643
