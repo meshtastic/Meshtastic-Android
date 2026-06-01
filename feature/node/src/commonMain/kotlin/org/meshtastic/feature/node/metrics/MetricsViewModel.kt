@@ -431,6 +431,51 @@ open class MetricsViewModel(
         }
     }
 
+    fun saveAirQualityMetricsCSV(uri: CommonUri, data: List<Telemetry>) {
+        exportCsv(
+            uri = uri,
+            header =
+            "\"date\",\"time\",\"pm10_standard\",\"pm25_standard\",\"pm100_standard\"," +
+                "\"pm10_environmental\",\"pm25_environmental\",\"pm100_environmental\"," +
+                "\"particles_03um\",\"particles_05um\",\"particles_10um\"," +
+                "\"particles_25um\",\"particles_50um\",\"particles_100um\"," +
+                "\"co2\",\"co2_temperature\",\"co2_humidity\"," +
+                "\"form_formaldehyde\",\"form_humidity\",\"form_temperature\"," +
+                "\"pm40_standard\",\"particles_40um\"," +
+                "\"pm_temperature\",\"pm_humidity\",\"pm_voc_idx\",\"pm_nox_idx\"," +
+                "\"particles_tps\"\n",
+            rows = data,
+            epochSeconds = { it.time.toLong() },
+        ) { t ->
+            val aq = t.air_quality_metrics
+            "\"${aq?.pm10_standard?.takeIf { it != 0 } ?: ""}\"," +
+                "\"${aq?.pm25_standard?.takeIf { it != 0 } ?: ""}\"," +
+                "\"${aq?.pm100_standard?.takeIf { it != 0 } ?: ""}\"," +
+                "\"${aq?.pm10_environmental?.takeIf { it != 0 } ?: ""}\"," +
+                "\"${aq?.pm25_environmental?.takeIf { it != 0 } ?: ""}\"," +
+                "\"${aq?.pm100_environmental?.takeIf { it != 0 } ?: ""}\"," +
+                "\"${aq?.particles_03um?.takeIf { it != 0 } ?: ""}\"," +
+                "\"${aq?.particles_05um?.takeIf { it != 0 } ?: ""}\"," +
+                "\"${aq?.particles_10um?.takeIf { it != 0 } ?: ""}\"," +
+                "\"${aq?.particles_25um?.takeIf { it != 0 } ?: ""}\"," +
+                "\"${aq?.particles_50um?.takeIf { it != 0 } ?: ""}\"," +
+                "\"${aq?.particles_100um?.takeIf { it != 0 } ?: ""}\"," +
+                "\"${aq?.co2?.takeIf { it != 0 } ?: ""}\"," +
+                "\"${aq?.co2_temperature?.takeIf { it != 0f } ?: ""}\"," +
+                "\"${aq?.co2_humidity?.takeIf { it != 0f } ?: ""}\"," +
+                "\"${aq?.form_formaldehyde?.takeIf { it != 0f } ?: ""}\"," +
+                "\"${aq?.form_humidity?.takeIf { it != 0f } ?: ""}\"," +
+                "\"${aq?.form_temperature?.takeIf { it != 0f } ?: ""}\"," +
+                "\"${aq?.pm40_standard?.takeIf { it != 0 } ?: ""}\"," +
+                "\"${aq?.particles_40um?.takeIf { it != 0 } ?: ""}\"," +
+                "\"${aq?.pm_temperature?.takeIf { it != 0f } ?: ""}\"," +
+                "\"${aq?.pm_humidity?.takeIf { it != 0f } ?: ""}\"," +
+                "\"${aq?.pm_voc_idx?.takeIf { it != 0f } ?: ""}\"," +
+                "\"${aq?.pm_nox_idx?.takeIf { it != 0f } ?: ""}\"," +
+                "\"${aq?.particles_tps?.takeIf { it != 0f } ?: ""}\""
+        }
+    }
+
     // endregion
 
     @Suppress("MagicNumber", "CyclomaticComplexMethod", "ReturnCount")

@@ -98,6 +98,7 @@ Any session that passes ~10-12 turns without compaction should be compacted. Con
 
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
-shell commands, and other important information, read the current plan
+shell commands, and other important information, read the current plan at
+specs/20260601-074653-air-quality-telemetry/plan.md
 <!-- SPECKIT END -->
 

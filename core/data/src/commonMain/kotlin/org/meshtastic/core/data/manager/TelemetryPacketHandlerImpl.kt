@@ -116,6 +116,10 @@ class TelemetryPacketHandlerImpl(
                 environment != null -> nextNode = nextNode.copy(environmentMetrics = environment)
 
                 power != null -> nextNode = nextNode.copy(powerMetrics = power)
+
+                t.air_quality_metrics != null -> {
+                    nextNode = nextNode.copy(airQualityMetrics = t.air_quality_metrics!!)
+                }
             }
 
             val telemetryTime = if (t.time != 0) t.time else nextNode.lastHeard

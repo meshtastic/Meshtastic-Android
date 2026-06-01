@@ -280,6 +280,7 @@ class NodeRepositoryImpl(
         isMuted = isMuted,
         environmentTelemetry = org.meshtastic.proto.Telemetry(environment_metrics = environmentMetrics),
         powerTelemetry = org.meshtastic.proto.Telemetry(power_metrics = powerMetrics),
+        airQualityTelemetry = org.meshtastic.proto.Telemetry(air_quality_metrics = airQualityMetrics),
         paxcounter = paxcounter,
         publicKey = publicKey,
         notes = notes,

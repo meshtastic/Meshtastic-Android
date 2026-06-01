@@ -20,8 +20,8 @@
 
 **Purpose**: String resources and shared utilities needed by all subsequent phases
 
-- [ ] T001 Add air quality string resources (pm1_0, pm2_5, pm10, co2, air_quality_metrics_log, units) in `core/resources/src/commonMain/composeResources/values/strings.xml` then run `python3 scripts/sort-strings.py`
-- [ ] T002 [P] Create `Co2Severity` enum and `fromPpm()` color utility in `core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/component/Co2Severity.kt` mapping thresholds: Good 0–1000, Stuffy 1000–2000, Poor 2000–5000, Unsafe 5000–30000, Evacuate 30000+ to M3-compatible color tokens
+- [X] T001 Add air quality string resources (pm1_0, pm2_5, pm10, co2, air_quality_metrics_log, units) in `core/resources/src/commonMain/composeResources/values/strings.xml` then run `python3 scripts/sort-strings.py`
+- [X] T002 [P] Create `Co2Severity` enum and `fromPpm()` color utility in `core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/component/Co2Severity.kt` mapping thresholds: Good 0–1000, Stuffy 1000–2000, Poor 2000–5000, Unsafe 5000–30000, Evacuate 30000+ to M3-compatible color tokens
 
 ---
 
@@ -31,10 +31,10 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete — without these changes, air quality telemetry packets are silently dropped and no data persists.
 
-- [ ] T003 Add `airQualityMetrics: AirQualityMetrics = AirQualityMetrics()` field and `hasAirQualityMetrics` computed property to `Node` data class in `core/model/src/commonMain/kotlin/org/meshtastic/core/model/Node.kt`
-- [ ] T004 Add `air_quality_metrics` BLOB column (type `Telemetry`, default `Telemetry()`) to `NodeEntity` in `core/database/src/commonMain/kotlin/org/meshtastic/core/database/entity/NodeEntity.kt` with `airQualityMetrics` accessor property
-- [ ] T005 Bump database version 38→39 with auto-migration adding nullable `air_quality_metrics` column in `core/database/src/commonMain/kotlin/org/meshtastic/core/database/MeshtasticDatabase.kt`
-- [ ] T006 Handle `air_quality_metrics` oneof variant in `TelemetryPacketHandlerImpl` — add branch to `when` block that copies metrics to Node model via `nextNode.copy(airQualityMetrics = airQuality)` in `core/data/src/commonMain/kotlin/org/meshtastic/core/data/manager/TelemetryPacketHandlerImpl.kt`
+- [X] T003 Add `airQualityMetrics: AirQualityMetrics = AirQualityMetrics()` field and `hasAirQualityMetrics` computed property to `Node` data class in `core/model/src/commonMain/kotlin/org/meshtastic/core/model/Node.kt`
+- [X] T004 Add `air_quality_metrics` BLOB column (type `Telemetry`, default `Telemetry()`) to `NodeEntity` in `core/database/src/commonMain/kotlin/org/meshtastic/core/database/entity/NodeEntity.kt` with `airQualityMetrics` accessor property
+- [X] T005 Bump database version 38→39 with auto-migration adding nullable `air_quality_metrics` column in `core/database/src/commonMain/kotlin/org/meshtastic/core/database/MeshtasticDatabase.kt`
+- [X] T006 Handle `air_quality_metrics` oneof variant in `TelemetryPacketHandlerImpl` — add branch to `when` block that copies metrics to Node model via `nextNode.copy(airQualityMetrics = airQuality)` in `core/data/src/commonMain/kotlin/org/meshtastic/core/data/manager/TelemetryPacketHandlerImpl.kt`
 
 **Checkpoint**: Foundation ready — telemetry packets are now decoded, stored in-memory, and persisted to database. UI phases can begin.
 
@@ -48,9 +48,9 @@
 
 ### Implementation for User Story 1
 
-- [ ] T007 [US1] Create `AirQualityInfoCards` composable in `feature/node/src/commonMain/kotlin/org/meshtastic/feature/node/component/AirQualityMetrics.kt` — build `VectorMetricInfo` list for PM1.0, PM2.5, PM10 (µg/m³) and CO₂ (ppm) from `Node.airQualityMetrics`, filtering zero values, using `MeshtasticIcons.AirQuality` icon
-- [ ] T008 [US1] Apply `Co2Severity.fromPpm()` color to the CO₂ info card value text in `feature/node/src/commonMain/kotlin/org/meshtastic/feature/node/component/AirQualityMetrics.kt`
-- [ ] T009 [US1] Integrate `AirQualityInfoCards` into the node detail screen — render cards when `node.hasAirQualityMetrics` is true, positioned after existing Environment/Power info cards
+- [X] T007 [US1] Create `AirQualityInfoCards` composable in `feature/node/src/commonMain/kotlin/org/meshtastic/feature/node/component/AirQualityMetrics.kt` — build `VectorMetricInfo` list for PM1.0, PM2.5, PM10 (µg/m³) and CO₂ (ppm) from `Node.airQualityMetrics`, filtering zero values, using `MeshtasticIcons.AirQuality` icon
+- [X] T008 [US1] Apply `Co2Severity.fromPpm()` color to the CO₂ info card value text in `feature/node/src/commonMain/kotlin/org/meshtastic/feature/node/component/AirQualityMetrics.kt`
+- [X] T009 [US1] Integrate `AirQualityInfoCards` into the node detail screen — render cards when `node.hasAirQualityMetrics` is true, positioned after existing Environment/Power info cards
 
 **Checkpoint**: User Story 1 complete — users see at-a-glance air quality readings on the node detail screen with CO₂ severity coloring. Cards hide when no data is present and update live when new packets arrive.
 
@@ -64,9 +64,9 @@
 
 ### Implementation for User Story 5
 
-- [ ] T010 [P] [US5] Add `NodeDetailRoute.AirQualityMetrics(destNum: Int)` serializable data class to the `NodeDetailRoute` sealed interface in `core/navigation/src/commonMain/kotlin/org/meshtastic/core/navigation/Routes.kt`
-- [ ] T011 [P] [US5] Add `AIR_QUALITY` enum entry to `LogsType` in `feature/node/src/commonMain/kotlin/org/meshtastic/feature/node/model/LogsType.kt` — use `Res.string.air_quality_metrics_log`, `MeshtasticIcons.AirQuality` icon, and `NodeDetailRoute.AirQualityMetrics(it)` factory
-- [ ] T012 [US5] Register `NodeDetailRoute.AirQualityMetrics` route in `NodesNavigation.kt` via `addNodeDetailScreenComposable` in `feature/node/src/commonMain/kotlin/org/meshtastic/feature/node/detail/NodesNavigation.kt`
+- [X] T010 [P] [US5] Add `NodeDetailRoute.AirQualityMetrics(destNum: Int)` serializable data class to the `NodeDetailRoute` sealed interface in `core/navigation/src/commonMain/kotlin/org/meshtastic/core/navigation/Routes.kt`
+- [X] T011 [P] [US5] Add `AIR_QUALITY` enum entry to `LogsType` in `feature/node/src/commonMain/kotlin/org/meshtastic/feature/node/model/LogsType.kt` — use `Res.string.air_quality_metrics_log`, `MeshtasticIcons.AirQuality` icon, and `NodeDetailRoute.AirQualityMetrics(it)` factory
+- [X] T012 [US5] Register `NodeDetailRoute.AirQualityMetrics` route in `NodesNavigation.kt` via `addNodeDetailScreenComposable` in `feature/node/src/commonMain/kotlin/org/meshtastic/feature/node/detail/NodesNavigation.kt`
 
 **Checkpoint**: User Story 5 complete — Air Quality appears in the logs list and navigates to the metrics log screen (screen content implemented in next phases).
 
@@ -80,9 +80,9 @@
 
 ### Implementation for User Story 2
 
-- [ ] T013 [US2] Create `AirQualityMetricsScreen` composable in `feature/node/src/commonMain/kotlin/org/meshtastic/feature/node/metrics/AirQualityMetrics.kt` — delegate to `BaseMetricScreen` with history content, time frame selector, and `onRequestTelemetry = { viewModel.requestTelemetry(TelemetryType.AIR_QUALITY) }` callback
-- [ ] T014 [US2] Implement air quality metrics state class (`AirQualityMetricsState`) providing timestamped history cards from `NodeEntity.air_quality_metrics` BLOB list, showing PM1.0, PM2.5, PM10, CO₂ values with CO₂ severity color in `feature/node/src/commonMain/kotlin/org/meshtastic/feature/node/metrics/AirQualityMetrics.kt`
-- [ ] T015 [US2] Add air quality telemetry list query/accessor to `MetricsViewModel` in `feature/node/src/commonMain/kotlin/org/meshtastic/feature/node/MetricsViewModel.kt` — load historical telemetry entries for the node, support time frame filtering
+- [X] T013 [US2] Create `AirQualityMetricsScreen` composable in `feature/node/src/commonMain/kotlin/org/meshtastic/feature/node/metrics/AirQualityMetrics.kt` — delegate to `BaseMetricScreen` with history content, time frame selector, and `onRequestTelemetry = { viewModel.requestTelemetry(TelemetryType.AIR_QUALITY) }` callback
+- [X] T014 [US2] Implement air quality metrics state class (`AirQualityMetricsState`) providing timestamped history cards from `NodeEntity.air_quality_metrics` BLOB list, showing PM1.0, PM2.5, PM10, CO₂ values with CO₂ severity color in `feature/node/src/commonMain/kotlin/org/meshtastic/feature/node/metrics/AirQualityMetrics.kt`
+- [X] T015 [US2] Add air quality telemetry list query/accessor to `MetricsViewModel` in `feature/node/src/commonMain/kotlin/org/meshtastic/feature/node/MetricsViewModel.kt` — load historical telemetry entries for the node, support time frame filtering
 
 **Checkpoint**: User Story 2 complete — users can browse timestamped air quality history with time frame filtering on the dedicated log screen.
 
@@ -96,9 +96,9 @@
 
 ### Implementation for User Story 3
 
-- [ ] T016 [P] [US3] Create `AirQuality` chart metric enum (PM1_0, PM2_5, PM10, CO2) with label, unit, and proto field mapping in `feature/node/src/commonMain/kotlin/org/meshtastic/feature/node/metrics/AirQualityMetrics.kt`
-- [ ] T017 [US3] Implement chart content section in `AirQualityMetricsScreen` using Vico thin-line chart with selectable metric series, dot marker only at cursor position, and graceful handling of zero/absent data points in `feature/node/src/commonMain/kotlin/org/meshtastic/feature/node/metrics/AirQualityMetrics.kt`
-- [ ] T018 [US3] Wire chart selection to history list — when user taps a chart point, highlight/scroll to corresponding history card in `feature/node/src/commonMain/kotlin/org/meshtastic/feature/node/metrics/AirQualityMetrics.kt`
+- [X] T016 [P] [US3] Create `AirQuality` chart metric enum (PM1_0, PM2_5, PM10, CO2) with label, unit, and proto field mapping in `feature/node/src/commonMain/kotlin/org/meshtastic/feature/node/metrics/AirQualityMetrics.kt`
+- [X] T017 [US3] Implement chart content section in `AirQualityMetricsScreen` using Vico thin-line chart with selectable metric series, dot marker only at cursor position, and graceful handling of zero/absent data points in `feature/node/src/commonMain/kotlin/org/meshtastic/feature/node/metrics/AirQualityMetrics.kt`
+- [X] T018 [US3] Wire chart selection to history list — when user taps a chart point, highlight/scroll to corresponding history card in `feature/node/src/commonMain/kotlin/org/meshtastic/feature/node/metrics/AirQualityMetrics.kt`
 
 **Checkpoint**: User Story 3 complete — users can visualize air quality trends with interactive thin-line charts and chart-to-list synchronization.
 
@@ -112,8 +112,8 @@
 
 ### Implementation for User Story 4
 
-- [ ] T019 [US4] Implement `saveAirQualityMetricsCSV()` in `MetricsViewModel` in `feature/node/src/commonMain/kotlin/org/meshtastic/feature/node/MetricsViewModel.kt` — generate CSV with all 27 proto field columns per contracts/ui-contracts.md, respecting active time frame filter, empty cells for zero/missing values
-- [ ] T020 [US4] Wire export action into `AirQualityMetricsScreen`'s `BaseMetricScreen` `exportAction` parameter in `feature/node/src/commonMain/kotlin/org/meshtastic/feature/node/metrics/AirQualityMetrics.kt`
+- [X] T019 [US4] Implement `saveAirQualityMetricsCSV()` in `MetricsViewModel` in `feature/node/src/commonMain/kotlin/org/meshtastic/feature/node/MetricsViewModel.kt` — generate CSV with all 27 proto field columns per contracts/ui-contracts.md, respecting active time frame filter, empty cells for zero/missing values
+- [X] T020 [US4] Wire export action into `AirQualityMetricsScreen`'s `BaseMetricScreen` `exportAction` parameter in `feature/node/src/commonMain/kotlin/org/meshtastic/feature/node/metrics/AirQualityMetrics.kt`
 
 **Checkpoint**: User Story 4 complete — users can export filtered air quality data to CSV for external analysis.
 
@@ -123,11 +123,11 @@
 
 **Purpose**: Verification, consistency checks, and constitution compliance
 
-- [ ] T021 [P] Review `AirQualityInfoCards` and `AirQualityMetricsScreen` against Meshtastic design standards — verify M3 component usage, typography (labelSmall/labelLarge), TalkBack semantics, touch targets, and units in content descriptions
-- [ ] T022 [P] Confirm no logs, telemetry, or config changes expose PII, location data, secrets, or modify `core/proto` — verify only raw sensor numerics are stored/displayed
+- [X] T021 [P] Review `AirQualityInfoCards` and `AirQualityMetricsScreen` against Meshtastic design standards — verify M3 component usage, typography (labelSmall/labelLarge), TalkBack semantics, touch targets, and units in content descriptions
+- [X] T022 [P] Confirm no logs, telemetry, or config changes expose PII, location data, secrets, or modify `core/proto` — verify only raw sensor numerics are stored/displayed
 - [ ] T023 [P] Run constitution-required verification: `./gradlew spotlessApply spotlessCheck detekt :core:model:test :core:data:test :core:database:test :feature:node:test`
 - [ ] T024 Validate end-to-end request→response→display loop works: tap request button on node detail and log screen, verify telemetry packet is handled, Node state updates, info cards refresh, log screen appends entry
-- [ ] T025 [P] Update `docs/en/user/telemetry-and-sensors.md` to document the Air Quality metrics log screen, info cards, CO₂ severity color-coding, chart usage, and CSV export. Update `last_updated` frontmatter. Verify DocBundleLoader registration if a new page is created.
+- [X] T025 [P] Update `docs/en/user/telemetry-and-sensors.md` to document the Air Quality metrics log screen, info cards, CO₂ severity color-coding, chart usage, and CSV export. Update `last_updated` frontmatter. Verify DocBundleLoader registration if a new page is created.
 
 ---
 

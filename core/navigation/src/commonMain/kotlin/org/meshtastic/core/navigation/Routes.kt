@@ -79,6 +79,8 @@ sealed interface NodeDetailRoute : Route {
 
     @Serializable data class PaxMetrics(val destNum: Int) : NodeDetailRoute
 
+    @Serializable data class AirQualityMetrics(val destNum: Int) : NodeDetailRoute
+
     @Serializable data class NeighborInfoLog(val destNum: Int) : NodeDetailRoute
 }
 
