@@ -16,6 +16,7 @@
  */
 package org.meshtastic.app.map.component
 
+import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.RectF
@@ -23,8 +24,10 @@ import android.graphics.Typeface
 import android.text.TextPaint
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.core.graphics.createBitmap
+import com.google.android.gms.maps.MapsInitializer
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import org.meshtastic.core.model.Node
@@ -44,9 +47,11 @@ private const val EMOJI_PADDING_DP = 2f
  */
 @Composable
 fun rememberNodeChipDescriptor(node: Node): BitmapDescriptor {
+    val context = LocalContext.current
     val density = LocalDensity.current.density
     val fontScale = LocalDensity.current.fontScale
     return remember(node.num, node.user.short_name, node.colors, node.isIgnored) {
+        ensureMapsInitialized(context)
         renderNodeChipBitmap(node, density, fontScale)
     }
 }
@@ -54,9 +59,25 @@ fun rememberNodeChipDescriptor(node: Node): BitmapDescriptor {
 /** Renders an emoji waypoint marker as a [BitmapDescriptor] using Canvas. */
 @Composable
 fun rememberEmojiMarkerDescriptor(codePoint: Int): BitmapDescriptor {
+    val context = LocalContext.current
     val density = LocalDensity.current.density
     val fontScale = LocalDensity.current.fontScale
-    return remember(codePoint) { renderEmojiBitmap(codePoint, density, fontScale) }
+    return remember(codePoint) {
+        ensureMapsInitialized(context)
+        renderEmojiBitmap(codePoint, density, fontScale)
+    }
+}
+
+/**
+ * [BitmapDescriptorFactory] only works after the Maps SDK has been initialized, which normally happens when a
+ * GoogleMap/MapView is created. These descriptors are built during composition, and on the node-detail inline map the
+ * icon is computed before that screen's GoogleMap has loaded the SDK — so [BitmapDescriptorFactory.fromBitmap] crashes
+ * with "IBitmapDescriptorFactory is not initialized". Initialize explicitly first; [MapsInitializer.initialize] is
+ * synchronous and idempotent, so it is a no-op once the SDK is already up.
+ */
+@Suppress("DEPRECATION")
+private fun ensureMapsInitialized(context: Context) {
+    MapsInitializer.initialize(context)
 }
 
 private fun renderNodeChipBitmap(node: Node, density: Float, fontScale: Float): BitmapDescriptor {
