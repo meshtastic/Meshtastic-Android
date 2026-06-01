@@ -17,14 +17,12 @@
 package org.meshtastic.app.node.component
 
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.setViewTreeLifecycleOwner
@@ -37,17 +35,15 @@ import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.ComposeMapColorScheme
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapUiSettings
-import com.google.maps.android.compose.MapsComposeExperimentalApi
-import com.google.maps.android.compose.MarkerComposable
+import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberUpdatedMarkerState
+import org.meshtastic.app.map.component.rememberNodeChipDescriptor
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.component.precisionBitsToMeters
 
 private const val DEFAULT_ZOOM = 15f
 
-@OptIn(MapsComposeExperimentalApi::class)
 @Composable
 fun InlineMap(node: Node, modifier: Modifier = Modifier) {
     val dark = isSystemInDarkTheme()
@@ -57,14 +53,14 @@ fun InlineMap(node: Node, modifier: Modifier = Modifier) {
             else -> ComposeMapColorScheme.LIGHT
         }
 
-    // Workaround for a maps-compose issue where MarkerComposable's internal ComposeView cannot find a
-    // ViewTreeLifecycleOwner, causing a crash on bitmap rendering. We attach the current owners to the
-    // window root view for the lifetime of the map.
+    // Defensive workaround: propagate ViewTreeLifecycleOwner to the root view so that
+    // any internal maps-compose ComposeView (e.g., info windows) can find the lifecycle
+    // when walking up the view tree.
     //
     // IMPORTANT: capture and restore the previous owners on dispose. This InlineMap is hosted inside the
     // node-detail NavEntry, whose LocalLifecycleOwner is a transient, entry-scoped lifecycle. Leaving it
     // attached to the activity root view after the entry is destroyed (e.g. navigating back to the node
-    // list) would make every subsequently opened Popup/DropdownMenu inherit a DESTROYED lifecycle and
+    // list) would make subsequently opened Popups/DropdownMenus inherit a DESTROYED lifecycle and
     // render at 0x0 (invisible). See the node-list popup regression.
     val view = LocalView.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -86,6 +82,7 @@ fun InlineMap(node: Node, modifier: Modifier = Modifier) {
         val cameraState = rememberCameraPositionState {
             position = CameraPosition.fromLatLngZoom(location, DEFAULT_ZOOM)
         }
+        val markerIcon = rememberNodeChipDescriptor(node)
 
         GoogleMap(
             mapColorScheme = mapColorScheme,
@@ -114,9 +111,7 @@ fun InlineMap(node: Node, modifier: Modifier = Modifier) {
                     strokeWidth = 2f,
                 )
             }
-            MarkerComposable(state = rememberUpdatedMarkerState(position = latLng)) {
-                NodeChip(node = node, modifier = Modifier.defaultMinSize(minWidth = 64.dp, minHeight = 28.dp))
-            }
+            Marker(state = rememberUpdatedMarkerState(position = latLng), icon = markerIcon)
         }
     }
 }

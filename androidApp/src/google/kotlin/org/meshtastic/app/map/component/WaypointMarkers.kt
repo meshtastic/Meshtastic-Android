@@ -16,22 +16,14 @@
  */
 package org.meshtastic.app.map.component
 
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.google.android.gms.maps.model.LatLng
-import com.google.maps.android.compose.MapsComposeExperimentalApi
 import com.google.maps.android.compose.Marker
-import com.google.maps.android.compose.rememberComposeBitmapDescriptor
 import com.google.maps.android.compose.rememberUpdatedMarkerState
 import kotlinx.coroutines.launch
-import org.meshtastic.app.map.convertIntToEmoji
 import org.meshtastic.core.model.util.GeoConstants.DEG_D
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.locked
@@ -39,7 +31,6 @@ import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.feature.map.BaseMapViewModel
 import org.meshtastic.proto.Waypoint
 
-@OptIn(MapsComposeExperimentalApi::class)
 @Composable
 fun WaypointMarkers(
     displayableWaypoints: List<Waypoint>,
@@ -65,11 +56,7 @@ fun WaypointMarkers(
             }
 
             val iconCodePoint = if (waypoint.icon == 0) PUSHPIN else waypoint.icon
-            val emojiText = convertIntToEmoji(iconCodePoint)
-            val icon =
-                rememberComposeBitmapDescriptor(iconCodePoint) {
-                    Text(text = emojiText, fontSize = 32.sp, modifier = Modifier.padding(2.dp))
-                }
+            val icon = rememberEmojiMarkerDescriptor(iconCodePoint)
 
             Marker(
                 state = markerState,
