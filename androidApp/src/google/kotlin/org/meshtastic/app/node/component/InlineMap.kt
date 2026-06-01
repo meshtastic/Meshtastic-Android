@@ -111,10 +111,7 @@ fun InlineMap(node: Node, modifier: Modifier = Modifier) {
                     strokeWidth = 2f,
                 )
             }
-            Marker(
-                state = rememberUpdatedMarkerState(position = latLng),
-                icon = markerIcon,
-            )
+            Marker(state = rememberUpdatedMarkerState(position = latLng), icon = markerIcon)
         }
     }
 }

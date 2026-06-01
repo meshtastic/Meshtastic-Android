@@ -38,10 +38,9 @@ private const val EMOJI_TEXT_SIZE_SP = 32f
 private const val EMOJI_PADDING_DP = 2f
 
 /**
- * Renders a node chip marker as a [BitmapDescriptor] using Canvas — avoids the off-screen
- * ComposeView pipeline in maps-compose's `MarkerComposable`/`rememberComposeBitmapDescriptor`
- * which can crash with "The ComposeView was measured to have a width or height of zero"
- * during subcomposition races (googlemaps/android-maps-compose#875).
+ * Renders a node chip marker as a [BitmapDescriptor] using Canvas — avoids the off-screen ComposeView pipeline in
+ * maps-compose's `MarkerComposable`/`rememberComposeBitmapDescriptor` which can crash with "The ComposeView was
+ * measured to have a width or height of zero" during subcomposition races (googlemaps/android-maps-compose#875).
  */
 @Composable
 fun rememberNodeChipDescriptor(node: Node): BitmapDescriptor {
@@ -52,29 +51,26 @@ fun rememberNodeChipDescriptor(node: Node): BitmapDescriptor {
     }
 }
 
-/**
- * Renders an emoji waypoint marker as a [BitmapDescriptor] using Canvas.
- */
+/** Renders an emoji waypoint marker as a [BitmapDescriptor] using Canvas. */
 @Composable
 fun rememberEmojiMarkerDescriptor(codePoint: Int): BitmapDescriptor {
     val density = LocalDensity.current.density
     val fontScale = LocalDensity.current.fontScale
-    return remember(codePoint) {
-        renderEmojiBitmap(codePoint, density, fontScale)
-    }
+    return remember(codePoint) { renderEmojiBitmap(codePoint, density, fontScale) }
 }
 
 private fun renderNodeChipBitmap(node: Node, density: Float, fontScale: Float): BitmapDescriptor {
     val (textColorInt, nodeColorInt) = node.colors
     val scaledDensity = density * fontScale
 
-    val textPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
-        textSize = CHIP_TEXT_SIZE_SP * scaledDensity
-        typeface = Typeface.DEFAULT_BOLD
-        color = textColorInt
-        textAlign = Paint.Align.CENTER
-        isStrikeThruText = node.isIgnored
-    }
+    val textPaint =
+        TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
+            textSize = CHIP_TEXT_SIZE_SP * scaledDensity
+            typeface = Typeface.DEFAULT_BOLD
+            color = textColorInt
+            textAlign = Paint.Align.CENTER
+            isStrikeThruText = node.isIgnored
+        }
     val label = node.user.short_name.ifEmpty { "???" }
 
     val textWidth = textPaint.measureText(label)
@@ -90,12 +86,7 @@ private fun renderNodeChipBitmap(node: Node, density: Float, fontScale: Float): 
 
     val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = nodeColorInt }
     val cornerRadius = CHIP_CORNER_RADIUS_DP * density
-    canvas.drawRoundRect(
-        RectF(0f, 0f, width.toFloat(), height.toFloat()),
-        cornerRadius,
-        cornerRadius,
-        bgPaint,
-    )
+    canvas.drawRoundRect(RectF(0f, 0f, width.toFloat(), height.toFloat()), cornerRadius, cornerRadius, bgPaint)
 
     val textX = width / 2f
     val textY = (height / 2f) - ((textPaint.descent() + textPaint.ascent()) / 2f)
@@ -106,10 +97,11 @@ private fun renderNodeChipBitmap(node: Node, density: Float, fontScale: Float): 
 
 private fun renderEmojiBitmap(codePoint: Int, density: Float, fontScale: Float): BitmapDescriptor {
     val scaledDensity = density * fontScale
-    val textPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
-        textSize = EMOJI_TEXT_SIZE_SP * scaledDensity
-        textAlign = Paint.Align.CENTER
-    }
+    val textPaint =
+        TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
+            textSize = EMOJI_TEXT_SIZE_SP * scaledDensity
+            textAlign = Paint.Align.CENTER
+        }
     val emoji = String(Character.toChars(codePoint))
     val padding = EMOJI_PADDING_DP * density
 
