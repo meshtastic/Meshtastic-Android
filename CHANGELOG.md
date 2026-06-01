@@ -9,6 +9,11 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
+* fix(map): remove manual ViewTree lifecycle owner workarounds (#5704) by James Rich (@jamesarich) in [`be6f2cfb7`](https://github.com/meshtastic/Meshtastic-Android/commit/be6f2cfb71c3a37ba1a1e5bbd92211a36dbe96b2)
+
+### Internal (v2.7.14-internal.114)
+Changes since [`v2.7.14-open.17`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14-open.17):
+
 * fix(firmware): surface error state when BLE OTA connection attempts are exhausted (#5700) by James Rich (@jamesarich) in [`cc3b88d00`](https://github.com/meshtastic/Meshtastic-Android/commit/cc3b88d005636dc500c0bb3c1450346f05d22c36)
 * fix(map): replace MarkerComposable with Canvas-rendered bitmaps (#5702) by James Rich (@jamesarich) in [`60feec646`](https://github.com/meshtastic/Meshtastic-Android/commit/60feec646b8d3ada85c8dcf8893fcb7b2ebb3170)
 
