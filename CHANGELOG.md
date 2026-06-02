@@ -13,6 +13,7 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 * chore(deps): update compose-multiplatform to v1.11.1 (#5713) by renovate[bot] (@renovate[bot]) in [`c45466a63`](https://github.com/meshtastic/Meshtastic-Android/commit/c45466a633d6e34df3a0a27c83e169c7eb91e481)
 * fix(map): eliminate cluster-renderer FATAL and harden black-map paths (#5715) by James Rich (@jamesarich) in [`0f123adb7`](https://github.com/meshtastic/Meshtastic-Android/commit/0f123adb72d3d13a208959a17f7d9dd40809804b)
 * chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5711) by James Rich (@jamesarich) in [`aeed07364`](https://github.com/meshtastic/Meshtastic-Android/commit/aeed07364c4465bede0c9d83037ac4c9518e8a56)
+* chore(deps): update net.java.dev.jna:jna to v5.19.0 (#5716) by renovate[bot] (@renovate[bot]) in [`f6d972d21`](https://github.com/meshtastic/Meshtastic-Android/commit/f6d972d2127cad3aab5c372b44483774f6049e77)
 
 ### Open Beta (v2.7.14-open.19)
 Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.13):
