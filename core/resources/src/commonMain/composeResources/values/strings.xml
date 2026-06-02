@@ -321,6 +321,9 @@
     <string name="device_db_cache_limit">Device DB cache limit</string>
     <string name="device_db_cache_limit_summary">Max device databases to keep on this phone</string>
     <string name="device_gps">Device GPS</string>
+    <string name="device_links">Device Links</string>
+    <string name="device_links_i_want_one">I want one</string>
+    <string name="device_links_open_in_browser">Open in browser</string>
     <string name="device_metrics_label_value">%1$s: %2$s</string>
     <string name="device_metrics_log">Device Metrics</string>
     <string name="device_metrics_numeric_value">%1$s</string>

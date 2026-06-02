@@ -297,6 +297,9 @@ device_configuration
 device_db_cache_limit
 device_db_cache_limit_summary
 device_gps
+device_links
+device_links_i_want_one
+device_links_open_in_browser
 device_metrics_label_value
 device_metrics_log
 device_metrics_numeric_value

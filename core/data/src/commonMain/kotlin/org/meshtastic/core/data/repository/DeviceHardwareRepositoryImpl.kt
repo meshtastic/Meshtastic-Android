@@ -37,6 +37,7 @@ import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.network.DeviceHardwareRemoteDataSource
 import org.meshtastic.core.repository.DeviceHardwareRepository
+import org.meshtastic.core.repository.DeviceLinkRepository
 
 @Single
 class DeviceHardwareRepositoryImpl(
@@ -44,6 +45,7 @@ class DeviceHardwareRepositoryImpl(
     private val localDataSource: DeviceHardwareLocalDataSource,
     private val jsonDataSource: DeviceHardwareJsonDataSource,
     private val bootloaderOtaQuirksJsonDataSource: BootloaderOtaQuirksJsonDataSource,
+    private val deviceLinkRepository: DeviceLinkRepository,
     private val dispatchers: CoroutineDispatchers,
 ) : DeviceHardwareRepository {
 
@@ -131,6 +133,8 @@ class DeviceHardwareRepositoryImpl(
                         val remoteHardware = remoteDataSource.getAllDeviceHardware()
                         Logger.d { "DeviceHardwareRepository: remote returned ${remoteHardware.size} entries" }
                         localDataSource.insertAllDeviceHardware(remoteHardware)
+                        // Reconcile msh.to links against the freshest catalog (isVendor + orphan pruning).
+                        deviceLinkRepository.reconcile()
                     }
                 if (completed == null) {
                     Logger.w {

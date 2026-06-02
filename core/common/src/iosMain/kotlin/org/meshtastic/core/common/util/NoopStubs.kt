@@ -42,6 +42,8 @@ actual fun getSystemMeasurementSystem(): MeasurementSystem = MeasurementSystem.M
 
 actual fun currentLocaleCode(): String = "en"
 
+actual fun currentRegionCode(): String = ""
+
 actual fun currentLocaleQualifier(): String = "en"
 
 actual fun String?.isValidAddress(): Boolean = false

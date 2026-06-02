@@ -6,6 +6,12 @@
 # the oldest entries to `session_context.archive.md` (not read by default). The
 # "Golden Context" block at the bottom is stable across sessions; keep it here.
 
+## 2026-06-02 — Ported Apple's "Device msh.to Links" feature (vendor/marketplace buy-links)
+- Faithful Room-backed port of Meshtastic-Apple PR #1898 (spec `010-device-mshto-links`): an "I want one" collapsible section on the node hardware-detail view surfacing vendor/variant + region-filtered marketplace links, plus a Settings "Device Links" directory. Links resolve via `https://msh.to/{shortCode}`.
+- Data: bundled `androidApp/src/main/assets/urls.json` (copied from the msh.to repo) + app-maintained `marketplaces.json`. New Room `device_link` table (DB v38→39 AutoMigration + schema `39.json`), `DeviceLink`/`MshTo*` models, `DeviceLinkRepository(Impl)` + pure `DeviceLinkMatcher` (ported multi-tier matching: exact vendor → variant → marketplace prefix/suffix, rak-prefix strip, region filter), `MshToLinksJsonDataSource` (androidMain impl + desktop Koin stub), `DeviceHardwareDao.getAllTargets()`. `isVendor`/orphan reconcile rides `DeviceHardwareRepositoryImpl.singleFlightRefresh()`; self-seeds on first read.
+- UI: `DeviceLinksSection` (feature/node) fed via new `MetricsState.deviceLinks` from `CommonGetNodeDetailsUseCase`; `DeviceLinkDirectoryScreen`+VM wired to new `SettingsRoute.DeviceLinks`. Added `currentRegionCode()` expect/actual (android/jvm = `Locale.country`, ios noop) for marketplace region filtering. `architecture`-as-String pitfall already safe on Android.
+- Tests: `DeviceLinkMatcherTest` (11) + `DeviceLinkRepositoryImplTest` (3, in-memory DB). Full baseline green: spotlessCheck, detekt, assembleDebug, test+allTests (1213), kmpSmokeCompile.
+
 ## 2026-05-28 — Stabilized DatabaseManager withDb retry host test
 - Hardened `DatabaseManagerWithDbRetryTest` to remove CI race conditions by running the manager on a `StandardTestDispatcher(testScheduler)` instead of real `Dispatchers.IO`.
 - Added a `withTimeout(10_000)` guard around the test body to fail fast on coordination stalls instead of hanging/flapping.
@@ -32,13 +38,6 @@
 - Integrated Firebase Remote Config into `GeminiNanoDocAssistant` to dynamically fetch the model name (`chirpy_model_name`) and system instruction (`chirpy_system_instruction`) with release-optimized fetch intervals.
 - Refactored `GeminiNanoDocAssistant.answer` to reuse `answerStream` flow under the hood, eliminating duplicate prompting code.
 - Verified that all unit tests (`:feature:docs:allTests`) and static analysis checks (`spotlessApply spotlessCheck detekt`) pass 100% green.
-
-## 2026-05-21 — Fixed Chirpy Assistant invalid model name and enhanced failure fallback suggestions
-- Fixed a 404/Unknown inference error by updating `GeminiNanoDocAssistant.kt`'s `MODEL_NAME` from `"gemini-3.1-flash-lite"` to the correct Firebase AI Logic preview name `"gemini-3.1-flash-lite-preview"`.
-- Overhauled multi-turn hybrid chat seeding: eliminated the redundant background `chat.sendMessage` call on the first turn; if the first turn is answered on-device, the session caches the Q&A locally and seeds the subsequent cloud-chat session via `startChat(history = ...)`.
-- Expanded the hybrid model's `looksLikeNoAnswer` heuristics to better detect on-device failure and fall back to the grounded cloud model.
-- Programmed a smart UI fallback: on inference error (offline, rate limit, model not found), Chirpy displays local keyword search results as recommended page chips.
-- Verified 100% compliance with Spotless, Detekt, and unit tests (`:feature:docs:allTests` and `:androidApp:testGoogleDebugUnitTest`).
 
 ## Golden Context (stable across sessions)
 - Always check `.skills/compose-ui/strings-index.txt` before reading `strings.xml`.

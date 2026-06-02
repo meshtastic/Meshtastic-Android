@@ -33,6 +33,7 @@ import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.feature.settings.AboutScreen
 import org.meshtastic.feature.settings.AdministrationScreen
 import org.meshtastic.feature.settings.DeviceConfigurationScreen
+import org.meshtastic.feature.settings.DeviceLinkDirectoryScreen
 import org.meshtastic.feature.settings.ModuleConfigurationScreen
 import org.meshtastic.feature.settings.NodeListScreen
 import org.meshtastic.feature.settings.SettingsViewModel
@@ -245,6 +246,13 @@ fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
         val settingsViewModel: SettingsViewModel = koinViewModel()
         NodeListScreen(
             settingsViewModel = settingsViewModel,
+            onNavigateUp = dropUnlessResumed { backStack.removeLastOrNull() },
+        )
+    }
+
+    entry<SettingsRoute.DeviceLinks> {
+        DeviceLinkDirectoryScreen(
+            viewModel = koinViewModel(),
             onNavigateUp = dropUnlessResumed { backStack.removeLastOrNull() },
         )
     }

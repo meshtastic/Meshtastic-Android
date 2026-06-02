@@ -36,7 +36,10 @@ import org.koin.dsl.module
 import org.meshtastic.core.data.datasource.BootloaderOtaQuirksJsonDataSource
 import org.meshtastic.core.data.datasource.DeviceHardwareJsonDataSource
 import org.meshtastic.core.data.datasource.FirmwareReleaseJsonDataSource
+import org.meshtastic.core.data.datasource.MshToLinksJsonDataSource
 import org.meshtastic.core.model.BootloaderOtaQuirk
+import org.meshtastic.core.model.MshToMarketplace
+import org.meshtastic.core.model.MshToRoute
 import org.meshtastic.core.model.NetworkDeviceHardware
 import org.meshtastic.core.model.NetworkFirmwareReleases
 import org.meshtastic.core.model.RadioController
@@ -242,6 +245,14 @@ private fun desktopPlatformStubsModule() = module {
     single<BootloaderOtaQuirksJsonDataSource> {
         object : BootloaderOtaQuirksJsonDataSource {
             override fun loadBootloaderOtaQuirksFromJsonAsset(): List<BootloaderOtaQuirk> = emptyList()
+        }
+    }
+
+    single<MshToLinksJsonDataSource> {
+        object : MshToLinksJsonDataSource {
+            override fun loadRoutes(): List<MshToRoute> = emptyList()
+
+            override fun loadMarketplaces(): Map<String, MshToMarketplace> = emptyMap()
         }
     }
 }
