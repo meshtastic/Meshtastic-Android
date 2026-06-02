@@ -110,7 +110,9 @@ fun NodeDetailList(
                 reportedTarget = uiState.metricsState.reportedTarget,
             )
         }
-        item { DeviceLinksSection(links = uiState.metricsState.deviceLinks) }
+        if (uiState.metricsState.deviceLinks.isNotEmpty()) {
+            item { DeviceLinksSection(links = uiState.metricsState.deviceLinks) }
+        }
         item {
             DeviceActions(
                 node = node,
