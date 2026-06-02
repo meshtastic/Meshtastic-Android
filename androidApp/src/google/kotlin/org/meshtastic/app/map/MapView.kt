@@ -186,6 +186,11 @@ fun MapView(
     mode: GoogleMapMode = GoogleMapMode.Main,
 ) {
     val context = LocalContext.current
+
+    // Initialize the Maps SDK up front (idempotent) so the loaded renderer is logged even when the mesh has
+    // no nodes/waypoints to build marker descriptors from. See MapsSdkInitializer.
+    LaunchedEffect(Unit) { MapsSdkInitializer.ensureInitialized(context) }
+
     val coroutineScope = rememberCoroutineScope()
     val mapLayers by mapViewModel.mapLayers.collectAsStateWithLifecycle()
 
@@ -492,7 +497,31 @@ fun MapView(
     val onRemoveLayer = { layerId: String -> mapViewModel.removeMapLayer(layerId) }
     val onToggleVisibility = { layerId: String -> mapViewModel.toggleLayerVisibility(layerId) }
 
-    val effectiveGoogleMapType = if (currentCustomTileProviderUrl != null) MapType.NONE else selectedGoogleMapType
+    // Resolve the selected custom tile provider once (cached). getTileProvider returns null when the
+    // configured source is unusable (bad {x}/{y}/{z} URL template, missing local MBTiles file, etc.).
+    val customTileConfigs by mapViewModel.customTileProviderConfigs.collectAsStateWithLifecycle()
+    val customTileProvider =
+        remember(currentCustomTileProviderUrl, customTileConfigs) {
+            currentCustomTileProviderUrl?.let { url ->
+                val config = customTileConfigs.find { it.urlTemplate == url || it.localUri == url }
+                mapViewModel.getTileProvider(config)
+            }
+        }
+
+    // Only blank the Google base map (MapType.NONE) when we actually have a working custom basemap to draw
+    // over it. If the selected custom source failed to build, fall back to the user's base map instead of
+    // rendering MapType.NONE with no tiles — that is a solid black screen with no recourse.
+    val effectiveGoogleMapType = if (customTileProvider != null) MapType.NONE else selectedGoogleMapType
+
+    // Surface the fallback so a broken custom tile source is diagnosable instead of a silent black map.
+    LaunchedEffect(currentCustomTileProviderUrl, customTileProvider) {
+        if (currentCustomTileProviderUrl != null && customTileProvider == null) {
+            Logger.withTag("MapView").w {
+                "Custom tile provider '$currentCustomTileProviderUrl' could not be built; " +
+                    "falling back to base map $selectedGoogleMapType"
+            }
+        }
+    }
 
     var showClusterItemsDialog by remember { mutableStateOf<List<NodeClusterItem>?>(null) }
 
@@ -541,16 +570,11 @@ fun MapView(
                 }
             },
         ) {
-            // Custom tile overlay (all modes)
+            // Custom tile overlay (all modes) — uses the hoisted provider so the base-map decision above and
+            // this overlay stay consistent (no overlay ⇒ base map is shown, never a black MapType.NONE).
             key(currentCustomTileProviderUrl) {
-                currentCustomTileProviderUrl?.let { url ->
-                    val config =
-                        mapViewModel.customTileProviderConfigs.collectAsStateWithLifecycle().value.find {
-                            it.urlTemplate == url || it.localUri == url
-                        }
-                    mapViewModel.getTileProvider(config)?.let { tileProvider ->
-                        TileOverlay(tileProvider = tileProvider, fadeIn = true, transparency = 0f, zIndex = -1f)
-                    }
+                customTileProvider?.let { tileProvider ->
+                    TileOverlay(tileProvider = tileProvider, fadeIn = true, transparency = 0f, zIndex = -1f)
                 }
             }
 

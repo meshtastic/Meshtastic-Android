@@ -16,30 +16,38 @@
  */
 package org.meshtastic.app.map.component
 
+import android.content.Context
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalView
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.compose.currentStateAsState
-import androidx.lifecycle.findViewTreeLifecycleOwner
-import androidx.lifecycle.setViewTreeLifecycleOwner
-import androidx.savedstate.compose.LocalSavedStateRegistryOwner
-import androidx.savedstate.findViewTreeSavedStateRegistryOwner
-import androidx.savedstate.setViewTreeSavedStateRegistryOwner
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.maps.model.MarkerOptions
 import com.google.maps.android.clustering.Cluster
+import com.google.maps.android.clustering.ClusterManager
 import com.google.maps.android.clustering.view.DefaultClusterRenderer
 import com.google.maps.android.compose.Circle
+import com.google.maps.android.compose.MapEffect
 import com.google.maps.android.compose.MapsComposeExperimentalApi
 import com.google.maps.android.compose.clustering.Clustering
-import com.google.maps.android.compose.clustering.ClusteringMarkerProperties
+import com.google.maps.android.compose.clustering.rememberClusterManager
 import org.meshtastic.app.map.model.NodeClusterItem
 import org.meshtastic.feature.map.BaseMapViewModel
 
+private const val MIN_CLUSTER_SIZE = 10
+
+// Match the bottom-center anchor maps-compose used for the old `clusterItemContent` chip
+// (clusterItemContentAnchor defaults to Offset(0.5f, 1.0f)), so chips keep sitting on the node coordinate.
+private const val CHIP_ANCHOR_U = 0.5f
+private const val CHIP_ANCHOR_V = 1.0f
+
 @OptIn(MapsComposeExperimentalApi::class)
-@Suppress("NestedBlockDepth")
 @Composable
 fun NodeClusterMarkers(
     nodeClusterItems: List<NodeClusterItem>,
@@ -47,68 +55,93 @@ fun NodeClusterMarkers(
     navigateToNodeDetails: (Int) -> Unit,
     onClusterClick: (Cluster<NodeClusterItem>) -> Boolean,
 ) {
-    val view = LocalView.current
-    val lifecycleOwner = LocalLifecycleOwner.current
-    val savedStateRegistryOwner = LocalSavedStateRegistryOwner.current
-    val lifecycleState by lifecycleOwner.lifecycle.currentStateAsState()
+    val context = LocalContext.current
+    val density = LocalDensity.current.density
+    val fontScale = LocalDensity.current.fontScale
 
-    // maps-compose renders each non-clustered item to a bitmap through an off-screen ComposeView that
-    // it attaches under the MapView (see ComposeUiClusterRenderer + NoDrawContainerView in
-    // MapComposeViewRender). That ComposeView walks up the view tree for a ViewTreeLifecycleOwner and,
-    // when it finds none, crashes with "Composed into the View which doesn't propagate
-    // ViewTreeLifecycleOwner!" (googlemaps/android-maps-compose#875 / #325) — a FATAL on the map screen.
-    //
-    // Propagate the owners onto this map screen's host view (LocalView.current), which is an ancestor
-    // of the internally-created MapView, so the renderer's ComposeView can resolve them. We deliberately
-    // do NOT touch view.rootView (the activity root): attaching a transient NavEntry lifecycle there is
-    // what caused the node-list popup regression (#5684), which is why #5704 removed the prior, broader
-    // workaround entirely. Scoping to the map host view and restoring the previous owners on dispose
-    // keeps the fix local to the map and leaves Popups/DropdownMenus untouched.
-    DisposableEffect(view, lifecycleOwner, savedStateRegistryOwner) {
-        val prevLifecycleOwner = view.findViewTreeLifecycleOwner()
-        val prevSavedStateRegistryOwner = view.findViewTreeSavedStateRegistryOwner()
-        view.setViewTreeLifecycleOwner(lifecycleOwner)
-        view.setViewTreeSavedStateRegistryOwner(savedStateRegistryOwner)
-        onDispose {
-            view.setViewTreeLifecycleOwner(prevLifecycleOwner)
-            view.setViewTreeSavedStateRegistryOwner(prevSavedStateRegistryOwner)
-        }
+    val clusterManager = rememberClusterManager<NodeClusterItem>() ?: return
+
+    // Render each non-clustered node as a Canvas-built BitmapDescriptor through a custom
+    // DefaultClusterRenderer instead of passing a `clusterItemContent` Composable. The Composable path makes
+    // maps-compose rasterize the chip through an off-screen ComposeView (ComposeUiClusterRenderer); that view
+    // walks the view tree for a ViewTreeLifecycleOwner/SavedStateRegistryOwner and, because the cluster
+    // renderer drives marker creation from an async Handler after the screen may have stopped, finds none and
+    // crashes with "Composed into the View which doesn't propagate ViewTreeLifecycleOwner!"
+    // (googlemaps/android-maps-compose#325 / #875) — historically our #1 FATAL. A renderer that paints the icon
+    // in onBeforeClusterItemRendered never creates a View, so the crash class is eliminated rather than raced
+    // against (see the owner-propagation workarounds in #5704/#5708 that could not win that race).
+    val rendererState: MutableState<NodeChipClusterRenderer?> = remember { mutableStateOf(null) }
+
+    MapEffect(clusterManager, density, fontScale) { map ->
+        val renderer = NodeChipClusterRenderer(context, map, clusterManager, density, fontScale)
+        renderer.minClusterSize = MIN_CLUSTER_SIZE
+        clusterManager.renderer = renderer
+        rendererState.value = renderer
     }
 
-    // The cluster renderer drives marker rendering from an async Handler (DefaultClusterRenderer's
-    // MarkerModifier), which can fire after this screen has stopped and the internal ComposeView is
-    // detached — at which point no owner is reachable regardless of the above. Skip rendering once the
-    // lifecycle is no longer at least STARTED to close most of that race.
-    if (!lifecycleState.isAtLeast(Lifecycle.State.STARTED)) return
+    SideEffect {
+        clusterManager.setOnClusterClickListener(onClusterClick)
+        clusterManager.setOnClusterItemInfoWindowClickListener { item -> navigateToNodeDetails(item.node.num) }
+    }
 
-    Clustering(
-        items = nodeClusterItems,
-        onClusterClick = onClusterClick,
-        onClusterItemInfoWindowClick = { item ->
-            navigateToNodeDetails(item.node.num)
-            false
-        },
-        clusterItemContent = { clusterItem -> PulsingNodeChip(node = clusterItem.node) },
-        onClusterManager = { clusterManager ->
-            (clusterManager.renderer as DefaultClusterRenderer).minClusterSize = 10
-        },
-        clusterItemDecoration = { clusterItem ->
-            if (mapFilterState.showPrecisionCircle) {
-                clusterItem.getPrecisionMeters()?.let { precisionMeters ->
-                    if (precisionMeters > 0) {
-                        Circle(
-                            center = clusterItem.position,
-                            radius = precisionMeters,
-                            fillColor = Color(clusterItem.node.colors.second).copy(alpha = 0.2f),
-                            strokeColor = Color(clusterItem.node.colors.second),
-                            strokeWidth = 2f,
-                            zIndex = 0f,
-                        )
-                    }
+    Clustering(items = nodeClusterItems, clusterManager = clusterManager)
+
+    // The library's `clusterItemDecoration` only fires for its internal ComposeUiClusterRenderer (the gating
+    // ClusterRendererItemState type is library-internal), so it never runs for our custom renderer. Draw the
+    // precision circles ourselves for exactly the unclustered items the renderer exposes, preserving the prior
+    // "circle only on non-clustered nodes" behavior.
+    val renderer = rendererState.value
+    if (renderer != null && mapFilterState.showPrecisionCircle) {
+        val unclusteredItems by renderer.unclusteredItems
+        unclusteredItems.forEach { item ->
+            item.getPrecisionMeters()?.let { precisionMeters ->
+                if (precisionMeters > 0) {
+                    Circle(
+                        center = item.position,
+                        radius = precisionMeters,
+                        fillColor = Color(item.node.colors.second).copy(alpha = 0.2f),
+                        strokeColor = Color(item.node.colors.second),
+                        strokeWidth = 2f,
+                        zIndex = 0f,
+                    )
                 }
             }
-            // Use the item's own priority-based zIndex (5f for My Node/Favorites, 4f for others)
-            ClusteringMarkerProperties(zIndex = clusterItem.getZIndex())
-        },
-    )
+        }
+    }
+}
+
+/**
+ * A [DefaultClusterRenderer] that draws each non-clustered node's chip as a Canvas [BitmapDescriptor]
+ * ([buildNodeChipDescriptor]) instead of a Composable, avoiding maps-compose's crash-prone off-screen ComposeView
+ * rasterization. It also exposes the current set of unclustered items so the caller can draw precision circles (the
+ * library's `clusterItemDecoration` hook is unavailable to non-library renderers).
+ */
+private class NodeChipClusterRenderer(
+    private val context: Context,
+    map: GoogleMap,
+    clusterManager: ClusterManager<NodeClusterItem>,
+    private val density: Float,
+    private val fontScale: Float,
+) : DefaultClusterRenderer<NodeClusterItem>(context, map, clusterManager) {
+
+    val unclusteredItems: MutableState<Set<NodeClusterItem>> = mutableStateOf(emptySet())
+
+    // Called on a background render thread — building the descriptor here keeps marker rasterization off the
+    // main thread, and BitmapDescriptorFactory is safe once the SDK is initialized (the live map guarantees it).
+    override fun onBeforeClusterItemRendered(item: NodeClusterItem, markerOptions: MarkerOptions) {
+        markerOptions
+            .icon(buildNodeChipDescriptor(context, item.node, density, fontScale))
+            .anchor(CHIP_ANCHOR_U, CHIP_ANCHOR_V)
+            .zIndex(item.getZIndex())
+    }
+
+    override fun onClusterItemUpdated(item: NodeClusterItem, marker: Marker) {
+        marker.setIcon(buildNodeChipDescriptor(context, item.node, density, fontScale))
+        marker.zIndex = item.getZIndex()
+    }
+
+    override fun onClustersChanged(clusters: Set<Cluster<NodeClusterItem>>) {
+        super.onClustersChanged(clusters)
+        unclusteredItems.value = clusters.filterNot { shouldRenderAsCluster(it) }.flatMap { it.items }.toSet()
+    }
 }
