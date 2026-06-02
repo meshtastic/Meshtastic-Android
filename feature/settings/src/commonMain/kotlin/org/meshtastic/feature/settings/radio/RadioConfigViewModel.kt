@@ -504,6 +504,17 @@ open class RadioConfigViewModel(
         _radioConfigState.update { it.copy(responseState = ResponseState.Empty) }
     }
 
+    /**
+     * Sets the initial loading state for remote config sub-screens. Must be called before the first
+     * `collectAsStateWithLifecycle` read so the LoadingOverlay is visible from the very first composition frame.
+     */
+    fun ensureLoadingForRemote() {
+        val state = _radioConfigState.value
+        if (!state.isLocal && state.responseState is ResponseState.Empty) {
+            _radioConfigState.update { it.copy(responseState = ResponseState.Loading()) }
+        }
+    }
+
     fun setResponseStateLoading(route: Enum<*>) {
         val destNum = destNum ?: destNode.value?.num ?: return
 

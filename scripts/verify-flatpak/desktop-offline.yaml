@@ -65,9 +65,13 @@ modules:
         # Point Gradle at the offline mirror produced by flatpak-sources.json
         GRADLE_USER_HOME: /run/build/meshtastic-desktop/.gradle
     build-commands:
-      - install -Dm644 -t /app/share/icons/hicolor/scalable/apps org.meshtastic.desktop.svg
-      - install -Dm644 -t /app/share/applications org.meshtastic.desktop.desktop
-      - install -Dm644 -t /app/share/metainfo org.meshtastic.desktop.metainfo.xml
+      # Install desktop metadata from the in-repo packaging sources (mirrors vid's upstream manifest,
+      # which stopped shipping standalone root-level copies as of 2026-05-30).
+      - install -Dm644 desktopApp/packaging/icons/icon.svg /app/share/icons/hicolor/scalable/apps/org.meshtastic.desktop.svg
+      - install -Dm644 -t /app/share/applications desktopApp/packaging/linux/org.meshtastic.desktop.desktop
+      - desktop-file-edit --set-key="Exec" --set-value="meshtastic-wrapper.sh %U"
+        /app/share/applications/org.meshtastic.desktop.desktop
+      - install -Dm644 -t /app/share/metainfo desktopApp/packaging/linux/org.meshtastic.desktop.metainfo.xml
       # Redirect the Gradle wrapper to the bundled distribution (no network).
       - sed -i 's|distributionUrl=.*|distributionUrl=gradle-all.zip|' gradle/wrapper/gradle-wrapper.properties
       - echo "org.gradle.java.installations.auto-detect=false" >> gradle.properties
@@ -83,12 +87,9 @@ modules:
         JAR_FILE=$(find desktopApp/build/compose/jars/ -name "*.jar" -type f | head -1)
         && install -Dm755 "$JAR_FILE" /app/lib/meshtastic-desktop.jar
     sources:
-      - type: file
-        path: org.meshtastic.desktop.desktop
-      - type: file
-        path: org.meshtastic.desktop.metainfo.xml
-      - type: file
-        path: org.meshtastic.desktop.svg
+      # Desktop metadata (.desktop/.metainfo.xml/.svg) now lives inside the meshtastic-android
+      # source tree (desktopApp/packaging/...) and is installed by build-commands above —
+      # no longer sourced as standalone root-level files.
       - type: dir
         path: meshtastic-android
       - type: file

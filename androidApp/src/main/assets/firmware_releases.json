@@ -189,6 +189,12 @@
   },
   "pullRequests": [
     {
+      "id": "10587",
+      "title": "Add SHT2x CRC check to fix i2c scan hang",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10587",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
       "id": "10578",
       "title": "PR: Fix has_module_settings flag inconsistency in channel updates",
       "page_url": "https://github.com/meshtastic/firmware/pull/10578",

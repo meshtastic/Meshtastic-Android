@@ -127,8 +127,7 @@ fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
     }
 
     ConfigRoute.entries.forEach { routeInfo ->
-        configComposable(routeInfo.route::class, backStack) { viewModel ->
-            LaunchedEffect(Unit) { viewModel.setResponseStateLoading(routeInfo) }
+        configComposable(routeInfo.route::class, backStack, routeInfo) { viewModel ->
             when (routeInfo) {
                 ConfigRoute.USER ->
                     UserConfigScreen(viewModel, onBack = dropUnlessResumed { backStack.removeLastOrNull() })
@@ -164,8 +163,7 @@ fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
     }
 
     ModuleRoute.entries.forEach { routeInfo ->
-        configComposable(routeInfo.route::class, backStack) { viewModel ->
-            LaunchedEffect(Unit) { viewModel.setResponseStateLoading(routeInfo) }
+        configComposable(routeInfo.route::class, backStack, routeInfo) { viewModel ->
             when (routeInfo) {
                 ModuleRoute.MQTT ->
                     MQTTConfigScreen(viewModel, onBack = dropUnlessResumed { backStack.removeLastOrNull() })
@@ -266,7 +264,15 @@ expect fun SettingsMainScreen(
 fun <R : Route> EntryProviderScope<NavKey>.configComposable(
     route: KClass<R>,
     backStack: NavBackStack<NavKey>,
+    routeInfo: Enum<*>,
     content: @Composable (RadioConfigViewModel) -> Unit,
 ) {
-    addEntryProvider(route) { content(getRadioConfigViewModel(backStack)) }
+    addEntryProvider(route) {
+        val viewModel = getRadioConfigViewModel(backStack)
+        // Set loading state before content reads the StateFlow, ensuring
+        // LoadingOverlay is visible from the very first composition frame.
+        remember { viewModel.ensureLoadingForRemote().let { true } }
+        LaunchedEffect(Unit) { viewModel.setResponseStateLoading(routeInfo) }
+        content(viewModel)
+    }
 }

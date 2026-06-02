@@ -18,11 +18,16 @@ package org.meshtastic.app.map.component
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.currentStateAsState
+import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.savedstate.compose.LocalSavedStateRegistryOwner
+import androidx.savedstate.findViewTreeSavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.google.maps.android.clustering.Cluster
 import com.google.maps.android.clustering.view.DefaultClusterRenderer
@@ -45,26 +50,36 @@ fun NodeClusterMarkers(
     val view = LocalView.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val savedStateRegistryOwner = LocalSavedStateRegistryOwner.current
+    val lifecycleState by lifecycleOwner.lifecycle.currentStateAsState()
 
-    // Workaround for https://github.com/googlemaps/android-maps-compose/issues/858
-    // and https://github.com/googlemaps/android-maps-compose/issues/875
-    // The maps clustering library creates an internal ComposeView to snapshot markers.
-    // If that view is not attached to the hierarchy (which it often isn't during rendering),
-    // it fails to find the Lifecycle and SavedState owners. We propagate them to the root view
-    // so the internal snapshot view can find them when walking up the tree.
-    // DisposableEffect runs at composition time (not post-composition like SideEffect),
-    // ensuring owners are set before the Clustering composable triggers marker rendering.
-    DisposableEffect(lifecycleOwner, savedStateRegistryOwner) {
-        val root = view.rootView
-        root.setViewTreeLifecycleOwner(lifecycleOwner)
-        root.setViewTreeSavedStateRegistryOwner(savedStateRegistryOwner)
-        // Also set on the view itself in case the internal renderer walks from a child
-        if (view !== root) {
-            view.setViewTreeLifecycleOwner(lifecycleOwner)
-            view.setViewTreeSavedStateRegistryOwner(savedStateRegistryOwner)
+    // maps-compose renders each non-clustered item to a bitmap through an off-screen ComposeView that
+    // it attaches under the MapView (see ComposeUiClusterRenderer + NoDrawContainerView in
+    // MapComposeViewRender). That ComposeView walks up the view tree for a ViewTreeLifecycleOwner and,
+    // when it finds none, crashes with "Composed into the View which doesn't propagate
+    // ViewTreeLifecycleOwner!" (googlemaps/android-maps-compose#875 / #325) — a FATAL on the map screen.
+    //
+    // Propagate the owners onto this map screen's host view (LocalView.current), which is an ancestor
+    // of the internally-created MapView, so the renderer's ComposeView can resolve them. We deliberately
+    // do NOT touch view.rootView (the activity root): attaching a transient NavEntry lifecycle there is
+    // what caused the node-list popup regression (#5684), which is why #5704 removed the prior, broader
+    // workaround entirely. Scoping to the map host view and restoring the previous owners on dispose
+    // keeps the fix local to the map and leaves Popups/DropdownMenus untouched.
+    DisposableEffect(view, lifecycleOwner, savedStateRegistryOwner) {
+        val prevLifecycleOwner = view.findViewTreeLifecycleOwner()
+        val prevSavedStateRegistryOwner = view.findViewTreeSavedStateRegistryOwner()
+        view.setViewTreeLifecycleOwner(lifecycleOwner)
+        view.setViewTreeSavedStateRegistryOwner(savedStateRegistryOwner)
+        onDispose {
+            view.setViewTreeLifecycleOwner(prevLifecycleOwner)
+            view.setViewTreeSavedStateRegistryOwner(prevSavedStateRegistryOwner)
         }
-        onDispose {}
     }
+
+    // The cluster renderer drives marker rendering from an async Handler (DefaultClusterRenderer's
+    // MarkerModifier), which can fire after this screen has stopped and the internal ComposeView is
+    // detached — at which point no owner is reachable regardless of the above. Skip rendering once the
+    // lifecycle is no longer at least STARTED to close most of that race.
+    if (!lifecycleState.isAtLeast(Lifecycle.State.STARTED)) return
 
     Clustering(
         items = nodeClusterItems,

@@ -1,115 +1,115 @@
 ---
-title: Firmware Updates
-parent: User Guide
+title: 韌體更新
+parent: 使用者指南
 nav_order: 13
 last_updated: 2026-05-13
-description: Update your radio firmware over Bluetooth — OTA process, version channels, pre-flight checks, and recovery.
+description: 透過藍牙更新您的無線電裝置韌體 — 包含 OTA 流程、版本頻道、更新前檢查與復原機制。
 aliases:
-  - firmware
-  - update
+  - 韌體
+  - 更新
   - OTA（空中升级）
-  - flash
+  - 記憶體
 ---
 
-# Firmware Updates
+# 韌體更新
 
-Keep your Meshtastic radio up to date with the latest firmware for new features, bug fixes, and security improvements.
+保持 Meshtastic 無線電裝置的韌體為最新版本，以取得新功能、錯誤修正與安全性改善。
 
-## Checking for Updates
+## 檢查更新
 
-1. Navigate to **Settings → Firmware Update** or tap the firmware notification if shown.
-2. The app checks for available firmware versions.
-3. Available updates show the version number and changelog summary.
+1. 前往「設定 → 韌體更新」，或點選顯示的韌體通知。
+2. 應用程式將檢查可用的韌體版本。
+3. 如有可用更新將顯示版本號碼與更新記錄摘要。
 
-## Update Methods
+## 更新方式
 
-### OTA (Over-The-Air) via Bluetooth
+### OTA（無線空中下載）透過藍牙
 
-The most common update method for Android users:
+Android 使用者最常用的更新方式：
 
-1. Ensure your radio is connected via Bluetooth.
-2. Navigate to the Firmware Update screen.
-3. Select the desired firmware version.
-4. Tap **Update** to begin the OTA process.
-5. Wait for the update to complete — **do not disconnect** during the update.
+1. 請確認您的無線電裝置已透過藍牙連線。
+2. 前往韌體更新畫面。
+3. 選取所需的韌體版本。
+4. 點選「更新」以開始 OTA 流程。
+5. 請等待更新完成 — 更新期間請勿中斷連線。
 
 ![Firmware checking for updates](../../assets/screenshots/firmware_checking.png)
 
-> ⚠️ **Warning:** Interrupting a firmware update can brick your device. Ensure your radio has sufficient battery (>50% recommended) and maintain Bluetooth proximity during the entire process.
+> ⚠️ 警告：中斷韌體更新可能導致裝置變磚。 請確認無線電裝置電量充足（建議 50% 以上），並在整個更新過程中保持藍牙通訊距離。
 
 ![Firmware disclaimer](../../assets/screenshots/firmware_disclaimer.png)
 
-### USB Flashing
+### USB 燒錄
 
-For recovery or when OTA is unavailable:
+適用於裝置復原，或 OTA 無法使用的情況：
 
-- Use the [Meshtastic Web Flasher](https://flasher.meshtastic.org)
-- Or the [Meshtastic CLI tool](https://meshtastic.org/docs/getting-started/flashing-firmware) on desktop
+- 請使用〔Meshtastic 網頁燒錄工具〕(https://flasher.meshtastic.org)
+- 或在桌面版使用〔Meshtastic CLI 工具〕(https://meshtastic.org/docs/getting-started/flashing-firmware)
 
-## Version Channels
+## 版本頻道
 
-| 頻道        | 描述說明                                        |
-| --------- | ------------------------------------------- |
-| 穩定版       | Recommended for most users; tested releases |
-| Alpha 測試版 | Preview releases; may contain bugs          |
+| 頻道        | 描述說明                |
+| --------- | ------------------- |
+| 穩定版       | 建議大多數使用者採用；已測試的正式版本 |
+| Alpha 測試版 | 預覽版本；可能包含錯誤         |
 
-## Pre-Update Checklist
+## 更新前檢查清單
 
-Before updating:
+更新前請確認：
 
-- [ ] Battery > 50%
-- [ ] Stable Bluetooth connection
-- [ ] Note your current settings (they may reset on major version changes)
-- [ ] Check the release notes for breaking changes
+- [ ] 電量 > 50%
+- [ ] 藍牙連線穩定
+- [ ] 記錄目前的設定（主要版本更新時可能會重設）
+- [ ] 查看版本說明中是否有重大變更
 
-## Post-Update
+## 更新後
 
-After a successful update:
+成功更新後：
 
-- The radio will reboot automatically
-- Bluetooth connection will re-establish
-- Verify your settings are intact
-- Check the firmware version in **Settings → About**
+- 無線電裝置將自動重新開機
+- 藍牙連線將自動重新建立
+- 確認您的設定完整無缺
+- 在「設定 → 關於」中確認韌體版本
 
 ![Firmware update success](../../assets/screenshots/firmware_success.png)
 
 ## 故障排除
 
-### Update Stuck
+### 更新卡住
 
-If the update appears frozen:
+若更新似乎停滯不動：
 
-- Wait at least 5 minutes before intervening
-- If truly stuck, power-cycle the radio
-- Attempt the update again
+- 請至少等待 5 分鐘再採取行動
+- 若確實卡住，請將無線電裝置重新開關機
+- 再次嘗試更新
 
 ![Firmware update error](../../assets/screenshots/firmware_error.png)
 
-### Device Won't Boot After Update
+### 更新後裝置無法開機
 
-If your device fails to boot:
+若您的裝置無法開機：
 
-1. Try connecting via USB to a computer
-2. Use the web flasher in recovery/DFU mode
-3. Flash a known-good firmware version
-4. Check the Meshtastic Discord for device-specific recovery steps
+1. 請嘗試透過 USB 連接至電腦
+2. 在復原／DFU 模式下使用網頁燒錄工具
+3. 燒錄已知可正常運作的韌體版本
+4. 前往 Meshtastic Discord 查詢特定裝置的復原步驟
 
-### Compatibility Warnings
+### 相容性警告
 
-The app may show warnings when:
+應用程式在以下情況可能顯示警告：
 
-- Connected radio firmware is below minimum supported version
-- Major version mismatch between app and firmware
-- Deprecated features need migration
+- 已連接的無線電裝置韌體低於最低支援版本
+- 應用程式與韌體之間的主要版本不相符
+- 已棄用的功能需要進行遷移
 
-> ⚠️ **Important:** Always update the Meshtastic app before or alongside firmware updates to ensure compatibility.
+> ⚠️ 重要：請在韌體更新之前或同時更新 Meshtastic 應用程式，以確保相容性。
 
-## Related Topics
+## 相關主題
 
-- [Connections](connections) — reconnecting after a firmware update
-- [Flashing firmware guide](https://meshtastic.org/docs/getting-started/flashing-firmware) — full firmware flashing walkthrough on meshtastic.org
-- [Supported devices](https://meshtastic.org/docs/hardware/devices) — check firmware compatibility by device
-- [FAQ](https://meshtastic.org/docs/about/faq) — common questions on meshtastic.org
+- 〔連線〕(connections)——韌體更新後重新連線
+- (https://meshtastic.org/docs/getting-started/flashing-firmware) — meshtastic.org 上的完整韌體燒錄操作說明
+- 〔支援的裝置〕(https://meshtastic.org/docs/hardware/devices) https://meshtastic.org/docs/hardware/devices — 依裝置查詢韌體相容性
+- [FAQ](https://meshtastic.org/docs/about/faq) — meshtastic.org 上的常見問題
 
 ---
 

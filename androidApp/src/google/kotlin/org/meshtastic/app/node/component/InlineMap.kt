@@ -27,17 +27,15 @@ import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.ComposeMapColorScheme
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapUiSettings
-import com.google.maps.android.compose.MapsComposeExperimentalApi
-import com.google.maps.android.compose.MarkerComposable
+import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberUpdatedMarkerState
+import org.meshtastic.app.map.component.rememberNodeChipDescriptor
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.component.precisionBitsToMeters
 
 private const val DEFAULT_ZOOM = 15f
 
-@OptIn(MapsComposeExperimentalApi::class)
 @Composable
 fun InlineMap(node: Node, modifier: Modifier = Modifier) {
     val dark = isSystemInDarkTheme()
@@ -51,6 +49,7 @@ fun InlineMap(node: Node, modifier: Modifier = Modifier) {
         val cameraState = rememberCameraPositionState {
             position = CameraPosition.fromLatLngZoom(location, DEFAULT_ZOOM)
         }
+        val markerIcon = rememberNodeChipDescriptor(node)
 
         GoogleMap(
             mapColorScheme = mapColorScheme,
@@ -79,7 +78,7 @@ fun InlineMap(node: Node, modifier: Modifier = Modifier) {
                     strokeWidth = 2f,
                 )
             }
-            MarkerComposable(state = rememberUpdatedMarkerState(position = latLng)) { NodeChip(node = node) }
+            Marker(state = rememberUpdatedMarkerState(position = latLng), icon = markerIcon)
         }
     }
 }
