@@ -133,7 +133,7 @@ fun MapScreen(
 
     // Location tracking state: 3-mode cycling (Off → Track → TrackBearing → Off)
     var isLocationTrackingEnabled by remember { mutableStateOf(false) }
-    var bearingUpdate by remember { mutableStateOf(BearingUpdate.TRACK_LOCATION) }
+    var bearingUpdate by remember { mutableStateOf(BearingUpdate.TRACK_AUTOMATIC) }
     val locationProvider = rememberLocationProviderOrNull()
     val locationState = rememberUserLocationState(locationProvider ?: rememberNullLocationProvider())
     val locationAvailable = locationProvider != null
@@ -144,8 +144,13 @@ fun MapScreen(
             if (isLocationTrackingEnabled) {
                 when (bearingUpdate) {
                     BearingUpdate.IGNORE -> GestureOptions.PositionLocked
+
                     BearingUpdate.ALWAYS_NORTH -> GestureOptions.ZoomOnly
-                    BearingUpdate.TRACK_LOCATION -> GestureOptions.ZoomOnly
+
+                    BearingUpdate.TRACK_AUTOMATIC,
+                    BearingUpdate.TRACK_COURSE,
+                    BearingUpdate.TRACK_ORIENTATION,
+                    -> GestureOptions.ZoomOnly
                 }
             } else {
                 GestureOptions.Standard
@@ -220,7 +225,7 @@ fun MapScreen(
                 LocationTrackingEffect(
                     locationState = locationState,
                     enabled = isLocationTrackingEnabled,
-                    trackBearing = bearingUpdate == BearingUpdate.TRACK_LOCATION,
+                    trackBearing = bearingUpdate == BearingUpdate.TRACK_AUTOMATIC,
                 ) {
                     cameraState.updateFromLocation(updateBearing = bearingUpdate)
                 }
@@ -239,7 +244,7 @@ fun MapScreen(
                 modifier = Modifier.align(Alignment.TopEnd).padding(paddingValues),
                 bearing = cameraState.position.bearing.toFloat(),
                 onCompassClick = { scope.launch { cameraState.animateTo(cameraState.position.copy(bearing = 0.0)) } },
-                followPhoneBearing = isLocationTrackingEnabled && bearingUpdate == BearingUpdate.TRACK_LOCATION,
+                followPhoneBearing = isLocationTrackingEnabled && bearingUpdate == BearingUpdate.TRACK_AUTOMATIC,
                 activeFilterCount = activeFilterCount,
                 filterDropdownContent = {
                     MapFilterDropdown(
@@ -267,27 +272,23 @@ fun MapScreen(
                 },
                 layersContent = { OfflineMapContent(styleUri = selectedMapStyle.styleUri, cameraState = cameraState) },
                 isLocationTrackingEnabled = isLocationTrackingEnabled,
-                isTrackingBearing = bearingUpdate == BearingUpdate.TRACK_LOCATION,
+                isTrackingBearing = bearingUpdate == BearingUpdate.TRACK_AUTOMATIC,
                 onToggleLocationTracking = {
                     if (!locationAvailable) {
                         scope.launch { snackbarHostState.showSnackbar(locationUnavailableMsg) }
                     } else if (!isLocationTrackingEnabled) {
                         // Off → Track with bearing
-                        bearingUpdate = BearingUpdate.TRACK_LOCATION
+                        bearingUpdate = BearingUpdate.TRACK_AUTOMATIC
                         isLocationTrackingEnabled = true
                     } else {
                         when (bearingUpdate) {
-                            BearingUpdate.TRACK_LOCATION -> {
+                            BearingUpdate.TRACK_AUTOMATIC -> {
                                 // TrackBearing → TrackNorth
                                 bearingUpdate = BearingUpdate.ALWAYS_NORTH
                             }
 
-                            BearingUpdate.ALWAYS_NORTH -> {
-                                // TrackNorth → Off
-                                isLocationTrackingEnabled = false
-                            }
-
-                            BearingUpdate.IGNORE -> {
+                            else -> {
+                                // TrackNorth (or any other) → Off
                                 isLocationTrackingEnabled = false
                             }
                         }

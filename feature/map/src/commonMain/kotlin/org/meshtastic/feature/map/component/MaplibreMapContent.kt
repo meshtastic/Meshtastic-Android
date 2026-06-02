@@ -79,6 +79,7 @@ import org.maplibre.compose.util.ClickResult
 import org.maplibre.spatialk.geojson.Point
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
+import org.meshtastic.feature.map.mapOverlaysSupported
 import org.meshtastic.feature.map.util.MARKER_STROKE_WIDTH
 import org.meshtastic.feature.map.util.NODE_MARKER_RADIUS
 import org.meshtastic.feature.map.util.PRECISION_CIRCLE_STROKE_ALPHA
@@ -157,6 +158,10 @@ fun MaplibreMapContent(
         onMapLoadFinished = onMapLoad,
         onMapLoadFailed = onMapLoadFail,
     ) {
+        // MapLibre Compose layers/sources are stubbed on desktop (maplibre-compose 0.13.0); gate overlays off
+        // there so the base map still renders without throwing NotImplementedError. See [mapOverlaysSupported].
+        if (!mapOverlaysSupported) return@MaplibreMap
+
         // --- Terrain hillshade overlay ---
         if (showHillshade) {
             val demSource = rememberRasterDemSource(tiles = TERRAIN_TILES, encoding = RasterDemEncoding.Terrarium)
@@ -181,7 +186,7 @@ fun MaplibreMapContent(
         if (locationState != null) {
             LocationPuck(
                 idPrefix = "user-location",
-                locationState = locationState,
+                location = locationState.location,
                 cameraState = cameraState,
                 colors = LocationPuckDefaults.colors(),
             )

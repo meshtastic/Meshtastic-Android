@@ -41,6 +41,7 @@ import org.maplibre.spatialk.geojson.Feature
 import org.maplibre.spatialk.geojson.FeatureCollection
 import org.maplibre.spatialk.geojson.Point
 import org.meshtastic.core.model.Node
+import org.meshtastic.feature.map.mapOverlaysSupported
 import org.meshtastic.feature.map.model.MapStyle
 import org.meshtastic.feature.map.util.MARKER_STROKE_WIDTH
 import org.meshtastic.feature.map.util.NODE_MARKER_RADIUS
@@ -84,6 +85,10 @@ fun InlineMap(node: Node, modifier: Modifier = Modifier) {
             options =
             MapOptions(gestureOptions = GestureOptions.AllDisabled, ornamentOptions = OrnamentOptions.AllDisabled),
         ) {
+            // Desktop (maplibre-compose 0.13.0) stubs all layers/sources; render base map only. See
+            // [mapOverlaysSupported].
+            if (!mapOverlaysSupported) return@MaplibreMap
+
             val source = rememberGeoJsonSource(data = GeoJsonData.Features(nodeFeature))
 
             // Node marker dot

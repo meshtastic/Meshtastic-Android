@@ -28,6 +28,7 @@ import org.maplibre.compose.map.GestureOptions
 import org.maplibre.compose.map.MapOptions
 import org.maplibre.compose.map.MaplibreMap
 import org.maplibre.compose.map.OrnamentOptions
+import org.meshtastic.feature.map.mapOverlaysSupported
 import org.meshtastic.feature.map.model.MapStyle
 import org.meshtastic.feature.map.util.computeBoundingBox
 import org.meshtastic.feature.map.util.toGeoPositionOrNull
@@ -79,6 +80,9 @@ fun NodeTrackMap(
         options =
         MapOptions(gestureOptions = GestureOptions.RotationLocked, ornamentOptions = OrnamentOptions.AllEnabled),
     ) {
+        // Desktop (maplibre-compose 0.13.0) stubs all layers/sources; render base map only. See [mapOverlaysSupported].
+        if (!mapOverlaysSupported) return@MaplibreMap
+
         NodeTrackLayers(
             positions = positions,
             selectedPositionTime = selectedPositionTime,

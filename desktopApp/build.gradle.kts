@@ -233,7 +233,42 @@ compose.desktop {
     }
 }
 
+/**
+ * Selects the MapLibre Native desktop backend capability matching the build host.
+ *
+ * MapLibre Compose ships the native renderer as mutually-exclusive per-OS/arch capability variants of
+ * `maplibre-native-bindings-jni`. Gradle can't auto-pick among them, so without an explicit selection no native library
+ * is linked and the map canvas renders black. See https://maplibre.org/maplibre-compose/getting-started/.
+ *
+ * macOS is Apple-Silicon only (Metal); Linux/Windows use OpenGL here for broadest driver/Flatpak/CI compatibility
+ * (Vulkan variants — `*-amd64-vulkan` — are also published if preferred).
+ */
+fun maplibreNativeTarget(): String {
+    val os = System.getProperty("os.name").lowercase()
+    val arch = System.getProperty("os.arch").lowercase()
+    return when {
+        os.contains("mac") || os.contains("darwin") -> {
+            require(arch == "aarch64" || arch == "arm64") {
+                "MapLibre Native desktop ships only a macOS arm64 (Apple Silicon) backend; host arch '$arch' is unsupported."
+            }
+            "macos-aarch64-metal"
+        }
+
+        os.contains("win") -> "windows-amd64-opengl"
+
+        else -> "linux-amd64-opengl"
+    }
+}
+
 dependencies {
+    // MapLibre Native renderer for the current desktop host (runtime-only). Selects exactly one OS/arch
+    // capability — required, or the map renders black. See maplibreNativeTarget() above.
+    runtimeOnly("org.maplibre.compose:maplibre-native-bindings-jni:${libs.versions.maplibre.compose.get()}") {
+        capabilities {
+            requireCapability("org.maplibre.compose:maplibre-native-bindings-jni-${maplibreNativeTarget()}")
+        }
+    }
+
     implementation(libs.aboutlibraries.core)
     implementation(libs.aboutlibraries.compose.m3)
 

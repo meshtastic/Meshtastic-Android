@@ -30,6 +30,7 @@ import org.maplibre.compose.map.MaplibreMap
 import org.maplibre.compose.map.OrnamentOptions
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.TracerouteOverlay
+import org.meshtastic.feature.map.mapOverlaysSupported
 import org.meshtastic.feature.map.model.MapStyle
 import org.meshtastic.feature.map.util.computeBoundingBox
 import org.meshtastic.feature.map.util.toGeoPositionOrNull
@@ -87,6 +88,9 @@ fun TracerouteMap(
         options =
         MapOptions(gestureOptions = GestureOptions.RotationLocked, ornamentOptions = OrnamentOptions.AllEnabled),
     ) {
+        // Desktop (maplibre-compose 0.13.0) stubs all layers/sources; render base map only. See [mapOverlaysSupported].
+        if (!mapOverlaysSupported) return@MaplibreMap
+
         TracerouteLayers(
             overlay = tracerouteOverlay,
             nodePositions = tracerouteNodePositions,
