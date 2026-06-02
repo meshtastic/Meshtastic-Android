@@ -9,10 +9,12 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
-* chore(agents): prune governance cruft and add Claude token guards (#5706) by James Rich (@jamesarich) in [`813acee71`](https://github.com/meshtastic/Meshtastic-Android/commit/813acee71604686dc4c98b43cf692fe4586cb5c5)
-* fix(map): scope cluster-renderer ViewTreeLifecycleOwner to map host view (#5708) by James Rich (@jamesarich) in [`1b661739e`](https://github.com/meshtastic/Meshtastic-Android/commit/1b661739e346f6d64ff06731ee2ac0bc80501d19)
+* chore(deps): update core/proto/src/main/proto digest to 6b1ded4 (#5712) by renovate[bot] (@renovate[bot]) in [`ef4ef8e2f`](https://github.com/meshtastic/Meshtastic-Android/commit/ef4ef8e2f59f5e1468673174729d75992504d4c7)
+* chore(deps): update compose-multiplatform to v1.11.1 (#5713) by renovate[bot] (@renovate[bot]) in [`c45466a63`](https://github.com/meshtastic/Meshtastic-Android/commit/c45466a633d6e34df3a0a27c83e169c7eb91e481)
+* fix(map): eliminate cluster-renderer FATAL and harden black-map paths (#5715) by James Rich (@jamesarich) in [`0f123adb7`](https://github.com/meshtastic/Meshtastic-Android/commit/0f123adb72d3d13a208959a17f7d9dd40809804b)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5711) by James Rich (@jamesarich) in [`aeed07364`](https://github.com/meshtastic/Meshtastic-Android/commit/aeed07364c4465bede0c9d83037ac4c9518e8a56)
 
-### Open Beta (v2.7.14-open.18)
+### Open Beta (v2.7.14-open.19)
 Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.13):
 
 #### 🏗️ Features
@@ -239,6 +241,8 @@ Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/relea
 * fix(firmware): surface error state when BLE OTA connection attempts are exhausted by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5700
 * fix(map): replace MarkerComposable with Canvas-rendered bitmaps by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5702
 * fix(map): remove manual ViewTree lifecycle owner workarounds by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5704
+* fix(map): scope cluster-renderer ViewTreeLifecycleOwner to map host view by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5708
+* fix(map): initialize Maps SDK before building marker bitmap descriptors by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5709
 #### 📝 Other Changes
 * refactor(ui): compose resources, domain layer by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/4628
 * Add per-message transport method icons for new message format by @Kealper in https://github.com/meshtastic/Meshtastic-Android/pull/4643
