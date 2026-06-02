@@ -103,17 +103,12 @@ class DeviceLinkRepositoryImpl(
             .onFailure { Logger.w(it) { "DeviceLinkRepository: device links import failed" } }
     }
 
-    /** Shipping regions for a marketplace short code, or null if it matches no known marketplace. */
-    private fun marketplaceRegions(code: String, marketplaces: Map<String, MshToMarketplace>): List<String>? {
-        for ((marketplace, config) in marketplaces) {
-            val matched =
-                if (config.match == "prefix") {
-                    code.startsWith(marketplace)
-                } else {
-                    code.endsWith("_$marketplace") || code.endsWith("-$marketplace")
-                }
-            if (matched) return config.regions
-        }
-        return null
-    }
+    /**
+     * Shipping regions for a marketplace short code, or null when it is not a marketplace link. Uses the same
+     * delimiter-aware classifier as the matcher/UI so a code's classification (vendor/variant vs marketplace) is
+     * consistent everywhere — independent of the `match` hint in `marketplaces.json`, which is unreliable in practice
+     * (e.g. AliExpress is declared `suffix` yet most codes use the `aliexpress-<target>` prefix form).
+     */
+    private fun marketplaceRegions(code: String, marketplaces: Map<String, MshToMarketplace>): List<String>? =
+        DeviceLinkMatcher.marketplaceKeyFor(code, marketplaces.keys)?.let { marketplaces.getValue(it).regions }
 }

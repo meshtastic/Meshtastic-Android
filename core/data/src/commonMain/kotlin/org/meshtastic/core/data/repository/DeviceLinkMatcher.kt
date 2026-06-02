@@ -83,21 +83,28 @@ object DeviceLinkMatcher {
     }
 
     /** True when [code] carries a known marketplace prefix or suffix. */
-    fun isMarketplaceLink(code: String, marketplaceKeys: Set<String>): Boolean = marketplaceKeys.any { mp ->
+    fun isMarketplaceLink(code: String, marketplaceKeys: Set<String>): Boolean =
+        marketplaceKeyFor(code, marketplaceKeys) != null
+
+    /**
+     * The marketplace identifier [code] belongs to (as a delimiter-bounded prefix `mp-`/`mp_` or suffix `-mp`/`_mp`),
+     * or `null` if none. This is the single source of truth for "is this a marketplace link" — used for import-time
+     * region tagging, sort ordering, and UI prominence — so the classifications never disagree. Delimiter bounds avoid
+     * mis-tagging codes that merely begin with a marketplace name (e.g. `muziworks` is NOT `muzi`).
+     */
+    fun marketplaceKeyFor(code: String, marketplaceKeys: Set<String>): String? = marketplaceKeys.firstOrNull { mp ->
         code.startsWith("$mp-") || code.startsWith("${mp}_") || code.endsWith("-$mp") || code.endsWith("_$mp")
     }
 
     /**
-     * Alternate target strings for matching. Strips a leading `rak`/`rak-` (e.g. `rak4631` → `4631`) to absorb msh.to
-     * naming inconsistencies like `rokland-4631`.
+     * Alternate target strings for matching. Strips a leading `rak` (e.g. `rak4631` → `4631`) to absorb msh.to naming
+     * inconsistencies like `rokland-4631`.
      */
     fun buildTargetVariants(target: String): List<String> {
         val variants = mutableListOf(target)
-        for (prefix in listOf("rak", "rak-")) {
-            if (target.startsWith(prefix)) {
-                val stripped = target.drop(prefix.length)
-                if (stripped.isNotEmpty()) variants.add(stripped)
-            }
+        if (target.startsWith("rak")) {
+            val stripped = target.removePrefix("rak")
+            if (stripped.isNotEmpty()) variants.add(stripped)
         }
         return variants
     }

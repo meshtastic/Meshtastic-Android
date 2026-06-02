@@ -44,13 +44,16 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.DeviceLink
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.collapsed
 import org.meshtastic.core.resources.device_links_i_want_one
 import org.meshtastic.core.resources.device_links_open_in_browser
+import org.meshtastic.core.resources.expanded
 import org.meshtastic.core.ui.icon.ExpandLess
 import org.meshtastic.core.ui.icon.ExpandMore
 import org.meshtastic.core.ui.icon.Language
@@ -66,6 +69,7 @@ fun DeviceLinksSection(links: List<DeviceLink>, modifier: Modifier = Modifier) {
 
     var expanded by rememberSaveable { mutableStateOf(false) }
     val title = stringResource(Res.string.device_links_i_want_one)
+    val expandStateDescription = stringResource(if (expanded) Res.string.expanded else Res.string.collapsed)
 
     ElevatedCard(
         modifier = modifier.fillMaxWidth(),
@@ -77,6 +81,7 @@ fun DeviceLinksSection(links: List<DeviceLink>, modifier: Modifier = Modifier) {
                 modifier =
                 Modifier.fillMaxWidth()
                     .clickable(role = Role.Button) { expanded = !expanded }
+                    .semantics { stateDescription = expandStateDescription }
                     .padding(horizontal = 20.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {

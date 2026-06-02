@@ -14,6 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:OptIn(ExperimentalSerializationApi::class)
+
 package org.meshtastic.core.data.datasource
 
 import android.app.Application
@@ -30,29 +32,35 @@ import org.meshtastic.core.model.MshToUrlsFile
 class MshToLinksJsonDataSourceImpl(private val application: Application) : MshToLinksJsonDataSource {
 
     // Tolerant parser: tolerate extra fields/trailing data so a stale bundled file never crashes the import.
-    @OptIn(ExperimentalSerializationApi::class)
     private val json = Json {
         ignoreUnknownKeys = true
         isLenient = true
         exceptionsWithDebugInfo = false
     }
 
-    @OptIn(ExperimentalSerializationApi::class)
-    override fun loadRoutes(): List<MshToRoute> =
+    // The bundled assets are immutable for the install's lifetime, so parse once and reuse — these are read on the
+    // node-detail flow's hot path (once per hardware emission).
+    private val routes: List<MshToRoute> by lazy {
         runCatching { application.assets.open(URLS_ASSET).use { json.decodeFromStream<MshToUrlsFile>(it).routes } }
             .onFailure { Logger.w(it) { "Unable to load $URLS_ASSET for device links" } }
             .getOrDefault(emptyList())
-
-    @OptIn(ExperimentalSerializationApi::class)
-    override fun loadMarketplaces(): Map<String, MshToMarketplace> = runCatching {
-        application.assets.open(MARKETPLACES_ASSET).use {
-            json.decodeFromStream<Map<String, MshToMarketplace>>(it)
-        }
     }
-        .onFailure {
-            Logger.w(it) { "Unable to load $MARKETPLACES_ASSET; marketplace links will not be region-filtered" }
+
+    private val marketplaces: Map<String, MshToMarketplace> by lazy {
+        runCatching {
+            application.assets.open(MARKETPLACES_ASSET).use {
+                json.decodeFromStream<Map<String, MshToMarketplace>>(it)
+            }
         }
-        .getOrDefault(emptyMap())
+            .onFailure {
+                Logger.w(it) { "Unable to load $MARKETPLACES_ASSET; marketplace links won't be region-filtered" }
+            }
+            .getOrDefault(emptyMap())
+    }
+
+    override fun loadRoutes(): List<MshToRoute> = routes
+
+    override fun loadMarketplaces(): Map<String, MshToMarketplace> = marketplaces
 
     private companion object {
         const val URLS_ASSET = "urls.json"

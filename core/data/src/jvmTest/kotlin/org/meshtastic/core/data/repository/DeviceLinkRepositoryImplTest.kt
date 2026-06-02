@@ -123,6 +123,32 @@ class DeviceLinkRepositoryImplTest {
     }
 
     @Test
+    fun aliexpressPrefixFormIsClassifiedAsWorldwideMarketplace() = runTest(dispatcher) {
+        // AliExpress is declared match="suffix" yet most bundled codes use the `aliexpress-<target>` prefix form;
+        // import must still classify it as a (worldwide) marketplace link, not a null-region variant.
+        json.routes = listOf(route("rak4631"), route("aliexpress-rak4631"))
+        seedDeviceTargets("rak4631")
+        repository.reconcile()
+
+        assertEquals(emptyList(), linkLocal.getAll().single { it.shortCode == "aliexpress-rak4631" }.regions)
+    }
+
+    @Test
+    fun bareMarketplaceNamePrefixIsNotMistagged() = runTest(dispatcher) {
+        // "muziworks" merely begins with "muzi" — delimiter bounds must keep it from inheriting muzi's regions.
+        json =
+            FakeMshToLinksJsonDataSource(
+                routes = listOf(route("muziworks")),
+                marketplaces = mapOf("muzi" to MshToMarketplace(regions = listOf("US"), match = "prefix")),
+            )
+        repository = DeviceLinkRepositoryImpl(json, linkLocal, hardwareLocal)
+        seedDeviceTargets("rak4631")
+        repository.reconcile()
+
+        assertNull(linkLocal.getAll().single().regions)
+    }
+
+    @Test
     fun ensureImportedSeedsOnlyWhenEmpty() = runTest(dispatcher) {
         seedDeviceTargets("rak4631")
         repository.ensureImported()

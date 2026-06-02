@@ -133,13 +133,15 @@ class DeviceHardwareRepositoryImpl(
                         val remoteHardware = remoteDataSource.getAllDeviceHardware()
                         Logger.d { "DeviceHardwareRepository: remote returned ${remoteHardware.size} entries" }
                         localDataSource.insertAllDeviceHardware(remoteHardware)
-                        // Reconcile msh.to links against the freshest catalog (isVendor + orphan pruning).
-                        deviceLinkRepository.reconcile()
                     }
                 if (completed == null) {
                     Logger.w {
                         "DeviceHardwareRepository: network refresh timed out after ${NETWORK_REFRESH_TIMEOUT_MS}ms"
                     }
+                } else {
+                    // Reconcile msh.to links against the freshest catalog (isVendor + orphan pruning). Runs outside
+                    // the network timeout so a deadline can't cancel it mid-write and leave links half-reconciled.
+                    deviceLinkRepository.reconcile()
                 }
             }
                 .onFailure { e -> Logger.w(e) { "DeviceHardwareRepository: network refresh failed" } }

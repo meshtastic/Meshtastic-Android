@@ -20,6 +20,7 @@ import org.meshtastic.core.model.DeviceLink
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
@@ -131,5 +132,16 @@ class DeviceLinkMatcherTest {
         assertTrue(DeviceLinkMatcher.isMarketplaceLink("rokland-rak4631", marketplaceKeys))
         assertTrue(DeviceLinkMatcher.isMarketplaceLink("heltec-v3_aliexpress", marketplaceKeys))
         assertFalse(DeviceLinkMatcher.isMarketplaceLink("heltec-v3", marketplaceKeys))
+    }
+
+    @Test
+    fun marketplaceKeyForUsesDelimiterBounds() {
+        // Both prefix and suffix forms resolve to their marketplace...
+        assertEquals("rokland", DeviceLinkMatcher.marketplaceKeyFor("rokland-rak4631", marketplaceKeys))
+        assertEquals("aliexpress", DeviceLinkMatcher.marketplaceKeyFor("aliexpress-rak1921", marketplaceKeys))
+        assertEquals("aliexpress", DeviceLinkMatcher.marketplaceKeyFor("rak4631_aliexpress", marketplaceKeys))
+        // ...but a code that merely begins with a marketplace name is NOT that marketplace.
+        assertNull(DeviceLinkMatcher.marketplaceKeyFor("muziworks", marketplaceKeys))
+        assertNull(DeviceLinkMatcher.marketplaceKeyFor("heltec-v3", marketplaceKeys))
     }
 }

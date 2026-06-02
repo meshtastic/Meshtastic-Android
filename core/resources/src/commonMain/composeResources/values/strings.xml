@@ -185,6 +185,7 @@
     <string name="codec2_sample_rate">CODEC2 sample rate</string>
     <string name="coding_rate">Coding Rate</string>
     <string name="collapse_chart">Collapse chart</string>
+    <string name="collapsed">Collapsed</string>
     <string name="communicate_off_the_grid">Communicate off-the-grid with your friends and community without cell service.</string>
     <!-- COMPASS -->
     <string name="compass_bearing">Bearing: %1$s</string>
@@ -441,6 +442,7 @@
     <string name="event_welcome_open_sauce">Welcome to Open Sauce! 🔧</string>
     <string name="exchange_position">Exchange position</string>
     <string name="expand_chart">Expand chart</string>
+    <string name="expanded">Expanded</string>
     <string name="expires">Expires</string>
     <!-- EXPORT -->
     <string name="export_configuration">Export configuration</string>
