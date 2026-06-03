@@ -20,7 +20,7 @@ plugins {
 }
 
 kotlin {
-    androidLibrary {
+    android {
         namespace = "org.meshtastic.feature.wifiprovision"
         withHostTest {}
     }
