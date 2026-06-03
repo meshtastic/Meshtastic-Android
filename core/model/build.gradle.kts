@@ -24,7 +24,7 @@ plugins {
 }
 
 kotlin {
-    androidLibrary {
+    android {
         withHostTest { isIncludeAndroidResources = true }
         withDeviceTest { instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner" }
     }

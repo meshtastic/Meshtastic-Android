@@ -33,4 +33,6 @@ internal actual fun Peripheral.negotiatedMaxWriteLength(): Int? = DEFAULT_JVM_MT
 
 internal actual fun Peripheral.requestHighConnectionPriority(): Boolean = false
 
+internal actual fun Peripheral.requestBalancedConnectionPriority(): Boolean = false
+
 private const val DEFAULT_JVM_MTU = 512

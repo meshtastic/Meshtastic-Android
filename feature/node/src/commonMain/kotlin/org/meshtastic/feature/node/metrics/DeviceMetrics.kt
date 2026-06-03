@@ -50,7 +50,7 @@ import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianLayerRangeProvider
-import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
+import com.patrykandpatrick.vico.compose.cartesian.data.lineModel
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
 import org.jetbrains.compose.resources.stringResource
@@ -274,7 +274,7 @@ private fun DeviceMetricsChart(
             modelProducer.runTransaction {
                 /* Series for Left Axis (0-100%) */
                 if (leftLayerSeriesStyles.isNotEmpty()) {
-                    lineSeries {
+                    lineModel {
                         if (batteryData.isNotEmpty()) {
                             series(
                                 x = batteryData.map { it.time },
@@ -297,7 +297,7 @@ private fun DeviceMetricsChart(
                 }
                 /* Series for Right Axis (Voltage) */
                 if (voltageData.isNotEmpty()) {
-                    lineSeries {
+                    lineModel {
                         series(
                             x = voltageData.map { it.time },
                             y = voltageData.map { it.device_metrics?.voltage ?: 0f },

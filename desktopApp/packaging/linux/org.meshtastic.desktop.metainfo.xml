@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2025 Meshtastic LLC -->
+<component type="desktop-application">
+  <id>org.meshtastic.desktop</id>
+
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+
+  <name>Meshtastic Desktop</name>
+  <summary>Communicate off-grid with Meshtastic mesh radio devices</summary>
+
+  <description>
+    <p>
+      Meshtastic is an open-source, off-grid mesh networking project that lets
+      you send messages and view node locations over long distances without
+      cellular service or the internet, using inexpensive LoRa radio hardware.
+    </p>
+    <p>Features include:</p>
+    <ul>
+      <li>Text messaging between nodes on the mesh network</li>
+      <li>Encrypted channels for private group communication</li>
+      <li>Node management and device configuration</li>
+      <li>Works entirely offline — no internet required</li>
+    </ul>
+    <p>
+      Connect to your Meshtastic device over Bluetooth, USB serial, or Wi-Fi.
+    </p>
+  </description>
+
+  <launchable type="desktop-id">org.meshtastic.desktop.desktop</launchable>
+
+  <developer id="org.meshtastic">
+    <name>Meshtastic LLC</name>
+  </developer>
+
+  <url type="homepage">https://meshtastic.org</url>
+  <url type="bugtracker">https://github.com/meshtastic/Meshtastic-Android/issues</url>
+  <url type="vcs-browser">https://github.com/meshtastic/Meshtastic-Android</url>
+  <url type="donation">https://opencollective.com/meshtastic</url>
+  <url type="contribute">https://meshtastic.org/docs/contributing/</url>
+
+  <branding>
+    <color type="primary" scheme_preference="light">#47c66e</color>
+    <color type="primary" scheme_preference="dark">#2d7d46</color>
+  </branding>
+
+  <recommends>
+    <control>keyboard</control>
+    <control>pointing</control>
+  </recommends>
+  <requires>
+    <display_length compare="ge">640</display_length>
+  </requires>
+
+  <categories>
+    <category>Network</category>
+    <category>Chat</category>
+    <category>HamRadio</category>
+  </categories>
+
+  <keywords>
+    <keyword>mesh</keyword>
+    <keyword>LoRa</keyword>
+    <keyword>radio</keyword>
+    <keyword>off-grid</keyword>
+    <keyword>communication</keyword>
+    <keyword>ham</keyword>
+  </keywords>
+
+  <content_rating type="oars-1.1">
+    <content_attribute id="social-chat">intense</content_attribute>
+    <content_attribute id="social-location">intense</content_attribute>
+  </content_rating>
+
+  <releases>
+    <release version="2.7.14" date="2025-05-01">
+      <description>
+        <p>Latest stable release of Meshtastic Desktop.</p>
+      </description>
+    </release>
+  </releases>
+</component>

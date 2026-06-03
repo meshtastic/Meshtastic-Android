@@ -86,14 +86,23 @@ internal class SerialConnectionImpl(
         }
 
         port.open(usbDeviceConnection)
-        port.setParameters(115200, UsbSerialPort.DATABITS_8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE)
+        try {
+            port.setParameters(115200, UsbSerialPort.DATABITS_8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE)
 
-        // Assert DTR/RTS so native USB-CDC firmware (RAK4631 / nRF52840) recognizes the host as
-        // present and starts its serial-side Meshtastic protocol. Empirically, omitting these
-        // signals causes the firmware to never respond to WAKE_BYTES, stalling the handshake at
-        // Stage 1. Bridge-chip boards (CH340, CP210x, FTDI) tolerate the assertion.
-        port.dtr = true
-        port.rts = true
+            // Assert DTR/RTS so native USB-CDC firmware (RAK4631 / nRF52840) recognizes the host as
+            // present and starts its serial-side Meshtastic protocol. Empirically, omitting these
+            // signals causes the firmware to never respond to WAKE_BYTES, stalling the handshake at
+            // Stage 1. Bridge-chip boards (CH340, CP210x, FTDI) tolerate the assertion.
+            port.dtr = true
+            port.rts = true
+        } catch (e: java.io.IOException) {
+            Logger.w(e) { "USB control transfer failed during port setup — device may have disconnected" }
+            closed.set(true)
+            ignoreException(silent = true) { port.close() }
+            closedLatch.countDown()
+            listener.onDisconnected(e)
+            return
+        }
 
         Logger.d { "Starting serial reader thread" }
         val io =

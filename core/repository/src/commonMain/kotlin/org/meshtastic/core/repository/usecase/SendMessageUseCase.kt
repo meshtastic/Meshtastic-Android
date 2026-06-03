@@ -44,7 +44,11 @@ import kotlin.random.Random
  * This implementation is platform-agnostic and relies on injected repositories and controllers.
  */
 interface SendMessageUseCase {
-    suspend operator fun invoke(text: String, contactKey: String = "0${DataPacket.ID_BROADCAST}", replyId: Int? = null)
+    suspend operator fun invoke(
+        text: String,
+        contactKey: String = "0${DataPacket.ID_BROADCAST}",
+        replyId: Int? = null,
+    ): Int
 }
 
 @Suppress("TooGenericExceptionCaught")
@@ -64,7 +68,7 @@ class SendMessageUseCaseImpl(
      * @param replyId Optional ID of a message being replied to.
      */
     @Suppress("NestedBlockDepth", "LongMethod", "CyclomaticComplexMethod")
-    override suspend operator fun invoke(text: String, contactKey: String, replyId: Int?) {
+    override suspend operator fun invoke(text: String, contactKey: String, replyId: Int?): Int {
         val channel = contactKey[0].digitToIntOrNull()
         val dest = if (channel != null) contactKey.substring(1) else contactKey
 
@@ -125,7 +129,10 @@ class SendMessageUseCaseImpl(
             messageQueue.enqueue(packetId)
         } catch (ex: Exception) {
             Logger.e(ex) { "Failed to enqueue message packet" }
+            throw ex
         }
+
+        return packetId
     }
 
     private suspend fun favoriteNode(node: Node) {
