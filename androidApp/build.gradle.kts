@@ -30,6 +30,7 @@ plugins {
     id("meshtastic.koin")
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.secrets)
+    alias(libs.plugins.androidx.baselineprofile)
     id("meshtastic.aboutlibraries")
     id("dev.mokkery")
 }
@@ -250,6 +251,9 @@ dependencies {
     implementation(libs.coil.network.ktor3)
     implementation(libs.coil.svg)
     implementation(libs.androidx.core.splashscreen)
+    // Installs the baseline profile produced by :baselineProfile at app startup (API < 31)
+    // and lets ART honor it on first launch. On API 31+ the platform installs it automatically.
+    implementation(libs.androidx.profileinstaller)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.usb.serial.android)
     implementation(libs.androidx.work.runtime.ktx)
@@ -297,4 +301,8 @@ dependencies {
     testImplementation(libs.compose.multiplatform.ui.test)
     testImplementation(libs.androidx.test.ext.junit)
     testImplementation(libs.androidx.glance.appwidget)
+
+    // Producer of the baseline profile consumed by the release build. The androidx.baselineprofile
+    // plugin merges the generated rules into src/<variant>/generated/baselineProfiles at build time.
+    baselineProfile(projects.baselineProfile)
 }
