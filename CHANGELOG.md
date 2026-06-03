@@ -9,9 +9,9 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
-* fix(map): apply kotlinx-serialization compiler plugin to androidApp (#5726) by James Rich (@jamesarich) in [`0e4f12ec0`](https://github.com/meshtastic/Meshtastic-Android/commit/0e4f12ec0dbf2d303d09574698e3ef3c73341cf6)
+* fix(map): keep compass icon visible while following bearing (#5728) by James Rich (@jamesarich) in [`9bf188c9f`](https://github.com/meshtastic/Meshtastic-Android/commit/9bf188c9f4e03fa64cf88dd3d1937d2c2b05f3c0)
 
-### Open Beta (v2.7.14-open.21)
+### Open Beta (v2.7.14-open.22)
 Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.13):
 
 #### 🏗️ Features
@@ -243,6 +243,7 @@ Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/relea
 * fix(map): eliminate cluster-renderer FATAL and harden black-map paths by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5715
 * fix(map): revert app-side Maps SDK init to library-idiomatic, fix inline-map crash by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5719
 * fix(map): render cluster markers in-scope to kill ClusterRenderer FATAL by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5723
+* fix(map): apply kotlinx-serialization compiler plugin to androidApp by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5726
 #### 📝 Other Changes
 * refactor(ui): compose resources, domain layer by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/4628
 * Add per-message transport method icons for new message format by @Kealper in https://github.com/meshtastic/Meshtastic-Android/pull/4643
