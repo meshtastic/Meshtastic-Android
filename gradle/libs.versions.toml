@@ -36,7 +36,7 @@ turbine = "1.2.1"
 compose-screenshot = "0.0.1-alpha15"
 
 # Compose Multiplatform
-compose-multiplatform = "1.11.0"
+compose-multiplatform = "1.11.1"
 compose-multiplatform-material3 = "1.11.0-alpha07"
 # `androidx-compose-bom-aligned` tracks androidx.compose.{runtime,ui,foundation,animation}
 # artifacts that ship in lockstep with CMP. Kept as a separate version ref so Renovate
@@ -281,7 +281,7 @@ test-retry-gradlePlugin = { module = "org.gradle:test-retry-gradle-plugin", vers
 aboutlibraries-gradlePlugin = { module = "com.mikepenz.aboutlibraries.plugin:aboutlibraries-plugin", version.ref = "aboutlibraries" }
 
 jmdns = { module = "org.jmdns:jmdns", version.ref = "jmdns" }
-jna = { module = "net.java.dev.jna:jna", version = "5.18.1" }
+jna = { module = "net.java.dev.jna:jna", version = "5.19.0" }
 
 # TAK
 takpacket-sdk-kmp = { module = "org.meshtastic:takpacket-sdk", version.ref = "takpacket-sdk" }

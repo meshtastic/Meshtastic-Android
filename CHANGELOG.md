@@ -9,10 +9,9 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
-* chore(agents): prune governance cruft and add Claude token guards (#5706) by James Rich (@jamesarich) in [`813acee71`](https://github.com/meshtastic/Meshtastic-Android/commit/813acee71604686dc4c98b43cf692fe4586cb5c5)
-* fix(map): scope cluster-renderer ViewTreeLifecycleOwner to map host view (#5708) by James Rich (@jamesarich) in [`1b661739e`](https://github.com/meshtastic/Meshtastic-Android/commit/1b661739e346f6d64ff06731ee2ac0bc80501d19)
+* fix(map): apply kotlinx-serialization compiler plugin to androidApp (#5726) by James Rich (@jamesarich) in [`0e4f12ec0`](https://github.com/meshtastic/Meshtastic-Android/commit/0e4f12ec0dbf2d303d09574698e3ef3c73341cf6)
 
-### Open Beta (v2.7.14-open.18)
+### Open Beta (v2.7.14-open.21)
 Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.13):
 
 #### 🏗️ Features
@@ -239,6 +238,11 @@ Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/relea
 * fix(firmware): surface error state when BLE OTA connection attempts are exhausted by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5700
 * fix(map): replace MarkerComposable with Canvas-rendered bitmaps by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5702
 * fix(map): remove manual ViewTree lifecycle owner workarounds by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5704
+* fix(map): scope cluster-renderer ViewTreeLifecycleOwner to map host view by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5708
+* fix(map): initialize Maps SDK before building marker bitmap descriptors by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5709
+* fix(map): eliminate cluster-renderer FATAL and harden black-map paths by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5715
+* fix(map): revert app-side Maps SDK init to library-idiomatic, fix inline-map crash by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5719
+* fix(map): render cluster markers in-scope to kill ClusterRenderer FATAL by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5723
 #### 📝 Other Changes
 * refactor(ui): compose resources, domain layer by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/4628
 * Add per-message transport method icons for new message format by @Kealper in https://github.com/meshtastic/Meshtastic-Android/pull/4643

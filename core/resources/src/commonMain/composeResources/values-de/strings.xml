@@ -559,7 +559,7 @@
     <string name="history_return_max">Verlauf Rückgabewert maximal</string>
     <string name="history_return_window">Zeitraum Rückgabewert</string>
     <string name="hop_limit">Anzahl der Weiterleitungen</string>
-    <string name="hops_away">Zwischenschritte entfernt</string>
+    <string name="hops_away">Sprünge entfernt</string>
     <string name="host">Host</string>
     <string name="host_metrics_log">Host Kennzahlen</string>
     <string name="humidity">Feuchtigkeit</string>
@@ -843,7 +843,7 @@
     <string name="node_layout_help_signal_good">Das Signal ist stark, das Signal-Rauschverhältnis ist über −7 dB und die Signalstärke ist über −115 dBm.</string>
     <string name="node_layout_help_signal_indicator">Kombiniert SNR und RSSI zu einem Qualitätsniveau, das als farbiges Symbol mit einer Beschreibung angezeigt wird.</string>
     <string name="node_layout_help_signal_none">Kein nutzbares Signal erkannt. Unterhalb aller Qualitätsgrenzen.</string>
-    <string name="node_layout_hops_away">Hops Entfernt</string>
+    <string name="node_layout_hops_away">Sprünge entfernt</string>
     <string name="node_layout_last_heard_time">Zuletzt gesehen</string>
     <string name="node_layout_log_icons">Umweltdaten</string>
     <string name="node_layout_no_preview_available">Keine Knoten für die Vorschau vorhanden.</string>
@@ -862,7 +862,7 @@
     <string name="node_sort_button">Sortieroptionen</string>
     <string name="node_sort_channel">Kanal</string>
     <string name="node_sort_distance">Entfernung</string>
-    <string name="node_sort_hops_away">Zwischenschritte entfernt</string>
+    <string name="node_sort_hops_away">Sprünge entfernt</string>
     <string name="node_sort_last_heard">Zuletzt gehört</string>
     <string name="node_sort_title">Sortieren nach</string>
     <string name="node_sort_via_favorite">über Favorit</string>

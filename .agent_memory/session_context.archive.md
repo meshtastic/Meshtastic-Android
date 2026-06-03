@@ -2,6 +2,13 @@
 # Older handover entries rotated out of session_context.md. Not read by default.
 # Consult only if you need historical detail on a specific past change.
 
+## 2026-05-21 — Fixed Chirpy Assistant invalid model name and enhanced failure fallback suggestions
+- Fixed a 404/Unknown inference error by updating `GeminiNanoDocAssistant.kt`'s `MODEL_NAME` from `"gemini-3.1-flash-lite"` to the correct Firebase AI Logic preview name `"gemini-3.1-flash-lite-preview"`.
+- Overhauled multi-turn hybrid chat seeding: eliminated the redundant background `chat.sendMessage` call on the first turn; if the first turn is answered on-device, the session caches the Q&A locally and seeds the subsequent cloud-chat session via `startChat(history = ...)`.
+- Expanded the hybrid model's `looksLikeNoAnswer` heuristics to better detect on-device failure and fall back to the grounded cloud model.
+- Programmed a smart UI fallback: on inference error (offline, rate limit, model not found), Chirpy displays local keyword search results as recommended page chips.
+- Verified 100% compliance with Spotless, Detekt, and unit tests (`:feature:docs:allTests` and `:androidApp:testGoogleDebugUnitTest`).
+
 ## 2026-05-20 — Decoupled and Isolated Flatpak manifest generation logic to build-logic/flatpak
 - Isolated the optimized `GenerateFlatpakSourcesTask` from monolithic `build-logic/convention` into its own specialized, lightweight `:flatpak` subproject under `build-logic`.
 - Created `:flatpak` configuration and registered the formal plugin ID `"meshtastic.flatpak"` implemented by `FlatpakConventionPlugin` inside the default package namespace.
