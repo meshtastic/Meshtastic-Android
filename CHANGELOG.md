@@ -12,6 +12,7 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 * chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5718) by James Rich (@jamesarich) in [`e50ab28d1`](https://github.com/meshtastic/Meshtastic-Android/commit/e50ab28d122535db71060f7972e6b9efcb8f26a4)
 * chore(deps): update com.github.luben:zstd-jni to v1.5.7-10 (#5721) by renovate[bot] (@renovate[bot]) in [`7efbc699d`](https://github.com/meshtastic/Meshtastic-Android/commit/7efbc699da7889b59ca34d6e2a58a8ae6b3c490c)
 * fix(map): revert app-side Maps SDK init to library-idiomatic, fix inline-map crash (#5719) by James Rich (@jamesarich) in [`9629daa51`](https://github.com/meshtastic/Meshtastic-Android/commit/9629daa5136496f721a86b5520b35de1c4b4dfc2)
+* fix(map): render cluster markers in-scope to kill ClusterRenderer FATAL (#5723) by James Rich (@jamesarich) in [`e3e09452d`](https://github.com/meshtastic/Meshtastic-Android/commit/e3e09452ddbfaba3f67b8df18394afb681569307)
 
 ### Open Beta (v2.7.14-open.20)
 Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.13):
