@@ -7,22 +7,14 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 <!-- UNRELEASED_START -->
 ## [Unreleased]
 
-### Unreleased (not yet in any build)
+*No changes yet.*
+<!-- UNRELEASED_END -->
 
-* refactor(node): migrate to non-deprecated Vico chart APIs (#5737) by James Rich (@jamesarich) in [`d86c62759`](https://github.com/meshtastic/Meshtastic-Android/commit/d86c627598bfe34e93cb09524334b804020f0b7e)
+<!-- RELEASED_START -->
 
-### Internal (v2.7.14-internal.122)
-Changes since [`v2.7.14-open.23`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14-open.23):
+## [2.7.14] - 2026-06-03
 
-* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5732) by James Rich (@jamesarich) in [`c25033aee`](https://github.com/meshtastic/Meshtastic-Android/commit/c25033aeee4684da74e0c8f5ba19b3520e7ceac8)
-* chore(deps): update androidx.core:core-ktx to v1.19.0 (#5731) by renovate[bot] (@renovate[bot]) in [`3c2b6a58d`](https://github.com/meshtastic/Meshtastic-Android/commit/3c2b6a58de3758166ee90b4ff0ed280010c07340)
-* chore(deps): update room to v3.0.0-alpha06 (#5730) by renovate[bot] (@renovate[bot]) in [`304a11ca5`](https://github.com/meshtastic/Meshtastic-Android/commit/304a11ca5dd6bcc0a32c1c44f28cbb2028d31397)
-* build: migrate KMP Android DSL from androidLibrary {} to android {} (#5734) by James Rich (@jamesarich) in [`ea872f36d`](https://github.com/meshtastic/Meshtastic-Android/commit/ea872f36d0923a1bf0cea8c4a04855cc1e488293)
-
-### Open Beta (v2.7.14-open.23)
-Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.13):
-
-#### 🏗️ Features
+### 🏗️ Features
 * refactor(ble): Centralize BLE logic into a core module by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/4550
 * feat(ble): Add support for `FromRadioSync` characteristic by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/4609
 * feat(widget): Add Local Stats glance widget by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/4642
@@ -112,9 +104,9 @@ Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/relea
 * feat(ai): upgrade Chirpy on-device AI with proper APIs, download UX, and streaming by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5579
 * feat: replace LoRa bandwidth text input with constrained dropdown by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5687
 * feat: Save unsent chat message as draft by @Copilot in https://github.com/meshtastic/Meshtastic-Android/pull/5686
-#### 🖥️ Desktop
+### 🖥️ Desktop
 * fix(desktop): keep Vico package to prevent bytecode verification errors by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5424
-#### 🛠️ Fixes
+### 🛠️ Fixes
 * fix(strings): replace plurals by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/4596
 * fix: replace fdroid map_style_selection string by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/4598
 * refactor(test): Introduce MeshTestApplication for robust testing by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/4602
@@ -253,7 +245,7 @@ Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/relea
 * fix(map): render cluster markers in-scope to kill ClusterRenderer FATAL by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5723
 * fix(map): apply kotlinx-serialization compiler plugin to androidApp by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5726
 * fix(map): keep compass icon visible while following bearing by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5728
-#### 📝 Other Changes
+### 📝 Other Changes
 * refactor(ui): compose resources, domain layer by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/4628
 * Add per-message transport method icons for new message format by @Kealper in https://github.com/meshtastic/Meshtastic-Android/pull/4643
 * build: apply instrumented test dependencies conditionally by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/4698
@@ -297,7 +289,5 @@ Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/relea
 * @riddlemd made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/5265
 * @elagin made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/5284
 * @somenice made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/5325
-<!-- UNRELEASED_END -->
 
-<!-- RELEASED_START -->
 <!-- RELEASED_END -->
