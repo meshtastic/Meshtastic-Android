@@ -251,7 +251,7 @@ dependencies {
     implementation(libs.coil.network.ktor3)
     implementation(libs.coil.svg)
     implementation(libs.androidx.core.splashscreen)
-    // Installs the baseline profile produced by :baselineProfile at app startup (API < 31)
+    // Installs the baseline profile produced by :baselineprofile at app startup (API < 31)
     // and lets ART honor it on first launch. On API 31+ the platform installs it automatically.
     implementation(libs.androidx.profileinstaller)
     implementation(libs.kotlinx.serialization.json)
@@ -304,5 +304,5 @@ dependencies {
 
     // Producer of the baseline profile consumed by the release build. The androidx.baselineprofile
     // plugin merges the generated rules into src/<variant>/generated/baselineProfiles at build time.
-    baselineProfile(projects.baselineProfile)
+    baselineProfile(projects.baselineprofile)
 }

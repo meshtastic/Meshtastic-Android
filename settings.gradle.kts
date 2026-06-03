@@ -133,5 +133,5 @@ include(
     ":core:barcode",
     ":feature:widget",
     ":screenshot-tests",
-    ":baselineProfile",
+    ":baselineprofile",
 )

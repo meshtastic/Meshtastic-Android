@@ -1,4 +1,4 @@
-# `:baselineProfile`
+# `:baselineprofile`
 
 Generates a [Baseline Profile](https://developer.android.com/topic/performance/baselineprofiles/overview)
 for `:androidApp` — AOT-compiling the cold-start and first-frame code paths so ART doesn't pay the
