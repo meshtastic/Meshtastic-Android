@@ -107,7 +107,7 @@ fun MainAppBar(
     )
 }
 
-/** Reads [LocalEventBranding] to show event artwork (with tap → snackbar), or the default Meshtastic logo. */
+/** Reads [LocalEventBranding] to show event artwork (with tap → snackbar), or the default KV logo. */
 @Composable
 private fun EventAwareBranding() {
     val eventEdition = LocalEventBranding.current

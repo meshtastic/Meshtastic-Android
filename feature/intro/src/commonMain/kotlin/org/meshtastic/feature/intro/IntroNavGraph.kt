@@ -20,87 +20,20 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 
-/** Navigation graph for the application introduction / onboarding flow. */
-@Suppress("LongMethod")
+/**
+ * Navigation graph for the application onboarding flow.
+ *
+ * The flow has been reduced to a single screen that lists every runtime permission the app needs. The [backStack] and
+ * [viewModel] parameters are retained for call-site compatibility but are no longer used now that the multi-step intro
+ * has been removed.
+ */
 internal fun EntryProviderScope<NavKey>.introGraph(
     backStack: NavBackStack<NavKey>,
     viewModel: IntroViewModel,
     onDone: () -> Unit,
 ) {
-    fun navigateToNext(current: NavKey, permissionsGranted: Boolean = true) {
-        val next = viewModel.getNextKey(current, permissionsGranted)
-        if (next != null) {
-            backStack.add(next)
-        } else {
-            onDone()
-        }
-    }
-
-    entry<Welcome> { WelcomeScreen(onGetStarted = { navigateToNext(Welcome) }) }
-
-    entry<Bluetooth> {
+    entry<Welcome> {
         val permissions = LocalIntroPermissions.current
-        val settingsNavigator = LocalIntroSettingsNavigator.current
-        val isGranted = permissions.bluetooth.isGranted
-        BluetoothScreen(
-            showNextButton = isGranted,
-            onSkip = { navigateToNext(Bluetooth) },
-            onConfigure = {
-                if (isGranted) {
-                    navigateToNext(Bluetooth)
-                } else {
-                    permissions.bluetooth.launchRequest()
-                }
-            },
-            onOpenSettings = { settingsNavigator.openAppSettings() },
-        )
-    }
-
-    entry<Location> {
-        val permissions = LocalIntroPermissions.current
-        val settingsNavigator = LocalIntroSettingsNavigator.current
-        val isGranted = permissions.location.isGranted
-        LocationScreen(
-            showNextButton = isGranted,
-            onSkip = { navigateToNext(Location) },
-            onConfigure = {
-                if (isGranted) {
-                    navigateToNext(Location)
-                } else {
-                    permissions.location.launchRequest()
-                }
-            },
-            onOpenSettings = { settingsNavigator.openAppSettings() },
-        )
-    }
-
-    entry<Notifications> {
-        val permissions = LocalIntroPermissions.current
-        val settingsNavigator = LocalIntroSettingsNavigator.current
-        val notificationPermission = permissions.notification
-        val isGranted = notificationPermission?.isGranted ?: true
-        NotificationsScreen(
-            showNextButton = isGranted,
-            onSkip = onDone,
-            onConfigure = {
-                if (notificationPermission != null && !isGranted) {
-                    notificationPermission.launchRequest()
-                } else {
-                    navigateToNext(Notifications, permissionsGranted = isGranted)
-                }
-            },
-            onOpenSettings = { settingsNavigator.openAppSettings() },
-        )
-    }
-
-    entry<CriticalAlerts> {
-        val settingsNavigator = LocalIntroSettingsNavigator.current
-        CriticalAlertsScreen(
-            onSkip = onDone,
-            onConfigure = {
-                settingsNavigator.openCriticalAlertsSettings()
-                onDone()
-            },
-        )
+        PermissionsScreen(permissions = permissions, onContinue = onDone)
     }
 }

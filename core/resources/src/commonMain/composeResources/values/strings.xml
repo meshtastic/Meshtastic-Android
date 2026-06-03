@@ -960,7 +960,17 @@
     <string name="paxcounter_config">Paxcounter Config</string>
     <string name="paxcounter_enabled">Paxcounter enabled</string>
     <string name="periodic_position_broadcast">Periodic position broadcast</string>
+    <string name="permission_bluetooth_summary">Find and connect to nearby mesh devices.</string>
+    <string name="permission_bluetooth_title">Bluetooth</string>
+    <string name="permission_grant">Grant</string>
+    <string name="permission_granted">Granted</string>
+    <string name="permission_location_summary">Show device and node positions on the map.</string>
+    <string name="permission_location_title">Location</string>
     <string name="permission_missing_31">KV Field Console needs "Nearby devices" permissions enabled to find and connect to devices via Bluetooth. You can disable when not in use.</string>
+    <string name="permission_notifications_summary">Get alerts for new messages and device events.</string>
+    <string name="permission_notifications_title">Notifications</string>
+    <string name="permissions_subtitle">KV Field Console needs these permissions to connect to and manage your mesh devices. You can change them anytime in your system settings.</string>
+    <string name="permissions_title">Permissions</string>
     <string name="phone_location">Phone Location</string>
     <string name="phone_location_description">KV Field Console uses your phone's location to enable a number of features. You can update your location permissions at any time from settings.</string>
     <string name="play">Play</string>

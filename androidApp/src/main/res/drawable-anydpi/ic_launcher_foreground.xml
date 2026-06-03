@@ -1,4 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
-    android:src="@drawable/krath_veil"
-    android:gravity="center" />
+<!--
+    Adaptive-icon foreground. The Krath Veil logo is inset so it sits inside the adaptive-icon
+    "safe zone" (the centre ~66dp of the 108dp canvas); otherwise the launcher mask clips it.
+    The surrounding margin reveals ic_launcher_background, which is the same near-black, so the
+    inset is seamless.
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:left="22dp"
+        android:top="22dp"
+        android:right="22dp"
+        android:bottom="22dp"
+        android:drawable="@drawable/krath_veil" />
+</layer-list>

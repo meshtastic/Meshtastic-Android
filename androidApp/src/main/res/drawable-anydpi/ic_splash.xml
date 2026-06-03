@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Android 12+ splash icon. The system masks windowSplashScreenAnimatedIcon to a circle:
+    the icon canvas is ~288dp but only the centre ~192dp circle is the "safe zone". The Krath
+    Veil logo is inset so it sits inside that circle; otherwise the splash mask clips its corners.
+    The surrounding margin reveals the near-black background (#0B0B0D), so the inset is seamless.
+-->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item>
         <shape android:shape="rectangle">
@@ -6,6 +12,10 @@
         </shape>
     </item>
     <item
+        android:left="56dp"
+        android:top="56dp"
+        android:right="56dp"
+        android:bottom="56dp"
         android:gravity="center"
         android:drawable="@drawable/krath_veil" />
 </layer-list>
