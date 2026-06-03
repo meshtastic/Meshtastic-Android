@@ -51,7 +51,7 @@
     <string name="add_layer">Ebene hinzufügen</string>
     <string name="add_local_mbtiles_file">Lokale MB Kacheldatei hinzufügen</string>
     <string name="add_network_device">Hinzufügen</string>
-    <string name="add_network_device_manually">Gerät manuell hinzufügen.</string>
+    <string name="add_network_device_manually">Gerät manuell hinzufügen…</string>
     <string name="add_network_layer">Netzwerkebene hinzufügen</string>
     <string name="address">Adresse</string>
     <string name="admin_key">Administrativer Schlüssel</string>
@@ -354,7 +354,7 @@
     <string name="doc_keywords_telemetry">Telemetrie,Sensor,Temperatur,Luftfeuchtigkeit,Druck, Energie</string>
     <string name="doc_keywords_translate">Übersetzen,Crowdin,Lokalisierung,Sprache,i18n,Mitmachen</string>
     <string name="doc_keywords_units">Einheiten, Sprache, Metrische, Imperiale, Temperatur, Distanz</string>
-    <string name="doc_search_placeholder">Dokumentation durchsuchen</string>
+    <string name="doc_search_placeholder">Dokumentation durchsuchen…</string>
     <string name="doc_section_developer">Entwicklerhandbuch</string>
     <string name="doc_section_user">Benutzerhandbuch</string>
     <string name="doc_title_connections">Verbindungen</string>
@@ -631,11 +631,11 @@
     <string name="licensed_amateur_radio_text">Das Aktivieren dieser Option deaktiviert die Verschlüsselung und ist nicht mit dem Standardnetzwerk von Meshtastic kompatibel.</string>
     <!-- LOAD -->
     <string name="load">Last</string>
-    <string name="load_15_min">Last 15 Min.</string>
+    <string name="load_15_min">Last 15 Min</string>
     <string name="load_15_min_description">Durchschnittliche Systemlast von 15 Minuten</string>
-    <string name="load_1_min">Last 1 Min.</string>
+    <string name="load_1_min">Last 1 Min</string>
     <string name="load_1_min_description">Durchschnittliche Systemlast von 1 Minute</string>
-    <string name="load_5_min">Last 5 Min.</string>
+    <string name="load_5_min">Last 5 Min</string>
     <string name="load_5_min_description">Durchschnittliche Systemlast von 5 Minuten</string>
     <string name="load_indexed">Last %1$d</string>
     <string name="loading">Wird geladen</string>
@@ -767,11 +767,11 @@
     <string name="mqtt_probe_timeout">Zeitüberschreitung nach %1$d ms</string>
     <string name="mqtt_probe_tls_failure">TLS Aushandlung fehlgeschlagen: %1$s</string>
     <string name="mqtt_status_connected">Verbunden</string>
-    <string name="mqtt_status_connecting">Wird verbunden</string>
+    <string name="mqtt_status_connecting">Wird verbunden…</string>
     <string name="mqtt_status_disconnected">Verbindung getrennt</string>
     <string name="mqtt_status_disconnected_with_reason">Verbindung getrennt - %1$s</string>
     <string name="mqtt_status_inactive">Inaktiv</string>
-    <string name="mqtt_status_reconnecting">Erneut verbinden</string>
+    <string name="mqtt_status_reconnecting">Erneut verbinden…</string>
     <string name="mqtt_status_reconnecting_with_attempt">Erneut verbinden (Versuch %1$d) - %2$s</string>
     <string name="mqtt_test_connection">Verbindung testen</string>
     <string name="must_set_region">Sie müssen eine Region festlegen!</string>
@@ -804,7 +804,7 @@
     <string name="next">Weiter</string>
     <string name="nfc_disabled">NFC ist deaktiviert. Bitte aktivieren Sie es in den Systemeinstellungen.</string>
     <!-- NO -->
-    <string name="no_bluetooth_devices_hint">Stelle sicher, daß Du in der Reichweite des Gerätes bist.</string>
+    <string name="no_bluetooth_devices_hint">Stelle sicher, dass Du in der Reichweite des Gerätes bist.</string>
     <string name="no_bluetooth_devices_seen">Keine Bluetoothgeräte gefunden</string>
     <string name="no_custom_tile_sources_found">Keine eigenen Kachelquellen gefunden.</string>
     <string name="no_device_selected">Kein Gerät ausgewählt</string>
@@ -813,7 +813,7 @@
     <string name="no_local_stats">Keine Statistiken verfügbar</string>
     <string name="no_map_layers_loaded">Keine Kartenebenen geladen.</string>
     <string name="no_network_devices_found">Keine Netzwerkgeräte gefunden</string>
-    <string name="no_network_devices_hint">Stelle sicher, daß Du im selben Netzwerk bist wie das Gerät.</string>
+    <string name="no_network_devices_hint">Stelle sicher, dass Du im selben Netzwerk bist wie das Gerät.</string>
     <string name="no_network_devices_seen">Kein Netzwerkgerät gefunden</string>
     <string name="no_pax_metrics_logs">Keine Daten für den Besucherzähler verfügbar.</string>
     <string name="no_usb_devices_found">Kein USB-Gerät gefunden.</string>
@@ -902,7 +902,7 @@
     <string name="one_hour_short">1 Stunde</string>
     <string name="one_month">1 Monat</string>
     <string name="one_week">1 Woche</string>
-    <string name="one_wire_temperature">1-Wire Temperature</string>
+    <string name="one_wire_temperature">1-Draht Temperatur</string>
     <string name="only_favorites">Nur Favoriten</string>
     <string name="open_compass">Kompass öffnen</string>
     <string name="open_settings">Einstellungen öffnen</string>
@@ -931,7 +931,7 @@
     <string name="pax_total_format">Besucher: %1$d</string>
     <string name="pax_total_marker">Besucher: %1$s</string>
     <string name="pax_wifi_format">W:%1$d</string>
-    <string name="pax_wifi_marker">WLAN: %1$s</string>
+    <string name="pax_wifi_marker">Wlan: %1$s</string>
     <string name="paxcounter">Besucherzähler</string>
     <string name="paxcounter_config">Einstellung Besucherzähler</string>
     <string name="paxcounter_enabled">Besucherzähler aktiviert</string>
@@ -1226,7 +1226,7 @@
     <string name="tak_role">Mitgliedsrolle</string>
     <string name="tak_role_forwardobserver">Aufklärer</string>
     <string name="tak_role_hq">Hauptquartier</string>
-    <string name="tak_role_k9">Hundeführer</string>
+    <string name="tak_role_k9">Hundeführer (K9)</string>
     <string name="tak_role_medic">Sanitäter</string>
     <string name="tak_role_rto">Funker</string>
     <string name="tak_role_sniper">Scharfschütze</string>
@@ -1401,7 +1401,7 @@
     <string name="wifi_provision_scan_failed">Suche nach WLAN Netzwerken fehlgeschlagen: %1$s</string>
     <string name="wifi_provision_scan_networks">Suche nach Netzwerken</string>
     <string name="wifi_provision_scanning_ble">Gerät wird gesucht...</string>
-    <string name="wifi_provision_scanning_wifi">Suche...</string>
+    <string name="wifi_provision_scanning_wifi">Scanne…</string>
     <string name="wifi_provision_sending_credentials">WLAN Konfiguration wird angewendet...</string>
     <string name="wifi_provision_signal_strength">%1$d%</string>
     <string name="wifi_provision_ssid_label">Netzwerkname (SSID)</string>
