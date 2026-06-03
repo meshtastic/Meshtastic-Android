@@ -48,7 +48,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
-import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
+import com.patrykandpatrick.vico.compose.cartesian.data.lineModel
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -211,7 +211,7 @@ private fun PowerMetricsChart(
         LaunchedEffect(selectedChannel, currentData, voltageData) {
             modelProducer.runTransaction {
                 if (currentData.isNotEmpty()) {
-                    lineSeries {
+                    lineModel {
                         series(
                             x = currentData.map { it.time },
                             y = currentData.map { retrieveCurrent(selectedChannel, it) },
@@ -219,7 +219,7 @@ private fun PowerMetricsChart(
                     }
                 }
                 if (voltageData.isNotEmpty()) {
-                    lineSeries {
+                    lineModel {
                         series(
                             x = voltageData.map { it.time },
                             y = voltageData.map { retrieveVoltage(selectedChannel, it) },
