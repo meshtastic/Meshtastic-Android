@@ -19,5 +19,8 @@ package org.meshtastic.app.di
 import org.koin.core.annotation.Module
 import org.meshtastic.app.map.prefs.di.GoogleMapsKoinModule
 
-@Module(includes = [GoogleNetworkModule::class, GoogleMapsKoinModule::class, GoogleAiModule::class])
+@Module(
+    includes =
+    [GoogleNetworkModule::class, GoogleMapsKoinModule::class, GoogleAiModule::class, AppFunctionsModule::class],
+)
 class FlavorModule

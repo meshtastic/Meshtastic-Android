@@ -296,9 +296,53 @@ interface TakPrefs {
     fun setTakServerEnabled(enabled: Boolean)
 }
 
+/** Reactive interface for App Functions (system AI integration) preferences. */
+interface AppFunctionsPrefs {
+    val masterEnabled: StateFlow<Boolean>
+
+    fun setMasterEnabled(enabled: Boolean)
+
+    val sendMessageEnabled: StateFlow<Boolean>
+
+    fun setSendMessageEnabled(enabled: Boolean)
+
+    val getMeshStatusEnabled: StateFlow<Boolean>
+
+    fun setGetMeshStatusEnabled(enabled: Boolean)
+
+    val getNodeListEnabled: StateFlow<Boolean>
+
+    fun setGetNodeListEnabled(enabled: Boolean)
+
+    val getChannelInfoEnabled: StateFlow<Boolean>
+
+    fun setGetChannelInfoEnabled(enabled: Boolean)
+
+    val getDeviceStatusEnabled: StateFlow<Boolean>
+
+    fun setGetDeviceStatusEnabled(enabled: Boolean)
+
+    val getNodeDetailsEnabled: StateFlow<Boolean>
+
+    fun setGetNodeDetailsEnabled(enabled: Boolean)
+
+    val getMeshMetricsEnabled: StateFlow<Boolean>
+
+    fun setGetMeshMetricsEnabled(enabled: Boolean)
+
+    val getRecentMessagesEnabled: StateFlow<Boolean>
+
+    fun setGetRecentMessagesEnabled(enabled: Boolean)
+
+    val getUnreadSummaryEnabled: StateFlow<Boolean>
+
+    fun setGetUnreadSummaryEnabled(enabled: Boolean)
+}
+
 /** Consolidated interface for all application preferences. */
 interface AppPreferences {
     val analytics: AnalyticsPrefs
+    val appFunctions: AppFunctionsPrefs
     val homoglyph: HomoglyphPrefs
     val filter: FilterPrefs
     val meshLog: MeshLogPrefs
