@@ -68,6 +68,22 @@ analytics_notice
 analytics_okay
 analytics_platforms
 any
+### APP ###
+app_functions_get_channel_info
+app_functions_get_device_status
+app_functions_get_mesh_metrics
+app_functions_get_mesh_status
+app_functions_get_node_details
+app_functions_get_node_list
+app_functions_get_recent_messages
+app_functions_get_unread_summary
+app_functions_master_summary
+app_functions_master_toggle
+app_functions_read_section
+app_functions_send_message
+app_functions_settings
+app_functions_settings_summary
+app_functions_write_section
 app_notifications
 app_settings
 app_too_old
