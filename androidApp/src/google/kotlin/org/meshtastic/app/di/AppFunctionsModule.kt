@@ -16,13 +16,30 @@
  */
 package org.meshtastic.app.di
 
+import android.content.Context
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.app.ai.appfunctions.AppFunctionStateSync
+import org.meshtastic.app.ai.appfunctions.MeshtasticAppFunctions
+import org.meshtastic.core.data.ai.AiFunctionProvider
+import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.repository.AppFunctionsPrefs
 
-@Module(includes = [FDroidNetworkModule::class, FdroidAiModule::class])
-class FlavorModule {
+/** Provides AppFunctions integration for the Google flavor. */
+@Module
+class AppFunctionsModule {
+    @Single
+    fun meshtasticAppFunctions(provider: AiFunctionProvider): MeshtasticAppFunctions = MeshtasticAppFunctions(provider)
+
+    @Single(createdAtStart = true)
+    fun appFunctionStateSync(
+        context: Context,
+        prefs: AppFunctionsPrefs,
+        dispatchers: CoroutineDispatchers,
+    ): AppFunctionStateSync = AppFunctionStateSync(context, prefs, dispatchers)
+
     @Single
     @Named("googleServicesAvailable")
-    fun googleServicesAvailable(): Boolean = false
+    fun googleServicesAvailable(): Boolean = true
 }
