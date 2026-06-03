@@ -9,9 +9,11 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
-* fix(map): keep compass icon visible while following bearing (#5728) by James Rich (@jamesarich) in [`9bf188c9f`](https://github.com/meshtastic/Meshtastic-Android/commit/9bf188c9f4e03fa64cf88dd3d1937d2c2b05f3c0)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5732) by James Rich (@jamesarich) in [`c25033aee`](https://github.com/meshtastic/Meshtastic-Android/commit/c25033aeee4684da74e0c8f5ba19b3520e7ceac8)
+* chore(deps): update androidx.core:core-ktx to v1.19.0 (#5731) by renovate[bot] (@renovate[bot]) in [`3c2b6a58d`](https://github.com/meshtastic/Meshtastic-Android/commit/3c2b6a58de3758166ee90b4ff0ed280010c07340)
+* chore(deps): update room to v3.0.0-alpha06 (#5730) by renovate[bot] (@renovate[bot]) in [`304a11ca5`](https://github.com/meshtastic/Meshtastic-Android/commit/304a11ca5dd6bcc0a32c1c44f28cbb2028d31397)
 
-### Open Beta (v2.7.14-open.22)
+### Open Beta (v2.7.14-open.23)
 Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.13):
 
 #### 🏗️ Features
@@ -244,6 +246,7 @@ Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/relea
 * fix(map): revert app-side Maps SDK init to library-idiomatic, fix inline-map crash by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5719
 * fix(map): render cluster markers in-scope to kill ClusterRenderer FATAL by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5723
 * fix(map): apply kotlinx-serialization compiler plugin to androidApp by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5726
+* fix(map): keep compass icon visible while following bearing by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5728
 #### 📝 Other Changes
 * refactor(ui): compose resources, domain layer by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/4628
 * Add per-message transport method icons for new message format by @Kealper in https://github.com/meshtastic/Meshtastic-Android/pull/4643
