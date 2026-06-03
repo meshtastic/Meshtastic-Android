@@ -23,6 +23,13 @@ import org.meshtastic.app.map.prefs.di.GoogleMapsKoinModule
 import org.meshtastic.feature.car.di.FeatureCarModule
 
 @Module(
-    includes = [GoogleNetworkModule::class, GoogleMapsKoinModule::class, GoogleAiModule::class, AppFunctionsModule::class, FeatureCarModule::class],
+    includes =
+    [
+        GoogleNetworkModule::class,
+        GoogleMapsKoinModule::class,
+        GoogleAiModule::class,
+        AppFunctionsModule::class,
+        FeatureCarModule::class,
+    ],
 )
 class FlavorModule
