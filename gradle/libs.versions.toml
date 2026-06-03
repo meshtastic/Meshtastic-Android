@@ -36,7 +36,7 @@ turbine = "1.2.1"
 compose-screenshot = "0.0.1-alpha15"
 
 # Compose Multiplatform
-compose-multiplatform = "1.11.0"
+compose-multiplatform = "1.11.1"
 compose-multiplatform-material3 = "1.11.0-alpha07"
 # `androidx-compose-bom-aligned` tracks androidx.compose.{runtime,ui,foundation,animation}
 # artifacts that ship in lockstep with CMP. Kept as a separate version ref so Renovate
@@ -81,18 +81,17 @@ markdownRenderer = "0.41.0"
 okio = "3.17.0"
 uri-kmp = "0.0.21"
 osmdroid-android = "6.1.20"
-spotless = "8.5.1"
+spotless = "8.6.0"
 wire = "6.4.0"
-vico = "3.2.0-next.5"
+vico = "3.2.1"
 kable = "0.43.0"
 mqttastic = "0.3.6"
 jmdns = "3.6.3"
 qrcode-kotlin = "4.5.0"
-takpacket-sdk = "0.2.6"
+takpacket-sdk = "0.5.1"
 
-# Gradle Enterprise & Toolchains Plugins
+# Gradle Plugins
 develocity = "4.4.2"
-custom-user-data = "2.6.0"
 foojay-resolver = "1.0.0"
 
 
@@ -165,7 +164,7 @@ jetbrains-compose-material3-adaptive-navigation-suite = { module = "org.jetbrain
 firebase-ai = { module = "com.google.firebase:firebase-ai" }
 firebase-ai-ondevice = { module = "com.google.firebase:firebase-ai-ondevice", version = "16.0.0-beta02" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
-firebase-bom = { module = "com.google.firebase:firebase-bom", version = "34.13.0" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version = "34.14.0" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 location-services = { module = "com.google.android.gms:play-services-location", version = "21.3.0" }
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
@@ -189,7 +188,7 @@ kotlin-gradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", ve
 dokka-gradlePlugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "dokka" }
 
 kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version = "0.4.0" }
-kotlinx-atomicfu = { module = "org.jetbrains.kotlinx:atomicfu", version = "0.32.1" }
+kotlinx-atomicfu = { module = "org.jetbrains.kotlinx:atomicfu", version = "0.33.0" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines-android" }
 kotlinx-coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines-android" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines-android" }
@@ -281,7 +280,7 @@ test-retry-gradlePlugin = { module = "org.gradle:test-retry-gradle-plugin", vers
 aboutlibraries-gradlePlugin = { module = "com.mikepenz.aboutlibraries.plugin:aboutlibraries-plugin", version.ref = "aboutlibraries" }
 
 jmdns = { module = "org.jmdns:jmdns", version.ref = "jmdns" }
-jna = { module = "net.java.dev.jna:jna", version = "5.18.1" }
+jna = { module = "net.java.dev.jna:jna", version = "5.19.0" }
 
 # TAK
 takpacket-sdk-kmp = { module = "org.meshtastic:takpacket-sdk", version.ref = "takpacket-sdk" }
@@ -325,7 +324,6 @@ spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 test-retry = { id = "org.gradle.test-retry", version.ref = "testRetry" }
 
 develocity = { id = "com.gradle.develocity", version.ref = "develocity" }
-custom-user-data = { id = "com.gradle.common-custom-user-data-gradle-plugin", version.ref = "custom-user-data" }
 foojay-resolver = { id = "org.gradle.toolchains.foojay-resolver", version.ref = "foojay-resolver" }
 
 # Meshtastic

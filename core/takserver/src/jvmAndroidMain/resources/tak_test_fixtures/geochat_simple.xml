@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <event version="2.0" uid="GeoChat.ANDROID-0000000000000002.All Chat Rooms.d4e5f6a7" type="b-t-f" how="h-g-i-g-o" time="2026-03-15T19:00:00Z" start="2026-03-15T19:00:00Z" stale="2026-03-15T19:01:00Z">
-  <point lat="12.00000" lon="90.00000" hae="-22" ce="9999999" le="9999999"/>
+  <point lat="33.1280" lon="-107.2530" hae="-22" ce="9999999" le="9999999"/>
   <detail>
     <__chat senderCallsign="TESTNODE-01" chatRoom="All Chat Rooms" id="All Chat Rooms" parent="RootContactGroup">
       <chatgrp uid0="ANDROID-0000000000000002" uid1="All Chat Rooms"/>

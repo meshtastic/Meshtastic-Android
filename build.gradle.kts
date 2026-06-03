@@ -40,7 +40,19 @@ plugins {
     alias(libs.plugins.test.retry) apply false
     alias(libs.plugins.meshtastic.root)
     id("meshtastic.docs")
-    id("meshtastic.flatpak-ops")
+}
+
+plugins.withId("org.meshtastic.flatpak.sources") {
+    extensions.configure<org.meshtastic.flatpak.sources.FlatpakSourcesExtension> {
+        outputFile.set(layout.buildDirectory.file("flatpak-sources.json"))
+        mustRunAfterTasks.set(listOf(":desktopApp:assemble", ":desktopApp:packageUberJarForCurrentOS"))
+        // Force-resolve platform-specific native artifacts not resolved on the generation host
+        targetPlatforms.set(setOf("linux-x64", "linux-arm64"))
+        platformDependencies.set(setOf(
+            "org.jetbrains.skiko:skiko-awt-runtime-{platform}:0.144.6",
+            "org.jetbrains.compose.desktop:desktop-jvm-{platform}:1.11.0",
+        ))
+    }
 }
 
 dependencies {

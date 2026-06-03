@@ -58,6 +58,11 @@ wire {
     sourcePath {
         srcDir("src/main/proto")
         srcDir("src/main/wire-includes")
+        // Upstream added packages/kmp/ with symlinks back to root protos.
+        // Without filtering, Wire follows the symlinks and loads duplicates.
+        include("meshtastic/**/*.proto")
+        include("nanopb.proto")
+        include("google/**/*.proto")
     }
     kotlin {
         // Wire 6 optimization: Avoid unnecessary immutable copies of repeated/map fields.
@@ -118,6 +123,12 @@ wire {
     prune("meshtastic.CotHow")
     prune("meshtastic.CotType")
     prune("meshtastic.GeoPointSource")
+    prune("meshtastic.TakTalkMessage")
+    prune("meshtastic.TakTalkRoomData")
+    // Marti is also shipped by the TAKPacket-SDK jar (org.meshtastic.proto.Marti),
+    // so it must be pruned here too or R8 fails with a duplicate-class error at
+    // release minify. (Team/MemberRole are NOT shipped by the SDK, so they stay.)
+    prune("meshtastic.Marti")
 }
 
 // Modern KMP publication uses the project name as the artifactId by default.

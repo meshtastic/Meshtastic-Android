@@ -1,9 +1,9 @@
 ---
-title: Map & Waypoints
-parent: User Guide
+title: 地圖與航點
+parent: 使用者指南
 nav_order: 6
 last_updated: 2026-05-13
-description: View node positions on the map, create and share waypoints, and manage position sharing and privacy.
+description: 在地圖上檢視節點位置、建立與分享航點，以及管理位置分享與隱私設定。
 aliases:
   - map
   - waypoints
@@ -11,107 +11,107 @@ aliases:
   - location
 ---
 
-# Map & Waypoints
+# 地圖與航點
 
-The Map screen shows the geographic positions of nodes on your mesh, along with shared waypoints.
+地圖畫面顯示 mesh 網路上各節點的地理位置，以及已分享的航點。
 
-## Map View
+## 地圖檢視
 
-The map displays:
+地圖顯示以下內容：
 
-- **Node positions** — colored markers for each node reporting location
-- **Waypoints** — shared points of interest
-- **Your position** — your current GPS location
+- 節點位置 — 每個回報位置的節點以彩色標記顯示
+- 航點 — 已分享的興趣點
+- 您的位置 — 您目前的 GPS 定位
 
-### Node Markers
+### 節點標記
 
-Node markers on the map indicate:
+地圖上的節點標記代表：
 
-| Color      | Meaning                                        |
-| ---------- | ---------------------------------------------- |
-| Green - 綠色 | Online (heard recently)     |
-| 黃色         | Away (heard within 2 hours) |
-| Gray       | Offline (stale position)    |
-| Blue - 藍色  | 你自己的節點                                         |
+| 顏色         | 含義            |
+| ---------- | ------------- |
+| Green - 綠色 | 線上（近期收到訊號）    |
+| 黃色         | 暫離（2 小時內收到訊號） |
+| 灰色         | 離線（位置資訊已過期）   |
+| Blue - 藍色  | 你自己的節點        |
 
 ### 地圖控制項
 
-- **Zoom** — pinch or use +/- buttons
-- **Pan** — drag to explore
-- **Center** — select the location button to center on your position
-- **Node tap** — tap a node marker to view details
+- 縮放 — 雙指縮放或使用 +/- 按鈕
+- 平移 — 拖曳以瀏覽地圖
+- 置中 — 點選位置按鈕，使地圖以您的位置為中心
+- 點選節點 — 點選節點標記以檢視詳細資訊
 
-The floating toolbar provides quick access to compass, layer switching, node filters, refresh, and location tracking. Tap the compass to reorient north-up, or tap the location button to center on your current position.
+浮動工具列提供快速存取羅盤、圖層切換、節點篩選、重新整理及位置追蹤等功能。 點選羅盤可重新對齊正北方向，或點選位置按鈕使地圖以您目前位置為中心。
 
 ![Map controls overlay](../../assets/screenshots/map_controls_overlay.png)
 
-## Waypoints
+## 航點
 
-Waypoints are shared geographic points of interest that all mesh members can see.
+航點是可分享的地理興趣點，mesh 網路上的所有成員均可看見。
 
-### Creating a Waypoint
+### 建立航點
 
-1. Long-press on the map at the desired location.
-2. Enter a name and optional description.
-3. Choose an icon/emoji for the waypoint.
-4. Tap **Send** to share with the mesh.
+1. 在地圖上的目標位置長按。
+2. 輸入名稱及選填的說明。
+3. 為航點選擇圖示或表情符號。
+4. 點選「傳送」以分享至 mesh 網路。
 
-### Waypoint Properties
+### 航點屬性
 
-| Property   | 描述說明                                                    |
-| ---------- | ------------------------------------------------------- |
-| 名稱         | Short identifier (max 30 characters) |
-| 描述說明       | Optional longer description                             |
-| Icon       | Visual marker emoji on the map                          |
-| 鎖定         | If locked, only the creator can edit or delete          |
-| Expiration | Optional auto-remove time                               |
+| 屬性   | 描述說明            |
+| ---- | --------------- |
+| 名稱   | 簡短名稱（最多 30 個字元） |
+| 描述說明 | 選填的較長說明         |
+| 圖示   | 地圖上的視覺標記表情符號    |
+| 鎖定   | 若已鎖定，僅建立者可編輯或刪除 |
+| 到期時間 | 選填的自動移除時間       |
 
-### Waypoint Expiration
+### 航點到期設定
 
-Waypoints can be set to expire automatically:
+航點可設定為自動到期：
 
-- **Never** (default) — waypoint remains until manually deleted
-- **Timed** — waypoint is automatically removed after the specified duration (e.g., "remove after 2 hours"). Useful for temporary markers like rally points, hazards, or meeting locations.
+- 永不到期（預設）— 航點將保留至手動刪除為止
+- 定時到期 — 航點將在指定時間後自動移除（例如：「2 小時後移除」）。 適用於臨時標記，例如集合點、危險區域或會面地點。
 
-Expired waypoints are automatically hidden from the map so they don't clutter the display. The expiration countdown begins when the waypoint is created, not when other nodes receive it.
+已到期的航點將自動從地圖上隱藏，以避免畫面雜亂。 到期倒數計時從航點建立時開始，而非從其他節點收到時起算。
 
-### Managing Waypoints
+### 管理航點
 
-- Tap a waypoint on the map to view its details and coordinates
-- Edit or delete waypoints you created
-- **Locked waypoints** cannot be modified or deleted by other nodes — only the original creator can change them
-- Unlocked waypoints can be edited by any mesh member
+- 點選地圖上的航點，可檢視其詳細資訊與座標
+- 編輯或刪除您建立的航點
+- 已鎖定的航點無法被其他節點修改或刪除 — 僅原始建立者可進行變更
+- 未鎖定的航點可由任何 mesh 成員編輯
 
-## Position Sharing
+## 位置分享
 
-### Enabling Position Sharing
+### 啟用位置分享
 
-Your node shares its GPS position based on:
+您的節點依據以下方式分享 GPS 位置：
 
-- **Fixed interval** — broadcast position at regular intervals
-- **Smart position** — broadcast when movement exceeds a threshold
-- **Manual** — only share when explicitly requested
+- 固定間隔 — 依固定時間間隔廣播位置
+- 智慧位置 — 移動距離超過閾值時才廣播位置
+- 手動 — 僅在明確要求時才分享位置
 
-Configure position behavior in **Settings → Position**.
+請在「設定 → 位置」中設定位置行為。
 
-### Privacy Considerations
+### 隱私注意事項
 
-> 🔒 **Privacy:** Position data is broadcast to all nodes on your channel. If you don't want your location shared, disable GPS position in settings or use a fixed/fake position.
+> 🔒 隱私：位置資料將廣播至您頻道上的所有節點。 若不想分享您的位置，請在設定中停用 GPS 定位，或使用固定／假位置。
 
-## Map Sources
+## 地圖來源
 
-The app supports multiple map tile sources:
+應用程式支援多種地圖圖磚來源：
 
-- OpenStreetMap (default)
-- Satellite imagery (where available)
-- Offline tiles (download map areas for offline use)
+- OpenStreetMap（預設）
+- 衛星影像（視可用性而定）
+- 離線圖磚（下載地圖區域以供離線使用）
 
-## Related Topics
+## 相關主題
 
-- [Nodes](nodes) — view and filter your node list
-- [Node Metrics](node-metrics) — signal quality and position history for individual nodes
-- [Discovery](discovery) — traceroute and neighbor info for understanding mesh topology
-- [Units & Locale](units-and-locale) — distance and coordinate display formats
+- 〔節點〕(nodes) — 檢視與篩選您的節點清單
+- 〔節點數據〕(node-metrics) — 各節點的訊號品質與位置歷史記錄
+- 〔探索〕(discovery) — 路由追蹤與鄰近節點資訊，用於了解 mesh 網路拓撲
+- 〔單位與地區設定〕(units-and-locale) — 距離與座標的顯示格式
 
 ---
 

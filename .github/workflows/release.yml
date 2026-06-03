@@ -286,6 +286,7 @@ jobs:
         with:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           cache_read_only: 'false'
+          install_jetbrains_jdk: 'true'
 
       - name: Install dependencies for AppImage
         if: runner.os == 'Linux'
@@ -369,9 +370,10 @@ jobs:
         with:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           cache_read_only: 'true'
+          install_jetbrains_jdk: 'true'
 
       # Uses an isolated Gradle user home so every artifact actually traverses the
-      # network — meshtastic.flatpak-ops captures URLs via BuildOperationListener and
+      # network — the flatpak-sources plugin captures URLs via BuildOperationListener and
       # only sees ExternalResourceReadBuildOperation events for cache misses. With the
       # shared cache, downloads would be skipped and the manifest would be (nearly) empty.
       # We drive packageUberJarForCurrentOS — the same task the in-flatpak build invokes —
@@ -381,11 +383,10 @@ jobs:
         run: >
           ./gradlew --no-build-cache --no-configuration-cache
           -Dgradle.user.home=${{ runner.temp }}/flatpak-gradle-home
-          -I gradle/init-scripts/flatpak-ops.init.gradle.kts
           :desktopApp:packageUberJarForCurrentOS :captureFlatpakSources
 
       - name: Stage manifest
-        run: cp build/flatpak-ops-sources.json flatpak-sources.json
+        run: cp build/flatpak-sources.json flatpak-sources.json
 
       - name: List Flatpak source files
         run: ls -l flatpak-sources.json

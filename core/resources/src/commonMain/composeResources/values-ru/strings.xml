@@ -21,6 +21,7 @@
     <string name="a11y_message_from">От %1$s: %2$s</string>
     <string name="a11y_node_battery">заряд батареи %1$d%%</string>
     <string name="a11y_node_favorite">избранный</string>
+    <string name="a11y_node_last_heard">последний раз услышан %1$s</string>
     <string name="a11y_node_offline">оффлайн</string>
     <string name="a11y_node_online">онлайн</string>
     <string name="a11y_node_role">роль %1$s</string>
@@ -148,6 +149,21 @@
     <!-- CHIRPY -->
     <string name="chirpy">Щебетун</string>
     <string name="chirpy_assistant_title">Весёлый помощник</string>
+    <string name="chirpy_checking">Проверка доступности Chirpy…</string>
+    <string name="chirpy_downloading">Chirpy загружается…</string>
+    <string name="chirpy_downloading_progress">Загрузка модели Chirpy: %1$d%%</string>
+    <string name="chirpy_downloading_subtitle">Это произошло только один раз. Chirpy скоро будет готов!</string>
+    <string name="chirpy_error_busy">Ух ё! Канал сейчас совершенно перегружен из-за сильного трафика! 📶 Давай подождём свободного промежутка и попробуем передать снова.</string>
+    <string name="chirpy_error_model_unavailable">Моя батарея заряжается или моя прошивка всё ещё загружается! 🔋 Дай мне немного времени, чтобы синхронизироваться и загрузиться!</string>
+    <string name="chirpy_error_token_budget_exceeded">Эта нагрузка слишком велика для моего бюджета передачи! 📱 Попробуй сократить сообщение, чтобы я мог передать его без проблем.</string>
+    <string name="chirpy_error_unknown">Упс! Произошла сильная потеря пакетов или помехи сигнала! 📡 Давай повторно отправим этот запрос и посмотрим, сможет ли он пройти.</string>
+    <string name="chirpy_error_unsupported_flavor">Я работаю на ограниченной частоте в этой версии приложения! 🔌 Попробуй использовать версию с полной интеграцией ИИ-ядра.</string>
+    <string name="chirpy_error_unsupported_platform">О нет! Похоже, моя антенна не может установить соединение на этой платформе. 📡 Пожалуйста, дважды проверь совместимость своего оборудования!</string>
+    <string name="chirpy_intro">Привет! 📡 Я Chirpy - твой помощник по Meshtastic на устройстве! Я могу помочь с настройкой, конфигурацией, устранением неполадок и советами по mesh-сетям. Чем я могу тебе помочь?</string>
+    <string name="chirpy_ready">Спроси Chirpy</string>
+    <string name="chirpy_search_placeholder">Спроси о Meshtastic…</string>
+    <string name="chirpy_suggested_pages_help">Вот несколько страниц документации, которые могут помочь:</string>
+    <string name="chirpy_thinking">Chirpy прокладывает маршрут через сеть… 📡</string>
     <string name="choose_contrast">Уровень контрастности</string>
     <string name="choose_theme">Выберите тему</string>
     <!-- CLEAN -->
@@ -836,9 +852,31 @@
     <string name="node_filter_title">Фильтр по</string>
     <string name="node_id">ID ноды</string>
     <string name="node_layout_channel">Канал</string>
+    <string name="node_layout_compact">Компактность</string>
+    <string name="node_layout_compact_fields_header">Компактные поля</string>
+    <string name="node_layout_complete">Полнота</string>
+    <string name="node_layout_complete_description">Полная схема отображает все доступные данные нод. Поля без данных автоматически скрываются.</string>
+    <string name="node_layout_device_role">Роль устройства</string>
+    <string name="node_layout_distance_and_bearing">Расстояние и азимут</string>
+    <string name="node_layout_help_signal_bad">Сигнал плохой. SNR выше −18 дБ, а RSSI выше −125 дБм.</string>
+    <string name="node_layout_help_signal_fair">Сигнал умеренный. SNR выше −12 дБ, а RSSI — выше −120 дБм.</string>
+    <string name="node_layout_help_signal_good">Сигнал сильный. SNR выше −7 дБ, а RSSI выше −115 дБм.</string>
+    <string name="node_layout_help_signal_indicator">Объединяет SNR и RSSI в уровень качества, отображаемый в виде цветного значка с описанием. Отображается только в полной компоновке.</string>
+    <string name="node_layout_help_signal_none">Не обнаружен пригодный сигнал. Ниже всех порогов качества.</string>
     <string name="node_layout_hops_away">Прыжков</string>
+    <string name="node_layout_last_heard_time">Время последнего вещания</string>
     <string name="node_layout_log_icons">Метрики окружения</string>
+    <string name="node_layout_no_preview_available">Нет доступных нод для предпросмотра.</string>
     <string name="node_layout_power">Питание</string>
+    <string name="node_layout_preview">Предпросмотр</string>
+    <string name="node_layout_relative_last_heard">Относительное время последнего вещания</string>
+    <string name="node_layout_section_title">Расположение нод</string>
+    <string name="node_layout_signal_direct_only">Сигнал (только прямой)</string>
+    <string name="node_layout_signal_quality_indicator">Индикатор качества сигнала</string>
+    <string name="node_list_click_label">Открыть детали ноды</string>
+    <string name="node_list_help_node_details">Детали ноды</string>
+    <string name="node_list_help_title">Справка по списку нод</string>
+    <string name="node_list_long_click_label">Параметры ноды</string>
     <string name="node_number">Номер ноды</string>
     <string name="node_sort_alpha">А-Я</string>
     <string name="node_sort_button">Варианты сортировки нод</string>
@@ -1320,6 +1358,7 @@
     <string name="tx_power_dbm">Мощность передатчика</string>
     <string name="type">Тип</string>
     <string name="type_a_message">Написать сообщение</string>
+    <string name="udp_enabled">UDP трансляция</string>
     <!-- UNKNOWN -->
     <string name="unknown">Неизвестно</string>
     <string name="unknown_age">Неизвестный возраст</string>

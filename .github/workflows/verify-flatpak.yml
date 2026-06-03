@@ -1,0 +1,116 @@
+name: Verify Flatpak Offline Build
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'scripts/verify-flatpak/**'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - '.github/workflows/verify-flatpak.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: flatpak-verify-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  generate-sources:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: jetbrains
+          java-version: 21
+
+      - uses: gradle/actions/setup-gradle@v6
+
+      - name: Generate flatpak-sources.json
+        run: |
+          ./gradlew --no-build-cache --no-configuration-cache \
+            -Dgradle.user.home="$RUNNER_TEMP/flatpak-gradle-home" \
+            :desktopApp:packageUberJarForCurrentOS :captureFlatpakSources
+          cp build/flatpak-sources.json flatpak-sources.json
+          echo "### Flatpak Sources Summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "- URLs captured: $(jq length flatpak-sources.json)" >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: flatpak-sources
+          path: flatpak-sources.json
+
+  build-flatpak:
+    needs: generate-sources
+    runs-on: ${{ matrix.arch == 'aarch64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    timeout-minutes: 45
+    strategy:
+      matrix:
+        arch: [x86_64, aarch64]
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: flatpak-sources
+
+      - name: Clone vid's flatpak repo
+        run: |
+          git clone --depth 1 --recurse-submodules \
+            https://github.com/vidplace7/org.meshtastic.desktop.git \
+            "$RUNNER_TEMP/org.meshtastic.desktop"
+
+      - name: Wire overlay manifest + sources
+        run: |
+          cp scripts/verify-flatpak/desktop-offline.yaml \
+            "$RUNNER_TEMP/org.meshtastic.desktop/org.meshtastic.desktop.yaml"
+          cp flatpak-sources.json \
+            "$RUNNER_TEMP/org.meshtastic.desktop/flatpak-sources.json"
+          rsync -a --delete \
+            --exclude='/build/' --exclude='/.gradle/' \
+            --exclude='*/build/' --exclude='*/.gradle/' \
+            --exclude='/.idea/' --exclude='/local.properties' \
+            ./ "$RUNNER_TEMP/org.meshtastic.desktop/meshtastic-android/"
+
+      - name: Install flatpak-builder
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq flatpak flatpak-builder
+          flatpak remote-add --user --if-not-exists flathub \
+            https://dl.flathub.org/repo/flathub.flatpakrepo
+
+      - name: Build flatpak offline
+        working-directory: ${{ runner.temp }}/org.meshtastic.desktop
+        run: |
+          flatpak-builder --user --repo=repo --install-deps-from=flathub \
+            --force-clean builddir org.meshtastic.desktop.yaml
+
+      - name: Export .flatpak bundle
+        working-directory: ${{ runner.temp }}/org.meshtastic.desktop
+        env:
+          ARCH: ${{ matrix.arch }}
+        run: |
+          flatpak build-bundle repo org.meshtastic.desktop.${ARCH}.flatpak \
+            org.meshtastic.desktop \
+            --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo
+          echo "### ✅ Offline Flatpak build succeeded ($ARCH)" >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: meshtastic-desktop-flatpak-${{ matrix.arch }}
+          path: ${{ runner.temp }}/org.meshtastic.desktop/org.meshtastic.desktop.${{ matrix.arch }}.flatpak
