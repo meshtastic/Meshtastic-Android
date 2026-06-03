@@ -178,7 +178,9 @@ maps-compose-utils = { module = "com.google.maps.android:maps-compose-utils", ve
 maps-compose-widgets = { module = "com.google.maps.android:maps-compose-widgets", version.ref = "maps-compose" }
 mlkit-barcode-scanning = { module = "com.google.mlkit:barcode-scanning", version.ref = "mlkit-barcode-scanning" }
 mlkit-translate = { module = "com.google.mlkit:translate", version.ref = "mlkit-translate" }
-play-services-maps = { module = "com.google.android.gms:play-services-maps", version = "20.0.0" }
+# No version pin: maps-compose (via maps-ktx) already pulls the play-services-maps version it was built
+# against. Pinning here risks forcing a version maps-compose was not tested with — let the library drive it.
+play-services-maps = { module = "com.google.android.gms:play-services-maps" }
 wire-runtime = { module = "com.squareup.wire:wire-runtime", version.ref = "wire" }
 zxing-core = { module = "com.google.zxing:core", version = "3.5.4" }
 qrcode-kotlin = { module = "io.github.g0dkar:qrcode-kotlin", version.ref = "qrcode-kotlin" }
