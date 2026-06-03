@@ -32,6 +32,7 @@ plugins {
     alias(libs.plugins.secrets)
     id("meshtastic.aboutlibraries")
     id("dev.mokkery")
+    alias(libs.plugins.devtools.ksp)
 }
 
 val keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -178,6 +179,8 @@ secrets {
     propertiesFileName = "secrets.properties"
 }
 
+ksp { arg("appfunctions:aggregateAppFunctions", "true") }
+
 androidComponents {
     onVariants(selector().withBuildType("debug")) { variant ->
         variant.flavorName?.let { flavor -> variant.applicationId.set("com.geeksville.mesh.$flavor.debug") }
@@ -282,6 +285,10 @@ dependencies {
     googleImplementation(libs.firebase.ai)
     googleImplementation(libs.firebase.ai.ondevice)
     googleImplementation(libs.mlkit.translate)
+
+    googleImplementation(libs.androidx.appfunctions)
+    googleImplementation(libs.androidx.appfunctions.service)
+    add("kspGoogle", libs.androidx.appfunctions.compiler)
 
     fdroidImplementation(libs.osmdroid.android)
     fdroidImplementation(libs.osmdroid.geopackage) { exclude(group = "com.j256.ormlite") }
