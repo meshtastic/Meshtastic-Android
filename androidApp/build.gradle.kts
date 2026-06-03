@@ -26,6 +26,7 @@ plugins {
     alias(libs.plugins.meshtastic.android.application)
     alias(libs.plugins.meshtastic.android.application.flavors)
     alias(libs.plugins.meshtastic.android.application.compose)
+    alias(libs.plugins.meshtastic.kotlinx.serialization)
     id("meshtastic.koin")
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.secrets)
