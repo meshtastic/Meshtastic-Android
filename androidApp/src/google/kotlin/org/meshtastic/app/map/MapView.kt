@@ -78,7 +78,7 @@ import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.MapsComposeExperimentalApi
-import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerComposable
 import com.google.maps.android.compose.MarkerInfoWindowComposable
 import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.TileOverlay
@@ -102,7 +102,6 @@ import org.meshtastic.app.map.component.MapTypeDropdown
 import org.meshtastic.app.map.component.NodeClusterMarkers
 import org.meshtastic.app.map.component.NodeMapFilterDropdown
 import org.meshtastic.app.map.component.WaypointMarkers
-import org.meshtastic.app.map.component.rememberNodeChipDescriptor
 import org.meshtastic.app.map.model.NodeClusterItem
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
@@ -126,6 +125,7 @@ import org.meshtastic.core.resources.sats
 import org.meshtastic.core.resources.speed
 import org.meshtastic.core.resources.timestamp
 import org.meshtastic.core.resources.track_point
+import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.icon.Layers
 import org.meshtastic.core.ui.icon.Map
 import org.meshtastic.core.ui.icon.MeshtasticIcons
@@ -186,7 +186,6 @@ fun MapView(
     mode: GoogleMapMode = GoogleMapMode.Main,
 ) {
     val context = LocalContext.current
-
     val coroutineScope = rememberCoroutineScope()
     val mapLayers by mapViewModel.mapLayers.collectAsStateWithLifecycle()
 
@@ -493,31 +492,7 @@ fun MapView(
     val onRemoveLayer = { layerId: String -> mapViewModel.removeMapLayer(layerId) }
     val onToggleVisibility = { layerId: String -> mapViewModel.toggleLayerVisibility(layerId) }
 
-    // Resolve the selected custom tile provider once (cached). getTileProvider returns null when the
-    // configured source is unusable (bad {x}/{y}/{z} URL template, missing local MBTiles file, etc.).
-    val customTileConfigs by mapViewModel.customTileProviderConfigs.collectAsStateWithLifecycle()
-    val customTileProvider =
-        remember(currentCustomTileProviderUrl, customTileConfigs) {
-            currentCustomTileProviderUrl?.let { url ->
-                val config = customTileConfigs.find { it.urlTemplate == url || it.localUri == url }
-                mapViewModel.getTileProvider(config)
-            }
-        }
-
-    // Only blank the Google base map (MapType.NONE) when we actually have a working custom basemap to draw
-    // over it. If the selected custom source failed to build, fall back to the user's base map instead of
-    // rendering MapType.NONE with no tiles — that is a solid black screen with no recourse.
-    val effectiveGoogleMapType = if (customTileProvider != null) MapType.NONE else selectedGoogleMapType
-
-    // Surface the fallback so a broken custom tile source is diagnosable instead of a silent black map.
-    LaunchedEffect(currentCustomTileProviderUrl, customTileProvider) {
-        if (currentCustomTileProviderUrl != null && customTileProvider == null) {
-            Logger.withTag("MapView").w {
-                "Custom tile provider '$currentCustomTileProviderUrl' could not be built; " +
-                    "falling back to base map $selectedGoogleMapType"
-            }
-        }
-    }
+    val effectiveGoogleMapType = if (currentCustomTileProviderUrl != null) MapType.NONE else selectedGoogleMapType
 
     var showClusterItemsDialog by remember { mutableStateOf<List<NodeClusterItem>?>(null) }
 
@@ -566,11 +541,16 @@ fun MapView(
                 }
             },
         ) {
-            // Custom tile overlay (all modes) — uses the hoisted provider so the base-map decision above and
-            // this overlay stay consistent (no overlay ⇒ base map is shown, never a black MapType.NONE).
+            // Custom tile overlay (all modes)
             key(currentCustomTileProviderUrl) {
-                customTileProvider?.let { tileProvider ->
-                    TileOverlay(tileProvider = tileProvider, fadeIn = true, transparency = 0f, zIndex = -1f)
+                currentCustomTileProviderUrl?.let { url ->
+                    val config =
+                        mapViewModel.customTileProviderConfigs.collectAsStateWithLifecycle().value.find {
+                            it.urlTemplate == url || it.localUri == url
+                        }
+                    mapViewModel.getTileProvider(config)?.let { tileProvider ->
+                        TileOverlay(tileProvider = tileProvider, fadeIn = true, transparency = 0f, zIndex = -1f)
+                    }
                 }
             }
 
@@ -884,17 +864,17 @@ private fun NodeTrackOverlay(
                 }
 
             if (index == sortedPositions.lastIndex) {
-                val chipIcon = rememberNodeChipDescriptor(focusedNode)
-                Marker(
+                MarkerComposable(
                     state = markerState,
-                    icon = chipIcon,
                     zIndex = activeNodeZIndex,
                     alpha = if (isHighPriority) 1.0f else 0.9f,
                     onClick = {
                         onPositionSelected?.invoke(position.time)
                         false // Allow default info window behavior
                     },
-                )
+                ) {
+                    NodeChip(node = focusedNode)
+                }
             } else {
                 MarkerInfoWindowComposable(
                     state = markerState,
@@ -989,6 +969,7 @@ private fun speedFromPosition(position: Position, displayUnits: DisplayUnits): S
 
 // region --- Traceroute Map Content ---
 
+@OptIn(MapsComposeExperimentalApi::class)
 @Composable
 private fun TracerouteMapContent(
     forwardOffsetPoints: List<LatLng>,
@@ -1017,8 +998,7 @@ private fun TracerouteMapContent(
     }
     displayNodes.forEach { node ->
         val markerState = rememberUpdatedMarkerState(position = node.position.toLatLng())
-        val chipIcon = rememberNodeChipDescriptor(node)
-        Marker(state = markerState, icon = chipIcon, zIndex = 4f)
+        MarkerComposable(state = markerState, zIndex = 4f) { NodeChip(node = node) }
     }
 }
 

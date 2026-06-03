@@ -18,15 +18,17 @@ package org.meshtastic.app.map.component
 
 import android.content.Context
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.maps.android.clustering.Cluster
@@ -37,17 +39,28 @@ import com.google.maps.android.compose.MapEffect
 import com.google.maps.android.compose.MapsComposeExperimentalApi
 import com.google.maps.android.compose.clustering.Clustering
 import com.google.maps.android.compose.clustering.rememberClusterManager
+import com.google.maps.android.compose.rememberComposeBitmapDescriptor
 import org.meshtastic.app.map.model.NodeClusterItem
 import org.meshtastic.feature.map.BaseMapViewModel
 
 private const val MIN_CLUSTER_SIZE = 10
 
-// Match the bottom-center anchor maps-compose used for the old `clusterItemContent` chip
-// (clusterItemContentAnchor defaults to Offset(0.5f, 1.0f)), so chips keep sitting on the node coordinate.
-private const val CHIP_ANCHOR_U = 0.5f
-private const val CHIP_ANCHOR_V = 1.0f
-
+/**
+ * Renders node markers with clustering.
+ *
+ * Marker bitmaps are generated **in the maps compose scope** via [rememberComposeBitmapDescriptor], which composes each
+ * chip in a `ComposeView` parented to the live host view (a real, attached view that has valid `ViewTreeLifecycleOwner`
+ * / `SavedStateRegistryOwner`) and renders it synchronously to a [BitmapDescriptor].
+ *
+ * This deliberately avoids the clustering library's `clusterItemContent` path: that renderer
+ * ([com.google.maps.android.compose.clustering.ComposeUiClusterRenderer]) composes each item in a *detached*
+ * `ComposeView` that only carries a fake lifecycle owner and no `SavedStateRegistryOwner`, so it crashes when the
+ * surrounding Navigation 3 / popup hierarchy lacks those owners (the top Crashlytics FATAL). A custom
+ * [DefaultClusterRenderer] subclass assigns the pre-baked bitmaps instead, keeping native info windows (title/snippet
+ * from [NodeClusterItem]) and click interactions intact.
+ */
 @OptIn(MapsComposeExperimentalApi::class)
+@Suppress("NestedBlockDepth")
 @Composable
 fun NodeClusterMarkers(
     nodeClusterItems: List<NodeClusterItem>,
@@ -56,54 +69,58 @@ fun NodeClusterMarkers(
     onClusterClick: (Cluster<NodeClusterItem>) -> Boolean,
 ) {
     val context = LocalContext.current
-    val density = LocalDensity.current.density
-    val fontScale = LocalDensity.current.fontScale
+    val clusterManager = rememberClusterManager<NodeClusterItem>()
 
-    val clusterManager = rememberClusterManager<NodeClusterItem>() ?: return
-
-    // Render each non-clustered node as a Canvas-built BitmapDescriptor through a custom
-    // DefaultClusterRenderer instead of passing a `clusterItemContent` Composable. The Composable path makes
-    // maps-compose rasterize the chip through an off-screen ComposeView (ComposeUiClusterRenderer); that view
-    // walks the view tree for a ViewTreeLifecycleOwner/SavedStateRegistryOwner and, because the cluster
-    // renderer drives marker creation from an async Handler after the screen may have stopped, finds none and
-    // crashes with "Composed into the View which doesn't propagate ViewTreeLifecycleOwner!"
-    // (googlemaps/android-maps-compose#325 / #875) — historically our #1 FATAL. A renderer that paints the icon
-    // in onBeforeClusterItemRendered never creates a View, so the crash class is eliminated rather than raced
-    // against (see the owner-propagation workarounds in #5704/#5708 that could not win that race).
-    val rendererState: MutableState<NodeChipClusterRenderer?> = remember { mutableStateOf(null) }
-
-    MapEffect(clusterManager, density, fontScale) { map ->
-        val renderer = NodeChipClusterRenderer(context, map, clusterManager, density, fontScale)
-        renderer.minClusterSize = MIN_CLUSTER_SIZE
-        clusterManager.renderer = renderer
-        rendererState.value = renderer
+    // Bake each node's marker icon in-scope. Keyed by node so a bitmap is only re-rendered when that node
+    // actually changes. The descriptors are stashed in a snapshot map the renderer reads at render time.
+    val iconDescriptors = remember { mutableStateMapOf<Int, BitmapDescriptor>() }
+    nodeClusterItems.forEach { item ->
+        key(item.node.num) {
+            val descriptor = rememberComposeBitmapDescriptor(item.node) { PulsingNodeChip(node = item.node) }
+            DisposableEffect(descriptor) {
+                iconDescriptors[item.node.num] = descriptor
+                onDispose { iconDescriptors.remove(item.node.num) }
+            }
+        }
     }
 
-    SideEffect {
-        clusterManager.setOnClusterClickListener(onClusterClick)
-        clusterManager.setOnClusterItemInfoWindowClickListener { item -> navigateToNodeDetails(item.node.num) }
-    }
+    if (clusterManager != null) {
+        val rendererState = remember { mutableStateOf<NodeClusterRenderer?>(null) }
 
-    Clustering(items = nodeClusterItems, clusterManager = clusterManager)
+        // The renderer needs the GoogleMap instance, only available inside the map scope.
+        MapEffect(clusterManager) { map ->
+            val renderer = NodeClusterRenderer(context, map, clusterManager) { iconDescriptors[it] }
+            clusterManager.renderer = renderer
+            rendererState.value = renderer
+        }
 
-    // The library's `clusterItemDecoration` only fires for its internal ComposeUiClusterRenderer (the gating
-    // ClusterRendererItemState type is library-internal), so it never runs for our custom renderer. Draw the
-    // precision circles ourselves for exactly the unclustered items the renderer exposes, preserving the prior
-    // "circle only on non-clustered nodes" behavior.
-    val renderer = rendererState.value
-    if (renderer != null && mapFilterState.showPrecisionCircle) {
-        val unclusteredItems by renderer.unclusteredItems
-        unclusteredItems.forEach { item ->
-            item.getPrecisionMeters()?.let { precisionMeters ->
-                if (precisionMeters > 0) {
-                    Circle(
-                        center = item.position,
-                        radius = precisionMeters,
-                        fillColor = Color(item.node.colors.second).copy(alpha = 0.2f),
-                        strokeColor = Color(item.node.colors.second),
-                        strokeWidth = 2f,
-                        zIndex = 0f,
-                    )
+        // Keep listeners current — the lambdas can change across recompositions.
+        SideEffect {
+            clusterManager.setOnClusterClickListener { cluster -> onClusterClick(cluster) }
+            clusterManager.setOnClusterItemInfoWindowClickListener { item -> navigateToNodeDetails(item.node.num) }
+        }
+
+        // Re-cluster once the renderer is attached and freshly-baked icons arrive, so markers pick up the bitmaps
+        // even when the cluster manager became available after the icons were rendered.
+        val renderer = rendererState.value
+        LaunchedEffect(renderer, iconDescriptors.size) { if (renderer != null) clusterManager.cluster() }
+
+        Clustering(items = nodeClusterItems, clusterManager = clusterManager)
+
+        // Precision circles for the currently-unclustered items (the renderer tracks them as the zoom changes).
+        if (mapFilterState.showPrecisionCircle) {
+            renderer?.unclusteredItems?.value?.forEach { item ->
+                item.getPrecisionMeters()?.let { precisionMeters ->
+                    if (precisionMeters > 0) {
+                        Circle(
+                            center = item.position,
+                            radius = precisionMeters,
+                            fillColor = Color(item.node.colors.second).copy(alpha = 0.2f),
+                            strokeColor = Color(item.node.colors.second),
+                            strokeWidth = 2f,
+                            zIndex = 0f,
+                        )
+                    }
                 }
             }
         }
@@ -111,37 +128,39 @@ fun NodeClusterMarkers(
 }
 
 /**
- * A [DefaultClusterRenderer] that draws each non-clustered node's chip as a Canvas [BitmapDescriptor]
- * ([buildNodeChipDescriptor]) instead of a Composable, avoiding maps-compose's crash-prone off-screen ComposeView
- * rasterization. It also exposes the current set of unclustered items so the caller can draw precision circles (the
- * library's `clusterItemDecoration` hook is unavailable to non-library renderers).
+ * [DefaultClusterRenderer] that assigns the pre-baked [BitmapDescriptor]s (rendered in the maps compose scope) to
+ * non-clustered item markers, and exposes the set of currently-unclustered items so the caller can decorate them (e.g.
+ * precision circles). Cluster bubbles keep the library's default rendering.
  */
-private class NodeChipClusterRenderer(
+private class NodeClusterRenderer(
     context: Context,
     map: GoogleMap,
     clusterManager: ClusterManager<NodeClusterItem>,
-    private val density: Float,
-    private val fontScale: Float,
+    private val iconProvider: (Int) -> BitmapDescriptor?,
 ) : DefaultClusterRenderer<NodeClusterItem>(context, map, clusterManager) {
 
-    val unclusteredItems: MutableState<Set<NodeClusterItem>> = mutableStateOf(emptySet())
+    val unclusteredItems = mutableStateOf<Set<NodeClusterItem>>(emptySet())
 
-    // Called on a background render thread — building the descriptor here keeps marker rasterization off the
-    // main thread, and BitmapDescriptorFactory is safe once the SDK is initialized (the live map guarantees it).
-    override fun onBeforeClusterItemRendered(item: NodeClusterItem, markerOptions: MarkerOptions) {
-        markerOptions
-            .icon(buildNodeChipDescriptor(item.node, density, fontScale))
-            .anchor(CHIP_ANCHOR_U, CHIP_ANCHOR_V)
-            .zIndex(item.getZIndex())
-    }
-
-    override fun onClusterItemUpdated(item: NodeClusterItem, marker: Marker) {
-        marker.setIcon(buildNodeChipDescriptor(item.node, density, fontScale))
-        marker.zIndex = item.getZIndex()
+    init {
+        minClusterSize = MIN_CLUSTER_SIZE
     }
 
     override fun onClustersChanged(clusters: Set<Cluster<NodeClusterItem>>) {
         super.onClustersChanged(clusters)
         unclusteredItems.value = clusters.filterNot { shouldRenderAsCluster(it) }.flatMap { it.items }.toSet()
+    }
+
+    override fun onBeforeClusterItemRendered(item: NodeClusterItem, markerOptions: MarkerOptions) {
+        // super sets title/snippet from the ClusterItem, which drives the native info window.
+        super.onBeforeClusterItemRendered(item, markerOptions)
+        iconProvider(item.node.num)?.let { markerOptions.icon(it) }
+        markerOptions.zIndex(item.getZIndex())
+    }
+
+    override fun onClusterItemUpdated(item: NodeClusterItem, marker: Marker) {
+        // super keeps title/snippet (and the open info window) in sync.
+        super.onClusterItemUpdated(item, marker)
+        iconProvider(item.node.num)?.let { marker.setIcon(it) }
+        marker.zIndex = item.getZIndex()
     }
 }

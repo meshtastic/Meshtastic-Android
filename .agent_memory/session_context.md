@@ -6,6 +6,12 @@
 # the oldest entries to `session_context.archive.md` (not read by default). The
 # "Golden Context" block at the bottom is stable across sessions; keep it here.
 
+## 2026-06-03 — Cluster-marker FATAL: revert shipped map series + in-scope rememberComposeBitmapDescriptor fix
+- Reverted ALL google-flavor map changes to before #5684 (per user): restored MapView.kt, NodeClusterMarkers.kt, WaypointMarkers.kt, InlineMap.kt to parent commit bc9f1637; deleted MarkerBitmapRenderer.kt; re-pinned `play-services-maps = 20.0.0` in libs.versions.toml. The shipped #5702–#5719 series (Canvas markers + ViewTree-owner band-aids) had lost the info-window popups + interactions.
+- Root cause (verified against maps-compose 8.3.0 + android-maps-utils 4.1.1 SOURCE in gradle cache): ONLY `Clustering(clusterItemContent=…)` crashes — its `ComposeUiClusterRenderer` builds a *detached* `InvalidatingComposeView` with a fake lifecycle owner and NO SavedStateRegistryOwner. `MarkerComposable` already bakes its icon via the safe in-scope `rememberComposeBitmapDescriptor`; info windows render with the live marker compositionContext. So InlineMap/NodeTrack/Traceroute were left untouched.
+- Fix (NodeClusterMarkers.kt ONLY): icons baked in-scope via `rememberComposeBitmapDescriptor(node){ PulsingNodeChip }` into a snapshot stateMap; custom `private class NodeClusterRenderer : DefaultClusterRenderer` assigns them in onBeforeClusterItemRendered/onClusterItemUpdated (bg thread, READ-only — never composes, so the crash class is gone). Native info windows (super sets title/snippet) + onClusterItemInfoWindowClick→navigateToNodeDetails; precision circles drawn from the renderer's own `unclusteredItems` MutableState (clusterItemDecoration can't fire — `ClusterRendererItemState` is lib-internal). Strictly better than the elegant-euler Canvas branch — keeps the REAL Compose chip.
+- `compileGoogleDebugKotlin` + `spotlessCheck` + `detekt` PASS. NOT committed, NOT device-verified. Next: device-test (clusters show chips + info-window popups + no FATAL), then commit/push.
+
 ## 2026-05-28 — Stabilized DatabaseManager withDb retry host test
 - Hardened `DatabaseManagerWithDbRetryTest` to remove CI race conditions by running the manager on a `StandardTestDispatcher(testScheduler)` instead of real `Dispatchers.IO`.
 - Added a `withTimeout(10_000)` guard around the test body to fail fast on coordination stalls instead of hanging/flapping.
@@ -32,13 +38,6 @@
 - Integrated Firebase Remote Config into `GeminiNanoDocAssistant` to dynamically fetch the model name (`chirpy_model_name`) and system instruction (`chirpy_system_instruction`) with release-optimized fetch intervals.
 - Refactored `GeminiNanoDocAssistant.answer` to reuse `answerStream` flow under the hood, eliminating duplicate prompting code.
 - Verified that all unit tests (`:feature:docs:allTests`) and static analysis checks (`spotlessApply spotlessCheck detekt`) pass 100% green.
-
-## 2026-05-21 — Fixed Chirpy Assistant invalid model name and enhanced failure fallback suggestions
-- Fixed a 404/Unknown inference error by updating `GeminiNanoDocAssistant.kt`'s `MODEL_NAME` from `"gemini-3.1-flash-lite"` to the correct Firebase AI Logic preview name `"gemini-3.1-flash-lite-preview"`.
-- Overhauled multi-turn hybrid chat seeding: eliminated the redundant background `chat.sendMessage` call on the first turn; if the first turn is answered on-device, the session caches the Q&A locally and seeds the subsequent cloud-chat session via `startChat(history = ...)`.
-- Expanded the hybrid model's `looksLikeNoAnswer` heuristics to better detect on-device failure and fall back to the grounded cloud model.
-- Programmed a smart UI fallback: on inference error (offline, rate limit, model not found), Chirpy displays local keyword search results as recommended page chips.
-- Verified 100% compliance with Spotless, Detekt, and unit tests (`:feature:docs:allTests` and `:androidApp:testGoogleDebugUnitTest`).
 
 ## Golden Context (stable across sessions)
 - Always check `.skills/compose-ui/strings-index.txt` before reading `strings.xml`.
