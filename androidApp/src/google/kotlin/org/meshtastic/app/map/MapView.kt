@@ -187,10 +187,6 @@ fun MapView(
 ) {
     val context = LocalContext.current
 
-    // Initialize the Maps SDK up front (idempotent) so the loaded renderer is logged even when the mesh has
-    // no nodes/waypoints to build marker descriptors from. See MapsSdkInitializer.
-    LaunchedEffect(Unit) { MapsSdkInitializer.ensureInitialized(context) }
-
     val coroutineScope = rememberCoroutineScope()
     val mapLayers by mapViewModel.mapLayers.collectAsStateWithLifecycle()
 

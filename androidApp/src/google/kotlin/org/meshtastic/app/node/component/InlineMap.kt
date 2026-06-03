@@ -49,7 +49,6 @@ fun InlineMap(node: Node, modifier: Modifier = Modifier) {
         val cameraState = rememberCameraPositionState {
             position = CameraPosition.fromLatLngZoom(location, DEFAULT_ZOOM)
         }
-        val markerIcon = rememberNodeChipDescriptor(node)
 
         GoogleMap(
             mapColorScheme = mapColorScheme,
@@ -78,6 +77,10 @@ fun InlineMap(node: Node, modifier: Modifier = Modifier) {
                     strokeWidth = 2f,
                 )
             }
+            // Build the marker icon inside the map content: by the time this composes, the GoogleMap has created its
+            // MapView and initialized the Maps SDK, so BitmapDescriptorFactory is ready. Building it before the map
+            // (outside this lambda) is what crashed the inline map in #5702 / #5709.
+            val markerIcon = rememberNodeChipDescriptor(node)
             Marker(state = rememberUpdatedMarkerState(position = latLng), icon = markerIcon)
         }
     }

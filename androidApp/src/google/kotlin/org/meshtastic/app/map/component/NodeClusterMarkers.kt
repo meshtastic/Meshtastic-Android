@@ -117,7 +117,7 @@ fun NodeClusterMarkers(
  * library's `clusterItemDecoration` hook is unavailable to non-library renderers).
  */
 private class NodeChipClusterRenderer(
-    private val context: Context,
+    context: Context,
     map: GoogleMap,
     clusterManager: ClusterManager<NodeClusterItem>,
     private val density: Float,
@@ -130,13 +130,13 @@ private class NodeChipClusterRenderer(
     // main thread, and BitmapDescriptorFactory is safe once the SDK is initialized (the live map guarantees it).
     override fun onBeforeClusterItemRendered(item: NodeClusterItem, markerOptions: MarkerOptions) {
         markerOptions
-            .icon(buildNodeChipDescriptor(context, item.node, density, fontScale))
+            .icon(buildNodeChipDescriptor(item.node, density, fontScale))
             .anchor(CHIP_ANCHOR_U, CHIP_ANCHOR_V)
             .zIndex(item.getZIndex())
     }
 
     override fun onClusterItemUpdated(item: NodeClusterItem, marker: Marker) {
-        marker.setIcon(buildNodeChipDescriptor(context, item.node, density, fontScale))
+        marker.setIcon(buildNodeChipDescriptor(item.node, density, fontScale))
         marker.zIndex = item.getZIndex()
     }
 
