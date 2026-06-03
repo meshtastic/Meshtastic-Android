@@ -27,15 +27,17 @@ import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.ComposeMapColorScheme
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapUiSettings
-import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MapsComposeExperimentalApi
+import com.google.maps.android.compose.MarkerComposable
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberUpdatedMarkerState
-import org.meshtastic.app.map.component.rememberNodeChipDescriptor
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.component.precisionBitsToMeters
 
 private const val DEFAULT_ZOOM = 15f
 
+@OptIn(MapsComposeExperimentalApi::class)
 @Composable
 fun InlineMap(node: Node, modifier: Modifier = Modifier) {
     val dark = isSystemInDarkTheme()
@@ -77,11 +79,7 @@ fun InlineMap(node: Node, modifier: Modifier = Modifier) {
                     strokeWidth = 2f,
                 )
             }
-            // Build the marker icon inside the map content: by the time this composes, the GoogleMap has created its
-            // MapView and initialized the Maps SDK, so BitmapDescriptorFactory is ready. Building it before the map
-            // (outside this lambda) is what crashed the inline map in #5702 / #5709.
-            val markerIcon = rememberNodeChipDescriptor(node)
-            Marker(state = rememberUpdatedMarkerState(position = latLng), icon = markerIcon)
+            MarkerComposable(state = rememberUpdatedMarkerState(position = latLng)) { NodeChip(node = node) }
         }
     }
 }
