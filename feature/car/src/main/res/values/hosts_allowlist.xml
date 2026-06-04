@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="car_hosts_allowlist">
+        <!-- Android Auto host (Google) -->
+        <item>com.google.android.projection.gearhead</item>
+        <!-- Android Automotive OS system host -->
+        <item>com.android.car.carlauncher</item>
+        <!-- Android Auto for Phone Screens (testing) -->
+        <item>com.google.android.apps.auto</item>
+    </string-array>
+</resources>

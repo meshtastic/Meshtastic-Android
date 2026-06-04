@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <service
+            android:name="org.meshtastic.feature.car.service.MeshtasticCarAppService"
+            android:exported="true"
+            android:permission="androidx.car.app.CarAppService">
+            <intent-filter>
+                <action android:name="androidx.car.app.CarAppService" />
+                <category android:name="androidx.car.app.category.MESSAGING" />
+            </intent-filter>
+        </service>
+
+        <receiver
+            android:name="org.meshtastic.feature.car.service.CarReplyReceiver"
+            android:exported="false" />
+
+        <meta-data
+            android:name="androidx.car.app.minCarApiLevel"
+            android:value="7" />
+    </application>
+</manifest>

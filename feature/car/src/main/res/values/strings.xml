@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="car_app_name">Meshtastic</string>
+    <string name="car_dismiss">Dismiss</string>
+    <string name="car_disconnected">Disconnected</string>
+    <string name="car_emergency_from">⚠️ Emergency from %s</string>
+    <string name="car_error">Error</string>
+    <string name="car_message_node">Message</string>
+    <string name="car_new_conversation">New conversation</string>
+    <string name="car_no_messages">No messages yet</string>
+    <string name="car_no_nodes">No nodes heard</string>
+    <string name="car_node_not_found">Node not found</string>
+    <string name="car_onboarding_text">Open Meshtastic on your phone to configure channels and connect to a radio.</string>
+    <string name="car_onboarding_title">Setup Required</string>
+    <string name="car_reconnected">Reconnected to radio</string>
+    <string name="car_reconnecting">Radio connection lost. Will reconnect automatically.</string>
+    <string name="car_signal_bad">Bad</string>
+    <string name="car_signal_excellent">Excellent</string>
+    <string name="car_signal_fair">Fair</string>
+    <string name="car_signal_good">Good</string>
+    <string name="car_signal_none">None</string>
+    <string name="car_status_battery">Battery</string>
+    <string name="car_status_last_heard">Last Heard</string>
+    <string name="car_status_offline">Offline</string>
+    <string name="car_status_online">Online</string>
+    <string name="car_status_signal">Signal</string>
+    <string name="car_status_status">Status</string>
+    <string name="car_stat_air_util">Air Utilization</string>
+    <string name="car_stat_battery">Battery</string>
+    <string name="car_stat_channel_util">Channel Utilization</string>
+    <string name="car_stat_nodes">Nodes Online</string>
+    <string name="car_stat_packets">Packets</string>
+    <string name="car_stat_uptime">Uptime</string>
+    <string name="car_tab_messages">Messages</string>
+    <string name="car_tab_nodes">Nodes</string>
+    <string name="car_tab_status">Status</string>
+    <string name="car_time_never">Never</string>
+</resources>
