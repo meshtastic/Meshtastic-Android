@@ -23,6 +23,8 @@ import java.util.Locale
 
 actual fun currentLocaleCode(): String = Locale.getDefault().language
 
+actual fun currentRegionCode(): String = Locale.getDefault().country
+
 actual fun currentLocaleQualifier(): String {
     val locale = Locale.getDefault()
     val country = locale.country
