@@ -41,6 +41,7 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.loading
 import org.meshtastic.feature.node.component.AdministrationSection
 import org.meshtastic.feature.node.component.DeviceActions
+import org.meshtastic.feature.node.component.DeviceLinksSection
 import org.meshtastic.feature.node.component.NodeDetailsSection
 import org.meshtastic.feature.node.component.NotesSection
 import org.meshtastic.feature.node.model.NodeDetailAction
@@ -108,6 +109,9 @@ fun NodeDetailList(
                 deviceHardware = uiState.metricsState.deviceHardware,
                 reportedTarget = uiState.metricsState.reportedTarget,
             )
+        }
+        if (uiState.metricsState.deviceLinks.isNotEmpty()) {
+            item { DeviceLinksSection(links = uiState.metricsState.deviceLinks) }
         }
         item {
             DeviceActions(

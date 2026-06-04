@@ -49,6 +49,7 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.app_functions_settings
 import org.meshtastic.core.resources.app_functions_settings_summary
 import org.meshtastic.core.resources.bottom_nav_settings
+import org.meshtastic.core.resources.device_links
 import org.meshtastic.core.resources.export_configuration
 import org.meshtastic.core.resources.filter_settings
 import org.meshtastic.core.resources.help_and_documentation
@@ -60,6 +61,7 @@ import org.meshtastic.core.resources.wifi_devices
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MeshtasticDialog
+import org.meshtastic.core.ui.icon.Device
 import org.meshtastic.core.ui.icon.FilterList
 import org.meshtastic.core.ui.icon.HelpOutline
 import org.meshtastic.core.ui.icon.List
@@ -269,6 +271,12 @@ fun SettingsScreen(
                         leadingIcon = MeshtasticIcons.FilterList,
                     ) {
                         onNavigate(SettingsRoute.FilterSettings)
+                    }
+                }
+
+                ExpressiveSection(title = stringResource(Res.string.device_links)) {
+                    ListItem(text = stringResource(Res.string.device_links), leadingIcon = MeshtasticIcons.Device) {
+                        onNavigate(SettingsRoute.DeviceLinks)
                     }
                 }
 
