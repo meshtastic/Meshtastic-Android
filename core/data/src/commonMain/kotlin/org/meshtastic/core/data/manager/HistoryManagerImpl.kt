@@ -68,7 +68,7 @@ class HistoryManagerImpl(private val meshPrefs: MeshPrefs, private val packetHan
     private fun activeDeviceAddress(): String? =
         meshPrefs.deviceAddress.value?.takeIf { !it.equals(NO_DEVICE_SELECTED, ignoreCase = true) && it.isNotBlank() }
 
-    override fun requestHistoryReplay(
+    override suspend fun requestHistoryReplay(
         trigger: String,
         myNodeNum: Int?,
         storeForwardConfig: ModuleConfig.StoreForwardConfig?,

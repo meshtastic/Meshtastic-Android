@@ -20,8 +20,8 @@ import dev.mokkery.MockMode
 import dev.mokkery.mock
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.test.runTest
-import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.repository.MessageQueue
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.testing.FakeAppPreferences
@@ -68,7 +68,7 @@ class SendMessageUseCaseTest {
         appPreferences.homoglyph.setHomoglyphEncodingEnabled(false)
 
         // Act
-        useCase("Hello broadcast", "0${DataPacket.ID_BROADCAST}", null)
+        useCase("Hello broadcast", "0${NodeAddress.ID_BROADCAST}", null)
 
         // Assert
         radioController.favoritedNodes.size shouldBe 0
@@ -133,7 +133,7 @@ class SendMessageUseCaseTest {
         val originalText = "\u0410pple" // Cyrillic A
 
         // Act
-        useCase(originalText, "0${DataPacket.ID_BROADCAST}", null)
+        useCase(originalText, "0${NodeAddress.ID_BROADCAST}", null)
 
         // Assert
         // Verified by observing that no exception is thrown and coverage is hit.
@@ -156,7 +156,7 @@ class SendMessageUseCaseTest {
         appPreferences.homoglyph.setHomoglyphEncodingEnabled(false)
 
         // Act — PKI DM: channel 8 + node ID
-        useCase("PKI direct message", "${DataPacket.PKC_CHANNEL_INDEX}!70fdde9b", null)
+        useCase("PKI direct message", "${NodeAddress.PKC_CHANNEL_INDEX}!70fdde9b", null)
 
         // Assert — sendSharedContact should be called for PKI DMs
         radioController.sentSharedContacts.size shouldBe 1
@@ -205,7 +205,7 @@ class SendMessageUseCaseTest {
         appPreferences.homoglyph.setHomoglyphEncodingEnabled(false)
 
         // Act — PKI DM with firmware that doesn't support verified contacts
-        useCase("Old PKI DM", "${DataPacket.PKC_CHANNEL_INDEX}!abcdef01", null)
+        useCase("Old PKI DM", "${NodeAddress.PKC_CHANNEL_INDEX}!abcdef01", null)
 
         // Assert — PKI DMs should not trigger legacy favoriting (that's only for channel==null)
         radioController.sentSharedContacts.size shouldBe 0

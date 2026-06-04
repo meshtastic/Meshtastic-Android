@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import okio.ByteString.Companion.decodeBase64
@@ -51,7 +52,7 @@ import org.meshtastic.core.model.util.UnitConversions
 import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.NodeRepository
-import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.TracerouteResponseProvider
 import org.meshtastic.core.repository.TracerouteSnapshotRepository
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.okay
@@ -80,7 +81,7 @@ open class MetricsViewModel(
     @InjectedParam val destNum: Int,
     protected val dispatchers: CoroutineDispatchers,
     private val meshLogRepository: MeshLogRepository,
-    private val serviceRepository: ServiceRepository,
+    private val tracerouteResponseProvider: TracerouteResponseProvider,
     private val nodeRepository: NodeRepository,
     private val tracerouteSnapshotRepository: TracerouteSnapshotRepository,
     private val nodeRequestActions: NodeRequestActions,
@@ -191,7 +192,7 @@ open class MetricsViewModel(
         if (cached != null) return cached
 
         val overlay =
-            serviceRepository.tracerouteResponse.value
+            tracerouteResponseProvider.tracerouteResponse.value
                 ?.takeIf { it.requestId == requestId }
                 ?.let { response ->
                     TracerouteOverlay(
@@ -211,7 +212,7 @@ open class MetricsViewModel(
 
     fun tracerouteSnapshotPositions(logUuid: String) = tracerouteSnapshotRepository.getSnapshotPositions(logUuid)
 
-    fun clearTracerouteResponse() = serviceRepository.clearTracerouteResponse()
+    fun clearTracerouteResponse() = tracerouteResponseProvider.clearTracerouteResponse()
 
     fun positionedNodeNums(): Set<Int> =
         nodeRepository.nodeDBbyNum.value.values.filter { it.validPosition != null }.numSet()
@@ -220,7 +221,7 @@ open class MetricsViewModel(
 
     init {
         safeLaunch(tag = "tracerouteCollector") {
-            serviceRepository.tracerouteResponse.filterNotNull().collect { response ->
+            tracerouteResponseProvider.tracerouteResponse.filterNotNull().collect { response ->
                 val overlay =
                     TracerouteOverlay(
                         requestId = response.requestId,
@@ -243,25 +244,29 @@ open class MetricsViewModel(
 
     fun requestPosition() {
         (manualNodeId.value ?: nodeIdFromRoute)?.let {
-            nodeRequestActions.requestPosition(viewModelScope, it, state.value.node?.user?.long_name ?: "")
+            viewModelScope.launch { nodeRequestActions.requestPosition(it, state.value.node?.user?.long_name ?: "") }
         }
     }
 
     fun requestTelemetry(type: TelemetryType) {
         (manualNodeId.value ?: nodeIdFromRoute)?.let {
-            nodeRequestActions.requestTelemetry(viewModelScope, it, state.value.node?.user?.long_name ?: "", type)
+            viewModelScope.launch {
+                nodeRequestActions.requestTelemetry(it, state.value.node?.user?.long_name ?: "", type)
+            }
         }
     }
 
     fun requestTraceroute() {
         (manualNodeId.value ?: nodeIdFromRoute)?.let {
-            nodeRequestActions.requestTraceroute(viewModelScope, it, state.value.node?.user?.long_name ?: "")
+            viewModelScope.launch { nodeRequestActions.requestTraceroute(it, state.value.node?.user?.long_name ?: "") }
         }
     }
 
     fun requestNeighborInfo() {
         (manualNodeId.value ?: nodeIdFromRoute)?.let {
-            nodeRequestActions.requestNeighborInfo(viewModelScope, it, state.value.node?.user?.long_name ?: "")
+            viewModelScope.launch {
+                nodeRequestActions.requestNeighborInfo(it, state.value.node?.user?.long_name ?: "")
+            }
         }
     }
 

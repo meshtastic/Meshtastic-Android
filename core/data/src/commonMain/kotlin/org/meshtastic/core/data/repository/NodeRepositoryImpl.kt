@@ -43,10 +43,10 @@ import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.datastore.LocalStatsDataSource
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.NodeSortOption
 import org.meshtastic.core.model.util.onlineTimeThreshold
 import org.meshtastic.core.repository.NodeRepository
@@ -137,10 +137,10 @@ class NodeRepositoryImpl(
 
     /** Returns the [Node] associated with a given [userId]. Falls back to a generic node if not found. */
     override fun getNode(userId: String): Node = nodeDBbyNum.value.values.find { it.user.id == userId }
-        ?: Node(num = DataPacket.idToDefaultNodeNum(userId) ?: 0, user = getUser(userId))
+        ?: Node(num = NodeAddress.idToNum(userId) ?: 0, user = getUser(userId))
 
     /** Returns the [User] info for a given [nodeNum]. */
-    override fun getUser(nodeNum: Int): User = getUser(DataPacket.nodeNumToDefaultId(nodeNum))
+    override fun getUser(nodeNum: Int): User = getUser(NodeAddress.numToDefaultId(nodeNum))
 
     private val last4 = 4
 
@@ -152,14 +152,17 @@ class NodeRepositoryImpl(
         }
 
         val fallbackId = userId.takeLast(last4)
+        // Single equality check replaces two NodeAddress.fromString calls — getUser is called per paged contact
+        // and per text-message arrival, so the parser allocations add up.
+        val isLocal = userId == NodeAddress.ID_LOCAL
         val defaultLong =
-            if (userId == DataPacket.ID_LOCAL) {
+            if (isLocal) {
                 ourNodeInfo.value?.user?.long_name?.takeIf { it.isNotBlank() } ?: "Local"
             } else {
                 "Meshtastic $fallbackId"
             }
         val defaultShort =
-            if (userId == DataPacket.ID_LOCAL) {
+            if (isLocal) {
                 ourNodeInfo.value?.user?.short_name?.takeIf { it.isNotBlank() } ?: "Local"
             } else {
                 fallbackId

@@ -20,7 +20,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeout
 import org.koin.core.annotation.Single
 import org.meshtastic.core.model.ConnectionState
-import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
@@ -377,7 +377,7 @@ class AiFunctionProviderImpl(
                     val unreadCount = packetRepository.getUnreadCount(contactKey)
                     if (unreadCount <= 0) return@mapNotNull null
 
-                    val isBroadcast = lastPacket.to == DataPacket.ID_BROADCAST
+                    val isBroadcast = lastPacket.to == NodeAddress.ID_BROADCAST
                     val displayName =
                         if (isBroadcast) {
                             val channelIndex = contactKey.firstOrNull()?.digitToIntOrNull() ?: 0
@@ -420,7 +420,7 @@ class AiFunctionProviderImpl(
         // Try node name first
         when (val nodeResult = fuzzyNameResolver.resolveNodeName(name)) {
             is NodeNameResult.Found -> {
-                val channelIndex = DataPacket.PKC_CHANNEL_INDEX
+                val channelIndex = NodeAddress.PKC_CHANNEL_INDEX
                 return "${channelIndex}${nodeResult.userId}"
             }
 
@@ -433,7 +433,7 @@ class AiFunctionProviderImpl(
 
         // Try channel name
         return when (val channelResult = fuzzyNameResolver.resolveChannelName(name)) {
-            is ChannelNameResult.Found -> "${channelResult.channelIndex}${DataPacket.ID_BROADCAST}"
+            is ChannelNameResult.Found -> "${channelResult.channelIndex}${NodeAddress.ID_BROADCAST}"
             is ChannelNameResult.Ambiguous -> null
             is ChannelNameResult.NotFound -> null
         }
@@ -457,7 +457,7 @@ class AiFunctionProviderImpl(
                 is NodeNameResult.Found -> {
                     // DM contact key format: channel_index + nodeId
                     // For PKC DMs, use channel index 8; for legacy use no channel prefix
-                    val channelIndex = DataPacket.PKC_CHANNEL_INDEX
+                    val channelIndex = NodeAddress.PKC_CHANNEL_INDEX
                     ResolvedContact.Resolved(
                         contactKey = "${channelIndex}${result.userId}",
                         channelName = "DM to $recipientName",
@@ -477,7 +477,7 @@ class AiFunctionProviderImpl(
             return when (val result = fuzzyNameResolver.resolveChannelName(channelName)) {
                 is ChannelNameResult.Found ->
                     ResolvedContact.Resolved(
-                        contactKey = "${result.channelIndex}${DataPacket.ID_BROADCAST}",
+                        contactKey = "${result.channelIndex}${NodeAddress.ID_BROADCAST}",
                         channelName = result.name,
                     )
 
@@ -490,7 +490,7 @@ class AiFunctionProviderImpl(
         // Default: broadcast on primary channel (index 0)
         val channelSet = radioConfigRepository.channelSetFlow.first()
         val primaryName = channelSet.settings.firstOrNull()?.name?.ifBlank { "Primary" } ?: "Primary"
-        return ResolvedContact.Resolved(contactKey = "0${DataPacket.ID_BROADCAST}", channelName = primaryName)
+        return ResolvedContact.Resolved(contactKey = "0${NodeAddress.ID_BROADCAST}", channelName = primaryName)
     }
 
     private sealed class ResolvedContact {

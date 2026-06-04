@@ -45,8 +45,6 @@ import org.meshtastic.core.domain.usecase.settings.InstallProfileUseCase
 import org.meshtastic.core.domain.usecase.settings.ProcessRadioResponseUseCase
 import org.meshtastic.core.domain.usecase.settings.RadioConfigUseCase
 import org.meshtastic.core.domain.usecase.settings.RadioResponseResult
-import org.meshtastic.core.domain.usecase.settings.ToggleAnalyticsUseCase
-import org.meshtastic.core.domain.usecase.settings.ToggleHomoglyphEncodingUseCase
 import org.meshtastic.core.model.MqttProbeStatus
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
@@ -93,8 +91,6 @@ class RadioConfigViewModelTest {
     private val analyticsPrefs: AnalyticsPrefs = mock(MockMode.autofill)
     private val homoglyphEncodingPrefs: HomoglyphPrefs = mock(MockMode.autofill)
 
-    private val toggleAnalyticsUseCase: ToggleAnalyticsUseCase = mock(MockMode.autofill)
-    private val toggleHomoglyphEncodingUseCase: ToggleHomoglyphEncodingUseCase = mock(MockMode.autofill)
     private val importProfileUseCase: ImportProfileUseCase = mock(MockMode.autofill)
     private val exportProfileUseCase: ExportProfileUseCase = mock(MockMode.autofill)
     private val exportSecurityConfigUseCase: ExportSecurityConfigUseCase = mock(MockMode.autofill)
@@ -150,8 +146,6 @@ class RadioConfigViewModelTest {
         mapConsentPrefs = mapConsentPrefs,
         analyticsPrefs = analyticsPrefs,
         homoglyphEncodingPrefs = homoglyphEncodingPrefs,
-        toggleAnalyticsUseCase = toggleAnalyticsUseCase,
-        toggleHomoglyphEncodingUseCase = toggleHomoglyphEncodingUseCase,
         importProfileUseCase = importProfileUseCase,
         exportProfileUseCase = exportProfileUseCase,
         exportSecurityConfigUseCase = exportSecurityConfigUseCase,
@@ -185,21 +179,23 @@ class RadioConfigViewModelTest {
     }
 
     @Test
-    fun `toggleAnalyticsAllowed calls useCase`() {
-        every { toggleAnalyticsUseCase() } returns Unit
+    fun `toggleAnalyticsAllowed calls prefs`() {
+        every { analyticsPrefs.analyticsAllowed } returns MutableStateFlow(true)
+        every { analyticsPrefs.setAnalyticsAllowed(false) } returns Unit
 
         viewModel.toggleAnalyticsAllowed()
 
-        verify { toggleAnalyticsUseCase() }
+        verify { analyticsPrefs.setAnalyticsAllowed(false) }
     }
 
     @Test
-    fun `toggleHomoglyphCharactersEncodingEnabled calls useCase`() {
-        every { toggleHomoglyphEncodingUseCase() } returns Unit
+    fun `toggleHomoglyphCharactersEncodingEnabled calls prefs`() {
+        every { homoglyphEncodingPrefs.homoglyphEncodingEnabled } returns MutableStateFlow(true)
+        every { homoglyphEncodingPrefs.setHomoglyphEncodingEnabled(false) } returns Unit
 
         viewModel.toggleHomoglyphCharactersEncodingEnabled()
 
-        verify { toggleHomoglyphEncodingUseCase() }
+        verify { homoglyphEncodingPrefs.setHomoglyphEncodingEnabled(false) }
     }
 
     @Test
@@ -417,8 +413,6 @@ class RadioConfigViewModelTest {
                 mapConsentPrefs = mapConsentPrefs,
                 analyticsPrefs = analyticsPrefs,
                 homoglyphEncodingPrefs = homoglyphEncodingPrefs,
-                toggleAnalyticsUseCase = toggleAnalyticsUseCase,
-                toggleHomoglyphEncodingUseCase = toggleHomoglyphEncodingUseCase,
                 importProfileUseCase = importProfileUseCase,
                 exportProfileUseCase = exportProfileUseCase,
                 exportSecurityConfigUseCase = exportSecurityConfigUseCase,

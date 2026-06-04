@@ -32,8 +32,8 @@ import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.onlineTimeThreshold
+import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.NodeRepository
-import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.LocalStats
 
 data class LocalStatsWidgetUiState(
@@ -77,13 +77,13 @@ data class LocalStatsWidgetUiState(
 )
 
 @Single
-class LocalStatsWidgetStateProvider(nodeRepository: NodeRepository, serviceRepository: ServiceRepository) {
+class LocalStatsWidgetStateProvider(nodeRepository: NodeRepository, connectionStateProvider: ConnectionStateProvider) {
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
     @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
     val state: StateFlow<LocalStatsWidgetUiState> =
         combine(
-            serviceRepository.connectionState,
+            connectionStateProvider.connectionState,
             nodeRepository.nodeDBbyNum
                 .map { nodes ->
                     val online = nodes.values.count { it.lastHeard > onlineTimeThreshold() }

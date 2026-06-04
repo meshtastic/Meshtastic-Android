@@ -65,7 +65,7 @@ class MeshConfigHandlerImplTest {
 
     private fun createHandler(scope: CoroutineScope): MeshConfigHandlerImpl = MeshConfigHandlerImpl(
         radioConfigRepository = radioConfigRepository,
-        serviceRepository = serviceRepository,
+        serviceStateWriter = serviceRepository,
         nodeManager = nodeManager,
         scope = scope,
     )

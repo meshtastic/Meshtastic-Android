@@ -22,24 +22,30 @@ The `:core:repository` module defines the **data and infrastructure contracts** 
 src/
 ├── commonMain/kotlin/org/meshtastic/core/repository/
 │   ├── RadioTransport.kt              ← interface: raw hardware I/O
-│   ├── ServiceRepository.kt           ← interface: service ↔ UI bridge
+│   ├── ServiceRepository.kt           ← interface: service ↔ UI bridge (extends all providers)
+│   ├── ConnectionStateProvider.kt     ← interface: read-only connection state
+│   ├── ResponseProviders.kt           ← interfaces: TracerouteResponseProvider, NeighborInfoResponseProvider
+│   ├── ServiceStateWriter.kt          ← interface: write-side for handlers
 │   ├── NodeRepository.kt              ← interface: mesh node database
 │   ├── SessionManager.kt              ← interface: per-node passkey store
 │   ├── MeshConnectionManager.kt       ← interface: connection lifecycle callbacks
 │   ├── AppWidgetUpdater.kt            ← interface: trigger widget refresh
 │   ├── LocationRepository.kt
 │   ├── LocationService.kt
+│   ├── RadioController.kt             ← interface: composite radio command API
+│   ├── AdminController.kt             ← config, channels, owner, device lifecycle, editSettings
+│   ├── MessagingController.kt         ← send packets, reactions, contacts
+│   ├── NodeController.kt              ← favorite, ignore, mute, remove nodes
+│   ├── QueryController.kt           ← telemetry, traceroute, position queries
 │   ├── CommandSender.kt
 │   ├── AdminPacketHandler.kt
 │   ├── FromRadioPacketHandler.kt
-│   ├── MeshActionHandler.kt
 │   ├── MeshConfigFlowManager.kt
 │   ├── MeshConfigHandler.kt
 │   ├── MeshDataHandler.kt
 │   ├── MeshLocationManager.kt
 │   ├── MeshLogRepository.kt
 │   ├── MeshMessageProcessor.kt
-│   ├── MeshRouter.kt
 │   ├── MessageFilter.kt
 │   ├── MessageQueue.kt
 │   ├── MqttManager.kt
@@ -51,7 +57,6 @@ src/
 │   ├── RadioConfigRepository.kt
 │   ├── RadioInterfaceService.kt
 │   ├── RadioTransportCallback.kt / RadioTransportFactory.kt
-│   ├── ServiceBroadcasts.kt
 │   ├── StoreForwardPacketHandler.kt
 │   ├── TelemetryPacketHandler.kt
 │   ├── TracerouteHandler.kt / TracerouteSnapshotRepository.kt
@@ -83,23 +88,49 @@ interface RadioTransport {
 ### `ServiceRepository`
 
 The primary reactive bridge between the long-running mesh service and all feature/UI layers.
+Decomposed into focused sub-interfaces via Interface Segregation Principle:
 
 ```kotlin
-interface ServiceRepository {
+interface ConnectionStateProvider {
     val connectionState: StateFlow<ConnectionState>
+}
+
+interface TracerouteResponseProvider {
+    val tracerouteResponse: StateFlow<TracerouteResponse?>
+    fun clearTracerouteResponse()
+}
+
+interface NeighborInfoResponseProvider {
+    val neighborInfoResponse: StateFlow<String?>
+    fun clearNeighborInfoResponse()
+}
+
+interface ServiceStateWriter {
+    fun setConnectionState(state: ConnectionState)
+    suspend fun emitMeshPacket(packet: MeshPacket)
+    fun setTracerouteResponse(value: TracerouteResponse?)
+    fun setNeighborInfoResponse(value: String?)
+    // …setters/clearers for error, progress, notification
+}
+
+interface ServiceRepository :
+    ConnectionStateProvider,
+    TracerouteResponseProvider,
+    NeighborInfoResponseProvider,
+    ServiceStateWriter {
     val clientNotification: StateFlow<ClientNotification?>
     val errorMessage: StateFlow<String?>
     val connectionProgress: StateFlow<String?>
     val meshPacketFlow: Flow<MeshPacket>
-    val tracerouteResponse: Flow<...>
-    val neighborInfoResponse: Flow<...>
-    val serviceAction: Flow<ServiceAction>
-
-    fun setConnectionState(state: ConnectionState)
-    fun emitMeshPacket(packet: MeshPacket)
-    fun onServiceAction(action: ServiceAction)
 }
 ```
+
+VMs inject the narrowest interface they need (e.g., `ConnectionStateProvider` for read-only
+connection state). Handlers inject `ServiceStateWriter` for mutations. The full
+`ServiceRepository` union is still available for backward compatibility.
+
+Radio commands are issued through `RadioController` (a composite of `AdminController`,
+`MessagingController`, `NodeController`, `QueryController`) rather than an action/intent bus.
 
 ### `NodeRepository`
 
@@ -120,7 +151,7 @@ interface NodeRepository {
     suspend fun clearNodeDB(preserveFavorites: Boolean = false)
     suspend fun deleteNode(num: Int)
     suspend fun insertMetadata(nodeNum: Int, metadata: DeviceMetadata)
-    suspend fun installConfig(mi: MyNodeInfo, nodes: List<NodeInfo>)
+    suspend fun installConfig(mi: MyNodeInfo, nodes: List<Node>)
 }
 ```
 

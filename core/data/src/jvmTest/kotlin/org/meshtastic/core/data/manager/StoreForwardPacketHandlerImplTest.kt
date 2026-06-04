@@ -32,11 +32,11 @@ import kotlinx.coroutines.test.runTest
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.repository.HistoryManager
 import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.PacketRepository
-import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
@@ -50,7 +50,6 @@ class StoreForwardPacketHandlerImplTest {
 
     private val nodeManager = mock<NodeManager>(MockMode.autofill)
     private val packetRepository = mock<PacketRepository>(MockMode.autofill)
-    private val serviceBroadcasts = mock<ServiceBroadcasts>(MockMode.autofill)
     private val historyManager = mock<HistoryManager>(MockMode.autofill)
     private val dataHandler = mock<MeshDataHandler>(MockMode.autofill)
 
@@ -69,7 +68,6 @@ class StoreForwardPacketHandlerImplTest {
             StoreForwardPacketHandlerImpl(
                 nodeManager = nodeManager,
                 packetRepository = lazy { packetRepository },
-                serviceBroadcasts = serviceBroadcasts,
                 historyManager = historyManager,
                 dataHandler = lazy { dataHandler },
                 scope = testScope,
@@ -89,8 +87,8 @@ class StoreForwardPacketHandlerImplTest {
     private fun makeDataPacket(from: Int): DataPacket = DataPacket(
         id = 1,
         time = 1700000000000L,
-        to = DataPacket.ID_BROADCAST,
-        from = DataPacket.nodeNumToDefaultId(from),
+        to = NodeAddress.ID_BROADCAST,
+        from = NodeAddress.numToDefaultId(from),
         bytes = null,
         dataType = PortNum.STORE_FORWARD_APP.value,
     )
@@ -222,7 +220,6 @@ class StoreForwardPacketHandlerImplTest {
         advanceUntilIdle()
 
         verifySuspend { packetRepository.updateSFPPStatus(any(), any(), any(), any(), any(), any(), any()) }
-        verify { serviceBroadcasts.broadcastMessageStatus(42, any()) }
     }
 
     // ---------- SF++: CANON_ANNOUNCE ----------

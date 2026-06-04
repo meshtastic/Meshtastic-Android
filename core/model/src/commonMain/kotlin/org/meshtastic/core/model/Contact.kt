@@ -16,10 +16,6 @@
  */
 package org.meshtastic.core.model
 
-import org.meshtastic.core.common.util.CommonParcelable
-import org.meshtastic.core.common.util.CommonParcelize
-
-@CommonParcelize
 data class Contact(
     val contactKey: String,
     val shortName: String,
@@ -31,7 +27,7 @@ data class Contact(
     val isMuted: Boolean,
     val isUnmessageable: Boolean,
     val nodeColors: Pair<Int, Int>? = null,
-) : CommonParcelable
+)
 
 data class ContactSettings(
     val contactKey: String,

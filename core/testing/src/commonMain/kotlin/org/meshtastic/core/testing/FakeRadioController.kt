@@ -20,7 +20,8 @@ import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Position
-import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.repository.AdminEditScope
+import org.meshtastic.core.repository.RadioController
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Config
@@ -36,7 +37,7 @@ class FakeRadioController :
     RadioController {
 
     /** Canonical app-level connection state, mirroring [ServiceRepository][connectionState] semantics. */
-    private val _connectionState = mutableStateFlow<ConnectionState>(ConnectionState.Connected)
+    private val _connectionState = mutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
     override val connectionState: StateFlow<ConnectionState> = _connectionState
 
     private val _clientNotification = mutableStateFlow<ClientNotification?>(null)
@@ -47,8 +48,7 @@ class FakeRadioController :
     val sentSharedContacts = mutableListOf<Int>()
     var throwOnSend: Boolean = false
     var lastSetDeviceAddress: String? = null
-    var beginEditSettingsCalled = false
-    var commitEditSettingsCalled = false
+    var editSettingsCalled = false
     var startProvideLocationCalled = false
     var stopProvideLocationCalled = false
 
@@ -59,8 +59,7 @@ class FakeRadioController :
             sentSharedContacts.clear()
             throwOnSend = false
             lastSetDeviceAddress = null
-            beginEditSettingsCalled = false
-            commitEditSettingsCalled = false
+            editSettingsCalled = false
             startProvideLocationCalled = false
             stopProvideLocationCalled = false
         }
@@ -75,14 +74,24 @@ class FakeRadioController :
         _clientNotification.value = null
     }
 
-    override suspend fun favoriteNode(nodeNum: Int) {
-        favoritedNodes.add(nodeNum)
+    override suspend fun setFavorite(nodeNum: Int, favorite: Boolean) {
+        if (favorite) favoritedNodes.add(nodeNum) else favoritedNodes.remove(nodeNum)
     }
 
     override suspend fun sendSharedContact(nodeNum: Int): Boolean {
         sentSharedContacts.add(nodeNum)
         return true
     }
+
+    override suspend fun setIgnored(nodeNum: Int, ignored: Boolean) {}
+
+    override suspend fun toggleMuted(nodeNum: Int) {}
+
+    override suspend fun sendReaction(emoji: String, replyId: Int, contactKey: String) {}
+
+    override suspend fun importContact(contact: org.meshtastic.proto.SharedContact) {}
+
+    override suspend fun refreshMetadata(destNum: Int) {}
 
     override suspend fun setLocalConfig(config: Config) {}
 
@@ -140,15 +149,27 @@ class FakeRadioController :
 
     override suspend fun requestNeighborInfo(requestId: Int, destNum: Int) {}
 
-    override suspend fun beginEditSettings(destNum: Int) {
-        beginEditSettingsCalled = true
+    override suspend fun editSettings(destNum: Int, block: suspend AdminEditScope.() -> Unit) {
+        editSettingsCalled = true
+        val scope =
+            object : AdminEditScope {
+                override suspend fun setOwner(user: User) = setOwner(destNum, user, generatePacketId())
+
+                override suspend fun setConfig(config: Config) = setConfig(destNum, config, generatePacketId())
+
+                override suspend fun setModuleConfig(config: ModuleConfig) =
+                    setModuleConfig(destNum, config, generatePacketId())
+
+                override suspend fun setChannel(channel: Channel) =
+                    setRemoteChannel(destNum, channel, generatePacketId())
+
+                override suspend fun setFixedPosition(position: Position) =
+                    this@FakeRadioController.setFixedPosition(destNum, position)
+            }
+        scope.block()
     }
 
-    override suspend fun commitEditSettings(destNum: Int) {
-        commitEditSettingsCalled = true
-    }
-
-    override fun getPacketId(): Int = 1
+    override fun generatePacketId(): Int = 1
 
     override fun startProvideLocation() {
         startProvideLocationCalled = true
@@ -158,7 +179,7 @@ class FakeRadioController :
         stopProvideLocationCalled = true
     }
 
-    override fun setDeviceAddress(address: String) {
+    override suspend fun setDeviceAddress(address: String) {
         lastSetDeviceAddress = address
     }
 

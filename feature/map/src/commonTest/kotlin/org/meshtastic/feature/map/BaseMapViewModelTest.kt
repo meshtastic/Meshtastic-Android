@@ -30,6 +30,7 @@ import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.testing.FakeNodeRepository
@@ -196,7 +197,7 @@ class BaseMapViewModelTest {
     }
 
     private fun waypointPacket(id: Int, expire: Int): DataPacket = DataPacket(
-        to = DataPacket.ID_BROADCAST,
+        to = NodeAddress.ID_BROADCAST,
         channel = 0,
         waypoint = Waypoint(id = id, name = "Waypoint $id", expire = expire),
     )

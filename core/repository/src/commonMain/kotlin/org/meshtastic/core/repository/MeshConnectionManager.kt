@@ -30,7 +30,7 @@ interface MeshConnectionManager {
     fun startNodeInfoOnly()
 
     /** Called when the node database is ready and fully populated. */
-    fun onNodeDbReady()
+    suspend fun onNodeDbReady()
 
     /** Updates the telemetry information for the local node. */
     fun updateTelemetry(t: Telemetry)

@@ -16,6 +16,13 @@
  */
 package org.meshtastic.core.repository
 
+/**
+ * Platform-agnostic notification dispatch primitive. Posts opaque [Notification] records, cancels by id, or wipes all
+ * active notifications. Intended as the lowest layer of the notification stack.
+ *
+ * Domain-specific notification builders (mesh message arrivals, low-battery alerts, etc.) live in
+ * [MeshNotificationManager], which composes over this dispatcher.
+ */
 interface NotificationManager {
     fun dispatch(notification: Notification)
 
