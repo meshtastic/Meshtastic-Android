@@ -66,6 +66,7 @@ import org.meshtastic.core.resources.a11y_message_from
 import org.meshtastic.core.resources.filter_message_label
 import org.meshtastic.core.resources.reply
 import org.meshtastic.core.ui.component.AutoLinkText
+import org.meshtastic.core.ui.component.HighlightedText
 import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.component.Rssi
 import org.meshtastic.core.ui.component.Snr
@@ -103,6 +104,7 @@ fun MessageItem(
     onStatusClick: () -> Unit = {},
     hasSamePrev: Boolean = false,
     hasSameNext: Boolean = false,
+    searchQuery: String = "",
 ) = Column(
     modifier =
     modifier
@@ -260,7 +262,20 @@ fun MessageItem(
             )
 
             Column(modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)) {
-                AutoLinkText(text = message.text, style = MaterialTheme.typography.bodyLarge, color = contentColor)
+                if (searchQuery.isNotEmpty()) {
+                    HighlightedText(
+                        text = message.text,
+                        query = searchQuery,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = contentColor,
+                    )
+                } else {
+                    AutoLinkText(
+                        text = message.text,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = contentColor,
+                    )
+                }
 
                 Row(modifier = Modifier, verticalAlignment = Alignment.CenterVertically) {
                     if (!message.fromLocal) {
