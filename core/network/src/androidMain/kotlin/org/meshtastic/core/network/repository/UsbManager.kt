@@ -28,7 +28,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import org.meshtastic.core.common.util.registerReceiverCompat
 
-private const val ACTION_USB_PERMISSION = "com.geeksville.mesh.USB_PERMISSION"
+private const val ACTION_USB_PERMISSION = "org.meshtastic.app.USB_PERMISSION"
 
 internal fun UsbManager.requestPermission(context: Context, device: UsbDevice): Flow<Boolean> = callbackFlow {
     val receiver =

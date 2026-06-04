@@ -61,8 +61,6 @@ component_management:
 ignore:
   - "**/build/**"
   - "**/*.pb.kt"          # Generated Protobuf code
-  - "**/*.aidl"           # AIDL interface files
-  - "**/aidl/**"           # Generated AIDL code
   - "core/resources/**"   # Centralized resources
   - "**/test/**"          # Unit tests
   - "**/androidTest/**"   # Instrumented tests

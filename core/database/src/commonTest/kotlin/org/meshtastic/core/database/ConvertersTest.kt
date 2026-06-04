@@ -20,6 +20,7 @@ import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.DeviceMetrics
 import org.meshtastic.proto.FromRadio
@@ -41,7 +42,7 @@ class ConvertersTest {
     fun `data packet string converter round trips`() {
         val packet =
             DataPacket(
-                to = DataPacket.ID_BROADCAST,
+                to = NodeAddress.ID_BROADCAST,
                 bytes = "hello mesh".encodeToByteArray().toByteString(),
                 dataType = 1,
                 from = "!12345678",

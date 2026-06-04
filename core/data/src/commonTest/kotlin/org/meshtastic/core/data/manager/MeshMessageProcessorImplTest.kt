@@ -33,7 +33,6 @@ import okio.ByteString
 import org.meshtastic.core.repository.FromRadioPacketHandler
 import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.MeshLogRepository
-import org.meshtastic.core.repository.MeshRouter
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.Data
@@ -50,7 +49,6 @@ class MeshMessageProcessorImplTest {
     private val nodeManager = mock<NodeManager>(MockMode.autofill)
     private val serviceRepository = mock<ServiceRepository>(MockMode.autofill)
     private val meshLogRepository = mock<MeshLogRepository>(MockMode.autofill)
-    private val router = mock<MeshRouter>(MockMode.autofill)
     private val fromRadioDispatcher = mock<FromRadioPacketHandler>(MockMode.autofill)
     private val dataHandler = mock<MeshDataHandler>(MockMode.autofill)
 
@@ -65,14 +63,13 @@ class MeshMessageProcessorImplTest {
     fun setUp() {
         every { nodeManager.isNodeDbReady } returns isNodeDbReady
         every { nodeManager.myNodeNum } returns MutableStateFlow<Int?>(myNodeNum)
-        every { router.dataHandler } returns dataHandler
     }
 
     private fun createProcessor(scope: CoroutineScope): MeshMessageProcessorImpl = MeshMessageProcessorImpl(
         nodeManager = nodeManager,
-        serviceRepository = serviceRepository,
+        serviceStateWriter = serviceRepository,
         meshLogRepository = lazy { meshLogRepository },
-        router = lazy { router },
+        dataHandler = lazy { dataHandler },
         fromRadioDispatcher = fromRadioDispatcher,
         scope = scope,
     )
@@ -251,7 +248,7 @@ class MeshMessageProcessorImplTest {
         advanceUntilIdle()
 
         // Should have called updateNode for myNodeNum (lastHeard update)
-        verify { nodeManager.updateNode(myNodeNum, withBroadcast = true, any(), any()) }
+        verify { nodeManager.updateNode(myNodeNum, any(), any()) }
     }
 
     @Test
@@ -273,7 +270,7 @@ class MeshMessageProcessorImplTest {
         advanceUntilIdle()
 
         // Should have called updateNode for the sender
-        verify { nodeManager.updateNode(senderNode, withBroadcast = false, any(), any()) }
+        verify { nodeManager.updateNode(senderNode, any(), any()) }
     }
 
     // ---------- handleReceivedMeshPacket: null decoded ----------

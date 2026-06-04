@@ -16,8 +16,8 @@
  */
 package org.meshtastic.feature.car.util
 
-import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.feature.car.model.CarLocalStats
 import org.meshtastic.feature.car.model.ConversationUi
 import org.meshtastic.feature.car.model.NodeUi
@@ -114,7 +114,7 @@ internal object CarScreenDataBuilder {
      * Returns the contact key in the format expected by the messaging system. Channels use `"<channelIndex>^all"`
      * format; DMs use `"0<nodeId>"`.
      */
-    fun buildContactKey(channelIndex: Int): String = "${channelIndex}${DataPacket.ID_BROADCAST}"
+    fun buildContactKey(channelIndex: Int): String = "${channelIndex}${NodeAddress.ID_BROADCAST}"
 
     /** Returns the most recent N messages from a list, ordered chronologically (oldest first). */
     fun recentMessages(messages: List<MessageSnapshot>, limit: Int = MAX_CONVERSATION_MESSAGES): List<MessageSnapshot> =

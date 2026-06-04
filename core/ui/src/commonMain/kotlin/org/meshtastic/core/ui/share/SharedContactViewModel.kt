@@ -22,19 +22,18 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.repository.NodeRepository
-import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.SharedContact
 
 @KoinViewModel
-class SharedContactViewModel(nodeRepository: NodeRepository, private val serviceRepository: ServiceRepository) :
+class SharedContactViewModel(nodeRepository: NodeRepository, private val radioController: RadioController) :
     ViewModel() {
 
     val unfilteredNodes: StateFlow<List<Node>> =
         nodeRepository.getNodes().stateInWhileSubscribed(initialValue = emptyList())
 
     fun addSharedContact(sharedContact: SharedContact) =
-        viewModelScope.launch { serviceRepository.onServiceAction(ServiceAction.ImportContact(sharedContact)) }
+        viewModelScope.launch { radioController.importContact(sharedContact) }
 }

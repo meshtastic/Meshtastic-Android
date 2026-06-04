@@ -37,7 +37,7 @@ import org.meshtastic.core.network.repository.resolveEndpoint
 import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketHandler
-import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.ServiceStateWriter
 import org.meshtastic.mqtt.ConnectionState
 import org.meshtastic.mqtt.MqttClient
 import org.meshtastic.mqtt.MqttException
@@ -51,7 +51,7 @@ import kotlin.uuid.Uuid
 class MqttManagerImpl(
     private val mqttRepository: MQTTRepository,
     private val packetHandler: PacketHandler,
-    private val serviceRepository: ServiceRepository,
+    private val serviceStateWriter: ServiceStateWriter,
     private val nodeRepository: NodeRepository,
     @Named("ServiceScope") private val scope: CoroutineScope,
 ) : MqttManager {
@@ -79,7 +79,7 @@ class MqttManagerImpl(
                                 is MqttException.ConnectionLost -> "MQTT: connection lost"
                                 else -> "MQTT proxy failed: ${throwable.message}"
                             }
-                        serviceRepository.setErrorMessage(text = message, severity = Severity.Warn)
+                        serviceStateWriter.setErrorMessage(text = message, severity = Severity.Warn)
                     }
                     .launchIn(scope)
         }
