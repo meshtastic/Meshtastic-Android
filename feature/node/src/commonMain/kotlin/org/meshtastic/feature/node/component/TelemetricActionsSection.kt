@@ -179,6 +179,9 @@ private fun rememberTelemetricFeatures(
                 titleRes = Res.string.request_air_quality_metrics,
                 icon = Res.drawable.ic_air,
                 requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.AIR_QUALITY) },
+                logsType = LogsType.AIR_QUALITY,
+                content = { node, _ -> AirQualityInfoCards(node) },
+                hasContent = { it.hasAirQualityMetrics },
             ),
             TelemetricFeature(
                 titleRes = LogsType.POWER.titleRes,
