@@ -5,7 +5,7 @@ Module directory, namespacing conventions, environment setup, and troubleshootin
 
 - **Build System:** Gradle (Kotlin DSL). JDK 21 REQUIRED. Target SDK: API 36. Min SDK: API 26.
 - **Flavors:** `fdroid` (OSS only) · `google` (Maps + DataDog analytics)
-- **Android-only Modules:** `core:api` (AIDL), `core:barcode` (CameraX). Shared contracts abstracted into `core:ui/commonMain`.
+- **Android-only Modules:** `core:barcode` (CameraX). Shared contracts abstracted into `core:ui/commonMain`.
 
 ## Codebase Map
 
@@ -28,7 +28,6 @@ Module directory, namespacing conventions, environment setup, and troubleshootin
 | `core:navigation` | Shared navigation keys/routes for Navigation 3 using `@Serializable sealed interface` hierarchies. `DeepLinkRouter` for typed backstack synthesis, and `MeshtasticNavSavedStateConfig` with `subclassesOfSealed()` for automatic polymorphic backstack persistence. |
 | `core:ui` | Shared Compose UI components (`MeshtasticAppShell`, `MeshtasticNavDisplay`, `MeshtasticNavigationSuite`, `AlertHost`, `SharedDialogs`, `PlaceholderScreen`, `MainAppBar`, dialogs, preferences) and platform abstractions. |
 | `core:service` | KMP service layer; Android bindings stay in `androidMain`. |
-| `core:api` | Public AIDL/API integration module for external clients. |
 | `core:prefs` | KMP preferences layer built on DataStore abstractions. |
 | `core:barcode` | Barcode scanning (Android-only). |
 | `core:nfc` | NFC abstractions (KMP). Android NFC hardware implementation in `androidMain`. |

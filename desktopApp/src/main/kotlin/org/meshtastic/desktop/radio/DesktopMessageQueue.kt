@@ -23,9 +23,9 @@ import kotlinx.coroutines.launch
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.MessageStatus
-import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.MessageQueue
 import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.repository.RadioController
 
 /**
  * Desktop implementation of [MessageQueue].

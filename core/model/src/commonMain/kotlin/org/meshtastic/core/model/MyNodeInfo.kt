@@ -16,11 +16,7 @@
  */
 package org.meshtastic.core.model
 
-import org.meshtastic.core.common.util.CommonParcelable
-import org.meshtastic.core.common.util.CommonParcelize
-
 // MyNodeInfo sent via special protobuf from radio
-@CommonParcelize
 data class MyNodeInfo(
     val myNodeNum: Int,
     val hasGPS: Boolean,
@@ -37,7 +33,7 @@ data class MyNodeInfo(
     val airUtilTx: Float,
     val deviceId: String?,
     val pioEnv: String? = null,
-) : CommonParcelable {
+) {
     /** A human readable description of the software/hardware version */
     val firmwareString: String
         get() = "$model $firmwareVersion"

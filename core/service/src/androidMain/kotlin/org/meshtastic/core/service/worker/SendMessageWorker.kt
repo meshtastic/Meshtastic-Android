@@ -22,8 +22,8 @@ import androidx.work.WorkerParameters
 import org.koin.android.annotation.KoinWorker
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.MessageStatus
-import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.repository.RadioController
 
 @KoinWorker
 class SendMessageWorker(

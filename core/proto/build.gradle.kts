@@ -18,7 +18,6 @@
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.wire)
-    id("meshtastic.publishing")
 }
 
 kotlin {
@@ -129,17 +128,4 @@ wire {
     // so it must be pruned here too or R8 fails with a duplicate-class error at
     // release minify. (Team/MemberRole are NOT shipped by the SDK, so they stay.)
     prune("meshtastic.Marti")
-}
-
-// Modern KMP publication uses the project name as the artifactId by default.
-// We rename the publications to include the 'core-' prefix for consistency.
-publishing {
-    publications.withType<MavenPublication>().configureEach {
-        val baseId = artifactId
-        if (baseId == "proto") {
-            artifactId = "meshtastic-android-proto"
-        } else if (baseId.startsWith("proto-")) {
-            artifactId = baseId.replace("proto-", "meshtastic-android-proto-")
-        }
-    }
 }

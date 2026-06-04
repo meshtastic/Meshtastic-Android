@@ -18,15 +18,12 @@ package org.meshtastic.core.service
 
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.receiveAsFlow
 import org.meshtastic.core.model.ConnectionState
-import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.model.service.TracerouteResponse
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.ClientNotification
@@ -37,7 +34,7 @@ import org.meshtastic.proto.MeshPacket
  *
  * Manages reactive state for connection status, error messages, mesh packets, and service actions using only
  * KMP-compatible primitives (StateFlow, SharedFlow, Channel, Kermit Logger). This implementation can be used directly
- * on any KMP target — Android extends it with AIDL binding via [AndroidServiceRepository].
+ * on any KMP target.
  */
 @Suppress("TooManyFunctions")
 open class ServiceRepositoryImpl : ServiceRepository {
@@ -117,12 +114,5 @@ open class ServiceRepositoryImpl : ServiceRepository {
 
     override fun clearNeighborInfoResponse() {
         setNeighborInfoResponse(null)
-    }
-
-    private val _serviceAction = Channel<ServiceAction>()
-    override val serviceAction: Flow<ServiceAction> = _serviceAction.receiveAsFlow()
-
-    override suspend fun onServiceAction(action: ServiceAction) {
-        _serviceAction.send(action)
     }
 }

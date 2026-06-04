@@ -26,9 +26,9 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.User

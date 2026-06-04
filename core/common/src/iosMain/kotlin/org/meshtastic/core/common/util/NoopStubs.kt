@@ -45,38 +45,3 @@ actual fun currentLocaleCode(): String = "en"
 actual fun currentLocaleQualifier(): String = "en"
 
 actual fun String?.isValidAddress(): Boolean = false
-
-actual interface CommonParcelable
-
-@Target(AnnotationTarget.CLASS)
-@Retention(AnnotationRetention.BINARY)
-actual annotation class CommonParcelize actual constructor()
-
-@Target(AnnotationTarget.PROPERTY)
-@Retention(AnnotationRetention.SOURCE)
-actual annotation class CommonIgnoredOnParcel actual constructor()
-
-actual interface CommonParceler<T> {
-    actual fun create(parcel: CommonParcel): T
-
-    actual fun T.write(parcel: CommonParcel, flags: Int)
-}
-
-@Target(AnnotationTarget.CLASS, AnnotationTarget.PROPERTY)
-@Retention(AnnotationRetention.SOURCE)
-@Repeatable
-actual annotation class CommonTypeParceler<T, P : CommonParceler<in T>> actual constructor()
-
-actual class CommonParcel {
-    actual fun readString(): String? = null
-
-    actual fun readInt(): Int = 0
-
-    actual fun readLong(): Long = 0L
-
-    actual fun readFloat(): Float = 0.0f
-
-    actual fun createByteArray(): ByteArray? = null
-
-    actual fun writeByteArray(b: ByteArray?) {}
-}

@@ -201,7 +201,7 @@ data class Node(
 
         /** Creates a fallback [Node] when the node is not found in the database. */
         fun createFallback(nodeNum: Int, fallbackNamePrefix: String): Node {
-            val userId = DataPacket.nodeNumToDefaultId(nodeNum)
+            val userId = NodeAddress.numToDefaultId(nodeNum)
             val safeUserId = userId.padStart(DEFAULT_ID_SUFFIX_LENGTH, '0').takeLast(DEFAULT_ID_SUFFIX_LENGTH)
             val longName = "$fallbackNamePrefix $safeUserId"
             val defaultUser =

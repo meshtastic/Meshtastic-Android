@@ -20,14 +20,16 @@ import co.touchlab.kermit.Logger
 import org.meshtastic.core.common.util.HomoglyphCharacterStringTransformer
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.Capabilities
+import org.meshtastic.core.model.ContactKey
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.repository.HomoglyphPrefs
 import org.meshtastic.core.repository.MessageQueue
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.repository.RadioController
 import org.meshtastic.proto.Config
 import kotlin.random.Random
 
@@ -46,7 +48,7 @@ import kotlin.random.Random
 interface SendMessageUseCase {
     suspend operator fun invoke(
         text: String,
-        contactKey: String = "0${DataPacket.ID_BROADCAST}",
+        contactKey: String = "0${NodeAddress.ID_BROADCAST}",
         replyId: Int? = null,
     ): Int
 }
@@ -69,17 +71,18 @@ class SendMessageUseCaseImpl(
      */
     @Suppress("NestedBlockDepth", "LongMethod", "CyclomaticComplexMethod")
     override suspend operator fun invoke(text: String, contactKey: String, replyId: Int?): Int {
-        val channel = contactKey[0].digitToIntOrNull()
-        val dest = if (channel != null) contactKey.substring(1) else contactKey
+        val parsedKey = ContactKey(contactKey)
+        val channel = parsedKey.channelOrNull
+        val dest = parsedKey.addressString
 
         val ourNode = nodeRepository.ourNodeInfo.value
-        val fromId = ourNode?.user?.id ?: DataPacket.ID_LOCAL
+        val fromId = ourNode?.user?.id ?: NodeAddress.ID_LOCAL
 
         // Direct message side-effects: share the contact's public key (PKI) or
         // favorite the node (legacy) before sending the first message.  PKI DMs use
         // channel == PKC_CHANNEL_INDEX (8); legacy DMs have no channel prefix
         // (channel == null).  Both formats target a specific node.
-        val isDirectMessage = channel == null || channel == DataPacket.PKC_CHANNEL_INDEX
+        val isDirectMessage = channel == null || channel == NodeAddress.PKC_CHANNEL_INDEX
         if (isDirectMessage) {
             val destNode = nodeRepository.getNode(dest)
             val fwVersion = ourNode?.metadata?.firmware_version
@@ -137,7 +140,7 @@ class SendMessageUseCaseImpl(
 
     private suspend fun favoriteNode(node: Node) {
         try {
-            radioController.favoriteNode(node.num)
+            radioController.setFavorite(node.num, favorite = true)
         } catch (ex: Exception) {
             Logger.e(ex) { "Favorite node error" }
         }
