@@ -43,7 +43,9 @@ advanced
 advanced_device_gps
 advanced_title
 ### AIR ###
+air_quality
 air_quality_icon
+air_quality_metrics_log
 air_quality_metrics_module_enabled
 air_quality_metrics_update_interval_seconds
 air_util_definition
@@ -179,6 +181,7 @@ clear_time_zone
 client_notification
 close
 close_selection
+co2
 codec_2_enabled
 codec2_sample_rate
 coding_rate
@@ -751,6 +754,7 @@ message_status_sfpp_confirmed
 message_status_sfpp_routing
 message_status_unknown
 messages
+micrograms_per_cubic_meter
 min
 minimum_broadcast_seconds
 minimum_distance
@@ -953,6 +957,9 @@ play
 plurals_hours
 plurals_minutes
 plurals_seconds
+pm1_0
+pm10
+pm2_5
 ### POSITION ###
 position
 position_config_set_fixed_from_phone
@@ -968,6 +975,7 @@ power_metrics_module_enabled
 power_metrics_on_screen_enabled
 power_metrics_update_interval_seconds
 powered
+ppm
 precise_location
 preferences_language
 preferences_system_default
