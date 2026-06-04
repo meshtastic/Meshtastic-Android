@@ -1,0 +1,15 @@
+{
+  "$comment": "Team-wide Claude Code token guard. Claude does NOT read .aiexclude/.copilotignore, so the big-file protections live here. 'deny' = never read (Crowdin-managed translations); 'ask' = prompt first (big files rarely needed in full — prefer .skills/compose-ui/strings-index.txt for strings).",
+  "permissions": {
+    "deny": [
+      "Read(**/composeResources/**/values-*/*.xml)",
+      "Read(**/res/values-*/strings.xml)"
+    ],
+    "ask": [
+      "Read(**/composeResources/**/values/strings.xml)",
+      "Read(**/firmware_releases.json)",
+      "Read(**/composeResources/files/emoji-data.json)",
+      "Read(**/flatpak-sources*.json)"
+    ]
+  }
+}

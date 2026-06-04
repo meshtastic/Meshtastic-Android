@@ -19,6 +19,15 @@
     <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">Meddelande från %1$s: %2$s</string>
+    <string name="a11y_node_battery">batteri %1$d%%</string>
+    <string name="a11y_node_distance_away">%1$s bort</string>
+    <string name="a11y_node_favorite">favorit</string>
+    <string name="a11y_node_hops_away">%1$d hopp bort</string>
+    <string name="a11y_node_last_heard">hördes senast %1$s</string>
+    <string name="a11y_node_offline">offline</string>
+    <string name="a11y_node_online">online</string>
+    <string name="a11y_node_role">roll %1$s</string>
+    <string name="a11y_node_signal">mottagning %1$s</string>
     <string name="accept">Acceptera</string>
     <string name="acknowledgements">Bekräftelser</string>
     <!-- ACTION -->
@@ -95,7 +104,7 @@
     <string name="bluetooth_config">Bluetooth-inställningar</string>
     <string name="bluetooth_enabled">Bluetooth är aktiverad</string>
     <string name="bluetooth_feature_config">Konfiguration</string>
-    <string name="bluetooth_feature_config_description">Hantera enhetsinställningarna och kanalerna trådlöst</string>
+    <string name="bluetooth_feature_config_description">Hantera enhetsinställningarna och kanalerna trådlöst.</string>
     <string name="bluetooth_feature_discovery">Upptäckt</string>
     <string name="bluetooth_feature_discovery_description">Hitta och identifiera Meshtastic-enheter nära dig.</string>
     <string name="bluetooth_permission">Bluetooth</string>
@@ -155,12 +164,14 @@
     <string name="compass_bearing">Riktning: %1$s</string>
     <string name="compass_bearing_na">Riktning: okänd</string>
     <string name="compass_distance">Avstånd: %1$s</string>
+    <string name="compass_location_disabled">Platstjänst är inaktiverad. Slå på platstjänst.</string>
     <string name="compass_no_location_fix">Väntar på en GPS-position för att beräkna avstånd och riktning.</string>
     <string name="compass_no_location_permission">Platstillstånd krävs för att visa avstånd och riktning.</string>
     <string name="compass_no_magnetometer">Denna enhet har ingen kompass. Riktning okänd.</string>
     <string name="compass_north_top">Kompassens norrläge uppåt</string>
     <string name="compass_orientation">Kompassriktning</string>
     <string name="compass_title">Kompass</string>
+    <string name="compass_uncertainty">Uppskattad area: \u00b1%1$s (\u00b1%2$s)</string>
     <string name="compass_uncertainty_unknown">Uppskattat område: okänd noggrannhet</string>
     <string name="compromised_keys">Läkta nycklar upptäcktes, välj OK för att återskapa.</string>
     <!-- CONFIG -->
@@ -189,7 +200,7 @@
     <string name="config_position_broadcast_secs_summary">Längsta tid som kan förflyta utan att en nod sänder en position.</string>
     <string name="config_position_broadcast_smart_minimum_distance_summary">Minsta förändring av position för att smart position ska sända (meter).</string>
     <string name="config_position_broadcast_smart_minimum_interval_secs_summary">Hur ofta position ska skickas om minsta angivna förflyttning skett.</string>
-    <string name="config_position_flags_summary">Valfria fält att inkludera vid sammansättning av positionsmeddelanden. Ju fler fält som väljs, desto större kommer meddelandet att bli. Längre meddelanden leder till högre sändningsutnyttnande och en högre risk för paketförlust.</string>
+    <string name="config_position_flags_summary">Valfria fält att inkludera vid sammansättning av positionsmeddelanden. Ju fler fält som väljs, desto större kommer meddelandet att bli. Längre meddelanden leder till högre sändningsutnyttjande och en högre risk för paketförlust.</string>
     <string name="config_position_gps_update_interval_summary">Hur ofta ska vi försöka få en GPS-position (&lt;10sec håller GPS aktiv).</string>
     <string name="config_power_is_power_saving_summary">Kommer att pausa allt så mycket som möjligt. För tracker- och sensor-rollen kommer detta också att omfatta lora radio. Använd inte den här inställningen om du vill använda enheten med telefonapparna eller använder en enhet utan en hårdvaruknapp.</string>
     <string name="config_security_admin_key">Den publika nyckeln som ger rätt att skicka administratörsmeddelanden till den här noden.</string>
@@ -241,6 +252,7 @@
     <string name="debug_filter_included">Filtrera inkluderade</string>
     <string name="debug_filter_preset_title">Förinställda filter</string>
     <string name="debug_filters">Filter</string>
+    <string name="debug_log_api_enabled">API för debugloggen igång</string>
     <string name="debug_logs_export">Exportera loggar</string>
     <string name="debug_panel">Felsökningspanel</string>
     <string name="debug_search_clear">Rensa sökning</string>
@@ -295,6 +307,7 @@
     <string name="disk_free_indexed">Ledigt lagringutrymme %1$d</string>
     <!-- DISPLAY -->
     <string name="display">Display</string>
+    <string name="display_config">Enhetsskärm</string>
     <string name="display_mode">Visningsläge</string>
     <string name="display_time_in_12h_format">Visar tiden i 12-timmarsformat när denna är aktiverad.</string>
     <string name="display_units">Visa enheter</string>
@@ -307,6 +320,8 @@
     <string name="dns">DNS</string>
     <!-- DOC -->
     <string name="doc_clear_search">Rensa sökning</string>
+    <string name="doc_section_developer">Guide för utvecklare</string>
+    <string name="doc_section_user">Användarguide</string>
     <string name="doc_title_discovery">Upptäckt</string>
     <string name="doc_title_mqtt">MQTT</string>
     <string name="doc_title_nodes">Noder</string>
@@ -360,8 +375,10 @@
     <string name="favorite">Favorit</string>
     <string name="favorite_add">Lägg till '%1$s' som en favoritnod?</string>
     <string name="favorite_remove">Ta bort '%1$s' som en favoritnod?</string>
+    <string name="file_entry">- %1$s (%2$d bytes)</string>
     <string name="files_available">Tillgängliga filer (%1$d):</string>
     <!-- FILTER -->
+    <string name="filter_add_placeholder">Lägg till ord eller regex:mönster</string>
     <string name="filter_disable_for_contact">Inaktivera filtrering</string>
     <string name="filter_enable">Aktivera filtrering</string>
     <string name="filter_enable_for_contact">Aktivera filtrering</string>
@@ -384,6 +401,7 @@
     <string name="firmware_update_almost_there">Alldeles snart...</string>
     <string name="firmware_update_alpha">Alfa</string>
     <string name="firmware_update_checking">Söker efter uppdateringar...</string>
+    <string name="firmware_update_connecting_attempt">Ansluter till enhet (försök %1$d/%2$d)...</string>
     <string name="firmware_update_currently_installed">Installerad version: %1$s</string>
     <string name="firmware_update_device">Enhet: %1$s</string>
     <string name="firmware_update_disclaimer_chirpy_says">Chirpy säger: \"Håll i dig!\"</string>
@@ -515,6 +533,7 @@
     <string name="led_heartbeat">LED pulsering</string>
     <string name="led_state">LED-läge</string>
     <string name="legacy_admin_channel">Äldre typ av adminkanal</string>
+    <string name="library_count">%1$d bibliotek</string>
     <string name="licensed_amateur_radio">Licensierad radioamatör (ham)</string>
     <string name="licensed_amateur_radio_text">Aktivering detta alternativ inaktiverar kryptering och är inte kompatibelt med standard Meshtastic-nätverk.</string>
     <!-- LOAD -->
@@ -529,8 +548,11 @@
     <string name="local_stats_battery">Batteri: %1$d%</string>
     <string name="local_stats_diagnostics_prefix">Diagnostik: %1$s</string>
     <string name="local_stats_dropped">Släppta %1$d</string>
+    <string name="local_stats_heap_value">%1$d / %2$d</string>
     <string name="local_stats_nodes">Noder: %1$d aktiva / %2$d totalt</string>
+    <string name="local_stats_noise">Brus %1$d dBm</string>
     <string name="local_stats_traffic">Trafik: TX %1$d / RX %2$d (D: %3$d)</string>
+    <string name="local_stats_updated_at">%1$s</string>
     <string name="local_stats_uptime">Upptid: %1$s</string>
     <string name="location_disabled">Platsåtkomst är avstängd, kan inte leverera position till meshnätverket.</string>
     <string name="location_sharing">Positionsdelning</string>
@@ -553,6 +575,7 @@
     <string name="low_battery">Lågt batteri</string>
     <string name="low_battery_message">Noden %1$s har ett lågt batteri (%2$d%)</string>
     <string name="low_battery_title">Lågt batteri: %1$s</string>
+    <string name="low_entropy_key_title">Upptäckte svag krypteringsnyckel</string>
     <string name="lux">Lux</string>
     <string name="manage_custom_tile_sources">Hantera kartkällor</string>
     <string name="manage_map_layers">Hantera kartlager</string>
@@ -570,6 +593,7 @@
     <string name="map_download_region">Ladda ner region</string>
     <string name="map_filter">Kartfilter\n</string>
     <string name="map_layer_formats">Kartalager stödjer .kml, .kmz och GeoJSON format.</string>
+    <string name="map_node_popup_details">%1$s&lt;br&gt;Hördes senast: %2$s&lt;br&gt;Senaste position: %3$s&lt;br&gt;Batteri: %4$s</string>
     <string name="map_offline_manager">Offline-hanterare</string>
     <string name="map_purge_fail">SQL-cache rensning misslyckades, se logcat för detaljer</string>
     <string name="map_purge_success">SQL-cache rensad för %1$s</string>
@@ -620,6 +644,7 @@
     <string name="module_settings">Modul konfiguration</string>
     <string name="modules_already_unlocked">Modulerna är redan upplåsta</string>
     <string name="modules_unlocked">Modulerna är upplåsta</string>
+    <string name="more_reactions">Fler reaktioner</string>
     <!-- MQTT -->
     <string name="mqtt">MQTT</string>
     <string name="mqtt_config">MQTT-konfiguration</string>
@@ -660,9 +685,11 @@
     <string name="next">Nästa</string>
     <string name="nfc_disabled">NFC är inaktiverat. Aktivera det i systeminställningar.</string>
     <!-- NO -->
+    <string name="no_bluetooth_devices_seen">Inga bluetooth-enheter hittades</string>
     <string name="no_device_selected">Ingen enhet vald</string>
     <string name="no_devices_found">Hittade inga enheter</string>
     <string name="no_local_stats">Ingen tillgänglig statistik</string>
+    <string name="no_network_devices_hint">Säkerställ att du och din enhet är anslutna till samma nätverk.</string>
     <!-- NODE -->
     <string name="node_count_template">(%1$d aktiva / %2$d visas / %3$d totalt)</string>
     <string name="node_filter_exclude_infrastructure">Dölj infrastruktur</string>
@@ -675,7 +702,12 @@
     <string name="node_filter_title">Filtrera på</string>
     <string name="node_id">Nod-ID</string>
     <string name="node_layout_channel">Kanal</string>
+    <string name="node_layout_distance_and_bearing">Avstånd och bäring</string>
+    <string name="node_layout_help_signal_bad">Dålig mottagning. SNR över −18 dB och RSSI över −125 dBm.</string>
+    <string name="node_layout_help_signal_fair">Medelbra mottagning. SNR över −12 dB och RSSI över −120 dBm.</string>
+    <string name="node_layout_help_signal_good">Bra mottagning. SNR över −7 dB och RSSI över −115 dBm.</string>
     <string name="node_layout_hops_away">Hopp bort</string>
+    <string name="node_layout_last_heard_time">Hördes senast klockan</string>
     <string name="node_layout_log_icons">Miljövärden</string>
     <string name="node_layout_power">Ström</string>
     <string name="node_number">Nodnummer</string>
@@ -739,6 +771,13 @@
     <string name="password">Lösenord</string>
     <!-- PAX -->
     <string name="pax">PAX</string>
+    <string name="pax_ble_format">B:%1$d</string>
+    <string name="pax_ble_marker">BLE: %1$s</string>
+    <string name="pax_metrics_log">PAX nyckeltal</string>
+    <string name="pax_total_format">PAX: %1$d</string>
+    <string name="pax_total_marker">PAX: %1$s</string>
+    <string name="pax_wifi_format">W:%1$d</string>
+    <string name="pax_wifi_marker">WiFi: %1$s</string>
     <string name="paxcounter">Paxcounter</string>
     <string name="paxcounter_config">Konfiguration av PAX-räknare</string>
     <string name="paxcounter_enabled">PAX-räknare aktiverad</string>
@@ -780,9 +819,13 @@
     <string name="press_and_drag">Tryck och dra för att ändra ordning</string>
     <string name="pressure">Tryck</string>
     <!-- PREVIEW -->
+    <string name="preview_dot">Punkt</string>
     <string name="preview_footer">Sidfot</string>
+    <string name="preview_gauge">Mätare</string>
     <string name="preview_gradient">Gradient</string>
     <string name="preview_header">Rubrik</string>
+    <string name="preview_item">Föremål %1$d</string>
+    <string name="preview_pill">Piller</string>
     <string name="preview_text">Text</string>
     <string name="primary">Primär</string>
     <string name="primary_channel_feature">Periodisk sändning av position och telemetri</string>
@@ -921,6 +964,7 @@
     <string name="scanning_network">Söker...</string>
     <string name="screen_on_for">Håll skärmen tänd</string>
     <string name="scroll_to_bottom">Gå till slutet</string>
+    <string name="search_emoji">Sök efter emoji...</string>
     <string name="secondary">Sekundär</string>
     <string name="secondary_channel_position_feature">Inaktivering av position på den primära kanalen tillåter periodiska positionsuppdateringar på den första sekundära kanalen med positionen aktiverad, annars krävs manuell positionsbegäran.</string>
     <string name="secondary_no_telemetry">Inga periodiska sändningar av telemetri</string>
@@ -959,6 +1003,7 @@
     <string name="serial_rx_pin">RX</string>
     <string name="serial_tx_pin">TX</string>
     <string name="server">Server</string>
+    <string name="session_active">Session aktiv</string>
     <string name="set_your_region">Ange din region</string>
     <string name="settings">inställningar</string>
     <!-- SHARE -->

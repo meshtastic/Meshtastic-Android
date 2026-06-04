@@ -36,6 +36,8 @@ import org.meshtastic.feature.settings.DeviceConfigurationScreen
 import org.meshtastic.feature.settings.ModuleConfigurationScreen
 import org.meshtastic.feature.settings.NodeListScreen
 import org.meshtastic.feature.settings.SettingsViewModel
+import org.meshtastic.feature.settings.appfunctions.AppFunctionsSettingsScreen
+import org.meshtastic.feature.settings.appfunctions.AppFunctionsSettingsViewModel
 import org.meshtastic.feature.settings.debugging.DebugScreen
 import org.meshtastic.feature.settings.debugging.DebugViewModel
 import org.meshtastic.feature.settings.filter.FilterSettingsScreen
@@ -127,8 +129,7 @@ fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
     }
 
     ConfigRoute.entries.forEach { routeInfo ->
-        configComposable(routeInfo.route::class, backStack) { viewModel ->
-            LaunchedEffect(Unit) { viewModel.setResponseStateLoading(routeInfo) }
+        configComposable(routeInfo.route::class, backStack, routeInfo) { viewModel ->
             when (routeInfo) {
                 ConfigRoute.USER ->
                     UserConfigScreen(viewModel, onBack = dropUnlessResumed { backStack.removeLastOrNull() })
@@ -164,8 +165,7 @@ fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
     }
 
     ModuleRoute.entries.forEach { routeInfo ->
-        configComposable(routeInfo.route::class, backStack) { viewModel ->
-            LaunchedEffect(Unit) { viewModel.setResponseStateLoading(routeInfo) }
+        configComposable(routeInfo.route::class, backStack, routeInfo) { viewModel ->
             when (routeInfo) {
                 ModuleRoute.MQTT ->
                     MQTTConfigScreen(viewModel, onBack = dropUnlessResumed { backStack.removeLastOrNull() })
@@ -250,6 +250,11 @@ fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
             onNavigateUp = dropUnlessResumed { backStack.removeLastOrNull() },
         )
     }
+
+    entry<SettingsRoute.AppFunctionsSettings> {
+        val viewModel: AppFunctionsSettingsViewModel = koinViewModel()
+        AppFunctionsSettingsScreen(viewModel = viewModel, onBack = dropUnlessResumed { backStack.removeLastOrNull() })
+    }
 }
 
 /** Expect declaration for the platform-specific settings main screen. */
@@ -266,7 +271,15 @@ expect fun SettingsMainScreen(
 fun <R : Route> EntryProviderScope<NavKey>.configComposable(
     route: KClass<R>,
     backStack: NavBackStack<NavKey>,
+    routeInfo: Enum<*>,
     content: @Composable (RadioConfigViewModel) -> Unit,
 ) {
-    addEntryProvider(route) { content(getRadioConfigViewModel(backStack)) }
+    addEntryProvider(route) {
+        val viewModel = getRadioConfigViewModel(backStack)
+        // Set loading state before content reads the StateFlow, ensuring
+        // LoadingOverlay is visible from the very first composition frame.
+        remember { viewModel.ensureLoadingForRemote().let { true } }
+        LaunchedEffect(Unit) { viewModel.setResponseStateLoading(routeInfo) }
+        content(viewModel)
+    }
 }
