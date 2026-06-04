@@ -91,6 +91,7 @@ import org.meshtastic.feature.messaging.component.ActionModeTopBar
 import org.meshtastic.feature.messaging.component.DeleteMessageDialog
 import org.meshtastic.feature.messaging.component.MESSAGE_CHARACTER_LIMIT_BYTES
 import org.meshtastic.feature.messaging.component.MessageMenuAction
+import org.meshtastic.feature.messaging.component.MessageSearchBar
 import org.meshtastic.feature.messaging.component.MessageTopBar
 import org.meshtastic.feature.messaging.component.QuickChatRow
 import org.meshtastic.feature.messaging.component.ReplySnippet
@@ -144,6 +145,11 @@ fun MessageScreen(
     val filteredCount by viewModel.filteredCount.collectAsStateWithLifecycle()
     val showFiltered by viewModel.showFiltered.collectAsStateWithLifecycle()
     val filteringDisabled = contactSettings[contactKey]?.filteringDisabled ?: false
+    val isSearchActive by viewModel.isSearchActive.collectAsStateWithLifecycle()
+    val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
+    val searchResults by viewModel.searchResults.collectAsStateWithLifecycle()
+    val searchResultIndex by viewModel.searchResultIndex.collectAsStateWithLifecycle()
+    val currentSearchResult by viewModel.currentSearchResult.collectAsStateWithLifecycle()
 
     // Sync text field changes back to ViewModel draft
     LaunchedEffect(messageInputState) {
@@ -228,6 +234,15 @@ fun MessageScreen(
             // If no unread messages, just scroll to bottom (most recent)
             listState.scrollToItem(0)
             hasPerformedInitialScroll = true
+        }
+    }
+
+    // Scroll to the current search result when navigating prev/next
+    LaunchedEffect(currentSearchResult) {
+        val targetUuid = currentSearchResult?.uuid ?: return@LaunchedEffect
+        val index = pagedMessages.itemSnapshotList.indexOfFirst { it?.uuid == targetUuid }
+        if (index != -1) {
+            listState.animateScrollToItem(index)
         }
     }
 
@@ -324,6 +339,16 @@ fun MessageScreen(
                         }
                     },
                 )
+            } else if (isSearchActive) {
+                MessageSearchBar(
+                    query = searchQuery,
+                    onQueryChange = viewModel::setSearchQuery,
+                    onClose = viewModel::closeSearch,
+                    resultCount = searchResults.size,
+                    currentIndex = searchResultIndex,
+                    onPrevious = viewModel::navigateToPreviousResult,
+                    onNext = viewModel::navigateToNextResult,
+                )
             } else {
                 MessageTopBar(
                     title = title,
@@ -343,6 +368,7 @@ fun MessageScreen(
                     showFiltered = showFiltered,
                     onToggleShowFiltered = viewModel::toggleShowFiltered,
                     onNavigateToFilterSettings = navigateToFilterSettings,
+                    onSearchClick = viewModel::toggleSearch,
                 )
             }
         },
@@ -396,6 +422,7 @@ fun MessageScreen(
                     filteredCount = filteredCount,
                     showFiltered = showFiltered,
                     filteringDisabled = filteringDisabled,
+                    searchQuery = if (isSearchActive) searchQuery else "",
                 ),
                 handlers =
                 MessageListHandlers(
