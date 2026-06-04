@@ -24,6 +24,7 @@ import org.meshtastic.core.common.util.bearing
 import org.meshtastic.core.common.util.latLongToMeter
 import org.meshtastic.core.model.util.onlineTimeThreshold
 import org.meshtastic.core.model.util.toDistanceString
+import org.meshtastic.proto.AirQualityMetrics
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.DeviceMetrics
@@ -58,6 +59,7 @@ data class Node(
     val isMuted: Boolean = false,
     val environmentMetrics: EnvironmentMetrics = EnvironmentMetrics(),
     val powerMetrics: PowerMetrics = PowerMetrics(),
+    val airQualityMetrics: AirQualityMetrics = AirQualityMetrics(),
     val paxcounter: Paxcount = Paxcount(),
     val publicKey: ByteString? = null,
     val notes: String = "",
@@ -88,6 +90,9 @@ data class Node(
 
     val hasPowerMetrics: Boolean
         get() = powerMetrics != PowerMetrics()
+
+    val hasAirQualityMetrics: Boolean
+        get() = airQualityMetrics != AirQualityMetrics()
 
     val batteryLevel
         get() = deviceMetrics.battery_level
