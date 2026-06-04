@@ -421,7 +421,7 @@ class AiFunctionProviderImpl(
         // Try node name first
         when (val nodeResult = fuzzyNameResolver.resolveNodeName(name)) {
             is NodeNameResult.Found -> {
-                val channelIndex = DataPacket.PKC_CHANNEL_INDEX
+                val channelIndex = NodeAddress.PKC_CHANNEL_INDEX
                 return "${channelIndex}${nodeResult.userId}"
             }
 
@@ -458,7 +458,7 @@ class AiFunctionProviderImpl(
                 is NodeNameResult.Found -> {
                     // DM contact key format: channel_index + nodeId
                     // For PKC DMs, use channel index 8; for legacy use no channel prefix
-                    val channelIndex = DataPacket.PKC_CHANNEL_INDEX
+                    val channelIndex = NodeAddress.PKC_CHANNEL_INDEX
                     ResolvedContact.Resolved(
                         contactKey = "${channelIndex}${result.userId}",
                         channelName = "DM to $recipientName",

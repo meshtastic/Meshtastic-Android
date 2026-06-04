@@ -16,8 +16,8 @@
  */
 package org.meshtastic.feature.car.util
 
-import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.feature.car.model.CarLocalStats
 import org.meshtastic.feature.car.model.ConversationUi
 import org.meshtastic.feature.car.model.NodeUi
