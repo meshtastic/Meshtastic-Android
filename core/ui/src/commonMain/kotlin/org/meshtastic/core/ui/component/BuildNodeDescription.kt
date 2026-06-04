@@ -30,6 +30,8 @@ import org.meshtastic.core.resources.a11y_node_offline
 import org.meshtastic.core.resources.a11y_node_online
 import org.meshtastic.core.resources.a11y_node_role
 import org.meshtastic.core.resources.a11y_node_signal
+import org.meshtastic.core.resources.now
+import org.meshtastic.core.resources.unknown
 import org.meshtastic.core.ui.util.formatAgo
 
 private const val MILLIS_PER_SECOND = 1000L
@@ -48,6 +50,8 @@ internal data class NodeDescriptionStrings(
     val battery: String,
     val distanceAway: String,
     val signal: String,
+    val unknown: String,
+    val now: String,
 )
 
 /** Resolves [NodeDescriptionStrings] from Compose string resources. */
@@ -62,6 +66,8 @@ internal fun rememberNodeDescriptionStrings(): NodeDescriptionStrings = NodeDesc
     battery = stringResource(Res.string.a11y_node_battery, 0),
     distanceAway = stringResource(Res.string.a11y_node_distance_away, "%s"),
     signal = stringResource(Res.string.a11y_node_signal, "%s"),
+    unknown = stringResource(Res.string.unknown),
+    now = stringResource(Res.string.now),
 )
 
 /** Builds a TalkBack-friendly description aggregating node state. Shared between [NodeItem] and [NodeItemCompact]. */
@@ -91,7 +97,7 @@ internal fun buildNodeDescription(
     if (lastHeard > 0) {
         val timeText =
             if (lastHeardIsRelative) {
-                formatAgo(lastHeard)
+                formatAgo(lastHeard, strings.unknown, strings.now)
             } else {
                 DateFormatter.formatDateTime(lastHeard.toLong() * MILLIS_PER_SECOND)
             }

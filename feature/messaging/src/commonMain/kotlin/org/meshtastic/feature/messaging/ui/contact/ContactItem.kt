@@ -53,6 +53,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.model.Contact
+import org.meshtastic.core.model.ContactKey
 import org.meshtastic.core.ui.component.SecurityIcon
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.VolumeOff
@@ -138,8 +139,7 @@ private fun ContactHeader(
         val isBroadcast = with(contact.contactKey) { getOrNull(1) == '^' || endsWith("^all") || endsWith("^broadcast") }
 
         if (isBroadcast && channels != null) {
-            val channelIndex = contact.contactKey[0].digitToIntOrNull()
-            channelIndex?.let { index -> SecurityIcon(channels, index) }
+            ContactKey(contact.contactKey).channelOrNull?.let { index -> SecurityIcon(channels, index) }
         }
 
         Text(

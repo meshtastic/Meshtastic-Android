@@ -32,7 +32,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
-import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.nodeColorsFromNum
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
@@ -63,7 +63,7 @@ class ConversationShortcutManager(
                         .map { contacts ->
                             // DM contacts are those whose key does NOT contain the broadcast ID
                             contacts.entries
-                                .filter { (key, _) -> !key.contains(DataPacket.ID_BROADCAST) }
+                                .filter { (key, _) -> !key.contains(NodeAddress.ID_BROADCAST) }
                                 .sortedByDescending { (_, packet) -> packet.time }
                                 .map { (key, packet) -> DmContact(key, packet.from.orEmpty(), packet.time) }
                         }
@@ -136,7 +136,7 @@ class ConversationShortcutManager(
     }
 
     private fun buildChannelShortcut(index: Int, name: String): ShortcutInfoCompat {
-        val contactKey = "${index}${DataPacket.ID_BROADCAST}"
+        val contactKey = "${index}${NodeAddress.ID_BROADCAST}"
         val channelName = name.ifEmpty { "Primary Channel" }
         val person = Person.Builder().setName(channelName).setKey("channel-$index").build()
         return ShortcutInfoCompat.Builder(context, contactKey)

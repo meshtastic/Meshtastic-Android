@@ -22,11 +22,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.CommonUri
-import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.model.util.toChannelSet
 import org.meshtastic.core.repository.DataPair
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.ui.util.getChannelList
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed

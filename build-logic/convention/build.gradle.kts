@@ -199,11 +199,6 @@ gradlePlugin {
             implementationClass = "org.meshtastic.buildlogic.DocsTasks"
         }
 
-        register("publishing") {
-            id = "meshtastic.publishing"
-            implementationClass = "PublishingConventionPlugin"
-        }
-
         register("aboutLibraries") {
             id = "meshtastic.aboutlibraries"
             implementationClass = "AboutLibrariesConventionPlugin"

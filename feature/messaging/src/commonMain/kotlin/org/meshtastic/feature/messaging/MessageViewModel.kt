@@ -37,18 +37,18 @@ import kotlinx.coroutines.flow.update
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.model.ContactSettings
-import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.model.service.ServiceAction
+import org.meshtastic.core.model.NodeAddress
+import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.CustomEmojiPrefs
 import org.meshtastic.core.repository.HomoglyphPrefs
+import org.meshtastic.core.repository.MessagingController
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.QuickChatActionRepository
 import org.meshtastic.core.repository.RadioConfigRepository
-import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.repository.usecase.SendMessageUseCase
 import org.meshtastic.core.ui.viewmodel.safeLaunch
@@ -62,7 +62,8 @@ class MessageViewModel(
     private val nodeRepository: NodeRepository,
     radioConfigRepository: RadioConfigRepository,
     quickChatActionRepository: QuickChatActionRepository,
-    private val serviceRepository: ServiceRepository,
+    private val connectionStateProvider: ConnectionStateProvider,
+    private val messagingController: MessagingController,
     private val packetRepository: PacketRepository,
     private val uiPrefs: UiPrefs,
     private val customEmojiPrefs: CustomEmojiPrefs,
@@ -88,7 +89,7 @@ class MessageViewModel(
 
     val ourNodeInfo = nodeRepository.ourNodeInfo
 
-    val connectionState = serviceRepository.connectionState
+    val connectionState = connectionStateProvider.connectionState
 
     val nodeList: StateFlow<List<Node>> = nodeRepository.getNodes().stateInWhileSubscribed(initialValue = emptyList())
 
@@ -125,10 +126,11 @@ class MessageViewModel(
         get() =
             customEmojiPrefs.customEmojiFrequency.value
                 ?.split(",")
-                ?.associate { entry ->
-                    entry.split("=", limit = 2).takeIf { it.size == 2 }?.let { it[0] to it[1].toInt() } ?: ("" to 0)
+                ?.mapNotNull { entry ->
+                    val parts = entry.split("=", limit = 2)
+                    val count = parts.getOrNull(1)?.toIntOrNull()
+                    if (parts.size == 2 && parts[0].isNotEmpty() && count != null) parts[0] to count else null
                 }
-                ?.toList()
                 ?.sortedByDescending { it.second }
                 ?.map { it.first }
                 ?.take(6) ?: listOf("👍", "👎", "😂", "🔥", "❤️", "😮")
@@ -273,9 +275,9 @@ class MessageViewModel(
         }
     }
 
-    fun getNode(userId: String?) = nodeRepository.getNode(userId ?: DataPacket.ID_BROADCAST)
+    fun getNode(userId: String?) = nodeRepository.getNode(userId ?: NodeAddress.ID_BROADCAST)
 
-    fun getUser(userId: String?) = nodeRepository.getUser(userId ?: DataPacket.ID_BROADCAST)
+    fun getUser(userId: String?) = nodeRepository.getUser(userId ?: NodeAddress.ID_BROADCAST)
 
     /**
      * Sends a message to a contact or channel.
@@ -290,13 +292,12 @@ class MessageViewModel(
      *   broadcasting on channel 0.
      * @param replyId The ID of the message this is a reply to, if any.
      */
-    fun sendMessage(str: String, contactKey: String = "0${DataPacket.ID_BROADCAST}", replyId: Int? = null) {
+    fun sendMessage(str: String, contactKey: String = "0${NodeAddress.ID_BROADCAST}", replyId: Int? = null) {
         safeLaunch(tag = "sendMessage") { sendMessageUseCase.invoke(str, contactKey, replyId) }
     }
 
-    fun sendReaction(emoji: String, replyId: Int, contactKey: String) = safeLaunch(tag = "sendReaction") {
-        serviceRepository.onServiceAction(ServiceAction.Reaction(emoji, replyId, contactKey))
-    }
+    fun sendReaction(emoji: String, replyId: Int, contactKey: String) =
+        safeLaunch(tag = "sendReaction") { messagingController.sendReaction(emoji, replyId, contactKey) }
 
     fun deleteMessages(uuidList: List<Long>) =
         safeLaunch(context = ioDispatcher, tag = "deleteMessages") { packetRepository.deleteMessages(uuidList) }

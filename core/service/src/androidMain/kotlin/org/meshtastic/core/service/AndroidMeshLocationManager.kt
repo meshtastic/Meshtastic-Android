@@ -36,11 +36,13 @@ import org.meshtastic.proto.Position as ProtoPosition
 class AndroidMeshLocationManager(private val context: Application, private val locationRepository: LocationRepository) :
     MeshLocationManager {
     private lateinit var scope: CoroutineScope
+    private var sendPositionFn: (suspend (ProtoPosition) -> Unit)? = null
     private var locationFlow: Job? = null
 
     @SuppressLint("MissingPermission")
-    override fun start(scope: CoroutineScope, sendPositionFn: (ProtoPosition) -> Unit) {
+    override fun start(scope: CoroutineScope, sendPositionFn: suspend (ProtoPosition) -> Unit) {
         this.scope = scope
+        this.sendPositionFn = sendPositionFn
         if (locationFlow?.isActive == true) return
 
         if (context.hasLocationPermission()) {
@@ -68,6 +70,17 @@ class AndroidMeshLocationManager(private val context: Application, private val l
                     }
                     .launchIn(scope)
         }
+    }
+
+    override fun restart() {
+        val fn = sendPositionFn
+        if (fn == null || !::scope.isInitialized) {
+            // start() hasn't been called yet — the connection manager wires us up on first myNodeInfo emission via
+            // the shouldProvideNodeLocation pref. Nothing to restart until that happens.
+            Logger.d { "restart() before start() — no-op until MeshConnectionManagerImpl wires location" }
+            return
+        }
+        start(scope, fn)
     }
 
     override fun stop() {

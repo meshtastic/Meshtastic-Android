@@ -28,8 +28,8 @@ import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeSortOption
+import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.RadioConfigRepository
-import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.testing.FakeDeviceHardwareRepository
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioController
@@ -50,7 +50,7 @@ class NodeListViewModelTest {
     private lateinit var radioController: FakeRadioController
     private lateinit var radioInterfaceService: FakeRadioInterfaceService
     private val radioConfigRepository: RadioConfigRepository = mock(MockMode.autofill)
-    private val serviceRepository: ServiceRepository = mock(MockMode.autofill)
+    private val connectionStateProvider: ConnectionStateProvider = mock(MockMode.autofill)
     private val nodeFilterPreferences: NodeFilterPreferences = mock(MockMode.autofill)
     private val nodeManagementActions: NodeManagementActions = mock(MockMode.autofill)
     private val nodeRequestActions: NodeRequestActions = mock(MockMode.autofill)
@@ -64,7 +64,7 @@ class NodeListViewModelTest {
 
         every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(org.meshtastic.proto.LocalConfig())
         every { radioConfigRepository.deviceProfileFlow } returns MutableStateFlow(org.meshtastic.proto.DeviceProfile())
-        every { serviceRepository.connectionState } returns MutableStateFlow(ConnectionState.Disconnected)
+        every { connectionStateProvider.connectionState } returns MutableStateFlow(ConnectionState.Disconnected)
 
         every { nodeFilterPreferences.nodeSortOption } returns MutableStateFlow(NodeSortOption.LAST_HEARD)
         every { nodeFilterPreferences.includeUnknown } returns MutableStateFlow(true)
@@ -83,8 +83,8 @@ class NodeListViewModelTest {
         savedStateHandle = SavedStateHandle(),
         nodeRepository = nodeRepository,
         radioConfigRepository = radioConfigRepository,
-        serviceRepository = serviceRepository,
-        radioController = radioController,
+        connectionStateProvider = connectionStateProvider,
+        adminController = radioController,
         radioInterfaceService = radioInterfaceService,
         deviceHardwareRepository = FakeDeviceHardwareRepository(),
         nodeManagementActions = nodeManagementActions,
@@ -120,7 +120,7 @@ class NodeListViewModelTest {
     @Test
     fun `connectionState reflects serviceRepository state`() = runTest {
         val stateFlow = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
-        every { serviceRepository.connectionState } returns stateFlow
+        every { connectionStateProvider.connectionState } returns stateFlow
 
         val vm = createViewModel()
         vm.connectionState.test {

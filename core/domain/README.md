@@ -35,7 +35,6 @@ src/commonMain/kotlin/org/meshtastic/core/domain/
         ├── ImportProfileUseCase.kt
         ├── InstallProfileUseCase.kt
         ├── IsOtaCapableUseCase.kt
-        ├── MeshLocationUseCase.kt
         ├── ProcessRadioResponseUseCase.kt
         ├── RadioConfigUseCase.kt
         ├── SetAppIntroCompletedUseCase.kt

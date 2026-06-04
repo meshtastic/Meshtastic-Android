@@ -43,7 +43,6 @@ import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.EventEdition
 import org.meshtastic.core.model.MeshActivity
 import org.meshtastic.core.model.MyNodeInfo
-import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.model.TracerouteMapAvailability
 import org.meshtastic.core.model.evaluateTracerouteMapAvailability
 import org.meshtastic.core.model.service.TracerouteResponse
@@ -55,6 +54,7 @@ import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
@@ -198,7 +198,7 @@ class UIViewModel(
     }
 
     fun setDeviceAddress(address: String) {
-        radioController.setDeviceAddress(address)
+        safeLaunch(tag = "setDeviceAddress") { radioController.setDeviceAddress(address) }
     }
 
     val unreadMessageCount =

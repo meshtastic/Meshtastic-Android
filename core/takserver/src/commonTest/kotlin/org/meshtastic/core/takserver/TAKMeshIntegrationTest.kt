@@ -34,7 +34,6 @@ import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeSortOption
 import org.meshtastic.core.model.Position
-import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.model.service.TracerouteResponse
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.MeshConfigHandler
@@ -112,7 +111,7 @@ class TAKMeshIntegrationTest {
     private class FakeCommandSender : CommandSender {
         val sentPackets = mutableListOf<DataPacket>()
 
-        override fun sendData(p: DataPacket) {
+        override suspend fun sendData(p: DataPacket) {
             sentPackets.add(p)
         }
 
@@ -124,7 +123,12 @@ class TAKMeshIntegrationTest {
 
         override fun generatePacketId(): Int = 1
 
-        override fun sendAdmin(destNum: Int, requestId: Int, wantResponse: Boolean, initFn: () -> AdminMessage) {}
+        override suspend fun sendAdmin(
+            destNum: Int,
+            requestId: Int,
+            wantResponse: Boolean,
+            initFn: () -> AdminMessage,
+        ) {}
 
         override suspend fun sendAdminAwait(
             destNum: Int,
@@ -133,19 +137,19 @@ class TAKMeshIntegrationTest {
             initFn: () -> AdminMessage,
         ): Boolean = true
 
-        override fun sendPosition(pos: org.meshtastic.proto.Position, destNum: Int?, wantResponse: Boolean) {}
+        override suspend fun sendPosition(pos: org.meshtastic.proto.Position, destNum: Int?, wantResponse: Boolean) {}
 
-        override fun requestPosition(destNum: Int, currentPosition: Position) {}
+        override suspend fun requestPosition(destNum: Int, currentPosition: Position) {}
 
-        override fun setFixedPosition(destNum: Int, pos: Position) {}
+        override suspend fun setFixedPosition(destNum: Int, pos: Position) {}
 
-        override fun requestUserInfo(destNum: Int) {}
+        override suspend fun requestUserInfo(destNum: Int) {}
 
-        override fun requestTraceroute(requestId: Int, destNum: Int) {}
+        override suspend fun requestTraceroute(requestId: Int, destNum: Int) {}
 
-        override fun requestTelemetry(requestId: Int, destNum: Int, typeValue: Int) {}
+        override suspend fun requestTelemetry(requestId: Int, destNum: Int, typeValue: Int) {}
 
-        override fun requestNeighborInfo(requestId: Int, destNum: Int) {}
+        override suspend fun requestNeighborInfo(requestId: Int, destNum: Int) {}
     }
 
     private class FakeServiceRepository : ServiceRepository {
@@ -187,10 +191,6 @@ class TAKMeshIntegrationTest {
         override fun setNeighborInfoResponse(value: String?) {}
 
         override fun clearNeighborInfoResponse() {}
-
-        override val serviceAction: Flow<ServiceAction> = MutableSharedFlow()
-
-        override suspend fun onServiceAction(action: ServiceAction) {}
     }
 
     private class FakeMeshConfigHandler : MeshConfigHandler {

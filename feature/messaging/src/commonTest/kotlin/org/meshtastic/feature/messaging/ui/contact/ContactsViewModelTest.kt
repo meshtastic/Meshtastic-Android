@@ -29,9 +29,9 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
-import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.proto.ChannelSet
 import kotlin.test.AfterTest
@@ -48,13 +48,13 @@ class ContactsViewModelTest {
     private val nodeRepository = FakeNodeRepository()
     private val packetRepository: PacketRepository = mock(MockMode.autofill)
     private val radioConfigRepository: RadioConfigRepository = mock(MockMode.autofill)
-    private val serviceRepository: ServiceRepository = mock(MockMode.autofill)
+    private val connectionStateProvider: ConnectionStateProvider = mock(MockMode.autofill)
 
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
 
-        every { serviceRepository.connectionState } returns MutableStateFlow(ConnectionState.Disconnected)
+        every { connectionStateProvider.connectionState } returns MutableStateFlow(ConnectionState.Disconnected)
         every { packetRepository.getUnreadCountTotal() } returns MutableStateFlow(0)
         every { radioConfigRepository.channelSetFlow } returns MutableStateFlow(ChannelSet())
 
@@ -63,7 +63,7 @@ class ContactsViewModelTest {
                 nodeRepository = nodeRepository,
                 packetRepository = packetRepository,
                 radioConfigRepository = radioConfigRepository,
-                serviceRepository = serviceRepository,
+                connectionStateProvider = connectionStateProvider,
             )
     }
 
@@ -83,7 +83,8 @@ class ContactsViewModelTest {
         every { packetRepository.getUnreadCountTotal() } returns countFlow
 
         // Re-init VM
-        viewModel = ContactsViewModel(nodeRepository, packetRepository, radioConfigRepository, serviceRepository)
+        viewModel =
+            ContactsViewModel(nodeRepository, packetRepository, radioConfigRepository, connectionStateProvider)
 
         viewModel.unreadCountTotal.test {
             assertEquals(0, awaitItem())
