@@ -547,4 +547,43 @@ interface PacketDao {
         "UPDATE packet SET filtered = :filtered WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node)) AND data LIKE :senderIdPattern",
     )
     suspend fun updateFilteredBySender(senderIdPattern: String, filtered: Boolean)
+
+    // region ── FTS5 Search ──
+
+    @Query(
+        "SELECT packet.* FROM packet JOIN packet_fts ON packet.rowid = packet_fts.rowid " +
+            "WHERE packet_fts MATCH :query AND packet.myNodeNum = (SELECT myNodeNum FROM my_node) " +
+            "ORDER BY packet.received_time DESC LIMIT 100",
+    )
+    suspend fun searchMessages(query: String): List<Packet>
+
+    @Query(
+        "SELECT packet.* FROM packet JOIN packet_fts ON packet.rowid = packet_fts.rowid " +
+            "WHERE packet_fts MATCH :query AND packet.contact_key = :contactKey " +
+            "AND packet.myNodeNum = (SELECT myNodeNum FROM my_node) " +
+            "ORDER BY packet.received_time DESC LIMIT 100",
+    )
+    suspend fun searchMessagesInConversation(query: String, contactKey: String): List<Packet>
+
+    @Query("UPDATE packet SET message_text = :text WHERE uuid = :uuid")
+    suspend fun updateMessageText(uuid: Long, text: String)
+
+    @Query(
+        "SELECT COUNT(*) FROM packet " +
+            "WHERE port_num = 1 AND (message_text IS NULL OR message_text = '') " +
+            "AND json_extract(data, '\$.text') IS NOT NULL",
+    )
+    suspend fun countPacketsNeedingBackfill(): Int
+
+    @Query(
+        "UPDATE packet SET message_text = json_extract(data, '\$.text') " +
+            "WHERE port_num = 1 AND (message_text IS NULL OR message_text = '') " +
+            "AND json_extract(data, '\$.text') IS NOT NULL",
+    )
+    suspend fun backfillMessageTexts(): Int
+
+    @Query("INSERT INTO packet_fts(packet_fts) VALUES('rebuild')")
+    suspend fun rebuildFtsIndex()
+
+    // endregion
 }

@@ -1130,6 +1130,7 @@ scanning_network
 screen_on_for
 scroll_to_bottom
 search_emoji
+search_messages
 secondary
 secondary_channel_position_feature
 secondary_no_telemetry

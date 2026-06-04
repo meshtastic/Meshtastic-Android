@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.ui.component
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -27,8 +28,10 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import org.meshtastic.core.ui.theme.HyperlinkBlue
 
 private val DefaultTextLinkStyles =
@@ -90,3 +93,77 @@ private fun buildAnnotatedStringWithLinks(text: String, linkStyles: TextLinkStyl
             range.forEach { usedIndices.add(it) }
         }
     }
+
+/**
+ * A [Text] component that highlights occurrences of [query] within [text] using the tertiary container color. Each
+ * matching token in the query is highlighted independently (case-insensitive).
+ */
+@Composable
+fun HighlightedText(
+    text: String,
+    query: String,
+    modifier: Modifier = Modifier,
+    style: TextStyle = TextStyle.Default,
+    color: Color = Color.Unspecified,
+) {
+    val highlightColor = MaterialTheme.colorScheme.tertiaryContainer
+    val highlightContentColor = MaterialTheme.colorScheme.onTertiaryContainer
+    val annotatedString =
+        remember(text, query, highlightColor, highlightContentColor) {
+            buildHighlightedString(text, query, highlightColor, highlightContentColor)
+        }
+    Text(text = annotatedString, modifier = modifier, style = style.copy(color = color))
+}
+
+private fun buildHighlightedString(
+    text: String,
+    query: String,
+    highlightColor: Color,
+    contentColor: Color,
+): AnnotatedString = buildAnnotatedString {
+    val lowerText = text.lowercase()
+    val tokens = query.split("\\s+".toRegex()).filter { it.isNotBlank() }.map { it.lowercase() }
+    if (tokens.isEmpty()) {
+        append(text)
+        return@buildAnnotatedString
+    }
+
+    // Find all match ranges
+    val matchRanges = mutableListOf<IntRange>()
+    for (token in tokens) {
+        var start = 0
+        while (start < lowerText.length) {
+            val matchStart = lowerText.indexOf(token, start)
+            if (matchStart == -1) break
+            matchRanges.add(matchStart until matchStart + token.length)
+            start = matchStart + token.length
+        }
+    }
+
+    // Merge overlapping ranges and sort
+    val merged = mergeRanges(matchRanges.sortedBy { it.first })
+
+    val highlightStyle = SpanStyle(background = highlightColor, color = contentColor, fontWeight = FontWeight.Bold)
+
+    var cursor = 0
+    for (range in merged) {
+        if (range.first > cursor) append(text.substring(cursor, range.first))
+        withStyle(highlightStyle) { append(text.substring(range.first, range.last + 1)) }
+        cursor = range.last + 1
+    }
+    if (cursor < text.length) append(text.substring(cursor))
+}
+
+private fun mergeRanges(sorted: List<IntRange>): List<IntRange> {
+    if (sorted.isEmpty()) return emptyList()
+    val result = mutableListOf(sorted.first())
+    for (range in sorted.drop(1)) {
+        val last = result.last()
+        if (range.first <= last.last + 1) {
+            result[result.lastIndex] = last.first..maxOf(last.last, range.last)
+        } else {
+            result.add(range)
+        }
+    }
+    return result
+}
