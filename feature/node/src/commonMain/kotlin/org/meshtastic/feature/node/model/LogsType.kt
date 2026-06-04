@@ -21,9 +21,11 @@ import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.navigation.NodeDetailRoute
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.air_quality_metrics_log
 import org.meshtastic.core.resources.device_metrics_log
 import org.meshtastic.core.resources.env_metrics_log
 import org.meshtastic.core.resources.host_metrics_log
+import org.meshtastic.core.resources.ic_air
 import org.meshtastic.core.resources.ic_charging_station
 import org.meshtastic.core.resources.ic_group
 import org.meshtastic.core.resources.ic_groups
@@ -46,6 +48,7 @@ enum class LogsType(val titleRes: StringResource, val icon: DrawableResource, va
     ENVIRONMENT(Res.string.env_metrics_log, Res.drawable.ic_thermostat, { NodeDetailRoute.EnvironmentMetrics(it) }),
     SIGNAL(Res.string.signal_quality, Res.drawable.ic_signal_cellular_alt, { NodeDetailRoute.SignalMetrics(it) }),
     POWER(Res.string.power_metrics_log, Res.drawable.ic_power, { NodeDetailRoute.PowerMetrics(it) }),
+    AIR_QUALITY(Res.string.air_quality_metrics_log, Res.drawable.ic_air, { NodeDetailRoute.AirQualityMetrics(it) }),
     TRACEROUTE(Res.string.traceroute_log, Res.drawable.ic_route, { NodeDetailRoute.TracerouteLog(it) }),
     NEIGHBOR_INFO(Res.string.neighbor_info, Res.drawable.ic_groups, { NodeDetailRoute.NeighborInfoLog(it) }),
     HOST(Res.string.host_metrics_log, Res.drawable.ic_memory, { NodeDetailRoute.HostMetricsLog(it) }),

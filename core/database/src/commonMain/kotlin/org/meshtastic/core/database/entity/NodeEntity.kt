@@ -59,6 +59,7 @@ data class NodeWithRelations(
         isMuted = node.isMuted,
         environmentMetrics = node.environmentMetrics ?: org.meshtastic.proto.EnvironmentMetrics(),
         powerMetrics = node.powerMetrics ?: org.meshtastic.proto.PowerMetrics(),
+        airQualityMetrics = node.airQualityMetrics ?: org.meshtastic.proto.AirQualityMetrics(),
         paxcounter = node.paxcounter,
         publicKey = node.publicKey ?: node.user.public_key,
         notes = node.notes,
@@ -85,6 +86,7 @@ data class NodeWithRelations(
             isMuted = isMuted,
             environmentTelemetry = environmentTelemetry,
             powerTelemetry = powerTelemetry,
+            airQualityTelemetry = airQualityTelemetry,
             paxcounter = paxcounter,
             publicKey = publicKey ?: user.public_key,
             notes = notes,
@@ -137,6 +139,8 @@ data class NodeEntity(
     @ColumnInfo(name = "environment_metrics", typeAffinity = ColumnInfo.BLOB)
     var environmentTelemetry: Telemetry = Telemetry(),
     @ColumnInfo(name = "power_metrics", typeAffinity = ColumnInfo.BLOB) var powerTelemetry: Telemetry = Telemetry(),
+    @ColumnInfo(name = "air_quality_metrics", typeAffinity = ColumnInfo.BLOB, defaultValue = "x''")
+    var airQualityTelemetry: Telemetry = Telemetry(),
     @ColumnInfo(typeAffinity = ColumnInfo.BLOB) var paxcounter: Paxcount = Paxcount(),
     @ColumnInfo(name = "public_key") var publicKey: ByteString? = null,
     @ColumnInfo(name = "notes", defaultValue = "") var notes: String = "",
@@ -154,6 +158,9 @@ data class NodeEntity(
 
     val powerMetrics: org.meshtastic.proto.PowerMetrics?
         get() = powerTelemetry.power_metrics
+
+    val airQualityMetrics: org.meshtastic.proto.AirQualityMetrics?
+        get() = airQualityTelemetry.air_quality_metrics
 
     val isUnknownUser
         get() = user.hw_model == HardwareModel.UNSET
@@ -200,6 +207,7 @@ data class NodeEntity(
         isMuted = isMuted,
         environmentMetrics = environmentMetrics ?: org.meshtastic.proto.EnvironmentMetrics(),
         powerMetrics = powerMetrics ?: org.meshtastic.proto.PowerMetrics(),
+        airQualityMetrics = airQualityMetrics ?: org.meshtastic.proto.AirQualityMetrics(),
         paxcounter = paxcounter,
         publicKey = publicKey ?: user.public_key,
         notes = notes,
