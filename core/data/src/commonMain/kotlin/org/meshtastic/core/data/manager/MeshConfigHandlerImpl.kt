@@ -28,7 +28,7 @@ import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.repository.MeshConfigHandler
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.RadioConfigRepository
-import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.ServiceStateWriter
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceUIConfig
@@ -39,7 +39,7 @@ import org.meshtastic.proto.ModuleConfig
 @Single
 class MeshConfigHandlerImpl(
     private val radioConfigRepository: RadioConfigRepository,
-    private val serviceRepository: ServiceRepository,
+    private val serviceStateWriter: ServiceStateWriter,
     private val nodeManager: NodeManager,
     @Named("ServiceScope") private val scope: CoroutineScope,
 ) : MeshConfigHandler {
@@ -58,13 +58,13 @@ class MeshConfigHandlerImpl(
     override fun handleDeviceConfig(config: Config) {
         Logger.d { "Device config received: ${config.summarize()}" }
         scope.handledLaunch { radioConfigRepository.setLocalConfig(config) }
-        serviceRepository.setConnectionProgress("Device config received")
+        serviceStateWriter.setConnectionProgress("Device config received")
     }
 
     override fun handleModuleConfig(config: ModuleConfig) {
         Logger.d { "Module config received: ${config.summarize()}" }
         scope.handledLaunch { radioConfigRepository.setLocalModuleConfig(config) }
-        serviceRepository.setConnectionProgress("Module config received")
+        serviceStateWriter.setConnectionProgress("Module config received")
 
         config.statusmessage?.let { sm ->
             nodeManager.myNodeNum.value?.let { num -> nodeManager.updateNodeStatus(num, sm.node_status) }
@@ -79,9 +79,9 @@ class MeshConfigHandlerImpl(
         val mi = nodeManager.getMyNodeInfo()
         val index = channel.index
         if (mi != null) {
-            serviceRepository.setConnectionProgress("Channels (${index + 1} / ${mi.maxChannels})")
+            serviceStateWriter.setConnectionProgress("Channels (${index + 1} / ${mi.maxChannels})")
         } else {
-            serviceRepository.setConnectionProgress("Channels (${index + 1})")
+            serviceStateWriter.setConnectionProgress("Channels (${index + 1})")
         }
     }
 

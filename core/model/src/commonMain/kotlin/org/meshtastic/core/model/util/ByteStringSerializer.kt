@@ -23,8 +23,6 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
-import org.meshtastic.core.common.util.CommonParcel
-import org.meshtastic.core.common.util.CommonParceler
 
 /** Serializer for Okio [ByteString] using kotlinx.serialization */
 object ByteStringSerializer : KSerializer<ByteString> {
@@ -37,13 +35,4 @@ object ByteStringSerializer : KSerializer<ByteString> {
     }
 
     override fun deserialize(decoder: Decoder): ByteString = byteArraySerializer.deserialize(decoder).toByteString()
-}
-
-/** Parceler for Okio [ByteString] for Android Parcelable support */
-object ByteStringParceler : CommonParceler<ByteString?> {
-    override fun create(parcel: CommonParcel): ByteString? = parcel.createByteArray()?.toByteString()
-
-    override fun ByteString?.write(parcel: CommonParcel, flags: Int) {
-        parcel.writeByteArray(this?.toByteArray())
-    }
 }

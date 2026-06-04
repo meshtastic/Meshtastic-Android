@@ -26,7 +26,6 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeoutOrNull
 import org.meshtastic.core.model.ConnectionState
-import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.model.service.TracerouteResponse
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -47,13 +46,11 @@ class ServiceRepositoryImplTest {
         assertNull(repository.neighborInfoResponse.value)
 
         val initialMeshPacket = async { withTimeoutOrNull(1) { repository.meshPacketFlow.first() } }
-        val initialServiceAction = async { withTimeoutOrNull(1) { repository.serviceAction.first() } }
 
         runCurrent()
         advanceTimeBy(1)
 
         assertNull(initialMeshPacket.await())
-        assertNull(initialServiceAction.await())
     }
 
     @Test
@@ -66,18 +63,6 @@ class ServiceRepositoryImplTest {
 
         assertEquals(ConnectionState.Connecting, emittedState.await())
         assertEquals(ConnectionState.Connecting, repository.connectionState.value)
-    }
-
-    @Test
-    fun onServiceActionEmitsThroughFlow() = runTest {
-        val repository = ServiceRepositoryImpl()
-        val action = ServiceAction.GetDeviceMetadata(destNum = 42)
-        val emittedAction = async { repository.serviceAction.first() }
-
-        runCurrent()
-        repository.onServiceAction(action)
-
-        assertEquals(action, emittedAction.await())
     }
 
     @Test

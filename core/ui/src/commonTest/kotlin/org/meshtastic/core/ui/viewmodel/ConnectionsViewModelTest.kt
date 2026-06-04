@@ -59,7 +59,7 @@ class ConnectionsViewModelTest {
         viewModel =
             ConnectionsViewModel(
                 radioConfigRepository = radioConfigRepository,
-                serviceRepository = serviceRepository,
+                connectionStateProvider = serviceRepository,
                 nodeRepository = nodeRepository,
                 uiPrefs = uiPrefs,
             )

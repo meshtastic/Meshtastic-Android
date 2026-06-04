@@ -40,7 +40,7 @@ import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.NodeRepository
-import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.TracerouteResponseProvider
 import org.meshtastic.core.repository.TracerouteSnapshotRepository
 import org.meshtastic.feature.node.detail.NodeDetailUiState
 import org.meshtastic.feature.node.detail.NodeRequestActions
@@ -66,7 +66,7 @@ class MetricsViewModelTest {
     private val dispatchers = CoroutineDispatchers(main = testDispatcher, io = testDispatcher, default = testDispatcher)
 
     private val meshLogRepository: MeshLogRepository = mock()
-    private val serviceRepository: ServiceRepository = mock()
+    private val tracerouteResponseProvider: TracerouteResponseProvider = mock()
     private val nodeRepository: NodeRepository = mock()
     private val tracerouteSnapshotRepository: TracerouteSnapshotRepository = mock()
     private val nodeRequestActions: NodeRequestActions = mock()
@@ -81,7 +81,7 @@ class MetricsViewModelTest {
         Dispatchers.setMain(testDispatcher)
 
         // Default setup for flows
-        every { serviceRepository.tracerouteResponse } returns MutableStateFlow(null)
+        every { tracerouteResponseProvider.tracerouteResponse } returns MutableStateFlow(null)
         every { nodeRequestActions.lastTracerouteTime } returns MutableStateFlow(null)
         every { nodeRequestActions.lastRequestNeighborTimes } returns MutableStateFlow(emptyMap())
         every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(emptyMap())
@@ -96,7 +96,7 @@ class MetricsViewModelTest {
         destNum = destNum,
         dispatchers = dispatchers,
         meshLogRepository = meshLogRepository,
-        serviceRepository = serviceRepository,
+        tracerouteResponseProvider = tracerouteResponseProvider,
         nodeRepository = nodeRepository,
         tracerouteSnapshotRepository = tracerouteSnapshotRepository,
         nodeRequestActions = nodeRequestActions,

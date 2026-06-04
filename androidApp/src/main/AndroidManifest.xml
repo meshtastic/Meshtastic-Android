@@ -67,7 +67,6 @@
      -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
-    <!-- We run our mesh code as a foreground service - FIXME, find a way to stop doing this -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
@@ -157,16 +156,12 @@
             android:name="google_analytics_default_allow_analytics_storage"
             android:value="false" />
 
-        <!-- This is the public API for doing mesh radio operations from android apps -->
+        <!-- In-app mesh foreground service -->
         <service
             android:name="org.meshtastic.core.service.MeshService"
             android:enabled="true"
             android:foregroundServiceType="connectedDevice|location"
-            android:exported="true" tools:ignore="ExportedActivity">
-            <intent-filter>
-                <action android:name="com.geeksville.mesh.Service" />
-            </intent-filter>
-        </service>
+            android:exported="false" />
 
         <service
             android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"
@@ -268,7 +263,7 @@
                 <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
 
                 <!-- for testing -->
-                <action android:name="com.geeksville.mesh.SIM_BOOT" />
+                <action android:name="org.meshtastic.app.SIM_BOOT" />
             </intent-filter>
 
             <!-- Also restart our service if the app gets upgraded -->

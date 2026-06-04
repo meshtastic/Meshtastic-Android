@@ -70,6 +70,7 @@ import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Contact
+import org.meshtastic.core.model.ContactKey
 import org.meshtastic.core.model.ContactSettings
 import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.model.util.formatMuteRemainingTime
@@ -212,7 +213,7 @@ fun ContactsScreen(
     val onNodeChipClick: (Contact) -> Unit = { contact ->
         if (contact.contactKey.contains("!")) {
             // if it's a node, look up the nodeNum including the !
-            val nodeKey = contact.contactKey.substring(1)
+            val nodeKey = ContactKey(contact.contactKey).addressString
             val node = viewModel.getNode(nodeKey)
             onNavigateToNodeDetails(node.num)
         } else {

@@ -26,13 +26,15 @@ import kotlinx.coroutines.flow.mapLatest
 import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.nowSeconds
+import org.meshtastic.core.model.ContactKey
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.TracerouteOverlay
 import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.any
 import org.meshtastic.core.resources.eight_hours
@@ -142,19 +144,17 @@ open class BaseMapViewModel(
     }
 
     open fun getUser(userId: String?) =
-        nodeRepository.getUser(userId ?: org.meshtastic.core.model.DataPacket.ID_BROADCAST)
+        nodeRepository.getUser(userId ?: org.meshtastic.core.model.NodeAddress.ID_BROADCAST)
 
     fun getNodeOrFallback(nodeNum: Int): Node = nodeRepository.nodeDBbyNum.value[nodeNum] ?: Node(num = nodeNum)
 
     fun deleteWaypoint(id: Int) =
         safeLaunch(context = ioDispatcher, tag = "deleteWaypoint") { packetRepository.deleteWaypoint(id) }
 
-    fun sendWaypoint(wpt: Waypoint, contactKey: String = "0${DataPacket.ID_BROADCAST}") {
+    fun sendWaypoint(wpt: Waypoint, contactKey: String = "0${NodeAddress.ID_BROADCAST}") {
         // contactKey: unique contact key filter (channel)+(nodeId)
-        val channel = contactKey[0].digitToIntOrNull()
-        val dest = if (channel != null) contactKey.substring(1) else contactKey
-
-        val p = DataPacket(dest, channel ?: 0, wpt)
+        val parsedKey = ContactKey(contactKey)
+        val p = DataPacket(parsedKey.addressString, parsedKey.channel, wpt)
         if (wpt.id != 0) sendDataPacket(p)
     }
 
@@ -162,7 +162,7 @@ open class BaseMapViewModel(
         safeLaunch(context = ioDispatcher, tag = "sendDataPacket") { radioController.sendMessage(p) }
     }
 
-    fun generatePacketId(): Int = radioController.getPacketId()
+    fun generatePacketId(): Int = radioController.generatePacketId()
 
     data class MapFilterState(
         val onlyFavorites: Boolean,

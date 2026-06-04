@@ -18,6 +18,8 @@ package org.meshtastic.core.testing
 
 import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.common.database.DatabaseManager
+import org.meshtastic.core.database.DatabaseConstants.MAX_CACHE_LIMIT
+import org.meshtastic.core.database.DatabaseConstants.MIN_CACHE_LIMIT
 
 /** A test double for [DatabaseManager] that provides a simple implementation and tracks calls. */
 class FakeDatabaseManager :
@@ -40,7 +42,7 @@ class FakeDatabaseManager :
     override fun getCurrentCacheLimit(): Int = _cacheLimit.value
 
     override fun setCacheLimit(limit: Int) {
-        _cacheLimit.value = limit
+        _cacheLimit.value = limit.coerceIn(MIN_CACHE_LIMIT, MAX_CACHE_LIMIT)
     }
 
     override suspend fun switchActiveDatabase(address: String?) {
