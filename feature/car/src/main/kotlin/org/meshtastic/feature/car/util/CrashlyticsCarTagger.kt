@@ -14,22 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-@file:Suppress("ktlint:standard:max-line-length")
+package org.meshtastic.feature.car.util
 
-package org.meshtastic.app.di
+import com.google.firebase.crashlytics.FirebaseCrashlytics
+import org.koin.core.annotation.Single
 
-import org.koin.core.annotation.Module
-import org.meshtastic.app.map.prefs.di.GoogleMapsKoinModule
-import org.meshtastic.feature.car.di.FeatureCarModule
+@Single
+class CrashlyticsCarTagger {
 
-@Module(
-    includes =
-    [
-        GoogleNetworkModule::class,
-        GoogleMapsKoinModule::class,
-        GoogleAiModule::class,
-        AppFunctionsModule::class,
-        FeatureCarModule::class,
-    ],
-)
-class FlavorModule
+    fun setCarSession(active: Boolean) {
+        FirebaseCrashlytics.getInstance().setCustomKey("car_session", active)
+    }
+}
