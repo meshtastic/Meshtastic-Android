@@ -37,6 +37,7 @@ import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.network.DeviceHardwareRemoteDataSource
 import org.meshtastic.core.repository.DeviceHardwareRepository
+import org.meshtastic.core.repository.DeviceLinkRepository
 
 @Single
 class DeviceHardwareRepositoryImpl(
@@ -44,6 +45,7 @@ class DeviceHardwareRepositoryImpl(
     private val localDataSource: DeviceHardwareLocalDataSource,
     private val jsonDataSource: DeviceHardwareJsonDataSource,
     private val bootloaderOtaQuirksJsonDataSource: BootloaderOtaQuirksJsonDataSource,
+    private val deviceLinkRepository: DeviceLinkRepository,
     private val dispatchers: CoroutineDispatchers,
 ) : DeviceHardwareRepository {
 
@@ -136,6 +138,10 @@ class DeviceHardwareRepositoryImpl(
                     Logger.w {
                         "DeviceHardwareRepository: network refresh timed out after ${NETWORK_REFRESH_TIMEOUT_MS}ms"
                     }
+                } else {
+                    // Reconcile msh.to links against the freshest catalog (isVendor + orphan pruning). Runs outside
+                    // the network timeout so a deadline can't cancel it mid-write and leave links half-reconciled.
+                    deviceLinkRepository.reconcile()
                 }
             }
                 .onFailure { e -> Logger.w(e) { "DeviceHardwareRepository: network refresh failed" } }

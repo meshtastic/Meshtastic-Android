@@ -18,6 +18,7 @@ package org.meshtastic.feature.node.model
 
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.DeviceLink
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.Node
 import org.meshtastic.proto.Config
@@ -42,6 +43,8 @@ data class MetricsState(
     val neighborInfoResults: List<MeshLog> = emptyList(),
     val positionLogs: List<Position> = emptyList(),
     val deviceHardware: DeviceHardware? = null,
+    /** msh.to vendor/marketplace links for this device's hardware, region-filtered and sorted (vendor first). */
+    val deviceLinks: List<DeviceLink> = emptyList(),
     val firmwareEdition: FirmwareEdition? = null,
     val latestStableFirmware: FirmwareRelease = FirmwareRelease(),
     val latestAlphaFirmware: FirmwareRelease = FirmwareRelease(),
