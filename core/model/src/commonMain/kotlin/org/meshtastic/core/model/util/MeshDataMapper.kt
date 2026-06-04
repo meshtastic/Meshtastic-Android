@@ -20,6 +20,7 @@ package org.meshtastic.core.model.util
 
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.proto.MeshPacket
 
 /**
@@ -40,7 +41,7 @@ open class MeshDataMapper(private val nodeIdLookup: NodeIdLookup) {
             dataType = decoded.portnum.value,
             bytes = decoded.payload.toByteArray().toByteString(),
             hopLimit = packet.hop_limit,
-            channel = if (packet.pki_encrypted == true) DataPacket.PKC_CHANNEL_INDEX else packet.channel,
+            channel = if (packet.pki_encrypted == true) NodeAddress.PKC_CHANNEL_INDEX else packet.channel,
             wantAck = packet.want_ack == true,
             hopStart = packet.hop_start,
             snr = packet.rx_snr,

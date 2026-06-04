@@ -28,17 +28,17 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
-import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.NodeListDensity
 import org.meshtastic.core.model.NodeSortOption
-import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.repository.AdminController
+import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioInterfaceService
-import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.node.detail.NodeManagementActions
 import org.meshtastic.feature.node.detail.NodeRequestActions
@@ -52,8 +52,8 @@ class NodeListViewModel(
     private val savedStateHandle: SavedStateHandle,
     private val nodeRepository: NodeRepository,
     private val radioConfigRepository: RadioConfigRepository,
-    private val serviceRepository: ServiceRepository,
-    private val radioController: RadioController,
+    private val connectionStateProvider: ConnectionStateProvider,
+    private val adminController: AdminController,
     private val radioInterfaceService: RadioInterfaceService,
     private val deviceHardwareRepository: DeviceHardwareRepository,
     val nodeManagementActions: NodeManagementActions,
@@ -68,7 +68,7 @@ class NodeListViewModel(
 
     val totalNodeCount = nodeRepository.totalNodeCount.stateInWhileSubscribed(initialValue = 0)
 
-    val connectionState = serviceRepository.connectionState
+    val connectionState = connectionStateProvider.connectionState
 
     val deviceType: StateFlow<DeviceType?> =
         radioInterfaceService.currentDeviceAddressFlow
@@ -184,7 +184,7 @@ class NodeListViewModel(
         radioConfigRepository.replaceAllSettings(channelSet.settings)
         val newLoraConfig = channelSet.lora_config
         if (newLoraConfig != null) {
-            radioController.setLocalConfig(Config(lora = newLoraConfig))
+            adminController.setLocalConfig(Config(lora = newLoraConfig))
         }
     }
 
@@ -200,13 +200,13 @@ class NodeListViewModel(
     fun getDirectMessageRoute(node: Node): String {
         val ourNode = ourNodeInfo.value
         val hasPKC = ourNode?.hasPKC == true && node.hasPKC
-        val channel = if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else node.channel
+        val channel = if (hasPKC) NodeAddress.PKC_CHANNEL_INDEX else node.channel
         return "${channel}${node.user.id}"
     }
 
     /** Initiates a trace route request to the specified node. */
     fun traceRoute(node: Node) {
-        nodeRequestActions.requestTraceroute(viewModelScope, node.num, node.user.long_name)
+        viewModelScope.launch { nodeRequestActions.requestTraceroute(node.num, node.user.long_name) }
     }
 
     companion object {

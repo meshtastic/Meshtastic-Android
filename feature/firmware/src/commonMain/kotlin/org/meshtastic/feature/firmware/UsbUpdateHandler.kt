@@ -20,8 +20,8 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
-import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.RadioController
 
 /** Handles firmware updates via USB Mass Storage (UF2). */
 @Single

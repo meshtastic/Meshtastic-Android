@@ -32,6 +32,7 @@ import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.request.url
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import org.meshtastic.core.data.datasource.BootloaderOtaQuirksJsonDataSource
 import org.meshtastic.core.data.datasource.DeviceHardwareJsonDataSource
@@ -39,28 +40,35 @@ import org.meshtastic.core.data.datasource.FirmwareReleaseJsonDataSource
 import org.meshtastic.core.model.BootloaderOtaQuirk
 import org.meshtastic.core.model.NetworkDeviceHardware
 import org.meshtastic.core.model.NetworkFirmwareReleases
-import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.network.HttpClientDefaults
 import org.meshtastic.core.network.KermitHttpLogger
 import org.meshtastic.core.network.repository.MQTTRepository
 import org.meshtastic.core.network.service.ApiService
 import org.meshtastic.core.network.service.ApiServiceImpl
+import org.meshtastic.core.repository.AdminController
 import org.meshtastic.core.repository.AppWidgetUpdater
+import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.LocationRepository
 import org.meshtastic.core.repository.MeshLocationManager
-import org.meshtastic.core.repository.MeshServiceNotifications
+import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.MeshWorkerManager
 import org.meshtastic.core.repository.MessageQueue
+import org.meshtastic.core.repository.MessagingController
+import org.meshtastic.core.repository.NeighborInfoResponseProvider
+import org.meshtastic.core.repository.NodeController
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PlatformAnalytics
+import org.meshtastic.core.repository.QueryController
+import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.RadioTransportFactory
-import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.repository.ServiceRepository
-import org.meshtastic.core.service.DirectRadioControllerImpl
+import org.meshtastic.core.repository.ServiceStateWriter
+import org.meshtastic.core.repository.TracerouteResponseProvider
+import org.meshtastic.core.service.RadioControllerImpl
 import org.meshtastic.core.service.ServiceRepositoryImpl
 import org.meshtastic.desktop.DesktopBuildConfig
 import org.meshtastic.desktop.DesktopNotificationManager
-import org.meshtastic.desktop.notification.DesktopMeshServiceNotifications
+import org.meshtastic.desktop.notification.DesktopMeshNotificationManager
 import org.meshtastic.desktop.notification.DesktopOS
 import org.meshtastic.desktop.notification.LinuxNotificationSender
 import org.meshtastic.desktop.notification.MacOSNotificationSender
@@ -77,7 +85,6 @@ import org.meshtastic.desktop.stub.NoopMeshLocationManager
 import org.meshtastic.desktop.stub.NoopMeshWorkerManager
 import org.meshtastic.desktop.stub.NoopPhoneLocationProvider
 import org.meshtastic.desktop.stub.NoopPlatformAnalytics
-import org.meshtastic.desktop.stub.NoopServiceBroadcasts
 import org.meshtastic.feature.docs.ai.AIDocAssistant
 import org.meshtastic.feature.docs.ai.KeywordFallbackAssistant
 import org.meshtastic.feature.docs.translation.DocTranslationService
@@ -157,6 +164,10 @@ fun desktopModule() = module {
 @Suppress("LongMethod")
 private fun desktopPlatformStubsModule() = module {
     single<ServiceRepository> { ServiceRepositoryImpl() }
+    single<ConnectionStateProvider> { get<ServiceRepository>() }
+    single<TracerouteResponseProvider> { get<ServiceRepository>() }
+    single<NeighborInfoResponseProvider> { get<ServiceRepository>() }
+    single<ServiceStateWriter> { get<ServiceRepository>() }
     single<RadioTransportFactory> {
         DesktopRadioTransportFactory(
             dispatchers = get(),
@@ -166,16 +177,29 @@ private fun desktopPlatformStubsModule() = module {
         )
     }
     single<RadioController> {
-        DirectRadioControllerImpl(
+        RadioControllerImpl(
             serviceRepository = get(),
             nodeRepository = get(),
             commandSender = get(),
-            router = get(),
             nodeManager = get(),
             radioInterfaceService = get(),
             locationManager = get(),
+            packetRepository = lazy { get() },
+            dataHandler = lazy { get() },
+            analytics = get(),
+            meshPrefs = get(),
+            uiPrefs = get(),
+            databaseManager = get(),
+            notificationManager = get(),
+            messageProcessor = lazy { get() },
+            radioConfigRepository = get(),
+            scope = get(qualifier = named("ServiceScope")),
         )
     }
+    single<AdminController> { get<RadioController>() }
+    single<MessagingController> { get<RadioController>() }
+    single<NodeController> { get<RadioController>() }
+    single<QueryController> { get<RadioController>() }
     single<NativeNotificationSender> {
         when (DesktopOS.current()) {
             DesktopOS.Linux -> LinuxNotificationSender()
@@ -185,9 +209,8 @@ private fun desktopPlatformStubsModule() = module {
     }
     single { DesktopNotificationManager(prefs = get(), nativeSender = get()) }
     single<NotificationManager> { get<DesktopNotificationManager>() }
-    single<MeshServiceNotifications> { DesktopMeshServiceNotifications(notificationManager = get()) }
+    single<MeshNotificationManager> { DesktopMeshNotificationManager(notificationManager = get()) }
     single<PlatformAnalytics> { NoopPlatformAnalytics() }
-    single<ServiceBroadcasts> { NoopServiceBroadcasts() }
     single<AppWidgetUpdater> { NoopAppWidgetUpdater() }
     single<MeshWorkerManager> { NoopMeshWorkerManager() }
     single<MessageQueue> { DesktopMessageQueue(packetRepository = get(), radioController = get(), dispatchers = get()) }
@@ -222,7 +245,7 @@ private fun desktopPlatformStubsModule() = module {
             if (DesktopBuildConfig.IS_DEBUG) {
                 install(Logging) {
                     logger = KermitHttpLogger
-                    level = LogLevel.BODY
+                    level = LogLevel.INFO
                 }
             }
         }

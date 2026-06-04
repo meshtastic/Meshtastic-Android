@@ -50,7 +50,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import org.meshtastic.core.model.ConnectionState
-import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.nodeColorsFromNum
 import org.meshtastic.feature.car.R
 import org.meshtastic.feature.car.alerts.EmergencyHandler
@@ -248,7 +248,7 @@ class HomeScreen(
             .setMessages(messages)
             .setSelf(selfPerson)
             .setConversationCallback(callback)
-            .setGroupConversation(conversation.contactKey.contains(DataPacket.ID_BROADCAST))
+            .setGroupConversation(conversation.contactKey.contains(NodeAddress.ID_BROADCAST))
             .build()
     }
 

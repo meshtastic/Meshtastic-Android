@@ -36,8 +36,14 @@ class KotlinXSerializationConventionPlugin : Plugin<Project> {
                 }
             }
 
-            pluginManager.withPlugin("org.jetbrains.kotlin.android") {
+            pluginManager.withPlugin("com.android.application") {
                 dependencies { "implementation"(serializationLib) }
+            }
+
+            pluginManager.withPlugin("com.android.library") {
+                if (!pluginManager.hasPlugin("org.jetbrains.kotlin.multiplatform")) {
+                    dependencies { "implementation"(serializationLib) }
+                }
             }
 
             pluginManager.withPlugin("org.jetbrains.kotlin.jvm") { dependencies { "implementation"(serializationLib) } }

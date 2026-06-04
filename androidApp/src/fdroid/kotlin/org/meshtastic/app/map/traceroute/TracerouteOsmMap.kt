@@ -33,6 +33,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.app.R
 import org.meshtastic.app.map.MapViewModel
@@ -44,6 +45,9 @@ import org.meshtastic.app.map.rememberMapViewWithLifecycle
 import org.meshtastic.app.map.zoomIn
 import org.meshtastic.core.model.TracerouteOverlay
 import org.meshtastic.core.model.util.GeoConstants.EARTH_RADIUS_METERS
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.now
+import org.meshtastic.core.resources.unknown
 import org.meshtastic.core.ui.theme.TracerouteColors
 import org.meshtastic.core.ui.util.formatAgo
 import org.meshtastic.feature.map.tracerouteNodeSelection
@@ -94,6 +98,9 @@ fun TracerouteOsmMap(
         }
     val displayNodes = tracerouteSelection.nodesForMarkers
     val nodeLookup = tracerouteSelection.nodeLookup
+
+    val unknownText = stringResource(Res.string.unknown)
+    val nowText = stringResource(Res.string.now)
 
     // Report mappable count
     LaunchedEffect(tracerouteOverlay, displayNodes) {
@@ -191,7 +198,10 @@ fun TracerouteOsmMap(
             displayNodes.forEach { node ->
                 val position = GeoPoint(node.latitude, node.longitude)
                 val marker =
-                    MarkerWithLabel(mapView = map, label = "${node.user.short_name} ${formatAgo(node.position.time)}")
+                    MarkerWithLabel(
+                        mapView = map,
+                        label = "${node.user.short_name} ${formatAgo(node.position.time, unknownText, nowText)}",
+                    )
                         .apply {
                             id = node.user.id
                             title = node.user.long_name

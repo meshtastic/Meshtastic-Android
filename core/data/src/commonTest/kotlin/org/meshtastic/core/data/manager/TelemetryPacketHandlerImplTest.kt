@@ -27,6 +27,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NotificationManager
@@ -78,8 +79,8 @@ class TelemetryPacketHandlerImplTest {
     private fun makeDataPacket(from: Int): DataPacket = DataPacket(
         id = 1,
         time = 1700000000000L,
-        to = DataPacket.ID_BROADCAST,
-        from = DataPacket.nodeNumToDefaultId(from),
+        to = NodeAddress.ID_BROADCAST,
+        from = NodeAddress.numToDefaultId(from),
         bytes = null,
         dataType = PortNum.TELEMETRY_APP.value,
     )
@@ -97,7 +98,7 @@ class TelemetryPacketHandlerImplTest {
         advanceUntilIdle()
 
         verify { connectionManager.updateTelemetry(any()) }
-        verify { nodeManager.updateNode(myNodeNum, any(), any(), any()) }
+        verify { nodeManager.updateNode(myNodeNum, any(), any()) }
     }
 
     // ---------- Device metrics from remote node ----------
@@ -112,7 +113,7 @@ class TelemetryPacketHandlerImplTest {
         handler.handleTelemetry(packet, dataPacket, myNodeNum)
         advanceUntilIdle()
 
-        verify { nodeManager.updateNode(remoteNodeNum, any(), any(), any()) }
+        verify { nodeManager.updateNode(remoteNodeNum, any(), any()) }
     }
 
     // ---------- Environment metrics ----------
@@ -130,7 +131,7 @@ class TelemetryPacketHandlerImplTest {
         handler.handleTelemetry(packet, dataPacket, myNodeNum)
         advanceUntilIdle()
 
-        verify { nodeManager.updateNode(remoteNodeNum, any(), any(), any()) }
+        verify { nodeManager.updateNode(remoteNodeNum, any(), any()) }
     }
 
     // ---------- Power metrics ----------
@@ -144,7 +145,7 @@ class TelemetryPacketHandlerImplTest {
         handler.handleTelemetry(packet, dataPacket, myNodeNum)
         advanceUntilIdle()
 
-        verify { nodeManager.updateNode(remoteNodeNum, any(), any(), any()) }
+        verify { nodeManager.updateNode(remoteNodeNum, any(), any()) }
     }
 
     // ---------- Telemetry time handling ----------
@@ -158,7 +159,7 @@ class TelemetryPacketHandlerImplTest {
         handler.handleTelemetry(packet, dataPacket, myNodeNum)
         advanceUntilIdle()
 
-        verify { nodeManager.updateNode(myNodeNum, any(), any(), any()) }
+        verify { nodeManager.updateNode(myNodeNum, any(), any()) }
     }
 
     // ---------- Null payload ----------

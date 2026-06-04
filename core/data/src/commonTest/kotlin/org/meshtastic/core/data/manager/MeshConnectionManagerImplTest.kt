@@ -24,6 +24,7 @@ import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify
+import dev.mokkery.verifySuspend
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
@@ -39,7 +40,7 @@ import org.meshtastic.core.repository.AppWidgetUpdater
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.HistoryManager
 import org.meshtastic.core.repository.MeshLocationManager
-import org.meshtastic.core.repository.MeshServiceNotifications
+import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.MeshWorkerManager
 import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.NodeManager
@@ -48,7 +49,6 @@ import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioInterfaceService
-import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.SessionManager
 import org.meshtastic.core.repository.UiPrefs
@@ -66,8 +66,8 @@ import kotlin.test.assertEquals
 class MeshConnectionManagerImplTest {
     private val radioInterfaceService = mock<RadioInterfaceService>(MockMode.autofill)
     private val serviceRepository = mock<ServiceRepository>(MockMode.autofill)
-    private val serviceBroadcasts = mock<ServiceBroadcasts>(MockMode.autofill)
-    private val serviceNotifications = mock<MeshServiceNotifications>(MockMode.autofill)
+
+    private val serviceNotifications = mock<MeshNotificationManager>(MockMode.autofill)
     private val uiPrefs = mock<UiPrefs>(MockMode.autofill)
     private val packetHandler = mock<PacketHandler>(MockMode.autofill)
     private val nodeRepository = FakeNodeRepository()
@@ -105,7 +105,7 @@ class MeshConnectionManagerImplTest {
                 connectionStateFlow.value = call.arg<ConnectionState>(0)
             }
         every { serviceNotifications.updateServiceStateNotification(any(), any()) } returns Unit
-        every { commandSender.sendAdmin(any(), any(), any(), any()) } returns Unit
+        everySuspend { commandSender.sendAdmin(any(), any(), any(), any()) } returns Unit
         every { packetHandler.stopPacketQueue() } returns Unit
         every { locationManager.stop() } returns Unit
         every { mqttManager.stop() } returns Unit
@@ -116,7 +116,6 @@ class MeshConnectionManagerImplTest {
     private fun createManager(scope: CoroutineScope): MeshConnectionManagerImpl = MeshConnectionManagerImpl(
         radioInterfaceService,
         serviceRepository,
-        serviceBroadcasts,
         serviceNotifications,
         uiPrefs,
         packetHandler,
@@ -149,7 +148,6 @@ class MeshConnectionManagerImplTest {
             serviceRepository.connectionState.value,
             "State should be Connecting after radio Connected",
         )
-        verify { serviceBroadcasts.broadcastConnection() }
     }
 
     @Test
@@ -290,10 +288,10 @@ class MeshConnectionManagerImplTest {
                 store_forward = ModuleConfig.StoreForwardConfig(enabled = true),
             )
         moduleConfigFlow.value = moduleConfig
-        every { commandSender.requestTelemetry(any(), any(), any()) } returns Unit
+        everySuspend { commandSender.requestTelemetry(any(), any(), any()) } returns Unit
         every { nodeManager.myNodeNum } returns MutableStateFlow(123)
         every { mqttManager.startProxy(any(), any()) } returns Unit
-        every { historyManager.requestHistoryReplay(any(), any(), any(), any()) } returns Unit
+        everySuspend { historyManager.requestHistoryReplay(any(), any(), any(), any()) } returns Unit
         every { nodeManager.getMyNodeInfo() } returns null
 
         manager = createManager(backgroundScope)
@@ -301,7 +299,7 @@ class MeshConnectionManagerImplTest {
         advanceUntilIdle()
 
         verify { mqttManager.startProxy(true, true) }
-        verify { historyManager.requestHistoryReplay(any(), any(), any(), any()) }
+        verifySuspend { historyManager.requestHistoryReplay(any(), any(), any(), any()) }
     }
 
     @Test

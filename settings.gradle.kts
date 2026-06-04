@@ -130,7 +130,6 @@ include(
     ":feature:car",
     ":desktopApp",
     ":androidApp",
-    ":core:api",
     ":core:barcode",
     ":feature:widget",
     ":screenshot-tests",
