@@ -41,5 +41,6 @@ These are specific to the Copilot CLI environment and are not covered in AGENTS.
 
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
-shell commands, and other important information, read the current plan
+shell commands, and other important information, read the current plan at
+specs/20260521-153452-car-app-library-integration/plan.md
 <!-- SPECKIT END -->
