@@ -189,6 +189,12 @@
   },
   "pullRequests": [
     {
+      "id": "10604",
+      "title": "Add XIAO ESP32C6 + Wio SX1262 variant with hardware SPI support",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10604",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
       "id": "10587",
       "title": "Add SHT2x CRC check to fix i2c scan hang",
       "page_url": "https://github.com/meshtastic/firmware/pull/10587",

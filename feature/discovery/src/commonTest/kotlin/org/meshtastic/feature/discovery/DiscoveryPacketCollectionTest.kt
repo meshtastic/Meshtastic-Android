@@ -38,6 +38,7 @@ import org.meshtastic.core.model.ChannelOption
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MyNodeInfo
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.repository.DiscoveryPacketCollector
 import org.meshtastic.core.repository.DiscoveryPacketCollectorRegistry
 import org.meshtastic.core.testing.FakeNodeRepository
@@ -301,7 +302,7 @@ class DiscoveryPacketCollectionTest {
     }
 
     private fun dataPacket(from: Int) = DataPacket(
-        to = DataPacket.ID_BROADCAST,
+        to = NodeAddress.ID_BROADCAST,
         bytes = ByteString.EMPTY,
         dataType = PortNum.POSITION_APP.value,
         from = "!${from.toString(16)}",

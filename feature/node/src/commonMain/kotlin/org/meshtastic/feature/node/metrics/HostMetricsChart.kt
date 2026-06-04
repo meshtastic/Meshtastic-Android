@@ -27,7 +27,7 @@ import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianLayerRangeProvider
-import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
+import com.patrykandpatrick.vico.compose.cartesian.data.lineModel
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.resources.Res
@@ -155,7 +155,7 @@ internal fun HostMetricsChart(
         LaunchedEffect(chartData) {
             modelProducer.runTransaction {
                 if (chartData.hasLoad) {
-                    lineSeries {
+                    lineModel {
                         if (load1Data.isNotEmpty()) {
                             series(x = load1Data.map { it.time }, y = load1Data.map { it.value })
                         }
@@ -168,7 +168,7 @@ internal fun HostMetricsChart(
                     }
                 }
                 if (memData.isNotEmpty()) {
-                    lineSeries { series(x = memData.map { it.time }, y = memData.map { it.value }) }
+                    lineModel { series(x = memData.map { it.time }, y = memData.map { it.value }) }
                 }
             }
         }

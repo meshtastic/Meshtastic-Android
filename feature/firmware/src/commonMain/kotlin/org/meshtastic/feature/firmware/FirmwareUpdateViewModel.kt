@@ -46,10 +46,10 @@ import org.meshtastic.core.datastore.BootloaderWarningDataSource
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.MyNodeInfo
-import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FirmwareReleaseRepository
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.isBle
 import org.meshtastic.core.repository.isSerial
@@ -237,10 +237,20 @@ class FirmwareUpdateViewModel(
                                     updateState = { _state.value = it },
                                 )
 
-                            if (_state.value is FirmwareUpdateState.Success) {
-                                verifyUpdateResult(originalDeviceAddress)
-                            } else if (_state.value is FirmwareUpdateState.Error) {
-                                tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
+                            when (_state.value) {
+                                is FirmwareUpdateState.Success -> verifyUpdateResult(originalDeviceAddress)
+
+                                is FirmwareUpdateState.Error -> {
+                                    tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
+                                }
+
+                                else -> {
+                                    // Defense-in-depth: handler returned without setting a terminal state
+                                    Logger.w { "Firmware update returned without terminal state: ${_state.value}" }
+                                    _state.value =
+                                        FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_failed))
+                                    tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
+                                }
                             }
                         } catch (e: CancellationException) {
                             Logger.w(e) { "Firmware update cancelled — cause: ${e.cause} message: ${e.message}" }
@@ -315,10 +325,18 @@ class FirmwareUpdateViewModel(
                         )
                     tempFirmwareFile = updateArtifact ?: extractedFile
 
-                    if (_state.value is FirmwareUpdateState.Success) {
-                        verifyUpdateResult(originalDeviceAddress)
-                    } else if (_state.value is FirmwareUpdateState.Error) {
-                        tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
+                    when (_state.value) {
+                        is FirmwareUpdateState.Success -> verifyUpdateResult(originalDeviceAddress)
+
+                        is FirmwareUpdateState.Error -> {
+                            tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
+                        }
+
+                        else -> {
+                            Logger.w { "Firmware update returned without terminal state: ${_state.value}" }
+                            _state.value = FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_failed))
+                            tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
+                        }
                     }
                 } catch (e: CancellationException) {
                     throw e

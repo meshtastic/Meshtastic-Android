@@ -183,3 +183,30 @@ private fun NodeDetailsSectionWithDeviceHeroPreview() {
         Surface { NodeDetailsSection(node = node, deviceHardware = deviceHardware, reportedTarget = "heltec-v3") }
     }
 }
+
+@PreviewLightDark
+@Composable
+private fun DeviceLinksSectionPreview() {
+    val links =
+        listOf(
+            org.meshtastic.core.model.DeviceLink(
+                shortCode = "heltec-v3",
+                originalUrl = "https://heltec.org",
+                description = "Heltec V3",
+                isVendor = true,
+            ),
+            org.meshtastic.core.model.DeviceLink(
+                shortCode = "rokland-heltec-v3",
+                originalUrl = "https://rokland.com",
+                description = "Rokland",
+                regions = listOf("US"),
+            ),
+            org.meshtastic.core.model.DeviceLink(
+                shortCode = "heltec-v3_aliexpress",
+                originalUrl = "https://aliexpress.com",
+                description = "AliExpress",
+                regions = emptyList(),
+            ),
+        )
+    AppTheme { Surface { DeviceLinksSection(links = links) } }
+}

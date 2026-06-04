@@ -27,7 +27,7 @@ import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianLayerRangeProvider
-import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
+import com.patrykandpatrick.vico.compose.cartesian.data.lineModel
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.model.MeshLog
@@ -157,15 +157,15 @@ internal fun TracerouteMetricsChart(
         LaunchedEffect(forwardData, returnData, rttData) {
             modelProducer.runTransaction {
                 if (forwardData.isNotEmpty()) {
-                    lineSeries {
+                    lineModel {
                         series(x = forwardData.map { it.timeSeconds }, y = forwardData.map { it.forwardHops!! })
                     }
                 }
                 if (returnData.isNotEmpty()) {
-                    lineSeries { series(x = returnData.map { it.timeSeconds }, y = returnData.map { it.returnHops!! }) }
+                    lineModel { series(x = returnData.map { it.timeSeconds }, y = returnData.map { it.returnHops!! }) }
                 }
                 if (rttData.isNotEmpty()) {
-                    lineSeries { series(x = rttData.map { it.timeSeconds }, y = rttData.map { it.roundTripSeconds!! }) }
+                    lineModel { series(x = rttData.map { it.timeSeconds }, y = rttData.map { it.roundTripSeconds!! }) }
                 }
             }
         }

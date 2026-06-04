@@ -22,9 +22,6 @@ import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
 import dev.mokkery.gradle.MokkeryGradleExtension
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
-import org.gradle.api.tasks.testing.Test
-import org.gradle.jvm.toolchain.JavaLanguageVersion
-import org.gradle.jvm.toolchain.JavaToolchainService
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.findByType
 import org.gradle.kotlin.dsl.withType
@@ -53,9 +50,8 @@ internal fun Project.configureKotlinAndroid(commonExtension: CommonExtension) {
             defaultConfig.targetSdk = targetSdkVersion
         }
 
-        val javaVersion = if (project.name in PUBLISHED_MODULES) JavaVersion.VERSION_17 else JavaVersion.VERSION_21
-        compileOptions.sourceCompatibility = javaVersion
-        compileOptions.targetCompatibility = javaVersion
+        compileOptions.sourceCompatibility = JavaVersion.VERSION_21
+        compileOptions.targetCompatibility = JavaVersion.VERSION_21
 
         testOptions.animationsDisabled = true
         testOptions.unitTests.isReturnDefaultValues = true
@@ -118,7 +114,7 @@ internal fun Project.configureKotlinMultiplatform() {
 
                 // Default: disable Android resources for most KMP modules.
                 // Modules that need resources (e.g. core:resources) override this
-                // explicitly in their build.gradle.kts androidLibrary {} block.
+                // explicitly in their build.gradle.kts android {} block.
                 androidResources.enable = false
 
                 // Set the namespace automatically if not already set
@@ -236,9 +232,6 @@ internal fun Project.configureKotlinJvm() {
     configureKotlin<KotlinJvmProjectExtension>()
 }
 
-/** Modules published for external consumers — use Java 17 for broader compatibility. */
-private val PUBLISHED_MODULES = setOf("api", "model", "proto")
-
 /** Compiler args shared across all Kotlin targets (JVM, Android, iOS, etc.). */
 private val SHARED_COMPILER_ARGS =
     listOf(
@@ -251,18 +244,12 @@ private val SHARED_COMPILER_ARGS =
         "-Xbackend-threads=0",
     )
 
-private const val PUBLISHED_MODULE_JDK = 17
-private const val APP_JDK = 21
+private const val JDK_VERSION = 21
 
 /** Configure base Kotlin options */
 private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() {
-    val isPublishedModule = project.name in PUBLISHED_MODULES
-
     extensions.configure<T> {
-        // Using Java 17 for published modules for better compatibility with consumers (e.g. plugins, older
-        // environments), and Java 21 for the rest of the app.
-        val javaVersion = if (isPublishedModule) PUBLISHED_MODULE_JDK else APP_JDK
-        jvmToolchain(javaVersion)
+        jvmToolchain(JDK_VERSION)
 
         if (this is KotlinMultiplatformExtension) {
             targets.configureEach {
@@ -270,9 +257,7 @@ private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() {
                 compilations.configureEach {
                     compileTaskProvider.configure {
                         compilerOptions {
-                            if (!isPublishedModule) {
-                                freeCompilerArgs.add("-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi")
-                            }
+                            freeCompilerArgs.add("-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi")
                             freeCompilerArgs.addAll(SHARED_COMPILER_ARGS)
                             if (isJvmTarget) {
                                 freeCompilerArgs.add("-jvm-default=no-compatibility")
@@ -288,28 +273,16 @@ private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() {
 
     tasks.withType<KotlinCompile>().configureEach {
         compilerOptions {
-            jvmTarget.set(if (isPublishedModule) JvmTarget.JVM_17 else JvmTarget.JVM_21)
+            jvmTarget.set(JvmTarget.JVM_21)
             allWarningsAsErrors.set(warningsAsErrors)
 
             // For non-KMP modules, configure compiler args here since they don't use targets.compilations.
             // KMP modules already set these via the targets block above — only jvmTarget/warnings needed here.
             if (T::class != KotlinMultiplatformExtension::class) {
-                if (!isPublishedModule) {
-                    freeCompilerArgs.add("-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi")
-                }
+                freeCompilerArgs.add("-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi")
                 freeCompilerArgs.addAll(SHARED_COMPILER_ARGS)
                 freeCompilerArgs.add("-jvm-default=no-compatibility")
             }
-        }
-    }
-
-    // Published modules compile to JVM 17 for binary compatibility, but their test runtime
-    // classpath includes non-published dependencies compiled to JVM 21. Override the test
-    // launcher to JDK 21 so the JVM can load all class file versions at runtime.
-    if (isPublishedModule) {
-        val toolchains = extensions.getByType(JavaToolchainService::class.java)
-        tasks.withType<Test>().configureEach {
-            javaLauncher.set(toolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(APP_JDK)) })
         }
     }
 }

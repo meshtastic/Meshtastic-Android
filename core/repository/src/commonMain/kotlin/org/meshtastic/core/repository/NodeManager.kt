@@ -19,7 +19,6 @@ package org.meshtastic.core.repository
 import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.model.NodeInfo
 import org.meshtastic.core.model.util.NodeIdLookup
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.FirmwareEdition
@@ -36,8 +35,8 @@ interface NodeManager : NodeIdLookup {
     /** Reactive map of all nodes by their number. */
     val nodeDBbyNodeNum: Map<Int, Node>
 
-    /** Reactive map of all nodes by their ID string. */
-    val nodeDBbyID: Map<String, Node>
+    /** Look up a node by its user ID string (e.g. `"!a1b2c3d4"`). */
+    fun getNodeById(id: String): Node?
 
     /** Whether the node database is ready. */
     val isNodeDbReady: StateFlow<Boolean>
@@ -75,9 +74,6 @@ interface NodeManager : NodeIdLookup {
     /** Returns the local node ID. */
     fun getMyId(): String
 
-    /** Returns a list of all known nodes. */
-    fun getNodes(): List<NodeInfo>
-
     /** Processes a received user packet. */
     fun handleReceivedUser(fromNum: Int, p: User, channel: Int = 0, manuallyVerified: Boolean = false)
 
@@ -97,13 +93,13 @@ interface NodeManager : NodeIdLookup {
     fun updateNodeStatus(nodeNum: Int, status: String?)
 
     /** Updates a node using a transformation function. */
-    fun updateNode(nodeNum: Int, withBroadcast: Boolean = true, channel: Int = 0, transform: (Node) -> Node)
+    fun updateNode(nodeNum: Int, channel: Int = 0, transform: (Node) -> Node)
 
     /** Removes a node from the in-memory database by its number. */
     fun removeByNodenum(nodeNum: Int)
 
     /** Installs node information from a ProtoNodeInfo object. */
-    fun installNodeInfo(info: ProtoNodeInfo, withBroadcast: Boolean = true)
+    fun installNodeInfo(info: ProtoNodeInfo)
 
     /** Inserts hardware metadata for a node. */
     fun insertMetadata(nodeNum: Int, metadata: DeviceMetadata)

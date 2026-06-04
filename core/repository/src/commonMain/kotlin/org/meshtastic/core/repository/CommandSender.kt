@@ -38,10 +38,10 @@ interface CommandSender {
     fun generatePacketId(): Int
 
     /** Sends a data packet to the mesh. */
-    fun sendData(p: DataPacket)
+    suspend fun sendData(p: DataPacket)
 
     /** Sends an admin message to a specific node. */
-    fun sendAdmin(
+    suspend fun sendAdmin(
         destNum: Int,
         requestId: Int = generatePacketId(),
         wantResponse: Boolean = false,
@@ -64,23 +64,23 @@ interface CommandSender {
     ): Boolean
 
     /** Sends our current position to the mesh. */
-    fun sendPosition(pos: org.meshtastic.proto.Position, destNum: Int? = null, wantResponse: Boolean = false)
+    suspend fun sendPosition(pos: org.meshtastic.proto.Position, destNum: Int? = null, wantResponse: Boolean = false)
 
     /** Requests the position of a specific node. */
-    fun requestPosition(destNum: Int, currentPosition: Position)
+    suspend fun requestPosition(destNum: Int, currentPosition: Position)
 
     /** Sets a fixed position for a node. */
-    fun setFixedPosition(destNum: Int, pos: Position)
+    suspend fun setFixedPosition(destNum: Int, pos: Position)
 
     /** Requests user info from a specific node. */
-    fun requestUserInfo(destNum: Int)
+    suspend fun requestUserInfo(destNum: Int)
 
     /** Requests a traceroute to a specific node. */
-    fun requestTraceroute(requestId: Int, destNum: Int)
+    suspend fun requestTraceroute(requestId: Int, destNum: Int)
 
     /** Requests telemetry from a specific node. */
-    fun requestTelemetry(requestId: Int, destNum: Int, typeValue: Int)
+    suspend fun requestTelemetry(requestId: Int, destNum: Int, typeValue: Int)
 
     /** Requests neighbor info from a specific node. */
-    fun requestNeighborInfo(requestId: Int, destNum: Int)
+    suspend fun requestNeighborInfo(requestId: Int, destNum: Int)
 }

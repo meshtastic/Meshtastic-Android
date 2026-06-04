@@ -34,9 +34,10 @@ import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.ContactSettings
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.util.MeshDataMapper
 import org.meshtastic.core.repository.AdminPacketHandler
-import org.meshtastic.core.repository.MeshServiceNotifications
+import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.MessageFilter
 import org.meshtastic.core.repository.NeighborInfoHandler
 import org.meshtastic.core.repository.NodeManager
@@ -45,7 +46,6 @@ import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
-import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.StoreForwardPacketHandler
 import org.meshtastic.core.repository.TelemetryPacketHandler
@@ -72,9 +72,8 @@ class MeshDataHandlerTest {
     private val packetHandler: PacketHandler = mock(MockMode.autofill)
     private val serviceRepository: ServiceRepository = mock(MockMode.autofill)
     private val packetRepository: PacketRepository = mock(MockMode.autofill)
-    private val serviceBroadcasts: ServiceBroadcasts = mock(MockMode.autofill)
     private val notificationManager: NotificationManager = mock(MockMode.autofill)
-    private val serviceNotifications: MeshServiceNotifications = mock(MockMode.autofill)
+    private val serviceNotifications: MeshNotificationManager = mock(MockMode.autofill)
     private val analytics: PlatformAnalytics = mock(MockMode.autofill)
     private val dataMapper: MeshDataMapper = mock(MockMode.autofill)
     private val tracerouteHandler: TracerouteHandler = mock(MockMode.autofill)
@@ -94,9 +93,8 @@ class MeshDataHandlerTest {
             MeshDataHandlerImpl(
                 nodeManager = nodeManager,
                 packetHandler = packetHandler,
-                serviceRepository = serviceRepository,
+                serviceStateWriter = serviceRepository,
                 packetRepository = lazy { packetRepository },
-                serviceBroadcasts = serviceBroadcasts,
                 notificationManager = notificationManager,
                 serviceNotifications = serviceNotifications,
                 analytics = analytics,
@@ -115,7 +113,7 @@ class MeshDataHandlerTest {
         // Default: mapper returns null for empty packets, which is the safe default
         every { dataMapper.toDataPacket(any()) } returns null
         // Stub commonly accessed properties to avoid NPE from autofill
-        every { nodeManager.nodeDBbyID } returns emptyMap()
+        every { nodeManager.getNodeById(any()) } returns null
         every { nodeManager.nodeDBbyNodeNum } returns emptyMap()
         every { radioConfigRepository.channelSetFlow } returns MutableStateFlow(ChannelSet())
     }
@@ -133,7 +131,6 @@ class MeshDataHandlerTest {
         handler.handleReceivedData(packet, 123)
 
         // Should not broadcast if dataMapper returns null
-        verify(mode = dev.mokkery.verify.VerifyMode.not) { serviceBroadcasts.broadcastReceivedData(any()) }
     }
 
     @Test
@@ -147,8 +144,8 @@ class MeshDataHandlerTest {
             )
         val dataPacket =
             DataPacket(
-                from = DataPacket.nodeNumToDefaultId(myNodeNum),
-                to = DataPacket.ID_BROADCAST,
+                from = NodeAddress.numToDefaultId(myNodeNum),
+                to = NodeAddress.ID_BROADCAST,
                 bytes = position.encode().toByteString(),
                 dataType = PortNum.POSITION_APP.value,
                 time = 1000L,
@@ -157,8 +154,7 @@ class MeshDataHandlerTest {
 
         handler.handleReceivedData(packet, myNodeNum)
 
-        // Position from local node: shouldBroadcast stays as !fromUs = false
-        verify(mode = dev.mokkery.verify.VerifyMode.not) { serviceBroadcasts.broadcastReceivedData(any()) }
+        // Position from local node — no further action expected
     }
 
     @Test
@@ -168,16 +164,14 @@ class MeshDataHandlerTest {
         val packet = MeshPacket(from = remoteNum, decoded = Data(portnum = PortNum.PRIVATE_APP))
         val dataPacket =
             DataPacket(
-                from = DataPacket.nodeNumToDefaultId(remoteNum),
-                to = DataPacket.ID_BROADCAST,
+                from = NodeAddress.numToDefaultId(remoteNum),
+                to = NodeAddress.ID_BROADCAST,
                 bytes = null,
                 dataType = PortNum.PRIVATE_APP.value,
             )
         every { dataMapper.toDataPacket(packet) } returns dataPacket
 
         handler.handleReceivedData(packet, myNodeNum)
-
-        verify { serviceBroadcasts.broadcastReceivedData(any()) }
     }
 
     @Test
@@ -186,7 +180,7 @@ class MeshDataHandlerTest {
         val dataPacket =
             DataPacket(
                 from = "!other",
-                to = DataPacket.ID_BROADCAST,
+                to = NodeAddress.ID_BROADCAST,
                 bytes = null,
                 dataType = PortNum.PRIVATE_APP.value,
             )
@@ -212,7 +206,7 @@ class MeshDataHandlerTest {
         val dataPacket =
             DataPacket(
                 from = "!remote",
-                to = DataPacket.ID_BROADCAST,
+                to = NodeAddress.ID_BROADCAST,
                 bytes = position.encode().toByteString(),
                 dataType = PortNum.POSITION_APP.value,
                 time = 1000L,
@@ -239,7 +233,7 @@ class MeshDataHandlerTest {
         val dataPacket =
             DataPacket(
                 from = "!remote",
-                to = DataPacket.ID_BROADCAST,
+                to = NodeAddress.ID_BROADCAST,
                 bytes = user.encode().toByteString(),
                 dataType = PortNum.NODEINFO_APP.value,
             )
@@ -262,7 +256,7 @@ class MeshDataHandlerTest {
         val dataPacket =
             DataPacket(
                 from = "!local",
-                to = DataPacket.ID_BROADCAST,
+                to = NodeAddress.ID_BROADCAST,
                 bytes = user.encode().toByteString(),
                 dataType = PortNum.NODEINFO_APP.value,
             )
@@ -287,7 +281,7 @@ class MeshDataHandlerTest {
         val dataPacket =
             DataPacket(
                 from = "!remote",
-                to = DataPacket.ID_BROADCAST,
+                to = NodeAddress.ID_BROADCAST,
                 bytes = pax.encode().toByteString(),
                 dataType = PortNum.PAXCOUNTER_APP.value,
             )
@@ -319,7 +313,6 @@ class MeshDataHandlerTest {
         handler.handleReceivedData(packet, 123)
 
         verify { tracerouteHandler.handleTraceroute(packet, any(), any()) }
-        verify(mode = dev.mokkery.verify.VerifyMode.not) { serviceBroadcasts.broadcastReceivedData(any()) }
     }
 
     // --- NeighborInfo handling ---
@@ -335,7 +328,7 @@ class MeshDataHandlerTest {
         val dataPacket =
             DataPacket(
                 from = "!remote",
-                to = DataPacket.ID_BROADCAST,
+                to = NodeAddress.ID_BROADCAST,
                 bytes = ni.encode().toByteString(),
                 dataType = PortNum.NEIGHBORINFO_APP.value,
             )
@@ -344,7 +337,6 @@ class MeshDataHandlerTest {
         handler.handleReceivedData(packet, 123)
 
         verify { neighborInfoHandler.handleNeighborInfo(packet) }
-        verify { serviceBroadcasts.broadcastReceivedData(any()) }
     }
 
     // --- Store-and-Forward handling ---
@@ -359,7 +351,7 @@ class MeshDataHandlerTest {
         val dataPacket =
             DataPacket(
                 from = "!remote",
-                to = DataPacket.ID_BROADCAST,
+                to = NodeAddress.ID_BROADCAST,
                 bytes = byteArrayOf().toByteString(),
                 dataType = PortNum.STORE_FORWARD_APP.value,
             )
@@ -384,7 +376,7 @@ class MeshDataHandlerTest {
         val dataPacket =
             DataPacket(
                 from = "!remote",
-                to = DataPacket.ID_BROADCAST,
+                to = NodeAddress.ID_BROADCAST,
                 bytes = routing.encode().toByteString(),
                 dataType = PortNum.ROUTING_APP.value,
             )
@@ -408,7 +400,7 @@ class MeshDataHandlerTest {
         val dataPacket =
             DataPacket(
                 from = "!remote",
-                to = DataPacket.ID_BROADCAST,
+                to = NodeAddress.ID_BROADCAST,
                 bytes = routing.encode().toByteString(),
                 dataType = PortNum.ROUTING_APP.value,
             )
@@ -416,8 +408,6 @@ class MeshDataHandlerTest {
         every { nodeManager.toNodeID(456) } returns "!remote"
 
         handler.handleReceivedData(packet, 123)
-
-        verify { serviceBroadcasts.broadcastReceivedData(any()) }
     }
 
     // --- Telemetry handling ---
@@ -437,7 +427,7 @@ class MeshDataHandlerTest {
         val dataPacket =
             DataPacket(
                 from = "!remote",
-                to = DataPacket.ID_BROADCAST,
+                to = NodeAddress.ID_BROADCAST,
                 bytes = telemetry.encode().toByteString(),
                 dataType = PortNum.TELEMETRY_APP.value,
                 time = 2000000L,
@@ -465,7 +455,7 @@ class MeshDataHandlerTest {
         val dataPacket =
             DataPacket(
                 from = "!local",
-                to = DataPacket.ID_BROADCAST,
+                to = NodeAddress.ID_BROADCAST,
                 bytes = telemetry.encode().toByteString(),
                 dataType = PortNum.TELEMETRY_APP.value,
                 time = 2000000L,
@@ -492,7 +482,7 @@ class MeshDataHandlerTest {
             DataPacket(
                 id = 42,
                 from = "!remote",
-                to = DataPacket.ID_BROADCAST,
+                to = NodeAddress.ID_BROADCAST,
                 bytes = "hello".encodeToByteArray().toByteString(),
                 dataType = PortNum.TEXT_MESSAGE_APP.value,
             )
@@ -501,11 +491,8 @@ class MeshDataHandlerTest {
         everySuspend { packetRepository.getContactSettings(any()) } returns ContactSettings(contactKey = "test")
         every { messageFilter.shouldFilter(any(), any()) } returns false
         // Provide sender node so getSenderName() doesn't fall back to getString (requires Skiko)
-        every { nodeManager.nodeDBbyID } returns
-            mapOf(
-                "!remote" to
-                    Node(num = 456, user = User(id = "!remote", long_name = "Remote User", short_name = "RU")),
-            )
+        every { nodeManager.getNodeById("!remote") } returns
+            Node(num = 456, user = User(id = "!remote", long_name = "Remote User", short_name = "RU"))
 
         handler.handleReceivedData(packet, 123)
         advanceUntilIdle()
@@ -526,7 +513,7 @@ class MeshDataHandlerTest {
             DataPacket(
                 id = 42,
                 from = "!remote",
-                to = DataPacket.ID_BROADCAST,
+                to = NodeAddress.ID_BROADCAST,
                 bytes = "hello".encodeToByteArray().toByteString(),
                 dataType = PortNum.TEXT_MESSAGE_APP.value,
             )
@@ -599,7 +586,7 @@ class MeshDataHandlerTest {
             DataPacket(
                 id = 55,
                 from = "!remote",
-                to = DataPacket.ID_BROADCAST,
+                to = NodeAddress.ID_BROADCAST,
                 bytes = "test".encodeToByteArray().toByteString(),
                 dataType = PortNum.RANGE_TEST_APP.value,
             )
@@ -607,11 +594,8 @@ class MeshDataHandlerTest {
         everySuspend { packetRepository.findPacketsWithId(55) } returns emptyList()
         everySuspend { packetRepository.getContactSettings(any()) } returns ContactSettings(contactKey = "test")
         every { messageFilter.shouldFilter(any(), any()) } returns false
-        every { nodeManager.nodeDBbyID } returns
-            mapOf(
-                "!remote" to
-                    Node(num = 456, user = User(id = "!remote", long_name = "Remote User", short_name = "RU")),
-            )
+        every { nodeManager.getNodeById("!remote") } returns
+            Node(num = 456, user = User(id = "!remote", long_name = "Remote User", short_name = "RU"))
 
         handler.handleReceivedData(packet, 123)
         advanceUntilIdle()
@@ -630,7 +614,7 @@ class MeshDataHandlerTest {
         val dataPacket =
             DataPacket(
                 from = "!local",
-                to = DataPacket.ID_BROADCAST,
+                to = NodeAddress.ID_BROADCAST,
                 bytes = admin.encode().toByteString(),
                 dataType = PortNum.ADMIN_APP.value,
             )
@@ -659,13 +643,13 @@ class MeshDataHandlerTest {
             DataPacket(
                 id = 77,
                 from = "!remote",
-                to = DataPacket.ID_BROADCAST,
+                to = NodeAddress.ID_BROADCAST,
                 bytes = "spam content".encodeToByteArray().toByteString(),
                 dataType = PortNum.TEXT_MESSAGE_APP.value,
             )
         every { dataMapper.toDataPacket(packet) } returns dataPacket
         everySuspend { packetRepository.findPacketsWithId(77) } returns emptyList()
-        every { nodeManager.nodeDBbyID } returns emptyMap()
+        every { nodeManager.getNodeById(any()) } returns null
         everySuspend { packetRepository.getContactSettings(any()) } returns ContactSettings(contactKey = "test")
         every { messageFilter.shouldFilter("spam content", false) } returns true
 
@@ -689,14 +673,14 @@ class MeshDataHandlerTest {
             DataPacket(
                 id = 88,
                 from = "!remote",
-                to = DataPacket.ID_BROADCAST,
+                to = NodeAddress.ID_BROADCAST,
                 bytes = "hello".encodeToByteArray().toByteString(),
                 dataType = PortNum.TEXT_MESSAGE_APP.value,
             )
         every { dataMapper.toDataPacket(packet) } returns dataPacket
         everySuspend { packetRepository.findPacketsWithId(88) } returns emptyList()
-        every { nodeManager.nodeDBbyID } returns
-            mapOf("!remote" to Node(num = 456, user = User(id = "!remote"), isIgnored = true))
+        every { nodeManager.getNodeById("!remote") } returns
+            Node(num = 456, user = User(id = "!remote"), isIgnored = true)
         everySuspend { packetRepository.getContactSettings(any()) } returns ContactSettings(contactKey = "test")
 
         handler.handleReceivedData(packet, 123)

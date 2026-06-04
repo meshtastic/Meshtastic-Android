@@ -43,7 +43,9 @@ advanced
 advanced_device_gps
 advanced_title
 ### AIR ###
+air_quality
 air_quality_icon
+air_quality_metrics_log
 air_quality_metrics_module_enabled
 air_quality_metrics_update_interval_seconds
 air_util_definition
@@ -68,6 +70,22 @@ analytics_notice
 analytics_okay
 analytics_platforms
 any
+### APP ###
+app_functions_get_channel_info
+app_functions_get_device_status
+app_functions_get_mesh_metrics
+app_functions_get_mesh_status
+app_functions_get_node_details
+app_functions_get_node_list
+app_functions_get_recent_messages
+app_functions_get_unread_summary
+app_functions_master_summary
+app_functions_master_toggle
+app_functions_read_section
+app_functions_send_message
+app_functions_settings
+app_functions_settings_summary
+app_functions_write_section
 app_notifications
 app_settings
 app_too_old
@@ -163,10 +181,12 @@ clear_time_zone
 client_notification
 close
 close_selection
+co2
 codec_2_enabled
 codec2_sample_rate
 coding_rate
 collapse_chart
+collapsed
 communicate_off_the_grid
 ### COMPASS ###
 compass_bearing
@@ -297,6 +317,9 @@ device_configuration
 device_db_cache_limit
 device_db_cache_limit_summary
 device_gps
+device_links
+device_links_i_want_one
+device_links_open_in_browser
 device_metrics_label_value
 device_metrics_log
 device_metrics_numeric_value
@@ -489,6 +512,7 @@ event_welcome_hamvention
 event_welcome_open_sauce
 exchange_position
 expand_chart
+expanded
 expires
 ### EXPORT ###
 export_configuration
@@ -810,6 +834,7 @@ message_status_sfpp_confirmed
 message_status_sfpp_routing
 message_status_unknown
 messages
+micrograms_per_cubic_meter
 min
 minimum_broadcast_seconds
 minimum_distance
@@ -1012,6 +1037,9 @@ play
 plurals_hours
 plurals_minutes
 plurals_seconds
+pm1_0
+pm10
+pm2_5
 ### POSITION ###
 position
 position_config_set_fixed_from_phone
@@ -1027,6 +1055,7 @@ power_metrics_module_enabled
 power_metrics_on_screen_enabled
 power_metrics_update_interval_seconds
 powered
+ppm
 precise_location
 preferences_language
 preferences_system_default
@@ -1189,6 +1218,7 @@ scanning_network
 screen_on_for
 scroll_to_bottom
 search_emoji
+search_messages
 secondary
 secondary_channel_position_feature
 secondary_no_telemetry

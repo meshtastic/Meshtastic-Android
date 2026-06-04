@@ -26,11 +26,13 @@ plugins {
     alias(libs.plugins.meshtastic.android.application)
     alias(libs.plugins.meshtastic.android.application.flavors)
     alias(libs.plugins.meshtastic.android.application.compose)
+    alias(libs.plugins.meshtastic.kotlinx.serialization)
     id("meshtastic.koin")
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.secrets)
     id("meshtastic.aboutlibraries")
     id("dev.mokkery")
+    alias(libs.plugins.devtools.ksp)
 }
 
 val keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -110,7 +112,7 @@ configure<ApplicationExtension> {
                 ),
             )
         }
-        ndk { abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64") }
+        ndk { abiFilters += listOf("armeabi-v7a", "arm64-v8a") }
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -124,7 +126,7 @@ configure<ApplicationExtension> {
         abi {
             isEnable = !disableSplits
             reset()
-            include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+            include("armeabi-v7a", "arm64-v8a")
             isUniversalApk = true
         }
     }
@@ -176,6 +178,8 @@ secrets {
     defaultPropertiesFileName = "secrets.defaults.properties"
     propertiesFileName = "secrets.properties"
 }
+
+ksp { arg("appfunctions:aggregateAppFunctions", "true") }
 
 androidComponents {
     onVariants(selector().withBuildType("debug")) { variant ->
@@ -264,6 +268,7 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.glance.preview)
 
+    googleImplementation(projects.feature.car)
     googleImplementation(libs.location.services)
     googleImplementation(libs.play.services.maps)
     googleImplementation(libs.maps.compose)
@@ -283,6 +288,10 @@ dependencies {
     googleImplementation(libs.firebase.ai.ondevice)
     googleImplementation(libs.mlkit.translate)
 
+    googleImplementation(libs.androidx.appfunctions)
+    googleImplementation(libs.androidx.appfunctions.service)
+    add("kspGoogle", libs.androidx.appfunctions.compiler)
+
     fdroidImplementation(libs.osmdroid.android)
     fdroidImplementation(libs.osmdroid.geopackage) { exclude(group = "com.j256.ormlite") }
     fdroidImplementation(libs.osmbonuspack)
@@ -297,4 +306,6 @@ dependencies {
     testImplementation(libs.compose.multiplatform.ui.test)
     testImplementation(libs.androidx.test.ext.junit)
     testImplementation(libs.androidx.glance.appwidget)
+    // JVM variant provides the host-platform native library for BundledSQLiteDriver under Robolectric
+    testRuntimeOnly("androidx.sqlite:sqlite-bundled-jvm:2.6.2")
 }

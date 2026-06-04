@@ -37,6 +37,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.eygraber.uri.toKmpUri
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.koinInject
+import org.koin.core.qualifier.named
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.toDate
 import org.meshtastic.core.common.util.toInstant
@@ -45,7 +47,10 @@ import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.navigation.WifiProvisionRoute
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.app_functions_settings
+import org.meshtastic.core.resources.app_functions_settings_summary
 import org.meshtastic.core.resources.bottom_nav_settings
+import org.meshtastic.core.resources.device_links
 import org.meshtastic.core.resources.discovery_local_mesh
 import org.meshtastic.core.resources.export_configuration
 import org.meshtastic.core.resources.filter_settings
@@ -58,11 +63,13 @@ import org.meshtastic.core.resources.wifi_devices
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MeshtasticDialog
+import org.meshtastic.core.ui.icon.Device
 import org.meshtastic.core.ui.icon.FilterList
 import org.meshtastic.core.ui.icon.HelpOutline
 import org.meshtastic.core.ui.icon.List
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.PermScanWifi
+import org.meshtastic.core.ui.icon.SettingsRemote
 import org.meshtastic.core.ui.icon.Wifi
 import org.meshtastic.feature.settings.component.AppInfoSection
 import org.meshtastic.feature.settings.component.AppearanceSection
@@ -90,6 +97,7 @@ fun SettingsScreen(
     onNavigate: (Route) -> Unit = {},
     onBack: (() -> Unit)? = null,
 ) {
+    val appFunctionsAvailable: Boolean = koinInject(qualifier = named("googleServicesAvailable"))
     val excludedModulesUnlocked by settingsViewModel.excludedModulesUnlocked.collectAsStateWithLifecycle()
     val localConfig by settingsViewModel.localConfig.collectAsStateWithLifecycle()
     val ourNode by settingsViewModel.ourNodeInfo.collectAsStateWithLifecycle()
@@ -229,7 +237,7 @@ fun SettingsScreen(
             // App-local settings are only relevant when configuring the local node
             if (state.isLocal) {
                 PrivacySection(
-                    analyticsAvailable = state.analyticsAvailable,
+                    analyticsAvailable = appFunctionsAvailable,
                     analyticsEnabled = viewModel.analyticsAllowedFlow.collectAsStateWithLifecycle(true).value,
                     onToggleAnalytics = { viewModel.toggleAnalyticsAllowed() },
                     provideLocation = settingsViewModel.provideLocation.collectAsStateWithLifecycle().value,
@@ -275,6 +283,24 @@ fun SettingsScreen(
                         leadingIcon = MeshtasticIcons.FilterList,
                     ) {
                         onNavigate(SettingsRoute.FilterSettings)
+                    }
+                }
+
+                ExpressiveSection(title = stringResource(Res.string.device_links)) {
+                    ListItem(text = stringResource(Res.string.device_links), leadingIcon = MeshtasticIcons.Device) {
+                        onNavigate(SettingsRoute.DeviceLinks)
+                    }
+                }
+
+                if (appFunctionsAvailable) {
+                    ExpressiveSection(title = stringResource(Res.string.app_functions_settings)) {
+                        ListItem(
+                            text = stringResource(Res.string.app_functions_settings),
+                            supportingText = stringResource(Res.string.app_functions_settings_summary),
+                            leadingIcon = MeshtasticIcons.SettingsRemote,
+                        ) {
+                            onNavigate(SettingsRoute.AppFunctionsSettings)
+                        }
                     }
                 }
 

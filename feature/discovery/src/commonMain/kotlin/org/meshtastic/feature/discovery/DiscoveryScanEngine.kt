@@ -44,12 +44,12 @@ import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.ChannelOption
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
-import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.model.util.decodeOrNull
 import org.meshtastic.core.repository.DiscoveryPacketCollector
 import org.meshtastic.core.repository.DiscoveryPacketCollectorRegistry
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.feature.discovery.ai.DiscoverySummaryAiProvider
 import org.meshtastic.proto.Config
@@ -351,7 +351,7 @@ class DiscoveryScanEngine(
      */
     private suspend fun requestNeighborInfoAtDwellBoundary() {
         val myNodeNum = nodeRepository.myNodeInfo.value?.myNodeNum ?: return
-        val packetId = radioController.getPacketId()
+        val packetId = radioController.generatePacketId()
         radioController.requestNeighborInfo(packetId, myNodeNum)
         Logger.d { "DiscoveryScanEngine: requested NeighborInfo from local node $myNodeNum (packetId=$packetId)" }
     }

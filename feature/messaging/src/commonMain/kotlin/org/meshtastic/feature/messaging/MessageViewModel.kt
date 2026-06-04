@@ -21,31 +21,34 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.model.ContactSettings
-import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.model.service.ServiceAction
+import org.meshtastic.core.model.NodeAddress
+import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.CustomEmojiPrefs
 import org.meshtastic.core.repository.HomoglyphPrefs
+import org.meshtastic.core.repository.MessagingController
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.QuickChatActionRepository
 import org.meshtastic.core.repository.RadioConfigRepository
-import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.repository.usecase.SendMessageUseCase
 import org.meshtastic.core.ui.viewmodel.safeLaunch
@@ -55,11 +58,12 @@ import org.meshtastic.proto.ChannelSet
 @Suppress("LongParameterList", "TooManyFunctions")
 @KoinViewModel
 class MessageViewModel(
-    savedStateHandle: SavedStateHandle,
+    private val savedStateHandle: SavedStateHandle,
     private val nodeRepository: NodeRepository,
     radioConfigRepository: RadioConfigRepository,
     quickChatActionRepository: QuickChatActionRepository,
-    private val serviceRepository: ServiceRepository,
+    private val connectionStateProvider: ConnectionStateProvider,
+    private val messagingController: MessagingController,
     private val packetRepository: PacketRepository,
     private val uiPrefs: UiPrefs,
     private val customEmojiPrefs: CustomEmojiPrefs,
@@ -70,9 +74,22 @@ class MessageViewModel(
     private val _title = MutableStateFlow("")
     val title: StateFlow<String> = _title.asStateFlow()
 
+    private val _draftMessage = MutableStateFlow(savedStateHandle.get<String>("draftMessage") ?: "")
+    val draftMessage: StateFlow<String> = _draftMessage.asStateFlow()
+
+    fun setDraftMessage(text: String) {
+        _draftMessage.value = text
+        savedStateHandle["draftMessage"] = text
+    }
+
+    fun clearDraftMessage() {
+        _draftMessage.value = ""
+        savedStateHandle["draftMessage"] = ""
+    }
+
     val ourNodeInfo = nodeRepository.ourNodeInfo
 
-    val connectionState = serviceRepository.connectionState
+    val connectionState = connectionStateProvider.connectionState
 
     val nodeList: StateFlow<List<Node>> = nodeRepository.getNodes().stateInWhileSubscribed(initialValue = emptyList())
 
@@ -109,10 +126,11 @@ class MessageViewModel(
         get() =
             customEmojiPrefs.customEmojiFrequency.value
                 ?.split(",")
-                ?.associate { entry ->
-                    entry.split("=", limit = 2).takeIf { it.size == 2 }?.let { it[0] to it[1].toInt() } ?: ("" to 0)
+                ?.mapNotNull { entry ->
+                    val parts = entry.split("=", limit = 2)
+                    val count = parts.getOrNull(1)?.toIntOrNull()
+                    if (parts.size == 2 && parts[0].isNotEmpty() && count != null) parts[0] to count else null
                 }
-                ?.toList()
                 ?.sortedByDescending { it.second }
                 ?.map { it.first }
                 ?.take(6) ?: listOf("👍", "👎", "😂", "🔥", "❤️", "😮")
@@ -142,6 +160,68 @@ class MessageViewModel(
             .filterNotNull()
             .flatMapLatest { packetRepository.getFilteredCountFlow(it) }
             .stateInWhileSubscribed(0)
+
+    // region ── Search ──
+
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+
+    private val _isSearchActive = MutableStateFlow(false)
+    val isSearchActive: StateFlow<Boolean> = _isSearchActive.asStateFlow()
+
+    private val _searchResultIndex = MutableStateFlow(0)
+    val searchResultIndex: StateFlow<Int> = _searchResultIndex.asStateFlow()
+
+    @OptIn(FlowPreview::class)
+    val searchResults: StateFlow<List<Message>> =
+        combine(_searchQuery, contactKeyForPagedMessages) { query, contactKey -> query to contactKey }
+            .debounce(SEARCH_DEBOUNCE_MS)
+            .flatMapLatest { (query, contactKey) ->
+                if (query.length < MIN_SEARCH_LENGTH) {
+                    flowOf(emptyList())
+                } else {
+                    packetRepository.searchMessages(query, contactKey, ::getNode)
+                }
+            }
+            .stateInWhileSubscribed(emptyList())
+
+    /** The currently focused search result message (for scroll-to-match). */
+    val currentSearchResult: StateFlow<Message?> =
+        combine(searchResults, _searchResultIndex) { results, index -> results.getOrNull(index) }
+            .stateInWhileSubscribed(null)
+
+    fun setSearchQuery(query: String) {
+        _searchQuery.value = query
+        _searchResultIndex.value = 0
+    }
+
+    fun navigateToNextResult() {
+        val max = searchResults.value.size
+        if (max == 0) return
+        _searchResultIndex.update { (it + 1) % max }
+    }
+
+    fun navigateToPreviousResult() {
+        val max = searchResults.value.size
+        if (max == 0) return
+        _searchResultIndex.update { if (it == 0) max - 1 else it - 1 }
+    }
+
+    fun toggleSearch() {
+        _isSearchActive.value = !_isSearchActive.value
+        if (!_isSearchActive.value) {
+            _searchQuery.value = ""
+            _searchResultIndex.value = 0
+        }
+    }
+
+    fun closeSearch() {
+        _isSearchActive.value = false
+        _searchQuery.value = ""
+        _searchResultIndex.value = 0
+    }
+
+    // endregion
 
     init {
         val contactKey = savedStateHandle.get<String>("contactKey")
@@ -195,9 +275,9 @@ class MessageViewModel(
         }
     }
 
-    fun getNode(userId: String?) = nodeRepository.getNode(userId ?: DataPacket.ID_BROADCAST)
+    fun getNode(userId: String?) = nodeRepository.getNode(userId ?: NodeAddress.ID_BROADCAST)
 
-    fun getUser(userId: String?) = nodeRepository.getUser(userId ?: DataPacket.ID_BROADCAST)
+    fun getUser(userId: String?) = nodeRepository.getUser(userId ?: NodeAddress.ID_BROADCAST)
 
     /**
      * Sends a message to a contact or channel.
@@ -212,13 +292,12 @@ class MessageViewModel(
      *   broadcasting on channel 0.
      * @param replyId The ID of the message this is a reply to, if any.
      */
-    fun sendMessage(str: String, contactKey: String = "0${DataPacket.ID_BROADCAST}", replyId: Int? = null) {
+    fun sendMessage(str: String, contactKey: String = "0${NodeAddress.ID_BROADCAST}", replyId: Int? = null) {
         safeLaunch(tag = "sendMessage") { sendMessageUseCase.invoke(str, contactKey, replyId) }
     }
 
-    fun sendReaction(emoji: String, replyId: Int, contactKey: String) = safeLaunch(tag = "sendReaction") {
-        serviceRepository.onServiceAction(ServiceAction.Reaction(emoji, replyId, contactKey))
-    }
+    fun sendReaction(emoji: String, replyId: Int, contactKey: String) =
+        safeLaunch(tag = "sendReaction") { messagingController.sendReaction(emoji, replyId, contactKey) }
 
     fun deleteMessages(uuidList: List<Long>) =
         safeLaunch(context = ioDispatcher, tag = "deleteMessages") { packetRepository.deleteMessages(uuidList) }
@@ -234,4 +313,9 @@ class MessageViewModel(
             val unreadCount = packetRepository.getUnreadCount(contact)
             if (unreadCount == 0) notificationManager.cancel(contact.hashCode())
         }
+
+    companion object {
+        private const val SEARCH_DEBOUNCE_MS = 300L
+        private const val MIN_SEARCH_LENGTH = 2
+    }
 }

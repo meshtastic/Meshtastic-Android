@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavKey
@@ -58,12 +59,13 @@ fun MainScreen() {
     val viewModel: UIViewModel = koinViewModel()
     // Land on Connections for first-run / no-device-selected; otherwise on Nodes. Read synchronously
     // from the StateFlow (seeded from persisted prefs) so the initial tab is set in one shot.
-    val initialTab =
+    val initialTab = remember {
         if (viewModel.currentDeviceAddressFlow.value.isNullOrSelectedNone()) {
             TopLevelDestination.Connect.route
         } else {
             NodesRoute.Nodes
         }
+    }
     val multiBackstack = rememberMultiBackstack(initialTab)
     val backStack = multiBackstack.activeBackStack
 

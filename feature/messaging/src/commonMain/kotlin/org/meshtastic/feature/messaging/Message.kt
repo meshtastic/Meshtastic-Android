@@ -51,6 +51,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
@@ -72,8 +73,9 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.HomoglyphCharacterStringTransformer
 import org.meshtastic.core.database.entity.QuickChatAction
 import org.meshtastic.core.model.ConnectionState
-import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.ContactKey
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.util.getChannel
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.message_input_label
@@ -90,6 +92,7 @@ import org.meshtastic.feature.messaging.component.ActionModeTopBar
 import org.meshtastic.feature.messaging.component.DeleteMessageDialog
 import org.meshtastic.feature.messaging.component.MESSAGE_CHARACTER_LIMIT_BYTES
 import org.meshtastic.feature.messaging.component.MessageMenuAction
+import org.meshtastic.feature.messaging.component.MessageSearchBar
 import org.meshtastic.feature.messaging.component.MessageTopBar
 import org.meshtastic.feature.messaging.component.QuickChatRow
 import org.meshtastic.feature.messaging.component.ReplySnippet
@@ -138,11 +141,21 @@ fun MessageScreen(
     var showDeleteDialog by rememberSaveable { mutableStateOf(false) }
     var sharedContact by rememberSaveable { mutableStateOf<Node?>(null) }
     val selectedMessageIds = rememberSaveable { mutableStateOf(emptySet<Long>()) }
-    val messageInputState = rememberTextFieldState(message)
+    val messageInputState = rememberTextFieldState(message.ifEmpty { viewModel.draftMessage.value })
     val showQuickChat by viewModel.showQuickChat.collectAsStateWithLifecycle()
     val filteredCount by viewModel.filteredCount.collectAsStateWithLifecycle()
     val showFiltered by viewModel.showFiltered.collectAsStateWithLifecycle()
     val filteringDisabled = contactSettings[contactKey]?.filteringDisabled ?: false
+    val isSearchActive by viewModel.isSearchActive.collectAsStateWithLifecycle()
+    val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
+    val searchResults by viewModel.searchResults.collectAsStateWithLifecycle()
+    val searchResultIndex by viewModel.searchResultIndex.collectAsStateWithLifecycle()
+    val currentSearchResult by viewModel.currentSearchResult.collectAsStateWithLifecycle()
+
+    // Sync text field changes back to ViewModel draft
+    LaunchedEffect(messageInputState) {
+        snapshotFlow { messageInputState.text.toString() }.collect { text -> viewModel.setDraftMessage(text) }
+    }
 
     // Prevent the message TextField from stealing focus when the screen opens
     LaunchedEffect(contactKey) { focusManager.clearFocus() }
@@ -150,8 +163,9 @@ fun MessageScreen(
     // Derived state, memoized for performance
     val channelInfo =
         remember(contactKey, channels) {
-            val index = contactKey.firstOrNull()?.digitToIntOrNull()
-            val id = contactKey.substring(1)
+            val parsedKey = ContactKey(contactKey)
+            val index = parsedKey.channelOrNull
+            val id = parsedKey.addressString
             val name = index?.let { channels.getChannel(it)?.name } // channels can be null initially
             Triple(index, id, name)
         }
@@ -162,14 +176,14 @@ fun MessageScreen(
     val title =
         remember(nodeId, channelName, viewModel) {
             when (nodeId) {
-                DataPacket.ID_BROADCAST -> channelName
+                NodeAddress.ID_BROADCAST -> channelName
                 else -> viewModel.getUser(nodeId).long_name
             }
         }
 
     val isMismatchKey =
         remember(channelIndex, nodeId, viewModel) {
-            channelIndex == DataPacket.PKC_CHANNEL_INDEX && viewModel.getNode(nodeId).mismatchKey
+            channelIndex == NodeAddress.PKC_CHANNEL_INDEX && viewModel.getNode(nodeId).mismatchKey
         }
 
     val inSelectionMode by remember { derivedStateOf { selectedMessageIds.value.isNotEmpty() } }
@@ -225,6 +239,15 @@ fun MessageScreen(
         }
     }
 
+    // Scroll to the current search result when navigating prev/next
+    LaunchedEffect(currentSearchResult) {
+        val targetUuid = currentSearchResult?.uuid ?: return@LaunchedEffect
+        val index = pagedMessages.itemSnapshotList.indexOfFirst { it?.uuid == targetUuid }
+        if (index != -1) {
+            listState.animateScrollToItem(index)
+        }
+    }
+
     val onEvent: (MessageScreenEvent) -> Unit =
         remember(viewModel, contactKey, messageInputState, ourNode) {
             fun handle(event: MessageScreenEvent) {
@@ -233,6 +256,7 @@ fun MessageScreen(
                         viewModel.sendMessage(event.text, contactKey, event.replyingToPacketId)
                         if (event.replyingToPacketId != null) replyingToPacketId = null
                         messageInputState.clearText()
+                        viewModel.clearDraftMessage()
                     }
 
                     is MessageScreenEvent.SendReaction ->
@@ -317,6 +341,16 @@ fun MessageScreen(
                         }
                     },
                 )
+            } else if (isSearchActive) {
+                MessageSearchBar(
+                    query = searchQuery,
+                    onQueryChange = viewModel::setSearchQuery,
+                    onClose = viewModel::closeSearch,
+                    resultCount = searchResults.size,
+                    currentIndex = searchResultIndex,
+                    onPrevious = viewModel::navigateToPreviousResult,
+                    onNext = viewModel::navigateToNextResult,
+                )
             } else {
                 MessageTopBar(
                     title = title,
@@ -336,6 +370,7 @@ fun MessageScreen(
                     showFiltered = showFiltered,
                     onToggleShowFiltered = viewModel::toggleShowFiltered,
                     onNavigateToFilterSettings = navigateToFilterSettings,
+                    onSearchClick = viewModel::toggleSearch,
                 )
             }
         },
@@ -389,6 +424,7 @@ fun MessageScreen(
                     filteredCount = filteredCount,
                     showFiltered = showFiltered,
                     filteringDisabled = filteringDisabled,
+                    searchQuery = if (isSearchActive) searchQuery else "",
                 ),
                 handlers =
                 MessageListHandlers(

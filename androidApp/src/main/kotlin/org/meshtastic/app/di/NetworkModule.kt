@@ -111,7 +111,7 @@ class NetworkModule {
             if (buildConfigProvider.isDebug) {
                 install(plugin = Logging) {
                     logger = KermitHttpLogger
-                    level = LogLevel.BODY
+                    level = LogLevel.INFO
                 }
             }
         }

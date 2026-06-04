@@ -1,9 +1,9 @@
 ---
-title: How the Meshtastic Signal Meter Works
+title: Как работает измеритель сигнала Meshtastic
 parent: Руководство пользователя
 nav_order: 15
 last_updated: 2026-05-13
-description: How the signal meter calculates quality from RSSI and SNR — LoRa spread spectrum, presets, and what the bars really mean.
+description: Как измеритель сигнала вычисляет качество по RSSI и SNR — спектр с расширением LoRa, предустановки и что на самом деле означают эти полосы.
 aliases:
   - signal
   - signal-meter
@@ -11,72 +11,72 @@ aliases:
   - rssi
 ---
 
-# How the Meshtastic Signal Meter Works
+# Как работает измеритель сигнала Meshtastic
 
-The Meshtastic signal meter — the familiar bars or status color in the app — is calculated very differently than the "bars" on a traditional cell phone or Wi-Fi router.
+Измеритель сигнала Meshtastic — знакомые полосы или цвет состояния в приложении — рассчитывается совсем иначе, чем "полоски" на традиционном мобильном телефоне или Wi-Fi роутере.
 
-Most consumer devices simply measure how "loud" a signal is. However, because Meshtastic uses **LoRa (Long Range)** technology, its signal meter measures how **clear** the signal is, relative to the specific settings your mesh is using.
+Большинство потребительских устройств просто измеряют, насколько "громкий" сигнал. Однако, поскольку Meshtastic использует технологию **LoRa (Long Range)**, его измеритель сигнала оценивает, насколько **чистый** сигнал, относительно конкретных настроек вашей mesh-сети.
 
 ---
 
-## 1. The Two Metrics: "Loudness" vs. "Clarity"
+## 1. Две метрики: "Громкость" против "Чёткости"
 
-Every time the LoRa radio chip receives a message, it reports two measurements:
+Каждый раз, когда радиочип LoRa получает сообщение, он сообщает два измерения:
 
-- **RSSI (Received Signal Strength Indicator):** The **loudness** of the raw power hitting your antenna.
-- **SNR (Signal-to-Noise Ratio):** The **clarity** of the signal compared to the background static.
+- **RSSI (Индикатор уровня принятого сигнала):** **громкость** необработанного сигнала, поступающего на твою антенну.
+- **SNR (Соотношение сигнал/шум):** **Чёткость** сигнала по сравнению с фоновым шумом.
 
-> **Tip — The Analogy:** Imagine you are trying to hear a friend talking to you.
+> **Совет — аналогия:** Представь, что ты пытаешься услышать, как друг разговаривает с тобой.
 >
-> - **RSSI** is how loud their voice is.
-> - **The Noise Floor** is the background noise in the room (air conditioning, other people talking, traffic).
-> - **SNR** is how easily you can distinguish your friend's voice from the background noise.
+> - **RSSI** — это громкость его голоса.
+> - **Минимальный уровень шума** — это фоновый шум в комнате (кондиционер, разговоры других людей, движение транспорта).
+> - **SNR** — это то, насколько легко ты можешь различить голос твоего друга на фоне шума.
 
-If your friend shouts at you at a deafening rock concert, the signal is incredibly loud (High RSSI), but you still can't understand them because the background noise is louder (Bad SNR). Conversely, if your friend whispers to you in a dead-silent library, the signal is very weak (Low RSSI), but you can understand them perfectly (Great SNR).
-
----
-
-## 2. The Magic of LoRa: Hearing "Below the Noise Floor"
-
-For standard radios (like FM or Wi-Fi), if the background noise is louder than the signal (a negative SNR), the receiver just hears static.
-
-LoRa is special. It uses **"Spread Spectrum"** modulation, which allows the radio to mathematically pull a signal out of the air even when it is buried deep _underneath_ the background noise. This is why you will frequently see **negative SNR numbers** in Meshtastic (e.g., -10 dB, which means the signal is 10 decibels weaker than the background static).
-
-Depending on which Meshtastic preset you are using (e.g., `LongFast` vs. `ShortFast`), the radio has a specific **SNR Limit** — the absolute maximum amount of noise it can tolerate before the message is completely lost to the static.
+Если твой друг кричит тебе на оглушительном рок-концерте, сигнал невероятно громкий (высокий RSSI), но ты всё равно не можешь его понять, потому что фоновый шум громче (плохое SNR). И наоборот, если твой друг шепчет тебе в абсолютно тихой библиотеке, сигнал очень слабый (низкий RSSI), но ты можешь его прекрасно понять (отличный SNR).
 
 ---
 
-## 3. How the Signal Meter Calculates Quality
+## 2. Магия LoRa: слышит "ниже уровня шума"
 
-The Meshtastic apps take both RSSI and SNR and run them through a specific formula to assign your signal a quality rating (None, Bad, Fair, or Good). It specifically scales these values based on the physical limits of the radio preset you are using.
+Для стандартных радиостанций (таких как FM или Wi-Fi), если фоновый шум громче сигнала (отрицательное отношение сигнал/шум), приемник просто слышит помехи.
 
-Here is exactly how the app decides how many bars (or what color) to show you:
+LoRa особенная. Она использует модуляцию **"широкополосного спектра"**, которая позволяет радио математически извлекать сигнал из воздуха даже когда он глубоко _под_ фоновым шумом. Вот почему ты часто будете видеть **отрицательные значения SNR** в Meshtastic (например, -10 дБ, что означает, что сигнал на 10 децибел слабее фонового шума).
 
-| Level       | Bars | Criteria                                                                                  | Meaning                                                                 |
-| ----------- | ---- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| Хороший     | 3    | RSSI better than `-115 dBm` **AND** SNR better than `-7 dB`                               | Signal is both loud and clear — healthy connection.     |
-| Средний     | 2    | RSSI better than `-126 dBm` with good SNR, **OR** SNR better than `-15 dB` with good RSSI | Signal getting quieter or noisier, but still decodable. |
-| Плохой      | 1    | Falls between Fair and None thresholds                                                    | At the edge of range or experiencing interference.      |
-| Отсутствует | 0    | RSSI worse than `-126 dBm` **AND** SNR worse than `-15 dB`                                | Transmission completely buried in noise.                |
+В зависимости от того, какой пресет Meshtastic ты используешь (например, `LongFast` или `ShortFast`), у радиоприемника есть определённый **предел SNR** — абсолютное максимальное количество шума, которое он может выдержать, прежде чем сообщение полностью потеряется в помехах.
 
 ---
 
-## 4. What This Means for You
+## 3. Как измеритель сигнала рассчитывает качество
 
-Because Meshtastic's meter acts as a **"Clarity Meter"**, it behaves differently than what most people expect:
+Приложения Meshtastic используют как RSSI, так и SNR и пропускают их через определённую формулу для присвоения сигналу оценки качества (Нет, Плохой, Удовлетворительный или Хороший). Оно специально масштабирует эти значения на основе физических ограничений используемого тобой пресета радиоприемника.
 
-> **Tip — Don't panic over low RSSI:** You might see a seemingly terrible RSSI value like `-118 dBm`. On a cell phone, you would have zero bars. But if you have an SNR of `+2 dB`, Meshtastic will still show a strong signal! _The library is quiet, so the whisper is heard perfectly._
+Вот точно как приложение решает, сколько полосок (или какого цвета) показывать тебе:
 
-> **Warning — Watch out for local noise:** If you hook up a massive antenna and see a great RSSI (e.g., `-90 dBm`) but your signal meter is only showing **1 Bar (Bad)**, you have a problem. It means you have local interference — perhaps a cheap power supply, a noisy computer, or a nearby radio tower — creating so much static that it is drowning out your mesh.
+| Уровень     | Деления | Критерии                                                                       | Значение                                                                |
+| ----------- | ------- | ------------------------------------------------------------------------------ | ----------------------------------------------------------------------- |
+| Хороший     | 3       | RSSI лучше `-115 dBm` **И** SNR лучше `-7 dB`                                  | Сигнал как громкий, так и четкий — здоровое соединение. |
+| Средний     | 2       | RSSI лучше `-126 dBm` с хорошим SNR, **ИЛИ** SNR лучше `-15 dB` с хорошим RSSI | Сигнал становится тише или громче, но всё ещё читается. |
+| Плохой      | 1       | Попадает между порогами Fair и None                                            | На границе диапазона или при наличии помех.             |
+| Отсутствует | 0       | RSSI хуже `-126 dBm` **И** SNR хуже `-15 dB`                                   | Передача полностью погребена в шуме.                    |
 
-## Where Signal Information Appears
+---
 
-In the app, signal data is shown in several places:
+## 4. Что это значит для тебя
 
-- **Node list** — signal bars icon next to each node
-- **Node detail** — SNR, RSSI, and signal quality in the device metrics section
-- **Traceroute** — per-hop signal quality for each relay node
-- **Signal metrics** — historical SNR and RSSI data in the metrics charts
+Поскольку измеритель Meshtastic действует как **"Измеритель чёткости"**, он ведёт себя иначе, чем ожидает большинство людей:
 
-![Node entry showing SNR, RSSI values and colored signal bars](../../assets/screenshots/nodes_signal_info.png)
+> **Совет — не паникуй из-за низкого RSSI:** ты можешь увидеть кажущееся ужасным значение RSSI, например `-118 dBm`. На сотовом телефоне у тебя было бы ноль делений. Но если отношение сигнал/шум (SNR) `+2 дБ`, Meshtastic все равно покажет сильный сигнал! _Библиотека тихая, поэтому шепот слышен идеально._
+
+> **Внимание — остерегайся местного шума:** если ты подключишь массивную антенну и увидишь отличный RSSI (например, `-90 dBm`), но индикатор сигнала показывает только **1 полоску (плохо)**, у тебя есть проблема. Это означает, что у тебя есть местные помехи — возможно, дешевый источник питания, шумный компьютер или расположенная рядом радиовышка — создающие столько статического шума, что он заглушает сеть.
+
+## Где появляется информация о сигнале
+
+В приложении данные сигнала отображаются в нескольких местах:
+
+- **Список нод** — значок полос сигнала рядом с каждой нодой
+- **Детали ноды** — SNR, RSSI и качество сигнала в разделе метрик устройства
+- **Трассировка** — качество сигнала на каждой промежуточной ноде
+- **Метрики сигнала** — история данных SNR и RSSI на графиках метрик
+
+![Запись ноды, показывающая значения SNR, RSSI и цветные индикаторы сигнала](../../assets/screenshots/nodes_signal_info.png)
 

@@ -18,13 +18,11 @@
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
-    alias(libs.plugins.kotlin.parcelize)
     id("meshtastic.kmp.jvm.android")
-    id("meshtastic.publishing")
 }
 
 kotlin {
-    androidLibrary {
+    android {
         withHostTest { isIncludeAndroidResources = true }
         withDeviceTest { instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner" }
     }
@@ -54,18 +52,5 @@ kotlin {
         }
 
         commonTest.dependencies { implementation(projects.core.testing) }
-    }
-}
-
-// Modern KMP publication uses the project name as the artifactId by default.
-// We rename the publications to include the 'core-' prefix for consistency.
-publishing {
-    publications.withType<MavenPublication>().configureEach {
-        val baseId = artifactId
-        if (baseId == "model") {
-            artifactId = "meshtastic-android-model"
-        } else if (baseId.startsWith("model-")) {
-            artifactId = baseId.replace("model-", "meshtastic-android-model-")
-        }
     }
 }

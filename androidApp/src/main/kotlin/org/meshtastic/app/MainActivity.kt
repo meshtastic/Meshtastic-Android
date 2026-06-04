@@ -63,7 +63,8 @@ import org.meshtastic.core.network.repository.UsbRepository
 import org.meshtastic.core.nfc.NfcScannerEffect
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.channel_invalid
-import org.meshtastic.core.service.MeshServiceClient
+import org.meshtastic.core.service.MeshService
+import org.meshtastic.core.service.startService
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.MODE_DYNAMIC
 import org.meshtastic.core.ui.util.LocalAnalyticsIntroProvider
@@ -96,17 +97,8 @@ class MainActivity : AppCompatActivity() {
 
     private val usbRepository: UsbRepository by inject()
 
-    /**
-     * Activity-lifecycle-aware client that binds to the mesh service. Note: This is used implicitly as it registers
-     * itself as a LifecycleObserver in its init block.
-     */
-    internal val meshServiceClient: MeshServiceClient by inject { parametersOf(this) }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
-
-        // Eagerly evaluate lazy Koin dependency so it registers its LifecycleObserver
-        meshServiceClient.hashCode()
 
         super.onCreate(savedInstanceState)
 
@@ -167,6 +159,11 @@ class MainActivity : AppCompatActivity() {
         addOnNewIntentListener { intent -> handleIntent(intent) }
 
         handleIntent(intent)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        MeshService.startService(this)
     }
 
     override fun onResume() {

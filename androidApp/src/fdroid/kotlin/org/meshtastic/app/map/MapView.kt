@@ -52,6 +52,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -87,6 +88,7 @@ import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.calculating
 import org.meshtastic.core.resources.cancel
@@ -113,9 +115,11 @@ import org.meshtastic.core.resources.map_purge_success
 import org.meshtastic.core.resources.map_style_selection
 import org.meshtastic.core.resources.map_subDescription
 import org.meshtastic.core.resources.map_tile_source
+import org.meshtastic.core.resources.now
 import org.meshtastic.core.resources.only_favorites
 import org.meshtastic.core.resources.show_precision_circle
 import org.meshtastic.core.resources.show_waypoints
+import org.meshtastic.core.resources.unknown
 import org.meshtastic.core.resources.waypoint_delete
 import org.meshtastic.core.resources.you
 import org.meshtastic.core.ui.component.BasicListItem
@@ -239,6 +243,9 @@ fun MapView(
     val haptic = LocalHapticFeedback.current
     fun performHapticFeedback() = haptic.performHapticFeedback(HapticFeedbackType.LongPress)
 
+    val unknownText = stringResource(Res.string.unknown)
+    val nowText = stringResource(Res.string.now)
+
     // Accompanist permissions state for location
     val locationPermissionsState =
         rememberMultiplePermissionsState(permissions = listOf(Manifest.permission.ACCESS_FINE_LOCATION))
@@ -355,36 +362,37 @@ fun MapView(
 
             val (p, u) = node.position to node.user
             val nodePosition = GeoPoint(node.latitude, node.longitude)
-            MarkerWithLabel(mapView = this, label = "${u.short_name} ${formatAgo(p.time)}").apply {
-                id = u.id
-                title = u.long_name
-                snippet =
-                    getString(
-                        Res.string.map_node_popup_details,
-                        node.gpsString(),
-                        formatAgo(node.lastHeard),
-                        formatAgo(p.time),
-                        if (node.batteryStr != "") node.batteryStr else "?",
-                    )
-                ourNode?.distanceStr(node, displayUnits)?.let { dist ->
-                    ourNode.bearing(node)?.let { bearing ->
-                        subDescription = getString(Res.string.map_subDescription, bearing, dist)
+            MarkerWithLabel(mapView = this, label = "${u.short_name} ${formatAgo(p.time, unknownText, nowText)}")
+                .apply {
+                    id = u.id
+                    title = u.long_name
+                    snippet =
+                        getString(
+                            Res.string.map_node_popup_details,
+                            node.gpsString(),
+                            formatAgo(node.lastHeard, unknownText, nowText),
+                            formatAgo(p.time, unknownText, nowText),
+                            if (node.batteryStr != "") node.batteryStr else "?",
+                        )
+                    ourNode?.distanceStr(node, displayUnits)?.let { dist ->
+                        ourNode.bearing(node)?.let { bearing ->
+                            subDescription = getString(Res.string.map_subDescription, bearing, dist)
+                        }
+                    }
+                    setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                    position = nodePosition
+                    icon = markerIcon
+                    setNodeColors(node.colors)
+                    if (!mapFilterStateValue.showPrecisionCircle) {
+                        setPrecisionBits(0)
+                    } else {
+                        setPrecisionBits(p.precision_bits)
+                    }
+                    setOnLongClickListener {
+                        navigateToNodeDetails(node.num)
+                        true
                     }
                 }
-                setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                position = nodePosition
-                icon = markerIcon
-                setNodeColors(node.colors)
-                if (!mapFilterStateValue.showPrecisionCircle) {
-                    setPrecisionBits(0)
-                } else {
-                    setPrecisionBits(p.precision_bits)
-                }
-                setOnLongClickListener {
-                    navigateToNodeDetails(node.num)
-                    true
-                }
-            }
         }
     }
 
@@ -433,7 +441,7 @@ fun MapView(
         }
     }
 
-    fun getUsername(id: String?) = if (id == DataPacket.ID_LOCAL || (myId != null && id == myId)) {
+    fun getUsername(id: String?) = if (id == NodeAddress.ID_LOCAL || (myId != null && id == myId)) {
         getString(Res.string.you)
     } else {
         mapViewModel.getUser(id).long_name
@@ -446,7 +454,7 @@ fun MapView(
             if (!mapFilterState.showWaypoints) return@mapNotNull null // Use collected mapFilterState
             val lock = if (pt.locked_to != 0) "\uD83D\uDD12" else ""
             val time = DateFormatter.formatDateTime(waypoint.time)
-            val label = pt.name + " " + formatAgo((waypoint.time / 1000).toInt())
+            val label = pt.name + " " + formatAgo((waypoint.time / 1000).toInt(), unknownText, nowText)
             val emoji = String(Character.toChars(if (pt.icon == 0) 128205 else pt.icon))
             val now = nowMillis
             val expireTimeMillis = pt.expire * 1000L
@@ -818,15 +826,15 @@ private fun FdroidMainMapFilterDropdown(
 
 @Composable
 private fun MapStyleDialog(selectedMapStyle: Int, onDismiss: () -> Unit, onSelectMapStyle: (Int) -> Unit) {
-    val selected = remember { mutableStateOf(selectedMapStyle) }
+    val selected = remember { mutableIntStateOf(selectedMapStyle) }
 
     MapsDialog(onDismiss = onDismiss) {
         CustomTileSource.mTileSources.values.forEachIndexed { index, style ->
             ListItem(
                 text = style,
-                trailingIcon = if (index == selected.value) MeshtasticIcons.Check else null,
+                trailingIcon = if (index == selected.intValue) MeshtasticIcons.Check else null,
                 onClick = {
-                    selected.value = index
+                    selected.intValue = index
                     onSelectMapStyle(index)
                     onDismiss()
                 },
@@ -879,7 +887,7 @@ private fun PurgeTileSourceDialog(onDismiss: () -> Unit) {
     val context = LocalContext.current
     val cache = SqlTileWriterExt()
 
-    val sourceList by derivedStateOf { cache.sources.map { it.source as String } }
+    val sourceList by remember { derivedStateOf { cache.sources.map { it.source as String } } }
 
     val selected = remember { mutableStateListOf<Int>() }
 

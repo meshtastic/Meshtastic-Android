@@ -5,6 +5,8 @@ xmlutil = "0.91.3"
 agp = "9.2.1"
 appcompat = "1.7.1"
 accompanist = "0.37.3"
+car-app = "1.9.0-alpha01"
+appfunctions = "1.0.0-alpha09"
 
 # androidx
 datastore = "1.2.1"
@@ -13,7 +15,7 @@ lifecycle = "2.10.0"
 jetbrains-lifecycle = "2.11.0-beta01"
 navigation3 = "1.1.1"
 paging = "3.5.0"
-room = "3.0.0-alpha05"
+room = "3.0.0-alpha06"
 koin = "4.2.1"
 koin-plugin = "1.0.0"
 
@@ -36,7 +38,7 @@ turbine = "1.2.1"
 compose-screenshot = "0.0.1-alpha15"
 
 # Compose Multiplatform
-compose-multiplatform = "1.11.0"
+compose-multiplatform = "1.11.1"
 compose-multiplatform-material3 = "1.11.0-alpha07"
 # `androidx-compose-bom-aligned` tracks androidx.compose.{runtime,ui,foundation,animation}
 # artifacts that ship in lockstep with CMP. Kept as a separate version ref so Renovate
@@ -84,7 +86,7 @@ uri-kmp = "0.0.21"
 osmdroid-android = "6.1.20"
 spotless = "8.6.0"
 wire = "6.4.0"
-vico = "3.2.0-next.6"
+vico = "3.2.1"
 kable = "0.43.0"
 mqttastic = "0.3.6"
 jmdns = "3.6.3"
@@ -104,13 +106,20 @@ xmlutil-serialization = { module = "io.github.pdvrieze.xmlutil:serialization", v
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version = "1.13.0" }
 androidx-annotation = { module = "androidx.annotation:annotation", version = "1.10.0" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
+androidx-appfunctions = { module = "androidx.appfunctions:appfunctions", version.ref = "appfunctions" }
+androidx-appfunctions-compiler = { module = "androidx.appfunctions:appfunctions-compiler", version.ref = "appfunctions" }
+androidx-appfunctions-service = { module = "androidx.appfunctions:appfunctions-service", version.ref = "appfunctions" }
 androidx-camera-core = { module = "androidx.camera:camera-core", version.ref = "camerax" }
 androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "camerax" }
 androidx-camera-lifecycle = { module = "androidx.camera:camera-lifecycle", version.ref = "camerax" }
 androidx-camera-view = { module = "androidx.camera:camera-view", version.ref = "camerax" }
 androidx-camera-compose = { module = "androidx.camera:camera-compose", version.ref = "camerax" }
 androidx-camera-viewfinder-compose = { module = "androidx.camera.viewfinder:viewfinder-compose", version = "1.6.1" }
-androidx-core-ktx = { module = "androidx.core:core-ktx", version = "1.18.0" }
+androidx-car-app = { module = "androidx.car.app:app", version.ref = "car-app" }
+androidx-car-app-projected = { module = "androidx.car.app:app-projected", version.ref = "car-app" }
+androidx-car-app-automotive = { module = "androidx.car.app:app-automotive", version.ref = "car-app" }
+androidx-car-app-testing = { module = "androidx.car.app:app-testing", version.ref = "car-app" }
+androidx-core-ktx = { module = "androidx.core:core-ktx", version = "1.19.0" }
 androidx-core-location-altitude = { module = "androidx.core:core-location-altitude", version = "1.0.0-rc01" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version = "1.2.0" }
 androidx-datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
@@ -282,11 +291,10 @@ test-retry-gradlePlugin = { module = "org.gradle:test-retry-gradle-plugin", vers
 aboutlibraries-gradlePlugin = { module = "com.mikepenz.aboutlibraries.plugin:aboutlibraries-plugin", version.ref = "aboutlibraries" }
 
 jmdns = { module = "org.jmdns:jmdns", version.ref = "jmdns" }
-jna = { module = "net.java.dev.jna:jna", version = "5.18.1" }
+jna = { module = "net.java.dev.jna:jna", version = "5.19.0" }
 
 # TAK
 takpacket-sdk-kmp = { module = "org.meshtastic:takpacket-sdk", version.ref = "takpacket-sdk" }
-takpacket-sdk-jvm = { module = "org.meshtastic:takpacket-sdk-jvm", version.ref = "takpacket-sdk" }
 
 
 [plugins]
@@ -299,7 +307,6 @@ compose-screenshot = { id = "com.android.compose.screenshot", version.ref = "com
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 compose-multiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
 koin-compiler = { id = "io.insert-koin.compiler.plugin", version.ref = "koin-plugin" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }

@@ -21,7 +21,7 @@ plugins {
 }
 
 kotlin {
-    androidLibrary {
+    android {
         androidResources {
             enable = true
             resourcePrefix = "meshtastic_"

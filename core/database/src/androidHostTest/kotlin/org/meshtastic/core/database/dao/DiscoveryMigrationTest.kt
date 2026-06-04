@@ -39,7 +39,7 @@ import kotlin.test.assertTrue
 /**
  * Migration coverage for discovery tables (D011).
  *
- * Verifies that the discovery schema (version 39→40 auto-migration) creates the expected tables, supports CRUD
+ * Verifies that the discovery schema (version 41→42 auto-migration) creates the expected tables, supports CRUD
  * operations, enforces foreign key cascade behavior, and respects column defaults.
  */
 @RunWith(AndroidJUnit4::class)
