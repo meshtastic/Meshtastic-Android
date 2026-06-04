@@ -27,15 +27,15 @@ import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
-import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.LocalConfig
 
 /**
- * Derived, UI-friendly summary of the device connection state. Combines [ServiceRepository.connectionState] with
+ * Derived, UI-friendly summary of the device connection state. Combines [ConnectionStateProvider.connectionState] with
  * "region unset" to surface the MUST_SET_REGION case that otherwise needs a separate boolean flag in the UI layer.
  */
 enum class ConnectionStatus {
@@ -58,7 +58,7 @@ enum class ConnectionStatus {
 @KoinViewModel
 class ConnectionsViewModel(
     radioConfigRepository: RadioConfigRepository,
-    serviceRepository: ServiceRepository,
+    connectionStateProvider: ConnectionStateProvider,
     nodeRepository: NodeRepository,
     private val uiPrefs: UiPrefs,
 ) : ViewModel() {
@@ -66,7 +66,7 @@ class ConnectionsViewModel(
     val localConfig: StateFlow<LocalConfig> =
         radioConfigRepository.localConfigFlow.stateInWhileSubscribed(initialValue = LocalConfig())
 
-    val connectionState = serviceRepository.connectionState
+    val connectionState = connectionStateProvider.connectionState
 
     val myNodeInfo: StateFlow<MyNodeInfo?> = nodeRepository.myNodeInfo
 

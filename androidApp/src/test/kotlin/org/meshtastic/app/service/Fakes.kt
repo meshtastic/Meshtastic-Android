@@ -19,7 +19,7 @@ package org.meshtastic.app.service
 import dev.mokkery.MockMode
 import dev.mokkery.mock
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.repository.MeshServiceNotifications
+import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Telemetry
@@ -28,7 +28,7 @@ class Fakes {
     val service: RadioInterfaceService = mock(MockMode.autofill)
 }
 
-class FakeMeshServiceNotifications : MeshServiceNotifications {
+class FakeMeshNotificationManager : MeshNotificationManager {
     override fun clearNotifications() {}
 
     override fun initChannels() {}

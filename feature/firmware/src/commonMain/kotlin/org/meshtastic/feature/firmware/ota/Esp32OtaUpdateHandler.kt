@@ -29,8 +29,8 @@ import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceHardware
-import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.firmware_update_connecting_attempt
@@ -156,7 +156,7 @@ class Esp32OtaUpdateHandler(
                 delay(GATT_RELEASE_DELAY_MS)
 
                 val transport = transportFactory()
-                if (!connectToDevice(transport, connectionAttempts, updateState)) return@withContext null
+                connectToDevice(transport, connectionAttempts, updateState)
 
                 try {
                     executeOtaSequence(transport, firmwareBytes, sha256Hash, rebootMode, updateState)
@@ -190,14 +190,14 @@ class Esp32OtaUpdateHandler(
         val myInfo = nodeRepository.myNodeInfo.value ?: return
         val myNodeNum = myInfo.myNodeNum
         Logger.i { "ESP32 OTA: Triggering reboot OTA mode $mode with hash" }
-        radioController.requestRebootOta(radioController.getPacketId(), myNodeNum, mode, hash)
+        radioController.requestRebootOta(radioController.generatePacketId(), myNodeNum, mode, hash)
     }
 
     /**
      * Disconnect the mesh service BLE connection to free up the GATT for OTA. Setting device address to "n" (NOP
      * interface) cleanly disconnects without reconnection attempts.
      */
-    private fun disconnectMeshService() {
+    private suspend fun disconnectMeshService() {
         Logger.i { "ESP32 OTA: Disconnecting mesh service for OTA" }
         radioController.setDeviceAddress("n")
     }
@@ -255,7 +255,7 @@ class Esp32OtaUpdateHandler(
         transport: UnifiedOtaProtocol,
         attempts: Int,
         updateState: (FirmwareUpdateState) -> Unit,
-    ): Boolean {
+    ) {
         // Show "waiting for reboot" state before first connection attempt
         updateState(
             FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_waiting_reboot))),
@@ -269,13 +269,12 @@ class Esp32OtaUpdateHandler(
                     ),
                 )
                 transport.connect().getOrThrow()
-                return true
+                return
             } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
                 if (i == attempts) throw e
                 delay(RETRY_DELAY)
             }
         }
-        return false
     }
 
     @Suppress("LongMethod")

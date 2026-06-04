@@ -24,7 +24,7 @@ import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.Channel
-import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.util.getInitials
 import org.meshtastic.core.repository.RadioTransport
 import org.meshtastic.core.repository.RadioTransportCallback
@@ -333,7 +333,7 @@ class MockRadioTransport(
                 num = numIn,
                 user =
                 User(
-                    id = DataPacket.nodeNumToDefaultId(numIn),
+                    id = NodeAddress.numToDefaultId(numIn),
                     long_name = "Sim ${numIn.toString(16)}",
                     short_name = getInitials("Sim ${numIn.toString(16)}"),
                     hw_model = HardwareModel.ANDROID_SIM,

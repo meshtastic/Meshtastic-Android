@@ -9,16 +9,17 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
-* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5682) by James Rich (@jamesarich) in [`ba163c40a`](https://github.com/meshtastic/Meshtastic-Android/commit/ba163c40a9d2ff7e49845c7f1410c1fff8368cc3)
-* chore(deps): update vico to v3.2.0-next.6 (#5683) by renovate[bot] (@renovate[bot]) in [`93faeabbc`](https://github.com/meshtastic/Meshtastic-Android/commit/93faeabbc6bd2e23770f5b03706beea1e0d7bdab)
-* fix: address top Crashlytics crashes and non-fatals for build 29320984 (#5684) by James Rich (@jamesarich) in [`cca7c274b`](https://github.com/meshtastic/Meshtastic-Android/commit/cca7c274b98dbe224c3df6f511da7f3263c697ab)
-* chore(deps): update vico to v3.2.0 (#5689) by renovate[bot] (@renovate[bot]) in [`38ec47e89`](https://github.com/meshtastic/Meshtastic-Android/commit/38ec47e894cee5913bdb55e97202610238636db3)
-* feat: replace LoRa bandwidth text input with constrained dropdown (#5687) by James Rich (@jamesarich) in [`ccf984e4b`](https://github.com/meshtastic/Meshtastic-Android/commit/ccf984e4b1ea208941d491841e79f62ac84b573a)
-* chore(deps): update core/proto/src/main/proto digest to c4540bb (#5688) by renovate[bot] (@renovate[bot]) in [`0e068053b`](https://github.com/meshtastic/Meshtastic-Android/commit/0e068053bce224de4871cc3d8cc05a9719ad88db)
-* Revert "feat: replace LoRa bandwidth text input with constrained dropdown" (#5691) by James Rich (@jamesarich) in [`c430eacaa`](https://github.com/meshtastic/Meshtastic-Android/commit/c430eacaace8b1f05c15dc11673a2debf294eb81)
-* feat: Save unsent chat message as draft (#5686) by Copilot (@Copilot) in [`a36b60e55`](https://github.com/meshtastic/Meshtastic-Android/commit/a36b60e5510469ee6c78898a363b739963119b9b)
+* refactor(node): migrate to non-deprecated Vico chart APIs (#5737) by James Rich (@jamesarich) in [`d86c62759`](https://github.com/meshtastic/Meshtastic-Android/commit/d86c627598bfe34e93cb09524334b804020f0b7e)
 
-### Open Beta (v2.7.14-open.15)
+### Internal (v2.7.14-internal.122)
+Changes since [`v2.7.14-open.23`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14-open.23):
+
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5732) by James Rich (@jamesarich) in [`c25033aee`](https://github.com/meshtastic/Meshtastic-Android/commit/c25033aeee4684da74e0c8f5ba19b3520e7ceac8)
+* chore(deps): update androidx.core:core-ktx to v1.19.0 (#5731) by renovate[bot] (@renovate[bot]) in [`3c2b6a58d`](https://github.com/meshtastic/Meshtastic-Android/commit/3c2b6a58de3758166ee90b4ff0ed280010c07340)
+* chore(deps): update room to v3.0.0-alpha06 (#5730) by renovate[bot] (@renovate[bot]) in [`304a11ca5`](https://github.com/meshtastic/Meshtastic-Android/commit/304a11ca5dd6bcc0a32c1c44f28cbb2028d31397)
+* build: migrate KMP Android DSL from androidLibrary {} to android {} (#5734) by James Rich (@jamesarich) in [`ea872f36d`](https://github.com/meshtastic/Meshtastic-Android/commit/ea872f36d0923a1bf0cea8c4a04855cc1e488293)
+
+### Open Beta (v2.7.14-open.23)
 Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.13):
 
 #### 🏗️ Features
@@ -109,6 +110,8 @@ Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/relea
 * feat: enable WAL connection pool for parallel reads by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5372
 * feat: node list density switching with compact layout and field toggles by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5444
 * feat(ai): upgrade Chirpy on-device AI with proper APIs, download UX, and streaming by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5579
+* feat: replace LoRa bandwidth text input with constrained dropdown by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5687
+* feat: Save unsent chat message as draft by @Copilot in https://github.com/meshtastic/Meshtastic-Android/pull/5686
 #### 🖥️ Desktop
 * fix(desktop): keep Vico package to prevent bytecode verification errors by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5424
 #### 🛠️ Fixes
@@ -237,6 +240,19 @@ Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/relea
 * fix: address top Crashlytics crashes in beta 2.7.14 by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5672
 * fix(flatpak): source desktop metadata from in-repo packaging dir by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5673
 * Rename Desktop application to 'Meshtastic Desktop' by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5677
+* fix: address top Crashlytics crashes and non-fatals for build 29320984 by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5684
+* fix: show loading overlay immediately for remote config sub-screens by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5694
+* fix(node): restore view-tree owners on map dispose so node-list popups aren't invisible by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5699
+* fix(firmware): surface error state when BLE OTA connection attempts are exhausted by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5700
+* fix(map): replace MarkerComposable with Canvas-rendered bitmaps by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5702
+* fix(map): remove manual ViewTree lifecycle owner workarounds by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5704
+* fix(map): scope cluster-renderer ViewTreeLifecycleOwner to map host view by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5708
+* fix(map): initialize Maps SDK before building marker bitmap descriptors by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5709
+* fix(map): eliminate cluster-renderer FATAL and harden black-map paths by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5715
+* fix(map): revert app-side Maps SDK init to library-idiomatic, fix inline-map crash by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5719
+* fix(map): render cluster markers in-scope to kill ClusterRenderer FATAL by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5723
+* fix(map): apply kotlinx-serialization compiler plugin to androidApp by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5726
+* fix(map): keep compass icon visible while following bearing by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5728
 #### 📝 Other Changes
 * refactor(ui): compose resources, domain layer by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/4628
 * Add per-message transport method icons for new message format by @Kealper in https://github.com/meshtastic/Meshtastic-Android/pull/4643
@@ -266,6 +282,7 @@ Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/relea
 * Upgrade takpacket-sdk to version 0.3.0 by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5621
 * repo: Add Meshtastic Desktop icon SVGs by @vidplace7 in https://github.com/meshtastic/Meshtastic-Android/pull/5623
 * Enhance TAKTALK support with message and room handling, update SDK to v0.3.2 by @thebentern in https://github.com/meshtastic/Meshtastic-Android/pull/5634
+* Revert "feat: replace LoRa bandwidth text input with constrained dropdown" by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5691
 
 ## New Contributors
 * @nreisbeck made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/4607

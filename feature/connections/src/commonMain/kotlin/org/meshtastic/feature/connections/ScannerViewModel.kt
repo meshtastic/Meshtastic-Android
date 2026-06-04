@@ -38,9 +38,9 @@ import org.meshtastic.core.ble.MeshtasticBleConstants
 import org.meshtastic.core.datastore.RecentAddressesDataSource
 import org.meshtastic.core.datastore.model.RecentAddress
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.network.repository.NetworkRepository
+import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.ServiceRepository
@@ -287,7 +287,7 @@ open class ScannerViewModel(
 
     fun changeDeviceAddress(address: String) {
         Logger.i { "Attempting to change device address to ${address.anonymize()}" }
-        radioController.setDeviceAddress(address)
+        safeLaunch(tag = "changeDeviceAddress") { radioController.setDeviceAddress(address) }
     }
 
     fun addRecentAddress(address: String, name: String) {

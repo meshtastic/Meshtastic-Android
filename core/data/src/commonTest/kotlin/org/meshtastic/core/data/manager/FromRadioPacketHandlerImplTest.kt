@@ -23,11 +23,11 @@ import dev.mokkery.mock
 import dev.mokkery.verify
 import org.meshtastic.core.repository.MeshConfigFlowManager
 import org.meshtastic.core.repository.MeshConfigHandler
-import org.meshtastic.core.repository.MeshRouter
 import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.XModemManager
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Config
@@ -49,19 +49,18 @@ class FromRadioPacketHandlerImplTest {
     private val notificationManager: NotificationManager = mock(MockMode.autofill)
     private val configFlowManager: MeshConfigFlowManager = mock(MockMode.autofill)
     private val configHandler: MeshConfigHandler = mock(MockMode.autofill)
-    private val router: MeshRouter = mock(MockMode.autofill)
+    private val xmodemManager: XModemManager = mock(MockMode.autofill)
 
     private lateinit var handler: FromRadioPacketHandlerImpl
 
     @BeforeTest
     fun setup() {
-        every { router.configFlowManager } returns configFlowManager
-        every { router.configHandler } returns configHandler
-
         handler =
             FromRadioPacketHandlerImpl(
                 serviceRepository,
-                lazy { router },
+                lazy { configFlowManager },
+                lazy { configHandler },
+                lazy { xmodemManager },
                 mqttManager,
                 packetHandler,
                 notificationManager,

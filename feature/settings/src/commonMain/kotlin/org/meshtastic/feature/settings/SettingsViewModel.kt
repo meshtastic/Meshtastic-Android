@@ -32,24 +32,17 @@ import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.domain.usecase.settings.ExportDataUseCase
 import org.meshtastic.core.domain.usecase.settings.IsOtaCapableUseCase
-import org.meshtastic.core.domain.usecase.settings.MeshLocationUseCase
-import org.meshtastic.core.domain.usecase.settings.SetAppIntroCompletedUseCase
-import org.meshtastic.core.domain.usecase.settings.SetDatabaseCacheLimitUseCase
-import org.meshtastic.core.domain.usecase.settings.SetLocaleUseCase
 import org.meshtastic.core.domain.usecase.settings.SetMeshLogSettingsUseCase
-import org.meshtastic.core.domain.usecase.settings.SetNotificationSettingsUseCase
-import org.meshtastic.core.domain.usecase.settings.SetProvideLocationUseCase
-import org.meshtastic.core.domain.usecase.settings.SetThemeUseCase
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeListDensity
-import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.MeshLogPrefs
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NotificationPrefs
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
@@ -66,14 +59,7 @@ class SettingsViewModel(
     private val databaseManager: DatabaseManager,
     private val meshLogPrefs: MeshLogPrefs,
     private val notificationPrefs: NotificationPrefs,
-    private val setThemeUseCase: SetThemeUseCase,
-    private val setLocaleUseCase: SetLocaleUseCase,
-    private val setAppIntroCompletedUseCase: SetAppIntroCompletedUseCase,
-    private val setProvideLocationUseCase: SetProvideLocationUseCase,
-    private val setDatabaseCacheLimitUseCase: SetDatabaseCacheLimitUseCase,
     private val setMeshLogSettingsUseCase: SetMeshLogSettingsUseCase,
-    private val setNotificationSettingsUseCase: SetNotificationSettingsUseCase,
-    private val meshLocationUseCase: MeshLocationUseCase,
     private val exportDataUseCase: ExportDataUseCase,
     private val isOtaCapableUseCase: IsOtaCapableUseCase,
     private val fileService: FileService,
@@ -106,11 +92,11 @@ class SettingsViewModel(
             .stateInWhileSubscribed(initialValue = false)
 
     fun startProvidingLocation() {
-        meshLocationUseCase.startProvidingLocation()
+        radioController.startProvideLocation()
     }
 
     fun stopProvidingLocation() {
-        meshLocationUseCase.stopProvidingLocation()
+        radioController.stopProvideLocation()
     }
 
     private val _excludedModulesUnlocked = MutableStateFlow(false)
@@ -125,7 +111,7 @@ class SettingsViewModel(
     val dbCacheLimit: StateFlow<Int> = databaseManager.cacheLimit
 
     fun setDbCacheLimit(limit: Int) {
-        setDatabaseCacheLimitUseCase(limit)
+        databaseManager.setCacheLimit(limit)
     }
 
     // Notifications
@@ -133,11 +119,11 @@ class SettingsViewModel(
     val nodeEventsEnabled = notificationPrefs.nodeEventsEnabled
     val lowBatteryEnabled = notificationPrefs.lowBatteryEnabled
 
-    fun setMessagesEnabled(enabled: Boolean) = setNotificationSettingsUseCase.setMessagesEnabled(enabled)
+    fun setMessagesEnabled(enabled: Boolean) = notificationPrefs.setMessagesEnabled(enabled)
 
-    fun setNodeEventsEnabled(enabled: Boolean) = setNotificationSettingsUseCase.setNodeEventsEnabled(enabled)
+    fun setNodeEventsEnabled(enabled: Boolean) = notificationPrefs.setNodeEventsEnabled(enabled)
 
-    fun setLowBatteryEnabled(enabled: Boolean) = setNotificationSettingsUseCase.setLowBatteryEnabled(enabled)
+    fun setLowBatteryEnabled(enabled: Boolean) = notificationPrefs.setLowBatteryEnabled(enabled)
 
     // MeshLog retention period (bounded by MeshLogPrefsImpl constants)
     private val _meshLogRetentionDays = MutableStateFlow(meshLogPrefs.retentionDays.value)
@@ -157,20 +143,20 @@ class SettingsViewModel(
     }
 
     fun setProvideLocation(value: Boolean) {
-        myNodeNum?.let { setProvideLocationUseCase(it, value) }
+        myNodeNum?.let { uiPrefs.setShouldProvideNodeLocation(it, value) }
     }
 
     fun setTheme(theme: Int) {
-        setThemeUseCase(theme)
+        uiPrefs.setTheme(theme)
     }
 
     /** Set the application locale. Empty string means system default. */
     fun setLocale(languageTag: String) {
-        setLocaleUseCase(languageTag)
+        uiPrefs.setLocale(languageTag)
     }
 
     fun showAppIntro() {
-        setAppIntroCompletedUseCase(false)
+        uiPrefs.setAppIntroCompleted(false)
     }
 
     fun unlockExcludedModules() {

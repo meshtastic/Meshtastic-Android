@@ -48,8 +48,18 @@ class KoinConventionPlugin : Plugin<Project> {
                 }
             }
 
-            pluginManager.withPlugin("org.jetbrains.kotlin.android") {
+            pluginManager.withPlugin("com.android.application") {
                 // If this is *only* an Android module (no KMP plugin)
+                if (!pluginManager.hasPlugin("org.jetbrains.kotlin.multiplatform")) {
+                    dependencies {
+                        add("implementation", koinCore)
+                        add("implementation", koinAnnotations)
+                    }
+                }
+            }
+
+            pluginManager.withPlugin("com.android.library") {
+                // If this is *only* an Android library module (no KMP plugin)
                 if (!pluginManager.hasPlugin("org.jetbrains.kotlin.multiplatform")) {
                     dependencies {
                         add("implementation", koinCore)

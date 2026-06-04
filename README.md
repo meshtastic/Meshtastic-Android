@@ -87,7 +87,6 @@ Each module has its own README with details on its responsibilities, API surface
 
 | Module | Description |
 |---|---|
-| [core/api](core/api/README.md) | AIDL service API for third-party integrations |
 | [core/domain](core/domain/README.md) | Business-logic use cases (radio config, sessions, exports) |
 | [core/repository](core/repository/README.md) | Data & infrastructure contracts (RadioTransport, NodeRepository, ServiceRepository) |
 | [core/takserver](core/takserver/README.md) | Meshtastic ↔ TAK (ATAK/iTAK) bridge — CoT server & conversion |
@@ -123,13 +122,9 @@ Each module has its own README with details on its responsibilities, API surface
 
 You can help translate the app into your native language using [Crowdin](https://crowdin.meshtastic.org/android).
 
-## API & Integration
+## Integration
 
-Developers can integrate with the Meshtastic Android app using our published API library via **JitPack**. This allows third-party applications (like the ATAK plugin) to communicate with the mesh service via AIDL.
-
-For detailed integration instructions, see [core/api/README.md](core/api/README.md).
-
-Additionally, the app includes a built-in **Local TAK Server** feature that can be enabled in settings. This runs a local TCP server on port 8089 to allow ATAK clients to connect directly and route their traffic over the mesh.
+The app includes a built-in **Local TAK Server** feature that can be enabled in settings. This runs a local TCP server on port 8089 to allow ATAK clients to connect directly and route their traffic over the mesh.
 
 ## Building the Android App
 > [!WARNING]

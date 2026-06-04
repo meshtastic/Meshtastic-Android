@@ -59,7 +59,7 @@ fun <T : Message<T, *>> ProtoAdapter<T>.decodeOrNull(bytes: ByteArray?, logger: 
  * ```
  * val data = Data(portnum = PortNum.TEXT_MESSAGE_APP, payload = bytes)
  * if (!Data.ADAPTER.isWithinSizeLimit(data, MAX_PAYLOAD)) {
- *     throw RemoteException("Payload too large")
+ *     error("Payload too large")
  * }
  * ```
  *

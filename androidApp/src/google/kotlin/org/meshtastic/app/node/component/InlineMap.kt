@@ -17,18 +17,10 @@
 package org.meshtastic.app.node.component
 
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.setViewTreeLifecycleOwner
-import androidx.savedstate.compose.LocalSavedStateRegistryOwner
-import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.Circle
@@ -54,23 +46,6 @@ fun InlineMap(node: Node, modifier: Modifier = Modifier) {
             true -> ComposeMapColorScheme.DARK
             else -> ComposeMapColorScheme.LIGHT
         }
-
-    // Workaround for maps-compose issue where MarkerComposable's internal ComposeView
-    // cannot find ViewTreeLifecycleOwner, causing crash on bitmap rendering.
-    val view = LocalView.current
-    val lifecycleOwner = LocalLifecycleOwner.current
-    val savedStateRegistryOwner = LocalSavedStateRegistryOwner.current
-    DisposableEffect(lifecycleOwner, savedStateRegistryOwner) {
-        val root = view.rootView
-        root.setViewTreeLifecycleOwner(lifecycleOwner)
-        root.setViewTreeSavedStateRegistryOwner(savedStateRegistryOwner)
-        if (view !== root) {
-            view.setViewTreeLifecycleOwner(lifecycleOwner)
-            view.setViewTreeSavedStateRegistryOwner(savedStateRegistryOwner)
-        }
-        onDispose {}
-    }
-
     key(node.num) {
         val location = LatLng(node.latitude, node.longitude)
         val cameraState = rememberCameraPositionState {
@@ -104,9 +79,7 @@ fun InlineMap(node: Node, modifier: Modifier = Modifier) {
                     strokeWidth = 2f,
                 )
             }
-            MarkerComposable(state = rememberUpdatedMarkerState(position = latLng)) {
-                NodeChip(node = node, modifier = Modifier.defaultMinSize(minWidth = 64.dp, minHeight = 28.dp))
-            }
+            MarkerComposable(state = rememberUpdatedMarkerState(position = latLng)) { NodeChip(node = node) }
         }
     }
 }
