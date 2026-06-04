@@ -283,6 +283,7 @@ class NodeManagerImpl(
             telemetry.device_metrics?.let { nextNode = nextNode.copy(deviceMetrics = it) }
             telemetry.environment_metrics?.let { nextNode = nextNode.copy(environmentMetrics = it) }
             telemetry.power_metrics?.let { nextNode = nextNode.copy(powerMetrics = it) }
+            telemetry.air_quality_metrics?.let { nextNode = nextNode.copy(airQualityMetrics = it) }
             val telemetryTime = if (telemetry.time != 0) telemetry.time else node.lastHeard
             val newLastHeard = clampTimestampToNow(maxOf(node.lastHeard, telemetryTime))
             nextNode.copy(lastHeard = newLastHeard)

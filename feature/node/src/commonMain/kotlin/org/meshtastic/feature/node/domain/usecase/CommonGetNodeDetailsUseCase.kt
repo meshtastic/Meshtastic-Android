@@ -187,6 +187,7 @@ constructor(
                     displayUnits = displayUnits,
                     deviceMetrics = logs.telemetry.filter { it.device_metrics != null },
                     powerMetrics = logs.telemetry.filter { it.power_metrics != null },
+                    airQualityMetrics = logs.telemetry.filter { it.air_quality_metrics != null },
                     hostMetrics = logs.telemetry.filter { it.host_metrics != null },
                     signalMetrics = logs.packets.filter { it.isDirectSignal() },
                     positionLogs = logs.posPackets.mapNotNull { it.toPosition() },
@@ -211,6 +212,7 @@ constructor(
                 if (environmentState.hasEnvironmentMetrics()) add(LogsType.ENVIRONMENT)
                 if (metricsState.hasSignalMetrics()) add(LogsType.SIGNAL)
                 if (metricsState.hasPowerMetrics()) add(LogsType.POWER)
+                if (metricsState.hasAirQualityMetrics()) add(LogsType.AIR_QUALITY)
                 if (metricsState.hasTracerouteLogs()) add(LogsType.TRACEROUTE)
                 if (metricsState.hasNeighborInfoLogs()) add(LogsType.NEIGHBOR_INFO)
                 if (metricsState.hasHostMetrics()) add(LogsType.HOST)
