@@ -47,4 +47,7 @@ class DeviceHardwareLocalDataSource(
         withContext(dispatchers.io) { deviceHardwareDao.getByModelAndTarget(hwModel, target) }
 
     suspend fun hasAnyEntries(): Boolean = withContext(dispatchers.io) { deviceHardwareDao.count() > 0 }
+
+    /** All known `platformioTarget` values — used to determine which msh.to links are vendor links. */
+    suspend fun getAllTargets(): List<String> = withContext(dispatchers.io) { deviceHardwareDao.getAllTargets() }
 }
