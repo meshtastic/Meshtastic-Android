@@ -305,4 +305,6 @@ dependencies {
     testImplementation(libs.compose.multiplatform.ui.test)
     testImplementation(libs.androidx.test.ext.junit)
     testImplementation(libs.androidx.glance.appwidget)
+    // JVM variant provides the host-platform native library for BundledSQLiteDriver under Robolectric
+    testRuntimeOnly("androidx.sqlite:sqlite-bundled-jvm:2.6.2")
 }

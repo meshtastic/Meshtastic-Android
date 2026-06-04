@@ -17,6 +17,7 @@
 package org.meshtastic.core.database.dao
 
 import androidx.room3.Room
+import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.flow.first
@@ -66,6 +67,7 @@ class MigrationTest {
                 context = context,
                 factory = { MeshtasticDatabaseConstructor.initialize() },
             )
+                .setDriver(BundledSQLiteDriver())
                 .build()
         nodeInfoDao = database.nodeInfoDao().apply { setMyNodeInfo(myNodeInfo) }
         packetDao = database.packetDao()
