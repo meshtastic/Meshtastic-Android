@@ -34,9 +34,11 @@ import org.meshtastic.core.navigation.NodeDetailRoute
 import org.meshtastic.core.navigation.NodesRoute
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.air_quality
 import org.meshtastic.core.resources.device
 import org.meshtastic.core.resources.environment
 import org.meshtastic.core.resources.host
+import org.meshtastic.core.resources.ic_air
 import org.meshtastic.core.resources.ic_cell_tower
 import org.meshtastic.core.resources.ic_group
 import org.meshtastic.core.resources.ic_groups
@@ -56,6 +58,7 @@ import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.feature.node.compass.CompassViewModel
 import org.meshtastic.feature.node.detail.NodeDetailScreen
 import org.meshtastic.feature.node.detail.NodeDetailViewModel
+import org.meshtastic.feature.node.metrics.AirQualityMetricsScreen
 import org.meshtastic.feature.node.metrics.DeviceMetricsScreen
 import org.meshtastic.feature.node.metrics.EnvironmentMetricsScreen
 import org.meshtastic.feature.node.metrics.HostMetricsLogScreen
@@ -157,6 +160,9 @@ fun EntryProviderScope<NavKey>.nodeDetailGraph(backStack: NavBackStack<NavKey>) 
             NodeDetailRoute.PaxMetrics::class ->
                 addNodeDetailScreenComposable<NodeDetailRoute.PaxMetrics>(backStack, routeInfo) { it.destNum }
 
+            NodeDetailRoute.AirQualityMetrics::class ->
+                addNodeDetailScreenComposable<NodeDetailRoute.AirQualityMetrics>(backStack, routeInfo) { it.destNum }
+
             NodeDetailRoute.NeighborInfoLog::class ->
                 addNodeDetailScreenComposable<NodeDetailRoute.NeighborInfoLog>(backStack, routeInfo) { it.destNum }
 
@@ -242,5 +248,11 @@ enum class NodeDetailScreen(
         NodeDetailRoute.PaxMetrics::class,
         Res.drawable.ic_group,
         { metricsVM, onNavigateUp -> PaxMetricsScreen(metricsVM, onNavigateUp) },
+    ),
+    AIR_QUALITY(
+        Res.string.air_quality,
+        NodeDetailRoute.AirQualityMetrics::class,
+        Res.drawable.ic_air,
+        { metricsVM, onNavigateUp -> AirQualityMetricsScreen(metricsVM, onNavigateUp) },
     ),
 }

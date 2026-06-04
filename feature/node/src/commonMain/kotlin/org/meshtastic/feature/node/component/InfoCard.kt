@@ -61,6 +61,7 @@ fun InfoCard(
     icon: ImageVector? = null,
     iconRes: DrawableResource? = null,
     rotateIcon: Float = 0f,
+    valueColor: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.onSurface,
 ) {
     val clipboard: Clipboard = LocalClipboard.current
     val coroutineScope = rememberCoroutineScope()
@@ -107,7 +108,7 @@ fun InfoCard(
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                Text(value, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurface)
+                Text(value, style = MaterialTheme.typography.labelLarge, color = valueColor)
             }
         }
     }
