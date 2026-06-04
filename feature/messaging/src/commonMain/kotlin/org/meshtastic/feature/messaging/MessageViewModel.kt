@@ -21,15 +21,18 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.ioDispatcher
@@ -55,7 +58,7 @@ import org.meshtastic.proto.ChannelSet
 @Suppress("LongParameterList", "TooManyFunctions")
 @KoinViewModel
 class MessageViewModel(
-    savedStateHandle: SavedStateHandle,
+    private val savedStateHandle: SavedStateHandle,
     private val nodeRepository: NodeRepository,
     radioConfigRepository: RadioConfigRepository,
     quickChatActionRepository: QuickChatActionRepository,
@@ -70,6 +73,19 @@ class MessageViewModel(
 ) : ViewModel() {
     private val _title = MutableStateFlow("")
     val title: StateFlow<String> = _title.asStateFlow()
+
+    private val _draftMessage = MutableStateFlow(savedStateHandle.get<String>("draftMessage") ?: "")
+    val draftMessage: StateFlow<String> = _draftMessage.asStateFlow()
+
+    fun setDraftMessage(text: String) {
+        _draftMessage.value = text
+        savedStateHandle["draftMessage"] = text
+    }
+
+    fun clearDraftMessage() {
+        _draftMessage.value = ""
+        savedStateHandle["draftMessage"] = ""
+    }
 
     val ourNodeInfo = nodeRepository.ourNodeInfo
 
@@ -144,6 +160,68 @@ class MessageViewModel(
             .filterNotNull()
             .flatMapLatest { packetRepository.getFilteredCountFlow(it) }
             .stateInWhileSubscribed(0)
+
+    // region ── Search ──
+
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+
+    private val _isSearchActive = MutableStateFlow(false)
+    val isSearchActive: StateFlow<Boolean> = _isSearchActive.asStateFlow()
+
+    private val _searchResultIndex = MutableStateFlow(0)
+    val searchResultIndex: StateFlow<Int> = _searchResultIndex.asStateFlow()
+
+    @OptIn(FlowPreview::class)
+    val searchResults: StateFlow<List<Message>> =
+        combine(_searchQuery, contactKeyForPagedMessages) { query, contactKey -> query to contactKey }
+            .debounce(SEARCH_DEBOUNCE_MS)
+            .flatMapLatest { (query, contactKey) ->
+                if (query.length < MIN_SEARCH_LENGTH) {
+                    flowOf(emptyList())
+                } else {
+                    packetRepository.searchMessages(query, contactKey, ::getNode)
+                }
+            }
+            .stateInWhileSubscribed(emptyList())
+
+    /** The currently focused search result message (for scroll-to-match). */
+    val currentSearchResult: StateFlow<Message?> =
+        combine(searchResults, _searchResultIndex) { results, index -> results.getOrNull(index) }
+            .stateInWhileSubscribed(null)
+
+    fun setSearchQuery(query: String) {
+        _searchQuery.value = query
+        _searchResultIndex.value = 0
+    }
+
+    fun navigateToNextResult() {
+        val max = searchResults.value.size
+        if (max == 0) return
+        _searchResultIndex.update { (it + 1) % max }
+    }
+
+    fun navigateToPreviousResult() {
+        val max = searchResults.value.size
+        if (max == 0) return
+        _searchResultIndex.update { if (it == 0) max - 1 else it - 1 }
+    }
+
+    fun toggleSearch() {
+        _isSearchActive.value = !_isSearchActive.value
+        if (!_isSearchActive.value) {
+            _searchQuery.value = ""
+            _searchResultIndex.value = 0
+        }
+    }
+
+    fun closeSearch() {
+        _isSearchActive.value = false
+        _searchQuery.value = ""
+        _searchResultIndex.value = 0
+    }
+
+    // endregion
 
     init {
         val contactKey = savedStateHandle.get<String>("contactKey")
@@ -235,4 +313,9 @@ class MessageViewModel(
             val unreadCount = packetRepository.getUnreadCount(contact)
             if (unreadCount == 0) notificationManager.cancel(contact.hashCode())
         }
+
+    companion object {
+        private const val SEARCH_DEBOUNCE_MS = 300L
+        private const val MIN_SEARCH_LENGTH = 2
+    }
 }

@@ -23,6 +23,10 @@ import com.juul.kable.logs.LogEngine
  * Bridges Kable's internal logging to [Kermit][Logger] so BLE lifecycle events (connect, disconnect, subscribe, GATT
  * operations) appear in the standard app logs rather than going to [System.out] via Kable's default
  * [com.juul.kable.logs.SystemLogEngine].
+ *
+ * Kable logs connection failures and disconnections at error level, but these are expected BLE operational events — not
+ * application bugs. We downgrade error/assert to warn so these don't trigger non-fatal exception recording in
+ * Crashlytics (which records any Kermit Error-level log with a throwable as a non-fatal).
  */
 internal object KermitLogEngine : LogEngine {
     override fun verbose(throwable: Throwable?, tag: String, message: String) {
@@ -42,10 +46,11 @@ internal object KermitLogEngine : LogEngine {
     }
 
     override fun error(throwable: Throwable?, tag: String, message: String) {
-        Logger.e(throwable) { "[$tag] $message" }
+        // Downgrade: Kable "errors" are operational (failed connect, disconnect requested) not app bugs.
+        Logger.w(throwable) { "[$tag] $message" }
     }
 
     override fun assert(throwable: Throwable?, tag: String, message: String) {
-        Logger.e(throwable) { "[$tag] $message" }
+        Logger.w(throwable) { "[$tag] $message" }
     }
 }

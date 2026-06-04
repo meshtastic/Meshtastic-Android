@@ -21,6 +21,9 @@ plugins {
 }
 
 kotlin {
+    // Override minSdk for ATAK compatibility (standard is 26)
+    android { minSdk = 21 }
+
     sourceSets {
         commonMain.dependencies {
             api(libs.wire.runtime)
@@ -54,6 +57,11 @@ wire {
     sourcePath {
         srcDir("src/main/proto")
         srcDir("src/main/wire-includes")
+        // Upstream added packages/kmp/ with symlinks back to root protos.
+        // Without filtering, Wire follows the symlinks and loads duplicates.
+        include("meshtastic/**/*.proto")
+        include("nanopb.proto")
+        include("google/**/*.proto")
     }
     kotlin {
         // Wire 6 optimization: Avoid unnecessary immutable copies of repeated/map fields.

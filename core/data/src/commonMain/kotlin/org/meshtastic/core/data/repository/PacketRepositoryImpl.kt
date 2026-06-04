@@ -23,6 +23,7 @@ import androidx.paging.map
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.withContext
@@ -143,6 +144,7 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
                 rssi = packet.rssi,
                 hopsAway = packet.hopsAway,
                 filtered = filtered,
+                messageText = packet.text.orEmpty(),
             )
         insertRoomPacket(packetToSave)
     }
@@ -282,6 +284,7 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
                 rssi = packet.rssi,
                 hopsAway = packet.hopsAway,
                 filtered = filtered,
+                messageText = packet.text.orEmpty(),
             )
         insertRoomPacket(packetToSave)
     }
@@ -513,6 +516,54 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
         channel = channel,
         sfpp_hash = sfppHash,
     )
+
+    override fun searchMessages(query: String, contactKey: String?, getNode: (String?) -> Node): Flow<List<Message>> {
+        val sanitized = sanitizeFtsQuery(query)
+        if (sanitized.isBlank()) return flowOf(emptyList())
+        return dbManager.currentDb.flatMapLatest { db ->
+            kotlinx.coroutines.flow.flow {
+                val dao = db.packetDao()
+                val packets =
+                    if (contactKey != null) {
+                        dao.searchMessagesInConversation(sanitized, contactKey)
+                    } else {
+                        dao.searchMessages(sanitized)
+                    }
+                emit(
+                    packets.map { packet ->
+                        val node = getNode(packet.data.from)
+                        val isFromLocal =
+                            node.user.id == NodeAddress.ID_LOCAL ||
+                                (packet.myNodeNum != 0 && node.num == packet.myNodeNum)
+                        Message(
+                            uuid = packet.uuid,
+                            receivedTime = packet.received_time,
+                            node = node,
+                            text = packet.data.text.orEmpty(),
+                            fromLocal = isFromLocal,
+                            time = org.meshtastic.core.model.util.getShortDateTime(packet.data.time),
+                            snr = packet.snr,
+                            rssi = packet.rssi,
+                            hopsAway = packet.hopsAway,
+                            read = packet.read,
+                            status = packet.data.status,
+                            routingError = packet.routingError,
+                            packetId = packet.packetId,
+                            emojis = emptyList(),
+                            replyId = packet.data.replyId,
+                        )
+                    },
+                )
+            }
+        }
+    }
+
+    /**
+     * Sanitizes a user query for FTS5 by wrapping each token in double quotes. This escapes FTS5 special characters (*,
+     * -, NEAR, etc.) while still allowing multi-word searches as implicit AND queries.
+     */
+    private fun sanitizeFtsQuery(query: String): String =
+        query.split("\\s+".toRegex()).filter { it.isNotBlank() }.joinToString(" ") { "\"${it.replace("\"", "")}\"" }
 
     companion object {
         private const val CONTACTS_PAGE_SIZE = 30

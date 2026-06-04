@@ -179,7 +179,7 @@ class MessageViewModelTest {
 
     @Test
     fun testSendMessage() = runTest {
-        everySuspend { sendMessageUseCase.invoke(any(), any(), any()) } returns Unit
+        everySuspend { sendMessageUseCase.invoke(any(), any(), any()) } returns 1
 
         viewModel.sendMessage("Hello", "0!12345678", null)
 

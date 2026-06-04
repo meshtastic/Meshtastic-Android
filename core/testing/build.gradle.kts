@@ -18,7 +18,7 @@
 plugins { alias(libs.plugins.meshtastic.kmp.library) }
 
 kotlin {
-    androidLibrary { withHostTest {} }
+    android { withHostTest {} }
 
     sourceSets {
         commonMain.dependencies {

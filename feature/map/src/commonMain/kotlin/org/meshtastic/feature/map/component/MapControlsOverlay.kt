@@ -42,6 +42,7 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.MyLocation
 import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.core.ui.icon.Tune
+import org.meshtastic.core.ui.theme.StatusColors.StatusBlue
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 
 /**
@@ -127,9 +128,11 @@ fun MapControlsOverlay(
 
 @Composable
 private fun CompassButton(onClick: () -> Unit, bearing: Float, isFollowing: Boolean) {
+    // Tint, not `primary` — tinting the icon `primary` painted it the same color as its own primary-colored
+    // button background, making the compass disappear while following.
     val iconTint =
         when {
-            isFollowing -> MaterialTheme.colorScheme.primary
+            isFollowing -> MaterialTheme.colorScheme.StatusBlue
             bearing == 0f -> MaterialTheme.colorScheme.StatusRed
             else -> null
         }

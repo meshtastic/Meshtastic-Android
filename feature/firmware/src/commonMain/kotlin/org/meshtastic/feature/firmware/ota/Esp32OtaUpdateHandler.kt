@@ -156,7 +156,7 @@ class Esp32OtaUpdateHandler(
                 delay(GATT_RELEASE_DELAY_MS)
 
                 val transport = transportFactory()
-                if (!connectToDevice(transport, connectionAttempts, updateState)) return@withContext null
+                connectToDevice(transport, connectionAttempts, updateState)
 
                 try {
                     executeOtaSequence(transport, firmwareBytes, sha256Hash, rebootMode, updateState)
@@ -255,7 +255,7 @@ class Esp32OtaUpdateHandler(
         transport: UnifiedOtaProtocol,
         attempts: Int,
         updateState: (FirmwareUpdateState) -> Unit,
-    ): Boolean {
+    ) {
         // Show "waiting for reboot" state before first connection attempt
         updateState(
             FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_waiting_reboot))),
@@ -269,13 +269,12 @@ class Esp32OtaUpdateHandler(
                     ),
                 )
                 transport.connect().getOrThrow()
-                return true
+                return
             } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
                 if (i == attempts) throw e
                 delay(RETRY_DELAY)
             }
         }
-        return false
     }
 
     @Suppress("LongMethod")

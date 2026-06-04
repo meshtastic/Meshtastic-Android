@@ -83,6 +83,7 @@ internal data class MessageListPagedState(
     val filteredCount: Int = 0,
     val showFiltered: Boolean = false,
     val filteringDisabled: Boolean = false,
+    val searchQuery: String = "",
 )
 
 private fun MutableState<Set<Long>>.toggle(uuid: Long) {
@@ -368,6 +369,7 @@ private fun RenderPagedChatMessageRow(
         hasSamePrev = hasSamePrev,
         hasSameNext = hasSameNext,
         quickEmojis = quickEmojis,
+        searchQuery = state.searchQuery,
     )
 }
 

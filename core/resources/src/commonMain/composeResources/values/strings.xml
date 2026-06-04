@@ -86,6 +86,22 @@
     <string name="analytics_okay">Allow analytics and crash reporting.</string>
     <string name="analytics_platforms">Analytics platforms:</string>
     <string name="any">Any</string>
+    <!-- APP -->
+    <string name="app_functions_get_channel_info">Get channel info</string>
+    <string name="app_functions_get_device_status">Get device status</string>
+    <string name="app_functions_get_mesh_metrics">Get mesh metrics</string>
+    <string name="app_functions_get_mesh_status">Get mesh status</string>
+    <string name="app_functions_get_node_details">Get node details</string>
+    <string name="app_functions_get_node_list">Get node list</string>
+    <string name="app_functions_get_recent_messages">Get recent messages</string>
+    <string name="app_functions_get_unread_summary">Get unread summary</string>
+    <string name="app_functions_master_summary">Let system AI assistants (e.g. Gemini) discover and use mesh functions</string>
+    <string name="app_functions_master_toggle">Allow AI access</string>
+    <string name="app_functions_read_section">Read functions</string>
+    <string name="app_functions_send_message">Send message</string>
+    <string name="app_functions_settings">System AI</string>
+    <string name="app_functions_settings_summary">Control which functions are available to AI assistants</string>
+    <string name="app_functions_write_section">Write functions</string>
     <string name="app_notifications">App Notifications</string>
     <string name="app_settings">App</string>
     <string name="app_too_old">Application update required</string>
@@ -1156,6 +1172,7 @@
     <string name="screen_on_for">Screen on for</string>
     <string name="scroll_to_bottom">Scroll to bottom</string>
     <string name="search_emoji">Search emoji...</string>
+    <string name="search_messages">Search messages…</string>
     <string name="secondary">Secondary</string>
     <string name="secondary_channel_position_feature">Disabling position on the primary channel allows periodic position broadcasts on the first secondary channel with the position enabled, otherwise manual position request required.</string>
     <string name="secondary_no_telemetry">No periodic telemetry broadcast</string>

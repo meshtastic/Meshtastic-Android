@@ -47,54 +47,54 @@ Bluetooth является основным методом соединения 
 
 > ⚠️ **Почему для Bluetooth требуется местоположение?** Android требует разрешение на определение местоположения для обнаружения устройств Bluetooth Low Energy поблизости. Это требование системы Android, а не специфический выбор Meshtastic.
 
-Meshtastic also uses your location for:
+Meshtastic также использует местоположение для:
 
-- Showing your position on the mesh map
-- Calculating distances to other nodes
-- Sharing your GPS coordinates with other mesh members (if enabled)
+- Показ вашего положения на карте
+- Вычисление расстояний до других нод
+- Обмен GPS-координатами с другими участниками сети (если включено)
 
-Grant **"While using the app"** or **"Always"** depending on your preference:
+Предоставь доступ **"При использовании приложения"** или **"Всегда"** в зависимости от своих предпочтений:
 
-- **While using the app** — position updates only when the app is open
-- **Always** — enables background position updates for always-on mesh presence
+- **При использовании приложения** — обновление местоположения происходит только когда приложение открыто
+- **Всегда** — включает обновления позиции в фоновом режиме для активного присутствия в сети
 
-If denied, Bluetooth scanning will not function and your node will not report a position.
+Если доступ будет запрещен, сканирование Bluetooth не будет работать, и нода не будет сообщать о положении.
 
-### Notifications Permission
+### Разрешение на уведомления
 
-Notifications alert you to:
+Уведомления оповещают тебя о:
 
-- Incoming messages from channels and direct messages
-- Connection status changes (connected, disconnected, reconnecting)
-- Firmware update availability
+- Входящие сообщения из каналов и личных сообщений
+- Изменения состояния подключения (подключено, отключено, переподключение)
+- Доступность обновления прошивки
 
-> 💡 **Tip:** You can fine-tune notification preferences later in Android system settings. The app creates separate notification channels for messages, connection events, and background service status.
+> 💡 **Совет:** Ты можешь настроить предпочтения уведомлений позже в системных настройках Android. Приложение создает отдельные каналы уведомлений для сообщений, событий подключения и фонового состояния службы.
 
-### Critical Alerts Permission
+### Разрешение на критические уведомления
 
-On supported devices, the app may request permission for critical alerts:
+На поддерживаемых устройствах приложение может запрашивать разрешение на критические уведомления:
 
-- These are high-priority notifications that can break through Do Not Disturb mode
-- Useful for emergency mesh alerts or urgent messages
-- You can **skip** this step if you don't need breakthrough notifications
-- Configure or revoke later in Android notification settings
+- Это уведомления высокого приоритета, которые могут прерывать режим "Не беспокоить"
+- Полезно для экстренных уведомлений в mesh-сети или срочных сообщений
+- Вы можете **пропустить** этот шаг, если не нужны уведомления о прорывах
+- Настроить или отменить можно позже в настройках уведомлений Android
 
-## After Setup
+## После настройки
 
-Once permissions are granted, the app transitions to the main interface. Your first action should be connecting to a Meshtastic radio — see [Connections](connections) for detailed instructions.
+Как только разрешения предоставлены, приложение переходит к основному интерфейсу. Ваше первое действие должно заключаться в подключении к радиостанции Meshtastic — см. [Подключения](connections) для подробных инструкций.
 
-> 💡 **Tip:** If you skipped any permissions during setup, you can grant them later through **Android Settings → Apps → Meshtastic → Permissions**. The app will prompt you again if a missing permission blocks a feature you try to use.
+> 💡 **Совет:** Если ты пропустил какие-либо разрешения во время настройки, то можешь выдать их позже через **Настройки Android → Приложения → Meshtastic → Разрешения**. Приложение снова запросит у тебя разрешение, если отсутствующее разрешение блокирует функцию, которую ты пытаешься использовать.
 
-## What's Next?
+## Что дальше?
 
-Once connected to a radio, explore:
+После подключения к радиостанции, исследуй:
 
-- [Connections](connections) — pair your first radio device
-- [Messages & Channels](messages-and-channels) — send your first message
-- [Nodes](nodes) — see who's on your mesh
-- [Map & Waypoints](map-and-waypoints) — view node positions
-- [Settings](settings-radio-user) — configure your radio and user profile
+- [Подключения](connections) — соедини своё первое радиоустройство
+- [Сообщения и каналы](messages-and-channels) — отправь  своё первое сообщение
+- [Ноды](nodes) — посмотри, кто есть в сети
+- [Карта и контрольные точки](map-and-waypoints) — просмотр позиций нод
+- [Настройки](settings-radio-user) — настрой своё устройство и профиль пользователя
 
-New to Meshtastic? The [getting started guide](https://meshtastic.org/docs/getting-started) on meshtastic.org covers hardware selection, initial radio configuration, and your first mesh setup.
+Новичок в Meshtastic? Руководство [по началу работы](https://meshtastic.org/docs/getting-started) на meshtastic.org охватывает выбор оборудования, начальную настройку радиостанции и первую установку сети.
 
 ---

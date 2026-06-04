@@ -114,7 +114,7 @@ internal fun Project.configureKotlinMultiplatform() {
 
                 // Default: disable Android resources for most KMP modules.
                 // Modules that need resources (e.g. core:resources) override this
-                // explicitly in their build.gradle.kts androidLibrary {} block.
+                // explicitly in their build.gradle.kts android {} block.
                 androidResources.enable = false
 
                 // Set the namespace automatically if not already set
