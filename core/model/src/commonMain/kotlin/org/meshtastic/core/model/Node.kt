@@ -72,15 +72,7 @@ data class Node(
         get() = lastHeard > onlineTimeThreshold()
 
     val colors: Pair<Int, Int>
-        get() { // returns foreground and background @ColorInt for each 'num'
-            val r = (num and 0xFF0000) shr 16
-            val g = (num and 0x00FF00) shr 8
-            val b = num and 0x0000FF
-            val brightness = ((r * 0.299) + (g * 0.587) + (b * 0.114)) / 255
-            val foreground = if (brightness > 0.5) 0xFF000000.toInt() else 0xFFFFFFFF.toInt()
-            val background = (0xFF shl 24) or (r shl 16) or (g shl 8) or b
-            return foreground to background
-        }
+        get() = nodeColorsFromNum(num)
 
     val isUnknownUser
         get() = user.hw_model == HardwareModel.UNSET
