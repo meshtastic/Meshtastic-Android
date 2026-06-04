@@ -61,7 +61,9 @@
     <string name="advanced_device_gps">Advanced Device GPS</string>
     <string name="advanced_title">Advanced</string>
     <!-- AIR -->
+    <string name="air_quality">Air Quality</string>
     <string name="air_quality_icon">Air quality icon</string>
+    <string name="air_quality_metrics_log">Air Quality Metrics Log</string>
     <string name="air_quality_metrics_module_enabled">Air quality metrics module enabled</string>
     <string name="air_quality_metrics_update_interval_seconds">Air quality metrics update interval</string>
     <string name="air_util_definition">Percent of airtime for transmission used within the last hour.</string>
@@ -86,6 +88,22 @@
     <string name="analytics_okay">Allow analytics and crash reporting.</string>
     <string name="analytics_platforms">Analytics platforms:</string>
     <string name="any">Any</string>
+    <!-- APP -->
+    <string name="app_functions_get_channel_info">Get channel info</string>
+    <string name="app_functions_get_device_status">Get device status</string>
+    <string name="app_functions_get_mesh_metrics">Get mesh metrics</string>
+    <string name="app_functions_get_mesh_status">Get mesh status</string>
+    <string name="app_functions_get_node_details">Get node details</string>
+    <string name="app_functions_get_node_list">Get node list</string>
+    <string name="app_functions_get_recent_messages">Get recent messages</string>
+    <string name="app_functions_get_unread_summary">Get unread summary</string>
+    <string name="app_functions_master_summary">Let system AI assistants (e.g. Gemini) discover and use mesh functions</string>
+    <string name="app_functions_master_toggle">Allow AI access</string>
+    <string name="app_functions_read_section">Read functions</string>
+    <string name="app_functions_send_message">Send message</string>
+    <string name="app_functions_settings">System AI</string>
+    <string name="app_functions_settings_summary">Control which functions are available to AI assistants</string>
+    <string name="app_functions_write_section">Write functions</string>
     <string name="app_notifications">App Notifications</string>
     <string name="app_settings">App</string>
     <string name="app_too_old">Application update required</string>
@@ -181,6 +199,7 @@
     <string name="client_notification">Client Notification</string>
     <string name="close">Close</string>
     <string name="close_selection">Close selection</string>
+    <string name="co2">CO₂</string>
     <string name="codec_2_enabled">CODEC 2 enabled</string>
     <string name="codec2_sample_rate">CODEC2 sample rate</string>
     <string name="coding_rate">Coding Rate</string>
@@ -770,6 +789,7 @@
     <string name="message_status_sfpp_routing">Routing via SF++ chain…</string>
     <string name="message_status_unknown">Unknown</string>
     <string name="messages">Messages</string>
+    <string name="micrograms_per_cubic_meter">µg/m³</string>
     <string name="min">Min</string>
     <string name="minimum_broadcast_seconds">Minimum broadcast (seconds)</string>
     <string name="minimum_distance">Smart Distance</string>
@@ -981,6 +1001,9 @@
         <item quantity="one">%1$d second</item>
         <item quantity="other">%1$d seconds</item>
     </plurals>
+    <string name="pm1_0">PM1.0</string>
+    <string name="pm10">PM10</string>
+    <string name="pm2_5">PM2.5</string>
     <!-- POSITION -->
     <string name="position">Position</string>
     <string name="position_config_set_fixed_from_phone">Set from current phone location</string>
@@ -996,6 +1019,7 @@
     <string name="power_metrics_on_screen_enabled">Power metrics on-screen enabled</string>
     <string name="power_metrics_update_interval_seconds">Power metrics update interval</string>
     <string name="powered">Powered</string>
+    <string name="ppm">ppm</string>
     <string name="precise_location">Precise location</string>
     <string name="preferences_language">Language</string>
     <string name="preferences_system_default">System default</string>
@@ -1161,6 +1185,7 @@
     <string name="screen_on_for">Screen on for</string>
     <string name="scroll_to_bottom">Scroll to bottom</string>
     <string name="search_emoji">Search emoji...</string>
+    <string name="search_messages">Search messages…</string>
     <string name="secondary">Secondary</string>
     <string name="secondary_channel_position_feature">Disabling position on the primary channel allows periodic position broadcasts on the first secondary channel with the position enabled, otherwise manual position request required.</string>
     <string name="secondary_no_telemetry">No periodic telemetry broadcast</string>

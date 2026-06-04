@@ -26,7 +26,7 @@ interface PacketHandler {
     fun sendToRadio(p: ToRadio)
 
     /** Adds a mesh packet to the queue for sending. */
-    fun sendToRadio(packet: MeshPacket)
+    suspend fun sendToRadio(packet: MeshPacket)
 
     /**
      * Adds a mesh packet to the queue and suspends until the radio acknowledges it via [QueueStatus].

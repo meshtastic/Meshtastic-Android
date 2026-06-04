@@ -78,7 +78,7 @@ import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.MapsComposeExperimentalApi
-import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerComposable
 import com.google.maps.android.compose.MarkerInfoWindowComposable
 import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.TileOverlay
@@ -102,7 +102,6 @@ import org.meshtastic.app.map.component.MapTypeDropdown
 import org.meshtastic.app.map.component.NodeClusterMarkers
 import org.meshtastic.app.map.component.NodeMapFilterDropdown
 import org.meshtastic.app.map.component.WaypointMarkers
-import org.meshtastic.app.map.component.rememberNodeChipDescriptor
 import org.meshtastic.app.map.model.NodeClusterItem
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
@@ -126,6 +125,7 @@ import org.meshtastic.core.resources.sats
 import org.meshtastic.core.resources.speed
 import org.meshtastic.core.resources.timestamp
 import org.meshtastic.core.resources.track_point
+import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.icon.Layers
 import org.meshtastic.core.ui.icon.Map
 import org.meshtastic.core.ui.icon.MeshtasticIcons
@@ -864,17 +864,17 @@ private fun NodeTrackOverlay(
                 }
 
             if (index == sortedPositions.lastIndex) {
-                val chipIcon = rememberNodeChipDescriptor(focusedNode)
-                Marker(
+                MarkerComposable(
                     state = markerState,
-                    icon = chipIcon,
                     zIndex = activeNodeZIndex,
                     alpha = if (isHighPriority) 1.0f else 0.9f,
                     onClick = {
                         onPositionSelected?.invoke(position.time)
                         false // Allow default info window behavior
                     },
-                )
+                ) {
+                    NodeChip(node = focusedNode)
+                }
             } else {
                 MarkerInfoWindowComposable(
                     state = markerState,
@@ -969,6 +969,7 @@ private fun speedFromPosition(position: Position, displayUnits: DisplayUnits): S
 
 // region --- Traceroute Map Content ---
 
+@OptIn(MapsComposeExperimentalApi::class)
 @Composable
 private fun TracerouteMapContent(
     forwardOffsetPoints: List<LatLng>,
@@ -997,8 +998,7 @@ private fun TracerouteMapContent(
     }
     displayNodes.forEach { node ->
         val markerState = rememberUpdatedMarkerState(position = node.position.toLatLng())
-        val chipIcon = rememberNodeChipDescriptor(node)
-        Marker(state = markerState, icon = chipIcon, zIndex = 4f)
+        MarkerComposable(state = markerState, zIndex = 4f) { NodeChip(node = node) }
     }
 }
 

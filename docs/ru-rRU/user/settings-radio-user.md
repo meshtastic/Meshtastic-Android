@@ -113,13 +113,13 @@ aliases:
 
 ### Настройка питания
 
-| Настройка                               | Описание                                          |
-| --------------------------------------- | ------------------------------------------------- |
-| Энергосбережение                        | Включить спящий режим с низким энергопотреблением |
-| Завершение работы через                 | Таймер автоотключения при простое                 |
-| Множитель ADC                           | Коэффициент калибровки напряжения батареи         |
-| Wait Bluetooth (s)   | Time to wait for BLE connection at boot           |
-| Mesh SDS Timeout (s) | Super-deep-sleep timeout                          |
+| Настройка               | Описание                                          |
+| ----------------------- | ------------------------------------------------- |
+| Энергосбережение        | Включить спящий режим с низким энергопотреблением |
+| Завершение работы через | Таймер автоотключения при простое                 |
+| Множитель ADC           | Коэффициент калибровки напряжения батареи         |
+| Ожидание Bluetooth      | Время ожидания подключения BLE при загрузке       |
+| Тайм-аут Mesh SDS       | Тайм-аут сверхглубокого сна                       |
 
 ### Настройка сети
 
@@ -131,44 +131,44 @@ aliases:
 | NTP-сервер    | Сервер синхронизации времени                                    |
 | Syslog-сервер | Удалённый сервер логирования                                    |
 
-![IP address field](../../assets/screenshots/settings_ipv4_field.png)
+![Поле IP-адреса](../../assets/screenshots/settings_ipv4_field.png)
 
 ### Настройка Bluetooth
 
-| Настройка             | Описание                                                                  |
-| --------------------- | ------------------------------------------------------------------------- |
-| Bluetooth Enabled     | Enable/disable BLE radio                                                  |
-| Pairing Mode          | Fixed PIN, Random PIN, or No PIN                                          |
-| Фиксированный PIN-код | PIN code for pairing (default: 123456) |
+| Настройка             | Описание                                                                         |
+| --------------------- | -------------------------------------------------------------------------------- |
+| Bluetooth включен     | Включение/отключение BLE радиостанции                                            |
+| Режим сопряжения      | Фиксированный PIN, случайный PIN или без PIN                                     |
+| Фиксированный PIN-код | PIN-код для сопряжения (по умолчанию: 123456) |
 
 ### Настройки безопасности
 
-| Настройка                 | Описание                                                                   |
-| ------------------------- | -------------------------------------------------------------------------- |
-| Публичный ключ            | Your node's public key (read-only)                      |
-| Ключ администратора       | Key for remote administration                                              |
-| Приватный ключ            | Your node's private key (handle securely)               |
-| ~~Admin Channel Enabled~~ | ⚠️ Removed — now configured automatically when an admin key is set         |
-| Журнал отладки            | Output live debug logging over serial/bluetooth                            |
-| Serial Enabled            | Enable serial console access (moved from Device Config) |
-| Управляемый режим         | Restrict non-admin channel changes                                         |
+| Настройка                        | Описание                                                                                          |
+| -------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Публичный ключ                   | Публичный ключ твоей ноды (только для чтения)                                  |
+| Ключ администратора              | Ключ для удалённого администрирования                                                             |
+| Приватный ключ                   | Приватный ключ твоей ноды (обращайся с ним осторожно)                          |
+| ~~Канал администратора включен~~ | ⚠️ Удалено — теперь настраивается автоматически при установке ключа администратора                |
+| Журнал отладки                   | Выводить живой отладочный лог через последовательный порт/Bluetooth                               |
+| Последовательная включена        | Включить доступ к последовательной консоли (перемещено из настроек устройства) |
+| Управляемый режим                | Ограничить изменения канала для неадминистраторов                                                 |
 
-![Password field](../../assets/screenshots/settings_password_field.png)
+![Поле пароля](../../assets/screenshots/settings_password_field.png)
 
-Settings use standard preference controls — dropdowns, toggles, and sliders:
+Настройки используют стандартные элементы управления предпочтениями — выпадающие списки, переключатели и ползунки:
 
-| Control  | Screenshot                                                  |
-| -------- | ----------------------------------------------------------- |
-| Dropdown | ![Dropdown](../../assets/screenshots/settings_dropdown.png) |
-| Toggle   | ![Toggle](../../assets/screenshots/settings_switch.png)     |
-| Slider   | ![Slider](../../assets/screenshots/settings_slider.png)     |
+| Управление        | Снимок экрана                                                        |
+| ----------------- | -------------------------------------------------------------------- |
+| Выпадающий список | ![Выпадающий список](../../assets/screenshots/settings_dropdown.png) |
+| Переключатель     | ![Переключатель](../../assets/screenshots/settings_switch.png)       |
+| Ползунок          | ![Ползунок](../../assets/screenshots/settings_slider.png)            |
 
 ## Связанные темы
 
-- [Settings — Modules & Admin](settings-module-admin) — optional feature modules and device administration
-- [Signal Meter](signal-meter) — how modem presets affect signal quality thresholds
-- [LoRa configuration](https://meshtastic.org/docs/configuration/radio/lora) — detailed LoRa settings reference on meshtastic.org
-- [Initial configuration](https://meshtastic.org/docs/getting-started/initial-config) — region setup guide on meshtastic.org
+- [Настройки — Модули и администрирование](settings-module-admin) — дополнительные модули и управление устройством
+- [Измеритель сигнала](signal-meter) — как предустановки модема влияют на пороги качества сигнала
+- [Конфигурация LoRa](https://meshtastic.org/docs/configuration/radio/lora) — подробная справка по настройкам LoRa на meshtastic.org
+- [Начальная конфигурация](https://meshtastic.org/docs/getting-started/initial-config) — руководство по настройке региона на meshtastic.org
 
 ---
 

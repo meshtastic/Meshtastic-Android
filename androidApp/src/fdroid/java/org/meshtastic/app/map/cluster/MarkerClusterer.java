@@ -127,8 +127,8 @@ public abstract class MarkerClusterer extends Overlay {
 		int zoomLevel = mapView.getZoomLevel();
 		if (zoomLevel != mLastZoomLevel && !mapView.isAnimating()){
 			hideInfoWindows();
-        	mClusters = clusterer(mapView);
-        	renderer(mClusters, canvas, mapView);
+			mClusters = clusterer(mapView);
+			renderer(mClusters, canvas, mapView);
 			mLastZoomLevel = zoomLevel;
 		}
 		

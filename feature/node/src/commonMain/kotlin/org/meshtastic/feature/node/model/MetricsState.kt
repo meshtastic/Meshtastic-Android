@@ -49,6 +49,7 @@ data class MetricsState(
     val latestStableFirmware: FirmwareRelease = FirmwareRelease(),
     val latestAlphaFirmware: FirmwareRelease = FirmwareRelease(),
     val paxMetrics: List<MeshLog> = emptyList(),
+    val airQualityMetrics: List<Telemetry> = emptyList(),
     /** The PlatformIO environment reported by the device (if known). */
     val reportedTarget: String? = null,
 ) {
@@ -68,10 +69,12 @@ data class MetricsState(
 
     fun hasPaxMetrics() = paxMetrics.isNotEmpty()
 
+    fun hasAirQualityMetrics() = airQualityMetrics.isNotEmpty()
+
     /** Finds the oldest timestamp (in seconds) among all collected metric types. */
     @Suppress("MagicNumber")
     fun oldestTimestampSeconds(): Long? {
-        val telemetryTimes = (deviceMetrics + powerMetrics + hostMetrics).map { it.time.toLong() }
+        val telemetryTimes = (deviceMetrics + powerMetrics + hostMetrics + airQualityMetrics).map { it.time.toLong() }
         val signalTimes = signalMetrics.map { it.rx_time.toLong() }
         val logTimes =
             (tracerouteRequests + tracerouteResults + neighborInfoRequests + neighborInfoResults + paxMetrics).map {

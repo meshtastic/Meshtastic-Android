@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 39,
-    "identityHash": "01b3c1c79a4d6ff8eed1680826d15203",
+    "identityHash": "69fb4477a86e5ba8c47876cbb3035839",
     "entities": [
       {
         "tableName": "my_node",
@@ -315,7 +315,7 @@
       },
       {
         "tableName": "packet",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`uuid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `myNodeNum` INTEGER NOT NULL DEFAULT 0, `port_num` INTEGER NOT NULL, `contact_key` TEXT NOT NULL, `received_time` INTEGER NOT NULL, `read` INTEGER NOT NULL DEFAULT 1, `data` TEXT NOT NULL, `packet_id` INTEGER NOT NULL DEFAULT 0, `routing_error` INTEGER NOT NULL DEFAULT -1, `snr` REAL NOT NULL DEFAULT 0, `rssi` INTEGER NOT NULL DEFAULT 0, `hopsAway` INTEGER NOT NULL DEFAULT -1, `sfpp_hash` BLOB, `filtered` INTEGER NOT NULL DEFAULT 0)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`uuid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `myNodeNum` INTEGER NOT NULL DEFAULT 0, `port_num` INTEGER NOT NULL, `contact_key` TEXT NOT NULL, `received_time` INTEGER NOT NULL, `read` INTEGER NOT NULL DEFAULT 1, `data` TEXT NOT NULL, `packet_id` INTEGER NOT NULL DEFAULT 0, `routing_error` INTEGER NOT NULL DEFAULT -1, `snr` REAL NOT NULL DEFAULT 0, `rssi` INTEGER NOT NULL DEFAULT 0, `hopsAway` INTEGER NOT NULL DEFAULT -1, `sfpp_hash` BLOB, `filtered` INTEGER NOT NULL DEFAULT 0, `message_text` TEXT NOT NULL DEFAULT '')",
         "fields": [
           {
             "fieldPath": "uuid",
@@ -407,6 +407,13 @@
             "affinity": "INTEGER",
             "notNull": true,
             "defaultValue": "0"
+          },
+          {
+            "fieldPath": "messageText",
+            "columnName": "message_text",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "''"
           }
         ],
         "primaryKey": {
@@ -490,6 +497,42 @@
             "orders": [],
             "createSql": "CREATE INDEX IF NOT EXISTS `index_packet_read` ON `${TABLE_NAME}` (`read`)"
           }
+        ]
+      },
+      {
+        "tableName": "packet_fts",
+        "createSql": "CREATE VIRTUAL TABLE IF NOT EXISTS `${TABLE_NAME}` USING FTS5(`message_text`, tokenize=`unicode61`, content=`packet`)",
+        "fields": [
+          {
+            "fieldPath": "messageText",
+            "columnName": "message_text",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": []
+        },
+        "ftsVersion": "FTS5",
+        "ftsOptions": {
+          "tokenizer": "unicode61",
+          "tokenizerArgs": [],
+          "contentTable": "packet",
+          "languageIdColumnName": "",
+          "matchInfo": "FTS4",
+          "notIndexedColumns": [],
+          "prefixSizes": [],
+          "preferredOrder": "ASC",
+          "contentRowId": "",
+          "columnSize": true,
+          "detail": "FULL"
+        },
+        "contentSyncTriggers": [
+          "CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_packet_fts_BEFORE_UPDATE BEFORE UPDATE ON `packet` BEGIN DELETE FROM `packet_fts` WHERE `rowid`=OLD.`rowid`; END",
+          "CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_packet_fts_BEFORE_DELETE BEFORE DELETE ON `packet` BEGIN DELETE FROM `packet_fts` WHERE `rowid`=OLD.`rowid`; END",
+          "CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_packet_fts_AFTER_UPDATE AFTER UPDATE ON `packet` BEGIN INSERT INTO `packet_fts`(`rowid`, `message_text`) VALUES (NEW.`rowid`, NEW.`message_text`); END",
+          "CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_packet_fts_AFTER_INSERT AFTER INSERT ON `packet` BEGIN INSERT INTO `packet_fts`(`rowid`, `message_text`) VALUES (NEW.`rowid`, NEW.`message_text`); END"
         ]
       },
       {
@@ -920,46 +963,6 @@
         }
       },
       {
-        "tableName": "device_link",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`short_code` TEXT NOT NULL, `original_url` TEXT NOT NULL, `link_description` TEXT, `is_vendor` INTEGER NOT NULL, `regions` TEXT, PRIMARY KEY(`short_code`))",
-        "fields": [
-          {
-            "fieldPath": "shortCode",
-            "columnName": "short_code",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "originalUrl",
-            "columnName": "original_url",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "linkDescription",
-            "columnName": "link_description",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "isVendor",
-            "columnName": "is_vendor",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "regions",
-            "columnName": "regions",
-            "affinity": "TEXT"
-          }
-        ],
-        "primaryKey": {
-          "autoGenerate": false,
-          "columnNames": [
-            "short_code"
-          ]
-        }
-      },
-      {
         "tableName": "firmware_release",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `page_url` TEXT NOT NULL, `release_notes` TEXT NOT NULL, `title` TEXT NOT NULL, `zip_url` TEXT NOT NULL, `last_updated` INTEGER NOT NULL, `release_type` TEXT NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
@@ -1086,7 +1089,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '01b3c1c79a4d6ff8eed1680826d15203')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '69fb4477a86e5ba8c47876cbb3035839')"
     ]
   }
 }

@@ -41,6 +41,7 @@ import org.meshtastic.core.database.entity.MetadataEntity
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.database.entity.Packet
+import org.meshtastic.core.database.entity.PacketFts
 import org.meshtastic.core.database.entity.QuickChatAction
 import org.meshtastic.core.database.entity.ReactionEntity
 import org.meshtastic.core.database.entity.TracerouteNodePositionEntity
@@ -51,6 +52,7 @@ import org.meshtastic.core.database.entity.TracerouteNodePositionEntity
         MyNodeEntity::class,
         NodeEntity::class,
         Packet::class,
+        PacketFts::class,
         ContactSettings::class,
         MeshLog::class,
         QuickChatAction::class,
@@ -99,8 +101,10 @@ import org.meshtastic.core.database.entity.TracerouteNodePositionEntity
         AutoMigration(from = 36, to = 37),
         AutoMigration(from = 37, to = 38),
         AutoMigration(from = 38, to = 39),
+        AutoMigration(from = 39, to = 40),
+        AutoMigration(from = 40, to = 41),
     ],
-    version = 39,
+    version = 41,
     exportSchema = true,
 )
 @androidx.room3.ConstructedBy(MeshtasticDatabaseConstructor::class)

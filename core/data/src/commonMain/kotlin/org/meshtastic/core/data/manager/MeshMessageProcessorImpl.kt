@@ -36,11 +36,11 @@ import org.meshtastic.core.model.util.isLora
 import org.meshtastic.core.model.util.toOneLineString
 import org.meshtastic.core.model.util.toPIIString
 import org.meshtastic.core.repository.FromRadioPacketHandler
+import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.MeshMessageProcessor
-import org.meshtastic.core.repository.MeshRouter
 import org.meshtastic.core.repository.NodeManager
-import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.ServiceStateWriter
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.LogRecord
 import org.meshtastic.proto.MeshPacket
@@ -53,9 +53,9 @@ import kotlin.uuid.Uuid
 @Single
 class MeshMessageProcessorImpl(
     private val nodeManager: NodeManager,
-    private val serviceRepository: ServiceRepository,
+    private val serviceStateWriter: ServiceStateWriter,
     private val meshLogRepository: Lazy<MeshLogRepository>,
-    private val router: Lazy<MeshRouter>,
+    private val dataHandler: Lazy<MeshDataHandler>,
     private val fromRadioDispatcher: FromRadioPacketHandler,
     @Named("ServiceScope") private val scope: CoroutineScope,
 ) : MeshMessageProcessor {
@@ -212,15 +212,13 @@ class MeshMessageProcessorImpl(
             }
         }
 
-        scope.handledLaunch { serviceRepository.emitMeshPacket(packet) }
+        scope.handledLaunch { serviceStateWriter.emitMeshPacket(packet) }
 
         myNodeNum?.let { myNum ->
             val from = packet.from
             val isOtherNode = myNum != from
-            nodeManager.updateNode(myNum, withBroadcast = isOtherNode) { node: Node ->
-                node.copy(lastHeard = nowSeconds.toInt())
-            }
-            nodeManager.updateNode(from, withBroadcast = false, channel = packet.channel) { node: Node ->
+            nodeManager.updateNode(myNum) { node: Node -> node.copy(lastHeard = nowSeconds.toInt()) }
+            nodeManager.updateNode(from, channel = packet.channel) { node: Node ->
                 val viaMqtt = packet.via_mqtt == true
                 val isDirect = packet.hop_start == packet.hop_limit
 
@@ -255,7 +253,7 @@ class MeshMessageProcessorImpl(
             }
 
             try {
-                router.value.dataHandler.handleReceivedData(packet, myNum, log.uuid, logJob)
+                dataHandler.value.handleReceivedData(packet, myNum, log.uuid, logJob)
             } finally {
                 scope.launch {
                     mapsMutex.withLock {
@@ -284,7 +282,7 @@ class MeshMessageProcessorImpl(
         lastLocalNodeRefreshMs = now
 
         val myNum = nodeManager.myNodeNum.value ?: return
-        nodeManager.updateNode(myNum, withBroadcast = false) { node: Node -> node.copy(lastHeard = nowSeconds.toInt()) }
+        nodeManager.updateNode(myNum) { node: Node -> node.copy(lastHeard = nowSeconds.toInt()) }
     }
 
     private fun insertMeshLog(log: MeshLog): Job = scope.handledLaunch { meshLogRepository.value.insert(log) }

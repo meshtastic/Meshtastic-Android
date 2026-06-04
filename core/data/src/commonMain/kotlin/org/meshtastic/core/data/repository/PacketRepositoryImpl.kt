@@ -20,8 +20,10 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.withContext
@@ -37,6 +39,7 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.Reaction
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.PortNum
@@ -89,13 +92,15 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
         dbManager.currentDb.flatMapLatest { db -> db.packetDao().getUnreadCountTotal() }
 
     override suspend fun clearUnreadCount(contact: String, timestamp: Long) =
-        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().clearUnreadCount(contact, timestamp) }
+        withContext(dispatchers.io + NonCancellable) {
+            dbManager.currentDb.value.packetDao().clearUnreadCount(contact, timestamp)
+        }
 
     override suspend fun clearAllUnreadCounts() =
-        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().clearAllUnreadCounts() }
+        withContext(dispatchers.io + NonCancellable) { dbManager.currentDb.value.packetDao().clearAllUnreadCounts() }
 
     override suspend fun updateLastReadMessage(contact: String, messageUuid: Long, lastReadTimestamp: Long) =
-        withContext(dispatchers.io) {
+        withContext(dispatchers.io + NonCancellable) {
             val dao = dbManager.currentDb.value.packetDao()
             val current = dao.getContactSettings(contact)
             val existingTimestamp = current?.lastReadMessageTimestamp ?: Long.MIN_VALUE
@@ -115,7 +120,7 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
     }
 
     suspend fun insertRoomPacket(packet: RoomPacket) =
-        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().insert(packet) }
+        withContext(dispatchers.io + NonCancellable) { dbManager.currentDb.value.packetDao().insert(packet) }
 
     override suspend fun savePacket(
         myNodeNum: Int,
@@ -139,6 +144,7 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
                 rssi = packet.rssi,
                 hopsAway = packet.hopsAway,
                 filtered = filtered,
+                messageText = packet.text.orEmpty(),
             )
         insertRoomPacket(packetToSave)
     }
@@ -278,6 +284,7 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
                 rssi = packet.rssi,
                 hopsAway = packet.hopsAway,
                 filtered = filtered,
+                messageText = packet.text.orEmpty(),
             )
         insertRoomPacket(packetToSave)
     }
@@ -339,13 +346,13 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
         val dao = dbManager.currentDb.value.packetDao()
         val packets = findPacketsWithIdInternal(packetId)
         val reactions = findReactionsWithIdInternal(packetId)
-        val fromId = DataPacket.nodeNumToDefaultId(from)
+        val fromId = NodeAddress.numToDefaultId(from)
         val isFromLocalNode = myNodeNum != null && from == myNodeNum
         val toId =
-            if (to == 0 || to == DataPacket.NODENUM_BROADCAST) {
-                DataPacket.ID_BROADCAST
+            if (to == 0 || to == NodeAddress.NODENUM_BROADCAST) {
+                NodeAddress.ID_BROADCAST
             } else {
-                DataPacket.nodeNumToDefaultId(to)
+                NodeAddress.numToDefaultId(to)
             }
 
         val hashByteString = hash.toByteString()
@@ -353,7 +360,7 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
         packets.forEach { packet ->
             // For sent messages, from is stored as ID_LOCAL, but SFPP packet has node number
             val fromMatches =
-                packet.data.from == fromId || (isFromLocalNode && packet.data.from == DataPacket.ID_LOCAL)
+                packet.data.from == fromId || (isFromLocalNode && packet.data.from == NodeAddress.ID_LOCAL)
             co.touchlab.kermit.Logger.d {
                 "SFPP match check: packetFrom=${packet.data.from} fromId=$fromId " +
                     "isFromLocal=$isFromLocalNode fromMatches=$fromMatches " +
@@ -373,7 +380,7 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
         reactions.forEach { reaction ->
             val reactionFrom = reaction.userId
             // For sent reactions, from is stored as ID_LOCAL, but SFPP packet has node number
-            val fromMatches = reactionFrom == fromId || (isFromLocalNode && reactionFrom == DataPacket.ID_LOCAL)
+            val fromMatches = reactionFrom == fromId || (isFromLocalNode && reactionFrom == NodeAddress.ID_LOCAL)
 
             val toMatches = reaction.to == toId
 
@@ -509,6 +516,54 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
         channel = channel,
         sfpp_hash = sfppHash,
     )
+
+    override fun searchMessages(query: String, contactKey: String?, getNode: (String?) -> Node): Flow<List<Message>> {
+        val sanitized = sanitizeFtsQuery(query)
+        if (sanitized.isBlank()) return flowOf(emptyList())
+        return dbManager.currentDb.flatMapLatest { db ->
+            kotlinx.coroutines.flow.flow {
+                val dao = db.packetDao()
+                val packets =
+                    if (contactKey != null) {
+                        dao.searchMessagesInConversation(sanitized, contactKey)
+                    } else {
+                        dao.searchMessages(sanitized)
+                    }
+                emit(
+                    packets.map { packet ->
+                        val node = getNode(packet.data.from)
+                        val isFromLocal =
+                            node.user.id == NodeAddress.ID_LOCAL ||
+                                (packet.myNodeNum != 0 && node.num == packet.myNodeNum)
+                        Message(
+                            uuid = packet.uuid,
+                            receivedTime = packet.received_time,
+                            node = node,
+                            text = packet.data.text.orEmpty(),
+                            fromLocal = isFromLocal,
+                            time = org.meshtastic.core.model.util.getShortDateTime(packet.data.time),
+                            snr = packet.snr,
+                            rssi = packet.rssi,
+                            hopsAway = packet.hopsAway,
+                            read = packet.read,
+                            status = packet.data.status,
+                            routingError = packet.routingError,
+                            packetId = packet.packetId,
+                            emojis = emptyList(),
+                            replyId = packet.data.replyId,
+                        )
+                    },
+                )
+            }
+        }
+    }
+
+    /**
+     * Sanitizes a user query for FTS5 by wrapping each token in double quotes. This escapes FTS5 special characters (*,
+     * -, NEAR, etc.) while still allowing multi-word searches as implicit AND queries.
+     */
+    private fun sanitizeFtsQuery(query: String): String =
+        query.split("\\s+".toRegex()).filter { it.isNotBlank() }.joinToString(" ") { "\"${it.replace("\"", "")}\"" }
 
     companion object {
         private const val CONTACTS_PAGE_SIZE = 30

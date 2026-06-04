@@ -35,6 +35,8 @@ class BuildNodeDescriptionTest {
             battery = "battery 0%",
             distanceAway = "%s away",
             signal = "signal %s",
+            unknown = "unknown",
+            now = "now",
         )
 
     private fun describe(

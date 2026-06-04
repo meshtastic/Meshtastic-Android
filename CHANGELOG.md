@@ -9,10 +9,17 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
-* chore(agents): prune governance cruft and add Claude token guards (#5706) by James Rich (@jamesarich) in [`813acee71`](https://github.com/meshtastic/Meshtastic-Android/commit/813acee71604686dc4c98b43cf692fe4586cb5c5)
-* fix(map): scope cluster-renderer ViewTreeLifecycleOwner to map host view (#5708) by James Rich (@jamesarich) in [`1b661739e`](https://github.com/meshtastic/Meshtastic-Android/commit/1b661739e346f6d64ff06731ee2ac0bc80501d19)
+* refactor(node): migrate to non-deprecated Vico chart APIs (#5737) by James Rich (@jamesarich) in [`d86c62759`](https://github.com/meshtastic/Meshtastic-Android/commit/d86c627598bfe34e93cb09524334b804020f0b7e)
 
-### Open Beta (v2.7.14-open.18)
+### Internal (v2.7.14-internal.122)
+Changes since [`v2.7.14-open.23`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14-open.23):
+
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5732) by James Rich (@jamesarich) in [`c25033aee`](https://github.com/meshtastic/Meshtastic-Android/commit/c25033aeee4684da74e0c8f5ba19b3520e7ceac8)
+* chore(deps): update androidx.core:core-ktx to v1.19.0 (#5731) by renovate[bot] (@renovate[bot]) in [`3c2b6a58d`](https://github.com/meshtastic/Meshtastic-Android/commit/3c2b6a58de3758166ee90b4ff0ed280010c07340)
+* chore(deps): update room to v3.0.0-alpha06 (#5730) by renovate[bot] (@renovate[bot]) in [`304a11ca5`](https://github.com/meshtastic/Meshtastic-Android/commit/304a11ca5dd6bcc0a32c1c44f28cbb2028d31397)
+* build: migrate KMP Android DSL from androidLibrary {} to android {} (#5734) by James Rich (@jamesarich) in [`ea872f36d`](https://github.com/meshtastic/Meshtastic-Android/commit/ea872f36d0923a1bf0cea8c4a04855cc1e488293)
+
+### Open Beta (v2.7.14-open.23)
 Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.13):
 
 #### 🏗️ Features
@@ -239,6 +246,13 @@ Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/relea
 * fix(firmware): surface error state when BLE OTA connection attempts are exhausted by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5700
 * fix(map): replace MarkerComposable with Canvas-rendered bitmaps by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5702
 * fix(map): remove manual ViewTree lifecycle owner workarounds by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5704
+* fix(map): scope cluster-renderer ViewTreeLifecycleOwner to map host view by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5708
+* fix(map): initialize Maps SDK before building marker bitmap descriptors by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5709
+* fix(map): eliminate cluster-renderer FATAL and harden black-map paths by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5715
+* fix(map): revert app-side Maps SDK init to library-idiomatic, fix inline-map crash by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5719
+* fix(map): render cluster markers in-scope to kill ClusterRenderer FATAL by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5723
+* fix(map): apply kotlinx-serialization compiler plugin to androidApp by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5726
+* fix(map): keep compass icon visible while following bearing by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5728
 #### 📝 Other Changes
 * refactor(ui): compose resources, domain layer by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/4628
 * Add per-message transport method icons for new message format by @Kealper in https://github.com/meshtastic/Meshtastic-Android/pull/4643

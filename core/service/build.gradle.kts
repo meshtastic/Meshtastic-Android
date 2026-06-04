@@ -21,7 +21,7 @@ plugins {
 }
 
 kotlin {
-    androidLibrary { withHostTest { isIncludeAndroidResources = true } }
+    android { withHostTest { isIncludeAndroidResources = true } }
 
     sourceSets {
         commonMain.dependencies {
@@ -45,7 +45,6 @@ kotlin {
         }
 
         androidMain.dependencies {
-            api(projects.core.api)
             implementation(libs.androidx.core.ktx)
             implementation(libs.androidx.work.runtime.ktx)
             implementation(libs.koin.android)
