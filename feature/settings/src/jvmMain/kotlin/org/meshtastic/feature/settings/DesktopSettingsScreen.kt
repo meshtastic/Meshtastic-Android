@@ -48,6 +48,7 @@ import org.meshtastic.core.resources.app_version
 import org.meshtastic.core.resources.bottom_nav_settings
 import org.meshtastic.core.resources.device_db_cache_limit
 import org.meshtastic.core.resources.device_db_cache_limit_summary
+import org.meshtastic.core.resources.device_links
 import org.meshtastic.core.resources.help_and_documentation
 import org.meshtastic.core.resources.info
 import org.meshtastic.core.resources.modules_already_unlocked
@@ -62,6 +63,7 @@ import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.icon.ChevronRight
+import org.meshtastic.core.ui.icon.Device
 import org.meshtastic.core.ui.icon.FormatPaint
 import org.meshtastic.core.ui.icon.HelpOutline
 import org.meshtastic.core.ui.icon.Info
@@ -210,6 +212,12 @@ fun DesktopSettingsScreen(
                         leadingIcon = MeshtasticIcons.List,
                     ) {
                         onNavigate(SettingsRoute.NodeList)
+                    }
+                }
+
+                ExpressiveSection(title = stringResource(Res.string.device_links)) {
+                    ListItem(text = stringResource(Res.string.device_links), leadingIcon = MeshtasticIcons.Device) {
+                        onNavigate(SettingsRoute.DeviceLinks)
                     }
                 }
 

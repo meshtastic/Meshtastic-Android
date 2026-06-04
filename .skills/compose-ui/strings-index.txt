@@ -186,6 +186,7 @@ codec_2_enabled
 codec2_sample_rate
 coding_rate
 collapse_chart
+collapsed
 communicate_off_the_grid
 ### COMPASS ###
 compass_bearing
@@ -316,6 +317,9 @@ device_configuration
 device_db_cache_limit
 device_db_cache_limit_summary
 device_gps
+device_links
+device_links_i_want_one
+device_links_open_in_browser
 device_metrics_label_value
 device_metrics_log
 device_metrics_numeric_value
@@ -433,6 +437,7 @@ event_welcome_hamvention
 event_welcome_open_sauce
 exchange_position
 expand_chart
+expanded
 expires
 ### EXPORT ###
 export_configuration

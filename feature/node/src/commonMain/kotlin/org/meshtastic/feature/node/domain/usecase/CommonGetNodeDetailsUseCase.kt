@@ -22,16 +22,19 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onStart
 import org.koin.core.annotation.Single
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.DeviceLink
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.hasValidEnvironmentMetrics
 import org.meshtastic.core.model.util.isDirectSignal
 import org.meshtastic.core.repository.DeviceHardwareRepository
+import org.meshtastic.core.repository.DeviceLinkRepository
 import org.meshtastic.core.repository.FirmwareReleaseRepository
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.NodeRepository
@@ -59,6 +62,7 @@ constructor(
     private val meshLogRepository: MeshLogRepository,
     private val radioConfigRepository: RadioConfigRepository,
     private val deviceHardwareRepository: DeviceHardwareRepository,
+    private val deviceLinkRepository: DeviceLinkRepository,
     private val firmwareReleaseRepository: FirmwareReleaseRepository,
     private val nodeRequestActions: NodeRequestActions,
 ) : GetNodeDetailsUseCase {
@@ -114,8 +118,8 @@ constructor(
                 IdentityGroup(ourNode, myInfo, profile)
             }
 
-        // 3. Device Hardware — non-blocking Flow derived from stable (hwModel, pioEnv) key.
-        val hardwareFlow: Flow<DeviceHardware?> =
+        // 3. Device Hardware (+ msh.to links) — non-blocking Flow derived from stable (hwModel, pioEnv) key.
+        val hardwareAndLinksFlow: Flow<Pair<DeviceHardware?, List<DeviceLink>>> =
             combine(nodeFlow, identityFlow) { node, identity ->
                 val isLocal = node.num == identity.ourNode?.num
                 val pioEnv = if (isLocal) identity.myInfo?.pioEnv else null
@@ -124,6 +128,13 @@ constructor(
                 .distinctUntilChanged()
                 .flatMapLatest { key -> deviceHardwareRepository.observeDeviceHardware(key.hwModel, key.target) }
                 .onStart { emit(null) }
+                .mapLatest { hw ->
+                    val links =
+                        hw?.platformioTarget
+                            ?.takeIf { it.isNotBlank() }
+                            ?.let { deviceLinkRepository.getLinksForTarget(it) } ?: emptyList()
+                    hw to links
+                }
 
         // 4. Metadata & Request Timestamps
         val metadataFlow =
@@ -157,7 +168,7 @@ constructor(
             identityFlow,
             metadataFlow,
             requestsFlow,
-            hardwareFlow,
+            hardwareAndLinksFlow,
         ) { args: Array<Any?> ->
             @Suppress("UNCHECKED_CAST")
             val node = args[NODE_INDEX] as Node
@@ -165,7 +176,7 @@ constructor(
             val identity = args[IDENTITY_INDEX] as IdentityGroup
             val metadata = args[METADATA_INDEX] as MetadataGroup
             val requests = args[REQUESTS_INDEX] as Pair<List<MeshLog>, List<MeshLog>>
-            val hw = args[HARDWARE_INDEX] as DeviceHardware?
+            val (hw, deviceLinks) = args[HARDWARE_INDEX] as Pair<DeviceHardware?, List<DeviceLink>>
 
             val (trReqs, niReqs) = requests
             val isLocal = node.num == identity.ourNode?.num
@@ -179,6 +190,7 @@ constructor(
                     node = node,
                     isLocal = isLocal,
                     deviceHardware = hw,
+                    deviceLinks = deviceLinks,
                     reportedTarget = pioEnv,
                     isManaged = identity.profile.config?.security?.is_managed ?: false,
                     isFahrenheit =
