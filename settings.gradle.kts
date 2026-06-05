@@ -123,6 +123,7 @@ include(
     ":feature:map",
     ":feature:node",
     ":feature:settings",
+    ":feature:discovery",
     ":feature:docs",
     ":feature:firmware",
     ":feature:wifi-provision",

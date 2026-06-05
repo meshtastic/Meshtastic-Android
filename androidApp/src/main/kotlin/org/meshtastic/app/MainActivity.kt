@@ -70,6 +70,7 @@ import org.meshtastic.core.ui.theme.MODE_DYNAMIC
 import org.meshtastic.core.ui.util.LocalAnalyticsIntroProvider
 import org.meshtastic.core.ui.util.LocalBarcodeScannerProvider
 import org.meshtastic.core.ui.util.LocalBarcodeScannerSupported
+import org.meshtastic.core.ui.util.LocalDiscoveryMapProvider
 import org.meshtastic.core.ui.util.LocalEventBranding
 import org.meshtastic.core.ui.util.LocalInlineMapProvider
 import org.meshtastic.core.ui.util.LocalMapMainScreenProvider
@@ -207,6 +208,10 @@ class MainActivity : AppCompatActivity() {
                         onMappableCountChanged = onMappableCountChanged,
                         modifier = modifier,
                     )
+                },
+            LocalDiscoveryMapProvider provides
+                { userLat, userLon, nodes, modifier ->
+                    org.meshtastic.app.map.discovery.DiscoveryMap(userLat, userLon, nodes, modifier)
                 },
             LocalNodeMapScreenProvider provides
                 { destNum, onNavigateUp ->
