@@ -2,7 +2,7 @@ name: Scheduled Updates (Firmware, Hardware, Translations)
 
 on:
   schedule:
-    - cron: '0 */4 * * *' # Run every 4 hours (was hourly — reduced to cut cascade CI cost)
+    - cron: '0 */6 * * *' # Run every 6 hours (raised from 4h to absorb the added baseline-profile step)
   workflow_dispatch:       # Allow manual triggering
 
 jobs:
@@ -111,6 +111,45 @@ jobs:
         run: ./gradlew graphUpdate
         continue-on-error: true
 
+      # ── Baseline Profile regeneration ───────────────────────────────────
+      # Runs on every scheduled tick (and manual dispatch). Generation needs a booted emulator
+      # (~10 min); continue-on-error keeps flakiness from blocking the firmware/translation PR.
+      - name: Enable KVM (for the emulator)
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Generate Baseline Profile
+        id: generate_baseline
+        continue-on-error: true # Emulator flakiness must not block the firmware/translation PR.
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis # google flavor needs GMS (Maps) on the device image
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          # Writes androidApp/src/google/generated/baselineProfiles/ via the androidx.baselineprofile plugin.
+          script: ./gradlew :androidApp:generateGoogleReleaseBaselineProfile -Pci=true
+
+      - name: Detect baseline profile changes
+        id: baseline
+        run: |
+          profile_dir="androidApp/src/google/generated/baselineProfiles"
+          outcome="${{ steps.generate_baseline.outcome }}"
+          if [ "$outcome" = "skipped" ]; then
+            echo "status=skipped" >> "$GITHUB_OUTPUT"
+          elif [ "$outcome" != "success" ]; then
+            echo "::warning::Baseline profile generation failed (outcome: $outcome). Skipping."
+            echo "status=error" >> "$GITHUB_OUTPUT"
+          elif [ -n "$(git status --porcelain "$profile_dir" 2>/dev/null)" ]; then
+            echo "status=updated" >> "$GITHUB_OUTPUT"
+          else
+            echo "status=unchanged" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Build PR body
         id: pr_body
@@ -119,6 +158,7 @@ jobs:
           firmware_detail="${{ steps.firmware.outputs.detail }}"
           hardware_status="${{ steps.hardware.outputs.status }}"
           hardware_detail="${{ steps.hardware.outputs.detail }}"
+          baseline_status="${{ steps.baseline.outputs.status }}"
 
           body="This PR includes automated updates from the scheduled workflow:"
           body+=$'\n'
@@ -137,6 +177,15 @@ jobs:
             unchanged) body+=$'\n'"- ✔️ \`device_hardware.json\` checked — no changes detected." ;;
             error)     body+=$'\n'"- ⚠️ \`device_hardware.json\` skipped — ${hardware_detail}." ;;
             *)         body+=$'\n'"- ❓ \`device_hardware.json\` — unknown status." ;;
+          esac
+
+          # Baseline profile (daily / manual only)
+          case "$baseline_status" in
+            updated)   body+=$'\n'"- ✅ \`androidApp\` baseline profile regenerated on an emulator." ;;
+            unchanged) body+=$'\n'"- ✔️ \`androidApp\` baseline profile regenerated — no changes detected." ;;
+            error)     body+=$'\n'"- ⚠️ \`androidApp\` baseline profile generation failed — skipped (see workflow logs)." ;;
+            skipped)   ;; # Not a daily/manual run — omit the line entirely.
+            *)         ;;
           esac
 
           # Crowdin & graphs (always attempted)
@@ -158,7 +207,7 @@ jobs:
         with:
           token: ${{ secrets.CROWDIN_GITHUB_TOKEN }}
           commit-message: |
-            chore: Scheduled updates (Firmware, Hardware, Translations, Graphs)
+            chore: Scheduled updates (Firmware, Hardware, Translations, Graphs, Baseline)
 
             Automated updates for:
             - Firmware releases list
@@ -166,7 +215,8 @@ jobs:
             - Crowdin source string uploads
             - Crowdin translation downloads
             - Module dependency graphs
-          title: 'chore: Scheduled updates (Firmware, Hardware, Translations, Graphs)'
+            - androidApp baseline profile
+          title: 'chore: Scheduled updates (Firmware, Hardware, Translations, Graphs, Baseline)'
           body: ${{ steps.pr_body.outputs.content }}
           branch: 'scheduled-updates'
           base: 'main'
@@ -174,6 +224,7 @@ jobs:
           add-paths: |
             androidApp/src/main/assets/firmware_releases.json
             androidApp/src/main/assets/device_hardware.json
+            androidApp/src/google/generated/baselineProfiles/**
             fastlane/metadata/android/**
             **/strings.xml
             **/README.md
