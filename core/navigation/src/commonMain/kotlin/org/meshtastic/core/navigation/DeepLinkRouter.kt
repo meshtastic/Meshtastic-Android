@@ -132,7 +132,7 @@ object DeepLinkRouter {
         }
     }
 
-    @Suppress("ReturnCount", "MagicNumber")
+    @Suppress("MagicNumber", "ReturnCount")
     private fun routeSettings(segments: List<String>): List<NavKey> {
         var destNum: Int? = null
         var subRouteStr: String? = null
@@ -162,6 +162,20 @@ object DeepLinkRouter {
                 listOf(SettingsRoute.Settings(destNum), SettingsRoute.HelpDocs, SettingsRoute.HelpDocPage(pageId))
             } else {
                 listOf(SettingsRoute.Settings(destNum), SettingsRoute.HelpDocs)
+            }
+        }
+
+        // Handle discovery session deep links: /settings/local-mesh-discovery/session/{sessionId}
+        if (subRouteStr in discoveryAliases && segments.size > 3 && segments[2].lowercase() == "session") {
+            val sessionId = segments[3].toLongOrNull()
+            return if (sessionId != null) {
+                listOf(
+                    SettingsRoute.Settings(destNum),
+                    DiscoveryRoute.DiscoveryGraph,
+                    DiscoveryRoute.DiscoverySummary(sessionId),
+                )
+            } else {
+                listOf(SettingsRoute.Settings(destNum), DiscoveryRoute.DiscoveryGraph)
             }
         }
 
@@ -224,7 +238,12 @@ object DeepLinkRouter {
             "filter-settings" to SettingsRoute.FilterSettings,
             "helpdocs" to SettingsRoute.HelpDocs,
             "help-docs" to SettingsRoute.HelpDocs,
+            "local-mesh-discovery" to DiscoveryRoute.DiscoveryGraph,
+            "localmeshdiscovery" to DiscoveryRoute.DiscoveryGraph,
         )
+
+    /** URL path segments that map to the discovery feature. */
+    private val discoveryAliases = setOf("local-mesh-discovery", "localmeshdiscovery")
 
     private val nodeDetailSubRoutes: Map<String, (Int) -> Route> =
         mapOf(
