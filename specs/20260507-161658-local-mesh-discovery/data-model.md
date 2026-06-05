@@ -1,5 +1,13 @@
 # Data Model — Local Mesh Discovery
 
+> **⚠️ Implementation Note (2026-05-18):** The actual Room entities diverge from this original proposal.
+> The implemented schema is simpler (auto-generated Long PKs, fewer indices, unified DAO) and adds
+> RF health fields (`numPacketsTx`, `numPacketsRx`, `numPacketsRxBad`, `numRxDupe`, `avgChannelUtilization`,
+> `avgAirtimeRate`, `packetSuccessRate`, `packetFailureRate`, `numTxRelay`, `numTxRelayCanceled`,
+> `numOnlineNodes`, `numTotalNodes`, `uptimeSeconds`), `neighborType` on DiscoveredNode, `userLatitude`/
+> `userLongitude` on Session, and per-preset `aiSummary`. See the actual entity files in
+> `core/database/src/commonMain/kotlin/org/meshtastic/core/database/entity/` for the source of truth.
+
 This document defines the Room KMP persistence model for Local Mesh Discovery. The model is intentionally normalized around **session**, **per-preset result**, and **per-node discovery observation** so that history, summary, map, and export views can be rebuilt from persisted state without a live radio connection.
 
 ## Design Goals

@@ -225,6 +225,7 @@ dependencies {
     implementation(projects.feature.map)
     implementation(projects.feature.node)
     implementation(projects.feature.settings)
+    implementation(projects.feature.discovery)
     implementation(projects.feature.docs)
     implementation(projects.feature.firmware)
     implementation(projects.feature.wifiProvision)
