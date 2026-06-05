@@ -1,0 +1,83 @@
+/*
+ * Copyright (c) 2026 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+package org.meshtastic.feature.discovery.ui.component
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.progressBarRangeInfo
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.discovery_dwell_progress
+import org.meshtastic.core.resources.discovery_stat_dwelling_on
+import org.meshtastic.core.resources.discovery_time_remaining
+
+@Suppress("MagicNumber")
+private val CONTENT_PADDING = 8.dp
+private const val SECONDS_PER_MINUTE = 60L
+
+/** Displays dwell progress for a single preset with a countdown timer and linear progress bar. */
+@Composable
+fun DwellProgressIndicator(
+    presetName: String,
+    remainingSeconds: Long,
+    totalSeconds: Long,
+    modifier: Modifier = Modifier,
+) {
+    val progress =
+        if (totalSeconds > 0) {
+            1f - (remainingSeconds.toFloat() / totalSeconds.toFloat())
+        } else {
+            0f
+        }
+    val minutes = remainingSeconds / SECONDS_PER_MINUTE
+    val seconds = remainingSeconds % SECONDS_PER_MINUTE
+    val timeText = "${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}"
+    val progressDescription = stringResource(Res.string.discovery_dwell_progress, presetName, timeText)
+
+    Column(
+        verticalArrangement = Arrangement.spacedBy(CONTENT_PADDING),
+        modifier =
+        modifier.fillMaxWidth().semantics(mergeDescendants = true) {
+            contentDescription = progressDescription
+            progressBarRangeInfo = ProgressBarRangeInfo(progress, 0f..1f)
+        },
+    ) {
+        Text(
+            text = stringResource(Res.string.discovery_stat_dwelling_on, presetName),
+            style = MaterialTheme.typography.titleSmall,
+        )
+        LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth().clearAndSetSemantics {})
+        Text(
+            text = stringResource(Res.string.discovery_time_remaining, timeText),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = CONTENT_PADDING / 2),
+        )
+    }
+}

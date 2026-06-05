@@ -26,6 +26,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.meshtastic.core.navigation.NodesRoute
 import org.meshtastic.feature.connections.navigation.connectionsGraph
+import org.meshtastic.feature.discovery.navigation.discoveryGraph
 import org.meshtastic.feature.firmware.navigation.firmwareGraph
 import org.meshtastic.feature.map.navigation.mapGraph
 import org.meshtastic.feature.messaging.navigation.contactsGraph
@@ -50,6 +51,7 @@ class NavigationAssemblyTest {
                 mapGraph(backStack)
                 channelsGraph(backStack)
                 connectionsGraph(backStack)
+                discoveryGraph(backStack)
                 settingsGraph(backStack)
                 firmwareGraph(backStack)
             }
