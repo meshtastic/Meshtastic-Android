@@ -37,6 +37,14 @@ turbine = "1.2.1"
 # Compose Screenshot Testing
 compose-screenshot = "0.0.1-alpha15"
 
+# Baseline Profiles / Macrobenchmark
+# `benchmark` drives both the androidx.benchmark macro lib AND the androidx.baselineprofile
+# Gradle plugin (same coordinates/version). Kept on the alpha track to stay compatible with
+# AGP 9.x (the stable 1.4.x line predates AGP 9 support).
+benchmark = "1.5.0-alpha06"
+profileinstaller = "1.4.1"
+androidx-uiautomator = "2.3.0"
+
 # Compose Multiplatform
 compose-multiplatform = "1.11.1"
 compose-multiplatform-material3 = "1.11.0-alpha07"
@@ -147,6 +155,11 @@ androidx-room-testing = { module = "androidx.room3:room3-testing", version.ref =
 androidx-sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version = "2.6.2" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version = "2.11.2" }
 androidx-work-testing = { module = "androidx.work:work-testing", version = "2.11.2" }
+
+# Baseline Profiles / Macrobenchmark
+androidx-profileinstaller = { module = "androidx.profileinstaller:profileinstaller", version.ref = "profileinstaller" }
+androidx-benchmark-macro-junit4 = { module = "androidx.benchmark:benchmark-macro-junit4", version.ref = "benchmark" }
+androidx-uiautomator = { module = "androidx.test.uiautomator:uiautomator", version.ref = "androidx-uiautomator" }
 
 # AndroidX Compose (explicit versions — BOM removed; CMP is the sole version authority)
 androidx-compose-runtime-tracing = { module = "androidx.compose.runtime:runtime-tracing", version.ref = "androidx-compose-bom-aligned" }
@@ -303,6 +316,8 @@ meshtastic-protobufs = { module = "org.meshtastic:protobufs", version.ref = "mes
 # Android
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
+android-test = { id = "com.android.test" }
+androidx-baselineprofile = { id = "androidx.baselineprofile", version.ref = "benchmark" }
 compose-screenshot = { id = "com.android.compose.screenshot", version.ref = "compose-screenshot" }
 
 # Jetbrains
