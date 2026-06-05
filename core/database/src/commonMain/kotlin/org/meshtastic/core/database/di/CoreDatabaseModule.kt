@@ -17,10 +17,13 @@
 package org.meshtastic.core.database.di
 
 import org.koin.core.annotation.ComponentScan
+import org.koin.core.annotation.Factory
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.database.DatabaseProvider
 import org.meshtastic.core.database.createDatabaseDataStore
+import org.meshtastic.core.database.dao.DiscoveryDao
 
 @Module
 @ComponentScan("org.meshtastic.core.database")
@@ -28,4 +31,8 @@ class CoreDatabaseModule {
     @Single
     @Named("DatabaseDataStore")
     fun provideDatabaseDataStore() = createDatabaseDataStore("db-manager-prefs")
+
+    @Factory
+    fun provideDiscoveryDao(databaseProvider: DatabaseProvider): DiscoveryDao =
+        databaseProvider.currentDb.value.discoveryDao()
 }
