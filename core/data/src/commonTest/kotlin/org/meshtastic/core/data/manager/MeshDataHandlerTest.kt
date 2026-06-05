@@ -106,6 +106,7 @@ class MeshDataHandlerTest {
                 storeForwardHandler = storeForwardHandler,
                 telemetryHandler = telemetryHandler,
                 adminPacketHandler = adminPacketHandler,
+                collectorRegistry = mock(MockMode.autofill),
                 scope = testScope,
             )
 
