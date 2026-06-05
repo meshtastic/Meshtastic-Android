@@ -17,6 +17,12 @@
 package org.meshtastic.app.di
 
 import org.koin.core.annotation.Module
+import org.koin.core.annotation.Named
+import org.koin.core.annotation.Single
 
 @Module(includes = [FDroidNetworkModule::class, FdroidAiModule::class])
-class FlavorModule
+class FlavorModule {
+    @Single
+    @Named("googleServicesAvailable")
+    fun googleServicesAvailable(): Boolean = false
+}

@@ -28,6 +28,7 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.Reaction
 import org.meshtastic.core.model.util.getShortDateTime
 
@@ -38,7 +39,7 @@ data class PacketEntity(
 ) {
     suspend fun toMessage(getNode: suspend (userId: String?) -> Node) = with(packet) {
         val node = getNode(data.from)
-        val isFromLocal = node.user.id == DataPacket.ID_LOCAL || (myNodeNum != 0 && node.num == myNodeNum)
+        val isFromLocal = node.user.id == NodeAddress.ID_LOCAL || (myNodeNum != 0 && node.num == myNodeNum)
         Message(
             uuid = uuid,
             receivedTime = received_time,
@@ -94,6 +95,7 @@ data class Packet(
     @ColumnInfo(name = "hopsAway", defaultValue = "-1") val hopsAway: Int = -1,
     @ColumnInfo(name = "sfpp_hash") val sfpp_hash: ByteString? = null,
     @ColumnInfo(name = "filtered", defaultValue = "0") val filtered: Boolean = false,
+    @ColumnInfo(name = "message_text", defaultValue = "") val messageText: String = "",
 ) {
     companion object {
         const val RELAY_NODE_SUFFIX_MASK = 0xFF

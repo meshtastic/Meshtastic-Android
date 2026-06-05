@@ -56,6 +56,7 @@ import kotlinx.coroutines.launch
 import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.Reaction
 import org.meshtastic.feature.messaging.component.MessageItem
 import org.meshtastic.feature.messaging.component.MessageStatusDialog
@@ -82,6 +83,7 @@ internal data class MessageListPagedState(
     val filteredCount: Int = 0,
     val showFiltered: Boolean = false,
     val filteringDisabled: Boolean = false,
+    val searchQuery: String = "",
 )
 
 private fun MutableState<Set<Long>>.toggle(uuid: Long) {
@@ -344,7 +346,7 @@ private fun RenderPagedChatMessageRow(
                 message.emojis.any { reaction ->
                     (
                         reaction.user.id == ourNode.user.id ||
-                            reaction.user.id == org.meshtastic.core.model.DataPacket.ID_LOCAL
+                            reaction.user.id == org.meshtastic.core.model.NodeAddress.ID_LOCAL
                         ) && reaction.emoji == emoji
                 }
             if (!hasReacted) {
@@ -367,6 +369,7 @@ private fun RenderPagedChatMessageRow(
         hasSamePrev = hasSamePrev,
         hasSameNext = hasSameNext,
         quickEmojis = quickEmojis,
+        searchQuery = state.searchQuery,
     )
 }
 

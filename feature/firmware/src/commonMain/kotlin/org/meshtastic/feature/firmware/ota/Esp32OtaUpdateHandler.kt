@@ -29,8 +29,8 @@ import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceHardware
-import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.firmware_update_connecting_attempt
@@ -190,14 +190,14 @@ class Esp32OtaUpdateHandler(
         val myInfo = nodeRepository.myNodeInfo.value ?: return
         val myNodeNum = myInfo.myNodeNum
         Logger.i { "ESP32 OTA: Triggering reboot OTA mode $mode with hash" }
-        radioController.requestRebootOta(radioController.getPacketId(), myNodeNum, mode, hash)
+        radioController.requestRebootOta(radioController.generatePacketId(), myNodeNum, mode, hash)
     }
 
     /**
      * Disconnect the mesh service BLE connection to free up the GATT for OTA. Setting device address to "n" (NOP
      * interface) cleanly disconnects without reconnection attempts.
      */
-    private fun disconnectMeshService() {
+    private suspend fun disconnectMeshService() {
         Logger.i { "ESP32 OTA: Disconnecting mesh service for OTA" }
         radioController.setDeviceAddress("n")
     }

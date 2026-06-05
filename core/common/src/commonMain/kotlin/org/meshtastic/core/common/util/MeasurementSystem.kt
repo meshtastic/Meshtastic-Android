@@ -29,6 +29,12 @@ expect fun getSystemMeasurementSystem(): MeasurementSystem
 expect fun currentLocaleCode(): String
 
 /**
+ * Returns the device's current region as a 2-letter ISO 3166-1 alpha-2 country code (e.g. "US", "DE"), or an empty
+ * string when the region is unknown. Used to region-filter marketplace links.
+ */
+expect fun currentRegionCode(): String
+
+/**
  * Returns the device locale as a CMP resource qualifier string. Examples: "pt-rBR", "zh-rCN", "fr" (no region when not
  * specified). Use this to construct locale-qualified file resource paths like "files-$qualifier/docs/...".
  */

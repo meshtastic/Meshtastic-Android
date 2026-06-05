@@ -27,9 +27,8 @@ import org.meshtastic.core.service.worker.ServiceKeepAliveWorker
 
 // / Helper function to start running our service
 fun MeshService.Companion.startService(context: Context) {
-    // Before binding we want to explicitly create - so the service stays alive forever (so it can keep
-    // listening for the bluetooth packets arriving from the radio. And when they arrive forward them
-    // to Signal or whatever.
+    // We explicitly start the service as a foreground service so it stays alive for the duration of the radio
+    // connection — keeping the BLE/TCP/serial link active and forwarding packets to the mesh network.
     Logger.i { "Trying to start service debug=${false}" }
 
     val intent = createIntent(context)

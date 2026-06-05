@@ -8,17 +8,17 @@ The `:core:service` module contains the abstractions and client-side logic for i
 
 ## Key Components
 
-### 1. `ServiceClient`
-The main entry point for other parts of the app (or third-party apps) to bind to and interact with the mesh service via AIDL.
+### 1. `MeshService`
+Android foreground service entry point that hosts the orchestrator lifecycle.
 
 ### 2. `ServiceRepository`
 A high-level repository that wraps the service connection and exposes reactive `Flow`s for connection status and data arrival.
 
 ### 3. `ConnectionState`
-An enum representing the current state of the radio connection (`Connected`, `Disconnected`, `DeviceSleep`, etc.).
+Represents the current state of the radio connection (`Connected`, `Disconnected`, `DeviceSleep`, etc.).
 
-### 4. `ServiceAction`
-Defines Intent actions for starting, stopping, and interacting with the background service.
+### 4. `RadioControllerImpl`
+The in-process `RadioController` composition root (Desktop, iOS, and single-process Android). It assembles four focused sub-controllers — `AdminControllerImpl`, `MessagingControllerImpl`, `NodeControllerImpl`, `QueryControllerImpl` — via Kotlin interface delegation, and owns the cross-cutting concerns (connection state, packet-id, location, device-address switching). Commands are direct suspend calls to `CommandSender`; admin sends are fire-and-forget (the device is the source of truth). Config writes use the `editSettings { }` transaction.
 
 
 ## Dependency Graph
@@ -28,7 +28,6 @@ Defines Intent actions for starting, stopping, and interacting with the backgrou
 graph TB
   :core:service[service]:::kmp-library
   :core:service -.-> :core:testing
-  :core:service --> :core:api
   :core:service --> :core:repository
   :core:service -.-> :core:common
   :core:service -.-> :core:data

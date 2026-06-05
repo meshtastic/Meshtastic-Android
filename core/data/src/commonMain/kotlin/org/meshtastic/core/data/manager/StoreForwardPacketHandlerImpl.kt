@@ -25,12 +25,12 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.util.SfppHasher
 import org.meshtastic.core.repository.HistoryManager
 import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.PacketRepository
-import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.repository.StoreForwardPacketHandler
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
@@ -43,7 +43,6 @@ import kotlin.time.Duration.Companion.milliseconds
 class StoreForwardPacketHandlerImpl(
     private val nodeManager: NodeManager,
     private val packetRepository: Lazy<PacketRepository>,
-    private val serviceBroadcasts: ServiceBroadcasts,
     private val historyManager: HistoryManager,
     private val dataHandler: Lazy<MeshDataHandler>,
     @Named("ServiceScope") private val scope: CoroutineScope,
@@ -105,7 +104,7 @@ class StoreForwardPacketHandlerImpl(
                         encryptedPayload = sfpp.message.toByteArray(),
                         to =
                         if (sfpp.encapsulated_to == 0) {
-                            DataPacket.NODENUM_BROADCAST
+                            NodeAddress.NODENUM_BROADCAST
                         } else {
                             sfpp.encapsulated_to
                         },
@@ -131,7 +130,6 @@ class StoreForwardPacketHandlerImpl(
                 rxTime = sfpp.encapsulated_rxtime.toLong() and 0xFFFFFFFFL,
                 myNodeNum = nodeManager.myNodeNum.value ?: 0,
             )
-            serviceBroadcasts.broadcastMessageStatus(sfpp.encapsulated_id, status)
         }
     }
 
@@ -183,7 +181,7 @@ class StoreForwardPacketHandlerImpl(
 
             s.text != null -> {
                 if (s.rr == StoreAndForward.RequestResponse.ROUTER_TEXT_BROADCAST) {
-                    dataPacket.to = DataPacket.ID_BROADCAST
+                    dataPacket.to = NodeAddress.ID_BROADCAST
                 }
                 val u = dataPacket.copy(bytes = s.text, dataType = PortNum.TEXT_MESSAGE_APP.value)
                 dataHandler.value.rememberDataPacket(u, myNodeNum)

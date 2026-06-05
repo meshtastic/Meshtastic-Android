@@ -17,4 +17,5 @@
   -->
 <resources>
     <string name="app_name">Meshtastic</string>
+    <string name="app_description">Off-grid mesh networking for secure, long-range communications via LoRa radio.</string>
 </resources>

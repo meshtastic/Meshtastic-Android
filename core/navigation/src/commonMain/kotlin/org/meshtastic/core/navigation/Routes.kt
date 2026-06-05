@@ -79,6 +79,8 @@ sealed interface NodeDetailRoute : Route {
 
     @Serializable data class PaxMetrics(val destNum: Int) : NodeDetailRoute
 
+    @Serializable data class AirQualityMetrics(val destNum: Int) : NodeDetailRoute
+
     @Serializable data class NeighborInfoLog(val destNum: Int) : NodeDetailRoute
 }
 
@@ -168,6 +170,10 @@ sealed interface SettingsRoute : Route {
 
     @Serializable data object NodeList : SettingsRoute
 
+    @Serializable data object DeviceLinks : SettingsRoute
+
+    @Serializable data object AppFunctionsSettings : SettingsRoute
+
     // endregion
 
     // region help & documentation routes
@@ -191,4 +197,19 @@ sealed interface WifiProvisionRoute : Route {
     @Serializable data object WifiProvisionGraph : WifiProvisionRoute, Graph
 
     @Serializable data class WifiProvision(val address: String? = null) : WifiProvisionRoute
+}
+
+@Serializable
+sealed interface DiscoveryRoute : Route {
+    @Serializable data object DiscoveryGraph : DiscoveryRoute, Graph
+
+    @Serializable data object DiscoveryScan : DiscoveryRoute
+
+    @Serializable data class DiscoverySummary(val sessionId: Long) : DiscoveryRoute
+
+    @Serializable data object DiscoveryHistory : DiscoveryRoute
+
+    @Serializable data class DiscoveryHistoryDetail(val sessionId: Long) : DiscoveryRoute
+
+    @Serializable data class DiscoveryMap(val sessionId: Long) : DiscoveryRoute
 }

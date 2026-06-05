@@ -46,14 +46,7 @@ import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.domain.usecase.settings.ExportDataUseCase
 import org.meshtastic.core.domain.usecase.settings.IsOtaCapableUseCase
-import org.meshtastic.core.domain.usecase.settings.MeshLocationUseCase
-import org.meshtastic.core.domain.usecase.settings.SetAppIntroCompletedUseCase
-import org.meshtastic.core.domain.usecase.settings.SetDatabaseCacheLimitUseCase
-import org.meshtastic.core.domain.usecase.settings.SetLocaleUseCase
 import org.meshtastic.core.domain.usecase.settings.SetMeshLogSettingsUseCase
-import org.meshtastic.core.domain.usecase.settings.SetNotificationSettingsUseCase
-import org.meshtastic.core.domain.usecase.settings.SetProvideLocationUseCase
-import org.meshtastic.core.domain.usecase.settings.SetThemeUseCase
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.repository.FileService
@@ -110,14 +103,7 @@ class SettingsViewModelTest {
         every { isOtaCapableUseCase() } returns flowOf(true)
 
         val uiPrefs = appPreferences.ui
-        val setThemeUseCase = SetThemeUseCase(uiPrefs)
-        val setLocaleUseCase = SetLocaleUseCase(uiPrefs)
-        val setAppIntroCompletedUseCase = SetAppIntroCompletedUseCase(uiPrefs)
-        val setProvideLocationUseCase = SetProvideLocationUseCase(uiPrefs)
-        val setDatabaseCacheLimitUseCase = SetDatabaseCacheLimitUseCase(databaseManager)
         val setMeshLogSettingsUseCase = SetMeshLogSettingsUseCase(meshLogRepository, appPreferences.meshLog)
-        val setNotificationSettingsUseCase = SetNotificationSettingsUseCase(notificationPrefs)
-        val meshLocationUseCase = MeshLocationUseCase(radioController)
         val exportDataUseCase = ExportDataUseCase(nodeRepository, meshLogRepository)
 
         viewModel =
@@ -130,14 +116,7 @@ class SettingsViewModelTest {
                 databaseManager = databaseManager,
                 meshLogPrefs = appPreferences.meshLog,
                 notificationPrefs = notificationPrefs,
-                setThemeUseCase = setThemeUseCase,
-                setLocaleUseCase = setLocaleUseCase,
-                setAppIntroCompletedUseCase = setAppIntroCompletedUseCase,
-                setProvideLocationUseCase = setProvideLocationUseCase,
-                setDatabaseCacheLimitUseCase = setDatabaseCacheLimitUseCase,
                 setMeshLogSettingsUseCase = setMeshLogSettingsUseCase,
-                setNotificationSettingsUseCase = setNotificationSettingsUseCase,
-                meshLocationUseCase = meshLocationUseCase,
                 exportDataUseCase = exportDataUseCase,
                 isOtaCapableUseCase = isOtaCapableUseCase,
                 fileService = fileService,
@@ -158,15 +137,15 @@ class SettingsViewModelTest {
     @Test
     fun `isConnected flow emits updates using Turbine`() = runTest {
         viewModel.isConnected.test {
-            expectMostRecentItem() shouldBe true // Default in FakeRadioController is Connected (true)
-
-            radioController.setConnectionState(ConnectionState.Disconnected)
-            runCurrent()
-            expectMostRecentItem() shouldBe false
+            expectMostRecentItem() shouldBe false // Default in FakeRadioController is Disconnected
 
             radioController.setConnectionState(ConnectionState.Connected)
             runCurrent()
             expectMostRecentItem() shouldBe true
+
+            radioController.setConnectionState(ConnectionState.Disconnected)
+            runCurrent()
+            expectMostRecentItem() shouldBe false
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -224,7 +203,7 @@ class SettingsViewModelTest {
     }
 
     @Test
-    fun `meshLocationUseCase calls work`() {
+    fun `startProvidingLocation and stopProvidingLocation delegate to RadioController`() {
         viewModel.startProvidingLocation()
         radioController.startProvideLocationCalled shouldBe true
 

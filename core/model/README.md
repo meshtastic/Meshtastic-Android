@@ -4,17 +4,20 @@
 The `:core:model` module is a **Kotlin Multiplatform (KMP)** library containing the domain models and data classes used throughout the application and its API. These models are platform-agnostic and designed to be shared across Android, JVM, and future supported platforms.
 
 ## Multiplatform Support
-Models in this module use the `CommonParcelable` and `CommonParcelize` abstractions from `:core:common`. This allows them to maintain Android `Parcelable` compatibility (via `@Parcelize`) while residing in `commonMain` and remaining accessible to non-Android targets.
+Models are plain `commonMain` Kotlin types — `@Serializable` (kotlinx.serialization) data classes and
+`@JvmInline value class`es — with no Android `Parcelable` dependency, so they are shared verbatim
+across Android, JVM, and iOS.
 
 ## Key Models
 
 - **`DataPacket`**: Represents a mesh packet (text, telemetry, etc.).
-- **`NodeInfo`**: Contains detailed information about a node (position, SNR, battery, etc.).
+- **`Node`**: Contains detailed information about a node (position, SNR, battery, etc.).
+- **`NodeAddress` / `ContactKey`**: Type-safe node addressing (`Broadcast`/`Local`/`ByNum`/`ById`) and contact-key parsing, replacing stringly-typed `"^all"`/`"!hex"` handling.
 - **`DeviceHardware`**: Represents supported Meshtastic hardware devices and their capabilities.
 - **`Channel`**: Represents a mesh channel configuration.
 
 ## Usage
-This module is a core dependency of `core:api` and most feature modules.
+This module is a core dependency of most feature modules.
 
 ```kotlin
 // In commonMain

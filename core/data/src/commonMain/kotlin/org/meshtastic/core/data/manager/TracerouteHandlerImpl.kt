@@ -16,22 +16,16 @@
  */
 package org.meshtastic.core.data.manager
 
-import co.touchlab.kermit.Logger
-import kotlinx.atomicfu.atomic
-import kotlinx.atomicfu.update
-import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
-import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.handledLaunch
-import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.fullRouteDiscovery
 import org.meshtastic.core.model.getTracerouteResponse
 import org.meshtastic.core.model.service.TracerouteResponse
 import org.meshtastic.core.repository.NodeRepository
-import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.ServiceStateWriter
 import org.meshtastic.core.repository.TracerouteHandler
 import org.meshtastic.core.repository.TracerouteSnapshotRepository
 import org.meshtastic.core.resources.Res
@@ -42,17 +36,15 @@ import org.meshtastic.proto.MeshPacket
 
 @Single
 class TracerouteHandlerImpl(
-    private val serviceRepository: ServiceRepository,
+    private val serviceStateWriter: ServiceStateWriter,
     private val tracerouteSnapshotRepository: TracerouteSnapshotRepository,
     private val nodeRepository: NodeRepository,
     @Named("ServiceScope") private val scope: CoroutineScope,
 ) : TracerouteHandler {
 
-    private val startTimes = atomic(persistentMapOf<Int, Long>())
+    private val requestTimer = RequestTimer()
 
-    override fun recordStartTime(requestId: Int) {
-        startTimes.update { it.put(requestId, nowMillis) }
-    }
+    override fun recordStartTime(requestId: Int) = requestTimer.start(requestId)
 
     override fun handleTraceroute(packet: MeshPacket, logUuid: String?, logInsertJob: Job?) {
         // Decode the route discovery once — avoids triple protobuf decode
@@ -85,21 +77,11 @@ class TracerouteHandlerImpl(
                 tracerouteSnapshotRepository.upsertSnapshotPositions(logUuid, requestId, snapshotPositions)
             }
 
-            val start = startTimes.value[requestId]
-            startTimes.update { it.remove(requestId) }
-            val responseText =
-                if (start != null) {
-                    val elapsedMs = nowMillis - start
-                    val seconds = elapsedMs / MILLIS_PER_SECOND
-                    Logger.i { "Traceroute $requestId complete in $seconds s" }
-                    "$full\n\nDuration: ${NumberFormatter.format(seconds, 1)} s"
-                } else {
-                    full
-                }
+            val responseText = requestTimer.appendDuration(requestId, full, "Traceroute")
 
             val destination = forwardRoute.firstOrNull() ?: returnRoute.lastOrNull() ?: 0
 
-            serviceRepository.setTracerouteResponse(
+            serviceStateWriter.setTracerouteResponse(
                 TracerouteResponse(
                     message = responseText,
                     destinationNodeNum = destination,
@@ -110,9 +92,5 @@ class TracerouteHandlerImpl(
                 ),
             )
         }
-    }
-
-    companion object {
-        private const val MILLIS_PER_SECOND = 1000.0
     }
 }

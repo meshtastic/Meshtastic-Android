@@ -23,7 +23,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asFlow
 import org.meshtastic.core.model.ConnectionState
-import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.model.service.TracerouteResponse
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.ClientNotification
@@ -95,12 +94,5 @@ class FakeServiceRepository : ServiceRepository {
 
     override fun clearNeighborInfoResponse() {
         _neighborInfoResponse.value = null
-    }
-
-    private val _serviceAction = MutableSharedFlow<ServiceAction>(replay = 1)
-    override val serviceAction: Flow<ServiceAction> = _serviceAction
-
-    override suspend fun onServiceAction(action: ServiceAction) {
-        _serviceAction.emit(action)
     }
 }

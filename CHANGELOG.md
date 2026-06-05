@@ -9,9 +9,15 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
+* refactor(node): migrate to non-deprecated Vico chart APIs (#5737) by James Rich (@jamesarich) in [`d86c62759`](https://github.com/meshtastic/Meshtastic-Android/commit/d86c627598bfe34e93cb09524334b804020f0b7e)
+
+### Internal (v2.7.14-internal.122)
+Changes since [`v2.7.14-open.23`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14-open.23):
+
 * chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5732) by James Rich (@jamesarich) in [`c25033aee`](https://github.com/meshtastic/Meshtastic-Android/commit/c25033aeee4684da74e0c8f5ba19b3520e7ceac8)
 * chore(deps): update androidx.core:core-ktx to v1.19.0 (#5731) by renovate[bot] (@renovate[bot]) in [`3c2b6a58d`](https://github.com/meshtastic/Meshtastic-Android/commit/3c2b6a58de3758166ee90b4ff0ed280010c07340)
 * chore(deps): update room to v3.0.0-alpha06 (#5730) by renovate[bot] (@renovate[bot]) in [`304a11ca5`](https://github.com/meshtastic/Meshtastic-Android/commit/304a11ca5dd6bcc0a32c1c44f28cbb2028d31397)
+* build: migrate KMP Android DSL from androidLibrary {} to android {} (#5734) by James Rich (@jamesarich) in [`ea872f36d`](https://github.com/meshtastic/Meshtastic-Android/commit/ea872f36d0923a1bf0cea8c4a04855cc1e488293)
 
 ### Open Beta (v2.7.14-open.23)
 Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.13):

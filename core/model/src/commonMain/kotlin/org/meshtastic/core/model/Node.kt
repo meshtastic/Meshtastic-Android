@@ -24,6 +24,7 @@ import org.meshtastic.core.common.util.bearing
 import org.meshtastic.core.common.util.latLongToMeter
 import org.meshtastic.core.model.util.onlineTimeThreshold
 import org.meshtastic.core.model.util.toDistanceString
+import org.meshtastic.proto.AirQualityMetrics
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.DeviceMetrics
@@ -58,6 +59,7 @@ data class Node(
     val isMuted: Boolean = false,
     val environmentMetrics: EnvironmentMetrics = EnvironmentMetrics(),
     val powerMetrics: PowerMetrics = PowerMetrics(),
+    val airQualityMetrics: AirQualityMetrics = AirQualityMetrics(),
     val paxcounter: Paxcount = Paxcount(),
     val publicKey: ByteString? = null,
     val notes: String = "",
@@ -72,15 +74,7 @@ data class Node(
         get() = lastHeard > onlineTimeThreshold()
 
     val colors: Pair<Int, Int>
-        get() { // returns foreground and background @ColorInt for each 'num'
-            val r = (num and 0xFF0000) shr 16
-            val g = (num and 0x00FF00) shr 8
-            val b = num and 0x0000FF
-            val brightness = ((r * 0.299) + (g * 0.587) + (b * 0.114)) / 255
-            val foreground = if (brightness > 0.5) 0xFF000000.toInt() else 0xFFFFFFFF.toInt()
-            val background = (0xFF shl 24) or (r shl 16) or (g shl 8) or b
-            return foreground to background
-        }
+        get() = nodeColorsFromNum(num)
 
     val isUnknownUser
         get() = user.hw_model == HardwareModel.UNSET
@@ -96,6 +90,9 @@ data class Node(
 
     val hasPowerMetrics: Boolean
         get() = powerMetrics != PowerMetrics()
+
+    val hasAirQualityMetrics: Boolean
+        get() = airQualityMetrics != AirQualityMetrics()
 
     val batteryLevel
         get() = deviceMetrics.battery_level
@@ -209,7 +206,7 @@ data class Node(
 
         /** Creates a fallback [Node] when the node is not found in the database. */
         fun createFallback(nodeNum: Int, fallbackNamePrefix: String): Node {
-            val userId = DataPacket.nodeNumToDefaultId(nodeNum)
+            val userId = NodeAddress.numToDefaultId(nodeNum)
             val safeUserId = userId.padStart(DEFAULT_ID_SUFFIX_LENGTH, '0').takeLast(DEFAULT_ID_SUFFIX_LENGTH)
             val longName = "$fallbackNamePrefix $safeUserId"
             val defaultUser =

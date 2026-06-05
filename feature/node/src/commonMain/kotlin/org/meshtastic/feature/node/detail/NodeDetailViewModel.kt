@@ -34,13 +34,12 @@ import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.domain.usecase.session.EnsureRemoteAdminSessionUseCase
 import org.meshtastic.core.domain.usecase.session.EnsureSessionResult
 import org.meshtastic.core.domain.usecase.session.ObserveRemoteAdminSessionStatusUseCase
-import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.SessionStatus
-import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
-import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.QueryController
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.connect_radio_for_remote_admin
@@ -82,7 +81,7 @@ class NodeDetailViewModel(
     private val savedStateHandle: SavedStateHandle,
     private val nodeManagementActions: NodeManagementActions,
     private val nodeRequestActions: NodeRequestActions,
-    private val serviceRepository: ServiceRepository,
+    private val queryController: QueryController,
     private val getNodeDetailsUseCase: GetNodeDetailsUseCase,
     private val ensureRemoteAdminSession: EnsureRemoteAdminSessionUseCase,
     private val observeRemoteAdminSessionStatus: ObserveRemoteAdminSessionStatusUseCase,
@@ -144,39 +143,47 @@ class NodeDetailViewModel(
             is NodeMenuAction.Favorite -> nodeManagementActions.requestFavoriteNode(viewModelScope, action.node)
 
             is NodeMenuAction.RequestUserInfo ->
-                nodeRequestActions.requestUserInfo(viewModelScope, action.node.num, action.node.user.long_name)
+                viewModelScope.launch {
+                    nodeRequestActions.requestUserInfo(action.node.num, action.node.user.long_name)
+                }
 
             is NodeMenuAction.RequestNeighborInfo ->
-                nodeRequestActions.requestNeighborInfo(viewModelScope, action.node.num, action.node.user.long_name)
+                viewModelScope.launch {
+                    nodeRequestActions.requestNeighborInfo(action.node.num, action.node.user.long_name)
+                }
 
             is NodeMenuAction.RequestPosition ->
-                nodeRequestActions.requestPosition(viewModelScope, action.node.num, action.node.user.long_name)
+                viewModelScope.launch {
+                    nodeRequestActions.requestPosition(action.node.num, action.node.user.long_name)
+                }
 
             is NodeMenuAction.RequestTelemetry ->
-                nodeRequestActions.requestTelemetry(
-                    viewModelScope,
-                    action.node.num,
-                    action.node.user.long_name,
-                    action.type,
-                )
+                viewModelScope.launch {
+                    nodeRequestActions.requestTelemetry(action.node.num, action.node.user.long_name, action.type)
+                }
 
             is NodeMenuAction.TraceRoute ->
-                nodeRequestActions.requestTraceroute(viewModelScope, action.node.num, action.node.user.long_name)
+                viewModelScope.launch {
+                    nodeRequestActions.requestTraceroute(action.node.num, action.node.user.long_name)
+                }
 
             else -> {}
         }
     }
 
-    fun onServiceAction(action: ServiceAction) = viewModelScope.launch { serviceRepository.onServiceAction(action) }
+    /**
+     * Re-fetch device metadata (firmware/edition/role) for [destNum]. Refreshes the session passkey as a side effect.
+     */
+    fun refreshMetadata(destNum: Int) = viewModelScope.launch { queryController.refreshMetadata(destNum) }
 
     /**
      * Ensure a remote-admin session passkey is fresh, then request navigation to the remote-admin screen. Surfaces a
      * snackbar with the appropriate guidance on [EnsureSessionResult.Disconnected] or [EnsureSessionResult.Timeout].
      */
     fun openRemoteAdmin(destNum: Int) {
-        if (isEnsuringSession.value) return
+        // Atomic check-and-flip prevents a double-tap from queuing two passkey exchanges + two navigation events.
+        if (!isEnsuringSession.compareAndSet(expect = false, update = true)) return
         viewModelScope.launch {
-            isEnsuringSession.value = true
             try {
                 when (ensureRemoteAdminSession(destNum)) {
                     EnsureSessionResult.AlreadyActive,
@@ -199,19 +206,14 @@ class NodeDetailViewModel(
         }
     }
 
-    /**
-     * Re-fetch device metadata (firmware/edition/role) for [destNum]. Refreshes the session passkey as a side effect.
-     */
-    fun refreshMetadata(destNum: Int) = onServiceAction(ServiceAction.GetDeviceMetadata(destNum))
-
     fun setNodeNotes(nodeNum: Int, notes: String) {
-        nodeManagementActions.setNodeNotes(viewModelScope, nodeNum, notes)
+        viewModelScope.launch { nodeManagementActions.setNodeNotes(nodeNum, notes) }
     }
 
     /** Returns the type-safe navigation route for a direct message to this node. */
     fun getDirectMessageRoute(node: Node, ourNode: Node?): String {
         val hasPKC = ourNode?.hasPKC == true && node.hasPKC
-        val channel = if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else node.channel
+        val channel = if (hasPKC) NodeAddress.PKC_CHANNEL_INDEX else node.channel
         return "${channel}${node.user.id}"
     }
 }

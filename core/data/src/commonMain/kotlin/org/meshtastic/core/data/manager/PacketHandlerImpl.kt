@@ -24,9 +24,7 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.asDeferred
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -43,12 +41,11 @@ import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.RadioNotConnectedException
 import org.meshtastic.core.model.util.toOneLineString
 import org.meshtastic.core.model.util.toPIIString
+import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioInterfaceService
-import org.meshtastic.core.repository.ServiceBroadcasts
-import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.QueueStatus
@@ -61,10 +58,9 @@ import kotlin.uuid.Uuid
 @Single
 class PacketHandlerImpl(
     private val packetRepository: Lazy<PacketRepository>,
-    private val serviceBroadcasts: ServiceBroadcasts,
     private val radioInterfaceService: RadioInterfaceService,
     private val meshLogRepository: Lazy<MeshLogRepository>,
-    private val serviceRepository: ServiceRepository,
+    private val connectionStateProvider: ConnectionStateProvider,
     @Named("ServiceScope") private val scope: CoroutineScope,
 ) : PacketHandler {
 
@@ -77,31 +73,12 @@ class PacketHandlerImpl(
     private val queueMutex = Mutex()
     private val queuedPackets = mutableListOf<MeshPacket>()
 
-    // Unbounded channel preserves FIFO ordering of fire-and-forget sendToRadio(MeshPacket)
-    // calls. The non-suspend entry point does trySend (always succeeds for UNLIMITED) and
-    // a single consumer coroutine enqueues packets under queueMutex in arrival order.
-    private val outboundChannel = Channel<MeshPacket>(Channel.UNLIMITED)
-
     // Set to true by stopPacketQueue() under queueMutex. Checked by startPacketQueueLocked()
     // and the queue processor's finally block to prevent restarting a stopped queue.
     private var queueStopped = false
 
     private val responseMutex = Mutex()
     private val queueResponse = mutableMapOf<Int, CompletableDeferred<Boolean>>()
-
-    init {
-        // Single consumer serializes enqueues from the non-suspend sendToRadio(MeshPacket)
-        // entry point, preserving FIFO across rapid concurrent callers.
-        scope.launch {
-            outboundChannel.consumeAsFlow().collect { packet ->
-                queueMutex.withLock {
-                    queueStopped = false // Allow queue to resume after a disconnect/reconnect cycle.
-                    queuedPackets.add(packet)
-                    startPacketQueueLocked()
-                }
-            }
-        }
-    }
 
     override fun sendToRadio(p: ToRadio) {
         Logger.d { "Sending to radio ${p.toPIIString()}" }
@@ -126,10 +103,18 @@ class PacketHandlerImpl(
         }
     }
 
-    override fun sendToRadio(packet: MeshPacket) {
-        // Non-suspend entry point — order-preserving via unbounded channel drained by
-        // a single consumer coroutine. trySend on UNLIMITED never fails for capacity.
-        outboundChannel.trySend(packet)
+    /**
+     * Enqueue [packet] for transmission. Order is preserved for sequential calls from the same coroutine (mutex
+     * acquisition is uncontested between sequential calls). Transactional sequences that require strict ordering across
+     * multiple calls — e.g. an `editSettings { … }` begin → writes → commit sequence — MUST be issued from a single
+     * coroutine; concurrent senders share FIFO only at the per-call grain.
+     */
+    override suspend fun sendToRadio(packet: MeshPacket) {
+        queueMutex.withLock {
+            queueStopped = false
+            queuedPackets.add(packet)
+            startPacketQueueLocked()
+        }
     }
 
     @Suppress("TooGenericExceptionCaught", "SwallowedException")
@@ -206,7 +191,7 @@ class PacketHandlerImpl(
         queueJob =
             scope.handledLaunch {
                 try {
-                    while (serviceRepository.connectionState.value == ConnectionState.Connected) {
+                    while (connectionStateProvider.connectionState.value == ConnectionState.Connected) {
                         val packet = queueMutex.withLock { queuedPackets.removeFirstOrNull() } ?: break
                         @Suppress("TooGenericExceptionCaught", "SwallowedException")
                         try {
@@ -247,7 +232,6 @@ class PacketHandlerImpl(
             getDataPacketById(packetId)?.let { p ->
                 if (p.status == m) return@handledLaunch
                 packetRepository.value.updateMessageStatus(p, m)
-                serviceBroadcasts.broadcastMessageStatus(packetId, m)
             }
         }
     }
@@ -266,7 +250,7 @@ class PacketHandlerImpl(
         // Reuse a deferred pre-registered by sendToRadioAndAwait, or create a new one.
         val deferred = responseMutex.withLock { queueResponse.getOrPut(packet.id) { CompletableDeferred() } }
         try {
-            if (serviceRepository.connectionState.value != ConnectionState.Connected) {
+            if (connectionStateProvider.connectionState.value != ConnectionState.Connected) {
                 throw RadioNotConnectedException()
             }
             sendToRadio(ToRadio(packet = packet))

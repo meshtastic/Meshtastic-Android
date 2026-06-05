@@ -28,6 +28,7 @@ import kotlinx.coroutines.launch
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.MeshConfigHandler
 import org.meshtastic.core.repository.NodeRepository
@@ -248,12 +249,14 @@ class TAKMeshIntegration(
         try {
             val dataPacket =
                 DataPacket(
-                    to = DataPacket.ID_BROADCAST,
+                    to = NodeAddress.ID_BROADCAST,
                     bytes = wirePayload.toByteString(),
                     dataType = PortNum.ATAK_PLUGIN_V2.value,
                 )
             commandSender.sendData(dataPacket)
             Logger.d { "Sent V2 to mesh: ${cotMessage.type} (${wirePayload.size} bytes)" }
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             // Something other than size — radio not connected, queue full, etc.
             Logger.e(e) {
@@ -291,12 +294,14 @@ class TAKMeshIntegration(
         try {
             val dataPacket =
                 DataPacket(
-                    to = DataPacket.ID_BROADCAST,
+                    to = NodeAddress.ID_BROADCAST,
                     bytes = wirePayload.toByteString(),
                     dataType = PortNum.ATAK_PLUGIN.value,
                 )
             commandSender.sendData(dataPacket)
             Logger.d { "Sent V1 to mesh: ${cotMessage.type} (${wirePayload.size} bytes)" }
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
         } catch (e: Exception) {
             Logger.e(e) {
                 "Failed to send v1 TAKPacket to mesh (${cotMessage.type}, ${wirePayload.size} bytes): ${e.message}"

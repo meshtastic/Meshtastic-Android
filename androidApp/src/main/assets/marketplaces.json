@@ -1,0 +1,126 @@
+{
+  "rokland": {
+    "regions": [
+      "AU",
+      "AT",
+      "BE",
+      "CA",
+      "DK",
+      "EC",
+      "FR",
+      "DE",
+      "IE",
+      "JP",
+      "NL",
+      "NZ",
+      "NO",
+      "PK",
+      "ES",
+      "SE",
+      "CH",
+      "GB",
+      "US"
+    ],
+    "match": "prefix"
+  },
+  "hexaspot": {
+    "regions": [
+      "AT",
+      "BE",
+      "BG",
+      "CY",
+      "CZ",
+      "DE",
+      "DK",
+      "EE",
+      "ES",
+      "FI",
+      "FR",
+      "GR",
+      "HR",
+      "HU",
+      "IE",
+      "IT",
+      "LT",
+      "LU",
+      "LV",
+      "MT",
+      "NL",
+      "NO",
+      "PL",
+      "PT",
+      "RO",
+      "SE",
+      "SI",
+      "SK"
+    ],
+    "match": "prefix"
+  },
+  "aliexpress": {
+    "regions": [],
+    "match": "suffix"
+  },
+  "amazon": {
+    "regions": [
+      "AU",
+      "CA",
+      "FR",
+      "DE",
+      "IE",
+      "JP",
+      "NL",
+      "ES",
+      "SE",
+      "GB",
+      "US"
+    ],
+    "match": "suffix"
+  },
+  "tindie": {
+    "regions": [
+      "US",
+      "CA",
+      "GB",
+      "DE",
+      "FR",
+      "AU",
+      "NL"
+    ],
+    "match": "suffix"
+  },
+  "muzi": {
+    "regions": [
+      "AU",
+      "AT",
+      "BE",
+      "CA",
+      "CZ",
+      "DK",
+      "FI",
+      "FR",
+      "DE",
+      "HK",
+      "IN",
+      "IE",
+      "IL",
+      "IT",
+      "JP",
+      "MY",
+      "NL",
+      "NZ",
+      "NO",
+      "PL",
+      "PT",
+      "SG",
+      "KR",
+      "ES",
+      "SE",
+      "CH",
+      "TW",
+      "AE",
+      "GB",
+      "US"
+    ],
+    "match": "prefix"
+  }
+}

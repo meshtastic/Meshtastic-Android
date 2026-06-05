@@ -25,6 +25,8 @@ import androidx.room3.TypeConverters
 import androidx.room3.migration.AutoMigrationSpec
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.database.dao.DeviceHardwareDao
+import org.meshtastic.core.database.dao.DeviceLinkDao
+import org.meshtastic.core.database.dao.DiscoveryDao
 import org.meshtastic.core.database.dao.FirmwareReleaseDao
 import org.meshtastic.core.database.dao.MeshLogDao
 import org.meshtastic.core.database.dao.NodeInfoDao
@@ -33,12 +35,17 @@ import org.meshtastic.core.database.dao.QuickChatActionDao
 import org.meshtastic.core.database.dao.TracerouteNodePositionDao
 import org.meshtastic.core.database.entity.ContactSettings
 import org.meshtastic.core.database.entity.DeviceHardwareEntity
+import org.meshtastic.core.database.entity.DeviceLinkEntity
+import org.meshtastic.core.database.entity.DiscoveredNodeEntity
+import org.meshtastic.core.database.entity.DiscoveryPresetResultEntity
+import org.meshtastic.core.database.entity.DiscoverySessionEntity
 import org.meshtastic.core.database.entity.FirmwareReleaseEntity
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.database.entity.MetadataEntity
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.database.entity.Packet
+import org.meshtastic.core.database.entity.PacketFts
 import org.meshtastic.core.database.entity.QuickChatAction
 import org.meshtastic.core.database.entity.ReactionEntity
 import org.meshtastic.core.database.entity.TracerouteNodePositionEntity
@@ -49,14 +56,19 @@ import org.meshtastic.core.database.entity.TracerouteNodePositionEntity
         MyNodeEntity::class,
         NodeEntity::class,
         Packet::class,
+        PacketFts::class,
         ContactSettings::class,
         MeshLog::class,
         QuickChatAction::class,
         ReactionEntity::class,
         MetadataEntity::class,
         DeviceHardwareEntity::class,
+        DeviceLinkEntity::class,
         FirmwareReleaseEntity::class,
         TracerouteNodePositionEntity::class,
+        DiscoverySessionEntity::class,
+        DiscoveryPresetResultEntity::class,
+        DiscoveredNodeEntity::class,
     ],
     autoMigrations =
     [
@@ -95,8 +107,12 @@ import org.meshtastic.core.database.entity.TracerouteNodePositionEntity
         AutoMigration(from = 35, to = 36),
         AutoMigration(from = 36, to = 37),
         AutoMigration(from = 37, to = 38),
+        AutoMigration(from = 38, to = 39),
+        AutoMigration(from = 39, to = 40),
+        AutoMigration(from = 40, to = 41),
+        AutoMigration(from = 41, to = 42),
     ],
-    version = 38,
+    version = 42,
     exportSchema = true,
 )
 @androidx.room3.ConstructedBy(MeshtasticDatabaseConstructor::class)
@@ -113,9 +129,13 @@ abstract class MeshtasticDatabase : RoomDatabase() {
 
     abstract fun deviceHardwareDao(): DeviceHardwareDao
 
+    abstract fun deviceLinkDao(): DeviceLinkDao
+
     abstract fun firmwareReleaseDao(): FirmwareReleaseDao
 
     abstract fun tracerouteNodePositionDao(): TracerouteNodePositionDao
+
+    abstract fun discoveryDao(): DiscoveryDao
 
     companion object {
         /** Configures a [RoomDatabase.Builder] with standard settings for this project. */

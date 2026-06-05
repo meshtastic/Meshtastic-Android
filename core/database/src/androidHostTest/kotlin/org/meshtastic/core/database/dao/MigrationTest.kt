@@ -17,6 +17,7 @@
 package org.meshtastic.core.database.dao
 
 import androidx.room3.Room
+import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.flow.first
@@ -32,6 +33,7 @@ import org.meshtastic.core.database.MeshtasticDatabaseConstructor
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.PortNum
 import org.robolectric.annotation.Config
@@ -66,6 +68,7 @@ class MigrationTest {
                 context = context,
                 factory = { MeshtasticDatabaseConstructor.initialize() },
             )
+                .setDriver(BundledSQLiteDriver())
                 .build()
         nodeInfoDao = database.nodeInfoDao().apply { setMyNodeInfo(myNodeInfo) }
         packetDao = database.packetDao()
@@ -166,7 +169,7 @@ class MigrationTest {
                 contact_key = "$channel!broadcast",
                 received_time = nowMillis,
                 read = false,
-                data = DataPacket(to = DataPacket.ID_BROADCAST, channel = channel, text = text),
+                data = DataPacket(to = NodeAddress.ID_BROADCAST, channel = channel, text = text),
             )
         packetDao.insert(packet)
     }

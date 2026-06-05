@@ -26,20 +26,20 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.model.service.ServiceAction
-import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.RadioController
+import kotlin.coroutines.cancellation.CancellationException
 
 /**
  * Handles inline emoji reaction actions from message notifications.
  *
- * Uses [goAsync] to keep the process alive while the coroutine dispatches the reaction through [ServiceRepository],
+ * Uses [goAsync] to keep the process alive while the coroutine dispatches the reaction through [RadioController],
  * matching the pattern used by [ReplyReceiver] and [MarkAsReadReceiver].
  */
 class ReactionReceiver :
     BroadcastReceiver(),
     KoinComponent {
 
-    private val serviceRepository: ServiceRepository by inject()
+    private val radioController: RadioController by inject()
 
     private val dispatchers: CoroutineDispatchers by inject()
 
@@ -56,7 +56,9 @@ class ReactionReceiver :
         val pendingResult = goAsync()
         scope.launch {
             try {
-                serviceRepository.onServiceAction(ServiceAction.Reaction(reaction, replyId, contactKey))
+                radioController.sendReaction(reaction, replyId, contactKey)
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 Logger.e(e) { "Error sending reaction" }
             } finally {
