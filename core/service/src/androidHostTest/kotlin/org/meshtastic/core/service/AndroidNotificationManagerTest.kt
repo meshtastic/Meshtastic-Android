@@ -117,6 +117,62 @@ class AndroidNotificationManagerTest {
         assertDispatchesToChannel(manager, Notification.Category.Service, NotificationChannels.SERVICE)
     }
 
+    @Test
+    fun `dispatch attaches deep-link PendingIntent when deepLinkUri is set`() {
+        registerStubMainActivity()
+        val manager = AndroidNotificationManager(context)
+        val deepLink = "meshtastic://meshtastic/nodes/1234"
+
+        manager.dispatch(
+            Notification(
+                title = "New node",
+                message = "Long Name",
+                category = Notification.Category.NodeEvent,
+                id = 1234,
+                deepLinkUri = deepLink,
+            ),
+        )
+
+        val posted = shadowOf(systemNotificationManager).allNotifications.last()
+        val pendingIntent =
+            requireNotNull(posted.contentIntent) { "Expected contentIntent to be set when deepLinkUri is provided" }
+        val shadowPendingIntent = shadowOf(pendingIntent)
+        val savedIntent = shadowPendingIntent.savedIntent
+        assertEquals(android.content.Intent.ACTION_VIEW, savedIntent.action)
+        assertEquals(deepLink, savedIntent.data?.toString())
+        assertEquals("org.meshtastic.app.MainActivity", savedIntent.component?.className)
+    }
+
+    @Test
+    fun `dispatch leaves contentIntent unset when deepLinkUri is null`() {
+        val manager = AndroidNotificationManager(context)
+
+        manager.dispatch(Notification(title = "Plain", message = "No tap", category = Notification.Category.NodeEvent))
+
+        val posted = shadowOf(systemNotificationManager).allNotifications.last()
+        assertNull(posted.contentIntent)
+    }
+
+    @Test
+    fun `dispatch uses provided notification id as system id`() {
+        val manager = AndroidNotificationManager(context)
+        val explicitId = 4242
+
+        manager.dispatch(
+            Notification(
+                title = "With id",
+                message = "explicit",
+                category = Notification.Category.NodeEvent,
+                id = explicitId,
+            ),
+        )
+
+        // Cancellation by the same id should remove the posted notification.
+        assertEquals(1, shadowOf(systemNotificationManager).allNotifications.size)
+        manager.cancel(explicitId)
+        assertEquals(0, shadowOf(systemNotificationManager).allNotifications.size)
+    }
+
     private fun assertDispatchesToChannel(
         manager: AndroidNotificationManager,
         category: Notification.Category,
@@ -135,6 +191,23 @@ class AndroidNotificationManagerTest {
         systemNotificationManager.createNotificationChannel(
             NotificationChannel(id, id, NotificationManager.IMPORTANCE_DEFAULT),
         )
+    }
+
+    /**
+     * Registers a stub `org.meshtastic.app.MainActivity` with the Robolectric `PackageManager` so that
+     * `TaskStackBuilder.addNextIntentWithParentStack` does not throw `NameNotFoundException` when resolving the
+     * activity that hosts deep-link intents. The real activity lives in `:androidApp`, which is intentionally not on
+     * `:core:service`'s test classpath.
+     */
+    private fun registerStubMainActivity() {
+        val componentName = android.content.ComponentName(context, "org.meshtastic.app.MainActivity")
+        val activityInfo =
+            android.content.pm.ActivityInfo().apply {
+                name = componentName.className
+                packageName = componentName.packageName
+                exported = true
+            }
+        shadowOf(context.packageManager).addOrUpdateActivity(activityInfo)
     }
 
     private fun clearManagedChannels() {

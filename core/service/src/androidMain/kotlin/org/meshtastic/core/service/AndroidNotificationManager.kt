@@ -17,10 +17,14 @@
 package org.meshtastic.core.service
 
 import android.app.NotificationChannel
+import android.app.PendingIntent
+import android.app.TaskStackBuilder
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.content.getSystemService
+import androidx.core.net.toUri
 import org.koin.core.annotation.Single
 import org.meshtastic.core.repository.Notification
 import org.meshtastic.core.repository.NotificationManager
@@ -108,6 +112,7 @@ class AndroidNotificationManager(private val context: Context) : NotificationMan
 
     override fun dispatch(notification: Notification) {
         ensureChannelsInitialized()
+        val id = notification.id ?: notification.hashCode()
         val builder =
             NotificationCompat.Builder(context, notification.category.channelConfig().id)
                 .setContentTitle(notification.title)
@@ -122,8 +127,27 @@ class AndroidNotificationManager(private val context: Context) : NotificationMan
             builder.setPriority(NotificationCompat.PRIORITY_HIGH)
         }
 
-        val id = notification.id ?: notification.hashCode()
+        notification.deepLinkUri?.let { uri -> builder.setContentIntent(createDeepLinkPendingIntent(uri, id)) }
+
         notificationManager.notify(id, builder.build())
+    }
+
+    /**
+     * Builds a [PendingIntent] that launches [MainActivity] with the given deep-link URI as [Intent.ACTION_VIEW], so
+     * the existing deep-link plumbing (`UIViewModel.handleDeepLink` → `DeepLinkRouter` → `MultiBackstack`) can
+     * synthesize the proper backstack and surface the target screen.
+     *
+     * Uses [Class.forName] to avoid pulling the `:androidApp` module into `:core:service` as a Gradle dep.
+     */
+    private fun createDeepLinkPendingIntent(uri: String, requestCode: Int): PendingIntent {
+        val deepLinkIntent =
+            Intent(Intent.ACTION_VIEW, uri.toUri(), context, Class.forName(MAIN_ACTIVITY_CLASS)).apply {
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+            }
+        return TaskStackBuilder.create(context).run {
+            addNextIntentWithParentStack(deepLinkIntent)
+            getPendingIntent(requestCode, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)!!
+        }
     }
 
     override fun cancel(id: Int) {
@@ -132,5 +156,13 @@ class AndroidNotificationManager(private val context: Context) : NotificationMan
 
     override fun cancelAll() {
         notificationManager.cancelAll()
+    }
+
+    private companion object {
+        /**
+         * Fully-qualified name of the host activity that handles `meshtastic://` deep-link intents. Kept as a string to
+         * avoid creating a module dependency from `:core:service` back onto `:androidApp`.
+         */
+        const val MAIN_ACTIVITY_CLASS = "org.meshtastic.app.MainActivity"
     }
 }
