@@ -91,6 +91,20 @@
         "major"
       ],
       "automerge": false
+    },
+    {
+      "description": "Coordinate the Kotlin-compiler-locked toolchain in one human-reviewed PR. Kotlin, KSP, Mokkery, and the Koin compiler plugin are version-locked to the Kotlin compiler and break when bumped out of lockstep (e.g. Mokkery 3.4.0 and kable 0.43.1 both required Kotlin 2.4.0 — PRs #5750/#5740). Supersedes the built-in group:kotlinMonorepo/group:kspMonorepo for these packages so they land together; automerge stays off so compiler bumps always get a human review plus a green CI build. The `[.:]` after kotlin intentionally excludes org.jetbrains.kotlinx (coroutines/serialization runtime), which is not compiler-locked.",
+      "groupName": "kotlin-toolchain",
+      "matchManagers": [
+        "gradle"
+      ],
+      "matchPackageNames": [
+        "/^org\\.jetbrains\\.kotlin[.:]/",
+        "/^com\\.google\\.devtools\\.ksp/",
+        "/^dev\\.mokkery/",
+        "/^io\\.insert-koin\\.compiler\\.plugin/"
+      ],
+      "automerge": false
     }
   ]
 }
