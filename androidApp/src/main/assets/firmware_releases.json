@@ -189,6 +189,18 @@
   },
   "pullRequests": [
     {
+      "id": "10663",
+      "title": "BaseUI: First attempt at Ham Mode implementation",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10663",
+      "zip_url": "s"
+    },
+    {
+      "id": "10658",
+      "title": "Fix BLE advertising management to prevent crashes during reconnections",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10658",
+      "zip_url": "s"
+    },
+    {
       "id": "10656",
       "title": "UDP Unicast for Meshtasticd",
       "page_url": "https://github.com/meshtastic/firmware/pull/10656",
