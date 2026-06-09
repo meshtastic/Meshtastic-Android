@@ -1,14 +1,14 @@
 ---
 title: Verbindungen
-parent: User Guide
+parent: Benutzerhandbuch
 nav_order: 2
-last_updated: 2026-05-20
-description: Connect your phone or desktop to a Meshtastic radio via Bluetooth, USB, or TCP/IP.
+last_updated: 20.05.2026
+description: Verbinden Sie Ihr Telefon oder Ihren Desktop mit einem Meshtastic Funkgerät über Bluetooth, USB oder TCP/IP.
 aliases:
   - bluetooth
   - usb
   - tcp
-  - pairing
+  - Kopplung
 ---
 
 # Verbindungen

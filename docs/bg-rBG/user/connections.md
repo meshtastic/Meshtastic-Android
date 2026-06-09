@@ -17,15 +17,15 @@ Meshtastic поддържа множество транспортни метод
 
 ## Bluetooth (BLE)
 
-Bluetooth Low Energy is the default and most common connection method on Android.
+Bluetooth Low Energy е методът за свързване по подразбиране и най-често срещаният в Android.
 
-### Pairing a Device
+### Сдвояване на устройство
 
-1. Ensure your Meshtastic radio is powered on and in pairing mode.
-2. Open the app and navigate to the **Connect** tab.
-3. Tap **Scan for Devices** — nearby Meshtastic radios will appear.
-4. Select your device from the list.
-5. Accept the Bluetooth pairing prompt if shown.
+1. Уверете се, че вашето радио Meshtastic е включено и е в режим на сдвояване.
+2. Отворете приложението и отидете в раздела **Свързване**.
+3. Натиснете **Сканиране за устройства** — ще се появят близките радиа Meshtastic.
+4. Изберете вашето устройство от списъка.
+5. Приемете подканата за Bluetooth сдвояване, ако се покаже.
 
 ![Device list item](../../assets/screenshots/connections_bluetooth_scan.png)
 
@@ -40,11 +40,11 @@ You can filter devices by transport type using the filter chips at the top:
 | Икона | Състояние          | Описание                       |
 | ----- | ------------------ | ------------------------------ |
 | 🟢    | Свързано           | Установена активна радиовръзка |
-| 🟡    | Свързване          | Handshake in progress          |
+| 🟡    | Свързване          | Ръкостискането е в ход         |
 | 🔴    | Прекъсната връзка  | Няма активна връзка            |
 | ⚪     | Не е конфигурирано | Няма избрано устройство        |
 
-When connecting, a status indicator shows the current connection state:
+При свързване, индикатора за състояние показва текущото състояние на връзката:
 
 ![Connecting status](../../assets/screenshots/connections_connecting.png)
 

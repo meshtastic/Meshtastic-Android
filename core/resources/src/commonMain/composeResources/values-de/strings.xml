@@ -164,6 +164,8 @@
     <string name="chirpy_intro">Hallo! 📡 Ich bin Chirpy, ihr lokaler Meshtastic Assistent! Ich kann Ihnen bei der Einrichtung, Konfiguration, Fehlerbehebung und mit Tipps rund um das Mesh-Netzwerk helfen. Wobei kann ich Ihnen behilflich sein?</string>
     <string name="chirpy_ready">Fragen Sie Chirpy</string>
     <string name="chirpy_search_placeholder">Fragen Sie nach Meshtastic…</string>
+    <string name="chirpy_suggested_pages_help">Hier sind einige Dokumentationsseiten, die Ihnen helfen können:</string>
+    <string name="chirpy_thinking">Chirpy leitet Daten durch das Mesh… 📡</string>
     <string name="choose_contrast">Kontrast</string>
     <string name="choose_theme">Design auswählen</string>
     <!-- CLEAN -->
@@ -351,6 +353,21 @@
     <string name="dns">DNS</string>
     <!-- DOC -->
     <string name="doc_clear_search">Neue Suche</string>
+    <string name="doc_keywords_connections">Bluetooth, USB, TCP, Kopplung, seriell, WLAN</string>
+    <string name="doc_keywords_desktop">Desktop, Linux, macOS, Windows, seriell</string>
+    <string name="doc_keywords_discovery">Erkennung, Topologie, Netzwerk, Scan, Nachbar</string>
+    <string name="doc_keywords_firmware">Firmware, Update, OTA, Flash, Version, Recovery</string>
+    <string name="doc_keywords_map">Karte, Wegpunkt, GPS, Position, Standort, Markierung</string>
+    <string name="doc_keywords_measurement">Formatierer, Metrik, Zahl, Gebietsschema, Temperatur, Umrechnung, API</string>
+    <string name="doc_keywords_messages">Nachricht, Kanal, Verschlüsselung, direkt, Broadcast, Schnellchat</string>
+    <string name="doc_keywords_mqtt">MQTT, Broker, Internet, Bridge, Uplink, Downlink</string>
+    <string name="doc_keywords_node_metrics">Metriken, Telemetrie, Signal, SNR, RSSI, Batterie, Traceroute</string>
+    <string name="doc_keywords_nodes">Knoten, Netz, Liste, Rolle, Status, Favorit, Filter</string>
+    <string name="doc_keywords_onboarding">Einrichtung, Begrüßung, Berechtigungen, erster Start</string>
+    <string name="doc_keywords_settings_module">Modul, seriell, Telemetrie, vorgefertigt, Speichern-und-Weiterleiten, Administration</string>
+    <string name="doc_keywords_settings_radio">Einstellungen, Funk, LoRa, Region, Modem, Gerät, Leistung, Sicherheit</string>
+    <string name="doc_keywords_signal_meter">Signal, RSSI, SNR, Balken, Qualität, LoRa, Rauschen, Messgerät</string>
+    <string name="doc_keywords_tak">tak, atak, Cursor-auf-Ziel, Teambewusstsein</string>
     <string name="doc_keywords_telemetry">Telemetrie,Sensor,Temperatur,Luftfeuchtigkeit,Druck, Energie</string>
     <string name="doc_keywords_translate">Übersetzen,Crowdin,Lokalisierung,Sprache,i18n,Mitmachen</string>
     <string name="doc_keywords_units">Einheiten, Sprache, Metrische, Imperiale, Temperatur, Distanz</string>

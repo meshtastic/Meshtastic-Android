@@ -3,7 +3,7 @@ title: Обнаружение
 parent: Руководство пользователя
 nav_order: 12
 last_updated: 2026-05-13
-description: Explore your mesh network — traceroute paths, neighbor maps, and node discovery tools.
+description: Исследуйте вашу mesh-сеть — трассировка, карты соседей и инструменты обнаружения нод.
 aliases:
   - mesh-discovery
   - local-discovery
@@ -14,34 +14,34 @@ aliases:
 
 # Обнаружение
 
-Discovery tools help you understand **how** your mesh network is connected — which nodes can hear each other, what paths messages take, and where bottlenecks or weak links exist.
+Инструменты обнаружения помогают понять, **как** твоя mesh-сетевая структура соединена — какие ноды могут слышать друг друга, по каким путям проходят сообщения и где существуют узкие места или слабые звенья.
 
-> 💡 **Tip:** You don't need a dedicated "discovery mode" to start exploring your mesh. The tools below are available right now from the node list and node detail screens.
+> 💡 **Совет:** Тебе не нужен специальный "режим обнаружения", чтобы начать изучать свою сеть. Инструменты ниже доступны прямо сейчас на экранах списка нод и деталей ноды.
 
 ---
 
 ## Трассировка маршрута
 
-Traceroute reveals the exact path a message takes from your node to any other node on the mesh. It's the single most useful tool for debugging connectivity problems.
+Трассировка показывает точный путь, который сообщение проходит от твоей ноды до любой другой ноды в сети. Это самый полезный инструмент для отладки проблем с подключением.
 
-### Running a Traceroute
+### Выполнение трассировки
 
-1. Navigate to **Nodes** and tap the node you want to trace.
-2. On the node detail screen, tap **Traceroute**.
-3. The app sends a traceroute request and waits for the response.
-4. Results display each hop in order, with signal quality at every step.
+1. Перейди в **Ноды** и коснись ноды, которую ты хочешь отследить.
+2. На экране деталей ноды нажми **Трассировка**.
+3. Приложение отправляет запрос трассировки и ожидает ответа.
+4. Результаты отображают каждую ноду по порядку с качеством сигнала на каждом этапе.
 
-### Reading the Results
+### Чтение результатов
 
-A traceroute result looks like this:
+Результат трассировки выглядит так:
 
 ```
-You → Node A (SNR: 8.5, RSSI: -95) → Node B (SNR: 5.2, RSSI: -108) → Target
+Ты → Нода A (SNR: 8.5, RSSI: -95) → Нода B (SNR: 5.2, RSSI: -108) → Цель
 ```
 
-Each hop represents a relay node that forwarded the message. The SNR and RSSI values at each hop tell you about the link quality on that specific segment.
+Каждый хоп представляет собой ретранслирующую ноду, которая переслала сообщение. Значения SNR и RSSI на каждой ноде говорят о качестве соединения на этом конкретном участке.
 
-| What to look for                                                           | What it means                                                               |
+| На что обращать внимание                                                   | Что это значит                                                              |
 | -------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
 | All hops show Good SNR (> 5 dB)                         | Healthy path — messages flow reliably                                       |
 | One hop shows Bad SNR (< 0 dB) | Weak link — this relay segment is fragile                                   |
