@@ -70,6 +70,7 @@ import org.meshtastic.core.ui.viewmodel.ConnectionStatus
 import org.meshtastic.core.ui.viewmodel.ConnectionsViewModel
 import org.meshtastic.feature.connections.MOCK_DEVICE_PREFIX
 import org.meshtastic.feature.connections.NO_DEVICE_SELECTED
+import org.meshtastic.feature.connections.REPLAY_DEVICE_PREFIX
 import org.meshtastic.feature.connections.ScannerViewModel
 import org.meshtastic.feature.connections.TCP_DEVICE_PREFIX
 import org.meshtastic.feature.connections.model.DeviceListEntry
@@ -251,7 +252,8 @@ fun ConnectionsScreen(
                         if (
                             uiState == ConnectionUiState.CONNECTED_WITH_NODE &&
                             regionUnset &&
-                            selectedDevice != MOCK_DEVICE_PREFIX
+                            selectedDevice != MOCK_DEVICE_PREFIX &&
+                            selectedDevice != REPLAY_DEVICE_PREFIX
                         ) {
                             Spacer(modifier = Modifier.height(8.dp))
                             Card(modifier = Modifier.fillMaxWidth()) {

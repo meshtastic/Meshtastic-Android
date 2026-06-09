@@ -303,6 +303,7 @@ delete_selection
 delivery_confirmed
 delivery_confirmed_reboot_warning
 demo_mode
+demo_mode_replay
 desc_node_filter_clear
 description
 desktop_notification_title

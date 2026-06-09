@@ -19,6 +19,7 @@ package org.meshtastic.core.network.radio
 import android.content.Context
 import android.hardware.usb.UsbManager
 import android.provider.Settings
+import co.touchlab.kermit.Logger
 import org.koin.core.annotation.Single
 import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleScanner
@@ -60,6 +61,7 @@ class AndroidRadioTransportFactory(
         return when (interfaceId) {
             InterfaceId.MOCK,
             InterfaceId.NOP,
+            InterfaceId.REPLAY,
             InterfaceId.TCP,
             -> true
 
@@ -79,6 +81,8 @@ class AndroidRadioTransportFactory(
 
         return when (interfaceId) {
             InterfaceId.MOCK -> MockRadioTransport(callback = service, scope = service.serviceScope, address = rest)
+
+            InterfaceId.REPLAY -> createReplayTransport(service, rest)
 
             InterfaceId.TCP ->
                 TcpRadioTransport(
@@ -102,5 +106,34 @@ class AndroidRadioTransportFactory(
 
             InterfaceId.BLUETOOTH -> error("BLE addresses should be handled by BaseRadioTransportFactory")
         }
+    }
+
+    /**
+     * Replay selection ("r"). Replays the bundled burningmesh capture asset on-device via [ReplayRadioTransport] —
+     * realistic ~200-node traffic for perf / benchmark / populated-UI work. The asset only ships in debug (and
+     * benchmark) builds; when it is absent we fall back to the lightweight synthetic [MockRadioTransport] so selecting
+     * the entry still yields a working virtual device.
+     */
+    private fun createReplayTransport(service: RadioInterfaceService, rest: String): RadioTransport {
+        val replayFrames =
+            runCatching { context.assets.open(REPLAY_ASSET_NAME).use { it.readBytes() } }
+                .getOrNull()
+                ?.takeIf { it.isNotEmpty() }
+        return if (replayFrames != null) {
+            Logger.i { "Replay device → replaying $REPLAY_ASSET_NAME (${replayFrames.size} bytes)" }
+            ReplayRadioTransport(
+                callback = service,
+                scope = service.serviceScope,
+                address = rest,
+                frames = replayFrames,
+            )
+        } else {
+            Logger.w { "Replay device selected but $REPLAY_ASSET_NAME asset is missing — falling back to mock" }
+            MockRadioTransport(callback = service, scope = service.serviceScope, address = rest)
+        }
+    }
+
+    private companion object {
+        const val REPLAY_ASSET_NAME = "burningmesh.fromradio"
     }
 }
