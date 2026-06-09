@@ -256,7 +256,11 @@ class MQTTRepositoryImplTest {
             subscriptions.map { it.topicFilter },
         )
         assertTrue(subscriptions.all { it.maxQos == QoS.AT_LEAST_ONCE && it.noLocal })
-        assertEquals("MeshtasticAndroidMqttProxy-!12345678", harness.setups.single().ownerId)
+        assertTrue(
+            harness.setups.single().ownerId.startsWith("MeshtasticAndroidMqttProxy-!12345678-"),
+            "ownerId should be the node-scoped prefix plus a unique per-connection suffix, " +
+                "was: ${harness.setups.single().ownerId}",
+        )
         assertEquals(MqttLogLevel.DEBUG, harness.setups.single().logLevel)
 
         collector.cancelAndJoin()
