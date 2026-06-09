@@ -19,6 +19,15 @@
     <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">Viesti käyttäjältä %1$s: %2$s</string>
+    <string name="a11y_node_battery">akku %1$d%%</string>
+    <string name="a11y_node_distance_away">%1$s pois</string>
+    <string name="a11y_node_favorite">suosikki</string>
+    <string name="a11y_node_hops_away">%1$d hypyn päässä</string>
+    <string name="a11y_node_last_heard">viimeksi kuultu %1$s</string>
+    <string name="a11y_node_offline">offline-tilassa</string>
+    <string name="a11y_node_online">online-tilassa</string>
+    <string name="a11y_node_role">rooli %1$s</string>
+    <string name="a11y_node_signal">signaali %1$s</string>
     <string name="accept">Hyväksy</string>
     <string name="acknowledgements">Kiitokset</string>
     <!-- ACTION -->
@@ -141,6 +150,22 @@
     <string name="channels">Kanavat</string>
     <!-- CHIRPY -->
     <string name="chirpy">Chirpy</string>
+    <string name="chirpy_assistant_title">Chirpy Apulainen</string>
+    <string name="chirpy_checking">Tarkistetaan Chirpyn saatavuutta…</string>
+    <string name="chirpy_downloading">Chirpy lataa…</string>
+    <string name="chirpy_downloading_progress">Ladataan Chirpy mallia: %1$d%%</string>
+    <string name="chirpy_downloading_subtitle">Tämä tapahtuu vain kerran. Chirpy on valmis pian!</string>
+    <string name="chirpy_error_busy">Kanava on tällä hetkellä erittäin ruuhkainen. 📶 Odotetaan vapaata lähetysvuoroa ja yritetään uudelleen.</string>
+    <string name="chirpy_error_model_unavailable">Akkua ladataan tai laiteohjelmistoa päivitetään parhaillaan! 🔋 Odota hetki, niin saan synkronoinnin ja käynnistyksen valmiiksi.</string>
+    <string name="chirpy_error_token_budget_exceeded">Viesti on liian pitkä lähetettäväksi! 📱 Lyhennä viestiä hieman ja yritä uudelleen.</string>
+    <string name="chirpy_error_unknown">Hups! Signaalissa on häiriöitä tai paketteja katoaa matkalla. 📡 Yritetään lähettää pyyntö uudelleen ja katsotaan, meneekö se tällä kertaa läpi.</string>
+    <string name="chirpy_error_unsupported_flavor">Toimin tässä sovellusversiossa hieman rajoitetuilla tehoilla! 🔌 Kokeile versiota, jossa on täysi AI Core -integraatio käytössä.</string>
+    <string name="chirpy_error_unsupported_platform">Voi ei! Antennini ei näytä saavan yhteyttä tällä alustalla. 📡 Tarkista, että laitteistosi on yhteensopiva.</string>
+    <string name="chirpy_intro">Terve! 📡 Olen Chirpy, Meshtastic-laitteesi oma avustaja! Autan käyttöönotossa, asetuksissa, ongelmatilanteiden ratkaisemisessa ja mesh-verkkoihin liittyvissä vinkeissä. Miten voin auttaa?</string>
+    <string name="chirpy_ready">Kysy Crirpyltä</string>
+    <string name="chirpy_search_placeholder">Kysy Meshtasticista…</string>
+    <string name="chirpy_suggested_pages_help">Tässä on muutamia dokumentaatiosivuja, joista voi olla apua:</string>
+    <string name="chirpy_thinking">Chirpy reitittää viestiä mesh-verkon kautta… 📡</string>
     <string name="choose_contrast">Kontrastin taso</string>
     <string name="choose_theme">Valitse teema</string>
     <!-- CLEAN -->
@@ -328,10 +353,27 @@
     <string name="dns">DNS</string>
     <!-- DOC -->
     <string name="doc_clear_search">Tyhjennä haku</string>
+    <string name="doc_search_placeholder">Hae documentaatiosta…</string>
+    <string name="doc_section_developer">Kehittäjän opas</string>
+    <string name="doc_section_user">Käyttöopas</string>
     <string name="doc_title_connections">Yhteydet</string>
+    <string name="doc_title_desktop">Työpöytäsovellus</string>
     <string name="doc_title_discovery">Haku</string>
+    <string name="doc_title_firmware">Laiteohjelmiston päivitykset</string>
+    <string name="doc_title_map">Kartta &amp; reittipisteet</string>
+    <string name="doc_title_measurement">Mittayksikkö &amp; muotoilu</string>
+    <string name="doc_title_messages">Viestit &amp; kanavat</string>
     <string name="doc_title_mqtt">MQTT</string>
+    <string name="doc_title_node_metrics">Radion mittaustiedot</string>
     <string name="doc_title_nodes">Laitteet</string>
+    <string name="doc_title_onboarding">Aloittaminen</string>
+    <string name="doc_title_settings_module">Asetukset — moduulit &amp; ylläpito</string>
+    <string name="doc_title_settings_radio">Asetukset — radio &amp; käyttäjä</string>
+    <string name="doc_title_signal_meter">Signaalimittari</string>
+    <string name="doc_title_tak">TAK-integraatio</string>
+    <string name="doc_title_telemetry">Telemetria &amp; anturit</string>
+    <string name="doc_title_translate">Käännä sovellus</string>
+    <string name="doc_title_units">Yksiköt &amp; paikallisasetukset</string>
     <string name="done">Valmis</string>
     <string name="dont_show_again_for_device">Älä näytä enää tälle laitteelle</string>
     <string name="double_tap_as_button_press">Kaksoisnapautus painikkeena</string>
@@ -511,6 +553,7 @@
     <string name="hardware_model">Laitteen malli</string>
     <string name="heading">Suunta</string>
     <string name="heartbeat">Valvontasignaali</string>
+    <string name="help_and_documentation">Ohje &amp; documentaatio</string>
     <string name="hide_layer">Piilota taso</string>
     <string name="hide_password">Piilota salasana</string>
     <string name="history_return_max">Historian maksimimäärä</string>
@@ -789,9 +832,31 @@
     <string name="node_filter_title">Suodata otsikon mukaan</string>
     <string name="node_id">Laiteen ID</string>
     <string name="node_layout_channel">Kanava</string>
+    <string name="node_layout_compact">Tiivis</string>
+    <string name="node_layout_compact_fields_header">Tiiviit kentät</string>
+    <string name="node_layout_complete">Valmis</string>
+    <string name="node_layout_complete_description">Täydellinen-näkymä näyttää kaikki saatavilla olevat tiedot. Kentät, joista ei ole tietoja saatavilla, piilotetaan automaattisesti.</string>
+    <string name="node_layout_device_role">Laite &amp; rooli</string>
+    <string name="node_layout_distance_and_bearing">Etäisyys ja suuntima</string>
+    <string name="node_layout_help_signal_bad">Signaalin laatu on heikko. SNR-arvo on yli −18 dB ja RSSI-arvo yli −125 dBm.</string>
+    <string name="node_layout_help_signal_fair">Signaali on kohtalainen. SNR-arvo on yli −12 dB ja RSSI-arvo yli −120 dBm.</string>
+    <string name="node_layout_help_signal_good">Signaalin laatu on hyvä. SNR-arvo on yli −7 dB ja RSSI-arvo yli −115 dBm.</string>
+    <string name="node_layout_help_signal_indicator">Yhdistää SNR- ja RSSI-arvot signaalin laatuluokitukseksi, joka näytetään värillisenä kuvakkeena ja kuvauksena. Näytetään vain täydellinen-näkymässä. 📶</string>
+    <string name="node_layout_help_signal_none">Käyttökelpoista signaalia ei havaittu. Signaali alittaa kaikki laatukriteerit.</string>
     <string name="node_layout_hops_away">Hyppyjä</string>
+    <string name="node_layout_last_heard_time">Viimeksi kuultu</string>
     <string name="node_layout_log_icons">Ympäristöarvot</string>
+    <string name="node_layout_no_preview_available">Esikatseltavia radioita ei ole saatavilla.</string>
     <string name="node_layout_power">Virta</string>
+    <string name="node_layout_preview">Esikatselu</string>
+    <string name="node_layout_relative_last_heard">Kulunut aika viimeisestä yhteydestä</string>
+    <string name="node_layout_section_title">Radion asettelu</string>
+    <string name="node_layout_signal_direct_only">Signaali (vain suorat yhteydet)</string>
+    <string name="node_layout_signal_quality_indicator">Signaalin laadun ilmaisin</string>
+    <string name="node_list_click_label">Avaa radion tiedot</string>
+    <string name="node_list_help_node_details">Radion tiedot</string>
+    <string name="node_list_help_title">Radiolistan ohje</string>
+    <string name="node_list_long_click_label">Radion asetukset</string>
     <string name="node_number">Laitteen numero</string>
     <string name="node_sort_alpha">A-Ö</string>
     <string name="node_sort_button">Lajitteluvaihtoehdot</string>
@@ -1263,6 +1328,7 @@
     <string name="tx_power_dbm">Lähetysteho</string>
     <string name="type">Kirjoita</string>
     <string name="type_a_message">Kirjoita viesti</string>
+    <string name="udp_enabled">UDP-lähetys</string>
     <!-- UNKNOWN -->
     <string name="unknown">Tuntematon</string>
     <string name="unknown_age">Tuntematon ikä</string>

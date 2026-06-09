@@ -21,6 +21,7 @@
     <string name="a11y_message_from">Съобщение от %1$s: %2$s</string>
     <string name="a11y_node_battery">батерия %1$d%%</string>
     <string name="a11y_node_favorite">любим</string>
+    <string name="a11y_node_last_heard">последно чут %1$s</string>
     <string name="a11y_node_offline">офлайн</string>
     <string name="a11y_node_online">онлайн</string>
     <string name="a11y_node_role">роля %1$s</string>
@@ -449,6 +450,7 @@
     <string name="green">Зелен</string>
     <string name="hardware">Хардуер</string>
     <string name="hardware_model">Модел на хардуера</string>
+    <string name="help_and_documentation">Помощ &amp; Документация</string>
     <string name="hide_layer">Скриване на слоя</string>
     <string name="hide_password">Скриване на паролата</string>
     <string name="hop_limit">Брой отскоци</string>
@@ -664,7 +666,15 @@
     <string name="node_filter_title">Филтриране по</string>
     <string name="node_id">ID на възела</string>
     <string name="node_layout_channel">Канал</string>
+    <string name="node_layout_compact">Компактен</string>
+    <string name="node_layout_compact_fields_header">Компактни полета</string>
+    <string name="node_layout_complete">Пълен</string>
     <string name="node_layout_device_role">Устройство &amp; Роля</string>
+    <string name="node_layout_help_signal_bad">Сигналът е слаб. SNR е над −18 dB и RSSI е над −125 dBm.</string>
+    <string name="node_layout_help_signal_fair">Сигналът е умерен. SNR е над −12 dB и RSSI е над −120 dBm.</string>
+    <string name="node_layout_help_signal_good">Сигналът е силен. SNR е над −7 dB и RSSI е над −115 dBm.</string>
+    <string name="node_layout_help_signal_indicator">Комбинира SNR и RSSI в ниво на качество, показано като цветна икона с описание. Показва се само в пълния дизайн.</string>
+    <string name="node_layout_help_signal_none">Не е открит използваем сигнал. Под всички прагове за качество.</string>
     <string name="node_layout_hops_away">Брой отскоци</string>
     <string name="node_layout_log_icons">Показатели на околната среда</string>
     <string name="node_layout_no_preview_available">Няма налични възли за преглед.</string>
@@ -672,6 +682,8 @@
     <string name="node_layout_preview">Преглед</string>
     <string name="node_layout_signal_direct_only">Сигнал (Само директен)</string>
     <string name="node_layout_signal_quality_indicator">Индикатор за качество на сигнала</string>
+    <string name="node_list_click_label">Отваряне на детайли за възела</string>
+    <string name="node_list_help_node_details">Детайли за възела</string>
     <string name="node_number">Номер на възела</string>
     <string name="node_sort_alpha">А-Я</string>
     <string name="node_sort_button">Опции за сортиране на възлите</string>
@@ -994,6 +1006,7 @@
     <string name="tak_team_yellow">Жълт</string>
     <string name="telemetry">Телеметрия</string>
     <string name="telemetry_config">Конфигуриране на телеметрията</string>
+    <string name="temperature">Темп</string>
     <string name="theme">Тема</string>
     <string name="theme_dark">Тъмна</string>
     <string name="theme_light">Светла</string>

@@ -3,7 +3,7 @@ title: Настройки — Модули и администрирование
 parent: Руководство пользователя
 nav_order: 8
 last_updated: 2026-05-20
-description: Configure optional feature modules (MQTT, telemetry, canned messages, TAK, and more) and perform device administration.
+description: Настрой дополнительные функциональные модули (MQTT, телеметрия, готовые сообщения, TAK и другие) и выполняй администрирование устройств.
 aliases:
   - modules
   - module-config
@@ -12,11 +12,11 @@ aliases:
 
 # Настройки — Модули и администрирование
 
-Configure optional feature modules and perform device administration. Modules extend Meshtastic with specialized capabilities — each can be independently enabled or disabled.
+Настрой дополнительные функциональные модули и выполняй управление устройством. Модули расширяют Meshtastic с помощью специализированных возможностей — каждый из них можно включать или отключать отдельно.
 
-> 💡 **Tip:** You only need to enable the modules you actually use. Disabling unused modules reduces airtime, saves battery, and simplifies your configuration.
+> 💡 **Совет:** Тебе нужно включать только те модули, которые действительно используешь. Отключение неиспользуемых модулей снижает время передачи, экономит батарею и упрощает конфигурацию.
 
-Module settings use a card-based layout with toggle switches, dropdowns, text fields, and sliders:
+Настройки модулей используют макет на основе карточек с переключателями, выпадающими списками, текстовыми полями и ползунками:
 
 ![Toggle switch](../../assets/screenshots/settings_switch.png)
 
@@ -30,14 +30,14 @@ Module settings use a card-based layout with toggle switches, dropdowns, text fi
 
 ### Модуль MQTT
 
-Bridges mesh messages to and from an MQTT broker for internet connectivity. This is how you extend your mesh beyond radio range or integrate with home automation systems.
+Мосты передают сообщения туда и обратно от брокера MQTT для подключения к интернету. Ты так расширишь сеть за пределы радиуса действия или интегрируешь её с системами домашней автоматизации.
 
 | Настройка        | Описание                                                                 |
 | ---------------- | ------------------------------------------------------------------------ |
 | Включено         | Toggle MQTT bridge                                                       |
 | Сервер           | MQTT broker address                                                      |
-| Имя пользователя | Authentication username                                                  |
-| Пароль           | Authentication password                                                  |
+| Имя пользователя | Имя пользователя для аутентификации                                      |
+| Пароль           | Пароль аутентификации                                                    |
 | Шифрование       | Encrypt MQTT payloads                                                    |
 | ~~JSON Output~~  | ⚠️ **Deprecated** — JSON support removed from firmware; field is ignored |
 | TLS              | Use secure connection                                                    |

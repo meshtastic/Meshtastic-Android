@@ -27,11 +27,11 @@ The map displays:
 
 Node markers on the map indicate:
 
-| Color | Meaning                                        |
+| Цвят  | Значение                                       |
 | ----- | ---------------------------------------------- |
 | Зелен | Online (heard recently)     |
 | Жълт  | Away (heard within 2 hours) |
-| Gray  | Offline (stale position)    |
+| Сив   | Offline (stale position)    |
 | Син   | Your own node                                  |
 
 ### Map Controls
@@ -62,7 +62,7 @@ Waypoints are shared geographic points of interest that all mesh members can see
 | ---------- | ------------------------------------------------------- |
 | Име        | Short identifier (max 30 characters) |
 | Описание   | Optional longer description                             |
-| Icon       | Visual marker emoji on the map                          |
+| Икона      | Visual marker emoji on the map                          |
 | Заключен   | If locked, only the creator can edit or delete          |
 | Expiration | Optional auto-remove time                               |
 
