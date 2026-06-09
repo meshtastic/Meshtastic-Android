@@ -45,6 +45,7 @@ import org.meshtastic.mqtt.ProbeResult
 import org.meshtastic.mqtt.probe
 import org.meshtastic.proto.MqttClientProxyMessage
 import org.meshtastic.proto.ToRadio
+import kotlin.uuid.Uuid
 
 @Single
 class MqttManagerImpl(
@@ -132,8 +133,10 @@ class MqttManagerImpl(
         val endpoint = resolveEndpoint(address, tlsEnabled)
         val result =
             MqttClient.probe(endpoint = endpoint) {
-                // Use node ID for consistent client identification across platforms
-                clientId = "MeshtasticAndroidMqttProbe-${nodeRepository.myId.value ?: "unknown"}"
+                // Per-connection random suffix: myId identifies the node (and is null →
+                // "unknown" before the node record loads), so two probes can collide on one
+                // client-id and evict each other (SESSION_TAKEN_OVER). See MQTTRepositoryImpl.
+                clientId = "MeshtasticAndroidMqttProbe-${nodeRepository.myId.value ?: "unknown"}-${Uuid.random()}"
                 val user = username?.takeUnless { it.isEmpty() }
                 val pass = password?.takeUnless { it.isEmpty() }
                 if (user != null) this.username = user
