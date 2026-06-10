@@ -21,23 +21,22 @@ import org.meshtastic.core.common.util.currentRegionCode
 import org.meshtastic.core.model.DeviceLink
 
 /**
- * Provides msh.to device links imported from the bundled `urls.json`. Mirrors the Meshtastic-Apple device-links
- * feature: vendor, product-variant, and region-filtered marketplace links shown on the device hardware detail view,
- * plus a full directory.
+ * Provides msh.to device links resolved by the Meshtastic API (`/resource/deviceLinks`) and cached locally. Vendor and
+ * region-filtered marketplace links are shown on the device hardware detail view, plus a full directory.
  */
 interface DeviceLinkRepository {
-    /** Seeds the link table from the bundled JSON if it is empty (covers fresh install, data clear, radio switch). */
+    /** Seeds the link table from the bundled snapshot if it is empty (fresh install, data clear, radio switch). */
     suspend fun ensureImported()
 
-    /** Re-imports the bundled JSON: upserts all links, recomputes `isVendor`, and prunes orphaned short codes. */
+    /** Refreshes links from the API: upserts the resolved catalog and prunes short codes that no longer exist. */
     suspend fun reconcile()
 
     /**
-     * Links for a device's [platformioTarget], region-filtered and sorted with vendor/variant links first. Returns an
+     * Links attached to a device's [platformioTarget], region-filtered and sorted with vendor links first. Returns an
      * empty list when no links match.
      */
     suspend fun getLinksForTarget(platformioTarget: String, regionCode: String = currentRegionCode()): List<DeviceLink>
 
-    /** All imported links, sorted by short code — backs the Settings "Device Links" directory. */
+    /** All cached links, sorted by short code — backs the Settings "Device Links" directory. */
     fun observeAllLinks(): Flow<List<DeviceLink>>
 }

@@ -19,23 +19,23 @@ package org.meshtastic.core.model
 import kotlinx.serialization.Serializable
 
 /**
- * A msh.to short-link associated with a piece of hardware. Imported from the bundled `urls.json` (sourced from the
- * meshtastic/msh.to repo). Every link resolves through the msh.to redirect service.
+ * A msh.to device link resolved by the Meshtastic API (`/resource/deviceLinks`) and cached locally. Every link routes
+ * through the msh.to redirect service.
  *
  * @param shortCode the msh.to short code, e.g. `rak_wismeshtag`, `rokland-heltec-v3`.
- * @param originalUrl the destination URL recorded in `urls.json` (informational; the app links to msh.to).
  * @param description human-readable label shown to the user.
- * @param isVendor true when [shortCode] is itself a known device `platformioTarget` (the primary vendor link).
- * @param regions marketplace shipping regions (ISO 3166-1 alpha-2). `null` = vendor/variant (not region-filtered);
- *   empty = worldwide marketplace; non-empty = limited to the listed countries.
+ * @param isVendor true for a first-party vendor link (shown more prominently than region-filtered marketplace links).
+ * @param regions marketplace shipping regions (ISO 3166-1 alpha-2). `null` = not region-filtered (vendor/worldwide);
+ *   non-empty = limited to the listed countries.
+ * @param targets device `platformioTarget`s this link is attached to; used to match a link to the device on screen.
  */
 @Serializable
 data class DeviceLink(
     val shortCode: String,
-    val originalUrl: String,
     val description: String? = null,
     val isVendor: Boolean = false,
     val regions: List<String>? = null,
+    val targets: List<String>? = null,
 ) {
     /** The user-facing link, routed through the msh.to redirect service. */
     val url: String

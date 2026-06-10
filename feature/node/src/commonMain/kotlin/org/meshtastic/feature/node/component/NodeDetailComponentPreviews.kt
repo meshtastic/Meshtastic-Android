@@ -191,21 +191,21 @@ private fun DeviceLinksSectionPreview() {
         listOf(
             org.meshtastic.core.model.DeviceLink(
                 shortCode = "heltec-v3",
-                originalUrl = "https://heltec.org",
                 description = "Heltec V3",
                 isVendor = true,
+                targets = listOf("heltec-v3"),
             ),
             org.meshtastic.core.model.DeviceLink(
                 shortCode = "rokland-heltec-v3",
-                originalUrl = "https://rokland.com",
                 description = "Rokland",
                 regions = listOf("US"),
+                targets = listOf("heltec-v3"),
             ),
             org.meshtastic.core.model.DeviceLink(
                 shortCode = "heltec-v3_aliexpress",
-                originalUrl = "https://aliexpress.com",
                 description = "AliExpress",
                 regions = emptyList(),
+                targets = listOf("heltec-v3"),
             ),
         )
     AppTheme { Surface { DeviceLinksSection(links = links) } }

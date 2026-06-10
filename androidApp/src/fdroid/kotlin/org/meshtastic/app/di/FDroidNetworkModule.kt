@@ -19,6 +19,7 @@ package org.meshtastic.app.di
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
 import org.meshtastic.core.model.NetworkDeviceHardware
+import org.meshtastic.core.model.NetworkDeviceLinksResponse
 import org.meshtastic.core.model.NetworkFirmwareReleases
 import org.meshtastic.core.network.service.ApiService
 
@@ -35,6 +36,9 @@ class FDroidNetworkModule {
     fun provideApiService(): ApiService = object : ApiService {
         override suspend fun getDeviceHardware(): List<NetworkDeviceHardware> =
             throw UnsupportedOperationException("getDeviceHardware is not supported on F-Droid builds.")
+
+        override suspend fun getDeviceLinks(): NetworkDeviceLinksResponse =
+            throw UnsupportedOperationException("getDeviceLinks is not supported on F-Droid builds.")
 
         override suspend fun getFirmwareReleases(): NetworkFirmwareReleases =
             throw UnsupportedOperationException("getFirmwareReleases is not supported on F-Droid builds.")
