@@ -7,7 +7,25 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 <!-- UNRELEASED_START -->
 ## [Unreleased]
 
-*No changes yet.*
+### Unreleased (not yet in any build)
+
+* docs: release CHANGELOG.md for v2.7.14 (#5739) by github-actions[bot] (@github-actions[bot]) in [`0c7bda6f0`](https://github.com/meshtastic/Meshtastic-Android/commit/0c7bda6f07c8543fb124388d576dc9e8992b305c)
+* chore(deps): update vico to v3.2.2 (#5746) by renovate[bot] (@renovate[bot]) in [`21b6540e0`](https://github.com/meshtastic/Meshtastic-Android/commit/21b6540e0e060bd14b12cde269d4e509d245b492)
+* fix(mqtt): make the MQTT client-id unique per connection (#5755) by James Rich (@jamesarich) in [`65e937427`](https://github.com/meshtastic/Meshtastic-Android/commit/65e937427f30972788026b33aecf831a881f0046)
+* chore(deps): update fastlane to v2.236.0 (#5754) by renovate[bot] (@renovate[bot]) in [`d38ddc88b`](https://github.com/meshtastic/Meshtastic-Android/commit/d38ddc88b6543573f066a66ef87db862729d976f)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5742) by James Rich (@jamesarich) in [`bc046a66a`](https://github.com/meshtastic/Meshtastic-Android/commit/bc046a66a72cea0066c84e4344e45dae297df81f)
+* chore(deps): update com.google.firebase:firebase-bom to v34.14.1 (#5753) by renovate[bot] (@renovate[bot]) in [`5c4b5c240`](https://github.com/meshtastic/Meshtastic-Android/commit/5c4b5c24057e87ef9c93290ca9673cfd198ae8ff)
+* chore(deps): update io.nlopez.compose.rules:detekt to v0.6.0 (#5751) by renovate[bot] (@renovate[bot]) in [`476789d15`](https://github.com/meshtastic/Meshtastic-Android/commit/476789d1547c480dc06744ae73a5ddc0987c2e08)
+* chore(deps): update codecov/codecov-action action to v7 (#5749) by renovate[bot] (@renovate[bot]) in [`0d9d086b2`](https://github.com/meshtastic/Meshtastic-Android/commit/0d9d086b222b7ef590231ffe02c69f7cecb6a57c)
+* chore(deps): update org.jetbrains.kotlinx:kotlinx-collections-immutable to v0.5.0 (#5756) by renovate[bot] (@renovate[bot]) in [`9945499ba`](https://github.com/meshtastic/Meshtastic-Android/commit/9945499bad6e8c32110ec92b72a93027eb207a5b)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5757) by James Rich (@jamesarich) in [`d31800038`](https://github.com/meshtastic/Meshtastic-Android/commit/d318000383a911adfb8a1d2728cfd13c2a3f8a79)
+* ci: group Kotlin-compiler-locked tooling in one Renovate PR (#5758) by James Rich (@jamesarich) in [`58cbd1d55`](https://github.com/meshtastic/Meshtastic-Android/commit/58cbd1d55109f63547b2a27bdc9326015263a186)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5761) by James Rich (@jamesarich) in [`f77998d06`](https://github.com/meshtastic/Meshtastic-Android/commit/f77998d063c14601ab27496cefb6cdfa33f08e15)
+* Replace :core:proto with org.meshtastic:protobufs:2.7.25 (#5675) by James Rich (@jamesarich) in [`8daafe6f7`](https://github.com/meshtastic/Meshtastic-Android/commit/8daafe6f704a0e81165f5de28ffa5e3889e63dbd)
+* chore(deps): update mqttastic to v0.3.8 (#5763) by renovate[bot] (@renovate[bot]) in [`fd3dc0cc7`](https://github.com/meshtastic/Meshtastic-Android/commit/fd3dc0cc73a3ef31cd4901c03e79b36219f64817)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5767) by James Rich (@jamesarich) in [`dd462971e`](https://github.com/meshtastic/Meshtastic-Android/commit/dd462971e895636dcfb6641a0357abc867c845ce)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5768) by James Rich (@jamesarich) in [`595fb0035`](https://github.com/meshtastic/Meshtastic-Android/commit/595fb003525dc01f891b8bd505d6f00e914fee53)
+* ci: fix update-changelog crash when no channel tags exist (#5769) by James Rich (@jamesarich) in [`936be3998`](https://github.com/meshtastic/Meshtastic-Android/commit/936be3998f0fe49f58b8a0f9ff2c01e3cbd85609)
 <!-- UNRELEASED_END -->
 
 <!-- RELEASED_START -->
