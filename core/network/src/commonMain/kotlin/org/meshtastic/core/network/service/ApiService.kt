@@ -21,12 +21,16 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import org.koin.core.annotation.Single
 import org.meshtastic.core.model.NetworkDeviceHardware
+import org.meshtastic.core.model.NetworkDeviceLinksResponse
 import org.meshtastic.core.model.NetworkFirmwareReleases
 
 /** Client for the Meshtastic public API (device hardware catalog and firmware releases). */
 interface ApiService {
     /** Fetches the device hardware catalog from the Meshtastic API. */
     suspend fun getDeviceHardware(): List<NetworkDeviceHardware>
+
+    /** Fetches the resolved device-links catalog (msh.to purchase links) from the Meshtastic API. */
+    suspend fun getDeviceLinks(): NetworkDeviceLinksResponse
 
     /** Fetches the list of available firmware releases from the Meshtastic API. */
     suspend fun getFirmwareReleases(): NetworkFirmwareReleases
@@ -43,6 +47,8 @@ interface ApiService {
 @Single(binds = [])
 class ApiServiceImpl(private val client: HttpClient) : ApiService {
     override suspend fun getDeviceHardware(): List<NetworkDeviceHardware> = client.get("resource/deviceHardware").body()
+
+    override suspend fun getDeviceLinks(): NetworkDeviceLinksResponse = client.get("resource/deviceLinks").body()
 
     override suspend fun getFirmwareReleases(): NetworkFirmwareReleases = client.get("github/firmware/list").body()
 }

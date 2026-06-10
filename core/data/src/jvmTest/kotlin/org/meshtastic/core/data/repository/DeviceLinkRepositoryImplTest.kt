@@ -18,145 +18,168 @@ package org.meshtastic.core.data.repository
 
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.meshtastic.core.data.datasource.DeviceHardwareLocalDataSource
 import org.meshtastic.core.data.datasource.DeviceLinkLocalDataSource
-import org.meshtastic.core.data.datasource.MshToLinksJsonDataSource
+import org.meshtastic.core.data.datasource.DeviceLinksJsonDataSource
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.model.MshToMarketplace
-import org.meshtastic.core.model.MshToRoute
 import org.meshtastic.core.model.NetworkDeviceHardware
+import org.meshtastic.core.model.NetworkDeviceLink
+import org.meshtastic.core.model.NetworkDeviceLinksResponse
+import org.meshtastic.core.model.NetworkFirmwareReleases
+import org.meshtastic.core.network.DeviceLinksRemoteDataSource
+import org.meshtastic.core.network.service.ApiService
 import org.meshtastic.core.testing.FakeDatabaseProvider
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class DeviceLinkRepositoryImplTest {
 
-    private class FakeMshToLinksJsonDataSource(
-        var routes: List<MshToRoute>,
-        var marketplaces: Map<String, MshToMarketplace>,
-    ) : MshToLinksJsonDataSource {
-        override fun loadRoutes(): List<MshToRoute> = routes
+    /** Only [getDeviceLinks] is exercised; the other endpoints are never called by the link repository. */
+    private class FakeApiService(var response: NetworkDeviceLinksResponse) : ApiService {
+        override suspend fun getDeviceHardware(): List<NetworkDeviceHardware> = error("unused")
 
-        override fun loadMarketplaces(): Map<String, MshToMarketplace> = marketplaces
+        override suspend fun getDeviceLinks(): NetworkDeviceLinksResponse = response
+
+        override suspend fun getFirmwareReleases(): NetworkFirmwareReleases = error("unused")
+    }
+
+    private class FakeDeviceLinksJsonDataSource(var links: List<NetworkDeviceLink>) : DeviceLinksJsonDataSource {
+        override fun loadDeviceLinksFromJsonAsset(): List<NetworkDeviceLink> = links
     }
 
     private val dispatcher = UnconfinedTestDispatcher()
     private val dispatchers = CoroutineDispatchers(main = dispatcher, io = dispatcher, default = dispatcher)
 
     private lateinit var dbProvider: FakeDatabaseProvider
-    private lateinit var linkLocal: DeviceLinkLocalDataSource
-    private lateinit var hardwareLocal: DeviceHardwareLocalDataSource
-    private lateinit var json: FakeMshToLinksJsonDataSource
+    private lateinit var local: DeviceLinkLocalDataSource
+    private lateinit var api: FakeApiService
+    private lateinit var seed: FakeDeviceLinksJsonDataSource
     private lateinit var repository: DeviceLinkRepositoryImpl
 
-    private val marketplaces =
-        mapOf(
-            "rokland" to MshToMarketplace(regions = listOf("US"), match = "prefix"),
-            "aliexpress" to MshToMarketplace(regions = emptyList(), match = "suffix"),
-        )
-
-    private fun route(shortCode: String) =
-        MshToRoute(shortCode = shortCode, originalUrl = "https://example.com/$shortCode", description = shortCode)
+    private fun link(
+        shortCode: String,
+        type: String = NetworkDeviceLink.TYPE_VENDOR,
+        targets: List<String>? = null,
+        regions: List<String>? = null,
+    ) = NetworkDeviceLink(
+        shortCode = shortCode,
+        url = "https://msh.to/$shortCode",
+        description = shortCode,
+        type = type,
+        targets = targets,
+        regions = regions,
+    )
 
     @BeforeTest
     fun setup() {
         dbProvider = FakeDatabaseProvider()
-        linkLocal = DeviceLinkLocalDataSource(dbProvider, dispatchers)
-        hardwareLocal = DeviceHardwareLocalDataSource(dbProvider, dispatchers)
-        json =
-            FakeMshToLinksJsonDataSource(
-                routes =
-                listOf(route("rak4631"), route("rokland-rak4631"), route("rak4631_aliexpress"), route("github")),
-                marketplaces = marketplaces,
+        local = DeviceLinkLocalDataSource(dbProvider, dispatchers)
+        api = FakeApiService(NetworkDeviceLinksResponse())
+        seed = FakeDeviceLinksJsonDataSource(emptyList())
+        repository =
+            DeviceLinkRepositoryImpl(
+                remoteDataSource = DeviceLinksRemoteDataSource(api, dispatchers),
+                jsonDataSource = seed,
+                localDataSource = local,
+                dispatchers = dispatchers,
             )
-        repository = DeviceLinkRepositoryImpl(json, linkLocal, hardwareLocal)
     }
 
     @AfterTest fun tearDown() = dbProvider.close()
 
-    private suspend fun seedDeviceTargets(vararg targets: String) {
-        hardwareLocal.insertAllDeviceHardware(
-            targets.mapIndexed { i, t -> NetworkDeviceHardware(hwModel = i + 1, platformioTarget = t) },
-        )
-    }
-
     @Test
-    fun importClassifiesVendorAndMarketplaceLinks() = runTest(dispatcher) {
-        seedDeviceTargets("rak4631", "heltec-v3")
-        repository.reconcile()
-
-        val byCode = linkLocal.getAll().associateBy { it.shortCode }
-        assertEquals(4, byCode.size)
-
-        // rak4631 is a known device target → vendor, no regions.
-        assertTrue(byCode.getValue("rak4631").isVendor)
-        assertNull(byCode.getValue("rak4631").regions)
-
-        // rokland-rak4631 → prefix marketplace, region-tagged.
-        assertTrue(!byCode.getValue("rokland-rak4631").isVendor)
-        assertEquals(listOf("US"), byCode.getValue("rokland-rak4631").regions)
-
-        // rak4631_aliexpress → suffix marketplace, worldwide (empty regions).
-        assertEquals(emptyList(), byCode.getValue("rak4631_aliexpress").regions)
-
-        // github → neither vendor nor marketplace, null regions.
-        assertTrue(!byCode.getValue("github").isVendor)
-        assertNull(byCode.getValue("github").regions)
-    }
-
-    @Test
-    fun reconcilePrunesOrphanedShortCodes() = runTest(dispatcher) {
-        seedDeviceTargets("rak4631")
-        repository.reconcile()
-        assertEquals(4, linkLocal.count())
-
-        // Drop "github" from the bundled file and reconcile again.
-        json.routes = json.routes.filterNot { it.shortCode == "github" }
-        repository.reconcile()
-
-        val codes = linkLocal.getAll().map { it.shortCode }.toSet()
-        assertEquals(setOf("rak4631", "rokland-rak4631", "rak4631_aliexpress"), codes)
-    }
-
-    @Test
-    fun aliexpressPrefixFormIsClassifiedAsWorldwideMarketplace() = runTest(dispatcher) {
-        // AliExpress is declared match="suffix" yet most bundled codes use the `aliexpress-<target>` prefix form;
-        // import must still classify it as a (worldwide) marketplace link, not a null-region variant.
-        json.routes = listOf(route("rak4631"), route("aliexpress-rak4631"))
-        seedDeviceTargets("rak4631")
-        repository.reconcile()
-
-        assertEquals(emptyList(), linkLocal.getAll().single { it.shortCode == "aliexpress-rak4631" }.regions)
-    }
-
-    @Test
-    fun bareMarketplaceNamePrefixIsNotMistagged() = runTest(dispatcher) {
-        // "muziworks" merely begins with "muzi" — delimiter bounds must keep it from inheriting muzi's regions.
-        json =
-            FakeMshToLinksJsonDataSource(
-                routes = listOf(route("muziworks")),
-                marketplaces = mapOf("muzi" to MshToMarketplace(regions = listOf("US"), match = "prefix")),
+    fun seedsFromBundledJsonWhenEmptyAndDropsInternalLinks() = runTest(dispatcher) {
+        seed.links =
+            listOf(
+                link("rak4631", targets = listOf("rak4631")),
+                link("github", type = NetworkDeviceLink.TYPE_INTERNAL),
             )
-        repository = DeviceLinkRepositoryImpl(json, linkLocal, hardwareLocal)
-        seedDeviceTargets("rak4631")
-        repository.reconcile()
+        repository.ensureImported()
 
-        assertNull(linkLocal.getAll().single().regions)
+        assertEquals(setOf("rak4631"), local.getAll().map { it.shortCode }.toSet())
     }
 
     @Test
     fun ensureImportedSeedsOnlyWhenEmpty() = runTest(dispatcher) {
-        seedDeviceTargets("rak4631")
+        seed.links = listOf(link("rak4631", targets = listOf("rak4631")))
         repository.ensureImported()
-        assertEquals(4, linkLocal.count())
+        assertEquals(1, local.count())
 
-        // A second ensureImported with a larger bundled file must NOT re-import (table already populated).
-        json.routes = json.routes + route("new-code")
+        // A larger snapshot must NOT re-seed once the table is populated.
+        seed.links = seed.links + link("heltec-v3", targets = listOf("heltec-v3"))
         repository.ensureImported()
-        assertEquals(4, linkLocal.count())
+        assertEquals(1, local.count())
+    }
+
+    @Test
+    fun getLinksForTargetFiltersByTargetAndRegionVendorFirst() = runTest(dispatcher) {
+        api.response =
+            NetworkDeviceLinksResponse(
+                links =
+                listOf(
+                    link(
+                        "rokland-rak4631",
+                        type = NetworkDeviceLink.TYPE_MARKETPLACE,
+                        targets = listOf("rak4631"),
+                        regions = listOf("US"),
+                    ),
+                    link("rak4631", targets = listOf("rak4631")),
+                    link("heltec-v3", targets = listOf("heltec-v3")),
+                    link(
+                        "de-only",
+                        type = NetworkDeviceLink.TYPE_MARKETPLACE,
+                        targets = listOf("rak4631"),
+                        regions = listOf("DE"),
+                    ),
+                ),
+            )
+        repository.reconcile()
+
+        val links = repository.getLinksForTarget("rak4631", regionCode = "US")
+
+        // de-only filtered by region; heltec-v3 filtered by target; vendor sorted ahead of marketplace.
+        assertEquals(listOf("rak4631", "rokland-rak4631"), links.map { it.shortCode })
+        assertTrue(links.first().isVendor)
+    }
+
+    @Test
+    fun worldwideLinksShowRegardlessOfRegion() = runTest(dispatcher) {
+        api.response =
+            NetworkDeviceLinksResponse(
+                links =
+                listOf(
+                    link("ww", type = NetworkDeviceLink.TYPE_MARKETPLACE, targets = listOf("t"), regions = null),
+                ),
+            )
+        repository.reconcile()
+
+        assertEquals(listOf("ww"), repository.getLinksForTarget("t", regionCode = "ZZ").map { it.shortCode })
+    }
+
+    @Test
+    fun reconcilePrunesShortCodesNoLongerInCatalog() = runTest(dispatcher) {
+        api.response =
+            NetworkDeviceLinksResponse(
+                links = listOf(link("a", targets = listOf("t")), link("b", targets = listOf("t"))),
+            )
+        repository.reconcile()
+        assertEquals(2, local.count())
+
+        api.response = NetworkDeviceLinksResponse(links = listOf(link("a", targets = listOf("t"))))
+        repository.reconcile()
+        assertEquals(setOf("a"), local.getAll().map { it.shortCode }.toSet())
+    }
+
+    @Test
+    fun emptyResponseLeavesCacheUntouched() = runTest(dispatcher) {
+        api.response = NetworkDeviceLinksResponse(links = listOf(link("a", targets = listOf("t"))))
+        repository.reconcile()
+        assertEquals(1, local.count())
+
+        api.response = NetworkDeviceLinksResponse(links = emptyList())
+        repository.reconcile()
+        assertEquals(1, local.count())
     }
 }
