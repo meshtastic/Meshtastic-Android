@@ -111,7 +111,6 @@ include(
     ":core:network",
     ":core:nfc",
     ":core:prefs",
-    ":core:proto",
     ":core:repository",
     ":core:service",
     ":core:resources",

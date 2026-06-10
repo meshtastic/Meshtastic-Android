@@ -35,7 +35,7 @@ kotlin {
             implementation(projects.core.model)
             implementation(projects.core.network)
             implementation(projects.core.prefs)
-            implementation(projects.core.proto)
+            implementation(libs.meshtastic.protobufs)
             implementation(projects.core.takserver)
 
             implementation(libs.jetbrains.lifecycle.runtime)

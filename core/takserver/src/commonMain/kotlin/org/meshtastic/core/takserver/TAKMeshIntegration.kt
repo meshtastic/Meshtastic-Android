@@ -39,7 +39,6 @@ import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.TAKPacket
 import org.meshtastic.proto.Team
-import org.meshtastic.tak.CotMeshSanitizer
 import kotlin.concurrent.Volatile
 import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
@@ -339,7 +338,7 @@ class TAKMeshIntegration(
             // Normalize for the TAK TCP stream — drop the <?xml ...?> prologue
             // and collapse inter-tag whitespace so ATAK's streaming parser sees
             // bare <event>...</event> on a single line. Centralized in the SDK.
-            val xml = CotMeshSanitizer.normalizeCotXml(rawXml)
+            val xml = CotSanitizer.normalizeCotXml(rawXml)
             // Drop exact duplicates the mesh delivered more than once (multi-path relay or
             // retransmit) so ATAK doesn't surface doubled chat / TAK-Talk messages. Genuine
             // updates (new PLI position, moved marker, …) differ in content and pass through.
@@ -490,12 +489,12 @@ class TAKMeshIntegration(
         }
 
         /**
-         * Strip non-essential CoT detail before mesh compression to save wire bytes. Delegates to the SDK's
-         * [CotMeshSanitizer] so the strip rules live in ONE golden-tested place shared by every consumer (Android,
-         * Apple, …) and can't drift between sides. Drift here once silently stripped TAK-Talk `<voice>` / `<marti>` and
-         * broke the feature end-to-end — guarded by the strip-preservation test in TAKMeshIntegrationTest and by
-         * CotMeshSanitizerTest in the SDK.
+         * Strip non-essential CoT detail before mesh compression to save wire bytes. Delegates (via the [CotSanitizer]
+         * expect/actual seam) to the SDK's CotMeshSanitizer so the strip rules live in ONE golden-tested place shared
+         * by every consumer (Android, Apple, …) and can't drift between sides. Drift here once silently stripped
+         * TAK-Talk `<voice>` / `<marti>` and broke the feature end-to-end — guarded by the strip-preservation test in
+         * TAKMeshIntegrationTest and by CotMeshSanitizerTest in the SDK.
          */
-        fun stripNonEssentialElements(xml: String): String = CotMeshSanitizer.stripNonEssentialForMesh(xml)
+        fun stripNonEssentialElements(xml: String): String = CotSanitizer.stripNonEssentialForMesh(xml)
     }
 }
