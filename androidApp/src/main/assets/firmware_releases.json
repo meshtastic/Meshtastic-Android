@@ -14,16 +14,16 @@
         "page_url": "https://github.com/meshtastic/firmware/releases/tag/v2.6.11.60ec05e",
         "zip_url": "https://github.com/meshtastic/firmware/releases/download/v2.6.11.60ec05e/firmware-esp32-2.6.11.60ec05e.zip",
         "release_notes": "> [!CAUTION]  \r\n> In older firmware, generated public/private keys may have insufficient entropy, resulting in the possibility of key reuse across devices. This release delays key generation until the user sets a LoRa region, and also mixes in additional sources of randomness. Additionally, if one of the known key collisions are detected, the user is notified, and should regenerate keys as soon as possible.\r\n\r\n## 🚀 Enhancements\r\n* Add --1200bps-reset param to device-install/update scripts by @ThatKalle in https://github.com/meshtastic/firmware/pull/6752\r\n* Generate keys when Lora Region is set by @jp-bennett in https://github.com/meshtastic/firmware/pull/6951\r\n* Seeed_xiao_nrf52840_kit improvements by @ndoo in https://github.com/meshtastic/firmware/pull/6930\r\n* Add InkHUD driver for WeAct Studio 2.9\" display module by @todd-herbert in https://github.com/meshtastic/firmware/pull/6963\r\n* [Variant] nomadstar meteor pro by @CypressXt in https://github.com/meshtastic/firmware/pull/6742\r\n\r\n## 🐛 Bug fixes and maintenance\r\n* fix: Respect LED_STATE_ON for power and user LED by @ndoo in https://github.com/meshtastic/firmware/pull/6976\r\n* Chore(deps): update platformio/espressif32 to v6.11.0 by @renovate in https://github.com/meshtastic/firmware/pull/6900\r\n* Update Alpine to 3.22 by @vidplace7 in https://github.com/meshtastic/firmware/pull/6927\r\n* Clean up install & update shell scripts by @roens in https://github.com/meshtastic/firmware/pull/6839\r\n* Addition of Device Role inside of userPrefs.jsonc by @Crank-Git in https://github.com/meshtastic/firmware/pull/6972\r\n* Chore(deps): update platformio/ststm32 to v19.2.0 by @renovate in https://github.com/meshtastic/firmware/pull/6901\r\n* Chore(deps): update meshtastic/device-ui digest to 2fd19f8 by @renovate in https://github.com/meshtastic/firmware/pull/6982\r\n* Add note to hydra to note that the button pin has no pull-up by @NomDeTom in https://github.com/meshtastic/firmware/pull/6979\r\n* Chore(deps): update meshtastic/device-ui digest to 1b520fc by @renovate in https://github.com/meshtastic/firmware/pull/6991\r\n* Update heltec t114 URL by @dieseltravis in https://github.com/meshtastic/firmware/pull/7004\r\n* Update URL for ThinkNode M1 by @dieseltravis in https://github.com/meshtastic/firmware/pull/7005\r\n* Improve support for Heltec Wireless Bridge by @berlincount in https://github.com/meshtastic/firmware/pull/6647\r\n* Warn users about low entropy keys by @jp-bennett in https://github.com/meshtastic/firmware/pull/7003\r\n* T-watch screen misalignment fix by @HarukiToreda in https://github.com/meshtastic/firmware/pull/6996\r\n* Fix for T-Deck Plus: disable touch IRQ / enable custom touch driver by @mverch67 in https://github.com/meshtastic/firmware/pull/6988\r\n* Create lora-piggystick-lr1121.yaml by @markbirss in https://github.com/meshtastic/firmware/pull/7010\r\n\r\n## New Contributors\r\n* @roens made their first contribution in https://github.com/meshtastic/firmware/pull/6839\r\n* @Crank-Git made their first contribution in https://github.com/meshtastic/firmware/pull/6972\r\n* @dieseltravis made their first contribution in https://github.com/meshtastic/firmware/pull/7004\r\n* @berlincount made their first contribution in https://github.com/meshtastic/firmware/pull/6647\r\n\r\n**Full Changelog**: https://github.com/meshtastic/firmware/compare/v2.6.10.9ce4455...v2.6.11.60ec05e"
-      },
-      {
-        "id": "v2.6.10.9ce4455",
-        "title": "Meshtastic Firmware 2.6.10.9ce4455 Beta",
-        "page_url": "https://github.com/meshtastic/firmware/releases/tag/v2.6.10.9ce4455",
-        "zip_url": "https://github.com/meshtastic/firmware/releases/download/v2.6.10.9ce4455/firmware-esp32-2.6.10.9ce4455.zip",
-        "release_notes": "## 🚀  Enhancements\r\n* Don't cancel sending ReTx for relayer if we're ROUTER(_LATE)/REPEATER by @GUVWAF in https://github.com/meshtastic/firmware/pull/6904\r\n* Add LINK32 (Lilygo) Board with Light+Environment sensors by @caveman99 in https://github.com/meshtastic/firmware/pull/6899\r\n* Add support for seeed wio tracker L1 by @Dylanliacc in https://github.com/meshtastic/firmware/pull/6907\r\n* Added full support for LTR390UV readings of UV and Lux by @dmarman in https://github.com/meshtastic/firmware/pull/6872\r\n\r\n## 🐛 Bug fixes and maintenance\r\n* Linux: Adjust udev rules for gpio by @vidplace7 in https://github.com/meshtastic/firmware/pull/6891\r\n* Coerce user.id to always be derive from the nodenum by @thebentern in https://github.com/meshtastic/firmware/pull/6906\r\n* Parse own short name on InkHUD shutdown screen by @todd-herbert in https://github.com/meshtastic/firmware/pull/6913\r\n* Don't cancel sending ReTx for relayer if we're ROUTER(_LATE)/REPEATER by @GUVWAF in https://github.com/meshtastic/firmware/pull/6904\r\n* Fix renovate for Adafruit PCT2075 by @vidplace7 in https://github.com/meshtastic/firmware/pull/6919\r\n* Update TSL2591 gain and timing  by @ArgoNavi in https://github.com/meshtastic/firmware/pull/6921\r\n\r\n## New Contributors\r\n* @dmarman made their first contribution in https://github.com/meshtastic/firmware/pull/6872\r\n* @ArgoNavi made their first contribution in https://github.com/meshtastic/firmware/pull/6921\r\n\r\n**Full Changelog**: https://github.com/meshtastic/firmware/compare/v2.6.9.f223b8a...v2.6.10.9ce4455"
       }
     ],
     "alpha": [
+      {
+        "id": "v2.7.25.104df5f",
+        "title": "Meshtastic Firmware 2.7.25.104df5f Alpha",
+        "page_url": "https://github.com/meshtastic/firmware/releases/tag/v2.7.25.104df5f",
+        "zip_url": "https://github.com/meshtastic/firmware/releases/download/v2.7.25.104df5f/firmware-2.7.25.104df5f.json",
+        "release_notes": "## 🚀 Enhancements\r\n\r\n- Noise floor by @RCGV1 in https://github.com/meshtastic/firmware/pull/9347\r\n- Compass improvements/refactoring by @HarukiToreda in https://github.com/meshtastic/firmware/pull/10166\r\n- Update Thinknode m7 pins by @jp-bennett in https://github.com/meshtastic/firmware/pull/10635\r\n- Enhance RTC handling with unit test support for system time fallback by @thebentern in https://github.com/meshtastic/firmware/pull/10642\r\n\r\n## 🐛 Bug fixes and maintenance\r\n\r\n- Add Heltec mesh node t1 by @Quency-D in https://github.com/meshtastic/firmware/pull/10416\r\n- Fix SHT2x detection for INA219 addresses by @balya in https://github.com/meshtastic/firmware/pull/10482\r\n- Missing module config in rak6421 / 13300 + 13302 module config files. by @Littleaton in https://github.com/meshtastic/firmware/pull/10496\r\n- Add Lilygo T-Impulse-Plus by @vidplace7 in https://github.com/meshtastic/firmware/pull/10497\r\n- Preserve forwarded position payload precision by @h3lix1 in https://github.com/meshtastic/firmware/pull/10554\r\n- Fix mini-epaper-s3 build: resolve SensorLib `isBitSet` macro conflict with SparkFun MMC5983MA by @app/copilot-swe-agent in https://github.com/meshtastic/firmware/pull/10584\r\n- Debian: Correctly build without signing (for forks) by @vidplace7 in https://github.com/meshtastic/firmware/pull/10605\r\n- Add Module configuration for RAK6421 Slot 2 yamls by @pdxlocations in https://github.com/meshtastic/firmware/pull/10632\r\n\r\n## ⚙️ Dependencies\r\n\r\n- Update platformio/ststm32 to v19.6.0 by @app/renovate in https://github.com/meshtastic/firmware/pull/10329\r\n- Update libpax digest to 1730234 by @app/renovate in https://github.com/meshtastic/firmware/pull/10507\r\n- Update ESP32-CH390 to v1.1.0 by @vidplace7 in https://github.com/meshtastic/firmware/pull/10528\r\n- Update actions/stale action to v10.3.0 by @app/renovate in https://github.com/meshtastic/firmware/pull/10532\r\n- Update meshtastic/device-ui digest to 34e96d2 by @app/renovate in https://github.com/meshtastic/firmware/pull/10537\r\n- Update meshtastic-esp8266-oled-ssd1306 digest to 2e26010 by @app/renovate in https://github.com/meshtastic/firmware/pull/10562\r\n- Update Adafruit SSD1306 to v2.5.17 by @app/renovate in https://github.com/meshtastic/firmware/pull/10581\r\n- Update SparkFun MMC5983MA Magnetometer to v1.1.5 by @app/renovate in https://github.com/meshtastic/firmware/pull/10599\r\n- Update meshtastic/device-ui digest to 502ba30 by @app/renovate in https://github.com/meshtastic/firmware/pull/10629\r\n\r\n**Full Changelog**: https://github.com/meshtastic/firmware/compare/v2.7.24.472b14c...v2.7.25.104df5f"
+      },
       {
         "id": "v2.7.24.472b14c",
         "title": "Meshtastic Firmware 2.7.24.472b14c Alpha",
@@ -189,9 +189,27 @@
   },
   "pullRequests": [
     {
-      "id": "10663",
-      "title": "BaseUI: First attempt at Ham Mode implementation",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10663",
+      "id": "10669",
+      "title": "Allow key verification to work for unknown nodes.",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10669",
+      "zip_url": "s"
+    },
+    {
+      "id": "10666",
+      "title": "Short circuit invalid nodenum check in ham mode.",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10666",
+      "zip_url": "s"
+    },
+    {
+      "id": "10665",
+      "title": "Clamp position precision on public / known-keys",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10665",
+      "zip_url": "s"
+    },
+    {
+      "id": "10664",
+      "title": "Arduino Nesso N1 support",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10664",
       "zip_url": "s"
     },
     {
@@ -204,12 +222,6 @@
       "id": "10656",
       "title": "UDP Unicast for Meshtasticd",
       "page_url": "https://github.com/meshtastic/firmware/pull/10656",
-      "zip_url": "s"
-    },
-    {
-      "id": "10655",
-      "title": "NRF52 LTO flags",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10655",
       "zip_url": "s"
     },
     {
@@ -246,36 +258,6 @@
       "id": "10602",
       "title": "Mesh node t1 fixes",
       "page_url": "https://github.com/meshtastic/firmware/pull/10602",
-      "zip_url": "s"
-    },
-    {
-      "id": "10587",
-      "title": "Add SHT2x CRC check to fix i2c scan hang",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10587",
-      "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "10578",
-      "title": "PR: Fix has_module_settings flag inconsistency in channel updates",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10578",
-      "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "10569",
-      "title": "feat: add RockBase IoT NM-EPD-420 board support",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10569",
-      "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "10568",
-      "title": "TCA8418 keypad interface optimisations",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10568",
-      "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "10565",
-      "title": "Fix: MQTT topic not updated when LoRa region changes",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10565",
       "zip_url": "s"
     }
   ]
