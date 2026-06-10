@@ -32,10 +32,6 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(libs.meshtastic.protobufs)
-            api(libs.takpacket.sdk.kmp.get().toString()) {
-                exclude(group = "com.github.luben", module = "zstd-jni")
-                exclude(group = "org.ogce", module = "xpp3")
-            }
             api(projects.core.common)
             api(projects.core.resources)
 
@@ -45,6 +41,17 @@ kotlin {
             implementation(libs.kermit)
             api(libs.okio)
             api(libs.compose.multiplatform.resources)
+        }
+        jvmAndroidMain.dependencies {
+            // TAKPacket-SDK publishes only JVM artifacts since 0.5.2 (proto types
+            // now come from the protobufs SDK above; the CoT conversion pipeline is
+            // zstd-jni/xpp3-bound). Scoped to jvmAndroidMain so iOS compilations
+            // never try to resolve it — iOS code goes through the expect/actual
+            // seams in :core:takserver instead.
+            api(libs.takpacket.sdk.kmp.get().toString()) {
+                exclude(group = "com.github.luben", module = "zstd-jni")
+                exclude(group = "org.ogce", module = "xpp3")
+            }
         }
         androidMain.dependencies {
             api(libs.androidx.annotation)
