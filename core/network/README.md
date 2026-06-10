@@ -30,7 +30,6 @@ graph TB
   :core:network -.-> :core:common
   :core:network -.-> :core:di
   :core:network -.-> :core:model
-  :core:network -.-> :core:proto
   :core:network -.-> :core:ble
   :core:network -.-> :core:testing
 

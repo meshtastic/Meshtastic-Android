@@ -107,7 +107,6 @@ graph TB
   :feature:firmware -.-> :core:navigation
   :feature:firmware -.-> :core:network
   :feature:firmware -.-> :core:prefs
-  :feature:firmware -.-> :core:proto
   :feature:firmware -.-> :core:service
   :feature:firmware -.-> :core:resources
   :feature:firmware -.-> :core:ui

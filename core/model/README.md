@@ -33,7 +33,6 @@ implementation(projects.core.model)
 ```mermaid
 graph TB
   :core:model[model]:::kmp-library
-  :core:model --> :core:proto
   :core:model --> :core:common
   :core:model --> :core:resources
   :core:model -.-> :core:testing

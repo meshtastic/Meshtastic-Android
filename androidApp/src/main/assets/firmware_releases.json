@@ -189,6 +189,18 @@
   },
   "pullRequests": [
     {
+      "id": "10684",
+      "title": "Claude hooks don't work in a fresh box",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10684",
+      "zip_url": "s"
+    },
+    {
+      "id": "10673",
+      "title": "meshtasticd: Add configs for B&Q Station G3",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10673",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
       "id": "10669",
       "title": "Allow key verification to work for unknown nodes.",
       "page_url": "https://github.com/meshtastic/firmware/pull/10669",

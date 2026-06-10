@@ -116,7 +116,6 @@ graph TB
   :core:domain[domain]:::kmp-library
   :core:domain -.-> :core:repository
   :core:domain -.-> :core:model
-  :core:domain -.-> :core:proto
   :core:domain -.-> :core:common
   :core:domain -.-> :core:database
   :core:domain -.-> :core:datastore

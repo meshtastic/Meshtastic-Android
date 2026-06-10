@@ -34,7 +34,6 @@ graph TB
   :feature:messaging -.-> :core:model
   :feature:messaging -.-> :core:navigation
   :feature:messaging -.-> :core:prefs
-  :feature:messaging -.-> :core:proto
   :feature:messaging -.-> :core:resources
   :feature:messaging -.-> :core:service
   :feature:messaging -.-> :core:ui

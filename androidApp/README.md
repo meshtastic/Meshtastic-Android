@@ -37,7 +37,6 @@ graph TB
   :androidApp -.-> :core:network
   :androidApp -.-> :core:nfc
   :androidApp -.-> :core:prefs
-  :androidApp -.-> :core:proto
   :androidApp -.-> :core:service
   :androidApp -.-> :core:resources
   :androidApp -.-> :core:ui

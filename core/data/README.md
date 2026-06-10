@@ -28,7 +28,6 @@ graph TB
   :core:data -.-> :core:model
   :core:data -.-> :core:network
   :core:data -.-> :core:prefs
-  :core:data -.-> :core:proto
   :core:data -.-> :core:takserver
   :core:data -.-> :core:testing
 

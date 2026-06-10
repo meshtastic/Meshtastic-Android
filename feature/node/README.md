@@ -34,7 +34,6 @@ graph TB
   :feature:node -.-> :core:domain
   :feature:node -.-> :core:model
   :feature:node -.-> :core:navigation
-  :feature:node -.-> :core:proto
   :feature:node -.-> :core:repository
   :feature:node -.-> :core:resources
   :feature:node -.-> :core:service

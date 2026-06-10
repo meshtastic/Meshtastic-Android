@@ -58,7 +58,6 @@ graph TB
   :core:ui -.-> :core:model
   :core:ui -.-> :core:navigation
   :core:ui -.-> :core:prefs
-  :core:ui -.-> :core:proto
   :core:ui -.-> :core:repository
   :core:ui -.-> :core:resources
   :core:ui -.-> :core:service

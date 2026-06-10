@@ -25,7 +25,6 @@ graph TB
   :core:datastore[datastore]:::kmp-library
   :core:datastore -.-> :core:common
   :core:datastore -.-> :core:model
-  :core:datastore -.-> :core:proto
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

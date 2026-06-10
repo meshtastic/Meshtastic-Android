@@ -39,7 +39,6 @@ graph TB
   :feature:settings -.-> :core:model
   :feature:settings -.-> :core:navigation
   :feature:settings -.-> :core:network
-  :feature:settings -.-> :core:proto
   :feature:settings -.-> :core:repository
   :feature:settings -.-> :core:service
   :feature:settings -.-> :core:resources

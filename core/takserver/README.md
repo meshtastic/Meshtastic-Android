@@ -167,7 +167,6 @@ graph TB
   :core:takserver -.-> :core:common
   :core:takserver -.-> :core:di
   :core:takserver -.-> :core:model
-  :core:takserver -.-> :core:proto
   :core:takserver -.-> :core:testing
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
