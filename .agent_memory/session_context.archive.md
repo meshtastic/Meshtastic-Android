@@ -2,6 +2,14 @@
 # Older handover entries rotated out of session_context.md. Not read by default.
 # Consult only if you need historical detail on a specific past change.
 
+## 2026-05-21 — Implemented streaming chat support and Firebase Remote Config integration for Chirpy
+- Added `firebase-config` dependency to Version Catalog `libs.versions.toml` and `androidApp/build.gradle.kts`.
+- Added the `AIDocAssistantResult.Partial` variant to support intermediate stream updates.
+- Extended the `AIDocAssistant` interface and implemented `answerStream` in both `KeywordFallbackAssistant` and `GeminiNanoDocAssistant`.
+- Integrated Firebase Remote Config into `GeminiNanoDocAssistant` to dynamically fetch the model name (`chirpy_model_name`) and system instruction (`chirpy_system_instruction`) with release-optimized fetch intervals.
+- Refactored `GeminiNanoDocAssistant.answer` to reuse `answerStream` flow under the hood, eliminating duplicate prompting code.
+- Verified that all unit tests (`:feature:docs:allTests`) and static analysis checks (`spotlessApply spotlessCheck detekt`) pass 100% green.
+
 ## 2026-05-21 — Fixed Chirpy Assistant invalid model name and enhanced failure fallback suggestions
 - Fixed a 404/Unknown inference error by updating `GeminiNanoDocAssistant.kt`'s `MODEL_NAME` from `"gemini-3.1-flash-lite"` to the correct Firebase AI Logic preview name `"gemini-3.1-flash-lite-preview"`.
 - Overhauled multi-turn hybrid chat seeding: eliminated the redundant background `chat.sendMessage` call on the first turn; if the first turn is answered on-device, the session caches the Q&A locally and seeds the subsequent cloud-chat session via `startChat(history = ...)`.

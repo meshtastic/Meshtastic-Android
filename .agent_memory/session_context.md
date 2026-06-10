@@ -6,6 +6,12 @@
 # the oldest entries to `session_context.archive.md` (not read by default). The
 # "Golden Context" block at the bottom is stable across sessions; keep it here.
 
+## 2026-06-10 — Fixed Update Changelog workflow crash (failing on every main push since 2026-06-05)
+- PR #5769: `.github/workflows/update-changelog.yml` died with `TAG_NAMES: bad array subscript` once v2.7.14 went prod and its `-internal.*`/`-open.*` channel tags were cleaned up — zero channel tags means N=0 and `${TAG_NAMES[$((N-1))]:-$PROD_TAG}` indexes [-1] on an empty array, fatal under `bash -e` before the `:-` fallback applies. Replaced with an explicit `if (( N > 0 ))` branch.
+- Second latent bug fixed in the same step: the final `{ ... } > /tmp/unreleased-section.md` group ended with `[ -n ... ] && echo` lists; with SECTIONS and CONTRIBUTORS both empty the group (the script's last command) returns 1 and fails the step even though the file is written. Converted to `if` statements. Previously masked because the prod→HEAD range always had a New Contributors section.
+- Verified by extracting the step script from the YAML (10-space block indent stripped, heredoc terminators land at col 0) and running it against the live repo: failing env (prod-only) now exits 0 with correct output; simulated channel tag (N=1) confirms segmented path unchanged. Local BSD-sed chokes on a GNU-sed idiom in `generate_notes_api` — harmless locally, runner is GNU.
+- Push gotcha: both the git credential and gh token lack `workflow` scope (contents API rejects too) — pushing workflow-file changes works via SSH (`git push git@github.com:meshtastic/Meshtastic-Android.git <branch>`), which isn't scope-limited.
+
 ## 2026-06-03 — Cluster-marker FATAL: revert shipped map series + in-scope rememberComposeBitmapDescriptor fix
 - Reverted ALL google-flavor map changes to before #5684 (per user): restored MapView.kt, NodeClusterMarkers.kt, WaypointMarkers.kt, InlineMap.kt to parent commit bc9f1637; deleted MarkerBitmapRenderer.kt; re-pinned `play-services-maps = 20.0.0` in libs.versions.toml. The shipped #5702–#5719 series (Canvas markers + ViewTree-owner band-aids) had lost the info-window popups + interactions.
 - Root cause (verified against maps-compose 8.3.0 + android-maps-utils 4.1.1 SOURCE in gradle cache): ONLY `Clustering(clusterItemContent=…)` crashes — its `ComposeUiClusterRenderer` builds a *detached* `InvalidatingComposeView` with a fake lifecycle owner and NO SavedStateRegistryOwner. `MarkerComposable` already bakes its icon via the safe in-scope `rememberComposeBitmapDescriptor`; info windows render with the live marker compositionContext. So InlineMap/NodeTrack/Traceroute were left untouched.
@@ -30,14 +36,6 @@
 - Aggregated chunks and emitted incremental `AIDocAssistantResult.Partial` states down the Kotlin Flow, enabling true word-by-word/chunk-by-chunk streaming in the UI for a much more responsive user experience.
 - Refined the `SYSTEM_INSTRUCTION` personality rules for Chirpy to position him as our adorable LoRa radio Node mascot instead of an avian theme, emphasizing high-enthusiasm mesh networking, signal connectivity, battery status, and radio/routing concepts while preserving technical precision.
 - Overhauled system error messages inside `DocsNavigation.kt` and the loading bubble state inside `ChirpyAssistantSheet.kt` to align with the mascot theme.
-
-## 2026-05-21 — Implemented streaming chat support and Firebase Remote Config integration for Chirpy
-- Added `firebase-config` dependency to Version Catalog `libs.versions.toml` and `androidApp/build.gradle.kts`.
-- Added the `AIDocAssistantResult.Partial` variant to support intermediate stream updates.
-- Extended the `AIDocAssistant` interface and implemented `answerStream` in both `KeywordFallbackAssistant` and `GeminiNanoDocAssistant`.
-- Integrated Firebase Remote Config into `GeminiNanoDocAssistant` to dynamically fetch the model name (`chirpy_model_name`) and system instruction (`chirpy_system_instruction`) with release-optimized fetch intervals.
-- Refactored `GeminiNanoDocAssistant.answer` to reuse `answerStream` flow under the hood, eliminating duplicate prompting code.
-- Verified that all unit tests (`:feature:docs:allTests`) and static analysis checks (`spotlessApply spotlessCheck detekt`) pass 100% green.
 
 ## Golden Context (stable across sessions)
 - Always check `.skills/compose-ui/strings-index.txt` before reading `strings.xml`.
