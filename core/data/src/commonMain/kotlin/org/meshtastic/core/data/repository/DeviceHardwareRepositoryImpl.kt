@@ -139,8 +139,8 @@ class DeviceHardwareRepositoryImpl(
                         "DeviceHardwareRepository: network refresh timed out after ${NETWORK_REFRESH_TIMEOUT_MS}ms"
                     }
                 } else {
-                    // Reconcile msh.to links against the freshest catalog (isVendor + orphan pruning). Runs outside
-                    // the network timeout so a deadline can't cancel it mid-write and leave links half-reconciled.
+                    // Refresh msh.to device links from the API after a hardware refresh. Runs outside the hardware
+                    // network timeout so that deadline can't cancel it mid-write.
                     deviceLinkRepository.reconcile()
                 }
             }

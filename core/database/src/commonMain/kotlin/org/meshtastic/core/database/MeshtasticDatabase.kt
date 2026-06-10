@@ -111,8 +111,9 @@ import org.meshtastic.core.database.entity.TracerouteNodePositionEntity
         AutoMigration(from = 39, to = 40),
         AutoMigration(from = 40, to = 41),
         AutoMigration(from = 41, to = 42),
+        AutoMigration(from = 42, to = 43, spec = AutoMigration42to43::class),
     ],
-    version = 42,
+    version = 43,
     exportSchema = true,
 )
 @androidx.room3.ConstructedBy(MeshtasticDatabaseConstructor::class)
@@ -160,3 +161,7 @@ class AutoMigration33to34 : AutoMigrationSpec
 @DeleteColumn(tableName = "packet", columnName = "retry_count")
 @DeleteColumn(tableName = "reactions", columnName = "retry_count")
 class AutoMigration34to35 : AutoMigrationSpec
+
+/** Device links moved from the bundled `urls.json` to the resolved API; `original_url` is no longer stored. */
+@DeleteColumn(tableName = "device_link", columnName = "original_url")
+class AutoMigration42to43 : AutoMigrationSpec
