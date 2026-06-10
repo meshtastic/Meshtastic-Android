@@ -30,7 +30,6 @@ graph TB
   :core:database --> :core:common
   :core:database --> :core:model
   :core:database -.-> :core:di
-  :core:database -.-> :core:proto
   :core:database -.-> :core:resources
   :core:database -.-> :core:testing
 

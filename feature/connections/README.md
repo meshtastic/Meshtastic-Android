@@ -138,7 +138,6 @@ graph TB
   :feature:connections -.-> :core:model
   :feature:connections -.-> :core:navigation
   :feature:connections -.-> :core:prefs
-  :feature:connections -.-> :core:proto
   :feature:connections -.-> :core:resources
   :feature:connections -.-> :core:service
   :feature:connections -.-> :core:ui
