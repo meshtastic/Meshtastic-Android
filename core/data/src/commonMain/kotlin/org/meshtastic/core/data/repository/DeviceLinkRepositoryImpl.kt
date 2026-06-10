@@ -23,92 +23,125 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.safeCatching
-import org.meshtastic.core.data.datasource.DeviceHardwareLocalDataSource
 import org.meshtastic.core.data.datasource.DeviceLinkLocalDataSource
-import org.meshtastic.core.data.datasource.MshToLinksJsonDataSource
+import org.meshtastic.core.data.datasource.DeviceLinksJsonDataSource
 import org.meshtastic.core.database.entity.asEntity
 import org.meshtastic.core.database.entity.asExternalModel
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceLink
-import org.meshtastic.core.model.MshToMarketplace
+import org.meshtastic.core.model.NetworkDeviceLink
+import org.meshtastic.core.model.toDeviceLink
+import org.meshtastic.core.model.util.TimeConstants
+import org.meshtastic.core.network.DeviceLinksRemoteDataSource
 import org.meshtastic.core.repository.DeviceLinkRepository
+import kotlin.concurrent.Volatile
 
+/**
+ * Caches the resolved device-links catalog from the Meshtastic API (`/resource/deviceLinks`). The server does all the
+ * classification (type/targets/regions), so the client just seeds from a bundled snapshot, refreshes from the network,
+ * and filters the cache. Mirrors [DeviceHardwareRepositoryImpl]'s seed → single-flight refresh pattern.
+ */
 @Single
 class DeviceLinkRepositoryImpl(
-    private val jsonDataSource: MshToLinksJsonDataSource,
+    private val remoteDataSource: DeviceLinksRemoteDataSource,
+    private val jsonDataSource: DeviceLinksJsonDataSource,
     private val localDataSource: DeviceLinkLocalDataSource,
-    private val deviceHardwareLocalDataSource: DeviceHardwareLocalDataSource,
+    private val dispatchers: CoroutineDispatchers,
 ) : DeviceLinkRepository {
 
-    /** Guards the import so concurrent collectors don't run it more than once at a time. */
-    private val importMutex = Mutex()
+    /** Serializes seeding and network refreshes so concurrent collectors don't duplicate writes. */
+    private val writeMutex = Mutex()
+
+    @Volatile private var lastRefreshMillis = 0L
 
     override suspend fun ensureImported() {
-        if (localDataSource.count() > 0) return
-        importMutex.withLock { if (localDataSource.count() == 0) doImport() }
+        ensureSeeded()
     }
 
     override suspend fun reconcile() {
-        importMutex.withLock { doImport() }
+        writeMutex.withLock {
+            safeCatching {
+                // Bound only the network call by the timeout; the DB write runs after so a deadline can't cancel it
+                // mid-write and leave the cache half-pruned.
+                val remoteLinks =
+                    withTimeoutOrNull(NETWORK_REFRESH_TIMEOUT_MS) { remoteDataSource.getDeviceLinks() }
+                if (remoteLinks == null) {
+                    Logger.w {
+                        "DeviceLinkRepository: network refresh timed out after ${NETWORK_REFRESH_TIMEOUT_MS}ms"
+                    }
+                } else {
+                    store(remoteLinks)
+                    lastRefreshMillis = nowMillis
+                }
+            }
+                .onFailure { e -> Logger.w(e) { "DeviceLinkRepository: network refresh failed" } }
+        }
     }
 
-    override suspend fun getLinksForTarget(platformioTarget: String, regionCode: String): List<DeviceLink> {
-        if (platformioTarget.isBlank()) return emptyList()
-        ensureImported()
-        val links = localDataSource.getAll().map { it.asExternalModel() }
-        val marketplaceKeys = jsonDataSource.loadMarketplaces().keys
-        val deviceTargets = deviceHardwareLocalDataSource.getAllTargets().toSet()
-        return DeviceLinkMatcher.match(
-            links = links,
-            marketplaceKeys = marketplaceKeys,
-            deviceTargets = deviceTargets,
-            target = platformioTarget,
-            region = regionCode,
-        )
-    }
+    override suspend fun getLinksForTarget(platformioTarget: String, regionCode: String): List<DeviceLink> =
+        withContext(dispatchers.io) {
+            if (platformioTarget.isBlank()) return@withContext emptyList()
+            ensureSeeded()
+            // Deliberately non-blocking: the node-detail flow must stay snappy. Freshness arrives via reconcile(),
+            // triggered by the device-hardware refresh that resolves this device's hardware in the first place.
+            localDataSource
+                .getAll()
+                .map { it.asExternalModel() }
+                .filter { link -> platformioTarget in link.targets.orEmpty() }
+                .filter { link ->
+                    val regions = link.regions
+                    regions.isNullOrEmpty() || regionCode in regions
+                }
+                .sortedByDescending { it.isVendor }
+        }
 
     override fun observeAllLinks(): Flow<List<DeviceLink>> = flow {
-        ensureImported()
+        ensureSeeded()
+        refreshIfStale()
         emitAll(localDataSource.observeAll().map { entities -> entities.map { it.asExternalModel() } })
     }
 
-    /** Loads bundled `urls.json`, classifies each short code, upserts, and prunes orphans. Mirrors Apple's import. */
-    private suspend fun doImport() {
-        safeCatching {
-            val routes = jsonDataSource.loadRoutes()
-            if (routes.isEmpty()) {
-                Logger.w { "DeviceLinkRepository: no routes in bundled urls.json; skipping import" }
-                return@safeCatching
+    /** Seeds the table from the bundled snapshot if empty (fresh install, data clear, radio switch). */
+    private suspend fun ensureSeeded() {
+        if (localDataSource.count() > 0) return
+        writeMutex.withLock {
+            if (localDataSource.count() == 0) {
+                safeCatching { store(jsonDataSource.loadDeviceLinksFromJsonAsset()) }
+                    .onFailure { e -> Logger.w(e) { "DeviceLinkRepository: failed to seed from bundled JSON" } }
             }
-            val marketplaces = jsonDataSource.loadMarketplaces()
-            val deviceTargets = deviceHardwareLocalDataSource.getAllTargets().toSet()
-
-            val links =
-                routes.map { route ->
-                    val isVendor = route.shortCode in deviceTargets
-                    DeviceLink(
-                        shortCode = route.shortCode,
-                        originalUrl = route.originalUrl,
-                        description = route.description,
-                        isVendor = isVendor,
-                        regions = if (isVendor) null else marketplaceRegions(route.shortCode, marketplaces),
-                    )
-                }
-
-            localDataSource.upsertAll(links.map { it.asEntity() })
-            localDataSource.deleteNotIn(links.map { it.shortCode })
-            Logger.i { "DeviceLinkRepository: imported ${links.size} msh.to links" }
         }
-            .onFailure { Logger.w(it) { "DeviceLinkRepository: device links import failed" } }
+    }
+
+    /** Best-effort network refresh, gated by [CACHE_EXPIRATION_TIME_MS]. */
+    private suspend fun refreshIfStale() {
+        if (nowMillis - lastRefreshMillis > CACHE_EXPIRATION_TIME_MS) reconcile()
     }
 
     /**
-     * Shipping regions for a marketplace short code, or null when it is not a marketplace link. Uses the same
-     * delimiter-aware classifier as the matcher/UI so a code's classification (vendor/variant vs marketplace) is
-     * consistent everywhere — independent of the `match` hint in `marketplaces.json`, which is unreliable in practice
-     * (e.g. AliExpress is declared `suffix` yet most codes use the `aliexpress-<target>` prefix form).
+     * Maps resolved API links to the cached domain model, upserts them, and prunes short codes that no longer exist.
+     * Internal links (GitHub, YouTube, …) are dropped — they never belong to a device's purchase section. An empty list
+     * is ignored rather than wiping the cache on a bad response.
      */
-    private fun marketplaceRegions(code: String, marketplaces: Map<String, MshToMarketplace>): List<String>? =
-        DeviceLinkMatcher.marketplaceKeyFor(code, marketplaces.keys)?.let { marketplaces.getValue(it).regions }
+    private suspend fun store(networkLinks: List<NetworkDeviceLink>) {
+        val links = networkLinks.filter { it.type != NetworkDeviceLink.TYPE_INTERNAL }.map { it.toDeviceLink() }
+        if (links.isEmpty()) {
+            Logger.w { "DeviceLinkRepository: no device links to store; leaving cache untouched" }
+            return
+        }
+        localDataSource.upsertAll(links.map { it.asEntity() })
+        localDataSource.deleteNotIn(links.map { it.shortCode })
+        Logger.i { "DeviceLinkRepository: stored ${links.size} device links" }
+    }
+
+    private companion object {
+        private val CACHE_EXPIRATION_TIME_MS = TimeConstants.ONE_DAY.inWholeMilliseconds
+
+        /** Maximum time to wait for the remote API before falling back to cached/bundled data. */
+        private const val NETWORK_REFRESH_TIMEOUT_MS = 5_000L
+    }
 }

@@ -22,29 +22,29 @@ import androidx.room3.PrimaryKey
 import kotlinx.serialization.Serializable
 import org.meshtastic.core.model.DeviceLink
 
-/** A msh.to short-link, upserted from the bundled `urls.json` during the device-hardware refresh cycle. */
+/** A msh.to device link, cached from the Meshtastic API (`/resource/deviceLinks`) during the refresh cycle. */
 @Serializable
 @Entity(tableName = "device_link")
 data class DeviceLinkEntity(
     @PrimaryKey @ColumnInfo(name = "short_code") val shortCode: String,
-    @ColumnInfo(name = "original_url") val originalUrl: String,
     @ColumnInfo(name = "link_description") val linkDescription: String? = null,
     @ColumnInfo(name = "is_vendor") val isVendor: Boolean = false,
     val regions: List<String>? = null,
+    val targets: List<String>? = null,
 )
 
 fun DeviceLink.asEntity() = DeviceLinkEntity(
     shortCode = shortCode,
-    originalUrl = originalUrl,
     linkDescription = description,
     isVendor = isVendor,
     regions = regions,
+    targets = targets,
 )
 
 fun DeviceLinkEntity.asExternalModel() = DeviceLink(
     shortCode = shortCode,
-    originalUrl = originalUrl,
     description = linkDescription,
     isVendor = isVendor,
     regions = regions,
+    targets = targets,
 )

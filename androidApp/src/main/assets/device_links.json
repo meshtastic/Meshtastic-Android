@@ -1,0 +1,3646 @@
+{
+  "version": 1,
+  "generatedAt": "2026-06-10T14:17:34.591Z",
+  "source": "https://msh.to/api/urls",
+  "links": [
+    {
+      "shortCode": "github",
+      "url": "https://msh.to/github",
+      "description": "Meshtastic GitHub Organization",
+      "type": "internal",
+      "targets": null,
+      "hwModels": null,
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "youtube",
+      "url": "https://msh.to/youtube",
+      "description": "Meshtastic YouTube Channel",
+      "type": "internal",
+      "targets": null,
+      "hwModels": null,
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "reddit",
+      "url": "https://msh.to/reddit",
+      "description": "Meshtastic Reddit Community",
+      "type": "internal",
+      "targets": null,
+      "hwModels": null,
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "docs",
+      "url": "https://msh.to/docs",
+      "description": "Meshtastic Documentation",
+      "type": "internal",
+      "targets": null,
+      "hwModels": null,
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "discord",
+      "url": "https://msh.to/discord",
+      "description": "Meshtastic Discord Server",
+      "type": "internal",
+      "targets": null,
+      "hwModels": null,
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "web",
+      "url": "https://msh.to/web",
+      "description": "Meshtastic Web Client",
+      "type": "internal",
+      "targets": null,
+      "hwModels": null,
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "flash",
+      "url": "https://msh.to/flash",
+      "description": "Meshtastic Web Flasher",
+      "type": "internal",
+      "targets": null,
+      "hwModels": null,
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "firmware",
+      "url": "https://msh.to/firmware",
+      "description": "Meshtastic Firmware Repository",
+      "type": "internal",
+      "targets": null,
+      "hwModels": null,
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "android",
+      "url": "https://msh.to/android",
+      "description": "Meshtastic Android App",
+      "type": "internal",
+      "targets": null,
+      "hwModels": null,
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "ios",
+      "url": "https://msh.to/ios",
+      "description": "Meshtastic iOS App",
+      "type": "internal",
+      "targets": null,
+      "hwModels": null,
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "rak-collection",
+      "url": "https://msh.to/rak-collection",
+      "description": "RAKwireless Meshtastic Collection",
+      "type": "vendor",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "rak4631",
+      "url": "https://msh.to/rak4631",
+      "description": "WisMesh RAK4631 Starter Kit",
+      "type": "vendor",
+      "targets": [
+        "rak4631"
+      ],
+      "hwModels": [
+        9
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "rak3312",
+      "url": "https://msh.to/rak3312",
+      "description": "WisMesh ESP32-S3 Starter Kit",
+      "type": "vendor",
+      "targets": [
+        "rak3312"
+      ],
+      "hwModels": [
+        106
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "rak3401-1watt",
+      "url": "https://msh.to/rak3401-1watt",
+      "description": "WisMesh RAK3401 1W Starter Kit",
+      "type": "vendor",
+      "targets": [
+        "rak3401-1watt"
+      ],
+      "hwModels": [
+        117
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "rak_wismeshtap",
+      "url": "https://msh.to/rak_wismeshtap",
+      "description": "RAK WisMesh Tap",
+      "type": "vendor",
+      "targets": [
+        "rak_wismeshtap"
+      ],
+      "hwModels": [
+        84
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "rak_wismeshtag",
+      "url": "https://msh.to/rak_wismeshtag",
+      "description": "RAK WisMesh Tag",
+      "type": "vendor",
+      "targets": [
+        "rak_wismeshtag"
+      ],
+      "hwModels": [
+        105
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "rokland-wismesh-tag",
+      "url": "https://msh.to/rokland-wismesh-tag",
+      "description": "Rokland WisMesh Tag",
+      "type": "marketplace",
+      "targets": [
+        "rak_wismeshtag"
+      ],
+      "hwModels": [
+        105
+      ],
+      "marketplace": "rokland",
+      "regions": [
+        "AU",
+        "AT",
+        "BE",
+        "CA",
+        "DK",
+        "EC",
+        "FR",
+        "DE",
+        "IE",
+        "JP",
+        "NL",
+        "NZ",
+        "NO",
+        "PK",
+        "ES",
+        "SE",
+        "CH",
+        "GB",
+        "US"
+      ]
+    },
+    {
+      "shortCode": "hexaspot-wismesh-tag",
+      "url": "https://msh.to/hexaspot-wismesh-tag",
+      "description": "Hexaspot WisMesh Tag",
+      "type": "marketplace",
+      "targets": [
+        "rak_wismeshtag"
+      ],
+      "hwModels": [
+        105
+      ],
+      "marketplace": "hexaspot",
+      "regions": [
+        "AT",
+        "BE",
+        "BG",
+        "CY",
+        "CZ",
+        "DE",
+        "DK",
+        "EE",
+        "ES",
+        "FI",
+        "FR",
+        "GR",
+        "HR",
+        "HU",
+        "IE",
+        "IT",
+        "LT",
+        "LU",
+        "LV",
+        "MT",
+        "NL",
+        "NO",
+        "PL",
+        "PT",
+        "RO",
+        "SE",
+        "SI",
+        "SK"
+      ]
+    },
+    {
+      "shortCode": "aliexpress-wismesh-tag",
+      "url": "https://msh.to/aliexpress-wismesh-tag",
+      "description": "Aliexpress RAK WisMesh Tag",
+      "type": "marketplace",
+      "targets": [
+        "rak_wismeshtag"
+      ],
+      "hwModels": [
+        105
+      ],
+      "marketplace": "aliexpress",
+      "regions": null
+    },
+    {
+      "shortCode": "rak19007",
+      "url": "https://msh.to/rak19007",
+      "description": "RAKwireless RAK19007 WisBlock Base Board 2nd Gen",
+      "type": "vendor",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "tbeam-s3-core",
+      "url": "https://msh.to/tbeam-s3-core",
+      "description": "T-Beam Supreme",
+      "type": "vendor",
+      "targets": [
+        "tbeam-s3-core"
+      ],
+      "hwModels": [
+        12
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "t-echo",
+      "url": "https://msh.to/t-echo",
+      "description": "T-Echo",
+      "type": "vendor",
+      "targets": [
+        "t-echo"
+      ],
+      "hwModels": [
+        7
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "t-watch-s3",
+      "url": "https://msh.to/t-watch-s3",
+      "description": "T-Watch S3",
+      "type": "vendor",
+      "targets": [
+        "t-watch-s3"
+      ],
+      "hwModels": [
+        51
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "t-deck",
+      "url": "https://msh.to/t-deck",
+      "description": "T-Deck",
+      "type": "vendor",
+      "targets": [
+        "t-deck"
+      ],
+      "hwModels": [
+        50
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "tlora-t3s3-v1",
+      "url": "https://msh.to/tlora-t3s3-v1",
+      "description": "T3S3",
+      "type": "vendor",
+      "targets": [
+        "tlora-t3s3-v1"
+      ],
+      "hwModels": [
+        16
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "heltec-mesh-node-t114",
+      "url": "https://msh.to/heltec-mesh-node-t114",
+      "description": "Mesh Node T114",
+      "type": "vendor",
+      "targets": [
+        "heltec-mesh-node-t114"
+      ],
+      "hwModels": [
+        69
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "heltec-vision-master-e213",
+      "url": "https://msh.to/heltec-vision-master-e213",
+      "description": "Vision Master E213",
+      "type": "vendor",
+      "targets": [
+        "heltec-vision-master-e213"
+      ],
+      "hwModels": [
+        67
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "heltec-vision-master-e290",
+      "url": "https://msh.to/heltec-vision-master-e290",
+      "description": "Vision Master E290",
+      "type": "vendor",
+      "targets": [
+        "heltec-vision-master-e290"
+      ],
+      "hwModels": [
+        68
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "heltec-vision-master-t190",
+      "url": "https://msh.to/heltec-vision-master-t190",
+      "description": "Vision Master T190",
+      "type": "vendor",
+      "targets": [
+        "heltec-vision-master-t190"
+      ],
+      "hwModels": [
+        66
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "heltec-wireless-tracker",
+      "url": "https://msh.to/heltec-wireless-tracker",
+      "description": "Wireless Tracker",
+      "type": "vendor",
+      "targets": [
+        "heltec-wireless-tracker"
+      ],
+      "hwModels": [
+        48
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "heltec-wireless-tracker-v2",
+      "url": "https://msh.to/heltec-wireless-tracker-v2",
+      "description": "Wireless Tracker V2",
+      "type": "vendor",
+      "targets": [
+        "heltec-wireless-tracker-v2"
+      ],
+      "hwModels": [
+        113
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "heltec-wireless-paper",
+      "url": "https://msh.to/heltec-wireless-paper",
+      "description": "Wireless Paper",
+      "type": "vendor",
+      "targets": [
+        "heltec-wireless-paper"
+      ],
+      "hwModels": [
+        49
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "heltec-ht62-esp32c3-sx1262",
+      "url": "https://msh.to/heltec-ht62-esp32c3-sx1262",
+      "description": "HT-CT62",
+      "type": "vendor",
+      "targets": [
+        "heltec-ht62-esp32c3-sx1262"
+      ],
+      "hwModels": [
+        53
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "wio-tracker-wm1110",
+      "url": "https://msh.to/wio-tracker-wm1110",
+      "description": "Wio Tracker WM1110 Dev Kit",
+      "type": "vendor",
+      "targets": [
+        "wio-tracker-wm1110"
+      ],
+      "hwModels": [
+        21
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "tracker-t1000-e",
+      "url": "https://msh.to/tracker-t1000-e",
+      "description": "SenseCAP Card Tracker T1000-E",
+      "type": "vendor",
+      "targets": [
+        "tracker-t1000-e"
+      ],
+      "hwModels": [
+        71
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "tracker-t1000-e-aliexpress",
+      "url": "https://msh.to/tracker-t1000-e-aliexpress",
+      "description": "SenseCAP Card Tracker T1000-E Aliexpress",
+      "type": "marketplace",
+      "targets": [
+        "tracker-t1000-e"
+      ],
+      "hwModels": [
+        71
+      ],
+      "marketplace": "aliexpress",
+      "regions": null
+    },
+    {
+      "shortCode": "tracker-t1000-e-amazon",
+      "url": "https://msh.to/tracker-t1000-e-amazon",
+      "description": "SenseCAP Card Tracker T1000-E Amazon",
+      "type": "marketplace",
+      "targets": [
+        "tracker-t1000-e"
+      ],
+      "hwModels": [
+        71
+      ],
+      "marketplace": "amazon",
+      "regions": [
+        "AU",
+        "CA",
+        "FR",
+        "DE",
+        "IE",
+        "JP",
+        "NL",
+        "ES",
+        "SE",
+        "GB",
+        "US"
+      ]
+    },
+    {
+      "shortCode": "seeed-sensecap-indicator",
+      "url": "https://msh.to/seeed-sensecap-indicator",
+      "description": "SenseCAP Indicator",
+      "type": "vendor",
+      "targets": [
+        "seeed-sensecap-indicator"
+      ],
+      "hwModels": [
+        70
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "station-g2",
+      "url": "https://msh.to/station-g2",
+      "description": "Station G2",
+      "type": "vendor",
+      "targets": [
+        "station-g2"
+      ],
+      "hwModels": [
+        31
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "rak2560",
+      "url": "https://msh.to/rak2560",
+      "description": "WisMesh Repeater",
+      "type": "vendor",
+      "targets": [
+        "rak2560"
+      ],
+      "hwModels": [
+        22
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "heltec-v3",
+      "url": "https://msh.to/heltec-v3",
+      "description": "LoRa32 V3",
+      "type": "vendor",
+      "targets": [
+        "heltec-v3"
+      ],
+      "hwModels": [
+        43
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "heltec-wsl-v3",
+      "url": "https://msh.to/heltec-wsl-v3",
+      "description": "WSL V3",
+      "type": "vendor",
+      "targets": [
+        "heltec-wsl-v3"
+      ],
+      "hwModels": [
+        44
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "heltec-v4",
+      "url": "https://msh.to/heltec-v4",
+      "description": "LoRa32 V4",
+      "type": "vendor",
+      "targets": [
+        "heltec-v4"
+      ],
+      "hwModels": [
+        110
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "seeed-xiao-s3",
+      "url": "https://msh.to/seeed-xiao-s3",
+      "description": "XIAO ESP32-S3 + Wio-SX1262 Kit",
+      "type": "vendor",
+      "targets": [
+        "seeed-xiao-s3"
+      ],
+      "hwModels": [
+        81
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "tlora-t3s3-epaper",
+      "url": "https://msh.to/tlora-t3s3-epaper",
+      "description": "T3S3",
+      "type": "vendor",
+      "targets": [
+        "tlora-t3s3-epaper"
+      ],
+      "hwModels": [
+        16
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "ht-ct62",
+      "url": "https://msh.to/ht-ct62",
+      "description": "HT-CT62",
+      "type": "vendor",
+      "targets": [
+        "heltec-ht62-esp32c3-sx1262"
+      ],
+      "hwModels": [
+        53
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "seeed_xiao_nrf52840_kit",
+      "url": "https://msh.to/seeed_xiao_nrf52840_kit",
+      "description": "XIAO nRF52840 & Wio-SX1262 Kit",
+      "type": "vendor",
+      "targets": [
+        "seeed_xiao_nrf52840_kit"
+      ],
+      "hwModels": [
+        88
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "seeed_xiao_nrf52840_kit_aliexpress",
+      "url": "https://msh.to/seeed_xiao_nrf52840_kit_aliexpress",
+      "description": "XIAO nRF52840 & Wio-SX1262 Kit Aliexpress",
+      "type": "marketplace",
+      "targets": [
+        "seeed_xiao_nrf52840_kit"
+      ],
+      "hwModels": [
+        88
+      ],
+      "marketplace": "aliexpress",
+      "regions": null
+    },
+    {
+      "shortCode": "thinknode_m1",
+      "url": "https://msh.to/thinknode_m1",
+      "description": "ThinkNode M1",
+      "type": "vendor",
+      "targets": [
+        "thinknode_m1"
+      ],
+      "hwModels": [
+        89
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "thinknode_m2",
+      "url": "https://msh.to/thinknode_m2",
+      "description": "ThinkNode M2",
+      "type": "vendor",
+      "targets": [
+        "thinknode_m2"
+      ],
+      "hwModels": [
+        90
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "thinknode_m3",
+      "url": "https://msh.to/thinknode_m3",
+      "description": "ThinkNode M3",
+      "type": "vendor",
+      "targets": [
+        "thinknode_m3"
+      ],
+      "hwModels": [
+        115
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "thinknode_m5",
+      "url": "https://msh.to/thinknode_m5",
+      "description": "ThinkNode M5",
+      "type": "vendor",
+      "targets": [
+        "thinknode_m5"
+      ],
+      "hwModels": [
+        107
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "thinknode_m4",
+      "url": "https://msh.to/thinknode_m4",
+      "description": "ThinkNode M4",
+      "type": "vendor",
+      "targets": [
+        "thinknode_m4"
+      ],
+      "hwModels": [
+        119
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "thinknode_m6",
+      "url": "https://msh.to/thinknode_m6",
+      "description": "ThinkNode M6",
+      "type": "vendor",
+      "targets": [
+        "thinknode_m6"
+      ],
+      "hwModels": [
+        120
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "heltec-mesh-pocket-10000",
+      "url": "https://msh.to/heltec-mesh-pocket-10000",
+      "description": "MeshPocket",
+      "type": "vendor",
+      "targets": [
+        "heltec-mesh-pocket-10000"
+      ],
+      "hwModels": [
+        94
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "seeed_solar_node",
+      "url": "https://msh.to/seeed_solar_node",
+      "description": "SenseCAP Solar Node P1 Pro",
+      "type": "vendor",
+      "targets": [
+        "seeed_solar_node"
+      ],
+      "hwModels": [
+        95
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "seeed_solar_node_aliexpress",
+      "url": "https://msh.to/seeed_solar_node_aliexpress",
+      "description": "SenseCAP Solar Node P1 Pro Aliexpress",
+      "type": "marketplace",
+      "targets": [
+        "seeed_solar_node"
+      ],
+      "hwModels": [
+        95
+      ],
+      "marketplace": "aliexpress",
+      "regions": null
+    },
+    {
+      "shortCode": "seeed_solar_node_amazon",
+      "url": "https://msh.to/seeed_solar_node_amazon",
+      "description": "SenseCAP Solar Node P1 Pro Amazon",
+      "type": "marketplace",
+      "targets": [
+        "seeed_solar_node"
+      ],
+      "hwModels": [
+        95
+      ],
+      "marketplace": "amazon",
+      "regions": [
+        "AU",
+        "CA",
+        "FR",
+        "DE",
+        "IE",
+        "JP",
+        "NL",
+        "ES",
+        "SE",
+        "GB",
+        "US"
+      ]
+    },
+    {
+      "shortCode": "elecrow-adv-35-tft",
+      "url": "https://msh.to/elecrow-adv-35-tft",
+      "description": "CrowPanel 3.5",
+      "type": "vendor",
+      "targets": [
+        "elecrow-adv-35-tft"
+      ],
+      "hwModels": [
+        97
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "elecrow-adv1-43-50-70-tft",
+      "url": "https://msh.to/elecrow-adv1-43-50-70-tft",
+      "description": "CrowPanel 4.3",
+      "type": "vendor",
+      "targets": [
+        "elecrow-adv1-43-50-70-tft"
+      ],
+      "hwModels": [
+        97
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "elecrow-adv-24-28-tft",
+      "url": "https://msh.to/elecrow-adv-24-28-tft",
+      "description": "CrowPanel 2.4",
+      "type": "vendor",
+      "targets": [
+        "elecrow-adv-24-28-tft"
+      ],
+      "hwModels": [
+        97
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "elecrow-adv-28-tft",
+      "url": "https://msh.to/elecrow-adv-28-tft",
+      "description": "CrowPanel 2.8",
+      "type": "vendor",
+      "targets": [
+        "elecrow-adv-24-28-tft"
+      ],
+      "hwModels": [
+        97
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "elecrow-adv1-50-tft",
+      "url": "https://msh.to/elecrow-adv1-50-tft",
+      "description": "CrowPanel 5.0",
+      "type": "vendor",
+      "targets": [
+        "elecrow-adv1-43-50-70-tft"
+      ],
+      "hwModels": [
+        97
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "elecrow-adv1-70-tft",
+      "url": "https://msh.to/elecrow-adv1-70-tft",
+      "description": "CrowPanel 7.0",
+      "type": "vendor",
+      "targets": [
+        "elecrow-adv1-43-50-70-tft"
+      ],
+      "hwModels": [
+        97
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "seeed_wio_tracker_L1",
+      "url": "https://msh.to/seeed_wio_tracker_L1",
+      "description": "Wio Tracker L1",
+      "type": "vendor",
+      "targets": [
+        "seeed_wio_tracker_L1"
+      ],
+      "hwModels": [
+        99
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "seeed_wio_tracker_L1_aliexpress",
+      "url": "https://msh.to/seeed_wio_tracker_L1_aliexpress",
+      "description": "Wio Tracker L1 Aliexpress",
+      "type": "marketplace",
+      "targets": [
+        "seeed_wio_tracker_L1"
+      ],
+      "hwModels": [
+        99
+      ],
+      "marketplace": "aliexpress",
+      "regions": null
+    },
+    {
+      "shortCode": "seeed_wio_tracker_L1_amazon",
+      "url": "https://msh.to/seeed_wio_tracker_L1_amazon",
+      "description": "Wio Tracker L1 Amazon",
+      "type": "marketplace",
+      "targets": [
+        "seeed_wio_tracker_L1"
+      ],
+      "hwModels": [
+        99
+      ],
+      "marketplace": "amazon",
+      "regions": [
+        "AU",
+        "CA",
+        "FR",
+        "DE",
+        "IE",
+        "JP",
+        "NL",
+        "ES",
+        "SE",
+        "GB",
+        "US"
+      ]
+    },
+    {
+      "shortCode": "nano-g2-ultra",
+      "url": "https://msh.to/nano-g2-ultra",
+      "description": "Nano G2 Ultra",
+      "type": "vendor",
+      "targets": [
+        "nano-g2-ultra"
+      ],
+      "hwModels": [
+        18
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "rak11310",
+      "url": "https://msh.to/rak11310",
+      "description": "RAK11310",
+      "type": "vendor",
+      "targets": [
+        "rak11310"
+      ],
+      "hwModels": [
+        26
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "rokland-rak11310",
+      "url": "https://msh.to/rokland-rak11310",
+      "description": "Rokland RAKwireless RAK11310 WisBlock RP2040 Core Module",
+      "type": "vendor",
+      "targets": [
+        "rak11310"
+      ],
+      "hwModels": [
+        26
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "station-g2-tindie",
+      "url": "https://msh.to/station-g2-tindie",
+      "description": "Station G2 Tindie Listing",
+      "type": "marketplace",
+      "targets": [
+        "station-g2"
+      ],
+      "hwModels": [
+        31
+      ],
+      "marketplace": "tindie",
+      "regions": [
+        "US",
+        "CA",
+        "GB",
+        "DE",
+        "FR",
+        "AU",
+        "NL"
+      ]
+    },
+    {
+      "shortCode": "nano-g2-ultra-tindie",
+      "url": "https://msh.to/nano-g2-ultra-tindie",
+      "description": "Nano G2 Ultra Tindie Listing",
+      "type": "marketplace",
+      "targets": [
+        "nano-g2-ultra"
+      ],
+      "hwModels": [
+        18
+      ],
+      "marketplace": "tindie",
+      "regions": [
+        "US",
+        "CA",
+        "GB",
+        "DE",
+        "FR",
+        "AU",
+        "NL"
+      ]
+    },
+    {
+      "shortCode": "t-deck-plus",
+      "url": "https://msh.to/t-deck-plus",
+      "description": "T-Deck Plus",
+      "type": "vendor",
+      "targets": [
+        "t-deck"
+      ],
+      "hwModels": [
+        50
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "rokland-meshtastic-starter-kit",
+      "url": "https://msh.to/rokland-meshtastic-starter-kit",
+      "description": "Rokland Meshtastic Starter Kit",
+      "type": "marketplace",
+      "targets": null,
+      "hwModels": null,
+      "marketplace": "rokland",
+      "regions": [
+        "AU",
+        "AT",
+        "BE",
+        "CA",
+        "DK",
+        "EC",
+        "FR",
+        "DE",
+        "IE",
+        "JP",
+        "NL",
+        "NZ",
+        "NO",
+        "PK",
+        "ES",
+        "SE",
+        "CH",
+        "GB",
+        "US"
+      ]
+    },
+    {
+      "shortCode": "rokland-t-deck-base",
+      "url": "https://msh.to/rokland-t-deck-base",
+      "description": "Rokland T-Deck Base",
+      "type": "marketplace",
+      "targets": [
+        "t-deck"
+      ],
+      "hwModels": [
+        50
+      ],
+      "marketplace": "rokland",
+      "regions": [
+        "AU",
+        "AT",
+        "BE",
+        "CA",
+        "DK",
+        "EC",
+        "FR",
+        "DE",
+        "IE",
+        "JP",
+        "NL",
+        "NZ",
+        "NO",
+        "PK",
+        "ES",
+        "SE",
+        "CH",
+        "GB",
+        "US"
+      ]
+    },
+    {
+      "shortCode": "rokland-t-deck-complete",
+      "url": "https://msh.to/rokland-t-deck-complete",
+      "description": "Rokland T-Deck Complete",
+      "type": "marketplace",
+      "targets": [
+        "t-deck"
+      ],
+      "hwModels": [
+        50
+      ],
+      "marketplace": "rokland",
+      "regions": [
+        "AU",
+        "AT",
+        "BE",
+        "CA",
+        "DK",
+        "EC",
+        "FR",
+        "DE",
+        "IE",
+        "JP",
+        "NL",
+        "NZ",
+        "NO",
+        "PK",
+        "ES",
+        "SE",
+        "CH",
+        "GB",
+        "US"
+      ]
+    },
+    {
+      "shortCode": "rokland-t-deck-plus",
+      "url": "https://msh.to/rokland-t-deck-plus",
+      "description": "Rokland T-Deck Plus",
+      "type": "marketplace",
+      "targets": [
+        "t-deck"
+      ],
+      "hwModels": [
+        50
+      ],
+      "marketplace": "rokland",
+      "regions": [
+        "AU",
+        "AT",
+        "BE",
+        "CA",
+        "DK",
+        "EC",
+        "FR",
+        "DE",
+        "IE",
+        "JP",
+        "NL",
+        "NZ",
+        "NO",
+        "PK",
+        "ES",
+        "SE",
+        "CH",
+        "GB",
+        "US"
+      ]
+    },
+    {
+      "shortCode": "rokland-t-echo",
+      "url": "https://msh.to/rokland-t-echo",
+      "description": "Rokland T-Echo",
+      "type": "marketplace",
+      "targets": [
+        "t-echo"
+      ],
+      "hwModels": [
+        7
+      ],
+      "marketplace": "rokland",
+      "regions": [
+        "AU",
+        "AT",
+        "BE",
+        "CA",
+        "DK",
+        "EC",
+        "FR",
+        "DE",
+        "IE",
+        "JP",
+        "NL",
+        "NZ",
+        "NO",
+        "PK",
+        "ES",
+        "SE",
+        "CH",
+        "GB",
+        "US"
+      ]
+    },
+    {
+      "shortCode": "rokland-t-echo-bme280",
+      "url": "https://msh.to/rokland-t-echo-bme280",
+      "description": "Rokland T-Echo with BME280",
+      "type": "marketplace",
+      "targets": [
+        "t-echo"
+      ],
+      "hwModels": [
+        7
+      ],
+      "marketplace": "rokland",
+      "regions": [
+        "AU",
+        "AT",
+        "BE",
+        "CA",
+        "DK",
+        "EC",
+        "FR",
+        "DE",
+        "IE",
+        "JP",
+        "NL",
+        "NZ",
+        "NO",
+        "PK",
+        "ES",
+        "SE",
+        "CH",
+        "GB",
+        "US"
+      ]
+    },
+    {
+      "shortCode": "rokland-rak19007",
+      "url": "https://msh.to/rokland-rak19007",
+      "description": "Rokland RAKwireless RAK19007 WisBlock Base Board 2nd Gen",
+      "type": "marketplace",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": "rokland",
+      "regions": [
+        "AU",
+        "AT",
+        "BE",
+        "CA",
+        "DK",
+        "EC",
+        "FR",
+        "DE",
+        "IE",
+        "JP",
+        "NL",
+        "NZ",
+        "NO",
+        "PK",
+        "ES",
+        "SE",
+        "CH",
+        "GB",
+        "US"
+      ]
+    },
+    {
+      "shortCode": "hexaspot-rak19007",
+      "url": "https://msh.to/hexaspot-rak19007",
+      "description": "Hexaspot RAKwireless RAK19007 WisBlock Base Board 2nd Gen",
+      "type": "marketplace",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": "hexaspot",
+      "regions": [
+        "AT",
+        "BE",
+        "BG",
+        "CY",
+        "CZ",
+        "DE",
+        "DK",
+        "EE",
+        "ES",
+        "FI",
+        "FR",
+        "GR",
+        "HR",
+        "HU",
+        "IE",
+        "IT",
+        "LT",
+        "LU",
+        "LV",
+        "MT",
+        "NL",
+        "NO",
+        "PL",
+        "PT",
+        "RO",
+        "SE",
+        "SI",
+        "SK"
+      ]
+    },
+    {
+      "shortCode": "rokland-starter-kit",
+      "url": "https://msh.to/rokland-starter-kit",
+      "description": "Rokland RAKwireless 4631 Starter Kit",
+      "type": "marketplace",
+      "targets": [
+        "rak4631"
+      ],
+      "hwModels": [
+        9
+      ],
+      "marketplace": "rokland",
+      "regions": [
+        "AU",
+        "AT",
+        "BE",
+        "CA",
+        "DK",
+        "EC",
+        "FR",
+        "DE",
+        "IE",
+        "JP",
+        "NL",
+        "NZ",
+        "NO",
+        "PK",
+        "ES",
+        "SE",
+        "CH",
+        "GB",
+        "US"
+      ]
+    },
+    {
+      "shortCode": "hexaspot-starter-kit",
+      "url": "https://msh.to/hexaspot-starter-kit",
+      "description": "Hexaspot RAKwireless 4631 Starter Kit",
+      "type": "marketplace",
+      "targets": [
+        "rak4631"
+      ],
+      "hwModels": [
+        9
+      ],
+      "marketplace": "hexaspot",
+      "regions": [
+        "AT",
+        "BE",
+        "BG",
+        "CY",
+        "CZ",
+        "DE",
+        "DK",
+        "EE",
+        "ES",
+        "FI",
+        "FR",
+        "GR",
+        "HR",
+        "HU",
+        "IE",
+        "IT",
+        "LT",
+        "LU",
+        "LV",
+        "MT",
+        "NL",
+        "NO",
+        "PL",
+        "PT",
+        "RO",
+        "SE",
+        "SI",
+        "SK"
+      ]
+    },
+    {
+      "shortCode": "aliexpress-rak1921",
+      "url": "https://msh.to/aliexpress-rak1921",
+      "description": "RAK1921 OLED Display (AliExpress)",
+      "type": "marketplace",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": "aliexpress",
+      "regions": null
+    },
+    {
+      "shortCode": "rak1921",
+      "url": "https://msh.to/rak1921",
+      "description": "RAK1921 OLED Display (RAK Store)",
+      "type": "vendor",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "rokland-rak1921",
+      "url": "https://msh.to/rokland-rak1921",
+      "description": "Rokland RAK1921 WisBlock OLED Display",
+      "type": "marketplace",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": "rokland",
+      "regions": [
+        "AU",
+        "AT",
+        "BE",
+        "CA",
+        "DK",
+        "EC",
+        "FR",
+        "DE",
+        "IE",
+        "JP",
+        "NL",
+        "NZ",
+        "NO",
+        "PK",
+        "ES",
+        "SE",
+        "CH",
+        "GB",
+        "US"
+      ]
+    },
+    {
+      "shortCode": "muzi-rak1921",
+      "url": "https://msh.to/muzi-rak1921",
+      "description": "Muzi Works RAK1921 OLED Display SSD1306",
+      "type": "marketplace",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": "muzi",
+      "regions": [
+        "AU",
+        "AT",
+        "BE",
+        "CA",
+        "CZ",
+        "DK",
+        "FI",
+        "FR",
+        "DE",
+        "HK",
+        "IN",
+        "IE",
+        "IL",
+        "IT",
+        "JP",
+        "MY",
+        "NL",
+        "NZ",
+        "NO",
+        "PL",
+        "PT",
+        "SG",
+        "KR",
+        "ES",
+        "SE",
+        "CH",
+        "TW",
+        "AE",
+        "GB",
+        "US"
+      ]
+    },
+    {
+      "shortCode": "aliexpress-rak14000",
+      "url": "https://msh.to/aliexpress-rak14000",
+      "description": "RAK14000 E-Ink Display (AliExpress)",
+      "type": "marketplace",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": "aliexpress",
+      "regions": null
+    },
+    {
+      "shortCode": "rak14000",
+      "url": "https://msh.to/rak14000",
+      "description": "RAK14000 E-Ink Display (RAK Store)",
+      "type": "vendor",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "rokland-rak14000",
+      "url": "https://msh.to/rokland-rak14000",
+      "description": "Rokland RAK14000 WisBlock E-Ink Display",
+      "type": "marketplace",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": "rokland",
+      "regions": [
+        "AU",
+        "AT",
+        "BE",
+        "CA",
+        "DK",
+        "EC",
+        "FR",
+        "DE",
+        "IE",
+        "JP",
+        "NL",
+        "NZ",
+        "NO",
+        "PK",
+        "ES",
+        "SE",
+        "CH",
+        "GB",
+        "US"
+      ]
+    },
+    {
+      "shortCode": "aliexpress-rak12500",
+      "url": "https://msh.to/aliexpress-rak12500",
+      "description": "RAK12500 (AliExpress)",
+      "type": "marketplace",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": "aliexpress",
+      "regions": null
+    },
+    {
+      "shortCode": "rak12500",
+      "url": "https://msh.to/rak12500",
+      "description": "RAK12500 (RAK Store)",
+      "type": "vendor",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "rak13300",
+      "url": "https://msh.to/rak13300",
+      "description": "RAK13300 LPWAN Module (RAK Store)",
+      "type": "vendor",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "aliexpress-rak13002",
+      "url": "https://msh.to/aliexpress-rak13002",
+      "description": "RAK13002 IO Module (AliExpress)",
+      "type": "marketplace",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": "aliexpress",
+      "regions": null
+    },
+    {
+      "shortCode": "rak13002",
+      "url": "https://msh.to/rak13002",
+      "description": "RAK13002 IO Module (RAK Store)",
+      "type": "vendor",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "rokland-rak13002",
+      "url": "https://msh.to/rokland-rak13002",
+      "description": "Rokland RAK13002 WisBlock IO Adapter Module",
+      "type": "marketplace",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": "rokland",
+      "regions": [
+        "AU",
+        "AT",
+        "BE",
+        "CA",
+        "DK",
+        "EC",
+        "FR",
+        "DE",
+        "IE",
+        "JP",
+        "NL",
+        "NZ",
+        "NO",
+        "PK",
+        "ES",
+        "SE",
+        "CH",
+        "GB",
+        "US"
+      ]
+    },
+    {
+      "shortCode": "muzi-rak13002",
+      "url": "https://msh.to/muzi-rak13002",
+      "description": "Muzi Works RAK13002 IO Module",
+      "type": "marketplace",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": "muzi",
+      "regions": [
+        "AU",
+        "AT",
+        "BE",
+        "CA",
+        "CZ",
+        "DK",
+        "FI",
+        "FR",
+        "DE",
+        "HK",
+        "IN",
+        "IE",
+        "IL",
+        "IT",
+        "JP",
+        "MY",
+        "NL",
+        "NZ",
+        "NO",
+        "PL",
+        "PT",
+        "SG",
+        "KR",
+        "ES",
+        "SE",
+        "CH",
+        "TW",
+        "AE",
+        "GB",
+        "US"
+      ]
+    },
+    {
+      "shortCode": "rak6421",
+      "url": "https://msh.to/rak6421",
+      "description": "WisMesh Pi Hat RAK6421 (RAK Store)",
+      "type": "vendor",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "aliexpress-rak18001",
+      "url": "https://msh.to/aliexpress-rak18001",
+      "description": "RAK18001 RAK Buzzer (AliExpress)",
+      "type": "marketplace",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": "aliexpress",
+      "regions": null
+    },
+    {
+      "shortCode": "rak18001",
+      "url": "https://msh.to/rak18001",
+      "description": "RAK18001 RAK Buzzer (RAK Store)",
+      "type": "vendor",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "aliexpress-rak1901",
+      "url": "https://msh.to/aliexpress-rak1901",
+      "description": "RAK1901 Temperature and Humidity Sensor (AliExpress)",
+      "type": "marketplace",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": "aliexpress",
+      "regions": null
+    },
+    {
+      "shortCode": "rak1901",
+      "url": "https://msh.to/rak1901",
+      "description": "RAK1901 Temperature and Humidity Sensor (RAK Store)",
+      "type": "vendor",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "aliexpress-rak1902",
+      "url": "https://msh.to/aliexpress-rak1902",
+      "description": "RAK-1902 Barometric Pressure Sensor (AliExpress)",
+      "type": "marketplace",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": "aliexpress",
+      "regions": null
+    },
+    {
+      "shortCode": "rak1902",
+      "url": "https://msh.to/rak1902",
+      "description": "RAK-1902 Barometric Pressure Sensor (RAK Store)",
+      "type": "vendor",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "aliexpress-rak1906",
+      "url": "https://msh.to/aliexpress-rak1906",
+      "description": "RAK1906 Environment Sensor (AliExpress)",
+      "type": "marketplace",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": "aliexpress",
+      "regions": null
+    },
+    {
+      "shortCode": "rak1906",
+      "url": "https://msh.to/rak1906",
+      "description": "RAK1906 Environment Sensor (RAK Store)",
+      "type": "vendor",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "aliexpress-rak12002",
+      "url": "https://msh.to/aliexpress-rak12002",
+      "description": "RAK12002 WisBlock RTC Module (AliExpress)",
+      "type": "marketplace",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": "aliexpress",
+      "regions": null
+    },
+    {
+      "shortCode": "rak12002",
+      "url": "https://msh.to/rak12002",
+      "description": "RAK12002 WisBlock RTC Module (RAK Store)",
+      "type": "vendor",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "rokland-rak12002",
+      "url": "https://msh.to/rokland-rak12002",
+      "description": "Rokland RAK12002 RTC Module Micro Crystal RV-3028-C7",
+      "type": "marketplace",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": "rokland",
+      "regions": [
+        "AU",
+        "AT",
+        "BE",
+        "CA",
+        "DK",
+        "EC",
+        "FR",
+        "DE",
+        "IE",
+        "JP",
+        "NL",
+        "NZ",
+        "NO",
+        "PK",
+        "ES",
+        "SE",
+        "CH",
+        "GB",
+        "US"
+      ]
+    },
+    {
+      "shortCode": "aliexpress-wismesh-pocket-v2",
+      "url": "https://msh.to/aliexpress-wismesh-pocket-v2",
+      "description": "WisMesh Pocket V2 (AliExpress)",
+      "type": "marketplace",
+      "targets": null,
+      "hwModels": null,
+      "marketplace": "aliexpress",
+      "regions": null
+    },
+    {
+      "shortCode": "rokland-wismesh-pocket-v2",
+      "url": "https://msh.to/rokland-wismesh-pocket-v2",
+      "description": "WisMesh Pocket V2 (Rokland)",
+      "type": "marketplace",
+      "targets": null,
+      "hwModels": null,
+      "marketplace": "rokland",
+      "regions": [
+        "AU",
+        "AT",
+        "BE",
+        "CA",
+        "DK",
+        "EC",
+        "FR",
+        "DE",
+        "IE",
+        "JP",
+        "NL",
+        "NZ",
+        "NO",
+        "PK",
+        "ES",
+        "SE",
+        "CH",
+        "GB",
+        "US"
+      ]
+    },
+    {
+      "shortCode": "hexaspot-wismesh-pocket-v2",
+      "url": "https://msh.to/hexaspot-wismesh-pocket-v2",
+      "description": "WisMesh Pocket V2 (Hexaspot)",
+      "type": "marketplace",
+      "targets": null,
+      "hwModels": null,
+      "marketplace": "hexaspot",
+      "regions": [
+        "AT",
+        "BE",
+        "BG",
+        "CY",
+        "CZ",
+        "DE",
+        "DK",
+        "EE",
+        "ES",
+        "FI",
+        "FR",
+        "GR",
+        "HR",
+        "HU",
+        "IE",
+        "IT",
+        "LT",
+        "LU",
+        "LV",
+        "MT",
+        "NL",
+        "NO",
+        "PL",
+        "PT",
+        "RO",
+        "SE",
+        "SI",
+        "SK"
+      ]
+    },
+    {
+      "shortCode": "wismesh-pocket-v2",
+      "url": "https://msh.to/wismesh-pocket-v2",
+      "description": "WisMesh Pocket V2 (RAK Store)",
+      "type": "vendor",
+      "targets": null,
+      "hwModels": null,
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "aliexpress-wismesh-pocket-mini",
+      "url": "https://msh.to/aliexpress-wismesh-pocket-mini",
+      "description": "WisMesh Pocket Mini (Rokland)",
+      "type": "marketplace",
+      "targets": null,
+      "hwModels": null,
+      "marketplace": "aliexpress",
+      "regions": null
+    },
+    {
+      "shortCode": "rokland-wismesh-pocket-mini",
+      "url": "https://msh.to/rokland-wismesh-pocket-mini",
+      "description": "WisMesh Pocket Mini (Rokland)",
+      "type": "marketplace",
+      "targets": null,
+      "hwModels": null,
+      "marketplace": "rokland",
+      "regions": [
+        "AU",
+        "AT",
+        "BE",
+        "CA",
+        "DK",
+        "EC",
+        "FR",
+        "DE",
+        "IE",
+        "JP",
+        "NL",
+        "NZ",
+        "NO",
+        "PK",
+        "ES",
+        "SE",
+        "CH",
+        "GB",
+        "US"
+      ]
+    },
+    {
+      "shortCode": "wismesh-pocket-mini",
+      "url": "https://msh.to/wismesh-pocket-mini",
+      "description": "WisMesh Pocket Mini (RAK Store)",
+      "type": "vendor",
+      "targets": null,
+      "hwModels": null,
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "aliexpress-rak19026",
+      "url": "https://msh.to/aliexpress-rak19026",
+      "description": "WisMesh Baseboard (AliExpress)",
+      "type": "marketplace",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": "aliexpress",
+      "regions": null
+    },
+    {
+      "shortCode": "rokland-rak19026",
+      "url": "https://msh.to/rokland-rak19026",
+      "description": "WisMesh Baseboard (Rokland)",
+      "type": "marketplace",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": "rokland",
+      "regions": [
+        "AU",
+        "AT",
+        "BE",
+        "CA",
+        "DK",
+        "EC",
+        "FR",
+        "DE",
+        "IE",
+        "JP",
+        "NL",
+        "NZ",
+        "NO",
+        "PK",
+        "ES",
+        "SE",
+        "CH",
+        "GB",
+        "US"
+      ]
+    },
+    {
+      "shortCode": "rak19026",
+      "url": "https://msh.to/rak19026",
+      "description": "WisMesh Baseboard (RAK Store)",
+      "type": "vendor",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "aliexpress-wismesh-tap",
+      "url": "https://msh.to/aliexpress-wismesh-tap",
+      "description": "RAK WisMesh Tap (AliExpress)",
+      "type": "marketplace",
+      "targets": [
+        "rak_wismeshtap"
+      ],
+      "hwModels": [
+        84
+      ],
+      "marketplace": "aliexpress",
+      "regions": null
+    },
+    {
+      "shortCode": "aliexpress-board-one",
+      "url": "https://msh.to/aliexpress-board-one",
+      "description": "RAK WisMesh Board ONE (AliExpress)",
+      "type": "marketplace",
+      "targets": null,
+      "hwModels": null,
+      "marketplace": "aliexpress",
+      "regions": null
+    },
+    {
+      "shortCode": "board-one",
+      "url": "https://msh.to/board-one",
+      "description": "RAK WisMesh Board ONE (RAK Store)",
+      "type": "vendor",
+      "targets": null,
+      "hwModels": null,
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "rokland-board-one",
+      "url": "https://msh.to/rokland-board-one",
+      "description": "Rokland WisMesh Board ONE (US915 MHz)",
+      "type": "marketplace",
+      "targets": null,
+      "hwModels": null,
+      "marketplace": "rokland",
+      "regions": [
+        "AU",
+        "AT",
+        "BE",
+        "CA",
+        "DK",
+        "EC",
+        "FR",
+        "DE",
+        "IE",
+        "JP",
+        "NL",
+        "NZ",
+        "NO",
+        "PK",
+        "ES",
+        "SE",
+        "CH",
+        "GB",
+        "US"
+      ]
+    },
+    {
+      "shortCode": "wismesh-repeater",
+      "url": "https://msh.to/wismesh-repeater",
+      "description": "WisMesh Repeater (RAK Store)",
+      "type": "vendor",
+      "targets": [
+        "rak2560"
+      ],
+      "hwModels": [
+        22
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "aliexpress-wismesh-repeater",
+      "url": "https://msh.to/aliexpress-wismesh-repeater",
+      "description": "WisMesh Repeater (AliExpress)",
+      "type": "marketplace",
+      "targets": null,
+      "hwModels": null,
+      "marketplace": "aliexpress",
+      "regions": null
+    },
+    {
+      "shortCode": "aliexpress-wismesh-repeater-mini",
+      "url": "https://msh.to/aliexpress-wismesh-repeater-mini",
+      "description": "WisMesh Repeater Mini (AliExpress)",
+      "type": "marketplace",
+      "targets": null,
+      "hwModels": null,
+      "marketplace": "aliexpress",
+      "regions": null
+    },
+    {
+      "shortCode": "hexaspot-wismesh-repeater-mini",
+      "url": "https://msh.to/hexaspot-wismesh-repeater-mini",
+      "description": "WisMesh Repeater Mini (Hexaspot)",
+      "type": "marketplace",
+      "targets": null,
+      "hwModels": null,
+      "marketplace": "hexaspot",
+      "regions": [
+        "AT",
+        "BE",
+        "BG",
+        "CY",
+        "CZ",
+        "DE",
+        "DK",
+        "EE",
+        "ES",
+        "FI",
+        "FR",
+        "GR",
+        "HR",
+        "HU",
+        "IE",
+        "IT",
+        "LT",
+        "LU",
+        "LV",
+        "MT",
+        "NL",
+        "NO",
+        "PL",
+        "PT",
+        "RO",
+        "SE",
+        "SI",
+        "SK"
+      ]
+    },
+    {
+      "shortCode": "wismesh-repeater-mini",
+      "url": "https://msh.to/wismesh-repeater-mini",
+      "description": "WisMesh Repeater Mini (RAK Store)",
+      "type": "vendor",
+      "targets": null,
+      "hwModels": null,
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "aliexpress-wismesh-ethernet-gateway",
+      "url": "https://msh.to/aliexpress-wismesh-ethernet-gateway",
+      "description": "WisMesh Ethernet MQTT Gateway (AliExpress)",
+      "type": "marketplace",
+      "targets": null,
+      "hwModels": null,
+      "marketplace": "aliexpress",
+      "regions": null
+    },
+    {
+      "shortCode": "wismesh-ethernet-gateway",
+      "url": "https://msh.to/wismesh-ethernet-gateway",
+      "description": "WisMesh Ethernet MQTT Gateway (RAK Store)",
+      "type": "vendor",
+      "targets": null,
+      "hwModels": null,
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "aliexpress-wismesh-wifi-gateway",
+      "url": "https://msh.to/aliexpress-wismesh-wifi-gateway",
+      "description": "WisMesh WiFi MQTT Gateway (AliExpress)",
+      "type": "marketplace",
+      "targets": null,
+      "hwModels": null,
+      "marketplace": "aliexpress",
+      "regions": null
+    },
+    {
+      "shortCode": "wismesh-wifi-gateway",
+      "url": "https://msh.to/wismesh-wifi-gateway",
+      "description": "WisMesh WiFi MQTT Gateway (RAK Store)",
+      "type": "vendor",
+      "targets": null,
+      "hwModels": null,
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "aliexpress-board-one-pocket",
+      "url": "https://msh.to/aliexpress-board-one-pocket",
+      "description": "RAK WisMesh Board ONE Pocket (AliExpress)",
+      "type": "marketplace",
+      "targets": null,
+      "hwModels": null,
+      "marketplace": "aliexpress",
+      "regions": null
+    },
+    {
+      "shortCode": "board-one-pocket",
+      "url": "https://msh.to/board-one-pocket",
+      "description": "RAK WisMesh Board ONE Pocket (RAK Store)",
+      "type": "vendor",
+      "targets": null,
+      "hwModels": null,
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "aliexpress-wismesh-unify-enclosure",
+      "url": "https://msh.to/aliexpress-wismesh-unify-enclosure",
+      "description": "WisMesh Unify Enclosure (AliExpress)",
+      "type": "marketplace",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": "aliexpress",
+      "regions": null
+    },
+    {
+      "shortCode": "wismesh-unify-enclosure",
+      "url": "https://msh.to/wismesh-unify-enclosure",
+      "description": "WisMesh Unify Enclosure (RAK Store)",
+      "type": "vendor",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "aliexpress-wismesh-antenna",
+      "url": "https://msh.to/aliexpress-wismesh-antenna",
+      "description": "WisMesh Antenna (AliExpress)",
+      "type": "marketplace",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": "aliexpress",
+      "regions": null
+    },
+    {
+      "shortCode": "wismesh-antenna",
+      "url": "https://msh.to/wismesh-antenna",
+      "description": "WisMesh Antenna (RAK Store)",
+      "type": "vendor",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "muzi-rak4631",
+      "url": "https://msh.to/muzi-rak4631",
+      "description": "Muzi RAK4631 Starter Kit",
+      "type": "marketplace",
+      "targets": [
+        "rak4631"
+      ],
+      "hwModels": [
+        9
+      ],
+      "marketplace": "muzi",
+      "regions": [
+        "AU",
+        "AT",
+        "BE",
+        "CA",
+        "CZ",
+        "DK",
+        "FI",
+        "FR",
+        "DE",
+        "HK",
+        "IN",
+        "IE",
+        "IL",
+        "IT",
+        "JP",
+        "MY",
+        "NL",
+        "NZ",
+        "NO",
+        "PL",
+        "PT",
+        "SG",
+        "KR",
+        "ES",
+        "SE",
+        "CH",
+        "TW",
+        "AE",
+        "GB",
+        "US"
+      ]
+    },
+    {
+      "shortCode": "aliexpress-rak19007",
+      "url": "https://msh.to/aliexpress-rak19007",
+      "description": "RAK19007 (AliExpress)",
+      "type": "marketplace",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": "aliexpress",
+      "regions": null
+    },
+    {
+      "shortCode": "aliexpress-starter-kit",
+      "url": "https://msh.to/aliexpress-starter-kit",
+      "description": "WisMesh RAK4631 Starter Kit (AliExpress)",
+      "type": "marketplace",
+      "targets": [
+        "rak4631"
+      ],
+      "hwModels": [
+        9
+      ],
+      "marketplace": "aliexpress",
+      "regions": null
+    },
+    {
+      "shortCode": "rak19003",
+      "url": "https://msh.to/rak19003",
+      "description": "RAK19003 (RAK Store)",
+      "type": "vendor",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "aliexpress-rak19003",
+      "url": "https://msh.to/aliexpress-rak19003",
+      "description": "RAK19003 (AliExpress)",
+      "type": "marketplace",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": "aliexpress",
+      "regions": null
+    },
+    {
+      "shortCode": "rak19001",
+      "url": "https://msh.to/rak19001",
+      "description": "RAK19001 WisBlock Dual IO Base Board (RAK Store)",
+      "type": "vendor",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "aliexpress-rak19001",
+      "url": "https://msh.to/aliexpress-rak19001",
+      "description": "RAK19001 WisBlock Dual IO Base Board (AliExpress)",
+      "type": "marketplace",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": "aliexpress",
+      "regions": null
+    },
+    {
+      "shortCode": "rokland-19003",
+      "url": "https://msh.to/rokland-19003",
+      "description": "Rokland WisBlock Mini Base Board RAK19003 (Ver B)",
+      "type": "marketplace",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": "rokland",
+      "regions": [
+        "AU",
+        "AT",
+        "BE",
+        "CA",
+        "DK",
+        "EC",
+        "FR",
+        "DE",
+        "IE",
+        "JP",
+        "NL",
+        "NZ",
+        "NO",
+        "PK",
+        "ES",
+        "SE",
+        "CH",
+        "GB",
+        "US"
+      ]
+    },
+    {
+      "shortCode": "hexaspot-19003",
+      "url": "https://msh.to/hexaspot-19003",
+      "description": "Hexaspot WisBlock Mini Base Board RAK19003 (Ver B)",
+      "type": "marketplace",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": "hexaspot",
+      "regions": [
+        "AT",
+        "BE",
+        "BG",
+        "CY",
+        "CZ",
+        "DE",
+        "DK",
+        "EE",
+        "ES",
+        "FI",
+        "FR",
+        "GR",
+        "HR",
+        "HU",
+        "IE",
+        "IT",
+        "LT",
+        "LU",
+        "LV",
+        "MT",
+        "NL",
+        "NO",
+        "PL",
+        "PT",
+        "RO",
+        "SE",
+        "SI",
+        "SK"
+      ]
+    },
+    {
+      "shortCode": "rokland-19001",
+      "url": "https://msh.to/rokland-19001",
+      "description": "Rokland WisBlock Dual IO Base Board RAK19001",
+      "type": "marketplace",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": "rokland",
+      "regions": [
+        "AU",
+        "AT",
+        "BE",
+        "CA",
+        "DK",
+        "EC",
+        "FR",
+        "DE",
+        "IE",
+        "JP",
+        "NL",
+        "NZ",
+        "NO",
+        "PK",
+        "ES",
+        "SE",
+        "CH",
+        "GB",
+        "US"
+      ]
+    },
+    {
+      "shortCode": "hexaspot-19001",
+      "url": "https://msh.to/hexaspot-19001",
+      "description": "Hexaspot WisBlock Dual IO Base Board RAK19001",
+      "type": "marketplace",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": "hexaspot",
+      "regions": [
+        "AT",
+        "BE",
+        "BG",
+        "CY",
+        "CZ",
+        "DE",
+        "DK",
+        "EE",
+        "ES",
+        "FI",
+        "FR",
+        "GR",
+        "HR",
+        "HU",
+        "IE",
+        "IT",
+        "LT",
+        "LU",
+        "LV",
+        "MT",
+        "NL",
+        "NO",
+        "PL",
+        "PT",
+        "RO",
+        "SE",
+        "SI",
+        "SK"
+      ]
+    },
+    {
+      "shortCode": "rokland-4631",
+      "url": "https://msh.to/rokland-4631",
+      "description": "Rokland RAK4631 Nordic nRF52840 BLE Core Module for LoRaWAN with LoRa SX1262",
+      "type": "marketplace",
+      "targets": [
+        "rak4631"
+      ],
+      "hwModels": [
+        9
+      ],
+      "marketplace": "rokland",
+      "regions": [
+        "AU",
+        "AT",
+        "BE",
+        "CA",
+        "DK",
+        "EC",
+        "FR",
+        "DE",
+        "IE",
+        "JP",
+        "NL",
+        "NZ",
+        "NO",
+        "PK",
+        "ES",
+        "SE",
+        "CH",
+        "GB",
+        "US"
+      ]
+    },
+    {
+      "shortCode": "hexaspot-4631",
+      "url": "https://msh.to/hexaspot-4631",
+      "description": "Hexaspot RAK4631 Nordic nRF52840 BLE Core Module for LoRaWAN with LoRa SX1262",
+      "type": "marketplace",
+      "targets": [
+        "rak4631"
+      ],
+      "hwModels": [
+        9
+      ],
+      "marketplace": "hexaspot",
+      "regions": [
+        "AT",
+        "BE",
+        "BG",
+        "CY",
+        "CZ",
+        "DE",
+        "DK",
+        "EE",
+        "ES",
+        "FI",
+        "FR",
+        "GR",
+        "HR",
+        "HU",
+        "IE",
+        "IT",
+        "LT",
+        "LU",
+        "LV",
+        "MT",
+        "NL",
+        "NO",
+        "PL",
+        "PT",
+        "RO",
+        "SE",
+        "SI",
+        "SK"
+      ]
+    },
+    {
+      "shortCode": "aliexpress-rak4631",
+      "url": "https://msh.to/aliexpress-rak4631",
+      "description": "RAK4631 Nordic nRF52840 BLE Core Module (AliExpress)",
+      "type": "marketplace",
+      "targets": [
+        "rak4631"
+      ],
+      "hwModels": [
+        9
+      ],
+      "marketplace": "aliexpress",
+      "regions": null
+    },
+    {
+      "shortCode": "rakwireless-4631",
+      "url": "https://msh.to/rakwireless-4631",
+      "description": "RAK4631 Nordic nRF52840 BLE Core Module",
+      "type": "vendor",
+      "targets": [
+        "rak4631"
+      ],
+      "hwModels": [
+        9
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "rakwireless-rak11310",
+      "url": "https://msh.to/rakwireless-rak11310",
+      "description": "RAK11310 RP2040 Core Module)",
+      "type": "vendor",
+      "targets": [
+        "rak11310"
+      ],
+      "hwModels": [
+        26
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "rakwireless-rak3312",
+      "url": "https://msh.to/rakwireless-rak3312",
+      "description": "RAK3312 ESP32-S3 Core Module",
+      "type": "vendor",
+      "targets": [
+        "rak3312"
+      ],
+      "hwModels": [
+        106
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "hexaspot-rak3312",
+      "url": "https://msh.to/hexaspot-rak3312",
+      "description": "Hexaspot RAK3312 ESP32-S3 Core Module",
+      "type": "marketplace",
+      "targets": [
+        "rak3312"
+      ],
+      "hwModels": [
+        106
+      ],
+      "marketplace": "hexaspot",
+      "regions": [
+        "AT",
+        "BE",
+        "BG",
+        "CY",
+        "CZ",
+        "DE",
+        "DK",
+        "EE",
+        "ES",
+        "FI",
+        "FR",
+        "GR",
+        "HR",
+        "HU",
+        "IE",
+        "IT",
+        "LT",
+        "LU",
+        "LV",
+        "MT",
+        "NL",
+        "NO",
+        "PL",
+        "PT",
+        "RO",
+        "SE",
+        "SI",
+        "SK"
+      ]
+    },
+    {
+      "shortCode": "rokland-rak3312",
+      "url": "https://msh.to/rokland-rak3312",
+      "description": "Rokland RAK3312 ESP32-S3 Core Module",
+      "type": "marketplace",
+      "targets": [
+        "rak3312"
+      ],
+      "hwModels": [
+        106
+      ],
+      "marketplace": "rokland",
+      "regions": [
+        "AU",
+        "AT",
+        "BE",
+        "CA",
+        "DK",
+        "EC",
+        "FR",
+        "DE",
+        "IE",
+        "JP",
+        "NL",
+        "NZ",
+        "NO",
+        "PK",
+        "ES",
+        "SE",
+        "CH",
+        "GB",
+        "US"
+      ]
+    },
+    {
+      "shortCode": "rokland-rak3312-starter-kit",
+      "url": "https://msh.to/rokland-rak3312-starter-kit",
+      "description": "Rokland RAK3312 ESP32-S3 Starter Kit",
+      "type": "marketplace",
+      "targets": [
+        "rak3312"
+      ],
+      "hwModels": [
+        106
+      ],
+      "marketplace": "rokland",
+      "regions": [
+        "AU",
+        "AT",
+        "BE",
+        "CA",
+        "DK",
+        "EC",
+        "FR",
+        "DE",
+        "IE",
+        "JP",
+        "NL",
+        "NZ",
+        "NO",
+        "PK",
+        "ES",
+        "SE",
+        "CH",
+        "GB",
+        "US"
+      ]
+    },
+    {
+      "shortCode": "aliexpress-rak11310",
+      "url": "https://msh.to/aliexpress-rak11310",
+      "description": "RAK11310 RP2040 Core Module (AliExpress)",
+      "type": "marketplace",
+      "targets": [
+        "rak11310"
+      ],
+      "hwModels": [
+        26
+      ],
+      "marketplace": "aliexpress",
+      "regions": null
+    },
+    {
+      "shortCode": "rokland-1901",
+      "url": "https://msh.to/rokland-1901",
+      "description": "Rokland RAK1901 Temperature and Humidity Sensor",
+      "type": "marketplace",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": "rokland",
+      "regions": [
+        "AU",
+        "AT",
+        "BE",
+        "CA",
+        "DK",
+        "EC",
+        "FR",
+        "DE",
+        "IE",
+        "JP",
+        "NL",
+        "NZ",
+        "NO",
+        "PK",
+        "ES",
+        "SE",
+        "CH",
+        "GB",
+        "US"
+      ]
+    },
+    {
+      "shortCode": "rokland-1902",
+      "url": "https://msh.to/rokland-1902",
+      "description": "Rokland RAK1902 Barometric Pressure Sensor",
+      "type": "marketplace",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": "rokland",
+      "regions": [
+        "AU",
+        "AT",
+        "BE",
+        "CA",
+        "DK",
+        "EC",
+        "FR",
+        "DE",
+        "IE",
+        "JP",
+        "NL",
+        "NZ",
+        "NO",
+        "PK",
+        "ES",
+        "SE",
+        "CH",
+        "GB",
+        "US"
+      ]
+    },
+    {
+      "shortCode": "rokland-1906",
+      "url": "https://msh.to/rokland-1906",
+      "description": "Rokland RAK1906 WisBlock Environment Sensor",
+      "type": "marketplace",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": "rokland",
+      "regions": [
+        "AU",
+        "AT",
+        "BE",
+        "CA",
+        "DK",
+        "EC",
+        "FR",
+        "DE",
+        "IE",
+        "JP",
+        "NL",
+        "NZ",
+        "NO",
+        "PK",
+        "ES",
+        "SE",
+        "CH",
+        "GB",
+        "US"
+      ]
+    },
+    {
+      "shortCode": "aliexpress-wismesh-tap",
+      "url": "https://msh.to/aliexpress-wismesh-tap",
+      "description": "RAKwireless WisMesh Tap (AliExpress)",
+      "type": "marketplace",
+      "targets": [
+        "rak_wismeshtap"
+      ],
+      "hwModels": [
+        84
+      ],
+      "marketplace": "aliexpress",
+      "regions": null
+    },
+    {
+      "shortCode": "rokland-wismesh-tap",
+      "url": "https://msh.to/rokland-wismesh-tap",
+      "description": "RAKwireless WisMesh Tap (Rokland)",
+      "type": "marketplace",
+      "targets": [
+        "rak_wismeshtap"
+      ],
+      "hwModels": [
+        84
+      ],
+      "marketplace": "rokland",
+      "regions": [
+        "AU",
+        "AT",
+        "BE",
+        "CA",
+        "DK",
+        "EC",
+        "FR",
+        "DE",
+        "IE",
+        "JP",
+        "NL",
+        "NZ",
+        "NO",
+        "PK",
+        "ES",
+        "SE",
+        "CH",
+        "GB",
+        "US"
+      ]
+    },
+    {
+      "shortCode": "rakdap1",
+      "url": "https://msh.to/rakdap1",
+      "description": "RAKwireless RAKDAP1 Debug and Flash Tool",
+      "type": "vendor",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "rokland-heltec-wsl-v3",
+      "url": "https://msh.to/rokland-heltec-wsl-v3",
+      "description": "Rokland WSL V3",
+      "type": "marketplace",
+      "targets": [
+        "heltec-wsl-v3"
+      ],
+      "hwModels": [
+        44
+      ],
+      "marketplace": "rokland",
+      "regions": [
+        "AU",
+        "AT",
+        "BE",
+        "CA",
+        "DK",
+        "EC",
+        "FR",
+        "DE",
+        "IE",
+        "JP",
+        "NL",
+        "NZ",
+        "NO",
+        "PK",
+        "ES",
+        "SE",
+        "CH",
+        "GB",
+        "US"
+      ]
+    },
+    {
+      "shortCode": "aliexpress-heltec-wsl-v3",
+      "url": "https://msh.to/aliexpress-heltec-wsl-v3",
+      "description": "Aliexpress WSL V3",
+      "type": "marketplace",
+      "targets": [
+        "heltec-wsl-v3"
+      ],
+      "hwModels": [
+        44
+      ],
+      "marketplace": "aliexpress",
+      "regions": null
+    },
+    {
+      "shortCode": "rokland-heltec-wireless-tracker",
+      "url": "https://msh.to/rokland-heltec-wireless-tracker",
+      "description": "Rokland Wireless Tracker",
+      "type": "marketplace",
+      "targets": [
+        "heltec-wireless-tracker"
+      ],
+      "hwModels": [
+        48
+      ],
+      "marketplace": "rokland",
+      "regions": [
+        "AU",
+        "AT",
+        "BE",
+        "CA",
+        "DK",
+        "EC",
+        "FR",
+        "DE",
+        "IE",
+        "JP",
+        "NL",
+        "NZ",
+        "NO",
+        "PK",
+        "ES",
+        "SE",
+        "CH",
+        "GB",
+        "US"
+      ]
+    },
+    {
+      "shortCode": "aliexpress-heltec-wireless-tracker",
+      "url": "https://msh.to/aliexpress-heltec-wireless-tracker",
+      "description": "Aliexpress Wireless Tracker",
+      "type": "marketplace",
+      "targets": [
+        "heltec-wireless-tracker"
+      ],
+      "hwModels": [
+        48
+      ],
+      "marketplace": "aliexpress",
+      "regions": null
+    },
+    {
+      "shortCode": "aliexpress-heltec-wireless-paper",
+      "url": "https://msh.to/aliexpress-heltec-wireless-paper",
+      "description": "Aliexpress Wireless Paper",
+      "type": "marketplace",
+      "targets": [
+        "heltec-wireless-paper"
+      ],
+      "hwModels": [
+        49
+      ],
+      "marketplace": "aliexpress",
+      "regions": null
+    },
+    {
+      "shortCode": "rokland-heltec-wireless-paper",
+      "url": "https://msh.to/rokland-heltec-wireless-paper",
+      "description": "Rokland Wireless Paper",
+      "type": "marketplace",
+      "targets": [
+        "heltec-wireless-paper"
+      ],
+      "hwModels": [
+        49
+      ],
+      "marketplace": "rokland",
+      "regions": [
+        "AU",
+        "AT",
+        "BE",
+        "CA",
+        "DK",
+        "EC",
+        "FR",
+        "DE",
+        "IE",
+        "JP",
+        "NL",
+        "NZ",
+        "NO",
+        "PK",
+        "ES",
+        "SE",
+        "CH",
+        "GB",
+        "US"
+      ]
+    },
+    {
+      "shortCode": "muzi-heltec-mesh-node-t114",
+      "url": "https://msh.to/muzi-heltec-mesh-node-t114",
+      "description": "MuziWorks Mesh Node T114",
+      "type": "marketplace",
+      "targets": [
+        "heltec-mesh-node-t114"
+      ],
+      "hwModels": [
+        69
+      ],
+      "marketplace": "muzi",
+      "regions": [
+        "AU",
+        "AT",
+        "BE",
+        "CA",
+        "CZ",
+        "DK",
+        "FI",
+        "FR",
+        "DE",
+        "HK",
+        "IN",
+        "IE",
+        "IL",
+        "IT",
+        "JP",
+        "MY",
+        "NL",
+        "NZ",
+        "NO",
+        "PL",
+        "PT",
+        "SG",
+        "KR",
+        "ES",
+        "SE",
+        "CH",
+        "TW",
+        "AE",
+        "GB",
+        "US"
+      ]
+    },
+    {
+      "shortCode": "aliexpress-heltec-mesh-node-t114",
+      "url": "https://msh.to/aliexpress-heltec-mesh-node-t114",
+      "description": "Aliexpress Mesh Node T114",
+      "type": "marketplace",
+      "targets": [
+        "heltec-mesh-node-t114"
+      ],
+      "hwModels": [
+        69
+      ],
+      "marketplace": "aliexpress",
+      "regions": null
+    },
+    {
+      "shortCode": "aliexpress-heltec-vision-master-e213",
+      "url": "https://msh.to/aliexpress-heltec-vision-master-e213",
+      "description": "Aliexpress Vision Master E213",
+      "type": "marketplace",
+      "targets": [
+        "heltec-vision-master-e213"
+      ],
+      "hwModels": [
+        67
+      ],
+      "marketplace": "aliexpress",
+      "regions": null
+    },
+    {
+      "shortCode": "aliexpress-heltec-vision-master-e290",
+      "url": "https://msh.to/aliexpress-heltec-vision-master-e290",
+      "description": "Aliexpress Vision Master E290",
+      "type": "marketplace",
+      "targets": [
+        "heltec-vision-master-e290"
+      ],
+      "hwModels": [
+        68
+      ],
+      "marketplace": "aliexpress",
+      "regions": null
+    },
+    {
+      "shortCode": "aliexpress-heltec-vision-master-t190",
+      "url": "https://msh.to/aliexpress-heltec-vision-master-t190",
+      "description": "Aliexpress Vision Master T190",
+      "type": "marketplace",
+      "targets": [
+        "heltec-vision-master-t190"
+      ],
+      "hwModels": [
+        66
+      ],
+      "marketplace": "aliexpress",
+      "regions": null
+    },
+    {
+      "shortCode": "seeed-wio-tracker-l1-oled",
+      "url": "https://msh.to/seeed-wio-tracker-l1-oled",
+      "description": "Wio Tracker L1 (with OLED)",
+      "type": "vendor",
+      "targets": [
+        "seeed_wio_tracker_L1"
+      ],
+      "hwModels": [
+        99
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "seeed-wio-tracker-l1-oled_aliexpress",
+      "url": "https://msh.to/seeed-wio-tracker-l1-oled_aliexpress",
+      "description": "Wio Tracker L1 (with OLED)",
+      "type": "marketplace",
+      "targets": [
+        "seeed_wio_tracker_L1"
+      ],
+      "hwModels": [
+        99
+      ],
+      "marketplace": "aliexpress",
+      "regions": null
+    },
+    {
+      "shortCode": "seeed_wio_tracker_L1_eink",
+      "url": "https://msh.to/seeed_wio_tracker_L1_eink",
+      "description": "Wio Tracker L1 (with E-Ink)",
+      "type": "vendor",
+      "targets": [
+        "seeed_wio_tracker_L1_eink"
+      ],
+      "hwModels": [
+        100
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "seeed_wio_tracker_L1_eink_amazon",
+      "url": "https://msh.to/seeed_wio_tracker_L1_eink_amazon",
+      "description": "Wio Tracker L1 (with E-Ink) Amazon",
+      "type": "marketplace",
+      "targets": [
+        "seeed_wio_tracker_L1_eink"
+      ],
+      "hwModels": [
+        100
+      ],
+      "marketplace": "amazon",
+      "regions": [
+        "AU",
+        "CA",
+        "FR",
+        "DE",
+        "IE",
+        "JP",
+        "NL",
+        "ES",
+        "SE",
+        "GB",
+        "US"
+      ]
+    },
+    {
+      "shortCode": "seeed-wio-tracker-l1-lite",
+      "url": "https://msh.to/seeed-wio-tracker-l1-lite",
+      "description": "Wio Tracker L1 Lite (no display)",
+      "type": "vendor",
+      "targets": null,
+      "hwModels": null,
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "seeed_solar_node_p1",
+      "url": "https://msh.to/seeed_solar_node_p1",
+      "description": "SenseCAP Solar Node P1",
+      "type": "vendor",
+      "targets": null,
+      "hwModels": null,
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "seeed_solar_node_p1_aliexpress",
+      "url": "https://msh.to/seeed_solar_node_p1_aliexpress",
+      "description": "SenseCAP Solar Node P1 Aliexpress",
+      "type": "marketplace",
+      "targets": null,
+      "hwModels": null,
+      "marketplace": "aliexpress",
+      "regions": null
+    },
+    {
+      "shortCode": "android-closed-test",
+      "url": "https://msh.to/android-closed-test",
+      "description": "Android Closed Test Form",
+      "type": "internal",
+      "targets": null,
+      "hwModels": null,
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "t-deck-pro",
+      "url": "https://msh.to/t-deck-pro",
+      "description": "LilyGo T-Deck Pro",
+      "type": "vendor",
+      "targets": [
+        "t-deck-pro"
+      ],
+      "hwModels": [
+        102
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "rak4631_nomadstar_meteor_pro",
+      "url": "https://msh.to/rak4631_nomadstar_meteor_pro",
+      "description": "NomadStar Meteor Pro",
+      "type": "vendor",
+      "targets": [
+        "rak4631_nomadstar_meteor_pro"
+      ],
+      "hwModels": [
+        96
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "muziworks",
+      "url": "https://msh.to/muziworks",
+      "description": "muzi WORKS Homepage",
+      "type": "internal",
+      "targets": null,
+      "hwModels": null,
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "r1-neo",
+      "url": "https://msh.to/r1-neo",
+      "description": "muzi WORKS R1 Neo",
+      "type": "vendor",
+      "targets": [
+        "r1-neo"
+      ],
+      "hwModels": [
+        101
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "muzi-base",
+      "url": "https://msh.to/muzi-base",
+      "description": "muzi WORKS Base System",
+      "type": "vendor",
+      "targets": [
+        "muzi-base"
+      ],
+      "hwModels": [
+        93
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "muzi-base-uno",
+      "url": "https://msh.to/muzi-base-uno",
+      "description": "muzi WORKS Base Uno",
+      "type": "vendor",
+      "targets": [
+        "muzi-base"
+      ],
+      "hwModels": [
+        93
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "muzi-base-duo",
+      "url": "https://msh.to/muzi-base-duo",
+      "description": "muzi WORKS Base Duo",
+      "type": "vendor",
+      "targets": [
+        "muzi-base"
+      ],
+      "hwModels": [
+        93
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "muzi-base-super-io",
+      "url": "https://msh.to/muzi-base-super-io",
+      "description": "muzi WORKS Base Super IO",
+      "type": "vendor",
+      "targets": [
+        "muzi-base"
+      ],
+      "hwModels": [
+        93
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "ttc-tickets",
+      "url": "https://msh.to/ttc-tickets",
+      "description": "The Things Conference Tickets",
+      "type": "internal",
+      "targets": null,
+      "hwModels": null,
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "rokland-atlavox-makers-market",
+      "url": "https://msh.to/rokland-atlavox-makers-market",
+      "description": "Rokland Atlavox Makers Market",
+      "type": "marketplace",
+      "targets": null,
+      "hwModels": null,
+      "marketplace": "rokland",
+      "regions": [
+        "AU",
+        "AT",
+        "BE",
+        "CA",
+        "DK",
+        "EC",
+        "FR",
+        "DE",
+        "IE",
+        "JP",
+        "NL",
+        "NZ",
+        "NO",
+        "PK",
+        "ES",
+        "SE",
+        "CH",
+        "GB",
+        "US"
+      ]
+    },
+    {
+      "shortCode": "rokland-tlora-pager",
+      "url": "https://msh.to/rokland-tlora-pager",
+      "description": "Rokland T-Lora Pager",
+      "type": "marketplace",
+      "targets": [
+        "tlora-pager"
+      ],
+      "hwModels": [
+        103
+      ],
+      "marketplace": "rokland",
+      "regions": [
+        "AU",
+        "AT",
+        "BE",
+        "CA",
+        "DK",
+        "EC",
+        "FR",
+        "DE",
+        "IE",
+        "JP",
+        "NL",
+        "NZ",
+        "NO",
+        "PK",
+        "ES",
+        "SE",
+        "CH",
+        "GB",
+        "US"
+      ]
+    },
+    {
+      "shortCode": "tlora-pager",
+      "url": "https://msh.to/tlora-pager",
+      "description": "T-Lora Pager",
+      "type": "vendor",
+      "targets": [
+        "tlora-pager"
+      ],
+      "hwModels": [
+        103
+      ],
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "hexaspot",
+      "url": "https://msh.to/hexaspot",
+      "description": "Hexaspot Meshtastic Products",
+      "type": "marketplace",
+      "targets": [],
+      "hwModels": [],
+      "marketplace": "hexaspot",
+      "regions": [
+        "AT",
+        "BE",
+        "BG",
+        "CY",
+        "CZ",
+        "DE",
+        "DK",
+        "EE",
+        "ES",
+        "FI",
+        "FR",
+        "GR",
+        "HR",
+        "HU",
+        "IE",
+        "IT",
+        "LT",
+        "LU",
+        "LV",
+        "MT",
+        "NL",
+        "NO",
+        "PL",
+        "PT",
+        "RO",
+        "SE",
+        "SI",
+        "SK"
+      ]
+    },
+    {
+      "shortCode": "ew26",
+      "url": "https://msh.to/ew26",
+      "description": "embeddedworld26 event page",
+      "type": "internal",
+      "targets": null,
+      "hwModels": null,
+      "marketplace": null,
+      "regions": null
+    },
+    {
+      "shortCode": "hexaspot-heltec-v3",
+      "url": "https://msh.to/hexaspot-heltec-v3",
+      "description": "Heltec V3 (Hexaspot)",
+      "type": "marketplace",
+      "targets": [
+        "heltec-v3"
+      ],
+      "hwModels": [
+        43
+      ],
+      "marketplace": "hexaspot",
+      "regions": [
+        "AT",
+        "BE",
+        "BG",
+        "CY",
+        "CZ",
+        "DE",
+        "DK",
+        "EE",
+        "ES",
+        "FI",
+        "FR",
+        "GR",
+        "HR",
+        "HU",
+        "IE",
+        "IT",
+        "LT",
+        "LU",
+        "LV",
+        "MT",
+        "NL",
+        "NO",
+        "PL",
+        "PT",
+        "RO",
+        "SE",
+        "SI",
+        "SK"
+      ]
+    },
+    {
+      "shortCode": "hexaspot-heltec-v4",
+      "url": "https://msh.to/hexaspot-heltec-v4",
+      "description": "Heltec V4 (Hexaspot)",
+      "type": "marketplace",
+      "targets": [
+        "heltec-v4"
+      ],
+      "hwModels": [
+        110
+      ],
+      "marketplace": "hexaspot",
+      "regions": [
+        "AT",
+        "BE",
+        "BG",
+        "CY",
+        "CZ",
+        "DE",
+        "DK",
+        "EE",
+        "ES",
+        "FI",
+        "FR",
+        "GR",
+        "HR",
+        "HU",
+        "IE",
+        "IT",
+        "LT",
+        "LU",
+        "LV",
+        "MT",
+        "NL",
+        "NO",
+        "PL",
+        "PT",
+        "RO",
+        "SE",
+        "SI",
+        "SK"
+      ]
+    },
+    {
+      "shortCode": "hexaspot-wireless-tracker-v2",
+      "url": "https://msh.to/hexaspot-wireless-tracker-v2",
+      "description": "Heltec Wireless Tracker V2 (Hexaspot)",
+      "type": "marketplace",
+      "targets": [
+        "heltec-wireless-tracker-v2"
+      ],
+      "hwModels": [
+        113
+      ],
+      "marketplace": "hexaspot",
+      "regions": [
+        "AT",
+        "BE",
+        "BG",
+        "CY",
+        "CZ",
+        "DE",
+        "DK",
+        "EE",
+        "ES",
+        "FI",
+        "FR",
+        "GR",
+        "HR",
+        "HU",
+        "IE",
+        "IT",
+        "LT",
+        "LU",
+        "LV",
+        "MT",
+        "NL",
+        "NO",
+        "PL",
+        "PT",
+        "RO",
+        "SE",
+        "SI",
+        "SK"
+      ]
+    }
+  ]
+}

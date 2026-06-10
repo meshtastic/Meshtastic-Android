@@ -16,14 +16,9 @@
  */
 package org.meshtastic.core.data.datasource
 
-import org.meshtastic.core.model.MshToMarketplace
-import org.meshtastic.core.model.MshToRoute
+import org.meshtastic.core.model.NetworkDeviceLink
 
-/** Reads the bundled msh.to link data: `urls.json` (short codes) and `marketplaces.json` (region metadata). */
-interface MshToLinksJsonDataSource {
-    /** Routes from the bundled `urls.json`, or empty if missing/malformed. */
-    fun loadRoutes(): List<MshToRoute>
-
-    /** Marketplace metadata from the bundled `marketplaces.json`, keyed by marketplace identifier. */
-    fun loadMarketplaces(): Map<String, MshToMarketplace>
+/** Loads the bundled device-links snapshot (a frozen copy of the `/resource/deviceLinks` API response). */
+interface DeviceLinksJsonDataSource {
+    fun loadDeviceLinksFromJsonAsset(): List<NetworkDeviceLink>
 }
