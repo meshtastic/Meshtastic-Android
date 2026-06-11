@@ -16,9 +16,7 @@ This replaces the ad-hoc prose that used to be retyped at the start of every ses
 1. **Clean worktree.** If `git status --porcelain` is non-empty, ask the user before proceeding.
 2. **Upstream remote present.** `git remote -v` must list `upstream` pointing at
    `meshtastic/Meshtastic-Android`. If only `origin` exists on a fork, treat `origin` as upstream.
-3. **Submodules initialised.** `core/proto/src/main/proto` must be populated — see AGENTS.md
-   workspace bootstrap rules.
-4. **Secrets bootstrapped.** If `local.properties` is missing, copy `secrets.defaults.properties`
+3. **Secrets bootstrapped.** If `local.properties` is missing, copy `secrets.defaults.properties`
    (required for `google` flavor builds).
 
 ## Standard Recipe
@@ -30,10 +28,7 @@ git fetch upstream --prune --tags
 # 2. Create the branch from upstream/main (never from a local stale main)
 git switch -c <branch-name> upstream/main
 
-# 3. Ensure submodules track the new base
-git submodule update --init --recursive
-
-# 4. Sanity check
+# 3. Sanity check
 git --no-pager log -1 --oneline
 ```
 
@@ -58,7 +53,6 @@ When the user says *"rebase #NNNN"* or *"dust off PR NNNN"*:
 git fetch upstream --prune
 gh pr checkout <NNNN>          # checks out the PR head locally
 git rebase upstream/main
-git submodule update --init --recursive
 # Resolve conflicts, then:
 git push --force-with-lease
 ```
@@ -67,7 +61,6 @@ Never use plain `--force`. Always `--force-with-lease` to avoid clobbering colla
 
 ## Post-Branch Checklist
 - [ ] Branch name follows conventional prefix.
-- [ ] Submodules up to date.
 - [ ] `local.properties` exists.
 - [ ] `ANDROID_HOME` exported (see AGENTS.md workspace bootstrap).
 - [ ] Optional: run `./gradlew assembleDebug` once to catch environment regressions before editing.

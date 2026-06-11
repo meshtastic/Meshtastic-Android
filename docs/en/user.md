@@ -19,19 +19,21 @@ Documentation for using the Meshtastic Android and Desktop app.
 Keep the last 5–8 entries and archive older ones by removing them.
 -->
 
+**June 2026** — [Discovery](user/discovery) — Added the Local Mesh Discovery scanner: a dedicated mode that cycles your radio through LoRa presets, dwells on each to collect packets, and ranks which preset works best at your location.
+
+**June 2026** — [Node Metrics](user/node-metrics) — Added Air Quality metrics (PM1.0, PM2.5, PM10, and CO₂ with severity color bands), a separate view from the BME680 IAQ reading.
+
+**June 2026** — [Messages & Channels](user/messages-and-channels) — Added full-text message search within a conversation, with a result counter and previous/next navigation.
+
+**June 2026** — [Android Auto](user/android-auto) — New page covering Meshtastic in Android Auto.
+
+**June 2026** — [App Functions](user/app-functions) — New page covering App Functions, which exposes app actions to the Android system AI on Google flavor builds.
+
 **May 2026** — [Translate the App](user/translate) — New page explaining how to contribute translations to the Meshtastic app via Crowdin.
 
 **May 2026** — [Units & Locale](user/units-and-locale) — New page explaining how the app automatically adapts temperatures, distances, speeds, and times to your device's regional settings.
 
 **May 2026** — [Signal Meter](user/signal-meter) — New page explaining how the LoRa signal quality meter works, why negative SNR values are normal, and how to interpret RSSI vs. SNR.
-
-**May 2026** — [Messages & Channels](user/messages-and-channels) — Added reactions, message actions, and delivery retry documentation.
-
-**May 2026** — [Nodes](user/nodes) — Corrected filtering and sorting documentation to match actual app capabilities (7 sort options, 6 filter toggles).
-
-**May 2026** — [Desktop App](user/desktop) — Added keyboard shortcuts table and confirmed system tray support.
-
-**May 2026** — [Getting Started](user/onboarding) — Added Critical Alerts permission screen and expanded permission explanations.
 
 <!-- WHATS_NEW_END -->
 

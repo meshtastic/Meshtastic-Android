@@ -52,6 +52,7 @@ dependencies {
     implementation(project(":feature:intro"))
     implementation(project(":feature:map"))
     implementation(project(":feature:docs"))
+    implementation(project(":feature:discovery"))
 
     implementation(libs.compose.multiplatform.foundation)
     implementation(libs.compose.multiplatform.material3)
@@ -62,13 +63,14 @@ dependencies {
 }
 
 tasks.register<Copy>("copyDocsScreenshots") {
-    description = "Copies selected reference screenshots to docs/screenshots/ for the docs pipeline."
+    description =
+        "Refreshes the semantically-named docs screenshots in docs/assets/screenshots/ from CST reference images."
     group = "documentation"
 
     val referenceDir = layout.projectDirectory.dir("src/screenshotTestDebug/reference")
     val manifestFile = layout.projectDirectory.file("docs-screenshots-manifest.txt")
     val aliasFile = layout.projectDirectory.file("docs-screenshot-aliases.properties")
-    val outputDir = rootProject.layout.projectDirectory.dir("docs/screenshots")
+    val outputDir = rootProject.layout.projectDirectory.dir("docs/assets/screenshots")
 
     // Read manifest patterns at configuration time so Copy task can resolve includes
     val manifestPatterns =
@@ -97,10 +99,16 @@ tasks.register<Copy>("copyDocsScreenshots") {
             }
     }
 
-    // Flatten directory structure and apply alias renaming
+    // Flatten directory structure, keep only screenshots with a semantic alias, and rename them.
+    // Unaliased reference images are skipped: only curated, semantically-named screenshots feed the
+    // docs site and the in-app bundle.
     eachFile {
         val alias = reverseAliases[name]
-        path = alias ?: name
+        if (alias == null) {
+            exclude()
+        } else {
+            path = alias
+        }
     }
     duplicatesStrategy = DuplicatesStrategy.WARN
     includeEmptyDirs = false
