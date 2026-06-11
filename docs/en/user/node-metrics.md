@@ -2,8 +2,8 @@
 title: Node Metrics
 parent: User Guide
 nav_order: 5
-last_updated: 2026-05-13
-description: Telemetry dashboards for each mesh node — device health, environment sensors, signal quality, power, traceroute, and position history.
+last_updated: 2026-06-11
+description: Telemetry dashboards for each mesh node — device health, environment sensors, air quality, signal quality, power, traceroute, and position history.
 aliases:
   - metrics
   - telemetry
@@ -46,6 +46,36 @@ Environmental sensor data (requires compatible hardware):
 Environment metrics are charted over time for easy trend analysis — temperature, humidity, and pressure each get their own line chart with the measurement unit displayed on the Y axis.
 
 > 💡 **Tip:** Environment metrics require a sensor connected to the remote node. Not all nodes report environmental data. See [Telemetry & Sensors](telemetry-and-sensors) for a full list of supported sensors.
+
+## Air Quality Metrics
+
+Air Quality is a dedicated metrics view for nodes equipped with a particulate-matter and/or CO₂ sensor. It is **separate from the BME680 IAQ reading** listed under Environment Metrics — IAQ is a single gas-resistance-derived index, while the Air Quality view charts the underlying particulate and CO₂ measurements.
+
+| Metric | Unit | Description |
+|--------|------|-------------|
+| PM1.0 | µg/m³ | Particulate matter up to 1.0 micron |
+| PM2.5 | µg/m³ | Particulate matter up to 2.5 microns |
+| PM10 | µg/m³ | Particulate matter up to 10 microns |
+| CO₂ | ppm | Carbon dioxide concentration |
+
+CO₂ readings are color-coded by severity to make air quality easy to read at a glance:
+
+| Band | CO₂ Range (ppm) | Color |
+|------|-----------------|-------|
+| Good | < 1000 | Green |
+| Stuffy | < 2000 | Amber |
+| Poor | < 5000 | Orange |
+| Unsafe | < 30000 | Red |
+| Evacuate | ≥ 30000 | Dark red |
+
+An air-quality log/metrics button appears on the node detail screen **only when the node has reported air-quality telemetry**. From the Air Quality view you can:
+
+- Select a **time frame** for the charts.
+- Filter with **metric chips** — only metrics that have data are shown.
+- **Refresh / request** the latest air-quality telemetry.
+- **Export to CSV** for analysis in a spreadsheet.
+
+> 💡 **Tip:** Air Quality metrics require a compatible air-quality sensor on the remote node. If a node has no particulate or CO₂ sensor, the air-quality button won't appear. See [Telemetry & Sensors](telemetry-and-sensors) for supported hardware.
 
 ## Signal Metrics
 
