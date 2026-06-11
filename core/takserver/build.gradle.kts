@@ -32,13 +32,15 @@ kotlin {
             implementation(projects.core.common)
             implementation(projects.core.di)
             implementation(projects.core.model)
-            implementation(projects.core.proto)
+            implementation(libs.meshtastic.protobufs)
 
-            // TAKPacket-SDK is api()-exported by :core:proto (see
-            // https://github.com/meshtastic/TAKPacket-SDK/issues/6).
-            // Provides org.meshtastic.proto.TAKPacketV2 and friends, plus
-            // the SDK's own org.meshtastic.tak.* parser/builder/compressor.
-            // zstd-jni and xpp3 are excluded at the dep site in :core:proto
+            // org.meshtastic.proto.TAKPacketV2 and friends come from the
+            // protobufs SDK (api()-exported by :core:model for every target).
+            // The TAKPacket-SDK conversion pipeline (org.meshtastic.tak.*) is
+            // JVM-only since 0.5.2 and is api()-exported by :core:model's
+            // jvmAndroidMain — common code reaches it through the
+            // TakSdkCompressor/TakV2Compressor/CotSanitizer expect/actual seams.
+            // zstd-jni and xpp3 are excluded at the dep site in :core:model
             // and re-added per-target below.
 
             implementation(libs.okio)

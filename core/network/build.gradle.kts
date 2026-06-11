@@ -31,7 +31,7 @@ kotlin {
             implementation(projects.core.common)
             implementation(projects.core.di)
             implementation(projects.core.model)
-            implementation(projects.core.proto)
+            implementation(libs.meshtastic.protobufs)
             implementation(projects.core.ble)
 
             implementation(libs.okio)

@@ -54,6 +54,7 @@ import org.meshtastic.mqtt.packet.Subscription
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.MqttClientProxyMessage
 import kotlin.concurrent.Volatile
+import kotlin.uuid.Uuid
 
 @Single(binds = [MQTTRepository::class])
 class MQTTRepositoryImpl(
@@ -112,7 +113,12 @@ class MQTTRepositoryImpl(
 
     @OptIn(ExperimentalSerializationApi::class)
     override val proxyMessageFlow: Flow<MqttClientProxyMessage> = callbackFlow {
-        val ownerId = "MeshtasticAndroidMqttProxy-${nodeRepository.myId.value ?: "unknown"}"
+        // Append a per-connection random id. myId identifies the *node* (and is null →
+        // "unknown" before the local node record loads), so it is not unique per client:
+        // clients sharing a node id — and the whole "unknown" pool on the public broker —
+        // evict each other (SESSION_TAKEN_OVER), storming reconnects. A fresh id per client
+        // (captured for its lifetime, so auto-reconnects stay stable) prevents that.
+        val ownerId = "MeshtasticAndroidMqttProxy-${nodeRepository.myId.value ?: "unknown"}-${Uuid.random()}"
         val channelSet = radioConfigRepository.channelSetFlow.first()
         val mqttConfig = radioConfigRepository.moduleConfigFlow.first().mqtt
 

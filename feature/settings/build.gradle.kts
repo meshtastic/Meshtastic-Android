@@ -32,7 +32,7 @@ kotlin {
             implementation(projects.core.model)
             implementation(projects.core.navigation)
             implementation(projects.core.network)
-            implementation(projects.core.proto)
+            implementation(libs.meshtastic.protobufs)
             implementation(projects.core.repository)
             implementation(projects.core.service)
             implementation(projects.core.resources)

@@ -210,7 +210,14 @@ jobs:
 
           # === Unreleased segment (HEAD -> newest tag) ===
           UNRELEASED_SECTION=""
-          LATEST_TAG="${TAG_NAMES[$((N-1))]:-$PROD_TAG}"
+          # Indexing TAG_NAMES[-1] on an empty array is a fatal error under
+          # bash -e, so the no-channel-tags state (right after a production
+          # release) needs an explicit branch instead of a :- fallback.
+          if (( N > 0 )); then
+            LATEST_TAG="${TAG_NAMES[$((N-1))]}"
+          else
+            LATEST_TAG="$PROD_TAG"
+          fi
           if [ "$HEAD_SHA" != "$(git rev-parse "$LATEST_TAG" 2>/dev/null)" ]; then
             UNRELEASED_COMMITS=$(generate_notes_git "$LATEST_TAG" "$HEAD_SHA")
             if [ -n "$UNRELEASED_COMMITS" ]; then
@@ -223,13 +230,15 @@ jobs:
             fi
           fi
 
-          # Assemble the full unreleased section (newest first)
+          # Assemble the full unreleased section (newest first).
+          # Use if-statements, not `[ -n ... ] && ...` lists: a failed test as
+          # the group's last command makes the whole step exit 1 under bash -e.
           {
             echo "## [Unreleased]"
             echo ""
-            [ -n "$UNRELEASED_SECTION" ] && echo "$UNRELEASED_SECTION" && echo ""
-            [ -n "$SECTIONS" ] && echo "$SECTIONS" && echo ""
-            [ -n "$CONTRIBUTORS" ] && echo "$CONTRIBUTORS"
+            if [ -n "$UNRELEASED_SECTION" ]; then echo "$UNRELEASED_SECTION"; echo ""; fi
+            if [ -n "$SECTIONS" ]; then echo "$SECTIONS"; echo ""; fi
+            if [ -n "$CONTRIBUTORS" ]; then echo "$CONTRIBUTORS"; fi
           } > /tmp/unreleased-section.md
 
       - name: Update CHANGELOG.md

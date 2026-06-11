@@ -49,70 +49,70 @@ last_updated: 2026-05-12
 
 ### Где они появляются
 
-- **Node list** — distance and bearing to each node
-- **Node detail** — altitude, distance from your position
-- **Map** — waypoint distances, traceroute hop distances
-- **Compass** — distance to selected node
+- **Список нод** — расстояние и курс до каждой ноды
+- **Детали ноды** — высота, расстояние от твоего положения
+- **Карта** — расстояния между путевыми точками, расстояния между хопами трассировки
+- **Компас** — расстояние до выбранной ноды
 
 ## Скорость
 
-GPS ground speed is displayed in your locale's preferred speed unit.
+Наземная скорость GPS отображается в единицах скорости, предпочитаемых в твоем регионе.
 
-| Your Setting                     | You See |
-| -------------------------------- | ------- |
-| Metric                           | 12 km/h |
-| Imperial (US) | 7 mph   |
+| Твоя настройка                     | Ты видишь |
+| ---------------------------------- | --------- |
+| Метрическая                        | 12 км/ч   |
+| Имперская (США) | 7 миль/ч  |
 
 ## Ветер
 
-Wind speed and gust data from environment sensors are transmitted as **m/s** and converted for display.
+Данные о скорости ветра и порывах с датчиков окружающей среды передаются в **м/с** и преобразуются для отображения.
 
-| Your Setting                     | You See |
-| -------------------------------- | ------- |
-| Metric                           | 5 m/s   |
-| Imperial (US) | 11 mph  |
+| Твоя настройка                     | Ты видишь |
+| ---------------------------------- | --------- |
+| Метрическая                        | 5 м/с     |
+| Имперская (США) | 11 миль/ч |
 
-Wind readings appear in the **Node Detail** environment section and the **Environment Telemetry** charts.
+Показания ветра отображаются в разделе среды **Детали ноды** и на диаграммах **Телеметрия окружающей среды**.
 
-## Rainfall
+## Осадки
 
-Rainfall measurements (1-hour and 24-hour totals) are transmitted as **mm** and converted for display.
+Измерения осадков (за 1 час и за 24 часа) передаются в **мм** и конвертируются для отображения.
 
-| Your Setting                     | You See                |
-| -------------------------------- | ---------------------- |
-| Metric                           | 12 mm                  |
-| Imperial (US) | 0.5 in |
+| Твоя настройка                     | Ты видишь  |
+| ---------------------------------- | ---------- |
+| Метрическая                        | 12 мм      |
+| Имперская (США) | 0,5 дюймов |
 
-## Units That Never Change
+## Единицы, которые никогда не меняются
 
-Some units are international standards and are displayed the same way regardless of your locale:
+Некоторые единицы являются международными стандартами и отображаются одинаково независимо от вашего региона:
 
-| Measurement                      | Unit                           | Why                                   |
-| -------------------------------- | ------------------------------ | ------------------------------------- |
-| Barometric pressure              | hPa                            | International meteorological standard |
-| Heading / bearing                | ° (degrees) | Universal navigation convention       |
-| Радиация                         | μR/hr                          | Standard dosimetry unit               |
-| GPS coordinates                  | decimal degrees                | Universal geographic standard         |
-| Humidity, battery, soil moisture | %                              | Universal                             |
+| Показатель                          | Единица                        | Почему                                   |
+| ----------------------------------- | ------------------------------ | ---------------------------------------- |
+| Барометрическое давление            | гПа                            | Международный метеорологический стандарт |
+| Курс / направление                  | ° (градусы) | Универсальная навигационная конвенция    |
+| Радиация                            | мкР/ч                          | Стандартная единица дозиметрии           |
+| GPS координаты                      | десятичные градусы             | Универсальный географический стандарт    |
+| Влажность, батарея, влажность почвы | %                              | Универсальный                            |
 
-## Date & Time
+## Дата и время
 
-All timestamps throughout the app — last heard, message times, telemetry logs, chart axes — follow your device's date and time preferences.
+Все отметки времени в приложении — последняя активность, время сообщений, журналы телеметрии, оси графиков — следуют настройкам даты и времени вашего устройства.
 
-| Настройка        | What It Controls | Example                                          |
-| ---------------- | ---------------- | ------------------------------------------------ |
-| **24-Hour Time** | Clock format     | 14:30 vs 2:30 PM |
-| **Date Format**  | Date ordering    | 09/05/2026 vs 05/09/2026                         |
+| Настройка                     | Что это контролирует | Пример                                            |
+| ----------------------------- | -------------------- | ------------------------------------------------- |
+| **24-часовой формат времени** | Формат часов         | 14:30 или 2:30 PM |
+| **Формат даты**               | Сортировка даты      | 09/05/2026 или 05/09/2026                         |
 
-The app also uses **relative time** where it makes sense — for example, "5 min ago" or "2 hours ago" in the node list — which is automatically localised into your device language.
+Приложение также использует **относительное время** в списке нод, где это имеет смысл — например, "5 минут назад" или "2 часа назад", которое автоматически локализуется на язык твоего устройства.
 
-## Changing Your Measurement System (Android)
+## Изменение системы измерений (Android)
 
-On Android, your measurement system (metric vs imperial) is tied to your region setting:
+На Android система измерений (метрическая или имперская) связана с настройкой региона:
 
-1. Open **Android Settings → System → Language & Region**
-2. Change your **Region** or **Measurement units** preference
-3. Return to Meshtastic — values update immediately
+1. Откройте **Настройки Android → Система → Язык и регион**
+2. Измените свои предпочтения в **Регион** или **Единицы измерения**
+3. Вернуться к Meshtastic — значения обновляются немедленно
 
-> **Tip — The app uses `MetricFormatter` from `core:common`.** All measurement formatting is handled by a shared KMP utility that respects your platform's locale. Developers adding new measurement displays should use `MetricFormatter` rather than hard-coding unit conversions.
+> **Совет — приложение использует `MetricFormatter` из `core:common`.** Все форматирование измерений выполняется с помощью общей утилиты KMP, которая учитывает локаль платформы. Разработчикам, добавляющим новые индикаторы измерений, следует использовать `MetricFormatter`, а не жестко кодировать преобразования единиц.
 

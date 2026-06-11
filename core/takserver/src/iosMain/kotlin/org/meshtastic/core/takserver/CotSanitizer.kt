@@ -14,29 +14,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+package org.meshtastic.core.takserver
 
-plugins {
-    alias(libs.plugins.meshtastic.kmp.library)
-    id("meshtastic.koin")
-}
+/**
+ * iOS stub for CotSanitizer.
+ *
+ * Passthrough — the JVM-only TAKPacket-SDK is unavailable here, and stale/whitespace normalization is tolerated by the
+ * iOS receive path (uncompressed TAK_TRACKER mode).
+ *
+ * TODO: Replace with Swift SDK integration via interop so the sanitize rules can't drift from the golden-tested SDK.
+ */
+internal actual object CotSanitizer {
 
-kotlin {
-    android { withHostTest {} }
+    actual fun normalizeCotXml(xml: String): String = xml
 
-    sourceSets {
-        commonMain.dependencies {
-            api(projects.core.model)
-            api(libs.meshtastic.protobufs)
-            implementation(projects.core.common)
-            implementation(projects.core.database)
-
-            implementation(libs.kotlinx.coroutines.core)
-            implementation(libs.kermit)
-            implementation(libs.androidx.paging.common)
-        }
-        commonTest.dependencies {
-            implementation(projects.core.testing)
-            implementation(libs.kotlinx.coroutines.test)
-        }
-    }
+    actual fun stripNonEssentialForMesh(xml: String): String = xml
 }

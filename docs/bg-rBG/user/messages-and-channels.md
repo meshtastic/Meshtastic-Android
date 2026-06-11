@@ -1,5 +1,5 @@
 ---
-title: Messages & Channels
+title: Съобщения & Канали
 parent: Ръководство за потребители
 nav_order: 3
 last_updated: 2026-05-13
@@ -11,7 +11,7 @@ aliases:
   - conversations
 ---
 
-# Messages & Channels
+# Съобщения & Канали
 
 Meshtastic supports two communication modes: **channel broadcasts** and **direct messages**.
 
@@ -27,12 +27,12 @@ Every Meshtastic device comes with a default **LongFast** channel. This is an un
 
 Channels support multiple encryption levels:
 
-| Icon | Security Level                       | Описание                                                                                                                               |
-| ---- | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
-| 🔒   | PSK (256-bit AES) | Fully encrypted with a strong pre-shared key. Only nodes with the matching key can read messages.      |
-| 🔐   | PSK (128-bit AES) | Encrypted with a shorter key. Secure for most uses but 256-bit is preferred for sensitive data.        |
-| 🔓   | Default / Open                       | Uses the well-known default key. **Any Meshtastic device** on the same preset can read these messages. |
-| ⚠️   | Insecure + Position                  | Open channel that also broadcasts your GPS position. Use with caution in public meshes.                |
+| Икона | Security Level                       | Описание                                                                                                                               |
+| ----- | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| 🔒    | PSK (256-bit AES) | Fully encrypted with a strong pre-shared key. Only nodes with the matching key can read messages.      |
+| 🔐    | PSK (128-bit AES) | Encrypted with a shorter key. Secure for most uses but 256-bit is preferred for sensitive data.        |
+| 🔓    | Default / Open                       | Uses the well-known default key. **Any Meshtastic device** on the same preset can read these messages. |
+| ⚠️    | Insecure + Position                  | Open channel that also broadcasts your GPS position. Use with caution in public meshes.                |
 
 > 🔒 **Security Tip:** Always configure a unique PSK for private communications. The default channel is intentionally open so new users can discover the mesh — but you should create a separate encrypted channel for anything sensitive.
 
@@ -57,15 +57,15 @@ Direct messages (DMs) are point-to-point encrypted communications between two sp
 
 ### Message States
 
-| State                             | Icon | Meaning                                                                                                           |
-| --------------------------------- | ---- | ----------------------------------------------------------------------------------------------------------------- |
-| Queued                            | ⏳    | Message waiting to be sent                                                                                        |
-| En route                          | ✓    | Delivered to the radio, awaiting acknowledgment                                                                   |
-| Доставено                         | ✓✓   | Acknowledgment received from recipient                                                                            |
-| Received                          | ✓    | Message received from the mesh (incoming)                                                      |
-| S&F Routing   | 🔗   | Store & Forward: message being routed through an S&F node |
-| S&F Confirmed | 🔗   | Store & Forward: delivery confirmed via S&F node          |
-| Грешка                            | ✗    | Delivery failed after retries                                                                                     |
+| Състояние                         | Икона | Значение                                                                                                          |
+| --------------------------------- | ----- | ----------------------------------------------------------------------------------------------------------------- |
+| Queued                            | ⏳     | Message waiting to be sent                                                                                        |
+| En route                          | ✓     | Delivered to the radio, awaiting acknowledgment                                                                   |
+| Доставено                         | ✓✓    | Acknowledgment received from recipient                                                                            |
+| Received                          | ✓     | Message received from the mesh (incoming)                                                      |
+| S&F Routing   | 🔗    | Store & Forward: message being routed through an S&F node |
+| S&F Confirmed | 🔗    | Store & Forward: delivery confirmed via S&F node          |
+| Грешка                            | ✗     | Delivery failed after retries                                                                                     |
 
 ### Delivery Errors
 

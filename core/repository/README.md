@@ -156,7 +156,6 @@ core:repository
 graph TB
   :core:repository[repository]:::kmp-library
   :core:repository --> :core:model
-  :core:repository --> :core:proto
   :core:repository -.-> :core:common
   :core:repository -.-> :core:database
   :core:repository -.-> :core:testing

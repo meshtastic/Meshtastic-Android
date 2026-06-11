@@ -82,13 +82,13 @@ okio = "3.17.0"
 uri-kmp = "0.0.21"
 osmdroid-android = "6.1.20"
 spotless = "8.6.0"
-wire = "6.4.0"
 vico = "3.2.2"
 kable = "0.43.0"
-mqttastic = "0.3.6"
+mqttastic = "0.3.8"
 jmdns = "3.6.3"
 qrcode-kotlin = "4.5.0"
-takpacket-sdk = "0.5.1"
+takpacket-sdk = "0.5.3"
+meshtastic-protobufs = "2.7.25"
 
 # Gradle Plugins
 develocity = "4.4.2"
@@ -164,7 +164,7 @@ jetbrains-compose-material3-adaptive-navigation-suite = { module = "org.jetbrain
 firebase-ai = { module = "com.google.firebase:firebase-ai" }
 firebase-ai-ondevice = { module = "com.google.firebase:firebase-ai-ondevice", version = "16.0.0-beta02" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
-firebase-bom = { module = "com.google.firebase:firebase-bom", version = "34.14.0" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version = "34.14.1" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 location-services = { module = "com.google.android.gms:play-services-location", version = "21.3.0" }
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
@@ -179,7 +179,6 @@ maps-compose-widgets = { module = "com.google.maps.android:maps-compose-widgets"
 mlkit-barcode-scanning = { module = "com.google.mlkit:barcode-scanning", version.ref = "mlkit-barcode-scanning" }
 mlkit-translate = { module = "com.google.mlkit:translate", version.ref = "mlkit-translate" }
 play-services-maps = { module = "com.google.android.gms:play-services-maps", version = "20.0.0" }
-wire-runtime = { module = "com.squareup.wire:wire-runtime", version.ref = "wire" }
 zxing-core = { module = "com.google.zxing:core", version = "3.5.4" }
 qrcode-kotlin = { module = "io.github.g0dkar:qrcode-kotlin", version.ref = "qrcode-kotlin" }
 
@@ -187,7 +186,7 @@ qrcode-kotlin = { module = "io.github.g0dkar:qrcode-kotlin", version.ref = "qrco
 kotlin-gradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 dokka-gradlePlugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "dokka" }
 
-kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version = "0.4.0" }
+kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version = "0.5.0" }
 kotlinx-atomicfu = { module = "org.jetbrains.kotlinx:atomicfu", version = "0.33.0" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines-android" }
 kotlinx-coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines-android" }
@@ -265,7 +264,7 @@ androidx-room-gradlePlugin = { module = "androidx.room3:room3-gradle-plugin", ve
 compose-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 compose-multiplatform-gradlePlugin = { module = "org.jetbrains.compose:compose-gradle-plugin", version.ref = "compose-multiplatform" }
 datadog-gradlePlugin = { module = "com.datadoghq.dd-sdk-android-gradle-plugin:com.datadoghq.dd-sdk-android-gradle-plugin.gradle.plugin", version.ref = "datadog-gradle" }
-detekt-compose = { module = "io.nlopez.compose.rules:detekt", version = "0.5.9" }
+detekt-compose = { module = "io.nlopez.compose.rules:detekt", version = "0.6.0" }
 detekt-formatting = { module = "dev.detekt:detekt-rules-ktlint-wrapper", version.ref = "detekt" }
 detekt-gradlePlugin = { module = "dev.detekt:detekt-gradle-plugin", version.ref = "detekt" }
 firebase-crashlytics-gradlePlugin = { module = "com.google.firebase:firebase-crashlytics-gradle", version.ref = "firebase-crashlytics-gradle" }
@@ -285,6 +284,9 @@ jna = { module = "net.java.dev.jna:jna", version = "5.19.0" }
 # TAK
 takpacket-sdk-kmp = { module = "org.meshtastic:takpacket-sdk", version.ref = "takpacket-sdk" }
 takpacket-sdk-jvm = { module = "org.meshtastic:takpacket-sdk-jvm", version.ref = "takpacket-sdk" }
+
+# Meshtastic Protobufs SDK (Wire-generated KMP models from meshtastic/protobufs)
+meshtastic-protobufs = { module = "org.meshtastic:protobufs", version.ref = "meshtastic-protobufs" }
 
 
 [plugins]
@@ -318,7 +320,6 @@ aboutlibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "abo
 datadog = { id = "com.datadoghq.dd-sdk-android-gradle-plugin", version.ref = "datadog-gradle" }
 detekt = { id = "dev.detekt", version.ref = "detekt" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
-wire = { id = "com.squareup.wire", version.ref = "wire" }
 room = { id = "androidx.room3", version.ref = "room" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 test-retry = { id = "org.gradle.test-retry", version.ref = "testRetry" }

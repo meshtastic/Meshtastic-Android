@@ -46,11 +46,13 @@ plugins.withId("org.meshtastic.flatpak.sources") {
     extensions.configure<org.meshtastic.flatpak.sources.FlatpakSourcesExtension> {
         outputFile.set(layout.buildDirectory.file("flatpak-sources.json"))
         mustRunAfterTasks.set(listOf(":desktopApp:assemble", ":desktopApp:packageUberJarForCurrentOS"))
-        // Force-resolve platform-specific native artifacts not resolved on the generation host
+        // Force-resolve platform-specific native artifacts not resolved on the generation host.
+        // The compose-desktop version MUST track the compose-multiplatform catalog version, else the
+        // arm64 offline flatpak build fails to resolve desktop-jvm-linux-arm64 (skiko version per its POM).
         targetPlatforms.set(setOf("linux-x64", "linux-arm64"))
         platformDependencies.set(setOf(
             "org.jetbrains.skiko:skiko-awt-runtime-{platform}:0.144.6",
-            "org.jetbrains.compose.desktop:desktop-jvm-{platform}:1.11.0",
+            "org.jetbrains.compose.desktop:desktop-jvm-{platform}:1.11.1",
         ))
     }
 }

@@ -27,7 +27,7 @@ kotlin {
         commonMain.dependencies {
             implementation(projects.core.repository)
             implementation(projects.core.model)
-            implementation(projects.core.proto)
+            implementation(libs.meshtastic.protobufs)
             implementation(projects.core.common)
             implementation(projects.core.database)
             implementation(projects.core.datastore)
