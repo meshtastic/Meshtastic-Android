@@ -29,6 +29,9 @@
 # Feature: Docs
 **/DocsScreenshotTestsKt/Screenshot*_Light_*.png
 
+# Feature: Discovery
+**/DiscoveryScreenshotTestsKt/Screenshot*_Light_*.png
+
 # Feature: Map
 **/MapScreenshotTestsKt/Screenshot*_Light_*.png
 

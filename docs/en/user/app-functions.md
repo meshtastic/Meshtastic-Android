@@ -28,6 +28,8 @@ App Functions are controlled from **Settings → System AI** (the in-app screen 
 
 The functions are grouped into a **Write** section (functions that change something or send data to your mesh) and a **Read** section (functions that only return information).
 
+![App Functions screen with master and per-function toggles](../../assets/screenshots/app-functions_settings.png)
+
 ### Write Functions
 
 | Function | What it does |

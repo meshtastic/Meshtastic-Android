@@ -68,6 +68,8 @@ CO₂ readings are color-coded by severity to make air quality easy to read at a
 | Unsafe | < 30000 | Red |
 | Evacuate | ≥ 30000 | Dark red |
 
+![Air quality readings with color-coded CO₂ severity](../../assets/screenshots/node-metrics_air_quality.png)
+
 An air-quality log/metrics button appears on the node detail screen **only when the node has reported air-quality telemetry**. From the Air Quality view you can:
 
 - Select a **time frame** for the charts.

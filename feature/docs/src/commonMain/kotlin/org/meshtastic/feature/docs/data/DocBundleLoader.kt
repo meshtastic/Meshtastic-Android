@@ -428,7 +428,7 @@ class DefaultDocBundleLoader : DocBundleLoader {
                 "en/user/app-functions.html",
                 19,
                 listOf("app-functions", "system-ai", "gemini", "assistant"),
-                2635,
+                2750,
                 "app-functions",
             ),
         )

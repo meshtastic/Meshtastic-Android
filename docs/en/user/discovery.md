@@ -61,9 +61,15 @@ While a scan runs, Discovery shows its current stage:
 | **Analysis** | Processing the collected packets and ranking the presets. |
 | **Restoring** | Putting your original LoRa configuration back. |
 
+![Dwell countdown showing time remaining on the current preset](../../assets/screenshots/discovery_dwell_progress.png)
+
 ### Reading the Results
 
-When the scan completes, Discovery presents a per-preset result card for each preset it tested, plus an overall summary. Metrics include:
+When the scan completes, Discovery presents a per-preset result card for each preset it tested, plus an overall summary.
+
+![Per-preset result card with ranking and collected metrics](../../assets/screenshots/discovery_preset_result.png)
+
+Metrics include:
 
 | Metric | What it tells you |
 |--------|-------------------|

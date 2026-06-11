@@ -109,6 +109,8 @@ You can search the full history of any conversation directly from the chat scree
 3. Type into the **Search messages…** field. The search runs as you type, across all stored messages in that conversation.
 4. Use the **N / M** result counter and the **previous / next arrows** to jump between matches, which are highlighted in the conversation.
 
+![Message search bar with result counter and previous/next arrows](../../assets/screenshots/messages_search_bar.png)
+
 > 💡 **Tip:** Search is full-text and stays within the conversation you opened it from — it doesn't search across other channels or contacts. Matching is fast even on long histories because messages are indexed locally.
 
 ### Message Bubbles
