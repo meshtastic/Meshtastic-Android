@@ -2,7 +2,7 @@
 title: Codebase
 parent: Developer Guide
 nav_order: 2
-last_updated: 2026-05-20
+last_updated: 2026-06-11
 aliases:
   - repository-layout
   - project-structure
@@ -32,9 +32,10 @@ Meshtastic-Android/
 │   ├── firmware/
 │   ├── docs/
 │   ├── wifi-provision/
-│   └── widget/
+│   ├── widget/
+│   ├── discovery/
+│   └── car/
 ├── core/                   # Core infrastructure modules (KMP)
-│   ├── api/
 │   ├── barcode/
 │   ├── ble/
 │   ├── common/
@@ -48,13 +49,14 @@ Meshtastic-Android/
 │   ├── network/
 │   ├── nfc/
 │   ├── prefs/
-│   ├── proto/
 │   ├── repository/
 │   ├── resources/
 │   ├── service/
 │   ├── takserver/
 │   ├── testing/
 │   └── ui/
+├── baselineprofile/        # Baseline Profile generation for :androidApp
+├── screenshot-tests/       # Compose Preview screenshot tests
 ├── build-logic/            # Convention plugins and build helpers
 │   ├── convention/
 │   └── flatpak/

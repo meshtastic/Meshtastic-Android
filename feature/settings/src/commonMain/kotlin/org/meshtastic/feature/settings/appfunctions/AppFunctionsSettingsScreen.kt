@@ -23,10 +23,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
@@ -49,6 +51,7 @@ import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.SwitchListItem
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.SettingsRemote
+import org.meshtastic.core.ui.theme.AppTheme
 
 @Composable
 fun AppFunctionsSettingsScreen(
@@ -223,4 +226,39 @@ private fun ReadFunctionsSection(
         enabled = masterEnabled,
         onClick = onToggleUnreadSummary,
     )
+}
+
+@PreviewLightDark
+@Suppress("PreviewPublic") // public so :screenshot-tests can reference it
+@Composable
+fun PreviewAppFunctionsSettings() {
+    AppTheme {
+        Surface {
+            Column {
+                MasterToggleSection(masterEnabled = true, onToggle = {})
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                WriteFunctionsSection(masterEnabled = true, sendMessage = false, onToggleSendMessage = {})
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                ReadFunctionsSection(
+                    masterEnabled = true,
+                    getMeshStatus = true,
+                    onToggleMeshStatus = {},
+                    getNodeList = true,
+                    onToggleNodeList = {},
+                    getChannelInfo = true,
+                    onToggleChannelInfo = {},
+                    getDeviceStatus = true,
+                    onToggleDeviceStatus = {},
+                    getNodeDetails = true,
+                    onToggleNodeDetails = {},
+                    getMeshMetrics = true,
+                    onToggleMeshMetrics = {},
+                    getRecentMessages = false,
+                    onToggleRecentMessages = {},
+                    getUnreadSummary = true,
+                    onToggleUnreadSummary = {},
+                )
+            }
+        }
+    }
 }

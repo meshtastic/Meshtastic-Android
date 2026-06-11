@@ -32,6 +32,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -43,6 +44,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
@@ -62,12 +64,14 @@ import org.meshtastic.core.resources.pm10
 import org.meshtastic.core.resources.pm1_0
 import org.meshtastic.core.resources.pm2_5
 import org.meshtastic.core.ui.component.Co2Severity
+import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.GraphColors.Blue
 import org.meshtastic.core.ui.theme.GraphColors.Cyan
 import org.meshtastic.core.ui.theme.GraphColors.Green
 import org.meshtastic.core.ui.theme.GraphColors.Red
 import org.meshtastic.core.ui.util.rememberSaveFileLauncher
 import org.meshtastic.proto.Telemetry
+import org.meshtastic.proto.AirQualityMetrics as AirQualityMetricsProto
 
 /** Selectable chart metric enum for air quality data series. */
 private enum class AirQuality(val labelRes: StringResource, val unit: String, val color: Color) {
@@ -258,41 +262,88 @@ private fun AirQualityChart(
 }
 
 @Composable
-private fun AirQualityMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick: () -> Unit) {
+private fun AirQualityMetricsCard(
+    telemetry: Telemetry,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    timeTextOverride: String? = null,
+) {
     val aq = telemetry.air_quality_metrics ?: return
-    val time = DateFormatter.formatDateTime(telemetry.time.toLong() * MS_PER_SEC)
+    val time = timeTextOverride ?: DateFormatter.formatDateTime(telemetry.time.toLong() * MS_PER_SEC)
 
     SelectableMetricCard(isSelected = isSelected, onClick = onClick) {
-        Text(
-            text = time,
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Column {
-                aq.pm10_standard
-                    ?.takeIf { it != 0 }
-                    ?.let { Text("PM1.0: $it µg/m³", style = MaterialTheme.typography.bodySmall) }
-                aq.pm25_standard
-                    ?.takeIf { it != 0 }
-                    ?.let { Text("PM2.5: $it µg/m³", style = MaterialTheme.typography.bodySmall) }
-                aq.pm100_standard
-                    ?.takeIf { it != 0 }
-                    ?.let { Text("PM10: $it µg/m³", style = MaterialTheme.typography.bodySmall) }
+        // SelectableMetricCard's SelectionContainer imposes no layout of its own,
+        // so the card content must bring its own Column (matches EnvironmentMetricsContent).
+        Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
+            Text(
+                text = time,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Column {
+                    aq.pm10_standard
+                        ?.takeIf { it != 0 }
+                        ?.let { Text("PM1.0: $it µg/m³", style = MaterialTheme.typography.bodySmall) }
+                    aq.pm25_standard
+                        ?.takeIf { it != 0 }
+                        ?.let { Text("PM2.5: $it µg/m³", style = MaterialTheme.typography.bodySmall) }
+                    aq.pm100_standard
+                        ?.takeIf { it != 0 }
+                        ?.let { Text("PM10: $it µg/m³", style = MaterialTheme.typography.bodySmall) }
+                }
+                Column {
+                    aq.co2
+                        ?.takeIf { it != 0 }
+                        ?.let { co2 ->
+                            val severity = Co2Severity.fromPpm(co2)
+                            Text(
+                                text = "CO₂: $co2 ppm",
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.Medium,
+                                color = severity?.color ?: MaterialTheme.colorScheme.onSurface,
+                            )
+                        }
+                }
             }
+        }
+    }
+}
+
+@PreviewLightDark
+@Suppress("MagicNumber", "PreviewPublic") // fake data; public so :screenshot-tests can reference it
+@Composable
+fun PreviewAirQualityCards() {
+    val readings =
+        listOf(
+            Telemetry(
+                time = 1700000000,
+                air_quality_metrics =
+                AirQualityMetricsProto(pm10_standard = 4, pm25_standard = 9, pm100_standard = 12, co2 = 620),
+            ) to "2023-11-14 20:13",
+            Telemetry(
+                time = 1700003600,
+                air_quality_metrics =
+                AirQualityMetricsProto(pm10_standard = 6, pm25_standard = 14, pm100_standard = 19, co2 = 1450),
+            ) to "2023-11-14 21:13",
+            Telemetry(
+                time = 1700007200,
+                air_quality_metrics =
+                AirQualityMetricsProto(pm10_standard = 11, pm25_standard = 25, pm100_standard = 33, co2 = 2300),
+            ) to "2023-11-14 22:13",
+        )
+    AppTheme {
+        Surface {
             Column {
-                aq.co2
-                    ?.takeIf { it != 0 }
-                    ?.let { co2 ->
-                        val severity = Co2Severity.fromPpm(co2)
-                        Text(
-                            text = "CO₂: $co2 ppm",
-                            style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.Medium,
-                            color = severity?.color ?: MaterialTheme.colorScheme.onSurface,
-                        )
-                    }
+                readings.forEach { (telemetry, timeText) ->
+                    AirQualityMetricsCard(
+                        telemetry = telemetry,
+                        isSelected = false,
+                        onClick = {},
+                        timeTextOverride = timeText,
+                    )
+                }
             }
         }
     }
