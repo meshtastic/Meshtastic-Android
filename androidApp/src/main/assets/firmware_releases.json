@@ -189,10 +189,46 @@
   },
   "pullRequests": [
     {
+      "id": "10691",
+      "title": "Update actions/github-script action to v9",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10691",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "10690",
+      "title": "Update python to v3.14.6",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10690",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "10689",
+      "title": "Heltec Vision Master E213: enable 32768hz crystal osc for rtc",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10689",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
       "id": "10684",
       "title": "Claude hooks don't work in a fresh box",
       "page_url": "https://github.com/meshtastic/firmware/pull/10684",
-      "zip_url": "s"
+      "zip_url": "+37.2 KB"
+    },
+    {
+      "id": "10677",
+      "title": "Add native Portduino malloc shim",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10677",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "10674",
+      "title": "Lora led rx",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10674",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "10671",
+      "title": "Use standard GPS enable pin, for smarter power control on M3",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10671",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
       "id": "10669",
@@ -210,7 +246,7 @@
       "id": "10665",
       "title": "Clamp position precision on public / known-keys",
       "page_url": "https://github.com/meshtastic/firmware/pull/10665",
-      "zip_url": "s"
+      "zip_url": "+43.6 KB"
     },
     {
       "id": "10664",
@@ -222,7 +258,7 @@
       "id": "10658",
       "title": "Fix BLE advertising management to prevent crashes during reconnections",
       "page_url": "https://github.com/meshtastic/firmware/pull/10658",
-      "zip_url": "s"
+      "zip_url": "+40.3 KB"
     },
     {
       "id": "10656",
@@ -264,13 +300,7 @@
       "id": "10602",
       "title": "Mesh node t1 fixes",
       "page_url": "https://github.com/meshtastic/firmware/pull/10602",
-      "zip_url": "s"
-    },
-    {
-      "id": "10587",
-      "title": "Add SHT2x CRC check to fix i2c scan hang",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10587",
-      "zip_url": "https://discord.com/invite/meshtastic"
+      "zip_url": "+46.0 KB"
     }
   ]
 }
