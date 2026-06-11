@@ -429,6 +429,8 @@ distance_measurements_description
 dns
 ### DOC ###
 doc_clear_search
+doc_keywords_android_auto
+doc_keywords_app_functions
 doc_keywords_connections
 doc_keywords_desktop
 doc_keywords_discovery
@@ -450,6 +452,8 @@ doc_keywords_units
 doc_search_placeholder
 doc_section_developer
 doc_section_user
+doc_title_android_auto
+doc_title_app_functions
 doc_title_connections
 doc_title_desktop
 doc_title_discovery

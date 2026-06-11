@@ -63,7 +63,7 @@ val syncDocsToComposeResources by
         group = "docs"
 
         val docsEnDir = rootProject.layout.projectDirectory.dir("docs/en")
-        val screenshotsDir = rootProject.layout.projectDirectory.dir("docs/screenshots")
+        val screenshotsDir = rootProject.layout.projectDirectory.dir("docs/assets/screenshots")
         val composeResourcesTarget = layout.projectDirectory.dir("src/commonMain/composeResources/files/docs")
 
         from(docsEnDir) {
@@ -72,9 +72,9 @@ val syncDocsToComposeResources by
         }
 
         // FR-038: Bundle screenshots into assets/screenshots/ to match markdown image paths.
-        // Markdown references use `assets/screenshots/foo.png` (relative to the doc page).
-        // copyDocsScreenshots flattens reference PNGs into docs/screenshots/,
-        // so we remap them into assets/screenshots/ within the compose resource tree.
+        // docs/assets/screenshots/ is the tracked, semantically-named screenshot set shared with the
+        // Jekyll site; copyDocsScreenshots refreshes it from the CST reference images, so the site and
+        // the in-app reader always serve identical images (and raw CST renders never reach the bundle).
         from(screenshotsDir) {
             include("**/*.png")
             into("assets/screenshots")

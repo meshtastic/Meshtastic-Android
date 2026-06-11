@@ -2,7 +2,7 @@
 title: Architecture
 parent: Developer Guide
 nav_order: 1
-last_updated: 2026-05-29
+last_updated: 2026-06-11
 aliases:
   - layers
   - module-architecture
@@ -62,6 +62,8 @@ Each `feature/` module owns a vertical slice of functionality:
 | `feature:docs` | In-app documentation browser |
 | `feature:wifi-provision` | WiFi provisioning |
 | `feature:widget` | Android home screen widgets |
+| `feature:discovery` | Mesh network discovery |
+| `feature:car` | Android Auto / Car App Library — google flavor only, conditionally registered in the google `FlavorModule` |
 
 Feature modules:
 - Use the `meshtastic.kmp.feature` convention plugin
@@ -89,8 +91,9 @@ Shared infrastructure used by all features:
 | `core:di` | DI utilities |
 | `core:network` | HTTP/serial/transport |
 | `core:ble` | Bluetooth LE abstractions |
-| `core:proto` | Protobuf definitions |
 | `core:testing` | Test utilities |
+
+Protobuf models are no longer a local module — they come from the external `org.meshtastic:protobufs` Maven artifact (pinned in `gradle/libs.versions.toml`).
 
 ## KMP Source Sets
 

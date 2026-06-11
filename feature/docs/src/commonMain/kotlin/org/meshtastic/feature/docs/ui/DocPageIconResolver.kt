@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import org.meshtastic.core.ui.icon.Altitude
 import org.meshtastic.core.ui.icon.Antenna
+import org.meshtastic.core.ui.icon.Api
 import org.meshtastic.core.ui.icon.BluetoothConnected
 import org.meshtastic.core.ui.icon.BugReport
 import org.meshtastic.core.ui.icon.Chart
@@ -34,6 +35,7 @@ import org.meshtastic.core.ui.icon.Nodes
 import org.meshtastic.core.ui.icon.Notes
 import org.meshtastic.core.ui.icon.PersonSearch
 import org.meshtastic.core.ui.icon.PinDrop
+import org.meshtastic.core.ui.icon.Route
 import org.meshtastic.core.ui.icon.Rssi
 import org.meshtastic.core.ui.icon.Settings
 import org.meshtastic.core.ui.icon.SignalCellular3Bar
@@ -78,6 +80,10 @@ internal fun DocPage.resolveIcon(): ImageVector = when (iconId) {
     "units-locale" -> MeshtasticIcons.Language
 
     "translate" -> MeshtasticIcons.Language
+
+    "android-auto" -> MeshtasticIcons.Route
+
+    "app-functions" -> MeshtasticIcons.Api
 
     // Developer Guide
     "architecture" -> MeshtasticIcons.ForkLeft

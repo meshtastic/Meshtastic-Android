@@ -21,6 +21,8 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.currentLocaleQualifier
+import org.meshtastic.core.resources.doc_keywords_android_auto
+import org.meshtastic.core.resources.doc_keywords_app_functions
 import org.meshtastic.core.resources.doc_keywords_connections
 import org.meshtastic.core.resources.doc_keywords_desktop
 import org.meshtastic.core.resources.doc_keywords_discovery
@@ -38,6 +40,8 @@ import org.meshtastic.core.resources.doc_keywords_tak
 import org.meshtastic.core.resources.doc_keywords_telemetry
 import org.meshtastic.core.resources.doc_keywords_translate
 import org.meshtastic.core.resources.doc_keywords_units
+import org.meshtastic.core.resources.doc_title_android_auto
+import org.meshtastic.core.resources.doc_title_app_functions
 import org.meshtastic.core.resources.doc_title_connections
 import org.meshtastic.core.resources.doc_title_desktop
 import org.meshtastic.core.resources.doc_title_discovery
@@ -406,6 +410,26 @@ class DefaultDocBundleLoader : DocBundleLoader {
                 listOf("crowdin", "localization", "language", "i18n", "contribute"),
                 3700,
                 "translate",
+            ),
+            UserPageDef(
+                "android-auto",
+                CoreRes.string.doc_title_android_auto,
+                CoreRes.string.doc_keywords_android_auto,
+                "en/user/android-auto.html",
+                18,
+                listOf("android-auto", "car", "head-unit", "auto"),
+                2119,
+                "android-auto",
+            ),
+            UserPageDef(
+                "app-functions",
+                CoreRes.string.doc_title_app_functions,
+                CoreRes.string.doc_keywords_app_functions,
+                "en/user/app-functions.html",
+                19,
+                listOf("app-functions", "system-ai", "gemini", "assistant"),
+                2750,
+                "app-functions",
             ),
         )
 

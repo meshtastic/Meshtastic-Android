@@ -38,6 +38,7 @@ import org.meshtastic.feature.node.detail.NodeDetailContentMinimalPreview
 import org.meshtastic.feature.node.detail.NodeDetailContentRemotePreview
 import org.meshtastic.feature.node.metrics.DeviceMetricsCardPreview
 import org.meshtastic.feature.node.metrics.LegendPreview
+import org.meshtastic.feature.node.metrics.PreviewAirQualityCards
 import org.meshtastic.feature.node.metrics.PreviewEnvironmentMetricsContent
 
 @PreviewTest
@@ -122,6 +123,13 @@ fun ScreenshotDeviceMetricsCard() {
 @Composable
 fun ScreenshotEnvironmentMetricsContent() {
     PreviewEnvironmentMetricsContent()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotAirQualityCards() {
+    PreviewAirQualityCards()
 }
 
 // ---------------------------------------------------------------------------
