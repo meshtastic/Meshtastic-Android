@@ -119,6 +119,7 @@ bluetooth_permission
 bold_heading
 bottom_nav_settings
 broadcast_interval
+busy_noise_floor
 button_gpio
 buzzer_gpio
 calculating
@@ -978,6 +979,9 @@ nodes_empty_disconnected_title
 nodes_empty_searching_hint
 nodes_empty_searching_title
 nodes_queued_for_deletion
+noise_floor
+noise_floor_definition
+noise_floor_no_reading
 none
 none_quality
 not_connected
@@ -1151,6 +1155,7 @@ request_air_quality_metrics
 request_device_metrics
 request_environment_metrics
 request_host_metrics
+request_local_stats
 request_metadata
 request_pax_metrics
 request_power_metrics
@@ -1202,6 +1207,7 @@ routing_error_rate_limit_exceeded
 routing_error_timeout
 routing_error_too_large
 rssi
+rssi_definition
 rsyslog_server
 sample_message
 sats
@@ -1296,6 +1302,7 @@ skip
 slot
 smart_position
 snr
+snr_definition
 soil_moisture
 soil_temperature
 speed

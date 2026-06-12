@@ -174,6 +174,22 @@ open class MeshLogRepositoryImpl(
         dbManager.currentDb.value.meshLogDao().deleteLogs(logId, portNum)
     }
 
+    /** Deletes only local stats telemetry logs for [nodeNum], preserving other telemetry types. */
+    override suspend fun deleteLocalStatsLogs(nodeNum: Int) = withContext(dispatchers.io) {
+        val myNodeNum = nodeInfoReadDataSource.myNodeInfoFlow().firstOrNull()?.myNodeNum
+        val logId = if (nodeNum == myNodeNum) MeshLog.NODE_NUM_LOCAL else nodeNum
+        val dao = dbManager.currentDb.value.meshLogDao()
+        val localStatsLogs =
+            dao.getLogsFrom(logId, PortNum.TELEMETRY_APP.value, Int.MAX_VALUE)
+                .firstOrNull()
+                .orEmpty()
+                .map { it.asExternalModel() }
+                .filter { parseTelemetryLog(it)?.local_stats != null }
+
+        val localStatsLogIds = localStatsLogs.map { it.uuid }
+        if (localStatsLogIds.isNotEmpty()) dao.deleteLogsByUuid(localStatsLogIds)
+    }
+
     /** Prunes the log database based on the configured [retentionDays]. */
     @Suppress("MagicNumber")
     override suspend fun deleteLogsOlderThan(retentionDays: Int) = withContext(dispatchers.io) {

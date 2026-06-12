@@ -34,6 +34,7 @@ data class MetricsState(
     val displayUnits: Config.DisplayConfig.DisplayUnits = Config.DisplayConfig.DisplayUnits.METRIC,
     val node: Node? = null,
     val deviceMetrics: List<Telemetry> = emptyList(),
+    val localStats: List<Telemetry> = emptyList(),
     val signalMetrics: List<MeshPacket> = emptyList(),
     val powerMetrics: List<Telemetry> = emptyList(),
     val hostMetrics: List<Telemetry> = emptyList(),
@@ -57,6 +58,8 @@ data class MetricsState(
 
     fun hasSignalMetrics() = signalMetrics.isNotEmpty()
 
+    fun hasLocalStats() = localStats.isNotEmpty()
+
     fun hasPowerMetrics() = powerMetrics.isNotEmpty()
 
     fun hasTracerouteLogs() = tracerouteRequests.isNotEmpty()
@@ -74,7 +77,8 @@ data class MetricsState(
     /** Finds the oldest timestamp (in seconds) among all collected metric types. */
     @Suppress("MagicNumber")
     fun oldestTimestampSeconds(): Long? {
-        val telemetryTimes = (deviceMetrics + powerMetrics + hostMetrics + airQualityMetrics).map { it.time.toLong() }
+        val telemetryTimes =
+            (deviceMetrics + localStats + powerMetrics + hostMetrics + airQualityMetrics).map { it.time.toLong() }
         val signalTimes = signalMetrics.map { it.rx_time.toLong() }
         val logTimes =
             (tracerouteRequests + tracerouteResults + neighborInfoRequests + neighborInfoResults + paxMetrics).map {

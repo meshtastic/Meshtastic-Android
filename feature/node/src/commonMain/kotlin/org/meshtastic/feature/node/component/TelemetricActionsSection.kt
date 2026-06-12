@@ -159,7 +159,6 @@ private fun rememberTelemetricFeatures(
                 icon = LogsType.SIGNAL.icon,
                 requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.LOCAL_STATS) },
                 logsType = LogsType.SIGNAL,
-                isVisible = { !isLocal },
             ),
             TelemetricFeature(
                 titleRes = LogsType.DEVICE.titleRes,

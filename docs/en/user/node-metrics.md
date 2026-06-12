@@ -2,7 +2,7 @@
 title: Node Metrics
 parent: User Guide
 nav_order: 5
-last_updated: 2026-06-11
+last_updated: 2026-06-16
 description: Telemetry dashboards for each mesh node — device health, environment sensors, air quality, signal quality, power, traceroute, and position history.
 aliases:
   - metrics
@@ -87,6 +87,7 @@ Radio signal quality information:
 |--------|-------------|
 | SNR | Signal-to-Noise Ratio (higher is better) |
 | RSSI | Received Signal Strength Indicator (closer to 0 is better) |
+| Noise Floor | Local background RF noise in dBm (more negative is quieter) |
 | Hop Count | Number of mesh hops for last message |
 
 ### Signal Quality Reference
@@ -97,6 +98,8 @@ Radio signal quality information:
 | 0 to 10 dB | Good |
 | -10 to 0 dB | Fair |
 | < -10 dB | Poor |
+
+Local Stats from your connected radio are also shown in Signal Quality when available. These logs include noise floor, traffic counters, relay counters, online node counts, and radio uptime. The noise floor chart uses a dashed reference line at -85 dBm to help identify a busy RF environment. Use **Request** to ask the connected radio for a fresh Local Stats telemetry report, **Clear** to remove Local Stats logs for that node, and **Save** to export the visible Local Stats history as CSV.
 
 ## Power Metrics
 
@@ -159,4 +162,3 @@ The position tab shows location data for nodes that share GPS:
 - [Units & Locale](units-and-locale) — temperature, distance, and speed display formats
 
 ---
-

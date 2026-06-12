@@ -242,6 +242,10 @@ open class MetricsViewModel(
         }
     }
 
+    fun clearLocalStats() = safeLaunch(context = dispatchers.io, tag = "clearLocalStats") {
+        (manualNodeId.value ?: nodeIdFromRoute)?.let { meshLogRepository.deleteLocalStatsLogs(it) }
+    }
+
     fun requestPosition() {
         (manualNodeId.value ?: nodeIdFromRoute)?.let {
             viewModelScope.launch { nodeRequestActions.requestPosition(it, state.value.node?.user?.long_name ?: "") }
@@ -367,6 +371,26 @@ open class MetricsViewModel(
             val lon = (pos.longitude_i ?: 0) * GeoConstants.DEG_D
             val heading = formatString("%.2f", (pos.ground_track ?: 0) * GeoConstants.HEADING_DEG)
             "\"$lat\",\"$lon\",\"${pos.altitude}\",\"${pos.sats_in_view}\",\"${pos.ground_speed}\",\"$heading\""
+        }
+    }
+
+    fun saveLocalStatsCSV(uri: CommonUri, data: List<Telemetry>) {
+        exportCsv(
+            uri = uri,
+            header =
+            "\"date\",\"time\",\"noise_floor_dbm\",\"uptime_seconds\",\"channel_utilization\",\"air_util_tx\"," +
+                "\"packets_tx\",\"packets_rx\",\"bad_rx\",\"rx_dupe\",\"tx_relay\",\"tx_relay_canceled\"," +
+                "\"online_nodes\",\"total_nodes\"\n",
+            rows = data.filter { it.local_stats != null },
+            epochSeconds = { it.time.toLong() },
+        ) { telemetry ->
+            val stats = telemetry.local_stats
+            "\"${stats?.noise_floor ?: ""}\",\"${stats?.uptime_seconds ?: ""}\"," +
+                "\"${stats?.channel_utilization ?: ""}\",\"${stats?.air_util_tx ?: ""}\"," +
+                "\"${stats?.num_packets_tx ?: ""}\",\"${stats?.num_packets_rx ?: ""}\"," +
+                "\"${stats?.num_packets_rx_bad ?: ""}\",\"${stats?.num_rx_dupe ?: ""}\"," +
+                "\"${stats?.num_tx_relay ?: ""}\",\"${stats?.num_tx_relay_canceled ?: ""}\"," +
+                "\"${stats?.num_online_nodes ?: ""}\",\"${stats?.num_total_nodes ?: ""}\""
         }
     }
 
