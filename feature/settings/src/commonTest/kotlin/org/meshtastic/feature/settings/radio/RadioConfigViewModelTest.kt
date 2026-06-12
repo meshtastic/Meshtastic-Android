@@ -422,6 +422,27 @@ class RadioConfigViewModelTest {
     }
 
     @Test
+    fun `saveUserConfig routes subsequent licensed saves to setOwner`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        nodeRepository.setNodes(listOf(node))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
+        viewModel = createViewModel()
+
+        val user = User(long_name = "KK7ABC", short_name = "KK7A", is_licensed = true)
+        everySuspend { radioConfigUseCase.setHamMode(any(), any()) } returns 42
+        everySuspend { radioConfigUseCase.setOwner(any(), any()) } returns 43
+
+        // First save transitions OFF→ON and onboards via set_ham_mode.
+        viewModel.saveUserConfig(user)
+        // A later save while already licensed must use set_owner so other owner fields propagate.
+        val edited = user.copy(short_name = "KK7B")
+        viewModel.saveUserConfig(edited)
+
+        verifySuspend(exactly(1)) { radioConfigUseCase.setHamMode(any(), any()) }
+        verifySuspend { radioConfigUseCase.setOwner(123, edited) }
+    }
+
+    @Test
     fun `saveUserConfig routes licensed save to setOwner when myNodeInfo is absent`() = runTest {
         val node = Node(num = 123, user = User(id = "!123"))
         nodeRepository.setNodes(listOf(node))

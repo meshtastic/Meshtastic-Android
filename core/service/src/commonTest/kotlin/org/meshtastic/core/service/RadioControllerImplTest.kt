@@ -363,7 +363,7 @@ class RadioControllerImplTest {
 
     @Test
     fun setHamModeSendsAdminWithEchoedLoraValuesAndUpdatesUser() = runTest {
-        val controller = createController()
+        val controller = createController(myNodeNum = 123)
         val existingUser = User(id = "!0000007b", long_name = "Old Name", short_name = "OLD")
         every { nodeManager.nodeDBbyNodeNum } returns mapOf(123 to Node(num = 123, user = existingUser))
         every { radioConfigRepository.localConfigFlow } returns
@@ -396,7 +396,7 @@ class RadioControllerImplTest {
 
     @Test
     fun setHamModeWithNoCachedLoraConfigSendsProtoDefaults() = runTest {
-        val controller = createController()
+        val controller = createController(myNodeNum = 123)
         every { nodeManager.nodeDBbyNodeNum } returns emptyMap()
         every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(LocalConfig())
 
@@ -421,6 +421,16 @@ class RadioControllerImplTest {
                 false,
             )
         }
+    }
+
+    @Test
+    fun setHamModeIgnoresRemoteDestinations() = runTest {
+        val controller = createController(myNodeNum = 123)
+
+        controller.setHamMode(456, HamParameters(call_sign = "KK7ABC", short_name = "KK7A"), 42)
+
+        verifySuspend(exactly(0)) { commandSender.sendAdmin(any(), any(), any(), any()) }
+        verify(exactly(0)) { nodeManager.handleReceivedUser(any(), any(), any(), any()) }
     }
 
     @Test

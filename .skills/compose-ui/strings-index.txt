@@ -123,6 +123,7 @@ button_gpio
 buzzer_gpio
 calculating
 call_sign
+call_sign_summary
 cancel
 cancel_reply
 canned_message

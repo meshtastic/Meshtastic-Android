@@ -292,13 +292,16 @@ open class RadioConfigViewModel(
     }
 
     /**
-     * Routes the User config save: ham onboarding (`set_ham_mode`) when the licensed toggle is on and the target is the
-     * locally connected node, [setOwner] otherwise. The local-node guard is the backstop for the UI gate —
-     * `set_ham_mode` must never be sent to a remote node.
+     * Routes the User config save: ham onboarding (`set_ham_mode`) when the licensed toggle transitions OFF→ON on the
+     * locally connected node, [setOwner] otherwise. Routing on the transition — not the toggle state — keeps subsequent
+     * saves of an already-licensed node on the `set_owner` path, so edits to other owner fields still reach the device
+     * and the node doesn't reboot on every save (firmware reboots on `set_ham_mode`). The local-node guard is the
+     * backstop for the UI gate — `set_ham_mode` must never be sent to a remote node.
      */
     fun saveUserConfig(user: User) {
         val destNum = destNum ?: destNode.value?.num ?: return
-        if (user.is_licensed && destNum == myNodeNum) setHamMode(destNum, user) else setOwner(user)
+        val enablingHam = user.is_licensed && !radioConfigState.value.userConfig.is_licensed
+        if (enablingHam && destNum == myNodeNum) setHamMode(destNum, user) else setOwner(user)
     }
 
     private fun setHamMode(destNum: Int, user: User) {
@@ -315,6 +318,10 @@ open class RadioConfigViewModel(
         }
     }
 
+    /**
+     * Sends a plain `set_owner` with [user]. Prefer [saveUserConfig] for User config screen saves — it routes ham
+     * onboarding to `set_ham_mode` when the licensed toggle is first enabled; calling this directly bypasses that.
+     */
     fun setOwner(user: User) {
         val destNum = destNum ?: destNode.value?.num ?: return
         safeLaunch(tag = "setOwner") {

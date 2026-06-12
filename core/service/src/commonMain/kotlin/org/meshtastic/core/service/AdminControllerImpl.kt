@@ -68,6 +68,10 @@ internal class AdminControllerImpl(
     }
 
     override suspend fun setHamMode(destNum: Int, hamParameters: HamParameters, packetId: Int) {
+        if (destNum != nodeManager.myNodeNum.value) {
+            Logger.w { "Ignoring setHamMode for node $destNum — ham onboarding targets the local node only" }
+            return
+        }
         // Firmware applies tx_power/frequency to the LoRa config verbatim, so echo the node's current
         // values to keep a re-send (e.g. a callsign edit while already licensed) from wiping overrides.
         val lora = radioConfigRepository.localConfigFlow.firstOrNull()?.lora ?: Config.LoRaConfig()

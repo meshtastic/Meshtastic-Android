@@ -32,6 +32,7 @@ import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.isUnmessageableRole
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.call_sign
+import org.meshtastic.core.resources.call_sign_summary
 import org.meshtastic.core.resources.hardware_model
 import org.meshtastic.core.resources.licensed_amateur_radio
 import org.meshtastic.core.resources.licensed_amateur_radio_text
@@ -87,6 +88,7 @@ fun UserConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 EditTextPreference(
                     title = stringResource(if (hamMode) Res.string.call_sign else Res.string.long_name),
                     value = formState.value.long_name,
+                    summary = if (hamMode) stringResource(Res.string.call_sign_summary) else null,
                     maxSize = longNameMax,
                     enabled = state.connected,
                     isError = !validLongName,
