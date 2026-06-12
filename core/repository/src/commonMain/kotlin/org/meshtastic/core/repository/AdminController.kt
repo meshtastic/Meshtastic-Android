@@ -19,6 +19,7 @@ package org.meshtastic.core.repository
 import org.meshtastic.core.model.Position
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.Config
+import org.meshtastic.proto.HamParameters
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.User
 
@@ -51,6 +52,17 @@ interface AdminController {
 
     /** Updates the owner (user info) on a remote node. */
     suspend fun setOwner(destNum: Int, user: User, packetId: Int)
+
+    /**
+     * Enables amateur-radio (ham) mode on a node via `AdminMessage.set_ham_mode`.
+     *
+     * Must only target the locally connected node — firmware ham onboarding is a local operation and the UI gates it
+     * accordingly. The firmware handler rewrites the owner (long_name = call_sign), flips `is_licensed`, disables
+     * encryption, applies [HamParameters.tx_power]/[HamParameters.frequency] to the LoRa config verbatim, and reboots,
+     * so callers must echo the node's current LoRa values rather than send defaults. Intentionally absent from
+     * [AdminEditScope]: ham enablement is not a batch-edit operation.
+     */
+    suspend fun setHamMode(destNum: Int, hamParameters: HamParameters, packetId: Int)
 
     /** Updates the general configuration on a remote node. */
     suspend fun setConfig(destNum: Int, config: Config, packetId: Int)

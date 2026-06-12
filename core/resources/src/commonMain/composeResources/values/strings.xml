@@ -140,6 +140,7 @@
     <string name="button_gpio">Button GPIO</string>
     <string name="buzzer_gpio">Buzzer GPIO</string>
     <string name="calculating">Calculating…</string>
+    <string name="call_sign">Call sign</string>
     <string name="cancel">Cancel</string>
     <string name="cancel_reply">Cancel reply</string>
     <string name="canned_message">Canned Message</string>

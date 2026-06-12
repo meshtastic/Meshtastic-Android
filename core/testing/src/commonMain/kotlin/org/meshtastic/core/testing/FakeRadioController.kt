@@ -25,6 +25,7 @@ import org.meshtastic.core.repository.RadioController
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Config
+import org.meshtastic.proto.HamParameters
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.User
 
@@ -107,6 +108,8 @@ class FakeRadioController :
     override suspend fun setLocalChannel(channel: Channel) {}
 
     override suspend fun setOwner(destNum: Int, user: User, packetId: Int) {}
+
+    override suspend fun setHamMode(destNum: Int, hamParameters: HamParameters, packetId: Int) {}
 
     override suspend fun setConfig(destNum: Int, config: Config, packetId: Int) {}
 

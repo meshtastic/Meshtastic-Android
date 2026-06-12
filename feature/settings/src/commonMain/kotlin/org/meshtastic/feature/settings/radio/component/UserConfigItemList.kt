@@ -31,6 +31,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.isUnmessageableRole
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.call_sign
 import org.meshtastic.core.resources.hardware_model
 import org.meshtastic.core.resources.licensed_amateur_radio
 import org.meshtastic.core.resources.licensed_amateur_radio_text
@@ -47,6 +48,9 @@ import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 
+private const val LONG_NAME_MAX_LENGTH = 39 // long_name max_size:40
+private const val CALL_SIGN_MAX_LENGTH = 8 // iOS parity; firmware sets long_name from the callsign
+
 @Composable
 fun UserConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
@@ -55,7 +59,10 @@ fun UserConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val firmwareVersion = state.metadata?.firmware_version
     val capabilities = remember(firmwareVersion) { Capabilities(firmwareVersion) }
 
-    val validLongName = formState.value.long_name.isNotBlank()
+    // Ham onboarding repurposes the long-name field as the callsign, for the local node only (iOS parity).
+    val hamMode = formState.value.is_licensed && state.isLocal
+    val longNameMax = if (hamMode) CALL_SIGN_MAX_LENGTH else LONG_NAME_MAX_LENGTH
+    val validLongName = formState.value.long_name.isNotBlank() && formState.value.long_name.length <= longNameMax
     val validShortName = formState.value.short_name.isNotBlank()
     val validNames = validLongName && validShortName
     val focusManager = LocalFocusManager.current
@@ -67,7 +74,7 @@ fun UserConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         enabled = state.connected && validNames,
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
-        onSave = viewModel::setOwner,
+        onSave = viewModel::saveUserConfig,
     ) {
         item {
             TitledCard(title = stringResource(Res.string.user_config)) {
@@ -78,9 +85,9 @@ fun UserConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 )
                 HorizontalDivider()
                 EditTextPreference(
-                    title = stringResource(Res.string.long_name),
+                    title = stringResource(if (hamMode) Res.string.call_sign else Res.string.long_name),
                     value = formState.value.long_name,
-                    maxSize = 39, // long_name max_size:40
+                    maxSize = longNameMax,
                     enabled = state.connected,
                     isError = !validLongName,
                     keyboardOptions =
@@ -123,7 +130,20 @@ fun UserConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     summary = stringResource(Res.string.licensed_amateur_radio_text),
                     checked = formState.value.is_licensed,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy(is_licensed = it) },
+                    onCheckedChange = { licensed ->
+                        val longName = formState.value.long_name
+                        formState.value =
+                            formState.value.copy(
+                                is_licensed = licensed,
+                                // The field becomes the callsign: clear an over-long name so the user enters one.
+                                long_name =
+                                if (licensed && state.isLocal && longName.length > CALL_SIGN_MAX_LENGTH) {
+                                    ""
+                                } else {
+                                    longName
+                                },
+                            )
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
             }

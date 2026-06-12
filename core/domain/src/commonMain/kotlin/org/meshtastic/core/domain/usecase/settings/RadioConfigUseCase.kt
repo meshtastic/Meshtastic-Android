@@ -20,6 +20,7 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.repository.RadioController
 import org.meshtastic.proto.Config
+import org.meshtastic.proto.HamParameters
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.User
 
@@ -37,6 +38,20 @@ open class RadioConfigUseCase constructor(private val radioController: RadioCont
     open suspend fun setOwner(destNum: Int, user: User): Int {
         val packetId = radioController.generatePacketId()
         radioController.setOwner(destNum, user, packetId)
+        return packetId
+    }
+
+    /**
+     * Enables amateur-radio (ham) mode on the locally connected node via `set_ham_mode`. At protobufs 2.7.25 only
+     * `call_sign` and `short_name` are user-supplied; `long_name` joins when meshtastic/protobufs#941 ships.
+     *
+     * @param destNum The node number to update (must be the local node).
+     * @param hamParameters The ham onboarding parameters.
+     * @return The packet ID of the request.
+     */
+    open suspend fun setHamMode(destNum: Int, hamParameters: HamParameters): Int {
+        val packetId = radioController.generatePacketId()
+        radioController.setHamMode(destNum, hamParameters, packetId)
         return packetId
     }
 

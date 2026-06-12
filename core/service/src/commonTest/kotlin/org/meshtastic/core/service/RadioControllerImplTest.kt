@@ -17,6 +17,7 @@
 package org.meshtastic.core.service
 
 import dev.mokkery.MockMode
+import dev.mokkery.answering.calls
 import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.everySuspend
@@ -49,7 +50,11 @@ import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
+import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.ClientNotification
+import org.meshtastic.proto.Config
+import org.meshtastic.proto.HamParameters
+import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.SharedContact
 import org.meshtastic.proto.User
 import kotlin.test.Test
@@ -354,6 +359,39 @@ class RadioControllerImplTest {
         verifySuspend { commandSender.sendAdmin(any(), any(), any(), any()) }
         // Importing is an act of manual verification, so the node is recorded as verified.
         verify { nodeManager.handleReceivedUser(42, any(), any(), true) }
+    }
+
+    @Test
+    fun setHamModeSendsAdminWithEchoedLoraValuesAndUpdatesUser() = runTest {
+        val controller = createController()
+        val existingUser = User(id = "!0000007b", long_name = "Old Name", short_name = "OLD")
+        every { nodeManager.nodeDBbyNodeNum } returns mapOf(123 to Node(num = 123, user = existingUser))
+        every { radioConfigRepository.localConfigFlow } returns
+            MutableStateFlow(LocalConfig(lora = Config.LoRaConfig(tx_power = 20, override_frequency = 915.5f)))
+
+        var sentMessage: AdminMessage? = null
+        everySuspend { commandSender.sendAdmin(any(), any(), any(), any()) } calls
+            {
+                @Suppress("UNCHECKED_CAST")
+                sentMessage = (it.args[3] as () -> AdminMessage)()
+            }
+
+        controller.setHamMode(123, HamParameters(call_sign = "KK7ABC", short_name = "KK7A"), 42)
+
+        val ham = sentMessage?.set_ham_mode
+        assertEquals("KK7ABC", ham?.call_sign)
+        assertEquals("KK7A", ham?.short_name)
+        // Current LoRa values are echoed so a re-send never wipes the node's overrides.
+        assertEquals(20, ham?.tx_power)
+        assertEquals(915.5f, ham?.frequency)
+        verify {
+            nodeManager.handleReceivedUser(
+                123,
+                existingUser.copy(long_name = "KK7ABC", short_name = "KK7A", is_licensed = true),
+                0,
+                false,
+            )
+        }
     }
 
     @Test

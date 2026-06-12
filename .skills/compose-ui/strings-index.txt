@@ -122,6 +122,7 @@ broadcast_interval
 button_gpio
 buzzer_gpio
 calculating
+call_sign
 cancel
 cancel_reply
 canned_message

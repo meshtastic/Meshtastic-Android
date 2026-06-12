@@ -80,6 +80,7 @@ import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.DeviceProfile
 import org.meshtastic.proto.DeviceUIConfig
 import org.meshtastic.proto.FileInfo
+import org.meshtastic.proto.HamParameters
 import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
@@ -288,6 +289,30 @@ open class RadioConfigViewModel(
     override fun onCleared() {
         super.onCleared()
         Logger.d { "RadioConfigViewModel cleared" }
+    }
+
+    /**
+     * Routes the User config save: ham onboarding (`set_ham_mode`) when the licensed toggle is on and the target is the
+     * locally connected node, [setOwner] otherwise. The local-node guard is the backstop for the UI gate —
+     * `set_ham_mode` must never be sent to a remote node.
+     */
+    fun saveUserConfig(user: User) {
+        val destNum = destNum ?: destNode.value?.num ?: return
+        if (user.is_licensed && destNum == myNodeNum) setHamMode(destNum, user) else setOwner(user)
+    }
+
+    private fun setHamMode(destNum: Int, user: User) {
+        safeLaunch(tag = "setHamMode") {
+            _radioConfigState.update { it.copy(userConfig = user) }
+            // The form's long-name field carries the callsign while licensed (iOS parity).
+            // When meshtastic/protobufs#941 ships, add long_name here.
+            val packetId =
+                radioConfigUseCase.setHamMode(
+                    destNum,
+                    HamParameters(call_sign = user.long_name, short_name = user.short_name),
+                )
+            registerRequestId(packetId)
+        }
     }
 
     fun setOwner(user: User) {
