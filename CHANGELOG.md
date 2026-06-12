@@ -26,6 +26,14 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 * chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5767) by James Rich (@jamesarich) in [`dd462971e`](https://github.com/meshtastic/Meshtastic-Android/commit/dd462971e895636dcfb6641a0357abc867c845ce)
 * chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5768) by James Rich (@jamesarich) in [`595fb0035`](https://github.com/meshtastic/Meshtastic-Android/commit/595fb003525dc01f891b8bd505d6f00e914fee53)
 * ci: fix update-changelog crash when no channel tags exist (#5769) by James Rich (@jamesarich) in [`936be3998`](https://github.com/meshtastic/Meshtastic-Android/commit/936be3998f0fe49f58b8a0f9ff2c01e3cbd85609)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5771) by James Rich (@jamesarich) in [`c9eae8e64`](https://github.com/meshtastic/Meshtastic-Android/commit/c9eae8e640e6a49941b094963f682e826bb2fd46)
+* chore(deps): update fastlane to v2.236.1 (#5772) by renovate[bot] (@renovate[bot]) in [`4a0eeae6e`](https://github.com/meshtastic/Meshtastic-Android/commit/4a0eeae6eff2c9ed46e6edf6714ba7467fa73341)
+* chore(deps): update kotlin-toolchain (#5760) by renovate[bot] (@renovate[bot]) in [`bce317c68`](https://github.com/meshtastic/Meshtastic-Android/commit/bce317c687b2cec241dc4818bccf93d47ebbcc61)
+* chore(deps): update coil to v3.5.0 (#5766) by renovate[bot] (@renovate[bot]) in [`d9b024acd`](https://github.com/meshtastic/Meshtastic-Android/commit/d9b024acde4db05002d2f413cfcffc5fd19927d5)
+* chore(deps): update kable to v0.43.1 (#5750) by renovate[bot] (@renovate[bot]) in [`15568ff46`](https://github.com/meshtastic/Meshtastic-Android/commit/15568ff462ce1d772b2f849b0ac5ffb053315fbf)
+* test: fix wall-clock race in NodeTest.isOnline_usesStrictThresholdBoundary (#5779) by James Rich (@jamesarich) in [`e71722137`](https://github.com/meshtastic/Meshtastic-Android/commit/e71722137f25d9ddfd4c0f35b510426cc4f9854c)
+* chore(deps): update datadog.gradle to v1.27.0 (#5776) by renovate[bot] (@renovate[bot]) in [`9e3d014c3`](https://github.com/meshtastic/Meshtastic-Android/commit/9e3d014c3d6c11b558e77174503eed4f0c3db1a2)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5774) by James Rich (@jamesarich) in [`161b2b09a`](https://github.com/meshtastic/Meshtastic-Android/commit/161b2b09abaaf82030af81a3d50c80e7d6cbae32)
 <!-- UNRELEASED_END -->
 
 <!-- RELEASED_START -->
