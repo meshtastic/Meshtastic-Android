@@ -32,7 +32,11 @@ class AppFunctionsModule {
     @Single
     fun meshtasticAppFunctions(provider: AiFunctionProvider): MeshtasticAppFunctions = MeshtasticAppFunctions(provider)
 
-    @Single(createdAtStart = true)
+    // NOT createdAtStart: eager creation needs the androidContext binding and spawns the sync
+    // coroutine, which breaks (and is wrong for) any Koin graph built outside a running app —
+    // e.g. KoinVerificationTest's typed-bootstrap check. GoogleMeshUtilApplication starts it
+    // explicitly at app startup instead.
+    @Single
     fun appFunctionStateSync(
         context: Context,
         prefs: AppFunctionsPrefs,
