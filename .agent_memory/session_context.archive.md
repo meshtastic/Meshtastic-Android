@@ -2,6 +2,12 @@
 # Older handover entries rotated out of session_context.md. Not read by default.
 # Consult only if you need historical detail on a specific past change.
 
+## 2026-05-21 — Activated full on-device token streaming and polished Chirpy's personality instructions
+- Upgraded the on-device inference flow inside `GeminiNanoDocAssistant.kt` to use Firebase AI SDK's reactive `generateContentStream(prompt)` instead of the blocking `generateContent` invocation.
+- Aggregated chunks and emitted incremental `AIDocAssistantResult.Partial` states down the Kotlin Flow, enabling true word-by-word/chunk-by-chunk streaming in the UI for a much more responsive user experience.
+- Refined the `SYSTEM_INSTRUCTION` personality rules for Chirpy to position him as our adorable LoRa radio Node mascot instead of an avian theme, emphasizing high-enthusiasm mesh networking, signal connectivity, battery status, and radio/routing concepts while preserving technical precision.
+- Overhauled system error messages inside `DocsNavigation.kt` and the loading bubble state inside `ChirpyAssistantSheet.kt` to align with the mascot theme.
+
 ## 2026-05-21 — Implemented streaming chat support and Firebase Remote Config integration for Chirpy
 - Added `firebase-config` dependency to Version Catalog `libs.versions.toml` and `androidApp/build.gradle.kts`.
 - Added the `AIDocAssistantResult.Partial` variant to support intermediate stream updates.

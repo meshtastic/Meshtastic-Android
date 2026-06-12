@@ -69,7 +69,10 @@ data class Node(
     val capabilities: Capabilities by lazy { Capabilities(metadata?.firmware_version) }
 
     val isOnline: Boolean
-        get() = lastHeard > onlineTimeThreshold()
+        get() = isOnline(onlineTimeThreshold())
+
+    /** Injectable [threshold] keeps tests deterministic — the property getter re-reads the clock on every access. */
+    internal fun isOnline(threshold: Int): Boolean = lastHeard > threshold
 
     val colors: Pair<Int, Int>
         get() { // returns foreground and background @ColorInt for each 'num'
