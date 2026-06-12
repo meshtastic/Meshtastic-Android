@@ -6,6 +6,11 @@
 # the oldest entries to `session_context.archive.md` (not read by default). The
 # "Golden Context" block at the bottom is stable across sessions; keep it here.
 
+## 2026-06-12 — Fixed flaky NodeTest.isOnline_usesStrictThresholdBoundary (wall-clock race)
+- PR #5779 (targeting main): the test read the clock twice — `onlineTimeThreshold()` once for its expected value, then again inside the `isOnline` getter; a one-second wall-clock tick between reads turned the strict-boundary assertion into `N+1 > N+1` = false. Seen failing on loaded CI in #5760's shard-core (jvm + androidHostTest).
+- Fix: internal `Node.isOnline(threshold: Int)` overload; the public `isOnline` property delegates to it. Test pins one threshold for both construction and check, keeping the strict `>` boundary assertion (no slop widening).
+- Verified: `:core:model:allTests` ×3 (`--rerun-tasks`) all green; full baseline `spotlessApply spotlessCheck detekt assembleDebug test allTests kmpSmokeCompile` 1625 tasks 0 failures.
+
 ## 2026-06-10 — Fixed Update Changelog workflow crash (failing on every main push since 2026-06-05)
 - PR #5769: `.github/workflows/update-changelog.yml` died with `TAG_NAMES: bad array subscript` once v2.7.14 went prod and its `-internal.*`/`-open.*` channel tags were cleaned up — zero channel tags means N=0 and `${TAG_NAMES[$((N-1))]:-$PROD_TAG}` indexes [-1] on an empty array, fatal under `bash -e` before the `:-` fallback applies. Replaced with an explicit `if (( N > 0 ))` branch.
 - Second latent bug fixed in the same step: the final `{ ... } > /tmp/unreleased-section.md` group ended with `[ -n ... ] && echo` lists; with SECTIONS and CONTRIBUTORS both empty the group (the script's last command) returns 1 and fails the step even though the file is written. Converted to `if` statements. Previously masked because the prod→HEAD range always had a New Contributors section.
@@ -30,12 +35,6 @@
 - Developed a dynamic live-state prompt formatting block within `buildPrompt(...)` that queries current hardware model, firmware version, connection status, GPS capability, channel utilization, airtime, battery level/voltage, user profile long/short names, and total registered mesh peer counts & active online peers directly from `NodeRepository`'s reactive flows.
 - Injected this live radio diagnostics context dynamically as a system instruction metadata block on every user query. This empowers the on-device model to answer real-time, personalized diagnostic questions (e.g. "what is my battery level?", "how many active nodes are on my mesh right now?") with 100% on-device offline accuracy.
 - Tuned context retrieval constraints for the modern `nano-v4-full` (Gemini Nano v4) model: expanded the total context budget `MAX_CONTEXT_CHARS` from 8,000 to **32,000 characters** (up to ~12K tokens out of the model's native 32K window), and scaled `MAX_PAGE_CHARS` to **16,000 characters** and `MAX_SNIPPET_CHARS` to **8,000 characters** to supply vastly richer, more detailed, and complete documentation fragments.
-
-## 2026-05-21 — Activated full on-device token streaming and polished Chirpy's personality instructions
-- Upgraded the on-device inference flow inside `GeminiNanoDocAssistant.kt` to use Firebase AI SDK's reactive `generateContentStream(prompt)` instead of the blocking `generateContent` invocation.
-- Aggregated chunks and emitted incremental `AIDocAssistantResult.Partial` states down the Kotlin Flow, enabling true word-by-word/chunk-by-chunk streaming in the UI for a much more responsive user experience.
-- Refined the `SYSTEM_INSTRUCTION` personality rules for Chirpy to position him as our adorable LoRa radio Node mascot instead of an avian theme, emphasizing high-enthusiasm mesh networking, signal connectivity, battery status, and radio/routing concepts while preserving technical precision.
-- Overhauled system error messages inside `DocsNavigation.kt` and the loading bubble state inside `ChirpyAssistantSheet.kt` to align with the mascot theme.
 
 ## Golden Context (stable across sessions)
 - Always check `.skills/compose-ui/strings-index.txt` before reading `strings.xml`.
