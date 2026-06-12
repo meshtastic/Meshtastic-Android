@@ -189,15 +189,9 @@
   },
   "pullRequests": [
     {
-      "id": "10691",
-      "title": "Update actions/github-script action to v9",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10691",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10690",
-      "title": "Update python to v3.14.6",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10690",
+      "id": "10699",
+      "title": "Update debian Docker tag to trixie-20260610",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10699",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
@@ -205,12 +199,6 @@
       "title": "Heltec Vision Master E213: enable 32768hz crystal osc for rtc",
       "page_url": "https://github.com/meshtastic/firmware/pull/10689",
       "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "10684",
-      "title": "Claude hooks don't work in a fresh box",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10684",
-      "zip_url": "+37.2 KB"
     },
     {
       "id": "10677",
