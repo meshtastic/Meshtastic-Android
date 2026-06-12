@@ -70,8 +70,8 @@ internal class AdminControllerImpl(
     override suspend fun setHamMode(destNum: Int, hamParameters: HamParameters, packetId: Int) {
         // Firmware applies tx_power/frequency to the LoRa config verbatim, so echo the node's current
         // values to keep a re-send (e.g. a callsign edit while already licensed) from wiping overrides.
-        val lora = radioConfigRepository.localConfigFlow.firstOrNull()?.lora
-        val params = hamParameters.copy(tx_power = lora?.tx_power ?: 0, frequency = lora?.override_frequency ?: 0f)
+        val lora = radioConfigRepository.localConfigFlow.firstOrNull()?.lora ?: Config.LoRaConfig()
+        val params = hamParameters.copy(tx_power = lora.tx_power, frequency = lora.override_frequency)
         commandSender.sendAdmin(destNum, packetId) { AdminMessage(set_ham_mode = params) }
         val currentUser = nodeManager.nodeDBbyNodeNum[destNum]?.user ?: User()
         nodeManager.handleReceivedUser(

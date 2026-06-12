@@ -56,11 +56,12 @@ interface AdminController {
     /**
      * Enables amateur-radio (ham) mode on a node via `AdminMessage.set_ham_mode`.
      *
-     * Must only target the locally connected node — firmware ham onboarding is a local operation and the UI gates it
+     * Must target only the locally connected node — firmware ham onboarding is a local operation and the UI gates it
      * accordingly. The firmware handler rewrites the owner (long_name = call_sign), flips `is_licensed`, disables
-     * encryption, applies [HamParameters.tx_power]/[HamParameters.frequency] to the LoRa config verbatim, and reboots,
-     * so callers must echo the node's current LoRa values rather than send defaults. Intentionally absent from
-     * [AdminEditScope]: ham enablement is not a batch-edit operation.
+     * encryption, applies [HamParameters.tx_power]/[HamParameters.frequency] to the LoRa config verbatim, and reboots.
+     * The implementation echoes the local node's current LoRa values into those two fields so a re-send never wipes the
+     * node's overrides; caller-supplied [HamParameters.tx_power]/[HamParameters.frequency] are ignored. Intentionally
+     * absent from [AdminEditScope]: ham enablement is not a batch-edit operation.
      */
     suspend fun setHamMode(destNum: Int, hamParameters: HamParameters, packetId: Int)
 

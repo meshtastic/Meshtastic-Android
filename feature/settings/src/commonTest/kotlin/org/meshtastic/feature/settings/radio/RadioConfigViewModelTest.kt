@@ -421,22 +421,20 @@ class RadioConfigViewModelTest {
         verifySuspend(exactly(0)) { radioConfigUseCase.setHamMode(any(), any()) }
     }
 
-    private fun myNodeInfo(myNodeNum: Int) = MyNodeInfo(
-        myNodeNum = myNodeNum,
-        hasGPS = false,
-        model = null,
-        firmwareVersion = null,
-        couldUpdate = false,
-        shouldUpdate = false,
-        currentPacketId = 0,
-        messageTimeoutMsec = 0,
-        minAppVersion = 0,
-        maxChannels = 8,
-        hasWifi = false,
-        channelUtilization = 0f,
-        airUtilTx = 0f,
-        deviceId = null,
-    )
+    @Test
+    fun `saveUserConfig routes licensed save to setOwner when myNodeInfo is absent`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        nodeRepository.setNodes(listOf(node))
+        viewModel = createViewModel()
+
+        val user = User(long_name = "KK7ABC", short_name = "KK7A", is_licensed = true)
+        everySuspend { radioConfigUseCase.setOwner(any(), any()) } returns 42
+
+        viewModel.saveUserConfig(user)
+
+        verifySuspend { radioConfigUseCase.setOwner(123, user) }
+        verifySuspend(exactly(0)) { radioConfigUseCase.setHamMode(any(), any()) }
+    }
 
     @Test
     fun `setRingtone calls useCase`() = runTest {
@@ -680,24 +678,7 @@ class RadioConfigViewModelTest {
         val localNode = Node(num = 100, user = User(id = "!100"))
         val remoteNode = Node(num = 456, user = User(id = "!456"))
         nodeRepository.setNodes(listOf(localNode, remoteNode))
-        nodeRepository.setMyNodeInfo(
-            MyNodeInfo(
-                myNodeNum = 100,
-                hasGPS = false,
-                model = null,
-                firmwareVersion = null,
-                couldUpdate = false,
-                shouldUpdate = false,
-                currentPacketId = 0,
-                messageTimeoutMsec = 0,
-                minAppVersion = 0,
-                maxChannels = 8,
-                hasWifi = false,
-                channelUtilization = 0f,
-                airUtilTx = 0f,
-                deviceId = null,
-            ),
-        )
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100))
 
         val remoteVm = createViewModel(destNum = 456)
 
@@ -714,24 +695,7 @@ class RadioConfigViewModelTest {
     fun `ensureLoadingForRemote is no-op for local nodes`() = runTest {
         val localNode = Node(num = 100, user = User(id = "!100"))
         nodeRepository.setNodes(listOf(localNode))
-        nodeRepository.setMyNodeInfo(
-            MyNodeInfo(
-                myNodeNum = 100,
-                hasGPS = false,
-                model = null,
-                firmwareVersion = null,
-                couldUpdate = false,
-                shouldUpdate = false,
-                currentPacketId = 0,
-                messageTimeoutMsec = 0,
-                minAppVersion = 0,
-                maxChannels = 8,
-                hasWifi = false,
-                channelUtilization = 0f,
-                airUtilTx = 0f,
-                deviceId = null,
-            ),
-        )
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100))
 
         val localVm = createViewModel(destNum = 100)
 
@@ -748,24 +712,7 @@ class RadioConfigViewModelTest {
         val localNode = Node(num = 100, user = User(id = "!100"))
         val remoteNode = Node(num = 456, user = User(id = "!456"))
         nodeRepository.setNodes(listOf(localNode, remoteNode))
-        nodeRepository.setMyNodeInfo(
-            MyNodeInfo(
-                myNodeNum = 100,
-                hasGPS = false,
-                model = null,
-                firmwareVersion = null,
-                couldUpdate = false,
-                shouldUpdate = false,
-                currentPacketId = 0,
-                messageTimeoutMsec = 0,
-                minAppVersion = 0,
-                maxChannels = 8,
-                hasWifi = false,
-                channelUtilization = 0f,
-                airUtilTx = 0f,
-                deviceId = null,
-            ),
-        )
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100))
 
         val remoteVm = createViewModel(destNum = 456)
 
@@ -777,4 +724,21 @@ class RadioConfigViewModelTest {
         remoteVm.ensureLoadingForRemote()
         assertTrue(remoteVm.radioConfigState.value.responseState is ResponseState.Loading)
     }
+
+    private fun myNodeInfo(myNodeNum: Int) = MyNodeInfo(
+        myNodeNum = myNodeNum,
+        hasGPS = false,
+        model = null,
+        firmwareVersion = null,
+        couldUpdate = false,
+        shouldUpdate = false,
+        currentPacketId = 0,
+        messageTimeoutMsec = 0,
+        minAppVersion = 0,
+        maxChannels = 8,
+        hasWifi = false,
+        channelUtilization = 0f,
+        airUtilTx = 0f,
+        deviceId = null,
+    )
 }

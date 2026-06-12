@@ -395,6 +395,35 @@ class RadioControllerImplTest {
     }
 
     @Test
+    fun setHamModeWithNoCachedLoraConfigSendsProtoDefaults() = runTest {
+        val controller = createController()
+        every { nodeManager.nodeDBbyNodeNum } returns emptyMap()
+        every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(LocalConfig())
+
+        var sentMessage: AdminMessage? = null
+        everySuspend { commandSender.sendAdmin(any(), any(), any(), any()) } calls
+            {
+                @Suppress("UNCHECKED_CAST")
+                sentMessage = (it.args[3] as () -> AdminMessage)()
+            }
+
+        controller.setHamMode(123, HamParameters(call_sign = "KK7ABC", short_name = "KK7A"), 42)
+
+        val ham = sentMessage?.set_ham_mode
+        assertEquals(0, ham?.tx_power)
+        assertEquals(0f, ham?.frequency)
+        // Unknown node: the optimistic update is built on a default User.
+        verify {
+            nodeManager.handleReceivedUser(
+                123,
+                User(long_name = "KK7ABC", short_name = "KK7A", is_licensed = true),
+                0,
+                false,
+            )
+        }
+    }
+
+    @Test
     fun importContactReturnsEarlyWhenDisconnected() = runTest {
         val controller = createController(myNodeNum = null)
         val contact = SharedContact(node_num = 42, user = User(id = "!0000002a"))

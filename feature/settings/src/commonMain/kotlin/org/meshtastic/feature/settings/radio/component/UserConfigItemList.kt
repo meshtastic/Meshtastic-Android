@@ -132,16 +132,12 @@ fun UserConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     enabled = state.connected,
                     onCheckedChange = { licensed ->
                         val longName = formState.value.long_name
+                        // The field becomes the callsign: clear an over-long name so the user enters one.
+                        val clearForCallsign = licensed && state.isLocal && longName.length > CALL_SIGN_MAX_LENGTH
                         formState.value =
                             formState.value.copy(
                                 is_licensed = licensed,
-                                // The field becomes the callsign: clear an over-long name so the user enters one.
-                                long_name =
-                                if (licensed && state.isLocal && longName.length > CALL_SIGN_MAX_LENGTH) {
-                                    ""
-                                } else {
-                                    longName
-                                },
+                                long_name = if (clearForCallsign) "" else longName,
                             )
                     },
                     containerColor = CardDefaults.cardColors().containerColor,
