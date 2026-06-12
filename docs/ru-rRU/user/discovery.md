@@ -41,20 +41,20 @@ aliases:
 
 Каждый хоп представляет собой ретранслирующую ноду, которая переслала сообщение. Значения SNR и RSSI на каждой ноде говорят о качестве соединения на этом конкретном участке.
 
-| На что обращать внимание                                                   | Что это значит                                                              |
-| -------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| All hops show Good SNR (> 5 dB)                         | Healthy path — messages flow reliably                                       |
-| One hop shows Bad SNR (< 0 dB) | Weak link — this relay segment is fragile                                   |
-| Many hops (4+)                                          | Long path — consider repositioning a node to shorten it                     |
-| Different path on retry                                                    | Mesh is adapting — multiple routes exist (this is good!) |
+| На что обращать внимание                                                                | Что это значит                                                                      |
+| --------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Все хопы показывают хороший SNR (> 5 дБ)                             | Здоровый путь — сообщения идут без сбоев                                            |
+| Все переходы показывают плохой SNR (< 0 дБ) | Слабое звено — этот сегмент ретрансляции хрупкий                                    |
+| Много хопов (4+)                                                     | Длинный путь — подумай о перемещении ноды для его сокращения                        |
+| Другой путь при повторе                                                                 | Сеть адаптируется — существуют несколько маршрутов (это хорошо!) |
 
-> 💡 **Tip:** Run traceroute several times over a few minutes. If the path changes, your mesh has redundant routes — a sign of a well-connected network.
+> 💡 **Совет:** Запусти трассировку несколько раз в течение нескольких минут. Если путь изменяется, у твоей сети есть лишние маршруты — признак хорошо связанной сети.
 
-### Troubleshooting with Traceroute
+### Устранение неполадок с трассировкой
 
-- **"No route found"** — The target node may be offline, out of range, or on a different channel. Check that both nodes share at least one channel with the same encryption key.
-- **Traceroute times out** — The path may be too long (exceeds hop limit) or a relay node is congested. Try increasing the hop limit in **Settings → LoRa Config**.
-- **Asymmetric paths** — A traceroute from A→B may take a different path than B→A. This is normal — radio propagation is not always symmetric.
+- **''Маршрут не найден''** — Целевая нода может быть оффлайн, находиться вне зоны действия или на другом канале. Проверь, что обе ноды имеют хотя бы один канал с одинаковым ключом шифрования.
+- **Время ожидания трассировки истекло** — путь может быть слишком длинным (превышен лимит хопов) или нода ретрансляции перегружена. Попробуй увеличить лимит хопов в **Настройки → Конфигурация LoRa**.
+- **Асимметричные маршруты** — трассировка от A→B может проходить по другому пути, чем B→A. This is normal — radio propagation is not always symmetric.
 
 ---
 
@@ -62,15 +62,15 @@ aliases:
 
 The Neighbor Info module lets each node broadcast a list of the nodes it can **directly hear** (single-hop). When multiple nodes share their neighbor lists, you can piece together a topology map of the entire mesh.
 
-### Enabling Neighbor Info
+### Включение информации о соседях
 
-1. Navigate to **Settings → Module Config → Neighbor Info**.
-2. Enable the module.
+1. Перейдите в **Настройки → Конфигурация модуля → Информация о соседях**.
+2. Включение модуля
 3. Set the broadcast interval (default: 900 seconds / 15 minutes).
 
 Once enabled, your node periodically broadcasts its neighbor table. Other nodes with Neighbor Info enabled do the same.
 
-### Viewing Neighbor Data
+### Просмотр данных соседа
 
 - Open any node's detail screen and look for the **Neighbors** section.
 - Each neighbor entry shows the node that was directly heard and its signal quality.
@@ -80,22 +80,22 @@ Once enabled, your node periodically broadcasts its neighbor table. Other nodes 
 
 ---
 
-## Node List as a Discovery Tool
+## Список узлов как инструмент для обзора
 
 The node list itself is a powerful discovery tool when you use its filtering and sorting features effectively.
 
-### Finding New Nodes
+### Поиск новых узлов
 
 - Sort by **Last heard** to see the most recently active nodes at the top.
 - Enable **Include unknown** to see nodes that have appeared on the mesh but haven't sent user info yet — these are often newly powered-on devices.
 
-### Assessing Connectivity
+### Оценка подключения
 
 - Sort by **Hops away** to see which nodes are directly reachable (0 hops) versus relayed.
 - Sort by **Distance** to find nearby nodes and verify they're reachable.
 - Use **Exclude MQTT** to focus on nodes reachable over radio (not via internet bridge).
 
-### Infrastructure Audit
+### Аудит инфраструктуры
 
 - Disable **Exclude infrastructure** to see Router, Repeater, Router Late, and Client Base nodes.
 - Check their signal quality and last-heard times to verify your infrastructure nodes are healthy.
@@ -104,7 +104,7 @@ See [Nodes](nodes) for full details on filtering and sorting options.
 
 ---
 
-## Tips for Mesh Exploration
+## Советы по исследованию сети
 
 - **Start with traceroute** — it gives you immediate, actionable information about a specific path.
 - **Enable Neighbor Info on key nodes** — especially routers and repeaters, to build a picture of the backbone.
