@@ -1,6 +1,12 @@
 # Agent Session Context — ARCHIVE
 # Older handover entries rotated out of session_context.md. Not read by default.
 # Consult only if you need historical detail on a specific past change.
+## 2026-05-21 — Upgraded Chirpy to a fully-personalized Live Diagnostic Node & Mesh Assistant
+- Integrated `NodeRepository` into `GeminiNanoDocAssistant.kt` and the Google AI Koin dependency injection module (`GoogleAiModule.kt`).
+- Developed a dynamic live-state prompt formatting block within `buildPrompt(...)` that queries current hardware model, firmware version, connection status, GPS capability, channel utilization, airtime, battery level/voltage, user profile long/short names, and total registered mesh peer counts & active online peers directly from `NodeRepository`'s reactive flows.
+- Injected this live radio diagnostics context dynamically as a system instruction metadata block on every user query. This empowers the on-device model to answer real-time, personalized diagnostic questions (e.g. "what is my battery level?", "how many active nodes are on my mesh right now?") with 100% on-device offline accuracy.
+- Tuned context retrieval constraints for the modern `nano-v4-full` (Gemini Nano v4) model: expanded the total context budget `MAX_CONTEXT_CHARS` from 8,000 to **32,000 characters** (up to ~12K tokens out of the model's native 32K window), and scaled `MAX_PAGE_CHARS` to **16,000 characters** and `MAX_SNIPPET_CHARS` to **8,000 characters** to supply vastly richer, more detailed, and complete documentation fragments.
+
 
 ## 2026-05-21 — Activated full on-device token streaming and polished Chirpy's personality instructions
 - Upgraded the on-device inference flow inside `GeminiNanoDocAssistant.kt` to use Firebase AI SDK's reactive `generateContentStream(prompt)` instead of the blocking `generateContent` invocation.

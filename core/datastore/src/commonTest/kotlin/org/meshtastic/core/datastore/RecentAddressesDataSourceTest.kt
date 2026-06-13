@@ -39,10 +39,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
-@OptIn(ExperimentalUuidApi::class)
 class RecentAddressesDataSourceTest {
     private lateinit var tmpDir: Path
     private lateinit var dataSource: RecentAddressesDataSource

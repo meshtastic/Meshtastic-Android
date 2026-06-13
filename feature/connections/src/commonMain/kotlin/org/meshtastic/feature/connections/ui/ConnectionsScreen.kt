@@ -81,7 +81,6 @@ import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.getNavRouteFrom
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.component.PacketResponseStateDialog
-import kotlin.uuid.ExperimentalUuidApi
 
 /**
  * Fixed minimum height for the "connected device" card at the top of the Connections screen. Shared across the three UI
@@ -91,7 +90,7 @@ import kotlin.uuid.ExperimentalUuidApi
 private val CardMinHeight = 100.dp
 
 /** Composable screen for managing device connections (BLE, TCP, USB). It displays connection status. */
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalUuidApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Suppress("CyclomaticComplexMethod", "LongMethod", "MagicNumber", "ModifierMissing", "ComposableParamOrder")
 @Composable
 fun ConnectionsScreen(
