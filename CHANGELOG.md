@@ -34,6 +34,10 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 * test: fix wall-clock race in NodeTest.isOnline_usesStrictThresholdBoundary (#5779) by James Rich (@jamesarich) in [`e71722137`](https://github.com/meshtastic/Meshtastic-Android/commit/e71722137f25d9ddfd4c0f35b510426cc4f9854c)
 * chore(deps): update datadog.gradle to v1.27.0 (#5776) by renovate[bot] (@renovate[bot]) in [`9e3d014c3`](https://github.com/meshtastic/Meshtastic-Android/commit/9e3d014c3d6c11b558e77174503eed4f0c3db1a2)
 * chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5774) by James Rich (@jamesarich) in [`161b2b09a`](https://github.com/meshtastic/Meshtastic-Android/commit/161b2b09abaaf82030af81a3d50c80e7d6cbae32)
+* chore(deps): update net.java.dev.jna:jna to v5.19.1 (#5781) by renovate[bot] (@renovate[bot]) in [`47134f447`](https://github.com/meshtastic/Meshtastic-Android/commit/47134f447e5c668b371d5b7d5a16bb63ff01ff65)
+* build: drop compiler flags and opt-ins made redundant by Kotlin 2.4 (#5786) by James Rich (@jamesarich) in [`65320ab7f`](https://github.com/meshtastic/Meshtastic-Android/commit/65320ab7f99c54587184918808f0ee699fc73967)
+* chore(deps): update com.github.luben:zstd-jni to v1.5.7-11 (#5788) by renovate[bot] (@renovate[bot]) in [`bd6670572`](https://github.com/meshtastic/Meshtastic-Android/commit/bd6670572a1c86b9a124fb659d494974ad8d9592)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5783) by James Rich (@jamesarich) in [`e670468aa`](https://github.com/meshtastic/Meshtastic-Android/commit/e670468aa3ff59d3f600fd99978e087ba1f1d636)
 <!-- UNRELEASED_END -->
 
 <!-- RELEASED_START -->
