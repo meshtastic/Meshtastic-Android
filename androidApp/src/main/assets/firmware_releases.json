@@ -189,12 +189,6 @@
   },
   "pullRequests": [
     {
-      "id": "10699",
-      "title": "Update debian Docker tag to trixie-20260610",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10699",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
       "id": "10689",
       "title": "Heltec Vision Master E213: enable 32768hz crystal osc for rtc",
       "page_url": "https://github.com/meshtastic/firmware/pull/10689",
