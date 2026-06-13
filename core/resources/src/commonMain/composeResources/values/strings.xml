@@ -638,6 +638,8 @@
     <string name="label_short_fast">Short Range - Fast</string>
     <string name="label_short_slow">Short Range - Slow</string>
     <string name="label_short_turbo">Short Range - Turbo</string>
+    <string name="label_tiny_fast">Tiny - Fast</string>
+    <string name="label_tiny_slow">Tiny - Slow</string>
     <string name="label_very_long_slow">Very Long Range - Slow</string>
     <string name="last_heard_filter_label">Filter by Last Heard time: %1$s</string>
     <string name="last_position_update">Last position update</string>

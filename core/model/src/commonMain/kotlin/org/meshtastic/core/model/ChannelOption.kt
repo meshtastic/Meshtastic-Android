@@ -311,6 +311,11 @@ enum class ChannelOption(val modemPreset: ModemPreset, val bandwidth: Float) {
     LITE_SLOW(ModemPreset.LITE_SLOW, 0.125f),
     NARROW_FAST(ModemPreset.NARROW_FAST, 0.0625f),
     NARROW_SLOW(ModemPreset.NARROW_SLOW, 0.0625f),
+
+    // 15.625 kHz LoRa bandwidth (firmware modemPresetToParams; the proto's "20kHz" is the
+    // padded channel spacing, not the modem bandwidth used for numChannels/radioFreq math).
+    TINY_FAST(ModemPreset.TINY_FAST, 0.015625f),
+    TINY_SLOW(ModemPreset.TINY_SLOW, 0.015625f),
     ;
 
     companion object {
