@@ -228,11 +228,7 @@ private val PUBLISHED_MODULES = setOf("api", "model", "proto")
 /** Compiler args shared across all Kotlin targets (JVM, Android, iOS, etc.). */
 private val SHARED_COMPILER_ARGS =
     listOf(
-        "-opt-in=kotlin.uuid.ExperimentalUuidApi",
-        "-opt-in=kotlin.time.ExperimentalTime",
         "-Xexpect-actual-classes",
-        "-Xcontext-parameters",
-        "-Xannotation-default-target=param-property",
         "-Xskip-prerelease-check",
         "-Xbackend-threads=0",
     )
