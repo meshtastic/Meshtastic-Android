@@ -88,7 +88,7 @@ mqttastic = "0.3.8"
 jmdns = "3.6.3"
 qrcode-kotlin = "4.5.0"
 takpacket-sdk = "0.5.3"
-meshtastic-protobufs = "2.7.25"
+meshtastic-protobufs = "develop-SNAPSHOT"
 
 # Gradle Plugins
 develocity = "4.4.2"
