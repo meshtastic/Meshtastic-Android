@@ -139,11 +139,20 @@ abstract class MeshtasticDatabase : RoomDatabase() {
     abstract fun discoveryDao(): DiscoveryDao
 
     companion object {
-        /** Configures a [RoomDatabase.Builder] with standard settings for this project. */
-        fun <T : RoomDatabase> RoomDatabase.Builder<T>.configureCommon(): RoomDatabase.Builder<T> =
-            this.fallbackToDestructiveMigration(dropAllTables = false)
-                .setMultipleConnectionPool(maxNumOfReaders = 4, maxNumOfWriters = 1)
-                .setQueryCoroutineContext(ioDispatcher)
+        /**
+         * Configures a [RoomDatabase.Builder] with standard settings for this project.
+         *
+         * @param multiConnection opens a multi-reader connection pool for concurrent reads. Production/file databases
+         *   want this. In-memory databases (tests) MUST pass `false`: a pooled reader connection can serve a snapshot
+         *   older than the latest write on the writer connection, so a read immediately after a write may observe stale
+         *   rows — making read-after-write assertions non-deterministically flaky (see `DeviceLinkRepositoryImplTest`).
+         *   A single connection serializes reads behind writes.
+         */
+        fun <T : RoomDatabase> RoomDatabase.Builder<T>.configureCommon(
+            multiConnection: Boolean = true,
+        ): RoomDatabase.Builder<T> = this.fallbackToDestructiveMigration(dropAllTables = false)
+            .apply { if (multiConnection) setMultipleConnectionPool(maxNumOfReaders = 4, maxNumOfWriters = 1) }
+            .setQueryCoroutineContext(ioDispatcher)
     }
 }
 
