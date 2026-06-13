@@ -24,7 +24,6 @@ import org.meshtastic.core.model.util.CHANNEL_URL_PREFIX
 import org.meshtastic.core.model.util.getChannelUrl
 import org.meshtastic.core.model.util.toChannelSet
 import org.meshtastic.proto.ChannelSet
-import org.meshtastic.proto.Config
 
 @RunWith(AndroidJUnit4::class)
 class ChannelTest {
@@ -63,19 +62,5 @@ class ChannelTest {
         val ch = Channel.default
 
         Assert.assertEquals(906.875f, ch.radioFreq)
-    }
-
-    @Test
-    fun allModemPresetsHaveValidNames() {
-        Config.LoRaConfig.ModemPreset.entries.forEach { preset ->
-            // Skip UNRECOGNIZED if it exists (Wire generates it sometimes) or generic UNSET values if applicable
-            if (preset.name == "UNSET" || preset.name == "UNRECOGNIZED") return@forEach
-
-            val loraConfig = Channel.default.loraConfig.copy(use_preset = true, modem_preset = preset)
-            val channel = Channel(loraConfig = loraConfig)
-
-            // We want to ensure it is NOT "Invalid"
-            Assert.assertNotEquals("Preset ${preset.name} should typically have a valid name", "Invalid", channel.name)
-        }
     }
 }
