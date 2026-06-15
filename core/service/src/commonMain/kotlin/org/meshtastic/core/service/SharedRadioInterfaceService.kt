@@ -380,10 +380,12 @@ class SharedRadioInterfaceService(
             // double liveness-timeout (timer not cancelled between fires) does not produce
             // duplicate disconnect notifications for a single restart cycle.
             if (isRestarting.compareAndSet(expect = false, update = true)) {
-                // Note: hardcoded error message follows the existing pattern used throughout the
-                // transport layer (BleExceptionClassifier, toDisconnectReason, etc.). Refactoring to
-                // typed DisconnectReason + string resources is a broader change across all transports.
-                onDisconnect(isPermanent = false, errorMessage = "Connection timeout — no data received")
+                // Silent recovery: emit the non-permanent state transition (DeviceSleep) so the
+                // reconnect machinery takes over, but do NOT pass an errorMessage. Automatic
+                // liveness recovery is self-healing — surfacing a modal dialog for a transient
+                // condition the app already handled is confusing UX. The warning log above
+                // remains the observability surface for this event.
+                onDisconnect(isPermanent = false)
                 processLifecycle.coroutineScope.launch {
                     try {
                         transportMutex.withLock {

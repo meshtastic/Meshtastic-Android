@@ -302,6 +302,38 @@ class SharedRadioInterfaceServiceLivenessTest {
     }
 
     @Test
+    fun `BLE liveness restart does not emit user-facing connection error`() = runTest(testDispatcher) {
+        clock = 0L
+        val service = createConnectedService("xAA:BB:CC:DD:EE:FF")
+
+        try {
+            // Collect connectionError emissions — automatic liveness recovery must be silent.
+            // _connectionError is a no-replay SharedFlow, so the collector must subscribe before
+            // triggering the liveness timeout. Under UnconfinedTestDispatcher the launch runs
+            // eagerly to its first suspension (awaiting SharedFlow emission).
+            val errors = mutableListOf<String>()
+            val collectJob = backgroundScope.launch { service.connectionError.collect { errors.add(it) } }
+
+            clock = 65_000L
+            service.checkLiveness()
+            // The restart completes inline under UnconfinedTestDispatcher; runCurrent/advanceTimeBy
+            // are belt-and-suspenders (mirrors the sibling liveness tests' pattern).
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+
+            collectJob.cancel()
+
+            assertTrue(
+                errors.isEmpty(),
+                "Automatic BLE liveness recovery must not emit user-facing connection error (got: $errors)",
+            )
+        } finally {
+            service.disconnect()
+            advanceTimeBy(1_000L)
+        }
+    }
+
+    @Test
     fun `BLE liveness restart does not send polite disconnect into zombie transport`() = runTest(testDispatcher) {
         clock = 0L
         val service = createConnectedService("xAA:BB:CC:DD:EE:FF")
