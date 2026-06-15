@@ -196,8 +196,9 @@ class BleRadioTransportReconnectCrashTest {
 
             advanceTimeBy(24_001L)
 
-            // Transient disconnect must have been signalled.
-            dev.mokkery.verify { service.onDisconnect(isPermanent = false, errorMessage = any()) }
+            // Transient disconnect must be signalled with NO user-facing error message — the
+            // reconnect loop is still retrying, so a modal dialog would be confusing UX.
+            dev.mokkery.verify { service.onDisconnect(isPermanent = false, errorMessage = null) }
             // Permanent disconnect must NEVER be called by the transport on its own.
             dev.mokkery.verify(mode = dev.mokkery.verify.VerifyMode.not) {
                 service.onDisconnect(isPermanent = true, errorMessage = any())
@@ -522,8 +523,9 @@ class BleRadioTransportReconnectCrashTest {
             // disconnect must have been called (forced cleanup)
             assertTrue(connection.disconnectCalls >= 1, "disconnect() must be called after write failure")
 
-            // Verify onDisconnect was called with isPermanent = false (not true)
-            dev.mokkery.verify { service.onDisconnect(isPermanent = false, errorMessage = any()) }
+            // Verify onDisconnect was called with isPermanent = false and NO user-facing error —
+            // non-permanent session failures auto-recover, so no modal dialog should be shown.
+            dev.mokkery.verify { service.onDisconnect(isPermanent = false, errorMessage = null) }
             dev.mokkery.verify(mode = dev.mokkery.verify.VerifyMode.not) {
                 service.onDisconnect(isPermanent = true, errorMessage = any())
             }

@@ -293,9 +293,14 @@ class BleRadioTransport(
                     onTransientDisconnect = { error ->
                         // Guard: if handleFailure already emitted the disconnect callback for this
                         // session (sessionFailed CAS won), don't emit a duplicate from the policy.
+                        // Silent recovery: no errorMessage — the reconnect loop is still retrying, so
+                        // a modal dialog would just confuse the user. The warning log is the
+                        // observability surface for this transient event.
                         if (!sessionFailed.value) {
-                            val msg = error?.toDisconnectReason()?.second ?: "Device unreachable"
-                            callback.onDisconnect(isPermanent = false, errorMessage = msg)
+                            error?.let {
+                                Logger.w(it) { "[$address] BLE reconnect attempt failed; continuing automatic retry" }
+                            }
+                            callback.onDisconnect(isPermanent = false)
                         }
                     },
                     onPermanentDisconnect = { error ->
@@ -723,7 +728,11 @@ class BleRadioTransport(
         isFullyConnected = false
 
         val (isPermanent, msg) = throwable.toDisconnectReason()
-        callback.onDisconnect(isPermanent, errorMessage = msg)
+        // Silent recovery for non-permanent failures: the transport tears down stale GATT state
+        // and reconnects automatically, so surfacing a modal for a transient session failure is
+        // confusing UX. Permanent failures (pairing, missing characteristic, etc.) remain
+        // user-facing.
+        callback.onDisconnect(isPermanent, errorMessage = if (isPermanent) msg else null)
 
         Logger.w(throwable) { "[$address] Session failure — forcing cleanup for reconnect" }
 
