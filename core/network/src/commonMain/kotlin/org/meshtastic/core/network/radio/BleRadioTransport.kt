@@ -76,6 +76,7 @@ private val CONNECTION_TIMEOUT = 15.seconds
  */
 private val HEARTBEAT_DRAIN_DELAY = 200.milliseconds
 
+private val TARGETED_SCAN_TIMEOUT = 2.seconds
 private val SCAN_TIMEOUT = 5.seconds
 private val GATT_CLEANUP_TIMEOUT = 5.seconds
 
@@ -214,13 +215,21 @@ class BleRadioTransport(
 
     // --- Connection & Discovery Logic ---
 
-    /** Robustly finds the device. First checks bonded devices, then performs a short scan if not found. */
+    /** Robustly finds the device. Checks bonded devices, preferring a fresh scan result when available. */
+    @Suppress("ReturnCount")
     private suspend fun findDevice(): BleDevice {
-        bluetoothRepository.state.value.bondedDevices
-            .firstOrNull { it.address.equals(address, ignoreCase = true) }
-            ?.let {
+        val bondedDevice =
+            bluetoothRepository.state.value.bondedDevices.firstOrNull { it.address.equals(address, ignoreCase = true) }
+
+        if (bondedDevice != null) {
+            Logger.i { "[$address] Bonded device found; attempting short targeted scan for fresh advertisement" }
+            findTargetedDevice()?.let {
+                Logger.i { "[$address] Fresh advertisement found; using scanned device" }
                 return it
             }
+            Logger.i { "[$address] Targeted scan timed out; falling back to bonded address" }
+            return bondedDevice
+        }
 
         Logger.i { "[$address] Device not found in bonded list, scanning" }
 
@@ -249,6 +258,21 @@ class BleRadioTransport(
         }
 
         throw RadioNotConnectedException("Device not found at address $address")
+    }
+
+    private suspend fun findTargetedDevice(): BleDevice? = try {
+        withTimeoutOrNull(TARGETED_SCAN_TIMEOUT) {
+            // Pass both service UUID and address so the scanner can apply the most
+            // efficient platform filter while still keeping CoreBluetooth service-scoped.
+            scanner.scan(timeout = TARGETED_SCAN_TIMEOUT, serviceUuid = SERVICE_UUID, address = address).first {
+                it.address.equals(address, ignoreCase = true)
+            }
+        }
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        Logger.v(e) { "[$address] Targeted scan failed; falling back to bonded address" }
+        null
     }
 
     private fun connect() {

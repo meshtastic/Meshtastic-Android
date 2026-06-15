@@ -72,11 +72,14 @@ class BleRadioTransportTest {
                 address = address,
             )
         bleTransport.start()
-
-        // start() begins connect() which is async
-        // In a real test we'd verify the connection state,
-        // but for now this confirms it works with the fakes.
-        assertEquals(address, bleTransport.address)
+        try {
+            // start() begins connect() which is async
+            // In a real test we'd verify the connection state,
+            // but for now this confirms it works with the fakes.
+            assertEquals(address, bleTransport.address)
+        } finally {
+            bleTransport.close()
+        }
     }
 
     @Test
@@ -106,7 +109,8 @@ class BleRadioTransportTest {
     @Test
     fun `onDisconnect is called after DEFAULT_FAILURE_THRESHOLD consecutive failures`() = runTest {
         val device = FakeBleDevice(address = address, name = "Test Device")
-        bluetoothRepository.bond(device) // skip BLE scan — device is already bonded
+        bluetoothRepository.bond(device)
+        scanner.emitDevice(device) // targeted scan resolves immediately; this test covers reconnect timing
 
         // Make every connectAndAwait call throw so each iteration counts as one failure.
         connection.connectException = RadioNotConnectedException("simulated failure")
@@ -122,15 +126,17 @@ class BleRadioTransportTest {
             )
         bleTransport.start()
 
-        // Advance through exactly 3 failure iterations (≈24 001 ms virtual time).
-        // The 4th iteration's backoff hasn't elapsed yet, so the coroutine is suspended
-        // and advanceTimeBy returns cleanly.
-        advanceTimeBy(24_001L)
+        try {
+            // Advance through exactly 3 failure iterations (≈24 001 ms virtual time).
+            // The 4th iteration's backoff hasn't elapsed yet, so the coroutine is suspended
+            // and advanceTimeBy returns cleanly.
+            advanceTimeBy(24_001L)
 
-        verify { service.onDisconnect(any(), any()) }
-
-        // Cancel the reconnect loop so runTest can complete.
-        bleTransport.close()
+            verify { service.onDisconnect(any(), any()) }
+        } finally {
+            // Cancel the reconnect loop so runTest can complete.
+            bleTransport.close()
+        }
     }
 
     /**
@@ -147,6 +153,7 @@ class BleRadioTransportTest {
     fun `reconnect loop never gives up - no permanent disconnect from policy`() = runTest {
         val device = FakeBleDevice(address = address, name = "Test Device")
         bluetoothRepository.bond(device)
+        scanner.emitDevice(device)
 
         connection.connectException = RadioNotConnectedException("simulated failure")
         every { service.onDisconnect(any(), any()) } returns Unit
@@ -162,15 +169,69 @@ class BleRadioTransportTest {
             )
         bleTransport.start()
 
-        // Run well past where the legacy policy (maxFailures = 10) would have given up.
-        advanceTimeBy(800_001L)
+        try {
+            // Run well past where the legacy policy (maxFailures = 10) would have given up.
+            advanceTimeBy(800_001L)
 
-        // Transient disconnects (isPermanent = false) are expected once the failure threshold is hit;
-        // the policy must NEVER signal a permanent disconnect on its own. Only explicit close()
-        // (verified separately by the service layer) may emit isPermanent = true.
-        verify(mode = VerifyMode.not) { service.onDisconnect(isPermanent = true, errorMessage = any()) }
+            // Transient disconnects (isPermanent = false) are expected once the failure threshold is hit;
+            // the policy must NEVER signal a permanent disconnect on its own. Only explicit close()
+            // (verified separately by the service layer) may emit isPermanent = true.
+            verify(mode = VerifyMode.not) { service.onDisconnect(isPermanent = true, errorMessage = any()) }
+        } finally {
+            bleTransport.close()
+        }
+    }
 
-        bleTransport.close()
+    @Test
+    fun `findDevice prefers freshly scanned device over bonded device`() = runTest {
+        val bondedDevice = FakeBleDevice(address = address, name = "Bonded Device")
+        val scannedDevice = FakeBleDevice(address = address, name = "Scanned Device")
+        bluetoothRepository.bond(bondedDevice)
+        scanner.emitDevice(scannedDevice)
+
+        val bleTransport =
+            BleRadioTransport(
+                scope = this,
+                scanner = scanner,
+                bluetoothRepository = bluetoothRepository,
+                connectionFactory = connectionFactory,
+                callback = service,
+                address = address,
+            )
+        bleTransport.start()
+        try {
+            advanceTimeBy(3_001)
+
+            assertEquals("Scanned Device", connection.device?.name)
+        } finally {
+            bleTransport.close()
+        }
+    }
+
+    @Test
+    fun `findDevice falls back to bonded device when targeted scan finds nothing`() = runTest {
+        val bondedDevice = FakeBleDevice(address = address, name = "Bonded Device")
+        bluetoothRepository.bond(bondedDevice)
+
+        val bleTransport =
+            BleRadioTransport(
+                scope = this,
+                scanner = scanner,
+                bluetoothRepository = bluetoothRepository,
+                connectionFactory = connectionFactory,
+                callback = service,
+                address = address,
+            )
+        bleTransport.start()
+        try {
+            advanceTimeBy(5_500)
+
+            assertEquals(SERVICE_UUID, scanner.lastScanServiceUuid)
+            assertEquals(address, scanner.lastScanAddress)
+            assertEquals("Bonded Device", connection.device?.name)
+        } finally {
+            bleTransport.close()
+        }
     }
 
     @Test
@@ -188,12 +249,14 @@ class BleRadioTransportTest {
                 address = address,
             )
         bleTransport.start()
-        advanceTimeBy(3_001)
+        try {
+            advanceTimeBy(3_001)
 
-        assertNotNull(scanner.lastScanServiceUuid, "scan must include serviceUuid")
-        assertEquals(SERVICE_UUID, scanner.lastScanServiceUuid)
-        assertEquals(address, scanner.lastScanAddress)
-
-        bleTransport.close()
+            assertNotNull(scanner.lastScanServiceUuid, "scan must include serviceUuid")
+            assertEquals(SERVICE_UUID, scanner.lastScanServiceUuid)
+            assertEquals(address, scanner.lastScanAddress)
+        } finally {
+            bleTransport.close()
+        }
     }
 }

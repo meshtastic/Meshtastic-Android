@@ -95,6 +95,7 @@ class BleRadioTransportReconnectCrashTest {
     fun `close calls disconnect to clean up GATT handle`() = runTest {
         val device = FakeBleDevice(address = address, name = "Test Radio")
         bluetoothRepository.bond(device)
+        scanner.emitDevice(device)
 
         val bleTransport =
             BleRadioTransport(
@@ -134,6 +135,7 @@ class BleRadioTransportReconnectCrashTest {
     fun `disconnect is called on connection failure`() = runTest {
         val device = FakeBleDevice(address = address, name = "Test Radio")
         bluetoothRepository.bond(device)
+        scanner.emitDevice(device)
 
         // Make every connection attempt fail.
         connection.failNextN = Int.MAX_VALUE
@@ -174,6 +176,7 @@ class BleRadioTransportReconnectCrashTest {
     fun `transient onDisconnect is signalled after failure threshold without giving up`() = runTest {
         val device = FakeBleDevice(address = address, name = "Test Radio")
         bluetoothRepository.bond(device)
+        scanner.emitDevice(device)
 
         connection.connectException = org.meshtastic.core.model.RadioNotConnectedException("simulated GATT failure")
 
@@ -227,6 +230,7 @@ class BleRadioTransportReconnectCrashTest {
             }
         val device = FakeBleDevice(address = address, name = "Test Radio")
         bluetoothRepository.bond(device)
+        scanner.emitDevice(device)
 
         val bleTransport =
             BleRadioTransport(
@@ -276,6 +280,7 @@ class BleRadioTransportReconnectCrashTest {
     fun `transport reconnects after a stable connection is dropped remotely`() = runTest {
         val device = FakeBleDevice(address = address, name = "Test Radio")
         bluetoothRepository.bond(device)
+        scanner.emitDevice(device)
 
         val bleTransport =
             BleRadioTransport(
@@ -321,6 +326,7 @@ class BleRadioTransportReconnectCrashTest {
     fun `write failure while connected clears state and triggers reconnect`() = runTest {
         val device = FakeBleDevice(address = address, name = "Test Radio")
         bluetoothRepository.bond(device)
+        scanner.emitDevice(device)
 
         val bleTransport =
             BleRadioTransport(
@@ -366,6 +372,7 @@ class BleRadioTransportReconnectCrashTest {
     fun `CancellationException from write does not trigger callback`() = runTest {
         val device = FakeBleDevice(address = address, name = "Test Radio")
         bluetoothRepository.bond(device)
+        scanner.emitDevice(device)
 
         every { service.onDisconnect(any(), any()) } returns Unit
 
@@ -401,6 +408,7 @@ class BleRadioTransportReconnectCrashTest {
     fun `repeated writes after session failure do not spam onDisconnect`() = runTest {
         val device = FakeBleDevice(address = address, name = "Test Radio")
         bluetoothRepository.bond(device)
+        scanner.emitDevice(device)
 
         var onDisconnectCalls = 0
         every { service.onDisconnect(any(), any()) } calls { onDisconnectCalls++ }
@@ -441,6 +449,7 @@ class BleRadioTransportReconnectCrashTest {
     fun `stale radioService is cleared after session failure`() = runTest {
         val device = FakeBleDevice(address = address, name = "Test Radio")
         bluetoothRepository.bond(device)
+        scanner.emitDevice(device)
 
         val bleTransport =
             BleRadioTransport(
@@ -486,6 +495,7 @@ class BleRadioTransportReconnectCrashTest {
     fun `internal session failure is not treated as intentional disconnect`() = runTest {
         val device = FakeBleDevice(address = address, name = "Test Radio")
         bluetoothRepository.bond(device)
+        scanner.emitDevice(device)
 
         every { service.onDisconnect(any(), any()) } returns Unit
 
@@ -545,6 +555,7 @@ class BleRadioTransportReconnectCrashTest {
     fun `stop and restart creates a new connection attempt`() = runTest {
         val device = FakeBleDevice(address = address, name = "Test Radio")
         bluetoothRepository.bond(device)
+        scanner.emitDevice(device)
 
         val bleTransport =
             BleRadioTransport(
@@ -605,6 +616,7 @@ class BleRadioTransportReconnectCrashTest {
     fun `profile setup failure returns Failed outcome and retries`() = runTest {
         val device = FakeBleDevice(address = address, name = "Test Radio")
         bluetoothRepository.bond(device)
+        scanner.emitDevice(device)
 
         // Make SERVICE_UUID missing → profile() throws NoSuchElementException
         connection.missingServices.add(SERVICE_UUID)
@@ -646,6 +658,7 @@ class BleRadioTransportReconnectCrashTest {
     fun `CancellationException from write does not trigger onDisconnect after reconnection`() = runTest {
         val device = FakeBleDevice(address = address, name = "Test Radio")
         bluetoothRepository.bond(device)
+        scanner.emitDevice(device)
 
         every { service.onDisconnect(any(), any()) } returns Unit
 
@@ -698,6 +711,7 @@ class BleRadioTransportReconnectCrashTest {
     fun `fromRadio read failure triggers handleFailure and reconnect`() = runTest {
         val device = FakeBleDevice(address = address, name = "Test Radio")
         bluetoothRepository.bond(device)
+        scanner.emitDevice(device)
 
         // Register FROMNUM + FROMRADIO before start() so the profile's observe collector and read
         // loop are set up during discoverServicesAndSetupCharacteristics. Without FROMNUM, no
@@ -759,6 +773,7 @@ class BleRadioTransportReconnectCrashTest {
     fun `concurrent fromRadio and write failure fires onDisconnect exactly once`() = runTest {
         val device = FakeBleDevice(address = address, name = "Test Radio")
         bluetoothRepository.bond(device)
+        scanner.emitDevice(device)
 
         // Register FROMNUM + FROMRADIO before start() so both read and write failure paths can
         // fire. See the read-failure test above for details.
@@ -822,6 +837,7 @@ class BleRadioTransportReconnectCrashTest {
     private fun fromNumPreReadinessFailureAbortsSetupAndRetries(failure: Exception) = runTest {
         val device = FakeBleDevice(address = address, name = "Test Radio")
         bluetoothRepository.bond(device)
+        scanner.emitDevice(device)
 
         connection.service.addCharacteristic(FROMNUM_CHARACTERISTIC)
         connection.service.observeBeforeSubscriptionExceptionByCharacteristic[FROMNUM_CHARACTERISTIC] = failure
@@ -866,6 +882,7 @@ class BleRadioTransportReconnectCrashTest {
     fun `FROMNUM subscription readiness timeout aborts setup clears stale service and retries`() = runTest {
         val device = FakeBleDevice(address = address, name = "Test Radio")
         bluetoothRepository.bond(device)
+        scanner.emitDevice(device)
 
         connection.service.addCharacteristic(FROMNUM_CHARACTERISTIC)
         connection.service.observeNeverSubscribeCharacteristics += FROMNUM_CHARACTERISTIC
@@ -925,6 +942,7 @@ class BleRadioTransportReconnectCrashTest {
             }
         val device = FakeBleDevice(address = address, name = "Test Radio")
         bluetoothRepository.bond(device)
+        scanner.emitDevice(device)
 
         var onDisconnectCalls = 0
         every { service.onDisconnect(any(), any()) } calls { onDisconnectCalls++ }
@@ -979,6 +997,7 @@ class BleRadioTransportReconnectCrashTest {
     fun `Connected-gate normal path succeeds and transport operates`() = runTest {
         val device = FakeBleDevice(address = address, name = "Test Radio")
         bluetoothRepository.bond(device)
+        scanner.emitDevice(device)
 
         val bleTransport =
             BleRadioTransport(
