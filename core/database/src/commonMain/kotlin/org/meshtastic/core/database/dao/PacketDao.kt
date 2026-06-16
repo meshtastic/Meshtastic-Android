@@ -568,19 +568,31 @@ interface PacketDao {
     @Query("UPDATE packet SET message_text = :text WHERE uuid = :uuid")
     suspend fun updateMessageText(uuid: Long, text: String)
 
-    @Query(
-        "SELECT COUNT(*) FROM packet " +
-            "WHERE port_num = 1 AND (message_text IS NULL OR message_text = '') " +
-            "AND json_extract(data, '\$.text') IS NOT NULL",
-    )
+    @Query("SELECT COUNT(*) FROM packet WHERE port_num = 1 AND (message_text IS NULL OR message_text = '')")
     suspend fun countPacketsNeedingBackfill(): Int
 
-    @Query(
-        "UPDATE packet SET message_text = json_extract(data, '\$.text') " +
-            "WHERE port_num = 1 AND (message_text IS NULL OR message_text = '') " +
-            "AND json_extract(data, '\$.text') IS NOT NULL",
-    )
-    suspend fun backfillMessageTexts(): Int
+    @Query("SELECT * FROM packet WHERE port_num = 1 AND (message_text IS NULL OR message_text = '')")
+    suspend fun getPacketsNeedingBackfill(): List<Packet>
+
+    /**
+     * Populates [Packet.messageText] for historical text packets that predate the FTS5 schema (v39) so they become
+     * searchable. The text is decoded in Kotlin from each packet's [DataPacket.text]; it cannot be read with a SQL
+     * `json_extract(data, '$.text')` because [DataPacket.text] is a computed property that is never serialized into the
+     * stored JSON (the payload is persisted as `bytes`). Returns the number of rows updated; the caller rebuilds the
+     * FTS index via [rebuildFtsIndex] when this is greater than zero.
+     */
+    @Transaction
+    suspend fun backfillMessageTexts(): Int {
+        var updated = 0
+        getPacketsNeedingBackfill().forEach { packet ->
+            val text = packet.data.text
+            if (!text.isNullOrEmpty()) {
+                updateMessageText(packet.uuid, text)
+                updated++
+            }
+        }
+        return updated
+    }
 
     @Query("INSERT INTO packet_fts(packet_fts) VALUES('rebuild')")
     suspend fun rebuildFtsIndex()

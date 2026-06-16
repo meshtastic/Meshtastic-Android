@@ -130,7 +130,7 @@ class AiFunctionProviderImpl(
             val nodes =
                 nodeMap.values.map { node ->
                     NodeSummary(
-                        id = "!${node.num.toString(HEX_RADIX)}",
+                        id = NodeAddress.numToDefaultId(node.num),
                         name = node.user.long_name.takeIf { it.isNotBlank() } ?: "Node ${node.num}",
                         batteryLevel = node.deviceMetrics.battery_level?.coerceIn(0, MAX_BATTERY_LEVEL),
                         lastHeard = node.lastHeard.toLong() * MS_PER_SEC,
@@ -201,8 +201,11 @@ class AiFunctionProviderImpl(
         try {
             val node =
                 if (nodeId.startsWith("!")) {
-                    // Hex format: extract number and search
-                    val nodeNum = nodeId.drop(1).toInt(HEX_RADIX)
+                    // Canonical hex node ID (e.g. "!ffffffff"). idToNum parses the full unsigned 32-bit
+                    // range and returns null for malformed input, which we surface as NotFound.
+                    val nodeNum =
+                        NodeAddress.idToNum(nodeId)
+                            ?: return@withTimeout GetNodeDetailsResult.NotFound("Node not found: $nodeId")
                     nodeRepository.nodeDBbyNum.first()[nodeNum]
                 } else {
                     // User ID format
@@ -218,7 +221,7 @@ class AiFunctionProviderImpl(
 
             val details =
                 NodeDetails(
-                    id = "!${node.num.toString(HEX_RADIX)}",
+                    id = NodeAddress.numToDefaultId(node.num),
                     userId = node.user.id,
                     name = node.user.long_name.takeIf { it.isNotBlank() } ?: "Node ${node.num}",
                     batteryLevel = node.deviceMetrics.battery_level?.coerceIn(0, MAX_BATTERY_LEVEL),
@@ -502,7 +505,6 @@ class AiFunctionProviderImpl(
     companion object {
         private val OPERATION_TIMEOUT = 5.seconds
         private const val MAX_BATTERY_LEVEL = 100
-        private const val HEX_RADIX = 16
         private const val MS_PER_SEC = 1000L
         private const val HEALTH_SCORE_BASE = 50
         private const val HEALTH_SCORE_ONLINE_RATIO = 50

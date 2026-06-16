@@ -310,9 +310,10 @@ open class DatabaseManager(
     }
 
     /**
-     * Backfills [Packet.messageText] for existing text-message packets that predate the FTS5 schema. Uses a single SQL
-     * UPDATE with json_extract to avoid loading all packets into memory, then rebuilds the FTS index so search covers
-     * historical messages.
+     * Backfills [Packet.messageText] for existing text-message packets that predate the FTS5 schema, then rebuilds the
+     * FTS index so search covers historical messages. The text is decoded in Kotlin from each packet's payload (see
+     * [PacketDao.backfillMessageTexts]); it cannot be read in SQL because the message body is stored as serialized
+     * `bytes`, not a `text` JSON field.
      */
     private suspend fun backfillSearchIndexIfNeeded(db: MeshtasticDatabase) {
         val needsBackfill = db.packetDao().countPacketsNeedingBackfill() > 0
