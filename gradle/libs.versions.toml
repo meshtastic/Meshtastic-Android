@@ -51,7 +51,7 @@ androidx-compose-bom-aligned = "1.11.2"
 # maps-compose-widgets requests `androidx.compose.material:material` without
 # a version (relying on a BOM that we exclude). M2 is frozen at 1.7.8.
 androidx-compose-material = "1.7.8"
-jetbrains-adaptive = "1.3.0-beta01"
+jetbrains-adaptive = "1.3.0-beta02"
 
 # Google
 maps-compose = "8.3.0"
