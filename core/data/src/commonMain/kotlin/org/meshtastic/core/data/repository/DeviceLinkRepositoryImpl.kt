@@ -1,0 +1,147 @@
+/*
+ * Copyright (c) 2026 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+package org.meshtastic.core.data.repository
+
+import co.touchlab.kermit.Logger
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
+import org.koin.core.annotation.Single
+import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.common.util.safeCatching
+import org.meshtastic.core.data.datasource.DeviceLinkLocalDataSource
+import org.meshtastic.core.data.datasource.DeviceLinksJsonDataSource
+import org.meshtastic.core.database.entity.asEntity
+import org.meshtastic.core.database.entity.asExternalModel
+import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.model.DeviceLink
+import org.meshtastic.core.model.NetworkDeviceLink
+import org.meshtastic.core.model.toDeviceLink
+import org.meshtastic.core.model.util.TimeConstants
+import org.meshtastic.core.network.DeviceLinksRemoteDataSource
+import org.meshtastic.core.repository.DeviceLinkRepository
+import kotlin.concurrent.Volatile
+
+/**
+ * Caches the resolved device-links catalog from the Meshtastic API (`/resource/deviceLinks`). The server does all the
+ * classification (type/targets/regions), so the client just seeds from a bundled snapshot, refreshes from the network,
+ * and filters the cache. Mirrors [DeviceHardwareRepositoryImpl]'s seed → single-flight refresh pattern.
+ */
+@Single
+class DeviceLinkRepositoryImpl(
+    private val remoteDataSource: DeviceLinksRemoteDataSource,
+    private val jsonDataSource: DeviceLinksJsonDataSource,
+    private val localDataSource: DeviceLinkLocalDataSource,
+    private val dispatchers: CoroutineDispatchers,
+) : DeviceLinkRepository {
+
+    /** Serializes seeding and network refreshes so concurrent collectors don't duplicate writes. */
+    private val writeMutex = Mutex()
+
+    @Volatile private var lastRefreshMillis = 0L
+
+    override suspend fun ensureImported() {
+        ensureSeeded()
+    }
+
+    override suspend fun reconcile() {
+        writeMutex.withLock {
+            safeCatching {
+                // Bound only the network call by the timeout; the DB write runs after so a deadline can't cancel it
+                // mid-write and leave the cache half-pruned.
+                val remoteLinks =
+                    withTimeoutOrNull(NETWORK_REFRESH_TIMEOUT_MS) { remoteDataSource.getDeviceLinks() }
+                if (remoteLinks == null) {
+                    Logger.w {
+                        "DeviceLinkRepository: network refresh timed out after ${NETWORK_REFRESH_TIMEOUT_MS}ms"
+                    }
+                } else {
+                    store(remoteLinks)
+                    lastRefreshMillis = nowMillis
+                }
+            }
+                .onFailure { e -> Logger.w(e) { "DeviceLinkRepository: network refresh failed" } }
+        }
+    }
+
+    override suspend fun getLinksForTarget(platformioTarget: String, regionCode: String): List<DeviceLink> =
+        withContext(dispatchers.io) {
+            if (platformioTarget.isBlank()) return@withContext emptyList()
+            ensureSeeded()
+            // Deliberately non-blocking: the node-detail flow must stay snappy. Freshness arrives via reconcile(),
+            // triggered by the device-hardware refresh that resolves this device's hardware in the first place.
+            localDataSource
+                .getAll()
+                .map { it.asExternalModel() }
+                .filter { link -> platformioTarget in link.targets.orEmpty() }
+                .filter { link ->
+                    val regions = link.regions
+                    regions.isNullOrEmpty() || regionCode in regions
+                }
+                .sortedByDescending { it.isVendor }
+        }
+
+    override fun observeAllLinks(): Flow<List<DeviceLink>> = flow {
+        ensureSeeded()
+        refreshIfStale()
+        emitAll(localDataSource.observeAll().map { entities -> entities.map { it.asExternalModel() } })
+    }
+
+    /** Seeds the table from the bundled snapshot if empty (fresh install, data clear, radio switch). */
+    private suspend fun ensureSeeded() {
+        if (localDataSource.count() > 0) return
+        writeMutex.withLock {
+            if (localDataSource.count() == 0) {
+                safeCatching { store(jsonDataSource.loadDeviceLinksFromJsonAsset()) }
+                    .onFailure { e -> Logger.w(e) { "DeviceLinkRepository: failed to seed from bundled JSON" } }
+            }
+        }
+    }
+
+    /** Best-effort network refresh, gated by [CACHE_EXPIRATION_TIME_MS]. */
+    private suspend fun refreshIfStale() {
+        if (nowMillis - lastRefreshMillis > CACHE_EXPIRATION_TIME_MS) reconcile()
+    }
+
+    /**
+     * Maps resolved API links to the cached domain model, upserts them, and prunes short codes that no longer exist.
+     * Internal links (GitHub, YouTube, …) are dropped — they never belong to a device's purchase section. An empty list
+     * is ignored rather than wiping the cache on a bad response.
+     */
+    private suspend fun store(networkLinks: List<NetworkDeviceLink>) {
+        val links = networkLinks.filter { it.type != NetworkDeviceLink.TYPE_INTERNAL }.map { it.toDeviceLink() }
+        if (links.isEmpty()) {
+            Logger.w { "DeviceLinkRepository: no device links to store; leaving cache untouched" }
+            return
+        }
+        localDataSource.upsertAll(links.map { it.asEntity() })
+        localDataSource.deleteNotIn(links.map { it.shortCode })
+        Logger.i { "DeviceLinkRepository: stored ${links.size} device links" }
+    }
+
+    private companion object {
+        private val CACHE_EXPIRATION_TIME_MS = TimeConstants.ONE_DAY.inWholeMilliseconds
+
+        /** Maximum time to wait for the remote API before falling back to cached/bundled data. */
+        private const val NETWORK_REFRESH_TIMEOUT_MS = 5_000L
+    }
+}

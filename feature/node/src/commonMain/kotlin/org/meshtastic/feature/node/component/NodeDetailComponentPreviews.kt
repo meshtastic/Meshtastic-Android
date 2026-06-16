@@ -136,6 +136,28 @@ fun TelemetricActionsSectionEmptyPreview() {
     }
 }
 
+@PreviewLightDark
+@Suppress("PreviewPublic")
+@Composable
+fun TelemetricActionsSectionLocalPreview() {
+    val node = previewData.mickeyMouse
+    AppTheme {
+        Surface {
+            TelemetricActionsSection(
+                node = node,
+                ourNode = node,
+                availableLogs = emptySet(),
+                lastTracerouteTime = null,
+                lastRequestNeighborsTime = null,
+                displayUnits = Config.DisplayConfig.DisplayUnits.METRIC,
+                isFahrenheit = false,
+                onAction = {},
+                isLocal = true,
+            )
+        }
+    }
+}
+
 // ---------------------------------------------------------------------------
 // PositionInlineContent preview
 // ---------------------------------------------------------------------------
@@ -182,4 +204,31 @@ private fun NodeDetailsSectionWithDeviceHeroPreview() {
     AppTheme {
         Surface { NodeDetailsSection(node = node, deviceHardware = deviceHardware, reportedTarget = "heltec-v3") }
     }
+}
+
+@PreviewLightDark
+@Composable
+private fun DeviceLinksSectionPreview() {
+    val links =
+        listOf(
+            org.meshtastic.core.model.DeviceLink(
+                shortCode = "heltec-v3",
+                description = "Heltec V3",
+                isVendor = true,
+                targets = listOf("heltec-v3"),
+            ),
+            org.meshtastic.core.model.DeviceLink(
+                shortCode = "rokland-heltec-v3",
+                description = "Rokland",
+                regions = listOf("US"),
+                targets = listOf("heltec-v3"),
+            ),
+            org.meshtastic.core.model.DeviceLink(
+                shortCode = "heltec-v3_aliexpress",
+                description = "AliExpress",
+                regions = emptyList(),
+                targets = listOf("heltec-v3"),
+            ),
+        )
+    AppTheme { Surface { DeviceLinksSection(links = links) } }
 }

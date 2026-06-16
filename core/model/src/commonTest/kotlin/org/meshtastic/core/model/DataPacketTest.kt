@@ -38,8 +38,8 @@ class DataPacketTest {
 
     @Test
     fun nodeNumToDefaultId_formatsHexWithPrefix() {
-        assertEquals("!1234abcd", DataPacket.nodeNumToDefaultId(0x1234ABCD))
-        assertEquals("!ffffffff", DataPacket.nodeNumToDefaultId(DataPacket.NODENUM_BROADCAST))
+        assertEquals("!1234abcd", NodeAddress.numToDefaultId(0x1234ABCD))
+        assertEquals("!ffffffff", NodeAddress.numToDefaultId(NodeAddress.NODENUM_BROADCAST))
     }
 
     @Test

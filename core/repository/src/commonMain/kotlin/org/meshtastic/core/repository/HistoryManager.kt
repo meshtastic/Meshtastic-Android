@@ -28,7 +28,7 @@ interface HistoryManager {
      * @param storeForwardConfig The store-and-forward module configuration.
      * @param transport The transport method being used (for logging).
      */
-    fun requestHistoryReplay(
+    suspend fun requestHistoryReplay(
         trigger: String,
         myNodeNum: Int?,
         storeForwardConfig: ModuleConfig.StoreForwardConfig?,

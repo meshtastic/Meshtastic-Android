@@ -2,7 +2,7 @@
 title: Testing
 parent: Developer Guide
 nav_order: 7
-last_updated: 2026-05-13
+last_updated: 2026-06-11
 aliases:
   - tests
   - unit-tests
@@ -63,6 +63,21 @@ Uses Android Gradle Plugin's native screenshot testing framework:
 ./gradlew :screenshot-tests:validateDebugScreenshotTest  # Compare against goldens
 ./gradlew :screenshot-tests:copyDocsScreenshots          # Copy reference images to docs pipeline
 ```
+
+### Baseline Profile / Startup Performance
+
+The `:baselineprofile` module (#5735) generates a [Baseline Profile](https://developer.android.com/topic/performance/baselineprofiles/overview) for `:androidApp`, AOT-compiling the hot startup paths so ART doesn't pay the JIT cost on first launch. It targets the **google** flavor (the variant most users run).
+
+The Macrobenchmark generator (`BaselineProfileGenerator`) and the before/after benchmark (`StartupBenchmark`) live in `baselineprofile/src/main/kotlin/org/meshtastic/baselineprofile/`. Both run on a device/emulator:
+
+```bash
+./gradlew :androidApp:generateGoogleReleaseBaselineProfile   # Generate the profile (commit the output)
+./gradlew :androidApp:benchmarkGoogleReleaseBaselineProfile  # Quantify the cold-start win
+```
+
+The generated profile is merged into `androidApp/src/google/generated/baselineProfiles/` and packaged into release builds via `androidx.profileinstaller`.
+
+> ⚠️ **Warning:** The journey currently covers cold start only (launch → first frame), because CI has no paired radio. Post-connection screens (node list, map, message thread) are not yet AOT-compiled; extend the journey once a fake transport or connected device is wired into the harness.
 
 ## Test Organization
 

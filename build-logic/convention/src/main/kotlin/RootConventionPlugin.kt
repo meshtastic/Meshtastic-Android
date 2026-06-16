@@ -81,7 +81,6 @@ private val DEVICE_TEST_MODULES = listOf(":core:database", ":core:model")
 private val ALL_MODULES_FULL =
     listOf(
         ":androidApp",
-        ":core:api",
         ":core:barcode",
         ":core:ble",
         ":core:common",
@@ -114,7 +113,7 @@ private val ALL_MODULES_FULL =
     )
 
 /** Android-only modules that don't apply the KMP plugin. */
-private val ANDROID_ONLY_MODULES = setOf(":androidApp", ":core:api", ":core:barcode", ":feature:widget")
+private val ANDROID_ONLY_MODULES = setOf(":androidApp", ":core:barcode", ":feature:widget")
 
 /**
  * Modules excluded from Dokka aggregation. Empty now that :core:proto has been replaced by
@@ -126,6 +125,6 @@ private fun allModules(): List<String> = ALL_MODULES_FULL
 
 /**
  * Modules that apply the KMP plugin and should be compiled for JVM + iOS targets. Excludes pure-Android modules
- * (:androidApp, :core:api, :core:barcode, :feature:widget) and the desktop JVM-only module.
+ * (:androidApp, :core:barcode, :feature:widget) and the desktop JVM-only module.
  */
 private fun kmpModules(): List<String> = allModules().filter { it !in ANDROID_ONLY_MODULES + ":desktopApp" }

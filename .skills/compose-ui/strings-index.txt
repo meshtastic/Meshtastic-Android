@@ -43,7 +43,9 @@ advanced
 advanced_device_gps
 advanced_title
 ### AIR ###
+air_quality
 air_quality_icon
+air_quality_metrics_log
 air_quality_metrics_module_enabled
 air_quality_metrics_update_interval_seconds
 air_util_definition
@@ -68,6 +70,22 @@ analytics_notice
 analytics_okay
 analytics_platforms
 any
+### APP ###
+app_functions_get_channel_info
+app_functions_get_device_status
+app_functions_get_mesh_metrics
+app_functions_get_mesh_status
+app_functions_get_node_details
+app_functions_get_node_list
+app_functions_get_recent_messages
+app_functions_get_unread_summary
+app_functions_master_summary
+app_functions_master_toggle
+app_functions_read_section
+app_functions_send_message
+app_functions_settings
+app_functions_settings_summary
+app_functions_write_section
 app_notifications
 app_settings
 app_too_old
@@ -101,9 +119,12 @@ bluetooth_permission
 bold_heading
 bottom_nav_settings
 broadcast_interval
+busy_noise_floor
 button_gpio
 buzzer_gpio
 calculating
+call_sign
+call_sign_summary
 cancel
 cancel_reply
 canned_message
@@ -163,10 +184,12 @@ clear_time_zone
 client_notification
 close
 close_selection
+co2
 codec_2_enabled
 codec2_sample_rate
 coding_rate
 collapse_chart
+collapsed
 communicate_off_the_grid
 ### COMPASS ###
 compass_bearing
@@ -297,6 +320,9 @@ device_configuration
 device_db_cache_limit
 device_db_cache_limit_summary
 device_gps
+device_links
+device_links_i_want_one
+device_links_open_in_browser
 device_metrics_label_value
 device_metrics_log
 device_metrics_numeric_value
@@ -315,6 +341,81 @@ discard_changes
 disconnect
 disconnected
 discovered_network_devices
+### DISCOVERY ###
+discovery_analysing_results
+discovery_cancelling_scan
+discovery_connection_warning
+discovery_delete_session
+discovery_delete_session_confirm
+discovery_dwell_minutes
+discovery_dwell_progress
+discovery_dwell_time
+discovery_dwell_time_description
+discovery_empty_history
+discovery_export_report
+discovery_history
+discovery_keep_screen_awake
+discovery_keep_screen_awake_description
+discovery_local_mesh
+discovery_lora_presets
+discovery_lora_presets_description
+discovery_map
+discovery_not_connected
+discovery_not_connected_description
+discovery_paused
+discovery_preparing
+discovery_preset_home_label
+discovery_reconnecting
+discovery_rerun_analysis
+discovery_restoring_preset
+discovery_scan_complete
+discovery_scan_failed
+discovery_scan_history
+discovery_scan_incomplete
+discovery_scan_progress
+discovery_scan_summary
+discovery_session_detail
+discovery_shifting_to
+discovery_start_scan
+discovery_start_scan_disabled
+discovery_start_scan_reason_24ghz_unsupported
+discovery_start_scan_reason_default_key
+discovery_start_scan_reason_no_presets
+discovery_start_scan_reason_not_connected
+discovery_stat_analysis
+discovery_stat_avg_airtime_rate
+discovery_stat_avg_channel_utilization
+discovery_stat_bad_packets
+discovery_stat_channel_utilization
+discovery_stat_date
+discovery_stat_direct
+discovery_stat_duplicate_packets
+discovery_stat_dwelling_on
+discovery_stat_failure_rate
+discovery_stat_home_preset
+discovery_stat_mesh
+discovery_stat_messages
+discovery_stat_online_total_nodes
+discovery_stat_packets_rx
+discovery_stat_packets_tx
+discovery_stat_preset_results
+discovery_stat_presets_scanned
+discovery_stat_rf_health
+discovery_stat_selected
+discovery_stat_sensor_pkts
+discovery_stat_session_overview
+discovery_stat_status
+discovery_stat_success_rate
+discovery_stat_total_dwell_time
+discovery_stat_total_messages
+discovery_stat_total_unique_nodes
+discovery_stat_unique_nodes
+discovery_stat_unselected
+discovery_stop_scan
+discovery_summary_not_available
+discovery_time_remaining
+discovery_unique_nodes
+discovery_view_map
 disk_free_indexed
 ### DISPLAY ###
 display
@@ -331,6 +432,8 @@ distance_measurements_description
 dns
 ### DOC ###
 doc_clear_search
+doc_keywords_android_auto
+doc_keywords_app_functions
 doc_keywords_connections
 doc_keywords_desktop
 doc_keywords_discovery
@@ -352,6 +455,8 @@ doc_keywords_units
 doc_search_placeholder
 doc_section_developer
 doc_section_user
+doc_title_android_auto
+doc_title_app_functions
 doc_title_connections
 doc_title_desktop
 doc_title_discovery
@@ -414,6 +519,7 @@ event_welcome_hamvention
 event_welcome_open_sauce
 exchange_position
 expand_chart
+expanded
 expires
 ### EXPORT ###
 export_configuration
@@ -735,6 +841,7 @@ message_status_sfpp_confirmed
 message_status_sfpp_routing
 message_status_unknown
 messages
+micrograms_per_cubic_meter
 min
 minimum_broadcast_seconds
 minimum_distance
@@ -872,6 +979,9 @@ nodes_empty_disconnected_title
 nodes_empty_searching_hint
 nodes_empty_searching_title
 nodes_queued_for_deletion
+noise_floor
+noise_floor_definition
+noise_floor_no_reading
 none
 none_quality
 not_connected
@@ -937,6 +1047,9 @@ play
 plurals_hours
 plurals_minutes
 plurals_seconds
+pm1_0
+pm10
+pm2_5
 ### POSITION ###
 position
 position_config_set_fixed_from_phone
@@ -952,6 +1065,7 @@ power_metrics_module_enabled
 power_metrics_on_screen_enabled
 power_metrics_update_interval_seconds
 powered
+ppm
 precise_location
 preferences_language
 preferences_system_default
@@ -1041,6 +1155,7 @@ request_air_quality_metrics
 request_device_metrics
 request_environment_metrics
 request_host_metrics
+request_local_stats
 request_metadata
 request_pax_metrics
 request_power_metrics
@@ -1092,6 +1207,7 @@ routing_error_rate_limit_exceeded
 routing_error_timeout
 routing_error_too_large
 rssi
+rssi_definition
 rsyslog_server
 sample_message
 sats
@@ -1114,6 +1230,7 @@ scanning_network
 screen_on_for
 scroll_to_bottom
 search_emoji
+search_messages
 secondary
 secondary_channel_position_feature
 secondary_no_telemetry
@@ -1185,6 +1302,7 @@ skip
 slot
 smart_position
 snr
+snr_definition
 soil_moisture
 soil_temperature
 speed

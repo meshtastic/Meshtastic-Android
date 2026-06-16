@@ -25,6 +25,8 @@ import androidx.room3.TypeConverters
 import androidx.room3.migration.AutoMigrationSpec
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.database.dao.DeviceHardwareDao
+import org.meshtastic.core.database.dao.DeviceLinkDao
+import org.meshtastic.core.database.dao.DiscoveryDao
 import org.meshtastic.core.database.dao.FirmwareReleaseDao
 import org.meshtastic.core.database.dao.MeshLogDao
 import org.meshtastic.core.database.dao.NodeInfoDao
@@ -33,12 +35,17 @@ import org.meshtastic.core.database.dao.QuickChatActionDao
 import org.meshtastic.core.database.dao.TracerouteNodePositionDao
 import org.meshtastic.core.database.entity.ContactSettings
 import org.meshtastic.core.database.entity.DeviceHardwareEntity
+import org.meshtastic.core.database.entity.DeviceLinkEntity
+import org.meshtastic.core.database.entity.DiscoveredNodeEntity
+import org.meshtastic.core.database.entity.DiscoveryPresetResultEntity
+import org.meshtastic.core.database.entity.DiscoverySessionEntity
 import org.meshtastic.core.database.entity.FirmwareReleaseEntity
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.database.entity.MetadataEntity
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.database.entity.Packet
+import org.meshtastic.core.database.entity.PacketFts
 import org.meshtastic.core.database.entity.QuickChatAction
 import org.meshtastic.core.database.entity.ReactionEntity
 import org.meshtastic.core.database.entity.TracerouteNodePositionEntity
@@ -49,14 +56,19 @@ import org.meshtastic.core.database.entity.TracerouteNodePositionEntity
         MyNodeEntity::class,
         NodeEntity::class,
         Packet::class,
+        PacketFts::class,
         ContactSettings::class,
         MeshLog::class,
         QuickChatAction::class,
         ReactionEntity::class,
         MetadataEntity::class,
         DeviceHardwareEntity::class,
+        DeviceLinkEntity::class,
         FirmwareReleaseEntity::class,
         TracerouteNodePositionEntity::class,
+        DiscoverySessionEntity::class,
+        DiscoveryPresetResultEntity::class,
+        DiscoveredNodeEntity::class,
     ],
     autoMigrations =
     [
@@ -95,8 +107,13 @@ import org.meshtastic.core.database.entity.TracerouteNodePositionEntity
         AutoMigration(from = 35, to = 36),
         AutoMigration(from = 36, to = 37),
         AutoMigration(from = 37, to = 38),
+        AutoMigration(from = 38, to = 39),
+        AutoMigration(from = 39, to = 40),
+        AutoMigration(from = 40, to = 41),
+        AutoMigration(from = 41, to = 42),
+        AutoMigration(from = 42, to = 43, spec = AutoMigration42to43::class),
     ],
-    version = 38,
+    version = 43,
     exportSchema = true,
 )
 @androidx.room3.ConstructedBy(MeshtasticDatabaseConstructor::class)
@@ -113,16 +130,29 @@ abstract class MeshtasticDatabase : RoomDatabase() {
 
     abstract fun deviceHardwareDao(): DeviceHardwareDao
 
+    abstract fun deviceLinkDao(): DeviceLinkDao
+
     abstract fun firmwareReleaseDao(): FirmwareReleaseDao
 
     abstract fun tracerouteNodePositionDao(): TracerouteNodePositionDao
 
+    abstract fun discoveryDao(): DiscoveryDao
+
     companion object {
-        /** Configures a [RoomDatabase.Builder] with standard settings for this project. */
-        fun <T : RoomDatabase> RoomDatabase.Builder<T>.configureCommon(): RoomDatabase.Builder<T> =
-            this.fallbackToDestructiveMigration(dropAllTables = false)
-                .setMultipleConnectionPool(maxNumOfReaders = 4, maxNumOfWriters = 1)
-                .setQueryCoroutineContext(ioDispatcher)
+        /**
+         * Configures a [RoomDatabase.Builder] with standard settings for this project.
+         *
+         * @param multiConnection opens a multi-reader connection pool for concurrent reads. Production/file databases
+         *   want this. In-memory databases (tests) MUST pass `false`: a pooled reader connection can serve a snapshot
+         *   older than the latest write on the writer connection, so a read immediately after a write may observe stale
+         *   rows — making read-after-write assertions non-deterministically flaky (see `DeviceLinkRepositoryImplTest`).
+         *   A single connection serializes reads behind writes.
+         */
+        fun <T : RoomDatabase> RoomDatabase.Builder<T>.configureCommon(
+            multiConnection: Boolean = true,
+        ): RoomDatabase.Builder<T> = this.fallbackToDestructiveMigration(dropAllTables = false)
+            .apply { if (multiConnection) setMultipleConnectionPool(maxNumOfReaders = 4, maxNumOfWriters = 1) }
+            .setQueryCoroutineContext(ioDispatcher)
     }
 }
 
@@ -140,3 +170,7 @@ class AutoMigration33to34 : AutoMigrationSpec
 @DeleteColumn(tableName = "packet", columnName = "retry_count")
 @DeleteColumn(tableName = "reactions", columnName = "retry_count")
 class AutoMigration34to35 : AutoMigrationSpec
+
+/** Device links moved from the bundled `urls.json` to the resolved API; `original_url` is no longer stored. */
+@DeleteColumn(tableName = "device_link", columnName = "original_url")
+class AutoMigration42to43 : AutoMigrationSpec

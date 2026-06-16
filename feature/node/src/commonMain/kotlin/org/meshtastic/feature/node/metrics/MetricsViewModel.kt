@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import okio.ByteString.Companion.decodeBase64
@@ -51,7 +52,7 @@ import org.meshtastic.core.model.util.UnitConversions
 import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.NodeRepository
-import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.TracerouteResponseProvider
 import org.meshtastic.core.repository.TracerouteSnapshotRepository
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.okay
@@ -80,7 +81,7 @@ open class MetricsViewModel(
     @InjectedParam val destNum: Int,
     protected val dispatchers: CoroutineDispatchers,
     private val meshLogRepository: MeshLogRepository,
-    private val serviceRepository: ServiceRepository,
+    private val tracerouteResponseProvider: TracerouteResponseProvider,
     private val nodeRepository: NodeRepository,
     private val tracerouteSnapshotRepository: TracerouteSnapshotRepository,
     private val nodeRequestActions: NodeRequestActions,
@@ -191,7 +192,7 @@ open class MetricsViewModel(
         if (cached != null) return cached
 
         val overlay =
-            serviceRepository.tracerouteResponse.value
+            tracerouteResponseProvider.tracerouteResponse.value
                 ?.takeIf { it.requestId == requestId }
                 ?.let { response ->
                     TracerouteOverlay(
@@ -211,7 +212,7 @@ open class MetricsViewModel(
 
     fun tracerouteSnapshotPositions(logUuid: String) = tracerouteSnapshotRepository.getSnapshotPositions(logUuid)
 
-    fun clearTracerouteResponse() = serviceRepository.clearTracerouteResponse()
+    fun clearTracerouteResponse() = tracerouteResponseProvider.clearTracerouteResponse()
 
     fun positionedNodeNums(): Set<Int> =
         nodeRepository.nodeDBbyNum.value.values.filter { it.validPosition != null }.numSet()
@@ -220,7 +221,7 @@ open class MetricsViewModel(
 
     init {
         safeLaunch(tag = "tracerouteCollector") {
-            serviceRepository.tracerouteResponse.filterNotNull().collect { response ->
+            tracerouteResponseProvider.tracerouteResponse.filterNotNull().collect { response ->
                 val overlay =
                     TracerouteOverlay(
                         requestId = response.requestId,
@@ -241,27 +242,35 @@ open class MetricsViewModel(
         }
     }
 
+    fun clearLocalStats() = safeLaunch(context = dispatchers.io, tag = "clearLocalStats") {
+        (manualNodeId.value ?: nodeIdFromRoute)?.let { meshLogRepository.deleteLocalStatsLogs(it) }
+    }
+
     fun requestPosition() {
         (manualNodeId.value ?: nodeIdFromRoute)?.let {
-            nodeRequestActions.requestPosition(viewModelScope, it, state.value.node?.user?.long_name ?: "")
+            viewModelScope.launch { nodeRequestActions.requestPosition(it, state.value.node?.user?.long_name ?: "") }
         }
     }
 
     fun requestTelemetry(type: TelemetryType) {
         (manualNodeId.value ?: nodeIdFromRoute)?.let {
-            nodeRequestActions.requestTelemetry(viewModelScope, it, state.value.node?.user?.long_name ?: "", type)
+            viewModelScope.launch {
+                nodeRequestActions.requestTelemetry(it, state.value.node?.user?.long_name ?: "", type)
+            }
         }
     }
 
     fun requestTraceroute() {
         (manualNodeId.value ?: nodeIdFromRoute)?.let {
-            nodeRequestActions.requestTraceroute(viewModelScope, it, state.value.node?.user?.long_name ?: "")
+            viewModelScope.launch { nodeRequestActions.requestTraceroute(it, state.value.node?.user?.long_name ?: "") }
         }
     }
 
     fun requestNeighborInfo() {
         (manualNodeId.value ?: nodeIdFromRoute)?.let {
-            nodeRequestActions.requestNeighborInfo(viewModelScope, it, state.value.node?.user?.long_name ?: "")
+            viewModelScope.launch {
+                nodeRequestActions.requestNeighborInfo(it, state.value.node?.user?.long_name ?: "")
+            }
         }
     }
 
@@ -365,6 +374,26 @@ open class MetricsViewModel(
         }
     }
 
+    fun saveLocalStatsCSV(uri: CommonUri, data: List<Telemetry>) {
+        exportCsv(
+            uri = uri,
+            header =
+            "\"date\",\"time\",\"noise_floor_dbm\",\"uptime_seconds\",\"channel_utilization\",\"air_util_tx\"," +
+                "\"packets_tx\",\"packets_rx\",\"bad_rx\",\"rx_dupe\",\"tx_relay\",\"tx_relay_canceled\"," +
+                "\"online_nodes\",\"total_nodes\"\n",
+            rows = data.filter { it.local_stats != null },
+            epochSeconds = { it.time.toLong() },
+        ) { telemetry ->
+            val stats = telemetry.local_stats
+            "\"${stats?.noise_floor ?: ""}\",\"${stats?.uptime_seconds ?: ""}\"," +
+                "\"${stats?.channel_utilization ?: ""}\",\"${stats?.air_util_tx ?: ""}\"," +
+                "\"${stats?.num_packets_tx ?: ""}\",\"${stats?.num_packets_rx ?: ""}\"," +
+                "\"${stats?.num_packets_rx_bad ?: ""}\",\"${stats?.num_rx_dupe ?: ""}\"," +
+                "\"${stats?.num_tx_relay ?: ""}\",\"${stats?.num_tx_relay_canceled ?: ""}\"," +
+                "\"${stats?.num_online_nodes ?: ""}\",\"${stats?.num_total_nodes ?: ""}\""
+        }
+    }
+
     fun saveDeviceMetricsCSV(uri: CommonUri, data: List<Telemetry>) {
         exportCsv(
             uri = uri,
@@ -428,6 +457,54 @@ open class MetricsViewModel(
             "\"${pm?.ch1_voltage ?: ""}\",\"${pm?.ch1_current ?: ""}\"," +
                 "\"${pm?.ch2_voltage ?: ""}\",\"${pm?.ch2_current ?: ""}\"," +
                 "\"${pm?.ch3_voltage ?: ""}\",\"${pm?.ch3_current ?: ""}\""
+        }
+    }
+
+    @Suppress("CyclomaticComplexMethod")
+    fun saveAirQualityMetricsCSV(uri: CommonUri, data: List<Telemetry>) {
+        exportCsv(
+            uri = uri,
+            header =
+            "\"date\",\"time\",\"pm10_standard\",\"pm25_standard\",\"pm100_standard\"," +
+                "\"pm10_environmental\",\"pm25_environmental\",\"pm100_environmental\"," +
+                "\"particles_03um\",\"particles_05um\",\"particles_10um\"," +
+                "\"particles_25um\",\"particles_50um\",\"particles_100um\"," +
+                "\"co2\",\"co2_temperature\",\"co2_humidity\"," +
+                "\"form_formaldehyde\",\"form_humidity\",\"form_temperature\"," +
+                "\"pm40_standard\",\"particles_40um\"," +
+                "\"pm_temperature\",\"pm_humidity\",\"pm_voc_idx\",\"pm_nox_idx\"," +
+                "\"particles_tps\"\n",
+            rows = data,
+            epochSeconds = { it.time.toLong() },
+        ) { t ->
+            // Present-and-zero is a real reading and must be exported (matching the chart/card); only a genuinely
+            // absent field (null) renders as an empty cell. No zero-suppression guards here.
+            val aq = t.air_quality_metrics
+            "\"${aq?.pm10_standard ?: ""}\"," +
+                "\"${aq?.pm25_standard ?: ""}\"," +
+                "\"${aq?.pm100_standard ?: ""}\"," +
+                "\"${aq?.pm10_environmental ?: ""}\"," +
+                "\"${aq?.pm25_environmental ?: ""}\"," +
+                "\"${aq?.pm100_environmental ?: ""}\"," +
+                "\"${aq?.particles_03um ?: ""}\"," +
+                "\"${aq?.particles_05um ?: ""}\"," +
+                "\"${aq?.particles_10um ?: ""}\"," +
+                "\"${aq?.particles_25um ?: ""}\"," +
+                "\"${aq?.particles_50um ?: ""}\"," +
+                "\"${aq?.particles_100um ?: ""}\"," +
+                "\"${aq?.co2 ?: ""}\"," +
+                "\"${aq?.co2_temperature ?: ""}\"," +
+                "\"${aq?.co2_humidity ?: ""}\"," +
+                "\"${aq?.form_formaldehyde ?: ""}\"," +
+                "\"${aq?.form_humidity ?: ""}\"," +
+                "\"${aq?.form_temperature ?: ""}\"," +
+                "\"${aq?.pm40_standard ?: ""}\"," +
+                "\"${aq?.particles_40um ?: ""}\"," +
+                "\"${aq?.pm_temperature ?: ""}\"," +
+                "\"${aq?.pm_humidity ?: ""}\"," +
+                "\"${aq?.pm_voc_idx ?: ""}\"," +
+                "\"${aq?.pm_nox_idx ?: ""}\"," +
+                "\"${aq?.particles_tps ?: ""}\""
         }
     }
 

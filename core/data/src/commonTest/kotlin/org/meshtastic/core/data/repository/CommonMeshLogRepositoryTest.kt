@@ -32,8 +32,10 @@ import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.testing.FakeDatabaseProvider
 import org.meshtastic.core.testing.FakeMeshLogPrefs
 import org.meshtastic.proto.Data
+import org.meshtastic.proto.DeviceMetrics
 import org.meshtastic.proto.EnvironmentMetrics
 import org.meshtastic.proto.FromRadio
+import org.meshtastic.proto.LocalStats
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Telemetry
@@ -144,4 +146,73 @@ abstract class CommonMeshLogRepositoryTest {
         val logs = repository.getAllLogsUnbounded().first()
         assertTrue(logs.isEmpty())
     }
+
+    @Test
+    fun `deleteLocalStatsLogs deletes only local stats telemetry`() = runTest(testDispatcher) {
+        val nodeNum = 1234
+        val localStatsLog =
+            telemetryLog(
+                uuid = "local-stats",
+                nodeNum = nodeNum,
+                telemetry = Telemetry(local_stats = LocalStats(noise_floor = -112)),
+                receivedDate = nowMillis + 3,
+            )
+        val deviceLog =
+            telemetryLog(
+                uuid = "device",
+                nodeNum = nodeNum,
+                telemetry = Telemetry(device_metrics = DeviceMetrics(battery_level = 80)),
+                receivedDate = nowMillis + 2,
+            )
+        val environmentLog =
+            telemetryLog(
+                uuid = "environment",
+                nodeNum = nodeNum,
+                telemetry = Telemetry(environment_metrics = EnvironmentMetrics(temperature = 21f)),
+                receivedDate = nowMillis + 1,
+            )
+        val localStatsRequestLog =
+            telemetryLog(
+                uuid = "local-stats-request",
+                nodeNum = nodeNum,
+                telemetry = Telemetry(local_stats = LocalStats()),
+                receivedDate = nowMillis,
+                wantResponse = true,
+            )
+
+        listOf(localStatsLog, deviceLog, environmentLog, localStatsRequestLog).forEach { repository.insert(it) }
+
+        repository.deleteLocalStatsLogs(nodeNum)
+
+        val remainingIds = repository.getAllLogsUnbounded().first().map { it.uuid }.toSet()
+        assertEquals(setOf("device", "environment", "local-stats-request"), remainingIds)
+    }
+
+    private fun telemetryLog(
+        uuid: String,
+        nodeNum: Int,
+        telemetry: Telemetry,
+        receivedDate: Long,
+        wantResponse: Boolean = false,
+    ) = MeshLog(
+        uuid = uuid,
+        message_type = "telemetry",
+        received_date = receivedDate,
+        raw_message = "",
+        fromNum = nodeNum,
+        portNum = PortNum.TELEMETRY_APP.value,
+        fromRadio =
+        FromRadio(
+            packet =
+            MeshPacket(
+                from = nodeNum,
+                decoded =
+                Data(
+                    payload = telemetry.encode().toByteString(),
+                    portnum = PortNum.TELEMETRY_APP,
+                    want_response = wantResponse,
+                ),
+            ),
+        ),
+    )
 }

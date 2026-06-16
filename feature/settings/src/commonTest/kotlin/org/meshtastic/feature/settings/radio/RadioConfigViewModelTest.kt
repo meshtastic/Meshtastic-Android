@@ -25,6 +25,7 @@ import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify
+import dev.mokkery.verify.VerifyMode.Companion.exactly
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -45,8 +46,6 @@ import org.meshtastic.core.domain.usecase.settings.InstallProfileUseCase
 import org.meshtastic.core.domain.usecase.settings.ProcessRadioResponseUseCase
 import org.meshtastic.core.domain.usecase.settings.RadioConfigUseCase
 import org.meshtastic.core.domain.usecase.settings.RadioResponseResult
-import org.meshtastic.core.domain.usecase.settings.ToggleAnalyticsUseCase
-import org.meshtastic.core.domain.usecase.settings.ToggleHomoglyphEncodingUseCase
 import org.meshtastic.core.model.MqttProbeStatus
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
@@ -68,6 +67,7 @@ import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.DeviceProfile
+import org.meshtastic.proto.HamParameters
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.MeshPacket
@@ -93,8 +93,6 @@ class RadioConfigViewModelTest {
     private val analyticsPrefs: AnalyticsPrefs = mock(MockMode.autofill)
     private val homoglyphEncodingPrefs: HomoglyphPrefs = mock(MockMode.autofill)
 
-    private val toggleAnalyticsUseCase: ToggleAnalyticsUseCase = mock(MockMode.autofill)
-    private val toggleHomoglyphEncodingUseCase: ToggleHomoglyphEncodingUseCase = mock(MockMode.autofill)
     private val importProfileUseCase: ImportProfileUseCase = mock(MockMode.autofill)
     private val exportProfileUseCase: ExportProfileUseCase = mock(MockMode.autofill)
     private val exportSecurityConfigUseCase: ExportSecurityConfigUseCase = mock(MockMode.autofill)
@@ -150,8 +148,6 @@ class RadioConfigViewModelTest {
         mapConsentPrefs = mapConsentPrefs,
         analyticsPrefs = analyticsPrefs,
         homoglyphEncodingPrefs = homoglyphEncodingPrefs,
-        toggleAnalyticsUseCase = toggleAnalyticsUseCase,
-        toggleHomoglyphEncodingUseCase = toggleHomoglyphEncodingUseCase,
         importProfileUseCase = importProfileUseCase,
         exportProfileUseCase = exportProfileUseCase,
         exportSecurityConfigUseCase = exportSecurityConfigUseCase,
@@ -185,21 +181,23 @@ class RadioConfigViewModelTest {
     }
 
     @Test
-    fun `toggleAnalyticsAllowed calls useCase`() {
-        every { toggleAnalyticsUseCase() } returns Unit
+    fun `toggleAnalyticsAllowed calls prefs`() {
+        every { analyticsPrefs.analyticsAllowed } returns MutableStateFlow(true)
+        every { analyticsPrefs.setAnalyticsAllowed(false) } returns Unit
 
         viewModel.toggleAnalyticsAllowed()
 
-        verify { toggleAnalyticsUseCase() }
+        verify { analyticsPrefs.setAnalyticsAllowed(false) }
     }
 
     @Test
-    fun `toggleHomoglyphCharactersEncodingEnabled calls useCase`() {
-        every { toggleHomoglyphEncodingUseCase() } returns Unit
+    fun `toggleHomoglyphCharactersEncodingEnabled calls prefs`() {
+        every { homoglyphEncodingPrefs.homoglyphEncodingEnabled } returns MutableStateFlow(true)
+        every { homoglyphEncodingPrefs.setHomoglyphEncodingEnabled(false) } returns Unit
 
         viewModel.toggleHomoglyphCharactersEncodingEnabled()
 
-        verify { toggleHomoglyphEncodingUseCase() }
+        verify { homoglyphEncodingPrefs.setHomoglyphEncodingEnabled(false) }
     }
 
     @Test
@@ -375,6 +373,91 @@ class RadioConfigViewModelTest {
     }
 
     @Test
+    fun `saveUserConfig sends setHamMode for licensed local node`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        nodeRepository.setNodes(listOf(node))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
+        viewModel = createViewModel()
+
+        val user = User(long_name = "KK7ABC", short_name = "KK7A", is_licensed = true)
+        everySuspend { radioConfigUseCase.setHamMode(any(), any()) } returns 42
+
+        viewModel.saveUserConfig(user)
+
+        verifySuspend { radioConfigUseCase.setHamMode(123, HamParameters(call_sign = "KK7ABC", short_name = "KK7A")) }
+        verifySuspend(exactly(0)) { radioConfigUseCase.setOwner(any(), any()) }
+    }
+
+    @Test
+    fun `saveUserConfig sends setOwner for unlicensed user`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        nodeRepository.setNodes(listOf(node))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
+        viewModel = createViewModel()
+
+        val user = User(long_name = "Test User", short_name = "TU")
+        everySuspend { radioConfigUseCase.setOwner(any(), any()) } returns 42
+
+        viewModel.saveUserConfig(user)
+
+        verifySuspend { radioConfigUseCase.setOwner(123, user) }
+        verifySuspend(exactly(0)) { radioConfigUseCase.setHamMode(any(), any()) }
+    }
+
+    @Test
+    fun `saveUserConfig never sends setHamMode to a remote node`() = runTest {
+        val localNode = Node(num = 100, user = User(id = "!100"))
+        val remoteNode = Node(num = 456, user = User(id = "!456"))
+        nodeRepository.setNodes(listOf(localNode, remoteNode))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100))
+        viewModel = createViewModel(destNum = 456)
+
+        val user = User(long_name = "KK7ABC", short_name = "KK7A", is_licensed = true)
+        everySuspend { radioConfigUseCase.setOwner(any(), any()) } returns 42
+
+        viewModel.saveUserConfig(user)
+
+        verifySuspend { radioConfigUseCase.setOwner(456, user) }
+        verifySuspend(exactly(0)) { radioConfigUseCase.setHamMode(any(), any()) }
+    }
+
+    @Test
+    fun `saveUserConfig routes subsequent licensed saves to setOwner`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        nodeRepository.setNodes(listOf(node))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
+        viewModel = createViewModel()
+
+        val user = User(long_name = "KK7ABC", short_name = "KK7A", is_licensed = true)
+        everySuspend { radioConfigUseCase.setHamMode(any(), any()) } returns 42
+        everySuspend { radioConfigUseCase.setOwner(any(), any()) } returns 43
+
+        // First save transitions OFF→ON and onboards via set_ham_mode.
+        viewModel.saveUserConfig(user)
+        // A later save while already licensed must use set_owner so other owner fields propagate.
+        val edited = user.copy(short_name = "KK7B")
+        viewModel.saveUserConfig(edited)
+
+        verifySuspend(exactly(1)) { radioConfigUseCase.setHamMode(any(), any()) }
+        verifySuspend { radioConfigUseCase.setOwner(123, edited) }
+    }
+
+    @Test
+    fun `saveUserConfig routes licensed save to setOwner when myNodeInfo is absent`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        nodeRepository.setNodes(listOf(node))
+        viewModel = createViewModel()
+
+        val user = User(long_name = "KK7ABC", short_name = "KK7A", is_licensed = true)
+        everySuspend { radioConfigUseCase.setOwner(any(), any()) } returns 42
+
+        viewModel.saveUserConfig(user)
+
+        verifySuspend { radioConfigUseCase.setOwner(123, user) }
+        verifySuspend(exactly(0)) { radioConfigUseCase.setHamMode(any(), any()) }
+    }
+
+    @Test
     fun `setRingtone calls useCase`() = runTest {
         val node = Node(num = 123, user = User(id = "!123"))
         nodeRepository.setNodes(listOf(node))
@@ -417,8 +500,6 @@ class RadioConfigViewModelTest {
                 mapConsentPrefs = mapConsentPrefs,
                 analyticsPrefs = analyticsPrefs,
                 homoglyphEncodingPrefs = homoglyphEncodingPrefs,
-                toggleAnalyticsUseCase = toggleAnalyticsUseCase,
-                toggleHomoglyphEncodingUseCase = toggleHomoglyphEncodingUseCase,
                 importProfileUseCase = importProfileUseCase,
                 exportProfileUseCase = exportProfileUseCase,
                 exportSecurityConfigUseCase = exportSecurityConfigUseCase,
@@ -618,24 +699,7 @@ class RadioConfigViewModelTest {
         val localNode = Node(num = 100, user = User(id = "!100"))
         val remoteNode = Node(num = 456, user = User(id = "!456"))
         nodeRepository.setNodes(listOf(localNode, remoteNode))
-        nodeRepository.setMyNodeInfo(
-            MyNodeInfo(
-                myNodeNum = 100,
-                hasGPS = false,
-                model = null,
-                firmwareVersion = null,
-                couldUpdate = false,
-                shouldUpdate = false,
-                currentPacketId = 0,
-                messageTimeoutMsec = 0,
-                minAppVersion = 0,
-                maxChannels = 8,
-                hasWifi = false,
-                channelUtilization = 0f,
-                airUtilTx = 0f,
-                deviceId = null,
-            ),
-        )
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100))
 
         val remoteVm = createViewModel(destNum = 456)
 
@@ -652,24 +716,7 @@ class RadioConfigViewModelTest {
     fun `ensureLoadingForRemote is no-op for local nodes`() = runTest {
         val localNode = Node(num = 100, user = User(id = "!100"))
         nodeRepository.setNodes(listOf(localNode))
-        nodeRepository.setMyNodeInfo(
-            MyNodeInfo(
-                myNodeNum = 100,
-                hasGPS = false,
-                model = null,
-                firmwareVersion = null,
-                couldUpdate = false,
-                shouldUpdate = false,
-                currentPacketId = 0,
-                messageTimeoutMsec = 0,
-                minAppVersion = 0,
-                maxChannels = 8,
-                hasWifi = false,
-                channelUtilization = 0f,
-                airUtilTx = 0f,
-                deviceId = null,
-            ),
-        )
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100))
 
         val localVm = createViewModel(destNum = 100)
 
@@ -686,24 +733,7 @@ class RadioConfigViewModelTest {
         val localNode = Node(num = 100, user = User(id = "!100"))
         val remoteNode = Node(num = 456, user = User(id = "!456"))
         nodeRepository.setNodes(listOf(localNode, remoteNode))
-        nodeRepository.setMyNodeInfo(
-            MyNodeInfo(
-                myNodeNum = 100,
-                hasGPS = false,
-                model = null,
-                firmwareVersion = null,
-                couldUpdate = false,
-                shouldUpdate = false,
-                currentPacketId = 0,
-                messageTimeoutMsec = 0,
-                minAppVersion = 0,
-                maxChannels = 8,
-                hasWifi = false,
-                channelUtilization = 0f,
-                airUtilTx = 0f,
-                deviceId = null,
-            ),
-        )
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100))
 
         val remoteVm = createViewModel(destNum = 456)
 
@@ -715,4 +745,21 @@ class RadioConfigViewModelTest {
         remoteVm.ensureLoadingForRemote()
         assertTrue(remoteVm.radioConfigState.value.responseState is ResponseState.Loading)
     }
+
+    private fun myNodeInfo(myNodeNum: Int) = MyNodeInfo(
+        myNodeNum = myNodeNum,
+        hasGPS = false,
+        model = null,
+        firmwareVersion = null,
+        couldUpdate = false,
+        shouldUpdate = false,
+        currentPacketId = 0,
+        messageTimeoutMsec = 0,
+        minAppVersion = 0,
+        maxChannels = 8,
+        hasWifi = false,
+        channelUtilization = 0f,
+        airUtilTx = 0f,
+        deviceId = null,
+    )
 }

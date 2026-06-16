@@ -64,12 +64,11 @@ import org.meshtastic.feature.docs.translation.DocTranslationService
 import org.meshtastic.feature.docs.translation.TranslationResult
 import org.meshtastic.feature.docs.ui.DocsBrowserScreen
 import org.meshtastic.feature.docs.ui.DocsPageRouteScreen
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 import org.meshtastic.core.resources.Res as CoreRes
 
 /** Registers docs navigation entries into the Settings navigation graph. */
-@OptIn(ExperimentalUuidApi::class, ExperimentalMaterial3AdaptiveApi::class)
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 fun EntryProviderScope<NavKey>.docsEntries(backStack: NavBackStack<NavKey>) {
     entry<SettingsRoute.HelpDocs>(metadata = { ListDetailSceneStrategy.listPane() }) {
         val hasDetailSelected = remember(backStack) { backStack.any { it is SettingsRoute.HelpDocPage } }
@@ -99,7 +98,6 @@ class ChirpyUiState(
     val onNavigateToPage: (String) -> Unit,
 )
 
-@OptIn(ExperimentalUuidApi::class)
 @Composable
 private fun rememberChirpyState(
     backStack: NavBackStack<NavKey>,
@@ -208,7 +206,6 @@ private fun rememberChirpyState(
     )
 }
 
-@OptIn(ExperimentalUuidApi::class)
 @Composable
 private fun AutoIntroduceChirpy(
     showSheet: Boolean,
@@ -384,7 +381,6 @@ private const val CHIRPY_INTRO_PROMPT =
         "Do not give the user a nickname. Be punchy and fun."
 
 /** Maps an [AIDocAssistantResult] to a [ChirpyMessage]. */
-@OptIn(ExperimentalUuidApi::class)
 private suspend fun chirpyResultToMessage(result: AIDocAssistantResult): ChirpyMessage = when (result) {
     is AIDocAssistantResult.Partial ->
         ChirpyMessage(

@@ -33,8 +33,30 @@ import com.mikepenz.markdown.model.ImageTransformer
 import meshtasticandroid.feature.docs.generated.resources.Res
 import org.jetbrains.compose.resources.MissingResourceException
 
+private const val ASSETS_SEGMENT = "assets/"
+
 /**
- * Resolves local markdown image references (e.g. `assets/screenshots/foo.png`) to bundled Compose resources via
+ * Maps a markdown image link to its bundled compose resource path, or `null` for external URLs.
+ *
+ * Authored pages use paths relative to the Jekyll source layout (`../../assets/screenshots/foo.png` from
+ * `docs/en/user/page.md`), while the compose resource tree drops the `en/` level (`files/docs/user/page.md` with
+ * screenshots at `files/docs/assets/screenshots/`). Relative prefixes therefore cannot be resolved literally; instead,
+ * anything from the `assets/` segment onward is anchored at `files/docs/`, which matches where
+ * `syncDocsToComposeResources` places the bundled screenshots.
+ */
+internal fun resolveDocImageResourcePath(link: String): String? {
+    if (link.startsWith("http://") || link.startsWith("https://")) return null
+    val assetsIndex = link.indexOf(ASSETS_SEGMENT)
+    val isSegmentStart = assetsIndex == 0 || (assetsIndex > 0 && link[assetsIndex - 1] == '/')
+    return if (assetsIndex >= 0 && isSegmentStart) {
+        "files/docs/${link.substring(assetsIndex)}"
+    } else {
+        "files/docs/${link.removePrefix("/")}"
+    }
+}
+
+/**
+ * Resolves local markdown image references (e.g. `../../assets/screenshots/foo.png`) to bundled Compose resources via
  * [Res.getUri] and loads them asynchronously using Coil 3's [rememberAsyncImagePainter].
  *
  * External URLs (`http://` / `https://`) return `null` so the default renderer behaviour applies (or they are simply
@@ -42,18 +64,14 @@ import org.jetbrains.compose.resources.MissingResourceException
  * not yet been generated or synced.
  *
  * FR-038: Screenshots synced by `syncDocsToComposeResources` land under
- * `composeResources/files/docs/assets/screenshots/`, matching the relative paths used in the authored markdown.
+ * `composeResources/files/docs/assets/screenshots/`; [resolveDocImageResourcePath] maps the authored markdown paths
+ * onto that location.
  */
 class ComposeResourceImageTransformer : ImageTransformer {
 
     @Composable
     override fun transform(link: String): ImageData? {
-        if (link.startsWith("http://") || link.startsWith("https://")) return null
-
-        // Markdown uses root-relative paths (/assets/screenshots/foo.png) for Jekyll compatibility.
-        // Strip the leading slash to build the compose resource path.
-        val relativePath = link.removePrefix("/")
-        val resourcePath = "files/docs/$relativePath"
+        val resourcePath = resolveDocImageResourcePath(link) ?: return null
         val uri =
             try {
                 Res.getUri(resourcePath)

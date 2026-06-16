@@ -40,7 +40,7 @@ import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.NodeRepository
-import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.TracerouteResponseProvider
 import org.meshtastic.core.repository.TracerouteSnapshotRepository
 import org.meshtastic.feature.node.detail.NodeDetailUiState
 import org.meshtastic.feature.node.detail.NodeRequestActions
@@ -49,6 +49,7 @@ import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.DeviceMetrics
 import org.meshtastic.proto.EnvironmentMetrics
+import org.meshtastic.proto.LocalStats
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.PowerMetrics
@@ -66,7 +67,7 @@ class MetricsViewModelTest {
     private val dispatchers = CoroutineDispatchers(main = testDispatcher, io = testDispatcher, default = testDispatcher)
 
     private val meshLogRepository: MeshLogRepository = mock()
-    private val serviceRepository: ServiceRepository = mock()
+    private val tracerouteResponseProvider: TracerouteResponseProvider = mock()
     private val nodeRepository: NodeRepository = mock()
     private val tracerouteSnapshotRepository: TracerouteSnapshotRepository = mock()
     private val nodeRequestActions: NodeRequestActions = mock()
@@ -81,7 +82,7 @@ class MetricsViewModelTest {
         Dispatchers.setMain(testDispatcher)
 
         // Default setup for flows
-        every { serviceRepository.tracerouteResponse } returns MutableStateFlow(null)
+        every { tracerouteResponseProvider.tracerouteResponse } returns MutableStateFlow(null)
         every { nodeRequestActions.lastTracerouteTime } returns MutableStateFlow(null)
         every { nodeRequestActions.lastRequestNeighborTimes } returns MutableStateFlow(emptyMap())
         every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(emptyMap())
@@ -96,7 +97,7 @@ class MetricsViewModelTest {
         destNum = destNum,
         dispatchers = dispatchers,
         meshLogRepository = meshLogRepository,
-        serviceRepository = serviceRepository,
+        tracerouteResponseProvider = tracerouteResponseProvider,
         nodeRepository = nodeRepository,
         tracerouteSnapshotRepository = tracerouteSnapshotRepository,
         nodeRequestActions = nodeRequestActions,
@@ -376,6 +377,78 @@ class MetricsViewModelTest {
 
             cancelAndIgnoreRemainingEvents()
         }
+    }
+
+    @Test
+    fun `saveLocalStatsCSV writes only provided visible data`() = runTest(testDispatcher) {
+        val visibleTelemetry =
+            Telemetry(
+                time = 1700000000,
+                local_stats =
+                LocalStats(
+                    noise_floor = -112,
+                    uptime_seconds = 3600,
+                    channel_utilization = 12.5f,
+                    air_util_tx = 3.25f,
+                    num_packets_tx = 2,
+                    num_packets_rx = 3,
+                    num_packets_rx_bad = 1,
+                    num_rx_dupe = 4,
+                    num_tx_relay = 5,
+                    num_tx_relay_canceled = 6,
+                    num_online_nodes = 7,
+                    num_total_nodes = 8,
+                ),
+            )
+        val hiddenTelemetry =
+            Telemetry(time = 1600000000, local_stats = LocalStats(noise_floor = -99, uptime_seconds = 10))
+
+        val nodeDetailFlow =
+            MutableStateFlow(
+                NodeDetailUiState(
+                    metricsState = MetricsState(localStats = listOf(visibleTelemetry, hiddenTelemetry)),
+                ),
+            )
+        every { getNodeDetailsUseCase(1234) } returns nodeDetailFlow.asStateFlow()
+
+        val buffer = Buffer()
+        everySuspend { fileService.write(any(), any()) } calls
+            { args ->
+                val block = args.arg<suspend (BufferedSink) -> Unit>(1)
+                block(buffer)
+                true
+            }
+
+        val vm = createViewModel()
+        vm.state.test {
+            awaitItem()
+            awaitItem()
+
+            val uri = CommonUri.parse("content://test")
+            vm.saveLocalStatsCSV(uri, listOf(visibleTelemetry))
+            runCurrent()
+
+            verifySuspend { fileService.write(uri, any()) }
+
+            val csvOutput = buffer.readUtf8()
+            assertTrue(csvOutput.startsWith("\"date\",\"time\",\"noise_floor_dbm\",\"uptime_seconds\""))
+            assertTrue(csvOutput.contains("\"-112\",\"3600\",\"12.5\",\"3.25\""))
+            assertTrue(csvOutput.contains("\"2\",\"3\",\"1\",\"4\",\"5\",\"6\",\"7\",\"8\""))
+            assertTrue(!csvOutput.contains("-99"), "Should only export the rows supplied by the screen")
+
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `clearLocalStats deletes local stats logs for route node`() = runTest(testDispatcher) {
+        everySuspend { meshLogRepository.deleteLocalStatsLogs(1234) } returns Unit
+
+        val vm = createViewModel()
+        vm.clearLocalStats()
+        runCurrent()
+
+        verifySuspend { meshLogRepository.deleteLocalStatsLogs(1234) }
     }
 
     @Test

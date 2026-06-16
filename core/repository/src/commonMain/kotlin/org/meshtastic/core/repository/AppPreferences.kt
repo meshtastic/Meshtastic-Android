@@ -296,9 +296,53 @@ interface TakPrefs {
     fun setTakServerEnabled(enabled: Boolean)
 }
 
+/** Reactive interface for App Functions (system AI integration) preferences. */
+interface AppFunctionsPrefs {
+    val masterEnabled: StateFlow<Boolean>
+
+    fun setMasterEnabled(enabled: Boolean)
+
+    val sendMessageEnabled: StateFlow<Boolean>
+
+    fun setSendMessageEnabled(enabled: Boolean)
+
+    val getMeshStatusEnabled: StateFlow<Boolean>
+
+    fun setGetMeshStatusEnabled(enabled: Boolean)
+
+    val getNodeListEnabled: StateFlow<Boolean>
+
+    fun setGetNodeListEnabled(enabled: Boolean)
+
+    val getChannelInfoEnabled: StateFlow<Boolean>
+
+    fun setGetChannelInfoEnabled(enabled: Boolean)
+
+    val getDeviceStatusEnabled: StateFlow<Boolean>
+
+    fun setGetDeviceStatusEnabled(enabled: Boolean)
+
+    val getNodeDetailsEnabled: StateFlow<Boolean>
+
+    fun setGetNodeDetailsEnabled(enabled: Boolean)
+
+    val getMeshMetricsEnabled: StateFlow<Boolean>
+
+    fun setGetMeshMetricsEnabled(enabled: Boolean)
+
+    val getRecentMessagesEnabled: StateFlow<Boolean>
+
+    fun setGetRecentMessagesEnabled(enabled: Boolean)
+
+    val getUnreadSummaryEnabled: StateFlow<Boolean>
+
+    fun setGetUnreadSummaryEnabled(enabled: Boolean)
+}
+
 /** Consolidated interface for all application preferences. */
 interface AppPreferences {
     val analytics: AnalyticsPrefs
+    val appFunctions: AppFunctionsPrefs
     val homoglyph: HomoglyphPrefs
     val filter: FilterPrefs
     val meshLog: MeshLogPrefs
@@ -310,4 +354,28 @@ interface AppPreferences {
     val radio: RadioPrefs
     val mesh: MeshPrefs
     val tak: TakPrefs
+    val discovery: DiscoveryPrefs
+}
+
+/** Reactive interface for Local Mesh Discovery scan preferences. */
+interface DiscoveryPrefs {
+    val dwellMinutes: StateFlow<Int>
+
+    fun setDwellMinutes(minutes: Int)
+
+    val selectedPresets: StateFlow<Set<String>>
+
+    fun setSelectedPresets(presets: Set<String>)
+
+    val aiEnabled: StateFlow<Boolean>
+
+    fun setAiEnabled(enabled: Boolean)
+
+    val topologyOverlayEnabled: StateFlow<Boolean>
+
+    fun setTopologyOverlayEnabled(enabled: Boolean)
+
+    companion object {
+        const val DEFAULT_DWELL_MINUTES = 15
+    }
 }

@@ -28,14 +28,18 @@ import kotlinx.coroutines.flow.map
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.model.Contact
+import org.meshtastic.core.model.ContactKey
 import org.meshtastic.core.model.ContactSettings
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MyNodeInfo
+import org.meshtastic.core.model.NodeAddress
+import org.meshtastic.core.model.isBroadcast
+import org.meshtastic.core.model.isFromLocal
 import org.meshtastic.core.model.util.getChannel
+import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
-import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.ChannelSet
@@ -46,11 +50,11 @@ class ContactsViewModel(
     private val nodeRepository: NodeRepository,
     private val packetRepository: PacketRepository,
     radioConfigRepository: RadioConfigRepository,
-    serviceRepository: ServiceRepository,
+    connectionStateProvider: ConnectionStateProvider,
 ) : ViewModel() {
     val ourNodeInfo = nodeRepository.ourNodeInfo
 
-    val connectionState = serviceRepository.connectionState
+    val connectionState = connectionStateProvider.connectionState
 
     val unreadCountTotal = packetRepository.getUnreadCountTotal().stateInWhileSubscribed(0)
 
@@ -80,7 +84,7 @@ class ContactsViewModel(
             // Add empty channel placeholders (always show Broadcast contacts, even when empty)
             val placeholder =
                 (0 until channelSet.settings.size).associate { ch ->
-                    val contactKey = "$ch${DataPacket.ID_BROADCAST}"
+                    val contactKey = ContactKey.broadcast(ch).value
                     val data = DataPacket(bytes = null, dataType = 1, time = 0L, channel = ch)
                     contactKey to data
                 }
@@ -89,14 +93,13 @@ class ContactsViewModel(
                 val contactKey = entry.key
                 val packetData = entry.value
                 // Determine if this is my message (originated on this device)
-                val fromLocal =
-                    (packetData.from == DataPacket.ID_LOCAL || (myId != null && packetData.from == myId))
-                val toBroadcast = packetData.to == DataPacket.ID_BROADCAST
+                val fromLocal = packetData.isFromLocal(myNodeNum)
+                val toBroadcast = packetData.isBroadcast
 
                 // grab usernames from NodeInfo
                 val userId = if (fromLocal) packetData.to else packetData.from
-                val user = nodeRepository.getUser(userId ?: DataPacket.ID_BROADCAST)
-                val node = nodeRepository.getNode(userId ?: DataPacket.ID_BROADCAST)
+                val user = nodeRepository.getUser(userId ?: NodeAddress.ID_BROADCAST)
+                val node = nodeRepository.getNode(userId ?: NodeAddress.ID_BROADCAST)
 
                 val shortName = user.short_name
                 val longName =
@@ -136,13 +139,13 @@ class ContactsViewModel(
                 val channelSet = params.channelSet
                 val settings = params.settings
                 val myId = params.myId
+                val myNodeNum = params.myNodeNum
 
                 packetRepository.getContactsPaged().map { pagingData ->
                     pagingData.map { packetData: DataPacket ->
                         // Determine if this is my message (originated on this device)
-                        val fromLocal =
-                            (packetData.from == DataPacket.ID_LOCAL || (myId != null && packetData.from == myId))
-                        val toBroadcast = packetData.to == DataPacket.ID_BROADCAST
+                        val fromLocal = packetData.isFromLocal(myNodeNum)
+                        val toBroadcast = packetData.isBroadcast
 
                         // Reconstruct contactKey exactly as rememberDataPacket() computes it:
                         // For outgoing or broadcast: use the "to" field (recipient / ^all)
@@ -152,8 +155,8 @@ class ContactsViewModel(
 
                         // grab usernames from NodeInfo
                         val userId = if (fromLocal) packetData.to else packetData.from
-                        val user = nodeRepository.getUser(userId ?: DataPacket.ID_BROADCAST)
-                        val node = nodeRepository.getNode(userId ?: DataPacket.ID_BROADCAST)
+                        val user = nodeRepository.getUser(userId ?: NodeAddress.ID_BROADCAST)
+                        val node = nodeRepository.getNode(userId ?: NodeAddress.ID_BROADCAST)
 
                         val shortName = user.short_name
                         val longName =
@@ -185,7 +188,7 @@ class ContactsViewModel(
             }
             .cachedIn(viewModelScope)
 
-    fun getNode(userId: String?) = nodeRepository.getNode(userId ?: DataPacket.ID_BROADCAST)
+    fun getNode(userId: String?) = nodeRepository.getNode(userId ?: NodeAddress.ID_BROADCAST)
 
     fun deleteContacts(contacts: List<String>) =
         safeLaunch(context = ioDispatcher, tag = "deleteContacts") { packetRepository.deleteContacts(contacts) }

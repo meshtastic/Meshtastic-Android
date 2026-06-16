@@ -1,0 +1,49 @@
+/*
+ * Copyright (c) 2026 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+package org.meshtastic.app.di
+
+import android.content.Context
+import org.koin.core.annotation.Module
+import org.koin.core.annotation.Named
+import org.koin.core.annotation.Single
+import org.meshtastic.app.ai.appfunctions.AppFunctionStateSync
+import org.meshtastic.app.ai.appfunctions.MeshtasticAppFunctions
+import org.meshtastic.core.data.ai.AiFunctionProvider
+import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.repository.AppFunctionsPrefs
+
+/** Provides AppFunctions integration for the Google flavor. */
+@Module
+class AppFunctionsModule {
+    @Single
+    fun meshtasticAppFunctions(provider: AiFunctionProvider): MeshtasticAppFunctions = MeshtasticAppFunctions(provider)
+
+    // NOT createdAtStart: eager creation needs the androidContext binding and spawns the sync
+    // coroutine, which breaks (and is wrong for) any Koin graph built outside a running app —
+    // e.g. KoinVerificationTest's typed-bootstrap check. GoogleMeshUtilApplication starts it
+    // explicitly at app startup instead.
+    @Single
+    fun appFunctionStateSync(
+        context: Context,
+        prefs: AppFunctionsPrefs,
+        dispatchers: CoroutineDispatchers,
+    ): AppFunctionStateSync = AppFunctionStateSync(context, prefs, dispatchers)
+
+    @Single
+    @Named("googleServicesAvailable")
+    fun googleServicesAvailable(): Boolean = true
+}

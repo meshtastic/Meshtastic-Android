@@ -22,6 +22,7 @@ import com.android.tools.screenshot.PreviewTest
 import org.meshtastic.feature.messaging.EditQuickChatDialogPreview
 import org.meshtastic.feature.messaging.MessageInputPreview
 import org.meshtastic.feature.messaging.QuickChatItemPreview
+import org.meshtastic.feature.messaging.component.MessageSearchBarPreview
 import org.meshtastic.feature.messaging.component.ReactionItemPreview
 
 @PreviewTest
@@ -50,4 +51,11 @@ fun ScreenshotMessageInput() {
 @Composable
 fun ScreenshotReactionItem() {
     ReactionItemPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotMessageSearchBar() {
+    MessageSearchBarPreview()
 }

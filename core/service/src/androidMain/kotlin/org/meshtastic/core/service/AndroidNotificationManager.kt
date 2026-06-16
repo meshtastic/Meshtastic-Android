@@ -53,7 +53,7 @@ class AndroidNotificationManager(private val context: Context) : NotificationMan
      * [org.meshtastic.core.service.MeshService.onCreate] on the main thread. The CMP [getString] helper uses
      * [kotlinx.coroutines.runBlocking] which can fail in that context, crashing the entire service startup chain.
      * Instead, channels are lazily ensured before the first [dispatch] call. Note that
-     * [MeshServiceNotificationsImpl.initChannels] already creates a superset of these channels when the orchestrator
+     * [MeshNotificationManagerImpl.initChannels] already creates a superset of these channels when the orchestrator
      * starts, so this lazy path is only a safety net for notifications dispatched before orchestrator initialization.
      */
     private var channelsInitialized = false
@@ -83,7 +83,7 @@ class AndroidNotificationManager(private val context: Context) : NotificationMan
         return NotificationChannel(channelConfig.id, getString(nameRes), channelConfig.importance)
     }
 
-    // Keep category-to-channel mapping aligned with MeshServiceNotificationsImpl.NotificationType IDs.
+    // Keep category-to-channel mapping aligned with MeshNotificationManagerImpl.NotificationType IDs.
     private fun Notification.Category.channelConfig(): ChannelConfig = when (this) {
         Notification.Category.Message ->
             ChannelConfig(

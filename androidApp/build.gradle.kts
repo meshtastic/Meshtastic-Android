@@ -30,8 +30,10 @@ plugins {
     id("meshtastic.koin")
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.secrets)
+    alias(libs.plugins.androidx.baselineprofile)
     id("meshtastic.aboutlibraries")
     id("dev.mokkery")
+    alias(libs.plugins.devtools.ksp)
 }
 
 val keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -111,7 +113,7 @@ configure<ApplicationExtension> {
                 ),
             )
         }
-        ndk { abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64") }
+        ndk { abiFilters += listOf("armeabi-v7a", "arm64-v8a") }
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -125,7 +127,7 @@ configure<ApplicationExtension> {
         abi {
             isEnable = !disableSplits
             reset()
-            include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+            include("armeabi-v7a", "arm64-v8a")
             isUniversalApk = true
         }
     }
@@ -178,6 +180,8 @@ secrets {
     propertiesFileName = "secrets.properties"
 }
 
+ksp { arg("appfunctions:aggregateAppFunctions", "true") }
+
 androidComponents {
     onVariants(selector().withBuildType("debug")) { variant ->
         variant.flavorName?.let { flavor -> variant.applicationId.set("com.geeksville.mesh.$flavor.debug") }
@@ -222,6 +226,7 @@ dependencies {
     implementation(projects.feature.map)
     implementation(projects.feature.node)
     implementation(projects.feature.settings)
+    implementation(projects.feature.discovery)
     implementation(projects.feature.docs)
     implementation(projects.feature.firmware)
     implementation(projects.feature.wifiProvision)
@@ -250,6 +255,9 @@ dependencies {
     implementation(libs.coil.network.ktor3)
     implementation(libs.coil.svg)
     implementation(libs.androidx.core.splashscreen)
+    // Installs the baseline profile produced by :baselineprofile at app startup (API < 31)
+    // and lets ART honor it on first launch. On API 31+ the platform installs it automatically.
+    implementation(libs.androidx.profileinstaller)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.usb.serial.android)
     implementation(libs.androidx.work.runtime.ktx)
@@ -264,6 +272,7 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.glance.preview)
 
+    googleImplementation(projects.feature.car)
     googleImplementation(libs.location.services)
     googleImplementation(libs.play.services.maps)
     googleImplementation(libs.maps.compose)
@@ -283,6 +292,10 @@ dependencies {
     googleImplementation(libs.firebase.ai.ondevice)
     googleImplementation(libs.mlkit.translate)
 
+    googleImplementation(libs.androidx.appfunctions)
+    googleImplementation(libs.androidx.appfunctions.service)
+    add("kspGoogle", libs.androidx.appfunctions.compiler)
+
     fdroidImplementation(libs.osmdroid.android)
     fdroidImplementation(libs.osmdroid.geopackage) { exclude(group = "com.j256.ormlite") }
     fdroidImplementation(libs.osmbonuspack)
@@ -297,4 +310,10 @@ dependencies {
     testImplementation(libs.compose.multiplatform.ui.test)
     testImplementation(libs.androidx.test.ext.junit)
     testImplementation(libs.androidx.glance.appwidget)
+    // JVM variant provides the host-platform native library for BundledSQLiteDriver under Robolectric
+    testRuntimeOnly("androidx.sqlite:sqlite-bundled-jvm:2.6.2")
+
+    // Producer of the baseline profile consumed by the release build. The androidx.baselineprofile
+    // plugin merges the generated rules into src/<variant>/generated/baselineProfiles at build time.
+    baselineProfile(projects.baselineprofile)
 }

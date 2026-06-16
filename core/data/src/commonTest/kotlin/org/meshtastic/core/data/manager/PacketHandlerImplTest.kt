@@ -34,7 +34,6 @@ import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioInterfaceService
-import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.MeshPacket
@@ -48,7 +47,6 @@ import kotlin.test.assertNotNull
 class PacketHandlerImplTest {
 
     private val packetRepository: PacketRepository = mock(MockMode.autofill)
-    private val serviceBroadcasts: ServiceBroadcasts = mock(MockMode.autofill)
     private val radioInterfaceService: RadioInterfaceService = mock(MockMode.autofill)
     private val meshLogRepository: MeshLogRepository = mock(MockMode.autofill)
     private val serviceRepository: ServiceRepository = mock(MockMode.autofill)
@@ -67,7 +65,6 @@ class PacketHandlerImplTest {
         handler =
             PacketHandlerImpl(
                 lazy { packetRepository },
-                serviceBroadcasts,
                 radioInterfaceService,
                 lazy { meshLogRepository },
                 serviceRepository,

@@ -547,4 +547,55 @@ interface PacketDao {
         "UPDATE packet SET filtered = :filtered WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node)) AND data LIKE :senderIdPattern",
     )
     suspend fun updateFilteredBySender(senderIdPattern: String, filtered: Boolean)
+
+    // region ── FTS5 Search ──
+
+    @Query(
+        "SELECT packet.* FROM packet JOIN packet_fts ON packet.rowid = packet_fts.rowid " +
+            "WHERE packet_fts MATCH :query AND packet.myNodeNum = (SELECT myNodeNum FROM my_node) " +
+            "ORDER BY packet.received_time DESC LIMIT 100",
+    )
+    suspend fun searchMessages(query: String): List<Packet>
+
+    @Query(
+        "SELECT packet.* FROM packet JOIN packet_fts ON packet.rowid = packet_fts.rowid " +
+            "WHERE packet_fts MATCH :query AND packet.contact_key = :contactKey " +
+            "AND packet.myNodeNum = (SELECT myNodeNum FROM my_node) " +
+            "ORDER BY packet.received_time DESC LIMIT 100",
+    )
+    suspend fun searchMessagesInConversation(query: String, contactKey: String): List<Packet>
+
+    @Query("UPDATE packet SET message_text = :text WHERE uuid = :uuid")
+    suspend fun updateMessageText(uuid: Long, text: String)
+
+    @Query("SELECT COUNT(*) FROM packet WHERE port_num = 1 AND (message_text IS NULL OR message_text = '')")
+    suspend fun countPacketsNeedingBackfill(): Int
+
+    @Query("SELECT * FROM packet WHERE port_num = 1 AND (message_text IS NULL OR message_text = '')")
+    suspend fun getPacketsNeedingBackfill(): List<Packet>
+
+    /**
+     * Populates [Packet.messageText] for historical text packets that predate the FTS5 schema (v39) so they become
+     * searchable. The text is decoded in Kotlin from each packet's [DataPacket.text]; it cannot be read with a SQL
+     * `json_extract(data, '$.text')` because [DataPacket.text] is a computed property that is never serialized into the
+     * stored JSON (the payload is persisted as `bytes`). Returns the number of rows updated; the caller rebuilds the
+     * FTS index via [rebuildFtsIndex] when this is greater than zero.
+     */
+    @Transaction
+    suspend fun backfillMessageTexts(): Int {
+        var updated = 0
+        getPacketsNeedingBackfill().forEach { packet ->
+            val text = packet.data.text
+            if (!text.isNullOrEmpty()) {
+                updateMessageText(packet.uuid, text)
+                updated++
+            }
+        }
+        return updated
+    }
+
+    @Query("INSERT INTO packet_fts(packet_fts) VALUES('rebuild')")
+    suspend fun rebuildFtsIndex()
+
+    // endregion
 }

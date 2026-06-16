@@ -38,7 +38,7 @@ You are an expert Android/KMP engineer. Maintain architectural boundaries, use M
 - **CMP Over Android:** Use `compose-multiplatform` constraints. Pre-format floats with `NumberFormatter.format()`. Use `MeshtasticNavDisplay` and `NavigationBackHandler`.
 - **Zero Lint Tolerance:** Task is incomplete if `detekt` or `spotlessCheck` fails.
 - **Verify Before Push:** Treat any "push" as verify-then-push. CI has failed repeatedly due to skipped local checks.
-- **Never Touch Protos or Secrets:** `core/proto` is an upstream submodule. Secrets are git-ignored.
+- **Never Touch Protos or Secrets:** Protobuf models come from the upstream `org.meshtastic:protobufs` Maven dependency (pinned in `gradle/libs.versions.toml`) — bump the version upstream, never hand-edit generated proto. Secrets are git-ignored.
 - **Privacy First:** Never log or expose PII, location, or cryptographic keys.
 </rules>
 

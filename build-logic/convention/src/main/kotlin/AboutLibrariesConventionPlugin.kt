@@ -36,9 +36,16 @@ class AboutLibrariesConventionPlugin : Plugin<Project> {
                     providers.gradleProperty("aboutLibraries.release").map { it.toBoolean() }.getOrElse(false)
                 val ghToken = providers.environmentVariable("GITHUB_TOKEN")
 
+                // Shared directory of manually supplied license texts (config/aboutlibraries/licenses/*.json),
+                // matched by `hash`. Offline mode never fetches SPDX/remote texts, so without these the
+                // open-source-licenses screen would be missing license bodies in fdroid/reproducible builds.
+                // Supplying them also makes release builds deterministic (no network fetch when content exists).
+                val licenseConfigDir = isolated.rootProject.projectDirectory.dir("config/aboutlibraries")
+
                 offlineMode.set(!isReleaseBuild)
 
                 collect {
+                    configPath.set(licenseConfigDir)
                     fetchRemoteLicense.set(isReleaseBuild && ghToken.isPresent)
                     fetchRemoteFunding.set(isReleaseBuild && ghToken.isPresent)
                     if (ghToken.isPresent) {

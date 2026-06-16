@@ -45,7 +45,6 @@ kotlin {
         }
 
         androidMain.dependencies {
-            api(projects.core.api)
             implementation(libs.androidx.core.ktx)
             implementation(libs.androidx.work.runtime.ktx)
             implementation(libs.koin.android)
@@ -60,6 +59,9 @@ kotlin {
             }
         }
 
-        commonTest.dependencies { implementation(libs.kotlinx.coroutines.test) }
+        commonTest.dependencies {
+            implementation(projects.core.testing)
+            implementation(libs.kotlinx.coroutines.test)
+        }
     }
 }

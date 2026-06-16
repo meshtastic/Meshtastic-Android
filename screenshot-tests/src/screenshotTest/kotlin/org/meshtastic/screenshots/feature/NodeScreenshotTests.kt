@@ -31,6 +31,7 @@ import org.meshtastic.feature.node.component.NodeItemCompleteOnlineRemotePreview
 import org.meshtastic.feature.node.component.NodeItemCompletePreview
 import org.meshtastic.feature.node.component.PositionInlineContentPreview
 import org.meshtastic.feature.node.component.TelemetricActionsSectionEmptyPreview
+import org.meshtastic.feature.node.component.TelemetricActionsSectionLocalPreview
 import org.meshtastic.feature.node.component.TelemetricActionsSectionPreview
 import org.meshtastic.feature.node.detail.NodeDetailContentLoadingPreview
 import org.meshtastic.feature.node.detail.NodeDetailContentLocalPreview
@@ -38,6 +39,7 @@ import org.meshtastic.feature.node.detail.NodeDetailContentMinimalPreview
 import org.meshtastic.feature.node.detail.NodeDetailContentRemotePreview
 import org.meshtastic.feature.node.metrics.DeviceMetricsCardPreview
 import org.meshtastic.feature.node.metrics.LegendPreview
+import org.meshtastic.feature.node.metrics.PreviewAirQualityCards
 import org.meshtastic.feature.node.metrics.PreviewEnvironmentMetricsContent
 
 @PreviewTest
@@ -66,6 +68,13 @@ fun ScreenshotTelemetricActionsSection() {
 @Composable
 fun ScreenshotTelemetricActionsSectionEmpty() {
     TelemetricActionsSectionEmptyPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotTelemetricActionsSectionLocal() {
+    TelemetricActionsSectionLocalPreview()
 }
 
 @PreviewTest
@@ -122,6 +131,13 @@ fun ScreenshotDeviceMetricsCard() {
 @Composable
 fun ScreenshotEnvironmentMetricsContent() {
     PreviewEnvironmentMetricsContent()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotAirQualityCards() {
+    PreviewAirQualityCards()
 }
 
 // ---------------------------------------------------------------------------

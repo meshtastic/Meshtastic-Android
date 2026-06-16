@@ -5,7 +5,7 @@ Module directory, namespacing conventions, environment setup, and troubleshootin
 
 - **Build System:** Gradle (Kotlin DSL). JDK 21 REQUIRED. Target SDK: API 36. Min SDK: API 26.
 - **Flavors:** `fdroid` (OSS only) · `google` (Maps + DataDog analytics)
-- **Android-only Modules:** `core:api` (AIDL), `core:barcode` (CameraX). Shared contracts abstracted into `core:ui/commonMain`.
+- **Android-only Modules:** `core:barcode` (CameraX), `feature:widget` (Glance home-screen widget), `feature:car` (Android Auto via the Car App Library, `google` flavor only), and `baselineprofile` (Macrobenchmark). Shared contracts are abstracted into `core:ui/commonMain`.
 
 ## Codebase Map
 
@@ -16,7 +16,6 @@ Module directory, namespacing conventions, environment setup, and troubleshootin
 | `config/` | Detekt static analysis rules (`config/detekt/detekt.yml`) and Spotless formatting config (`config/spotless/.editorconfig`). |
 | `docs/` | Architecture docs and agent playbooks. See `docs/kmp-status.md` and `docs/roadmap.md` for current status. |
 | `core/model` | Domain models and common data structures. |
-| `core:proto` | Protobuf definitions (Git submodule). |
 | `core:common` | Low-level utilities, I/O abstractions (Okio), and common types. |
 | `core:database` | Room KMP database implementation. |
 | `core:datastore` | Multiplatform DataStore for preferences. |
@@ -28,14 +27,15 @@ Module directory, namespacing conventions, environment setup, and troubleshootin
 | `core:navigation` | Shared navigation keys/routes for Navigation 3 using `@Serializable sealed interface` hierarchies. `DeepLinkRouter` for typed backstack synthesis, and `MeshtasticNavSavedStateConfig` with `subclassesOfSealed()` for automatic polymorphic backstack persistence. |
 | `core:ui` | Shared Compose UI components (`MeshtasticAppShell`, `MeshtasticNavDisplay`, `MeshtasticNavigationSuite`, `AlertHost`, `SharedDialogs`, `PlaceholderScreen`, `MainAppBar`, dialogs, preferences) and platform abstractions. |
 | `core:service` | KMP service layer; Android bindings stay in `androidMain`. |
-| `core:api` | Public AIDL/API integration module for external clients. |
+| `core:takserver` | Meshtastic ↔ TAK (ATAK/iTAK) bridge — local CoT server and CoT ⇄ mesh conversion. |
 | `core:prefs` | KMP preferences layer built on DataStore abstractions. |
 | `core:barcode` | Barcode scanning (Android-only). |
 | `core:nfc` | NFC abstractions (KMP). Android NFC hardware implementation in `androidMain`. |
 | `core/ble/` | Bluetooth Low Energy stack using Kable. |
 | `core/resources/` | Centralized string and image resources (Compose Multiplatform). |
 | `core/testing/` | Shared test doubles, fakes, and utilities for `commonTest` across all KMP modules. |
-| `feature/` | Feature modules (e.g., `settings`, `map`, `messaging`, `node`, `intro`, `connections`, `firmware`, `wifi-provision`, `widget`). All are KMP except `widget`. Use `meshtastic.kmp.feature` convention plugin. |
+| `feature/` | Feature modules (e.g., `settings`, `map`, `messaging`, `node`, `intro`, `connections`, `firmware`, `wifi-provision`, `discovery`, `docs`, `widget`, `car`). Most are KMP and use the `meshtastic.kmp.feature` convention plugin; `widget` (Glance) and `car` (Android Auto, `google` flavor only) are Android-only. |
+| `baselineprofile/` | Macrobenchmark Baseline Profile generation for `:androidApp` (AOT-compiled cold-start journey). Android-only. |
 | `feature/wifi-provision` | KMP WiFi provisioning via BLE (Nymea protocol). Uses `core:ble` Kable abstractions. |
 | `feature/firmware` | Fully KMP firmware update system: Unified OTA (BLE + WiFi), native Nordic Secure DFU protocol (pure KMP), USB/UF2 updates, and `FirmwareRetriever` with manifest-based resolution. Desktop is a first-class target. |
 | `desktopApp/` | Compose Desktop application. Thin host shell relying on feature modules for shared UI. Full Koin DI graph, TCP, Serial/USB, and BLE transports. Versioning via `config.properties` + `GitVersionValueSource`. |
@@ -67,12 +67,7 @@ Agents **MUST** perform these steps automatically at the start of every session 
    ```
    All `./gradlew` invocations must include `ANDROID_HOME` in the environment. If the SDK cannot be found, ask the user for the path.
 
-2. **Proto submodule:** `core/proto/src/main/proto` is a Git submodule containing Protobuf definitions. It must be initialized or builds will fail with proto generation errors:
-   ```bash
-   git submodule update --init
-   ```
-
-3. **Init secrets:** If `local.properties` does not exist, copy `secrets.defaults.properties` to `local.properties`. Without this the `google` flavor build fails:
+2. **Init secrets:** If `local.properties` does not exist, copy `secrets.defaults.properties` to `local.properties`. Without this the `google` flavor build fails:
    ```bash
    [ -f local.properties ] || cp secrets.defaults.properties local.properties
    ```

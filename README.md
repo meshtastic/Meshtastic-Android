@@ -15,7 +15,16 @@ This is a tool for using Android (and Compose Desktop) with open-source mesh rad
 
 If you have questions or feedback please [Join our discussion forum](https://github.com/orgs/meshtastic/discussions) or the [Discord Group](https://discord.gg/meshtastic). We would love to hear from you!
 
+## Features
 
+Highlights from the latest release:
+
+- **Full-text message search** across your conversation history.
+- **Mesh network discovery** to surface nodes and channels around you.
+- **Android Auto** support for hands-free use while driving (`google` flavor).
+- **Air-quality telemetry** — PM1.0, PM2.5, PM10, and CO₂ readings from supported sensors.
+- **Device hardware links** via [msh.to](https://msh.to) for quick access to hardware details.
+- **App Functions / system-AI integration** so on-device assistants can trigger common workflows.
 
 ## Get Meshtastic
 
@@ -76,7 +85,7 @@ The app follows modern Android development practices, built on top of a shared K
 - **State Management:** Unidirectional Data Flow (UDF) with ViewModels, Coroutines, and Flow.
 - **Dependency Injection:** Koin with Koin Annotations (K2 Compiler Plugin).
 - **Navigation:** JetBrains Navigation 3 (Multiplatform routing with RESTful deep linking).
-- **Data Layer:** Repository pattern with Room KMP (local DB), DataStore (prefs), and Protobuf (device comms).
+- **Data Layer:** Repository pattern with Room KMP (local DB), DataStore (prefs), and Protobuf (device comms). Protobuf models are consumed from the upstream `org.meshtastic:protobufs` Maven artifact, pinned in `gradle/libs.versions.toml`.
 
 ### Bluetooth Low Energy (BLE)
 The BLE stack uses a multiplatform interface-driven architecture. Platform-agnostic interfaces live in `commonMain`, utilizing the **Kable** multiplatform BLE library to handle device communication across all supported targets (Android, Desktop). This provides a robust, Coroutine-based architecture for reliable device communication while remaining fully KMP compatible. See [core/ble/README.md](core/ble/README.md) for details.
@@ -87,7 +96,6 @@ Each module has its own README with details on its responsibilities, API surface
 
 | Module | Description |
 |---|---|
-| [core/api](core/api/README.md) | AIDL service API for third-party integrations |
 | [core/domain](core/domain/README.md) | Business-logic use cases (radio config, sessions, exports) |
 | [core/repository](core/repository/README.md) | Data & infrastructure contracts (RadioTransport, NodeRepository, ServiceRepository) |
 | [core/takserver](core/takserver/README.md) | Meshtastic ↔ TAK (ATAK/iTAK) bridge — CoT server & conversion |
@@ -107,7 +115,6 @@ Each module has its own README with details on its responsibilities, API surface
 | [core/nfc](core/nfc/README.md) | NFC support |
 | [core/prefs](core/prefs/README.md) | Legacy preference helpers |
 | [core/barcode](core/barcode/README.md) | Barcode / QR scanning |
-| [core/proto](core/proto/README.md) | Protobuf submodule wrapper |
 | [feature/messaging](feature/messaging/README.md) | Messaging UI feature |
 | [feature/map](feature/map/README.md) | Map UI feature |
 | [feature/node](feature/node/README.md) | Node detail UI feature |
@@ -116,20 +123,19 @@ Each module has its own README with details on its responsibilities, API surface
 | [feature/intro](feature/intro/README.md) | Onboarding / intro UI feature |
 | [feature/wifi-provision](feature/wifi-provision/README.md) | Wi-Fi provisioning UI feature |
 | [feature/connections](feature/connections/README.md) | Device discovery & connection management (BLE / USB / TCP) |
+| [feature/discovery](feature/discovery) | Mesh network discovery |
 | [feature/docs](feature/docs/README.md) | In-app documentation browser with Chirpy AI assistant |
 | [feature/widget](feature/widget/README.md) | Android home-screen Glance widget (live mesh stats) |
+| [feature/car](feature/car) | Android Auto integration (Car App Library, `google` flavor) |
+| [baselineprofile](baselineprofile/README.md) | Macrobenchmark Baseline Profile generation for `:androidApp` |
 
 ## Translations
 
 You can help translate the app into your native language using [Crowdin](https://crowdin.meshtastic.org/android).
 
-## API & Integration
+## Integration
 
-Developers can integrate with the Meshtastic Android app using our published API library via **JitPack**. This allows third-party applications (like the ATAK plugin) to communicate with the mesh service via AIDL.
-
-For detailed integration instructions, see [core/api/README.md](core/api/README.md).
-
-Additionally, the app includes a built-in **Local TAK Server** feature that can be enabled in settings. This runs a local TCP server on port 8089 to allow ATAK clients to connect directly and route their traffic over the mesh.
+The app includes a built-in **Local TAK Server** feature that can be enabled in settings. This runs a local TCP server on port 8089 to allow ATAK clients to connect directly and route their traffic over the mesh.
 
 ## Building the Android App
 > [!WARNING]

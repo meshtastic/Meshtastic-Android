@@ -57,7 +57,7 @@ actual fun getDatabaseBuilder(dbName: String): RoomDatabase.Builder<MeshtasticDa
 /** Returns a [RoomDatabase.Builder] configured for an in-memory JVM database. */
 actual fun getInMemoryDatabaseBuilder(): RoomDatabase.Builder<MeshtasticDatabase> =
     Room.inMemoryDatabaseBuilder<MeshtasticDatabase>(factory = { MeshtasticDatabaseConstructor.initialize() })
-        .configureCommon()
+        .configureCommon(multiConnection = false)
         .setDriver(BundledSQLiteDriver())
 
 /** Returns the JVM/Desktop directory where database files are stored. */

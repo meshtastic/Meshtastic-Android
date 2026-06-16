@@ -73,6 +73,9 @@ interface MeshLogRepository {
     /** Deletes all logs associated with a specific [nodeNum] and [portNum]. */
     suspend fun deleteLogs(nodeNum: Int, portNum: Int)
 
+    /** Deletes only local stats telemetry logs for [nodeNum], preserving other telemetry logs. */
+    suspend fun deleteLocalStatsLogs(nodeNum: Int)
+
     /** Prunes the log database based on the configured [retentionDays]. */
     suspend fun deleteLogsOlderThan(retentionDays: Int)
 

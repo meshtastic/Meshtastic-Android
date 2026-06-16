@@ -26,6 +26,7 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -148,6 +149,9 @@ open class DatabaseManager(
 
         // One-time cleanup: remove legacy DB if present and not active
         managerScope.launch(dispatchers.io) { cleanupLegacyDbIfNeeded(activeDbName = dbName) }
+
+        // Backfill FTS search index for any text messages missing messageText
+        managerScope.launch(dispatchers.io) { backfillSearchIndexIfNeeded(db) }
 
         Logger.i { "Switched active DB to ${anonymizeDbName(dbName)} for address ${anonymizeAddress(address)}" }
     }
@@ -303,6 +307,28 @@ open class DatabaseManager(
                 .onFailure { Logger.w(it) { "Failed to delete legacy database ${anonymizeDbName(legacy)}" } }
         }
         datastore.edit { it[legacyCleanedKey] = true }
+    }
+
+    /**
+     * Backfills [Packet.messageText] for existing text-message packets that predate the FTS5 schema, then rebuilds the
+     * FTS index so search covers historical messages. The text is decoded in Kotlin from each packet's payload (see
+     * [PacketDao.backfillMessageTexts]); it cannot be read in SQL because the message body is stored as serialized
+     * `bytes`, not a `text` JSON field.
+     */
+    private suspend fun backfillSearchIndexIfNeeded(db: MeshtasticDatabase) {
+        val needsBackfill = db.packetDao().countPacketsNeedingBackfill() > 0
+        if (!needsBackfill) return
+
+        // Perform the write operations inside NonCancellable to prevent
+        // connection pool leaks due to coroutine cancellation.
+        withContext(NonCancellable) {
+            val count = db.packetDao().backfillMessageTexts()
+            if (count > 0) {
+                Logger.i { "Backfilled $count messages for FTS search index" }
+                db.packetDao().rebuildFtsIndex()
+                Logger.i { "FTS search index rebuild complete" }
+            }
+        }
     }
 
     /** Closes all open databases and cancels background work. */

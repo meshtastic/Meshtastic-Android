@@ -5,35 +5,45 @@ xmlutil = "0.91.3"
 agp = "9.2.1"
 appcompat = "1.7.1"
 accompanist = "0.37.3"
+car-app = "1.9.0-alpha01"
+appfunctions = "1.0.0-alpha09"
 
 # androidx
 datastore = "1.2.1"
 glance = "1.2.0-rc01"
 lifecycle = "2.10.0"
-jetbrains-lifecycle = "2.11.0-beta01"
+jetbrains-lifecycle = "2.11.0-beta02"
 navigation3 = "1.1.1"
 paging = "3.5.0"
 room = "3.0.0-alpha06"
-koin = "4.2.1"
-koin-plugin = "1.0.0"
+koin = "4.2.2"
+koin-plugin = "1.0.1"
 
 # Kotlin
-kotlin = "2.3.21"
+kotlin = "2.4.0"
 kotlinx-coroutines-android = "1.11.0"
 kotlinx-datetime = "0.8.0-0.6.x-compat"
 kotlinx-serialization = "1.11.0"
 ktlint = "1.7.1"
 ktfmt = "0.61"
 kover = "0.9.8"
-mokkery = "3.3.0"
+mokkery = "3.4.1"
 junit5 = "6.1.0"
 junit-platform = "6.1.0" # aligned with junit5 — JUnit Platform uses 1.x scheme
-kotest = "6.1.11"
+kotest = "6.2.0"
 testRetry = "1.6.5"
 turbine = "1.2.1"
 
 # Compose Screenshot Testing
 compose-screenshot = "0.0.1-alpha15"
+
+# Baseline Profiles / Macrobenchmark
+# `benchmark` drives both the androidx.benchmark macro lib AND the androidx.baselineprofile
+# Gradle plugin (same coordinates/version). Kept on the alpha track to stay compatible with
+# AGP 9.x (the stable 1.4.x line predates AGP 9 support).
+benchmark = "1.5.0-alpha06"
+profileinstaller = "1.4.1"
+androidx-uiautomator = "2.3.0"
 
 # Compose Multiplatform
 compose-multiplatform = "1.11.1"
@@ -51,13 +61,14 @@ androidx-compose-bom-aligned = "1.11.2"
 # maps-compose-widgets requests `androidx.compose.material:material` without
 # a version (relying on a BOM that we exclude). M2 is frozen at 1.7.8.
 androidx-compose-material = "1.7.8"
-jetbrains-adaptive = "1.3.0-beta01"
+jetbrains-adaptive = "1.3.0-beta02"
 
 # Google
 maps-compose = "8.3.0"
 
 # ML Kit
 mlkit-barcode-scanning = "17.3.0"
+mlkit-genai-prompt = "1.0.0-beta2"
 mlkit-translate = "17.0.3"
 
 # CameraX
@@ -69,21 +80,21 @@ ktor = "3.5.0"
 # Other
 aboutlibraries = "14.2.1"
 jserialcomm = "2.11.4"
-coil = "3.4.0"
-datadog-gradle = "1.26.0"
-dd-sdk-android = "3.10.0"
+coil = "3.5.0"
+datadog-gradle = "1.27.0"
+dd-sdk-android = "3.11.0"
 detekt = "2.0.0-alpha.3"
 dokka = "2.2.0"
 devtools-ksp = "2.3.9"
 firebase-crashlytics-gradle = "3.0.7"
-google-services-gradle = "4.4.4"
+google-services-gradle = "4.5.0"
 markdownRenderer = "0.41.0"
 okio = "3.17.0"
 uri-kmp = "0.0.21"
 osmdroid-android = "6.1.20"
-spotless = "8.6.0"
+spotless = "8.7.0"
 vico = "3.2.2"
-kable = "0.43.0"
+kable = "0.43.1"
 mqttastic = "0.3.8"
 jmdns = "3.6.3"
 qrcode-kotlin = "4.5.0"
@@ -91,7 +102,7 @@ takpacket-sdk = "0.5.3"
 meshtastic-protobufs = "2.7.25"
 
 # Gradle Plugins
-develocity = "4.4.2"
+develocity = "4.4.3"
 foojay-resolver = "1.0.0"
 
 
@@ -103,12 +114,19 @@ xmlutil-serialization = { module = "io.github.pdvrieze.xmlutil:serialization", v
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version = "1.13.0" }
 androidx-annotation = { module = "androidx.annotation:annotation", version = "1.10.0" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
+androidx-appfunctions = { module = "androidx.appfunctions:appfunctions", version.ref = "appfunctions" }
+androidx-appfunctions-compiler = { module = "androidx.appfunctions:appfunctions-compiler", version.ref = "appfunctions" }
+androidx-appfunctions-service = { module = "androidx.appfunctions:appfunctions-service", version.ref = "appfunctions" }
 androidx-camera-core = { module = "androidx.camera:camera-core", version.ref = "camerax" }
 androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "camerax" }
 androidx-camera-lifecycle = { module = "androidx.camera:camera-lifecycle", version.ref = "camerax" }
 androidx-camera-view = { module = "androidx.camera:camera-view", version.ref = "camerax" }
 androidx-camera-compose = { module = "androidx.camera:camera-compose", version.ref = "camerax" }
 androidx-camera-viewfinder-compose = { module = "androidx.camera.viewfinder:viewfinder-compose", version = "1.6.1" }
+androidx-car-app = { module = "androidx.car.app:app", version.ref = "car-app" }
+androidx-car-app-projected = { module = "androidx.car.app:app-projected", version.ref = "car-app" }
+androidx-car-app-automotive = { module = "androidx.car.app:app-automotive", version.ref = "car-app" }
+androidx-car-app-testing = { module = "androidx.car.app:app-testing", version.ref = "car-app" }
 androidx-core-ktx = { module = "androidx.core:core-ktx", version = "1.19.0" }
 androidx-core-location-altitude = { module = "androidx.core:core-location-altitude", version = "1.0.0-rc01" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version = "1.2.0" }
@@ -138,6 +156,11 @@ androidx-sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version =
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version = "2.11.2" }
 androidx-work-testing = { module = "androidx.work:work-testing", version = "2.11.2" }
 
+# Baseline Profiles / Macrobenchmark
+androidx-profileinstaller = { module = "androidx.profileinstaller:profileinstaller", version.ref = "profileinstaller" }
+androidx-benchmark-macro-junit4 = { module = "androidx.benchmark:benchmark-macro-junit4", version.ref = "benchmark" }
+androidx-uiautomator = { module = "androidx.test.uiautomator:uiautomator", version.ref = "androidx-uiautomator" }
+
 # AndroidX Compose (explicit versions — BOM removed; CMP is the sole version authority)
 androidx-compose-runtime-tracing = { module = "androidx.compose.runtime:runtime-tracing", version.ref = "androidx-compose-bom-aligned" }
 androidx-compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "androidx-compose-bom-aligned" } # Required by Robolectric Compose tests (registers ComponentActivity)
@@ -162,9 +185,9 @@ jetbrains-compose-material3-adaptive-navigation-suite = { module = "org.jetbrain
 
 # Google
 firebase-ai = { module = "com.google.firebase:firebase-ai" }
-firebase-ai-ondevice = { module = "com.google.firebase:firebase-ai-ondevice", version = "16.0.0-beta02" }
+firebase-ai-ondevice = { module = "com.google.firebase:firebase-ai-ondevice", version = "16.0.0-beta03" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
-firebase-bom = { module = "com.google.firebase:firebase-bom", version = "34.14.1" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version = "34.15.0" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 location-services = { module = "com.google.android.gms:play-services-location", version = "21.3.0" }
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
@@ -177,6 +200,7 @@ maps-compose = { module = "com.google.maps.android:maps-compose", version.ref = 
 maps-compose-utils = { module = "com.google.maps.android:maps-compose-utils", version.ref = "maps-compose" }
 maps-compose-widgets = { module = "com.google.maps.android:maps-compose-widgets", version.ref = "maps-compose" }
 mlkit-barcode-scanning = { module = "com.google.mlkit:barcode-scanning", version.ref = "mlkit-barcode-scanning" }
+mlkit-genai-prompt = { module = "com.google.mlkit:genai-prompt", version.ref = "mlkit-genai-prompt" }
 mlkit-translate = { module = "com.google.mlkit:translate", version.ref = "mlkit-translate" }
 play-services-maps = { module = "com.google.android.gms:play-services-maps", version = "20.0.0" }
 zxing-core = { module = "com.google.zxing:core", version = "3.5.4" }
@@ -264,7 +288,7 @@ androidx-room-gradlePlugin = { module = "androidx.room3:room3-gradle-plugin", ve
 compose-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 compose-multiplatform-gradlePlugin = { module = "org.jetbrains.compose:compose-gradle-plugin", version.ref = "compose-multiplatform" }
 datadog-gradlePlugin = { module = "com.datadoghq.dd-sdk-android-gradle-plugin:com.datadoghq.dd-sdk-android-gradle-plugin.gradle.plugin", version.ref = "datadog-gradle" }
-detekt-compose = { module = "io.nlopez.compose.rules:detekt", version = "0.6.0" }
+detekt-compose = { module = "io.nlopez.compose.rules:detekt", version = "0.6.1" }
 detekt-formatting = { module = "dev.detekt:detekt-rules-ktlint-wrapper", version.ref = "detekt" }
 detekt-gradlePlugin = { module = "dev.detekt:detekt-gradle-plugin", version.ref = "detekt" }
 firebase-crashlytics-gradlePlugin = { module = "com.google.firebase:firebase-crashlytics-gradle", version.ref = "firebase-crashlytics-gradle" }
@@ -279,11 +303,10 @@ test-retry-gradlePlugin = { module = "org.gradle:test-retry-gradle-plugin", vers
 aboutlibraries-gradlePlugin = { module = "com.mikepenz.aboutlibraries.plugin:aboutlibraries-plugin", version.ref = "aboutlibraries" }
 
 jmdns = { module = "org.jmdns:jmdns", version.ref = "jmdns" }
-jna = { module = "net.java.dev.jna:jna", version = "5.19.0" }
+jna = { module = "net.java.dev.jna:jna", version = "5.19.1" }
 
 # TAK
 takpacket-sdk-kmp = { module = "org.meshtastic:takpacket-sdk", version.ref = "takpacket-sdk" }
-takpacket-sdk-jvm = { module = "org.meshtastic:takpacket-sdk-jvm", version.ref = "takpacket-sdk" }
 
 # Meshtastic Protobufs SDK (Wire-generated KMP models from meshtastic/protobufs)
 meshtastic-protobufs = { module = "org.meshtastic:protobufs", version.ref = "meshtastic-protobufs" }
@@ -293,13 +316,14 @@ meshtastic-protobufs = { module = "org.meshtastic:protobufs", version.ref = "mes
 # Android
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
+android-test = { id = "com.android.test" }
+androidx-baselineprofile = { id = "androidx.baselineprofile", version.ref = "benchmark" }
 compose-screenshot = { id = "com.android.compose.screenshot", version.ref = "compose-screenshot" }
 
 # Jetbrains
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 compose-multiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
 koin-compiler = { id = "io.insert-koin.compiler.plugin", version.ref = "koin-plugin" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }

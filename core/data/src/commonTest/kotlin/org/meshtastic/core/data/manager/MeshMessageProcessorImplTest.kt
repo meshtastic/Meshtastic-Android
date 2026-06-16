@@ -22,6 +22,7 @@ import dev.mokkery.every
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify
+import dev.mokkery.verify.VerifyMode
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -33,7 +34,6 @@ import okio.ByteString
 import org.meshtastic.core.repository.FromRadioPacketHandler
 import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.MeshLogRepository
-import org.meshtastic.core.repository.MeshRouter
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.Data
@@ -50,7 +50,6 @@ class MeshMessageProcessorImplTest {
     private val nodeManager = mock<NodeManager>(MockMode.autofill)
     private val serviceRepository = mock<ServiceRepository>(MockMode.autofill)
     private val meshLogRepository = mock<MeshLogRepository>(MockMode.autofill)
-    private val router = mock<MeshRouter>(MockMode.autofill)
     private val fromRadioDispatcher = mock<FromRadioPacketHandler>(MockMode.autofill)
     private val dataHandler = mock<MeshDataHandler>(MockMode.autofill)
 
@@ -65,14 +64,13 @@ class MeshMessageProcessorImplTest {
     fun setUp() {
         every { nodeManager.isNodeDbReady } returns isNodeDbReady
         every { nodeManager.myNodeNum } returns MutableStateFlow<Int?>(myNodeNum)
-        every { router.dataHandler } returns dataHandler
     }
 
     private fun createProcessor(scope: CoroutineScope): MeshMessageProcessorImpl = MeshMessageProcessorImpl(
         nodeManager = nodeManager,
-        serviceRepository = serviceRepository,
+        serviceStateWriter = serviceRepository,
         meshLogRepository = lazy { meshLogRepository },
-        router = lazy { router },
+        dataHandler = lazy { dataHandler },
         fromRadioDispatcher = fromRadioDispatcher,
         scope = scope,
     )
@@ -251,7 +249,7 @@ class MeshMessageProcessorImplTest {
         advanceUntilIdle()
 
         // Should have called updateNode for myNodeNum (lastHeard update)
-        verify { nodeManager.updateNode(myNodeNum, withBroadcast = true, any(), any()) }
+        verify { nodeManager.updateNode(myNodeNum, any(), any()) }
     }
 
     @Test
@@ -273,7 +271,7 @@ class MeshMessageProcessorImplTest {
         advanceUntilIdle()
 
         // Should have called updateNode for the sender
-        verify { nodeManager.updateNode(senderNode, withBroadcast = false, any(), any()) }
+        verify { nodeManager.updateNode(senderNode, any(), any()) }
     }
 
     // ---------- handleReceivedMeshPacket: null decoded ----------
@@ -290,10 +288,13 @@ class MeshMessageProcessorImplTest {
         // No crash, no emitMeshPacket call (decoded is null so processReceivedMeshPacket returns early)
     }
 
-    // ---------- handleReceivedMeshPacket: null myNodeNum ----------
+    // ---------- handleReceivedMeshPacket: myNodeNum not yet known ----------
 
     @Test
-    fun `processReceivedMeshPacket with null myNodeNum skips node updates`() = runTest(testDispatcher) {
+    fun `packets received before myNodeNum is known are buffered until it resolves`() = runTest(testDispatcher) {
+        // Our own node number is not yet known, even though the node DB is ready.
+        val myNodeNumFlow = MutableStateFlow<Int?>(null)
+        every { nodeManager.myNodeNum } returns myNodeNumFlow
         processor = createProcessor(backgroundScope)
         isNodeDbReady.value = true
 
@@ -308,7 +309,48 @@ class MeshMessageProcessorImplTest {
         processor.handleReceivedMeshPacket(packet, null)
         advanceUntilIdle()
 
-        // emitMeshPacket should still be called, but node updates should be skipped
+        // Buffered, not processed: storing now could key a local packet under its raw from_num and orphan it from
+        // per-node chart queries. Neither the DB insert nor the downstream emit should have happened yet.
+        verifySuspend(mode = VerifyMode.not) { meshLogRepository.insert(any()) }
+        verifySuspend(mode = VerifyMode.not) { serviceRepository.emitMeshPacket(any()) }
+
+        // Once myNodeNum resolves, the buffer flushes and the packet is processed (stored + emitted).
+        myNodeNumFlow.value = 4321
+        advanceUntilIdle()
+        verifySuspend { meshLogRepository.insert(any()) }
+        verifySuspend { serviceRepository.emitMeshPacket(any()) }
+    }
+
+    @Test
+    fun `buffer survives a reconnect toggle and flushes only once myNodeNum resolves`() = runTest(testDispatcher) {
+        val myNodeNumFlow = MutableStateFlow<Int?>(null)
+        every { nodeManager.myNodeNum } returns myNodeNumFlow
+        processor = createProcessor(backgroundScope)
+        isNodeDbReady.value = true // DB ready, our node number still unknown
+
+        val packet =
+            MeshPacket(
+                id = 11,
+                from = 999,
+                decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP, payload = ByteString.EMPTY),
+                rx_time = 1700000000,
+            )
+        processor.handleReceivedMeshPacket(packet, null)
+        advanceUntilIdle()
+        verifySuspend(mode = VerifyMode.not) { serviceRepository.emitMeshPacket(any()) }
+
+        // Reconnect: isNodeDbReady toggles false -> true while myNodeNum stays null. The packet must stay buffered
+        // —
+        // flushing now would key it under its raw from_num.
+        isNodeDbReady.value = false
+        advanceUntilIdle()
+        isNodeDbReady.value = true
+        advanceUntilIdle()
+        verifySuspend(mode = VerifyMode.not) { serviceRepository.emitMeshPacket(any()) }
+
+        // Only once myNodeNum finally resolves does the buffer flush.
+        myNodeNumFlow.value = 4321
+        advanceUntilIdle()
         verifySuspend { serviceRepository.emitMeshPacket(any()) }
     }
 

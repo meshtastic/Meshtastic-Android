@@ -20,6 +20,7 @@ import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.proto.Config
+import org.meshtastic.proto.HamParameters
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.User
 import kotlin.test.BeforeTest
@@ -43,6 +44,12 @@ class RadioConfigUseCaseTest {
         useCase.setOwner(1234, user)
         // Verify call implicitly or by adding tracking to FakeRadioController if needed.
         // FakeRadioController already has getPacketId returning 1.
+    }
+
+    @Test
+    fun `setHamMode calls radioController and returns packetId`() = runTest {
+        val packetId = useCase.setHamMode(1234, HamParameters(call_sign = "KK7ABC", short_name = "KK7A"))
+        assertEquals(1, packetId)
     }
 
     @Test

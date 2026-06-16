@@ -31,14 +31,20 @@ import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.Reaction
+import org.meshtastic.core.model.destination
+import org.meshtastic.core.model.isBroadcast
+import org.meshtastic.core.model.isFromLocal
+import org.meshtastic.core.model.source
 import org.meshtastic.core.model.util.MeshDataMapper
 import org.meshtastic.core.model.util.decodeOrNull
 import org.meshtastic.core.model.util.toOneLiner
 import org.meshtastic.core.repository.AdminPacketHandler
 import org.meshtastic.core.repository.DataPair
+import org.meshtastic.core.repository.DiscoveryPacketCollectorRegistry
 import org.meshtastic.core.repository.MeshDataHandler
-import org.meshtastic.core.repository.MeshServiceNotifications
+import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.MessageFilter
 import org.meshtastic.core.repository.NeighborInfoHandler
 import org.meshtastic.core.repository.NodeManager
@@ -48,8 +54,7 @@ import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
-import org.meshtastic.core.repository.ServiceBroadcasts
-import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.ServiceStateWriter
 import org.meshtastic.core.repository.StoreForwardPacketHandler
 import org.meshtastic.core.repository.TelemetryPacketHandler
 import org.meshtastic.core.repository.TracerouteHandler
@@ -82,11 +87,10 @@ import org.meshtastic.proto.Waypoint
 class MeshDataHandlerImpl(
     private val nodeManager: NodeManager,
     private val packetHandler: PacketHandler,
-    private val serviceRepository: ServiceRepository,
+    private val serviceStateWriter: ServiceStateWriter,
     private val packetRepository: Lazy<PacketRepository>,
-    private val serviceBroadcasts: ServiceBroadcasts,
     private val notificationManager: NotificationManager,
-    private val serviceNotifications: MeshServiceNotifications,
+    private val serviceNotifications: MeshNotificationManager,
     private val analytics: PlatformAnalytics,
     private val dataMapper: MeshDataMapper,
     private val tracerouteHandler: TracerouteHandler,
@@ -96,6 +100,7 @@ class MeshDataHandlerImpl(
     private val storeForwardHandler: StoreForwardPacketHandler,
     private val telemetryHandler: TelemetryPacketHandler,
     private val adminPacketHandler: AdminPacketHandler,
+    private val collectorRegistry: DiscoveryPacketCollectorRegistry,
     @Named("ServiceScope") private val scope: CoroutineScope,
 ) : MeshDataHandler {
 
@@ -112,12 +117,16 @@ class MeshDataHandlerImpl(
         val fromUs = myNodeNum == packet.from
         dataPacket.status = MessageStatus.RECEIVED
 
-        val shouldBroadcast = handleDataPacket(packet, dataPacket, myNodeNum, fromUs, logUuid, logInsertJob)
+        handleDataPacket(packet, dataPacket, myNodeNum, fromUs, logUuid, logInsertJob)
 
-        if (shouldBroadcast) {
-            serviceBroadcasts.broadcastReceivedData(dataPacket)
-        }
         analytics.track("num_data_receive", DataPair("num_data_receive", 1))
+
+        // Forward to discovery scan collector if active
+        collectorRegistry.collector?.let { collector ->
+            if (collector.isActive) {
+                scope.handledLaunch { collector.onPacketReceived(packet, dataPacket) }
+            }
+        }
     }
 
     private fun handleDataPacket(
@@ -127,50 +136,35 @@ class MeshDataHandlerImpl(
         fromUs: Boolean,
         logUuid: String?,
         logInsertJob: Job?,
-    ): Boolean {
-        var shouldBroadcast = !fromUs
-        val decoded = packet.decoded ?: return shouldBroadcast
+    ) {
+        val decoded = packet.decoded ?: return
         when (decoded.portnum) {
             PortNum.TEXT_MESSAGE_APP -> handleTextMessage(packet, dataPacket, myNodeNum)
-
             PortNum.NODE_STATUS_APP -> handleNodeStatus(packet, dataPacket, myNodeNum)
-
             PortNum.ALERT_APP -> rememberDataPacket(dataPacket, myNodeNum)
-
             PortNum.WAYPOINT_APP -> handleWaypoint(packet, dataPacket, myNodeNum)
-
             PortNum.POSITION_APP -> handlePosition(packet, dataPacket, myNodeNum)
-
             PortNum.NODEINFO_APP -> if (!fromUs) handleNodeInfo(packet)
-
             PortNum.TELEMETRY_APP -> telemetryHandler.handleTelemetry(packet, dataPacket, myNodeNum)
-
-            else ->
-                shouldBroadcast =
-                    handleSpecializedDataPacket(packet, dataPacket, myNodeNum, fromUs, logUuid, logInsertJob)
+            else -> handleSpecializedDataPacket(packet, dataPacket, myNodeNum, logUuid, logInsertJob)
         }
-        return shouldBroadcast
     }
 
     private fun handleSpecializedDataPacket(
         packet: MeshPacket,
         dataPacket: DataPacket,
         myNodeNum: Int,
-        fromUs: Boolean,
         logUuid: String?,
         logInsertJob: Job?,
-    ): Boolean {
-        var shouldBroadcast = !fromUs
-        val decoded = packet.decoded ?: return shouldBroadcast
+    ) {
+        val decoded = packet.decoded ?: return
         when (decoded.portnum) {
             PortNum.TRACEROUTE_APP -> {
                 tracerouteHandler.handleTraceroute(packet, logUuid, logInsertJob)
-                shouldBroadcast = false
             }
 
             PortNum.ROUTING_APP -> {
                 handleRouting(packet, dataPacket)
-                shouldBroadcast = true
             }
 
             PortNum.PAXCOUNTER_APP -> {
@@ -191,30 +185,21 @@ class MeshDataHandlerImpl(
 
             PortNum.NEIGHBORINFO_APP -> {
                 neighborInfoHandler.handleNeighborInfo(packet)
-                shouldBroadcast = true
             }
 
             PortNum.ATAK_PLUGIN,
             PortNum.ATAK_PLUGIN_V2,
             PortNum.PRIVATE_APP,
-            -> {
-                shouldBroadcast = true
-            }
+            -> {}
 
             PortNum.RANGE_TEST_APP,
             PortNum.DETECTION_SENSOR_APP,
             -> {
                 handleRangeTest(dataPacket, myNodeNum)
-                shouldBroadcast = true
             }
 
-            else -> {
-                // By default, if we don't know what it is, we should probably broadcast it
-                // so that external apps can handle it.
-                shouldBroadcast = true
-            }
+            else -> {}
         }
-        return shouldBroadcast
     }
 
     private fun handleRangeTest(dataPacket: DataPacket, myNodeNum: Int) {
@@ -279,7 +264,7 @@ class MeshDataHandlerImpl(
         val r = Routing.ADAPTER.decodeOrNull(payload, Logger) ?: return
         if (r.error_reason == Routing.Error.DUTY_CYCLE_LIMIT) {
             scope.launch {
-                serviceRepository.setErrorMessage(getStringSuspend(Res.string.error_duty_cycle), Severity.Warn)
+                serviceStateWriter.setErrorMessage(getStringSuspend(Res.string.error_duty_cycle), Severity.Warn)
             }
         }
         handleAckNak(
@@ -326,16 +311,13 @@ class MeshDataHandlerImpl(
                     packetRepository.value.updateReaction(updated)
                 }
             }
-
-            serviceBroadcasts.broadcastMessageStatus(requestId, m)
         }
     }
 
     override fun rememberDataPacket(dataPacket: DataPacket, myNodeNum: Int, updateNotification: Boolean) {
         if (dataPacket.dataType !in rememberDataType) return
-        val fromLocal =
-            dataPacket.from == DataPacket.ID_LOCAL || dataPacket.from == DataPacket.nodeNumToDefaultId(myNodeNum)
-        val toBroadcast = dataPacket.to == DataPacket.ID_BROADCAST
+        val fromLocal = dataPacket.isFromLocal(myNodeNum)
+        val toBroadcast = dataPacket.isBroadcast
         val contactId = if (fromLocal || toBroadcast) dataPacket.to else dataPacket.from
 
         // contactKey: unique contact key filter (channel)+(nodeId)
@@ -374,7 +356,7 @@ class MeshDataHandlerImpl(
 
     @Suppress("ReturnCount")
     private suspend fun PacketRepository.shouldFilterMessage(dataPacket: DataPacket, contactKey: String): Boolean {
-        val isIgnored = nodeManager.nodeDBbyID[dataPacket.from]?.isIgnored == true
+        val isIgnored = nodeManager.getNodeById(dataPacket.from.orEmpty())?.isIgnored == true
         if (isIgnored) return true
 
         if (dataPacket.dataType != PortNum.TEXT_MESSAGE_APP.value) return false
@@ -388,7 +370,7 @@ class MeshDataHandlerImpl(
         updateNotification: Boolean,
     ) {
         val conversationMuted = packetRepository.value.getContactSettings(contactKey).isMuted
-        val nodeMuted = nodeManager.nodeDBbyID[dataPacket.from]?.isMuted == true
+        val nodeMuted = nodeManager.getNodeById(dataPacket.from.orEmpty())?.isMuted == true
         val isSilent = conversationMuted || nodeMuted
         if (dataPacket.dataType == PortNum.ALERT_APP.value && !isSilent) {
             scope.launch {
@@ -407,19 +389,21 @@ class MeshDataHandlerImpl(
     }
 
     private suspend fun getSenderName(packet: DataPacket): String {
-        if (packet.from == DataPacket.ID_LOCAL) {
+        if (packet.source is NodeAddress.Local) {
             val myId = nodeManager.getMyId()
-            return nodeManager.nodeDBbyID[myId]?.user?.long_name ?: getStringSuspend(Res.string.unknown_username)
+            return nodeManager.getNodeById(myId)?.user?.long_name ?: getStringSuspend(Res.string.unknown_username)
         }
-        return nodeManager.nodeDBbyID[packet.from]?.user?.long_name ?: getStringSuspend(Res.string.unknown_username)
+        return nodeManager.getNodeById(packet.from.orEmpty())?.user?.long_name
+            ?: getStringSuspend(Res.string.unknown_username)
     }
 
     private suspend fun updateNotification(contactKey: String, dataPacket: DataPacket, isSilent: Boolean) {
         when (dataPacket.dataType) {
             PortNum.TEXT_MESSAGE_APP.value -> {
                 val message = dataPacket.text!!
+                val isBroadcast = dataPacket.destination is NodeAddress.Broadcast
                 val channelName =
-                    if (dataPacket.to == DataPacket.ID_BROADCAST) {
+                    if (isBroadcast) {
                         radioConfigRepository.channelSetFlow.first().settings.getOrNull(dataPacket.channel)?.name
                     } else {
                         null
@@ -428,7 +412,7 @@ class MeshDataHandlerImpl(
                     contactKey,
                     getSenderName(dataPacket),
                     message,
-                    dataPacket.to == DataPacket.ID_BROADCAST,
+                    isBroadcast,
                     channelName,
                     isSilent,
                 )
@@ -496,15 +480,16 @@ class MeshDataHandlerImpl(
         packetRepository.value.getPacketByPacketId(decoded.reply_id)?.let { originalPacket ->
             // Skip notification if the original message was filtered
             val targetId =
-                if (originalPacket.from == DataPacket.ID_LOCAL) originalPacket.to else originalPacket.from
+                if (originalPacket.source is NodeAddress.Local) originalPacket.to else originalPacket.from
             val contactKey = "${originalPacket.channel}$targetId"
             val conversationMuted = packetRepository.value.getContactSettings(contactKey).isMuted
-            val nodeMuted = nodeManager.nodeDBbyID[fromId]?.isMuted == true
+            val nodeMuted = nodeManager.getNodeById(fromId)?.isMuted == true
             val isSilent = conversationMuted || nodeMuted
 
             if (!isSilent) {
+                val isBroadcast = originalPacket.destination is NodeAddress.Broadcast
                 val channelName =
-                    if (originalPacket.to == DataPacket.ID_BROADCAST) {
+                    if (isBroadcast) {
                         radioConfigRepository.channelSetFlow
                             .first()
                             .settings
@@ -517,7 +502,7 @@ class MeshDataHandlerImpl(
                     contactKey,
                     getSenderName(dataMapper.toDataPacket(packet)!!),
                     emoji,
-                    originalPacket.to == DataPacket.ID_BROADCAST,
+                    isBroadcast,
                     channelName,
                     isSilent,
                 )

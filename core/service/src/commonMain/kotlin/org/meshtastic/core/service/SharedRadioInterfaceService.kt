@@ -128,11 +128,27 @@ class SharedRadioInterfaceService(
      */
     @Volatile private var isStopping = false
 
+    /** Prevents concurrent liveness-induced transport restarts from stacking. */
+    private val isRestarting = atomic(false)
+
     private val listenersInitialized = atomic(false)
     private var heartbeatJob: Job? = null
     private var lastHeartbeatMillis = 0L
 
     @Volatile private var lastDataReceivedMillis = 0L
+
+    /**
+     * Internal test seam for deterministic clock injection. Production uses [nowMillis]; tests override this to a
+     * controllable clock so [onConnect], [handleFromRadio], [checkLiveness], and [keepAlive] all share one coherent
+     * time source. Not a constructor parameter to avoid breaking Koin @Single annotation generation (which would try to
+     * resolve `() -> Long` from the DI graph).
+     */
+    @Volatile
+    @Suppress("MemberVisibilityCanBePrivate")
+    internal var clockMillis: () -> Long = { nowMillis }
+
+    /** The current time from the injected clock. */
+    private fun now(): Long = clockMillis()
 
     companion object {
         private const val HEARTBEAT_INTERVAL_MILLIS = 30 * 1000L
@@ -271,8 +287,16 @@ class SharedRadioInterfaceService(
         startHeartbeat()
     }
 
-    /** Must be called under [transportMutex]. */
-    private suspend fun stopTransportLocked() {
+    /**
+     * Must be called under [transportMutex].
+     *
+     * @param notifyPermanent When `true`, emits a permanent disconnect state to [connectionState]. Set `false` during
+     *   automatic liveness recovery to avoid surfacing a user-facing disconnect.
+     * @param sendPoliteDisconnect When `true`, sends a `ToRadio(disconnect = true)` frame to the firmware before
+     *   tearing down. Set `false` when the transport is already dead (zombie session) to avoid writing into a broken
+     *   link.
+     */
+    private suspend fun stopTransportLocked(notifyPermanent: Boolean = true, sendPoliteDisconnect: Boolean = true) {
         val currentTransport = radioTransport
         Logger.i { "Stopping transport $currentTransport" }
         // Best-effort polite goodbye: tell the firmware we're disconnecting on purpose so it can
@@ -284,7 +308,9 @@ class SharedRadioInterfaceService(
         // transport's own scope; the drain delay gives async transports a window to flush before
         // close() cancels their write scope. BLE's retry path backs off 500ms, so this window
         // also covers one retry on flaky GATT links.
-        if (currentTransport != null && _connectionState.value != ConnectionState.Disconnected) {
+        if (
+            sendPoliteDisconnect && currentTransport != null && _connectionState.value != ConnectionState.Disconnected
+        ) {
             isStopping = true
             ignoreExceptionSuspend {
                 currentTransport.handleSendToRadio(ToRadio(disconnect = true).encode())
@@ -300,14 +326,14 @@ class SharedRadioInterfaceService(
         _serviceScope.cancel("stopping transport")
         _serviceScope = CoroutineScope(dispatchers.io + SupervisorJob())
 
-        if (currentTransport != null) {
+        if (notifyPermanent && currentTransport != null) {
             onDisconnect(isPermanent = true)
         }
     }
 
     private fun startHeartbeat() {
         heartbeatJob?.cancel()
-        lastDataReceivedMillis = nowMillis
+        lastDataReceivedMillis = now()
         heartbeatJob =
             serviceScope.launch {
                 while (true) {
@@ -323,21 +349,60 @@ class SharedRadioInterfaceService(
      *
      * If we believe we're connected but haven't received any data from the radio within [LIVENESS_TIMEOUT_MILLIS], the
      * connection is likely dead. Signal a non-permanent disconnect so the reconnect machinery can take over.
+     *
+     * Uses [clockMillis] for the current time so tests can inject a deterministic clock.
      */
-    private fun checkLiveness() {
+    internal fun checkLiveness() {
         if (_connectionState.value != ConnectionState.Connected) return
 
-        val silenceMs = nowMillis - lastDataReceivedMillis
+        val silenceMs = now() - lastDataReceivedMillis
         if (silenceMs > LIVENESS_TIMEOUT_MILLIS) {
+            // "Silence" = lastDataReceivedMillis not updated by handleFromRadio (no inbound
+            // packets). Only BLE suffers from silent zombie sessions (no disconnect signal from
+            // stack), so the liveness-restart path is BLE-only. For non-BLE transports we return
+            // WITHOUT emitting a disconnect or mutating ConnectionState — there is no
+            // transport-level timeout contract proving that silence past this threshold means
+            // the session is dead.
+            if (runningTransportId != InterfaceId.BLUETOOTH) {
+                Logger.d { "Ignoring liveness timeout for non-BLE transport (silence: ${silenceMs}ms)" }
+                return
+            }
+
             Logger.w {
                 "Liveness check failed: no data received for ${silenceMs}ms " +
-                    "(threshold: ${LIVENESS_TIMEOUT_MILLIS}ms). Treating as disconnect."
+                    "(threshold: ${LIVENESS_TIMEOUT_MILLIS}ms). Restarting BLE transport."
             }
-            onDisconnect(isPermanent = false, errorMessage = "Connection timeout — no data received")
+
+            // Force transport restart to recover from silent zombie sessions where the BLE stack
+            // did not report a disconnect. Uses the same processLifecycle scope and transportMutex
+            // pattern as setDeviceAddress() to guarantee clean teardown/restart sequencing.
+            // The onDisconnect notification is emitted INSIDE the compareAndSet guard so that a
+            // double liveness-timeout (timer not cancelled between fires) does not produce
+            // duplicate disconnect notifications for a single restart cycle.
+            if (isRestarting.compareAndSet(expect = false, update = true)) {
+                // Silent recovery: emit the non-permanent state transition (DeviceSleep) so the
+                // reconnect machinery takes over, but do NOT pass an errorMessage. Automatic
+                // liveness recovery is self-healing — surfacing a modal dialog for a transient
+                // condition the app already handled is confusing UX. The warning log above
+                // remains the observability surface for this event.
+                onDisconnect(isPermanent = false)
+                processLifecycle.coroutineScope.launch {
+                    try {
+                        transportMutex.withLock {
+                            ignoreExceptionSuspend {
+                                stopTransportLocked(notifyPermanent = false, sendPoliteDisconnect = false)
+                            }
+                            startTransportLocked()
+                        }
+                    } finally {
+                        isRestarting.value = false
+                    }
+                }
+            }
         }
     }
 
-    fun keepAlive(now: Long = nowMillis) {
+    fun keepAlive(now: Long = now()) {
         if (now - lastHeartbeatMillis > HEARTBEAT_INTERVAL_MILLIS) {
             radioTransport?.keepAlive()
             lastHeartbeatMillis = now
@@ -369,7 +434,7 @@ class SharedRadioInterfaceService(
     @Suppress("TooGenericExceptionCaught")
     override fun handleFromRadio(bytes: ByteArray) {
         try {
-            lastDataReceivedMillis = nowMillis
+            lastDataReceivedMillis = now()
             // trySend synchronously onto the unbounded Channel so packet order matches arrival
             // order. The previous `launch { emit() }` pattern dispatched each packet onto a
             // fresh coroutine, letting the scheduler reorder them — which broke the firmware
@@ -397,7 +462,7 @@ class SharedRadioInterfaceService(
         // launching a coroutine. The async launch pattern introduced a window where a concurrent
         // onDisconnect launch could execute AFTER an onConnect launch, leaving the service stuck
         // in Connected while the transport was actually disconnected.
-        lastDataReceivedMillis = nowMillis
+        lastDataReceivedMillis = now()
         if (_connectionState.value != ConnectionState.Connected) {
             Logger.d { "Broadcasting connection state change to Connected" }
             _connectionState.value = ConnectionState.Connected

@@ -33,8 +33,8 @@ class NodeTest {
     fun isOnline_usesStrictThresholdBoundary() {
         val threshold = onlineTimeThreshold()
 
-        assertFalse(Node(num = 1, lastHeard = threshold).isOnline)
-        assertTrue(Node(num = 1, lastHeard = threshold + 1).isOnline)
+        assertFalse(Node(num = 1, lastHeard = threshold).isOnline(threshold))
+        assertTrue(Node(num = 1, lastHeard = threshold + 1).isOnline(threshold))
     }
 
     @Test

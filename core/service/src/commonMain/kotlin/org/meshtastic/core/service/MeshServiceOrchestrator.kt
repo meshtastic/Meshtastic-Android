@@ -18,6 +18,7 @@ package org.meshtastic.core.service
 
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
@@ -31,11 +32,10 @@ import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MeshMessageProcessor
-import org.meshtastic.core.repository.MeshRouter
-import org.meshtastic.core.repository.MeshServiceNotifications
+import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.RadioInterfaceService
-import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.ServiceStateWriter
 import org.meshtastic.core.repository.TakPrefs
 import org.meshtastic.core.takserver.TAKMeshIntegration
 import org.meshtastic.core.takserver.TAKServerManager
@@ -52,11 +52,10 @@ import org.meshtastic.core.takserver.TAKServerManager
 @Single
 class MeshServiceOrchestrator(
     private val radioInterfaceService: RadioInterfaceService,
-    private val serviceRepository: ServiceRepository,
+    private val serviceStateWriter: ServiceStateWriter,
     private val nodeManager: NodeManager,
     private val messageProcessor: MeshMessageProcessor,
-    private val router: MeshRouter,
-    private val serviceNotifications: MeshServiceNotifications,
+    private val serviceNotifications: MeshNotificationManager,
     private val takServerManager: TAKServerManager,
     private val takMeshIntegration: TAKMeshIntegration,
     private val takPrefs: TakPrefs,
@@ -66,27 +65,38 @@ class MeshServiceOrchestrator(
 ) {
     // Per-start coroutine scope. A fresh scope is created on each start() and cancelled on stop(), so all collectors
     // launched from start() are torn down cleanly and do not accumulate across start/stop/start cycles.
-    private var scope: CoroutineScope? = null
+    // Held in an atomic ref so concurrent start()/stop() callers serialize on compareAndSet rather than racing through
+    // a check-then-set on a plain var.
+    private val scopeRef = atomic<CoroutineScope?>(null)
 
     /** Whether the orchestrator is currently running. */
     val isRunning: Boolean
-        get() = scope?.isActive == true
+        get() = scopeRef.value?.isActive == true
 
     /**
      * Starts the mesh service components and wires up data flows.
      *
      * This is the KMP equivalent of `MeshService.onCreate()`. It connects to the radio and wires incoming radio data to
-     * the message processor and service actions to the router's action handler.
+     * the message processor.
      */
     fun start() {
-        if (isRunning) {
-            Logger.d { "start() called while already running, ignoring" }
-            return
+        val newScope = CoroutineScope(SupervisorJob() + dispatchers.default)
+        // Atomic claim — if another thread already installed a live scope, abandon ours.
+        if (!scopeRef.compareAndSet(expect = null, update = newScope)) {
+            val existing = scopeRef.value
+            if (existing?.isActive == true) {
+                Logger.d { "start() called while already running, ignoring" }
+                return
+            }
+            // The slot held a dead scope (post-stop). CAS-replace it to avoid racing with another caller.
+            if (!scopeRef.compareAndSet(expect = existing, update = newScope)) {
+                Logger.d { "start() lost race replacing dead scope, ignoring" }
+                newScope.cancel()
+                return
+            }
         }
 
         Logger.i { "Starting mesh service orchestrator" }
-        val newScope = CoroutineScope(SupervisorJob() + dispatchers.default)
-        scope = newScope
 
         // Drop any bytes that piled up in the service's receivedData channel since the last stop(). The channel
         // outlives the orchestrator's per-start scope, so without this drain a stop/start cycle would replay stale
@@ -126,14 +136,7 @@ class MeshServiceOrchestrator(
             .launchIn(newScope)
 
         radioInterfaceService.connectionError
-            .onEach { errorMessage -> serviceRepository.setErrorMessage(errorMessage, Severity.Warn) }
-            .launchIn(newScope)
-
-        // Each action is dispatched in its own supervised coroutine so that a failure in one
-        // action (e.g. a timeout in sendAdminAwait) cannot terminate the collector and silently
-        // drop all subsequent service actions for the rest of the session.
-        serviceRepository.serviceAction
-            .onEach { action -> newScope.handledLaunch { router.actionHandler.onServiceAction(action) } }
+            .onEach { errorMessage -> serviceStateWriter.setErrorMessage(errorMessage, Severity.Warn) }
             .launchIn(newScope)
 
         nodeManager.loadCachedNodeDB()
@@ -158,7 +161,6 @@ class MeshServiceOrchestrator(
         CoroutineScope(SupervisorJob() + dispatchers.default).launch {
             runCatching { radioInterfaceService.disconnect() }
         }
-        scope?.cancel()
-        scope = null
+        scopeRef.getAndSet(null)?.cancel()
     }
 }

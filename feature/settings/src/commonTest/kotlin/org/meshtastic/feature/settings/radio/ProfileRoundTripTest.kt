@@ -41,8 +41,6 @@ import org.meshtastic.core.domain.usecase.settings.ImportProfileUseCase
 import org.meshtastic.core.domain.usecase.settings.InstallProfileUseCase
 import org.meshtastic.core.domain.usecase.settings.ProcessRadioResponseUseCase
 import org.meshtastic.core.domain.usecase.settings.RadioConfigUseCase
-import org.meshtastic.core.domain.usecase.settings.ToggleAnalyticsUseCase
-import org.meshtastic.core.domain.usecase.settings.ToggleHomoglyphEncodingUseCase
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.repository.AnalyticsPrefs
 import org.meshtastic.core.repository.FileService
@@ -82,8 +80,6 @@ class ProfileRoundTripTest {
     private val mapConsentPrefs: MapConsentPrefs = mock(MockMode.autofill)
     private val analyticsPrefs: AnalyticsPrefs = mock(MockMode.autofill)
     private val homoglyphEncodingPrefs: HomoglyphPrefs = mock(MockMode.autofill)
-    private val toggleAnalyticsUseCase: ToggleAnalyticsUseCase = mock(MockMode.autofill)
-    private val toggleHomoglyphEncodingUseCase: ToggleHomoglyphEncodingUseCase = mock(MockMode.autofill)
     private val exportSecurityConfigUseCase: ExportSecurityConfigUseCase = mock(MockMode.autofill)
     private val installProfileUseCase: InstallProfileUseCase = mock(MockMode.autofill)
     private val radioConfigUseCase: RadioConfigUseCase = mock(MockMode.autofill)
@@ -125,8 +121,6 @@ class ProfileRoundTripTest {
                 mapConsentPrefs = mapConsentPrefs,
                 analyticsPrefs = analyticsPrefs,
                 homoglyphEncodingPrefs = homoglyphEncodingPrefs,
-                toggleAnalyticsUseCase = toggleAnalyticsUseCase,
-                toggleHomoglyphEncodingUseCase = toggleHomoglyphEncodingUseCase,
                 importProfileUseCase = ImportProfileUseCase(),
                 exportProfileUseCase = ExportProfileUseCase(),
                 exportSecurityConfigUseCase = exportSecurityConfigUseCase,

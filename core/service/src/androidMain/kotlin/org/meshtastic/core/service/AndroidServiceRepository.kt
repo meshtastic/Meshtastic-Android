@@ -17,22 +17,21 @@
 package org.meshtastic.core.service
 
 import org.koin.core.annotation.Single
+import org.meshtastic.core.repository.ConnectionStateProvider
+import org.meshtastic.core.repository.NeighborInfoResponseProvider
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.ServiceStateWriter
+import org.meshtastic.core.repository.TracerouteResponseProvider
 
-/**
- * Android-specific [ServiceRepository] that extends [ServiceRepositoryImpl] with AIDL service binding.
- *
- * The base class provides all reactive state management (connection state, error messages, mesh packets, etc.) in pure
- * KMP code. This subclass adds the [IMeshService] reference needed by [AndroidRadioControllerImpl] and the AIDL binder
- * in `MeshService`.
- */
-@Single(binds = [ServiceRepository::class, AndroidServiceRepository::class])
-@Suppress("DEPRECATION") // IMeshService is deprecated but still required for AIDL binding
-class AndroidServiceRepository : ServiceRepositoryImpl() {
-    var meshService: IMeshService? = null
-        private set
-
-    fun setMeshService(service: IMeshService?) {
-        meshService = service
-    }
-}
+/** Android DI binding of the shared [ServiceRepositoryImpl]. */
+@Single(
+    binds =
+    [
+        ServiceRepository::class,
+        ConnectionStateProvider::class,
+        TracerouteResponseProvider::class,
+        NeighborInfoResponseProvider::class,
+        ServiceStateWriter::class,
+    ],
+)
+class AndroidServiceRepository : ServiceRepositoryImpl()

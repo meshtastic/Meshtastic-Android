@@ -18,8 +18,9 @@ package org.meshtastic.core.domain.usecase.settings
 
 import org.koin.core.annotation.Single
 import org.meshtastic.core.model.Position
-import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.repository.RadioController
 import org.meshtastic.proto.Config
+import org.meshtastic.proto.HamParameters
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.User
 
@@ -35,8 +36,22 @@ open class RadioConfigUseCase constructor(private val radioController: RadioCont
      * @return The packet ID of the request.
      */
     open suspend fun setOwner(destNum: Int, user: User): Int {
-        val packetId = radioController.getPacketId()
+        val packetId = radioController.generatePacketId()
         radioController.setOwner(destNum, user, packetId)
+        return packetId
+    }
+
+    /**
+     * Enables amateur-radio (ham) mode on the locally connected node via `set_ham_mode`. At protobufs 2.7.25 only
+     * `call_sign` and `short_name` are user-supplied; `long_name` becomes settable when meshtastic/protobufs#941 ships.
+     *
+     * @param destNum The node number to update (must be the local node).
+     * @param hamParameters The ham onboarding parameters.
+     * @return The packet ID of the request.
+     */
+    open suspend fun setHamMode(destNum: Int, hamParameters: HamParameters): Int {
+        val packetId = radioController.generatePacketId()
+        radioController.setHamMode(destNum, hamParameters, packetId)
         return packetId
     }
 
@@ -47,7 +62,7 @@ open class RadioConfigUseCase constructor(private val radioController: RadioCont
      * @return The packet ID of the request.
      */
     open suspend fun getOwner(destNum: Int): Int {
-        val packetId = radioController.getPacketId()
+        val packetId = radioController.generatePacketId()
         radioController.getOwner(destNum, packetId)
         return packetId
     }
@@ -60,7 +75,7 @@ open class RadioConfigUseCase constructor(private val radioController: RadioCont
      * @return The packet ID of the request.
      */
     open suspend fun setConfig(destNum: Int, config: Config): Int {
-        val packetId = radioController.getPacketId()
+        val packetId = radioController.generatePacketId()
         radioController.setConfig(destNum, config, packetId)
         return packetId
     }
@@ -73,7 +88,7 @@ open class RadioConfigUseCase constructor(private val radioController: RadioCont
      * @return The packet ID of the request.
      */
     open suspend fun getConfig(destNum: Int, configType: Int): Int {
-        val packetId = radioController.getPacketId()
+        val packetId = radioController.generatePacketId()
         radioController.getConfig(destNum, configType, packetId)
         return packetId
     }
@@ -86,7 +101,7 @@ open class RadioConfigUseCase constructor(private val radioController: RadioCont
      * @return The packet ID of the request.
      */
     open suspend fun setModuleConfig(destNum: Int, config: ModuleConfig): Int {
-        val packetId = radioController.getPacketId()
+        val packetId = radioController.generatePacketId()
         radioController.setModuleConfig(destNum, config, packetId)
         return packetId
     }
@@ -99,7 +114,7 @@ open class RadioConfigUseCase constructor(private val radioController: RadioCont
      * @return The packet ID of the request.
      */
     open suspend fun getModuleConfig(destNum: Int, moduleConfigType: Int): Int {
-        val packetId = radioController.getPacketId()
+        val packetId = radioController.generatePacketId()
         radioController.getModuleConfig(destNum, moduleConfigType, packetId)
         return packetId
     }
@@ -112,7 +127,7 @@ open class RadioConfigUseCase constructor(private val radioController: RadioCont
      * @return The packet ID of the request.
      */
     open suspend fun getChannel(destNum: Int, index: Int): Int {
-        val packetId = radioController.getPacketId()
+        val packetId = radioController.generatePacketId()
         radioController.getChannel(destNum, index, packetId)
         return packetId
     }
@@ -125,7 +140,7 @@ open class RadioConfigUseCase constructor(private val radioController: RadioCont
      * @return The packet ID of the request.
      */
     open suspend fun setRemoteChannel(destNum: Int, channel: org.meshtastic.proto.Channel): Int {
-        val packetId = radioController.getPacketId()
+        val packetId = radioController.generatePacketId()
         radioController.setRemoteChannel(destNum, channel, packetId)
         return packetId
     }
@@ -152,7 +167,7 @@ open class RadioConfigUseCase constructor(private val radioController: RadioCont
      * @return The packet ID of the request.
      */
     open suspend fun getRingtone(destNum: Int): Int {
-        val packetId = radioController.getPacketId()
+        val packetId = radioController.generatePacketId()
         radioController.getRingtone(destNum, packetId)
         return packetId
     }
@@ -169,7 +184,7 @@ open class RadioConfigUseCase constructor(private val radioController: RadioCont
      * @return The packet ID of the request.
      */
     open suspend fun getCannedMessages(destNum: Int): Int {
-        val packetId = radioController.getPacketId()
+        val packetId = radioController.generatePacketId()
         radioController.getCannedMessages(destNum, packetId)
         return packetId
     }
@@ -181,7 +196,7 @@ open class RadioConfigUseCase constructor(private val radioController: RadioCont
      * @return The packet ID of the request.
      */
     open suspend fun getDeviceConnectionStatus(destNum: Int): Int {
-        val packetId = radioController.getPacketId()
+        val packetId = radioController.generatePacketId()
         radioController.getDeviceConnectionStatus(destNum, packetId)
         return packetId
     }

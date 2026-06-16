@@ -27,6 +27,8 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.view.MotionEvent;
 
+import androidx.core.content.res.ResourcesCompat;
+
 import org.meshtastic.app.map.model.MarkerWithLabel;
 
 import org.osmdroid.bonuspack.R;
@@ -72,7 +74,7 @@ public class RadiusMarkerClusterer extends MarkerClusterer {
         mTextPaint.setFakeBoldText(true);
         mTextPaint.setTextAlign(Paint.Align.CENTER);
         mTextPaint.setAntiAlias(true);
-        Drawable clusterIconD = ctx.getResources().getDrawable(R.drawable.marker_cluster);
+        Drawable clusterIconD = ResourcesCompat.getDrawable(ctx.getResources(), R.drawable.marker_cluster, ctx.getTheme());
         Bitmap clusterIcon = ((BitmapDrawable) clusterIconD).getBitmap();
         setIcon(clusterIcon);
         mAnimated = true;

@@ -63,12 +63,14 @@ import org.meshtastic.core.network.repository.UsbRepository
 import org.meshtastic.core.nfc.NfcScannerEffect
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.channel_invalid
-import org.meshtastic.core.service.MeshServiceClient
+import org.meshtastic.core.service.MeshService
+import org.meshtastic.core.service.startService
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.MODE_DYNAMIC
 import org.meshtastic.core.ui.util.LocalAnalyticsIntroProvider
 import org.meshtastic.core.ui.util.LocalBarcodeScannerProvider
 import org.meshtastic.core.ui.util.LocalBarcodeScannerSupported
+import org.meshtastic.core.ui.util.LocalDiscoveryMapProvider
 import org.meshtastic.core.ui.util.LocalEventBranding
 import org.meshtastic.core.ui.util.LocalInlineMapProvider
 import org.meshtastic.core.ui.util.LocalMapMainScreenProvider
@@ -95,17 +97,8 @@ class MainActivity : AppCompatActivity() {
 
     private val usbRepository: UsbRepository by inject()
 
-    /**
-     * Activity-lifecycle-aware client that binds to the mesh service. Note: This is used implicitly as it registers
-     * itself as a LifecycleObserver in its init block.
-     */
-    internal val meshServiceClient: MeshServiceClient by inject { parametersOf(this) }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
-
-        // Eagerly evaluate lazy Koin dependency so it registers its LifecycleObserver
-        meshServiceClient.hashCode()
 
         super.onCreate(savedInstanceState)
 
@@ -168,6 +161,11 @@ class MainActivity : AppCompatActivity() {
         handleIntent(intent)
     }
 
+    override fun onStart() {
+        super.onStart()
+        MeshService.startService(this)
+    }
+
     override fun onResume() {
         super.onResume()
         // Belt-and-suspenders for the Android 12+ attach-intent quirk: if the activity is
@@ -210,6 +208,10 @@ class MainActivity : AppCompatActivity() {
                         onMappableCountChanged = onMappableCountChanged,
                         modifier = modifier,
                     )
+                },
+            LocalDiscoveryMapProvider provides
+                { userLat, userLon, nodes, modifier ->
+                    org.meshtastic.app.map.discovery.DiscoveryMap(userLat, userLon, nodes, modifier)
                 },
             LocalNodeMapScreenProvider provides
                 { destNum, onNavigateUp ->
