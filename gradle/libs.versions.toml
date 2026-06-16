@@ -14,7 +14,7 @@ jetbrains-lifecycle = "2.11.0-beta01"
 navigation3 = "1.1.1"
 paging = "3.5.0"
 room = "3.0.0-alpha06"
-koin = "4.2.1"
+koin = "4.2.2"
 koin-plugin = "1.0.1"
 
 # Kotlin
