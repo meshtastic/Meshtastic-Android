@@ -137,6 +137,22 @@ class AiFunctionProviderImplTest {
         assertEquals(true, isHandled)
     }
 
+    @Test
+    fun getNodeDetails_round_trips_high_bit_node_num() = runTest {
+        // A node num with the high bit set (-1 == 0xFFFFFFFF) must format and parse as the canonical
+        // "!ffffffff", not the signed "!-1" — regression guard for the node-ID hex fix.
+        val testNode = Node(num = -1, user = User(id = "!ffffffff", long_name = "HighBit", short_name = "HB"))
+        val nodeMap = MutableStateFlow(mapOf(-1 to testNode))
+        every { nodeRepository.nodeDBbyNum } returns nodeMap
+
+        val provider = createProvider()
+        val result = provider.getNodeDetails("!ffffffff")
+
+        assertIs<GetNodeDetailsResult.Success>(result)
+        assertEquals("!ffffffff", result.node.id)
+        assertEquals("HighBit", result.node.name)
+    }
+
     // --- getMeshMetrics tests ---
 
     @Test

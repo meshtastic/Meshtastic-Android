@@ -37,8 +37,9 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.feature.node.model.VectorMetricInfo
 
 /**
- * Displays air quality info cards for a node showing PM1.0, PM2.5, PM10 and CO₂ values. Cards with zero values are
- * hidden. CO₂ value text is color-coded by severity.
+ * Displays air quality info cards for a node showing PM1.0, PM2.5, PM10 and CO₂ values. A card is shown for each metric
+ * the node actually reports; a present reading of 0 (e.g. clean air at 0 µg/m³) is a valid value and is shown — only
+ * absent metrics are hidden. CO₂ value text is color-coded by severity.
  */
 @Composable
 internal fun AirQualityInfoCards(node: Node) {
@@ -47,26 +48,18 @@ internal fun AirQualityInfoCards(node: Node) {
     val ppmUnit = stringResource(Res.string.ppm)
 
     val cards = buildList {
+        // A present reading of 0 is a valid value (e.g. clean air at 0 µg/m³), so only the `?.` null-check (an
+        // absent metric) hides a card — matching the #5793 chart/CSV zero-suppression fix.
         metrics.pm10_standard?.let { pm ->
-            if (pm != 0) {
-                add(VectorMetricInfo(Res.string.pm1_0, "$pm $ugm3", MeshtasticIcons.AirQuality))
-            }
+            add(VectorMetricInfo(Res.string.pm1_0, "$pm $ugm3", MeshtasticIcons.AirQuality))
         }
         metrics.pm25_standard?.let { pm ->
-            if (pm != 0) {
-                add(VectorMetricInfo(Res.string.pm2_5, "$pm $ugm3", MeshtasticIcons.AirQuality))
-            }
+            add(VectorMetricInfo(Res.string.pm2_5, "$pm $ugm3", MeshtasticIcons.AirQuality))
         }
         metrics.pm100_standard?.let { pm ->
-            if (pm != 0) {
-                add(VectorMetricInfo(Res.string.pm10, "$pm $ugm3", MeshtasticIcons.AirQuality))
-            }
+            add(VectorMetricInfo(Res.string.pm10, "$pm $ugm3", MeshtasticIcons.AirQuality))
         }
-        metrics.co2?.let { co2 ->
-            if (co2 != 0) {
-                add(VectorMetricInfo(Res.string.co2, "$co2 $ppmUnit", MeshtasticIcons.AirQuality))
-            }
-        }
+        metrics.co2?.let { co2 -> add(VectorMetricInfo(Res.string.co2, "$co2 $ppmUnit", MeshtasticIcons.AirQuality)) }
     }
 
     if (cards.isEmpty()) return
