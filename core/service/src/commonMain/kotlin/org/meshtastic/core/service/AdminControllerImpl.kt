@@ -18,6 +18,7 @@ package org.meshtastic.core.service
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.firstOrNull
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.util.handledLaunch
@@ -30,6 +31,7 @@ import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.Config
+import org.meshtastic.proto.HamParameters
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.OTAMode
 import org.meshtastic.proto.User
@@ -63,6 +65,27 @@ internal class AdminControllerImpl(
 
     override suspend fun getOwner(destNum: Int, packetId: Int) {
         commandSender.sendAdmin(destNum, packetId, wantResponse = true) { AdminMessage(get_owner_request = true) }
+    }
+
+    override suspend fun setHamMode(destNum: Int, hamParameters: HamParameters, packetId: Int) {
+        if (destNum != nodeManager.myNodeNum.value) {
+            Logger.w { "Ignoring setHamMode for node $destNum — ham onboarding targets the local node only" }
+            return
+        }
+        // Firmware applies tx_power/frequency to the LoRa config verbatim, so echo the node's current
+        // values to keep a re-send (e.g. a callsign edit while already licensed) from wiping overrides.
+        val lora = radioConfigRepository.localConfigFlow.firstOrNull()?.lora ?: Config.LoRaConfig()
+        val params = hamParameters.copy(tx_power = lora.tx_power, frequency = lora.override_frequency)
+        commandSender.sendAdmin(destNum, packetId) { AdminMessage(set_ham_mode = params) }
+        val currentUser = nodeManager.nodeDBbyNodeNum[destNum]?.user ?: User()
+        nodeManager.handleReceivedUser(
+            destNum,
+            currentUser.copy(
+                long_name = hamParameters.call_sign,
+                short_name = hamParameters.short_name,
+                is_licensed = true,
+            ),
+        )
     }
 
     // ── Configuration ─────────────────────────────────────────────────────────
