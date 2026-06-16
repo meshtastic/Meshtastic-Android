@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.onStart
 import org.meshtastic.core.ble.BleCharacteristic
 import org.meshtastic.core.ble.BleConnection
 import org.meshtastic.core.ble.BleConnectionFactory
@@ -170,6 +171,9 @@ class FakeBleConnection :
         if (serviceUuid in missingServices) {
             throw NoSuchElementException("Service $serviceUuid not found")
         }
+        // Use Dispatchers.Unconfined so notification emissions are delivered synchronously to
+        // collectors (write → immediate notification). This matches the original FakeBleConnection
+        // contract and the auto-responding pattern used by DFU/OTA transport tests.
         return CoroutineScope(Dispatchers.Unconfined).setup(service)
     }
 
@@ -193,18 +197,89 @@ class FakeBleService : BleService {
 
     val writes = mutableListOf<FakeBleWrite>()
 
+    /** When non-null, [write] throws this exception on every call until explicitly cleared. */
+    var writeException: Exception? = null
+
+    /**
+     * When non-null, [read] throws this exception instead of returning data. Reset to null before throwing (in the same
+     * call).
+     */
+    var readException: Exception? = null
+
+    /**
+     * When non-null, [observe] returns a flow that immediately throws. Reset to null when observe() is called (before
+     * flow collection).
+     */
+    var observeException: Exception? = null
+
+    /** Characteristic-specific observe failures that occur when the returned flow is collected. */
+    val observeExceptionsByCharacteristic: MutableMap<Uuid, Exception> = mutableMapOf()
+
+    /** Characteristic-specific observe failures that occur before [BleService.observe]'s onSubscription callback. */
+    val observeBeforeSubscriptionExceptionByCharacteristic: MutableMap<Uuid, Exception> = mutableMapOf()
+
+    /** Characteristics whose 2-arg [observe] never invokes onSubscription. Notifications can still be emitted. */
+    val observeNeverSubscribeCharacteristics: MutableSet<Uuid> = mutableSetOf()
+
     override fun hasCharacteristic(characteristic: BleCharacteristic): Boolean =
         availableCharacteristics.contains(characteristic.uuid)
 
-    override fun observe(characteristic: BleCharacteristic): Flow<ByteArray> =
-        notificationFlows.getOrPut(characteristic.uuid) { MutableSharedFlow(extraBufferCapacity = 16) }
+    override fun observe(characteristic: BleCharacteristic): Flow<ByteArray> {
+        val failure =
+            observeExceptionsByCharacteristic.remove(characteristic.uuid)
+                ?: observeException?.also { observeException = null }
+        if (failure != null) {
+            return flow { throw failure }
+        }
+        return notificationFlows.getOrPut(characteristic.uuid) { MutableSharedFlow(extraBufferCapacity = 16) }
+    }
 
-    override suspend fun read(characteristic: BleCharacteristic): ByteArray =
-        readQueues[characteristic.uuid]?.removeFirstOrNull() ?: ByteArray(0)
+    /**
+     * Overrides the 2-arg observe to prevent false subscriptionReady when testing pre-readiness failures.
+     *
+     * The default BleService implementation calls `observe(characteristic).onStart { onSubscription() }`, which would
+     * invoke [onSubscription] BEFORE any pre-collection failure flow throws. This override throws BEFORE invoking
+     * [onSubscription], correctly simulating "observe failed before CCCD/subscription readiness."
+     *
+     * Pre-readiness failures are sourced (in priority order) from:
+     * - [observeBeforeSubscriptionExceptionByCharacteristic] (2-arg-specific, one-shot per uuid)
+     * - [observeExceptionsByCharacteristic] (shared with 1-arg observe, one-shot per uuid; defensively treated as a
+     *   pre-subscription failure here so the bare onStart wrap cannot swallow it after [onSubscription] runs)
+     * - [observeException] (global, one-shot)
+     *
+     * For characteristics in [observeNeverSubscribeCharacteristics], [onSubscription] is never invoked but
+     * notifications are still exposed — the returned flow is the bare SharedFlow with no [onStart] wrap, so
+     * [emitNotification] still reaches active collectors.
+     */
+    override fun observe(characteristic: BleCharacteristic, onSubscription: suspend () -> Unit): Flow<ByteArray> {
+        val failure =
+            observeBeforeSubscriptionExceptionByCharacteristic.remove(characteristic.uuid)
+                ?: observeExceptionsByCharacteristic.remove(characteristic.uuid)
+                ?: observeException?.also { observeException = null }
+        if (failure != null) {
+            // onSubscription is NOT invoked — simulates failure before CCCD/subscription readiness.
+            return flow { throw failure }
+        }
+        val base = observe(characteristic)
+        return if (characteristic.uuid in observeNeverSubscribeCharacteristics) {
+            base
+        } else {
+            base.onStart { onSubscription() }
+        }
+    }
+
+    override suspend fun read(characteristic: BleCharacteristic): ByteArray {
+        readException?.let {
+            readException = null
+            throw it
+        }
+        return readQueues[characteristic.uuid]?.removeFirstOrNull() ?: ByteArray(0)
+    }
 
     override fun preferredWriteType(characteristic: BleCharacteristic): BleWriteType = BleWriteType.WITH_RESPONSE
 
     override suspend fun write(characteristic: BleCharacteristic, data: ByteArray, writeType: BleWriteType) {
+        writeException?.let { ex -> throw ex }
         availableCharacteristics += characteristic.uuid
         writes += FakeBleWrite(characteristic = characteristic, data = data.copyOf(), writeType = writeType)
     }

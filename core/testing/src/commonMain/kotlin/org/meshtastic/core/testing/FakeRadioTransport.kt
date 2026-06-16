@@ -22,6 +22,9 @@ import org.meshtastic.core.repository.RadioTransport
 class FakeRadioTransport : RadioTransport {
     val sentData = mutableListOf<ByteArray>()
     var closeCalled = false
+    var closeCount = 0
+        private set
+
     var keepAliveCalled = false
 
     override fun handleSendToRadio(p: ByteArray) {
@@ -34,5 +37,6 @@ class FakeRadioTransport : RadioTransport {
 
     override suspend fun close() {
         closeCalled = true
+        closeCount++
     }
 }

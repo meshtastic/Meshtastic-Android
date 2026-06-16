@@ -64,4 +64,57 @@ class BleExceptionClassifierTest {
     fun `RuntimeException returns null`() {
         assertNull(RuntimeException("boom").classifyBleException())
     }
+
+    // --- isSessionFatalBleException tests ---
+
+    @Test
+    fun `isSessionFatalBleException returns true for NotConnectedException`() {
+        assertTrue(NotConnectedException("test").isSessionFatalBleException())
+    }
+
+    @Test
+    fun `isSessionFatalBleException returns true for fatal GATT status codes`() {
+        assertTrue(GattStatusException(status = 133, message = "test").isSessionFatalBleException())
+        assertTrue(GattStatusException(status = 8, message = "test").isSessionFatalBleException())
+        assertTrue(GattStatusException(status = 129, message = "test").isSessionFatalBleException())
+    }
+
+    @Test
+    fun `isSessionFatalBleException returns true for peer-disconnect and establishment-failure codes`() {
+        // 19 = GATT_CONN_TERMINATE_PEER_USER — firmware reboot / peer-initiated disconnect
+        assertTrue(GattStatusException(status = 19, message = "peer disconnect").isSessionFatalBleException())
+        // 22 = GATT_CONN_LMP_TIMEOUT — link manager protocol timeout
+        assertTrue(GattStatusException(status = 22, message = "lmp timeout").isSessionFatalBleException())
+        // 62 = GATT_CONN_FAIL_ESTABLISH — connection establishment failed
+        assertTrue(GattStatusException(status = 62, message = "establish failed").isSessionFatalBleException())
+    }
+
+    @Test
+    fun `isSessionFatalBleException returns false for transient GATT status`() {
+        assertFalse(GattStatusException(status = 6, message = "busy").isSessionFatalBleException())
+    }
+
+    @Test
+    fun `isSessionFatalBleException returns false for unrelated exceptions`() {
+        assertFalse(IllegalStateException("test").isSessionFatalBleException())
+        assertFalse(RuntimeException("test").isSessionFatalBleException())
+    }
+
+    @Test
+    fun `isSessionFatalBleException traverses cause chain for wrapped exceptions`() {
+        val fatal = GattStatusException(status = 133, message = "wrapped fatal")
+        val wrapper = RuntimeException("wrapper", fatal)
+        assertTrue(wrapper.isSessionFatalBleException())
+
+        val notConnected = NotConnectedException("wrapped")
+        val doubleWrapper = IllegalStateException("outer", RuntimeException("middle", notConnected))
+        assertTrue(doubleWrapper.isSessionFatalBleException())
+    }
+
+    @Test
+    fun `isSessionFatalBleException returns false for non-fatal cause chain`() {
+        val transient = GattStatusException(status = 6, message = "busy")
+        val wrapper = RuntimeException("wrapper", transient)
+        assertFalse(wrapper.isSessionFatalBleException())
+    }
 }

@@ -25,7 +25,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import org.meshtastic.core.ble.MeshtasticBleConstants.FROMNUM_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.FROMRADIO_CHARACTERISTIC
@@ -70,12 +71,23 @@ class KableMeshtasticRadioProfile(private val service: BleService) : MeshtasticR
     override val fromRadio: Flow<ByteArray> = channelFlow {
         launch {
             if (service.hasCharacteristic(fromNum)) {
-                service
-                    .observe(fromNum) {
-                        Logger.d { "FROMNUM CCCD written — notifications enabled" }
-                        subscriptionReady.complete(Unit)
-                    }
-                    .collect { triggerDrain.tryEmit(Unit) }
+                try {
+                    service
+                        .observe(fromNum) {
+                            Logger.d { "FROMNUM CCCD written — notifications enabled" }
+                            subscriptionReady.complete(Unit)
+                        }
+                        .collect { triggerDrain.tryEmit(Unit) }
+                } catch (e: CancellationException) {
+                    // Propagate cancellation — don't complete subscription as that would
+                    // let setup proceed on a cancelled scope.
+                    throw e
+                } catch (e: Exception) {
+                    // Complete subscriptionReady exceptionally so awaitSubscriptionReady()
+                    // throws promptly instead of waiting for the transport's 5s timeout.
+                    subscriptionReady.completeExceptionally(e)
+                    throw e
+                }
             } else {
                 subscriptionReady.complete(Unit)
             }
@@ -94,7 +106,13 @@ class KableMeshtasticRadioProfile(private val service: BleService) : MeshtasticR
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
-                    Logger.w(e) { "FROMRADIO read error, pausing before next drain trigger" }
+                    // Session-fatal BLE exceptions must propagate so the transport layer detects the
+                    // broken session via its .catch handler and triggers reconnection.
+                    if (e.isSessionFatalBleException()) {
+                        Logger.w(e) { "FROMRADIO read hit session-fatal BLE exception — propagating for reconnect" }
+                        throw e
+                    }
+                    Logger.w(e) { "FROMRADIO read error (transient), pausing before next drain trigger" }
                     keepReading = false
                     delay(TRANSIENT_RETRY_DELAY)
                 }
@@ -102,16 +120,27 @@ class KableMeshtasticRadioProfile(private val service: BleService) : MeshtasticR
         }
     }
 
-    override val logRadio: Flow<ByteArray> =
-        if (service.hasCharacteristic(logRadioChar)) {
+    /**
+     * Observes the LOGRADIO characteristic. Session-fatal exceptions propagate to trigger reconnect.
+     *
+     * Note: a transient (non-fatal) observation error terminates this flow permanently for the current session. Unlike
+     * [fromRadio] which has a retry loop, [logRadio] does not recover from transient errors. This is intentional —
+     * logRadio is diagnostic-only, and the flow is recreated on the next reconnect cycle.
+     */
+    override val logRadio: Flow<ByteArray> = flow {
+        if (!service.hasCharacteristic(logRadioChar)) return@flow
+        emitAll(
             service.observe(logRadioChar).catch { e ->
                 if (e is CancellationException) throw e
+                if (e.isSessionFatalBleException()) {
+                    Logger.w(e) { "logRadio observation hit session-fatal BLE exception — propagating for reconnect" }
+                    throw e
+                }
                 // logRadio is optional — log at debug for diagnostics but don't surface to callers.
                 Logger.d(e) { "logRadio observation failure suppressed" }
-            }
-        } else {
-            emptyFlow()
-        }
+            },
+        )
+    }
 
     override suspend fun sendToRadio(packet: ByteArray) {
         service.write(toRadio, packet, toRadioWriteType)
