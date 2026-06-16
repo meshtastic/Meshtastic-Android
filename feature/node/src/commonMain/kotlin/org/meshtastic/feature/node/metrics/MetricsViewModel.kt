@@ -453,32 +453,34 @@ open class MetricsViewModel(
             rows = data,
             epochSeconds = { it.time.toLong() },
         ) { t ->
+            // Present-and-zero is a real reading and must be exported (matching the chart/card); only a genuinely
+            // absent field (null) renders as an empty cell. No zero-suppression guards here.
             val aq = t.air_quality_metrics
-            "\"${aq?.pm10_standard?.takeIf { it != 0 } ?: ""}\"," +
-                "\"${aq?.pm25_standard?.takeIf { it != 0 } ?: ""}\"," +
-                "\"${aq?.pm100_standard?.takeIf { it != 0 } ?: ""}\"," +
-                "\"${aq?.pm10_environmental?.takeIf { it != 0 } ?: ""}\"," +
-                "\"${aq?.pm25_environmental?.takeIf { it != 0 } ?: ""}\"," +
-                "\"${aq?.pm100_environmental?.takeIf { it != 0 } ?: ""}\"," +
-                "\"${aq?.particles_03um?.takeIf { it != 0 } ?: ""}\"," +
-                "\"${aq?.particles_05um?.takeIf { it != 0 } ?: ""}\"," +
-                "\"${aq?.particles_10um?.takeIf { it != 0 } ?: ""}\"," +
-                "\"${aq?.particles_25um?.takeIf { it != 0 } ?: ""}\"," +
-                "\"${aq?.particles_50um?.takeIf { it != 0 } ?: ""}\"," +
-                "\"${aq?.particles_100um?.takeIf { it != 0 } ?: ""}\"," +
-                "\"${aq?.co2?.takeIf { it != 0 } ?: ""}\"," +
-                "\"${aq?.co2_temperature?.takeIf { it != 0f } ?: ""}\"," +
-                "\"${aq?.co2_humidity?.takeIf { it != 0f } ?: ""}\"," +
-                "\"${aq?.form_formaldehyde?.takeIf { it != 0f } ?: ""}\"," +
-                "\"${aq?.form_humidity?.takeIf { it != 0f } ?: ""}\"," +
-                "\"${aq?.form_temperature?.takeIf { it != 0f } ?: ""}\"," +
-                "\"${aq?.pm40_standard?.takeIf { it != 0 } ?: ""}\"," +
-                "\"${aq?.particles_40um?.takeIf { it != 0 } ?: ""}\"," +
-                "\"${aq?.pm_temperature?.takeIf { it != 0f } ?: ""}\"," +
-                "\"${aq?.pm_humidity?.takeIf { it != 0f } ?: ""}\"," +
-                "\"${aq?.pm_voc_idx?.takeIf { it != 0f } ?: ""}\"," +
-                "\"${aq?.pm_nox_idx?.takeIf { it != 0f } ?: ""}\"," +
-                "\"${aq?.particles_tps?.takeIf { it != 0f } ?: ""}\""
+            "\"${aq?.pm10_standard ?: ""}\"," +
+                "\"${aq?.pm25_standard ?: ""}\"," +
+                "\"${aq?.pm100_standard ?: ""}\"," +
+                "\"${aq?.pm10_environmental ?: ""}\"," +
+                "\"${aq?.pm25_environmental ?: ""}\"," +
+                "\"${aq?.pm100_environmental ?: ""}\"," +
+                "\"${aq?.particles_03um ?: ""}\"," +
+                "\"${aq?.particles_05um ?: ""}\"," +
+                "\"${aq?.particles_10um ?: ""}\"," +
+                "\"${aq?.particles_25um ?: ""}\"," +
+                "\"${aq?.particles_50um ?: ""}\"," +
+                "\"${aq?.particles_100um ?: ""}\"," +
+                "\"${aq?.co2 ?: ""}\"," +
+                "\"${aq?.co2_temperature ?: ""}\"," +
+                "\"${aq?.co2_humidity ?: ""}\"," +
+                "\"${aq?.form_formaldehyde ?: ""}\"," +
+                "\"${aq?.form_humidity ?: ""}\"," +
+                "\"${aq?.form_temperature ?: ""}\"," +
+                "\"${aq?.pm40_standard ?: ""}\"," +
+                "\"${aq?.particles_40um ?: ""}\"," +
+                "\"${aq?.pm_temperature ?: ""}\"," +
+                "\"${aq?.pm_humidity ?: ""}\"," +
+                "\"${aq?.pm_voc_idx ?: ""}\"," +
+                "\"${aq?.pm_nox_idx ?: ""}\"," +
+                "\"${aq?.particles_tps ?: ""}\""
         }
     }
 

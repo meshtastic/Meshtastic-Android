@@ -19,6 +19,8 @@ package org.meshtastic.core.data.manager
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -80,10 +82,17 @@ class MeshMessageProcessorImpl(
     }
 
     init {
-        nodeManager.isNodeDbReady
-            .onEach { ready ->
-                if (ready) {
-                    flushEarlyReceivedPackets("dbReady")
+        // Flush buffered packets only once BOTH the node DB is ready AND our own node number is known. Processing a
+        // received packet while myNodeNum is still null would key a local packet under its raw from_num instead of
+        // NODE_NUM_LOCAL (see [handleReceivedMeshPacket] / [processReceivedMeshPacket]), orphaning it from per-node
+        // queries. Emit the (ready, myNodeNum) pair — not the derived boolean — so distinctUntilChanged re-fires on
+        // every underlying state change (including a reconnect where myNodeNum transitions null -> value) rather than
+        // collapsing distinct states that happen to map to the same boolean.
+        combine(nodeManager.isNodeDbReady, nodeManager.myNodeNum) { ready, myNodeNum -> ready to myNodeNum }
+            .distinctUntilChanged()
+            .onEach { (ready, myNodeNum) ->
+                if (ready && myNodeNum != null) {
+                    flushEarlyReceivedPackets("ready")
                 }
             }
             .launchIn(scope)
@@ -157,7 +166,12 @@ class MeshMessageProcessorImpl(
             }
         val preparedPacket = packet.copy(rx_time = rxTime)
 
-        if (nodeManager.isNodeDbReady.value) {
+        // Require myNodeNum to be known before storing: processReceivedMeshPacket only keys a local packet under
+        // NODE_NUM_LOCAL when packet.from == myNodeNum. If myNodeNum is still null (early in a (re)connect, before
+        // MyNodeInfo resolves), a local packet would be stored under its raw from_num and become invisible to
+        // per-node chart queries while still appearing in the unfiltered Debug log. Buffer until both are ready;
+        // the init combine flushes the buffer once myNodeNum resolves.
+        if (nodeManager.isNodeDbReady.value && myNodeNum != null) {
             processReceivedMeshPacket(preparedPacket, myNodeNum)
         } else {
             scope.launch {
@@ -175,6 +189,10 @@ class MeshMessageProcessorImpl(
 
     private fun flushEarlyReceivedPackets(reason: String) {
         scope.launch {
+            // Resolve and null-check myNodeNum BEFORE draining the buffer: if it regressed to null between the flush
+            // trigger and here, leave the packets buffered for the next resolution rather than draining and keying
+            // them under their raw from_num. The captured non-null value is used for the whole batch.
+            val myNodeNum = nodeManager.myNodeNum.value ?: return@launch
             val packets =
                 earlyMutex.withLock {
                     if (earlyReceivedPackets.isEmpty()) return@withLock emptyList<MeshPacket>()
@@ -185,7 +203,6 @@ class MeshMessageProcessorImpl(
             if (packets.isEmpty()) return@launch
 
             Logger.d { "replayEarlyPackets reason=$reason count=${packets.size}" }
-            val myNodeNum = nodeManager.myNodeNum.value
             packets.forEach { processReceivedMeshPacket(it, myNodeNum) }
         }
     }

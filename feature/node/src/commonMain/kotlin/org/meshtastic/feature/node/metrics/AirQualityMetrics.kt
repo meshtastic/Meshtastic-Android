@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-@file:Suppress("MagicNumber")
+@file:Suppress("MagicNumber", "MatchingDeclarationName") // file groups the AirQuality enum with its chart composables
 
 package org.meshtastic.feature.node.metrics
 
@@ -73,8 +73,10 @@ import org.meshtastic.core.ui.util.rememberSaveFileLauncher
 import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.AirQualityMetrics as AirQualityMetricsProto
 
-/** Selectable chart metric enum for air quality data series. */
-private enum class AirQuality(val labelRes: StringResource, val unit: String, val color: Color) {
+/**
+ * Selectable chart metric enum for air quality data series. Internal (not private) so [getValue] can be unit-tested.
+ */
+internal enum class AirQuality(val labelRes: StringResource, val unit: String, val color: Color) {
     PM1_0(Res.string.pm1_0, "µg/m³", Blue),
     PM2_5(Res.string.pm2_5, "µg/m³", Cyan),
     PM10(Res.string.pm10, "µg/m³", Green),
@@ -83,11 +85,14 @@ private enum class AirQuality(val labelRes: StringResource, val unit: String, va
 
     fun getValue(telemetry: Telemetry): Float? {
         val aq = telemetry.air_quality_metrics ?: return null
+        // A field that is present-and-zero is a real reading (e.g. a PM sensor in clean air reports 0 µg/m³) and must
+        // be plotted. The `?.` already excludes genuinely-absent fields (Wire decodes an unset optional uint32 to
+        // null), so no zero-suppression guard is needed — adding one would discard valid clean-air data.
         return when (this) {
-            PM1_0 -> aq.pm10_standard?.takeIf { it != 0 }?.toFloat()
-            PM2_5 -> aq.pm25_standard?.takeIf { it != 0 }?.toFloat()
-            PM10 -> aq.pm100_standard?.takeIf { it != 0 }?.toFloat()
-            CO2 -> aq.co2?.takeIf { it != 0 }?.toFloat()
+            PM1_0 -> aq.pm10_standard?.toFloat()
+            PM2_5 -> aq.pm25_standard?.toFloat()
+            PM10 -> aq.pm100_standard?.toFloat()
+            CO2 -> aq.co2?.toFloat()
         }
     }
 }
@@ -283,28 +288,21 @@ private fun AirQualityMetricsCard(
             Spacer(modifier = Modifier.height(4.dp))
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Column {
-                    aq.pm10_standard
-                        ?.takeIf { it != 0 }
-                        ?.let { Text("PM1.0: $it µg/m³", style = MaterialTheme.typography.bodySmall) }
-                    aq.pm25_standard
-                        ?.takeIf { it != 0 }
-                        ?.let { Text("PM2.5: $it µg/m³", style = MaterialTheme.typography.bodySmall) }
-                    aq.pm100_standard
-                        ?.takeIf { it != 0 }
-                        ?.let { Text("PM10: $it µg/m³", style = MaterialTheme.typography.bodySmall) }
+                    // Present-and-zero is a valid clean-air reading; only `?.` (absent field) hides a row.
+                    aq.pm10_standard?.let { Text("PM1.0: $it µg/m³", style = MaterialTheme.typography.bodySmall) }
+                    aq.pm25_standard?.let { Text("PM2.5: $it µg/m³", style = MaterialTheme.typography.bodySmall) }
+                    aq.pm100_standard?.let { Text("PM10: $it µg/m³", style = MaterialTheme.typography.bodySmall) }
                 }
                 Column {
-                    aq.co2
-                        ?.takeIf { it != 0 }
-                        ?.let { co2 ->
-                            val severity = Co2Severity.fromPpm(co2)
-                            Text(
-                                text = "CO₂: $co2 ppm",
-                                style = MaterialTheme.typography.bodySmall,
-                                fontWeight = FontWeight.Medium,
-                                color = severity?.color ?: MaterialTheme.colorScheme.onSurface,
-                            )
-                        }
+                    aq.co2?.let { co2 ->
+                        val severity = Co2Severity.fromPpm(co2)
+                        Text(
+                            text = "CO₂: $co2 ppm",
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.Medium,
+                            color = severity?.color ?: MaterialTheme.colorScheme.onSurface,
+                        )
+                    }
                 }
             }
         }
