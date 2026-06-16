@@ -187,7 +187,10 @@ open class MeshLogRepositoryImpl(
                 .filter { parseTelemetryLog(it)?.local_stats != null }
 
         val localStatsLogIds = localStatsLogs.map { it.uuid }
-        if (localStatsLogIds.isNotEmpty()) dao.deleteLogsByUuid(localStatsLogIds)
+        // Chunk to stay under SQLite's bind-variable limit; re-fetch DAO per chunk if the active DB switches.
+        for (chunk in localStatsLogIds.chunked(DELETE_CHUNK_SIZE)) {
+            dbManager.currentDb.value.meshLogDao().deleteLogsByUuid(chunk)
+        }
     }
 
     /** Prunes the log database based on the configured [retentionDays]. */
@@ -199,5 +202,8 @@ open class MeshLogRepositoryImpl(
 
     companion object {
         private const val MILLIS_PER_SEC = 1000L
+
+        /** Max UUIDs per DELETE IN-clause; keeps us under SQLite's bind-variable limit. */
+        private const val DELETE_CHUNK_SIZE = 500
     }
 }
