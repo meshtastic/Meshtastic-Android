@@ -14,7 +14,7 @@ aliases:
 
 The Nodes screen displays all devices visible on your mesh network.
 
-## Node List
+## Списък с възли
 
 The node list shows every node your radio has heard, including:
 
