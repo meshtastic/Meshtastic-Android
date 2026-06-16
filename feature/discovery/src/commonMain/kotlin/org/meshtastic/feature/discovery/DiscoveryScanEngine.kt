@@ -321,10 +321,16 @@ class DiscoveryScanEngine(
     /** Common cleanup path when a scan step fails mid-loop. */
     private suspend fun pauseAndAbort() {
         _scanState.value = DiscoveryScanState.Failed("Connection lost during scan")
-        cancelScanInternal()
-        restoreHomePreset()
+        // pauseAndAbort runs inside the runScanLoop coroutine, which is a child of scanScope.
+        // cancelScanInternal() cancels scanScope (and therefore this coroutine), so it must run LAST:
+        // any suspend after it — finalizeSession or restoreHomePreset — would throw CancellationException
+        // and silently skip cleanup, stranding the radio on the scan modem preset. So finalize and reach
+        // the terminal state first, then restore the home preset on applicationScope (which outlives
+        // scanScope), mirroring stopScan().
         finalizeSession("failed")
         _scanState.value = DiscoveryScanState.Complete(DiscoveryScanState.CompletionOutcome.Failed)
+        applicationScope.launch { restoreHomePreset() }
+        cancelScanInternal()
     }
 
     private suspend fun shiftPreset(preset: ChannelOption) {

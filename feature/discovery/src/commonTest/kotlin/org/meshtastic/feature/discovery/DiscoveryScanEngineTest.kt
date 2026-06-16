@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
@@ -535,4 +536,57 @@ class DiscoveryScanEngineTest {
             "Distance should be between 10km and 25km, was ${node.distanceFromUser}m",
         )
     }
+
+    // region Home-preset restoration (the one config-mutating, safety-critical behavior of a scan)
+
+    @Test
+    fun reconnectTimeoutAbortsRestoresHomePresetAndFinalizesSession() = runTest {
+        val engine = createEngine(this)
+        // Scan a preset different from the seeded home (LONG_FAST) so a restore-to-home is observable.
+        engine.startScan(listOf(ChannelOption.SHORT_FAST), dwellDurationSeconds = 60)
+        assertScanActive(engine)
+
+        // The radio fails to come back after the preset shift (firmware reboots on a LoRa config change).
+        serviceRepository.setConnectionState(ConnectionState.Disconnected)
+        advanceUntilIdle()
+
+        // The abort path must reach a terminal Failed state, finalize the session, and restore the home preset —
+        // none of which happened before the fix, because cancelScanInternal() cancelled this coroutine first.
+        val state = engine.scanState.value
+        assertTrue(state is DiscoveryScanState.Complete, "expected Complete, was $state")
+        assertEquals(DiscoveryScanState.CompletionOutcome.Failed, (state as DiscoveryScanState.Complete).outcome)
+        assertFalse(engine.isActive)
+        assertNull(collectorRegistry.collector, "collector should be unregistered")
+
+        assertEquals("failed", discoveryDao.sessions.values.first().completionStatus)
+        // The last LoRa config applied is the home preset (LONG_FAST), not the scan preset (SHORT_FAST).
+        assertEquals(ChannelOption.LONG_FAST.modemPreset, radioController.lastLocalConfig?.lora?.modem_preset)
+    }
+
+    @Test
+    fun stopScanRestoresHomePreset() = runTest {
+        val engine = createEngine(this)
+        engine.startScan(listOf(ChannelOption.SHORT_FAST), dwellDurationSeconds = 60)
+        assertScanActive(engine)
+
+        engine.stopScan()
+        advanceUntilIdle() // let the applicationScope restore complete
+
+        assertEquals(ChannelOption.LONG_FAST.modemPreset, radioController.lastLocalConfig?.lora?.modem_preset)
+    }
+
+    @Test
+    fun normalCompletionRestoresHomePreset() = runTest {
+        val engine = createEngine(this)
+        engine.startScan(listOf(ChannelOption.SHORT_FAST), dwellDurationSeconds = 1)
+        advanceUntilIdle() // connection stays Connected, so the scan runs to completion
+
+        val state = engine.scanState.value
+        assertTrue(state is DiscoveryScanState.Complete, "expected Complete, was $state")
+        assertEquals(DiscoveryScanState.CompletionOutcome.Success, (state as DiscoveryScanState.Complete).outcome)
+        assertEquals("complete", discoveryDao.sessions.values.first().completionStatus)
+        assertEquals(ChannelOption.LONG_FAST.modemPreset, radioController.lastLocalConfig?.lora?.modem_preset)
+    }
+
+    // endregion
 }

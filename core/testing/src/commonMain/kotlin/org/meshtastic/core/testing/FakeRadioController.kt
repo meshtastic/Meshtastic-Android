@@ -46,6 +46,12 @@ class FakeRadioController :
     val sentPackets = mutableListOf<DataPacket>()
     val favoritedNodes = mutableListOf<Int>()
     val sentSharedContacts = mutableListOf<Int>()
+
+    /** Every [setLocalConfig] call, in order — lets tests assert e.g. that a scan restored the home LoRa preset. */
+    val localConfigs = mutableListOf<Config>()
+    val lastLocalConfig: Config?
+        get() = localConfigs.lastOrNull()
+
     var throwOnSend: Boolean = false
     var lastSetDeviceAddress: String? = null
     var editSettingsCalled = false
@@ -57,6 +63,7 @@ class FakeRadioController :
             sentPackets.clear()
             favoritedNodes.clear()
             sentSharedContacts.clear()
+            localConfigs.clear()
             throwOnSend = false
             lastSetDeviceAddress = null
             editSettingsCalled = false
@@ -93,7 +100,9 @@ class FakeRadioController :
 
     override suspend fun refreshMetadata(destNum: Int) {}
 
-    override suspend fun setLocalConfig(config: Config) {}
+    override suspend fun setLocalConfig(config: Config) {
+        localConfigs.add(config)
+    }
 
     override suspend fun setLocalChannel(channel: Channel) {}
 
