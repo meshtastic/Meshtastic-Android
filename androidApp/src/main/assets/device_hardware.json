@@ -784,7 +784,7 @@
     "platformioTarget": "seeed-xiao-s3",
     "architecture": "esp32-s3",
     "activelySupported": true,
-    "supportLevel": 3,
+    "supportLevel": 1,
     "displayName": "Seeed Xiao ESP32-S3",
     "tags": [
       "Seeed"
@@ -1473,5 +1473,20 @@
     ],
     "requiresDfu": true,
     "partitionScheme": "16MB"
+  },
+  {
+    "hwModel": 83,
+    "hwModelSlug": "TLORA_C6",
+    "platformioTarget": "tlora-c6",
+    "architecture": "esp32-c6",
+    "activelySupported": false,
+    "supportLevel": 1,
+    "displayName": "LilyGo T-Lora C6",
+    "tags": [
+      "LilyGo"
+    ],
+    "images": [
+      "tlora-c6.svg"
+    ]
   }
 ]

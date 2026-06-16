@@ -19,6 +19,8 @@
     <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">Zpráva od %1$s: %2$s</string>
+    <string name="a11y_node_battery">baterie: %1$d%%</string>
+    <string name="a11y_node_favorite">oblíbené</string>
     <string name="accept">Přijmout</string>
     <string name="acknowledgements">Poděkování</string>
     <!-- ACTION -->
@@ -292,10 +294,13 @@
     <string name="distance_measurements_description">Zobrazí vzdálenost mezi vaším telefonem a ostatními uzly Meshtastic s určenou polohou.</string>
     <!-- DOC -->
     <string name="doc_clear_search">Vymazat hledání</string>
+    <string name="doc_section_user">Uživatelská příručka</string>
     <string name="doc_title_connections">Připojení</string>
     <string name="doc_title_discovery">Objevujte</string>
     <string name="doc_title_mqtt">MQTT</string>
     <string name="doc_title_nodes">Uzly</string>
+    <string name="doc_title_settings_radio">Nastavení – Rádio &amp; Uživatel</string>
+    <string name="doc_title_translate">Překlad aplikace</string>
     <string name="done">Hotovo</string>
     <string name="double_tap_as_button_press">Dvojité klepnutí jako stisk tlačítka</string>
     <string name="downlink_enabled">Stahování povoleno</string>
@@ -670,7 +675,10 @@
     <string name="node_layout_device_role">Zařízení a Role</string>
     <string name="node_layout_distance_and_bearing">Vzdálenost a směr</string>
     <string name="node_layout_help_signal_bad">Kvalita signálu je nízká. Poměr signálu k šumu (SNR) je vyšší než −18 dB a síla přijímaného signálu (RSSI) je vyšší než −125 dBm.</string>
+    <string name="node_layout_help_signal_fair">Signál je uspokojivý. SNR je vyšší než −12 dB a RSSI je vyšší než −120 dBm.</string>
+    <string name="node_layout_help_signal_good">Signál je silný. SNR je vyšší než −7 dB a RSSI je vyšší než −115 dBm.</string>
     <string name="node_layout_help_signal_indicator">Kombinuje SNR a RSSI do úrovně kvality zobrazené jako barevná ikona s popisem. Zobrazeno pouze v úplném rozložení.</string>
+    <string name="node_layout_help_signal_none">Nebyl detekován žádný použitelný signál. Hodnoty jsou pod všemi prahovými úrovněmi kvality.</string>
     <string name="node_layout_hops_away">Počet skoků</string>
     <string name="node_layout_log_icons">Metriky prostředí</string>
     <string name="node_layout_power">Napájení</string>
@@ -984,6 +992,9 @@
     <string name="sx126x_rx_boosted_gain">Zvýšené zesílení přijímače (RX)</string>
     <string name="system_settings">Nastavení systému</string>
     <!-- TAK -->
+    <string name="tak_server_enabled">Povolit lokální TAK server</string>
+    <string name="tak_server_enabled_desc">Spustí lokální TLS server na portu 8089 pro ATAK/iTAK připojení</string>
+    <string name="tak_server_export_data_package_desc">Generovat .zip pro ATAK/iTAK pro připojení k tomuto serveru</string>
     <string name="tak_server_section">Server</string>
     <string name="tak_team_blue">Modrá</string>
     <string name="tak_team_green">Zelená</string>
