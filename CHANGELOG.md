@@ -38,6 +38,17 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 * build: drop compiler flags and opt-ins made redundant by Kotlin 2.4 (#5786) by James Rich (@jamesarich) in [`65320ab7f`](https://github.com/meshtastic/Meshtastic-Android/commit/65320ab7f99c54587184918808f0ee699fc73967)
 * chore(deps): update com.github.luben:zstd-jni to v1.5.7-11 (#5788) by renovate[bot] (@renovate[bot]) in [`bd6670572`](https://github.com/meshtastic/Meshtastic-Android/commit/bd6670572a1c86b9a124fb659d494974ad8d9592)
 * chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5783) by James Rich (@jamesarich) in [`e670468aa`](https://github.com/meshtastic/Meshtastic-Android/commit/e670468aa3ff59d3f600fd99978e087ba1f1d636)
+* chore(deps): update spotless to v8.7.0 (#5802) by renovate[bot] (@renovate[bot]) in [`d641d9267`](https://github.com/meshtastic/Meshtastic-Android/commit/d641d9267a465ebebc9bda4dc826530093760f79)
+* chore(deps): update kotest to v6.2.0 (#5799) by renovate[bot] (@renovate[bot]) in [`1250e967f`](https://github.com/meshtastic/Meshtastic-Android/commit/1250e967f75e7792201b5c7c14c1742c3d744ce2)
+* chore(deps): update koin to v4.2.2 (#5797) by renovate[bot] (@renovate[bot]) in [`f8cdd3d14`](https://github.com/meshtastic/Meshtastic-Android/commit/f8cdd3d141721d20092ca8f8c4849b27867c0d2a)
+* chore(deps): update jetbrains.lifecycle to v2.11.0-beta02 (#5804) by renovate[bot] (@renovate[bot]) in [`ac2295def`](https://github.com/meshtastic/Meshtastic-Android/commit/ac2295deffaadb6e9a77cbbe65037e3748399037)
+* chore(deps): update io.nlopez.compose.rules:detekt to v0.6.1 (#5794) by renovate[bot] (@renovate[bot]) in [`321af1fce`](https://github.com/meshtastic/Meshtastic-Android/commit/321af1fcef6b3992df4ed8829ae397544e3b7f1b)
+* chore(deps): update compose-multiplatform to v1.3.0-beta02 (#5803) by renovate[bot] (@renovate[bot]) in [`c74021cec`](https://github.com/meshtastic/Meshtastic-Android/commit/c74021cec4a837f4b2b7eb6305e01e98c70ee27f)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5791) by James Rich (@jamesarich) in [`abf839d8b`](https://github.com/meshtastic/Meshtastic-Android/commit/abf839d8bc2c593996430af215516a0c4acdfee6)
+* chore(deps): update com.google.firebase:firebase-ai-ondevice to v16.0.0-beta03 (#5809) by renovate[bot] (@renovate[bot]) in [`b5e4a6799`](https://github.com/meshtastic/Meshtastic-Android/commit/b5e4a6799a3889a4e5e95d0646a59d4c74b4729e)
+* chore(deps): update develocity to v4.4.3 (#5810) by renovate[bot] (@renovate[bot]) in [`ddff15609`](https://github.com/meshtastic/Meshtastic-Android/commit/ddff1560921b76fac55dbc90e7646960b723f402)
+* chore(deps): update com.google.firebase:firebase-bom to v34.15.0 (#5812) by renovate[bot] (@renovate[bot]) in [`463b93d5b`](https://github.com/meshtastic/Meshtastic-Android/commit/463b93d5ba59a493d0679e12a55bdd49e9aabccc)
+* chore(deps): update plugin com.gradle.develocity to v4.4.3 (#5811) by renovate[bot] (@renovate[bot]) in [`a268e9345`](https://github.com/meshtastic/Meshtastic-Android/commit/a268e93459ea44ed936544eb30c8c93441e9cb21)
 <!-- UNRELEASED_END -->
 
 <!-- RELEASED_START -->

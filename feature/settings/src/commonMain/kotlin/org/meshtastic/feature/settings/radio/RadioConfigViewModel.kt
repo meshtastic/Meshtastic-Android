@@ -80,6 +80,7 @@ import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.DeviceProfile
 import org.meshtastic.proto.DeviceUIConfig
 import org.meshtastic.proto.FileInfo
+import org.meshtastic.proto.HamParameters
 import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
@@ -290,6 +291,37 @@ open class RadioConfigViewModel(
         Logger.d { "RadioConfigViewModel cleared" }
     }
 
+    /**
+     * Routes the User config save: ham onboarding (`set_ham_mode`) when the licensed toggle transitions OFF→ON on the
+     * locally connected node, [setOwner] otherwise. Routing on the transition — not the toggle state — keeps subsequent
+     * saves of an already-licensed node on the `set_owner` path, so edits to other owner fields still reach the device
+     * and the node doesn't reboot on every save (firmware reboots on `set_ham_mode`). The local-node guard is the
+     * backstop for the UI gate — `set_ham_mode` must never be sent to a remote node.
+     */
+    fun saveUserConfig(user: User) {
+        val destNum = destNum ?: destNode.value?.num ?: return
+        val enablingHam = user.is_licensed && !radioConfigState.value.userConfig.is_licensed
+        if (enablingHam && destNum == myNodeNum) setHamMode(destNum, user) else setOwner(user)
+    }
+
+    private fun setHamMode(destNum: Int, user: User) {
+        safeLaunch(tag = "setHamMode") {
+            _radioConfigState.update { it.copy(userConfig = user) }
+            // The form's long-name field carries the callsign while licensed (iOS parity).
+            // When meshtastic/protobufs#941 ships, add long_name here.
+            val packetId =
+                radioConfigUseCase.setHamMode(
+                    destNum,
+                    HamParameters(call_sign = user.long_name, short_name = user.short_name),
+                )
+            registerRequestId(packetId)
+        }
+    }
+
+    /**
+     * Sends a plain `set_owner` with [user]. Prefer [saveUserConfig] for User config screen saves — it routes ham
+     * onboarding to `set_ham_mode` when the licensed toggle is first enabled; calling this directly bypasses that.
+     */
     fun setOwner(user: User) {
         val destNum = destNum ?: destNode.value?.num ?: return
         safeLaunch(tag = "setOwner") {

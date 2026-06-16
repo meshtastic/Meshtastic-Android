@@ -82,12 +82,12 @@ aboutlibraries = "14.2.1"
 jserialcomm = "2.11.4"
 coil = "3.5.0"
 datadog-gradle = "1.27.0"
-dd-sdk-android = "3.10.0"
+dd-sdk-android = "3.11.0"
 detekt = "2.0.0-alpha.3"
 dokka = "2.2.0"
 devtools-ksp = "2.3.9"
 firebase-crashlytics-gradle = "3.0.7"
-google-services-gradle = "4.4.4"
+google-services-gradle = "4.5.0"
 markdownRenderer = "0.41.0"
 okio = "3.17.0"
 uri-kmp = "0.0.21"
@@ -102,7 +102,7 @@ takpacket-sdk = "0.5.3"
 meshtastic-protobufs = "2.7.25"
 
 # Gradle Plugins
-develocity = "4.4.2"
+develocity = "4.4.3"
 foojay-resolver = "1.0.0"
 
 
@@ -185,9 +185,9 @@ jetbrains-compose-material3-adaptive-navigation-suite = { module = "org.jetbrain
 
 # Google
 firebase-ai = { module = "com.google.firebase:firebase-ai" }
-firebase-ai-ondevice = { module = "com.google.firebase:firebase-ai-ondevice", version = "16.0.0-beta02" }
+firebase-ai-ondevice = { module = "com.google.firebase:firebase-ai-ondevice", version = "16.0.0-beta03" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
-firebase-bom = { module = "com.google.firebase:firebase-bom", version = "34.14.1" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version = "34.15.0" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 location-services = { module = "com.google.android.gms:play-services-location", version = "21.3.0" }
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
