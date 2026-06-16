@@ -118,6 +118,64 @@ class CustomTileSource {
                 "image/png",
             )
 
+        private val SWISS_TOPO =
+            object :
+                OnlineTileSourceBase(
+                    "Swiss Topo",
+                    1,
+                    20,
+                    256,
+                    ".jpeg",
+                    arrayOf("https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/3857/"),
+                    "© Data: swisstopo",
+                    TileSourcePolicy(
+                        4,
+                        TileSourcePolicy.FLAG_NO_BULK or
+                                TileSourcePolicy.FLAG_NO_PREVENTIVE or
+                                TileSourcePolicy.FLAG_USER_AGENT_MEANINGFUL or
+                                TileSourcePolicy.FLAG_USER_AGENT_NORMALIZED,
+                    ),
+                ) {
+                override fun getTileURLString(pMapTileIndex: Long): String = baseUrl +
+                        (
+                                MapTileIndex.getZoom(pMapTileIndex).toString() +
+                                        "/" +
+                                        MapTileIndex.getX(pMapTileIndex) +
+                                        "/" +
+                                        MapTileIndex.getY(pMapTileIndex) +
+                                        mImageFilenameEnding
+                                )
+            }
+
+        private val SWISS_IMAGE =
+            object :
+                OnlineTileSourceBase(
+                    "Swiss Image",
+                    1,
+                    20,
+                    256,
+                    ".jpeg",
+                    arrayOf("https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage/default/current/3857/"),
+                    "© Data: swisstopo",
+                    TileSourcePolicy(
+                        4,
+                        TileSourcePolicy.FLAG_NO_BULK or
+                                TileSourcePolicy.FLAG_NO_PREVENTIVE or
+                                TileSourcePolicy.FLAG_USER_AGENT_MEANINGFUL or
+                                TileSourcePolicy.FLAG_USER_AGENT_NORMALIZED,
+                    ),
+                ) {
+                override fun getTileURLString(pMapTileIndex: Long): String = baseUrl +
+                        (
+                                MapTileIndex.getZoom(pMapTileIndex).toString() +
+                                        "/" +
+                                        MapTileIndex.getX(pMapTileIndex) +
+                                        "/" +
+                                        MapTileIndex.getY(pMapTileIndex) +
+                                        mImageFilenameEnding
+                                )
+            }
+
         /** =============================================================================================== */
         private val MAPNIK: OnlineTileSourceBase = TileSourceFactory.MAPNIK
         private val USGS_TOPO: OnlineTileSourceBase = TileSourceFactory.USGS_TOPO
@@ -134,6 +192,8 @@ class CustomTileSource {
                 ESRI_WORLD_TOPO to "ESRI World TOPO",
                 USGS_SAT to "USGS Satellite",
                 ESRI_IMAGERY to "ESRI World Overview",
+                SWISS_TOPO to "Swiss TOPO",
+                SWISS_IMAGE to "Swiss IMAGE",
             )
 
         fun getTileSource(index: Int): ITileSource = mTileSources.keys.elementAtOrNull(index) ?: DEFAULT_TILE_SOURCE
