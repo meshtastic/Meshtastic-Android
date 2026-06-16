@@ -136,6 +136,28 @@ fun TelemetricActionsSectionEmptyPreview() {
     }
 }
 
+@PreviewLightDark
+@Suppress("PreviewPublic")
+@Composable
+fun TelemetricActionsSectionLocalPreview() {
+    val node = previewData.mickeyMouse
+    AppTheme {
+        Surface {
+            TelemetricActionsSection(
+                node = node,
+                ourNode = node,
+                availableLogs = emptySet(),
+                lastTracerouteTime = null,
+                lastRequestNeighborsTime = null,
+                displayUnits = Config.DisplayConfig.DisplayUnits.METRIC,
+                isFahrenheit = false,
+                onAction = {},
+                isLocal = true,
+            )
+        }
+    }
+}
+
 // ---------------------------------------------------------------------------
 // PositionInlineContent preview
 // ---------------------------------------------------------------------------

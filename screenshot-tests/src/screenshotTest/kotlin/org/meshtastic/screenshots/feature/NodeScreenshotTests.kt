@@ -31,6 +31,7 @@ import org.meshtastic.feature.node.component.NodeItemCompleteOnlineRemotePreview
 import org.meshtastic.feature.node.component.NodeItemCompletePreview
 import org.meshtastic.feature.node.component.PositionInlineContentPreview
 import org.meshtastic.feature.node.component.TelemetricActionsSectionEmptyPreview
+import org.meshtastic.feature.node.component.TelemetricActionsSectionLocalPreview
 import org.meshtastic.feature.node.component.TelemetricActionsSectionPreview
 import org.meshtastic.feature.node.detail.NodeDetailContentLoadingPreview
 import org.meshtastic.feature.node.detail.NodeDetailContentLocalPreview
@@ -67,6 +68,13 @@ fun ScreenshotTelemetricActionsSection() {
 @Composable
 fun ScreenshotTelemetricActionsSectionEmpty() {
     TelemetricActionsSectionEmptyPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotTelemetricActionsSectionLocal() {
+    TelemetricActionsSectionLocalPreview()
 }
 
 @PreviewTest

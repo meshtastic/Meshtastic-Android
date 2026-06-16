@@ -174,6 +174,25 @@ open class MeshLogRepositoryImpl(
         dbManager.currentDb.value.meshLogDao().deleteLogs(logId, portNum)
     }
 
+    /** Deletes only local stats telemetry logs for [nodeNum], preserving other telemetry types. */
+    override suspend fun deleteLocalStatsLogs(nodeNum: Int) = withContext(dispatchers.io) {
+        val myNodeNum = nodeInfoReadDataSource.myNodeInfoFlow().firstOrNull()?.myNodeNum
+        val logId = if (nodeNum == myNodeNum) MeshLog.NODE_NUM_LOCAL else nodeNum
+        val dao = dbManager.currentDb.value.meshLogDao()
+        val localStatsLogs =
+            dao.getLogsFrom(logId, PortNum.TELEMETRY_APP.value, Int.MAX_VALUE)
+                .firstOrNull()
+                .orEmpty()
+                .map { it.asExternalModel() }
+                .filter { parseTelemetryLog(it)?.local_stats != null }
+
+        val localStatsLogIds = localStatsLogs.map { it.uuid }
+        // Chunk to stay under SQLite's bind-variable limit; re-fetch DAO per chunk if the active DB switches.
+        for (chunk in localStatsLogIds.chunked(DELETE_CHUNK_SIZE)) {
+            dbManager.currentDb.value.meshLogDao().deleteLogsByUuid(chunk)
+        }
+    }
+
     /** Prunes the log database based on the configured [retentionDays]. */
     @Suppress("MagicNumber")
     override suspend fun deleteLogsOlderThan(retentionDays: Int) = withContext(dispatchers.io) {
@@ -183,5 +202,8 @@ open class MeshLogRepositoryImpl(
 
     companion object {
         private const val MILLIS_PER_SEC = 1000L
+
+        /** Max UUIDs per DELETE IN-clause; keeps us under SQLite's bind-variable limit. */
+        private const val DELETE_CHUNK_SIZE = 500
     }
 }

@@ -34,10 +34,10 @@ import org.meshtastic.core.resources.request_air_quality_metrics
 import org.meshtastic.core.resources.request_device_metrics
 import org.meshtastic.core.resources.request_environment_metrics
 import org.meshtastic.core.resources.request_host_metrics
+import org.meshtastic.core.resources.request_local_stats
 import org.meshtastic.core.resources.request_pax_metrics
 import org.meshtastic.core.resources.request_power_metrics
 import org.meshtastic.core.resources.requesting_from
-import org.meshtastic.core.resources.signal_quality
 import org.meshtastic.core.resources.traceroute
 import org.meshtastic.core.resources.user_info
 import org.meshtastic.core.ui.util.SnackbarManager
@@ -90,7 +90,7 @@ constructor(
                 TelemetryType.ENVIRONMENT -> Res.string.request_environment_metrics
                 TelemetryType.AIR_QUALITY -> Res.string.request_air_quality_metrics
                 TelemetryType.POWER -> Res.string.request_power_metrics
-                TelemetryType.LOCAL_STATS -> Res.string.signal_quality
+                TelemetryType.LOCAL_STATS -> Res.string.request_local_stats
                 TelemetryType.HOST -> Res.string.request_host_metrics
                 TelemetryType.PAX -> Res.string.request_pax_metrics
             }

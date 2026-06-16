@@ -137,6 +137,7 @@
     <string name="bold_heading">Bold Heading</string>
     <string name="bottom_nav_settings">Settings</string>
     <string name="broadcast_interval">Broadcast Interval</string>
+    <string name="busy_noise_floor">Busy floor</string>
     <string name="button_gpio">Button GPIO</string>
     <string name="buzzer_gpio">Buzzer GPIO</string>
     <string name="calculating">Calculating…</string>
@@ -1008,6 +1009,9 @@
     <string name="nodes_empty_searching_hint">Nearby nodes will appear here as they're discovered.</string>
     <string name="nodes_empty_searching_title">Searching for nodes</string>
     <string name="nodes_queued_for_deletion">%1$d nodes queued for deletion:</string>
+    <string name="noise_floor">Noise Floor</string>
+    <string name="noise_floor_definition">The background RF noise measured by the radio receiver. Lower values usually indicate a quieter receiver environment; -85 dBm is a busy reference point, not a hard failure threshold.</string>
+    <string name="noise_floor_no_reading">Noise Floor: No reading</string>
     <string name="none">None (disable)</string>
     <string name="none_quality">None</string>
     <string name="not_connected">Not connected</string>
@@ -1193,6 +1197,7 @@
     <string name="request_device_metrics">Device Metrics</string>
     <string name="request_environment_metrics">Environment Metrics</string>
     <string name="request_host_metrics">Host Metrics</string>
+    <string name="request_local_stats">Local Stats</string>
     <string name="request_metadata">Metadata</string>
     <string name="request_pax_metrics">Pax Metrics</string>
     <string name="request_power_metrics">Power Metrics</string>
@@ -1244,6 +1249,7 @@
     <string name="routing_error_timeout">Timeout</string>
     <string name="routing_error_too_large">Packet too large</string>
     <string name="rssi">RSSI</string>
+    <string name="rssi_definition">Received Signal Strength Indicator, a measurement used to determine the power level being received by the antenna. A higher RSSI value generally indicates a stronger and more stable connection.</string>
     <string name="rsyslog_server">rsyslog server</string>
     <string name="sample_message" translatable="false">hey I found the cache, it is over here next to the big tiger. I'm kinda scared.</string>
     <string name="sats">Sats</string>
@@ -1338,6 +1344,7 @@
     <string name="slot">Slot</string>
     <string name="smart_position">Smart Position</string>
     <string name="snr">SNR</string>
+    <string name="snr_definition">Signal-to-Noise Ratio, a measure used in communications to quantify the level of a desired signal to the level of background noise. In Meshtastic and other wireless systems, a higher SNR indicates a clearer signal that can enhance the reliability and quality of data transmission.</string>
     <string name="soil_moisture">Soil Moist</string>
     <string name="soil_temperature">Soil Temp</string>
     <string name="speed">Speed</string>
@@ -1576,4 +1583,3 @@
     <string name="zh_CN" translatable="false">简体中文</string>
     <string name="zh_TW" translatable="false">繁體中文</string>
 </resources>
-

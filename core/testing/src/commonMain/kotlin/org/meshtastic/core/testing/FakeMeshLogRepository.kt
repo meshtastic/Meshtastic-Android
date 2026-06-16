@@ -41,10 +41,14 @@ class FakeMeshLogRepository :
     var deleteAllCalled = false
         private set
 
+    var lastDeletedLocalStatsNodeNum: Int? = null
+        private set
+
     override fun reset() {
         super.reset()
         lastDeletedOlderThan = null
         deleteAllCalled = false
+        lastDeletedLocalStatsNodeNum = null
     }
 
     override fun getAllLogs(maxItem: Int): Flow<List<MeshLog>> = logsFlow.map { it.take(maxItem) }
@@ -82,6 +86,14 @@ class FakeMeshLogRepository :
         logsFlow.value = logsFlow.value.filterNot { it.fromNum == nodeNum && it.portNum == portNum }
     }
 
+    override suspend fun deleteLocalStatsLogs(nodeNum: Int) {
+        lastDeletedLocalStatsNodeNum = nodeNum
+        logsFlow.value =
+            logsFlow.value.filterNot { log ->
+                log.fromNum == nodeNum && log.portNum == PortNum.TELEMETRY_APP.value && log.hasLocalStatsTelemetry()
+            }
+    }
+
     override suspend fun deleteLogsOlderThan(retentionDays: Int) {
         lastDeletedOlderThan = retentionDays
     }
@@ -89,4 +101,11 @@ class FakeMeshLogRepository :
     fun setLogs(logs: List<MeshLog>) {
         logsFlow.value = logs
     }
+
+    private fun MeshLog.hasLocalStatsTelemetry(): Boolean = runCatching {
+        val decoded = fromRadio.packet?.decoded ?: return false
+        if (decoded.want_response == true) return false
+        Telemetry.ADAPTER.decode(decoded.payload).local_stats != null
+    }
+        .getOrDefault(false)
 }

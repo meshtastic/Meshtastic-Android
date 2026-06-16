@@ -238,6 +238,7 @@ fun AdaptiveMetricLayout(
  *   cooldown traceroute button).
  * @param onExportCsv When non-null, a Save [IconButton] is rendered in the app bar that invokes this callback. This
  *   centralises the CSV export affordance so individual screens only need to provide the export logic.
+ * @param bottomContent Optional content pinned below the adaptive chart/list area.
  */
 @Composable
 @Suppress("LongMethod")
@@ -255,6 +256,8 @@ fun <T> BaseMetricScreen(
     chartPart: @Composable (Modifier, Double?, VicoScrollState, (Double) -> Unit) -> Unit,
     listPart: @Composable (Modifier, Double?, LazyListState, (Double) -> Unit) -> Unit,
     controlPart: @Composable () -> Unit = {},
+    bottomContent: @Composable () -> Unit = {},
+    modifier: Modifier = Modifier,
 ) {
     var displayInfoDialog by rememberSaveable { mutableStateOf(false) }
     var isChartExpanded by rememberSaveable { mutableStateOf(false) }
@@ -269,6 +272,7 @@ fun <T> BaseMetricScreen(
     var selectedX by remember { mutableStateOf<Double?>(null) }
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             MainAppBar(
                 title = nodeName,
@@ -331,6 +335,7 @@ fun <T> BaseMetricScreen(
 
             AdaptiveMetricLayout(
                 isChartExpanded = isChartExpanded,
+                modifier = Modifier.weight(1f),
                 chartPart = { modifier ->
                     chartPart(modifier, selectedX, vicoScrollState) { x ->
                         selectedX = x
@@ -349,6 +354,8 @@ fun <T> BaseMetricScreen(
                     }
                 },
             )
+
+            bottomContent()
         }
     }
 }
