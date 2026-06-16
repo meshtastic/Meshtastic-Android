@@ -313,12 +313,6 @@
       "title": "Fix BLE advertising management to prevent crashes during reconnections",
       "page_url": "https://github.com/meshtastic/firmware/pull/10658",
       "zip_url": "+40.3 KB"
-    },
-    {
-      "id": "10656",
-      "title": "UDP Unicast for Meshtasticd",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10656",
-      "zip_url": "s"
     }
   ]
 }
