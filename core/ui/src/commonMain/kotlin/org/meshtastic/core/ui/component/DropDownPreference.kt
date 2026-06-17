@@ -82,7 +82,14 @@ fun <T : Enum<T>> DropDownPreference(
     )
 }
 
-data class DropDownItem<T>(val value: T, val label: String, val icon: ImageVector? = null, val color: Color? = null)
+data class DropDownItem<T>(
+    val value: T,
+    val label: String,
+    val icon: ImageVector? = null,
+    val color: Color? = null,
+    /** When false, the item is shown greyed-out and cannot be selected. */
+    val enabled: Boolean = true,
+)
 
 @JvmName("DropDownPreferencePairs")
 @Composable
@@ -191,6 +198,7 @@ fun <T> DropDownPreference(
                                 Text(selectionOption.label)
                             }
                         },
+                        enabled = selectionOption.enabled,
                         onClick = {
                             onItemSelected(selectionOption.value)
                             expanded = false

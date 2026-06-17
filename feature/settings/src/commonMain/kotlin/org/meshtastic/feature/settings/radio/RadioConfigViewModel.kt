@@ -82,6 +82,7 @@ import org.meshtastic.proto.DeviceUIConfig
 import org.meshtastic.proto.FileInfo
 import org.meshtastic.proto.HamParameters
 import org.meshtastic.proto.HardwareModel
+import org.meshtastic.proto.LoRaRegionPresetMap
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.MeshPacket
@@ -104,6 +105,10 @@ data class RadioConfigState(
     val deviceConnectionStatus: DeviceConnectionStatus? = null,
     val deviceUIConfig: DeviceUIConfig? = null,
     val fileManifest: List<FileInfo> = emptyList(),
+    /** Firmware's region→preset legality map (local handshake only); null when unavailable (firmware < 2.8). */
+    val loraRegionPresetMap: LoRaRegionPresetMap? = null,
+    /** Whether the device being configured is flagged as a licensed (amateur) operator; gates licensed-only presets. */
+    val localIsLicensed: Boolean = false,
     val responseState: ResponseState<Boolean> = ResponseState.Empty,
     val analyticsAvailable: Boolean = true,
     val analyticsEnabled: Boolean = true,
@@ -209,6 +214,10 @@ open class RadioConfigViewModel(
     private val _radioConfigState = MutableStateFlow(RadioConfigState())
     val radioConfigState: StateFlow<RadioConfigState> = _radioConfigState
 
+    // Set when a local LoRa config write is in flight, so the set ACK triggers a re-read (R9): the firmware can
+    // clamp/region-swap a LoRa config and applies it live without a reboot, so the form must re-read to reflect it.
+    private var pendingLocalLoraReread = false
+
     fun setPreserveFavorites(preserveFavorites: Boolean) {
         _radioConfigState.update { it.copy(nodeDbResetPreserveFavorites = preserveFavorites) }
     }
@@ -226,7 +235,9 @@ open class RadioConfigViewModel(
             .distinctUntilChanged()
             .onEach {
                 _destNode.value = it
-                _radioConfigState.update { state -> state.copy(metadata = it?.metadata) }
+                _radioConfigState.update { state ->
+                    state.copy(metadata = it?.metadata, localIsLicensed = it?.user?.is_licensed == true)
+                }
             }
             .launchIn(viewModelScope)
 
@@ -275,6 +286,10 @@ open class RadioConfigViewModel(
 
         radioConfigRepository.fileManifestFlow
             .onEach { manifest -> _radioConfigState.update { it.copy(fileManifest = manifest) } }
+            .launchIn(viewModelScope)
+
+        radioConfigRepository.loraRegionPresetMapFlow
+            .onEach { map -> _radioConfigState.update { it.copy(loraRegionPresetMap = map) } }
             .launchIn(viewModelScope)
 
         serviceRepository.meshPacketFlow.onEach(::processPacketResponse).launchIn(viewModelScope)
@@ -372,6 +387,9 @@ open class RadioConfigViewModel(
 
     fun setConfig(config: Config) {
         val destNum = destNum ?: destNode.value?.num ?: return
+        // R9: a LoRa write may be clamped or region-swapped (e.g. EU sibling) by the firmware and applies live
+        // (no reboot), so schedule a re-read of the local device's LoRa config once the set is acknowledged.
+        pendingLocalLoraReread = config.lora != null && radioConfigState.value.isLocal
         safeLaunch(tag = "setConfig") {
             _radioConfigState.update { state ->
                 state.copy(
@@ -695,6 +713,7 @@ open class RadioConfigViewModel(
 
         when (result) {
             is RadioResponseResult.Error -> {
+                pendingLocalLoraReread = false
                 sendError(result.message)
                 // Abort the AdminRoute flow — do not fire the destructive action
                 // (reboot/shutdown/factory_reset) if the metadata preflight failed.
@@ -706,7 +725,14 @@ open class RadioConfigViewModel(
                     val data = packet.decoded!!
                     requestIds.update { it.apply { remove(data.request_id) } }
                     if (requestIds.value.isEmpty()) {
-                        setResponseStateSuccess()
+                        if (pendingLocalLoraReread) {
+                            // R9: re-read the local LoRa config so a firmware-applied region change (e.g. an EU
+                            // sibling swap, applied live without a reboot) is reflected back into the form.
+                            pendingLocalLoraReread = false
+                            setResponseStateLoading(ConfigRoute.LORA)
+                        } else {
+                            setResponseStateSuccess()
+                        }
                     } else {
                         incrementCompleted()
                     }

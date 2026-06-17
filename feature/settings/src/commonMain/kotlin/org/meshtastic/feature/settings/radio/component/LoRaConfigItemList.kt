@@ -30,13 +30,16 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.ChannelOption
 import org.meshtastic.core.model.RegionInfo
+import org.meshtastic.core.model.constraintFor
 import org.meshtastic.core.model.numChannels
+import org.meshtastic.core.model.repairPresetFor
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.advanced
 import org.meshtastic.core.resources.bandwidth
 import org.meshtastic.core.resources.coding_rate
 import org.meshtastic.core.resources.config_lora_frequency_slot_summary
 import org.meshtastic.core.resources.config_lora_hop_limit_summary
+import org.meshtastic.core.resources.config_lora_modem_preset_licensed_summary
 import org.meshtastic.core.resources.config_lora_modem_preset_summary
 import org.meshtastic.core.resources.config_lora_region_summary
 import org.meshtastic.core.resources.frequency_slot
@@ -55,6 +58,7 @@ import org.meshtastic.core.resources.sx126x_rx_boosted_gain
 import org.meshtastic.core.resources.tx_enabled
 import org.meshtastic.core.resources.tx_power_dbm
 import org.meshtastic.core.resources.use_modem_preset
+import org.meshtastic.core.ui.component.DropDownItem
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SignedIntegerEditTextPreference
@@ -105,13 +109,26 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     ) {
         item {
             TitledCard(title = stringResource(Res.string.options)) {
+                // Region→preset legality map only constrains the locally connected device (R10); for remote admin
+                // there is no map for the remote node, so leave the preset list unconstrained.
+                val regionPresetMap = if (state.isLocal) state.loraRegionPresetMap else null
+                val presetConstraint =
+                    remember(regionPresetMap, formState.value.region) {
+                        regionPresetMap.constraintFor(formState.value.region)
+                    }
+                val presetsGated = presetConstraint?.isGated(state.localIsLicensed) == true
                 DropDownPreference(
                     title = stringResource(Res.string.region_frequency_plan),
                     summary = stringResource(Res.string.config_lora_region_summary),
                     enabled = state.connected,
                     items = RegionInfo.entries.map { it.regionCode to it.description },
                     selectedItem = formState.value.region,
-                    onItemSelected = { formState.value = formState.value.copy(region = it) },
+                    onItemSelected = { region ->
+                        // When the region changes, snap the preset to the region's default if the current one is
+                        // no longer legal there (R7); a no-op when the region is unconstrained.
+                        val repaired = regionPresetMap.repairPresetFor(region, formState.value.modem_preset)
+                        formState.value = formState.value.copy(region = region, modem_preset = repaired)
+                    },
                 )
                 HorizontalDivider()
                 SwitchPreference(
@@ -123,11 +140,31 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 )
                 HorizontalDivider()
                 if (formState.value.use_preset) {
+                    // Restrict the preset list to those legal in the selected region (R7); a null constraint means
+                    // unconstrained, so show every preset. Licensed-only regions disable their presets unless the
+                    // device is flagged as a licensed operator (R8).
+                    val presetItems =
+                        ChannelOption.entries
+                            .filter { option ->
+                                presetConstraint == null || option.modemPreset in presetConstraint.presets
+                            }
+                            .map { option ->
+                                DropDownItem(
+                                    value = option.modemPreset,
+                                    label = option.modemPreset.name,
+                                    enabled = !presetsGated,
+                                )
+                            }
                     DropDownPreference(
                         title = stringResource(Res.string.modem_preset),
-                        summary = stringResource(Res.string.config_lora_modem_preset_summary),
+                        summary =
+                        if (presetsGated) {
+                            stringResource(Res.string.config_lora_modem_preset_licensed_summary)
+                        } else {
+                            stringResource(Res.string.config_lora_modem_preset_summary)
+                        },
                         enabled = state.connected && formState.value.use_preset,
-                        items = ChannelOption.entries.map { it.modemPreset to it.modemPreset.name },
+                        items = presetItems,
                         selectedItem = formState.value.modem_preset,
                         onItemSelected = { formState.value = formState.value.copy(modem_preset = it) },
                     )

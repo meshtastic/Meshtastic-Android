@@ -65,9 +65,12 @@ import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config
+import org.meshtastic.proto.Data
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.DeviceProfile
 import org.meshtastic.proto.HamParameters
+import org.meshtastic.proto.LoRaPresetGroup
+import org.meshtastic.proto.LoRaRegionPresetMap
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.MeshPacket
@@ -117,6 +120,7 @@ class RadioConfigViewModelTest {
         every { radioConfigRepository.moduleConfigFlow } returns MutableStateFlow(LocalModuleConfig())
         every { radioConfigRepository.deviceUIConfigFlow } returns MutableStateFlow(null)
         every { radioConfigRepository.fileManifestFlow } returns MutableStateFlow(emptyList())
+        every { radioConfigRepository.loraRegionPresetMapFlow } returns MutableStateFlow(null)
 
         every { analyticsPrefs.analyticsAllowed } returns MutableStateFlow(false)
         every { homoglyphEncodingPrefs.homoglyphEncodingEnabled } returns MutableStateFlow(false)
@@ -787,6 +791,79 @@ class RadioConfigViewModelTest {
         // Calling again should still be Loading (no-op, not a new instance)
         remoteVm.ensureLoadingForRemote()
         assertTrue(remoteVm.radioConfigState.value.responseState is ResponseState.Loading)
+    }
+
+    @Test
+    fun `loraRegionPresetMapFlow populates state`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        nodeRepository.setNodes(listOf(node))
+        val mapFlow = MutableStateFlow<LoRaRegionPresetMap?>(null)
+        every { radioConfigRepository.loraRegionPresetMapFlow } returns mapFlow
+        viewModel = createViewModel()
+        runCurrent()
+
+        assertEquals(null, viewModel.radioConfigState.value.loraRegionPresetMap)
+
+        val map = LoRaRegionPresetMap(groups = listOf(LoRaPresetGroup(licensed_only = true)))
+        mapFlow.value = map
+        runCurrent()
+
+        assertEquals(map, viewModel.radioConfigState.value.loraRegionPresetMap)
+    }
+
+    @Test
+    fun `localIsLicensed tracks the destination node's is_licensed flag`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123", is_licensed = true))
+        nodeRepository.setNodes(listOf(node))
+        viewModel = createViewModel()
+        runCurrent()
+
+        assertTrue(viewModel.radioConfigState.value.localIsLicensed)
+    }
+
+    @Test
+    fun `local LoRa setConfig triggers a LoRa re-read once the set is acknowledged`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        nodeRepository.setNodes(listOf(node))
+        val packetFlow = MutableSharedFlow<MeshPacket>()
+        every { serviceRepository.meshPacketFlow } returns packetFlow
+        viewModel = createViewModel()
+
+        everySuspend { radioConfigUseCase.setConfig(any(), any()) } returns 42
+        everySuspend { radioConfigUseCase.getChannel(any(), any()) } returns 43
+        everySuspend { radioConfigUseCase.getConfig(any(), any()) } returns 44
+
+        // Save a LoRa config on the local device — this schedules a re-read.
+        viewModel.setConfig(Config(lora = Config.LoRaConfig(use_preset = true)))
+        runCurrent()
+
+        // Firmware acknowledges with a routing ACK (Success) carrying the set's request_id.
+        every { processRadioResponseUseCase(any(), 123, any()) } returns RadioResponseResult.Success
+        packetFlow.emit(MeshPacket(decoded = Data(request_id = 42)))
+        runCurrent()
+
+        // R9: a LoRa config re-read is issued so a firmware-applied region swap is reflected back.
+        verifySuspend { radioConfigUseCase.getConfig(123, ConfigRoute.LORA.type) }
+    }
+
+    @Test
+    fun `non-LoRa setConfig does not trigger a re-read`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        nodeRepository.setNodes(listOf(node))
+        val packetFlow = MutableSharedFlow<MeshPacket>()
+        every { serviceRepository.meshPacketFlow } returns packetFlow
+        viewModel = createViewModel()
+
+        everySuspend { radioConfigUseCase.setConfig(any(), any()) } returns 42
+
+        viewModel.setConfig(Config(device = Config.DeviceConfig(role = Config.DeviceConfig.Role.CLIENT)))
+        runCurrent()
+
+        every { processRadioResponseUseCase(any(), 123, any()) } returns RadioResponseResult.Success
+        packetFlow.emit(MeshPacket(decoded = Data(request_id = 42)))
+        runCurrent()
+
+        verifySuspend(exactly(0)) { radioConfigUseCase.getConfig(any(), any()) }
     }
 
     private fun myNodeInfo(myNodeNum: Int) = MyNodeInfo(
