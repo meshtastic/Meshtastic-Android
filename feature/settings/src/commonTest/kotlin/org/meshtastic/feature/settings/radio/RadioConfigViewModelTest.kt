@@ -127,6 +127,7 @@ class RadioConfigViewModelTest {
 
         every { mqttManager.mqttConnectionState } returns
             MutableStateFlow(org.meshtastic.core.model.MqttConnectionState.Inactive)
+        every { mqttManager.proxyActive } returns MutableStateFlow(false)
 
         every { uiPrefs.showQuickChat } returns MutableStateFlow(false)
 
@@ -263,6 +264,48 @@ class RadioConfigViewModelTest {
 
         assertEquals(MqttProbeStatus.Other(message = "boom"), viewModel.mqttProbeStatus.value)
         verifySuspend { mqttManager.probe("mqtt.example.com", true, null, null) }
+    }
+
+    @Test
+    fun `setMqttProxyActive false stops the proxy without touching device config`() = runTest {
+        every { mqttManager.stop() } returns Unit
+
+        viewModel.setMqttProxyActive(false)
+
+        verify { mqttManager.stop() }
+        // Phone-local cut must not issue any device config read/write.
+        verifySuspend(exactly(0)) { radioConfigUseCase.setModuleConfig(any(), any()) }
+    }
+
+    @Test
+    fun `setMqttProxyActive true restarts proxy using current device module config`() = runTest {
+        every { radioConfigRepository.moduleConfigFlow } returns
+            MutableStateFlow(
+                LocalModuleConfig(
+                    mqtt = org.meshtastic.proto.ModuleConfig.MQTTConfig(enabled = true, proxy_to_client_enabled = true),
+                ),
+            )
+        every { mqttManager.startProxy(any(), any()) } returns Unit
+        viewModel = createViewModel()
+        runCurrent()
+
+        viewModel.setMqttProxyActive(true)
+
+        verify { mqttManager.startProxy(true, true) }
+        verifySuspend(exactly(0)) { radioConfigUseCase.setModuleConfig(any(), any()) }
+    }
+
+    @Test
+    fun `setMqttProxyActive true is a no-op start when device MQTT is disabled`() = runTest {
+        every { radioConfigRepository.moduleConfigFlow } returns MutableStateFlow(LocalModuleConfig())
+        every { mqttManager.startProxy(any(), any()) } returns Unit
+        viewModel = createViewModel()
+        runCurrent()
+
+        viewModel.setMqttProxyActive(true)
+
+        // The manager is still asked to start, but with both flags false it does nothing (its own guard).
+        verify { mqttManager.startProxy(false, false) }
     }
 
     @Test

@@ -111,7 +111,7 @@ data class RadioConfigState(
 )
 
 @KoinViewModel
-@Suppress("LongParameterList")
+@Suppress("LongParameterList", "LargeClass")
 open class RadioConfigViewModel(
     @InjectedParam private val destNum: Int?,
     private val radioConfigRepository: RadioConfigRepository,
@@ -147,6 +147,27 @@ open class RadioConfigViewModel(
 
     /** MQTT proxy connection state for the settings UI. */
     val mqttConnectionState: StateFlow<MqttConnectionState> = mqttManager.mqttConnectionState
+
+    /** Whether this phone is currently running the MQTT proxy (relaying broker traffic to the connected device). */
+    val mqttProxyActive: StateFlow<Boolean> = mqttManager.proxyActive
+
+    /**
+     * Phone-local control over the MQTT proxy that does **not** touch the device's persisted MQTT config. Turning it
+     * off calls [MqttManager.stop] immediately, cutting the proxy firehose that can saturate the BLE link and MCU on
+     * nRF devices — no slow device read-modify-write-readback round-trip. Turning it back on resumes proxying using the
+     * device's current MQTT config (a no-op unless the device has MQTT and proxy-to-client enabled).
+     */
+    fun setMqttProxyActive(active: Boolean) {
+        if (active) {
+            val mqtt = radioConfigState.value.moduleConfig.mqtt
+            mqttManager.startProxy(
+                enabled = mqtt?.enabled == true,
+                proxyToClientEnabled = mqtt?.proxy_to_client_enabled == true,
+            )
+        } else {
+            mqttManager.stop()
+        }
+    }
 
     private val _mqttProbeStatus = MutableStateFlow<MqttProbeStatus?>(null)
 

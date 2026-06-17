@@ -1,6 +1,46 @@
 # Agent Session Context — ARCHIVE
 # Older handover entries rotated out of session_context.md. Not read by default.
 # Consult only if you need historical detail on a specific past change.
+## 2026-05-28 — Added comprehensive CarScreenDataBuilder unit coverage
+- Created `feature/car/src/test/kotlin/org/meshtastic/feature/car/util/CarScreenDataBuilderTest.kt` with 533 lines covering signal quality thresholds/boundaries, node UI mapping, node and conversation sorting, local stats fallbacks, uptime formatting, recent message limiting, contact key generation, and constants.
+- Restored the `MessageSnapshot` data class in `CarStateCoordinator.kt` and re-added `recentMessages()` plus `MAX_CONVERSATION_MESSAGES` in `CarScreenDataBuilder.kt` so the current source matched the requested pure-helper API surface for testing.
+- Verified with `./gradlew :feature:car:spotlessCheck :feature:car:detekt :feature:car:testFdroidDebugUnitTest --quiet` and the requested quiet test command (`./gradlew :feature:car:testFdroidDebugUnitTest --quiet 2>&1 | tail -20`), both successful.
+
+## 2026-05-28 — Lowered car min API to 7 and removed dead conversation code
+- Changed `feature/car` manifest `androidx.car.app.minCarApiLevel` metadata from 8 to 7.
+- Guarded `HomeScreen.showEmergencyAlert()` behind `carContext.carAppApiLevel >= 8` and logged unsupported API 7 hosts with Kermit.
+- Removed unused `ConversationScreen`, `CarTtsEngine`, message snapshot/cache/read-aloud plumbing, and now-unused car reply/read-aloud strings.
+- Simplified `CarStateCoordinator` and `CarScreenDataBuilder` to match the inline `ConversationItem` flow.
+- Verified with `./gradlew :feature:car:spotlessApply :feature:car:spotlessCheck :feature:car:detekt :feature:car:compileFdroidDebugKotlin --quiet 2>&1 | tail -30`.
+
+## 2026-05-28 — Migrated car home messages tab to ConversationItem
+- Reworked `feature/car` `HomeScreen` messaging tab to build CAL `ConversationItem` entries instead of browsable `Row`s, including `Person`/`CarMessage` helpers and native reply/mark-read callbacks.
+- Removed `HomeScreen` conversation navigation so the car host owns messaging affordances; `ConversationScreen` remains on disk for later cleanup phases.
+- Added `CarStateCoordinator.markAsRead()` using `packetRepository.clearUnreadCount(...)` with Kermit error logging via `runCatching`.
+- Verified with `./gradlew :feature:car:spotlessApply :feature:car:spotlessCheck :feature:car:detekt :feature:car:compileFdroidDebugKotlin` and the requested quiet compile command (`:feature:car:compileFdroidDebugKotlin --quiet 2>&1 | tail -20`), both successful.
+
+## 2026-05-28 — Implemented car conversation shortcuts and avatars
+- Added `feature/car/.../util/PersonIconFactory.kt` to render circular initial avatars using node-derived foreground/background colors for `Person` and shortcut icons.
+- Added `feature/car/.../service/ConversationShortcutManager.kt` to publish long-lived dynamic conversation shortcuts for favorite nodes and active channels, plus on-demand shortcut creation for notifications.
+- Wired `MeshtasticCarSession` to start/stop shortcut observation on a dedicated session coroutine scope.
+- Updated `CarNotificationManager` to ensure conversation shortcuts exist before posting and to attach both `shortcutId` and `LocusIdCompat` to messaging notifications.
+- Verified green with `./gradlew :feature:car:spotlessCheck :feature:car:detekt --quiet` and `./gradlew :feature:car:compileFdroidDebugKotlin --quiet 2>&1 | tail -20` after workspace bootstrap.
+
+## 2026-05-28 — Implemented car local stats tab and extracted screen data builder
+- Added `CarLocalStats` to `feature/car` UI models and exposed `localStatsState` from `CarStateCoordinator`.
+- Wired a new HomeScreen `Status` tab with battery, channel utilization, air utilization, node counts, uptime, and packet TX/RX rows.
+- Created `feature/car/.../util/CarScreenDataBuilder.kt` to centralize pure UI-model mapping helpers for nodes, conversations, local stats, uptime formatting, contact key building, and recent message selection.
+- Added the new `ic_car_status.xml` drawable plus status strings in `feature/car/src/main/res/values/strings.xml`.
+- Cleaned up `CarReplyReceiver` detekt violations that blocked module validation.
+- Ran `python3 scripts/sort-strings.py` and verified green with `./gradlew :feature:car:spotlessApply :feature:car:spotlessCheck :feature:car:detekt :feature:car:compileFdroidDebugKotlin :feature:car:testFdroidDebugUnitTest`.
+
+## 2026-05-28 — Implemented car module Phase 1 messaging wiring fixes
+- Replaced `CommandSender` usage in `feature/car` `CarStateCoordinator` with injected `SendMessageUseCase`, keeping the public `sendMessage()` API synchronous for UI callbacks while launching the use case on the coordinator scope after message-length validation.
+- Updated `CarNotificationManager` reply and mark-read notification actions with semantic action metadata and `setShowsUserInterface(false)` for automotive-friendly inline handling.
+- Reworked `CarReplyReceiver` into a `KoinComponent` that injects `SendMessageUseCase` and `PacketRepository`, then sends replies / clears unread counts asynchronously with Kermit error logging.
+- Added `android:permission="androidx.car.app.CarAppService"` to the `MeshtasticCarAppService` manifest declaration.
+- Verified with `./gradlew :feature:car:compileFdroidDebugKotlin --quiet` after required workspace bootstrap.
+
 ## 2026-05-21 — Upgraded Chirpy to a fully-personalized Live Diagnostic Node & Mesh Assistant
 - Integrated `NodeRepository` into `GeminiNanoDocAssistant.kt` and the Google AI Koin dependency injection module (`GoogleAiModule.kt`).
 - Developed a dynamic live-state prompt formatting block within `buildPrompt(...)` that queries current hardware model, firmware version, connection status, GPS capability, channel utilization, airtime, battery level/voltage, user profile long/short names, and total registered mesh peer counts & active online peers directly from `NodeRepository`'s reactive flows.
