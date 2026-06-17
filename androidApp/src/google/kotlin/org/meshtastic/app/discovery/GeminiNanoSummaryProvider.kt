@@ -14,26 +14,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.discovery.ai
+package org.meshtastic.app.discovery
 
 import co.touchlab.kermit.Logger
 import com.google.mlkit.genai.prompt.Generation
 import com.google.mlkit.genai.prompt.GenerativeModel
 import com.google.mlkit.genai.prompt.TextPart
 import com.google.mlkit.genai.prompt.generateContentRequest
-import org.koin.core.annotation.Single
 import org.meshtastic.core.database.entity.DiscoveryPresetResultEntity
 import org.meshtastic.core.database.entity.DiscoverySessionEntity
 import org.meshtastic.feature.discovery.DiscoverySummaryGenerator
+import org.meshtastic.feature.discovery.ai.DiscoverySummaryAiProvider
 
 /**
- * Android provider that uses Gemini Nano via ML Kit GenAI Prompt API for on-device AI summaries.
+ * Google-flavor provider that uses Gemini Nano via the ML Kit GenAI Prompt API for on-device AI summaries.
+ *
+ * Lives in the Google flavor source set (not the shared `:feature:discovery` module) so the proprietary ML Kit GenAI
+ * dependency never reaches the F-Droid build. The F-Droid flavor binds
+ * [org.meshtastic.feature.discovery.ai. AlgorithmicSummaryProvider] instead.
  *
  * Falls back to [DiscoverySummaryGenerator] when:
  * - The on-device model is unavailable (unsupported hardware or not downloaded)
  * - Generation fails for any reason
  */
-@Single(binds = [DiscoverySummaryAiProvider::class])
 class GeminiNanoSummaryProvider(private val generator: DiscoverySummaryGenerator) : DiscoverySummaryAiProvider {
 
     private val log = Logger.withTag("GeminiNanoSummary")

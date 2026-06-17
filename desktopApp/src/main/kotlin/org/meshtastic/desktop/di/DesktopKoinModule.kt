@@ -87,6 +87,8 @@ import org.meshtastic.desktop.stub.NoopMeshLocationManager
 import org.meshtastic.desktop.stub.NoopMeshWorkerManager
 import org.meshtastic.desktop.stub.NoopPhoneLocationProvider
 import org.meshtastic.desktop.stub.NoopPlatformAnalytics
+import org.meshtastic.feature.discovery.ai.AlgorithmicSummaryProvider
+import org.meshtastic.feature.discovery.ai.DiscoverySummaryAiProvider
 import org.meshtastic.feature.docs.ai.AIDocAssistant
 import org.meshtastic.feature.docs.ai.KeywordFallbackAssistant
 import org.meshtastic.feature.docs.translation.DocTranslationService
@@ -227,6 +229,7 @@ private fun desktopPlatformStubsModule() = module {
 
     // AI assistant: keyword-only fallback on desktop (no on-device model)
     single<AIDocAssistant> { get<KeywordFallbackAssistant>() }
+    single<DiscoverySummaryAiProvider> { get<AlgorithmicSummaryProvider>() }
     single<DocTranslationService> { NoOpDocTranslator() }
 
     // Desktop uses the real ApiService implementation (no flavor stub needed)

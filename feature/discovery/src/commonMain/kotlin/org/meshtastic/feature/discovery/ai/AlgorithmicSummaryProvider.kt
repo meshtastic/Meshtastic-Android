@@ -21,8 +21,14 @@ import org.meshtastic.core.database.entity.DiscoveryPresetResultEntity
 import org.meshtastic.core.database.entity.DiscoverySessionEntity
 import org.meshtastic.feature.discovery.DiscoverySummaryGenerator
 
-/** JVM/Desktop fallback that delegates to the algorithmic [DiscoverySummaryGenerator]. */
-@Single(binds = [DiscoverySummaryAiProvider::class])
+/**
+ * Algorithmic [DiscoverySummaryAiProvider] that delegates to the deterministic [DiscoverySummaryGenerator].
+ *
+ * Used wherever no on-device AI model is available: Desktop, iOS, and the Android F-Droid flavor. Registered with
+ * `binds = []` so it is injectable by concrete type but is not auto-bound to [DiscoverySummaryAiProvider]; each
+ * platform binds the interface explicitly (the Google flavor binds the Gemini Nano provider instead).
+ */
+@Single(binds = [])
 class AlgorithmicSummaryProvider(private val generator: DiscoverySummaryGenerator) : DiscoverySummaryAiProvider {
 
     override val isAvailable: Boolean = true
