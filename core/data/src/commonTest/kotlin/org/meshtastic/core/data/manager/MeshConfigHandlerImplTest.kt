@@ -37,6 +37,7 @@ import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceUIConfig
+import org.meshtastic.proto.LoRaRegionPresetMap
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.ModuleConfig
@@ -273,5 +274,17 @@ class MeshConfigHandlerImplTest {
         advanceUntilIdle()
 
         verify { connectionManager.onHandshakeProgress() }
+    }
+
+    // ---------- handleRegionPresets ----------
+
+    @Test
+    fun `handleRegionPresets persists map`() = runTest(testDispatcher) {
+        handler = createHandler(backgroundScope)
+        val map = LoRaRegionPresetMap()
+        handler.handleRegionPresets(map)
+        advanceUntilIdle()
+
+        verifySuspend { radioConfigRepository.setLoraRegionPresetMap(map) }
     }
 }
