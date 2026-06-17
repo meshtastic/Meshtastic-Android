@@ -79,6 +79,7 @@
     <string name="analytics_okay">Tillåt analys och kraschrapportering.</string>
     <string name="analytics_platforms">Analysplattformar:</string>
     <string name="any">Valfri</string>
+    <!-- APP -->
     <string name="app_notifications">Appens aviseringar</string>
     <string name="app_settings">App</string>
     <string name="app_too_old">Applikationen måste uppgraderas</string>
@@ -304,6 +305,12 @@
     <string name="disconnect">Koppla från</string>
     <string name="disconnected">Frånkopplad</string>
     <string name="discovered_network_devices">Upptäckta nätverksenheter</string>
+    <!-- DISCOVERY -->
+    <string name="discovery_stat_channel_utilization">Kanalutnyttjande</string>
+    <string name="discovery_stat_date">Datum</string>
+    <string name="discovery_stat_direct">Direkt</string>
+    <string name="discovery_stat_messages">Meddelanden</string>
+    <string name="discovery_stat_selected">Vald</string>
     <string name="disk_free_indexed">Ledigt lagringutrymme %1$d</string>
     <!-- DISPLAY -->
     <string name="display">Display</string>
@@ -898,6 +905,7 @@
     <string name="request_device_metrics">Enhetens mätvärden</string>
     <string name="request_environment_metrics">Miljövärden</string>
     <string name="request_host_metrics">Begär värdens värden</string>
+    <string name="request_local_stats">Lokal statistik</string>
     <string name="request_metadata">Metadata</string>
     <string name="request_power_metrics">Strömdata</string>
     <string name="request_telemetry">Begär telemetri</string>
@@ -944,6 +952,7 @@
     <string name="routing_error_timeout">Timeout</string>
     <string name="routing_error_too_large">Paket för stort</string>
     <string name="rssi">RSSI</string>
+    <string name="rssi_definition">Received Signal Strength Indicator, ett mått som används för att avgöra effektnivån som togs emot av antennen. Ett högre RSSI-värde indikerar generellt en starkare och stabilare anslutning.</string>
     <string name="rsyslog_server">rsyslog-server</string>
     <string name="sats">Sat.</string>
     <string name="save">Spara</string>
@@ -1033,6 +1042,7 @@
     <string name="slot">Lucka</string>
     <string name="smart_position">Smart position</string>
     <string name="snr">SNR</string>
+    <string name="snr_definition">Signal-to-Noise Ratio, är ett mått som används inom kommunikation för att kvantifiera nivån av en önskad signal mot nivån av bakgrundsbrus. I Meshtastic och andra trådlösa system indikerar en högre SNR en tydligare signal som kan förbättra tillförlitligheten och kvaliteten på dataöverföringen.</string>
     <string name="soil_moisture">Fukthalt i jord</string>
     <string name="soil_temperature">Markens temperatur</string>
     <string name="speed">Hastighet</string>

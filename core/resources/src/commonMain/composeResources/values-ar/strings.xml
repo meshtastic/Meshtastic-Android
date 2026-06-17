@@ -25,6 +25,7 @@
     <string name="administration">الإدارة</string>
     <!-- AIR -->
     <!-- ALERT -->
+    <!-- APP -->
     <string name="app_too_old">مطلوب تحديث التطبيق</string>
     <string name="apply">تفعيل</string>
     <string name="are_you_sure">هل أنت متيقِّن؟</string>
@@ -68,6 +69,9 @@
     <string name="device_sleeping">الجهاز في وضعية السكون</string>
     <string name="direct_message">رسالة مباشره</string>
     <string name="disconnected">انقطع الاتصال</string>
+    <!-- DISCOVERY -->
+    <string name="discovery_stat_direct">مباشره</string>
+    <string name="discovery_stat_messages">الرسائل</string>
     <!-- DISPLAY -->
     <string name="display">إعدادات الشاشة</string>
     <!-- DISTANCE -->

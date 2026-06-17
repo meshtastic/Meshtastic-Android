@@ -62,6 +62,7 @@
     <string name="analytics_okay">Analitika és hibajelentések engedélyezése.</string>
     <string name="analytics_platforms">Analitikai platformok:</string>
     <string name="any">Bármely</string>
+    <!-- APP -->
     <string name="app_notifications">Alkalmazás-értesítések</string>
     <string name="app_settings">Alkalmazás</string>
     <string name="app_too_old">Az alkalmazás frissítése szükséges</string>
@@ -244,6 +245,11 @@
     <string name="disconnect">Leválasztás</string>
     <string name="disconnected">Szétkapcsolva</string>
     <string name="discovered_network_devices">Felfedezett hálózati eszközök</string>
+    <!-- DISCOVERY -->
+    <string name="discovery_stat_date">Dátum</string>
+    <string name="discovery_stat_direct">Közvetlen</string>
+    <string name="discovery_stat_messages">Üzenetek</string>
+    <string name="discovery_stat_selected">Kijelölve</string>
     <string name="disk_free_indexed">Szabad lemezterület %1$d</string>
     <!-- DISPLAY -->
     <string name="display">Kijelző</string>
@@ -693,6 +699,7 @@
     <string name="request_air_quality_metrics">Levegőminőségi metrikák</string>
     <string name="request_device_metrics">Eszközmetrikák</string>
     <string name="request_environment_metrics">Környezeti metrikák</string>
+    <string name="request_local_stats">Helyi statisztikák</string>
     <string name="request_metadata">Metaadatok</string>
     <string name="request_power_metrics">Tápellátási metrikák</string>
     <string name="request_telemetry">Telemetria kérése</string>
@@ -735,6 +742,7 @@
     <string name="routing_error_timeout">Időtúllépés</string>
     <string name="routing_error_too_large">Túl nagy csomag</string>
     <string name="rssi">RSSI</string>
+    <string name="rssi_definition">Vett jelerősség-mutató (RSSI): az antenna által vett jel teljesítményszintjének mérése. A magasabb RSSI általában erősebb, stabilabb kapcsolatot jelez.</string>
     <string name="rsyslog_server">rsyslog szerver</string>
     <string name="sats">Műholdak</string>
     <string name="save">Mentés</string>
@@ -808,6 +816,7 @@
     <string name="slot">Sávhely</string>
     <string name="smart_position">Intelligens pozíció</string>
     <string name="snr">SNR</string>
+    <string name="snr_definition">Jel–zaj arány (SNR): a kommunikációban a kívánt jel szintjének és a háttérzaj szintjének aránya. A Meshtastic és más vezeték nélküli rendszerek esetében a magasabb SNR tisztább jelet jelent, ami javítja az adatátvitel megbízhatóságát és minőségét.</string>
     <string name="speed">Sebesség</string>
     <string name="spread_factor">Szórási Faktor</string>
     <string name="ssid">SSID</string>

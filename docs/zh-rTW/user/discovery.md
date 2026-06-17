@@ -2,8 +2,8 @@
 title: 尋找
 parent: 使用者指南
 nav_order: 12
-last_updated: 2026-05-13
-description: 探索您的 mesh 網路——追蹤路由路徑、鄰近節點地圖與節點探索工具。
+last_updated: 2026-06-11
+description: Explore your mesh network — the Local Mesh Discovery scanner, traceroute paths, neighbor maps, and node discovery tools.
 aliases:
   - mesh-探索
   - 本地-探索
@@ -16,9 +16,82 @@ aliases:
 
 探索工具可協助您了解 mesh 網路的連線方式——哪些節點彼此可以收到訊號、訊息所經過的路徑，以及哪裡存在瓶頸或訊號薄弱的連結。
 
-> 💡 提示：您不需要專屬的「探索模式」即可開始探索 mesh 網路。 以下工具目前可直接從節點清單與節點詳細資訊畫面使用。
+The app offers two complementary approaches:
+
+- **Local Mesh Discovery (Scanner)** — an automated mode that cycles your connected radio through different LoRa presets, listens on each, and ranks which preset performs best at your location.
+- **Manual exploration** — traceroute, Neighbor Info, and the node list, which you can use at any time to investigate specific paths and topology.
 
 ---
+
+## Local Mesh Discovery (Scanner)
+
+Local Mesh Discovery is a dedicated scanning mode that helps you find the best LoRa modem preset for your location and see which nodes are active on each preset. It cycles your connected radio through one or more presets you choose, listens (or "dwells") on each one for a set time to collect packets, then analyzes and ranks the results.
+
+Open it from **Settings → Local Mesh Discovery**.
+
+> ⚠️ **Note:** Discovery temporarily changes your radio's LoRa settings while it scans, then restores your original configuration when it finishes. Your device must be connected to run a scan.
+
+### Setting Up a Scan
+
+Before starting, configure these controls:
+
+| Control                | 描述說明                                                                                                                                                                                                                           |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **LoRa preset picker** | Select one or more presets to scan. Discovery dwells on each selected preset in turn.                                                                                                          |
+| **Dwell time**         | Time to listen on each preset. Choose from 1, 5, 15, 30, 45, 60, 90, 120, or 180 minutes. Longer dwell times collect more packets and give a clearer picture, but take longer. |
+| **Keep screen awake**  | Optional toggle that prevents the screen from sleeping during a long scan.                                                                                                                                     |
+
+The **Start** button stays disabled — with an explanation of why — until the scan can run. Common reasons it's disabled:
+
+- The device is **not connected**.
+- The current channel is using the **default channel key** (use a unique key first — see [Messages & Channels](messages-and-channels)).
+- **No presets** have been selected to scan.
+- The selected preset uses **2.4 GHz**, which your hardware doesn't support.
+
+### Live Progress
+
+While a scan runs, Discovery shows its current stage:
+
+| Stage                                                 | What's happening                                                                                       |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| **Preparing**                                         | Saving your current configuration and getting ready to scan.                           |
+| **Shifting to \<preset\>** | Switching the radio to the next preset to test.                                        |
+| **Reconnecting**                                      | Re-establishing the connection after the preset change.                                |
+| **Dwell**                                             | Listening on the current preset to collect packets, with a countdown to the next step. |
+| **Analysis**                                          | Processing the collected packets and ranking the presets.                              |
+| **Restoring**                                         | Putting your original LoRa configuration back.                                         |
+
+![Dwell countdown showing time remaining on the current preset](../../assets/screenshots/discovery_dwell_progress.png)
+
+### 解讀結果
+
+When the scan completes, Discovery presents a per-preset result card for each preset it tested, plus an overall summary.
+
+![Per-preset result card with ranking and collected metrics](../../assets/screenshots/discovery_preset_result.png)
+
+Metrics include:
+
+| 公制（公里/公尺）                                | What it tells you                                                                              |
+| ---------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| RF health                                | Overall quality of the radio environment on that preset.                       |
+| 頻道使用率                                    | How busy the airwaves were during the dwell.                                   |
+| Airtime                                  | Transmission time observed.                                                    |
+| Direct vs. relayed nodes | How many mesh nodes were heard directly versus via a relay.                    |
+| Bad / duplicate packets                  | Counts of corrupt and repeated packets, indicating congestion or interference. |
+
+Additional features available from the results:
+
+- **Scan History** — saved sessions you can revisit; view or delete past scans.
+- **Discovery Map** — a map of the nodes found during the scan.
+- **Report export** — export a report as a PDF on Android, or as text on other platforms.
+
+> 💡 **Tip:** On Android, Discovery can generate an on-device AI summary (Gemini Nano) of your results. If the on-device model isn't available, an algorithmic summary is used instead — so you always get a readable interpretation of the scan.
+
+---
+
+## Manual Exploration
+
+The tools below are available at any time from the node list and node detail screens. Use them to investigate specific paths and build a topology picture, alongside or instead of a full scan.
 
 ## 路由追蹤
 

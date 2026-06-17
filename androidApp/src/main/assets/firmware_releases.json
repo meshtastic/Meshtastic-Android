@@ -201,12 +201,6 @@
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
-      "id": "10728",
-      "title": "Beta fixes",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10728",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
       "id": "10726",
       "title": "Leave src/platform out of the build filter by default",
       "page_url": "https://github.com/meshtastic/firmware/pull/10726",
@@ -313,6 +307,18 @@
       "title": "Fix BLE advertising management to prevent crashes during reconnections",
       "page_url": "https://github.com/meshtastic/firmware/pull/10658",
       "zip_url": "+40.3 KB"
+    },
+    {
+      "id": "10656",
+      "title": "UDP Unicast for Meshtasticd",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10656",
+      "zip_url": "s"
+    },
+    {
+      "id": "10633",
+      "title": "revert a conflict regression and introduce the DCDC workaround ",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10633",
+      "zip_url": "s"
     }
   ]
 }

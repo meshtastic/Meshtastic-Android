@@ -67,6 +67,7 @@
     <string name="analytics_okay">Permiteți analiza și raportări de erori.</string>
     <string name="analytics_platforms">Platforme analitice:</string>
     <string name="any">Oricare</string>
+    <!-- APP -->
     <string name="app_notifications">Notificări aplicații</string>
     <string name="app_settings">Aplicaţie</string>
     <string name="app_too_old">Aplicație prea veche</string>
@@ -288,6 +289,11 @@
     <string name="disconnect">Deconectați</string>
     <string name="disconnected">Deconectat</string>
     <string name="discovered_network_devices">Dispozitive ale rețelei descoperite</string>
+    <!-- DISCOVERY -->
+    <string name="discovery_stat_date">Dată</string>
+    <string name="discovery_stat_direct">Direct</string>
+    <string name="discovery_stat_messages">Mesaje</string>
+    <string name="discovery_stat_selected">Selectat</string>
     <string name="disk_free_indexed">Disc liber %1$d</string>
     <!-- DISPLAY -->
     <string name="display">Ecran</string>
@@ -946,6 +952,7 @@
     <string name="routing_error_timeout">Expirat</string>
     <string name="routing_error_too_large">Pachet prea mare</string>
     <string name="rssi"> RSSI</string>
+    <string name="rssi_definition">Indicatorul intensității semnalului recepționat (Received Signal Strength Indicator), o măsurătoare utilizată pentru a determina nivelul de putere recepționat de antenă. O valoare RSSI mai mare indică, în general, o conexiune mai puternică și mai stabilă.</string>
     <string name="rsyslog_server">server rsyslog</string>
     <string name="sats">Sateliți</string>
     <string name="save">Salvează</string>
@@ -1032,6 +1039,7 @@
     <string name="slot">Slot</string>
     <string name="smart_position">Poziție inteligentă</string>
     <string name="snr">SNR</string>
+    <string name="snr_definition">Raportul semnal-zgomot (Signal-to-Noise Ratio), o măsură utilizată în comunicații pentru a cuantifica nivelul unui semnal dorit în raport cu nivelul zgomotului de fond. În Meshtastic și în alte sisteme wireless, un SNR mai mare indică un semnal mai clar, care poate îmbunătăți fiabilitatea și calitatea transmiterii datelor.</string>
     <string name="soil_moisture">Umid sol</string>
     <string name="soil_temperature">Temp sol</string>
     <string name="speed">Viteza</string>

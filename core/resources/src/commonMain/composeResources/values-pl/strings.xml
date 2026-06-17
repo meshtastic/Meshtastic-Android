@@ -46,6 +46,7 @@
     <string name="always_point_north">Zawsze wskazywać na północ</string>
     <string name="ambient_lighting">Oświetlenie otoczenia</string>
     <string name="analytics_okay">Zezwalaj na analizę i raportowanie awarii.</string>
+    <!-- APP -->
     <string name="app_notifications">Powiadomienia aplikacji</string>
     <string name="app_settings">Aplikacja</string>
     <string name="app_too_old">Konieczna aktualizacja aplikacji</string>
@@ -220,6 +221,12 @@
     <string name="discard_changes">Odrzuć</string>
     <string name="disconnect">Rozłącz</string>
     <string name="disconnected">Rozłączono</string>
+    <!-- DISCOVERY -->
+    <string name="discovery_stat_channel_utilization">Wykorzystanie kanału</string>
+    <string name="discovery_stat_date">Data</string>
+    <string name="discovery_stat_direct">Bezpośrednio</string>
+    <string name="discovery_stat_messages">Wiadomości</string>
+    <string name="discovery_stat_selected">Wybrane</string>
     <!-- DISPLAY -->
     <string name="display">Wyświetlacz</string>
     <string name="display_config">Ustawienia wyświetlacza</string>
@@ -630,6 +637,7 @@
     <string name="request_device_metrics">Metryka urządzenia</string>
     <string name="request_environment_metrics">Metryki środowiskowe</string>
     <string name="request_host_metrics">Statystyki hosta</string>
+    <string name="request_local_stats">Statystyki lokalne</string>
     <string name="request_metadata">Metadane</string>
     <string name="request_power_metrics">Metryki zasilania</string>
     <string name="request_telemetry">Żądanie telemetrii</string>
@@ -672,6 +680,7 @@
     <string name="routing_error_timeout">Upłynął limit czasu</string>
     <string name="routing_error_too_large">Pakiet jest zbyt duży</string>
     <string name="rssi">RSSI:</string>
+    <string name="rssi_definition">Received Signal Strength Indicator - miara używana do określenia poziomu mocy odbieranej przez antenę. Wyższa wartość RSSI zazwyczaj oznacza silniejsze i bardziej stabilne połączenie.</string>
     <string name="rsyslog_server">Serwer rsyslog</string>
     <string name="save">Zapisz</string>
     <string name="save_changes">Zapisz</string>
@@ -725,6 +734,7 @@
     <string name="skip">Pomiń</string>
     <string name="smart_position">Inteligentne Pozycjonowanie</string>
     <string name="snr">SNR:</string>
+    <string name="snr_definition">Współczynnik sygnału do szumu (Signal-to-Noise Ratio) - miara stosowana w komunikacji do określania poziomu pożądanego sygnału w stosunku do poziomu szumu tła. W Meshtastic i innych systemach bezprzewodowych wyższy współczynnik SNR oznacza czystszy sygnał, który może zwiększyć niezawodność i jakość transmisji danych.</string>
     <string name="speed">Prędkość</string>
     <string name="ssid">SSID</string>
     <string name="supported">Obsługiwane</string>

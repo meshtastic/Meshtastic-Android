@@ -26,6 +26,7 @@
     <string name="administration">Διαχείριση</string>
     <!-- AIR -->
     <!-- ALERT -->
+    <!-- APP -->
     <string name="app_too_old">Εφαρμογή πολύ παλαιά</string>
     <string name="apply">Εφαρμογή</string>
     <string name="are_you_sure_change_default">Είστε σίγουροι ότι θέλετε να αλλάξετε στο προεπιλεγμένο κανάλι;</string>
@@ -79,6 +80,8 @@
     <string name="dew_point">Σημείο Δρόσου</string>
     <string name="direct_message">Άμεσο Μήνυμα</string>
     <string name="disconnected">Αποσυνδεδεμένο</string>
+    <!-- DISCOVERY -->
+    <string name="discovery_stat_messages">Μηνύματα</string>
     <!-- DISPLAY -->
     <string name="display">Οθόνη</string>
     <!-- DISTANCE -->

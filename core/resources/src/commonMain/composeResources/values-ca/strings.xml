@@ -25,6 +25,7 @@
     <string name="add_network_device">Afegir</string>
     <!-- AIR -->
     <!-- ALERT -->
+    <!-- APP -->
     <string name="app_too_old">Actualització de l'aplicació necessària</string>
     <string name="apply">Aplicar</string>
     <string name="are_you_sure_change_default">Estàs segur que vols canviar al canal per defecte?</string>
@@ -62,6 +63,7 @@
     <string name="device_sleeping">Dispositiu hivernant</string>
     <string name="direct_message">Missatge directe</string>
     <string name="disconnected">Desconnectat</string>
+    <!-- DISCOVERY -->
     <!-- DISPLAY -->
     <!-- DISTANCE -->
     <string name="distance">Distància</string>

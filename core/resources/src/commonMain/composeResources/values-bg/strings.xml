@@ -54,6 +54,7 @@
     <string name="advanced">Разширени</string>
     <string name="advanced_title">Разширени</string>
     <!-- AIR -->
+    <string name="air_quality">Качество на въздуха</string>
     <string name="air_quality_icon">Икона за качество на въздуха</string>
     <string name="air_quality_metrics_module_enabled">Модулът за показатели за качеството на въздуха е активиран</string>
     <string name="air_quality_metrics_update_interval_seconds">Интервал на актуализиране на показателите за качеството на въздуха</string>
@@ -67,6 +68,7 @@
     <string name="analytics_notice">Анализите се събират, за да ни помогнат да подобрим приложението за Android (благодарим ви). Ще получаваме анонимизирана информация за поведението на потребителите. Това включва отчети за сривове, екрани, използвани в приложението и др.</string>
     <string name="analytics_okay">Разрешаване на анализи и докладване за сривове.</string>
     <string name="analytics_platforms">Аналитични платформи:</string>
+    <!-- APP -->
     <string name="app_notifications">Известия от приложението</string>
     <string name="app_settings">Приложение</string>
     <string name="app_too_old">Изисква се актуализация на приложението</string>
@@ -264,6 +266,12 @@
     <string name="disconnect">Прекъсване на връзката</string>
     <string name="disconnected">Прекъсната връзка</string>
     <string name="discovered_network_devices">Открити мрежови устройства</string>
+    <!-- DISCOVERY -->
+    <string name="discovery_stat_channel_utilization">Използване на канала</string>
+    <string name="discovery_stat_date">Дата</string>
+    <string name="discovery_stat_direct">Директно</string>
+    <string name="discovery_stat_messages">Съобщения</string>
+    <string name="discovery_stat_selected">Избрани</string>
     <string name="disk_free_indexed">Свободен диск %1$d</string>
     <!-- DISPLAY -->
     <string name="display">Дисплей</string>
@@ -886,6 +894,7 @@
     <string name="routing_error_pki_unknown_pubkey">Неизвестен публичен ключ</string>
     <string name="routing_error_too_large">Пакетът е твърде голям</string>
     <string name="rssi">RSSI</string>
+    <string name="rssi_definition">Индикатор за силата на получения сигнал - измерване, използвано за определяне на нивото на получения сигнал, приемано от антената. По-високата стойност на RSSI обикновено показва по-силна и по-стабилна връзка.</string>
     <string name="rsyslog_server">rsyslog сървър</string>
     <string name="sats">Сат</string>
     <string name="save">Запис</string>
@@ -962,6 +971,7 @@
     <string name="slot">Слот</string>
     <string name="smart_position">Интелигентна позиция</string>
     <string name="snr">SNR</string>
+    <string name="snr_definition">Съотношение сигнал/шум, мярка, използвана в комуникациите за количествено определяне на нивото на желания сигнал спрямо нивото на фоновия шум. В Meshtastic и други безжични системи, по-високото съотношение сигнал/шум показва по-ясен сигнал, който може да подобри надеждността и качеството на предаване на данни.</string>
     <string name="speed">Скорост</string>
     <string name="speed_kmh">%1$d Km/h</string>
     <string name="ssid">SSID</string>

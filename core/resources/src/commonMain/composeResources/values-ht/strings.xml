@@ -27,6 +27,7 @@
     <!-- AIR -->
     <string name="air_util_definition">Pousantaj tan lè transmisyon te itilize nan dènye èdtan an.</string>
     <!-- ALERT -->
+    <!-- APP -->
     <string name="app_too_old">Aplikasyon twò ansyen</string>
     <string name="apply">Aplike</string>
     <string name="are_you_sure_change_default">Eske ou sèten ou vle chanje pou kanal default la?</string>
@@ -67,6 +68,8 @@
     <string name="device_sleeping">Aparèy ap dòmi</string>
     <string name="direct_message">Mesaj dirèk</string>
     <string name="disconnected">Dekonekte</string>
+    <!-- DISCOVERY -->
+    <string name="discovery_stat_direct">Direk</string>
     <!-- DISPLAY -->
     <!-- DISTANCE -->
     <string name="distance">Distans</string>
@@ -232,6 +235,7 @@
     <string name="routing_error_pki_unknown_pubkey">Kle piblik enkoni</string>
     <string name="routing_error_timeout">Tan pase</string>
     <string name="routing_error_too_large">Pake twò gwo</string>
+    <string name="rssi_definition">Endikatè Fòs Siynal Resevwa, yon mezi ki itilize pou detèmine nivo pouvwa siynal ki resevwa pa antèn nan. Yon RSSI pi wo jeneralman endike yon koneksyon pi fò ak plis estab.</string>
     <string name="save">Sove</string>
     <string name="save_changes">Sove</string>
     <!-- SCAN -->
@@ -246,6 +250,7 @@
     <string name="shutdown">Fèmen</string>
     <string name="signal">Siynal</string>
     <string name="signal_quality">Kalite Siynal</string>
+    <string name="snr_definition">Rapò Siynal sou Bri, yon mezi ki itilize nan kominikasyon pou mezire nivo siynal vle a kont nivo bri ki nan anviwònman an. Nan Meshtastic ak lòt sistèm san fil, yon SNR pi wo endike yon siynal pi klè ki ka amelyore fyab ak kalite transmisyon done.</string>
     <!-- TAK -->
     <string name="theme">Tèm</string>
     <string name="theme_dark">Fènwa</string>

@@ -86,6 +86,7 @@
     <string name="analytics_okay">Analyse und Absturzberichterstattung erlauben.</string>
     <string name="analytics_platforms">Analyse Plattformen:</string>
     <string name="any">Beliebig</string>
+    <!-- APP -->
     <string name="app_notifications">App-Benachrichtigungen</string>
     <string name="app_settings">Anwendung</string>
     <string name="app_too_old">Anwendungsaktualisierung erforderlich</string>
@@ -337,6 +338,14 @@
     <string name="disconnect">Verbindung trennen</string>
     <string name="disconnected">Verbindung getrennt</string>
     <string name="discovered_network_devices">Entdeckte Netzwerkgeräte</string>
+    <!-- DISCOVERY -->
+    <string name="discovery_stat_channel_utilization">Kanalauslastung</string>
+    <string name="discovery_stat_date">Datum</string>
+    <string name="discovery_stat_direct">Direkt</string>
+    <string name="discovery_stat_mesh">Netz</string>
+    <string name="discovery_stat_messages">Nachrichten</string>
+    <string name="discovery_stat_selected">Ausgewählt</string>
+    <string name="discovery_stat_status">Status</string>
     <string name="disk_free_indexed">Laufwerkspeicher frei %1$d</string>
     <!-- DISPLAY -->
     <string name="display">Display</string>
@@ -1074,6 +1083,7 @@
     <string name="request_device_metrics">Gerätedaten</string>
     <string name="request_environment_metrics">Umweltdaten</string>
     <string name="request_host_metrics">Host Kennzahlen</string>
+    <string name="request_local_stats">Lokale Statistik</string>
     <string name="request_metadata">Metadaten</string>
     <string name="request_pax_metrics">Benutzerzählerdaten</string>
     <string name="request_power_metrics">Energiedaten</string>
@@ -1125,6 +1135,7 @@
     <string name="routing_error_timeout">Zeitüberschreitung</string>
     <string name="routing_error_too_large">Nachricht zu groß</string>
     <string name="rssi">RSSI</string>
+    <string name="rssi_definition">Indikator für die empfangene Signalstärke, eine Messung zur Bestimmung der von der Antenne empfangenen Leistungsstärke. Ein höherer RSSI-Wert weist im Allgemeinen auf eine stärkere und stabilere Verbindung hin.</string>
     <string name="rsyslog_server">rsyslog Server</string>
     <string name="sats">Satelliten</string>
     <string name="save">Speichern</string>
@@ -1217,6 +1228,7 @@
     <string name="slot">Position</string>
     <string name="smart_position">Intelligente Position</string>
     <string name="snr">SNR</string>
+    <string name="snr_definition">Signal-Rausch-Verhältnis, ein in der Kommunikation verwendetes Maß, um den Pegel eines gewünschten Signals im Verhältnis zum Pegel des Hintergrundrauschens zu quantifizieren. Bei Meshtastic und anderen drahtlosen Systemen weist ein höheres SNR auf ein klareres Signal hin, das die Zuverlässigkeit und Qualität der Datenübertragung verbessern kann.</string>
     <string name="soil_moisture">Bodenfeuchte</string>
     <string name="soil_temperature">Bodentemperatur</string>
     <string name="speed">Geschwindigkeit</string>

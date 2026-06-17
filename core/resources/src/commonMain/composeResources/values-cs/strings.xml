@@ -67,6 +67,7 @@
     <string name="analytics_okay">Povolit analýzu a hlášení pádů.</string>
     <string name="analytics_platforms">Analytické nástroje:</string>
     <string name="any">Vše</string>
+    <!-- APP -->
     <string name="app_notifications">Oznámení aplikace</string>
     <string name="app_settings">Aplikace</string>
     <string name="app_too_old">Aplikace je příliš stará</string>
@@ -280,6 +281,11 @@
     <string name="disconnect">Odpojit</string>
     <string name="disconnected">Odpojeno</string>
     <string name="discovered_network_devices">Nalezená síťová zařízení</string>
+    <!-- DISCOVERY -->
+    <string name="discovery_stat_date">Datum</string>
+    <string name="discovery_stat_direct">Přímý</string>
+    <string name="discovery_stat_messages">Zprávy</string>
+    <string name="discovery_stat_selected">Vybrané</string>
     <!-- DISPLAY -->
     <string name="display">Obrazovka</string>
     <string name="display_config">Obrazovka zařízení</string>
@@ -854,6 +860,7 @@
     <string name="request_air_quality_metrics">Metriky kvality ovzduší</string>
     <string name="request_device_metrics">Metriky zařízení</string>
     <string name="request_environment_metrics">Metriky prostředí</string>
+    <string name="request_local_stats">Lokální statistiky</string>
     <string name="request_metadata">Metadata</string>
     <string name="request_power_metrics">Metriky napájení</string>
     <string name="request_telemetry">Vyžádat telemetrii</string>
@@ -899,6 +906,7 @@
     <string name="routing_error_timeout">Vypršel čas spojení</string>
     <string name="routing_error_too_large">Příliš velký paket</string>
     <string name="rssi">RSSI</string>
+    <string name="rssi_definition">Indikátor síly přijímaného signálu, měření, které se používá k určení hladiny výkonu přijímané anténou. Vyšší hodnota RSSI obvykle znamená silnější a stabilnější spojení.</string>
     <string name="rsyslog_server">rsyslog server</string>
     <string name="sats">Satelitů</string>
     <string name="save">Uložit</string>
@@ -981,6 +989,7 @@
     <string name="skip">Přeskočit</string>
     <string name="smart_position">Chytrá poloha</string>
     <string name="snr">SNR</string>
+    <string name="snr_definition">Poměr signálu k šumu (SNR) je veličina používaná k vyjádření poměru mezi úrovní požadovaného signálu a úrovní šumu na pozadí. V Meshtastic a dalších bezdrátových systémech vyšší hodnota SNR značí čistší signál, což může zvýšit spolehlivost a kvalitu přenosu dat.</string>
     <string name="speed">Rychlost</string>
     <string name="ssid">SSID</string>
     <string name="status_message">Stavová zpráva</string>

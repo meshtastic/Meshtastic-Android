@@ -25,6 +25,7 @@
     <string name="add_network_device">Bæta við</string>
     <!-- AIR -->
     <!-- ALERT -->
+    <!-- APP -->
     <string name="app_too_old">Uppfærsla á smáforriti nauðsynleg</string>
     <string name="apply">Virkja</string>
     <string name="are_you_sure_change_default">Ert þú viss um að þú viljir skipta yfir á sjálfgefna rás?</string>
@@ -58,6 +59,7 @@
     <string name="device_sleeping">Radíó er í svefnham</string>
     <string name="direct_message">Bein skilaboð</string>
     <string name="disconnected">Aftengd</string>
+    <!-- DISCOVERY -->
     <!-- DISPLAY -->
     <!-- DISTANCE -->
     <!-- DOC -->

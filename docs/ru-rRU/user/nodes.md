@@ -2,7 +2,7 @@
 title: Ноды
 parent: Руководство пользователя
 nav_order: 4
-last_updated: 2026-05-20
+last_updated: 2026-06-02
 description: Просматривайте, фильтруйте и сортируйте ноды сети — просматривайте подробности, качество сигнала, роли и быстрые действия.
 aliases:
   - node-list
@@ -141,6 +141,12 @@ Inline status indicators show key metrics at a glance:
 | Hop count              | ![Hops](../../assets/screenshots/nodes_hops_info.png)         |
 | Последний раз слышен   | ![Last heard](../../assets/screenshots/nodes_last_heard.png)  |
 | Расстояние             | ![Distance](../../assets/screenshots/nodes_distance_info.png) |
+
+### Device Links ("I want one")
+
+When a node's hardware is recognized, the detail view shows a collapsible **"I want one"** section linking to places to buy or learn more about that device: the vendor's product page, product variants, and regional marketplace listings (such as AliExpress, Amazon, and supported retailers), filtered to your country. Each link opens through the `msh.to` redirect service. Devices with no matching links don't show the section.
+
+A full, browsable directory of every link is also available under **Settings → Device Links**.
 
 ## Related Topics
 

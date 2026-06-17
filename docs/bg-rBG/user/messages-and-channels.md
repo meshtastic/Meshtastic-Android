@@ -2,8 +2,8 @@
 title: Съобщения & Канали
 parent: Ръководство за потребители
 nav_order: 3
-last_updated: 2026-05-13
-description: Send and receive messages, manage channels, configure encryption, and use quick chat, reactions, and message actions.
+last_updated: 2026-06-11
+description: Send and receive messages, manage channels, configure encryption, search conversations, and use quick chat, reactions, and message actions.
 aliases:
   - канали
   - direct-messages
@@ -100,6 +100,19 @@ Pre-configured messages for rapid communication:
 ![Quick chat option](../../assets/screenshots/messages_quick_chat.png)
 
 The channel list shows each channel with its latest message preview.
+
+### Searching Messages
+
+You can search the full history of any conversation directly from the chat screen:
+
+1. Open a conversation (a channel or a direct message).
+2. Tap the **search icon** in the top bar.
+3. Type into the **Search messages…** field. The search runs as you type, across all stored messages in that conversation.
+4. Use the **N / M** result counter and the **previous / next arrows** to jump between matches, which are highlighted in the conversation.
+
+![Message search bar with result counter and previous/next arrows](../../assets/screenshots/messages_search_bar.png)
+
+> 💡 **Tip:** Search is full-text and stays within the conversation you opened it from — it doesn't search across other channels or contacts. Matching is fast even on long histories because messages are indexed locally.
 
 ### Message Bubbles
 
