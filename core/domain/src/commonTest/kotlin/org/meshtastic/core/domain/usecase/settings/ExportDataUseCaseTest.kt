@@ -50,6 +50,7 @@ class ExportDataUseCaseTest {
 
         val output = buffer.readUtf8()
         assertTrue(output.startsWith("\"date\",\"time\",\"from\""))
+        assertTrue(output.contains("\"hop limit\",\"hop start\",\"relay node\",\"payload\""))
     }
 
     @Test
@@ -78,5 +79,64 @@ class ExportDataUseCaseTest {
         val output = buffer.readUtf8()
         assertTrue(output.contains("\"1234\""))
         assertTrue(output.contains("Hello"))
+    }
+
+    @Test
+    fun `invoke writes hop start and relay node columns`() = runTest {
+        val buffer = Buffer()
+        val log =
+            MeshLog(
+                uuid = "1",
+                message_type = "TEXT",
+                received_date = 1000000000L,
+                raw_message = "",
+                fromRadio =
+                FromRadio(
+                    packet =
+                    MeshPacket(
+                        from = 1234,
+                        rx_snr = 5.0f,
+                        hop_limit = 2,
+                        hop_start = 3,
+                        relay_node = 77, // 0x4d -> matches the tail of a node id such as !........4d
+                        decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP, payload = "Hello".encodeUtf8()),
+                    ),
+                ),
+            )
+        meshLogRepository.setLogs(listOf(log))
+
+        useCase(buffer, 1)
+
+        val output = buffer.readUtf8()
+        // hop limit, hop start, relay node (hex), payload
+        assertTrue(output.contains("\"2\",\"3\",\"4d\",\"Hello\""))
+    }
+
+    @Test
+    fun `invoke leaves relay node blank when unset`() = runTest {
+        val buffer = Buffer()
+        val log =
+            MeshLog(
+                uuid = "1",
+                message_type = "TEXT",
+                received_date = 1000000000L,
+                raw_message = "",
+                fromRadio =
+                FromRadio(
+                    packet =
+                    MeshPacket(
+                        from = 1234,
+                        rx_snr = 5.0f,
+                        decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP, payload = "Hello".encodeUtf8()),
+                    ),
+                ),
+            )
+        meshLogRepository.setLogs(listOf(log))
+
+        useCase(buffer, 1)
+
+        val output = buffer.readUtf8()
+        // relay_node defaults to 0 (unset) -> blank field before the payload
+        assertTrue(output.contains("\"0\",\"\",\"Hello\""))
     }
 }
