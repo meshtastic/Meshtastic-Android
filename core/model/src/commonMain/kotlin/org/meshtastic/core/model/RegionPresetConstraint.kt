@@ -41,14 +41,15 @@ data class RegionPresetConstraint(
  * Resolves the [RegionPresetConstraint] the firmware advertised for [region], or `null` when there is no constraint
  * information and the client must therefore NOT restrict the preset list. A `null` result happens when:
  * - the map is `null` (firmware older than 2.8 never sends it),
- * - [region] is absent from `region_groups` (no firmware table entry — treated as unconstrained), or
- * - the referenced `group_index` is out of range (defensive against a malformed map).
+ * - [region] is absent from `region_groups` (no firmware table entry — treated as unconstrained),
+ * - the referenced `group_index` is out of range (defensive against a malformed map), or
+ * - the referenced group has no presets (a degenerate/malformed group — must not collapse the picker to nothing).
  */
 @Suppress("ReturnCount") // Guard clauses for defensive null checks and missing lookups are idiomatic
 fun LoRaRegionPresetMap?.constraintFor(region: RegionCode): RegionPresetConstraint? {
     if (this == null) return null
     val entry = region_groups.firstOrNull { it.region == region } ?: return null
-    val group = groups.getOrNull(entry.group_index) ?: return null
+    val group = groups.getOrNull(entry.group_index)?.takeIf { it.presets.isNotEmpty() } ?: return null
     return RegionPresetConstraint(
         presets = group.presets,
         defaultPreset = group.default_preset,

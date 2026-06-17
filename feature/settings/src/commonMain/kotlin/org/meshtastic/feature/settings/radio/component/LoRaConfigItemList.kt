@@ -143,18 +143,30 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     // Restrict the preset list to those legal in the selected region (R7); a null constraint means
                     // unconstrained, so show every preset. Licensed-only regions disable their presets unless the
                     // device is flagged as a licensed operator (R8).
+                    val selectedPreset = formState.value.modem_preset
                     val presetItems =
-                        ChannelOption.entries
-                            .filter { option ->
-                                presetConstraint == null || option.modemPreset in presetConstraint.presets
+                        remember(presetConstraint, presetsGated, selectedPreset) {
+                            val items =
+                                ChannelOption.entries
+                                    .filter { option ->
+                                        presetConstraint == null || option.modemPreset in presetConstraint.presets
+                                    }
+                                    .map { option ->
+                                        DropDownItem(
+                                            value = option.modemPreset,
+                                            label = option.modemPreset.name,
+                                            enabled = !presetsGated,
+                                        )
+                                    }
+                            // Always keep the current selection present (disabled) so the field is never blank when
+                            // the device's preset is illegal for the selected region.
+                            if (items.any { it.value == selectedPreset }) {
+                                items
+                            } else {
+                                items +
+                                    DropDownItem(value = selectedPreset, label = selectedPreset.name, enabled = false)
                             }
-                            .map { option ->
-                                DropDownItem(
-                                    value = option.modemPreset,
-                                    label = option.modemPreset.name,
-                                    enabled = !presetsGated,
-                                )
-                            }
+                        }
                     DropDownPreference(
                         title = stringResource(Res.string.modem_preset),
                         summary =
@@ -163,7 +175,7 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                         } else {
                             stringResource(Res.string.config_lora_modem_preset_summary)
                         },
-                        enabled = state.connected && formState.value.use_preset,
+                        enabled = state.connected,
                         items = presetItems,
                         selectedItem = formState.value.modem_preset,
                         onItemSelected = { formState.value = formState.value.copy(modem_preset = it) },

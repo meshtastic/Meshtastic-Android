@@ -77,6 +77,18 @@ class LoRaRegionPresetsTest {
     }
 
     @Test
+    fun `a group with no presets is treated as unconstrained`() {
+        // A degenerate/malformed group must degrade to the full preset list, not an empty picker.
+        val empty =
+            LoRaRegionPresetMap(
+                groups = listOf(LoRaPresetGroup(presets = emptyList(), licensed_only = false)),
+                region_groups = listOf(LoRaRegionPresets(region = RegionCode.US, group_index = 0)),
+            )
+        assertNull(empty.constraintFor(RegionCode.US))
+        assertEquals(ModemPreset.LONG_FAST, empty.repairPresetFor(RegionCode.US, ModemPreset.LONG_FAST))
+    }
+
+    @Test
     fun `constraint resolves the region's preset group`() {
         val constraint = map.constraintFor(RegionCode.US)
         assertEquals(listOf(ModemPreset.LONG_FAST, ModemPreset.LONG_SLOW, ModemPreset.SHORT_FAST), constraint?.presets)
