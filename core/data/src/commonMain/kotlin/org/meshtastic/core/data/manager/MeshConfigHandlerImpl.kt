@@ -102,7 +102,7 @@ class MeshConfigHandlerImpl(
 
     override fun handleRegionPresets(map: LoRaRegionPresetMap) {
         Logger.d { "Region presets received (${map.region_groups.size} regions, ${map.groups.size} groups)" }
-        scope.handledLaunch { radioConfigRepository.setLoRaRegionPresetMap(map) }
+        scope.handledLaunch { radioConfigRepository.setLoraRegionPresetMap(map) }
     }
 }
 

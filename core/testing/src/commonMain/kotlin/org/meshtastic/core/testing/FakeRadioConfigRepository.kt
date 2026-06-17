@@ -147,11 +147,11 @@ class FakeRadioConfigRepository :
         fileManifestBacking.value = emptyList()
     }
 
-    override suspend fun setLoRaRegionPresetMap(map: LoRaRegionPresetMap) {
+    override suspend fun setLoraRegionPresetMap(map: LoRaRegionPresetMap) {
         loraRegionPresetMapBacking.value = map
     }
 
-    override suspend fun clearLoRaRegionPresetMap() {
+    override suspend fun clearLoraRegionPresetMap() {
         loraRegionPresetMapBacking.value = null
     }
 

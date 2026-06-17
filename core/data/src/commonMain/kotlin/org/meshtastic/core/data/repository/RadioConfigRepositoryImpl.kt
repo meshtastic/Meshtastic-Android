@@ -137,11 +137,11 @@ open class RadioConfigRepositoryImpl(
     private val _loraRegionPresetMapFlow = MutableStateFlow<LoRaRegionPresetMap?>(null)
     override val loraRegionPresetMapFlow: Flow<LoRaRegionPresetMap?> = _loraRegionPresetMapFlow.asStateFlow()
 
-    override suspend fun setLoRaRegionPresetMap(map: LoRaRegionPresetMap) {
+    override suspend fun setLoraRegionPresetMap(map: LoRaRegionPresetMap) {
         _loraRegionPresetMapFlow.value = map
     }
 
-    override suspend fun clearLoRaRegionPresetMap() {
+    override suspend fun clearLoraRegionPresetMap() {
         _loraRegionPresetMapFlow.value = null
     }
 

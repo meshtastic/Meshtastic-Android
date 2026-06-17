@@ -93,14 +93,14 @@ interface RadioConfigRepository {
     /**
      * Flow of the firmware's region→modem-preset compatibility map ([LoRaRegionPresetMap]), populated from
      * [org.meshtastic.proto.FromRadio.region_presets] during the config handshake (sent after metadata, before
-     * channels). Null when the connected firmware predates this message (< 2.8) or after [clearLoRaRegionPresetMap].
+     * channels). Null when the connected firmware predates this message (< 2.8) or after [clearLoraRegionPresetMap].
      * The local LoRa config UI uses it to constrain the preset picker to the presets legal in the selected region.
      */
     val loraRegionPresetMapFlow: Flow<LoRaRegionPresetMap?>
 
     /** Stores the [LoRaRegionPresetMap] received from the device. */
-    suspend fun setLoRaRegionPresetMap(map: LoRaRegionPresetMap)
+    suspend fun setLoraRegionPresetMap(map: LoRaRegionPresetMap)
 
     /** Clears the stored region→preset map; called at the start of each new handshake. */
-    suspend fun clearLoRaRegionPresetMap()
+    suspend fun clearLoraRegionPresetMap()
 }
