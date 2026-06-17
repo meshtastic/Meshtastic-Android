@@ -91,6 +91,8 @@ data class Channel(val settings: ChannelSettings = default.settings, val loraCon
                         ModemPreset.LITE_SLOW -> "LiteSlow"
                         ModemPreset.NARROW_FAST -> "NarrowFast"
                         ModemPreset.NARROW_SLOW -> "NarrowSlow"
+                        ModemPreset.TINY_FAST -> "TinyFast"
+                        ModemPreset.TINY_SLOW -> "TinySlow"
                     }
                 } else {
                     "Custom"

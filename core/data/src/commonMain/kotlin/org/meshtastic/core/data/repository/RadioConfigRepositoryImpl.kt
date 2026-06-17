@@ -44,6 +44,7 @@ import org.meshtastic.proto.ModuleConfig
  * [LocalModuleConfig].
  */
 @Single
+@Suppress("TooManyFunctions") // All functions mandated by RadioConfigRepository interface; logically grouped by concern
 open class RadioConfigRepositoryImpl(
     private val nodeDB: NodeRepository,
     private val channelSetDataSource: ChannelSetDataSource,
