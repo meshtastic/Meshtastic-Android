@@ -142,11 +142,22 @@ abstract class MeshtasticDatabase : RoomDatabase() {
         /**
          * Configures a [RoomDatabase.Builder] with standard settings for this project.
          *
-         * @param multiConnection opens a multi-reader connection pool for concurrent reads. Production/file databases
-         *   want this. In-memory databases (tests) MUST pass `false`: a pooled reader connection can serve a snapshot
-         *   older than the latest write on the writer connection, so a read immediately after a write may observe stale
-         *   rows — making read-after-write assertions non-deterministically flaky (see `DeviceLinkRepositoryImplTest`).
-         *   A single connection serializes reads behind writes.
+         * @param multiConnection when `true` (default), opens a multi-reader connection pool (`maxNumOfReaders = 4`,
+         *   `maxNumOfWriters = 1`) so reads can run concurrently. Pass `false` to serialize all reads and writes
+         *   through a single connection (no separate reader pool).
+         *
+         * **Android production passes `false`.** Under coroutine cancellation churn (e.g. DB switches via
+         * `flatMapLatest`), the Room KMP reader-pool permit semaphore can wedge: all reader connections report `Free`
+         * but `permits=0`, so every read acquisition times out indefinitely. Single-connection mode eliminates the
+         * separate reader permit pool. See `DatabaseBuilder.kt` (androidMain).
+         *
+         * **In-memory databases MUST pass `false`** for deterministic read-after-write: a pooled reader connection can
+         * serve a snapshot older than the latest write on the writer connection, so a read immediately after a write
+         * may observe stale rows — making read-after-write assertions non-deterministically flaky (see
+         * `DeviceLinkRepositoryImplTest`). A single connection serializes reads behind writes.
+         *
+         * **JVM/iOS production uses `true`** (the default). Revisit if desktop/iOS field logs show similar
+         * pool-exhaustion patterns under cancellation churn.
          */
         fun <T : RoomDatabase> RoomDatabase.Builder<T>.configureCommon(
             multiConnection: Boolean = true,
