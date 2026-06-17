@@ -424,6 +424,12 @@ open class RadioConfigViewModel(
         val preserveFavorites = radioConfigState.value.nodeDbResetPreserveFavorites
 
         when (route) {
+            AdminRoute.SET_TIME.name ->
+                safeLaunch(tag = "setTime") {
+                    val packetId = adminActionsUseCase.setTime(destNum)
+                    registerRequestId(packetId)
+                }
+
             AdminRoute.REBOOT.name ->
                 safeLaunch(tag = "reboot") {
                     val packetId = adminActionsUseCase.reboot(destNum)

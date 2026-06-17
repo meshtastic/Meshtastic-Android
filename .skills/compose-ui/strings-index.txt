@@ -1271,6 +1271,7 @@ serial_tx_pin
 server
 session_active
 session_refresh_required
+set_time
 set_up_connection
 set_your_region
 settings

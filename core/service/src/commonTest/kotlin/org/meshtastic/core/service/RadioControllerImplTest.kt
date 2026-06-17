@@ -340,6 +340,25 @@ class RadioControllerImplTest {
     }
 
     @Test
+    fun setTimeSendsAdminMessageWithCurrentEpochSeconds() = runTest {
+        val controller = createController()
+
+        var sentMessage: AdminMessage? = null
+        everySuspend { commandSender.sendAdmin(any(), any(), any(), any()) } calls
+            {
+                @Suppress("UNCHECKED_CAST")
+                sentMessage = (it.args[3] as () -> AdminMessage)()
+            }
+
+        controller.setTime(destNum = 101, packetId = 11)
+
+        verifySuspend { commandSender.sendAdmin(any(), any(), any(), any()) }
+        // The phone's current time is sent; assert it is populated and a plausible recent epoch (after 2020).
+        val setTime = sentMessage?.set_time_only
+        assertTrue(setTime != null && setTime > 1_577_836_800)
+    }
+
+    @Test
     fun refreshMetadataSendsAdminWithWantResponse() = runTest {
         val controller = createController()
 
