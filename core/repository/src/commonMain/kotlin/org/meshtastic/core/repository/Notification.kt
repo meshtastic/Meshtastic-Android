@@ -25,6 +25,12 @@ data class Notification(
     val isSilent: Boolean = false,
     val group: String? = null,
     val id: Int? = null,
+    /**
+     * Optional deep-link URI invoked when the user taps the notification. Platform implementations are responsible for
+     * converting this into the appropriate intent / activation action. When null, tapping the notification has no
+     * effect.
+     */
+    val deepLinkUri: String? = null,
 ) {
     enum class Type {
         None,

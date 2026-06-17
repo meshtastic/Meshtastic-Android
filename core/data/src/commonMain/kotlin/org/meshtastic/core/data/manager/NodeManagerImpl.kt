@@ -239,6 +239,11 @@ class NodeManagerImpl(
                             title = getStringSuspend(Res.string.new_node_seen, next.user.short_name),
                             message = next.user.long_name,
                             category = Notification.Category.NodeEvent,
+                            id = next.num,
+                            // Path format must stay in sync with DEEP_LINK_BASE_URI + DeepLinkRouter
+                            // in core/navigation (avoided as a Gradle dep here to keep core/data free
+                            // of Compose Navigation libs).
+                            deepLinkUri = "meshtastic://meshtastic/nodes/${next.num}",
                         ),
                     )
                 }
