@@ -60,6 +60,7 @@
     <string name="analytics_notice">Se recopilan analíticas de uso para ayudarnos a mejorar la aplicación Android (¡gracias!), recibiremos información anónima sobre el comportamiento del usuario. Esto incluye reportes de fallos, pantallas utilizadas en la aplicación, etc.</string>
     <string name="analytics_okay">Permitir analíticas y reporte de errores.</string>
     <string name="any">Cualquiera</string>
+    <!-- APP -->
     <string name="app_notifications">Notificaciones de la app</string>
     <string name="app_too_old">Es necesario actualizar la aplicación</string>
     <string name="app_version">Versión</string>
@@ -239,6 +240,11 @@
     <string name="disconnect">Desconectar</string>
     <string name="disconnected">Desconectado</string>
     <string name="discovered_network_devices">Dispositivos de red descubiertos</string>
+    <!-- DISCOVERY -->
+    <string name="discovery_stat_date">Fecha</string>
+    <string name="discovery_stat_direct">Directo</string>
+    <string name="discovery_stat_messages">Mensajes</string>
+    <string name="discovery_stat_selected">Seleccionados</string>
     <string name="disk_free_indexed">Disco libre %1$d</string>
     <!-- DISPLAY -->
     <string name="display">Pantalla</string>
@@ -691,6 +697,7 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="request_device_metrics">Métricas de Dispositivo</string>
     <string name="request_environment_metrics">Métricas de Entorno</string>
     <string name="request_host_metrics">Métricas del anfitrión</string>
+    <string name="request_local_stats">Estadísticas Locales</string>
     <string name="request_metadata">Metadatos</string>
     <string name="request_power_metrics">Métricas de Energía</string>
     <string name="request_telemetry">Solicitar Telemetría</string>
@@ -734,6 +741,7 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="routing_error_timeout">Tiempo agotado</string>
     <string name="routing_error_too_large">Paquete demasiado largo</string>
     <string name="rssi">RSSI</string>
+    <string name="rssi_definition">Indicador de Fuerza de Señal Recibida (RSSI en inglés), una medida utilizada para determinar el nivel de potencia que está siendo recibido por la antena. Un valor de RSSI más alto generalmente indica una conexión más fuerte y estable.</string>
     <string name="rsyslog_server">Servidor rsyslog</string>
     <string name="sats">Satélites</string>
     <string name="save">Guardar</string>
@@ -802,6 +810,7 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="slot">Ranura</string>
     <string name="smart_position">Ubicación inteligente</string>
     <string name="snr">SNR</string>
+    <string name="snr_definition">SNR: Ratio de señal a ruido, una medida utilizada en las comunicaciones para cuantificar el nivel de una señal deseada respecto al nivel del ruido de fondo. En Meshtastic y otros sistemas inalámbricos, un mayor SNR indica una señal más clara que puede mejorar la fiabilidad y la calidad de la transmisión de datos.</string>
     <string name="speed">Velocidad</string>
     <string name="spread_factor">Factor de dispersión</string>
     <string name="ssid">SSID (Nombre la Red)</string>

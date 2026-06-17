@@ -67,6 +67,7 @@
     <string name="analytics_okay">Дозволити аналітику і звіти про збої</string>
     <string name="analytics_platforms">Аналітичні платформи:</string>
     <string name="any">Будь-який</string>
+    <!-- APP -->
     <string name="app_notifications">Сповіщення застосунку</string>
     <string name="app_settings">Застосунок</string>
     <string name="app_too_old">Потрібне оновлення програми</string>
@@ -277,6 +278,11 @@
     <string name="disconnect">Від'єднатись</string>
     <string name="disconnected">Відключено</string>
     <string name="discovered_network_devices">Виявлені мережеві пристрої</string>
+    <!-- DISCOVERY -->
+    <string name="discovery_stat_date">Дата</string>
+    <string name="discovery_stat_direct">Прямий</string>
+    <string name="discovery_stat_messages">Повідомлення</string>
+    <string name="discovery_stat_selected">Вибраний</string>
     <string name="disk_free_indexed">Вільне місце %1$d</string>
     <!-- DISPLAY -->
     <string name="display">Дисплей</string>
@@ -907,6 +913,7 @@
     <string name="request_device_metrics">Показники пристрою</string>
     <string name="request_environment_metrics">Екологічні показники</string>
     <string name="request_host_metrics">Показники хоста</string>
+    <string name="request_local_stats">Локальна статистика</string>
     <string name="request_metadata">Метадані</string>
     <string name="request_pax_metrics">Показники Pax</string>
     <string name="request_power_metrics">Показники живлення</string>
@@ -957,6 +964,7 @@
     <string name="routing_error_timeout">Таймаут</string>
     <string name="routing_error_too_large">Пакет завеликий</string>
     <string name="rssi">RSSI</string>
+    <string name="rssi_definition">Показник рівня потужності сигналу — вимірювання, що використовується для визначення рівня потужності, що приймається антеною. Вище значення RSSI зазвичай вказує на міцніше та стабільніше з'єднання.</string>
     <string name="rsyslog_server">rsyslog-сервер</string>
     <string name="sats">Супутники</string>
     <string name="save">Зберегти</string>

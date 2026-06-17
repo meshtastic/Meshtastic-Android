@@ -86,6 +86,7 @@
     <string name="analytics_okay">允許傳送分析及崩潰報告。</string>
     <string name="analytics_platforms">分析平台：</string>
     <string name="any">所有</string>
+    <!-- APP -->
     <string name="app_notifications">應用程式通知</string>
     <string name="app_settings">App</string>
     <string name="app_too_old">需要應用程式更新</string>
@@ -336,6 +337,13 @@
     <string name="disconnect">中斷連線</string>
     <string name="disconnected">已中斷連線</string>
     <string name="discovered_network_devices">發現的網路裝置</string>
+    <!-- DISCOVERY -->
+    <string name="discovery_stat_channel_utilization">頻道使用率</string>
+    <string name="discovery_stat_date">日期</string>
+    <string name="discovery_stat_direct">直線</string>
+    <string name="discovery_stat_mesh">網狀網路 (Mesh)</string>
+    <string name="discovery_stat_messages">訊息</string>
+    <string name="discovery_stat_selected">已選取</string>
     <string name="disk_free_indexed">硬碟可用空間：%1$d</string>
     <!-- DISPLAY -->
     <string name="display">顯示</string>
@@ -1067,6 +1075,7 @@
     <string name="request_device_metrics">裝置計量資料</string>
     <string name="request_environment_metrics">環境計量資料</string>
     <string name="request_host_metrics">主機資訊</string>
+    <string name="request_local_stats">本機統計資料</string>
     <string name="request_metadata">中繼資料</string>
     <string name="request_pax_metrics">人流計量資料</string>
     <string name="request_power_metrics">電源計量資料</string>
@@ -1118,6 +1127,7 @@
     <string name="routing_error_timeout">逾時</string>
     <string name="routing_error_too_large">封包過大</string>
     <string name="rssi">RSSI</string>
+    <string name="rssi_definition">接收信號強度指示（RSSI）用於測量天線所接收到信號的功率強度。 RSSI 值越高通常代表連線越強且穩定。</string>
     <string name="rsyslog_server">rsyslog伺服器</string>
     <string name="sats">衛星數</string>
     <string name="save">儲存</string>
@@ -1210,6 +1220,7 @@
     <string name="slot">時隙</string>
     <string name="smart_position">智慧定位</string>
     <string name="snr">SNR</string>
+    <string name="snr_definition">信噪比（SNR），用於通訊中量化所需信號與背景噪音水平的指標。在 Meshtastic 及其他無線系統中，信噪比越高表示信號越清晰，可以提高數據傳輸的可靠性和品質。</string>
     <string name="soil_moisture">土壤濕度</string>
     <string name="soil_temperature">土壤溫度</string>
     <string name="speed">速度</string>

@@ -25,6 +25,7 @@
     <!-- AIR -->
     <!-- ALERT -->
     <string name="all_time">Усе</string>
+    <!-- APP -->
     <string name="app_settings">Праграма</string>
     <string name="app_version">Версія</string>
     <string name="apply">Прымяніць</string>
@@ -83,6 +84,8 @@
     <string name="direct_message">Прыватнае паведамленне</string>
     <string name="discard_changes">Скасаваць змены</string>
     <string name="disconnected">Адлучана</string>
+    <!-- DISCOVERY -->
+    <string name="discovery_stat_messages">Паведамленні</string>
     <!-- DISPLAY -->
     <string name="display">Экран</string>
     <!-- DISTANCE -->

@@ -25,6 +25,7 @@
     <string name="add_network_device">Dodaj</string>
     <!-- AIR -->
     <!-- ALERT -->
+    <!-- APP -->
     <string name="app_too_old">Potrebna je nadogradnja aplikacije</string>
     <string name="apply">Potvrdi</string>
     <string name="are_you_sure_change_default">Jeste li sigurni da želite promijeniti na zadani kanal?</string>
@@ -68,6 +69,7 @@
     <string name="device_sleeping">Uređaj je u stanju mirovanja</string>
     <string name="direct_message">Izravna poruka</string>
     <string name="disconnected">Odspojeno</string>
+    <!-- DISCOVERY -->
     <!-- DISPLAY -->
     <!-- DISTANCE -->
     <string name="distance">Udaljenost</string>

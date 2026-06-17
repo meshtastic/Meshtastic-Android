@@ -49,6 +49,7 @@
     <string name="altitude">Rakım</string>
     <string name="ambient_lighting">Ortam Işıklandırması</string>
     <string name="ambient_lighting_config">Ortam Işıklandırma Ayarı</string>
+    <!-- APP -->
     <string name="app_too_old">Uygulama güncellemesi gerekli</string>
     <string name="apply">Uygula</string>
     <string name="are_you_sure">Emin misiniz?</string>
@@ -151,6 +152,11 @@
     <string name="direct_message">Direkt Mesaj</string>
     <string name="disconnect">Bağlantıyı Kes</string>
     <string name="disconnected">Bağlantı kesildi</string>
+    <!-- DISCOVERY -->
+    <string name="discovery_stat_date">Tarih</string>
+    <string name="discovery_stat_direct">Doğrudan</string>
+    <string name="discovery_stat_mesh">Amatör Telsiz</string>
+    <string name="discovery_stat_messages">Mesajlar</string>
     <!-- DISPLAY -->
     <string name="display">Ekran</string>
     <string name="display_mode">Görüntü Modu</string>
@@ -491,6 +497,7 @@
     <string name="routing_error_timeout">Zaman Aşımı</string>
     <string name="routing_error_too_large">Paket çok büyük</string>
     <string name="rssi">RSSI</string>
+    <string name="rssi_definition">Alınan Sinyal Gücü Göstergesi, anten tarafından alınan güç seviyesini belirlemek için kullanılan bir ölçüdür. Daha yüksek bir RSSI değeri genellikle daha güçlü ve daha istikrarlı bir bağlantıya işaret eder.</string>
     <string name="rsyslog_server">rsyslog sunucusu</string>
     <string name="sats">Uydular</string>
     <string name="save">Kaydet</string>
@@ -533,6 +540,7 @@
     <string name="skip">Atla</string>
     <string name="slot">Yuva</string>
     <string name="snr">SNR</string>
+    <string name="snr_definition">Sinyal-Gürültü Oranı, iletişimde istenen bir sinyalin seviyesini arka plan gürültüsü seviyesine mukayese ölçmek için kullanılan bir ölçüdür. Meshtastic ve diğer kablosuz sistemlerde, daha yüksek bir SNR, veri iletiminin güvenilirliğini ve kalitesini artırabilecek daha net bir sinyale işaret eder.</string>
     <string name="ssid">SSID</string>
     <string name="state_broadcast_seconds">Durum yayını (saniye)</string>
     <string name="supported">Desteklenen</string>

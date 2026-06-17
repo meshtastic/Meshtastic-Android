@@ -28,6 +28,7 @@
     <string name="air_util_definition">Procentas eterio laiko naudoto perdavimams per pastarąją valandą.</string>
     <!-- ALERT -->
     <string name="alert_bell_text">Skambučio simbolis!</string>
+    <!-- APP -->
     <string name="app_too_old">Reikalingas programos atnaujinimas</string>
     <string name="apply">Taikyti</string>
     <string name="are_you_sure_change_default">Ar tikrai norite pakeisti į numatytąjį kanalą?</string>
@@ -71,6 +72,8 @@
     <string name="device_sleeping">Įrenginys miega</string>
     <string name="direct_message">Tiesioginė žinutė</string>
     <string name="disconnected">Atsijungta</string>
+    <!-- DISCOVERY -->
+    <string name="discovery_stat_direct">Tiesiogiai</string>
     <!-- DISPLAY -->
     <!-- DISTANCE -->
     <string name="distance">Atstumas</string>

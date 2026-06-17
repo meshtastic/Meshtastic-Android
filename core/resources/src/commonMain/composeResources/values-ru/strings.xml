@@ -84,6 +84,7 @@
     <string name="analytics_okay">Разрешить аналитику и отчеты о сбоях.</string>
     <string name="analytics_platforms">Платформы для аналитики:</string>
     <string name="any">Любой</string>
+    <!-- APP -->
     <string name="app_notifications">Уведомления приложений</string>
     <string name="app_settings">Приложение</string>
     <string name="app_too_old">Требуется обновление приложения</string>
@@ -337,6 +338,12 @@
     <string name="disconnect">Отключиться</string>
     <string name="disconnected">Отключено</string>
     <string name="discovered_network_devices">Найденные сетевые устройства</string>
+    <!-- DISCOVERY -->
+    <string name="discovery_stat_channel_utilization">Использование канала</string>
+    <string name="discovery_stat_date">Дата</string>
+    <string name="discovery_stat_direct">Прямой</string>
+    <string name="discovery_stat_messages">Сообщения</string>
+    <string name="discovery_stat_selected">Выбрано</string>
     <string name="disk_free_indexed">Свободно на диске %1$d</string>
     <!-- DISPLAY -->
     <string name="display">Дисплей</string>
@@ -1085,6 +1092,7 @@
     <string name="request_device_metrics">Метрики устройства</string>
     <string name="request_environment_metrics">Метрики окружения</string>
     <string name="request_host_metrics">Метрики хоста</string>
+    <string name="request_local_stats">Локальная статистика</string>
     <string name="request_metadata">Метаданные</string>
     <string name="request_pax_metrics">Метрика прохожих</string>
     <string name="request_power_metrics">Метрики мощности</string>
@@ -1136,6 +1144,7 @@
     <string name="routing_error_timeout">Время ожидания истекло</string>
     <string name="routing_error_too_large">Пакет слишком велик</string>
     <string name="rssi">RSSI</string>
+    <string name="rssi_definition">Индикатор уровня принимаемого сигнала, измерение, используемое для определения уровня мощности, принимаемой антенной. Более высокое значение RSSI обычно указывает на более сильное и стабильное соединение.</string>
     <string name="rsyslog_server">Сервер rsyslog</string>
     <string name="sats">Количество спутников</string>
     <string name="save">Сохранить</string>
@@ -1228,6 +1237,7 @@
     <string name="slot">Слот</string>
     <string name="smart_position">Умная позиция</string>
     <string name="snr">Сигнал/шум</string>
+    <string name="snr_definition">Соотношение сигнал/шум, мера, используемая в коммуникациях для количественной оценки уровня желаемого сигнала по отношению к уровню фонового шума. В Meshtastic и других беспроводных системах более высокий SNR указывает на более четкий сигнал, который может повысить надежность и качество передачи данных.</string>
     <string name="soil_moisture">Влажн почвы</string>
     <string name="soil_temperature">Темп почвы</string>
     <string name="speed">Скорость</string>

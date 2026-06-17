@@ -2,8 +2,8 @@
 title: Node Metrics
 parent: User Guide
 nav_order: 5
-last_updated: 2026-05-13
-description: Telemetry dashboards for each mesh node — device health, environment sensors, signal quality, power, traceroute, and position history.
+last_updated: 2026-06-16
+description: Telemetry dashboards for each mesh node — device health, environment sensors, air quality, signal quality, power, traceroute, and position history.
 aliases:
   - metrics
   - telemetry
@@ -47,15 +47,48 @@ Environment metrics are charted over time for easy trend analysis — temperatur
 
 > 💡 **Tip:** Environment metrics require a sensor connected to the remote node. Not all nodes report environmental data. See [Telemetry & Sensors](telemetry-and-sensors) for a full list of supported sensors.
 
+## Air Quality Metrics
+
+Air Quality is a dedicated metrics view for nodes equipped with a particulate-matter and/or CO₂ sensor. It is **separate from the BME680 IAQ reading** listed under Environment Metrics — IAQ is a single gas-resistance-derived index, while the Air Quality view charts the underlying particulate and CO₂ measurements.
+
+| Metric                | Unit  | الوصف                                                |
+| --------------------- | ----- | ---------------------------------------------------- |
+| PM1.0 | µg/m³ | Particulate matter up to 1.0 micron  |
+| PM2.5 | µg/m³ | Particulate matter up to 2.5 microns |
+| PM10                  | µg/m³ | Particulate matter up to 10 microns                  |
+| CO₂                   | ppm   | Carbon dioxide concentration                         |
+
+CO₂ readings are color-coded by severity to make air quality easy to read at a glance:
+
+| Band     | CO₂ Range (ppm) | Color    |
+| -------- | ---------------------------------- | -------- |
+| جيد      | < 1000    | Green    |
+| Stuffy   | < 2000    | Amber    |
+| Poor     | < 5000    | Orange   |
+| Unsafe   | < 30000   | Red      |
+| Evacuate | ≥ 30000                            | Dark red |
+
+![Air quality readings with color-coded CO₂ severity](../../assets/screenshots/node-metrics_air_quality.png)
+
+An air-quality log/metrics button appears on the node detail screen **only when the node has reported air-quality telemetry**. From the Air Quality view you can:
+
+- Select a **time frame** for the charts.
+- Filter with **metric chips** — only metrics that have data are shown.
+- **Refresh / request** the latest air-quality telemetry.
+- **Export to CSV** for analysis in a spreadsheet.
+
+> 💡 **Tip:** Air Quality metrics require a compatible air-quality sensor on the remote node. If a node has no particulate or CO₂ sensor, the air-quality button won't appear. See [Telemetry & Sensors](telemetry-and-sensors) for supported hardware.
+
 ## Signal Metrics
 
 Radio signal quality information:
 
-| Metric             | الوصف                                                                         |
-| ------------------ | ----------------------------------------------------------------------------- |
-| SNR                | Signal-to-Noise Ratio (higher is better)                   |
-| مؤشر القوة النسبية | Received Signal Strength Indicator (closer to 0 is better) |
-| Hop Count          | Number of mesh hops for last message                                          |
+| Metric             | الوصف                                                                          |
+| ------------------ | ------------------------------------------------------------------------------ |
+| SNR                | Signal-to-Noise Ratio (higher is better)                    |
+| مؤشر القوة النسبية | Received Signal Strength Indicator (closer to 0 is better)  |
+| Noise Floor        | Local background RF noise in dBm (more negative is quieter) |
+| Hop Count          | Number of mesh hops for last message                                           |
 
 ### Signal Quality Reference
 
@@ -65,6 +98,8 @@ Radio signal quality information:
 | 0 to 10 dB                        | جيد       |
 | -10 to 0 dB                       | مناسب     |
 | < -10 dB | Poor      |
+
+Local Stats from your connected radio are also shown in Signal Quality when available. These logs include noise floor, traffic counters, relay counters, online node counts, and radio uptime. The noise floor chart uses a dashed reference line at -85 dBm to help identify a busy RF environment. Use **Request** to ask the connected radio for a fresh Local Stats telemetry report, **Clear** to remove Local Stats logs for that node, and **Save** to export the visible Local Stats history as CSV.
 
 ## Power Metrics
 
@@ -128,4 +163,3 @@ The position tab shows location data for nodes that share GPS:
 - [Units & Locale](units-and-locale) — temperature, distance, and speed display formats
 
 ---
-

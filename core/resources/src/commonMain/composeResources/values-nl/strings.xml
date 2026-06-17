@@ -34,6 +34,7 @@
     <string name="all_time">Alles</string>
     <string name="alt">Alt</string>
     <string name="ambient_lighting">Sfeerverlichting</string>
+    <!-- APP -->
     <string name="app_too_old">Applicatie bijwerken vereist</string>
     <string name="apply">Toepassen</string>
     <string name="are_you_sure">Weet u het zeker?</string>
@@ -116,6 +117,9 @@
     <string name="direct_message">Privébericht</string>
     <string name="disconnect">Verbinding verbreken</string>
     <string name="disconnected">Niet verbonden</string>
+    <!-- DISCOVERY -->
+    <string name="discovery_stat_direct">Direct</string>
+    <string name="discovery_stat_messages">Berichten</string>
     <!-- DISPLAY -->
     <string name="display">Weergave</string>
     <string name="display_mode">Weergavemodus</string>
@@ -385,6 +389,7 @@
     <string name="routing_error_timeout">Time-Out</string>
     <string name="routing_error_too_large">Pakket te groot</string>
     <string name="rssi">RSSI</string>
+    <string name="rssi_definition">Ontvangen Signal Sterkte Indicator, een meting gebruikt om het stroomniveau te bepalen dat de antenne ontvangt. Een hogere RSSI-waarde geeft een sterkere en stabielere verbinding aan.</string>
     <string name="rsyslog_server">rsyslog server</string>
     <string name="sats">Sats</string>
     <string name="save">Opslaan</string>
@@ -416,6 +421,7 @@
     <string name="signal_quality">Signaalkwaliteit</string>
     <string name="slot">Slot</string>
     <string name="snr">SNR</string>
+    <string name="snr_definition">Signal-to-Noise Ratio, een meeting die wordt gebruikt in de communicatie om het niveau van een gewenst signaal tegenover achtergrondlawaai te kwantificeren. In Meshtastische en andere draadloze systemen geeft een hoger SNR een zuiverder signaal aan dat de betrouwbaarheid en kwaliteit van de gegevensoverdracht kan verbeteren.</string>
     <string name="ssid">SSID</string>
     <string name="supported">Ondersteund</string>
     <!-- TAK -->

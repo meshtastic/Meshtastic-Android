@@ -68,6 +68,7 @@
     <string name="analytics_okay">报告崩溃信息</string>
     <string name="analytics_platforms">分析平台：</string>
     <string name="any">任意内容</string>
+    <!-- APP -->
     <string name="app_notifications">应用通知</string>
     <string name="app_settings">App</string>
     <string name="app_too_old">需要更新应用程序</string>
@@ -290,6 +291,12 @@
     <string name="disconnect">断开</string>
     <string name="disconnected">已断开连接</string>
     <string name="discovered_network_devices">发现的网络设备</string>
+    <!-- DISCOVERY -->
+    <string name="discovery_stat_channel_utilization">频道使用</string>
+    <string name="discovery_stat_date">日期</string>
+    <string name="discovery_stat_direct">直频</string>
+    <string name="discovery_stat_messages">消息</string>
+    <string name="discovery_stat_selected">选择</string>
     <string name="disk_free_indexed">存储空间剩余 %1$d</string>
     <!-- DISPLAY -->
     <string name="display">显示</string>
@@ -888,6 +895,7 @@
     <string name="request_device_metrics">设备指标</string>
     <string name="request_environment_metrics">传感器指标</string>
     <string name="request_host_metrics">主机测量</string>
+    <string name="request_local_stats">本地统计数据</string>
     <string name="request_metadata">元数据</string>
     <string name="request_pax_metrics">Pax 计量</string>
     <string name="request_power_metrics">电源计量日志</string>
@@ -935,6 +943,7 @@
     <string name="routing_error_timeout">超时</string>
     <string name="routing_error_too_large">数据包过大</string>
     <string name="rssi">RSSI</string>
+    <string name="rssi_definition">接收信号强度指示（Received Signal Strength Indicator, RSSI）是一种用于测量天线接收到的信号功率的指标。较高的 RSSI 值通常表示更强、更稳定的连接。</string>
     <string name="rsyslog_server">rsyslog 服务器</string>
     <string name="sats">卫星</string>
     <string name="save">保存</string>
@@ -1017,6 +1026,7 @@
     <string name="slot">槽位</string>
     <string name="smart_position">智能位置</string>
     <string name="snr">SNR</string>
+    <string name="snr_definition">信噪比（Signal-to-Noise Ratio, SNR）是一种用于通信领域的测量指标，用于量化目标信号与背景噪声的比例。在 Meshtastic 及其他无线系统中，较高的信噪比表示信号更加清晰，从而能够提升数据传输的可靠性和质量。</string>
     <string name="soil_moisture">土壤湿度</string>
     <string name="soil_temperature">土壤温度</string>
     <string name="speed">速度</string>

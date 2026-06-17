@@ -2,8 +2,8 @@
 title: 訊息與頻道
 parent: 使用者指南
 nav_order: 3
-last_updated: 2026-05-13
-description: 傳送與接收訊息、管理頻道、設定加密，以及使用快速聊天、訊息回應與訊息動作。
+last_updated: 2026-06-11
+description: Send and receive messages, manage channels, configure encryption, search conversations, and use quick chat, reactions, and message actions.
 aliases:
   - 頻道
   - direct-messages
@@ -100,6 +100,19 @@ Meshtastic 支援兩種通訊模式：頻道廣播與私訊。
 ![Quick chat option](../../assets/screenshots/messages_quick_chat.png)
 
 頻道清單會顯示每個頻道及其最新訊息預覽。
+
+### Searching Messages
+
+You can search the full history of any conversation directly from the chat screen:
+
+1. Open a conversation (a channel or a direct message).
+2. Tap the **search icon** in the top bar.
+3. Type into the **Search messages…** field. The search runs as you type, across all stored messages in that conversation.
+4. Use the **N / M** result counter and the **previous / next arrows** to jump between matches, which are highlighted in the conversation.
+
+![Message search bar with result counter and previous/next arrows](../../assets/screenshots/messages_search_bar.png)
+
+> 💡 **Tip:** Search is full-text and stays within the conversation you opened it from — it doesn't search across other channels or contacts. Matching is fast even on long histories because messages are indexed locally.
 
 ### 訊息泡泡
 

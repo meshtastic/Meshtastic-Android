@@ -34,6 +34,7 @@
     <string name="ambient_lighting">Ambientné osvetlenie</string>
     <string name="ambient_lighting_config">Nastavenie Ambientného Osvetlenia</string>
     <string name="analytics_okay">Povoliť posielanie analytiky a chybových hlásení.</string>
+    <!-- APP -->
     <string name="app_too_old">Aplikáciu je potrebné aktualizovať</string>
     <string name="apply">Použiť</string>
     <string name="are_you_sure">Si si istý?</string>
@@ -128,6 +129,9 @@
     <string name="direct_message">Priama správa</string>
     <string name="discard_changes">Vymazať</string>
     <string name="disconnected">Odpojené</string>
+    <!-- DISCOVERY -->
+    <string name="discovery_stat_direct">Priamo</string>
+    <string name="discovery_stat_messages">Správy</string>
     <!-- DISPLAY -->
     <string name="display">Obrazovka</string>
     <!-- DISTANCE -->
@@ -408,6 +412,7 @@
     <string name="routing_error_timeout">Časový limit</string>
     <string name="routing_error_too_large">Príliš veľký paket</string>
     <string name="rssi">RSSI</string>
+    <string name="rssi_definition">Indikátor sily prijímaného signálu (RSSI), meranie používané na určenie úrovne výkonu prijatého skrz anténu. Vyššia hodnota RSSI vo všeobecnosti znamená silnejšie a stabilnejšie pripojenie.</string>
     <string name="save">Uložiť</string>
     <string name="save_changes">Uložiť</string>
     <!-- SCAN -->
@@ -431,6 +436,7 @@
     <string name="signal_quality">Kvalita signálu</string>
     <string name="smart_position">Inteligentná poloha</string>
     <string name="snr">SNR</string>
+    <string name="snr_definition">Pomer signálu od šumu (SNR), miera používaná v komunikácii na kvantifikáciu úrovne požadovaného signálu k úrovni hluku pozadia. V Meshtastic a iných bezdrôtových systémoch znamená vyšší SNR jasnejší signál, ktorý môže zvýšiť spoľahlivosť a kvalitu prenosu údajov.</string>
     <string name="speed">Rýchlosť</string>
     <string name="ssid">SSID</string>
     <string name="supported">Podporované</string>

@@ -25,6 +25,7 @@
     <string name="add_network_device">Engadir</string>
     <!-- AIR -->
     <!-- ALERT -->
+    <!-- APP -->
     <string name="app_too_old">Actualización da aplicación requerida</string>
     <string name="apply">Aplicar</string>
     <string name="are_you_sure_change_default">Está seguro de que quere cambiar á canle predeterminada?</string>
@@ -64,6 +65,7 @@
     <string name="device_sleeping">Dispositivo durmindo</string>
     <string name="direct_message">Mensaxe directa</string>
     <string name="disconnected">Desconectado</string>
+    <!-- DISCOVERY -->
     <!-- DISPLAY -->
     <!-- DISTANCE -->
     <string name="distance">Distancia</string>

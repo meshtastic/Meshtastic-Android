@@ -77,6 +77,7 @@
     <string name="analytics_okay">Luba analüüsi ja krahhi aruandlus.</string>
     <string name="analytics_platforms">Analüütikaplatvormid:</string>
     <string name="any">Kõik</string>
+    <!-- APP -->
     <string name="app_notifications">Rakenduse märguanded</string>
     <string name="app_settings">Rakendus</string>
     <string name="app_too_old">Vajalik on rakenduse värskendus</string>
@@ -312,6 +313,11 @@
     <string name="disconnect">Katkesta ühendus</string>
     <string name="disconnected">Ühendus katkenud</string>
     <string name="discovered_network_devices">Avastatud seadmed</string>
+    <!-- DISCOVERY -->
+    <string name="discovery_stat_date">Kuupäev</string>
+    <string name="discovery_stat_direct">Otsene</string>
+    <string name="discovery_stat_messages">Sõnumid</string>
+    <string name="discovery_stat_selected">Valitud</string>
     <string name="disk_free_indexed">Vaba kettamaht %1$d</string>
     <!-- DISPLAY -->
     <string name="display">Ekraan</string>
@@ -1010,6 +1016,7 @@
     <string name="request_device_metrics">Seadme mõõdikud</string>
     <string name="request_environment_metrics">Keskkonnamõõdikud</string>
     <string name="request_host_metrics">Hosti mõõdik</string>
+    <string name="request_local_stats">Kohalik statistika</string>
     <string name="request_metadata">Metaandmed</string>
     <string name="request_pax_metrics">Pax mõõdiku küsimine</string>
     <string name="request_power_metrics">Võimsusnäitajad</string>
@@ -1061,6 +1068,7 @@
     <string name="routing_error_timeout">Aegunud</string>
     <string name="routing_error_too_large">Liiga suur pakett</string>
     <string name="rssi">RSSI</string>
+    <string name="rssi_definition">Vastuvõetud signaali tugevuse indikaator (RSSI), mõõt mida kasutatakse antenni poolt vastuvõetava võimsustaseme määramiseks. Kõrgem RSSI väärtus näitab üldiselt tugevamat ja stabiilsemat ühendust.</string>
     <string name="rsyslog_server">rsyslog server</string>
     <string name="sats">Sateliit</string>
     <string name="save">Salvesta</string>
@@ -1153,6 +1161,7 @@
     <string name="slot">Pesa</string>
     <string name="smart_position">Nutikas asukoht</string>
     <string name="snr">SNR</string>
+    <string name="snr_definition">Signaali ja müra suhe (SNR) on mõõdik, mida kasutatakse soovitud signaali taseme ja taustamüra taseme vahelise suhte määramisel. Meshtastic ja teistes traadita süsteemides näitab kõrgem signaali ja müra suhe selgemat signaali, mis võib parandada andmeedastuse usaldusväärsust ja kvaliteeti.</string>
     <string name="soil_moisture">Pinnase niiskus</string>
     <string name="soil_temperature">Pinnase temperatuur</string>
     <string name="speed">Kiirus</string>

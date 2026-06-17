@@ -25,6 +25,8 @@ The module primarily serves as a "glue" layer, connecting:
 ```mermaid
 graph TB
   :androidApp[androidApp]:::android-application
+  :androidApp -.-> :baselineprofile
+  :androidApp -.-> :feature:car
   :androidApp -.-> :core:ble
   :androidApp -.-> :core:common
   :androidApp -.-> :core:data
@@ -48,6 +50,7 @@ graph TB
   :androidApp -.-> :feature:map
   :androidApp -.-> :feature:node
   :androidApp -.-> :feature:settings
+  :androidApp -.-> :feature:discovery
   :androidApp -.-> :feature:docs
   :androidApp -.-> :feature:firmware
   :androidApp -.-> :feature:wifi-provision

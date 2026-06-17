@@ -86,6 +86,7 @@
     <string name="analytics_okay">Salli analytiikka ja virheraportit.</string>
     <string name="analytics_platforms">Analytiikkapalvelut</string>
     <string name="any">Milloin tahansa</string>
+    <!-- APP -->
     <string name="app_notifications">Sovellusilmoitukset</string>
     <string name="app_settings">Sovellus</string>
     <string name="app_too_old">Sovelluspäivitys vaaditaan</string>
@@ -337,6 +338,13 @@
     <string name="disconnect">Katkaise yhteys</string>
     <string name="disconnected">Ei yhdistetty</string>
     <string name="discovered_network_devices">Löydetyt verkkolaitteet</string>
+    <!-- DISCOVERY -->
+    <string name="discovery_stat_channel_utilization">Kanavan käyttöaste</string>
+    <string name="discovery_stat_date">Päivä</string>
+    <string name="discovery_stat_direct">Suora</string>
+    <string name="discovery_stat_mesh">Verkko</string>
+    <string name="discovery_stat_messages">Viestit</string>
+    <string name="discovery_stat_selected">Valittu</string>
     <string name="disk_free_indexed">Vapaa levytila %1$d</string>
     <!-- DISPLAY -->
     <string name="display">Näyttö</string>
@@ -1057,6 +1065,7 @@
     <string name="request_device_metrics">Laitteen mittausloki</string>
     <string name="request_environment_metrics">Ympäristöarvot</string>
     <string name="request_host_metrics">Isäntälaitteen mittausarvot</string>
+    <string name="request_local_stats">Paikalliset tilastot</string>
     <string name="request_metadata">Metatiedot</string>
     <string name="request_pax_metrics">Pax mittarit</string>
     <string name="request_power_metrics">Virranhallinnan arvot</string>
@@ -1108,6 +1117,7 @@
     <string name="routing_error_timeout">Aikakatkaisu</string>
     <string name="routing_error_too_large">Paketti on liian suuri</string>
     <string name="rssi">RSSI</string>
+    <string name="rssi_definition">Vastaanotetun signaalin voimakkuusindikaattori (RSSI) on mittari, jota käytetään määrittämään antennilla vastaanotetun signaalin voimakkuus. Korkeampi RSSI-arvo yleensä osoittaa vahvemman ja vakaamman yhteyden.</string>
     <string name="rsyslog_server">rsyslog-palvelin</string>
     <string name="sats">Satelliitit</string>
     <string name="save">Tallenna</string>
@@ -1200,6 +1210,7 @@
     <string name="slot">Paikka</string>
     <string name="smart_position">Älykäs sijainti</string>
     <string name="snr">SNR</string>
+    <string name="snr_definition">Signaali-kohinasuhde (SNR) on mittari, jota käytetään viestinnässä halutun signaalin tason ja taustahälyn tason määrittämisessä. Meshtasticissa ja muissa langattomissa järjestelmissä korkeampi SNR tarkoittaa selkeämpää signaalia, joka voi parantaa tiedonsiirron luotettavuutta ja laatua.</string>
     <string name="soil_moisture">Maaperän kosteus</string>
     <string name="soil_temperature">Maaperän lämpötila</string>
     <string name="speed">Nopeus</string>

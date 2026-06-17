@@ -79,6 +79,7 @@
     <string name="analytics_okay">Autoriser les statistiques et les rapports de plantage.</string>
     <string name="analytics_platforms">Plateformes d'analyse : </string>
     <string name="any">N'importe laquelle</string>
+    <!-- APP -->
     <string name="app_notifications">Notifications de l’application</string>
     <string name="app_settings">App</string>
     <string name="app_too_old">Mise à jour de l’application requise</string>
@@ -320,6 +321,12 @@
     <string name="disconnect">Déconnecter</string>
     <string name="disconnected">Déconnecté</string>
     <string name="discovered_network_devices">Appareils réseau découverts</string>
+    <!-- DISCOVERY -->
+    <string name="discovery_stat_channel_utilization">Utilisation du canal</string>
+    <string name="discovery_stat_date">Date</string>
+    <string name="discovery_stat_direct">Direct</string>
+    <string name="discovery_stat_messages">Messages</string>
+    <string name="discovery_stat_selected">Sélectionné</string>
     <string name="disk_free_indexed">Disque libre %1$d</string>
     <!-- DISPLAY -->
     <string name="display">Écran</string>
@@ -996,6 +1003,7 @@
     <string name="request_device_metrics">Métriques de l’appareil</string>
     <string name="request_environment_metrics">Métriques d'environnement</string>
     <string name="request_host_metrics">Métriques de l’hôte</string>
+    <string name="request_local_stats">Statistiques locales</string>
     <string name="request_metadata">Métadonnées</string>
     <string name="request_pax_metrics">Métriques de Pax</string>
     <string name="request_power_metrics">Métriques d'alimentation</string>
@@ -1047,6 +1055,7 @@
     <string name="routing_error_timeout">Délai dépassé</string>
     <string name="routing_error_too_large">Paquet trop grand</string>
     <string name="rssi">RSSI</string>
+    <string name="rssi_definition">Indicateur de force du signal reçu, une mesure utilisée pour déterminer le niveau de puissance reçu par l'antenne. Une valeur RSSI plus élevée indique généralement une connexion plus forte et plus stable.</string>
     <string name="rsyslog_server">Serveur Rsyslog</string>
     <string name="sats">Sats</string>
     <string name="save">Enregistrer</string>
@@ -1139,6 +1148,7 @@
     <string name="slot">Emplacement</string>
     <string name="smart_position">Position Intelligente</string>
     <string name="snr">SNR</string>
+    <string name="snr_definition">Signal-to-Noise Ratio, une mesure utilisée dans les communications pour quantifier le niveau du signal par rapport au niveau du bruit de fond. Dans les systèmes Meshtastic et autres systèmes sans fil, un SNR plus élevé indique un signal plus clair qui peut améliorer la fiabilité et la qualité de la transmission de données.</string>
     <string name="soil_moisture">Hum sol</string>
     <string name="soil_temperature">Temp sol</string>
     <string name="speed">Vitesse</string>

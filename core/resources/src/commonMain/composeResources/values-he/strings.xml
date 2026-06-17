@@ -25,6 +25,7 @@
     <string name="add_network_device">הוסף</string>
     <!-- AIR -->
     <!-- ALERT -->
+    <!-- APP -->
     <string name="app_too_old">נדרש עדכון של האפליקציה</string>
     <string name="apply">החל</string>
     <string name="are_you_sure_change_default">לשנות לערוץ ברירת המחדל?</string>
@@ -63,6 +64,8 @@
     <string name="device_sleeping">מכשיר במצב שינה</string>
     <string name="direct_message">הודעה ישירה</string>
     <string name="disconnected">מנותק</string>
+    <!-- DISCOVERY -->
+    <string name="discovery_stat_messages">הודעות</string>
     <!-- DISPLAY -->
     <!-- DISTANCE -->
     <string name="distance">מרחק</string>

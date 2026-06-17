@@ -17,21 +17,38 @@
   -->
 <resources>
     <!-- A11Y -->
+    <string name="a11y_node_hops_away">%1$d ホップ先</string>
     <string name="accept">同意</string>
     <string name="acknowledgements">謝辞</string>
     <!-- ACTION -->
+    <string name="action_copy_message">メッセージをコピー</string>
+    <string name="action_delete_message">メッセージを削除</string>
+    <string name="action_react_with_emoji">絵文字で返信</string>
+    <string name="action_select_device">デバイスを選択</string>
+    <string name="action_select_message">メッセージを選択</string>
+    <string name="action_select_network">ネットワークを選択</string>
+    <string name="action_send_reply">返信</string>
+    <string name="action_show_message_status">メッセージの状態を表示</string>
     <string name="actions">アクション</string>
+    <string name="adc_multiplier_override">ADC倍率のオーバーライド</string>
     <string name="adc_multiplier_override_ratio">ADC乗算器のオーバーライド率</string>
     <!-- ADD -->
     <string name="add">追加</string>
+    <string name="add_channels_description">QRコードから次のチャンネルが見つかりました。端末に追加したいチャンネルを選択してください。既存のチャンネルは保持されます。</string>
+    <string name="add_custom_tile_source">ネットワークタイルのソースを追加</string>
+    <string name="add_favorite">お気に入りに追加</string>
+    <string name="add_layer">レイヤーを追加</string>
     <string name="add_local_mbtiles_file">ローカル MBTiles ファイルを追加する</string>
     <string name="add_network_device">追加</string>
+    <string name="add_network_device_manually">手動でデバイスを追加</string>
     <string name="add_network_layer">ネットレイヤーを追加</string>
     <string name="address">アドレス</string>
     <string name="admin_key">管理者キー</string>
+    <string name="admin_keys">管理者キー</string>
     <string name="administration">管理</string>
     <string name="advanced_device_gps">高度なデバイス GPS</string>
     <!-- AIR -->
+    <string name="air_quality">空気質</string>
     <string name="air_quality_metrics_module_enabled">空気品質測定モジュールを有効化</string>
     <string name="air_util_definition">過去1時間以内に送信に使用された通信時間の割合。</string>
     <!-- ALERT -->
@@ -51,6 +68,16 @@
     <string name="ambient_lighting_config">環境照明設定</string>
     <string name="analytics_okay">分析とクラッシュレポートを許可する。</string>
     <string name="any">すべて</string>
+    <!-- APP -->
+    <string name="app_functions_get_channel_info">チャンネル情報を取得</string>
+    <string name="app_functions_get_device_status">デバイスの状態を取得</string>
+    <string name="app_functions_get_mesh_status">メッシュの状態を取得</string>
+    <string name="app_functions_get_node_details">ノードの詳細を取得</string>
+    <string name="app_functions_get_node_list">ノードリストを取得</string>
+    <string name="app_functions_get_recent_messages">最近のメッセージを取得</string>
+    <string name="app_functions_get_unread_summary">未読の概要を取得</string>
+    <string name="app_functions_master_toggle">AIへのアクセスを許可</string>
+    <string name="app_functions_send_message">メッセージを送信</string>
     <string name="app_too_old">アプリを更新して下さい。</string>
     <string name="apply">適用</string>
     <string name="are_you_sure">よろしいですか？</string>
@@ -75,6 +102,7 @@
     <string name="bluetooth_permission">Bluetooth</string>
     <string name="bottom_nav_settings">設定</string>
     <string name="calculating">計算中…</string>
+    <string name="call_sign">コールサイン</string>
     <string name="cancel">キャンセル</string>
     <string name="canned_message">Cannedメッセージ</string>
     <string name="canned_message_config">Cannedメッセージ設定</string>
@@ -187,6 +215,9 @@
     <string name="discard_changes">破棄</string>
     <string name="disconnect">切断</string>
     <string name="disconnected">切断</string>
+    <!-- DISCOVERY -->
+    <string name="discovery_stat_direct">直接</string>
+    <string name="discovery_stat_messages">メッセージ</string>
     <!-- DISPLAY -->
     <string name="display">表示</string>
     <string name="display_mode">表示モード</string>
@@ -576,6 +607,7 @@
     <string name="routing_error_timeout">タイムアウト</string>
     <string name="routing_error_too_large">パケットが大きすぎます</string>
     <string name="rssi">RSSI</string>
+    <string name="rssi_definition">受信信号強度インジケーター（RSSI）は、アンテナで受信している電力レベルを測定するための指標です。一般的にRSSI値が高いほど、より強力で安定した接続を示します。</string>
     <string name="rsyslog_server">rsyslogサーバー</string>
     <string name="sats">GPS衛星</string>
     <string name="save">保存</string>
@@ -623,6 +655,7 @@
     <string name="signal_quality">信号品質</string>
     <string name="slot">スロット</string>
     <string name="snr">SN比</string>
+    <string name="snr_definition">信号対ノイズ比（SN比）は、通信において、目的の信号のレベルを背景ノイズのレベルに対して定量化するために使用される尺度です。Meshtasticや他の無線システムでは、SN比が高いほど信号が鮮明であることを示し、データ伝送の信頼性と品質を向上させることができます。</string>
     <string name="ssid">SSID</string>
     <string name="state_broadcast_seconds">状態のブロードキャスト間隔 (秒)</string>
     <string name="supported">対応済み</string>

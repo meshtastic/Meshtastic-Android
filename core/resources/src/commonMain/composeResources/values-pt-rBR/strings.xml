@@ -46,6 +46,7 @@
     <string name="alt">Alt</string>
     <string name="ambient_lighting">Luz Ambiente</string>
     <string name="ambient_lighting_config">Configuração de Iluminação Ambiente</string>
+    <!-- APP -->
     <string name="app_notifications">Notificações do Aplicativo</string>
     <string name="app_too_old">Atualização do aplicativo necessária</string>
     <string name="apply">Aplicar</string>
@@ -176,6 +177,10 @@
     <string name="disconnect">Desconectar</string>
     <string name="disconnected">Desconectado</string>
     <string name="discovered_network_devices">Dispositivos de Rede Descobertos</string>
+    <!-- DISCOVERY -->
+    <string name="discovery_stat_date">Data</string>
+    <string name="discovery_stat_direct">Direto</string>
+    <string name="discovery_stat_messages">Mensagens</string>
     <string name="disk_free_indexed">Disco Livre %1$d</string>
     <!-- DISPLAY -->
     <string name="display">Tela</string>
@@ -580,6 +585,7 @@
     <string name="routing_error_timeout">Tempo esgotado</string>
     <string name="routing_error_too_large">Pacote grande demais</string>
     <string name="rssi">RSSI</string>
+    <string name="rssi_definition">Indicador de Força de Sinal Recebido, uma medida usada para determinar o nível de potência que está sendo recebida pela antena. Um valor maior de RSSI geralmente indica uma conexão mais forte e mais estável.</string>
     <string name="rsyslog_server">Servidor rsyslog</string>
     <string name="sats">Sats</string>
     <string name="save">Salvar</string>
@@ -643,6 +649,7 @@
     <string name="skip">Pular</string>
     <string name="slot">Slot</string>
     <string name="snr">SNR</string>
+    <string name="snr_definition">Relação sinal-para-ruído, uma medida utilizada nas comunicações para quantificar o nível de um sinal desejado para o nível de ruído de fundo. Na Meshtastic e outros sistemas sem fios, uma SNR maior indica um sinal mais claro que pode melhorar a confiabilidade e a qualidade da transmissão de dados.</string>
     <string name="speed">Velocidade</string>
     <string name="ssid">SSID</string>
     <string name="state_broadcast_seconds">Transmissão de estado (segundos)</string>
