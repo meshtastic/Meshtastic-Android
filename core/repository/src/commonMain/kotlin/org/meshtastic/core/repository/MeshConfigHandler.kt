@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceUIConfig
+import org.meshtastic.proto.LoRaRegionPresetMap
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.ModuleConfig
@@ -46,4 +47,10 @@ interface MeshConfigHandler {
      * packet in every handshake, immediately after my_info.
      */
     fun handleDeviceUIConfig(config: DeviceUIConfig)
+
+    /**
+     * Handles the [LoRaRegionPresetMap] received during the config handshake (after metadata, before channels). It
+     * describes which modem presets are legal in each LoRa region. Absent on firmware older than 2.8.
+     */
+    fun handleRegionPresets(map: LoRaRegionPresetMap)
 }

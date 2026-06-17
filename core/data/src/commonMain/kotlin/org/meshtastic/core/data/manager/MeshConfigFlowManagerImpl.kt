@@ -259,6 +259,7 @@ class MeshConfigFlowManagerImpl(
             radioConfigRepository.clearLocalModuleConfig()
             radioConfigRepository.clearDeviceUIConfig()
             radioConfigRepository.clearFileManifest()
+            radioConfigRepository.clearLoRaRegionPresetMap()
         }
         connectionManager.value.onHandshakeProgress()
     }

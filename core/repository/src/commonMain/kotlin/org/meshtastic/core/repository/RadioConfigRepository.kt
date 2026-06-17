@@ -24,6 +24,7 @@ import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceProfile
 import org.meshtastic.proto.DeviceUIConfig
 import org.meshtastic.proto.FileInfo
+import org.meshtastic.proto.LoRaRegionPresetMap
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.ModuleConfig
@@ -88,4 +89,18 @@ interface RadioConfigRepository {
 
     /** Clears the accumulated file manifest; called at the start of each new handshake. */
     suspend fun clearFileManifest()
+
+    /**
+     * Flow of the firmware's region→modem-preset compatibility map ([LoRaRegionPresetMap]), populated from
+     * [org.meshtastic.proto.FromRadio.region_presets] during the config handshake (sent after metadata, before
+     * channels). Null when the connected firmware predates this message (< 2.8) or after [clearLoRaRegionPresetMap].
+     * The local LoRa config UI uses it to constrain the preset picker to the presets legal in the selected region.
+     */
+    val loraRegionPresetMapFlow: Flow<LoRaRegionPresetMap?>
+
+    /** Stores the [LoRaRegionPresetMap] received from the device. */
+    suspend fun setLoRaRegionPresetMap(map: LoRaRegionPresetMap)
+
+    /** Clears the stored region→preset map; called at the start of each new handshake. */
+    suspend fun clearLoRaRegionPresetMap()
 }

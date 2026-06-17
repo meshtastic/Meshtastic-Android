@@ -33,6 +33,7 @@ import org.meshtastic.core.repository.ServiceStateWriter
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceUIConfig
+import org.meshtastic.proto.LoRaRegionPresetMap
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.ModuleConfig
@@ -97,6 +98,11 @@ class MeshConfigHandlerImpl(
         // is alive, so surface it as handshake progress — without this, a long gap before the next
         // meaningful packet could falsely trip the fast-path watchdog on TCP/USB.
         connectionManager.value.onHandshakeProgress()
+    }
+
+    override fun handleRegionPresets(map: LoRaRegionPresetMap) {
+        Logger.d { "Region presets received (${map.region_groups.size} regions, ${map.groups.size} groups)" }
+        scope.handledLaunch { radioConfigRepository.setLoRaRegionPresetMap(map) }
     }
 }
 

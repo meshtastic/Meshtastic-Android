@@ -25,6 +25,7 @@ import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceProfile
 import org.meshtastic.proto.DeviceUIConfig
 import org.meshtastic.proto.FileInfo
+import org.meshtastic.proto.LoRaRegionPresetMap
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.ModuleConfig
@@ -60,6 +61,9 @@ class FakeRadioConfigRepository :
     private val fileManifestBacking = mutableStateFlow<List<FileInfo>>(emptyList())
     override val fileManifestFlow: Flow<List<FileInfo>> = fileManifestBacking
 
+    private val loraRegionPresetMapBacking = mutableStateFlow<LoRaRegionPresetMap?>(null)
+    override val loraRegionPresetMapFlow: Flow<LoRaRegionPresetMap?> = loraRegionPresetMapBacking
+
     val currentChannelSet: ChannelSet
         get() = channelSetBacking.value
 
@@ -74,6 +78,9 @@ class FakeRadioConfigRepository :
 
     val currentFileManifest: List<FileInfo>
         get() = fileManifestBacking.value
+
+    val currentLoRaRegionPresetMap: LoRaRegionPresetMap?
+        get() = loraRegionPresetMapBacking.value
 
     /**
      * Last [Config] passed to [setLocalConfig] (null until called). Tests should use [setLocalConfigDirect] to drive
@@ -138,6 +145,14 @@ class FakeRadioConfigRepository :
 
     override suspend fun clearFileManifest() {
         fileManifestBacking.value = emptyList()
+    }
+
+    override suspend fun setLoRaRegionPresetMap(map: LoRaRegionPresetMap) {
+        loraRegionPresetMapBacking.value = map
+    }
+
+    override suspend fun clearLoRaRegionPresetMap() {
+        loraRegionPresetMapBacking.value = null
     }
 
     /** Directly sets the [LocalConfig] without merging (preferred for test setup). */

@@ -72,6 +72,7 @@ class FromRadioPacketHandlerImpl(
         val clientNotification = proto.clientNotification
         val deviceUIConfig = proto.deviceuiConfig
         val fileInfo = proto.fileInfo
+        val regionPresets = proto.region_presets
         val xmodemPacket = proto.xmodemPacket
 
         when {
@@ -101,6 +102,10 @@ class FromRadioPacketHandlerImpl(
             channel != null -> configHandler.value.handleChannel(channel)
 
             fileInfo != null -> configFlowManager.value.handleFileInfo(fileInfo)
+
+            // region_presets arrives during the handshake (after metadata, before channels). It tells the client
+            // which modem presets are legal per LoRa region. Absent on firmware < 2.8.
+            regionPresets != null -> configHandler.value.handleRegionPresets(regionPresets)
 
             xmodemPacket != null -> xmodemManager.value.handleIncomingXModem(xmodemPacket)
 
