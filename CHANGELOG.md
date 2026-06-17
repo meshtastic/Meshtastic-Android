@@ -72,6 +72,16 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 * fix(ble): Harden BLE connection lifecycle (#5795) by Jeremiah K (@jeremiah-k) in [`35fba4d56`](https://github.com/meshtastic/Meshtastic-Android/commit/35fba4d56d1a6fa0a2f44fee9c9a550c476b8c96)
 * fix(build): supply AboutLibraries license texts for offline builds (#5818) by James Rich (@jamesarich) in [`1d0dc8b7b`](https://github.com/meshtastic/Meshtastic-Android/commit/1d0dc8b7b5303333688a0fa9dc554790b29b4c76)
 * feat(node): add local stats noise floor metrics (#5782) by Benjamin Faershtein (@RCGV1) in [`5ac26be18`](https://github.com/meshtastic/Meshtastic-Android/commit/5ac26be18f1023bcc88dac66526c0ad80e2e6a9d)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5817) by James Rich (@jamesarich) in [`c3488d4f5`](https://github.com/meshtastic/Meshtastic-Android/commit/c3488d4f5dbea7f8c327fd4eb8b3897f44e2612d)
+* fix(build): isolate ML Kit GenAI to the Google flavor (fix F-Droid rb-check) (#5824) by James Rich (@jamesarich) in [`f2769a3b2`](https://github.com/meshtastic/Meshtastic-Android/commit/f2769a3b29041ea8dd9deb34d3cac9bfa7b8e477)
+* feat(export): add hop start and relay node columns to CSV export (#5822) by James Rich (@jamesarich) in [`d9fe1691a`](https://github.com/meshtastic/Meshtastic-Android/commit/d9fe1691aca32d7df51a3a41a7a436b126547f1e)
+* feat(mqtt): add phone-local MQTT proxy cutoff control (#5823) by James Rich (@jamesarich) in [`c347903c6`](https://github.com/meshtastic/Meshtastic-Android/commit/c347903c6ef0a01abaa31504c63727f5b228b780)
+* feat(settings): add remote "Set time" admin action (#5821) by James Rich (@jamesarich) in [`cef12c39d`](https://github.com/meshtastic/Meshtastic-Android/commit/cef12c39ddda652eec872a2ccffa52a2665bd2ec)
+* feat(node): show our node shortname chip on the Nodes tab (#5820) by James Rich (@jamesarich) in [`212eea9d3`](https://github.com/meshtastic/Meshtastic-Android/commit/212eea9d3086f1f774a2a6115da93d0f4608a858)
+* fix(notifications): open node detail when tapping 'New Node Seen' notification (#5752) by Lester Cheng (@LesterCheng) in [`ae3e3d298`](https://github.com/meshtastic/Meshtastic-Android/commit/ae3e3d298c377902ea3b7ba6a58b7170927f4db1)
+
+## New Contributors
+* @LesterCheng made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/5752
 <!-- UNRELEASED_END -->
 
 <!-- RELEASED_START -->
