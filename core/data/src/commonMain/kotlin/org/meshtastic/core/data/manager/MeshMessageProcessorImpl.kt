@@ -32,6 +32,7 @@ import org.meshtastic.core.common.util.clampTimestampToNow
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.isLora
@@ -115,18 +116,25 @@ class MeshMessageProcessorImpl(
     }
 
     private fun processFromRadio(proto: FromRadio, myNodeNum: Int?) {
-        // Any decoded FromRadio proves the radio link is alive — keep the local node fresh.
-        refreshLocalNodeLastHeard()
+        // The FromRadio *decode* boundary is guarded by the caller, but the per-variant handlers below are not. A
+        // single malformed-but-decodable packet from any peer must not throw out to the receivedData collector and
+        // cancel it — that would silently deafen the radio (a remote DoS). Contain handler failures here: log and drop
+        // the packet, then carry on. (safeCatching still re-throws CancellationException, preserving cancellation.)
+        safeCatching {
+            // Any decoded FromRadio proves the radio link is alive — keep the local node fresh.
+            refreshLocalNodeLastHeard()
 
-        // Audit log every incoming variant
-        logVariant(proto)
+            // Audit log every incoming variant
+            logVariant(proto)
 
-        val packet = proto.packet
-        if (packet != null) {
-            handleReceivedMeshPacket(packet, myNodeNum)
-        } else {
-            fromRadioDispatcher.handleFromRadio(proto)
+            val packet = proto.packet
+            if (packet != null) {
+                handleReceivedMeshPacket(packet, myNodeNum)
+            } else {
+                fromRadioDispatcher.handleFromRadio(proto)
+            }
         }
+            .onFailure { Logger.e(it) { "Dropped a FromRadio after a handler error; receive pipeline kept alive" } }
     }
 
     private fun logVariant(proto: FromRadio) {
