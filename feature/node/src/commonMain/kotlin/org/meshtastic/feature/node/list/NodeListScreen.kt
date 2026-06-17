@@ -150,7 +150,7 @@ fun NodeListScreen(
                 title = stringResource(Res.string.nodes),
                 subtitle = stringResource(Res.string.node_count_template, onlineNodeCount, nodes.size, totalNodeCount),
                 ourNode = ourNode,
-                showNodeChip = false,
+                showNodeChip = ourNode != null && connectionState is ConnectionState.Connected,
                 canNavigateUp = false,
                 onNavigateUp = {},
                 actions = {
@@ -161,7 +161,7 @@ fun NodeListScreen(
                         )
                     }
                 },
-                onClickChip = {},
+                onClickChip = { navigateToNodeDetails(it.num) },
             )
         },
         floatingActionButton = {
