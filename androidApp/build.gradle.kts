@@ -291,6 +291,7 @@ dependencies {
     googleImplementation(libs.firebase.ai)
     googleImplementation(libs.firebase.ai.ondevice)
     googleImplementation(libs.mlkit.translate)
+    googleImplementation(libs.mlkit.genai.prompt)
 
     googleImplementation(libs.androidx.appfunctions)
     googleImplementation(libs.androidx.appfunctions.service)

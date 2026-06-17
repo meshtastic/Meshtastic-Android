@@ -22,8 +22,11 @@ import okio.Path.Companion.toOkioPath
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
 import org.meshtastic.app.ai.GeminiNanoDocAssistant
+import org.meshtastic.app.discovery.GeminiNanoSummaryProvider
 import org.meshtastic.app.translation.MlKitDocTranslator
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.feature.discovery.DiscoverySummaryGenerator
+import org.meshtastic.feature.discovery.ai.DiscoverySummaryAiProvider
 import org.meshtastic.feature.docs.ai.AIDocAssistant
 import org.meshtastic.feature.docs.data.DocBundleLoader
 import org.meshtastic.feature.docs.data.KeywordSearchEngine
@@ -43,6 +46,10 @@ class GoogleAiModule {
         bundleLoader: DocBundleLoader,
         nodeRepository: NodeRepository,
     ): AIDocAssistant = GeminiNanoDocAssistant(searchEngine, bundleLoader, nodeRepository)
+
+    @Single
+    fun discoverySummaryAiProvider(generator: DiscoverySummaryGenerator): DiscoverySummaryAiProvider =
+        GeminiNanoSummaryProvider(generator)
 
     @Single
     fun docTranslationCache(context: Context): DocTranslationCache =

@@ -18,6 +18,8 @@ package org.meshtastic.app.di
 
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
+import org.meshtastic.feature.discovery.ai.AlgorithmicSummaryProvider
+import org.meshtastic.feature.discovery.ai.DiscoverySummaryAiProvider
 import org.meshtastic.feature.docs.ai.AIDocAssistant
 import org.meshtastic.feature.docs.ai.KeywordFallbackAssistant
 import org.meshtastic.feature.docs.translation.DocTranslationService
@@ -27,6 +29,8 @@ import org.meshtastic.feature.docs.translation.NoOpDocTranslator
 @Module
 class FdroidAiModule {
     @Single fun aiDocAssistant(fallback: KeywordFallbackAssistant): AIDocAssistant = fallback
+
+    @Single fun discoverySummaryAiProvider(fallback: AlgorithmicSummaryProvider): DiscoverySummaryAiProvider = fallback
 
     @Single fun docTranslationService(): DocTranslationService = NoOpDocTranslator()
 }
