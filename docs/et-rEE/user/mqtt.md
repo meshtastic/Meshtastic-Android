@@ -41,7 +41,7 @@ A gateway node with internet access (WiFi or Ethernet) publishes mesh messages t
 
 ![MQTT toggle switch](../../assets/screenshots/settings_switch.png)
 
-| Setting         | Kirjeldus                                                                                     | Vaikimisi                                           |
+| Sätted          | Kirjeldus                                                                                     | Vaikimisi                                           |
 | --------------- | --------------------------------------------------------------------------------------------- | --------------------------------------------------- |
 | Server Address  | MQTT broker hostname                                                                          | mqtt.meshtastic.org |
 | Kasutajatunnus  | Broker authentication                                                                         | meshdev                                             |

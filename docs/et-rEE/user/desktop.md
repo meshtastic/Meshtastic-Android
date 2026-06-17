@@ -87,7 +87,7 @@ The Desktop app uses the same Compose Multiplatform UI with adaptations for larg
 | Shortcut            | Action                 |
 | ------------------- | ---------------------- |
 | **⌘Q** / **Ctrl+Q** | Quit the application   |
-| **⌘,** / **Ctrl+,** | Open Settings          |
+| **⌘,** / **Ctrl+,** | Ava sätted             |
 | **⌘1** / **Ctrl+1** | Switch to Messages tab |
 | **⌘2** / **Ctrl+2** | Switch to Nodes tab    |
 | **⌘3** / **Ctrl+3** | Switch to Map tab      |

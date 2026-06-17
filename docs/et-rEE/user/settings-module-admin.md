@@ -32,7 +32,7 @@ Module settings use a card-based layout with toggle switches, dropdowns, text fi
 
 Bridges mesh messages to and from an MQTT broker for internet connectivity. This is how you extend your mesh beyond radio range or integrate with home automation systems.
 
-| Setting         | Kirjeldus                                                                |
+| Sätted          | Kirjeldus                                                                |
 | --------------- | ------------------------------------------------------------------------ |
 | Lubatud         | Toggle MQTT bridge                                                       |
 | Server          | MQTT broker address                                                      |
@@ -50,7 +50,7 @@ See [MQTT](mqtt) for a detailed usage guide including encryption, privacy, and b
 
 Enables serial port communication for external device integrations (GPS modules, sensors, or custom hardware). When enabled, the node's serial port can send and receive protobuf or text data, allowing external microcontrollers or computers to interact with the mesh.
 
-| Setting    | Kirjeldus                       |
+| Sätted     | Kirjeldus                       |
 | ---------- | ------------------------------- |
 | Lubatud    | Activate serial communication   |
 | Echo       | Echo received serial data back  |
@@ -62,7 +62,7 @@ Enables serial port communication for external device integrations (GPS modules,
 
 Controls buzzer, LED, or vibration alerts on your radio hardware. Useful for devices that need to physically signal when a message arrives — particularly helpful for unattended or outdoor installations.
 
-| Setting                          | Kirjeldus                   |
+| Sätted                           | Kirjeldus                   |
 | -------------------------------- | --------------------------- |
 | Lubatud                          | Activate notifications      |
 | Alert Message                    | Notify on incoming messages |
@@ -78,7 +78,7 @@ Controls buzzer, LED, or vibration alerts on your radio hardware. Useful for dev
 
 Buffers messages for nodes that were temporarily offline, then replays them when those nodes reconnect. Essential for meshes where nodes go in and out of range regularly — ensures messages aren't lost during brief disconnections.
 
-| Setting                                    | Kirjeldus                  |
+| Sätted                                     | Kirjeldus                  |
 | ------------------------------------------ | -------------------------- |
 | Lubatud                                    | Activate store and forward |
 | Heartbeat (s)           | Announcement interval      |
@@ -92,7 +92,7 @@ Buffers messages for nodes that were temporarily offline, then replays them when
 
 Automated range testing tool for evaluating link quality between nodes. When enabled, the node periodically transmits test messages with incrementing counters. A receiver node logs these messages, allowing you to walk or drive away and later analyze at what distance messages stopped arriving.
 
-| Setting                                | Kirjeldus                         |
+| Sätted                                 | Kirjeldus                         |
 | -------------------------------------- | --------------------------------- |
 | Lubatud                                | Activate range testing            |
 | Sender Interval (s) | Time between test transmissions   |
@@ -102,7 +102,7 @@ Automated range testing tool for evaluating link quality between nodes. When ena
 
 Controls what telemetry data your node shares with the mesh. Telemetry includes device health (battery, uptime) and environmental sensor data (temperature, humidity, pressure).
 
-| Setting                      | Kirjeldus                               |
+| Sätted                       | Kirjeldus                               |
 | ---------------------------- | --------------------------------------- |
 | Device Metrics Interval      | How often to report device metrics      |
 | Environment Metrics Interval | How often to report environment sensors |
@@ -115,7 +115,7 @@ See [Telemetry & Sensors](telemetry-and-sensors) for supported sensors and confi
 
 Pre-configured messages accessible from the device's physical buttons (for radios with rotary encoders, keypads, or similar input hardware). Define a list of quick-send messages that can be transmitted without a phone connected — ideal for field use.
 
-| Setting            | Kirjeldus                                                   |
+| Sätted             | Kirjeldus                                                   |
 | ------------------ | ----------------------------------------------------------- |
 | ~~Enabled~~        | ⚠️ **Deprecated** — current firmware may ignore this toggle |
 | Sõnumid            | Newline-separated list of messages                          |
@@ -127,7 +127,7 @@ Pre-configured messages accessible from the device's physical buttons (for radio
 
 Codec2 audio support for low-bandwidth voice communication over the mesh. This is an **experimental** feature that encodes voice into very small data packets using the Codec2 codec.
 
-| Setting         | Kirjeldus                        |
+| Sätted          | Kirjeldus                        |
 | --------------- | -------------------------------- |
 | Lubatud         | Activate audio module            |
 | Codec2 Rate     | Audio quality/bandwidth tradeoff |
@@ -141,7 +141,7 @@ Codec2 audio support for low-bandwidth voice communication over the mesh. This i
 
 GPIO control over the mesh network. Allows a remote node to read or write GPIO pins on another node — useful for activating relays, reading switches, or controlling external hardware from a distance.
 
-| Setting              | Kirjeldus                                                       |
+| Sätted               | Kirjeldus                                                       |
 | -------------------- | --------------------------------------------------------------- |
 | Lubatud              | Activate remote GPIO access                                     |
 | Allow Undefined Pins | Allow access to any GPIO pin (security risk) |
@@ -152,7 +152,7 @@ GPIO control over the mesh network. Allows a remote node to read or write GPIO p
 
 Broadcasts information about directly heard neighbors, enabling mesh topology mapping. Each enabled node periodically shares a list of the other nodes it can hear and their signal quality.
 
-| Setting                                | Kirjeldus                            |
+| Sätted                                 | Kirjeldus                            |
 | -------------------------------------- | ------------------------------------ |
 | Lubatud                                | Activate neighbor broadcasting       |
 | Update Interval (s) | How often to broadcast neighbor list |
@@ -163,7 +163,7 @@ See [Discovery](discovery) for how to use neighbor data for mesh topology explor
 
 Controls onboard NeoPixel or other addressable RGB LEDs on supported hardware. Can be used for visual status indicators, notification lights, or decorative effects.
 
-| Setting            | Kirjeldus                                                  |
+| Sätted             | Kirjeldus                                                  |
 | ------------------ | ---------------------------------------------------------- |
 | Lubatud            | Activate LED control                                       |
 | LED State          | On, Off, or set specific color                             |
@@ -173,7 +173,7 @@ Controls onboard NeoPixel or other addressable RGB LEDs on supported hardware. C
 
 Turns your node into a motion or door sensor alert system. When a GPIO pin detects a state change (motion detected, door opened), the node broadcasts an alert message over the mesh.
 
-| Setting                                  | Kirjeldus                                                               |
+| Sätted                                   | Kirjeldus                                                               |
 | ---------------------------------------- | ----------------------------------------------------------------------- |
 | Lubatud                                  | Activate detection sensor                                               |
 | Monitor Pin                              | GPIO pin connected to sensor                                            |
@@ -187,7 +187,7 @@ Turns your node into a motion or door sensor alert system. When a GPIO pin detec
 
 People counter using WiFi and BLE probe requests. Counts nearby devices by passively listening for probe requests that phones and laptops emit when scanning for networks. Available only on ESP32 devices.
 
-| Setting                                | Kirjeldus                  |
+| Sätted                                 | Kirjeldus                  |
 | -------------------------------------- | -------------------------- |
 | Lubatud                                | Activate people counting   |
 | Update Interval (s) | How often to report counts |

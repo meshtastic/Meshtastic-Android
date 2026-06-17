@@ -38,7 +38,7 @@ The TAK module allows Meshtastic nodes to:
 
 ![Module toggle switch](../../assets/screenshots/settings_switch.png)
 
-| Setting | Kirjeldus                  |
+| Sätted  | Kirjeldus                  |
 | ------- | -------------------------- |
 | Lubatud | Activate TAK interop       |
 | Mode    | TAK-compatible output mode |
@@ -68,7 +68,7 @@ TAK messages use the Cursor on Target XML format — a military standard for sha
 
 When using TAK roles, your node broadcasts identity information that appears on TAK maps:
 
-| Setting  | Kirjeldus                                                                                                        |
+| Sätted   | Kirjeldus                                                                                                        |
 | -------- | ---------------------------------------------------------------------------------------------------------------- |
 | Team     | Your team color on the TAK map (e.g., Blue, Red, Cyan, Green) |
 | Roll     | Your operational role (Team Member, Team Lead, HQ, Medic, RTO, etc.)          |

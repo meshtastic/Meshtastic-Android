@@ -189,9 +189,15 @@
   },
   "pullRequests": [
     {
-      "id": "10730",
-      "title": "Fix PKC on portduino sim by working around region blocks keygen and packet length",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10730",
+      "id": "10736",
+      "title": "Lora region preset map",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10736",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "10735",
+      "title": "PR3 Next Hop improvements",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10735",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
@@ -216,12 +222,6 @@
       "id": "10724",
       "title": "Use upstream fusion library",
       "page_url": "https://github.com/meshtastic/firmware/pull/10724",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10721",
-      "title": "InkHUD: Wipe all messages option",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10721",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
@@ -312,12 +312,6 @@
       "id": "10656",
       "title": "UDP Unicast for Meshtasticd",
       "page_url": "https://github.com/meshtastic/firmware/pull/10656",
-      "zip_url": "s"
-    },
-    {
-      "id": "10633",
-      "title": "revert a conflict regression and introduce the DCDC workaround ",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10633",
       "zip_url": "s"
     }
   ]
