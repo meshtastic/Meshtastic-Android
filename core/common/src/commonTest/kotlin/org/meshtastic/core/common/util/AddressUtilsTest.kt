@@ -18,6 +18,8 @@ package org.meshtastic.core.common.util
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class AddressUtilsTest {
 
@@ -68,5 +70,19 @@ class AddressUtilsTest {
     @Test
     fun mixedCaseWithColons() {
         assertEquals("AABBCC", normalizeAddress("aA:Bb:cC"))
+    }
+
+    @Test
+    fun isValidDeviceAddressAcceptsRealDeviceAddress() {
+        assertTrue(isValidDeviceAddress("xAA:BB:CC:DD:EE:FF"))
+        assertTrue(isValidDeviceAddress("t192.168.1.100"))
+    }
+
+    @Test
+    fun isValidDeviceAddressRejectsNoDeviceSentinels() {
+        listOf(null, "", "   ", "\t", "n", "N", "null", "NULL", "Null", ".n", ".N", "default", "DEFAULT", "Default")
+            .forEach { sentinel ->
+                assertFalse(isValidDeviceAddress(sentinel), "Sentinel ${sentinel ?: "null"} must be invalid")
+            }
     }
 }

@@ -17,6 +17,7 @@
 package org.meshtastic.core.database
 
 import okio.ByteString.Companion.encodeUtf8
+import org.meshtastic.core.common.util.isNoDeviceSentinel
 import org.meshtastic.core.common.util.normalizeAddress
 
 object DatabaseConstants {
@@ -47,11 +48,9 @@ fun buildDbName(address: String?): String {
     val normalized = normalizeAddress(address)
     // No-device sentinels must resolve to the canonical DEFAULT_DB_NAME file, not be hashed into a
     // separate DB — otherwise data for "no device selected" would split across files depending on
-    // which sentinel form prefs happened to emit. normalizeAddress collapses null/blank/"N"/"NULL"
-    // to "DEFAULT"; ".N" (any case) is also collapsed here as a defensive legacy/sentinel guard.
-    // There is no current producer of ".n" in the codebase, but the rule keeps buildDbName
-    // self-consistent regardless of input shape.
-    if (normalized == "DEFAULT" || normalized == ".N") return DatabaseConstants.DEFAULT_DB_NAME
+    // which sentinel form prefs happened to emit. Sentinel detection is shared with isValidDeviceAddress
+    // via isNoDeviceSentinel so DB naming and the foreground-service stay-alive decision never diverge.
+    if (isNoDeviceSentinel(normalized)) return DatabaseConstants.DEFAULT_DB_NAME
     return "${DatabaseConstants.DB_PREFIX}_${shortSha1(normalized)}"
 }
 

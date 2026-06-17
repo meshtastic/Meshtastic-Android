@@ -39,6 +39,7 @@ import org.koin.android.ext.android.inject
 import org.meshtastic.core.common.hasLocationPermission
 import org.meshtastic.core.common.util.isValidDeviceAddress
 import org.meshtastic.core.model.DeviceVersion
+import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.RadioInterfaceService
@@ -149,14 +150,14 @@ class MeshService : Service() {
             addressWaitJob?.cancel()
             addressWaitJob = null
             acquireWakeLock()
-            Logger.i { "MeshService: selected device ready ($address), staying foreground" }
+            Logger.i { "MeshService: selected device ready (${address.anonymize}), staying foreground" }
             return START_STICKY
         }
 
         // Address is currently null/blank/sentinel. This may be a transient state while DataStore emits the persisted
         // value (cold-start race: RadioPrefsImpl.devAddr starts as null until the first DataStore emission). Make no
         // irreversible stopSelf() decision here; wait briefly for the address flow to settle.
-        Logger.i { "MeshService: selected address not yet loaded ($address); waiting for address flow" }
+        Logger.i { "MeshService: selected address not yet loaded (${address.anonymize}); waiting for address flow" }
         scheduleDeviceAddressResolution()
         return START_STICKY
     }
@@ -180,7 +181,7 @@ class MeshService : Service() {
                         radioInterfaceService.currentDeviceAddressFlow.first(::isValidDeviceAddress)
                     }
                 if (isValidDeviceAddress(resolved)) {
-                    Logger.i { "MeshService: selected device resolved ($resolved) after address-flow wait" }
+                    Logger.i { "MeshService: selected device resolved (${resolved.anonymize}) after address-flow wait" }
                     acquireWakeLock()
                 } else {
                     Logger.i { "MeshService: no device selected after address flow settled; stopping" }

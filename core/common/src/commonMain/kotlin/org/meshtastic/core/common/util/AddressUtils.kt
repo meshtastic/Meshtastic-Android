@@ -30,12 +30,15 @@ fun normalizeAddress(addr: String?): String {
 }
 
 /**
- * True iff [address] refers to a real selected device. Rejects null/blank and all legacy no-device sentinels (`"n"`,
- * `"null"`, `".n"`, `"default"`, case-insensitive) by delegating to [normalizeAddress]. Any input that [buildDbName]
- * would collapse to `DEFAULT_DB_NAME` is rejected here too, so the foreground-service stay-alive decision and the DB
- * name resolution can never diverge.
+ * True iff [normalized] (the output of [normalizeAddress]) is a no-device sentinel that DB naming collapses to the
+ * default database. Single source of truth for "no real device selected".
  */
-fun isValidDeviceAddress(address: String?): Boolean {
-    val normalized = normalizeAddress(address)
-    return normalized != "DEFAULT" && normalized != ".N"
-}
+fun isNoDeviceSentinel(normalized: String): Boolean = normalized == "DEFAULT" || normalized == ".N"
+
+/**
+ * True iff [address] refers to a real selected device. Rejects null/blank and all legacy no-device sentinels (`"n"`,
+ * `"null"`, `".n"`, `"default"`, case-insensitive) by delegating to [normalizeAddress] and [isNoDeviceSentinel]. Any
+ * input that [buildDbName] would collapse to `DEFAULT_DB_NAME` is rejected here too, so the foreground-service
+ * stay-alive decision and the DB name resolution can never diverge.
+ */
+fun isValidDeviceAddress(address: String?): Boolean = !isNoDeviceSentinel(normalizeAddress(address))
