@@ -27,10 +27,10 @@ Temperature values from environment sensors are transmitted as **°C** and displ
 
 ![Environment metrics with temperature](../../assets/screenshots/nodes_environment_metrics.png)
 
-| Your Setting | You See |
-| ------------ | ------- |
-| Celsius      | 22°C    |
-| Fahrenheit   | 72°F    |
+| Sinu sätted | You See |
+| ----------- | ------- |
+| Celsius     | 22°C    |
+| Fahrenheit  | 72°F    |
 
 This affects all temperature displays throughout the app: node environment telemetry, soil temperature, dew point, and telemetry chart axes.
 
@@ -40,7 +40,7 @@ Distances between nodes and GPS altitudes are transmitted as **meters** and auto
 
 ![Distance info display](../../assets/screenshots/nodes_distance_info.png)
 
-| Your Setting                     | Small Distance | Large Distance         | Kõrgus   |
+| Sinu sätted                      | Small Distance | Large Distance         | Kõrgus   |
 | -------------------------------- | -------------- | ---------------------- | -------- |
 | Metric                           | 350 m          | 2.5 km | 1,200 m  |
 | Imperial (US) | 1,148 ft       | 1.6 mi | 3,937 ft |
@@ -58,7 +58,7 @@ The app uses natural scaling — short distances stay in meters or feet, while l
 
 GPS ground speed is displayed in your locale's preferred speed unit.
 
-| Your Setting                     | You See |
+| Sinu sätted                      | You See |
 | -------------------------------- | ------- |
 | Metric                           | 12 km/h |
 | Imperial (US) | 7 mph   |
@@ -67,7 +67,7 @@ GPS ground speed is displayed in your locale's preferred speed unit.
 
 Wind speed and gust data from environment sensors are transmitted as **m/s** and converted for display.
 
-| Your Setting                     | You See |
+| Sinu sätted                      | You See |
 | -------------------------------- | ------- |
 | Metric                           | 5 m/s   |
 | Imperial (US) | 11 mph  |
@@ -78,7 +78,7 @@ Wind readings appear in the **Node Detail** environment section and the **Enviro
 
 Rainfall measurements (1-hour and 24-hour totals) are transmitted as **mm** and converted for display.
 
-| Your Setting                     | You See                |
+| Sinu sätted                      | You See                |
 | -------------------------------- | ---------------------- |
 | Metric                           | 12 mm                  |
 | Imperial (US) | 0.5 in |
@@ -99,7 +99,7 @@ Some units are international standards and are displayed the same way regardless
 
 All timestamps throughout the app — last heard, message times, telemetry logs, chart axes — follow your device's date and time preferences.
 
-| Setting          | What It Controls | Example                                          |
+| Sätted           | What It Controls | Example                                          |
 | ---------------- | ---------------- | ------------------------------------------------ |
 | **24-Hour Time** | Clock format     | 14:30 vs 2:30 PM |
 | **Date Format**  | Date ordering    | 09/05/2026 vs 05/09/2026                         |

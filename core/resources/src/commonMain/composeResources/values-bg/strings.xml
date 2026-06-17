@@ -105,6 +105,8 @@
     <string name="button_gpio">GPIO за бутон</string>
     <string name="buzzer_gpio">GPIO за зумер</string>
     <string name="calculating">Изчисляване…</string>
+    <string name="call_sign">Опознавателен знак</string>
+    <string name="call_sign_summary">Вашият радиолюбителски опознавателен знак, до 8 знака</string>
     <string name="cancel">Отказ</string>
     <string name="cant_change_no_radio">Каналът не може да бъде сменен, тъй като радиото все още не е свързано. Моля, опитайте отново.</string>
     <string name="cant_shutdown">Изключването не се поддържа на това устройство</string>
@@ -126,6 +128,7 @@
     <string name="channels">Канали</string>
     <!-- CHIRPY -->
     <string name="chirpy">Чирпи</string>
+    <string name="chirpy_downloading_subtitle">Това се случва само веднъж. Chirpy скоро ще е готов!</string>
     <string name="chirpy_ready">Попитайте Chirpy</string>
     <string name="chirpy_search_placeholder">Попитайте за Meshtastic…</string>
     <string name="chirpy_suggested_pages_help">Ето някои страници с документация, които биха могли да помогнат:</string>
@@ -142,6 +145,7 @@
     <string name="clear_time_zone">Изчистване на часовата зона</string>
     <string name="close">Затвори</string>
     <string name="close_selection">Затваряне на избраните</string>
+    <string name="co2">CO₂</string>
     <string name="codec_2_enabled">CODEC 2 е активиран</string>
     <string name="collapse_chart">Свиване на диаграмата</string>
     <string name="communicate_off_the_grid">Комуникирайте извън мрежата с вашите приятели и общността без клетъчна услуга.</string>
@@ -250,6 +254,7 @@
     <string name="device_configuration">Конфигурация на устройството</string>
     <string name="device_db_cache_limit">Лимит на кеша на DB на устройството</string>
     <string name="device_db_cache_limit_summary">Максимален брой бази данни на устройства, които да се съхраняват на този телефон</string>
+    <string name="device_links_open_in_browser">Отваряне в браузър</string>
     <string name="device_metrics_label_value">%1$s: %2$s</string>
     <string name="device_metrics_log">Метрики на устройството</string>
     <string name="device_metrics_numeric_value">%1$s</string>
@@ -267,11 +272,20 @@
     <string name="disconnected">Прекъсната връзка</string>
     <string name="discovered_network_devices">Открити мрежови устройства</string>
     <!-- DISCOVERY -->
+    <string name="discovery_start_scan_reason_24ghz_unsupported">радио хардуерът не поддържа 2.4 GHz</string>
+    <string name="discovery_start_scan_reason_default_key">каналът използва ключ за криптиране по подразбиране</string>
+    <string name="discovery_stat_analysis">Анализ</string>
+    <string name="discovery_stat_avg_channel_utilization">Средно използване на канала</string>
     <string name="discovery_stat_channel_utilization">Използване на канала</string>
     <string name="discovery_stat_date">Дата</string>
     <string name="discovery_stat_direct">Директно</string>
     <string name="discovery_stat_messages">Съобщения</string>
     <string name="discovery_stat_selected">Избрани</string>
+    <string name="discovery_stat_status">Статус</string>
+    <string name="discovery_stat_total_messages">Общо съобщения</string>
+    <string name="discovery_stat_total_unique_nodes">Общо уникални възли</string>
+    <string name="discovery_stat_unique_nodes">Уникални възли</string>
+    <string name="discovery_unique_nodes">%1$d уникални възела</string>
     <string name="disk_free_indexed">Свободен диск %1$d</string>
     <!-- DISPLAY -->
     <string name="display">Дисплей</string>
@@ -288,6 +302,7 @@
     <string name="doc_search_placeholder">Търсене в документацията…</string>
     <string name="doc_section_developer">Ръководство за разработчици</string>
     <string name="doc_section_user">Ръководство за потребители</string>
+    <string name="doc_title_app_functions">Функции на приложението</string>
     <string name="doc_title_connections">Връзки</string>
     <string name="doc_title_desktop">Настолно приложение</string>
     <string name="doc_title_discovery">Откриване</string>
@@ -604,6 +619,7 @@
     <string name="message_status_sfpp_routing"></string>
     <string name="message_status_unknown">Неизвестно</string>
     <string name="messages">Съобщения</string>
+    <string name="micrograms_per_cubic_meter">µg/m³</string>
     <string name="min">Мин</string>
     <string name="minimum_wake_time_seconds">Минимално време за събуждане</string>
     <string name="modem_preset">Предварително зададени</string>
@@ -771,6 +787,9 @@
         <item quantity="one">%1$d секунда</item>
         <item quantity="other">%1$d секунди</item>
     </plurals>
+    <string name="pm1_0">PM1.0</string>
+    <string name="pm10">PM10</string>
+    <string name="pm2_5">PM2.5</string>
     <!-- POSITION -->
     <string name="position">Позиция</string>
     <string name="position_config_set_fixed_from_phone">Зададено от текущото местоположение на телефона</string>
