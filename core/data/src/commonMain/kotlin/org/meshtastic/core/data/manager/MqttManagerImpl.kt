@@ -23,6 +23,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
@@ -56,10 +57,12 @@ class MqttManagerImpl(
     @Named("ServiceScope") private val scope: CoroutineScope,
 ) : MqttManager {
     private var mqttMessageFlow: Job? = null
-    private val proxyActive = MutableStateFlow(false)
+    private val _proxyActive = MutableStateFlow(false)
+
+    override val proxyActive: StateFlow<Boolean> = _proxyActive.asStateFlow()
 
     override val mqttConnectionState: StateFlow<MqttConnectionState> =
-        combine(proxyActive, mqttRepository.connectionState) { active, libState ->
+        combine(_proxyActive, mqttRepository.connectionState) { active, libState ->
             if (!active) MqttConnectionState.Inactive else libState.toAppState()
         }
             .stateIn(scope, SharingStarted.Eagerly, MqttConnectionState.Inactive)
@@ -67,12 +70,12 @@ class MqttManagerImpl(
     override fun startProxy(enabled: Boolean, proxyToClientEnabled: Boolean) {
         if (mqttMessageFlow?.isActive == true) return
         if (enabled && proxyToClientEnabled) {
-            proxyActive.value = true
+            _proxyActive.value = true
             mqttMessageFlow =
                 mqttRepository.proxyMessageFlow
                     .onEach { message -> packetHandler.sendToRadio(ToRadio(mqttClientProxyMessage = message)) }
                     .catch { throwable ->
-                        proxyActive.value = false
+                        _proxyActive.value = false
                         val message =
                             when (throwable) {
                                 is MqttException.ConnectionRejected -> "MQTT: connection rejected (check credentials)"
@@ -91,7 +94,7 @@ class MqttManagerImpl(
             mqttMessageFlow?.cancel()
             mqttMessageFlow = null
         }
-        proxyActive.value = false
+        _proxyActive.value = false
     }
 
     override fun handleMqttProxyMessage(message: MqttClientProxyMessage) {

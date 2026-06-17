@@ -26,6 +26,13 @@ interface MqttManager {
     /** Observable MQTT proxy connection state for UI consumption. */
     val mqttConnectionState: StateFlow<MqttConnectionState>
 
+    /**
+     * Observable phone-local proxy state: `true` while this phone is actively running the MQTT proxy (relaying broker
+     * traffic to the connected device). This reflects only the phone-side proxy lifecycle and is independent of the
+     * device's persisted MQTT config — [stop] and [startProxy] flip it without any device read/write round-trip.
+     */
+    val proxyActive: StateFlow<Boolean>
+
     /** Starts the MQTT proxy with the given settings. */
     fun startProxy(enabled: Boolean, proxyToClientEnabled: Boolean)
 

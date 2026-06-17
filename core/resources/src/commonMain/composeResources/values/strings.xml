@@ -896,6 +896,8 @@
     <string name="mqtt_probe_tcp_failure">Cannot reach broker (TCP)</string>
     <string name="mqtt_probe_timeout">Timed out after %1$d ms</string>
     <string name="mqtt_probe_tls_failure">TLS handshake failed: %1$s</string>
+    <string name="mqtt_proxy_local">MQTT proxy on this phone</string>
+    <string name="mqtt_proxy_local_summary">This phone relays MQTT traffic for the connected device. Turn off to cut the relay immediately without changing the device\'s MQTT setting — useful when MQTT traffic is overwhelming the connection. Turn back on to resume relaying.</string>
     <string name="mqtt_status_connected">Connected</string>
     <string name="mqtt_status_connecting">Connecting…</string>
     <string name="mqtt_status_disconnected">Disconnected</string>
@@ -1583,3 +1585,4 @@
     <string name="zh_CN" translatable="false">简体中文</string>
     <string name="zh_TW" translatable="false">繁體中文</string>
 </resources>
+

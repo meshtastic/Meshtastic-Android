@@ -866,6 +866,8 @@ mqtt_probe_success_with_info
 mqtt_probe_tcp_failure
 mqtt_probe_timeout
 mqtt_probe_tls_failure
+mqtt_proxy_local
+mqtt_proxy_local_summary
 mqtt_status_connected
 mqtt_status_connecting
 mqtt_status_disconnected

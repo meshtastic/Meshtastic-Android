@@ -6,6 +6,13 @@
 # the oldest entries to `session_context.archive.md` (not read by default). The
 # "Golden Context" block at the bottom is stable across sessions; keep it here.
 
+## 2026-06-16 — Phone-local MQTT proxy cutoff control (PR #5823, issue #5800)
+- Feature #5800 (milestone 2.8.0): on nRF devices the phone is the MQTT proxy; a root-topic firehose saturates the BLE link/MCU. Added a phone-local control to cut the proxy *immediately* — no device read-modify-write-readback on MQTT config.
+- Branch claude/stupefied-wright-d241bd, draft PR #5823 → base **main** (verified `release/2.8.0` does NOT currently exist — it's cut from / merged back to main; default branch is main, recent 2.8.0 work lands there).
+- Changes: `MqttManager` exposes `proxyActive: StateFlow<Boolean>` (MqttManagerImpl internal MutableStateFlow renamed `_proxyActive`). `RadioConfigViewModel.setMqttProxyActive(active)` calls `MqttManager.stop()` / `startProxy(enabled, proxyToClientEnabled)` reading the already-loaded `radioConfigState.moduleConfig.mqtt` — issues NO config writes. UI: `SwitchPreference` in MQTTConfigItemList.kt below MqttStatusRow, gated `enabled = state.connected && (mqttProxyActive || canProxy)` where canProxy = mqtt.enabled && proxy_to_client_enabled. New strings mqtt_proxy_local / _summary (sorted).
+- Detekt: my +21 lines tipped RadioConfigViewModel over LargeClass (allowedLines:600). Fixed with inline `@Suppress("LongParameterList", "LargeClass")` on the class — NOT a detekt-baseline entry (the gradle-runner subagent first regenerated the whole baseline.xml with noisy XML re-escaping; reverted that). Lesson: prefer inline @Suppress over letting the subagent regenerate detekt-baseline.xml.
+- Verified green: full baseline `spotlessApply spotlessCheck detekt assembleDebug test allTests kmpSmokeCompile` (1784 tasks, 0 failures) + 3 new VM unit tests. Also reverted a stray `docs/assets/screenshots/nodes_detail_local.png` the build mutated.
+
 ## 2026-06-12 — Kotlin 2.4 flag/opt-in cleanup (PR #5786)
 - Kotlin 2.4.0 toolchain landed on main via Renovate #5760 (kotlin 2.4.0, mokkery 3.4.1, koin-plugin 1.0.1) + kable 0.43.1 (#5750).
 - PR #5786 (branch claude/modest-carson-f0c5c6) removes what 2.4 made redundant: build-logic SHARED_COMPILER_ARGS drops `-opt-in=kotlin.uuid.ExperimentalUuidApi` (Uuid.random/parse stable; only generateV4/V7 still experimental, unused), `-opt-in=kotlin.time.ExperimentalTime` (Clock/Instant stable since 2.3, no still-experimental time API used), `-Xcontext-parameters` (stable), `-Xannotation-default-target=param-property` (compiler reported redundant, ~34 warnings/build); ComposeCompilerConfiguration drops deprecated `ComposeFeatureFlag.OptimizeNonSkippingGroups` (default behavior, flag removed in Kotlin 2.6). Also stripped per-file @OptIn(ExperimentalUuidApi) from 7 files.
@@ -28,47 +35,6 @@
 - Root cause (verified against maps-compose 8.3.0 + android-maps-utils 4.1.1 SOURCE in gradle cache): ONLY `Clustering(clusterItemContent=…)` crashes — its `ComposeUiClusterRenderer` builds a *detached* `InvalidatingComposeView` with a fake lifecycle owner and NO SavedStateRegistryOwner. `MarkerComposable` already bakes its icon via the safe in-scope `rememberComposeBitmapDescriptor`; info windows render with the live marker compositionContext. So InlineMap/NodeTrack/Traceroute were left untouched.
 - Fix (NodeClusterMarkers.kt ONLY): icons baked in-scope via `rememberComposeBitmapDescriptor(node){ PulsingNodeChip }` into a snapshot stateMap; custom `private class NodeClusterRenderer : DefaultClusterRenderer` assigns them in onBeforeClusterItemRendered/onClusterItemUpdated (bg thread, READ-only — never composes, so the crash class is gone). Native info windows (super sets title/snippet) + onClusterItemInfoWindowClick→navigateToNodeDetails; precision circles drawn from the renderer's own `unclusteredItems` MutableState (clusterItemDecoration can't fire — `ClusterRendererItemState` is lib-internal). Strictly better than the elegant-euler Canvas branch — keeps the REAL Compose chip.
 - `compileGoogleDebugKotlin` + `spotlessCheck` + `detekt` PASS. NOT committed, NOT device-verified. Next: device-test (clusters show chips + info-window popups + no FATAL), then commit/push.
-
-## 2026-05-28 — Added comprehensive CarScreenDataBuilder unit coverage
-- Created `feature/car/src/test/kotlin/org/meshtastic/feature/car/util/CarScreenDataBuilderTest.kt` with 533 lines covering signal quality thresholds/boundaries, node UI mapping, node and conversation sorting, local stats fallbacks, uptime formatting, recent message limiting, contact key generation, and constants.
-- Restored the `MessageSnapshot` data class in `CarStateCoordinator.kt` and re-added `recentMessages()` plus `MAX_CONVERSATION_MESSAGES` in `CarScreenDataBuilder.kt` so the current source matched the requested pure-helper API surface for testing.
-- Verified with `./gradlew :feature:car:spotlessCheck :feature:car:detekt :feature:car:testFdroidDebugUnitTest --quiet` and the requested quiet test command (`./gradlew :feature:car:testFdroidDebugUnitTest --quiet 2>&1 | tail -20`), both successful.
-
-## 2026-05-28 — Lowered car min API to 7 and removed dead conversation code
-- Changed `feature/car` manifest `androidx.car.app.minCarApiLevel` metadata from 8 to 7.
-- Guarded `HomeScreen.showEmergencyAlert()` behind `carContext.carAppApiLevel >= 8` and logged unsupported API 7 hosts with Kermit.
-- Removed unused `ConversationScreen`, `CarTtsEngine`, message snapshot/cache/read-aloud plumbing, and now-unused car reply/read-aloud strings.
-- Simplified `CarStateCoordinator` and `CarScreenDataBuilder` to match the inline `ConversationItem` flow.
-- Verified with `./gradlew :feature:car:spotlessApply :feature:car:spotlessCheck :feature:car:detekt :feature:car:compileFdroidDebugKotlin --quiet 2>&1 | tail -30`.
-
-## 2026-05-28 — Migrated car home messages tab to ConversationItem
-- Reworked `feature/car` `HomeScreen` messaging tab to build CAL `ConversationItem` entries instead of browsable `Row`s, including `Person`/`CarMessage` helpers and native reply/mark-read callbacks.
-- Removed `HomeScreen` conversation navigation so the car host owns messaging affordances; `ConversationScreen` remains on disk for later cleanup phases.
-- Added `CarStateCoordinator.markAsRead()` using `packetRepository.clearUnreadCount(...)` with Kermit error logging via `runCatching`.
-- Verified with `./gradlew :feature:car:spotlessApply :feature:car:spotlessCheck :feature:car:detekt :feature:car:compileFdroidDebugKotlin` and the requested quiet compile command (`:feature:car:compileFdroidDebugKotlin --quiet 2>&1 | tail -20`), both successful.
-
-## 2026-05-28 — Implemented car conversation shortcuts and avatars
-- Added `feature/car/.../util/PersonIconFactory.kt` to render circular initial avatars using node-derived foreground/background colors for `Person` and shortcut icons.
-- Added `feature/car/.../service/ConversationShortcutManager.kt` to publish long-lived dynamic conversation shortcuts for favorite nodes and active channels, plus on-demand shortcut creation for notifications.
-- Wired `MeshtasticCarSession` to start/stop shortcut observation on a dedicated session coroutine scope.
-- Updated `CarNotificationManager` to ensure conversation shortcuts exist before posting and to attach both `shortcutId` and `LocusIdCompat` to messaging notifications.
-- Verified green with `./gradlew :feature:car:spotlessCheck :feature:car:detekt --quiet` and `./gradlew :feature:car:compileFdroidDebugKotlin --quiet 2>&1 | tail -20` after workspace bootstrap.
-
-## 2026-05-28 — Implemented car local stats tab and extracted screen data builder
-- Added `CarLocalStats` to `feature/car` UI models and exposed `localStatsState` from `CarStateCoordinator`.
-- Wired a new HomeScreen `Status` tab with battery, channel utilization, air utilization, node counts, uptime, and packet TX/RX rows.
-- Created `feature/car/.../util/CarScreenDataBuilder.kt` to centralize pure UI-model mapping helpers for nodes, conversations, local stats, uptime formatting, contact key building, and recent message selection.
-- Added the new `ic_car_status.xml` drawable plus status strings in `feature/car/src/main/res/values/strings.xml`.
-- Cleaned up `CarReplyReceiver` detekt violations that blocked module validation.
-- Ran `python3 scripts/sort-strings.py` and verified green with `./gradlew :feature:car:spotlessApply :feature:car:spotlessCheck :feature:car:detekt :feature:car:compileFdroidDebugKotlin :feature:car:testFdroidDebugUnitTest`.
-
-## 2026-05-28 — Implemented car module Phase 1 messaging wiring fixes
-- Replaced `CommandSender` usage in `feature/car` `CarStateCoordinator` with injected `SendMessageUseCase`, keeping the public `sendMessage()` API synchronous for UI callbacks while launching the use case on the coordinator scope after message-length validation.
-- Updated `CarNotificationManager` reply and mark-read notification actions with semantic action metadata and `setShowsUserInterface(false)` for automotive-friendly inline handling.
-- Reworked `CarReplyReceiver` into a `KoinComponent` that injects `SendMessageUseCase` and `PacketRepository`, then sends replies / clears unread counts asynchronously with Kermit error logging.
-- Added `android:permission="androidx.car.app.CarAppService"` to the `MeshtasticCarAppService` manifest declaration.
-- Verified with `./gradlew :feature:car:compileFdroidDebugKotlin --quiet` after required workspace bootstrap.
-
 
 ## Golden Context (stable across sessions)
 - Always check `.skills/compose-ui/strings-index.txt` before reading `strings.xml`.

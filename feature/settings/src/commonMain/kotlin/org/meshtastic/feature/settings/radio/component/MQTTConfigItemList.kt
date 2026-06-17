@@ -67,6 +67,8 @@ import org.meshtastic.core.resources.mqtt_probe_success_with_info
 import org.meshtastic.core.resources.mqtt_probe_tcp_failure
 import org.meshtastic.core.resources.mqtt_probe_timeout
 import org.meshtastic.core.resources.mqtt_probe_tls_failure
+import org.meshtastic.core.resources.mqtt_proxy_local
+import org.meshtastic.core.resources.mqtt_proxy_local_summary
 import org.meshtastic.core.resources.mqtt_status_connected
 import org.meshtastic.core.resources.mqtt_status_connecting
 import org.meshtastic.core.resources.mqtt_status_disconnected
@@ -92,6 +94,7 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val destNode by viewModel.destNode.collectAsStateWithLifecycle()
     val mqttProxyState by viewModel.mqttConnectionState.collectAsStateWithLifecycle()
+    val mqttProxyActive by viewModel.mqttProxyActive.collectAsStateWithLifecycle()
     val probeStatus by viewModel.mqttProbeStatus.collectAsStateWithLifecycle()
     val destNum = destNode?.num
     val mqttConfig = state.moduleConfig.mqtt ?: ModuleConfig.MQTTConfig()
@@ -126,6 +129,26 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         },
     ) {
         item { MqttStatusRow(mqttProxyState) }
+
+        item {
+            // Phone-local proxy control: stops/starts the MQTT proxy running on this phone via
+            // MqttManager directly, independent of the device's persisted MQTT config. Lets the user
+            // cut the proxy firehose immediately without the slow read-modify-write-readback round-trip.
+            val mqtt = state.moduleConfig.mqtt
+            val canProxy = mqtt?.enabled == true && mqtt.proxy_to_client_enabled == true
+            TitledCard(title = null) {
+                SwitchPreference(
+                    title = stringResource(Res.string.mqtt_proxy_local),
+                    summary = stringResource(Res.string.mqtt_proxy_local_summary),
+                    checked = mqttProxyActive,
+                    // Off→on only makes sense when the device config permits proxying; keep the
+                    // switch live while the proxy is running so it can always be turned off.
+                    enabled = state.connected && (mqttProxyActive || canProxy),
+                    onCheckedChange = viewModel::setMqttProxyActive,
+                    containerColor = CardDefaults.cardColors().containerColor,
+                )
+            }
+        }
 
         item {
             TitledCard(title = stringResource(Res.string.mqtt_config)) {
