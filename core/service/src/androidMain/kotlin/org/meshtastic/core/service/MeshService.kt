@@ -27,9 +27,19 @@ import android.os.IBinder
 import android.os.PowerManager
 import androidx.core.app.ServiceCompat
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.android.ext.android.inject
 import org.meshtastic.core.common.hasLocationPermission
+import org.meshtastic.core.common.util.isValidDeviceAddress
 import org.meshtastic.core.model.DeviceVersion
+import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.RadioInterfaceService
@@ -59,6 +69,18 @@ class MeshService : Service() {
     private var isServiceInitialized = false
 
     /**
+     * Scope for short-lived coroutines owned by this service (e.g. waiting for the selected-device address to load).
+     * Canceled in [onDestroy].
+     */
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+
+    /**
+     * Active job waiting for the selected-device address to be loaded from DataStore. Null when no wait is pending
+     * (either the address was already valid at [onStartCommand] time, or the wait already resolved).
+     */
+    private var addressWaitJob: Job? = null
+
+    /**
      * Partial wake lock held while the foreground service is running. Prevents the CPU from being throttled while the
      * TAK server's keepalive coroutines, socket writes, and mesh packet handlers need to run on a regular cadence.
      * Without this, OEM battery optimizations can pause coroutines for long enough that connected TAK clients
@@ -73,6 +95,13 @@ class MeshService : Service() {
         val absoluteMinDeviceVersion = DeviceVersion(DeviceVersion.ABS_MIN_FW_VERSION)
 
         private const val WAKE_LOCK_TIMEOUT_MS = 30L * 60L * 1_000L // 30 minutes
+
+        /**
+         * How long [onStartCommand] will keep the service alive waiting for the selected-device address flow to emit a
+         * valid value before concluding that no device is genuinely selected. Covers cold-start DataStore load time;
+         * only the initial null/blank value is treated as transient.
+         */
+        private const val DEVICE_ADDRESS_SETTLE_MS = 5_000L
     }
 
     override fun onCreate() {
@@ -97,9 +126,6 @@ class MeshService : Service() {
             return START_NOT_STICKY
         }
 
-        val address = radioInterfaceService.getDeviceAddress()
-        val wantForeground = address != null && address != "n"
-
         connectionManager.updateStatusNotification()
         val notification = androidNotifications.getServiceNotification()
 
@@ -114,18 +140,56 @@ class MeshService : Service() {
                 0
             }
 
+        // Start foreground FIRST. Android requires startForeground() within ~5s of onStartCommand and before any
+        // potentially-blocking work. We never defer this — even when the selected-device address is not yet loaded.
         startForegroundSafely(notification, foregroundServiceType)
 
-        return if (!wantForeground) {
-            Logger.i { "Stopping mesh service because no device is selected" }
-            releaseWakeLock()
-            ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
-            stopSelf()
-            START_NOT_STICKY
-        } else {
+        val address = radioInterfaceService.getDeviceAddress()
+        if (isValidDeviceAddress(address)) {
+            // Address is already loaded and valid — proceed normally.
+            addressWaitJob?.cancel()
+            addressWaitJob = null
             acquireWakeLock()
-            START_STICKY
+            Logger.i { "MeshService: selected device ready (${address.anonymize}), staying foreground" }
+            return START_STICKY
         }
+
+        // Address is currently null/blank/sentinel. This may be a transient state while DataStore emits the persisted
+        // value (cold-start race: RadioPrefsImpl.devAddr starts as null until the first DataStore emission). Make no
+        // irreversible stopSelf() decision here; wait briefly for the address flow to settle.
+        Logger.i { "MeshService: selected address not yet loaded (${address.anonymize}); waiting for address flow" }
+        scheduleDeviceAddressResolution()
+        return START_STICKY
+    }
+
+    /**
+     * Waits for [RadioInterfaceService.currentDeviceAddressFlow] to emit a valid device address. Resolves the transient
+     * null/blank window at cold start without busy-polling [RadioInterfaceService.getDeviceAddress].
+     * - On a valid emission: acquires the wake lock and the service continues as a normal foreground service.
+     * - On timeout (no valid address observed): concludes no device is genuinely selected and stops cleanly.
+     *
+     * Uses [first] with a predicate rather than `drop(1)` so we never skip an already-current valid StateFlow value: if
+     * the address arrived between the synchronous [onStartCommand] read and this subscription, [first] returns it
+     * immediately instead of waiting the full timeout and spuriously stopping a service that has a valid device.
+     */
+    private fun scheduleDeviceAddressResolution() {
+        addressWaitJob?.cancel()
+        addressWaitJob =
+            serviceScope.launch {
+                val resolved =
+                    withTimeoutOrNull(DEVICE_ADDRESS_SETTLE_MS) {
+                        radioInterfaceService.currentDeviceAddressFlow.first(::isValidDeviceAddress)
+                    }
+                if (isValidDeviceAddress(resolved)) {
+                    Logger.i { "MeshService: selected device resolved (${resolved.anonymize}) after address-flow wait" }
+                    acquireWakeLock()
+                } else {
+                    Logger.i { "MeshService: no device selected after address flow settled; stopping" }
+                    releaseWakeLock()
+                    ServiceCompat.stopForeground(this@MeshService, ServiceCompat.STOP_FOREGROUND_REMOVE)
+                    stopSelf()
+                }
+            }
     }
 
     private fun startForegroundSafely(notification: android.app.Notification, foregroundServiceType: Int) {
@@ -201,6 +265,9 @@ class MeshService : Service() {
 
     override fun onDestroy() {
         Logger.i { "Destroying mesh service" }
+        addressWaitJob?.cancel()
+        addressWaitJob = null
+        serviceScope.cancel()
         releaseWakeLock()
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
         if (isServiceInitialized) {

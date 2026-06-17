@@ -128,6 +128,17 @@ class SharedRadioInterfaceService(
      */
     @Volatile private var isStopping = false
 
+    /**
+     * True while an explicit connection lifecycle is active (set by [connect]/[setDeviceAddress], cleared by
+     * [disconnect]). The hardware ([bluetoothRepository.state]) and network ([networkRepository.networkAvailable])
+     * listeners and the [checkLiveness] zombie-recovery path consult this to avoid starting a transport the user has
+     * torn down — without it, BT/network recovery emissions can wake a transport after explicit disconnect, leaving the
+     * app "connected" with no orchestrator collector and an unloaded NodeDB/channels.
+     *
+     * Guarded by [transportMutex]; every read/write site holds the lock. The @Volatile keeps diagnostic reads honest.
+     */
+    @Volatile private var connectionRequested = false
+
     /** Prevents concurrent liveness-induced transport restarts from stacking. */
     private val isRestarting = atomic(false)
 
@@ -170,6 +181,29 @@ class SharedRadioInterfaceService(
     private val initLock = Mutex()
     private val transportMutex = Mutex()
 
+    init {
+        // Address sync runs INDEPENDENTLY of connect() so that observers (notably
+        // MeshServiceOrchestrator) see a valid currentDeviceAddressFlow BEFORE the transport
+        // starts. Previously this mirror lived inside initStateListeners()'s devAddr listener and
+        // was coupled to startTransportLocked() — but initStateListeners() is only invoked from
+        // connect(), so the flow never updated until connect() ran. That created a cold-start race:
+        // the orchestrator's currentDeviceAddressFlow observer could fire AFTER the transport had
+        // already started, violating the invariant that the active DB must be switched to the
+        // selected device's DB before its transport starts.
+        //
+        // This listener ONLY mirrors radioPrefs.devAddr into _currentDeviceAddressFlow; it never
+        // starts a transport. Transport start remains driven exclusively by connect() (initial),
+        // setDeviceAddress() (explicit user switch), BLE/network state changes (environment
+        // recovery), and liveness restarts (zombie recovery) — see startTransportLocked() callers.
+        // _currentDeviceAddressFlow is a MutableStateFlow (atomic .value), so the unconditional
+        // assignment here is race-free without holding transportMutex; same-address writes are
+        // idempotent no-ops.
+        radioPrefs.devAddr
+            .onEach { addr -> _currentDeviceAddressFlow.value = addr }
+            .catch { Logger.e(it) { "radioPrefs.devAddr address-sync flow crashed" } }
+            .launchIn(processLifecycle.coroutineScope)
+    }
+
     private fun initStateListeners() {
         if (listenersInitialized.value) return
         processLifecycle.coroutineScope.launch {
@@ -177,23 +211,17 @@ class SharedRadioInterfaceService(
                 if (listenersInitialized.value) return@withLock
                 listenersInitialized.value = true
 
-                radioPrefs.devAddr
-                    .onEach { addr ->
-                        transportMutex.withLock {
-                            if (_currentDeviceAddressFlow.value != addr) {
-                                _currentDeviceAddressFlow.value = addr
-                                startTransportLocked()
-                            }
-                        }
-                    }
-                    .catch { Logger.e(it) { "devAddr flow crashed" } }
-                    .launchIn(processLifecycle.coroutineScope)
-
                 bluetoothRepository.state
                     .onEach { state ->
                         transportMutex.withLock {
                             if (state.enabled) {
-                                startTransportLocked()
+                                // Environmental recovery only: don't wake a transport the user has
+                                // explicitly disconnected from. stopTransportLocked() below still fires on
+                                // BLE-disabled to tear down a running BLE link, but we deliberately do NOT
+                                // clear connectionRequested here — that is disconnect()'s job.
+                                if (connectionRequested) {
+                                    startTransportLocked()
+                                }
                             } else if (runningTransportId == InterfaceId.BLUETOOTH) {
                                 stopTransportLocked()
                             }
@@ -206,7 +234,10 @@ class SharedRadioInterfaceService(
                     .onEach { state ->
                         transportMutex.withLock {
                             if (state) {
-                                startTransportLocked()
+                                // Environmental recovery only — see the BLE listener above for rationale.
+                                if (connectionRequested) {
+                                    startTransportLocked()
+                                }
                             } else if (runningTransportId == InterfaceId.TCP) {
                                 stopTransportLocked()
                             }
@@ -219,12 +250,24 @@ class SharedRadioInterfaceService(
     }
 
     override fun connect() {
-        processLifecycle.coroutineScope.launch { transportMutex.withLock { startTransportLocked() } }
+        processLifecycle.coroutineScope.launch {
+            transportMutex.withLock {
+                // Mark the connection lifecycle as active BEFORE starting so concurrent
+                // hardware/network listeners observe the gate as open.
+                connectionRequested = true
+                startTransportLocked()
+            }
+        }
         initStateListeners()
     }
 
     override suspend fun disconnect() {
-        transportMutex.withLock { ignoreExceptionSuspend { stopTransportLocked() } }
+        transportMutex.withLock {
+            // Tear the gate down BEFORE stopTransportLocked() so a concurrent state-listener
+            // emission arriving while we wait for the mutex cannot re-start the transport.
+            connectionRequested = false
+            ignoreExceptionSuspend { stopTransportLocked() }
+        }
     }
 
     override fun isMockTransport(): Boolean = transportFactory.isMockTransport()
@@ -259,8 +302,17 @@ class SharedRadioInterfaceService(
 
         processLifecycle.coroutineScope.launch {
             transportMutex.withLock {
+                // The sanitized address is the single source of truth for the connectionRequested
+                // gate: a real address arms the lifecycle (connect() equivalent) so environmental
+                // listeners cannot race the rebind into a "down" state; null/("n") is a deselect
+                // that MUST clear the gate so subsequent BT/network recovery cannot resurrect a
+                // transport for a device the user explicitly tore down. Only start a fresh
+                // transport when an address was actually selected.
+                connectionRequested = sanitized != null
                 ignoreExceptionSuspend { stopTransportLocked() }
-                startTransportLocked()
+                if (sanitized != null) {
+                    startTransportLocked()
+                }
             }
         }
         return true
@@ -385,10 +437,24 @@ class SharedRadioInterfaceService(
                 // liveness recovery is self-healing — surfacing a modal dialog for a transient
                 // condition the app already handled is confusing UX. The warning log above
                 // remains the observability surface for this event.
+                //
+                // Ordering note (pre-existing): onDisconnect fires here, BEFORE the launched
+                // restart coroutine's `connectionRequested` check below. If an explicit disconnect()
+                // races this timeout, a spurious DeviceSleep emission can leak to observers. The
+                // connectionRequested gate still prevents the worse outcome — transport resurrection
+                // — so this is a benign UI-level transient, not a state-machine bug.
                 onDisconnect(isPermanent = false)
                 processLifecycle.coroutineScope.launch {
                     try {
                         transportMutex.withLock {
+                            // Defense against a race between checkLiveness() firing and a
+                            // concurrent disconnect(): if the user has torn the connection down
+                            // since the heartbeat scheduled this restart, leave it down. The
+                            // transport is already null after disconnect()'s stopTransportLocked().
+                            if (!connectionRequested) {
+                                Logger.d { "Skipping liveness restart: connection no longer requested" }
+                                return@withLock
+                            }
                             ignoreExceptionSuspend {
                                 stopTransportLocked(notifyPermanent = false, sendPoliteDisconnect = false)
                             }

@@ -31,14 +31,22 @@ import okio.Path.Companion.toPath
 import org.meshtastic.core.common.ContextServices
 import org.meshtastic.core.database.MeshtasticDatabase.Companion.configureCommon
 
-/** Returns a [RoomDatabase.Builder] configured for Android with the given [dbName]. */
+/**
+ * Returns a [RoomDatabase.Builder] configured for Android with the given [dbName].
+ *
+ * Android production deliberately opts out of Room KMP's multi-reader connection pool (`multiConnection = false`).
+ * Under coroutine cancellation churn (e.g. DB switches via `flatMapLatest`), the reader-pool permit semaphore can
+ * wedge: all reader connections report `Free` but `permits=0`, so every new read acquisition times out indefinitely.
+ * Single-connection mode serializes reads and writes through one connection, eliminating the separate reader permit
+ * pool entirely. JVM/iOS may still use the pool; see [MeshtasticDatabase.configureCommon].
+ */
 actual fun getDatabaseBuilder(dbName: String): RoomDatabase.Builder<MeshtasticDatabase> {
     val dbFile = ContextServices.app.getDatabasePath(dbName)
     return Room.databaseBuilder<MeshtasticDatabase>(
         name = dbFile.absolutePath,
         factory = { MeshtasticDatabaseConstructor.initialize() },
     )
-        .configureCommon()
+        .configureCommon(multiConnection = false)
         .setDriver(BundledSQLiteDriver())
 }
 
