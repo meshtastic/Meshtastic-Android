@@ -43,10 +43,16 @@ object DatabaseConstants {
 
 fun shortSha1(s: String): String = s.encodeUtf8().sha1().hex().take(DatabaseConstants.DB_NAME_HASH_LEN)
 
-fun buildDbName(address: String?): String = if (address.isNullOrBlank()) {
-    DatabaseConstants.DEFAULT_DB_NAME
-} else {
-    "${DatabaseConstants.DB_PREFIX}_${shortSha1(normalizeAddress(address))}"
+fun buildDbName(address: String?): String {
+    val normalized = normalizeAddress(address)
+    // No-device sentinels must resolve to the canonical DEFAULT_DB_NAME file, not be hashed into a
+    // separate DB — otherwise data for "no device selected" would split across files depending on
+    // which sentinel form prefs happened to emit. normalizeAddress collapses null/blank/"N"/"NULL"
+    // to "DEFAULT"; ".N" (any case) is also collapsed here as a defensive legacy/sentinel guard.
+    // There is no current producer of ".n" in the codebase, but the rule keeps buildDbName
+    // self-consistent regardless of input shape.
+    if (normalized == "DEFAULT" || normalized == ".N") return DatabaseConstants.DEFAULT_DB_NAME
+    return "${DatabaseConstants.DB_PREFIX}_${shortSha1(normalized)}"
 }
 
 fun anonymizeAddress(address: String?): String = when {

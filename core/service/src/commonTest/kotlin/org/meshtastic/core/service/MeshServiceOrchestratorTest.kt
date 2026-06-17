@@ -18,8 +18,10 @@ package org.meshtastic.core.service
 
 import co.touchlab.kermit.Severity
 import dev.mokkery.MockMode
+import dev.mokkery.answering.calls
 import dev.mokkery.answering.returns
 import dev.mokkery.every
+import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify
@@ -32,6 +34,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.MeshConfigHandler
 import org.meshtastic.core.repository.MeshConnectionManager
@@ -46,6 +49,7 @@ import org.meshtastic.core.takserver.TAKMeshIntegration
 import org.meshtastic.core.takserver.TAKServerManager
 import org.meshtastic.proto.LocalModuleConfig
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -75,11 +79,18 @@ class MeshServiceOrchestratorTest {
     private fun createOrchestrator(
         receivedData: MutableSharedFlow<ByteArray> = MutableSharedFlow(),
         connectionError: MutableSharedFlow<String> = MutableSharedFlow(),
+        connectionState: MutableStateFlow<ConnectionState> = MutableStateFlow(ConnectionState.Disconnected),
+        // A valid default address lets every start() proceed through the new
+        // wait-for-valid-address -> DB switch -> connect ordering without per-test boilerplate.
+        // Tests that need a different initial address (or no address) override it explicitly.
+        currentDeviceAddressFlow: MutableStateFlow<String?> = MutableStateFlow<String?>("x:AA:BB:CC:DD:EE:FF"),
         takEnabledFlow: MutableStateFlow<Boolean> = MutableStateFlow(false),
         takRunningFlow: MutableStateFlow<Boolean> = MutableStateFlow(false),
     ): MeshServiceOrchestrator {
         every { radioInterfaceService.receivedData } returns receivedData
         every { radioInterfaceService.connectionError } returns connectionError
+        every { radioInterfaceService.connectionState } returns connectionState
+        every { radioInterfaceService.currentDeviceAddressFlow } returns currentDeviceAddressFlow
         every { serviceRepository.meshPacketFlow } returns MutableSharedFlow()
         every { meshConfigHandler.moduleConfig } returns MutableStateFlow(LocalModuleConfig())
         every { takPrefs.isTakServerEnabled } returns takEnabledFlow
@@ -151,13 +162,39 @@ class MeshServiceOrchestratorTest {
 
     @Test
     fun testStartCallsSwitchActiveDatabase() {
-        every { radioInterfaceService.getDeviceAddress() } returns "tcp:192.168.1.100"
+        // New ordering: start() waits for currentDeviceAddressFlow to surface a valid address,
+        // then switches the DB to it and connects. getDeviceAddress() is no longer consulted
+        // from start(), so drive the address via the flow.
+        val deviceAddressFlow = MutableStateFlow<String?>("tcp:192.168.1.100")
+        val orchestrator = createOrchestrator(currentDeviceAddressFlow = deviceAddressFlow)
 
-        val orchestrator = createOrchestrator()
+        // Event recorder: locks the cold-start ordering (DB switch -> load cached NodeDB ->
+        // connect) without depending on Mokkery's global call-order semantics. The global
+        // order verifier (verifySuspend(order) { ... }) fails because start() also drives
+        // other calls on the same mocks (resetReceivedBuffer, currentDeviceAddressFlow
+        // collectors, the mid-session DB switch replay, etc.) that interleave with the
+        // three calls we care about and break the global sequence. Recording only the
+        // three calls under test sidesteps the global check entirely.
+        val events = mutableListOf<String>()
+        everySuspend { databaseManager.switchActiveDatabase(any()) } calls { events.add("switchDb") }
+        every { nodeManager.loadCachedNodeDB() } calls { events.add("loadCachedNodeDb") }
+        every { radioInterfaceService.connect() } calls { events.add("connect") }
+
         orchestrator.start()
 
         verifySuspend { databaseManager.switchActiveDatabase("tcp:192.168.1.100") }
+        verify { nodeManager.loadCachedNodeDB() }
         verify { radioInterfaceService.connect() }
+
+        // Locks in the cold-start ordering invariant: DB switch -> load cached NodeDB ->
+        // connect. loadCachedNodeDB must run AFTER the DB switch (so it reads from the
+        // freshly-selected per-device DB) and BEFORE connect() (so the firmware handshake
+        // doesn't see a stale or empty node set). On UnconfinedTestDispatcher the
+        // handledLaunch block runs eagerly, producing these three events in order. The
+        // mid-session address observer then replays the initial value, producing a
+        // redundant "switchDb"; assert only the first three to lock the order without
+        // coupling to the redundant replay.
+        assertEquals(listOf("switchDb", "loadCachedNodeDb", "connect"), events.take(3))
 
         orchestrator.stop()
     }
@@ -269,5 +306,70 @@ class MeshServiceOrchestratorTest {
         verifySuspend(exactly(1)) { messageProcessor.handleFromRadio(packet, null) }
 
         orchestrator.stop()
+    }
+
+    /**
+     * Regression: when [RadioInterfaceService.currentDeviceAddressFlow] emits a new address mid-session (e.g. a late
+     * process-lifecycle address resolution on Android), the orchestrator must propagate it to [DatabaseManager] so Room
+     * writes land in the right per-device DB. Previously start() only switched the DB once via getDeviceAddress() and
+     * missed subsequent address changes, leaving the new session writing to the old DB.
+     *
+     * DatabaseManager is idempotent, so the redundant initial replay (matching the getDeviceAddress() snapshot) is a
+     * no-op; we therefore assert by argument value rather than brittle exact counts.
+     */
+    @Test
+    fun testCurrentDeviceAddressChangeSwitchesActiveDatabaseAfterStart() {
+        val deviceAddressFlow = MutableStateFlow<String?>("tcp:192.168.1.100")
+        val orchestrator = createOrchestrator(currentDeviceAddressFlow = deviceAddressFlow)
+
+        orchestrator.start()
+
+        // Initial address was switched (the first-valid emission in start() + the StateFlow
+        // replay into the mid-session observer; DatabaseManager is idempotent for the dup).
+        verifySuspend { databaseManager.switchActiveDatabase("tcp:192.168.1.100") }
+
+        // Mid-session address resolution must propagate to DatabaseManager.
+        deviceAddressFlow.value = "tcp:10.0.0.5"
+        verifySuspend { databaseManager.switchActiveDatabase("tcp:10.0.0.5") }
+
+        orchestrator.stop()
+    }
+
+    /**
+     * Lifecycle invariant: when the transport reports [ConnectionState.Connected] while the orchestrator is stopped
+     * (e.g. a late BLE liveness reconnect, or an emission that arrives after [MeshService.onDestroy]), the orchestrator
+     * MUST NOT auto-restart. The orchestrator is a Koin `@Single` whose lifetime exceeds the Android `Service`, so an
+     * unguarded observer launched in `init {}` would resurrect the orchestrator after a deliberate stop — collecting
+     * from [RadioInterfaceService.receivedData] in the background with no foreground service, no wake lock, and no UI.
+     *
+     * This also preserves the documented invariant that [MeshConnectionManagerImpl] is the only consumer of
+     * [RadioInterfaceService.connectionState]. Recovery after stop is the host's responsibility: it must call `start()`
+     * explicitly (e.g. via a fresh `MeshService.onCreate()`).
+     *
+     * Replaces the previous "orphan-Connected recovery" behavior that was removed for violating both invariants.
+     */
+    @Test
+    fun testConnectedWhileStoppedDoesNotRestartWithoutExplicitStart() {
+        val receivedData = MutableSharedFlow<ByteArray>(extraBufferCapacity = 8)
+        val connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
+        val orchestrator = createOrchestrator(receivedData = receivedData, connectionState = connectionState)
+        every { nodeManager.myNodeNum } returns MutableStateFlow(null)
+
+        // Stopped; never call start() explicitly.
+        assertFalse(orchestrator.isRunning)
+
+        // Transport reaches Connected — orchestrator must stay stopped.
+        connectionState.value = ConnectionState.Connected
+        assertFalse(orchestrator.isRunning)
+
+        // No collector may have been attached: a packet emitted now is unhandled.
+        val packet = byteArrayOf(7, 7, 7)
+        receivedData.tryEmit(packet)
+        verifySuspend(exactly(0)) { messageProcessor.handleFromRadio(packet, null) }
+
+        // Likewise, subsequent transport state cycles must not restart the orchestrator.
+        connectionState.value = ConnectionState.Disconnected
+        connectionState.value = ConnectionState.Connected
+        assertFalse(orchestrator.isRunning)
     }
 }

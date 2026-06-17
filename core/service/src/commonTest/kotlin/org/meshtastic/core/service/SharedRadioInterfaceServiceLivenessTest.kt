@@ -214,8 +214,9 @@ class SharedRadioInterfaceServiceLivenessTest {
     private fun createConnectedService(
         address: String,
         transportProvider: () -> RadioTransport = { FakeRadioTransport().also { createdTransports.add(it) } },
+        networkAvailability: MutableStateFlow<Boolean> = MutableStateFlow(true),
     ): SharedRadioInterfaceService {
-        every { networkRepository.networkAvailable } returns MutableStateFlow(true)
+        every { networkRepository.networkAvailable } returns networkAvailability
         every { networkRepository.resolvedList } returns MutableSharedFlow()
         every { analytics.isPlatformServicesAvailable } returns false
         every { transportFactory.supportedDeviceTypes } returns listOf(DeviceType.BLE)
@@ -550,4 +551,238 @@ class SharedRadioInterfaceServiceLivenessTest {
             advanceTimeBy(1_000L)
         }
     }
+
+    // ─── connectionRequested gate: environmental recovery vs explicit disconnect ────────────
+
+    /**
+     * Regression: after an explicit [SharedRadioInterfaceService.disconnect], BT state emissions MUST NOT restart the
+     * transport. Without the `connectionRequested` gate, a subsequent `bluetoothRepository.state = enabled` emission
+     * would silently resurrect the transport the user tore down — leaving the app "connected" with no orchestrator
+     * collector, no NodeDB load, and no channels. Only [disconnect] clears the gate; the state listener checks it
+     * before calling `startTransportLocked()`.
+     */
+    @Test
+    fun `BLE state recovery does not restart transport after explicit disconnect`() = runTest(testDispatcher) {
+        clock = 0L
+        val service = createConnectedService("xAA:BB:CC:DD:EE:FF")
+        try {
+            assertEquals(1, createdTransports.size, "Initial connect should create one transport")
+
+            // Explicit user-initiated disconnect: clears the connectionRequested gate BEFORE
+            // stopTransportLocked() so a racing state-listener emission cannot re-arm the transport.
+            service.disconnect()
+            // Drain the polite-disconnect frame (production waits POLITE_DISCONNECT_DRAIN_MS = 500ms).
+            advanceTimeBy(1_000L)
+
+            val transportCountAfterDisconnect = createdTransports.size
+
+            // Force a fresh BLE state cycle (disabled → enabled). The initial listener subscription
+            // already consumed the default enabled=true emission during connect(), so toggling is
+            // required to deliver a NEW enabled=true emission that would trigger startTransportLocked().
+            bluetoothRepository.setBluetoothEnabled(false)
+            testDispatcher.scheduler.runCurrent()
+            bluetoothRepository.setBluetoothEnabled(true)
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+
+            assertEquals(
+                transportCountAfterDisconnect,
+                createdTransports.size,
+                "BT-enabled emission after disconnect must NOT restart transport (connectionRequested gate)",
+            )
+            assertFalse(
+                service.connectionState.value == ConnectionState.Connected,
+                "State must remain Disconnected after post-disconnect BT recovery emission",
+            )
+        } finally {
+            service.disconnect()
+            advanceTimeBy(1_000L)
+        }
+    }
+
+    /**
+     * Counterpart to the disconnect-gate test: environmental recovery MUST still function while a connection is
+     * explicitly desired (connectionRequested == true). When the BT radio toggles off then back on (user toggled
+     * airplane mode, BT permission revoked/restored, etc.) the state listener must tear down and restart the transport.
+     * Only [disconnect] clears the gate; environmental stops via `stopTransportLocked()` do not.
+     */
+    @Test
+    fun `BLE environmental recovery restarts transport while connection is still desired`() = runTest(testDispatcher) {
+        clock = 0L
+        val service = createConnectedService("xAA:BB:CC:DD:EE:FF")
+        try {
+            assertEquals(1, createdTransports.size, "Initial connect should create one transport")
+
+            // Environmental stop: BT radio disabled while a connection is active.
+            // stopTransportLocked() fires but connectionRequested stays true (only disconnect() clears it).
+            bluetoothRepository.setBluetoothEnabled(false)
+            testDispatcher.scheduler.runCurrent()
+            // Drain the polite-disconnect frame inside the listener's stopTransportLocked() (500ms).
+            advanceTimeBy(1_000L)
+
+            assertTrue(
+                createdTransports.first().closeCalled,
+                "BLE-disabled should close the running transport via environmental stop",
+            )
+
+            // Environmental recovery: BT radio re-enabled. connectionRequested is still true, so the
+            // listener MUST call startTransportLocked() and bring the transport back.
+            bluetoothRepository.setBluetoothEnabled(true)
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+
+            assertEquals(
+                2,
+                createdTransports.size,
+                "BLE-enabled should restart transport via environmental recovery (connectionRequested still true)",
+            )
+        } finally {
+            service.disconnect()
+            advanceTimeBy(1_000L)
+        }
+    }
+
+    /**
+     * Network/TCP counterpart to `BLE state recovery does not restart transport after explicit disconnect`.
+     *
+     * The [networkRepository.networkAvailable] listener (see `initStateListeners`) consults the same
+     * `connectionRequested` gate as the BLE listener: after an explicit [SharedRadioInterfaceService.disconnect], a
+     * network-available emission MUST NOT resurrect the transport. Without the gate, a connectivity cycle (Wi-Fi
+     * toggled off→on, network handoff) would silently restart a transport the user tore down.
+     */
+    @Test
+    fun `network available recovery does not restart transport after explicit disconnect`() = runTest(testDispatcher) {
+        clock = 0L
+        val networkAvailability = MutableStateFlow<Boolean>(true)
+        val service = createConnectedService("t192.168.1.100", networkAvailability = networkAvailability)
+        try {
+            assertEquals(1, createdTransports.size, "Initial connect should create one transport")
+
+            // Explicit user-initiated disconnect: clears the connectionRequested gate BEFORE
+            // stopTransportLocked() so a racing network-listener emission cannot re-arm the transport.
+            service.disconnect()
+            // Drain the polite-disconnect frame (production waits POLITE_DISCONNECT_DRAIN_MS = 500ms).
+            advanceTimeBy(1_000L)
+
+            val transportCountAfterDisconnect = createdTransports.size
+
+            // Force a fresh network-available cycle (false → true). The initial listener subscription
+            // already consumed the default true emission during connect(), so toggling is required to
+            // deliver a NEW true emission that would trigger startTransportLocked().
+            networkAvailability.value = false
+            testDispatcher.scheduler.runCurrent()
+            networkAvailability.value = true
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+
+            assertEquals(
+                transportCountAfterDisconnect,
+                createdTransports.size,
+                "network-available emission after disconnect must NOT restart transport (connectionRequested gate)",
+            )
+            assertFalse(
+                service.connectionState.value == ConnectionState.Connected,
+                "State must remain Disconnected after post-disconnect network recovery emission",
+            )
+        } finally {
+            service.disconnect()
+            advanceTimeBy(1_000L)
+        }
+    }
+
+    // ─── connectionRequested gate: setDeviceAddress(null)/("n") deselect ────────────────────
+
+    /**
+     * Regression: after [SharedRadioInterfaceService.setDeviceAddress] with `null`/`"n"` (deselect), the
+     * `connectionRequested` gate MUST be cleared so subsequent BLE state emissions cannot restart the transport.
+     * Without the gate-clear in setDeviceAddress(), BT recovery (user toggled BT off→on) would silently resurrect a
+     * transport for a device the user explicitly deselected — leaving the app "connected" to an unselected device with
+     * no orchestrator collector.
+     */
+    @Test
+    fun `BLE state recovery does not restart transport after setDeviceAddress deselect`() = runTest(testDispatcher) {
+        clock = 0L
+        val service = createConnectedService("xAA:BB:CC:DD:EE:FF")
+        try {
+            assertEquals(1, createdTransports.size, "Initial connect should create one transport")
+
+            // Explicit device deselect: setDeviceAddress(null)/("n") must clear the connectionRequested
+            // gate BEFORE stopTransportLocked() so a racing state-listener emission cannot re-arm it.
+            service.setDeviceAddress("n")
+            // Drain the polite-disconnect frame (production waits POLITE_DISCONNECT_DRAIN_MS = 500ms).
+            advanceTimeBy(1_000L)
+
+            val transportCountAfterDeselect = createdTransports.size
+
+            // Force a fresh BLE state cycle (disabled → enabled). The initial listener subscription
+            // already consumed the default enabled=true emission during connect(), so toggling is
+            // required to deliver a NEW enabled=true emission that would trigger startTransportLocked().
+            bluetoothRepository.setBluetoothEnabled(false)
+            testDispatcher.scheduler.runCurrent()
+            bluetoothRepository.setBluetoothEnabled(true)
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+
+            assertEquals(
+                transportCountAfterDeselect,
+                createdTransports.size,
+                "BT-enabled emission after deselect must NOT restart transport (connectionRequested gate cleared)",
+            )
+            assertFalse(
+                service.connectionState.value == ConnectionState.Connected,
+                "State must NOT be Connected after post-deselect BT recovery emission",
+            )
+        } finally {
+            service.disconnect()
+            advanceTimeBy(1_000L)
+        }
+    }
+
+    /**
+     * Network/TCP counterpart to `BLE state recovery does not restart transport after setDeviceAddress deselect`.
+     *
+     * After [SharedRadioInterfaceService.setDeviceAddress] with `null`/`"n"`, a network-available emission MUST NOT
+     * resurrect the transport. Without the gate-clear in setDeviceAddress(), network recovery (Wi-Fi toggled off→on,
+     * network handoff) would silently restart a transport for a device the user explicitly deselected.
+     */
+    @Test
+    fun `network available recovery does not restart transport after setDeviceAddress deselect`() =
+        runTest(testDispatcher) {
+            clock = 0L
+            val networkAvailability = MutableStateFlow<Boolean>(true)
+            val service = createConnectedService("t192.168.1.100", networkAvailability = networkAvailability)
+            try {
+                assertEquals(1, createdTransports.size, "Initial connect should create one transport")
+
+                // Explicit device deselect: setDeviceAddress(null)/("n") must clear the connectionRequested
+                // gate BEFORE stopTransportLocked() so a racing network-listener emission cannot re-arm it.
+                service.setDeviceAddress("n")
+                // Drain the polite-disconnect frame (production waits POLITE_DISCONNECT_DRAIN_MS = 500ms).
+                advanceTimeBy(1_000L)
+
+                val transportCountAfterDeselect = createdTransports.size
+
+                // Force a fresh network-available cycle (false → true). The initial listener subscription
+                // already consumed the default true emission during connect(), so toggling is required to
+                // deliver a NEW true emission that would trigger startTransportLocked().
+                networkAvailability.value = false
+                testDispatcher.scheduler.runCurrent()
+                networkAvailability.value = true
+                testDispatcher.scheduler.runCurrent()
+                advanceTimeBy(1_000L)
+
+                assertEquals(
+                    transportCountAfterDeselect,
+                    createdTransports.size,
+                    "network-available emission after deselect must NOT restart transport (connectionRequested gate cleared)",
+                )
+                assertFalse(
+                    service.connectionState.value == ConnectionState.Connected,
+                    "State must NOT be Connected after post-deselect network recovery emission",
+                )
+            } finally {
+                service.disconnect()
+                advanceTimeBy(1_000L)
+            }
+        }
 }
