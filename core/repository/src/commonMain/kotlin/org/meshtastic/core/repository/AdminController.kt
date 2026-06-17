@@ -83,6 +83,15 @@ interface AdminController {
     /** Updates the canned messages configuration on a remote node. */
     suspend fun setCannedMessages(destNum: Int, messages: String)
 
+    /**
+     * Syncs a node's real-time clock to the phone's current time via `AdminMessage.set_time_only`.
+     *
+     * Mirrors the Python CLI's `Node.setTime`: an accurate epoch-seconds timestamp is sent so a remote node whose RTC
+     * has drifted can be corrected without an on-site visit. Fire-and-forget — the firmware applies the value without
+     * an admin response (the routing ACK confirms delivery).
+     */
+    suspend fun setTime(destNum: Int, packetId: Int)
+
     // ── Remote queries ──────────────────────────────────────────────────────
 
     /** Requests the current owner (user info) from a remote node. */

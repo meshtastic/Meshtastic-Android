@@ -123,6 +123,8 @@ class FakeRadioController :
 
     override suspend fun setCannedMessages(destNum: Int, messages: String) {}
 
+    override suspend fun setTime(destNum: Int, packetId: Int) {}
+
     override suspend fun getOwner(destNum: Int, packetId: Int) {}
 
     override suspend fun getConfig(destNum: Int, configType: Int, packetId: Int) {}

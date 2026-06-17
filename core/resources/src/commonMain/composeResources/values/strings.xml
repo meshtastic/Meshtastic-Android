@@ -1315,6 +1315,7 @@
     <string name="server">Server</string>
     <string name="session_active">Session active</string>
     <string name="session_refresh_required">Refresh required</string>
+    <string name="set_time">Set time</string>
     <string name="set_up_connection">Set up connection</string>
     <string name="set_your_region">Set your region</string>
     <string name="settings">settings</string>

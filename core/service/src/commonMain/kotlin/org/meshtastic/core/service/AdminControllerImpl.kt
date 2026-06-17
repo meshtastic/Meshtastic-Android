@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.util.handledLaunch
+import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.repository.AdminController
 import org.meshtastic.core.repository.AdminEditScope
@@ -158,6 +159,12 @@ internal class AdminControllerImpl(
 
     override suspend fun setCannedMessages(destNum: Int, messages: String) {
         commandSender.sendAdmin(destNum) { AdminMessage(set_canned_message_module_messages = messages) }
+    }
+
+    override suspend fun setTime(destNum: Int, packetId: Int) {
+        Logger.i { "Set time requested for node $destNum" }
+        // Resolve the timestamp at send time so the value is as fresh as possible when it leaves the phone.
+        commandSender.sendAdmin(destNum, packetId) { AdminMessage(set_time_only = nowSeconds.toInt()) }
     }
 
     override suspend fun getCannedMessages(destNum: Int, packetId: Int) {

@@ -76,6 +76,20 @@ constructor(
     }
 
     /**
+     * Syncs the node's real-time clock to the phone's current time.
+     *
+     * Lets a user correct a remote node whose RTC has drifted without being on-site or using the CLI.
+     *
+     * @param destNum The node number to update.
+     * @return The packet ID of the request.
+     */
+    open suspend fun setTime(destNum: Int): Int {
+        val packetId = radioController.generatePacketId()
+        radioController.setTime(destNum, packetId)
+        return packetId
+    }
+
+    /**
      * Resets the NodeDB on the radio.
      *
      * @param destNum The node number to reset.
