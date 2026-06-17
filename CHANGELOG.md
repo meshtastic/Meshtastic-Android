@@ -11,6 +11,8 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 * fix(appfunctions): keep AppSearch document-factory constructors under R8 full mode (#5829) by James Rich (@jamesarich) in [`5b19a5f31`](https://github.com/meshtastic/Meshtastic-Android/commit/5b19a5f31f2be8894c372bbee88532a70002e6a5)
 * fix(service): resolve selected-device startup race (#5828) by Jeremiah K (@jeremiah-k) in [`acf9ff934`](https://github.com/meshtastic/Meshtastic-Android/commit/acf9ff9349cd55459e35ae016ef9f03ab1ce20fa)
+* chore(deps): update androidx.core:core-location-altitude to v1.0.0 (#5831) by renovate[bot] (@renovate[bot]) in [`b590f438e`](https://github.com/meshtastic/Meshtastic-Android/commit/b590f438ea1320a7ed26a1c9c1133c6025780077)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs, Baseline) (#5833) by James Rich (@jamesarich) in [`021f467b6`](https://github.com/meshtastic/Meshtastic-Android/commit/021f467b61f64d472768e905b33bb17ac8294420)
 
 ### Internal (v2.8.0-internal.1)
 Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14):
