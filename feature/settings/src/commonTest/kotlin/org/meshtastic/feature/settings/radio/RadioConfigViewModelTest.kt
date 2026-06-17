@@ -822,42 +822,27 @@ class RadioConfigViewModelTest {
     }
 
     @Test
-    fun `local LoRa setConfig triggers a LoRa re-read once the set is acknowledged`() = runTest {
+    fun `LoRa setConfig is not applied optimistically and issues no re-read`() = runTest {
+        // A firmware region swap (e.g. EU sibling) is applied live; the form must reflect the device's actual
+        // value, which is re-read on next LoRa-screen entry — NOT applied optimistically here, and the save ACK
+        // must not trigger an in-place re-read (that would suppress the normal save-success UX).
         val node = Node(num = 123, user = User(id = "!123"))
         nodeRepository.setNodes(listOf(node))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
         val packetFlow = MutableSharedFlow<MeshPacket>()
         every { serviceRepository.meshPacketFlow } returns packetFlow
-        viewModel = createViewModel()
-
-        everySuspend { radioConfigUseCase.setConfig(any(), any()) } returns 42
-        everySuspend { radioConfigUseCase.getChannel(any(), any()) } returns 43
-        everySuspend { radioConfigUseCase.getConfig(any(), any()) } returns 44
-
-        // Save a LoRa config on the local device — this schedules a re-read.
-        viewModel.setConfig(Config(lora = Config.LoRaConfig(use_preset = true)))
+        every { radioConfigRepository.localConfigFlow } returns
+            MutableStateFlow(LocalConfig(lora = Config.LoRaConfig(region = Config.LoRaConfig.RegionCode.EU_868)))
+        viewModel = createViewModel(destNum = 123)
         runCurrent()
-
-        // Firmware acknowledges with a routing ACK (Success) carrying the set's request_id.
-        every { processRadioResponseUseCase(any(), 123, any()) } returns RadioResponseResult.Success
-        packetFlow.emit(MeshPacket(decoded = Data(request_id = 42)))
-        runCurrent()
-
-        // R9: a LoRa config re-read is issued so a firmware-applied region swap is reflected back.
-        verifySuspend { radioConfigUseCase.getConfig(123, ConfigRoute.LORA.type) }
-    }
-
-    @Test
-    fun `non-LoRa setConfig does not trigger a re-read`() = runTest {
-        val node = Node(num = 123, user = User(id = "!123"))
-        nodeRepository.setNodes(listOf(node))
-        val packetFlow = MutableSharedFlow<MeshPacket>()
-        every { serviceRepository.meshPacketFlow } returns packetFlow
-        viewModel = createViewModel()
 
         everySuspend { radioConfigUseCase.setConfig(any(), any()) } returns 42
 
-        viewModel.setConfig(Config(device = Config.DeviceConfig(role = Config.DeviceConfig.Role.CLIENT)))
+        viewModel.setConfig(Config(lora = Config.LoRaConfig(region = Config.LoRaConfig.RegionCode.US)))
         runCurrent()
+
+        // The optimistic state still reflects the device's value, not the requested region.
+        assertEquals(Config.LoRaConfig.RegionCode.EU_868, viewModel.radioConfigState.value.radioConfig.lora?.region)
 
         every { processRadioResponseUseCase(any(), 123, any()) } returns RadioResponseResult.Success
         packetFlow.emit(MeshPacket(decoded = Data(request_id = 42)))
