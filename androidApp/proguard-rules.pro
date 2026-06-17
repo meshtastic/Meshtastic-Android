@@ -40,6 +40,22 @@
 -dontwarn org.bouncycastle.**
 -dontwarn org.openjsse.**
 
+# ---- AppSearch / AppFunctions generated document factories ------------------
+# AppSearch's DocumentClassFactoryRegistry loads the generated
+# `$$__AppSearch__*` factory classes by name and instantiates them via their
+# no-arg constructor (reflection). AppSearch's own consumer rule keeps the
+# factory *class* (`-keep ... class ** implements DocumentClassFactory {}`) but
+# not its members. Under R8 full mode (AGP 8+ default, and we're on AGP 9) a
+# bare `-keep class X {}` no longer implicitly retains the default constructor,
+# so the constructor is tree-shaken and runtime construction fails with
+# NoSuchMethodException — e.g.
+# androidx.appfunctions.metadata.$$__AppSearch__AppFunctionRuntimeMetadata.<init>[]
+# crashing AppFunctionManager.getInstance(). Upstream tracking: b/440484133.
+# Keep the no-arg constructor explicitly until AppSearch's rules cover it.
+-keepclassmembers class * implements androidx.appsearch.app.DocumentClassFactory {
+    <init>();
+}
+
 # Compose runtime/ui/animation/foundation/material3 keep rules now live in
 # config/proguard/shared-rules.pro so both Android (R8) and desktop (ProGuard)
 # get the same defence-in-depth coverage against CMP 1.11 optimizer folding.
