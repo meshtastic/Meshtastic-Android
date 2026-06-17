@@ -17,11 +17,11 @@
 package org.meshtastic.core.database
 
 import androidx.room3.AutoMigration
+import androidx.room3.ColumnTypeConverters
 import androidx.room3.Database
 import androidx.room3.DeleteColumn
 import androidx.room3.DeleteTable
 import androidx.room3.RoomDatabase
-import androidx.room3.TypeConverters
 import androidx.room3.migration.AutoMigrationSpec
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.database.dao.DeviceHardwareDao
@@ -117,7 +117,7 @@ import org.meshtastic.core.database.entity.TracerouteNodePositionEntity
     exportSchema = true,
 )
 @androidx.room3.ConstructedBy(MeshtasticDatabaseConstructor::class)
-@TypeConverters(Converters::class)
+@ColumnTypeConverters(Converters::class)
 @androidx.room3.DaoReturnTypeConverters(androidx.room3.paging.PagingSourceDaoReturnTypeConverter::class)
 abstract class MeshtasticDatabase : RoomDatabase() {
     abstract fun nodeInfoDao(): NodeInfoDao

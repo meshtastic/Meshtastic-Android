@@ -16,7 +16,7 @@
  */
 package org.meshtastic.core.database
 
-import androidx.room3.TypeConverter
+import androidx.room3.ColumnTypeConverter
 import co.touchlab.kermit.Logger
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
@@ -42,41 +42,43 @@ class Converters {
         exceptionsWithDebugInfo = false
     }
 
-    @TypeConverter fun dataFromString(value: String): DataPacket = json.decodeFromString(DataPacket.serializer(), value)
+    @ColumnTypeConverter
+    fun dataFromString(value: String): DataPacket = json.decodeFromString(DataPacket.serializer(), value)
 
-    @TypeConverter fun dataToString(value: DataPacket): String = json.encodeToString(DataPacket.serializer(), value)
+    @ColumnTypeConverter
+    fun dataToString(value: DataPacket): String = json.encodeToString(DataPacket.serializer(), value)
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun bytesToFromRadio(bytes: ByteArray): FromRadio = FromRadio.ADAPTER.decodeOrNull(bytes, Logger) ?: FromRadio()
 
-    @TypeConverter fun fromRadioToBytes(value: FromRadio): ByteArray = FromRadio.ADAPTER.encode(value)
+    @ColumnTypeConverter fun fromRadioToBytes(value: FromRadio): ByteArray = FromRadio.ADAPTER.encode(value)
 
-    @TypeConverter fun bytesToUser(bytes: ByteArray): User = User.ADAPTER.decodeOrNull(bytes, Logger) ?: User()
+    @ColumnTypeConverter fun bytesToUser(bytes: ByteArray): User = User.ADAPTER.decodeOrNull(bytes, Logger) ?: User()
 
-    @TypeConverter fun userToBytes(value: User): ByteArray = User.ADAPTER.encode(value)
+    @ColumnTypeConverter fun userToBytes(value: User): ByteArray = User.ADAPTER.encode(value)
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun bytesToPosition(bytes: ByteArray): Position = Position.ADAPTER.decodeOrNull(bytes, Logger) ?: Position()
 
-    @TypeConverter fun positionToBytes(value: Position): ByteArray = Position.ADAPTER.encode(value)
+    @ColumnTypeConverter fun positionToBytes(value: Position): ByteArray = Position.ADAPTER.encode(value)
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun bytesToTelemetry(bytes: ByteArray): Telemetry = Telemetry.ADAPTER.decodeOrNull(bytes, Logger) ?: Telemetry()
 
-    @TypeConverter fun telemetryToBytes(value: Telemetry): ByteArray = Telemetry.ADAPTER.encode(value)
+    @ColumnTypeConverter fun telemetryToBytes(value: Telemetry): ByteArray = Telemetry.ADAPTER.encode(value)
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun bytesToPaxcounter(bytes: ByteArray): Paxcount = Paxcount.ADAPTER.decodeOrNull(bytes, Logger) ?: Paxcount()
 
-    @TypeConverter fun paxCounterToBytes(value: Paxcount): ByteArray = Paxcount.ADAPTER.encode(value)
+    @ColumnTypeConverter fun paxCounterToBytes(value: Paxcount): ByteArray = Paxcount.ADAPTER.encode(value)
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun bytesToMetadata(bytes: ByteArray): DeviceMetadata =
         DeviceMetadata.ADAPTER.decodeOrNull(bytes, Logger) ?: DeviceMetadata()
 
-    @TypeConverter fun metadataToBytes(value: DeviceMetadata): ByteArray = DeviceMetadata.ADAPTER.encode(value)
+    @ColumnTypeConverter fun metadataToBytes(value: DeviceMetadata): ByteArray = DeviceMetadata.ADAPTER.encode(value)
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun fromStringList(value: String?): List<String>? {
         if (value == null) {
             return null
@@ -84,7 +86,7 @@ class Converters {
         return Json.decodeFromString<List<String>>(value)
     }
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun toStringList(list: List<String>?): String? {
         if (list == null) {
             return null
@@ -92,12 +94,13 @@ class Converters {
         return Json.encodeToString(list)
     }
 
-    @TypeConverter fun bytesToByteString(bytes: ByteArray?): ByteString? = bytes?.toByteString()
+    @ColumnTypeConverter fun bytesToByteString(bytes: ByteArray?): ByteString? = bytes?.toByteString()
 
-    @TypeConverter fun byteStringToBytes(value: ByteString?): ByteArray? = value?.toByteArray()
+    @ColumnTypeConverter fun byteStringToBytes(value: ByteString?): ByteArray? = value?.toByteArray()
 
-    @TypeConverter fun messageStatusToInt(value: MessageStatus?): Int = value?.ordinal ?: MessageStatus.UNKNOWN.ordinal
+    @ColumnTypeConverter
+    fun messageStatusToInt(value: MessageStatus?): Int = value?.ordinal ?: MessageStatus.UNKNOWN.ordinal
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun intToMessageStatus(value: Int): MessageStatus = MessageStatus.entries.getOrElse(value) { MessageStatus.UNKNOWN }
 }
