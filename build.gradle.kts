@@ -59,3 +59,23 @@ plugins.withId("org.meshtastic.flatpak.sources") {
 dependencies {
     dokkaPlugin(libs.dokka.android.documentation.plugin)
 }
+
+// ─── TEMPORARY: protobufs develop-SNAPSHOT preview (PR #5790) ────────────────────────────────────
+// We track the unreleased protobufs develop-SNAPSHOT. takpacket-sdk-jvm:0.5.3 transitively pins
+// protobufs:2.7.25, and Gradle ranks 2.7.25 > develop-SNAPSHOT (a numeric part outranks the
+// "develop" string qualifier). That downgrades the test *runtime* classpath to 2.7.25 while the
+// common-metadata *compile* uses the snapshot, yielding NoSuchFieldError/NoSuchMethodError on the
+// proto-generated classes at test runtime (assembleDebug/detekt don't catch it; test/allTests do).
+// Force every protobufs* variant to the snapshot so compile and runtime agree. Safe because
+// atak.proto is unchanged, so takpacket's own message ABI stays compatible with the newer protobufs.
+// REMOVE once takpacket-sdk (and mqtt) are republished against the new protobufs.
+allprojects {
+    configurations.all {
+        resolutionStrategy.eachDependency {
+            if (requested.group == "org.meshtastic" && requested.name.startsWith("protobufs")) {
+                useVersion("develop-SNAPSHOT")
+                because("preview #5790: override takpacket transitive protobufs:2.7.25 pin")
+            }
+        }
+    }
+}

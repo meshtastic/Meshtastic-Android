@@ -327,6 +327,11 @@ enum class ChannelOption(val modemPreset: ModemPreset, val bandwidth: Float, val
     LITE_SLOW(ModemPreset.LITE_SLOW, 0.125f, snrLimit = -15f),
     NARROW_FAST(ModemPreset.NARROW_FAST, 0.0625f, snrLimit = -10f),
     NARROW_SLOW(ModemPreset.NARROW_SLOW, 0.0625f, snrLimit = -12.5f),
+
+    // 15.625 kHz LoRa bandwidth (firmware modemPresetToParams; the proto's "20kHz" is the
+    // padded channel spacing, not the modem bandwidth used for numChannels/radioFreq math).
+    TINY_FAST(ModemPreset.TINY_FAST, 0.015625f, snrLimit = -7.5f), // SF7
+    TINY_SLOW(ModemPreset.TINY_SLOW, 0.015625f, snrLimit = -10f), // SF8
     ;
 
     companion object {

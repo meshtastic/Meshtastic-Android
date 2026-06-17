@@ -726,6 +726,8 @@ label_narrow_slow
 label_short_fast
 label_short_slow
 label_short_turbo
+label_tiny_fast
+label_tiny_slow
 label_very_long_slow
 last_heard_filter_label
 last_position_update
