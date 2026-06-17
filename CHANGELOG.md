@@ -79,6 +79,8 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 * feat(settings): add remote "Set time" admin action (#5821) by James Rich (@jamesarich) in [`cef12c39d`](https://github.com/meshtastic/Meshtastic-Android/commit/cef12c39ddda652eec872a2ccffa52a2665bd2ec)
 * feat(node): show our node shortname chip on the Nodes tab (#5820) by James Rich (@jamesarich) in [`212eea9d3`](https://github.com/meshtastic/Meshtastic-Android/commit/212eea9d3086f1f774a2a6115da93d0f4608a858)
 * fix(notifications): open node detail when tapping 'New Node Seen' notification (#5752) by Lester Cheng (@LesterCheng) in [`ae3e3d298`](https://github.com/meshtastic/Meshtastic-Android/commit/ae3e3d298c377902ea3b7ba6a58b7170927f4db1)
+* fix(ci): stop scheduled-updates choking on failed baseline profile (#5825) by James Rich (@jamesarich) in [`27e9990e3`](https://github.com/meshtastic/Meshtastic-Android/commit/27e9990e3ce6369d6ae19f4eb6539d03596f270b)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs, Baseline) (#5827) by James Rich (@jamesarich) in [`5e3df30ed`](https://github.com/meshtastic/Meshtastic-Android/commit/5e3df30edd67eaf580b7d214038f7cdbe74b36b7)
 
 ## New Contributors
 * @LesterCheng made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/5752
