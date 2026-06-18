@@ -16,40 +16,36 @@
  */
 package org.meshtastic.feature.intro
 
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.MultiplePermissionsState
-import com.google.accompanist.permissions.PermissionState
-import com.google.accompanist.permissions.isGranted
+import org.meshtastic.core.ui.util.PermissionUiState
 
-@OptIn(ExperimentalPermissionsApi::class)
 internal class AndroidIntroPermissions(
-    private val bluetoothState: MultiplePermissionsState,
-    private val locationState: MultiplePermissionsState,
-    private val notificationState: PermissionState?,
+    private val bluetoothState: PermissionUiState,
+    private val locationState: PermissionUiState,
+    private val notificationState: PermissionUiState?,
 ) : IntroPermissions {
     override val bluetooth: IntroPermissionState =
         object : IntroPermissionState {
             override val isGranted: Boolean
-                get() = bluetoothState.allPermissionsGranted
+                get() = bluetoothState.isGranted
 
-            override fun launchRequest() = bluetoothState.launchMultiplePermissionRequest()
+            override fun launchRequest() = bluetoothState.request()
         }
 
     override val location: IntroPermissionState =
         object : IntroPermissionState {
             override val isGranted: Boolean
-                get() = locationState.allPermissionsGranted
+                get() = locationState.isGranted
 
-            override fun launchRequest() = locationState.launchMultiplePermissionRequest()
+            override fun launchRequest() = locationState.request()
         }
 
     override val notification: IntroPermissionState? =
         notificationState?.let { state ->
             object : IntroPermissionState {
                 override val isGranted: Boolean
-                    get() = state.status.isGranted
+                    get() = state.isGranted
 
-                override fun launchRequest() = state.launchPermissionRequest()
+                override fun launchRequest() = state.request()
             }
         }
 }

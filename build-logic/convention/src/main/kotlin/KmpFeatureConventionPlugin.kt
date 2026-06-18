@@ -65,7 +65,6 @@ class KmpFeatureConventionPlugin : Plugin<Project> {
                 }
 
                 sourceSets.getByName("androidMain").dependencies {
-                    implementation(libs.library("accompanist-permissions"))
                     implementation(libs.library("androidx-activity-compose"))
 
                     implementation(libs.library("compose-multiplatform-ui"))

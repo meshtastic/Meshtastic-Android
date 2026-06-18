@@ -90,7 +90,7 @@ class CommonGetDiscoveredDevicesUseCaseTest {
         setUp()
         useCase.invoke(showMock = true, resolvedList = resolvedServicesFlow).test {
             val result = awaitItem()
-            result.usbDevices.size shouldBe 1
+            result.usbDevices.size shouldBe 2
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -239,7 +239,7 @@ class CommonGetDiscoveredDevicesUseCaseTest {
         setUp()
         useCase.invoke(showMock = true, resolvedList = flowOf(emptyList())).test {
             val result = awaitItem()
-            result.usbDevices.size shouldBe 1
+            result.usbDevices.size shouldBe 2
             cancelAndIgnoreRemainingEvents()
         }
     }

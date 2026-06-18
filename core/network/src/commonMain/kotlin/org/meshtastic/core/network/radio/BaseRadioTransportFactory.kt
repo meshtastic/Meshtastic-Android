@@ -43,6 +43,7 @@ abstract class BaseRadioTransportFactory(
             InterfaceId.SERIAL.id,
             InterfaceId.BLUETOOTH.id,
             InterfaceId.MOCK.id,
+            InterfaceId.REPLAY.id,
             '!',
             -> true
 

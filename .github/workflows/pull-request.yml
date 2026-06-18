@@ -20,7 +20,7 @@ jobs:
     outputs:
       android: ${{ steps.filter.outputs.android }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7.0.0
       - uses: dorny/paths-filter@v4
         id: filter
         with:
@@ -57,7 +57,7 @@ jobs:
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7.0.0
       - name: Verify module roots are represented in check-changes filter
         run: |
           python3 - <<'PY'

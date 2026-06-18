@@ -18,7 +18,6 @@
 
 package org.meshtastic.app.map
 
-import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
@@ -57,8 +56,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import co.touchlab.kermit.Logger
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
@@ -131,8 +128,10 @@ import org.meshtastic.core.ui.icon.Map
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.TripOrigin
 import org.meshtastic.core.ui.theme.TracerouteColors
+import org.meshtastic.core.ui.util.PermissionStatus
 import org.meshtastic.core.ui.util.formatAgo
 import org.meshtastic.core.ui.util.formatPositionTime
+import org.meshtastic.core.ui.util.rememberLocationPermissionState
 import org.meshtastic.feature.map.BaseMapViewModel.MapFilterState
 import org.meshtastic.feature.map.LastHeardFilter
 import org.meshtastic.feature.map.component.MapButton
@@ -177,7 +176,7 @@ private const val TRACEROUTE_OFFSET_METERS = 100.0
 private const val TRACEROUTE_BOUNDS_PADDING_PX = 120
 
 @Suppress("CyclomaticComplexMethod", "LongMethod")
-@OptIn(MapsComposeExperimentalApi::class, ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
+@OptIn(MapsComposeExperimentalApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun MapView(
     modifier: Modifier = Modifier,
@@ -190,16 +189,15 @@ fun MapView(
     val mapLayers by mapViewModel.mapLayers.collectAsStateWithLifecycle()
 
     // --- Location permissions ---
-    val locationPermissionsState =
-        rememberMultiplePermissionsState(permissions = listOf(Manifest.permission.ACCESS_FINE_LOCATION))
+    val locationPermission = rememberLocationPermissionState()
     var triggerLocationToggleAfterPermission by remember { mutableStateOf(false) }
 
     // --- Location tracking ---
     var isLocationTrackingEnabled by remember { mutableStateOf(false) }
     var followPhoneBearing by remember { mutableStateOf(false) }
 
-    LaunchedEffect(locationPermissionsState.allPermissionsGranted) {
-        if (locationPermissionsState.allPermissionsGranted && triggerLocationToggleAfterPermission) {
+    LaunchedEffect(locationPermission.isGranted) {
+        if (locationPermission.isGranted && triggerLocationToggleAfterPermission) {
             isLocationTrackingEnabled = true
             triggerLocationToggleAfterPermission = false
         }
@@ -280,8 +278,8 @@ fun MapView(
         }
     }
 
-    LaunchedEffect(isLocationTrackingEnabled, locationPermissionsState.allPermissionsGranted) {
-        if (isLocationTrackingEnabled && locationPermissionsState.allPermissionsGranted) {
+    LaunchedEffect(isLocationTrackingEnabled, locationPermission.isGranted) {
+        if (isLocationTrackingEnabled && locationPermission.isGranted) {
             val locationRequest =
                 LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 5000L)
                     .setMinUpdateIntervalMillis(2000L)
@@ -529,7 +527,7 @@ fun MapView(
             properties =
             MapProperties(
                 mapType = effectiveGoogleMapType,
-                isMyLocationEnabled = isLocationTrackingEnabled && locationPermissionsState.allPermissionsGranted,
+                isMyLocationEnabled = isLocationTrackingEnabled && locationPermission.isGranted,
             ),
             onMapLongClick = { latLng ->
                 if (isMainMode && isConnected) {
@@ -695,14 +693,22 @@ fun MapView(
             },
             isLocationTrackingEnabled = isLocationTrackingEnabled,
             onToggleLocationTracking = {
-                if (locationPermissionsState.allPermissionsGranted) {
-                    isLocationTrackingEnabled = !isLocationTrackingEnabled
-                    if (!isLocationTrackingEnabled) {
-                        followPhoneBearing = false
+                when {
+                    locationPermission.isGranted -> {
+                        isLocationTrackingEnabled = !isLocationTrackingEnabled
+                        if (!isLocationTrackingEnabled) {
+                            followPhoneBearing = false
+                        }
                     }
-                } else {
-                    triggerLocationToggleAfterPermission = true
-                    locationPermissionsState.launchMultiplePermissionRequest()
+
+                    // Permanently denied: the system won't prompt again, so send the user to settings to recover.
+                    locationPermission.status == PermissionStatus.PERMANENTLY_DENIED ->
+                        locationPermission.openAppSettings()
+
+                    else -> {
+                        triggerLocationToggleAfterPermission = true
+                        locationPermission.request()
+                    }
                 }
             },
             bearing = cameraPositionState.position.bearing,

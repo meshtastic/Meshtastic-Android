@@ -142,10 +142,31 @@ class AndroidBluetoothRepository(
             }
 
             if (!remoteDevice.createBond()) {
-                try {
-                    context.unregisterReceiver(receiver)
-                } catch (ignored: Exception) {}
-                if (cont.isActive) cont.resumeWith(Result.failure(Exception("Failed to initiate bonding")))
+                // createBond() returns false when a bond is already in flight (initiated by the OS or
+                // triggered by a GATT operation hitting a secured characteristic) or already established.
+                // The ACTION_BOND_STATE_CHANGED broadcast is unreliable on some devices (see Kable #111),
+                // so re-check bondState directly rather than failing the whole flow.
+                when (remoteDevice.bondState) {
+                    android.bluetooth.BluetoothDevice.BOND_BONDED -> {
+                        try {
+                            context.unregisterReceiver(receiver)
+                        } catch (ignored: Exception) {}
+                        if (cont.isActive) cont.resume(Unit)
+                    }
+
+                    android.bluetooth.BluetoothDevice.BOND_BONDING -> {
+                        // Bond already in progress; leave the receiver registered to resolve it on the
+                        // terminal BOND_BONDED / BOND_NONE transition instead of treating this as a failure.
+                        Logger.d { "createBond() returned false but bonding is already in progress" }
+                    }
+
+                    else -> {
+                        try {
+                            context.unregisterReceiver(receiver)
+                        } catch (ignored: Exception) {}
+                        if (cont.isActive) cont.resumeWith(Result.failure(Exception("Failed to initiate bonding")))
+                    }
+                }
             }
         }
         updateBluetoothState()

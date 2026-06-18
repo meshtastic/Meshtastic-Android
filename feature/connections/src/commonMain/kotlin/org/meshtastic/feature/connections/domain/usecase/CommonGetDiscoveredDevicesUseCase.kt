@@ -26,6 +26,7 @@ import org.meshtastic.core.network.repository.DiscoveredService
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.demo_mode
+import org.meshtastic.core.resources.demo_mode_replay
 import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.resources.meshtastic
 import org.meshtastic.feature.connections.model.DeviceListEntry
@@ -68,6 +69,10 @@ open class CommonGetDiscoveredDevicesUseCase(
                 if (showMock) {
                     val label = safeCatchingAll { getStringSuspend(Res.string.demo_mode) }.getOrDefault("Demo Mode")
                     add(DeviceListEntry.Mock(label))
+                    val replayLabel =
+                        safeCatchingAll { getStringSuspend(Res.string.demo_mode_replay) }
+                            .getOrDefault("Demo Mode (Replay)")
+                    add(DeviceListEntry.Replay(replayLabel))
                 }
             }
 

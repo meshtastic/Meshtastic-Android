@@ -164,7 +164,12 @@ class MeshServiceOrchestrator(
             .launchIn(newScope)
 
         radioInterfaceService.receivedData
-            .onEach { bytes -> messageProcessor.handleFromRadio(bytes, nodeManager.myNodeNum.value) }
+            // This loop is the single lifeline for every inbound packet. handleFromRadio is already total, but guard
+            // here too so nothing — now or later — can cancel the collection and leave the radio permanently deaf.
+            .onEach { bytes ->
+                safeCatching { messageProcessor.handleFromRadio(bytes, nodeManager.myNodeNum.value) }
+                    .onFailure { Logger.e(it) { "Dropped inbound bytes after a receive-loop error" } }
+            }
             .launchIn(newScope)
 
         radioInterfaceService.connectionError

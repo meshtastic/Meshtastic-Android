@@ -18,6 +18,7 @@ package org.meshtastic.core.data.manager
 
 import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
+import dev.mokkery.answering.throws
 import dev.mokkery.every
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
@@ -114,6 +115,21 @@ class MeshMessageProcessorImplTest {
         processor.handleFromRadio(garbage, myNodeNum)
         advanceUntilIdle()
         // No crash
+    }
+
+    @Test
+    fun `a throwing handler does not propagate out of handleFromRadio`() = runTest(testDispatcher) {
+        processor = createProcessor(backgroundScope)
+        // A malformed-but-decodable packet can make a downstream handler throw. That must NOT escape to the
+        // receivedData collector, which would cancel the collection and silently deafen the radio (a remote DoS).
+        // Regression guard for the safeCatching in processFromRadio: before that fix this call rethrew and failed.
+        every { fromRadioDispatcher.handleFromRadio(any()) } throws RuntimeException("hostile packet")
+        val fromRadio = FromRadio(log_record = LogRecord(message = "boom")) // routes to fromRadioDispatcher
+
+        processor.handleFromRadio(fromRadio.encode(), myNodeNum) // must return normally, not throw
+        advanceUntilIdle()
+
+        verify { fromRadioDispatcher.handleFromRadio(any()) } // handler ran and threw, yet we are still here
     }
 
     // ---------- handleReceivedMeshPacket: early buffering ----------

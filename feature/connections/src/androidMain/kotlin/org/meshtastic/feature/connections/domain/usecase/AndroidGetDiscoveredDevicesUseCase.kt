@@ -33,6 +33,7 @@ import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.demo_mode
+import org.meshtastic.core.resources.demo_mode_replay
 import org.meshtastic.core.resources.meshtastic
 import org.meshtastic.feature.connections.model.AndroidUsbDeviceData
 import org.meshtastic.feature.connections.model.DeviceListEntry
@@ -154,9 +155,18 @@ class AndroidGetDiscoveredDevicesUseCase(
         usbDevices: List<DeviceListEntry.Usb>,
         showMock: Boolean,
         db: Map<Int, Node>,
-    ): List<DeviceListEntry> =
-        (usbDevices + if (showMock) listOf(DeviceListEntry.Mock(getString(Res.string.demo_mode))) else emptyList())
-            .map { entry ->
-                entry.copy(node = findNodeByNameSuffix(entry.name, entry.fullAddress, db, databaseManager))
+    ): List<DeviceListEntry> = (
+        usbDevices +
+            if (showMock) {
+                listOf(
+                    DeviceListEntry.Mock(getString(Res.string.demo_mode)),
+                    DeviceListEntry.Replay(getString(Res.string.demo_mode_replay)),
+                )
+            } else {
+                emptyList()
             }
+        )
+        .map { entry ->
+            entry.copy(node = findNodeByNameSuffix(entry.name, entry.fullAddress, db, databaseManager))
+        }
 }

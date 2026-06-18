@@ -18,8 +18,8 @@ package org.meshtastic.feature.settings.tak
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import org.meshtastic.core.ui.util.isLocalNetworkPermissionGranted
-import org.meshtastic.core.ui.util.rememberRequestLocalNetworkPermission
+import org.meshtastic.core.ui.util.PermissionStatus
+import org.meshtastic.core.ui.util.rememberLocalNetworkPermissionState
 
 @Composable
 actual fun TakPermissionHandler(isTakServerEnabled: Boolean, onPermissionResult: (Boolean) -> Unit) {
@@ -28,21 +28,22 @@ actual fun TakPermissionHandler(isTakServerEnabled: Boolean, onPermissionResult:
     // when targetSdk >= 37, and is requested up-front from the Connections screen, so it will usually
     // already be granted by the time the user enables TAK. This composable handles the standalone case
     // (e.g. user opens TAK settings before ever tapping the network-scan toggle).
-    val isPermissionGranted = isLocalNetworkPermissionGranted()
-    val requestPermission =
-        rememberRequestLocalNetworkPermission(
-            onGranted = { onPermissionResult(true) },
-            onDenied = { onPermissionResult(false) },
-        )
+    val permission = rememberLocalNetworkPermissionState()
 
-    // The launcher must run as a post-composition side effect — invoking it directly in the composition
-    // body crashes with "Launcher has not been initialized" because the underlying
-    // ActivityResultLauncherHolder is not linked to the activity until composition completes. Keying on
-    // both inputs also guarantees we only re-prompt when state actually transitions, not on every
-    // recomposition.
-    LaunchedEffect(isTakServerEnabled, isPermissionGranted) {
-        if (isTakServerEnabled && !isPermissionGranted) {
-            requestPermission()
+    // The launcher must run as a post-composition side effect — invoking it directly in the composition body crashes
+    // with "Launcher has not been initialized". Keying on the status enum re-runs only on real transitions: request
+    // once when never asked, and disable the server on any denial (preserving the prior request-once-then-disable
+    // behavior, now with PERMANENTLY_DENIED treated the same as a fresh denial).
+    LaunchedEffect(isTakServerEnabled, permission.status) {
+        if (!isTakServerEnabled) return@LaunchedEffect
+        when (permission.status) {
+            PermissionStatus.GRANTED -> onPermissionResult(true)
+
+            PermissionStatus.NOT_REQUESTED -> permission.request()
+
+            PermissionStatus.DENIED_CAN_RETRY,
+            PermissionStatus.PERMANENTLY_DENIED,
+            -> onPermissionResult(false)
         }
     }
 }

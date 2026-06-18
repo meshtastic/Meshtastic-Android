@@ -21,6 +21,7 @@ enum class InterfaceId(val id: Char) {
     BLUETOOTH('x'),
     MOCK('m'),
     NOP('n'),
+    REPLAY('r'),
     SERIAL('s'),
     TCP('t'),
     ;

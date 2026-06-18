@@ -116,35 +116,42 @@ actual fun KeepScreenOn(enabled: Boolean) {
 }
 
 @Composable
-actual fun rememberRequestLocationPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit = {
-    Logger.w { "Location permissions not implemented on Desktop" }
-    onDenied()
-}
-
-@Composable
 actual fun rememberOpenLocationSettings(): () -> Unit = { Logger.w { "Location settings not implemented on Desktop" } }
 
-/** JVM no-op — Desktop does not require runtime Bluetooth permissions. */
+/** JVM stub — Bluetooth settings are not available on Desktop. */
 @Composable
-actual fun rememberRequestBluetoothPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit = { onGranted() }
-
-/** JVM no-op — Desktop does not require runtime local network permissions. */
-@Composable
-actual fun rememberRequestLocalNetworkPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit = {
-    onGranted()
+actual fun rememberOpenBluetoothSettings(): () -> Unit = {
+    Logger.w { "Bluetooth settings not available on JVM/Desktop" }
 }
 
-/** JVM — local network permission is always considered granted on Desktop. */
-@Composable actual fun isLocalNetworkPermissionGranted(): Boolean = true
-
-/** JVM no-op — Desktop does not require runtime notification permissions. */
+/** JVM stub — Wi-Fi settings are not available on Desktop. */
 @Composable
-actual fun rememberRequestNotificationPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit = {
-    onGranted()
-}
-
-/** JVM — location permission is always considered granted on Desktop. */
-@Composable actual fun isLocationPermissionGranted(): Boolean = true
+actual fun rememberOpenWifiSettings(): () -> Unit = { Logger.w { "Wi-Fi settings not available on JVM/Desktop" } }
 
 /** JVM — GPS is never disabled on Desktop (concept doesn't apply). */
 @Composable actual fun isGpsDisabled(): Boolean = false
+
+/** JVM — Bluetooth adapter state is not surfaced on Desktop. */
+@Composable actual fun isBluetoothDisabled(): Boolean = false
+
+/** JVM — local-network availability is not gated on Desktop. */
+@Composable actual fun isWifiUnavailable(): Boolean = false
+
+/** JVM stub — app settings are not available on Desktop. */
+@Composable
+actual fun rememberOpenAppSettings(): () -> Unit = { Logger.w { "App settings not available on JVM/Desktop" } }
+
+/** JVM — Desktop does not gate location behind a runtime permission. */
+@Composable actual fun rememberLocationPermissionState(): PermissionUiState = grantedPermissionUiState()
+
+/** JVM — Desktop does not gate Bluetooth behind a runtime permission. */
+@Composable actual fun rememberBluetoothPermissionState(): PermissionUiState = grantedPermissionUiState()
+
+/** JVM — Desktop does not gate notifications behind a runtime permission. */
+@Composable actual fun rememberNotificationPermissionState(): PermissionUiState = grantedPermissionUiState()
+
+/** JVM — Desktop does not gate local-network access behind a runtime permission. */
+@Composable actual fun rememberLocalNetworkPermissionState(): PermissionUiState = grantedPermissionUiState()
+
+/** JVM — Desktop does not gate the camera behind a runtime permission. */
+@Composable actual fun rememberCameraPermissionState(): PermissionUiState = grantedPermissionUiState()

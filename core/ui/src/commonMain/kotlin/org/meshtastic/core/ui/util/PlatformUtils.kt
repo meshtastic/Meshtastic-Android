@@ -55,36 +55,62 @@ expect fun rememberSaveFileLauncher(
 /** Keeps the screen awake while [enabled] is true. No-op on platforms that don't support it. */
 @Composable expect fun KeepScreenOn(enabled: Boolean)
 
-/** Returns a launcher to request location permissions. */
-@Composable expect fun rememberRequestLocationPermission(onGranted: () -> Unit, onDenied: () -> Unit = {}): () -> Unit
-
 /** Returns a launcher to open the platform's location settings. */
 @Composable expect fun rememberOpenLocationSettings(): () -> Unit
 
-/** Returns a launcher to request Bluetooth scan + connect permissions. No-op on platforms without runtime BLE perms. */
-@Composable expect fun rememberRequestBluetoothPermission(onGranted: () -> Unit, onDenied: () -> Unit = {}): () -> Unit
+/** Returns a launcher to open the platform's Bluetooth settings. */
+@Composable expect fun rememberOpenBluetoothSettings(): () -> Unit
 
-/** Returns a launcher to request the ACCESS_LOCAL_NETWORK permission. No-op on platforms that don't require it. */
-@Composable
-expect fun rememberRequestLocalNetworkPermission(onGranted: () -> Unit, onDenied: () -> Unit = {}): () -> Unit
-
-/**
- * Returns whether ACCESS_LOCAL_NETWORK is currently granted. Always `true` on platforms / API levels that don't gate
- * local-network access behind a runtime permission.
- */
-@Composable expect fun isLocalNetworkPermissionGranted(): Boolean
-
-/** Returns a launcher to request the POST_NOTIFICATIONS permission. No-op on platforms that don't require it. */
-@Composable
-expect fun rememberRequestNotificationPermission(onGranted: () -> Unit, onDenied: () -> Unit = {}): () -> Unit
-
-/**
- * Returns whether location permissions are currently granted. Always `true` on platforms without runtime permissions.
- */
-@Composable expect fun isLocationPermissionGranted(): Boolean
+/** Returns a launcher to open the platform's Wi-Fi settings. */
+@Composable expect fun rememberOpenWifiSettings(): () -> Unit
 
 /**
  * Returns whether GPS/location services are currently disabled at the system level. Always `false` on platforms where
  * this concept doesn't apply.
  */
 @Composable expect fun isGpsDisabled(): Boolean
+
+/**
+ * Returns whether Bluetooth is currently turned off at the system level (the adapter exists but is disabled). Always
+ * `false` on devices without Bluetooth and on platforms where the concept doesn't apply.
+ */
+@Composable expect fun isBluetoothDisabled(): Boolean
+
+/**
+ * Returns whether the device currently lacks a local-network-capable connection (no active Wi-Fi or Ethernet). NSD/mDNS
+ * discovery needs a LAN, so this surfaces the "connect to Wi-Fi" hint. Always `false` where the concept doesn't apply.
+ */
+@Composable expect fun isWifiUnavailable(): Boolean
+
+/** Returns a function that opens this app's system settings page (where the user can change any permission). */
+@Composable expect fun rememberOpenAppSettings(): () -> Unit
+
+/**
+ * Returns the reactive [PermissionUiState] for the location permissions, recomputed on `ON_RESUME`. On platforms
+ * without runtime permissions the status is always [PermissionStatus.GRANTED].
+ */
+@Composable expect fun rememberLocationPermissionState(): PermissionUiState
+
+/**
+ * Returns the reactive [PermissionUiState] for the Bluetooth scan/connect permissions. On pre-Android-12 devices BLE
+ * scanning is gated by the location permission, so the returned state delegates to [rememberLocationPermissionState].
+ */
+@Composable expect fun rememberBluetoothPermissionState(): PermissionUiState
+
+/**
+ * Returns the reactive [PermissionUiState] for the POST_NOTIFICATIONS permission. Always [PermissionStatus.GRANTED] on
+ * API levels / platforms that don't gate notifications behind a runtime permission.
+ */
+@Composable expect fun rememberNotificationPermissionState(): PermissionUiState
+
+/**
+ * Returns the reactive [PermissionUiState] for the ACCESS_LOCAL_NETWORK permission. Always [PermissionStatus.GRANTED]
+ * on API levels / platforms that don't gate local-network access behind a runtime permission.
+ */
+@Composable expect fun rememberLocalNetworkPermissionState(): PermissionUiState
+
+/**
+ * Returns the reactive [PermissionUiState] for the CAMERA permission. Always [PermissionStatus.GRANTED] on platforms
+ * that don't require a runtime camera permission.
+ */
+@Composable expect fun rememberCameraPermissionState(): PermissionUiState
