@@ -26,9 +26,11 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -44,6 +46,7 @@ import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.di.CoroutineDispatchers
+import kotlin.concurrent.Volatile
 import org.meshtastic.core.common.database.DatabaseManager as SharedDatabaseManager
 
 /** Manages per-device Room database instances for node data, with LRU eviction. */
@@ -63,6 +66,10 @@ open class DatabaseManager(
     private val legacyCleanedKey = booleanPreferencesKey(DatabaseConstants.LEGACY_DB_CLEANED_KEY)
 
     private fun lastUsedKey(dbName: String) = longPreferencesKey("db_last_used:$dbName")
+
+    private var backfillJob: Job? = null
+
+    @Volatile private var hasDelayedFirstDeviceBackfill = false
 
     override val cacheLimit: StateFlow<Int> =
         datastore.data
@@ -150,8 +157,12 @@ open class DatabaseManager(
         // One-time cleanup: remove legacy DB if present and not active
         managerScope.launch(dispatchers.io) { cleanupLegacyDbIfNeeded(activeDbName = dbName) }
 
-        // Backfill FTS search index for any text messages missing messageText
-        managerScope.launch(dispatchers.io) { backfillSearchIndexIfNeeded(db) }
+        // Backfill FTS search index for any text messages missing messageText.
+        // On the first real device DB, defer this so it does not starve the single DB connection while
+        // the UI is collecting startup flows. The default DB should not consume the cold-start delay.
+        val shouldDelayBackfill = dbName != DatabaseConstants.DEFAULT_DB_NAME && !hasDelayedFirstDeviceBackfill
+        if (shouldDelayBackfill) hasDelayedFirstDeviceBackfill = true
+        scheduleSearchIndexBackfill(dbName = dbName, db = db, shouldDelayBackfill = shouldDelayBackfill)
 
         Logger.i { "Switched active DB to ${anonymizeDbName(dbName)} for address ${anonymizeAddress(address)}" }
     }
@@ -208,6 +219,7 @@ open class DatabaseManager(
         }
 
     private companion object {
+        private const val BACKFILL_COLD_START_DELAY_MS = 2_000L
         val DB_TERMS = listOf("pool", "database", "connection", "sqlite")
     }
 
@@ -309,6 +321,23 @@ open class DatabaseManager(
         datastore.edit { it[legacyCleanedKey] = true }
     }
 
+    @Suppress("TooGenericExceptionCaught")
+    private fun scheduleSearchIndexBackfill(dbName: String, db: MeshtasticDatabase, shouldDelayBackfill: Boolean) {
+        backfillJob?.cancel()
+        backfillJob =
+            managerScope.launch(dispatchers.io) {
+                try {
+                    if (shouldDelayBackfill) delay(BACKFILL_COLD_START_DELAY_MS)
+                    if (_currentDb.value !== db) return@launch
+                    backfillSearchIndexIfNeeded(db)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    Logger.w(e) { "Failed to backfill search index for ${anonymizeDbName(dbName)}" }
+                }
+            }
+    }
+
     /**
      * Backfills [Packet.messageText] for existing text-message packets that predate the FTS5 schema, then rebuilds the
      * FTS index so search covers historical messages. The text is decoded in Kotlin from each packet's payload (see
@@ -333,6 +362,8 @@ open class DatabaseManager(
 
     /** Closes all open databases and cancels background work. */
     fun close() {
+        backfillJob?.cancel()
+        backfillJob = null
         managerScope.cancel()
         dbCache.values.forEach { it.close() }
         dbCache.clear()

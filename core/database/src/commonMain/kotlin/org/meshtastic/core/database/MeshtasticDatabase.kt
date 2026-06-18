@@ -23,6 +23,7 @@ import androidx.room3.DeleteColumn
 import androidx.room3.DeleteTable
 import androidx.room3.RoomDatabase
 import androidx.room3.migration.AutoMigrationSpec
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.database.dao.DeviceHardwareDao
 import org.meshtastic.core.database.dao.DeviceLinkDao
@@ -143,13 +144,14 @@ abstract class MeshtasticDatabase : RoomDatabase() {
          * Configures a [RoomDatabase.Builder] with standard settings for this project.
          *
          * @param multiConnection when `true` (default), opens a multi-reader connection pool (`maxNumOfReaders = 4`,
-         *   `maxNumOfWriters = 1`) so reads can run concurrently. Pass `false` to serialize all reads and writes
-         *   through a single connection (no separate reader pool).
+         *   `maxNumOfWriters = 1`) so reads can run concurrently. Pass `false` to explicitly force
+         *   [setSingleConnectionPool], serializing all reads and writes through one connection.
          *
-         * **Android production passes `false`.** Under coroutine cancellation churn (e.g. DB switches via
-         * `flatMapLatest`), the Room KMP reader-pool permit semaphore can wedge: all reader connections report `Free`
-         * but `permits=0`, so every read acquisition times out indefinitely. Single-connection mode eliminates the
-         * separate reader permit pool. See `DatabaseBuilder.kt` (androidMain).
+         * **Android production passes `false`.** Without the explicit `setSingleConnectionPool()` call, Room defaults
+         * to a 4-reader pool for named databases regardless of whether `setMultipleConnectionPool` was called. Under
+         * coroutine cancellation churn (e.g. DB switches via `flatMapLatest`), the reader-pool permit semaphore can
+         * wedge: all reader connections report `Free` but `permits=0`, so every read acquisition times out
+         * indefinitely. Forcing single-connection eliminates the separate reader permit pool entirely.
          *
          * **In-memory databases MUST pass `false`** for deterministic read-after-write: a pooled reader connection can
          * serve a snapshot older than the latest write on the writer connection, so a read immediately after a write
@@ -159,11 +161,22 @@ abstract class MeshtasticDatabase : RoomDatabase() {
          * **JVM/iOS production uses `true`** (the default). Revisit if desktop/iOS field logs show similar
          * pool-exhaustion patterns under cancellation churn.
          */
+        @OptIn(ExperimentalCoroutinesApi::class)
         fun <T : RoomDatabase> RoomDatabase.Builder<T>.configureCommon(
             multiConnection: Boolean = true,
         ): RoomDatabase.Builder<T> = this.fallbackToDestructiveMigration(dropAllTables = false)
-            .apply { if (multiConnection) setMultipleConnectionPool(maxNumOfReaders = 4, maxNumOfWriters = 1) }
-            .setQueryCoroutineContext(ioDispatcher)
+            .apply {
+                if (multiConnection) {
+                    setMultipleConnectionPool(maxNumOfReaders = 4, maxNumOfWriters = 1)
+                } else {
+                    setSingleConnectionPool()
+                }
+            }
+            .setQueryCoroutineContext(
+                // limitedParallelism(1) has the same throughput ceiling as the single-connection pool
+                // (already serialized), so this only blocks the cancellation pileup — not real I/O concurrency.
+                if (multiConnection) ioDispatcher else ioDispatcher.limitedParallelism(1),
+            )
     }
 }
 
