@@ -307,12 +307,6 @@
       "title": "revert a conflict regression and introduce the DCDC workaround ",
       "page_url": "https://github.com/meshtastic/firmware/pull/10633",
       "zip_url": "s"
-    },
-    {
-      "id": "10627",
-      "title": "Add 70cm amateur radio region support",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10627",
-      "zip_url": "+23.2 KB"
     }
   ]
 }
