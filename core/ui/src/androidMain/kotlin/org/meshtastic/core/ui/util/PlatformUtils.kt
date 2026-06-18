@@ -18,9 +18,13 @@
 
 package org.meshtastic.core.ui.util
 
+import android.bluetooth.BluetoothManager
 import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.net.Uri
 import android.provider.Settings
 import androidx.activity.compose.LocalActivity
@@ -213,6 +217,62 @@ private const val LOCAL_NETWORK_PERMISSION_API = 37
 actual fun isGpsDisabled(): Boolean {
     val context = LocalContext.current
     return rememberOnResumeState { context.gpsDisabled() }
+}
+
+@Composable
+actual fun rememberOpenBluetoothSettings(): () -> Unit {
+    val context = LocalContext.current
+    return remember(context) {
+        {
+            try {
+                context.startActivity(
+                    Intent(Settings.ACTION_BLUETOOTH_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                )
+            } catch (ex: ActivityNotFoundException) {
+                Logger.w(ex) { "No Bluetooth settings activity available" }
+            }
+        }
+    }
+}
+
+@Composable
+actual fun rememberOpenWifiSettings(): () -> Unit {
+    val context = LocalContext.current
+    return remember(context) {
+        {
+            try {
+                context.startActivity(Intent(Settings.ACTION_WIFI_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            } catch (ex: ActivityNotFoundException) {
+                Logger.w(ex) { "No Wi-Fi settings activity available" }
+            }
+        }
+    }
+}
+
+@Composable
+actual fun isBluetoothDisabled(): Boolean {
+    val context = LocalContext.current
+    return rememberOnResumeState {
+        // adapter == null means the device has no Bluetooth at all — not "disabled", so don't nag.
+        val adapter = (context.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager)?.adapter
+        adapter != null && !adapter.isEnabled
+    }
+}
+
+@Composable
+actual fun isWifiUnavailable(): Boolean {
+    val context = LocalContext.current
+    return rememberOnResumeState {
+        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+        val capabilities = cm?.activeNetwork?.let { cm.getNetworkCapabilities(it) }
+        val onLocalNetwork =
+            capabilities != null &&
+                (
+                    capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                        capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
+                    )
+        !onLocalNetwork
+    }
 }
 
 @Composable

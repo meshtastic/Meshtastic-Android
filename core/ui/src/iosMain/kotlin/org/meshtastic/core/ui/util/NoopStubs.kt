@@ -52,7 +52,15 @@ actual fun rememberOpenFileLauncher(onUriReceived: (CommonUri?) -> Unit): (mimeT
 
 @Composable actual fun rememberOpenLocationSettings(): () -> Unit = {}
 
+@Composable actual fun rememberOpenBluetoothSettings(): () -> Unit = {}
+
+@Composable actual fun rememberOpenWifiSettings(): () -> Unit = {}
+
 @Composable actual fun isGpsDisabled(): Boolean = false
+
+@Composable actual fun isBluetoothDisabled(): Boolean = false
+
+@Composable actual fun isWifiUnavailable(): Boolean = false
 
 @Composable actual fun SetScreenBrightness(brightness: Float) {}
 

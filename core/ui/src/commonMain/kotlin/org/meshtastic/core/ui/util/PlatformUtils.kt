@@ -58,11 +58,29 @@ expect fun rememberSaveFileLauncher(
 /** Returns a launcher to open the platform's location settings. */
 @Composable expect fun rememberOpenLocationSettings(): () -> Unit
 
+/** Returns a launcher to open the platform's Bluetooth settings. */
+@Composable expect fun rememberOpenBluetoothSettings(): () -> Unit
+
+/** Returns a launcher to open the platform's Wi-Fi settings. */
+@Composable expect fun rememberOpenWifiSettings(): () -> Unit
+
 /**
  * Returns whether GPS/location services are currently disabled at the system level. Always `false` on platforms where
  * this concept doesn't apply.
  */
 @Composable expect fun isGpsDisabled(): Boolean
+
+/**
+ * Returns whether Bluetooth is currently turned off at the system level (the adapter exists but is disabled). Always
+ * `false` on devices without Bluetooth and on platforms where the concept doesn't apply.
+ */
+@Composable expect fun isBluetoothDisabled(): Boolean
+
+/**
+ * Returns whether the device currently lacks a local-network-capable connection (no active Wi-Fi or Ethernet). NSD/mDNS
+ * discovery needs a LAN, so this surfaces the "connect to Wi-Fi" hint. Always `false` where the concept doesn't apply.
+ */
+@Composable expect fun isWifiUnavailable(): Boolean
 
 /** Returns a function that opens this app's system settings page (where the user can change any permission). */
 @Composable expect fun rememberOpenAppSettings(): () -> Unit

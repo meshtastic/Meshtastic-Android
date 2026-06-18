@@ -31,6 +31,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
@@ -43,26 +44,23 @@ import org.meshtastic.core.ui.util.PermissionStatus
 import org.meshtastic.core.ui.util.PermissionUiState
 
 /**
- * A reusable error-state card for a missing runtime permission. Generalizes the compass warning/recovery pattern so
- * every feature presents context plus a single, context-correct recovery action:
- * - [PermissionStatus.NOT_REQUESTED] / [PermissionStatus.DENIED_CAN_RETRY] — shows a "Grant permission" button that
- *   re-launches the in-context request.
- * - [PermissionStatus.PERMANENTLY_DENIED] — shows an "Open settings" button (user-initiated recovery) because the
- *   system will no longer show the dialog.
- * - [PermissionStatus.GRANTED] — renders nothing.
+ * A reusable error-state card: an `errorContainer` message box plus one full-width recovery action. Generalizes the
+ * compass warning/recovery pattern so any feature can present context plus a single corrective action (request a
+ * permission, open Bluetooth/Wi-Fi/app settings, etc.).
  *
- * @param rationale a feature-specific explanation of why the permission is needed.
+ * @param message the user-facing explanation of what is wrong.
+ * @param actionLabel the recovery button label.
+ * @param onAction invoked when the recovery button is tapped.
+ * @param actionIcon optional leading icon for the recovery button.
  */
 @Composable
-internal fun PermissionRecoveryCard(
-    status: PermissionStatus,
-    rationale: String,
-    onRequest: () -> Unit,
-    onOpenSettings: () -> Unit,
+fun RecoveryCard(
+    message: String,
+    actionLabel: String,
+    onAction: () -> Unit,
     modifier: Modifier = Modifier,
+    actionIcon: ImageVector? = null,
 ) {
-    if (status == PermissionStatus.GRANTED) return
-
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Surface(
             tonalElevation = 2.dp,
@@ -81,24 +79,58 @@ internal fun PermissionRecoveryCard(
                     tint = MaterialTheme.colorScheme.onErrorContainer,
                 )
                 Text(
-                    text = rationale,
+                    text = message,
                     color = MaterialTheme.colorScheme.onErrorContainer,
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }
         }
 
-        if (status == PermissionStatus.PERMANENTLY_DENIED) {
-            Button(onClick = onOpenSettings, modifier = Modifier.fillMaxWidth()) {
-                Icon(imageVector = MeshtasticIcons.AppSettingsAlt, contentDescription = null)
+        Button(onClick = onAction, modifier = Modifier.fillMaxWidth()) {
+            if (actionIcon != null) {
+                Icon(imageVector = actionIcon, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(text = stringResource(Res.string.open_settings))
             }
-        } else {
-            Button(onClick = onRequest, modifier = Modifier.fillMaxWidth()) {
-                Text(text = stringResource(Res.string.grant_permission))
-            }
+            Text(text = actionLabel)
         }
+    }
+}
+
+/**
+ * A [RecoveryCard] specialized for a missing runtime permission, presenting a context-correct recovery action:
+ * - [PermissionStatus.NOT_REQUESTED] / [PermissionStatus.DENIED_CAN_RETRY] — shows a "Grant permission" button that
+ *   re-launches the in-context request.
+ * - [PermissionStatus.PERMANENTLY_DENIED] — shows an "Open settings" button (user-initiated recovery) because the
+ *   system will no longer show the dialog.
+ * - [PermissionStatus.GRANTED] — renders nothing.
+ *
+ * @param rationale a feature-specific explanation of why the permission is needed.
+ */
+@Composable
+internal fun PermissionRecoveryCard(
+    status: PermissionStatus,
+    rationale: String,
+    onRequest: () -> Unit,
+    onOpenSettings: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    if (status == PermissionStatus.GRANTED) return
+
+    if (status == PermissionStatus.PERMANENTLY_DENIED) {
+        RecoveryCard(
+            message = rationale,
+            actionLabel = stringResource(Res.string.open_settings),
+            onAction = onOpenSettings,
+            modifier = modifier,
+            actionIcon = MeshtasticIcons.AppSettingsAlt,
+        )
+    } else {
+        RecoveryCard(
+            message = rationale,
+            actionLabel = stringResource(Res.string.grant_permission),
+            onAction = onRequest,
+            modifier = modifier,
+        )
     }
 }
 

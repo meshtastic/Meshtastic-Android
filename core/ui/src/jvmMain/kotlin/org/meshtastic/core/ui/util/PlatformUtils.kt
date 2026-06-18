@@ -118,8 +118,24 @@ actual fun KeepScreenOn(enabled: Boolean) {
 @Composable
 actual fun rememberOpenLocationSettings(): () -> Unit = { Logger.w { "Location settings not implemented on Desktop" } }
 
+/** JVM stub — Bluetooth settings are not available on Desktop. */
+@Composable
+actual fun rememberOpenBluetoothSettings(): () -> Unit = {
+    Logger.w { "Bluetooth settings not available on JVM/Desktop" }
+}
+
+/** JVM stub — Wi-Fi settings are not available on Desktop. */
+@Composable
+actual fun rememberOpenWifiSettings(): () -> Unit = { Logger.w { "Wi-Fi settings not available on JVM/Desktop" } }
+
 /** JVM — GPS is never disabled on Desktop (concept doesn't apply). */
 @Composable actual fun isGpsDisabled(): Boolean = false
+
+/** JVM — Bluetooth adapter state is not surfaced on Desktop. */
+@Composable actual fun isBluetoothDisabled(): Boolean = false
+
+/** JVM — local-network availability is not gated on Desktop. */
+@Composable actual fun isWifiUnavailable(): Boolean = false
 
 /** JVM stub — app settings are not available on Desktop. */
 @Composable
