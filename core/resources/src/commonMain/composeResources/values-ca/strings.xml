@@ -31,6 +31,7 @@
     <string name="are_you_sure_change_default">Estàs segur que vols canviar al canal per defecte?</string>
     <!-- BLUETOOTH -->
     <string name="calculating">Calculant…</string>
+    <string name="camera_permission">Permisos de la càmera</string>
     <string name="cancel">Cancel·lar</string>
     <string name="cant_change_no_radio">No s'ha pogut canviar el canal perquè la ràdio no està configurada correctament. Si us plau torna-ho a provar.</string>
     <!-- CHANNEL -->
@@ -160,6 +161,7 @@
     <string name="okay">Acceptar</string>
     <!-- ONE -->
     <string name="one_day">24 Hores</string>
+    <!-- OPEN -->
     <!-- OUTPUT -->
     <!-- PAX -->
     <!-- POSITION -->

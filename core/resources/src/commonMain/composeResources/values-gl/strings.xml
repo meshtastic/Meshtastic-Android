@@ -31,6 +31,7 @@
     <string name="are_you_sure_change_default">Está seguro de que quere cambiar á canle predeterminada?</string>
     <!-- BLUETOOTH -->
     <string name="calculating">Calculando…</string>
+    <string name="camera_permission">Permiso da cámara</string>
     <string name="cancel">Cancelar</string>
     <string name="cant_change_no_radio">Non se puido cambiar de canle, porque a radio aínda non está conectada. Por favor inténteo de novo.</string>
     <!-- CHANNEL -->
@@ -153,6 +154,7 @@
     <string name="okay">OK</string>
     <!-- ONE -->
     <string name="one_day">24 Horas</string>
+    <!-- OPEN -->
     <!-- OUTPUT -->
     <!-- PAX -->
     <!-- POSITION -->

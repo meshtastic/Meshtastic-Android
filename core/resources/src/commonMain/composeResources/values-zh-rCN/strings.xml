@@ -104,6 +104,7 @@
     <string name="button_gpio">按钮 GPIO</string>
     <string name="buzzer_gpio">蜂鸣器 GPIO</string>
     <string name="calculating">正在计算……</string>
+    <string name="camera_permission">相机权限</string>
     <string name="cancel">取消</string>
     <string name="cancel_reply">取消回复</string>
     <string name="canned_message">预设消息</string>
@@ -767,6 +768,7 @@
     <string name="one_month">1M</string>
     <string name="one_week">1 周</string>
     <string name="only_favorites">仅收藏的</string>
+    <!-- OPEN -->
     <string name="open_compass">打开指南针...</string>
     <string name="open_settings">打开设置</string>
     <string name="open_source_description">Meshtastic 是用以下开源库构建的。点击任何库查看其许可证。</string>

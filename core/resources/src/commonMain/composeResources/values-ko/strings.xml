@@ -66,6 +66,7 @@
     <string name="bottom_nav_settings">설정</string>
     <string name="broadcast_interval">전송 간격</string>
     <string name="calculating">계산 중...</string>
+    <string name="camera_permission">카메라 권한 부여</string>
     <string name="cancel">취소</string>
     <string name="canned_message">빠른 답장 문구</string>
     <string name="canned_message_config">빠른 답장 문구 설정</string>
@@ -374,6 +375,7 @@
     <string name="one_day">24 시간</string>
     <string name="one_week">1주</string>
     <string name="only_favorites">즐겨찾기만 보기</string>
+    <!-- OPEN -->
     <!-- OUTPUT -->
     <string name="output_buzzer_gpio">부저 출력 (GPIO)</string>
     <string name="output_duration_milliseconds">출력 지속시간 (밀리초)</string>

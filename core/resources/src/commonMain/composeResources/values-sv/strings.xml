@@ -115,6 +115,7 @@
     <string name="button_gpio">GPIO för knapp</string>
     <string name="buzzer_gpio">GPIO för summer</string>
     <string name="calculating">Beräknar…</string>
+    <string name="camera_permission">Kamerabehörighet</string>
     <string name="cancel">Avbryt</string>
     <string name="cancel_reply">Avbryt svar</string>
     <string name="canned_message">Burksvar</string>
@@ -760,6 +761,7 @@
     <string name="one_month">1m</string>
     <string name="one_week">1V</string>
     <string name="only_favorites">Endast favoriter</string>
+    <!-- OPEN -->
     <string name="open_compass">Visa kompass</string>
     <string name="open_settings">Öppna inställningar</string>
     <string name="open_source_libraries">Öppet källkods bibliotek</string>

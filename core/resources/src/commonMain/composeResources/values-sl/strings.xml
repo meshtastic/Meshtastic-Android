@@ -36,6 +36,7 @@
     <string name="battery">Baterija</string>
     <!-- BLUETOOTH -->
     <string name="calculating">Preračunavam…</string>
+    <string name="camera_permission">Dovoljenja kamere</string>
     <string name="cancel">Prekliči/zavrzi</string>
     <string name="cant_change_no_radio">Menjava ni možna ni radia.</string>
     <string name="cant_shutdown">Izklop na tej napravi ni podprt</string>
@@ -181,6 +182,7 @@
     <!-- ONE -->
     <string name="one_day">24 Ur</string>
     <string name="one_week">1T</string>
+    <!-- OPEN -->
     <!-- OUTPUT -->
     <!-- PAX -->
     <!-- POSITION -->

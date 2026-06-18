@@ -35,6 +35,7 @@
     <string name="battery">Cúis leictreachais</string>
     <!-- BLUETOOTH -->
     <string name="calculating">Á ríomh…</string>
+    <string name="camera_permission">Cead ceamara</string>
     <string name="cancel">Cealaigh</string>
     <string name="cant_change_no_radio">Ní féidir an cainéal a athrú, toisc nach bhfuil an raidió nasctha fós. Déan iarracht arís.</string>
     <string name="cant_shutdown">Ní tacaítear le dúnadh ar an ngléas seo</string>
@@ -174,6 +175,7 @@
     <string name="okay">Ceadaigh</string>
     <!-- ONE -->
     <string name="one_day">24 Uair an chloig</string>
+    <!-- OPEN -->
     <!-- OUTPUT -->
     <!-- PAX -->
     <!-- POSITION -->

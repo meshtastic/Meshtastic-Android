@@ -1,1 +1,1 @@
-L'application officielle pour Meshtastic, un système open-source, hors ligne, de radios en réseau maillé.
+App officielle de Meshtastic : radio maillée open source et hors ligne.

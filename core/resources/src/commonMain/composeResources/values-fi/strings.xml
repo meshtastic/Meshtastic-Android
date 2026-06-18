@@ -143,6 +143,7 @@
     <string name="calculating">Lasketaan…</string>
     <string name="call_sign">Kutsutunnus</string>
     <string name="call_sign_summary">Amatööriradion kutsutunnuksesi, enintään 8 merkkiä</string>
+    <string name="camera_permission">Kameran käyttöoikeudet</string>
     <string name="cancel">Peruuta</string>
     <string name="cancel_reply">Peruuta vastaus</string>
     <string name="canned_message">Esiasetettu viesti</string>
@@ -1012,6 +1013,7 @@
     <string name="one_week">1vko</string>
     <string name="one_wire_temperature">Lämpötila (1-Wire)</string>
     <string name="only_favorites">Vain suosikit</string>
+    <!-- OPEN -->
     <string name="open_compass">Avaa kompassi</string>
     <string name="open_settings">Avaa asetukset</string>
     <string name="open_source_description">Meshtastic on rakennettu seuraavilla avoimen lähdekoodin kirjastoilla. Napauta mitä tahansa kirjastoa nähdäksesi sen lisenssin.</string>

@@ -88,6 +88,7 @@
     <string name="button_gpio">Botón GPIO</string>
     <string name="buzzer_gpio">Zumbador GPIO</string>
     <string name="calculating">Calculando…</string>
+    <string name="camera_permission">Permisos de acceso a la cámara</string>
     <string name="cancel">Cancelar</string>
     <string name="cancel_reply">Cancelar respuesta</string>
     <string name="canned_message">Mensajes Predefinidos</string>
@@ -587,6 +588,7 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="one_hour">1 hora</string>
     <string name="one_week">1Semana</string>
     <string name="only_favorites">Solo favoritos</string>
+    <!-- OPEN -->
     <string name="open_compass">Abrir brújula</string>
     <string name="open_settings">Abrir ajustes</string>
     <string name="options">Opciones</string>

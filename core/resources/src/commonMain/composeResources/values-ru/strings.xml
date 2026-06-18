@@ -121,6 +121,7 @@
     <string name="button_gpio">Кнопка GPIO</string>
     <string name="buzzer_gpio">Зуммер GPIO</string>
     <string name="calculating">Вычисление…</string>
+    <string name="camera_permission">Разрешение камеры</string>
     <string name="cancel">Отмена</string>
     <string name="cancel_reply">Отменить ответ</string>
     <string name="canned_message">Шаблонные сообщения</string>
@@ -931,6 +932,7 @@
     <string name="one_week">1нед</string>
     <string name="one_wire_temperature">Темп. 1-Wire</string>
     <string name="only_favorites">Только Избранные</string>
+    <!-- OPEN -->
     <string name="open_compass">Открыть компас</string>
     <string name="open_settings">Открыть настройки</string>
     <string name="open_source_description">Meshtastic создан с использованием следующих библиотек с открытым исходным кодом. Нажмите на любую библиотеку, чтобы просмотреть ее лицензию.</string>

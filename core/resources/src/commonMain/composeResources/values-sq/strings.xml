@@ -35,6 +35,7 @@
     <string name="battery">Bateria</string>
     <!-- BLUETOOTH -->
     <string name="calculating">Po llogaritet…</string>
+    <string name="camera_permission">Leje për kamerën</string>
     <string name="cancel">Anullo</string>
     <string name="cant_change_no_radio">Nuk mund të ndryshoni kanalin, sepse radioja ende nuk është lidhur. Ju lutemi provoni përsëri.</string>
     <string name="cant_shutdown">Fikja nuk mbështetet në këtë pajisje</string>
@@ -172,6 +173,7 @@
     <string name="okay">Mirë</string>
     <!-- ONE -->
     <string name="one_day">24 Orë</string>
+    <!-- OPEN -->
     <!-- OUTPUT -->
     <!-- PAX -->
     <!-- POSITION -->

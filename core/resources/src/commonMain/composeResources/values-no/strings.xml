@@ -36,6 +36,7 @@
     <string name="battery">Batteri</string>
     <!-- BLUETOOTH -->
     <string name="calculating">Beregner…</string>
+    <string name="camera_permission">Kamera tillatelse</string>
     <string name="cancel">Avbryt</string>
     <string name="cant_change_no_radio">Kunne ikke endre kanalen, fordi radio ikke er tilkoblet enda. Vennligst prøv på nytt.</string>
     <string name="cant_shutdown">Avslutning støttes ikke på denne enheten</string>
@@ -179,6 +180,7 @@
     <!-- ONE -->
     <string name="one_day">24 Timer</string>
     <string name="one_week">1U</string>
+    <!-- OPEN -->
     <!-- OUTPUT -->
     <!-- PAX -->
     <!-- POSITION -->

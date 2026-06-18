@@ -34,6 +34,7 @@
     <!-- BLUETOOTH -->
     <string name="bluetooth_config">Postavke Bluetootha</string>
     <string name="calculating">Izračunavanje…</string>
+    <string name="camera_permission">Dozvola za kameru</string>
     <string name="cancel">Odustani</string>
     <string name="cant_change_no_radio">Nije moguće promijeniti kanal jer radio još nije povezan. Molim pokušajte ponovno.</string>
     <!-- CHANNEL -->
@@ -158,6 +159,7 @@
     <string name="okay">U redu</string>
     <!-- ONE -->
     <string name="one_day">24 Sati</string>
+    <!-- OPEN -->
     <!-- OUTPUT -->
     <!-- PAX -->
     <!-- POSITION -->

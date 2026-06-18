@@ -143,6 +143,7 @@
     <string name="calculating">Arvutan…</string>
     <string name="call_sign">Kutsung</string>
     <string name="call_sign_summary">Sinu amatöörraadio kutsung, kuni 8 tähemärki</string>
+    <string name="camera_permission">Luba kaamera</string>
     <string name="cancel">Tühista</string>
     <string name="cancel_reply">Tühista vastus</string>
     <string name="canned_message">Salvestatud sõnum</string>
@@ -1033,6 +1034,7 @@
     <string name="one_week">1N</string>
     <string name="one_wire_temperature">1-juhtmeline temperatuur</string>
     <string name="only_favorites">Ainult lemmikud</string>
+    <!-- OPEN -->
     <string name="open_compass">Ava kompass</string>
     <string name="open_settings">Ava seaded</string>
     <string name="open_source_description">Meshtastic on loodud avatud lähtekoodiga teekidest. Litsentsi vaatamiseks valige teek.</string>

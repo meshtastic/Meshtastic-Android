@@ -100,6 +100,7 @@
     <string name="button_gpio">GPIO buton</string>
     <string name="buzzer_gpio">GPIO buzzer</string>
     <string name="calculating">Calculare…</string>
+    <string name="camera_permission">Permisiune cameră</string>
     <string name="cancel">Renunta</string>
     <string name="cancel_reply">Anulați răspunsul</string>
     <string name="canned_message">Mesaj predefinit</string>
@@ -766,6 +767,7 @@
     <string name="one_hour">1 Oră</string>
     <string name="one_week">1W</string>
     <string name="only_favorites">Doar Favorite</string>
+    <!-- OPEN -->
     <string name="open_compass">Deschide busola</string>
     <string name="open_settings">Deschideți setările</string>
     <string name="open_source_description">Meshtastic este construit cu următoarele biblioteci open source. Atingeți orice bibliotecă pentru a vedea licența.</string>

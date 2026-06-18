@@ -35,6 +35,7 @@
     <string name="battery">Batri</string>
     <!-- BLUETOOTH -->
     <string name="calculating">Ap kalkile…</string>
+    <string name="camera_permission">Pèmisyon kamera</string>
     <string name="cancel">Anile</string>
     <string name="cant_change_no_radio">Nou pa t kapab chanje kanal la paske radyo a poko konekte. Tanpri eseye ankò.</string>
     <string name="cant_shutdown">Fèmen pa sipòte sou aparèy sa a</string>
@@ -170,6 +171,7 @@
     <string name="okay">Dakò</string>
     <!-- ONE -->
     <string name="one_day">24 Èdtan</string>
+    <!-- OPEN -->
     <!-- OUTPUT -->
     <!-- PAX -->
     <!-- POSITION -->

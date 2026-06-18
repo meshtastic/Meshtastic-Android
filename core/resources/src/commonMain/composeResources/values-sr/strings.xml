@@ -58,6 +58,7 @@
     <string name="button_gpio">Дугме GPIO</string>
     <string name="buzzer_gpio">Звучни сигнал GPIO</string>
     <string name="calculating">Прорачунавање…</string>
+    <string name="camera_permission">Дозволе за употребу камере</string>
     <string name="cancel">Otkaži</string>
     <string name="cant_change_no_radio">Није било могуће променити канал, јер радио још није повезан. Молимо покушајте поново.</string>
     <string name="cant_shutdown">Искључивање није подржано на овом уређају</string>
@@ -320,6 +321,7 @@
     <!-- ONE -->
     <string name="one_day">24 Сати</string>
     <string name="one_week">1n</string>
+    <!-- OPEN -->
     <string name="options">Опције</string>
     <!-- OUTPUT -->
     <string name="override_frequency_mhz">Измена фреквенције</string>
