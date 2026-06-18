@@ -1,9 +1,12 @@
 # Car App Library ProGuard/R8 rules
 
-# CarAppService must not be obfuscated (resolved by android:exported="true" in manifest,
-# but keep rule ensures R8 doesn't remove it during aggressive shrinking)
--keep class org.meshtastic.feature.car.service.MeshtasticCarAppService { *; }
+# The service class itself is kept by android:exported="true" in the manifest, and
+# obfuscation is off project-wide. The Car App Library constructs it reflectively, so
+# pin only the no-arg <init> (its other members are framework overrides, kept as such).
+-keepclassmembers class org.meshtastic.feature.car.service.MeshtasticCarAppService {
+    <init>();
+}
 
-# Keep Koin-annotated classes for runtime DI resolution
--keep @org.koin.core.annotation.Single class * { *; }
--keep @org.koin.core.annotation.Factory class * { *; }
+# Koin @Single/@Factory keeps are provided app-wide by config/proguard/shared-rules.pro
+# (applied to the app that consumes this module). Re-add them here only if feature:car is
+# ever published/consumed standalone.
