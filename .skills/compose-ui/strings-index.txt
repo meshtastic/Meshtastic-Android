@@ -117,7 +117,6 @@ bluetooth_feature_discovery
 bluetooth_feature_discovery_description
 bluetooth_permission
 bold_heading
-bonding_failed
 bonding_failed_permissions
 bottom_nav_settings
 broadcast_interval

@@ -35,7 +35,6 @@ import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.bonding_failed
 import org.meshtastic.core.resources.bonding_failed_permissions
 import org.meshtastic.core.resources.usb_permission_denied
 import org.meshtastic.feature.connections.model.AndroidUsbDeviceData
@@ -73,29 +72,34 @@ class AndroidScannerViewModel(
         Logger.i { "Starting bonding for ${entry.device.address.anonymize}" }
         viewModelScope.launch {
             @Suppress("TooGenericExceptionCaught")
-            try {
-                bluetoothRepository.bond(entry.device)
-                Logger.i { "Bonding complete for ${entry.device.address.anonymize}, selecting device..." }
-                changeDeviceAddress(entry.fullAddress)
-            } catch (ex: SecurityException) {
-                Logger.w(ex) { "Bonding failed for ${entry.device.address.anonymize} Permissions not granted" }
-                serviceRepository.setErrorMessage(
-                    text = getString(Res.string.bonding_failed_permissions),
-                    severity = Severity.Warn,
-                )
-            } catch (ex: Exception) {
-                // Bonding is often flaky and can fail for many reasons (timeout, user cancel, etc)
-                val message = ex.message ?: ""
-                if (message.contains("Received bond state changed 11")) {
-                    // This is a known issue where bonding is still in progress, ignore as error
-                    Logger.d { "Bonding still in progress for ${entry.device.address.anonymize}" }
-                } else {
-                    Logger.w(ex) { "Bonding failed for ${entry.device.address.anonymize}: ${ex.message}" }
+            val armTransport =
+                try {
+                    bluetoothRepository.bond(entry.device)
+                    Logger.i { "Bonding complete for ${entry.device.address.anonymize}, selecting device..." }
+                    true
+                } catch (ex: SecurityException) {
+                    // No BLUETOOTH_CONNECT permission — connecting would fail the same way, so surface the
+                    // error and do not arm the transport.
+                    Logger.w(ex) { "Bonding failed for ${entry.device.address.anonymize} Permissions not granted" }
                     serviceRepository.setErrorMessage(
-                        text = getString(Res.string.bonding_failed),
+                        text = getString(Res.string.bonding_failed_permissions),
                         severity = Severity.Warn,
                     )
+                    false
+                } catch (ex: Exception) {
+                    // Bonding is flaky and can fail for many reasons: user cancel/timeout, an unreliable
+                    // ACTION_BOND_STATE_CHANGED broadcast, or an OS/GATT-initiated bond already in flight
+                    // (see Kable #111). Don't treat any of these as terminal — arm the transport anyway so
+                    // its persistent reconnect loop (which bonds on demand and retries with backoff) can
+                    // converge, instead of leaving the device inert until the user re-selects it.
+                    Logger.w(ex) {
+                        "Bonding did not complete cleanly for ${entry.device.address.anonymize}; " +
+                            "arming transport to retry"
+                    }
+                    true
                 }
+            if (armTransport) {
+                changeDeviceAddress(entry.fullAddress)
             }
         }
     }
