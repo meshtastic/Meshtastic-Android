@@ -4,7 +4,6 @@ xmlutil = "0.91.3"
 # Android
 agp = "9.2.1"
 appcompat = "1.7.1"
-accompanist = "0.37.3"
 car-app = "1.9.0-alpha01"
 appfunctions = "1.0.0-alpha09"
 
@@ -245,7 +244,6 @@ turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 # Other
 aboutlibraries-core = { module = "com.mikepenz:aboutlibraries-core", version.ref = "aboutlibraries" }
 aboutlibraries-compose-m3 = { module = "com.mikepenz:aboutlibraries-compose-m3", version.ref = "aboutlibraries" }
-accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanist" }
 coil = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
 coil-network-ktor3 = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coil" }
 coil-svg = { module = "io.coil-kt.coil3:coil-svg", version.ref = "coil" }

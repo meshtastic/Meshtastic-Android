@@ -14,11 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-@file:OptIn(ExperimentalPermissionsApi::class)
-
 package org.meshtastic.core.barcode
 
-import android.Manifest
 import androidx.camera.compose.CameraXViewfinder
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
@@ -31,11 +28,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,29 +52,42 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import co.touchlab.kermit.Logger
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asExecutor
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.camera_permission_rationale
 import org.meshtastic.core.resources.close
+import org.meshtastic.core.ui.component.PermissionRecoveryCard
 import org.meshtastic.core.ui.icon.Close
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.util.BarcodeScanner
+import org.meshtastic.core.ui.util.PermissionStatus
+import org.meshtastic.core.ui.util.rememberCameraPermissionState
 
 @Composable
 fun rememberBarcodeScanner(onResult: (String?) -> Unit): BarcodeScanner {
     var showDialog by remember { mutableStateOf(false) }
     var pendingScan by remember { mutableStateOf(false) }
-    val cameraPermissionState = rememberPermissionState(Manifest.permission.CAMERA)
+    var showPermissionRecovery by remember { mutableStateOf(false) }
+    val cameraPermission = rememberCameraPermissionState()
+    val currentStatus = rememberUpdatedState(cameraPermission.status)
 
-    LaunchedEffect(cameraPermissionState.status.isGranted) {
-        if (cameraPermissionState.status.isGranted && pendingScan) {
-            showDialog = true
-            pendingScan = false
+    LaunchedEffect(cameraPermission.status) {
+        when {
+            !pendingScan -> Unit
+            cameraPermission.isGranted -> {
+                showDialog = true
+                pendingScan = false
+            }
+            // The request completed without a grant — surface a recovery card instead of failing silently.
+            cameraPermission.status != PermissionStatus.NOT_REQUESTED -> {
+                showPermissionRecovery = true
+                pendingScan = false
+            }
         }
+        // Dismiss the recovery card once the permission is granted (e.g. user returned from settings).
+        if (cameraPermission.isGranted) showPermissionRecovery = false
     }
 
     if (showDialog) {
@@ -90,14 +103,28 @@ fun rememberBarcodeScanner(onResult: (String?) -> Unit): BarcodeScanner {
         )
     }
 
+    if (showPermissionRecovery) {
+        Dialog(onDismissRequest = { showPermissionRecovery = false }) {
+            Surface(shape = MaterialTheme.shapes.large, color = MaterialTheme.colorScheme.surface) {
+                PermissionRecoveryCard(
+                    state = cameraPermission,
+                    rationale = stringResource(Res.string.camera_permission_rationale),
+                    modifier = Modifier.padding(16.dp),
+                )
+            }
+        }
+    }
+
     return remember {
         object : BarcodeScanner {
             override fun startScan() {
-                if (cameraPermissionState.status.isGranted) {
-                    showDialog = true
-                } else {
-                    pendingScan = true
-                    cameraPermissionState.launchPermissionRequest()
+                when (currentStatus.value) {
+                    PermissionStatus.GRANTED -> showDialog = true
+                    PermissionStatus.PERMANENTLY_DENIED -> showPermissionRecovery = true
+                    else -> {
+                        pendingScan = true
+                        cameraPermission.request()
+                    }
                 }
             }
         }
