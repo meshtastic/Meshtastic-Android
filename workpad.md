@@ -237,6 +237,18 @@ AC8: [R8] New user-facing strings are resources; BT-bonding literal converted; s
 AC9: [R9] Compass behavior preserved (magnetometer/fix warnings intact); TAK auto-disable + API gating + rememberOnResumeState unchanged.
      Auto-verify: TAKConfigPermissionDeniedTest passes; manifest diff empty; review Compass parity
 
+### AC Completion Notes
+
+- AC1 ✓ DONE — `PermissionStatusTest` (4 cases incl. the adversarial `(false,true,false)→PERMANENTLY_DENIED`) passes on all targets; classifier lives once in `core/ui` commonMain.
+- AC2 ✓ DONE — `grep accompanist` over .kt/.toml/.gradle.kts returns NONE; both flavors assemble.
+- AC3 ✓ DONE — barcode renders `PermissionRecoveryCard` on denial; USB denial calls `setErrorMessage`; map button handles denial. [MANUAL-VERIFY] runtime UI in review.
+- AC4 ✓ DONE — `rememberOpenAppSettings()` uses `ACTION_APPLICATION_DETAILS_SETTINGS`; card shows settings button only for PERMANENTLY_DENIED; ON_RESUME recheck via `rememberRuntimePermissionState`. [MANUAL-VERIFY] resume.
+- AC5 ✓ DONE — Compass distinguishes GPS-disabled (`ACTION_LOCATION_SOURCE_SETTINGS`) from permission; map reuses `isGpsDisabled()`. [MANUAL-VERIFY].
+- AC6 ✓ DONE — intro hoists `rememberXxxPermissionState()` (still skippable, IntroViewModelTest green); map/barcode request in-context. [MANUAL-VERIFY] skippable.
+- AC7 ✓ DONE — `rememberLocationPermissionState` uses `requireAll=false` (coarse OK); cards are inline. [MANUAL-VERIFY].
+- AC8 ✓ DONE — new strings added + `sort-strings.py` clean; BT-bonding + USB literals converted to resources.
+- AC9 ✓ DONE — `TAKConfigPermissionDeniedTest` green; manifest untouched; Compass left intact (preserved, not regressed).
+
 ---
 
 ## Implementation Plan
@@ -245,24 +257,24 @@ AC9: [R9] Compass behavior preserved (magnetometer/fix warnings intact); TAK aut
 
 ### Task list
 
-- [ ] `core/ui/.../util/PermissionStatus.kt` (new, commonMain) — enum + `computePermissionStatus` (pure) + `PermissionUiState`
-- [ ] `core/ui/.../util/PlatformUtils.kt` (commonMain) — add expect `rememberXxxPermissionState()` + `rememberOpenAppSettings()`
-- [ ] `core/ui/.../util/PermissionRequestTracker.kt` (new, androidMain) — synchronous SharedPreferences flag
-- [ ] `core/ui/.../util/PlatformUtils.kt` (androidMain) — actuals; flag write in result callback; LocalActivity; pre-12 BT→location delegation
-- [ ] `core/ui/.../util/PlatformUtils.kt` (jvmMain) + `NoopStubs.kt` (iosMain) — GRANTED stubs
-- [ ] `core/ui/.../component/PermissionRecoveryCard.kt` (new, commonMain) — shared card
-- [ ] `core/ui/.../util/PermissionStatusTest.kt` (new, commonTest) — table test (R1 anchor)
-- [ ] `core/resources/.../strings.xml` — new strings + sort-strings.py
-- [ ] `core/barcode/.../BarcodeScannerProvider.kt` — migrate camera off Accompanist + denial card
-- [ ] `feature/intro/.../AndroidIntroPermissions.kt` + `AppIntroductionScreen.kt` — migrate off Accompanist
-- [ ] `androidApp/src/google` + `src/fdroid` `MapView.kt` — migrate off Accompanist
-- [ ] `feature/connections/.../AndroidScannerViewModel.kt` — USB + BT-bonding strings/messages
-- [ ] `feature/node/.../component/CompassBottomSheet.kt` — refactor onto shared card (preserve behavior)
-- [ ] Remove Accompanist: `KmpFeatureConventionPlugin.kt`, `libs.versions.toml`, `core/barcode/build.gradle.kts`, `androidApp/build.gradle.kts`
+- [x] `core/ui/.../util/PermissionStatus.kt` (new, commonMain) — enum + `computePermissionStatus` (pure) + `PermissionUiState`
+- [x] `core/ui/.../util/PlatformUtils.kt` (commonMain) — add expect `rememberXxxPermissionState()` + `rememberOpenAppSettings()`
+- [x] `core/ui/.../util/PermissionRequestTracker.kt` (new, androidMain) — synchronous SharedPreferences flag
+- [x] `core/ui/.../util/PlatformUtils.kt` (androidMain) — actuals; flag write in result callback; LocalActivity; pre-12 BT→location delegation
+- [x] `core/ui/.../util/PlatformUtils.kt` (jvmMain) + `NoopStubs.kt` (iosMain) — GRANTED stubs
+- [x] `core/ui/.../component/PermissionRecoveryCard.kt` (new, commonMain) — shared card
+- [x] `core/ui/.../util/PermissionStatusTest.kt` (new, commonTest) — table test (R1 anchor)
+- [x] `core/resources/.../strings.xml` — new strings + sort-strings.py
+- [x] `core/barcode/.../BarcodeScannerProvider.kt` — migrate camera off Accompanist + denial card
+- [x] `feature/intro/.../AndroidIntroPermissions.kt` + `AppIntroductionScreen.kt` — migrate off Accompanist
+- [x] `androidApp/src/google` + `src/fdroid` `MapView.kt` — migrate off Accompanist + permanent-denial → settings
+- [x] `feature/connections/.../AndroidScannerViewModel.kt` — USB + BT-bonding strings/messages
+- [~] `feature/node/.../component/CompassBottomSheet.kt` — NOT refactored (deliberate, see [DEFERRED]); R9 satisfied by preservation
+- [x] Remove Accompanist: `KmpFeatureConventionPlugin.kt`, `libs.versions.toml`, `core/barcode/build.gradle.kts`, `androidApp/build.gradle.kts`
 
 ### Pre-existing failures (do not fix — out of scope)
 
-<!-- [file:line] — description -->
+None introduced. `docs/assets/screenshots/nodes_detail_local.png` was regenerated by the baseline build (known host-render diff) and reverted, not committed.
 
 ---
 
@@ -270,12 +282,12 @@ AC9: [R9] Compass behavior preserved (magnetometer/fix warnings intact); TAK aut
 
 _All 6 must be checked before handing off to review._
 
-1. [ ] All planned files created/modified (task list fully checked)
-2. [ ] Linter clean — zero new errors (pre-existing errors logged above)
-3. [ ] Tests pass — new failures logged as pre-existing above
-4. [ ] Every AC has a completion note
-5. [ ] No open markers remain (`[NEEDS CLARIFICATION]`, `[TODO]`, `[TODO-IMPL]`, `[TBD]`)
-6. [ ] Scope discipline honored — discovered improvements in `[DEFERRED]` items only
+1. [x] All planned files created/modified (Compass intentionally preserved — see DEFERRED)
+2. [x] Linter clean — spotlessCheck + detekt PASS (zero new errors)
+3. [x] Tests pass — PermissionStatusTest, IntroViewModelTest, TAKConfigPermissionDeniedTest all green; both flavors assemble
+4. [x] Every AC has a completion note
+5. [x] No open markers remain
+6. [x] Scope discipline honored — Compass non-refactor recorded in DEFERRED with rationale
 
 ---
 
@@ -295,12 +307,18 @@ _Populated by `/craft-review`._
 
 _Accumulated across all phases._
 
-<!-- Template for deferred items:
-- [title]
-  - severity: [P0|P1|P2|P3]
-  - phase: [explore|clarify|architect|implement|review]
-  - context: [one sentence]
--->
+- Compass not refactored onto the shared PermissionRecoveryCard
+  - severity: P3
+  - phase: implement
+  - context: Compass's `WarningList` shows GPS-disabled vs permission-denied vs magnetometer/no-fix warnings simultaneously with two distinct action buttons — shapes the single-permission card can't express. Forcing it would regress R9; the card was lifted FROM this pattern, so duplication is ~20 lines and intentional. Revisit only if a multi-warning card variant is built.
+- Delete the now-unused old `rememberRequestXxx`/`isXxx` wrappers in `PlatformUtils.kt`
+  - severity: P3
+  - phase: architect
+  - context: Kept during migration to bound the diff; per the approved plan, deletion is a follow-up PR once all callers are confirmed migrated. (Note: `rememberRequestLocalNetworkPermission` + `isLocalNetworkPermissionGranted` are still used by TAK; not all old wrappers are dead yet.)
+- In-context recovery cards for permanently-denied BT/local-network in ConnectionsScreen
+  - severity: P3
+  - phase: implement
+  - context: USB + BT-bonding denials now surface messages (R3); a richer inline PermissionRecoveryCard at the scan entry points was in one architect variant but not required by R1–R9. Candidate polish.
 
 ---
 
@@ -311,7 +329,7 @@ _Accumulated across all phases._
 - explore: done — 2026-06-18 — 5 agents (arch, change-surface, history, deps, docs-research) + file verification. Resolved Accompanist contradiction: partial migration. Central gap: no `shouldShowRequestPermissionRationale`/permanent-denial handling anywhere.
 - clarify: done — 2026-06-18 — Comprehensive scope confirmed. Shared recovery helper + full Accompanist migration + hybrid intro (skippable + in-context). R1–R9 recorded.
 - architect: done — 2026-06-18 — Pragmatic+enriched approved. 3 architect agents + adversarial (P1, mitigations folded in). PlatformUtils seam + status enum + SharedPreferences flag + shared recovery card.
-- implement:
+- implement: done — 2026-06-18 — All 9 ACs met; both flavors assemble; spotless/detekt/tests green. Latest sha 2aa33c8d5. Compass intentionally preserved (DEFERRED P3). 3 commits.
 - review:
 - refine:
 - pr:
