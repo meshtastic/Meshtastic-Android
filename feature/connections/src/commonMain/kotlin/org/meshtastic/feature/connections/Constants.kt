@@ -29,5 +29,8 @@ const val TCP_DEVICE_PREFIX: String = "t"
 /** One-char prefix / sentinel marking the mock (demo-mode) device's `fullAddress`. See [DeviceListEntry.Mock]. */
 const val MOCK_DEVICE_PREFIX: String = "m"
 
+/** One-char prefix / sentinel marking the capture-replay device's `fullAddress`. See [DeviceListEntry.Replay]. */
+const val REPLAY_DEVICE_PREFIX: String = "r"
+
 /** One-char prefix marking a BLE device's `fullAddress`. See [DeviceListEntry.Ble]. */
 const val BLE_DEVICE_PREFIX: String = "x"

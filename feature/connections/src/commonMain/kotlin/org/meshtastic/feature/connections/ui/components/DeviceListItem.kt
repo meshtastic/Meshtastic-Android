@@ -108,6 +108,8 @@ fun DeviceListItem(
             is DeviceListEntry.Tcp -> MeshtasticIcons.Wifi
 
             is DeviceListEntry.Mock -> MeshtasticIcons.Add
+
+            is DeviceListEntry.Replay -> MeshtasticIcons.Add
         }
 
     val contentDescription =
@@ -116,6 +118,7 @@ fun DeviceListItem(
             is DeviceListEntry.Usb -> stringResource(Res.string.serial)
             is DeviceListEntry.Tcp -> stringResource(Res.string.network)
             is DeviceListEntry.Mock -> stringResource(Res.string.add)
+            is DeviceListEntry.Replay -> stringResource(Res.string.add)
         }
 
     val selectLabel = stringResource(Res.string.action_select_device)

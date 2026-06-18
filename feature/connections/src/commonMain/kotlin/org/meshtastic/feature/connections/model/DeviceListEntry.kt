@@ -72,6 +72,12 @@ sealed class DeviceListEntry(
         DeviceListEntry(name, "m", true, node) {
         override fun copy(node: Node?): Mock = copy(name = name, node = node)
     }
+
+    /** Debug-only virtual device that replays a bundled packet capture on-device (see `ReplayRadioTransport`). */
+    data class Replay(override val name: String, override val node: Node? = null) :
+        DeviceListEntry(name, "r", true, node) {
+        override fun copy(node: Node?): Replay = copy(name = name, node = node)
+    }
 }
 
 /** Matches names like Meshtastic_1234. */

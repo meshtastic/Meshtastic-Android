@@ -338,6 +338,11 @@ open class ScannerViewModel(
                 changeDeviceAddress(entry.fullAddress)
                 true
             }
+
+            is DeviceListEntry.Replay -> {
+                changeDeviceAddress(entry.fullAddress)
+                true
+            }
         }
     }
 

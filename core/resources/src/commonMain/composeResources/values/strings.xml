@@ -327,6 +327,7 @@
     <string name="delivery_confirmed">Delivery confirmed</string>
     <string name="delivery_confirmed_reboot_warning">Your device may disconnect and reboot while settings are applied.</string>
     <string name="demo_mode">Demo Mode</string>
+    <string name="demo_mode_replay">Demo Mode (Replay)</string>
     <string name="desc_node_filter_clear">clear node filter</string>
     <string name="description">Description</string>
     <string name="desktop_notification_title">Meshtastic</string>
