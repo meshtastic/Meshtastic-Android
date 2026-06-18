@@ -38,8 +38,12 @@ actual fun TakPermissionHandler(isTakServerEnabled: Boolean, onPermissionResult:
         if (!isTakServerEnabled) return@LaunchedEffect
         when (permission.status) {
             PermissionStatus.GRANTED -> onPermissionResult(true)
+
             PermissionStatus.NOT_REQUESTED -> permission.request()
-            PermissionStatus.DENIED_CAN_RETRY, PermissionStatus.PERMANENTLY_DENIED -> onPermissionResult(false)
+
+            PermissionStatus.DENIED_CAN_RETRY,
+            PermissionStatus.PERMANENTLY_DENIED,
+            -> onPermissionResult(false)
         }
     }
 }

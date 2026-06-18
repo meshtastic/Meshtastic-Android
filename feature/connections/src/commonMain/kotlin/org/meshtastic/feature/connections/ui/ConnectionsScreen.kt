@@ -294,9 +294,11 @@ fun ConnectionsScreen(
                                 onToggleBleScan = {
                                     when {
                                         isBleScanning || bluetoothPermission.isGranted -> scanModel.toggleBleScan()
+
                                         // Permanently denied: the system won't prompt again, so send to settings.
                                         bluetoothPermission.status == PermissionStatus.PERMANENTLY_DENIED ->
                                             bluetoothPermission.openAppSettings()
+
                                         // Request in-context; once granted the user can start scanning.
                                         else -> bluetoothPermission.request()
                                     }
@@ -305,8 +307,10 @@ fun ConnectionsScreen(
                                     when {
                                         isNetworkScanning || localNetworkPermission.isGranted ->
                                             scanModel.toggleNetworkScan()
+
                                         localNetworkPermission.status == PermissionStatus.PERMANENTLY_DENIED ->
                                             localNetworkPermission.openAppSettings()
+
                                         else -> {
                                             // Prefer requesting the runtime grant over letting the platform fall back
                                             // to the system NSD picker. Persist the user's intent so that if they

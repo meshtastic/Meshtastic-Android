@@ -28,6 +28,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -161,9 +162,11 @@ private fun NodeDetailOverlays(
     val openLocationSettings = org.meshtastic.core.ui.util.rememberOpenLocationSettings()
     // Request a fresh position once the user grants from the compass warning, mirroring the prior onGranted callback.
     var positionPendingGrant by remember { mutableStateOf(false) }
+    val currentNode by rememberUpdatedState(node)
+    val currentOnRequestPosition by rememberUpdatedState(onRequestPosition)
     LaunchedEffect(locationPermission.status) {
         if (locationPermission.isGranted && positionPendingGrant) {
-            node?.let { onRequestPosition(it) }
+            currentNode?.let { currentOnRequestPosition(it) }
             positionPendingGrant = false
         }
     }
