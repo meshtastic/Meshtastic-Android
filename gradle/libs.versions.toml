@@ -29,7 +29,7 @@ kover = "0.9.8"
 mokkery = "3.4.1"
 junit5 = "6.1.0"
 junit-platform = "6.1.0" # aligned with junit5 — JUnit Platform uses 1.x scheme
-kotest = "6.2.0"
+kotest = "6.2.1"
 testRetry = "1.6.5"
 turbine = "1.2.1"
 
