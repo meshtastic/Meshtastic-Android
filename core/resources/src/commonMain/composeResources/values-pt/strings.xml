@@ -69,6 +69,7 @@
     <string name="bottom_nav_settings">Definições</string>
     <string name="broadcast_interval">Intervalo de difusão</string>
     <string name="calculating">Calculando…</string>
+    <string name="camera_permission">Permissão da câmera</string>
     <string name="cancel">Cancelar</string>
     <string name="canned_message">Mensagem Pronta</string>
     <string name="canned_message_config">Configuração de Mensagem Pronta</string>
@@ -365,6 +366,7 @@
     <!-- ONE -->
     <string name="one_day">24 Horas</string>
     <string name="one_week">1sem</string>
+    <!-- OPEN -->
     <!-- OUTPUT -->
     <string name="output_buzzer_gpio">Buzzer de saída (GPIO)</string>
     <string name="output_duration_milliseconds">Duração da Saída (milissegundos)</string>

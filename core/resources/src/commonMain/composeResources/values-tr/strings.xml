@@ -71,6 +71,7 @@
     <string name="bluetooth_permission">Bluetooth</string>
     <string name="bottom_nav_settings">Ayarlar</string>
     <string name="calculating">Hesaplanıyor…</string>
+    <string name="camera_permission">Kamera izni</string>
     <string name="cancel">İptal</string>
     <string name="canned_message">Önceden Hazırlanmış Mesaj</string>
     <string name="canned_message_config">Önceden Hazırlanmış Mesaj Yapılandırması</string>
@@ -387,6 +388,7 @@
     <string name="one_day">24 Saat</string>
     <string name="one_week">1H</string>
     <string name="only_favorites">Sadece Favoriler</string>
+    <!-- OPEN -->
     <!-- OUTPUT -->
     <string name="output_buzzer_gpio">Çıktı zırnı (GPIO)</string>
     <string name="output_duration_milliseconds">Çıktı süresi (milisaniye)</string>

@@ -31,6 +31,7 @@
     <string name="are_you_sure_change_default">Ert þú viss um að þú viljir skipta yfir á sjálfgefna rás?</string>
     <!-- BLUETOOTH -->
     <string name="calculating">Reiknar…</string>
+    <string name="camera_permission">Aðgangur að myndavél</string>
     <string name="cancel">Hætta við</string>
     <string name="cant_change_no_radio">Gat ekki skipt um rás vegna þess að radíó er ekki enn tengt. Vinsamlegast reyndu aftur.</string>
     <!-- CHANNEL -->
@@ -127,6 +128,7 @@
     <!-- NOTIFICATIONS -->
     <string name="okay">Í lagi</string>
     <!-- ONE -->
+    <!-- OPEN -->
     <!-- OUTPUT -->
     <!-- PAX -->
     <!-- POSITION -->

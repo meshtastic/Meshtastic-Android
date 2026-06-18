@@ -53,6 +53,7 @@
     <string name="bottom_nav_settings">Nastavenia</string>
     <string name="broadcast_interval">Broadcastový Interval</string>
     <string name="calculating">Prepočítavanie…</string>
+    <string name="camera_permission">Práva pre prístup k fotoaparátu</string>
     <string name="cancel">Odmietnuť</string>
     <string name="canned_message">Konzervovaná správa</string>
     <string name="cant_change_no_radio">Nie je možné zmeniť kanál, pretože vysielač ešte nie je pripojený. Skúste to neskôr.</string>
@@ -319,6 +320,7 @@
     <!-- ONE -->
     <string name="one_day">24 Hodín</string>
     <string name="one_week">1 týždeň</string>
+    <!-- OPEN -->
     <!-- OUTPUT -->
     <string name="pairing_mode">Režim párovania</string>
     <string name="password">Heslo</string>

@@ -73,6 +73,7 @@
     <string name="button_gpio">Przycisk GPIO</string>
     <string name="buzzer_gpio">Buzzer GPIO</string>
     <string name="calculating">Obliczanie…</string>
+    <string name="camera_permission">Pozwolenie na użycie kamery</string>
     <string name="cancel">Anuluj</string>
     <string name="canned_message_config">Konfiguracja gotowych wiadomości</string>
     <string name="cant_change_no_radio">Nie można zmienić kanału, ponieważ urządzenie nie jest jeszcze podłączone. Proszę, spróbuj ponownie.</string>
@@ -550,6 +551,7 @@
     <string name="one_hour">1 godzina</string>
     <string name="one_week">1W</string>
     <string name="only_favorites">Tylko ulubione</string>
+    <!-- OPEN -->
     <string name="open_compass">Otwórz kompas</string>
     <string name="open_settings">Otwórz ustawienia</string>
     <string name="options">Opcje</string>

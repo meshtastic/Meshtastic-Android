@@ -116,6 +116,7 @@
     <string name="button_gpio">GPIO du bouton</string>
     <string name="buzzer_gpio">GPIO du buzzer</string>
     <string name="calculating">Calcul en cours…</string>
+    <string name="camera_permission">Autorisation de la caméra</string>
     <string name="cancel">Annuler</string>
     <string name="cancel_reply">Annuler la réponse</string>
     <string name="canned_message">Message prédéfini</string>
@@ -850,6 +851,7 @@
     <string name="one_week">1S</string>
     <string name="one_wire_temperature">Températeur 1-Wire</string>
     <string name="only_favorites">Juste les favoris</string>
+    <!-- OPEN -->
     <string name="open_compass">Boussole</string>
     <string name="open_settings">Ouvrir les paramètres</string>
     <string name="open_source_description">Meshtastic est construit avec les bibliothèques open source suivantes. Appuyez sur n'importe quelle bibliothèque pour voir sa licence.</string>

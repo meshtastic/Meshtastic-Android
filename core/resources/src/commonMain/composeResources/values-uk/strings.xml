@@ -100,6 +100,7 @@
     <string name="button_gpio">GPIO кнопки</string>
     <string name="buzzer_gpio">GPIO гудка</string>
     <string name="calculating">Обчислюю…</string>
+    <string name="camera_permission">Дозвіл доступу до камери</string>
     <string name="cancel">Скасувати</string>
     <string name="cancel_reply">Скасувати відповідь</string>
     <string name="canned_message">Шаблонне повідомлення</string>
@@ -757,6 +758,7 @@
     <string name="one_week">1Т</string>
     <string name="one_wire_temperature">Датчик температури з 1 проводом</string>
     <string name="only_favorites">Лише обрані</string>
+    <!-- OPEN -->
     <string name="open_compass">Відкрити компас</string>
     <string name="open_settings">Відкрити налаштування</string>
     <string name="open_source_description">Meshtastic побудований на бібліотеках з відкритим вихідним кодом. Натисніть на будь-яку бібліотеку, щоб побачити її ліцензію.</string>

@@ -95,6 +95,7 @@
     <string name="button_gpio">GPIO del Pulsante</string>
     <string name="buzzer_gpio">GPIO del Buzzer</string>
     <string name="calculating">Calcolo…</string>
+    <string name="camera_permission">Autorizzazione fotocamera</string>
     <string name="cancel">Annulla</string>
     <string name="cancel_reply">Annulla risposta</string>
     <string name="canned_message">Messaggi Preconfezionati</string>
@@ -676,6 +677,7 @@
     <string name="one_month">1M</string>
     <string name="one_week">1S</string>
     <string name="only_favorites">Solo preferiti</string>
+    <!-- OPEN -->
     <string name="open_settings">Apri impostazioni</string>
     <string name="open_source_description">Meshtastic è costruito con le seguenti librerie open source. Tocca una libreria per visualizzare la sua licenza.</string>
     <string name="open_source_libraries">Librerie Open Source</string>

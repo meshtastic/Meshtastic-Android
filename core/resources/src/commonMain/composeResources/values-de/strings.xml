@@ -123,6 +123,7 @@
     <string name="button_gpio">GPIO Taste</string>
     <string name="buzzer_gpio">GPIO Summer</string>
     <string name="calculating">Wird berechnet...</string>
+    <string name="camera_permission">Kamera-Berechtigungen</string>
     <string name="cancel">Abbrechen</string>
     <string name="cancel_reply">Antwort abbrechen</string>
     <string name="canned_message">Vordefinierte Nachricht</string>
@@ -930,6 +931,7 @@
     <string name="one_week">1 Woche</string>
     <string name="one_wire_temperature">1-Draht Temperatur</string>
     <string name="only_favorites">Nur Favoriten</string>
+    <!-- OPEN -->
     <string name="open_compass">Kompass öffnen</string>
     <string name="open_settings">Einstellungen öffnen</string>
     <string name="open_source_description">Meshtastic wurde mit den folgenden Quellen offenen Bibliotheken gebaut. Tippen Sie auf eine beliebige Bibliothek, um ihre Lizenz anzuzeigen.</string>

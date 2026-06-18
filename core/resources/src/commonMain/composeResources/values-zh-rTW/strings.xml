@@ -123,6 +123,7 @@
     <string name="button_gpio">按鈕腳位</string>
     <string name="buzzer_gpio">蜂鳴器腳位</string>
     <string name="calculating">正在計算……</string>
+    <string name="camera_permission">相機權限</string>
     <string name="cancel">取消</string>
     <string name="cancel_reply">取消回覆</string>
     <string name="canned_message">罐頭訊息</string>
@@ -926,6 +927,7 @@
     <string name="one_week">一週</string>
     <string name="one_wire_temperature">1-Wire 溫度</string>
     <string name="only_favorites">僅顯示收藏</string>
+    <!-- OPEN -->
     <string name="open_compass">開啟指南針</string>
     <string name="open_settings">開啟設定</string>
     <string name="open_source_description">Meshtastic 採用以下開源函式庫建構而成。點擊任一函式庫以查看其授權條款。</string>

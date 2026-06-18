@@ -1,1 +1,1 @@
-Die offizielle Anwendung für Meshtastic, ein unabhängiges, vernetztes Open Source Funknetzwerk.
+Die offizielle App für Meshtastic, ein unabhängiges Open-Source-Mesh-Funknetz.

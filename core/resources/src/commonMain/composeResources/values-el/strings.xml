@@ -39,6 +39,7 @@
     <string name="bluetooth_permission">Bluetooth</string>
     <string name="bottom_nav_settings">Ρυθμίσεις</string>
     <string name="calculating">Υπολογισμός…</string>
+    <string name="camera_permission">Άδεια κάμερας</string>
     <string name="cancel">Ακύρωση</string>
     <!-- CHANNEL -->
     <string name="channel_1">Κανάλι 1</string>
@@ -175,6 +176,7 @@
     <string name="okay">Εντάξει</string>
     <!-- ONE -->
     <string name="one_day">24 Ώρες</string>
+    <!-- OPEN -->
     <!-- OUTPUT -->
     <string name="password">Κωδικός πρόσβασης</string>
     <!-- PAX -->

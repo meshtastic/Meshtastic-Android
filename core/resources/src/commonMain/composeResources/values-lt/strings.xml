@@ -36,6 +36,7 @@
     <string name="battery">Baterija</string>
     <!-- BLUETOOTH -->
     <string name="calculating">Skaičiuojama…</string>
+    <string name="camera_permission">Fotoaparato leidimai</string>
     <string name="cancel">Atšaukti</string>
     <string name="cant_change_no_radio">Nepavyko pakeisti kanalo, nes radijas dar nėra prisijungęs. Bandykite dar kartą.</string>
     <string name="cant_shutdown">Išjungimas nepalaikomas šiame įtaise</string>
@@ -176,6 +177,7 @@
     <!-- ONE -->
     <string name="one_day">24 Valandos</string>
     <string name="one_week">1 sav</string>
+    <!-- OPEN -->
     <string name="open_settings">Atidaryti nustatymus</string>
     <!-- OUTPUT -->
     <!-- PAX -->

@@ -104,6 +104,7 @@
     <string name="button_gpio">Tlačítko GPIO</string>
     <string name="buzzer_gpio">Bzučák GPIO</string>
     <string name="calculating">Vypočítávám…</string>
+    <string name="camera_permission">Oprávnění přístupu k fotoaparátu</string>
     <string name="cancel">Zrušit</string>
     <string name="cancel_reply">Zrušit odpověď</string>
     <string name="canned_message">Přednastavené zprávy</string>
@@ -737,6 +738,7 @@
     <string name="one_month">1M</string>
     <string name="one_week">1T</string>
     <string name="only_favorites">Pouze oblíbené</string>
+    <!-- OPEN -->
     <string name="open_compass">Otevřít kompas</string>
     <string name="open_settings">Otevřít nastavení</string>
     <string name="open_source_description">Meshtastic používá následující open-source knihovny. Klepnutím zobrazíte jejich licence.</string>

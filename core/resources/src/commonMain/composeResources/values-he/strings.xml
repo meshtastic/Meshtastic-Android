@@ -32,6 +32,7 @@
     <!-- BLUETOOTH -->
     <string name="bottom_nav_settings">הגדרות</string>
     <string name="calculating">מחשב…</string>
+    <string name="camera_permission">הרשאות מצלמה</string>
     <string name="cancel">בטל</string>
     <string name="cant_change_no_radio">לא ניתן לשנות ערוץ כי אין מכשיר מחובר. בבקשה נסה שנית.</string>
     <string name="cant_shutdown">כיבוי אינו נתמך במכשיר זה</string>
@@ -146,6 +147,7 @@
     <!-- NOTIFICATIONS -->
     <string name="okay">אישור</string>
     <!-- ONE -->
+    <!-- OPEN -->
     <!-- OUTPUT -->
     <!-- PAX -->
     <!-- POSITION -->

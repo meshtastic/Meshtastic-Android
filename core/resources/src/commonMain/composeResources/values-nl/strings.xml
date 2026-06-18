@@ -54,6 +54,7 @@
     <string name="bluetooth_permission">Bluetooth</string>
     <string name="bottom_nav_settings">Instellingen</string>
     <string name="calculating">Berekenen…</string>
+    <string name="camera_permission">Camera toestemming</string>
     <string name="cancel">Annuleer</string>
     <string name="cant_change_no_radio">Kon kanaal niet wijzigen, omdat de radio nog niet is aangesloten. Probeer het opnieuw.</string>
     <string name="cant_shutdown">Uitschakelen niet ondersteund op dit apparaat</string>
@@ -294,6 +295,7 @@
     <!-- ONE -->
     <string name="one_day">24 Uur</string>
     <string name="one_week">1W</string>
+    <!-- OPEN -->
     <!-- OUTPUT -->
     <string name="output_duration_milliseconds">Output duur (milliseconden)</string>
     <string name="output_vibra_gpio">Output vibra (GPIO)</string>

@@ -107,6 +107,7 @@
     <string name="calculating">Изчисляване…</string>
     <string name="call_sign">Опознавателен знак</string>
     <string name="call_sign_summary">Вашият радиолюбителски опознавателен знак, до 8 знака</string>
+    <string name="camera_permission">Разрешение за камерата</string>
     <string name="cancel">Отказ</string>
     <string name="cant_change_no_radio">Каналът не може да бъде сменен, тъй като радиото все още не е свързано. Моля, опитайте отново.</string>
     <string name="cant_shutdown">Изключването не се поддържа на това устройство</string>
@@ -751,6 +752,7 @@
     <string name="one_month">1М</string>
     <string name="one_week">1С</string>
     <string name="only_favorites">Само любими</string>
+    <!-- OPEN -->
     <string name="open_compass">Отваряне на компас</string>
     <string name="open_settings">Отваряне на настройките</string>
     <string name="open_source_description">Meshtastic е изграден със следните библиотеки с отворен код. Докоснете която и да е библиотека, за да видите нейния лиценз.</string>

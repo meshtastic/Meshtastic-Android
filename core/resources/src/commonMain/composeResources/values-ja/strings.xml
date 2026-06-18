@@ -103,6 +103,7 @@
     <string name="bottom_nav_settings">設定</string>
     <string name="calculating">計算中…</string>
     <string name="call_sign">コールサイン</string>
+    <string name="camera_permission">カメラの権限</string>
     <string name="cancel">キャンセル</string>
     <string name="canned_message">Cannedメッセージ</string>
     <string name="canned_message_config">Cannedメッセージ設定</string>
@@ -484,6 +485,7 @@
     <string name="one_day">24時間</string>
     <string name="one_hour">1時間</string>
     <string name="one_week">1週間</string>
+    <!-- OPEN -->
     <!-- OUTPUT -->
     <string name="output_buzzer_gpio">ブザー出力(GPIO)</string>
     <string name="output_duration_milliseconds">出力時間 (ミリ秒)</string>

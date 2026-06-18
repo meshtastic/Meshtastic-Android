@@ -90,6 +90,7 @@
     <string name="button_gpio">Gomb GPIO</string>
     <string name="buzzer_gpio">Csipogó (buzzer) GPIO</string>
     <string name="calculating">Számolás…</string>
+    <string name="camera_permission">Kamera hozzáférés engedély</string>
     <string name="cancel">Megszakítani</string>
     <string name="cancel_reply">Válasz törlése</string>
     <string name="canned_message">Előre beállított üzenet</string>
@@ -588,6 +589,7 @@
     <string name="one_hour">1 óra</string>
     <string name="one_week">1 hét</string>
     <string name="only_favorites">Csak kedvencek</string>
+    <!-- OPEN -->
     <string name="open_settings">Beállítások megnyitása</string>
     <string name="options">Beállítások</string>
     <string name="orient_north">Északra tájolás</string>
