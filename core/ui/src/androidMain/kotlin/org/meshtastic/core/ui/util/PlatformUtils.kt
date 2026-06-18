@@ -18,14 +18,20 @@
 
 package org.meshtastic.core.ui.util
 
+import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.content.ActivityNotFoundException
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
+import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.Uri
+import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -34,6 +40,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.app.ActivityCompat
@@ -252,27 +259,63 @@ actual fun rememberOpenWifiSettings(): () -> Unit {
 @Composable
 actual fun isBluetoothDisabled(): Boolean {
     val context = LocalContext.current
-    return rememberOnResumeState {
-        // adapter == null means the device has no Bluetooth at all — not "disabled", so don't nag.
-        val adapter = (context.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager)?.adapter
-        adapter != null && !adapter.isEnabled
-    }
+    return rememberObservedFlag(
+        read = {
+            // adapter == null means the device has no Bluetooth at all — not "disabled", so don't nag.
+            val adapter = (context.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager)?.adapter
+            adapter != null && !adapter.isEnabled
+        },
+        subscribe = { onChange ->
+            val receiver =
+                object : BroadcastReceiver() {
+                    override fun onReceive(receiverContext: Context?, intent: Intent?) = onChange()
+                }
+            // ACTION_STATE_CHANGED is a protected system broadcast; NOT_EXPORTED keeps the receiver app-private.
+            // Registered without a Handler, so onReceive is delivered on the main thread.
+            ContextCompat.registerReceiver(
+                context,
+                receiver,
+                IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED),
+                ContextCompat.RECEIVER_NOT_EXPORTED,
+            )
+            val unregister = { context.unregisterReceiver(receiver) }
+            unregister
+        },
+    )
 }
 
 @Composable
 actual fun isWifiUnavailable(): Boolean {
     val context = LocalContext.current
-    return rememberOnResumeState {
-        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
-        val capabilities = cm?.activeNetwork?.let { cm.getNetworkCapabilities(it) }
-        val onLocalNetwork =
-            capabilities != null &&
-                (
-                    capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
-                        capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
-                    )
-        !onLocalNetwork
-    }
+    return rememberObservedFlag(
+        read = {
+            val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+            val capabilities = cm?.activeNetwork?.let { cm.getNetworkCapabilities(it) }
+            val onLocalNetwork =
+                capabilities != null &&
+                    (
+                        capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
+                        )
+            !onLocalNetwork
+        },
+        subscribe = { onChange ->
+            val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            val callback =
+                object : ConnectivityManager.NetworkCallback() {
+                    override fun onAvailable(network: Network) = onChange()
+
+                    override fun onLost(network: Network) = onChange()
+
+                    override fun onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities) =
+                        onChange()
+                }
+            // Main-thread Handler so the state write lands on the main thread (the API-26+ overload; minSdk is 26).
+            cm.registerDefaultNetworkCallback(callback, Handler(Looper.getMainLooper()))
+            val unregister = { cm.unregisterNetworkCallback(callback) }
+            unregister
+        },
+    )
 }
 
 @Composable
@@ -404,6 +447,26 @@ private fun rememberRuntimePermissionState(permissions: Array<String>, requireAl
 
     val request = remember(launcher) { { launcher.launch(permissions) } }
     return PermissionUiState(status = statusState.value, request = request, openAppSettings = openAppSettings)
+}
+
+/**
+ * Remembers a boolean derived from [read], kept live by an observer registered via [subscribe] for the duration of the
+ * composition. [subscribe] receives an `onChange` callback to invoke whenever the underlying state may have changed and
+ * must return a teardown function. The value is re-seeded via [read] at registration, so it is correct even before the
+ * first event arrives. Used for adapter/connectivity state that changes outside the activity lifecycle (e.g. toggling
+ * Bluetooth or Wi-Fi from the quick-settings shade).
+ */
+@Composable
+private fun rememberObservedFlag(read: () -> Boolean, subscribe: (onChange: () -> Unit) -> () -> Unit): Boolean {
+    val currentRead = rememberUpdatedState(read)
+    val currentSubscribe = rememberUpdatedState(subscribe)
+    val state = remember { mutableStateOf(read()) }
+    DisposableEffect(Unit) {
+        state.value = currentRead.value()
+        val unsubscribe = currentSubscribe.value { state.value = currentRead.value() }
+        onDispose { unsubscribe() }
+    }
+    return state.value
 }
 
 /**
