@@ -50,13 +50,13 @@ See [MQTT](mqtt) for a detailed usage guide including encryption, privacy, and b
 
 Enables serial port communication for external device integrations (GPS modules, sensors, or custom hardware). When enabled, the node's serial port can send and receive protobuf or text data, allowing external microcontrollers or computers to interact with the mesh.
 
-| Sätted     | Kirjeldus                       |
-| ---------- | ------------------------------- |
-| Lubatud    | Activate serial communication   |
-| Echo       | Echo received serial data back  |
-| Mode       | Text, Protobuf, or NMEA output  |
-| RX/TX Pins | GPIO pins for serial connection |
-| Baud Rate  | Serial communication speed      |
+| Sätted          | Kirjeldus                       |
+| --------------- | ------------------------------- |
+| Lubatud         | Activate serial communication   |
+| Echo            | Echo received serial data back  |
+| Mode            | Text, Protobuf, or NMEA output  |
+| RX/TX kontaktid | GPIO pins for serial connection |
+| Baud Rate       | Serial communication speed      |
 
 ### External Notification Module
 
@@ -81,7 +81,7 @@ Buffers messages for nodes that were temporarily offline, then replays them when
 | Sätted                                     | Kirjeldus                  |
 | ------------------------------------------ | -------------------------- |
 | Lubatud                                    | Activate store and forward |
-| Heartbeat (s)           | Announcement interval      |
+| Südamelöök(id)          | Announcement interval      |
 | Records                                    | Maximum stored messages    |
 | History Return (max)    | Max messages to replay     |
 | History Return (window) | Time window for replay     |
@@ -96,7 +96,7 @@ Automated range testing tool for evaluating link quality between nodes. When ena
 | -------------------------------------- | --------------------------------- |
 | Lubatud                                | Activate range testing            |
 | Sender Interval (s) | Time between test transmissions   |
-| Save CSV                               | Log received test data to SD card |
+| Salvesta CSV                           | Log received test data to SD card |
 
 ### Telemetry Module
 
@@ -117,7 +117,7 @@ Pre-configured messages accessible from the device's physical buttons (for radio
 
 | Sätted             | Kirjeldus                                                   |
 | ------------------ | ----------------------------------------------------------- |
-| ~~Enabled~~        | ⚠️ **Deprecated** — current firmware may ignore this toggle |
+| ~~Lubatud~~        | ⚠️ **Deprecated** — current firmware may ignore this toggle |
 | Sõnumid            | Newline-separated list of messages                          |
 | Send Bell          | Play bell sound on send                                     |
 | Rotary Encoder     | Enable rotary encoder input                                 |

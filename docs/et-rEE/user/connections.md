@@ -5,7 +5,7 @@ nav_order: 2
 last_updated: 2026-05-20
 description: Connect your phone or desktop to a Meshtastic radio via Bluetooth, USB, or TCP/IP.
 aliases:
-  - bluetooth
+  - sinihammas
   - usb
   - tcp
   - pairing
@@ -15,7 +15,7 @@ aliases:
 
 Meshtastic supports multiple transport methods to communicate between your phone/desktop and a radio node.
 
-## Bluetooth (BLE)
+## Sinihammas (BLE)
 
 Bluetooth Low Energy is the default and most common connection method on Android.
 

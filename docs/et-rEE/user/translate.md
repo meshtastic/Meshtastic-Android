@@ -4,7 +4,7 @@ parent: User Guide
 nav_order: 17
 last_updated: 2026-05-13
 aliases:
-  - translate
+  - tõlgi
   - crowdin
   - localization
 ---

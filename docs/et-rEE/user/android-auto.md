@@ -6,7 +6,7 @@ last_updated: 2026-06-11
 description: Use Meshtastic hands-free on an Android Auto head unit — read messages aloud, reply by voice, and check nodes and mesh status while driving.
 aliases:
   - android-auto
-  - car
+  - auto
   - head-unit
   - auto
 ---

@@ -5,17 +5,17 @@ nav_order: 9
 last_updated: 2026-05-13
 description: Sensor data on the mesh — supported environment, air quality, and power sensors, plus configuration and viewing guides.
 aliases:
-  - sensors
+  - sensorid
   - environment
-  - weather
+  - ilm
   - power-metrics
 ---
 
-# Telemetry & Sensors
+# Telemetria & sensorid
 
 Meshtastic nodes can collect and share sensor data across the mesh network.
 
-## Overview
+## Ülevaade
 
 Telemetry allows nodes equipped with sensors to broadcast environmental, power, and device health information. This data is visible on the node detail screen and can be logged over time.
 
@@ -23,13 +23,13 @@ Telemetry allows nodes equipped with sensors to broadcast environmental, power, 
 
 All Meshtastic nodes report basic device telemetry:
 
-| Metric             | Kirjeldus                      | Tüüpiline ulatus                                                   |
-| ------------------ | ------------------------------ | ------------------------------------------------------------------ |
-| Battery Level      | Charge percentage              | 0–100%                                                             |
-| Vool               | Battery voltage                | 3.0–4.2V (LiPo) |
-| Kanali kasutus     | % of airtime used locally      | 0–100%                                                             |
-| Air Utilization TX | % of airtime used by this node | 0–100%                                                             |
-| Töötamise aeg      | Seconds since last boot        | Varies                                                             |
+| Meetriline         | Kirjeldus                      | Tüüpiline ulatus                   |
+| ------------------ | ------------------------------ | ---------------------------------- |
+| Battery Level      | Charge percentage              | 0–100%                             |
+| Vool               | Battery voltage                | 3,0–4,2V (LiPo) |
+| Kanali kasutus     | % of airtime used locally      | 0–100%                             |
+| Air Utilization TX | % of airtime used by this node | 0–100%                             |
+| Töötamise aeg      | Seconds since last boot        | Varies                             |
 
 ## Environment Sensors
 
@@ -47,25 +47,25 @@ Supported environmental sensors:
 
 ### Air Quality
 
-| Andur    | Metric                                             | Sõnumid                    |
-| -------- | -------------------------------------------------- | -------------------------- |
-| BME680   | Gas Resistance / IAQ                               | Volatile organic compounds |
-| PMSA003I | PM1.0, PM2.5, PM10 | Particulate matter         |
-| SEN55    | PM, NOx, VOC, Temp, Humidity                       | Multi-sensor               |
+| Andur    | Meetriline                   | Sõnumid                    |
+| -------- | ---------------------------- | -------------------------- |
+| BME680   | Gas Resistance / IAQ         | Volatile organic compounds |
+| PMSA003I | PM1,0, PM2,5, PM10           | Particulate matter         |
+| SEN55    | PM, NOx, VOC, Temp, Humidity | Multi-sensor               |
 
-### Light & UV
+### Valgus & UV
 
-| Andur    | Metric                                 |
-| -------- | -------------------------------------- |
-| OPT3001  | Ambient light (lux) |
-| VEML7700 | Ambient light (lux) |
-| LTR390   | UV index                               |
+| Andur    | Meetriline                              |
+| -------- | --------------------------------------- |
+| OPT3001  | Ambient valgus (lux) |
+| VEML7700 | Ambient valgus (lux) |
+| LTR390   | UV indeks                               |
 
 ## Võimsusnäitajad
 
 Nodes with INA-series power sensors can report:
 
-| Metric      | Kirjeldus                                 |
+| Meetriline  | Kirjeldus                                 |
 | ----------- | ----------------------------------------- |
 | Bus Voltage | Supply rail voltage                       |
 | Pinge       | Power consumption (mA) |
@@ -96,7 +96,7 @@ Useful for monitoring solar charging or battery health on remote nodes.
 
 Nodes with particulate matter or CO₂ sensors report air quality data:
 
-| Metric                | Unit  | Kirjeldus                    |
+| Meetriline            | Unit  | Kirjeldus                    |
 | --------------------- | ----- | ---------------------------- |
 | PM1.0 | µg/m³ | Ultrafine particulate matter |
 | PM2.5 | µg/m³ | Fine particulate matter      |
@@ -105,10 +105,10 @@ Nodes with particulate matter or CO₂ sensors report air quality data:
 
 The CO₂ reading is color-coded by severity:
 
-- 🟢 **Good** (< 1000 ppm) — normal indoor levels
-- 🟡 **Moderate** (1000–2000 ppm) — elevated, consider ventilation
-- 🟠 **Poor** (2000–5000 ppm) — drowsiness, poor concentration
-- 🔴 **Hazardous** (≥ 5000 ppm) — immediate health concern
+- 🟢 **Hea** (< 1000 ppm) — normaalne sisetase
+- 🟡 **Mõõdukas** (1000–2000 ppm) – kõrgenenud, kaaluge ventilatsiooni
+- 🟠 **Kehv** (2000–5000 ppm) — unisus, halb keskendumisvõime
+- 🔴 **Ohtlik** (≥ 5000 ppm) — otsene terviseprobleem
 
 Air quality data can be viewed as info cards on the node detail screen, charted over time, and exported to CSV.
 

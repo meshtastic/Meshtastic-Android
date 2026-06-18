@@ -38,7 +38,7 @@ After modifying settings, tap **Save** to write the configuration to your radio.
 | Roll                                       | Node behavior (Client, Router, etc.) | Klient    |
 | Kordusülekannete režiim                    | How the node retransmits messages                                       | Kõik      |
 | Node Info Broadcast (s) | Interval for broadcasting node info                                     | 10800     |
-| Double-tap Button                          | Action for double-tap button press                                      | Disabled  |
+| Double-tap Button                          | Action for double-tap button press                                      | Keelatud  |
 
 ### LoRa sätted
 
@@ -47,7 +47,7 @@ After modifying settings, tap **Save** to write the configuration to your radio.
 | Regioon           | Regulatory region for frequency bands                                   | Unset (must configure) |
 | Modemi vaikesäte  | Speed/range tradeoff                                                    | LongFast                                  |
 | Hop Limit         | Maximum retransmit hops                                                 | 3                                         |
-| TX Power          | Transmission power (dBm); 0 = max allowed for region | 0 (region max)         |
+| TX võimsus        | Transmission power (dBm); 0 = max allowed for region | 0 (region max)         |
 | Frequency Offset  | Fine-tune frequency (MHz)                            | 0                                         |
 | Channel Bandwidth | Bandwidth setting                                                       | Default for preset                        |
 
@@ -55,22 +55,22 @@ After modifying settings, tap **Save** to write the configuration to your radio.
 
 ### Modem Presets
 
-| Preset             | Range                   | Kiirus                    | SNR Limit                | Best For                                                                                                 |
-| ------------------ | ----------------------- | ------------------------- | ------------------------ | -------------------------------------------------------------------------------------------------------- |
-| Short Turbo        | ~1 km   | 21.9 kbps | −5 dB                    | Dense urban with line-of-sight; data-heavy applications                                                  |
-| Short Fast         | ~3 km   | 10.9 kbps | −7.5 dB  | Urban neighborhoods; buildings within a few blocks                                                       |
-| Short Slow         | ~5 km   | 5.5 kbps  | −10 dB                   | Suburban short-range; moderate building density                                                          |
-| Medium Fast        | ~5 km   | 5.5 kbps  | −10 dB                   | Suburban areas; moderate building density                                                                |
-| Medium Slow        | ~8 km   | 1.1 kbps  | −12.5 dB | Suburban/rural; moderate range with slower speed                                                         |
-| Long Turbo         | ~10 km  | 4.4 kbps  | −10 dB                   | Similar range to Long Fast but with 500 kHz bandwidth; faster throughput                                 |
-| Long Fast          | ~10 km  | 1.1 kbps  | −12.5 dB | **General use (default)** — balanced range and speed                                  |
-| Long Moderate      | ~20 km  | 0.34 kbps | −15 dB                   | Rural with some terrain; occasional use                                                                  |
-| Lite Fast          | ~5 km   | 5.5 kbps  | −10 dB                   | EU 866 MHz SRD band (125 kHz BW); comparable to Medium Fast                           |
-| Lite Slow          | ~10 km  | 1.1 kbps  | −12.5 dB | EU 866 MHz SRD band (125 kHz BW); comparable to Long Fast                             |
-| Narrow Fast        | ~5 km   | 2.7 kbps  | −10 dB                   | EU 868 MHz band (62.5 kHz BW); avoids interference with other devices |
-| Narrow Slow        | ~10 km  | 1.1 kbps  | −12.5 dB | EU 868 MHz band (62.5 kHz BW); comparable to Long Fast                |
-| ~~Long Slow~~      | ~30 km  | 0.18 kbps | −17.5 dB | ⚠️ **Deprecated** — still selectable but may be removed in a future firmware release                     |
-| ~~Very Long Slow~~ | ~40+ km | 0.09 kbps | −20 dB                   | ⚠️ **Deprecated** — still selectable but may be removed in a future firmware release                     |
+| Preset             | Range                   | Kiirus                   | SNR Limit | Best For                                                                                          |
+| ------------------ | ----------------------- | ------------------------ | --------- | ------------------------------------------------------------------------------------------------- |
+| Short Turbo        | ~1 km   | 21,9 kbps                | −5 dB     | Dense urban with line-of-sight; data-heavy applications                                           |
+| Short Fast         | ~3 km   | 10,9 kbps                | −7,5 dB   | Urban neighborhoods; buildings within a few blocks                                                |
+| Short Slow         | ~5 km   | 5.5 kbps | −10 dB    | Suburban short-range; moderate building density                                                   |
+| Medium Fast        | ~5 km   | 5.5 kbps | −10 dB    | Suburban areas; moderate building density                                                         |
+| Medium Slow        | ~8 km   | 1,1 kbps                 | −12,5 dB  | Suburban/rural; moderate range with slower speed                                                  |
+| Long Turbo         | ~10 km  | 4,4 kbps                 | −10 dB    | Similar range to Long Fast but with 500 kHz bandwidth; faster throughput                          |
+| Long Fast          | ~10 km  | 1,1 kbps                 | −12,5 dB  | **General use (default)** — balanced range and speed                           |
+| Long Moderate      | ~20 km  | 0,34 kbps                | −15 dB    | Rural with some terrain; occasional use                                                           |
+| Lite Fast          | ~5 km   | 5,5 kbps                 | −10 dB    | EL 866 MHz SRD sagedusala (125 kHz ribalaius); võrreldav Medium Fast           |
+| Lite Slow          | ~10 km  | 1,1 kbps                 | −12,5 dB  | EL 866 MHz SRD sagedusala (125 kHz ribalaius); võrreldav Long Fast             |
+| Narrow Fast        | ~5 km   | 2,7 kbps                 | −10 dB    | EL 868 MHz sagedusala (62,5 kHz sagedusriba); väldib häireid teiste seadmetega |
+| Narrow Slow        | ~10 km  | 1,1 kbps                 | −12,5 dB  | EL 868 MHz sagedusala (62,5 kHz ribalaius); võrreldav Long Fast                |
+| ~~Long Slow~~      | ~30 km  | 0,18 kbps                | −17,5 dB  | ⚠️ **Deprecated** — still selectable but may be removed in a future firmware release              |
+| ~~Very Long Slow~~ | ~40+ km | 0,09 kbps                | −20 dB    | ⚠️ **Deprecated** — still selectable but may be removed in a future firmware release              |
 
 #### Choosing a Modem Preset
 
@@ -96,7 +96,7 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 | Setting             | Kirjeldus                                                                            |
 | ------------------- | ------------------------------------------------------------------------------------ |
 | Screen Timeout      | Time before display sleeps                                                           |
-| Display Units       | Metric or Imperial                                                                   |
+| Display Units       | Meetriline või Imperial                                                              |
 | OLED Type           | Auto, SSD1306, SH1106, SH1107                                                        |
 | Compass Orientation | Rotation offset for compass display (0°, 90°, 180°, 270°)         |
 | ~~Compass North~~   | ⚠️ **Deprecated** — replaced by Compass Orientation; still visible in older firmware |
@@ -123,13 +123,13 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 
 ### Võrgu sätted
 
-| Setting       | Kirjeldus                                            |
-| ------------- | ---------------------------------------------------- |
-| WiFi Enabled  | Enable WiFi radio (ESP32 devices) |
-| WiFi SSID     | Network name to connect to                           |
-| WiFi PSK      | Network password                                     |
-| NTP Server    | Time synchronization server                          |
-| Syslog Server | Remote logging server                                |
+| Setting       | Kirjeldus                                  |
+| ------------- | ------------------------------------------ |
+| WiFi lubatud  | Luba WiFi (ESP32 seade) |
+| WiFi SSID     | Network name to connect to                 |
+| WiFi PSK      | Network password                           |
+| NTP server    | Time synchronization server                |
+| Syslog Server | Remote logging server                      |
 
 ![IP address field](../../assets/screenshots/settings_ipv4_field.png)
 

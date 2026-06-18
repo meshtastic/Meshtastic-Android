@@ -52,12 +52,12 @@ The Meshtastic apps take both RSSI and SNR and run them through a specific formu
 
 Here is exactly how the app decides how many bars (or what color) to show you:
 
-| Level    | Bars | Criteria                                                                                  | Meaning                                                                 |
-| -------- | ---- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| Hea      | 3    | RSSI better than `-115 dBm` **AND** SNR better than `-7 dB`                               | Signal is both loud and clear — healthy connection.     |
-| Rahuldav | 2    | RSSI better than `-126 dBm` with good SNR, **OR** SNR better than `-15 dB` with good RSSI | Signal getting quieter or noisier, but still decodable. |
-| Halb     | 1    | Falls between Fair and None thresholds                                                    | At the edge of range or experiencing interference.      |
-| Puudub   | 0    | RSSI worse than `-126 dBm` **AND** SNR worse than `-15 dB`                                | Transmission completely buried in noise.                |
+| Level    | Bars | Criteria                                                                             | Meaning                                                                 |
+| -------- | ---- | ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------- |
+| Hea      | 3    | RSSI parem kui `-115 dBm` **JA** SNR parem kui `-7 dB`                               | Signal is both loud and clear — healthy connection.     |
+| Rahuldav | 2    | RSSI parem kui `-126 dBm` koos hea SNR, **VÕI** SNR parem kui `-15 dB` koos hea RSSI | Signal getting quieter or noisier, but still decodable. |
+| Halb     | 1    | Falls between Fair and None thresholds                                               | At the edge of range or experiencing interference.      |
+| Puudub   | 0    | RSSI worse than `-126 dBm` **AND** SNR worse than `-15 dB`                           | Transmission completely buried in noise.                |
 
 ---
 

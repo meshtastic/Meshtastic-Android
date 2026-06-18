@@ -41,16 +41,16 @@ A gateway node with internet access (WiFi or Ethernet) publishes mesh messages t
 
 ![MQTT toggle switch](../../assets/screenshots/settings_switch.png)
 
-| Sätted          | Kirjeldus                                                                                     | Vaikimisi                                           |
-| --------------- | --------------------------------------------------------------------------------------------- | --------------------------------------------------- |
-| Server Address  | MQTT broker hostname                                                                          | mqtt.meshtastic.org |
-| Kasutajatunnus  | Broker authentication                                                                         | meshdev                                             |
-| Parool          | Broker authentication                                                                         | large4cats                                          |
-| Root Topic      | Base topic for messages                                                                       | msh                                                 |
-| Encryption      | Encrypt MQTT payload                                                                          | Lubatud                                             |
-| ~~JSON Output~~ | ⚠️ **Deprecated** — JSON packet support has been removed from firmware; this field is ignored | Disabled                                            |
-| TLS             | Secure connection to broker                                                                   | Disabled                                            |
-| Map Reporting   | Report position to public map                                                                 | Disabled                                            |
+| Sätted           | Kirjeldus                                                                                     | Vaikimisi                                           |
+| ---------------- | --------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| Server Address   | MQTT broker hostname                                                                          | mqtt.meshtastic.org |
+| Kasutajatunnus   | Broker authentication                                                                         | meshdev                                             |
+| Parool           | Broker authentication                                                                         | large4cats                                          |
+| Root Topic       | Base topic for messages                                                                       | msh                                                 |
+| Encryption       | Encrypt MQTT payload                                                                          | Lubatud                                             |
+| ~~JSON väljund~~ | ⚠️ **Deprecated** — JSON packet support has been removed from firmware; this field is ignored | Keelatud                                            |
+| TLS              | Secure connection to broker                                                                   | Keelatud                                            |
+| Map Reporting    | Report position to public map                                                                 | Keelatud                                            |
 
 ### Default Meshtastic Broker
 

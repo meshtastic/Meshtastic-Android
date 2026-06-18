@@ -5,7 +5,7 @@ nav_order: 14
 last_updated: 2026-06-11
 description: Install and use the Meshtastic Desktop app on Linux, macOS, and Windows — connections, feature parity, and keyboard shortcuts.
 aliases:
-  - desktop
+  - lauaarvuti
   - linux
   - macos
   - windows
@@ -47,10 +47,10 @@ The most reliable connection method on Desktop:
 
 For network-connected radios:
 
-1. Enter the radio's IP address and port (default: 4403).
-2. Click **Connect**.
+1. Sisesta raadio IP-aadress ja port (vaikimisi: 4403).
+2. Klõpsa **Ühenda**.
 
-### Bluetooth (BLE)
+### Sinihammas (BLE)
 
 Bluetooth Low Energy is supported on Desktop via the [Kable](https://github.com/JuulLabs/kable) library:
 
@@ -66,7 +66,7 @@ Bluetooth Low Energy is supported on Desktop via the [Kable](https://github.com/
 | Node List                                    | ✓       | ✓       | Full parity                                    |
 | Kaart                                        | ✓       | ✓       | Full parity                                    |
 | Sätted                                       | ✓       | ✓       | Full parity                                    |
-| Bluetooth (BLE)           | ✓       | ✓       | Via Kable on desktop                           |
+| Sinihammas (BLE)          | ✓       | ✓       | Via Kable on desktop                           |
 | Firmware Update OTA                          | ✓       | ✗       | Use web flasher                                |
 | Notifications                                | ✓       | ✓       | Native OS notifications                        |
 | Widgets                                      | ✓       | ✗       | Android-only                                   |
@@ -97,7 +97,7 @@ The Desktop app uses the same Compose Multiplatform UI with adaptations for larg
 
 - **Window resizing** — responsive layout adapts to window dimensions
 - **System tray** — minimize to system tray for background mesh operation
-- **Tray menu** — right-click the tray icon to show window or quit
+- **Salvemenüü** – paremklõpsa salveikoonil akna kuvamiseks või sulgemiseks
 - **Mouse interaction** — hover states and standard desktop navigation
 
 ### Notification Preferences
