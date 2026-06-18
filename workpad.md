@@ -129,4 +129,4 @@ Findings (both P3, no action):
 - implement: done — 2026-06-18 — one file (core/ui androidMain PlatformUtils). All 5 ACs met; build+detekt+spotless+both flavors green.
 - review: done — 2026-06-18 — concurrency reviewer: SOUND. 2×P3 non-actionable (lint-required wrapper; bounded TooManyRequests).
 - refine: done — 2026-06-18 — fast path, no actionable findings. P3s recorded as considered/declined.
-- pr:
+- pr: done — 2026-06-18 — pushed to existing PR #5851 (174db32ae); no new PR (same branch/feature).
