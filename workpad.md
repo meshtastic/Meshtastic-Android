@@ -344,7 +344,19 @@ _Accumulated across all phases._
 - In-context recovery cards for permanently-denied BT/local-network in ConnectionsScreen
   - severity: P3
   - phase: implement
-  - context: USB + BT-bonding denials now surface messages (R3); a richer inline PermissionRecoveryCard at the scan entry points was in one architect variant but not required by R1–R9. Candidate polish.
+  - context: RESOLVED in refine — Connections scan toggles now request BT + local-network in-context and route permanent denial to app settings.
+- Shared `PermissionUiState.route()` helper for the request/permanent-denial/grant routing
+  - severity: P3
+  - phase: review (refine second round)
+  - context: The 3-branch toggle routing (granted→act / permanently-denied→settings / else→request) is duplicated across ConnectionsScreen (×2) and both MapViews; a shared inline extension would centralize the policy. Deferred — each site has real per-call variation and is individually readable.
+- Robolectric test for `PermissionRequestTracker` round-trip
+  - severity: P2
+  - phase: review
+  - context: The SharedPreferences has-requested round-trip (the R1 disambiguator) is untested; core/ui has no `androidHostTest`/Robolectric source set, so adding one is its own infra task. The pure `computePermissionStatus` + `isPermissionGroupGranted` logic IS unit-tested.
+- Notifications in-context request
+  - severity: P3
+  - phase: review
+  - context: R6 in-context coverage is met for location/camera/BT/local-network. Notifications have no active feature "point of use" (they are passive); the modernized, skippable intro screen remains the request point. A dedicated in-context notification prompt would need a product decision on placement.
 
 ---
 
@@ -357,5 +369,5 @@ _Accumulated across all phases._
 - architect: done — 2026-06-18 — Pragmatic+enriched approved. 3 architect agents + adversarial (P1, mitigations folded in). PlatformUtils seam + status enum + SharedPreferences flag + shared recovery card.
 - implement: done — 2026-06-18 — All 9 ACs met; both flavors assemble; spotless/detekt/tests green. Latest sha 2aa33c8d5. Compass intentionally preserved (DEFERRED P3). 3 commits.
 - review: done — 2026-06-18 — 12 reviewers. No P0; concurrency+security clean (adversarial race refuted). 17 findings: 1×P1 (AC6/R6 in-context coverage), 8×P2, rest P3/P4. Report in Review section.
-- refine:
+- refine: done — 2026-06-18 — human triaged "fix all". Applied 10 auto-fixes + all 7 triaged fixes (incl. F-1 in-context BT/local-network, F-5 full old-wrapper deletion + FINE/COARSE reconciliation, F-2 pre-12 BT). Second review round (correctness+simplification) on the delta: correctness CLEARED, one P3 routing-helper deferred. Both flavors assemble; detekt/spotless/tests green. Deferred: P3 routing helper, Robolectric tracker test (P2, needs infra), notifications-in-context (P3). 4 commits (HEAD 81b5e03f2 + manifest doc fix).
 - pr:
