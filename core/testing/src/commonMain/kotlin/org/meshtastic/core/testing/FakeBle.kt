@@ -311,6 +311,24 @@ class FakeBluetoothRepository :
     private val _state = mutableStateFlow(BluetoothState(hasPermissions = true, enabled = true))
     override val state: StateFlow<BluetoothState> = _state.asStateFlow()
 
+    /**
+     * Controls what [bond] does. Defaults to [BondOutcome.Success] so existing tests that never touch this knob keep
+     * the historical "bonding always succeeds" behavior. Set it (or use the [failBondWith] /
+     * [failBondWithSecurityException] helpers) to drive the failure paths of consumers such as
+     * `AndroidScannerViewModel.requestBonding`.
+     */
+    var bondOutcome: BondOutcome = BondOutcome.Success
+
+    /** Every device passed to [bond], in call order — lets tests assert that bonding was (or was not) attempted. */
+    val bondCalls = mutableListOf<BleDevice>()
+
+    init {
+        registerResetAction {
+            bondOutcome = BondOutcome.Success
+            bondCalls.clear()
+        }
+    }
+
     override fun refreshState() {}
 
     override fun isValid(bleAddress: String): Boolean = bleAddress.isNotBlank()
@@ -318,9 +336,18 @@ class FakeBluetoothRepository :
     override fun isBonded(address: String): Boolean = _state.value.bondedDevices.any { it.address == address }
 
     override suspend fun bond(device: BleDevice) {
-        val currentState = _state.value
-        if (!currentState.bondedDevices.contains(device)) {
-            _state.value = currentState.copy(bondedDevices = currentState.bondedDevices + device)
+        bondCalls += device
+        when (val outcome = bondOutcome) {
+            is BondOutcome.Security -> throw outcome.error
+
+            is BondOutcome.Fail -> throw outcome.error
+
+            BondOutcome.Success -> {
+                val currentState = _state.value
+                if (!currentState.bondedDevices.contains(device)) {
+                    _state.value = currentState.copy(bondedDevices = currentState.bondedDevices + device)
+                }
+            }
         }
     }
 
@@ -331,4 +358,25 @@ class FakeBluetoothRepository :
     fun setHasPermissions(hasPermissions: Boolean) {
         _state.value = _state.value.copy(hasPermissions = hasPermissions)
     }
+
+    /**
+     * The outcome [FakeBluetoothRepository.bond] produces. [Fail] and [Security] both simply throw their wrapped error;
+     * the distinct cases exist only to document caller intent (via [failBondWith] vs [failBondWithSecurityException])
+     * and leave a seam should the fake ever need to branch on permission failures.
+     */
+    sealed interface BondOutcome {
+        /** bond() completes normally and records the device as bonded (pre-existing default behavior). */
+        data object Success : BondOutcome
+
+        /** bond() throws [error] — models a generic/flaky bonding failure (timeout, dropped broadcast, etc.). */
+        data class Fail(val error: Throwable) : BondOutcome
+
+        /** bond() throws [error] — models a missing-permission (BLUETOOTH_CONNECT) failure. */
+        data class Security(val error: Throwable) : BondOutcome
+    }
+}
+
+/** Make the next [FakeBluetoothRepository.bond] call throw a generic [error] (the flaky/interrupted-bonding path). */
+fun FakeBluetoothRepository.failBondWith(error: Throwable = Exception("bond failed")) {
+    bondOutcome = FakeBluetoothRepository.BondOutcome.Fail(error)
 }

@@ -17,32 +17,19 @@
 package org.meshtastic.feature.connections
 
 import app.cash.turbine.test
-import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.matcher.any
-import dev.mokkery.mock
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import org.meshtastic.core.datastore.RecentAddressesDataSource
 import org.meshtastic.core.network.repository.DiscoveredService
-import org.meshtastic.core.network.repository.NetworkRepository
-import org.meshtastic.core.repository.RadioInterfaceService
-import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.testing.FakeBleDevice
-import org.meshtastic.core.testing.FakeRadioController
-import org.meshtastic.core.testing.FakeServiceRepository
 import org.meshtastic.feature.connections.model.DeviceListEntry
 import org.meshtastic.feature.connections.model.DiscoveredDevices
-import org.meshtastic.feature.connections.model.GetDiscoveredDevicesUseCase
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -52,69 +39,34 @@ import kotlin.test.assertNotNull
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class ScannerViewModelTest {
 
-    private val testDispatcher = UnconfinedTestDispatcher()
+    private val harness = ScannerViewModelHarness()
     private lateinit var viewModel: ScannerViewModel
-    private val serviceRepository = FakeServiceRepository()
-    private val radioController = FakeRadioController()
-    private val radioInterfaceService: RadioInterfaceService = mock(MockMode.autofill)
-    private val radioPrefs: RadioPrefs = mock(MockMode.autofill)
-    private val recentAddressesDataSource: RecentAddressesDataSource = mock(MockMode.autofill)
-    private val networkRepository: NetworkRepository = mock(MockMode.autofill)
-    private val bleScanner: org.meshtastic.core.ble.BleScanner = mock(MockMode.autofill)
-    private val uiPrefs = org.meshtastic.core.testing.FakeUiPrefs()
 
-    private val resolvedServicesFlow = MutableStateFlow<List<DiscoveredService>>(emptyList())
-    private val baseDevicesFlow = MutableStateFlow(DiscoveredDevices())
+    // Convenience aliases so the existing test bodies read unchanged.
+    private val serviceRepository
+        get() = harness.serviceRepository
 
-    /**
-     * A fake [GetDiscoveredDevicesUseCase] that mirrors the real behavior: it combines the provided [resolvedList] with
-     * base device data so tests can verify NSD gating.
-     */
-    private val getDiscoveredDevicesUseCase =
-        object : GetDiscoveredDevicesUseCase {
-            override fun invoke(
-                showMock: Boolean,
-                resolvedList: Flow<List<DiscoveredService>>,
-            ): Flow<DiscoveredDevices> = combine(baseDevicesFlow, resolvedList) { base, resolved ->
-                val tcpDevices =
-                    resolved.map { DeviceListEntry.Tcp(name = it.name, fullAddress = "t${it.hostAddress}") }
-                base.copy(discoveredTcpDevices = tcpDevices)
-            }
-        }
+    private val radioController
+        get() = harness.radioController
+
+    private val bleScanner
+        get() = harness.bleScanner
+
+    private val baseDevicesFlow
+        get() = harness.baseDevicesFlow
+
+    private val resolvedServicesFlow
+        get() = harness.resolvedServicesFlow
 
     @BeforeTest
     fun setUp() {
-        Dispatchers.setMain(testDispatcher)
-
-        every { radioInterfaceService.isMockTransport() } returns false
-        every { radioInterfaceService.currentDeviceAddressFlow } returns MutableStateFlow(null)
-
-        every { recentAddressesDataSource.recentAddresses } returns MutableStateFlow(emptyList())
-        every { networkRepository.resolvedList } returns resolvedServicesFlow
-        every { networkRepository.networkAvailable } returns flowOf(true)
+        Dispatchers.setMain(harness.testDispatcher)
 
         serviceRepository.setConnectionProgress("")
         baseDevicesFlow.value = DiscoveredDevices()
         resolvedServicesFlow.value = emptyList()
 
-        viewModel =
-            ScannerViewModel(
-                serviceRepository = serviceRepository,
-                radioController = radioController,
-                radioInterfaceService = radioInterfaceService,
-                radioPrefs = radioPrefs,
-                recentAddressesDataSource = recentAddressesDataSource,
-                getDiscoveredDevicesUseCase = getDiscoveredDevicesUseCase,
-                networkRepository = networkRepository,
-                dispatchers =
-                org.meshtastic.core.di.CoroutineDispatchers(
-                    io = testDispatcher,
-                    main = testDispatcher,
-                    default = testDispatcher,
-                ),
-                uiPrefs = uiPrefs,
-                bleScanner = bleScanner,
-            )
+        viewModel = harness.buildBase()
     }
 
     @AfterTest
