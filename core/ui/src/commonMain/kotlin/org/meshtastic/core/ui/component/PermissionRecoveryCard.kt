@@ -45,11 +45,10 @@ import org.meshtastic.core.ui.util.PermissionUiState
 /**
  * A reusable error-state card for a missing runtime permission. Generalizes the compass warning/recovery pattern so
  * every feature presents context plus a single, context-correct recovery action:
- *
  * - [PermissionStatus.NOT_REQUESTED] / [PermissionStatus.DENIED_CAN_RETRY] — a "Grant permission" button that
  *   re-launches the in-context request.
- * - [PermissionStatus.PERMANENTLY_DENIED] — an "Open settings" button (user-initiated recovery) since the system
- *   will no longer show the dialog.
+ * - [PermissionStatus.PERMANENTLY_DENIED] — an "Open settings" button (user-initiated recovery) since the system will
+ *   no longer show the dialog.
  * - [PermissionStatus.GRANTED] — renders nothing.
  *
  * @param rationale a feature-specific explanation of why the permission is needed.

@@ -56,8 +56,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import co.touchlab.kermit.Logger
-import org.meshtastic.core.ui.util.PermissionStatus
-import org.meshtastic.core.ui.util.rememberLocationPermissionState
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
@@ -130,8 +128,10 @@ import org.meshtastic.core.ui.icon.Map
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.TripOrigin
 import org.meshtastic.core.ui.theme.TracerouteColors
+import org.meshtastic.core.ui.util.PermissionStatus
 import org.meshtastic.core.ui.util.formatAgo
 import org.meshtastic.core.ui.util.formatPositionTime
+import org.meshtastic.core.ui.util.rememberLocationPermissionState
 import org.meshtastic.feature.map.BaseMapViewModel.MapFilterState
 import org.meshtastic.feature.map.LastHeardFilter
 import org.meshtastic.feature.map.component.MapButton
@@ -700,8 +700,11 @@ fun MapView(
                             followPhoneBearing = false
                         }
                     }
+
                     // Permanently denied: the system won't prompt again, so send the user to settings to recover.
-                    locationPermission.status == PermissionStatus.PERMANENTLY_DENIED -> locationPermission.openAppSettings()
+                    locationPermission.status == PermissionStatus.PERMANENTLY_DENIED ->
+                        locationPermission.openAppSettings()
+
                     else -> {
                         triggerLocationToggleAfterPermission = true
                         locationPermission.request()

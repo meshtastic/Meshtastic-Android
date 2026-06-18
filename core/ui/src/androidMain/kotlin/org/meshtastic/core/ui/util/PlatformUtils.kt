@@ -334,16 +334,15 @@ actual fun rememberOpenAppSettings(): () -> Unit {
 }
 
 @Composable
-actual fun rememberLocationPermissionState(): PermissionUiState =
-    rememberRuntimePermissionState(
-        permissions =
-        arrayOf(
-            android.Manifest.permission.ACCESS_FINE_LOCATION,
-            android.Manifest.permission.ACCESS_COARSE_LOCATION,
-        ),
-        // Coarse-only grants are an accepted degraded mode, so any granted permission counts.
-        requireAll = false,
-    )
+actual fun rememberLocationPermissionState(): PermissionUiState = rememberRuntimePermissionState(
+    permissions =
+    arrayOf(
+        android.Manifest.permission.ACCESS_FINE_LOCATION,
+        android.Manifest.permission.ACCESS_COARSE_LOCATION,
+    ),
+    // Coarse-only grants are an accepted degraded mode, so any granted permission counts.
+    requireAll = false,
+)
 
 @Composable
 actual fun rememberBluetoothPermissionState(): PermissionUiState {
@@ -397,9 +396,9 @@ private fun rememberGrantedPermissionState(): PermissionUiState {
 }
 
 /**
- * Shared engine behind every `rememberXxxPermissionState()`. Computes the [PermissionStatus] from the live grant
- * state, the persisted "has-been-requested" flag, and `shouldShowRequestPermissionRationale`, refreshing on
- * `ON_RESUME` (return from settings) and immediately after a request completes.
+ * Shared engine behind every `rememberXxxPermissionState()`. Computes the [PermissionStatus] from the live grant state,
+ * the persisted "has-been-requested" flag, and `shouldShowRequestPermissionRationale`, refreshing on `ON_RESUME`
+ * (return from settings) and immediately after a request completes.
  *
  * @param requireAll when true, all [permissions] must be granted to count as [PermissionStatus.GRANTED]; when false,
  *   any single grant suffices (used by location so a coarse-only grant is accepted — R7).

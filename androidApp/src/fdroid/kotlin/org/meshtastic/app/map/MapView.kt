@@ -67,8 +67,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import co.touchlab.kermit.Logger
-import org.meshtastic.core.ui.util.PermissionStatus
-import org.meshtastic.core.ui.util.rememberLocationPermissionState
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
@@ -129,7 +127,9 @@ import org.meshtastic.core.ui.icon.Layers
 import org.meshtastic.core.ui.icon.Lens
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.PinDrop
+import org.meshtastic.core.ui.util.PermissionStatus
 import org.meshtastic.core.ui.util.formatAgo
+import org.meshtastic.core.ui.util.rememberLocationPermissionState
 import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.feature.map.BaseMapViewModel.MapFilterState
 import org.meshtastic.feature.map.LastHeardFilter
@@ -636,9 +636,11 @@ fun MapView(
                     onToggleLocationTracking = {
                         when {
                             locationPermission.isGranted -> map.toggleMyLocation()
+
                             // Permanently denied: the system won't prompt again, so send the user to settings.
                             locationPermission.status == PermissionStatus.PERMANENTLY_DENIED ->
                                 locationPermission.openAppSettings()
+
                             else -> {
                                 triggerLocationToggleAfterPermission = true
                                 locationPermission.request()

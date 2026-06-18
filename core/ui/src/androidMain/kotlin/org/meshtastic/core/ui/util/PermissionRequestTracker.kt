@@ -21,14 +21,14 @@ import android.content.Context
 /**
  * Persists, per Android permission string, whether the app has ever completed a runtime request for it.
  *
- * This flag is the disambiguator required by [computePermissionStatus]: `shouldShowRequestPermissionRationale`
- * returns `false` both before the first prompt and after a permanent denial, so a persisted "has been requested"
- * marker is the only way to tell the two apart.
+ * This flag is the disambiguator required by [computePermissionStatus]: `shouldShowRequestPermissionRationale` returns
+ * `false` both before the first prompt and after a permanent denial, so a persisted "has been requested" marker is the
+ * only way to tell the two apart.
  *
  * Deliberately backed by [android.content.SharedPreferences] rather than DataStore: the flag is read synchronously
  * inside composition (in the same pass as the rationale check) and written synchronously from a permission-result
- * callback. DataStore's asynchronous `Flow` model would introduce a read-after-write race on exactly the transition
- * the permission state machine hinges on.
+ * callback. DataStore's asynchronous `Flow` model would introduce a read-after-write race on exactly the transition the
+ * permission state machine hinges on.
  */
 internal class PermissionRequestTracker(context: Context) {
     private val prefs = context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)

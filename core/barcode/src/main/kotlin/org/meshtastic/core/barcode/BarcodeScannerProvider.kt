@@ -76,10 +76,12 @@ fun rememberBarcodeScanner(onResult: (String?) -> Unit): BarcodeScanner {
     LaunchedEffect(cameraPermission.status) {
         when {
             !pendingScan -> Unit
+
             cameraPermission.isGranted -> {
                 showDialog = true
                 pendingScan = false
             }
+
             // The request completed without a grant — surface a recovery card instead of failing silently.
             cameraPermission.status != PermissionStatus.NOT_REQUESTED -> {
                 showPermissionRecovery = true
@@ -120,7 +122,9 @@ fun rememberBarcodeScanner(onResult: (String?) -> Unit): BarcodeScanner {
             override fun startScan() {
                 when (currentStatus.value) {
                     PermissionStatus.GRANTED -> showDialog = true
+
                     PermissionStatus.PERMANENTLY_DENIED -> showPermissionRecovery = true
+
                     else -> {
                         pendingScan = true
                         cameraPermission.request()
