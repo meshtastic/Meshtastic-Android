@@ -370,4 +370,4 @@ _Accumulated across all phases._
 - implement: done — 2026-06-18 — All 9 ACs met; both flavors assemble; spotless/detekt/tests green. Latest sha 2aa33c8d5. Compass intentionally preserved (DEFERRED P3). 3 commits.
 - review: done — 2026-06-18 — 12 reviewers. No P0; concurrency+security clean (adversarial race refuted). 17 findings: 1×P1 (AC6/R6 in-context coverage), 8×P2, rest P3/P4. Report in Review section.
 - refine: done — 2026-06-18 — human triaged "fix all". Applied 10 auto-fixes + all 7 triaged fixes (incl. F-1 in-context BT/local-network, F-5 full old-wrapper deletion + FINE/COARSE reconciliation, F-2 pre-12 BT). Second review round (correctness+simplification) on the delta: correctness CLEARED, one P3 routing-helper deferred. Both flavors assemble; detekt/spotless/tests green. Deferred: P3 routing helper, Robolectric tracker test (P2, needs infra), notifications-in-context (P3). 4 commits (HEAD 81b5e03f2 + manifest doc fix).
-- pr:
+- pr: done — 2026-06-18 — draft PR https://github.com/meshtastic/Meshtastic-Android/pull/5851 (base main, head claude/gallant-thompson-d1b2ea)
