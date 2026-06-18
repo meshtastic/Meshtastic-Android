@@ -6,7 +6,7 @@ last_updated: 2026-06-11
 description: Expose mesh capabilities to the Android system and on-device AI assistants (e.g. Gemini) so they can run mesh workflows without opening the app.
 aliases:
   - app-functions
-  - system-ai
+  - süsteemi-ti
   - gemini
   - assistant-functions
 ---

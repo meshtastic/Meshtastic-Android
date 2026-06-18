@@ -71,7 +71,7 @@ When the scan completes, Discovery presents a per-preset result card for each pr
 
 Metrics include:
 
-| Metric                                   | What it tells you                                                                              |
+| Meetriline                               | What it tells you                                                                              |
 | ---------------------------------------- | ---------------------------------------------------------------------------------------------- |
 | RF health                                | Overall quality of the radio environment on that preset.                       |
 | Channel utilization                      | How busy the airwaves were during the dwell.                                   |

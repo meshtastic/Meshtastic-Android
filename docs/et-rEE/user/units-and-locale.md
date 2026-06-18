@@ -42,7 +42,7 @@ Distances between nodes and GPS altitudes are transmitted as **meters** and auto
 
 | Sinu sätted                      | Small Distance | Large Distance         | Kõrgus   |
 | -------------------------------- | -------------- | ---------------------- | -------- |
-| Metric                           | 350 m          | 2.5 km | 1,200 m  |
+| Meetriline                       | 350 m          | 2.5 km | 1,200 m  |
 | Imperial (US) | 1,148 ft       | 1.6 mi | 3,937 ft |
 
 The app uses natural scaling — short distances stay in meters or feet, while longer distances switch to kilometres or miles automatically.
@@ -60,7 +60,7 @@ GPS ground speed is displayed in your locale's preferred speed unit.
 
 | Sinu sätted                      | You See |
 | -------------------------------- | ------- |
-| Metric                           | 12 km/h |
+| Meetriline                       | 12 km/h |
 | Imperial (US) | 7 mph   |
 
 ## Tuul
@@ -69,7 +69,7 @@ Wind speed and gust data from environment sensors are transmitted as **m/s** and
 
 | Sinu sätted                      | You See |
 | -------------------------------- | ------- |
-| Metric                           | 5 m/s   |
+| Meetriline                       | 5 m/s   |
 | Imperial (US) | 11 mph  |
 
 Wind readings appear in the **Node Detail** environment section and the **Environment Telemetry** charts.
@@ -78,10 +78,10 @@ Wind readings appear in the **Node Detail** environment section and the **Enviro
 
 Rainfall measurements (1-hour and 24-hour totals) are transmitted as **mm** and converted for display.
 
-| Sinu sätted                      | You See                |
-| -------------------------------- | ---------------------- |
-| Metric                           | 12 mm                  |
-| Imperial (US) | 0.5 in |
+| Sinu sätted                      | You See |
+| -------------------------------- | ------- |
+| Meetriline                       | 12 mm   |
+| Imperial (US) | 0,5 in  |
 
 ## Units That Never Change
 
@@ -89,7 +89,7 @@ Some units are international standards and are displayed the same way regardless
 
 | Measurement                      | Unit                           | Why                                   |
 | -------------------------------- | ------------------------------ | ------------------------------------- |
-| Barometric pressure              | hPa                            | International meteorological standard |
+| Baromeetrii rõhk                 | hPa                            | International meteorological standard |
 | Heading / bearing                | ° (degrees) | Universal navigation convention       |
 | Radiatsioon                      | μR/hr                          | Standard dosimetry unit               |
 | GPS coordinates                  | decimal degrees                | Universal geographic standard         |

@@ -27,12 +27,12 @@ The node list shows every node your radio has heard, including:
 
 ### Node Status Indicators
 
-| Badge      | Meaning                               |
-| ---------- | ------------------------------------- |
-| 🟢 Online  | Node heard within the last 15 minutes |
-| 🟡 Away    | Node heard within the last 2 hours    |
-| 🔴 Offline | Node not heard for over 2 hours       |
-| ⭐ Favorite | Node marked as favorite by the user   |
+| Badge             | Meaning                               |
+| ----------------- | ------------------------------------- |
+| 🟢 Online         | Node heard within the last 15 minutes |
+| 🟡 Eemal          | Node heard within the last 2 hours    |
+| 🔴 Võrgust väljas | Node not heard for over 2 hours       |
+| ⭐ Lemmik          | Node marked as favorite by the user   |
 
 ### Node Roles
 
@@ -72,11 +72,11 @@ Most users should keep the default **Client** role. Consider a different role wh
 
 Nodes display encryption status icons next to their name:
 
-| Icon        | Meaning                                                                                                             |
-| ----------- | ------------------------------------------------------------------------------------------------------------------- |
-| 🔒 Locked   | Communication uses PKI (public key infrastructure) — end-to-end encrypted with verified identity |
-| 🔓 Unlocked | Communication uses shared channel PSK — encrypted but identity not individually verified                            |
-| ⚠️ Mismatch | Public key mismatch — the node's key has changed since last seen (investigate before trusting)   |
+| Icon          | Meaning                                                                                                             |
+| ------------- | ------------------------------------------------------------------------------------------------------------------- |
+| 🔒 Lukustatud | Communication uses PKI (public key infrastructure) — end-to-end encrypted with verified identity |
+| 🔓 Unlocked   | Communication uses shared channel PSK — encrypted but identity not individually verified                            |
+| ⚠️ Mismatch   | Public key mismatch — the node's key has changed since last seen (investigate before trusting)   |
 
 > 💡 **Tip:** PKI encryption (firmware 2.5+) provides stronger security than channel PSK because each node has a unique key pair. If you see a key mismatch warning, the node may have been reset or compromised.
 

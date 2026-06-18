@@ -5,10 +5,10 @@ nav_order: 6
 last_updated: 2026-05-13
 description: View node positions on the map, create and share waypoints, and manage position sharing and privacy.
 aliases:
-  - map
-  - waypoints
+  - kaart
+  - teekonnapunkt
   - gps
-  - location
+  - asukoht
 ---
 
 # Map & Waypoints
@@ -27,11 +27,11 @@ The map displays:
 
 Node markers on the map indicate:
 
-| Color    | Meaning                                        |
+| Värv     | Meaning                                        |
 | -------- | ---------------------------------------------- |
 | Roheline | Online (heard recently)     |
 | Kollane  | Away (heard within 2 hours) |
-| Gray     | Offline (stale position)    |
+| Hall     | Offline (stale position)    |
 | Sinine   | Your own node                                  |
 
 ### Map Controls
@@ -45,11 +45,11 @@ The floating toolbar provides quick access to compass, layer switching, node fil
 
 ![Map controls overlay](../../assets/screenshots/map_controls_overlay.png)
 
-## Waypoints
+## Teekonnapunkt
 
 Waypoints are shared geographic points of interest that all mesh members can see.
 
-### Creating a Waypoint
+### Loo teekonnapunkt
 
 1. Long-press on the map at the desired location.
 2. Enter a name and optional description.

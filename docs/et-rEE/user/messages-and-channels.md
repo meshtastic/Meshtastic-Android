@@ -27,12 +27,12 @@ Every Meshtastic device comes with a default **LongFast** channel. This is an un
 
 Channels support multiple encryption levels:
 
-| Icon | Security Level                       | Kirjeldus                                                                                                                              |
-| ---- | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
-| 🔒   | PSK (256-bit AES) | Fully encrypted with a strong pre-shared key. Only nodes with the matching key can read messages.      |
-| 🔐   | PSK (128-bit AES) | Encrypted with a shorter key. Secure for most uses but 256-bit is preferred for sensitive data.        |
-| 🔓   | Default / Open                       | Uses the well-known default key. **Any Meshtastic device** on the same preset can read these messages. |
-| ⚠️   | Insecure + Position                  | Open channel that also broadcasts your GPS position. Use with caution in public meshes.                |
+| Ikoon | Security Level                       | Kirjeldus                                                                                                                              |
+| ----- | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| 🔒    | PSK (256-bit AES) | Fully encrypted with a strong pre-shared key. Only nodes with the matching key can read messages.      |
+| 🔐    | PSK (128-bit AES) | Encrypted with a shorter key. Secure for most uses but 256-bit is preferred for sensitive data.        |
+| 🔓    | Default / Open                       | Uses the well-known default key. **Any Meshtastic device** on the same preset can read these messages. |
+| ⚠️    | Insecure + Position                  | Open channel that also broadcasts your GPS position. Use with caution in public meshes.                |
 
 > 🔒 **Security Tip:** Always configure a unique PSK for private communications. The default channel is intentionally open so new users can discover the mesh — but you should create a separate encrypted channel for anything sensitive.
 

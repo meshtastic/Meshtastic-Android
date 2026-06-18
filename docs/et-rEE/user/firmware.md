@@ -57,7 +57,7 @@ For recovery or when OTA is unavailable:
 
 Before updating:
 
-- [ ] Battery > 50%
+- [ ] Aku > 50%
 - [ ] Stable Bluetooth connection
 - [ ] Note your current settings (they may reset on major version changes)
 - [ ] Check the release notes for breaking changes

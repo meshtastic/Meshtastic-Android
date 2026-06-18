@@ -5,7 +5,7 @@ nav_order: 5
 last_updated: 2026-06-16
 description: Telemetry dashboards for each mesh node — device health, environment sensors, air quality, signal quality, power, traceroute, and position history.
 aliases:
-  - metrics
+  - meetriline
   - telemetry
   - device-metrics
   - signal
@@ -19,7 +19,7 @@ The node detail screen provides comprehensive telemetry and metrics for each nod
 
 Basic operating information reported by each node:
 
-| Metric         | Kirjeldus                           |
+| Meetriline     | Kirjeldus                           |
 | -------------- | ----------------------------------- |
 | Battery Level  | Current battery percentage          |
 | Vool           | Battery voltage reading             |
@@ -35,7 +35,7 @@ Device metrics are displayed as individual cards with trend sparklines showing b
 
 Environmental sensor data (requires compatible hardware):
 
-| Metric                               | Sensor Examples       |
+| Meetriline                           | Sensor Examples       |
 | ------------------------------------ | --------------------- |
 | Temperatuur                          | BME280, BME680, SHT31 |
 | Niiskus                              | BME280, BME680, SHT31 |
@@ -51,22 +51,22 @@ Environment metrics are charted over time for easy trend analysis — temperatur
 
 Air Quality is a dedicated metrics view for nodes equipped with a particulate-matter and/or CO₂ sensor. It is **separate from the BME680 IAQ reading** listed under Environment Metrics — IAQ is a single gas-resistance-derived index, while the Air Quality view charts the underlying particulate and CO₂ measurements.
 
-| Metric                | Unit  | Kirjeldus                                            |
+| Meetriline            | Unit  | Kirjeldus                                            |
 | --------------------- | ----- | ---------------------------------------------------- |
 | PM1.0 | µg/m³ | Particulate matter up to 1.0 micron  |
-| PM2.5 | µg/m³ | Particulate matter up to 2.5 microns |
+| PM2,5                 | µg/m³ | Particulate matter up to 2.5 microns |
 | PM10                  | µg/m³ | Particulate matter up to 10 microns                  |
 | CO₂                   | ppm   | Carbon dioxide concentration                         |
 
 CO₂ readings are color-coded by severity to make air quality easy to read at a glance:
 
-| Band     | CO₂ Range (ppm) | Color    |
-| -------- | ---------------------------------- | -------- |
-| Hea      | < 1000    | Roheline |
-| Stuffy   | < 2000    | Amber    |
-| Poor     | < 5000    | Oranž    |
-| Unsafe   | < 30000   | Punane   |
-| Evacuate | ≥ 30000                            | Dark red |
+| Band         | CO₂ Range (ppm) | Värv        |
+| ------------ | ---------------------------------- | ----------- |
+| Hea          | < 1000    | Roheline    |
+| Stuffy       | < 2000    | Merevaik    |
+| Kehv         | < 5000    | Oranž       |
+| Ebaturvaline | < 30000   | Punane      |
+| Evakueeru    | ≥ 30000                            | Tume punane |
 
 ![Air quality readings with color-coded CO₂ severity](../../assets/screenshots/node-metrics_air_quality.png)
 
@@ -83,7 +83,7 @@ An air-quality log/metrics button appears on the node detail screen **only when 
 
 Radio signal quality information:
 
-| Metric      | Kirjeldus                                                                      |
+| Meetriline  | Kirjeldus                                                                      |
 | ----------- | ------------------------------------------------------------------------------ |
 | SNR         | Signal-to-Noise Ratio (higher is better)                    |
 | RSSI        | Received Signal Strength Indicator (closer to 0 is better)  |
@@ -105,7 +105,7 @@ Local Stats from your connected radio are also shown in Signal Quality when avai
 
 Power management telemetry (requires INA sensor or compatible hardware):
 
-| Metric      | Kirjeldus               |
+| Meetriline  | Kirjeldus               |
 | ----------- | ----------------------- |
 | Bus Voltage | Supply voltage          |
 | Pinge       | Power draw in milliamps |
