@@ -18,6 +18,8 @@ package org.meshtastic.core.ui.util
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class PermissionStatusTest {
 
@@ -69,5 +71,21 @@ class PermissionStatusTest {
             PermissionStatus.PERMANENTLY_DENIED,
             computePermissionStatus(granted = false, hasRequested = true, shouldShowRationale = false),
         )
+    }
+
+    @Test
+    fun `requireAll false accepts a coarse-only grant`() {
+        // Location requests FINE+COARSE; a coarse-only grant ([fine=false, coarse=true]) must count as granted (R7).
+        assertTrue(isPermissionGroupGranted(results = listOf(false, true), requireAll = false))
+        assertTrue(isPermissionGroupGranted(results = listOf(true, false), requireAll = false))
+        assertFalse(isPermissionGroupGranted(results = listOf(false, false), requireAll = false))
+    }
+
+    @Test
+    fun `requireAll true demands every permission`() {
+        // Bluetooth needs both SCAN and CONNECT; a partial grant is not granted.
+        assertTrue(isPermissionGroupGranted(results = listOf(true, true), requireAll = true))
+        assertFalse(isPermissionGroupGranted(results = listOf(true, false), requireAll = true))
+        assertFalse(isPermissionGroupGranted(results = listOf(false, false), requireAll = true))
     }
 }

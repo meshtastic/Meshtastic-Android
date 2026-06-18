@@ -55,33 +55,8 @@ expect fun rememberSaveFileLauncher(
 /** Keeps the screen awake while [enabled] is true. No-op on platforms that don't support it. */
 @Composable expect fun KeepScreenOn(enabled: Boolean)
 
-/** Returns a launcher to request location permissions. */
-@Composable expect fun rememberRequestLocationPermission(onGranted: () -> Unit, onDenied: () -> Unit = {}): () -> Unit
-
 /** Returns a launcher to open the platform's location settings. */
 @Composable expect fun rememberOpenLocationSettings(): () -> Unit
-
-/** Returns a launcher to request Bluetooth scan + connect permissions. No-op on platforms without runtime BLE perms. */
-@Composable expect fun rememberRequestBluetoothPermission(onGranted: () -> Unit, onDenied: () -> Unit = {}): () -> Unit
-
-/** Returns a launcher to request the ACCESS_LOCAL_NETWORK permission. No-op on platforms that don't require it. */
-@Composable
-expect fun rememberRequestLocalNetworkPermission(onGranted: () -> Unit, onDenied: () -> Unit = {}): () -> Unit
-
-/**
- * Returns whether ACCESS_LOCAL_NETWORK is currently granted. Always `true` on platforms / API levels that don't gate
- * local-network access behind a runtime permission.
- */
-@Composable expect fun isLocalNetworkPermissionGranted(): Boolean
-
-/** Returns a launcher to request the POST_NOTIFICATIONS permission. No-op on platforms that don't require it. */
-@Composable
-expect fun rememberRequestNotificationPermission(onGranted: () -> Unit, onDenied: () -> Unit = {}): () -> Unit
-
-/**
- * Returns whether location permissions are currently granted. Always `true` on platforms without runtime permissions.
- */
-@Composable expect fun isLocationPermissionGranted(): Boolean
 
 /**
  * Returns whether GPS/location services are currently disabled at the system level. Always `false` on platforms where

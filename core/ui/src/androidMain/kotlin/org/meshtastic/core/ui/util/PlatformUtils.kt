@@ -30,7 +30,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.app.ActivityCompat
@@ -186,30 +185,6 @@ actual fun KeepScreenOn(enabled: Boolean) {
 }
 
 @Composable
-actual fun rememberRequestLocationPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit {
-    val launcher =
-        androidx.activity.compose.rememberLauncherForActivityResult(
-            androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions(),
-        ) { permissions ->
-            if (permissions.values.any { it }) {
-                onGranted()
-            } else {
-                onDenied()
-            }
-        }
-    return remember(launcher) {
-        {
-            launcher.launch(
-                arrayOf(
-                    android.Manifest.permission.ACCESS_FINE_LOCATION,
-                    android.Manifest.permission.ACCESS_COARSE_LOCATION,
-                ),
-            )
-        }
-    }
-}
-
-@Composable
 actual fun rememberOpenLocationSettings(): () -> Unit {
     val launcher =
         androidx.activity.compose.rememberLauncherForActivityResult(
@@ -227,90 +202,12 @@ actual fun rememberOpenLocationSettings(): () -> Unit {
     }
 }
 
-@Composable
-actual fun rememberRequestBluetoothPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit {
-    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) {
-        // On pre-Android 12, BLE scanning is gated by location permission, not Bluetooth.
-        return remember { { onGranted() } }
-    }
-    val currentOnGranted = rememberUpdatedState(onGranted)
-    val currentOnDenied = rememberUpdatedState(onDenied)
-    val launcher =
-        rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            if (permissions.values.all { it }) currentOnGranted.value() else currentOnDenied.value()
-        }
-    return remember(launcher) {
-        {
-            launcher.launch(
-                arrayOf(android.Manifest.permission.BLUETOOTH_SCAN, android.Manifest.permission.BLUETOOTH_CONNECT),
-            )
-        }
-    }
-}
-
-@Composable
-actual fun rememberRequestNotificationPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit {
-    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) {
-        // Pre-Android 13, no runtime notification permission required.
-        return remember { { onGranted() } }
-    }
-    val currentOnGranted = rememberUpdatedState(onGranted)
-    val currentOnDenied = rememberUpdatedState(onDenied)
-    val launcher =
-        rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-            if (granted) currentOnGranted.value() else currentOnDenied.value()
-        }
-    return remember(launcher) { { launcher.launch(android.Manifest.permission.POST_NOTIFICATIONS) } }
-}
-
 // API level at which ACCESS_LOCAL_NETWORK became a real runtime permission (Android 17 / API 37).
 // Hardcoded as an integer literal because Build.VERSION_CODES does not yet expose a named constant
 // for API 37 in the SDK we compile against (current max named constant is VANILLA_ICE_CREAM / API 35).
 // On older API levels the permission string is unknown to the system and requestPermission() returns
 // an immediate denial, which would incorrectly disable any caller that disables itself on denial.
 private const val LOCAL_NETWORK_PERMISSION_API = 37
-
-@Composable
-actual fun rememberRequestLocalNetworkPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit {
-    if (android.os.Build.VERSION.SDK_INT < LOCAL_NETWORK_PERMISSION_API) {
-        // Pre-Android 17, ACCESS_LOCAL_NETWORK is not a runtime permission. Localhost / LAN access
-        // works implicitly under the INTERNET permission, so report granted without prompting.
-        return remember { { onGranted() } }
-    }
-    val currentOnGranted = rememberUpdatedState(onGranted)
-    val currentOnDenied = rememberUpdatedState(onDenied)
-    val launcher =
-        rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-            if (granted) currentOnGranted.value() else currentOnDenied.value()
-        }
-    return remember(launcher) { { launcher.launch(android.Manifest.permission.ACCESS_LOCAL_NETWORK) } }
-}
-
-@Composable
-actual fun isLocalNetworkPermissionGranted(): Boolean {
-    if (android.os.Build.VERSION.SDK_INT < LOCAL_NETWORK_PERMISSION_API) {
-        // Pre-Android 17, no runtime local-network gate; access is implicit via INTERNET.
-        return true
-    }
-    val context = LocalContext.current
-    return rememberOnResumeState {
-        androidx.core.content.ContextCompat.checkSelfPermission(
-            context,
-            android.Manifest.permission.ACCESS_LOCAL_NETWORK,
-        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
-    }
-}
-
-@Composable
-actual fun isLocationPermissionGranted(): Boolean {
-    val context = LocalContext.current
-    return rememberOnResumeState {
-        androidx.core.content.ContextCompat.checkSelfPermission(
-            context,
-            android.Manifest.permission.ACCESS_FINE_LOCATION,
-        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
-    }
-}
 
 @Composable
 actual fun isGpsDisabled(): Boolean {
@@ -351,9 +248,10 @@ actual fun rememberLocationPermissionState(): PermissionUiState = rememberRuntim
 @Composable
 actual fun rememberBluetoothPermissionState(): PermissionUiState {
     if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) {
-        // On pre-Android 12, BLE scanning is gated by the location permission, not Bluetooth. Delegate so the
-        // recovery UI surfaces the permission the system actually requires.
-        return rememberLocationPermissionState()
+        // Pre-Android 12 has no runtime Bluetooth permission — BLE scanning is gated by the location permission, which
+        // callers request separately (the intro Location screen, the map/Privacy location flows). Report granted here
+        // so the Bluetooth surface itself is a no-op rather than masquerading as a location request.
+        return rememberGrantedPermissionState()
     }
     return rememberRuntimePermissionState(
         permissions =
@@ -412,13 +310,21 @@ private fun rememberRuntimePermissionState(permissions: Array<String>, requireAl
 
     fun compute(): PermissionStatus {
         val granted =
-            if (requireAll) {
-                permissions.all { ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED }
-            } else {
-                permissions.any { ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED }
-            }
+            isPermissionGroupGranted(
+                results =
+                permissions.map {
+                    ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
+                },
+                requireAll = requireAll,
+            )
         val shouldShowRationale =
-            activity?.let { ActivityCompat.shouldShowRequestPermissionRationale(it, primaryPermission) } ?: false
+            if (activity != null) {
+                ActivityCompat.shouldShowRequestPermissionRationale(activity, primaryPermission)
+            } else {
+                // No Activity to query (e.g. a non-Activity-hosted composition). Assume a rationale is still warranted
+                // rather than risk a false PERMANENTLY_DENIED that would strand the user with only a settings link.
+                true
+            }
         return computePermissionStatus(
             granted = granted,
             hasRequested = tracker.hasRequested(primaryPermission),

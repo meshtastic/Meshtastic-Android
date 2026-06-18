@@ -54,7 +54,7 @@ import org.meshtastic.core.ui.util.PermissionUiState
  * @param rationale a feature-specific explanation of why the permission is needed.
  */
 @Composable
-fun PermissionRecoveryCard(
+internal fun PermissionRecoveryCard(
     status: PermissionStatus,
     rationale: String,
     onRequest: () -> Unit,

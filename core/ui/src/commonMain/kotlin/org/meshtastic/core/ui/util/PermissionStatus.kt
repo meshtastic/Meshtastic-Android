@@ -20,19 +20,19 @@ import androidx.compose.runtime.Stable
 
 /**
  * The UX-relevant state of a runtime permission, as recommended by the Android permissions guidance
- * (https://developer.android.com/training/permissions/requesting).
- * - [GRANTED] — the permission is held; proceed.
+ * (https://developer.android.com/training/permissions/requesting). Declared in lifecycle order.
  * - [NOT_REQUESTED] — the user has never been prompted; request directly (no rationale needed yet).
  * - [DENIED_CAN_RETRY] — the user denied once but the system will still show the dialog; show a rationale and offer to
  *   re-request.
  * - [PERMANENTLY_DENIED] — the system will no longer show the dialog ("Don't allow" twice, or "Don't ask again"); the
  *   only recovery is the app's settings screen.
+ * - [GRANTED] — the permission is held; proceed.
  */
 enum class PermissionStatus {
-    GRANTED,
     NOT_REQUESTED,
     DENIED_CAN_RETRY,
     PERMANENTLY_DENIED,
+    GRANTED,
 }
 
 /**
@@ -73,3 +73,12 @@ class PermissionUiState(val status: PermissionStatus, val request: () -> Unit, v
 /** A constant [PermissionUiState] for platforms / API levels where a permission is not gated at runtime. */
 fun grantedPermissionUiState(): PermissionUiState =
     PermissionUiState(status = PermissionStatus.GRANTED, request = {}, openAppSettings = {})
+
+/**
+ * Reduces the per-permission grant [results] of a permission group to a single granted flag.
+ *
+ * @param requireAll when true every permission must be granted (e.g. Bluetooth scan + connect); when false a single
+ *   grant suffices (e.g. location, where a coarse-only grant is an accepted degraded mode).
+ */
+fun isPermissionGroupGranted(results: List<Boolean>, requireAll: Boolean): Boolean =
+    if (requireAll) results.all { it } else results.any { it }

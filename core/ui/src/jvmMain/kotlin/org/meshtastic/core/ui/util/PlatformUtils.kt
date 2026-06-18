@@ -116,35 +116,7 @@ actual fun KeepScreenOn(enabled: Boolean) {
 }
 
 @Composable
-actual fun rememberRequestLocationPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit = {
-    Logger.w { "Location permissions not implemented on Desktop" }
-    onDenied()
-}
-
-@Composable
 actual fun rememberOpenLocationSettings(): () -> Unit = { Logger.w { "Location settings not implemented on Desktop" } }
-
-/** JVM no-op — Desktop does not require runtime Bluetooth permissions. */
-@Composable
-actual fun rememberRequestBluetoothPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit = { onGranted() }
-
-/** JVM no-op — Desktop does not require runtime local network permissions. */
-@Composable
-actual fun rememberRequestLocalNetworkPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit = {
-    onGranted()
-}
-
-/** JVM — local network permission is always considered granted on Desktop. */
-@Composable actual fun isLocalNetworkPermissionGranted(): Boolean = true
-
-/** JVM no-op — Desktop does not require runtime notification permissions. */
-@Composable
-actual fun rememberRequestNotificationPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit = {
-    onGranted()
-}
-
-/** JVM — location permission is always considered granted on Desktop. */
-@Composable actual fun isLocationPermissionGranted(): Boolean = true
 
 /** JVM — GPS is never disabled on Desktop (concept doesn't apply). */
 @Composable actual fun isGpsDisabled(): Boolean = false

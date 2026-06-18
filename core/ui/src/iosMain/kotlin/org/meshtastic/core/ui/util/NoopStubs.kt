@@ -50,21 +50,7 @@ actual fun rememberOpenFileLauncher(onUriReceived: (CommonUri?) -> Unit): (mimeT
 
 @Composable actual fun KeepScreenOn(enabled: Boolean) {}
 
-@Composable actual fun rememberRequestLocationPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit = {}
-
 @Composable actual fun rememberOpenLocationSettings(): () -> Unit = {}
-
-@Composable actual fun rememberRequestBluetoothPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit = {}
-
-@Composable
-actual fun rememberRequestLocalNetworkPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit = {}
-
-@Composable actual fun isLocalNetworkPermissionGranted(): Boolean = true
-
-@Composable
-actual fun rememberRequestNotificationPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit = {}
-
-@Composable actual fun isLocationPermissionGranted(): Boolean = true
 
 @Composable actual fun isGpsDisabled(): Boolean = false
 
