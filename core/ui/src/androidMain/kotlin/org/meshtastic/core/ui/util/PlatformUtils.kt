@@ -20,16 +20,25 @@ package org.meshtastic.core.ui.util
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.provider.Settings
+import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
@@ -303,6 +312,138 @@ actual fun isLocationPermissionGranted(): Boolean {
 actual fun isGpsDisabled(): Boolean {
     val context = LocalContext.current
     return rememberOnResumeState { context.gpsDisabled() }
+}
+
+@Composable
+actual fun rememberOpenAppSettings(): () -> Unit {
+    val context = LocalContext.current
+    return remember(context) {
+        {
+            val intent =
+                Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                    data = Uri.fromParts("package", context.packageName, null)
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+            try {
+                context.startActivity(intent)
+            } catch (ex: ActivityNotFoundException) {
+                Logger.w(ex) { "Failed to open app settings" }
+            }
+        }
+    }
+}
+
+@Composable
+actual fun rememberLocationPermissionState(): PermissionUiState =
+    rememberRuntimePermissionState(
+        permissions =
+        arrayOf(
+            android.Manifest.permission.ACCESS_FINE_LOCATION,
+            android.Manifest.permission.ACCESS_COARSE_LOCATION,
+        ),
+        // Coarse-only grants are an accepted degraded mode, so any granted permission counts.
+        requireAll = false,
+    )
+
+@Composable
+actual fun rememberBluetoothPermissionState(): PermissionUiState {
+    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) {
+        // On pre-Android 12, BLE scanning is gated by the location permission, not Bluetooth. Delegate so the
+        // recovery UI surfaces the permission the system actually requires.
+        return rememberLocationPermissionState()
+    }
+    return rememberRuntimePermissionState(
+        permissions =
+        arrayOf(android.Manifest.permission.BLUETOOTH_SCAN, android.Manifest.permission.BLUETOOTH_CONNECT),
+        requireAll = true,
+    )
+}
+
+@Composable
+actual fun rememberNotificationPermissionState(): PermissionUiState {
+    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) {
+        // Pre-Android 13, no runtime notification permission required.
+        return rememberGrantedPermissionState()
+    }
+    return rememberRuntimePermissionState(
+        permissions = arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
+        requireAll = true,
+    )
+}
+
+@Composable
+actual fun rememberLocalNetworkPermissionState(): PermissionUiState {
+    if (android.os.Build.VERSION.SDK_INT < LOCAL_NETWORK_PERMISSION_API) {
+        // Pre-Android 17, ACCESS_LOCAL_NETWORK is implicit via INTERNET; treat as granted.
+        return rememberGrantedPermissionState()
+    }
+    return rememberRuntimePermissionState(
+        permissions = arrayOf(android.Manifest.permission.ACCESS_LOCAL_NETWORK),
+        requireAll = true,
+    )
+}
+
+@Composable
+actual fun rememberCameraPermissionState(): PermissionUiState =
+    rememberRuntimePermissionState(permissions = arrayOf(android.Manifest.permission.CAMERA), requireAll = true)
+
+/** A constant [PermissionUiState] for API levels where the permission is not gated at runtime. */
+@Composable
+private fun rememberGrantedPermissionState(): PermissionUiState {
+    val openAppSettings = rememberOpenAppSettings()
+    return remember(openAppSettings) {
+        PermissionUiState(status = PermissionStatus.GRANTED, request = {}, openAppSettings = openAppSettings)
+    }
+}
+
+/**
+ * Shared engine behind every `rememberXxxPermissionState()`. Computes the [PermissionStatus] from the live grant
+ * state, the persisted "has-been-requested" flag, and `shouldShowRequestPermissionRationale`, refreshing on
+ * `ON_RESUME` (return from settings) and immediately after a request completes.
+ *
+ * @param requireAll when true, all [permissions] must be granted to count as [PermissionStatus.GRANTED]; when false,
+ *   any single grant suffices (used by location so a coarse-only grant is accepted — R7).
+ */
+@Composable
+private fun rememberRuntimePermissionState(permissions: Array<String>, requireAll: Boolean): PermissionUiState {
+    val context = LocalContext.current
+    val activity = LocalActivity.current
+    val tracker = remember(context) { PermissionRequestTracker(context) }
+    val openAppSettings = rememberOpenAppSettings()
+    // The permission whose rationale + requested flag represents the group.
+    val primaryPermission = permissions.first()
+
+    var refreshTrigger by remember { mutableIntStateOf(0) }
+
+    val launcher =
+        rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { _ ->
+            // The OS has now adjudicated the request; only here is it true that we have asked the user.
+            tracker.markRequested(primaryPermission)
+            refreshTrigger++
+        }
+
+    fun compute(): PermissionStatus {
+        val granted =
+            if (requireAll) {
+                permissions.all { ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED }
+            } else {
+                permissions.any { ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED }
+            }
+        val shouldShowRationale =
+            activity?.let { ActivityCompat.shouldShowRequestPermissionRationale(it, primaryPermission) } ?: false
+        return computePermissionStatus(
+            granted = granted,
+            hasRequested = tracker.hasRequested(primaryPermission),
+            shouldShowRationale = shouldShowRationale,
+        )
+    }
+
+    val statusState = remember { mutableStateOf(compute()) }
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { statusState.value = compute() }
+    LaunchedEffect(refreshTrigger) { statusState.value = compute() }
+
+    val request = remember(launcher) { { launcher.launch(permissions) } }
+    return PermissionUiState(status = statusState.value, request = request, openAppSettings = openAppSettings)
 }
 
 /**

@@ -69,3 +69,18 @@ actual fun rememberRequestNotificationPermission(onGranted: () -> Unit, onDenied
 @Composable actual fun isGpsDisabled(): Boolean = false
 
 @Composable actual fun SetScreenBrightness(brightness: Float) {}
+
+@Composable actual fun rememberOpenAppSettings(): () -> Unit = {}
+
+private fun grantedPermissionState(): PermissionUiState =
+    PermissionUiState(status = PermissionStatus.GRANTED, request = {}, openAppSettings = {})
+
+@Composable actual fun rememberLocationPermissionState(): PermissionUiState = grantedPermissionState()
+
+@Composable actual fun rememberBluetoothPermissionState(): PermissionUiState = grantedPermissionState()
+
+@Composable actual fun rememberNotificationPermissionState(): PermissionUiState = grantedPermissionState()
+
+@Composable actual fun rememberLocalNetworkPermissionState(): PermissionUiState = grantedPermissionState()
+
+@Composable actual fun rememberCameraPermissionState(): PermissionUiState = grantedPermissionState()

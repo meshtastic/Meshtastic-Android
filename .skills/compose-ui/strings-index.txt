@@ -117,6 +117,7 @@ bluetooth_feature_discovery
 bluetooth_feature_discovery_description
 bluetooth_permission
 bold_heading
+bonding_failed_permissions
 bottom_nav_settings
 broadcast_interval
 busy_noise_floor
@@ -125,6 +126,7 @@ buzzer_gpio
 calculating
 call_sign
 call_sign_summary
+camera_permission_rationale
 cancel
 cancel_reply
 canned_message
@@ -653,6 +655,7 @@ gps_en_gpio
 gps_mode
 gps_receive_gpio
 gps_transmit_gpio
+grant_permission
 green
 hardware
 hardware_model
@@ -1460,6 +1463,7 @@ url_must_contain_placeholders
 url_template
 url_template_hint
 usb
+usb_permission_denied
 ### USE ###
 use_12h_format
 use_homoglyph_characters_encoding

@@ -148,3 +148,25 @@ actual fun rememberRequestNotificationPermission(onGranted: () -> Unit, onDenied
 
 /** JVM — GPS is never disabled on Desktop (concept doesn't apply). */
 @Composable actual fun isGpsDisabled(): Boolean = false
+
+/** JVM stub — app settings are not available on Desktop. */
+@Composable
+actual fun rememberOpenAppSettings(): () -> Unit = { Logger.w { "App settings not available on JVM/Desktop" } }
+
+private fun grantedDesktopPermissionState(): PermissionUiState =
+    PermissionUiState(status = PermissionStatus.GRANTED, request = {}, openAppSettings = {})
+
+/** JVM — Desktop does not gate location behind a runtime permission. */
+@Composable actual fun rememberLocationPermissionState(): PermissionUiState = grantedDesktopPermissionState()
+
+/** JVM — Desktop does not gate Bluetooth behind a runtime permission. */
+@Composable actual fun rememberBluetoothPermissionState(): PermissionUiState = grantedDesktopPermissionState()
+
+/** JVM — Desktop does not gate notifications behind a runtime permission. */
+@Composable actual fun rememberNotificationPermissionState(): PermissionUiState = grantedDesktopPermissionState()
+
+/** JVM — Desktop does not gate local-network access behind a runtime permission. */
+@Composable actual fun rememberLocalNetworkPermissionState(): PermissionUiState = grantedDesktopPermissionState()
+
+/** JVM — Desktop does not gate the camera behind a runtime permission. */
+@Composable actual fun rememberCameraPermissionState(): PermissionUiState = grantedDesktopPermissionState()

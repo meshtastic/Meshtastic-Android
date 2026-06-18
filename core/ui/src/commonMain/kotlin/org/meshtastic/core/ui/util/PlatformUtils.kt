@@ -88,3 +88,36 @@ expect fun rememberRequestNotificationPermission(onGranted: () -> Unit, onDenied
  * this concept doesn't apply.
  */
 @Composable expect fun isGpsDisabled(): Boolean
+
+/** Returns a function that opens this app's system settings page (where the user can change any permission). */
+@Composable expect fun rememberOpenAppSettings(): () -> Unit
+
+/**
+ * Returns the reactive [PermissionUiState] for the location permissions, recomputed on `ON_RESUME`. On platforms
+ * without runtime permissions the status is always [PermissionStatus.GRANTED].
+ */
+@Composable expect fun rememberLocationPermissionState(): PermissionUiState
+
+/**
+ * Returns the reactive [PermissionUiState] for the Bluetooth scan/connect permissions. On pre-Android-12 devices BLE
+ * scanning is gated by the location permission, so the returned state delegates to [rememberLocationPermissionState].
+ */
+@Composable expect fun rememberBluetoothPermissionState(): PermissionUiState
+
+/**
+ * Returns the reactive [PermissionUiState] for the POST_NOTIFICATIONS permission. Always [PermissionStatus.GRANTED] on
+ * API levels / platforms that don't gate notifications behind a runtime permission.
+ */
+@Composable expect fun rememberNotificationPermissionState(): PermissionUiState
+
+/**
+ * Returns the reactive [PermissionUiState] for the ACCESS_LOCAL_NETWORK permission. Always [PermissionStatus.GRANTED]
+ * on API levels / platforms that don't gate local-network access behind a runtime permission.
+ */
+@Composable expect fun rememberLocalNetworkPermissionState(): PermissionUiState
+
+/**
+ * Returns the reactive [PermissionUiState] for the CAMERA permission. Always [PermissionStatus.GRANTED] on platforms
+ * that don't require a runtime camera permission.
+ */
+@Composable expect fun rememberCameraPermissionState(): PermissionUiState
