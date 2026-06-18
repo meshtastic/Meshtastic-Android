@@ -44,6 +44,7 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.application
+import androidx.compose.ui.window.isTraySupported
 import androidx.compose.ui.window.rememberTrayState
 import androidx.compose.ui.window.rememberWindowState
 import co.touchlab.kermit.Logger
@@ -112,7 +113,7 @@ private fun svgPainterResource(path: String, density: Density): Painter = rememb
 }
 
 @OptIn(ExperimentalCoilApi::class)
-fun main(args: Array<String>) = application(exitProcessOnExit = false) {
+fun main(args: Array<String>) = application {
     val koinApp = remember {
         Logger.i { "Meshtastic Desktop — Starting" }
         startKoin { modules(desktopPlatformModule(), desktopModule()) }
@@ -228,7 +229,16 @@ private fun ApplicationScope.MeshtasticDesktopApp(uiViewModel: UIViewModel, isDa
     )
 
     if (isWindowReady && isAppVisible) {
-        MeshtasticWindow(uiViewModel, isDarkTheme, appIcon, windowState) { isAppVisible = false }
+        MeshtasticWindow(uiViewModel, isDarkTheme, appIcon, windowState) {
+            // Minimize to the tray on close — but only where a tray exists. On platforms without a
+            // system tray (e.g. some Linux desktop environments) there's nowhere to minimize to, so
+            // quit instead; otherwise the process would be stranded with no window and no tray icon.
+            if (isTraySupported) {
+                isAppVisible = false
+            } else {
+                exitApplication()
+            }
+        }
     }
 }
 
