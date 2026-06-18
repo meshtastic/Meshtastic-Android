@@ -38,8 +38,8 @@ import org.robolectric.shadows.ShadowBluetoothDevice
  * - [ShadowBluetoothDevice.createBond] calls `checkForBluetoothConnectPermission()` first, so tests must call
  *   [grantBluetoothConnectPermission] or `createBond()` throws [SecurityException] instead of returning a value.
  *
- * Isolation note: because the device cache is static and survives across tests in the same JVM, call
- * [resetBleBondingShadows] (or use a fresh MAC) between tests to avoid bond-state bleed.
+ * Isolation note: because the device cache is static and survives across tests in the same JVM, give each test a
+ * distinct MAC so bond-state cannot bleed between tests.
  */
 object RobolectricBleBonding {
 
@@ -60,14 +60,6 @@ object RobolectricBleBonding {
     fun grantBluetoothConnectPermission() {
         shadowOf(application)
             .grantPermissions(Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_SCAN)
-    }
-
-    /**
-     * Revoke BLUETOOTH_CONNECT so [ShadowBluetoothDevice.createBond] throws [SecurityException] (permission-denied
-     * path).
-     */
-    fun denyBluetoothConnectPermission() {
-        shadowOf(application).denyPermissions(Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_SCAN)
     }
 
     /**
@@ -104,13 +96,5 @@ object RobolectricBleBonding {
             }
         application.sendBroadcast(intent)
         shadowOf(Looper.getMainLooper()).idle()
-    }
-
-    /** Reset the cached device for [mac] back to unbonded so bond-state does not bleed between tests in one JVM. */
-    fun resetBleBondingShadows(mac: String = TEST_BLE_MAC) {
-        deviceShadow(mac).apply {
-            setBondState(BluetoothDevice.BOND_NONE)
-            setCreatedBond(false)
-        }
     }
 }

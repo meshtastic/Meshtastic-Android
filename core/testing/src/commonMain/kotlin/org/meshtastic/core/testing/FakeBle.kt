@@ -359,7 +359,11 @@ class FakeBluetoothRepository :
         _state.value = _state.value.copy(hasPermissions = hasPermissions)
     }
 
-    /** The outcome [FakeBluetoothRepository.bond] produces. */
+    /**
+     * The outcome [FakeBluetoothRepository.bond] produces. [Fail] and [Security] both simply throw their wrapped error;
+     * the distinct cases exist only to document caller intent (via [failBondWith] vs [failBondWithSecurityException])
+     * and leave a seam should the fake ever need to branch on permission failures.
+     */
     sealed interface BondOutcome {
         /** bond() completes normally and records the device as bonded (pre-existing default behavior). */
         data object Success : BondOutcome

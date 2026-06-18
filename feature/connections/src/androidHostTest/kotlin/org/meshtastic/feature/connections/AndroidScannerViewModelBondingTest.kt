@@ -109,7 +109,7 @@ class AndroidScannerViewModelBondingTest {
     }
 
     @Test
-    fun `successful bond arms the transport`() = runTest {
+    fun `successful bond arms the transport`() = runTest(harness.testDispatcher) {
         viewModel.onSelected(ScannerViewModelHarness.unbondedBleEntry(mac))
         testScheduler.advanceUntilIdle()
 
@@ -119,7 +119,7 @@ class AndroidScannerViewModelBondingTest {
     }
 
     @Test
-    fun `generic bond failure still arms the transport`() = runTest {
+    fun `generic bond failure still arms the transport`() = runTest(harness.testDispatcher) {
         // The interrupted-bonding case the fix targets: bond() throws a non-permission error, but we must still
         // arm the transport so its reconnect loop can converge instead of leaving the device inert.
         harness.bluetoothRepository.failBondWith(Exception("Failed to initiate bonding"))
@@ -133,7 +133,7 @@ class AndroidScannerViewModelBondingTest {
     }
 
     @Test
-    fun `security exception does not arm the transport and surfaces an error`() = runTest {
+    fun `security exception does not arm the transport and surfaces an error`() = runTest(harness.testDispatcher) {
         // Missing BLUETOOTH_CONNECT: connecting would fail the same way, so surface the error and do NOT arm.
         harness.bluetoothRepository.failBondWithSecurityException()
 
@@ -146,7 +146,7 @@ class AndroidScannerViewModelBondingTest {
     }
 
     @Test
-    fun `already bonded entry arms the transport without bonding`() = runTest {
+    fun `already bonded entry arms the transport without bonding`() = runTest(harness.testDispatcher) {
         // R6: selecting an already-bonded device connects directly without invoking createBond().
         val bonded = DeviceListEntry.Ble(device = FakeBleDevice(address = mac, name = "Node"), bonded = true)
 

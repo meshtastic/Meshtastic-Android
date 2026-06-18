@@ -131,17 +131,23 @@ class AndroidBluetoothRepositoryBondTest {
         val mac = "AA:BB:CC:DD:EE:03"
         val repo = newRepository(UnconfinedTestDispatcher(testScheduler))
 
-        repo.bond(FakeBleDevice(address = mac)) // returns normally (no broadcast, no exception)
+        // Resumes (no broadcast) via the post-createBond BOND_BONDED branch; assert no error surfaced.
+        assertNull(launchBond(repo, mac).await(), "bond() should resume when the re-check finds BOND_BONDED")
     }
 
     @Test
     fun `already bonded device returns immediately without initiating a bond`() = runTest(UnconfinedTestDispatcher()) {
         val mac = "AA:BB:CC:DD:EE:04"
         RobolectricBleBonding.grantBluetoothConnectPermission()
+        // Make the device already bonded both at the adapter level (so isBonded is observable) and per-device
+        // (so bond() hits the early BOND_BONDED guard at line 85 without ever calling createBond()).
         RobolectricBleBonding.primeBond(mac, bondState = BluetoothDevice.BOND_BONDED, createBondReturns = false)
+        shadowOf(BluetoothAdapter.getDefaultAdapter())
+            .setBondedDevices(setOf(BluetoothAdapter.getDefaultAdapter().getRemoteDevice(mac)))
         val repo = newRepository(UnconfinedTestDispatcher(testScheduler))
 
-        repo.bond(FakeBleDevice(address = mac)) // early return at the BOND_BONDED guard; no exception
+        assertNull(launchBond(repo, mac).await(), "an already-bonded device should return without error")
+        assertTrue(repo.isBonded(mac), "the device should remain reported as bonded")
     }
 
     @Test
@@ -160,6 +166,52 @@ class AndroidBluetoothRepositoryBondTest {
 
         assertEquals("Bonding failed or rejected", failure.await()?.message)
     }
+
+    @Test
+    fun `createBond true then a BONDED broadcast resumes the bond`() = runTest(UnconfinedTestDispatcher()) {
+        // The ordinary successful path: createBond() succeeds, the call parks on the receiver, and the OS later
+        // confirms via ACTION_BOND_STATE_CHANGED(BOND_BONDED).
+        val mac = "AA:BB:CC:DD:EE:08"
+        RobolectricBleBonding.grantBluetoothConnectPermission()
+        RobolectricBleBonding.primeBond(mac, bondState = BluetoothDevice.BOND_NONE, createBondReturns = true)
+        val repo = newRepository(UnconfinedTestDispatcher(testScheduler))
+
+        val failure = launchBond(repo, mac)
+        RobolectricBleBonding.sendBondStateChanged(
+            mac,
+            newState = BluetoothDevice.BOND_BONDED,
+            previousState = BluetoothDevice.BOND_BONDING,
+        )
+
+        assertNull(failure.await(), "a freshly initiated bond should resolve on the BONDED broadcast")
+    }
+
+    @Test
+    fun `a BOND_NONE broadcast from a non-BONDING state does not fail the parked bond`() =
+        runTest(UnconfinedTestDispatcher()) {
+            // Only BOND_NONE *from* BOND_BONDING means rejection; a spurious BOND_NONE (prev != BONDING) must be
+            // ignored and leave the call waiting.
+            val mac = "AA:BB:CC:DD:EE:09"
+            RobolectricBleBonding.grantBluetoothConnectPermission()
+            RobolectricBleBonding.primeBond(mac, bondState = BluetoothDevice.BOND_BONDING, createBondReturns = false)
+            val repo = newRepository(UnconfinedTestDispatcher(testScheduler))
+
+            val failure = launchBond(repo, mac)
+            RobolectricBleBonding.sendBondStateChanged(
+                mac,
+                newState = BluetoothDevice.BOND_NONE,
+                previousState = BluetoothDevice.BOND_NONE,
+            )
+            assertFalse(failure.isCompleted, "a spurious BOND_NONE must not resolve the bond")
+
+            // A genuine completion still resolves it (and cleans up the background coroutine).
+            RobolectricBleBonding.sendBondStateChanged(
+                mac,
+                newState = BluetoothDevice.BOND_BONDED,
+                previousState = BluetoothDevice.BOND_BONDING,
+            )
+            assertNull(failure.await())
+        }
 
     @Test
     fun `isBonded reflects the adapter bonded devices`() = runTest(UnconfinedTestDispatcher()) {
