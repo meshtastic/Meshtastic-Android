@@ -106,6 +106,7 @@ include(
     ":core:datastore",
     ":core:di",
     ":core:domain",
+    ":core:konsist",
     ":core:model",
     ":core:navigation",
     ":core:network",

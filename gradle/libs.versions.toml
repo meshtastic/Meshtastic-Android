@@ -30,6 +30,7 @@ mokkery = "3.4.1"
 junit5 = "6.1.0"
 junit-platform = "6.1.0" # aligned with junit5 — JUnit Platform uses 1.x scheme
 kotest = "6.2.1"
+konsist = "0.17.3"
 testRetry = "1.6.5"
 turbine = "1.2.1"
 
@@ -238,6 +239,7 @@ junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher
 kotest-assertions = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
 kotest-property = { module = "io.kotest:kotest-property", version.ref = "kotest" }
 kotest-runner-junit6 = { module = "io.kotest:kotest-runner-junit6", version.ref = "kotest" }
+konsist = { module = "com.lemonappdev:konsist", version.ref = "konsist" }
 robolectric = { module = "org.robolectric:robolectric", version = "4.16.1" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 
