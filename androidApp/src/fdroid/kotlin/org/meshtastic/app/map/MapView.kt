@@ -16,7 +16,6 @@
  */
 package org.meshtastic.app.map
 
-import android.Manifest
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -68,8 +67,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import co.touchlab.kermit.Logger
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
@@ -130,7 +127,9 @@ import org.meshtastic.core.ui.icon.Layers
 import org.meshtastic.core.ui.icon.Lens
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.PinDrop
+import org.meshtastic.core.ui.util.PermissionStatus
 import org.meshtastic.core.ui.util.formatAgo
+import org.meshtastic.core.ui.util.rememberLocationPermissionState
 import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.feature.map.BaseMapViewModel.MapFilterState
 import org.meshtastic.feature.map.LastHeardFilter
@@ -208,7 +207,6 @@ private fun cacheManagerCallback(onTaskComplete: () -> Unit, onTaskFailed: (Int)
  * @param mapViewModel The [MapViewModel] providing data and state for the map.
  * @param navigateToNodeDetails Callback to navigate to the details screen of a selected node.
  */
-@OptIn(ExperimentalPermissionsApi::class) // Added for Accompanist
 @Suppress("CyclomaticComplexMethod", "LongMethod")
 @Composable
 fun MapView(
@@ -246,9 +244,8 @@ fun MapView(
     val unknownText = stringResource(Res.string.unknown)
     val nowText = stringResource(Res.string.now)
 
-    // Accompanist permissions state for location
-    val locationPermissionsState =
-        rememberMultiplePermissionsState(permissions = listOf(Manifest.permission.ACCESS_FINE_LOCATION))
+    // Location permission state (native; recomputed on resume).
+    val locationPermission = rememberLocationPermissionState()
     var triggerLocationToggleAfterPermission by remember { mutableStateOf(false) }
 
     fun loadOnlineTileSourceBase(): ITileSource {
@@ -309,8 +306,8 @@ fun MapView(
     }
 
     // Effect to toggle MyLocation after permission is granted
-    LaunchedEffect(locationPermissionsState.allPermissionsGranted) {
-        if (locationPermissionsState.allPermissionsGranted && triggerLocationToggleAfterPermission) {
+    LaunchedEffect(locationPermission.isGranted) {
+        if (locationPermission.isGranted && triggerLocationToggleAfterPermission) {
             map.toggleMyLocation()
             triggerLocationToggleAfterPermission = false
         }
@@ -637,11 +634,17 @@ fun MapView(
                     },
                     isLocationTrackingEnabled = myLocationOverlay != null,
                     onToggleLocationTracking = {
-                        if (locationPermissionsState.allPermissionsGranted) {
-                            map.toggleMyLocation()
-                        } else {
-                            triggerLocationToggleAfterPermission = true
-                            locationPermissionsState.launchMultiplePermissionRequest()
+                        when {
+                            locationPermission.isGranted -> map.toggleMyLocation()
+
+                            // Permanently denied: the system won't prompt again, so send the user to settings.
+                            locationPermission.status == PermissionStatus.PERMANENTLY_DENIED ->
+                                locationPermission.openAppSettings()
+
+                            else -> {
+                                triggerLocationToggleAfterPermission = true
+                                locationPermission.request()
+                            }
                         }
                     },
                 )

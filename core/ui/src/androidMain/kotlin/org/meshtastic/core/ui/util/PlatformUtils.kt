@@ -18,9 +18,22 @@
 
 package org.meshtastic.core.ui.util
 
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
 import android.content.ActivityNotFoundException
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.content.pm.PackageManager
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.Uri
+import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
+import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
@@ -30,6 +43,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
@@ -181,73 +196,21 @@ actual fun KeepScreenOn(enabled: Boolean) {
 }
 
 @Composable
-actual fun rememberRequestLocationPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit {
-    val launcher =
-        androidx.activity.compose.rememberLauncherForActivityResult(
-            androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions(),
-        ) { permissions ->
-            if (permissions.values.any { it }) {
-                onGranted()
-            } else {
-                onDenied()
-            }
-        }
-    return remember(launcher) {
-        {
-            launcher.launch(
-                arrayOf(
-                    android.Manifest.permission.ACCESS_FINE_LOCATION,
-                    android.Manifest.permission.ACCESS_COARSE_LOCATION,
-                ),
-            )
-        }
-    }
-}
-
-@Composable
 actual fun rememberOpenLocationSettings(): () -> Unit {
     val launcher =
         androidx.activity.compose.rememberLauncherForActivityResult(
             androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult(),
         ) { _ ->
         }
-    return remember(launcher) { { launcher.launch(Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS)) } }
-}
-
-@Composable
-actual fun rememberRequestBluetoothPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit {
-    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) {
-        // On pre-Android 12, BLE scanning is gated by location permission, not Bluetooth.
-        return remember { { onGranted() } }
-    }
-    val currentOnGranted = rememberUpdatedState(onGranted)
-    val currentOnDenied = rememberUpdatedState(onDenied)
-    val launcher =
-        rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            if (permissions.values.all { it }) currentOnGranted.value() else currentOnDenied.value()
-        }
     return remember(launcher) {
         {
-            launcher.launch(
-                arrayOf(android.Manifest.permission.BLUETOOTH_SCAN, android.Manifest.permission.BLUETOOTH_CONNECT),
-            )
+            try {
+                launcher.launch(Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+            } catch (ex: ActivityNotFoundException) {
+                Logger.w(ex) { "No location settings activity available" }
+            }
         }
     }
-}
-
-@Composable
-actual fun rememberRequestNotificationPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit {
-    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) {
-        // Pre-Android 13, no runtime notification permission required.
-        return remember { { onGranted() } }
-    }
-    val currentOnGranted = rememberUpdatedState(onGranted)
-    val currentOnDenied = rememberUpdatedState(onDenied)
-    val launcher =
-        rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-            if (granted) currentOnGranted.value() else currentOnDenied.value()
-        }
-    return remember(launcher) { { launcher.launch(android.Manifest.permission.POST_NOTIFICATIONS) } }
 }
 
 // API level at which ACCESS_LOCAL_NETWORK became a real runtime permission (Android 17 / API 37).
@@ -258,51 +221,252 @@ actual fun rememberRequestNotificationPermission(onGranted: () -> Unit, onDenied
 private const val LOCAL_NETWORK_PERMISSION_API = 37
 
 @Composable
-actual fun rememberRequestLocalNetworkPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit {
-    if (android.os.Build.VERSION.SDK_INT < LOCAL_NETWORK_PERMISSION_API) {
-        // Pre-Android 17, ACCESS_LOCAL_NETWORK is not a runtime permission. Localhost / LAN access
-        // works implicitly under the INTERNET permission, so report granted without prompting.
-        return remember { { onGranted() } }
-    }
-    val currentOnGranted = rememberUpdatedState(onGranted)
-    val currentOnDenied = rememberUpdatedState(onDenied)
-    val launcher =
-        rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-            if (granted) currentOnGranted.value() else currentOnDenied.value()
-        }
-    return remember(launcher) { { launcher.launch(android.Manifest.permission.ACCESS_LOCAL_NETWORK) } }
-}
-
-@Composable
-actual fun isLocalNetworkPermissionGranted(): Boolean {
-    if (android.os.Build.VERSION.SDK_INT < LOCAL_NETWORK_PERMISSION_API) {
-        // Pre-Android 17, no runtime local-network gate; access is implicit via INTERNET.
-        return true
-    }
-    val context = LocalContext.current
-    return rememberOnResumeState {
-        androidx.core.content.ContextCompat.checkSelfPermission(
-            context,
-            android.Manifest.permission.ACCESS_LOCAL_NETWORK,
-        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
-    }
-}
-
-@Composable
-actual fun isLocationPermissionGranted(): Boolean {
-    val context = LocalContext.current
-    return rememberOnResumeState {
-        androidx.core.content.ContextCompat.checkSelfPermission(
-            context,
-            android.Manifest.permission.ACCESS_FINE_LOCATION,
-        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
-    }
-}
-
-@Composable
 actual fun isGpsDisabled(): Boolean {
     val context = LocalContext.current
     return rememberOnResumeState { context.gpsDisabled() }
+}
+
+@Composable
+actual fun rememberOpenBluetoothSettings(): () -> Unit {
+    val context = LocalContext.current
+    return remember(context) {
+        {
+            try {
+                context.startActivity(
+                    Intent(Settings.ACTION_BLUETOOTH_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                )
+            } catch (ex: ActivityNotFoundException) {
+                Logger.w(ex) { "No Bluetooth settings activity available" }
+            }
+        }
+    }
+}
+
+@Composable
+actual fun rememberOpenWifiSettings(): () -> Unit {
+    val context = LocalContext.current
+    return remember(context) {
+        {
+            try {
+                context.startActivity(Intent(Settings.ACTION_WIFI_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            } catch (ex: ActivityNotFoundException) {
+                Logger.w(ex) { "No Wi-Fi settings activity available" }
+            }
+        }
+    }
+}
+
+@Composable
+actual fun isBluetoothDisabled(): Boolean {
+    val context = LocalContext.current
+    return rememberObservedFlag(
+        read = {
+            // adapter == null means the device has no Bluetooth at all — not "disabled", so don't nag.
+            val adapter = (context.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager)?.adapter
+            adapter != null && !adapter.isEnabled
+        },
+        subscribe = { onChange ->
+            val receiver =
+                object : BroadcastReceiver() {
+                    override fun onReceive(receiverContext: Context?, intent: Intent?) = onChange()
+                }
+            // ACTION_STATE_CHANGED is a protected system broadcast; NOT_EXPORTED keeps the receiver app-private.
+            // Registered without a Handler, so onReceive is delivered on the main thread.
+            ContextCompat.registerReceiver(
+                context,
+                receiver,
+                IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED),
+                ContextCompat.RECEIVER_NOT_EXPORTED,
+            )
+            val unregister = { context.unregisterReceiver(receiver) }
+            unregister
+        },
+    )
+}
+
+@Composable
+actual fun isWifiUnavailable(): Boolean {
+    val context = LocalContext.current
+    return rememberObservedFlag(
+        read = {
+            val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+            val capabilities = cm?.activeNetwork?.let { cm.getNetworkCapabilities(it) }
+            val onLocalNetwork =
+                capabilities != null &&
+                    (
+                        capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
+                        )
+            !onLocalNetwork
+        },
+        subscribe = { onChange ->
+            val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            val callback =
+                object : ConnectivityManager.NetworkCallback() {
+                    override fun onAvailable(network: Network) = onChange()
+
+                    override fun onLost(network: Network) = onChange()
+
+                    override fun onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities) =
+                        onChange()
+                }
+            // Main-thread Handler so the state write lands on the main thread (the API-26+ overload; minSdk is 26).
+            cm.registerDefaultNetworkCallback(callback, Handler(Looper.getMainLooper()))
+            val unregister = { cm.unregisterNetworkCallback(callback) }
+            unregister
+        },
+    )
+}
+
+@Composable
+actual fun rememberOpenAppSettings(): () -> Unit {
+    val context = LocalContext.current
+    return remember(context) {
+        {
+            val intent =
+                Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                    data = Uri.fromParts("package", context.packageName, null)
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+            try {
+                context.startActivity(intent)
+            } catch (ex: ActivityNotFoundException) {
+                Logger.w(ex) { "Failed to open app settings" }
+            }
+        }
+    }
+}
+
+@Composable
+actual fun rememberLocationPermissionState(): PermissionUiState = rememberRuntimePermissionState(
+    permissions =
+    arrayOf(
+        android.Manifest.permission.ACCESS_FINE_LOCATION,
+        android.Manifest.permission.ACCESS_COARSE_LOCATION,
+    ),
+    // Coarse-only grants are an accepted degraded mode, so any granted permission counts.
+    requireAll = false,
+)
+
+@Composable
+actual fun rememberBluetoothPermissionState(): PermissionUiState {
+    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) {
+        // Pre-Android 12 has no runtime Bluetooth permission — BLE scanning is gated by the location permission, which
+        // callers request separately (the intro Location screen, the map/Privacy location flows). Report granted here
+        // so the Bluetooth surface itself is a no-op rather than masquerading as a location request.
+        return rememberGrantedPermissionState()
+    }
+    return rememberRuntimePermissionState(
+        permissions =
+        arrayOf(android.Manifest.permission.BLUETOOTH_SCAN, android.Manifest.permission.BLUETOOTH_CONNECT),
+        requireAll = true,
+    )
+}
+
+@Composable
+actual fun rememberNotificationPermissionState(): PermissionUiState {
+    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) {
+        // Pre-Android 13, no runtime notification permission required.
+        return rememberGrantedPermissionState()
+    }
+    return rememberRuntimePermissionState(
+        permissions = arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
+        requireAll = true,
+    )
+}
+
+@Composable
+actual fun rememberLocalNetworkPermissionState(): PermissionUiState {
+    if (android.os.Build.VERSION.SDK_INT < LOCAL_NETWORK_PERMISSION_API) {
+        // Pre-Android 17, ACCESS_LOCAL_NETWORK is implicit via INTERNET; treat as granted.
+        return rememberGrantedPermissionState()
+    }
+    return rememberRuntimePermissionState(
+        permissions = arrayOf(android.Manifest.permission.ACCESS_LOCAL_NETWORK),
+        requireAll = true,
+    )
+}
+
+@Composable
+actual fun rememberCameraPermissionState(): PermissionUiState =
+    rememberRuntimePermissionState(permissions = arrayOf(android.Manifest.permission.CAMERA), requireAll = true)
+
+/** A constant [PermissionUiState] for API levels where the permission is not gated at runtime. */
+@Composable private fun rememberGrantedPermissionState(): PermissionUiState = remember { grantedPermissionUiState() }
+
+/**
+ * Shared engine behind every `rememberXxxPermissionState()`. Computes the [PermissionStatus] from the live grant state,
+ * the persisted "has-been-requested" flag, and `shouldShowRequestPermissionRationale`, refreshing on `ON_RESUME`
+ * (return from settings) and immediately after a request completes.
+ *
+ * @param requireAll when true, all [permissions] must be granted to count as [PermissionStatus.GRANTED]; when false,
+ *   any single grant suffices (used by location so a coarse-only grant is accepted — R7).
+ */
+@Composable
+private fun rememberRuntimePermissionState(permissions: Array<String>, requireAll: Boolean): PermissionUiState {
+    val context = LocalContext.current
+    val activity = LocalActivity.current
+    val tracker = remember(context) { PermissionRequestTracker(context) }
+    val openAppSettings = rememberOpenAppSettings()
+    // The permission whose rationale + requested flag represents the group.
+    val primaryPermission = permissions.first()
+
+    fun compute(): PermissionStatus {
+        val granted =
+            isPermissionGroupGranted(
+                results =
+                permissions.map {
+                    ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
+                },
+                requireAll = requireAll,
+            )
+        val shouldShowRationale =
+            if (activity != null) {
+                ActivityCompat.shouldShowRequestPermissionRationale(activity, primaryPermission)
+            } else {
+                // No Activity to query (e.g. a non-Activity-hosted composition). Assume a rationale is still warranted
+                // rather than risk a false PERMANENTLY_DENIED that would strand the user with only a settings link.
+                true
+            }
+        return computePermissionStatus(
+            granted = granted,
+            hasRequested = tracker.hasRequested(primaryPermission),
+            shouldShowRationale = shouldShowRationale,
+        )
+    }
+
+    val statusState = remember { mutableStateOf(compute()) }
+    val launcher =
+        rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { _ ->
+            // The OS has now adjudicated the request; only here is it true that we have asked the user. The result
+            // callback runs on the main thread, so updating the state directly here is safe and recomposes the caller.
+            tracker.markRequested(primaryPermission)
+            statusState.value = compute()
+        }
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { statusState.value = compute() }
+
+    val request = remember(launcher) { { launcher.launch(permissions) } }
+    return PermissionUiState(status = statusState.value, request = request, openAppSettings = openAppSettings)
+}
+
+/**
+ * Remembers a boolean derived from [read], kept live by an observer registered via [subscribe] for the duration of the
+ * composition. [subscribe] receives an `onChange` callback to invoke whenever the underlying state may have changed and
+ * must return a teardown function. The value is re-seeded via [read] at registration, so it is correct even before the
+ * first event arrives. Used for adapter/connectivity state that changes outside the activity lifecycle (e.g. toggling
+ * Bluetooth or Wi-Fi from the quick-settings shade).
+ */
+@Composable
+private fun rememberObservedFlag(read: () -> Boolean, subscribe: (onChange: () -> Unit) -> () -> Unit): Boolean {
+    val currentRead = rememberUpdatedState(read)
+    val currentSubscribe = rememberUpdatedState(subscribe)
+    val state = remember { mutableStateOf(read()) }
+    DisposableEffect(Unit) {
+        state.value = currentRead.value()
+        val unsubscribe = currentSubscribe.value { state.value = currentRead.value() }
+        onDispose { unsubscribe() }
+    }
+    return state.value
 }
 
 /**

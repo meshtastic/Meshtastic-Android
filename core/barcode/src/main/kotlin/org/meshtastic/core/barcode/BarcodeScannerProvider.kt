@@ -14,11 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-@file:OptIn(ExperimentalPermissionsApi::class)
-
 package org.meshtastic.core.barcode
 
-import android.Manifest
 import androidx.camera.compose.CameraXViewfinder
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
@@ -26,16 +23,22 @@ import androidx.camera.core.Preview
 import androidx.camera.core.SurfaceRequest
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,34 +49,51 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import co.touchlab.kermit.Logger
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asExecutor
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.camera_permission
+import org.meshtastic.core.resources.camera_permission_rationale
 import org.meshtastic.core.resources.close
+import org.meshtastic.core.ui.component.PermissionRecoveryCard
 import org.meshtastic.core.ui.icon.Close
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.util.BarcodeScanner
+import org.meshtastic.core.ui.util.PermissionStatus
+import org.meshtastic.core.ui.util.rememberCameraPermissionState
 
 @Composable
 fun rememberBarcodeScanner(onResult: (String?) -> Unit): BarcodeScanner {
     var showDialog by remember { mutableStateOf(false) }
     var pendingScan by remember { mutableStateOf(false) }
-    val cameraPermissionState = rememberPermissionState(Manifest.permission.CAMERA)
+    var showPermissionRecovery by remember { mutableStateOf(false) }
+    val cameraPermission = rememberCameraPermissionState()
+    val currentStatus = rememberUpdatedState(cameraPermission.status)
 
-    LaunchedEffect(cameraPermissionState.status.isGranted) {
-        if (cameraPermissionState.status.isGranted && pendingScan) {
-            showDialog = true
-            pendingScan = false
+    LaunchedEffect(cameraPermission.status) {
+        when {
+            // A grant arrived for a scan the user asked for — either the pending request or the recovery card's
+            // "Grant"/"Open settings" round-trip. Open the scanner and clear both pending flags.
+            cameraPermission.isGranted && (pendingScan || showPermissionRecovery) -> {
+                showDialog = true
+                pendingScan = false
+                showPermissionRecovery = false
+            }
+
+            // The pending request completed without a grant — surface a recovery card instead of failing silently.
+            pendingScan && cameraPermission.status != PermissionStatus.NOT_REQUESTED -> {
+                showPermissionRecovery = true
+                pendingScan = false
+            }
         }
     }
 
@@ -90,14 +110,38 @@ fun rememberBarcodeScanner(onResult: (String?) -> Unit): BarcodeScanner {
         )
     }
 
+    if (showPermissionRecovery) {
+        Dialog(onDismissRequest = { showPermissionRecovery = false }) {
+            Surface(shape = MaterialTheme.shapes.large, color = MaterialTheme.colorScheme.surface) {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    // Heading gives screen readers context for the standalone dialog (unlike the in-sheet Compass
+                    // card).
+                    Text(
+                        text = stringResource(Res.string.camera_permission),
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.semantics { heading() },
+                    )
+                    PermissionRecoveryCard(
+                        state = cameraPermission,
+                        rationale = stringResource(Res.string.camera_permission_rationale),
+                    )
+                }
+            }
+        }
+    }
+
     return remember {
         object : BarcodeScanner {
             override fun startScan() {
-                if (cameraPermissionState.status.isGranted) {
-                    showDialog = true
-                } else {
-                    pendingScan = true
-                    cameraPermissionState.launchPermissionRequest()
+                when (currentStatus.value) {
+                    PermissionStatus.GRANTED -> showDialog = true
+
+                    PermissionStatus.PERMANENTLY_DENIED -> showPermissionRecovery = true
+
+                    else -> {
+                        pendingScan = true
+                        cameraPermission.request()
+                    }
                 }
             }
         }

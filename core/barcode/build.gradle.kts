@@ -36,7 +36,6 @@ dependencies {
     implementation(libs.compose.multiplatform.material3)
     implementation(libs.compose.multiplatform.runtime)
     implementation(libs.compose.multiplatform.ui)
-    implementation(libs.accompanist.permissions)
     implementation(libs.kermit)
 
     // ML Kit is used for the Google flavor, while ZXing is used for F-Droid to avoid GMS dependencies.

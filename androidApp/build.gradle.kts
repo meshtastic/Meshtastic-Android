@@ -265,7 +265,6 @@ dependencies {
     implementation(libs.koin.compose.viewmodel)
     implementation(libs.koin.androidx.workmanager)
     implementation(libs.koin.annotations)
-    implementation(libs.accompanist.permissions)
     implementation(libs.kermit)
     implementation(libs.kotlinx.datetime)
 

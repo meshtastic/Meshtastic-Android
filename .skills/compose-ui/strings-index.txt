@@ -110,6 +110,7 @@ blue
 bluetooth
 bluetooth_available_devices
 bluetooth_config
+bluetooth_disabled
 bluetooth_enabled
 bluetooth_feature_config
 bluetooth_feature_config_description
@@ -117,6 +118,7 @@ bluetooth_feature_discovery
 bluetooth_feature_discovery_description
 bluetooth_permission
 bold_heading
+bonding_failed_permissions
 bottom_nav_settings
 broadcast_interval
 busy_noise_floor
@@ -125,6 +127,8 @@ buzzer_gpio
 calculating
 call_sign
 call_sign_summary
+camera_permission
+camera_permission_rationale
 cancel
 cancel_reply
 canned_message
@@ -653,6 +657,7 @@ gps_en_gpio
 gps_mode
 gps_receive_gpio
 gps_transmit_gpio
+grant_permission
 green
 hardware
 hardware_model
@@ -1011,10 +1016,13 @@ one_month
 one_week
 one_wire_temperature
 only_favorites
+### OPEN ###
+open_bluetooth_settings
 open_compass
 open_settings
 open_source_description
 open_source_libraries
+open_wifi_settings
 options
 orient_north
 ### OUTPUT ###
@@ -1460,6 +1468,7 @@ url_must_contain_placeholders
 url_template
 url_template_hint
 usb
+usb_permission_denied
 ### USE ###
 use_12h_format
 use_homoglyph_characters_encoding
@@ -1532,6 +1541,7 @@ wifi_provisioning
 wifi_qr_code_error
 wifi_qr_code_scan
 wifi_rssi_threshold_defaults_to_80
+wifi_unavailable
 ### WIND ###
 wind
 wind_direction

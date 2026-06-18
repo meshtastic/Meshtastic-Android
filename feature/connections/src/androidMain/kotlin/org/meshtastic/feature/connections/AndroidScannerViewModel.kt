@@ -22,6 +22,7 @@ import co.touchlab.kermit.Severity
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.datastore.RecentAddressesDataSource
@@ -33,6 +34,9 @@ import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.bonding_failed_permissions
+import org.meshtastic.core.resources.usb_permission_denied
 import org.meshtastic.feature.connections.model.AndroidUsbDeviceData
 import org.meshtastic.feature.connections.model.DeviceListEntry
 import org.meshtastic.feature.connections.model.GetDiscoveredDevicesUseCase
@@ -78,7 +82,7 @@ class AndroidScannerViewModel(
                     // error and do not arm the transport.
                     Logger.w(ex) { "Bonding failed for ${entry.device.address.anonymize} Permissions not granted" }
                     serviceRepository.setErrorMessage(
-                        text = "Bonding failed: ${ex.message} Permissions not granted",
+                        text = getString(Res.string.bonding_failed_permissions),
                         severity = Severity.Warn,
                     )
                     false
@@ -110,6 +114,10 @@ class AndroidScannerViewModel(
                     changeDeviceAddress(entry.fullAddress)
                 } else {
                     Logger.e { "USB permission denied for device ${entry.address}" }
+                    serviceRepository.setErrorMessage(
+                        text = getString(Res.string.usb_permission_denied),
+                        severity = Severity.Warn,
+                    )
                 }
             }
             .launchIn(viewModelScope)

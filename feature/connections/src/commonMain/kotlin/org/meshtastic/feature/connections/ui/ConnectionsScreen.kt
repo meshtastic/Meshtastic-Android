@@ -54,18 +54,29 @@ import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.bluetooth_disabled
 import org.meshtastic.core.resources.connections
 import org.meshtastic.core.resources.no_device_selected
+import org.meshtastic.core.resources.open_bluetooth_settings
+import org.meshtastic.core.resources.open_wifi_settings
 import org.meshtastic.core.resources.set_your_region
 import org.meshtastic.core.resources.unknown_device
+import org.meshtastic.core.resources.wifi_unavailable
 import org.meshtastic.core.ui.component.AdaptiveTwoPane
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.MainAppBar
+import org.meshtastic.core.ui.component.RecoveryCard
+import org.meshtastic.core.ui.icon.Bluetooth
 import org.meshtastic.core.ui.icon.Language
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.NoDevice
-import org.meshtastic.core.ui.util.isLocalNetworkPermissionGranted
-import org.meshtastic.core.ui.util.rememberRequestLocalNetworkPermission
+import org.meshtastic.core.ui.util.PermissionStatus
+import org.meshtastic.core.ui.util.isBluetoothDisabled
+import org.meshtastic.core.ui.util.isWifiUnavailable
+import org.meshtastic.core.ui.util.rememberBluetoothPermissionState
+import org.meshtastic.core.ui.util.rememberLocalNetworkPermissionState
+import org.meshtastic.core.ui.util.rememberOpenBluetoothSettings
+import org.meshtastic.core.ui.util.rememberOpenWifiSettings
 import org.meshtastic.core.ui.viewmodel.ConnectionStatus
 import org.meshtastic.core.ui.viewmodel.ConnectionsViewModel
 import org.meshtastic.feature.connections.MOCK_DEVICE_PREFIX
@@ -124,16 +135,18 @@ fun ConnectionsScreen(
     val showBleTransport by scanModel.showBleTransport.collectAsStateWithLifecycle()
     val showNetworkTransport by scanModel.showNetworkTransport.collectAsStateWithLifecycle()
     val showUsbTransport by scanModel.showUsbTransport.collectAsStateWithLifecycle()
-    val localNetworkPermissionGranted = isLocalNetworkPermissionGranted()
+    // Android 17 (API 37) gates NSD/mDNS behind ACCESS_LOCAL_NETWORK. Without this prompt the platform falls back to
+    // the system "Choose a device to connect" picker on every discoverServices() call. The reactive state lets the
+    // network-scan toggle request in-context and route a permanent denial to settings.
+    val localNetworkPermission = rememberLocalNetworkPermissionState()
+    val bluetoothPermission = rememberBluetoothPermissionState()
 
-    // Android 17 (API 37) gates NSD/mDNS behind ACCESS_LOCAL_NETWORK. Without this prompt the platform
-    // falls back to the system "Choose a device to connect" picker on every discoverServices() call.
-    // Granting the permission upfront lets discovery run silently in-app.
-    val requestLocalNetworkPermission =
-        rememberRequestLocalNetworkPermission(
-            onGranted = { scanModel.startNetworkScan() },
-            onDenied = { scanModel.stopNetworkScan() },
-        )
+    // Adapter-state, distinct from permission state: a permission can be granted while Bluetooth is off or the device
+    // is off Wi-Fi. Detected separately so the UI can route to the adapter's settings rather than re-prompting.
+    val bluetoothDisabled = isBluetoothDisabled()
+    val wifiUnavailable = isWifiUnavailable()
+    val openBluetoothSettings = rememberOpenBluetoothSettings()
+    val openWifiSettings = rememberOpenWifiSettings()
 
     // Auto-start BLE scan when the screen is visible (lifecycle ≥ STARTED) and the user has previously opted in.
     // LifecycleStartEffect stops scanning on ON_STOP (app backgrounded) and restarts on ON_START — preventing
@@ -143,8 +156,8 @@ fun ConnectionsScreen(
         onStopOrDispose { scanModel.stopBleScan() }
     }
 
-    LifecycleStartEffect(networkAutoScan, localNetworkPermissionGranted) {
-        if (networkAutoScan && localNetworkPermissionGranted) scanModel.startNetworkScan()
+    LifecycleStartEffect(networkAutoScan, localNetworkPermission.isGranted) {
+        if (networkAutoScan && localNetworkPermission.isGranted) scanModel.startNetworkScan()
         onStopOrDispose { scanModel.stopNetworkScan() }
     }
 
@@ -278,6 +291,24 @@ fun ConnectionsScreen(
                             onToggleNetwork = { scanModel.setShowNetworkTransport(!showNetworkTransport) },
                             onToggleUsb = { scanModel.setShowUsbTransport(!showUsbTransport) },
                         )
+
+                        // Adapter-off hints: shown only when the relevant permission is granted but the radio/network
+                        // is unavailable, so they don't overlap the permission-recovery flow on the scan toggles.
+                        if (showBleTransport && bluetoothPermission.isGranted && bluetoothDisabled) {
+                            RecoveryCard(
+                                message = stringResource(Res.string.bluetooth_disabled),
+                                actionLabel = stringResource(Res.string.open_bluetooth_settings),
+                                onAction = openBluetoothSettings,
+                                actionIcon = MeshtasticIcons.Bluetooth,
+                            )
+                        }
+                        if (showNetworkTransport && localNetworkPermission.isGranted && wifiUnavailable) {
+                            RecoveryCard(
+                                message = stringResource(Res.string.wifi_unavailable),
+                                actionLabel = stringResource(Res.string.open_wifi_settings),
+                                onAction = openWifiSettings,
+                            )
+                        }
                     },
                     second = {
                         // ── Unified device list ──
@@ -295,17 +326,40 @@ fun ConnectionsScreen(
                                 showNetworkSection = showNetworkTransport,
                                 showUsbSection = showUsbTransport,
                                 onSelectDevice = { scanModel.onSelected(it) },
-                                onToggleBleScan = { scanModel.toggleBleScan() },
+                                onToggleBleScan = {
+                                    when {
+                                        // Always allow stopping an in-progress scan.
+                                        isBleScanning -> scanModel.toggleBleScan()
+
+                                        // Granted but the radio is off — scanning can't work, so open BT settings.
+                                        bluetoothPermission.isGranted && bluetoothDisabled -> openBluetoothSettings()
+
+                                        bluetoothPermission.isGranted -> scanModel.toggleBleScan()
+
+                                        // Permanently denied: the system won't prompt again, so send to settings.
+                                        bluetoothPermission.status == PermissionStatus.PERMANENTLY_DENIED ->
+                                            bluetoothPermission.openAppSettings()
+
+                                        // Request in-context; once granted the user can start scanning.
+                                        else -> bluetoothPermission.request()
+                                    }
+                                },
                                 onToggleNetworkScan = {
-                                    if (isNetworkScanning || localNetworkPermissionGranted) {
-                                        scanModel.toggleNetworkScan()
-                                    } else {
-                                        // Prefer requesting the runtime grant over letting the platform fall
-                                        // back to the system NSD picker. Persist the user's intent so that if
-                                        // they grant after the prompt, the scan starts via the launcher's
-                                        // onGranted callback and stays on for next session.
-                                        scanModel.persistNetworkAutoScanIntent(true)
-                                        requestLocalNetworkPermission()
+                                    when {
+                                        isNetworkScanning || localNetworkPermission.isGranted ->
+                                            scanModel.toggleNetworkScan()
+
+                                        localNetworkPermission.status == PermissionStatus.PERMANENTLY_DENIED ->
+                                            localNetworkPermission.openAppSettings()
+
+                                        else -> {
+                                            // Prefer requesting the runtime grant over letting the platform fall back
+                                            // to the system NSD picker. Persist the user's intent so that if they
+                                            // grant after the prompt, the scan starts via the LifecycleStartEffect and
+                                            // stays on for next session.
+                                            scanModel.persistNetworkAutoScanIntent(true)
+                                            localNetworkPermission.request()
+                                        }
                                     }
                                 },
                                 onAddManualAddress = { _, fullAddress ->

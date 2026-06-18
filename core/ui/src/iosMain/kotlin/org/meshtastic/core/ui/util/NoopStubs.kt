@@ -50,22 +50,28 @@ actual fun rememberOpenFileLauncher(onUriReceived: (CommonUri?) -> Unit): (mimeT
 
 @Composable actual fun KeepScreenOn(enabled: Boolean) {}
 
-@Composable actual fun rememberRequestLocationPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit = {}
-
 @Composable actual fun rememberOpenLocationSettings(): () -> Unit = {}
 
-@Composable actual fun rememberRequestBluetoothPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit = {}
+@Composable actual fun rememberOpenBluetoothSettings(): () -> Unit = {}
 
-@Composable
-actual fun rememberRequestLocalNetworkPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit = {}
-
-@Composable actual fun isLocalNetworkPermissionGranted(): Boolean = true
-
-@Composable
-actual fun rememberRequestNotificationPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit = {}
-
-@Composable actual fun isLocationPermissionGranted(): Boolean = true
+@Composable actual fun rememberOpenWifiSettings(): () -> Unit = {}
 
 @Composable actual fun isGpsDisabled(): Boolean = false
 
+@Composable actual fun isBluetoothDisabled(): Boolean = false
+
+@Composable actual fun isWifiUnavailable(): Boolean = false
+
 @Composable actual fun SetScreenBrightness(brightness: Float) {}
+
+@Composable actual fun rememberOpenAppSettings(): () -> Unit = {}
+
+@Composable actual fun rememberLocationPermissionState(): PermissionUiState = grantedPermissionUiState()
+
+@Composable actual fun rememberBluetoothPermissionState(): PermissionUiState = grantedPermissionUiState()
+
+@Composable actual fun rememberNotificationPermissionState(): PermissionUiState = grantedPermissionUiState()
+
+@Composable actual fun rememberLocalNetworkPermissionState(): PermissionUiState = grantedPermissionUiState()
+
+@Composable actual fun rememberCameraPermissionState(): PermissionUiState = grantedPermissionUiState()

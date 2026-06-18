@@ -128,6 +128,7 @@
     <string name="bluetooth">Bluetooth</string>
     <string name="bluetooth_available_devices">Available Bluetooth Devices</string>
     <string name="bluetooth_config">Bluetooth Config</string>
+    <string name="bluetooth_disabled">Bluetooth is off. Turn it on to scan for nearby devices.</string>
     <string name="bluetooth_enabled">Bluetooth enabled</string>
     <string name="bluetooth_feature_config">Configuration</string>
     <string name="bluetooth_feature_config_description">Wirelessly manage your device settings and channels.</string>
@@ -135,6 +136,7 @@
     <string name="bluetooth_feature_discovery_description">Find and identify Meshtastic devices near you.</string>
     <string name="bluetooth_permission">Bluetooth</string>
     <string name="bold_heading">Bold Heading</string>
+    <string name="bonding_failed_permissions">Pairing failed. Grant nearby device permissions and try again.</string>
     <string name="bottom_nav_settings">Settings</string>
     <string name="broadcast_interval">Broadcast Interval</string>
     <string name="busy_noise_floor">Busy floor</string>
@@ -143,6 +145,8 @@
     <string name="calculating">Calculating…</string>
     <string name="call_sign">Call sign</string>
     <string name="call_sign_summary">Your amateur radio call sign, up to 8 characters</string>
+    <string name="camera_permission">Camera permission</string>
+    <string name="camera_permission_rationale">Allow camera access to scan QR codes.</string>
     <string name="cancel">Cancel</string>
     <string name="cancel_reply">Cancel reply</string>
     <string name="canned_message">Canned Message</string>
@@ -677,6 +681,7 @@
     <string name="gps_mode">GPS Mode (Physical Hardware)</string>
     <string name="gps_receive_gpio">GPS Receive GPIO</string>
     <string name="gps_transmit_gpio">GPS Transmit GPIO</string>
+    <string name="grant_permission">Grant permission</string>
     <string name="green">Green</string>
     <string name="hardware">Hardware</string>
     <string name="hardware_model">Hardware model</string>
@@ -1041,10 +1046,13 @@
     <string name="one_week">1W</string>
     <string name="one_wire_temperature">1-Wire Temp</string>
     <string name="only_favorites">Only Favorites</string>
+    <!-- OPEN -->
+    <string name="open_bluetooth_settings">Open Bluetooth settings</string>
     <string name="open_compass">Open Compass</string>
     <string name="open_settings">Open settings</string>
     <string name="open_source_description">Meshtastic is built with the following open source libraries. Tap any library to view its license.</string>
     <string name="open_source_libraries">Open Source Libraries</string>
+    <string name="open_wifi_settings">Open Wi-Fi settings</string>
     <string name="options">Options</string>
     <string name="orient_north">Orient north</string>
     <!-- OUTPUT -->
@@ -1505,6 +1513,7 @@
     <string name="url_template">URL Template</string>
     <string name="url_template_hint" translatable="false">https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png</string>
     <string name="usb">USB</string>
+    <string name="usb_permission_denied">USB permission denied. Reconnect the device to try again.</string>
     <!-- USE -->
     <string name="use_12h_format">Use 12h clock format</string>
     <string name="use_homoglyph_characters_encoding">Compact encoding for Cyrillic</string>
@@ -1577,6 +1586,7 @@
     <string name="wifi_qr_code_error">Invalid WiFi Credential QR code format</string>
     <string name="wifi_qr_code_scan">Scan WiFi QR code</string>
     <string name="wifi_rssi_threshold_defaults_to_80">WiFi RSSI threshold (defaults to -80)</string>
+    <string name="wifi_unavailable">Not connected to Wi-Fi. Network scan may not find nearby devices.</string>
     <!-- WIND -->
     <string name="wind">Wind</string>
     <string name="wind_direction">Wind Dir</string>

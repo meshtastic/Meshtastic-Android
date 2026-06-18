@@ -28,6 +28,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -157,12 +158,26 @@ private fun NodeDetailOverlays(
     onDismiss: () -> Unit,
     onRequestPosition: (Node) -> Unit,
 ) {
-    val requestLocationPermission =
-        org.meshtastic.core.ui.util.rememberRequestLocationPermission(
-            onGranted = { node?.let { onRequestPosition(it) } },
-            onDenied = {},
-        )
+    val locationPermission = org.meshtastic.core.ui.util.rememberLocationPermissionState()
     val openLocationSettings = org.meshtastic.core.ui.util.rememberOpenLocationSettings()
+    // Request a fresh position once the user grants from the compass warning, mirroring the prior onGranted callback.
+    var positionPendingGrant by remember { mutableStateOf(false) }
+    val currentNode by rememberUpdatedState(node)
+    val currentOnRequestPosition by rememberUpdatedState(onRequestPosition)
+    LaunchedEffect(locationPermission.status) {
+        if (locationPermission.isGranted && positionPendingGrant) {
+            currentNode?.let { currentOnRequestPosition(it) }
+            positionPendingGrant = false
+        }
+    }
+    val onRequestLocationPermission = {
+        if (locationPermission.status == org.meshtastic.core.ui.util.PermissionStatus.PERMANENTLY_DENIED) {
+            locationPermission.openAppSettings()
+        } else {
+            positionPendingGrant = true
+            locationPermission.request()
+        }
+    }
 
     when (overlay) {
         is NodeDetailOverlay.SharedContact -> node?.let { SharedContactDialog(it, onDismiss) }
@@ -180,7 +195,7 @@ private fun NodeDetailOverlays(
             ) {
                 CompassSheetContent(
                     uiState = compassUiState,
-                    onRequestLocationPermission = { requestLocationPermission() },
+                    onRequestLocationPermission = onRequestLocationPermission,
                     onOpenLocationSettings = { openLocationSettings() },
                     onRequestPosition = { node?.let { onRequestPosition(it) } },
                     modifier = Modifier.padding(bottom = 24.dp),
