@@ -28,13 +28,9 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.app.ActivityCompat
@@ -220,7 +216,15 @@ actual fun rememberOpenLocationSettings(): () -> Unit {
             androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult(),
         ) { _ ->
         }
-    return remember(launcher) { { launcher.launch(Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS)) } }
+    return remember(launcher) {
+        {
+            try {
+                launcher.launch(Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+            } catch (ex: ActivityNotFoundException) {
+                Logger.w(ex) { "No location settings activity available" }
+            }
+        }
+    }
 }
 
 @Composable
@@ -387,13 +391,7 @@ actual fun rememberCameraPermissionState(): PermissionUiState =
     rememberRuntimePermissionState(permissions = arrayOf(android.Manifest.permission.CAMERA), requireAll = true)
 
 /** A constant [PermissionUiState] for API levels where the permission is not gated at runtime. */
-@Composable
-private fun rememberGrantedPermissionState(): PermissionUiState {
-    val openAppSettings = rememberOpenAppSettings()
-    return remember(openAppSettings) {
-        PermissionUiState(status = PermissionStatus.GRANTED, request = {}, openAppSettings = openAppSettings)
-    }
-}
+@Composable private fun rememberGrantedPermissionState(): PermissionUiState = remember { grantedPermissionUiState() }
 
 /**
  * Shared engine behind every `rememberXxxPermissionState()`. Computes the [PermissionStatus] from the live grant state,
@@ -412,15 +410,6 @@ private fun rememberRuntimePermissionState(permissions: Array<String>, requireAl
     // The permission whose rationale + requested flag represents the group.
     val primaryPermission = permissions.first()
 
-    var refreshTrigger by remember { mutableIntStateOf(0) }
-
-    val launcher =
-        rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { _ ->
-            // The OS has now adjudicated the request; only here is it true that we have asked the user.
-            tracker.markRequested(primaryPermission)
-            refreshTrigger++
-        }
-
     fun compute(): PermissionStatus {
         val granted =
             if (requireAll) {
@@ -438,8 +427,14 @@ private fun rememberRuntimePermissionState(permissions: Array<String>, requireAl
     }
 
     val statusState = remember { mutableStateOf(compute()) }
+    val launcher =
+        rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { _ ->
+            // The OS has now adjudicated the request; only here is it true that we have asked the user. The result
+            // callback runs on the main thread, so updating the state directly here is safe and recomposes the caller.
+            tracker.markRequested(primaryPermission)
+            statusState.value = compute()
+        }
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { statusState.value = compute() }
-    LaunchedEffect(refreshTrigger) { statusState.value = compute() }
 
     val request = remember(launcher) { { launcher.launch(permissions) } }
     return PermissionUiState(status = statusState.value, request = request, openAppSettings = openAppSettings)

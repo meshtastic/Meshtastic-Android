@@ -23,13 +23,16 @@ import androidx.camera.core.Preview
 import androidx.camera.core.SurfaceRequest
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -46,6 +49,8 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -56,6 +61,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asExecutor
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.camera_permission
 import org.meshtastic.core.resources.camera_permission_rationale
 import org.meshtastic.core.resources.close
 import org.meshtastic.core.ui.component.PermissionRecoveryCard
@@ -75,21 +81,20 @@ fun rememberBarcodeScanner(onResult: (String?) -> Unit): BarcodeScanner {
 
     LaunchedEffect(cameraPermission.status) {
         when {
-            !pendingScan -> Unit
-
-            cameraPermission.isGranted -> {
+            // A grant arrived for a scan the user asked for — either the pending request or the recovery card's
+            // "Grant"/"Open settings" round-trip. Open the scanner and clear both pending flags.
+            cameraPermission.isGranted && (pendingScan || showPermissionRecovery) -> {
                 showDialog = true
                 pendingScan = false
+                showPermissionRecovery = false
             }
 
-            // The request completed without a grant — surface a recovery card instead of failing silently.
-            cameraPermission.status != PermissionStatus.NOT_REQUESTED -> {
+            // The pending request completed without a grant — surface a recovery card instead of failing silently.
+            pendingScan && cameraPermission.status != PermissionStatus.NOT_REQUESTED -> {
                 showPermissionRecovery = true
                 pendingScan = false
             }
         }
-        // Dismiss the recovery card once the permission is granted (e.g. user returned from settings).
-        if (cameraPermission.isGranted) showPermissionRecovery = false
     }
 
     if (showDialog) {
@@ -108,11 +113,19 @@ fun rememberBarcodeScanner(onResult: (String?) -> Unit): BarcodeScanner {
     if (showPermissionRecovery) {
         Dialog(onDismissRequest = { showPermissionRecovery = false }) {
             Surface(shape = MaterialTheme.shapes.large, color = MaterialTheme.colorScheme.surface) {
-                PermissionRecoveryCard(
-                    state = cameraPermission,
-                    rationale = stringResource(Res.string.camera_permission_rationale),
-                    modifier = Modifier.padding(16.dp),
-                )
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    // Heading gives screen readers context for the standalone dialog (unlike the in-sheet Compass
+                    // card).
+                    Text(
+                        text = stringResource(Res.string.camera_permission),
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.semantics { heading() },
+                    )
+                    PermissionRecoveryCard(
+                        state = cameraPermission,
+                        rationale = stringResource(Res.string.camera_permission_rationale),
+                    )
+                }
             }
         }
     }

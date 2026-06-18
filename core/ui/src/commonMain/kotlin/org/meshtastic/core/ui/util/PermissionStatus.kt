@@ -16,6 +16,8 @@
  */
 package org.meshtastic.core.ui.util
 
+import androidx.compose.runtime.Stable
+
 /**
  * The UX-relevant state of a runtime permission, as recommended by the Android permissions guidance
  * (https://developer.android.com/training/permissions/requesting).
@@ -57,8 +59,17 @@ fun computePermissionStatus(granted: Boolean, hasRequested: Boolean, shouldShowR
  * A reactive snapshot of a runtime permission plus the actions a caller can take. Produced by the
  * `rememberXxxPermissionState()` composables and recomputed on `ON_RESUME` so it stays fresh when the user returns from
  * a permission dialog or the system settings screen.
+ *
+ * Intentionally NOT a `data class`: the lambda members would give `equals`/`hashCode` reference semantics, advertising
+ * value equality the type cannot honor. Callers read [status]/[isGranted] and invoke the actions; they do not compare
+ * instances.
  */
-data class PermissionUiState(val status: PermissionStatus, val request: () -> Unit, val openAppSettings: () -> Unit) {
+@Stable
+class PermissionUiState(val status: PermissionStatus, val request: () -> Unit, val openAppSettings: () -> Unit) {
     val isGranted: Boolean
         get() = status == PermissionStatus.GRANTED
 }
+
+/** A constant [PermissionUiState] for platforms / API levels where a permission is not gated at runtime. */
+fun grantedPermissionUiState(): PermissionUiState =
+    PermissionUiState(status = PermissionStatus.GRANTED, request = {}, openAppSettings = {})

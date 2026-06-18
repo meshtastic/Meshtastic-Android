@@ -153,20 +153,17 @@ actual fun rememberRequestNotificationPermission(onGranted: () -> Unit, onDenied
 @Composable
 actual fun rememberOpenAppSettings(): () -> Unit = { Logger.w { "App settings not available on JVM/Desktop" } }
 
-private fun grantedDesktopPermissionState(): PermissionUiState =
-    PermissionUiState(status = PermissionStatus.GRANTED, request = {}, openAppSettings = {})
-
 /** JVM — Desktop does not gate location behind a runtime permission. */
-@Composable actual fun rememberLocationPermissionState(): PermissionUiState = grantedDesktopPermissionState()
+@Composable actual fun rememberLocationPermissionState(): PermissionUiState = grantedPermissionUiState()
 
 /** JVM — Desktop does not gate Bluetooth behind a runtime permission. */
-@Composable actual fun rememberBluetoothPermissionState(): PermissionUiState = grantedDesktopPermissionState()
+@Composable actual fun rememberBluetoothPermissionState(): PermissionUiState = grantedPermissionUiState()
 
 /** JVM — Desktop does not gate notifications behind a runtime permission. */
-@Composable actual fun rememberNotificationPermissionState(): PermissionUiState = grantedDesktopPermissionState()
+@Composable actual fun rememberNotificationPermissionState(): PermissionUiState = grantedPermissionUiState()
 
 /** JVM — Desktop does not gate local-network access behind a runtime permission. */
-@Composable actual fun rememberLocalNetworkPermissionState(): PermissionUiState = grantedDesktopPermissionState()
+@Composable actual fun rememberLocalNetworkPermissionState(): PermissionUiState = grantedPermissionUiState()
 
 /** JVM — Desktop does not gate the camera behind a runtime permission. */
-@Composable actual fun rememberCameraPermissionState(): PermissionUiState = grantedDesktopPermissionState()
+@Composable actual fun rememberCameraPermissionState(): PermissionUiState = grantedPermissionUiState()

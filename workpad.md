@@ -295,11 +295,37 @@ _All 6 must be checked before handing off to review._
 
 _Populated by `/craft-review`._
 
-**Reviewers activated:** [list]
+**Reviewers activated:** correctness, simplification, requirements, idioms (Kotlin/KMP/Compose), security, tests, error-handling, concurrency, architecture, api-surface, prose, accessibility
 
 ### Findings
 
-<!-- Populated by craft-review. AC pass/fail rolls up as regular findings under `reviewer-requirements`. -->
+- **F-1 [P1]** `ConnectionsScreen.kt` / `TakPermissionUtil.kt` / notifications — AC6/R6 only partially met: in-context `rememberXxxPermissionState()` wired for location + camera only. BT-scan, notifications, and local-network feature entry points are NOT migrated to in-context (notification/local-network state composables have zero feature call sites). Contradicts AC6=DONE and the workpad's own P3 deferred item. (requirements; human-triage) [CORROBORATED-3: requirements, architecture, api-surface]
+- **F-2 [P2]** `PlatformUtils.kt` (androidMain `rememberBluetoothPermissionState`) + intro — pre-Android-12, the intro Bluetooth screen now delegates to the location state, so it shows "Configure Bluetooth permissions" yet fires a *location* dialog and the dedicated Location screen's rationale is skipped (API 26–30 regression vs prior empty-list→granted behavior). (correctness; human-triage) [LIKELY]
+- **F-3 [P2]** `BarcodeScannerProvider.kt` — on DENIED_CAN_RETRY the recovery card's "Grant permission" calls `request()` without setting `pendingScan`, so after the user grants, the card dismisses but the scanner never opens (dead-end; must re-tap). (error-handling; auto-fix)
+- **F-4 [P2]** `PermissionStatus.kt` — `PermissionUiState` is a `data class` with lambda members → generated `equals`/`hashCode`/`copy` compare lambdas by reference (misleading value semantics; Compose-skipping footgun). Drop `data` / make a `@Stable class` with status-based equals. (idioms/api-surface; auto-fix) [CORROBORATED-2]
+- **F-5 [P2]** `PlatformUtils.kt` — old `rememberRequestBluetoothPermission`/`rememberRequestNotificationPermission` are now fully dead (only caller was intro, migrated here) and deletable in this PR; remaining old location/local-network wrappers have a *conflicting* grant definition (`isLocationPermissionGranted` = FINE only vs new = FINE|COARSE). Reconcile or `@Deprecated`. (architecture/simplification/api-surface; human-triage) [CORROBORATED-3]
+- **F-6 [P2]** `PlatformUtils.kt` `rememberOpenLocationSettings` (and `rememberOpenNfcSettings`) launch the settings intent with no `ActivityNotFoundException` guard, unlike the new `rememberOpenAppSettings`; R5 GPS recovery routes here. (error-handling; auto-fix) [pre-existing]
+- **F-7 [P2]** No tests for `PermissionRequestTracker` (SharedPreferences round-trip — the R1 disambiguator) or the `requireAll` grant reduction (AC7 coarse-location). Both cheaply extractable to pure/Robolectric tests. (tests; human-triage)
+- **F-8 [P2]** `BarcodeScannerProvider.kt` recovery `Dialog` has no heading/title → screen reader announces body text with no framing (unlike Compass, which sits in a labeled sheet). (accessibility; auto-fix)
+- **F-9 [P2]** `strings.xml` `bonding_failed_permissions` states the requirement but gives no recovery action, unlike its sibling `usb_permission_denied`; also passive voice. (prose; auto-fix)
+- **F-10 [P3]** `strings.xml` `camera_permission_rationale` uses passive "is needed" — active voice is more direct and consistent with siblings. (prose; auto-fix)
+- **F-11 [P3]** `PlatformUtils.kt` `rememberRuntimePermissionState` `refreshTrigger` counter + `LaunchedEffect` is removable indirection — the main-thread result callback can set `statusState.value` directly. (simplification; auto-fix)
+- **F-12 [P3]** jvmMain/iosMain duplicate an identical `grantedPermissionState()` factory; a commonMain helper would serve all stubs. (simplification; auto-fix)
+- **F-13 [P3]** `PlatformUtils.kt` — null `LocalActivity.current` collapses `shouldShowRationale` to false → can yield PERMANENTLY_DENIED; safe in practice (always Activity-hosted) but couples missing-activity to the punitive state. (correctness; human-triage, advisory)
+- **F-14 [P3]** `PermissionRecoveryCard` 4-arg overload could be `internal` (only the `PermissionUiState` overload is used). (api-surface; human-triage)
+- **F-15 [P3]** `PermissionRecoveryCard` KDoc bullets not grammatically parallel. (prose; auto-fix)
+- **F-16 [P4]** `PermissionStatus` enum ordinal order (GRANTED first) — note for any future ordinal-based persistence. (api-surface; advisory)
+- **F-17 [P3]** `AndroidScannerViewModel.kt` generic-catch path still has hardcoded English `"Bonding failed: ${ex.message}"` (R8 consistency — sibling was internationalized). (requirements/prose; auto-fix)
+
+### Reviewers with no findings
+
+- **reviewer-concurrency** — investigated the adversarial read-after-write race; refuted (all on main thread; SharedPreferences in-memory write synchronous; single instance). The result-callback-only write invariant holds.
+- **reviewer-security** — no weakened gate; pre-12 BT→location delegation is stronger not weaker; coarse acceptance doesn't over-grant (framework still enforces); has-requested flag stores no PII; settings deep-link is package-scoped; manifest unchanged.
+
+### Corroborations of deliberate decisions
+
+- `PermissionRecoveryCard` vs Compass `WarningList` duplication confirmed justified by simplification reviewer (different shapes; forcing unification would regress R9). Not a finding.
+- Decorative `contentDescription=null` on the error icon confirmed correct by accessibility reviewer (adjacent text conveys meaning; error not color-alone).
 
 ---
 
@@ -330,6 +356,6 @@ _Accumulated across all phases._
 - clarify: done — 2026-06-18 — Comprehensive scope confirmed. Shared recovery helper + full Accompanist migration + hybrid intro (skippable + in-context). R1–R9 recorded.
 - architect: done — 2026-06-18 — Pragmatic+enriched approved. 3 architect agents + adversarial (P1, mitigations folded in). PlatformUtils seam + status enum + SharedPreferences flag + shared recovery card.
 - implement: done — 2026-06-18 — All 9 ACs met; both flavors assemble; spotless/detekt/tests green. Latest sha 2aa33c8d5. Compass intentionally preserved (DEFERRED P3). 3 commits.
-- review:
+- review: done — 2026-06-18 — 12 reviewers. No P0; concurrency+security clean (adversarial race refuted). 17 findings: 1×P1 (AC6/R6 in-context coverage), 8×P2, rest P3/P4. Report in Review section.
 - refine:
 - pr:

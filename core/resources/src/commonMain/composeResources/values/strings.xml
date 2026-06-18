@@ -135,7 +135,8 @@
     <string name="bluetooth_feature_discovery_description">Find and identify Meshtastic devices near you.</string>
     <string name="bluetooth_permission">Bluetooth</string>
     <string name="bold_heading">Bold Heading</string>
-    <string name="bonding_failed_permissions">Pairing failed — nearby device permissions are required.</string>
+    <string name="bonding_failed">Pairing failed. Try again.</string>
+    <string name="bonding_failed_permissions">Pairing failed. Grant nearby device permissions and try again.</string>
     <string name="bottom_nav_settings">Settings</string>
     <string name="broadcast_interval">Broadcast Interval</string>
     <string name="busy_noise_floor">Busy floor</string>
@@ -144,7 +145,8 @@
     <string name="calculating">Calculating…</string>
     <string name="call_sign">Call sign</string>
     <string name="call_sign_summary">Your amateur radio call sign, up to 8 characters</string>
-    <string name="camera_permission_rationale">Camera access is needed to scan QR codes.</string>
+    <string name="camera_permission">Camera permission</string>
+    <string name="camera_permission_rationale">Allow camera access to scan QR codes.</string>
     <string name="cancel">Cancel</string>
     <string name="cancel_reply">Cancel reply</string>
     <string name="canned_message">Canned Message</string>

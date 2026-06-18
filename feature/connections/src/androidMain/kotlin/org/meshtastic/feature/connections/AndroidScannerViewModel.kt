@@ -35,6 +35,7 @@ import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.bonding_failed
 import org.meshtastic.core.resources.bonding_failed_permissions
 import org.meshtastic.core.resources.usb_permission_denied
 import org.meshtastic.feature.connections.model.AndroidUsbDeviceData
@@ -89,8 +90,11 @@ class AndroidScannerViewModel(
                     // This is a known issue where bonding is still in progress, ignore as error
                     Logger.d { "Bonding still in progress for ${entry.device.address.anonymize}" }
                 } else {
-                    Logger.w(ex) { "Bonding failed for ${entry.device.address.anonymize}" }
-                    serviceRepository.setErrorMessage(text = "Bonding failed: ${ex.message}", severity = Severity.Warn)
+                    Logger.w(ex) { "Bonding failed for ${entry.device.address.anonymize}: ${ex.message}" }
+                    serviceRepository.setErrorMessage(
+                        text = getString(Res.string.bonding_failed),
+                        severity = Severity.Warn,
+                    )
                 }
             }
         }
