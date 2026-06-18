@@ -101,6 +101,15 @@ jobs:
       - name: Fix file permissions
         run: sudo chown -R $USER:$USER .
 
+      # Early warning for overlength store-listing translations just pulled from
+      # Crowdin. Non-blocking on purpose: a hard failure here would abort the
+      # firmware/hardware/graphs job and stop the PR from being created. The
+      # hard gate is the check-metadata job in pull-request.yml, which runs
+      # against the PR this workflow opens.
+      - name: Check store metadata lengths
+        continue-on-error: true
+        run: python3 scripts/check-metadata-length.py
+
       - name: Gradle Setup
         uses: ./.github/actions/gradle-setup
         with:

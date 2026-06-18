@@ -96,6 +96,24 @@ jobs:
           print('check-changes filter is aligned with settings.gradle module roots.')
           PY
 
+  # 1c. STORE METADATA: Enforce store-listing length limits (e.g. the F-Droid /
+  # Play 80-char short_description). These files are mirrored from Crowdin, so
+  # this guard intentionally runs on the translation-sync PRs too (no
+  # scheduled-updates / l10n_main skip) -- that is where overlength translations
+  # land. It is a standalone lightweight job, decoupled from the Gradle build so
+  # a one-line translation fix never triggers a full assemble/test cycle.
+  check-metadata:
+    name: Check Store Metadata
+    if: github.repository == 'meshtastic/Meshtastic-Android'
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+      - name: Validate store listing metadata lengths
+        run: python3 scripts/check-metadata-length.py
+
   # 2. VALIDATION & BUILD: Delegate to reusable-check.yml
   # We disable coverage and desktop builds for PRs to keep feedback fast
   # (< 10 mins). Desktop compilation is already covered by the :desktopApp:test
@@ -117,13 +135,18 @@ jobs:
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 5
     permissions: {}
-    needs: [check-changes, verify-check-changes-filter, validate-and-build]
+    needs: [check-changes, verify-check-changes-filter, check-metadata, validate-and-build]
     if: always()
     steps:
       - name: Check Workflow Status
         run: |
           if [[ "${{ needs.verify-check-changes-filter.result }}" == "failure" || "${{ needs.verify-check-changes-filter.result }}" == "cancelled" ]]; then
             echo "::error::check-changes filter verification failed"
+            exit 1
+          fi
+
+          if [[ "${{ needs.check-metadata.result }}" == "failure" || "${{ needs.check-metadata.result }}" == "cancelled" ]]; then
+            echo "::error::Store metadata length check failed"
             exit 1
           fi
 
