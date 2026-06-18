@@ -1,0 +1,200 @@
+/*
+ * Copyright (c) 2026 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+package org.meshtastic.core.ble
+
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LifecycleRegistry
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestDispatcher
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
+import org.junit.runner.RunWith
+import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.testing.FakeBleDevice
+import org.meshtastic.core.testing.RobolectricBleBonding
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.RuntimeEnvironment
+import org.robolectric.Shadows.shadowOf
+import org.robolectric.annotation.Config
+import org.robolectric.annotation.Implementation
+import org.robolectric.annotation.Implements
+import org.robolectric.shadows.ShadowBluetoothDevice
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
+
+/**
+ * Coverage for the #5849 fix in [AndroidBluetoothRepository.bond]: when `createBond()` returns false the flow no longer
+ * fails outright — it re-checks `bondState` and either resumes (already BONDED), keeps waiting on the broadcast
+ * receiver (still BONDING), or fails ("Failed to initiate bonding").
+ *
+ * Exercises the real production method via Robolectric shadows (no production seam): [RobolectricBleBonding] drives the
+ * address-cached [ShadowBluetoothDevice] and fires `ACTION_BOND_STATE_CHANGED` broadcasts. Each test uses a distinct
+ * MAC so the static device cache cannot bleed bond-state across tests.
+ */
+@OptIn(ExperimentalCoroutinesApi::class)
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [34])
+class AndroidBluetoothRepositoryBondTest {
+
+    private fun newRepository(dispatcher: TestDispatcher): AndroidBluetoothRepository {
+        val context = RuntimeEnvironment.getApplication()
+        val dispatchers = CoroutineDispatchers(io = dispatcher, main = dispatcher, default = dispatcher)
+        return AndroidBluetoothRepository(context, dispatchers, startedLifecycle())
+    }
+
+    /** A minimal STARTED lifecycle so the repository's `init { ... }` launch has a live, non-cancelled scope. */
+    private fun startedLifecycle(): Lifecycle {
+        val owner =
+            object : LifecycleOwner {
+                override val lifecycle: LifecycleRegistry =
+                    LifecycleRegistry.createUnsafe(this).apply { currentState = Lifecycle.State.STARTED }
+            }
+        return owner.lifecycle
+    }
+
+    /**
+     * Launch `bond()` in the background so it can suspend (e.g. in the BONDING branch) while the test fires the
+     * resolving broadcast. The returned [Deferred] completes with the throwable `bond()` raised, or `null` on success.
+     * Using launch + captured result avoids `async`/`await` exception-propagation surprises under the test scope.
+     */
+    private fun TestScope.launchBond(repo: AndroidBluetoothRepository, mac: String): Deferred<Throwable?> {
+        val result = CompletableDeferred<Throwable?>()
+        backgroundScope.launch {
+            result.complete(runCatching { repo.bond(FakeBleDevice(address = mac)) }.exceptionOrNull())
+        }
+        return result
+    }
+
+    @Test
+    fun `createBond false while still BONDING keeps waiting and resumes on a later BONDED broadcast`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val mac = "AA:BB:CC:DD:EE:01"
+            RobolectricBleBonding.grantBluetoothConnectPermission()
+            RobolectricBleBonding.primeBond(mac, bondState = BluetoothDevice.BOND_BONDING, createBondReturns = false)
+            val repo = newRepository(UnconfinedTestDispatcher(testScheduler))
+
+            // bond() runs until it parks in the BONDING branch (receiver left registered).
+            val failure = launchBond(repo, mac)
+
+            // The OS later completes bonding — the broadcast must resume the suspended call.
+            RobolectricBleBonding.sendBondStateChanged(
+                mac,
+                newState = BluetoothDevice.BOND_BONDED,
+                previousState = BluetoothDevice.BOND_BONDING,
+            )
+
+            assertNull(failure.await(), "bond() should have resumed without an error")
+        }
+
+    @Test
+    fun `createBond false with no in-flight bond fails to initiate bonding`() = runTest(UnconfinedTestDispatcher()) {
+        val mac = "AA:BB:CC:DD:EE:02"
+        RobolectricBleBonding.grantBluetoothConnectPermission()
+        RobolectricBleBonding.primeBond(mac, bondState = BluetoothDevice.BOND_NONE, createBondReturns = false)
+        val repo = newRepository(UnconfinedTestDispatcher(testScheduler))
+
+        val error = assertFailsWith<Exception> { repo.bond(FakeBleDevice(address = mac)) }
+        assertEquals("Failed to initiate bonding", error.message)
+    }
+
+    @Test
+    @Config(sdk = [34], shadows = [ShadowBondingThenBonded::class])
+    fun `createBond false but bond already established resumes immediately`() = runTest(UnconfinedTestDispatcher()) {
+        // Models the real-device race the fix targets: the bond completes between the early bondState check and
+        // the post-createBond re-check. The custom shadow returns BONDING first, then BONDED, with
+        // createBond()==false — driving the BOND_BONDED branch without any broadcast.
+        val mac = "AA:BB:CC:DD:EE:03"
+        val repo = newRepository(UnconfinedTestDispatcher(testScheduler))
+
+        repo.bond(FakeBleDevice(address = mac)) // returns normally (no broadcast, no exception)
+    }
+
+    @Test
+    fun `already bonded device returns immediately without initiating a bond`() = runTest(UnconfinedTestDispatcher()) {
+        val mac = "AA:BB:CC:DD:EE:04"
+        RobolectricBleBonding.grantBluetoothConnectPermission()
+        RobolectricBleBonding.primeBond(mac, bondState = BluetoothDevice.BOND_BONDED, createBondReturns = false)
+        val repo = newRepository(UnconfinedTestDispatcher(testScheduler))
+
+        repo.bond(FakeBleDevice(address = mac)) // early return at the BOND_BONDED guard; no exception
+    }
+
+    @Test
+    fun `bond fails when bonding is rejected (BOND_NONE from BONDING)`() = runTest(UnconfinedTestDispatcher()) {
+        val mac = "AA:BB:CC:DD:EE:05"
+        RobolectricBleBonding.grantBluetoothConnectPermission()
+        RobolectricBleBonding.primeBond(mac, bondState = BluetoothDevice.BOND_BONDING, createBondReturns = false)
+        val repo = newRepository(UnconfinedTestDispatcher(testScheduler))
+
+        val failure = launchBond(repo, mac)
+        RobolectricBleBonding.sendBondStateChanged(
+            mac,
+            newState = BluetoothDevice.BOND_NONE,
+            previousState = BluetoothDevice.BOND_BONDING,
+        )
+
+        assertEquals("Bonding failed or rejected", failure.await()?.message)
+    }
+
+    @Test
+    fun `isBonded reflects the adapter bonded devices`() = runTest(UnconfinedTestDispatcher()) {
+        val bondedMac = "AA:BB:CC:DD:EE:06"
+        val otherMac = "AA:BB:CC:DD:EE:07"
+        RobolectricBleBonding.grantBluetoothConnectPermission()
+        val bondedDevice = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(bondedMac)
+        shadowOf(BluetoothAdapter.getDefaultAdapter()).setBondedDevices(setOf(bondedDevice))
+        val repo = newRepository(UnconfinedTestDispatcher(testScheduler))
+
+        assertTrue(repo.isBonded(bondedMac))
+        assertFalse(repo.isBonded(otherMac))
+    }
+
+    @Test
+    fun `isValid accepts a well-formed MAC and rejects garbage`() = runTest(UnconfinedTestDispatcher()) {
+        val repo = newRepository(UnconfinedTestDispatcher(testScheduler))
+
+        assertTrue(repo.isValid("AA:BB:CC:DD:EE:FF"))
+        assertFalse(repo.isValid("not-a-mac"))
+    }
+
+    /**
+     * Custom shadow that returns [BluetoothDevice.BOND_BONDING] on the first `getBondState()` read (the early guard)
+     * and [BluetoothDevice.BOND_BONDED] thereafter (the post-`createBond` re-check), with `createBond()` returning
+     * false — reproducing the bond-completed-mid-method race for the BOND_BONDED branch of the fix.
+     */
+    @Implements(BluetoothDevice::class)
+    class ShadowBondingThenBonded : ShadowBluetoothDevice() {
+        private var bondStateReads = 0
+
+        @Implementation
+        override fun getBondState(): Int =
+            if (bondStateReads++ == 0) BluetoothDevice.BOND_BONDING else BluetoothDevice.BOND_BONDED
+
+        @Implementation override fun createBond(): Boolean = false
+    }
+}
