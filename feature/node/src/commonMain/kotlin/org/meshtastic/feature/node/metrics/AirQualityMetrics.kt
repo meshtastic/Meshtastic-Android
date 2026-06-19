@@ -166,7 +166,11 @@ fun AirQualityMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Uni
         },
         listPart = { modifier, selectedX, lazyListState, onCardClick ->
             LazyColumn(modifier = modifier.fillMaxSize(), state = lazyListState) {
-                itemsIndexed(data) { _, telemetry ->
+                itemsIndexed(
+                    data,
+                    key = { _, telemetry -> telemetry.time },
+                    contentType = { _, _ -> "air_quality_metrics" },
+                ) { _, telemetry ->
                     AirQualityMetricsCard(
                         telemetry = telemetry,
                         isSelected = telemetry.time.toDouble() == selectedX,

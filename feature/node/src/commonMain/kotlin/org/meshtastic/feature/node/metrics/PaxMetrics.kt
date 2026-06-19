@@ -231,7 +231,11 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel, onNavigateUp: () -> Uni
                     state = lazyListState,
                     contentPadding = PaddingValues(horizontal = 16.dp),
                 ) {
-                    itemsIndexed(paxMetrics) { _, (log, pax) ->
+                    itemsIndexed(
+                        paxMetrics,
+                        key = { _, (log, _) -> log.uuid },
+                        contentType = { _, _ -> "pax_metrics" },
+                    ) { _, (log, pax) ->
                         PaxMetricsItem(
                             log = log,
                             pax = pax,

@@ -114,12 +114,22 @@ private val LEGEND_DATA =
 private sealed interface SignalLogEntry {
     val timeSeconds: Int
 
+    /** Stable, collision-free identity for use as a LazyColumn item key across both entry types. */
+    val key: Any
+
+    /** Distinguishes the two card layouts so Compose can reuse compositions per type. */
+    val contentType: Any
+
     data class LocalStatsEntry(val telemetry: Telemetry) : SignalLogEntry {
         override val timeSeconds: Int = telemetry.time
+        override val key: Any = "local_stats_${telemetry.time}"
+        override val contentType: Any = "local_stats"
     }
 
     data class PacketEntry(val meshPacket: MeshPacket) : SignalLogEntry {
         override val timeSeconds: Int = meshPacket.rx_time
+        override val key: Any = "packet_${meshPacket.id}"
+        override val contentType: Any = "signal_packet"
     }
 }
 
@@ -204,7 +214,11 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit, m
                 }
             } else {
                 LazyColumn(modifier = contentModifier.fillMaxSize(), state = lazyListState) {
-                    itemsIndexed(data) { _, entry ->
+                    itemsIndexed(
+                        data,
+                        key = { _, entry -> entry.key },
+                        contentType = { _, entry -> entry.contentType },
+                    ) { _, entry ->
                         when (entry) {
                             is SignalLogEntry.LocalStatsEntry ->
                                 LocalStatsCard(

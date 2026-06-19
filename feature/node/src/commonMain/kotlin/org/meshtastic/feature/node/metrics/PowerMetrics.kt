@@ -159,7 +159,11 @@ fun PowerMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
         },
         listPart = { modifier, selectedX, lazyListState, onCardClick ->
             LazyColumn(modifier = modifier.fillMaxSize(), state = lazyListState) {
-                itemsIndexed(data) { _, telemetry ->
+                itemsIndexed(
+                    data,
+                    key = { _, telemetry -> telemetry.time },
+                    contentType = { _, _ -> "power_metrics" },
+                ) { _, telemetry ->
                     PowerMetricsCard(
                         telemetry = telemetry,
                         isSelected = telemetry.time.toDouble() == selectedX,

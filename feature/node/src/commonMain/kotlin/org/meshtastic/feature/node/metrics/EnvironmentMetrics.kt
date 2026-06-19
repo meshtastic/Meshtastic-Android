@@ -115,7 +115,11 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Un
         },
         listPart = { modifier, selectedX, lazyListState, onCardClick ->
             LazyColumn(modifier = modifier.fillMaxSize(), state = lazyListState) {
-                itemsIndexed(filteredTelemetries) { _, telemetry ->
+                itemsIndexed(
+                    filteredTelemetries,
+                    key = { _, telemetry -> telemetry.time },
+                    contentType = { _, _ -> "environment_metrics" },
+                ) { _, telemetry ->
                     EnvironmentMetricsCard(
                         telemetry = telemetry,
                         environmentDisplayFahrenheit = state.isFahrenheit,
