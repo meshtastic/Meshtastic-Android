@@ -189,15 +189,15 @@
   },
   "pullRequests": [
     {
-      "id": "10740",
-      "title": "fix: T-Deck (Plus) touch driver fix",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10740",
+      "id": "10741",
+      "title": "NimBLE params overhaul and try-fix for incompatible bond cleanup",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10741",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
-      "id": "10739",
-      "title": "fix(esp32): skip RTC timer wake on user shutdown; TAP V2 OCV and partition",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10739",
+      "id": "10740",
+      "title": "fix: T-Deck (Plus) touch driver fix",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10740",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
@@ -301,12 +301,6 @@
       "title": "Arduino Nesso N1 support",
       "page_url": "https://github.com/meshtastic/firmware/pull/10664",
       "zip_url": "s"
-    },
-    {
-      "id": "10658",
-      "title": "Fix BLE advertising management to prevent crashes during reconnections",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10658",
-      "zip_url": "+40.3 KB"
     },
     {
       "id": "10656",
