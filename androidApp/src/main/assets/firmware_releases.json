@@ -189,6 +189,18 @@
   },
   "pullRequests": [
     {
+      "id": "10744",
+      "title": "Update actions/checkout action to v7",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10744",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "10743",
+      "title": "Update meshtastic/device-ui digest to 6cadf54",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10743",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
       "id": "10741",
       "title": "NimBLE params overhaul and try-fix for incompatible bond cleanup",
       "page_url": "https://github.com/meshtastic/firmware/pull/10741",
@@ -300,12 +312,6 @@
       "id": "10664",
       "title": "Arduino Nesso N1 support",
       "page_url": "https://github.com/meshtastic/firmware/pull/10664",
-      "zip_url": "s"
-    },
-    {
-      "id": "10656",
-      "title": "UDP Unicast for Meshtasticd",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10656",
       "zip_url": "s"
     }
   ]
