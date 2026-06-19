@@ -16,13 +16,17 @@
  */
 package org.meshtastic.core.takserver
 
+import org.meshtastic.tak.CotXmlParser
+import org.meshtastic.tak.TakCompressor
+
 /**
- * Expect/actual wrapper for the TAKPacket-SDK compression pipeline.
+ * Thin wrapper over the TAKPacket-SDK compression pipeline
+ * ([org.meshtastic.tak.CotXmlParser] + [org.meshtastic.tak.TakCompressor]).
  *
- * On JVM/Android the SDK's [org.meshtastic.tak.CotXmlParser] and [org.meshtastic.tak.TakCompressor] are available. On
- * iOS they are not, so the actual throws [UnsupportedOperationException].
+ * The SDK is multiplatform since 0.7.0 — zstd dictionary compression rides on its transitive pure-Kotlin kzstd codec —
+ * so this works on every target.
  */
-internal expect object TakSdkCompressor {
+internal object TakSdkCompressor {
 
     /**
      * Parse CoT XML via the SDK and compress with remarks-fallback.
@@ -30,5 +34,8 @@ internal expect object TakSdkCompressor {
      * @return compressed wire payload, or `null` if the packet exceeds [maxBytes] even without remarks.
      * @throws Exception on parse or compression failure.
      */
-    fun compressCoT(xml: String, maxBytes: Int): ByteArray?
+    fun compressCoT(xml: String, maxBytes: Int): ByteArray? {
+        val sdkData = CotXmlParser().parse(xml)
+        return TakCompressor().compressWithRemarksFallback(sdkData, maxBytes)
+    }
 }

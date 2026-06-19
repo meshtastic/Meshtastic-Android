@@ -16,21 +16,22 @@
  */
 package org.meshtastic.core.takserver
 
+import org.meshtastic.tak.CotMeshSanitizer
+
 /**
- * Expect/actual wrapper for the TAKPacket-SDK's [org.meshtastic.tak.CotMeshSanitizer].
+ * Thin wrapper over the TAKPacket-SDK's [org.meshtastic.tak.CotMeshSanitizer].
  *
- * The SDK publishes only JVM artifacts since 0.5.2, so common code cannot reference it directly. On JVM/Android the
- * actual delegates to the SDK so the golden-tested sanitize rules live in ONE place shared by every consumer and can't
- * drift between sides. On iOS the actual is a passthrough stub until the Swift SDK is wired up via interop.
+ * The SDK is multiplatform since 0.7.0, so the golden-tested sanitize rules live in ONE place shared by every consumer
+ * and every target — they can't drift between platforms.
  */
-internal expect object CotSanitizer {
+internal object CotSanitizer {
 
     /**
      * Normalize CoT XML for the TAK TCP stream — drop the `<?xml ...?>` prologue and collapse inter-tag whitespace so
      * ATAK's streaming parser sees bare `<event>...</event>` on a single line.
      */
-    fun normalizeCotXml(xml: String): String
+    fun normalizeCotXml(xml: String): String = CotMeshSanitizer.normalizeCotXml(xml)
 
     /** Strip non-essential CoT detail before mesh compression to save wire bytes. */
-    fun stripNonEssentialForMesh(xml: String): String
+    fun stripNonEssentialForMesh(xml: String): String = CotMeshSanitizer.stripNonEssentialForMesh(xml)
 }
