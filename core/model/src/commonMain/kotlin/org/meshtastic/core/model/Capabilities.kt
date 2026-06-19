@@ -52,8 +52,8 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
     /** Support for Status Message module. Supported since firmware v2.8.0. */
     val supportsStatusMessage = atLeast(V2_8_0)
 
-    /** Support for Traffic Management module. Supported since firmware v3.0.0. */
-    val supportsTrafficManagementConfig = atLeast(V3_0_0)
+    /** Support for Traffic Management module. Supported since firmware v2.8.0. */
+    val supportsTrafficManagementConfig = atLeast(V2_8_0)
 
     /** Support for TAK (ATAK) module configuration. Supported since firmware v2.7.19. */
     val supportsTakConfig = atLeast(V2_7_19)
@@ -79,7 +79,6 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
         private val V2_7_18 = DeviceVersion("2.7.18")
         private val V2_7_19 = DeviceVersion("2.7.19")
         private val V2_8_0 = DeviceVersion("2.8.0")
-        private val V3_0_0 = DeviceVersion("3.0.0")
         private val UNRELEASED = DeviceVersion("9.9.9")
     }
 }

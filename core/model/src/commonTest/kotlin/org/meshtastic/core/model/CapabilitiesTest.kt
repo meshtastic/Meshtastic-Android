@@ -74,9 +74,9 @@ class CapabilitiesTest {
     }
 
     @Test
-    fun supportsTrafficManagementConfig_requires_V3_0_0() {
-        assertFalse(caps("2.7.18").supportsTrafficManagementConfig)
-        assertTrue(caps("3.0.0").supportsTrafficManagementConfig)
+    fun supportsTrafficManagementConfig_requires_V2_8_0() {
+        assertFalse(caps("2.7.21").supportsTrafficManagementConfig)
+        assertTrue(caps("2.8.0").supportsTrafficManagementConfig)
     }
 
     @Test
