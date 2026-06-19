@@ -86,10 +86,12 @@ docs/_config_local.yml
 flatpak-sources-*.json
 flatpak-sources.json
 offline-repository/
-# Share team-wide Claude config (token-guard deny rules + subagents); keep per-user local settings ignored
+# Share team-wide Claude config (settings, subagents, hooks, skills); keep per-user local settings ignored
 .claude/*
 !.claude/settings.json
 !.claude/agents/
+!.claude/hooks/
+!.claude/skills/
 build-scan-*.scan
 # burningmesh capture replay assets (private data — generated via replay_server.py --export)
 *.fromradio

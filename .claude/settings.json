@@ -1,5 +1,5 @@
 {
-  "$comment": "Team-wide Claude Code token guard. Claude does NOT read .aiexclude/.copilotignore, so the big-file protections live here. 'deny' = never read (Crowdin-managed translations); 'ask' = prompt first (big files rarely needed in full — prefer .skills/compose-ui/strings-index.txt for strings).",
+  "$comment": "Team-wide Claude Code config. (1) Read guards: Claude does NOT read .aiexclude/.copilotignore, so the big-file protections live here. 'deny' = never read (Crowdin-managed translations); 'ask' = prompt first (big files rarely needed in full — prefer .skills/compose-ui/strings-index.txt for strings; signing keys should never be read into context). (2) Hooks front-run this repo's own CI gates locally — see .claude/hooks/*.sh for what each does. The pre-bash-guard spotlessApply-on-commit hook is the heaviest (runs gradle at commit time); remove its PreToolUse entry if it's too eager for your workflow.",
   "permissions": {
     "deny": [
       "Read(**/composeResources/**/values-*/*.xml)",
@@ -9,7 +9,37 @@
       "Read(**/composeResources/**/values/strings.xml)",
       "Read(**/firmware_releases.json)",
       "Read(**/composeResources/files/emoji-data.json)",
-      "Read(**/flatpak-sources*.json)"
+      "Read(**/flatpak-sources*.json)",
+      "Read(**/*.keystore)",
+      "Read(**/*.jks)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/post-edit.sh\"",
+            "timeout": 60,
+            "statusMessage": "Post-edit checks (strings sort / metadata length / module CI filter)"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/pre-bash-guard.sh\"",
+            "timeout": 300,
+            "statusMessage": "Pre-commit spotlessApply on staged Kotlin / destructive-git confirm"
+          }
+        ]
+      }
     ]
   }
 }
