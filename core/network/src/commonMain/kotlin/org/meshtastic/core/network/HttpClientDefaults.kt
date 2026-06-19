@@ -16,8 +16,10 @@
  */
 package org.meshtastic.core.network
 
+import io.ktor.client.plugins.HttpRequestRetryConfig
+
 /**
- * Shared HTTP client configuration constants used by both Android and Desktop Ktor `HttpClient` setups.
+ * Shared HTTP client configuration used by both Android and Desktop Ktor `HttpClient` setups.
  *
  * These values are consumed by the platform-specific Koin modules (`NetworkModule` on Android, `DesktopKoinModule` on
  * Desktop) when installing [io.ktor.client.plugins.HttpTimeout] and [io.ktor.client.plugins.HttpRequestRetry].
@@ -26,9 +28,22 @@ object HttpClientDefaults {
     /** Timeout in milliseconds for connect, request, and socket operations. */
     const val TIMEOUT_MS = 30_000L
 
-    /** Maximum number of automatic retries on server errors (5xx). */
+    /** Maximum number of automatic retries on server errors (5xx) and transient connection/IO failures. */
     const val MAX_RETRIES = 3
 
     /** Base URL for the Meshtastic public API. Installed via the `DefaultRequest` plugin. */
     const val API_BASE_URL = "https://api.meshtastic.org/"
+}
+
+/**
+ * Shared [io.ktor.client.plugins.HttpRequestRetry] policy for both engines.
+ *
+ * Retries on 5xx server errors and on transient connection/IO failures (dropped sockets, DNS blips, read timeouts) —
+ * the common failure mode on flaky cellular — with exponential backoff. [HttpClientDefaults.MAX_RETRIES] applies to
+ * both rules.
+ */
+fun HttpRequestRetryConfig.configureDefaultRetry() {
+    retryOnServerErrors(maxRetries = HttpClientDefaults.MAX_RETRIES)
+    retryOnException(maxRetries = HttpClientDefaults.MAX_RETRIES, retryOnTimeout = true)
+    exponentialDelay()
 }

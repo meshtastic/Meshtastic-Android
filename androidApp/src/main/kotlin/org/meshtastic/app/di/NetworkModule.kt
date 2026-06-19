@@ -48,6 +48,7 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.network.HttpClientDefaults
 import org.meshtastic.core.network.KermitHttpLogger
+import org.meshtastic.core.network.configureDefaultRetry
 
 private const val DISK_CACHE_PERCENT = 0.02
 private const val MEMORY_CACHE_PERCENT = 0.25
@@ -104,10 +105,7 @@ class NetworkModule {
                 connectTimeoutMillis = HttpClientDefaults.TIMEOUT_MS
                 socketTimeoutMillis = HttpClientDefaults.TIMEOUT_MS
             }
-            install(plugin = HttpRequestRetry) {
-                retryOnServerErrors(maxRetries = HttpClientDefaults.MAX_RETRIES)
-                exponentialDelay()
-            }
+            install(plugin = HttpRequestRetry) { configureDefaultRetry() }
             if (buildConfigProvider.isDebug) {
                 install(plugin = Logging) {
                     logger = KermitHttpLogger
