@@ -44,6 +44,7 @@ import org.meshtastic.core.model.NetworkDeviceLink
 import org.meshtastic.core.model.NetworkFirmwareReleases
 import org.meshtastic.core.network.HttpClientDefaults
 import org.meshtastic.core.network.KermitHttpLogger
+import org.meshtastic.core.network.configureDefaultRetry
 import org.meshtastic.core.network.repository.MQTTRepository
 import org.meshtastic.core.network.service.ApiService
 import org.meshtastic.core.network.service.ApiServiceImpl
@@ -245,10 +246,7 @@ private fun desktopPlatformStubsModule() = module {
                 connectTimeoutMillis = HttpClientDefaults.TIMEOUT_MS
                 socketTimeoutMillis = HttpClientDefaults.TIMEOUT_MS
             }
-            install(HttpRequestRetry) {
-                retryOnServerErrors(maxRetries = HttpClientDefaults.MAX_RETRIES)
-                exponentialDelay()
-            }
+            install(HttpRequestRetry) { configureDefaultRetry() }
             if (DesktopBuildConfig.IS_DEBUG) {
                 install(Logging) {
                     logger = KermitHttpLogger
