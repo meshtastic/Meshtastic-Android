@@ -9,32 +9,12 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
-* fix(appfunctions): keep AppSearch document-factory constructors under R8 full mode (#5829) by James Rich (@jamesarich) in [`5b19a5f31`](https://github.com/meshtastic/Meshtastic-Android/commit/5b19a5f31f2be8894c372bbee88532a70002e6a5)
-* fix(service): resolve selected-device startup race (#5828) by Jeremiah K (@jeremiah-k) in [`acf9ff934`](https://github.com/meshtastic/Meshtastic-Android/commit/acf9ff9349cd55459e35ae016ef9f03ab1ce20fa)
-* chore(deps): update androidx.core:core-location-altitude to v1.0.0 (#5831) by renovate[bot] (@renovate[bot]) in [`b590f438e`](https://github.com/meshtastic/Meshtastic-Android/commit/b590f438ea1320a7ed26a1c9c1133c6025780077)
-* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs, Baseline) (#5833) by James Rich (@jamesarich) in [`021f467b6`](https://github.com/meshtastic/Meshtastic-Android/commit/021f467b61f64d472768e905b33bb17ac8294420)
-* chore(deps): update lifecycle to v2.11.0 (#5836) by renovate[bot] (@renovate[bot]) in [`2439a1552`](https://github.com/meshtastic/Meshtastic-Android/commit/2439a1552fac866aa9bbb598ff426924582fc3e7)
-* chore(deps): update compose-multiplatform to v1.11.3 (#5832) by renovate[bot] (@renovate[bot]) in [`76a7fdf7a`](https://github.com/meshtastic/Meshtastic-Android/commit/76a7fdf7aa0f34f7751da8d99dc1684fab6f40d0)
-* chore(deps): update room to v3.0.0-rc01 (#5835) by renovate[bot] (@renovate[bot]) in [`c1269b0d8`](https://github.com/meshtastic/Meshtastic-Android/commit/c1269b0d8ef484e84e1048c77dd24ff41f63904d)
-* fix(database): defer FTS backfill on cold start and enforce single-connection pool (#5841) by Jeremiah K (@jeremiah-k) in [`e94f2eec3`](https://github.com/meshtastic/Meshtastic-Android/commit/e94f2eec38286452b23a86e709a884a5d82a9444)
-* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs, Baseline) (#5840) by James Rich (@jamesarich) in [`ca9aba323`](https://github.com/meshtastic/Meshtastic-Android/commit/ca9aba32358e045b087b2a6f8ee08d8663405885)
-* chore(deps): update detekt to v2.0.0-alpha.5 (#5792) by renovate[bot] (@renovate[bot]) in [`02274216a`](https://github.com/meshtastic/Meshtastic-Android/commit/02274216af0398826dc517aa4cf6243b221ce090)
-* chore(deps): update datadog.gradle to v1.28.0 (#5843) by renovate[bot] (@renovate[bot]) in [`4a87cd035`](https://github.com/meshtastic/Meshtastic-Android/commit/4a87cd035b2b0cc38552144b5eef08c5d68089b4)
-* chore(deps): update takpacket.sdk to v0.7.0 (#5844) by renovate[bot] (@renovate[bot]) in [`da9a9154d`](https://github.com/meshtastic/Meshtastic-Android/commit/da9a9154da5af5276ee050ad8a059b63152d8d7b)
-* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs, Baseline) (#5845) by James Rich (@jamesarich) in [`cad7ef98d`](https://github.com/meshtastic/Meshtastic-Android/commit/cad7ef98d0b7cef01e3f1fdd2b19bc634e38a325)
-* feat(network): on-device capture-replay transport + ingestion fuzzing/hardening (#5846) by James Rich (@jamesarich) in [`1125172c4`](https://github.com/meshtastic/Meshtastic-Android/commit/1125172c46cefd23c7f0a70a19cb46699f6c7cc2)
-* chore(deps): update actions/checkout action to v7 (#5848) by renovate[bot] (@renovate[bot]) in [`eb2c42276`](https://github.com/meshtastic/Meshtastic-Android/commit/eb2c422763b09a3b94dfaae6684dddef0298df9d)
-* fix(ble): retrigger connection when bonding is interrupted (#5849) by James Rich (@jamesarich) in [`975adce30`](https://github.com/meshtastic/Meshtastic-Android/commit/975adce3031af14ae2fd2044e4503267982ed3d7)
-* test(ble): add Robolectric coverage for the bonding-interruption fix (#5849) (#5850) by James Rich (@jamesarich) in [`4e7e4c39c`](https://github.com/meshtastic/Meshtastic-Android/commit/4e7e4c39cbf77b5d9b546c4b138e23b8b3774e73)
-* feat(permissions): runtime-permission + adapter-state recovery UX; remove Accompanist (#5851) by James Rich (@jamesarich) in [`b8ab53e71`](https://github.com/meshtastic/Meshtastic-Android/commit/b8ab53e712871d076effd2defc55be720495aba5)
-* ci: enforce store-listing metadata length limits (#5854) by James Rich (@jamesarich) in [`1650d219c`](https://github.com/meshtastic/Meshtastic-Android/commit/1650d219c25f54443e2dc8e148fe615fa2b80b76)
-* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs, Baseline) (#5852) by James Rich (@jamesarich) in [`6366a8b1d`](https://github.com/meshtastic/Meshtastic-Android/commit/6366a8b1d40da3959d2f0a51ec7015d8e29f4836)
-* chore(deps): update kotest to v6.2.1 (#5853) by renovate[bot] (@renovate[bot]) in [`dd479d3ba`](https://github.com/meshtastic/Meshtastic-Android/commit/dd479d3ba098c00d85852789d6e46743ba861711)
-* chore(deps): update actions/checkout action to v7 (#5855) by renovate[bot] (@renovate[bot]) in [`b98a4ca3c`](https://github.com/meshtastic/Meshtastic-Android/commit/b98a4ca3c45c0f2e224609b10f26d1714bacc4f9)
-* fix(desktop): terminate process on exit; quit on close when no tray (#5858) by James Rich (@jamesarich) in [`0ab7a4d8c`](https://github.com/meshtastic/Meshtastic-Android/commit/0ab7a4d8c290dc6271bbeb17e54fdee27cb069a0)
-* chore: Claude Code tooling, Konsist commonMain boundary guard, and R8 keep-rule cleanup (#5859) by James Rich (@jamesarich) in [`18d402bdd`](https://github.com/meshtastic/Meshtastic-Android/commit/18d402bdd206fe993f334ae0a2f9589eb7ae260e)
+* fix(settings): crash opening Position radio-config screen (#5862) by James Rich (@jamesarich) in [`5dd9d57ca`](https://github.com/meshtastic/Meshtastic-Android/commit/5dd9d57ca9ab5f1f4ba02c6ff75e0de991faea60)
+* fix(settings): gate Traffic Management config at firmware v2.8.0 (#5864) by James Rich (@jamesarich) in [`20b64d4d9`](https://github.com/meshtastic/Meshtastic-Android/commit/20b64d4d99cb5e7d29df7c8c031f594e454d85e9)
+* chore(deps): update gradle to v9.6.0 (#5860) by renovate[bot] (@renovate[bot]) in [`4f3ecbef7`](https://github.com/meshtastic/Meshtastic-Android/commit/4f3ecbef7759f57f61c5825a836ca5d34ab73592)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs, Baseline) (#5861) by James Rich (@jamesarich) in [`c1e9fbe83`](https://github.com/meshtastic/Meshtastic-Android/commit/c1e9fbe832be25e1280805cb1bf0606cdb566198)
 
-### Internal (v2.8.0-internal.1)
+### Internal (v2.8.0-internal.2)
 Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14):
 
 #### 🏗️ Features
@@ -42,11 +22,17 @@ Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/relea
 * feat(mqtt): add phone-local MQTT proxy cutoff control by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5823
 * feat(node): show our node shortname chip on the Nodes tab by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5820
 * feat(settings): add remote "Set time" admin action by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5821
+* feat(network): on-device capture-replay transport + ingestion fuzzing/hardening by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5846
 #### 🛠️ Fixes
 * fix(mqtt): make the MQTT client-id unique per connection by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5755
 * fix(ble): Harden BLE connection lifecycle by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/5795
 * fix(build): isolate ML Kit GenAI to the Google flavor (fix F-Droid rb-check) by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5824
 * fix(notifications): open node detail when tapping 'New Node Seen' notification by @LesterCheng in https://github.com/meshtastic/Meshtastic-Android/pull/5752
+* fix(appfunctions): keep AppSearch document-factory constructors under R8 full mode by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5829
+* fix(service): resolve selected-device startup race by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/5828
+* fix(database): defer FTS backfill on cold start and enforce single-connection pool by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/5841
+* fix(ble): retrigger connection when bonding is interrupted by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5849
+* fix(desktop): terminate process on exit; quit on close when no tray by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5858
 
 ## New Contributors
 * @LesterCheng made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/5752
