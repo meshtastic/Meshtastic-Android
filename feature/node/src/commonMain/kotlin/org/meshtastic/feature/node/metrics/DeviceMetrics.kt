@@ -191,7 +191,11 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
         },
         listPart = { modifier, selectedX, lazyListState, onCardClick ->
             LazyColumn(modifier = modifier.fillMaxSize(), state = lazyListState) {
-                itemsIndexed(data) { _, telemetry ->
+                itemsIndexed(
+                    data,
+                    key = { _, telemetry -> telemetry.time },
+                    contentType = { _, _ -> "device_metrics" },
+                ) { _, telemetry ->
                     DeviceMetricsCard(
                         telemetry = telemetry,
                         isSelected = telemetry.time.toDouble() == selectedX,
@@ -560,7 +564,11 @@ private fun DeviceMetricsScreenPreview() {
 
                 /* Device Metric Cards */
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    itemsIndexed(telemetries) { _, telemetry ->
+                    itemsIndexed(
+                        telemetries,
+                        key = { _, telemetry -> telemetry.time },
+                        contentType = { _, _ -> "device_metrics" },
+                    ) { _, telemetry ->
                         DeviceMetricsCard(telemetry = telemetry, isSelected = false, onClick = {})
                     }
                 }

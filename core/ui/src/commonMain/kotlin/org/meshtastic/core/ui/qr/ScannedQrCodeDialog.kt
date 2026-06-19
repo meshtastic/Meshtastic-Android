@@ -202,7 +202,10 @@ fun ScannedQrCodeDialog(
                     )
                 }
 
-                itemsIndexed(channelSet.settings) { index, channel ->
+                itemsIndexed(channelSet.settings, key = { index, _ -> index }, contentType = { _, _ -> "channel" }) {
+                        index,
+                        channel,
+                    ->
                     val isExisting = !shouldReplace && index < channels.settings.size
                     val channelObj = Channel(channel, channelSet.lora_config ?: Channel.default.loraConfig)
                     ChannelSelection(
