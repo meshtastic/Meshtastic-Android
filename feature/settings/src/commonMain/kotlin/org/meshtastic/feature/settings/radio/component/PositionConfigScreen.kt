@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalFocusManager
@@ -71,6 +72,34 @@ expect fun DeviceLocationButton(
     onLocationReceived: (Position) -> Unit,
 )
 
+private val PositionStateSaver =
+    listSaver<Position, Any>(
+        save = {
+            listOf(
+                it.latitude,
+                it.longitude,
+                it.altitude,
+                it.time,
+                it.satellitesInView,
+                it.groundSpeed,
+                it.groundTrack,
+                it.precisionBits,
+            )
+        },
+        restore = {
+            Position(
+                latitude = it[0] as Double,
+                longitude = it[1] as Double,
+                altitude = it[2] as Int,
+                time = it[3] as Int,
+                satellitesInView = it[4] as Int,
+                groundSpeed = it[5] as Int,
+                groundTrack = it[6] as Int,
+                precisionBits = it[7] as Int,
+            )
+        },
+    )
+
 @Composable
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 fun PositionConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
@@ -102,7 +131,9 @@ fun PositionConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
             updated
         }
     val formState = rememberConfigState(initialValue = sanitizedPositionConfig)
-    var locationInput by rememberSaveable(currentPosition) { mutableStateOf(currentPosition) }
+    // Position is not Bundle-storable, so persist it through a custom Saver of its primitive fields.
+    var locationInput by
+        rememberSaveable(currentPosition, stateSaver = PositionStateSaver) { mutableStateOf(currentPosition) }
 
     val focusManager = LocalFocusManager.current
     RadioConfigScreenList(
