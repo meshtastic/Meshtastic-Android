@@ -77,6 +77,7 @@ import org.meshtastic.core.ui.util.rememberBluetoothPermissionState
 import org.meshtastic.core.ui.util.rememberLocalNetworkPermissionState
 import org.meshtastic.core.ui.util.rememberOpenBluetoothSettings
 import org.meshtastic.core.ui.util.rememberOpenWifiSettings
+import org.meshtastic.core.ui.util.shouldShowWifiUnavailableBanner
 import org.meshtastic.core.ui.viewmodel.ConnectionStatus
 import org.meshtastic.core.ui.viewmodel.ConnectionsViewModel
 import org.meshtastic.feature.connections.MOCK_DEVICE_PREFIX
@@ -294,6 +295,9 @@ fun ConnectionsScreen(
 
                         // Adapter-off hints: shown only when the relevant permission is granted but the radio/network
                         // is unavailable, so they don't overlap the permission-recovery flow on the scan toggles.
+                        // The Wi-Fi banner gate includes `isNetworkScanning` because `LifecycleStartEffect` keys the
+                        // auto-scan off `networkAutoScan + permission`, not the section-visibility chip — a user with
+                        // the Network filter off but auto-scan on still has a running scan that needs the hint.
                         if (showBleTransport && bluetoothPermission.isGranted && bluetoothDisabled) {
                             RecoveryCard(
                                 message = stringResource(Res.string.bluetooth_disabled),
@@ -302,7 +306,14 @@ fun ConnectionsScreen(
                                 actionIcon = MeshtasticIcons.Bluetooth,
                             )
                         }
-                        if (showNetworkTransport && localNetworkPermission.isGranted && wifiUnavailable) {
+                        if (
+                            shouldShowWifiUnavailableBanner(
+                                showNetworkTransport = showNetworkTransport,
+                                isNetworkScanning = isNetworkScanning,
+                                localNetworkPermissionGranted = localNetworkPermission.isGranted,
+                                wifiUnavailable = wifiUnavailable,
+                            )
+                        ) {
                             RecoveryCard(
                                 message = stringResource(Res.string.wifi_unavailable),
                                 actionLabel = stringResource(Res.string.open_wifi_settings),
