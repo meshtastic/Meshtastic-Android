@@ -270,6 +270,80 @@ class SharedRadioInterfaceService(
         }
     }
 
+    override suspend fun restartTransport() {
+        // CAS BEFORE the mutex, mirroring checkLiveness()'s coordination structure: both
+        // restart paths CAS synchronously, one wins, one loses immediately. Performing the
+        // CAS inside transportMutex.withLock races checkLiveness's outer
+        // `finally { isRestarting = false }` (which runs AFTER mutex release): a queued
+        // restartTransport that resumes from mutex.wait can observe isRestarting == false,
+        // win the CAS, and produce an extra transport cycle (3 instead of 2) under the JVM's
+        // real dispatcher. The loser here observes isRestarting == true and defers to the
+        // in-flight cycle. startTransportLocked() is idempotent w.r.t. an existing transport,
+        // but the CAS also prevents a double stop/stop race on the teardown side.
+        if (!isRestarting.compareAndSet(expect = false, update = true)) {
+            Logger.d { "restartTransport: skipped, concurrent restart in progress" }
+            return
+        }
+        try {
+            transportMutex.withLock {
+                // Silent recovery for app-level handshake stalls. The transport may still be physically
+                // up (TCP socket alive, firmware unresponsive to want_config_id), so cycling it in place
+                // WITHOUT clearing connectionRequested avoids the split-brain where setDeviceAddress's
+                // fast-path would otherwise block same-node reconnect. The caller (MeshConnectionManager)
+                // is responsible for the app-level Disconnected flip; this method only cycles the
+                // transport and emits the transport-level DeviceSleep -> Connected transitions via
+                // callbacks (no Connecting — that is an app-level state, not a transport emission).
+                if (!connectionRequested) {
+                    Logger.d { "restartTransport: skipped-not-requested" }
+                    return@withLock
+                }
+                if (getBondedDeviceAddress() == null) {
+                    Logger.d { "restartTransport: skipped-no-address" }
+                    return@withLock
+                }
+                // Honor the documented "safe no-op when no transport running" contract: environmental
+                // stops (network unavailable, BLE disabled) intentionally preserve
+                // connectionRequested=true so the recovery listeners above can re-bring-up the
+                // transport later. A stale restart job running after such a stop must NOT bypass that
+                // recovery path by creating a transport directly via startTransportLocked().
+                if (radioTransport == null) {
+                    Logger.d { "restartTransport: skipped-no-transport" }
+                    return@withLock
+                }
+                Logger.w { "restartTransport: restarting transport for ${getDeviceAddress()?.anonymize}" }
+                // Mirror checkLiveness()'s coordination contract: emit a transport-level
+                // Connected -> DeviceSleep transition before the stop/start cycle so
+                // transport-level observers see a full DeviceSleep -> Connected cycle when
+                // the fresh transport's onConnect() fires and can re-trigger their onConnected
+                // logic. The caller (runSiblingHandshakeRecovery) flips the app-level state to
+                // Disconnected before invoking restartTransport(), so this emission exists for
+                // transport-level coordination, not for app-level StateFlow dedupe. Silent:
+                // transient DeviceSleep, not a permanent Disconnected.
+                onDisconnect(isPermanent = false)
+                // notifyPermanent=false below (no user-facing Disconnected modal — the app-level
+                // state machine drives that separately) and sendPoliteDisconnect=false (firmware
+                // is unresponsive, writing a goodbye frame into a dead link only delays teardown).
+                ignoreExceptionSuspend { stopTransportLocked(notifyPermanent = false, sendPoliteDisconnect = false) }
+                // Defense-in-depth mirroring the liveness recovery gate; today all
+                // connectionRequested mutators (connect/disconnect/setDeviceAddress) hold
+                // transportMutex so this re-check is unreachable, but it guards against future
+                // refactors that mutate the gate without serialization.
+                if (!connectionRequested) {
+                    Logger.d { "restartTransport: aborted, disconnect requested during stop" }
+                    return@withLock
+                }
+                // startTransportLocked() re-validates the selected address (no-op if null) and emits
+                // Connected through the transport callbacks (via the new transport's onConnect) once
+                // the fresh transport comes up — there is no Connecting emission at the transport
+                // layer (that is an app-level state owned by MeshConnectionManager).
+                startTransportLocked()
+                Logger.i { "restartTransport: completed" }
+            }
+        } finally {
+            isRestarting.value = false
+        }
+    }
+
     override fun isMockTransport(): Boolean = transportFactory.isMockTransport()
 
     override fun toInterfaceAddress(interfaceId: InterfaceId, rest: String): String =
