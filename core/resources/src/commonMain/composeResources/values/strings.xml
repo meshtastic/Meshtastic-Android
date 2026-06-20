@@ -1456,23 +1456,6 @@
     <string name="traceroute_showing_nodes">Showing %1$d/%2$d nodes</string>
     <string name="track_and_share_locations">Track and Share Locations</string>
     <string name="track_point">track point</string>
-    <!-- TRAFFIC -->
-    <string name="traffic_management">Traffic Management</string>
-    <string name="traffic_management_config">Traffic Management Configuration</string>
-    <string name="traffic_management_drop_unknown_enabled">Drop Unknown Packets</string>
-    <string name="traffic_management_enabled">Module Enabled</string>
-    <string name="traffic_management_exhaust_hop_position">Local-only Position (Relays)</string>
-    <string name="traffic_management_exhaust_hop_telemetry">Local-only Telemetry (Relays)</string>
-    <string name="traffic_management_nodeinfo_direct_response">NodeInfo Direct Response</string>
-    <string name="traffic_management_nodeinfo_direct_response_max_hops">Max Hops for Direct Response</string>
-    <string name="traffic_management_position_dedup">Position Deduplication</string>
-    <string name="traffic_management_position_min_interval">Min Position Interval (secs)</string>
-    <string name="traffic_management_position_precision">Position Precision (bits)</string>
-    <string name="traffic_management_rate_limit_enabled">Rate Limiting</string>
-    <string name="traffic_management_rate_limit_max_packets">Max Packets in Window</string>
-    <string name="traffic_management_rate_limit_window">Rate Limit Window (secs)</string>
-    <string name="traffic_management_router_preserve_hops">Preserve Router Hops</string>
-    <string name="traffic_management_unknown_packet_threshold">Unknown Packet Threshold</string>
     <string name="transmit_over_lora">Transmit over LoRa</string>
     <string name="transport_ble">BLE</string>
     <string name="transport_tcp">TCP</string>

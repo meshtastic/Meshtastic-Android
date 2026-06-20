@@ -230,7 +230,6 @@ object DeepLinkRouter {
             "detection-sensor" to SettingsRoute.DetectionSensor,
             "paxcounter" to SettingsRoute.Paxcounter,
             "status-message" to SettingsRoute.StatusMessage,
-            "traffic-management" to SettingsRoute.TrafficManagement,
             "tak" to SettingsRoute.TAK,
             "clean-node-db" to SettingsRoute.CleanNodeDb,
             "debug-panel" to SettingsRoute.DebugPanel,

@@ -416,7 +416,6 @@ open class RadioConfigViewModel(
                         detection_sensor = config.detection_sensor ?: state.moduleConfig.detection_sensor,
                         paxcounter = config.paxcounter ?: state.moduleConfig.paxcounter,
                         statusmessage = config.statusmessage ?: state.moduleConfig.statusmessage,
-                        traffic_management = config.traffic_management ?: state.moduleConfig.traffic_management,
                         tak = config.tak ?: state.moduleConfig.tak,
                     ),
                 )
@@ -796,8 +795,6 @@ open class RadioConfigViewModel(
                             detection_sensor = response.detection_sensor ?: state.moduleConfig.detection_sensor,
                             paxcounter = response.paxcounter ?: state.moduleConfig.paxcounter,
                             statusmessage = response.statusmessage ?: state.moduleConfig.statusmessage,
-                            traffic_management =
-                            response.traffic_management ?: state.moduleConfig.traffic_management,
                             tak = response.tak ?: state.moduleConfig.tak,
                         ),
                     )
