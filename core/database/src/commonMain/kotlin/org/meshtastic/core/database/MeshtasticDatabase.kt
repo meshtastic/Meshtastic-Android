@@ -153,10 +153,11 @@ abstract class MeshtasticDatabase : RoomDatabase() {
          * wedge: all reader connections report `Free` but `permits=0`, so every read acquisition times out
          * indefinitely. Forcing single-connection eliminates the separate reader permit pool entirely.
          *
-         * **In-memory databases MUST pass `false`** for deterministic read-after-write: a pooled reader connection can
-         * serve a snapshot older than the latest write on the writer connection, so a read immediately after a write
-         * may observe stale rows — making read-after-write assertions non-deterministically flaky (see
-         * `DeviceLinkRepositoryImplTest`). A single connection serializes reads behind writes.
+         * **In-memory databases (tests) pass `false`.** Room already serves an in-memory database (`name == null`) from
+         * a single connection regardless of the pool configuration, so this only makes the single-connection intent
+         * explicit and serializes the query dispatcher; it is not load-bearing for read-after-write.
+         * (`DeviceLinkRepositoryImplTest` is deterministic because it runs on the wall clock, not because of this flag;
+         * see that test's comments.)
          *
          * **JVM/iOS production uses `true`** (the default). Revisit if desktop/iOS field logs show similar
          * pool-exhaustion patterns under cancellation churn.

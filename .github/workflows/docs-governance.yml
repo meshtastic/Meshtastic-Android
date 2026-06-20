@@ -1,6 +1,17 @@
 name: UI & Docs Governance
 
+# Split by trust level:
+# - pull_request (fork context, read-only token, NO secrets) runs the `validate`
+#   job, which checks out and EXECUTES fork-supplied code (node scripts/*.js). This
+#   is safe only because the token is read-only and secrets are unavailable.
+# - pull_request_target (base context, write token) runs the comment-posting
+#   staleness jobs. They MUST NOT check out or execute fork code — they read the
+#   changed-file list via the API instead. (actions/checkout@v7 also refuses a fork
+#   checkout under pull_request_target, which is what surfaced this.)
 on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
   pull_request_target:
     branches: [main]
     types: [opened, synchronize, reopened, labeled, unlabeled]
@@ -17,24 +28,21 @@ jobs:
   staleness:
     name: Docs staleness check
     runs-on: ubuntu-24.04-arm
+    # pull_request_target only: needs the write token to post advisory comments.
+    # Reads the changed-file list via the API — no fork checkout, no fork code run.
     if: >-
-      github.event.pull_request != null
+      github.event_name == 'pull_request_target'
+      && github.event.pull_request != null
       && !contains(github.event.pull_request.labels.*.name, 'skip-docs-check')
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v7.0.0
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          fetch-depth: 0
-
       - name: Detect changed files
         id: changed
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          BASE="${{ github.event.pull_request.base.sha }}"
-          HEAD="${{ github.event.pull_request.head.sha }}"
-
-          changed=$(git diff --name-only "$BASE" "$HEAD")
+          changed=$(gh pr diff "${{ github.event.pull_request.number }}" \
+            --repo "${{ github.repository }}" --name-only)
 
           views_changed=$(echo "$changed" | grep -E \
             '^feature/.*/src/commonMain/.*/(ui|component|screen)/|^feature/.*/src/androidMain/.*/ui/|^core/ui/src/commonMain/' \
@@ -158,6 +166,12 @@ jobs:
   validate:
     name: Docs quality gates
     runs-on: ubuntu-24.04-arm
+    # Runs on pull_request (fork context, read-only token, no secrets) — never on
+    # pull_request_target — because it checks out and executes fork-supplied code
+    # (node scripts/*.js). The pull_request event makes that execution safe; the
+    # pull_request_target instance is skipped to avoid the pwn-request RCE and the
+    # actions/checkout@v7 fork-checkout refusal.
+    if: github.event_name != 'pull_request_target'
 
     steps:
       - name: Checkout
@@ -204,24 +218,21 @@ jobs:
   preview-staleness:
     name: Preview staleness check
     runs-on: ubuntu-24.04-arm
+    # pull_request_target only: needs the write token to post advisory comments.
+    # Reads the changed-file list via the API — no fork checkout, no fork code run.
     if: >-
-      github.event.pull_request != null
+      github.event_name == 'pull_request_target'
+      && github.event.pull_request != null
       && !contains(github.event.pull_request.labels.*.name, 'skip-preview-check')
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v7.0.0
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          fetch-depth: 0
-
       - name: Detect changed files
         id: changed
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          BASE="${{ github.event.pull_request.base.sha }}"
-          HEAD="${{ github.event.pull_request.head.sha }}"
-
-          changed=$(git diff --name-only "$BASE" "$HEAD")
+          changed=$(gh pr diff "${{ github.event.pull_request.number }}" \
+            --repo "${{ github.repository }}" --name-only)
 
           # UI composables changed (screens, components — excluding tests and previews)
           ui_changed=$(echo "$changed" | grep -E \

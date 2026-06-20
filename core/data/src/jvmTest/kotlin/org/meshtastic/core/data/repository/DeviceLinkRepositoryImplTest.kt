@@ -16,9 +16,8 @@
  */
 package org.meshtastic.core.data.repository
 
-import kotlinx.coroutines.test.TestDispatcher
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import org.meshtastic.core.data.datasource.DeviceLinkLocalDataSource
 import org.meshtastic.core.data.datasource.DeviceLinksJsonDataSource
 import org.meshtastic.core.di.CoroutineDispatchers
@@ -50,8 +49,13 @@ class DeviceLinkRepositoryImplTest {
         override fun loadDeviceLinksFromJsonAsset(): List<NetworkDeviceLink> = links
     }
 
-    private lateinit var dispatcher: TestDispatcher
-    private lateinit var dispatchers: CoroutineDispatchers
+    // Real dispatchers + runBlocking (per test), NOT runTest/UnconfinedTestDispatcher. reconcile() guards its network
+    // fetch with withTimeoutOrNull, whose deadline follows the calling coroutine's clock. Under runTest that clock is
+    // virtual and runTest fast-forwards it while the coroutine parks on Room's real IO dispatcher; under load the 5s
+    // budget "elapsed" in virtual time, so the fetch was treated as timed out, store() was skipped, and the cache kept
+    // stale rows (reconcilePrunes... flaked). On the wall clock the instant fake never times out.
+    private val unconfined = Dispatchers.Unconfined
+    private val dispatchers = CoroutineDispatchers(main = unconfined, io = unconfined, default = unconfined)
 
     private lateinit var dbProvider: FakeDatabaseProvider
     private lateinit var local: DeviceLinkLocalDataSource
@@ -75,8 +79,6 @@ class DeviceLinkRepositoryImplTest {
 
     @BeforeTest
     fun setup() {
-        dispatcher = UnconfinedTestDispatcher()
-        dispatchers = CoroutineDispatchers(main = dispatcher, io = dispatcher, default = dispatcher)
         dbProvider = FakeDatabaseProvider()
         local = DeviceLinkLocalDataSource(dbProvider, dispatchers)
         api = FakeApiService(NetworkDeviceLinksResponse())
@@ -93,19 +95,16 @@ class DeviceLinkRepositoryImplTest {
     @AfterTest fun tearDown() = dbProvider.close()
 
     @Test
-    fun seedsFromBundledJsonWhenEmptyAndDropsInternalLinks() = runTest(dispatcher) {
+    fun seedsFromBundledJsonWhenEmptyAndDropsInternalLinks() = runBlocking {
         seed.links =
-            listOf(
-                link("rak4631", targets = listOf("rak4631")),
-                link("github", type = NetworkDeviceLink.TYPE_INTERNAL),
-            )
+            listOf(link("rak4631", targets = listOf("rak4631")), link("github", type = NetworkDeviceLink.TYPE_INTERNAL))
         repository.ensureImported()
 
         assertEquals(setOf("rak4631"), local.getAll().map { it.shortCode }.toSet())
     }
 
     @Test
-    fun ensureImportedSeedsOnlyWhenEmpty() = runTest(dispatcher) {
+    fun ensureImportedSeedsOnlyWhenEmpty() = runBlocking {
         seed.links = listOf(link("rak4631", targets = listOf("rak4631")))
         repository.ensureImported()
         assertEquals(1, local.count())
@@ -117,7 +116,7 @@ class DeviceLinkRepositoryImplTest {
     }
 
     @Test
-    fun getLinksForTargetFiltersByTargetAndRegionVendorFirst() = runTest(dispatcher) {
+    fun getLinksForTargetFiltersByTargetAndRegionVendorFirst() = runBlocking {
         api.response =
             NetworkDeviceLinksResponse(
                 links =
@@ -148,13 +147,11 @@ class DeviceLinkRepositoryImplTest {
     }
 
     @Test
-    fun worldwideLinksShowRegardlessOfRegion() = runTest(dispatcher) {
+    fun worldwideLinksShowRegardlessOfRegion() = runBlocking {
         api.response =
             NetworkDeviceLinksResponse(
                 links =
-                listOf(
-                    link("ww", type = NetworkDeviceLink.TYPE_MARKETPLACE, targets = listOf("t"), regions = null),
-                ),
+                listOf(link("ww", type = NetworkDeviceLink.TYPE_MARKETPLACE, targets = listOf("t"), regions = null)),
             )
         repository.reconcile()
 
@@ -162,7 +159,7 @@ class DeviceLinkRepositoryImplTest {
     }
 
     @Test
-    fun reconcilePrunesShortCodesNoLongerInCatalog() = runTest(dispatcher) {
+    fun reconcilePrunesShortCodesNoLongerInCatalog() = runBlocking {
         api.response =
             NetworkDeviceLinksResponse(
                 links = listOf(link("a", targets = listOf("t")), link("b", targets = listOf("t"))),
@@ -176,7 +173,7 @@ class DeviceLinkRepositoryImplTest {
     }
 
     @Test
-    fun emptyResponseLeavesCacheUntouched() = runTest(dispatcher) {
+    fun emptyResponseLeavesCacheUntouched() = runBlocking {
         api.response = NetworkDeviceLinksResponse(links = listOf(link("a", targets = listOf("t"))))
         repository.reconcile()
         assertEquals(1, local.count())
