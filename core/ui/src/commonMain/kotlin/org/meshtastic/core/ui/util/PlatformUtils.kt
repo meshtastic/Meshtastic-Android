@@ -77,8 +77,12 @@ expect fun rememberSaveFileLauncher(
 @Composable expect fun isBluetoothDisabled(): Boolean
 
 /**
- * Returns whether the device currently lacks a local-network-capable connection (no active Wi-Fi or Ethernet). NSD/mDNS
- * discovery needs a LAN, so this surfaces the "connect to Wi-Fi" hint. Always `false` where the concept doesn't apply.
+ * Returns whether the device currently lacks any transport that can back the network-scan discovery (no active Wi-Fi,
+ * Ethernet, or VPN). Cellular alone is **not** sufficient — a carrier uplink does not place the device on the same
+ * segment as a Meshtastic node — so a cellular-only state surfaces the "connect to Wi-Fi" hint. The function name is
+ * historical: the original implementation checked Wi-Fi alone, later widened to Ethernet, and now also recognizes VPN
+ * (ZeroTier/Tailscale) as a valid reachability path for a TCP node. The name is retained to avoid churning the
+ * expect/actual contract and every consumer. Always `false` where the concept doesn't apply.
  */
 @Composable expect fun isWifiUnavailable(): Boolean
 
