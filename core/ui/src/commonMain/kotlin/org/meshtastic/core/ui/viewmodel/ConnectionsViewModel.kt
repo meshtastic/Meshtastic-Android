@@ -27,16 +27,17 @@ import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.LocalConfig
 
 /**
- * Derived, UI-friendly summary of the device connection state. Combines [ConnectionStateProvider.connectionState] with
- * "region unset" to surface the MUST_SET_REGION case that otherwise needs a separate boolean flag in the UI layer.
+ * Derived, UI-friendly summary of the device connection state. Combines [ServiceRepository.connectionState] with
+ * "region unset" and the [ServiceRepository.RECONNECTING_PROGRESS_TEXT] handshake-recovery signal to surface cases
+ * (MUST_SET_REGION, RECONNECTING) that otherwise need separate boolean flags in the UI layer.
  */
 enum class ConnectionStatus {
     /** No device has been selected or we are otherwise disconnected. */
@@ -44,6 +45,12 @@ enum class ConnectionStatus {
 
     /** A device has been selected and we are working through bonding/handshake. */
     CONNECTING,
+
+    /**
+     * Transport is recovering from a WiFi/TCP handshake stall (the watchdog tore the link down and is bringing it back
+     * up). Distinct from [NOT_CONNECTED] so the UI can show an in-progress recovery instead of a final failure.
+     */
+    RECONNECTING,
 
     /** Connected with node info available. */
     CONNECTED,
@@ -58,7 +65,7 @@ enum class ConnectionStatus {
 @KoinViewModel
 class ConnectionsViewModel(
     radioConfigRepository: RadioConfigRepository,
-    connectionStateProvider: ConnectionStateProvider,
+    serviceRepository: ServiceRepository,
     nodeRepository: NodeRepository,
     private val uiPrefs: UiPrefs,
 ) : ViewModel() {
@@ -66,7 +73,7 @@ class ConnectionsViewModel(
     val localConfig: StateFlow<LocalConfig> =
         radioConfigRepository.localConfigFlow.stateInWhileSubscribed(initialValue = LocalConfig())
 
-    val connectionState = connectionStateProvider.connectionState
+    val connectionState = serviceRepository.connectionState
 
     val myNodeInfo: StateFlow<MyNodeInfo?> = nodeRepository.myNodeInfo
 
@@ -95,18 +102,29 @@ class ConnectionsViewModel(
             .stateInWhileSubscribed(initialValue = false)
 
     /**
-     * Single source of truth for the UI's "connection status" pill/banner. Derived from [connectionState] and
-     * [regionUnset]; kept here rather than in the composable so the mapping is observable and testable.
+     * Single source of truth for the UI's "connection status" pill/banner. Derived from [connectionState],
+     * [ServiceRepository.connectionProgress], and [regionUnset]; kept here rather than in the composable so the mapping
+     * is observable and testable.
+     *
+     * The [ConnectionStatus.RECONNECTING] case is signalled by the WiFi/TCP handshake watchdog writing
+     * [ServiceRepository.RECONNECTING_PROGRESS_TEXT] to [ServiceRepository.connectionProgress] immediately before its
+     * recovery sibling transitions to [ConnectionState.Disconnected]. See
+     * [ServiceRepository.RECONNECTING_PROGRESS_TEXT] for the cross-track contract.
      */
     val connectionStatus: StateFlow<ConnectionStatus> =
-        combine(connectionState, regionUnset) { state, unset ->
+        combine(connectionState, regionUnset, serviceRepository.connectionProgress) { state, unset, progress ->
             when (state) {
                 is ConnectionState.Connected ->
                     if (unset) ConnectionStatus.MUST_SET_REGION else ConnectionStatus.CONNECTED
 
                 ConnectionState.Connecting -> ConnectionStatus.CONNECTING
 
-                ConnectionState.Disconnected -> ConnectionStatus.NOT_CONNECTED
+                ConnectionState.Disconnected ->
+                    if (progress == ServiceRepository.RECONNECTING_PROGRESS_TEXT) {
+                        ConnectionStatus.RECONNECTING
+                    } else {
+                        ConnectionStatus.NOT_CONNECTED
+                    }
 
                 ConnectionState.DeviceSleep -> ConnectionStatus.CONNECTED_SLEEPING
             }

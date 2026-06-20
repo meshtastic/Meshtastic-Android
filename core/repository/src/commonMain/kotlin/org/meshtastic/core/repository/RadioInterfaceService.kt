@@ -101,6 +101,35 @@ interface RadioInterfaceService : RadioTransportCallback {
      */
     suspend fun disconnect()
 
+    /**
+     * Silent in-place transport restart for handshake stalls: tears down the active transport and re-establishes it in
+     * place, without touching the connection-request gate or the selected device address.
+     *
+     * Both transport families use this recovery path but with different trigger timings: TCP/USB reach it through the
+     * fast-path watchdog (~12s after the last meaningful handshake packet), while BLE reaches it after the
+     * retry-exhausted path (~30s/60s watchdog plus a ~15s retry window). In both cases the symptom is identical: the
+     * transport itself may still be physically [ConnectionState.Connected] (e.g. a TCP socket whose radio firmware has
+     * stopped responding to `want_config_id`, or a BLE link whose GATT peer has stalled), so flipping app-level state
+     * to [ConnectionState.Disconnected] alone leaves a split-brain: transport Connected + `connectionRequested=true` +
+     * a live `RadioTransport` handle, which then blocks same-node reconnect via [setDeviceAddress]'s fast-path. This
+     * method breaks that deadlock by cycling the transport in place.
+     *
+     * Contract:
+     * - Preserves the selected device address (does not modify [currentDeviceAddressFlow]).
+     * - Preserves the `connectionRequested` gate; **MUST NOT** clear it. Safe to call concurrently with an explicit
+     *   [disconnect] — the internal gate check makes it a no-op in that case.
+     * - Safe to call when no transport is running — implementations must no-op.
+     * - Does **NOT** bypass selected-device validation; the replacement transport is built from the same bonded address
+     *   via the normal start path.
+     * - Emits ordinary transport-level transitions through the existing [RadioTransportCallback] surface, so observers
+     *   see the transient [ConnectionState.DeviceSleep] state followed by [ConnectionState.Connected] when the
+     *   replacement transport connects. (No [ConnectionState.Connecting] is emitted at the transport layer — that is an
+     *   app-level state set by [MeshConnectionManager], not a transport callback.)
+     *
+     * Suspends until the teardown/restart cycle completes.
+     */
+    suspend fun restartTransport()
+
     /** Returns the current device address. */
     fun getDeviceAddress(): String?
 

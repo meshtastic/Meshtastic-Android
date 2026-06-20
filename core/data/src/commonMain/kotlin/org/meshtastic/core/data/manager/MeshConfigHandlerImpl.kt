@@ -26,6 +26,7 @@ import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.repository.MeshConfigHandler
+import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceStateWriter
@@ -41,6 +42,7 @@ class MeshConfigHandlerImpl(
     private val radioConfigRepository: RadioConfigRepository,
     private val serviceStateWriter: ServiceStateWriter,
     private val nodeManager: NodeManager,
+    private val connectionManager: Lazy<MeshConnectionManager>,
     @Named("ServiceScope") private val scope: CoroutineScope,
 ) : MeshConfigHandler {
 
@@ -59,6 +61,7 @@ class MeshConfigHandlerImpl(
         Logger.d { "Device config received: ${config.summarize()}" }
         scope.handledLaunch { radioConfigRepository.setLocalConfig(config) }
         serviceStateWriter.setConnectionProgress("Device config received")
+        connectionManager.value.onHandshakeProgress()
     }
 
     override fun handleModuleConfig(config: ModuleConfig) {
@@ -69,6 +72,7 @@ class MeshConfigHandlerImpl(
         config.statusmessage?.let { sm ->
             nodeManager.myNodeNum.value?.let { num -> nodeManager.updateNodeStatus(num, sm.node_status) }
         }
+        connectionManager.value.onHandshakeProgress()
     }
 
     override fun handleChannel(channel: Channel) {
@@ -83,11 +87,16 @@ class MeshConfigHandlerImpl(
         } else {
             serviceStateWriter.setConnectionProgress("Channels (${index + 1})")
         }
+        connectionManager.value.onHandshakeProgress()
     }
 
     override fun handleDeviceUIConfig(config: DeviceUIConfig) {
         Logger.d { "DeviceUI config received" }
         scope.handledLaunch { radioConfigRepository.setDeviceUIConfig(config) }
+        // deviceuiConfig arrives during Stage 1 immediately after my_info. It proves the transport
+        // is alive, so surface it as handshake progress — without this, a long gap before the next
+        // meaningful packet could falsely trip the fast-path watchdog on TCP/USB.
+        connectionManager.value.onHandshakeProgress()
     }
 }
 

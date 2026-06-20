@@ -39,6 +39,7 @@ import org.meshtastic.core.resources.connected_sleeping
 import org.meshtastic.core.resources.connecting
 import org.meshtastic.core.resources.must_set_region
 import org.meshtastic.core.resources.not_connected
+import org.meshtastic.core.resources.reconnecting
 import org.meshtastic.core.ui.viewmodel.ConnectionStatus
 
 /**
@@ -59,6 +60,7 @@ fun ConnectingDeviceInfo(
             ConnectionStatus.CONNECTED -> stringResource(Res.string.connected)
             ConnectionStatus.MUST_SET_REGION -> stringResource(Res.string.must_set_region)
             ConnectionStatus.CONNECTING -> connectionProgress ?: stringResource(Res.string.connecting)
+            ConnectionStatus.RECONNECTING -> stringResource(Res.string.reconnecting)
             ConnectionStatus.CONNECTED_SLEEPING -> stringResource(Res.string.connected_sleeping)
             ConnectionStatus.NOT_CONNECTED -> stringResource(Res.string.not_connected)
         }

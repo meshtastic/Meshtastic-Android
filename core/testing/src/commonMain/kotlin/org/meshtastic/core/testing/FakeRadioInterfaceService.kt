@@ -64,6 +64,8 @@ class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = Main
 
     val sentToRadio = mutableListOf<ByteArray>()
     var connectCalled = false
+    var restartTransportCalled: Boolean = false
+        private set
 
     override fun isMockTransport(): Boolean = true
 
@@ -77,6 +79,10 @@ class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = Main
 
     override suspend fun disconnect() {
         connectCalled = false
+    }
+
+    override suspend fun restartTransport() {
+        restartTransportCalled = true
     }
 
     override fun getDeviceAddress(): String? = _currentDeviceAddressFlow.value

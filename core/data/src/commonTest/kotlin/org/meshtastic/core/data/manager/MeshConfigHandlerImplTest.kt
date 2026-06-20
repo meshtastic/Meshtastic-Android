@@ -30,6 +30,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.model.MyNodeInfo
+import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
@@ -49,6 +50,7 @@ class MeshConfigHandlerImplTest {
     private val radioConfigRepository = mock<RadioConfigRepository>(MockMode.autofill)
     private val serviceRepository = mock<ServiceRepository>(MockMode.autofill)
     private val nodeManager = mock<NodeManager>(MockMode.autofill)
+    private val connectionManager = mock<MeshConnectionManager>(MockMode.autofill)
 
     private val localConfigFlow = MutableStateFlow(LocalConfig())
     private val moduleConfigFlow = MutableStateFlow(LocalModuleConfig())
@@ -67,6 +69,7 @@ class MeshConfigHandlerImplTest {
         radioConfigRepository = radioConfigRepository,
         serviceStateWriter = serviceRepository,
         nodeManager = nodeManager,
+        connectionManager = lazy { this.connectionManager },
         scope = scope,
     )
 
@@ -227,5 +230,48 @@ class MeshConfigHandlerImplTest {
         advanceUntilIdle()
 
         verifySuspend { radioConfigRepository.setDeviceUIConfig(config) }
+    }
+
+    // ---------- onHandshakeProgress ----------
+
+    @Test
+    fun `handleDeviceConfig calls onHandshakeProgress`() = runTest(testDispatcher) {
+        handler = createHandler(backgroundScope)
+        val config = Config(device = Config.DeviceConfig(role = Config.DeviceConfig.Role.CLIENT))
+        handler.handleDeviceConfig(config)
+        advanceUntilIdle()
+
+        verify { connectionManager.onHandshakeProgress() }
+    }
+
+    @Test
+    fun `handleModuleConfig calls onHandshakeProgress`() = runTest(testDispatcher) {
+        handler = createHandler(backgroundScope)
+        val config = ModuleConfig(mqtt = ModuleConfig.MQTTConfig(enabled = true))
+        handler.handleModuleConfig(config)
+        advanceUntilIdle()
+
+        verify { connectionManager.onHandshakeProgress() }
+    }
+
+    @Test
+    fun `handleChannel calls onHandshakeProgress`() = runTest(testDispatcher) {
+        handler = createHandler(backgroundScope)
+        every { nodeManager.getMyNodeInfo() } returns null
+
+        val channel = Channel(index = 0)
+        handler.handleChannel(channel)
+        advanceUntilIdle()
+
+        verify { connectionManager.onHandshakeProgress() }
+    }
+
+    @Test
+    fun `handleDeviceUIConfig calls onHandshakeProgress`() = runTest(testDispatcher) {
+        handler = createHandler(backgroundScope)
+        handler.handleDeviceUIConfig(DeviceUIConfig())
+        advanceUntilIdle()
+
+        verify { connectionManager.onHandshakeProgress() }
     }
 }

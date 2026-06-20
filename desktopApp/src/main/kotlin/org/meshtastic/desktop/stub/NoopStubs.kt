@@ -90,6 +90,10 @@ class NoopRadioInterfaceService : RadioInterfaceService {
         logWarn("NoopRadioInterfaceService.disconnect()")
     }
 
+    override suspend fun restartTransport() {
+        logWarn("NoopRadioInterfaceService.restartTransport()")
+    }
+
     override fun getDeviceAddress(): String? = null
 
     override fun setDeviceAddress(deviceAddr: String?): Boolean = false

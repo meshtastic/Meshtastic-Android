@@ -32,6 +32,38 @@ interface MeshConnectionManager {
     /** Called when the node database is ready and fully populated. */
     suspend fun onNodeDbReady()
 
+    /**
+     * Synchronously cancels the transport-aware handshake watchdog the moment the firmware signals Stage 2 completion
+     * (NODE_INFO_NONCE received).
+     *
+     * This MUST be invoked before the asynchronous NodeDB install work begins so that a slow DB commit on a large mesh
+     * cannot trip the 12 s fast-recovery timeout after the firmware handshake has already succeeded. The watchdog
+     * cancellation it performs is a strict subset of [onNodeDbReady]; the remaining post-NodeDB side effects
+     * (analytics, MQTT start, history replay, telemetry requests) stay gated on [onNodeDbReady] at the end of the DB
+     * install block.
+     */
+    fun onHandshakeComplete()
+
+    /**
+     * Recovers from a failure after firmware handshake completion but before NodeDB install has completed.
+     *
+     * At this point the handshake watchdog has already been cancelled by [onHandshakeComplete], so recovery must
+     * explicitly move the app-level state out of Connecting and restart the raw transport in the same ordering used by
+     * handshake stall recovery.
+     */
+    fun recoverPostHandshakeFailure()
+
+    /**
+     * Called when meaningful handshake progress is observed on the wire (e.g. an inbound packet related to the
+     * in-flight config or node-info exchange).
+     *
+     * On fast transports (TCP, USB serial) this re-arms the transport-aware handshake watchdog so a steady trickle of
+     * progress does not trip the aggressive fast-recovery timeout while a true stall still fires on schedule. On BLE
+     * this is a no-op: BLE keeps the original long-and-retry stall-guard budget because GATT latency is high and
+     * variable.
+     */
+    fun onHandshakeProgress()
+
     /** Updates the telemetry information for the local node. */
     fun updateTelemetry(t: Telemetry)
 

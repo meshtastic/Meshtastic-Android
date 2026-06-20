@@ -163,4 +163,17 @@ interface ServiceRepository :
 
     /** Clears the current neighbor info response. */
     override fun clearNeighborInfoResponse()
+
+    companion object {
+        /**
+         * The cross-module contract for the WiFi/TCP handshake-watchdog recovery progress signal.
+         *
+         * [MeshConnectionManager] writes this exact literal to [connectionProgress] immediately before its recovery
+         * sibling transitions the transport to [ConnectionState.Disconnected], and `ConnectionsViewModel` (and its
+         * tests) compare incoming progress against it to surface `RECONNECTING` UI state instead of a final-feeling
+         * `NOT_CONNECTED`. The literal text and the U+2026 HORIZONTAL ELLIPSIS character MUST match exactly across both
+         * writers and readers — centralizing it here removes the prior cross-module string-contract hazard.
+         */
+        const val RECONNECTING_PROGRESS_TEXT = "Reconnecting\u2026"
+    }
 }

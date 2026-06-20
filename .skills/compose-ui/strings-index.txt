@@ -513,6 +513,7 @@ environment_metrics_update_interval_seconds
 environment_metrics_use_fahrenheit
 error
 error_duty_cycle
+error_recovery_exhausted
 establish_session
 establishing_session
 ethernet_config
@@ -1133,6 +1134,7 @@ rebroadcast_mode_known_only_desc
 rebroadcast_mode_local_only_desc
 rebroadcast_mode_none_desc
 recent_network_devices
+reconnecting
 red
 refresh
 refresh_metadata
@@ -1411,6 +1413,23 @@ traceroute_route_towards_dest
 traceroute_showing_nodes
 track_and_share_locations
 track_point
+### TRAFFIC ###
+traffic_management
+traffic_management_config
+traffic_management_drop_unknown_enabled
+traffic_management_enabled
+traffic_management_exhaust_hop_position
+traffic_management_exhaust_hop_telemetry
+traffic_management_nodeinfo_direct_response
+traffic_management_nodeinfo_direct_response_max_hops
+traffic_management_position_dedup
+traffic_management_position_min_interval
+traffic_management_position_precision
+traffic_management_rate_limit_enabled
+traffic_management_rate_limit_max_packets
+traffic_management_rate_limit_window
+traffic_management_router_preserve_hops
+traffic_management_unknown_packet_threshold
 transmit_over_lora
 transport_ble
 transport_tcp

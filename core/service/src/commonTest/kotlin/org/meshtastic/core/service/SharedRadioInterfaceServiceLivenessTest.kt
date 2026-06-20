@@ -785,4 +785,443 @@ class SharedRadioInterfaceServiceLivenessTest {
                 advanceTimeBy(1_000L)
             }
         }
+
+    // ─── restartTransport gate contract ─────────────────────────────────────────────────────
+    //
+    // [SharedRadioInterfaceService.restartTransport] is the app-level handshake-stall recovery
+    // path. It mirrors BLE liveness silent recovery: stopTransportLocked(notifyPermanent=false,
+    // sendPoliteDisconnect=false) then startTransportLocked(). The isRestarting CAS runs
+    // synchronously BEFORE transportMutex (mirroring checkLiveness), then the remaining gates run
+    // inside the mutex. The gate contract has four early-return gates that MUST all hold for the
+    // cycle to fire, evaluated in this exact order:
+    //   1. isRestarting.compareAndSet(false, true) succeeds  (reuses the liveness CAS; synchronous,
+    //      BEFORE acquiring transportMutex — both restart paths serialize on this CAS first)
+    //   2. connectionRequested == true  (cleared by disconnect() / setDeviceAddress(null)/("n");
+    //      checked inside transportMutex)
+    //   3. getBondedDeviceAddress() != null  (re-validates the selected address; inside transportMutex)
+    //   4. radioTransport != null  (defends against a stale restart after an environmental stop;
+    //      inside transportMutex)
+    // The cycle must also be address-preserving and silent (no permanent Disconnected, no
+    // user-facing error). The tests below lock each leg of that contract.
+
+    /**
+     * Happy path: [SharedRadioInterfaceService.restartTransport] after a normal [connect] with a selected address stops
+     * the running transport and creates a fresh one. Mirrors the BLE liveness "timeout closes old transport and creates
+     * fresh one" assertion shape.
+     */
+    @Test
+    fun `restartTransport after connect closes old transport and creates fresh one`() = runTest(testDispatcher) {
+        clock = 0L
+        val service = createConnectedService("xAA:BB:CC:DD:EE:FF")
+        try {
+            assertEquals(1, createdTransports.size, "Initial connect should create one transport")
+            val initialTransport = createdTransports.first()
+
+            // Lock the sendPoliteDisconnect=false contract: clear any bytes recorded during the
+            // initial connect so sentData reflects only writes performed during restartTransport.
+            initialTransport.sentData.clear()
+
+            service.restartTransport()
+            // sendPoliteDisconnect = false → no 500ms drain inside the cycle. Under
+            // UnconfinedTestDispatcher the whole stop/start runs inline; runCurrent is
+            // belt-and-suspenders. The trailing disconnect() covers its own polite delay.
+            testDispatcher.scheduler.runCurrent()
+
+            assertEquals(2, createdTransports.size, "restartTransport should create exactly one fresh transport")
+            assertTrue(initialTransport.closeCalled, "Old transport must be closed by restartTransport")
+            assertEquals(1, initialTransport.closeCount, "Old transport closed exactly once (no double-close)")
+            assertTrue(
+                initialTransport.sentData.isEmpty(),
+                "restartTransport must NOT write any bytes to the old transport (sendPoliteDisconnect=false)",
+            )
+        } finally {
+            service.disconnect()
+            advanceTimeBy(1_000L)
+        }
+    }
+
+    /**
+     * Regression: [SharedRadioInterfaceService.restartTransport] MUST be a no-op after an explicit
+     * [SharedRadioInterfaceService.disconnect]. disconnect() clears `connectionRequested` BEFORE stopTransportLocked(),
+     * and restartTransport() consults that gate as its first check. Without the gate, a racing handshake-induced
+     * restart would silently resurrect a transport the user tore down.
+     */
+    @Test
+    fun `restartTransport is a no-op after explicit disconnect`() = runTest(testDispatcher) {
+        clock = 0L
+        val service = createConnectedService("xAA:BB:CC:DD:EE:FF")
+        try {
+            assertEquals(1, createdTransports.size, "Initial connect should create one transport")
+
+            service.disconnect()
+            advanceTimeBy(1_000L)
+            val transportCountAfterDisconnect = createdTransports.size
+
+            service.restartTransport()
+            testDispatcher.scheduler.runCurrent()
+
+            assertEquals(
+                transportCountAfterDisconnect,
+                createdTransports.size,
+                "restartTransport must not create a transport after disconnect (connectionRequested gate)",
+            )
+        } finally {
+            service.disconnect()
+            advanceTimeBy(1_000L)
+        }
+    }
+
+    /**
+     * Regression: [SharedRadioInterfaceService.restartTransport] MUST be a no-op after
+     * [SharedRadioInterfaceService.setDeviceAddress] with `null`. The deselect clears `connectionRequested` AND leaves
+     * getBondedDeviceAddress() == null (invalid address); either gate alone is sufficient to skip the restart, but both
+     * must hold to defend against a stale listener emission re-arming the transport.
+     */
+    @Test
+    fun `restartTransport is a no-op after setDeviceAddress null`() = runTest(testDispatcher) {
+        clock = 0L
+        val service = createConnectedService("xAA:BB:CC:DD:EE:FF")
+        try {
+            assertEquals(1, createdTransports.size, "Initial connect should create one transport")
+
+            service.setDeviceAddress(null)
+            advanceTimeBy(1_000L)
+            val transportCountAfterDeselect = createdTransports.size
+
+            service.restartTransport()
+            testDispatcher.scheduler.runCurrent()
+
+            assertEquals(
+                transportCountAfterDeselect,
+                createdTransports.size,
+                "restartTransport must not create a transport after setDeviceAddress(null)",
+            )
+        } finally {
+            service.disconnect()
+            advanceTimeBy(1_000L)
+        }
+    }
+
+    /**
+     * Counterpart to the null-deselect test: `"n"` is the UI sentinel for "no device" and is sanitized to `null` inside
+     * [SharedRadioInterfaceService.setDeviceAddress]. The same gate must skip restartTransport for both forms.
+     */
+    @Test
+    fun `restartTransport is a no-op after setDeviceAddress n`() = runTest(testDispatcher) {
+        clock = 0L
+        val service = createConnectedService("xAA:BB:CC:DD:EE:FF")
+        try {
+            assertEquals(1, createdTransports.size, "Initial connect should create one transport")
+
+            service.setDeviceAddress("n")
+            advanceTimeBy(1_000L)
+            val transportCountAfterDeselect = createdTransports.size
+
+            service.restartTransport()
+            testDispatcher.scheduler.runCurrent()
+
+            assertEquals(
+                transportCountAfterDeselect,
+                createdTransports.size,
+                "restartTransport must not create a transport after setDeviceAddress(\"n\")",
+            )
+        } finally {
+            service.disconnect()
+            advanceTimeBy(1_000L)
+        }
+    }
+
+    /**
+     * Regression: [SharedRadioInterfaceService.restartTransport] cycles the transport in place WITHOUT writing a new
+     * devAddr or clearing currentDeviceAddressFlow. The caller (MeshConnectionManager) is the sole owner of address
+     * changes; restartTransport must never silently re-bind to a different device or evict the selection.
+     */
+    @Test
+    fun `restartTransport preserves selected device address`() = runTest(testDispatcher) {
+        clock = 0L
+        val address = "xAA:BB:CC:DD:EE:FF"
+        val service = createConnectedService(address)
+        try {
+            assertEquals(1, createdTransports.size, "Initial connect should create one transport")
+            val addrBefore = service.getDeviceAddress()
+            val prefsAddrBefore = radioPrefs.devAddr.value
+
+            service.restartTransport()
+            testDispatcher.scheduler.runCurrent()
+
+            assertEquals(
+                addrBefore,
+                service.getDeviceAddress(),
+                "getDeviceAddress must not change across restartTransport",
+            )
+            assertEquals(address, service.getDeviceAddress(), "Selected device address preserved")
+            assertEquals(
+                prefsAddrBefore,
+                radioPrefs.devAddr.value,
+                "radioPrefs.devAddr must not be rewritten by restartTransport",
+            )
+        } finally {
+            service.disconnect()
+            advanceTimeBy(1_000L)
+        }
+    }
+
+    /**
+     * Regression: [SharedRadioInterfaceService.restartTransport] mirrors BLE liveness silent recovery. It MUST emit a
+     * transient DeviceSleep (via onDisconnect(isPermanent = false)) BEFORE the stop/start cycle so the subsequent
+     * onConnect() produces a real Connected transition (StateFlow is idempotent on same-value — without the DeviceSleep
+     * flip, Connected -> Connected is a no-op and MeshConnectionManager stays stuck on its app-level Disconnected
+     * state). It MUST NOT emit a permanent user-facing Disconnected state — the caller drives app-level state
+     * transitions separately, and surfacing a permanent disconnect for a self-healing cycle would pop a confusing modal
+     * for a transient condition.
+     */
+    @Test
+    fun `restartTransport does not emit permanent Disconnected`() = runTest(testDispatcher) {
+        clock = 0L
+        val service = createConnectedService("xAA:BB:CC:DD:EE:FF")
+        try {
+            val stateEmissions = mutableListOf<ConnectionState>()
+            val collectJob = backgroundScope.launch { service.connectionState.collect { stateEmissions.add(it) } }
+
+            service.restartTransport()
+            testDispatcher.scheduler.runCurrent()
+
+            collectJob.cancel()
+
+            // The DeviceSleep emission is the intended transport-level transition that lets
+            // MeshConnectionManager observe a real Connected transition on the fresh transport.
+            assertTrue(
+                ConnectionState.DeviceSleep in stateEmissions,
+                "restartTransport must emit transient DeviceSleep so the post-restart onConnect() re-triggers handleConnected() (emitted: $stateEmissions)",
+            )
+            assertFalse(
+                ConnectionState.Disconnected in stateEmissions,
+                "restartTransport must not emit permanent Disconnected state (emitted: $stateEmissions)",
+            )
+        } finally {
+            service.disconnect()
+            advanceTimeBy(1_000L)
+        }
+    }
+
+    /**
+     * Regression: [SharedRadioInterfaceService.restartTransport] must not emit a user-facing connection error.
+     * _connectionError is a no-replay SharedFlow, so the collector must subscribe BEFORE the restart; under
+     * UnconfinedTestDispatcher the launch runs eagerly up to its first suspension (awaiting SharedFlow emission). A
+     * silent-recovery cycle surfacing an error modal is the same UX bug as a liveness recovery surfacing one.
+     */
+    @Test
+    fun `restartTransport does not emit user-facing connection error`() = runTest(testDispatcher) {
+        clock = 0L
+        val service = createConnectedService("xAA:BB:CC:DD:EE:FF")
+        try {
+            val errors = mutableListOf<String>()
+            val collectJob = backgroundScope.launch { service.connectionError.collect { errors.add(it) } }
+
+            service.restartTransport()
+            testDispatcher.scheduler.runCurrent()
+
+            collectJob.cancel()
+
+            assertTrue(
+                errors.isEmpty(),
+                "restartTransport must not emit user-facing connection error (got: $errors)",
+            )
+        } finally {
+            service.disconnect()
+            advanceTimeBy(1_000L)
+        }
+    }
+
+    /**
+     * Regression: [SharedRadioInterfaceService.restartTransport] reuses the BLE liveness `isRestarting` CAS so a
+     * concurrent liveness silent-recovery cycle and a handshake-induced restart cannot stack. The loser of the CAS
+     * observes `isRestarting == true` and defers to the in-flight cycle, preventing a double stop/start race on the
+     * transport.
+     *
+     * restartTransport performs the isRestarting CAS synchronously BEFORE acquiring transportMutex (mirroring
+     * checkLiveness). Under this pattern, a concurrent liveness restart and a handshake-induced restart serialize on
+     * the CAS first — the loser returns immediately without touching the mutex. This is deterministic on all
+     * dispatchers, not just UnconfinedTestDispatcher.
+     *
+     * Deterministic in-flight overlap: a [GatedFakeRadioTransport] suspends the liveness restart genuinely inside
+     * stopTransportLocked → close() (awaiting closeGate). While the liveness coroutine holds `isRestarting == true`
+     * inside its restart cycle, a concurrent `restartTransport()` call CAS-fails on `isRestarting` and returns
+     * immediately without ever acquiring `transportMutex`. A stacking bug (CAS ignored, or CAS performed inside the
+     * mutex) would produce 3 transports.
+     */
+    @Test
+    fun `restartTransport coordinates with in-flight liveness restart via isRestarting`() = runTest(testDispatcher) {
+        val gatedTransports = mutableListOf<GatedFakeRadioTransport>()
+        val closeGate = CompletableDeferred<Unit>()
+        // Publish the gate to activeCloseGate so tearDown can release it even if an assertion
+        // throws before we reach the inner try/finally — otherwise disconnect() below would
+        // hang forever on the gated close().
+        activeCloseGate = closeGate
+        val transportProvider: () -> RadioTransport = {
+            GatedFakeRadioTransport(closeGate).also { gatedTransports.add(it) }
+        }
+
+        clock = 0L
+        val service = createConnectedService("xAA:BB:CC:DD:EE:FF", transportProvider)
+        try {
+            assertEquals(1, gatedTransports.size, "Initial connect should create one transport")
+            val initialTransport = gatedTransports.first()
+
+            // Past the 60s threshold → first checkLiveness CAS-sets isRestarting=true and
+            // launches a restart coroutine whose close() suspends on closeGate. Under
+            // UnconfinedTestDispatcher the launched coroutine runs eagerly up to the
+            // suspension point: by the time checkLiveness() returns, mutex is held and
+            // isRestarting == true.
+            clock = 65_000L
+            service.checkLiveness()
+
+            // Issue restartTransport() while the liveness restart is in-flight. Under the refactored
+            // CAS-before-mutex pattern, restartTransport's CAS fails immediately (isRestarting is already
+            // true from checkLiveness's synchronous CAS). It returns without acquiring the mutex.
+            val restartJob = backgroundScope.launch { service.restartTransport() }
+            testDispatcher.scheduler.runCurrent()
+
+            try {
+                // Pre-release: liveness still in-flight (close() suspended on closeGate),
+                // but restartTransport already returned via CAS-fail on isRestarting (it never
+                // touched transportMutex). No fresh transport from restartTransport, no stacking.
+                assertEquals(
+                    1,
+                    gatedTransports.size,
+                    "No fresh transport created while liveness restart is in-flight",
+                )
+                assertTrue(initialTransport.closeCalled, "Liveness restart must have entered close()")
+                assertEquals(
+                    0,
+                    initialTransport.closeCompletedCount,
+                    "Liveness restart close() must still be suspended (gate not yet released)",
+                )
+                assertTrue(
+                    restartJob.isCompleted,
+                    "restartTransport should CAS-fail immediately when liveness already holds isRestarting, " +
+                        "not queue on transportMutex",
+                )
+            } finally {
+                // Release the gate unconditionally so the suspended liveness restart can
+                // complete. tearDown also releases activeCloseGate, but completing here is
+                // required for the post-finally assertions to observe the resumed cycle.
+                closeGate.complete(Unit)
+            }
+
+            // Release the gate: liveness restart completes (close + startTransport).
+            // restartTransport already returned via CAS-fail, so no second cycle. Exactly 2 transports.
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+            restartJob.join()
+
+            // Exactly 2 transports: 1 initial + 1 from liveness restart. restartTransport
+            // was a no-op via the isRestarting CAS. A stacking bug would produce 3.
+            assertEquals(
+                2,
+                gatedTransports.size,
+                "restartTransport must not stack another cycle on an in-flight liveness restart",
+            )
+            assertEquals(1, initialTransport.closeCount, "Initial transport closed exactly once")
+            assertEquals(
+                1,
+                initialTransport.closeCompletedCount,
+                "Initial transport close completed exactly once after gate release",
+            )
+        } finally {
+            service.disconnect()
+            advanceTimeBy(1_000L)
+        }
+    }
+
+    /**
+     * Regression for the `radioTransport == null` gate added to [SharedRadioInterfaceService.restartTransport] (the
+     * mutex-protected early-return, checked after the `isRestarting` CAS but before the `onDisconnect(isPermanent =
+     * false)` call).
+     *
+     * Scenario: a TCP transport has been torn down by an environmental stop (`networkAvailable = false`) but
+     * `connectionRequested` is intentionally preserved so the network recovery listener can re-bring-up the transport
+     * when connectivity returns. A stale handshake-stall restart fired in that window MUST be a no-op:
+     * - It MUST NOT create a fresh transport via `startTransportLocked()` (that would bypass the recovery listener,
+     *   which owns the re-bring-up).
+     * - It MUST NOT emit `DeviceSleep` via `onDisconnect(isPermanent = false)` (the gate returns before that call), so
+     *   the recovery path's later transitions stay meaningful.
+     *
+     * Counter-assertion: the recovery listener itself MUST still function after the gate fires — toggling
+     * `networkAvailable` back to `true` MUST create the second transport, proving the gate did not break the documented
+     * re-bring-up path.
+     */
+    @Test
+    fun `restartTransport is a no-op when transport is environmentally stopped but connection remains requested`() =
+        runTest(testDispatcher) {
+            clock = 0L
+            val networkAvailability = MutableStateFlow<Boolean>(true)
+            val service = createConnectedService("t192.168.1.100", networkAvailability = networkAvailability)
+            try {
+                assertEquals(1, createdTransports.size, "Initial connect should create one transport")
+                val initialTransport = createdTransports.first()
+
+                // Subscribe BEFORE the environmental stop so we capture every state transition through
+                // the stop, the gated restartTransport, and the recovery. _connectionState is a StateFlow
+                // (replays current value to late collectors), so the launch's first emission is Connected.
+                val stateEmissions = mutableListOf<ConnectionState>()
+                val collectJob = backgroundScope.launch { service.connectionState.collect { stateEmissions.add(it) } }
+                testDispatcher.scheduler.runCurrent()
+
+                // Environmental stop: network drops while a TCP transport is running. The network
+                // listener (see initStateListeners) calls stopTransportLocked() with defaults
+                // (notifyPermanent=true → onDisconnect(isPermanent=true) → Disconnected). The transport
+                // is closed and radioTransport becomes null, but connectionRequested STAYS true so the
+                // recovery listener can re-bring-up later.
+                networkAvailability.value = false
+                testDispatcher.scheduler.runCurrent()
+                // Drain the polite-disconnect frame (POLITE_DISCONNECT_DRAIN_MS = 500ms).
+                advanceTimeBy(1_000L)
+
+                assertTrue(initialTransport.closeCalled, "Environmental stop must close the running TCP transport")
+                assertEquals(
+                    1,
+                    createdTransports.size,
+                    "Environmental stop must not create a new transport (only teardown)",
+                )
+
+                // Stale handshake-stall restart fired in the window where radioTransport == null but
+                // connectionRequested is still true. The new gate must short-circuit AFTER the
+                // isRestarting CAS (inside transportMutex) but BEFORE the onDisconnect(isPermanent=false) DeviceSleep
+                // emission.
+                service.restartTransport()
+                testDispatcher.scheduler.runCurrent()
+                advanceTimeBy(1_000L)
+
+                assertEquals(
+                    1,
+                    createdTransports.size,
+                    "restartTransport must be a no-op when radioTransport == null (gate fired)",
+                )
+                assertFalse(
+                    ConnectionState.DeviceSleep in stateEmissions,
+                    "Gated restartTransport must NOT emit DeviceSleep " +
+                        "(returned before onDisconnect(isPermanent=false)); emitted: $stateEmissions",
+                )
+
+                // Environmental recovery: networkAvailable flips back to true. connectionRequested is
+                // still true (neither the environmental stop nor the gated restart cleared it), so the
+                // recovery listener MUST call startTransportLocked() and create the second transport.
+                // This proves the new gate did not break the documented re-bring-up path.
+                networkAvailability.value = true
+                testDispatcher.scheduler.runCurrent()
+                advanceTimeBy(1_000L)
+
+                collectJob.cancel()
+
+                assertEquals(
+                    2,
+                    createdTransports.size,
+                    "Network recovery must re-bring-up the transport after the gated no-op restart (gate still set)",
+                )
+            } finally {
+                service.disconnect()
+                advanceTimeBy(1_000L)
+            }
+        }
 }

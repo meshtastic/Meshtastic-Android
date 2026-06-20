@@ -20,6 +20,7 @@ import dev.mokkery.MockMode
 import dev.mokkery.answering.calls
 import dev.mokkery.answering.returns
 import dev.mokkery.every
+import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify
@@ -29,9 +30,12 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.encodeUtf8
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.HandshakeConstants
 import org.meshtastic.core.repository.MeshConnectionManager
@@ -54,6 +58,13 @@ import org.meshtastic.proto.MyNodeInfo as ProtoMyNodeInfo
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class MeshConfigFlowManagerImplTest {
+
+    private companion object {
+        // Production issues two sequential delay(wantConfigDelay) calls (100ms each = 200ms)
+        // plus scheduler slack for the inter-stage heartbeat and startNodeInfoOnly(); bump in
+        // lockstep with wantConfigDelay if it changes.
+        const val STAGE_TRANSITION_ADVANCE_MS = 250L
+    }
 
     private val nodeManager = mock<NodeManager>(MockMode.autofill)
     private val connectionManager = mock<MeshConnectionManager>(MockMode.autofill)
@@ -173,7 +184,8 @@ class MeshConfigFlowManagerImplTest {
         advanceUntilIdle()
 
         manager.handleConfigComplete(HandshakeConstants.CONFIG_NONCE)
-        advanceUntilIdle()
+        advanceTimeBy(STAGE_TRANSITION_ADVANCE_MS)
+        runCurrent()
 
         verify { connectionManager.onRadioConfigLoaded() }
         verify { connectionManager.startNodeInfoOnly() }
@@ -194,7 +206,8 @@ class MeshConfigFlowManagerImplTest {
 
         sentPackets.clear() // Clear any packets from prior phases
         manager.handleConfigComplete(HandshakeConstants.CONFIG_NONCE)
-        advanceUntilIdle()
+        advanceTimeBy(STAGE_TRANSITION_ADVANCE_MS)
+        runCurrent()
 
         val heartbeats = sentPackets.filter { it.heartbeat != null }
         assertEquals(1, heartbeats.size, "Expected exactly one inter-stage heartbeat")
@@ -215,7 +228,8 @@ class MeshConfigFlowManagerImplTest {
         advanceUntilIdle()
 
         manager.handleConfigComplete(HandshakeConstants.CONFIG_NONCE)
-        advanceUntilIdle()
+        advanceTimeBy(STAGE_TRANSITION_ADVANCE_MS)
+        runCurrent()
 
         // Handshake should still progress despite old firmware
         verify { connectionManager.onRadioConfigLoaded() }
@@ -235,6 +249,20 @@ class MeshConfigFlowManagerImplTest {
     }
 
     @Test
+    fun `Stage 1 complete updates progress for node list loading`() = testScope.runTest {
+        manager.handleMyInfo(protoMyNodeInfo)
+        advanceUntilIdle()
+        manager.handleLocalMetadata(metadata)
+        advanceUntilIdle()
+
+        manager.handleConfigComplete(HandshakeConstants.CONFIG_NONCE)
+        advanceTimeBy(STAGE_TRANSITION_ADVANCE_MS)
+        runCurrent()
+
+        verify { serviceRepository.setConnectionProgress("Loading node list") }
+    }
+
+    @Test
     fun `Stage 1 complete id ignored when not in ReceivingConfig state`() = testScope.runTest {
         // State is Idle — should be a no-op
         manager.handleConfigComplete(HandshakeConstants.CONFIG_NONCE)
@@ -250,11 +278,13 @@ class MeshConfigFlowManagerImplTest {
         advanceUntilIdle()
 
         manager.handleConfigComplete(HandshakeConstants.CONFIG_NONCE)
-        advanceUntilIdle()
+        advanceTimeBy(STAGE_TRANSITION_ADVANCE_MS)
+        runCurrent()
 
         // Now in ReceivingNodeInfo — a second Stage 1 complete should be ignored
         manager.handleConfigComplete(HandshakeConstants.CONFIG_NONCE)
-        advanceUntilIdle()
+        advanceTimeBy(STAGE_TRANSITION_ADVANCE_MS)
+        runCurrent()
     }
 
     // ---------- handleNodeInfo ----------
@@ -267,13 +297,37 @@ class MeshConfigFlowManagerImplTest {
         manager.handleLocalMetadata(metadata)
         advanceUntilIdle()
         manager.handleConfigComplete(HandshakeConstants.CONFIG_NONCE)
-        advanceUntilIdle()
+        advanceTimeBy(STAGE_TRANSITION_ADVANCE_MS)
+        runCurrent()
 
         // Now in ReceivingNodeInfo
         manager.handleNodeInfo(NodeInfo(num = 100))
         manager.handleNodeInfo(NodeInfo(num = 200))
 
         assertEquals(2, manager.newNodeCount)
+    }
+
+    @Test
+    fun `handleNodeInfo buffers nodes received during Stage 1`() = testScope.runTest {
+        val testNode = org.meshtastic.core.testing.TestDataFactory.createTestNode(num = 100)
+        every { nodeManager.nodeDBbyNodeNum } returns mapOf(100 to testNode)
+
+        manager.handleMyInfo(protoMyNodeInfo)
+        advanceUntilIdle()
+
+        manager.handleNodeInfo(NodeInfo(num = 100))
+        assertEquals(1, manager.newNodeCount)
+
+        manager.handleLocalMetadata(metadata)
+        advanceUntilIdle()
+        manager.handleConfigComplete(HandshakeConstants.CONFIG_NONCE)
+        advanceTimeBy(STAGE_TRANSITION_ADVANCE_MS)
+        runCurrent()
+        manager.handleConfigComplete(HandshakeConstants.NODE_INFO_NONCE)
+        advanceUntilIdle()
+
+        verify { nodeManager.installNodeInfo(NodeInfo(num = 100)) }
+        verifySuspend { connectionManager.onNodeDbReady() }
     }
 
     @Test
@@ -297,7 +351,8 @@ class MeshConfigFlowManagerImplTest {
         manager.handleLocalMetadata(metadata)
         advanceUntilIdle()
         manager.handleConfigComplete(HandshakeConstants.CONFIG_NONCE)
-        advanceUntilIdle()
+        advanceTimeBy(STAGE_TRANSITION_ADVANCE_MS)
+        runCurrent()
 
         manager.handleNodeInfo(NodeInfo(num = 100))
         manager.handleConfigComplete(HandshakeConstants.NODE_INFO_NONCE)
@@ -323,7 +378,8 @@ class MeshConfigFlowManagerImplTest {
         manager.handleLocalMetadata(metadata)
         advanceUntilIdle()
         manager.handleConfigComplete(HandshakeConstants.CONFIG_NONCE)
-        advanceUntilIdle()
+        advanceTimeBy(STAGE_TRANSITION_ADVANCE_MS)
+        runCurrent()
 
         // No handleNodeInfo calls — empty node list
         manager.handleConfigComplete(HandshakeConstants.NODE_INFO_NONCE)
@@ -331,6 +387,54 @@ class MeshConfigFlowManagerImplTest {
 
         verify { nodeManager.setNodeDbReady(true) }
         verifySuspend { connectionManager.onNodeDbReady() }
+    }
+
+    @Test
+    fun `Stage 2 complete keeps connected when post NodeDB side effects fail`() = testScope.runTest {
+        every { analytics.setDeviceAttributes(any(), any()) } calls { throw IllegalStateException("analytics") }
+        everySuspend { connectionManager.onNodeDbReady() } calls { throw IllegalStateException("side effects") }
+
+        manager.handleMyInfo(protoMyNodeInfo)
+        advanceUntilIdle()
+        manager.handleLocalMetadata(metadata)
+        advanceUntilIdle()
+        manager.handleConfigComplete(HandshakeConstants.CONFIG_NONCE)
+        advanceTimeBy(STAGE_TRANSITION_ADVANCE_MS)
+        runCurrent()
+
+        manager.handleConfigComplete(HandshakeConstants.NODE_INFO_NONCE)
+        advanceUntilIdle()
+
+        verify { nodeManager.setNodeDbReady(true) }
+        verify { nodeManager.setAllowNodeDbWrites(true) }
+        verify { serviceRepository.setConnectionState(ConnectionState.Connected) }
+        verifySuspend { connectionManager.onNodeDbReady() }
+        verify(mode = VerifyMode.not) { nodeManager.setNodeDbReady(false) }
+        verify(mode = VerifyMode.not) { nodeManager.setAllowNodeDbWrites(false) }
+        verify(mode = VerifyMode.not) { connectionManager.recoverPostHandshakeFailure() }
+    }
+
+    @Test
+    fun `Stage 2 complete disconnects when NodeDB install fails`() = testScope.runTest {
+        everySuspend { nodeRepository.installConfig(any(), any()) } calls { throw IllegalStateException("room") }
+
+        manager.handleMyInfo(protoMyNodeInfo)
+        advanceUntilIdle()
+        manager.handleLocalMetadata(metadata)
+        advanceUntilIdle()
+        manager.handleConfigComplete(HandshakeConstants.CONFIG_NONCE)
+        advanceTimeBy(STAGE_TRANSITION_ADVANCE_MS)
+        runCurrent()
+
+        manager.handleConfigComplete(HandshakeConstants.NODE_INFO_NONCE)
+        advanceUntilIdle()
+
+        verify { connectionManager.onHandshakeComplete() }
+        verify { nodeManager.setNodeDbReady(false) }
+        verify { nodeManager.setAllowNodeDbWrites(false) }
+        verify { connectionManager.recoverPostHandshakeFailure() }
+        verify(mode = VerifyMode.not) { nodeManager.setNodeDbReady(true) }
+        verifySuspend(mode = VerifyMode.not) { connectionManager.onNodeDbReady() }
     }
 
     // ---------- Unknown config_complete_id ----------
@@ -386,7 +490,8 @@ class MeshConfigFlowManagerImplTest {
 
         // Stage 1 complete
         manager.handleConfigComplete(HandshakeConstants.CONFIG_NONCE)
-        advanceUntilIdle()
+        advanceTimeBy(STAGE_TRANSITION_ADVANCE_MS)
+        runCurrent()
         verify { connectionManager.onRadioConfigLoaded() }
 
         // Receive NodeInfo during Stage 2
@@ -467,5 +572,203 @@ class MeshConfigFlowManagerImplTest {
 
         verify(mode = VerifyMode.not) { notificationPrefs.setNodeEventsEnabled(any()) }
         verify(mode = VerifyMode.not) { notificationPrefs.setNodeEventsAutoDisabledForEvent(any()) }
+    }
+
+    // ---------- onHandshakeProgress ----------
+
+    @Test
+    fun `handleMyInfo calls onHandshakeProgress`() = testScope.runTest {
+        manager.handleMyInfo(protoMyNodeInfo)
+        advanceUntilIdle()
+
+        verify { connectionManager.onHandshakeProgress() }
+    }
+
+    @Test
+    fun `handleLocalMetadata in ReceivingConfig calls onHandshakeProgress`() = testScope.runTest {
+        manager.handleMyInfo(protoMyNodeInfo)
+        advanceUntilIdle()
+        manager.handleLocalMetadata(metadata)
+        advanceUntilIdle()
+
+        // handleMyInfo fires one call; handleLocalMetadata adds exactly one more in ReceivingConfig.
+        verify(mode = VerifyMode.exactly(2)) { connectionManager.onHandshakeProgress() }
+    }
+
+    @Test
+    fun `handleLocalMetadata outside ReceivingConfig does not call onHandshakeProgress`() = testScope.runTest {
+        // State is Idle — metadata is ignored and must not reset the watchdog.
+        manager.handleLocalMetadata(metadata)
+        advanceUntilIdle()
+
+        verify(mode = VerifyMode.not) { connectionManager.onHandshakeProgress() }
+    }
+
+    @Test
+    fun `handleFileInfo calls onHandshakeProgress`() = testScope.runTest {
+        val fileInfo = FileInfo(file_name = "firmware.bin", size_bytes = 1024)
+        manager.handleFileInfo(fileInfo)
+        advanceUntilIdle()
+
+        verify { connectionManager.onHandshakeProgress() }
+    }
+
+    @Test
+    fun `handleNodeInfo during Stage 1 calls onHandshakeProgress`() = testScope.runTest {
+        manager.handleMyInfo(protoMyNodeInfo)
+        advanceUntilIdle()
+        manager.handleNodeInfo(NodeInfo(num = 100))
+
+        // handleMyInfo fires one call; handleNodeInfo in ReceivingConfig adds exactly one more.
+        verify(mode = VerifyMode.exactly(2)) { connectionManager.onHandshakeProgress() }
+    }
+
+    @Test
+    fun `handleNodeInfo during Stage 2 calls onHandshakeProgress`() = testScope.runTest {
+        manager.handleMyInfo(protoMyNodeInfo)
+        advanceUntilIdle()
+        manager.handleLocalMetadata(metadata)
+        advanceUntilIdle()
+        manager.handleConfigComplete(HandshakeConstants.CONFIG_NONCE)
+        advanceTimeBy(STAGE_TRANSITION_ADVANCE_MS)
+        runCurrent()
+
+        // Now in ReceivingNodeInfo — a NodeInfo packet must reset the watchdog.
+        manager.handleNodeInfo(NodeInfo(num = 100))
+
+        // Prior calls: handleMyInfo(1) + handleLocalMetadata(1) + handleConfigOnlyComplete(1) = 3.
+        // handleNodeInfo adds exactly one more.
+        verify(mode = VerifyMode.exactly(4)) { connectionManager.onHandshakeProgress() }
+    }
+
+    @Test
+    fun `Stage 1 complete calls onHandshakeProgress`() = testScope.runTest {
+        manager.handleMyInfo(protoMyNodeInfo)
+        advanceUntilIdle()
+        manager.handleLocalMetadata(metadata)
+        advanceUntilIdle()
+        manager.handleConfigComplete(HandshakeConstants.CONFIG_NONCE)
+        advanceTimeBy(STAGE_TRANSITION_ADVANCE_MS)
+        runCurrent()
+
+        // handleMyInfo(1) + handleLocalMetadata(1) + handleConfigOnlyComplete(1) = 3.
+        verify(mode = VerifyMode.exactly(3)) { connectionManager.onHandshakeProgress() }
+    }
+
+    @Test
+    fun `handleNodeInfo outside active handshake does not call onHandshakeProgress`() = testScope.runTest {
+        // State is Idle — NodeInfo is ignored and must not reset the watchdog.
+        manager.handleNodeInfo(NodeInfo(num = 999))
+
+        verify(mode = VerifyMode.not) { connectionManager.onHandshakeProgress() }
+    }
+
+    /**
+     * Regression guard: a full handshake must fire [MeshConnectionManager.onHandshakeProgress] exactly for meaningful
+     * handshake events only. Packet types not meaningful to the handshake — queueStatus, mqttClientProxyMessage,
+     * xmodemPacket, clientNotification, deviceuiConfig, and rebooted — are routed to sibling handlers
+     * (PacketHandlerImpl, MqttManagerImpl, FromRadioPacketHandlerImpl, MeshConfigHandlerImpl) and must never reset the
+     * watchdog from this manager. This test pins the exact count so any accidental wiring surfaces as a failure.
+     */
+    @Test
+    fun `full handshake fires onHandshakeProgress exactly for meaningful events only`() = testScope.runTest {
+        val testNode = org.meshtastic.core.testing.TestDataFactory.createTestNode(num = 100)
+        every { nodeManager.nodeDBbyNodeNum } returns mapOf(100 to testNode)
+
+        manager.handleMyInfo(protoMyNodeInfo)
+        advanceUntilIdle()
+        manager.handleLocalMetadata(metadata)
+        advanceUntilIdle()
+        manager.handleConfigComplete(HandshakeConstants.CONFIG_NONCE)
+        advanceTimeBy(STAGE_TRANSITION_ADVANCE_MS)
+        runCurrent()
+        manager.handleNodeInfo(NodeInfo(num = 100))
+        manager.handleConfigComplete(HandshakeConstants.NODE_INFO_NONCE)
+        advanceUntilIdle()
+
+        // handleMyInfo(1) + handleLocalMetadata(1) + handleConfigOnlyComplete(1)
+        //   + handleNodeInfo(1) = 4. handleNodeInfoComplete intentionally does NOT call
+        //   onHandshakeProgress: by that point the handshake is Complete and the synchronous
+        //   onHandshakeComplete() call (verified in a separate test) cancels the watchdog.
+        verify(mode = VerifyMode.exactly(4)) { connectionManager.onHandshakeProgress() }
+    }
+
+    /**
+     * Regression guard for the Stage 2 watchdog-cancellation race fixed by adding
+     * [MeshConnectionManager.onHandshakeComplete]. Stage 2 completion must synchronously fire the terminal callback
+     * exactly once so the transport-aware fast-recovery watchdog is cancelled before any async DB install work begins.
+     */
+    @Test
+    fun `Stage 2 complete fires onHandshakeComplete exactly once`() = testScope.runTest {
+        val testNode = org.meshtastic.core.testing.TestDataFactory.createTestNode(num = 100)
+        every { nodeManager.nodeDBbyNodeNum } returns mapOf(100 to testNode)
+
+        manager.handleMyInfo(protoMyNodeInfo)
+        advanceUntilIdle()
+        manager.handleLocalMetadata(metadata)
+        advanceUntilIdle()
+        manager.handleConfigComplete(HandshakeConstants.CONFIG_NONCE)
+        advanceTimeBy(STAGE_TRANSITION_ADVANCE_MS)
+        runCurrent()
+        manager.handleNodeInfo(NodeInfo(num = 100))
+        manager.handleConfigComplete(HandshakeConstants.NODE_INFO_NONCE)
+        advanceUntilIdle()
+
+        verify(mode = VerifyMode.exactly(1)) { connectionManager.onHandshakeComplete() }
+    }
+
+    /**
+     * Regression guard for the actual Stage 2 watchdog-cancellation race: the synchronous
+     * [MeshConnectionManager.onHandshakeComplete] call MUST land before the asynchronous NodeDB install work begins, so
+     * that a slow Room commit on a large mesh cannot trip the 12 s fast-recovery timeout after the firmware handshake
+     * has already succeeded.
+     *
+     * Under [StandardTestDispatcher] the async DB install coroutine does not run until the test dispatcher is advanced,
+     * so we can assert the call ordering deterministically without any suspension trick on
+     * [NodeRepository.installConfig].
+     */
+    @Test
+    fun `Stage 2 complete cancels watchdog synchronously before async DB install work`() = testScope.runTest {
+        val testNode = org.meshtastic.core.testing.TestDataFactory.createTestNode(num = 100)
+        every { nodeManager.nodeDBbyNodeNum } returns mapOf(100 to testNode)
+
+        // Record the order in which the synchronous watchdog-cancellation callback and the
+        // async DB install entry point are observed. The order is the invariant under test.
+        val callOrder = mutableListOf<String>()
+        every { connectionManager.onHandshakeComplete() } calls { callOrder.add("handshakeComplete") }
+        everySuspend { nodeRepository.installConfig(any(), any()) } calls { callOrder.add("installConfig") }
+
+        manager.handleMyInfo(protoMyNodeInfo)
+        advanceUntilIdle()
+        manager.handleLocalMetadata(metadata)
+        advanceUntilIdle()
+        manager.handleConfigComplete(HandshakeConstants.CONFIG_NONCE)
+        advanceTimeBy(STAGE_TRANSITION_ADVANCE_MS)
+        runCurrent()
+        manager.handleNodeInfo(NodeInfo(num = 100))
+
+        // Drive Stage 2 complete. handleNodeInfoComplete runs synchronously: state becomes
+        // Complete, onHandshakeComplete() fires (cancelling the watchdog), then the async DB
+        // install block is launched but not yet executed under StandardTestDispatcher.
+        manager.handleConfigComplete(HandshakeConstants.NODE_INFO_NONCE)
+
+        // Synchronous post-condition: the watchdog was cancelled BEFORE the async DB install
+        // block was scheduled to run. If this ordering invariant ever regresses, a slow Room
+        // commit on a large mesh would falsely trip the 12s fast-recovery timeout.
+        assertEquals(
+            listOf("handshakeComplete"),
+            callOrder,
+            "onHandshakeComplete() must fire synchronously at Stage 2 complete, BEFORE any " +
+                "async DB install work begins — this is the race this test guards against",
+        )
+
+        // Now let the async DB install block run.
+        advanceUntilIdle()
+        assertEquals(
+            listOf("handshakeComplete", "installConfig"),
+            callOrder,
+            "installConfig must run AFTER onHandshakeComplete, ensuring the watchdog is " +
+                "already cancelled before any DB work could trip the fast-recovery timeout",
+        )
     }
 }
