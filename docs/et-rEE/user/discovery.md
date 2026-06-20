@@ -99,8 +99,8 @@ Traceroute reveals the exact path a message takes from your node to any other no
 
 ### Running a Traceroute
 
-1. Navigate to **Nodes** and tap the node you want to trace.
-2. On the node detail screen, tap **Traceroute**.
+1. Mine valikuni **Sõlmed** ja puuduta sõlme, mida soovid jälgida.
+2. Sõlme üksikasjade ekraanil puuduta **Traceroute**.
 3. The app sends a traceroute request and waits for the response.
 4. Results display each hop in order, with signal quality at every step.
 
@@ -133,15 +133,15 @@ Each hop represents a relay node that forwarded the message. The SNR and RSSI va
 
 ## Naabruse teave
 
-The Neighbor Info module lets each node broadcast a list of the nodes it can **directly hear** (single-hop). When multiple nodes share their neighbor lists, you can piece together a topology map of the entire mesh.
+Naabriinfo moodul võimaldab igal sõlmel levitada nimekirja sõlmedest, mida see **otse kuuleb** (üksik-hüpe). When multiple nodes share their neighbor lists, you can piece together a topology map of the entire mesh.
 
 ### Enabling Neighbor Info
 
-1. Navigate to **Settings → Module Config → Neighbor Info**.
-2. Enable the module.
-3. Set the broadcast interval (default: 900 seconds / 15 minutes).
+1. Mine menüüsse **Seaded → Mooduli konfiguratsioon → Naabri info**.
+2. Luba moodul.
+3. Määra levintervall (vaikimisi: 900 sekundit / 15 minutit).
 
-Once enabled, your node periodically broadcasts its neighbor table. Other nodes with Neighbor Info enabled do the same.
+Kui see on lubatud, levitab teie sõlm perioodiliselt oma naabertabelit. Other nodes with Neighbor Info enabled do the same.
 
 ### Viewing Neighbor Data
 
@@ -149,7 +149,7 @@ Once enabled, your node periodically broadcasts its neighbor table. Other nodes 
 - Each neighbor entry shows the node that was directly heard and its signal quality.
 - Combine neighbor data from multiple nodes to understand the full mesh topology.
 
-> ⚠️ **Note:** Neighbor Info increases airtime usage because every enabled node periodically broadcasts its neighbor list. On busy meshes with many nodes, consider longer broadcast intervals (3600 seconds or more) to avoid congestion.
+> ⚠️ **Märkus:** Naabriinfo suurendab eetriaega, kuna iga lubatud sõlm levitab perioodiliselt oma naabrite nimekirja. Paljude sõlmedega tiheda liiklusega kärgvõrgu puhul kaaluge ummikute vältimiseks pikemaid levitamise intervalle (3600 sekundit või rohkem).
 
 ---
 
@@ -166,7 +166,7 @@ The node list itself is a powerful discovery tool when you use its filtering and
 
 - Sort by **Hops away** to see which nodes are directly reachable (0 hops) versus relayed.
 - Sort by **Distance** to find nearby nodes and verify they're reachable.
-- Use **Exclude MQTT** to focus on nodes reachable over radio (not via internet bridge).
+- Kasuta **Välista MQTT** raadio teel (mitte internetisilla kaudu) ligipääsetavatele sõlmedele keskendumiseks.
 
 ### Infrastructure Audit
 

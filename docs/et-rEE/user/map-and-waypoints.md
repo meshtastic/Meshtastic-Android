@@ -39,9 +39,9 @@ Node markers on the map indicate:
 - **Zoom** — pinch or use +/- buttons
 - **Pan** — drag to explore
 - **Center** — select the location button to center on your position
-- **Node tap** — tap a node marker to view details
+- **Sõlme puudutamine** – üksikasjade kuvamiseks puuduta sõlmel
 
-The floating toolbar provides quick access to compass, layer switching, node filters, refresh, and location tracking. Tap the compass to reorient north-up, or tap the location button to center on your current position.
+The floating toolbar provides quick access to compass, layer switching, node filters, refresh, and location tracking. Põhjasuuna muutmiseks puuduta kompassi või praeguse asukoha keskpunkti seadmiseks asukohanuppu.
 
 ![Map controls overlay](../../assets/screenshots/map_controls_overlay.png)
 
@@ -54,7 +54,7 @@ Waypoints are shared geographic points of interest that all mesh members can see
 1. Long-press on the map at the desired location.
 2. Enter a name and optional description.
 3. Choose an icon/emoji for the waypoint.
-4. Tap **Send** to share with the mesh.
+4. Puuduta **Saada** jagamiseks kärgvõrku.
 
 ### Waypoint Properties
 
@@ -77,7 +77,7 @@ Expired waypoints are automatically hidden from the map so they don't clutter th
 
 ### Managing Waypoints
 
-- Tap a waypoint on the map to view its details and coordinates
+- Puuduta kaardil teekonnapunkti, et vaadata selle üksikasju ja koordinaate
 - Edit or delete waypoints you created
 - **Locked waypoints** cannot be modified or deleted by other nodes — only the original creator can change them
 - Unlocked waypoints can be edited by any mesh member
@@ -88,15 +88,15 @@ Expired waypoints are automatically hidden from the map so they don't clutter th
 
 Your node shares its GPS position based on:
 
-- **Fixed interval** — broadcast position at regular intervals
-- **Smart position** — broadcast when movement exceeds a threshold
+- **Fikseeritud intervall** – levitamine regulaarsete intervallidega
+- **Nutikas asukoht** – levitatakse, kui liikumine ületab lävendi
 - **Manual** — only share when explicitly requested
 
 Configure position behavior in **Settings → Position**.
 
 ### Privacy Considerations
 
-> 🔒 **Privacy:** Position data is broadcast to all nodes on your channel. If you don't want your location shared, disable GPS position in settings or use a fixed/fake position.
+> 🔒 **Privaatsus:** asukoha andmed levitatakse kõigile teie kanali sõlmedele. If you don't want your location shared, disable GPS position in settings or use a fixed/fake position.
 
 ## Map Sources
 

@@ -13,7 +13,7 @@ aliases:
 
 # Messages & Channels
 
-Meshtastic supports two communication modes: **channel broadcasts** and **direct messages**.
+Meshtastic toetab kahte suhtlusrežiimi: **kanalite levitamine** ja **otsesõnumid**.
 
 ## Kanal
 
@@ -32,18 +32,18 @@ Channels support multiple encryption levels:
 | 🔒    | PSK (256-bit AES) | Fully encrypted with a strong pre-shared key. Only nodes with the matching key can read messages.      |
 | 🔐    | PSK (128-bit AES) | Encrypted with a shorter key. Secure for most uses but 256-bit is preferred for sensitive data.        |
 | 🔓    | Default / Open                       | Uses the well-known default key. **Any Meshtastic device** on the same preset can read these messages. |
-| ⚠️    | Insecure + Position                  | Open channel that also broadcasts your GPS position. Use with caution in public meshes.                |
+| ⚠️    | Insecure + Position                  | Ava kanal, mis levitab ka sinu GPS asukohta. Use with caution in public meshes.                        |
 
 > 🔒 **Security Tip:** Always configure a unique PSK for private communications. The default channel is intentionally open so new users can discover the mesh — but you should create a separate encrypted channel for anything sensitive.
 
 ### Adding a Channel
 
 1. Navigate to **Settings → Channels**.
-2. Tap **Add Channel** or scan a QR code.
+2. Puuduta **Lisa kanal** või skanni QR-koodi.
 3. Configure the channel name and encryption key.
 4. Share the channel URL/QR code with others who need access.
 
-Tapping a channel shows its details and sharing options.
+Kanali puudutamine kuvab selle üksikasjad ja jagamisvalikud.
 
 ## Direct Messages
 
@@ -52,8 +52,8 @@ Direct messages (DMs) are point-to-point encrypted communications between two sp
 ### Sending a Direct Message
 
 1. Open the **Messages** tab.
-2. Select a node from your contacts list or tap a node in the node list.
-3. Type your message and tap **Send**.
+2. Vali kontaktide loendist sõlm või puuduta sõlme loendis.
+3. Tippi oma sõnum ja puuduta nuppu **Saada**.
 
 ### Message States
 
@@ -79,7 +79,7 @@ When a message fails to deliver, the error indicator shows what went wrong:
 | Liidest pole     | No radio interface available to send     | Check that your radio is connected and the channel is configured.                                                                                           |
 | Max Retransmit   | All retry attempts exhausted             | The mesh path is unreliable. Try a different channel or wait for conditions to improve.                                                     |
 | Kanalit pole     | The destination channel doesn't exist    | Verify both nodes share the same channel configuration.                                                                                                     |
-| Too Large        | Message exceeds maximum payload size     | Shorten your message (max ~230 characters).                                                                              |
+| Too Large        | Sõnum ületab maksimaalset sõnumi mahtu   | Shorten your message (max ~230 characters).                                                                              |
 | Vastust pole     | Node received message but didn't respond | The recipient's radio may be busy or in low-power sleep mode.                                                                                               |
 | Duty Cycle Limit | Regional airtime limit reached           | Your radio has used its allowed transmit time. Wait for the duty cycle window to reset (typically 1 hour in EU regions). |
 | Vigane päring    | Malformed or invalid message             | This usually indicates a software bug. Try restarting the app.                                                                              |
@@ -106,7 +106,7 @@ The channel list shows each channel with its latest message preview.
 You can search the full history of any conversation directly from the chat screen:
 
 1. Open a conversation (a channel or a direct message).
-2. Tap the **search icon** in the top bar.
+2. Puuduta ülemisel ribal **otsinguikooni**.
 3. Type into the **Search messages…** field. The search runs as you type, across all stored messages in that conversation.
 4. Use the **N / M** result counter and the **previous / next arrows** to jump between matches, which are highlighted in the conversation.
 
@@ -123,7 +123,7 @@ Messages appear as chat bubbles — sent messages on the right, received message
 React to messages with emoji:
 
 - **Long-press** a message to open the actions menu
-- Tap **Add Reaction** to choose an emoji
+- Emotikoni valimiseks puuduta **Lisa reaktsioon**
 - Reactions appear below the message bubble
 - Multiple users can react to the same message
 - React to your own messages or others' messages
@@ -147,7 +147,7 @@ Messages are queued and transmitted based on priority:
 
 1. Emergency/alert messages (highest)
 2. Direct messages
-3. Channel broadcasts (lowest)
+3. Kanalite levitamine (madalaim)
 
 ### Message Limits
 
@@ -164,9 +164,9 @@ Messages are queued and transmitted based on priority:
 
 ## Related Topics
 
-- [Nodes](nodes) — tap a node to start a direct message
+- [Sõlmed] (nodes) — otsesõnumi alustamiseks puuduta sõlme
 - [Settings — Radio & User](settings-radio-user) — configure channel encryption and presets
-- [MQTT](mqtt) — bridge channel messages to the internet
+- [MQTT](mqtt) — silda kanali sõnumid internetti
 - [Channel configuration](https://meshtastic.org/docs/configuration/radio/channels) — detailed channel settings on meshtastic.org
 
 ---

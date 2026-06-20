@@ -563,6 +563,7 @@
     </plurals>
     <string name="traceroute_log">추적 루트</string>
     <!-- TRAFFIC -->
+    <string name="traffic_management_enabled">모듈 활성화</string>
     <string name="transmit_over_lora">LoRa로 전송</string>
     <string name="transport_ble">BLE</string>
     <string name="twenty_four_hours">24시간</string>

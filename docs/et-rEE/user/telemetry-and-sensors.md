@@ -17,7 +17,7 @@ Meshtastic nodes can collect and share sensor data across the mesh network.
 
 ## Ülevaade
 
-Telemetry allows nodes equipped with sensors to broadcast environmental, power, and device health information. This data is visible on the node detail screen and can be logged over time.
+Telemeetria võimaldab anduritega varustatud sõlmedel levitada keskkonna-, energiatarbimise ja seadme terviseteavet. This data is visible on the node detail screen and can be logged over time.
 
 ## Device Telemetry
 
@@ -75,10 +75,10 @@ Useful for monitoring solar charging or battery health on remote nodes.
 
 ## Configuring Telemetry
 
-1. Navigate to **Settings → Module Config → Telemetry**.
+1. Mine menüüsse **Seaded → Mooduli konfiguratsioon → Telemeetria**.
 2. Set reporting intervals:
-   - **Device Metrics Interval** — how often to broadcast device metrics
-   - **Environment Metrics Interval** — how often to broadcast sensor data
+   - **Seadme mõõdikute intervall** – kui tihti seadme mõõdikuid levitada
+   - **Keskkonnamõõdikute intervall** – kui tihti anduriandmeid levitada
 3. Enable specific sensor types as needed.
 
 ### Recommended Intervals
@@ -106,7 +106,7 @@ Nodes with particulate matter or CO₂ sensors report air quality data:
 The CO₂ reading is color-coded by severity:
 
 - 🟢 **Hea** (< 1000 ppm) — normaalne sisetase
-- 🟡 **Mõõdukas** (1000–2000 ppm) – kõrgenenud, kaaluge ventilatsiooni
+- 🟡 **Mõõdukas** (1000–2000 ppm) – kõrgenenud, kaalu ventilatsiooni
 - 🟠 **Kehv** (2000–5000 ppm) — unisus, halb keskendumisvõime
 - 🔴 **Ohtlik** (≥ 5000 ppm) — otsene terviseprobleem
 
@@ -127,13 +127,13 @@ Air quality data can be viewed as info cards on the node detail screen, charted 
 ## Troubleshooting
 
 - **No environment data showing?** The remote node needs a physical sensor connected (e.g., BME280 on I2C). Device telemetry (battery, uptime) is always available, but environment metrics require hardware.
-- **Stale readings?** Check the reporting interval — very long intervals (7200s+) mean data updates infrequently. Also verify the remote node is still online.
-- **Sensor conflict on I2C bus?** Some sensors share I2C addresses. If you have multiple sensors on the same bus, check for address collisions in the radio's serial debug output.
+- **Vananenud näidud?** Kontrolli aruandlusintervalli – väga pikad intervallid (7200+ sekundit) tähendavad harva andmete uuendamist. Also verify the remote node is still online.
+- **Sensor conflict on I2C bus?** Some sensors share I2C addresses. Kui samal siinil on mitu andurit, kontrolli raadio jadapordi silumisväljundis aadresside kokkupõrkeid.
 
 ## Related Topics
 
 - [Node Metrics](node-metrics) — view telemetry data on the node detail screen
-- [Settings — Modules & Admin](settings-module-admin) — telemetry module configuration
+- [Seaded — Moodulid ja administreerimine](settings-module-admin) — telemeetriamooduli konfiguratsioon
 - [Units & Locale](units-and-locale) — temperature and pressure display units
 
 ---

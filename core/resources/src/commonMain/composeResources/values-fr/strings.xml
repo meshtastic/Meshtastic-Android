@@ -969,6 +969,7 @@
     <string name="rebroadcast_mode_local_only_desc">Ignore les messages observés à partir de maillages étrangers qui sont ouverts ou ceux qu'il ne peut pas déchiffrer. Ne diffuse que le message sur les nœuds des canaux primaires / secondaires.</string>
     <string name="rebroadcast_mode_none_desc">Seulement autorisé pour les rôles SENSOR, TRACKER et TAK_TRACKER, cela empêchera toutes les rediffusions, contrairement au rôle CLIENT_MUTE.</string>
     <string name="recent_network_devices">Périphériques réseaux récents</string>
+    <string name="reconnecting">Reconnexion…</string>
     <string name="red">Rouge</string>
     <string name="refresh">Actualiser</string>
     <string name="refresh_metadata">Actualiser les métadonnées</string>

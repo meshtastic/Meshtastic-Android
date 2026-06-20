@@ -1141,6 +1141,7 @@
     <string name="rebroadcast_mode_local_only_desc">Ei ota huomioon havaittuja viestejä ulkomaisista verkoista, jotka ovat avoimia tai joita se ei voi purkaa. Lähettää uudelleen viestin vain laitteen paikallisilla ensisijaisilla / toissijaisilla kanavilla.</string>
     <string name="rebroadcast_mode_none_desc">Sallittu vain SENSOR-, TRACKER- ja TAK_TRACKER -rooleille. Tämä estää kaikki uudelleenlähetykset, toisin kuin CLIENT_MUTE -roolissa.</string>
     <string name="recent_network_devices">Äskettäin havaitut verkkolaitteet</string>
+    <string name="reconnecting">Yhdistetään uudelleen…</string>
     <string name="red">Punainen</string>
     <string name="refresh">Päivitä</string>
     <string name="refresh_metadata">Päivitä metatiedot</string>

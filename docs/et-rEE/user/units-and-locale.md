@@ -17,7 +17,7 @@ Meshtastic radios always transmit data in **metric units** (meters, °C, km/h, h
 
 On Android, your measurement preferences are determined by your system **Language & Region** settings. On Desktop (JVM), the app uses the JVM's default `Locale`.
 
-> **Tip — You never need to toggle units inside the app.** Change your system measurement preferences and every screen in Meshtastic updates automatically — node details, telemetry charts, weather, altitude, and more.
+> **Vihje – rakenduses pole kunagi vaja ühikuid vahetada.** Muutke oma süsteemi mõõtühikute eelistusi ja iga Meshtasticu ekraan uueneb automaatselt – sõlmede üksikasjad, telemeetriadiagrammid, ilm, kõrgus ja palju muud.
 
 ---
 
@@ -112,7 +112,7 @@ On Android, your measurement system (metric vs imperial) is tied to your region 
 
 1. Open **Android Settings → System → Language & Region**
 2. Change your **Region** or **Measurement units** preference
-3. Return to Meshtastic — values update immediately
+3. Tagasi Meshtastic juurde — väärtused värskendatakse kohe
 
 > **Tip — The app uses `MetricFormatter` from `core:common`.** All measurement formatting is handled by a shared KMP utility that respects your platform's locale. Developers adding new measurement displays should use `MetricFormatter` rather than hard-coding unit conversions.
 

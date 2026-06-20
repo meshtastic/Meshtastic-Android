@@ -45,7 +45,7 @@ Nodes can be configured with different roles that affect their mesh behavior:
 | Vaikne klient                    | Receives but doesn't retransmit                                                                                                                        |
 | Peidetud klient                  | Like Client Mute, plus hides from node list                                                                                                            |
 | Ruuter                           | Prioritizes message forwarding; stays awake to relay                                                                                                   |
-| Hiline ruuter                    | Infrastructure node that rebroadcasts once, but only after all other modes (provides supplemental coverage)                         |
+| Hiline ruuter                    | Infrastruktuurisõlm, mis levitab signaali ühe korra, kuid alles pärast kõiki teisi režiime (pakub täiendavat leviala)               |
 | ~~Router Client~~                | ⚠️ **Deprecated** (removed in firmware 2.3.15) — no longer selectable; use Router or Client instead |
 | ~~Repeater~~                     | ⚠️ **Deprecated** (removed in firmware 2.7.11) — no longer selectable; use Router instead           |
 | Jälgitav                         | Optimized for position reporting at regular intervals                                                                                                  |
@@ -59,12 +59,12 @@ Nodes can be configured with different roles that affect their mesh behavior:
 Most users should keep the default **Client** role. Consider a different role when:
 
 - **Router** — You have a node in a fixed, elevated location with reliable power (rooftop, hilltop). Routers stay awake continuously to relay messages for others and are essential for extending mesh coverage. Don't use Router on battery-powered handheld devices.
-- **Router Late** — An infrastructure node that always rebroadcasts packets once but only after all other routing modes have had their turn. Provides supplemental coverage for local clusters without competing with primary routers.
+- **Ruuter hiline** – infrastruktuurisõlm, mis levitab pakette alati üks kord uuesti, aga alles pärast seda, kui kõik teised marsruutimisrežiimid on oma käigu teinud. Provides supplemental coverage for local clusters without competing with primary routers.
 - **Client Base** — Treats traffic from/to your favorited nodes with Router Late priority (ensuring those messages get extra relay coverage) while handling everything else as a normal Client.
 - **Client Mute** — You want to receive mesh traffic but not contribute to relaying. Useful for monitoring-only devices or to reduce congestion in dense areas.
-- **Tracker** — An unattended device whose sole purpose is broadcasting its GPS position (e.g., a vehicle, pet, or asset). Sleeps between broadcasts to conserve battery.
-- **Sensor** — An unattended device reporting environmental telemetry (temperature, humidity, air quality). Similar power profile to Tracker.
-- **TAK / TAK Tracker** — Only needed if interoperating with ATAK/WinTAK systems. See [TAK Integration](tak) for details.
+- **Jälgimisseade** – järelevalveta seade, mille ainus eesmärk on oma GPS asukoha levitamine (nt sõiduk, lemmikloom või vara). Aku säästmiseks magab saadete vahel.
+- **Sensor** — An unattended device reporting environmental telemetry (temperature, humidity, air quality). Sarnane võimsusprofiil jälgimisseadmele.
+- **TAK / TAK jälgimisseade** — Vajalik ainult ATAK/WinTAK süsteemidega koostööl. See [TAK Integration](tak) for details.
 
 > 💡 **Tip:** The mesh works best when most nodes are **Client** or **Router**. Too many Mute nodes reduces mesh resilience; too many Routers in a dense area can cause congestion. A good rule of thumb: one Router per 5–10 Clients in your area.
 
@@ -78,13 +78,13 @@ Nodes display encryption status icons next to their name:
 | 🔓 Unlocked   | Communication uses shared channel PSK — encrypted but identity not individually verified                            |
 | ⚠️ Mismatch   | Public key mismatch — the node's key has changed since last seen (investigate before trusting)   |
 
-> 💡 **Tip:** PKI encryption (firmware 2.5+) provides stronger security than channel PSK because each node has a unique key pair. If you see a key mismatch warning, the node may have been reset or compromised.
+> 💡 **Vihje:** PKI krüpteering (püsivara 2,5+) pakub tugevamat turvalisust kui kanali PSK, kuna igal sõlmel on unikaalne võtmepaar. If you see a key mismatch warning, the node may have been reset or compromised.
 
 ## Quick Actions
 
 From the node list, you can:
 
-- **Tap** a node to view its detail page
+- **Puuduta** sõlmel, et vaadata üksikasjade lehte
 - **Long-press** for quick actions:
   - Mark/remove favorite
   - Mute/unmute notifications
@@ -97,7 +97,7 @@ From the node list, you can:
 
 ### Text Search
 
-Type in the search field to filter nodes by name or short name. The filter updates in real time as you type.
+Type in the search field to filter nodes by name or short name. Filter uueneb reaalajas kirjutamise ajal.
 
 ### Filter Toggles
 
@@ -107,7 +107,7 @@ Type in the search field to filter nodes by name or short name. The filter updat
 | **Only direct**            | Show only nodes with direct (non-relayed) connections                       |
 | **Include unknown**        | Show nodes that haven't sent user info yet                                                     |
 | **Exclude infrastructure** | Hide infrastructure-role nodes (Router, Repeater, Router Late, Client Base) |
-| **Exclude MQTT**           | Hide nodes heard only via MQTT internet bridge                                                 |
+| **Välista MQTT**           | Peida ainult MQTT internetisilla kaudu kuuldavad sõlmed                                        |
 | **Show ignored**           | Show nodes you've previously dismissed or muted                                                |
 
 ### Sort Options
@@ -119,12 +119,12 @@ Type in the search field to filter nodes by name or short name. The filter updat
 | **Distance**                                | Nearest nodes first (requires position sharing) |
 | **Hops away**                               | Fewest relay hops first                                            |
 | **Channel**                                 | Grouped by channel index                                           |
-| **Via MQTT**                                | Grouped by MQTT vs. radio-heard                    |
+| **Läbi MQTT**                               | Rühmitatud MQTT ver raadiost kuuldud järgi                         |
 | **Favorites**                               | Favorited nodes first                                              |
 
 ## Node Detail
 
-Tapping a node opens the detail view with comprehensive information. See [Node Metrics](node-metrics) for full details on metrics and telemetry.
+Sõlmel klõpsamine avab detailvaate koos põhjaliku teabega. See [Node Metrics](node-metrics) for full details on metrics and telemetry.
 
 ![Node detail view](../../assets/screenshots/nodes_node_list.png)
 

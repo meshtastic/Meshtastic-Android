@@ -26,7 +26,7 @@ The welcome screen introduces Meshtastic and its core capabilities:
 - No cellular or internet required
 - End-to-end encrypted messaging
 
-Tap **Get Started** to proceed through the setup flow.
+Puuduta **Alusta** seadistusvoo jätkamiseks.
 
 ![Welcome screen](../../assets/screenshots/onboarding_welcome.png)
 
@@ -39,7 +39,7 @@ The app requests several permissions during setup. Each one serves a specific pu
 Bluetooth is the primary connection method between your phone and Meshtastic radio:
 
 - **Bluetooth scanning** — discover nearby Meshtastic radios
-- **Bluetooth connect** — establish and maintain connections with paired radios
+- **Sinihamba ühendus** – loo ja halda seotud seadmete ühendusi
 
 Grant both permissions when prompted. Without Bluetooth, you'll need to use USB or TCP connections instead.
 
@@ -55,8 +55,8 @@ Meshtastic also uses your location for:
 
 Grant **"While using the app"** or **"Always"** depending on your preference:
 
-- **While using the app** — position updates only when the app is open
-- **Always** — enables background position updates for always-on mesh presence
+- **Rakenduse kasutamise ajal** – asukohta uuendatakse kui rakendus on avatud
+- **Alati** – lubab taustal asukoha värskendusi, et kärgvõrgu oleks alati sisse lülitatud
 
 If denied, Bluetooth scanning will not function and your node will not report a position.
 
@@ -66,7 +66,7 @@ Notifications alert you to:
 
 - Incoming messages from channels and direct messages
 - Connection status changes (connected, disconnected, reconnecting)
-- Firmware update availability
+- Püsivara värskenduse võimalikus
 
 > 💡 **Tip:** You can fine-tune notification preferences later in Android system settings. The app creates separate notification channels for messages, connection events, and background service status.
 
@@ -89,7 +89,7 @@ Once permissions are granted, the app transitions to the main interface. Your fi
 
 Once connected to a radio, explore:
 
-- [Connections](connections) — pair your first radio device
+- [Ühendused(connections) — seo oma esimene raadioseade
 - [Messages & Channels](messages-and-channels) — send your first message
 - [Nodes](nodes) — see who's on your mesh
 - [Map & Waypoints](map-and-waypoints) — view node positions
