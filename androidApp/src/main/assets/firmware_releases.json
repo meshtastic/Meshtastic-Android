@@ -189,39 +189,15 @@
   },
   "pullRequests": [
     {
-      "id": "10744",
-      "title": "Update actions/checkout action to v7",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10744",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10743",
-      "title": "Update meshtastic/device-ui digest to 6cadf54",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10743",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10741",
-      "title": "NimBLE params overhaul and try-fix for incompatible bond cleanup",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10741",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+      "id": "10751",
+      "title": "Add Femtofox E22P-915M30S meshtasticd config",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10751",
+      "zip_url": "https://discord.com/invite/meshtastic"
     },
     {
       "id": "10740",
       "title": "fix: T-Deck (Plus) touch driver fix",
       "page_url": "https://github.com/meshtastic/firmware/pull/10740",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10736",
-      "title": "Lora region preset map",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10736",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10735",
-      "title": "PR3 Next Hop improvements",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10735",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
@@ -313,6 +289,30 @@
       "title": "Arduino Nesso N1 support",
       "page_url": "https://github.com/meshtastic/firmware/pull/10664",
       "zip_url": "s"
+    },
+    {
+      "id": "10656",
+      "title": "UDP Unicast for Meshtasticd",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10656",
+      "zip_url": "s"
+    },
+    {
+      "id": "10633",
+      "title": "revert a conflict regression and introduce the DCDC workaround ",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10633",
+      "zip_url": "s"
+    },
+    {
+      "id": "10627",
+      "title": "Add 70cm amateur radio region support",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10627",
+      "zip_url": "+23.2 KB"
+    },
+    {
+      "id": "10625",
+      "title": "Add MVP control point routing module for Meshtastic",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10625",
+      "zip_url": "https://discord.com/invite/meshtastic"
     }
   ]
 }
