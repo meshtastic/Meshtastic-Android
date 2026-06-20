@@ -35,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
 import com.mikepenz.aboutlibraries.ui.compose.produceLibraries
+import com.mikepenz.aboutlibraries.ui.compose.variant.LibraryBadges
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.acknowledgements
@@ -52,7 +53,8 @@ import org.meshtastic.core.ui.component.MainAppBar
  * - **divider**: [HorizontalDivider] between library items for clean visual separation
  * - **footer**: total library count summary
  * - **contentPadding**: proper LazyColumn padding (avoids clipping during scroll)
- * - **license dialog**: built-in license dialog on library tap (default behavior)
+ * - **badges**: per-row metadata badges (author, version, description, license, funding) via [LibraryBadges]
+ * - **license dialog**: built-in license dialog wired by default via the container's `licenseDialogBody`
  *
  * Each platform provides a [jsonProvider] lambda that loads the library definitions JSON
  *
@@ -79,11 +81,7 @@ fun AboutScreen(onNavigateUp: () -> Unit, jsonProvider: suspend () -> String) {
             libraries = libraries,
             modifier = Modifier.fillMaxSize(),
             contentPadding = paddingValues,
-            showAuthor = true,
-            showVersion = true,
-            showDescription = true,
-            showLicenseBadges = true,
-            showFundingBadges = true,
+            badges = LibraryBadges(version = true, author = true, description = true, license = true, funding = true),
             header = {
                 item {
                     AboutHeader()
