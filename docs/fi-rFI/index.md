@@ -1,30 +1,30 @@
 ---
-title: Home
-layout: default
+title: Etusivu
+layout: oletus
 nav_order: 0
 ---
 
-# Meshtastic Android App Documentation
+# Meshtastic Android -sovelluksen dokumentaatio
 
-User and developer documentation for the Meshtastic Android, Desktop, and iOS applications powered by KMP (Kotlin Multiplatform).
+Käyttäjä- ja kehittäjädokumentaatio Meshtasticin Android-, Desktop- ja iOS-sovelluksille, jotka on toteutettu Kotlin Multiplatform (KMP) -teknologialla.
 
-Use the sidebar navigation to browse the **User Guide** for app features and the **Developer Guide** for contributing to the project.
-
----
-
-## Quick Links
-
-| Guide                                                                 | Kuvaus                                                         |
-| --------------------------------------------------------------------- | -------------------------------------------------------------- |
-| [Getting Started](user/onboarding)                                    | Connect your first radio and send a message                    |
-| [Messages & Channels](user/messages-and-channels) | Channel broadcasts, direct messages, reactions, and encryption |
-| [Nodes](user/nodes)                                                   | Understanding the mesh network node list                       |
-| [Signal Meter](user/signal-meter)                                     | How the LoRa signal quality meter works                        |
-| [Units & Locale](user/units-and-locale)           | How temperatures, distances, and times adapt to your region    |
-| [Desktop App](user/desktop)                                           | Linux, macOS, and Windows desktop usage                        |
-| [Architecture](developer/architecture)                                | App architecture overview for contributors                     |
-| [Contributing](developer/contributing)                                | Branch naming, PR workflow, and verification commands          |
+Käytä sivupalkkia selataksesi **käyttöopasta** ja **Kehittäjäopasta**. Käyttöoppaasta löydät sovelluksen ominaisuudet ja kehittäjäoppaasta ohjeet projektin kehittämiseen osallistumiseen.
 
 ---
 
-> This documentation is served from the same markdown source that powers the in-app **Help & Documentation** browser.
+## Pikalinkit
+
+| Opas                                                                | Kuvaus                                                                      |
+| ------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| [Aloittaminen](user/onboarding)                                     | Yhdistä radioon ja lähetä viesti                                            |
+| [Viestit & kanavat](user/messages-and-channels) | Kanavaviestit, yksityisviestit, reaktiot ja salaus                          |
+| [Radiot](user/nodes)                                                | Mesh-verkon radioluettelon ymmärtäminen                                     |
+| [Signaalimittari](user/signal-meter)                                | Miten LoRa-signaalin laatumittari toimii                                    |
+| [Yksiköt & kielialue](user/units-and-locale)    | Lämpötilojen, etäisyyksien ja aikaesitysten mukautuminen alueesi asetuksiin |
+| [Työpöytäsovellus](user/desktop)                                    | Työpöytäsovelluksen käyttö Linuxissa, macOS ja Windows käyttöjärjestelmissä |
+| [Arkkitehtuuri](developer/architecture)                             | Yleiskatsaus sovelluksen arkkitehtuuriin kehittäjille                       |
+| [Osallistuminen kehitystyöhön](developer/contributing)              | Haarojen nimeäminen, PR-työnkulku ja tarkistuskomennot                      |
+
+---
+
+> Tämä dokumentaatio perustuu samoihin Markdown-lähdetiedostoihin kuin sovelluksen sisäinen **Ohje ja dokumentaatio** -osio.
