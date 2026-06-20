@@ -75,6 +75,11 @@ class ScannerViewModelHarness(val testDispatcher: TestDispatcher = UnconfinedTes
     /** NSD-resolved services, gated by the network-scan flag in the ViewModel. */
     val resolvedServicesFlow = MutableStateFlow<List<DiscoveredService>>(emptyList())
 
+    /**
+     * Currently-selected device address (the `fullAddress`), backing `radioInterfaceService.currentDeviceAddressFlow`.
+     */
+    val currentDeviceAddressFlow = MutableStateFlow<String?>(null)
+
     val dispatchers = CoroutineDispatchers(io = testDispatcher, main = testDispatcher, default = testDispatcher)
 
     /**
@@ -95,7 +100,7 @@ class ScannerViewModelHarness(val testDispatcher: TestDispatcher = UnconfinedTes
 
     init {
         every { radioInterfaceService.isMockTransport() } returns false
-        every { radioInterfaceService.currentDeviceAddressFlow } returns MutableStateFlow(null)
+        every { radioInterfaceService.currentDeviceAddressFlow } returns currentDeviceAddressFlow
         every { recentAddressesDataSource.recentAddresses } returns MutableStateFlow(emptyList())
         every { networkRepository.resolvedList } returns resolvedServicesFlow
         every { networkRepository.networkAvailable } returns flowOf(true)

@@ -177,14 +177,11 @@ class ScannerViewModelTest {
     }
 
     @Test
-    fun `bleDevicesForUi sorts by bonded then discovery order`() = runTest {
+    fun `bleDevicesForUi shows bonded devices only once they are visible via scan`() = runTest {
         val device1 = FakeBleDevice(address = "01:02:03:04:05:06", name = "Node B", rssi = -50)
         val device2 = FakeBleDevice(address = "07:08:09:0A:0B:0C", name = "Node A", rssi = -30)
-        val bondedDevice =
-            DeviceListEntry.Ble(
-                device = FakeBleDevice(address = "0D:0E:0F:10:11:12", name = "Bonded C", rssi = null),
-                bonded = true,
-            )
+        val bondedBle = FakeBleDevice(address = "0D:0E:0F:10:11:12", name = "Bonded C", rssi = null)
+        val bondedDevice = DeviceListEntry.Ble(device = bondedBle, bonded = true)
 
         val scanFlow = MutableStateFlow<org.meshtastic.core.ble.BleDevice?>(null)
         every { bleScanner.scan(any(), any()) } returns scanFlow.filterNotNull()
@@ -192,33 +189,62 @@ class ScannerViewModelTest {
         viewModel.bleDevicesForUi.test {
             assertEquals(emptyList(), awaitItem())
 
-            // 1. Bonded device appears (via use case)
+            // A system-bonded device that isn't advertising stays hidden — the list only shows what's nearby.
             baseDevicesFlow.value = DiscoveredDevices(bleDevices = listOf(bondedDevice))
-            assertEquals(listOf(bondedDevice), awaitItem())
+            expectNoEvents()
 
-            // 2. Scan finds Device 1 (Node B, -50dBm)
+            // 1. Scan finds Device 1 (Node B) — unbonded, appears and routes through bonding when tapped.
             viewModel.startBleScan()
             scanFlow.value = device1
-            val itemsAfterDevice1 = awaitItem()
-            assertEquals(2, itemsAfterDevice1.size)
-            assertEquals(bondedDevice.address, (itemsAfterDevice1[0] as DeviceListEntry.Ble).address)
-            assertEquals(device1.address, (itemsAfterDevice1[1] as DeviceListEntry.Ble).address)
+            val afterDevice1 = awaitItem()
+            assertEquals(1, afterDevice1.size)
+            assertEquals(device1.address, (afterDevice1[0] as DeviceListEntry.Ble).address)
+            assertEquals(false, afterDevice1[0].bonded)
 
-            // 3. Scan finds Device 2 (Node A, -30dBm) - stronger signal but should be AFTER Device 1 per discovery
-            // order
+            // 2. Scan finds Device 2 (Node A, -30dBm) - stronger signal but kept AFTER Device 1 per discovery order.
             scanFlow.value = device2
-            val itemsAfterDevice2 = awaitItem()
-            assertEquals(3, itemsAfterDevice2.size)
-            assertEquals(bondedDevice.address, (itemsAfterDevice2[0] as DeviceListEntry.Ble).address)
-            assertEquals(device1.address, (itemsAfterDevice1[1] as DeviceListEntry.Ble).address)
-            assertEquals(device2.address, (itemsAfterDevice2[2] as DeviceListEntry.Ble).address)
+            val afterDevice2 = awaitItem()
+            assertEquals(2, afterDevice2.size)
+            assertEquals(device1.address, (afterDevice2[0] as DeviceListEntry.Ble).address)
+            assertEquals(device2.address, (afterDevice2[1] as DeviceListEntry.Ble).address)
 
-            // 4. Device 1 RSSI updates to -20dBm (strongest) - should NOT re-sort
+            // 3. The bonded device starts advertising — now it appears, flagged bonded and sorted first by name.
+            scanFlow.value = bondedBle
+            val afterBonded = awaitItem()
+            assertEquals(3, afterBonded.size)
+            assertEquals(bondedDevice.address, (afterBonded[0] as DeviceListEntry.Ble).address)
+            assertEquals(true, afterBonded[0].bonded)
+            assertEquals(device1.address, (afterBonded[1] as DeviceListEntry.Ble).address)
+            assertEquals(device2.address, (afterBonded[2] as DeviceListEntry.Ble).address)
+
+            // 4. Device 1 RSSI updates to -20dBm (strongest) - should NOT re-sort.
             scanFlow.value = FakeBleDevice(address = device1.address, name = device1.name, rssi = -20)
-            val itemsAfterRssiUpdate = awaitItem()
-            assertEquals(3, itemsAfterRssiUpdate.size)
-            assertEquals(device1.address, (itemsAfterRssiUpdate[1] as DeviceListEntry.Ble).address)
-            assertEquals(-20, (itemsAfterRssiUpdate[1] as DeviceListEntry.Ble).device.rssi)
+            val afterRssiUpdate = awaitItem()
+            assertEquals(3, afterRssiUpdate.size)
+            assertEquals(device1.address, (afterRssiUpdate[1] as DeviceListEntry.Ble).address)
+            assertEquals(-20, (afterRssiUpdate[1] as DeviceListEntry.Ble).device.rssi)
+
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `bleDevicesForUi keeps the selected device visible even when not seen via scan`() = runTest {
+        val bondedBle = FakeBleDevice(address = "0D:0E:0F:10:11:12", name = "Bonded C", rssi = null)
+        val bondedDevice = DeviceListEntry.Ble(device = bondedBle, bonded = true)
+
+        viewModel.bleDevicesForUi.test {
+            assertEquals(emptyList(), awaitItem())
+
+            // The device is bonded and selected (e.g. auto-reconnect on launch); while connected it stops
+            // advertising, so a scan never sees it — but it must stay visible so the user can disconnect.
+            harness.currentDeviceAddressFlow.value = bondedDevice.fullAddress
+            baseDevicesFlow.value = DiscoveredDevices(bleDevices = listOf(bondedDevice))
+
+            val items = awaitItem()
+            assertEquals(1, items.size)
+            assertEquals(bondedDevice.fullAddress, items[0].fullAddress)
+            assertEquals(true, items[0].bonded)
 
             cancelAndIgnoreRemainingEvents()
         }
