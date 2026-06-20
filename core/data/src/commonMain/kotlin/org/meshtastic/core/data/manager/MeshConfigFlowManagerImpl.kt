@@ -18,11 +18,13 @@ package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
 import kotlinx.atomicfu.atomic
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.repository.CommandSender
@@ -77,10 +79,14 @@ class MeshConfigFlowManagerImpl(
          * Stage 1: receiving device config, module config, channels, and metadata.
          *
          * [rawMyNodeInfo] arrives first (my_info packet); [metadata] may arrive shortly after. Both are consumed
-         * together by [buildMyNodeInfo] at Stage 1 completion.
+         * together by [buildMyNodeInfo] at Stage 1 completion. Some firmware/network paths can deliver NodeInfo before
+         * the Stage 2 request; keep those packets so the later node-list phase can still make progress.
          */
-        data class ReceivingConfig(val rawMyNodeInfo: ProtoMyNodeInfo, val metadata: DeviceMetadata? = null) :
-            HandshakeState()
+        data class ReceivingConfig(
+            val rawMyNodeInfo: ProtoMyNodeInfo,
+            val metadata: DeviceMetadata? = null,
+            val earlyNodes: List<NodeInfo> = emptyList(),
+        ) : HandshakeState()
 
         /**
          * Stage 2: receiving node-info packets from the firmware.
@@ -95,13 +101,18 @@ class MeshConfigFlowManagerImpl(
         data class Complete(val myNodeInfo: SharedMyNodeInfo) : HandshakeState()
     }
 
-    private var handshakeState: HandshakeState = HandshakeState.Idle
+    private val handshakeState = atomic<HandshakeState>(HandshakeState.Idle)
 
     override val newNodeCount: Int
-        get() = (handshakeState as? HandshakeState.ReceivingNodeInfo)?.nodes?.size ?: 0
+        get() =
+            when (val state = handshakeState.value) {
+                is HandshakeState.ReceivingConfig -> state.earlyNodes.size
+                is HandshakeState.ReceivingNodeInfo -> state.nodes.size
+                else -> 0
+            }
 
     override fun handleConfigComplete(configCompleteId: Int) {
-        val state = handshakeState
+        val state = handshakeState.value
         when (configCompleteId) {
             HandshakeConstants.CONFIG_NONCE -> {
                 if (state !is HandshakeState.ReceivingConfig) {
@@ -129,7 +140,7 @@ class MeshConfigFlowManagerImpl(
         val finalizedInfo = buildMyNodeInfo(state.rawMyNodeInfo, state.metadata)
         if (finalizedInfo == null) {
             Logger.w { "Stage 1 failed: could not build MyNodeInfo, retrying Stage 1" }
-            handshakeState = HandshakeState.Idle
+            handshakeState.value = HandshakeState.Idle
             scope.handledLaunch {
                 delay(wantConfigDelay)
                 connectionManager.value.startConfigOnly()
@@ -149,9 +160,10 @@ class MeshConfigFlowManagerImpl(
             }
         }
 
-        handshakeState = HandshakeState.ReceivingNodeInfo(myNodeInfo = finalizedInfo)
-        Logger.i { "myNodeInfo committed (nodeNum=${finalizedInfo.myNodeNum})" }
+        handshakeState.value = HandshakeState.ReceivingNodeInfo(myNodeInfo = finalizedInfo, nodes = state.earlyNodes)
+        Logger.i { "myNodeInfo committed" }
         connectionManager.value.onRadioConfigLoaded()
+        serviceStateWriter.setConnectionProgress("Loading node list")
 
         scope.handledLaunch {
             delay(wantConfigDelay)
@@ -160,6 +172,7 @@ class MeshConfigFlowManagerImpl(
             Logger.i { "Requesting NodeInfo (Stage 2)" }
             connectionManager.value.startNodeInfoOnly()
         }
+        connectionManager.value.onHandshakeProgress()
     }
 
     private fun handleNodeInfoComplete(state: HandshakeState.ReceivingNodeInfo) {
@@ -171,7 +184,15 @@ class MeshConfigFlowManagerImpl(
         // The async work below (DB writes, broadcasts) proceeds without the guard.
         // Because nodes is now immutable, no snapshot is needed — state.nodes IS the snapshot.
         // Any stall-guard retry that re-enters handleNodeInfo will see Complete state and be ignored.
-        handshakeState = HandshakeState.Complete(myNodeInfo = info)
+        handshakeState.value = HandshakeState.Complete(myNodeInfo = info)
+
+        // Cancel the transport-aware fast-recovery watchdog SYNCHRONOUSLY, before the async DB
+        // install work below is launched. The firmware handshake has already completed at this
+        // point (NODE_INFO_NONCE received); a slow Room commit on a large mesh would otherwise
+        // falsely trip the 12s fast-recovery timeout before onNodeDbReady() gets a chance to
+        // cancel it. onNodeDbReady() still performs the same cancel as part of its larger post-
+        // NodeDB side-effect set, but it runs only after the DB install block finishes.
+        connectionManager.value.onHandshakeComplete()
 
         val entities =
             state.nodes.mapNotNull { nodeInfo ->
@@ -184,20 +205,39 @@ class MeshConfigFlowManagerImpl(
             }
 
         scope.handledLaunch {
-            nodeRepository.installConfig(info, entities)
-            analytics.setDeviceAttributes(info.firmwareVersion ?: "unknown", info.model ?: "unknown")
+            try {
+                nodeRepository.installConfig(info, entities)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                Logger.e(e) { "Post-handshake NodeDB install failed; restarting transport to recover" }
+                nodeManager.setNodeDbReady(false)
+                nodeManager.setAllowNodeDbWrites(false)
+                connectionManager.value.recoverPostHandshakeFailure()
+                return@handledLaunch
+            }
+
             nodeManager.setNodeDbReady(true)
             nodeManager.setAllowNodeDbWrites(true)
             serviceStateWriter.setConnectionState(ConnectionState.Connected)
-            connectionManager.value.onNodeDbReady()
+
+            safeCatching { analytics.setDeviceAttributes(info.firmwareVersion ?: "unknown", info.model ?: "unknown") }
+                .onFailure { e -> Logger.w(e) { "Failed to set post-handshake analytics attributes" } }
+            safeCatching { connectionManager.value.onNodeDbReady() }
+                .onFailure { e -> Logger.e(e) { "Post-connected onNodeDbReady side effects failed" } }
         }
+        // Note: onHandshakeProgress() is intentionally NOT called here. By this point the
+        // handshake has reached HandshakeState.Complete and the synchronous onHandshakeComplete()
+        // call above has already cancelled the watchdog. Re-arming via onHandshakeProgress()
+        // would be both semantically wrong and wasted work. The remaining onHandshakeProgress
+        // sites cover all genuine progress.
     }
 
     override fun handleMyInfo(myInfo: ProtoMyNodeInfo) {
-        Logger.i { "MyNodeInfo received: ${myInfo.my_node_num}" }
+        Logger.i { "MyNodeInfo received" }
 
         // Transition to Stage 1, discarding any stale data from a prior interrupted handshake.
-        handshakeState = HandshakeState.ReceivingConfig(rawMyNodeInfo = myInfo)
+        handshakeState.value = HandshakeState.ReceivingConfig(rawMyNodeInfo = myInfo)
         nodeManager.setMyNodeNum(myInfo.my_node_num)
         nodeManager.setFirmwareEdition(myInfo.firmware_edition)
         applyEventFirmwareNotificationDefaults(myInfo.firmware_edition)
@@ -220,35 +260,47 @@ class MeshConfigFlowManagerImpl(
             radioConfigRepository.clearDeviceUIConfig()
             radioConfigRepository.clearFileManifest()
         }
+        connectionManager.value.onHandshakeProgress()
     }
 
     override fun handleLocalMetadata(metadata: DeviceMetadata) {
         Logger.i { "Local Metadata received: ${metadata.firmware_version}" }
-        val state = handshakeState
+        val state = handshakeState.value
         if (state is HandshakeState.ReceivingConfig) {
-            handshakeState = state.copy(metadata = metadata)
+            handshakeState.value = state.copy(metadata = metadata)
             // Persist the metadata immediately — buildMyNodeInfo() reads it at Stage 1 complete,
             // but the DB write does not need to wait until then.
             if (metadata != DeviceMetadata()) {
                 scope.handledLaunch { nodeRepository.insertMetadata(state.rawMyNodeInfo.my_node_num, metadata) }
             }
+            connectionManager.value.onHandshakeProgress()
         } else {
             Logger.w { "Ignoring metadata outside Stage 1 (state=$state)" }
         }
     }
 
     override fun handleNodeInfo(info: NodeInfo) {
-        val state = handshakeState
-        if (state is HandshakeState.ReceivingNodeInfo) {
-            handshakeState = state.copy(nodes = state.nodes + info)
-        } else {
-            Logger.w { "Ignoring NodeInfo outside Stage 2 (state=$state)" }
+        val state = handshakeState.value
+        when (state) {
+            is HandshakeState.ReceivingConfig -> {
+                Logger.d { "Buffering NodeInfo received during Stage 1" }
+                handshakeState.value = state.copy(earlyNodes = state.earlyNodes.withNodeInfo(info))
+                connectionManager.value.onHandshakeProgress()
+            }
+
+            is HandshakeState.ReceivingNodeInfo -> {
+                handshakeState.value = state.copy(nodes = state.nodes.withNodeInfo(info))
+                connectionManager.value.onHandshakeProgress()
+            }
+
+            else -> Logger.w { "Ignoring NodeInfo outside active handshake (state=$state)" }
         }
     }
 
     override fun handleFileInfo(info: FileInfo) {
         Logger.d { "FileInfo received: ${info.file_name} (${info.size_bytes} bytes)" }
         scope.handledLaunch { radioConfigRepository.addFileInfo(info) }
+        connectionManager.value.onHandshakeProgress()
     }
 
     override fun triggerWantConfig() {
@@ -303,5 +355,14 @@ class MeshConfigFlowManagerImpl(
                 notificationPrefs.setNodeEventsAutoDisabledForEvent(false)
             }
         }
+    }
+}
+
+private fun List<NodeInfo>.withNodeInfo(info: NodeInfo): List<NodeInfo> {
+    val index = indexOfFirst { it.num == info.num }
+    return if (index >= 0) {
+        toMutableList().apply { this[index] = info }
+    } else {
+        this + info
     }
 }
