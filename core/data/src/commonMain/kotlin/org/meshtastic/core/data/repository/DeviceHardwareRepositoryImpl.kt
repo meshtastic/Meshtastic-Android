@@ -17,6 +17,7 @@
 package org.meshtastic.core.data.repository
 
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -98,7 +99,7 @@ class DeviceHardwareRepositoryImpl(
         shouldFetch = { cached -> cached == null || lookupEntities(hwModel, target).any { it.isStale() } },
         fetch = { singleFlightRefresh() },
         context = dispatchers.io,
-        networkTimeoutMs = NETWORK_REFRESH_TIMEOUT_MS,
+        networkTimeoutMs = null,
         tag = "DeviceHardwareRepository",
     )
 
@@ -127,18 +128,20 @@ class DeviceHardwareRepositoryImpl(
     private suspend fun singleFlightRefresh() {
         refreshMutex.withLock {
             safeCatching {
-                val completed =
+                val remoteHardware =
                     withTimeoutOrNull(NETWORK_REFRESH_TIMEOUT_MS) {
                         Logger.d { "DeviceHardwareRepository: fetching from remote API" }
-                        val remoteHardware = remoteDataSource.getAllDeviceHardware()
-                        Logger.d { "DeviceHardwareRepository: remote returned ${remoteHardware.size} entries" }
-                        localDataSource.insertAllDeviceHardware(remoteHardware)
+                        remoteDataSource.getAllDeviceHardware()
                     }
-                if (completed == null) {
+                if (remoteHardware == null) {
                     Logger.w {
                         "DeviceHardwareRepository: network refresh timed out after ${NETWORK_REFRESH_TIMEOUT_MS}ms"
                     }
                 } else {
+                    Logger.d { "DeviceHardwareRepository: remote returned ${remoteHardware.size} entries" }
+                    withContext(NonCancellable + dispatchers.io) {
+                        localDataSource.insertAllDeviceHardware(remoteHardware)
+                    }
                     // Refresh msh.to device links from the API after a hardware refresh. Runs outside the hardware
                     // network timeout so that deadline can't cancel it mid-write.
                     deviceLinkRepository.reconcile()
