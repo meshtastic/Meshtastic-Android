@@ -155,15 +155,29 @@ open class ScannerViewModel(
     // ── Device lists for UI ──────────────────────────────────────────────────────────────────
 
     /**
-     * Combined bonded + scanned BLE devices for the UI.
+     * BLE devices for the UI — restricted to those currently visible via an active scan.
      *
-     * Sorted for stability to prevent "shifting" as advertisements arrive: bonded devices always appear first (sorted
-     * by name), followed by unbonded scanned devices in the order they were first discovered. RSSI updates are
-     * reflected on the cards but do not trigger a re-sort.
+     * Previously bonded / system-paired peripherals that aren't advertising right now are intentionally excluded so the
+     * list reflects what's actually nearby. The currently-selected device is the one exception: it's always kept so the
+     * active connection stays visible (a connected radio stops advertising and would otherwise drop out).
+     *
+     * Sorted for stability to prevent "shifting" as advertisements arrive: bonded devices appear first (sorted by
+     * name), followed by unbonded scanned devices in the order they were first discovered. RSSI updates are reflected
+     * on the cards but do not trigger a re-sort.
      */
     val bleDevicesForUi: StateFlow<List<DeviceListEntry>> =
-        combine(discoveredDevicesFlow, scannedBleDevices, discoveryOrder) { discovered, scannedMap, order ->
-            val bonded = discovered.bleDevices.filterIsInstance<DeviceListEntry.Ble>()
+        combine(
+            discoveredDevicesFlow,
+            scannedBleDevices,
+            discoveryOrder,
+            radioInterfaceService.currentDeviceAddressFlow,
+        ) { discovered, scannedMap, order, selectedAddress ->
+            // Surface a bonded device only when it's currently visible via scan (advertising) or it's the selected
+            // device — this hides stale system-bonded peripherals that aren't nearby.
+            val bonded =
+                discovered.bleDevices.filterIsInstance<DeviceListEntry.Ble>().filter {
+                    it.address in scannedMap || it.fullAddress == selectedAddress
+                }
             val bondedAddresses = bonded.mapTo(mutableSetOf()) { it.address }
 
             // Scanned-but-not-bonded devices are explicitly flagged unbonded so the UI routes through
