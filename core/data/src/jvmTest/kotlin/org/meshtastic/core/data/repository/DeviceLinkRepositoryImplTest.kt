@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.data.repository
 
+import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.data.datasource.DeviceLinkLocalDataSource
@@ -49,8 +50,8 @@ class DeviceLinkRepositoryImplTest {
         override fun loadDeviceLinksFromJsonAsset(): List<NetworkDeviceLink> = links
     }
 
-    private val dispatcher = UnconfinedTestDispatcher()
-    private val dispatchers = CoroutineDispatchers(main = dispatcher, io = dispatcher, default = dispatcher)
+    private lateinit var dispatcher: TestDispatcher
+    private lateinit var dispatchers: CoroutineDispatchers
 
     private lateinit var dbProvider: FakeDatabaseProvider
     private lateinit var local: DeviceLinkLocalDataSource
@@ -74,6 +75,8 @@ class DeviceLinkRepositoryImplTest {
 
     @BeforeTest
     fun setup() {
+        dispatcher = UnconfinedTestDispatcher()
+        dispatchers = CoroutineDispatchers(main = dispatcher, io = dispatcher, default = dispatcher)
         dbProvider = FakeDatabaseProvider()
         local = DeviceLinkLocalDataSource(dbProvider, dispatchers)
         api = FakeApiService(NetworkDeviceLinksResponse())

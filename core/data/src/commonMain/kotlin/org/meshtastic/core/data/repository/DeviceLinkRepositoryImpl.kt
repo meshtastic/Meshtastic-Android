@@ -17,6 +17,7 @@
 package org.meshtastic.core.data.repository
 
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
@@ -75,8 +76,10 @@ class DeviceLinkRepositoryImpl(
                         "DeviceLinkRepository: network refresh timed out after ${NETWORK_REFRESH_TIMEOUT_MS}ms"
                     }
                 } else {
-                    store(remoteLinks)
-                    lastRefreshMillis = nowMillis
+                    withContext(NonCancellable + dispatchers.io) {
+                        store(remoteLinks)
+                        lastRefreshMillis = nowMillis
+                    }
                 }
             }
                 .onFailure { e -> Logger.w(e) { "DeviceLinkRepository: network refresh failed" } }

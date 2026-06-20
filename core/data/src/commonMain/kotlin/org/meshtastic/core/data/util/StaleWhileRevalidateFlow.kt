@@ -29,7 +29,7 @@ private const val DEFAULT_NETWORK_TIMEOUT_MS = 5_000L
 /**
  * Creates a cold Flow that implements the stale-while-revalidate caching pattern:
  * 1. Load and emit cached data immediately (UI never waits for network).
- * 2. If [shouldFetch] returns true, attempt a network refresh bounded by [networkTimeoutMs].
+ * 2. If [shouldFetch] returns true, attempt a refresh optionally bounded by [networkTimeoutMs].
  * 3. Reload from cache and emit again if the data changed.
  *
  * The [fetch] lambda is expected to write results to the local cache as a side-effect; [loadFromCache] is called again
@@ -42,7 +42,8 @@ private const val DEFAULT_NETWORK_TIMEOUT_MS = 5_000L
  * @param shouldFetch Decides whether a network refresh is needed based on the cached value (suspendable).
  * @param fetch Performs the network call and persists results locally (side-effect only).
  * @param context The coroutine context for cache/network operations.
- * @param networkTimeoutMs Maximum time to wait for [fetch] before falling back to cached data.
+ * @param networkTimeoutMs Maximum time to wait for [fetch] before falling back to cached data. Pass null when [fetch]
+ *   bounds its own network work and also performs local cache writes that must not be cancelled by this helper.
  * @param tag Logging tag for diagnostics.
  */
 internal fun <T : Any> staleWhileRevalidateFlow(
@@ -50,7 +51,7 @@ internal fun <T : Any> staleWhileRevalidateFlow(
     shouldFetch: suspend (T?) -> Boolean,
     fetch: suspend () -> Unit,
     context: CoroutineContext,
-    networkTimeoutMs: Long = DEFAULT_NETWORK_TIMEOUT_MS,
+    networkTimeoutMs: Long? = DEFAULT_NETWORK_TIMEOUT_MS,
     tag: String = "StaleWhileRevalidate",
 ): Flow<T?> = flow {
     val cached = loadFromCache()
@@ -58,11 +59,22 @@ internal fun <T : Any> staleWhileRevalidateFlow(
 
     if (!shouldFetch(cached)) return@flow
 
-    val completed =
-        withTimeoutOrNull(networkTimeoutMs) {
-            safeCatching { fetch() }.onFailure { e -> Logger.w(e) { "$tag: network fetch failed" } }
+    suspend fun runFetch() {
+        safeCatching { fetch() }.onFailure { e -> Logger.w(e) { "$tag: network fetch failed" } }
+    }
+
+    val timedOut =
+        if (networkTimeoutMs == null) {
+            runFetch()
+            false
+        } else {
+            withTimeoutOrNull(networkTimeoutMs) {
+                runFetch()
+                true
+            } != true
         }
-    if (completed == null) {
+
+    if (timedOut) {
         Logger.w { "$tag: network fetch timed out after ${networkTimeoutMs}ms" }
     }
 
