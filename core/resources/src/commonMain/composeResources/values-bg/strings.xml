@@ -842,6 +842,7 @@
     <string name="rebroadcast_mode">Режим на препредаване</string>
     <string name="rebroadcast_mode_all_desc">Препредава всяко наблюдавано съобщение, ако е било на нашия частен канал или от друга мрежа със същите параметри на lora.</string>
     <string name="recent_network_devices">Скорошни мрежови устройства</string>
+    <string name="reconnecting">Повторно свързване…</string>
     <string name="red">Червен</string>
     <string name="refresh">Опресняване</string>
     <string name="refresh_metadata">Обновяване на метаданните</string>

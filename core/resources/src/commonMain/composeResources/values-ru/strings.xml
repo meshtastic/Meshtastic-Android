@@ -1056,6 +1056,7 @@
     <string name="rebroadcast_mode_local_only_desc">Игнорирует обнаруженные сообщения из чужих mesh-сетей, которые открыты или не могут быть расшифрованы. Ретранслирует сообщение только на локальных основных / дополнительных каналах нод.</string>
     <string name="rebroadcast_mode_none_desc">Разрешено только для ролей SENSOR, TRACKER и TAK_TRACKER, это запретит все ретрансляции, не похожие на роль CLIENT_MUTE.</string>
     <string name="recent_network_devices">Недавние сетевые устройства</string>
+    <string name="reconnecting">Восстановление связи…</string>
     <string name="red">Красный</string>
     <string name="refresh">Обновить</string>
     <string name="refresh_metadata">Обновить метаданные</string>

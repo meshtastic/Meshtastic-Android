@@ -8,7 +8,7 @@ aliases:
   - sinihammas
   - usb
   - tcp
-  - pairing
+  - seon
 ---
 
 # Ühendus
@@ -19,13 +19,13 @@ Meshtastic supports multiple transport methods to communicate between your phone
 
 Bluetooth Low Energy is the default and most common connection method on Android.
 
-### Pairing a Device
+### Seadme sidumine
 
-1. Ensure your Meshtastic radio is powered on and in pairing mode.
+1. Veendu, et Meshtastic seade on sisse lülitatud ja sidumisrežiimis.
 2. Open the app and navigate to the **Connect** tab.
-3. Tap **Scan for Devices** — nearby Meshtastic radios will appear.
+3. Puuduta **Skanni seadmeid** – kuvatakse lähedalasuvad Meshtastic raadiod.
 4. Select your device from the list.
-5. Accept the Bluetooth pairing prompt if shown.
+5. Nõustu Bluetoothi ​​sidumise taotlusega, kui see kuvatakse.
 
 ![Device list item](../../assets/screenshots/connections_bluetooth_scan.png)
 
@@ -56,16 +56,16 @@ If no devices are found, the app shows an empty state with instructions:
 
 - **Device not found:** Toggle Bluetooth off/on, ensure location is enabled.
 - **Connection drops:** Move closer to the radio; check for interference.
-- **Pairing rejected:** Forget the device in Android Bluetooth settings and retry.
+- **Sidumine tagasi lükatud:** Unusta seade Androidi sinihamba ​​seadetes ja proovi uuesti.
 
-## USB Serial
+## USB port
 
 USB connections provide a wired alternative, useful for desktop or when Bluetooth is unavailable.
 
 ### Setup
 
 1. Connect your radio via USB cable to your device.
-2. The app will prompt for USB permission — tap **Allow**.
+2. Rakendus küsib USB luba – puuduta **Luba**.
 3. The connection is established automatically.
 
 > ⚠️ **Note:** USB connections require OTG support on Android devices.
@@ -79,7 +79,7 @@ Some Meshtastic radios support WiFi connectivity, allowing TCP-based connections
 1. Connect your radio to a WiFi network via the radio's web interface or settings.
 2. In the app, go to **Connect → TCP**.
 3. Enter the radio's IP address and port (default: 4403).
-4. Tap **Connect**.
+4. Puuduta **Ühenda**.
 
 ![WiFi scanning for devices](../../assets/screenshots/connections_wifi_scanning.png)
 
@@ -101,7 +101,7 @@ A successful connection is confirmed with a status indicator:
 
 The app reconnects to the **last selected device** on startup. You can switch transports from the Connect screen at any time.
 
-To disconnect, tap the disconnect button on the Connect screen:
+Ühenduse katkestamiseks puuduta ühenduse loomise ekraanil katkestamise nuppu:
 
 ![Disconnect from radio](../../assets/screenshots/connections_disconnect.png)
 
@@ -110,7 +110,7 @@ To disconnect, tap the disconnect button on the Connect screen:
 On Desktop (Linux/macOS/Windows), the app supports:
 
 - **Bluetooth (BLE)** — via the Kable library; works on macOS, Linux, and Windows
-- **USB Serial** — primary wired connection method
+- **USB port** – peamine juhtmega ühendusmeetod
 - **TCP/IP** — for network-connected radios
 
 See [Desktop App](desktop) for platform-specific details and keyboard shortcuts.

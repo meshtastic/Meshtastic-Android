@@ -29,7 +29,7 @@ Basic operating information reported by each node:
 
 Device metrics are displayed as individual cards with trend sparklines showing battery level, voltage, channel utilization, airtime, and uptime over time.
 
-> 💡 **Tip:** Tap any metric card to expand it into a full chart with historical data points. Pinch to zoom the time axis.
+> 💡 **Vihje:** Puuduta mis tahes mõõdikukaarti, et laiendada see ajalooliste andmepunktidega täisdiagrammiks. Pinch to zoom the time axis.
 
 ## Keskkonnamõõdikud
 
@@ -115,7 +115,7 @@ Power management telemetry (requires INA sensor or compatible hardware):
 
 Traceroute shows the path a message takes through the mesh:
 
-1. From the node detail screen, tap **Traceroute**.
+1. Sõlme üksikasjade ekraanil puuduta **Traceroute**.
 2. The app sends a traceroute request to the target node.
 3. Results show each hop with SNR/RSSI values.
 
@@ -143,7 +143,7 @@ Shows which nodes a given node can directly hear, useful for understanding mesh 
 ## Viewing Metrics
 
 1. Navigate to **Nodes**.
-2. Tap the node you want to inspect.
+2. Puuduta sõlme, mida soovite kontrollida.
 3. Select the metric category from the detail tabs.
 
 ![Node detail — local device](../../assets/screenshots/nodes_detail_local.png)
@@ -152,7 +152,7 @@ The position tab shows location data for nodes that share GPS:
 
 ![Position inline content](../../assets/screenshots/nodes_position.png)
 
-> ⚠️ **Note:** Metrics are only available when they have been reported by the remote node. Metrics update at intervals configured on each node's telemetry settings.
+> ⚠️ **Note:** Metrics are only available when they have been reported by the remote node. Mõõdikud värskendatakse iga sõlme telemeetria sätetes konfigureeritud intervallidega.
 
 ## Related Topics
 

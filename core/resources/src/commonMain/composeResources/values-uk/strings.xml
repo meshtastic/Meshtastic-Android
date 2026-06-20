@@ -880,6 +880,7 @@
     <string name="rebroadcast_mode_local_only_desc">Ігнорує чужі mesh-мережі та пакети, які неможливо розшифрувати. Повторно передає повідомлення лише для власних каналів пристрою.</string>
     <string name="rebroadcast_mode_none_desc">Дозволяється лише для таких ролей, як SENSOR, TRACKER та TAK_TRACKER, і гальмуватиме всі перенаправлення, на відміну від ролі CLIENT_MUTE.</string>
     <string name="recent_network_devices">Нещодавні пристрої в мережі</string>
+    <string name="reconnecting">Роз'єднання…</string>
     <string name="red">Червоний</string>
     <string name="refresh">Оновити</string>
     <string name="refresh_metadata">Оновити метаданні</string>

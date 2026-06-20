@@ -1,22 +1,22 @@
 ---
-title: Settings — Modules & Admin
+title: Sätted - moodulid & admin
 parent: User Guide
 nav_order: 8
 last_updated: 2026-05-20
-description: Configure optional feature modules (MQTT, telemetry, canned messages, TAK, and more) and perform device administration.
+description: Muuda valikulisi funktsioonimooduleid (MQTT, telemeetria, salvestatud sõnumid, TAK ja palju muud) ja teosta seadme haldamist.
 aliases:
-  - modules
-  - module-config
+  - moodul
+  - mooduli sätted
   - administration
 ---
 
-# Settings — Modules & Admin
+# Sätted - moodulid & admin
 
-Configure optional feature modules and perform device administration. Modules extend Meshtastic with specialized capabilities — each can be independently enabled or disabled.
+Konfi valikulisi funktsioonimooduleid ja teosta seadme haldamist. Moodulid laiendavad Meshtasticut spetsiaalsete võimalustega – igaüht saab eraldi lubada või keelata.
 
-> 💡 **Tip:** You only need to enable the modules you actually use. Disabling unused modules reduces airtime, saves battery, and simplifies your configuration.
+> 💡 **Vihje:** Pead lubama ainult need moodulid, mida sa tegelikult kasutad. Kasutamata moodulite keelamine vähendab eetriaega, säästab akut ja lihtsustab seadistamist.
 
-Module settings use a card-based layout with toggle switches, dropdowns, text fields, and sliders:
+Mooduli seaded kasutavad kaardipõhist paigutust koos lülitite, rippmenüüde, tekstiväljade ja liuguritega:
 
 ![Toggle switch](../../assets/screenshots/settings_switch.png)
 
@@ -26,41 +26,41 @@ Module settings use a card-based layout with toggle switches, dropdowns, text fi
 
 ![Settings card layout](../../assets/screenshots/settings_titled_card.png)
 
-## Module Configuration
+## Mooduli konf
 
-### MQTT Module
+### MQTT moodul
 
-Bridges mesh messages to and from an MQTT broker for internet connectivity. This is how you extend your mesh beyond radio range or integrate with home automation systems.
+Sildab võrgusõnumeid MQTT vahendajasse ja sealt internetiühenduse loomiseks. This is how you extend your mesh beyond radio range or integrate with home automation systems.
 
 | Sätted          | Kirjeldus                                                                |
 | --------------- | ------------------------------------------------------------------------ |
-| Lubatud         | Toggle MQTT bridge                                                       |
-| Server          | MQTT broker address                                                      |
+| Lubatud         | Lükka MQTT sild sisse                                                    |
+| Server          | MQTT vahendaja aadress                                                   |
 | Kasutajatunnus  | Authentication username                                                  |
 | Parool          | Authentication password                                                  |
-| Encryption      | Encrypt MQTT payloads                                                    |
+| Encryption      | Krüpteeri MQTT kasutus                                                   |
 | ~~JSON Output~~ | ⚠️ **Deprecated** — JSON support removed from firmware; field is ignored |
 | TLS             | Use secure connection                                                    |
-| Root Topic      | Base MQTT topic path                                                     |
+| Root Topic      | Baas MQTT teema teekond                                                  |
 | Map Report      | Publish position for public map                                          |
 
-See [MQTT](mqtt) for a detailed usage guide including encryption, privacy, and broker setup.
+Vaata [MQTT](mqtt) üksikasjalikumat kasutusjuhendit, mis sisaldab teavet krüpteerimise, privaatsuse ja vahendaja seadistamise kohta,.
 
-### Serial Module
+### Jadapordi moodul
 
-Enables serial port communication for external device integrations (GPS modules, sensors, or custom hardware). When enabled, the node's serial port can send and receive protobuf or text data, allowing external microcontrollers or computers to interact with the mesh.
+Võimaldab jadapordi sidet väliste seadmete integreerimiseks (GPS-moodulid, andurid või kohandatud riistvara). Kui lubatud, saab sõlme jadaport saata ja vastu võtta protobuf- või tekstiandmeid, võimaldades välistel mikrokontrolleritel või arvutitel võrguga suhelda.
 
-| Sätted          | Kirjeldus                       |
-| --------------- | ------------------------------- |
-| Lubatud         | Activate serial communication   |
-| Echo            | Echo received serial data back  |
-| Mode            | Text, Protobuf, or NMEA output  |
-| RX/TX kontaktid | GPIO pins for serial connection |
-| Baud Rate       | Serial communication speed      |
+| Sätted          | Kirjeldus                      |
+| --------------- | ------------------------------ |
+| Lubatud         | Aktiveeri jadapordi ühendus    |
+| Echo            | Kaja sai jadaandmed tagasi     |
+| Mode            | Text, Protobuf, or NMEA output |
+| RX/TX kontaktid | GPIO kontaktid jagaühenduseks  |
+| Baud Rate       | Jadaühenduse kiirus            |
 
-### External Notification Module
+### Välise teavitusmoodul
 
-Controls buzzer, LED, or vibration alerts on your radio hardware. Useful for devices that need to physically signal when a message arrives — particularly helpful for unattended or outdoor installations.
+Juhib raadio riistvara summeri-, LED- või vibratsioonihoiatusi. Useful for devices that need to physically signal when a message arrives — particularly helpful for unattended or outdoor installations.
 
 | Sätted                           | Kirjeldus                   |
 | -------------------------------- | --------------------------- |
@@ -74,7 +74,7 @@ Controls buzzer, LED, or vibration alerts on your radio hardware. Useful for dev
 | Duration (ms) | Notification length         |
 | Use I2S as Buzzer                | Use I2S audio output        |
 
-### Store & Forward Module
+### Salvesta & edasta moodul
 
 Buffers messages for nodes that were temporarily offline, then replays them when those nodes reconnect. Essential for meshes where nodes go in and out of range regularly — ensures messages aren't lost during brief disconnections.
 
@@ -88,7 +88,7 @@ Buffers messages for nodes that were temporarily offline, then replays them when
 
 > 💡 **Tip:** Store and Forward works best on nodes with ample memory (ESP32 with PSRAM). Router nodes are ideal candidates since they're typically always-on.
 
-### Range Test Module
+### Kaugustesti moodul
 
 Automated range testing tool for evaluating link quality between nodes. When enabled, the node periodically transmits test messages with incrementing counters. A receiver node logs these messages, allowing you to walk or drive away and later analyze at what distance messages stopped arriving.
 
@@ -98,7 +98,7 @@ Automated range testing tool for evaluating link quality between nodes. When ena
 | Sender Interval (s) | Time between test transmissions   |
 | Salvesta CSV                           | Log received test data to SD card |
 
-### Telemetry Module
+### Telemeetria moodul
 
 Controls what telemetry data your node shares with the mesh. Telemetry includes device health (battery, uptime) and environmental sensor data (temperature, humidity, pressure).
 
@@ -111,7 +111,7 @@ Controls what telemetry data your node shares with the mesh. Telemetry includes 
 
 See [Telemetry & Sensors](telemetry-and-sensors) for supported sensors and configuration recommendations.
 
-### Canned Message Module
+### Eelsalvestatud sõnumi moodul
 
 Pre-configured messages accessible from the device's physical buttons (for radios with rotary encoders, keypads, or similar input hardware). Define a list of quick-send messages that can be transmitted without a phone connected — ideal for field use.
 
@@ -123,13 +123,13 @@ Pre-configured messages accessible from the device's physical buttons (for radio
 | Rotary Encoder     | Enable rotary encoder input                                 |
 | Up/Down/Press Pins | GPIO pin assignments for input                              |
 
-### Audio Module
+### Audio moodul
 
 Codec2 audio support for low-bandwidth voice communication over the mesh. This is an **experimental** feature that encodes voice into very small data packets using the Codec2 codec.
 
 | Sätted          | Kirjeldus                        |
 | --------------- | -------------------------------- |
-| Lubatud         | Activate audio module            |
+| Lubatud         | Aktiveeri audio moodul           |
 | Codec2 Rate     | Audio quality/bandwidth tradeoff |
 | I2S Word Select | GPIO pin for I2S WS              |
 | I2S Data In     | GPIO pin for I2S DIN             |
@@ -137,7 +137,7 @@ Codec2 audio support for low-bandwidth voice communication over the mesh. This i
 
 > ⚠️ **Note:** Audio requires specific hardware (I2S microphone and speaker). Voice quality is very low-bandwidth — think "understandable radio voice," not phone-call quality.
 
-### Remote Hardware Module
+### Kaugriistvara moodul
 
 GPIO control over the mesh network. Allows a remote node to read or write GPIO pins on another node — useful for activating relays, reading switches, or controlling external hardware from a distance.
 
@@ -148,55 +148,55 @@ GPIO control over the mesh network. Allows a remote node to read or write GPIO p
 
 > ⚠️ **Warning:** Enabling "Allow Undefined Pins" gives remote nodes access to all GPIO pins, which could interfere with the radio's own hardware. Only enable on dedicated GPIO nodes.
 
-### Neighbor Info Module
+### Naabriinfo moodul
 
-Broadcasts information about directly heard neighbors, enabling mesh topology mapping. Each enabled node periodically shares a list of the other nodes it can hear and their signal quality.
+Levitab teavet otse kuuldud naabrite kohta, võimaldades kärgvõrgu topoloogia kaardistamist. Each enabled node periodically shares a list of the other nodes it can hear and their signal quality.
 
-| Sätted                                 | Kirjeldus                            |
-| -------------------------------------- | ------------------------------------ |
-| Lubatud                                | Activate neighbor broadcasting       |
-| Update Interval (s) | How often to broadcast neighbor list |
+| Sätted                                     | Kirjeldus                             |
+| ------------------------------------------ | ------------------------------------- |
+| Lubatud                                    | Aktiveeri naabrite leviring           |
+| Värskendusintervall(id) | Kui tihti naabrite nimekirja levitada |
 
 See [Discovery](discovery) for how to use neighbor data for mesh topology exploration.
 
-### Ambient Lighting Module
+### Ambientvalguse moodul
 
-Controls onboard NeoPixel or other addressable RGB LEDs on supported hardware. Can be used for visual status indicators, notification lights, or decorative effects.
+Juhib toetatud riistvaral NeoPixeli või muid adresseeritavaid RGB LEDe. Can be used for visual status indicators, notification lights, or decorative effects.
 
-| Sätted             | Kirjeldus                                                  |
-| ------------------ | ---------------------------------------------------------- |
-| Lubatud            | Activate LED control                                       |
-| LED State          | On, Off, or set specific color                             |
-| Red / Green / Blue | Individual color channel values (0–255) |
+| Sätted             | Kirjeldus                                                          |
+| ------------------ | ------------------------------------------------------------------ |
+| Lubatud            | LED juhtimise aktiveerimine                                        |
+| LED State          | Sees, Väljas või määrake konkreetne värv                           |
+| Red / Green / Blue | Individuaalsete värvikanalite väärtused (0–255) |
 
-### Detection Sensor Module
+### Tuvastusanduri moodul
 
-Turns your node into a motion or door sensor alert system. When a GPIO pin detects a state change (motion detected, door opened), the node broadcasts an alert message over the mesh.
+Turns your node into a motion or door sensor alert system. Kui GPIO klemm tuvastab oleku muutuse (liikumine tuvastatud, uks avatud), levitab sõlm kärgvõrgu kaudu hoiatusteate.
 
-| Sätted                                   | Kirjeldus                                                               |
-| ---------------------------------------- | ----------------------------------------------------------------------- |
-| Lubatud                                  | Activate detection sensor                                               |
-| Monitor Pin                              | GPIO pin connected to sensor                                            |
-| Detection Triggered High                 | Trigger when pin goes high (vs. low) |
-| Minimum Broadcast (s) | Minimum time between alert broadcasts                                   |
-| State Broadcast (s)   | Periodic state broadcast interval                                       |
-| Send Bell                                | Include bell character in alerts                                        |
-| Friendly Name                            | Custom name for this sensor                                             |
+| Sätted                                     | Kirjeldus                                                               |
+| ------------------------------------------ | ----------------------------------------------------------------------- |
+| Lubatud                                    | Activate detection sensor                                               |
+| Monitor Pin                                | GPIO pin connected to sensor                                            |
+| Detection Triggered High                   | Trigger when pin goes high (vs. low) |
+| Minimaalne leviring(id) | Minimaalne aeg hoiatusteadete levitamisel                               |
+| Riiklik ringhääling(ud) | Perioodilise oleku levitamise intervall                                 |
+| Send Bell                                  | Include bell character in alerts                                        |
+| Friendly Name                              | Custom name for this sensor                                             |
 
-### Paxcounter Module
+### Paxloenduri moodul
 
 People counter using WiFi and BLE probe requests. Counts nearby devices by passively listening for probe requests that phones and laptops emit when scanning for networks. Available only on ESP32 devices.
 
-| Sätted                                 | Kirjeldus                  |
-| -------------------------------------- | -------------------------- |
-| Lubatud                                | Activate people counting   |
-| Update Interval (s) | How often to report counts |
+| Sätted                                     | Kirjeldus                  |
+| ------------------------------------------ | -------------------------- |
+| Lubatud                                    | Activate people counting   |
+| Värskendusintervall(id) | How often to report counts |
 
-> 💡 **Tip:** Paxcounter is useful for estimating foot traffic at trailheads, event venues, or other locations. Counts are approximate — one person may carry multiple devices.
+> 💡 **Vihje:** Paxloendur on kasulik jalakäijate liikluse hindamiseks matkaradade alguses, ürituste toimumiskohtades või muudes kohtades. Counts are approximate — one person may carry multiple devices.
 
-### TAK Module
+### TAK moodul
 
-Team Awareness Kit integration for interoperability with ATAK and WinTAK. See [TAK Integration](tak) for detailed setup and usage.
+Meeskonna teadlikkuse komplekti integratsioon ATAKi ja WinTAKi koostalitlusvõime tagamiseks. See [TAK Integration](tak) for detailed setup and usage.
 
 ## Haldus
 
@@ -207,7 +207,7 @@ Remotely configure nodes that share your admin key:
 1. Select the target node in the node list.
 2. Navigate to **Settings** for that node.
 3. Modify configuration.
-4. Tap **Save** — changes are sent over the mesh.
+4. Puuduta **Salvesta** – muudatused saadetakse kärgvõrgu kaudu.
 
 > ⚠️ **Requires:** Admin key configured on both your node and the target node.
 
@@ -240,7 +240,7 @@ View detailed diagnostic information:
 ## Related Topics
 
 - [Settings — Radio & User](settings-radio-user) — core radio and user profile settings
-- [Module configuration reference](https://meshtastic.org/docs/configuration/module) — detailed module docs on meshtastic.org
+- [Mooduli konfiguratsiooni viide](https://meshtastic.org/docs/configuration/module) — üksikasjalik mooduli dokumentatsioon aadressil meshtastic.org
 - [FAQ](https://meshtastic.org/docs/about/faq) — common questions on meshtastic.org
 
 ---

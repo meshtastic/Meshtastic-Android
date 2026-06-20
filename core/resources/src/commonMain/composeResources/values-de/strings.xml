@@ -1049,6 +1049,7 @@
     <string name="rebroadcast_mode_local_only_desc">Ignoriert beobachtete Nachrichten aus fremden Netzen, die offen sind oder die, die nicht entschlüsselt werden können. Sendet nur die Nachricht auf den Knoten lokalen primären / sekundären Kanälen.</string>
     <string name="rebroadcast_mode_none_desc">Nur für SENSOR, TRACKER und TAK_TRACKER zulässig. Verhindert alle Übertragungen, nicht anders als CLIENT_MUTE Rolle.</string>
     <string name="recent_network_devices">Kürzliche Netzwerkgeräte</string>
+    <string name="reconnecting">Erneut verbinden…</string>
     <string name="red">Rot</string>
     <string name="refresh">Aktualisieren</string>
     <string name="refresh_metadata">Metadaten aktualisieren</string>

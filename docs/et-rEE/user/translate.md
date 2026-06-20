@@ -83,7 +83,7 @@ The app automatically selects the correct locale based on your device's **Langua
 
 ## Translation Guidelines
 
-- **Do not translate** technical terms like "LoRa", "MQTT", "BLE", "TAK", "SNR", or "RSSI" — these are universal.
+- **Ära tõlgi** tehnilisi termineid nagu "LoRa", "MQTT", "BLE", "TAK", "SNR", or "RSSI" — need on universaalsed.
 - **Keep placeholders intact.** Strings like `%1$s` or `%d` are filled in at runtime. Do not remove or reorder them unless the grammar of your language requires it.
 - **Match tone.** The app uses a friendly, direct voice. Avoid overly formal language.
 - **Test if possible.** Switch your device language and open the app to see how translations look in context.

@@ -35,13 +35,13 @@ The Meshtastic Desktop application shares its core codebase with Android via Kot
 
 ## Connecting Your Radio
 
-### USB Serial (Primary)
+### USB port (esmane)
 
 The most reliable connection method on Desktop:
 
 1. Connect your Meshtastic radio via USB cable.
-2. The app should detect the serial port automatically.
-3. If not detected, select the correct serial port from the Connect menu.
+2. Rakendus peaks jadapordi automaatselt tuvastama.
+3. Kui seda ei tuvastata, vali menüüst Ühenda õige jadapordiga.
 
 ### TCP/IP
 
@@ -67,7 +67,7 @@ Bluetooth Low Energy is supported on Desktop via the [Kable](https://github.com/
 | Kaart                                        | ✓       | ✓       | Full parity                                    |
 | Sätted                                       | ✓       | ✓       | Full parity                                    |
 | Sinihammas (BLE)          | ✓       | ✓       | Via Kable on desktop                           |
-| Firmware Update OTA                          | ✓       | ✗       | Use web flasher                                |
+| Püsivara värskendus OTA kaudu                | ✓       | ✗       | Use web flasher                                |
 | Notifications                                | ✓       | ✓       | Native OS notifications                        |
 | Widgets                                      | ✓       | ✗       | Android-only                                   |
 | Android Auto                                 | ✓       | ✗       | Android-only — not available on Desktop or iOS |
@@ -134,15 +134,15 @@ Requirements:
 
 ## Known Limitations
 
-- No OTA firmware updates (use web flasher)
+- OTA püsivara värskendusi pole (kasuta veebivärskendajat)
 - Some Android-specific features (widgets, specific notification channels) are unavailable
 - Performance may vary on low-spec hardware running Compose Desktop
-- BLE bonding is not yet supported on desktop (pairing works without bonding)
+- Lauaarvutid ei toeta veel BLE liitmist (sidumine toimib ilma ühendamiseta)
 
 ## Related Topics
 
 - [Connections](connections) — connection methods overview
-- [Firmware Updates](firmware) — use the [Web Flasher](https://flasher.meshtastic.org) for desktop firmware updates
+- [Püsivara värskendused] (firmware) – kasutage töölaua püsivara värskenduste jaoks [Web Flasherit] (https://flasher.meshtastic.org)
 
 ---
 

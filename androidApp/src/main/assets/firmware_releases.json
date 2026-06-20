@@ -195,12 +195,6 @@
       "zip_url": "https://discord.com/invite/meshtastic"
     },
     {
-      "id": "10740",
-      "title": "fix: T-Deck (Plus) touch driver fix",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10740",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
       "id": "10729",
       "title": "Update meshtastic/web to v2.7.1",
       "page_url": "https://github.com/meshtastic/firmware/pull/10729",
@@ -307,12 +301,6 @@
       "title": "Add 70cm amateur radio region support",
       "page_url": "https://github.com/meshtastic/firmware/pull/10627",
       "zip_url": "+23.2 KB"
-    },
-    {
-      "id": "10625",
-      "title": "Add MVP control point routing module for Meshtastic",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10625",
-      "zip_url": "https://discord.com/invite/meshtastic"
     }
   ]
 }

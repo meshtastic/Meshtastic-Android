@@ -1,6 +1,6 @@
 Meshtastic on avatud lähtekoodiga tööriist Android-seadmetele kasutamiseks, võrguväliste raadiosaatjatega. See rakendus on Meshtastic projekti peamine klient, mis võimaldab teil hallata oma kärgvõrgu seadmeid ja suhelda teiste kasutajatega.
 
-Meshtastic projekti kohta lisateabe saamiseks külastage veebisaiti: <a href="https://www.meshtastic.org">meshtastic.org</a>. Raadioseadmetel töötav püsivara on eraldi avatud lähtekoodiga projekt, mille leiate siit: <a href="https://github.com/meshtastic/Meshtastic-device">https://github.com/meshtastic/Meshtastic-device</a>.
+Meshtastic projekti kohta lisateabe saamiseks külasta veebisaiti: <a href="https://www.meshtastic.org">meshtastic.org</a>. Raadioseadmetel töötav püsivara on eraldi avatud lähtekoodiga projekt, mille leiate siit: <a href="https://github.com/meshtastic/Meshtastic-device">https://github.com/meshtastic/Meshtastic-device</a>.
 
 <b>Kogukond ja tugi</b>
 

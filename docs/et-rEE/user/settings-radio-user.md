@@ -27,18 +27,18 @@ Configure your radio hardware and user identity parameters.
 
 ### Applying Changes
 
-After modifying settings, tap **Save** to write the configuration to your radio. The device may reboot to apply changes.
+Pärast sätete muutmist puuduta nuppu **Salvesta**, et konfiguratsioon raadiosse salvestada. The device may reboot to apply changes.
 
 ## Radio Configuration
 
 ### Seadme sätted
 
-| Setting                                    | Kirjeldus                                                               | Vaikimisi |
-| ------------------------------------------ | ----------------------------------------------------------------------- | --------- |
-| Roll                                       | Node behavior (Client, Router, etc.) | Klient    |
-| Kordusülekannete režiim                    | How the node retransmits messages                                       | Kõik      |
-| Node Info Broadcast (s) | Interval for broadcasting node info                                     | 10800     |
-| Double-tap Button                          | Action for double-tap button press                                      | Keelatud  |
+| Setting                                       | Kirjeldus                                                               | Vaikimisi |
+| --------------------------------------------- | ----------------------------------------------------------------------- | --------- |
+| Roll                                          | Node behavior (Client, Router, etc.) | Klient    |
+| Kordusülekannete režiim                       | How the node retransmits messages                                       | Kõik      |
+| Sõlme(de) teabe levitamine | Sõlme teabe levitamise intervall                                        | 10800     |
+| Topeltpuudutusnupp                            | Toiming topeltpuudutuse nupu korral                                     | Keelatud  |
 
 ### LoRa sätted
 
@@ -106,9 +106,9 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 | Setting                                   | Kirjeldus                          |
 | ----------------------------------------- | ---------------------------------- |
 | GPS Enabled                               | Enable/disable GPS                 |
-| GPS Update Interval                       | How often to acquire GPS fix       |
-| Position Broadcast (s) | How often to share position        |
-| Nutikas asukoht                           | Enable movement-based broadcasting |
+| GPS värskendamise intervall               | How often to acquire GPS fix       |
+| Asukoha(de) levitamine | How often to share position        |
+| Nutikas asukoht                           | Liikumispõhise levitamise lubamine |
 | Määratud asukoht                          | Use a manually set position        |
 
 ### Toite sätted
@@ -135,23 +135,23 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 
 ### Sinihamba sätted
 
-| Setting           | Kirjeldus                                                                 |
-| ----------------- | ------------------------------------------------------------------------- |
-| Bluetooth Enabled | Enable/disable BLE radio                                                  |
-| Pairing Mode      | Fixed PIN, Random PIN, or No PIN                                          |
-| Fikseeritud PIN   | PIN code for pairing (default: 123456) |
+| Setting           | Kirjeldus                                                           |
+| ----------------- | ------------------------------------------------------------------- |
+| Bluetooth Enabled | Enable/disable BLE radio                                            |
+| Sidumisreziim     | Fixed PIN, Random PIN, or No PIN                                    |
+| Fikseeritud PIN   | Sidumise PIN (vaikimisi: 123456) |
 
 ### Turva sätted
 
-| Setting                   | Kirjeldus                                                                  |
-| ------------------------- | -------------------------------------------------------------------------- |
-| Avalik võti               | Your node's public key (read-only)                      |
-| Administraatori võti      | Key for remote administration                                              |
-| Salajane võti             | Your node's private key (handle securely)               |
-| ~~Admin Channel Enabled~~ | ⚠️ Removed — now configured automatically when an admin key is set         |
-| Debug Log                 | Output live debug logging over serial/bluetooth                            |
-| Serial Enabled            | Enable serial console access (moved from Device Config) |
-| Hallatud režiim           | Restrict non-admin channel changes                                         |
+| Setting                   | Kirjeldus                                                                            |
+| ------------------------- | ------------------------------------------------------------------------------------ |
+| Avalik võti               | Your node's public key (read-only)                                |
+| Administraatori võti      | Key for remote administration                                                        |
+| Salajane võti             | Your node's private key (handle securely)                         |
+| ~~Admin Channel Enabled~~ | ⚠️ Removed — now configured automatically when an admin key is set                   |
+| Debug Log                 | Edasta reaalajas silumislogi jadapordi/sinihamba ​​kaudu                             |
+| Jadaport lubatud          | Luba jadapordi konsoolile juurdepääs (teisaldatud seadme konfist) |
+| Hallatud režiim           | Restrict non-admin channel changes                                                   |
 
 ![Password field](../../assets/screenshots/settings_password_field.png)
 
@@ -165,7 +165,7 @@ Settings use standard preference controls — dropdowns, toggles, and sliders:
 
 ## Related Topics
 
-- [Settings — Modules & Admin](settings-module-admin) — optional feature modules and device administration
+- [Seaded — moodulid ja admin](settings-module-admin) — valikulised funktsioonimoodulid ja seadme haldamine
 - [Signal Meter](signal-meter) — how modem presets affect signal quality thresholds
 - [LoRa configuration](https://meshtastic.org/docs/configuration/radio/lora) — detailed LoRa settings reference on meshtastic.org
 - [Initial configuration](https://meshtastic.org/docs/getting-started/initial-config) — region setup guide on meshtastic.org

@@ -91,13 +91,13 @@
     <!-- APP -->
     <string name="app_functions_get_channel_info">Küsi kanali infot</string>
     <string name="app_functions_get_device_status">Küsi seadme olekut</string>
-    <string name="app_functions_get_mesh_metrics">Küsi võrgusilma mõõdikuid</string>
-    <string name="app_functions_get_mesh_status">Küsi võrgusilma olekut</string>
+    <string name="app_functions_get_mesh_metrics">Küsi kärgvõrgu mõõdikuid</string>
+    <string name="app_functions_get_mesh_status">Küsi kärgvõrgu olekut</string>
     <string name="app_functions_get_node_details">Küsi sõlme üksikasju</string>
     <string name="app_functions_get_node_list">Küsi sõlmede loend</string>
     <string name="app_functions_get_recent_messages">Küsi hiljutisi sõnumeid</string>
     <string name="app_functions_get_unread_summary">Küsi lugemata kokkuvõte</string>
-    <string name="app_functions_master_summary">Lase süsteemi TI assistentidel (nt Gemini) võrgusilma funktsioone avastada ja kasutada</string>
+    <string name="app_functions_master_summary">Lase süsteemi TI assistentidel (nt Gemini) kärgvõrgu funktsioone avastada ja kasutada</string>
     <string name="app_functions_master_toggle">Luba TI juurdepääs</string>
     <string name="app_functions_read_section">Loe funktsioone</string>
     <string name="app_functions_send_message">Saada sõnum</string>
@@ -128,6 +128,7 @@
     <string name="bluetooth">Sinihammas</string>
     <string name="bluetooth_available_devices">Saadaval olevad sinhamba seadmed</string>
     <string name="bluetooth_config">Sinihamba sätted</string>
+    <string name="bluetooth_disabled">Sinihammas on välja lülitatud. Lähedalasuvate seadmete otsimiseks lülita see sisse.</string>
     <string name="bluetooth_enabled">Sinihammas lubatud</string>
     <string name="bluetooth_feature_config">Sätted</string>
     <string name="bluetooth_feature_config_description">Halda juhtmevabalt seadme sätteid ja kanaleid.</string>
@@ -135,8 +136,9 @@
     <string name="bluetooth_feature_discovery_description">Leia ja tuvasta lähedal asuvad Meshtastic seadmed.</string>
     <string name="bluetooth_permission">Sinihammas</string>
     <string name="bold_heading">Paks pealkiri</string>
+    <string name="bonding_failed_permissions">Sidumine ebaõnnestus. Anna lähedal asuvatele seadmetele luba ja proovi uuesti.</string>
     <string name="bottom_nav_settings">Sätted</string>
-    <string name="broadcast_interval">Saateintervall</string>
+    <string name="broadcast_interval">Levinteintervall</string>
     <string name="busy_noise_floor">Hõivatuse tase</string>
     <string name="button_gpio">Nupu GPIO</string>
     <string name="buzzer_gpio">Summeri GPIO</string>
@@ -144,6 +146,7 @@
     <string name="call_sign">Kutsung</string>
     <string name="call_sign_summary">Sinu amatöörraadio kutsung, kuni 8 tähemärki</string>
     <string name="camera_permission">Luba kaamera</string>
+    <string name="camera_permission_rationale">QR-koodide skaneerimiseks luba kaamera juurdepääs.</string>
     <string name="cancel">Tühista</string>
     <string name="cancel_reply">Tühista vastus</string>
     <string name="canned_message">Salvestatud sõnum</string>
@@ -179,11 +182,11 @@
     <string name="chirpy_downloading_subtitle">See juhtub ainult korra. Chirpy on varsti valmis!</string>
     <string name="chirpy_error_busy">Vau! Kanal on hetkel täiesti ülekoormatud ja liiklus on tihe! 📶 Ootame vaba aega ja proovime edastust uuesti.</string>
     <string name="chirpy_error_model_unavailable">Mu aku laeb või püsivara allalaadimine on pooleli! 🔋 Anna mulle paar hetke sünkroonimiseks ja käivitamiseks!</string>
-    <string name="chirpy_error_token_budget_exceeded">See koormus on minu edastusvõimsuse jaoks liiga suur! 📱 Proovi oma sõnumit lühendada, et saaksime seda sujuvalt suunata.</string>
+    <string name="chirpy_error_token_budget_exceeded">See sõnumi maht on minu edastusvõimsuse jaoks liiga suur! 📱 Proovi oma sõnumit lühendada, et saaksime seda sujuvalt suunata.</string>
     <string name="chirpy_error_unknown">Ups! Esines tugev paketi kadu või signaalihäire! 📡 Saadan päringu uuesti ja vaatan, kas saan läbi.</string>
     <string name="chirpy_error_unsupported_flavor">Kasutan seda rakenduse versiooni piiratud sagedusega! 🔌 Proovi versiooni, millel on täielik AI Core'i integratsioon.</string>
     <string name="chirpy_error_unsupported_platform">Oh ei! Mu antenn ei suuda sellel platvormil ühendust luua. 📡 Palun kontrolli oma riistvara ühilduvust!</string>
-    <string name="chirpy_intro">Tere! 📡 Mina olen Chirpy, sinu seadmesisene Meshtasticu assistent! Saan aidata seadistamise, konfigureerimise, tõrkeotsingu ja võrgusilma võrkude näpunäidetega. Millega saan sind aidata?</string>
+    <string name="chirpy_intro">Tere! 📡 Mina olen Chirpy, sinu seadmesisene Meshtasticu assistent! Saan aidata seadistamise, konfigureerimise, tõrkeotsingu ja kärgvõrgu võrkude näpunäidetega. Millega saan sind aidata?</string>
     <string name="chirpy_ready">Küsi Chirpy</string>
     <string name="chirpy_search_placeholder">Küsi Meshtastic kohta…</string>
     <string name="chirpy_suggested_pages_help">Siin on mõned abimaterjalid, mis võivad abiks olla:</string>
@@ -247,7 +250,7 @@
     <string name="config_network_eth_enabled_summary">Etherneti lubamine keelab sinihamba ühenduse rakendusega. TCP-sõlmede ühendused pole Apple'i seadmetes saadaval.</string>
     <string name="config_network_udp_enabled_summary">Luba kohalikus võrgus pakettide edastamine UDP kaudu.</string>
     <string name="config_network_wifi_enabled_summary">WiFi lubamine keelab rakenduses Bluetooth-ühenduse.</string>
-    <string name="config_position_broadcast_secs_summary">Maksimaalne intervall, mille jooksul sõlm ei edasta oma asukohta.</string>
+    <string name="config_position_broadcast_secs_summary">Maksimaalne intervall, mille jooksul sõlm ei levita oma asukohta.</string>
     <string name="config_position_broadcast_smart_minimum_distance_summary">Nutika asukoha edastamisel arvestatav minimaalne kauguse muutus meetrites.</string>
     <string name="config_position_broadcast_smart_minimum_interval_secs_summary">Asukohavärskendused saadetakse kiiremini, kui minimaalne vahemaa on saavutatud.</string>
     <string name="config_position_flags_summary">Valikulised väljad lisatakse asukohasõnumitele, mida rohkem välju, seda pikem sõnum – see pikendab eetriaega ja suurendab pakettide kadumise ohtu.</string>
@@ -255,9 +258,9 @@
     <string name="config_power_is_power_saving_summary">Unereziimis nii palju kui võimalik, jälgitava ja anduri rolli puhul hõlmab see ka Lora raadiot. Ärge kasutage seda sätet, kui soovite oma seadet kasutada telefonirakendustega või kui kasutate seadet ilma kasutajanuputa.</string>
     <string name="config_security_admin_key">Avalik võti, millel on õigus sellele sõlmele administraatori sõnumeid saata.</string>
     <string name="config_security_debug_log_api_enabled">Väljenda reaalajas silumislogi jadapordi kaudu, vaata ja ekspordi asukoha redigeerimisega seadmelogisid sinihamba ​​kaudu.</string>
-    <string name="config_security_is_managed">Seadet haldab võrgusilma administraator, kasutajal pole juurdepääsu seadme sätetele.</string>
+    <string name="config_security_is_managed">Seadet haldab kärgvõrgu administraator, kasutajal pole juurdepääsu seadme sätetele.</string>
     <string name="config_security_private_key">Kasutatakse jagatud võtme loomiseks kaugseadmega.</string>
-    <string name="config_security_public_key">Genereeritakse privaatvõtmest ja saadetakse võrgusilma sõlmedele, et nad saaksid koostada jagatud salajase võtme.</string>
+    <string name="config_security_public_key">Genereeritakse privaatvõtmest ja saadetakse kärgvõrgu sõlmedele, et nad saaksid koostada jagatud salajase võtme.</string>
     <string name="config_security_serial_enabled">Jadapordi konsool voog API kaudu.</string>
     <string name="configure_bluetooth_permissions">Sinihamba ​​õiguste sätted</string>
     <string name="configure_critical_alerts">Kriitiliste hoiatuste seadistamine</string>
@@ -293,7 +296,7 @@
     <string name="debug_active_filters">Aktiivsed filtrid</string>
     <string name="debug_clear">Puhasta logid</string>
     <string name="debug_clear_logs_confirm">See eemaldab teie seadmest kõik logipaketid ja andmebaasikirjed – see on täielik lähtestamine ja see on püsiv.</string>
-    <string name="debug_decoded_payload">Dekodeeritud andmed:</string>
+    <string name="debug_decoded_payload">Dekodeeritud sõnumi maht:</string>
     <string name="debug_default_search">Otsi logist…</string>
     <string name="debug_export_failed">Ebaõnnestus kirjutada logi faili: %1$s</string>
     <string name="debug_export_success">%1$d logi eksporditud</string>
@@ -326,6 +329,7 @@
     <string name="delivery_confirmed">Kohale toimetatud</string>
     <string name="delivery_confirmed_reboot_warning">Seadete rakendamise ajal võib seadme ühendus katkeda ja taaskäivituda.</string>
     <string name="demo_mode">Demo režiim</string>
+    <string name="demo_mode_replay">Demorežiim (kordus)</string>
     <string name="desc_node_filter_clear">eemalda sõlmefilter</string>
     <string name="description">Kirjeldus</string>
     <string name="desktop_notification_title">Kärgvõrgustik</string>
@@ -367,7 +371,7 @@
     <!-- DISCOVERY -->
     <string name="discovery_analysing_results">Analüüsin tulemusi</string>
     <string name="discovery_cancelling_scan">Skaneerimise tühistamine</string>
-    <string name="discovery_connection_warning">Ühendust pole. Skaneerimise alustamiseks looge ühendus Meshtastic seadmega.</string>
+    <string name="discovery_connection_warning">Ühendust pole. Skaneerimise alustamiseks loo ühendus Meshtastic seadmega.</string>
     <string name="discovery_delete_session">Kustuta seanss</string>
     <string name="discovery_delete_session_confirm">Kas oled kindel, et soovid selle avastusseansi kustutada? Seda toimingut ei saa tagasi võtta.</string>
     <string name="discovery_dwell_minutes">%1$d min</string>
@@ -379,12 +383,12 @@
     <string name="discovery_history">Avastuste ajalugu</string>
     <string name="discovery_keep_screen_awake">Hoia ekraan ärkvel</string>
     <string name="discovery_keep_screen_awake_description">Hoiab ära Androidi tukastamisrežiimi raadiopakettide kaotamise pikkade skaneerimiste ajal. Soovitatav.</string>
-    <string name="discovery_local_mesh">Kohaliku võrgusilma avastamine</string>
+    <string name="discovery_local_mesh">Kohaliku kärgvõrgu avastamine</string>
     <string name="discovery_lora_presets">LoRa eelseadistused</string>
-    <string name="discovery_lora_presets_description">Valige skaneerimiseks üks või mitu eelseadistust</string>
+    <string name="discovery_lora_presets_description">Vali skaneerimiseks üks või mitu eelseadistust</string>
     <string name="discovery_map">Avastuskaart</string>
     <string name="discovery_not_connected">Pole ühendatud</string>
-    <string name="discovery_not_connected_description">Skaneerimise alustamiseks looge ühendus Meshtastic seadmega.</string>
+    <string name="discovery_not_connected_description">Skaneerimise alustamiseks loo ühendus Meshtastic seadmega.</string>
     <string name="discovery_paused">Peatatud: %1$s</string>
     <string name="discovery_preparing">Skaneerimise ettevalmistamine</string>
     <string name="discovery_preset_home_label">%1$s (Kodu)</string>
@@ -672,6 +676,7 @@
     <string name="gps_mode">GPS-režiim (riistvara)</string>
     <string name="gps_receive_gpio">GPS vastuvõtu GPIO</string>
     <string name="gps_transmit_gpio">GPS saatmise GPIO</string>
+    <string name="grant_permission">Luba juurepääs</string>
     <string name="green">Roheline</string>
     <string name="hardware">Raudvara</string>
     <string name="hardware_model">Seadme mudel</string>
@@ -1035,10 +1040,12 @@
     <string name="one_wire_temperature">1-juhtmeline temperatuur</string>
     <string name="only_favorites">Ainult lemmikud</string>
     <!-- OPEN -->
+    <string name="open_bluetooth_settings">Ava sinihamba ​​seaded</string>
     <string name="open_compass">Ava kompass</string>
     <string name="open_settings">Ava seaded</string>
-    <string name="open_source_description">Meshtastic on loodud avatud lähtekoodiga teekidest. Litsentsi vaatamiseks valige teek.</string>
+    <string name="open_source_description">Meshtastic on loodud avatud lähtekoodiga teekidest. Litsentsi vaatamiseks vali teek.</string>
     <string name="open_source_libraries">Avatud lähtekoodiga teegid</string>
+    <string name="open_wifi_settings">Ava WiFi ​​seaded</string>
     <string name="options">Valikud</string>
     <string name="orient_north">Põhja suund</string>
     <!-- OUTPUT -->
@@ -1156,6 +1163,7 @@
     <string name="rebroadcast_mode_local_only_desc">Ignoreerib jälgitavaid sõnumeid välis kärgvõrkudest avatud või dekrüpteerida mittevõimalikke sõnumeid. Saadab sõnumeid ainult kohalikel primaarsetel/sekundaarsetel kanalitel.</string>
     <string name="rebroadcast_mode_none_desc">Lubatud ainult rollidele SENSOR, TRACKER ja TAK_TRACKER, see blokeerib kõik kordus edastused, vastupidiselt CLIENT_MUTE rollile.</string>
     <string name="recent_network_devices">Hiljuti nähtud seadmed</string>
+    <string name="reconnecting">Taas ühendan…</string>
     <string name="red">Punane</string>
     <string name="refresh">Värskenda</string>
     <string name="refresh_metadata">Värskenda metaandmeid</string>
@@ -1448,9 +1456,9 @@
     <string name="traffic_management_exhaust_hop_telemetry">Ainult kohalik telemeetria (vahendajad)</string>
     <string name="traffic_management_nodeinfo_direct_response">Sõlmeinfo otsevastus</string>
     <string name="traffic_management_nodeinfo_direct_response_max_hops">Otsevastuse hüpete maksimaalne arv</string>
-    <string name="traffic_management_position_dedup">Positsioonide dubleerimine</string>
-    <string name="traffic_management_position_min_interval">Minimaalne positsiooniintervall (sekundites)</string>
-    <string name="traffic_management_position_precision">Positsiooni täpsus (bittides)</string>
+    <string name="traffic_management_position_dedup">Asukoha dubleerimine</string>
+    <string name="traffic_management_position_min_interval">Minimaalne asukoha intervall (sekundites)</string>
+    <string name="traffic_management_position_precision">Asukoha täpsus (bittides)</string>
     <string name="traffic_management_rate_limit_enabled">Saatekiiruse piiramine</string>
     <string name="traffic_management_rate_limit_max_packets">Max pakettide arv aknas</string>
     <string name="traffic_management_rate_limit_window">Kiiruse piirangu aken (sekundites)</string>
@@ -1495,6 +1503,7 @@
     <string name="url_must_contain_placeholders">URL peab sisaldama vahesümboleid.</string>
     <string name="url_template">URL mall</string>
     <string name="usb">USB</string>
+    <string name="usb_permission_denied">USB luba keelatud. Ühenda seade uuesti ja proovi uuesti.</string>
     <!-- USE -->
     <string name="use_12h_format">Kasuta 12 tunni formaati</string>
     <string name="use_homoglyph_characters_encoding">Kompaktne kodeering kirillitsa jaoks</string>
@@ -1545,7 +1554,7 @@
     <string name="wifi_provision_sending_credentials">WiFi sätete rakendamine…</string>
     <string name="wifi_provision_signal_strength">%1$d%</string>
     <string name="wifi_provision_ssid_label">Võrgu nimi (SSID)</string>
-    <string name="wifi_provision_ssid_placeholder">Sisestage või valige võrk</string>
+    <string name="wifi_provision_ssid_placeholder">Sisesta või vali võrk</string>
     <string name="wifi_provision_status_applied">WiFi edukalt seadistatud!</string>
     <string name="wifi_provision_status_failed">WiFi sätete rakendamine ebaõnnestus</string>
     <string name="wifi_provision_success_description">Sinu mPWRD-OS seade on WiFi-võrguga ühendatud.</string>
@@ -1565,6 +1574,7 @@
     <string name="wifi_qr_code_error">Vigane WiFi tõendi QR koodi vorming</string>
     <string name="wifi_qr_code_scan">Skaneeri WiFi QR kood</string>
     <string name="wifi_rssi_threshold_defaults_to_80">WiFi RSSI lävi (vaikeväärtus -80)</string>
+    <string name="wifi_unavailable">Pole WiFi ühendust. Võrgu skann ei pruugi lähedalasuvaid seadmeid leida.</string>
     <!-- WIND -->
     <string name="wind">Tuul</string>
     <string name="wind_direction">Tuule suund</string>

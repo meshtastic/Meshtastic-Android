@@ -1042,6 +1042,7 @@
     <string name="rebroadcast_mode_local_only_desc">忽略來自開放的或無法解密的外部 Mesh 觀察到的訊息。僅轉播來自本地節點的主要/次要頻道的訊息。</string>
     <string name="rebroadcast_mode_none_desc">僅允許 SENSOR、TRACKER 和 TAK_TRACKER 角色，與 CLIENT_MUTE 角色不同，此模式將禁止所有重新廣播行為。</string>
     <string name="recent_network_devices">最近的網路裝置</string>
+    <string name="reconnecting">重新連接中…</string>
     <string name="red">紅色</string>
     <string name="refresh">重新整理</string>
     <string name="refresh_metadata">重新整理中繼資料</string>

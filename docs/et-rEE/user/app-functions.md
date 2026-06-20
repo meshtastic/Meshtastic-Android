@@ -21,7 +21,7 @@ App Functions expose Meshtastic capabilities to the Android system and to on-dev
 
 ## Enabling App Functions
 
-App Functions are controlled from **Settings → System AI** (the in-app screen is labeled "System AI"). The screen has:
+Rakenduse funktsioone saab juhtida menüüst **Seaded → Süsteemi TI** (rakenduse sisemine ekraan on tähistatud kui „Süsteemi TI“). The screen has:
 
 - A **master toggle** labeled **"Allow AI access"**, with the subtitle _"Let system AI assistants (e.g. Gemini) discover and use mesh functions"_. When off, no functions are exposed to the system.
 - An **individual toggle for each function**, so you can expose only the capabilities you want.
