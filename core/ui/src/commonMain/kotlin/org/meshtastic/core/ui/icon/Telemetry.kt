@@ -21,7 +21,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.ic_air
-import org.meshtastic.core.resources.ic_alt_route
 import org.meshtastic.core.resources.ic_blur_on
 import org.meshtastic.core.resources.ic_bolt
 import org.meshtastic.core.resources.ic_charging_station
@@ -87,7 +86,5 @@ val MeshtasticIcons.LightMode: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_light_mode)
 val MeshtasticIcons.ChargingStation: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_charging_station)
-val MeshtasticIcons.TrafficManagement: ImageVector
-    @Composable get() = vectorResource(Res.drawable.ic_alt_route)
 val MeshtasticIcons.VolumeUp: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_volume_up)

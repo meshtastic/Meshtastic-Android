@@ -71,7 +71,6 @@ import org.meshtastic.feature.settings.radio.component.StoreForwardConfigScreen
 import org.meshtastic.feature.settings.radio.component.TAKConfigScreen
 import org.meshtastic.feature.settings.radio.component.TakServerScreen
 import org.meshtastic.feature.settings.radio.component.TelemetryConfigScreen
-import org.meshtastic.feature.settings.radio.component.TrafficManagementConfigScreen
 import org.meshtastic.feature.settings.radio.component.UserConfigScreen
 import kotlin.reflect.KClass
 
@@ -212,12 +211,6 @@ fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
 
                 ModuleRoute.STATUS_MESSAGE ->
                     StatusMessageConfigScreen(viewModel, onBack = dropUnlessResumed { backStack.removeLastOrNull() })
-
-                ModuleRoute.TRAFFIC_MANAGEMENT ->
-                    TrafficManagementConfigScreen(
-                        viewModel,
-                        onBack = dropUnlessResumed { backStack.removeLastOrNull() },
-                    )
 
                 ModuleRoute.TAK ->
                     TAKConfigScreen(viewModel, onBack = dropUnlessResumed { backStack.removeLastOrNull() })
