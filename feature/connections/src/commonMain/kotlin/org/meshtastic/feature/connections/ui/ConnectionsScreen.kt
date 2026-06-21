@@ -300,9 +300,9 @@ fun ConnectionsScreen(
 
                         // Adapter-off hints: shown only when the relevant permission is granted but the radio/network
                         // is unavailable, so they don't overlap the permission-recovery flow on the scan toggles.
-                        // The Wi-Fi banner gate includes `isNetworkScanning` because `LifecycleStartEffect` keys the
-                        // auto-scan off `permission status`, not the section-visibility chip — a user with the Network
-                        // filter off but auto-scan on still has a running scan that needs the hint.
+                        // The WiFi-unavailable banner only renders while a network scan is actively running —
+                        // discovery is the only moment the user needs to know WiFi is missing. The auto-scan case is
+                        // covered because `isNetworkScanning` is true during auto-scan regardless of chip state.
                         if (showBleTransport && bluetoothPermission.isGranted && bluetoothDisabled) {
                             RecoveryCard(
                                 message = stringResource(Res.string.bluetooth_disabled),
@@ -313,7 +313,6 @@ fun ConnectionsScreen(
                         }
                         if (
                             shouldShowWifiUnavailableBanner(
-                                showNetworkTransport = showNetworkTransport,
                                 isNetworkScanning = isNetworkScanning,
                                 localNetworkPermissionGranted = localNetworkPermission.isGranted,
                                 wifiUnavailable = wifiUnavailable,

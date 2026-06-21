@@ -46,19 +46,17 @@ internal fun anyNetworkScanTransportAvailable(networks: List<NetworkTransportInf
 /**
  * Returns `true` when the "Wi-Fi unavailable" recovery banner should render in `ConnectionsScreen`.
  *
- * The banner surfaces "no usable transport for NSD/mDNS scan" only while the user is actually trying to use network
- * discovery: when the Network section is visible OR an active scan is in progress.
+ * Banner shows only while a network scan is actively running, local-network permission is granted, and WiFi is
+ * unavailable. The auto-scan case is covered because `isNetworkScanning` is true during auto-scan regardless of the
+ * user's transport-chip preference.
  *
- * The previous gate (`showNetworkTransport &&` alone) missed the auto-scan case — `LifecycleStartEffect` keys
- * `startNetworkScan()` off `networkAutoScan + permission`, not the section-visibility chip, so a user with the Network
- * filter chip toggled off but auto-scan on gets a running scan that can't find anything with the recovery banner
- * suppressed. Widening to `showNetworkTransport || isNetworkScanning` surfaces the hint whenever the user is actually
- * interacting with network discovery, without overlapping the permission-request flow on the scan toggle (still gated
- * by [localNetworkPermissionGranted]).
+ * Gating on the scan state (rather than the `showNetworkTransport` chip preference, which defaults to on) keeps the
+ * banner silent while discovery is idle — the user only needs the recovery hint at the moment a scan cannot find a
+ * usable transport. The [localNetworkPermissionGranted] guard keeps the banner from overlapping the permission-request
+ * flow on the scan toggle.
  */
 fun shouldShowWifiUnavailableBanner(
-    showNetworkTransport: Boolean,
     isNetworkScanning: Boolean,
     localNetworkPermissionGranted: Boolean,
     wifiUnavailable: Boolean,
-): Boolean = (showNetworkTransport || isNetworkScanning) && localNetworkPermissionGranted && wifiUnavailable
+): Boolean = isNetworkScanning && localNetworkPermissionGranted && wifiUnavailable
