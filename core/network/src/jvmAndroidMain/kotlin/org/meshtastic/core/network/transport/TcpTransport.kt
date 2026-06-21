@@ -36,6 +36,16 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
+ * Decides whether to reset the reconnect backoff based on session data and uptime.
+ *
+ * Only sessions that lasted at least [thresholdMs] with actual data exchange are considered stable enough to warrant a
+ * backoff reset. Short sessions — e.g., an ESP32 dumping config then closing the socket — keep the growing backoff so
+ * the radio has time to recover between attempts.
+ */
+internal fun shouldResetBackoff(hadData: Boolean, sessionUptimeMs: Long, thresholdMs: Long): Boolean =
+    hadData && sessionUptimeMs >= thresholdMs
+
+/**
  * Shared JVM TCP transport for Meshtastic radios.
  *
  * Manages the TCP socket lifecycle (connect, read loop, reconnect with backoff) and uses [StreamFrameCodec] for the
@@ -76,6 +86,14 @@ class TcpTransport(
         const val SOCKET_RETRIES = 18 // 18 * 5s = 90s inactivity before disconnect
         const val TIMEOUT_LOG_INTERVAL = 5
         private const val MILLIS_PER_SECOND = 1_000L
+
+        /**
+         * Minimum session duration for backoff to reset. Sessions shorter than this that ended in peer-EOF are treated
+         * as transient firmware-side disconnects (e.g., ESP32 light sleep closing the TCP PhoneAPI session after a
+         * config dump) and do NOT reset the backoff — the growing delay gives the radio time to recover between
+         * attempts instead of hammering it at 1 Hz.
+         */
+        const val SHORT_SESSION_THRESHOLD_MS = 30_000L
     }
 
     private val codec =
@@ -176,12 +194,18 @@ class TcpTransport(
                     false
                 }
 
-            // Reset backoff after a connection that successfully exchanged data,
-            // so transient firmware-side disconnects recover quickly.
-            if (hadData) {
-                Logger.d { "$logTag: [$address] Resetting backoff after successful data exchange" }
+            // Reset backoff only after a session that lasted long enough to indicate a real connection,
+            // not a short config-dump-then-EOF from a sleeping radio. Short sessions keep the backoff
+            // growing so the radio has time to recover between reconnect attempts.
+            val sessionUptime = if (connectionStartTime > 0) nowMillis - connectionStartTime else 0
+            if (shouldResetBackoff(hadData, sessionUptime, SHORT_SESSION_THRESHOLD_MS)) {
+                Logger.d { "$logTag: [$address] Resetting backoff after successful data exchange (${sessionUptime}ms)" }
                 retryCount = 1
                 backoff = MIN_BACKOFF_MILLIS
+            } else if (hadData) {
+                Logger.d {
+                    "$logTag: [$address] Short session (${sessionUptime}ms) — keeping backoff at ${backoff / MILLIS_PER_SECOND}s"
+                }
             }
 
             val delaySec = backoff / MILLIS_PER_SECOND
