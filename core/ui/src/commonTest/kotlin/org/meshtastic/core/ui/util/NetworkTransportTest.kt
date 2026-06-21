@@ -177,9 +177,10 @@ class NetworkTransportTest {
 
 /**
  * Coverage for the [shouldShowWifiUnavailableBanner] gate consumed by `ConnectionsScreen`. The banner surfaces "no
- * usable transport for NSD/mDNS scan" only while the user is actually trying to use network discovery. Each case
- * mirrors one of the four reported combinations of (section-visible, scan-active) plus the permission and
- * transport-availability guards.
+ * usable transport for NSD/mDNS scan" only while a network scan is actively running, and is suppressed once the scan
+ * has produced discovered TCP nodes — at that point the user has found what they were looking for and the recovery hint
+ * is no longer useful. Each case mirrors one of the reported combinations of (scan-active, results-empty) plus the
+ * permission and transport-availability guards.
  */
 class WifiUnavailableBannerTest {
     private fun transports(wifi: Boolean = false) =
@@ -187,41 +188,46 @@ class WifiUnavailableBannerTest {
         listOf(NetworkTransportInfo(hasWifi = wifi, hasEthernet = false, hasVpn = false))
 
     @Test
-    fun section_visible_permission_granted_cellular_only_then_banner_shows() {
-        // Baseline: Network chip visible, permission granted, cellular-only — banner shows.
-        assertTrue(
+    fun scan_inactive_permission_granted_cellular_only_then_banner_hidden() {
+        // Pins the user-reported bug: no scan is running, permission granted, cellular-only
+        // transport. The banner must NOT render — the user is not actively trying to discover, so
+        // the recovery hint is noise.
+        assertFalse(
             shouldShowWifiUnavailableBanner(
-                showNetworkTransport = true,
                 isNetworkScanning = false,
                 localNetworkPermissionGranted = true,
                 wifiUnavailable = !anyNetworkScanTransportAvailable(transports()),
+                discoveredTcpDevicesEmpty = true,
             ),
         )
     }
 
     @Test
-    fun scan_active_section_hidden_cellular_only_then_banner_shows() {
-        // The user-reported regression: Network chip toggled off but auto-scan running in the background,
-        // cellular-only transport. The pre-fix gate (`showNetworkTransport &&` alone) suppressed this case.
+    fun scan_active_permission_granted_cellular_only_then_banner_shows() {
+        // The auto-scan case: scan running in the background with cellular-only transport. Chip
+        // visibility no longer gates this surface — `isNetworkScanning` is the only activity
+        // signal — so the banner surfaces the missing-transport hint to the user.
         assertTrue(
             shouldShowWifiUnavailableBanner(
-                showNetworkTransport = false,
                 isNetworkScanning = true,
                 localNetworkPermissionGranted = true,
                 wifiUnavailable = !anyNetworkScanTransportAvailable(transports()),
+                discoveredTcpDevicesEmpty = true,
             ),
         )
     }
 
     @Test
-    fun section_hidden_and_scan_inactive_then_banner_hidden() {
-        // User is not interacting with network discovery at all — banner suppressed even on cellular-only.
-        assertFalse(
+    fun scan_active_permission_granted_wifi_unavailable_then_banner_shows() {
+        // Clean positive case: scan actively running, permission granted, WiFi unavailable, no
+        // discovered nodes yet — banner fires. This is the only combination the banner is meant
+        // to surface.
+        assertTrue(
             shouldShowWifiUnavailableBanner(
-                showNetworkTransport = false,
-                isNetworkScanning = false,
+                isNetworkScanning = true,
                 localNetworkPermissionGranted = true,
-                wifiUnavailable = !anyNetworkScanTransportAvailable(transports()),
+                wifiUnavailable = true,
+                discoveredTcpDevicesEmpty = true,
             ),
         )
     }
@@ -231,10 +237,10 @@ class WifiUnavailableBannerTest {
         // Permission-recovery flow on the scan toggle owns this surface; banner must not overlap.
         assertFalse(
             shouldShowWifiUnavailableBanner(
-                showNetworkTransport = true,
                 isNetworkScanning = true,
                 localNetworkPermissionGranted = false,
                 wifiUnavailable = !anyNetworkScanTransportAvailable(transports()),
+                discoveredTcpDevicesEmpty = true,
             ),
         )
     }
@@ -244,10 +250,10 @@ class WifiUnavailableBannerTest {
         // VPN off + Wi-Fi on + scanning → no banner (preserves the existing "transport available" outcome).
         assertFalse(
             shouldShowWifiUnavailableBanner(
-                showNetworkTransport = true,
                 isNetworkScanning = true,
                 localNetworkPermissionGranted = true,
                 wifiUnavailable = !anyNetworkScanTransportAvailable(transports(wifi = true)),
+                discoveredTcpDevicesEmpty = true,
             ),
         )
     }
@@ -258,10 +264,25 @@ class WifiUnavailableBannerTest {
         val vpnOnly = listOf(NetworkTransportInfo(hasWifi = false, hasEthernet = false, hasVpn = true))
         assertFalse(
             shouldShowWifiUnavailableBanner(
-                showNetworkTransport = true,
                 isNetworkScanning = true,
                 localNetworkPermissionGranted = true,
                 wifiUnavailable = !anyNetworkScanTransportAvailable(vpnOnly),
+                discoveredTcpDevicesEmpty = true,
+            ),
+        )
+    }
+
+    @Test
+    fun scan_active_permission_granted_wifi_unavailable_results_found_then_banner_hidden() {
+        // Once the live scan has produced discovered TCP nodes, the recovery hint is no longer
+        // useful — the user has found what they were looking for. Banner stays hidden even though
+        // scan is active, permission is granted, and WiFi is reported unavailable.
+        assertFalse(
+            shouldShowWifiUnavailableBanner(
+                isNetworkScanning = true,
+                localNetworkPermissionGranted = true,
+                wifiUnavailable = true,
+                discoveredTcpDevicesEmpty = false,
             ),
         )
     }
