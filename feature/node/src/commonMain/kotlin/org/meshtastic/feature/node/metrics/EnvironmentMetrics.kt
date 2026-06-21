@@ -117,7 +117,7 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Un
             LazyColumn(modifier = modifier.fillMaxSize(), state = lazyListState) {
                 itemsIndexed(
                     filteredTelemetries,
-                    key = { _, telemetry -> telemetry.time },
+                    key = { index, telemetry -> "${telemetry.time}_$index" },
                     contentType = { _, _ -> "environment_metrics" },
                 ) { _, telemetry ->
                     EnvironmentMetricsCard(

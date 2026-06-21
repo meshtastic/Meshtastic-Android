@@ -161,7 +161,7 @@ fun PowerMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
             LazyColumn(modifier = modifier.fillMaxSize(), state = lazyListState) {
                 itemsIndexed(
                     data,
-                    key = { _, telemetry -> telemetry.time },
+                    key = { index, telemetry -> "${telemetry.time}_$index" },
                     contentType = { _, _ -> "power_metrics" },
                 ) { _, telemetry ->
                     PowerMetricsCard(

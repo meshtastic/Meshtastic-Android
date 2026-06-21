@@ -120,9 +120,11 @@ private sealed interface SignalLogEntry {
     /** Distinguishes the two card layouts so Compose can reuse compositions per type. */
     val contentType: Any
 
-    data class LocalStatsEntry(val telemetry: Telemetry) : SignalLogEntry {
+    data class LocalStatsEntry(val telemetry: Telemetry, val index: Int) : SignalLogEntry {
         override val timeSeconds: Int = telemetry.time
-        override val key: Any = "local_stats_${telemetry.time}"
+
+        // Local stats telemetry is an id-less proto; the source-list index disambiguates same-second samples.
+        override val key: Any = "local_stats_${telemetry.time}_$index"
         override val contentType: Any = "local_stats"
     }
 
@@ -145,7 +147,7 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit, m
     val data =
         remember(signalData, localStatsData) {
             (
-                localStatsData.map { SignalLogEntry.LocalStatsEntry(it) } +
+                localStatsData.mapIndexed { index, telemetry -> SignalLogEntry.LocalStatsEntry(telemetry, index) } +
                     signalData.map { SignalLogEntry.PacketEntry(it) }
                 )
                 .sortedByDescending { it.timeSeconds }

@@ -168,7 +168,7 @@ fun AirQualityMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Uni
             LazyColumn(modifier = modifier.fillMaxSize(), state = lazyListState) {
                 itemsIndexed(
                     data,
-                    key = { _, telemetry -> telemetry.time },
+                    key = { index, telemetry -> "${telemetry.time}_$index" },
                     contentType = { _, _ -> "air_quality_metrics" },
                 ) { _, telemetry ->
                     AirQualityMetricsCard(
