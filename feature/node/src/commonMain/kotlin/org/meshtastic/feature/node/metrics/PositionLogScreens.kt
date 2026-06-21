@@ -72,7 +72,7 @@ fun PositionLogScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
             LazyColumn(modifier = modifier.fillMaxSize(), state = lazyListState) {
                 itemsIndexed(
                     positions,
-                    key = { _, position -> position.time },
+                    key = { index, position -> "${position.time}_$index" },
                     contentType = { _, _ -> "position_log" },
                 ) { _, position ->
                     PositionCard(

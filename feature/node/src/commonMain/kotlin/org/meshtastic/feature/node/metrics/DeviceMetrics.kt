@@ -193,7 +193,7 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
             LazyColumn(modifier = modifier.fillMaxSize(), state = lazyListState) {
                 itemsIndexed(
                     data,
-                    key = { _, telemetry -> telemetry.time },
+                    key = { index, telemetry -> "${telemetry.time}_$index" },
                     contentType = { _, _ -> "device_metrics" },
                 ) { _, telemetry ->
                     DeviceMetricsCard(
@@ -566,7 +566,7 @@ private fun DeviceMetricsScreenPreview() {
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     itemsIndexed(
                         telemetries,
-                        key = { _, telemetry -> telemetry.time },
+                        key = { index, telemetry -> "${telemetry.time}_$index" },
                         contentType = { _, _ -> "device_metrics" },
                     ) { _, telemetry ->
                         DeviceMetricsCard(telemetry = telemetry, isSelected = false, onClick = {})
