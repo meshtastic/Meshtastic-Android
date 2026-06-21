@@ -19,14 +19,18 @@ package org.meshtastic.feature.connections
 import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
 import dev.mokkery.every
+import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import org.meshtastic.core.ble.BleDevice
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.datastore.RecentAddressesDataSource
 import org.meshtastic.core.di.CoroutineDispatchers
@@ -104,6 +108,11 @@ class ScannerViewModelHarness(val testDispatcher: TestDispatcher = UnconfinedTes
         every { recentAddressesDataSource.recentAddresses } returns MutableStateFlow(emptyList())
         every { networkRepository.resolvedList } returns resolvedServicesFlow
         every { networkRepository.networkAvailable } returns flowOf(true)
+        // Default: a non-completing scan flow so the BLE scan stays "active" until explicitly cancelled.
+        // Under UnconfinedTestDispatcher an emptyFlow().collect{} returns immediately and would flip
+        // _isBleScanning back to false before startBleScan() returns. Tests that need specific emissions
+        // (e.g. device-list updates) override this stub.
+        every { bleScanner.scan(any(), any()) } returns flow<BleDevice> { awaitCancellation() }
     }
 
     /**
