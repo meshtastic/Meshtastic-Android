@@ -75,6 +75,8 @@ open class ScannerViewModel(
 
     // ── Mock / demo transport ─────────────────────────────────────────────────────────────────
     private val _showMockTransport = MutableStateFlow(false)
+
+    /** Whether the mock/demo transport is currently selected. */
     val showMockTransport: StateFlow<Boolean> = _showMockTransport.asStateFlow()
 
     // ── Connection-progress chatter (surfaced as the bottom status pill) ──────────────────────
@@ -91,6 +93,8 @@ open class ScannerViewModel(
 
     // ── BLE scanning ──────────────────────────────────────────────────────────────────────────
     private val _isBleScanning = MutableStateFlow(false)
+
+    /** Whether a BLE scan is currently active. */
     val isBleScanning: StateFlow<Boolean> = _isBleScanning.asStateFlow()
 
     /** User preference that controls whether BLE scanning auto-starts when the Connections screen opens. */
@@ -100,8 +104,16 @@ open class ScannerViewModel(
     private val discoveryOrder = MutableStateFlow<List<String>>(emptyList())
     private var scanJob: Job? = null
 
+    // Generation counter that owns the `_isBleScanning` flag's cleanup. The scan coroutine's `finally` block may run
+    // asynchronously on the IO dispatcher after a stop+restart has already kicked off a new scan; without this guard
+    // the old job's finally would reset the flag on the new scan's state. Bumped on each start and each stop so that
+    // only the current generation's finally may clear the flag.
+    private val scanGeneration = MutableStateFlow(0)
+
     // ── Network scanning (NSD gating) ─────────────────────────────────────────────────────────
     private val _isNetworkScanning = MutableStateFlow(false)
+
+    /** Whether an NSD network scan is currently active. */
     val isNetworkScanning: StateFlow<Boolean> = _isNetworkScanning.asStateFlow()
 
     /** User preference that controls whether NSD network scanning auto-starts when the Connections screen opens. */
@@ -118,10 +130,13 @@ open class ScannerViewModel(
     /** Whether the USB section is visible in the Connections device list. Defaults to `true`. */
     val showUsbTransport: StateFlow<Boolean> = uiPrefs.showUsbTransport
 
+    /** Toggles whether the BLE section is visible in the Connections device list. */
     fun setShowBleTransport(enabled: Boolean) = uiPrefs.setShowBleTransport(enabled)
 
+    /** Toggles whether the Network (TCP/NSD) section is visible in the Connections device list. */
     fun setShowNetworkTransport(enabled: Boolean) = uiPrefs.setShowNetworkTransport(enabled)
 
+    /** Toggles whether the USB section is visible in the Connections device list. */
     fun setShowUsbTransport(enabled: Boolean) = uiPrefs.setShowUsbTransport(enabled)
 
     /**
@@ -209,14 +224,17 @@ open class ScannerViewModel(
     val usbDevicesForUi: StateFlow<List<DeviceListEntry>> =
         discoveredDevicesFlow.map { it.usbDevices }.distinctUntilChanged().stateInWhileSubscribed(emptyList())
 
+    /** Discovered (NSD) TCP devices for the Connections device list, gated by the network-scan flag. */
     val discoveredTcpDevicesForUi: StateFlow<List<DeviceListEntry>> =
         discoveredDevicesFlow.map { it.discoveredTcpDevices }.distinctUntilChanged().stateInWhileSubscribed(emptyList())
 
+    /** Recently-used TCP addresses for the Connections device list. */
     val recentTcpDevicesForUi: StateFlow<List<DeviceListEntry>> =
         discoveredDevicesFlow.map { it.recentTcpDevices }.distinctUntilChanged().stateInWhileSubscribed(emptyList())
 
     // ── Current selection ────────────────────────────────────────────────────────────────────
 
+    /** The currently-selected device address, or `null` when nothing is selected. */
     val selectedAddressFlow: StateFlow<String?> = radioInterfaceService.currentDeviceAddressFlow
 
     /** The persisted device name from the last selection, for use as a UI fallback. */
@@ -230,10 +248,21 @@ open class ScannerViewModel(
 
     // ── Scan commands ────────────────────────────────────────────────────────────────────────
 
+    /**
+     * Starts BLE scanning. Enforces mutual exclusion (cancels any active network scan first). No-op if already scanning
+     * or if [bleScanner] is null.
+     *
+     * The `finally` that clears [_isBleScanning] is guarded by a generation counter so a stale cancellation from a
+     * prior scan cannot reset the flag on this new scan's state.
+     */
     fun startBleScan() {
         if (_isBleScanning.value || bleScanner == null) return
+        // Cancel the other scan first so only one flag is ever true. Both stop methods are idempotent.
+        stopNetworkScan()
 
         _isBleScanning.value = true
+        val generation = scanGeneration.value + 1
+        scanGeneration.value = generation
 
         scanJob =
             safeLaunch(tag = "startBleScan") {
@@ -257,60 +286,127 @@ open class ScannerViewModel(
                             }
                         }
                 } finally {
-                    _isBleScanning.value = false
+                    if (scanGeneration.value == generation) _isBleScanning.value = false
                 }
             }
     }
 
+    /**
+     * Cancels the active BLE scan and resets the scanning flag. Idempotent.
+     *
+     * Bumps [scanGeneration] so any in-flight `finally` from the cancelled job cannot reset `_isBleScanning` after a
+     * subsequent [startBleScan] has flipped it back to `true`.
+     */
     fun stopBleScan() {
         scanJob?.cancel()
         scanJob = null
+        scanGeneration.value = scanGeneration.value + 1
         _isBleScanning.value = false
     }
 
-    /** Convenience command: start scanning if idle, stop otherwise. Persists the resulting state to prefs. */
+    /**
+     * Toggles BLE scanning. Persists the auto-scan preference only when the scan actually activates, and clears the
+     * opposite [networkAutoScan] preference to keep persisted state consistent with the runtime mutual-exclusion
+     * invariant.
+     */
     fun toggleBleScan() {
-        if (_isBleScanning.value) stopBleScan() else startBleScan()
-        uiPrefs.setBleAutoScan(_isBleScanning.value)
+        if (_isBleScanning.value) {
+            stopBleScan()
+            uiPrefs.setBleAutoScan(false)
+        } else {
+            startBleScan()
+            // Only persist enable-intent (and clear the opposite pref) if start actually worked — e.g. not
+            // blocked by a null bleScanner.
+            if (_isBleScanning.value) {
+                uiPrefs.setBleAutoScan(true)
+                uiPrefs.setNetworkAutoScan(false)
+            }
+        }
     }
 
+    /**
+     * Starts NSD network scanning. Enforces the same mutual-exclusion invariant as [startBleScan]; starting Network
+     * cancels any active BLE scan first.
+     */
     fun startNetworkScan() {
+        if (_isNetworkScanning.value) return
+        // Cancel the other scan first so only one flag is ever true. Both stop methods are idempotent.
+        stopBleScan()
         _isNetworkScanning.value = true
     }
 
+    /** Cancels the active network scan and resets the scanning flag. Idempotent. */
     fun stopNetworkScan() {
         _isNetworkScanning.value = false
     }
 
-    /** Convenience command: start scanning if idle, stop otherwise. Persists the resulting state to prefs. */
-    fun toggleNetworkScan() {
-        if (_isNetworkScanning.value) stopNetworkScan() else startNetworkScan()
-        uiPrefs.setNetworkAutoScan(_isNetworkScanning.value)
+    /** Stops both BLE and network scans. Idempotent — safe to call when neither scan is active. */
+    private fun stopAllScans() {
+        stopBleScan()
+        stopNetworkScan()
     }
 
     /**
-     * Persist the user's intent to auto-scan the network on next screen entry without flipping the active scan flag.
+     * Toggles network scanning. Persists the auto-scan preference only when the scan actually activates, and clears the
+     * opposite [bleAutoScan] preference to keep persisted state consistent with the runtime mutual-exclusion invariant.
+     */
+    fun toggleNetworkScan() {
+        if (_isNetworkScanning.value) {
+            stopNetworkScan()
+            uiPrefs.setNetworkAutoScan(false)
+        } else {
+            startNetworkScan()
+            // Only persist enable-intent (and clear the opposite pref) if start actually worked.
+            if (_isNetworkScanning.value) {
+                uiPrefs.setNetworkAutoScan(true)
+                uiPrefs.setBleAutoScan(false)
+            }
+        }
+    }
+
+    /**
+     * Persists the user's intent to auto-scan the network on next screen entry without flipping the active scan flag.
      * Used by the Connections screen when it must defer the actual scan start until after the system permission grant
-     * dialog resolves — the persisted intent ensures auto-start fires once permission is granted.
+     * dialog resolves. When [enabled] is `true`, also clears [bleAutoScan] so persisted state mirrors the runtime
+     * mutual-exclusion invariant (at most one of [bleAutoScan] / [networkAutoScan] may be true).
      */
     fun persistNetworkAutoScanIntent(enabled: Boolean) {
         uiPrefs.setNetworkAutoScan(enabled)
+        if (enabled) uiPrefs.setBleAutoScan(false)
     }
 
     // ── Device selection / disconnect ───────────────────────────────────────────────────────
 
+    /** Asynchronously tells the radio controller to connect to [address]. */
     fun changeDeviceAddress(address: String) {
         Logger.i { "Attempting to change device address to ${address.anonymize()}" }
         safeLaunch(tag = "changeDeviceAddress") { radioController.setDeviceAddress(address) }
     }
 
+    /**
+     * Persists [address] in the recent-TCP list under [name]. No-op when [address] does not start with
+     * [TCP_DEVICE_PREFIX].
+     */
     fun addRecentAddress(address: String, name: String) {
         if (!address.startsWith(TCP_DEVICE_PREFIX)) return
         safeLaunch(tag = "addRecentAddress") { recentAddressesDataSource.add(RecentAddress(address, name)) }
     }
 
+    /** Removes [address] from the recent-TCP list. */
     fun removeRecentAddress(address: String) {
         safeLaunch(tag = "removeRecentAddress") { recentAddressesDataSource.remove(address) }
+    }
+
+    /**
+     * Connects to a manually-entered TCP address. Wraps the manual-entry flow with the same scan-cancel invariant as
+     * [onSelected]: stops discovery before connection setup so the manual connect does not race an in-progress
+     * BLE/network scan for radio resources.
+     */
+    fun connectToManualAddress(fullAddress: String) {
+        val displayAddress = fullAddress.removePrefix(TCP_DEVICE_PREFIX)
+        stopAllScans()
+        addRecentAddress(fullAddress, displayAddress)
+        changeDeviceAddress(fullAddress)
     }
 
     /**
@@ -320,6 +416,10 @@ open class ScannerViewModel(
      * @return `true` if the connection has been initiated; `false` if bonding/permission is pending.
      */
     fun onSelected(entry: DeviceListEntry): Boolean {
+        // Stop discovery the moment the user picks a device, before any connection setup runs. The connect
+        // attempt (BLE GATT or TCP) contends with an active BLE scan for the same radio resources during the
+        // handshake; cancelling here keeps the lifecycle ordered: scan → stop → connect.
+        stopAllScans()
         radioPrefs.setDevName(entry.name)
         addRecentAddress(entry.fullAddress, entry.name)
         return when (entry) {
@@ -371,8 +471,10 @@ open class ScannerViewModel(
         changeDeviceAddress(entry.fullAddress)
     }
 
+    /** Platform hook for requesting USB permission before connecting; default is a no-op. */
     protected open fun requestPermission(entry: DeviceListEntry.Usb) = Unit
 
+    /** Clears the persisted device name and tells the radio controller to disconnect. */
     fun disconnect() {
         radioPrefs.setDevName(null)
         changeDeviceAddress(NO_DEVICE_SELECTED)

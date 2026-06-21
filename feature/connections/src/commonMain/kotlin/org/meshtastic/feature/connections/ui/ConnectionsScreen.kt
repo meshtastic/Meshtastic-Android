@@ -84,7 +84,6 @@ import org.meshtastic.feature.connections.MOCK_DEVICE_PREFIX
 import org.meshtastic.feature.connections.NO_DEVICE_SELECTED
 import org.meshtastic.feature.connections.REPLAY_DEVICE_PREFIX
 import org.meshtastic.feature.connections.ScannerViewModel
-import org.meshtastic.feature.connections.TCP_DEVICE_PREFIX
 import org.meshtastic.feature.connections.model.DeviceListEntry
 import org.meshtastic.feature.connections.ui.components.ConnectingDeviceInfo
 import org.meshtastic.feature.connections.ui.components.CurrentlyConnectedInfo
@@ -131,8 +130,6 @@ fun ConnectionsScreen(
     val isBleScanning by scanModel.isBleScanning.collectAsStateWithLifecycle()
     val isNetworkScanning by scanModel.isNetworkScanning.collectAsStateWithLifecycle()
 
-    val bleAutoScan by scanModel.bleAutoScan.collectAsStateWithLifecycle()
-    val networkAutoScan by scanModel.networkAutoScan.collectAsStateWithLifecycle()
     val showBleTransport by scanModel.showBleTransport.collectAsStateWithLifecycle()
     val showNetworkTransport by scanModel.showNetworkTransport.collectAsStateWithLifecycle()
     val showUsbTransport by scanModel.showUsbTransport.collectAsStateWithLifecycle()
@@ -152,13 +149,21 @@ fun ConnectionsScreen(
     // Auto-start BLE scan when the screen is visible (lifecycle ≥ STARTED) and the user has previously opted in.
     // LifecycleStartEffect stops scanning on ON_STOP (app backgrounded) and restarts on ON_START — preventing
     // continuous background BLE radio usage that drains the battery.
-    LifecycleStartEffect(bleAutoScan) {
-        if (bleAutoScan && !scanModel.isBleScanning.value) scanModel.startBleScan()
+    // Keyed on Unit so the effect fires only on lifecycle events, not on preference writes. The toggle handler
+    // starts/stops scans directly; this effect handles screen-entry auto-start only. Keying on the pref caused
+    // Compose to dispose the running scan (calling stopBleScan) and immediately re-run (calling startBleScan)
+    // every time the pref was written, which cycled scans until Android's BluetoothLeScanner rate-limited.
+    LifecycleStartEffect(Unit) {
+        if (scanModel.bleAutoScan.value && !scanModel.isBleScanning.value) scanModel.startBleScan()
         onStopOrDispose { scanModel.stopBleScan() }
     }
 
-    LifecycleStartEffect(networkAutoScan, localNetworkPermission.isGranted) {
-        if (networkAutoScan && localNetworkPermission.isGranted) scanModel.startNetworkScan()
+    // Keyed on permission status (not on the pref) so the effect re-fires when the user grants local-network
+    // permission, but not when the pref is toggled. This prevents the dispose+restart cycle that caused
+    // Android's BluetoothLeScanner rate-limit rejection, while still supporting the request-permission →
+    // grant → auto-start flow. The body reads the pref directly via the StateFlow's current value.
+    LifecycleStartEffect(localNetworkPermission.isGranted) {
+        if (scanModel.networkAutoScan.value && localNetworkPermission.isGranted) scanModel.startNetworkScan()
         onStopOrDispose { scanModel.stopNetworkScan() }
     }
 
@@ -296,8 +301,8 @@ fun ConnectionsScreen(
                         // Adapter-off hints: shown only when the relevant permission is granted but the radio/network
                         // is unavailable, so they don't overlap the permission-recovery flow on the scan toggles.
                         // The Wi-Fi banner gate includes `isNetworkScanning` because `LifecycleStartEffect` keys the
-                        // auto-scan off `networkAutoScan + permission`, not the section-visibility chip — a user with
-                        // the Network filter off but auto-scan on still has a running scan that needs the hint.
+                        // auto-scan off `permission status`, not the section-visibility chip — a user with the Network
+                        // filter off but auto-scan on still has a running scan that needs the hint.
                         if (showBleTransport && bluetoothPermission.isGranted && bluetoothDisabled) {
                             RecoveryCard(
                                 message = stringResource(Res.string.bluetooth_disabled),
@@ -374,9 +379,7 @@ fun ConnectionsScreen(
                                     }
                                 },
                                 onAddManualAddress = { _, fullAddress ->
-                                    val displayAddress = fullAddress.removePrefix(TCP_DEVICE_PREFIX)
-                                    scanModel.addRecentAddress(fullAddress, displayAddress)
-                                    scanModel.changeDeviceAddress(fullAddress)
+                                    scanModel.connectToManualAddress(fullAddress)
                                 },
                                 onRemoveRecentAddress = { scanModel.removeRecentAddress(it.fullAddress) },
                             )

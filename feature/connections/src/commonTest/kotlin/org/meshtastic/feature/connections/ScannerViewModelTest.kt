@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.network.repository.DiscoveredService
 import org.meshtastic.core.testing.FakeBleDevice
 import org.meshtastic.feature.connections.model.DeviceListEntry
@@ -91,8 +92,6 @@ class ScannerViewModelTest {
 
     @Test
     fun `startBleScan updates isBleScanning`() = runTest {
-        every { bleScanner.scan(any(), any()) } returns kotlinx.coroutines.flow.emptyFlow()
-
         viewModel.isBleScanning.test {
             assertEquals(false, awaitItem())
             viewModel.startBleScan()
@@ -269,5 +268,172 @@ class ScannerViewModelTest {
 
             cancelAndIgnoreRemainingEvents()
         }
+    }
+
+    // ── Mutual exclusion: only one of BLE / Network scanning may be active at a time ──────────
+
+    @Test
+    fun `startBleScan cancels active network scan`() = runTest {
+        viewModel.startNetworkScan()
+        assertEquals(true, viewModel.isNetworkScanning.value)
+
+        viewModel.startBleScan()
+
+        assertEquals(false, viewModel.isNetworkScanning.value)
+        assertEquals(true, viewModel.isBleScanning.value)
+    }
+
+    @Test
+    fun `startNetworkScan cancels active ble scan`() = runTest {
+        viewModel.startBleScan()
+        assertEquals(true, viewModel.isBleScanning.value)
+
+        viewModel.startNetworkScan()
+
+        assertEquals(false, viewModel.isBleScanning.value)
+        assertEquals(true, viewModel.isNetworkScanning.value)
+    }
+
+    // ── Scanning allowed in any connection state ────────────────────────────────────────────
+
+    @Test
+    fun `startBleScan succeeds while Connected`() = runTest {
+        serviceRepository.setConnectionState(ConnectionState.Connected)
+        testScheduler.advanceUntilIdle()
+
+        viewModel.startBleScan()
+
+        assertEquals(true, viewModel.isBleScanning.value)
+    }
+
+    @Test
+    fun `startNetworkScan succeeds while Connected`() = runTest {
+        serviceRepository.setConnectionState(ConnectionState.Connected)
+        testScheduler.advanceUntilIdle()
+
+        viewModel.startNetworkScan()
+
+        assertEquals(true, viewModel.isNetworkScanning.value)
+    }
+
+    @Test
+    fun `startBleScan succeeds while Connecting`() = runTest {
+        serviceRepository.setConnectionState(ConnectionState.Connecting)
+        testScheduler.advanceUntilIdle()
+
+        viewModel.startBleScan()
+
+        assertEquals(true, viewModel.isBleScanning.value)
+    }
+
+    @Test
+    fun `startBleScan succeeds while DeviceSleep`() = runTest {
+        serviceRepository.setConnectionState(ConnectionState.DeviceSleep)
+        testScheduler.advanceUntilIdle()
+
+        viewModel.startBleScan()
+
+        assertEquals(true, viewModel.isBleScanning.value)
+    }
+
+    @Test
+    fun `connectionState transition does not cancel active scan`() = runTest {
+        viewModel.startBleScan()
+        assertEquals(true, viewModel.isBleScanning.value)
+
+        serviceRepository.setConnectionState(ConnectionState.Connected)
+        testScheduler.advanceUntilIdle()
+
+        assertEquals(true, viewModel.isBleScanning.value)
+    }
+
+    // ── Toggle persistence: enable clears the opposite persisted auto-scan pref ──────────────
+
+    @Test
+    fun `toggleBleScan enabling scan clears networkAutoScan`() = runTest {
+        harness.uiPrefs.setNetworkAutoScan(true)
+        assertEquals(true, viewModel.networkAutoScan.value)
+
+        viewModel.toggleBleScan()
+
+        // Successful enable persisted bleAutoScan=true AND cleared the opposite pref to mirror the runtime
+        // mutual-exclusion invariant in persisted state.
+        assertEquals(true, viewModel.isBleScanning.value)
+        assertEquals(true, viewModel.bleAutoScan.value)
+        assertEquals(false, viewModel.networkAutoScan.value)
+    }
+
+    @Test
+    fun `toggleNetworkScan enabling scan clears bleAutoScan`() = runTest {
+        harness.uiPrefs.setBleAutoScan(true)
+        assertEquals(true, viewModel.bleAutoScan.value)
+
+        viewModel.toggleNetworkScan()
+
+        assertEquals(true, viewModel.isNetworkScanning.value)
+        assertEquals(true, viewModel.networkAutoScan.value)
+        assertEquals(false, viewModel.bleAutoScan.value)
+    }
+
+    // ── onSelected stops active scan before connection setup ────────────────────────────────
+
+    @Test
+    fun `onSelected bonded BLE stops active scan before changing device`() = runTest {
+        val entry =
+            DeviceListEntry.Ble(device = FakeBleDevice(address = "01:02:03:04:05:06", name = "Node"), bonded = true)
+
+        viewModel.startBleScan()
+        assertEquals(true, viewModel.isBleScanning.value)
+
+        viewModel.onSelected(entry)
+        testScheduler.advanceUntilIdle()
+
+        // stopAllScans() runs before changeDeviceAddress() in onSelected — scan flag flips to false and
+        // the radio controller sees the new address.
+        assertEquals(false, viewModel.isBleScanning.value)
+        assertEquals(entry.fullAddress, radioController.lastSetDeviceAddress)
+    }
+
+    @Test
+    fun `onSelected TCP stops active network scan before changing device`() = runTest {
+        val entry = DeviceListEntry.Tcp(name = "TCP Node", fullAddress = "t192.168.1.50")
+
+        viewModel.startNetworkScan()
+        assertEquals(true, viewModel.isNetworkScanning.value)
+
+        viewModel.onSelected(entry)
+        testScheduler.advanceUntilIdle()
+
+        assertEquals(false, viewModel.isNetworkScanning.value)
+        assertEquals(entry.fullAddress, radioController.lastSetDeviceAddress)
+    }
+
+    // ── persistNetworkAutoScanIntent invariant ───────────────────────────────────────────────
+
+    @Test
+    fun `persistNetworkAutoScanIntent true clears bleAutoScan`() = runTest {
+        harness.uiPrefs.setBleAutoScan(true)
+        assertEquals(true, viewModel.bleAutoScan.value)
+
+        viewModel.persistNetworkAutoScanIntent(true)
+
+        // Persisting a network-auto-scan intent must clear the opposite BLE pref so persisted state
+        // mirrors the runtime mutual-exclusion invariant — at most one of the two may be true.
+        assertEquals(false, viewModel.bleAutoScan.value)
+        assertEquals(true, viewModel.networkAutoScan.value)
+    }
+
+    // ── connectToManualAddress stops scans before changing device ────────────────────────────
+
+    @Test
+    fun `connectToManualAddress stops active network scan and changes device address`() = runTest {
+        viewModel.startNetworkScan()
+        assertEquals(true, viewModel.isNetworkScanning.value)
+
+        viewModel.connectToManualAddress("t192.168.1.99")
+        testScheduler.advanceUntilIdle()
+
+        assertEquals(false, viewModel.isNetworkScanning.value)
+        assertEquals("t192.168.1.99", radioController.lastSetDeviceAddress)
     }
 }
