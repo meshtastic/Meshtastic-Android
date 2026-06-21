@@ -76,6 +76,14 @@ class TcpTransport(
         const val SOCKET_RETRIES = 18 // 18 * 5s = 90s inactivity before disconnect
         const val TIMEOUT_LOG_INTERVAL = 5
         private const val MILLIS_PER_SECOND = 1_000L
+
+        /**
+         * Minimum session duration for backoff to reset. Sessions shorter than this that ended in peer-EOF are treated
+         * as transient firmware-side disconnects (e.g., ESP32 light sleep closing the TCP PhoneAPI session after a
+         * config dump) and do NOT reset the backoff — the growing delay gives the radio time to recover between
+         * attempts instead of hammering it at 1 Hz.
+         */
+        const val SHORT_SESSION_THRESHOLD_MS = 30_000L
     }
 
     private val codec =
@@ -176,12 +184,18 @@ class TcpTransport(
                     false
                 }
 
-            // Reset backoff after a connection that successfully exchanged data,
-            // so transient firmware-side disconnects recover quickly.
-            if (hadData) {
-                Logger.d { "$logTag: [$address] Resetting backoff after successful data exchange" }
+            // Reset backoff only after a session that lasted long enough to indicate a real connection,
+            // not a short config-dump-then-EOF from a sleeping radio. Short sessions keep the backoff
+            // growing so the radio has time to recover between reconnect attempts.
+            val sessionUptime = if (connectionStartTime > 0) nowMillis - connectionStartTime else 0
+            if (hadData && sessionUptime >= SHORT_SESSION_THRESHOLD_MS) {
+                Logger.d { "$logTag: [$address] Resetting backoff after successful data exchange (${sessionUptime}ms)" }
                 retryCount = 1
                 backoff = MIN_BACKOFF_MILLIS
+            } else if (hadData) {
+                Logger.d {
+                    "$logTag: [$address] Short session (${sessionUptime}ms) — keeping backoff at ${backoff / MILLIS_PER_SECOND}s"
+                }
             }
 
             val delaySec = backoff / MILLIS_PER_SECOND
