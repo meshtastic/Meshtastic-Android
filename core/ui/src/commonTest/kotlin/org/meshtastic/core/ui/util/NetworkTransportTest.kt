@@ -177,8 +177,10 @@ class NetworkTransportTest {
 
 /**
  * Coverage for the [shouldShowWifiUnavailableBanner] gate consumed by `ConnectionsScreen`. The banner surfaces "no
- * usable transport for NSD/mDNS scan" only while a network scan is actively running. Each case mirrors one of the
- * reported combinations of (scan-active) plus the permission and transport-availability guards.
+ * usable transport for NSD/mDNS scan" only while a network scan is actively running, and is suppressed once the scan
+ * has produced discovered TCP nodes — at that point the user has found what they were looking for and the recovery hint
+ * is no longer useful. Each case mirrors one of the reported combinations of (scan-active, results-empty) plus the
+ * permission and transport-availability guards.
  */
 class WifiUnavailableBannerTest {
     private fun transports(wifi: Boolean = false) =
@@ -195,6 +197,7 @@ class WifiUnavailableBannerTest {
                 isNetworkScanning = false,
                 localNetworkPermissionGranted = true,
                 wifiUnavailable = !anyNetworkScanTransportAvailable(transports()),
+                discoveredTcpDevicesEmpty = true,
             ),
         )
     }
@@ -209,19 +212,22 @@ class WifiUnavailableBannerTest {
                 isNetworkScanning = true,
                 localNetworkPermissionGranted = true,
                 wifiUnavailable = !anyNetworkScanTransportAvailable(transports()),
+                discoveredTcpDevicesEmpty = true,
             ),
         )
     }
 
     @Test
     fun scan_active_permission_granted_wifi_unavailable_then_banner_shows() {
-        // Clean positive case: scan actively running, permission granted, WiFi unavailable — banner
-        // fires. This is the only combination the banner is meant to surface.
+        // Clean positive case: scan actively running, permission granted, WiFi unavailable, no
+        // discovered nodes yet — banner fires. This is the only combination the banner is meant
+        // to surface.
         assertTrue(
             shouldShowWifiUnavailableBanner(
                 isNetworkScanning = true,
                 localNetworkPermissionGranted = true,
                 wifiUnavailable = true,
+                discoveredTcpDevicesEmpty = true,
             ),
         )
     }
@@ -234,6 +240,7 @@ class WifiUnavailableBannerTest {
                 isNetworkScanning = true,
                 localNetworkPermissionGranted = false,
                 wifiUnavailable = !anyNetworkScanTransportAvailable(transports()),
+                discoveredTcpDevicesEmpty = true,
             ),
         )
     }
@@ -246,6 +253,7 @@ class WifiUnavailableBannerTest {
                 isNetworkScanning = true,
                 localNetworkPermissionGranted = true,
                 wifiUnavailable = !anyNetworkScanTransportAvailable(transports(wifi = true)),
+                discoveredTcpDevicesEmpty = true,
             ),
         )
     }
@@ -259,6 +267,22 @@ class WifiUnavailableBannerTest {
                 isNetworkScanning = true,
                 localNetworkPermissionGranted = true,
                 wifiUnavailable = !anyNetworkScanTransportAvailable(vpnOnly),
+                discoveredTcpDevicesEmpty = true,
+            ),
+        )
+    }
+
+    @Test
+    fun scan_active_permission_granted_wifi_unavailable_results_found_then_banner_hidden() {
+        // Once the live scan has produced discovered TCP nodes, the recovery hint is no longer
+        // useful — the user has found what they were looking for. Banner stays hidden even though
+        // scan is active, permission is granted, and WiFi is reported unavailable.
+        assertFalse(
+            shouldShowWifiUnavailableBanner(
+                isNetworkScanning = true,
+                localNetworkPermissionGranted = true,
+                wifiUnavailable = true,
+                discoveredTcpDevicesEmpty = false,
             ),
         )
     }

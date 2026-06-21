@@ -316,6 +316,7 @@ fun ConnectionsScreen(
                                 isNetworkScanning = isNetworkScanning,
                                 localNetworkPermissionGranted = localNetworkPermission.isGranted,
                                 wifiUnavailable = wifiUnavailable,
+                                discoveredTcpDevicesEmpty = discoveredTcpDevices.isEmpty(),
                             )
                         ) {
                             RecoveryCard(

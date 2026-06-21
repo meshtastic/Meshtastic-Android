@@ -46,17 +46,22 @@ internal fun anyNetworkScanTransportAvailable(networks: List<NetworkTransportInf
 /**
  * Returns `true` when the "Wi-Fi unavailable" recovery banner should render in `ConnectionsScreen`.
  *
- * Banner shows only while a network scan is actively running, local-network permission is granted, and WiFi is
- * unavailable. The auto-scan case is covered because `isNetworkScanning` is true during auto-scan regardless of the
- * user's transport-chip preference.
+ * Banner shows only while a network scan is actively running, local-network permission is granted, WiFi is unavailable,
+ * and the scan has not yet produced any discovered TCP nodes. The auto-scan case is covered because `isNetworkScanning`
+ * is true during auto-scan regardless of the user's transport-chip preference.
  *
  * Gating on the scan state (rather than the `showNetworkTransport` chip preference, which defaults to on) keeps the
  * banner silent while discovery is idle — the user only needs the recovery hint at the moment a scan cannot find a
  * usable transport. The [localNetworkPermissionGranted] guard keeps the banner from overlapping the permission-request
  * flow on the scan toggle.
+ *
+ * The banner is a recovery hint for the case where the user has started a network scan but no nodes have been
+ * discovered yet. Once the scan produces results, the user has found what they were looking for and the hint is no
+ * longer useful — so the banner is suppressed when the discovered-TCP list is non-empty.
  */
 fun shouldShowWifiUnavailableBanner(
     isNetworkScanning: Boolean,
     localNetworkPermissionGranted: Boolean,
     wifiUnavailable: Boolean,
-): Boolean = isNetworkScanning && localNetworkPermissionGranted && wifiUnavailable
+    discoveredTcpDevicesEmpty: Boolean,
+): Boolean = isNetworkScanning && localNetworkPermissionGranted && wifiUnavailable && discoveredTcpDevicesEmpty
