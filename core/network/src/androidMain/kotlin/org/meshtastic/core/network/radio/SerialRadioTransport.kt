@@ -25,6 +25,7 @@ import org.meshtastic.core.network.repository.SerialConnectionListener
 import org.meshtastic.core.network.repository.UsbRepository
 import org.meshtastic.core.network.transport.HeartbeatSender
 import org.meshtastic.core.repository.RadioTransportCallback
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 
 /** An Android USB/serial [RadioTransport] implementation. */
@@ -38,13 +39,38 @@ class SerialRadioTransport(
 
     private val heartbeatSender = HeartbeatSender(sendToRadio = ::handleSendToRadio, logTag = "Serial[$address]")
 
+    /**
+     * Set while an explicit [close] is tearing down the connection so the reader thread's
+     * [SerialConnectionListener.onDisconnected] callback (invoked synchronously by `port.close()` through the reader's
+     * `onRunError`) does NOT forward a transient [onDeviceDisconnect] up to the orchestrator. The service-layer caller
+     * of `close()` (SharedRadioInterfaceService's stopTransportLocked) owns post-close notification and would otherwise
+     * observe a double emission: a transient DeviceSleep from this callback chain followed by its own intended
+     * disconnect emission.
+     */
+    private val explicitCloseInProgress = AtomicBoolean(false)
+
     override fun start() {
         connect()
     }
 
+    override suspend fun close() {
+        Logger.d { "[$address] Closing serial transport" }
+        explicitCloseInProgress.set(true)
+        try {
+            closeConnection(waitForStopped = true)
+            super.close()
+        } finally {
+            explicitCloseInProgress.set(false)
+        }
+    }
+
     override fun onDeviceDisconnect(waitForStopped: Boolean, isPermanent: Boolean) {
-        connRef.get()?.close(waitForStopped)
+        closeConnection(waitForStopped)
         super.onDeviceDisconnect(waitForStopped, isPermanent)
+    }
+
+    private fun closeConnection(waitForStopped: Boolean) {
+        connRef.getAndSet(null)?.close(waitForStopped)
     }
 
     override fun connect() {
@@ -107,6 +133,13 @@ class SerialRadioTransport(
                                     "Device: $device, " +
                                     "Uptime: ${uptime}ms, " +
                                     "Packets RX: $packetsReceived ($bytesReceived bytes)"
+                            }
+                            // Skip the disconnect callback when the reader-thread termination is the
+                            // direct result of an explicit close() — the caller owns the post-close
+                            // notification. USB unplug / cable error is the only path that should
+                            // forward a transient disconnect here.
+                            if (explicitCloseInProgress.get()) {
+                                return
                             }
                             // USB unplug / cable error is transient — the transport will reconnect when
                             // the device is replugged or the OS re-enumerates the port. Only an explicit

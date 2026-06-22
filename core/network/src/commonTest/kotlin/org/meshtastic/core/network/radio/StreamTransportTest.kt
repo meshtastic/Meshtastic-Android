@@ -17,8 +17,10 @@
 package org.meshtastic.core.network.radio
 
 import dev.mokkery.MockMode
+import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify
+import dev.mokkery.verify.VerifyMode
 import io.kotest.property.Arb
 import io.kotest.property.arbitrary.byte
 import io.kotest.property.arbitrary.byteArray
@@ -83,5 +85,14 @@ class StreamTransportTest {
         assertTrue(fakeStream.sentBytes.isNotEmpty())
         assertTrue(fakeStream.sentBytes[0].contentEquals(StreamFrameCodec.WAKE_BYTES))
         verify { callback.onConnect() }
+    }
+
+    @Test
+    fun `close does not emit disconnect callback`() = runTest {
+        fakeStream = FakeStreamTransport(callback, testScope)
+
+        fakeStream.close()
+
+        verify(mode = VerifyMode.not) { callback.onDisconnect(isPermanent = any(), errorMessage = any()) }
     }
 }

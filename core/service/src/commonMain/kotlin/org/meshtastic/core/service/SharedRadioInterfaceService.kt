@@ -34,6 +34,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -53,6 +57,7 @@ import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.MeshActivity
 import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.network.repository.NetworkRepository
+import org.meshtastic.core.network.repository.SerialDevicePresence
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioPrefs
@@ -74,6 +79,7 @@ class SharedRadioInterfaceService(
     private val dispatchers: CoroutineDispatchers,
     private val bluetoothRepository: BluetoothRepository,
     private val networkRepository: NetworkRepository,
+    private val serialDevicePresence: SerialDevicePresence,
     @Named("ProcessLifecycle") private val processLifecycle: Lifecycle,
     private val radioPrefs: RadioPrefs,
     private val transportFactory: RadioTransportFactory,
@@ -245,8 +251,81 @@ class SharedRadioInterfaceService(
                     }
                     .catch { Logger.e(it) { "networkRepository.networkAvailable flow crashed" } }
                     .launchIn(processLifecycle.coroutineScope)
+
+                observeUsbRecoveryTriggers()
             }
         }
+    }
+
+    // USB-serial recovery: when the selected SERIAL ('s') device is unplugged, the underlying
+    // SerialRadioTransport's onDisconnected fires and emits a transient DeviceSleep, but the
+    // orchestrator does not bring the transport back automatically when the device is replugged.
+    // Without this observer the user must manually re-select the device after every replug.
+    //
+    // We watch the SERIAL device-key set, the currently-selected address, AND the transport
+    // connection state together. The combined boolean — "is the SELECTED serial device present
+    // AND is the transport in zombie DeviceSleep?" — drives the recovery signal:
+    // distinctUntilChanged coalesces same-value re-emissions from UsbRepository and from
+    // incidental state transitions, drop(1) skips the initial cold emission so we never fire on
+    // the startup snapshot, and filter{it} fires only on the absent → present convergence.
+    // There is no symmetric stop on absent → absent: the transport's own I/O error path
+    // (SerialConnectionListener.onDisconnected → onDeviceDisconnect) handles teardown, mirroring
+    // how the network listener only stops on networkAvailable=false rather than trying to detect
+    // TCP socket death itself.
+    //
+    // Race correctness: including _connectionState in the trigger closes the unplug/replug race
+    // where presence arrives BEFORE the I/O-death callback flips state to DeviceSleep. Without it,
+    // the early-return on Connected/Connecting (below) would swallow the presence emission, the
+    // subsequent state transition would NOT re-emit (distinctUntilChanged swallows true → true),
+    // and the zombie transport would never recover. With state in the combine, the
+    // Connected → DeviceSleep transition while presence is true re-triggers the flow.
+    //
+    // Flap/loop safety: each physical replug produces exactly one false → true transition (guaranteed
+    // by distinctUntilChanged), and the recovery branch only fires when connectionRequested AND the
+    // running transport is SERIAL — so an explicit disconnect() (which clears connectionRequested and
+    // nulls runningTransportId via stopTransportLocked) immediately disarms the observer. A device
+    // that flaps N times produces at most N restarts, never an unbounded loop.
+    //
+    // Extracted from initStateListeners() so that function stays under detekt's LongMethod cap (60).
+    // Pure code motion — all referenced state is class-member scope, launchIn() registers the cold
+    // flow on processLifecycle.coroutineScope exactly as before.
+    private suspend fun observeUsbRecoveryTriggers() {
+        combine(currentDeviceAddressFlow, serialDevicePresence.deviceKeys, _connectionState) { address, keys, state ->
+            val rest = address?.takeIf { it.firstOrNull() == InterfaceId.SERIAL.id }?.substring(1)
+            rest != null && rest in keys && state == ConnectionState.DeviceSleep
+        }
+            .distinctUntilChanged()
+            .drop(1)
+            .filter { it }
+            .onEach {
+                transportMutex.withLock {
+                    if (!connectionRequested) return@withLock
+                    if (runningTransportId != InterfaceId.SERIAL) return@withLock
+                    // Race-defense: the combine snapshot may be stale by the time we acquire
+                    // transportMutex — another path (setDeviceAddress, BLE liveness restart) may
+                    // have just brought this transport up to Connected/Connecting. The combine-level
+                    // state filter narrows the trigger; this check guards the emission → mutex
+                    // acquisition window so we never tear down a fresh healthy transport.
+                    val state = _connectionState.value
+                    if (state is ConnectionState.Connected || state is ConnectionState.Connecting) {
+                        return@withLock
+                    }
+                    // A previously-started SERIAL transport that died on unplug is still held in
+                    // radioTransport (the I/O-death path emits DeviceSleep but does not null it). Tear it
+                    // down silently so startTransportLocked() can build a fresh one for the replugged
+                    // device. Mirrors the BLE liveness recovery shape: notifyPermanent=false (no
+                    // user-facing Disconnected), sendPoliteDisconnect=false (the link is already gone).
+                    // Both stop and start live inside ignoreExceptionSuspend so a transient USB error
+                    // during teardown or bring-up cannot escape onEach and terminate the recovery flow
+                    // via .catch{} (which would disarm all future replug recoveries for this session).
+                    ignoreExceptionSuspend {
+                        stopTransportLocked(notifyPermanent = false, sendPoliteDisconnect = false)
+                        startTransportLocked()
+                    }
+                }
+            }
+            .catch { Logger.e(it) { "serialDevicePresence recovery flow crashed" } }
+            .launchIn(processLifecycle.coroutineScope)
     }
 
     override fun connect() {
