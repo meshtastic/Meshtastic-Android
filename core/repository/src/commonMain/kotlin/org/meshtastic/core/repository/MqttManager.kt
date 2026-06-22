@@ -47,7 +47,8 @@ interface MqttManager {
      * "Test Connection" affordances.
      *
      * @param address Raw broker address as the user would type it (host, host:port, or full URL).
-     * @param tlsEnabled `true` to upgrade bare addresses to `wss://` (ignored when [address] already has a scheme).
+     * @param tlsEnabled `true` upgrades bare addresses to `ssl://` (TLS, port 8883) instead of `tcp://` (plaintext,
+     *   port 1883); ignored when [address] already has a scheme.
      * @param username Optional MQTT username.
      * @param password Optional MQTT password.
      */
