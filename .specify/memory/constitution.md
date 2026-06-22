@@ -1,13 +1,17 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version change: 1.3.1 → 1.3.2
+Version change: 1.3.2 → 1.3.3
 Modified principles:
-  - I–VII: Rationale blocks compressed into HTML comments (no semantic change)
-Modified sections: None.
+  - IV. Privacy First: "core/proto read-only submodule" → "org.meshtastic:protobufs Maven dependency" (protos are no longer a submodule)
+Modified sections:
+  - Architecture Constraints: Data Protocol de-submoduled; Language & Toolchain Kotlin 2.3+ → 2.4+
 Added sections: None.
 Removed sections: None.
-Templates requiring updates: None (no principle renumbering).
+Templates requiring updates:
+  - .skills/speckit/SKILL.md (constitution version + principle count 6 → 7; added VI. Documentation Freshness)
+  - .specify/templates/{plan,checklist}-template.md (Constitution Check: added Documentation Freshness; renumbered Verify Before Push → VII)
+  - .specify/templates/{plan,spec,tasks,checklist}-template.md (proto submodule → Maven dependency)
 Follow-up TODOs: None.
 -->
 
@@ -56,8 +60,9 @@ times:
   or any debug output.
 - Secrets MUST be git-ignored and MUST NOT be committed to the repository under any
   circumstances.
-- `core/proto` is a read-only upstream submodule (`meshtastic/protobufs`). MUST NOT modify
-  `.proto` files directly; proto changes require an upstream issue labeled `upstream`.
+- Protobuf models come from the upstream `org.meshtastic:protobufs` Maven dependency (pinned
+  in `gradle/libs.versions.toml`). MUST NOT hand-edit generated proto; proto changes require
+  an upstream change and a dependency version bump.
 <!-- Rationale: Meshtastic users rely on the mesh for private, off-grid communications. Data leaks could endanger users in sensitive deployments. -->
 
 ### V. Design Standards Compliance
@@ -142,9 +147,9 @@ The following module boundaries and technology choices are fixed for this projec
   No alternative DI framework may be introduced.
 - **Navigation**: JetBrains Navigation 3 for multiplatform routing with RESTful deep
   linking. All navigation MUST use `MeshtasticNavDisplay`.
-- **Data Protocol**: Protobuf for device communications (read-only upstream submodule).
-  Room KMP for local persistence. DataStore for user preferences.
-- **Language & Toolchain**: Kotlin 2.3+ targeting JDK 21. Java source files MUST NOT be
+- **Data Protocol**: Protobuf for device communications (the `org.meshtastic:protobufs`
+  Maven dependency). Room KMP for local persistence. DataStore for user preferences.
+- **Language & Toolchain**: Kotlin 2.4+ targeting JDK 21. Java source files MUST NOT be
   introduced in KMP modules.
 
 ## Operational Standards
@@ -189,4 +194,4 @@ summary derived from this constitution. The files `.github/copilot-instructions.
 Constitution Check confirming all seven principles were evaluated. Complexity violations
 require explicit justification in the Complexity Tracking table of the plan document.
 
-**Version**: 1.3.2 | **Ratified**: 2026-05-07 | **Last Amended**: 2026-05-21
+**Version**: 1.3.3 | **Ratified**: 2026-05-07 | **Last Amended**: 2026-06-22

@@ -4,9 +4,8 @@
 
 ## Build, Test & Lint (essentials)
 
-Requires JDK 21, `ANDROID_HOME`, and the proto submodule. Per fresh clone:
+Requires JDK 21 and `ANDROID_HOME`. Per fresh clone:
 ```bash
-git submodule update --init
 [ -f local.properties ] || cp secrets.defaults.properties local.properties
 ```
 ```bash

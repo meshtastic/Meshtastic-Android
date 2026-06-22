@@ -172,7 +172,7 @@
 
 - [ ] No PII, location data, or cryptographic keys logged or exposed
 - [ ] No new network calls that transmit user data
-- [ ] Proto submodule (`core/proto`) not modified (read-only upstream)
+- [ ] Generated proto not hand-edited (the `org.meshtastic:protobufs` Maven dependency)
 
 ## Success Criteria *(mandatory)*
 
