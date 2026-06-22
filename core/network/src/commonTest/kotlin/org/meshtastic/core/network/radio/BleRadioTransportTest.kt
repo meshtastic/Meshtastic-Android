@@ -209,7 +209,7 @@ class BleRadioTransportTest {
     }
 
     @Test
-    fun `findDevice falls back to bonded device when targeted scan finds nothing`() = runTest {
+    fun `findDevice does not fall back to bonded device when scan finds nothing`() = runTest {
         val bondedDevice = FakeBleDevice(address = address, name = "Bonded Device")
         bluetoothRepository.bond(bondedDevice)
 
@@ -224,11 +224,12 @@ class BleRadioTransportTest {
             )
         bleTransport.start()
         try {
-            advanceTimeBy(5_500)
+            // 3s settle + 2s targeted + 5s escalated scan = 10s before RadioNotConnectedException.
+            // The bonded device is never advertising, so findDevice must escalate and throw
+            // rather than returning the stale bonded handle.
+            advanceTimeBy(11_000)
 
-            assertEquals(SERVICE_UUID, scanner.lastScanServiceUuid)
-            assertEquals(address, scanner.lastScanAddress)
-            assertEquals("Bonded Device", connection.device?.name)
+            assertEquals(0, connection.connectAndAwaitCalls, "Must not connect when bonded device is not advertising")
         } finally {
             bleTransport.close()
         }
