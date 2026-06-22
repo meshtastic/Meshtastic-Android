@@ -9,25 +9,13 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
-* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs, Baseline) (#5865) by James Rich (@jamesarich) in [`26c308305`](https://github.com/meshtastic/Meshtastic-Android/commit/26c308305ba761e2237bfeb329aa5506cb446f8f)
-* chore(deps): update io.nlopez.compose.rules:detekt to v0.6.2 (#5867) by renovate[bot] (@renovate[bot]) in [`393025279`](https://github.com/meshtastic/Meshtastic-Android/commit/3930252790d161b0dbb087cbca7e7b819026233f)
-* perf(node): add stable keys and contentType to telemetry chart lists (#5869) by James Rich (@jamesarich) in [`3fe1deb01`](https://github.com/meshtastic/Meshtastic-Android/commit/3fe1deb01ccbc17b2d08941cd3dfed7b747dd325)
-* fix(network): retry transient connection/IO failures to api.meshtastic.org (#5870) by James Rich (@jamesarich) in [`a5f923818`](https://github.com/meshtastic/Meshtastic-Android/commit/a5f9238183bdbbd4b57c8346b1d76d1351f37320)
-* refactor(takserver): commonize TAK SDK pipeline, drop redundant zstd/xpp3 deps (#5871) by James Rich (@jamesarich) in [`be940720c`](https://github.com/meshtastic/Meshtastic-Android/commit/be940720c932826589b5654c2a56152061573678)
-* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs, Baseline) (#5868) by James Rich (@jamesarich) in [`bf026485d`](https://github.com/meshtastic/Meshtastic-Android/commit/bf026485d07dddcdaa7a81d46204e6d5bb355afc)
-* refactor(settings): remove Traffic Management module config (#5878) by James Rich (@jamesarich) in [`ea47e01c8`](https://github.com/meshtastic/Meshtastic-Android/commit/ea47e01c87e033a432484ce4fed6826208882d74)
-* feat(connections): list only BLE devices visible via scan (#5877) by James Rich (@jamesarich) in [`53cb1568c`](https://github.com/meshtastic/Meshtastic-Android/commit/53cb1568c70536071ef293b59c8d739672064d92)
-* chore(deps): update vico to v3.2.3 (#5875) by renovate[bot] (@renovate[bot]) in [`24161516d`](https://github.com/meshtastic/Meshtastic-Android/commit/24161516d7a2fc253ecdd4a3dad5977af6743a07)
-* chore(deps): update markdownrenderer to v0.42.0 (#5876) by renovate[bot] (@renovate[bot]) in [`ff388387b`](https://github.com/meshtastic/Meshtastic-Android/commit/ff388387b795b9e69c7b9633392bd23e0b0afba7)
-* chore(deps): update aboutlibraries to v15 (#5880) by renovate[bot] (@renovate[bot]) in [`6a09a4a1e`](https://github.com/meshtastic/Meshtastic-Android/commit/6a09a4a1efd52b318bd956ab831bb1b01dc4d33a)
-* test(data): de-flake DeviceLinkRepositoryImplTest by running on the wall clock (#5883) by James Rich (@jamesarich) in [`b314a0cf8`](https://github.com/meshtastic/Meshtastic-Android/commit/b314a0cf822dd34b06509c9fc7e5e171e16a45b8)
-* fix(ci): make docs-governance fork-PR safe under actions/checkout v7 (#5885) by James Rich (@jamesarich) in [`bc86134b7`](https://github.com/meshtastic/Meshtastic-Android/commit/bc86134b737901b22f9b292512dc846ba4e07556)
-* fix(ui): recognize VPN and all networks for network scan availability (#5882) by Jeremiah K (@jeremiah-k) in [`75f229e8e`](https://github.com/meshtastic/Meshtastic-Android/commit/75f229e8e758dbda76b035c2eea0f02ea96882bd)
-* fix(data): separate refresh timeouts from Room persistence (#5881) by Jeremiah K (@jeremiah-k) in [`63dbbddb0`](https://github.com/meshtastic/Meshtastic-Android/commit/63dbbddb0fd5e0ba076680c4c74b30cd83167395)
-* fix(service): recover stalled WiFi/TCP handshakes by cycling active transport (#5856) by Jeremiah K (@jeremiah-k) in [`3ca87fa03`](https://github.com/meshtastic/Meshtastic-Android/commit/3ca87fa0323214c7204c9d37acfe9d4b6ab6ea8b)
-* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs, Baseline) (#5879) by James Rich (@jamesarich) in [`36198a8a4`](https://github.com/meshtastic/Meshtastic-Android/commit/36198a8a44cef5bdd7727b9f12ebbcd4d719435f)
+* fix(ui): prevent duplicate LazyColumn keys in node metrics logs (#5890) by James Rich (@jamesarich) in [`0ce0c286c`](https://github.com/meshtastic/Meshtastic-Android/commit/0ce0c286cb14381f24c0033b2698220b5afd7a7c)
+* fix(network): preserve TCP reconnect backoff on short sessions (#5893) by Jeremiah K (@jeremiah-k) in [`bf2338ce4`](https://github.com/meshtastic/Meshtastic-Android/commit/bf2338ce4ec52f5d346a7fa87a2681943a0cc6f3)
+* fix(connections): coordinate BLE and TCP scan lifecycle (#5887) by Jeremiah K (@jeremiah-k) in [`91629c3e5`](https://github.com/meshtastic/Meshtastic-Android/commit/91629c3e5b8d942b6dbc8aa20665e962a08bce92)
+* fix(ui): show Wi-Fi unavailable banner only during active network scan (#5892) by Jeremiah K (@jeremiah-k) in [`419d3ec33`](https://github.com/meshtastic/Meshtastic-Android/commit/419d3ec3355d233e51d63e4ce2c6219a8a5d14ee)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs, Baseline) (#5886) by James Rich (@jamesarich) in [`933e07514`](https://github.com/meshtastic/Meshtastic-Android/commit/933e075143714762bcddf6a421b49c326ff0db28)
 
-### Internal (v2.8.0-internal.3)
+### Internal (v2.8.0-internal.4)
 Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14):
 
 #### 🏗️ Features
@@ -36,6 +24,8 @@ Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/relea
 * feat(node): show our node shortname chip on the Nodes tab by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5820
 * feat(settings): add remote "Set time" admin action by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5821
 * feat(network): on-device capture-replay transport + ingestion fuzzing/hardening by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5846
+* perf(node): add stable keys and contentType to telemetry chart lists by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5869
+* feat(connections): list only BLE devices visible via scan by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5877
 #### 🛠️ Fixes
 * fix(mqtt): make the MQTT client-id unique per connection by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5755
 * fix(ble): Harden BLE connection lifecycle by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/5795
@@ -48,6 +38,10 @@ Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/relea
 * fix(desktop): terminate process on exit; quit on close when no tray by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5858
 * fix(settings): crash opening Position radio-config screen by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5862
 * fix(settings): gate Traffic Management config at firmware v2.8.0 by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5864
+* fix(network): retry transient connection/IO failures to api.meshtastic.org by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5870
+* fix(ui): recognize VPN and all networks for network scan availability by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/5882
+* fix(data): separate refresh timeouts from Room persistence by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/5881
+* fix(service): recover stalled WiFi/TCP handshakes by cycling active transport by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/5856
 
 ## New Contributors
 * @LesterCheng made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/5752
