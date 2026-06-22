@@ -164,6 +164,9 @@ androidx-uiautomator = { module = "androidx.test.uiautomator:uiautomator", versi
 # AndroidX Compose (explicit versions — BOM removed; CMP is the sole version authority)
 androidx-compose-runtime-tracing = { module = "androidx.compose.runtime:runtime-tracing", version.ref = "androidx-compose-bom-aligned" }
 androidx-compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "androidx-compose-bom-aligned" } # Required by Robolectric Compose tests (registers ComponentActivity)
+# M2 `material`, version-less from maps-compose-widgets (google). Declared explicitly so the version
+# propagates to consumers of the app's graph (e.g. :baselineprofile); see androidApp/build.gradle.kts.
+androidx-compose-material = { module = "androidx.compose.material:material", version.ref = "androidx-compose-material" }
 
 # Compose Multiplatform
 compose-multiplatform-animation = { module = "org.jetbrains.compose.animation:animation", version.ref = "compose-multiplatform" }

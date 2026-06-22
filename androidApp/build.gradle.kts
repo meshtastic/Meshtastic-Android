@@ -277,6 +277,9 @@ dependencies {
     googleImplementation(libs.maps.compose)
     googleImplementation(libs.maps.compose.utils)
     googleImplementation(libs.maps.compose.widgets)
+    // maps-compose-widgets requests androidx.compose.material:material version-less (expects a BOM
+    // we exclude). Name it with a version so the version is published in the app's graph metadata.
+    googleImplementation(libs.androidx.compose.material)
     googleImplementation(libs.dd.sdk.android.logs)
     googleImplementation(libs.dd.sdk.android.rum)
     googleImplementation(libs.dd.sdk.android.session.replay)

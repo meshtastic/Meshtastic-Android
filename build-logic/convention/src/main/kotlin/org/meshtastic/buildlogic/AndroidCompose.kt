@@ -43,17 +43,14 @@ internal fun Project.configureAndroidCompose(commonExtension: CommonExtension) {
             "androidx.compose.runtime",
             "androidx.compose.ui",
         )
-    // The BOM exclusion above strips the version from `androidx.compose.material:material`
-    // requested by maps-compose-widgets (google flavor). Pin only that artifact — the
-    // group also contains `material-ripple`, which CMP publishes at the bom-aligned
-    // version and must not be force-downgraded.
-    val materialVersion = libs.version("androidx-compose-material")
+    // `androidx.compose.material:material` is ALSO requested version-less by maps-compose-widgets,
+    // but it is pinned via an explicit versioned dependency in :androidApp rather than forced here —
+    // a force does not cross the project boundary, so consumers of the app's graph (e.g.
+    // :baselineprofile) would otherwise re-orphan it. Do not re-add a force for it here.
     configurations.configureEach {
         resolutionStrategy.eachDependency {
             if (requested.group in cmpAlignedGroups) {
                 useVersion(androidxComposeVersion)
-            } else if (requested.group == "androidx.compose.material" && requested.name == "material") {
-                useVersion(materialVersion)
             }
         }
     }
