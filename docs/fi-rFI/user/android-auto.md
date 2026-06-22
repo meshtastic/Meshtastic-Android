@@ -3,52 +3,52 @@ title: Android Auto
 parent: Käyttöopas
 nav_order: 18
 last_updated: 2026-06-11
-description: Use Meshtastic hands-free on an Android Auto head unit — read messages aloud, reply by voice, and check nodes and mesh status while driving.
+description: Käytä Meshtasticia hands-free-tilassa Android Auto -laitteessa — lue viestit ääneen, vastaa puheella ja tarkista radiot sekä mesh-verkon tila ajon aikana.
 aliases:
   - android-auto
-  - car
-  - head-unit
+  - auto
+  - päälaite
   - auto
 ---
 
 # Android Auto
 
-Meshtastic integrates with Android Auto so you can stay in touch with your mesh while driving, without taking your hands off the wheel or your eyes off the road.
+Meshtastic integroituu Android Auton kanssa, joten voit pysyä yhteydessä mesh-verkkoosi ajon aikana ilman, että otat käsiä pois ratista tai katsetta tiestä.
 
-> ⚠️ **Note:** Android Auto support is available on **Google-flavor Android builds only**. It is not included in the F-Droid build, and it is not available on Desktop or iOS.
+> ⚠️ **Huom:** Android Auto -tuki on saatavilla vain **Google-version Android-laitteissa**. Sitä ei ole mukana F-Droid-versiossa, eikä se ole saatavilla työpöydällä tai iOS:ssä.
 
 ## Yleiskatsaus
 
-When your phone is connected to an Android Auto head unit (or the Desktop Head Unit emulator used for development), Meshtastic appears as a messaging app built with the Android Car App Library. The car interface presents a tabbed Home screen optimized for driving-safe, glanceable use:
+Kun puhelin on yhdistetty Android Auto -pääyksikköön (tai kehityksessä käytettävään Desktop Head Unit -emulaattoriin), Meshtastic näkyy viestisovelluksena, joka on toteutettu Android Car App Library -kirjastolla. Auton käyttöliittymä näyttää välilehdellisen aloitusnäkymän, joka on optimoitu ajoturvalliseen ja nopeasti silmäiltävään käyttöön:
 
-- **Messages** — recent conversations, with hands-free reading and replies.
-- **Nodes** — the mesh node list, with a node-detail view.
-- **Status** — current connection and mesh status.
+- **Viestit** — viimeisimmät keskustelut, ääneen luettava ja äänellä vastattava.
+- **Radiot** — mesh-verkon radiolista, sisältää radion yksityiskohtaisen näkymän.
+- **Tila** — nykyinen yhteys- ja mesh-verkon tila.
 
-The car app does not add a new connection of its own. It uses the Meshtastic app's existing connection, node, and message state, so it reflects whatever your phone is already connected to.
+Autosovellus ei luo omaa yhteyttä. Se käyttää Meshtastic-sovelluksen olemassa olevaa yhteyttä, radioa ja viestitilaa, joten se heijastaa sitä, mihin puhelimesi on jo yhdistetty.
 
-> ⚠️ **Note:** Your phone must be connected to a Meshtastic radio for the car app to show live data. If the app is disconnected, the car screen reflects that disconnected state.
+> ⚠️ **Huom:** Puhelimen täytyy olla yhdistetty Meshtastic-radioon, jotta autosovellus näyttää reaaliaikaista dataa. Jos sovellus ei ole yhdistetty, auton näyttö näyttää katkaistun yhteyden tilan.
 
 ## Viestit
 
-The Messages tab lists your recent conversations. While driving, you can:
+Viestit-välilehti näyttää viimeisimmät keskustelusi. Ajon aikana voit:
 
-- **Have messages read aloud** so you don't need to look at the screen.
-- **Reply by voice or text** using your head unit's reply control, dictating your response hands-free.
+- **Kuunnella viestit ääneen**, jotta sinun ei tarvitse katsoa näyttöä.
+- **Vastata äänellä tai tekstillä** käyttämällä pääyksikön vastaustoimintoa ja sanella vastauksesi hands-free-tilassa.
 
 ## Laitteet
 
-The Nodes tab shows your mesh node list in a car-friendly layout. Selecting a node opens a node-detail view with key information about that node. See [Nodes](nodes) for the full meaning of the information shown.
+Radiot-välilehti näyttää mesh-verkon radiolistan ajamiseen sopivassa näkymässä. Radion valinta avaa yksityiskohtaisen näkymän, jossa näkyy tärkeimmät tiedot kyseisestä radiosta. Katso [Radiot](nodes) saadaksesi täydellisen selityksen näytettävistä tiedoista.
 
-## Status
+## Tila
 
-The Status tab summarizes your current connection and mesh status at a glance — useful for confirming you're still connected to your radio without opening your phone.
+Tila-välilehti näyttää nykyisen yhteyden ja mesh-verkon tilan yhdellä silmäyksellä — hyödyllinen varmistamaan, että olet yhä yhteydessä radioon ilman puhelimen avaamista.
 
-## Related Topics
+## Aiheeseen liittyvät aiheet
 
-- [Messages & Channels](messages-and-channels) — full messaging features on your phone
-- [Nodes](nodes) — detailed node list and node-detail information
-- [Connections](connections) — how the app connects to your radio
+- [Viestit ja kanavat](messages-and-channels) — kaikki viestitoiminnot puhelimessa
+- [Radiot](nodes) — yksityiskohtainen radiolista ja radion tietonäkymä
+- [Yhteydet](connections) — miten sovellus yhdistyy radioon
 
 ---
 

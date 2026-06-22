@@ -1,124 +1,124 @@
 ---
-title: Desktop App
-parent: User Guide
+title: Työpöytäsovellus
+parent: Käyttöopas
 nav_order: 14
 last_updated: 2026-06-11
-description: Install and use the Meshtastic Desktop app on Linux, macOS, and Windows — connections, feature parity, and keyboard shortcuts.
+description: Asenna ja käytä Meshtastic-työpöytäsovellusta Linuxilla, macOS:llä ja Windowsilla — yhteydet, ominaisuuksien yhtenevyys ja pikanäppäimet.
 aliases:
-  - desktop
+  - työpöytä
   - linux
   - macos
   - windows
   - jvm
 ---
 
-# Desktop App
+# Työpöytäsovellus
 
-The Meshtastic Desktop application shares its core codebase with Android via Kotlin Multiplatform. Most features work identically on Linux, macOS, and Windows.
+Meshtastic-työpöytäsovellus jakaa ydinkoodipohjan Android-version kanssa Kotlin Multiplatformin kautta. Useimmat ominaisuudet toimivat identtisesti Linuxilla, macOS:llä ja Windowsilla.
 
 ## Asennus
 
 ### Linux
 
-- Download the `.deb` or `.AppImage` package from the releases page
-- Or build from source using `./gradlew :desktopApp:run`
+- Lataa `.deb`- tai `.AppImage`-paketti julkaisusivulta
+- Tai rakenna lähdekoodista komennolla `./gradlew :desktopApp:run`
 
 ### macOS
 
-- Download the `.dmg` package from releases
-- Or build from source
+- Lataa `.dmg`-paketti julkaisusivulta
+- Tai rakenna lähdekoodista
 
 ### Windows
 
-- Download the `.msi` installer from releases
-- Or build from source
+- Lataa `.msi`-asennuspaketti julkaisusivulta
+- Tai rakenna lähdekoodista
 
-## Connecting Your Radio
+## Radioon yhdistäminen
 
-### USB Serial (Primary)
+### USB-sarjaportti (ensisijainen)
 
-The most reliable connection method on Desktop:
+Luotettavin yhteystapa työpöydällä:
 
-1. Connect your Meshtastic radio via USB cable.
-2. The app should detect the serial port automatically.
-3. If not detected, select the correct serial port from the Connect menu.
+1. Yhdistä Meshtastic-radio USB-kaapelilla.
+2. Sovelluksen pitäisi tunnistaa sarjaportti automaattisesti.
+3. Jos laitetta ei tunnisteta, valitse oikea sarjaportti Yhdistä-valikosta.
 
 ### TCP/IP
 
-For network-connected radios:
+Verkkoyhteydellä oleville radioille:
 
-1. Enter the radio's IP address and port (default: 4403).
-2. Click **Connect**.
+1. Syötä radion IP-osoite ja portti (oletus: 4403).
+2. Paina **Yhdistä**.
 
 ### Bluetooth (BLE)
 
-Bluetooth Low Energy is supported on Desktop via the [Kable](https://github.com/JuulLabs/kable) library:
+Bluetooth Low Energy on tuettu työpöydällä [Kable](https://github.com/JuulLabs/kable)-kirjaston kautta:
 
-1. Ensure your system has a Bluetooth adapter.
-2. The app scans for nearby Meshtastic radios automatically.
-3. Select your device from the Connect screen.
+1. Varmista, että järjestelmässäsi on Bluetooth-adapteri.
+2. Sovellus etsii lähellä olevia Meshtastic-radioita automaattisesti.
+3. Valitse laitteesi Yhdistä-näkymästä.
 
-## Feature Parity
+## Ominaisuuksien yhtenevyys
 
-| Feature                                      | Android | Desktop | Viestit                                        |
-| -------------------------------------------- | ------- | ------- | ---------------------------------------------- |
-| Messaging                                    | ✓       | ✓       | Full parity                                    |
-| Node List                                    | ✓       | ✓       | Full parity                                    |
-| Kartta                                       | ✓       | ✓       | Full parity                                    |
-| Asetukset                                    | ✓       | ✓       | Full parity                                    |
-| Bluetooth (BLE)           | ✓       | ✓       | Via Kable on desktop                           |
-| Firmware Update OTA                          | ✓       | ✗       | Use web flasher                                |
-| Notifications                                | ✓       | ✓       | Native OS notifications                        |
-| Widgets                                      | ✓       | ✗       | Android-only                                   |
-| Android Auto                                 | ✓       | ✗       | Android-only — not available on Desktop or iOS |
-| AI Assistant (Chirpy)     | ✓\*     | ✗       | Google flavor Android only                     |
-| App Functions (system AI) | ✓†      | ✗       | Google flavor Android only                     |
+| Ominaisuus                                                  | Android | Työpöytä | Viestit                                                              |
+| ----------------------------------------------------------- | ------- | -------- | -------------------------------------------------------------------- |
+| Viestit                                                     | ✓       | ✓        | Täysi yhtenevyys                                                     |
+| Radiolista                                                  | ✓       | ✓        | Täysi yhtenevyys                                                     |
+| Kartta                                                      | ✓       | ✓        | Täysi yhtenevyys                                                     |
+| Asetukset                                                   | ✓       | ✓        | Täysi yhtenevyys                                                     |
+| Bluetooth (BLE)                          | ✓       | ✓        | Työpöydällä Kable-kirjaston kautta                                   |
+| Laiteohjelmistopäivitys OTA                                 | ✓       | ✗        | Käytä web-flasheria                                                  |
+| Ilmoitukset                                                 | ✓       | ✓        | Käyttöjärjestelmän natiivit ilmoitukset                              |
+| Widgetit                                                    | ✓       | ✗        | Vain Android                                                         |
+| Vain Android                                                | ✓       | ✗        | Vain Android — ei saatavilla työpöydällä tai iOS:llä |
+| Tekoälyavustaja (Chirpy)                 | ✓\*     | ✗        | Vain Google-version Android-laitteissa                               |
+| Sovellustoiminnot (järjestelmän tekoäly) | ✓†      | ✗        | Vain Google-version Android-laitteissa                               |
 
-\*Chirpy AI requires Android 14+ on Google flavor builds with supported hardware.
+\*Chirpy AI vaatii Android 14+ -version Google-version Android-laitteissa, joissa on tuettu laitteisto.
 
-†App Functions exposes app actions to the Android system AI on Google flavor builds. See [App Functions](app-functions).
+†Sovellustoiminnot tuo sovellustoiminnot Android-järjestelmän tekoälylle Google-version Android-laitteissa. Katso [Sovellustoiminnot](app-functions).
 
-## UI Differences
+## Käyttöliittymäerot
 
-The Desktop app uses the same Compose Multiplatform UI with adaptations for larger screens and desktop interaction.
+Työpöytäsovellus käyttää samaa Compose Multiplatform -käyttöliittymää, mutta se on mukautettu suuremmille näytöille ja työpöytäkäyttöön.
 
-### Keyboard Shortcuts
+### Pikanäppäimet
 
-| Shortcut            | Action                 |
-| ------------------- | ---------------------- |
-| **⌘Q** / **Ctrl+Q** | Quit the application   |
-| **⌘,** / **Ctrl+,** | Open Settings          |
-| **⌘1** / **Ctrl+1** | Switch to Messages tab |
-| **⌘2** / **Ctrl+2** | Switch to Nodes tab    |
-| **⌘3** / **Ctrl+3** | Switch to Map tab      |
-| **⌘4** / **Ctrl+4** | Switch to Connect tab  |
+| Pikanäppäin         | Toiminto                    |
+| ------------------- | --------------------------- |
+| **⌘Q** / **Ctrl+Q** | Sulje sovellus              |
+| **⌘,** / **Ctrl+,** | Avaa asetukset              |
+| **⌘1** / **Ctrl+1** | Vaihda Viestit-välilehdelle |
+| **⌘2** / **Ctrl+2** | Vaihda Radiot-välilehdelle  |
+| **⌘3** / **Ctrl+3** | Vaihda Kartta-välilehdelle  |
+| **⌘4** / **Ctrl+4** | Vaihda Yhdistä-välilehdelle |
 
-### Window & System Tray
+### Ikkuna ja järjestelmätarjotin
 
-- **Window resizing** — responsive layout adapts to window dimensions
-- **System tray** — minimize to system tray for background mesh operation
-- **Tray menu** — right-click the tray icon to show window or quit
-- **Mouse interaction** — hover states and standard desktop navigation
+- **Ikkunan koon muuttaminen** — responsiivinen asettelu mukautuu ikkunan kokoon
+- **Järjestelmätarjotin** — pienennä järjestelmätarjottimeen taustalla tapahtuvaa mesh-toimintaa varten
+- **Valikko** — napsauta järjestelmätarjottimen kuvaketta hiiren oikealla näyttääksesi ikkunan tai sulkeaksesi sovelluksen
+- **Hiiritoiminnot** — hover-tilat ja tavallinen työpöydän navigointi
 
-### Notification Preferences
+### Ilmoitusasetukset
 
-The Desktop app provides in-app toggles for controlling which notifications are shown — messages, new nodes, and low battery alerts. Access these from **Settings → Notifications** within the app.
+Työpöytäsovellus tarjoaa sisäiset kytkimet ilmoitusten hallintaan — viestit, uudet radiot ja alhaisen akun varoitukset. Avaa nämä kohdasta **Asetukset → Ilmoitukset** sovelluksessa.
 
-## Built-in Documentation Browser
+## Sisäänrakennettu dokumentaatioselain
 
-The Desktop app includes a built-in documentation browser for quick access to help content without leaving the application.
+Työpöytäsovellus sisältää sisäänrakennetun dokumentaatioselaimen, jonka avulla ohjeisiin pääsee nopeasti poistumatta sovelluksesta.
 
-![Docs browser with table of contents](../../assets/screenshots/docs-browser_toc.png)
+![Dokumentaatioselain ja sisällysluettelo](../../assets/screenshots/docs-browser_toc.png)
 
-The browser supports full-text search across all documentation:
+Selain tukee koko dokumentaation laajuista kokotekstihakua:
 
-![Searching the docs browser](../../assets/screenshots/docs-browser_search.png)
+![Haku dokumentaatioselaimessa](../../assets/screenshots/docs-browser_search.png)
 
-Individual doc pages render with full formatting:
+Yksittäiset dokumenttisivut renderöidään täydellä muotoilulla:
 
-![A documentation page](../../assets/screenshots/docs-browser_page.png)
+![Dokumenttisivu](../../assets/screenshots/docs-browser_page.png)
 
-## Building from Source
+## Rakentaminen lähdekoodista
 
 ```bash
 git clone https://github.com/meshtastic/Meshtastic-Android.git
@@ -127,22 +127,22 @@ git submodule update --init
 ./gradlew :desktopApp:run
 ```
 
-Requirements:
+Vaatimukset:
 
 - JDK 21
-- No Android SDK required for desktop-only builds
+- Android SDK:ta ei tarvita pelkkien työpöytäversioiden rakentamiseen
 
-## Known Limitations
+## Tunnetut rajoitukset
 
-- No OTA firmware updates (use web flasher)
-- Some Android-specific features (widgets, specific notification channels) are unavailable
-- Performance may vary on low-spec hardware running Compose Desktop
-- BLE bonding is not yet supported on desktop (pairing works without bonding)
+- Ei OTA-laiteohjelmistopäivityksiä (käytä web-flasheria)
+- Jotkin Android-kohtaiset ominaisuudet (widgetit, tietyt ilmoituskanavat) eivät ole käytettävissä
+- Suorituskyky voi vaihdella heikkotehoisella laitteistolla ajettaessa Compose Desktopia
+- BLE-paritus ei vielä tallenna laiteparia työpöydällä (paritus toimii ilman tallennusta)
 
-## Related Topics
+## Aiheeseen liittyvät aiheet
 
-- [Connections](connections) — connection methods overview
-- [Firmware Updates](firmware) — use the [Web Flasher](https://flasher.meshtastic.org) for desktop firmware updates
+- [Yhteydet](connections) — yhteystapojen yleiskatsaus
+- [Laiteohjelmistopäivitykset](firmware) — käytä [Web Flasheria](https://flasher.meshtastic.org) työpöydän laiteohjelmistopäivityksiin
 
 ---
 
