@@ -1,126 +1,126 @@
 ---
 title: Yhteydet
-parent: User Guide
+parent: Käyttöopas
 nav_order: 2
 last_updated: 2026-05-20
-description: Connect your phone or desktop to a Meshtastic radio via Bluetooth, USB, or TCP/IP.
+description: Yhdistä puhelin tai työpöytä Meshtastic-radioon Bluetoothin, USB:n tai TCP/IP:n kautta.
 aliases:
   - bluetooth
   - usb
   - tcp
-  - pairing
+  - pariliitos
 ---
 
 # Yhteydet
 
-Meshtastic supports multiple transport methods to communicate between your phone/desktop and a radio node.
+Meshtastic tukee useita siirtotapoja puhelimen/työpöydän ja radion välillä viestimiseen.
 
 ## Bluetooth (BLE)
 
-Bluetooth Low Energy is the default and most common connection method on Android.
+Bluetooth Low Energy on oletus ja yleisin yhteystapa Androidilla.
 
-### Pairing a Device
+### Laitteen pariliitos
 
-1. Ensure your Meshtastic radio is powered on and in pairing mode.
-2. Open the app and navigate to the **Connect** tab.
-3. Tap **Scan for Devices** — nearby Meshtastic radios will appear.
-4. Select your device from the list.
-5. Accept the Bluetooth pairing prompt if shown.
+1. Varmista, että Meshtastic-radio on päällä ja paritustilassa.
+2. Avaa sovellus ja siirry **Yhdistä**-välilehdelle.
+3. Paina **Etsi laitteita** — lähellä olevat Meshtastic-radiot tulevat näkyviin.
+4. Valitse laitteesi listasta.
+5. Hyväksy Bluetooth-pariliitospyyntö, jos se tulee näkyviin.
 
-![Device list item](../../assets/screenshots/connections_bluetooth_scan.png)
+![Laiteluettelon kohde](../../assets/screenshots/connections_bluetooth_scan.png)
 
-You can filter devices by transport type using the filter chips at the top:
+Voit suodattaa laitteita yhteystavan mukaan yläreunan suodatinpainikkeilla:
 
-![Transport filter chips](../../assets/screenshots/connections_transport_filters.png)
+![Yhteystavan suodatinpainikkeet](../../assets/screenshots/connections_transport_filters.png)
 
-> 💡 **Tip:** If your device doesn't appear, check that Bluetooth and Location permissions are granted, and that the radio is not already connected to another device.
+> 💡 **Vinkki:** Jos laitteesi ei näy, varmista että Bluetooth ja sijaintiluvat on myönnetty ja että radio ei ole jo yhdistettynä toiseen laitteeseen.
 
-### Connection Status
+### Yhteyden tila
 
-| Icon | State          | Kuvaus                        |
-| ---- | -------------- | ----------------------------- |
-| 🟢   | Yhdistetty     | Active radio link established |
-| 🟡   | Yhdistetään    | Handshake in progress         |
-| 🔴   | Ei yhdistetty  | No active connection          |
-| ⚪    | Not configured | Ei laitetta valittuna         |
+| Ikoni | Tila          | Kuvaus                             |
+| ----- | ------------- | ---------------------------------- |
+| 🟢    | Yhdistetty    | Aktiivinen radiolinkki muodostettu |
+| 🟡    | Yhdistetään   | Yhteyden muodostus käynnissä       |
+| 🔴    | Ei yhdistetty | Ei aktiivista yhteyttä             |
+| ⚪     | Ei määritetty | Ei laitetta valittuna              |
 
-When connecting, a status indicator shows the current connection state:
+Yhdistettäessä tilailmaisin näyttää nykyisen yhteyden tilan:
 
-![Connecting status](../../assets/screenshots/connections_connecting.png)
+![Yhdistämisen tila](../../assets/screenshots/connections_connecting.png)
 
-If no devices are found, the app shows an empty state with instructions:
+Jos laitteita ei löydy, sovellus näyttää tyhjän näkymän ohjeiden kanssa:
 
-![No devices found](../../assets/screenshots/connections_empty_state.png)
+![Laitteita ei löytynyt](../../assets/screenshots/connections_empty_state.png)
 
-### Troubleshooting Bluetooth
+### Bluetoothin vianmääritys
 
-- **Device not found:** Toggle Bluetooth off/on, ensure location is enabled.
-- **Connection drops:** Move closer to the radio; check for interference.
-- **Pairing rejected:** Forget the device in Android Bluetooth settings and retry.
+- **Laitetta ei löydy:** Kytke Bluetooth pois/päälle ja varmista, että sijainti on käytössä.
+- **Yhteys katkeaa:** Siirry lähemmäs radiota ja tarkista mahdolliset häiriöt.
+- **Paritus hylätty:** Poista laite Androidin Bluetooth-asetuksista ja yritä uudelleen.
 
-## USB Serial
+## USB-sarjaporttiyhteys
 
-USB connections provide a wired alternative, useful for desktop or when Bluetooth is unavailable.
-
-### Setup
-
-1. Connect your radio via USB cable to your device.
-2. The app will prompt for USB permission — tap **Allow**.
-3. The connection is established automatically.
-
-> ⚠️ **Note:** USB connections require OTG support on Android devices.
-
-## TCP/IP (WiFi)
-
-Some Meshtastic radios support WiFi connectivity, allowing TCP-based connections.
+USB-yhteydet tarjoavat langallisen vaihtoehdon, hyödyllinen työpöytäkäytössä tai kun Bluetooth ei ole käytettävissä.
 
 ### Asetukset
 
-1. Connect your radio to a WiFi network via the radio's web interface or settings.
-2. In the app, go to **Connect → TCP**.
-3. Enter the radio's IP address and port (default: 4403).
-4. Tap **Connect**.
+1. Yhdistä radio USB-kaapelilla laitteeseesi.
+2. Sovellus pyytää USB-oikeuksia — paina **Salli**.
+3. Yhteys muodostetaan automaattisesti.
 
-![WiFi scanning for devices](../../assets/screenshots/connections_wifi_scanning.png)
+> ⚠️ **Huom:** USB-yhteydet vaativat OTG-tuen Android-laitteissa.
 
-When a device is found, it appears in the connection list:
+## TCP/IP (WiFi)
 
-![WiFi device found](../../assets/screenshots/connections_wifi_device_found.png)
+Jotkin Meshtastic-radiot tukevat WiFi-yhteyttä, jolloin yhteys voidaan muodostaa TCP:n kautta.
 
-A successful connection is confirmed with a status indicator:
+### Asetukset
 
-![WiFi connection success](../../assets/screenshots/connections_wifi_success.png)
+1. Yhdistä radio WiFi-verkkoon radion web-käyttöliittymän tai asetusten kautta.
+2. Sovelluksessa siirry kohtaan **Yhdistä → TCP**.
+3. Syötä radion IP-osoite ja portti (oletus: 4403).
+4. Paina **Yhdistä**.
 
-### When to Use TCP
+![WiFi-laitteiden haku](../../assets/screenshots/connections_wifi_scanning.png)
 
-- Radio is on the same local network
-- Testing with a simulated radio
-- Environments where Bluetooth has interference issues
+Kun laite löytyy, se näkyy yhteyslistassa:
 
-## Reconnection Behavior
+![WiFi-laite löytyi](../../assets/screenshots/connections_wifi_device_found.png)
 
-The app reconnects to the **last selected device** on startup. You can switch transports from the Connect screen at any time.
+Onnistunut yhteys vahvistetaan tilailmaisimella:
 
-To disconnect, tap the disconnect button on the Connect screen:
+![WiFi-yhteys onnistui](../../assets/screenshots/connections_wifi_success.png)
 
-![Disconnect from radio](../../assets/screenshots/connections_disconnect.png)
+### Milloin TCP-yhteyttä kannattaa käyttää
 
-## Desktop Connections
+- Radio on samassa lähiverkossa
+- Testaus simuloidulla radiolla
+- Ympäristöt, joissa Bluetoothissa on häiriöongelmia
 
-On Desktop (Linux/macOS/Windows), the app supports:
+## Uudelleenyhdistämisen toiminta
 
-- **Bluetooth (BLE)** — via the Kable library; works on macOS, Linux, and Windows
-- **USB Serial** — primary wired connection method
-- **TCP/IP** — for network-connected radios
+Sovellus yhdistyy käynnistyksen yhteydessä **viimeksi valittuun laitteeseen**. Voit vaihtaa yhteystapaa Yhdistä-näkymästä milloin tahansa.
 
-See [Desktop App](desktop) for platform-specific details and keyboard shortcuts.
+Yhteyden katkaisemiseksi paina Yhdistä-näkymän katkaisupainiketta:
 
-## Related Topics
+![Katkaise yhteys radiosta](../../assets/screenshots/connections_disconnect.png)
 
-- [Getting Started](onboarding) — first-launch setup and permissions
-- [Settings — Radio & User](settings-radio-user) — Bluetooth and network configuration
-- [Desktop App](desktop) — desktop-specific connection details
-- [Supported devices](https://meshtastic.org/docs/hardware/devices) — full list of compatible radios on meshtastic.org
+## Työpöytäyhteydet
+
+Työpöydällä (Linux/macOS/Windows) sovellus tukee:
+
+- **Bluetooth (BLE)** — Kable-kirjaston kautta; toimii macOS:llä, Linuxilla ja Windowsilla
+- **USB-sarjaportti** — ensisijainen langallinen yhteystapa
+- **TCP/IP** — verkkoyhteydellä oleville radioille
+
+Katso [Työpöytäsovellus](desktop) alustakohtaiset tiedot ja pikanäppäimet.
+
+## Aiheeseen liittyvät aiheet
+
+- [Aloitus](onboarding) — ensikäynnistyksen käyttöönotto ja käyttöoikeudet
+- [Asetukset — Radio & käyttäjä](settings-radio-user) — Bluetooth- ja verkkoasetukset
+- [Työpöytäsovellus](desktop) — työpöytäkohtaiset yhteystiedot
+- [Tuetut laitteet](https://meshtastic.org/docs/hardware/devices) — täydellinen lista yhteensopivista radioista meshtastic.org -sivustolla
 
 ---
 

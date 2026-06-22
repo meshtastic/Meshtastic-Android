@@ -1,63 +1,63 @@
 ---
-title: App Functions
+title: Sovellustoiminnot
 parent: Käyttöopas
 nav_order: 19
 last_updated: 2026-06-11
-description: Expose mesh capabilities to the Android system and on-device AI assistants (e.g. Gemini) so they can run mesh workflows without opening the app.
+description: Tuo mesh-ominaisuudet Android-järjestelmälle ja laitteessa toimiville tekoälyavustajille (esim. Gemini), jotta ne voivat suorittaa mesh-toimintoja ilman sovelluksen avaamista.
 aliases:
-  - app-functions
-  - system-ai
+  - sovellustoiminnot
+  - järjestelmä-ai
   - gemini
-  - assistant-functions
+  - assistenttitoiminnot
 ---
 
-# App Functions
+# Sovellustoiminnot
 
-App Functions expose Meshtastic capabilities to the Android system and to on-device AI assistants (such as Gemini) through the Android App Functions API. With them enabled, an assistant can discover and trigger mesh workflows for you — for example sending a message or checking your mesh status — without you opening the app.
+Sovellustoiminnot tuovat Meshtastic-ominaisuudet Android-järjestelmälle ja laitteessa toimiville tekoälyavustajille (kuten Gemini) Android App Functions -rajapinnan kautta. Kun ne ovat käytössä, avustaja voi löytää ja käynnistää mesh-toimintoja puolestasi — esimerkiksi lähettää viestin tai tarkistaa mesh-tilan — ilman että avaat sovellusta.
 
-> ⚠️ **Note:** App Functions are available on **Google-flavor Android builds only**.
+> ⚠️ **Huom:** Sovellustoiminnot ovat saatavilla vain **Google-version Android-laitteissa**.
 
-> ⚠️ **Note:** This is separate from the in-app **Chirpy** assistant. App Functions let the _system_ AI assistant act on your mesh; Chirpy is a conversational assistant inside the Meshtastic app itself.
+> ⚠️ **Huom:** Tämä on erillinen in-app **Chirpy** -avustajasta. Sovellustoiminnot mahdollistavat sen, että _järjestelmän_ tekoälyavustaja voi toimia mesh-verkon kautta; Chirpy on Meshtastic-sovelluksen sisäinen keskusteluavustaja.
 
-## Enabling App Functions
+## Sovellustoimintojen käyttöönotto
 
-App Functions are controlled from **Settings → System AI** (the in-app screen is labeled "System AI"). The screen has:
+Sovellustoimintoja hallitaan kohdasta **Asetukset → Järjestelmän tekoäly** (sovelluksen näkymän nimi on "Järjestelmän tekoäly"). Näyttö sisältää:
 
-- A **master toggle** labeled **"Allow AI access"**, with the subtitle _"Let system AI assistants (e.g. Gemini) discover and use mesh functions"_. When off, no functions are exposed to the system.
-- An **individual toggle for each function**, so you can expose only the capabilities you want.
+- **Pääkytkin**, nimeltään **"Salli tekoälyn käyttö"**, ja alaotsikko _"Salli järjestelmän tekoälyavustajien (esim. Gemini) löytää ja käyttää mesh-toimintoja"_. Kun pois käytöstä, toimintoja ei jaeta järjestelmälle.
+- Yksittäinen kytkin jokaiselle toiminnolle, jotta voit paljastaa vain haluamasi ominaisuudet.
 
-The functions are grouped into a **Write** section (functions that change something or send data to your mesh) and a **Read** section (functions that only return information).
+Toiminnot on jaettu **Kirjoita**-osioon (toiminnot, jotka muuttavat jotakin tai lähettävät dataa mesh-verkkoon) ja **Lue**-osioon (toiminnot, jotka palauttavat vain tietoa).
 
-![App Functions screen with master and per-function toggles](../../assets/screenshots/app-functions_settings.png)
+![Sovellustoimintojen näkymä, jossa on pääkytkin ja toimintokohtaiset kytkimet](../../assets/screenshots/app-functions_settings.png)
 
-### Write Functions
+### Kirjoitustoiminnot
 
-| Function         | What it does                                                                                                            |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| **Send Message** | Sends a text message to a contact (direct message) or to a channel, up to 237 bytes. |
+| Toiminto          | Mitä se tekee                                                                                                          |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| **Lähetä viesti** | Lähettää tekstiviestin kontaktille (suora viesti) tai kanavaan, enintään 237 tavua. |
 
-### Read Functions
+### Lukutoiminnot
 
-| Function                | What it returns                                             |
-| ----------------------- | ----------------------------------------------------------- |
-| **Get Mesh Status**     | Overall mesh status.                        |
-| **Get Node List**       | The list of nodes on your mesh.             |
-| **Get Channel Info**    | Information about your channels.            |
-| **Get Device Status**   | Status of your connected radio.             |
-| **Get Node Details**    | Detailed information about a specific node. |
-| **Get Recent Messages** | Recent messages from your conversations.    |
-| **Get Unread Summary**  | A summary of unread messages.               |
-| **Get Mesh Metrics**    | Telemetry and metrics from your mesh.       |
+| Toiminto                         | Mitä se palauttaa                                           |
+| -------------------------------- | ----------------------------------------------------------- |
+| **Hae mesh-verkko-tila**         | Koko mesh-verkon tila.                      |
+| **Hae radiolista**               | Mesh-verkon radiolista.                     |
+| **Hae kanavatiedot**             | Tietoa kanavistasi.                         |
+| **Hae laitteen tila**            | Yhdistetyn radion tila.                     |
+| **Hae radion tiedot**            | Yksityiskohtaiset tiedot tietystä radiosta. |
+| **Hae viimeisimmät viestit**     | Viimeisimmät viestisi keskusteluista.       |
+| **Hae lukemattomien yhteenveto** | Yhteenveto lukemattomista viesteistä.       |
+| **Hae mesh-metriikat**           | Mesh-verkon telemetria ja metriikat.        |
 
-## Privacy
+## Yksityisyys
 
-> 🔒 **Privacy:** The **Send Message** function lets an assistant send messages to your mesh on your behalf. Only enable functions you trust the assistant to use. The read functions expose node, message, and metric data to the assistant — enable only what you're comfortable sharing. Each function has its own toggle, and the master toggle turns all of them off at once.
+> 🔒 **Tietosuoja:** **Lähetä viesti** -toiminnon avulla avustaja voi lähettää viestejä mesh-verkkoosi puolestasi. Ota käyttöön vain ne toiminnot, joihin luotat avustajan saavan käyttää. Lukutoiminnot tuovat radion, viestien ja metriikoiden tiedot avustajan käyttöön — ota käyttöön vain se, mitä haluat jakaa. Jokaisella toiminnolla on oma kytkin, ja pääkytkin poistaa kaikki käytöstä kerralla.
 
-## Related Topics
+## Aiheeseen liittyvät aiheet
 
-- [Messages & Channels](messages-and-channels) — sending messages directly in the app
-- [Nodes](nodes) — the node list the read functions draw from
-- [Node Metrics](node-metrics) — the telemetry behind Get Mesh Metrics
+- [Viestit ja kanavat](messages-and-channels) — viestien lähettäminen suoraan sovelluksessa
+- [Radiot](nodes) — radiolista, josta lukutoiminnot hakevat tiedot
+- [Radiometriikat](node-metrics) — telemetria, jonka pohjalta **Hae mesh-metriikat** muodostuu
 
 ---
 
