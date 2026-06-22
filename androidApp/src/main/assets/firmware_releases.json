@@ -295,12 +295,6 @@
       "title": "Add 70cm amateur radio region support",
       "page_url": "https://github.com/meshtastic/firmware/pull/10627",
       "zip_url": "+23.2 KB"
-    },
-    {
-      "id": "10625",
-      "title": "Add MVP control point routing module for Meshtastic",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10625",
-      "zip_url": "https://discord.com/invite/meshtastic"
     }
   ]
 }
