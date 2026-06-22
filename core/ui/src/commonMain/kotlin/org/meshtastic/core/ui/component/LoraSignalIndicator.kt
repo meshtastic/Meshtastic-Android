@@ -42,6 +42,7 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.common.util.MetricFormatter
+import org.meshtastic.core.model.snrLimit
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.bad
 import org.meshtastic.core.resources.fair
@@ -59,12 +60,21 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
+import org.meshtastic.core.ui.util.LocalModemPreset
+import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
 
+// Fixed-threshold SNR colors retained for contexts without an active preset (e.g. traceroute hop coloring in
+// AnnotatedStrings). Per-node signal quality uses preset-relative thresholds instead — see [determineSignalQuality].
 const val SNR_GOOD_THRESHOLD = -7f
 const val SNR_FAIR_THRESHOLD = -15f
 
 const val RSSI_GOOD_THRESHOLD = -115
 const val RSSI_FAIR_THRESHOLD = -126
+
+// SNR offsets (dB) below a preset's demodulation floor that delimit the quality bands, matching Meshtastic-Apple's
+// getSnrColor(): within 5.5 dB below the limit is FAIR, within 7.5 dB is BAD, further down is NONE.
+private const val SNR_FAIR_OFFSET = 5.5f
+private const val SNR_BAD_OFFSET = 7.5f
 
 @Stable
 enum class Quality(
@@ -84,14 +94,19 @@ enum class Quality(
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun NodeSignalQuality(snr: Float, rssi: Int, modifier: Modifier = Modifier) {
-    val quality = determineSignalQuality(snr, rssi)
+fun NodeSignalQuality(
+    snr: Float,
+    rssi: Int,
+    modifier: Modifier = Modifier,
+    modemPreset: ModemPreset? = LocalModemPreset.current,
+) {
+    val quality = determineSignalQuality(snr, modemPreset)
     FlowRow(
         modifier = modifier,
         itemVerticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        Snr(snr)
+        Snr(snr, modemPreset = modemPreset)
         Rssi(rssi)
         Text(
             text = "${stringResource(Res.string.signal)} ${stringResource(quality.nameRes)}",
@@ -111,21 +126,26 @@ private const val SIZE_ICON_DP = 16
 
 /** Displays the `snr` and `rssi` with color depending on the values respectively. */
 @Composable
-fun SnrAndRssi(snr: Float, rssi: Int) {
+fun SnrAndRssi(snr: Float, rssi: Int, modemPreset: ModemPreset? = LocalModemPreset.current) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        Snr(snr)
+        Snr(snr, modemPreset = modemPreset)
         Rssi(rssi)
     }
 }
 
 /** Displays a human readable description and icon representing the signal quality. */
 @Composable
-fun LoraSignalIndicator(snr: Float, rssi: Int, contentColor: Color = MaterialTheme.colorScheme.onSurface) {
-    val quality = determineSignalQuality(snr, rssi)
+fun LoraSignalIndicator(
+    snr: Float,
+    modifier: Modifier = Modifier,
+    modemPreset: ModemPreset? = LocalModemPreset.current,
+    contentColor: Color = MaterialTheme.colorScheme.onSurface,
+) {
+    val quality = determineSignalQuality(snr, modemPreset)
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxSize().padding(8.dp),
+        modifier = modifier.fillMaxSize().padding(8.dp),
     ) {
         Icon(
             modifier = Modifier.size(SIZE_ICON_DP.dp),
@@ -142,15 +162,8 @@ fun LoraSignalIndicator(snr: Float, rssi: Int, contentColor: Color = MaterialThe
 }
 
 @Composable
-fun Snr(snr: Float, modifier: Modifier = Modifier) {
-    val color: Color =
-        if (snr > SNR_GOOD_THRESHOLD) {
-            Quality.GOOD.color.invoke()
-        } else if (snr > SNR_FAIR_THRESHOLD) {
-            Quality.FAIR.color.invoke()
-        } else {
-            Quality.BAD.color.invoke()
-        }
+fun Snr(snr: Float, modifier: Modifier = Modifier, modemPreset: ModemPreset? = LocalModemPreset.current) {
+    val color: Color = determineSignalQuality(snr, modemPreset).color.invoke()
 
     Text(
         modifier = modifier,
@@ -178,10 +191,22 @@ fun Rssi(rssi: Int, modifier: Modifier = Modifier) {
     )
 }
 
-fun determineSignalQuality(snr: Float, rssi: Int): Quality = when {
-    snr > SNR_GOOD_THRESHOLD && rssi > RSSI_GOOD_THRESHOLD -> Quality.GOOD
-    snr > SNR_GOOD_THRESHOLD && rssi > RSSI_FAIR_THRESHOLD -> Quality.FAIR
-    snr > SNR_FAIR_THRESHOLD && rssi > RSSI_GOOD_THRESHOLD -> Quality.FAIR
-    snr <= SNR_FAIR_THRESHOLD && rssi <= RSSI_FAIR_THRESHOLD -> Quality.NONE
-    else -> Quality.BAD
+/**
+ * Rates link quality from SNR relative to the active modem preset's demodulation floor ([ModemPreset.snrLimit]). A
+ * given SNR means different things per preset — e.g. -15 dB is excellent on LongSlow (SF12) but unusable on ShortFast
+ * (SF7) — so a fixed threshold mis-rates most presets.
+ *
+ * RSSI is intentionally not considered: without the noise floor it cannot indicate whether a signal is demodulable, so
+ * SNR-versus-preset-limit is the meaningful measure (it is still shown to the user via [Rssi]). See #5446.
+ *
+ * A null/unknown [modemPreset] falls back to the LongFast default limit.
+ */
+fun determineSignalQuality(snr: Float, modemPreset: ModemPreset?): Quality {
+    val limit = modemPreset.snrLimit
+    return when {
+        snr > limit -> Quality.GOOD
+        snr > limit - SNR_FAIR_OFFSET -> Quality.FAIR
+        snr >= limit - SNR_BAD_OFFSET -> Quality.BAD
+        else -> Quality.NONE
+    }
 }

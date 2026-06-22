@@ -40,6 +40,7 @@ import org.meshtastic.core.model.util.onlineTimeThreshold
 import org.meshtastic.feature.car.model.ConversationUi
 import org.meshtastic.feature.car.model.SignalQuality
 import org.meshtastic.feature.car.service.MessageSnapshot
+import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
 import org.meshtastic.proto.DeviceMetrics
 import org.meshtastic.proto.LocalStats
 import org.meshtastic.proto.Position
@@ -52,76 +53,71 @@ import kotlin.test.assertTrue
 
 class CarScreenDataBuilderTest {
 
-    // determineSignalQuality()
+    // determineSignalQuality() — preset-relative SNR, RSSI not used (issue #5446)
 
     @Test
     fun `determineSignalQuality returns none when snr is max value`() {
-        val quality = CarScreenDataBuilder.determineSignalQuality(Float.MAX_VALUE, -100)
+        val quality = CarScreenDataBuilder.determineSignalQuality(Float.MAX_VALUE, ModemPreset.LONG_FAST)
 
         assertEquals(SignalQuality.NONE, quality)
     }
 
     @Test
-    fun `determineSignalQuality returns none when rssi is max value`() {
-        val quality = CarScreenDataBuilder.determineSignalQuality(-5f, Int.MAX_VALUE)
-
-        assertEquals(SignalQuality.NONE, quality)
-    }
-
-    @Test
-    fun `determineSignalQuality returns excellent for strong snr and strong rssi`() {
-        val quality = CarScreenDataBuilder.determineSignalQuality(snr = -6f, rssi = -110)
+    fun `determineSignalQuality returns excellent well above the preset floor`() {
+        // LongFast floor -17.5; -10 is 7.5 dB above it (> floor + 5.5 margin).
+        val quality = CarScreenDataBuilder.determineSignalQuality(snr = -10f, modemPreset = ModemPreset.LONG_FAST)
 
         assertEquals(SignalQuality.EXCELLENT, quality)
     }
 
     @Test
-    fun `determineSignalQuality returns good for strong snr and fair rssi`() {
-        val quality = CarScreenDataBuilder.determineSignalQuality(snr = -6f, rssi = -120)
+    fun `determineSignalQuality returns good just above the preset floor`() {
+        val quality = CarScreenDataBuilder.determineSignalQuality(snr = -15f, modemPreset = ModemPreset.LONG_FAST)
 
         assertEquals(SignalQuality.GOOD, quality)
     }
 
     @Test
-    fun `determineSignalQuality returns good for fair snr and strong rssi`() {
-        val quality = CarScreenDataBuilder.determineSignalQuality(snr = -10f, rssi = -110)
-
-        assertEquals(SignalQuality.GOOD, quality)
-    }
-
-    @Test
-    fun `determineSignalQuality returns fair for fair snr and weak rssi`() {
-        val quality = CarScreenDataBuilder.determineSignalQuality(snr = -10f, rssi = -130)
+    fun `determineSignalQuality returns fair just below the preset floor`() {
+        val quality = CarScreenDataBuilder.determineSignalQuality(snr = -20f, modemPreset = ModemPreset.LONG_FAST)
 
         assertEquals(SignalQuality.FAIR, quality)
     }
 
     @Test
-    fun `determineSignalQuality returns bad for weak snr`() {
-        val quality = CarScreenDataBuilder.determineSignalQuality(snr = -15f, rssi = -110)
+    fun `determineSignalQuality returns bad further below the floor`() {
+        val quality = CarScreenDataBuilder.determineSignalQuality(snr = -24f, modemPreset = ModemPreset.LONG_FAST)
 
         assertEquals(SignalQuality.BAD, quality)
     }
 
     @Test
-    fun `determineSignalQuality treats snr good threshold as not excellent`() {
-        val quality = CarScreenDataBuilder.determineSignalQuality(snr = -7f, rssi = -110)
+    fun `determineSignalQuality returns none far below the floor`() {
+        val quality = CarScreenDataBuilder.determineSignalQuality(snr = -30f, modemPreset = ModemPreset.LONG_FAST)
+
+        assertEquals(SignalQuality.NONE, quality)
+    }
+
+    @Test
+    fun `determineSignalQuality rates the same snr relative to the preset`() {
+        // -15 dB clears LongSlow's -20 floor but sits at/below ShortFast's -7.5 floor.
+        assertEquals(SignalQuality.GOOD, CarScreenDataBuilder.determineSignalQuality(-15f, ModemPreset.LONG_SLOW))
+        assertEquals(SignalQuality.BAD, CarScreenDataBuilder.determineSignalQuality(-15f, ModemPreset.SHORT_FAST))
+    }
+
+    @Test
+    fun `determineSignalQuality uses the corrected LongSlow SF12 floor`() {
+        // -19 dB clears the physically-correct -20 floor (GOOD); it would be NONE under Apple's bugged -7.5.
+        val quality = CarScreenDataBuilder.determineSignalQuality(snr = -19f, modemPreset = ModemPreset.LONG_SLOW)
 
         assertEquals(SignalQuality.GOOD, quality)
     }
 
     @Test
-    fun `determineSignalQuality treats rssi fair threshold as not good for strong snr`() {
-        val quality = CarScreenDataBuilder.determineSignalQuality(snr = -6f, rssi = -126)
+    fun `determineSignalQuality falls back to LongFast for a null preset`() {
+        val quality = CarScreenDataBuilder.determineSignalQuality(snr = -10f, modemPreset = null)
 
-        assertEquals(SignalQuality.FAIR, quality)
-    }
-
-    @Test
-    fun `determineSignalQuality treats snr fair threshold as bad`() {
-        val quality = CarScreenDataBuilder.determineSignalQuality(snr = -15f, rssi = -130)
-
-        assertEquals(SignalQuality.BAD, quality)
+        assertEquals(SignalQuality.EXCELLENT, quality)
     }
 
     // buildNodeUi()

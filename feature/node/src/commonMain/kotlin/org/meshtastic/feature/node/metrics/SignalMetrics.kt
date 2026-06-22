@@ -564,7 +564,7 @@ private fun SignalMetricsCard(meshPacket: MeshPacket, isSelected: Boolean, onCli
 
             /* Signal Indicator */
             Box(modifier = Modifier.weight(weight = 3f).height(IntrinsicSize.Max)) {
-                LoraSignalIndicator(meshPacket.rx_snr, meshPacket.rx_rssi)
+                LoraSignalIndicator(snr = meshPacket.rx_snr)
             }
         }
     }

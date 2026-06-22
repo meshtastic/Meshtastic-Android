@@ -33,6 +33,7 @@ import org.meshtastic.core.resources.a11y_node_signal
 import org.meshtastic.core.resources.now
 import org.meshtastic.core.resources.unknown
 import org.meshtastic.core.ui.util.formatAgo
+import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
 
 private const val MILLIS_PER_SECOND = 1000L
 private const val MAX_BATTERY_PERCENT = 100
@@ -86,6 +87,7 @@ internal fun buildNodeDescription(
     viaMqtt: Boolean,
     strings: NodeDescriptionStrings,
     lastHeardIsRelative: Boolean = true,
+    modemPreset: ModemPreset? = null,
 ): String = buildString {
     append(name)
     append(", ")
@@ -121,7 +123,7 @@ internal fun buildNodeDescription(
         append(strings.distanceAway.replace("%s", it))
     }
     if (hopsAway == 0 && !viaMqtt && snr < SNR_UNSET_THRESHOLD && rssi < 0) {
-        val quality = determineSignalQuality(snr, rssi)
+        val quality = determineSignalQuality(snr, modemPreset)
         append(", ")
         append(strings.signal.replace("%s", quality.name.lowercase()))
     }

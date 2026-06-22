@@ -75,6 +75,7 @@ import org.meshtastic.core.ui.icon.MapCompass
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Notes
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
+import org.meshtastic.core.ui.util.LocalModemPreset
 import org.meshtastic.proto.Config
 
 private const val ACTIVE_BORDER_ALPHA = 0.65f
@@ -140,8 +141,9 @@ fun NodeItem(
         }
 
     val a11yStrings = rememberNodeDescriptionStrings()
+    val modemPreset = LocalModemPreset.current
     val nodeDescription =
-        remember(thatNode, a11yStrings) {
+        remember(thatNode, a11yStrings, modemPreset) {
             buildNodeDescription(
                 name = originalLongName,
                 isOnline = thatNode.isOnline,
@@ -155,6 +157,7 @@ fun NodeItem(
                 rssi = thatNode.rssi,
                 viaMqtt = thatNode.viaMqtt,
                 strings = a11yStrings,
+                modemPreset = modemPreset,
             )
         }
 
@@ -317,7 +320,7 @@ private fun NodeSignalRow(thatNode: Node, isThisNode: Boolean, contentColor: Col
                     if (thatNode.snr < 100f) add { Snr(thatNode.snr) }
                     if (thatNode.rssi < 0) add { Rssi(thatNode.rssi) }
                     if (thatNode.snr < 100f && thatNode.rssi < 0) {
-                        val quality = determineSignalQuality(thatNode.snr, thatNode.rssi)
+                        val quality = determineSignalQuality(thatNode.snr, LocalModemPreset.current)
                         add {
                             IconInfo(
                                 icon = vectorResource(quality.icon),

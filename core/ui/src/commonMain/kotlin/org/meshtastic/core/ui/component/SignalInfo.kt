@@ -40,6 +40,7 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.signal_quality
 import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.ui.util.LocalModemPreset
 
 const val MAX_VALID_SNR = 100F
 const val MAX_VALID_RSSI = 0
@@ -51,7 +52,7 @@ fun SignalInfo(
     @Suppress("UNUSED_PARAMETER") contentColor: Color = MaterialTheme.colorScheme.onSurface,
 ) {
     if (node.snr < MAX_VALID_SNR && node.rssi < MAX_VALID_RSSI) {
-        val quality = determineSignalQuality(node.snr, node.rssi)
+        val quality = determineSignalQuality(node.snr, LocalModemPreset.current)
         val signalColor = quality.color.invoke()
         Row(
             modifier = modifier,
