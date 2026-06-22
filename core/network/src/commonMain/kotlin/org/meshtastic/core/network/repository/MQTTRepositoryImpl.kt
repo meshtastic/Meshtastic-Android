@@ -51,6 +51,9 @@ import org.meshtastic.mqtt.MqttLogLevel
 import org.meshtastic.mqtt.MqttMessage
 import org.meshtastic.mqtt.QoS
 import org.meshtastic.mqtt.packet.Subscription
+import org.meshtastic.mqtt.plus
+import org.meshtastic.mqtt.transport.tcp.TcpTransportFactory
+import org.meshtastic.mqtt.transport.ws.WebSocketTransportFactory
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.MqttClientProxyMessage
 import kotlin.concurrent.Volatile
@@ -321,6 +324,9 @@ private class DefaultMqttClientSession(private val delegate: MqttClient) : MqttC
 
 private fun defaultMqttClientFactory(setup: MqttClientSetup): MqttClientSession = DefaultMqttClientSession(
     MqttClient(setup.ownerId) {
+        // mqtt-client 0.4.0 makes transport a required SPI: the client throws at connect if unset.
+        // Register TCP/TLS (the default) + WebSocket (for user-entered ws://-/wss:// brokers).
+        transportFactory = TcpTransportFactory() + WebSocketTransportFactory()
         keepAliveSeconds = MQTT_KEEPALIVE_SECONDS
         autoReconnect = true
         username = setup.mqttConfig?.username

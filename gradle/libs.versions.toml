@@ -95,7 +95,7 @@ osmdroid-android = "6.1.20"
 spotless = "8.7.0"
 vico = "3.2.3"
 kable = "0.43.1"
-mqttastic = "0.3.8"
+mqttastic = "0.4.0"
 jmdns = "3.6.3"
 qrcode-kotlin = "4.5.0"
 takpacket-sdk = "0.7.0"
@@ -264,7 +264,13 @@ markdown-renderer-android = { module = "com.mikepenz:multiplatform-markdown-rend
 material = { module = "com.google.android.material:material", version = "1.14.0" }
 
 kable-core = { module = "com.juul.kable:kable-core", version.ref = "kable" }
-meshtastic-mqtt-client = { module = "org.meshtastic:mqtt-client", version.ref = "mqttastic" }
+# mqtt-client 0.4.0 split the monolith into a BOM + core + per-transport modules. The BOM pins the
+# versions, so core/transport stay versionless. Both transports are wired: transport-tcp (tcp://-/ssl://,
+# the default) and transport-ws (for user-entered ws://-/wss:// broker addresses).
+meshtastic-mqtt-client-bom = { module = "org.meshtastic:mqtt-client-bom", version.ref = "mqttastic" }
+meshtastic-mqtt-client-core = { module = "org.meshtastic:mqtt-client-core" }
+meshtastic-mqtt-client-transport-tcp = { module = "org.meshtastic:mqtt-client-transport-tcp" }
+meshtastic-mqtt-client-transport-ws = { module = "org.meshtastic:mqtt-client-transport-ws" }
 
 jserialcomm = { module = "com.fazecast:jSerialComm", version.ref = "jserialcomm" }
 okio = { module = "com.squareup.okio:okio", version.ref = "okio" }

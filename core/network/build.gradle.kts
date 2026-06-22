@@ -35,7 +35,15 @@ kotlin {
             implementation(projects.core.ble)
 
             implementation(libs.okio)
-            api(libs.meshtastic.mqtt.client)
+            // mqtt-client 0.4.0 splits into BOM + core + transport modules. `api` (not `implementation`)
+            // because :core:data and :desktopApp consume org.meshtastic.mqtt.* types transitively through
+            // this module. Both transports are registered: transport-tcp (tcp://-/ssl://, default) +
+            // transport-ws (user-entered ws://-/wss://), composed with `+` at the client config sites.
+            // No platform() on the KMP commonMain handler; reach the BOM through project.dependencies.
+            api(project.dependencies.platform(libs.meshtastic.mqtt.client.bom))
+            api(libs.meshtastic.mqtt.client.core)
+            api(libs.meshtastic.mqtt.client.transport.tcp)
+            api(libs.meshtastic.mqtt.client.transport.ws)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kotlinx.atomicfu)
             implementation(libs.ktor.client.core)
