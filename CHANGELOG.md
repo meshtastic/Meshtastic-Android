@@ -14,6 +14,9 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 * fix(connections): coordinate BLE and TCP scan lifecycle (#5887) by Jeremiah K (@jeremiah-k) in [`91629c3e5`](https://github.com/meshtastic/Meshtastic-Android/commit/91629c3e5b8d942b6dbc8aa20665e962a08bce92)
 * fix(ui): show Wi-Fi unavailable banner only during active network scan (#5892) by Jeremiah K (@jeremiah-k) in [`419d3ec33`](https://github.com/meshtastic/Meshtastic-Android/commit/419d3ec3355d233e51d63e4ce2c6219a8a5d14ee)
 * chore: Scheduled updates (Firmware, Hardware, Translations, Graphs, Baseline) (#5886) by James Rich (@jamesarich) in [`933e07514`](https://github.com/meshtastic/Meshtastic-Android/commit/933e075143714762bcddf6a421b49c326ff0db28)
+* fix(network): migrate to mqtt-client 0.4.0 (IP-literal TLS fix) (#5895) by James Rich (@jamesarich) in [`ba9319c2d`](https://github.com/meshtastic/Meshtastic-Android/commit/ba9319c2dfc2655d529c480306a206a68bca02bc)
+* docs(mqtt): correct probe() tlsEnabled KDoc transport scheme (#5896) by James Rich (@jamesarich) in [`44bc88014`](https://github.com/meshtastic/Meshtastic-Android/commit/44bc880142d25d735b827731f81926802e81fe67)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs, Baseline) (#5897) by James Rich (@jamesarich) in [`90c183352`](https://github.com/meshtastic/Meshtastic-Android/commit/90c1833520bf2c318e86112fef891cc319950356)
 
 ### Internal (v2.8.0-internal.4)
 Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14):
