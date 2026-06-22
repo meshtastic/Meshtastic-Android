@@ -1071,6 +1071,9 @@
         <item quantity="one">%1$d sekunti</item>
         <item quantity="other">%1$d sekuntia</item>
     </plurals>
+    <string name="pm1_0">PM1.0</string>
+    <string name="pm10">PM10</string>
+    <string name="pm2_5">PM2.5</string>
     <!-- POSITION -->
     <string name="position">Sijainti</string>
     <string name="position_config_set_fixed_from_phone">Aseta nykyisestä puhelimen sijainnista</string>
