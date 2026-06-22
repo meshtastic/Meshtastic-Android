@@ -62,7 +62,8 @@
       "matchPackageNames": [
         "/^org\\.jetbrains\\.compose/",
         "androidx.compose.runtime:runtime-tracing",
-        "androidx.compose.ui:ui-test-manifest"
+        "androidx.compose.ui:ui-test-manifest",
+        "androidx.compose.material:material"
       ]
     },
     {
