@@ -49,11 +49,14 @@
   Multiplatform patterns, `MeshtasticNavDisplay`/`NavigationBackHandler` where relevant,
   and pre-formats floats with `NumberFormatter.format()`.
 - **IV. Privacy First**: Confirm the change does not log or expose PII, location data,
-  cryptographic keys, or modify the read-only `core/proto` submodule.
+  cryptographic keys, or hand-edit generated proto (the `org.meshtastic:protobufs` Maven dependency).
 - **V. Design Standards Compliance**: For any user-facing UI, record how the design was
   checked against the Meshtastic Client Design Standards. For cross-platform features,
   link the upstream behavior spec from `meshtastic/design/features/` or justify N/A.
-- **VI. Verify Before Push**: Record the exact local verification commands and the expected
+- **VI. Documentation Freshness**: If user-facing UI changes, confirm the corresponding
+  `docs/` page(s) are updated (with `last_updated` frontmatter) or the `skip-docs-check`
+  label is applied with justification.
+- **VII. Verify Before Push**: Record the exact local verification commands and the expected
   post-push CI check command (`gh pr checks` or `gh run list`) before implementation starts.
 
 If any gate cannot be met, the exception MUST be justified in the Complexity Tracking

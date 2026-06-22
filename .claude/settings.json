@@ -2,8 +2,7 @@
   "$comment": "Team-wide Claude Code config. (1) Read guards: Claude does NOT read .aiexclude/.copilotignore, so the big-file protections live here. 'deny' = never read (Crowdin-managed translations); 'ask' = prompt first (big files rarely needed in full — prefer .skills/compose-ui/strings-index.txt for strings; signing keys should never be read into context). (2) Hooks front-run this repo's own CI gates locally — see .claude/hooks/*.sh for what each does. The pre-bash-guard spotlessApply-on-commit hook is the heaviest (runs gradle at commit time); remove its PreToolUse entry if it's too eager for your workflow.",
   "permissions": {
     "deny": [
-      "Read(**/composeResources/**/values-*/*.xml)",
-      "Read(**/res/values-*/strings.xml)"
+      "Read(**/composeResources/**/values-*/*.xml)"
     ],
     "ask": [
       "Read(**/composeResources/**/values/strings.xml)",

@@ -33,8 +33,8 @@ git --no-pager log -1 --oneline
 ```
 
 ## Branch Naming
-Use conventional-commit style prefixes that match the PR title convention in AGENTS.md
-`<git_and_prs>`:
+Use conventional-commit style prefixes that match the PR title convention in
+`.github/copilot-pull-request-instructions.md`:
 
 | Prefix | Use for |
 | :--- | :--- |
@@ -65,8 +65,9 @@ Never use plain `--force`. Always `--force-with-lease` to avoid clobbering colla
 - [ ] `ANDROID_HOME` exported (see AGENTS.md workspace bootstrap).
 - [ ] Optional: run `./gradlew assembleDebug` once to catch environment regressions before editing.
 
-## Tip: Prefer `/delegate` for Long Audits
+## Tip: Delegate Long Audits to a Subagent
 If the user's opening prompt is a sweeping audit or investigation (e.g. *"audit changes since
-v2.7.13 for regressions"*, *"investigate why animations are broken on release"*), consider
-suggesting `/delegate` — the GitHub cloud agent can execute the branch + investigation + PR
-end-to-end while the user keeps working locally. See AGENTS.md `<copilot_cli_workflow>`.
+v2.7.13 for regressions"*, *"investigate why animations are broken on release"*), dispatch the
+`Explore` subagent (read-only, broad fan-out) so file dumps stay out of the main context and
+you get back just the conclusion; use the `gradle-runner` subagent for heavy `./gradlew` runs.
+See CLAUDE.md → "Delegate to keep context lean".

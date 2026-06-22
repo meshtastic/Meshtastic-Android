@@ -25,9 +25,10 @@
 - [ ] CHK001 — Principle I (KMP Core): All code in `commonMain`? No `java.*`/`android.*` imports? [Consistency]
 - [ ] CHK002 — Principle II (Zero Lint Tolerance): `spotlessApply` + `detekt` pass? [Consistency]
 - [ ] CHK003 — Principle III (CMP UI): Compose Multiplatform composables? `NumberFormatter.format()` for floats? Navigation 3 patterns? [Consistency]
-- [ ] CHK004 — Principle IV (Privacy First): No PII/location/key logging? Proto submodule untouched? [Consistency]
+- [ ] CHK004 — Principle IV (Privacy First): No PII/location/key logging? Generated proto not hand-edited? [Consistency]
 - [ ] CHK005 — Principle V (Design Standards): UI reviewed against Meshtastic design standards? Cross-platform features linked to upstream spec in `meshtastic/design/features/`? [Consistency]
-- [ ] CHK006 — Principle VI (Verify Before Push): Full verification passing locally? [Consistency]
+- [ ] CHK006 — Principle VI (Documentation Freshness): User-facing changes update `docs/` (with `last_updated`) or justified `skip-docs-check`? [Consistency]
+- [ ] CHK007 — Principle VII (Verify Before Push): Full verification passing locally? [Consistency]
 
 ## [Category 1]
 

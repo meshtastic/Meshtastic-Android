@@ -160,7 +160,7 @@ Examples of foundational tasks (adjust based on your project):
 - [ ] TXXX [P] Documentation updates in docs/
 - [ ] TXXX Code cleanup and refactoring
 - [ ] TXXX [P] Review user-facing UI against Meshtastic design standards and document any approved deviations
-- [ ] TXXX [P] Confirm no logs, telemetry, or config changes expose PII, location data, secrets, or modify `core/proto`
+- [ ] TXXX [P] Confirm no logs, telemetry, or config changes expose PII, location data, or secrets
 - [ ] TXXX [P] Run constitution-required verification (`spotlessCheck`, `detekt`, and relevant compile/test tasks)
 - [ ] TXXX [P] Additional unit/integration tests (if requested) in the appropriate test source sets
 - [ ] TXXX Validate quickstart/README or developer workflow docs if contributor workflow changed
