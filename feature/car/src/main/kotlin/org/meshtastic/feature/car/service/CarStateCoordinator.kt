@@ -179,8 +179,12 @@ class CarStateCoordinator(
     private fun collectNodeData() {
         nodeJob =
             scope.launch {
-                combine(nodeRepository.nodeDBbyNum, nodeRepository.onlineNodeCount) { nodeMap, onlineCount ->
-                    val nodes = CarScreenDataBuilder.sortNodes(nodeMap.values)
+                combine(
+                    nodeRepository.nodeDBbyNum,
+                    nodeRepository.onlineNodeCount,
+                    radioConfigRepository.localConfigFlow,
+                ) { nodeMap, onlineCount, localConfig ->
+                    val nodes = CarScreenDataBuilder.sortNodes(nodeMap.values, localConfig.lora?.modem_preset)
                     val totalCount = nodeMap.size
                     val meshName = nodeRepository.myNodeInfo.value?.firmwareVersion
 

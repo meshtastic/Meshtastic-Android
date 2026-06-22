@@ -89,6 +89,7 @@ import org.meshtastic.core.ui.icon.Unmessageable
 import org.meshtastic.core.ui.icon.role
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
+import org.meshtastic.core.ui.util.LocalModemPreset
 import org.meshtastic.proto.Config
 
 private const val ACTIVE_BORDER_ALPHA = 0.65f
@@ -152,8 +153,9 @@ fun NodeItemCompact(
     val style = if (thatNode.isUnknownUser) FontStyle.Italic else FontStyle.Normal
 
     val a11yStrings = rememberNodeDescriptionStrings()
+    val modemPreset = LocalModemPreset.current
     val nodeDescription =
-        remember(thatNode, lastHeardIsRelative, a11yStrings) {
+        remember(thatNode, lastHeardIsRelative, a11yStrings, modemPreset) {
             buildNodeDescription(
                 name = longName,
                 isOnline = thatNode.isOnline,
@@ -168,6 +170,7 @@ fun NodeItemCompact(
                 viaMqtt = thatNode.viaMqtt,
                 strings = a11yStrings,
                 lastHeardIsRelative = lastHeardIsRelative,
+                modemPreset = modemPreset,
             )
         }
 
@@ -371,7 +374,7 @@ private fun CompactHealthRow(
         // Signal quality
         val hasDirectSignal = thatNode.hopsAway == 0 && thatNode.snr < 100f && !thatNode.viaMqtt && thatNode.rssi < 0
         if (showSignal && hasDirectSignal) {
-            val quality = determineSignalQuality(thatNode.snr, thatNode.rssi)
+            val quality = determineSignalQuality(thatNode.snr, LocalModemPreset.current)
             add(
                 @Composable {
                     IconInfo(

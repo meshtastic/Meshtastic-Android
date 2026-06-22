@@ -18,11 +18,13 @@ package org.meshtastic.feature.car.util
 
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
+import org.meshtastic.core.model.snrLimit
 import org.meshtastic.feature.car.model.CarLocalStats
 import org.meshtastic.feature.car.model.ConversationUi
 import org.meshtastic.feature.car.model.NodeUi
 import org.meshtastic.feature.car.model.SignalQuality
 import org.meshtastic.feature.car.service.MessageSnapshot
+import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
 import org.meshtastic.proto.LocalStats
 
 /**
@@ -39,19 +41,19 @@ internal object CarScreenDataBuilder {
     private const val DAY_SECONDS = 86400
     private const val BATTERY_MAX_PERCENT = 100
 
-    // Thresholds aligned with core/ui LoraSignalIndicator.kt
-    private const val SNR_GOOD_THRESHOLD = -7f
-    private const val SNR_FAIR_THRESHOLD = -15f
-    private const val RSSI_GOOD_THRESHOLD = -115
-    private const val RSSI_FAIR_THRESHOLD = -126
+    // Preset-relative SNR band offsets (dB) around the modem preset's demodulation floor; aligned with core/ui
+    // LoraSignalIndicator. EXCELLENT sits a margin above the floor; FAIR/BAD step below it.
+    private const val SNR_EXCELLENT_MARGIN = 5.5f
+    private const val SNR_FAIR_OFFSET = 5.5f
+    private const val SNR_BAD_OFFSET = 7.5f
 
     /** Converts a [Node] to a [NodeUi] for car display. */
-    fun buildNodeUi(node: Node): NodeUi = NodeUi(
+    fun buildNodeUi(node: Node, modemPreset: ModemPreset? = null): NodeUi = NodeUi(
         nodeNum = node.num,
         userId = node.user.id,
         longName = node.user.long_name.ifEmpty { "Unknown" },
         shortName = node.user.short_name.ifEmpty { "?" },
-        signalQuality = determineSignalQuality(node.snr, node.rssi),
+        signalQuality = determineSignalQuality(node.snr, modemPreset),
         batteryPercent = node.batteryLevel?.takeIf { it in 1..BATTERY_MAX_PERCENT },
         isOnline = node.isOnline,
         lastHeard = node.lastHeard.toLong() * SECONDS_TO_MILLIS,
@@ -59,22 +61,28 @@ internal object CarScreenDataBuilder {
     )
 
     /** Sorts nodes for car display: online nodes first, then by lastHeard descending. */
-    fun sortNodes(nodes: Collection<Node>): List<NodeUi> = nodes
-        .map(::buildNodeUi)
+    fun sortNodes(nodes: Collection<Node>, modemPreset: ModemPreset? = null): List<NodeUi> = nodes
+        .map { buildNodeUi(it, modemPreset) }
         .sortedWith(compareByDescending<NodeUi> { it.isOnline }.thenByDescending { it.lastHeard })
 
     /** Builds ordered conversation list: sorted by most recent message time descending. */
     fun sortConversations(conversations: List<ConversationUi>): List<ConversationUi> =
         conversations.sortedByDescending { it.lastMessageTime }
 
-    /** Determines signal quality from SNR and RSSI values. */
-    fun determineSignalQuality(snr: Float, rssi: Int): SignalQuality = when {
-        snr == Float.MAX_VALUE || rssi == Int.MAX_VALUE -> SignalQuality.NONE
-        snr > SNR_GOOD_THRESHOLD && rssi > RSSI_GOOD_THRESHOLD -> SignalQuality.EXCELLENT
-        snr > SNR_GOOD_THRESHOLD && rssi > RSSI_FAIR_THRESHOLD -> SignalQuality.GOOD
-        snr > SNR_FAIR_THRESHOLD && rssi > RSSI_GOOD_THRESHOLD -> SignalQuality.GOOD
-        snr > SNR_FAIR_THRESHOLD -> SignalQuality.FAIR
-        else -> SignalQuality.BAD
+    /**
+     * Determines signal quality from SNR relative to the modem preset's demodulation floor ([ModemPreset.snrLimit]).
+     * RSSI is not used (matching core/ui); a null/unknown preset falls back to the LongFast default limit.
+     */
+    fun determineSignalQuality(snr: Float, modemPreset: ModemPreset? = null): SignalQuality {
+        if (snr == Float.MAX_VALUE) return SignalQuality.NONE
+        val limit = modemPreset.snrLimit
+        return when {
+            snr > limit + SNR_EXCELLENT_MARGIN -> SignalQuality.EXCELLENT
+            snr > limit -> SignalQuality.GOOD
+            snr > limit - SNR_FAIR_OFFSET -> SignalQuality.FAIR
+            snr >= limit - SNR_BAD_OFFSET -> SignalQuality.BAD
+            else -> SignalQuality.NONE
+        }
     }
 
     /**

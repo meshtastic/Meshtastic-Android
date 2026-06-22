@@ -40,6 +40,18 @@ private val ModemPreset.bandwidth: Float
         return 0f
     }
 
+/**
+ * The SNR (in dB) at or above which a packet sent with this modem preset can still be demodulated — i.e. the
+ * spreading-factor-determined demodulation floor. Signal quality should be judged relative to this limit, since the
+ * same SNR means very different things per preset: -15 dB is excellent on LongSlow (SF12) yet unusable on ShortFast
+ * (SF7).
+ *
+ * Values follow the Semtech SF -> SNR floor (SF7 -7.5 dB, stepping -2.5 dB per spreading factor up to SF12 -20 dB).
+ * Unknown/unset presets fall back to [ChannelOption.DEFAULT] (LongFast).
+ */
+val ModemPreset?.snrLimit: Float
+    get() = (ChannelOption.from(this) ?: ChannelOption.DEFAULT).snrLimit
+
 private fun LoRaConfig.bandwidth(regionInfo: RegionInfo?) = if (use_preset) {
     modem_preset.bandwidth * if (regionInfo?.wideLora == true) 3.25f else 1f
 } else {
@@ -295,22 +307,26 @@ enum class RegionInfo(
     }
 }
 
-enum class ChannelOption(val modemPreset: ModemPreset, val bandwidth: Float) {
-    // Grouped by range and speed for better readability
-    VERY_LONG_SLOW(ModemPreset.VERY_LONG_SLOW, 0.0625f),
-    LONG_TURBO(ModemPreset.LONG_TURBO, 0.500f),
-    LONG_FAST(ModemPreset.LONG_FAST, 0.250f),
-    LONG_MODERATE(ModemPreset.LONG_MODERATE, 0.125f),
-    LONG_SLOW(ModemPreset.LONG_SLOW, 0.125f),
-    MEDIUM_FAST(ModemPreset.MEDIUM_FAST, 0.250f),
-    MEDIUM_SLOW(ModemPreset.MEDIUM_SLOW, 0.250f),
-    SHORT_FAST(ModemPreset.SHORT_FAST, 0.250f),
-    SHORT_SLOW(ModemPreset.SHORT_SLOW, 0.250f),
-    SHORT_TURBO(ModemPreset.SHORT_TURBO, 0.500f),
-    LITE_FAST(ModemPreset.LITE_FAST, 0.125f),
-    LITE_SLOW(ModemPreset.LITE_SLOW, 0.125f),
-    NARROW_FAST(ModemPreset.NARROW_FAST, 0.0625f),
-    NARROW_SLOW(ModemPreset.NARROW_SLOW, 0.0625f),
+enum class ChannelOption(val modemPreset: ModemPreset, val bandwidth: Float, val snrLimit: Float) {
+    // Grouped by range and speed for better readability.
+    // snrLimit = demodulation floor for the preset's spreading factor (see [ModemPreset.snrLimit]).
+    VERY_LONG_SLOW(ModemPreset.VERY_LONG_SLOW, 0.0625f, snrLimit = -20f), // SF12
+    LONG_TURBO(ModemPreset.LONG_TURBO, 0.500f, snrLimit = -12.5f), // SF9
+    LONG_FAST(ModemPreset.LONG_FAST, 0.250f, snrLimit = -17.5f), // SF11
+    LONG_MODERATE(ModemPreset.LONG_MODERATE, 0.125f, snrLimit = -17.5f), // SF11
+
+    // SF12: physically -20 dB. NB: Meshtastic-Apple's snrLimit() returns -7.5 here, which is the SF7 value
+    // and an apparent bug — see meshtastic/Meshtastic-Android#5446.
+    LONG_SLOW(ModemPreset.LONG_SLOW, 0.125f, snrLimit = -20f), // SF12
+    MEDIUM_FAST(ModemPreset.MEDIUM_FAST, 0.250f, snrLimit = -12.5f), // SF9
+    MEDIUM_SLOW(ModemPreset.MEDIUM_SLOW, 0.250f, snrLimit = -15f), // SF10
+    SHORT_FAST(ModemPreset.SHORT_FAST, 0.250f, snrLimit = -7.5f), // SF7
+    SHORT_SLOW(ModemPreset.SHORT_SLOW, 0.250f, snrLimit = -10f), // SF8
+    SHORT_TURBO(ModemPreset.SHORT_TURBO, 0.500f, snrLimit = -7.5f), // SF7
+    LITE_FAST(ModemPreset.LITE_FAST, 0.125f, snrLimit = -12.5f),
+    LITE_SLOW(ModemPreset.LITE_SLOW, 0.125f, snrLimit = -15f),
+    NARROW_FAST(ModemPreset.NARROW_FAST, 0.0625f, snrLimit = -10f),
+    NARROW_SLOW(ModemPreset.NARROW_SLOW, 0.0625f, snrLimit = -12.5f),
     ;
 
     companion object {
