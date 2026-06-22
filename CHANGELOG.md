@@ -17,6 +17,8 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 * fix(network): migrate to mqtt-client 0.4.0 (IP-literal TLS fix) (#5895) by James Rich (@jamesarich) in [`ba9319c2d`](https://github.com/meshtastic/Meshtastic-Android/commit/ba9319c2dfc2655d529c480306a206a68bca02bc)
 * docs(mqtt): correct probe() tlsEnabled KDoc transport scheme (#5896) by James Rich (@jamesarich) in [`44bc88014`](https://github.com/meshtastic/Meshtastic-Android/commit/44bc880142d25d735b827731f81926802e81fe67)
 * chore: Scheduled updates (Firmware, Hardware, Translations, Graphs, Baseline) (#5897) by James Rich (@jamesarich) in [`90c183352`](https://github.com/meshtastic/Meshtastic-Android/commit/90c1833520bf2c318e86112fef891cc319950356)
+* fix(build): pin compose-material via explicit dep so baseline-profile generation resolves (#5899) by James Rich (@jamesarich) in [`a21894049`](https://github.com/meshtastic/Meshtastic-Android/commit/a21894049a6158049c582a5ca8667a56b336537e)
+* chore(deps): track androidx.compose.material (M2) with the CMP-aligned compose ref (#5902) by James Rich (@jamesarich) in [`950c9efa5`](https://github.com/meshtastic/Meshtastic-Android/commit/950c9efa566e92e643cbd0f975dfc68602bd67b3)
 
 ### Internal (v2.8.0-internal.4)
 Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14):
