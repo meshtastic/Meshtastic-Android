@@ -189,10 +189,10 @@
   },
   "pullRequests": [
     {
-      "id": "10751",
-      "title": "Add Femtofox E22P-915M30S meshtasticd config",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10751",
-      "zip_url": "https://discord.com/invite/meshtastic"
+      "id": "10754",
+      "title": "fix(phone-api): skip manifest scan for node-info-only config requests",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10754",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
       "id": "10729",
@@ -249,12 +249,6 @@
       "zip_url": "https://discord.com/invite/meshtastic"
     },
     {
-      "id": "10706",
-      "title": "Pr2 tmm basic",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10706",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
       "id": "10689",
       "title": "Heltec Vision Master E213: enable 32768hz crystal osc for rtc",
       "page_url": "https://github.com/meshtastic/firmware/pull/10689",
@@ -301,6 +295,12 @@
       "title": "Add 70cm amateur radio region support",
       "page_url": "https://github.com/meshtastic/firmware/pull/10627",
       "zip_url": "+23.2 KB"
+    },
+    {
+      "id": "10625",
+      "title": "Add MVP control point routing module for Meshtastic",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10625",
+      "zip_url": "https://discord.com/invite/meshtastic"
     }
   ]
 }
