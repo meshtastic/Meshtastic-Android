@@ -20,6 +20,9 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 * fix(build): pin compose-material via explicit dep so baseline-profile generation resolves (#5899) by James Rich (@jamesarich) in [`a21894049`](https://github.com/meshtastic/Meshtastic-Android/commit/a21894049a6158049c582a5ca8667a56b336537e)
 * chore(deps): track androidx.compose.material (M2) with the CMP-aligned compose ref (#5902) by James Rich (@jamesarich) in [`950c9efa5`](https://github.com/meshtastic/Meshtastic-Android/commit/950c9efa566e92e643cbd0f975dfc68602bd67b3)
 * feat(ui): use modem-preset-relative SNR thresholds for signal quality (#5903) by James Rich (@jamesarich) in [`27e936f10`](https://github.com/meshtastic/Meshtastic-Android/commit/27e936f1045e1fdcc9e256e4ed401980e7b8f3dc)
+* docs: de-submodule protos, sync constitution to v1.3.3, prune stale governance refs (#5905) by James Rich (@jamesarich) in [`2ff7ecf2d`](https://github.com/meshtastic/Meshtastic-Android/commit/2ff7ecf2d94b80483ad0867dc125ebcfbc9d1e29)
+* chore(deps): update markdownrenderer to v0.43.0 (#5908) by renovate[bot] (@renovate[bot]) in [`d8d96e74d`](https://github.com/meshtastic/Meshtastic-Android/commit/d8d96e74d6d4720276f59aeccd4abcd5f3987757)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs, Baseline) (#5906) by James Rich (@jamesarich) in [`808596db9`](https://github.com/meshtastic/Meshtastic-Android/commit/808596db9ea16ffa4b832fdc2ce518f8031d94d6)
 
 ### Internal (v2.8.0-internal.4)
 Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14):
