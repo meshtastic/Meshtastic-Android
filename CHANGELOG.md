@@ -19,6 +19,7 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 * chore: Scheduled updates (Firmware, Hardware, Translations, Graphs, Baseline) (#5897) by James Rich (@jamesarich) in [`90c183352`](https://github.com/meshtastic/Meshtastic-Android/commit/90c1833520bf2c318e86112fef891cc319950356)
 * fix(build): pin compose-material via explicit dep so baseline-profile generation resolves (#5899) by James Rich (@jamesarich) in [`a21894049`](https://github.com/meshtastic/Meshtastic-Android/commit/a21894049a6158049c582a5ca8667a56b336537e)
 * chore(deps): track androidx.compose.material (M2) with the CMP-aligned compose ref (#5902) by James Rich (@jamesarich) in [`950c9efa5`](https://github.com/meshtastic/Meshtastic-Android/commit/950c9efa566e92e643cbd0f975dfc68602bd67b3)
+* feat(ui): use modem-preset-relative SNR thresholds for signal quality (#5903) by James Rich (@jamesarich) in [`27e936f10`](https://github.com/meshtastic/Meshtastic-Android/commit/27e936f1045e1fdcc9e256e4ed401980e7b8f3dc)
 
 ### Internal (v2.8.0-internal.4)
 Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14):
