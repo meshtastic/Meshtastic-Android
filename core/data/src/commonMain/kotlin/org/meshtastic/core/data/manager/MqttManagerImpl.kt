@@ -43,7 +43,10 @@ import org.meshtastic.mqtt.ConnectionState
 import org.meshtastic.mqtt.MqttClient
 import org.meshtastic.mqtt.MqttException
 import org.meshtastic.mqtt.ProbeResult
+import org.meshtastic.mqtt.plus
 import org.meshtastic.mqtt.probe
+import org.meshtastic.mqtt.transport.tcp.TcpTransportFactory
+import org.meshtastic.mqtt.transport.ws.WebSocketTransportFactory
 import org.meshtastic.proto.MqttClientProxyMessage
 import org.meshtastic.proto.ToRadio
 import kotlin.uuid.Uuid
@@ -136,6 +139,8 @@ class MqttManagerImpl(
         val endpoint = resolveEndpoint(address, tlsEnabled)
         val result =
             MqttClient.probe(endpoint = endpoint) {
+                // probe() requires a transportFactory in 0.4.0 (errors otherwise); mirror the live client.
+                transportFactory = TcpTransportFactory() + WebSocketTransportFactory()
                 // Per-connection random suffix: myId identifies the node (and is null →
                 // "unknown" before the node record loads), so two probes can collide on one
                 // client-id and evict each other (SESSION_TAKEN_OVER). See MQTTRepositoryImpl.
