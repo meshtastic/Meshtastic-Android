@@ -294,7 +294,7 @@ class ScannerViewModelTest {
         assertEquals(true, viewModel.isNetworkScanning.value)
     }
 
-    // ── Scanning allowed in any connection state ────────────────────────────────────────────
+    // Manual scan control.
 
     @Test
     fun `startBleScan succeeds while Connected`() = runTest {
@@ -337,12 +337,41 @@ class ScannerViewModelTest {
     }
 
     @Test
-    fun `connectionState transition does not cancel active scan`() = runTest {
+    fun `connectionState transition to Connected cancels active ble scan`() = runTest {
         viewModel.startBleScan()
         assertEquals(true, viewModel.isBleScanning.value)
 
         serviceRepository.setConnectionState(ConnectionState.Connected)
         testScheduler.advanceUntilIdle()
+
+        assertEquals(false, viewModel.isBleScanning.value)
+    }
+
+    @Test
+    fun `connectionState transition to Connected cancels active network scan`() = runTest {
+        viewModel.startNetworkScan()
+        assertEquals(true, viewModel.isNetworkScanning.value)
+
+        serviceRepository.setConnectionState(ConnectionState.Connected)
+        testScheduler.advanceUntilIdle()
+
+        assertEquals(false, viewModel.isNetworkScanning.value)
+    }
+
+    @Test
+    fun `startBleAutoScan skips when device already selected`() = runTest {
+        harness.currentDeviceAddressFlow.value = "x01:02:03:04:05:06"
+
+        viewModel.startBleAutoScan()
+
+        assertEquals(false, viewModel.isBleScanning.value)
+    }
+
+    @Test
+    fun `startBleAutoScan starts when no device selected`() = runTest {
+        harness.currentDeviceAddressFlow.value = null
+
+        viewModel.startBleAutoScan()
 
         assertEquals(true, viewModel.isBleScanning.value)
     }
