@@ -79,7 +79,7 @@ private data class UsbRecoveryTriggerState(
 )
 
 private fun selectedSerialPresence(address: String?, keys: Set<String>): SelectedSerialPresence {
-    val key = address?.takeIf { it.firstOrNull() == InterfaceId.SERIAL.id }?.substring(1)
+    val key = address?.takeIf { it.firstOrNull() == InterfaceId.SERIAL.id }?.drop(1)?.takeIf { it.isNotEmpty() }
     return SelectedSerialPresence(key = key, present = key != null && key in keys)
 }
 
@@ -307,37 +307,17 @@ class SharedRadioInterfaceService(
         }
     }
 
-    // USB-serial recovery: when the selected SERIAL ('s') device is unplugged, the underlying
-    // SerialRadioTransport's onDisconnected fires and emits a transient DeviceSleep, but the
-    // orchestrator does not bring the transport back automatically when the device is replugged.
-    // Without this observer the user must manually re-select the device after every replug.
-    //
-    // We watch the SERIAL device-key set, the currently-selected address, AND the transport
-    // connection state together. Recovery is armed only after the SELECTED serial key has been
-    // observed absent and then present again. That "armed by absence" edge is what separates a real
-    // replug from a normal unplug race where onDisconnect(DeviceSleep) arrives before UsbRepository
-    // has removed the still-present key.
-    // There is no symmetric stop on absent → absent: the transport's own I/O error path
-    // (SerialConnectionListener.onDisconnected → onDeviceDisconnect) handles teardown, mirroring
-    // how the network listener only stops on networkAvailable=false rather than trying to detect
-    // TCP socket death itself.
-    //
-    // Race correctness: including _connectionState in the trigger closes the unplug/replug race
-    // where presence arrives BEFORE the I/O-death callback flips state to DeviceSleep. Without it,
-    // the early-return on Connected/Connecting (below) would swallow the presence emission, the
-    // subsequent state transition would NOT re-emit (distinctUntilChanged swallows true → true),
-    // and the zombie transport would never recover. With state in the combine, the
-    // Connected → DeviceSleep transition while presence is true re-triggers the flow.
-    //
-    // Flap/loop safety: each physical replug consumes exactly one armed-by-absence transition, and
-    // the recovery branch only fires when connectionRequested AND the running transport is SERIAL —
-    // so an explicit disconnect() (which clears connectionRequested and nulls runningTransportId via
-    // stopTransportLocked) immediately disarms the observer. A device that flaps N times produces at
-    // most N restarts, never an unbounded loop.
-    //
-    // Extracted from initStateListeners() so that function stays under detekt's LongMethod cap (60).
-    // Pure code motion — all referenced state is class-member scope, launchIn() registers the cold
-    // flow on processLifecycle.coroutineScope exactly as before.
+    /**
+     * Observes selected-SERIAL-device presence and transport state to auto-restart USB serial after replug.
+     *
+     * Recovery arms only after the selected serial key is observed absent, then fires when that same key is present
+     * while the transport is in [ConnectionState.DeviceSleep]. This prevents normal unplug races from restarting
+     * against stale presence before UsbRepository removes the key.
+     *
+     * Including [_connectionState] closes the race where presence returns before the I/O-death callback flips state to
+     * [ConnectionState.DeviceSleep]. Each physical replug consumes one armed edge, and recovery remains gated by
+     * [connectionRequested] and [runningTransportId] so explicit disconnects cannot resurrect a transport.
+     */
     private fun observeUsbRecoveryTriggers() {
         val selectedPresence =
             combine(currentDeviceAddressFlow, serialDevicePresence.deviceKeys, ::selectedSerialPresence)
@@ -364,12 +344,8 @@ class SharedRadioInterfaceService(
                     // Re-check presence under the lock — the combine snapshot may be stale
                     // if the device was unplugged or the selection changed while awaiting
                     // the mutex. Mirrors the race-defense pattern of the state check above.
-                    val currentRest =
-                        _currentDeviceAddressFlow.value
-                            ?.takeIf { it.firstOrNull() == InterfaceId.SERIAL.id }
-                            ?.substring(1)
                     val currentKeys = serialDevicePresence.deviceKeys.value
-                    if (currentRest == null || currentRest !in currentKeys) {
+                    if (!selectedSerialPresence(_currentDeviceAddressFlow.value, currentKeys).present) {
                         return@withLock
                     }
                     // A previously-started SERIAL transport that died on unplug is still held in
