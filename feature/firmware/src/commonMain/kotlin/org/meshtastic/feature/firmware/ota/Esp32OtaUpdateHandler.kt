@@ -351,6 +351,6 @@ class Esp32OtaUpdateHandler(
             .getOrThrow()
         Logger.i { "ESP32 OTA: Firmware stream completed" }
 
-        updateState(FirmwareUpdateState.Success)
+        updateState(FirmwareUpdateState.Success())
     }
 }

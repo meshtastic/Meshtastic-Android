@@ -208,7 +208,7 @@ class SecureDfuHandler(
                     )
 
                     completed = true
-                    updateState(FirmwareUpdateState.Success)
+                    updateState(FirmwareUpdateState.Success(wasLowSpeedTransfer = transport.isLowSpeedTransfer))
                     zipFile
                 } finally {
                     // Send ABORT if cancelled mid-transfer, then always clean up.

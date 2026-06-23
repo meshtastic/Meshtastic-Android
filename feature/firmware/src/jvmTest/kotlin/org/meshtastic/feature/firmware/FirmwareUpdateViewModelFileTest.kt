@@ -197,7 +197,7 @@ class FirmwareUpdateViewModelFileTest {
             .calls {
                 @Suppress("UNCHECKED_CAST")
                 val updateState = it.args[3] as (FirmwareUpdateState) -> Unit
-                updateState(FirmwareUpdateState.Success)
+                updateState(FirmwareUpdateState.Success())
                 null
             }
 
@@ -257,7 +257,7 @@ class FirmwareUpdateViewModelFileTest {
             .calls {
                 @Suppress("UNCHECKED_CAST")
                 val updateState = it.args[3] as (FirmwareUpdateState) -> Unit
-                updateState(FirmwareUpdateState.Success)
+                updateState(FirmwareUpdateState.Success())
                 null
             }
 

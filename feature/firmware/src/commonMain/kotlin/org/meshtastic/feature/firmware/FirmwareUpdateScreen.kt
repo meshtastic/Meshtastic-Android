@@ -112,6 +112,7 @@ import org.meshtastic.core.resources.firmware_update_release_notes
 import org.meshtastic.core.resources.firmware_update_retry
 import org.meshtastic.core.resources.firmware_update_save_dfu_file
 import org.meshtastic.core.resources.firmware_update_select_file
+import org.meshtastic.core.resources.firmware_update_slow_bootloader_hint
 import org.meshtastic.core.resources.firmware_update_source_local
 import org.meshtastic.core.resources.firmware_update_stable
 import org.meshtastic.core.resources.firmware_update_success
@@ -149,6 +150,14 @@ import org.meshtastic.core.ui.util.rememberOpenUrl
 import org.meshtastic.core.ui.util.rememberSaveFileLauncher
 
 private const val CYCLE_DELAY_MS = 4500L
+
+/**
+ * Flashing instructions for the OTAFIX 2.1 bootloader, which lifts the BLE DFU MTU cap (20-byte → 244-byte packets,
+ * ~10× faster updates). Offered on the Success screen after a low-speed transfer — never mid-upload, where leaving the
+ * app could drop the DFU link and brick the device.
+ */
+private const val OTAFIX_BOOTLOADER_URL =
+    "https://github.com/oltaco/Adafruit_nRF52_Bootloader_OTAFIX#changes-in-otafix-21"
 
 @Composable
 @Suppress("LongMethod")
@@ -328,7 +337,8 @@ private fun FirmwareUpdateContent(
 
             is FirmwareUpdateState.Error -> ErrorState(error = state.error, onRetry = actions.onRetry)
 
-            is FirmwareUpdateState.Success -> SuccessState(onDone = actions.onDone)
+            is FirmwareUpdateState.Success ->
+                SuccessState(onDone = actions.onDone, wasLowSpeedTransfer = state.wasLowSpeedTransfer)
 
             is FirmwareUpdateState.AwaitingFileSave -> AwaitingFileSaveState(state, actions.onSaveFile)
         }
@@ -866,8 +876,9 @@ internal fun ErrorState(error: UiText, onRetry: () -> Unit) {
 }
 
 @Composable
-internal fun SuccessState(onDone: () -> Unit) {
+internal fun SuccessState(wasLowSpeedTransfer: Boolean = false, onDone: () -> Unit) {
     val haptic = LocalHapticFeedback.current
+    val openUrl = rememberOpenUrl()
     LaunchedEffect(Unit) { haptic.performHapticFeedback(HapticFeedbackType.LongPress) }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -884,6 +895,18 @@ internal fun SuccessState(onDone: () -> Unit) {
             style = MaterialTheme.typography.headlineLarge,
             textAlign = TextAlign.Center,
         )
+        // The just-finished transfer was MTU-capped (stock bootloader). Now that the device is back and it's safe to
+        // leave the app, offer a one-time OTAFIX upgrade tip for faster future updates.
+        if (wasLowSpeedTransfer) {
+            Spacer(Modifier.height(16.dp))
+            Text(
+                text = stringResource(Res.string.firmware_update_slow_bootloader_hint),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
+            TextButton(onClick = { openUrl(OTAFIX_BOOTLOADER_URL) }) { Text(stringResource(Res.string.learn_more)) }
+        }
         Spacer(Modifier.height(32.dp))
         @OptIn(ExperimentalMaterial3ExpressiveApi::class)
         val largeHeight = ButtonDefaults.LargeContainerHeight
