@@ -33,7 +33,7 @@ runs:
     - name: Restore cached JetBrains JDK 21
       if: inputs.install_jetbrains_jdk == 'true'
       id: cache-jbr
-      uses: actions/cache@v5
+      uses: actions/cache@v6
       with:
         path: ${{ runner.tool_cache }}/Java_JetBrains_jdk
         key: jbr-21-${{ runner.os }}-${{ runner.arch }}
