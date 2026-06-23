@@ -38,6 +38,7 @@ import org.meshtastic.core.ble.MeshtasticBleConstants
 import org.meshtastic.core.datastore.RecentAddressesDataSource
 import org.meshtastic.core.datastore.model.RecentAddress
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.network.repository.NetworkRepository
 import org.meshtastic.core.repository.RadioController
@@ -157,6 +158,13 @@ open class ScannerViewModel(
     init {
         _showMockTransport.value = radioInterfaceService.isMockTransport()
         serviceRepository.connectionProgress.onEach { _connectionProgressText.value = it }.launchIn(viewModelScope)
+        serviceRepository.connectionState
+            .onEach { state ->
+                if (state is ConnectionState.Connected) {
+                    stopAllScans()
+                }
+            }
+            .launchIn(viewModelScope)
         Logger.d { "ScannerViewModel created" }
     }
 
@@ -289,6 +297,19 @@ open class ScannerViewModel(
                     if (scanGeneration.value == generation) _isBleScanning.value = false
                 }
             }
+    }
+
+    /**
+     * Starts BLE scanning for screen-entry auto-scan only when no device is already selected. Manual scan toggles call
+     * [startBleScan] directly so users can still discover/switch devices while connected.
+     *
+     * This controls only Connections-screen discovery. Selected-device reconnect still performs its fresh-advertisement
+     * scan in `BleRadioTransport.findDevice` before connecting.
+     */
+    fun startBleAutoScan() {
+        val selectedAddress = selectedAddressFlow.value
+        if (selectedAddress != null && selectedAddress != NO_DEVICE_SELECTED) return
+        startBleScan()
     }
 
     /**

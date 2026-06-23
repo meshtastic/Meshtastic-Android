@@ -54,10 +54,12 @@ import org.meshtastic.core.ble.retryBleOperation
 import org.meshtastic.core.ble.toMeshtasticRadioProfile
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.RadioNotConnectedException
+import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.network.transport.HeartbeatSender
 import org.meshtastic.core.repository.RadioTransport
 import org.meshtastic.core.repository.RadioTransportCallback
 import kotlin.concurrent.Volatile
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
@@ -77,6 +79,18 @@ private val CONNECTION_TIMEOUT = 15.seconds
 private val HEARTBEAT_DRAIN_DELAY = 200.milliseconds
 
 private val TARGETED_SCAN_TIMEOUT = 2.seconds
+
+/**
+ * Bounded scan duration used by both discovery paths in [findDevice]:
+ * - Bonded escalation: after the 2s [TARGETED_SCAN_TIMEOUT] misses the low-duty advertisement window, this is the
+ *   single bounded retry before declaring the bonded device unreachable.
+ * - Non-bonded retry: each of the [SCAN_RETRY_COUNT] attempts uses this duration.
+ *
+ * 5s covers multiple advertising intervals for typical BLE power-save slots (~1–2s each) while keeping the total bonded
+ * scan window bounded (~7s scan, ~10s total attempt including the existing reconnect settle delay) so
+ * [BleReconnectPolicy] iterates on its normal schedule instead of parking on [CONNECTION_TIMEOUT] (15s) via an
+ * `autoConnect=true` hang on a stale handle.
+ */
 private val SCAN_TIMEOUT = 5.seconds
 private val GATT_CLEANUP_TIMEOUT = 5.seconds
 
@@ -222,56 +236,71 @@ class BleRadioTransport(
             bluetoothRepository.state.value.bondedDevices.firstOrNull { it.address.equals(address, ignoreCase = true) }
 
         if (bondedDevice != null) {
-            Logger.i { "[$address] Bonded device found; attempting short targeted scan for fresh advertisement" }
-            findTargetedDevice()?.let {
-                Logger.i { "[$address] Fresh advertisement found; using scanned device" }
+            // Fast path: 2s targeted scan catches active advertising.
+            Logger.i {
+                "[${address.anonymize()}] Bonded device found; attempting short targeted scan for fresh advertisement"
+            }
+            scanForFreshDevice(TARGETED_SCAN_TIMEOUT)?.let {
+                Logger.i { "[${address.anonymize()}] Fresh advertisement found; using scanned device" }
                 return it
             }
-            Logger.i { "[$address] Targeted scan timed out; falling back to bonded address" }
-            return bondedDevice
-        }
 
-        Logger.i { "[$address] Device not found in bonded list, scanning" }
-
-        repeat(SCAN_RETRY_COUNT) { attempt ->
-            try {
-                val d =
-                    withTimeoutOrNull(SCAN_TIMEOUT) {
-                        // Pass both service UUID and address so the scanner can apply the most
-                        // efficient platform filter. Android uses address (OS-level HW filter),
-                        // while CoreBluetooth (macOS) needs the service UUID because it caches
-                        // peripheral identifiers and may not re-report by address alone.
-                        scanner.scan(timeout = SCAN_TIMEOUT, serviceUuid = SERVICE_UUID, address = address).first {
-                            it.address.equals(address, ignoreCase = true)
-                        }
-                    }
-                if (d != null) return d
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                Logger.v(e) { "[$address] Scan attempt failed or timed out" }
+            // Escalation: radio may be in a low-duty advertising slot. Try one bounded SCAN_TIMEOUT scan.
+            Logger.i { "[${address.anonymize()}] Targeted scan missed; escalating to bounded scan before giving up" }
+            scanForFreshDevice(SCAN_TIMEOUT)?.let {
+                Logger.i { "[${address.anonymize()}] Fresh advertisement found during escalated scan" }
+                return it
             }
 
+            // Never fall back to the stale bonded handle — that path forces autoConnect=true and hangs for
+            // CONNECTION_TIMEOUT (15s) before throwing. Bounded scan window (~7s scan, ~10s total attempt
+            // including the existing reconnect settle delay) lets the reconnect policy iterate on its
+            // normal schedule instead of parking on the autoConnect hang.
+            Logger.w { "[${address.anonymize()}] No fresh advertisement within $SCAN_TIMEOUT; reporting unreachable" }
+            throw RadioNotConnectedException("Bonded device is not advertising")
+        }
+
+        // Non-bonded path: preserve existing retry behavior (SCAN_RETRY_COUNT attempts at SCAN_TIMEOUT).
+        Logger.i { "[${address.anonymize()}] Device not found in bonded list, scanning" }
+        repeat(SCAN_RETRY_COUNT) { attempt ->
+            scanForFreshDevice(SCAN_TIMEOUT)?.let {
+                return it
+            }
             if (attempt < SCAN_RETRY_COUNT - 1) {
                 delay(SCAN_RETRY_DELAY)
             }
         }
-
         throw RadioNotConnectedException("Device not found at address $address")
     }
 
-    private suspend fun findTargetedDevice(): BleDevice? = try {
-        withTimeoutOrNull(TARGETED_SCAN_TIMEOUT) {
-            // Pass both service UUID and address so the scanner can apply the most
-            // efficient platform filter while still keeping CoreBluetooth service-scoped.
-            scanner.scan(timeout = TARGETED_SCAN_TIMEOUT, serviceUuid = SERVICE_UUID, address = address).first {
+    /**
+     * Performs a single BLE scan attempt for the selected [address] and returns the first matching [BleDevice], or null
+     * if the scan times out or fails.
+     *
+     * One scan attempt only — no retry, no backoff. Both bonded and non-bonded paths in [findDevice] share this
+     * primitive so retry policy stays centralized:
+     * - Bonded: escalated from [TARGETED_SCAN_TIMEOUT] to [SCAN_TIMEOUT] before [findDevice] declares the device
+     *   unreachable.
+     * - Non-bonded: [SCAN_RETRY_COUNT] attempts at [SCAN_TIMEOUT] with [SCAN_RETRY_DELAY] between attempts.
+     *
+     * The outer [withTimeoutOrNull] is binding: the scanner receives [timeout] as a hint, but this coroutine resumes on
+     * its own schedule regardless of when (or whether) the scanner honors it.
+     *
+     * [CancellationException] is rethrown — coroutine cancellation must never be swallowed.
+     */
+    private suspend fun scanForFreshDevice(timeout: Duration): BleDevice? = try {
+        withTimeoutOrNull(timeout) {
+            // Pass both service UUID and address so the scanner can apply the most efficient platform filter.
+            // Android uses address (OS-level HW filter), while CoreBluetooth (macOS) needs the service UUID because
+            // it caches peripheral identifiers and may not re-report by address alone.
+            scanner.scan(timeout = timeout, serviceUuid = SERVICE_UUID, address = address).first {
                 it.address.equals(address, ignoreCase = true)
             }
         }
     } catch (e: CancellationException) {
         throw e
     } catch (e: Exception) {
-        Logger.v(e) { "[$address] Targeted scan failed; falling back to bonded address" }
+        Logger.v(e) { "[${address.anonymize()}] Scan failed (timeout=$timeout)" }
         null
     }
 

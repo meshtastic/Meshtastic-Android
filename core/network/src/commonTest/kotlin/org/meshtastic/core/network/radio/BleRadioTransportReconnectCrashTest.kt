@@ -27,16 +27,20 @@ import dev.mokkery.mock
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.ble.BleConnection
 import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleConnectionState
 import org.meshtastic.core.ble.BleDevice
+import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.BleService
 import org.meshtastic.core.ble.BleWriteType
 import org.meshtastic.core.ble.DisconnectReason
@@ -1025,6 +1029,132 @@ class BleRadioTransportReconnectCrashTest {
             bleTransport.close()
         }
     }
+
+    // ─── Bonded fresh-advertisement discovery ─────────────────────────────────────────────────────
+
+    /**
+     * Regression: bonded auto-reconnect must NOT reuse the stale bonded handle when the targeted scan misses the
+     * advertising window. The escalation path (TARGETED_SCAN_TIMEOUT → SCAN_TIMEOUT) must surface a freshly-scanned
+     * device.
+     *
+     * Sequenced scanner: call 0 (2s targeted) returns empty; call 1 (5s escalated) emits a fresh `FakeBleDevice` for
+     * the bonded address. The transport must connect using the fresh scanned device, never the stale bonded handle.
+     */
+    @Test
+    fun `bonded device missed by targeted scan is found by escalated scan`() = runTest {
+        val bondedDevice = FakeBleDevice(address = address, name = "Bonded Handle")
+        bluetoothRepository.bond(bondedDevice)
+
+        val freshDevice = FakeBleDevice(address = address, name = "Fresh Scan Result")
+        val sequencedScanner =
+            SequencedBleScanner().apply {
+                responses += { flow { awaitCancellation() } } // call 0: targeted scan misses (runs until 2s timeout)
+                responses += { flow { emit(freshDevice) } } // call 1: escalated scan emits fresh device
+            }
+
+        // Profile setup needs FROMNUM/FROMRADIO so the transport reaches a stable Connected state
+        // rather than tearing down before we can inspect which device was connected.
+        connection.service.addCharacteristic(FROMNUM_CHARACTERISTIC)
+        connection.service.addCharacteristic(FROMRADIO_CHARACTERISTIC)
+
+        val bleTransport =
+            BleRadioTransport(
+                scope = this,
+                scanner = sequencedScanner,
+                bluetoothRepository = bluetoothRepository,
+                connectionFactory = connectionFactory,
+                callback = service,
+                address = address,
+            )
+        try {
+            bleTransport.start()
+
+            // 2s targeted scan + immediate escalated emit + connect/handshake settle.
+            advanceTimeBy(8_000L)
+
+            assertTrue(
+                sequencedScanner.callCount >= 2,
+                "Expected at least 2 scan calls (targeted + escalated); got ${sequencedScanner.callCount}",
+            )
+            assertEquals(
+                2_000L,
+                sequencedScanner.calls[0].timeout.inWholeMilliseconds,
+                "First scan must be targeted (2s)",
+            )
+            assertEquals(
+                5_000L,
+                sequencedScanner.calls[1].timeout.inWholeMilliseconds,
+                "Second scan must be escalated (5s)",
+            )
+            assertEquals(SERVICE_UUID, sequencedScanner.calls[0].serviceUuid, "First scan must include service UUID")
+            assertEquals(address, sequencedScanner.calls[0].address, "First scan must target selected address")
+            assertEquals(SERVICE_UUID, sequencedScanner.calls[1].serviceUuid, "Second scan must include service UUID")
+            assertEquals(address, sequencedScanner.calls[1].address, "Second scan must target selected address")
+            assertEquals(1, connection.connectAndAwaitCalls, "Must connect exactly once with the fresh scanned device")
+            assertTrue(
+                connection.device === freshDevice,
+                "Must use the fresh scanned device, not the stale bonded handle " +
+                    "(got: ${connection.device?.name}, expected: ${freshDevice.name})",
+            )
+
+            bleTransport.close()
+        } finally {
+            bleTransport.close()
+        }
+    }
+
+    /**
+     * Critical regression: when the bonded device is not advertising at all, [findDevice] must throw
+     * [RadioNotConnectedException] after the bounded scan window (~7s scan, ~10s total attempt including the existing
+     * reconnect settle delay) and must not fall back to the stale bonded handle.
+     *
+     * Before the fix, the stale handle forced `autoConnect=true` and hung for [CONNECTION_TIMEOUT] (15s) before the
+     * reconnect loop could iterate. This test proves `connectAndAwait` is never invoked against the stale handle.
+     */
+    @Test
+    fun `bonded device never advertising results in zero connect calls`() = runTest {
+        val bondedDevice = FakeBleDevice(address = address, name = "Bonded Handle")
+        bluetoothRepository.bond(bondedDevice)
+
+        val sequencedScanner =
+            SequencedBleScanner().apply {
+                responses += { flow { awaitCancellation() } } // call 0: targeted scan misses (runs until 2s timeout)
+                responses += { flow { awaitCancellation() } } // call 1: escalated scan misses (runs until 5s timeout)
+            }
+
+        val bleTransport =
+            BleRadioTransport(
+                scope = this,
+                scanner = sequencedScanner,
+                bluetoothRepository = bluetoothRepository,
+                connectionFactory = connectionFactory,
+                callback = service,
+                address = address,
+            )
+        try {
+            bleTransport.start()
+
+            // 2s targeted + 5s escalated + reconnect backoff + settle delay before second iteration.
+            // With awaitCancellation(), scans now suspend for their full timeout durations, so we
+            // must cover the full reconnect iteration window (settle + targeted + escalated + backoff).
+            advanceTimeBy(20_000L)
+
+            // Proves the stale bonded handle was not used: no connectAndAwait call.
+            assertEquals(
+                0,
+                connection.connectAndAwaitCalls,
+                "Must never call connectAndAwait when no fresh advertisement was found",
+            )
+            assertTrue(
+                sequencedScanner.callCount >= 2,
+                "Expected at least 2 scan calls (targeted + escalated); got ${sequencedScanner.callCount}",
+            )
+
+            bleTransport.close()
+        } finally {
+            bleTransport.close()
+        }
+    }
 }
 
 // ─── Test doubles ────────────────────────────────────────────────────────────────────────────────
@@ -1117,4 +1247,34 @@ private class NeverConnectedStateBleConnection : BleConnection {
     ): T = CoroutineScope(currentCoroutineContext()).setup(service)
 
     override fun maximumWriteValueLength(writeType: BleWriteType): Int? = null
+}
+
+/**
+ * A [BleScanner] test double that records each [scan] call's arguments and delegates to a per-call [Flow] supplier.
+ *
+ * Unlike [FakeBleScanner] (which is replay-based and re-emits all previously-emitted devices on every call), this
+ * scanner lets a test model "first scan misses, second scan finds" by configuring [responses] index-by-index. Calls
+ * beyond the configured list return a never-completing flow (models a scan that runs until cancelled).
+ */
+private class SequencedBleScanner : BleScanner {
+    data class Call(val timeout: Duration, val serviceUuid: kotlin.uuid.Uuid?, val address: String?)
+
+    private val _calls = mutableListOf<Call>()
+    val calls: List<Call>
+        get() = _calls.toList()
+
+    val callCount: Int
+        get() = _calls.size
+
+    /**
+     * Per-call [Flow] suppliers, indexed by call order. Call 0 returns [responses][0], call 1 returns [responses][1],
+     * etc. Calls beyond the list size return a never-completing flow (suspends until cancelled).
+     */
+    val responses = mutableListOf<() -> Flow<BleDevice>>()
+
+    override fun scan(timeout: Duration, serviceUuid: kotlin.uuid.Uuid?, address: String?): Flow<BleDevice> {
+        val index = _calls.size
+        _calls += Call(timeout, serviceUuid, address)
+        return if (index < responses.size) responses[index]() else flow { awaitCancellation() }
+    }
 }

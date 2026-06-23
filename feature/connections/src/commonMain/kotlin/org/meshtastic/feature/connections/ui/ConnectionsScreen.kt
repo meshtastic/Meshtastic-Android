@@ -146,15 +146,16 @@ fun ConnectionsScreen(
     val openBluetoothSettings = rememberOpenBluetoothSettings()
     val openWifiSettings = rememberOpenWifiSettings()
 
-    // Auto-start BLE scan when the screen is visible (lifecycle ≥ STARTED) and the user has previously opted in.
-    // LifecycleStartEffect stops scanning on ON_STOP (app backgrounded) and restarts on ON_START — preventing
-    // continuous background BLE radio usage that drains the battery.
+    // Auto-start BLE discovery when the screen is visible (lifecycle ≥ STARTED) and the user has previously opted in.
+    // ScannerViewModel skips screen-entry discovery when a selected device can reconnect through the transport's
+    // fresh-advertisement scan. LifecycleStartEffect stops scanning on ON_STOP (app backgrounded) and restarts on
+    // ON_START — preventing continuous background BLE radio usage that drains the battery.
     // Keyed on Unit so the effect fires only on lifecycle events, not on preference writes. The toggle handler
     // starts/stops scans directly; this effect handles screen-entry auto-start only. Keying on the pref caused
     // Compose to dispose the running scan (calling stopBleScan) and immediately re-run (calling startBleScan)
     // every time the pref was written, which cycled scans until Android's BluetoothLeScanner rate-limited.
     LifecycleStartEffect(Unit) {
-        if (scanModel.bleAutoScan.value && !scanModel.isBleScanning.value) scanModel.startBleScan()
+        if (scanModel.bleAutoScan.value && !scanModel.isBleScanning.value) scanModel.startBleAutoScan()
         onStopOrDispose { scanModel.stopBleScan() }
     }
 
