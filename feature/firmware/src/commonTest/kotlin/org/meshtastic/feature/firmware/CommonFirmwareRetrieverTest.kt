@@ -22,6 +22,7 @@ import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.feature.firmware.ota.FirmwareHashUtil
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -87,6 +88,66 @@ abstract class CommonFirmwareRetrieverTest {
         val result = retriever.retrieveEsp32Firmware(TEST_RELEASE, TEST_HARDWARE) {}
 
         assertNotNull(result, "Should resolve firmware via manifest")
+        assertEquals("firmware-heltec-v3-2.7.17.bin", result.fileName)
+    }
+
+    @Test
+    fun `retrieveEsp32Firmware accepts manifest artifact when md5 and size match`() = runTest {
+        val handler = FakeFirmwareFileHandler()
+        val retriever = FirmwareRetriever(handler)
+
+        // Distinctive app0 name no fallback heuristic would construct, so resolving it proves the verified manifest
+        // path returned the artifact (rather than a filename-heuristic fallback that happens to share the name).
+        val name = "firmware-heltec-v3-2.7.17-app0.bin"
+        val payload = ByteArray(2048) { it.toByte() }
+        val md5 = FirmwareHashUtil.calculateMd5Hex(payload)
+        handler.textResponses["$BASE_URL/firmware-2.7.17/firmware-heltec-v3-2.7.17.mt.json"] =
+            """{"files":[{"name":"$name","part_name":"app0","md5":"$md5","bytes":${payload.size}}]}"""
+        handler.existingUrls.add("$BASE_URL/firmware-2.7.17/$name")
+        handler.fileBytes[name] = payload
+
+        val result = retriever.retrieveEsp32Firmware(TEST_RELEASE, TEST_HARDWARE) {}
+
+        assertNotNull(result, "Manifest artifact passing the md5+size check should resolve")
+        assertEquals(name, result.fileName)
+    }
+
+    @Test
+    fun `retrieveEsp32Firmware rejects manifest artifact on md5 mismatch and falls back`() = runTest {
+        val handler = FakeFirmwareFileHandler()
+        val retriever = FirmwareRetriever(handler)
+
+        val name = "firmware-heltec-v3-2.7.17-app0.bin"
+        // Size matches (4) so md5 is computed; the manifest md5 is wrong, so the artifact must be rejected.
+        handler.textResponses["$BASE_URL/firmware-2.7.17/firmware-heltec-v3-2.7.17.mt.json"] =
+            """{"files":[{"name":"$name","part_name":"app0","md5":"deadbeef","bytes":4}]}"""
+        handler.existingUrls.add("$BASE_URL/firmware-2.7.17/$name")
+        handler.fileBytes[name] = byteArrayOf(0x01, 0x02, 0x03, 0x04)
+        // Heuristic fallback the rejection should land on.
+        handler.existingUrls.add("$BASE_URL/firmware-2.7.17/firmware-heltec-v3-2.7.17.bin")
+
+        val result = retriever.retrieveEsp32Firmware(TEST_RELEASE, TEST_HARDWARE) {}
+
+        assertNotNull(result)
+        assertEquals("firmware-heltec-v3-2.7.17.bin", result.fileName)
+    }
+
+    @Test
+    fun `retrieveEsp32Firmware rejects manifest artifact on size mismatch and falls back`() = runTest {
+        val handler = FakeFirmwareFileHandler()
+        val retriever = FirmwareRetriever(handler)
+
+        val name = "firmware-heltec-v3-2.7.17-app0.bin"
+        // Blank md5 → only size is checked; the declared size disagrees with the download, so it must be rejected.
+        handler.textResponses["$BASE_URL/firmware-2.7.17/firmware-heltec-v3-2.7.17.mt.json"] =
+            """{"files":[{"name":"$name","part_name":"app0","md5":"","bytes":9999}]}"""
+        handler.existingUrls.add("$BASE_URL/firmware-2.7.17/$name")
+        handler.fileBytes[name] = ByteArray(10)
+        handler.existingUrls.add("$BASE_URL/firmware-2.7.17/firmware-heltec-v3-2.7.17.bin")
+
+        val result = retriever.retrieveEsp32Firmware(TEST_RELEASE, TEST_HARDWARE) {}
+
+        assertNotNull(result)
         assertEquals("firmware-heltec-v3-2.7.17.bin", result.fileName)
     }
 
@@ -345,6 +406,9 @@ abstract class CommonFirmwareRetrieverTest {
         /** Result returned by [extractFirmwareFromZip]. */
         var zipExtractionResult: FirmwareArtifact? = null
 
+        /** Bytes (and thus size) reported by [readBytes] / [getFileSize] for a downloaded file, keyed by fileName. */
+        val fileBytes = mutableMapOf<String, ByteArray>()
+
         // Tracking
         val checkedUrls = mutableListOf<String>()
         val fetchedTextUrls = mutableListOf<String>()
@@ -401,9 +465,10 @@ abstract class CommonFirmwareRetrieverTest {
             preferredFilename: String?,
         ): FirmwareArtifact? = zipExtractionResult
 
-        override suspend fun getFileSize(file: FirmwareArtifact): Long = 0L
+        override suspend fun getFileSize(file: FirmwareArtifact): Long = (fileBytes[file.fileName]?.size ?: 0).toLong()
 
-        override suspend fun readBytes(artifact: FirmwareArtifact): ByteArray = ByteArray(0)
+        override suspend fun readBytes(artifact: FirmwareArtifact): ByteArray =
+            fileBytes[artifact.fileName] ?: ByteArray(0)
 
         override suspend fun importFromUri(uri: CommonUri): FirmwareArtifact? = null
 

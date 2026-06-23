@@ -370,6 +370,23 @@ class FirmwareUpdateViewModelTest {
     }
 
     @Test
+    fun `update method is Unknown for TCP nrf52`() = runTest {
+        // WiFi OTA is ESP32-only — nRF52 over TCP has no update path, so the method must be Unknown (the screen then
+        // shows an unsupported message instead of an Update button that would only throw on press).
+        val hardware = DeviceHardware(hwModel = 1, architecture = "nrf52", platformioTarget = "tbeam")
+        everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any(), any()) } returns
+            Result.success(hardware)
+        every { radioPrefs.devAddr } returns MutableStateFlow("t192.168.1.1")
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        val state = viewModel.state.value
+        assertIs<FirmwareUpdateState.Ready>(state)
+        assertIs<FirmwareUpdateMethod.Unknown>(state.updateMethod)
+    }
+
+    @Test
     fun `setReleaseType LOCAL produces null release in Ready`() = runTest {
         advanceUntilIdle()
 

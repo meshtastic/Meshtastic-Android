@@ -22,6 +22,7 @@ import kotlinx.serialization.json.Json
 import org.koin.core.annotation.Single
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.feature.firmware.ota.FirmwareHashUtil
 
 private val KNOWN_ARCHS = setOf("esp32-s3", "esp32-c3", "esp32-c6", "nrf52840", "rp2040", "stm32", "esp32")
 
@@ -173,14 +174,41 @@ class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
 
         Logger.i { "Manifest resolved OTA firmware: ${otaEntry.name} (${otaEntry.bytes} bytes, md5=${otaEntry.md5})" }
 
-        return retrieveArtifact(
-            release = release,
-            hardware = hardware,
-            onProgress = onProgress,
-            fileSuffix = ".bin",
-            internalFileExtension = ".bin",
-            preferredFilename = otaEntry.name,
-        )
+        val artifact =
+            retrieveArtifact(
+                release = release,
+                hardware = hardware,
+                onProgress = onProgress,
+                fileSuffix = ".bin",
+                internalFileExtension = ".bin",
+                preferredFilename = otaEntry.name,
+            ) ?: return null
+
+        // Verify the download against the manifest before handing it to the OTA flow. On mismatch we return null so the
+        // caller falls back to the filename heuristics (exactly like a missing/garbage manifest) — surfacing a bad
+        // download here beats rebooting the device into OTA mode, which tears down the mesh link, only to fail
+        // device-side hash verification mid-flash.
+        return artifact.takeIf { verifyAgainstManifest(it, otaEntry) }
+    }
+
+    /**
+     * Check a downloaded `.bin` against the manifest entry's [FirmwareManifestFile.bytes] and
+     * [FirmwareManifestFile.md5] (each enforced only when the manifest actually carries it). The md5 read is skipped
+     * when the size already fails, avoiding a full re-read of a known-wrong file.
+     */
+    private suspend fun verifyAgainstManifest(artifact: FirmwareArtifact, entry: FirmwareManifestFile): Boolean {
+        val sizeOk = entry.bytes <= 0 || fileHandler.getFileSize(artifact) == entry.bytes
+        val md5Ok =
+            !sizeOk ||
+                entry.md5.isBlank() ||
+                FirmwareHashUtil.calculateMd5Hex(fileHandler.readBytes(artifact)).equals(entry.md5, ignoreCase = true)
+        if (!sizeOk || !md5Ok) {
+            Logger.w {
+                "Manifest integrity check failed for ${entry.name} " +
+                    "(expected ${entry.bytes} bytes, md5=${entry.md5}; sizeOk=$sizeOk, md5Ok=$md5Ok)"
+            }
+        }
+        return sizeOk && md5Ok
     }
 
     // ── Private helpers ──────────────────────────────────────────────────────

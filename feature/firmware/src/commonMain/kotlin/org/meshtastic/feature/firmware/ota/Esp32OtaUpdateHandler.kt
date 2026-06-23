@@ -62,6 +62,12 @@ private const val PACKET_SEND_DELAY_MS = 2000L
 // Time to wait for BLE GATT to fully release after disconnecting mesh service
 private const val GATT_RELEASE_DELAY_MS = 1000L
 
+// A BLE target is a 6-octet MAC (e.g. AA:BB:CC:DD:EE:FF). Matching the exact MAC shape — not merely "contains a colon"
+// — keeps an IPv6 WiFi target (which also has colons) from being misrouted to the BLE path.
+private val MAC_ADDRESS_REGEX = Regex("([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}")
+
+internal fun isBleMacAddress(target: String): Boolean = MAC_ADDRESS_REGEX.matches(target)
+
 /**
  * KMP handler for ESP32 firmware updates using the Unified OTA protocol. Supports both BLE and WiFi/TCP transports via
  * [UnifiedOtaProtocol].
@@ -80,14 +86,14 @@ class Esp32OtaUpdateHandler(
     private val dispatchers: CoroutineDispatchers,
 ) : FirmwareUpdateHandler {
 
-    /** Entry point for FirmwareUpdateHandler interface. Routes to BLE (MAC with colons) or WiFi (IP without). */
+    /** Entry point for FirmwareUpdateHandler interface. Routes to BLE (target is a MAC) or WiFi (anything else). */
     override suspend fun startUpdate(
         release: FirmwareRelease,
         hardware: DeviceHardware,
         target: String,
         updateState: (FirmwareUpdateState) -> Unit,
         firmwareUri: CommonUri?,
-    ): FirmwareArtifact? = if (target.contains(":")) {
+    ): FirmwareArtifact? = if (isBleMacAddress(target)) {
         startBleUpdate(release, hardware, target, updateState, firmwareUri)
     } else {
         startWifiUpdate(release, hardware, target, updateState, firmwareUri)

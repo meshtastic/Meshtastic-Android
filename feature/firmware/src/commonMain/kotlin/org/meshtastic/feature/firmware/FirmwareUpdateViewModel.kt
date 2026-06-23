@@ -188,7 +188,14 @@ class FirmwareUpdateViewModel(
 
                                     radioPrefs.isBle() -> FirmwareUpdateMethod.Ble
 
-                                    radioPrefs.isTcp() -> FirmwareUpdateMethod.Wifi
+                                    radioPrefs.isTcp() -> {
+                                        // WiFi OTA is ESP32-only; nRF52/RP2040 have no TCP update path.
+                                        if (deviceHardware.isEsp32Arc) {
+                                            FirmwareUpdateMethod.Wifi
+                                        } else {
+                                            FirmwareUpdateMethod.Unknown
+                                        }
+                                    }
 
                                     else -> FirmwareUpdateMethod.Unknown
                                 }

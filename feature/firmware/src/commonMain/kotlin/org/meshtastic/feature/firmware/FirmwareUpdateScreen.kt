@@ -120,6 +120,7 @@ import org.meshtastic.core.resources.firmware_update_taking_a_while
 import org.meshtastic.core.resources.firmware_update_target
 import org.meshtastic.core.resources.firmware_update_title
 import org.meshtastic.core.resources.firmware_update_unknown_release
+import org.meshtastic.core.resources.firmware_update_unsupported_transport
 import org.meshtastic.core.resources.firmware_update_usb_bootloader_warning
 import org.meshtastic.core.resources.firmware_update_usb_instruction_text
 import org.meshtastic.core.resources.firmware_update_usb_instruction_title
@@ -374,6 +375,13 @@ private fun ReadyState(
     selectedReleaseType: FirmwareReleaseType,
     actions: FirmwareUpdateActions,
 ) {
+    // Unknown == no update path for this transport+device combo (e.g. ESP32 over Serial, nRF52 over TCP). Say so
+    // up front instead of offering a button whose handler would only throw on press.
+    if (state.updateMethod is FirmwareUpdateMethod.Unknown) {
+        UnsupportedTransportState()
+        return
+    }
+
     var showDisclaimer by remember { mutableStateOf(false) }
     val device = state.deviceHardware
     val haptic = LocalHapticFeedback.current
@@ -452,6 +460,26 @@ private fun ReadyState(
         }
         Spacer(Modifier.height(24.dp))
         ReleaseNotesCard(state.release.releaseNotes)
+    }
+}
+
+@Composable
+private fun UnsupportedTransportState() {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Spacer(Modifier.height(16.dp))
+        Icon(
+            MeshtasticIcons.Warning,
+            contentDescription = null,
+            modifier = Modifier.size(48.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.height(16.dp))
+        Text(
+            stringResource(Res.string.firmware_update_unsupported_transport),
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+        )
     }
 }
 

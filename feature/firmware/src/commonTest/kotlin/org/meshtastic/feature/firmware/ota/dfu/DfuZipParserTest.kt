@@ -124,4 +124,34 @@ class DfuZipParserTest {
         val ex = assertFailsWith<DfuException.InvalidPackage> { parseDfuZipEntries(entries) }
         assertEquals("Firmware 'app.bin' not found in zip", ex.message)
     }
+
+    @Test
+    fun picksPriorityImageWhenMultiplePresent() {
+        // Combined packages are unsupported; the parser flashes only the priority (application) image, ignoring the
+        // softdevice entry. Guards the multi-image limitation documented in parseDfuZipEntries.
+        val manifestJson =
+            """
+            {
+              "manifest": {
+                "application": { "bin_file": "app.bin", "dat_file": "app.dat" },
+                "softdevice": { "bin_file": "sd.bin", "dat_file": "sd.dat" }
+              }
+            }
+            """
+                .trimIndent()
+
+        val entries =
+            mapOf(
+                "manifest.json" to manifestJson.encodeToByteArray(),
+                "app.bin" to byteArrayOf(0x01, 0x02),
+                "app.dat" to byteArrayOf(0x03),
+                "sd.bin" to byteArrayOf(0x04),
+                "sd.dat" to byteArrayOf(0x05),
+            )
+
+        val packageResult = parseDfuZipEntries(entries)
+
+        assertTrue(packageResult.firmware.contentEquals(byteArrayOf(0x01, 0x02)))
+        assertTrue(packageResult.initPacket.contentEquals(byteArrayOf(0x03)))
+    }
 }

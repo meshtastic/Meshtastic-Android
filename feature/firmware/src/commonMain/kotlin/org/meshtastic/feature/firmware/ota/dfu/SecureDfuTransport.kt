@@ -210,10 +210,12 @@ class SecureDfuTransport(
                 }
             }
         } catch (_: TimeoutCancellationException) {
-            Logger.w {
-                "DFU: $logLabel buttonless trigger timed out — likely cause: stale BLE bond (Meshtastic " +
-                    "BLEDfu requires SECMODE_ENC_WITH_MITM). User must Forget+Re-pair the device in Android " +
-                    "Bluetooth settings if the next DFU-mode scan also fails."
+            // Expected on the normal success path: the WITH_RESPONSE write never ATT-ACKs because the device reboots
+            // into the bootloader before sending it. connectToDfuMode()'s scan confirms whether the trigger actually
+            // landed; only that scan failing indicates a real problem (e.g. a stale bond that blocked the trigger),
+            // and it surfaces the Forget+Re-pair guidance there.
+            Logger.d {
+                "DFU: $logLabel buttonless trigger write did not ACK before timeout (expected — device rebooting)"
             }
         }
     }
@@ -233,7 +235,11 @@ class SecureDfuTransport(
 
         val device =
             scanForDevice { d -> d.address in targetAddresses }
-                ?: throw DfuException.ConnectionFailed("DFU mode device not found. Tried: $targetAddresses")
+                ?: throw DfuException.ConnectionFailed(
+                    "DFU mode device not found (tried $targetAddresses). If the device never rebooted into DFU mode, " +
+                        "a stale BLE bond may be blocking the trigger (Meshtastic BLEDfu requires " +
+                        "SECMODE_ENC_WITH_MITM) — Forget+Re-pair the device in Android Bluetooth settings and retry.",
+                )
 
         Logger.i { "DFU: Found DFU mode device at ${device.address}, connecting..." }
 

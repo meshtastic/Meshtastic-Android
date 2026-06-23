@@ -422,6 +422,21 @@ class BleOtaTransportTest {
         assertIs<OtaProtocolException.TransferFailed>(result.exceptionOrNull())
     }
 
+    @Test
+    fun `streamFirmware fails immediately on empty firmware`() = runTest {
+        val scanner = FakeBleScanner()
+        val connection = FakeBleConnection()
+        val (transport) = createTransport(scanner, connection)
+        connectTransport(transport, scanner, connection)
+
+        // Empty image: must fail right away rather than skipping the loop and waiting out VERIFICATION_TIMEOUT. No
+        // device response is buffered, so a regression (waiting for a response) would surface as a Timeout, not this.
+        val result = transport.streamFirmware(ByteArray(0), 512) {}
+
+        assertTrue(result.isFailure)
+        assertIs<OtaProtocolException.TransferFailed>(result.exceptionOrNull())
+    }
+
     // -----------------------------------------------------------------------
     // close()
     // -----------------------------------------------------------------------
