@@ -26,8 +26,11 @@ import kotlinx.coroutines.flow.asStateFlow
  * Unified [BleDevice] implementation for all BLE devices — scanned, bonded, or both.
  *
  * When created from a live BLE scan, [advertisement] is populated and used for optimal peripheral construction via
- * `Peripheral(advertisement)`. When created from the OS bonded device list (address only), [advertisement] is `null`
- * and the peripheral is constructed via `createPeripheral(address)` with `autoConnect = true`.
+ * `Peripheral(advertisement)` with a direct (non-autoConnect) connection attempt.
+ *
+ * Bonded-only devices (address only, [advertisement] null) can still be constructed — e.g. for display in the device
+ * list — but [BleRadioTransport.findDevice] requires a fresh advertisement before connecting and will throw
+ * [RadioNotConnectedException] rather than returning a stale handle.
  *
  * @param address The device's MAC address (or platform identifier string).
  * @param name The device's display name, if known.
