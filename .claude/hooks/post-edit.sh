@@ -66,6 +66,22 @@ $out"
   *settings.gradle.kts)
     emit_context "You edited settings.gradle.kts. If you added a NEW TOP-LEVEL module directory, add its '<root>/**' line to the 'android:' paths-filter in .github/workflows/pull-request.yml (case-sensitive) or the verify-check-changes-filter drift guard will fail the PR (bit us on #5735). New sub-modules under an already-listed root (core/**, feature/**, etc.) are already covered — no change needed."
     ;;
+
+  */src/commonMain/*.kt|*/src/commonTest/*.kt)
+    # KMP No-Framework-Bleed (AGENTS.md): common source sets compile to iOS/JS too,
+    # so java.*/android.* imports are illegal there. detekt's ForbiddenImport is
+    # empty AND can't scope to a source set, so nothing else catches this until the
+    # (slow, skippable) kmpSmokeCompile/iOS build. Cheap grep, blocks at edit time.
+    bleed=$(grep -nE '^[[:space:]]*import[[:space:]]+(java|android)\.' "$file_path" 2>/dev/null)
+    if [ -n "$bleed" ]; then
+      {
+        printf '%s\n' "KMP boundary violation — $file_path is a common source set but imports java.*/android.*:"
+        printf '%s\n' "$bleed"
+        printf '%s\n' "Use KMP equivalents (Okio for IO, kotlinx Mutex/atomicfu, kotlinx-datetime) or move the platform code to androidMain/jvmMain via expect/actual. (AGENTS.md No-Framework-Bleed; not caught until kmpSmokeCompile.)"
+      } >&2
+      exit 2
+    fi
+    ;;
 esac
 
 exit 0
