@@ -38,9 +38,6 @@ internal object SecureDfuUuids {
 
     /** Buttonless DFU – no bond required. Write 0x01 to reboot into DFU mode. */
     val BUTTONLESS_NO_BONDS: Uuid = Uuid.parse("8EC90003-F315-4F60-9FB8-838830DAEA50")
-
-    /** Buttonless DFU – bond required variant. */
-    val BUTTONLESS_WITH_BONDS: Uuid = Uuid.parse("8EC90004-F315-4F60-9FB8-838830DAEA50")
 }
 
 /**

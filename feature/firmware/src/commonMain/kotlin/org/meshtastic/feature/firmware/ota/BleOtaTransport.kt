@@ -69,13 +69,7 @@ class BleOtaTransport(
         val targetAddresses = setOf(address, otaAddress)
         Logger.i { "BLE OTA: Will match addresses: $targetAddresses" }
 
-        return scanForBleDevice(
-            scanner = scanner,
-            tag = "BLE OTA",
-            serviceUuid = OTA_SERVICE_UUID,
-            retryCount = SCAN_RETRY_COUNT,
-            retryDelay = SCAN_RETRY_DELAY,
-        ) {
+        return scanForBleDevice(scanner = scanner, tag = "BLE OTA", serviceUuid = OTA_SERVICE_UUID) {
             it.address in targetAddresses
         }
     }
@@ -319,8 +313,6 @@ class BleOtaTransport(
         private val ACK_TIMEOUT = 10.seconds
         private val VERIFICATION_TIMEOUT = 10.seconds
         private val REBOOT_DELAY = 5.seconds
-        private const val SCAN_RETRY_COUNT = 3
-        private val SCAN_RETRY_DELAY = 2.seconds
         const val RECOMMENDED_CHUNK_SIZE = 512
 
         /** Fallback write payload when the MTU has not been negotiated (23-byte ATT MTU minus the 3-byte header). */

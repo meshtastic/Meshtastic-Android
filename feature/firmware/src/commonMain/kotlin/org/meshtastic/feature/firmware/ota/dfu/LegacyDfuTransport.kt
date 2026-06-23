@@ -475,8 +475,6 @@ class LegacyDfuTransport(
         scanner = scanner,
         tag = "Legacy DFU",
         serviceUuid = LegacyDfuUuids.SERVICE,
-        retryCount = SCAN_RETRY_COUNT,
-        retryDelay = SCAN_RETRY_DELAY,
         predicate = predicate,
     )
 
@@ -490,8 +488,6 @@ class LegacyDfuTransport(
         private val START_RESPONSE_TIMEOUT = 30.seconds
         private val VALIDATE_TIMEOUT = 60.seconds
         private val SUBSCRIPTION_SETTLE = 500.milliseconds
-        private const val SCAN_RETRY_COUNT = 3
-        private val SCAN_RETRY_DELAY = 2.seconds
 
         /**
          * Wall-clock budget for a full firmware streaming session. Must comfortably exceed the upload duration for the
