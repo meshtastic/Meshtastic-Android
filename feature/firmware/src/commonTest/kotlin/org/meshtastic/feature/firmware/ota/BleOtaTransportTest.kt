@@ -212,11 +212,8 @@ class BleOtaTransportTest {
         val progressValues = mutableListOf<Float>()
         val firmwareData = byteArrayOf(0x01, 0x02, 0x03, 0x04)
 
-        // For a 4-byte firmware with chunkSize=4 and maxWriteValueLength=512:
-        // 1 chunk → 1 packet → 1 ACK expected.
-        // Then the code checks if it's the last packet of the last chunk —
-        // if OK is received with isLastPacketOfChunk=true and nextSentBytes>=totalBytes,
-        // it returns early.
+        // 4-byte firmware, chunkSize 4, payload 512 → one chunk = one write expecting one response.
+        // The terminal OK on the last (only) chunk completes the transfer.
         emitResponse(connection, "OK")
 
         val result = transport.streamFirmware(firmwareData, 4) { progress -> progressValues.add(progress) }
@@ -306,6 +303,60 @@ class BleOtaTransportTest {
 
         assertTrue(result.isFailure)
         assertIs<OtaProtocolException.TransferFailed>(result.exceptionOrNull())
+    }
+
+    @Test
+    fun `streamFirmware clamps chunk to negotiated write payload and acks once per chunk`() = runTest {
+        val scanner = FakeBleScanner()
+        val connection = FakeBleConnection()
+        val (transport) = createTransport(scanner, connection)
+        // Negotiated payload (200) smaller than the requested chunk (512) — the real MTU-512 case is payload 509.
+        connection.maxWriteValueLength = 200
+        scanner.emitDevice(FakeBleDevice(address))
+        transport.connect().getOrThrow()
+
+        emitResponse(connection, "OK")
+        transport.startOta(600L, "hash")
+
+        // The transport must clamp 512 → 200, yielding three 200-byte chunks, each ONE write expecting ONE
+        // response. Before the fix the 512-byte chunk fragmented into multiple writes and the loop waited for a
+        // response per fragment, desyncing against the device's one-response-per-chunk cadence (10s ACK-timeout hang).
+        emitResponse(connection, "ACK")
+        emitResponse(connection, "ACK")
+        emitResponse(connection, "OK")
+
+        val progress = mutableListOf<Float>()
+        val result = transport.streamFirmware(ByteArray(600) { it.toByte() }, 512) { progress.add(it) }
+
+        assertTrue(result.isSuccess, "streamFirmware failed: ${result.exceptionOrNull()}")
+        assertEquals(1.0f, progress.last())
+
+        val dataWrites = connection.service.writes.filter { it.writeType == BleWriteType.WITHOUT_RESPONSE }
+        assertEquals(3, dataWrites.size, "expected exactly one write per 200-byte chunk")
+        assertTrue(dataWrites.all { it.data.size <= 200 }, "no write may exceed the negotiated payload")
+    }
+
+    @Test
+    fun `streamFirmware surfaces a final-chunk error instead of reporting success`() = runTest {
+        val scanner = FakeBleScanner()
+        val connection = FakeBleConnection()
+        val (transport) = createTransport(scanner, connection)
+        connection.maxWriteValueLength = 200
+        scanner.emitDevice(FakeBleDevice(address))
+        transport.connect().getOrThrow()
+
+        emitResponse(connection, "OK")
+        transport.startOta(600L, "hash")
+
+        // First two chunks ack; the device then rejects the final image hash. Must fail, never report success.
+        emitResponse(connection, "ACK")
+        emitResponse(connection, "ACK")
+        emitResponse(connection, "ERR Hash Mismatch")
+
+        val result = transport.streamFirmware(ByteArray(600) { it.toByte() }, 512) {}
+
+        assertTrue(result.isFailure)
+        assertIs<OtaProtocolException.VerificationFailed>(result.exceptionOrNull())
     }
 
     // -----------------------------------------------------------------------
