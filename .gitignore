@@ -95,3 +95,7 @@ offline-repository/
 build-scan-*.scan
 # burningmesh capture replay assets (private data — generated via replay_server.py --export)
 *.fromradio
+
+# craft pipeline scratch workpad (per-task working notes, not source)
+/workpad.md
+/workpad.*.md
