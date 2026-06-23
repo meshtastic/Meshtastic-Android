@@ -82,6 +82,9 @@ class SharedRadioInterfaceServiceLivenessTest {
         // Create the lifecycle owner AFTER setMain so Robolectric's main thread is ready.
         // Field initializers run before @BeforeTest, which is too early for Robolectric.
         processLifecycleOwner = TestLifecycleOwner()
+        // USB tests leave serialDeviceKeys non-empty; reset before each test so non-USB
+        // tests start from the documented empty default.
+        serialDeviceKeys.value = emptySet()
     }
 
     @AfterTest

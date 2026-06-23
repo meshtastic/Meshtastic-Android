@@ -18,6 +18,7 @@ package org.meshtastic.core.network.repository
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import org.koin.core.annotation.Single
 
 /**
@@ -29,7 +30,5 @@ import org.koin.core.annotation.Single
  */
 @Single
 class JvmSerialDevicePresence : SerialDevicePresence {
-    // MutableStateFlow implements StateFlow; the property's declared type seals external consumers
-    // to the read-only view without an asStateFlow() wrapper for a value that never changes.
-    override val deviceKeys: StateFlow<Set<String>> = MutableStateFlow(emptySet())
+    override val deviceKeys: StateFlow<Set<String>> = MutableStateFlow<Set<String>>(emptySet()).asStateFlow()
 }

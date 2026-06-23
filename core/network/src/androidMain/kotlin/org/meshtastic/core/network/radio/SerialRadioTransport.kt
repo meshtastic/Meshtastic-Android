@@ -65,12 +65,15 @@ class SerialRadioTransport(
     }
 
     override fun onDeviceDisconnect(waitForStopped: Boolean, isPermanent: Boolean) {
-        closeConnection(waitForStopped)
-        super.onDeviceDisconnect(waitForStopped, isPermanent)
+        if (closeConnection(waitForStopped)) {
+            super.onDeviceDisconnect(waitForStopped, isPermanent)
+        }
     }
 
-    private fun closeConnection(waitForStopped: Boolean) {
-        connRef.getAndSet(null)?.close(waitForStopped)
+    private fun closeConnection(waitForStopped: Boolean): Boolean {
+        val connection = connRef.getAndSet(null) ?: return false
+        connection.close(waitForStopped)
+        return true
     }
 
     override fun connect() {

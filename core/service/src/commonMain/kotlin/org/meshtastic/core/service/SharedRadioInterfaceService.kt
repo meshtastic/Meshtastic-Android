@@ -327,7 +327,7 @@ class SharedRadioInterfaceService(
     // Extracted from initStateListeners() so that function stays under detekt's LongMethod cap (60).
     // Pure code motion — all referenced state is class-member scope, launchIn() registers the cold
     // flow on processLifecycle.coroutineScope exactly as before.
-    private suspend fun observeUsbRecoveryTriggers() {
+    private fun observeUsbRecoveryTriggers() {
         val selectedPresence =
             combine(currentDeviceAddressFlow, serialDevicePresence.deviceKeys, ::selectedSerialPresence)
                 .distinctUntilChanged()
@@ -348,6 +348,17 @@ class SharedRadioInterfaceService(
                     // acquisition window so we never tear down a fresh healthy transport.
                     val state = _connectionState.value
                     if (state is ConnectionState.Connected || state is ConnectionState.Connecting) {
+                        return@withLock
+                    }
+                    // Re-check presence under the lock — the combine snapshot may be stale
+                    // if the device was unplugged or the selection changed while awaiting
+                    // the mutex. Mirrors the race-defense pattern of the state check above.
+                    val currentRest =
+                        _currentDeviceAddressFlow.value
+                            ?.takeIf { it.firstOrNull() == InterfaceId.SERIAL.id }
+                            ?.substring(1)
+                    val currentKeys = serialDevicePresence.deviceKeys.value
+                    if (currentRest == null || currentRest !in currentKeys) {
                         return@withLock
                     }
                     // A previously-started SERIAL transport that died on unplug is still held in
