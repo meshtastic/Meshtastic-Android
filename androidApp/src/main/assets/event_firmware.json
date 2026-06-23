@@ -1,0 +1,63 @@
+{
+  "version": 1,
+  "generatedAt": "2026-06-23T00:00:00Z",
+  "source": "bundled",
+  "editions": [
+    {
+      "edition": "HAMVENTION",
+      "displayName": "Hamvention",
+      "welcomeMessage": "Welcome to Hamvention! 🍖📻",
+      "eventStart": "2026-05-15",
+      "eventEnd": "2026-05-17",
+      "timeZone": "America/New_York",
+      "location": "Xenia, Ohio, USA",
+      "iconUrl": null,
+      "accentColor": "#005DAA",
+      "links": [
+        { "label": "Event Website", "url": "https://hamvention.org" }
+      ]
+    },
+    {
+      "edition": "OPEN_SAUCE",
+      "displayName": "Open Sauce",
+      "welcomeMessage": "Welcome to Open Sauce! 🔧",
+      "eventStart": "2026-07-18",
+      "eventEnd": "2026-07-19",
+      "timeZone": "America/Los_Angeles",
+      "location": "San Mateo, California, USA",
+      "iconUrl": null,
+      "accentColor": "#E94F1D",
+      "links": [
+        { "label": "Event Website", "url": "https://opensauce.com" }
+      ]
+    },
+    {
+      "edition": "DEFCON",
+      "displayName": "DEFCON",
+      "welcomeMessage": "Welcome to DEFCON! 💀",
+      "eventStart": "2026-08-06",
+      "eventEnd": "2026-08-09",
+      "timeZone": "America/Los_Angeles",
+      "location": "Las Vegas, Nevada, USA",
+      "iconUrl": null,
+      "accentColor": "#C0392B",
+      "links": [
+        { "label": "Event Website", "url": "https://defcon.org" }
+      ]
+    },
+    {
+      "edition": "BURNING_MAN",
+      "displayName": "Burning Man",
+      "welcomeMessage": "Welcome to Burning Man! 🔥",
+      "eventStart": "2026-08-30",
+      "eventEnd": "2026-09-07",
+      "timeZone": "America/Los_Angeles",
+      "location": "Black Rock City, Nevada, USA",
+      "iconUrl": null,
+      "accentColor": "#E8552D",
+      "links": [
+        { "label": "Event Website", "url": "https://burningman.org" }
+      ]
+    }
+  ]
+}
