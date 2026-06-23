@@ -26,20 +26,20 @@ import kotlinx.serialization.Serializable
  * we fetch the manifest on-demand, locate the `app0` partition entry, and use its [FirmwareManifestFile.name] as the
  * exact filename to download.
  *
+ * Only [files] is modelled. The manifest also carries decorative metadata (`hwModel`, `mcu`, `build_epoch`, the
+ * partition table, …) whose scalar types vary across firmware versions — notably `hwModel` is an **integer** in current
+ * releases (the `HardwareModel` enum value) though it was historically a string. Modelling those would couple parsing
+ * to a schema we don't control; instead [Json.ignoreUnknownKeys] drops them so an upstream type change can never break
+ * OTA resolution. (A `hwModel: String` field previously made every manifest fail to parse, silently falling back to
+ * filename heuristics — see `FirmwareRetriever`.)
+ *
  * Example URL:
  * ```
  * https://raw.githubusercontent.com/meshtastic/meshtastic.github.io/master/
  *   firmware-2.7.17/firmware-t-deck-2.7.17.mt.json
  * ```
  */
-@Serializable
-internal data class FirmwareManifest(
-    @SerialName("hwModel") val hwModel: String = "",
-    val architecture: String = "",
-    @SerialName("platformioTarget") val platformioTarget: String = "",
-    val mcu: String = "",
-    val files: List<FirmwareManifestFile> = emptyList(),
-)
+@Serializable internal data class FirmwareManifest(val files: List<FirmwareManifestFile> = emptyList())
 
 /**
  * A single partition file entry inside a [FirmwareManifest].
