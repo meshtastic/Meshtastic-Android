@@ -1376,13 +1376,25 @@ class SharedRadioInterfaceServiceLivenessTest {
     @Test
     fun `USB replug recovers when presence arrives before DeviceSleep`() = runTest(testDispatcher) {
         clock = 0L
-        val service = createConnectedService("s/dev/bus/usb/001/002")
+        val selectedKey = "/dev/bus/usb/001/002"
+        serialDeviceKeys.value = setOf(selectedKey)
+        val service = createConnectedService("s$selectedKey")
         try {
             assertEquals(1, createdTransports.size, "Initial connect should create one transport")
             assertEquals(ConnectionState.Connected, service.connectionState.value, "Precondition: Connected state")
 
+            // The actual detach is observed first, while state is still Connected.
+            serialDeviceKeys.value = emptySet()
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+            assertEquals(1, createdTransports.size, "Detach while Connected must NOT restart transport")
+            assertFalse(
+                createdTransports.first().closeCalled,
+                "Detach while Connected must NOT close the transport",
+            )
+
             // Replug signal arrives WHILE state is still Connected — the trigger must NOT fire yet.
-            serialDeviceKeys.value = setOf("/dev/bus/usb/001/002")
+            serialDeviceKeys.value = setOf(selectedKey)
             testDispatcher.scheduler.runCurrent()
             advanceTimeBy(1_000L)
             assertEquals(1, createdTransports.size, "Presence while Connected must NOT restart transport")
@@ -1399,6 +1411,43 @@ class SharedRadioInterfaceServiceLivenessTest {
                 createdTransports.first().closeCalled,
                 "Zombie transport must be closed by stopTransportLocked",
             )
+        } finally {
+            service.disconnect()
+            advanceTimeBy(1_000L)
+        }
+    }
+
+    /**
+     * Regression: Android serialDevices starts as an empty snapshot before UsbRepository refreshes. That initial empty
+     * → present emission is not a detach/replug edge and must not arm recovery for a later normal unplug callback.
+     */
+    @Test
+    fun `USB initial empty presence does not arm recovery`() = runTest(testDispatcher) {
+        clock = 0L
+        val selectedKey = "/dev/bus/usb/001/002"
+        val service = createConnectedService("s$selectedKey")
+        try {
+            assertEquals(1, createdTransports.size, "Initial connect should create one transport")
+            val initialTransport = createdTransports.first()
+            assertEquals(ConnectionState.Connected, service.connectionState.value, "Precondition: Connected state")
+
+            serialDeviceKeys.value = setOf(selectedKey)
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+
+            assertEquals(1, createdTransports.size, "Initial empty → present must NOT restart transport")
+            assertFalse(initialTransport.closeCalled, "Initial presence refresh must not close the transport")
+
+            service.onDisconnect(isPermanent = false)
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+
+            assertEquals(
+                1,
+                createdTransports.size,
+                "Later DeviceSleep with initially-present key must NOT restart transport",
+            )
+            assertFalse(initialTransport.closeCalled, "Unplug callback alone must not close the transport")
         } finally {
             service.disconnect()
             advanceTimeBy(1_000L)

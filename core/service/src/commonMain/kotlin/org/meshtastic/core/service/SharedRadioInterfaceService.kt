@@ -86,22 +86,31 @@ private fun selectedSerialPresence(address: String?, keys: Set<String>): Selecte
 private fun UsbRecoveryTriggerState.next(snapshot: UsbRecoverySnapshot): UsbRecoveryTriggerState {
     val key = snapshot.presence.key
     val present = snapshot.presence.present
-    val armed = armedByAbsence || !this.present
-    val trigger = key == this.key && present && armed && snapshot.state == ConnectionState.DeviceSleep
     return when {
         key == null -> UsbRecoveryTriggerState()
 
-        key != this.key -> UsbRecoveryTriggerState(key = key, present = present)
+        key != this.key ->
+            UsbRecoveryTriggerState(
+                key = key,
+                present = present,
+                armedByAbsence = !present && snapshot.state == ConnectionState.DeviceSleep,
+            )
 
-        !present -> UsbRecoveryTriggerState(key = key)
+        !present ->
+            UsbRecoveryTriggerState(
+                key = key,
+                armedByAbsence = armedByAbsence || this.present || snapshot.state == ConnectionState.DeviceSleep,
+            )
 
-        else ->
+        else -> {
+            val trigger = armedByAbsence && snapshot.state == ConnectionState.DeviceSleep
             UsbRecoveryTriggerState(
                 key = key,
                 present = true,
-                armedByAbsence = armed && !trigger,
+                armedByAbsence = armedByAbsence && !trigger,
                 triggerRecovery = trigger,
             )
+        }
     }
 }
 
