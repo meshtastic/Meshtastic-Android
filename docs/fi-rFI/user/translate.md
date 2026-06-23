@@ -1,57 +1,57 @@
 ---
-title: Translate the App
-parent: User Guide
+title: Käännä sovellus
+parent: Käyttöopas
 nav_order: 17
 last_updated: 2026-05-13
 aliases:
-  - translate
+  - käännä
   - crowdin
-  - localization
+  - lokalisointi
 ---
 
-# Translate the App
+# Käännä sovellus
 
-Contributing translations helps make Meshtastic accessible to a wider audience. The app uses [Crowdin](https://crowdin.com/) to manage community translations for both the user interface and in-app documentation.
-
----
-
-## What Gets Translated
-
-| Resource          | Source Location                       | Viestit                                                                |
-| ----------------- | ------------------------------------- | ---------------------------------------------------------------------- |
-| UI strings        | `composeResources/values/strings.xml` | Buttons, labels, messages, and all user-visible text                   |
-| User Guide pages  | `docs/user/*.md`                      | In-app documentation shown in Help & Documentation |
-| Fastlane metadata | `fastlane/metadata/android/en-US/`    | App Store listing title, description, and changelogs                   |
-
-> **Note — Developer Guide pages are English-only.** Code-focused documentation targeting contributors is not translated.
+Käännöksiin osallistuminen auttaa tekemään Meshtasticista saavutettavamman laajemmalle yleisölle. Sovellus käyttää [Crowdinia](https://crowdin.com/) yhteisökäännösten hallintaan sekä käyttöliittymän sovelluksen sisäisten dokumentaatioiden hallintaan.
 
 ---
 
-## How to Contribute
+## Mitä käännetään
 
-1. **Visit the Crowdin project.** Open the [Meshtastic Android Crowdin project](https://crowdin.com/project/meshtastic-android) and sign in or create a free account.
-2. **Choose your language.** Select an existing language or request a new one by opening a [GitHub issue](https://github.com/meshtastic/Meshtastic-Android/issues/new).
-3. **Translate strings.** Crowdin shows the English source on the left and your translation on the right. Translate each string and save.
-4. **Review context.** Many strings include screenshots or context comments — check these to understand where the text appears in the app.
-5. **Submit.** Approved translations are automatically merged into the next release.
+| Resurssi            | Lähteen sijainti                      | Viestit                                                             |
+| ------------------- | ------------------------------------- | ------------------------------------------------------------------- |
+| UI-tekstit          | `composeResources/values/strings.xml` | Painikkeet, otsikot, viestit ja kaikki käyttäjälle näkyvä teksti    |
+| Käyttöoppaan sivut  | `docs/user/*.md`                      | Sovelluksen sisäinen dokumentaatio Ohjeet ja dokumentaatio -osiossa |
+| Fastlane-metatiedot | fastlane/metadata/android/en-US/      | Sovelluskaupan listauksen otsikko, kuvaus ja muutoslokit            |
 
-> **Tip — Keep translations short.** UI strings often appear in buttons, chips, or narrow columns. If a translation is significantly longer than the English original, consider abbreviating where the meaning stays clear.
-
----
-
-## Adding a New Language
-
-If your language is not yet listed on Crowdin:
-
-1. Open an issue on [GitHub](https://github.com/meshtastic/Meshtastic-Android/issues/new) requesting the new locale.
-2. A maintainer will add the language to Crowdin and configure `crowdin.yml`.
-3. Once added, you can begin translating immediately.
+> Huomio – Kehittajäoppaan -sivut ovat vain englanniksi. Koodikeskeistä dokumentaatiota ei käännetä.
 
 ---
 
-## How Translations Are Organized
+## Kuinka voi osallistua
 
-The Android app uses **Compose Multiplatform resources** for all user-visible strings:
+1. Avaa Meshtastic Android Crowdin -projekti (https://crowdin.com/project/meshtastic-android) ja kirjaudu sisään tai luo ilmainen tili.
+2. **Valitse kielesi.** Valitse olemassa oleva kieli tai pyydä uutta avaamalla [GitHub-issue](https://github.com/meshtastic/Meshtastic-Android/issues/new).
+3. **Käännä merkkijonot.** Crowdin näyttää englanninkielisen lähteen vasemmalla ja käännöksesi oikealla. Käännä jokainen merkkijono ja tallenna.
+4. **Tarkista konteksti.** Monet merkkijonot sisältävät kuvakaappauksia tai kontekstikommentteja — tarkista nämä ymmärtääksesi, missä teksti näkyy sovelluksessa.
+5. **Lähetä.** Hyväksytyt käännökset yhdistetään automaattisesti seuraavaan julkaisuun.
+
+> **Vinkki — Pidä käännökset lyhyinä.** UI-tekstit näkyvät usein painikkeissa, tageissa tai kapeissa sarakkeissa. Jos käännös on huomattavasti pidempi kuin englanninkielinen alkuperäinen, harkitse tiivistämistä niin, että merkitys säilyy selkeänä.
+
+---
+
+## Uuden kielen lisääminen
+
+Jos kieltäsi ei ole vielä listattu Crowdinissa:
+
+1. Avaa GitHub-issue (https://github.com/meshtastic/Meshtastic-Android/issues/new) ja pyydä uutta kielialuetta.
+2. Ylläpitäjä lisää kielen Crowdin-projektiin ja määrittää `crowdin.yml`-asetukset.
+3. Kun kieli on lisätty, voit aloittaa kääntämisen heti.
+
+---
+
+## Kuinka käännökset on järjestetty
+
+Android-sovellus käyttää **Compose Multiplatform -resursseja** kaikille käyttäjälle näkyville teksteille:
 
 ```
 core/resources/src/commonMain/composeResources/
@@ -64,7 +64,7 @@ core/resources/src/commonMain/composeResources/
 └── ...
 ```
 
-In-app documentation follows a similar pattern under `docs/`:
+Sovelluksen sisäinen dokumentaatio noudattaa samaa rakennetta `docs/` -hakemistossa:
 
 ```
 docs/
@@ -77,21 +77,21 @@ docs/
 └── ...
 ```
 
-The app automatically selects the correct locale based on your device's **Language & Region** settings.
+Sovellus valitsee automaattisesti oikean kielialueen laitteen **Kieli & alue** -asetusten perusteella.
 
 ---
 
-## Translation Guidelines
+## Käännösohjeet
 
-- **Do not translate** technical terms like "LoRa", "MQTT", "BLE", "TAK", "SNR", or "RSSI" — these are universal.
-- **Keep placeholders intact.** Strings like `%1$s` or `%d` are filled in at runtime. Do not remove or reorder them unless the grammar of your language requires it.
-- **Match tone.** The app uses a friendly, direct voice. Avoid overly formal language.
-- **Test if possible.** Switch your device language and open the app to see how translations look in context.
+- **Älä käännä** teknisiä termejä kuten "LoRa", "MQTT", "BLE", "TAK", "SNR" tai "RSSI" — nämä ovat yleisiä.
+- **Pidä paikkamerkit ennallaan.** Merkkijonot kuten `%1$s` tai `%d` täytetään ajon aikana. Älä poista tai muuta niiden järjestystä, ellei kielesi kielioppi sitä vaadi.
+- **Säilytä sävy.** Sovellus käyttää ystävällistä ja suoraa tyyliä. Vältä liian muodollista kieltä.
+- **Testaa jos mahdollista.** Vaihda laitteesi kieli ja avaa sovellus nähdäksesi käännökset kontekstissa.
 
 ---
 
-## Questions?
+## Kysyttävää?
 
-If you have questions about a specific string's context or need help getting started, open a discussion on the [Meshtastic GitHub Discussions](https://github.com/meshtastic/Meshtastic-Android/discussions) page.
+Jos sinulla on kysyttävää tietyn merkkijonon kontekstista tai tarvitset apua alkuun pääsemisessä, avaa keskustelu Meshtastic GitHub Discussions -sivulla (https://github.com/meshtastic/Meshtastic-Android/discussions).
 
-Thank you for helping expand the reach of Meshtastic!
+Kiitos, että autat laajentamaan Meshtasticin tavoittavuutta!

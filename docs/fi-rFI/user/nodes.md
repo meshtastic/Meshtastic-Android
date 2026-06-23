@@ -1,160 +1,160 @@
 ---
 title: Laitteet
-parent: User Guide
+parent: Käyttöopas
 nav_order: 4
 last_updated: 2026-06-02
-description: Browse, filter, and sort mesh nodes — view details, signal quality, roles, and quick actions.
+description: Selaa, suodata ja lajittele verkon radioita — tarkastele tietoja, signaalin laatua, rooleja ja pikatoimintoja.
 aliases:
-  - node-list
-  - mesh-nodes
-  - peers
+  - radiolista
+  - mesh-radiot
+  - vertaisradiot
 ---
 
 # Laitteet
 
-The Nodes screen displays all devices visible on your mesh network.
+Radiot-näyttö näyttää kaikki verkossasi näkyvät laitteet.
 
-## Node List
+## Radiolista
 
-The node list shows every node your radio has heard, including:
+Radioluettelo näyttää kaikki radiot, joista radiosi on vastaanottanut tietoja, mukaan lukien:
 
-- **Node name** — user-configured long name
-- **Short name** — 4-character identifier
-- **Signal quality** — last heard signal strength
-- **Last heard** — time since last communication
-- **Distance** — estimated distance (if positions are shared)
-- **Battery** — remote node battery level (if telemetry is enabled)
+- **Radion nimi** — käyttäjän määrittämä pitkä nimi
+- **Lyhyt nimi** — 4-merkkinen tunniste
+- **Signaalin laatu** — viimeksi vastaanotetun signaalin voimakkuus
+- **Viimeksi kuultu** — aika viimeisimmästä yhteydestä
+- **Etäisyys** — arvioitu etäisyys (jos sijaintitiedot jaetaan)
+- **Akku** — etäradion akun varaustaso (jos telemetria on käytössä)
 
-### Node Status Indicators
+### Radion tilailmaisimet
 
-| Badge      | Meaning                               |
-| ---------- | ------------------------------------- |
-| 🟢 Online  | Node heard within the last 15 minutes |
-| 🟡 Away    | Node heard within the last 2 hours    |
-| 🔴 Offline | Node not heard for over 2 hours       |
-| ⭐ Favorite | Node marked as favorite by the user   |
+| Tunniste       | Tarkoitus                                 |
+| -------------- | ----------------------------------------- |
+| 🟢 Verkossa    | Radio kuultu viimeisen 15 minuutin aikana |
+| 🟡 Poissa      | Radio kuultu viimeisen 2 tunnin aikana    |
+| 🔴 Ei verkossa | Radiosta ei ole kuultu yli 2 tuntiin      |
+| ⭐ Suosikki     | Käyttäjän suosikiksi merkitsemä radio     |
 
-### Node Roles
+### Radion roolit
 
-Nodes can be configured with different roles that affect their mesh behavior:
+Radioille voidaan määrittää erilaisia rooleja, jotka vaikuttavat niiden toimintaan verkossa:
 
-| Rooli                            | Kuvaus                                                                                                                                                 |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Client                           | Standard end-user device                                                                                                                               |
-| Client Base                      | Treats favorited-node traffic as Router Late priority; all other traffic as Client                                                                     |
-| Client Mute                      | Receives but doesn't retransmit                                                                                                                        |
-| Client Hidden                    | Like Client Mute, plus hides from node list                                                                                                            |
-| Router                           | Prioritizes message forwarding; stays awake to relay                                                                                                   |
-| Router Late                      | Infrastructure node that rebroadcasts once, but only after all other modes (provides supplemental coverage)                         |
-| ~~Router Client~~                | ⚠️ **Deprecated** (removed in firmware 2.3.15) — no longer selectable; use Router or Client instead |
-| ~~Repeater~~                     | ⚠️ **Deprecated** (removed in firmware 2.7.11) — no longer selectable; use Router instead           |
-| Tracker                          | Optimized for position reporting at regular intervals                                                                                                  |
-| Sensor                           | Optimized for telemetry reporting                                                                                                                      |
-| TAK                              | Interoperates with TAK systems (sends/receives CoT)                                                                                 |
-| TAK Tracker                      | TAK position reporting only                                                                                                                            |
-| Lost & Found | Continuous position beacon for recovery                                                                                                                |
+| Rooli                | Kuvaus                                                                                                                                                                         |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Client               | Tavallinen loppukäyttäjän laite                                                                                                                                                |
+| Client Base          | Käsittelee suosikkiradioiden liikenteen Router Late -prioriteetilla, kaiken muun liikenteen Client -prioriteetilla                                                             |
+| Client Mute          | Vastaanottaa viestejä, mutta ei lähetä niitä edelleen                                                                                                                          |
+| Client Hidden        | Kuten Client Mute, mutta piilotetaan myös radioluettelosta                                                                                                                     |
+| Router               | Priorisoi viestien välittämistä; pysyy hereillä välittääkseen viestejä                                                                                                         |
+| Router Late          | Infrastruktuuriradio, joka lähettää viestin uudelleen kerran, mutta vasta kaikkien muiden tilojen jälkeen (tarjoaa lisäpeittoa)                             |
+| ~~Router Client~~    | ⚠️ **Vanhentunut** (poistettu laiteohjelmistossa 2.3.15) — ei enää valittavissa; käytä sen sijaan Router- tai Client-roolia |
+| ~~Repeater~~         | ⚠️ **Vanhentunut** (poistettu laiteohjelmistossa 2.7.11) — ei enää valittavissa; käytä sen sijaan Router-roolia             |
+| Tracker              | Optimoitu sijainnin raportointiin säännöllisin väliajoin                                                                                                                       |
+| Sensor               | Optimoitu telemetrian raportointiin                                                                                                                                            |
+| TAK                  | Yhteensopiva TAK-järjestelmien kanssa (lähettää ja vastaanottaa CoT-viestejä)                                                                               |
+| TAK Tracker          | Vain TAK-sijainnin raportointi                                                                                                                                                 |
+| Kadonnut ja löydetty | Jatkuva sijaintimajakka löytämistä varten                                                                                                                                      |
 
-### Choosing a Role
+### Roolin valitseminen
 
-Most users should keep the default **Client** role. Consider a different role when:
+Useimpien käyttäjien kannattaa käyttää oletusarvoista **Client**-roolia. Harkitse muuta roolia seuraavissa tilanteissa:
 
-- **Router** — You have a node in a fixed, elevated location with reliable power (rooftop, hilltop). Routers stay awake continuously to relay messages for others and are essential for extending mesh coverage. Don't use Router on battery-powered handheld devices.
-- **Router Late** — An infrastructure node that always rebroadcasts packets once but only after all other routing modes have had their turn. Provides supplemental coverage for local clusters without competing with primary routers.
-- **Client Base** — Treats traffic from/to your favorited nodes with Router Late priority (ensuring those messages get extra relay coverage) while handling everything else as a normal Client.
-- **Client Mute** — You want to receive mesh traffic but not contribute to relaying. Useful for monitoring-only devices or to reduce congestion in dense areas.
-- **Tracker** — An unattended device whose sole purpose is broadcasting its GPS position (e.g., a vehicle, pet, or asset). Sleeps between broadcasts to conserve battery.
-- **Sensor** — An unattended device reporting environmental telemetry (temperature, humidity, air quality). Similar power profile to Tracker.
-- **TAK / TAK Tracker** — Only needed if interoperating with ATAK/WinTAK systems. See [TAK Integration](tak) for details.
+- **Router** — Sinulla on radio kiinteässä, korkealla sijaitsevassa paikassa, jossa on luotettava virransyöttö (katto, mäki). Routerit pysyvät jatkuvasti hereillä välittääkseen muiden viestejä ja ovat tärkeitä verkon peittoalueen laajentamisessa. Älä käytä **Router**-roolia akkukäyttöisissä käsilaitteissa.
+- **Router Late** — Infrastruktuuriradio, joka lähettää paketit uudelleen kerran, mutta vasta kaikkien muiden reititystilojen jälkeen. Tarjoaa lisäpeittoa paikallisille ryhmille kilpailematta ensisijaisten Routerien kanssa.
+- **Client Base** — Käsittelee suosikkiradioihisi menevän tai niistä tulevan liikenteen Router Late -prioriteetilla (varmistaen näille viesteille ylimääräisen välityspeiton), samalla kun kaikki muu käsitellään tavallisen Client-roolin tavoin.
+- **Client Mute** — Voit vastaanottaa verkkoliikennettä, mutta et osallistu viestien välittämiseen. Hyödyllinen vain valvontaan käytettäville laitteille tai ruuhkien vähentämiseen tiheästi rakennetuilla alueilla.
+- **Tracker** — Valvomaton laite, jonka ainoa tarkoitus on lähettää GPS-sijaintiaan (esim. ajoneuvo, lemmikki tai omaisuus). Nukkuu lähetysten välillä akun säästämiseksi.
+- **Sensor** — Valvomaton laite, joka raportoi ympäristötelemetriaa (lämpötila, kosteus, ilmanlaatu). Samanlainen virrankulutusprofiili kuin Tracker-roolissa.
+- **TAK / TAK Tracker** — Tarvitaan vain yhteensopivuuteen ATAK-/WinTAK-järjestelmien kanssa. Katso [TAK-integraatio](tak) lisätietoja varten.
 
-> 💡 **Tip:** The mesh works best when most nodes are **Client** or **Router**. Too many Mute nodes reduces mesh resilience; too many Routers in a dense area can cause congestion. A good rule of thumb: one Router per 5–10 Clients in your area.
+> 💡 **Vinkki:** Verkko toimii parhaiten, kun suurin osa radioista käyttää **Client**- tai **Router**-roolia. Liian suuri määrä Client Mute -rooleja heikentää verkon toimintavarmuutta, kun taas liian suuri määrä Router-rooleja tiheässä verkossa voi aiheuttaa ruuhkaa. Hyvä nyrkkisääntö on yksi Router jokaista 5–10 Client-roolia kohden alueellasi.
 
-### Encryption Indicators
+### Salausilmaisimet
 
-Nodes display encryption status icons next to their name:
+Radiot näyttävät nimensä vieressä salauksen tilaa kuvaavat kuvakkeet:
 
-| Icon        | Meaning                                                                                                             |
-| ----------- | ------------------------------------------------------------------------------------------------------------------- |
-| 🔒 Locked   | Communication uses PKI (public key infrastructure) — end-to-end encrypted with verified identity |
-| 🔓 Unlocked | Communication uses shared channel PSK — encrypted but identity not individually verified                            |
-| ⚠️ Mismatch | Public key mismatch — the node's key has changed since last seen (investigate before trusting)   |
+| Kuvake          | Merkitys                                                                                                                                                                       |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 🔒 Lukittu      | Yhteys käyttää PKI:tä (julkisen avaimen infrastruktuuria) — päästä päähän salattu ja varmennetulla identiteetillä suojattu. |
+| 🔓 Lukitsematon | Yhteys käyttää PKI:tä (julkisen avaimen infrastruktuuria) — päästä päähän salattu ja varmennetulla identiteetillä suojattu. |
+| ⚠️ Ei täsmää    | Julkinen avain ei täsmää — radion avain on muuttunut viime näkemän jälkeen (tutki ennen luottamista).                                       |
 
-> 💡 **Tip:** PKI encryption (firmware 2.5+) provides stronger security than channel PSK because each node has a unique key pair. If you see a key mismatch warning, the node may have been reset or compromised.
+> 💡 **Vinkki:** PKI-salaus (laiteohjelmisto 2.5+) tarjoaa vahvemman suojauksen kuin kanavan PSK-avain, koska jokaisella radiolla on oma yksilöllinen avainparinsa. Jos näet avaimen täsmäämättömyysvaroituksen, radio on voitu nollata tai sen tietoturva on voinut vaarantua.
 
-## Quick Actions
+## Pikatoiminnot
 
-From the node list, you can:
+Radioluettelosta voit:
 
-- **Tap** a node to view its detail page
-- **Long-press** for quick actions:
-  - Mark/remove favorite
-  - Mute/unmute notifications
-  - Send a direct message
-  - Trace route
-  - Ignore/unignore
+- **Napauttaa** radiota avataksesi sen tietosivun
+- **Pitkä painallus** pikatoimintoja varten:
+  - Merkitse tai poista suosikki
+  - Mykistä tai poista mykistys ilmoituksista
+  - Lähetä yksityisviesti
+  - Reitinselvitys
+  - Ohita tai poista ohitus
   - Poista laite
 
-## Filtering & Sorting
+## Suodatus ja lajittelu
 
-### Text Search
+### Tekstihaku
 
-Type in the search field to filter nodes by name or short name. The filter updates in real time as you type.
+Kirjoita hakukenttään suodattaaksesi radioita nimen tai lyhyen nimen perusteella. Suodatus päivittyy reaaliajassa kirjoittaessasi.
 
-### Filter Toggles
+### Suodatusvalinnat
 
-| Suodatus                   | Kuvaus                                                                                         |
-| -------------------------- | ---------------------------------------------------------------------------------------------- |
-| **Only online**            | Show only nodes heard within the last 15 minutes                                               |
-| **Only direct**            | Show only nodes with direct (non-relayed) connections                       |
-| **Include unknown**        | Show nodes that haven't sent user info yet                                                     |
-| **Exclude infrastructure** | Hide infrastructure-role nodes (Router, Repeater, Router Late, Client Base) |
-| **Exclude MQTT**           | Hide nodes heard only via MQTT internet bridge                                                 |
-| **Show ignored**           | Show nodes you've previously dismissed or muted                                                |
+| Suodatus                              | Kuvaus                                                                                          |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| **Vain verkossa olevat**              | Näytä vain radiot, joista on kuultu viimeisen 15 minuutin aikana                                |
+| **Vain suorat**                       | Näytä vain radiot, joihin on suora yhteys (ei välitetty yhteys)              |
+| **Näytä tuntemattomat**               | Näytä radiot, jotka eivät ole vielä lähettäneet käyttäjätietoja                                 |
+| **Ohita infrastruktuurilaitteet**     | Piilottaa infrastruktuuriroolit (Router, Repeater, Router Late, Client Base) |
+| **Rajaa MQTT pois**                   | Piilottaa radiot, joista on kuultu vain MQTT-internetsillan kautta                              |
+| **Näytä vain huomioimattomat radiot** | Näytä radiot, jotka olet aiemmin ohittanut tai mykistänyt                                       |
 
-### Sort Options
+### Lajitteluvaihtoehdot
 
-| Sort                                        | Kuvaus                                                             |
-| ------------------------------------------- | ------------------------------------------------------------------ |
-| **Last heard** (default) | Most recently heard nodes first                                    |
-| **Alphabetical**                            | Sorted by node long name                                           |
-| **Distance**                                | Nearest nodes first (requires position sharing) |
-| **Hops away**                               | Fewest relay hops first                                            |
-| **Channel**                                 | Grouped by channel index                                           |
-| **Via MQTT**                                | Grouped by MQTT vs. radio-heard                    |
-| **Favorites**                               | Favorited nodes first                                              |
+| Lajittelu                                       | Kuvaus                                                                            |
+| ----------------------------------------------- | --------------------------------------------------------------------------------- |
+| **Viimeksi kuultu** (oletus) | Näytä viimeksi kuullut radiot ensin                                               |
+| **Aakkosjärjestys**                             | Lajiteltu radion pitkän nimen mukaan                                              |
+| **Etäisyys**                                    | Lähimpänä olevat radiot ensin (edellyttää sijainnin jakamista) |
+| **Hyppyjä**                                     | Vähiten välityshyppyjä vaativat radiot ensin                                      |
+| **Kanava**                                      | Ryhmitelty kanavaindeksin mukaan                                                  |
+| **MQTT:n kautta**               | Ryhmitelty MQTT:n kautta kuultuihin ja radiolla kuultuihin        |
+| **Suosikkien kautta**                           | Suosikkiradiot ensin                                                              |
 
-## Node Detail
+## Radion tiedot
 
-Tapping a node opens the detail view with comprehensive information. See [Node Metrics](node-metrics) for full details on metrics and telemetry.
+Radion napauttaminen avaa tietonäkymän, jossa on kattavat tiedot. Katso [Radion mittarit](node-metrics) saadaksesi täydelliset tiedot mittareista ja telemetriasta.
 
-![Node detail view](../../assets/screenshots/nodes_node_list.png)
+![Radion tietonäkymä](../../assets/screenshots/nodes_node_list.png)
 
-The detail screen includes device info, position, and action buttons:
+Tietonäyttö sisältää laitetiedot, sijainnin ja toimintopainikkeet:
 
-![Node detail section](../../assets/screenshots/nodes_detail_section.png)
+![Radion tietonäkymän osio](../../assets/screenshots/nodes_detail_section.png)
 
-Inline status indicators show key metrics at a glance:
+Rivinsisäiset tilailmaisimet näyttävät tärkeimmät tiedot yhdellä silmäyksellä:
 
-| Indicator       | Screenshot                                                    |
-| --------------- | ------------------------------------------------------------- |
-| Signal quality  | ![Signal](../../assets/screenshots/nodes_signal_info.png)     |
-| Akun varaus     | ![Battery](../../assets/screenshots/nodes_battery_info.png)   |
-| Hop count       | ![Hops](../../assets/screenshots/nodes_hops_info.png)         |
-| Viimeksi kuultu | ![Last heard](../../assets/screenshots/nodes_last_heard.png)  |
-| Etäisyys        | ![Distance](../../assets/screenshots/nodes_distance_info.png) |
+| Ilmaisin        | Kuvakaappaus                                                      |
+| --------------- | ----------------------------------------------------------------- |
+| Signaalin laatu | ![Signaali](../../assets/screenshots/nodes_signal_info.png)       |
+| Akun varaus     | ![Akku](../../assets/screenshots/nodes_battery_info.png)          |
+| Hyppymäärä      | ![Hypyt](../../assets/screenshots/nodes_hops_info.png)            |
+| Viimeksi kuultu | ![Viimeksi kuultu](../../assets/screenshots/nodes_last_heard.png) |
+| Etäisyys        | ![Etäisyys](../../assets/screenshots/nodes_distance_info.png)     |
 
-### Device Links ("I want one")
+### Laite-linkit ("Haluan sellaisen")
 
-When a node's hardware is recognized, the detail view shows a collapsible **"I want one"** section linking to places to buy or learn more about that device: the vendor's product page, product variants, and regional marketplace listings (such as AliExpress, Amazon, and supported retailers), filtered to your country. Each link opens through the `msh.to` redirect service. Devices with no matching links don't show the section.
+Kun radion laitteisto tunnistetaan, tietonäkymä näyttää avattavan **"Haluan sellaisen"** -osion, jossa on linkkejä laitteen ostamiseen tai lisätietojen hankkimiseen: valmistajan tuotesivu, tuoteversiot sekä alueelliset kauppapaikkalistaukset (esim. AliExpress, Amazon ja tuetut jälleenmyyjät), suodatettuna maasi mukaan. Jokainen linkki avautuu mesh.to -uudelleenohjauspalvelun kautta. Laitteet, joille ei löydy vastaavia linkkejä, eivät näytä tätä osiota.
 
-A full, browsable directory of every link is also available under **Settings → Device Links**.
+Täydellinen selattava hakemisto kaikista linkeistä on saatavilla myös kohdassa **Asetukset → Laite-linkit**.
 
-## Related Topics
+## Aiheeseen liittyvät aiheet
 
-- [Node Metrics](node-metrics) — detailed telemetry dashboards for each node
-- [Messages & Channels](messages-and-channels) — send a direct message to a node
-- [Map & Waypoints](map-and-waypoints) — view node positions geographically
-- [Discovery](discovery) — traceroute and neighbor info for topology exploration
-- [Signal Meter](signal-meter) — understand what the signal bars mean
+- [Radion mittarit](node-metrics) — yksityiskohtaiset telemetriakoontinäytöt jokaiselle radiolle
+- [Viestit ja kanavat](messages-and-channels) — lähetä yksityisviesti radiolle
+- [Kartta ja reittipisteet](map-and-waypoints) — tarkastele radioiden sijainteja kartalla
+- [Haku](discovery) — reitinselvitys- ja naapuritiedot verkon topologian tutkimiseen
+- [Signaalimittari](signal-meter) — ymmärrä, mitä signaalipalkit tarkoittavat
 
 ---
 

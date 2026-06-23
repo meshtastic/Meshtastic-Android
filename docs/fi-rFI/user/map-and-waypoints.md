@@ -1,117 +1,117 @@
 ---
-title: Map & Waypoints
-parent: User Guide
+title: Kartta ja reittipisteet
+parent: Käyttöopas
 nav_order: 6
 last_updated: 2026-05-13
-description: View node positions on the map, create and share waypoints, and manage position sharing and privacy.
+description: Näytä radion sijainnit kartalla, luo ja jaa reittipisteitä sekä hallitse sijainnin jakamista ja yksityisyyttä.
 aliases:
-  - map
-  - waypoints
+  - kartta
+  - reittipisteet
   - gps
-  - location
+  - sijainti
 ---
 
-# Map & Waypoints
+# Kartta ja reittipisteet
 
-The Map screen shows the geographic positions of nodes on your mesh, along with shared waypoints.
+Karttanäkymä näyttää mesh-verkkosi radioiden maantieteelliset sijainnit sekä jaetut reittipisteet.
 
-## Map View
+## Karttanäkymä
 
-The map displays:
+Kartta näyttää:
 
-- **Node positions** — colored markers for each node reporting location
-- **Waypoints** — shared points of interest
-- **Your position** — your current GPS location
+- **Radion sijainnit** — kunkin sijaintia lähettävän radion värilliset merkit
+- **Reittipisteet** — jaetut kiinnostavat kohteet
+- **Oma sijaintisi** — nykyinen GPS-sijaintisi
 
-### Node Markers
+### Radioiden merkinnät
 
-Node markers on the map indicate:
+Karttamerkkien värit kertovat:
 
-| Color     | Meaning                                        |
-| --------- | ---------------------------------------------- |
-| Vihreä    | Online (heard recently)     |
-| Keltainen | Away (heard within 2 hours) |
-| Gray      | Offline (stale position)    |
-| Sininen   | Your own node                                  |
+| Väri      | Merkitys                                            |
+| --------- | --------------------------------------------------- |
+| Vihreä    | Online (kuultu hiljattain)       |
+| Keltainen | Poissa (kuultu 2 tunnin sisällä) |
+| Harmaa    | Offline (vanhentunut sijainti)   |
+| Sininen   | Oma radio                                           |
 
-### Map Controls
+### Kartan hallinta
 
-- **Zoom** — pinch or use +/- buttons
-- **Pan** — drag to explore
-- **Center** — select the location button to center on your position
-- **Node tap** — tap a node marker to view details
+- **Zoomaus** — nipistä tai käytä +/- -painikkeita
+- **Panorointi** — vedä karttaa
+- **Keskitä** — valitse sijaintipainike keskittääksesi oman sijaintisi
+- **Radion napautus** — avaa radion tiedot napauttamalla merkkiä
 
-The floating toolbar provides quick access to compass, layer switching, node filters, refresh, and location tracking. Tap the compass to reorient north-up, or tap the location button to center on your current position.
+Kelluva työkalupalkki tarjoaa nopean pääsyn kompassiin, tasojen vaihtoon, suodattimiin, päivitykseen ja sijainnin seurantaan. Napauta kompassia suunnan palauttamiseksi pohjoiseen tai sijaintipainiketta keskittääksesi oman sijaintisi.
 
-![Map controls overlay](../../assets/screenshots/map_controls_overlay.png)
+![Kartan hallintapainikkeet](../../assets/screenshots/map_controls_overlay.png)
 
-## Waypoints
+## Reittipisteet
 
-Waypoints are shared geographic points of interest that all mesh members can see.
+Reittipisteet ovat jaettuja maantieteellisiä kiinnostavia kohteita, jotka kaikki mesh-verkon jäsenet voivat nähdä.
 
-### Creating a Waypoint
+### Reittipisteen luominen
 
-1. Long-press on the map at the desired location.
-2. Enter a name and optional description.
-3. Choose an icon/emoji for the waypoint.
-4. Tap **Send** to share with the mesh.
+1. Paina karttaa pitkään haluamassasi sijainnissa.
+2. Anna nimi ja valinnainen kuvaus.
+3. Valitse reittipisteelle kuvake tai emoji.
+4. Napauta **Lähetä** jakaaksesi sen verkkoon.
 
-### Waypoint Properties
+### Reittipisteen ominaisuudet
 
-| Property   | Kuvaus                                                  |
-| ---------- | ------------------------------------------------------- |
-| Nimi       | Short identifier (max 30 characters) |
-| Kuvaus     | Optional longer description                             |
-| Icon       | Visual marker emoji on the map                          |
-| Lukittu    | If locked, only the creator can edit or delete          |
-| Expiration | Optional auto-remove time                               |
+| Ominaisuus      | Kuvaus                                                      |
+| --------------- | ----------------------------------------------------------- |
+| Nimi            | Lyhyt tunniste (enintään 30 merkkiä)     |
+| Kuvaus          | Valinnainen pidempi kuvaus                                  |
+| Kuvake          | Visuaalinen merkkiemoji kartalla                            |
+| Lukittu         | Jos lukittu, vain merkin luonut voi muokata tai poistaa sen |
+| Voimassaoloaika | Valinnainen automaattinen poistumisaika                     |
 
-### Waypoint Expiration
+### Reittipisteen vanheneminen
 
-Waypoints can be set to expire automatically:
+Reittipisteet voidaan asettaa vanhenemaan automaattisesti:
 
-- **Never** (default) — waypoint remains until manually deleted
-- **Timed** — waypoint is automatically removed after the specified duration (e.g., "remove after 2 hours"). Useful for temporary markers like rally points, hazards, or meeting locations.
+- Ei koskaan (oletus) — reittipiste pysyy voimassa kunnes se poistetaan manuaalisesti
+- **Aikaperusteinen** — reittipiste poistetaan automaattisesti määritellyn ajan jälkeen (esim. “poista 2 tunnin kuluttua”). Hyödyllinen tilapäisille merkinnöille kuten kokoontumispaikat, vaarat tai tapaamispaikat.
 
-Expired waypoints are automatically hidden from the map so they don't clutter the display. The expiration countdown begins when the waypoint is created, not when other nodes receive it.
+Vanhentuneet reittipisteet piilotetaan automaattisesti kartalta, jotta näkymä pysyy selkeänä. Vanhenemislaskuri alkaa, kun reittipiste luodaan, ei silloin kun muut radiot vastaanottavat sen.
 
-### Managing Waypoints
+### Reittipisteiden hallinta
 
-- Tap a waypoint on the map to view its details and coordinates
-- Edit or delete waypoints you created
-- **Locked waypoints** cannot be modified or deleted by other nodes — only the original creator can change them
-- Unlocked waypoints can be edited by any mesh member
+- Napauta reittipistettä kartalla nähdäksesi sen tiedot ja koordinaatit
+- Muokkaa tai poista luomiasi reittipisteitä
+- **Lukitut reittipisteet** eivät ole muiden radioiden muokattavissa tai poistettavissa — vain alkuperäisen merkin luonut voi muuttaa niitä
+- Lukitsemattomia reittipisteitä voi muokata kuka tahansa mesh-verkon jäsen
 
-## Position Sharing
+## Sijainnin jakaminen
 
-### Enabling Position Sharing
+### Sijainnin jakamisen käyttöönotto
 
-Your node shares its GPS position based on:
+Radiosi jakaa GPS-sijaintinsa seuraavilla tavoilla:
 
-- **Fixed interval** — broadcast position at regular intervals
-- **Smart position** — broadcast when movement exceeds a threshold
-- **Manual** — only share when explicitly requested
+- **Kiinteä väli** — sijainti lähetetään säännöllisin väliajoin
+- **Älykäs sijainti** — sijainti lähetetään, kun liike ylittää kynnyksen
+- **Manuaalinen** — sijainti jaetaan vain erikseen pyydettäessä
 
-Configure position behavior in **Settings → Position**.
+Määritä sijaintikäyttäytyminen kohdassa **Asetukset → Sijainti**.
 
-### Privacy Considerations
+### Tietosuoja
 
-> 🔒 **Privacy:** Position data is broadcast to all nodes on your channel. If you don't want your location shared, disable GPS position in settings or use a fixed/fake position.
+> 🔒 **Yksityisyys:** sijaintitiedot lähetetään kaikille saman kanavan radioille. Jos et halua sijaintiasi jaettavan, poista GPS käytöstä asetuksista tai käytä kiinteää tai valesijaintia.
 
-## Map Sources
+## Karttalähteet
 
-The app supports multiple map tile sources:
+Sovellus tukee useita karttatiililähteitä:
 
-- OpenStreetMap (default)
-- Satellite imagery (where available)
-- Offline tiles (download map areas for offline use)
+- OpenStreetMap (oletus)
+- Satelliittikuvat (jos saatavilla)
+- Offline-kartat (lataa alueet offline-käyttöä varten)
 
-## Related Topics
+## Aiheeseen liittyvät aiheet
 
-- [Nodes](nodes) — view and filter your node list
-- [Node Metrics](node-metrics) — signal quality and position history for individual nodes
-- [Discovery](discovery) — traceroute and neighbor info for understanding mesh topology
-- [Units & Locale](units-and-locale) — distance and coordinate display formats
+- [Radiot](nodes) — tarkastele ja suodata radiolistaa
+- [Radion mittarit](node-metrics) — signaalin laatu ja sijaintihistoria yksittäisille radioille
+- [Haku](discovery) — reitinselvitys ja naapuritiedot mesh-verkon ymmärtämiseen
+- [Yksiköt ja kieliasetukset](units-and-locale) — etäisyys- ja koordinaattien näyttömuodot
 
 ---
 

@@ -1,140 +1,140 @@
 ---
-title: Telemetry & Sensors
-parent: User Guide
+title: Telemetria ja anturit
+parent: Käyttöopas
 nav_order: 9
 last_updated: 2026-05-13
-description: Sensor data on the mesh — supported environment, air quality, and power sensors, plus configuration and viewing guides.
+description: Anturitiedot verkossa — tuetut ympäristö-, ilmanlaatu- ja virta-anturit sekä määritys- ja katseluohjeet.
 aliases:
-  - sensors
-  - environment
-  - weather
-  - power-metrics
+  - sensorit
+  - ympäristö
+  - sää
+  - virtamittarit
 ---
 
-# Telemetry & Sensors
+# Telemetria ja anturit
 
-Meshtastic nodes can collect and share sensor data across the mesh network.
+Meshtastic-radiot voivat kerätä ja jakaa anturitietoja koko verkon laajuisesti.
 
 ## Yleiskatsaus
 
-Telemetry allows nodes equipped with sensors to broadcast environmental, power, and device health information. This data is visible on the node detail screen and can be logged over time.
+Telemetria mahdollistaa antureilla varustettujen radioiden ympäristö-, virta- ja laitteen kuntotietojen lähettämisen verkkoon. Nämä tiedot näkyvät radion tietonäytössä ja niitä voidaan tallentaa sekä seurata ajan kuluessa.
 
-## Device Telemetry
+## Laitteen telemetriatiedot
 
-All Meshtastic nodes report basic device telemetry:
+Kaikki Meshtastic-radiot raportoivat peruslaitetelemetrian:
 
-| Metrijärjestelmä   | Kuvaus                         | Typical Range                                                      |
-| ------------------ | ------------------------------ | ------------------------------------------------------------------ |
-| Battery Level      | Charge percentage              | 0–100%                                                             |
-| Jännite            | Battery voltage                | 3.0–4.2V (LiPo) |
-| Kanavan Käyttö     | % of airtime used locally      | 0–100%                                                             |
-| Air Utilization TX | % of airtime used by this node | 0–100%                                                             |
-| Käyttöaika         | Seconds since last boot        | Varies                                                             |
+| Metrijärjestelmä                               | Kuvaus                                             | Tyypillinen vaihteluväli                                           |
+| ---------------------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------ |
+| Akun varaustaso                                | Varausprosentti                                    | 0–100%                                                             |
+| Jännite                                        | Akun jännite                                       | 3.0–4.2V (LiPo) |
+| Kanavan Käyttö                                 | Paikallisesti käytetyn käyttöasteen prosenttiosuus | 0–100%                                                             |
+| Lähetysajan käyttöaste (TX) | Tämän radion käyttämän lähetysajan prosenttiosuus  | 0–100%                                                             |
+| Käyttöaika                                     | Sekuntia viimeisestä käynnistyksestä               | Vaihtelee                                                          |
 
-## Environment Sensors
+## Ympäristöanturit
 
-Supported environmental sensors:
+Tuetut ympäristöanturit:
 
-### Temperature & Humidity
+### Lämpötila ja kosteus
 
-| Sensor  | Lämpötila | Kosteus | Ilmanpaine | Viestit                 |
-| ------- | --------- | ------- | ---------- | ----------------------- |
-| BME280  | ✓         | ✓       | ✓          | Recommended all-in-one  |
-| BME680  | ✓         | ✓       | ✓          | Adds gas resistance/IAQ |
-| SHT31   | ✓         | ✓       | —          | High accuracy           |
-| MCP9808 | ✓         | —       | —          | Precision temperature   |
-| LPS22   | —         | —       | ✓          | Pressure only           |
+| Sensor  | Lämpötila | Kosteus | Ilmanpaine | Viestit                             |
+| ------- | --------- | ------- | ---------- | ----------------------------------- |
+| BME280  | ✓         | ✓       | ✓          | Suositeltu all-in-one-anturi        |
+| BME680  | ✓         | ✓       | ✓          | Lisää kaasuvastus ja IAQ-mittaukset |
+| SHT31   | ✓         | ✓       | —          | Korkea tarkkuus                     |
+| MCP9808 | ✓         | —       | —          | Tarkka lämpötilamittaus             |
+| LPS22   | —         | —       | ✓          | Vain ilmanpaine                     |
 
-### Air Quality
+### Ilmanlaatu
 
-| Sensor   | Metrijärjestelmä                                   | Viestit                    |
-| -------- | -------------------------------------------------- | -------------------------- |
-| BME680   | Gas Resistance / IAQ                               | Volatile organic compounds |
-| PMSA003I | PM1.0, PM2.5, PM10 | Particulate matter         |
-| SEN55    | PM, NOx, VOC, Temp, Humidity                       | Multi-sensor               |
+| Sensor   | Metrijärjestelmä                                   | Viestit                        |
+| -------- | -------------------------------------------------- | ------------------------------ |
+| BME680   | Kaasuvastus ja IAQ                                 | Haihtuvat orgaaniset yhdisteet |
+| PMSA003I | PM1.0, PM2.5, PM10 | Hiukkaset                      |
+| SEN55    | PM, NOx, VOC, lämpötila, kosteus                   | Monianturi                     |
 
-### Light & UV
+### Valo ja UV
 
-| Sensor   | Metrijärjestelmä                       |
-| -------- | -------------------------------------- |
-| OPT3001  | Ambient light (lux) |
-| VEML7700 | Ambient light (lux) |
-| LTR390   | UV index                               |
+| Sensor   | Metrijärjestelmä                              |
+| -------- | --------------------------------------------- |
+| OPT3001  | Ympäristön valoisuus (lux) |
+| VEML7700 | Ympäristön valoisuus (lux) |
+| LTR390   | UV-indeksi                                    |
 
 ## Virranhallinnan arvot
 
-Nodes with INA-series power sensors can report:
+INA-sarjan virta-antureilla varustetut radiot voivat raportoida:
 
-| Metrijärjestelmä | Kuvaus                                    |
-| ---------------- | ----------------------------------------- |
-| Bus Voltage      | Supply rail voltage                       |
-| Virta            | Power consumption (mA) |
-| Virta            | Calculated power (mW)  |
+| Metrijärjestelmä | Kuvaus                                   |
+| ---------------- | ---------------------------------------- |
+| Väyläjännite     | Syöttöjännitteen                         |
+| Virta            | Virrankulutuksen (mA) |
+| Virta            | Lasketun tehon (mW)   |
 
-Useful for monitoring solar charging or battery health on remote nodes.
+Hyödyllinen aurinkolatauksen tai etäradioiden akun kunnon seurantaan.
 
-## Configuring Telemetry
+## Telemetrian määrittäminen
 
-1. Navigate to **Settings → Module Config → Telemetry**.
-2. Set reporting intervals:
-   - **Device Metrics Interval** — how often to broadcast device metrics
-   - **Environment Metrics Interval** — how often to broadcast sensor data
-3. Enable specific sensor types as needed.
+1. Siirry kohtaan **Asetukset → Moduuliasetukset → Telemetria**
+2. Määritä raportointivälit:
+   - **Laitemittarien väli** — kuinka usein laitteen mittarit lähetetään verkkoon
+   - **Ympäristömittarien väli** — kuinka usein anturitiedot lähetetään verkkoon
+3. Ota tarvittavat anturityypit käyttöön.
 
-### Recommended Intervals
+### Suositellut raportointivälit
 
-| Use Case                                   | Device (s) | Environment (s) |
-| ------------------------------------------ | ----------------------------- | ---------------------------------- |
-| Urban mesh (many nodes) | 3600                          | 3600                               |
-| Rural mesh (few nodes)  | 900                           | 900                                |
-| Weather station                            | 900                           | 300                                |
-| Battery conservation                       | 7200                          | 7200                               |
+| Käyttötarkoitus                                     | Laite (s) | Ympäristö (s) |
+| --------------------------------------------------- | ---------------------------- | -------------------------------- |
+| Kaupunkiverkko (paljon radioita) | 3600                         | 3600                             |
+| Maaseutuverkko (vähän radioita)  | 900                          | 900                              |
+| Sääasema                                            | 900                          | 300                              |
+| Akun säästäminen                                    | 7200                         | 7200                             |
 
-> ⚠️ **Note:** Shorter intervals increase airtime usage and battery drain across the mesh.
+> ⚠️ **Huomautus:** Lyhyemmät välit lisäävät käyttöastetta ja akun kulutusta koko verkossa.
 
-## Air Quality Metrics
+## Ilmanlaatumittarit
 
-Nodes with particulate matter or CO₂ sensors report air quality data:
+Hiukkas- tai CO₂-antureilla varustetut radiot raportoivat ilmanlaatutietoja:
 
-| Metrijärjestelmä      | Unit  | Kuvaus                       |
-| --------------------- | ----- | ---------------------------- |
-| PM1.0 | µg/m³ | Ultrafine particulate matter |
-| PM2.5 | µg/m³ | Fine particulate matter      |
-| PM10                  | µg/m³ | Coarse particulate matter    |
-| CO₂                   | ppm   | Carbon dioxide concentration |
+| Metrijärjestelmä      | Yksikkö | Kuvaus                    |
+| --------------------- | ------- | ------------------------- |
+| PM1.0 | µg/m³   | Erittäin pienet hiukkaset |
+| PM2.5 | µg/m³   | Pienhiukkaset             |
+| PM10                  | µg/m³   | Karkeat hiukkaset         |
+| CO₂                   | ppm     | Hiilidioksidipitoisuus    |
 
-The CO₂ reading is color-coded by severity:
+CO₂-lukemat on värikoodattu vakavuusasteen mukaan:
 
-- 🟢 **Good** (< 1000 ppm) — normal indoor levels
-- 🟡 **Moderate** (1000–2000 ppm) — elevated, consider ventilation
-- 🟠 **Poor** (2000–5000 ppm) — drowsiness, poor concentration
-- 🔴 **Hazardous** (≥ 5000 ppm) — immediate health concern
+- 🟢 **Hyvä** (< 1000 ppm) — normaali sisäilman taso
+- 🟡 **Kohtalainen** (1000–2000 ppm) — kohonnut taso, harkitse ilmanvaihtoa
+- 🟠 **Huono** (2000–5000 ppm) — väsymystä, heikentynyt keskittymiskyky
+- 🔴 **Vaarallinen** (≥ 5000 ppm) — välitön terveyshuoli
 
-Air quality data can be viewed as info cards on the node detail screen, charted over time, and exported to CSV.
+Ilmanlaatutiedot voidaan näyttää tietokortteina radion tietonäytössä, esittää kaavioina ajan kuluessa ja viedä CSV-tiedostoon.
 
-## Viewing Telemetry
+## Telemetrian tarkastelu
 
-1. Navigate to **Nodes** and select a node.
-2. Telemetry sections show on the detail screen:
-   - Device Metrics (always available)
-   - Environment Metrics (if sensors present)
-   - Power Metrics (if INA sensor present)
-   - Air Quality Metrics (if PM/CO₂ sensor present)
-3. Historical graphs show trends over time.
+1. Siirry kohtaan **Radiot** ja valitse radio.
+2. Telemetriaosiot näkyvät radion tietonäytössä:
+   - Laitemittarit (aina käytettävissä)
+   - Ympäristömittarit (jos antureita on saatavilla)
+   - Virtamittarit (jos INA-anturi on käytettävissä)
+   - Ilmanlaatumittarit (jos PM-/CO₂-anturi on käytettävissä)
+3. Historiakaaviot näyttävät mittaustietojen kehittymisen ajan kuluessa.
 
-![Telemetry actions](../../assets/screenshots/node-metrics_telemetric_actions.png)
+![Telemetriatoiminnot](../../assets/screenshots/node-metrics_telemetric_actions.png)
 
 ## Vianetsintä
 
-- **No environment data showing?** The remote node needs a physical sensor connected (e.g., BME280 on I2C). Device telemetry (battery, uptime) is always available, but environment metrics require hardware.
-- **Stale readings?** Check the reporting interval — very long intervals (7200s+) mean data updates infrequently. Also verify the remote node is still online.
-- **Sensor conflict on I2C bus?** Some sensors share I2C addresses. If you have multiple sensors on the same bus, check for address collisions in the radio's serial debug output.
+- **Ympäristötiedot eivät näy?** Etäradio tarvitsee fyysisen anturin (esim. BME280 I²C-väylässä). Laitetelemetria (akun varaustaso, käyttöaika) on aina käytettävissä, mutta ympäristömittarit edellyttävät laitteistoa.
+- **Vanhentuneita lukemia?** Tarkista raportointiväli — erittäin pitkät välit (7200 s tai enemmän) tarkoittavat, että tiedot päivittyvät harvoin. Varmista myös, että etäradio on edelleen verkossa.
+- **Anturiristiriita I²C-väylässä?** Jotkin anturit käyttävät samoja I²C-osoitteita. Jos samalla väylällä on useita antureita, tarkista osoiteristiriidat radion sarjaportin virheenkorjaustulosteesta.
 
-## Related Topics
+## Aiheeseen liittyvät aiheet
 
-- [Node Metrics](node-metrics) — view telemetry data on the node detail screen
-- [Settings — Modules & Admin](settings-module-admin) — telemetry module configuration
-- [Units & Locale](units-and-locale) — temperature and pressure display units
+- [Radion mittarit](node-metrics) — tarkastele telemetriatietoja radion tietonäytössä
+- [Asetukset — Moduulit ja ylläpito](settings-module-admin) — telemetriamoduulin määritys
+- [Yksiköt ja aluekohtaiset asetukset](units-and-locale) — lämpötilan ja ilmanpaineen näyttöyksiköt
 
 ---
 

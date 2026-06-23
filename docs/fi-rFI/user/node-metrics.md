@@ -1,165 +1,165 @@
 ---
-title: Node Metrics
-parent: User Guide
+title: Radion mittarit
+parent: Käyttöopas
 nav_order: 5
 last_updated: 2026-06-16
-description: Telemetry dashboards for each mesh node — device health, environment sensors, air quality, signal quality, power, traceroute, and position history.
+description: Telemetrianäkymät jokaiselle verkon radiolle — laitteen kunto, ympäristöanturit, ilmanlaatu, signaalin laatu, virta, reitinselvitys ja sijaintihistoria.
 aliases:
-  - metrics
-  - telemetry
-  - device-metrics
-  - signal
+  - mittarit
+  - telemetria
+  - laitteen mittarit
+  - signaali
 ---
 
-# Node Metrics
+# Radion mittarit
 
-The node detail screen provides comprehensive telemetry and metrics for each node on your mesh.
+Radion tietonäyttö tarjoaa kattavat telemetria- ja mittaritiedot jokaiselle verkon radiolle.
 
 ## Laitteen mittausloki
 
-Basic operating information reported by each node:
+Perustoimintatiedot, jotka jokainen radio raportoi:
 
-| Metrijärjestelmä | Kuvaus                              |
-| ---------------- | ----------------------------------- |
-| Battery Level    | Current battery percentage          |
-| Jännite          | Battery voltage reading             |
-| Kanavan Käyttö   | Percentage of airtime consumed      |
-| Airtime          | Transmission time used by this node |
-| Käyttöaika       | Time since last reboot              |
+| Metrijärjestelmä | Kuvaus                                           |
+| ---------------- | ------------------------------------------------ |
+| Akun varaustaso  | Nykyinen akun varaustaso                         |
+| Jännite          | Akun jännitelukema                               |
+| Kanavan Käyttö   | Käytetyn lähetysajan käyttöasteen prosenttiosuus |
+| Lähetysaika      | Tämän radion käyttämä lähetysaika                |
+| Käyttöaika       | Aika viimeisestä uudelleenkäynnistyksestä        |
 
-Device metrics are displayed as individual cards with trend sparklines showing battery level, voltage, channel utilization, airtime, and uptime over time.
+Laitemittarit näytetään erillisinä kortteina, joissa trendikäyrät esittävät akun varaustason, jännitteen, kanavan käyttöasteen, käyttöasteen ja käyttöajan kehitystä ajan kuluessa.
 
-> 💡 **Tip:** Tap any metric card to expand it into a full chart with historical data points. Pinch to zoom the time axis.
+> 💡 **Vinkki:** Napauta mitä tahansa mittarikorttia laajentaaksesi sen täydelliseksi kaavioksi, jossa näkyvät historiatiedot. Nipistä lähentääksesi tai loitontaaksesi aika-akselia.
 
 ## Ympäristöarvot
 
-Environmental sensor data (requires compatible hardware):
+Ympäristöanturien tiedot (edellyttää yhteensopivaa laitteistoa):
 
-| Metrijärjestelmä                     | Sensor Examples       |
-| ------------------------------------ | --------------------- |
-| Lämpötila                            | BME280, BME680, SHT31 |
-| Kosteus                              | BME280, BME680, SHT31 |
-| Barometrinen paine                   | BME280, BMP280        |
-| Kaasuvastus                          | BME680                |
-| IAQ (Air Quality) | BME680                |
+| Metrijärjestelmä                    | Anturiesimerkkejä     |
+| ----------------------------------- | --------------------- |
+| Lämpötila                           | BME280, BME680, SHT31 |
+| Kosteus                             | BME280, BME680, SHT31 |
+| Barometrinen paine                  | BME280, BMP280        |
+| Kaasuvastus                         | BME680                |
+| IAQ (ilmanlaatu) | BME680                |
 
-Environment metrics are charted over time for easy trend analysis — temperature, humidity, and pressure each get their own line chart with the measurement unit displayed on the Y axis.
+Ympäristömittarit esitetään kaavioina ajan kuluessa tapahtuvan trendianalyysin helpottamiseksi — lämpötila, kosteus ja ilmanpaine saavat kukin oman viivakaavionsa, jossa mittayksikkö näkyy Y-akselilla.
 
-> 💡 **Tip:** Environment metrics require a sensor connected to the remote node. Not all nodes report environmental data. See [Telemetry & Sensors](telemetry-and-sensors) for a full list of supported sensors.
+> 💡 **Vinkki:** Ympäristömittarit edellyttävät etäradioon liitettyä anturia. Kaikki radiot eivät raportoi ympäristötietoja. Katso [Telemetria ja anturit](telemetry-and-sensors) saadaksesi täydellisen luettelon tuetuista antureista.
 
-## Air Quality Metrics
+## Ilmanlaatumittarit
 
-Air Quality is a dedicated metrics view for nodes equipped with a particulate-matter and/or CO₂ sensor. It is **separate from the BME680 IAQ reading** listed under Environment Metrics — IAQ is a single gas-resistance-derived index, while the Air Quality view charts the underlying particulate and CO₂ measurements.
+Ilmanlaatu on erillinen mittarinäkymä radioille, joissa on hiukkas- ja/tai CO₂-anturi. Se on **erillinen BME680:n IAQ-lukemasta**, joka on lueteltu ympäristömittareissa — IAQ on yksittäinen kaasuvastukseen perustuva indeksi, kun taas ilmanlaatunäkymä esittää varsinaiset hiukkas- ja CO₂-mittaukset kaavioina.
 
-| Metrijärjestelmä      | Unit  | Kuvaus                                               |
-| --------------------- | ----- | ---------------------------------------------------- |
-| PM1.0 | µg/m³ | Particulate matter up to 1.0 micron  |
-| PM2.5 | µg/m³ | Particulate matter up to 2.5 microns |
-| PM10                  | µg/m³ | Particulate matter up to 10 microns                  |
-| CO₂                   | ppm   | Carbon dioxide concentration                         |
+| Metrijärjestelmä      | Yksikkö | Kuvaus                                      |
+| --------------------- | ------- | ------------------------------------------- |
+| PM1.0 | µg/m³   | Enintään 1,0 mikrometrin kokoiset hiukkaset |
+| PM2.5 | µg/m³   | Enintään 2,5 mikrometrin kokoiset hiukkaset |
+| PM10                  | µg/m³   | Enintään 10 mikrometrin kokoiset hiukkaset  |
+| CO₂                   | ppm     | Hiilidioksidipitoisuus                      |
 
-CO₂ readings are color-coded by severity to make air quality easy to read at a glance:
+CO₂-lukemat on värikoodattu vakavuusasteen mukaan, jotta ilmanlaadun arviointi onnistuu yhdellä silmäyksellä:
 
-| Band     | CO₂ Range (ppm) | Color    |
-| -------- | ---------------------------------- | -------- |
-| Hyvä     | < 1000    | Vihreä   |
-| Stuffy   | < 2000    | Amber    |
-| Poor     | < 5000    | Oranssi  |
-| Unsafe   | < 30000   | Punainen |
-| Evacuate | ≥ 30000                            | Dark red |
+| Taajuusalue | CO₂-pitoisuus (ppm) | Väri           |
+| ----------- | -------------------------------------- | -------------- |
+| Hyvä        | < 1000        | Vihreä         |
+| Tunkkainen  | < 2000        | Keltainen      |
+| Huono       | < 5000        | Oranssi        |
+| Vaarallinen | < 30000       | Punainen       |
+| Evakuoi     | ≥ 30000                                | Tummanpunainen |
 
-![Air quality readings with color-coded CO₂ severity](../../assets/screenshots/node-metrics_air_quality.png)
+![Ilmanlaatulukemat värikoodatulla CO₂-vakavuusasteella](../../assets/screenshots/node-metrics_air_quality.png)
 
-An air-quality log/metrics button appears on the node detail screen **only when the node has reported air-quality telemetry**. From the Air Quality view you can:
+Ilmanlaatu tai mittaripainike näkyy radion tietonäytössä **vain silloin, kun radio on raportoinut ilmanlaatutelemetriaa**. Ilmanlaatu-näkymässä voit:
 
-- Select a **time frame** for the charts.
-- Filter with **metric chips** — only metrics that have data are shown.
-- **Refresh / request** the latest air-quality telemetry.
-- **Export to CSV** for analysis in a spreadsheet.
+- Valita kaavioille **aikajakson**.
+- Suodattaa **mittarisiruilla** — vain mittarit, joista on dataa, näytetään.
+- **Päivittää ja pyytää** uusimmat ilmanlaatutelemetriatiedot.
+- **Viedä CSV-tiedostoon** analysoitavaksi taulukkolaskentaohjelmassa.
 
-> 💡 **Tip:** Air Quality metrics require a compatible air-quality sensor on the remote node. If a node has no particulate or CO₂ sensor, the air-quality button won't appear. See [Telemetry & Sensors](telemetry-and-sensors) for supported hardware.
+> 💡 **Vinkki:** Ilmanlaatumittarit edellyttävät yhteensopivaa ilmanlaatuanturia etäradiossa. Jos radiossa ei ole hiukkas- tai CO₂-anturia, ilmanlaatupainiketta ei näytetä. Katso [Telemetria ja anturit](telemetry-and-sensors) saadaksesi lisätietoja tuetusta laitteistosta.
 
 ## Signaalin voimakkuudet
 
-Radio signal quality information:
+Radiosignaalin laatutiedot:
 
-| Metrijärjestelmä | Kuvaus                                                                         |
-| ---------------- | ------------------------------------------------------------------------------ |
-| SNR              | Signal-to-Noise Ratio (higher is better)                    |
-| RSSI             | Received Signal Strength Indicator (closer to 0 is better)  |
-| Noise Floor      | Local background RF noise in dBm (more negative is quieter) |
-| Hop Count        | Number of mesh hops for last message                                           |
+| Metrijärjestelmä | Kuvaus                                                                                                                    |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| SNR              | Signaali-kohinasuhde (suurempi SNR on parempi)                                                         |
+| RSSI             | Vastaanotetun signaalin voimakkuusindikaattori (RSSI) (lähempänä nollaa on parempi) |
+| Kohinataso       | Paikallinen taustakohina dBm-arvona (negatiivisempi on hiljaisempi)                                    |
+| Hyppylaskuri     | Verkon hyppymäärä viimeisimmälle viestille                                                                                |
 
-### Signal Quality Reference
+### Signaalin laadun viitearvot
 
-| SNR Range                         | Quality     |
+| SNR-alue                          | Laatu       |
 | --------------------------------- | ----------- |
-| > 10 dB                           | Excellent   |
+| > 10 dB                           | Erinomainen |
 | 0 to 10 dB                        | Hyvä        |
 | -10 to 0 dB                       | Kohtalainen |
-| < -10 dB | Poor        |
+| < -10 dB | Huono       |
 
-Local Stats from your connected radio are also shown in Signal Quality when available. These logs include noise floor, traffic counters, relay counters, online node counts, and radio uptime. The noise floor chart uses a dashed reference line at -85 dBm to help identify a busy RF environment. Use **Request** to ask the connected radio for a fresh Local Stats telemetry report, **Clear** to remove Local Stats logs for that node, and **Save** to export the visible Local Stats history as CSV.
+Yhdistetyn radion paikalliset tilastot näytetään myös Signaalin laatu -näkymässä silloin, kun ne ovat saatavilla. Nämä kerätyt tiedot sisältävät kohinatason, liikennelaskurit, välityslaskurit, verkossa olevien radioiden määrän sekä radion käyttöajan. Kohinatason kaaviossa käytetään katkoviivalla merkittyä viiteviivaa arvossa -85 dBm, jotta kuormittunut RF-ympäristö on helpompi tunnistaa. Käytä **Pyydä**-painiketta pyytääksesi yhdistetystä radiosta tuoreen Paikalliset tilastot -telemetriaraportin, **Tyhjennä**-painiketta poistaaksesi Paikalliset tilastot -lokit kyseiseltä radiolta ja **Tallenna**-painiketta viedäksesi näkyvän Paikalliset tilastot -historian CSV-tiedostoksi.
 
 ## Virranhallinnan arvot
 
-Power management telemetry (requires INA sensor or compatible hardware):
+Virranhallintatelemetria (edellyttää INA-anturia tai yhteensopivaa laitteistoa):
 
-| Metrijärjestelmä | Kuvaus                  |
-| ---------------- | ----------------------- |
-| Bus Voltage      | Supply voltage          |
-| Virta            | Power draw in milliamps |
-| Virta            | Calculated wattage      |
+| Metrijärjestelmä | Kuvaus                        |
+| ---------------- | ----------------------------- |
+| Väyläjännite     | Syöttöjännite                 |
+| Virta            | Virrankulutus milliampeereina |
+| Virta            | Laskennallinen teho           |
 
 ## Reitinselvitys
 
-Traceroute shows the path a message takes through the mesh:
+Reitinselvitys näyttää viestin kulkeman reitin verkossa:
 
-1. From the node detail screen, tap **Traceroute**.
-2. The app sends a traceroute request to the target node.
-3. Results show each hop with SNR/RSSI values.
+1. Napauta radion tietonäytössä **Reitinselvitys**.
+2. Sovellus lähettää reitinselvityspyynnön kohderadiolle.
+3. Tulokset näyttävät jokaisen hypyn SNR- ja RSSI-arvoineen.
 
-### Reading Traceroute Results
+### Reitinselvityksen tulosten lukeminen
 
 ```
-You → Node A (SNR: 8.5) → Node B (SNR: 5.2) → Target
+Sinä → Radio A (SNR: 8.5) → Radio B (SNR: 5.2) → Kohde
 ```
 
-Each hop represents a relay node that forwarded the message.
+Jokainen hyppy edustaa välitysradiota, joka välitti viestin eteenpäin.
 
 ## Sijainnin Loki
 
-Historical position data for nodes that share their location:
+Historialliset sijaintitiedot radioille, jotka jakavat sijaintinsa:
 
-- GPS coordinates
+- GPS-koordinaatit
 - Korkeus
-- Speed (if moving)
-- Timestamp for each position report
+- Nopeus (jos radio liikkuu)
+- Aikaleima jokaiselle sijaintiraportille
 
 ## Naapuritieto
 
-Shows which nodes a given node can directly hear, useful for understanding mesh topology.
+Näyttää, mitkä radiot tietty radio voi kuulla suoraan, mikä auttaa ymmärtämään verkon topologiaa.
 
-## Viewing Metrics
+## Mittareiden tarkastelu
 
-1. Navigate to **Nodes**.
-2. Tap the node you want to inspect.
-3. Select the metric category from the detail tabs.
+1. Siirry kohtaan **Radiot**.
+2. Napauta radiota, jota haluat tarkastella.
+3. Valitse mittariluokka tietonäytön välilehdistä.
 
-![Node detail — local device](../../assets/screenshots/nodes_detail_local.png)
+![Radion tietonäyttö – paikallinen laite](../../assets/screenshots/nodes_detail_local.png)
 
-The position tab shows location data for nodes that share GPS:
+Sijainti-välilehti näyttää sijaintitiedot radioille, jotka jakavat GPS-sijaintinsa:
 
-![Position inline content](../../assets/screenshots/nodes_position.png)
+![Sijaintivälilehden sisältö](../../assets/screenshots/nodes_position.png)
 
-> ⚠️ **Note:** Metrics are only available when they have been reported by the remote node. Metrics update at intervals configured on each node's telemetry settings.
+> ⚠️ **Huomautus:** Mittarit ovat käytettävissä vain, jos etäradio on raportoinut ne. Mittarit päivittyvät kunkin radion telemetria-asetuksissa määritetyin väliajoin.
 
-## Related Topics
+## Aiheeseen liittyvät aiheet
 
-- [Nodes](nodes) — node list, filtering, and sorting
-- [Telemetry & Sensors](telemetry-and-sensors) — supported sensors and configuration
-- [Signal Meter](signal-meter) — how signal quality is calculated from SNR and RSSI
-- [Discovery](discovery) — traceroute details and neighbor info
-- [Units & Locale](units-and-locale) — temperature, distance, and speed display formats
+- [Radiot](nodes) — radioluettelo, suodatus ja lajittelu
+- [Telemetria ja anturit](telemetry-and-sensors) — tuetut anturit ja määritykset
+- [Signaalimittari](signal-meter) — miten signaalin laatu lasketaan SNR- ja RSSI-arvoista
+- [Haku](discovery) — reitinselvityksen tiedot ja naapuritiedot
+- [Yksiköt ja aluekohtaiset asetukset](units-and-locale) — lämpötilan, etäisyyden ja nopeuden näyttömuodot
 
 ---

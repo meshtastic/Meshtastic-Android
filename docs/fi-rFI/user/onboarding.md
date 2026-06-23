@@ -1,100 +1,100 @@
 ---
-title: Getting Started
-parent: User Guide
+title: Aloittaminen
+parent: Käyttöopas
 nav_order: 1
 last_updated: 2026-05-13
-description: First-launch setup — permissions, onboarding flow, and next steps after connecting your radio.
+description: Ensimmäisen käynnistyksen määritys — käyttöoikeudet, käyttöönottoprosessi ja seuraavat vaiheet radion yhdistämisen jälkeen.
 aliases:
-  - first-launch
-  - setup
-  - intro
+  - ensimmäinen käynnistys
+  - asetukset
+  - esittely
 ---
 
-# Getting Started
+# Aloittaminen
 
-Welcome to Meshtastic! This guide walks you through the initial setup of the Meshtastic Android app.
+Tervetuloa Meshtasticiin! Tämä opas opastaa sinut Meshtastic Android -sovelluksen alkuasetusten läpi.
 
-## First Launch
+## Ensimmäinen käynnistys
 
-When you open the app for the first time, you'll be guided through an introductory flow that helps configure essential permissions and settings. Each step can be completed in order, or you can skip and configure permissions later in Android settings.
+Kun avaat sovelluksen ensimmäistä kertaa, sinut ohjataan käyttöönottoprosessin läpi, joka auttaa määrittämään tarvittavat käyttöoikeudet ja asetukset. Voit suorittaa jokaisen vaiheen järjestyksessä tai ohittaa ne ja määrittää käyttöoikeudet myöhemmin Androidin asetuksissa.
 
-### Welcome Screen
+### Aloitusnäkymä
 
-The welcome screen introduces Meshtastic and its core capabilities:
+Tervetulonäyttö esittelee Meshtasticin ja sen tärkeimmät ominaisuudet:
 
-- Off-grid mesh communication
-- No cellular or internet required
-- End-to-end encrypted messaging
+- Matkapuhelinverkosta riippumaton mesh-viestintä
+- Ei vaadi matkapuhelinverkkoa tai internetyhteyttä
+- Päästä päähän salattu viestintä
 
-Tap **Get Started** to proceed through the setup flow.
+Napauta **"Aloita"** jatkaaksesi käyttöönottoprosessia.
 
-![Welcome screen](../../assets/screenshots/onboarding_welcome.png)
+![Tervetulonäyttö](../../assets/screenshots/onboarding_welcome.png)
 
-## Permissions
+## Käyttöoikeudet
 
-The app requests several permissions during setup. Each one serves a specific purpose, and some are required for core functionality.
+Sovellus pyytää määrityksen aikana useita käyttöoikeuksia. Jokaisella niistä on oma tarkoituksensa, ja osa niistä on välttämättömiä perustoimintojen kannalta.
 
-### Bluetooth Permission
+### Bluetooth-käyttöoikeus
 
-Bluetooth is the primary connection method between your phone and Meshtastic radio:
+Bluetooth on ensisijainen yhteystapa puhelimesi ja Meshtastic-radion välillä:
 
-- **Bluetooth scanning** — discover nearby Meshtastic radios
-- **Bluetooth connect** — establish and maintain connections with paired radios
+- **Bluetooth-skannaus** — etsi lähellä olevia Meshtastic-radioita
+- **Bluetooth-yhteys** — muodosta ja ylläpidä yhteyksiä pariliitettyihin radioihin
 
-Grant both permissions when prompted. Without Bluetooth, you'll need to use USB or TCP connections instead.
+Myönnä molemmat käyttöoikeudet pyydettäessä. Ilman Bluetoothia sinun on käytettävä sen sijaan USB- tai TCP-yhteyksiä.
 
-### Location Permission
+### Sijaintikäyttöoikeus
 
-> ⚠️ **Why is location required for Bluetooth?** Android requires location permission to discover nearby Bluetooth Low Energy devices. This is an Android system requirement, not a Meshtastic-specific choice.
+> ⚠️ **Miksi sijaintikäyttöoikeus tarvitaan Bluetoothille?** Android vaatii sijaintikäyttöoikeuden lähellä olevien Bluetooth Low Energy -laitteiden löytämiseen. Tämä on Android-järjestelmän vaatimus, eikä Meshtasticin erityinen valinta.
 
-Meshtastic also uses your location for:
+Meshtastic käyttää sijaintiasi myös seuraaviin tarkoituksiin:
 
-- Showing your position on the mesh map
-- Calculating distances to other nodes
-- Sharing your GPS coordinates with other mesh members (if enabled)
+- Sijaintisi näyttäminen mesh-kartalla
+- Etäisyyksien laskeminen muihin radioihin
+- GPS-koordinaattiesi jakaminen muiden verkon jäsenten kanssa (jos käytössä)
 
-Grant **"While using the app"** or **"Always"** depending on your preference:
+Myönnä **"Sovelluksen käytön aikana"** tai **"Aina"** oman mieltymyksesi mukaan:
 
-- **While using the app** — position updates only when the app is open
-- **Always** — enables background position updates for always-on mesh presence
+- **Sovelluksen käytön aikana** — sijainti päivittyy vain silloin, kun sovellus on avoinna
+- **Aina** — mahdollistaa sijainnin päivittämisen taustalla jatkuvaa verkon läsnäoloa varten
 
-If denied, Bluetooth scanning will not function and your node will not report a position.
+Jos käyttöoikeus evätään, Bluetooth-skannaus ei toimi eikä radiosi raportoi sijaintia.
 
-### Notifications Permission
+### Ilmoituskäyttöoikeus
 
-Notifications alert you to:
+Ilmoitukset kertovat sinulle:
 
-- Incoming messages from channels and direct messages
-- Connection status changes (connected, disconnected, reconnecting)
-- Firmware update availability
+- Saapuvista viesteistä kanavilta ja yksityisviesteistä
+- Yhteyden tilan muutoksista (yhdistetty, yhteys katkaistu, yhdistetään uudelleen)
+- Laiteohjelmistopäivitysten saatavuudesta
 
-> 💡 **Tip:** You can fine-tune notification preferences later in Android system settings. The app creates separate notification channels for messages, connection events, and background service status.
+> 💡 **Vinkki:** Voit myöhemmin hienosäätää ilmoitusasetuksia Androidin järjestelmäasetuksissa. Sovellus luo erilliset ilmoituskanavat viesteille, yhteystapahtumille ja taustapalvelun tilalle.
 
-### Critical Alerts Permission
+### Kriittisten hälytysten käyttöoikeus
 
-On supported devices, the app may request permission for critical alerts:
+Tuetuilla laitteilla sovellus voi pyytää käyttöoikeutta kriittisiin hälytyksiin:
 
-- These are high-priority notifications that can break through Do Not Disturb mode
-- Useful for emergency mesh alerts or urgent messages
-- You can **skip** this step if you don't need breakthrough notifications
-- Configure or revoke later in Android notification settings
+- Nämä ovat korkean prioriteetin ilmoituksia, jotka voivat ohittaa Älä häiritse -tilan
+- Hyödyllinen hätätilanteiden verkkohälytyksille tai kiireellisille viesteille
+- Voit **ohittaa** tämän vaiheen, jos et tarvitse ilmoituksia, jotka ohittavat **Älä häiritse** -tilan
+- Voit määrittää tai peruuttaa tämän myöhemmin Androidin ilmoitusasetuksissa
 
-## After Setup
+## Määrityksen jälkeen
 
-Once permissions are granted, the app transitions to the main interface. Your first action should be connecting to a Meshtastic radio — see [Connections](connections) for detailed instructions.
+Kun käyttöoikeudet on myönnetty, sovellus siirtyy pääkäyttöliittymään. Ensimmäinen toimenpiteesi pitäisi olla yhteyden muodostaminen Meshtastic-radioon — katso [Yhteydet](connections) yksityiskohtaisia ohjeita varten.
 
-> 💡 **Tip:** If you skipped any permissions during setup, you can grant them later through **Android Settings → Apps → Meshtastic → Permissions**. The app will prompt you again if a missing permission blocks a feature you try to use.
+> 💡 **Vinkki:** Jos ohitit käyttöoikeuksia määrityksen aikana, voit myöntää ne myöhemmin kohdassa **Androidin asetukset → Sovellukset → Meshtastic → Käyttöoikeudet**. Sovellus pyytää sinulta uudelleen käyttöoikeutta, jos puuttuva käyttöoikeus estää käyttämästä ominaisuutta, jota yrität käyttää.
 
-## What's Next?
+## Mitä seuraavaksi?
 
-Once connected to a radio, explore:
+Kun olet muodostanut yhteyden radioon, tutustu seuraaviin:
 
-- [Connections](connections) — pair your first radio device
-- [Messages & Channels](messages-and-channels) — send your first message
-- [Nodes](nodes) — see who's on your mesh
-- [Map & Waypoints](map-and-waypoints) — view node positions
-- [Settings](settings-radio-user) — configure your radio and user profile
+- [Yhteydet](connections) — yhdistä ensimmäinen radiolaitteesi
+- [Viestit ja kanavat](messages-and-channels) — lähetä ensimmäinen viestisi
+- [Radiot](nodes) — katso, ketkä ovat verkossasi
+- [Kartta ja reittipisteet](map-and-waypoints) — tarkastele radioiden sijainteja
+- [Asetukset](settings-radio-user) — määritä radiosi ja käyttäjäprofiilisi
 
-New to Meshtastic? The [getting started guide](https://meshtastic.org/docs/getting-started) on meshtastic.org covers hardware selection, initial radio configuration, and your first mesh setup.
+Uusi Meshtasticissa? [Aloitusopas](https://meshtastic.org/docs/getting-started) meshtastic.org-sivustolla käsittelee laitteiston valintaa, radion alkuasetuksia ja ensimmäisen verkon käyttöönottoa.
 
 ---

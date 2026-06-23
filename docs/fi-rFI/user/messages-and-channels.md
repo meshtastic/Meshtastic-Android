@@ -1,173 +1,173 @@
 ---
-title: Messages & Channels
-parent: User Guide
+title: Viestit ja kanavat
+parent: Käyttöopas
 nav_order: 3
 last_updated: 2026-06-11
-description: Send and receive messages, manage channels, configure encryption, search conversations, and use quick chat, reactions, and message actions.
+description: Lähetä ja vastaanota viestejä, hallitse kanavia, määritä salaus, hae keskusteluja sekä käytä pikachatia, reaktioita ja viestitoimintoja.
 aliases:
-  - channels
-  - direct-messages
-  - messaging
-  - conversations
+  - kanavat
+  - yksityisviestit
+  - viestit
+  - keskustelut
 ---
 
-# Messages & Channels
+# Viestit ja kanavat
 
-Meshtastic supports two communication modes: **channel broadcasts** and **direct messages**.
+Meshtastic tukee kahta viestintätilaa: **kanavaviestit** ja **suoraviestit**.
 
 ## Kanavat
 
-Channels are shared communication groups. All nodes configured with the same channel key can read and send messages on that channel.
+Kanavat ovat jaettuja viestintäryhmiä. Kaikki radiot, jotka on määritetty samalla kanava-avaimella, voivat lukea ja lähettää viestejä kyseisellä kanavalla.
 
-### Default Channel
+### Oletuskanava
 
-Every Meshtastic device comes with a default **LongFast** channel. This is an unencrypted channel used for general mesh communication.
+Jokaisessa Meshtastic-laitteessa on oletuksena **LongFast**-kanava. Tämä on salaamaton kanava yleiseen mesh-viestintään.
 
 ### Kanavan turvallisuus
 
-Channels support multiple encryption levels:
+Kanavat tukevat useita salaustasoja:
 
-| Icon | Security Level                       | Kuvaus                                                                                                                                 |
-| ---- | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
-| 🔒   | PSK (256-bit AES) | Fully encrypted with a strong pre-shared key. Only nodes with the matching key can read messages.      |
-| 🔐   | PSK (128-bit AES) | Encrypted with a shorter key. Secure for most uses but 256-bit is preferred for sensitive data.        |
-| 🔓   | Default / Open                       | Uses the well-known default key. **Any Meshtastic device** on the same preset can read these messages. |
-| ⚠️   | Insecure + Position                  | Open channel that also broadcasts your GPS position. Use with caution in public meshes.                |
+| Ikoni | Suojaustaso                               | Kuvaus                                                                                                                                                            |
+| ----- | ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 🔒    | PSK (256-bittinen AES) | Täysin salattu vahvalla esijaetulla avaimella. Vain samaa avainta käyttävät radiot voivat lukea viestejä.                         |
+| 🔐    | PSK (128-bittinen AES) | Salattu lyhyemmällä avaimella. Useimmille käyttötapauksille turvallinen, mutta 256-bittinen on suositeltu arkaluontoiseen dataan. |
+| 🔓    | Oletus / avoin                            | Käyttää tunnettua oletusavainta. **Kaikki Meshtastic-radiot** samalla esiasetuksella voivat lukea nämä viestit.                   |
+| ⚠️    | Turvaton + sijainti                       | Avoin kanava, joka lähettää myös GPS-sijaintisi. Käytä varoen julkisissa verkoissa.                                               |
 
-> 🔒 **Security Tip:** Always configure a unique PSK for private communications. The default channel is intentionally open so new users can discover the mesh — but you should create a separate encrypted channel for anything sensitive.
+> 🔒 **Tietoturvavinkki:** Käytä aina yksilöllistä PSK-avainta yksityiseen viestintään. Oletuskanava on tarkoituksella avoin, jotta uudet käyttäjät löytävät mesh-verkon — luo erillinen salattu kanava arkaluontoiselle viestinnälle.
 
-### Adding a Channel
+### Kanavan lisääminen
 
-1. Navigate to **Settings → Channels**.
-2. Tap **Add Channel** or scan a QR code.
-3. Configure the channel name and encryption key.
-4. Share the channel URL/QR code with others who need access.
+1. Siirry kohtaan **Asetukset → Kanavat**.
+2. Napauta **Lisää kanava** tai skannaa QR-koodi.
+3. Määritä kanavan nimi ja salausavain.
+4. Jaa kanavan URL tai QR-koodi muille, jotka tarvitsevat pääsyn.
 
-Tapping a channel shows its details and sharing options.
+Napauttamalla kanavaa näet sen tiedot ja jakovaihtoehdot.
 
 ## Yksityisviestit
 
-Direct messages (DMs) are point-to-point encrypted communications between two specific nodes.
+Yksityisviestit (DM) ovat kahden radion välistä päästä päähän salattua viestintää.
 
-### Sending a Direct Message
+### Yksityisviestin lähettäminen
 
-1. Open the **Messages** tab.
-2. Select a node from your contacts list or tap a node in the node list.
-3. Type your message and tap **Send**.
+1. Avaa **Viestit**-välilehti.
+2. Valitse radion yhteystiedoista tai napauta radiota radiolistasta.
+3. Kirjoita viesti ja napauta **Lähetä**.
 
-### Message States
+### Viestin tilat
 
-| State                             | Icon | Meaning                                                                                                           |
-| --------------------------------- | ---- | ----------------------------------------------------------------------------------------------------------------- |
-| Queued                            | ⏳    | Message waiting to be sent                                                                                        |
-| En route                          | ✓    | Delivered to the radio, awaiting acknowledgment                                                                   |
-| Toimitettu                        | ✓✓   | Acknowledgment received from recipient                                                                            |
-| Received                          | ✓    | Message received from the mesh (incoming)                                                      |
-| S&F Routing   | 🔗   | Store & Forward: message being routed through an S&F node |
-| S&F Confirmed | 🔗   | Store & Forward: delivery confirmed via S&F node          |
-| Virhe                             | ✗    | Delivery failed after retries                                                                                     |
+| Tila                                              | Ikoni | Tarkoitus                                                                 |
+| ------------------------------------------------- | ----- | ------------------------------------------------------------------------- |
+| Jonossa                                           | ⏳     | Viestiä odotetaan lähetettäväksi                                          |
+| Matkalla                                          | ✓     | Toimitettu radiolle, odottaa kuittausta                                   |
+| Toimitettu                                        | ✓✓    | Kuittaus vastaanotettu vastaanottajalta                                   |
+| Vastaanotettu                                     | ✓     | Viesti vastaanotettu mesh-verkosta (saapuva)           |
+| Varastoi & välitä             | 🔗    | Viestiä reititetään Varastoi & välitä -radion kautta  |
+| Varastoi & välitä vahvistettu | 🔗    | Toimitus vahvistettu Varastoi & välitä -radion kautta |
+| Virhe                                             | ✗     | Toimitus epäonnistui uudelleenyritysten jälkeen                           |
 
-### Delivery Errors
+### Toimitusvirheet
 
-When a message fails to deliver, the error indicator shows what went wrong:
+Kun viestin toimitus epäonnistuu, virheilmaisin näyttää, mikä meni pieleen:
 
-| Virhe               | Meaning                                  | What to Do                                                                                                                                                                  |
-| ------------------- | ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| No Route            | No path exists to the destination node   | The recipient may be offline or out of mesh range. Try later or move closer.                                                                |
-| Got NAK             | The next-hop node refused to relay       | The relay node may be congested. Wait and retry.                                                                                            |
-| Aikakatkaisu        | No acknowledgment within retry window    | The recipient may be just out of range. Try increasing hop limit or moving to a better position.                                            |
-| Ei Käyttöliittymää  | No radio interface available to send     | Check that your radio is connected and the channel is configured.                                                                                           |
-| Max Retransmit      | All retry attempts exhausted             | The mesh path is unreliable. Try a different channel or wait for conditions to improve.                                                     |
-| Ei Kanavaa          | The destination channel doesn't exist    | Verify both nodes share the same channel configuration.                                                                                                     |
-| Too Large           | Message exceeds maximum payload size     | Shorten your message (max ~230 characters).                                                                              |
-| Ei vastausta        | Node received message but didn't respond | The recipient's radio may be busy or in low-power sleep mode.                                                                                               |
-| Duty Cycle Limit    | Regional airtime limit reached           | Your radio has used its allowed transmit time. Wait for the duty cycle window to reset (typically 1 hour in EU regions). |
-| Virheellinen pyyntö | Malformed or invalid message             | This usually indicates a software bug. Try restarting the app.                                                                              |
+| Virhe                                                  | Merkitys                                        | Toimenpiteet                                                                                                                                                                             |
+| ------------------------------------------------------ | ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ei reittiä                                             | Kohderadioon ei ole reittiä                     | Vastaanottaja voi olla offline-tilassa tai verkon kantaman ulkopuolella. Yritä myöhemmin tai siirry lähemmäksi.                                          |
+| Hylkäyskuittaus vastaanotettu (NAK) | Seuraavan hypyn radio kieltäytyi välittämästä   | Välittäjä-radio voi olla ruuhkautunut. Odota ja yritä uudelleen.                                                                                         |
+| Aikakatkaisu                                           | Ei kuittausta uudelleenyritysten aikana         | Vastaanottaja voi olla kantaman ulkopuolella. Yritä nostaa hyppyrajaa tai siirtyä parempaan paikkaan.                                                    |
+| Ei Käyttöliittymää                                     | Lähetykseen ei ole käytettävissä radioliitäntää | Tarkista, että radio on yhdistetty ja kanava on määritetty.                                                                                                              |
+| Kaikki uudelleenyritykset käytetty                     | Uudelleenyritysten enimmäismäärä saavutettu     | Mesh-reitti ei ole luotettava. Kokeile toista kanavaa tai odota olosuhteiden parantumista.                                                               |
+| Ei Kanavaa                                             | Kohdekanavaa ei ole olemassa                    | Varmista, että molemmilla radioilla on sama kanavakonfiguraatio.                                                                                                         |
+| Liian suuri                                            | Viesti ylittää sallitun enimmäiskoon            | Lyhennä viestiä (enintään ~230 merkkiä).                                                                                              |
+| Ei vastausta                                           | Radio vastaanotti viestin mutta ei vastannut    | Vastaanottajan radio voi olla varattu tai virransäästötilassa.                                                                                                           |
+| Käyttöasteen rajoitus                                  | Alueellinen lähetysajan raja saavutettu         | Radiosi on käyttänyt sallitun lähetysajan. Odota, että käyttöasteen rajoituksen ikkuna nollautuu (tyypillisesti 1 tunti EU-alueilla). |
+| Virheellinen pyyntö                                    | Viallinen tai virheellinen viesti               | Tämä yleensä viittaa ohjelmistovirheeseen. Kokeile käynnistää sovellus uudelleen.                                                                        |
 
-> 💡 **Tip:** Most delivery errors resolve themselves. If a node is intermittently reachable, the mesh will retry. For persistent "No Route" errors, check that intermediate Router nodes are online.
+> 💡 Vinkki: Useimmat toimitusvirheet korjaantuvat itsestään. Jos radio on ajoittain tavoitettavissa, mesh yrittää uudelleen. Jos “Ei reittiä” -virhe toistuu, tarkista että välissä olevat reitittävät radiot ovat verkossa.
 
-## Message Features
+## Viestiominaisuudet
 
-### Quick Chat
+### Pikachatti
 
-Pre-configured messages for rapid communication:
+Valmiiksi määritetyt viestit nopeaan viestintään:
 
-- Access via the Quick Chat button in the message input area
-- Choose from built-in phrases or custom messages
-- Customize quick chat messages in **Settings → Quick Chat**
-- Useful when typing is impractical (gloves, small screen, urgent)
+- Käytettävissä viestikentän Pikachatti-painikkeen kautta
+- Valitse valmiista sisäänrakennetuista viesteistä tai omista viesteistä
+- Muokkaa pikachatti-viestejä kohdassa **Asetukset → Pikachatti**
+- Hyödyllinen, kun kirjoittaminen on hankalaa (hanskat, pieni näyttö, kiire)
 
-![Quick chat option](../../assets/screenshots/messages_quick_chat.png)
+![Pikachatti-vaihtoehto](../../assets/screenshots/messages_quick_chat.png)
 
-The channel list shows each channel with its latest message preview.
+Kanavalista näyttää jokaisen kanavan ja sen viimeisimmän viestin esikatselun.
 
-### Searching Messages
+### Viestien haku
 
-You can search the full history of any conversation directly from the chat screen:
+Voit hakea koko keskusteluhistorian suoraan chat-näkymästä:
 
-1. Open a conversation (a channel or a direct message).
-2. Tap the **search icon** in the top bar.
-3. Type into the **Search messages…** field. The search runs as you type, across all stored messages in that conversation.
-4. Use the **N / M** result counter and the **previous / next arrows** to jump between matches, which are highlighted in the conversation.
+1. Avaa keskustelu (kanava tai suoraviesti).
+2. Napauta **hakukuvaketta** yläpalkissa.
+3. Kirjoita **Etsi viestejä** -kenttään. Haku toimii kirjoittaessa ja käy läpi kaikki tallennetut viestit kyseisessä keskustelussa.
+4. Käytä **N / M** -laskuria ja edellinen/seuraava -nuolia siirtyäksesi osumien välillä, jotka on korostettu keskustelussa.
 
-![Message search bar with result counter and previous/next arrows](../../assets/screenshots/messages_search_bar.png)
+![Viestihaku-palkki tuloslaskurilla ja nuolilla](../../assets/screenshots/messages_search_bar.png)
 
-> 💡 **Tip:** Search is full-text and stays within the conversation you opened it from — it doesn't search across other channels or contacts. Matching is fast even on long histories because messages are indexed locally.
+> 💡 Vinkki: Haku on täystekstihaku ja toimii vain siinä keskustelussa, josta avasit sen — se ei hae muista kanavista tai kontakteista. Osumat löytyvät nopeasti myös pitkistä historiatiedoista, koska viestit on indeksoitu paikallisesti.
 
-### Message Bubbles
+### Viestikuplat
 
-Messages appear as chat bubbles — sent messages on the right, received messages on the left. Each bubble shows the sender, timestamp, and delivery status. Messages with replies include a quoted preview of the original message above the response.
+Viestit näkyvät chat-kuplina — lähetetyt viestit oikealla, vastaanotetut vasemmalla. Jokainen kupla näyttää lähettäjän, aikaleiman ja toimitustilan. Vastaukselliset viestit sisältävät alkuperäisen viestin esikatselun vastauksen yläpuolella.
 
-### Reactions
+### Reaktiot
 
-React to messages with emoji:
+Reagoi viesteihin emojeilla:
 
-- **Long-press** a message to open the actions menu
-- Tap **Add Reaction** to choose an emoji
-- Reactions appear below the message bubble
-- Multiple users can react to the same message
-- React to your own messages or others' messages
+- **Pitkä painallus** viestissä avaa toimintovalikon
+- Napauta **Lisää reaktio** valitaksesi emojin
+- Reaktiot näkyvät viestin alapuolella
+- Useampi käyttäjä voi reagoida samaan viestiin
+- Voit reagoida omiin ja muiden viesteihin
 
-![Emoji reaction badges displayed beneath a message](../../assets/screenshots/messages_reaction.png)
+![Emoji-reaktiot viestin alla](../../assets/screenshots/messages_reaction.png)
 
-> 💡 **Tip:** Reactions are lightweight — they use minimal mesh bandwidth compared to full text messages.
+> 💡 Vinkki: Reaktiot kuluttavat vain vähän mesh-verkon kaistaa verrattuna täysiin tekstiviesteihin.
 
-### Message Actions
+### Viestitoiminnot
 
-Long-press any message to access:
+Pitkä painallus missä tahansa viestissä avaa:
 
-- **Copy** — copy message text to clipboard
-- **Reply** — quote the message in your response
-- **React** — add an emoji reaction
-- **Delete** — remove a message you sent (local deletion)
+- **Kopioi** — kopioi viestin teksti leikepöydälle
+- **Vastaa** — lainaa viesti vastaukseesi
+- **Reagoi** — lisää emoji-reaktio
+- **Poista** — poista lähettämäsi viesti (paikallinen poisto)
 
-### Message Priority
+### Viestien prioriteetti
 
-Messages are queued and transmitted based on priority:
+Viestit jonotetaan ja lähetetään prioriteetin mukaan:
 
-1. Emergency/alert messages (highest)
-2. Direct messages
-3. Channel broadcasts (lowest)
+1. Hätä ja hälytysviestit (korkein)
+2. Suoraviestit
+3. Kanavaviestit (alin prioriteetti)
 
-### Message Limits
+### Viestirajoitukset
 
-- **Maximum length:** 237 bytes (approximately 230 characters for ASCII text)
-- **Rate limiting:** The mesh enforces airtime fairness; heavy message volume may be throttled
-- **Delivery:** Messages are retried automatically if no acknowledgment is received
+- **Enimmäispituus:** 237 tavua (noin 230 merkkiä ASCII-tekstille)
+- **Rajoitusnopeus:** mesh-verkko tasaa lähetysajan oikeudenmukaisesti; suuri viestimäärä voi joutua rajoitetuksi
+- **Toimitus:** viestit yritetään lähettää uudelleen automaattisesti, jos kuittausta ei saada
 
-## Best Practices
+## Parhaat käytännöt
 
-- Use channels for group coordination
-- Use direct messages for private person-to-person communication
-- Keep messages short — mesh bandwidth is limited
-- Configure encryption for sensitive communications
+- Käytä kanavia ryhmäviestintään
+- Käytä suoraviestejä kahden käyttäjän väliseen yksityiseen viestintään
+- Pidä viestit lyhyinä — mesh-verkon kaistanleveys on rajallinen
+- Määritä salaus arkaluontoiselle viestinnälle
 
-## Related Topics
+## Aiheeseen liittyvät aiheet
 
-- [Nodes](nodes) — tap a node to start a direct message
-- [Settings — Radio & User](settings-radio-user) — configure channel encryption and presets
-- [MQTT](mqtt) — bridge channel messages to the internet
-- [Channel configuration](https://meshtastic.org/docs/configuration/radio/channels) — detailed channel settings on meshtastic.org
+- [Radiot](nodes) — napauta radiota aloittaaksesi suoraviestin
+- [Asetukset — Radio ja käyttäjä](settings-radio-user) — määritä kanavan salaus ja esiasetukset
+- [MQTT](mqtt) — välittää kanavaviestit internetiin
+- [Kanavien määritys](https://meshtastic.org/docs/configuration/radio/channels) — tarkemmat kanava-asetukset meshtastic.org-sivustolla
 
 ---
 

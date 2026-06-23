@@ -1,188 +1,188 @@
 ---
 title: Haku
-parent: User Guide
+parent: Käyttöopas
 nav_order: 12
 last_updated: 2026-06-11
-description: Explore your mesh network — the Local Mesh Discovery scanner, traceroute paths, neighbor maps, and node discovery tools.
+description: Tutki mesh-verkkoasi — paikallinen verkon haku, reitinselvitykset, naapurikartat ja radion hakuun liittyvät työkalut.
 aliases:
-  - mesh-discovery
-  - local-discovery
-  - network-scan
-  - traceroute
-  - neighbor-info
+  - mesh-verkon haku
+  - paikallinen haku
+  - verkkohaku
+  - reitinselvitys
+  - naapuritieto
 ---
 
 # Haku
 
-Discovery tools help you understand **how** your mesh network is connected — which nodes can hear each other, what paths messages take, and where bottlenecks or weak links exist.
+Hakutyökalut auttavat ymmärtämään **miten** mesh-verkko on yhteydessä — mitkä radiot kuulevat toisensa, mitä reittejä viestit kulkevat ja missä on pullonkauloja tai heikkoja yhteyksiä.
 
-The app offers two complementary approaches:
+Sovellus tarjoaa kaksi toisiaan täydentävää lähestymistapaa:
 
-- **Local Mesh Discovery (Scanner)** — an automated mode that cycles your connected radio through different LoRa presets, listens on each, and ranks which preset performs best at your location.
-- **Manual exploration** — traceroute, Neighbor Info, and the node list, which you can use at any time to investigate specific paths and topology.
-
----
-
-## Local Mesh Discovery (Scanner)
-
-Local Mesh Discovery is a dedicated scanning mode that helps you find the best LoRa modem preset for your location and see which nodes are active on each preset. It cycles your connected radio through one or more presets you choose, listens (or "dwells") on each one for a set time to collect packets, then analyzes and ranks the results.
-
-Open it from **Settings → Local Mesh Discovery**.
-
-> ⚠️ **Note:** Discovery temporarily changes your radio's LoRa settings while it scans, then restores your original configuration when it finishes. Your device must be connected to run a scan.
-
-### Setting Up a Scan
-
-Before starting, configure these controls:
-
-| Control                | Kuvaus                                                                                                                                                                                                                         |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **LoRa preset picker** | Select one or more presets to scan. Discovery dwells on each selected preset in turn.                                                                                                          |
-| **Dwell time**         | Time to listen on each preset. Choose from 1, 5, 15, 30, 45, 60, 90, 120, or 180 minutes. Longer dwell times collect more packets and give a clearer picture, but take longer. |
-| **Keep screen awake**  | Optional toggle that prevents the screen from sleeping during a long scan.                                                                                                                                     |
-
-The **Start** button stays disabled — with an explanation of why — until the scan can run. Common reasons it's disabled:
-
-- The device is **not connected**.
-- The current channel is using the **default channel key** (use a unique key first — see [Messages & Channels](messages-and-channels)).
-- **No presets** have been selected to scan.
-- The selected preset uses **2.4 GHz**, which your hardware doesn't support.
-
-### Live Progress
-
-While a scan runs, Discovery shows its current stage:
-
-| Stage                                                 | What's happening                                                                                       |
-| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| **Preparing**                                         | Saving your current configuration and getting ready to scan.                           |
-| **Shifting to \<preset\>** | Switching the radio to the next preset to test.                                        |
-| **Reconnecting**                                      | Re-establishing the connection after the preset change.                                |
-| **Dwell**                                             | Listening on the current preset to collect packets, with a countdown to the next step. |
-| **Analysis**                                          | Processing the collected packets and ranking the presets.                              |
-| **Restoring**                                         | Putting your original LoRa configuration back.                                         |
-
-![Dwell countdown showing time remaining on the current preset](../../assets/screenshots/discovery_dwell_progress.png)
-
-### Reading the Results
-
-When the scan completes, Discovery presents a per-preset result card for each preset it tested, plus an overall summary.
-
-![Per-preset result card with ranking and collected metrics](../../assets/screenshots/discovery_preset_result.png)
-
-Metrics include:
-
-| Metrijärjestelmä                         | What it tells you                                                                              |
-| ---------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| RF health                                | Overall quality of the radio environment on that preset.                       |
-| Kanavan käyttöaste                       | How busy the airwaves were during the dwell.                                   |
-| Airtime                                  | Transmission time observed.                                                    |
-| Direct vs. relayed nodes | How many mesh nodes were heard directly versus via a relay.                    |
-| Bad / duplicate packets                  | Counts of corrupt and repeated packets, indicating congestion or interference. |
-
-Additional features available from the results:
-
-- **Scan History** — saved sessions you can revisit; view or delete past scans.
-- **Discovery Map** — a map of the nodes found during the scan.
-- **Report export** — export a report as a PDF on Android, or as text on other platforms.
-
-> 💡 **Tip:** On Android, Discovery can generate an on-device AI summary (Gemini Nano) of your results. If the on-device model isn't available, an algorithmic summary is used instead — so you always get a readable interpretation of the scan.
+- Paikallinen verkon haku (Scanner) — automaattinen tila, joka kierrättää yhdistettyä radiota eri LoRa-esiasetusten läpi, kuuntelee jokaisella ja arvioi, mikä esiasetus toimii parhaiten sijainnissasi.
+- Manuaalinen etsiminen — reitinselvityksen reitit, naapuritiedot ja radiolista, joita voit käyttää milloin tahansa yksittäisten reittien ja topologian tarkasteluun.
 
 ---
 
-## Manual Exploration
+## Paikallinen verkon haku (Scanner)
 
-The tools below are available at any time from the node list and node detail screens. Use them to investigate specific paths and build a topology picture, alongside or instead of a full scan.
+Paikallinen verkon haku on erillinen skannaustila, joka auttaa löytämään parhaan LoRa-modeemiesiasetuksen sijaintiisi ja näkemään, mitkä radiot ovat aktiivisia kullakin esiasetuksella. Se kierrättää yhdistettyä radiota valitsemiesi esiasetusten läpi, kuuntelee jokaisella asetuksella määrätyn ajan kerätäkseen paketteja ja analysoi sekä pisteyttää tulokset.
+
+Avaa se kohdasta **Asetukset → Paikallinen verkon haku**.
+
+> ⚠️ **Huom:** Haku muuttaa radiosi LoRa-asetuksia väliaikaisesti skannauksen ajaksi ja palauttaa alkuperäisen konfiguraation sen päätyttyä. Laitteen täytyy olla yhdistettynä, jotta skannaus voidaan suorittaa.
+
+### Skannauksen asetukset
+
+Ennen aloittamista määritä nämä asetukset:
+
+| Hallinta                       | Kuvaus                                                                                                                                                                                                                                    |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **LoRa-esiasetuksen valitsin** | Valitse yksi tai useampi esiasetus skannattavaksi. Haku pysähtyy jokaisessa valitussa esiasetuksessa vuorollaan kuuntelemaan liikennettä.                                                                 |
+| **Kuunteluaika**               | Kunkin esiasetuksen kuunteluaika. Valitse 1, 5, 15, 30, 45, 60, 90, 120 tai 180 minuuttia. Pidempi kuunteluaika kerää enemmän paketteja ja antaa tarkemman kuvan, mutta kestää pidempään. |
+| **Pidä näyttö päällä**         | Valinnainen kytkin, joka estää näytön siirtymisen lepotilaan pitkän skannauksen aikana.                                                                                                                                   |
+
+**Käynnistä**-painike ei ole käytettävissä ja näyttää syyn, kunnes skannaus voidaan suorittaa. Yleisiä syitä, miksi se on pois käytöstä:
+
+- Laite **ei ole yhdistetty**
+- Nykyinen kanava käyttää **oletuskanava-avainta** (käytä ensin yksilöllistä avainta — katso [Viestit ja kanavat](messages-and-channels)).
+- **Esiasetuksia ei ole valittu** skannattavaksi.
+- Valittu esiasetus käyttää **2,4 GHz -taajuutta**, jota laitteistosi ei tue.
+
+### Reaaliaikainen edistyminen
+
+Skannauksen aikana haku näyttää sen nykyisen vaiheen:
+
+| Tila                                                          | Mitä tapahtuu                                                                                                               |
+| ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| **Valmistelee**                                               | Tallennetaan nykyinen kokoonpano ja valmistaudutaan skannaukseen.                                           |
+| **Vaihdetaan kohteeseen <preset\>** | Vaihdetaan radio seuraavaan esiasetukseen testausta varten.                                                 |
+| **Yhdistetään uudelleen**                                     | Yhteys muodostetaan uudelleen esiasetuksen vaihdon jälkeen.                                                 |
+| **Kuuntelu**                                                  | Nykyisen esiasetuksen kuuntelu pakettien keräämiseksi, seuraavaan vaiheeseen siirtymisen laskuri käynnissä. |
+| **Analyysi**                                                  | Kerättyjen pakettien käsittely ja esiasetusten vertailu ja pisteytys.                                       |
+| **Palautetaan asetuksia**                                     | Palautetaan alkuperäinen LoRa-konfiguraatio takaisin.                                                       |
+
+![Kuuntelun laskuri näyttää jäljellä olevan ajan nykyisessä esiasetuksessa](../../assets/screenshots/discovery_dwell_progress.png)
+
+### Tulosten lukeminen
+
+Kun skannaus valmistuu, haku näyttää jokaiselle testatulle esiasetukselle oman tuloskortin sekä yleisen yhteenvedon.
+
+![Esiasetuksen tuloskortti, jossa näkyy sijoitus ja kerätyt mittarit](../../assets/screenshots/discovery_preset_result.png)
+
+Mittarit sisältävät:
+
+| Metrijärjestelmä                     | Mitä ne kertovat sinulle                                                                             |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| Radiolaatu (RF)   | Kyseisen esiasetuksen radioympäristön kokonaislaatu                                                  |
+| Kanavan käyttöaste                   | Kuinka kuormitetut radiotaajuudet olivat kuuntelun aikana.                           |
+| Lähetysaika                          | Havaittu lähetysaika.                                                                |
+| Suorat ja välitetyt radiot           | Kuinka monta mesh-radiota kuultiin suoraan verrattuna välitettyihin.                 |
+| Virheelliset / päällekkäiset paketit | Vioittuneiden ja toistettujen pakettien määrä, joka kertoo ruuhkasta tai häiriöistä. |
+
+Tuloksista saatavilla olevat lisätoiminnot:
+
+- **Skannaus­historia** — tallennetut istunnot, joita voit tarkastella myöhemmin; katsele tai poista aiempia skannauksia.
+- **Haun kartta** — kartta skannauksessa löydetyistä radioista.
+- **Raportin vienti** — vie raportti PDF-tiedostona Androidilla tai tekstinä muilla alustoilla.
+
+> 💡 **Vinkki:** Androidilla haku voi luoda laitteessa toimivan tekoälyyhteenvedon (Gemini Nano) tuloksistasi. Jos laitteessa toimivaa mallia ei ole käytettävissä, käytetään algoritmista yhteenvetoa — näin saat aina luettavan tulkinnan skannauksesta.
+
+---
+
+## Manuaalinen haku
+
+Alla olevat työkalut ovat käytettävissä milloin tahansa radiolistasta ja radion tietonäkymistä. Käytä niitä yksittäisten reittien tutkimiseen ja topologian muodostamiseen, joko osana skannausta tai sen sijaan.
 
 ## Reitinselvitys
 
-Traceroute reveals the exact path a message takes from your node to any other node on the mesh. It's the single most useful tool for debugging connectivity problems.
+Reitinselvitys näyttää tarkan polun, jota kautta viesti kulkee omalta radioltasi mihin tahansa toiseen verkon radioon. Se on yksittäisistä työkaluista hyödyllisin yhteysongelmien vianmääritykseen.
 
-### Running a Traceroute
+### Reitinselvityksen suorittaminen
 
-1. Navigate to **Nodes** and tap the node you want to trace.
-2. On the node detail screen, tap **Traceroute**.
-3. The app sends a traceroute request and waits for the response.
-4. Results display each hop in order, with signal quality at every step.
+1. Siirry kohtaan **Radiot** ja napauta radiota, jota haluat jäljittää.
+2. Radion tietonäkymässä napauta **Reitinselvitys**.
+3. Sovellus lähettää reitinselvityspyynnön ja odottaa vastausta.
+4. Tulokset näyttävät jokaisen hypyn järjestyksessä sekä signaalin laadun jokaisessa vaiheessa.
 
-### Reading the Results
+### Tulosten lukeminen
 
-A traceroute result looks like this:
+Reitinselvityksen tulos näyttää tältä:
 
 ```
-You → Node A (SNR: 8.5, RSSI: -95) → Node B (SNR: 5.2, RSSI: -108) → Target
+Sinä → Radio A (SNR: 8.5, RSSI: -95) → Radio B (SNR: 5.2, RSSI: -108) → Kohde
 ```
 
-Each hop represents a relay node that forwarded the message. The SNR and RSSI values at each hop tell you about the link quality on that specific segment.
+Jokainen hyppy on välittäjä-radio, joka lähetti viestin eteenpäin. Jokaisen hypyn SNR- ja RSSI-arvot kertovat kyseisen yhteysvälin laadusta.
 
-| What to look for                                                           | What it means                                                               |
-| -------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| All hops show Good SNR (> 5 dB)                         | Healthy path — messages flow reliably                                       |
-| One hop shows Bad SNR (< 0 dB) | Weak link — this relay segment is fragile                                   |
-| Many hops (4+)                                          | Long path — consider repositioning a node to shorten it                     |
-| Different path on retry                                                    | Mesh is adapting — multiple routes exist (this is good!) |
+| Mitä kannattaa tarkkailla                                                                            | Mitä se tarkoittaa                                                               |
+| ---------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| Kaikki hypyt näyttävät hyvää SNR-arvoa (> 5 dB)                                   | Hyvä reitti — viestit kulkevat luotettavasti                                     |
+| Yksi hyppy näyttää huonon SNR:n (< 0 dB) | Heikko yhteys — tämä välityssegmentti on haavoittuva                             |
+| Useita hyppyjä (4+)                                                               | Pitkä reitti — harkitse radion siirtämistä sen lyhentämiseksi                    |
+| Eri reitti uudelleenyrityksellä                                                                      | Verkko mukautuu — useita reittejä on olemassa (tämä on hyvä!) |
 
-> 💡 **Tip:** Run traceroute several times over a few minutes. If the path changes, your mesh has redundant routes — a sign of a well-connected network.
+> Vinkki: Aja reitinselvitys useita kertoja muutaman minuutin aikana. Jos reitti muuttuu, verkossasi on varareittejä — merkki hyvin kytketystä verkosta.
 
-### Troubleshooting with Traceroute
+### Reitinselvityksen vianmääritys
 
-- **"No route found"** — The target node may be offline, out of range, or on a different channel. Check that both nodes share at least one channel with the same encryption key.
-- **Traceroute times out** — The path may be too long (exceeds hop limit) or a relay node is congested. Try increasing the hop limit in **Settings → LoRa Config**.
-- **Asymmetric paths** — A traceroute from A→B may take a different path than B→A. This is normal — radio propagation is not always symmetric.
+- **Reittiä ei löytynyt** — kohderadio voi olla kiinni, kantaman ulkopuolella tai eri kanavalla. Varmista, että molemmat radiot jakavat vähintään yhden kanavan samalla salausavaimella.
+- **Reitinselvitys aikakatkaistu** — reitti voi olla liian pitkä (ylittää hyppymäärärajan) tai välittäjä-radio on ruuhkautunut. Kokeile nostaa hyppymäärärajaa kohdassa **Asetukset → LoRa-asetukset**.
+- **Epäsymmetriset reitit** — reitinselvitys A→B voi kulkea eri reittiä kuin B→A. Tämä on normaalia — radiosignaalin eteneminen ei aina ole symmetristä.
 
 ---
 
 ## Naapuritieto
 
-The Neighbor Info module lets each node broadcast a list of the nodes it can **directly hear** (single-hop). When multiple nodes share their neighbor lists, you can piece together a topology map of the entire mesh.
+Naapuritieto-moduuli antaa jokaisen radion lähettää listan radioista, jotka se voi **kuulla suoraan** (yhden hypyn päässä). Kun useat radiot jakavat naapurilistansa, voit muodostaa koko verkon topologian kartan.
 
-### Enabling Neighbor Info
+### Naapuritiedon käyttöönotto
 
-1. Navigate to **Settings → Module Config → Neighbor Info**.
-2. Enable the module.
-3. Set the broadcast interval (default: 900 seconds / 15 minutes).
+1. Siirry kohtaan **Asetukset → Moduuliasetukset → Naapuritieto**.
+2. Ota moduuli käyttöön.
+3. Aseta lähetysväli (oletus: 900 sekuntia / 15 minuuttia).
 
-Once enabled, your node periodically broadcasts its neighbor table. Other nodes with Neighbor Info enabled do the same.
+Kun toiminto on käytössä, radio lähettää säännöllisesti naapuritiedot. Myös muut radiot, joissa naapuritieto on käytössä, toimivat samalla tavalla.
 
-### Viewing Neighbor Data
+### Naapuritiedon katselu
 
-- Open any node's detail screen and look for the **Neighbors** section.
-- Each neighbor entry shows the node that was directly heard and its signal quality.
-- Combine neighbor data from multiple nodes to understand the full mesh topology.
+- Avaa minkä tahansa radion tietonäkymä ja etsi **Naapurit**-osio.
+- Jokainen naapurimerkintä näyttää radion, joka on kuultu suoraan, sekä sen signaalilaadun.
+- Yhdistä naapuritiedot useista radioista ymmärtääksesi koko mesh-verkon topologian.
 
-> ⚠️ **Note:** Neighbor Info increases airtime usage because every enabled node periodically broadcasts its neighbor list. On busy meshes with many nodes, consider longer broadcast intervals (3600 seconds or more) to avoid congestion.
-
----
-
-## Node List as a Discovery Tool
-
-The node list itself is a powerful discovery tool when you use its filtering and sorting features effectively.
-
-### Finding New Nodes
-
-- Sort by **Last heard** to see the most recently active nodes at the top.
-- Enable **Include unknown** to see nodes that have appeared on the mesh but haven't sent user info yet — these are often newly powered-on devices.
-
-### Assessing Connectivity
-
-- Sort by **Hops away** to see which nodes are directly reachable (0 hops) versus relayed.
-- Sort by **Distance** to find nearby nodes and verify they're reachable.
-- Use **Exclude MQTT** to focus on nodes reachable over radio (not via internet bridge).
-
-### Infrastructure Audit
-
-- Disable **Exclude infrastructure** to see Router, Repeater, Router Late, and Client Base nodes.
-- Check their signal quality and last-heard times to verify your infrastructure nodes are healthy.
-
-See [Nodes](nodes) for full details on filtering and sorting options.
+> ⚠️ Huom: Naapuritieto lisää lähetysajan käyttöä, koska jokainen käytössä oleva radio lähettää säännöllisesti naapurilistansa. Vilkkaissa verkoissa, joissa on paljon radioita, harkitse pidempiä lähetysvälejä (3600 sekuntia tai enemmän) ruuhkautumisen välttämiseksi.
 
 ---
 
-## Tips for Mesh Exploration
+## Radiolista hakutyökaluna
 
-- **Start with traceroute** — it gives you immediate, actionable information about a specific path.
-- **Enable Neighbor Info on key nodes** — especially routers and repeaters, to build a picture of the backbone.
-- **Check the map** — node positions on the [Map](map-and-waypoints) combined with signal data help you understand why some links are strong and others are weak.
-- **Compare signal over time** — use the [Signal Meter](signal-meter) guide to interpret SNR and RSSI values correctly.
+Radiolista on itsessään tehokas hakutyökalu, kun käytät sen suodatus- ja lajitteluominaisuuksia oikein.
+
+### Uusien radioiden löytäminen
+
+- Lajittele **Viimeksi kuultu** nähdäksesi viimeksi aktiiviset radiot ylimpänä.
+- Ota käyttöön **Näytä tuntemattomat** nähdäksesi radiot, jotka ovat ilmestyneet verkkoon, mutta eivät ole vielä lähettäneet käyttäjätietoja — usein juuri käyttöönotettuja laitteita.
+
+### Yhteyksien arviointi
+
+- Lajittele **Hyppyjen määrä** nähdäksesi mitkä radiot ovat suoraan tavoitettavissa (0 hyppyä) ja mitkä välitettyinä.
+- Lajittele **Etäisyys** löytääksesi lähellä olevat radiot ja varmistaaksesi niiden tavoitettavuuden.
+- Käytä **Rajaa MQTT pois** keskittyäksesi radioyhteyksillä tavoitettaviin radioihin (ei internet-sillan kautta).
+
+### Infrastruktuurin tarkistus
+
+- Poista käytöstä **Ohita infrastruktuurilaitteet** nähdäksesi Router-, Repeater-, Router Late- ja Client Base -radiot.
+- Tarkista niiden signaalin laatu ja viimeksi kuultu -ajat varmistaaksesi, että infrastruktuuriradiot ovat kunnossa.
+
+Katso [Radiot](nodes) saadaksesi lisätietoa suodatus- ja lajitteluasetuksista.
+
+---
+
+## Vinkkejä mesh-verkon tutkimiseen
+
+- Aloita reitinselvityksellä — se antaa välittömän ja käytännöllisen tiedon yksittäisestä reitistä.
+- Ota naapuritieto käyttöön keskeisissä radioissa — erityisesti reitittimissä ja toistimissa, jotta saat näkyvyyden runkoverkkoon.
+- Tarkista kartta — [Kartta](map-and-waypoints) yhdessä signaalitiedon kanssa auttaa ymmärtämään, miksi jotkin yhteydet ovat vahvoja ja toiset heikkoja.
+- Seuraa signaalin muutoksia ajan kuluessa — käytä [Signaalimittari](signal-meter) -opasta tulkitaksesi SNR- ja RSSI-arvot oikein.
 
 ---
 

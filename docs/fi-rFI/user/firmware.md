@@ -1,115 +1,115 @@
 ---
-title: Firmware Updates
-parent: User Guide
+title: Laiteohjelmiston päivitykset
+parent: Käyttöopas
 nav_order: 13
 last_updated: 2026-05-13
-description: Update your radio firmware over Bluetooth — OTA process, version channels, pre-flight checks, and recovery.
+description: Päivitä radion laiteohjelmisto Bluetoothin kautta — OTA-päivitys, versiohaarat, esitarkistukset ja palautus.
 aliases:
   - firmware
-  - update
+  - päivitä
   - ota
-  - flash
+  - ohjelmoi
 ---
 
-# Firmware Updates
+# Laiteohjelmiston päivitykset
 
-Keep your Meshtastic radio up to date with the latest firmware for new features, bug fixes, and security improvements.
+Pidä Meshtastic-radiosi ajan tasalla uusimmalla firmwarella, jossa on uusia ominaisuuksia, virhekorjauksia ja tietoturvaparannuksia.
 
-## Checking for Updates
+## Päivitysten tarkistaminen
 
-1. Navigate to **Settings → Firmware Update** or tap the firmware notification if shown.
-2. The app checks for available firmware versions.
-3. Available updates show the version number and changelog summary.
+1. Siirry kohtaan **Asetukset — Firmware-päivitys** tai napauta päivitysilmoitusta, jos sellainen näkyy.
+2. Sovellus tarkistaa saatavilla olevat firmware-versiot.
+3. Saatavilla olevat päivitykset näyttävät versionumeron ja muutoslokin yhteenvedon.
 
-## Update Methods
+## Päivitysmenetelmät
 
-### OTA (Over-The-Air) via Bluetooth
+### OTA (Over-The-Air) Bluetooth-yhteyden kautta
 
-The most common update method for Android users:
+Yleisin päivitystapa Android-käyttäjille:
 
-1. Ensure your radio is connected via Bluetooth.
-2. Navigate to the Firmware Update screen.
-3. Select the desired firmware version.
-4. Tap **Update** to begin the OTA process.
-5. Wait for the update to complete — **do not disconnect** during the update.
+1. Varmista, että radiosi on yhdistetty Bluetoothilla.
+2. Siirry Firmware-päivitys -näkymään.
+3. Valitse haluamasi firmware-versio.
+4. Napauta **Päivitä** aloittaaksesi OTA-päivityksen.
+5. Odota, että päivitys valmistuu — älä katkaise yhteyttä päivityksen aikana.
 
-![Firmware checking for updates](../../assets/screenshots/firmware_checking.png)
+![Päivitysten tarkistaminen](../../assets/screenshots/firmware_checking.png)
 
-> ⚠️ **Warning:** Interrupting a firmware update can brick your device. Ensure your radio has sufficient battery (>50% recommended) and maintain Bluetooth proximity during the entire process.
+> ⚠️ Varoitus: firmware-päivityksen keskeyttäminen voi rikkoa laitteen. Varmista, että radiossa on riittävästi akkua (>50 % suositus) ja pidä Bluetooth-yhteys lähellä koko prosessin ajan.
 
-![Firmware disclaimer](../../assets/screenshots/firmware_disclaimer.png)
+![Laiteohjelmiston vastuuvapauslauseke](../../assets/screenshots/firmware_disclaimer.png)
 
-### USB Flashing
+### USB-ohjelmointi
 
-For recovery or when OTA is unavailable:
+Palautusta varten tai jos OTA ei ole käytettävissä:
 
-- Use the [Meshtastic Web Flasher](https://flasher.meshtastic.org)
-- Or the [Meshtastic CLI tool](https://meshtastic.org/docs/getting-started/flashing-firmware) on desktop
+- Käytä [Meshtastic Web Flasheriä](https://flasher.meshtastic.org)
+- Tai [Meshtastic CLI -työkalua](https://meshtastic.org/docs/getting-started/flashing-firmware) työpöytäympäristössä
 
-## Version Channels
+## Versiokanavat
 
-| Kanava | Kuvaus                                      |
-| ------ | ------------------------------------------- |
-| Vakaa  | Recommended for most users; tested releases |
-| Alpha  | Preview releases; may contain bugs          |
+| Kanava | Kuvaus                                                                |
+| ------ | --------------------------------------------------------------------- |
+| Vakaa  | Suositeltu useimmille käyttäjille: testatut julkaisut |
+| Alpha  | Esijulkaisut voivat sisältää virheitä                                 |
 
-## Pre-Update Checklist
+## Päivitystä edeltävä tarkistuslista
 
-Before updating:
+Ennen päivityksen aloitamista:
 
-- [ ] Battery > 50%
-- [ ] Stable Bluetooth connection
-- [ ] Note your current settings (they may reset on major version changes)
-- [ ] Check the release notes for breaking changes
+- [ ] Akku > 50 %
+- [ ] Vakaa Bluetooth-yhteys
+- [ ] Kirjaa ylös nykyiset asetuksesi (ne voivat nollautua suurissa versiomuutoksissa)
+- [ ] Tarkista julkaisumuistiinpanot mahdollista yhteensopivuutta rikkovien muutosten varalta
 
-## Post-Update
+## Päivityksen jälkeen
 
-After a successful update:
+Onnistuneen päivityksen jälkeen:
 
-- The radio will reboot automatically
-- Bluetooth connection will re-establish
-- Verify your settings are intact
-- Check the firmware version in **Settings → About**
+- Radio käynnistyy uudelleen automaattisesti
+- Bluetooth-yhteys muodostuu uudelleen
+- Varmista, että asetuksesi ovat säilyneet
+- Tarkista firmware-versio kohdasta **Asetukset — Tietoja**
 
-![Firmware update success](../../assets/screenshots/firmware_success.png)
+![Firmware-päivitys onnistui](../../assets/screenshots/firmware_success.png)
 
 ## Vianetsintä
 
-### Update Stuck
+### Päivitys jumissa
 
-If the update appears frozen:
+Jos päivitys näyttää jumiutuneen:
 
-- Wait at least 5 minutes before intervening
-- If truly stuck, power-cycle the radio
-- Attempt the update again
+- Odota vähintään 5 minuuttia ennen toimenpiteitä
+- Jos laite on edelleen jumissa, käynnistä radio uudelleen virrankatkaisulla
+- Yritä päivitystä uudelleen
 
-![Firmware update error](../../assets/screenshots/firmware_error.png)
+![Laiteohjelmiston päivitysvirhe](../../assets/screenshots/firmware_error.png)
 
-### Device Won't Boot After Update
+### Laite ei käynnisty päivityksen jälkeen
 
-If your device fails to boot:
+Jos laite ei käynnisty:
 
-1. Try connecting via USB to a computer
-2. Use the web flasher in recovery/DFU mode
-3. Flash a known-good firmware version
-4. Check the Meshtastic Discord for device-specific recovery steps
+1. Kokeile yhdistää USB:llä tietokoneeseen
+2. Käytä web-flasheria palautus tai DFU-tilassa
+3. Asenna tunnetusti toimiva firmware-versio
+4. Tarkista Meshtastic Discordista laitekohtaiset palautusohjeet
 
-### Compatibility Warnings
+### Yhteensopivuutta koskevat varoitukset
 
-The app may show warnings when:
+Sovellus voi näyttää varoituksia, kun:
 
-- Connected radio firmware is below minimum supported version
-- Major version mismatch between app and firmware
-- Deprecated features need migration
+- Yhdistetyn radion laiteohjelmisto on alle tuetun vähimmäisversion
+- Sovelluksen ja laiteohjelmiston version välillä on ristiriita
+- Vanhentuneet ominaisuudet vaativat siirtymistä uuteen versioon
 
-> ⚠️ **Important:** Always update the Meshtastic app before or alongside firmware updates to ensure compatibility.
+> ⚠️ **Tärkeää:** Päivitä Meshtastic-sovellus aina ennen firmware-päivitystä tai sen yhteydessä varmistaaksesi yhteensopivuuden.
 
-## Related Topics
+## Aiheeseen liittyvät aiheet
 
-- [Connections](connections) — reconnecting after a firmware update
-- [Flashing firmware guide](https://meshtastic.org/docs/getting-started/flashing-firmware) — full firmware flashing walkthrough on meshtastic.org
-- [Supported devices](https://meshtastic.org/docs/hardware/devices) — check firmware compatibility by device
-- [FAQ](https://meshtastic.org/docs/about/faq) — common questions on meshtastic.org
+- [Yhteydet](connections) — yhdistetään uudelleen laiteohjelmiston päivityksen jälkeen
+- [Laiteohjelmiston päivitysopas](https://meshtastic.org/docs/getting-started/flashing-firmware) — täydellinen firmware-päivityksen ohjeistus meshtastic.org -sivustolla
+- [Tuetut laitteet](https://meshtastic.org/docs/hardware/devices) — tarkista firmware-yhteensopivuus laitekohtaisesti
+- [Usein kysytyt kysymykset](https://meshtastic.org/docs/about/faq) — yleisiä kysymyksiä meshtastic.org -sivustolla
 
 ---
 

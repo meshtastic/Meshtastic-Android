@@ -1,82 +1,82 @@
 ---
-title: How the Meshtastic Signal Meter Works
-parent: User Guide
+title: Kuinka Meshtastic-signaalimittari toimii
+parent: Käyttöopas
 nav_order: 15
 last_updated: 2026-05-13
-description: How the signal meter calculates quality from RSSI and SNR — LoRa spread spectrum, presets, and what the bars really mean.
+description: Kuinka signaalimittari laskee laadun RSSI- ja SNR-arvoista — LoRa-hajaspektri, esiasetukset ja mitä palkit todella tarkoittavat.
 aliases:
-  - signal
-  - signal-meter
+  - signaali
+  - signaalimittari
   - snr
   - rssi
 ---
 
-# How the Meshtastic Signal Meter Works
+# Kuinka Meshtastic-signaalimittari toimii
 
-The Meshtastic signal meter — the familiar bars or status color in the app — is calculated very differently than the "bars" on a traditional cell phone or Wi-Fi router.
+Meshtastic-signaalimittari — sovelluksen tutut palkit tai tilaväri — lasketaan hyvin eri tavalla kuin perinteisessä matkapuhelimessa tai Wi-Fi-reitittimessä.
 
-Most consumer devices simply measure how "loud" a signal is. However, because Meshtastic uses **LoRa (Long Range)** technology, its signal meter measures how **clear** the signal is, relative to the specific settings your mesh is using.
+Useimmat kuluttajalaitteet mittaavat yksinkertaisesti signaalin “voimakkuutta”. Koska Meshtastic käyttää **LoRa (Long Range)** -teknologiaa, signaalimittari arvioi sen sijaan kuinka “selkeä” signaali on suhteessa käytössä olevan mesh-verkon asetuksiin.
 
 ---
 
-## 1. The Two Metrics: "Loudness" vs. "Clarity"
+## 1. Kaksi mittaria: “voimakkuus” vs “selkeys”
 
-Every time the LoRa radio chip receives a message, it reports two measurements:
+Aina kun LoRa-radio vastaanottaa viestin, se raportoi kaksi arvoa:
 
-- **RSSI (Received Signal Strength Indicator):** The **loudness** of the raw power hitting your antenna.
-- **SNR (Signal-to-Noise Ratio):** The **clarity** of the signal compared to the background static.
+- **RSSI (Received Signal Strength Indicator):** kuinka “voimakas” antenniin saapuva signaali on.
+- **SNR (Signal-to-Noise Ratio):** kuinka “selkeä” signaali on suhteessa taustakohinaan.
 
-> **Tip — The Analogy:** Imagine you are trying to hear a friend talking to you.
+> 💡 **Vinkki — vertauskuva:** Kuvittele, että yrität kuulla ystävääsi meluisassa ympäristössä.
 >
-> - **RSSI** is how loud their voice is.
-> - **The Noise Floor** is the background noise in the room (air conditioning, other people talking, traffic).
-> - **SNR** is how easily you can distinguish your friend's voice from the background noise.
+> - **RSSI** on kuinka kovaa hän puhuu.
+> - **Melutaso (Noise Floor)** on huoneen taustahäly (ilmastointi, muut ihmiset, liikenne).
+> - **SNR** on se, kuinka hyvin erotat ystäväsi äänen taustamelusta.
 
-If your friend shouts at you at a deafening rock concert, the signal is incredibly loud (High RSSI), but you still can't understand them because the background noise is louder (Bad SNR). Conversely, if your friend whispers to you in a dead-silent library, the signal is very weak (Low RSSI), but you can understand them perfectly (Great SNR).
-
----
-
-## 2. The Magic of LoRa: Hearing "Below the Noise Floor"
-
-For standard radios (like FM or Wi-Fi), if the background noise is louder than the signal (a negative SNR), the receiver just hears static.
-
-LoRa is special. It uses **"Spread Spectrum"** modulation, which allows the radio to mathematically pull a signal out of the air even when it is buried deep _underneath_ the background noise. This is why you will frequently see **negative SNR numbers** in Meshtastic (e.g., -10 dB, which means the signal is 10 decibels weaker than the background static).
-
-Depending on which Meshtastic preset you are using (e.g., `LongFast` vs. `ShortFast`), the radio has a specific **SNR Limit** — the absolute maximum amount of noise it can tolerate before the message is completely lost to the static.
+Jos ystäväsi huutaa rock-konsertissa, signaali on erittäin voimakas (korkea RSSI), mutta et silti ymmärrä häntä, koska kohina on liian suuri (huono SNR). Toisaalta, jos hän kuiskaa hiljaisessa kirjastossa, signaali voi olla heikko (matala RSSI), mutta ymmärrät silti hyvin (hyvä SNR).
 
 ---
 
-## 3. How the Signal Meter Calculates Quality
+## 2. LoRa:n “taika”: kuuleminen kohinan alta
 
-The Meshtastic apps take both RSSI and SNR and run them through a specific formula to assign your signal a quality rating (None, Bad, Fair, or Good). It specifically scales these values based on the physical limits of the radio preset you are using.
+Tavallisissa radioissa (kuten FM tai Wi-Fi), jos kohina on signaalia voimakkaampi (negatiivinen SNR), vastaanotin kuulee vain kohinaa.
 
-Here is exactly how the app decides how many bars (or what color) to show you:
+LoRa on erilainen. Se käyttää **hajaspektritekniikkaa (Spread Spectrum)**, joka mahdollistaa signaalin erottamisen myös silloin, kun se on taustakohinan alla. Siksi Meshtasticissa näkyy usein **negatiivisia SNR-arvoja** (esim. -10 dB tarkoittaa, että signaali on 10 dB heikompi kuin kohina).
 
-| Level       | Bars | Criteria                                                                                  | Meaning                                                                 |
-| ----------- | ---- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| Hyvä        | 3    | RSSI better than `-115 dBm` **AND** SNR better than `-7 dB`                               | Signal is both loud and clear — healthy connection.     |
-| Kohtalainen | 2    | RSSI better than `-126 dBm` with good SNR, **OR** SNR better than `-15 dB` with good RSSI | Signal getting quieter or noisier, but still decodable. |
-| Huono       | 1    | Falls between Fair and None thresholds                                                    | At the edge of range or experiencing interference.      |
-| ei mitään   | 0    | RSSI worse than `-126 dBm` **AND** SNR worse than `-15 dB`                                | Transmission completely buried in noise.                |
+Riippuen siitä, mitä Meshtastic-esiasetusta käytät (esim. “LongFast” vs. “ShortFast”), radiolla on tietty **SNR-raja** — eli suurin määrä kohinaa, jonka se kestää ennen kuin viesti alkaa kadota täysin kohinaan.
 
 ---
 
-## 4. What This Means for You
+## 3. Kuinka signaalimittari laskee laadun
 
-Because Meshtastic's meter acts as a **"Clarity Meter"**, it behaves differently than what most people expect:
+Meshtastic-sovellus käyttää sekä RSSI- että SNR-arvoja ja laskee niiden perusteella signaalille laatuluokan (Ei mitään, Huono, Kohtalainen tai Hyvä). Se skaalaa nämä arvot suoraan käytettävän radio-esiasetuksen fyysisten rajojen mukaan.
 
-> **Tip — Don't panic over low RSSI:** You might see a seemingly terrible RSSI value like `-118 dBm`. On a cell phone, you would have zero bars. But if you have an SNR of `+2 dB`, Meshtastic will still show a strong signal! _The library is quiet, so the whisper is heard perfectly._
+Näin sovellus päättää, montako palkkia (tai minkä värin) näet:
 
-> **Warning — Watch out for local noise:** If you hook up a massive antenna and see a great RSSI (e.g., `-90 dBm`) but your signal meter is only showing **1 Bar (Bad)**, you have a problem. It means you have local interference — perhaps a cheap power supply, a noisy computer, or a nearby radio tower — creating so much static that it is drowning out your mesh.
+| Taso        | Palkit | Kriteerit                                                       | Merkitys                                                                                        |
+| ----------- | ------ | --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Hyvä        | 3      | RSSI parempi kuin “-115 dBm” **JA** SNR parempi kuin “-7 dB”    | Signaali on sekä voimakas että selkeä — yhteys on hyvä.                         |
+| Kohtalainen | 2      | RSSI parempi kuin “-126 dBm” **TAI** SNR parempi kuin “-15 dB”  | Signaali heikkenee tai muuttuu kohinaisemmaksi, mutta on edelleen purettavissa. |
+| Huono       | 1      | Osuu “Kohtalainen” ja “Ei mitään” -rajojen väliin               | Verkon kantaman reunalla tai häiriöitä esiintyy.                                |
+| ei mitään   | 0      | RSSI heikompi kuin “-126 dBm” **JA** SNR heikompi kuin “-15 dB” | Lähetys on täysin hautautunut kohinaan.                                         |
 
-## Where Signal Information Appears
+---
 
-In the app, signal data is shown in several places:
+## 4. Mitä tämä tarkoittaa sinulle
 
-- **Node list** — signal bars icon next to each node
-- **Node detail** — SNR, RSSI, and signal quality in the device metrics section
-- **Traceroute** — per-hop signal quality for each relay node
-- **Signal metrics** — historical SNR and RSSI data in the metrics charts
+Koska Meshtasticin mittari toimii enemmän **selkeysmittarina**, se käyttäytyy eri tavalla kuin useimmat odottavat:
 
-![Node entry showing SNR, RSSI values and colored signal bars](../../assets/screenshots/nodes_signal_info.png)
+> **Vinkki — älä hätäänny heikosta RSSI-arvosta:** Voit nähdä näennäisesti huonon RSSI-arvon kuten “-118 dBm”. Tavallisessa puhelimessa tämä tarkoittaisi käytännössä nollakenttää. Mutta jos SNR on esimerkiksi +2 dB, Meshtastic voi silti näyttää vahvaa signaalia! _Kirjasto on hiljainen, joten kuiskaus kuuluu täydellisesti._
+
+> **Varoitus — paikallinen kohina:** Jos käytössä on hyvä antenni ja saat silti hyvän RSSI-arvon (esim. -90 dBm), mutta signaalimittari näyttää vain “1 palkki (Huono)”, sinulla on todennäköisesti ongelma. Se tarkoittaa paikallista häiriötä — esimerkiksi halpa virtalähde, kohiseva elektroniikka tai lähellä oleva radiolähetin voi luoda niin paljon kohinaa, että se peittää mesh-verkon.
+
+## Missä signaalitieto näkyy
+
+Sovelluksessa signaalidata näkyy useissa paikoissa:
+
+- **Radiolista** — signaalipalkki jokaisen radion vieressä
+- **Radion tiedot** — SNR, RSSI ja signaalin laatu laitteen mittareissa
+- **Reitinselvitys** — signaalin laatu jokaisessa välivaiheessa jokaiselle välittävälle radiolle
+- Signaalimittarit — historiallinen SNR- ja RSSI-data mittauskaavioissa
+
+![Radion tietorivi, jossa näkyvät SNR- ja RSSI-arvot sekä värilliset signaalipalkit](../../assets/screenshots/nodes_signal_info.png)
 

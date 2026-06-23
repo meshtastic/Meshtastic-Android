@@ -1,174 +1,174 @@
 ---
-title: Settings — Radio & User
-parent: User Guide
+title: Asetukset — Radio ja käyttäjä
+parent: Käyttöopas
 nav_order: 7
 last_updated: 2026-05-20
-description: Configure your radio hardware, LoRa presets, user profile, position sharing, power management, and security.
+description: Määritä radion laitteisto, LoRa-esiasetukset, käyttäjäprofiili, sijainnin jakaminen, virranhallinta ja tietoturva.
 aliases:
   - asetukset
-  - radio-config
-  - user-config
+  - radion asetukset
+  - käyttäjän asetukset
   - lora
 ---
 
-# Settings — Radio & User
+# Asetukset — Radio ja käyttäjä
 
-Configure your radio hardware and user identity parameters.
+Määritä radion laitteisto ja käyttäjätunnistetiedot.
 
 ## Käyttäjäasetukset
 
-### User Profile
+### Käyttäjäprofiili
 
-| Setting           | Kuvaus                                                                                |
-| ----------------- | ------------------------------------------------------------------------------------- |
-| Pitkä nimi        | Your display name (up to 39 characters)                            |
-| Lyhytnimi         | 4-character abbreviated name                                                          |
-| Licensed Operator | Enable if you hold an amateur radio license (enables higher power) |
+| Asetus                   | Kuvaus                                                                                                  |
+| ------------------------ | ------------------------------------------------------------------------------------------------------- |
+| Pitkä nimi               | Näyttönimesi (enintään 39 merkkiä)                                                   |
+| Lyhytnimi                | 4-merkkinen lyhytnimi                                                                                   |
+| Lisensoitu radioamatööri | Ota käyttöön, jos sinulla on radioamatöörilupa (mahdollistaa suuremman lähetystehon) |
 
-### Applying Changes
+### Muutosten käyttöönotto
 
-After modifying settings, tap **Save** to write the configuration to your radio. The device may reboot to apply changes.
+Asetusten muuttamisen jälkeen napauta **Tallenna** kirjoittaaksesi määritykset radioon. Laite voidaan käynnistää uudelleen muutosten käyttöönottoa varten.
 
-## Radio Configuration
+## Radion asetukset
 
 ### Laitteen asetukset
 
-| Setting                                    | Kuvaus                                                                  | Oletus   |
-| ------------------------------------------ | ----------------------------------------------------------------------- | -------- |
-| Rooli                                      | Node behavior (Client, Router, etc.) | Client   |
-| Uudelleenlähetyksen tila                   | How the node retransmits messages                                       | Kaikki   |
-| Node Info Broadcast (s) | Interval for broadcasting node info                                     | 10800    |
-| Double-tap Button                          | Action for double-tap button press                                      | Disabled |
+| Asetus                                     | Kuvaus                                                                | Oletus      |
+| ------------------------------------------ | --------------------------------------------------------------------- | ----------- |
+| Rooli                                      | Radion rooli (Client, Router jne.) | Client      |
+| Uudelleenlähetyksen tila                   | Miten radio välittää viestejä eteenpäin                               | Kaikki      |
+| Radiotiedon lähetys (s) | Radion tietojen lähetysväli                                           | 10800       |
+| Kaksoisnapautuspainike                     | Toiminto painikkeen kaksoisnapautukselle                              | Ei käytössä |
 
 ### LoRa:n asetukset
 
-| Setting            | Kuvaus                                                                  | Oletus                                    |
-| ------------------ | ----------------------------------------------------------------------- | ----------------------------------------- |
-| Alue               | Regulatory region for frequency bands                                   | Unset (must configure) |
-| Modeemin esiasetus | Speed/range tradeoff                                                    | LongFast                                  |
-| Hyppyraja          | Maximum retransmit hops                                                 | 3                                         |
-| TX Power           | Transmission power (dBm); 0 = max allowed for region | 0 (region max)         |
-| Taajuuspoikkeama   | Fine-tune frequency (MHz)                            | 0                                         |
-| Channel Bandwidth  | Bandwidth setting                                                       | Default for preset                        |
+| Asetus                | Kuvaus                                                                                | Oletus                                           |
+| --------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| Alue                  | Taajuusalueiden sääntelyalue                                                          | Ei asetettu (on määritettävä) |
+| Modeemin esiasetus    | Nopeuden ja kantaman välinen kompromissi                                              | LongFast                                         |
+| Hyppyraja             | Suurin hyppyjen määrä                                                                 | 3                                                |
+| Lähetysteho           | Lähetysteho (dBm): 0 = alueen sallima enimmäisteho | 0 (alueen enimmäisteho)       |
+| Taajuuspoikkeama      | Taajuuden hienosäätö (MHz)                                         | 0                                                |
+| Kanavan kaistanleveys | Kaistanleveysasetus                                                                   | Esiasetuksen oletusarvo                          |
 
-> ⚠️ **Important:** You **must** set your region before transmitting. Operating without the correct region may violate local radio regulations. See the [region configuration guide](https://meshtastic.org/docs/getting-started/initial-config) on meshtastic.org for details.
+> ⚠️ **Tärkeää:** Sinun **täytyy** määrittää alueesi ennen lähettämistä. Lähettäminen väärällä alueasetuksella voi rikkoa paikallisia radiomääräyksiä. Katso [alueasetusten määritysopas](https://meshtastic.org/docs/getting-started/initial-config) meshtastic.org-sivustolta saadaksesi lisätietoja.
 
-### Modem Presets
+### Esiasetukset
 
-| Preset             | Range                   | Nopeus                    | SNR Limit                | Best For                                                                                                 |
-| ------------------ | ----------------------- | ------------------------- | ------------------------ | -------------------------------------------------------------------------------------------------------- |
-| Short Turbo        | ~1 km   | 21.9 kbps | −5 dB                    | Dense urban with line-of-sight; data-heavy applications                                                  |
-| Short Fast         | ~3 km   | 10.9 kbps | −7.5 dB  | Urban neighborhoods; buildings within a few blocks                                                       |
-| Short Slow         | ~5 km   | 5.5 kbps  | −10 dB                   | Suburban short-range; moderate building density                                                          |
-| Medium Fast        | ~5 km   | 5.5 kbps  | −10 dB                   | Suburban areas; moderate building density                                                                |
-| Medium Slow        | ~8 km   | 1.1 kbps  | −12.5 dB | Suburban/rural; moderate range with slower speed                                                         |
-| Long Turbo         | ~10 km  | 4.4 kbps  | −10 dB                   | Similar range to Long Fast but with 500 kHz bandwidth; faster throughput                                 |
-| Long Fast          | ~10 km  | 1.1 kbps  | −12.5 dB | **General use (default)** — balanced range and speed                                  |
-| Long Moderate      | ~20 km  | 0.34 kbps | −15 dB                   | Rural with some terrain; occasional use                                                                  |
-| Lite Fast          | ~5 km   | 5.5 kbps  | −10 dB                   | EU 866 MHz SRD band (125 kHz BW); comparable to Medium Fast                           |
-| Lite Slow          | ~10 km  | 1.1 kbps  | −12.5 dB | EU 866 MHz SRD band (125 kHz BW); comparable to Long Fast                             |
-| Narrow Fast        | ~5 km   | 2.7 kbps  | −10 dB                   | EU 868 MHz band (62.5 kHz BW); avoids interference with other devices |
-| Narrow Slow        | ~10 km  | 1.1 kbps  | −12.5 dB | EU 868 MHz band (62.5 kHz BW); comparable to Long Fast                |
-| ~~Long Slow~~      | ~30 km  | 0.18 kbps | −17.5 dB | ⚠️ **Deprecated** — still selectable but may be removed in a future firmware release                     |
-| ~~Very Long Slow~~ | ~40+ km | 0.09 kbps | −20 dB                   | ⚠️ **Deprecated** — still selectable but may be removed in a future firmware release                     |
+| Esiasetus          | Kantama                 | Nopeus                    | SNR-raja                 | Paras käyttöön                                                                                                                     |
+| ------------------ | ----------------------- | ------------------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Short Turbo        | ~1 km   | 21.9 kbps | −5 dB                    | Tiheä kaupunkiympäristö suoralla näköyhteydellä; paljon dataa siirtävät sovellukset                                                |
+| Short Fast         | ~3 km   | 10.9 kbps | −7.5 dB  | Kaupunkialueet, rakennuksia muutaman korttelin säteellä                                                                            |
+| Short Slow         | ~5 km   | 5.5 kbps  | −10 dB                   | Lyhyen kantaman esikaupunkialueet; kohtalainen rakennustiheys                                                                      |
+| Medium Fast        | ~5 km   | 5.5 kbps  | −10 dB                   | Esikaupunkialueet; kohtalainen rakennustiheys                                                                                      |
+| Medium Slow        | ~8 km   | 1.1 kbps  | −12.5 dB | Esikaupunki-/maaseutualueet; kohtalainen kantama ja hitaampi nopeus                                                                |
+| Long Turbo         | ~10 km  | 4.4 kbps  | −10 dB                   | Samankaltainen kantama kuin Long Fast -asetuksella, mutta 500 kHz:n kaistanleveydellä; suurempi tiedonsiirtonopeus |
+| Long Fast          | ~10 km  | 1.1 kbps  | −12.5 dB | **Yleiskäyttö (oletus)** — tasapaino kantaman ja nopeuden välillä                                               |
+| Long Moderate      | ~20 km  | 0.34 kbps | −15 dB                   | Maaseutualueet, joissa on jonkin verran maastonmuotoja; satunnainen käyttö                                                         |
+| Lite Fast          | ~5 km   | 5.5 kbps  | −10 dB                   | EU 866 MHz SRD -alue (125 kHz BW); verrattavissa Medium Fast -asetukseen                                        |
+| Lite Slow          | ~10 km  | 1.1 kbps  | −12.5 dB | EU 866 MHz SRD -alue (125 kHz BW); verrattavissa Long Fast -asetukseen                                          |
+| Narrow Fast        | ~5 km   | 2.7 kbps  | −10 dB                   | EU 868 MHz -alue (62,5 kHz BW); välttää häiriöitä muiden laitteiden kanssa                                      |
+| Narrow Slow        | ~10 km  | 1.1 kbps  | −12.5 dB | EU 868 MHz -alue (62,5 kHz BW); verrattavissa Long Fast -asetukseen                                             |
+| ~~Long Slow~~      | ~30 km  | 0.18 kbps | −17.5 dB | ⚠️ **Vanhentunut** — edelleen valittavissa, mutta voidaan poistaa tulevassa laiteohjelmistoversiossa                               |
+| ~~Very Long Slow~~ | ~40+ km | 0.09 kbps | −20 dB                   | ⚠️ **Vanhentunut** — edelleen valittavissa, mutta voidaan poistaa tulevassa laiteohjelmistoversiossa                               |
 
-#### Choosing a Modem Preset
+#### Modeemiesiasetuksen valitseminen
 
-The modem preset controls the fundamental tradeoff between **range** and **data rate**:
+Modeemiesiasetus määrittää tärkeimmän kompromissin **kantaman** ja **tiedonsiirtonopeuden** välillä:
 
-- **Slower presets** use more spreading, making signals decodable at weaker signal levels (lower SNR limit). This means longer range but fewer bytes per second.
-- **Faster presets** pack more data per transmission but require a stronger signal to decode.
+- **Hitaammat esiasetukset** käyttävät enemmän hajautusta, jolloin signaali voidaan purkaa heikommilla signaalitasoilla (alempi SNR-raja). Tämä tarkoittaa pidempää kantamaa, mutta vähemmän tavuja sekunnissa.
+- **Nopeammat esiasetukset** siirtävät enemmän dataa, mutta vaativat vahvemman signaalin purkamista varten.
 
-**Practical guidance:**
+**Käytännön ohje:**
 
-- **Urban mesh (many nodes, short distances):** Use **Long Fast** (default) or **Short Fast**. Higher speed means less airtime congestion when many nodes share the channel.
-- **Rural/sparse mesh (few nodes, long distances):** Use **Long Moderate**. Range matters more than speed when nodes are far apart.
-- **EU 866/868 MHz regulatory compliance:** Use **Lite Fast**, **Lite Slow**, **Narrow Fast**, or **Narrow Slow** — these are optimized for the EU SRD/868 MHz bands with narrower bandwidths.
-- **Fixed infrastructure links:** Use **Short Turbo** or **Long Turbo** for dedicated point-to-point links with good antennas and line-of-sight.
-- **Mixed environments:** Stick with **Long Fast** — it's the community default and ensures compatibility with others in your area.
+- **Kaupunkiverkko (paljon radioita, lyhyet etäisyydet):** Käytä **Long Fast** -asetusta (oletus) tai **Short Fast** -asetusta. Suurempi nopeus tarkoittaa vähemmän käyttöasteruuhkaa, kun monet radiot jakavat saman kanavan.
+- **Maaseutu tai harva verkko (vähän radioita, pitkät etäisyydet):** Käytä **Long Moderate** -asetusta. Kantama on tärkeämpi kuin nopeus, kun radiot ovat kaukana toisistaan.
+- **EU 866/868 MHz -alueen säädösten noudattaminen:** Käytä **Lite Fast**, **Lite Slow**, **Narrow Fast** tai **Narrow Slow** -asetuksia — ne on optimoitu EU:n SRD/868 MHz -alueille kapeammilla kaistanleveyksillä.
+- **Kiinteät infrastruktuurilinkit:** Käytä **Short Turbo**- tai **Long Turbo** -asetusta erillisille pisteestä pisteeseen -linkeille, joissa on hyvät antennit ja suora näköyhteys.
+- **Sekaverkot:** Pysy **Long Fast** -asetuksessa — se on yhteisön oletusasetus ja varmistaa yhteensopivuuden alueesi muiden käyttäjien kanssa.
 
-> ⚠️ **Important:** All nodes on the same channel **must** use the same modem preset. Nodes with mismatched presets cannot communicate even if they share the same frequency and encryption key.
+> ⚠️ **Tärkeää:** Kaikkien samalla kanavalla olevien radioiden **täytyy** käyttää samaa modeemiesiasetusta. Radiot, joiden modeemiesiasetukset eivät täsmää, eivät voi viestiä keskenään, vaikka ne käyttäisivät samaa taajuutta ja salausavainta.
 
-> 💡 **Tip:** The range estimates above assume flat terrain and modest antennas. Elevation advantage (hilltop, rooftop) dramatically increases effective range. A well-placed Router with Long Fast can often outperform a ground-level node with Long Slow.
+> 💡 **Vinkki:** Yllä olevat kantama-arviot perustuvat tasaiseen maastoon ja vaatimattomiin antenneihin. Korkeuseroetu (mäki, rakennuksen katto) kasvattaa käytännön kantamaa huomattavasti. Hyvin sijoitettu Long Fast -asetusta käyttävä Router voi usein toimia paremmin kuin maan tasalla oleva Long Slow -asetusta käyttävä radio.
 
 ### Näytön asetukset
 
-| Setting             | Kuvaus                                                                               |
-| ------------------- | ------------------------------------------------------------------------------------ |
-| Näytön aikakatkaisu | Time before display sleeps                                                           |
-| Näyttöyksiköt       | Metric or Imperial                                                                   |
-| OLED-tyyppi         | Auto, SSD1306, SH1106, SH1107                                                        |
-| Compass Orientation | Rotation offset for compass display (0°, 90°, 180°, 270°)         |
-| ~~Compass North~~   | ⚠️ **Deprecated** — replaced by Compass Orientation; still visible in older firmware |
+| Asetus                | Kuvaus                                                                                                            |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Näytön aikakatkaisu   | Aika ennen näytön siirtymistä lepotilaan                                                                          |
+| Näyttöyksiköt         | Metrinen tai imperiaalinen järjestelmä                                                                            |
+| OLED-tyyppi           | Auto, SSD1306, SH1106, SH1107                                                                                     |
+| Kompassin suunta      | Kompassinäytön kiertosäätö (0°, 90°, 180°, 270°)                                               |
+| ~~Kompassipohjoinen~~ | ⚠️ **Vanhentunut** — korvattu Kompassin suunta -asetuksella; näkyy edelleen vanhemmissa laiteohjelmistoversioissa |
 
 ### Sijainnin asetukset
 
-| Setting                                   | Kuvaus                             |
-| ----------------------------------------- | ---------------------------------- |
-| GPS Enabled                               | Enable/disable GPS                 |
-| GPS-päivitysväli                          | How often to acquire GPS fix       |
-| Position Broadcast (s) | How often to share position        |
-| Älykäs sijainti                           | Enable movement-based broadcasting |
-| Kiinteä sijainti                          | Use a manually set position        |
+| Asetus                                   | Kuvaus                                     |
+| ---------------------------------------- | ------------------------------------------ |
+| GPS-käytössä                             | Ota GPS käyttöön tai poista käytöstä       |
+| GPS-päivitysväli                         | Kuinka usein GPS-paikannusta päivitetään   |
+| Sijainnin lähetys (s) | Kuinka usein sijaintia jaetaan             |
+| Älykäs sijainti                          | Ota liikkeeseen perustuva lähetys käyttöön |
+| Kiinteä sijainti                         | Käytä manuaalisesti asetettua sijaintia    |
 
 ### Virran asetukset
 
-| Setting                                 | Kuvaus                                  |
-| --------------------------------------- | --------------------------------------- |
-| Power Saving                            | Enable low-power sleep mode             |
-| Shutdown After (s)   | Auto-shutdown idle timer                |
-| ADC Multiplier                          | Battery voltage calibration factor      |
-| Wait Bluetooth (s)   | Time to wait for BLE connection at boot |
-| Mesh SDS Timeout (s) | Super-deep-sleep timeout                |
+| Asetus                                        | Kuvaus                                                        |
+| --------------------------------------------- | ------------------------------------------------------------- |
+| Virransäästö                                  | Ota vähän virtaa kuluttava lepotila käyttöön                  |
+| Sammuta jälkeen (s)        | Automaattisen sammutuksen ajastin                             |
+| ADC-kerroin                                   | Akun jännitteen kalibrointikerroin                            |
+| Odota Bluetoothia (s)      | Aika Bluetooth-yhteyden odottamiseen käynnistyksen yhteydessä |
+| Mesh SDS -aikakatkaisu (s) | Erittäin syvän lepotilan aikakatkaisu                         |
 
 ### Verkon asetukset
 
-| Setting       | Kuvaus                                               |
-| ------------- | ---------------------------------------------------- |
-| WiFi Enabled  | Enable WiFi radio (ESP32 devices) |
-| WiFi SSID     | Network name to connect to                           |
-| WiFi PSK      | Verkon salasana                                      |
-| NTP-palvelin  | Time synchronization server                          |
-| Syslog Server | Remote logging server                                |
+| Asetus          | Kuvaus                                                      |
+| --------------- | ----------------------------------------------------------- |
+| WiFi käytössä   | Ota WiFi-radio käyttöön (ESP32-laitteet) |
+| WiFi SSID       | Verkon nimi, johon yhdistetään                              |
+| WiFi PSK        | Verkon salasana                                             |
+| NTP-palvelin    | Ajan synkronointipalvelin (NTP-palvelin) |
+| Syslog-palvelin | Etätietojen palvelin                                        |
 
-![IP address field](../../assets/screenshots/settings_ipv4_field.png)
+![IP-osoitekenttä](../../assets/screenshots/settings_ipv4_field.png)
 
 ### Bluetooth asetukset
 
-| Setting           | Kuvaus                                                                    |
-| ----------------- | ------------------------------------------------------------------------- |
-| Bluetooth Enabled | Enable/disable BLE radio                                                  |
-| Pairing Mode      | Fixed PIN, Random PIN, or No PIN                                          |
-| Kiinteä PIN-koodi | PIN code for pairing (default: 123456) |
+| Asetus             | Kuvaus                                                                            |
+| ------------------ | --------------------------------------------------------------------------------- |
+| Bluetooth käytössä | Ota Bluetooth-radio käyttöön tai poista käytöstä                                  |
+| Pariliitostila     | Kiinteä PIN-koodi, satunnainen PIN-koodi tai ei PIN-koodia                        |
+| Kiinteä PIN-koodi  | PIN-koodi pariliitosta varten (oletus: 123456) |
 
 ### Turvallisuusasetukset
 
-| Setting                   | Kuvaus                                                                     |
-| ------------------------- | -------------------------------------------------------------------------- |
-| Julkinen avain            | Your node's public key (read-only)                      |
-| Ylläpitäjän avain         | Key for remote administration                                              |
-| Yksityinen avain          | Your node's private key (handle securely)               |
-| ~~Admin Channel Enabled~~ | ⚠️ Removed — now configured automatically when an admin key is set         |
-| Debug Log                 | Output live debug logging over serial/bluetooth                            |
-| Serial Enabled            | Enable serial console access (moved from Device Config) |
-| Hallintatila              | Restrict non-admin channel changes                                         |
+| Asetus                      | Kuvaus                                                                          |
+| --------------------------- | ------------------------------------------------------------------------------- |
+| Julkinen avain              | Radiosi julkinen avain (vain luku)                           |
+| Ylläpitäjän avain           | Avain etähallintaa varten                                                       |
+| Yksityinen avain            | Radiosi yksityinen avain (käsittele turvallisesti)           |
+| ~~Ylläpitokanava käytössä~~ | ⚠️ Poistettu — määritetään nyt automaattisesti, kun ylläpitoavain asetetaan     |
+| Virheenkorjausloki          | Tulosta reaaliaikainen virheenkorjausloki sarjaportin tai bluetoothin kautta    |
+| Sarjaportti käytössä        | Ota sarjakonsoliyhteys käyttöön (siirretty laiteasetuksista) |
+| Hallintatila                | Rajoita muutokset muihin kuin ylläpitokanaviin                                  |
 
-![Password field](../../assets/screenshots/settings_password_field.png)
+![Salasanakenttä](../../assets/screenshots/settings_password_field.png)
 
-Settings use standard preference controls — dropdowns, toggles, and sliders:
+Asetukset käyttävät tavallisia asetussäätimiä — pudotusvalikoita, kytkimiä ja liukusäätimiä:
 
-| Control  | Screenshot                                                  |
-| -------- | ----------------------------------------------------------- |
-| Dropdown | ![Dropdown](../../assets/screenshots/settings_dropdown.png) |
-| Toggle   | ![Toggle](../../assets/screenshots/settings_switch.png)     |
-| Slider   | ![Slider](../../assets/screenshots/settings_slider.png)     |
+| Säädin         | Kuvakaappaus                                                      |
+| -------------- | ----------------------------------------------------------------- |
+| Pudotusvalikko | ![Pudotusvalikko](../../assets/screenshots/settings_dropdown.png) |
+| Kytkin         | ![Kytkin](../../assets/screenshots/settings_switch.png)           |
+| Liukusäädin    | ![Liukusäädin](../../assets/screenshots/settings_slider.png)      |
 
-## Related Topics
+## Aiheeseen liittyvät aiheet
 
-- [Settings — Modules & Admin](settings-module-admin) — optional feature modules and device administration
-- [Signal Meter](signal-meter) — how modem presets affect signal quality thresholds
-- [LoRa configuration](https://meshtastic.org/docs/configuration/radio/lora) — detailed LoRa settings reference on meshtastic.org
-- [Initial configuration](https://meshtastic.org/docs/getting-started/initial-config) — region setup guide on meshtastic.org
+- [Asetukset — Moduulit ja ylläpito](settings-module-admin) — valinnaiset ominaisuusmoduulit ja laitteen ylläpitotoiminnot
+- [Signaalimittari](signal-meter) — miten modeemiesiasetukset vaikuttavat signaalin laadun raja-arvoihin
+- [LoRa-määritykset](https://meshtastic.org/docs/configuration/radio/lora) — yksityiskohtainen LoRa-asetusten viite meshtastic.org-sivustolla
+- [Alkumääritykset](https://meshtastic.org/docs/getting-started/initial-config) — alueasetusten määritysopas meshtastic.org-sivustolla
 
 ---
 

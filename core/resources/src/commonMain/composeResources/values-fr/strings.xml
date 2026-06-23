@@ -19,8 +19,14 @@
     <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">Message de %1$s: %2$s</string>
+    <string name="a11y_node_battery">batterie : %1$d%%</string>
+    <string name="a11y_node_favorite">favori</string>
+    <string name="a11y_node_hops_away">À %1$d sauts</string>
+    <string name="a11y_node_last_heard">dernier entendu %1$s</string>
     <string name="a11y_node_offline">hors-ligne</string>
     <string name="a11y_node_online">en ligne</string>
+    <string name="a11y_node_role">rôle %1$s</string>
+    <string name="a11y_node_signal">signal %1$s</string>
     <string name="accept">Accepter</string>
     <string name="acknowledgements">Remerciements</string>
     <!-- ACTION -->
@@ -54,7 +60,9 @@
     <string name="advanced_device_gps">Appareil GPS avancé</string>
     <string name="advanced_title">Avancé</string>
     <!-- AIR -->
+    <string name="air_quality">Qualité de l'air</string>
     <string name="air_quality_icon">Icône de la qualité de l'air</string>
+    <string name="air_quality_metrics_log">Métriques de qualité de l'air</string>
     <string name="air_quality_metrics_module_enabled">Module de mesure de la qualité de l'air activé</string>
     <string name="air_quality_metrics_update_interval_seconds">Intervalle de mise à jour des mesures de qualité d'air</string>
     <string name="air_util_definition">Pourcentage de temps d'antenne pour la transmission utilisée au cours de la dernière heure.</string>
@@ -80,6 +88,21 @@
     <string name="analytics_platforms">Plateformes d'analyse : </string>
     <string name="any">N'importe laquelle</string>
     <!-- APP -->
+    <string name="app_functions_get_channel_info">Obtenir les infos sur le canal</string>
+    <string name="app_functions_get_device_status">Obtenir le statut de l'appareil</string>
+    <string name="app_functions_get_mesh_metrics">Obtenir des métriques des mailles</string>
+    <string name="app_functions_get_mesh_status">Obtenir le statut des mailles</string>
+    <string name="app_functions_get_node_details">Obtenir les détails du nœud</string>
+    <string name="app_functions_get_node_list">Récupérer la liste des nœuds</string>
+    <string name="app_functions_get_recent_messages">Récupérer les messages récents</string>
+    <string name="app_functions_get_unread_summary">Obtenir le résumé des non lus</string>
+    <string name="app_functions_master_summary">Laisser les assistants du système AI (ex. Gémini)</string>
+    <string name="app_functions_master_toggle">Autoriser l'accès à l'IA</string>
+    <string name="app_functions_read_section">Fonctions de lecture</string>
+    <string name="app_functions_send_message">Envoyer le message</string>
+    <string name="app_functions_settings">Système IA</string>
+    <string name="app_functions_settings_summary">Contrôler quelles fonctions sont disponibles pour les assistants IA</string>
+    <string name="app_functions_write_section">Écrire des fonctions</string>
     <string name="app_notifications">Notifications de l’application</string>
     <string name="app_settings">App</string>
     <string name="app_too_old">Mise à jour de l’application requise</string>
@@ -104,6 +127,7 @@
     <string name="bluetooth">Bluetooth</string>
     <string name="bluetooth_available_devices">Périphériques Bluetooth disponibles</string>
     <string name="bluetooth_config">Configuration Bluetooth</string>
+    <string name="bluetooth_disabled">Le Bluetooth est désactivé. Activez-le pour rechercher les appareils à proximité.</string>
     <string name="bluetooth_enabled">Bluetooth activé</string>
     <string name="bluetooth_feature_config">Configuration</string>
     <string name="bluetooth_feature_config_description">Gérer à distance sans fil les paramètres et les canaux de votre appareil.</string>
@@ -111,12 +135,16 @@
     <string name="bluetooth_feature_discovery_description">Trouvez et identifiez les dispositifs Meshtastic autour de  vous.</string>
     <string name="bluetooth_permission">Bluetooth</string>
     <string name="bold_heading">Titre en gras</string>
+    <string name="bonding_failed_permissions">L'appairage a échoué. Accorder les autorisations de l'appareil à proximité et essayer à nouveau.</string>
     <string name="bottom_nav_settings">Réglages</string>
     <string name="broadcast_interval">Intervalle de diffusion</string>
     <string name="button_gpio">GPIO du bouton</string>
     <string name="buzzer_gpio">GPIO du buzzer</string>
     <string name="calculating">Calcul en cours…</string>
+    <string name="call_sign">Indicatif d'appel</string>
+    <string name="call_sign_summary">Votre indicatif d'appel radio amateur, jusqu'à 8 caractères</string>
     <string name="camera_permission">Autorisation de la caméra</string>
+    <string name="camera_permission_rationale">Autoriser l'accès à l'appareil photo pour scanner les codes QR.</string>
     <string name="cancel">Annuler</string>
     <string name="cancel_reply">Annuler la réponse</string>
     <string name="canned_message">Message prédéfini</string>
@@ -145,12 +173,18 @@
     <string name="channels">Canaux</string>
     <!-- CHIRPY -->
     <string name="chirpy">Chirpy</string>
+    <string name="chirpy_assistant_title">Assistant Chirpy</string>
+    <string name="chirpy_downloading">Chirpy est en train de télécharger…</string>
+    <string name="chirpy_downloading_progress">Téléchargement du modèle Chirpy : %1$d%%</string>
+    <string name="chirpy_downloading_subtitle">Cela ne se produit qu'une seule fois. Chirpy sera bientôt prêt !</string>
     <string name="chirpy_error_busy">Woah! Le canal est totalement bondé avec un lourd trafic actuellement ! 📶 Attende pour un moment plus calme et réessayer la transmission.</string>
     <string name="chirpy_error_model_unavailable">Ma batterie se charge ou mon firmware est toujours en téléchargement ! 🔋Donne-moi un peu de temps pour me synchroniser et m'allumer !</string>
     <string name="chirpy_error_token_budget_exceeded">Ce payload est trop grand pour mon budget de transmission ! 📱Essaye de raccourcir ton message pour qu'on puisse l'envoyer sans problème.</string>
     <string name="chirpy_error_unknown">Oups ! On a heurté une grosse perte de packet ou une interférence du signal ! 📡 Retransmet cette requête et voyons siont arrive à passer.</string>
     <string name="chirpy_error_unsupported_flavor">J'opère sur une fréquence limitée sur version de l'app! 🔌 ntm l ia.</string>
     <string name="chirpy_error_unsupported_platform">Oh non ! Mon antenne n'arrive pas à établir une connexion sur cette plate-forme.📡 Veuillez revérifier la compatibilité de l'hardwaree!</string>
+    <string name="chirpy_intro">Bonjour! : satellite_antenne: Je suis Chirpy, votre assistant Meshtastic sur votre appareil ! Je peux vous aider avec les conseils de configuration, de configuration, de dépannage et de réseautage de maillage. Comment puis-je vous aider ?</string>
+    <string name="chirpy_ready">Demander à Chirpy</string>
     <string name="chirpy_search_placeholder">Pose des questions sur Meshtastic…</string>
     <string name="chirpy_suggested_pages_help">Voici quelques pages de documentations qui pourrait aider:</string>
     <string name="chirpy_thinking">Chirpy traverse le mesh.📡</string>
@@ -169,10 +203,12 @@
     <string name="client_notification">Notification client</string>
     <string name="close">Fermer</string>
     <string name="close_selection">Fermer le choix</string>
+    <string name="co2">CO₂</string>
     <string name="codec_2_enabled">CODEC 2 activé</string>
     <string name="codec2_sample_rate">Taux d'échantillonnage CODEC2</string>
     <string name="coding_rate">Taux de codage</string>
     <string name="collapse_chart">Réduire le graphique</string>
+    <string name="collapsed">Réduit</string>
     <string name="communicate_off_the_grid">Communiquez en dehors du réseau avec vos amis et votre communauté sans service cellulaire.</string>
     <!-- COMPASS -->
     <string name="compass_bearing">Orientation : %1$s</string>
@@ -287,6 +323,7 @@
     <string name="delivery_confirmed">Réception confirmée par le destinataire</string>
     <string name="delivery_confirmed_reboot_warning">Votre appareil peut se déconnecter et redémarrer lorsque les paramètres sont appliqués.</string>
     <string name="demo_mode">Mode Démo</string>
+    <string name="demo_mode_replay">Mode démo (Rejouer)</string>
     <string name="desc_node_filter_clear">Effacer le filtre de nœud</string>
     <string name="description">Description</string>
     <string name="desktop_notification_title">Meshtastic</string>
@@ -304,6 +341,9 @@
     <string name="device_db_cache_limit">Limite du cache de la base de données de l'appareil</string>
     <string name="device_db_cache_limit_summary">Nombre max de bases de données à conserver sur ce téléphone</string>
     <string name="device_gps">Appareil GPS</string>
+    <string name="device_links">Liens de l'appareil</string>
+    <string name="device_links_i_want_one">J'en veux un</string>
+    <string name="device_links_open_in_browser">Ouvrir dans le navigateur</string>
     <string name="device_metrics_label_value">%1$s: %2$s</string>
     <string name="device_metrics_log">Métriques de l’appareil</string>
     <string name="device_metrics_numeric_value">%1$s</string>
@@ -323,6 +363,40 @@
     <string name="disconnected">Déconnecté</string>
     <string name="discovered_network_devices">Appareils réseau découverts</string>
     <!-- DISCOVERY -->
+    <string name="discovery_analysing_results">Analyse des résultats</string>
+    <string name="discovery_cancelling_scan">Annulation de l'analyse</string>
+    <string name="discovery_connection_warning">Non connecté. Connectez-vous à un appareil Meshtastic pour commencer à scanner.</string>
+    <string name="discovery_delete_session">Supprimer la session</string>
+    <string name="discovery_delete_session_confirm">Êtes-vous sûr de vouloir supprimer cette session de découverte ? Cette action ne peut pas être annulée.</string>
+    <string name="discovery_dwell_minutes">%1$d min</string>
+    <string name="discovery_dwell_time">Temporisation</string>
+    <string name="discovery_dwell_time_description">Temps d'écoute sur chaque préréglage</string>
+    <string name="discovery_empty_history">Aucune session de découverte pour l'instant</string>
+    <string name="discovery_export_report">Exporter le rapport</string>
+    <string name="discovery_history">Historique de découverte</string>
+    <string name="discovery_keep_screen_awake">Gardez l'écran éveillé</string>
+    <string name="discovery_keep_screen_awake_description">Empêche le mode Android Doze de baisser des paquets radio pendant les longs scans. Recommandé.</string>
+    <string name="discovery_local_mesh">Découverte de maille locale</string>
+    <string name="discovery_lora_presets">Préréglages LoRa</string>
+    <string name="discovery_lora_presets_description">Sélectionnez un ou plusieurs préréglages à analyser</string>
+    <string name="discovery_map">Carte de découverte</string>
+    <string name="discovery_not_connected">Non connecté</string>
+    <string name="discovery_paused">En pause : %1$s</string>
+    <string name="discovery_preparing">Préparation de l'analyse</string>
+    <string name="discovery_preset_home_label">%1$s (Accueil)</string>
+    <string name="discovery_reconnecting">Reconnexion sur %1$s</string>
+    <string name="discovery_rerun_analysis">Ré-exécuter l'analyse</string>
+    <string name="discovery_restoring_preset">Restauration des préréglages par défaut</string>
+    <string name="discovery_scan_complete">Session terminée</string>
+    <string name="discovery_scan_failed">Échec de l'analyse: %1$s</string>
+    <string name="discovery_scan_history">Historique des analyses</string>
+    <string name="discovery_scan_incomplete">Session incomplète</string>
+    <string name="discovery_scan_progress">Progression de l'analyse</string>
+    <string name="discovery_scan_summary">Synthèse d’analyse</string>
+    <string name="discovery_session_detail">Détails de la Session</string>
+    <string name="discovery_shifting_to">Déplacement vers %1$s</string>
+    <string name="discovery_start_scan">Démarrer l'analyse</string>
+    <string name="discovery_start_scan_disabled">Bouton de démarrage d'analyse désactivé. %1$s</string>
     <string name="discovery_stat_channel_utilization">Utilisation du canal</string>
     <string name="discovery_stat_date">Date</string>
     <string name="discovery_stat_direct">Direct</string>
@@ -801,6 +875,10 @@
     <string name="node_filter_title">Filtrer par</string>
     <string name="node_id">Identifiant (ID) du nœud</string>
     <string name="node_layout_channel">Canal</string>
+    <string name="node_layout_compact">Compacte</string>
+    <string name="node_layout_compact_fields_header">Champs compacts</string>
+    <string name="node_layout_complete">Complété</string>
+    <string name="node_layout_distance_and_bearing">Distance et orientation</string>
     <string name="node_layout_hops_away">Sauts</string>
     <string name="node_layout_log_icons">Métriques d'environnement</string>
     <string name="node_layout_power">Alimentation</string>
