@@ -36,8 +36,7 @@ abstract class StreamTransport(protected val callback: RadioTransportCallback, p
         StreamFrameCodec(onPacketReceived = { callback.handleFromRadio(it) }, logTag = "StreamTransport")
 
     override suspend fun close() {
-        Logger.d { "Closing stream for good" }
-        onDeviceDisconnect(waitForStopped = true, isPermanent = true)
+        Logger.d { "Closing stream transport" }
     }
 
     /**
@@ -45,10 +44,10 @@ abstract class StreamTransport(protected val callback: RadioTransportCallback, p
      *
      * @param waitForStopped if true we should wait for the transport to finish - must be false if called from inside
      *   transport callbacks
-     * @param isPermanent true only when the user has explicitly disconnected (e.g. [close] was called). USB unplug, I/O
-     *   errors, and similar conditions are transient — the transport may recover when the device is replugged or the OS
-     *   re-enumerates. Defaults to false so callbacks default to "may come back"; [close] passes true explicitly to
-     *   signal a user-initiated terminal disconnect.
+     * @param isPermanent true only when the service layer is signaling a user-initiated terminal disconnect. USB
+     *   unplug, I/O errors, and similar conditions are transient — the transport may recover when the device is
+     *   replugged or the OS re-enumerates. Defaults to false so callbacks default to "may come back". The service layer
+     *   owns explicit close notifications so automatic stop/start recovery can close transport resources silently.
      */
     protected open fun onDeviceDisconnect(waitForStopped: Boolean, isPermanent: Boolean = false) {
         callback.onDisconnect(isPermanent = isPermanent)

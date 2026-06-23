@@ -84,6 +84,7 @@ import org.meshtastic.core.ui.util.LocalTracerouteMapProvider
 import org.meshtastic.core.ui.util.LocalTracerouteMapScreenProvider
 import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.core.ui.viewmodel.UIViewModel
+import org.meshtastic.feature.connections.NO_DEVICE_SELECTED
 import org.meshtastic.feature.intro.AppIntroductionScreen
 import org.meshtastic.feature.intro.IntroViewModel
 import org.meshtastic.feature.map.MapScreen
@@ -279,7 +280,7 @@ class MainActivity : AppCompatActivity() {
                 // never sees this event. Forward it explicitly so the serialDevices StateFlow
                 // refreshes and the device shows up in the Connect → Serial tab.
                 usbRepository.refreshState()
-                showConnectionsPage()
+                showConnectionsPageIfNoDeviceSelected()
             }
 
             Intent.ACTION_MAIN -> {}
@@ -318,22 +319,10 @@ class MainActivity : AppCompatActivity() {
         return resultPendingIntent!!
     }
 
-    private fun createConnectionsIntent(): PendingIntent {
-        val deepLink = "$DEEP_LINK_BASE_URI/connections"
-        val startActivityIntent =
-            Intent(Intent.ACTION_VIEW, deepLink.toUri(), this, MainActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-            }
+    private fun showConnectionsPageIfNoDeviceSelected() {
+        val selectedAddress = model.currentDeviceAddressFlow.value
+        if (!selectedAddress.isNullOrBlank() && selectedAddress != NO_DEVICE_SELECTED) return
 
-        val resultPendingIntent: PendingIntent? =
-            TaskStackBuilder.create(this).run {
-                addNextIntentWithParentStack(startActivityIntent)
-                getPendingIntent(0, PendingIntent.FLAG_IMMUTABLE)
-            }
-        return resultPendingIntent!!
-    }
-
-    private fun showConnectionsPage() {
-        createConnectionsIntent().send()
+        handleMeshtasticUri("$DEEP_LINK_BASE_URI/connections".toUri())
     }
 }

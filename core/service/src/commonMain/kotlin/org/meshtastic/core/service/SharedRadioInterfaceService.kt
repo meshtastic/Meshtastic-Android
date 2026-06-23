@@ -34,9 +34,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.runningFold
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -53,6 +58,7 @@ import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.MeshActivity
 import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.network.repository.NetworkRepository
+import org.meshtastic.core.network.repository.SerialDevicePresence
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioPrefs
@@ -60,6 +66,55 @@ import org.meshtastic.core.repository.RadioTransport
 import org.meshtastic.core.repository.RadioTransportFactory
 import org.meshtastic.proto.ToRadio
 import kotlin.concurrent.Volatile
+
+private data class SelectedSerialPresence(val key: String?, val present: Boolean)
+
+private data class UsbRecoverySnapshot(val presence: SelectedSerialPresence, val state: ConnectionState)
+
+private data class UsbRecoveryTriggerState(
+    val key: String? = null,
+    val present: Boolean = false,
+    val armedByAbsence: Boolean = false,
+    val triggerRecovery: Boolean = false,
+)
+
+private fun selectedSerialPresence(address: String?, keys: Set<String>): SelectedSerialPresence {
+    val key = address?.takeIf { it.firstOrNull() == InterfaceId.SERIAL.id }?.drop(1)?.takeIf { it.isNotEmpty() }
+    return SelectedSerialPresence(key = key, present = key != null && key in keys)
+}
+
+private fun UsbRecoveryTriggerState.next(snapshot: UsbRecoverySnapshot): UsbRecoveryTriggerState {
+    val key = snapshot.presence.key
+    val present = snapshot.presence.present
+    return when {
+        key == null -> UsbRecoveryTriggerState()
+
+        snapshot.state == ConnectionState.Disconnected -> UsbRecoveryTriggerState(key = key, present = present)
+
+        key != this.key ->
+            UsbRecoveryTriggerState(
+                key = key,
+                present = present,
+                armedByAbsence = !present && snapshot.state == ConnectionState.DeviceSleep,
+            )
+
+        !present ->
+            UsbRecoveryTriggerState(
+                key = key,
+                armedByAbsence = armedByAbsence || this.present || snapshot.state == ConnectionState.DeviceSleep,
+            )
+
+        else -> {
+            val trigger = armedByAbsence && snapshot.state == ConnectionState.DeviceSleep
+            UsbRecoveryTriggerState(
+                key = key,
+                present = true,
+                armedByAbsence = armedByAbsence && !trigger,
+                triggerRecovery = trigger,
+            )
+        }
+    }
+}
 
 /**
  * Shared multiplatform connection orchestrator for Meshtastic radios.
@@ -74,6 +129,7 @@ class SharedRadioInterfaceService(
     private val dispatchers: CoroutineDispatchers,
     private val bluetoothRepository: BluetoothRepository,
     private val networkRepository: NetworkRepository,
+    private val serialDevicePresence: SerialDevicePresence,
     @Named("ProcessLifecycle") private val processLifecycle: Lifecycle,
     private val radioPrefs: RadioPrefs,
     private val transportFactory: RadioTransportFactory,
@@ -245,8 +301,68 @@ class SharedRadioInterfaceService(
                     }
                     .catch { Logger.e(it) { "networkRepository.networkAvailable flow crashed" } }
                     .launchIn(processLifecycle.coroutineScope)
+
+                observeUsbRecoveryTriggers()
             }
         }
+    }
+
+    /**
+     * Observes selected-SERIAL-device presence and transport state to auto-restart USB serial after replug.
+     *
+     * Recovery arms only after the selected serial key is observed absent, then fires when that same key is present
+     * while the transport is in [ConnectionState.DeviceSleep]. This prevents normal unplug races from restarting
+     * against stale presence before UsbRepository removes the key.
+     *
+     * Including [_connectionState] closes the race where presence returns before the I/O-death callback flips state to
+     * [ConnectionState.DeviceSleep]. Each physical replug consumes one armed edge, and recovery remains gated by
+     * [connectionRequested] and [runningTransportId] so explicit disconnects cannot resurrect a transport.
+     */
+    private fun observeUsbRecoveryTriggers() {
+        val selectedPresence =
+            combine(currentDeviceAddressFlow, serialDevicePresence.deviceKeys, ::selectedSerialPresence)
+                .distinctUntilChanged()
+
+        combine(selectedPresence, _connectionState, ::UsbRecoverySnapshot)
+            .runningFold(UsbRecoveryTriggerState()) { triggerState, snapshot -> triggerState.next(snapshot) }
+            .distinctUntilChanged()
+            .drop(1)
+            .filter { it.triggerRecovery }
+            .onEach {
+                transportMutex.withLock {
+                    if (!connectionRequested) return@withLock
+                    if (runningTransportId != InterfaceId.SERIAL) return@withLock
+                    // Race-defense: the combine snapshot may be stale by the time we acquire
+                    // transportMutex — another path (setDeviceAddress, BLE liveness restart) may
+                    // have just brought this transport up to Connected/Connecting. The combine-level
+                    // state filter narrows the trigger; this check guards the emission → mutex
+                    // acquisition window so we never tear down a fresh healthy transport.
+                    val state = _connectionState.value
+                    if (state is ConnectionState.Connected || state is ConnectionState.Connecting) {
+                        return@withLock
+                    }
+                    // Re-check presence under the lock — the combine snapshot may be stale
+                    // if the device was unplugged or the selection changed while awaiting
+                    // the mutex. Mirrors the race-defense pattern of the state check above.
+                    val currentKeys = serialDevicePresence.deviceKeys.value
+                    if (!selectedSerialPresence(_currentDeviceAddressFlow.value, currentKeys).present) {
+                        return@withLock
+                    }
+                    // A previously-started SERIAL transport that died on unplug is still held in
+                    // radioTransport (the I/O-death path emits DeviceSleep but does not null it). Tear it
+                    // down silently so startTransportLocked() can build a fresh one for the replugged
+                    // device. Mirrors the BLE liveness recovery shape: notifyPermanent=false (no
+                    // user-facing Disconnected), sendPoliteDisconnect=false (the link is already gone).
+                    // Keep teardown and bring-up isolated: a transient USB close error must not skip
+                    // the fresh start, and neither error should terminate this long-lived recovery flow.
+                    ignoreExceptionSuspend {
+                        stopTransportLocked(notifyPermanent = false, sendPoliteDisconnect = false)
+                    }
+                    ignoreExceptionSuspend { startTransportLocked() }
+                }
+            }
+            .catch { Logger.e(it) { "serialDevicePresence recovery flow crashed" } }
+            .launchIn(processLifecycle.coroutineScope)
     }
 
     override fun connect() {

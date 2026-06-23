@@ -31,6 +31,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
@@ -41,6 +43,7 @@ import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.network.repository.NetworkRepository
+import org.meshtastic.core.network.repository.SerialDevicePresence
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioTransport
 import org.meshtastic.core.repository.RadioTransportFactory
@@ -79,6 +82,9 @@ class SharedRadioInterfaceServiceLivenessTest {
         // Create the lifecycle owner AFTER setMain so Robolectric's main thread is ready.
         // Field initializers run before @BeforeTest, which is too early for Robolectric.
         processLifecycleOwner = TestLifecycleOwner()
+        // USB tests leave serialDeviceKeys non-empty; reset before each test so non-USB
+        // tests start from the documented empty default.
+        serialDeviceKeys.value = emptySet()
     }
 
     @AfterTest
@@ -110,6 +116,19 @@ class SharedRadioInterfaceServiceLivenessTest {
 
     private val bluetoothRepository = FakeBluetoothRepository()
     private val radioPrefs = FakeRadioPrefs()
+
+    /**
+     * Controllable backing flow for [serialDevicePresence]. Defaults to the empty set so liveness/gate-regression tests
+     * (which exercise BLE/TCP paths only) leave the USB recovery observer inert. USB replug tests drive this flow
+     * directly to exercise each branch of the observer's gate contract.
+     */
+    private val serialDeviceKeys = MutableStateFlow<Set<String>>(emptySet())
+
+    /** [SerialDevicePresence] backed by [serialDeviceKeys] so tests can publish device-key sets on demand. */
+    private val serialDevicePresence: SerialDevicePresence =
+        object : SerialDevicePresence {
+            override val deviceKeys: StateFlow<Set<String>> = serialDeviceKeys.asStateFlow()
+        }
 
     private val networkRepository: NetworkRepository = mock(MockMode.autofill)
     private val analytics: PlatformAnalytics = mock(MockMode.autofill)
@@ -232,6 +251,7 @@ class SharedRadioInterfaceServiceLivenessTest {
                 dispatchers = dispatchers,
                 bluetoothRepository = bluetoothRepository,
                 networkRepository = networkRepository,
+                serialDevicePresence = serialDevicePresence,
                 processLifecycle = processLifecycleOwner.lifecycle,
                 radioPrefs = radioPrefs,
                 transportFactory = transportFactory,
@@ -1224,4 +1244,412 @@ class SharedRadioInterfaceServiceLivenessTest {
                 advanceTimeBy(1_000L)
             }
         }
+
+    // ─── USB serial replug observer (observeUsbRecoveryTriggers) ───────────────────────────
+    //
+    // The USB-serial recovery observer (see observeUsbRecoveryTriggers) watches the selected SERIAL device's
+    // presence via [SerialDevicePresence.deviceKeys] combined with [currentDeviceAddressFlow] and
+    // [_connectionState]. It arms recovery only after the SELECTED serial key has been observed absent and then
+    // present again; when that armed edge converges with zombie DeviceSleep, it tears down the zombie transport
+    // (left over from the unplug I/O-death path that emits DeviceSleep without nulling radioTransport) and starts a
+    // fresh one — sparing the user a manual re-select.
+    //
+    // Pipeline (see SharedRadioInterfaceService.observeUsbRecoveryTriggers):
+    //   selectedPresence = combine(currentDeviceAddressFlow, serialDevicePresence.deviceKeys)
+    //   combine(selectedPresence, _connectionState)
+    //     .runningFold(...)         // arms only after selected key goes absent → present
+    //     .filter { triggerRecovery }
+    //     .onEach { transportMutex.withLock {
+    //         if (!connectionRequested) return@withLock
+    //         if (runningTransportId != InterfaceId.SERIAL) return@withLock
+    //         if (state is Connected || state is Connecting) return@withLock  // race-defense
+    //         ignoreExceptionSuspend { stopTransportLocked(notifyPermanent = false, sendPoliteDisconnect = false) }
+    //         ignoreExceptionSuspend { startTransportLocked() }
+    //     } }
+    //
+    // The tests below drive the controllable [serialDeviceKeys] flow directly to exercise each branch of that gate
+    // contract.
+
+    /**
+     * Happy path: a SERIAL transport left in zombie DeviceSleep (after an unplug I/O death) is recovered automatically
+     * when the same USB device is replugged. The observer must call stopTransportLocked + startTransportLocked exactly
+     * once, producing exactly one fresh transport and closing the zombie.
+     *
+     * The zombie state mirrors what `SerialConnectionListener.onDisconnected → onDeviceDisconnect` leaves behind: a
+     * transient DeviceSleep emission WITHOUT nulling radioTransport (the I/O-death path doesn't run
+     * stopTransportLocked). Only the observer's stop/start cycle reaps the zombie and builds a fresh transport for the
+     * replugged device.
+     */
+    @Test
+    fun `USB replug of selected serial device restarts transport when zombie`() = runTest(testDispatcher) {
+        clock = 0L
+        val service = createConnectedService("s/dev/bus/usb/001/002")
+        try {
+            assertEquals(1, createdTransports.size, "Initial connect should create one transport")
+            val initialTransport = createdTransports.first()
+
+            // Simulate the unplug I/O-death path: SerialConnectionListener.onDisconnected →
+            // onDeviceDisconnect emits a transient DeviceSleep but does NOT null radioTransport
+            // (the zombie state the observer comment specifies it recovers from).
+            service.onDisconnect(isPermanent = false)
+            assertEquals(ConnectionState.DeviceSleep, service.connectionState.value, "Precondition: zombie state")
+
+            // Replug: serialDevicePresence emits the device's `rest` key (the address minus its 's').
+            serialDeviceKeys.value = setOf("/dev/bus/usb/001/002")
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+
+            assertEquals(2, createdTransports.size, "Replug should create exactly one fresh transport")
+            assertTrue(initialTransport.closeCalled, "Zombie transport must be closed by stopTransportLocked")
+            assertEquals(1, initialTransport.closeCount, "Zombie transport closed exactly once (no double-close)")
+        } finally {
+            service.disconnect()
+            advanceTimeBy(1_000L)
+        }
+    }
+
+    /**
+     * Negative counterpart: only the SELECTED device's key triggers recovery. A different USB device being plugged in
+     * must not perturb the selected transport — `rest in keys` evaluates false, the combined flow stays false, and
+     * distinctUntilChanged swallows the redundant false emission.
+     */
+    @Test
+    fun `USB replug of unrelated serial device does not restart transport`() = runTest(testDispatcher) {
+        clock = 0L
+        val service = createConnectedService("s/dev/bus/usb/001/002")
+        try {
+            assertEquals(1, createdTransports.size, "Initial connect should create one transport")
+
+            service.onDisconnect(isPermanent = false)
+            assertEquals(ConnectionState.DeviceSleep, service.connectionState.value, "Precondition: zombie state")
+
+            // A different physical device — different `rest` key from the selected address.
+            serialDeviceKeys.value = setOf("/dev/bus/usb/001/003")
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+
+            assertEquals(1, createdTransports.size, "Unrelated device replug must NOT restart transport")
+            assertFalse(
+                createdTransports.first().closeCalled,
+                "Zombie transport must NOT be closed for an unrelated device",
+            )
+        } finally {
+            service.disconnect()
+            advanceTimeBy(1_000L)
+        }
+    }
+
+    /**
+     * Healthy-state guard: when the selected device is already Connected (or Connecting), the observer must NOT fire a
+     * restart. This guards the cold-flow false → true transition that happens when the user selects an already-present
+     * USB device — setDeviceAddress has already brought the transport up to Connected, so a "recovery" cycle would be a
+     * redundant teardown of a healthy link.
+     */
+    @Test
+    fun `USB replug does not restart transport when already Connected`() = runTest(testDispatcher) {
+        clock = 0L
+        val service = createConnectedService("s/dev/bus/usb/001/002")
+        try {
+            assertEquals(1, createdTransports.size, "Initial connect should create one transport")
+            assertEquals(ConnectionState.Connected, service.connectionState.value, "Precondition: Connected state")
+
+            // Device present in the keys — but state is Connected (healthy), not zombie.
+            serialDeviceKeys.value = setOf("/dev/bus/usb/001/002")
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+
+            assertEquals(1, createdTransports.size, "Healthy-state guard must skip restart for Connected state")
+            assertFalse(createdTransports.first().closeCalled, "Healthy transport must NOT be closed")
+        } finally {
+            service.disconnect()
+            advanceTimeBy(1_000L)
+        }
+    }
+
+    /**
+     * Regression: the unplug/replug race in which the USB presence signal arrives BEFORE the I/O-death callback has
+     * flipped `_connectionState` to DeviceSleep. The combined trigger now includes `_connectionState` so that the
+     * subsequent Connected → DeviceSleep transition re-emits the flow and fires recovery — without that, the
+     * early-return on Connected swallows the presence emission, the later state transition does not re-emit
+     * (distinctUntilChanged swallows true → true), and the zombie transport never recovers.
+     */
+    @Test
+    fun `USB replug recovers when presence arrives before DeviceSleep`() = runTest(testDispatcher) {
+        clock = 0L
+        val selectedKey = "/dev/bus/usb/001/002"
+        serialDeviceKeys.value = setOf(selectedKey)
+        val service = createConnectedService("s$selectedKey")
+        try {
+            assertEquals(1, createdTransports.size, "Initial connect should create one transport")
+            assertEquals(ConnectionState.Connected, service.connectionState.value, "Precondition: Connected state")
+
+            // The actual detach is observed first, while state is still Connected.
+            serialDeviceKeys.value = emptySet()
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+            assertEquals(1, createdTransports.size, "Detach while Connected must NOT restart transport")
+            assertFalse(
+                createdTransports.first().closeCalled,
+                "Detach while Connected must NOT close the transport",
+            )
+
+            // Replug signal arrives WHILE state is still Connected — the trigger must NOT fire yet.
+            serialDeviceKeys.value = setOf(selectedKey)
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+            assertEquals(1, createdTransports.size, "Presence while Connected must NOT restart transport")
+            assertFalse(createdTransports.first().closeCalled, "Healthy transport must NOT be closed")
+
+            // The I/O-death callback now fires (late) and flips state to DeviceSleep. The combine
+            // re-emits because state is one of its sources; recovery fires after the state catches up.
+            service.onDisconnect(isPermanent = false)
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+
+            assertEquals(2, createdTransports.size, "Recovery MUST fire once state catches up to DeviceSleep")
+            assertTrue(
+                createdTransports.first().closeCalled,
+                "Zombie transport must be closed by stopTransportLocked",
+            )
+        } finally {
+            service.disconnect()
+            advanceTimeBy(1_000L)
+        }
+    }
+
+    /**
+     * Regression: Android serialDevices starts as an empty snapshot before UsbRepository refreshes. That initial empty
+     * → present emission is not a detach/replug edge and must not arm recovery for a later normal unplug callback.
+     */
+    @Test
+    fun `USB initial empty presence does not arm recovery`() = runTest(testDispatcher) {
+        clock = 0L
+        val selectedKey = "/dev/bus/usb/001/002"
+        val service = createConnectedService("s$selectedKey")
+        try {
+            assertEquals(1, createdTransports.size, "Initial connect should create one transport")
+            val initialTransport = createdTransports.first()
+            assertEquals(ConnectionState.Connected, service.connectionState.value, "Precondition: Connected state")
+
+            serialDeviceKeys.value = setOf(selectedKey)
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+
+            assertEquals(1, createdTransports.size, "Initial empty → present must NOT restart transport")
+            assertFalse(initialTransport.closeCalled, "Initial presence refresh must not close the transport")
+
+            service.onDisconnect(isPermanent = false)
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+
+            assertEquals(
+                1,
+                createdTransports.size,
+                "Later DeviceSleep with initially-present key must NOT restart transport",
+            )
+            assertFalse(initialTransport.closeCalled, "Unplug callback alone must not close the transport")
+        } finally {
+            service.disconnect()
+            advanceTimeBy(1_000L)
+        }
+    }
+
+    /**
+     * Regression: some USB stacks deliver the transport disconnect callback before UsbRepository has emitted the detach
+     * that removes the selected key. A present-at-start key plus DeviceSleep is only "normal unplug in progress", not a
+     * replug, so recovery must stay quiet until the observer sees the selected key go absent and then present again.
+     */
+    @Test
+    fun `USB disconnect before detach emission waits for absent to present replug`() = runTest(testDispatcher) {
+        clock = 0L
+        serialDeviceKeys.value = setOf("/dev/bus/usb/001/002")
+        val service = createConnectedService("s/dev/bus/usb/001/002")
+        try {
+            assertEquals(1, createdTransports.size, "Initial connect should create one transport")
+            val initialTransport = createdTransports.first()
+            assertEquals(ConnectionState.Connected, service.connectionState.value, "Precondition: Connected state")
+
+            // The transport-level disconnect arrives before the deviceKeys detach emission. Because the key was
+            // already present, this must not be treated as an absent → present replug.
+            service.onDisconnect(isPermanent = false)
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+
+            assertEquals(
+                1,
+                createdTransports.size,
+                "DeviceSleep with an already-present key must NOT restart transport",
+            )
+            assertFalse(initialTransport.closeCalled, "Unplug callback alone must not close the transport")
+
+            // Now the actual detach/attach sequence is visible: absent first, then present again.
+            serialDeviceKeys.value = emptySet()
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+
+            assertEquals(1, createdTransports.size, "Detach emission alone must not restart transport")
+            assertFalse(initialTransport.closeCalled, "Detach emission alone must not close the transport")
+
+            serialDeviceKeys.value = setOf("/dev/bus/usb/001/002")
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+
+            assertEquals(2, createdTransports.size, "Absent → present replug should create one fresh transport")
+            assertTrue(initialTransport.closeCalled, "Zombie transport must be closed by stopTransportLocked")
+            assertEquals(1, initialTransport.closeCount, "Zombie transport closed exactly once")
+        } finally {
+            service.disconnect()
+            advanceTimeBy(1_000L)
+        }
+    }
+
+    /**
+     * Regression: after explicit [SharedRadioInterfaceService.disconnect], the observer MUST be disarmed. disconnect()
+     * clears `connectionRequested` BEFORE stopTransportLocked(), so even if the selected device reappears the
+     * observer's first gate (`!connectionRequested → return@withLock`) fires and no transport is resurrected for a
+     * connection the user tore down. Same shape as the BLE/network post-disconnect recovery regressions above.
+     */
+    @Test
+    fun `USB replug does not restart transport after explicit disconnect`() = runTest(testDispatcher) {
+        clock = 0L
+        val service = createConnectedService("s/dev/bus/usb/001/002")
+        try {
+            assertEquals(1, createdTransports.size, "Initial connect should create one transport")
+
+            // Explicit user disconnect: clears connectionRequested gate BEFORE stopTransportLocked(),
+            // nulls radioTransport, and clears runningTransportId. The observer is now disarmed on
+            // multiple gates.
+            service.disconnect()
+            advanceTimeBy(1_000L)
+            val transportCountAfterDisconnect = createdTransports.size
+
+            // Replug the selected device — the observer must observe but not act.
+            serialDeviceKeys.value = setOf("/dev/bus/usb/001/002")
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+
+            assertEquals(
+                transportCountAfterDisconnect,
+                createdTransports.size,
+                "Replug after explicit disconnect must NOT restart transport (connectionRequested gate)",
+            )
+            assertFalse(
+                service.connectionState.value == ConnectionState.Connected,
+                "State must remain Disconnected after post-disconnect replug",
+            )
+        } finally {
+            service.disconnect()
+            advanceTimeBy(1_000L)
+        }
+    }
+
+    /**
+     * Regression: the reducer's armed-by-absence state must not survive an explicit Disconnected state. A user can
+     * unplug while Connected, explicitly disconnect before replugging, then reconnect later. That later normal
+     * transport-level unplug callback arrives while the selected key is still present; it must not consume stale arm
+     * state from the previous connection and restart the fresh transport.
+     */
+    @Test
+    fun `USB recovery arm clears across explicit disconnect before reconnect`() = runTest(testDispatcher) {
+        clock = 0L
+        val selectedKey = "/dev/bus/usb/001/002"
+        serialDeviceKeys.value = setOf(selectedKey)
+        val service = createConnectedService("s$selectedKey")
+        try {
+            assertEquals(1, createdTransports.size, "Initial connect should create one transport")
+            val initialTransport = createdTransports.first()
+
+            // Detach while Connected arms the replug edge but must not restart while the transport is healthy.
+            serialDeviceKeys.value = emptySet()
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+
+            assertEquals(1, createdTransports.size, "Detach while Connected must NOT restart transport")
+            assertFalse(initialTransport.closeCalled, "Detach while Connected must not close the transport")
+
+            // Explicit disconnect must clear the armed reducer state.
+            service.disconnect()
+            advanceTimeBy(1_000L)
+            val transportCountAfterDisconnect = createdTransports.size
+            assertEquals(ConnectionState.Disconnected, service.connectionState.value, "Precondition: disconnected")
+
+            // Replug while disconnected must not preserve stale arm into the next connection.
+            serialDeviceKeys.value = setOf(selectedKey)
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+
+            assertEquals(
+                transportCountAfterDisconnect,
+                createdTransports.size,
+                "Replug while disconnected must NOT restart transport",
+            )
+
+            service.connect()
+            service.onConnect()
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+
+            val reconnectedTransport = createdTransports.last()
+            val transportCountAfterReconnect = createdTransports.size
+            assertEquals(ConnectionState.Connected, service.connectionState.value, "Precondition: reconnected")
+
+            service.onDisconnect(isPermanent = false)
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+
+            assertEquals(
+                transportCountAfterReconnect,
+                createdTransports.size,
+                "Normal unplug after reconnect must NOT restart from stale armed state",
+            )
+            assertFalse(
+                reconnectedTransport.closeCalled,
+                "Fresh transport must not be closed by stale recovery arm",
+            )
+        } finally {
+            service.disconnect()
+            advanceTimeBy(1_000L)
+        }
+    }
+
+    /**
+     * Regression: duplicate same-value emissions of [serialDevicePresence.deviceKeys] must not produce duplicate
+     * restarts. StateFlow semantics dedupe equal set re-publications at the source, and the pipeline's
+     * distinctUntilChanged() coalesces any redundant true → true emissions that slip through, so even a flappy
+     * publisher that re-emits the same set produces exactly ONE stop+start cycle for one physical replug.
+     */
+    @Test
+    fun `USB replug duplicate same-key emissions produce exactly one restart`() = runTest(testDispatcher) {
+        clock = 0L
+        val service = createConnectedService("s/dev/bus/usb/001/002")
+        try {
+            assertEquals(1, createdTransports.size, "Initial connect should create one transport")
+
+            service.onDisconnect(isPermanent = false)
+            assertEquals(ConnectionState.DeviceSleep, service.connectionState.value, "Precondition: zombie state")
+
+            // First replug: triggers one restart (false → true transition through the pipeline).
+            serialDeviceKeys.value = setOf("/dev/bus/usb/001/002")
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+            val transportsAfterFirstReplug = createdTransports.size
+
+            // Duplicate same-value emission (e.g. a flappy UsbRepository re-publishing the same set).
+            // StateFlow dedupes equal values at the source; distinctUntilChanged() coalesces any
+            // redundant true → true. No additional restart.
+            serialDeviceKeys.value = setOf("/dev/bus/usb/001/002")
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+
+            assertEquals(
+                transportsAfterFirstReplug,
+                createdTransports.size,
+                "Duplicate same-key emission must NOT produce a second restart",
+            )
+            assertEquals(2, createdTransports.size, "Exactly one restart total (1 initial + 1 replug)")
+        } finally {
+            service.disconnect()
+            advanceTimeBy(1_000L)
+        }
+    }
 }
