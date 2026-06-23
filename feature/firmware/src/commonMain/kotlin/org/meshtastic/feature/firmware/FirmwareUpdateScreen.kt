@@ -21,6 +21,7 @@ package org.meshtastic.feature.firmware
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Arrangement.spacedBy
 import androidx.compose.foundation.layout.Box
@@ -79,6 +80,7 @@ import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.mikepenz.markdown.m3.Markdown
 import kotlinx.coroutines.delay
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.database.entity.FirmwareRelease
@@ -531,12 +533,8 @@ private fun ChirpyCard() {
                 horizontalArrangement = spacedBy(4.dp),
             ) {
                 Text(text = "🪜", modifier = Modifier.size(48.dp), style = MaterialTheme.typography.headlineLarge)
-                AsyncImage(
-                    model =
-                    ImageRequest.Builder(LocalPlatformContext.current)
-                        .data(Res.drawable.img_chirpy)
-                        .crossfade(true)
-                        .build(),
+                Image(
+                    painter = painterResource(Res.drawable.img_chirpy),
                     contentScale = ContentScale.Fit,
                     contentDescription = stringResource(Res.string.chirpy),
                     modifier = Modifier.size(48.dp),
