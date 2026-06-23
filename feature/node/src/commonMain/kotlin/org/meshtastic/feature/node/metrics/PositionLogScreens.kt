@@ -27,8 +27,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.clear
+import org.meshtastic.core.resources.export_gpx
 import org.meshtastic.core.resources.position_log
 import org.meshtastic.core.ui.icon.Delete
+import org.meshtastic.core.ui.icon.FileDownload
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.core.ui.util.LocalNodeTrackMapProvider
@@ -40,6 +42,8 @@ fun PositionLogScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
     val positions = state.positionLogs
 
     val exportPositionLauncher = rememberSaveFileLauncher { uri -> viewModel.savePositionCSV(uri, positions) }
+    val nodeName = state.node?.user?.long_name ?: ""
+    val exportGpxLauncher = rememberSaveFileLauncher { uri -> viewModel.savePositionGpx(uri, positions, nodeName) }
 
     val trackMap = LocalNodeTrackMapProvider.current
     val destNum = state.node?.num ?: 0
@@ -48,12 +52,18 @@ fun PositionLogScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
         onNavigateUp = onNavigateUp,
         telemetryType = null,
         titleRes = Res.string.position_log,
-        nodeName = state.node?.user?.long_name ?: "",
+        nodeName = nodeName,
         data = positions,
         timeProvider = { it.time.toDouble() },
         onExportCsv = { exportPositionLauncher("position.csv", "text/csv") },
         extraActions = {
             if (positions.isNotEmpty()) {
+                IconButton(onClick = { exportGpxLauncher("track.gpx", "application/gpx+xml") }) {
+                    Icon(
+                        imageVector = MeshtasticIcons.FileDownload,
+                        contentDescription = stringResource(Res.string.export_gpx),
+                    )
+                }
                 IconButton(onClick = { viewModel.clearPosition() }) {
                     Icon(imageVector = MeshtasticIcons.Delete, contentDescription = stringResource(Res.string.clear))
                 }

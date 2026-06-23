@@ -554,6 +554,7 @@
     <!-- EXPORT -->
     <string name="export_configuration">Export configuration</string>
     <string name="export_data_csv">Export all packets</string>
+    <string name="export_gpx">Export GPX</string>
     <string name="export_keys">Export Keys</string>
     <string name="export_keys_confirmation">Exports public and private keys to a file. Please store somewhere securely.</string>
     <string name="export_tak_data_package">Export TAK Data Package</string>

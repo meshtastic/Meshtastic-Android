@@ -374,6 +374,12 @@ open class MetricsViewModel(
         }
     }
 
+    fun savePositionGpx(uri: CommonUri, data: List<org.meshtastic.proto.Position>, trackName: String) {
+        safeLaunch(context = dispatchers.io, tag = "exportGpx") {
+            fileService.write(uri) { sink -> sink.writeUtf8(buildGpx(data, trackName)) }
+        }
+    }
+
     fun saveLocalStatsCSV(uri: CommonUri, data: List<Telemetry>) {
         exportCsv(
             uri = uri,
@@ -543,4 +549,26 @@ open class MetricsViewModel(
     companion object {
         private const val ONE_WIRE_SENSOR_COUNT = 8
     }
+}
+
+private fun buildGpx(positions: List<org.meshtastic.proto.Position>, trackName: String): String {
+    val trkpts = buildString {
+        for (pos in positions) {
+            val lat = formatString("%.7f", (pos.latitude_i ?: 0) * GeoConstants.DEG_D)
+            val lon = formatString("%.7f", (pos.longitude_i ?: 0) * GeoConstants.DEG_D)
+            append("    <trkpt lat=\"$lat\" lon=\"$lon\">")
+            if ((pos.altitude ?: 0) != 0) append("<ele>${pos.altitude}</ele>")
+            if (pos.time > 0) append("<time>${Instant.fromEpochSeconds(pos.time.toLong())}</time>")
+            append("</trkpt>\n")
+        }
+    }
+    val name = trackName.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+    return """<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="Meshtastic" xmlns="http://www.topografix.com/GPX/1/1">
+  <trk>
+    <name>$name</name>
+    <trkseg>
+$trkpts    </trkseg>
+  </trk>
+</gpx>"""
 }
