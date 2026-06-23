@@ -129,7 +129,7 @@ class FirmwareUpdateIntegrationTest {
                 @Suppress("UNCHECKED_CAST")
                 val updateState = it.args[3] as (FirmwareUpdateState) -> Unit
                 updateState(FirmwareUpdateState.Updating(ProgressState()))
-                updateState(FirmwareUpdateState.Success)
+                updateState(FirmwareUpdateState.Success())
                 null
             }
 

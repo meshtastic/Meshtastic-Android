@@ -72,8 +72,13 @@ sealed interface FirmwareUpdateState {
     /** An error occurred at any stage of the update pipeline. */
     data class Error(val error: UiText) : FirmwareUpdateState
 
-    /** The firmware update completed and the device reconnected successfully. */
-    data object Success : FirmwareUpdateState
+    /**
+     * The firmware update completed and the device reconnected successfully.
+     *
+     * @property wasLowSpeedTransfer True if the upload ran at the MTU-capped low speed (stock bootloader), so the
+     *   Success screen can offer a one-time OTAFIX upgrade tip for faster future updates.
+     */
+    data class Success(val wasLowSpeedTransfer: Boolean = false) : FirmwareUpdateState
 
     /** UF2 file is ready; waiting for the user to choose a save location (USB flow). */
     data class AwaitingFileSave(val uf2Artifact: FirmwareArtifact, val fileName: String) : FirmwareUpdateState

@@ -237,8 +237,9 @@ class FirmwareUpdateViewModel(
                                     updateState = { _state.value = it },
                                 )
 
-                            when (_state.value) {
-                                is FirmwareUpdateState.Success -> verifyUpdateResult(originalDeviceAddress)
+                            when (val finalState = _state.value) {
+                                is FirmwareUpdateState.Success ->
+                                    verifyUpdateResult(originalDeviceAddress, finalState.wasLowSpeedTransfer)
 
                                 is FirmwareUpdateState.Error -> {
                                     tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
@@ -325,8 +326,9 @@ class FirmwareUpdateViewModel(
                         )
                     tempFirmwareFile = updateArtifact ?: extractedFile
 
-                    when (_state.value) {
-                        is FirmwareUpdateState.Success -> verifyUpdateResult(originalDeviceAddress)
+                    when (val finalState = _state.value) {
+                        is FirmwareUpdateState.Success ->
+                            verifyUpdateResult(originalDeviceAddress, finalState.wasLowSpeedTransfer)
 
                         is FirmwareUpdateState.Error -> {
                             tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
@@ -355,7 +357,7 @@ class FirmwareUpdateViewModel(
         }
     }
 
-    private suspend fun verifyUpdateResult(address: String?) {
+    private suspend fun verifyUpdateResult(address: String?, wasLowSpeedTransfer: Boolean = false) {
         _state.value = FirmwareUpdateState.Verifying
 
         // Trigger a fresh connection attempt by MeshService using the original prefixed address
@@ -378,7 +380,7 @@ class FirmwareUpdateViewModel(
             Logger.w { "Post-update verification timed out for $address" }
             _state.value = FirmwareUpdateState.VerificationFailed
         } else {
-            _state.value = FirmwareUpdateState.Success
+            _state.value = FirmwareUpdateState.Success(wasLowSpeedTransfer)
         }
     }
 
