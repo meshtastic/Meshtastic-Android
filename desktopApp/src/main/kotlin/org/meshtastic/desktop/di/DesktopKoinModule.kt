@@ -34,14 +34,7 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
-import org.meshtastic.core.data.datasource.BootloaderOtaQuirksJsonDataSource
-import org.meshtastic.core.data.datasource.DeviceHardwareJsonDataSource
-import org.meshtastic.core.data.datasource.DeviceLinksJsonDataSource
-import org.meshtastic.core.data.datasource.FirmwareReleaseJsonDataSource
-import org.meshtastic.core.model.BootloaderOtaQuirk
-import org.meshtastic.core.model.NetworkDeviceHardware
-import org.meshtastic.core.model.NetworkDeviceLink
-import org.meshtastic.core.model.NetworkFirmwareReleases
+import org.meshtastic.core.data.datasource.BundledAssetReader
 import org.meshtastic.core.network.HttpClientDefaults
 import org.meshtastic.core.network.KermitHttpLogger
 import org.meshtastic.core.network.configureDefaultRetry
@@ -256,26 +249,6 @@ private fun desktopPlatformStubsModule() = module {
         }
     }
 
-    // Desktop stubs for data sources that load from Android assets on mobile
-    single<FirmwareReleaseJsonDataSource> {
-        object : FirmwareReleaseJsonDataSource {
-            override fun loadFirmwareReleaseFromJsonAsset() = NetworkFirmwareReleases()
-        }
-    }
-    single<DeviceHardwareJsonDataSource> {
-        object : DeviceHardwareJsonDataSource {
-            override fun loadDeviceHardwareFromJsonAsset(): List<NetworkDeviceHardware> = emptyList()
-        }
-    }
-    single<BootloaderOtaQuirksJsonDataSource> {
-        object : BootloaderOtaQuirksJsonDataSource {
-            override fun loadBootloaderOtaQuirksFromJsonAsset(): List<BootloaderOtaQuirk> = emptyList()
-        }
-    }
-
-    single<DeviceLinksJsonDataSource> {
-        object : DeviceLinksJsonDataSource {
-            override fun loadDeviceLinksFromJsonAsset(): List<NetworkDeviceLink> = emptyList()
-        }
-    }
+    // Desktop has no bundled Android assets; repositories seed from the network instead.
+    single<BundledAssetReader> { BundledAssetReader { null } }
 }

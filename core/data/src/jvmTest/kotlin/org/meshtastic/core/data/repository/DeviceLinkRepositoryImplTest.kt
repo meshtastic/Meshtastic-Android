@@ -18,8 +18,11 @@ package org.meshtastic.core.data.repository
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.Json
+import okio.Buffer
+import okio.Source
+import org.meshtastic.core.data.datasource.BundledAssetReader
 import org.meshtastic.core.data.datasource.DeviceLinkLocalDataSource
-import org.meshtastic.core.data.datasource.DeviceLinksJsonDataSource
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.NetworkDeviceHardware
 import org.meshtastic.core.model.NetworkDeviceLink
@@ -45,9 +48,17 @@ class DeviceLinkRepositoryImplTest {
         override suspend fun getFirmwareReleases(): NetworkFirmwareReleases = error("unused")
     }
 
-    private class FakeDeviceLinksJsonDataSource(var links: List<NetworkDeviceLink>) : DeviceLinksJsonDataSource {
-        override fun loadDeviceLinksFromJsonAsset(): List<NetworkDeviceLink> = links
+    /** Serves only `device_links.json`, serializing the current [links] so the repo seeds via the real decode path. */
+    private class FakeBundledAssetReader(var links: List<NetworkDeviceLink>, private val json: Json) :
+        BundledAssetReader {
+        override fun open(name: String): Source? {
+            if (name != "device_links.json") return null
+            val bytes = json.encodeToString(NetworkDeviceLinksResponse(links = links)).encodeToByteArray()
+            return Buffer().write(bytes)
+        }
     }
+
+    private val json = Json { ignoreUnknownKeys = true }
 
     // Real dispatchers + runBlocking (per test), NOT runTest/UnconfinedTestDispatcher. reconcile() guards its network
     // fetch with withTimeoutOrNull, whose deadline follows the calling coroutine's clock. Under runTest that clock is
@@ -60,7 +71,7 @@ class DeviceLinkRepositoryImplTest {
     private lateinit var dbProvider: FakeDatabaseProvider
     private lateinit var local: DeviceLinkLocalDataSource
     private lateinit var api: FakeApiService
-    private lateinit var seed: FakeDeviceLinksJsonDataSource
+    private lateinit var seed: FakeBundledAssetReader
     private lateinit var repository: DeviceLinkRepositoryImpl
 
     private fun link(
@@ -82,11 +93,12 @@ class DeviceLinkRepositoryImplTest {
         dbProvider = FakeDatabaseProvider()
         local = DeviceLinkLocalDataSource(dbProvider, dispatchers)
         api = FakeApiService(NetworkDeviceLinksResponse())
-        seed = FakeDeviceLinksJsonDataSource(emptyList())
+        seed = FakeBundledAssetReader(emptyList(), json)
         repository =
             DeviceLinkRepositoryImpl(
                 remoteDataSource = DeviceLinksRemoteDataSource(api, dispatchers),
-                jsonDataSource = seed,
+                assetReader = seed,
+                json = json,
                 localDataSource = local,
                 dispatchers = dispatchers,
             )

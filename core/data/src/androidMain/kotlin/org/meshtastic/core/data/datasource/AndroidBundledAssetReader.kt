@@ -16,8 +16,12 @@
  */
 package org.meshtastic.core.data.datasource
 
-import org.meshtastic.core.model.NetworkFirmwareReleases
+import android.app.Application
+import okio.Source
+import okio.source
+import org.koin.core.annotation.Single
 
-interface FirmwareReleaseJsonDataSource {
-    fun loadFirmwareReleaseFromJsonAsset(): NetworkFirmwareReleases
+@Single
+class AndroidBundledAssetReader(private val application: Application) : BundledAssetReader {
+    override fun open(name: String): Source? = runCatching { application.assets.open(name).source() }.getOrNull()
 }
