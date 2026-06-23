@@ -1246,30 +1246,25 @@ class SharedRadioInterfaceServiceLivenessTest {
     //
     // The USB-serial recovery observer (see observeUsbRecoveryTriggers) watches the selected SERIAL device's
     // presence via [SerialDevicePresence.deviceKeys] combined with [currentDeviceAddressFlow] and
-    // [_connectionState]. On the absent → present transition for the SELECTED serial device while the
-    // transport is in zombie DeviceSleep, it tears down the zombie transport (left over from the unplug
-    // I/O-death path that emits DeviceSleep without nulling radioTransport) and starts a fresh one —
-    // sparing the user a manual re-select.
+    // [_connectionState]. It arms recovery only after the SELECTED serial key has been observed absent and then
+    // present again; when that armed edge converges with zombie DeviceSleep, it tears down the zombie transport
+    // (left over from the unplug I/O-death path that emits DeviceSleep without nulling radioTransport) and starts a
+    // fresh one — sparing the user a manual re-select.
     //
     // Pipeline (see SharedRadioInterfaceService.observeUsbRecoveryTriggers):
-    //   combine(currentDeviceAddressFlow, serialDevicePresence.deviceKeys, _connectionState) { address, keys, state ->
-    //     val rest = address?.takeIf { it.firstOrNull() == InterfaceId.SERIAL.id }?.substring(1)
-    //     rest != null && rest in keys && state == ConnectionState.DeviceSleep
-    //   }
-    //     .distinctUntilChanged()  // coalesce same-value emissions from UsbRepository
-    //     .drop(1)                  // skip the cold snapshot so a present-at-boot device doesn't fire
-    //     .filter { it }            // fire only on absent → present (false → true)
+    //   selectedPresence = combine(currentDeviceAddressFlow, serialDevicePresence.deviceKeys)
+    //   combine(selectedPresence, _connectionState)
+    //     .runningFold(...)         // arms only after selected key goes absent → present
+    //     .filter { triggerRecovery }
     //     .onEach { transportMutex.withLock {
     //         if (!connectionRequested) return@withLock
     //         if (runningTransportId != InterfaceId.SERIAL) return@withLock
     //         if (state is Connected || state is Connecting) return@withLock  // race-defense
-    //         ignoreExceptionSuspend {
-    //             stopTransportLocked(notifyPermanent = false, sendPoliteDisconnect = false)
-    //             startTransportLocked()
-    //         }
+    //         ignoreExceptionSuspend { stopTransportLocked(notifyPermanent = false, sendPoliteDisconnect = false) }
+    //         ignoreExceptionSuspend { startTransportLocked() }
     //     } }
     //
-    // The six tests below drive the controllable [serialDeviceKeys] flow directly to exercise each
+    // The seven tests below drive the controllable [serialDeviceKeys] flow directly to exercise each
     // branch of that gate contract.
 
     /**
@@ -1401,6 +1396,55 @@ class SharedRadioInterfaceServiceLivenessTest {
                 createdTransports.first().closeCalled,
                 "Zombie transport must be closed by stopTransportLocked",
             )
+        } finally {
+            service.disconnect()
+            advanceTimeBy(1_000L)
+        }
+    }
+
+    /**
+     * Regression: some USB stacks deliver the transport disconnect callback before UsbRepository has emitted the detach
+     * that removes the selected key. A present-at-start key plus DeviceSleep is only "normal unplug in progress", not a
+     * replug, so recovery must stay quiet until the observer sees the selected key go absent and then present again.
+     */
+    @Test
+    fun `USB disconnect before detach emission waits for absent to present replug`() = runTest(testDispatcher) {
+        clock = 0L
+        serialDeviceKeys.value = setOf("/dev/bus/usb/001/002")
+        val service = createConnectedService("s/dev/bus/usb/001/002")
+        try {
+            assertEquals(1, createdTransports.size, "Initial connect should create one transport")
+            val initialTransport = createdTransports.first()
+            assertEquals(ConnectionState.Connected, service.connectionState.value, "Precondition: Connected state")
+
+            // The transport-level disconnect arrives before the deviceKeys detach emission. Because the key was
+            // already present, this must not be treated as an absent → present replug.
+            service.onDisconnect(isPermanent = false)
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+
+            assertEquals(
+                1,
+                createdTransports.size,
+                "DeviceSleep with an already-present key must NOT restart transport",
+            )
+            assertFalse(initialTransport.closeCalled, "Unplug callback alone must not close the transport")
+
+            // Now the actual detach/attach sequence is visible: absent first, then present again.
+            serialDeviceKeys.value = emptySet()
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+
+            assertEquals(1, createdTransports.size, "Detach emission alone must not restart transport")
+            assertFalse(initialTransport.closeCalled, "Detach emission alone must not close the transport")
+
+            serialDeviceKeys.value = setOf("/dev/bus/usb/001/002")
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+
+            assertEquals(2, createdTransports.size, "Absent → present replug should create one fresh transport")
+            assertTrue(initialTransport.closeCalled, "Zombie transport must be closed by stopTransportLocked")
+            assertEquals(1, initialTransport.closeCount, "Zombie transport closed exactly once")
         } finally {
             service.disconnect()
             advanceTimeBy(1_000L)

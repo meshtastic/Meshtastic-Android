@@ -41,6 +41,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.runningFold
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -65,6 +66,44 @@ import org.meshtastic.core.repository.RadioTransport
 import org.meshtastic.core.repository.RadioTransportFactory
 import org.meshtastic.proto.ToRadio
 import kotlin.concurrent.Volatile
+
+private data class SelectedSerialPresence(val key: String?, val present: Boolean)
+
+private data class UsbRecoverySnapshot(val presence: SelectedSerialPresence, val state: ConnectionState)
+
+private data class UsbRecoveryTriggerState(
+    val key: String? = null,
+    val present: Boolean = false,
+    val armedByAbsence: Boolean = false,
+    val triggerRecovery: Boolean = false,
+)
+
+private fun selectedSerialPresence(address: String?, keys: Set<String>): SelectedSerialPresence {
+    val key = address?.takeIf { it.firstOrNull() == InterfaceId.SERIAL.id }?.substring(1)
+    return SelectedSerialPresence(key = key, present = key != null && key in keys)
+}
+
+private fun UsbRecoveryTriggerState.next(snapshot: UsbRecoverySnapshot): UsbRecoveryTriggerState {
+    val key = snapshot.presence.key
+    val present = snapshot.presence.present
+    val armed = armedByAbsence || !this.present
+    val trigger = key == this.key && present && armed && snapshot.state == ConnectionState.DeviceSleep
+    return when {
+        key == null -> UsbRecoveryTriggerState()
+
+        key != this.key -> UsbRecoveryTriggerState(key = key, present = present)
+
+        !present -> UsbRecoveryTriggerState(key = key)
+
+        else ->
+            UsbRecoveryTriggerState(
+                key = key,
+                present = true,
+                armedByAbsence = armed && !trigger,
+                triggerRecovery = trigger,
+            )
+    }
+}
 
 /**
  * Shared multiplatform connection orchestrator for Meshtastic radios.
@@ -263,11 +302,10 @@ class SharedRadioInterfaceService(
     // Without this observer the user must manually re-select the device after every replug.
     //
     // We watch the SERIAL device-key set, the currently-selected address, AND the transport
-    // connection state together. The combined boolean — "is the SELECTED serial device present
-    // AND is the transport in zombie DeviceSleep?" — drives the recovery signal:
-    // distinctUntilChanged coalesces same-value re-emissions from UsbRepository and from
-    // incidental state transitions, drop(1) skips the initial cold emission so we never fire on
-    // the startup snapshot, and filter{it} fires only on the absent → present convergence.
+    // connection state together. Recovery is armed only after the SELECTED serial key has been
+    // observed absent and then present again. That "armed by absence" edge is what separates a real
+    // replug from a normal unplug race where onDisconnect(DeviceSleep) arrives before UsbRepository
+    // has removed the still-present key.
     // There is no symmetric stop on absent → absent: the transport's own I/O error path
     // (SerialConnectionListener.onDisconnected → onDeviceDisconnect) handles teardown, mirroring
     // how the network listener only stops on networkAvailable=false rather than trying to detect
@@ -280,23 +318,25 @@ class SharedRadioInterfaceService(
     // and the zombie transport would never recover. With state in the combine, the
     // Connected → DeviceSleep transition while presence is true re-triggers the flow.
     //
-    // Flap/loop safety: each physical replug produces exactly one false → true transition (guaranteed
-    // by distinctUntilChanged), and the recovery branch only fires when connectionRequested AND the
-    // running transport is SERIAL — so an explicit disconnect() (which clears connectionRequested and
-    // nulls runningTransportId via stopTransportLocked) immediately disarms the observer. A device
-    // that flaps N times produces at most N restarts, never an unbounded loop.
+    // Flap/loop safety: each physical replug consumes exactly one armed-by-absence transition, and
+    // the recovery branch only fires when connectionRequested AND the running transport is SERIAL —
+    // so an explicit disconnect() (which clears connectionRequested and nulls runningTransportId via
+    // stopTransportLocked) immediately disarms the observer. A device that flaps N times produces at
+    // most N restarts, never an unbounded loop.
     //
     // Extracted from initStateListeners() so that function stays under detekt's LongMethod cap (60).
     // Pure code motion — all referenced state is class-member scope, launchIn() registers the cold
     // flow on processLifecycle.coroutineScope exactly as before.
     private suspend fun observeUsbRecoveryTriggers() {
-        combine(currentDeviceAddressFlow, serialDevicePresence.deviceKeys, _connectionState) { address, keys, state ->
-            val rest = address?.takeIf { it.firstOrNull() == InterfaceId.SERIAL.id }?.substring(1)
-            rest != null && rest in keys && state == ConnectionState.DeviceSleep
-        }
+        val selectedPresence =
+            combine(currentDeviceAddressFlow, serialDevicePresence.deviceKeys, ::selectedSerialPresence)
+                .distinctUntilChanged()
+
+        combine(selectedPresence, _connectionState, ::UsbRecoverySnapshot)
+            .runningFold(UsbRecoveryTriggerState()) { triggerState, snapshot -> triggerState.next(snapshot) }
             .distinctUntilChanged()
             .drop(1)
-            .filter { it }
+            .filter { it.triggerRecovery }
             .onEach {
                 transportMutex.withLock {
                     if (!connectionRequested) return@withLock
@@ -315,13 +355,12 @@ class SharedRadioInterfaceService(
                     // down silently so startTransportLocked() can build a fresh one for the replugged
                     // device. Mirrors the BLE liveness recovery shape: notifyPermanent=false (no
                     // user-facing Disconnected), sendPoliteDisconnect=false (the link is already gone).
-                    // Both stop and start live inside ignoreExceptionSuspend so a transient USB error
-                    // during teardown or bring-up cannot escape onEach and terminate the recovery flow
-                    // via .catch{} (which would disarm all future replug recoveries for this session).
+                    // Keep teardown and bring-up isolated: a transient USB close error must not skip
+                    // the fresh start, and neither error should terminate this long-lived recovery flow.
                     ignoreExceptionSuspend {
                         stopTransportLocked(notifyPermanent = false, sendPoliteDisconnect = false)
-                        startTransportLocked()
                     }
+                    ignoreExceptionSuspend { startTransportLocked() }
                 }
             }
             .catch { Logger.e(it) { "serialDevicePresence recovery flow crashed" } }
