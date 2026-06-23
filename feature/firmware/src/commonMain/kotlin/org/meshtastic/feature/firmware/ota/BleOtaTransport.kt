@@ -27,7 +27,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.withTimeout
 import org.meshtastic.core.ble.BleCharacteristic
 import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleConnectionState
@@ -113,16 +112,16 @@ class BleOtaTransport(
             val maxLen = bleConnection.maximumWriteValueLength(BleWriteType.WITHOUT_RESPONSE)
             Logger.i { "BLE OTA: Service ready. Max write value length: $maxLen bytes" }
 
-            // Enable notifications and collect responses
+            // Collect responses. onSubscription fires when the CCCD write completes — a precise readiness
+            // signal; the settle below is a conservative cushion.
             val subscribed = CompletableDeferred<Unit>()
             service
-                .observe(txChar)
+                .observe(txChar) {
+                    Logger.d { "BLE OTA: TX characteristic subscribed" }
+                    subscribed.complete(Unit)
+                }
                 .onEach { notifyBytes ->
                     try {
-                        if (!subscribed.isCompleted) {
-                            Logger.d { "BLE OTA: TX characteristic subscribed" }
-                            subscribed.complete(Unit)
-                        }
                         val response = notifyBytes.decodeToString()
                         Logger.d { "BLE OTA: Received response: $response" }
                         responseChannel.trySend(response)
@@ -136,11 +135,9 @@ class BleOtaTransport(
                 }
                 .launchIn(this)
 
-            // Allow time for the BLE subscription to be established before proceeding.
-            delay(SUBSCRIPTION_SETTLE)
-            if (!subscribed.isCompleted) subscribed.complete(Unit)
-
             subscribed.await()
+            // Conservative settle after CCCD confirmation before issuing commands.
+            delay(SUBSCRIPTION_SETTLE)
             Logger.i { "BLE OTA: Service discovered and ready" }
         }
     }
@@ -300,10 +297,8 @@ class BleOtaTransport(
         return packetsSent
     }
 
-    private suspend fun waitForResponse(timeout: Duration): String = try {
-        withTimeout(timeout) { responseChannel.receive() }
-    } catch (@Suppress("SwallowedException") e: kotlinx.coroutines.TimeoutCancellationException) {
-        throw OtaProtocolException.Timeout("Timeout waiting for response after $timeout")
+    private suspend fun waitForResponse(timeout: Duration): String = responseChannel.receiveWithin(timeout) {
+        OtaProtocolException.Timeout("Timeout waiting for response after $timeout")
     }
 
     companion object {

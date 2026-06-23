@@ -34,13 +34,10 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleConnectionState
@@ -51,7 +48,9 @@ import org.meshtastic.core.ble.DEFAULT_BLE_WRITE_VALUE_LENGTH
 import org.meshtastic.core.ble.MeshtasticBleDevice
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.feature.firmware.ota.calculateMacPlusOne
+import org.meshtastic.feature.firmware.ota.receiveWithin
 import org.meshtastic.feature.firmware.ota.scanForBleDevice
+import org.meshtastic.feature.firmware.ota.withDisconnectTripwire
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
@@ -247,27 +246,24 @@ class SecureDfuTransport(
         bleConnection.profile(SecureDfuUuids.SERVICE) { service ->
             val controlChar = service.characteristic(SecureDfuUuids.CONTROL_POINT)
 
-            // Subscribe to Control Point notifications before issuing any commands.
-            // launchIn(this) uses connectionScope so the subscription persists beyond this block.
+            // Subscribe to Control Point notifications before issuing any commands. onSubscription fires once the CCCD
+            // write completes; launchIn(this) uses connectionScope so the subscription persists beyond this block.
             val subscribed = CompletableDeferred<Unit>()
             service
-                .observe(controlChar)
-                .onEach { bytes ->
-                    if (!subscribed.isCompleted) {
-                        Logger.d { "DFU: Control Point subscribed" }
-                        subscribed.complete(Unit)
-                    }
-                    notificationChannel.trySend(bytes)
+                .observe(controlChar) {
+                    Logger.d { "DFU: Control Point subscribed" }
+                    subscribed.complete(Unit)
                 }
+                .onEach { bytes -> notificationChannel.trySend(bytes) }
                 .catch { e ->
                     if (!subscribed.isCompleted) subscribed.completeExceptionally(e)
                     Logger.e(e) { "DFU: Control Point notification error" }
                 }
                 .launchIn(this)
 
-            delay(SUBSCRIPTION_SETTLE)
-            if (!subscribed.isCompleted) subscribed.complete(Unit)
             subscribed.await()
+            // Conservative settle after CCCD confirmation before issuing commands.
+            delay(SUBSCRIPTION_SETTLE)
 
             Logger.i { "DFU: Connected and ready (${device.address})" }
         }
@@ -509,39 +505,33 @@ class SecureDfuTransport(
         val mtu = bleConnection.maximumWriteValueLength(BleWriteType.WITHOUT_RESPONSE) ?: DEFAULT_BLE_WRITE_VALUE_LENGTH
         var pos = from
 
-        coroutineScope {
-            // Trip-wire: cancels the streaming coroutine the moment Kable observes a disconnect.
-            val watcher = launch {
-                val state = bleConnection.connectionState.first { it is BleConnectionState.Disconnected }
+        bleConnection.withDisconnectTripwire(
+            onDrop = { state ->
                 Logger.w { "Secure DFU: Link dropped mid-stream at offset $pos/$until (state=$state)" }
-                throw DfuException.ConnectionFailed("BLE link dropped mid-upload at byte $pos/$until")
-            }
+                DfuException.ConnectionFailed("BLE link dropped mid-upload at byte $pos/$until")
+            },
+        ) {
+            var packetsSincePrn = 0
+            bleConnection.profile(SecureDfuUuids.SERVICE, timeout = STREAM_TIMEOUT) { service ->
+                val packetChar = service.characteristic(SecureDfuUuids.PACKET)
+                while (pos < until) {
+                    val chunkEnd = minOf(pos + mtu, until)
+                    service.write(packetChar, data.copyOfRange(pos, chunkEnd), BleWriteType.WITHOUT_RESPONSE)
+                    pos = chunkEnd
+                    packetsSincePrn++
 
-            try {
-                var packetsSincePrn = 0
-                bleConnection.profile(SecureDfuUuids.SERVICE, timeout = STREAM_TIMEOUT) { service ->
-                    val packetChar = service.characteristic(SecureDfuUuids.PACKET)
-                    while (pos < until) {
-                        val chunkEnd = minOf(pos + mtu, until)
-                        service.write(packetChar, data.copyOfRange(pos, chunkEnd), BleWriteType.WITHOUT_RESPONSE)
-                        pos = chunkEnd
-                        packetsSincePrn++
-
-                        if (prnInterval > 0 && packetsSincePrn >= prnInterval && pos < until) {
-                            val response = awaitNotification(COMMAND_TIMEOUT)
-                            if (response is DfuResponse.ChecksumResult) {
-                                val expectedCrc = DfuCrc32.calculate(data, length = pos)
-                                if (response.offset != pos || response.crc32 != expectedCrc) {
-                                    throw DfuException.ChecksumMismatch(expected = expectedCrc, actual = response.crc32)
-                                }
-                                Logger.d { "DFU: PRN checksum OK at offset $pos" }
+                    if (prnInterval > 0 && packetsSincePrn >= prnInterval && pos < until) {
+                        val response = awaitNotification(COMMAND_TIMEOUT)
+                        if (response is DfuResponse.ChecksumResult) {
+                            val expectedCrc = DfuCrc32.calculate(data, length = pos)
+                            if (response.offset != pos || response.crc32 != expectedCrc) {
+                                throw DfuException.ChecksumMismatch(expected = expectedCrc, actual = response.crc32)
                             }
-                            packetsSincePrn = 0
+                            Logger.d { "DFU: PRN checksum OK at offset $pos" }
                         }
+                        packetsSincePrn = 0
                     }
                 }
-            } finally {
-                watcher.cancel()
             }
         }
     }
@@ -602,13 +592,12 @@ class SecureDfuTransport(
         Logger.d { "DFU: Object executed." }
     }
 
-    private suspend fun awaitNotification(timeout: Duration): DfuResponse = try {
-        withTimeout(timeout) {
-            val bytes = notificationChannel.receive()
-            DfuResponse.parse(bytes).also { Logger.d { "DFU: Notification → $it" } }
-        }
-    } catch (_: TimeoutCancellationException) {
-        throw DfuException.Timeout("No response from Control Point after $timeout")
+    private suspend fun awaitNotification(timeout: Duration): DfuResponse {
+        val bytes =
+            notificationChannel.receiveWithin(timeout) {
+                DfuException.Timeout("No response from Control Point after $timeout")
+            }
+        return DfuResponse.parse(bytes).also { Logger.d { "DFU: Notification → $it" } }
     }
 
     private fun DfuResponse.requireSuccess(expectedOpcode: Byte) {

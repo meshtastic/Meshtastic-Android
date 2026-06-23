@@ -25,7 +25,6 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.common.util.CommonUri
-import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.di.CoroutineDispatchers
@@ -52,6 +51,8 @@ import org.meshtastic.feature.firmware.FirmwareUpdateState
 import org.meshtastic.feature.firmware.ProgressState
 import org.meshtastic.feature.firmware.ota.ThroughputTracker
 import org.meshtastic.feature.firmware.ota.calculateMacPlusOne
+import org.meshtastic.feature.firmware.ota.formatTransferProgress
+import org.meshtastic.feature.firmware.ota.retryWithDelay
 import org.meshtastic.feature.firmware.ota.scanForBleDevice
 import org.meshtastic.feature.firmware.stripFormatArgs
 import kotlin.time.Duration.Companion.seconds
@@ -61,7 +62,6 @@ private const val GATT_RELEASE_DELAY_MS = 1_500L
 private const val DFU_REBOOT_WAIT_MS = 3_000L
 private const val RETRY_DELAY_MS = 2_000L
 private const val CONNECT_ATTEMPTS = 4
-private const val KIB_DIVISOR = 1024f
 
 /**
  * KMP [FirmwareUpdateHandler] for nRF52 devices.
@@ -173,25 +173,10 @@ class SecureDfuHandler(
 
                     transport
                         .transferFirmware(pkg.firmware) { progress ->
-                            val pct = (progress * PERCENT_MAX).toInt()
                             val bytesSent = (progress * firmwareSize).toLong()
                             throughputTracker.record(bytesSent)
-
-                            val bytesPerSecond = throughputTracker.bytesPerSecond()
-                            val speedKib = bytesPerSecond.toFloat() / KIB_DIVISOR
-
-                            val details = buildString {
-                                append("$pct%")
-                                if (speedKib > 0f) {
-                                    val remainingBytes = firmwareSize - bytesSent
-                                    val etaSeconds = remainingBytes.toFloat() / bytesPerSecond
-                                    append(
-                                        " (${NumberFormatter.format(speedKib, 1)} " +
-                                            "KiB/s, ETA: ${etaSeconds.toInt()}s)",
-                                    )
-                                }
-                            }
-
+                            val details =
+                                formatTransferProgress(progress, firmwareSize, throughputTracker.bytesPerSecond())
                             updateState(
                                 FirmwareUpdateState.Updating(
                                     ProgressState(uploadMsg, progress, details, hint = slowHint),
@@ -269,27 +254,34 @@ class SecureDfuHandler(
         updateState(
             FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_waiting_reboot))),
         )
-        var lastError: Throwable? = null
-        for (attempt in 1..CONNECT_ATTEMPTS) {
-            updateState(
-                FirmwareUpdateState.Processing(
-                    ProgressState(
-                        UiText.Resource(Res.string.firmware_update_connecting_attempt, attempt, CONNECT_ATTEMPTS),
+        retryWithDelay(
+            attempts = CONNECT_ATTEMPTS,
+            retryDelayMillis = RETRY_DELAY_MS,
+            onAttempt = { attempt ->
+                updateState(
+                    FirmwareUpdateState.Processing(
+                        ProgressState(
+                            UiText.Resource(
+                                Res.string.firmware_update_connecting_attempt,
+                                attempt,
+                                CONNECT_ATTEMPTS,
+                            ),
+                        ),
                     ),
-                ),
-            )
-            val result = transport.connectToDfuMode()
-            if (result.isSuccess) {
-                return
-            }
-            lastError = result.exceptionOrNull()
-            Logger.w { "DFU: Connect attempt $attempt/$CONNECT_ATTEMPTS failed: ${lastError?.message}" }
-            if (attempt < CONNECT_ATTEMPTS) delay(RETRY_DELAY_MS)
-        }
-        throw DfuException.ConnectionFailed(
-            "Failed to connect to DFU device after $CONNECT_ATTEMPTS attempts",
-            lastError,
+                )
+            },
+            block = { attempt ->
+                transport.connectToDfuMode().onFailure {
+                    Logger.w { "DFU: Connect attempt $attempt/$CONNECT_ATTEMPTS failed: ${it.message}" }
+                }
+            },
         )
+            .getOrElse {
+                throw DfuException.ConnectionFailed(
+                    "Failed to connect to DFU device after $CONNECT_ATTEMPTS attempts",
+                    it,
+                )
+            }
     }
 
     private suspend fun obtainZipFile(

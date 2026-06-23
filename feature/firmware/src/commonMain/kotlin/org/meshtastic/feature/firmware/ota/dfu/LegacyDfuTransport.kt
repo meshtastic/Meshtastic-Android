@@ -34,13 +34,10 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleConnectionState
@@ -50,6 +47,7 @@ import org.meshtastic.core.ble.BleWriteType
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.feature.firmware.ota.calculateMacPlusOne
 import org.meshtastic.feature.firmware.ota.scanForBleDevice
+import org.meshtastic.feature.firmware.ota.withDisconnectTripwire
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
@@ -119,12 +117,11 @@ class LegacyDfuTransport(
 
             val subscribed = CompletableDeferred<Unit>()
             service
-                .observe(controlChar)
+                .observe(controlChar) {
+                    Logger.d { "Legacy DFU: Control Point subscribed" }
+                    subscribed.complete(Unit)
+                }
                 .onEach { bytes ->
-                    if (!subscribed.isCompleted) {
-                        Logger.d { "Legacy DFU: Control Point subscribed" }
-                        subscribed.complete(Unit)
-                    }
                     val parsed = LegacyDfuResponse.parse(bytes)
                     Logger.d { "Legacy DFU: Notification → $parsed" }
                     notificationChannel.trySend(parsed)
@@ -135,9 +132,9 @@ class LegacyDfuTransport(
                 }
                 .launchIn(this)
 
-            delay(SUBSCRIPTION_SETTLE)
-            if (!subscribed.isCompleted) subscribed.complete(Unit)
             subscribed.await()
+            // Conservative settle after CCCD confirmation before issuing commands.
+            delay(SUBSCRIPTION_SETTLE)
 
             // Best-effort DFU Version read — gate out unsupported old bootloaders (SDK ≤ 6).
             val versionChar = service.characteristic(LEGACY_DFU_VERSION_UUID)
@@ -306,60 +303,54 @@ class LegacyDfuTransport(
                 "(advertised='${dfuAdvertisedName ?: "?"}')"
         }
 
-        coroutineScope {
-            // Trip-wire: cancels the streaming coroutine the moment Kable observes a disconnect.
-            val watcher = launch {
-                val state = bleConnection.connectionState.first { it is BleConnectionState.Disconnected }
+        bleConnection.withDisconnectTripwire(
+            onDrop = { state ->
                 Logger.w { "Legacy DFU: Link dropped mid-stream at offset $offset/${firmware.size} (state=$state)" }
-                throw DfuException.ConnectionFailed("BLE link dropped mid-upload at byte $offset/${firmware.size}")
-            }
-
-            try {
-                var packetsSincePrn = 0
-                var bytesAtLastPrn = 0L
-                bleConnection.profile(LegacyDfuUuids.SERVICE, timeout = STREAM_TIMEOUT) { service ->
-                    val packetChar = service.characteristic(LEGACY_DFU_PACKET_UUID)
-                    while (offset < firmware.size) {
-                        val end = minOf(offset + mtu, firmware.size)
-                        try {
-                            service.write(packetChar, firmware.copyOfRange(offset, end), BleWriteType.WITHOUT_RESPONSE)
-                        } catch (e: CancellationException) {
-                            Logger.w(e) {
-                                "Legacy DFU: Write CANCELLED at offset $offset/${firmware.size} cause=${e.cause}"
-                            }
-                            throw e
-                        } catch (@Suppress("TooGenericExceptionCaught") e: Throwable) {
-                            Logger.w(e) { "Legacy DFU: Write FAILED at offset $offset/${firmware.size}: ${e.message}" }
-                            throw e
+                DfuException.ConnectionFailed("BLE link dropped mid-upload at byte $offset/${firmware.size}")
+            },
+        ) {
+            var packetsSincePrn = 0
+            var bytesAtLastPrn = 0L
+            bleConnection.profile(LegacyDfuUuids.SERVICE, timeout = STREAM_TIMEOUT) { service ->
+                val packetChar = service.characteristic(LEGACY_DFU_PACKET_UUID)
+                while (offset < firmware.size) {
+                    val end = minOf(offset + mtu, firmware.size)
+                    try {
+                        service.write(packetChar, firmware.copyOfRange(offset, end), BleWriteType.WITHOUT_RESPONSE)
+                    } catch (e: CancellationException) {
+                        Logger.w(e) {
+                            "Legacy DFU: Write CANCELLED at offset $offset/${firmware.size} cause=${e.cause}"
                         }
-                        offset = end
-                        packetsSincePrn++
+                        throw e
+                    } catch (@Suppress("TooGenericExceptionCaught") e: Throwable) {
+                        Logger.w(e) { "Legacy DFU: Write FAILED at offset $offset/${firmware.size}: ${e.message}" }
+                        throw e
+                    }
+                    offset = end
+                    packetsSincePrn++
 
-                        if (packetsSincePrn >= PRN_INTERVAL_PACKETS && offset < firmware.size) {
-                            Logger.d { "Legacy DFU: Awaiting PRN at offset $offset" }
-                            val receipt =
-                                try {
-                                    awaitPacketReceipt()
-                                } catch (e: CancellationException) {
-                                    Logger.w(e) {
-                                        "Legacy DFU: awaitPacketReceipt CANCELLED at offset $offset cause=${e.cause}"
-                                    }
-                                    throw e
+                    if (packetsSincePrn >= PRN_INTERVAL_PACKETS && offset < firmware.size) {
+                        Logger.d { "Legacy DFU: Awaiting PRN at offset $offset" }
+                        val receipt =
+                            try {
+                                awaitPacketReceipt()
+                            } catch (e: CancellationException) {
+                                Logger.w(e) {
+                                    "Legacy DFU: awaitPacketReceipt CANCELLED at offset $offset cause=${e.cause}"
                                 }
-                            val expected = offset.toLong()
-                            if (receipt.bytesReceived != expected) {
-                                throw LegacyDfuException.PacketReceiptMismatch(expected, receipt.bytesReceived)
+                                throw e
                             }
-                            bytesAtLastPrn = receipt.bytesReceived
-                            packetsSincePrn = 0
-                            onProgress(offset.toFloat() / firmware.size)
+                        val expected = offset.toLong()
+                        if (receipt.bytesReceived != expected) {
+                            throw LegacyDfuException.PacketReceiptMismatch(expected, receipt.bytesReceived)
                         }
+                        bytesAtLastPrn = receipt.bytesReceived
+                        packetsSincePrn = 0
+                        onProgress(offset.toFloat() / firmware.size)
                     }
                 }
-                Logger.d { "Legacy DFU: Streamed $offset/${firmware.size} bytes (lastPRN=$bytesAtLastPrn)" }
-            } finally {
-                watcher.cancel()
             }
+            Logger.d { "Legacy DFU: Streamed $offset/${firmware.size} bytes (lastPRN=$bytesAtLastPrn)" }
         }
     }
 

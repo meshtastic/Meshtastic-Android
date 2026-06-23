@@ -24,7 +24,6 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.common.util.CommonUri
-import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.di.CoroutineDispatchers
@@ -54,7 +53,6 @@ import org.meshtastic.feature.firmware.stripFormatArgs
 
 private const val RETRY_DELAY = 2000L
 private const val PERCENT_MAX = 100
-private const val KIB_DIVISOR = 1024f
 
 // Time to wait for OTA reboot packet to be sent before disconnecting mesh service
 private const val PACKET_SEND_DELAY_MS = 2000L
@@ -261,20 +259,20 @@ class Esp32OtaUpdateHandler(
             FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_waiting_reboot))),
         )
 
-        for (i in 1..attempts) {
-            try {
+        retryWithDelay(
+            attempts = attempts,
+            retryDelayMillis = RETRY_DELAY,
+            onAttempt = { i ->
                 updateState(
                     FirmwareUpdateState.Processing(
                         ProgressState(UiText.Resource(Res.string.firmware_update_connecting_attempt, i, attempts)),
                     ),
                 )
-                transport.connect().getOrThrow()
-                return
-            } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-                if (i == attempts) throw e
-                delay(RETRY_DELAY)
-            }
+            },
+        ) {
+            transport.connect()
         }
+            .getOrThrow()
     }
 
     @Suppress("LongMethod")
@@ -322,28 +320,11 @@ class Esp32OtaUpdateHandler(
                 onProgress = { progress ->
                     val bytesSent = (progress * firmwareData.size).toLong()
                     throughputTracker.record(bytesSent)
-
-                    val percent = (progress * PERCENT_MAX).toInt()
-                    val bytesPerSecond = throughputTracker.bytesPerSecond()
-
-                    val speedText =
-                        if (bytesPerSecond > 0) {
-                            val kibPerSecond = bytesPerSecond.toFloat() / KIB_DIVISOR
-                            val remainingBytes = firmwareData.size - bytesSent
-                            val etaSeconds = remainingBytes.toFloat() / bytesPerSecond
-
-                            "${NumberFormatter.format(kibPerSecond, 1)} KiB/s, ETA: ${etaSeconds.toInt()}s"
-                        } else {
-                            ""
-                        }
-
+                    val details =
+                        formatTransferProgress(progress, firmwareData.size, throughputTracker.bytesPerSecond())
                     updateState(
                         FirmwareUpdateState.Updating(
-                            ProgressState(
-                                message = uploadingMsg,
-                                progress = progress,
-                                details = "$percent% ($speedText)",
-                            ),
+                            ProgressState(message = uploadingMsg, progress = progress, details = details),
                         ),
                     )
                 },
