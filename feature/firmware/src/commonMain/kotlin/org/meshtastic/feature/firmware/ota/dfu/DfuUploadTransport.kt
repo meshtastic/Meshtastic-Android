@@ -24,6 +24,13 @@ package org.meshtastic.feature.firmware.ota.dfu
  * on which DFU service is exposed.
  */
 interface DfuUploadTransport {
+    /**
+     * True once connected if the bootloader can only transfer in small (≤20-byte) blocks — i.e. it did not negotiate a
+     * larger ATT MTU. Used to surface a "slow bootloader" advisory to the user. Valid after [connectToDfuMode].
+     */
+    val isLowSpeedTransfer: Boolean
+        get() = false
+
     /** Establish the GATT session with the device in DFU mode. */
     suspend fun connectToDfuMode(): Result<Unit>
 

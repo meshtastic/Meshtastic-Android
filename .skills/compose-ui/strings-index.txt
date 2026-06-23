@@ -607,6 +607,7 @@ firmware_update_retrieval_failed
 firmware_update_retry
 firmware_update_save_dfu_file
 firmware_update_select_file
+firmware_update_slow_bootloader_hint
 firmware_update_source_local
 firmware_update_stable
 firmware_update_starting_dfu
