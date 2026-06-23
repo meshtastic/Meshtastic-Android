@@ -26,16 +26,19 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.serialization.json.Json
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.safeCatching
+import org.meshtastic.core.data.datasource.BundledAssetReader
 import org.meshtastic.core.data.datasource.DeviceLinkLocalDataSource
-import org.meshtastic.core.data.datasource.DeviceLinksJsonDataSource
+import org.meshtastic.core.data.datasource.decode
 import org.meshtastic.core.database.entity.asEntity
 import org.meshtastic.core.database.entity.asExternalModel
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceLink
 import org.meshtastic.core.model.NetworkDeviceLink
+import org.meshtastic.core.model.NetworkDeviceLinksResponse
 import org.meshtastic.core.model.toDeviceLink
 import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.network.DeviceLinksRemoteDataSource
@@ -50,7 +53,8 @@ import kotlin.concurrent.Volatile
 @Single
 class DeviceLinkRepositoryImpl(
     private val remoteDataSource: DeviceLinksRemoteDataSource,
-    private val jsonDataSource: DeviceLinksJsonDataSource,
+    private val assetReader: BundledAssetReader,
+    private val json: Json,
     private val localDataSource: DeviceLinkLocalDataSource,
     private val dispatchers: CoroutineDispatchers,
 ) : DeviceLinkRepository {
@@ -114,7 +118,11 @@ class DeviceLinkRepositoryImpl(
         if (localDataSource.count() > 0) return
         writeMutex.withLock {
             if (localDataSource.count() == 0) {
-                safeCatching { store(jsonDataSource.loadDeviceLinksFromJsonAsset()) }
+                safeCatching {
+                    store(
+                        assetReader.decode<NetworkDeviceLinksResponse>("device_links.json", json)?.links.orEmpty(),
+                    )
+                }
                     .onFailure { e -> Logger.w(e) { "DeviceLinkRepository: failed to seed from bundled JSON" } }
             }
         }

@@ -19,6 +19,9 @@ package org.meshtastic.core.model
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+/** Envelope of the bundled `device_bootloader_ota_quirks.json` asset. */
+@Serializable data class BootloaderOtaQuirksResponse(val devices: List<BootloaderOtaQuirk> = emptyList())
+
 @Serializable
 data class BootloaderOtaQuirk(
     /** Hardware model id, matches DeviceHardware.hwModel. */

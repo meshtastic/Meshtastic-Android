@@ -23,18 +23,21 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.serialization.json.Json
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.safeCatching
-import org.meshtastic.core.data.datasource.BootloaderOtaQuirksJsonDataSource
-import org.meshtastic.core.data.datasource.DeviceHardwareJsonDataSource
+import org.meshtastic.core.data.datasource.BundledAssetReader
 import org.meshtastic.core.data.datasource.DeviceHardwareLocalDataSource
+import org.meshtastic.core.data.datasource.decode
 import org.meshtastic.core.data.util.staleWhileRevalidateFlow
 import org.meshtastic.core.database.entity.DeviceHardwareEntity
 import org.meshtastic.core.database.entity.asExternalModel
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.BootloaderOtaQuirk
+import org.meshtastic.core.model.BootloaderOtaQuirksResponse
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.NetworkDeviceHardware
 import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.network.DeviceHardwareRemoteDataSource
 import org.meshtastic.core.repository.DeviceHardwareRepository
@@ -44,8 +47,8 @@ import org.meshtastic.core.repository.DeviceLinkRepository
 class DeviceHardwareRepositoryImpl(
     private val remoteDataSource: DeviceHardwareRemoteDataSource,
     private val localDataSource: DeviceHardwareLocalDataSource,
-    private val jsonDataSource: DeviceHardwareJsonDataSource,
-    private val bootloaderOtaQuirksJsonDataSource: BootloaderOtaQuirksJsonDataSource,
+    private val assetReader: BundledAssetReader,
+    private val json: Json,
     private val deviceLinkRepository: DeviceLinkRepository,
     private val dispatchers: CoroutineDispatchers,
 ) : DeviceHardwareRepository {
@@ -114,7 +117,8 @@ class DeviceHardwareRepositoryImpl(
         if (!localDataSource.hasAnyEntries()) {
             safeCatching {
                 Logger.d { "DeviceHardwareRepository: seeding cache from bundled JSON" }
-                val jsonHardware = jsonDataSource.loadDeviceHardwareFromJsonAsset()
+                val jsonHardware =
+                    assetReader.decode<List<NetworkDeviceHardware>>("device_hardware.json", json).orEmpty()
                 localDataSource.insertAllDeviceHardware(jsonHardware)
             }
                 .onFailure { e -> Logger.w(e) { "DeviceHardwareRepository: failed to seed cache from bundled JSON" } }
@@ -174,8 +178,14 @@ class DeviceHardwareRepositoryImpl(
     private fun DeviceHardwareEntity.isStale(): Boolean =
         isIncomplete() || (nowMillis - this.lastUpdated) > CACHE_EXPIRATION_TIME_MS
 
-    private fun loadQuirks(): List<BootloaderOtaQuirk> =
-        bootloaderOtaQuirksJsonDataSource.loadBootloaderOtaQuirksFromJsonAsset()
+    // Quirks are best-effort: swallow any parse/IO error and fall back to "no quirks" rather than failing hardware
+    // lookup.
+    private fun loadQuirks(): List<BootloaderOtaQuirk> = runCatching {
+        assetReader.decode<BootloaderOtaQuirksResponse>("device_bootloader_ota_quirks.json", json)?.devices
+    }
+        .onFailure { e -> Logger.w(e) { "Failed to load device_bootloader_ota_quirks.json" } }
+        .getOrNull()
+        .orEmpty()
 
     private fun applyBootloaderQuirk(
         hwModel: Int,

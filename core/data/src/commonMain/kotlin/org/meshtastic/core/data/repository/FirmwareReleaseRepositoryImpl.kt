@@ -20,17 +20,20 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.json.Json
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.safeCatching
-import org.meshtastic.core.data.datasource.FirmwareReleaseJsonDataSource
+import org.meshtastic.core.data.datasource.BundledAssetReader
 import org.meshtastic.core.data.datasource.FirmwareReleaseLocalDataSource
+import org.meshtastic.core.data.datasource.decode
 import org.meshtastic.core.data.util.staleWhileRevalidateFlow
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.FirmwareReleaseEntity
 import org.meshtastic.core.database.entity.FirmwareReleaseType
 import org.meshtastic.core.database.entity.asExternalModel
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.model.NetworkFirmwareReleases
 import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.network.FirmwareReleaseRemoteDataSource
 import org.meshtastic.core.repository.FirmwareReleaseRepository
@@ -39,7 +42,8 @@ import org.meshtastic.core.repository.FirmwareReleaseRepository
 open class FirmwareReleaseRepositoryImpl(
     private val remoteDataSource: FirmwareReleaseRemoteDataSource,
     private val localDataSource: FirmwareReleaseLocalDataSource,
-    private val jsonDataSource: FirmwareReleaseJsonDataSource,
+    private val assetReader: BundledAssetReader,
+    private val json: Json,
     private val dispatchers: CoroutineDispatchers,
 ) : FirmwareReleaseRepository {
 
@@ -72,7 +76,9 @@ open class FirmwareReleaseRepositoryImpl(
         if (!localDataSource.hasAnyEntries()) {
             safeCatching {
                 Logger.d { "FirmwareReleaseRepository: seeding cache from bundled JSON" }
-                val jsonReleases = jsonDataSource.loadFirmwareReleaseFromJsonAsset()
+                val jsonReleases =
+                    assetReader.decode<NetworkFirmwareReleases>("firmware_releases.json", json)
+                        ?: NetworkFirmwareReleases()
                 localDataSource.insertFirmwareReleases(jsonReleases.releases.stable, FirmwareReleaseType.STABLE)
                 localDataSource.insertFirmwareReleases(jsonReleases.releases.alpha, FirmwareReleaseType.ALPHA)
             }
