@@ -359,6 +359,69 @@ class BleOtaTransportTest {
         assertIs<OtaProtocolException.VerificationFailed>(result.exceptionOrNull())
     }
 
+    @Test
+    fun `streamFirmware succeeds when the last chunk is ACKed then a separate terminal OK arrives`() = runTest {
+        val scanner = FakeBleScanner()
+        val connection = FakeBleConnection()
+        val (transport) = createTransport(scanner, connection)
+        connectTransport(transport, scanner, connection)
+
+        emitResponse(connection, "OK")
+        transport.startOta(8L, "hash")
+
+        // Last chunk is ACKed (not OK); the device then sends a separate terminal OK. Exercises the post-loop
+        // verification wait, which must complete successfully.
+        emitResponse(connection, "ACK")
+        emitResponse(connection, "ACK")
+        emitResponse(connection, "OK")
+
+        val result = transport.streamFirmware(ByteArray(8) { it.toByte() }, 4) {}
+
+        assertTrue(result.isSuccess, "streamFirmware failed: ${result.exceptionOrNull()}")
+    }
+
+    @Test
+    fun `streamFirmware fails when a terminal error arrives after the last chunk is ACKed`() = runTest {
+        val scanner = FakeBleScanner()
+        val connection = FakeBleConnection()
+        val (transport) = createTransport(scanner, connection)
+        connectTransport(transport, scanner, connection)
+
+        emitResponse(connection, "OK")
+        transport.startOta(8L, "hash")
+
+        // All chunks ACKed, then the device rejects the image post-transfer. Exercises the post-loop error branch —
+        // a late error must surface as failure, never success.
+        emitResponse(connection, "ACK")
+        emitResponse(connection, "ACK")
+        emitResponse(connection, "ERR Hash Mismatch")
+
+        val result = transport.streamFirmware(ByteArray(8) { it.toByte() }, 4) {}
+
+        assertTrue(result.isFailure)
+        assertIs<OtaProtocolException.VerificationFailed>(result.exceptionOrNull())
+    }
+
+    @Test
+    fun `streamFirmware fails when a non-final chunk receives OK`() = runTest {
+        val scanner = FakeBleScanner()
+        val connection = FakeBleConnection()
+        val (transport) = createTransport(scanner, connection)
+        connectTransport(transport, scanner, connection)
+
+        emitResponse(connection, "OK")
+        transport.startOta(8L, "hash")
+
+        // A premature OK on the first of two chunks: the device sends OK only at completion, so this signals a
+        // size disagreement and must fail rather than be treated as an ACK.
+        emitResponse(connection, "OK")
+
+        val result = transport.streamFirmware(ByteArray(8) { it.toByte() }, 4) {}
+
+        assertTrue(result.isFailure)
+        assertIs<OtaProtocolException.TransferFailed>(result.exceptionOrNull())
+    }
+
     // -----------------------------------------------------------------------
     // close()
     // -----------------------------------------------------------------------

@@ -38,6 +38,7 @@ import org.meshtastic.core.ble.MeshtasticBleConstants.OTA_NOTIFY_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.OTA_SERVICE_UUID
 import org.meshtastic.core.ble.MeshtasticBleConstants.OTA_WRITE_CHARACTERISTIC
 import org.meshtastic.core.common.util.safeCatching
+import kotlin.concurrent.Volatile
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -58,7 +59,9 @@ class BleOtaTransport(
 
     private val responseChannel = Channel<String>(Channel.UNLIMITED)
 
-    private var isConnected = false
+    // Written from the connectionState collector (Dispatchers.Default) and read by the streaming loop's
+    // connection-loss guard (Dispatchers.IO); @Volatile ensures the guard sees a mid-transfer disconnect.
+    @Volatile private var isConnected = false
 
     /** Scan for the device by MAC address (or MAC+1 for OTA mode) with retries. */
     private suspend fun scanForOtaDevice(): BleDevice? {
@@ -235,6 +238,10 @@ class BleOtaTransport(
                         sentBytes += currentChunkSize
                         onProgress(1.0f)
                         return@safeCatching Unit
+                    } else {
+                        // The device sends OK only once the full image is received; an OK before the final chunk
+                        // means its size accounting disagrees with ours — fail closed rather than treat it as an ACK.
+                        throw OtaProtocolException.TransferFailed("Received OK before the final chunk")
                     }
 
                 is OtaResponse.Error -> throw transferException(parsed)
@@ -277,7 +284,9 @@ class BleOtaTransport(
     }
 
     private suspend fun writeData(data: ByteArray, writeType: BleWriteType): Int {
-        val maxLen = bleConnection.maximumWriteValueLength(writeType) ?: data.size
+        // takeIf { it > 0 }: a non-positive negotiated length would stall the loop (offset never advances); fall
+        // back to a single whole-buffer write instead of looping forever.
+        val maxLen = bleConnection.maximumWriteValueLength(writeType)?.takeIf { it > 0 } ?: data.size
         var offset = 0
         var packetsSent = 0
 
