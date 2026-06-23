@@ -1,118 +1,118 @@
 ---
-title: Units, Measurement & Locale
-parent: User Guide
+title: Yksiköt, mittaus ja kieli- ja alueasetukset
+parent: Käyttöopas
 nav_order: 16
 last_updated: 2026-05-12
 ---
 
-# Units, Measurement & Locale
+# Yksiköt, mittaus ja kieli- ja alueasetukset
 
-The Meshtastic app automatically displays temperatures, distances, speeds, and times in the units your device is configured to use — no settings to change inside the app.
+Meshtastic-sovellus näyttää automaattisesti lämpötilat, etäisyydet, nopeudet ja ajat niissä yksiköissä, jotka laitteesi on asetettu käyttämään — asetuksia ei tarvitse muuttaa sovelluksessa.
 
 ---
 
-## How It Works
+## Miten se toimii
 
-Meshtastic radios always transmit data in **metric units** (meters, °C, km/h, hPa, etc.). When the app receives this data, it uses the `MetricFormatter` utility to convert and display values in whatever unit system your device's locale specifies.
+Meshtastic-radiot lähettävät aina datan **metrisissä yksiköissä** (metrit, °C, km/h, hPa jne.). Kun sovellus vastaanottaa tämän datan, se käyttää 'MetricFormatter'-toimintoa muuntaakseen ja näyttääkseen arvot sen yksikköjärjestelmän mukaan, jonka laitteesi tai alueasetuksesi määrittää.
 
-On Android, your measurement preferences are determined by your system **Language & Region** settings. On Desktop (JVM), the app uses the JVM's default `Locale`.
+Androidissa mittausasetukset määräytyvät järjestelmän **Kieli ja alue** -asetusten mukaan. Työpöytäversiossa (JVM) sovellus käyttää JVM:n oletus-`Locale`-asetusta.
 
-> **Tip — You never need to toggle units inside the app.** Change your system measurement preferences and every screen in Meshtastic updates automatically — node details, telemetry charts, weather, altitude, and more.
+> **Vinkki — Mittayksiköitä ei tarvitse koskaan vaihtaa sovelluksessa.** Muuta järjestelmän mittausasetuksia ja Meshtastic päivittää kaikki automaattisesti — radion tiedot, telemetriakaaviot, sää, korkeus ja paljon muuta.
 
 ---
 
 ## Lämpötila
 
-Temperature values from environment sensors are transmitted as **°C** and displayed based on your device's temperature unit preference.
+Lämpötila-arvot ympäristösensoreista lähetetään muodossa **°C** ja näytetään laitteen lämpötila-asetusten mukaisesti.
 
-![Environment metrics with temperature](../../assets/screenshots/nodes_environment_metrics.png)
+![Ympäristömittarit lämpötilan kanssa](../../assets/screenshots/nodes_environment_metrics.png)
 
-| Your Setting | You See |
-| ------------ | ------- |
-| Celsius      | 22°C    |
-| Fahrenheit   | 72°F    |
+| Asetuksesi | Näet  |
+| ---------- | ----- |
+| Celsius    | 22 °C |
+| Fahrenheit | 72 °F |
 
-This affects all temperature displays throughout the app: node environment telemetry, soil temperature, dew point, and telemetry chart axes.
+Tämä vaikuttaa kaikkiin lämpötilanäyttöihin sovelluksessa: radion ympäristötelemetria, maaperän lämpötila, kastepiste ja telemetriakäyrien akselit.
 
-## Distance & Altitude
+## Etäisyys ja korkeus
 
-Distances between nodes and GPS altitudes are transmitted as **meters** and automatically scaled and converted.
+Radioiden väliset etäisyydet ja GPS-korkeudet lähetetään **metreinä** ja muunnetaan sekä skaalataan automaattisesti.
 
-![Distance info display](../../assets/screenshots/nodes_distance_info.png)
+![Etäisyystietonäkymä](../../assets/screenshots/nodes_distance_info.png)
 
-| Your Setting                     | Small Distance | Large Distance         | Korkeus  |
-| -------------------------------- | -------------- | ---------------------- | -------- |
-| Metrijärjestelmä                 | 350 m          | 2.5 km | 1,200 m  |
-| Imperial (US) | 1,148 ft       | 1.6 mi | 3,937 ft |
+| Asetuksesi                            | Pieni etäisyys | Suuri etäisyys         | Korkeus  |
+| ------------------------------------- | -------------- | ---------------------- | -------- |
+| Metrijärjestelmä                      | 350 m          | 2,5 km                 | 1 200 m  |
+| Imperiaalinen (US) | 1,148 ft       | 1.6 mi | 3,937 ft |
 
-The app uses natural scaling — short distances stay in meters or feet, while longer distances switch to kilometres or miles automatically.
+Sovellus käyttää luonnollista skaalausta — lyhyet etäisyydet pysyvät metreissä tai jaloissa, kun taas pidemmät etäisyydet vaihtuvat automaattisesti kilometreihin tai maileihin.
 
-### Where these appear
+### Missä nämä näkyvät
 
-- **Node list** — distance and bearing to each node
-- **Node detail** — altitude, distance from your position
-- **Map** — waypoint distances, traceroute hop distances
-- **Compass** — distance to selected node
+- **Radiolista** — etäisyys ja suunta jokaiseen radioon
+- **Radion tiedot** — korkeus ja etäisyys sijainnistasi
+- **Kartta** — reittipisteiden etäisyydet ja reitinselvityksen hyppy-etäisyydet
+- **Kompassi** — etäisyys valittuun radioon
 
 ## Nopeus
 
-GPS ground speed is displayed in your locale's preferred speed unit.
+GPS-maanopeus näytetään laitteesi kieli- ja alueasetusten mukaisessa nopeusyksikössä.
 
-| Your Setting                     | You See |
-| -------------------------------- | ------- |
-| Metrijärjestelmä                 | 12 km/h |
-| Imperial (US) | 7 mph   |
+| Asetuksesi                            | Näet    |
+| ------------------------------------- | ------- |
+| Metrijärjestelmä                      | 12 km/h |
+| Imperiaalinen (US) | 7 mph   |
 
 ## Tuuli
 
-Wind speed and gust data from environment sensors are transmitted as **m/s** and converted for display.
+Tuulen nopeus- ja puuskadata ympäristösensoreista lähetetään muodossa **m/s** ja muunnetaan näyttöä varten.
 
-| Your Setting                     | You See |
-| -------------------------------- | ------- |
-| Metrijärjestelmä                 | 5 m/s   |
-| Imperial (US) | 11 mph  |
+| Asetuksesi                            | Näet   |
+| ------------------------------------- | ------ |
+| Metrijärjestelmä                      | 5 m/s  |
+| Imperiaalinen (US) | 11 mph |
 
-Wind readings appear in the **Node Detail** environment section and the **Environment Telemetry** charts.
+Tuulimittaukset näkyvät **Radion tiedot** -näkymän ympäristöosiossa sekä **Ympäristötelemetria** -kaavioissa.
 
-## Rainfall
+## Sademäärä
 
-Rainfall measurements (1-hour and 24-hour totals) are transmitted as **mm** and converted for display.
+Sademittaukset (1 tunnin ja 24 tunnin yhteismäärät) lähetetään muodossa **mm** ja muunnetaan näyttöä varten.
 
-| Your Setting                     | You See                |
-| -------------------------------- | ---------------------- |
-| Metrijärjestelmä                 | 12 mm                  |
-| Imperial (US) | 0.5 in |
+| Asetuksesi                            | Näet                   |
+| ------------------------------------- | ---------------------- |
+| Metrijärjestelmä                      | 12 mm                  |
+| Imperiaalinen (US) | 0.5 in |
 
-## Units That Never Change
+## Yksiköt, jotka eivät muutu
 
-Some units are international standards and are displayed the same way regardless of your locale:
+Jotkin yksiköt ovat kansainvälisiä standardeja ja näkyvät samalla tavalla kieli- ja alueasetuksista riippumatta:
 
-| Measurement                      | Unit                           | Why                                   |
-| -------------------------------- | ------------------------------ | ------------------------------------- |
-| Barometric pressure              | hPa                            | International meteorological standard |
-| Heading / bearing                | ° (degrees) | Universal navigation convention       |
-| Säteily                          | μR/hr                          | Standard dosimetry unit               |
-| GPS coordinates                  | decimal degrees                | Universal geographic standard         |
-| Humidity, battery, soil moisture | %                              | Universal                             |
+| Mittaus                           | Yksikkö                        | Miksi                                     |
+| --------------------------------- | ------------------------------ | ----------------------------------------- |
+| Ilmanpaine                        | hPa                            | Kansainvälinen meteorologinen standardi   |
+| Suunta / suuntima                 | ° (astetta) | Universaali navigointikäytäntö            |
+| Säteily                           | μR/hr                          | Standardi dosimetria-yksikkö              |
+| GPS-koordinaatit                  | desimaaliasteet                | Kansainvälinen maantieteellinen standardi |
+| Kosteus, akku ja maaperän kosteus | %                              | Yleinen                                   |
 
-## Date & Time
+## Päivämäärä ja aika
 
-All timestamps throughout the app — last heard, message times, telemetry logs, chart axes — follow your device's date and time preferences.
+Kaikki aikaleimat koko sovelluksessa — viimeksi kuultu, viestien ajat, telemetrialokit, kaavioakselit — noudattavat laitteesi päivämäärä- ja aika-asetuksia.
 
-| Setting          | What It Controls | Example                                          |
-| ---------------- | ---------------- | ------------------------------------------------ |
-| **24-Hour Time** | Clock format     | 14:30 vs 2:30 PM |
-| **Date Format**  | Date ordering    | 09/05/2026 vs 05/09/2026                         |
+| Asetus              | Mitä se ohjaa         | Esimerkki                                        |
+| ------------------- | --------------------- | ------------------------------------------------ |
+| **24 tunnin aika**  | Aikamuoto             | 14:30 vs 2:30 PM |
+| **Päivämäärämuoto** | Päivämäärän järjestys | 09/05/2026 vs 05/09/2026                         |
 
-The app also uses **relative time** where it makes sense — for example, "5 min ago" or "2 hours ago" in the node list — which is automatically localised into your device language.
+Sovellus käyttää myös **suhteellista aikaa** silloin kun se on järkevää — esimerkiksi “5 min sitten” tai “2 tuntia sitten” radiolistassa — ja tämä mukautuu automaattisesti laitteesi kieleen.
 
-## Changing Your Measurement System (Android)
+## Mittausjärjestelmän vaihtaminen (Android)
 
-On Android, your measurement system (metric vs imperial) is tied to your region setting:
+Androidissa mittausjärjestelmäsi (metrinen vs imperial) on sidottu alueasetuksiin:
 
-1. Open **Android Settings → System → Language & Region**
-2. Change your **Region** or **Measurement units** preference
-3. Return to Meshtastic — values update immediately
+1. Avaa **Asetukset → Järjestelmä → Kieli ja alue**
+2. Vaihda **Alue**- tai **Mittausyksiköt**-asetusta
+3. Palaa Meshtasticiin — arvot päivittyvät välittömästi
 
-> **Tip — The app uses `MetricFormatter` from `core:common`.** All measurement formatting is handled by a shared KMP utility that respects your platform's locale. Developers adding new measurement displays should use `MetricFormatter` rather than hard-coding unit conversions.
+> 💡 Vinkki — Sovellus käyttää `MetricFormatter`-toimintoa `core:common`-moduulista. Kaikki mittausmuotoilu hoidetaan jaetulla KMP-työkalulla, joka noudattaa alustasi kieli- ja alueasetuksia. Uusia mittausnäkymiä lisäävien kehittäjien tulisi käyttää `MetricFormatter`-toimintoa sen sijaan, että yksikkömuunnokset toteutetaan kovakoodattuna.
 

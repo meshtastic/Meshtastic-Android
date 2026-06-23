@@ -49,7 +49,7 @@
     <string name="add_custom_tile_source">Lisää karttatiilien verkkolähde</string>
     <string name="add_favorite">Lisää suosikkeihin</string>
     <string name="add_layer">Lisää taso</string>
-    <string name="add_local_mbtiles_file">Lisää paikallinen MBTiles-karttatiedosto</string>
+    <string name="add_local_mbtiles_file">Lisää paikallinen MBTiles -karttatiedosto</string>
     <string name="add_network_device">Lisää</string>
     <string name="add_network_device_manually">Lisää laite manuaalisesti…</string>
     <string name="add_network_layer">Lisää verkkokarttataso</string>
@@ -459,6 +459,26 @@
     <string name="dns">DNS</string>
     <!-- DOC -->
     <string name="doc_clear_search">Tyhjennä haku</string>
+    <string name="doc_keywords_android_auto">android auto, auto, auton tietokeskus, ajaminen, handsfree, viestintä</string>
+    <string name="doc_keywords_app_functions">järjestelmätekoäly, gemini, avustaja, toiminnot, automaatio, ääni</string>
+    <string name="doc_keywords_connections">bluetooth, usb, tcp, pariliitos, sarjaportti, wifi</string>
+    <string name="doc_keywords_desktop">desktop, linux, macOS, windows, sarjaportti</string>
+    <string name="doc_keywords_discovery">haku, verkon topologia, verkko, skannaus, naapuri</string>
+    <string name="doc_keywords_firmware">laiteohjelmisto, päivitys, ota, ohjelmoi, versio, palautus</string>
+    <string name="doc_keywords_map">kartta, reittipiste, gps, sijainti, sijainti, merkki</string>
+    <string name="doc_keywords_measurement">formatter, metriikka, numero, alueasetus, lämpötila, muunnos, api</string>
+    <string name="doc_keywords_messages">message, kanava, salaus, suora, yleislähetys, pikakeskustelu</string>
+    <string name="doc_keywords_mqtt">mqtt, välityspalvelin, internet, silta, lähetys, vastaanotto</string>
+    <string name="doc_keywords_node_metrics">mittarit, telemetria, signaali, snr, rssi, akku, reitinselvitys</string>
+    <string name="doc_keywords_nodes">radio, mesh, lista, rooli, tila, suosikki, suodatin</string>
+    <string name="doc_keywords_onboarding">määritys, tervetuloa, käyttöoikeudet, ensimmäinen käynnistys</string>
+    <string name="doc_keywords_settings_module">moduuli, sarjaportti, telemetria, valmiit viestit, varastoi &amp; välitä, ylläpito</string>
+    <string name="doc_keywords_settings_radio">asetukset, radio, lora, alue, modeemi, laite, virta, tietoturva</string>
+    <string name="doc_keywords_signal_meter">signaali, rssi, snr, palkit, laatu, lora, kohina, mittari</string>
+    <string name="doc_keywords_tak">tak, atak, cursor-on-target, team-awareness</string>
+    <string name="doc_keywords_telemetry">telemetria, anturi, lämpötila, kosteus, ilmanpaine, virta</string>
+    <string name="doc_keywords_translate">käännös, crowdin, lokalisointi, kieli, i18n, osallistu</string>
+    <string name="doc_keywords_units">yksiköt, alueasetus, metriikka, imperiaalinen, lämpötila, etäisyys</string>
     <string name="doc_search_placeholder">Hae documentaatiosta…</string>
     <string name="doc_section_developer">Kehittäjän opas</string>
     <string name="doc_section_user">Käyttöopas</string>
@@ -514,6 +534,7 @@
     <string name="environment_metrics_use_fahrenheit">Käytä Fahrenheit yksikköä</string>
     <string name="error">Virhe</string>
     <string name="error_duty_cycle">Duty Cyclen raja saavutettu. Viestien lähettäminen ei ole tällä hetkellä mahdollista. Yritä myöhemmin uudelleen.</string>
+    <string name="error_recovery_exhausted">Vakaan yhteyden muodostaminen epäonnistui useista yrityksistä huolimatta. Valitse radio uudelleen yrittääksesi uudestaan.</string>
     <string name="establish_session">Yhdistä &amp; ylläpidä</string>
     <string name="establishing_session">Muodostetaan etäyhteyttä…</string>
     <string name="ethernet_config">Verkon asetukset</string>
@@ -606,6 +627,7 @@
     <string name="firmware_update_retry">Yritä uudelleen</string>
     <string name="firmware_update_save_dfu_file">Tallenna .uf2-tiedosto laitteesi DFU-asemaan.</string>
     <string name="firmware_update_select_file">Valitse paikallinen tiedosto</string>
+    <string name="firmware_update_slow_bootloader_hint">Päivitykset ovat hitaita tämän laitteen käynnistyslataimella. OTAFIX-käynnistyslataimen asentaminen mahdollistaa huomattavasti nopeammat bluetooth-päivitykset.</string>
     <string name="firmware_update_source_local">Lähde: Paikallinen tiedosto</string>
     <string name="firmware_update_stable">Vakaa</string>
     <string name="firmware_update_starting_dfu">Käynnistetään DFU...</string>
@@ -617,6 +639,7 @@
     <string name="firmware_update_unknown_error">Tuntematon virhe</string>
     <string name="firmware_update_unknown_hardware">Tuntematon laitemalli: %1$d</string>
     <string name="firmware_update_unknown_release">Tuntematon etäjulkaisu</string>
+    <string name="firmware_update_unsupported_transport">Laiteohjelmiston päivityksiä ei tueta tällä yhteystavalla kyseiselle laitteelle. Muodosta yhteys toisella tavalla (esim. Bluetoothin kautta) päivittääksesi laitteen.</string>
     <string name="firmware_update_uploading">Lähetetään laiteohjelmistostoa...</string>
     <string name="firmware_update_usb_bootloader_warning">%1$s toimitetaan yleensä bootloaderilla, joka ei tue OTA-päivityksiä. Sinun täytyy ehkä ohjelmoida OTA-yhteensopiva bootloader USB:n kautta ennen kuin voit tehdä OTA-päivityksiä.</string>
     <string name="firmware_update_usb_failed">USB-päivitys epäonnistui</string>

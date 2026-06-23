@@ -189,9 +189,15 @@
   },
   "pullRequests": [
     {
-      "id": "10754",
-      "title": "fix(phone-api): skip manifest scan for node-info-only config requests",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10754",
+      "id": "10767",
+      "title": "Provide relay info for outbound packets and about subsequent relays",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10767",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
+      "id": "10752",
+      "title": "Reset noise floor samples after frequency changes",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10752",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {

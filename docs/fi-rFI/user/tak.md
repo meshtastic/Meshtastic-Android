@@ -1,127 +1,127 @@
 ---
-title: TAK Integration
-parent: User Guide
+title: TAK-integraatio
+parent: Käyttöopas
 nav_order: 10
 last_updated: 2026-05-13
-description: Interoperate with ATAK and WinTAK — CoT position sharing, TAK roles, and plugin setup.
+description: ATAK:n ja WinTAK:n yhteentoimivuus — CoT-sijaintijako, TAK-roolit ja lisäosien käyttöönotto.
 aliases:
   - tak
   - atak
-  - team-awareness-kit
+  - team awareness kit
 ---
 
-# TAK Integration
+# TAK-integraatio
 
-Meshtastic integrates with the Team Awareness Kit (TAK) ecosystem, enabling interoperability between Meshtastic mesh devices and TAK applications like ATAK and WinTAK.
+Meshtastic integroituu Team Awareness Kit (TAK) -ekosysteemiin, mahdollistaen yhteentoimivuuden Meshtastic-verkkoradioiden ja TAK-sovellusten kuten ATAK:n ja WinTAK:n välillä.
 
 ## Yleiskatsaus
 
-The TAK module allows Meshtastic nodes to:
+TAK-moduuli mahdollistaa Meshtastic-radioille:
 
-- Share position data in TAK-compatible CoT (Cursor on Target) format
-- Appear as team members on TAK map displays
-- Receive TAK PLI (Position Location Information) messages
+- Sijaintidatan jakamisen TAK-yhteensopivassa CoT (Cursor on Target) -muodossa
+- Näkyä tiimin jäseninä TAK-karttanäkymissä
+- Vastaanottaa TAK PLI (Position Location Information) -viestejä
 
-## Setup
+## Asetukset
 
 ### Edellytykset
 
-- ATAK (Android Team Awareness Kit) or WinTAK installed
-- Meshtastic ATAK Plugin installed
-- TAK module enabled on your Meshtastic radio
+- ATAK (Android Team Awareness Kit) tai WinTAK asennettuna
+- Meshtastic ATAK -lisäosa asennettuna
+- TAK-moduuli käytössä Meshtastic-radiossasi
 
 ### Asetukset
 
-1. Navigate to **Settings → Module Config → TAK**.
-2. Enable the TAK module.
-3. Configure the TAK team/group settings:
+1. Siirry kohtaan **Asetukset → Moduulin asetukset → TAK**.
+2. Ota TAK-moduuli käyttöön.
+3. Määritä TAK-tiimin/ryhmän asetukset:
 
-![Module toggle switch](../../assets/screenshots/settings_switch.png)
+![Moduulin kytkin](../../assets/screenshots/settings_switch.png)
 
-| Setting  | Kuvaus                     |
-| -------- | -------------------------- |
-| Käytössä | Activate TAK interop       |
-| Tila     | TAK-compatible output mode |
+| Asetus   | Kuvaus                           |
+| -------- | -------------------------------- |
+| Käytössä | Ota TAK-yhteentoimivuus käyttöön |
+| Tila     | TAK-yhteensopiva lähtötila       |
 
-### ATAK Plugin Setup
+### ATAK-lisäosan asennus
 
-1. Install the Meshtastic ATAK Plugin from the plugin repository.
-2. Open ATAK and enable the Meshtastic plugin.
-3. The plugin bridges messages between ATAK and your mesh network.
+1. Asenna Meshtastic ATAK -lisäosa lisäosien lähteestä.
+2. Avaa ATAK ja ota Meshtastic-lisäosa käyttöön.
+3. Lisäosa välittää viestejä ATAK:n ja mesh-verkkosi välillä.
 
-## TAK Roles
+## TAK-roolit
 
-Nodes configured with TAK-related roles behave differently from standard clients:
+TAK-rooleilla määritetyt radiot käyttäytyvät eri tavalla kuin tavalliset client-laitteet:
 
-| Rooli           | Kuvaus                                                                                                                                                                                                                                                                              |
-| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **TAK**         | Full TAK interoperability — sends and receives CoT data, chat messages, and PLI updates. Functions as a standard client plus TAK bridge.                                                                                                            |
-| **TAK Tracker** | Position-only TAK output — automatically broadcasts PLI at regular intervals without user interaction. Optimized for unattended position beacons (vehicles, equipment, waypoints). Does not relay chat messages. |
+| Rooli           | Kuvaus                                                                                                                                                                                                                                                                                                             |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **TAK**         | Täysi TAK-yhteentoimivuus — lähettää ja vastaanottaa CoT-dataa, chat-viestejä ja PLI-päivityksiä. Toimii tavallisen clientin lisäksi TAK-siltana.                                                                                                                                  |
+| **TAK Tracker** | Vain sijaintitietoihin perustuva TAK-lähtö — lähettää automaattisesti PLI-dataa säännöllisin väliajoin ilman käyttäjän toimintaa. Optimoitu valvomattomiin sijaintilähettimiin (ajoneuvot, laitteet ja reittipisteet). Ei välitä chat-viestejä. |
 
-> 💡 **Tip:** Use **TAK Tracker** for devices that only need to report position (e.g., a radio mounted in a vehicle). Use **TAK** for devices where users actively participate in TAK operations.
+> 💡 **Vinkki:** Käytä **TAK Tracker** -tilaa laitteille, joiden tarvitsee vain lähettää sijainti (esim. ajoneuvoon asennettu radio). Käytä **TAK**-tilaa laitteille, joissa käyttäjät osallistuvat aktiivisesti TAK-toimintaan.
 
-### CoT (Cursor on Target) Format
+### CoT (Cursor on Target) -muoto
 
-TAK messages use the Cursor on Target XML format — a military standard for sharing situational awareness data. Meshtastic converts its internal protobuf messages to CoT format when bridging to TAK systems, so no manual format conversion is needed.
+TAK-viestit käyttävät Cursor on Target XML -muotoa — sotilaskäytössä olevaa standardia tilannetiedon jakamiseen. Meshtastic muuntaa sisäiset protobuf-viestinsä CoT-muotoon silloin, kun se välittää dataa TAK-järjestelmiin, joten manuaalista muunnosta ei tarvita.
 
-## TAK Identity
+## TAK-identiteetti
 
-When using TAK roles, your node broadcasts identity information that appears on TAK maps:
+Kun käytät TAK-rooleja, radiosi lähettää identiteettitietoja, jotka näkyvät TAK-kartoilla:
 
-| Setting  | Kuvaus                                                                                                           |
-| -------- | ---------------------------------------------------------------------------------------------------------------- |
-| Team     | Your team color on the TAK map (e.g., Blue, Red, Cyan, Green) |
-| Rooli    | Your operational role (Team Member, Team Lead, HQ, Medic, RTO, etc.)          |
-| Callsign | Your TAK callsign (defaults to your Meshtastic long name)                                     |
+| Asetus      | Kuvaus                                                                                                                              |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Tiimi       | TAK-kartan tiimiväri (esim. sininen, punainen, syaani, vihreä)                                   |
+| Rooli       | Operatiivinen roolisi (tiimin jäsen, tiimin johtaja, esikunta, ensihoitaja, viestivastaava jne.) |
+| Kutsutunnus | TAK-kutsutunnuksesi (oletuksena Meshtastic-laitteesi pitkä nimi)                                                 |
 
-These settings appear in **Settings → Module Config → TAK** when the TAK module is enabled.
+Nämä asetukset näkyvät kohdassa **Asetukset → Moduulin asetukset → TAK**, kun TAK-moduuli on käytössä.
 
-> 💡 **Tip:** Team/role colors are the standard TAK affiliation colors. Coordinate with your TAK team to use consistent team assignments.
+> 💡 **Vinkki:** Tiimi- ja roolivärit ovat TAK-järjestelmän standardeja ryhmävärikoodauksia. Koordinoi TAK-tiimisi kanssa yhtenäisten tiimimääritysten käyttämiseksi.
 
 ## Wire Format (V1 / V2)
 
-Meshtastic supports two TAK wire formats:
+Meshtastic tukee kahta TAK-wire-formaattia:
 
-| Format                          | Compatibility                                                   | Ominaisuudet                                              |
-| ------------------------------- | --------------------------------------------------------------- | --------------------------------------------------------- |
-| V1 (Legacy)  | ATAK Plugin v1.x, older firmware                | Basic CoT position sharing only                           |
-| V2 (Current) | ATAK Plugin v2.x, firmware 2.3+ | Full CoT support including chat, routes, zstd compression |
+| Muoto                                | Yhteensopivuus                                                  | Ominaisuudet                                               |
+| ------------------------------------ | --------------------------------------------------------------- | ---------------------------------------------------------- |
+| V1 (vanha versio) | ATAK Plugin v1.x, vanhempi firmware             | Perustason CoT-sijainnin jakaminen                         |
+| V2 (nykyinen)     | ATAK Plugin v2.x, firmware 2.3+ | Täysi CoT-tuki sisältäen chatin, reitit ja zstd-pakkauksen |
 
-The app automatically selects V2 when both sides support it. No manual configuration needed — the TAK module negotiates format based on firmware capabilities.
+Sovellus valitsee automaattisesti V2-version, kun molemmat puolet tukevat sitä. Manuaalista asetusta ei tarvita — TAK-moduuli neuvottelee formaatin firmware-version perusteella.
 
-## Usage with ATAK
+## Käyttö ATAK:n kanssa
 
-Once configured:
+Kun asetukset on määritetty:
 
-- Meshtastic nodes appear as markers on the ATAK map with callsign labels
-- Chat messages can bridge between mesh and TAK networks
-- Position updates flow bidirectionally between Meshtastic and TAK
-- TAK Tracker nodes broadcast PLI automatically — their positions appear on ATAK maps without any ATAK-side configuration
+- Meshtastic-radiot näkyvät ATAK-kartalla merkkeinä kutsutunnuksineen
+- Viestit voivat välittyä mesh-verkon ja TAK-verkon välillä
+- Sijaintipäivitykset kulkevat kaksisuuntaisesti Meshtasticin ja TAK-järjestelmän välillä
+- TAK Tracker -radiot lähettävät PLI-sijaintia automaattisesti — niiden sijainti näkyy ATAK-kartoilla ilman erillistä ATAK-asetusta
 
-> ⚠️ **Note:** TAK integration requires specific node roles and module configuration. Standard client nodes don't automatically participate in TAK operations.
+> ⚠️ **Huom:** TAK-integraatio vaatii tietyt laiteroolit ja moduuliasetukset. Tavalliset client-laitteet eivät osallistu TAK-toimintoihin automaattisesti.
 
 ## Vianetsintä
 
-| Problem                          | Cause                                 | Solution                                                                |
-| -------------------------------- | ------------------------------------- | ----------------------------------------------------------------------- |
-| Node doesn't appear on ATAK map  | TAK module disabled or wrong role     | Verify TAK module is enabled and node role is TAK or TAK Tracker        |
-| Position updates are stale       | GPS fix lost or interval too long     | Check GPS status; reduce position broadcast interval in Position Config |
-| ATAK plugin shows "disconnected" | BLE connection lost or plugin crashed | Reconnect Bluetooth in Meshtastic app, then restart ATAK plugin         |
-| Chat messages not bridging       | V1 format doesn't support chat        | Ensure both nodes run firmware 2.3+ for V2 wire format  |
-| CoT data not flowing             | Channel mismatch                      | All TAK nodes must be on the same channel with matching encryption      |
+| Ongelma                                 | Syy                                                | Ratkaisu                                                                                        |
+| --------------------------------------- | -------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Radio ei näy ATAK-kartalla              | TAK-moduuli pois käytöstä tai väärä rooli          | Varmista, että TAK-moduuli on käytössä ja rooli on joko TAK tai TAK Tracker                     |
+| Sijaintipäivitykset ovat vanhentuneita  | GPS-signaali katkennut tai lähetysväli liian pitkä | Tarkista GPS-tila; lyhennä sijaintilähetyksen väliä kohdassa Sijainnin asetukset                |
+| ATAK-lisäosa näyttää “yhteys katkennut” | Bluetooth-yhteys katkennut tai lisäosa on kaatunut | Yhdistä Bluetooth uudelleen Meshtastic-sovelluksessa ja käynnistä ATAK-lisäosa uudelleen        |
+| Viestit eivät välity                    | V1-muoto ei tue chatia                             | Varmista, että molemmilla laitteilla on firmware 2.3+ ja V2-wire-muoto käytössä |
+| CoT-data ei kulje                       | Kanava ei täsmää                                   | Kaikkien TAK-laitteiden täytyy olla samalla kanavalla ja yhteensopivalla salauksella            |
 
-## Security Considerations
+## Tietoturvahuomiot
 
-- TAK data shares your position and callsign information
-- Ensure your channel encryption is configured when using TAK in sensitive environments
-- The TAK module respects the same channel encryption as other Meshtastic messages
+- TAK-data sisältää sijainti- ja kutsutunnustietoja
+- Varmista, että kanavan salaus on oikein määritetty, kun käytät TAK:ia arkaluonteisissa ympäristöissä
+- TAK-moduuli noudattaa samaa kanavasalausta kuin muut Meshtastic-viestit
 
-## Related Topics
+## Aiheeseen liittyvät aiheet
 
-- [Settings — Modules & Admin](settings-module-admin) — TAK module configuration
-- [Nodes](nodes) — TAK and TAK Tracker roles in the node list
-- [Map & Waypoints](map-and-waypoints) — node positions on the map
-- [ATAK plugin guide](https://meshtastic.org/docs/software/integrations/atak-plugin) — detailed ATAK setup on meshtastic.org
+- [Asetukset — Moduulit ja ylläpito](settings-module-admin) — TAK-moduulin asetukset
+- [Radiot](nodes) — TAK- ja TAK Tracker -roolit radiolistassa
+- [Kartta ja reittipisteet](map-and-waypoints) — radioiden sijainnit kartalla
+- [ATAK-lisäosan opas](https://meshtastic.org/docs/software/integrations/atak-plugin) — yksityiskohtainen ATAK-asennus meshtastic.org -sivustolla
 
 ---
 

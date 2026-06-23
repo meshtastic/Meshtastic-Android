@@ -1,138 +1,138 @@
 ---
 title: MQTT
-parent: User Guide
+parent: Käyttöopas
 nav_order: 11
 last_updated: 2026-05-13
-description: Bridge your mesh to the internet — MQTT broker setup, encryption layers, and map reporting.
+description: Siltaa mesh-verkko internetiin — MQTT-välityspalvelimen käyttöönotto, salauskerrokset ja karttadatan välitys.
 aliases:
   - mqtt
-  - internet-bridge
-  - broker
+  - internet-silta
+  - välityspalvelin
 ---
 
 # MQTT
 
-MQTT bridges your Meshtastic mesh network to the internet, enabling long-range communication beyond radio range.
+MQTT yhdistää Meshtastic-mesh-verkkosi internetiin ja mahdollistaa pitkän kantaman viestinnän radioalueen ulkopuolella.
 
 ## Yleiskatsaus
 
-The MQTT module connects your node to an MQTT broker, allowing:
+MQTT-moduuli yhdistää radion MQTT-välityspalvelimeen, mahdollistaen:
 
-- Messages to reach nodes on different physical meshes via the internet
-- Integration with home automation and monitoring systems
-- Publishing node positions to the public Meshtastic map
-- Custom data pipelines for logging and alerting
+- Viestien välittymisen eri fyysisten mesh-verkkojen välillä internetin kautta
+- Integraation kotiautomaatio- ja valvontajärjestelmiin
+- Radioiden sijaintien julkaisemisen julkiseen Meshtastic-karttaan
+- Mukautetut dataputket tiedonkeruuta ja hälytyksiä varten
 
-## How It Works
+## Kuinka se toimii
 
 ```
-[Your Node] → Radio → [Gateway Node with WiFi] → MQTT Broker → [Remote Gateway] → Radio → [Remote Node]
+[Oma radiot] → Radio → Gateway-radio WiFi:llä → MQTT-välityspalvelin → Etä-gateway → Radio → Etä-radio
 ```
 
-A gateway node with internet access (WiFi or Ethernet) publishes mesh messages to an MQTT topic. Remote gateways subscribed to the same topic inject those messages into their local mesh.
+Internet-yhteydellinen gateway-radio (WiFi tai Ethernet) julkaisee mesh-viestit MQTT-aiheeseen. Etä-yhdyskäytävät, jotka ovat tilanneet saman aiheen, syöttävät viestit omaan paikalliseen mesh-verkkoonsa.
 
 ## Asetukset
 
-### Enabling MQTT
+### MQTT:n käyttöönotto
 
-1. Navigate to **Settings → Module Config → MQTT**.
-2. Enable the MQTT module.
-3. Configure the broker connection:
+1. Siirry kohtaan **Asetukset → Moduulin asetukset → MQTT**.
+2. Ota MQTT-moduuli käyttöön.
+3. Määritä välityspalvelimen yhteys:
 
-![MQTT toggle switch](../../assets/screenshots/settings_switch.png)
+![MQTT kytkin](../../assets/screenshots/settings_switch.png)
 
-| Setting         | Kuvaus                                                                                        | Oletus                                              |
-| --------------- | --------------------------------------------------------------------------------------------- | --------------------------------------------------- |
-| Server Address  | MQTT broker hostname                                                                          | mqtt.meshtastic.org |
-| Käyttäjänimi    | Broker authentication                                                                         | meshdev                                             |
-| Salasana        | Broker authentication                                                                         | large4cats                                          |
-| Root Topic      | Base topic for messages                                                                       | msh                                                 |
-| Salaus          | Encrypt MQTT payload                                                                          | Käytössä                                            |
-| ~~JSON Output~~ | ⚠️ **Deprecated** — JSON packet support has been removed from firmware; this field is ignored | Disabled                                            |
-| TLS             | Secure connection to broker                                                                   | Disabled                                            |
-| Map Reporting   | Report position to public map                                                                 | Disabled                                            |
+| Asetus            | Kuvaus                                                                                                | Oletus                                              |
+| ----------------- | ----------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| Palvelimen osoite | MQTT-välityspalvelimen osoite                                                                         | mqtt.meshtastic.org |
+| Käyttäjänimi      | Välityspalvelimen tunnistautuminen                                                                    | meshdev                                             |
+| Salasana          | Välityspalvelimen tunnistautuminen                                                                    | large4cats                                          |
+| Juuriaihe         | Viestien perusaihe                                                                                    | msh                                                 |
+| Salaus            | MQTT-viestisisällön salaus                                                                            | Käytössä                                            |
+| ~~JSON Output~~   | ⚠️ **Poistettu käytöstä** — JSON-pakettituki on poistettu firmwaresta; tämä kenttä jätetään huomiotta | Ei käytössä                                         |
+| TLS               | Yhteyden suojaaminen välityspalvelimeen                                                               | Ei käytössä                                         |
+| Karttaraportointi | Sijainnin julkaisu julkiselle kartalle                                                                | Ei käytössä                                         |
 
-### Default Meshtastic Broker
+### Oletus Meshtastic-välityspalvelin
 
-The community maintains a public broker at `mqtt.meshtastic.org`. This is intended for general use and testing.
+Yhteisö ylläpitää julkista välityspalvelinta osoitteessa `mqtt.meshtastic.org`. Tämä on tarkoitettu yleiseen käyttöön ja testaukseen.
 
-> 🔒 **Privacy:** Messages on the public broker are readable by anyone subscribed. Always use channel encryption for private communications.
+> 🔒 **Tietosuoja:** Julkisen välityspalvelimen viestit ovat kaikkien tilaajien luettavissa. Käytä aina kanavasalausta yksityiseen viestintään.
 
-### Private Broker
+### Oma välityspalvelin
 
-For better privacy and control, you can run your own MQTT broker:
+Parempaa yksityisyyttä ja hallintaa varten voit käyttää omaa MQTT-välityspalvelinta:
 
-- Mosquitto (lightweight, open-source)
+- Mosquitto (kevyt, avoimen lähdekoodin)
 - HiveMQ
 - EMQX
 
-Configure your node to point to your private broker with appropriate credentials.
+Määritä radiosi osoittamaan omaan välityspalvelimeesi oikeilla tunnistetiedoilla.
 
-## Map Reporting
+## Karttaraportointi
 
-When Map Reporting is enabled, your node publishes its position to the Meshtastic community map:
+Kun karttajako (Map Reporting) on käytössä, radiosi julkaisee sijaintinsa Meshtastic-yhteisökartalle:
 
-- Visible at [meshmap.net](https://meshmap.net) and similar community map services
-- Only position and node info are shared
-- Disable this if you don't want your location publicly visible
+- Näkyvissä osoitteessa [meshmap.net](https://meshmap.net) ja vastaavissa yhteisökarttapalveluissa
+- Jaetaan vain sijainti- ja laitetiedot
+- Poista käytöstä, jos et halua sijaintisi näkyvän julkisesti
 
-## Uplink vs Downlink
+## Lähetys vs vastaanotto
 
-| Direction    | Kuvaus                           |
-| ------------ | -------------------------------- |
-| **Uplink**   | Messages from mesh → MQTT broker |
-| **Downlink** | Messages from MQTT broker → mesh |
+| Suunta          | Kuvaus                                           |
+| --------------- | ------------------------------------------------ |
+| **Lähetys**     | Viestit mesh-verkosta → MQTT-välityspalvelimeen  |
+| **Vastaanotto** | Viestit MQTT-välityspalvelimesta → mesh-verkkoon |
 
-Configure per-channel which directions are active to control message flow and airtime usage.
+Määritä kanavakohtaisesti, mitkä suunnat ovat käytössä viestiliikenteen ja lähetysajan käytön hallintaan.
 
-## Message Formats
+## Viestiformaatit
 
-MQTT uses protobuf message format:
+MQTT käyttää protobuf-viestimuotoa:
 
-| Format       | Kuvaus                              | Use case                   |
-| ------------ | ----------------------------------- | -------------------------- |
-| **Protobuf** | Binary Meshtastic protobuf encoding | Node-to-node mesh bridging |
+| Muoto        | Kuvaus                                    | Käyttötarkoitus                |
+| ------------ | ----------------------------------------- | ------------------------------ |
+| **Protobuf** | Binäärinen Meshtastic protobuf -enkoodaus | Radioiden välinen mesh-siltaus |
 
-> ⚠️ **Note:** JSON output support was removed from firmware. The `json_enabled` setting is still visible in the app for legacy compatibility but has no effect on current firmware versions.
+> ⚠️ **Huom:** JSON-ulostulotuki on poistettu firmwaresta. `json_enabled`-asetus näkyy yhä sovelluksessa taaksepäinyhteensopivuuden vuoksi, mutta sillä ei ole vaikutusta nykyisissä firmware-versioissa.
 
-## Encryption & Privacy
+## Salaus ja yksityisyys
 
-Understanding the layered encryption model:
+Kerrostetun salausmallin ymmärtäminen:
 
-1. **Channel encryption** happens on the mesh _before_ MQTT. If your channel has a PSK, the MQTT payload is already encrypted — the broker and any subscribers see only the ciphertext.
-2. **MQTT encryption** (the module setting) adds an additional encryption layer for transit to the broker. This protects metadata and routing information.
-3. **TLS** encrypts the TCP connection to the broker itself, preventing network-level eavesdropping.
+1. **Kanavasalaus** tapahtuu meshissä _ennen_ MQTT:tä. Jos kanavallasi on PSK, MQTT-viestisisältö on jo salattu — välityspalvelin ja tilaajat näkevät vain salatun datan.
+2. **MQTT-salaus** (moduuliasetus) lisää ylimääräisen salauskerroksen matkalla välityspalvelimelle. Tämä suojaa metatietoja ja reititystietoja.
+3. **TLS** salaa TCP-yhteyden itse välityspalvelimeen estäen verkkotason salakuuntelun.
 
-> 🔒 **Important:** The default public channel has a well-known key. Messages on the default channel sent via MQTT are effectively **unencrypted** — anyone can decode them. Always use a custom PSK for private communications.
+> 🔒 **Tärkeää:** julkisella oletuskanavalla on tunnettu avain. Oletuskanavan MQTT:n kautta lähetetyt viestit ovat käytännössä **salaamattomia** — kuka tahansa tilaaja voi purkaa ne. Käytä aina omaa PSK-avainta yksityiseen viestintään.
 
-## Best Practices
+## Parhaat käytännöt
 
-- Use channel-level encryption (PSK) on channels that bridge to MQTT
-- Don't enable MQTT on nodes without internet access (it will buffer and waste memory)
-- Use a private broker for sensitive deployments
-- Be mindful of airtime when downlinking messages from busy MQTT topics — every downlinked message consumes radio airtime on your local mesh
-- Consider enabling uplink-only if you only need to monitor your mesh remotely without injecting messages back
+- Käytä kanavatasoista salausta (PSK) kanavissa, jotka yhdistetään MQTT:hen
+- Älä ota MQTT:tä käyttöön laitteissa, joilla ei ole internet-yhteyttä (se puskuroidaan ja kuluttaa muistia)
+- Käytä yksityistä välityspalvelinta arkaluonteisissa käyttöönotossa
+- Ole tarkkana lähetysajan (downlink) käyttämisessä ruuhkaisissa MQTT-aiheissa — jokainen viesti kuluttaa radio-aikaa paikallisessa meshissä
+- Harkitse lähetyssuunnan vaihtamista (uplink), jos haluat vain seurata verkkoa etänä ilman viestien lähettämistä verkkoon
 
 ## Vianetsintä
 
-### MQTT Not Connecting
+### MQTT ei yhdistä
 
-- **Check WiFi** — the gateway node must have an active internet connection (WiFi or Ethernet). MQTT does not work over the LoRa radio link itself.
-- **Verify credentials** — incorrect username or password will silently fail on most brokers. Double-check for trailing spaces.
-- **Firewall** — port 1883 (MQTT) or 8883 (MQTT+TLS) must be open. Some networks block non-standard ports.
-- **DNS resolution** — if using a custom broker hostname, verify the node can resolve it. Try the broker's IP address directly.
+- Tarkista WiFi — yhdyskäytävän radiolla täytyy olla aktiivinen internet-yhteys (WiFi tai Ethernet). MQTT ei toimi LoRa-radiolinkin kautta.
+- Tarkista tunnukset — väärä käyttäjänimi tai salasana epäonnistuu useimmilla välityspalvelimilla hiljaisesti Tarkista ylimääräiset välilyönnit
+- Palomuuri — portti 1883 (MQTT) tai 8883 (MQTT+TLS) täytyy olla auki. Jotkin verkot estävät ei-standardit portit.
+- **DNS-ratkaisu** – jos käytät omaa välityspalvelimen isäntänimeä, varmista että laite pystyy ratkaisemaan sen. Kokeile välityspalvelimen IP-osoitetta suoraan.
 
-### Messages Not Bridging
+### Viestit eivät välity
 
-- **Check uplink/downlink settings** — if only uplink is enabled, messages flow from mesh to MQTT but not back. Enable downlink on the receiving gateway.
-- **Channel mismatch** — both gateways must share the same channel with the same PSK. A mismatch means messages are encrypted with different keys and appear as garbage.
-- **Topic mismatch** — ensure both gateways use the same root topic. The default `msh` works for the public broker.
+- **Tarkista lähetys ja vastaanotto-asetukset** – jos vain lähetys on käytössä, viestit kulkevat meshistä MQTT:hen mutta eivät takaisin. Ota vastaanotto käyttöön vastaanottavassa yhdyskäytävän laitteessa.
+- **Kanava ei täsmää** – molempien gateway-laitteiden täytyy käyttää samaa kanavaa ja samaa PSK-avainta. Eroavaisuus tarkoittaa, että viestit on salattu eri avaimilla ja näyttävät roskalta.
+- **Aihe ei täsmää** – varmista, että molemmat yhdyskäytävät käyttävät samaa juuriaihetta (Root Topic). Oletus `msh` toimii julkisessa välityspalvelimessa.
 
-## Related Topics
+## Aiheeseen liittyvät aiheet
 
-- [Settings — Modules & Admin](settings-module-admin) — MQTT module configuration reference
-- [Messages & Channels](messages-and-channels) — channel encryption and PSK setup
-- [MQTT integration guide](https://meshtastic.org/docs/software/integrations/mqtt) — detailed MQTT documentation on meshtastic.org
+- [Asetukset — Moduulit ja ylläpito](settings-module-admin) — MQTT-moduulin asetusten viite
+- [Viestit ja kanavat](messages-and-channels) — kanavasalaus ja PSK-asetukset
+- [MQTT-integraatio-opas](https://meshtastic.org/docs/software/integrations/mqtt) — yksityiskohtainen MQTT-dokumentaatio meshtastic.org -sivustolla
 
 ---
 
