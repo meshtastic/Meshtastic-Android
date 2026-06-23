@@ -530,6 +530,7 @@ expires
 ### EXPORT ###
 export_configuration
 export_data_csv
+export_gpx
 export_keys
 export_keys_confirmation
 export_tak_data_package
