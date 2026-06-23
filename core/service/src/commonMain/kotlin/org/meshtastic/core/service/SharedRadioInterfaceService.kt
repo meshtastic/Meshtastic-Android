@@ -89,6 +89,8 @@ private fun UsbRecoveryTriggerState.next(snapshot: UsbRecoverySnapshot): UsbReco
     return when {
         key == null -> UsbRecoveryTriggerState()
 
+        snapshot.state == ConnectionState.Disconnected -> UsbRecoveryTriggerState(key = key, present = present)
+
         key != this.key ->
             UsbRecoveryTriggerState(
                 key = key,

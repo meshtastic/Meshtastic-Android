@@ -1267,8 +1267,8 @@ class SharedRadioInterfaceServiceLivenessTest {
     //         ignoreExceptionSuspend { startTransportLocked() }
     //     } }
     //
-    // The seven tests below drive the controllable [serialDeviceKeys] flow directly to exercise each
-    // branch of that gate contract.
+    // The tests below drive the controllable [serialDeviceKeys] flow directly to exercise each branch of that gate
+    // contract.
 
     /**
      * Happy path: a SERIAL transport left in zombie DeviceSleep (after an unplug I/O death) is recovered automatically
@@ -1536,6 +1536,75 @@ class SharedRadioInterfaceServiceLivenessTest {
             assertFalse(
                 service.connectionState.value == ConnectionState.Connected,
                 "State must remain Disconnected after post-disconnect replug",
+            )
+        } finally {
+            service.disconnect()
+            advanceTimeBy(1_000L)
+        }
+    }
+
+    /**
+     * Regression: the reducer's armed-by-absence state must not survive an explicit Disconnected state. A user can
+     * unplug while Connected, explicitly disconnect before replugging, then reconnect later. That later normal
+     * transport-level unplug callback arrives while the selected key is still present; it must not consume stale arm
+     * state from the previous connection and restart the fresh transport.
+     */
+    @Test
+    fun `USB recovery arm clears across explicit disconnect before reconnect`() = runTest(testDispatcher) {
+        clock = 0L
+        val selectedKey = "/dev/bus/usb/001/002"
+        serialDeviceKeys.value = setOf(selectedKey)
+        val service = createConnectedService("s$selectedKey")
+        try {
+            assertEquals(1, createdTransports.size, "Initial connect should create one transport")
+            val initialTransport = createdTransports.first()
+
+            // Detach while Connected arms the replug edge but must not restart while the transport is healthy.
+            serialDeviceKeys.value = emptySet()
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+
+            assertEquals(1, createdTransports.size, "Detach while Connected must NOT restart transport")
+            assertFalse(initialTransport.closeCalled, "Detach while Connected must not close the transport")
+
+            // Explicit disconnect must clear the armed reducer state.
+            service.disconnect()
+            advanceTimeBy(1_000L)
+            val transportCountAfterDisconnect = createdTransports.size
+            assertEquals(ConnectionState.Disconnected, service.connectionState.value, "Precondition: disconnected")
+
+            // Replug while disconnected must not preserve stale arm into the next connection.
+            serialDeviceKeys.value = setOf(selectedKey)
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+
+            assertEquals(
+                transportCountAfterDisconnect,
+                createdTransports.size,
+                "Replug while disconnected must NOT restart transport",
+            )
+
+            service.connect()
+            service.onConnect()
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+
+            val reconnectedTransport = createdTransports.last()
+            val transportCountAfterReconnect = createdTransports.size
+            assertEquals(ConnectionState.Connected, service.connectionState.value, "Precondition: reconnected")
+
+            service.onDisconnect(isPermanent = false)
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+
+            assertEquals(
+                transportCountAfterReconnect,
+                createdTransports.size,
+                "Normal unplug after reconnect must NOT restart from stale armed state",
+            )
+            assertFalse(
+                reconnectedTransport.closeCalled,
+                "Fresh transport must not be closed by stale recovery arm",
             )
         } finally {
             service.disconnect()
