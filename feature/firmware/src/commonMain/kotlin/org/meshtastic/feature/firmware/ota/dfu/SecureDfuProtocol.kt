@@ -268,6 +268,10 @@ internal data class DfuManifestContent(
     /** First non-null entry in priority order. */
     val primaryEntry: DfuManifestEntry?
         get() = application ?: softdeviceBootloader ?: bootloader ?: softdevice
+
+    /** Number of image entries present. >1 means a combined package, of which only [primaryEntry] is flashed. */
+    val imageCount: Int
+        get() = listOfNotNull(application, softdeviceBootloader, bootloader, softdevice).size
 }
 
 @Serializable

@@ -151,19 +151,16 @@ class BleOtaTransport(
         onHandshakeStatus: suspend (OtaHandshakeStatus) -> Unit,
     ): Result<Unit> = safeCatching {
         val command = OtaCommand.StartOta(sizeBytes, sha256Hash)
-        val packetsSent = sendCommand(command)
+        sendCommand(command)
 
+        // Drive on response *type*, never a fragment/response count: the handshake completes only on an explicit OK.
+        // ERASING is an interim progress notification the device may emit before OK, so it just continues the wait. At
+        // a low MTU the command splits into multiple writes; gating completion on a write count would desync against
+        // the device's single OK — the same fragment-count bug PR #5915 removed from streamFirmware.
         var handshakeComplete = false
-        var responsesReceived = 0
         while (!handshakeComplete) {
-            val response = waitForResponse(ERASING_TIMEOUT)
-            responsesReceived++
-            when (val parsed = OtaResponse.parse(response)) {
-                is OtaResponse.Ok -> {
-                    if (responsesReceived >= packetsSent) {
-                        handshakeComplete = true
-                    }
-                }
+            when (val parsed = OtaResponse.parse(waitForResponse(ERASING_TIMEOUT))) {
+                is OtaResponse.Ok -> handshakeComplete = true
 
                 is OtaResponse.Erasing -> {
                     Logger.i { "BLE OTA: Device erasing flash..." }
@@ -177,9 +174,7 @@ class BleOtaTransport(
                     throw OtaProtocolException.CommandFailed(command, parsed)
                 }
 
-                else -> {
-                    Logger.w { "BLE OTA: Unexpected handshake response: $response" }
-                }
+                else -> Logger.w { "BLE OTA: Unexpected handshake response: $parsed" }
             }
         }
     }
@@ -205,6 +200,11 @@ class BleOtaTransport(
         onProgress: suspend (Float) -> Unit,
     ): Result<Unit> = safeCatching {
         val totalBytes = data.size
+        if (totalBytes == 0) {
+            // Fail now: an empty image would otherwise skip the loop and then wait out the full
+            // VERIFICATION_TIMEOUT before failing.
+            throw OtaProtocolException.TransferFailed("Firmware is empty")
+        }
         var sentBytes = 0
 
         val writePayload = bleConnection.maximumWriteValueLength(BleWriteType.WITHOUT_RESPONSE) ?: SAFE_WRITE_PAYLOAD
