@@ -106,17 +106,33 @@ abstract class CommonFirmwareRetrieverTest {
     }
 
     @Test
-    fun `retrieveEsp32Firmware falls back to legacy naming when current naming fails`() = runTest {
+    fun `retrieveEsp32Firmware resolves update bin when no manifest and no plain bin`() = runTest {
         val handler = FakeFirmwareFileHandler()
         val retriever = FirmwareRetriever(handler)
 
-        // No manifest, no current naming
-        // Legacy naming succeeds
+        // No manifest, no plain .bin; only the bare app `-update.bin` is published.
         handler.existingUrls.add("$BASE_URL/firmware-2.7.17/firmware-heltec-v3-2.7.17-update.bin")
 
         val result = retriever.retrieveEsp32Firmware(TEST_RELEASE, TEST_HARDWARE) {}
 
-        assertNotNull(result, "Should resolve firmware via legacy naming fallback")
+        assertNotNull(result, "Should resolve firmware via -update.bin")
+        assertEquals("firmware-heltec-v3-2.7.17-update.bin", result.fileName)
+    }
+
+    @Test
+    fun `retrieveEsp32Firmware prefers update bin over plain bin when both exist`() = runTest {
+        val handler = FakeFirmwareFileHandler()
+        val retriever = FirmwareRetriever(handler)
+
+        // No manifest. Both files exist: on pre-2.7.17 releases the plain `.bin` is a *merged* bootloader+app image
+        // (which esp_ota_end rejects when flashed to app0), while `-update.bin` is the bare app image. Confirmed on
+        // hardware with 2.7.15: the merged image failed `OTA End`, the -update.bin app image is the OTA-able one.
+        handler.existingUrls.add("$BASE_URL/firmware-2.7.17/firmware-heltec-v3-2.7.17.bin")
+        handler.existingUrls.add("$BASE_URL/firmware-2.7.17/firmware-heltec-v3-2.7.17-update.bin")
+
+        val result = retriever.retrieveEsp32Firmware(TEST_RELEASE, TEST_HARDWARE) {}
+
+        assertNotNull(result)
         assertEquals("firmware-heltec-v3-2.7.17-update.bin", result.fileName)
     }
 

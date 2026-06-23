@@ -634,14 +634,8 @@ class SecureDfuTransport(
     // Scanning helpers
     // ---------------------------------------------------------------------------
 
-    private suspend fun scanForDevice(predicate: (BleDevice) -> Boolean): BleDevice? = scanForBleDevice(
-        scanner = scanner,
-        tag = "DFU",
-        serviceUuid = SecureDfuUuids.SERVICE,
-        retryCount = SCAN_RETRY_COUNT,
-        retryDelay = SCAN_RETRY_DELAY,
-        predicate = predicate,
-    )
+    private suspend fun scanForDevice(predicate: (BleDevice) -> Boolean): BleDevice? =
+        scanForBleDevice(scanner = scanner, tag = "DFU", serviceUuid = SecureDfuUuids.SERVICE, predicate = predicate)
 
     // ---------------------------------------------------------------------------
     // Constants
@@ -662,8 +656,6 @@ class SecureDfuTransport(
          * ([BUTTONLESS_RESPONSE_TIMEOUT]) plus settle/write overhead.
          */
         private val TRIGGER_TIMEOUT = 5.seconds
-        private const val SCAN_RETRY_COUNT = 3
-        private val SCAN_RETRY_DELAY = 2.seconds
         private val RETRY_DELAY = 2.seconds
         private val FIRST_CHUNK_DELAY = 400.milliseconds
 

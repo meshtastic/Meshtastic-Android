@@ -38,6 +38,7 @@ import org.meshtastic.core.resources.firmware_update_downloading_percent
 import org.meshtastic.core.resources.firmware_update_enabling_dfu
 import org.meshtastic.core.resources.firmware_update_not_found_in_release
 import org.meshtastic.core.resources.firmware_update_ota_failed
+import org.meshtastic.core.resources.firmware_update_slow_bootloader_hint
 import org.meshtastic.core.resources.firmware_update_starting_dfu
 import org.meshtastic.core.resources.firmware_update_uploading
 import org.meshtastic.core.resources.firmware_update_validating
@@ -157,7 +158,15 @@ class SecureDfuHandler(
 
                     // ── 7. Firmware ───────────────────────────────────────────────
                     val uploadMsg = UiText.Resource(Res.string.firmware_update_uploading)
-                    updateState(FirmwareUpdateState.Updating(ProgressState(uploadMsg, 0f)))
+                    // Surface a "slow bootloader" tip during the upload when the link couldn't negotiate a larger MTU
+                    // (e.g. a stock Adafruit bootloader capped at MTU 23 → 20-byte packets, ~3.7 KB/s).
+                    val slowHint =
+                        if (transport.isLowSpeedTransfer) {
+                            UiText.Resource(Res.string.firmware_update_slow_bootloader_hint)
+                        } else {
+                            null
+                        }
+                    updateState(FirmwareUpdateState.Updating(ProgressState(uploadMsg, 0f, hint = slowHint)))
 
                     val firmwareSize = pkg.firmware.size
                     val throughputTracker = ThroughputTracker()
@@ -183,7 +192,11 @@ class SecureDfuHandler(
                                 }
                             }
 
-                            updateState(FirmwareUpdateState.Updating(ProgressState(uploadMsg, progress, details)))
+                            updateState(
+                                FirmwareUpdateState.Updating(
+                                    ProgressState(uploadMsg, progress, details, hint = slowHint),
+                                ),
+                            )
                         }
                         .getOrThrow()
 

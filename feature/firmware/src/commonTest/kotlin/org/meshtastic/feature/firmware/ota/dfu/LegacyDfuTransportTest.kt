@@ -216,6 +216,32 @@ class LegacyDfuTransportTest {
         env.packetWrites().forEach { assertEquals(BleWriteType.WITHOUT_RESPONSE, it.writeType) }
     }
 
+    @Test
+    fun `transferFirmware uses high-MTU packets when the link negotiates a larger MTU`() = runTest {
+        val env = createConnectedTransport(mtu = 244)
+        env.responder.scheme = LegacyResponderScheme.HappyPath
+
+        env.transport.transferInitPacket(ByteArray(14) { it.toByte() }).getOrThrow()
+        val result = env.transport.transferFirmware(ByteArray(600) { it.toByte() }) {}
+
+        assertTrue(result.isSuccess, "transferFirmware failed: ${result.exceptionOrNull()}")
+        // Firmware streams in 244-byte packets (negotiated MTU − 3) instead of the 20-byte default — the ~12× win.
+        assertEquals(244, env.packetWrites().maxOf { it.data.size })
+    }
+
+    @Test
+    fun `transferFirmware floors the packet size to a 4-byte boundary`() = runTest {
+        val env = createConnectedTransport(mtu = 242) // not a multiple of 4
+        env.responder.scheme = LegacyResponderScheme.HappyPath
+
+        env.transport.transferInitPacket(ByteArray(14) { it.toByte() }).getOrThrow()
+        val result = env.transport.transferFirmware(ByteArray(600) { it.toByte() }) {}
+
+        assertTrue(result.isSuccess, "transferFirmware failed: ${result.exceptionOrNull()}")
+        // 242 → 240: the Adafruit DFU data path rejects writes whose length isn't a multiple of 4.
+        assertEquals(240, env.packetWrites().maxOf { it.data.size })
+    }
+
     // -----------------------------------------------------------------------
     // Phase 4: error paths
     // -----------------------------------------------------------------------

@@ -76,10 +76,13 @@ class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
 
     /**
      * Download the ESP32 OTA firmware binary. Tries in order:
-     * 1. `.mt.json` manifest resolution (2.7.17+)
-     * 2. Current naming convention (`firmware-<target>-<version>.bin`)
-     * 3. Legacy naming (`firmware-<target>-<version>-update.bin`)
-     * 4. Any matching `.bin` from the release zip
+     * 1. `.mt.json` manifest resolution (2.7.17+) — the authoritative `app0` partition image.
+     * 2. `firmware-<target>-<version>-update.bin` — the bare app image. Preferred over the plain `.bin` because on
+     *    pre-2.7.17 releases (which ship no manifest) `firmware-<target>-<version>.bin` is a *merged* image
+     *    (bootloader + partition table + app); flashing that to the `app0` partition leaves it misaligned and the
+     *    device's `esp_ota_end` rejects it. `-update.bin` is the OTA-able app image whenever it is published.
+     * 3. `firmware-<target>-<version>.bin` — the bare app image on 2.7.17+ (which publish no `-update.bin`).
+     * 4. Any matching `.bin` from the release zip.
      *
      * @return The downloaded `.bin` [FirmwareArtifact], or `null` if the file could not be resolved.
      */
@@ -97,7 +100,22 @@ class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
             return it
         }
 
-        // ── Fallback 1: current naming (2.7.17+) ────────────────────────────
+        // ── Fallback 1: bare app image `-update.bin` (unambiguous OTA image when published; required for pre-2.7.17,
+        //    whose plain `.bin` is a merged bootloader+app image that esp_ota_end rejects) ──
+        val updateFilename = "firmware-$target-$version-update.bin"
+        retrieveArtifact(
+            release = release,
+            hardware = hardware,
+            onProgress = onProgress,
+            fileSuffix = "-update.bin",
+            internalFileExtension = "-update.bin",
+            preferredFilename = updateFilename,
+        )
+            ?.let {
+                return it
+            }
+
+        // ── Fallback 2: plain `firmware-<target>-<version>.bin` (the app image on 2.7.17+) ──
         val currentFilename = "firmware-$target-$version.bin"
         retrieveArtifact(
             release = release,
@@ -106,20 +124,6 @@ class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
             fileSuffix = ".bin",
             internalFileExtension = ".bin",
             preferredFilename = currentFilename,
-        )
-            ?.let {
-                return it
-            }
-
-        // ── Fallback 2: legacy naming (pre-2.7.17) ──────────────────────────
-        val legacyFilename = "firmware-$target-$version-update.bin"
-        retrieveArtifact(
-            release = release,
-            hardware = hardware,
-            onProgress = onProgress,
-            fileSuffix = "-update.bin",
-            internalFileExtension = "-update.bin",
-            preferredFilename = legacyFilename,
         )
             ?.let {
                 return it

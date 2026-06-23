@@ -270,32 +270,35 @@ class LegacyDfuTransport(
      */
 
     /**
+     * Low-speed when the bootloader did not negotiate a larger MTU, leaving us on the 20-byte packet floor. Valid once
+     * [connectToDfuMode] has established the connection (the MTU is known by then).
+     */
+    override val isLowSpeedTransfer: Boolean
+        get() = computeStreamPacketSize() <= LEGACY_DFU_PACKET_SIZE
+
+    /**
      * Determine the per-packet size for firmware streaming.
      *
-     * Returns [LEGACY_DFU_PACKET_SIZE] (20) by default for safety against stock Nordic / pre-2.1 OTAFIX bootloaders
-     * that overrun their flash buffer on larger writes. When the device advertises an OTAFIX-2.1+ name (`<board>_DFU`
-     * suffix per https://github.com/oltaco/Adafruit_nRF52_Bootloader_OTAFIX#changes-in-otafix-21) and the connection
-     * has negotiated a larger ATT MTU, returns that MTU − 3 (ATT header overhead) capped at 244 bytes.
+     * Uses the negotiated ATT MTU − 3 (the largest `WITHOUT_RESPONSE` write the link allows), capped at
+     * [MAX_HIGH_MTU_PACKET_SIZE] and floored to a 4-byte boundary. This is **self-gating**: a bootloader that cannot
+     * accept large DFU writes never negotiates a large MTU, so we fall back to the 20-byte [LEGACY_DFU_PACKET_SIZE]
+     * floor. The advertised name (`AdaDFU` vs OTAFIX `_DFU`) is NOT used — the negotiated MTU is the direct capability
+     * signal. The Adafruit nRF52 bootloader's DFU data characteristic accepts up to MTU−3 = 244 bytes (it copies the
+     * actual write length into a 600-byte pool buffer), but **rejects any write whose length is not a multiple of 4**
+     * (`BLE_DFU_RESP_VAL_NOT_SUPPORTED`) — hence the word-alignment floor.
      */
     private fun computeStreamPacketSize(): Int {
-        val name = dfuAdvertisedName.orEmpty()
-        val isOtafix21 = name.endsWith(OTAFIX_NAME_SUFFIX, ignoreCase = true)
-        if (!isOtafix21) return LEGACY_DFU_PACKET_SIZE
         val negotiated =
             bleConnection.maximumWriteValueLength(BleWriteType.WITHOUT_RESPONSE) ?: return LEGACY_DFU_PACKET_SIZE
-        return negotiated.coerceIn(LEGACY_DFU_PACKET_SIZE, MAX_HIGH_MTU_PACKET_SIZE)
+        val sized = negotiated.coerceIn(LEGACY_DFU_PACKET_SIZE, MAX_HIGH_MTU_PACKET_SIZE)
+        return sized - (sized % DFU_PACKET_WORD_ALIGNMENT)
     }
 
     @Suppress("CyclomaticComplexMethod", "NestedBlockDepth", "LongMethod")
     private suspend fun streamFirmware(firmware: ByteArray, onProgress: suspend (Float) -> Unit) {
-        // Default: 20-byte ATT packets (the only size accepted by stock Nordic / Adafruit pre-OTAFIX-2.1
-        // bootloaders). Sending larger packets to those bootloaders overruns the flash-write buffer and
-        // silently bricks the device. See .agent_refs/Android-DFU-Library/.../BaseCustomDfuImpl.java:417.
-        //
-        // OTAFIX 2.1+ explicitly supports high-MTU packets ("Enables larger DFU packets for improved
-        // throughput when supported by the client" per the OTAFIX README). It re-uses the standard
-        // `<board>_DFU` advertising-name suffix as a marker for the 2.1 feature set, so we opportunistically
-        // bump the packet size to the negotiated ATT MTU (minus 3 for the ATT header) when we see that name.
+        // Packet size = negotiated ATT MTU − 3, word-aligned and capped at 244 (see computeStreamPacketSize). Falls
+        // back to 20 bytes when the bootloader did not negotiate a larger MTU, which is the self-gating safety against
+        // bootloaders that can't accept large DFU writes — the 20-byte path is the slow but universally-safe default.
         val mtu = computeStreamPacketSize()
         var offset = 0
         Logger.i {
@@ -472,8 +475,6 @@ class LegacyDfuTransport(
         scanner = scanner,
         tag = "Legacy DFU",
         serviceUuid = LegacyDfuUuids.SERVICE,
-        retryCount = SCAN_RETRY_COUNT,
-        retryDelay = SCAN_RETRY_DELAY,
         predicate = predicate,
     )
 
@@ -487,8 +488,6 @@ class LegacyDfuTransport(
         private val START_RESPONSE_TIMEOUT = 30.seconds
         private val VALIDATE_TIMEOUT = 60.seconds
         private val SUBSCRIPTION_SETTLE = 500.milliseconds
-        private const val SCAN_RETRY_COUNT = 3
-        private val SCAN_RETRY_DELAY = 2.seconds
 
         /**
          * Wall-clock budget for a full firmware streaming session. Must comfortably exceed the upload duration for the
@@ -512,28 +511,21 @@ class LegacyDfuTransport(
         internal const val PRN_INTERVAL_PACKETS = 30
 
         /**
-         * Default Legacy DFU packet size (20 bytes — the original ATT_MTU minus the 3-byte ATT header).
-         *
-         * Stock Nordic / pre-OTAFIX-2.1 bootloaders only support this size; sending larger packets to those bootloaders
-         * overruns the flash-write buffer and silently bricks the device. For OTAFIX 2.1+ bootloaders (detected via
-         * `OTAFIX_NAME_SUFFIX`), [computeStreamPacketSize] bumps the per-packet size up to the negotiated MTU (capped
-         * by [MAX_HIGH_MTU_PACKET_SIZE]) for a ~12× throughput win.
+         * Universally-safe Legacy DFU packet size (20 bytes — the original ATT_MTU minus the 3-byte ATT header). Used
+         * as the floor when the link did not negotiate a larger MTU; [computeStreamPacketSize] raises the per-packet
+         * size to the negotiated MTU (capped by [MAX_HIGH_MTU_PACKET_SIZE]) for a ~12× throughput win when available.
          */
         internal const val LEGACY_DFU_PACKET_SIZE = 20
 
         /**
-         * Cap on the high-MTU packet size used when an OTAFIX-2.1+ bootloader is detected. The largest ATT MTU the BLE
-         * 5.0 LE Data Length extension can give us is 247 bytes (244 of payload), and Adafruit's own flash accumulation
-         * buffer is 240 bytes, so capping at 244 keeps each write to one ATT PDU and one flash-write boundary.
+         * Cap on the high-MTU DFU packet size. The largest ATT MTU the BLE 5.0 LE Data Length extension gives us is 247
+         * bytes (244 of payload); the Adafruit bootloader's DFU pool buffer (600 B) comfortably holds it, so 244 keeps
+         * each write to one ATT PDU. Stays a multiple of 4 — the bootloader rejects non-word-aligned writes.
          */
         internal const val MAX_HIGH_MTU_PACKET_SIZE = 244
 
-        /**
-         * Suffix used by the OTAFIX 2.1+ bootloader on every supported board's DFU-mode advertising name (e.g.
-         * `4631_DFU`, `T114_DFU`, `XIAO_DFU`). The 2.0 release advertised generic `AdaDFU`/board names without this
-         * suffix, so its presence is a reliable in-band signal that high-MTU is supported.
-         */
-        internal const val OTAFIX_NAME_SUFFIX = "_DFU"
+        /** DFU data writes must be a whole number of 32-bit words; [computeStreamPacketSize] floors to this. */
+        private const val DFU_PACKET_WORD_ALIGNMENT = 4
 
         /** Minimum DFU Version we support; older bootloaders use the SDK ≤ 6 single-shot init flow. */
         private const val MIN_SUPPORTED_DFU_VERSION = 5

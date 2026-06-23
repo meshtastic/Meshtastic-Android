@@ -38,6 +38,7 @@ import org.meshtastic.core.ble.MeshtasticBleConstants.OTA_NOTIFY_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.OTA_SERVICE_UUID
 import org.meshtastic.core.ble.MeshtasticBleConstants.OTA_WRITE_CHARACTERISTIC
 import org.meshtastic.core.common.util.safeCatching
+import kotlin.concurrent.Volatile
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -58,7 +59,9 @@ class BleOtaTransport(
 
     private val responseChannel = Channel<String>(Channel.UNLIMITED)
 
-    private var isConnected = false
+    // Written from the connectionState collector (Dispatchers.Default) and read by the streaming loop's
+    // connection-loss guard (Dispatchers.IO); @Volatile ensures the guard sees a mid-transfer disconnect.
+    @Volatile private var isConnected = false
 
     /** Scan for the device by MAC address (or MAC+1 for OTA mode) with retries. */
     private suspend fun scanForOtaDevice(): BleDevice? {
@@ -66,13 +69,7 @@ class BleOtaTransport(
         val targetAddresses = setOf(address, otaAddress)
         Logger.i { "BLE OTA: Will match addresses: $targetAddresses" }
 
-        return scanForBleDevice(
-            scanner = scanner,
-            tag = "BLE OTA",
-            serviceUuid = OTA_SERVICE_UUID,
-            retryCount = SCAN_RETRY_COUNT,
-            retryDelay = SCAN_RETRY_DELAY,
-        ) {
+        return scanForBleDevice(scanner = scanner, tag = "BLE OTA", serviceUuid = OTA_SERVICE_UUID) {
             it.address in targetAddresses
         }
     }
@@ -187,6 +184,20 @@ class BleOtaTransport(
         }
     }
 
+    /**
+     * Streams firmware to the device. The ESP32 OTA loader is an ACK-paced byte stream: it drains its receive buffer
+     * and emits exactly ONE response per drain — an `ACK` while more data is expected, or the terminal `OK` once the
+     * final byte is received and the image verified. To keep a deterministic 1-write → 1-response cadence at any MTU,
+     * each chunk is sent as a single GATT write no larger than the negotiated write payload. A chunk that exceeded the
+     * payload would fragment into multiple writes that the device coalesces into one response, desyncing our response
+     * accounting (the cause of the prior ACK-timeout hang at MTU 512, where a 512-byte chunk split into [509, 3]).
+     *
+     * Because we write one chunk then await its single response before writing the next, only one chunk is ever
+     * outstanding, so the device's byte-stream receive buffer holds exactly one chunk per drain — keeping the cadence a
+     * deterministic 1 write → 1 response. Branch on response *type* (never on a fragment count): success requires an
+     * explicit terminal `OK`, and any `ERR` fails the transfer, so a late device error can never be reported as
+     * success.
+     */
     @Suppress("MagicNumber")
     override suspend fun streamFirmware(
         data: ByteArray,
@@ -196,62 +207,64 @@ class BleOtaTransport(
         val totalBytes = data.size
         var sentBytes = 0
 
+        val writePayload = bleConnection.maximumWriteValueLength(BleWriteType.WITHOUT_RESPONSE) ?: SAFE_WRITE_PAYLOAD
+        val effectiveChunkSize = minOf(chunkSize, writePayload).coerceAtLeast(1)
+
         while (sentBytes < totalBytes) {
             if (!isConnected) {
                 throw OtaProtocolException.TransferFailed("Connection lost during transfer")
             }
 
-            val remainingBytes = totalBytes - sentBytes
-            val currentChunkSize = minOf(chunkSize, remainingBytes)
+            val currentChunkSize = minOf(effectiveChunkSize, totalBytes - sentBytes)
             val chunk = data.copyOfRange(sentBytes, sentBytes + currentChunkSize)
+            val isLastChunk = sentBytes + currentChunkSize >= totalBytes
 
-            val packetsSentForChunk = writeData(chunk, BleWriteType.WITHOUT_RESPONSE)
-
-            val nextSentBytes = sentBytes + currentChunkSize
-            repeat(packetsSentForChunk) { i ->
-                val response = waitForResponse(ACK_TIMEOUT)
-                val isLastPacketOfChunk = i == packetsSentForChunk - 1
-
-                when (val parsed = OtaResponse.parse(response)) {
-                    is OtaResponse.Ack -> {}
-
-                    is OtaResponse.Ok -> {
-                        if (nextSentBytes >= totalBytes && isLastPacketOfChunk) {
-                            sentBytes = nextSentBytes
-                            onProgress(1.0f)
-                            return@safeCatching Unit
-                        }
-                    }
-
-                    is OtaResponse.Error -> {
-                        if (parsed.message.contains("Hash Mismatch", ignoreCase = true)) {
-                            throw OtaProtocolException.VerificationFailed("Firmware hash mismatch after transfer")
-                        }
-                        throw OtaProtocolException.TransferFailed("Transfer failed: ${parsed.message}")
-                    }
-
-                    else -> throw OtaProtocolException.TransferFailed("Unexpected response: $response")
-                }
+            val packetsSent = writeData(chunk, BleWriteType.WITHOUT_RESPONSE)
+            if (packetsSent != 1) {
+                throw OtaProtocolException.TransferFailed("Chunk produced $packetsSent writes, expected exactly one")
             }
 
-            sentBytes = nextSentBytes
+            when (val parsed = OtaResponse.parse(waitForResponse(ACK_TIMEOUT))) {
+                is OtaResponse.Ack -> Unit
+
+                is OtaResponse.Ok ->
+                    if (isLastChunk) {
+                        sentBytes += currentChunkSize
+                        onProgress(1.0f)
+                        return@safeCatching Unit
+                    } else {
+                        // The device sends OK only once the full image is received; an OK before the final chunk
+                        // means its size accounting disagrees with ours — fail closed rather than treat it as an ACK.
+                        throw OtaProtocolException.TransferFailed("Received OK before the final chunk")
+                    }
+
+                is OtaResponse.Error -> throw transferException(parsed)
+
+                else -> throw OtaProtocolException.TransferFailed("Unexpected response during transfer: $parsed")
+            }
+
+            sentBytes += currentChunkSize
             onProgress(sentBytes.toFloat() / totalBytes)
         }
 
-        val finalResponse = waitForResponse(VERIFICATION_TIMEOUT)
-        when (val parsed = OtaResponse.parse(finalResponse)) {
+        // Every chunk was acknowledged with ACK but the terminal OK has not arrived (e.g. the device expected more
+        // bytes than we sent) — wait for the device's final verification result rather than reporting success.
+        when (val parsed = OtaResponse.parse(waitForResponse(VERIFICATION_TIMEOUT))) {
             is OtaResponse.Ok -> Unit
-
-            is OtaResponse.Error -> {
-                if (parsed.message.contains("Hash Mismatch", ignoreCase = true)) {
-                    throw OtaProtocolException.VerificationFailed("Firmware hash mismatch after transfer")
-                }
-                throw OtaProtocolException.TransferFailed("Verification failed: ${parsed.message}")
-            }
-
+            is OtaResponse.Error -> throw transferException(parsed)
             else -> throw OtaProtocolException.TransferFailed("Expected OK after transfer, got: $parsed")
         }
     }
+
+    /**
+     * Maps a device `ERR` response to the appropriate transfer exception (hash mismatch is verification, else generic).
+     */
+    private fun transferException(error: OtaResponse.Error): OtaProtocolException =
+        if (error.message.contains("Hash Mismatch", ignoreCase = true)) {
+            OtaProtocolException.VerificationFailed("Firmware hash mismatch after transfer")
+        } else {
+            OtaProtocolException.TransferFailed("Transfer failed: ${error.message}")
+        }
 
     override suspend fun close() {
         bleConnection.disconnect()
@@ -265,7 +278,9 @@ class BleOtaTransport(
     }
 
     private suspend fun writeData(data: ByteArray, writeType: BleWriteType): Int {
-        val maxLen = bleConnection.maximumWriteValueLength(writeType) ?: data.size
+        // takeIf { it > 0 }: a non-positive negotiated length would stall the loop (offset never advances); fall
+        // back to a single whole-buffer write instead of looping forever.
+        val maxLen = bleConnection.maximumWriteValueLength(writeType)?.takeIf { it > 0 } ?: data.size
         var offset = 0
         var packetsSent = 0
 
@@ -298,8 +313,9 @@ class BleOtaTransport(
         private val ACK_TIMEOUT = 10.seconds
         private val VERIFICATION_TIMEOUT = 10.seconds
         private val REBOOT_DELAY = 5.seconds
-        private const val SCAN_RETRY_COUNT = 3
-        private val SCAN_RETRY_DELAY = 2.seconds
         const val RECOMMENDED_CHUNK_SIZE = 512
+
+        /** Fallback write payload when the MTU has not been negotiated (23-byte ATT MTU minus the 3-byte header). */
+        private const val SAFE_WRITE_PAYLOAD = 20
     }
 }

@@ -728,6 +728,17 @@ private fun ProgressContent(
             )
         }
 
+        val hint = progressState.hint
+        if (hint != null) {
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = hint.asString(),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary,
+                textAlign = TextAlign.Center,
+            )
+        }
+
         Spacer(Modifier.height(12.dp))
 
         if (isDownloading || isUpdating) {
