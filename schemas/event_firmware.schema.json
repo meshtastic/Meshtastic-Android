@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://meshtastic.org/schemas/event_firmware.schema.json",
   "title": "Event Firmware Metadata",
-  "description": "Offline-first display metadata for event-specific firmware editions. The bundled androidApp/src/main/assets/event_firmware.json is a frozen copy of a future Meshtastic API response (planned GET /resource/eventFirmware); it shares the {version, generatedAt, source, <payload>[]} envelope used by device_links.json so the network layer can drop-in replace it. Keyed (within each record) by the FirmwareEdition proto enum name.",
+  "description": "Offline-first display metadata for event-specific firmware editions. The bundled androidApp/src/main/assets/event_firmware.json shares the {version, generatedAt, source, <payload>[]} envelope used by device_links.json so a future Meshtastic API (planned GET /resource/eventFirmware) can reuse the same shape. Each record identifies its edition by the FirmwareEdition proto enum name in the `edition` field. This schema is the authoring contract for the bundled file and is bumped as the shape evolves; the runtime JSON parser is independently tolerant of unknown fields.",
   "type": "object",
   "required": ["version", "editions"],
   "additionalProperties": false,
