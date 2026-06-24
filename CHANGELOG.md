@@ -14,6 +14,9 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 * fix(firmware): render chirpy mascot via painterResource in update dialog (#5925) by James Rich (@jamesarich) in [`b3ec677a7`](https://github.com/meshtastic/Meshtastic-Android/commit/b3ec677a72fd621ee154789df59ae8edb7dd3f38)
 * test(firmware): re-record disclaimer screenshot baselines (follow-up to #5925) (#5926) by James Rich (@jamesarich) in [`77e3abbff`](https://github.com/meshtastic/Meshtastic-Android/commit/77e3abbff3a577bbfb7434c15622c8afd1bcaf72)
 * fix(usb): Add serial presence recovery for USB replug (#5923) by Jeremiah K (@jeremiah-k) in [`1d528575f`](https://github.com/meshtastic/Meshtastic-Android/commit/1d528575fb319d95e6a61ad2869379f7c3ca03d0)
+* feat: offline-first event firmware metadata (JSON schema + bundled asset) (#5920) by James Rich (@jamesarich) in [`3ad885d67`](https://github.com/meshtastic/Meshtastic-Android/commit/3ad885d6704514e7974bacc4f1845238626d0965)
+* feat(firmware): drive event firmware branding from bundled metadata (#5929) by James Rich (@jamesarich) in [`828c6a4d6`](https://github.com/meshtastic/Meshtastic-Android/commit/828c6a4d6988ad55a06898104fe0736ff7faa9dc)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs, Baseline) (#5928) by James Rich (@jamesarich) in [`fdd386009`](https://github.com/meshtastic/Meshtastic-Android/commit/fdd386009932e24100f07579bf2cfa22c079e0e5)
 
 ### Internal (v2.8.0-internal.5)
 Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14):
