@@ -40,7 +40,6 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.scene.Scene
-import androidx.navigation3.scene.SinglePaneSceneStrategy
 import androidx.navigation3.ui.NavDisplay
 import org.meshtastic.core.navigation.MultiBackstack
 
@@ -129,13 +128,8 @@ fun MeshtasticNavDisplay(
                         backStack.removeLastOrNull()
                     }
                 },
-            sceneStrategies =
-            listOf(
-                DialogSceneStrategy(),
-                listDetailSceneStrategy,
-                supportingPaneSceneStrategy,
-                SinglePaneSceneStrategy(),
-            ),
+            // NavDisplay falls back to SinglePaneSceneStrategy automatically when none of these compute a Scene.
+            sceneStrategies = listOf(DialogSceneStrategy(), listDetailSceneStrategy, supportingPaneSceneStrategy),
             sharedTransitionScope = this@SharedTransitionLayout,
             transitionSpec = meshtasticTransitionSpec(),
             popTransitionSpec = meshtasticTransitionSpec(),
