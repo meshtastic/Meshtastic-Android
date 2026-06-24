@@ -1,31 +1,31 @@
 ---
-title: Android Auto
+title: Android auto
 parent: Kasutaja juhis
 nav_order: 18
 last_updated: 2026-06-11
-description: Use Meshtastic hands-free on an Android Auto head unit — read messages aloud, reply by voice, and check nodes and mesh status while driving.
+description: Kasuta Meshtasticut käed-vabad režiimis Android Auto peakomplektis – loe sõnumeid valjusti ette, vasta häälega ning kontrolli sõlmede ja võrgu olekut sõidu ajal.
 aliases:
-  - android-auto
+  - android auto
   - auto
   - head-unit
   - auto
 ---
 
-# Android Auto
+# Android auto
 
-Meshtastic integrates with Android Auto so you can stay in touch with your mesh while driving, without taking your hands off the wheel or your eyes off the road.
+Meshtastic integreerub Android Autoga, nii et saad sõidu ajal oma kärgvõrguga ühenduses püsida ilma käsi roolilt või pilku teelt tõstmata.
 
 > ⚠️ **Märkus:** Android Auto tugi on saadaval ainult **Google'i-tüüpi Androidi versioonides**. It is not included in the F-Droid build, and it is not available on Desktop or iOS.
 
 ## Overview
 
-When your phone is connected to an Android Auto head unit (or the Desktop Head Unit emulator used for development), Meshtastic appears as a messaging app built with the Android Car App Library. The car interface presents a tabbed Home screen optimized for driving-safe, glanceable use:
+Kui teie telefon on ühendatud Android Auto peakomplektiga (või arenduses kasutatava töölaua peakomplekti emulaatoriga), kuvatakse Meshtastic Android Car App Library abil loodud sõnumsiderakendusena. The car interface presents a tabbed Home screen optimized for driving-safe, glanceable use:
 
 - **Messages** — recent conversations, with hands-free reading and replies.
 - **Nodes** — the mesh node list, with a node-detail view.
 - **Status** — current connection and mesh status.
 
-The car app does not add a new connection of its own. It uses the Meshtastic app's existing connection, node, and message state, so it reflects whatever your phone is already connected to.
+The car app does not add a new connection of its own. See kasutab Meshtastici rakenduse olemasolevat ühendust, sõlme ja sõnumi olekut, seega kajastab see seda, millega telefon on juba ühendatud.
 
 > ⚠️ **Märkus:** Autorakenduse reaalajas andmete kuvamiseks peab telefon olema ühendatud Meshtastic raadioga. If the app is disconnected, the car screen reflects that disconnected state.
 

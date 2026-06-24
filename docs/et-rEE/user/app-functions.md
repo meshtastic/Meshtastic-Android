@@ -13,11 +13,11 @@ aliases:
 
 # App Functions
 
-App Functions expose Meshtastic capabilities to the Android system and to on-device AI assistants (such as Gemini) through the Android App Functions API. With them enabled, an assistant can discover and trigger mesh workflows for you — for example sending a message or checking your mesh status — without you opening the app.
+Rakendusfunktsioonid avaldavad Meshtasticu võimalused Androidi süsteemile ja seadmesisestele tehisintellekti assistentidele (näiteks Gemini) Androidi rakenduste funktsioonide API kaudu. With them enabled, an assistant can discover and trigger mesh workflows for you — for example sending a message or checking your mesh status — without you opening the app.
 
 > ⚠️ **Märkus:** Rakenduse funktsioonid on saadaval ainult **Google'i-tüüpi Androidi versioonides**.
 
-> ⚠️ **Märkus:** See on eraldi rakenduse sisesest **Chirpy** assistendist. App Functions let the _system_ AI assistant act on your mesh; Chirpy is a conversational assistant inside the Meshtastic app itself.
+> ⚠️ **Märkus:** See on eraldi rakenduse sisesest **Chirpy** assistendist. Rakenduse funktsioonid lasevad _süsteemi_ tehisintellekti assistendil teie võrgusilma kallal tegutseda; Chirpy on vestlusassistent Meshtasticu rakenduses endas.
 
 ## Enabling App Functions
 

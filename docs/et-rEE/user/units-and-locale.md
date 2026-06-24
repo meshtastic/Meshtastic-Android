@@ -13,7 +13,7 @@ Meshtastic rakendus kuvab automaatselt temperatuure, vahemaid, kiirusi ja aegu �
 
 ## How It Works
 
-Meshtastic radios always transmit data in **metric units** (meters, °C, km/h, hPa, etc.). When the app receives this data, it uses the `MetricFormatter` utility to convert and display values in whatever unit system your device's locale specifies.
+Meshtastic raadiod edastavad andmeid alati **meetrilistes ühikutes** (meetrid, °C, km/h, hPa jne). When the app receives this data, it uses the `MetricFormatter` utility to convert and display values in whatever unit system your device's locale specifies.
 
 On Android, your measurement preferences are determined by your system **Language & Region** settings. On Desktop (JVM), the app uses the JVM's default `Locale`.
 
@@ -27,10 +27,10 @@ Temperature values from environment sensors are transmitted as **°C** and displ
 
 ![Environment metrics with temperature](../../assets/screenshots/nodes_environment_metrics.png)
 
-| Sinu sätted | You See |
-| ----------- | ------- |
-| Celsius     | 22°C    |
-| Fahrenheit  | 72°F    |
+| Sinu sätted | Teadmiseks |
+| ----------- | ---------- |
+| Celsius     | 22°C       |
+| Fahrenheit  | 72°F       |
 
 This affects all temperature displays throughout the app: node environment telemetry, soil temperature, dew point, and telemetry chart axes.
 
@@ -58,19 +58,19 @@ The app uses natural scaling — short distances stay in meters or feet, while l
 
 GPS ground speed is displayed in your locale's preferred speed unit.
 
-| Sinu sätted                      | You See |
-| -------------------------------- | ------- |
-| Meetriline                       | 12 km/h |
-| Imperial (US) | 7 mph   |
+| Sinu sätted                      | Teadmiseks |
+| -------------------------------- | ---------- |
+| Meetriline                       | 12 km/h    |
+| Imperial (US) | 7 mph      |
 
 ## Tuul
 
 Wind speed and gust data from environment sensors are transmitted as **m/s** and converted for display.
 
-| Sinu sätted                      | You See |
-| -------------------------------- | ------- |
-| Meetriline                       | 5 m/s   |
-| Imperial (US) | 11 mph  |
+| Sinu sätted                      | Teadmiseks |
+| -------------------------------- | ---------- |
+| Meetriline                       | 5 m/s      |
+| Imperial (US) | 11 mph     |
 
 Wind readings appear in the **Node Detail** environment section and the **Environment Telemetry** charts.
 
@@ -78,10 +78,10 @@ Wind readings appear in the **Node Detail** environment section and the **Enviro
 
 Rainfall measurements (1-hour and 24-hour totals) are transmitted as **mm** and converted for display.
 
-| Sinu sätted                      | You See |
-| -------------------------------- | ------- |
-| Meetriline                       | 12 mm   |
-| Imperial (US) | 0,5 in  |
+| Sinu sätted                      | Teadmiseks |
+| -------------------------------- | ---------- |
+| Meetriline                       | 12 mm      |
+| Imperial (US) | 0,5 in     |
 
 ## Units That Never Change
 

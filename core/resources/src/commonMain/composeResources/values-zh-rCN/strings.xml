@@ -575,6 +575,9 @@
     <string name="local_stats_uptime">运行时间： %1$s</string>
     <string name="location_disabled">位置访问已关闭，无法向网络提供位置信息</string>
     <string name="location_sharing">位置共享</string>
+    <!-- LOCKDOWN -->
+    <string name="lockdown_hide_passphrase">隐藏</string>
+    <string name="lockdown_submit">提交</string>
     <string name="locked">锁定</string>
     <!-- LOG -->
     <string name="log_retention_days">Mesh日志保留时长</string>

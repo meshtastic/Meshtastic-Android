@@ -26,8 +26,8 @@ TAK moodul võimaldab Meshtastic sõlmedel:
 
 ### Prerequisites
 
-- ATAK (Android Team Awareness Kit) või WinTAK on installitud
-- Meshtastic ATAK Plugin installed
+- ATAK (Android Team Awareness Kit) või WinTAK on paigaldatud
+- Meshtastic ATAK plugin on paigaldatud
 - TAK moodul on teie Meshtastic raadios lubatud
 
 ### Sätted
@@ -45,8 +45,8 @@ TAK moodul võimaldab Meshtastic sõlmedel:
 
 ### ATAK Plugin Setup
 
-1. Install the Meshtastic ATAK Plugin from the plugin repository.
-2. Open ATAK and enable the Meshtastic plugin.
+1. Paigalda pluginate hoidlast Meshtastic ATAK plugin.
+2. Ava ATAK ja luba Meshtastic plugin.
 3. The plugin bridges messages between ATAK and your mesh network.
 
 ## TAK Roles
@@ -62,17 +62,17 @@ Nodes configured with TAK-related roles behave differently from standard clients
 
 ### CoT (Cursor on Target) Format
 
-TAK messages use the Cursor on Target XML format — a military standard for sharing situational awareness data. Meshtastic converts its internal protobuf messages to CoT format when bridging to TAK systems, so no manual format conversion is needed.
+TAK messages use the Cursor on Target XML format — a military standard for sharing situational awareness data. Meshtastic teisendab oma sisemised protobuf-sõnumid TAK-süsteemidega ühendamisel CoT-vormingusse, seega pole käsitsi vormingu teisendamist vaja.
 
 ## TAK Identity
 
 TAK rollide kasutamisel levitab teie sõlm identiteediteavet, mis kuvatakse TAK kaartidel:
 
-| Sätted   | Kirjeldus                                                                                            |
-| -------- | ---------------------------------------------------------------------------------------------------- |
-| Tiim     | Sinu meeskonna värv TAK kaardil (nt sinine, punane, tsüaansinine, roheline)       |
-| Roll     | Teie operatiivne roll (meeskonnaliige, meeskonnajuht, peakorter, meedik, RTO jne) |
-| Callsign | Your TAK callsign (defaults to your Meshtastic long name)                         |
+| Sätted  | Kirjeldus                                                                                            |
+| ------- | ---------------------------------------------------------------------------------------------------- |
+| Tiim    | Sinu meeskonna värv TAK kaardil (nt sinine, punane, tsüaansinine, roheline)       |
+| Roll    | Teie operatiivne roll (meeskonnaliige, meeskonnajuht, peakorter, meedik, RTO jne) |
+| Kutsung | Sinu TAK kutsung (vaikimisi sinu Meshtastic pikk nimi)                            |
 
 Need sätted kuvatakse menüüs **Seaded → Mooduli konfiguratsioon → TAK**, kui TAK moodul on lubatud.
 
@@ -80,7 +80,7 @@ Need sätted kuvatakse menüüs **Seaded → Mooduli konfiguratsioon → TAK**, 
 
 ## Wire Format (V1 / V2)
 
-Meshtastic supports two TAK wire formats:
+Meshtastic toetab kahte TAK wire-formaati:
 
 | Format                          | Compatibility                                                   | Features                                                  |
 | ------------------------------- | --------------------------------------------------------------- | --------------------------------------------------------- |
@@ -93,7 +93,7 @@ The app automatically selects V2 when both sides support it. Manuaalset konfigur
 
 Once configured:
 
-- Meshtastic nodes appear as markers on the ATAK map with callsign labels
+- Meshtastic sõlmed ilmuvad ATAK kaardil markeritena koos kutsungi nimega
 - Chat messages can bridge between mesh and TAK networks
 - Asukohavärskendused liiguvad Meshtasticu ja TAKi vahel kahesuunaliselt
 - TAK jälgimisseadme sõlmed levitavad PLId automaatselt – nende asukohad kuvatakse ATAK kaartidel ilma ATAK poolse konfita
@@ -102,17 +102,17 @@ Once configured:
 
 ## Troubleshooting
 
-| Problem                          | Cause                                 | Solution                                                                    |
-| -------------------------------- | ------------------------------------- | --------------------------------------------------------------------------- |
-| Node doesn't appear on ATAK map  | TAK moodul on keelatud või vale roll  | Veendu, et TAK moodul on lubatud ja sõlme roll on TAK või TAK jälgimisseade |
-| Asukohavärskendused on aegunud   | GPS fix lost or interval too long     | Kontrolli GPSi olekut; vähenda asukoha konfis asukoha levitamise intervalli |
-| ATAK plugin shows "disconnected" | BLE connection lost or plugin crashed | Reconnect Bluetooth in Meshtastic app, then restart ATAK plugin             |
-| Chat messages not bridging       | V1 format doesn't support chat        | Ensure both nodes run firmware 2.3+ for V2 wire format      |
-| CoT data not flowing             | Channel mismatch                      | All TAK nodes must be on the same channel with matching encryption          |
+| Problem                          | Cause                                 | Solution                                                                           |
+| -------------------------------- | ------------------------------------- | ---------------------------------------------------------------------------------- |
+| Node doesn't appear on ATAK map  | TAK moodul on keelatud või vale roll  | Veendu, et TAK moodul on lubatud ja sõlme roll on TAK või TAK jälgimisseade        |
+| Asukohavärskendused on aegunud   | GPS fix lost or interval too long     | Kontrolli GPSi olekut; vähenda asukoha konfis asukoha levitamise intervalli        |
+| ATAK plugin shows "disconnected" | BLE connection lost or plugin crashed | Ühenda Meshtastic rakenduses sinihammas uuesti ja seejärel taaskäivita ATAK plugin |
+| Chat messages not bridging       | V1 format doesn't support chat        | Ensure both nodes run firmware 2.3+ for V2 wire format             |
+| CoT data not flowing             | Channel mismatch                      | All TAK nodes must be on the same channel with matching encryption                 |
 
 ## Security Considerations
 
-- TAK data shares your position and callsign information
+- TAK andmed jagavad teie asukohta ja kutsungit
 - Ensure your channel encryption is configured when using TAK in sensitive environments
 - TAK moodul arvestab sama kanali krüptimist nagu teised Meshtasticu sõnumid
 
@@ -121,7 +121,7 @@ Once configured:
 - [Seaded — moodulid ja admin](settings-module-admin) — TAK mooduli konf
 - [Sõlmed](nodes) — TAK ja TAK jälgimisseade rollid sõlmede loendis
 - [Map & Waypoints](map-and-waypoints) — node positions on the map
-- [ATAK plugin guide](https://meshtastic.org/docs/software/integrations/atak-plugin) — detailed ATAK setup on meshtastic.org
+- [ATAK plugin juhend](https://meshtastic.org/docs/software/integrations/atak-plugin) — üksikasjalik ATAK seadistamine aadressil meshtastic.org
 
 ---
 

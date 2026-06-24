@@ -12,7 +12,7 @@ aliases:
 
 # Getting Started
 
-Tere tulemast Meshtasticusse! See juhend juhendab teid Meshtastic Androidi rakenduse esmasel seadistamisel.
+Tere tulemast Meshtasticusse! See juhend juhendab sind Meshtastic Androidi rakenduse esmasel seadistamisel.
 
 ## First Launch
 
@@ -91,7 +91,7 @@ Once connected to a radio, explore:
 
 - [Ühendused(connections) — seo oma esimene raadioseade
 - [Messages & Channels](messages-and-channels) — send your first message
-- [Nodes](nodes) — see who's on your mesh
+- [Seadmed](nodes) — vaata, kes on sinu võrgus
 - [Map & Waypoints](map-and-waypoints) — view node positions
 - [Settings](settings-radio-user) — configure your radio and user profile
 

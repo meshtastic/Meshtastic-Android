@@ -423,6 +423,8 @@ Rango de Valores 0 - 500.</string>
     <!-- LOCAL -->
     <string name="location_disabled">El acceso a la localización está desactivado, no se puede proporcionar la posición a la malla.</string>
     <string name="location_sharing">Compartir ubicación</string>
+    <!-- LOCKDOWN -->
+    <string name="lockdown_submit">Enviar</string>
     <string name="locked">Bloqueado</string>
     <!-- LOG -->
     <plurals name="log_retention_days_quantity">

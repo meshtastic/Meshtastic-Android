@@ -229,6 +229,7 @@
     <!-- LOAD -->
     <!-- LOCAL -->
     <string name="location_disabled">Pristup lokaciji je isključen, ne može se obezbediti pozicija mreži.</string>
+    <!-- LOCKDOWN -->
     <string name="locked">Закључано</string>
     <!-- LOG -->
     <string name="logs">Дневници</string>

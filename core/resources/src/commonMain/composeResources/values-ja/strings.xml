@@ -360,6 +360,7 @@
     <string name="local_stats_updated_at">%1$s</string>
     <string name="local_stats_uptime">稼働時間： %1$s</string>
     <string name="location_disabled">位置情報が無効なため、メッシュネットワークに位置情報を提供できません。</string>
+    <!-- LOCKDOWN -->
     <string name="locked">ロック済み</string>
     <!-- LOG -->
     <plurals name="log_retention_days_quantity">

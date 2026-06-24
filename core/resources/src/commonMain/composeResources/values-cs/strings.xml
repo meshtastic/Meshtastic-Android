@@ -525,6 +525,7 @@
     <string name="local_stats_uptime">Doba provozu: %1$s</string>
     <string name="location_disabled">Přístup k poloze zařízení nebyl povolen, není možné poskytnout polohu zařízení do Mesh sítě.</string>
     <string name="location_sharing">Sdílení polohy</string>
+    <!-- LOCKDOWN -->
     <string name="locked">Uzamknout</string>
     <!-- LOG -->
     <string name="log_retention_days">Doba ukládání mesh logů</string>

@@ -131,6 +131,7 @@
     <!-- LABEL -->
     <!-- LOAD -->
     <!-- LOCAL -->
+    <!-- LOCKDOWN -->
     <!-- LOG -->
     <string name="logs">Журнал</string>
     <string name="lora">LoRa</string>

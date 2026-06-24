@@ -490,6 +490,9 @@
     <!-- LOCAL -->
     <string name="location_disabled">L'accesso alla posizione è disattivato, non è possibile fornire la posizione al mesh.</string>
     <string name="location_sharing">Condivisione della posizione</string>
+    <!-- LOCKDOWN -->
+    <string name="lockdown_hide_passphrase">Nascondi</string>
+    <string name="lockdown_submit">Invia</string>
     <string name="locked">Bloccato</string>
     <!-- LOG -->
     <string name="log_retention_days">Periodo di conservazione MeshLog</string>

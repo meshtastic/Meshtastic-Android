@@ -206,6 +206,7 @@
     <!-- LOAD -->
     <!-- LOCAL -->
     <string name="location_disabled">Vrijgave positie niet actief, onmogelijk de positie aan het netwerk te geven.</string>
+    <!-- LOCKDOWN -->
     <string name="locked">Vergrendeld</string>
     <!-- LOG -->
     <string name="logs">Logs</string>

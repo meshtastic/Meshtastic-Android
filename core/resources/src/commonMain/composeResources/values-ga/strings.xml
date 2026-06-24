@@ -113,6 +113,7 @@
     <!-- LOAD -->
     <!-- LOCAL -->
     <string name="location_disabled">Cead iontrála áit dúnta, ní féidir an suíomh a chur ar fáil chuig an mesh.</string>
+    <!-- LOCKDOWN -->
     <string name="locked">Ceangailte</string>
     <!-- LOG -->
     <string name="logs">Lógáil</string>

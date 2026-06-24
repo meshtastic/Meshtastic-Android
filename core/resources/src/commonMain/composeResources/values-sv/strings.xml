@@ -564,6 +564,9 @@
     <string name="local_stats_uptime">Upptid: %1$s</string>
     <string name="location_disabled">Platsåtkomst är avstängd, kan inte leverera position till meshnätverket.</string>
     <string name="location_sharing">Positionsdelning</string>
+    <!-- LOCKDOWN -->
+    <string name="lockdown_hide_passphrase">Dölj</string>
+    <string name="lockdown_submit">Spara</string>
     <string name="locked">Låst</string>
     <!-- LOG -->
     <plurals name="log_retention_days_quantity">

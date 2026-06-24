@@ -786,6 +786,9 @@
     <string name="local_stats_utilization">Kanavan käyttöaste: %1$s% | Lähetysajan käyttöaste: %2$s%</string>
     <string name="location_disabled">Sijainnin käyttöoikeus on poistettu käytöstä, joten emme voi tarjota sijaintia mesh-verkkoon.</string>
     <string name="location_sharing">Sijainnin jakaminen</string>
+    <!-- LOCKDOWN -->
+    <string name="lockdown_hide_passphrase">Piilota</string>
+    <string name="lockdown_submit">Lähetä</string>
     <string name="locked">Lukittu</string>
     <!-- LOG -->
     <string name="log_retention_days">MeshLog-lokitietojen säilytysaika</string>

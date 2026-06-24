@@ -109,6 +109,7 @@
     <!-- LOAD -->
     <!-- LOCAL -->
     <string name="location_disabled">Aksè lokasyon enfim, pa ka bay pozisyon mesh la.</string>
+    <!-- LOCKDOWN -->
     <string name="locked">Loken</string>
     <!-- LOG -->
     <string name="logs">Jounal</string>

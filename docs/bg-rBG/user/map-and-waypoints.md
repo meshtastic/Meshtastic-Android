@@ -21,7 +21,7 @@ The map displays:
 
 - **Node positions** — colored markers for each node reporting location
 - **Waypoints** — shared points of interest
-- **Your position** — your current GPS location
+- **Вашата позиция** — вашето текущо GPS местоположение
 
 ### Node Markers
 
@@ -32,7 +32,7 @@ Node markers on the map indicate:
 | Зелен | Online (heard recently)     |
 | Жълт  | Away (heard within 2 hours) |
 | Сив   | Offline (stale position)    |
-| Син   | Your own node                                  |
+| Син   | Вашият собствен възел                          |
 
 ### Map Controls
 

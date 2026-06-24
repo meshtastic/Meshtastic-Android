@@ -62,7 +62,7 @@ Pärast sätete muutmist puuduta nuppu **Salvesta**, et konfiguratsioon raadioss
 | Short Slow         | ~5 km   | 5.5 kbps | −10 dB    | Suburban short-range; moderate building density                                                   |
 | Medium Fast        | ~5 km   | 5.5 kbps | −10 dB    | Suburban areas; moderate building density                                                         |
 | Medium Slow        | ~8 km   | 1,1 kbps                 | −12,5 dB  | Suburban/rural; moderate range with slower speed                                                  |
-| Long Turbo         | ~10 km  | 4,4 kbps                 | −10 dB    | Similar range to Long Fast but with 500 kHz bandwidth; faster throughput                          |
+| Long Turbo         | ~10 km  | 4,4 kbps                 | −10 dB    | Sarnane ulatus kui Pikk Kauge, aga 500 kHz ribalaiusega; kiirem läbilaskevõime                    |
 | Long Fast          | ~10 km  | 1,1 kbps                 | −12,5 dB  | **General use (default)** — balanced range and speed                           |
 | Long Moderate      | ~20 km  | 0,34 kbps                | −15 dB    | Rural with some terrain; occasional use                                                           |
 | Lite Fast          | ~5 km   | 5,5 kbps                 | −10 dB    | EL 866 MHz SRD sagedusala (125 kHz ribalaius); võrreldav Medium Fast           |
@@ -76,7 +76,7 @@ Pärast sätete muutmist puuduta nuppu **Salvesta**, et konfiguratsioon raadioss
 
 The modem preset controls the fundamental tradeoff between **range** and **data rate**:
 
-- **Slower presets** use more spreading, making signals decodable at weaker signal levels (lower SNR limit). This means longer range but fewer bytes per second.
+- **Slower presets** use more spreading, making signals decodable at weaker signal levels (lower SNR limit). See tähendab pikemat ulatust, aga vähem baite sekundis.
 - **Faster presets** pack more data per transmission but require a stronger signal to decode.
 
 **Practical guidance:**

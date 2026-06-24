@@ -679,6 +679,9 @@
     <string name="local_stats_utilization">Kanalauslastung: %1$s% | Sendezeit: %2$s%</string>
     <string name="location_disabled">Standortzugriff ist deaktiviert, es kann kein Standort zum Mesh bereitgestellt werden.</string>
     <string name="location_sharing">Standortfreigabe</string>
+    <!-- LOCKDOWN -->
+    <string name="lockdown_hide_passphrase">Ausblenden</string>
+    <string name="lockdown_submit">Absenden</string>
     <string name="locked">Gesperrt</string>
     <!-- LOG -->
     <string name="log_retention_days">Protokoll Speicherdauer</string>

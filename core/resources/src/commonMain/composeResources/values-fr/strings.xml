@@ -698,6 +698,9 @@
     <string name="local_stats_utilization">ChUtil: %1$s% | AirTX: %2$s%</string>
     <string name="location_disabled">L'accès à la localisation est désactivé, impossible de fournir la position du maillage.</string>
     <string name="location_sharing">Partage de position</string>
+    <!-- LOCKDOWN -->
+    <string name="lockdown_hide_passphrase">Masquer</string>
+    <string name="lockdown_submit">Envoyer</string>
     <string name="locked">Verrouillé</string>
     <!-- LOG -->
     <string name="log_retention_days">Durée de rétention des journaux</string>

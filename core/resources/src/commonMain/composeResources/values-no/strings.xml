@@ -115,6 +115,7 @@
     <!-- LOAD -->
     <!-- LOCAL -->
     <string name="location_disabled">Lokasjonstilgang er slått av,kan ikke gi posisjon til mesh.</string>
+    <!-- LOCKDOWN -->
     <string name="locked">Låst</string>
     <!-- LOG -->
     <string name="logs">Logger</string>

@@ -96,6 +96,7 @@
     <!-- LOAD -->
     <!-- LOCAL -->
     <string name="location_disabled">Accés al posicionament deshabilitat, no es pot proveir la posició a la xarxa.</string>
+    <!-- LOCKDOWN -->
     <string name="locked">Bloquejat</string>
     <!-- LOG -->
     <!-- MAP -->

@@ -215,6 +215,7 @@
     <string name="load_indexed">Zaťaženie %1$d</string>
     <!-- LOCAL -->
     <string name="location_disabled">Prístup k polohe zariadenia nie je povolený, nedokážem poskytnúť polohu zariadenia Mesh sieti.</string>
+    <!-- LOCKDOWN -->
     <string name="locked">Zamknuté</string>
     <!-- LOG -->
     <plurals name="log_retention_days_quantity">

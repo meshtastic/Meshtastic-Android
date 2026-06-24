@@ -4,9 +4,9 @@ layout: default
 nav_order: 0
 ---
 
-# Meshtastic Android App Documentation
+# Meshtastic Androidi rakenduse dokumentatsioon
 
-User and developer documentation for the Meshtastic Android, Desktop, and iOS applications powered by KMP (Kotlin Multiplatform).
+Kasutaja- ja arendajadokumentatsioon Meshtastic Androidi, arvuti ja iOS-i rakendust KMP (Kotlin Multiplatform) toega.
 
 Use the sidebar navigation to browse the **User Guide** for app features and the **Developer Guide** for contributing to the project.
 
