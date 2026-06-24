@@ -121,6 +121,14 @@ class SerialRadioTransport(
                         }
 
                         override fun onDisconnected(thrown: Exception?) {
+                            // Skip the disconnect callback when the reader-thread termination is the
+                            // direct result of an explicit close() — the caller owns the post-close
+                            // notification, and the expected close must not emit warning-log noise.
+                            // USB unplug / cable error is the only path that should log + forward a
+                            // transient disconnect here.
+                            if (explicitCloseInProgress.get()) {
+                                return
+                            }
                             val uptime =
                                 if (connectionStartTime > 0) {
                                     nowMillis - connectionStartTime
@@ -136,13 +144,6 @@ class SerialRadioTransport(
                                     "Device: $device, " +
                                     "Uptime: ${uptime}ms, " +
                                     "Packets RX: $packetsReceived ($bytesReceived bytes)"
-                            }
-                            // Skip the disconnect callback when the reader-thread termination is the
-                            // direct result of an explicit close() — the caller owns the post-close
-                            // notification. USB unplug / cable error is the only path that should
-                            // forward a transient disconnect here.
-                            if (explicitCloseInProgress.get()) {
-                                return
                             }
                             // USB unplug / cable error is transient — the transport will reconnect when
                             // the device is replugged or the OS re-enumerates the port. Only an explicit
