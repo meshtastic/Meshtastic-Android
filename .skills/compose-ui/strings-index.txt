@@ -519,10 +519,6 @@ establishing_session
 ethernet_config
 ethernet_enabled
 ethernet_ip
-event_welcome_burning_man
-event_welcome_defcon
-event_welcome_hamvention
-event_welcome_open_sauce
 exchange_position
 expand_chart
 expanded

@@ -40,15 +40,15 @@ import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.database.entity.asDeviceVersion
 import org.meshtastic.core.model.ConnectionState
-import org.meshtastic.core.model.EventEdition
+import org.meshtastic.core.model.EventFirmwareEdition
 import org.meshtastic.core.model.MeshActivity
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.TracerouteMapAvailability
 import org.meshtastic.core.model.evaluateTracerouteMapAvailability
 import org.meshtastic.core.model.service.TracerouteResponse
-import org.meshtastic.core.model.toEventEdition
 import org.meshtastic.core.model.util.dispatchMeshtasticUri
 import org.meshtastic.core.navigation.DeepLinkRouter
+import org.meshtastic.core.repository.EventFirmwareRepository
 import org.meshtastic.core.repository.FirmwareReleaseRepository
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.NodeRepository
@@ -84,6 +84,7 @@ class UIViewModel(
     radioInterfaceService: RadioInterfaceService,
     meshLogRepository: MeshLogRepository,
     firmwareReleaseRepository: FirmwareReleaseRepository,
+    private val eventFirmwareRepository: EventFirmwareRepository,
     private val uiPrefs: UiPrefs,
     private val notificationManager: NotificationManager,
     packetRepository: PacketRepository,
@@ -123,9 +124,14 @@ class UIViewModel(
 
     val firmwareEdition = meshLogRepository.getMyNodeInfo().map { nodeInfo -> nodeInfo?.firmware_edition }
 
-    val eventEdition: StateFlow<EventEdition?> =
+    val eventEdition: StateFlow<EventFirmwareEdition?> =
         combine(firmwareEdition, connectionState) { edition, state ->
-            if (state is ConnectionState.Connected) edition?.toEventEdition() else null
+            // combine's transform is suspending, so the repository lookup runs here directly.
+            if (state is ConnectionState.Connected) {
+                edition?.let { eventFirmwareRepository.getEdition(it.name) }
+            } else {
+                null
+            }
         }
             .stateInWhileSubscribed(initialValue = null)
 

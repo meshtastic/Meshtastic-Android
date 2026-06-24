@@ -543,10 +543,6 @@
     <string name="ethernet_config">Ethernet Options</string>
     <string name="ethernet_enabled">Ethernet enabled</string>
     <string name="ethernet_ip">Ethernet IP:</string>
-    <string name="event_welcome_burning_man">Welcome to Burning Man! 🔥</string>
-    <string name="event_welcome_defcon">Welcome to DEFCON! 💀</string>
-    <string name="event_welcome_hamvention">Welcome to Hamvention! 🍖📻</string>
-    <string name="event_welcome_open_sauce">Welcome to Open Sauce! 🔧</string>
     <string name="exchange_position">Exchange position</string>
     <string name="expand_chart">Expand chart</string>
     <string name="expanded">Expanded</string>
