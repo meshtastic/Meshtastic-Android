@@ -39,7 +39,7 @@ The Meshtastic Desktop application shares its core codebase with Android via Kot
 
 The most reliable connection method on Desktop:
 
-1. Connect your Meshtastic radio via USB cable.
+1. Ühenda oma Meshtastic raadio USB kaabliga.
 2. Rakendus peaks jadapordi automaatselt tuvastama.
 3. Kui seda ei tuvastata, vali menüüst Ühenda õige jadapordiga.
 

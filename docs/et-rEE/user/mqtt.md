@@ -20,7 +20,7 @@ MQTT moodul ühendab teie sõlme MQTT vahendajaga, võimaldades:
 
 - Messages to reach nodes on different physical meshes via the internet
 - Integration with home automation and monitoring systems
-- Publishing node positions to the public Meshtastic map
+- Sõlmede asukoha avaldamine avalikul Meshtastic kaardil
 - Custom data pipelines for logging and alerting
 
 ## How It Works
@@ -41,22 +41,22 @@ Internetiühendusega (WiFi või Ethernet) lüüsisõlm jagab võrgusõnumeid MQT
 
 ![MQTT lüliti](/assets/screenshots/settings_switch.png)
 
-| Sätted           | Kirjeldus                                                                                     | Vaikimisi                                           |
-| ---------------- | --------------------------------------------------------------------------------------------- | --------------------------------------------------- |
-| Server Address   | MQTT vahendaja hostinimi                                                                      | mqtt.meshtastic.org |
-| Kasutajatunnus   | Broker authentication                                                                         | meshdev                                             |
-| Parool           | Broker authentication                                                                         | large4cats                                          |
-| Root Topic       | Base topic for messages                                                                       | msh                                                 |
-| Encryption       | Krüpteeri MQTT liiklus                                                                        | Lubatud                                             |
-| ~~JSON väljund~~ | ⚠️ **Deprecated** — JSON packet support has been removed from firmware; this field is ignored | Keelatud                                            |
-| TLS              | Secure connection to broker                                                                   | Keelatud                                            |
-| Map Reporting    | Report position to public map                                                                 | Keelatud                                            |
+| Sätted           | Kirjeldus                                                                                  | Vaikimisi                                           |
+| ---------------- | ------------------------------------------------------------------------------------------ | --------------------------------------------------- |
+| Server Address   | MQTT vahendaja hostinimi                                                                   | mqtt.meshtastic.org |
+| Kasutajatunnus   | Broker authentication                                                                      | meshdev                                             |
+| Parool           | Broker authentication                                                                      | large4cats                                          |
+| Root Topic       | Base topic for messages                                                                    | msh                                                 |
+| Encryption       | Krüpteeri MQTT liiklus                                                                     | Lubatud                                             |
+| ~~JSON väljund~~ | ⚠️ **Vananenud** — JSON pakettide tugi on püsivarast eemaldatud; seda välja ignoreeritakse | Keelatud                                            |
+| TLS              | Secure connection to broker                                                                | Keelatud                                            |
+| Map Reporting    | Report position to public map                                                              | Keelatud                                            |
 
-### Default Meshtastic Broker
+### Meshtastic vaikemaakler
 
 Kogukond haldab avaliku vahendajat aadressil `mqtt.meshtastic.org`. This is intended for general use and testing.
 
-> 🔒 **Privacy:** Messages on the public broker are readable by anyone subscribed. Always use channel encryption for private communications.
+> 🔒 **Privaatsus:** Avaliku vahendaja sõnumeid saavad lugeda kõik tellijad. Always use channel encryption for private communications.
 
 ### Private Broker
 
@@ -70,7 +70,7 @@ Configure your node to point to your private broker with appropriate credentials
 
 ## Map Reporting
 
-When Map Reporting is enabled, your node publishes its position to the Meshtastic community map:
+Kui kaardiaruandlus on lubatud, avaldab sõlm oma asukoha Meshtasticu kogukonnakaardil:
 
 - Visible at [meshmap.net](https://meshmap.net) and similar community map services
 - Only position and node info are shared
@@ -89,11 +89,11 @@ Configure per-channel which directions are active to control message flow and ai
 
 MQTT kasutab protobuf-sõnumivormingut:
 
-| Format       | Kirjeldus                           | Use case                   |
-| ------------ | ----------------------------------- | -------------------------- |
-| **Protobuf** | Binary Meshtastic protobuf encoding | Node-to-node mesh bridging |
+| Format       | Kirjeldus                              | Use case                   |
+| ------------ | -------------------------------------- | -------------------------- |
+| **Protobuf** | Binaarne Meshtastic protobuf kodeering | Node-to-node mesh bridging |
 
-> ⚠️ **Note:** JSON output support was removed from firmware. The `json_enabled` setting is still visible in the app for legacy compatibility but has no effect on current firmware versions.
+> ⚠️ **Märkus:** JSON väljundi tugi eemaldati püsivarast. The `json_enabled` setting is still visible in the app for legacy compatibility but has no effect on current firmware versions.
 
 ## Encryption & Privacy
 
@@ -103,7 +103,7 @@ Understanding the layered encryption model:
 2. **MQTT krüptimine** (mooduli säte) lisab vahendajale edastamiseks täiendava krüptimiskihi. This protects metadata and routing information.
 3. **TLS** encrypts the TCP connection to the broker itself, preventing network-level eavesdropping.
 
-> 🔒 **Important:** The default public channel has a well-known key. MQTT kaudu saadetud vaikekanalil olevad sõnumid on sisuliselt **krüpteerimata** – igaüks saab neid dekodeerida. Always use a custom PSK for private communications.
+> 🔒 **Tähtis:** Vaikimisi avalikul kanalil on tuntud võti. MQTT kaudu saadetud vaikekanalil olevad sõnumid on sisuliselt **krüpteerimata** – igaüks saab neid dekodeerida. Always use a custom PSK for private communications.
 
 ## Best Practices
 
@@ -117,7 +117,7 @@ Understanding the layered encryption model:
 
 ### MQTT ei ühendu
 
-- **Check WiFi** — the gateway node must have an active internet connection (WiFi or Ethernet). MQTT ei tööta LoRa raadiolingi enda kaudu.
+- **Kontrolli WiFit** – lüüssõlmel peab olema aktiivne internetiühendus (WiFi või Ethernet). MQTT ei tööta LoRa raadiolingi enda kaudu.
 - **Verify credentials** — incorrect username or password will silently fail on most brokers. Double-check for trailing spaces.
 - **Tulemüür** — port 1883 (MQTT) või 8883 (MQTT+TLS) peab olema avatud. Some networks block non-standard ports.
 - **DNS resolution** — if using a custom broker hostname, verify the node can resolve it. Try the broker's IP address directly.

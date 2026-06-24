@@ -11,7 +11,7 @@ aliases:
 
 # Translate the App
 
-Contributing translations helps make Meshtastic accessible to a wider audience. The app uses [Crowdin](https://crowdin.com/) to manage community translations for both the user interface and in-app documentation.
+Tõlgete koostamisele kaasaaitamine aitab Meshtasticut laiemale publikule kättesaadavaks teha. Rakendus kasutab nii kasutajaliidese kui ka rakendusesisese dokumentatsiooni kogukonna tõlgete haldamiseks [Crowdinit](https://crowdin.com/).
 
 ---
 
@@ -29,9 +29,9 @@ Contributing translations helps make Meshtastic accessible to a wider audience. 
 
 ## How to Contribute
 
-1. **Visit the Crowdin project.** Open the [Meshtastic Android Crowdin project](https://crowdin.com/project/meshtastic-android) and sign in or create a free account.
-2. **Choose your language.** Select an existing language or request a new one by opening a [GitHub issue](https://github.com/meshtastic/Meshtastic-Android/issues/new).
-3. **Translate strings.** Crowdin shows the English source on the left and your translation on the right. Translate each string and save.
+1. **Külasta Crowdini projekti.** Ava [Meshtastic Android Crowdini projekt](https://crowdin.com/project/meshtastic-android) ja logi sisse või loo tasuta konto.
+2. **Vali keel.** Vali olemasolev keel või taotle uut, avades [GitHubi probleemi](https://github.com/meshtastic/Meshtastic-Android/issues/new).
+3. **Tõlgi stringe.** Crowdin kuvab ingliskeelse allika vasakul ja sinu tõlke paremal. Translate each string and save.
 4. **Review context.** Many strings include screenshots or context comments — check these to understand where the text appears in the app.
 5. **Submit.** Approved translations are automatically merged into the next release.
 
@@ -41,10 +41,10 @@ Contributing translations helps make Meshtastic accessible to a wider audience. 
 
 ## Adding a New Language
 
-If your language is not yet listed on Crowdin:
+Kui teie keelt Crowdinis veel pole:
 
-1. Open an issue on [GitHub](https://github.com/meshtastic/Meshtastic-Android/issues/new) requesting the new locale.
-2. A maintainer will add the language to Crowdin and configure `crowdin.yml`.
+1. Ava probleem [GitHubis](https://github.com/meshtastic/Meshtastic-Android/issues/new) ja taotle uut locale.
+2. Hooldaja lisab keele Crowdinile ja seadistab faili `crowdin.yml`.
 3. Once added, you can begin translating immediately.
 
 ---
@@ -92,6 +92,6 @@ The app automatically selects the correct locale based on your device's **Langua
 
 ## Questions?
 
-If you have questions about a specific string's context or need help getting started, open a discussion on the [Meshtastic GitHub Discussions](https://github.com/meshtastic/Meshtastic-Android/discussions) page.
+Kui on küsimusi konkreetse stringi konteksti kohta või vajad abi alustamisel, ava arutelu lehel [Meshtastic GitHub Discussions](https://github.com/meshtastic/Meshtastic-Android/discussions).
 
-Thank you for helping expand the reach of Meshtastic!
+Tänan teid Meshtasticu haardeala laiendamise eest!

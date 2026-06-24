@@ -45,13 +45,13 @@ Pärast sätete muutmist puuduta nuppu **Salvesta**, et konfiguratsioon raadioss
 | Setting           | Kirjeldus                                                               | Vaikimisi                                 |
 | ----------------- | ----------------------------------------------------------------------- | ----------------------------------------- |
 | Regioon           | Regulatory region for frequency bands                                   | Unset (must configure) |
-| Modemi vaikesäte  | Speed/range tradeoff                                                    | LongFast                                  |
+| Modemi vaikesäte  | Speed/range tradeoff                                                    | PikkKauge                                 |
 | Hop Limit         | Maximum retransmit hops                                                 | 3                                         |
 | TX võimsus        | Transmission power (dBm); 0 = max allowed for region | 0 (region max)         |
 | Frequency Offset  | Fine-tune frequency (MHz)                            | 0                                         |
 | Channel Bandwidth | Bandwidth setting                                                       | Default for preset                        |
 
-> ⚠️ **Important:** You **must** set your region before transmitting. Operating without the correct region may violate local radio regulations. See the [region configuration guide](https://meshtastic.org/docs/getting-started/initial-config) on meshtastic.org for details.
+> ⚠️ **Tähtis:** Enne edastamist **peate** oma piirkonna määrama. Operating without the correct region may violate local radio regulations. Lisateabe saamiseks vaadake [regiooni seadistamise juhendit](https://meshtastic.org/docs/getting-started/initial-config) aadressil meshtastic.org.
 
 ### Modem Presets
 
@@ -69,8 +69,8 @@ Pärast sätete muutmist puuduta nuppu **Salvesta**, et konfiguratsioon raadioss
 | Lite Slow          | ~10 km  | 1,1 kbps                 | −12,5 dB  | EL 866 MHz SRD sagedusala (125 kHz ribalaius); võrreldav Long Fast             |
 | Narrow Fast        | ~5 km   | 2,7 kbps                 | −10 dB    | EL 868 MHz sagedusala (62,5 kHz sagedusriba); väldib häireid teiste seadmetega |
 | Narrow Slow        | ~10 km  | 1,1 kbps                 | −12,5 dB  | EL 868 MHz sagedusala (62,5 kHz ribalaius); võrreldav Long Fast                |
-| ~~Long Slow~~      | ~30 km  | 0,18 kbps                | −17,5 dB  | ⚠️ **Deprecated** — still selectable but may be removed in a future firmware release              |
-| ~~Very Long Slow~~ | ~40+ km | 0,09 kbps                | −20 dB    | ⚠️ **Deprecated** — still selectable but may be removed in a future firmware release              |
+| ~~Long Slow~~      | ~30 km  | 0,18 kbps                | −17,5 dB  | ⚠️ **Vananenud** — endiselt valitav, kuid võidakse tulevases püsivara versioonis eemaldada        |
+| ~~Very Long Slow~~ | ~40+ km | 0,09 kbps                | −20 dB    | ⚠️ **Vananenud** — endiselt valitav, kuid võidakse tulevases püsivara versioonis eemaldada        |
 
 #### Choosing a Modem Preset
 
@@ -87,19 +87,19 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 - **Fixed infrastructure links:** Use **Short Turbo** or **Long Turbo** for dedicated point-to-point links with good antennas and line-of-sight.
 - **Mixed environments:** Stick with **Long Fast** — it's the community default and ensures compatibility with others in your area.
 
-> ⚠️ **Important:** All nodes on the same channel **must** use the same modem preset. Nodes with mismatched presets cannot communicate even if they share the same frequency and encryption key.
+> ⚠️ **Tähtis:** Kõik samal kanalil olevad sõlmed **peavad** kasutama sama modemi eelseadistust. Nodes with mismatched presets cannot communicate even if they share the same frequency and encryption key.
 
-> 💡 **Tip:** The range estimates above assume flat terrain and modest antennas. Elevation advantage (hilltop, rooftop) dramatically increases effective range. A well-placed Router with Long Fast can often outperform a ground-level node with Long Slow.
+> 💡 **Vihje:** ulatuse hinnangud eeldavad tasast maastikku ja mõõdukaid antenne. Elevation advantage (hilltop, rooftop) dramatically increases effective range. A well-placed Router with Long Fast can often outperform a ground-level node with Long Slow.
 
 ### Ekraani sätted
 
-| Setting             | Kirjeldus                                                                            |
-| ------------------- | ------------------------------------------------------------------------------------ |
-| Screen Timeout      | Time before display sleeps                                                           |
-| Display Units       | Meetriline või Imperial                                                              |
-| OLED Type           | Auto, SSD1306, SH1106, SH1107                                                        |
-| Compass Orientation | Rotation offset for compass display (0°, 90°, 180°, 270°)         |
-| ~~Compass North~~   | ⚠️ **Deprecated** — replaced by Compass Orientation; still visible in older firmware |
+| Setting             | Kirjeldus                                                                        |
+| ------------------- | -------------------------------------------------------------------------------- |
+| Screen Timeout      | Time before display sleeps                                                       |
+| Display Units       | Meetriline või Imperial                                                          |
+| OLED Type           | Auto, SSD1306, SH1106, SH1107                                                    |
+| Compass Orientation | Rotation offset for compass display (0°, 90°, 180°, 270°)     |
+| ~~Compass North~~   | ⚠️ **Vananenud** — asendatud kompassi suunaga; nähtav endiselt vanemas püsivaras |
 
 ### Asukoha sätted
 
@@ -148,7 +148,7 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 | Avalik võti               | Your node's public key (read-only)                                |
 | Administraatori võti      | Key for remote administration                                                        |
 | Salajane võti             | Your node's private key (handle securely)                         |
-| ~~Admin Channel Enabled~~ | ⚠️ Removed — now configured automatically when an admin key is set                   |
+| ~~Admin Channel Enabled~~ | ⚠️ Eemaldatud — nüüd konfitakse automaatselt, kui administraatori võti on määratud   |
 | Debug Log                 | Edasta reaalajas silumislogi jadapordi/sinihamba ​​kaudu                             |
 | Jadaport lubatud          | Luba jadapordi konsoolile juurdepääs (teisaldatud seadme konfist) |
 | Hallatud režiim           | Restrict non-admin channel changes                                                   |
@@ -167,8 +167,8 @@ Settings use standard preference controls — dropdowns, toggles, and sliders:
 
 - [Seaded — moodulid ja admin](settings-module-admin) — valikulised funktsioonimoodulid ja seadme haldamine
 - [Signal Meter](signal-meter) — how modem presets affect signal quality thresholds
-- [LoRa configuration](https://meshtastic.org/docs/configuration/radio/lora) — detailed LoRa settings reference on meshtastic.org
-- [Initial configuration](https://meshtastic.org/docs/getting-started/initial-config) — region setup guide on meshtastic.org
+- [LoRa konfiguratsioon](https://meshtastic.org/docs/configuration/radio/lora) — üksikasjalik LoRa sätete juhend aadressil meshtastic.org
+- [Esialgne konfiguratsioon](https://meshtastic.org/docs/getting-started/initial-config) — piirkonna seadistamise juhend meshtastic.org lehel
 
 ---
 

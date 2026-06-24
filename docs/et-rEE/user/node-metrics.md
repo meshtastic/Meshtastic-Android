@@ -45,7 +45,7 @@ Environmental sensor data (requires compatible hardware):
 
 Environment metrics are charted over time for easy trend analysis — temperature, humidity, and pressure each get their own line chart with the measurement unit displayed on the Y axis.
 
-> 💡 **Tip:** Environment metrics require a sensor connected to the remote node. Not all nodes report environmental data. See [Telemetry & Sensors](telemetry-and-sensors) for a full list of supported sensors.
+> 💡 **Vihje:** Keskkonnamõõdikute jaoks on vaja kaugsõlmega ühendatud andurit. Not all nodes report environmental data. See [Telemetry & Sensors](telemetry-and-sensors) for a full list of supported sensors.
 
 ## Air Quality Metrics
 
@@ -75,9 +75,9 @@ An air-quality log/metrics button appears on the node detail screen **only when 
 - Select a **time frame** for the charts.
 - Filter with **metric chips** — only metrics that have data are shown.
 - **Refresh / request** the latest air-quality telemetry.
-- **Export to CSV** for analysis in a spreadsheet.
+- **Ekspordi CSV** analüüsimiseks arvutustabeli vaates.
 
-> 💡 **Tip:** Air Quality metrics require a compatible air-quality sensor on the remote node. If a node has no particulate or CO₂ sensor, the air-quality button won't appear. See [Telemetry & Sensors](telemetry-and-sensors) for supported hardware.
+> 💡 **Vihje:** Õhukvaliteedi mõõdikute jaoks on vaja kaugsõlmega ühendatud andurit. If a node has no particulate or CO₂ sensor, the air-quality button won't appear. See [Telemetry & Sensors](telemetry-and-sensors) for supported hardware.
 
 ## Signaali mõõdikud
 
@@ -99,7 +99,7 @@ Radio signal quality information:
 | -10 to 0 dB                       | Rahuldav  |
 | < -10 dB | Poor      |
 
-Local Stats from your connected radio are also shown in Signal Quality when available. These logs include noise floor, traffic counters, relay counters, online node counts, and radio uptime. The noise floor chart uses a dashed reference line at -85 dBm to help identify a busy RF environment. Use **Request** to ask the connected radio for a fresh Local Stats telemetry report, **Clear** to remove Local Stats logs for that node, and **Save** to export the visible Local Stats history as CSV.
+Local Stats from your connected radio are also shown in Signal Quality when available. These logs include noise floor, traffic counters, relay counters, online node counts, and radio uptime. The noise floor chart uses a dashed reference line at -85 dBm to help identify a busy RF environment. Kasuta **Taotle**, et küsida ühendatud raadiost uut kohaliku statistika telemeetriaaruannet, **Tühjenda**, et eemaldada selle sõlme kohaliku statistika logi ja **Salvesta**, et salvestada nähtavat kohaliku statistika ajalugu CSV-failina.
 
 ## Võimsusnäitajad
 
@@ -152,7 +152,7 @@ The position tab shows location data for nodes that share GPS:
 
 ![Position inline content](../../assets/screenshots/nodes_position.png)
 
-> ⚠️ **Note:** Metrics are only available when they have been reported by the remote node. Mõõdikud värskendatakse iga sõlme telemeetria sätetes konfigureeritud intervallidega.
+> ⚠️ **Märkus:** Mõõdikud on saadaval ainult siis, kui need on kaugsõlme poolt esitatud. Mõõdikud värskendatakse iga sõlme telemeetria sätetes konfigureeritud intervallidega.
 
 ## Related Topics
 

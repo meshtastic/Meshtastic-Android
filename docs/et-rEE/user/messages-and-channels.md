@@ -21,20 +21,20 @@ Channels are shared communication groups. All nodes configured with the same cha
 
 ### Default Channel
 
-Every Meshtastic device comes with a default **LongFast** channel. This is an unencrypted channel used for general mesh communication.
+Igal Meshtastic seadmel on vaikimisi **PikkKauge** kanal. This is an unencrypted channel used for general mesh communication.
 
 ### Kanali turvalisus
 
 Channels support multiple encryption levels:
 
-| Ikoon | Security Level                       | Kirjeldus                                                                                                                              |
-| ----- | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
-| 🔒    | PSK (256-bit AES) | Fully encrypted with a strong pre-shared key. Only nodes with the matching key can read messages.      |
-| 🔐    | PSK (128-bit AES) | Encrypted with a shorter key. Secure for most uses but 256-bit is preferred for sensitive data.        |
-| 🔓    | Default / Open                       | Uses the well-known default key. **Any Meshtastic device** on the same preset can read these messages. |
-| ⚠️    | Insecure + Position                  | Ava kanal, mis levitab ka sinu GPS asukohta. Use with caution in public meshes.                        |
+| Ikoon | Security Level                       | Kirjeldus                                                                                                                                 |
+| ----- | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| 🔒    | PSK (256-bit AES) | Fully encrypted with a strong pre-shared key. Only nodes with the matching key can read messages.         |
+| 🔐    | PSK (128-bit AES) | Encrypted with a shorter key. Secure for most uses but 256-bit is preferred for sensitive data.           |
+| 🔓    | Default / Open                       | Uses the well-known default key. **Iga Meshtastic seade** saab sama eelseadistusega neid sõnumeid lugeda. |
+| ⚠️    | Insecure + Position                  | Ava kanal, mis levitab ka sinu GPS asukohta. Use with caution in public meshes.                           |
 
-> 🔒 **Security Tip:** Always configure a unique PSK for private communications. The default channel is intentionally open so new users can discover the mesh — but you should create a separate encrypted channel for anything sensitive.
+> 🔒 **Turvanõuanne:** Privaatse suhtluse jaoks konfi alati unikaalne PSK. The default channel is intentionally open so new users can discover the mesh — but you should create a separate encrypted channel for anything sensitive.
 
 ### Adding a Channel
 
@@ -84,7 +84,7 @@ When a message fails to deliver, the error indicator shows what went wrong:
 | Duty Cycle Limit | Regional airtime limit reached           | Your radio has used its allowed transmit time. Wait for the duty cycle window to reset (typically 1 hour in EU regions). |
 | Vigane päring    | Malformed or invalid message             | This usually indicates a software bug. Try restarting the app.                                                                              |
 
-> 💡 **Tip:** Most delivery errors resolve themselves. If a node is intermittently reachable, the mesh will retry. For persistent "No Route" errors, check that intermediate Router nodes are online.
+> 💡 **Vihje:** Enamik kohaletoimetamise vigu laheneb iseenesest. If a node is intermittently reachable, the mesh will retry. For persistent "No Route" errors, check that intermediate Router nodes are online.
 
 ## Message Features
 
@@ -112,7 +112,7 @@ You can search the full history of any conversation directly from the chat scree
 
 ![Message search bar with result counter and previous/next arrows](../../assets/screenshots/messages_search_bar.png)
 
-> 💡 **Tip:** Search is full-text and stays within the conversation you opened it from — it doesn't search across other channels or contacts. Matching is fast even on long histories because messages are indexed locally.
+> 💡 **Vihje:** Otsing toimub täisteksti põhjal ja jääb vestlusse, kust te selle avasite – see ei otsi teistest kanalitest ega kontaktide hulgast. Matching is fast even on long histories because messages are indexed locally.
 
 ### Message Bubbles
 
@@ -130,7 +130,7 @@ React to messages with emoji:
 
 ![Emoji reaction badges displayed beneath a message](../../assets/screenshots/messages_reaction.png)
 
-> 💡 **Tip:** Reactions are lightweight — they use minimal mesh bandwidth compared to full text messages.
+> 💡 **Vihje:** Reaktsioonid on kerged – need kasutavad täistekstisõnumitega võrreldes minimaalselt võrgu ribalaiust.
 
 ### Message Actions
 

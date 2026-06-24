@@ -15,9 +15,9 @@ aliases:
 
 App Functions expose Meshtastic capabilities to the Android system and to on-device AI assistants (such as Gemini) through the Android App Functions API. With them enabled, an assistant can discover and trigger mesh workflows for you — for example sending a message or checking your mesh status — without you opening the app.
 
-> ⚠️ **Note:** App Functions are available on **Google-flavor Android builds only**.
+> ⚠️ **Märkus:** Rakenduse funktsioonid on saadaval ainult **Google'i-tüüpi Androidi versioonides**.
 
-> ⚠️ **Note:** This is separate from the in-app **Chirpy** assistant. App Functions let the _system_ AI assistant act on your mesh; Chirpy is a conversational assistant inside the Meshtastic app itself.
+> ⚠️ **Märkus:** See on eraldi rakenduse sisesest **Chirpy** assistendist. App Functions let the _system_ AI assistant act on your mesh; Chirpy is a conversational assistant inside the Meshtastic app itself.
 
 ## Enabling App Functions
 
@@ -51,7 +51,7 @@ The functions are grouped into a **Write** section (functions that change someth
 
 ## Privacy
 
-> 🔒 **Privacy:** The **Send Message** function lets an assistant send messages to your mesh on your behalf. Only enable functions you trust the assistant to use. The read functions expose node, message, and metric data to the assistant — enable only what you're comfortable sharing. Each function has its own toggle, and the master toggle turns all of them off at once.
+> 🔒 **Privaatsus:** Funktsioon **Saada sõnum** võimaldab assistendil sinu nimel sinu kärgvõrku sõnumeid saata. Only enable functions you trust the assistant to use. The read functions expose node, message, and metric data to the assistant — enable only what you're comfortable sharing. Each function has its own toggle, and the master toggle turns all of them off at once.
 
 ## Related Topics
 
