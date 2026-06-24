@@ -23,6 +23,7 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.repository.FromRadioPacketHandler
+import org.meshtastic.core.repository.LockdownCoordinator
 import org.meshtastic.core.repository.MeshConfigFlowManager
 import org.meshtastic.core.repository.MeshConfigHandler
 import org.meshtastic.core.repository.MqttManager
@@ -52,6 +53,7 @@ class FromRadioPacketHandlerImpl(
     private val mqttManager: MqttManager,
     private val packetHandler: PacketHandler,
     private val notificationManager: NotificationManager,
+    private val lockdownCoordinator: LockdownCoordinator,
 ) : FromRadioPacketHandler {
 
     // Application-scoped coroutine context for suspend work (e.g. getStringSuspend).
@@ -73,6 +75,7 @@ class FromRadioPacketHandlerImpl(
         val deviceUIConfig = proto.deviceuiConfig
         val fileInfo = proto.fileInfo
         val xmodemPacket = proto.xmodemPacket
+        val lockdownStatus = proto.lockdown_status
 
         when {
             myInfo != null -> configFlowManager.value.handleMyInfo(myInfo)
@@ -88,7 +91,10 @@ class FromRadioPacketHandlerImpl(
                 serviceStateWriter.setConnectionProgress("Nodes (${configFlowManager.value.newNodeCount})")
             }
 
-            configCompleteId != null -> configFlowManager.value.handleConfigComplete(configCompleteId)
+            configCompleteId != null -> {
+                configFlowManager.value.handleConfigComplete(configCompleteId)
+                lockdownCoordinator.onConfigComplete()
+            }
 
             mqttProxyMessage != null -> mqttManager.handleMqttProxyMessage(mqttProxyMessage)
 
@@ -103,6 +109,8 @@ class FromRadioPacketHandlerImpl(
             fileInfo != null -> configFlowManager.value.handleFileInfo(fileInfo)
 
             xmodemPacket != null -> xmodemManager.value.handleIncomingXModem(xmodemPacket)
+
+            lockdownStatus != null -> lockdownCoordinator.handleLockdownStatus(lockdownStatus)
 
             clientNotification != null -> handleClientNotification(clientNotification)
 

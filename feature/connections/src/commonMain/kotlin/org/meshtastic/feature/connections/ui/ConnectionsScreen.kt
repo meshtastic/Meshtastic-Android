@@ -119,6 +119,7 @@ fun ConnectionsScreen(
     val connectionState by connectionsViewModel.connectionState.collectAsStateWithLifecycle()
     val ourNode by connectionsViewModel.ourNodeForDisplay.collectAsStateWithLifecycle()
     val regionUnset by connectionsViewModel.regionUnset.collectAsStateWithLifecycle()
+    val sessionAuthorized by connectionsViewModel.sessionAuthorized.collectAsStateWithLifecycle()
 
     val selectedDevice by scanModel.selectedNotNullFlow.collectAsStateWithLifecycle()
     val persistedDeviceName by scanModel.persistedDeviceName.collectAsStateWithLifecycle()
@@ -272,6 +273,7 @@ fun ConnectionsScreen(
                         if (
                             uiState == ConnectionUiState.CONNECTED_WITH_NODE &&
                             regionUnset &&
+                            sessionAuthorized &&
                             selectedDevice != MOCK_DEVICE_PREFIX &&
                             selectedDevice != REPLAY_DEVICE_PREFIX
                         ) {

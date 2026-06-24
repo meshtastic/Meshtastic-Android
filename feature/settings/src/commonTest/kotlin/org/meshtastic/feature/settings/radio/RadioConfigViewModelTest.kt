@@ -60,6 +60,7 @@ import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
+import org.meshtastic.core.testing.FakeLockdownCoordinator
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.proto.ChannelSet
@@ -159,6 +160,7 @@ class RadioConfigViewModelTest {
         locationService = locationService,
         fileService = fileService,
         mqttManager = mqttManager,
+        lockdownCoordinator = FakeLockdownCoordinator(),
     )
 
     @Test
@@ -553,6 +555,7 @@ class RadioConfigViewModelTest {
                 locationService = locationService,
                 fileService = fileService,
                 mqttManager = mqttManager,
+                lockdownCoordinator = FakeLockdownCoordinator(),
             )
         assertEquals(456, viewModel.destNode.value?.num)
     }

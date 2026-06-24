@@ -57,6 +57,8 @@ import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.HomoglyphPrefs
 import org.meshtastic.core.repository.LocationRepository
 import org.meshtastic.core.repository.LocationService
+import org.meshtastic.core.repository.LockdownCoordinator
+import org.meshtastic.core.repository.LockdownPassphraseStore
 import org.meshtastic.core.repository.MapConsentPrefs
 import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.NodeRepository
@@ -132,7 +134,33 @@ open class RadioConfigViewModel(
     private val locationService: LocationService,
     private val fileService: FileService,
     private val mqttManager: MqttManager,
+    private val lockdownCoordinator: LockdownCoordinator,
 ) : ViewModel() {
+
+    val lockdownTokenInfo = serviceRepository.lockdownTokenInfo
+    val sessionAuthorized = serviceRepository.sessionAuthorized
+    val lockdownState = serviceRepository.lockdownState
+
+    fun sendLockNow() {
+        safeLaunch(tag = "sendLockNow") { lockdownCoordinator.lockNow() }
+    }
+
+    /**
+     * Submits a lockdown passphrase: enables lockdown (from DISABLED), authenticates ([disable]=false from LOCKED), or
+     * turns lockdown off ([disable]=true from UNLOCKED).
+     */
+    fun submitLockdownPassphrase(
+        passphrase: String,
+        boots: Int = LockdownPassphraseStore.DEFAULT_BOOTS,
+        hours: Int = 0,
+        maxSessionSeconds: Int = 0,
+        disable: Boolean = false,
+    ) {
+        safeLaunch(tag = "submitLockdownPassphrase") {
+            lockdownCoordinator.submitPassphrase(passphrase, boots, hours, maxSessionSeconds, disable)
+        }
+    }
+
     val analyticsAllowedFlow = analyticsPrefs.analyticsAllowed
 
     fun toggleAnalyticsAllowed() {

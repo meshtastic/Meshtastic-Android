@@ -50,6 +50,8 @@ import org.meshtastic.core.model.util.dispatchMeshtasticUri
 import org.meshtastic.core.navigation.DeepLinkRouter
 import org.meshtastic.core.repository.EventFirmwareRepository
 import org.meshtastic.core.repository.FirmwareReleaseRepository
+import org.meshtastic.core.repository.LockdownCoordinator
+import org.meshtastic.core.repository.LockdownPassphraseStore
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NotificationManager
@@ -81,6 +83,7 @@ class UIViewModel(
     private val nodeDB: NodeRepository,
     protected val serviceRepository: ServiceRepository,
     private val radioController: RadioController,
+    private val lockdownCoordinator: LockdownCoordinator,
     radioInterfaceService: RadioInterfaceService,
     meshLogRepository: MeshLogRepository,
     firmwareReleaseRepository: FirmwareReleaseRepository,
@@ -140,6 +143,27 @@ class UIViewModel(
     fun clearClientNotification(notification: ClientNotification) {
         serviceRepository.clearClientNotification()
         notificationManager.cancel(notification.toString().hashCode())
+    }
+
+    val lockdownState = serviceRepository.lockdownState
+    val lockdownTokenInfo = serviceRepository.lockdownTokenInfo
+
+    fun sendLockdownUnlock(
+        passphrase: String,
+        bootTtl: Int = DEFAULT_BOOT_TTL,
+        hourTtl: Int = 0,
+        maxSessionSeconds: Int = 0,
+        disable: Boolean = false,
+    ) {
+        lockdownCoordinator.submitPassphrase(passphrase, bootTtl, hourTtl, maxSessionSeconds, disable)
+    }
+
+    fun sendLockNow() {
+        lockdownCoordinator.lockNow()
+    }
+
+    fun clearLockdownState() {
+        serviceRepository.clearLockdownState()
     }
 
     /** Emits events for mesh network send/receive activity. */
@@ -299,5 +323,9 @@ class UIViewModel(
 
     fun onAppIntroCompleted() {
         uiPrefs.setAppIntroCompleted(true)
+    }
+
+    companion object {
+        private const val DEFAULT_BOOT_TTL = LockdownPassphraseStore.DEFAULT_BOOTS
     }
 }

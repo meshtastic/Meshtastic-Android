@@ -43,6 +43,7 @@ import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.DataPair
 import org.meshtastic.core.repository.HandshakeConstants
 import org.meshtastic.core.repository.HistoryManager
+import org.meshtastic.core.repository.LockdownCoordinator
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MeshLocationManager
 import org.meshtastic.core.repository.MeshNotificationManager
@@ -91,6 +92,7 @@ class MeshConnectionManagerImpl(
     private val workerManager: MeshWorkerManager,
     private val appWidgetUpdater: AppWidgetUpdater,
     private val heartbeatSender: DataLayerHeartbeatSender,
+    private val lockdownCoordinator: LockdownCoordinator,
     @Named("ServiceScope") private val scope: CoroutineScope,
 ) : MeshConnectionManager {
     /**
@@ -242,6 +244,7 @@ class MeshConnectionManagerImpl(
         // signals ignored (latch left set from the prior failed cycle). This covers both initial
         // user-initiated connects and transport-restart recovery siblings.
         handshakeCompleteLatch.value = false
+        lockdownCoordinator.onConnect()
         // Send a wake-up heartbeat before the config request. The firmware may be in a
         // power-saving state where the NimBLE callback context needs warming up. The 100ms
         // delay ensures the heartbeat BLE write is enqueued before the want_config_id
@@ -448,6 +451,7 @@ class MeshConnectionManagerImpl(
 
     private fun handleDisconnected() {
         serviceRepository.setConnectionState(ConnectionState.Disconnected)
+        lockdownCoordinator.onDisconnect()
         tearDownConnection()
 
         analytics.track(
@@ -461,6 +465,14 @@ class MeshConnectionManagerImpl(
     override fun startConfigOnly() {
         startHandshakeStallGuard(1, HANDSHAKE_TIMEOUT_STAGE1)
         packetHandler.sendToRadio(ToRadio(want_config_id = HandshakeConstants.CONFIG_NONCE))
+    }
+
+    override fun clearRadioConfig() {
+        scope.handledLaunch {
+            radioConfigRepository.clearLocalConfig()
+            radioConfigRepository.clearChannelSet()
+            radioConfigRepository.clearLocalModuleConfig()
+        }
     }
 
     override fun startNodeInfoOnly() {

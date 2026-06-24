@@ -38,6 +38,12 @@ class CapabilitiesTest {
     }
 
     @Test
+    fun supportsLockdown_requires_V2_8_0() {
+        assertFalse(caps("2.7.21").supportsLockdown)
+        assertTrue(caps("2.8.0").supportsLockdown)
+    }
+
+    @Test
     fun canSendVerifiedContacts_requires_V2_7_12() {
         assertFalse(caps("2.7.11").canSendVerifiedContacts)
         assertTrue(caps("2.7.12").canSendVerifiedContacts)
