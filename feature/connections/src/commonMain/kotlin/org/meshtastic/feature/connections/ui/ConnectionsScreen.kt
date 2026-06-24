@@ -51,6 +51,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.resources.Res
@@ -80,9 +81,7 @@ import org.meshtastic.core.ui.util.rememberOpenWifiSettings
 import org.meshtastic.core.ui.util.shouldShowWifiUnavailableBanner
 import org.meshtastic.core.ui.viewmodel.ConnectionStatus
 import org.meshtastic.core.ui.viewmodel.ConnectionsViewModel
-import org.meshtastic.feature.connections.MOCK_DEVICE_PREFIX
 import org.meshtastic.feature.connections.NO_DEVICE_SELECTED
-import org.meshtastic.feature.connections.REPLAY_DEVICE_PREFIX
 import org.meshtastic.feature.connections.ScannerViewModel
 import org.meshtastic.feature.connections.model.DeviceListEntry
 import org.meshtastic.feature.connections.ui.components.ConnectingDeviceInfo
@@ -271,7 +270,8 @@ fun ConnectionsScreen(
                         // Region warning sits outside the animated card so it does not affect the
                         // CONNECTED ↔ CONNECTING ↔ NO_DEVICE size transition.
                         val isPhysicalDevice =
-                            selectedDevice != MOCK_DEVICE_PREFIX && selectedDevice != REPLAY_DEVICE_PREFIX
+                            selectedDevice != InterfaceId.MOCK.id.toString() &&
+                                selectedDevice != InterfaceId.REPLAY.id.toString()
                         if (
                             uiState == ConnectionUiState.CONNECTED_WITH_NODE &&
                             regionUnset &&

@@ -14,30 +14,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.model
+package org.meshtastic.feature.connections.model
 
-/** Represent the different ways a device can connect to the client. */
-enum class DeviceType {
-    BLE,
-    TCP,
-    USB,
-    ;
+import org.meshtastic.core.model.InterfaceId
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
-    companion object {
-        fun fromAddress(address: String): DeviceType? =
-            when (InterfaceId.forIdChar(address.firstOrNull() ?: return null)) {
-                InterfaceId.BLUETOOTH -> BLE
+class DeviceListEntryTest {
+    @Test
+    fun mock_uses_interface_id_prefix() {
+        val entry = DeviceListEntry.Mock(name = "Test")
 
-                InterfaceId.SERIAL,
-                InterfaceId.MOCK, // Mock/demo mode historically presents as USB.
-                -> USB
+        assertEquals(InterfaceId.MOCK.id.toString(), entry.fullAddress)
+    }
 
-                InterfaceId.TCP -> TCP
+    @Test
+    fun replay_uses_interface_id_prefix() {
+        val entry = DeviceListEntry.Replay(name = "Test")
 
-                InterfaceId.NOP,
-                InterfaceId.REPLAY,
-                null,
-                -> null
-            }
+        assertEquals(InterfaceId.REPLAY.id.toString(), entry.fullAddress)
     }
 }
