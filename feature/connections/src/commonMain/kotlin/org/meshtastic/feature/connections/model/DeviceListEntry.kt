@@ -18,6 +18,7 @@ package org.meshtastic.feature.connections.model
 
 import org.meshtastic.core.ble.BleDevice
 import org.meshtastic.core.ble.MeshtasticBleConstants.BLE_NAME_PATTERN
+import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.anonymize
 
@@ -45,7 +46,7 @@ sealed class DeviceListEntry(
         override val node: Node? = null,
     ) : DeviceListEntry(
         name = device.name ?: "unnamed-${device.address}",
-        fullAddress = "x${device.address}",
+        fullAddress = "${InterfaceId.BLUETOOTH.id}${device.address}",
         bonded = bonded,
         node = node,
     ) {
@@ -69,13 +70,13 @@ sealed class DeviceListEntry(
     }
 
     data class Mock(override val name: String, override val node: Node? = null) :
-        DeviceListEntry(name, "m", true, node) {
+        DeviceListEntry(name, InterfaceId.MOCK.id.toString(), true, node) {
         override fun copy(node: Node?): Mock = copy(name = name, node = node)
     }
 
     /** Debug-only virtual device that replays a bundled packet capture on-device (see `ReplayRadioTransport`). */
     data class Replay(override val name: String, override val node: Node? = null) :
-        DeviceListEntry(name, "r", true, node) {
+        DeviceListEntry(name, InterfaceId.REPLAY.id.toString(), true, node) {
         override fun copy(node: Node?): Replay = copy(name = name, node = node)
     }
 }
