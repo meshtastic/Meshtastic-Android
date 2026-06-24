@@ -27,9 +27,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.ChannelOption
 import org.meshtastic.core.model.RegionInfo
+import org.meshtastic.core.model.RegionPresetConstraint
 import org.meshtastic.core.model.constraintFor
 import org.meshtastic.core.model.numChannels
 import org.meshtastic.core.model.repairPresetFor
@@ -67,9 +69,38 @@ import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.util.hopLimits
 import org.meshtastic.proto.Config
+import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
 
 private val SPREAD_FACTOR_RANGE = 7..12
 private val CODING_RATE_RANGE = 5..8
+
+/**
+ * Builds the modem-preset dropdown items: hide the 2.8-only TINY presets on firmware without
+ * [Capabilities.supportsLoraRegionPresetMap], restrict to the region's legal presets (R7), then always keep the current
+ * selection present (disabled) so the field is never blank when the device's preset is illegal for the region.
+ */
+private fun buildPresetItems(
+    presetConstraint: RegionPresetConstraint?,
+    presetsGated: Boolean,
+    selectedPreset: ModemPreset,
+    capabilities: Capabilities,
+): List<DropDownItem<ModemPreset>> {
+    val items =
+        ChannelOption.entries
+            .filter { option ->
+                capabilities.supportsLoraRegionPresetMap ||
+                    (option != ChannelOption.TINY_FAST && option != ChannelOption.TINY_SLOW)
+            }
+            .filter { option -> presetConstraint == null || option.modemPreset in presetConstraint.presets }
+            .map { option ->
+                DropDownItem(value = option.modemPreset, label = option.modemPreset.name, enabled = !presetsGated)
+            }
+    return if (items.any { it.value == selectedPreset }) {
+        items
+    } else {
+        items + DropDownItem(value = selectedPreset, label = selectedPreset.name, enabled = false)
+    }
+}
 
 @Composable
 fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
@@ -109,9 +140,13 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     ) {
         item {
             TitledCard(title = stringResource(Res.string.options)) {
-                // Region→preset legality map only constrains the locally connected device (R10); for remote admin
-                // there is no map for the remote node, so leave the preset list unconstrained.
-                val regionPresetMap = if (state.isLocal) state.loraRegionPresetMap else null
+                // The region→preset legality map is a function of firmware version + region, not of the device
+                // instance, so the locally-cached map (from our own handshake) is reused for remote admin too. Gated
+                // on the *target* node's firmware capability (metadata is per-target): pre-2.8 nodes don't get the
+                // map or the new TINY presets, which also keeps older remotes unconstrained.
+                val capabilities =
+                    remember(state.metadata?.firmware_version) { Capabilities(state.metadata?.firmware_version) }
+                val regionPresetMap = if (capabilities.supportsLoraRegionPresetMap) state.loraRegionPresetMap else null
                 val presetConstraint =
                     remember(regionPresetMap, formState.value.region) {
                         regionPresetMap.constraintFor(formState.value.region)
@@ -145,27 +180,8 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     // device is flagged as a licensed operator (R8).
                     val selectedPreset = formState.value.modem_preset
                     val presetItems =
-                        remember(presetConstraint, presetsGated, selectedPreset) {
-                            val items =
-                                ChannelOption.entries
-                                    .filter { option ->
-                                        presetConstraint == null || option.modemPreset in presetConstraint.presets
-                                    }
-                                    .map { option ->
-                                        DropDownItem(
-                                            value = option.modemPreset,
-                                            label = option.modemPreset.name,
-                                            enabled = !presetsGated,
-                                        )
-                                    }
-                            // Always keep the current selection present (disabled) so the field is never blank when
-                            // the device's preset is illegal for the selected region.
-                            if (items.any { it.value == selectedPreset }) {
-                                items
-                            } else {
-                                items +
-                                    DropDownItem(value = selectedPreset, label = selectedPreset.name, enabled = false)
-                            }
+                        remember(presetConstraint, presetsGated, selectedPreset, capabilities) {
+                            buildPresetItems(presetConstraint, presetsGated, selectedPreset, capabilities)
                         }
                     DropDownPreference(
                         title = stringResource(Res.string.modem_preset),
