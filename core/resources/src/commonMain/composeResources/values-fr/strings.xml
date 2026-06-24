@@ -463,10 +463,6 @@
     <string name="ethernet_config">Options Ethernet</string>
     <string name="ethernet_enabled">Ethernet activé</string>
     <string name="ethernet_ip">IP Ethernet :</string>
-    <string name="event_welcome_burning_man">Bienvenue à Burning Man! 🔥</string>
-    <string name="event_welcome_defcon">Bienvenue à DEFCON! 💀</string>
-    <string name="event_welcome_hamvention">Bienvenue à Hamvention! 🍖📻</string>
-    <string name="event_welcome_open_sauce">Bienvenue à Open Sauce ! 🔧</string>
     <string name="exchange_position">Demander position</string>
     <string name="expand_chart">Agrandir le graphique</string>
     <string name="expires">Expire</string>
