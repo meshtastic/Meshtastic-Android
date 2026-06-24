@@ -31,20 +31,22 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
-import org.koin.compose.koinInject
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.ic_meshtastic
@@ -52,7 +54,11 @@ import org.meshtastic.core.resources.navigate_back
 import org.meshtastic.core.ui.icon.ArrowBack
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.util.LocalEventBranding
-import org.meshtastic.core.ui.util.SnackbarManager
+import org.meshtastic.core.ui.util.accentColorOrNull
+import org.meshtastic.core.ui.util.eventIconFor
+
+/** Alpha for the ambient event accent wash over the app bar — subtle enough to keep title text legible. */
+private const val EVENT_ACCENT_ALPHA = 0.12f
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -68,7 +74,19 @@ fun MainAppBar(
     onClickChip: (Node) -> Unit,
     brandingContent: @Composable () -> Unit = { EventAwareBranding() },
 ) {
+    // Ambient event theming: when connected to event firmware, tint the bar with a faint wash of its accent color.
+    val accent = LocalEventBranding.current?.accentColorOrNull()
+    val colors =
+        if (accent != null) {
+            TopAppBarDefaults.topAppBarColors(
+                containerColor =
+                accent.copy(alpha = EVENT_ACCENT_ALPHA).compositeOver(MaterialTheme.colorScheme.surface),
+            )
+        } else {
+            TopAppBarDefaults.topAppBarColors()
+        }
     TopAppBar(
+        colors = colors,
         title = {
             Text(
                 text = title,
@@ -89,6 +107,7 @@ fun MainAppBar(
             }
         },
         modifier = modifier,
+        navigationIcon =
         if (canNavigateUp) {
             {
                 IconButton(onClick = onNavigateUp) {
@@ -107,28 +126,34 @@ fun MainAppBar(
     )
 }
 
-/** Reads [LocalEventBranding] to show event artwork (with tap → snackbar), or the default Meshtastic logo. */
+/** Reads [LocalEventBranding] to show event branding (tap → [EventInfoSheet]), or the default Meshtastic logo. */
 @Composable
 private fun EventAwareBranding() {
     val eventEdition = LocalEventBranding.current
-    val iconRes = eventEdition?.iconRes
+    if (eventEdition == null) {
+        Icon(imageVector = vectorResource(Res.drawable.ic_meshtastic), contentDescription = null)
+        return
+    }
+    // Every event edition is tappable for its info sheet; editions without a bundled icon reuse the Meshtastic logo.
+    var showSheet by remember { mutableStateOf(false) }
+    val brandingModifier = Modifier.size(32.dp).clip(CircleShape).clickable(role = Role.Button) { showSheet = true }
+    val iconRes = eventIconFor(eventEdition.edition)
     if (iconRes != null) {
-        val scope = rememberCoroutineScope()
-        val snackbarManager = koinInject<SnackbarManager>()
         Image(
             painter = painterResource(iconRes),
-            contentDescription = eventEdition.name,
+            contentDescription = eventEdition.displayName,
             contentScale = ContentScale.Fit,
-            modifier =
-            Modifier.size(32.dp).clip(CircleShape).clickable(role = Role.Button) {
-                scope.launch {
-                    val message = getString(eventEdition.welcomeMessageRes)
-                    snackbarManager.showSnackbar(message)
-                }
-            },
+            modifier = brandingModifier,
         )
     } else {
-        Icon(imageVector = vectorResource(Res.drawable.ic_meshtastic), contentDescription = null)
+        Icon(
+            imageVector = vectorResource(Res.drawable.ic_meshtastic),
+            contentDescription = eventEdition.displayName,
+            modifier = brandingModifier,
+        )
+    }
+    if (showSheet) {
+        EventInfoSheet(edition = eventEdition, onDismiss = { showSheet = false })
     }
 }
 
