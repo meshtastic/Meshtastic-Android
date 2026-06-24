@@ -270,12 +270,13 @@ fun ConnectionsScreen(
 
                         // Region warning sits outside the animated card so it does not affect the
                         // CONNECTED ↔ CONNECTING ↔ NO_DEVICE size transition.
+                        val isPhysicalDevice =
+                            selectedDevice != MOCK_DEVICE_PREFIX && selectedDevice != REPLAY_DEVICE_PREFIX
                         if (
                             uiState == ConnectionUiState.CONNECTED_WITH_NODE &&
                             regionUnset &&
                             sessionAuthorized &&
-                            selectedDevice != MOCK_DEVICE_PREFIX &&
-                            selectedDevice != REPLAY_DEVICE_PREFIX
+                            isPhysicalDevice
                         ) {
                             Spacer(modifier = Modifier.height(8.dp))
                             Card(modifier = Modifier.fillMaxWidth()) {
