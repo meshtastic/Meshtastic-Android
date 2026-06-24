@@ -130,5 +130,6 @@ private fun ModuleConfig.summarize(): String = when {
     detection_sensor != null -> "detection_sensor"
     paxcounter != null -> "paxcounter"
     statusmessage != null -> "statusmessage"
+    tak != null -> "tak"
     else -> "unknown"
 }

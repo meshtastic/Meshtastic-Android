@@ -47,6 +47,7 @@ class ModuleConfigDataSource(
     }
 
     /** Updates [LocalModuleConfig] from each [ModuleConfig] oneOf. */
+    @Suppress("CyclomaticComplexMethod")
     suspend fun setLocalModuleConfig(config: ModuleConfig) = moduleConfigStore.updateData { current ->
         when {
             config.mqtt != null -> current.copy(mqtt = config.mqtt)
@@ -77,6 +78,8 @@ class ModuleConfigDataSource(
             config.paxcounter != null -> current.copy(paxcounter = config.paxcounter)
 
             config.statusmessage != null -> current.copy(statusmessage = config.statusmessage)
+
+            config.tak != null -> current.copy(tak = config.tak)
 
             else -> current
         }
