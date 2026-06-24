@@ -355,10 +355,6 @@
     <string name="ethernet_config">Опции за Ethernet</string>
     <string name="ethernet_enabled">Ethernet е активиран</string>
     <string name="ethernet_ip">Ethernet IP:</string>
-    <string name="event_welcome_burning_man">Добре дошли в Burning Man! 🔥</string>
-    <string name="event_welcome_defcon">Добре дошли в DEFCON! 💀</string>
-    <string name="event_welcome_hamvention">Добре дошли в Hamvention! 🍖📻</string>
-    <string name="event_welcome_open_sauce">Добре дошли в Open Sauce! 🔧</string>
     <string name="exchange_position">Размяна на позиция</string>
     <string name="expand_chart">Разгъване на диаграмата</string>
     <string name="expires">Изтича</string>

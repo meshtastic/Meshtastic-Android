@@ -437,10 +437,6 @@
     <string name="ethernet_config">乙太網路選項</string>
     <string name="ethernet_enabled">啟用以太網</string>
     <string name="ethernet_ip">乙太網路 IP：</string>
-    <string name="event_welcome_burning_man">歡迎來到 Burning Man！🔥</string>
-    <string name="event_welcome_defcon">歡迎來到 DEFCON！💀</string>
-    <string name="event_welcome_hamvention">歡迎來到 Hamvention！🍖📻</string>
-    <string name="event_welcome_open_sauce">歡迎來到 Open Sauce！🔧</string>
     <string name="exchange_position">交換位置</string>
     <string name="expand_chart">展開圖表</string>
     <string name="expires">到期時間</string>
