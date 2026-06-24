@@ -34,6 +34,7 @@ import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.FromRadio
+import org.meshtastic.proto.LoRaRegionPresetMap
 import org.meshtastic.proto.LockdownStatus
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.MqttClientProxyMessage
@@ -165,6 +166,16 @@ class FromRadioPacketHandlerImplTest {
         handler.handleFromRadio(proto)
 
         verify { configHandler.handleChannel(channel) }
+    }
+
+    @Test
+    fun `handleFromRadio routes REGION_PRESETS to configHandler`() {
+        val map = LoRaRegionPresetMap()
+        val proto = FromRadio(region_presets = map)
+
+        handler.handleFromRadio(proto)
+
+        verify { configHandler.handleRegionPresets(map) }
     }
 
     @Test

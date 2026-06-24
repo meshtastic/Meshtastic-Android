@@ -67,7 +67,14 @@ data class Channel(val settings: ChannelSettings = default.settings, val loraCon
         get() =
             settings.name.ifEmpty {
                 // We have a new style 'empty' channel name.  Use the same logic from the device to convert that to a
-                // human readable name
+                // human readable name.
+                //
+                // INTEROP-CRITICAL: these strings must byte-match the firmware, because the channel hash, channel
+                // number / radio frequency, and MQTT topic all derive from this name (see `hash`, `channelNum`).
+                // Source of truth: firmware DisplayFormatters::getModemPresetDisplayName(preset, useShortName=false).
+                // Two names are deliberately abbreviated (LONG_MODERATE -> "LongMod", VERY_LONG_SLOW -> "VLongSlow"),
+                // so do NOT auto-derive from the enum name. This `when` is intentionally exhaustive with no `else`: a
+                // new firmware preset SHOULD break the build here, forcing someone to copy its exact firmware name.
                 if (loraConfig.use_preset) {
                     when (loraConfig.modem_preset) {
                         ModemPreset.SHORT_TURBO -> "ShortTurbo"

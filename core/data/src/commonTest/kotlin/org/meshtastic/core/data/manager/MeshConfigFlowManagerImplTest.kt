@@ -138,6 +138,7 @@ class MeshConfigFlowManagerImplTest {
         verifySuspend { radioConfigRepository.clearLocalModuleConfig() }
         verifySuspend { radioConfigRepository.clearDeviceUIConfig() }
         verifySuspend { radioConfigRepository.clearFileManifest() }
+        verifySuspend { radioConfigRepository.clearLoraRegionPresetMap() }
     }
 
     // ---------- handleLocalMetadata ----------

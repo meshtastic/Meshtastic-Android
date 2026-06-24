@@ -34,6 +34,7 @@ import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceProfile
 import org.meshtastic.proto.DeviceUIConfig
 import org.meshtastic.proto.FileInfo
+import org.meshtastic.proto.LoRaRegionPresetMap
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.ModuleConfig
@@ -43,6 +44,7 @@ import org.meshtastic.proto.ModuleConfig
  * [LocalModuleConfig].
  */
 @Single
+@Suppress("TooManyFunctions") // All functions mandated by RadioConfigRepository interface; logically grouped by concern
 open class RadioConfigRepositoryImpl(
     private val nodeDB: NodeRepository,
     private val channelSetDataSource: ChannelSetDataSource,
@@ -129,6 +131,18 @@ open class RadioConfigRepositoryImpl(
 
     override suspend fun clearFileManifest() {
         _fileManifestFlow.value = emptyList()
+    }
+
+    // Region→preset compatibility map is session-scoped: delivered once per handshake, cleared on each new handshake.
+    private val _loraRegionPresetMapFlow = MutableStateFlow<LoRaRegionPresetMap?>(null)
+    override val loraRegionPresetMapFlow: Flow<LoRaRegionPresetMap?> = _loraRegionPresetMapFlow.asStateFlow()
+
+    override suspend fun setLoraRegionPresetMap(map: LoRaRegionPresetMap) {
+        _loraRegionPresetMapFlow.value = map
+    }
+
+    override suspend fun clearLoraRegionPresetMap() {
+        _loraRegionPresetMapFlow.value = null
     }
 
     /** Flow representing the combined [DeviceProfile] protobuf. */

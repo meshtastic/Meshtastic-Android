@@ -49,6 +49,7 @@ import org.meshtastic.proto.Config
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.DeviceUIConfig
+import org.meshtastic.proto.LoRaRegionPresetMap
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.LocalStats
@@ -230,6 +231,8 @@ class TAKMeshIntegrationTest {
         override fun handleChannel(channel: Channel) {}
 
         override fun handleDeviceUIConfig(config: DeviceUIConfig) {}
+
+        override fun handleRegionPresets(map: LoRaRegionPresetMap) {}
     }
 
     private class FakeNodeRepository(firmwareVersion: String? = "2.8.0.0") : NodeRepository {
