@@ -69,6 +69,12 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
     val supportsEsp32Ota = atLeast(V2_7_18)
 
     /**
+     * Support for the LoRa region→preset compatibility map and TINY presets. Supported since firmware v2.8.0. Older
+     * firmware never sends the map, so the UI keeps the preset list unconstrained and hides the new presets.
+     */
+    val supportsLoraRegionPresetMap = atLeast(V2_8_0)
+
+    /**
      * Support for runtime lockdown mode (per-connection passphrase auth). Supported since firmware v2.8.0. Note:
      * lockdown is also hardware-gated (nRF52 only) — the device advertises real support by sending a `LockdownStatus`,
      * which is the authoritative signal and drives the actual UI state.
