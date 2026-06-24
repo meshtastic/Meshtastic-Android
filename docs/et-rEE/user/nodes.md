@@ -78,7 +78,7 @@ Nodes display encryption status icons next to their name:
 | 🔓 Lukust lahti | Communication uses shared channel PSK — encrypted but identity not individually verified                            |
 | ⚠️ Ebakõla      | Public key mismatch — the node's key has changed since last seen (investigate before trusting)   |
 
-> 💡 **Vihje:** PKI krüpteering (püsivara 2,5+) pakub tugevamat turvalisust kui kanali PSK, kuna igal sõlmel on unikaalne võtmepaar. If you see a key mismatch warning, the node may have been reset or compromised.
+> 💡 **Vihje:** PKI krüpteering (püsivara 2,5+) pakub tugevamat turvalisust kui kanali PSK, kuna igal sõlmel on unikaalne võtmepaar. Kui näed võtme mittevastavuse hoiatust, võib sõlm olla lähtestatud või ohustatud.
 
 ## Quick Actions
 

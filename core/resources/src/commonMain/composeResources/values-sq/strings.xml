@@ -110,6 +110,7 @@
     <!-- LOAD -->
     <!-- LOCAL -->
     <string name="location_disabled">Aksesimi në vendndodhje është i fikur, nuk mund të ofrohet pozita për rrjetin mesh.</string>
+    <!-- LOCKDOWN -->
     <string name="locked">I bllokuar</string>
     <!-- LOG -->
     <string name="logs">Loget</string>

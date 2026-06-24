@@ -677,6 +677,9 @@
     <string name="local_stats_utilization">頻道使用率: %1$s% | 空中傳輸佔用率: %2$s%</string>
     <string name="location_disabled">定位服務已關閉，無法向設備提供位置。</string>
     <string name="location_sharing">位置分享</string>
+    <!-- LOCKDOWN -->
+    <string name="lockdown_hide_passphrase">隱藏</string>
+    <string name="lockdown_submit">提交</string>
     <string name="locked">鎖定</string>
     <!-- LOG -->
     <string name="log_retention_days">MeshLog 保留期限</string>

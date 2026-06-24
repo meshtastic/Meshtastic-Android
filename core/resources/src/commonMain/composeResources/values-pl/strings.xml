@@ -395,6 +395,9 @@
     <!-- LOCAL -->
     <string name="location_disabled">Brak dostępu do lokalizacji, nie można udostępnić pozycji w sieci mesh.</string>
     <string name="location_sharing">Udostępnianie lokalizacji</string>
+    <!-- LOCKDOWN -->
+    <string name="lockdown_hide_passphrase">Ukryj</string>
+    <string name="lockdown_submit">Prześlij</string>
     <string name="locked">Zablokowany</string>
     <!-- LOG -->
     <plurals name="log_retention_days_quantity">

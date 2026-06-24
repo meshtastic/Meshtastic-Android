@@ -257,6 +257,7 @@
     <!-- LOAD -->
     <!-- LOCAL -->
     <string name="location_disabled">Acesso à localização desativado, não é possível fornecer a localização na mesh.</string>
+    <!-- LOCKDOWN -->
     <string name="locked">Bloqueado</string>
     <!-- LOG -->
     <string name="logs">Registo de eventos</string>

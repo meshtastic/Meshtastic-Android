@@ -112,6 +112,7 @@
     <!-- LOAD -->
     <!-- LOCAL -->
     <string name="location_disabled">Vietos prieigos funkcija išjungta, negalima pateikti pozicijos tinklui.</string>
+    <!-- LOCKDOWN -->
     <string name="locked">Užrakintas</string>
     <!-- LOG -->
     <string name="logs">Log`ai</string>

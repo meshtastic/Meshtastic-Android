@@ -677,6 +677,9 @@
     <string name="local_stats_utilization">ChUtil: %1$s% | AirTX: %2$s%</string>
     <string name="location_disabled">Доступ к местоположению выключен, невозможно отправлять координаты в сеть.</string>
     <string name="location_sharing">Поделиться местоположением</string>
+    <!-- LOCKDOWN -->
+    <string name="lockdown_hide_passphrase">Скрыть</string>
+    <string name="lockdown_submit">Продолжить</string>
     <string name="locked">Заблокировано</string>
     <!-- LOG -->
     <string name="log_retention_days">Период хранения сообщений в журнале сети</string>

@@ -571,6 +571,7 @@
     <string name="local_stats_utilization">ChUtil: %1$s% | AirTX: %2$s%</string>
     <string name="location_disabled">Accesul locației este dezactivat, nu putem furniza locația ta la rețea.</string>
     <string name="location_sharing">Partajarea locației</string>
+    <!-- LOCKDOWN -->
     <string name="locked">Blocat</string>
     <!-- LOG -->
     <string name="log_retention_days">Perioadă de retenție MeshLog</string>

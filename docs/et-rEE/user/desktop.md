@@ -3,9 +3,9 @@ title: Desktop App
 parent: User Guide
 nav_order: 14
 last_updated: 2026-06-11
-description: Install and use the Meshtastic Desktop app on Linux, macOS, and Windows — connections, feature parity, and keyboard shortcuts.
+description: Meshtastic arvuti rakendus pakub samu võrgusuhtluse funktsioone Linuxis, macOS-is ja Windowsis.
 aliases:
-  - lauaarvuti
+  - töölaud
   - linux
   - macos
   - windows
@@ -14,7 +14,7 @@ aliases:
 
 # Desktop App
 
-The Meshtastic Desktop application shares its core codebase with Android via Kotlin Multiplatform. Most features work identically on Linux, macOS, and Windows.
+Meshtastic arvuti rakendus jagab oma põhikoodibaasi Androidiga Kotlin Multiplatformi kaudu. Most features work identically on Linux, macOS, and Windows.
 
 ## Installation
 
@@ -55,7 +55,7 @@ For network-connected radios:
 Bluetooth Low Energy is supported on Desktop via the [Kable](https://github.com/JuulLabs/kable) library:
 
 1. Ensure your system has a Bluetooth adapter.
-2. The app scans for nearby Meshtastic radios automatically.
+2. Rakendus otsib automaatselt lähedalasuvaid Meshtastic raadioid.
 3. Select your device from the Connect screen.
 
 ## Feature Parity
@@ -70,7 +70,7 @@ Bluetooth Low Energy is supported on Desktop via the [Kable](https://github.com/
 | Püsivara värskendus OTA kaudu                | ✓       | ✗       | Use web flasher                                |
 | Notifications                                | ✓       | ✓       | Native OS notifications                        |
 | Widgets                                      | ✓       | ✗       | Android-only                                   |
-| Android Auto                                 | ✓       | ✗       | Android-only — not available on Desktop or iOS |
+| Android auto                                 | ✓       | ✗       | Android-only — not available on Desktop or iOS |
 | AI Assistant (Chirpy)     | ✓\*     | ✗       | Google flavor Android only                     |
 | App Functions (system AI) | ✓†      | ✗       | Google flavor Android only                     |
 
@@ -142,7 +142,7 @@ Requirements:
 ## Related Topics
 
 - [Connections](connections) — connection methods overview
-- [Püsivara värskendused] (firmware) – kasutage töölaua püsivara värskenduste jaoks [Web Flasherit] (https://flasher.meshtastic.org)
+- [Püsivara värskendused] (firmware) – kasutage arvuti püsivara värskenduste jaoks [Web Flasherit] (https://flasher.meshtastic.org)
 
 ---
 

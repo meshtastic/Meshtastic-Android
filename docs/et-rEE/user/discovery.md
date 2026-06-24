@@ -3,7 +3,7 @@ title: Avastamine
 parent: User Guide
 nav_order: 12
 last_updated: 2026-06-11
-description: Explore your mesh network — the Local Mesh Discovery scanner, traceroute paths, neighbor maps, and node discovery tools.
+description: Avasta oma kärgvõrku – kohalik kärgvõrgu avastaja skanner, traceroute'i teed, naaberkaardid ja sõlmede avastamise tööriistad.
 aliases:
   - mesh-discovery
   - local-discovery
@@ -18,16 +18,16 @@ Discovery tools help you understand **how** your mesh network is connected — w
 
 The app offers two complementary approaches:
 
-- **Local Mesh Discovery (Scanner)** — an automated mode that cycles your connected radio through different LoRa presets, listens on each, and ranks which preset performs best at your location.
+- **Kohalik kärgvõrgu avastaja (skanner)** – automaatne režiim, mis perioodiliselt skaneerib ühendatud raadiol läbi erinevate LoRa eelhäälestuste, kuulab igaüht neist ja järjestab, milline eelhäälestus teie asukohas kõige paremini toimib.
 - **Manual exploration** — traceroute, Neighbor Info, and the node list, which you can use at any time to investigate specific paths and topology.
 
 ---
 
-## Local Mesh Discovery (Scanner)
+## Kohalik kärgvõrgu avastaja (skanner)
 
-Local Mesh Discovery is a dedicated scanning mode that helps you find the best LoRa modem preset for your location and see which nodes are active on each preset. It cycles your connected radio through one or more presets you choose, listens (or "dwells") on each one for a set time to collect packets, then analyzes and ranks the results.
+Kohalik kärgvõrdu avastaja on spetsiaalne skaneerimisrežiim, mis aitab leida oma asukoha jaoks parima LoRa modemi eelseadistuse ja näha, millised sõlmed on igal eelseadistusel aktiivsed. It cycles your connected radio through one or more presets you choose, listens (or "dwells") on each one for a set time to collect packets, then analyzes and ranks the results.
 
-Open it from **Settings → Local Mesh Discovery**.
+Ava **Sätted → Kohalik kärgvõrgu avastaja**.
 
 > ⚠️ **Märkus:** Discovery muudab skannimise ajal ajutiselt raadio LoRa seadeid ja taastab pärast skannimise lõppu algse konfiguratsiooni. Your device must be connected to run a scan.
 
@@ -141,7 +141,7 @@ Naabriinfo moodul võimaldab igal sõlmel levitada nimekirja sõlmedest, mida se
 2. Luba moodul.
 3. Määra levintervall (vaikimisi: 900 sekundit / 15 minutit).
 
-Kui see on lubatud, levitab teie sõlm perioodiliselt oma naabertabelit. Other nodes with Neighbor Info enabled do the same.
+Kui see on lubatud, levitab sõlm perioodiliselt oma naabertabelit. Other nodes with Neighbor Info enabled do the same.
 
 ### Viewing Neighbor Data
 

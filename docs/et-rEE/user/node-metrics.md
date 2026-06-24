@@ -1,5 +1,5 @@
 ---
-title: Node Metrics
+title: Sõlme mõõdikud
 parent: User Guide
 nav_order: 5
 last_updated: 2026-06-16
@@ -7,11 +7,11 @@ description: Telemetry dashboards for each mesh node — device health, environm
 aliases:
   - meetriline
   - telemetry
-  - device-metrics
+  - sõlme-mõõdikud
   - signal
 ---
 
-# Node Metrics
+# Sõlme mõõdikud
 
 The node detail screen provides comprehensive telemetry and metrics for each node on your mesh.
 

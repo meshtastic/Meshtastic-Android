@@ -320,6 +320,7 @@
     <string name="load_indexed">Carga %1$d</string>
     <!-- LOCAL -->
     <string name="location_disabled">Localização desativada, não será possível informar sua posição.</string>
+    <!-- LOCKDOWN -->
     <string name="locked">Bloqueado</string>
     <!-- LOG -->
     <string name="logs">Logs</string>

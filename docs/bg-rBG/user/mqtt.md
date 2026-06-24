@@ -41,16 +41,16 @@ A gateway node with internet access (WiFi or Ethernet) publishes mesh messages t
 
 ![MQTT toggle switch](../../assets/screenshots/settings_switch.png)
 
-| Настройка         | Описание                                                                                      | По подразбиране                                     |
-| ----------------- | --------------------------------------------------------------------------------------------- | --------------------------------------------------- |
-| Адрес на сървъра  | MQTT broker hostname                                                                          | mqtt.meshtastic.org |
-| Потребителско име | Broker authentication                                                                         | meshdev                                             |
-| Парола            | Broker authentication                                                                         | large4cats                                          |
-| Root Topic        | Base topic for messages                                                                       | msh                                                 |
-| Криптиране        | Encrypt MQTT payload                                                                          | Активиран                                           |
-| ~~JSON Output~~   | ⚠️ **Deprecated** — JSON packet support has been removed from firmware; this field is ignored | Disabled                                            |
-| TLS               | Secure connection to broker                                                                   | Disabled                                            |
-| Map Reporting     | Report position to public map                                                                 | Disabled                                            |
+| Настройка         | Описание                                                                                       | По подразбиране                                     |
+| ----------------- | ---------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| Адрес на сървъра  | MQTT broker hostname                                                                           | mqtt.meshtastic.org |
+| Потребителско име | Broker authentication                                                                          | meshdev                                             |
+| Парола            | Broker authentication                                                                          | large4cats                                          |
+| Root Topic        | Base topic for messages                                                                        | msh                                                 |
+| Криптиране        | Encrypt MQTT payload                                                                           | Активиран                                           |
+| ~~JSON Output~~   | ⚠️ **Отхвърлено** — Поддръжката на JSON пакети е премахната от фърмуера; това поле се игнорира | Disabled                                            |
+| TLS               | Secure connection to broker                                                                    | Disabled                                            |
+| Map Reporting     | Report position to public map                                                                  | Disabled                                            |
 
 ### Default Meshtastic Broker
 
@@ -60,7 +60,7 @@ The community maintains a public broker at `mqtt.meshtastic.org`. This is intend
 
 ### Private Broker
 
-For better privacy and control, you can run your own MQTT broker:
+За по-добра поверителност и контрол, можете да управлявате свой собствен MQTT брокер:
 
 - Mosquitto (lightweight, open-source)
 - HiveMQ

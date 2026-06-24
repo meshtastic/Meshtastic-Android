@@ -3,7 +3,7 @@ title: Ühendus
 parent: User Guide
 nav_order: 2
 last_updated: 2026-05-20
-description: Ühenda oma telefon või lauaarvuti Meshtastic raadioga Bluetoothi, USB või TCP/IP kaudu.
+description: Ühenda oma telefon või arvuti Meshtastic raadioga Bluetoothi, USB või TCP/IP kaudu.
 aliases:
   - sinihammas
   - usb
@@ -13,7 +13,7 @@ aliases:
 
 # Ühendus
 
-Meshtastic toetab mitut transpordimeetodit telefoni/töölaua ja raadiosõlme vaheliseks suhtluseks.
+Meshtastic toetab mitut transpordimeetodit telefoni/arvuti ja raadiosõlme vaheliseks suhtluseks.
 
 ## Sinihammas (BLE)
 

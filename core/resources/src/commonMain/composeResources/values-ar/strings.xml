@@ -110,6 +110,7 @@
     <!-- LOAD -->
     <!-- LOCAL -->
     <string name="location_disabled">تم إيقاف الوصول إلى الموقع، لا يمكن تحديد موقع للشبكة.</string>
+    <!-- LOCKDOWN -->
     <string name="locked">مقفل</string>
     <!-- LOG -->
     <string name="logs">سجلات</string>

@@ -538,6 +538,9 @@
     <string name="local_stats_uptime">Време на работа: %1$s</string>
     <string name="location_disabled">Достъпът до местоположението е изключен, не може да предостави позиция на мрежата.</string>
     <string name="location_sharing">Споделяне на местоположение</string>
+    <!-- LOCKDOWN -->
+    <string name="lockdown_hide_passphrase">Скриване</string>
+    <string name="lockdown_submit">Изпращане</string>
     <string name="locked">Заключен</string>
     <!-- LOG -->
     <plurals name="log_retention_days_quantity">

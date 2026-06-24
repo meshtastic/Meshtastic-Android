@@ -117,6 +117,7 @@
     <!-- LOAD -->
     <!-- LOCAL -->
     <string name="location_disabled">Dostop do lokacije je onemogočen, mreža ne more prikazati položaja.</string>
+    <!-- LOCKDOWN -->
     <string name="locked">Zaklenjeno</string>
     <!-- LOG -->
     <string name="logs">Dnevniki</string>

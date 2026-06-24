@@ -189,6 +189,12 @@
   },
   "pullRequests": [
     {
+      "id": "10776",
+      "title": "Update native to exit when configured with an unknown module",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10776",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
       "id": "10770",
       "title": "Update pschatzmann_arduino-audio-driver to v0.3.0",
       "page_url": "https://github.com/meshtastic/firmware/pull/10770",
@@ -276,18 +282,6 @@
       "id": "10669",
       "title": "Allow key verification to work for unknown nodes.",
       "page_url": "https://github.com/meshtastic/firmware/pull/10669",
-      "zip_url": "s"
-    },
-    {
-      "id": "10666",
-      "title": "Short circuit invalid nodenum check in ham mode.",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10666",
-      "zip_url": "s"
-    },
-    {
-      "id": "10664",
-      "title": "Arduino Nesso N1 support",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10664",
       "zip_url": "s"
     }
   ]

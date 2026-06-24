@@ -12,7 +12,7 @@ aliases:
 
 # Първи стъпки
 
-Welcome to Meshtastic! This guide walks you through the initial setup of the Meshtastic Android app.
+Добре дошли в Meshtastic! Това ръководство ви превежда през първоначалната настройка на приложението Meshtastic за Android.
 
 ## First Launch
 

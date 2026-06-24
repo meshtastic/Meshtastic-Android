@@ -86,6 +86,7 @@
     <!-- LOAD -->
     <!-- LOCAL -->
     <string name="location_disabled">Aðgangur að staðsetningu ekki leyfður, staðsetning ekki send út á mesh.</string>
+    <!-- LOCKDOWN -->
     <string name="locked">Læst</string>
     <!-- LOG -->
     <!-- MAP -->

@@ -96,6 +96,7 @@
     <!-- LOAD -->
     <!-- LOCAL -->
     <string name="location_disabled">שירותי מיקום כבויים, לא ניתן לספק מיקום לרשת משטסטיק.</string>
+    <!-- LOCKDOWN -->
     <string name="locked">נעול</string>
     <!-- LOG -->
     <!-- MAP -->

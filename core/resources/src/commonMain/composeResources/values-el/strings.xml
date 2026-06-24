@@ -122,6 +122,7 @@
     <!-- LOAD -->
     <!-- LOCAL -->
     <string name="location_disabled">Η πρόσβαση στην τοποθεσία είναι απενεργοποιημένη, δεν μπορεί να παρέχει θέση στο πλέγμα.</string>
+    <!-- LOCKDOWN -->
     <string name="locked">Κλειδωμένο</string>
     <!-- LOG -->
     <string name="logs">Αρχεία καταγραφής</string>

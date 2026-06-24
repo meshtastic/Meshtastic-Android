@@ -235,7 +235,7 @@ View detailed diagnostic information:
 
 - **"No response from target node"** — the target may be out of range, offline, or have a mismatched admin key. Verify the admin key matches on both nodes.
 - **Changes not applying** — some settings require a reboot to take effect. Try the Reboot action after saving.
-- **Can't see remote settings** — ensure your node has the admin key for the target node. The admin channel is configured automatically when an admin key is set.
+- **Ei näe kaugseadeid** — veendu, et sõlmel oleks sihtsõlme administraatori võti ja et administraatori kanal oleks turbekonfiguratsioonis lubatud. The admin channel is configured automatically when an admin key is set.
 
 ## Related Topics
 

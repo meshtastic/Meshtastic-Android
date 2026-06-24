@@ -295,7 +295,7 @@
     <string name="debug">Silumine</string>
     <string name="debug_active_filters">Aktiivsed filtrid</string>
     <string name="debug_clear">Puhasta logid</string>
-    <string name="debug_clear_logs_confirm">See eemaldab teie seadmest kõik logipaketid ja andmebaasikirjed – see on täielik lähtestamine ja see on püsiv.</string>
+    <string name="debug_clear_logs_confirm">See eemaldab seadmest kõik logipaketid ja andmebaasikirjed – see on täielik lähtestamine ja see on püsiv.</string>
     <string name="debug_decoded_payload">Dekodeeritud sõnumi maht:</string>
     <string name="debug_default_search">Otsi logist…</string>
     <string name="debug_export_failed">Ebaõnnestus kirjutada logi faili: %1$s</string>
@@ -383,7 +383,7 @@
     <string name="discovery_history">Avastuste ajalugu</string>
     <string name="discovery_keep_screen_awake">Hoia ekraan ärkvel</string>
     <string name="discovery_keep_screen_awake_description">Hoiab ära Androidi tukastamisrežiimi raadiopakettide kaotamise pikkade skaneerimiste ajal. Soovitatav.</string>
-    <string name="discovery_local_mesh">Kohaliku kärgvõrgu avastamine</string>
+    <string name="discovery_local_mesh">Kohalik kärgvõrgu avastaja</string>
     <string name="discovery_lora_presets">LoRa eelseadistused</string>
     <string name="discovery_lora_presets_description">Vali skaneerimiseks üks või mitu eelseadistust</string>
     <string name="discovery_map">Avastuskaart</string>
@@ -482,7 +482,7 @@
     <string name="doc_search_placeholder">Otsi dokumentatsiooni…</string>
     <string name="doc_section_developer">Arendaja juhis</string>
     <string name="doc_section_user">Kasutaja juhis</string>
-    <string name="doc_title_android_auto">Android Auto</string>
+    <string name="doc_title_android_auto">Android auto</string>
     <string name="doc_title_app_functions">Rakenduse funktsioonid</string>
     <string name="doc_title_connections">Ühendus</string>
     <string name="doc_title_desktop">Töölauarakendus</string>
@@ -782,6 +782,7 @@
     <string name="local_stats_utilization">ChUtil: %1$s% | AirTX: %2$s%</string>
     <string name="location_disabled">Juurdepääs asukohale on välja lülitatud, ei saa asukohta teistele jagada.</string>
     <string name="location_sharing">Asukoha jagamine</string>
+    <!-- LOCKDOWN -->
     <string name="locked">Lukustatud</string>
     <!-- LOG -->
     <string name="log_retention_days">MeshLogi säilitusperiood</string>

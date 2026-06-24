@@ -418,6 +418,8 @@
     <!-- LOCAL -->
     <string name="location_disabled">A földrajzi helyhez való hozzáférés le van tiltva, nem lehet pozíciót közölni a mesh hálózattal.</string>
     <string name="location_sharing">Helymegosztás</string>
+    <!-- LOCKDOWN -->
+    <string name="lockdown_submit">Mentés</string>
     <string name="locked">Zárolt</string>
     <!-- LOG -->
     <string name="log_retention_days">MeshLog megőrzési idő</string>

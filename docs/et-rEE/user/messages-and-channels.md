@@ -112,7 +112,7 @@ You can search the full history of any conversation directly from the chat scree
 
 ![Message search bar with result counter and previous/next arrows](../../assets/screenshots/messages_search_bar.png)
 
-> 💡 **Vihje:** Otsing toimub täisteksti põhjal ja jääb vestlusse, kust te selle avasite – see ei otsi teistest kanalitest ega kontaktide hulgast. Matching is fast even on long histories because messages are indexed locally.
+> 💡 **Vihje:** Otsing toimub täisteksti põhjal ja jääb vestlusse, kust sa selle avasid – see ei otsi teistest kanalitest ega kontaktide hulgast. Matching is fast even on long histories because messages are indexed locally.
 
 ### Message Bubbles
 
@@ -167,7 +167,7 @@ Messages are queued and transmitted based on priority:
 - [Sõlmed] (nodes) — otsesõnumi alustamiseks puuduta sõlme
 - [Settings — Radio & User](settings-radio-user) — configure channel encryption and presets
 - [MQTT](mqtt) — silda kanali sõnumid internetti
-- [Channel configuration](https://meshtastic.org/docs/configuration/radio/channels) — detailed channel settings on meshtastic.org
+- [Kanali konf](https://meshtastic.org/docs/configuration/radio/channels) — üksikasjalikud kanali seaded leiate aadressilt meshtastic.org
 
 ---
 

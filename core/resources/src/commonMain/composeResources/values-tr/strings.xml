@@ -277,6 +277,8 @@
     <string name="load">Yükle</string>
     <!-- LOCAL -->
     <string name="location_disabled">Konum erişimi kapalı, konum ağ ile paylaşılamıyor.</string>
+    <!-- LOCKDOWN -->
+    <string name="lockdown_submit">Gönder</string>
     <string name="locked">Kilitli</string>
     <!-- LOG -->
     <string name="logs">Kayıtlar</string>
