@@ -39,7 +39,7 @@ Sildab võrgusõnumeid MQTT vahendajasse ja sealt internetiühenduse loomiseks. 
 | Kasutajatunnus  | Authentication username                                                  |
 | Parool          | Authentication password                                                  |
 | Encryption      | Krüpteeri MQTT kasutus                                                   |
-| ~~JSON Output~~ | ⚠️ **Deprecated** — JSON support removed from firmware; field is ignored |
+| ~~JSON Output~~ | ⚠️ **Vananenud** — JSON tugi püsivarast eemaldatud; välja ignoreeritakse |
 | TLS             | Use secure connection                                                    |
 | Root Topic      | Baas MQTT teema teekond                                                  |
 | Map Report      | Publish position for public map                                          |
@@ -86,7 +86,7 @@ Buffers messages for nodes that were temporarily offline, then replays them when
 | History Return (max)    | Max messages to replay     |
 | History Return (window) | Time window for replay     |
 
-> 💡 **Tip:** Store and Forward works best on nodes with ample memory (ESP32 with PSRAM). Router nodes are ideal candidates since they're typically always-on.
+> 💡 **Vihje:** Salvesta ja edasta töötab kõige paremini rohke mäluga sõlmedes (ESP32 koos PSRAM-iga). Router nodes are ideal candidates since they're typically always-on.
 
 ### Kaugustesti moodul
 
@@ -115,13 +115,13 @@ See [Telemetry & Sensors](telemetry-and-sensors) for supported sensors and confi
 
 Pre-configured messages accessible from the device's physical buttons (for radios with rotary encoders, keypads, or similar input hardware). Define a list of quick-send messages that can be transmitted without a phone connected — ideal for field use.
 
-| Sätted             | Kirjeldus                                                   |
-| ------------------ | ----------------------------------------------------------- |
-| ~~Lubatud~~        | ⚠️ **Deprecated** — current firmware may ignore this toggle |
-| Sõnumid            | Newline-separated list of messages                          |
-| Send Bell          | Play bell sound on send                                     |
-| Rotary Encoder     | Enable rotary encoder input                                 |
-| Up/Down/Press Pins | GPIO pin assignments for input                              |
+| Sätted             | Kirjeldus                                                          |
+| ------------------ | ------------------------------------------------------------------ |
+| ~~Lubatud~~        | ⚠️ **Vananenud** — praegune püsivara võib seda lülitit ignoreerida |
+| Sõnumid            | Newline-separated list of messages                                 |
+| Send Bell          | Play bell sound on send                                            |
+| Rotary Encoder     | Enable rotary encoder input                                        |
+| Up/Down/Press Pins | GPIO pin assignments for input                                     |
 
 ### Audio moodul
 
@@ -135,7 +135,7 @@ Codec2 audio support for low-bandwidth voice communication over the mesh. This i
 | I2S Data In     | GPIO pin for I2S DIN             |
 | I2S Data Out    | GPIO pin for I2S DOUT            |
 
-> ⚠️ **Note:** Audio requires specific hardware (I2S microphone and speaker). Voice quality is very low-bandwidth — think "understandable radio voice," not phone-call quality.
+> ⚠️ **Märkus:** Heli jaoks on vaja spetsiaalset riistvara (I2S mikrofon ja kõlar). Voice quality is very low-bandwidth — think "understandable radio voice," not phone-call quality.
 
 ### Kaugriistvara moodul
 
@@ -146,7 +146,7 @@ GPIO control over the mesh network. Allows a remote node to read or write GPIO p
 | Lubatud              | Activate remote GPIO access                                     |
 | Allow Undefined Pins | Allow access to any GPIO pin (security risk) |
 
-> ⚠️ **Warning:** Enabling "Allow Undefined Pins" gives remote nodes access to all GPIO pins, which could interfere with the radio's own hardware. Only enable on dedicated GPIO nodes.
+> ⚠️ **Hoiatus:** Funktsiooni „Luba määratlemata kontaktid” lubamine annab kaugsõlmedele juurdepääsu kõigile GPIO kontaktile, mis võib häirida raadio enda riistvara. Only enable on dedicated GPIO nodes.
 
 ### Naabriinfo moodul
 
@@ -185,7 +185,7 @@ Turns your node into a motion or door sensor alert system. Kui GPIO klemm tuvast
 
 ### Paxloenduri moodul
 
-People counter using WiFi and BLE probe requests. Counts nearby devices by passively listening for probe requests that phones and laptops emit when scanning for networks. Available only on ESP32 devices.
+Inimeste loendur WiFi ja BLE päringute abil. Counts nearby devices by passively listening for probe requests that phones and laptops emit when scanning for networks. Available only on ESP32 devices.
 
 | Sätted                                     | Kirjeldus                  |
 | ------------------------------------------ | -------------------------- |
@@ -209,7 +209,7 @@ Remotely configure nodes that share your admin key:
 3. Modify configuration.
 4. Puuduta **Salvesta** – muudatused saadetakse kärgvõrgu kaudu.
 
-> ⚠️ **Requires:** Admin key configured on both your node and the target node.
+> ⚠️ **Nõutud:** Administraatori võtit, mis on konfitud nii teie kui ka sihtsõlmes.
 
 ### Tühjenda sõlmede andmebaas
 
@@ -241,7 +241,7 @@ View detailed diagnostic information:
 
 - [Settings — Radio & User](settings-radio-user) — core radio and user profile settings
 - [Mooduli konfiguratsiooni viide](https://meshtastic.org/docs/configuration/module) — üksikasjalik mooduli dokumentatsioon aadressil meshtastic.org
-- [FAQ](https://meshtastic.org/docs/about/faq) — common questions on meshtastic.org
+- [KKK](https://meshtastic.org/docs/about/faq) — meshtastic.org levinud küsimused
 
 ---
 

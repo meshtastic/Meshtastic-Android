@@ -1,5 +1,5 @@
 ---
-title: How the Meshtastic Signal Meter Works
+title: Kuidas Meshtastic signaalimõõtur töötab
 parent: User Guide
 nav_order: 15
 last_updated: 2026-05-13
@@ -11,7 +11,7 @@ aliases:
   - rssi
 ---
 
-# How the Meshtastic Signal Meter Works
+# Kuidas Meshtastic signaalimõõtur töötab
 
 The Meshtastic signal meter — the familiar bars or status color in the app — is calculated very differently than the "bars" on a traditional cell phone or Wi-Fi router.
 
@@ -42,7 +42,7 @@ For standard radios (like FM or Wi-Fi), if the background noise is louder than t
 
 LoRa is special. It uses **"Spread Spectrum"** modulation, which allows the radio to mathematically pull a signal out of the air even when it is buried deep _underneath_ the background noise. This is why you will frequently see **negative SNR numbers** in Meshtastic (e.g., -10 dB, which means the signal is 10 decibels weaker than the background static).
 
-Depending on which Meshtastic preset you are using (e.g., `LongFast` vs. `ShortFast`), the radio has a specific **SNR Limit** — the absolute maximum amount of noise it can tolerate before the message is completely lost to the static.
+Sõltuvalt sellest, millist Meshtastic eelhäälestust te kasutate (nt `PikkKauge` vs. `LühikeKiire`), on raadiol kindel **SNR-i piirang** – absoluutne maksimaalne müra hulk, mida see talub enne, kui sõnum staatilise müra tõttu täielikult kaob.
 
 ---
 

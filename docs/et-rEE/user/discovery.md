@@ -29,7 +29,7 @@ Local Mesh Discovery is a dedicated scanning mode that helps you find the best L
 
 Open it from **Settings → Local Mesh Discovery**.
 
-> ⚠️ **Note:** Discovery temporarily changes your radio's LoRa settings while it scans, then restores your original configuration when it finishes. Your device must be connected to run a scan.
+> ⚠️ **Märkus:** Discovery muudab skannimise ajal ajutiselt raadio LoRa seadeid ja taastab pärast skannimise lõppu algse konfiguratsiooni. Your device must be connected to run a scan.
 
 ### Setting Up a Scan
 
@@ -83,9 +83,9 @@ Additional features available from the results:
 
 - **Scan History** — saved sessions you can revisit; view or delete past scans.
 - **Discovery Map** — a map of the nodes found during the scan.
-- **Report export** — export a report as a PDF on Android, or as text on other platforms.
+- **Aruande eksport** – ekspordi aruanne PDF-failina Androidis või tekstina muudel platvormidel.
 
-> 💡 **Tip:** On Android, Discovery can generate an on-device AI summary (Gemini Nano) of your results. If the on-device model isn't available, an algorithmic summary is used instead — so you always get a readable interpretation of the scan.
+> 💡 **Vihje:** Androidis saab Discovery genereerida teie tulemustest seadmesisese tehisintellekti kokkuvõtte (Gemini Nano). If the on-device model isn't available, an algorithmic summary is used instead — so you always get a readable interpretation of the scan.
 
 ---
 
@@ -121,7 +121,7 @@ Each hop represents a relay node that forwarded the message. The SNR and RSSI va
 | Many hops (4+)                                          | Long path — consider repositioning a node to shorten it                     |
 | Different path on retry                                                    | Mesh is adapting — multiple routes exist (this is good!) |
 
-> 💡 **Tip:** Run traceroute several times over a few minutes. If the path changes, your mesh has redundant routes — a sign of a well-connected network.
+> 💡 **Vihje:** Käivita traceroute'i mitu korda mõne minuti tagant. If the path changes, your mesh has redundant routes — a sign of a well-connected network.
 
 ### Troubleshooting with Traceroute
 

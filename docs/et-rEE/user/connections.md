@@ -3,7 +3,7 @@ title: Ühendus
 parent: User Guide
 nav_order: 2
 last_updated: 2026-05-20
-description: Connect your phone or desktop to a Meshtastic radio via Bluetooth, USB, or TCP/IP.
+description: Ühenda oma telefon või lauaarvuti Meshtastic raadioga Bluetoothi, USB või TCP/IP kaudu.
 aliases:
   - sinihammas
   - usb
@@ -13,7 +13,7 @@ aliases:
 
 # Ühendus
 
-Meshtastic supports multiple transport methods to communicate between your phone/desktop and a radio node.
+Meshtastic toetab mitut transpordimeetodit telefoni/töölaua ja raadiosõlme vaheliseks suhtluseks.
 
 ## Sinihammas (BLE)
 
@@ -33,7 +33,7 @@ You can filter devices by transport type using the filter chips at the top:
 
 ![Transport filter chips](../../assets/screenshots/connections_transport_filters.png)
 
-> 💡 **Tip:** If your device doesn't appear, check that Bluetooth and Location permissions are granted, and that the radio is not already connected to another device.
+> 💡 **Vihje:** Kui sinu seadet ei kuvata, kontrolli, kas sinihamba ​​ja asukoha load on antud ning et raadio poleks juba teise seadmega ühendatud.
 
 ### Connection Status
 
@@ -68,28 +68,28 @@ USB connections provide a wired alternative, useful for desktop or when Bluetoot
 2. Rakendus küsib USB luba – puuduta **Luba**.
 3. The connection is established automatically.
 
-> ⚠️ **Note:** USB connections require OTG support on Android devices.
+> ⚠️ **Märkus:** USB ühenduste jaoks on Android-seadmetes vaja OTG tuge.
 
 ## TCP/IP (WiFi)
 
-Some Meshtastic radios support WiFi connectivity, allowing TCP-based connections.
+Mõned Meshtastic raadiod toetavad WiFi ühendust, mis võimaldab TCP põhiseid ühendusi.
 
 ### Sätted
 
-1. Connect your radio to a WiFi network via the radio's web interface or settings.
+1. Ühenda raadio WiFi võrguga raadio veebiliidese või sätete kaudu.
 2. In the app, go to **Connect → TCP**.
 3. Enter the radio's IP address and port (default: 4403).
 4. Puuduta **Ühenda**.
 
-![WiFi scanning for devices](../../assets/screenshots/connections_wifi_scanning.png)
+![WiFi seadmete otsimine](../../assets/screenshots/connections_wifi_scanning.png)
 
 When a device is found, it appears in the connection list:
 
-![WiFi device found](../../assets/screenshots/connections_wifi_device_found.png)
+![WiFi seade leitud](/assets/screenshots/connections_wifi_device_found.png)
 
 A successful connection is confirmed with a status indicator:
 
-![WiFi connection success](../../assets/screenshots/connections_wifi_success.png)
+![WiFi ühendus õnnestus](../../assets/screenshots/connections_wifi_success.png)
 
 ### When to Use TCP
 

@@ -29,7 +29,7 @@ The node list shows every node your radio has heard, including:
 
 | Badge             | Meaning                               |
 | ----------------- | ------------------------------------- |
-| 🟢 Online         | Node heard within the last 15 minutes |
+| 🟢 Võrgus         | Node heard within the last 15 minutes |
 | 🟡 Eemal          | Node heard within the last 2 hours    |
 | 🔴 Võrgust väljas | Node not heard for over 2 hours       |
 | ⭐ Lemmik          | Node marked as favorite by the user   |
@@ -38,21 +38,21 @@ The node list shows every node your radio has heard, including:
 
 Nodes can be configured with different roles that affect their mesh behavior:
 
-| Roll                             | Kirjeldus                                                                                                                                              |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Klient                           | Standard end-user device                                                                                                                               |
-| Klient-baas                      | Treats favorited-node traffic as Router Late priority; all other traffic as Client                                                                     |
-| Vaikne klient                    | Receives but doesn't retransmit                                                                                                                        |
-| Peidetud klient                  | Like Client Mute, plus hides from node list                                                                                                            |
-| Ruuter                           | Prioritizes message forwarding; stays awake to relay                                                                                                   |
-| Hiline ruuter                    | Infrastruktuurisõlm, mis levitab signaali ühe korra, kuid alles pärast kõiki teisi režiime (pakub täiendavat leviala)               |
-| ~~Router Client~~                | ⚠️ **Deprecated** (removed in firmware 2.3.15) — no longer selectable; use Router or Client instead |
-| ~~Repeater~~                     | ⚠️ **Deprecated** (removed in firmware 2.7.11) — no longer selectable; use Router instead           |
-| Jälgitav                         | Optimized for position reporting at regular intervals                                                                                                  |
-| Andur                            | Optimized for telemetry reporting                                                                                                                      |
-| TAK                              | Interoperates with TAK systems (sends/receives CoT)                                                                                 |
-| Jälgitav TAK                     | TAK position reporting only                                                                                                                            |
-| Lost & Found | Continuous position beacon for recovery                                                                                                                |
+| Roll                             | Kirjeldus                                                                                                                                                               |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Klient                           | Standard end-user device                                                                                                                                                |
+| Klient-baas                      | Treats favorited-node traffic as Router Late priority; all other traffic as Client                                                                                      |
+| Vaikne klient                    | Receives but doesn't retransmit                                                                                                                                         |
+| Peidetud klient                  | Like Client Mute, plus hides from node list                                                                                                                             |
+| Ruuter                           | Prioritizes message forwarding; stays awake to relay                                                                                                                    |
+| Hiline ruuter                    | Infrastruktuurisõlm, mis levitab signaali ühe korra, kuid alles pärast kõiki teisi režiime (pakub täiendavat leviala)                                |
+| ~~Router Client~~                | ⚠️ **Vananenud** (eemaldatud püsivara versioonis 2.3.15) — enam mitte valitav; kasuta hoopis ruuterint või kliendina |
+| ~~Repeater~~                     | ⚠️ **Vananenud** (eemaldatud püsivara versioonis 2.7.11) — enam mitte valitav; kasuta hoopis ruuterina               |
+| Jälgitav                         | Optimized for position reporting at regular intervals                                                                                                                   |
+| Andur                            | Optimized for telemetry reporting                                                                                                                                       |
+| TAK                              | Interoperates with TAK systems (sends/receives CoT)                                                                                                  |
+| Jälgitav TAK                     | TAK position reporting only                                                                                                                                             |
+| Lost & Found | Continuous position beacon for recovery                                                                                                                                 |
 
 ### Choosing a Role
 
@@ -66,17 +66,17 @@ Most users should keep the default **Client** role. Consider a different role wh
 - **Sensor** — An unattended device reporting environmental telemetry (temperature, humidity, air quality). Sarnane võimsusprofiil jälgimisseadmele.
 - **TAK / TAK jälgimisseade** — Vajalik ainult ATAK/WinTAK süsteemidega koostööl. See [TAK Integration](tak) for details.
 
-> 💡 **Tip:** The mesh works best when most nodes are **Client** or **Router**. Too many Mute nodes reduces mesh resilience; too many Routers in a dense area can cause congestion. A good rule of thumb: one Router per 5–10 Clients in your area.
+> 💡 **Vihje:** Kärgvõrk töötab kõige paremini, kui enamik sõlmi on **klient** või **ruuter**. Too many Mute nodes reduces mesh resilience; too many Routers in a dense area can cause congestion. A good rule of thumb: one Router per 5–10 Clients in your area.
 
 ### Encryption Indicators
 
 Nodes display encryption status icons next to their name:
 
-| Icon          | Meaning                                                                                                             |
-| ------------- | ------------------------------------------------------------------------------------------------------------------- |
-| 🔒 Lukustatud | Communication uses PKI (public key infrastructure) — end-to-end encrypted with verified identity |
-| 🔓 Unlocked   | Communication uses shared channel PSK — encrypted but identity not individually verified                            |
-| ⚠️ Mismatch   | Public key mismatch — the node's key has changed since last seen (investigate before trusting)   |
+| Icon            | Meaning                                                                                                             |
+| --------------- | ------------------------------------------------------------------------------------------------------------------- |
+| 🔒 Lukustatud   | Communication uses PKI (public key infrastructure) — end-to-end encrypted with verified identity |
+| 🔓 Lukust lahti | Communication uses shared channel PSK — encrypted but identity not individually verified                            |
+| ⚠️ Ebakõla      | Public key mismatch — the node's key has changed since last seen (investigate before trusting)   |
 
 > 💡 **Vihje:** PKI krüpteering (püsivara 2,5+) pakub tugevamat turvalisust kui kanali PSK, kuna igal sõlmel on unikaalne võtmepaar. If you see a key mismatch warning, the node may have been reset or compromised.
 

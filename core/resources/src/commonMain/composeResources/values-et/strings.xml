@@ -257,7 +257,7 @@
     <string name="config_position_gps_update_interval_summary">Kui tihti peaksime proovima GPS asukohta määrata (&lt;10sekundit hoiab GPSi sisselülitatuna).</string>
     <string name="config_power_is_power_saving_summary">Unereziimis nii palju kui võimalik, jälgitava ja anduri rolli puhul hõlmab see ka Lora raadiot. Ärge kasutage seda sätet, kui soovite oma seadet kasutada telefonirakendustega või kui kasutate seadet ilma kasutajanuputa.</string>
     <string name="config_security_admin_key">Avalik võti, millel on õigus sellele sõlmele administraatori sõnumeid saata.</string>
-    <string name="config_security_debug_log_api_enabled">Väljenda reaalajas silumislogi jadapordi kaudu, vaata ja ekspordi asukoha redigeerimisega seadmelogisid sinihamba ​​kaudu.</string>
+    <string name="config_security_debug_log_api_enabled">Väljunda reaalajas silumislogi jadapordi kaudu, vaata ja salvesta asukoha redigeerimisega seadmelogisid sinihamba ​​kaudu.</string>
     <string name="config_security_is_managed">Seadet haldab kärgvõrgu administraator, kasutajal pole juurdepääsu seadme sätetele.</string>
     <string name="config_security_private_key">Kasutatakse jagatud võtme loomiseks kaugseadmega.</string>
     <string name="config_security_public_key">Genereeritakse privaatvõtmest ja saadetakse kärgvõrgu sõlmedele, et nad saaksid koostada jagatud salajase võtme.</string>
@@ -299,7 +299,7 @@
     <string name="debug_decoded_payload">Dekodeeritud sõnumi maht:</string>
     <string name="debug_default_search">Otsi logist…</string>
     <string name="debug_export_failed">Ebaõnnestus kirjutada logi faili: %1$s</string>
-    <string name="debug_export_success">%1$d logi eksporditud</string>
+    <string name="debug_export_success">%1$d logi salvestatud</string>
     <string name="debug_filter_add">Lisa filter</string>
     <string name="debug_filter_add_custom">Lisa kohandatud filter</string>
     <string name="debug_filter_clear">Puhasta kõik filtrid</string>
@@ -379,7 +379,7 @@
     <string name="discovery_dwell_time">Viivitusaeg</string>
     <string name="discovery_dwell_time_description">Eelhäälestatud salvestuse kuulamise aeg</string>
     <string name="discovery_empty_history">Avastusseansse veel pole</string>
-    <string name="discovery_export_report">Ekspordi aruanne</string>
+    <string name="discovery_export_report">Salvesta aruanne</string>
     <string name="discovery_history">Avastuste ajalugu</string>
     <string name="discovery_keep_screen_awake">Hoia ekraan ärkvel</string>
     <string name="discovery_keep_screen_awake_description">Hoiab ära Androidi tukastamisrežiimi raadiopakettide kaotamise pikkade skaneerimiste ajal. Soovitatav.</string>
@@ -546,9 +546,10 @@
     <!-- EXPORT -->
     <string name="export_configuration">Salvesta sätted</string>
     <string name="export_data_csv">Ekspordi kõik paketid</string>
+    <string name="export_gpx">Salvesta GPX</string>
     <string name="export_keys">Salvesta võtmed</string>
     <string name="export_keys_confirmation">Ekspordib avalikud- ja privaatvõtmed faili. Palun hoidke kuskil turvalises kohas.</string>
-    <string name="export_tak_data_package">Ekspordi TAK andmepakett</string>
+    <string name="export_tak_data_package">Salvesta TAK andmepakett</string>
     <string name="external_notification">Välised teated</string>
     <string name="external_notification_config">Välisete teadete sätted</string>
     <string name="external_notification_enabled">Luba Välised teated</string>

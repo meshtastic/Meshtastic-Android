@@ -13,7 +13,7 @@ aliases:
 
 # Püsivara värskendus
 
-Keep your Meshtastic radio up to date with the latest firmware for new features, bug fixes, and security improvements.
+Hoia oma Meshtastic raadio ajakohasena uusima püsivaraga, et saada uusi funktsioone, veaparandusi ja turvalisuse täiustusi.
 
 ## Kontrollin värskendust
 
@@ -43,8 +43,8 @@ Kõige levinum värskendamisviis Androidi kasutajate seas:
 
 For recovery or when OTA is unavailable:
 
-- Use the [Meshtastic Web Flasher](https://flasher.meshtastic.org)
-- Or the [Meshtastic CLI tool](https://meshtastic.org/docs/getting-started/flashing-firmware) on desktop
+- Kasuta [Meshtastic Web Flasherit](https://flasher.meshtastic.org)
+- Või arvutil [Meshtastic CLI tööriist](https://meshtastic.org/docs/getting-started/flashing-firmware)
 
 ## Version Channels
 
@@ -92,7 +92,7 @@ If your device fails to boot:
 1. Try connecting via USB to a computer
 2. Use the web flasher in recovery/DFU mode
 3. Flash a known-good firmware version
-4. Check the Meshtastic Discord for device-specific recovery steps
+4. Seadmepõhiste taastamissammude kohta vaata Meshtastic Discordist
 
 ### Compatibility Warnings
 
@@ -107,9 +107,9 @@ The app may show warnings when:
 ## Related Topics
 
 - [Ühendused](connections) — ühenduse loomine pärast püsivara värskendamist
-- [Flashing firmware guide](https://meshtastic.org/docs/getting-started/flashing-firmware) — full firmware flashing walkthrough on meshtastic.org
-- [Supported devices](https://meshtastic.org/docs/hardware/devices) — check firmware compatibility by device
-- [FAQ](https://meshtastic.org/docs/about/faq) — common questions on meshtastic.org
+- [Püsivara uuendamise juhend](https://meshtastic.org/docs/getting-started/flashing-firmware) — täielik püsivara uuendamise juhend meshtastic.org lehel
+- [Toetatud seadmed](https://meshtastic.org/docs/hardware/devices) — ühilduvate raadiote täielik loetelu on leitav aadressilt meshtastic.org
+- [KKK](https://meshtastic.org/docs/about/faq) — meshtastic.org levinud küsimused
 
 ---
 

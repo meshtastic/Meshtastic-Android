@@ -7,7 +7,7 @@ last_updated: 2026-05-12
 
 # Units, Measurement & Locale
 
-The Meshtastic app automatically displays temperatures, distances, speeds, and times in the units your device is configured to use — no settings to change inside the app.
+Meshtastic rakendus kuvab automaatselt temperatuure, vahemaid, kiirusi ja aegu ühikutes, milleks teie seade on konfitud – rakenduses pole vaja sätteid muuta.
 
 ---
 

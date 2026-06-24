@@ -12,15 +12,15 @@ aliases:
 
 # Getting Started
 
-Welcome to Meshtastic! This guide walks you through the initial setup of the Meshtastic Android app.
+Tere tulemast Meshtasticusse! See juhend juhendab teid Meshtastic Androidi rakenduse esmasel seadistamisel.
 
 ## First Launch
 
 When you open the app for the first time, you'll be guided through an introductory flow that helps configure essential permissions and settings. Each step can be completed in order, or you can skip and configure permissions later in Android settings.
 
-### Welcome Screen
+### Tervituskuva
 
-The welcome screen introduces Meshtastic and its core capabilities:
+Tervituskuval tutvustatakse Meshtasticut ja selle põhifunktsioone:
 
 - Off-grid mesh communication
 - No cellular or internet required
@@ -28,7 +28,7 @@ The welcome screen introduces Meshtastic and its core capabilities:
 
 Puuduta **Alusta** seadistusvoo jätkamiseks.
 
-![Welcome screen](../../assets/screenshots/onboarding_welcome.png)
+![Tervituskuva](../../assets/screenshots/onboarding_welcome.png)
 
 ## Permissions
 
@@ -36,18 +36,18 @@ The app requests several permissions during setup. Each one serves a specific pu
 
 ### Bluetooth Permission
 
-Bluetooth is the primary connection method between your phone and Meshtastic radio:
+Sinihammas on peamine ühendusmeetod teie telefoni ja Meshtastic raadio vahel:
 
-- **Bluetooth scanning** — discover nearby Meshtastic radios
+- **Bluetoothi ​​skann** – avasta lähedalasuvad Meshtastic raadiod
 - **Sinihamba ühendus** – loo ja halda seotud seadmete ühendusi
 
 Grant both permissions when prompted. Without Bluetooth, you'll need to use USB or TCP connections instead.
 
 ### Location Permission
 
-> ⚠️ **Why is location required for Bluetooth?** Android requires location permission to discover nearby Bluetooth Low Energy devices. This is an Android system requirement, not a Meshtastic-specific choice.
+> ⚠️ **Miks on sinihamba ​​jaoks vaja asukohateavet?** Android vajab lähedalasuvate sinihamba madala energia seadmete avastamiseks asukohale juurdepääsu luba. See on Androidi süsteeminõue, mitte Meshtastic põhine valik.
 
-Meshtastic also uses your location for:
+Meshtastic kasutab teie asukohta ka järgmiseks:
 
 - Showing your position on the mesh map
 - Calculating distances to other nodes
@@ -68,7 +68,7 @@ Notifications alert you to:
 - Connection status changes (connected, disconnected, reconnecting)
 - Püsivara värskenduse võimalikus
 
-> 💡 **Tip:** You can fine-tune notification preferences later in Android system settings. The app creates separate notification channels for messages, connection events, and background service status.
+> 💡 **Vihje:** Märguannete eelistusi saad hiljem Androidi süsteemiseadetes täpsustada. The app creates separate notification channels for messages, connection events, and background service status.
 
 ### Critical Alerts Permission
 
@@ -81,9 +81,9 @@ On supported devices, the app may request permission for critical alerts:
 
 ## After Setup
 
-Once permissions are granted, the app transitions to the main interface. Your first action should be connecting to a Meshtastic radio — see [Connections](connections) for detailed instructions.
+Once permissions are granted, the app transitions to the main interface. Esimene samm peaks olema ühenduse loomine Meshtastic raadioga – üksikasjalike juhiste saamiseks vaata [Ühendused] (connections).
 
-> 💡 **Tip:** If you skipped any permissions during setup, you can grant them later through **Android Settings → Apps → Meshtastic → Permissions**. The app will prompt you again if a missing permission blocks a feature you try to use.
+> 💡 **Vihje:** Kui jätsid seadistamise ajal mõne õiguse andmata, saad selle hiljem anda jaotises **Androidi seaded → Rakendused → Meshtastic → Load**. The app will prompt you again if a missing permission blocks a feature you try to use.
 
 ## What's Next?
 
@@ -95,6 +95,6 @@ Once connected to a radio, explore:
 - [Map & Waypoints](map-and-waypoints) — view node positions
 - [Settings](settings-radio-user) — configure your radio and user profile
 
-New to Meshtastic? The [getting started guide](https://meshtastic.org/docs/getting-started) on meshtastic.org covers hardware selection, initial radio configuration, and your first mesh setup.
+Kas oled Meshtasticus algaja? Meshtastic.org lehel olev [alustusjuhend](https://meshtastic.org/docs/getting-started) käsitleb riistvara valimist, raadio esialgset seadistamist ja teie esimest võrgu seadistamist.
 
 ---

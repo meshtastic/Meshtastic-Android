@@ -13,7 +13,7 @@ aliases:
 
 # Telemetria & sensorid
 
-Meshtastic nodes can collect and share sensor data across the mesh network.
+Meshtastic sõlmed saavad koguda ja jagada andurite andmeid kärgvõrgu kaudu.
 
 ## Ülevaade
 
@@ -21,7 +21,7 @@ Telemeetria võimaldab anduritega varustatud sõlmedel levitada keskkonna-, ener
 
 ## Device Telemetry
 
-All Meshtastic nodes report basic device telemetry:
+Kõik Meshtastic sõlmed edastavad seadme põhitelemeetriat:
 
 | Meetriline         | Kirjeldus                      | Tüüpiline ulatus                   |
 | ------------------ | ------------------------------ | ---------------------------------- |
@@ -90,7 +90,7 @@ Useful for monitoring solar charging or battery health on remote nodes.
 | Weather station                            | 900                           | 300                                |
 | Battery conservation                       | 7200                          | 7200                               |
 
-> ⚠️ **Note:** Shorter intervals increase airtime usage and battery drain across the mesh.
+> ⚠️ **Märkus:** Lühemad intervallid suurendavad saate kasutusaega ja aku tühjenemist.
 
 ## Air Quality Metrics
 
@@ -110,7 +110,7 @@ The CO₂ reading is color-coded by severity:
 - 🟠 **Kehv** (2000–5000 ppm) — unisus, halb keskendumisvõime
 - 🔴 **Ohtlik** (≥ 5000 ppm) — otsene terviseprobleem
 
-Air quality data can be viewed as info cards on the node detail screen, charted over time, and exported to CSV.
+Õhukvaliteedi andmeid saab vaadata infokaartidena sõlme detailvaates, aja jooksul graafikule lisada ja CSV-vormingusse salvestada.
 
 ## Viewing Telemetry
 

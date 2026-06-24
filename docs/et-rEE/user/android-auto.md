@@ -15,7 +15,7 @@ aliases:
 
 Meshtastic integrates with Android Auto so you can stay in touch with your mesh while driving, without taking your hands off the wheel or your eyes off the road.
 
-> ⚠️ **Note:** Android Auto support is available on **Google-flavor Android builds only**. It is not included in the F-Droid build, and it is not available on Desktop or iOS.
+> ⚠️ **Märkus:** Android Auto tugi on saadaval ainult **Google'i-tüüpi Androidi versioonides**. It is not included in the F-Droid build, and it is not available on Desktop or iOS.
 
 ## Overview
 
@@ -27,7 +27,7 @@ When your phone is connected to an Android Auto head unit (or the Desktop Head U
 
 The car app does not add a new connection of its own. It uses the Meshtastic app's existing connection, node, and message state, so it reflects whatever your phone is already connected to.
 
-> ⚠️ **Note:** Your phone must be connected to a Meshtastic radio for the car app to show live data. If the app is disconnected, the car screen reflects that disconnected state.
+> ⚠️ **Märkus:** Autorakenduse reaalajas andmete kuvamiseks peab telefon olema ühendatud Meshtastic raadioga. If the app is disconnected, the car screen reflects that disconnected state.
 
 ## Sõnumid
 
