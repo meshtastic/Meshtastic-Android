@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -33,6 +34,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.util.encodeToString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.admin_key
@@ -62,6 +64,7 @@ import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Warning
+import org.meshtastic.feature.settings.lockdown.LockdownModeSetting
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.Config
 import kotlin.random.Random
@@ -77,6 +80,8 @@ expect fun ExportSecurityConfigButton(
 @Suppress("LongMethod")
 fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
+    val firmwareVersion = state.metadata?.firmware_version
+    val capabilities = remember(firmwareVersion) { Capabilities(firmwareVersion) }
     val securityConfig = state.radioConfig.security ?: Config.SecurityConfig()
     val formState = rememberConfigState(initialValue = securityConfig)
 
@@ -203,6 +208,28 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                     onCheckedChange = { formState.value = formState.value.copy(is_managed = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
+                HorizontalDivider()
+                val lockdownState by viewModel.lockdownState.collectAsStateWithLifecycle()
+                val tokenInfo by viewModel.lockdownTokenInfo.collectAsStateWithLifecycle()
+                LockdownModeSetting(
+                    supported = capabilities.supportsLockdown,
+                    lockdownState = lockdownState,
+                    tokenInfo = tokenInfo,
+                    connected = state.connected,
+                    containerColor = CardDefaults.cardColors().containerColor,
+                    onEnable = { passphrase, boots, hours, sessionMinutes ->
+                        viewModel.submitLockdownPassphrase(
+                            passphrase = passphrase,
+                            boots = boots,
+                            hours = hours,
+                            maxSessionSeconds = sessionMinutes * SECONDS_PER_MINUTE,
+                        )
+                    },
+                    onDisable = { passphrase ->
+                        viewModel.submitLockdownPassphrase(passphrase = passphrase, disable = true)
+                    },
+                    onLockNow = { viewModel.sendLockNow() },
+                )
             }
         }
     }
@@ -235,3 +262,5 @@ fun PrivateKeyRegenerateDialog(
         )
     }
 }
+
+private const val SECONDS_PER_MINUTE = 60

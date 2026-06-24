@@ -83,4 +83,21 @@ interface CommandSender {
 
     /** Requests neighbor info from a specific node. */
     suspend fun requestNeighborInfo(requestId: Int, destNum: Int)
+
+    /**
+     * Sends a lockdown passphrase to authenticate with a locked device.
+     *
+     * @param disable when `true`, instructs the device to decrypt storage back to plaintext and leave lockdown (the off
+     *   switch). The device reboots and reconnects reporting `DISABLED`.
+     */
+    fun sendLockdownPassphrase(
+        passphrase: String,
+        boots: Int = 0,
+        hours: Int = 0,
+        maxSessionSeconds: Int = 0,
+        disable: Boolean = false,
+    )
+
+    /** Sends a Lock Now command to immediately lock a locked-firmware device. */
+    fun sendLockNow()
 }

@@ -119,6 +119,7 @@ fun ConnectionsScreen(
     val connectionState by connectionsViewModel.connectionState.collectAsStateWithLifecycle()
     val ourNode by connectionsViewModel.ourNodeForDisplay.collectAsStateWithLifecycle()
     val regionUnset by connectionsViewModel.regionUnset.collectAsStateWithLifecycle()
+    val sessionAuthorized by connectionsViewModel.sessionAuthorized.collectAsStateWithLifecycle()
 
     val selectedDevice by scanModel.selectedNotNullFlow.collectAsStateWithLifecycle()
     val persistedDeviceName by scanModel.persistedDeviceName.collectAsStateWithLifecycle()
@@ -269,11 +270,13 @@ fun ConnectionsScreen(
 
                         // Region warning sits outside the animated card so it does not affect the
                         // CONNECTED ↔ CONNECTING ↔ NO_DEVICE size transition.
+                        val isPhysicalDevice =
+                            selectedDevice != MOCK_DEVICE_PREFIX && selectedDevice != REPLAY_DEVICE_PREFIX
                         if (
                             uiState == ConnectionUiState.CONNECTED_WITH_NODE &&
                             regionUnset &&
-                            selectedDevice != MOCK_DEVICE_PREFIX &&
-                            selectedDevice != REPLAY_DEVICE_PREFIX
+                            sessionAuthorized &&
+                            isPhysicalDevice
                         ) {
                             Spacer(modifier = Modifier.height(8.dp))
                             Card(modifier = Modifier.fillMaxWidth()) {

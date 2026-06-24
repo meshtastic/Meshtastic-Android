@@ -50,6 +50,7 @@ import org.meshtastic.proto.EnvironmentMetrics
 import org.meshtastic.proto.HostMetrics
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalStats
+import org.meshtastic.proto.LockdownAuth
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.Neighbor
 import org.meshtastic.proto.NeighborInfo
@@ -57,6 +58,7 @@ import org.meshtastic.proto.Paxcount
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.PowerMetrics
 import org.meshtastic.proto.Telemetry
+import org.meshtastic.proto.ToRadio
 import kotlin.math.absoluteValue
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.hours
@@ -374,6 +376,50 @@ class CommandSenderImpl(
         }
     }
 
+    override fun sendLockdownPassphrase(
+        passphrase: String,
+        boots: Int,
+        hours: Int,
+        maxSessionSeconds: Int,
+        disable: Boolean,
+    ) {
+        val validUntilEpoch =
+            if (hours > 0) {
+                (nowMillis / MILLIS_PER_SECOND + hours.toLong() * SECONDS_PER_HOUR).toInt()
+            } else {
+                0
+            }
+        val lockdownAuth =
+            LockdownAuth(
+                passphrase = passphrase.encodeToByteArray().toByteString(),
+                boots_remaining = boots.coerceAtLeast(0),
+                valid_until_epoch = validUntilEpoch,
+                max_session_seconds = maxSessionSeconds.coerceAtLeast(0),
+                disable = disable,
+            )
+        sendLockdownAdmin(AdminMessage(lockdown_auth = lockdownAuth))
+    }
+
+    override fun sendLockNow() {
+        sendLockdownAdmin(AdminMessage(lockdown_auth = LockdownAuth(lock_now = true)))
+    }
+
+    private fun sendLockdownAdmin(adminMessage: AdminMessage) {
+        val myNum = nodeManager.myNodeNum.value ?: return
+        val packet =
+            MeshPacket(
+                to = myNum,
+                id = generatePacketId(),
+                channel = 0,
+                want_ack = true,
+                hop_limit = DEFAULT_HOP_LIMIT,
+                hop_start = DEFAULT_HOP_LIMIT,
+                priority = MeshPacket.Priority.RELIABLE,
+                decoded = Data(portnum = PortNum.ADMIN_APP, payload = adminMessage.encode().toByteString()),
+            )
+        packetHandler.sendToRadio(ToRadio(packet = packet))
+    }
+
     fun resolveNodeNum(address: NodeAddress): Int = when (address) {
         NodeAddress.Broadcast -> NodeAddress.NODENUM_BROADCAST
 
@@ -456,5 +502,8 @@ class CommandSenderImpl(
         private const val ADMIN_CHANNEL_NAME = "admin"
 
         private const val DEFAULT_HOP_LIMIT = 3
+
+        private const val MILLIS_PER_SECOND = 1000L
+        private const val SECONDS_PER_HOUR = 3600
     }
 }

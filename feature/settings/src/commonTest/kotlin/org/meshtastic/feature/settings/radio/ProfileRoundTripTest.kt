@@ -52,6 +52,7 @@ import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.testing.FakeLockdownCoordinator
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.Config
@@ -132,6 +133,7 @@ class ProfileRoundTripTest {
                 locationService = locationService,
                 fileService = fileService,
                 mqttManager = mqttManager,
+                lockdownCoordinator = FakeLockdownCoordinator(),
             )
     }
 

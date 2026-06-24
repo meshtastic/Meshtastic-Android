@@ -45,7 +45,16 @@ kotlin {
             // kzstd codec, and CoT XML from xmlutil — all KMP, all targets. api()-
             // exported so :core:takserver reaches the org.meshtastic.tak.* pipeline
             // from commonMain on every platform (no JVM-only scoping or iOS stubs).
-            api(libs.takpacket.sdk.kmp.get().toString())
+            //
+            // takpacket-sdk still declares a transitive protobufs (protobufs-jvm:2.7.25); exclude it so
+            // the app's single protobufs version (api above) is authoritative. Otherwise the older
+            // transitive pin out-ranks our snapshot on the host-test classpath and breaks proto ABI
+            // (NoSuchMethodError on post-2.7.25 messages). Drop once takpacket stops exporting protobufs.
+            api(libs.takpacket.sdk.kmp.get().toString()) {
+                exclude(group = "org.meshtastic", module = "protobufs")
+                exclude(group = "org.meshtastic", module = "protobufs-jvm")
+                exclude(group = "org.meshtastic", module = "protobufs-android")
+            }
         }
         androidMain.dependencies {
             api(libs.androidx.annotation)

@@ -24,6 +24,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asFlow
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.service.LockdownState
+import org.meshtastic.core.model.service.LockdownTokenInfo
 import org.meshtastic.core.model.service.TracerouteResponse
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.ClientNotification
@@ -114,5 +116,33 @@ open class ServiceRepositoryImpl : ServiceRepository {
 
     override fun clearNeighborInfoResponse() {
         setNeighborInfoResponse(null)
+    }
+
+    private val _lockdownState = MutableStateFlow<LockdownState>(LockdownState.None)
+    override val lockdownState: StateFlow<LockdownState>
+        get() = _lockdownState
+
+    override fun setLockdownState(state: LockdownState) {
+        _lockdownState.value = state
+    }
+
+    override fun clearLockdownState() {
+        _lockdownState.value = LockdownState.None
+    }
+
+    private val _lockdownTokenInfo = MutableStateFlow<LockdownTokenInfo?>(null)
+    override val lockdownTokenInfo: StateFlow<LockdownTokenInfo?>
+        get() = _lockdownTokenInfo
+
+    override fun setLockdownTokenInfo(info: LockdownTokenInfo?) {
+        _lockdownTokenInfo.value = info
+    }
+
+    private val _sessionAuthorized = MutableStateFlow(false)
+    override val sessionAuthorized: StateFlow<Boolean>
+        get() = _sessionAuthorized
+
+    override fun setSessionAuthorized(authorized: Boolean) {
+        _sessionAuthorized.value = authorized
     }
 }

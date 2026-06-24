@@ -793,6 +793,36 @@
     <string name="local_stats_utilization">ChUtil: %1$s% | AirTX: %2$s%</string>
     <string name="location_disabled">Location access is turned off, can not provide position to mesh.</string>
     <string name="location_sharing">Location Sharing</string>
+    <!-- LOCKDOWN -->
+    <string name="lockdown_backoff">Try again in %1$d seconds.</string>
+    <string name="lockdown_boots_remaining">Boots remaining</string>
+    <string name="lockdown_confirm_passphrase">Confirm passphrase</string>
+    <string name="lockdown_disable">Disable lockdown</string>
+    <string name="lockdown_disable_message">Enter your passphrase to turn off lockdown. The device will decrypt its storage and reboot.</string>
+    <string name="lockdown_enable">Enable lockdown</string>
+    <string name="lockdown_enable_ack">I understand</string>
+    <string name="lockdown_enable_warning">Heads up: enabling lockdown locks the debug port (SWD) on supported hardware. You can turn lockdown off any time with your passphrase, and a full device erase restores everything if needed.</string>
+    <string name="lockdown_enter_passphrase">Enter Passphrase</string>
+    <string name="lockdown_hide_passphrase">Hide</string>
+    <string name="lockdown_hours_until_expiry">Hours until expiry</string>
+    <string name="lockdown_incorrect_passphrase">Incorrect passphrase.</string>
+    <string name="lockdown_lock_now">Lock Now</string>
+    <string name="lockdown_lock_reason">Reason: %1$s</string>
+    <string name="lockdown_mode">Lockdown mode</string>
+    <string name="lockdown_mode_setting_up">Setting up…</string>
+    <string name="lockdown_mode_summary_locked">Active — enter your passphrase to unlock this connection.</string>
+    <string name="lockdown_mode_summary_off">Encrypt device storage and require a passphrase per connection.</string>
+    <string name="lockdown_mode_summary_unlocked">Active — storage encrypted, this connection authenticated.</string>
+    <string name="lockdown_passphrase">Passphrase</string>
+    <string name="lockdown_passphrases_do_not_match">Passphrases do not match</string>
+    <string name="lockdown_session_boots_remaining">Session: %1$d reboots remaining</string>
+    <string name="lockdown_session_expires">Expires %1$s</string>
+    <string name="lockdown_session_minutes">Session cap (minutes)</string>
+    <string name="lockdown_session_minutes_help">Per-boot uptime cap. 0 = unlimited.</string>
+    <string name="lockdown_session_no_time_limit">No time limit</string>
+    <string name="lockdown_set_passphrase">Set Passphrase</string>
+    <string name="lockdown_show_passphrase">Show</string>
+    <string name="lockdown_submit">Submit</string>
     <string name="locked">Locked</string>
     <!-- LOG -->
     <string name="log_retention_days">MeshLog retention period</string>

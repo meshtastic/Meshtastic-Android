@@ -28,18 +28,22 @@ import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.XModemManager
+import org.meshtastic.core.testing.FakeLockdownCoordinator
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.LoRaRegionPresetMap
+import org.meshtastic.proto.LockdownStatus
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.MqttClientProxyMessage
 import org.meshtastic.proto.MyNodeInfo
 import org.meshtastic.proto.QueueStatus
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import org.meshtastic.proto.NodeInfo as ProtoNodeInfo
 
 class FromRadioPacketHandlerImplTest {
@@ -51,6 +55,7 @@ class FromRadioPacketHandlerImplTest {
     private val configFlowManager: MeshConfigFlowManager = mock(MockMode.autofill)
     private val configHandler: MeshConfigHandler = mock(MockMode.autofill)
     private val xmodemManager: XModemManager = mock(MockMode.autofill)
+    private val lockdownCoordinator = FakeLockdownCoordinator()
 
     private lateinit var handler: FromRadioPacketHandlerImpl
 
@@ -65,6 +70,7 @@ class FromRadioPacketHandlerImplTest {
                 mqttManager,
                 packetHandler,
                 notificationManager,
+                lockdownCoordinator,
             )
     }
 
@@ -109,6 +115,17 @@ class FromRadioPacketHandlerImplTest {
         handler.handleFromRadio(proto)
 
         verify { configFlowManager.handleConfigComplete(nonce) }
+        assertTrue(lockdownCoordinator.configCompleteCalled)
+    }
+
+    @Test
+    fun `handleFromRadio routes LOCKDOWN_STATUS to lockdownCoordinator`() {
+        val lockdownStatus = LockdownStatus(state = LockdownStatus.State.LOCKED, lock_reason = "token_missing")
+        val proto = FromRadio(lockdown_status = lockdownStatus)
+
+        handler.handleFromRadio(proto)
+
+        assertEquals(lockdownStatus, lockdownCoordinator.lastStatus)
     }
 
     @Test

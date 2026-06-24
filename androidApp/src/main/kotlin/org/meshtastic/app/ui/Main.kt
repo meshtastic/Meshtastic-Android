@@ -33,6 +33,7 @@ import co.touchlab.kermit.Logger
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.app.BuildConfig
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.service.LockdownState
 import org.meshtastic.core.navigation.NodesRoute
 import org.meshtastic.core.navigation.TopLevelDestination
 import org.meshtastic.core.navigation.rememberMultiBackstack
@@ -50,6 +51,7 @@ import org.meshtastic.feature.firmware.navigation.firmwareGraph
 import org.meshtastic.feature.map.navigation.mapGraph
 import org.meshtastic.feature.messaging.navigation.contactsGraph
 import org.meshtastic.feature.node.navigation.nodesGraph
+import org.meshtastic.feature.settings.lockdown.LockdownDialog
 import org.meshtastic.feature.settings.navigation.settingsGraph
 import org.meshtastic.feature.settings.radio.channel.channelsGraph
 import org.meshtastic.feature.wifiprovision.navigation.wifiProvisionGraph
@@ -70,6 +72,21 @@ fun MainScreen() {
     val backStack = multiBackstack.activeBackStack
 
     AndroidAppVersionCheck(viewModel)
+
+    val lockdownState by viewModel.lockdownState.collectAsStateWithLifecycle()
+    LockdownDialog(
+        lockdownState = lockdownState,
+        onSubmit = { passphrase, boots, hours, sessionMinutes ->
+            viewModel.sendLockdownUnlock(passphrase, boots, hours, sessionMinutes * SECONDS_PER_MINUTE)
+        },
+        onDisconnect = { viewModel.setDeviceAddress("n") },
+    )
+    // Auto-disconnect when firmware acknowledges Lock Now
+    LaunchedEffect(lockdownState) {
+        if (lockdownState is LockdownState.LockNowAcknowledged) {
+            viewModel.setDeviceAddress("n")
+        }
+    }
 
     MeshtasticAppShell(multiBackstack = multiBackstack, uiViewModel = viewModel, hostModifier = Modifier) {
         MeshtasticNavigationSuite(
@@ -136,3 +153,5 @@ private fun AndroidAppVersionCheck(viewModel: UIViewModel) {
         }
     }
 }
+
+private const val SECONDS_PER_MINUTE = 60
