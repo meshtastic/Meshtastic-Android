@@ -59,3 +59,27 @@ plugins.withId("org.meshtastic.flatpak.sources") {
 dependencies {
     dokkaPlugin(libs.dokka.android.documentation.plugin)
 }
+
+// ─── TEMPORARY: protobufs commit-pinned snapshot preview (PR #5834) ──────────────────────────────
+// We track the unreleased protobufs snapshot v2.7.26-497cd88-SNAPSHOT for the LoRa region→preset map (#951).
+// protobufs #959 switched RB snapshot publishing to immutable per-commit vX.Y.Z-{shorthash}-SNAPSHOT
+// coordinates; pin the exact one rather than the moving develop-SNAPSHOT.
+// takpacket-sdk:0.7.0 STILL transitively pins protobufs:2.7.25 (verified against its POM), and
+// Gradle ranks 2.7.25 > v2.7.26-…-SNAPSHOT (the numeric "2" outranks the "v2" string qualifier).
+// That downgrades the test *runtime* classpath to 2.7.25 while the common-metadata *compile* uses
+// the snapshot, yielding NoSuchFieldError/NoSuchMethodError on the proto-generated classes at test
+// runtime (assembleDebug/detekt don't catch it; test/allTests do). Force every protobufs* variant
+// to the snapshot so compile and runtime agree. Safe because atak.proto is unchanged, so takpacket's
+// own message ABI stays compatible with the newer protobufs.
+// REMOVE once protobufs cuts a tagged release containing #951 (re-pin the catalog to it) — and,
+// ideally, once takpacket-sdk is republished against that release.
+allprojects {
+    configurations.all {
+        resolutionStrategy.eachDependency {
+            if (requested.group == "org.meshtastic" && requested.name.startsWith("protobufs")) {
+                useVersion("v2.7.26-497cd88-SNAPSHOT")
+                because("preview #5834: override takpacket transitive protobufs:2.7.25 pin")
+            }
+        }
+    }
+}

@@ -33,6 +33,8 @@ import org.meshtastic.core.resources.label_narrow_slow
 import org.meshtastic.core.resources.label_short_fast
 import org.meshtastic.core.resources.label_short_slow
 import org.meshtastic.core.resources.label_short_turbo
+import org.meshtastic.core.resources.label_tiny_fast
+import org.meshtastic.core.resources.label_tiny_slow
 import org.meshtastic.core.resources.label_very_long_slow
 import org.meshtastic.core.resources.traceroute_endpoint_missing
 import org.meshtastic.core.resources.traceroute_map_no_data
@@ -54,6 +56,8 @@ val ChannelOption.labelRes: StringResource
             ChannelOption.LITE_SLOW -> Res.string.label_lite_slow
             ChannelOption.NARROW_FAST -> Res.string.label_narrow_fast
             ChannelOption.NARROW_SLOW -> Res.string.label_narrow_slow
+            ChannelOption.TINY_FAST -> Res.string.label_tiny_fast
+            ChannelOption.TINY_SLOW -> Res.string.label_tiny_slow
         }
 
 fun TracerouteMapAvailability.toMessageRes(): StringResource? = when (this) {

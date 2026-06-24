@@ -82,6 +82,7 @@ import org.meshtastic.proto.DeviceUIConfig
 import org.meshtastic.proto.FileInfo
 import org.meshtastic.proto.HamParameters
 import org.meshtastic.proto.HardwareModel
+import org.meshtastic.proto.LoRaRegionPresetMap
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.MeshPacket
@@ -104,6 +105,10 @@ data class RadioConfigState(
     val deviceConnectionStatus: DeviceConnectionStatus? = null,
     val deviceUIConfig: DeviceUIConfig? = null,
     val fileManifest: List<FileInfo> = emptyList(),
+    /** Firmware's region→preset legality map (local handshake only); null when unavailable (firmware < 2.8). */
+    val loraRegionPresetMap: LoRaRegionPresetMap? = null,
+    /** Whether the device being configured is flagged as a licensed (amateur) operator; gates licensed-only presets. */
+    val localIsLicensed: Boolean = false,
     val responseState: ResponseState<Boolean> = ResponseState.Empty,
     val analyticsAvailable: Boolean = true,
     val analyticsEnabled: Boolean = true,
@@ -226,7 +231,9 @@ open class RadioConfigViewModel(
             .distinctUntilChanged()
             .onEach {
                 _destNode.value = it
-                _radioConfigState.update { state -> state.copy(metadata = it?.metadata) }
+                _radioConfigState.update { state ->
+                    state.copy(metadata = it?.metadata, localIsLicensed = it?.user?.is_licensed == true)
+                }
             }
             .launchIn(viewModelScope)
 
@@ -275,6 +282,10 @@ open class RadioConfigViewModel(
 
         radioConfigRepository.fileManifestFlow
             .onEach { manifest -> _radioConfigState.update { it.copy(fileManifest = manifest) } }
+            .launchIn(viewModelScope)
+
+        radioConfigRepository.loraRegionPresetMapFlow
+            .onEach { map -> _radioConfigState.update { it.copy(loraRegionPresetMap = map) } }
             .launchIn(viewModelScope)
 
         serviceRepository.meshPacketFlow.onEach(::processPacketResponse).launchIn(viewModelScope)
@@ -382,7 +393,9 @@ open class RadioConfigViewModel(
                         power = config.power ?: state.radioConfig.power,
                         network = config.network ?: state.radioConfig.network,
                         display = config.display ?: state.radioConfig.display,
-                        lora = config.lora ?: state.radioConfig.lora,
+                        // LoRa is intentionally NOT applied optimistically: the firmware can clamp or region-swap
+                        // (e.g. EU sibling) a LoRa write and applies it live, so the form must reflect the device's
+                        // actual value. It is re-read from the device when the LoRa screen is next opened.
                         bluetooth = config.bluetooth ?: state.radioConfig.bluetooth,
                         security = config.security ?: state.radioConfig.security,
                     ),

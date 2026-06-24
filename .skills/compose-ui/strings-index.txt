@@ -227,6 +227,7 @@ config_display_units_summary
 config_display_wake_on_tap_or_motion_summary
 config_lora_frequency_slot_summary
 config_lora_hop_limit_summary
+config_lora_modem_preset_licensed_summary
 config_lora_modem_preset_summary
 config_lora_region_summary
 config_network_eth_enabled_summary
@@ -726,6 +727,8 @@ label_narrow_slow
 label_short_fast
 label_short_slow
 label_short_turbo
+label_tiny_fast
+label_tiny_slow
 label_very_long_slow
 last_heard_filter_label
 last_position_update
