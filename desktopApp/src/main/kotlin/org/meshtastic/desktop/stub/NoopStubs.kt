@@ -40,6 +40,7 @@ import org.meshtastic.core.repository.MeshLocationManager
 import org.meshtastic.core.repository.MeshWorkerManager
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.TransportDisconnectReason
 import org.meshtastic.proto.MqttClientProxyMessage
 import org.meshtastic.mqtt.ConnectionState as MqttConnectionState
 import org.meshtastic.proto.Position as ProtoPosition
@@ -102,7 +103,7 @@ class NoopRadioInterfaceService : RadioInterfaceService {
 
     override fun onConnect() {}
 
-    override fun onDisconnect(isPermanent: Boolean, errorMessage: String?) {}
+    override fun onDisconnect(isPermanent: Boolean, errorMessage: String?, reason: TransportDisconnectReason?) {}
 
     override fun handleFromRadio(bytes: ByteArray) {}
 

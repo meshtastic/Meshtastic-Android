@@ -47,6 +47,7 @@ import org.meshtastic.core.network.repository.SerialDevicePresence
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioTransport
 import org.meshtastic.core.repository.RadioTransportFactory
+import org.meshtastic.core.repository.TransportDisconnectReason
 import org.meshtastic.core.testing.FakeBluetoothRepository
 import org.meshtastic.core.testing.FakeRadioPrefs
 import org.meshtastic.core.testing.FakeRadioTransport
@@ -545,6 +546,36 @@ class SharedRadioInterfaceServiceLivenessTest {
             assertTrue(
                 createdTransports.first().closeCalled,
                 "Liveness should fire after silence exceeds threshold since last inbound data",
+            )
+        } finally {
+            service.disconnect()
+            advanceTimeBy(1_000L)
+        }
+    }
+
+    @Test
+    fun `USB permission denial emits error and permanent disconnected state`() = runTest(testDispatcher) {
+        clock = 0L
+        val service = createConnectedService("s/dev/bus/usb/001/002")
+        try {
+            val errors = mutableListOf<String>()
+            val collectJob = backgroundScope.launch { service.connectionError.collect { errors.add(it) } }
+
+            service.onDisconnect(
+                isPermanent = true,
+                errorMessage = null,
+                reason = TransportDisconnectReason.UsbPermissionDenied,
+            )
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+
+            collectJob.cancel()
+
+            assertEquals(ConnectionState.Disconnected, service.connectionState.value)
+            assertEquals(
+                listOf("USB permission denied. Reconnect the device to try again."),
+                errors,
+                "USB permission denial must surface a specific error message.",
             )
         } finally {
             service.disconnect()

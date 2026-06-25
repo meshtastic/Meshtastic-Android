@@ -22,6 +22,7 @@ import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.network.transport.StreamFrameCodec
 import org.meshtastic.core.repository.RadioTransport
 import org.meshtastic.core.repository.RadioTransportCallback
+import org.meshtastic.core.repository.TransportDisconnectReason
 
 /**
  * An interface that assumes we are talking to a meshtastic device over some sort of stream connection (serial or TCP
@@ -44,13 +45,22 @@ abstract class StreamTransport(protected val callback: RadioTransportCallback, p
      *
      * @param waitForStopped if true we should wait for the transport to finish - must be false if called from inside
      *   transport callbacks
-     * @param isPermanent true only when the service layer is signaling a user-initiated terminal disconnect. USB
-     *   unplug, I/O errors, and similar conditions are transient — the transport may recover when the device is
-     *   replugged or the OS re-enumerates. Defaults to false so callbacks default to "may come back". The service layer
-     *   owns explicit close notifications so automatic stop/start recovery can close transport resources silently.
+     * @param isPermanent true when the user explicitly disconnects (e.g. [close] was called), or when an authorization
+     *   failure makes the current connection attempt unrecoverable. USB unplug, I/O errors, and similar conditions are
+     *   transient — the transport may recover when the device is replugged or the OS re-enumerates. Defaults to false
+     *   so callbacks default to "may come back".
+     * @param errorMessage optional user-facing reason for the disconnect; surfaced via
+     *   [RadioTransportCallback.onDisconnect]. Prefer [reason] for newly-classified disconnect causes so transports do
+     *   not own UI copy.
+     * @param reason optional structured cause for service/UI-specific handling.
      */
-    protected open fun onDeviceDisconnect(waitForStopped: Boolean, isPermanent: Boolean = false) {
-        callback.onDisconnect(isPermanent = isPermanent)
+    protected open fun onDeviceDisconnect(
+        waitForStopped: Boolean,
+        isPermanent: Boolean = false,
+        errorMessage: String? = null,
+        reason: TransportDisconnectReason? = null,
+    ) {
+        callback.onDisconnect(isPermanent = isPermanent, errorMessage = errorMessage, reason = reason)
     }
 
     protected open fun connect() {
