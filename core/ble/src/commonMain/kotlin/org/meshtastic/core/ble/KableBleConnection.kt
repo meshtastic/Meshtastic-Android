@@ -85,9 +85,10 @@ class KableBleService(private val peripheral: Peripheral, private val serviceUui
  *
  * Manages peripheral lifecycle, connection state tracking, and GATT service profile access.
  *
- * Connection attempts follow Kable's recommended pattern from the SensorTag sample: try a direct connect first, then
- * fall back to `autoConnect = true` on failure. Only two attempts are made per [connect] call — the caller
- * ([BleRadioTransport]) owns the macro-level retry/backoff loop.
+ * Connection attempts follow Kable's recommended pattern from the SensorTag sample: use a direct connect when a fresh
+ * advertisement is available, then fall back to `autoConnect = true` on failure. Advertisement-less devices start on
+ * the `autoConnect` path. At most two attempts are made per [connect] call — the caller ([BleRadioTransport]) owns the
+ * macro-level retry/backoff loop.
  */
 class KableBleConnection(private val scope: CoroutineScope, private val loggingConfig: BleLoggingConfig) :
     BleConnection {
@@ -113,7 +114,7 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
         MutableStateFlow<BleConnectionState>(BleConnectionState.Disconnected(DisconnectReason.Unknown))
     override val connectionState: StateFlow<BleConnectionState> = _connectionState.asStateFlow()
 
-    @Suppress("CyclomaticComplexMethod", "LongMethod")
+    @Suppress("CyclomaticComplexMethod", "LongMethod", "ThrowsCount")
     override suspend fun connect(device: BleDevice) {
         val meshtasticDevice = device as? MeshtasticBleDevice ?: error("Unsupported BleDevice type: ${device::class}")
         var autoConnect = meshtasticDevice.advertisement == null
@@ -161,7 +162,11 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
                 }
                 .launchIn(scope)
 
-        while (p.state.value !is State.Connected) {
+        // Bounded to at most two attempts: direct connect, then autoConnect fallback when a fresh
+        // advertisement was available. Advertisement-less devices start on the autoConnect path.
+        // The outer reconnect loop (BleRadioTransport) owns the macro retry budget — see class kdoc.
+        repeat(2) {
+            if (p.state.value is State.Connected) return
             autoConnect =
                 try {
                     connectionScope?.let { oldScope ->
@@ -186,6 +191,16 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
                     delay(AUTOCONNECT_FALLBACK_DELAY)
                     true
                 }
+        }
+        // Bounded loop may exit without reaching Connected if both connect() calls
+        // returned without throwing but state hasn't settled. The original while loop
+        // would have kept iterating; the bounded loop defers to the outer reconnect policy.
+        // Guard against false-positive Connected by verifying state here.
+        if (p.state.value !is State.Connected) {
+            _connectionState.emit(BleConnectionState.Disconnected(DisconnectReason.ConnectionFailed))
+            throw NotConnectedException(
+                "Failed to establish connection after bounded attempts (state=${p.state.value})",
+            )
         }
     }
 
