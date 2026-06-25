@@ -222,10 +222,12 @@ function processMarkdown(srcPath, destPath, section) {
     writeFile(destPath, content);
 }
 
+/** Sync screenshots, returning the set of destination basenames written. */
 function processImages() {
+    const written = new Set();
     if (!fs.existsSync(SRC_SCREENSHOTS_DIR)) {
         console.log("No screenshots directory found, skipping image sync.");
-        return;
+        return written;
     }
 
     const images = fs.readdirSync(SRC_SCREENSHOTS_DIR)
@@ -241,19 +243,70 @@ function processImages() {
 
             if (DRY_RUN) {
                 console.log(`[dry-run] Would convert: ${srcPath} → ${destPath}`);
+                written.add(destName);
             } else {
                 ensureDir(path.dirname(destPath));
                 try {
                     execSync(`cwebp -q 80 "${srcPath}" -o "${destPath}"`, { stdio: "pipe" });
                     console.log(`Converted: ${destPath}`);
+                    written.add(destName);
                 } catch (err) {
                     console.error(`Failed to convert ${img}: ${err.message}`);
                     // Fall back to copying the original
                     copyFile(srcPath, path.join(DEST_IMAGES_DIR, img));
+                    written.add(img);
                 }
             }
         } else {
             copyFile(srcPath, path.join(DEST_IMAGES_DIR, img));
+            written.add(img);
+        }
+    }
+    return written;
+}
+
+/** Recursively collect files under a directory, as paths relative to it. */
+function collectFiles(dir) {
+    const results = [];
+    if (!fs.existsSync(dir)) return results;
+    (function walk(current) {
+        for (const entry of fs.readdirSync(current)) {
+            const full = path.join(current, entry);
+            if (fs.statSync(full).isDirectory()) walk(full);
+            else results.push(path.relative(dir, full));
+        }
+    })(dir);
+    return results;
+}
+
+/**
+ * Remove destination files this run did not produce, so renamed or deleted
+ * source pages (and the screenshots they referenced) don't linger on the site.
+ * Mirrors the Apple sync's cleanup pass. Scoped to docs pages (.md/.mdx) and
+ * images under the directories this script owns.
+ */
+function pruneStale(expectedDocPaths, expectedImageNames) {
+    for (const file of collectFiles(DEST_DOCS_DIR)) {
+        const ext = path.extname(file).toLowerCase();
+        if (ext !== ".md" && ext !== ".mdx") continue;
+        if (expectedDocPaths.has(file.split(path.sep).join("/"))) continue;
+        const target = path.join(DEST_DOCS_DIR, file);
+        if (DRY_RUN) {
+            console.log(`[dry-run] Would remove stale page: ${target}`);
+        } else {
+            fs.unlinkSync(target);
+            console.log(`Removed stale page: ${target}`);
+        }
+    }
+    for (const file of collectFiles(DEST_IMAGES_DIR)) {
+        if (!IMAGE_EXTENSIONS.has(path.extname(file).toLowerCase())) continue;
+        if (expectedImageNames.has(path.basename(file))) continue;
+        const target = path.join(DEST_IMAGES_DIR, file);
+        if (DRY_RUN) {
+            console.log(`[dry-run] Would remove stale image: ${target}`);
+        } else {
+            fs.unlinkSync(target);
+            console.log(`Removed stale image: ${target}`);
         }
     }
 }
@@ -277,12 +330,23 @@ Documentation for the [Meshtastic Android](https://github.com/meshtastic/Meshtas
 }
 
 function createCategoryFiles() {
+    // Top-level section category. Uses the synced index.md as the landing page
+    // (matching the Apple sync), replacing any hand-written generated-index that
+    // would otherwise collide with index.md.
+    const sectionCategory = `label: Android App
+collapsible: true
+position: 1
+link:
+  type: doc
+  id: software/android/index
+`;
     const userCategory = `label: User Guide
 position: 1
 `;
     const devCategory = `label: Developer Guide
 position: 2
 `;
+    writeFile(path.join(DEST_DOCS_DIR, "_category_.yml"), sectionCategory);
     writeFile(path.join(DEST_DOCS_DIR, "user", "_category_.yml"), userCategory);
     writeFile(path.join(DEST_DOCS_DIR, "developer", "_category_.yml"), devCategory);
 }
@@ -294,6 +358,14 @@ function main() {
     console.log(`Dry run: ${DRY_RUN}`);
     console.log("");
 
+    // Track everything this run produces so stale files can be pruned afterwards.
+    const expectedDocPaths = new Set([
+        "index.md",
+        "_category_.yml",
+        "user/_category_.yml",
+        "developer/_category_.yml",
+    ]);
+
     // Process user guide
     const userDir = path.join(SRC_DOCS_DIR, "user");
     if (fs.existsSync(userDir)) {
@@ -303,6 +375,7 @@ function main() {
                 path.join(DEST_DOCS_DIR, "user", file),
                 "user",
             );
+            expectedDocPaths.add(`user/${file}`);
         }
     }
 
@@ -315,6 +388,7 @@ function main() {
                 path.join(DEST_DOCS_DIR, "developer", file),
                 "developer",
             );
+            expectedDocPaths.add(`developer/${file}`);
         }
     }
 
@@ -323,7 +397,10 @@ function main() {
     createCategoryFiles();
 
     // Process images
-    processImages();
+    const expectedImageNames = processImages();
+
+    // Remove anything left over from a previous sync or the old hand-written docs.
+    pruneStale(expectedDocPaths, expectedImageNames);
 
     console.log("\nSync complete.");
 }
