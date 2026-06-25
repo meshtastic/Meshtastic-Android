@@ -27,6 +27,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
+import org.meshtastic.core.ble.MeshtasticBleConstants.FROMNUM_CHARACTERISTIC
+import org.meshtastic.core.ble.MeshtasticBleConstants.FROMRADIO_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.SERVICE_UUID
 import org.meshtastic.core.model.RadioNotConnectedException
 import org.meshtastic.core.repository.RadioInterfaceService
@@ -209,9 +211,11 @@ class BleRadioTransportTest {
     }
 
     @Test
-    fun `findDevice does not fall back to bonded device when scan finds nothing`() = runTest {
+    fun `findDevice falls back to bonded device when fresh scans miss`() = runTest {
         val bondedDevice = FakeBleDevice(address = address, name = "Bonded Device")
         bluetoothRepository.bond(bondedDevice)
+        connection.service.addCharacteristic(FROMNUM_CHARACTERISTIC)
+        connection.service.addCharacteristic(FROMRADIO_CHARACTERISTIC)
 
         val bleTransport =
             BleRadioTransport(
@@ -224,12 +228,11 @@ class BleRadioTransportTest {
             )
         bleTransport.start()
         try {
-            // 3s settle + 2s targeted + 5s escalated scan = 10s before RadioNotConnectedException.
-            // The bonded device is never advertising, so findDevice must escalate and throw
-            // rather than returning the stale bonded handle.
+            // 3s settle + 2s targeted + 5s escalated scan = 10s before bonded fallback.
             advanceTimeBy(11_000)
 
-            assertEquals(0, connection.connectAndAwaitCalls, "Must not connect when bonded device is not advertising")
+            assertEquals(1, connection.connectAndAwaitCalls, "Must use bounded bonded fallback after fresh scans miss")
+            assertEquals("Bonded Device", connection.device?.name)
         } finally {
             bleTransport.close()
         }

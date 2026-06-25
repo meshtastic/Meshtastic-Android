@@ -83,13 +83,12 @@ private val TARGETED_SCAN_TIMEOUT = 2.seconds
 /**
  * Bounded scan duration used by both discovery paths in [findDevice]:
  * - Bonded escalation: after the 2s [TARGETED_SCAN_TIMEOUT] misses the low-duty advertisement window, this is the
- *   single bounded retry before declaring the bonded device unreachable.
+ *   single bounded retry before falling back to the bonded handle.
  * - Non-bonded retry: each of the [SCAN_RETRY_COUNT] attempts uses this duration.
  *
- * 5s covers multiple advertising intervals for typical BLE power-save slots (~1–2s each) while keeping the total bonded
- * scan window bounded (~7s scan, ~10s total attempt including the existing reconnect settle delay) so
- * [BleReconnectPolicy] iterates on its normal schedule instead of parking on [CONNECTION_TIMEOUT] (15s) via an
- * `autoConnect=true` hang on a stale handle.
+ * 5s covers multiple advertising intervals for typical BLE power-save slots (~1–2s each). If the bounded bonded scan
+ * window still misses, [findDevice] falls back to the bonded handle and [attemptConnection] keeps that patient
+ * `autoConnect` path bounded through [CONNECTION_TIMEOUT].
  */
 private val SCAN_TIMEOUT = 5.seconds
 private val GATT_CLEANUP_TIMEOUT = 5.seconds
@@ -246,18 +245,21 @@ class BleRadioTransport(
             }
 
             // Escalation: radio may be in a low-duty advertising slot. Try one bounded SCAN_TIMEOUT scan.
-            Logger.i { "[${address.anonymize()}] Targeted scan missed; escalating to bounded scan before giving up" }
+            Logger.i { "[${address.anonymize()}] Targeted scan missed; escalating to bounded scan before fallback" }
             scanForFreshDevice(SCAN_TIMEOUT)?.let {
                 Logger.i { "[${address.anonymize()}] Fresh advertisement found during escalated scan" }
                 return it
             }
 
-            // Never fall back to the stale bonded handle — that path forces autoConnect=true and hangs for
-            // CONNECTION_TIMEOUT (15s) before throwing. Bounded scan window (~7s scan, ~10s total attempt
-            // including the existing reconnect settle delay) lets the reconnect policy iterate on its
-            // normal schedule instead of parking on the autoConnect hang.
-            Logger.w { "[${address.anonymize()}] No fresh advertisement within $SCAN_TIMEOUT; reporting unreachable" }
-            throw RadioNotConnectedException("Bonded device is not advertising")
+            // If both scans miss, fall back to the bonded handle. Bonded-only devices have no fresh advertisement, so
+            // Kable uses autoConnect=true and Android can patiently wait for the device to advertise again. This
+            // remains
+            // bounded by CONNECTION_TIMEOUT in connectAndAwait(), after which BleReconnectPolicy owns retry/backoff.
+            Logger.w {
+                "[${address.anonymize()}] No fresh advertisement within $SCAN_TIMEOUT; " +
+                    "falling back to bonded handle for bounded autoConnect"
+            }
+            return bondedDevice
         }
 
         // Non-bonded path: preserve existing retry behavior (SCAN_RETRY_COUNT attempts at SCAN_TIMEOUT).
@@ -279,8 +281,7 @@ class BleRadioTransport(
      *
      * One scan attempt only — no retry, no backoff. Both bonded and non-bonded paths in [findDevice] share this
      * primitive so retry policy stays centralized:
-     * - Bonded: escalated from [TARGETED_SCAN_TIMEOUT] to [SCAN_TIMEOUT] before [findDevice] declares the device
-     *   unreachable.
+     * - Bonded: escalated from [TARGETED_SCAN_TIMEOUT] to [SCAN_TIMEOUT] before [findDevice] returns the bonded handle.
      * - Non-bonded: [SCAN_RETRY_COUNT] attempts at [SCAN_TIMEOUT] with [SCAN_RETRY_DELAY] between attempts.
      *
      * The outer [withTimeoutOrNull] is binding: the scanner receives [timeout] as a hint, but this coroutine resumes on

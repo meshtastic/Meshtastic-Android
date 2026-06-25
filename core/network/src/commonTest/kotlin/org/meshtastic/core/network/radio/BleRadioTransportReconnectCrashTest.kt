@@ -1104,15 +1104,14 @@ class BleRadioTransportReconnectCrashTest {
     }
 
     /**
-     * Critical regression: when the bonded device is not advertising at all, [findDevice] must throw
-     * [RadioNotConnectedException] after the bounded scan window (~7s scan, ~10s total attempt including the existing
-     * reconnect settle delay) and must not fall back to the stale bonded handle.
+     * Regression: when the bonded device misses both fresh scan windows, [findDevice] must fall back to the bonded
+     * handle so Android's autoConnect path can patiently wait for the radio to advertise again.
      *
-     * Before the fix, the stale handle forced `autoConnect=true` and hung for [CONNECTION_TIMEOUT] (15s) before the
-     * reconnect loop could iterate. This test proves `connectAndAwait` is never invoked against the stale handle.
+     * The fallback remains bounded by [CONNECTION_TIMEOUT] in `connectAndAwait`, after which the reconnect policy owns
+     * the next retry/backoff iteration.
      */
     @Test
-    fun `bonded device never advertising results in zero connect calls`() = runTest {
+    fun `bonded device never advertising falls back to bounded autoConnect`() = runTest {
         val bondedDevice = FakeBleDevice(address = address, name = "Bonded Handle")
         bluetoothRepository.bond(bondedDevice)
 
@@ -1121,6 +1120,10 @@ class BleRadioTransportReconnectCrashTest {
                 responses += { flow { awaitCancellation() } } // call 0: targeted scan misses (runs until 2s timeout)
                 responses += { flow { awaitCancellation() } } // call 1: escalated scan misses (runs until 5s timeout)
             }
+
+        // Keep profile setup stable so the test can inspect the connected device.
+        connection.service.addCharacteristic(FROMNUM_CHARACTERISTIC)
+        connection.service.addCharacteristic(FROMRADIO_CHARACTERISTIC)
 
         val bleTransport =
             BleRadioTransport(
@@ -1134,20 +1137,27 @@ class BleRadioTransportReconnectCrashTest {
         try {
             bleTransport.start()
 
-            // 2s targeted + 5s escalated + reconnect backoff + settle delay before second iteration.
-            // With awaitCancellation(), scans now suspend for their full timeout durations, so we
-            // must cover the full reconnect iteration window (settle + targeted + escalated + backoff).
-            advanceTimeBy(20_000L)
+            // 3s settle + 2s targeted scan + 5s escalated scan + bonded fallback connect.
+            advanceTimeBy(11_000L)
 
-            // Proves the stale bonded handle was not used: no connectAndAwait call.
-            assertEquals(
-                0,
-                connection.connectAndAwaitCalls,
-                "Must never call connectAndAwait when no fresh advertisement was found",
-            )
             assertTrue(
                 sequencedScanner.callCount >= 2,
                 "Expected at least 2 scan calls (targeted + escalated); got ${sequencedScanner.callCount}",
+            )
+            assertEquals(
+                2_000L,
+                sequencedScanner.calls[0].timeout.inWholeMilliseconds,
+                "First scan must be targeted (2s)",
+            )
+            assertEquals(
+                5_000L,
+                sequencedScanner.calls[1].timeout.inWholeMilliseconds,
+                "Second scan must be escalated (5s)",
+            )
+            assertEquals(1, connection.connectAndAwaitCalls, "Must connect once through the bounded bonded fallback")
+            assertTrue(
+                connection.device === bondedDevice,
+                "Must use the bonded handle after fresh scans miss (got: ${connection.device?.name})",
             )
 
             bleTransport.close()
