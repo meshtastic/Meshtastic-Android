@@ -191,7 +191,7 @@ firebase-ai-ondevice = { module = "com.google.firebase:firebase-ai-ondevice", ve
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version = "34.15.0" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
-location-services = { module = "com.google.android.gms:play-services-location", version = "21.3.0" }
+location-services = { module = "com.google.android.gms:play-services-location", version = "21.4.0" }
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
 koin-androidx-workmanager = { module = "io.insert-koin:koin-androidx-workmanager", version.ref = "koin" }
 koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel", version.ref = "koin" }
