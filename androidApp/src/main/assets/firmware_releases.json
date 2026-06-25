@@ -189,9 +189,21 @@
   },
   "pullRequests": [
     {
-      "id": "10776",
-      "title": "Update native to exit when configured with an unknown module",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10776",
+      "id": "10787",
+      "title": "Add TiltTelemetryModule for LIS3DH accelerometer mounts",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10787",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
+      "id": "10783",
+      "title": "Update LovyanGFX to v1.2.24",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10783",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "10782",
+      "title": "Update debian Docker tag to trixie-20260623",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10782",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
@@ -271,6 +283,12 @@
       "title": "Heltec Vision Master E213: enable 32768hz crystal osc for rtc",
       "page_url": "https://github.com/meshtastic/firmware/pull/10689",
       "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
+      "id": "10677",
+      "title": "Add native Portduino malloc shim",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10677",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     }
   ]
 }
