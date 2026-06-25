@@ -30,6 +30,7 @@ import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.MeshActivity
 import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.TransportDisconnectReason
 
 /**
  * A test double for [RadioInterfaceService] that provides an in-memory implementation.
@@ -98,7 +99,7 @@ class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = Main
         _connectionState.value = ConnectionState.Connected
     }
 
-    override fun onDisconnect(isPermanent: Boolean, errorMessage: String?) {
+    override fun onDisconnect(isPermanent: Boolean, errorMessage: String?, reason: TransportDisconnectReason?) {
         _connectionState.value = ConnectionState.Disconnected
     }
 

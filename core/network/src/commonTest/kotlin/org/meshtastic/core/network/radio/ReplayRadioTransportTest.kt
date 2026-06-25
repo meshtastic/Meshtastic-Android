@@ -20,6 +20,7 @@ import kotlinx.coroutines.test.runTest
 import okio.Buffer
 import org.meshtastic.core.repository.HandshakeConstants
 import org.meshtastic.core.repository.RadioTransportCallback
+import org.meshtastic.core.repository.TransportDisconnectReason
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.MyNodeInfo
@@ -45,7 +46,8 @@ class ReplayRadioTransportTest {
             connects++
         }
 
-        override fun onDisconnect(isPermanent: Boolean, errorMessage: String?) = Unit
+        override fun onDisconnect(isPermanent: Boolean, errorMessage: String?, reason: TransportDisconnectReason?) =
+            Unit
 
         override fun handleFromRadio(bytes: ByteArray) {
             received.add(FromRadio.ADAPTER.decode(bytes))

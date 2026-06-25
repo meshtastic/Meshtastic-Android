@@ -64,8 +64,11 @@ import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.RadioTransport
 import org.meshtastic.core.repository.RadioTransportFactory
+import org.meshtastic.core.repository.TransportDisconnectReason
 import org.meshtastic.proto.ToRadio
 import kotlin.concurrent.Volatile
+
+private const val USB_PERMISSION_DENIED_ERROR = "USB permission denied. Reconnect the device to try again."
 
 private data class SelectedSerialPresence(val key: String?, val present: Boolean)
 
@@ -114,6 +117,10 @@ private fun UsbRecoveryTriggerState.next(snapshot: UsbRecoverySnapshot): UsbReco
             )
         }
     }
+}
+
+private fun TransportDisconnectReason.toConnectionErrorMessage(): String = when (this) {
+    TransportDisconnectReason.UsbPermissionDenied -> USB_PERMISSION_DENIED_ERROR
 }
 
 /**
@@ -725,9 +732,10 @@ class SharedRadioInterfaceService(
         }
     }
 
-    override fun onDisconnect(isPermanent: Boolean, errorMessage: String?) {
-        if (errorMessage != null) {
-            processLifecycle.coroutineScope.launch(dispatchers.default) { _connectionError.emit(errorMessage) }
+    override fun onDisconnect(isPermanent: Boolean, errorMessage: String?, reason: TransportDisconnectReason?) {
+        val resolvedErrorMessage = errorMessage ?: reason?.toConnectionErrorMessage()
+        if (resolvedErrorMessage != null) {
+            processLifecycle.coroutineScope.launch(dispatchers.default) { _connectionError.emit(resolvedErrorMessage) }
         }
         val newTargetState = if (isPermanent) ConnectionState.Disconnected else ConnectionState.DeviceSleep
         if (_connectionState.value != newTargetState) {

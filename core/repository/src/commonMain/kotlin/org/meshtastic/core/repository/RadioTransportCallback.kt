@@ -30,11 +30,13 @@ interface RadioTransportCallback {
     /**
      * Called when the transport has disconnected.
      *
-     * @param isPermanent true if the device is definitely gone (e.g. USB unplugged, max retries exhausted), false if it
-     *   may come back (e.g. BLE range, TCP transient).
+     * @param isPermanent true when the current connection attempt should stop retrying (e.g. user disconnect,
+     *   permission denied, max retries exhausted), false when it may come back (e.g. BLE range, TCP transient).
      * @param errorMessage optional user-facing error message describing the disconnect reason.
+     * @param reason optional structured reason when the transport can classify the disconnect without owning
+     *   user-facing text.
      */
-    fun onDisconnect(isPermanent: Boolean, errorMessage: String? = null)
+    fun onDisconnect(isPermanent: Boolean, errorMessage: String? = null, reason: TransportDisconnectReason? = null)
 
     /** Called when the transport has received raw data from the radio. */
     fun handleFromRadio(bytes: ByteArray)

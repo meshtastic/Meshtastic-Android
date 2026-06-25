@@ -25,6 +25,7 @@ import org.meshtastic.core.network.repository.SerialConnectionListener
 import org.meshtastic.core.network.repository.UsbRepository
 import org.meshtastic.core.network.transport.HeartbeatSender
 import org.meshtastic.core.repository.RadioTransportCallback
+import org.meshtastic.core.repository.TransportDisconnectReason
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 
@@ -64,9 +65,14 @@ class SerialRadioTransport(
         }
     }
 
-    override fun onDeviceDisconnect(waitForStopped: Boolean, isPermanent: Boolean) {
+    override fun onDeviceDisconnect(
+        waitForStopped: Boolean,
+        isPermanent: Boolean,
+        errorMessage: String?,
+        reason: TransportDisconnectReason?,
+    ) {
         if (closeConnection(waitForStopped)) {
-            super.onDeviceDisconnect(waitForStopped, isPermanent)
+            super.onDeviceDisconnect(waitForStopped, isPermanent, errorMessage, reason)
         }
     }
 
@@ -104,6 +110,14 @@ class SerialRadioTransport(
                             Logger.e {
                                 "[$address] Serial connection failed - missing USB permissions for device: $device"
                             }
+                            // Permission denial is terminal for this connection attempt: stop the reconnect loop
+                            // and let the service/UI layer choose the user-facing copy for the structured reason.
+                            onDeviceDisconnect(
+                                waitForStopped = false,
+                                isPermanent = true,
+                                errorMessage = null,
+                                reason = TransportDisconnectReason.UsbPermissionDenied,
+                            )
                         }
 
                         override fun onConnected() {
@@ -129,6 +143,7 @@ class SerialRadioTransport(
                             if (explicitCloseInProgress.get()) {
                                 return
                             }
+
                             val uptime =
                                 if (connectionStartTime > 0) {
                                     nowMillis - connectionStartTime
@@ -146,8 +161,9 @@ class SerialRadioTransport(
                                     "Packets RX: $packetsReceived ($bytesReceived bytes)"
                             }
                             // USB unplug / cable error is transient — the transport will reconnect when
-                            // the device is replugged or the OS re-enumerates the port. Only an explicit
-                            // close() (user disconnects) should signal a permanent disconnect.
+                            // the device is replugged or the OS re-enumerates the port. Only close()
+                            // (user disconnects) and missing-permission (see onMissingPermission) signal
+                            // a permanent disconnect; cable unplug / I/O errors are transient.
                             onDeviceDisconnect(waitForStopped = false, isPermanent = false)
                         }
                     },
