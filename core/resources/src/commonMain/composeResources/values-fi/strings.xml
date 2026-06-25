@@ -245,6 +245,7 @@
     <string name="config_display_wake_on_tap_or_motion_summary">Edellyttää, että laitteessasi on kiihtyvyysanturi.</string>
     <string name="config_lora_frequency_slot_summary">Laitteesi käyttämä taajuus lasketaan alueen, modeemin esiasetuksen ja tämän kentän perusteella. Kun arvo on 0, aikaväli lasketaan automaattisesti ensisijaisen kanavan nimen perusteella ja se poikkeaa oletus-julkisesta aikavälistä. Vaihda takaisin julkiseen oletus-aikaväliin, jos käytössä on yksityinen ensisijainen ja julkinen toissijainen kanava.</string>
     <string name="config_lora_hop_limit_summary">Asettaa maksimihyppyjen määrän, oletus on 3. Hyppyjen määrän lisääminen kasvattaa myös ruuhkaa, joten sitä tulisi käyttää varoen. 0 hypyn lähettämät viestit eivät saa kuittauksia (ACK).</string>
+    <string name="config_lora_modem_preset_licensed_summary">Tämän alueen esiasetukset on tarkoitettu vain lisensoiduille (radioamatööri) käyttäjille. Ota käyttöön **Licensed amateur radio (Ham)** käyttäjäasetuksissa -kohdassa, jotta voit valita ne.</string>
     <string name="config_lora_modem_preset_summary">Saatavilla olevat modeemiesiasetukset, oletus on Long Fast.</string>
     <string name="config_lora_region_summary">Alue, jossa aiot käyttää radiolaitteitasi.</string>
     <string name="config_network_eth_enabled_summary">Ethernetin ottaminen käyttöön poistaa Bluetooth-yhteyden sovellukseen. TCP-laiteyhteydet eivät ole käytettävissä Applen laitteilla.</string>
@@ -746,6 +747,8 @@
     <string name="label_short_fast">Short Range - Fast</string>
     <string name="label_short_slow">Short Range - Slow</string>
     <string name="label_short_turbo">Short Range - Turbo</string>
+    <string name="label_tiny_fast">Tiny - Fast</string>
+    <string name="label_tiny_slow">Tiny - Slow</string>
     <string name="label_very_long_slow">Very Long Range - Slow</string>
     <string name="last_heard_filter_label">Suodata viimeksi kuullun ajan mukaan: %1$s</string>
     <string name="last_position_update">Viimeisin sijainnin päivitys</string>
@@ -787,7 +790,34 @@
     <string name="location_disabled">Sijainnin käyttöoikeus on poistettu käytöstä, joten emme voi tarjota sijaintia mesh-verkkoon.</string>
     <string name="location_sharing">Sijainnin jakaminen</string>
     <!-- LOCKDOWN -->
+    <string name="lockdown_backoff">Yritä uudelleen %1$d sekunnin kuluttua.</string>
+    <string name="lockdown_boots_remaining">Jäljellä olevat käynnistykset</string>
+    <string name="lockdown_confirm_passphrase">Vahvista salasana</string>
+    <string name="lockdown_disable">Poista lukitus</string>
+    <string name="lockdown_disable_message">Anna salasana poistaaksesi lukituksen käytöstä. Laite purkaa tallennustilan salauksen ja käynnistyy uudelleen.</string>
+    <string name="lockdown_enable">Poista lukitus</string>
+    <string name="lockdown_enable_ack">Ymmärrän</string>
+    <string name="lockdown_enable_warning">Huom: lukitustilan käyttöönotto lukitsee debug-portin (SWD) tuetuilla laitteilla. Voit poistaa lukituksen milloin tahansa salasanallasi ja laitteen täydellinen tyhjennys palauttaa kaiken tarvittaessa.</string>
+    <string name="lockdown_enter_passphrase">Syötä salasana</string>
     <string name="lockdown_hide_passphrase">Piilota</string>
+    <string name="lockdown_hours_until_expiry">Tuntia vanhenemiseen saakka</string>
+    <string name="lockdown_incorrect_passphrase">Virheellinen salasana.</string>
+    <string name="lockdown_lock_now">Lukitse nyt</string>
+    <string name="lockdown_lock_reason">Syy: %1$s</string>
+    <string name="lockdown_mode">Lukituksen tila</string>
+    <string name="lockdown_mode_setting_up">Määritellään…</string>
+    <string name="lockdown_mode_summary_locked">Aktiivinen — syötä salasana avataksesi tämän yhteyden.</string>
+    <string name="lockdown_mode_summary_off">Salaa laitteen tallennustila ja vaadi salasana jokaiselle yhteydelle.</string>
+    <string name="lockdown_mode_summary_unlocked">Aktiivinen — tallennustila salattu, tämä yhteys todennettu.</string>
+    <string name="lockdown_passphrase">Salasana</string>
+    <string name="lockdown_passphrases_do_not_match">Salasana ei täsmää</string>
+    <string name="lockdown_session_boots_remaining">Istunto: %1$d uudelleenkäynnistystä jäljellä</string>
+    <string name="lockdown_session_expires">Vanhenee %1$s</string>
+    <string name="lockdown_session_minutes">Istunnon enimmäiskesto (minuuttia)</string>
+    <string name="lockdown_session_minutes_help">Käynnistyskohtainen käyttöaikakatto. 0 = rajoittamaton.</string>
+    <string name="lockdown_session_no_time_limit">Ei aikarajaa</string>
+    <string name="lockdown_set_passphrase">Aseta salasana</string>
+    <string name="lockdown_show_passphrase">Näytä</string>
     <string name="lockdown_submit">Lähetä</string>
     <string name="locked">Lukittu</string>
     <!-- LOG -->

@@ -35,7 +35,7 @@ Kõige levinum värskendamisviis Androidi kasutajate seas:
 
 ![Püsivara kontrollib värskendusi](../../assets/screenshots/firmware_checking.png)
 
-> ⚠️ **Hoiatus:** Püsivara värskenduse katkestamine võib teie seadme rikkuda. Ensure your radio has sufficient battery (>50% recommended) and maintain Bluetooth proximity during the entire process.
+> ⚠️ **Hoiatus:** Püsivara värskenduse katkestamine võib sinu seadme rikkuda. Ensure your radio has sufficient battery (>50% recommended) and maintain Bluetooth proximity during the entire process.
 
 ![Firmware disclaimer](../../assets/screenshots/firmware_disclaimer.png)
 

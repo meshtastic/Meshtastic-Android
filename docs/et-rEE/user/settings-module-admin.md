@@ -209,7 +209,7 @@ Remotely configure nodes that share your admin key:
 3. Modify configuration.
 4. Puuduta **Salvesta** – muudatused saadetakse kärgvõrgu kaudu.
 
-> ⚠️ **Nõutud:** Administraatori võtit, mis on konfitud nii teie kui ka sihtsõlmes.
+> ⚠️ **Nõutud:** Administraatori võtit, mis on konfitud nii sinu kui ka sihtsõlmes.
 
 ### Tühjenda sõlmede andmebaas
 

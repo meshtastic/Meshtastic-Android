@@ -36,7 +36,7 @@ The app requests several permissions during setup. Each one serves a specific pu
 
 ### Bluetooth Permission
 
-Sinihammas on peamine ühendusmeetod teie telefoni ja Meshtastic raadio vahel:
+Sinihammas on peamine ühendusmeetod sinu telefoni ja Meshtastic raadio vahel:
 
 - **Bluetoothi ​​skann** – avasta lähedalasuvad Meshtastic raadiod
 - **Sinihamba ühendus** – loo ja halda seotud seadmete ühendusi
@@ -47,7 +47,7 @@ Grant both permissions when prompted. Without Bluetooth, you'll need to use USB 
 
 > ⚠️ **Miks on sinihamba ​​jaoks vaja asukohateavet?** Android vajab lähedalasuvate sinihamba madala energia seadmete avastamiseks asukohale juurdepääsu luba. See on Androidi süsteeminõue, mitte Meshtastic põhine valik.
 
-Meshtastic kasutab teie asukohta ka järgmiseks:
+Meshtastic kasutab sinu asukohta ka järgmiseks:
 
 - Showing your position on the mesh map
 - Calculating distances to other nodes
@@ -95,6 +95,6 @@ Once connected to a radio, explore:
 - [Map & Waypoints](map-and-waypoints) — view node positions
 - [Settings](settings-radio-user) — configure your radio and user profile
 
-Kas oled Meshtasticus algaja? Meshtastic.org lehel olev [alustusjuhend](https://meshtastic.org/docs/getting-started) käsitleb riistvara valimist, raadio esialgset seadistamist ja teie esimest võrgu seadistamist.
+Kas oled Meshtasticus algaja? Meshtastic.org lehel olev [alustusjuhend](https://meshtastic.org/docs/getting-started) käsitleb riistvara valimist, raadio esialgset seadistamist ja esimest võrgu seadistamist.
 
 ---

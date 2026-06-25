@@ -4,7 +4,7 @@ Meshtastic projekti kohta lisateabe saamiseks külasta veebisaiti: <a href="http
 
 <b>Kogukond ja tugi</b>
 
-See projekt on hetkel beeta arenduses. Võtame meeleldi teie sõnumeid vastu! Kui sul on küsimusi, tagasisidet või probleeme, palun liitu meie sõbraliku ja aktiivse kogukonnaga:
+See projekt on hetkel beeta arenduses. Võtame meeleldi sinu sõnumeid vastu! Kui sul on küsimusi, tagasisidet või probleeme, palun liitu meie sõbraliku ja aktiivse kogukonnaga:
 
 • <b>Arutelufoorum:</b> <a href="https://github.com/orgs/meshtastic/discussions">https://github.com/orgs/meshtastic/discussions</a>
 • <b>Discord:</b> <a href="https://discord.gg/meshtastic">https://discord.gg/meshtastic</a>

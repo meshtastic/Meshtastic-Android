@@ -15,7 +15,7 @@ aliases:
 
 Meshtastic signaalimõõtur – rakenduses tuttavad tulbad või olekuvärv – arvutatakse väga erinevalt traditsioonilise mobiiltelefoni või WiFi-ruuteri „tulpadest”.
 
-Most consumer devices simply measure how "loud" a signal is. Kuna Meshtastic kasutab **LoRa (Long Range)** tehnoloogiat, mõõdab selle signaalimõõtja signaali **selgust** võrreldes teie võrgu konkreetsete sätetega.
+Most consumer devices simply measure how "loud" a signal is. Kuna Meshtastic kasutab **LoRa (Long Range)** tehnoloogiat, mõõdab selle signaalimõõtja signaali **selgust** võrreldes sinu võrgu konkreetsete sätetega.
 
 ---
 
@@ -65,7 +65,7 @@ Here is exactly how the app decides how many bars (or what color) to show you:
 
 Kuna Meshtasticu mõõdik toimib **"selguse mõõturina"**, käitub see erinevalt sellest, mida enamik inimesi ootab:
 
-> **Vihje – ära paanitse madala RSSI pärast:** Võid näha pealtnäha kohutavat RSSI väärtust, näiteks `-118 dBm`. On a cell phone, you would have zero bars. Aga kui teie signaali-müra suhe on `+2 dB`, näitab Meshtastic ikkagi tugevat signaali! _The library is quiet, so the whisper is heard perfectly._
+> **Vihje – ära paanitse madala RSSI pärast:** Võid näha pealtnäha kohutavat RSSI väärtust, näiteks `-118 dBm`. On a cell phone, you would have zero bars. Aga kui sinu seadme signaali-müra suhe on `+2 dB`, näitab Meshtastic ikkagi tugevat signaali! _The library is quiet, so the whisper is heard perfectly._
 
 > **Hoiatus – pöörake tähelepanu kohalikule mürale:** Kui ühendad võimsa antenni ja näete head RSSI-d (nt „-90 dBm”), aga signaalimõõtur näitab ainult **1 tulp (halb)**, on sul probleem. It means you have local interference — perhaps a cheap power supply, a noisy computer, or a nearby radio tower — creating so much static that it is drowning out your mesh.
 
