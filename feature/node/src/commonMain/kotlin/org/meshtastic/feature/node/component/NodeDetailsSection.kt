@@ -49,7 +49,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.common.util.Base64Factory
 import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.Node
@@ -92,6 +91,8 @@ import org.meshtastic.core.ui.icon.Verified
 import org.meshtastic.core.ui.icon.role
 import org.meshtastic.core.ui.util.createClipEntry
 import org.meshtastic.core.ui.util.formatAgo
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
 
 @Composable
 fun NodeDetailsSection(
@@ -324,7 +325,7 @@ private fun MqttAndVerificationRow(node: Node) {
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalEncodingApi::class)
 @Suppress("LongMethod", "MagicNumber")
 @Composable
 private fun PublicKeyItem(publicKeyBytes: ByteArray) {
@@ -335,7 +336,7 @@ private fun PublicKeyItem(publicKeyBytes: ByteArray) {
         if (isMismatch) {
             stringResource(Res.string.error)
         } else {
-            Base64Factory.encode(publicKeyBytes).trim()
+            Base64.Default.encode(publicKeyBytes).trim()
         }
     val label = stringResource(Res.string.public_key)
     val copyLabel = stringResource(Res.string.copy)

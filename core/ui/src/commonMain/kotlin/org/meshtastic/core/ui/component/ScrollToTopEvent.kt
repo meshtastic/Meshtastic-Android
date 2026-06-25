@@ -24,10 +24,9 @@ import kotlinx.coroutines.flow.MutableSharedFlow
  * Event emitted when a user re-presses a bottom navigation destination that should trigger a scroll-to-top behaviour on
  * the corresponding screen.
  */
-sealed class ScrollToTopEvent {
-    data object NodesTabPressed : ScrollToTopEvent()
-
-    data object ConversationsTabPressed : ScrollToTopEvent()
+enum class ScrollToTopEvent {
+    NodesTabPressed,
+    ConversationsTabPressed,
 }
 
 @Composable fun rememberScrollToTopEvents(): MutableSharedFlow<ScrollToTopEvent> = remember { MutableSharedFlow() }
