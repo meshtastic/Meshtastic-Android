@@ -19,7 +19,7 @@ Meshtastic integreerub Android Autoga, nii et saad sõidu ajal oma kärgvõrguga
 
 ## Overview
 
-Kui teie telefon on ühendatud Android Auto peakomplektiga (või arenduses kasutatava töölaua peakomplekti emulaatoriga), kuvatakse Meshtastic Android Car App Library abil loodud sõnumsiderakendusena. The car interface presents a tabbed Home screen optimized for driving-safe, glanceable use:
+Kui telefon on ühendatud Android Auto peakomplektiga (või arenduses kasutatava töölaua peakomplekti emulaatoriga), kuvatakse Meshtastic Android Car App Library abil loodud sõnumsiderakendusena. The car interface presents a tabbed Home screen optimized for driving-safe, glanceable use:
 
 - **Messages** — recent conversations, with hands-free reading and replies.
 - **Nodes** — the mesh node list, with a node-detail view.

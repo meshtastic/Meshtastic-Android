@@ -12,11 +12,11 @@ aliases:
 
 # MQTT
 
-MQTT ühendab teie Meshtastic võrgu internetiga, võimaldades raadiolevi ulatusest kaugemale ulatuvat pikamaasidet.
+MQTT ühendab Meshtastic võrgu internetiga, võimaldades raadiolevi ulatusest kaugemale ulatuvat pikamaasidet.
 
 ## Overview
 
-MQTT moodul ühendab teie sõlme MQTT vahendajaga, võimaldades:
+MQTT moodul ühendab sinu sõlme MQTT vahendajaga, võimaldades:
 
 - Messages to reach nodes on different physical meshes via the internet
 - Integration with home automation and monitoring systems
@@ -26,7 +26,7 @@ MQTT moodul ühendab teie sõlme MQTT vahendajaga, võimaldades:
 ## How It Works
 
 ```
-[Teie sõlm] → Raadio → [WiFi-ga lüüsisõlm] → MQTT vahendaja → [Kauglüüs] → Raadio → [Kaugsõlm]
+[Sinu sõlm] → Raadio → [WiFi-ga lüüsisõlm] → MQTT vahendaja → [Kauglüüs] → Raadio → [Kaugsõlm]
 ```
 
 Internetiühendusega (WiFi või Ethernet) lüüsisõlm jagab võrgusõnumeid MQTT. Remote gateways subscribed to the same topic inject those messages into their local mesh.
@@ -99,7 +99,7 @@ MQTT kasutab protobuf-sõnumivormingut:
 
 Understanding the layered encryption model:
 
-1. **Kanali krüptimine** toimub kärgvõrgus _enne_ MQTT. Kui teie kanalil on PSK, on ​​MQTT liiklus juba krüptitud – maakler ja kõik tellijad näevad ainult šifriteksti.
+1. **Kanali krüptimine** toimub kärgvõrgus _enne_ MQTT. Kui kanalil on PSK, on ​​MQTT liiklus juba krüptitud – maakler ja kõik tellijad näevad ainult šifriteksti.
 2. **MQTT krüptimine** (mooduli säte) lisab vahendajale edastamiseks täiendava krüptimiskihi. This protects metadata and routing information.
 3. **TLS** encrypts the TCP connection to the broker itself, preventing network-level eavesdropping.
 

@@ -742,6 +742,8 @@
     <string name="label_short_fast">Lühike ulatus - kiire</string>
     <string name="label_short_slow">Lühike ulatus - aeglane</string>
     <string name="label_short_turbo">Lühike ulatus - turbo</string>
+    <string name="label_tiny_fast">Pisike - kiire</string>
+    <string name="label_tiny_slow">Pisike - aeglane</string>
     <string name="label_very_long_slow">Väga pikk ulatus- aeglane</string>
     <string name="last_heard_filter_label">Filtreeri viimase kuulmise aja järgi: %1$s</string>
     <string name="last_position_update">Viimase asukoha värskendus</string>
@@ -783,6 +785,7 @@
     <string name="location_disabled">Juurdepääs asukohale on välja lülitatud, ei saa asukohta teistele jagada.</string>
     <string name="location_sharing">Asukoha jagamine</string>
     <!-- LOCKDOWN -->
+    <string name="lockdown_enable_ack">Saan aru</string>
     <string name="locked">Lukustatud</string>
     <!-- LOG -->
     <string name="log_retention_days">MeshLogi säilitusperiood</string>

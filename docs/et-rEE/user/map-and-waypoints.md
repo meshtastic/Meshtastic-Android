@@ -96,7 +96,7 @@ Configure position behavior in **Settings → Position**.
 
 ### Privacy Considerations
 
-> 🔒 **Privaatsus:** asukoha andmed levitatakse kõigile teie kanali sõlmedele. If you don't want your location shared, disable GPS position in settings or use a fixed/fake position.
+> 🔒 **Privaatsus:** asukoha andmed levitatakse kõigile sinu kanali sõlmedele. If you don't want your location shared, disable GPS position in settings or use a fixed/fake position.
 
 ## Map Sources
 

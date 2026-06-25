@@ -17,7 +17,7 @@ Rakendusfunktsioonid avaldavad Meshtasticu võimalused Androidi süsteemile ja s
 
 > ⚠️ **Märkus:** Rakenduse funktsioonid on saadaval ainult **Google'i-tüüpi Androidi versioonides**.
 
-> ⚠️ **Märkus:** See on eraldi rakenduse sisesest **Chirpy** assistendist. Rakenduse funktsioonid lasevad _süsteemi_ tehisintellekti assistendil teie võrgusilma kallal tegutseda; Chirpy on vestlusassistent Meshtasticu rakenduses endas.
+> ⚠️ **Märkus:** See on eraldi rakenduse sisesest **Chirpy** assistendist. Rakenduse funktsioonid lasevad _süsteemi_ tehisintellekti assistendil kärgvõrgu kallal tegutseda; Chirpy on vestlusassistent Meshtasticu rakenduses endas.
 
 ## Enabling App Functions
 

@@ -7,7 +7,7 @@ last_updated: 2026-05-12
 
 # Units, Measurement & Locale
 
-Meshtastic rakendus kuvab automaatselt temperatuure, vahemaid, kiirusi ja aegu ühikutes, milleks teie seade on konfitud – rakenduses pole vaja sätteid muuta.
+Meshtastic rakendus kuvab automaatselt temperatuure, vahemaid, kiirusi ja aegu ühikutes, milleks sinu seade on konfitud – rakenduses pole vaja sätteid muuta.
 
 ---
 
