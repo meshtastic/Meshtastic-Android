@@ -120,7 +120,7 @@ function rewriteImagePaths(content) {
  * e.g., `[text](connections)` → `[text](connections.md)`
  * e.g., `[text](../developer/testing)` → `[text](../developer/testing.md)`
  */
-function rewriteSiblingLinks(content, section) {
+function rewriteSiblingLinks(content, section, isIndex = false) {
     const slugs = section === "user" ? KNOWN_USER_SLUGS : KNOWN_DEV_SLUGS;
 
     // Match [text](link) where link is NOT an absolute URL, NOT an anchor, NOT already .md
@@ -130,6 +130,16 @@ function rewriteSiblingLinks(content, section) {
             // Skip if already has .md extension or is an image
             if (link.endsWith(".md") || IMAGE_EXTENSIONS.has(path.extname(link).toLowerCase())) {
                 return match;
+            }
+
+            // Section landing page (user/index.md, developer/index.md): the source
+            // user.md/developer.md sit beside the section dir, so they link to children
+            // as "user/onboarding". From index.md inside that dir, strip the prefix.
+            if (isIndex) {
+                const sameSection = link.match(new RegExp(`^${section}/(.+)`));
+                if (sameSection && slugs.has(sameSection[1])) {
+                    return `[${text}](${sameSection[1]}.md)`;
+                }
             }
 
             // Check for cross-section links like ../developer/testing
@@ -213,11 +223,11 @@ function convertCallouts(content) {
 
 // ── Main ─────────────────────────────────────────────────────────────────────
 
-function processMarkdown(srcPath, destPath, section) {
+function processMarkdown(srcPath, destPath, section, isIndex = false) {
     let content = fs.readFileSync(srcPath, "utf-8");
     content = transformFrontmatter(content, section);
     content = rewriteImagePaths(content);
-    content = rewriteSiblingLinks(content, section);
+    content = rewriteSiblingLinks(content, section, isIndex);
     content = convertCallouts(content);
     writeFile(destPath, content);
 }
@@ -333,18 +343,32 @@ function createCategoryFiles() {
     // Top-level section category. Uses the synced index.md as the landing page
     // (matching the Apple sync), replacing any hand-written generated-index that
     // would otherwise collide with index.md.
-    const sectionCategory = `label: Android App
+    // Unique `key` per category: the "User Guide" / "Developer Guide" labels also
+    // exist in the Apple section, and Docusaurus derives sidebar translation keys
+    // from the label, so without a key the two sections collide at build time.
+    const sectionCategory = `key: androidApp
+label: Android App
 collapsible: true
 position: 1
 link:
   type: doc
   id: software/android/index
 `;
-    const userCategory = `label: User Guide
+    const userCategory = `key: androidUserGuide
+label: User Guide
+collapsible: true
 position: 1
+link:
+  type: doc
+  id: software/android/user/index
 `;
-    const devCategory = `label: Developer Guide
+    const devCategory = `key: androidDeveloperGuide
+label: Developer Guide
+collapsible: true
 position: 2
+link:
+  type: doc
+  id: software/android/developer/index
 `;
     writeFile(path.join(DEST_DOCS_DIR, "_category_.yml"), sectionCategory);
     writeFile(path.join(DEST_DOCS_DIR, "user", "_category_.yml"), userCategory);
@@ -365,6 +389,22 @@ function main() {
         "user/_category_.yml",
         "developer/_category_.yml",
     ]);
+
+    // Section overview pages: docs/en/user.md → user/index.md and
+    // docs/en/developer.md → developer/index.md. Docusaurus uses <dir>/index.md
+    // as the category landing page, so the index.md "User Guide" / "Developer
+    // Guide" links resolve (matching the Apple sync).
+    const sections = [
+        { src: "user.md", dest: ["user", "index.md"], section: "user", key: "user/index.md" },
+        { src: "developer.md", dest: ["developer", "index.md"], section: "developer", key: "developer/index.md" },
+    ];
+    for (const { src, dest, section, key } of sections) {
+        const overview = path.join(SRC_DOCS_DIR, src);
+        if (fs.existsSync(overview)) {
+            processMarkdown(overview, path.join(DEST_DOCS_DIR, ...dest), section, true);
+            expectedDocPaths.add(key);
+        }
+    }
 
     // Process user guide
     const userDir = path.join(SRC_DOCS_DIR, "user");
