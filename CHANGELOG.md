@@ -14,6 +14,13 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 * fix(usb): Surface permission denial as permanent disconnect (#5943) by Jeremiah K (@jeremiah-k) in [`09cde67e5`](https://github.com/meshtastic/Meshtastic-Android/commit/09cde67e511d9bc7f61254a1dba4f39cf9fa8207)
 * chore(deps): update aboutlibraries to v15.0.1 (#5949) by renovate[bot] (@renovate[bot]) in [`cb8fbd739`](https://github.com/meshtastic/Meshtastic-Android/commit/cb8fbd73921ce39ae5efcd83005863f0dc128fd9)
 * chore(deps): update ktor to v3.5.1 (#5951) by renovate[bot] (@renovate[bot]) in [`fad8e5f0e`](https://github.com/meshtastic/Meshtastic-Android/commit/fad8e5f0e3dee4eb9913771b407c6a430c028a25)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs, Baseline) (#5952) by James Rich (@jamesarich) in [`aa4d040f4`](https://github.com/meshtastic/Meshtastic-Android/commit/aa4d040f4c0faf441f1e69a1541f377b23b563ae)
+* chore(deps): update com.google.android.gms:play-services-location to v21.4.0 (#5954) by renovate[bot] (@renovate[bot]) in [`4d7157da9`](https://github.com/meshtastic/Meshtastic-Android/commit/4d7157da904f951c76b48edcb3ed326e1e43d2b5)
+* chore(deps): update org.meshtastic:protobufs to v2.7.26-21879a9-snapshot (#5938) by renovate[bot] (@renovate[bot]) in [`3d981895f`](https://github.com/meshtastic/Meshtastic-Android/commit/3d981895fe56046b2dd160b0249619c1d48f919d)
+* chore(deps): update aboutlibraries to v15.0.2 (#5953) by renovate[bot] (@renovate[bot]) in [`df21efb98`](https://github.com/meshtastic/Meshtastic-Android/commit/df21efb98600c516ecbb52832a442a943bcddc23)
+* refactor(ble): Make Kable connect fallback explicitly bounded (#5944) by Jeremiah K (@jeremiah-k) in [`725133ec4`](https://github.com/meshtastic/Meshtastic-Android/commit/725133ec4aa8554ee84cd205e741404c9af996d7)
+* refactor(connections): Show one active transport pane (#5956) by Jeremiah K (@jeremiah-k) in [`33a4ca673`](https://github.com/meshtastic/Meshtastic-Android/commit/33a4ca6731fee1bd94a39ad729a251239751080b)
+* ci: fix Android docs sync (remove stray workflow, prune stale pages) (#5955) by James Rich (@jamesarich) in [`89f41dea5`](https://github.com/meshtastic/Meshtastic-Android/commit/89f41dea53f2cb954bc9ca07fe9983e98ed5fb7b)
 
 ### Closed Beta (v2.8.0-closed.1)
 Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14):
