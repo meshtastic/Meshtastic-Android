@@ -289,11 +289,10 @@ class UiPrefsImpl(
         private fun parseDeviceType(name: String): DeviceType? = DeviceType.entries.firstOrNull { it.name == name }
 
         private fun legacySelectedConnectionTransport(preferences: Preferences): DeviceType? {
-            val legacyKeys = preferences.asMap().keys
             val hasLegacyTransportPreference =
-                KEY_SHOW_BLE_TRANSPORT in legacyKeys ||
-                    KEY_SHOW_NETWORK_TRANSPORT in legacyKeys ||
-                    KEY_SHOW_USB_TRANSPORT in legacyKeys
+                KEY_SHOW_BLE_TRANSPORT in preferences ||
+                    KEY_SHOW_NETWORK_TRANSPORT in preferences ||
+                    KEY_SHOW_USB_TRANSPORT in preferences
             if (!hasLegacyTransportPreference) return null
 
             val selected =
@@ -302,7 +301,7 @@ class UiPrefsImpl(
                     DeviceType.TCP.takeIf { preferences[KEY_SHOW_NETWORK_TRANSPORT] ?: true },
                     DeviceType.USB.takeIf { preferences[KEY_SHOW_USB_TRANSPORT] ?: true },
                 )
-            return selected.singleOrNull()
+            return selected.firstOrNull()
         }
     }
 }

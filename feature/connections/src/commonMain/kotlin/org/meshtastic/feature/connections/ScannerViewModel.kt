@@ -254,6 +254,7 @@ open class ScannerViewModel(
 
     /** Selects one Connections transport pane and stops scans that cannot belong to that pane. */
     fun selectTransport(type: DeviceType) {
+        if (activeTransport.value == type) return
         when (type) {
             DeviceType.BLE -> stopNetworkScan()
             DeviceType.TCP -> stopBleScan()
@@ -367,7 +368,10 @@ open class ScannerViewModel(
 
     /** Starts NSD scanning for screen-entry auto-scan only when the Network pane is active. */
     fun startNetworkAutoScan() {
-        if (activeTransport.value == DeviceType.TCP) startNetworkScan()
+        if (activeTransport.value != DeviceType.TCP) return
+        val selectedAddress = selectedAddressFlow.value
+        if (selectedAddress != null && selectedAddress != NO_DEVICE_SELECTED) return
+        startNetworkScan()
     }
 
     /** Cancels the active network scan and resets the scanning flag. Idempotent. */

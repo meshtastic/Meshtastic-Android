@@ -11,7 +11,7 @@ The `:feature:connections` module provides the **device discovery and connection
 - Scan for BLE devices and merge results with previously bonded devices (bonded first, then discovery order)
 - Enumerate USB serial devices (CH340, FTDI, CP21xx, etc.) with permission gating on Android
 - Discover TCP/NSD services and manage recent manual TCP addresses
-- Surface a transport-filter UI (BLE / Network / USB chips) that persists to DataStore
+- Surface a single-choice transport selector (BLE / Network / USB) whose active pane persists to DataStore
 - Manage the full connection flow: bond → connect → disconnect
 - Show connection status and progress while a device is being configured
 
@@ -23,7 +23,7 @@ src/
 │   ├── ScannerViewModel.kt          ← platform-neutral ViewModel
 │   ├── Constants.kt
 │   ├── model/
-│   │   ├── DeviceListEntry.kt       ← sealed: Ble | Usb | Tcp | Mock
+│   │   ├── DeviceListEntry.kt       ← sealed: Ble | Usb | Tcp | Mock | Replay
 │   │   └── DiscoveredDevices.kt     ← GetDiscoveredDevicesUseCase interface + result
 │   ├── domain/usecase/
 │   │   ├── CommonGetDiscoveredDevicesUseCase.kt
@@ -61,13 +61,14 @@ sealed class DeviceListEntry {
     data class Usb(usbData: UsbDeviceData, name: String, fullAddress: String, ...) : DeviceListEntry()
     data class Tcp(name: String, fullAddress: String, node: Node?) : DeviceListEntry()
     data class Mock(name: String, node: Node?) : DeviceListEntry()
+    data class Replay(name: String, node: Node?) : DeviceListEntry()
 
     abstract val address: String          // strips transport prefix
     abstract fun copy(node: Node?): DeviceListEntry
 }
 ```
 
-Address format conventions: BLE → `x<MAC>`, USB → `s<path>`, TCP → `t<host:port>`, Mock → `m`.
+Address format conventions: BLE → `x<MAC>`, USB → `s<path>`, TCP → `t<host:port>`, Mock → `m`, Replay → `r`.
 
 ### `ScannerViewModel`
 
@@ -81,6 +82,7 @@ val discoveredTcpDevicesForUi: StateFlow<List<DeviceListEntry>>
 val recentTcpDevicesForUi: StateFlow<List<DeviceListEntry>>
 
 // Scan state
+val activeTransport: StateFlow<DeviceType>
 val isBleScanning: StateFlow<Boolean>
 val isNetworkScanning: StateFlow<Boolean>
 
@@ -89,8 +91,13 @@ val connectionProgressText: StateFlow<String?>
 val selectedAddressFlow: StateFlow<String?>
 
 // Actions
+fun selectTransport(type: DeviceType)
 fun startBleScan() / stopBleScan() / toggleBleScan()
+fun startBleAutoScan()
 fun startNetworkScan() / stopNetworkScan()
+fun startNetworkAutoScan()
+fun persistNetworkAutoScanIntent(enabled: Boolean)
+fun connectToManualAddress(fullAddress: String)
 fun onSelected(entry: DeviceListEntry): Boolean  // false if bond/permission still pending
 fun disconnect()
 fun addRecentAddress(address: String, name: String)
