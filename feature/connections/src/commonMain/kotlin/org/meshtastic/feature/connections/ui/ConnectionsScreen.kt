@@ -38,6 +38,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -131,6 +132,8 @@ fun ConnectionsScreen(
     val isBleScanning by scanModel.isBleScanning.collectAsStateWithLifecycle()
     val isNetworkScanning by scanModel.isNetworkScanning.collectAsStateWithLifecycle()
     val activeTransport by scanModel.activeTransport.collectAsStateWithLifecycle()
+    val bleAutoScan by scanModel.bleAutoScan.collectAsStateWithLifecycle()
+    val networkAutoScan by scanModel.networkAutoScan.collectAsStateWithLifecycle()
 
     // Android 17 (API 37) gates NSD/mDNS behind ACCESS_LOCAL_NETWORK. Without this prompt the platform falls back to
     // the system "Choose a device to connect" picker on every discoverServices() call. The reactive state lets the
@@ -150,28 +153,45 @@ fun ConnectionsScreen(
     // fresh-advertisement scan. LifecycleStartEffect stops scanning on ON_STOP (app backgrounded) and restarts on
     // ON_START — preventing continuous background BLE radio usage that drains the battery.
     // Keyed on the active pane so a persisted TCP/USB pane loaded after first composition disposes this effect and
-    // stops an initially eligible BLE scan. The toggle handler starts/stops scans directly; this effect handles
-    // screen-entry auto-start and lifecycle restarts without keying on the mutable scan preference itself.
+    // stops an initially eligible BLE scan. The toggle handler starts/stops scans directly; this effect owns lifecycle
+    // cleanup, while the LaunchedEffect below handles async preference loading without disposing the lifecycle owner.
     LifecycleStartEffect(activeTransport) {
-        if (activeTransport == DeviceType.BLE && scanModel.bleAutoScan.value && !scanModel.isBleScanning.value) {
+        if (activeTransport == DeviceType.BLE && bleAutoScan && !isBleScanning) {
             scanModel.startBleAutoScan()
         }
         onStopOrDispose { scanModel.stopBleScan() }
     }
 
-    // Keyed on active pane and permission status (not on the pref) so the effect re-fires when the user grants
-    // local-network permission or the persisted Network pane loads. This prevents dispose+restart cycles on pref
-    // writes while still supporting the request-permission -> grant -> auto-start flow.
+    LaunchedEffect(activeTransport, bleAutoScan) {
+        if (activeTransport == DeviceType.BLE && bleAutoScan && !isBleScanning) {
+            scanModel.startBleAutoScan()
+        }
+    }
+
+    // Keyed on active pane and permission status so the lifecycle owner re-fires when the user grants local-network
+    // permission or the persisted Network pane loads. The separate LaunchedEffect handles later pref arrival without a
+    // dispose+restart cycle on manual scan preference writes.
     LifecycleStartEffect(activeTransport, localNetworkPermission.isGranted) {
         if (
             activeTransport == DeviceType.TCP &&
-            scanModel.networkAutoScan.value &&
+            networkAutoScan &&
             localNetworkPermission.isGranted &&
-            !scanModel.isNetworkScanning.value
+            !isNetworkScanning
         ) {
             scanModel.startNetworkAutoScan()
         }
         onStopOrDispose { scanModel.stopNetworkScan() }
+    }
+
+    LaunchedEffect(activeTransport, localNetworkPermission.isGranted, networkAutoScan) {
+        if (
+            activeTransport == DeviceType.TCP &&
+            networkAutoScan &&
+            localNetworkPermission.isGranted &&
+            !isNetworkScanning
+        ) {
+            scanModel.startNetworkAutoScan()
+        }
     }
 
     /* Animate waiting for the configurations */
