@@ -17,7 +17,8 @@
 package org.meshtastic.feature.connections.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -29,51 +30,46 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.transport_ble
-import org.meshtastic.core.resources.transport_tcp
-import org.meshtastic.core.resources.transport_usb
+import org.meshtastic.core.resources.bluetooth
+import org.meshtastic.core.resources.network
+import org.meshtastic.core.resources.usb
 import org.meshtastic.core.ui.icon.Bluetooth
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Usb
 import org.meshtastic.core.ui.icon.Wifi
 
-/**
- * Inclusive transport-visibility filter chips rendered below the connection card. Each chip independently toggles the
- * visibility of its corresponding section ([showBle] → BLE, [showNetwork] → Network/TCP, [showUsb] → USB) in the device
- * list. Selections are persisted by the caller (defaults to all-on).
- */
+/** Single-choice transport selector rendered below the connection card. */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun TransportFilterChips(
-    showBle: Boolean,
-    showNetwork: Boolean,
-    showUsb: Boolean,
-    onToggleBle: () -> Unit,
-    onToggleNetwork: () -> Unit,
-    onToggleUsb: () -> Unit,
+fun TransportSelector(
+    activeTransport: DeviceType,
+    onSelectTransport: (DeviceType) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Row(
+    FlowRow(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         TransportChip(
-            selected = showBle,
-            label = Res.string.transport_ble,
+            selected = activeTransport == DeviceType.BLE,
+            label = Res.string.bluetooth,
             icon = MeshtasticIcons.Bluetooth,
-            onClick = onToggleBle,
+            onClick = { onSelectTransport(DeviceType.BLE) },
         )
         TransportChip(
-            selected = showNetwork,
-            label = Res.string.transport_tcp,
+            selected = activeTransport == DeviceType.TCP,
+            label = Res.string.network,
             icon = MeshtasticIcons.Wifi,
-            onClick = onToggleNetwork,
+            onClick = { onSelectTransport(DeviceType.TCP) },
         )
         TransportChip(
-            selected = showUsb,
-            label = Res.string.transport_usb,
+            selected = activeTransport == DeviceType.USB,
+            label = Res.string.usb,
             icon = MeshtasticIcons.Usb,
-            onClick = onToggleUsb,
+            onClick = { onSelectTransport(DeviceType.USB) },
         )
     }
 }

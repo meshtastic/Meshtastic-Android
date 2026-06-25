@@ -8,6 +8,6 @@
     <ID>PreviewPublic:ConnectionsPreviews.kt:@PreviewLightDark @Composable fun DeviceSectionHeaderPreview</ID>
     <ID>PreviewPublic:ConnectionsPreviews.kt:@PreviewLightDark @Composable fun DisconnectButtonPreview</ID>
     <ID>PreviewPublic:ConnectionsPreviews.kt:@PreviewLightDark @Composable fun EmptyStateContentPreview</ID>
-    <ID>PreviewPublic:ConnectionsPreviews.kt:@PreviewLightDark @Composable fun TransportFilterChipsPreview</ID>
+    <ID>PreviewPublic:ConnectionsPreviews.kt:@PreviewLightDark @Composable fun TransportSelectorPreview</ID>
   </CurrentIssues>
 </SmellBaseline>

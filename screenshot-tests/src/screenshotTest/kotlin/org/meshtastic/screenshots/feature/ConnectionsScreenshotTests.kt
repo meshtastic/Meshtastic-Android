@@ -24,7 +24,7 @@ import org.meshtastic.feature.connections.component.DeviceListItemPreview
 import org.meshtastic.feature.connections.component.DeviceSectionHeaderPreview
 import org.meshtastic.feature.connections.component.DisconnectButtonPreview
 import org.meshtastic.feature.connections.component.EmptyStateContentPreview
-import org.meshtastic.feature.connections.component.TransportFilterChipsPreview
+import org.meshtastic.feature.connections.component.TransportSelectorPreview
 
 @PreviewTest
 @PreviewLightDark
@@ -64,6 +64,6 @@ fun ScreenshotDeviceSectionHeader() {
 @PreviewTest
 @PreviewLightDark
 @Composable
-fun ScreenshotTransportFilterChips() {
-    TransportFilterChipsPreview()
+fun ScreenshotTransportSelector() {
+    TransportSelectorPreview()
 }
