@@ -9,28 +9,13 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
-* refactor(data): consolidate bundled-asset loading behind BundledAssetReader (#5921) by James Rich (@jamesarich) in [`1194c7559`](https://github.com/meshtastic/Meshtastic-Android/commit/1194c7559412f6f92c4a4197249a93b391c94fb9)
-* chore(claude): KMP bleed hook, RUM investigator agent, /baseline skill (#5924) by James Rich (@jamesarich) in [`4d9b0152f`](https://github.com/meshtastic/Meshtastic-Android/commit/4d9b0152f1b0ff1b3b01978f560a4c713e74c29b)
-* fix(firmware): render chirpy mascot via painterResource in update dialog (#5925) by James Rich (@jamesarich) in [`b3ec677a7`](https://github.com/meshtastic/Meshtastic-Android/commit/b3ec677a72fd621ee154789df59ae8edb7dd3f38)
-* test(firmware): re-record disclaimer screenshot baselines (follow-up to #5925) (#5926) by James Rich (@jamesarich) in [`77e3abbff`](https://github.com/meshtastic/Meshtastic-Android/commit/77e3abbff3a577bbfb7434c15622c8afd1bcaf72)
-* fix(usb): Add serial presence recovery for USB replug (#5923) by Jeremiah K (@jeremiah-k) in [`1d528575f`](https://github.com/meshtastic/Meshtastic-Android/commit/1d528575fb319d95e6a61ad2869379f7c3ca03d0)
-* feat: offline-first event firmware metadata (JSON schema + bundled asset) (#5920) by James Rich (@jamesarich) in [`3ad885d67`](https://github.com/meshtastic/Meshtastic-Android/commit/3ad885d6704514e7974bacc4f1845238626d0965)
-* feat(firmware): drive event firmware branding from bundled metadata (#5929) by James Rich (@jamesarich) in [`828c6a4d6`](https://github.com/meshtastic/Meshtastic-Android/commit/828c6a4d6988ad55a06898104fe0736ff7faa9dc)
-* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs, Baseline) (#5928) by James Rich (@jamesarich) in [`fdd386009`](https://github.com/meshtastic/Meshtastic-Android/commit/fdd386009932e24100f07579bf2cfa22c079e0e5)
-* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs, Baseline) (#5930) by James Rich (@jamesarich) in [`78d91ecc6`](https://github.com/meshtastic/Meshtastic-Android/commit/78d91ecc60f11dc4d6ad68ac89a18c5330f88a5f)
-* refactor(core:ui): drop redundant SinglePaneSceneStrategy from NavDisplay (#5934) by James Rich (@jamesarich) in [`f1a7982a4`](https://github.com/meshtastic/Meshtastic-Android/commit/f1a7982a4de58b13eb0b4f30bbe8cb2374f60fef)
-* fix(data): Persist TAK module config (#5933) by Jeremiah K (@jeremiah-k) in [`45a27ab5d`](https://github.com/meshtastic/Meshtastic-Android/commit/45a27ab5d97271c1bc7963e11ac1b6afcded8ced)
-* fix(usb): Suppress expected serial close warnings (#5932) by Jeremiah K (@jeremiah-k) in [`0180661bd`](https://github.com/meshtastic/Meshtastic-Android/commit/0180661bdf2a81e6ba820f8e2fd473ac22e69d5f)
-* docs: add Obtainium test-build install guide (#5936) by James Rich (@jamesarich) in [`637e3de29`](https://github.com/meshtastic/Meshtastic-Android/commit/637e3de29467e99fc996e8f480d61bda39a20c23)
-* feat(lora): consume region→preset compatibility map + TINY presets (protobufs #951) (#5834) by James Rich (@jamesarich) in [`8fb2001b5`](https://github.com/meshtastic/Meshtastic-Android/commit/8fb2001b52ec25b40808980e1c33f7c254e918a1)
-* feat(lockdown): firmware lockdown mode (provision / unlock / lock-now) (#5939) by James Rich (@jamesarich) in [`df67b3e09`](https://github.com/meshtastic/Meshtastic-Android/commit/df67b3e0949bf47e64ed0d399a843871edd6304f)
-* chore(deps): update androidx.security:security-crypto to v1.1.0 (#5940) by renovate[bot] (@renovate[bot]) in [`eced83040`](https://github.com/meshtastic/Meshtastic-Android/commit/eced830402ad242a45db22b3e4883aebad73aca3)
-* refactor(connections): Derive DeviceType from InterfaceId (#5935) by Jeremiah K (@jeremiah-k) in [`e1e40c7b0`](https://github.com/meshtastic/Meshtastic-Android/commit/e1e40c7b06a4aa3285130b14dbeb65a5d7477687)
-* feat(lora): gate region→preset map + TINY presets on firmware capability (#5941) by James Rich (@jamesarich) in [`d81a91a9d`](https://github.com/meshtastic/Meshtastic-Android/commit/d81a91a9da2de5f84a7b99a05233f434cc54a3dd)
-* chore(deps): re-pin protobufs to v-less snapshot 2.7.26-4b8d665-SNAPSHOT, drop resolution override (#5942) by James Rich (@jamesarich) in [`fa223bfc0`](https://github.com/meshtastic/Meshtastic-Android/commit/fa223bfc08a9ef844fb925370b131b880b8b0a78)
-* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs, Baseline) (#5937) by James Rich (@jamesarich) in [`c98a08841`](https://github.com/meshtastic/Meshtastic-Android/commit/c98a08841b69efadfe0f6739f012835ab7205c61)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs, Baseline) (#5948) by James Rich (@jamesarich) in [`40627fb02`](https://github.com/meshtastic/Meshtastic-Android/commit/40627fb02addd504df3e3b6713d05673d9ca9af3)
+* refactor: drop two over-engineered seams (enum + stdlib Base64) (#5945) by James Rich (@jamesarich) in [`ab07347e5`](https://github.com/meshtastic/Meshtastic-Android/commit/ab07347e5af5fe680a7d1a32b3551ca6eb12255c)
+* fix(usb): Surface permission denial as permanent disconnect (#5943) by Jeremiah K (@jeremiah-k) in [`09cde67e5`](https://github.com/meshtastic/Meshtastic-Android/commit/09cde67e511d9bc7f61254a1dba4f39cf9fa8207)
+* chore(deps): update aboutlibraries to v15.0.1 (#5949) by renovate[bot] (@renovate[bot]) in [`cb8fbd739`](https://github.com/meshtastic/Meshtastic-Android/commit/cb8fbd73921ce39ae5efcd83005863f0dc128fd9)
+* chore(deps): update ktor to v3.5.1 (#5951) by renovate[bot] (@renovate[bot]) in [`fad8e5f0e`](https://github.com/meshtastic/Meshtastic-Android/commit/fad8e5f0e3dee4eb9913771b407c6a430c028a25)
 
-### Internal (v2.8.0-internal.5)
+### Closed Beta (v2.8.0-closed.1)
 Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14):
 
 #### 🏗️ Features
@@ -44,6 +29,11 @@ Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/relea
 * feat(ui): use modem-preset-relative SNR thresholds for signal quality by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5903
 * feat(firmware): link OTAFIX bootloader from slow-DFU success screen by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5917
 * feat(node): add GPX export to position log screen by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5919
+* feat: offline-first event firmware metadata (JSON schema + bundled asset) by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5920
+* feat(firmware): drive event firmware branding from bundled metadata by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5929
+* feat(lora): consume region→preset compatibility map + TINY presets (protobufs #951) by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5834
+* feat(lockdown): firmware lockdown mode (provision / unlock / lock-now) by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5939
+* feat(lora): gate region→preset map + TINY presets on firmware capability by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5941
 #### 🛠️ Fixes
 * fix(mqtt): make the MQTT client-id unique per connection by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5755
 * fix(ble): Harden BLE connection lifecycle by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/5795
@@ -68,6 +58,10 @@ Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/relea
 * fix(ble): require fresh advertisement for auto-reconnect by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/5912
 * fix(firmware): harden ESP32 OTA + nRF DFU update paths (hardware-validated) by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5915
 * fix(firmware): batch of P3 OTA/DFU cleanups from the #5915 audit by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5916
+* fix(firmware): render chirpy mascot via painterResource in update dialog by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5925
+* fix(usb): Add serial presence recovery for USB replug by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/5923
+* fix(data): Persist TAK module config by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/5933
+* fix(usb): Suppress expected serial close warnings by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/5932
 
 ## New Contributors
 * @LesterCheng made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/5752
