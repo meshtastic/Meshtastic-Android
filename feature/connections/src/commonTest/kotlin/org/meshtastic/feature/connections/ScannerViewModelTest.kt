@@ -41,7 +41,7 @@ import kotlin.test.assertNotNull
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class ScannerViewModelTest {
 
-    private val harness = ScannerViewModelHarness()
+    private lateinit var harness: ScannerViewModelHarness
     private lateinit var viewModel: ScannerViewModel
 
     // Convenience aliases so the existing test bodies read unchanged.
@@ -62,6 +62,7 @@ class ScannerViewModelTest {
 
     @BeforeTest
     fun setUp() {
+        harness = ScannerViewModelHarness()
         Dispatchers.setMain(harness.testDispatcher)
 
         serviceRepository.setConnectionProgress("")

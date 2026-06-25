@@ -254,13 +254,12 @@ open class ScannerViewModel(
 
     /** Selects one Connections transport pane and stops scans that cannot belong to that pane. */
     fun selectTransport(type: DeviceType) {
-        if (activeTransport.value == type) return
         when (type) {
             DeviceType.BLE -> stopNetworkScan()
             DeviceType.TCP -> stopBleScan()
             DeviceType.USB -> stopAllScans()
         }
-        uiPrefs.setSelectedConnectionTransport(type)
+        if (activeTransport.value != type) uiPrefs.setSelectedConnectionTransport(type)
     }
 
     // ── Scan commands ────────────────────────────────────────────────────────────────────────
