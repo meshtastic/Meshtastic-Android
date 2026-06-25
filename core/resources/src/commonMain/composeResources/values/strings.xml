@@ -989,8 +989,8 @@
     <string name="no_network_devices_seen">No network devices seen</string>
     <string name="no_pax_metrics_logs">No PAX metrics available.</string>
     <string name="no_usb_devices_found">No USB devices found</string>
-    <string name="no_usb_devices_hint">Connect the device via serial or USB.</string>
-    <string name="no_usb_devices_seen">No USB devices seen</string>
+    <string name="no_usb_devices_hint">Connect a device with a USB data cable to use serial.</string>
+    <string name="no_usb_devices_seen">No USB devices detected</string>
     <!-- NODE -->
     <string name="node_count_template">(%1$d online / %2$d shown / %3$d total)</string>
     <string name="node_filter_exclude_infrastructure">Exclude infrastructure</string>
