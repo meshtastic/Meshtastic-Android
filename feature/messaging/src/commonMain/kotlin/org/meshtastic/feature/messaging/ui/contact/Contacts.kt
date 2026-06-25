@@ -173,7 +173,7 @@ fun ContactsScreen(
 
     LaunchedEffect(scrollToTopEvents) {
         scrollToTopEvents?.collectLatest { event ->
-            if (event is ScrollToTopEvent.ConversationsTabPressed) {
+            if (event == ScrollToTopEvent.ConversationsTabPressed) {
                 contactsListState.smartScrollToTop(coroutineScope)
             }
         }

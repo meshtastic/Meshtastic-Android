@@ -114,7 +114,7 @@ fun NodeListScreen(
 
     LaunchedEffect(scrollToTopEvents) {
         scrollToTopEvents?.collectLatest { event ->
-            if (event is ScrollToTopEvent.NodesTabPressed) {
+            if (event == ScrollToTopEvent.NodesTabPressed) {
                 listState.smartScrollToTop(coroutineScope)
             }
         }
