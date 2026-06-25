@@ -156,12 +156,36 @@
             android:name="google_analytics_default_allow_analytics_storage"
             android:value="false" />
 
-        <!-- In-app mesh foreground service -->
+        <!-- In-app mesh foreground service.
+
+             android:exported="true" + the <intent-filter> below restore the
+             public bind API that third-party plugins (notably
+             meshtastic/ATAK-Plugin) have relied on since pre-2.7. Without
+             these, bindService() from any other UID fails with
+             SecurityException regardless of class name or permissions.
+
+             Regression timeline:
+               - v2.7.13 and earlier: exported="true" + intent-filter present.
+                 ATAK plugin v1.1.42 binds successfully.
+               - v2.7.14: service repackaged from com.geeksville.mesh.service.*
+                 to org.meshtastic.core.service.*, intent-filter dropped, and
+                 exported flipped to "false".
+               - Symptom: ATAK plugin shows "Connected Node: Not connected"
+                 (red M); logcat shows "Permission Denial: opening provider..."
+                 or "Unable to start service Intent ...: not found" depending
+                 on Android version.
+
+             See: https://github.com/meshtastic/ATAK-Plugin/issues/111
+                  https://github.com/meshtastic/Meshtastic-Android/pull/<this PR> -->
         <service
             android:name="org.meshtastic.core.service.MeshService"
             android:enabled="true"
             android:foregroundServiceType="connectedDevice|location"
-            android:exported="false" />
+            android:exported="true">
+            <intent-filter>
+                <action android:name="org.meshtastic.core.service.MeshService" />
+            </intent-filter>
+        </service>
 
         <service
             android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"
