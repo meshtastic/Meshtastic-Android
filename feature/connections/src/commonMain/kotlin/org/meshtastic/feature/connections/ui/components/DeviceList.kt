@@ -60,6 +60,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.isValidAddress
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.network.repository.NetworkConstants
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.add_network_device
@@ -91,11 +92,11 @@ import org.meshtastic.core.ui.icon.Wifi
 import org.meshtastic.feature.connections.model.DeviceListEntry
 
 /**
- * Unified device list: BLE / USB / Network sections rendered as one scrollable [LazyColumn].
+ * Unified device list: one selected BLE / Network / USB pane rendered as a scrollable [LazyColumn].
  *
- * Replaces the previous tab-based UI. Every section uses the same M3 header template ([DeviceSectionHeader]); empty
- * sections are hidden. Stable per-transport keys (e.g. `"ble:<fullAddress>"`) keep LazyColumn's recomposition scope
- * tight to the actual item that changed when a user taps a device card.
+ * Every pane uses the same M3 header template ([DeviceSectionHeader]). Stable per-transport keys (e.g.
+ * `"ble:<fullAddress>"`) keep LazyColumn's recomposition scope tight to the actual item that changed when a user taps a
+ * device card.
  *
  * BLE / network scanning is user-triggered — the header's trailing toggle calls back to the caller.
  */
@@ -111,15 +112,13 @@ fun DeviceList(
     recentTcpDevices: List<DeviceListEntry>,
     isBleScanning: Boolean,
     isNetworkScanning: Boolean,
+    activeTransport: DeviceType,
     onSelectDevice: (DeviceListEntry) -> Unit,
     onToggleBleScan: () -> Unit,
     onToggleNetworkScan: () -> Unit,
     onAddManualAddress: (address: String, fullAddress: String) -> Unit,
     onRemoveRecentAddress: (DeviceListEntry) -> Unit,
     modifier: Modifier = Modifier,
-    showBleSection: Boolean = true,
-    showNetworkSection: Boolean = true,
-    showUsbSection: Boolean = true,
 ) {
     var showAddDialog by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -141,38 +140,37 @@ fun DeviceList(
     }
 
     LazyColumn(modifier = modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        if (showBleSection) {
-            bluetoothSection(
-                bleDevices = bleDevices,
-                connectionState = connectionState,
-                selectedDevice = selectedDevice,
-                isBleScanning = isBleScanning,
-                onSelectDevice = onSelectDevice,
-                onToggleBleScan = onToggleBleScan,
-            )
-        }
+        when (activeTransport) {
+            DeviceType.BLE ->
+                bluetoothSection(
+                    bleDevices = bleDevices,
+                    connectionState = connectionState,
+                    selectedDevice = selectedDevice,
+                    isBleScanning = isBleScanning,
+                    onSelectDevice = onSelectDevice,
+                    onToggleBleScan = onToggleBleScan,
+                )
 
-        if (showNetworkSection) {
-            networkSection(
-                discoveredTcpDevices = discoveredTcpDevices,
-                recentTcpDevices = recentTcpDevices,
-                connectionState = connectionState,
-                selectedDevice = selectedDevice,
-                isNetworkScanning = isNetworkScanning,
-                onSelectDevice = onSelectDevice,
-                onToggleNetworkScan = onToggleNetworkScan,
-                onAddManually = { showAddDialog = true },
-                onRemoveRecentAddress = onRemoveRecentAddress,
-            )
-        }
+            DeviceType.TCP ->
+                networkSection(
+                    discoveredTcpDevices = discoveredTcpDevices,
+                    recentTcpDevices = recentTcpDevices,
+                    connectionState = connectionState,
+                    selectedDevice = selectedDevice,
+                    isNetworkScanning = isNetworkScanning,
+                    onSelectDevice = onSelectDevice,
+                    onToggleNetworkScan = onToggleNetworkScan,
+                    onAddManually = { showAddDialog = true },
+                    onRemoveRecentAddress = onRemoveRecentAddress,
+                )
 
-        if (showUsbSection) {
-            usbSection(
-                usbDevices = usbDevices,
-                connectionState = connectionState,
-                selectedDevice = selectedDevice,
-                onSelectDevice = onSelectDevice,
-            )
+            DeviceType.USB ->
+                usbSection(
+                    usbDevices = usbDevices,
+                    connectionState = connectionState,
+                    selectedDevice = selectedDevice,
+                    onSelectDevice = onSelectDevice,
+                )
         }
     }
 }

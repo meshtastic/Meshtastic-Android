@@ -48,12 +48,11 @@ internal fun anyNetworkScanTransportAvailable(networks: List<NetworkTransportInf
  *
  * Banner shows only while a network scan is actively running, local-network permission is granted, WiFi is unavailable,
  * and the scan has not yet produced any discovered TCP nodes. The auto-scan case is covered because `isNetworkScanning`
- * is true during auto-scan regardless of the user's transport-chip preference.
+ * is true during auto-scan regardless of the user's active Connections pane.
  *
- * Gating on the scan state (rather than the `showNetworkTransport` chip preference, which defaults to on) keeps the
- * banner silent while discovery is idle — the user only needs the recovery hint at the moment a scan cannot find a
- * usable transport. The [localNetworkPermissionGranted] guard keeps the banner from overlapping the permission-request
- * flow on the scan toggle.
+ * Gating on the scan state keeps the banner silent while discovery is idle — the user only needs the recovery hint at
+ * the moment a scan cannot find a usable transport. The [localNetworkPermissionGranted] guard keeps the banner from
+ * overlapping the permission-request flow on the scan toggle.
  *
  * The banner is a recovery hint for the case where the user has started a network scan but no nodes have been
  * discovered yet. Once the scan produces results, the user has found what they were looking for and the hint is no

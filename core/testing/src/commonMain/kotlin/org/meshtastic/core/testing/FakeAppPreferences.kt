@@ -18,6 +18,7 @@ package org.meshtastic.core.testing
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.repository.AnalyticsPrefs
 import org.meshtastic.core.repository.AppFunctionsPrefs
 import org.meshtastic.core.repository.AppPreferences
@@ -162,22 +163,10 @@ class FakeUiPrefs : UiPrefs {
         networkAutoScan.value = enabled
     }
 
-    override val showBleTransport = MutableStateFlow(true)
+    override val selectedConnectionTransport = MutableStateFlow<DeviceType?>(null)
 
-    override fun setShowBleTransport(enabled: Boolean) {
-        showBleTransport.value = enabled
-    }
-
-    override val showNetworkTransport = MutableStateFlow(true)
-
-    override fun setShowNetworkTransport(enabled: Boolean) {
-        showNetworkTransport.value = enabled
-    }
-
-    override val showUsbTransport = MutableStateFlow(true)
-
-    override fun setShowUsbTransport(enabled: Boolean) {
-        showUsbTransport.value = enabled
+    override fun setSelectedConnectionTransport(type: DeviceType) {
+        selectedConnectionTransport.value = type
     }
 
     private val nodeLocationEnabled = mutableMapOf<Int, MutableStateFlow<Boolean>>()

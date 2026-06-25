@@ -21,6 +21,7 @@ import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
@@ -31,6 +32,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import org.meshtastic.core.ble.BleDevice
 import org.meshtastic.core.ble.BleScanner
@@ -39,6 +41,7 @@ import org.meshtastic.core.datastore.RecentAddressesDataSource
 import org.meshtastic.core.datastore.model.RecentAddress
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.network.repository.NetworkRepository
 import org.meshtastic.core.repository.RadioController
@@ -119,26 +122,6 @@ open class ScannerViewModel(
 
     /** User preference that controls whether NSD network scanning auto-starts when the Connections screen opens. */
     val networkAutoScan: StateFlow<Boolean> = uiPrefs.networkAutoScan
-
-    // ── Transport-section visibility (filter chips) ───────────────────────────────────────────
-
-    /** Whether the BLE section is visible in the Connections device list. Defaults to `true`. */
-    val showBleTransport: StateFlow<Boolean> = uiPrefs.showBleTransport
-
-    /** Whether the Network (TCP/NSD) section is visible in the Connections device list. Defaults to `true`. */
-    val showNetworkTransport: StateFlow<Boolean> = uiPrefs.showNetworkTransport
-
-    /** Whether the USB section is visible in the Connections device list. Defaults to `true`. */
-    val showUsbTransport: StateFlow<Boolean> = uiPrefs.showUsbTransport
-
-    /** Toggles whether the BLE section is visible in the Connections device list. */
-    fun setShowBleTransport(enabled: Boolean) = uiPrefs.setShowBleTransport(enabled)
-
-    /** Toggles whether the Network (TCP/NSD) section is visible in the Connections device list. */
-    fun setShowNetworkTransport(enabled: Boolean) = uiPrefs.setShowNetworkTransport(enabled)
-
-    /** Toggles whether the USB section is visible in the Connections device list. */
-    fun setShowUsbTransport(enabled: Boolean) = uiPrefs.setShowUsbTransport(enabled)
 
     /**
      * Resolved NSD services flow, gated by [_isNetworkScanning]. When scanning is inactive, emits `emptyList()` so
@@ -254,6 +237,31 @@ open class ScannerViewModel(
             .map { it ?: NO_DEVICE_SELECTED }
             .stateInWhileSubscribed(initialValue = selectedAddressFlow.value ?: NO_DEVICE_SELECTED)
 
+    // ── Active transport pane ────────────────────────────────────────────────────────────────
+
+    /** The single transport pane currently rendered by the Connections screen. */
+    val activeTransport: StateFlow<DeviceType> =
+        combine(uiPrefs.selectedConnectionTransport, selectedAddressFlow) { preferred, selectedAddress ->
+            resolveActiveTransport(preferred, selectedAddress)
+        }
+            .distinctUntilChanged()
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.Eagerly,
+                initialValue =
+                resolveActiveTransport(uiPrefs.selectedConnectionTransport.value, selectedAddressFlow.value),
+            )
+
+    /** Selects one Connections transport pane and stops scans that cannot belong to that pane. */
+    fun selectTransport(type: DeviceType) {
+        when (type) {
+            DeviceType.BLE -> stopNetworkScan()
+            DeviceType.TCP -> stopBleScan()
+            DeviceType.USB -> stopAllScans()
+        }
+        uiPrefs.setSelectedConnectionTransport(type)
+    }
+
     // ── Scan commands ────────────────────────────────────────────────────────────────────────
 
     /**
@@ -307,6 +315,7 @@ open class ScannerViewModel(
      * scan in `BleRadioTransport.findDevice` before connecting.
      */
     fun startBleAutoScan() {
+        if (activeTransport.value != DeviceType.BLE) return
         val selectedAddress = selectedAddressFlow.value
         if (selectedAddress != null && selectedAddress != NO_DEVICE_SELECTED) return
         startBleScan()
@@ -354,6 +363,11 @@ open class ScannerViewModel(
         // Cancel the other scan first so only one flag is ever true. Both stop methods are idempotent.
         stopBleScan()
         _isNetworkScanning.value = true
+    }
+
+    /** Starts NSD scanning for screen-entry auto-scan only when the Network pane is active. */
+    fun startNetworkAutoScan() {
+        if (activeTransport.value == DeviceType.TCP) startNetworkScan()
     }
 
     /** Cancels the active network scan and resets the scanning flag. Idempotent. */
@@ -426,6 +440,7 @@ open class ScannerViewModel(
     fun connectToManualAddress(fullAddress: String) {
         val displayAddress = fullAddress.removePrefix(TCP_DEVICE_PREFIX)
         stopAllScans()
+        uiPrefs.setSelectedConnectionTransport(DeviceType.TCP)
         addRecentAddress(fullAddress, displayAddress)
         changeDeviceAddress(fullAddress)
     }
@@ -441,6 +456,7 @@ open class ScannerViewModel(
         // attempt (BLE GATT or TCP) contends with an active BLE scan for the same radio resources during the
         // handshake; cancelling here keeps the lifecycle ordered: scan → stop → connect.
         stopAllScans()
+        recordSelectedTransport(entry.fullAddress)
         radioPrefs.setDevName(entry.name)
         addRecentAddress(entry.fullAddress, entry.name)
         return when (entry) {
@@ -499,5 +515,12 @@ open class ScannerViewModel(
     fun disconnect() {
         radioPrefs.setDevName(null)
         changeDeviceAddress(NO_DEVICE_SELECTED)
+    }
+
+    private fun resolveActiveTransport(preferred: DeviceType?, selectedAddress: String?): DeviceType =
+        preferred ?: selectedAddress?.let(DeviceType::fromAddress) ?: DeviceType.BLE
+
+    private fun recordSelectedTransport(fullAddress: String) {
+        DeviceType.fromAddress(fullAddress)?.let(uiPrefs::setSelectedConnectionTransport)
     }
 }

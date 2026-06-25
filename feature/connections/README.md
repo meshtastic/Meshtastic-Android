@@ -40,7 +40,7 @@ src/
 │   │       ├── DeviceList.kt / DeviceListItem.kt / DeviceSectionHeader.kt
 │   │       ├── DisconnectButton.kt
 │   │       ├── EmptyStateContent.kt
-│   │       └── TransportFilterChips.kt
+│   │       └── TransportSelector.kt
 │   └── di/
 │       └── FeatureConnectionsModule.kt
 ├── androidMain/kotlin/

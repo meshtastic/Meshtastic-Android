@@ -27,6 +27,7 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.network.repository.DiscoveredService
 import org.meshtastic.core.testing.FakeBleDevice
 import org.meshtastic.feature.connections.model.DeviceListEntry
@@ -133,6 +134,27 @@ class ScannerViewModelTest {
     @Test
     fun `isNetworkScanning defaults to false`() {
         assertEquals(false, viewModel.isNetworkScanning.value)
+    }
+
+    @Test
+    fun `active transport defaults to BLE when no selected device or preference exists`() {
+        assertEquals(DeviceType.BLE, viewModel.activeTransport.value)
+    }
+
+    @Test
+    fun `active transport defaults to selected device type when no explicit preference exists`() {
+        harness.currentDeviceAddressFlow.value = "t192.168.1.50"
+
+        assertEquals(DeviceType.TCP, viewModel.activeTransport.value)
+    }
+
+    @Test
+    fun `explicit active transport preference wins over selected device type`() {
+        harness.currentDeviceAddressFlow.value = "s/dev/bus/usb/001/002"
+
+        viewModel.selectTransport(DeviceType.BLE)
+
+        assertEquals(DeviceType.BLE, viewModel.activeTransport.value)
     }
 
     @Test
@@ -294,6 +316,48 @@ class ScannerViewModelTest {
         assertEquals(true, viewModel.isNetworkScanning.value)
     }
 
+    @Test
+    fun `selecting BLE stops active network scan`() = runTest {
+        viewModel.startNetworkScan()
+        assertEquals(true, viewModel.isNetworkScanning.value)
+
+        viewModel.selectTransport(DeviceType.BLE)
+
+        assertEquals(DeviceType.BLE, viewModel.activeTransport.value)
+        assertEquals(false, viewModel.isNetworkScanning.value)
+    }
+
+    @Test
+    fun `selecting TCP stops active ble scan`() = runTest {
+        viewModel.startBleScan()
+        assertEquals(true, viewModel.isBleScanning.value)
+
+        viewModel.selectTransport(DeviceType.TCP)
+
+        assertEquals(DeviceType.TCP, viewModel.activeTransport.value)
+        assertEquals(false, viewModel.isBleScanning.value)
+    }
+
+    @Test
+    fun `selecting USB stops all active scans`() = runTest {
+        viewModel.startBleScan()
+        assertEquals(true, viewModel.isBleScanning.value)
+
+        viewModel.selectTransport(DeviceType.USB)
+
+        assertEquals(DeviceType.USB, viewModel.activeTransport.value)
+        assertEquals(false, viewModel.isBleScanning.value)
+        assertEquals(false, viewModel.isNetworkScanning.value)
+
+        viewModel.startNetworkScan()
+        assertEquals(true, viewModel.isNetworkScanning.value)
+
+        viewModel.selectTransport(DeviceType.USB)
+
+        assertEquals(false, viewModel.isBleScanning.value)
+        assertEquals(false, viewModel.isNetworkScanning.value)
+    }
+
     // Manual scan control.
 
     @Test
@@ -376,6 +440,32 @@ class ScannerViewModelTest {
         assertEquals(true, viewModel.isBleScanning.value)
     }
 
+    @Test
+    fun `startBleAutoScan starts only when active transport is BLE`() = runTest {
+        viewModel.selectTransport(DeviceType.TCP)
+
+        viewModel.startBleAutoScan()
+
+        assertEquals(false, viewModel.isBleScanning.value)
+
+        viewModel.selectTransport(DeviceType.BLE)
+        viewModel.startBleAutoScan()
+
+        assertEquals(true, viewModel.isBleScanning.value)
+    }
+
+    @Test
+    fun `startNetworkAutoScan starts only when active transport is TCP`() = runTest {
+        viewModel.startNetworkAutoScan()
+
+        assertEquals(false, viewModel.isNetworkScanning.value)
+
+        viewModel.selectTransport(DeviceType.TCP)
+        viewModel.startNetworkAutoScan()
+
+        assertEquals(true, viewModel.isNetworkScanning.value)
+    }
+
     // ── Toggle persistence: enable clears the opposite persisted auto-scan pref ──────────────
 
     @Test
@@ -435,6 +525,29 @@ class ScannerViewModelTest {
 
         assertEquals(false, viewModel.isNetworkScanning.value)
         assertEquals(entry.fullAddress, radioController.lastSetDeviceAddress)
+    }
+
+    @Test
+    fun `onSelected records active transport for BLE TCP and USB entries`() = runTest {
+        val bleEntry =
+            DeviceListEntry.Ble(device = FakeBleDevice(address = "01:02:03:04:05:06", name = "BLE Node"), bonded = true)
+        val tcpEntry = DeviceListEntry.Tcp(name = "TCP Node", fullAddress = "t192.168.1.50")
+        val usbEntry =
+            DeviceListEntry.Usb(
+                usbData = object : org.meshtastic.feature.connections.model.UsbDeviceData {},
+                name = "USB Node",
+                fullAddress = "s/dev/bus/usb/001/002",
+                bonded = true,
+            )
+
+        viewModel.onSelected(bleEntry)
+        assertEquals(DeviceType.BLE, viewModel.activeTransport.value)
+
+        viewModel.onSelected(tcpEntry)
+        assertEquals(DeviceType.TCP, viewModel.activeTransport.value)
+
+        viewModel.onSelected(usbEntry)
+        assertEquals(DeviceType.USB, viewModel.activeTransport.value)
     }
 
     // ── persistNetworkAutoScanIntent invariant ───────────────────────────────────────────────

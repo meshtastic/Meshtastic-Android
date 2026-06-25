@@ -51,6 +51,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
@@ -87,7 +88,7 @@ import org.meshtastic.feature.connections.model.DeviceListEntry
 import org.meshtastic.feature.connections.ui.components.ConnectingDeviceInfo
 import org.meshtastic.feature.connections.ui.components.CurrentlyConnectedInfo
 import org.meshtastic.feature.connections.ui.components.DeviceList
-import org.meshtastic.feature.connections.ui.components.TransportFilterChips
+import org.meshtastic.feature.connections.ui.components.TransportSelector
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.getNavRouteFrom
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
@@ -129,10 +130,8 @@ fun ConnectionsScreen(
     val usbDevices by scanModel.usbDevicesForUi.collectAsStateWithLifecycle()
     val isBleScanning by scanModel.isBleScanning.collectAsStateWithLifecycle()
     val isNetworkScanning by scanModel.isNetworkScanning.collectAsStateWithLifecycle()
+    val activeTransport by scanModel.activeTransport.collectAsStateWithLifecycle()
 
-    val showBleTransport by scanModel.showBleTransport.collectAsStateWithLifecycle()
-    val showNetworkTransport by scanModel.showNetworkTransport.collectAsStateWithLifecycle()
-    val showUsbTransport by scanModel.showUsbTransport.collectAsStateWithLifecycle()
     // Android 17 (API 37) gates NSD/mDNS behind ACCESS_LOCAL_NETWORK. Without this prompt the platform falls back to
     // the system "Choose a device to connect" picker on every discoverServices() call. The reactive state lets the
     // network-scan toggle request in-context and route a permanent denial to settings.
@@ -155,7 +154,9 @@ fun ConnectionsScreen(
     // Compose to dispose the running scan (calling stopBleScan) and immediately re-run (calling startBleScan)
     // every time the pref was written, which cycled scans until Android's BluetoothLeScanner rate-limited.
     LifecycleStartEffect(Unit) {
-        if (scanModel.bleAutoScan.value && !scanModel.isBleScanning.value) scanModel.startBleAutoScan()
+        if (activeTransport == DeviceType.BLE && scanModel.bleAutoScan.value && !scanModel.isBleScanning.value) {
+            scanModel.startBleAutoScan()
+        }
         onStopOrDispose { scanModel.stopBleScan() }
     }
 
@@ -164,7 +165,9 @@ fun ConnectionsScreen(
     // Android's BluetoothLeScanner rate-limit rejection, while still supporting the request-permission →
     // grant → auto-start flow. The body reads the pref directly via the StateFlow's current value.
     LifecycleStartEffect(localNetworkPermission.isGranted) {
-        if (scanModel.networkAutoScan.value && localNetworkPermission.isGranted) scanModel.startNetworkScan()
+        if (activeTransport == DeviceType.TCP && scanModel.networkAutoScan.value && localNetworkPermission.isGranted) {
+            scanModel.startNetworkAutoScan()
+        }
         onStopOrDispose { scanModel.stopNetworkScan() }
     }
 
@@ -291,23 +294,19 @@ fun ConnectionsScreen(
                             }
                         }
 
-                        // Inclusive transport-visibility filter chips. Sit between the connection card and the
-                        // device list so users can hide entire transports they're not using.
-                        TransportFilterChips(
-                            showBle = showBleTransport,
-                            showNetwork = showNetworkTransport,
-                            showUsb = showUsbTransport,
-                            onToggleBle = { scanModel.setShowBleTransport(!showBleTransport) },
-                            onToggleNetwork = { scanModel.setShowNetworkTransport(!showNetworkTransport) },
-                            onToggleUsb = { scanModel.setShowUsbTransport(!showUsbTransport) },
+                        // Transport selector sits between the connection card and device list; it controls only the
+                        // visible discovery pane, not the globally selected/connected device shown above.
+                        TransportSelector(
+                            activeTransport = activeTransport,
+                            onSelectTransport = scanModel::selectTransport,
                         )
 
                         // Adapter-off hints: shown only when the relevant permission is granted but the radio/network
                         // is unavailable, so they don't overlap the permission-recovery flow on the scan toggles.
                         // The WiFi-unavailable banner only renders while a network scan is actively running —
                         // discovery is the only moment the user needs to know WiFi is missing. The auto-scan case is
-                        // covered because `isNetworkScanning` is true during auto-scan regardless of chip state.
-                        if (showBleTransport && bluetoothPermission.isGranted && bluetoothDisabled) {
+                        // covered because `isNetworkScanning` is true during auto-scan regardless of pane state.
+                        if (activeTransport == DeviceType.BLE && bluetoothPermission.isGranted && bluetoothDisabled) {
                             RecoveryCard(
                                 message = stringResource(Res.string.bluetooth_disabled),
                                 actionLabel = stringResource(Res.string.open_bluetooth_settings),
@@ -316,6 +315,7 @@ fun ConnectionsScreen(
                             )
                         }
                         if (
+                            activeTransport == DeviceType.TCP &&
                             shouldShowWifiUnavailableBanner(
                                 isNetworkScanning = isNetworkScanning,
                                 localNetworkPermissionGranted = localNetworkPermission.isGranted,
@@ -342,9 +342,7 @@ fun ConnectionsScreen(
                                 recentTcpDevices = recentTcpDevices,
                                 isBleScanning = isBleScanning,
                                 isNetworkScanning = isNetworkScanning,
-                                showBleSection = showBleTransport,
-                                showNetworkSection = showNetworkTransport,
-                                showUsbSection = showUsbTransport,
+                                activeTransport = activeTransport,
                                 onSelectDevice = { scanModel.onSelected(it) },
                                 onToggleBleScan = {
                                     when {

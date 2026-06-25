@@ -17,6 +17,7 @@
 package org.meshtastic.core.repository
 
 import kotlinx.coroutines.flow.StateFlow
+import org.meshtastic.core.model.DeviceType
 
 /** Reactive interface for analytics-related preferences. */
 interface AnalyticsPrefs {
@@ -133,20 +134,10 @@ interface UiPrefs {
 
     fun setNetworkAutoScan(enabled: Boolean)
 
-    /** Whether the BLE transport section is visible in the Connections device list. */
-    val showBleTransport: StateFlow<Boolean>
+    /** User-selected Connections transport pane, or null when the screen should derive a default. */
+    val selectedConnectionTransport: StateFlow<DeviceType?>
 
-    fun setShowBleTransport(enabled: Boolean)
-
-    /** Whether the network (TCP/NSD) transport section is visible in the Connections device list. */
-    val showNetworkTransport: StateFlow<Boolean>
-
-    fun setShowNetworkTransport(enabled: Boolean)
-
-    /** Whether the USB transport section is visible in the Connections device list. */
-    val showUsbTransport: StateFlow<Boolean>
-
-    fun setShowUsbTransport(enabled: Boolean)
+    fun setSelectedConnectionTransport(type: DeviceType)
 
     fun shouldProvideNodeLocation(nodeNum: Int): StateFlow<Boolean>
 

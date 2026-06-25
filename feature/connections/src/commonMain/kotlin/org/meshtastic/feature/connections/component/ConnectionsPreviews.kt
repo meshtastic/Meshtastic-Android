@@ -18,18 +18,26 @@ package org.meshtastic.feature.connections.component
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import org.meshtastic.core.ble.BleConnectionState
+import org.meshtastic.core.ble.BleDevice
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Search
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.viewmodel.ConnectionStatus
 import org.meshtastic.feature.connections.model.DeviceListEntry
+import org.meshtastic.feature.connections.model.UsbDeviceData
 import org.meshtastic.feature.connections.ui.components.ConnectingDeviceInfo
+import org.meshtastic.feature.connections.ui.components.DeviceList
 import org.meshtastic.feature.connections.ui.components.DeviceListItem
 import org.meshtastic.feature.connections.ui.components.DeviceSectionHeader
 import org.meshtastic.feature.connections.ui.components.DisconnectButton
 import org.meshtastic.feature.connections.ui.components.EmptyStateContent
-import org.meshtastic.feature.connections.ui.components.TransportFilterChips
+import org.meshtastic.feature.connections.ui.components.TransportSelector
 
 @PreviewLightDark
 @Composable
@@ -72,15 +80,123 @@ fun DeviceSectionHeaderPreview() {
 
 @PreviewLightDark
 @Composable
-fun TransportFilterChipsPreview() {
+fun TransportSelectorPreview() {
+    AppTheme { TransportSelector(activeTransport = DeviceType.BLE, onSelectTransport = {}) }
+}
+
+@PreviewLightDark
+@Composable
+private fun BluetoothPanePreview() {
     AppTheme {
-        TransportFilterChips(
-            showBle = true,
-            showNetwork = true,
-            showUsb = false,
-            onToggleBle = {},
-            onToggleNetwork = {},
-            onToggleUsb = {},
+        DeviceList(
+            connectionState = ConnectionState.Disconnected,
+            selectedDevice = "",
+            bleDevices =
+            listOf(DeviceListEntry.Ble(PreviewBleDevice(address = "AA:BB:CC:DD:EE:FF", name = "Meshtastic_abcd"))),
+            usbDevices = emptyList(),
+            discoveredTcpDevices = emptyList(),
+            recentTcpDevices = emptyList(),
+            isBleScanning = false,
+            isNetworkScanning = false,
+            activeTransport = DeviceType.BLE,
+            onSelectDevice = {},
+            onToggleBleScan = {},
+            onToggleNetworkScan = {},
+            onAddManualAddress = { _, _ -> },
+            onRemoveRecentAddress = {},
         )
     }
+}
+
+@PreviewLightDark
+@Composable
+private fun NetworkPanePreview() {
+    AppTheme {
+        DeviceList(
+            connectionState = ConnectionState.Disconnected,
+            selectedDevice = "",
+            bleDevices = emptyList(),
+            usbDevices = emptyList(),
+            discoveredTcpDevices = listOf(DeviceListEntry.Tcp(name = "Meshtastic_tcp", fullAddress = "t192.168.1.25")),
+            recentTcpDevices = listOf(DeviceListEntry.Tcp(name = "192.168.1.99", fullAddress = "t192.168.1.99")),
+            isBleScanning = false,
+            isNetworkScanning = true,
+            activeTransport = DeviceType.TCP,
+            onSelectDevice = {},
+            onToggleBleScan = {},
+            onToggleNetworkScan = {},
+            onAddManualAddress = { _, _ -> },
+            onRemoveRecentAddress = {},
+        )
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun UsbPanePreview() {
+    AppTheme {
+        DeviceList(
+            connectionState = ConnectionState.Disconnected,
+            selectedDevice = "",
+            bleDevices = emptyList(),
+            usbDevices =
+            listOf(
+                DeviceListEntry.Usb(
+                    usbData = object : UsbDeviceData {},
+                    name = "T-Deck",
+                    fullAddress = "s/dev/bus/usb/001/002",
+                    bonded = true,
+                ),
+            ),
+            discoveredTcpDevices = emptyList(),
+            recentTcpDevices = emptyList(),
+            isBleScanning = false,
+            isNetworkScanning = false,
+            activeTransport = DeviceType.USB,
+            onSelectDevice = {},
+            onToggleBleScan = {},
+            onToggleNetworkScan = {},
+            onAddManualAddress = { _, _ -> },
+            onRemoveRecentAddress = {},
+        )
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun UsbPaneEmptyPreview() {
+    AppTheme {
+        DeviceList(
+            connectionState = ConnectionState.Disconnected,
+            selectedDevice = "",
+            bleDevices = emptyList(),
+            usbDevices = emptyList(),
+            discoveredTcpDevices = emptyList(),
+            recentTcpDevices = emptyList(),
+            isBleScanning = false,
+            isNetworkScanning = false,
+            activeTransport = DeviceType.USB,
+            onSelectDevice = {},
+            onToggleBleScan = {},
+            onToggleNetworkScan = {},
+            onAddManualAddress = { _, _ -> },
+            onRemoveRecentAddress = {},
+        )
+    }
+}
+
+private class PreviewBleDevice(
+    override val address: String,
+    override val name: String?,
+    override val rssi: Int? = -60,
+) : BleDevice {
+    private val stateFlow = MutableStateFlow<BleConnectionState>(BleConnectionState.Disconnected())
+
+    override val state: StateFlow<BleConnectionState> = stateFlow.asStateFlow()
+    override val isBonded: Boolean = true
+    override val isConnected: Boolean = false
+
+    override suspend fun readRssi(): Int = rssi ?: -60
+
+    override suspend fun bond() = Unit
 }

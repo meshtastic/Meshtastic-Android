@@ -34,6 +34,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.prefs.cachedFlow
 import org.meshtastic.core.repository.UiPrefs
 
@@ -148,25 +149,16 @@ class UiPrefsImpl(
         scope.launch { dataStore.edit { it[KEY_NETWORK_AUTO_SCAN] = enabled } }
     }
 
-    override val showBleTransport: StateFlow<Boolean> =
-        dataStore.data.map { it[KEY_SHOW_BLE_TRANSPORT] ?: true }.stateIn(scope, SharingStarted.Eagerly, true)
+    override val selectedConnectionTransport: StateFlow<DeviceType?> =
+        dataStore.data
+            .map { preferences ->
+                preferences[KEY_SELECTED_CONNECTION_TRANSPORT]?.let(::parseDeviceType)
+                    ?: legacySelectedConnectionTransport(preferences)
+            }
+            .stateIn(scope, SharingStarted.Eagerly, null)
 
-    override fun setShowBleTransport(enabled: Boolean) {
-        scope.launch { dataStore.edit { it[KEY_SHOW_BLE_TRANSPORT] = enabled } }
-    }
-
-    override val showNetworkTransport: StateFlow<Boolean> =
-        dataStore.data.map { it[KEY_SHOW_NETWORK_TRANSPORT] ?: true }.stateIn(scope, SharingStarted.Eagerly, true)
-
-    override fun setShowNetworkTransport(enabled: Boolean) {
-        scope.launch { dataStore.edit { it[KEY_SHOW_NETWORK_TRANSPORT] = enabled } }
-    }
-
-    override val showUsbTransport: StateFlow<Boolean> =
-        dataStore.data.map { it[KEY_SHOW_USB_TRANSPORT] ?: true }.stateIn(scope, SharingStarted.Eagerly, true)
-
-    override fun setShowUsbTransport(enabled: Boolean) {
-        scope.launch { dataStore.edit { it[KEY_SHOW_USB_TRANSPORT] = enabled } }
+    override fun setSelectedConnectionTransport(type: DeviceType) {
+        scope.launch { dataStore.edit { it[KEY_SELECTED_CONNECTION_TRANSPORT] = type.name } }
     }
 
     override fun shouldProvideNodeLocation(nodeNum: Int): StateFlow<Boolean> =
@@ -289,8 +281,28 @@ class UiPrefsImpl(
         val KEY_EXCLUDE_MQTT = booleanPreferencesKey("exclude-mqtt")
         val KEY_BLE_AUTO_SCAN = booleanPreferencesKey("ble-auto-scan")
         val KEY_NETWORK_AUTO_SCAN = booleanPreferencesKey("network-auto-scan")
+        val KEY_SELECTED_CONNECTION_TRANSPORT = stringPreferencesKey("selected-connection-transport")
         val KEY_SHOW_BLE_TRANSPORT = booleanPreferencesKey("show-ble-transport")
         val KEY_SHOW_NETWORK_TRANSPORT = booleanPreferencesKey("show-network-transport")
         val KEY_SHOW_USB_TRANSPORT = booleanPreferencesKey("show-usb-transport")
+
+        private fun parseDeviceType(name: String): DeviceType? = DeviceType.entries.firstOrNull { it.name == name }
+
+        private fun legacySelectedConnectionTransport(preferences: Preferences): DeviceType? {
+            val legacyKeys = preferences.asMap().keys
+            val hasLegacyTransportPreference =
+                KEY_SHOW_BLE_TRANSPORT in legacyKeys ||
+                    KEY_SHOW_NETWORK_TRANSPORT in legacyKeys ||
+                    KEY_SHOW_USB_TRANSPORT in legacyKeys
+            if (!hasLegacyTransportPreference) return null
+
+            val selected =
+                listOfNotNull(
+                    DeviceType.BLE.takeIf { preferences[KEY_SHOW_BLE_TRANSPORT] ?: true },
+                    DeviceType.TCP.takeIf { preferences[KEY_SHOW_NETWORK_TRANSPORT] ?: true },
+                    DeviceType.USB.takeIf { preferences[KEY_SHOW_USB_TRANSPORT] ?: true },
+                )
+            return selected.singleOrNull()
+        }
     }
 }
