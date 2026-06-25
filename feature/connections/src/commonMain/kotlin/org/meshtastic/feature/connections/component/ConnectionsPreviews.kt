@@ -39,6 +39,8 @@ import org.meshtastic.feature.connections.ui.components.DisconnectButton
 import org.meshtastic.feature.connections.ui.components.EmptyStateContent
 import org.meshtastic.feature.connections.ui.components.TransportSelector
 
+private const val PREVIEW_BLE_RSSI = -60
+
 @PreviewLightDark
 @Composable
 fun DeviceListItemPreview() {
@@ -188,7 +190,7 @@ private fun UsbPaneEmptyPreview() {
 private class PreviewBleDevice(
     override val address: String,
     override val name: String?,
-    override val rssi: Int? = -60,
+    override val rssi: Int? = PREVIEW_BLE_RSSI,
 ) : BleDevice {
     private val stateFlow = MutableStateFlow<BleConnectionState>(BleConnectionState.Disconnected())
 
@@ -196,7 +198,7 @@ private class PreviewBleDevice(
     override val isBonded: Boolean = true
     override val isConnected: Boolean = false
 
-    override suspend fun readRssi(): Int = rssi ?: -60
+    override suspend fun readRssi(): Int = rssi ?: PREVIEW_BLE_RSSI
 
     override suspend fun bond() = Unit
 }

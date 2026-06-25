@@ -149,23 +149,26 @@ fun ConnectionsScreen(
     // ScannerViewModel skips screen-entry discovery when a selected device can reconnect through the transport's
     // fresh-advertisement scan. LifecycleStartEffect stops scanning on ON_STOP (app backgrounded) and restarts on
     // ON_START — preventing continuous background BLE radio usage that drains the battery.
-    // Keyed on Unit so the effect fires only on lifecycle events, not on preference writes. The toggle handler
-    // starts/stops scans directly; this effect handles screen-entry auto-start only. Keying on the pref caused
-    // Compose to dispose the running scan (calling stopBleScan) and immediately re-run (calling startBleScan)
-    // every time the pref was written, which cycled scans until Android's BluetoothLeScanner rate-limited.
-    LifecycleStartEffect(Unit) {
+    // Keyed on the active pane so a persisted TCP/USB pane loaded after first composition disposes this effect and
+    // stops an initially eligible BLE scan. The toggle handler starts/stops scans directly; this effect handles
+    // screen-entry auto-start and lifecycle restarts without keying on the mutable scan preference itself.
+    LifecycleStartEffect(activeTransport) {
         if (activeTransport == DeviceType.BLE && scanModel.bleAutoScan.value && !scanModel.isBleScanning.value) {
             scanModel.startBleAutoScan()
         }
         onStopOrDispose { scanModel.stopBleScan() }
     }
 
-    // Keyed on permission status (not on the pref) so the effect re-fires when the user grants local-network
-    // permission, but not when the pref is toggled. This prevents the dispose+restart cycle that caused
-    // Android's BluetoothLeScanner rate-limit rejection, while still supporting the request-permission →
-    // grant → auto-start flow. The body reads the pref directly via the StateFlow's current value.
-    LifecycleStartEffect(localNetworkPermission.isGranted) {
-        if (activeTransport == DeviceType.TCP && scanModel.networkAutoScan.value && localNetworkPermission.isGranted) {
+    // Keyed on active pane and permission status (not on the pref) so the effect re-fires when the user grants
+    // local-network permission or the persisted Network pane loads. This prevents dispose+restart cycles on pref
+    // writes while still supporting the request-permission -> grant -> auto-start flow.
+    LifecycleStartEffect(activeTransport, localNetworkPermission.isGranted) {
+        if (
+            activeTransport == DeviceType.TCP &&
+            scanModel.networkAutoScan.value &&
+            localNetworkPermission.isGranted &&
+            !scanModel.isNetworkScanning.value
+        ) {
             scanModel.startNetworkAutoScan()
         }
         onStopOrDispose { scanModel.stopNetworkScan() }

@@ -17,7 +17,8 @@
 package org.meshtastic.feature.connections.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -40,15 +41,17 @@ import org.meshtastic.core.ui.icon.Usb
 import org.meshtastic.core.ui.icon.Wifi
 
 /** Single-choice transport selector rendered below the connection card. */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun TransportSelector(
     activeTransport: DeviceType,
     onSelectTransport: (DeviceType) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Row(
+    FlowRow(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         TransportChip(
             selected = activeTransport == DeviceType.BLE,
