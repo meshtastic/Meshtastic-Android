@@ -699,8 +699,6 @@
     <string name="no_network_devices_seen">Мережеві пристрої не знайдені</string>
     <string name="no_pax_metrics_logs">Немає доступних показників PAX.</string>
     <string name="no_usb_devices_found">Не знайдений USB пристрій</string>
-    <string name="no_usb_devices_hint">Підключіть пристрій через послідовний порт або USB.</string>
-    <string name="no_usb_devices_seen">USB-пристроїв не виявлено</string>
     <!-- NODE -->
     <string name="node_count_template">(%1$d онлайн / %2$d показані / %3$d загалом)</string>
     <string name="node_filter_exclude_infrastructure">Виключити інфраструктуру</string>

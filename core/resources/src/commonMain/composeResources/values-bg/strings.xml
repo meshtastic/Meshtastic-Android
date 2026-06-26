@@ -676,8 +676,6 @@
     <string name="no_network_devices_seen">Не се виждат мрежови устройства</string>
     <string name="no_pax_metrics_logs">Няма налични показатели PAX</string>
     <string name="no_usb_devices_found">Няма намерени USB устройства</string>
-    <string name="no_usb_devices_hint">Свързване на устройството чрез сериен или USB порт.</string>
-    <string name="no_usb_devices_seen">Не се виждат USB устройства</string>
     <!-- NODE -->
     <string name="node_count_template">(%1$d онлайн / %2$d показани / %3$d общо)</string>
     <string name="node_filter_exclude_infrastructure">Изключване на инфраструктурата</string>
