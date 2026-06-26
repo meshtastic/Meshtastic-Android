@@ -28,9 +28,10 @@ import kotlinx.coroutines.flow.asStateFlow
  * When created from a live BLE scan, [advertisement] is populated and used for optimal peripheral construction via
  * `Peripheral(advertisement)` with a direct (non-autoConnect) connection attempt.
  *
- * Bonded-only devices (address only, [advertisement] null) can still be constructed — e.g. for display in the device
- * list — but [BleRadioTransport.findDevice] requires a fresh advertisement before connecting and will throw
- * [RadioNotConnectedException] rather than returning a stale handle.
+ * Bonded-only devices (address only, [advertisement] null) can still be constructed for display in the device list and
+ * as a bounded fallback when fresh scans miss. In that fallback, Kable creates an address-only peripheral so Android can
+ * wait for the device to advertise through its `autoConnect` path while the transport keeps the connection attempt
+ * bounded.
  *
  * @param address The device's MAC address (or platform identifier string).
  * @param name The device's display name, if known.
