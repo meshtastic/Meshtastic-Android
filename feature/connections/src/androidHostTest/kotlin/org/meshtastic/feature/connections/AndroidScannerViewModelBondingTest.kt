@@ -18,14 +18,19 @@ package org.meshtastic.feature.connections
 
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.jetbrains.compose.resources.getString
 import org.junit.runner.RunWith
 import org.meshtastic.core.network.repository.UsbRepository
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.bonding_failed_retry
 import org.meshtastic.core.testing.FakeBleDevice
+import org.meshtastic.core.testing.failBondAfterRecording
 import org.meshtastic.core.testing.failBondWith
 import org.meshtastic.core.testing.failBondWithSecurityException
 import org.meshtastic.feature.connections.model.DeviceListEntry
@@ -41,10 +46,9 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
- * Coverage for the #5849 fix in [AndroidScannerViewModel.requestBonding]: the transport is armed
- * (`changeDeviceAddress`) on every bonding outcome EXCEPT a permissions [SecurityException], so an interrupted bond no
- * longer strands the device. Driven through the public [ScannerViewModel.onSelected] entry point (which routes an
- * unbonded BLE entry to `requestBonding`).
+ * Coverage for [AndroidScannerViewModel.requestBonding]: only a successful bond arms the transport. Bond failures
+ * surface a warning and wait for an explicit retry so the Android pairing flow does not immediately re-enter through
+ * transport-side bonding.
  *
  * Robolectric is used only because the class under test lives in `androidMain`; the bonding outcomes themselves are
  * injected via [org.meshtastic.core.testing.FakeBluetoothRepository], keeping each assertion deterministic. The real
@@ -58,11 +62,12 @@ class AndroidScannerViewModelBondingTest {
     private val mac = "AA:BB:CC:DD:EE:FF"
     private val expectedFullAddress = "x$mac"
 
-    private val harness = ScannerViewModelHarness()
+    private lateinit var harness: ScannerViewModelHarness
     private lateinit var viewModel: AndroidScannerViewModel
 
     @BeforeTest
     fun setUp() {
+        harness = ScannerViewModelHarness()
         Dispatchers.setMain(harness.testDispatcher)
         viewModel =
             AndroidScannerViewModel(
@@ -119,10 +124,22 @@ class AndroidScannerViewModelBondingTest {
     }
 
     @Test
-    fun `generic bond failure still arms the transport`() = runTest(harness.testDispatcher) {
-        // The interrupted-bonding case the fix targets: bond() throws a non-permission error, but we must still
-        // arm the transport so its reconnect loop can converge instead of leaving the device inert.
+    fun `generic bond failure does not arm the transport and surfaces an error`() = runTest(harness.testDispatcher) {
+        // A failed pairing attempt should wait for another user action instead of immediately arming the transport,
+        // which would call transport-side bond() and risk a duplicate PIN dialog or Android createBond() throttle.
         harness.bluetoothRepository.failBondWith(Exception("Failed to initiate bonding"))
+
+        viewModel.onSelected(ScannerViewModelHarness.unbondedBleEntry(mac))
+        testScheduler.advanceUntilIdle()
+
+        assertEquals(1, harness.bluetoothRepository.bondCalls.size)
+        assertNull(harness.radioController.lastSetDeviceAddress)
+        assertEquals(getString(Res.string.bonding_failed_retry), harness.serviceRepository.errorMessage.value)
+    }
+
+    @Test
+    fun `bond failure after Android records bond still arms the transport`() = runTest(harness.testDispatcher) {
+        harness.bluetoothRepository.failBondAfterRecording(Exception("Timed out waiting for bonding to complete"))
 
         viewModel.onSelected(ScannerViewModelHarness.unbondedBleEntry(mac))
         testScheduler.advanceUntilIdle()
@@ -143,6 +160,23 @@ class AndroidScannerViewModelBondingTest {
         assertEquals(1, harness.bluetoothRepository.bondCalls.size)
         assertNull(harness.radioController.lastSetDeviceAddress)
         assertNotNull(harness.serviceRepository.errorMessage.value)
+    }
+
+    @Test
+    fun `CancellationException from bond propagates without arming transport`() = runTest(harness.testDispatcher) {
+        // CE must propagate — not be swallowed into an error message or transport arming.
+        // Discriminator: if the CE catch were removed, CE would fall through to catch(Exception),
+        // set an error message, and return false — errorMessage would be non-null, failing this test.
+        harness.bluetoothRepository.failBondWith(CancellationException("cancelled"))
+
+        viewModel.onSelected(ScannerViewModelHarness.unbondedBleEntry(mac))
+        testScheduler.advanceUntilIdle()
+
+        assertNull(harness.radioController.lastSetDeviceAddress, "transport must not be armed")
+        assertNull(
+            harness.serviceRepository.errorMessage.value,
+            "CE must propagate, not be caught as generic failure",
+        )
     }
 
     @Test

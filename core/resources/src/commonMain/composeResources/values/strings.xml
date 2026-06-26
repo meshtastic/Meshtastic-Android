@@ -137,6 +137,7 @@
     <string name="bluetooth_permission">Bluetooth</string>
     <string name="bold_heading">Bold Heading</string>
     <string name="bonding_failed_permissions">Pairing failed. Grant nearby device permissions and try again.</string>
+    <string name="bonding_failed_retry">Pairing did not complete. Try pairing again.</string>
     <string name="bottom_nav_settings">Settings</string>
     <string name="broadcast_interval">Broadcast Interval</string>
     <string name="busy_noise_floor">Busy floor</string>
