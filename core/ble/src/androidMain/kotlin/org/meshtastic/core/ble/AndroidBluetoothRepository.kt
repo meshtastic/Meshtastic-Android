@@ -27,15 +27,19 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
-import kotlin.coroutines.resume
+import kotlin.time.Duration.Companion.seconds
+
+private val BOND_TIMEOUT = 30.seconds
 
 /** Android implementation of [BluetoothRepository]. */
 @Single
@@ -87,89 +91,116 @@ class AndroidBluetoothRepository(
             return
         }
 
-        suspendCancellableCoroutine<Unit> { cont ->
-            val receiver =
-                object : android.content.BroadcastReceiver() {
-                    @SuppressLint("MissingPermission")
-                    override fun onReceive(c: Context, intent: android.content.Intent) {
-                        if (intent.action == android.bluetooth.BluetoothDevice.ACTION_BOND_STATE_CHANGED) {
-                            val d =
-                                androidx.core.content.IntentCompat.getParcelableExtra(
-                                    intent,
-                                    android.bluetooth.BluetoothDevice.EXTRA_DEVICE,
-                                    android.bluetooth.BluetoothDevice::class.java,
-                                )
-                            if (d?.address?.equals(macAddress, ignoreCase = true) == true) {
-                                val state =
-                                    intent.getIntExtra(
-                                        android.bluetooth.BluetoothDevice.EXTRA_BOND_STATE,
-                                        android.bluetooth.BluetoothDevice.ERROR,
-                                    )
-                                val prevState =
-                                    intent.getIntExtra(
-                                        android.bluetooth.BluetoothDevice.EXTRA_PREVIOUS_BOND_STATE,
-                                        android.bluetooth.BluetoothDevice.ERROR,
-                                    )
-
-                                if (state == android.bluetooth.BluetoothDevice.BOND_BONDED) {
-                                    try {
-                                        context.unregisterReceiver(this)
-                                    } catch (ignored: Exception) {}
-                                    if (cont.isActive) cont.resume(Unit)
-                                } else if (
-                                    state == android.bluetooth.BluetoothDevice.BOND_NONE &&
-                                    prevState == android.bluetooth.BluetoothDevice.BOND_BONDING
-                                ) {
-                                    try {
-                                        context.unregisterReceiver(this)
-                                    } catch (ignored: Exception) {}
-                                    if (cont.isActive) {
-                                        cont.resumeWith(Result.failure(Exception("Bonding failed or rejected")))
+        try {
+            val bonded =
+                withTimeoutOrNull(BOND_TIMEOUT) {
+                    suspendCancellableCoroutine<Unit> { cont ->
+                        val receiver =
+                            object : android.content.BroadcastReceiver() {
+                                @SuppressLint("MissingPermission")
+                                override fun onReceive(c: Context, intent: android.content.Intent) {
+                                    if (intent.action != android.bluetooth.BluetoothDevice.ACTION_BOND_STATE_CHANGED) {
+                                        return
                                     }
+                                    val d =
+                                        androidx.core.content.IntentCompat.getParcelableExtra(
+                                            intent,
+                                            android.bluetooth.BluetoothDevice.EXTRA_DEVICE,
+                                            android.bluetooth.BluetoothDevice::class.java,
+                                        )
+                                    if (d?.address?.equals(macAddress, ignoreCase = true) != true) return
+
+                                    val state =
+                                        intent.getIntExtra(
+                                            android.bluetooth.BluetoothDevice.EXTRA_BOND_STATE,
+                                            android.bluetooth.BluetoothDevice.ERROR,
+                                        )
+                                    val prevState =
+                                        intent.getIntExtra(
+                                            android.bluetooth.BluetoothDevice.EXTRA_PREVIOUS_BOND_STATE,
+                                            android.bluetooth.BluetoothDevice.ERROR,
+                                        )
+
+                                    if (state == android.bluetooth.BluetoothDevice.BOND_BONDED) {
+                                        completeBond(receiver = this, result = Result.success(Unit), cont = cont)
+                                    } else if (
+                                        state == android.bluetooth.BluetoothDevice.BOND_NONE &&
+                                        prevState == android.bluetooth.BluetoothDevice.BOND_BONDING
+                                    ) {
+                                        completeBond(
+                                            receiver = this,
+                                            result = Result.failure(Exception("Bonding failed or rejected")),
+                                            cont = cont,
+                                        )
+                                    }
+                                }
+                            }
+
+                        val filter =
+                            android.content.IntentFilter(android.bluetooth.BluetoothDevice.ACTION_BOND_STATE_CHANGED)
+                        ContextCompat.registerReceiver(context, receiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
+
+                        cont.invokeOnCancellation { unregisterBondReceiver(receiver) }
+
+                        if (remoteDevice.bondState == android.bluetooth.BluetoothDevice.BOND_BONDED) {
+                            completeBond(receiver = receiver, result = Result.success(Unit), cont = cont)
+                            return@suspendCancellableCoroutine
+                        }
+
+                        if (!remoteDevice.createBond()) {
+                            // createBond() returns false when a bond is already in flight (initiated by the OS or
+                            // triggered by a GATT operation hitting a secured characteristic) or already established.
+                            // The ACTION_BOND_STATE_CHANGED broadcast is unreliable on some devices (see Kable #111),
+                            // so re-check bondState directly rather than failing the whole flow.
+                            when (remoteDevice.bondState) {
+                                android.bluetooth.BluetoothDevice.BOND_BONDED -> {
+                                    completeBond(receiver = receiver, result = Result.success(Unit), cont = cont)
+                                }
+
+                                android.bluetooth.BluetoothDevice.BOND_BONDING -> {
+                                    // Bond already in progress; leave the receiver registered to resolve it on the
+                                    // terminal BOND_BONDED / BOND_NONE transition instead of treating this as a
+                                    // failure.
+                                    Logger.d { "createBond() returned false but bonding is already in progress" }
+                                }
+
+                                else -> {
+                                    completeBond(
+                                        receiver = receiver,
+                                        result = Result.failure(Exception("Failed to initiate bonding")),
+                                        cont = cont,
+                                    )
                                 }
                             }
                         }
                     }
-                }
+                    true
+                } ?: (remoteDevice.bondState == android.bluetooth.BluetoothDevice.BOND_BONDED)
 
-            val filter = android.content.IntentFilter(android.bluetooth.BluetoothDevice.ACTION_BOND_STATE_CHANGED)
-            ContextCompat.registerReceiver(context, receiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
-
-            cont.invokeOnCancellation {
-                try {
-                    context.unregisterReceiver(receiver)
-                } catch (ignored: Exception) {}
+            if (!bonded) {
+                throw Exception("Timed out waiting for bonding to complete")
             }
-
-            if (!remoteDevice.createBond()) {
-                // createBond() returns false when a bond is already in flight (initiated by the OS or
-                // triggered by a GATT operation hitting a secured characteristic) or already established.
-                // The ACTION_BOND_STATE_CHANGED broadcast is unreliable on some devices (see Kable #111),
-                // so re-check bondState directly rather than failing the whole flow.
-                when (remoteDevice.bondState) {
-                    android.bluetooth.BluetoothDevice.BOND_BONDED -> {
-                        try {
-                            context.unregisterReceiver(receiver)
-                        } catch (ignored: Exception) {}
-                        if (cont.isActive) cont.resume(Unit)
-                    }
-
-                    android.bluetooth.BluetoothDevice.BOND_BONDING -> {
-                        // Bond already in progress; leave the receiver registered to resolve it on the
-                        // terminal BOND_BONDED / BOND_NONE transition instead of treating this as a failure.
-                        Logger.d { "createBond() returned false but bonding is already in progress" }
-                    }
-
-                    else -> {
-                        try {
-                            context.unregisterReceiver(receiver)
-                        } catch (ignored: Exception) {}
-                        if (cont.isActive) cont.resumeWith(Result.failure(Exception("Failed to initiate bonding")))
-                    }
-                }
-            }
+        } finally {
+            updateBluetoothState()
         }
-        updateBluetoothState()
+    }
+
+    private fun completeBond(
+        receiver: android.content.BroadcastReceiver,
+        result: Result<Unit>,
+        cont: CancellableContinuation<Unit>,
+    ) {
+        unregisterBondReceiver(receiver)
+        if (cont.isActive) {
+            cont.resumeWith(result)
+        }
+    }
+
+    @Suppress("TooGenericExceptionCaught", "SwallowedException")
+    private fun unregisterBondReceiver(receiver: android.content.BroadcastReceiver) {
+        try {
+            context.unregisterReceiver(receiver)
+        } catch (ignored: Exception) {}
     }
 
     internal suspend fun updateBluetoothState() {
