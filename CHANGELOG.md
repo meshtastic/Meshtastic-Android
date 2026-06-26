@@ -7,7 +7,8 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 <!-- UNRELEASED_START -->
 ## [Unreleased]
 
-### Unreleased (not yet in any build)
+### Internal (v2.8.0-internal.7)
+Changes since [`v2.8.0-closed.1`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.0-closed.1):
 
 * chore: Scheduled updates (Firmware, Hardware, Translations, Graphs, Baseline) (#5948) by James Rich (@jamesarich) in [`40627fb02`](https://github.com/meshtastic/Meshtastic-Android/commit/40627fb02addd504df3e3b6713d05673d9ca9af3)
 * refactor: drop two over-engineered seams (enum + stdlib Base64) (#5945) by James Rich (@jamesarich) in [`ab07347e5`](https://github.com/meshtastic/Meshtastic-Android/commit/ab07347e5af5fe680a7d1a32b3551ca6eb12255c)
@@ -26,6 +27,7 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 * chore: Scheduled updates (Firmware, Hardware, Translations, Graphs, Baseline) (#5958) by James Rich (@jamesarich) in [`b86b44e62`](https://github.com/meshtastic/Meshtastic-Android/commit/b86b44e6294e45fffa52f8747af1399c6fbacf9a)
 * docs: veracity pass, screenshot enrichment & screenshot-pipeline split (#5961) by James Rich (@jamesarich) in [`d8e0c1dd5`](https://github.com/meshtastic/Meshtastic-Android/commit/d8e0c1dd5036188269cdbb75b73995273a740d2c)
 * fix(docs): preserve #anchor when rewriting sibling links for Docusaurus (#5963) by James Rich (@jamesarich) in [`a511fcf5e`](https://github.com/meshtastic/Meshtastic-Android/commit/a511fcf5ecbdb1efad0e0c374783530c4c9b34ca)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs, Baseline) (#5964) by James Rich (@jamesarich) in [`b80862d36`](https://github.com/meshtastic/Meshtastic-Android/commit/b80862d36e45b94ad189257813fa46f699ae0c83)
 
 ### Closed Beta (v2.8.0-closed.1)
 Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14):
