@@ -21,6 +21,11 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 * refactor(ble): Make Kable connect fallback explicitly bounded (#5944) by Jeremiah K (@jeremiah-k) in [`725133ec4`](https://github.com/meshtastic/Meshtastic-Android/commit/725133ec4aa8554ee84cd205e741404c9af996d7)
 * refactor(connections): Show one active transport pane (#5956) by Jeremiah K (@jeremiah-k) in [`33a4ca673`](https://github.com/meshtastic/Meshtastic-Android/commit/33a4ca6731fee1bd94a39ad729a251239751080b)
 * ci: fix Android docs sync (remove stray workflow, prune stale pages) (#5955) by James Rich (@jamesarich) in [`89f41dea5`](https://github.com/meshtastic/Meshtastic-Android/commit/89f41dea53f2cb954bc9ca07fe9983e98ed5fb7b)
+* chore(deps): update kotlin-toolchain to v3.4.2 (#5959) by renovate[bot] (@renovate[bot]) in [`f60525ab2`](https://github.com/meshtastic/Meshtastic-Android/commit/f60525ab22fda815e685c6945c7b5bc5c32b7657)
+* fix(ble): Restore bounded bonded reconnect fallback (#5960) by Jeremiah K (@jeremiah-k) in [`780bec03f`](https://github.com/meshtastic/Meshtastic-Android/commit/780bec03f91823524df96f3d0a08ea60ba4dcdf9)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs, Baseline) (#5958) by James Rich (@jamesarich) in [`b86b44e62`](https://github.com/meshtastic/Meshtastic-Android/commit/b86b44e6294e45fffa52f8747af1399c6fbacf9a)
+* docs: veracity pass, screenshot enrichment & screenshot-pipeline split (#5961) by James Rich (@jamesarich) in [`d8e0c1dd5`](https://github.com/meshtastic/Meshtastic-Android/commit/d8e0c1dd5036188269cdbb75b73995273a740d2c)
+* fix(docs): preserve #anchor when rewriting sibling links for Docusaurus (#5963) by James Rich (@jamesarich) in [`a511fcf5e`](https://github.com/meshtastic/Meshtastic-Android/commit/a511fcf5ecbdb1efad0e0c374783530c4c9b34ca)
 
 ### Closed Beta (v2.8.0-closed.1)
 Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14):
