@@ -2,7 +2,8 @@
 title: Käännä sovellus
 parent: Käyttöopas
 nav_order: 17
-last_updated: 2026-05-13
+last_updated: 2026-06-25
+description: How the app and its documentation are translated via Crowdin, and guidelines for contributing translations.
 aliases:
   - käännä
   - crowdin
@@ -23,7 +24,7 @@ Käännöksiin osallistuminen auttaa tekemään Meshtasticista saavutettavamman 
 | Käyttöoppaan sivut  | `docs/user/*.md`                      | Sovelluksen sisäinen dokumentaatio Ohjeet ja dokumentaatio -osiossa |
 | Fastlane-metatiedot | fastlane/metadata/android/en-US/      | Sovelluskaupan listauksen otsikko, kuvaus ja muutoslokit            |
 
-> Huomio – Kehittajäoppaan -sivut ovat vain englanniksi. Koodikeskeistä dokumentaatiota ei käännetä.
+> ⚠️ **Note:** Developer Guide pages are English-only. Code-focused documentation targeting contributors is not translated.
 
 ---
 
@@ -35,7 +36,7 @@ Käännöksiin osallistuminen auttaa tekemään Meshtasticista saavutettavamman 
 4. **Tarkista konteksti.** Monet merkkijonot sisältävät kuvakaappauksia tai kontekstikommentteja — tarkista nämä ymmärtääksesi, missä teksti näkyy sovelluksessa.
 5. **Lähetä.** Hyväksytyt käännökset yhdistetään automaattisesti seuraavaan julkaisuun.
 
-> **Vinkki — Pidä käännökset lyhyinä.** UI-tekstit näkyvät usein painikkeissa, tageissa tai kapeissa sarakkeissa. Jos käännös on huomattavasti pidempi kuin englanninkielinen alkuperäinen, harkitse tiivistämistä niin, että merkitys säilyy selkeänä.
+> 💡 **Tip:** Keep translations short. UI strings often appear in buttons, chips, or narrow columns. Jos käännös on huomattavasti pidempi kuin englanninkielinen alkuperäinen, harkitse tiivistämistä niin, että merkitys säilyy selkeänä.
 
 ---
 
@@ -68,14 +69,18 @@ Sovelluksen sisäinen dokumentaatio noudattaa samaa rakennetta `docs/` -hakemist
 
 ```
 docs/
-├── user/                ← English source (default)
+├── en/user/             ← English source (default)
 │   ├── onboarding.md
 │   └── ...
-├── fr/user/             ← French translations
+├── fr-rFR/user/         ← French (France)
 │   ├── onboarding.md
+│   └── ...
+├── de-rDE/user/         ← German (Germany)
 │   └── ...
 └── ...
 ```
+
+Locale folders use the Android resource convention `{lang}-r{REGION}` (e.g. `fr-rFR`, `de-rDE`, `ja-rJP`), matching the `values-*` directories used for app strings.
 
 Sovellus valitsee automaattisesti oikean kielialueen laitteen **Kieli & alue** -asetusten perusteella.
 

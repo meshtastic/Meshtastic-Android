@@ -55,6 +55,8 @@ aliases:
 
 ### Предустановки модема
 
+> 💡 **Tip:** The **SNR Limit** values are negative on purpose. LoRa can decode signals _below_ the noise floor, so a more-negative limit means the preset tolerates a weaker, noisier signal (more range). See [How the Signal Meter Works](signal-meter) for the full explanation.
+
 | Предустановка      | Диапазон                | Скорость                  | Предел SNR               | Лучше всего для                                                                                                   |
 | ------------------ | ----------------------- | ------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------- |
 | Short Turbo        | ~1 км   | 21.9 кб/с | −5 дБ                    | Плотная городская застройка с прямой видимостью; приложения, требующие высокой передачи данных                    |

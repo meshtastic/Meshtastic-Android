@@ -2,7 +2,7 @@
 title: Ноды
 parent: Руководство пользователя
 nav_order: 4
-last_updated: 2026-06-02
+last_updated: 2026-06-25
 description: Просматривайте, фильтруйте и сортируйте ноды сети — просматривайте подробности, качество сигнала, роли и быстрые действия.
 aliases:
   - node-list
@@ -27,12 +27,13 @@ The node list shows every node your radio has heard, including:
 
 ### Node Status Indicators
 
-| Badge       | Meaning                               |
-| ----------- | ------------------------------------- |
-| 🟢 Онлайн   | Node heard within the last 15 minutes |
-| 🟡 Отошёл   | Node heard within the last 2 hours    |
-| 🔴 Отключен | Node not heard for over 2 hours       |
-| ⭐ Избранный | Node marked as favorite by the user   |
+| Badge       | Meaning                             |
+| ----------- | ----------------------------------- |
+| 🟢 Онлайн   | Node heard within the last 2 hours  |
+| ⚪ Offline   | Node not heard for over 2 hours     |
+| ⭐ Избранный | Node marked as favorite by the user |
+
+A node is considered **online** if it was heard within the last 2 hours, and **offline** otherwise — there is no separate "away" tier.
 
 ### Node Roles
 
@@ -103,7 +104,7 @@ Type in the search field to filter nodes by name or short name. The filter updat
 
 | Фильтр                     | Описание                                                                                       |
 | -------------------------- | ---------------------------------------------------------------------------------------------- |
-| **Only online**            | Show only nodes heard within the last 15 minutes                                               |
+| **Only online**            | Show only nodes heard within the last 2 hours                                                  |
 | **Only direct**            | Show only nodes with direct (non-relayed) connections                       |
 | **Include unknown**        | Show nodes that haven't sent user info yet                                                     |
 | **Exclude infrastructure** | Hide infrastructure-role nodes (Router, Repeater, Router Late, Client Base) |

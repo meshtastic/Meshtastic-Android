@@ -3,6 +3,7 @@ title: Yksiköt, mittaus ja kieli- ja alueasetukset
 parent: Käyttöopas
 nav_order: 16
 last_updated: 2026-05-12
+description: How the app formats temperature, distance, speed, and other measurements based on your device locale.
 ---
 
 # Yksiköt, mittaus ja kieli- ja alueasetukset
@@ -17,7 +18,7 @@ Meshtastic-radiot lähettävät aina datan **metrisissä yksiköissä** (metrit,
 
 Androidissa mittausasetukset määräytyvät järjestelmän **Kieli ja alue** -asetusten mukaan. Työpöytäversiossa (JVM) sovellus käyttää JVM:n oletus-`Locale`-asetusta.
 
-> **Vinkki — Mittayksiköitä ei tarvitse koskaan vaihtaa sovelluksessa.** Muuta järjestelmän mittausasetuksia ja Meshtastic päivittää kaikki automaattisesti — radion tiedot, telemetriakaaviot, sää, korkeus ja paljon muuta.
+> 💡 **Tip:** You never need to toggle units inside the app. Change your system measurement preferences and every screen in Meshtastic updates automatically — node details, telemetry charts, weather, altitude, and more.
 
 ---
 
@@ -114,5 +115,13 @@ Androidissa mittausjärjestelmäsi (metrinen vs imperial) on sidottu alueasetuks
 2. Vaihda **Alue**- tai **Mittausyksiköt**-asetusta
 3. Palaa Meshtasticiin — arvot päivittyvät välittömästi
 
-> 💡 Vinkki — Sovellus käyttää `MetricFormatter`-toimintoa `core:common`-moduulista. Kaikki mittausmuotoilu hoidetaan jaetulla KMP-työkalulla, joka noudattaa alustasi kieli- ja alueasetuksia. Uusia mittausnäkymiä lisäävien kehittäjien tulisi käyttää `MetricFormatter`-toimintoa sen sijaan, että yksikkömuunnokset toteutetaan kovakoodattuna.
+> 💡 **Tip:** The app uses `MetricFormatter` from `core:common`. All measurement formatting is handled by a shared KMP utility that respects your platform's locale. Uusia mittausnäkymiä lisäävien kehittäjien tulisi käyttää `MetricFormatter`-toimintoa sen sijaan, että yksikkömuunnokset toteutetaan kovakoodattuna.
+
+## Aiheeseen liittyvät aiheet
+
+- [Node Metrics](node-metrics) — where temperature, distance, and sensor values are displayed
+- [Telemetry & Sensors](telemetry-and-sensors) — the sensors that produce these measurements
+- [Settings — Radio & User](settings-radio-user) — region setting that drives unit selection
+
+---
 

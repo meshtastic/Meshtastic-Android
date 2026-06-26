@@ -103,12 +103,7 @@ Nodes with particulate matter or CO₂ sensors report air quality data:
 | PM10                  | µg/m³ | Coarse particulate matter    |
 | CO₂                   | ppm   | Carbon dioxide concentration |
 
-The CO₂ reading is color-coded by severity:
-
-- 🟢 **Hea** (< 1000 ppm) — normaalne sisetase
-- 🟡 **Mõõdukas** (1000–2000 ppm) – kõrgenenud, kaalu ventilatsiooni
-- 🟠 **Kehv** (2000–5000 ppm) — unisus, halb keskendumisvõime
-- 🔴 **Ohtlik** (≥ 5000 ppm) — otsene terviseprobleem
+The CO₂ reading is color-coded by severity (Good → Stuffy → Poor → Unsafe → Evacuate). See [Node Metrics — Air Quality](node-metrics#air-quality-metrics) for the exact ppm bands and colors.
 
 Õhukvaliteedi andmeid saab vaadata infokaartidena sõlme detailvaates, aja jooksul graafikule lisada ja CSV-vormingusse salvestada.
 

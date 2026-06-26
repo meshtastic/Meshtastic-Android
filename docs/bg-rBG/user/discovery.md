@@ -33,9 +33,9 @@ Open it from **Settings → Local Mesh Discovery**.
 
 ### Setting Up a Scan
 
-Before starting, configure these controls:
+Преди да започнете, конфигурирайте тези контроли:
 
-| Control                | Описание                                                                                                                                                                                                                       |
+| Контрол                | Описание                                                                                                                                                                                                                       |
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **LoRa preset picker** | Select one or more presets to scan. Discovery dwells on each selected preset in turn.                                                                                                          |
 | **Dwell time**         | Time to listen on each preset. Choose from 1, 5, 15, 30, 45, 60, 90, 120, or 180 minutes. Longer dwell times collect more packets and give a clearer picture, but take longer. |

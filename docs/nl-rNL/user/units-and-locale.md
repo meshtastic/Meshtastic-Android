@@ -3,6 +3,7 @@ title: Units, Measurement & Locale
 parent: User Guide
 nav_order: 16
 last_updated: 2026-05-12
+description: How the app formats temperature, distance, speed, and other measurements based on your device locale.
 ---
 
 # Units, Measurement & Locale
@@ -17,7 +18,7 @@ Meshtastic radios always transmit data in **metric units** (meters, °C, km/h, h
 
 On Android, your measurement preferences are determined by your system **Language & Region** settings. On Desktop (JVM), the app uses the JVM's default `Locale`.
 
-> **Tip — You never need to toggle units inside the app.** Change your system measurement preferences and every screen in Meshtastic updates automatically — node details, telemetry charts, weather, altitude, and more.
+> 💡 **Tip:** You never need to toggle units inside the app. Change your system measurement preferences and every screen in Meshtastic updates automatically — node details, telemetry charts, weather, altitude, and more.
 
 ---
 
@@ -114,5 +115,13 @@ On Android, your measurement system (metric vs imperial) is tied to your region 
 2. Change your **Region** or **Measurement units** preference
 3. Return to Meshtastic — values update immediately
 
-> **Tip — The app uses `MetricFormatter` from `core:common`.** All measurement formatting is handled by a shared KMP utility that respects your platform's locale. Developers adding new measurement displays should use `MetricFormatter` rather than hard-coding unit conversions.
+> 💡 **Tip:** The app uses `MetricFormatter` from `core:common`. All measurement formatting is handled by a shared KMP utility that respects your platform's locale. Developers adding new measurement displays should use `MetricFormatter` rather than hard-coding unit conversions.
+
+## Related Topics
+
+- [Node Metrics](node-metrics) — where temperature, distance, and sensor values are displayed
+- [Telemetry & Sensors](telemetry-and-sensors) — the sensors that produce these measurements
+- [Settings — Radio & User](settings-radio-user) — region setting that drives unit selection
+
+---
 

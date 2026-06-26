@@ -49,6 +49,15 @@ TAK-moduuli mahdollistaa Meshtastic-radioille:
 2. Avaa ATAK ja ota Meshtastic-lisäosa käyttöön.
 3. Lisäosa välittää viestejä ATAK:n ja mesh-verkkosi välillä.
 
+### Local TAK Server
+
+The app can also run a **local TAK server** so ATAK/iTAK clients on the same device or network can connect directly, without a remote TAK server. Open **Settings → Module Config → TAK → TAK Server**:
+
+![Local TAK Server settings with enable toggle and export option](../../assets/screenshots/tak_server_enabled.png)
+
+- **Enable Local TAK Server** — starts a local TLS server on port **8089** for ATAK/iTAK connections.
+- **Export TAK Data Package** — generates a `.zip` data package that ATAK/iTAK can import to connect to this server.
+
 ## TAK-roolit
 
 TAK-rooleilla määritetyt radiot käyttäytyvät eri tavalla kuin tavalliset client-laitteet:

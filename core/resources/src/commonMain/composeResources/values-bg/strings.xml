@@ -273,6 +273,7 @@
     <string name="disconnected">Прекъсната връзка</string>
     <string name="discovered_network_devices">Открити мрежови устройства</string>
     <!-- DISCOVERY -->
+    <string name="discovery_dwell_minutes">%1$d мин</string>
     <string name="discovery_start_scan_reason_24ghz_unsupported">радио хардуерът не поддържа 2.4 GHz</string>
     <string name="discovery_start_scan_reason_default_key">каналът използва ключ за криптиране по подразбиране</string>
     <string name="discovery_stat_analysis">Анализ</string>
@@ -280,7 +281,12 @@
     <string name="discovery_stat_channel_utilization">Използване на канала</string>
     <string name="discovery_stat_date">Дата</string>
     <string name="discovery_stat_direct">Директно</string>
+    <string name="discovery_stat_duplicate_packets">Дублирани пакети</string>
+    <string name="discovery_stat_mesh">Mesh</string>
     <string name="discovery_stat_messages">Съобщения</string>
+    <string name="discovery_stat_online_total_nodes">Онлайн / Общо възли</string>
+    <string name="discovery_stat_packets_rx">Пакети RX</string>
+    <string name="discovery_stat_packets_tx">Пакети TX</string>
     <string name="discovery_stat_selected">Избрани</string>
     <string name="discovery_stat_status">Статус</string>
     <string name="discovery_stat_total_messages">Общо съобщения</string>
@@ -361,6 +367,7 @@
     <!-- EXPORT -->
     <string name="export_configuration">Експортиране на конфигурацията</string>
     <string name="export_data_csv">Експортиране на всички пакети</string>
+    <string name="export_gpx">Експортиране на GPX</string>
     <string name="export_keys">Експортиране на ключовете</string>
     <string name="export_keys_confirmation">Експортира публичния и частния ключове във файл. Моля, съхранявайте го на сигурно място.</string>
     <string name="external_notification">Външно известие</string>
@@ -676,6 +683,7 @@
     <string name="no_network_devices_seen">Не се виждат мрежови устройства</string>
     <string name="no_pax_metrics_logs">Няма налични показатели PAX</string>
     <string name="no_usb_devices_found">Няма намерени USB устройства</string>
+    <string name="no_usb_devices_seen">Не са открити USB устройства</string>
     <!-- NODE -->
     <string name="node_count_template">(%1$d онлайн / %2$d показани / %3$d общо)</string>
     <string name="node_filter_exclude_infrastructure">Изключване на инфраструктурата</string>
@@ -798,6 +806,7 @@
     <string name="power">Захранване</string>
     <string name="power_config">Конфигуриране на захранването</string>
     <string name="power_metrics_log">Показатели на мощност</string>
+    <string name="ppm">ppm</string>
     <string name="precise_location">Точно местоположение</string>
     <string name="preferences_language">Език</string>
     <string name="preferences_system_default">По подразбиране на системата</string>

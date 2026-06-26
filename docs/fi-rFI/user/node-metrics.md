@@ -2,7 +2,7 @@
 title: Radion mittarit
 parent: Käyttöopas
 nav_order: 5
-last_updated: 2026-06-16
+last_updated: 2026-06-25
 description: Telemetrianäkymät jokaiselle verkon radiolle — laitteen kunto, ympäristöanturit, ilmanlaatu, signaalin laatu, virta, reitinselvitys ja sijaintihistoria.
 aliases:
   - mittarit
@@ -44,6 +44,10 @@ Ympäristöanturien tiedot (edellyttää yhteensopivaa laitteistoa):
 | IAQ (ilmanlaatu) | BME680                |
 
 Ympäristömittarit esitetään kaavioina ajan kuluessa tapahtuvan trendianalyysin helpottamiseksi — lämpötila, kosteus ja ilmanpaine saavat kukin oman viivakaavionsa, jossa mittayksikkö näkyy Y-akselilla.
+
+The BME680 **IAQ (Indoor Air Quality)** index is a single 0–500+ value derived from gas resistance, shown against a color-coded scale from _Excellent_ to _Dangerously Polluted_:
+
+![IAQ index scale from Excellent to Dangerously Polluted](../../assets/screenshots/node-metrics_iaq_scale.png)
 
 > 💡 **Vinkki:** Ympäristömittarit edellyttävät etäradioon liitettyä anturia. Kaikki radiot eivät raportoi ympäristötietoja. Katso [Telemetria ja anturit](telemetry-and-sensors) saadaksesi täydellisen luettelon tuetuista antureista.
 
@@ -92,12 +96,16 @@ Radiosignaalin laatutiedot:
 
 ### Signaalin laadun viitearvot
 
-| SNR-alue                          | Laatu       |
-| --------------------------------- | ----------- |
-| > 10 dB                           | Erinomainen |
-| 0 to 10 dB                        | Hyvä        |
-| -10 to 0 dB                       | Kohtalainen |
-| < -10 dB | Huono       |
+Signal quality is rated from **SNR relative to the active LoRa modem preset's demodulation floor**, not from fixed thresholds — a given SNR means different things on different presets (e.g. −15 dB is fine on LongSlow but unusable on ShortFast). RSSI is shown but is not part of the rating. Letting `limit` be the preset's SNR limit:
+
+| Laatu       | Kriteerit                                        |
+| ----------- | ------------------------------------------------ |
+| Hyvä        | SNR above the preset's limit                     |
+| Kohtalainen | within 5.5 dB below the limit    |
+| Huono       | within 7.5 dB below the limit    |
+| ei mitään   | more than 7.5 dB below the limit |
+
+See [Understanding the Signal Meter](signal-meter) for the full explanation.
 
 Yhdistetyn radion paikalliset tilastot näytetään myös Signaalin laatu -näkymässä silloin, kun ne ovat saatavilla. Nämä kerätyt tiedot sisältävät kohinatason, liikennelaskurit, välityslaskurit, verkossa olevien radioiden määrän sekä radion käyttöajan. Kohinatason kaaviossa käytetään katkoviivalla merkittyä viiteviivaa arvossa -85 dBm, jotta kuormittunut RF-ympäristö on helpompi tunnistaa. Käytä **Pyydä**-painiketta pyytääksesi yhdistetystä radiosta tuoreen Paikalliset tilastot -telemetriaraportin, **Tyhjennä**-painiketta poistaaksesi Paikalliset tilastot -lokit kyseiseltä radiolta ja **Tallenna**-painiketta viedäksesi näkyvän Paikalliset tilastot -historian CSV-tiedostoksi.
 
