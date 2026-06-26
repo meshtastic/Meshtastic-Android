@@ -19,6 +19,7 @@ package org.meshtastic.feature.connections
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -36,6 +37,7 @@ import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.bonding_failed_permissions
+import org.meshtastic.core.resources.bonding_failed_retry
 import org.meshtastic.core.resources.usb_permission_denied
 import org.meshtastic.feature.connections.model.AndroidUsbDeviceData
 import org.meshtastic.feature.connections.model.DeviceListEntry
@@ -86,17 +88,18 @@ class AndroidScannerViewModel(
                         severity = Severity.Warn,
                     )
                     false
+                } catch (ex: CancellationException) {
+                    throw ex
                 } catch (ex: Exception) {
-                    // Bonding is flaky and can fail for many reasons: user cancel/timeout, an unreliable
-                    // ACTION_BOND_STATE_CHANGED broadcast, or an OS/GATT-initiated bond already in flight
-                    // (see Kable #111). Don't treat any of these as terminal — arm the transport anyway so
-                    // its persistent reconnect loop (which bonds on demand and retries with backoff) can
-                    // converge, instead of leaving the device inert until the user re-selects it.
                     Logger.w(ex) {
                         "Bonding did not complete cleanly for ${entry.device.address.anonymize}; " +
-                            "arming transport to retry"
+                            "waiting for an explicit retry"
                     }
-                    true
+                    serviceRepository.setErrorMessage(
+                        text = getString(Res.string.bonding_failed_retry),
+                        severity = Severity.Warn,
+                    )
+                    false
                 }
             if (armTransport) {
                 changeDeviceAddress(entry.fullAddress)

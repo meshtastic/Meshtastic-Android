@@ -41,10 +41,9 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
- * Coverage for the #5849 fix in [AndroidScannerViewModel.requestBonding]: the transport is armed
- * (`changeDeviceAddress`) on every bonding outcome EXCEPT a permissions [SecurityException], so an interrupted bond no
- * longer strands the device. Driven through the public [ScannerViewModel.onSelected] entry point (which routes an
- * unbonded BLE entry to `requestBonding`).
+ * Coverage for [AndroidScannerViewModel.requestBonding]: only a successful bond arms the transport. Bond failures
+ * surface a warning and wait for an explicit retry so the Android pairing flow does not immediately re-enter through
+ * transport-side bonding.
  *
  * Robolectric is used only because the class under test lives in `androidMain`; the bonding outcomes themselves are
  * injected via [org.meshtastic.core.testing.FakeBluetoothRepository], keeping each assertion deterministic. The real
@@ -58,11 +57,12 @@ class AndroidScannerViewModelBondingTest {
     private val mac = "AA:BB:CC:DD:EE:FF"
     private val expectedFullAddress = "x$mac"
 
-    private val harness = ScannerViewModelHarness()
+    private lateinit var harness: ScannerViewModelHarness
     private lateinit var viewModel: AndroidScannerViewModel
 
     @BeforeTest
     fun setUp() {
+        harness = ScannerViewModelHarness()
         Dispatchers.setMain(harness.testDispatcher)
         viewModel =
             AndroidScannerViewModel(
@@ -119,17 +119,17 @@ class AndroidScannerViewModelBondingTest {
     }
 
     @Test
-    fun `generic bond failure still arms the transport`() = runTest(harness.testDispatcher) {
-        // The interrupted-bonding case the fix targets: bond() throws a non-permission error, but we must still
-        // arm the transport so its reconnect loop can converge instead of leaving the device inert.
+    fun `generic bond failure does not arm the transport and surfaces an error`() = runTest(harness.testDispatcher) {
+        // A failed pairing attempt should wait for another user action instead of immediately arming the transport,
+        // which would call transport-side bond() and risk a duplicate PIN dialog or Android createBond() throttle.
         harness.bluetoothRepository.failBondWith(Exception("Failed to initiate bonding"))
 
         viewModel.onSelected(ScannerViewModelHarness.unbondedBleEntry(mac))
         testScheduler.advanceUntilIdle()
 
         assertEquals(1, harness.bluetoothRepository.bondCalls.size)
-        assertEquals(expectedFullAddress, harness.radioController.lastSetDeviceAddress)
-        assertNull(harness.serviceRepository.errorMessage.value)
+        assertNull(harness.radioController.lastSetDeviceAddress)
+        assertNotNull(harness.serviceRepository.errorMessage.value)
     }
 
     @Test
