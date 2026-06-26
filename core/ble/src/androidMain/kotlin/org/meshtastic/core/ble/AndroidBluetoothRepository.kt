@@ -142,36 +142,42 @@ class AndroidBluetoothRepository(
 
                         cont.invokeOnCancellation { unregisterBondReceiver(receiver) }
 
-                        if (remoteDevice.bondState == android.bluetooth.BluetoothDevice.BOND_BONDED) {
-                            completeBond(receiver = receiver, result = Result.success(Unit), cont = cont)
-                            return@suspendCancellableCoroutine
-                        }
+                        try {
+                            if (remoteDevice.bondState == android.bluetooth.BluetoothDevice.BOND_BONDED) {
+                                completeBond(receiver = receiver, result = Result.success(Unit), cont = cont)
+                                return@suspendCancellableCoroutine
+                            }
 
-                        if (!remoteDevice.createBond()) {
-                            // createBond() returns false when a bond is already in flight (initiated by the OS or
-                            // triggered by a GATT operation hitting a secured characteristic) or already established.
-                            // The ACTION_BOND_STATE_CHANGED broadcast is unreliable on some devices (see Kable #111),
-                            // so re-check bondState directly rather than failing the whole flow.
-                            when (remoteDevice.bondState) {
-                                android.bluetooth.BluetoothDevice.BOND_BONDED -> {
-                                    completeBond(receiver = receiver, result = Result.success(Unit), cont = cont)
-                                }
+                            if (!remoteDevice.createBond()) {
+                                // createBond() returns false when a bond is already in flight (initiated by the OS or
+                                // triggered by a GATT operation hitting a secured characteristic) or already
+                                // established.
+                                // The ACTION_BOND_STATE_CHANGED broadcast is unreliable on some devices (see Kable
+                                // #111),
+                                // so re-check bondState directly rather than failing the whole flow.
+                                when (remoteDevice.bondState) {
+                                    android.bluetooth.BluetoothDevice.BOND_BONDED -> {
+                                        completeBond(receiver = receiver, result = Result.success(Unit), cont = cont)
+                                    }
 
-                                android.bluetooth.BluetoothDevice.BOND_BONDING -> {
-                                    // Bond already in progress; leave the receiver registered to resolve it on the
-                                    // terminal BOND_BONDED / BOND_NONE transition instead of treating this as a
-                                    // failure.
-                                    Logger.d { "createBond() returned false but bonding is already in progress" }
-                                }
+                                    android.bluetooth.BluetoothDevice.BOND_BONDING -> {
+                                        // Bond already in progress; leave the receiver registered to resolve it on the
+                                        // terminal BOND_BONDED / BOND_NONE transition instead of treating this as a
+                                        // failure.
+                                        Logger.d { "createBond() returned false but bonding is already in progress" }
+                                    }
 
-                                else -> {
-                                    completeBond(
-                                        receiver = receiver,
-                                        result = Result.failure(Exception("Failed to initiate bonding")),
-                                        cont = cont,
-                                    )
+                                    else -> {
+                                        completeBond(
+                                            receiver = receiver,
+                                            result = Result.failure(Exception("Failed to initiate bonding")),
+                                            cont = cont,
+                                        )
+                                    }
                                 }
                             }
+                        } catch (e: Throwable) {
+                            completeBond(receiver = receiver, result = Result.failure(e), cont = cont)
                         }
                     }
                     true

@@ -224,7 +224,9 @@ class AndroidBluetoothRepositoryBondTest {
         val repo = newRepository(UnconfinedTestDispatcher(testScheduler))
 
         val failure = launchBond(repo, mac)
-        advanceTimeBy(30_001L)
+        advanceTimeBy(29_999L)
+        assertFalse(failure.isCompleted, "bond() should still be waiting before the timeout")
+        advanceTimeBy(2L)
 
         assertEquals("Timed out waiting for bonding to complete", failure.await()?.message)
     }
