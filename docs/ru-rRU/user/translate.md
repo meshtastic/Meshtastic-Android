@@ -2,7 +2,8 @@
 title: Перевод приложения
 parent: Руководство пользователя
 nav_order: 17
-last_updated: 2026-05-13
+last_updated: 2026-06-25
+description: How the app and its documentation are translated via Crowdin, and guidelines for contributing translations.
 aliases:
   - translate
   - crowdin
@@ -23,7 +24,7 @@ aliases:
 | Страницы руководства пользователя | `docs/user/*.md`                      | Встроенная документация, отображаемая в разделе «Справка и документация» |
 | Метаданные Fastlane               | `fastlane/metadata/android/en-US/`    | Название, описание и журналы изменений в App Store                       |
 
-> **Примечание — страницы руководства для разработчиков доступны только на английском языке.** Документация, ориентированная на код и предназначенная для контрибьюторов, не переводится.
+> ⚠️ **Note:** Developer Guide pages are English-only. Code-focused documentation targeting contributors is not translated.
 
 ---
 
@@ -35,7 +36,7 @@ aliases:
 4. **Проверьте контекст.** Многие строки содержат скриншоты или комментарии о контексте — проверьте их, чтобы понять, где данный текст появляется в приложении.
 5. **Отправьте.** Одобренные переводы автоматически включаются в следующий выпуск.
 
-> **Совет — делайте переводы короткими.** Строки интерфейса часто появляются на кнопках, ярлыках или в узких колонках. Если перевод значительно длиннее английского оригинала, рассмотрите возможность сокращения, чтобы смысл оставался понятным.
+> 💡 **Tip:** Keep translations short. UI strings often appear in buttons, chips, or narrow columns. Если перевод значительно длиннее английского оригинала, рассмотрите возможность сокращения, чтобы смысл оставался понятным.
 
 ---
 
@@ -67,14 +68,19 @@ core/resources/src/commonMain/composeResources/
 Встроенная документация следует аналогичной схеме в папке `docs/`:
 
 ```
-├── user/                ← English source (default)
+docs/
+├── en/user/             ← English source (default)
 │   ├── onboarding.md
 │   └── ...
-├── fr/user/             ← French translations
+├── fr-rFR/user/         ← French (France)
 │   ├── onboarding.md
+│   └── ...
+├── de-rDE/user/         ← German (Germany)
 │   └── ...
 └── ...
 ```
+
+Locale folders use the Android resource convention `{lang}-r{REGION}` (e.g. `fr-rFR`, `de-rDE`, `ja-rJP`), matching the `values-*` directories used for app strings.
 
 Приложение автоматически выбирает правильную локаль на основе настроек **Язык и регион** вашего устройства.
 

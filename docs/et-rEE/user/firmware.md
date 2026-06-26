@@ -64,7 +64,11 @@ Before updating:
 
 ## Eelvärskendus
 
-Peale edukat värskendust:
+After the firmware is written, the app verifies the update and waits for the device to come back online:
+
+![Verifying update and waiting for the device to reconnect](../../assets/screenshots/firmware_verifying.png)
+
+Once the update succeeds:
 
 - The radio will reboot automatically
 - Bluetooth connection will re-establish

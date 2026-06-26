@@ -2,7 +2,7 @@
 title: Laitteet
 parent: Käyttöopas
 nav_order: 4
-last_updated: 2026-06-02
+last_updated: 2026-06-25
 description: Selaa, suodata ja lajittele verkon radioita — tarkastele tietoja, signaalin laatua, rooleja ja pikatoimintoja.
 aliases:
   - radiolista
@@ -27,12 +27,13 @@ Radioluettelo näyttää kaikki radiot, joista radiosi on vastaanottanut tietoja
 
 ### Radion tilailmaisimet
 
-| Tunniste       | Tarkoitus                                 |
-| -------------- | ----------------------------------------- |
-| 🟢 Verkossa    | Radio kuultu viimeisen 15 minuutin aikana |
-| 🟡 Poissa      | Radio kuultu viimeisen 2 tunnin aikana    |
-| 🔴 Ei verkossa | Radiosta ei ole kuultu yli 2 tuntiin      |
-| ⭐ Suosikki     | Käyttäjän suosikiksi merkitsemä radio     |
+| Tunniste    | Tarkoitus                              |
+| ----------- | -------------------------------------- |
+| 🟢 Verkossa | Radio kuultu viimeisen 2 tunnin aikana |
+| ⚪ Offline   | Radiosta ei ole kuultu yli 2 tuntiin   |
+| ⭐ Suosikki  | Käyttäjän suosikiksi merkitsemä radio  |
+
+A node is considered **online** if it was heard within the last 2 hours, and **offline** otherwise — there is no separate "away" tier.
 
 ### Radion roolit
 
@@ -103,7 +104,7 @@ Kirjoita hakukenttään suodattaaksesi radioita nimen tai lyhyen nimen perusteel
 
 | Suodatus                              | Kuvaus                                                                                          |
 | ------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| **Vain verkossa olevat**              | Näytä vain radiot, joista on kuultu viimeisen 15 minuutin aikana                                |
+| **Vain verkossa olevat**              | Show only nodes heard within the last 2 hours                                                   |
 | **Vain suorat**                       | Näytä vain radiot, joihin on suora yhteys (ei välitetty yhteys)              |
 | **Näytä tuntemattomat**               | Näytä radiot, jotka eivät ole vielä lähettäneet käyttäjätietoja                                 |
 | **Ohita infrastruktuurilaitteet**     | Piilottaa infrastruktuuriroolit (Router, Repeater, Router Late, Client Base) |

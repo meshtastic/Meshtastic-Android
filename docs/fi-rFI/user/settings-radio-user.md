@@ -55,6 +55,8 @@ Asetusten muuttamisen jälkeen napauta **Tallenna** kirjoittaaksesi määritykse
 
 ### Esiasetukset
 
+> 💡 **Tip:** The **SNR Limit** values are negative on purpose. LoRa can decode signals _below_ the noise floor, so a more-negative limit means the preset tolerates a weaker, noisier signal (more range). See [How the Signal Meter Works](signal-meter) for the full explanation.
+
 | Esiasetus          | Kantama                 | Nopeus                    | SNR-raja                 | Paras käyttöön                                                                                                                     |
 | ------------------ | ----------------------- | ------------------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
 | Short Turbo        | ~1 km   | 21.9 kbps | −5 dB                    | Tiheä kaupunkiympäristö suoralla näköyhteydellä; paljon dataa siirtävät sovellukset                                                |

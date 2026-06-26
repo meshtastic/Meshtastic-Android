@@ -27,9 +27,9 @@ aliases:
 
 Най-често срещаният метод за актуализиране за потребителите на Android:
 
-1. Ensure your radio is connected via Bluetooth.
-2. Navigate to the Firmware Update screen.
-3. Select the desired firmware version.
+1. Уверете се, че радиото ви е свързано чрез Bluetooth.
+2. Отидете до екрана за актуализация на фърмуера.
+3. Изберете желаната версия на фърмуера.
 4. Tap **Update** to begin the OTA process.
 5. Wait for the update to complete — **do not disconnect** during the update.
 
@@ -46,32 +46,36 @@ For recovery or when OTA is unavailable:
 - Use the [Meshtastic Web Flasher](https://flasher.meshtastic.org)
 - Or the [Meshtastic CLI tool](https://meshtastic.org/docs/getting-started/flashing-firmware) on desktop
 
-## Version Channels
+## Канали на версиите
 
 | Канал    | Описание                                               |
 | -------- | ------------------------------------------------------ |
 | Стабилен | Препоръчва се за повечето потребители; тествани версии |
 | Алфа     | Предварителни издания; може да съдържат грешки         |
 
-## Pre-Update Checklist
+## Контролен списък преди актуализация
 
-Before updating:
+Преди актуализиране:
 
-- [ ] Battery > 50%
-- [ ] Stable Bluetooth connection
-- [ ] Note your current settings (they may reset on major version changes)
-- [ ] Check the release notes for breaking changes
+- [ ] Батерия > 50%
+- [ ] Стабилна Bluetooth връзка
+- [ ] Запишете текущите си настройки (те могат да се нулират при големи промени във версията)
+- [ ] Проверете бележките към изданието за важни промени
 
-## Post-Update
+## След актуализация
 
-After a successful update:
+After the firmware is written, the app verifies the update and waits for the device to come back online:
 
-- The radio will reboot automatically
-- Bluetooth connection will re-establish
-- Verify your settings are intact
-- Check the firmware version in **Settings → About**
+![Verifying update and waiting for the device to reconnect](../../assets/screenshots/firmware_verifying.png)
 
-![Firmware update success](../../assets/screenshots/firmware_success.png)
+Once the update succeeds:
+
+- Радиото ще се рестартира автоматично
+- Bluetooth връзката ще се възстанови
+- Проверете дали настройките ви са непокътнати
+- Проверете версията на фърмуера в **Настройки → Относно**
+
+![Актуализацията на фърмуера е успешна](../../assets/screenshots/firmware_success.png)
 
 ## Отстраняване на неизправности
 
@@ -79,11 +83,11 @@ After a successful update:
 
 If the update appears frozen:
 
-- Wait at least 5 minutes before intervening
+- Изчакайте поне 5 минути, преди да се намесите
 - If truly stuck, power-cycle the radio
-- Attempt the update again
+- Опитайте актуализацията отново
 
-![Firmware update error](../../assets/screenshots/firmware_error.png)
+![Грешка при актуализация на фърмуера](../../assets/screenshots/firmware_error.png)
 
 ### Device Won't Boot After Update
 

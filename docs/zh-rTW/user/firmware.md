@@ -64,7 +64,11 @@ Android 使用者最常用的更新方式：
 
 ## 更新後
 
-成功更新後：
+After the firmware is written, the app verifies the update and waits for the device to come back online:
+
+![Verifying update and waiting for the device to reconnect](../../assets/screenshots/firmware_verifying.png)
+
+Once the update succeeds:
 
 - 無線電裝置將自動重新開機
 - 藍牙連線將自動重新建立

@@ -3,6 +3,7 @@ title: Единицы измерения и локаль
 parent: Руководство пользователя
 nav_order: 16
 last_updated: 2026-05-12
+description: How the app formats temperature, distance, speed, and other measurements based on your device locale.
 ---
 
 # Единицы измерения и локаль
@@ -17,7 +18,7 @@ last_updated: 2026-05-12
 
 На Android твои предпочтения единиц измерений определяются настройками системы **Язык и регион**. На настольном компьютере (JVM) приложение использует стандартную `Locale` JVM.
 
-> **Совет — вам никогда не нужно переключать единицы измерения внутри приложения.** Измените системные настройки единиц измерений, и все отображения в Meshtastic обновятся автоматически — детали ноды, графики телеметрии, погода, высота и многое другое.
+> 💡 **Tip:** You never need to toggle units inside the app. Change your system measurement preferences and every screen in Meshtastic updates automatically — node details, telemetry charts, weather, altitude, and more.
 
 ---
 
@@ -114,5 +115,13 @@ last_updated: 2026-05-12
 2. Измените свои предпочтения в **Регион** или **Единицы измерения**
 3. Вернуться к Meshtastic — значения обновляются немедленно
 
-> **Совет — приложение использует `MetricFormatter` из `core:common`.** Все форматирование измерений выполняется с помощью общей утилиты KMP, которая учитывает локаль платформы. Разработчикам, добавляющим новые индикаторы измерений, следует использовать `MetricFormatter`, а не жестко кодировать преобразования единиц.
+> 💡 **Tip:** The app uses `MetricFormatter` from `core:common`. All measurement formatting is handled by a shared KMP utility that respects your platform's locale. Разработчикам, добавляющим новые индикаторы измерений, следует использовать `MetricFormatter`, а не жестко кодировать преобразования единиц.
+
+## Связанные темы
+
+- [Node Metrics](node-metrics) — where temperature, distance, and sensor values are displayed
+- [Telemetry & Sensors](telemetry-and-sensors) — the sensors that produce these measurements
+- [Settings — Radio & User](settings-radio-user) — region setting that drives unit selection
+
+---
 

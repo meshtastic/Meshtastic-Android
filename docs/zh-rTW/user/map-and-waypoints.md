@@ -2,7 +2,7 @@
 title: 地圖與航點
 parent: 使用者指南
 nav_order: 6
-last_updated: 2026-05-13
+last_updated: 2026-06-25
 description: 在地圖上檢視節點位置、建立與分享航點，以及管理位置分享與隱私設定。
 aliases:
   - map
@@ -25,14 +25,7 @@ aliases:
 
 ### 節點標記
 
-地圖上的節點標記代表：
-
-| 顏色         | 含義            |
-| ---------- | ------------- |
-| Green - 綠色 | 線上（近期收到訊號）    |
-| 黃色         | 暫離（2 小時內收到訊號） |
-| 灰色         | 離線（位置資訊已過期）   |
-| Blue - 藍色  | 你自己的節點        |
+Each node that reports a position is shown as a **node chip** marker displaying the node's short name. The chip is colored by the node's own identity color (a stable color derived from its node number) — the same chip used in the node list, so a node looks the same everywhere. Marker color does **not** encode online/offline status. When a node's position updates live, its marker briefly pulses. Nearby markers are clustered as you zoom out.
 
 ### 地圖控制項
 

@@ -19,11 +19,19 @@
     <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">Повідомлення від %1$s: %2$s</string>
+    <string name="a11y_node_battery">батарея: %1$d %</string>
+    <string name="a11y_node_distance_away">%1$s від вас</string>
+    <string name="a11y_node_offline">офлайн</string>
+    <string name="a11y_node_online">онлайн</string>
     <string name="accept">Прийняти</string>
     <string name="acknowledgements">Подяки</string>
     <!-- ACTION -->
     <string name="action_delete_message">Видалити повідомлення</string>
     <string name="action_select_device">Оберіть пристрій</string>
+    <string name="action_select_message">Обрати повідомлення</string>
+    <string name="action_select_network">Обрати мережу</string>
+    <string name="action_send_reply">Відповісти</string>
+    <string name="action_show_message_status">Показати статус повідомлення</string>
     <string name="actions">Дії</string>
     <string name="adc_multiplier_override">Корекція множника напруги</string>
     <string name="adc_multiplier_override_ratio">Множник корекції напруги</string>
@@ -42,6 +50,7 @@
     <string name="advanced_device_gps">Розширений пристрій GPS</string>
     <string name="advanced_title">Розширені</string>
     <!-- AIR -->
+    <string name="air_quality">Якість повітря</string>
     <string name="air_quality_icon">Іконка якості повітря</string>
     <string name="air_quality_metrics_module_enabled">Модуль показників якості повітря увімкнено</string>
     <string name="air_quality_metrics_update_interval_seconds">Інтервал оновлення показників якості повітря</string>
@@ -100,6 +109,7 @@
     <string name="button_gpio">GPIO кнопки</string>
     <string name="buzzer_gpio">GPIO гудка</string>
     <string name="calculating">Обчислюю…</string>
+    <string name="call_sign">Позивний</string>
     <string name="camera_permission">Дозвіл доступу до камери</string>
     <string name="cancel">Скасувати</string>
     <string name="cancel_reply">Скасувати відповідь</string>
@@ -124,10 +134,15 @@
     <string name="channel_invalid">URL-адреса цього каналу недійсна та не може бути використана</string>
     <string name="channel_label">Канал</string>
     <string name="channel_name">Ім'я каналу</string>
+    <string name="channel_url">URL каналу</string>
     <string name="channel_utilization">Завантаженість каналу</string>
     <string name="channels">Канали</string>
     <!-- CHIRPY -->
     <string name="chirpy">Chirpy</string>
+    <string name="chirpy_assistant_title">Помічник Chirpy</string>
+    <string name="chirpy_downloading">Chirpy завантажується…</string>
+    <string name="chirpy_ready">Запитати Chirpy</string>
+    <string name="chirpy_search_placeholder">Запитати про Meshtastic…</string>
     <string name="choose_contrast">Рівень контрасту</string>
     <string name="choose_theme">Оберіть тему</string>
     <!-- CLEAN -->
@@ -141,6 +156,7 @@
     <string name="client_notification">Клієнтські повідомлення</string>
     <string name="close">Закрити</string>
     <string name="close_selection">Закрити вибір</string>
+    <string name="co2">CO₂</string>
     <string name="codec_2_enabled">CODEC 2 увімкнено</string>
     <string name="codec2_sample_rate">Частота дискретизації CODEC2</string>
     <string name="coding_rate">Швидкість кодування</string>
@@ -264,6 +280,7 @@
     <string name="device_db_cache_limit">Обмеження кешу списку вузлів</string>
     <string name="device_db_cache_limit_summary">Макс. кількість баз даних, що зберігаються на цьому телефоні</string>
     <string name="device_gps">GPS пристрій</string>
+    <string name="device_links_open_in_browser">Відкрити в браузері</string>
     <string name="device_metrics_label_value">%1$s: %2$s</string>
     <string name="device_metrics_log">Показники пристрою</string>
     <string name="device_metrics_numeric_value">%1$s</string>
@@ -272,6 +289,7 @@
     <string name="device_metrics_voltage_value">%1$s: %2$s Вольт</string>
     <string name="device_sleeping">Пристрій в режимі сну</string>
     <string name="device_telemetry_enabled">Надсилати телеметрію пристрою</string>
+    <string name="device_theme_language">Тема: %1$s, Мова: %2$s</string>
     <string name="dew_point">Точка роси</string>
     <string name="direct_message">Пряме повідомлення</string>
     <string name="direct_message_key">Ключ для прямого повідомлення</string>
@@ -280,10 +298,20 @@
     <string name="disconnected">Відключено</string>
     <string name="discovered_network_devices">Виявлені мережеві пристрої</string>
     <!-- DISCOVERY -->
+    <string name="discovery_dwell_minutes">%1$d хв</string>
+    <string name="discovery_export_report">Експортувати звіт</string>
+    <string name="discovery_paused">Призупинено: %1$s</string>
+    <string name="discovery_scan_history">Історія сканувань</string>
+    <string name="discovery_start_scan">Почати сканування</string>
+    <string name="discovery_stat_analysis">Аналіз</string>
     <string name="discovery_stat_date">Дата</string>
     <string name="discovery_stat_direct">Прямий</string>
     <string name="discovery_stat_messages">Повідомлення</string>
     <string name="discovery_stat_selected">Вибраний</string>
+    <string name="discovery_stat_status">Статус</string>
+    <string name="discovery_stop_scan">Зупинити сканування</string>
+    <string name="discovery_time_remaining">%1$s залишилось</string>
+    <string name="discovery_unique_nodes">%1$d унікальних вузлів</string>
     <string name="disk_free_indexed">Вільне місце %1$d</string>
     <!-- DISPLAY -->
     <string name="display">Дисплей</string>
@@ -298,6 +326,26 @@
     <string name="dns">DNS</string>
     <!-- DOC -->
     <string name="doc_clear_search">Очистити пошук</string>
+    <string name="doc_keywords_android_auto">android auto,car,head unit,driving,hands free,messaging</string>
+    <string name="doc_keywords_app_functions">system ai,gemini,assistant,functions,automation,voice</string>
+    <string name="doc_keywords_connections">bluetooth,usb,tcp,pairing,serial,wifi</string>
+    <string name="doc_keywords_desktop">desktop,linux,macos,windows,serial</string>
+    <string name="doc_keywords_discovery">discovery,topology,network,scan,neighbor</string>
+    <string name="doc_keywords_firmware">firmware,update,ota,flash,version,recovery</string>
+    <string name="doc_keywords_map">map,waypoint,gps,position,location,marker</string>
+    <string name="doc_keywords_measurement">formatter,metric,number,locale,temperature,conversion,api</string>
+    <string name="doc_keywords_messages">message,channel,encryption,direct,broadcast,quick-chat</string>
+    <string name="doc_keywords_mqtt">mqtt,broker,internet,bridge,uplink,downlink</string>
+    <string name="doc_keywords_node_metrics">metrics,telemetry,signal,snr,rssi,battery,traceroute</string>
+    <string name="doc_keywords_nodes">node,mesh,list,role,status,favorite,filter</string>
+    <string name="doc_keywords_onboarding">setup,welcome,permissions,first-launch</string>
+    <string name="doc_keywords_settings_module">module,serial,telemetry,canned,store-forward,administration</string>
+    <string name="doc_keywords_settings_radio">settings,radio,lora,region,modem,device,power,security</string>
+    <string name="doc_keywords_signal_meter">signal,rssi,snr,bars,quality,lora,noise,meter</string>
+    <string name="doc_keywords_tak">tak,atak,cursor-on-target,team-awareness</string>
+    <string name="doc_section_developer">Посібник для розробників</string>
+    <string name="doc_section_user">Посібник користувача</string>
+    <string name="doc_title_android_auto">Android Auto</string>
     <string name="doc_title_mqtt">MQTT</string>
     <string name="doc_title_nodes">Вузли</string>
     <string name="done">Готово</string>
@@ -340,6 +388,7 @@
     <!-- EXPORT -->
     <string name="export_configuration">Експортувати налаштування</string>
     <string name="export_data_csv">Експортувати всі пакети</string>
+    <string name="export_gpx">Експортувати GPX</string>
     <string name="export_keys">Експортувати ключі</string>
     <string name="export_keys_confirmation">Експортує відкриті та закриті ключі у файл. Будь ласка, збережіть їх в надійному місці.</string>
     <string name="external_notification">Зовнішні сповіщення</string>
@@ -538,12 +587,20 @@
     <string name="load_indexed">Завантаження %1$d</string>
     <string name="loading">Завантаження</string>
     <!-- LOCAL -->
+    <string name="local_stats_bad">Поганих %1$d</string>
     <string name="local_stats_battery">Батарея: %1$d %</string>
+    <string name="local_stats_diagnostics_prefix">Діагностика: %1$s</string>
     <string name="local_stats_heap_value">%1$d / %2$d</string>
+    <string name="local_stats_nodes">Вузлів: %1$d онлайн / %2$d усього</string>
+    <string name="local_stats_noise">Шум %1$d dBm</string>
+    <string name="local_stats_traffic">Трафік: TX %1$d / RX %2$d (D: %3$d)</string>
     <string name="local_stats_updated_at">%1$s</string>
     <string name="location_disabled">Доступ до місцезнаходження вимкнено, неможливо транслювати позицію.</string>
     <!-- LOCKDOWN -->
+    <string name="lockdown_enable_ack">Я розумію</string>
     <string name="lockdown_hide_passphrase">Сховати</string>
+    <string name="lockdown_lock_reason">Причина: %1$s</string>
+    <string name="lockdown_show_passphrase">Показати</string>
     <string name="lockdown_submit">Надіслати</string>
     <string name="locked">Блоковано</string>
     <!-- LOG -->
@@ -630,6 +687,7 @@
     <string name="message_status_sfpp_routing">Маршрутизація через SF++ ланцюжок…</string>
     <string name="message_status_unknown">Невідомий</string>
     <string name="messages">Повідомлення</string>
+    <string name="micrograms_per_cubic_meter">мкг/м³</string>
     <string name="min">Мінімум</string>
     <string name="minimum_broadcast_seconds">Мінімальний період розсилки (секунди)</string>
     <string name="minimum_distance">Інтелектуальна дистанція</string>
@@ -712,9 +770,19 @@
     <string name="node_filter_title">Фільтрувати за</string>
     <string name="node_id">ID вузла</string>
     <string name="node_layout_channel">Канал</string>
+    <string name="node_layout_compact">Компактний</string>
+    <string name="node_layout_device_role">Пристрій &amp; Роль</string>
+    <string name="node_layout_help_signal_bad">Сигнал поганий. SNR вище −18 dB і RSSI вище −125 dBm.</string>
+    <string name="node_layout_help_signal_fair">Сигнал задовільний. SNR вище −12 dB і RSSI вище −120 dBm.</string>
+    <string name="node_layout_help_signal_good">Сигнал сильний. SNR вище −7 dB і RSSI вище −115 dBm.</string>
+    <string name="node_layout_help_signal_indicator">Поєднує SNR та RSSI в рівень якості, який відображається як кольоровий значок з описом. Відображається лише в повному макеті.</string>
     <string name="node_layout_hops_away">Кількість стрибків повідомлення</string>
     <string name="node_layout_log_icons">Показники довкілля</string>
     <string name="node_layout_power">Живлення</string>
+    <string name="node_layout_signal_quality_indicator">Індикатор якості сигналу</string>
+    <string name="node_list_click_label">Відкрити деталі вузла</string>
+    <string name="node_list_help_node_details">Деталі вузла</string>
+    <string name="node_list_help_title">Довідка по списку вузлів</string>
     <string name="node_number">Номер вузла</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_button">Опції сортування вузлів</string>
@@ -1022,6 +1090,7 @@
     <string name="server">Сервер</string>
     <string name="session_active">Сесія активна</string>
     <string name="session_refresh_required">Потрібне оновлення</string>
+    <string name="set_time">Встановити час</string>
     <string name="set_up_connection">Налаштувати з'єднання</string>
     <string name="set_your_region">Встановіть ваш регіон</string>
     <string name="settings">налаштування</string>
@@ -1078,6 +1147,7 @@
     <string name="tak_role_teammember">Член команди</string>
     <string name="tak_role_unspecified">Невизначений</string>
     <string name="tak_server_section">Сервер</string>
+    <string name="tak_server_test_result_unknown_error">✗</string>
     <string name="tak_team_blue">Синій</string>
     <string name="tak_team_brown">Коричневий</string>
     <string name="tak_team_cyan">Ціановий</string>
@@ -1202,8 +1272,16 @@
     <string name="wifi_devices">Налаштування Wi-Fi для mPWRD-OS</string>
     <string name="wifi_enabled">WiFi увімкнено</string>
     <string name="wifi_ip">Wi-Fi IP:</string>
+    <string name="wifi_provision_available_networks">Доступні мережі</string>
+    <string name="wifi_provision_hidden_network">Прихована мережа</string>
+    <string name="wifi_provision_no_networks">Не знайдено жодної мережі</string>
+    <string name="wifi_provision_scan_networks">Сканувати мережі</string>
+    <string name="wifi_provision_scanning_ble">Пошук пристрою…</string>
     <string name="wifi_provision_scanning_wifi">Сканування…</string>
     <string name="wifi_provision_signal_strength">%1$d%</string>
+    <string name="wifi_provision_ssid_label">Назва мережі (SSID)</string>
+    <string name="wifi_provision_ssid_placeholder">Введіть або оберіть мережу</string>
+    <string name="wifi_provision_status_applied">WiFi успішно налаштовано!</string>
     <string name="wifi_provision_success_done">Готово</string>
     <string name="wifi_provision_success_ip_address">Адреса IP</string>
     <string name="wifi_provision_success_ssh_command">ssh %1$s@%2$s</string>

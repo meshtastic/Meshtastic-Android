@@ -103,12 +103,7 @@ Hiukkas- tai CO₂-antureilla varustetut radiot raportoivat ilmanlaatutietoja:
 | PM10                  | µg/m³   | Karkeat hiukkaset         |
 | CO₂                   | ppm     | Hiilidioksidipitoisuus    |
 
-CO₂-lukemat on värikoodattu vakavuusasteen mukaan:
-
-- 🟢 **Hyvä** (< 1000 ppm) — normaali sisäilman taso
-- 🟡 **Kohtalainen** (1000–2000 ppm) — kohonnut taso, harkitse ilmanvaihtoa
-- 🟠 **Huono** (2000–5000 ppm) — väsymystä, heikentynyt keskittymiskyky
-- 🔴 **Vaarallinen** (≥ 5000 ppm) — välitön terveyshuoli
+The CO₂ reading is color-coded by severity (Good → Stuffy → Poor → Unsafe → Evacuate). See [Node Metrics — Air Quality](node-metrics#air-quality-metrics) for the exact ppm bands and colors.
 
 Ilmanlaatutiedot voidaan näyttää tietokortteina radion tietonäytössä, esittää kaavioina ajan kuluessa ja viedä CSV-tiedostoon.
 

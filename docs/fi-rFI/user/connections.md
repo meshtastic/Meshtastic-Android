@@ -2,7 +2,7 @@
 title: Yhteydet
 parent: Käyttöopas
 nav_order: 2
-last_updated: 2026-05-20
+last_updated: 2026-06-25
 description: Yhdistä puhelin tai työpöytä Meshtastic-radioon Bluetoothin, USB:n tai TCP/IP:n kautta.
 aliases:
   - bluetooth
@@ -27,7 +27,7 @@ Bluetooth Low Energy on oletus ja yleisin yhteystapa Androidilla.
 4. Valitse laitteesi listasta.
 5. Hyväksy Bluetooth-pariliitospyyntö, jos se tulee näkyviin.
 
-![Laiteluettelon kohde](../../assets/screenshots/connections_bluetooth_scan.png)
+![Scanning for Bluetooth devices, with a discovered radio in the list](../../assets/screenshots/connections_bluetooth_scan.png)
 
 Voit suodattaa laitteita yhteystavan mukaan yläreunan suodatinpainikkeilla:
 
@@ -70,26 +70,20 @@ USB-yhteydet tarjoavat langallisen vaihtoehdon, hyödyllinen työpöytäkäytös
 
 > ⚠️ **Huom:** USB-yhteydet vaativat OTG-tuen Android-laitteissa.
 
-## TCP/IP (WiFi)
+## TCP/IP (Network)
 
-Jotkin Meshtastic-radiot tukevat WiFi-yhteyttä, jolloin yhteys voidaan muodostaa TCP:n kautta.
+Some Meshtastic radios support WiFi/Ethernet connectivity, allowing TCP-based connections over your local network. Get the radio onto your network first — using the radio's own WiFi settings (via the firmware web interface or another connection) — then connect to it from the app.
 
-### Asetukset
+### Connecting over the Network
 
-1. Yhdistä radio WiFi-verkkoon radion web-käyttöliittymän tai asetusten kautta.
-2. Sovelluksessa siirry kohtaan **Yhdistä → TCP**.
-3. Syötä radion IP-osoite ja portti (oletus: 4403).
-4. Paina **Yhdistä**.
+1. Make sure the radio is on the same local network as your phone/desktop.
+2. On the Connect screen, select the **Network** transport filter.
+3. Choose the radio one of two ways:
+   - **Scan Network Devices** — toggle this on to auto-discover radios that advertise themselves on the local network (mDNS / `_meshtastic._tcp`). Discovered devices appear in the list; tap one to connect.
+   - **Add Network Device Manually** — enter the radio's IP address (or hostname) and port (default: `4403`).
+4. Previously-used network addresses are remembered under **Recent Network Devices** for quick reconnection (long-press to remove one).
 
-![WiFi-laitteiden haku](../../assets/screenshots/connections_wifi_scanning.png)
-
-Kun laite löytyy, se näkyy yhteyslistassa:
-
-![WiFi-laite löytyi](../../assets/screenshots/connections_wifi_device_found.png)
-
-Onnistunut yhteys vahvistetaan tilailmaisimella:
-
-![WiFi-yhteys onnistui](../../assets/screenshots/connections_wifi_success.png)
+> 💡 **Tip:** Network discovery uses mDNS, which only works when both devices are on the same subnet. On Android 17+ the app needs the local-network permission for scanning; if discovery finds nothing, add the device manually by IP.
 
 ### Milloin TCP-yhteyttä kannattaa käyttää
 
