@@ -151,7 +151,8 @@ class AndroidBluetoothRepository(
                             if (!remoteDevice.createBond()) {
                                 // createBond() returns false when a bond is already in flight, triggered by a GATT
                                 // operation hitting a secured characteristic, or already established.
-                                // The ACTION_BOND_STATE_CHANGED broadcast is unreliable on some devices (see Kable #111),
+                                // The ACTION_BOND_STATE_CHANGED broadcast is unreliable on some devices (see Kable
+                                // #111),
                                 // so re-check bondState directly rather than failing the whole flow.
                                 when (remoteDevice.bondState) {
                                     android.bluetooth.BluetoothDevice.BOND_BONDED -> {
