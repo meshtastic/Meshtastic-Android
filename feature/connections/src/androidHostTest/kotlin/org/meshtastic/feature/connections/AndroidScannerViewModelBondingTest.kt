@@ -18,6 +18,7 @@ package org.meshtastic.feature.connections
 
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.resetMain
@@ -159,6 +160,23 @@ class AndroidScannerViewModelBondingTest {
         assertEquals(1, harness.bluetoothRepository.bondCalls.size)
         assertNull(harness.radioController.lastSetDeviceAddress)
         assertNotNull(harness.serviceRepository.errorMessage.value)
+    }
+
+    @Test
+    fun `CancellationException from bond propagates without arming transport`() = runTest(harness.testDispatcher) {
+        // CE must propagate — not be swallowed into an error message or transport arming.
+        // Discriminator: if the CE catch were removed, CE would fall through to catch(Exception),
+        // set an error message, and return false — errorMessage would be non-null, failing this test.
+        harness.bluetoothRepository.failBondWith(CancellationException("cancelled"))
+
+        viewModel.onSelected(ScannerViewModelHarness.unbondedBleEntry(mac))
+        testScheduler.advanceUntilIdle()
+
+        assertNull(harness.radioController.lastSetDeviceAddress, "transport must not be armed")
+        assertNull(
+            harness.serviceRepository.errorMessage.value,
+            "CE must propagate, not be caught as generic failure",
+        )
     }
 
     @Test
