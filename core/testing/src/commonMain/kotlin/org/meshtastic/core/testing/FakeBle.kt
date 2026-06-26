@@ -342,12 +342,21 @@ class FakeBluetoothRepository :
 
             is BondOutcome.Fail -> throw outcome.error
 
-            BondOutcome.Success -> {
-                val currentState = _state.value
-                if (!currentState.bondedDevices.contains(device)) {
-                    _state.value = currentState.copy(bondedDevices = currentState.bondedDevices + device)
-                }
+            is BondOutcome.FailAfterBond -> {
+                addBondedDevice(device)
+                throw outcome.error
             }
+
+            BondOutcome.Success -> {
+                addBondedDevice(device)
+            }
+        }
+    }
+
+    private fun addBondedDevice(device: BleDevice) {
+        val currentState = _state.value
+        if (!currentState.bondedDevices.contains(device)) {
+            _state.value = currentState.copy(bondedDevices = currentState.bondedDevices + device)
         }
     }
 
@@ -371,6 +380,9 @@ class FakeBluetoothRepository :
         /** bond() throws [error] — models a generic/flaky bonding failure (timeout, dropped broadcast, etc.). */
         data class Fail(val error: Throwable) : BondOutcome
 
+        /** bond() records the device as bonded, then throws [error] — models a lost terminal bond signal. */
+        data class FailAfterBond(val error: Throwable) : BondOutcome
+
         /** bond() throws [error] — models a missing-permission (BLUETOOTH_CONNECT) failure. */
         data class Security(val error: Throwable) : BondOutcome
     }
@@ -379,4 +391,9 @@ class FakeBluetoothRepository :
 /** Make the next [FakeBluetoothRepository.bond] call throw a generic [error] (the flaky/interrupted-bonding path). */
 fun FakeBluetoothRepository.failBondWith(error: Throwable = Exception("bond failed")) {
     bondOutcome = FakeBluetoothRepository.BondOutcome.Fail(error)
+}
+
+/** Make the next [FakeBluetoothRepository.bond] call record the device as bonded and then throw [error]. */
+fun FakeBluetoothRepository.failBondAfterRecording(error: Throwable = Exception("bond failed after pairing")) {
+    bondOutcome = FakeBluetoothRepository.BondOutcome.FailAfterBond(error)
 }

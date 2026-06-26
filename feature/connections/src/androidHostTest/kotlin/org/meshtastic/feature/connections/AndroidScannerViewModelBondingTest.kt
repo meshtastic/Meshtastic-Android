@@ -26,6 +26,7 @@ import kotlinx.coroutines.test.setMain
 import org.junit.runner.RunWith
 import org.meshtastic.core.network.repository.UsbRepository
 import org.meshtastic.core.testing.FakeBleDevice
+import org.meshtastic.core.testing.failBondAfterRecording
 import org.meshtastic.core.testing.failBondWith
 import org.meshtastic.core.testing.failBondWithSecurityException
 import org.meshtastic.feature.connections.model.DeviceListEntry
@@ -130,6 +131,18 @@ class AndroidScannerViewModelBondingTest {
         assertEquals(1, harness.bluetoothRepository.bondCalls.size)
         assertNull(harness.radioController.lastSetDeviceAddress)
         assertNotNull(harness.serviceRepository.errorMessage.value)
+    }
+
+    @Test
+    fun `bond failure after Android records bond still arms the transport`() = runTest(harness.testDispatcher) {
+        harness.bluetoothRepository.failBondAfterRecording(Exception("Timed out waiting for bonding to complete"))
+
+        viewModel.onSelected(ScannerViewModelHarness.unbondedBleEntry(mac))
+        testScheduler.advanceUntilIdle()
+
+        assertEquals(1, harness.bluetoothRepository.bondCalls.size)
+        assertEquals(expectedFullAddress, harness.radioController.lastSetDeviceAddress)
+        assertNull(harness.serviceRepository.errorMessage.value)
     }
 
     @Test

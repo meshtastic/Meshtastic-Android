@@ -91,15 +91,23 @@ class AndroidScannerViewModel(
                 } catch (ex: CancellationException) {
                     throw ex
                 } catch (ex: Exception) {
-                    Logger.w(ex) {
-                        "Bonding did not complete cleanly for ${entry.device.address.anonymize}; " +
-                            "waiting for an explicit retry"
+                    if (bluetoothRepository.isBonded(entry.device.address)) {
+                        Logger.w(ex) {
+                            "Bonding did not complete cleanly for ${entry.device.address.anonymize}, " +
+                                "but Android now reports it bonded; selecting device"
+                        }
+                        true
+                    } else {
+                        Logger.w(ex) {
+                            "Bonding did not complete cleanly for ${entry.device.address.anonymize}; " +
+                                "waiting for an explicit retry"
+                        }
+                        serviceRepository.setErrorMessage(
+                            text = getString(Res.string.bonding_failed_retry),
+                            severity = Severity.Warn,
+                        )
+                        false
                     }
-                    serviceRepository.setErrorMessage(
-                        text = getString(Res.string.bonding_failed_retry),
-                        severity = Severity.Warn,
-                    )
-                    false
                 }
             if (armTransport) {
                 changeDeviceAddress(entry.fullAddress)
