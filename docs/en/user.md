@@ -19,6 +19,10 @@ Documentation for using the Meshtastic Android and Desktop app.
 Keep the last 5–8 entries and archive older ones by removing them.
 -->
 
+**June 2026** — [Help & In-App Docs](user/help-and-docs) — New page covering the in-app documentation browser, search, and the on-device Chirpy AI assistant.
+
+**June 2026** — [Home Screen Widget](user/widget) — New page covering the Android home screen widget that shows your connected radio's local stats at a glance.
+
 **June 2026** — [Discovery](user/discovery) — Added the Local Mesh Discovery scanner: a dedicated mode that cycles your radio through LoRa presets, dwells on each to collect packets, and ranks which preset works best at your location.
 
 **June 2026** — [Node Metrics](user/node-metrics) — Added Air Quality metrics (PM1.0, PM2.5, PM10, and CO₂ with severity color bands), a separate view from the BME680 IAQ reading.

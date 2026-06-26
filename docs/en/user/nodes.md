@@ -2,7 +2,7 @@
 title: Nodes
 parent: User Guide
 nav_order: 4
-last_updated: 2026-06-02
+last_updated: 2026-06-25
 description: Browse, filter, and sort mesh nodes — view details, signal quality, roles, and quick actions.
 aliases:
   - node-list
@@ -28,10 +28,11 @@ The node list shows every node your radio has heard, including:
 
 | Badge | Meaning |
 |-------|---------|
-| 🟢 Online | Node heard within the last 15 minutes |
-| 🟡 Away | Node heard within the last 2 hours |
-| 🔴 Offline | Node not heard for over 2 hours |
+| 🟢 Online | Node heard within the last 2 hours |
+| ⚪ Offline | Node not heard for over 2 hours |
 | ⭐ Favorite | Node marked as favorite by the user |
+
+A node is considered **online** if it was heard within the last 2 hours, and **offline** otherwise — there is no separate "away" tier.
 
 ### Node Roles
 
@@ -101,7 +102,7 @@ Type in the search field to filter nodes by name or short name. The filter updat
 
 | Filter | Description |
 |--------|-------------|
-| **Only online** | Show only nodes heard within the last 15 minutes |
+| **Only online** | Show only nodes heard within the last 2 hours |
 | **Only direct** | Show only nodes with direct (non-relayed) connections |
 | **Include unknown** | Show nodes that haven't sent user info yet |
 | **Exclude infrastructure** | Hide infrastructure-role nodes (Router, Repeater, Router Late, Client Base) |

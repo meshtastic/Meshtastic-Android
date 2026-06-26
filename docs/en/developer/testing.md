@@ -56,13 +56,19 @@ Located in `commonTest` or `jvmTest` source sets.
 
 ### Screenshot Tests
 
-Uses Android Gradle Plugin's native screenshot testing framework:
+Uses Android Gradle Plugin's native (layoutlib) screenshot testing framework, split across two modules:
+
+- **`:screenshot-tests`** — the **visual-regression gate**. CI runs `validateDebugScreenshotTest` on it; reframing one of these baselines is a real diff to review. Holds atomic, dual-purpose components.
+- **`:docs-screenshots`** — **generate-only**, *not* validated in CI. Holds doc-framed compositions whose framing is tuned for the docs site, so reframing a doc image never churns the regression gate.
 
 ```bash
-./gradlew :screenshot-tests:updateDebugScreenshotTest    # Record golden images
-./gradlew :screenshot-tests:validateDebugScreenshotTest  # Compare against goldens
-./gradlew :screenshot-tests:copyDocsScreenshots          # Copy reference images to docs pipeline
+./gradlew :screenshot-tests:updateDebugScreenshotTest    # record regression goldens
+./gradlew :screenshot-tests:validateDebugScreenshotTest  # compare against goldens (CI gate)
+./gradlew :docs-screenshots:updateDebugScreenshotTest    # record doc-framed composition images
+./gradlew :screenshot-tests:copyDocsScreenshots          # copy doc images from BOTH modules into docs/assets
 ```
+
+Rendering is host-deterministic here (layoutlib): a local `update` produces references byte-identical to CI, so locally-recorded goldens pass `validate`. See `docs/assets/screenshots/README.md` for which module a new screenshot belongs in.
 
 ### Baseline Profile / Startup Performance
 

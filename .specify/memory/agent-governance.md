@@ -42,8 +42,8 @@ changing linked areas; child directories change with their parent.
 
 **Top-level areas requiring review**: `.agent_memory/`, `.agent_plans/`, `.agent_refs/`,
 `.github/`, `.specify/`, `androidApp/`, `app/`, `build-logic/`, `config/`, `core/`,
-`desktop/`, `desktopApp/`, `docs/`, `docs-site/`, `fastlane/`, `feature/`, `gradle/`,
-`ios/`, `iosApp/`, `offline-repository/`, `screenshot-tests/`, `scripts/`, `specs/`
+`desktop/`, `desktopApp/`, `docs/`, `docs-screenshots/`, `docs-site/`, `fastlane/`, `feature/`,
+`gradle/`, `ios/`, `iosApp/`, `offline-repository/`, `screenshot-tests/`, `scripts/`, `specs/`
 
 ## Development Commands
 

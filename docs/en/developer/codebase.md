@@ -56,7 +56,8 @@ Meshtastic-Android/
 │   ├── testing/
 │   └── ui/
 ├── baselineprofile/        # Baseline Profile generation for :androidApp
-├── screenshot-tests/       # Compose Preview screenshot tests
+├── screenshot-tests/       # Compose Preview screenshot tests (visual-regression gate)
+├── docs-screenshots/       # Doc-framed composition screenshots (generate-only, not CI-gated)
 ├── build-logic/            # Convention plugins and build helpers
 │   ├── convention/
 │   └── flatpak/

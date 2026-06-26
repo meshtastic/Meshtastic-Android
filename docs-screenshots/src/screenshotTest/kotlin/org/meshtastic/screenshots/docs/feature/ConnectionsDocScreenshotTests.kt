@@ -14,48 +14,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.screenshots.feature
+package org.meshtastic.screenshots.docs.feature
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.android.tools.screenshot.PreviewTest
-import org.meshtastic.feature.firmware.CheckingStatePreview
-import org.meshtastic.feature.firmware.DisclaimerDialogPreview
-import org.meshtastic.feature.firmware.ErrorStatePreview
-import org.meshtastic.feature.firmware.SuccessStatePreview
-import org.meshtastic.feature.firmware.VerifyingStatePreview
+import org.meshtastic.feature.connections.component.BluetoothScanPreview
+import org.meshtastic.feature.connections.component.EmptyStateContentPreview
+
+// Doc-framed connections compositions (bounded-height crops tuned for the docs site). The atomic connections
+// components (device list item, transport selector, disconnect button, etc.) remain regression-gated in
+// :screenshot-tests.
 
 @PreviewTest
 @PreviewLightDark
 @Composable
-fun ScreenshotFirmwareVerifying() {
-    VerifyingStatePreview()
+fun ScreenshotConnectionsBluetoothScan() {
+    BluetoothScanPreview()
 }
 
 @PreviewTest
 @PreviewLightDark
 @Composable
-fun ScreenshotFirmwareChecking() {
-    CheckingStatePreview()
-}
-
-@PreviewTest
-@PreviewLightDark
-@Composable
-fun ScreenshotFirmwareError() {
-    ErrorStatePreview()
-}
-
-@PreviewTest
-@PreviewLightDark
-@Composable
-fun ScreenshotFirmwareSuccess() {
-    SuccessStatePreview()
-}
-
-@PreviewTest
-@PreviewLightDark
-@Composable
-fun ScreenshotFirmwareDisclaimer() {
-    DisclaimerDialogPreview()
+fun ScreenshotEmptyStateContent() {
+    EmptyStateContentPreview()
 }
