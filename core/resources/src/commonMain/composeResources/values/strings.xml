@@ -468,6 +468,7 @@
     <string name="doc_keywords_desktop">desktop,linux,macos,windows,serial</string>
     <string name="doc_keywords_discovery">discovery,topology,network,scan,neighbor</string>
     <string name="doc_keywords_firmware">firmware,update,ota,flash,version,recovery</string>
+    <string name="doc_keywords_help">help,documentation,docs,chirpy,assistant,search,offline</string>
     <string name="doc_keywords_map">map,waypoint,gps,position,location,marker</string>
     <string name="doc_keywords_measurement">formatter,metric,number,locale,temperature,conversion,api</string>
     <string name="doc_keywords_messages">message,channel,encryption,direct,broadcast,quick-chat</string>
@@ -482,6 +483,7 @@
     <string name="doc_keywords_telemetry">telemetry,sensor,temperature,humidity,pressure,power</string>
     <string name="doc_keywords_translate">translate,crowdin,localization,language,i18n,contribute</string>
     <string name="doc_keywords_units">units,locale,metric,imperial,temperature,distance</string>
+    <string name="doc_keywords_widget">widget,home screen,local stats,glance,battery,utilization</string>
     <string name="doc_search_placeholder">Search documentation…</string>
     <string name="doc_section_developer">Developer Guide</string>
     <string name="doc_section_user">User Guide</string>
@@ -491,6 +493,7 @@
     <string name="doc_title_desktop">Desktop App</string>
     <string name="doc_title_discovery">Discovery</string>
     <string name="doc_title_firmware">Firmware Updates</string>
+    <string name="doc_title_help">Help &amp; In-App Docs</string>
     <string name="doc_title_map">Map &amp; Waypoints</string>
     <string name="doc_title_measurement">Measurement &amp; Formatting</string>
     <string name="doc_title_messages">Messages &amp; Channels</string>
@@ -505,6 +508,7 @@
     <string name="doc_title_telemetry">Telemetry &amp; Sensors</string>
     <string name="doc_title_translate">Translate the App</string>
     <string name="doc_title_units">Units &amp; Locale</string>
+    <string name="doc_title_widget">Home Screen Widget</string>
     <string name="done">Done</string>
     <string name="dont_show_again_for_device">Don't show again for this device</string>
     <string name="double_tap_as_button_press">Double Tap as Button</string>

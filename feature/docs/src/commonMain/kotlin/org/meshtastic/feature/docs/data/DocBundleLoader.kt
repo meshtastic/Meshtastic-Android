@@ -431,6 +431,26 @@ class DefaultDocBundleLoader : DocBundleLoader {
                 2750,
                 "app-functions",
             ),
+            UserPageDef(
+                "widget",
+                CoreRes.string.doc_title_widget,
+                CoreRes.string.doc_keywords_widget,
+                "en/user/widget.html",
+                20,
+                listOf("widget", "home-screen-widget", "local-stats-widget"),
+                1700,
+                "widget",
+            ),
+            UserPageDef(
+                "help-and-docs",
+                CoreRes.string.doc_title_help,
+                CoreRes.string.doc_keywords_help,
+                "en/user/help-and-docs.html",
+                21,
+                listOf("help", "docs-browser", "chirpy", "assistant"),
+                1900,
+                "help",
+            ),
         )
 
     private suspend fun buildUserGuideIndex(): List<KeywordIndexEntry> = userPages.map { def ->
