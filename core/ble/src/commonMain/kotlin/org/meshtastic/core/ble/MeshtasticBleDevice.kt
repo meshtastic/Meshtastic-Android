@@ -29,8 +29,8 @@ import kotlinx.coroutines.flow.asStateFlow
  * `Peripheral(advertisement)` with a direct (non-autoConnect) connection attempt.
  *
  * Bonded-only devices (address only, [advertisement] null) can still be constructed for display in the device list and
- * as a bounded fallback when fresh scans miss. In that fallback, Kable creates an address-only peripheral so Android can
- * wait for the device to advertise through its `autoConnect` path while the transport keeps the connection attempt
+ * as a bounded fallback when fresh scans miss. In that fallback, Kable creates an address-only peripheral so Android
+ * can wait for the device to advertise through its `autoConnect` path while the transport keeps the connection attempt
  * bounded.
  *
  * @param address The device's MAC address (or platform identifier string).
