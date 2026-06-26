@@ -1,46 +1,46 @@
 ---
-title: Home Screen Widget
+title: Aloitusnäytön widget
 parent: Käyttöopas
 nav_order: 20
 last_updated: 2026-06-25
-description: Add the Meshtastic home screen widget to glance at your connected radio's local stats without opening the app.
+description: Lisää Meshtasticin aloitusnäytön widget, jotta näet yhdellä silmäyksellä yhdistetyn radiosi paikalliset tilastot ilman, että avaat sovelluksen.
 aliases:
   - widget
-  - home-screen-widget
-  - local-stats-widget
+  - aloitusnäytön widget
+  - paikalliset tilastot widget
 ---
 
-# Home Screen Widget
+# Aloitusnäytön widget
 
-On Android, Meshtastic provides a home screen **widget** that shows live local statistics from your connected radio at a glance — no need to open the app.
+Androidissa Meshtastic tarjoaa aloitusnäytölle **widgetin**, joka näyttää yhdistetyn radiosi paikalliset tilastot yhdellä silmäyksellä — sovellusta ei tarvitse avata.
 
-## What It Shows
+## Mitä se näyttää
 
-The widget displays the **connected radio's** current local stats:
+Widget näyttää **yhdistetyn radion** tämänhetkiset paikalliset tilastot:
 
-- **Battery** — the radio's battery level, or _Powered_ when running on external power
-- **ChUtil** — channel utilization (how busy the LoRa channel is, as a percentage)
-- **AirUtil** — airtime utilization (how much of the duty cycle your radio is transmitting)
-- **Traffic** — packets transmitted / received, and duplicates seen
-- **Relays** — packets relayed and relay cancellations (shown when the radio is relaying)
+- **Akun varaustaso** — radion akun varaustaso tai **Verkkovirta**, jos radio käyttää ulkoista virtalähdettä
+- **ChUtil** — kanavan käyttöaste (kuinka kuormitettu LoRa-kanava on prosentteina)
+- **AirUtil** — lähetysajan käyttöaste (kuinka suuren osan lähetysajasta radiosi käyttää)
+- **Liikenne** — lähetetyt ja vastaanotetut paketit sekä havaitut kaksoiskappaleet
+- **Välitykset** — välitetyt paketit ja välityksen peruutukset (näytetään, kun radio toimii välittäjänä)
 
-Tap the widget to open the app, or use its refresh control to request fresh stats.
+Avaa sovellus napauttamalla widgetiä tai pyydä uudet tilastot sen päivityspainikkeella.
 
-> 💡 **Tip:** The values reflect the radio you are currently connected to. If the app isn't connected to a radio, the widget shows the last known stats until it reconnects.
+> 💡 **Vinkki:** Arvot vastaavat sitä radiota, johon olet parhaillaan yhdistetty. Jos sovellus ei ole yhdistetty radioon, widget näyttää viimeksi tunnetut tilastot, kunnes yhteys muodostuu uudelleen.
 
-## Adding the Widget
+## Widgetin lisääminen
 
-1. Long-press an empty area of your Android home screen.
-2. Tap **Widgets**.
-3. Find **Meshtastic** in the list and drag the **Local Stats** widget to your home screen.
-4. Resize it as needed — the layout adapts to the available space.
+1. Paina pitkään tyhjää kohtaa Androidin aloitusnäytössä.
+2. Napauta **Widgetit**.
+3. Etsi luettelosta **Meshtastic** ja vedä **Paikalliset tilastot** -widget aloitusnäyttöön.
+4. Muuta widgetin kokoa tarvittaessa — asettelu mukautuu käytettävissä olevaan tilaan.
 
-> ⚠️ **Note:** The widget is Android-only. It is not available on the Desktop or iOS builds.
+> ⚠️ **Huomautus:** Widget on käytettävissä vain Androidissa. Se ei ole käytettävissä Desktop- tai iOS-versioissa.
 
 ## Aiheeseen liittyvät aiheet
 
-- [Node Metrics](node-metrics) — the full Signal Quality and Local Stats history inside the app
-- [Connections](connections) — connect to a radio so the widget has stats to show
-- [Discovery](discovery) — channel and airtime utilization across the mesh
+- [Radion mittarit](node-metrics) — täydellinen signaalin laatu- ja paikalliset tilastot -historia sovelluksessa
+- [Yhteydet](connections) — yhdistä radioon, jotta widgetillä on näytettäviä tilastoja
+- [Haku](discovery) — kanavan ja lähetysajan käyttöaste koko verkossa
 
 ---

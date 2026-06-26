@@ -27,7 +27,7 @@ Bluetooth Low Energy on oletus ja yleisin yhteystapa Androidilla.
 4. Valitse laitteesi listasta.
 5. Hyväksy Bluetooth-pariliitospyyntö, jos se tulee näkyviin.
 
-![Scanning for Bluetooth devices, with a discovered radio in the list](../../assets/screenshots/connections_bluetooth_scan.png)
+![Bluetooth-laitteiden haku, jossa löytynyt radio näkyy luettelossa](../../assets/screenshots/connections_bluetooth_scan.png)
 
 Voit suodattaa laitteita yhteystavan mukaan yläreunan suodatinpainikkeilla:
 
@@ -70,20 +70,20 @@ USB-yhteydet tarjoavat langallisen vaihtoehdon, hyödyllinen työpöytäkäytös
 
 > ⚠️ **Huom:** USB-yhteydet vaativat OTG-tuen Android-laitteissa.
 
-## TCP/IP (Network)
+## TCP/IP (Verkko)
 
-Some Meshtastic radios support WiFi/Ethernet connectivity, allowing TCP-based connections over your local network. Get the radio onto your network first — using the radio's own WiFi settings (via the firmware web interface or another connection) — then connect to it from the app.
+Jotkin Meshtastic-radiot tukevat WiFi tai Ethernet-yhteyttä, mikä mahdollistaa TCP-pohjaiset yhteydet lähiverkkosi kautta. Liitä radio ensin verkkoon käyttämällä radion omia WiFi-asetuksia (laiteohjelmiston verkkokäyttöliittymän tai muun yhteystavan kautta) — yhdistä siihen sitten sovelluksesta.
 
-### Connecting over the Network
+### Yhdistäminen verkon kautta
 
-1. Make sure the radio is on the same local network as your phone/desktop.
-2. On the Connect screen, select the **Network** transport filter.
-3. Choose the radio one of two ways:
-   - **Scan Network Devices** — toggle this on to auto-discover radios that advertise themselves on the local network (mDNS / `_meshtastic._tcp`). Discovered devices appear in the list; tap one to connect.
-   - **Add Network Device Manually** — enter the radio's IP address (or hostname) and port (default: `4403`).
-4. Previously-used network addresses are remembered under **Recent Network Devices** for quick reconnection (long-press to remove one).
+1. Varmista, että radio on samassa lähiverkossa kuin puhelimesi tai tietokoneesi.
+2. Valitse Yhdistä-näytössä **Verkko**-siirtotavan suodatin.
+3. Valitse radio jommallakummalla seuraavista tavoista:
+   - **Etsi verkkolaitteita** — ota tämä käyttöön löytääksesi automaattisesti lähiverkossa itsensä ilmoittavat radiot (mDNS / `_meshtastic._tcp`). Löydetyt laitteet näkyvät luettelossa; yhdistä napauttamalla haluamaasi laitetta.
+   - **Lisää verkkolaite manuaalisesti** — syötä radion IP-osoite (tai isäntänimi) ja portti (oletus: `4403`).
+4. Aiemmin käytetyt verkko-osoitteet tallennetaan **Viimeisimmät verkkolaitteet** -osioon nopeaa uudelleenyhdistämistä varten (poista pitämällä painettuna).
 
-> 💡 **Tip:** Network discovery uses mDNS, which only works when both devices are on the same subnet. On Android 17+ the app needs the local-network permission for scanning; if discovery finds nothing, add the device manually by IP.
+> 💡 **Vinkki:** Verkkolaitteiden haku käyttää mDNS:ää, joka toimii vain, kun molemmat laitteet ovat samassa aliverkossa. Android 17:ssä ja uudemmissa versioissa sovellus tarvitsee lähiverkon käyttöoikeuden laitteiden hakuun. Jos haku ei löydä mitään, lisää laite manuaalisesti IP-osoitteella.
 
 ### Milloin TCP-yhteyttä kannattaa käyttää
 

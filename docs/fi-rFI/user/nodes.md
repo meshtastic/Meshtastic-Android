@@ -27,13 +27,13 @@ Radioluettelo näyttää kaikki radiot, joista radiosi on vastaanottanut tietoja
 
 ### Radion tilailmaisimet
 
-| Tunniste    | Tarkoitus                              |
-| ----------- | -------------------------------------- |
-| 🟢 Verkossa | Radio kuultu viimeisen 2 tunnin aikana |
-| ⚪ Offline   | Radiosta ei ole kuultu yli 2 tuntiin   |
-| ⭐ Suosikki  | Käyttäjän suosikiksi merkitsemä radio  |
+| Tunniste     | Tarkoitus                              |
+| ------------ | -------------------------------------- |
+| 🟢 Verkossa  | Radio kuultu viimeisen 2 tunnin aikana |
+| Ei verkkossa | Radiosta ei ole kuultu yli 2 tuntiin   |
+| ⭐ Suosikki   | Käyttäjän suosikiksi merkitsemä radio  |
 
-A node is considered **online** if it was heard within the last 2 hours, and **offline** otherwise — there is no separate "away" tier.
+Radio katsotaan **verkossa olevaksi**, jos siitä on kuultu viimeisten 2 tunnin aikana. Muussa tapauksessa se katsotaan **poissa verkosta** olevaksi — erillistä "poissa"-tilaa ei ole.
 
 ### Radion roolit
 
@@ -104,7 +104,7 @@ Kirjoita hakukenttään suodattaaksesi radioita nimen tai lyhyen nimen perusteel
 
 | Suodatus                              | Kuvaus                                                                                          |
 | ------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| **Vain verkossa olevat**              | Show only nodes heard within the last 2 hours                                                   |
+| **Vain verkossa olevat**              | Näytä vain radiot, joista on kuultu viimeisten 2 tunnin aikana                                  |
 | **Vain suorat**                       | Näytä vain radiot, joihin on suora yhteys (ei välitetty yhteys)              |
 | **Näytä tuntemattomat**               | Näytä radiot, jotka eivät ole vielä lähettäneet käyttäjätietoja                                 |
 | **Ohita infrastruktuurilaitteet**     | Piilottaa infrastruktuuriroolit (Router, Repeater, Router Late, Client Base) |

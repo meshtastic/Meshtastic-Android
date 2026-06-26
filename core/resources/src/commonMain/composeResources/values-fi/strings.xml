@@ -466,6 +466,7 @@
     <string name="doc_keywords_desktop">desktop, linux, macOS, windows, sarjaportti</string>
     <string name="doc_keywords_discovery">haku, verkon topologia, verkko, skannaus, naapuri</string>
     <string name="doc_keywords_firmware">laiteohjelmisto, päivitys, ota, ohjelmoi, versio, palautus</string>
+    <string name="doc_keywords_help">ohje, dokumentaatio, dokumentit, chirpy, avustaja, haku, offline</string>
     <string name="doc_keywords_map">kartta, reittipiste, gps, sijainti, sijainti, merkki</string>
     <string name="doc_keywords_measurement">formatter, metriikka, numero, alueasetus, lämpötila, muunnos, api</string>
     <string name="doc_keywords_messages">message, kanava, salaus, suora, yleislähetys, pikakeskustelu</string>
@@ -480,6 +481,7 @@
     <string name="doc_keywords_telemetry">telemetria, anturi, lämpötila, kosteus, ilmanpaine, virta</string>
     <string name="doc_keywords_translate">käännös, crowdin, lokalisointi, kieli, i18n, osallistu</string>
     <string name="doc_keywords_units">yksiköt, alueasetus, metriikka, imperiaalinen, lämpötila, etäisyys</string>
+    <string name="doc_keywords_widget">widget, aloitusnäyttö, paikalliset tilastot, yhdellä silmäyksellä, akku, käyttöaste</string>
     <string name="doc_search_placeholder">Hae documentaatiosta…</string>
     <string name="doc_section_developer">Kehittäjän opas</string>
     <string name="doc_section_user">Käyttöopas</string>
@@ -489,6 +491,7 @@
     <string name="doc_title_desktop">Työpöytäsovellus</string>
     <string name="doc_title_discovery">Haku</string>
     <string name="doc_title_firmware">Laiteohjelmiston päivitykset</string>
+    <string name="doc_title_help">Ohjeet &amp; sovelluksen sisäinen dokumentaatio</string>
     <string name="doc_title_map">Kartta &amp; reittipisteet</string>
     <string name="doc_title_measurement">Mittayksikkö &amp; muotoilu</string>
     <string name="doc_title_messages">Viestit &amp; kanavat</string>
@@ -503,6 +506,7 @@
     <string name="doc_title_telemetry">Telemetria &amp; anturit</string>
     <string name="doc_title_translate">Käännä sovellus</string>
     <string name="doc_title_units">Yksiköt &amp; paikallisasetukset</string>
+    <string name="doc_title_widget">Aloitusnäytön Widget</string>
     <string name="done">Valmis</string>
     <string name="dont_show_again_for_device">Älä näytä enää tälle laitteelle</string>
     <string name="double_tap_as_button_press">Kaksoisnapautus painikkeena</string>

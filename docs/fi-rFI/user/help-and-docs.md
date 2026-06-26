@@ -1,49 +1,49 @@
 ---
-title: Help & In-App Docs
+title: Ohjeet jasovelluksen sisäinen dokumentaatio
 parent: Käyttöopas
 nav_order: 21
 last_updated: 2026-06-25
-description: Browse this documentation inside the app, search it, and ask Chirpy — the on-device AI assistant — questions about Meshtastic.
+description: Selaa tätä dokumentaatiota sovelluksessa, hae siitä tietoa ja kysy Meshtasticiin liittyviä kysymyksiä Chirpyltä — laitteella toimivalta tekoälyavustajalta.
 aliases:
-  - help
-  - docs-browser
+  - apua
+  - dokumenttiselain
   - chirpy
-  - assistant
+  - avustaja
 ---
 
-# Help & In-App Docs
+# Ohjeet jasovelluksen sisäinen dokumentaatio
 
-This same user documentation ships **inside the app**, so you can read it offline without leaving Meshtastic. Open it from **Settings → Help & Documentation**.
+Sama käyttöohje sisältyy myös **sovellukseen**, joten voit lukea sitä offline-tilassa poistumatta Meshtasticista. Avaa se kohdasta **Asetukset → Ohjeet & dokumentaatio**.
 
-## Browsing
+## Selaaminen
 
-The docs browser lists every user-guide page. Tap a page to read it; images and cross-links work just like they do here.
+Dokumentaation selain näyttää kaikki käyttöohjeen sivut. Avaa sivu napauttamalla sitä. Kuvat ja ristiviittaukset toimivat samalla tavalla kuin tässä dokumentaatiossa.
 
-![In-app documentation browser table of contents](../../assets/screenshots/docs-browser_toc.png)
+![Sovelluksen sisäisen dokumentaation sisällysluettelo](../../assets/screenshots/docs-browser_toc.png)
 
-### Search
+### Haku
 
-Tap the search icon and type to filter pages by title and keywords — results update as you type.
+Napauta hakukuvaketta ja kirjoita hakusanoja suodattaaksesi sivuja otsikon ja avainsanojen perusteella — tulokset päivittyvät kirjoittaessasi.
 
-![Searching the in-app documentation](../../assets/screenshots/docs-browser_search.png)
+![Haku sovelluksen sisäisessä dokumentaatiossa](../../assets/screenshots/docs-browser_search.png)
 
-A page open in the browser:
+Dokumentaatiosivu avattuna selaimessa:
 
-![A documentation page rendered in the app](../../assets/screenshots/docs-browser_page.png)
+![Dokumentaatiosivu avattuna sovelluksessa](../../assets/screenshots/docs-browser_page.png)
 
-## Chirpy — the AI Assistant
+## Chirpy — tekoälyn avustaja
 
-**Chirpy** answers plain-language questions about Meshtastic using this bundled documentation as its source. Tap the Chirpy button in the docs browser, type a question, and it replies with an answer and links to the relevant pages.
+**Chirpy** vastaa Meshtasticia koskeviin luonnollisella kielellä esitettyihin kysymyksiin käyttäen lähteenään tätä sovellukseen sisältyvää dokumentaatiota. Napauta Chirpy-painiketta dokumentaatioselaimessa, kirjoita kysymyksesi, niin se vastaa ja linkittää aiheeseen liittyville sivuille.
 
-![Chirpy AI assistant answering a question with page links](../../assets/screenshots/docs-browser_chirpy.png)
+![Chirpy-tekoälyavustaja vastaa kysymykseen ja näyttää linkkejä sivuille](../../assets/screenshots/docs-browser_chirpy.png)
 
-> 🔒 **Privacy:** On supported Google-flavor devices, Chirpy runs **on-device** using Gemini Nano — your questions never leave your phone. A small model downloads on first use.
+> ⚠️ **Tietosuoja:** Google-versiota käyttävillä laitteilla Chirpy toimii **laitteella** Gemini Nanon avulla — kysymyksesi eivät poistu puhelimestasi. Pieni kielimalli ladataan ensimmäisellä käyttökerralla.
 
-> ⚠️ **Note:** On F-Droid, Desktop, and iOS builds, Chirpy falls back to a **keyword search** over the documentation rather than a generative model. If your device doesn't support on-device AI, the assistant is hidden and you can still browse and search the docs normally.
+> ⚠️ **Huomautus:** F-Droid-, Desktop- ja iOS-versioissa Chirpy käyttää generatiivisen mallin sijaan dokumentaatioon perustuvaa **avainsanahakua**. Jos laitteesi ei tue laitteella toimivaa tekoälyä, avustaja piilotetaan, mutta voit silti selata dokumentaatiota ja hakea siitä tietoa normaalisti.
 
 ## Aiheeseen liittyvät aiheet
 
-- [Translate the App](translate) — how these pages get localized into other languages
-- [App Functions](app-functions) — the separate system-AI integration (distinct from Chirpy)
+- [Käännä sovellus](translate) — miten nämä sivut lokalisoidaan muille kielille
+- [Sovelluksen toiminnot](app-functions) — erillinen järjestelmätekoälyintegraatio (ei sama kuin Chirpy)
 
 ---
