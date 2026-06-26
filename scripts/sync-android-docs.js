@@ -127,8 +127,16 @@ function rewriteSiblingLinks(content, section, isIndex = false) {
     return content.replace(
         /\[([^\]]*)\]\((?!https?:\/\/)(?!#)([^)]+)\)/g,
         (match, text, link) => {
+            // Split off a trailing #anchor (or ?query) so it survives the .md rewrite.
+            // Source links like `node-metrics#air-quality-metrics` must become
+            // `node-metrics.md#air-quality-metrics`, else Docusaurus resolves the slug
+            // as a sub-path of the current page and the build fails on a broken link.
+            const splitIdx = link.search(/[#?]/);
+            const linkPath = splitIdx >= 0 ? link.slice(0, splitIdx) : link;
+            const suffix = splitIdx >= 0 ? link.slice(splitIdx) : "";
+
             // Skip if already has .md extension or is an image
-            if (link.endsWith(".md") || IMAGE_EXTENSIONS.has(path.extname(link).toLowerCase())) {
+            if (linkPath.endsWith(".md") || IMAGE_EXTENSIONS.has(path.extname(linkPath).toLowerCase())) {
                 return match;
             }
 
@@ -136,26 +144,26 @@ function rewriteSiblingLinks(content, section, isIndex = false) {
             // user.md/developer.md sit beside the section dir, so they link to children
             // as "user/onboarding". From index.md inside that dir, strip the prefix.
             if (isIndex) {
-                const sameSection = link.match(new RegExp(`^${section}/(.+)`));
+                const sameSection = linkPath.match(new RegExp(`^${section}/(.+)`));
                 if (sameSection && slugs.has(sameSection[1])) {
-                    return `[${text}](${sameSection[1]}.md)`;
+                    return `[${text}](${sameSection[1]}.md${suffix})`;
                 }
             }
 
             // Check for cross-section links like ../developer/testing
-            const crossMatch = link.match(/^\.\.\/(\w+)\/(.+)/);
+            const crossMatch = linkPath.match(/^\.\.\/(\w+)\/(.+)/);
             if (crossMatch) {
                 const [, targetSection, slug] = crossMatch;
                 const targetSlugs = targetSection === "user" ? KNOWN_USER_SLUGS : KNOWN_DEV_SLUGS;
                 if (targetSlugs.has(slug)) {
-                    return `[${text}](../${targetSection}/${slug}.md)`;
+                    return `[${text}](../${targetSection}/${slug}.md${suffix})`;
                 }
             }
 
             // Check for sibling links
-            const bare = link.replace(/^\.\//, "");
+            const bare = linkPath.replace(/^\.\//, "");
             if (slugs.has(bare)) {
-                return `[${text}](${bare}.md)`;
+                return `[${text}](${bare}.md${suffix})`;
             }
 
             return match;
