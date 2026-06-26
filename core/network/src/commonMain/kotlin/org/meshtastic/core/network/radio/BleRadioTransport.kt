@@ -78,7 +78,7 @@ private val CONNECTION_TIMEOUT = 15.seconds
  */
 private val HEARTBEAT_DRAIN_DELAY = 200.milliseconds
 
-private val TARGETED_SCAN_TIMEOUT = 2.seconds
+internal val TARGETED_SCAN_TIMEOUT = 2.seconds
 
 /**
  * Bounded scan duration used by both discovery paths in [findDevice]:
@@ -90,7 +90,7 @@ private val TARGETED_SCAN_TIMEOUT = 2.seconds
  * window still misses, [findDevice] falls back to the bonded handle and [attemptConnection] keeps that patient
  * `autoConnect` path bounded through [CONNECTION_TIMEOUT].
  */
-private val SCAN_TIMEOUT = 5.seconds
+internal val SCAN_TIMEOUT = 5.seconds
 private val GATT_CLEANUP_TIMEOUT = 5.seconds
 
 /**
@@ -252,9 +252,9 @@ class BleRadioTransport(
             }
 
             // If both scans miss, fall back to the bonded handle. Bonded-only devices have no fresh advertisement, so
-            // Kable uses autoConnect=true and Android can patiently wait for the device to advertise again. This
-            // remains
-            // bounded by CONNECTION_TIMEOUT in connectAndAwait(), after which BleReconnectPolicy owns retry/backoff.
+            // Kable uses autoConnect=true and Android can patiently wait for the device to advertise again.
+            // This remains bounded by CONNECTION_TIMEOUT in connectAndAwait(), after which BleReconnectPolicy owns
+            // retry/backoff.
             Logger.w {
                 "[${address.anonymize()}] No fresh advertisement within $SCAN_TIMEOUT; " +
                     "falling back to bonded handle for bounded autoConnect"

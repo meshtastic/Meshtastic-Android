@@ -59,6 +59,15 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.time.Duration
 
+private const val BONDED_FALLBACK_CONNECT_BUFFER_MILLIS = 1_000L
+private val targetedScanTimeoutMillis = TARGETED_SCAN_TIMEOUT.inWholeMilliseconds
+private val escalatedScanTimeoutMillis = SCAN_TIMEOUT.inWholeMilliseconds
+private val bondedReconnectWindowMillis =
+    BleReconnectPolicy.DEFAULT_SETTLE_DELAY.inWholeMilliseconds +
+        targetedScanTimeoutMillis +
+        escalatedScanTimeoutMillis +
+        BONDED_FALLBACK_CONNECT_BUFFER_MILLIS
+
 /**
  * Tests covering the BLE reconnect crash fixes in [BleRadioTransport]:
  * 1. **CancellationException / GATT 133 fix**: [discoverServicesAndSetupCharacteristics] previously had a bare `catch
@@ -1037,8 +1046,8 @@ class BleRadioTransportReconnectCrashTest {
      * advertising window. The escalation path (TARGETED_SCAN_TIMEOUT → SCAN_TIMEOUT) must surface a freshly-scanned
      * device.
      *
-     * Sequenced scanner: call 0 (2s targeted) returns empty; call 1 (5s escalated) emits a fresh `FakeBleDevice` for
-     * the bonded address. The transport must connect using the fresh scanned device, never the stale bonded handle.
+     * Sequenced scanner: call 0 (targeted) returns empty; call 1 (escalated) emits a fresh `FakeBleDevice` for the
+     * bonded address. The transport must connect using the fresh scanned device, never the stale bonded handle.
      */
     @Test
     fun `bonded device missed by targeted scan is found by escalated scan`() = runTest {
@@ -1048,7 +1057,7 @@ class BleRadioTransportReconnectCrashTest {
         val freshDevice = FakeBleDevice(address = address, name = "Fresh Scan Result")
         val sequencedScanner =
             SequencedBleScanner().apply {
-                responses += { flow { awaitCancellation() } } // call 0: targeted scan misses (runs until 2s timeout)
+                responses += { flow { awaitCancellation() } } // call 0: targeted scan misses
                 responses += { flow { emit(freshDevice) } } // call 1: escalated scan emits fresh device
             }
 
@@ -1069,22 +1078,21 @@ class BleRadioTransportReconnectCrashTest {
         try {
             bleTransport.start()
 
-            // 2s targeted scan + immediate escalated emit + connect/handshake settle.
-            advanceTimeBy(8_000L)
+            advanceTimeBy(bondedReconnectWindowMillis)
 
             assertTrue(
                 sequencedScanner.callCount >= 2,
                 "Expected at least 2 scan calls (targeted + escalated); got ${sequencedScanner.callCount}",
             )
             assertEquals(
-                2_000L,
+                targetedScanTimeoutMillis,
                 sequencedScanner.calls[0].timeout.inWholeMilliseconds,
-                "First scan must be targeted (2s)",
+                "First scan must use TARGETED_SCAN_TIMEOUT",
             )
             assertEquals(
-                5_000L,
+                escalatedScanTimeoutMillis,
                 sequencedScanner.calls[1].timeout.inWholeMilliseconds,
-                "Second scan must be escalated (5s)",
+                "Second scan must use SCAN_TIMEOUT",
             )
             assertEquals(SERVICE_UUID, sequencedScanner.calls[0].serviceUuid, "First scan must include service UUID")
             assertEquals(address, sequencedScanner.calls[0].address, "First scan must target selected address")
@@ -1117,8 +1125,8 @@ class BleRadioTransportReconnectCrashTest {
 
         val sequencedScanner =
             SequencedBleScanner().apply {
-                responses += { flow { awaitCancellation() } } // call 0: targeted scan misses (runs until 2s timeout)
-                responses += { flow { awaitCancellation() } } // call 1: escalated scan misses (runs until 5s timeout)
+                responses += { flow { awaitCancellation() } } // call 0: targeted scan misses
+                responses += { flow { awaitCancellation() } } // call 1: escalated scan misses
             }
 
         // Keep profile setup stable so the test can inspect the connected device.
@@ -1137,22 +1145,21 @@ class BleRadioTransportReconnectCrashTest {
         try {
             bleTransport.start()
 
-            // 3s settle + 2s targeted scan + 5s escalated scan + bonded fallback connect.
-            advanceTimeBy(11_000L)
+            advanceTimeBy(bondedReconnectWindowMillis)
 
             assertTrue(
                 sequencedScanner.callCount >= 2,
                 "Expected at least 2 scan calls (targeted + escalated); got ${sequencedScanner.callCount}",
             )
             assertEquals(
-                2_000L,
+                targetedScanTimeoutMillis,
                 sequencedScanner.calls[0].timeout.inWholeMilliseconds,
-                "First scan must be targeted (2s)",
+                "First scan must use TARGETED_SCAN_TIMEOUT",
             )
             assertEquals(
-                5_000L,
+                escalatedScanTimeoutMillis,
                 sequencedScanner.calls[1].timeout.inWholeMilliseconds,
-                "Second scan must be escalated (5s)",
+                "Second scan must use SCAN_TIMEOUT",
             )
             assertEquals(1, connection.connectAndAwaitCalls, "Must connect once through the bounded bonded fallback")
             assertTrue(
