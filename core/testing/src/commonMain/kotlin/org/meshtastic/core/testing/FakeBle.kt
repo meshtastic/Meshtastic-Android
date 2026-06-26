@@ -337,20 +337,23 @@ class FakeBluetoothRepository :
 
     override suspend fun bond(device: BleDevice) {
         bondCalls += device
-        when (val outcome = bondOutcome) {
-            is BondOutcome.Security -> throw outcome.error
+        val error =
+            when (val outcome = bondOutcome) {
+                is BondOutcome.Security -> outcome.error
 
-            is BondOutcome.Fail -> throw outcome.error
+                is BondOutcome.Fail -> outcome.error
 
-            is BondOutcome.FailAfterBond -> {
-                addBondedDevice(device)
-                throw outcome.error
+                is BondOutcome.FailAfterBond -> {
+                    addBondedDevice(device)
+                    outcome.error
+                }
+
+                BondOutcome.Success -> {
+                    addBondedDevice(device)
+                    null
+                }
             }
-
-            BondOutcome.Success -> {
-                addBondedDevice(device)
-            }
-        }
+        error?.let { throw it }
     }
 
     private fun addBondedDevice(device: BleDevice) {

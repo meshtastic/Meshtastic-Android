@@ -23,8 +23,11 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.jetbrains.compose.resources.getString
 import org.junit.runner.RunWith
 import org.meshtastic.core.network.repository.UsbRepository
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.bonding_failed_retry
 import org.meshtastic.core.testing.FakeBleDevice
 import org.meshtastic.core.testing.failBondAfterRecording
 import org.meshtastic.core.testing.failBondWith
@@ -130,7 +133,7 @@ class AndroidScannerViewModelBondingTest {
 
         assertEquals(1, harness.bluetoothRepository.bondCalls.size)
         assertNull(harness.radioController.lastSetDeviceAddress)
-        assertNotNull(harness.serviceRepository.errorMessage.value)
+        assertEquals(getString(Res.string.bonding_failed_retry), harness.serviceRepository.errorMessage.value)
     }
 
     @Test
