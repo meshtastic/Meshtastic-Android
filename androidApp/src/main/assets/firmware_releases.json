@@ -189,10 +189,28 @@
   },
   "pullRequests": [
     {
+      "id": "10793",
+      "title": "Portduino WASM hello world",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10793",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
       "id": "10787",
       "title": "Add TiltTelemetryModule for LIS3DH accelerometer mounts",
       "page_url": "https://github.com/meshtastic/firmware/pull/10787",
       "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
+      "id": "10785",
+      "title": "InkHUD: add offline map tile backgrounds and zoom controls",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10785",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "10784",
+      "title": "build(native-macos): enable UDP multicast mesh",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10784",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
       "id": "10783",
@@ -283,12 +301,6 @@
       "title": "Heltec Vision Master E213: enable 32768hz crystal osc for rtc",
       "page_url": "https://github.com/meshtastic/firmware/pull/10689",
       "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "10677",
-      "title": "Add native Portduino malloc shim",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10677",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     }
   ]
 }

@@ -845,8 +845,6 @@
     <string name="no_network_devices_seen">Сетевые устройства не обнаружены</string>
     <string name="no_pax_metrics_logs">Метрики прохожих недоступны</string>
     <string name="no_usb_devices_found">Устройства USB не найдены</string>
-    <string name="no_usb_devices_hint">Подключите устройство через последовательный порт или USB.</string>
-    <string name="no_usb_devices_seen">USB-устройства не обнаружены</string>
     <!-- NODE -->
     <string name="node_count_template">(онлайн %1$d / показано %2$d / всего %3$d)</string>
     <string name="node_filter_exclude_infrastructure">Исключить инфраструктуру</string>

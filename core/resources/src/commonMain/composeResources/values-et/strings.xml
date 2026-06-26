@@ -950,8 +950,6 @@
     <string name="no_network_devices_seen">Võrgu seadmeid ei tuvastatud</string>
     <string name="no_pax_metrics_logs">Pax mõõdikut pole saadaval.</string>
     <string name="no_usb_devices_found">USB seadmeid ei leitud</string>
-    <string name="no_usb_devices_hint">Ühenda seade jadapordi või USB kaudu.</string>
-    <string name="no_usb_devices_seen">USB seadmeid ei tuvastatud</string>
     <!-- NODE -->
     <string name="node_count_template">(%1$d võrgus / %2$d näidatud / %3$d kokku)</string>
     <string name="node_filter_exclude_infrastructure">Välista infrastruktuur</string>

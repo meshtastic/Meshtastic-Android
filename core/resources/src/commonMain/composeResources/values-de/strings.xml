@@ -843,8 +843,6 @@
     <string name="no_network_devices_seen">Kein Netzwerkgerät gefunden</string>
     <string name="no_pax_metrics_logs">Keine Daten für den Besucherzähler verfügbar.</string>
     <string name="no_usb_devices_found">Kein USB-Gerät gefunden.</string>
-    <string name="no_usb_devices_hint">Verbinde das Gerät über den seriellen Anschluß oder USB.</string>
-    <string name="no_usb_devices_seen">Kein USB-Gerät gefunden</string>
     <!-- NODE -->
     <string name="node_count_template">(%1$d online / %2$d angezeigt / %3$d gesamt)</string>
     <string name="node_filter_exclude_infrastructure">Infrastruktur ausschließen</string>

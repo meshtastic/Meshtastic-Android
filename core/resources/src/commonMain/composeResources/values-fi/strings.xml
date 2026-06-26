@@ -983,7 +983,7 @@
     <string name="no_network_devices_seen">Verkkolaitteita ei löytynyt</string>
     <string name="no_pax_metrics_logs">PAX mittareita ei ole saatavilla.</string>
     <string name="no_usb_devices_found">USB-laitteita ei löytynyt</string>
-    <string name="no_usb_devices_hint">Yhdistä laite sarjaliitännän tai USB:n kautta.</string>
+    <string name="no_usb_devices_hint">Yhdistä laite USB-datakaapelilla sarjaportin käyttöä varten.</string>
     <string name="no_usb_devices_seen">USB-laitteita ei löytynyt</string>
     <!-- NODE -->
     <string name="node_count_template">(%1$d yhdistetty / %2$d nähty / %3$d yhteensä)</string>

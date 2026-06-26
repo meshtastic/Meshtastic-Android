@@ -839,8 +839,6 @@
     <string name="no_network_devices_seen">未偵測到網路裝置</string>
     <string name="no_pax_metrics_logs">無可用的 PAX 人流計量資料。</string>
     <string name="no_usb_devices_found">找不到 USB 裝置</string>
-    <string name="no_usb_devices_hint">請透過序列埠或 USB 連接裝置。</string>
-    <string name="no_usb_devices_seen">未偵測到 USB 裝置</string>
     <!-- NODE -->
     <string name="node_count_template">(線上 %1$d / 顯示 %2$d / 總計 %3$d)</string>
     <string name="node_filter_exclude_infrastructure">排除基礎架構</string>

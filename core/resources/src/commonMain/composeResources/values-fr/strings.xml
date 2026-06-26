@@ -859,8 +859,6 @@
     <string name="no_network_devices_seen">Aucun appareil réseau détecté</string>
     <string name="no_pax_metrics_logs">Aucune métrique PAX disponible.</string>
     <string name="no_usb_devices_found">Pas de périphérique USB trouvé</string>
-    <string name="no_usb_devices_hint">Connectez le périphérique via le port série ou USB.</string>
-    <string name="no_usb_devices_seen">Aucun appareil USB détecté</string>
     <!-- NODE -->
     <string name="node_count_template">(%1$d en ligne / %2$d affichés / %3$d total)</string>
     <string name="node_filter_exclude_infrastructure">Exclure les nœuds infrastructure</string>
