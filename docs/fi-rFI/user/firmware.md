@@ -64,11 +64,11 @@ Ennen päivityksen aloitamista:
 
 ## Päivityksen jälkeen
 
-After the firmware is written, the app verifies the update and waits for the device to come back online:
+Kun laiteohjelmisto on kirjoitettu, sovellus varmistaa päivityksen ja odottaa laitteen palaavan takaisin verkkoon:
 
-![Verifying update and waiting for the device to reconnect](../../assets/screenshots/firmware_verifying.png)
+![Päivityksen varmistus ja laitteen uudelleenyhdistymisen odottaminen](../../assets/screenshots/firmware_verifying.png)
 
-Once the update succeeds:
+Kun päivitys onnistuu:
 
 - Radio käynnistyy uudelleen automaattisesti
 - Bluetooth-yhteys muodostuu uudelleen

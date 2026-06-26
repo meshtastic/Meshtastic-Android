@@ -103,7 +103,7 @@ Hiukkas- tai CO₂-antureilla varustetut radiot raportoivat ilmanlaatutietoja:
 | PM10                  | µg/m³   | Karkeat hiukkaset         |
 | CO₂                   | ppm     | Hiilidioksidipitoisuus    |
 
-The CO₂ reading is color-coded by severity (Good → Stuffy → Poor → Unsafe → Evacuate). See [Node Metrics — Air Quality](node-metrics#air-quality-metrics) for the exact ppm bands and colors.
+CO₂-arvo on värikoodattu vakavuuden mukaan (Hyvä → Tunkkainen → Huono → Epäturvallinen → Evakuoi). Katso [Radion metriikat — ilmanlaatu](node-metrics#air-quality-metrics) tarkat ppm-kaistat ja värit.
 
 Ilmanlaatutiedot voidaan näyttää tietokortteina radion tietonäytössä, esittää kaavioina ajan kuluessa ja viedä CSV-tiedostoon.
 

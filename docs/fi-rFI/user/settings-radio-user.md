@@ -55,7 +55,7 @@ Asetusten muuttamisen jälkeen napauta **Tallenna** kirjoittaaksesi määritykse
 
 ### Esiasetukset
 
-> 💡 **Tip:** The **SNR Limit** values are negative on purpose. LoRa can decode signals _below_ the noise floor, so a more-negative limit means the preset tolerates a weaker, noisier signal (more range). See [How the Signal Meter Works](signal-meter) for the full explanation.
+> 💡 **Vinkki:** **SNR-raja**-arvot ovat tarkoituksella negatiivisia. LoRa pystyy purkamaan signaaleja _kohinatason alapuolelta_, joten negatiivisempi raja tarkoittaa, että esiasetus sietää heikomman ja kohinaisemman signaalin (suurempi kantama). Katso [Miten signaalimittari toimii](signal-meter) saadaksesi täydellisen selityksen.
 
 | Esiasetus          | Kantama                 | Nopeus                    | SNR-raja                 | Paras käyttöön                                                                                                                     |
 | ------------------ | ----------------------- | ------------------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |

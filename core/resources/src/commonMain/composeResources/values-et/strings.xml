@@ -245,6 +245,7 @@
     <string name="config_display_wake_on_tap_or_motion_summary">Vajalik, et teie seadmes oleks kiirendusmõõtur.</string>
     <string name="config_lora_frequency_slot_summary">Teie sõlme töösagedus arvutatakse piirkonna, modemi eelseadistuse ja selle välja põhjal. Kui see on 0, arvutatakse pesa automaatselt primaarse kanali nime põhjal ja see muutub vaikimisi avalikust pesast. Muutke see tagasi avalikuks vaikepesaks, kui privaatsed primaarsed ja avalikud sekundaarsed kanalid on konfigureeritud.</string>
     <string name="config_lora_hop_limit_summary">Määrab hüpete maksimaalse arvu, vaikimisi on see 3. Hüpete suurendamine suurendab ka ülekoormust ja seda tuleks kasutada ettevaatlikult. 0 hüppega leviedastussõnumid ei saa ACK-sid.</string>
+    <string name="config_lora_modem_preset_licensed_summary">Selle piirkonna eelseadistused on ainult litsentseeritud (amatöörraadio) operaatoritele. Nende valimiseks lubage kasutaja konfis litsentseeritud amatöörraadio (amatöör).</string>
     <string name="config_lora_modem_preset_summary">Saadaval olevad modemi eelseadistused, vaikesäte on Long Fast.</string>
     <string name="config_lora_region_summary">Raadio kasutama hakkamise piirkond.</string>
     <string name="config_network_eth_enabled_summary">Etherneti lubamine keelab sinihamba ühenduse rakendusega. TCP-sõlmede ühendused pole Apple'i seadmetes saadaval.</string>
@@ -465,6 +466,7 @@
     <string name="doc_keywords_desktop">desktop,linux,macos,windows,serial</string>
     <string name="doc_keywords_discovery">avastamine,topoloogia,võrk,skaneerimine,naaber</string>
     <string name="doc_keywords_firmware">püsivara,värskendus,ota,välkmälu,versioon,taastamine</string>
+    <string name="doc_keywords_help">abi,dokumentatsioon,dokumendid,chirpy,assistent,otsing,võrguühenduseta</string>
     <string name="doc_keywords_map">kaart,teekonnapunkt,gps,asukoht,marker</string>
     <string name="doc_keywords_measurement">vormindaja,mõõdik,arv,lokaat,temperatuur,teisendus,api</string>
     <string name="doc_keywords_messages">sõnum,kanal,krüpteerimine,otseülekanne,kiirvestlus</string>
@@ -479,6 +481,7 @@
     <string name="doc_keywords_telemetry">telemeetria,andur,temperatuur,niiskus,rõhk,võimsus</string>
     <string name="doc_keywords_translate">tõlkimine,rahvahulk,lokaliseerimine,keel,i18n,panusta</string>
     <string name="doc_keywords_units">ühikud,lokaal,meetriline,imperial,temperatuur,vahemaa</string>
+    <string name="doc_keywords_widget">vidin,avakuva,kohalik statistika,vaade,aku,kasutus</string>
     <string name="doc_search_placeholder">Otsi dokumentatsiooni…</string>
     <string name="doc_section_developer">Arendaja juhis</string>
     <string name="doc_section_user">Kasutaja juhis</string>
@@ -488,6 +491,7 @@
     <string name="doc_title_desktop">Töölauarakendus</string>
     <string name="doc_title_discovery">Avastamine</string>
     <string name="doc_title_firmware">Püsivara värskendused</string>
+    <string name="doc_title_help">Abi &amp; Rakendusesisesed dokumendid</string>
     <string name="doc_title_map">Kaart &amp; Teekonnapunktid</string>
     <string name="doc_title_measurement">Mõõtmine &amp; vormindamine</string>
     <string name="doc_title_messages">Sõnumid &amp; Kanalid</string>
@@ -502,6 +506,7 @@
     <string name="doc_title_telemetry">Telemeetria &amp; Sensorid</string>
     <string name="doc_title_translate">Tõlgi rakendus</string>
     <string name="doc_title_units">Ühikud &amp; Asukoht</string>
+    <string name="doc_title_widget">Avakuva vidin</string>
     <string name="done">Valmis</string>
     <string name="dont_show_again_for_device">Ära selle seadme puhul enam kuva</string>
     <string name="double_tap_as_button_press">Topeltpuudutus nupuna</string>
@@ -534,6 +539,7 @@
     <string name="environment_metrics_use_fahrenheit">Keskkonnamõõdikud kasutavad Fahrenheiti</string>
     <string name="error">Viga</string>
     <string name="error_duty_cycle">Töötsükli limiit on saavutatud. Sõnumite saatmine ei ole hetkel võimalik. Proovi hiljem uuesti.</string>
+    <string name="error_recovery_exhausted">Pärast korduvaid katseid ei õnnestunud stabiilset ühendust luua. Uuesti proovimiseks vali palun sõlm.</string>
     <string name="establish_session">Ühenda &amp; ja halda</string>
     <string name="establishing_session">Kaugühenduse loomine…</string>
     <string name="ethernet_config">Etherneti valikud</string>
@@ -623,6 +629,7 @@
     <string name="firmware_update_retry">Proovi uuesti</string>
     <string name="firmware_update_save_dfu_file">Palun salvesta .uf2-fail oma seadme DFU-kettale.</string>
     <string name="firmware_update_select_file">Vali kohalik fail</string>
+    <string name="firmware_update_slow_bootloader_hint">Seadme alglaaduri värskendused on aeglased. OTAFIX alglaaduri flash võimaldab palju kiiremaid BLE värskendusi.</string>
     <string name="firmware_update_source_local">Allikas: kohalik fail</string>
     <string name="firmware_update_stable">Stabiilne</string>
     <string name="firmware_update_starting_dfu">DFU käivitamine...</string>
@@ -634,6 +641,7 @@
     <string name="firmware_update_unknown_error">Tundmatu viga</string>
     <string name="firmware_update_unknown_hardware">Tundmatu riistvaramudel: %1$d</string>
     <string name="firmware_update_unknown_release">Tundmatu väljalase</string>
+    <string name="firmware_update_unsupported_transport">Selle seadme püsivara värskendus ei toetata üle selle ühenduse. Värskendamiseks loo ühendus muul viisil (nt sinihamba ​​kaudu).</string>
     <string name="firmware_update_uploading">Laen püsivara...</string>
     <string name="firmware_update_usb_bootloader_warning">%1$s on tavaliselt varustatud alglaaduriga, mis ei toeta OTA värskendusi. Enne OTA värskendamist pead võib-olla USB kaudu OTA-toega alglaaduri käivitama.</string>
     <string name="firmware_update_usb_failed">USB-värskendus ebaõnnestus</string>
@@ -785,7 +793,35 @@
     <string name="location_disabled">Juurdepääs asukohale on välja lülitatud, ei saa asukohta teistele jagada.</string>
     <string name="location_sharing">Asukoha jagamine</string>
     <!-- LOCKDOWN -->
+    <string name="lockdown_backoff">Proovi uuesti %1$d sekundi pärast.</string>
+    <string name="lockdown_boots_remaining">Käivitusi alles</string>
+    <string name="lockdown_confirm_passphrase">Kinnita salasõna</string>
+    <string name="lockdown_disable">Keela lukustus</string>
+    <string name="lockdown_disable_message">Lukustuse väljalülitamiseks sisesta salasõna. Seade dekrüpteerib oma salvestusruumi ja taaskäivitub.</string>
+    <string name="lockdown_enable">Luba lukustus</string>
     <string name="lockdown_enable_ack">Saan aru</string>
+    <string name="lockdown_enable_warning">Tähelepanu: lukustuse lubamine lukustab silumispordi (SWD) toetatud riistvara. Lukustuse saab igal ajal salasõnaga välja lülitada ja seadme täielik kustutamine taastab vajadusel kõik.</string>
+    <string name="lockdown_enter_passphrase">Sisesta salasõna</string>
+    <string name="lockdown_hide_passphrase">Peida</string>
+    <string name="lockdown_hours_until_expiry">Tunde kuni kehtivusaja lõpuni</string>
+    <string name="lockdown_incorrect_passphrase">Vale salasõna.</string>
+    <string name="lockdown_lock_now">Lukusta nüüd</string>
+    <string name="lockdown_lock_reason">Põhjus: %1$s</string>
+    <string name="lockdown_mode">Lukustusrežiim</string>
+    <string name="lockdown_mode_setting_up">Seadistamine…</string>
+    <string name="lockdown_mode_summary_locked">Aktiivne – sisesta selle ühenduse avamiseks salasõna.</string>
+    <string name="lockdown_mode_summary_off">Krüpteeri seadme salvestusruum ja nõua iga ühenduse jaoks salasõna.</string>
+    <string name="lockdown_mode_summary_unlocked">Aktiivne – salvestusruum on krüpteeritud, see ühendus on autentitud.</string>
+    <string name="lockdown_passphrase">Salasõna</string>
+    <string name="lockdown_passphrases_do_not_match">Salasõna ei ühti</string>
+    <string name="lockdown_session_boots_remaining">Seanss: %1$d taaskäivitust jäänud</string>
+    <string name="lockdown_session_expires">Aegub %1$s</string>
+    <string name="lockdown_session_minutes">Seansi limiit (minutid)</string>
+    <string name="lockdown_session_minutes_help">Käivitusaja piirang. 0 = piiramatu.</string>
+    <string name="lockdown_session_no_time_limit">Ajapiirangut pole</string>
+    <string name="lockdown_set_passphrase">Määra salasõna</string>
+    <string name="lockdown_show_passphrase">Kuva</string>
+    <string name="lockdown_submit">Kinnita</string>
     <string name="locked">Lukustatud</string>
     <!-- LOG -->
     <string name="log_retention_days">MeshLogi säilitusperiood</string>
@@ -950,6 +986,8 @@
     <string name="no_network_devices_seen">Võrgu seadmeid ei tuvastatud</string>
     <string name="no_pax_metrics_logs">Pax mõõdikut pole saadaval.</string>
     <string name="no_usb_devices_found">USB seadmeid ei leitud</string>
+    <string name="no_usb_devices_hint">Jadapordi kasutamiseks ühenda seade USB-andmesidekaabli abil.</string>
+    <string name="no_usb_devices_seen">USB seadmeid ei tuvastatud</string>
     <!-- NODE -->
     <string name="node_count_template">(%1$d võrgus / %2$d näidatud / %3$d kokku)</string>
     <string name="node_filter_exclude_infrastructure">Välista infrastruktuur</string>

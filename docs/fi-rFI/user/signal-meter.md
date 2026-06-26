@@ -3,7 +3,7 @@ title: Kuinka Meshtastic-signaalimittari toimii
 parent: Käyttöopas
 nav_order: 15
 last_updated: 2026-06-25
-description: How the signal meter rates quality from SNR relative to the LoRa modem preset — spread spectrum, presets, and what the bars really mean.
+description: Miten signaalimittari arvioi signaalin laadun SNR-arvon perusteella suhteessa LoRa-modeemiesiasetukseen — hajaspektri, esiasetukset ja mitä palkit todellisuudessa tarkoittavat.
 aliases:
   - signaali
   - signaalimittari
@@ -13,7 +13,7 @@ aliases:
 
 # Kuinka Meshtastic-signaalimittari toimii
 
-The Meshtastic signal meter — the familiar bars or status color in the app — is calculated very differently than the "bars" on a traditional cell phone or WiFi router.
+Meshtasticin signaalimittari — sovelluksessa näkyvät tutut palkit tai tilan väri — lasketaan hyvin eri tavalla kuin perinteisen matkapuhelimen tai WiFi-reitittimen "palkit".
 
 Useimmat kuluttajalaitteet mittaavat yksinkertaisesti signaalin “voimakkuutta”. Koska Meshtastic käyttää **LoRa (Long Range)** -teknologiaa, signaalimittari arvioi sen sijaan kuinka “selkeä” signaali on suhteessa käytössä olevan mesh-verkon asetuksiin.
 
@@ -26,7 +26,7 @@ Aina kun LoRa-radio vastaanottaa viestin, se raportoi kaksi arvoa:
 - **RSSI (Received Signal Strength Indicator):** kuinka “voimakas” antenniin saapuva signaali on.
 - **SNR (Signal-to-Noise Ratio):** kuinka “selkeä” signaali on suhteessa taustakohinaan.
 
-> 💡 **Tip:** Here's an analogy — imagine you are trying to hear a friend talking to you.
+> 💡 **Vinkki:** Ajattele asiaa näin — yrität kuulla ystäväsi puhetta.
 >
 > - **RSSI** on kuinka kovaa hän puhuu.
 > - **Melutaso (Noise Floor)** on huoneen taustahäly (ilmastointi, muut ihmiset, liikenne).
@@ -38,7 +38,7 @@ Jos ystäväsi huutaa rock-konsertissa, signaali on erittäin voimakas (korkea R
 
 ## 2. LoRa:n “taika”: kuuleminen kohinan alta
 
-For standard radios (like FM or WiFi), if the background noise is louder than the signal (a negative SNR), the receiver just hears static.
+Tavallisessa radiossa (kuten FM- tai WiFi-yhteydessä), jos taustakohina on voimakkaampi kuin signaali (negatiivinen SNR), vastaanotin kuulee vain kohinaa.
 
 LoRa on erilainen. Se käyttää **hajaspektritekniikkaa (Spread Spectrum)**, joka mahdollistaa signaalin erottamisen myös silloin, kun se on taustakohinan alla. Siksi Meshtasticissa näkyy usein **negatiivisia SNR-arvoja** (esim. -10 dB tarkoittaa, että signaali on 10 dB heikompi kuin kohina).
 
@@ -48,18 +48,18 @@ Riippuen siitä, mitä Meshtastic-esiasetusta käytät (esim. “LongFast” vs.
 
 ## 3. Kuinka signaalimittari laskee laadun
 
-The app rates your signal quality (None, Bad, Fair, or Good) from **SNR alone, measured relative to the preset's SNR Limit** — the demodulation floor described above. It deliberately does **not** factor RSSI into the rating: without the local noise floor, RSSI cannot tell you whether a signal is actually decodable, so SNR-versus-the-preset-limit is the meaningful measure. (RSSI is still displayed to you elsewhere.)
+Sovellus arvioi signaalin laadun (Ei, Huono, Kohtalainen tai Hyvä) pelkästään **SNR**-arvon perusteella, suhteessa esiasetuksen **SNR-rajaan** — eli demodulaation alarajaan, joka on kuvattu aiemmin. Se ei tarkoituksella ota **RSSI**-arvoa huomioon arvioinnissa: ilman paikallista kohinatasoa RSSI ei kerro, voidaanko signaali todella purkaa, joten SNR suhteessa esiasetuksen rajaan on merkityksellinen mittari. (RSSI näytetään edelleen muualla sovelluksessa.)
 
-Because the rating is relative to the preset limit, the _same_ SNR can rate differently on different presets — `-15 dB` is healthy on `LongSlow` but unusable on `ShortFast`. Letting `limit` be the active preset's SNR Limit, here is how the app picks the bars (or color):
+Koska arviointi perustuu esiasetuksen rajaan, _sama_ SNR-arvo voi saada eri arvosanan eri esiasetuksilla — esimerkiksi `-15 dB` on hyvä arvo LongSlow-esiasetuksella, mutta käyttökelvoton ShortFast-esiasetuksella. Jos "raja" tarkoittaa käytössä olevan esiasetuksen SNR-rajaa, sovellus määrittää palkit (tai värin) seuraavasti:
 
-| Taso        | Palkit | Kriteerit                            | Merkitys                                                                                 |
-| ----------- | ------ | ------------------------------------ | ---------------------------------------------------------------------------------------- |
-| Hyvä        | 3      | SNR **above** the preset's `limit`   | Signal is comfortably above the demodulation floor — healthy connection. |
-| Kohtalainen | 2      | within `5.5 dB` below the `limit`    | Decodable, but getting close to the floor.                               |
-| Huono       | 1      | within `7.5 dB` below the `limit`    | At the very edge of what the preset can recover.                         |
-| ei mitään   | 0      | more than `7.5 dB` below the `limit` | Below the floor — transmission lost to noise.                            |
+| Taso        | Palkit | Kriteerit                              | Merkitys                                                                                   |
+| ----------- | ------ | -------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Hyvä        | 3      | SNR **esiasetuksen rajan yläpuolella** | Signaali on selvästi demodulaation alarajan yläpuolella — hyvä yhteys.     |
+| Kohtalainen | 2      | enintään 5,5 dB "rajan" alapuolella    | Signaali voidaan vielä purkaa, mutta se on lähellä demodulaation alarajaa. |
+| Huono       | 1      | enintään 7,5 dB "rajan" alapuolella    | Signaali on aivan esiasetuksen palautumiskyvyn rajalla.                    |
+| ei mitään   | 0      | yli 7,5 dB "rajan" alapuolella         | Signaali on demodulaation alarajan alapuolella — lähetys hukkuu kohinaan.  |
 
-> **Note:** The fixed SNR thresholds you may have seen elsewhere (`-7 dB` / `-15 dB`) are now only used for coloring individual hops in traceroute results — not for the per-node signal meter described here.
+> **Huomautus:** Kiinteitä SNR-rajoja, joita olet ehkä nähnyt muualla (−7 dB / −15 dB), käytetään nykyisin vain traceroute-tulosten yksittäisten hyppyjen väritykseen — ei radion yleisen signaalin laadun arviointiin.
 
 ---
 
@@ -67,9 +67,9 @@ Because the rating is relative to the preset limit, the _same_ SNR can rate diff
 
 Koska Meshtasticin mittari toimii enemmän **selkeysmittarina**, se käyttäytyy eri tavalla kuin useimmat odottavat:
 
-> 💡 **Tip:** Don't panic over low RSSI. You might see a seemingly terrible RSSI value like `-118 dBm`. Tavallisessa puhelimessa tämä tarkoittaisi käytännössä nollakenttää. Mutta jos SNR on esimerkiksi +2 dB, Meshtastic voi silti näyttää vahvaa signaalia! _Kirjasto on hiljainen, joten kuiskaus kuuluu täydellisesti._
+> 💡 **Vinkki:** Älä huolestu matalasta RSSI-arvosta. Saatat nähdä näennäisesti erittäin huonon RSSI-arvon, kuten `-118 dBm`. Tavallisessa puhelimessa tämä tarkoittaisi käytännössä nollakenttää. Mutta jos SNR on esimerkiksi +2 dB, Meshtastic voi silti näyttää vahvaa signaalia! _Kirjasto on hiljainen, joten kuiskaus kuuluu täydellisesti._
 
-> ⚠️ **Warning:** Watch out for local noise. If you hook up a massive antenna and see a great RSSI (e.g., `-90 dBm`) but your signal meter is only showing **1 Bar (Bad)**, you have a problem. Se tarkoittaa paikallista häiriötä — esimerkiksi halpa virtalähde, kohiseva elektroniikka tai lähellä oleva radiolähetin voi luoda niin paljon kohinaa, että se peittää mesh-verkon.
+> ⚠️ **Varoitus:** Kiinnitä huomiota paikalliseen kohinaan. Jos liität suuren antennin ja näet hyvän RSSI-arvon (esim. `-90 dBm`), mutta signaalimittari näyttää silti vain **1 palkin (Huono)**, yhteydessä on ongelma. Se tarkoittaa paikallista häiriötä — esimerkiksi halpa virtalähde, kohiseva elektroniikka tai lähellä oleva radiolähetin voi luoda niin paljon kohinaa, että se peittää mesh-verkon.
 
 ## Missä signaalitieto näkyy
 
@@ -84,9 +84,9 @@ Sovelluksessa signaalidata näkyy useissa paikoissa:
 
 ## Aiheeseen liittyvät aiheet
 
-- [Nodes](nodes) — where signal bars appear in the node list
-- [Node Metrics](node-metrics) — SNR/RSSI history and the per-node signal quality reference
-- [Settings — Radio & User](settings-radio-user) — modem presets and their SNR limits
+- [Radiot](nodes) — missä signaalipalkit näkyvät radioluettelossa
+- [Radion mittarit](node-metrics) — SNR ja RSSI-historia ja radion signaalin laadun viitearvot
+- [Asetukset — Radio ja käyttäjä](settings-radio-user) — modeemiesiasetukset ja niiden SNR-rajat
 
 ---
 

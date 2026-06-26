@@ -79,7 +79,7 @@ Kun viestin toimitus epäonnistuu, virheilmaisin näyttää, mikä meni pieleen:
 | Ei Käyttöliittymää                                     | Lähetykseen ei ole käytettävissä radioliitäntää | Tarkista, että radio on yhdistetty ja kanava on määritetty.                                                                                                              |
 | Kaikki uudelleenyritykset käytetty                     | Uudelleenyritysten enimmäismäärä saavutettu     | Mesh-reitti ei ole luotettava. Kokeile toista kanavaa tai odota olosuhteiden parantumista.                                                               |
 | Ei Kanavaa                                             | Kohdekanavaa ei ole olemassa                    | Varmista, että molemmilla radioilla on sama kanavakonfiguraatio.                                                                                                         |
-| Liian suuri                                            | Viesti ylittää sallitun enimmäiskoon            | Shorten your message (max ~200 characters).                                                                                           |
+| Liian suuri                                            | Viesti ylittää sallitun enimmäiskoon            | Lyhennä viestisi (enintään noin 200 merkkiä).                                                                                                         |
 | Ei vastausta                                           | Radio vastaanotti viestin mutta ei vastannut    | Vastaanottajan radio voi olla varattu tai virransäästötilassa.                                                                                                           |
 | Käyttöasteen rajoitus                                  | Alueellinen lähetysajan raja saavutettu         | Radiosi on käyttänyt sallitun lähetysajan. Odota, että käyttöasteen rajoituksen ikkuna nollautuu (tyypillisesti 1 tunti EU-alueilla). |
 | Virheellinen pyyntö                                    | Viallinen tai virheellinen viesti               | Tämä yleensä viittaa ohjelmistovirheeseen. Kokeile käynnistää sovellus uudelleen.                                                                        |
@@ -99,9 +99,9 @@ Valmiiksi määritetyt viestit nopeaan viestintään:
 
 ![Pikachatti-vaihtoehto](../../assets/screenshots/messages_quick_chat.png)
 
-Each quick chat entry has a short **Name** (the button label), the **Message** it inserts, and an **Instantly send** toggle — when enabled, tapping the button sends the message immediately instead of placing it in the input field for editing:
+Jokaisella pikaviestillä on lyhyt **Nimi** (painikkeen teksti), lisättävä **Viesti** sekä **Lähetä heti** -kytkin. Kun se on käytössä, painikkeen napauttaminen lähettää viestin välittömästi sen sijaan, että se lisättäisiin muokattavaksi syöttökenttään:
 
-![New quick chat dialog with name, message, and instantly-send toggle](../../assets/screenshots/messages_edit_quick_chat.png)
+![Uusi pikakeskusteluviestin valintaikkuna, jossa näkyvät nimi, viesti ja Lähetä heti -kytkin](../../assets/screenshots/messages_edit_quick_chat.png)
 
 Kanavalista näyttää jokaisen kanavan ja sen viimeisimmän viestin esikatselun.
 
@@ -155,7 +155,7 @@ Viestit jonotetaan ja lähetetään prioriteetin mukaan:
 
 ### Viestirajoitukset
 
-- **Maximum length:** 200 bytes (approximately 200 characters for ASCII text)
+- **Enimmäispituus:** 200 tavua (noin 200 merkkiä ASCII-tekstille)
 - **Rajoitusnopeus:** mesh-verkko tasaa lähetysajan oikeudenmukaisesti; suuri viestimäärä voi joutua rajoitetuksi
 - **Toimitus:** viestit yritetään lähettää uudelleen automaattisesti, jos kuittausta ei saada
 
