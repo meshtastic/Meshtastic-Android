@@ -16,9 +16,7 @@
  */
 package org.meshtastic.feature.firmware
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -29,16 +27,15 @@ import androidx.compose.ui.unit.dp
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.ui.theme.AppTheme
 
+// These previews intentionally wrap-content (no fillMaxSize) so the generated reference images are tight crops of
+// the status block — the docs reference the status component itself, not the whole screen. See docs/assets/screenshots.
+
 @PreviewLightDark
 @Composable
 fun VerifyingStatePreview() {
     AppTheme {
         Surface {
-            Column(
-                modifier = Modifier.fillMaxSize().padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-            ) {
+            Column(modifier = Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                 VerifyingState()
             }
         }
@@ -50,11 +47,7 @@ fun VerifyingStatePreview() {
 fun CheckingStatePreview() {
     AppTheme {
         Surface {
-            Column(
-                modifier = Modifier.fillMaxSize().padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-            ) {
+            Column(modifier = Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                 CheckingState()
             }
         }
@@ -66,11 +59,7 @@ fun CheckingStatePreview() {
 fun ErrorStatePreview() {
     AppTheme {
         Surface {
-            Column(
-                modifier = Modifier.fillMaxSize().padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-            ) {
+            Column(modifier = Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                 ErrorState(error = UiText.DynamicString("Connection lost"), onRetry = {})
             }
         }
@@ -82,11 +71,7 @@ fun ErrorStatePreview() {
 fun SuccessStatePreview() {
     AppTheme {
         Surface {
-            Column(
-                modifier = Modifier.fillMaxSize().padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-            ) {
+            Column(modifier = Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                 SuccessState(onDone = {})
             }
         }

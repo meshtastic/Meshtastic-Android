@@ -16,8 +16,13 @@
  */
 package org.meshtastic.feature.connections.component
 
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -71,7 +76,43 @@ fun ConnectingDeviceInfoPreview() {
 @PreviewLightDark
 @Composable
 fun EmptyStateContentPreview() {
-    AppTheme { EmptyStateContent(text = "No devices found", imageVector = MeshtasticIcons.Search) }
+    // Bounded height so the docs reference is a tight crop of the empty-state block, not a full-screen frame
+    // (EmptyStateContent fills its parent to center its content).
+    AppTheme {
+        Surface(modifier = Modifier.fillMaxWidth().height(220.dp)) {
+            EmptyStateContent(text = "No devices found", imageVector = MeshtasticIcons.Search)
+        }
+    }
+}
+
+// Real Connections-screen Bluetooth scan: the device list with the scan-in-progress header and a discovered radio.
+// Replaces the old wifi-provision "Searching for device…" splash that was mislabeled as the BLE scan in the docs.
+@PreviewLightDark
+@Composable
+fun BluetoothScanPreview() {
+    AppTheme {
+        Surface(modifier = Modifier.fillMaxWidth().height(320.dp)) {
+            DeviceList(
+                connectionState = ConnectionState.Disconnected,
+                selectedDevice = "",
+                bleDevices =
+                listOf(
+                    DeviceListEntry.Ble(PreviewBleDevice(address = "AA:BB:CC:DD:EE:FF", name = "Meshtastic_abcd")),
+                ),
+                usbDevices = emptyList(),
+                discoveredTcpDevices = emptyList(),
+                recentTcpDevices = emptyList(),
+                isBleScanning = true,
+                isNetworkScanning = false,
+                activeTransport = DeviceType.BLE,
+                onSelectDevice = {},
+                onToggleBleScan = {},
+                onToggleNetworkScan = {},
+                onAddManualAddress = { _, _ -> },
+                onRemoveRecentAddress = {},
+            )
+        }
+    }
 }
 
 @PreviewLightDark

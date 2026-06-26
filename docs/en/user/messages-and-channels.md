@@ -2,7 +2,7 @@
 title: Messages & Channels
 parent: User Guide
 nav_order: 3
-last_updated: 2026-06-11
+last_updated: 2026-06-25
 description: Send and receive messages, manage channels, configure encryption, search conversations, and use quick chat, reactions, and message actions.
 aliases:
   - channels
@@ -79,7 +79,7 @@ When a message fails to deliver, the error indicator shows what went wrong:
 | No Interface | No radio interface available to send | Check that your radio is connected and the channel is configured. |
 | Max Retransmit | All retry attempts exhausted | The mesh path is unreliable. Try a different channel or wait for conditions to improve. |
 | No Channel | The destination channel doesn't exist | Verify both nodes share the same channel configuration. |
-| Too Large | Message exceeds maximum payload size | Shorten your message (max ~230 characters). |
+| Too Large | Message exceeds maximum payload size | Shorten your message (max ~200 characters). |
 | No Response | Node received message but didn't respond | The recipient's radio may be busy or in low-power sleep mode. |
 | Duty Cycle Limit | Regional airtime limit reached | Your radio has used its allowed transmit time. Wait for the duty cycle window to reset (typically 1 hour in EU regions). |
 | Bad Request | Malformed or invalid message | This usually indicates a software bug. Try restarting the app. |
@@ -97,6 +97,10 @@ Pre-configured messages for rapid communication:
 - Useful when typing is impractical (gloves, small screen, urgent)
 
 ![Quick chat option](../../assets/screenshots/messages_quick_chat.png)
+
+Each quick chat entry has a short **Name** (the button label), the **Message** it inserts, and an **Instantly send** toggle — when enabled, tapping the button sends the message immediately instead of placing it in the input field for editing:
+
+![New quick chat dialog with name, message, and instantly-send toggle](../../assets/screenshots/messages_edit_quick_chat.png)
 
 The channel list shows each channel with its latest message preview.
 
@@ -147,7 +151,7 @@ Messages are queued and transmitted based on priority:
 
 ### Message Limits
 
-- **Maximum length:** 237 bytes (approximately 230 characters for ASCII text)
+- **Maximum length:** 200 bytes (approximately 200 characters for ASCII text)
 - **Rate limiting:** The mesh enforces airtime fairness; heavy message volume may be throttled
 - **Delivery:** Messages are retried automatically if no acknowledgment is received
 

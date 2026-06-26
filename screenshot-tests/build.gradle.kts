@@ -48,7 +48,6 @@ dependencies {
     implementation(project(":feature:wifi-provision"))
     implementation(project(":feature:connections"))
     implementation(project(":feature:settings"))
-    implementation(project(":feature:firmware"))
     implementation(project(":feature:intro"))
     implementation(project(":feature:map"))
     implementation(project(":feature:docs"))
@@ -68,6 +67,8 @@ tasks.register<Copy>("copyDocsScreenshots") {
     group = "documentation"
 
     val referenceDir = layout.projectDirectory.dir("src/screenshotTestDebug/reference")
+    // Doc-framed compositions live in the generate-only :docs-screenshots module; aggregate its references too.
+    val docsReferenceDir = rootProject.layout.projectDirectory.dir("docs-screenshots/src/screenshotTestDebug/reference")
     val manifestFile = layout.projectDirectory.file("docs-screenshots-manifest.txt")
     val aliasFile = layout.projectDirectory.file("docs-screenshot-aliases.properties")
     val outputDir = rootProject.layout.projectDirectory.dir("docs/assets/screenshots")
@@ -83,6 +84,7 @@ tasks.register<Copy>("copyDocsScreenshots") {
         }
 
     from(referenceDir) { include(manifestPatterns) }
+    from(docsReferenceDir) { include(manifestPatterns) }
     into(outputDir)
 
     // Build reverse alias map (CST name → semantic name) for renaming during copy.

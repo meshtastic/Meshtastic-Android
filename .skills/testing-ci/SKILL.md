@@ -62,9 +62,24 @@ Run these when relevant to map, provider, or flavor-specific behavior:
 ./gradlew testFdroidDebug testGoogleDebug
 ```
 
+## 3b) Screenshot testing (two modules)
+
+Compose Preview Screenshot Testing (AGP/layoutlib) is split into two modules — keep the distinction:
+
+- **`:screenshot-tests`** — visual-regression **gate**. CI runs `:screenshot-tests:validateDebugScreenshotTest`. Holds atomic, dual-purpose components. Touching one of these previews is expected to move a gated baseline.
+- **`:docs-screenshots`** — **generate-only**, NOT validated in CI. Holds doc-framed compositions (crops/full screens tuned for the docs site). Reframe these freely; it never churns the regression gate.
+
+```bash
+./gradlew :screenshot-tests:updateDebugScreenshotTest   # regression goldens
+./gradlew :docs-screenshots:updateDebugScreenshotTest   # doc-framed composition images
+./gradlew :screenshot-tests:copyDocsScreenshots         # copy doc images from BOTH modules → docs/assets
+```
+
+Rendering is **host-deterministic** (layoutlib): a local `update` produces references byte-identical to CI, so locally-recorded goldens pass `validate`. `copyDocsScreenshots` overwrites a stale committed `nodes_detail_local.png` each run — `git checkout` it. Public previews consumed cross-module by a wrapper need a `detekt-baseline.xml` entry (PreviewPublic). New screenshot? Pick the module by purpose; see `docs/assets/screenshots/README.md`.
+
 ## 4) CI Pipeline Architecture
 
-CI is defined in `.github/workflows/reusable-check.yml` and structured as four parallel job groups:
+CI is defined in `.github/workflows/reusable-check.yml` and structured as parallel job groups:
 
 1. **`lint-check`** — Runs spotless, detekt, Android lint, and KMP smoke compile in a single Gradle invocation (avoids 3x cold-start overhead). Uses `fetch-depth: 0` (full clone) for spotless ratcheting and version code calculation. Produces `cache_read_only` output and computed `version_code` for downstream jobs.
 2. **`test-shards`** — A 3-shard matrix that runs unit tests in parallel (depends on `lint-check`):
@@ -75,6 +90,7 @@ CI is defined in `.github/workflows/reusable-check.yml` and structured as four p
    Downstream jobs use `fetch-depth: 1` and receive `VERSION_CODE` from lint-check via env var, enabling shallow clones.
 3. **`android-check`** — Builds APKs for all flavors (depends on `lint-check`).
 4. **`build-desktop`** — Multi-OS matrix (`macos-latest`, `windows-latest`, `ubuntu-24.04`, `ubuntu-24.04-arm`) that builds desktop distributions via `createDistributable` (depends on `lint-check`).
+5. **`screenshot-check`** — Runs `:screenshot-tests:validateDebugScreenshotTest` (the visual-regression gate) and uploads a diff report. Note: `:docs-screenshots` is intentionally NOT validated here (generate-only).
 
 ### Runner Strategy (Three Tiers)
 - **`ubuntu-24.04-arm`** — Lightweight/utility jobs (status checks, labelers, triage, changelog, release metadata, stale, moderation). Benefits from ARM runners' shorter queue times.

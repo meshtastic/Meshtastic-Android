@@ -23,7 +23,6 @@ import org.meshtastic.feature.connections.component.ConnectingDeviceInfoPreview
 import org.meshtastic.feature.connections.component.DeviceListItemPreview
 import org.meshtastic.feature.connections.component.DeviceSectionHeaderPreview
 import org.meshtastic.feature.connections.component.DisconnectButtonPreview
-import org.meshtastic.feature.connections.component.EmptyStateContentPreview
 import org.meshtastic.feature.connections.component.TransportSelectorPreview
 
 @PreviewTest
@@ -45,13 +44,6 @@ fun ScreenshotDisconnectButton() {
 @Composable
 fun ScreenshotConnectingDeviceInfo() {
     ConnectingDeviceInfoPreview()
-}
-
-@PreviewTest
-@PreviewLightDark
-@Composable
-fun ScreenshotEmptyStateContent() {
-    EmptyStateContentPreview()
 }
 
 @PreviewTest

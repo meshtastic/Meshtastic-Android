@@ -27,6 +27,7 @@ import org.meshtastic.core.resources.doc_keywords_connections
 import org.meshtastic.core.resources.doc_keywords_desktop
 import org.meshtastic.core.resources.doc_keywords_discovery
 import org.meshtastic.core.resources.doc_keywords_firmware
+import org.meshtastic.core.resources.doc_keywords_help
 import org.meshtastic.core.resources.doc_keywords_map
 import org.meshtastic.core.resources.doc_keywords_messages
 import org.meshtastic.core.resources.doc_keywords_mqtt
@@ -40,12 +41,14 @@ import org.meshtastic.core.resources.doc_keywords_tak
 import org.meshtastic.core.resources.doc_keywords_telemetry
 import org.meshtastic.core.resources.doc_keywords_translate
 import org.meshtastic.core.resources.doc_keywords_units
+import org.meshtastic.core.resources.doc_keywords_widget
 import org.meshtastic.core.resources.doc_title_android_auto
 import org.meshtastic.core.resources.doc_title_app_functions
 import org.meshtastic.core.resources.doc_title_connections
 import org.meshtastic.core.resources.doc_title_desktop
 import org.meshtastic.core.resources.doc_title_discovery
 import org.meshtastic.core.resources.doc_title_firmware
+import org.meshtastic.core.resources.doc_title_help
 import org.meshtastic.core.resources.doc_title_map
 import org.meshtastic.core.resources.doc_title_messages
 import org.meshtastic.core.resources.doc_title_mqtt
@@ -59,6 +62,7 @@ import org.meshtastic.core.resources.doc_title_tak
 import org.meshtastic.core.resources.doc_title_telemetry
 import org.meshtastic.core.resources.doc_title_translate
 import org.meshtastic.core.resources.doc_title_units
+import org.meshtastic.core.resources.doc_title_widget
 import org.meshtastic.feature.docs.model.DocBundle
 import org.meshtastic.feature.docs.model.DocPage
 import org.meshtastic.feature.docs.model.DocPageContent
@@ -430,6 +434,26 @@ class DefaultDocBundleLoader : DocBundleLoader {
                 listOf("app-functions", "system-ai", "gemini", "assistant"),
                 2750,
                 "app-functions",
+            ),
+            UserPageDef(
+                "widget",
+                CoreRes.string.doc_title_widget,
+                CoreRes.string.doc_keywords_widget,
+                "en/user/widget.html",
+                20,
+                listOf("widget", "home-screen-widget", "local-stats-widget"),
+                1700,
+                "widget",
+            ),
+            UserPageDef(
+                "help-and-docs",
+                CoreRes.string.doc_title_help,
+                CoreRes.string.doc_keywords_help,
+                "en/user/help-and-docs.html",
+                21,
+                listOf("help", "docs-browser", "chirpy", "assistant"),
+                1900,
+                "help",
             ),
         )
 

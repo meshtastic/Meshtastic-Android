@@ -243,11 +243,11 @@ jobs:
           # Preview files changed
           preview_changed=$(echo "$changed" | grep -E 'Preview.*\.kt$' || true)
 
-          # Screenshot test files changed
-          screenshot_tests_changed=$(echo "$changed" | grep -E '^screenshot-tests/src/screenshotTest/.*\.kt$' || true)
+          # Screenshot test files changed (regression gate + generate-only docs module)
+          screenshot_tests_changed=$(echo "$changed" | grep -E '^(screenshot-tests|docs-screenshots)/src/screenshotTest/.*\.kt$' || true)
 
-          # Reference images changed
-          refs_changed=$(echo "$changed" | grep -E '^screenshot-tests/src/screenshotTestDebug/reference/.*\.png$' || true)
+          # Reference images changed (either module)
+          refs_changed=$(echo "$changed" | grep -E '^(screenshot-tests|docs-screenshots)/src/screenshotTestDebug/reference/.*\.png$' || true)
 
           echo "ui_changed<<EOF" >> "$GITHUB_OUTPUT"
           echo "$ui_changed" >> "$GITHUB_OUTPUT"
@@ -305,9 +305,9 @@ jobs:
               '',
               '**Adding previews checklist:**',
               '1. Create or update a `*Previews.kt` file in the same module with `@PreviewLightDark`',
-              '2. Add `@Suppress("PreviewPublic")` if the preview is consumed by screenshot-tests',
-              '3. Add corresponding `@PreviewTest` function in `screenshot-tests/src/screenshotTest/`',
-              '4. Run `./gradlew :screenshot-tests:updateDebugScreenshotTest` to generate reference images',
+              '2. Baseline the public preview in the module `detekt-baseline.xml` (or `@Suppress("PreviewPublic")`) if it is consumed cross-module by a screenshot wrapper',
+              '3. Add a `@PreviewTest` wrapper: in `screenshot-tests/src/screenshotTest/` for a regression-gated component, or `docs-screenshots/src/screenshotTest/` for a doc-framed composition',
+              '4. Run `./gradlew :screenshot-tests:updateDebugScreenshotTest` (and `:docs-screenshots:updateDebugScreenshotTest` for doc compositions) to generate reference images',
               '',
               'If this PR does **not** require preview updates (e.g., logic-only change, non-visual refactor), add the **`skip-preview-check`** label to dismiss.',
             ].join('\n');
@@ -357,9 +357,11 @@ jobs:
               '',
               '**How to update:**',
               '```bash',
-              './gradlew :screenshot-tests:updateDebugScreenshotTest',
+              './gradlew :screenshot-tests:updateDebugScreenshotTest   # regression goldens',
+              './gradlew :docs-screenshots:updateDebugScreenshotTest   # doc-framed compositions',
+              './gradlew :screenshot-tests:copyDocsScreenshots         # refresh docs/assets from both',
               '```',
-              'Then commit the updated reference PNGs.',
+              'Then commit the updated reference PNGs (and any refreshed `docs/assets/screenshots/*.png`).',
               '',
               'If this change is intentionally preview-only (e.g., adding a preview that doesn\'t need a test yet), add the **`skip-preview-check`** label.',
             ].join('\n');

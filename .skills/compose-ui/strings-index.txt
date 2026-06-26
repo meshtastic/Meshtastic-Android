@@ -444,6 +444,7 @@ doc_keywords_connections
 doc_keywords_desktop
 doc_keywords_discovery
 doc_keywords_firmware
+doc_keywords_help
 doc_keywords_map
 doc_keywords_measurement
 doc_keywords_messages
@@ -458,6 +459,7 @@ doc_keywords_tak
 doc_keywords_telemetry
 doc_keywords_translate
 doc_keywords_units
+doc_keywords_widget
 doc_search_placeholder
 doc_section_developer
 doc_section_user
@@ -467,6 +469,7 @@ doc_title_connections
 doc_title_desktop
 doc_title_discovery
 doc_title_firmware
+doc_title_help
 doc_title_map
 doc_title_measurement
 doc_title_messages
@@ -481,6 +484,7 @@ doc_title_tak
 doc_title_telemetry
 doc_title_translate
 doc_title_units
+doc_title_widget
 done
 dont_show_again_for_device
 double_tap_as_button_press

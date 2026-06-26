@@ -38,6 +38,8 @@ Keep the last 5–8 entries and trim older ones from the bottom.
 
 **June 2026** — AIDL/`IMeshService` removed (#5586). The mesh service is now in-process only, driven entirely through `RadioController` — no cross-process binder, no `aidl` stubs.
 
+**June 2026** — [Testing](developer/testing) — Split the screenshot pipeline: the new generate-only `:docs-screenshots` module holds doc-framed compositions, while `:screenshot-tests` stays the CI visual-regression gate — so reframing a doc image no longer churns a test baseline.
+
 **June 2026** — New feature modules: `feature:discovery` (mesh network discovery, #5275) and `feature:car` (Android Auto / Car App Library, google flavor only, #5633).
 
 **June 2026** — [Testing](developer/testing) — Added the `:baselineprofile` module (#5735): a Macrobenchmark cold-start journey generates a Baseline Profile for `:androidApp` to AOT-compile hot startup paths.
