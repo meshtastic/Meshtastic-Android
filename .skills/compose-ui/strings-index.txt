@@ -1304,6 +1304,7 @@ security_icon_warning_precise_mqtt
 security_signed_message_info
 security_signed_node
 security_signed_node_desc
+security_signed_node_help
 security_signed_verified
 select
 select_all

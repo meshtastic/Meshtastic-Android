@@ -1346,6 +1346,7 @@
     <string name="security_signed_message_info">Verified with the sender\'s key.</string>
     <string name="security_signed_node">Signed node</string>
     <string name="security_signed_node_desc">Verified automatically</string>
+    <string name="security_signed_node_help">This node signs its broadcasts with XEdDSA. Broadcasts you see from it are verified by the radio using its identity key.</string>
     <string name="security_signed_verified">Signed · verified</string>
     <string name="select">Select</string>
     <string name="select_all">Select all</string>

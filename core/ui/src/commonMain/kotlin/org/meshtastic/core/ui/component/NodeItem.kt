@@ -65,7 +65,6 @@ import org.meshtastic.core.resources.current
 import org.meshtastic.core.resources.elevation_suffix
 import org.meshtastic.core.resources.node_list_click_label
 import org.meshtastic.core.resources.node_list_long_click_label
-import org.meshtastic.core.resources.security_signed_node
 import org.meshtastic.core.resources.signal_quality
 import org.meshtastic.core.resources.unknown_username
 import org.meshtastic.core.resources.voltage
@@ -74,7 +73,6 @@ import org.meshtastic.core.ui.icon.ChannelUtilization
 import org.meshtastic.core.ui.icon.MapCompass
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Notes
-import org.meshtastic.core.ui.icon.ShieldCheck
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.util.LocalModemPreset
 import org.meshtastic.proto.Config
@@ -454,15 +452,10 @@ internal fun StatusAwareLastHeard(lastHeard: Int, online: Boolean, contentColor:
 
 /** Key status (always status-colored) + the signed-node shield share one scrim chip so both stay legible. */
 @Composable
-internal fun NodeSecurityIcons(thatNode: Node, iconSize: Dp = 20.dp) {
-    StatusSurface {
+fun NodeSecurityIcons(thatNode: Node, modifier: Modifier = Modifier, iconSize: Dp = 20.dp) {
+    StatusSurface(modifier = modifier) {
         if (thatNode.signsPackets) {
-            Icon(
-                imageVector = MeshtasticIcons.ShieldCheck,
-                contentDescription = stringResource(Res.string.security_signed_node),
-                modifier = Modifier.size(iconSize),
-                tint = MaterialTheme.colorScheme.StatusGreen,
-            )
+            NodeSignedStatusIcon(modifier = Modifier.size(iconSize))
         }
         NodeKeyStatusIcon(
             hasPKC = thatNode.hasPKC,
