@@ -289,6 +289,7 @@ class AndroidBluetoothRepositoryBondTest {
             val repo = newRepository(UnconfinedTestDispatcher(testScheduler))
 
             val failure = launchBond(repo, mac)
+            deviceShadow.setBondState(BluetoothDevice.BOND_NONE)
             advanceTimeBy(499L)
             assertFalse(failure.isCompleted, "bond() should still be waiting before the initial grace poll")
             advanceTimeBy(2L)
