@@ -18,7 +18,7 @@ The Nodes screen displays all devices visible on your mesh network.
 
 The node list shows every node your radio has heard, including:
 
-- **Node name** — user-configured long name
+- **Sõlme nimi** — kasutaja pandud pikk nimi
 - **Short name** — 4-character identifier
 - **Signal quality** — last heard signal strength
 - **Last heard** — time since last communication
@@ -37,7 +37,7 @@ A node is considered **online** if it was heard within the last 2 hours, and **o
 
 ### Node Roles
 
-Nodes can be configured with different roles that affect their mesh behavior:
+Sõlmedele saab määrata erinevaid rolle, mis mõjutavad nende kärgvõrgus käitumist:
 
 | Roll                             | Kirjeldus                                                                                                                                                               |
 | -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -127,11 +127,11 @@ Type in the search field to filter nodes by name or short name. Filter uueneb re
 
 Sõlmel klõpsamine avab detailvaate koos põhjaliku teabega. See [Node Metrics](node-metrics) for full details on metrics and telemetry.
 
-![Node detail view](../../assets/screenshots/nodes_node_list.png)
+![Sõlme detailvaade](../../assets/screenshots/nodes_node_list.png)
 
 The detail screen includes device info, position, and action buttons:
 
-![Node detail section](../../assets/screenshots/nodes_detail_section.png)
+![Sõlme üksikasjade jaotis](../../assets/screenshots/nodes_detail_section.png)
 
 Inline status indicators show key metrics at a glance:
 

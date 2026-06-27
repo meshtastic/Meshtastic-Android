@@ -8,7 +8,7 @@ description: How the app formats temperature, distance, speed, and other measure
 
 # Units, Measurement & Locale
 
-Meshtastic rakendus kuvab automaatselt temperatuure, vahemaid, kiirusi ja aegu ühikutes, milleks sinu seade on konfitud – rakenduses pole vaja sätteid muuta.
+Meshtastic rakendus kuvab automaatselt temperatuure, vahemaid, kiirusi ja aegu ühikutes, milleks sinu seade on seadistatud – rakenduses pole vaja sätteid muuta.
 
 ---
 

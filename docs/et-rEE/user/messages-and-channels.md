@@ -17,7 +17,7 @@ Meshtastic toetab kahte suhtlusrežiimi: **kanalite levitamine** ja **otsesõnum
 
 ## Kanal
 
-Channels are shared communication groups. All nodes configured with the same channel key can read and send messages on that channel.
+Channels are shared communication groups. Kõik sama kanalivõtmega seadistatud sõlmed saavad sellel kanalil sõnumeid lugeda ja saata.
 
 ### Default Channel
 
@@ -76,7 +76,7 @@ When a message fails to deliver, the error indicator shows what went wrong:
 | No Route         | No path exists to the destination node   | The recipient may be offline or out of mesh range. Try later or move closer.                                                                |
 | Got NAK          | The next-hop node refused to relay       | The relay node may be congested. Wait and retry.                                                                                            |
 | Aegunud          | No acknowledgment within retry window    | The recipient may be just out of range. Try increasing hop limit or moving to a better position.                                            |
-| Liidest pole     | No radio interface available to send     | Check that your radio is connected and the channel is configured.                                                                                           |
+| Liidest pole     | No radio interface available to send     | Kontrolli, kas raadio on ühendatud ja kanal on seadistatud.                                                                                                 |
 | Max Retransmit   | All retry attempts exhausted             | The mesh path is unreliable. Try a different channel or wait for conditions to improve.                                                     |
 | Kanalit pole     | The destination channel doesn't exist    | Verify both nodes share the same channel configuration.                                                                                                     |
 | Too Large        | Sõnum ületab maksimaalset sõnumi mahtu   | Shorten your message (max ~200 characters).                                                                              |
@@ -90,7 +90,7 @@ When a message fails to deliver, the error indicator shows what went wrong:
 
 ### Quick Chat
 
-Pre-configured messages for rapid communication:
+Eelsalvestatud sõnumid kiireks suhtluseks:
 
 - Access via the Quick Chat button in the message input area
 - Choose from built-in phrases or custom messages

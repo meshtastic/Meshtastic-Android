@@ -68,7 +68,7 @@ After the firmware is written, the app verifies the update and waits for the dev
 
 ![Verifying update and waiting for the device to reconnect](../../assets/screenshots/firmware_verifying.png)
 
-Once the update succeeds:
+Kui värskendus õnnestub:
 
 - The radio will reboot automatically
 - Bluetooth connection will re-establish

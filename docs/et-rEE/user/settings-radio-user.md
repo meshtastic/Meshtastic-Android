@@ -145,17 +145,17 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 
 ### Turva sätted
 
-| Setting                   | Kirjeldus                                                                            |
-| ------------------------- | ------------------------------------------------------------------------------------ |
-| Avalik võti               | Your node's public key (read-only)                                |
-| Administraatori võti      | Key for remote administration                                                        |
-| Salajane võti             | Your node's private key (handle securely)                         |
-| ~~Admin Channel Enabled~~ | ⚠️ Eemaldatud — nüüd konfitakse automaatselt, kui administraatori võti on määratud   |
-| Debug Log                 | Edasta reaalajas silumislogi jadapordi/sinihamba ​​kaudu                             |
-| Jadaport lubatud          | Luba jadapordi konsoolile juurdepääs (teisaldatud seadme konfist) |
-| Hallatud režiim           | Restrict non-admin channel changes                                                   |
+| Setting                   | Kirjeldus                                                                             |
+| ------------------------- | ------------------------------------------------------------------------------------- |
+| Avalik võti               | Your node's public key (read-only)                                 |
+| Administraatori võti      | Key for remote administration                                                         |
+| Salajane võti             | Your node's private key (handle securely)                          |
+| ~~Admin Channel Enabled~~ | ⚠️ Eemaldatud — nüüd seadistatakse automaatselt, kui administraatori võti on määratud |
+| Debug Log                 | Edasta reaalajas silumislogi jadapordi/sinihamba ​​kaudu                              |
+| Jadaport lubatud          | Luba jadapordi konsoolile juurdepääs (teisaldatud seadme konfist)  |
+| Hallatud režiim           | Restrict non-admin channel changes                                                    |
 
-![Password field](../../assets/screenshots/settings_password_field.png)
+![Parooli väli](../../assets/screenshots/settings_password_field.png)
 
 Settings use standard preference controls — dropdowns, toggles, and sliders:
 

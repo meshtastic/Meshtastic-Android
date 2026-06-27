@@ -42,7 +42,7 @@ You can filter devices by transport type using the filter chips at the top:
 | 🟢   | Ühendatud        | Active radio link established |
 | 🟡   | Ühendan          | Handshake in progress         |
 | 🔴   | Ühendus katkenud | No active connection          |
-| ⚪    | Not configured   | Seadet pole valitud           |
+| ⚪    | Pole seadistatud | Seadet pole valitud           |
 
 When connecting, a status indicator shows the current connection state:
 
@@ -50,7 +50,7 @@ When connecting, a status indicator shows the current connection state:
 
 If no devices are found, the app shows an empty state with instructions:
 
-![No devices found](../../assets/screenshots/connections_empty_state.png)
+![Ühtegi seadet ei leitud](../../assets/screenshots/connections_empty_state.png)
 
 ### Troubleshooting Bluetooth
 
