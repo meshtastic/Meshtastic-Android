@@ -18,7 +18,6 @@
 
 package org.meshtastic.core.ui.component
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -42,7 +41,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
@@ -78,8 +76,6 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.util.LocalModemPreset
 import org.meshtastic.proto.Config
 
-private const val ACTIVE_BORDER_ALPHA = 0.65f
-private const val INACTIVE_BORDER_ALPHA = 0.3f
 private const val GRID_COLUMNS = 3
 
 @Composable
@@ -115,15 +111,8 @@ fun NodeItem(
     val contentColor = MaterialTheme.colorScheme.onSurface
     val nodeColor =
         (if (isThisNode) thisNode?.colors?.second else thatNode.colors.second)?.let { Color(it) } ?: Color.Transparent
-    val cardContainerColor = CardDefaults.cardColors().containerColor
-    val tintedContainerColor =
-        if (nodeColor == Color.Transparent) cardContainerColor else lerp(cardContainerColor, nodeColor, 0.08f)
-    val cardColors = CardDefaults.cardColors(containerColor = tintedContainerColor)
-    val borderColor =
-        (if (isThisNode) thisNode?.colors?.second else thatNode.colors.second)?.let {
-            Color(it).copy(alpha = if (isActive) ACTIVE_BORDER_ALPHA else INACTIVE_BORDER_ALPHA)
-        }
-    val cardBorder = borderColor?.let { BorderStroke(1.5.dp, it) }
+    val cardColors = CardDefaults.cardColors(containerColor = nodeTintedContainer(nodeColor))
+    val cardBorder = nodeBorderStroke(nodeColor, active = isActive)
 
     val style =
         if (thatNode.isUnknownUser) {

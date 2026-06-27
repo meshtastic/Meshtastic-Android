@@ -16,7 +16,6 @@
  */
 package org.meshtastic.feature.messaging.component
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -69,11 +68,16 @@ import org.meshtastic.core.resources.reply
 import org.meshtastic.core.resources.security_signed_verified
 import org.meshtastic.core.ui.component.AutoLinkText
 import org.meshtastic.core.ui.component.HighlightedText
+import org.meshtastic.core.ui.component.NODE_TINT_EMPHASIZED
+import org.meshtastic.core.ui.component.NODE_TINT_MUTED
+import org.meshtastic.core.ui.component.NODE_TINT_NORMAL
 import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.component.Rssi
 import org.meshtastic.core.ui.component.Snr
 import org.meshtastic.core.ui.component.StatusSurface
 import org.meshtastic.core.ui.component.TransportIcon
+import org.meshtastic.core.ui.component.nodeBorderStroke
+import org.meshtastic.core.ui.component.nodeTintedContainer
 import org.meshtastic.core.ui.emoji.EmojiPickerDialog
 import org.meshtastic.core.ui.icon.FormatQuote
 import org.meshtastic.core.ui.icon.HopCount
@@ -187,16 +191,16 @@ fun MessageItem(
     val containsBel = message.text.contains('\u0007')
 
     val nodeColor = Color(if (message.fromLocal) ourNode.colors.second else node.colors.second)
-    val alpha =
-        if (message.filtered) {
-            FILTERED_ALPHA
-        } else if (inSelectionMode) {
-            if (selected) SELECTED_ALPHA else UNSELECTED_ALPHA
-        } else {
-            NORMAL_ALPHA
+    // Match the node card: a faint node wash over the neutral surface + a node outline (more AA than a saturated
+    // fill).
+    val tintFraction =
+        when {
+            inSelectionMode && selected -> NODE_TINT_EMPHASIZED
+            message.filtered || (inSelectionMode && !selected) -> NODE_TINT_MUTED
+            else -> NODE_TINT_NORMAL
         }
-
-    val containerColor = nodeColor.copy(alpha = alpha)
+    val containerColor = nodeTintedContainer(nodeColor, fraction = tintFraction)
+    val cardBorder = nodeBorderStroke(nodeColor, active = selected)
     val contentColor = MaterialTheme.colorScheme.onSurface
     val metadataStyle = MaterialTheme.typography.labelSmall
     val messageShape =
@@ -257,7 +261,7 @@ fun MessageItem(
         color = containerColor,
         contentColor = contentColor,
         shape = messageShape,
-        border = BorderStroke(0.5.dp, nodeColor),
+        border = cardBorder,
     ) {
         Column(modifier = Modifier.width(IntrinsicSize.Max)) {
             OriginalMessageSnippet(
@@ -370,11 +374,6 @@ fun MessageItem(
         onShowReactions = onShowReactions,
     )
 }
-
-private const val SELECTED_ALPHA = 0.6f
-private const val UNSELECTED_ALPHA = 0.2f
-private const val NORMAL_ALPHA = 0.4f
-private const val FILTERED_ALPHA = 0.5f
 
 private enum class ActiveSheet {
     Actions,
