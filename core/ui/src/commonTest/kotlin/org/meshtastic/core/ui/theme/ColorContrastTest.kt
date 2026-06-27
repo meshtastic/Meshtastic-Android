@@ -52,4 +52,24 @@ class ColorContrastTest {
         val onDark = statusGreen.ensureContrastOn(Color.Black)
         assertEquals(statusGreen, onDark, "already-contrasting color must be returned untouched")
     }
+
+    @Test
+    fun allStatusColorsReachAaOnEveryBubbleShade() {
+        // Every quality color (good/fair/bad/none) flows through ensureContrastOn in the bubble, not just green.
+        val statusColors =
+            listOf(
+                Color(0xFF3FB86D), // StatusGreen
+                Color(0xFFE8A33E), // StatusYellow (fair)
+                Color(0xFFFF8800), // StatusOrange (bad)
+                Color(0xFFE05252), // StatusRed (none)
+            )
+        // Sweep background lightness across the full range — covers any per-node bubble tint.
+        val backgrounds = (0..20).map { Color(it / 20f, it / 20f, it / 20f) }
+        for (fg in statusColors) {
+            for (bg in backgrounds) {
+                val ratio = contrastRatio(fg.ensureContrastOn(bg), bg)
+                assertTrue(ratio >= MIN_TEXT_CONTRAST, "AA failed for $fg on $bg (got $ratio)")
+            }
+        }
+    }
 }
