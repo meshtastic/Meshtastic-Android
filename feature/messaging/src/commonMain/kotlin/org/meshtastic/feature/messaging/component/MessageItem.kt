@@ -71,6 +71,7 @@ import org.meshtastic.core.ui.component.HighlightedText
 import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.component.Rssi
 import org.meshtastic.core.ui.component.Snr
+import org.meshtastic.core.ui.component.StatusSurface
 import org.meshtastic.core.ui.component.TransportIcon
 import org.meshtastic.core.ui.emoji.EmojiPickerDialog
 import org.meshtastic.core.ui.icon.FormatQuote
@@ -283,16 +284,13 @@ fun MessageItem(
 
                 Row(modifier = Modifier, verticalAlignment = Alignment.CenterVertically) {
                     if (!message.fromLocal) {
-                        if (message.hopsAway == 0 && !message.viaMqtt) {
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        // Status-colored metadata sits on a fixed dark scrim so the bright status tokens stay
+                        // AA-legible on any node-tinted bubble, while keeping their true values.
+                        StatusSurface {
+                            if (message.hopsAway == 0 && !message.viaMqtt) {
                                 Snr(message.snr)
                                 Rssi(message.rssi)
-                            }
-                        } else {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(2.dp),
-                            ) {
+                            } else {
                                 Icon(
                                     imageVector = MeshtasticIcons.HopCount,
                                     contentDescription = null,
@@ -300,32 +298,26 @@ fun MessageItem(
                                     tint = Color.White,
                                 )
                                 Text(
-                                    text =
-                                    if (message.hopsAway >= 0) {
-                                        message.hopsAway.toString()
-                                    } else {
-                                        "?"
-                                    },
+                                    text = if (message.hopsAway >= 0) message.hopsAway.toString() else "?",
                                     style = metadataStyle,
                                     color = Color.White,
                                 )
                             }
-                        }
-                        TransportIcon(
-                            transport = message.transportMechanism,
-                            viaMqtt = message.viaMqtt,
-                            modifier = Modifier.size(16.dp).padding(start = 4.dp),
-                            tint = Color.White,
-                        )
-                        // XEdDSA is only set on verified broadcasts, never DMs — so this never shows on a DM.
-                        // Green + slightly larger than the white metadata icons so "verified" reads at a glance.
-                        if (message.xeddsaSigned) {
-                            Icon(
-                                imageVector = MeshtasticIcons.ShieldCheck,
-                                contentDescription = stringResource(Res.string.security_signed_verified),
-                                modifier = Modifier.size(18.dp).padding(start = 4.dp),
-                                tint = MaterialTheme.colorScheme.StatusGreen,
+                            TransportIcon(
+                                transport = message.transportMechanism,
+                                viaMqtt = message.viaMqtt,
+                                modifier = Modifier.size(16.dp),
+                                tint = Color.White,
                             )
+                            // XEdDSA is only set on verified broadcasts, never DMs — so this never shows on a DM.
+                            if (message.xeddsaSigned) {
+                                Icon(
+                                    imageVector = MeshtasticIcons.ShieldCheck,
+                                    contentDescription = stringResource(Res.string.security_signed_verified),
+                                    modifier = Modifier.size(16.dp),
+                                    tint = MaterialTheme.colorScheme.StatusGreen,
+                                )
+                            }
                         }
                     }
                     if (containsBel) {
