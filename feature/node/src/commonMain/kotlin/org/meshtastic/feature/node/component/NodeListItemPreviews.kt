@@ -26,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.ui.component.NodeItem
 import org.meshtastic.core.ui.component.NodeItemCompact
@@ -82,8 +83,8 @@ fun NodeItemCompleteActivePreview() {
 @PreviewLightDark
 @Composable
 fun NodeItemSignedPreview() {
-    // A node that signs its broadcasts (XEdDSA) — the shield rides in the security chip next to the key status.
-    val signedNode = previewNodes.minnieMouse.copy(signsPackets = true)
+    // A node that signs its broadcasts (XEdDSA) AND has a PKC key — green lock + green shield in the security chip.
+    val signedNode = previewNodes.minnieMouse.copy(signsPackets = true, publicKey = ByteArray(32) { 1 }.toByteString())
     AppTheme {
         Surface {
             Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
