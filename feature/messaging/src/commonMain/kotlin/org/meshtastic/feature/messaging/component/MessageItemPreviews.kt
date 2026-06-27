@@ -34,6 +34,56 @@ import org.meshtastic.core.resources.sample_message
 import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
 import org.meshtastic.core.ui.theme.AppTheme
 
+@Suppress("PreviewPublic")
+@PreviewLightDark
+@Composable
+fun MessageItemSignedPreview() {
+    val signed =
+        Message(
+            text = "Net check — anyone copy on the ridge?",
+            time = "14:02",
+            fromLocal = false,
+            status = MessageStatus.RECEIVED,
+            snr = 6.5f,
+            rssi = 95,
+            hopsAway = 0,
+            uuid = 10L,
+            receivedTime = nowMillis,
+            node = NodePreviewParameterProvider().minnieMouse,
+            read = false,
+            routingError = 0,
+            packetId = 5001,
+            emojis = listOf(),
+            replyId = null,
+            viaMqtt = false,
+            xeddsaSigned = true,
+        )
+    val unsigned = signed.copy(text = "Copy, weak but readable.", time = "14:03", uuid = 11L, xeddsaSigned = false)
+    AppTheme {
+        Column(
+            modifier =
+            Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.background).padding(vertical = 16.dp),
+        ) {
+            listOf(signed, unsigned).forEach { msg ->
+                MessageItem(
+                    message = msg,
+                    node = msg.node,
+                    selected = false,
+                    ourNode = NodePreviewParameterProvider().mickeyMouse,
+                    onReply = {},
+                    sendReaction = {},
+                    onShowReactions = {},
+                    onClick = {},
+                    onLongClick = {},
+                    onDoubleClick = {},
+                    onClickChip = {},
+                    onNavigateToOriginalMessage = {},
+                )
+            }
+        }
+    }
+}
+
 @PreviewLightDark
 @Composable
 private fun MessageItemPreview() {

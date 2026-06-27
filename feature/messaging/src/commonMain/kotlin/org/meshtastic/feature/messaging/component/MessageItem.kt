@@ -65,6 +65,7 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.a11y_message_from
 import org.meshtastic.core.resources.filter_message_label
 import org.meshtastic.core.resources.reply
+import org.meshtastic.core.resources.security_signed_verified
 import org.meshtastic.core.ui.component.AutoLinkText
 import org.meshtastic.core.ui.component.HighlightedText
 import org.meshtastic.core.ui.component.NodeChip
@@ -75,6 +76,7 @@ import org.meshtastic.core.ui.emoji.EmojiPickerDialog
 import org.meshtastic.core.ui.icon.FormatQuote
 import org.meshtastic.core.ui.icon.HopCount
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.ShieldCheck
 import org.meshtastic.core.ui.theme.MessageItemColors
 import org.meshtastic.core.ui.util.createClipEntry
 
@@ -159,6 +161,7 @@ fun MessageItem(
                         } else {
                             null
                         },
+                        xeddsaSigned = message.xeddsaSigned,
                         onStatus = onStatusClick,
                     )
                 }
@@ -313,6 +316,15 @@ fun MessageItem(
                             modifier = Modifier.size(16.dp).padding(start = 4.dp),
                             tint = Color.White,
                         )
+                        // XEdDSA is only set on verified broadcasts, never DMs — so this never shows on a DM.
+                        if (message.xeddsaSigned) {
+                            Icon(
+                                imageVector = MeshtasticIcons.ShieldCheck,
+                                contentDescription = stringResource(Res.string.security_signed_verified),
+                                modifier = Modifier.size(16.dp).padding(start = 4.dp),
+                                tint = Color.White,
+                            )
+                        }
                     }
                     if (containsBel) {
                         Text(text = "\uD83D\uDD14", modifier = Modifier.padding(start = 4.dp))

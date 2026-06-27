@@ -61,6 +61,8 @@ data class DataPacket(
     @Serializable(with = ByteStringSerializer::class) var sfppHash: ByteString? = null,
     /** The transport mechanism this packet arrived over (see [MeshPacket.TransportMechanism]). */
     var transportMechanism: Int = 0,
+    /** True when the radio verified this broadcast's XEdDSA signature ([MeshPacket.xeddsa_signed]). */
+    var xeddsaSigned: Boolean = false,
 ) {
 
     /** If there was an error with this message, this string describes what was wrong. */

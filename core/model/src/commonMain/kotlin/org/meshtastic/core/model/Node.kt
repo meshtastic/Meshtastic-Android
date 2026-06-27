@@ -64,6 +64,8 @@ data class Node(
     val publicKey: ByteString? = null,
     val notes: String = "",
     val manuallyVerified: Boolean = false,
+    /** True when this node signs its broadcasts via XEdDSA (NodeInfo.has_xeddsa_signed). Automatic trust. */
+    val signsPackets: Boolean = false,
     val nodeStatus: String? = null,
     /** The transport mechanism this node was last heard over (see [MeshPacket.TransportMechanism]). */
     val lastTransport: Int = 0,

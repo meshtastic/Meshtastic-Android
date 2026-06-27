@@ -338,6 +338,7 @@ class NodeManagerImpl(
                     isFavorite = info.is_favorite,
                     isIgnored = info.is_ignored,
                     isMuted = info.is_muted,
+                    signsPackets = info.has_xeddsa_signed,
                 )
             next
         }

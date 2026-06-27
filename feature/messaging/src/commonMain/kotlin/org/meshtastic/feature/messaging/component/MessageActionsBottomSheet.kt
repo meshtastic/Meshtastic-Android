@@ -54,6 +54,8 @@ import org.meshtastic.core.resources.device_metrics_label_value
 import org.meshtastic.core.resources.message_delivery_status
 import org.meshtastic.core.resources.more_reactions
 import org.meshtastic.core.resources.reply
+import org.meshtastic.core.resources.security_signed_message_info
+import org.meshtastic.core.resources.security_signed_verified
 import org.meshtastic.core.resources.select
 import org.meshtastic.core.ui.icon.AddReaction
 import org.meshtastic.core.ui.icon.Copy
@@ -61,6 +63,7 @@ import org.meshtastic.core.ui.icon.Delete
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Reply
 import org.meshtastic.core.ui.icon.SelectAll
+import org.meshtastic.core.ui.icon.ShieldCheck
 
 @Suppress("LongMethod")
 @Composable
@@ -74,12 +77,27 @@ fun MessageActionsContent(
     onDelete: () -> Unit,
     statusString: Pair<StringResource, StringResource>? = null,
     status: MessageStatus? = null,
+    xeddsaSigned: Boolean = false,
     onStatus: (() -> Unit),
 ) {
     Column {
         QuickEmojiRow(quickEmojis = quickEmojis, onReact = onReact, onMoreReactions = onMoreReactions)
 
         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+        if (xeddsaSigned) {
+            ListItem(
+                headlineContent = { Text(stringResource(Res.string.security_signed_verified)) },
+                supportingContent = { Text(stringResource(Res.string.security_signed_message_info)) },
+                leadingContent = {
+                    Icon(
+                        MeshtasticIcons.ShieldCheck,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
+                },
+            )
+        }
 
         if (status != null) {
             val title =

@@ -68,6 +68,8 @@ import org.meshtastic.core.resources.node_sort_last_heard
 import org.meshtastic.core.resources.public_key
 import org.meshtastic.core.resources.role
 import org.meshtastic.core.resources.rssi
+import org.meshtastic.core.resources.security_signed_node
+import org.meshtastic.core.resources.security_signed_node_desc
 import org.meshtastic.core.resources.short_name
 import org.meshtastic.core.resources.snr
 import org.meshtastic.core.resources.status_message
@@ -86,6 +88,7 @@ import org.meshtastic.core.ui.icon.MqttConnected
 import org.meshtastic.core.ui.icon.Notes
 import org.meshtastic.core.ui.icon.Person
 import org.meshtastic.core.ui.icon.Rssi
+import org.meshtastic.core.ui.icon.ShieldCheck
 import org.meshtastic.core.ui.icon.Snr
 import org.meshtastic.core.ui.icon.Verified
 import org.meshtastic.core.ui.icon.role
@@ -173,6 +176,11 @@ private fun MainNodeDetails(node: Node) {
         if (node.viaMqtt || node.manuallyVerified) {
             SectionDivider()
             MqttAndVerificationRow(node)
+        }
+        // Most-trusted first: manual-verify (above) → signed (automatic) → has-key (below).
+        if (node.signsPackets) {
+            SectionDivider()
+            SignedNodeRow()
         }
         val publicKey = node.publicKey ?: node.user.public_key
         if (publicKey.size > 0) {
@@ -323,6 +331,16 @@ private fun MqttAndVerificationRow(node: Node) {
             Spacer(Modifier.weight(1f))
         }
     }
+}
+
+@Composable
+private fun SignedNodeRow() {
+    InfoItem(
+        label = stringResource(Res.string.security_signed_node),
+        value = stringResource(Res.string.security_signed_node_desc),
+        icon = MeshtasticIcons.ShieldCheck,
+        modifier = Modifier.fillMaxWidth(),
+    )
 }
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalEncodingApi::class)

@@ -290,5 +290,6 @@ class NodeRepositoryImpl(
         manuallyVerified = manuallyVerified,
         nodeStatus = nodeStatus,
         lastTransport = lastTransport,
+        signsPackets = signsPackets,
     )
 }

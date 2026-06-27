@@ -1301,6 +1301,10 @@ security_icon_insecure_no_precise
 security_icon_insecure_precise_only
 security_icon_secure
 security_icon_warning_precise_mqtt
+security_signed_message_info
+security_signed_node
+security_signed_node_desc
+security_signed_verified
 select
 select_all
 selected
