@@ -1343,6 +1343,10 @@
     <string name="security_icon_insecure_precise_only">Insecure Channel, Precise Location</string>
     <string name="security_icon_secure">Secure</string>
     <string name="security_icon_warning_precise_mqtt">Warning: Insecure, Precise Location &amp; MQTT Uplink</string>
+    <string name="security_signed_message_info">Verified with the sender\'s key.</string>
+    <string name="security_signed_node">Signed node</string>
+    <string name="security_signed_node_desc">Verified automatically</string>
+    <string name="security_signed_verified">Signed · verified</string>
     <string name="select">Select</string>
     <string name="select_all">Select all</string>
     <string name="selected">Selected</string>

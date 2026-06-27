@@ -67,6 +67,7 @@ data class NodeWithRelations(
         lastTransport = node.lastTransport,
         metadata = metadata?.proto,
         manuallyVerified = node.manuallyVerified,
+        signsPackets = node.signsPackets,
     )
 
     fun toEntity() = with(node) {
@@ -93,6 +94,7 @@ data class NodeWithRelations(
             manuallyVerified = manuallyVerified,
             nodeStatus = nodeStatus,
             lastTransport = lastTransport,
+            signsPackets = signsPackets,
         )
     }
 }
@@ -149,6 +151,8 @@ data class NodeEntity(
     @ColumnInfo(name = "node_status") var nodeStatus: String? = null,
     /** The transport mechanism this node was last heard over (see [MeshPacket.TransportMechanism]). */
     @ColumnInfo(name = "last_transport", defaultValue = "0") var lastTransport: Int = 0,
+    /** True when this node signs its broadcasts via XEdDSA (NodeInfo.has_xeddsa_signed). */
+    @ColumnInfo(name = "has_xeddsa_signed", defaultValue = "0") var signsPackets: Boolean = false,
 ) {
     val deviceMetrics: org.meshtastic.proto.DeviceMetrics?
         get() = deviceTelemetry.device_metrics
@@ -213,5 +217,6 @@ data class NodeEntity(
         notes = notes,
         nodeStatus = nodeStatus,
         lastTransport = lastTransport,
+        signsPackets = signsPackets,
     )
 }

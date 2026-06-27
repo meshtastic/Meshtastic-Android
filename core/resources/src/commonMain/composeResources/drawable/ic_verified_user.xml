@@ -1,0 +1,13 @@
+<!-- Material Symbols "verified_user" (outlined). Source viewBox is "0 -960 960 960";
+     the group translateY shifts it into the repo's 0..960 box without re-deriving coordinates. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="960"
+    android:viewportHeight="960">
+  <group android:translateY="960">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M436,-347L664,-575L622,-616L439,-433L338,-534L294,-490L436,-347ZM480,-81Q340,-116 250,-243.5Q160,-371 160,-523L160,-761L480,-881L800,-761L800,-523Q800,-371 710,-243.5Q620,-116 480,-81ZM480,-143Q595,-181 667.5,-286.5Q740,-392 740,-523L740,-719L480,-817L220,-719L220,-523Q220,-392 292.5,-286.5Q365,-181 480,-143Z"/>
+  </group>
+</vector>

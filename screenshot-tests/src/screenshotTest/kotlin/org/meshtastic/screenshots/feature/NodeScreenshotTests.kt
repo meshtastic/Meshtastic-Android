@@ -22,6 +22,7 @@ import com.android.tools.screenshot.PreviewTest
 import org.meshtastic.feature.node.component.DeviceActionsLocalPreview
 import org.meshtastic.feature.node.component.DeviceActionsRemotePreview
 import org.meshtastic.feature.node.component.NodeDetailsSectionPreview
+import org.meshtastic.feature.node.component.NodeDetailsSectionSignedPreview
 import org.meshtastic.feature.node.component.NodeItemCompactActivePreview
 import org.meshtastic.feature.node.component.NodeItemCompactAllFieldsPreview
 import org.meshtastic.feature.node.component.NodeItemCompactMinimalPreview
@@ -89,6 +90,13 @@ fun ScreenshotPositionInlineContent() {
 @Composable
 fun ScreenshotNodeDetailsSection() {
     NodeDetailsSectionPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotNodeDetailsSectionSigned() {
+    NodeDetailsSectionSignedPreview()
 }
 
 @PreviewTest

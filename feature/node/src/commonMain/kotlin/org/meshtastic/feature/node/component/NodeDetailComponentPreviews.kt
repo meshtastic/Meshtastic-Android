@@ -189,6 +189,15 @@ fun NodeDetailsSectionPreview() {
     AppTheme { Surface { NodeDetailsSection(node = node) } }
 }
 
+@Suppress("PreviewPublic")
+@PreviewLightDark
+@Composable
+fun NodeDetailsSectionSignedPreview() {
+    // signsPackets surfaces the "Signed node" row; manuallyVerified shows it sitting most-trusted-first.
+    val node = previewData.mickeyMouse.copy(manuallyVerified = true, signsPackets = true)
+    AppTheme { Surface { NodeDetailsSection(node = node) } }
+}
+
 @PreviewLightDark
 @Composable
 private fun NodeDetailsSectionWithDeviceHeroPreview() {

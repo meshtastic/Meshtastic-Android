@@ -51,6 +51,7 @@ open class MeshDataMapper(private val nodeIdLookup: NodeIdLookup) {
             viaMqtt = packet.via_mqtt == true,
             emoji = decoded.emoji,
             transportMechanism = packet.transport_mechanism.value,
+            xeddsaSigned = packet.xeddsa_signed,
         )
     }
 }
