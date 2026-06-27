@@ -85,7 +85,6 @@ import org.meshtastic.core.ui.icon.Pressure
 import org.meshtastic.core.ui.icon.Temperature
 import org.meshtastic.core.ui.icon.Unmessageable
 import org.meshtastic.core.ui.icon.role
-import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 import org.meshtastic.core.ui.util.LocalModemPreset
 import org.meshtastic.proto.Config
@@ -311,24 +310,12 @@ private fun CompactHealthRow(
         if (showLastHeard && thatNode.lastHeard > 0 && !isFutureDate(thatNode.lastHeard)) {
             add(
                 @Composable {
-                    // "Online" is shown in StatusGreen — back only that case with a scrim so it stays legible.
-                    if (thatNode.isOnline) {
-                        StatusSurface {
-                            LastHeardInfo(
-                                lastHeard = thatNode.lastHeard,
-                                showLabel = false,
-                                relative = lastHeardIsRelative,
-                                contentColor = MaterialTheme.colorScheme.StatusGreen,
-                            )
-                        }
-                    } else {
-                        LastHeardInfo(
-                            lastHeard = thatNode.lastHeard,
-                            showLabel = false,
-                            relative = lastHeardIsRelative,
-                            contentColor = contentColor,
-                        )
-                    }
+                    StatusAwareLastHeard(
+                        lastHeard = thatNode.lastHeard,
+                        online = thatNode.isOnline,
+                        contentColor = contentColor,
+                        relative = lastHeardIsRelative,
+                    )
                 },
             )
         }

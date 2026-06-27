@@ -432,6 +432,26 @@ private fun MetricsGrid(items: List<@Composable () -> Unit>) {
     }
 }
 
+/**
+ * [LastHeardInfo] backed by a scrim chip and tinted StatusGreen when [online] — the legible "online" affordance —
+ * rendered plain otherwise. Shared by the complete and compact node rows.
+ */
+@Composable
+internal fun StatusAwareLastHeard(lastHeard: Int, online: Boolean, contentColor: Color, relative: Boolean = true) {
+    if (online) {
+        StatusSurface {
+            LastHeardInfo(
+                lastHeard = lastHeard,
+                showLabel = false,
+                relative = relative,
+                contentColor = MaterialTheme.colorScheme.StatusGreen,
+            )
+        }
+    } else {
+        LastHeardInfo(lastHeard = lastHeard, showLabel = false, relative = relative, contentColor = contentColor)
+    }
+}
+
 /** Key status (always status-colored) + the signed-node shield share one scrim chip so both stay legible. */
 @Composable
 internal fun NodeSecurityIcons(thatNode: Node, iconSize: Dp = 20.dp) {
@@ -496,18 +516,11 @@ private fun NodeItemHeader(
                 )
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                // "Online" is shown in StatusGreen — back only that case with a scrim so it stays legible.
-                if (!isThisNode && thatNode.isOnline) {
-                    StatusSurface {
-                        LastHeardInfo(
-                            lastHeard = thatNode.lastHeard,
-                            showLabel = false,
-                            contentColor = MaterialTheme.colorScheme.StatusGreen,
-                        )
-                    }
-                } else {
-                    LastHeardInfo(lastHeard = thatNode.lastHeard, showLabel = false, contentColor = contentColor)
-                }
+                StatusAwareLastHeard(
+                    lastHeard = thatNode.lastHeard,
+                    online = !isThisNode && thatNode.isOnline,
+                    contentColor = contentColor,
+                )
             }
         }
 
