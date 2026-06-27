@@ -29,7 +29,7 @@ Basic operating information reported by each node:
 
 Device metrics are displayed as individual cards with trend sparklines showing battery level, voltage, channel utilization, airtime, and uptime over time.
 
-> 💡 **Vihje:** Puuduta mis tahes mõõdikukaarti, et laiendada see ajalooliste andmepunktidega täisdiagrammiks. Pinch to zoom the time axis.
+> 💡 **Vihje:** Puuduta mis tahes mõõdikukaarti, et laiendada see ajalooliste andmepunktidega täisdiagrammiks. Ajatelje suumimiseks näpista sõrmed kokku.
 
 ## Keskkonnamõõdikud
 

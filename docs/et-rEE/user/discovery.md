@@ -39,7 +39,7 @@ Before starting, configure these controls:
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **LoRa preset picker** | Select one or more presets to scan. Discovery dwells on each selected preset in turn.                                                                                                          |
 | **Dwell time**         | Time to listen on each preset. Choose from 1, 5, 15, 30, 45, 60, 90, 120, or 180 minutes. Longer dwell times collect more packets and give a clearer picture, but take longer. |
-| **Keep screen awake**  | Optional toggle that prevents the screen from sleeping during a long scan.                                                                                                                                     |
+| **Keep screen awake**  | Valikuline lüliti, mis takistab ekraani pika skannimise ajal magamaminekut.                                                                                                                                    |
 
 The **Start** button stays disabled — with an explanation of why — until the scan can run. Common reasons it's disabled:
 
@@ -141,7 +141,7 @@ Naabriinfo moodul võimaldab igal sõlmel levitada nimekirja sõlmedest, mida se
 2. Luba moodul.
 3. Määra levintervall (vaikimisi: 900 sekundit / 15 minutit).
 
-Kui see on lubatud, levitab sõlm perioodiliselt oma naabertabelit. Other nodes with Neighbor Info enabled do the same.
+Kui see on lubatud, levitab sõlm perioodiliselt oma naabertabelit. Teised sõlmed, millel on naabriinfo lubatud, teevad sama.
 
 ### Viewing Neighbor Data
 

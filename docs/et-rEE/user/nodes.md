@@ -23,7 +23,7 @@ The node list shows every node your radio has heard, including:
 - **Signal quality** — last heard signal strength
 - **Last heard** — time since last communication
 - **Distance** — estimated distance (if positions are shared)
-- **Battery** — remote node battery level (if telemetry is enabled)
+- **Aku** — kaugsõlme aku tase (kui telemeetria on lubatud)
 
 ### Node Status Indicators
 

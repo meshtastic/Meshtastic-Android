@@ -95,11 +95,11 @@ Eelsalvestatud sõnumid kiireks suhtluseks:
 - Access via the Quick Chat button in the message input area
 - Choose from built-in phrases or custom messages
 - Customize quick chat messages in **Settings → Quick Chat**
-- Useful when typing is impractical (gloves, small screen, urgent)
+- Kasulik, kui trükkimine on ebapraktiline (kindad, väike ekraan, kiireloomuline)
 
 ![Quick chat option](../../assets/screenshots/messages_quick_chat.png)
 
-Each quick chat entry has a short **Name** (the button label), the **Message** it inserts, and an **Instantly send** toggle — when enabled, tapping the button sends the message immediately instead of placing it in the input field for editing:
+Igal kiirvestluse kirjel on lühike **Nimi** (nupu silt), **Sõnum**, mille see lisab, ja **Saada kohe** lüliti – kui see on lubatud, saadetakse nupu puudutamisel sõnum kohe, selle asemel et see sisestada sisestusväljale redigeerimiseks:
 
 ![New quick chat dialog with name, message, and instantly-send toggle](../../assets/screenshots/messages_edit_quick_chat.png)
 

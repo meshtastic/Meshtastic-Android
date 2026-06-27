@@ -29,7 +29,7 @@ Each node that reports a position is shown as a **node chip** marker displaying 
 
 ### Map Controls
 
-- **Zoom** — pinch or use +/- buttons
+- **Suumi** – näpista või +/- nuppude kasutamine
 - **Pan** — drag to explore
 - **Center** — select the location button to center on your position
 - **Sõlme puudutamine** – üksikasjade kuvamiseks puuduta sõlmel
