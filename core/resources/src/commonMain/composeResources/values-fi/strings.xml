@@ -137,6 +137,7 @@
     <string name="bluetooth_permission">Bluetooth</string>
     <string name="bold_heading">Lihavoitu otsikko</string>
     <string name="bonding_failed_permissions">Pariliitos epäonnistui. Myönnä lupa lähellä olevien laitteiden käyttöön ja yritä uudelleen.</string>
+    <string name="bonding_failed_retry">Paritus ei onnistunut. Yritä uudelleen.</string>
     <string name="bottom_nav_settings">Asetukset</string>
     <string name="broadcast_interval">Lähetyksen aikaväli</string>
     <string name="busy_noise_floor">Kanava varattu</string>

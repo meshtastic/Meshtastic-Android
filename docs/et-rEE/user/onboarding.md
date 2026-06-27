@@ -81,13 +81,13 @@ On supported devices, the app may request permission for critical alerts:
 
 ## After Setup
 
-Once permissions are granted, the app transitions to the main interface. Esimene samm peaks olema ühenduse loomine Meshtastic raadioga – üksikasjalike juhiste saamiseks vaata [Ühendused] (connections).
+Kui load on antud, läheb rakendus üle põhiliidesele. Esimene samm peaks olema ühenduse loomine Meshtastic raadioga – üksikasjalike juhiste saamiseks vaata [Ühendused] (connections).
 
 > 💡 **Vihje:** Kui jätsid seadistamise ajal mõne õiguse andmata, saad selle hiljem anda jaotises **Androidi seaded → Rakendused → Meshtastic → Load**. The app will prompt you again if a missing permission blocks a feature you try to use.
 
 ## What's Next?
 
-Once connected to a radio, explore:
+Kui raadioga on ühendus loodud, uuri:
 
 - [Ühendused(connections) — seo oma esimene raadioseade
 - [Messages & Channels](messages-and-channels) — send your first message

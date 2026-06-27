@@ -67,7 +67,7 @@ While a scan runs, Discovery shows its current stage:
 
 When the scan completes, Discovery presents a per-preset result card for each preset it tested, plus an overall summary.
 
-![Per-preset result card with ranking and collected metrics](../../assets/screenshots/discovery_preset_result.png)
+![Eelmääratud tulemuste kaart koos edetabeli ja kogutud näitajatega](../../assets/screenshots/discovery_preset_result.png)
 
 Metrics include:
 

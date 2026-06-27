@@ -113,7 +113,7 @@ See [Telemetry & Sensors](telemetry-and-sensors) for supported sensors and confi
 
 ### Eelsalvestatud sõnumi moodul
 
-Pre-configured messages accessible from the device's physical buttons (for radios with rotary encoders, keypads, or similar input hardware). Define a list of quick-send messages that can be transmitted without a phone connected — ideal for field use.
+Seadme füüsiliste nuppude kaudu ligipääsetavad eelseadistatud sõnumid (pöördnuppude, klaviatuuride või sarnase sisendriistvaraga raadiote puhul). Define a list of quick-send messages that can be transmitted without a phone connected — ideal for field use.
 
 | Sätted             | Kirjeldus                                                          |
 | ------------------ | ------------------------------------------------------------------ |
@@ -209,7 +209,7 @@ Remotely configure nodes that share your admin key:
 3. Modify configuration.
 4. Puuduta **Salvesta** – muudatused saadetakse kärgvõrgu kaudu.
 
-> ⚠️ **Nõutud:** Administraatori võtit, mis on konfitud nii sinu kui ka sihtsõlmes.
+> ⚠️ **Nõutud:** Administraatori võtit, mis on seadistatud nii sinu kui ka sihtsõlmes.
 
 ### Tühjenda sõlmede andmebaas
 
@@ -235,7 +235,7 @@ View detailed diagnostic information:
 
 - **"No response from target node"** — the target may be out of range, offline, or have a mismatched admin key. Verify the admin key matches on both nodes.
 - **Changes not applying** — some settings require a reboot to take effect. Try the Reboot action after saving.
-- **Ei näe kaugseadeid** — veendu, et sõlmel oleks sihtsõlme administraatori võti ja et administraatori kanal oleks turbekonfiguratsioonis lubatud. The admin channel is configured automatically when an admin key is set.
+- **Ei näe kaugseadeid** — veendu, et sõlmel oleks sihtsõlme administraatori võti ja et administraatori kanal oleks turbekonfiguratsioonis lubatud. Administraatori kanal seadistatakse automaatselt, kui administraatori võti on määratud.
 
 ## Related Topics
 

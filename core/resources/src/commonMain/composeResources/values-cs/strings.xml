@@ -68,6 +68,14 @@
     <string name="analytics_platforms">Analytické nástroje:</string>
     <string name="any">Vše</string>
     <!-- APP -->
+    <string name="app_functions_get_channel_info">Získat informace o kanálu</string>
+    <string name="app_functions_get_device_status">Získat stav zařízení</string>
+    <string name="app_functions_get_mesh_metrics">Získat metriky sítě</string>
+    <string name="app_functions_master_summary">Povolit systémovým AI asistentům (např. Gemini) přístup k funkcím mesh sítě</string>
+    <string name="app_functions_master_toggle">Povolit AI přístup</string>
+    <string name="app_functions_send_message">Odeslat zprávu</string>
+    <string name="app_functions_settings">Systémová AI</string>
+    <string name="app_functions_settings_summary">Určete, které funkce mohou AI asistenti používat</string>
     <string name="app_notifications">Oznámení aplikace</string>
     <string name="app_settings">Aplikace</string>
     <string name="app_too_old">Aplikace je příliš stará</string>
@@ -266,6 +274,7 @@
     <string name="device_db_cache_limit">Limit mezipaměti databáze zařízení</string>
     <string name="device_db_cache_limit_summary">Maximální počet databází zařízení uchovávaných v tomto telefonu</string>
     <string name="device_gps">GPS zařízení</string>
+    <string name="device_links_open_in_browser">Otevřít v prohlížeči</string>
     <string name="device_metrics_label_value">%1$s: %2$s</string>
     <string name="device_metrics_log">Metriky zařízení</string>
     <string name="device_metrics_numeric_value">%1$s</string>
@@ -283,10 +292,13 @@
     <string name="disconnected">Odpojeno</string>
     <string name="discovered_network_devices">Nalezená síťová zařízení</string>
     <!-- DISCOVERY -->
+    <string name="discovery_not_connected">Nepřipojeno</string>
     <string name="discovery_stat_date">Datum</string>
     <string name="discovery_stat_direct">Přímý</string>
     <string name="discovery_stat_messages">Zprávy</string>
+    <string name="discovery_stat_online_total_nodes">Online / Celkem uzlů</string>
     <string name="discovery_stat_selected">Vybrané</string>
+    <string name="discovery_view_map">Zobrazit na mapě</string>
     <!-- DISPLAY -->
     <string name="display">Obrazovka</string>
     <string name="display_config">Obrazovka zařízení</string>
@@ -307,6 +319,7 @@
     <string name="doc_title_mqtt">MQTT</string>
     <string name="doc_title_nodes">Uzly</string>
     <string name="doc_title_settings_radio">Nastavení – Rádio &amp; Uživatel</string>
+    <string name="doc_title_tak">TAK integrace</string>
     <string name="doc_title_translate">Překlad aplikace</string>
     <string name="done">Hotovo</string>
     <string name="double_tap_as_button_press">Dvojité klepnutí jako stisk tlačítka</string>
@@ -1002,6 +1015,7 @@
     <string name="sx126x_rx_boosted_gain">Zvýšené zesílení přijímače (RX)</string>
     <string name="system_settings">Nastavení systému</string>
     <!-- TAK -->
+    <string name="tak_config">Nastavení TAK</string>
     <string name="tak_server_enabled">Povolit lokální TAK server</string>
     <string name="tak_server_enabled_desc">Spustí lokální TLS server na portu 8089 pro ATAK/iTAK připojení</string>
     <string name="tak_server_export_data_package_desc">Generovat .zip pro ATAK/iTAK pro připojení k tomuto serveru</string>

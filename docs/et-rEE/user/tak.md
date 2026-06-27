@@ -60,7 +60,7 @@ The app can also run a **local TAK server** so ATAK/iTAK clients on the same dev
 
 ## TAK Roles
 
-Nodes configured with TAK-related roles behave differently from standard clients:
+TAKiga seotud rollidega seadistatud sõlmed käituvad tavalistest klientidest erinevalt:
 
 | Roll                  | Kirjeldus                                                                                                                                                                                                                                                                                       |
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -100,7 +100,7 @@ The app automatically selects V2 when both sides support it. Manuaalset konfigur
 
 ## Kasutamine koos ATAKiga
 
-Once configured:
+Kui on seadistatud:
 
 - Meshtastic sõlmed ilmuvad ATAK kaardil markeritena koos kutsungi nimega
 - Chat messages can bridge between mesh and TAK networks
@@ -122,7 +122,7 @@ Once configured:
 ## Security Considerations
 
 - TAK andmed jagavad sinu asukohta ja kutsungit
-- Ensure your channel encryption is configured when using TAK in sensitive environments
+- TAKi kasutamisel tundlikes keskkondades veendu, et kanali krüpteerimine on seadistatud
 - TAK moodul arvestab sama kanali krüptimist nagu teised Meshtasticu sõnumid
 
 ## Related Topics

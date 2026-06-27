@@ -32,7 +32,7 @@ Every time the LoRa radio chip receives a message, it reports two measurements:
 > - **The Noise Floor** is the background noise in the room (air conditioning, other people talking, traffic).
 > - **SNR** is how easily you can distinguish your friend's voice from the background noise.
 
-If your friend shouts at you at a deafening rock concert, the signal is incredibly loud (High RSSI), but you still can't understand them because the background noise is louder (Bad SNR). Conversely, if your friend whispers to you in a dead-silent library, the signal is very weak (Low RSSI), but you can understand them perfectly (Great SNR).
+Kui su sõber karjub sulle kõrvulukustava rokkkontserdi ajal, on signaal uskumatult vali (kõrge RSSI), aga sa ei saa temast ikkagi aru, sest taustamüra on valjem (halb signaali-müra suhe). Conversely, if your friend whispers to you in a dead-silent library, the signal is very weak (Low RSSI), but you can understand them perfectly (Great SNR).
 
 ---
 

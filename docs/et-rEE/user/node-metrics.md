@@ -60,7 +60,7 @@ Air Quality is a dedicated metrics view for nodes equipped with a particulate-ma
 | PM1.0 | µg/m³ | Particulate matter up to 1.0 micron  |
 | PM2,5                 | µg/m³ | Particulate matter up to 2.5 microns |
 | PM10                  | µg/m³ | Particulate matter up to 10 microns                  |
-| CO₂                   | ppm   | Carbon dioxide concentration                         |
+| CO₂                   | ppm   | Süsinikdioksiidi kontsentratsioon                    |
 
 CO₂ readings are color-coded by severity to make air quality easy to read at a glance:
 
@@ -154,13 +154,13 @@ Shows which nodes a given node can directly hear, useful for understanding mesh 
 2. Puuduta sõlme, mida soovite kontrollida.
 3. Select the metric category from the detail tabs.
 
-![Node detail — local device](../../assets/screenshots/nodes_detail_local.png)
+![Sõlme detailid — kohalik seade](../../assets/screenshots/nodes_detail_local.png)
 
 The position tab shows location data for nodes that share GPS:
 
-![Position inline content](../../assets/screenshots/nodes_position.png)
+![Asukoha tekstisisene sisu](../../assets/screenshots/nodes_position.png)
 
-> ⚠️ **Märkus:** Mõõdikud on saadaval ainult siis, kui need on kaugsõlme poolt esitatud. Mõõdikud värskendatakse iga sõlme telemeetria sätetes konfigureeritud intervallidega.
+> ⚠️ **Märkus:** Mõõdikud on saadaval ainult siis, kui need on kaugsõlme poolt esitatud. Mõõdikud värskendatakse iga sõlme telemeetria sätetes seadistatud intervallidega.
 
 ## Related Topics
 

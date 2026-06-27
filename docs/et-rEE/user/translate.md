@@ -46,7 +46,7 @@ Kui teie keelt Crowdinis veel pole:
 
 1. Ava probleem [GitHubis](https://github.com/meshtastic/Meshtastic-Android/issues/new) ja taotle uut locale.
 2. Hooldaja lisab keele Crowdinile ja seadistab faili `crowdin.yml`.
-3. Once added, you can begin translating immediately.
+3. Pärast lisamist saad kohe tõlkima hakata.
 
 ---
 
