@@ -47,6 +47,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -79,6 +80,7 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.ShieldCheck
 import org.meshtastic.core.ui.theme.MessageItemColors
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
+import org.meshtastic.core.ui.theme.ensureContrastOn
 import org.meshtastic.core.ui.util.createClipEntry
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -196,6 +198,8 @@ fun MessageItem(
 
     val containerColor = nodeColor.copy(alpha = alpha)
     val contentColor = MaterialTheme.colorScheme.onSurface
+    // The bubble is a per-node tint over the surface; metadata "good"/signed greens must stay legible against it.
+    val bubbleBackground = containerColor.compositeOver(MaterialTheme.colorScheme.surface)
     val metadataStyle = MaterialTheme.typography.labelSmall
     val messageShape =
         getMessageBubbleShape(
@@ -285,8 +289,8 @@ fun MessageItem(
                     if (!message.fromLocal) {
                         if (message.hopsAway == 0 && !message.viaMqtt) {
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Snr(message.snr)
-                                Rssi(message.rssi)
+                                Snr(message.snr, background = bubbleBackground)
+                                Rssi(message.rssi, background = bubbleBackground)
                             }
                         } else {
                             Row(
@@ -324,7 +328,7 @@ fun MessageItem(
                                 imageVector = MeshtasticIcons.ShieldCheck,
                                 contentDescription = stringResource(Res.string.security_signed_verified),
                                 modifier = Modifier.size(18.dp).padding(start = 4.dp),
-                                tint = MaterialTheme.colorScheme.StatusGreen,
+                                tint = MaterialTheme.colorScheme.StatusGreen.ensureContrastOn(bubbleBackground),
                             )
                         }
                     }

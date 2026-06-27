@@ -60,6 +60,7 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
+import org.meshtastic.core.ui.theme.ensureContrastOn
 import org.meshtastic.core.ui.util.LocalModemPreset
 import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
 
@@ -126,10 +127,10 @@ private const val SIZE_ICON_DP = 16
 
 /** Displays the `snr` and `rssi` with color depending on the values respectively. */
 @Composable
-fun SnrAndRssi(snr: Float, rssi: Int, modemPreset: ModemPreset? = LocalModemPreset.current) {
+fun SnrAndRssi(snr: Float, rssi: Int, modemPreset: ModemPreset? = LocalModemPreset.current, background: Color? = null) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        Snr(snr, modemPreset = modemPreset)
-        Rssi(rssi)
+        Snr(snr, modemPreset = modemPreset, background = background)
+        Rssi(rssi, background = background)
     }
 }
 
@@ -162,8 +163,15 @@ fun LoraSignalIndicator(
 }
 
 @Composable
-fun Snr(snr: Float, modifier: Modifier = Modifier, modemPreset: ModemPreset? = LocalModemPreset.current) {
-    val color: Color = determineSignalQuality(snr, modemPreset).color.invoke()
+fun Snr(
+    snr: Float,
+    modifier: Modifier = Modifier,
+    modemPreset: ModemPreset? = LocalModemPreset.current,
+    background: Color? = null,
+) {
+    val base: Color = determineSignalQuality(snr, modemPreset).color.invoke()
+    // On a colored surface (e.g. a node-tinted message bubble) keep the quality hue but make it legible.
+    val color = background?.let { base.ensureContrastOn(it) } ?: base
 
     Text(
         modifier = modifier,
@@ -174,8 +182,8 @@ fun Snr(snr: Float, modifier: Modifier = Modifier, modemPreset: ModemPreset? = L
 }
 
 @Composable
-fun Rssi(rssi: Int, modifier: Modifier = Modifier) {
-    val color: Color =
+fun Rssi(rssi: Int, modifier: Modifier = Modifier, background: Color? = null) {
+    val base: Color =
         if (rssi > RSSI_GOOD_THRESHOLD) {
             Quality.GOOD.color.invoke()
         } else if (rssi > RSSI_FAIR_THRESHOLD) {
@@ -183,6 +191,7 @@ fun Rssi(rssi: Int, modifier: Modifier = Modifier) {
         } else {
             Quality.BAD.color.invoke()
         }
+    val color = background?.let { base.ensureContrastOn(it) } ?: base
     Text(
         modifier = modifier,
         text = "${stringResource(Res.string.rssi)} ${MetricFormatter.rssi(rssi)}",
