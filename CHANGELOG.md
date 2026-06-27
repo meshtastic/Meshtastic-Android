@@ -7,6 +7,15 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 <!-- UNRELEASED_START -->
 ## [Unreleased]
 
+### Unreleased (not yet in any build)
+
+* fix(ble): Bound Android bonding wait (#5967) by Jeremiah K (@jeremiah-k) in [`fe019d3fa`](https://github.com/meshtastic/Meshtastic-Android/commit/fe019d3fa5281fc0564c6751ccf3bcd631883fc3)
+* chore(deps): update gradle to v9.6.1 (#5971) by renovate[bot] (@renovate[bot]) in [`1d11adb75`](https://github.com/meshtastic/Meshtastic-Android/commit/1d11adb75eabb7649f9902545f65cb598bc58594)
+* fix(ble): Avoid duplicate bonding retries after pairing failure (#5969) by Jeremiah K (@jeremiah-k) in [`5c83333f9`](https://github.com/meshtastic/Meshtastic-Android/commit/5c83333f94535dba311461b11088e6526d9168ed)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs, Baseline) (#5972) by James Rich (@jamesarich) in [`8e99d1b91`](https://github.com/meshtastic/Meshtastic-Android/commit/8e99d1b91bb908e2a65f3fb73120c92fe48ac486)
+* fix(ble): Stop transport connect after failed bonding (#5973) by Jeremiah K (@jeremiah-k) in [`86580db6c`](https://github.com/meshtastic/Meshtastic-Android/commit/86580db6cfe9c20712b2a24c1658216732d647b7)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs, Baseline) (#5974) by James Rich (@jamesarich) in [`630a4351e`](https://github.com/meshtastic/Meshtastic-Android/commit/630a4351eb003f64e63ab43009aed6951819c65e)
+
 ### Internal (v2.8.0-internal.7)
 Changes since [`v2.8.0-closed.1`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.0-closed.1):
 
