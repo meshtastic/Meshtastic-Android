@@ -23,6 +23,7 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -321,7 +322,8 @@ fun MessageItem(
                         )
                         // XEdDSA is only set on verified broadcasts, never DMs — so this never shows on a DM.
                         if (message.xeddsaSigned) {
-                            StatusSurface {
+                            // Solo icon → equal padding so the pill renders as a circle.
+                            StatusSurface(contentPadding = PaddingValues(3.dp)) {
                                 Icon(
                                     imageVector = MeshtasticIcons.ShieldCheck,
                                     contentDescription = stringResource(Res.string.security_signed_verified),

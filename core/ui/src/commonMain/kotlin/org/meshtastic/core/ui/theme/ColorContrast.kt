@@ -22,6 +22,9 @@ import androidx.compose.ui.graphics.luminance
 /** WCAG AA contrast ratio for normal text. */
 const val MIN_TEXT_CONTRAST: Float = 4.5f
 
+/** WCAG AA contrast ratio for graphical objects / large text. */
+const val MIN_GRAPHICAL_CONTRAST: Float = 3f
+
 /** WCAG contrast ratio between two opaque colors (1.0 = identical, 21.0 = black-on-white). */
 fun contrastRatio(a: Color, b: Color): Float {
     val l1 = a.luminance()
