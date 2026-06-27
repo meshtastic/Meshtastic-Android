@@ -435,12 +435,6 @@ private fun MetricsGrid(items: List<@Composable () -> Unit>) {
 @Composable
 private fun NodeSecurityIcons(thatNode: Node) {
     StatusSurface {
-        NodeKeyStatusIcon(
-            hasPKC = thatNode.hasPKC,
-            mismatchKey = thatNode.mismatchKey,
-            publicKey = thatNode.user.public_key,
-            modifier = Modifier.size(24.dp),
-        )
         if (thatNode.signsPackets) {
             Icon(
                 imageVector = MeshtasticIcons.ShieldCheck,
@@ -449,6 +443,12 @@ private fun NodeSecurityIcons(thatNode: Node) {
                 tint = MaterialTheme.colorScheme.StatusGreen,
             )
         }
+        NodeKeyStatusIcon(
+            hasPKC = thatNode.hasPKC,
+            mismatchKey = thatNode.mismatchKey,
+            publicKey = thatNode.user.public_key,
+            modifier = Modifier.size(20.dp),
+        )
     }
 }
 
@@ -469,7 +469,7 @@ private fun NodeItemHeader(
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         NodeChip(node = thatNode)
         NodeSecurityIcons(thatNode)

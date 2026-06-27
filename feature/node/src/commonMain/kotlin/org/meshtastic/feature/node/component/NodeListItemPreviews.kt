@@ -79,6 +79,26 @@ fun NodeItemCompleteActivePreview() {
     }
 }
 
+@PreviewLightDark
+@Composable
+fun NodeItemSignedPreview() {
+    // A node that signs its broadcasts (XEdDSA) — the shield rides in the security chip next to the key status.
+    val signedNode = previewNodes.minnieMouse.copy(signsPackets = true)
+    AppTheme {
+        Surface {
+            Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+                NodeItem(
+                    thisNode = previewNodes.mickeyMouse,
+                    thatNode = signedNode,
+                    distanceUnits = 0,
+                    tempInFahrenheit = false,
+                    connectionState = ConnectionState.Connected,
+                )
+            }
+        }
+    }
+}
+
 // ---------------------------------------------------------------------------
 // NodeItemCompact previews
 // ---------------------------------------------------------------------------
