@@ -52,6 +52,7 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Unmessageable
 import org.meshtastic.core.ui.icon.VolumeOff
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
+import org.meshtastic.core.ui.util.LocalMeshActivity
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -118,7 +119,23 @@ private fun ThisNodeStatusBadge(connectionState: ConnectionState, deviceType: De
         },
         state = rememberTooltipState(),
     ) {
-        ConnectionsNavIcon(connectionState = connectionState, deviceType = deviceType, modifier = Modifier.size(24.dp))
+        // Mirror the nav-bar connection icon, blinking on mesh activity. Only this local-node badge collects the flow
+        // (at the leaf, in the draw phase) — see LocalMeshActivity. Falls back to the static icon in previews/tests.
+        val meshActivity = LocalMeshActivity.current
+        if (meshActivity != null) {
+            AnimatedConnectionsNavIcon(
+                connectionState = connectionState,
+                deviceType = deviceType,
+                meshActivityFlow = meshActivity,
+                modifier = Modifier.size(24.dp),
+            )
+        } else {
+            ConnectionsNavIcon(
+                connectionState = connectionState,
+                deviceType = deviceType,
+                modifier = Modifier.size(24.dp),
+            )
+        }
     }
 }
 
