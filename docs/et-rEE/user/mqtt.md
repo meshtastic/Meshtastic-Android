@@ -101,7 +101,7 @@ Understanding the layered encryption model:
 
 1. **Kanali krüptimine** toimub kärgvõrgus _enne_ MQTT. Kui kanalil on PSK, on ​​MQTT liiklus juba krüptitud – maakler ja kõik tellijad näevad ainult šifriteksti.
 2. **MQTT krüptimine** (mooduli säte) lisab vahendajale edastamiseks täiendava krüptimiskihi. This protects metadata and routing information.
-3. **TLS** encrypts the TCP connection to the broker itself, preventing network-level eavesdropping.
+3. **TLS** krüpteerib TCP ühenduse vahendaja endaga, takistades võrgutasandil pealtkuulamist.
 
 > 🔒 **Tähtis:** Vaikimisi avalikul kanalil on tuntud võti. MQTT kaudu saadetud vaikekanalil olevad sõnumid on sisuliselt **krüpteerimata** – igaüks saab neid dekodeerida. Always use a custom PSK for private communications.
 

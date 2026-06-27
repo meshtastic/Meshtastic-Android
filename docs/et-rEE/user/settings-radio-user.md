@@ -140,7 +140,7 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 | Setting           | Kirjeldus                                                           |
 | ----------------- | ------------------------------------------------------------------- |
 | Bluetooth Enabled | Enable/disable BLE radio                                            |
-| Sidumisreziim     | Fixed PIN, Random PIN, or No PIN                                    |
+| Sidumisreziim     | Määratud PIN kood, juhuslik PIN kood või PIN koodi pole             |
 | Fikseeritud PIN   | Sidumise PIN (vaikimisi: 123456) |
 
 ### Turva sätted

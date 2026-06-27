@@ -137,6 +137,7 @@
     <string name="bluetooth_permission">Sinihammas</string>
     <string name="bold_heading">Paks pealkiri</string>
     <string name="bonding_failed_permissions">Sidumine ebaõnnestus. Anna lähedal asuvatele seadmetele luba ja proovi uuesti.</string>
+    <string name="bonding_failed_retry">Sidumine ebaõnnestus. Proovi siduda uuesti.</string>
     <string name="bottom_nav_settings">Sätted</string>
     <string name="broadcast_interval">Levinteintervall</string>
     <string name="busy_noise_floor">Hõivatuse tase</string>

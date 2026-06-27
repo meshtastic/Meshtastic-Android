@@ -55,24 +55,24 @@ Võimaldab jadapordi sidet väliste seadmete integreerimiseks (GPS-moodulid, and
 | Lubatud         | Aktiveeri jadapordi ühendus    |
 | Echo            | Kaja sai jadaandmed tagasi     |
 | Mode            | Text, Protobuf, or NMEA output |
-| RX/TX kontaktid | GPIO kontaktid jagaühenduseks  |
+| RX/TX kontaktid | GPIO sisend jagaühenduseks     |
 | Baud Rate       | Jadaühenduse kiirus            |
 
 ### Välise teavitusmoodul
 
 Juhib raadio riistvara summeri-, LED- või vibratsioonihoiatusi. Useful for devices that need to physically signal when a message arrives — particularly helpful for unattended or outdoor installations.
 
-| Sätted                           | Kirjeldus                   |
-| -------------------------------- | --------------------------- |
-| Lubatud                          | Activate notifications      |
-| Alert Message                    | Notify on incoming messages |
-| Alert Message Buzzer             | Use buzzer for messages     |
-| Alert Message Vibra              | Use vibration for messages  |
-| Alert Bell                       | Notify on bell character    |
-| Output (GPIO) | Pin for notification output |
-| Active                           | High or Low active          |
-| Duration (ms) | Notification length         |
-| Use I2S as Buzzer                | Use I2S audio output        |
+| Sätted                           | Kirjeldus                     |
+| -------------------------------- | ----------------------------- |
+| Lubatud                          | Activate notifications        |
+| Alert Message                    | Notify on incoming messages   |
+| Alert Message Buzzer             | Use buzzer for messages       |
+| Alert Message Vibra              | Use vibration for messages    |
+| Hoiatuskell                      | Teavita hoiatuskella märgist  |
+| Output (GPIO) | Sisend teavitusväljundi jaoks |
+| Active                           | High or Low active            |
+| Duration (ms) | Notification length           |
+| Use I2S as Buzzer                | Use I2S audio output          |
 
 ### Salvesta & edasta moodul
 
@@ -90,7 +90,7 @@ Buffers messages for nodes that were temporarily offline, then replays them when
 
 ### Kaugustesti moodul
 
-Automated range testing tool for evaluating link quality between nodes. When enabled, the node periodically transmits test messages with incrementing counters. A receiver node logs these messages, allowing you to walk or drive away and later analyze at what distance messages stopped arriving.
+Automated range testing tool for evaluating link quality between nodes. Kui lubatud, edastab sõlm perioodiliselt testsõnumeid kasvavate loenduritega. A receiver node logs these messages, allowing you to walk or drive away and later analyze at what distance messages stopped arriving.
 
 | Sätted                                 | Kirjeldus                         |
 | -------------------------------------- | --------------------------------- |
@@ -115,13 +115,13 @@ See [Telemetry & Sensors](telemetry-and-sensors) for supported sensors and confi
 
 Seadme füüsiliste nuppude kaudu ligipääsetavad eelseadistatud sõnumid (pöördnuppude, klaviatuuride või sarnase sisendriistvaraga raadiote puhul). Define a list of quick-send messages that can be transmitted without a phone connected — ideal for field use.
 
-| Sätted             | Kirjeldus                                                          |
-| ------------------ | ------------------------------------------------------------------ |
-| ~~Lubatud~~        | ⚠️ **Vananenud** — praegune püsivara võib seda lülitit ignoreerida |
-| Sõnumid            | Newline-separated list of messages                                 |
-| Send Bell          | Play bell sound on send                                            |
-| Rotary Encoder     | Enable rotary encoder input                                        |
-| Up/Down/Press Pins | GPIO pin assignments for input                                     |
+| Sätted                  | Kirjeldus                                                          |
+| ----------------------- | ------------------------------------------------------------------ |
+| ~~Lubatud~~             | ⚠️ **Vananenud** — praegune püsivara võib seda lülitit ignoreerida |
+| Sõnumid                 | Newline-separated list of messages                                 |
+| Saada kelluke           | Esita saatmisel kellukese heli                                     |
+| Rotary Encoder          | Enable rotary encoder input                                        |
+| Üles/alla/vajuta sisend | GPIO sisendi kontaktide määramine                                  |
 
 ### Audio moodul
 
@@ -131,26 +131,26 @@ Codec2 audio support for low-bandwidth voice communication over the mesh. This i
 | --------------- | -------------------------------- |
 | Lubatud         | Aktiveeri audio moodul           |
 | Codec2 Rate     | Audio quality/bandwidth tradeoff |
-| I2S Word Select | GPIO pin for I2S WS              |
-| I2S Data In     | GPIO pin for I2S DIN             |
-| I2S Data Out    | GPIO pin for I2S DOUT            |
+| I2S Word Select | GPIO sisend I2S WS jaoks         |
+| I2S Data In     | GPIO sisend I2S DIN jaoks        |
+| I2S Data Out    | GPIO sisend I2S DOUT jaoks       |
 
 > ⚠️ **Märkus:** Heli jaoks on vaja spetsiaalset riistvara (I2S mikrofon ja kõlar). Voice quality is very low-bandwidth — think "understandable radio voice," not phone-call quality.
 
 ### Kaugriistvara moodul
 
-GPIO control over the mesh network. Allows a remote node to read or write GPIO pins on another node — useful for activating relays, reading switches, or controlling external hardware from a distance.
+GPIO control over the mesh network. Võimaldab kaugsõlmel lugeda või kirjutada GPIO sisendkontakte teisel sõlmel – kasulik releede aktiveerimiseks, lülitite lugemiseks või välise riistvara kaugjuhtimiseks.
 
-| Sätted               | Kirjeldus                                                       |
-| -------------------- | --------------------------------------------------------------- |
-| Lubatud              | Activate remote GPIO access                                     |
-| Allow Undefined Pins | Allow access to any GPIO pin (security risk) |
+| Sätted                     | Kirjeldus                                                               |
+| -------------------------- | ----------------------------------------------------------------------- |
+| Lubatud                    | Activate remote GPIO access                                             |
+| Luba määratlemata sisendid | Luba juurdepääs mis tahes GPIO sisendile (turvarisk) |
 
-> ⚠️ **Hoiatus:** Funktsiooni „Luba määratlemata kontaktid” lubamine annab kaugsõlmedele juurdepääsu kõigile GPIO kontaktile, mis võib häirida raadio enda riistvara. Only enable on dedicated GPIO nodes.
+> ⚠️ **Hoiatus:** Funktsiooni „Luba määratlemata sisendkontaktid” lubamine annab kaugsõlmedele juurdepääsu kõigile GPIO sisendile, mis võib häirida raadio enda riistvara. Only enable on dedicated GPIO nodes.
 
 ### Naabriinfo moodul
 
-Levitab teavet otse kuuldud naabrite kohta, võimaldades kärgvõrgu topoloogia kaardistamist. Each enabled node periodically shares a list of the other nodes it can hear and their signal quality.
+Levitab teavet otse kuuldud naabrite kohta, võimaldades kärgvõrgu topoloogia kaardistamist. Iga lubatud sõlm jagab perioodiliselt nimekirja teistest sõlmedest, mida ta kuuleb ja nende signaali kvaliteedist.
 
 | Sätted                                     | Kirjeldus                             |
 | ------------------------------------------ | ------------------------------------- |
@@ -171,17 +171,17 @@ Juhib toetatud riistvaral NeoPixeli või muid adresseeritavaid RGB LEDe. Can be 
 
 ### Tuvastusanduri moodul
 
-Turns your node into a motion or door sensor alert system. Kui GPIO klemm tuvastab oleku muutuse (liikumine tuvastatud, uks avatud), levitab sõlm kärgvõrgu kaudu hoiatusteate.
+Turns your node into a motion or door sensor alert system. Kui GPIO sisend tuvastab oleku muutuse (liikumine tuvastatud, uks avatud), levitab sõlm kärgvõrgu kaudu hoiatusteate.
 
-| Sätted                                     | Kirjeldus                                                               |
-| ------------------------------------------ | ----------------------------------------------------------------------- |
-| Lubatud                                    | Activate detection sensor                                               |
-| Monitor Pin                                | GPIO pin connected to sensor                                            |
-| Detection Triggered High                   | Trigger when pin goes high (vs. low) |
-| Minimaalne leviring(id) | Minimaalne aeg hoiatusteadete levitamisel                               |
-| Riiklik ringhääling(ud) | Perioodilise oleku levitamise intervall                                 |
-| Send Bell                                  | Include bell character in alerts                                        |
-| Friendly Name                              | Custom name for this sensor                                             |
+| Sätted                                     | Kirjeldus                                                                  |
+| ------------------------------------------ | -------------------------------------------------------------------------- |
+| Lubatud                                    | Aktiveeri tuvastusandur                                                    |
+| Ekraani sisend                             | GPIO sisend on anduriga ühendatud                                          |
+| Tuvastus käivitus kõrgel tasemel           | Käivitub, kui sisend läheb kõrgeks (võrreldes madalaga) |
+| Minimaalne leviring(id) | Minimaalne aeg hoiatusteadete levitamisel                                  |
+| Riiklik ringhääling(ud) | Perioodilise oleku levitamise intervall                                    |
+| Saada hoiatuskell                          | Lisa märguannetesse hoiatuskella sümbol                                    |
+| Friendly Name                              | Custom name for this sensor                                                |
 
 ### Paxloenduri moodul
 
