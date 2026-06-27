@@ -43,6 +43,12 @@ fun RangeTestConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val rangeTestConfig = state.moduleConfig.range_test ?: ModuleConfig.RangeTestConfig()
     val formState = rememberConfigState(initialValue = rangeTestConfig)
 
+    // A PSK shorter than 2 bytes means either cleartext (0 bytes) or the well-known default
+    // shortstring code (1 byte). Both are effectively public — Range Test must not run on them
+    // to avoid flooding the shared mesh. Use the CLI to override if intentional.
+    val isPublicPrimaryChannel = (state.channelList.firstOrNull()?.psk?.size ?: 0) < 2
+    val canConfigure = state.connected && !isPublicPrimaryChannel
+
     RadioConfigScreenList(
         title = stringResource(Res.string.range_test),
         onBack = onBack,
@@ -50,8 +56,10 @@ fun RangeTestConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         enabled = state.connected,
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
+        additionalDirtyCheck = { isPublicPrimaryChannel && formState.value.enabled },
         onSave = {
-            val config = ModuleConfig(range_test = it)
+            val safeConfig = if (isPublicPrimaryChannel) it.copy(enabled = false) else it
+            val config = ModuleConfig(range_test = safeConfig)
             viewModel.setModuleConfig(config)
         },
     ) {
@@ -60,7 +68,7 @@ fun RangeTestConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 SwitchPreference(
                     title = stringResource(Res.string.range_test_enabled),
                     checked = formState.value.enabled,
-                    enabled = state.connected,
+                    enabled = canConfigure,
                     onCheckedChange = { formState.value = formState.value.copy(enabled = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
@@ -69,7 +77,7 @@ fun RangeTestConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 DropDownPreference(
                     title = stringResource(Res.string.sender_message_interval_seconds),
                     selectedItem = (formState.value.sender).toLong(),
-                    enabled = state.connected,
+                    enabled = canConfigure,
                     items = rangeItems.map { it.value to it.toDisplayString() },
                     onItemSelected = { formState.value = formState.value.copy(sender = it.toInt()) },
                 )
@@ -77,7 +85,7 @@ fun RangeTestConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 SwitchPreference(
                     title = stringResource(Res.string.save_csv_in_storage_esp32_only),
                     checked = formState.value.save,
-                    enabled = state.connected,
+                    enabled = canConfigure,
                     onCheckedChange = { formState.value = formState.value.copy(save = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
