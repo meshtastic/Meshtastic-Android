@@ -64,6 +64,7 @@ import org.meshtastic.core.resources.current
 import org.meshtastic.core.resources.elevation_suffix
 import org.meshtastic.core.resources.node_list_click_label
 import org.meshtastic.core.resources.node_list_long_click_label
+import org.meshtastic.core.resources.security_signed_node
 import org.meshtastic.core.resources.signal_quality
 import org.meshtastic.core.resources.unknown_username
 import org.meshtastic.core.resources.voltage
@@ -72,6 +73,7 @@ import org.meshtastic.core.ui.icon.ChannelUtilization
 import org.meshtastic.core.ui.icon.MapCompass
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Notes
+import org.meshtastic.core.ui.icon.ShieldCheck
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.util.LocalModemPreset
 import org.meshtastic.proto.Config
@@ -429,6 +431,27 @@ private fun MetricsGrid(items: List<@Composable () -> Unit>) {
     }
 }
 
+/** Key status (always status-colored) + the signed-node shield share one scrim chip so both stay legible. */
+@Composable
+private fun NodeSecurityIcons(thatNode: Node) {
+    StatusSurface {
+        NodeKeyStatusIcon(
+            hasPKC = thatNode.hasPKC,
+            mismatchKey = thatNode.mismatchKey,
+            publicKey = thatNode.user.public_key,
+            modifier = Modifier.size(24.dp),
+        )
+        if (thatNode.signsPackets) {
+            Icon(
+                imageVector = MeshtasticIcons.ShieldCheck,
+                contentDescription = stringResource(Res.string.security_signed_node),
+                modifier = Modifier.size(20.dp),
+                tint = MaterialTheme.colorScheme.StatusGreen,
+            )
+        }
+    }
+}
+
 @Composable
 private fun NodeItemHeader(
     thatNode: Node,
@@ -449,13 +472,7 @@ private fun NodeItemHeader(
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         NodeChip(node = thatNode)
-
-        NodeKeyStatusIcon(
-            hasPKC = thatNode.hasPKC,
-            mismatchKey = thatNode.mismatchKey,
-            publicKey = thatNode.user.public_key,
-            modifier = Modifier.size(24.dp),
-        )
+        NodeSecurityIcons(thatNode)
 
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Row(

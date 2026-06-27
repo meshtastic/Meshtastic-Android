@@ -40,9 +40,10 @@ import androidx.compose.ui.unit.dp
  * (green/yellow/orange) stay at AA text contrast even over a light card; the darkest token (red) holds the 3:1
  * graphical floor — see ColorContrastTest / StatusSurfaceTest.
  */
-// Alpha is near the floor: over a pure-white worst case, ~0xD4 is the limit before red drops under 3:1 / green under
-// 4.5:1 (the bright status tokens need a dark backing). 0xD6 keeps a small margin — see StatusSurfaceTest.
-val StatusScrim = Color(0xD6101113)
+// Alpha is at the floor for the surfaces the chip actually sits on: over the lightest real backdrop (the card surface
+// at max node tint) 0xCD is the limit before red drops under 3:1 / green under 4.5:1. One step lower (0xCC) fails AA —
+// see StatusSurfaceTest.
+val StatusScrim = Color(0xCD101113)
 
 /**
  * Wraps status-colored [content] (e.g. [Snr]/[Rssi], a signed shield) on the [StatusScrim] so the colors stay legible

@@ -293,8 +293,18 @@ fun MessageItem(
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     if (!message.fromLocal) {
-                        // Only the status-colored items (SNR/RSSI, the signed shield) get a scrim chip so they stay
-                        // AA-legible on any node-tinted bubble; the white transport/hop icons stay bare.
+                        // XEdDSA is only set on verified broadcasts, never DMs — so this never shows on a DM.
+                        if (message.xeddsaSigned) {
+                            // Solo icon → equal padding so the pill renders as a circle.
+                            StatusSurface(contentPadding = PaddingValues(3.dp)) {
+                                Icon(
+                                    imageVector = MeshtasticIcons.ShieldCheck,
+                                    contentDescription = stringResource(Res.string.security_signed_verified),
+                                    modifier = Modifier.size(16.dp),
+                                    tint = MaterialTheme.colorScheme.StatusGreen,
+                                )
+                            }
+                        }
                         if (message.hopsAway == 0 && !message.viaMqtt) {
                             StatusSurface {
                                 Snr(message.snr)
@@ -324,18 +334,6 @@ fun MessageItem(
                             modifier = Modifier.size(16.dp),
                             tint = Color.White,
                         )
-                        // XEdDSA is only set on verified broadcasts, never DMs — so this never shows on a DM.
-                        if (message.xeddsaSigned) {
-                            // Solo icon → equal padding so the pill renders as a circle.
-                            StatusSurface(contentPadding = PaddingValues(3.dp)) {
-                                Icon(
-                                    imageVector = MeshtasticIcons.ShieldCheck,
-                                    contentDescription = stringResource(Res.string.security_signed_verified),
-                                    modifier = Modifier.size(16.dp),
-                                    tint = MaterialTheme.colorScheme.StatusGreen,
-                                )
-                            }
-                        }
                     }
                     if (containsBel) {
                         Text(text = "\uD83D\uDD14", modifier = Modifier.padding(start = 4.dp))

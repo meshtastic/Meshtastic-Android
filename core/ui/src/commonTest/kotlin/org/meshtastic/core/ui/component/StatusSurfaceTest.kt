@@ -18,9 +18,11 @@ package org.meshtastic.core.ui.component
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
+import androidx.compose.ui.graphics.lerp
 import org.meshtastic.core.ui.theme.MIN_GRAPHICAL_CONTRAST
 import org.meshtastic.core.ui.theme.MIN_TEXT_CONTRAST
 import org.meshtastic.core.ui.theme.contrastRatio
+import org.meshtastic.core.ui.theme.surfaceContainerHighestLight
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
@@ -36,8 +38,10 @@ class StatusSurfaceTest {
             "red" to Color(0xFFE05252),
         )
 
-    // StatusScrim is translucent, so test the effective color over the lightest surface it can sit on (worst case).
-    private val effectiveScrim = StatusScrim.compositeOver(Color.White)
+    // StatusScrim is translucent, so test the effective color over the lightest surface it can REALISTICALLY sit on:
+    // the light card surface (chip base) tinted toward the lightest possible node color (white) at max emphasis.
+    private val lightestBackdrop = lerp(surfaceContainerHighestLight, Color.White, NODE_TINT_EMPHASIZED)
+    private val effectiveScrim = StatusScrim.compositeOver(lightestBackdrop)
 
     @Test
     fun goodGreenMeetsTextContrast() {
