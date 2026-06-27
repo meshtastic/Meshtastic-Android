@@ -282,15 +282,24 @@ fun MessageItem(
                     )
                 }
 
-                Row(modifier = Modifier, verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    modifier = Modifier,
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
                     if (!message.fromLocal) {
-                        // Status-colored metadata sits on a fixed dark scrim so the bright status tokens stay
-                        // AA-legible on any node-tinted bubble, while keeping their true values.
-                        StatusSurface {
-                            if (message.hopsAway == 0 && !message.viaMqtt) {
+                        // Only the status-colored items (SNR/RSSI, the signed shield) get a scrim chip so they stay
+                        // AA-legible on any node-tinted bubble; the white transport/hop icons stay bare.
+                        if (message.hopsAway == 0 && !message.viaMqtt) {
+                            StatusSurface {
                                 Snr(message.snr)
                                 Rssi(message.rssi)
-                            } else {
+                            }
+                        } else {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(2.dp),
+                            ) {
                                 Icon(
                                     imageVector = MeshtasticIcons.HopCount,
                                     contentDescription = null,
@@ -303,14 +312,16 @@ fun MessageItem(
                                     color = Color.White,
                                 )
                             }
-                            TransportIcon(
-                                transport = message.transportMechanism,
-                                viaMqtt = message.viaMqtt,
-                                modifier = Modifier.size(16.dp),
-                                tint = Color.White,
-                            )
-                            // XEdDSA is only set on verified broadcasts, never DMs — so this never shows on a DM.
-                            if (message.xeddsaSigned) {
+                        }
+                        TransportIcon(
+                            transport = message.transportMechanism,
+                            viaMqtt = message.viaMqtt,
+                            modifier = Modifier.size(16.dp),
+                            tint = Color.White,
+                        )
+                        // XEdDSA is only set on verified broadcasts, never DMs — so this never shows on a DM.
+                        if (message.xeddsaSigned) {
+                            StatusSurface {
                                 Icon(
                                     imageVector = MeshtasticIcons.ShieldCheck,
                                     contentDescription = stringResource(Res.string.security_signed_verified),

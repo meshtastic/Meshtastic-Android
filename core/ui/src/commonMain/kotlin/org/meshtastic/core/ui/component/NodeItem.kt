@@ -317,17 +317,24 @@ private fun NodeSignalRow(thatNode: Node, isThisNode: Boolean, contentColor: Col
                 if (thatNode.hopsAway > 0) {
                     add { HopsInfo(hops = thatNode.hopsAway, contentColor = contentColor) }
                 } else if (thatNode.hopsAway == 0 && !thatNode.viaMqtt) {
-                    if (thatNode.snr < 100f) add { Snr(thatNode.snr) }
-                    if (thatNode.rssi < 0) add { Rssi(thatNode.rssi) }
-                    if (thatNode.snr < 100f && thatNode.rssi < 0) {
-                        val quality = determineSignalQuality(thatNode.snr, LocalModemPreset.current)
+                    val showSnr = thatNode.snr < 100f
+                    val showRssi = thatNode.rssi < 0
+                    if (showSnr || showRssi) {
+                        // SNR/RSSI/quality are the only status-colored metrics here — back just them with a scrim.
                         add {
-                            IconInfo(
-                                icon = vectorResource(quality.icon),
-                                contentDescription = stringResource(Res.string.signal_quality),
-                                contentColor = quality.color.invoke(),
-                                text = stringResource(quality.nameRes),
-                            )
+                            StatusSurface {
+                                if (showSnr) Snr(thatNode.snr)
+                                if (showRssi) Rssi(thatNode.rssi)
+                                if (showSnr && showRssi) {
+                                    val quality = determineSignalQuality(thatNode.snr, LocalModemPreset.current)
+                                    IconInfo(
+                                        icon = vectorResource(quality.icon),
+                                        contentDescription = stringResource(Res.string.signal_quality),
+                                        contentColor = quality.color.invoke(),
+                                        text = stringResource(quality.nameRes),
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -482,13 +489,18 @@ private fun NodeItemHeader(
                 )
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                val statusColor =
-                    if (!isThisNode && thatNode.isOnline) {
-                        MaterialTheme.colorScheme.StatusGreen
-                    } else {
-                        contentColor
+                // "Online" is shown in StatusGreen — back only that case with a scrim so it stays legible.
+                if (!isThisNode && thatNode.isOnline) {
+                    StatusSurface {
+                        LastHeardInfo(
+                            lastHeard = thatNode.lastHeard,
+                            showLabel = false,
+                            contentColor = MaterialTheme.colorScheme.StatusGreen,
+                        )
                     }
-                LastHeardInfo(lastHeard = thatNode.lastHeard, showLabel = false, contentColor = statusColor)
+                } else {
+                    LastHeardInfo(lastHeard = thatNode.lastHeard, showLabel = false, contentColor = contentColor)
+                }
             }
         }
 

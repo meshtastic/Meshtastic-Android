@@ -327,18 +327,24 @@ private fun CompactHealthRow(
         if (showLastHeard && thatNode.lastHeard > 0 && !isFutureDate(thatNode.lastHeard)) {
             add(
                 @Composable {
-                    val statusColor =
-                        if (thatNode.isOnline) {
-                            MaterialTheme.colorScheme.StatusGreen
-                        } else {
-                            contentColor
+                    // "Online" is shown in StatusGreen — back only that case with a scrim so it stays legible.
+                    if (thatNode.isOnline) {
+                        StatusSurface {
+                            LastHeardInfo(
+                                lastHeard = thatNode.lastHeard,
+                                showLabel = false,
+                                relative = lastHeardIsRelative,
+                                contentColor = MaterialTheme.colorScheme.StatusGreen,
+                            )
                         }
-                    LastHeardInfo(
-                        lastHeard = thatNode.lastHeard,
-                        showLabel = false,
-                        relative = lastHeardIsRelative,
-                        contentColor = statusColor,
-                    )
+                    } else {
+                        LastHeardInfo(
+                            lastHeard = thatNode.lastHeard,
+                            showLabel = false,
+                            relative = lastHeardIsRelative,
+                            contentColor = contentColor,
+                        )
+                    }
                 },
             )
         }
@@ -377,12 +383,14 @@ private fun CompactHealthRow(
             val quality = determineSignalQuality(thatNode.snr, LocalModemPreset.current)
             add(
                 @Composable {
-                    IconInfo(
-                        icon = vectorResource(quality.icon),
-                        contentDescription = stringResource(quality.nameRes),
-                        contentColor = quality.color.invoke(),
-                        text = stringResource(quality.nameRes),
-                    )
+                    StatusSurface {
+                        IconInfo(
+                            icon = vectorResource(quality.icon),
+                            contentDescription = stringResource(quality.nameRes),
+                            contentColor = quality.color.invoke(),
+                            text = stringResource(quality.nameRes),
+                        )
+                    }
                 },
             )
         }
