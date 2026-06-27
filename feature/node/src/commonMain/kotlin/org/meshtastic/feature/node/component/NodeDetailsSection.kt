@@ -92,6 +92,7 @@ import org.meshtastic.core.ui.icon.ShieldCheck
 import org.meshtastic.core.ui.icon.Snr
 import org.meshtastic.core.ui.icon.Verified
 import org.meshtastic.core.ui.icon.role
+import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.util.createClipEntry
 import org.meshtastic.core.ui.util.formatAgo
 import kotlin.io.encoding.Base64
@@ -340,6 +341,8 @@ private fun SignedNodeRow() {
         value = stringResource(Res.string.security_signed_node_desc),
         icon = MeshtasticIcons.ShieldCheck,
         modifier = Modifier.fillMaxWidth(),
+        iconTint = MaterialTheme.colorScheme.StatusGreen,
+        iconSize = 20.dp,
     )
 }
 

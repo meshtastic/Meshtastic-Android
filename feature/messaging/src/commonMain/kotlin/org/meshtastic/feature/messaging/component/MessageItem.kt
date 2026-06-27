@@ -78,6 +78,7 @@ import org.meshtastic.core.ui.icon.HopCount
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.ShieldCheck
 import org.meshtastic.core.ui.theme.MessageItemColors
+import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.util.createClipEntry
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -317,12 +318,13 @@ fun MessageItem(
                             tint = Color.White,
                         )
                         // XEdDSA is only set on verified broadcasts, never DMs — so this never shows on a DM.
+                        // Green + slightly larger than the white metadata icons so "verified" reads at a glance.
                         if (message.xeddsaSigned) {
                             Icon(
                                 imageVector = MeshtasticIcons.ShieldCheck,
                                 contentDescription = stringResource(Res.string.security_signed_verified),
-                                modifier = Modifier.size(16.dp).padding(start = 4.dp),
-                                tint = Color.White,
+                                modifier = Modifier.size(18.dp).padding(start = 4.dp),
+                                tint = MaterialTheme.colorScheme.StatusGreen,
                             )
                         }
                     }
