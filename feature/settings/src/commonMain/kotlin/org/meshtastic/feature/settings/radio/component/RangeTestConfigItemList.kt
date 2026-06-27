@@ -43,9 +43,6 @@ fun RangeTestConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val rangeTestConfig = state.moduleConfig.range_test ?: ModuleConfig.RangeTestConfig()
     val formState = rememberConfigState(initialValue = rangeTestConfig)
 
-    // A PSK shorter than 2 bytes means either cleartext (0 bytes) or the well-known default
-    // shortstring code (1 byte). Both are effectively public — Range Test must not run on them
-    // to avoid flooding the shared mesh. Use the CLI to override if intentional.
     val isPublicPrimaryChannel = (state.channelList.firstOrNull()?.psk?.size ?: 0) < 2
     val canConfigure = state.connected && !isPublicPrimaryChannel
 
