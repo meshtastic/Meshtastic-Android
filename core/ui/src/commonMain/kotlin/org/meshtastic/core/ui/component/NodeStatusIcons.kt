@@ -67,10 +67,6 @@ fun NodeStatusIcons(
     contentColor: Color = LocalContentColor.current,
 ) {
     Row(modifier = modifier.padding(4.dp)) {
-        if (isThisNode) {
-            ThisNodeStatusBadge(connectionState = connectionState, deviceType = deviceType)
-        }
-
         if (isUnmessageable) {
             StatusBadge(
                 imageVector = MeshtasticIcons.Unmessageable,
@@ -94,6 +90,9 @@ fun NodeStatusIcons(
                 tooltipText = Res.string.favorite,
                 tint = MaterialTheme.colorScheme.StatusYellow,
             )
+        }
+        if (isThisNode) {
+            ThisNodeStatusBadge(connectionState = connectionState, deviceType = deviceType)
         }
     }
 }
@@ -155,7 +154,7 @@ private fun StatusBadge(
         Icon(
             imageVector = imageVector,
             contentDescription = stringResource(contentDescription),
-            modifier = Modifier.size(24.dp),
+            modifier = Modifier.size(20.dp),
             tint = tint,
         )
     }

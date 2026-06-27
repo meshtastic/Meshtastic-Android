@@ -388,7 +388,10 @@ private fun OriginalMessageSnippet(
     val originalMessage = message.originalMessage
     if (originalMessage != null && originalMessage.packetId != 0) {
         val originalMessageNode = if (originalMessage.fromLocal) ourNode else originalMessage.node
-        val replyContainerColor = Color(originalMessageNode.colors.second).copy(alpha = 0.8f)
+        // Same node-tinted treatment as the bubble (keeps onSurface text AA), but at the emphasized tint so the quoted
+        // header still reads as distinct from the bubble body below it.
+        val replyContainerColor =
+            nodeTintedContainer(Color(originalMessageNode.colors.second), fraction = NODE_TINT_EMPHASIZED)
         val replyContentColor = MaterialTheme.colorScheme.onSurface
         // Rectangle shape — the outer message bubble's Surface clips to its
         // rounded corners, so the reply header inherits the correct top radii

@@ -48,6 +48,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -433,13 +434,13 @@ private fun MetricsGrid(items: List<@Composable () -> Unit>) {
 
 /** Key status (always status-colored) + the signed-node shield share one scrim chip so both stay legible. */
 @Composable
-private fun NodeSecurityIcons(thatNode: Node) {
+internal fun NodeSecurityIcons(thatNode: Node, iconSize: Dp = 20.dp) {
     StatusSurface {
         if (thatNode.signsPackets) {
             Icon(
                 imageVector = MeshtasticIcons.ShieldCheck,
                 contentDescription = stringResource(Res.string.security_signed_node),
-                modifier = Modifier.size(20.dp),
+                modifier = Modifier.size(iconSize),
                 tint = MaterialTheme.colorScheme.StatusGreen,
             )
         }
@@ -447,7 +448,7 @@ private fun NodeSecurityIcons(thatNode: Node) {
             hasPKC = thatNode.hasPKC,
             mismatchKey = thatNode.mismatchKey,
             publicKey = thatNode.user.public_key,
-            modifier = Modifier.size(20.dp),
+            modifier = Modifier.size(iconSize),
         )
     }
 }
