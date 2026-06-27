@@ -53,7 +53,6 @@ fun RangeTestConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         enabled = state.connected,
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
-        additionalDirtyCheck = { isPublicPrimaryChannel && formState.value.enabled },
         onSave = {
             val safeConfig = if (isPublicPrimaryChannel) it.copy(enabled = false) else it
             val config = ModuleConfig(range_test = safeConfig)
@@ -65,7 +64,7 @@ fun RangeTestConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 SwitchPreference(
                     title = stringResource(Res.string.range_test_enabled),
                     checked = formState.value.enabled,
-                    enabled = canConfigure,
+                    enabled = canConfigure || formState.value.enabled,
                     onCheckedChange = { formState.value = formState.value.copy(enabled = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
