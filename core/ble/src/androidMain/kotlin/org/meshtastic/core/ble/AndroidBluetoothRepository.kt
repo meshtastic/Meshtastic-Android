@@ -41,6 +41,7 @@ import kotlin.time.Duration.Companion.seconds
 
 private val BOND_TIMEOUT = 30.seconds
 private val BOND_STATE_POLL_INTERVAL = 500.milliseconds
+private const val CREATED_BOND_NONE_GRACE_POLLS = 1
 
 /** Android implementation of [BluetoothRepository]. */
 @Single
@@ -103,8 +104,8 @@ class AndroidBluetoothRepository(
                     ContextCompat.registerReceiver(context, receiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
 
                     try {
-                        startOrObserveBond(remoteDevice, result)
-                        awaitBondResult(remoteDevice, result)
+                        val start = startOrObserveBond(remoteDevice, result)
+                        awaitBondResult(remoteDevice, result, start)
                     } finally {
                         unregisterBondReceiver(receiver)
                     }
@@ -122,44 +123,78 @@ class AndroidBluetoothRepository(
 
     @Suppress("TooGenericExceptionCaught")
     @SuppressLint("MissingPermission")
-    private fun startOrObserveBond(remoteDevice: android.bluetooth.BluetoothDevice, result: CompletableDeferred<Unit>) {
+    private fun startOrObserveBond(
+        remoteDevice: android.bluetooth.BluetoothDevice,
+        result: CompletableDeferred<Unit>,
+    ): BondWaitStart {
+        var start = BondWaitStart()
         try {
-            if (result.isCompleted) return
-
-            if (remoteDevice.bondState == android.bluetooth.BluetoothDevice.BOND_BONDED) {
-                result.complete(Unit)
-            } else if (!remoteDevice.createBond()) {
-                // createBond() returns false when a bond is already in flight, triggered by a GATT
-                // operation hitting a secured characteristic, or already established.
-                // ACTION_BOND_STATE_CHANGED is unreliable on some devices (see Kable #111), so
-                // re-check bondState directly rather than failing the whole flow.
-                when (remoteDevice.bondState) {
-                    android.bluetooth.BluetoothDevice.BOND_BONDED -> {
-                        result.complete(Unit)
-                    }
-
-                    android.bluetooth.BluetoothDevice.BOND_BONDING -> {
-                        // Bond already in progress; leave the receiver registered to resolve it on
-                        // the terminal BOND_BONDED / BOND_NONE transition instead of treating this
-                        // as a failure.
-                        Logger.d { "createBond() returned false but bonding is already in progress" }
-                    }
-
-                    else -> {
-                        result.completeExceptionally(Exception("Failed to initiate bonding"))
-                    }
+            if (!result.isCompleted) {
+                if (remoteDevice.bondState == android.bluetooth.BluetoothDevice.BOND_BONDED) {
+                    result.complete(Unit)
+                } else if (remoteDevice.createBond()) {
+                    start = BondWaitStart(createdBond = true)
+                } else {
+                    start = observeExistingBond(remoteDevice, result)
                 }
             }
         } catch (e: Exception) {
             result.completeExceptionally(e)
         }
+        return start
     }
+
+    @SuppressLint("MissingPermission")
+    private fun observeExistingBond(
+        remoteDevice: android.bluetooth.BluetoothDevice,
+        result: CompletableDeferred<Unit>,
+    ): BondWaitStart {
+        // createBond() returns false when a bond is already in flight, triggered by a GATT
+        // operation hitting a secured characteristic, or already established.
+        // ACTION_BOND_STATE_CHANGED is unreliable on some devices (see Kable #111), so
+        // re-check bondState directly rather than failing the whole flow.
+        return when (remoteDevice.bondState) {
+            android.bluetooth.BluetoothDevice.BOND_BONDED -> {
+                result.complete(Unit)
+                BondWaitStart()
+            }
+
+            android.bluetooth.BluetoothDevice.BOND_BONDING -> {
+                // Bond already in progress; leave the receiver registered to resolve it on
+                // the terminal BOND_BONDED / BOND_NONE transition instead of treating this
+                // as a failure.
+                Logger.d { "createBond() returned false but bonding is already in progress" }
+                BondWaitStart(bondingObserved = true)
+            }
+
+            else -> {
+                result.completeExceptionally(Exception("Failed to initiate bonding"))
+                BondWaitStart()
+            }
+        }
+    }
+
+    private data class BondWaitStart(
+        val bondingObserved: Boolean = false,
+        val createdBond: Boolean = false,
+    )
 
     @SuppressLint("MissingPermission")
     private suspend fun awaitBondResult(
         remoteDevice: android.bluetooth.BluetoothDevice,
         result: CompletableDeferred<Unit>,
+        start: BondWaitStart,
     ) {
+        var bondingWasInFlight = start.bondingObserved
+        // createBond() can return before Android reports BOND_BONDING; avoid treating
+        // that initial BOND_NONE state as a terminal failure.
+        var bondNoneGracePolls =
+            if (start.createdBond && !bondingWasInFlight) {
+                CREATED_BOND_NONE_GRACE_POLLS
+            } else {
+                0
+            }
+
         while (!result.isCompleted) {
             val completedFromReceiver =
                 withTimeoutOrNull(BOND_STATE_POLL_INTERVAL) {
@@ -167,8 +202,26 @@ class AndroidBluetoothRepository(
                     true
                 } == true
 
-            if (!completedFromReceiver && remoteDevice.bondState == android.bluetooth.BluetoothDevice.BOND_BONDED) {
-                result.complete(Unit)
+            if (!completedFromReceiver) {
+                when (remoteDevice.bondState) {
+                    android.bluetooth.BluetoothDevice.BOND_BONDED -> {
+                        result.complete(Unit)
+                    }
+
+                    android.bluetooth.BluetoothDevice.BOND_BONDING -> {
+                        bondingWasInFlight = true
+                        bondNoneGracePolls = 0
+                    }
+
+                    android.bluetooth.BluetoothDevice.BOND_NONE -> {
+                        if (bondingWasInFlight) {
+                            result.completeExceptionally(Exception("Bonding failed or rejected"))
+                        } else if (bondNoneGracePolls > 0) {
+                            bondNoneGracePolls--
+                            bondingWasInFlight = bondNoneGracePolls == 0
+                        }
+                    }
+                }
             }
         }
         result.await()
