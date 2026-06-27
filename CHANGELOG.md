@@ -11,6 +11,7 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 * feat(security): surface XEdDSA packet signing in node & messaging UI (#5976) by James Rich (@jamesarich) in [`5a035ac1f`](https://github.com/meshtastic/Meshtastic-Android/commit/5a035ac1f101d76e5942f157729cb4bb9e0c4b81)
 * chore(deps): update vico to v3.3.0-next.1 (#5975) by renovate[bot] (@renovate[bot]) in [`b8fe31203`](https://github.com/meshtastic/Meshtastic-Android/commit/b8fe3120352d2c559bbfde6a0bdf0aa20f8df807)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs, Baseline) (#5978) by James Rich (@jamesarich) in [`a386e1d84`](https://github.com/meshtastic/Meshtastic-Android/commit/a386e1d84d9d8122f657dd8902b1cde77a440990)
 
 ### Internal (v2.8.0-internal.8)
 Changes since [`v2.8.0-closed.1`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.0-closed.1):
