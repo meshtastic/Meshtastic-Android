@@ -135,7 +135,27 @@ class AndroidBluetoothRepository(
                 } else if (remoteDevice.createBond()) {
                     start = BondWaitStart(createdBond = true)
                 } else {
-                    start = observeExistingBond(remoteDevice, result)
+                    // createBond() returns false when a bond is already in flight, triggered by a GATT
+                    // operation hitting a secured characteristic, or already established.
+                    // ACTION_BOND_STATE_CHANGED is unreliable on some devices (see Kable #111), so
+                    // re-check bondState directly rather than failing the whole flow.
+                    when (remoteDevice.bondState) {
+                        android.bluetooth.BluetoothDevice.BOND_BONDED -> {
+                            result.complete(Unit)
+                        }
+
+                        android.bluetooth.BluetoothDevice.BOND_BONDING -> {
+                            // Bond already in progress; leave the receiver registered to resolve it on
+                            // the terminal BOND_BONDED / BOND_NONE transition instead of treating this
+                            // as a failure.
+                            Logger.d { "createBond() returned false but bonding is already in progress" }
+                            start = BondWaitStart(bondingObserved = true)
+                        }
+
+                        else -> {
+                            result.completeExceptionally(Exception("Failed to initiate bonding"))
+                        }
+                    }
                 }
             }
         } catch (e: Exception) {
@@ -144,40 +164,7 @@ class AndroidBluetoothRepository(
         return start
     }
 
-    @SuppressLint("MissingPermission")
-    private fun observeExistingBond(
-        remoteDevice: android.bluetooth.BluetoothDevice,
-        result: CompletableDeferred<Unit>,
-    ): BondWaitStart {
-        // createBond() returns false when a bond is already in flight, triggered by a GATT
-        // operation hitting a secured characteristic, or already established.
-        // ACTION_BOND_STATE_CHANGED is unreliable on some devices (see Kable #111), so
-        // re-check bondState directly rather than failing the whole flow.
-        return when (remoteDevice.bondState) {
-            android.bluetooth.BluetoothDevice.BOND_BONDED -> {
-                result.complete(Unit)
-                BondWaitStart()
-            }
-
-            android.bluetooth.BluetoothDevice.BOND_BONDING -> {
-                // Bond already in progress; leave the receiver registered to resolve it on
-                // the terminal BOND_BONDED / BOND_NONE transition instead of treating this
-                // as a failure.
-                Logger.d { "createBond() returned false but bonding is already in progress" }
-                BondWaitStart(bondingObserved = true)
-            }
-
-            else -> {
-                result.completeExceptionally(Exception("Failed to initiate bonding"))
-                BondWaitStart()
-            }
-        }
-    }
-
-    private data class BondWaitStart(
-        val bondingObserved: Boolean = false,
-        val createdBond: Boolean = false,
-    )
+    private data class BondWaitStart(val bondingObserved: Boolean = false, val createdBond: Boolean = false)
 
     @SuppressLint("MissingPermission")
     private suspend fun awaitBondResult(

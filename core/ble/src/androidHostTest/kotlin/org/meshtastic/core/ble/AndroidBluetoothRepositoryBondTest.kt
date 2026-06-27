@@ -281,11 +281,7 @@ class AndroidBluetoothRepositoryBondTest {
             val mac = "AA:BB:CC:DD:EE:0E"
             RobolectricBleBonding.grantBluetoothConnectPermission()
             val deviceShadow =
-                RobolectricBleBonding.primeBond(
-                    mac,
-                    bondState = BluetoothDevice.BOND_NONE,
-                    createBondReturns = true,
-                )
+                RobolectricBleBonding.primeBond(mac, bondState = BluetoothDevice.BOND_NONE, createBondReturns = true)
             val repo = newRepository(UnconfinedTestDispatcher(testScheduler))
 
             val failure = launchBond(repo, mac)
