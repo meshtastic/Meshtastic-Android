@@ -358,21 +358,7 @@ class BleRadioTransport(
 
         val device = findDevice()
 
-        // Bond before connecting: firmware may require an encrypted link,
-        // and without a bond Android fails with status 5 or 133.
-        // No-op on Desktop/JVM where the OS handles pairing automatically.
-        if (!bluetoothRepository.isBonded(address)) {
-            Logger.i { "[$address] Device not bonded, initiating bonding" }
-            @Suppress("TooGenericExceptionCaught")
-            try {
-                bluetoothRepository.bond(device)
-                Logger.i { "[$address] Bonding successful" }
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                Logger.w(e) { "[$address] Bonding failed, attempting connection anyway" }
-            }
-        }
+        bondDeviceBeforeConnect(device)
 
         val state = bleConnection.connectAndAwait(device, CONNECTION_TIMEOUT)
 
@@ -468,6 +454,30 @@ class BleRadioTransport(
         }
 
         return BleReconnectPolicy.Outcome.Disconnected(wasStable = wasStable, wasIntentional = wasIntentional)
+    }
+
+    private suspend fun bondDeviceBeforeConnect(device: BleDevice) {
+        if (bluetoothRepository.isBonded(address)) return
+
+        // Bond before connecting: firmware may require an encrypted link, and without a bond Android fails with
+        // status 5 or 133. Non-Android targets use repository-specific no-op behavior.
+        Logger.i { "[$address] Device not bonded, initiating bonding" }
+        try {
+            bluetoothRepository.bond(device)
+            Logger.i { "[$address] Bonding successful" }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            // bond() failed. Android may still have recorded the bond, in which case we can safely continue into GATT
+            // setup. If the device is still not bonded, continuing would fail later with a cryptic status (5/133), so
+            // stop now and let BleReconnectPolicy own the retry/backoff.
+            if (bluetoothRepository.isBonded(address)) {
+                Logger.w(e) { "[$address] Bonding reported failure but device is bonded; continuing" }
+            } else {
+                Logger.w(e) { "[$address] Bonding failed and device is still not bonded; stopping connection attempt" }
+                throw RadioNotConnectedException("Bonding failed and device is still not bonded", e)
+            }
+        }
     }
 
     private suspend fun onConnected() {

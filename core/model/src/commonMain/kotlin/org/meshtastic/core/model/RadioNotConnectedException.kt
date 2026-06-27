@@ -17,4 +17,5 @@
 package org.meshtastic.core.model
 
 /** Exception thrown when an operation is attempted while not connected to a mesh radio. */
-open class RadioNotConnectedException(message: String = "Not connected to radio") : Exception(message)
+open class RadioNotConnectedException(message: String = "Not connected to radio", cause: Throwable? = null) :
+    Exception(message, cause)

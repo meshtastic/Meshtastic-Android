@@ -23,6 +23,7 @@ import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify
 import dev.mokkery.verify.VerifyMode
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
@@ -37,6 +38,8 @@ import org.meshtastic.core.testing.FakeBleConnectionFactory
 import org.meshtastic.core.testing.FakeBleDevice
 import org.meshtastic.core.testing.FakeBleScanner
 import org.meshtastic.core.testing.FakeBluetoothRepository
+import org.meshtastic.core.testing.failBondAfterRecording
+import org.meshtastic.core.testing.failBondWith
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -259,6 +262,129 @@ class BleRadioTransportTest {
             assertNotNull(scanner.lastScanServiceUuid, "scan must include serviceUuid")
             assertEquals(SERVICE_UUID, scanner.lastScanServiceUuid)
             assertEquals(address, scanner.lastScanAddress)
+        } finally {
+            bleTransport.close()
+        }
+    }
+
+    // --- Transport-side bond failure handling ---
+
+    @Test
+    fun `bond succeeds then connectAndAwait is called`() = runTest {
+        val device = FakeBleDevice(address = address, name = "Test Device")
+        scanner.emitDevice(device)
+
+        val bleTransport =
+            BleRadioTransport(
+                scope = this,
+                scanner = scanner,
+                bluetoothRepository = bluetoothRepository,
+                connectionFactory = connectionFactory,
+                callback = service,
+                address = address,
+            )
+        bleTransport.start()
+        try {
+            advanceTimeBy(3_001)
+            assertEquals(1, bluetoothRepository.bondCalls.size, "bond() must be called before connecting")
+            assertEquals(1, connection.connectAndAwaitCalls, "connectAndAwait must be called after successful bond")
+        } finally {
+            bleTransport.close()
+        }
+    }
+
+    @Test
+    fun `bond throws but device is bonded then connectAndAwait is still called`() = runTest {
+        val device = FakeBleDevice(address = address, name = "Test Device")
+        scanner.emitDevice(device)
+        bluetoothRepository.failBondAfterRecording(Exception("bond flaked"))
+
+        val bleTransport =
+            BleRadioTransport(
+                scope = this,
+                scanner = scanner,
+                bluetoothRepository = bluetoothRepository,
+                connectionFactory = connectionFactory,
+                callback = service,
+                address = address,
+            )
+        bleTransport.start()
+        try {
+            advanceTimeBy(3_001)
+            assertEquals(1, bluetoothRepository.bondCalls.size, "bond() must be attempted before connecting")
+            assertEquals(
+                1,
+                connection.connectAndAwaitCalls,
+                "connectAndAwait must be called when bond flaked but device is bonded",
+            )
+        } finally {
+            bleTransport.close()
+        }
+    }
+
+    @Test
+    fun `bond throws and device not bonded then connectAndAwait is not called`() = runTest {
+        val device = FakeBleDevice(address = address, name = "Test Device")
+        scanner.emitDevice(device)
+        bluetoothRepository.failBondWith(Exception("bond rejected"))
+
+        val bleTransport =
+            BleRadioTransport(
+                scope = this,
+                scanner = scanner,
+                bluetoothRepository = bluetoothRepository,
+                connectionFactory = connectionFactory,
+                callback = service,
+                address = address,
+            )
+        bleTransport.start()
+        try {
+            // Advance past one failed bond attempt and retry backoff, but before the next bond attempt.
+            advanceTimeBy(10_001)
+            assertEquals(
+                0,
+                connection.connectAndAwaitCalls,
+                "connectAndAwait must not be called when bond failed and device is not bonded",
+            )
+            assertEquals(1, bluetoothRepository.bondCalls.size, "bond() must have been attempted once")
+        } finally {
+            bleTransport.close()
+        }
+    }
+
+    /**
+     * When [bluetoothRepository.bond] throws a [CancellationException], it must propagate as coroutine cancellation —
+     * NOT be swallowed into a generic [BleReconnectPolicy.Outcome.Failed].
+     *
+     * Discriminator: with the `catch (CancellationException) { throw e }` guard present, the job is cancelled and bond
+     * is called exactly once. If the guard were removed, the CE would be caught by `catch (Exception)`, converted to
+     * `RadioNotConnectedException`, become `Outcome.Failed`, and the policy would retry — making `bondCalls.size > 1`.
+     */
+    @Test
+    fun `CancellationException from bond cancels the connection job without retrying`() = runTest {
+        val device = FakeBleDevice(address = address, name = "Test Device")
+        scanner.emitDevice(device)
+        bluetoothRepository.bondOutcome =
+            FakeBluetoothRepository.BondOutcome.Fail(CancellationException("simulated cancel"))
+
+        val bleTransport =
+            BleRadioTransport(
+                scope = this,
+                scanner = scanner,
+                bluetoothRepository = bluetoothRepository,
+                connectionFactory = connectionFactory,
+                callback = service,
+                address = address,
+            )
+        bleTransport.start()
+        try {
+            advanceTimeBy(12_000)
+            assertEquals(
+                1,
+                bluetoothRepository.bondCalls.size,
+                "bond() must be called exactly once — cancellation, not retry",
+            )
+            assertEquals(0, connection.connectAndAwaitCalls, "connectAndAwait must not be called after cancellation")
         } finally {
             bleTransport.close()
         }
