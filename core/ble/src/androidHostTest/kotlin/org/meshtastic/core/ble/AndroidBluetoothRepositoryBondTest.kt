@@ -168,7 +168,7 @@ class AndroidBluetoothRepositoryBondTest {
             previousState = BluetoothDevice.BOND_BONDING,
         )
 
-        assertEquals("Bonding failed or rejected", failure.await()?.message)
+        assertEquals(BOND_FAILED_OR_REJECTED_MESSAGE, failure.await()?.message)
     }
 
     @Test
@@ -272,7 +272,7 @@ class AndroidBluetoothRepositoryBondTest {
         deviceShadow.setBondState(BluetoothDevice.BOND_NONE)
         advanceTimeBy(2L)
 
-        assertEquals("Bonding failed or rejected", failure.await()?.message)
+        assertEquals(BOND_FAILED_OR_REJECTED_MESSAGE, failure.await()?.message)
     }
 
     @Test
@@ -285,11 +285,14 @@ class AndroidBluetoothRepositoryBondTest {
             val repo = newRepository(UnconfinedTestDispatcher(testScheduler))
 
             val failure = launchBond(repo, mac)
+            // Robolectric synchronously marks createBond() as BONDED here; reset it to model
+            // Android's async BOND_NONE -> BOND_BONDING transition.
             deviceShadow.setBondState(BluetoothDevice.BOND_NONE)
             advanceTimeBy(499L)
             assertFalse(failure.isCompleted, "bond() should still be waiting before the initial grace poll")
             advanceTimeBy(2L)
-            assertFalse(failure.isCompleted, "a newly initiated bond gets one poll before BOND_NONE is terminal")
+            assertFalse(failure.isCompleted, "a newly initiated bond should tolerate initial BOND_NONE")
+            // The same wait must still recover if Android later reports BONDING and then BONDED.
             deviceShadow.setBondState(BluetoothDevice.BOND_BONDING)
             advanceTimeBy(500L)
             assertFalse(failure.isCompleted, "BOND_BONDING should keep the bond wait active")
@@ -298,6 +301,79 @@ class AndroidBluetoothRepositoryBondTest {
 
             assertNull(failure.await(), "bond() should complete once Android reports BOND_BONDED")
         }
+
+    @Test
+    fun `createBond true fails on the BOND_NONE poll after grace is exhausted`() = runTest(UnconfinedTestDispatcher()) {
+        val mac = "AA:BB:CC:DD:EE:0F"
+        RobolectricBleBonding.grantBluetoothConnectPermission()
+        val deviceShadow =
+            RobolectricBleBonding.primeBond(mac, bondState = BluetoothDevice.BOND_NONE, createBondReturns = true)
+        val repo = newRepository(UnconfinedTestDispatcher(testScheduler))
+
+        val failure = launchBond(repo, mac)
+        // Robolectric synchronously marks createBond() as BONDED here; reset it to model
+        // Android's async BOND_NONE -> BOND_BONDING transition.
+        deviceShadow.setBondState(BluetoothDevice.BOND_NONE)
+        advanceTimeBy(499L)
+        assertFalse(failure.isCompleted, "bond() should still be waiting before the initial grace poll")
+        advanceTimeBy(2L)
+        assertFalse(failure.isCompleted, "the first BOND_NONE poll should still be within the grace")
+        advanceTimeBy(500L)
+        assertFalse(failure.isCompleted, "the second BOND_NONE poll should consume the grace")
+        advanceTimeBy(500L)
+
+        assertEquals(BOND_FAILED_OR_REJECTED_MESSAGE, failure.await()?.message)
+    }
+
+    @Test
+    fun `createBond true fails when polled bonding later returns none`() = runTest(UnconfinedTestDispatcher()) {
+        val mac = "AA:BB:CC:DD:EE:10"
+        RobolectricBleBonding.grantBluetoothConnectPermission()
+        val deviceShadow =
+            RobolectricBleBonding.primeBond(mac, bondState = BluetoothDevice.BOND_NONE, createBondReturns = true)
+        val repo = newRepository(UnconfinedTestDispatcher(testScheduler))
+
+        val failure = launchBond(repo, mac)
+        // Robolectric synchronously marks createBond() as BONDED here; reset it to model
+        // Android's async BOND_NONE -> BOND_BONDING transition.
+        deviceShadow.setBondState(BluetoothDevice.BOND_NONE)
+        advanceTimeBy(501L)
+        assertFalse(failure.isCompleted, "initial BOND_NONE should not fail before bonding is observed")
+        // Covers the missed failure broadcast after polling observes BOND_BONDING. The createBond=false
+        // BOND_BONDING test pins the already-in-flight start path.
+        deviceShadow.setBondState(BluetoothDevice.BOND_BONDING)
+        advanceTimeBy(500L)
+        assertFalse(failure.isCompleted, "polled BOND_BONDING should keep the bond wait active")
+        deviceShadow.setBondState(BluetoothDevice.BOND_NONE)
+        advanceTimeBy(500L)
+
+        assertEquals(BOND_FAILED_OR_REJECTED_MESSAGE, failure.await()?.message)
+    }
+
+    @Test
+    fun `spurious none broadcast is ignored but later polled none fails`() = runTest(UnconfinedTestDispatcher()) {
+        val mac = "AA:BB:CC:DD:EE:11"
+        RobolectricBleBonding.grantBluetoothConnectPermission()
+        val deviceShadow =
+            RobolectricBleBonding.primeBond(
+                mac,
+                bondState = BluetoothDevice.BOND_BONDING,
+                createBondReturns = false,
+            )
+        val repo = newRepository(UnconfinedTestDispatcher(testScheduler))
+
+        val failure = launchBond(repo, mac)
+        RobolectricBleBonding.sendBondStateChanged(
+            mac,
+            newState = BluetoothDevice.BOND_NONE,
+            previousState = BluetoothDevice.BOND_NONE,
+        )
+        assertFalse(failure.isCompleted, "a spurious BOND_NONE broadcast must not resolve the bond")
+        deviceShadow.setBondState(BluetoothDevice.BOND_NONE)
+        advanceTimeBy(500L)
+
+        assertEquals(BOND_FAILED_OR_REJECTED_MESSAGE, failure.await()?.message)
+    }
 
     @Test
     fun `bond succeeds when bond state becomes bonded at timeout boundary`() = runTest(UnconfinedTestDispatcher()) {

@@ -36,12 +36,17 @@ import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 private val BOND_TIMEOUT = 30.seconds
 private val BOND_STATE_POLL_INTERVAL = 500.milliseconds
-private const val CREATED_BOND_NONE_GRACE_POLLS = 1
+
+// Fixed two-poll grace for slow BOND_NONE -> BOND_BONDING transitions after createBond() returns true.
+// Tune this or track observed transition latency if a specific OEM needs a longer window.
+private val CREATED_BOND_NONE_GRACE = BOND_STATE_POLL_INTERVAL + BOND_STATE_POLL_INTERVAL
+internal const val BOND_FAILED_OR_REJECTED_MESSAGE = "Bonding failed or rejected"
 
 /** Android implementation of [BluetoothRepository]. */
 @Single
@@ -173,13 +178,13 @@ class AndroidBluetoothRepository(
         start: BondWaitStart,
     ) {
         var bondingWasInFlight = start.bondingObserved
-        // createBond() can return before Android reports BOND_BONDING; avoid treating
-        // that initial BOND_NONE state as a terminal failure.
-        var bondNoneGracePolls =
-            if (start.createdBond && !bondingWasInFlight) {
-                CREATED_BOND_NONE_GRACE_POLLS
+        // createBond() can return true before Android reports BOND_BONDING. Tolerate two polled
+        // BOND_NONE samples (polls 1-2), then fail on the third persistent BOND_NONE.
+        var createdBondNoneGraceRemaining =
+            if (start.createdBond) {
+                CREATED_BOND_NONE_GRACE
             } else {
-                0
+                Duration.ZERO
             }
 
         while (!result.isCompleted) {
@@ -196,16 +201,32 @@ class AndroidBluetoothRepository(
                     }
 
                     android.bluetooth.BluetoothDevice.BOND_BONDING -> {
+                        // Once polling observes BOND_BONDING, a later BOND_NONE is terminal. Keep this
+                        // defensive for any path that observes in-flight bonding outside the start state.
                         bondingWasInFlight = true
-                        bondNoneGracePolls = 0
+                        createdBondNoneGraceRemaining = Duration.ZERO
                     }
 
                     android.bluetooth.BluetoothDevice.BOND_NONE -> {
-                        if (bondingWasInFlight) {
-                            result.completeExceptionally(Exception("Bonding failed or rejected"))
-                        } else if (bondNoneGracePolls > 0) {
-                            bondNoneGracePolls--
-                            bondingWasInFlight = bondNoneGracePolls == 0
+                        // Invariant: if start.createdBond is false, startOrObserveBond either completed
+                        // result or observed BOND_BONDING, which is represented by bondingWasInFlight.
+                        val pollFailureDetails =
+                            "bond poll failed: bondingWasInFlight=$bondingWasInFlight " +
+                                "createdBond=${start.createdBond} graceRemaining=$createdBondNoneGraceRemaining"
+                        when {
+                            bondingWasInFlight -> {
+                                Logger.d { pollFailureDetails }
+                                result.completeExceptionally(Exception(BOND_FAILED_OR_REJECTED_MESSAGE))
+                            }
+
+                            createdBondNoneGraceRemaining > Duration.ZERO -> {
+                                createdBondNoneGraceRemaining -= BOND_STATE_POLL_INTERVAL
+                            }
+
+                            start.createdBond -> {
+                                Logger.d { pollFailureDetails }
+                                result.completeExceptionally(Exception(BOND_FAILED_OR_REJECTED_MESSAGE))
+                            }
                         }
                     }
                 }
@@ -246,7 +267,7 @@ class AndroidBluetoothRepository(
                 state == android.bluetooth.BluetoothDevice.BOND_NONE &&
                 prevState == android.bluetooth.BluetoothDevice.BOND_BONDING
             ) {
-                result.completeExceptionally(Exception("Bonding failed or rejected"))
+                result.completeExceptionally(Exception(BOND_FAILED_OR_REJECTED_MESSAGE))
             }
         }
     }
