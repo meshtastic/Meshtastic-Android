@@ -67,7 +67,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import co.touchlab.kermit.Logger
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -229,6 +228,7 @@ fun MapView(
 
     var showDownloadButton: Boolean by remember { mutableStateOf(false) }
     var showEditWaypointDialog by remember { mutableStateOf<Waypoint?>(null) }
+    var showDeleteWaypointDialog by remember { mutableStateOf<Waypoint?>(null) }
     var showCacheManagerDialog by remember { mutableStateOf(false) }
     var showCurrentCacheInfo by remember { mutableStateOf(false) }
     var showPurgeTileSourceDialog by remember { mutableStateOf(false) }
@@ -393,39 +393,6 @@ fun MapView(
         }
     }
 
-    fun showDeleteMarkerDialog(waypoint: Waypoint) {
-        val builder = MaterialAlertDialogBuilder(context)
-        builder.setTitle(getString(Res.string.waypoint_delete))
-        builder.setNeutralButton(getString(Res.string.cancel)) { _, _ ->
-            Logger.d { "User canceled marker delete dialog" }
-        }
-        builder.setNegativeButton(getString(Res.string.delete_for_me)) { _, _ ->
-            Logger.d { "User deleted waypoint ${waypoint.id} for me" }
-            mapViewModel.deleteWaypoint(waypoint.id)
-        }
-        if (waypoint.locked_to in setOf(0, mapViewModel.myNodeNum ?: 0) && isConnected) {
-            builder.setPositiveButton(getString(Res.string.delete_for_everyone)) { _, _ ->
-                Logger.d { "User deleted waypoint ${waypoint.id} for everyone" }
-                mapViewModel.sendWaypoint(waypoint.copy(expire = 1))
-                mapViewModel.deleteWaypoint(waypoint.id)
-            }
-        }
-        val dialog = builder.show()
-        for (
-        button in
-        setOf(
-            androidx.appcompat.app.AlertDialog.BUTTON_NEUTRAL,
-            androidx.appcompat.app.AlertDialog.BUTTON_NEGATIVE,
-            androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE,
-        )
-        ) {
-            with(dialog.getButton(button)) {
-                textSize = 12F
-                isAllCaps = false
-            }
-        }
-    }
-
     fun showMarkerLongPressDialog(id: Int) {
         performHapticFeedback()
         Logger.d { "marker long pressed id=$id" }
@@ -434,7 +401,7 @@ fun MapView(
         if (waypoint.locked_to in setOf(0, mapViewModel.myNodeNum ?: 0) && isConnected) {
             showEditWaypointDialog = waypoint
         } else {
-            showDeleteMarkerDialog(waypoint)
+            showDeleteWaypointDialog = waypoint
         }
     }
 
@@ -718,11 +685,59 @@ fun MapView(
             onDeleteClicked = { waypoint ->
                 Logger.d { "User clicked delete waypoint ${waypoint.id}" }
                 showEditWaypointDialog = null
-                showDeleteMarkerDialog(waypoint)
+                showDeleteWaypointDialog = waypoint
             },
             onDismissRequest = {
                 Logger.d { "User clicked cancel marker edit dialog" }
                 showEditWaypointDialog = null
+            },
+        )
+    }
+
+    if (showDeleteWaypointDialog != null) {
+        val waypoint = showDeleteWaypointDialog ?: return
+        val canDeleteForEveryone = waypoint.locked_to in setOf(0, mapViewModel.myNodeNum ?: 0) && isConnected
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = {
+                Logger.d { "User canceled marker delete dialog" }
+                showDeleteWaypointDialog = null
+            },
+            title = { Text(stringResource(Res.string.waypoint_delete)) },
+            // Both deletes are confirmations; Cancel is the dismiss action (mirrors the old neutral button).
+            confirmButton = {
+                Column {
+                    TextButton(
+                        onClick = {
+                            Logger.d { "User deleted waypoint ${waypoint.id} for me" }
+                            mapViewModel.deleteWaypoint(waypoint.id)
+                            showDeleteWaypointDialog = null
+                        },
+                    ) {
+                        Text(stringResource(Res.string.delete_for_me))
+                    }
+                    if (canDeleteForEveryone) {
+                        TextButton(
+                            onClick = {
+                                Logger.d { "User deleted waypoint ${waypoint.id} for everyone" }
+                                mapViewModel.sendWaypoint(waypoint.copy(expire = 1))
+                                mapViewModel.deleteWaypoint(waypoint.id)
+                                showDeleteWaypointDialog = null
+                            },
+                        ) {
+                            Text(stringResource(Res.string.delete_for_everyone))
+                        }
+                    }
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        Logger.d { "User canceled marker delete dialog" }
+                        showDeleteWaypointDialog = null
+                    },
+                ) {
+                    Text(stringResource(Res.string.cancel))
+                }
             },
         )
     }

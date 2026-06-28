@@ -264,7 +264,6 @@ dokka-android-documentation-plugin = { module = "org.jetbrains.dokka:android-doc
 markdown-renderer = { module = "com.mikepenz:multiplatform-markdown-renderer", version.ref = "markdownRenderer" }
 markdown-renderer-m3 = { module = "com.mikepenz:multiplatform-markdown-renderer-m3", version.ref = "markdownRenderer" }
 markdown-renderer-android = { module = "com.mikepenz:multiplatform-markdown-renderer-android", version.ref = "markdownRenderer" }
-material = { module = "com.google.android.material:material", version = "1.14.0" }
 
 kable-core = { module = "com.juul.kable:kable-core", version.ref = "kable" }
 # mqtt-client 0.4.0 split the monolith into a BOM + core + per-transport modules. The BOM pins the

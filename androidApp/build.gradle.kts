@@ -235,7 +235,7 @@ dependencies {
     implementation(libs.jetbrains.compose.material3.adaptive)
     implementation(libs.jetbrains.compose.material3.adaptive.layout)
     implementation(libs.jetbrains.compose.material3.adaptive.navigation)
-    implementation(libs.material)
+    implementation(libs.androidx.appcompat)
     implementation(libs.compose.multiplatform.animation)
     implementation(libs.compose.multiplatform.material3)
     implementation(libs.compose.multiplatform.ui.tooling.preview)
