@@ -24,9 +24,10 @@ import kotlin.time.Clock
 import kotlin.time.Instant
 
 private val xmlParser = XML {
+    // xmlutil 1.0.0 moved repairNamespaces from the policy builder to the top-level XML config.
+    repairNamespaces = false
     defaultPolicy {
         ignoreUnknownChildren()
-        repairNamespaces = false
     }
 }
 
