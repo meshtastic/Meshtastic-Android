@@ -36,12 +36,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.eygraber.uri.toKmpUri
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.format
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.core.qualifier.named
 import org.meshtastic.core.common.util.nowMillis
-import org.meshtastic.core.common.util.toDate
-import org.meshtastic.core.common.util.toInstant
 import org.meshtastic.core.navigation.DiscoveryRoute
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
@@ -85,8 +87,7 @@ import org.meshtastic.feature.settings.radio.component.EditDeviceProfileDialog
 import org.meshtastic.feature.settings.util.LanguageUtils
 import org.meshtastic.feature.settings.util.LanguageUtils.languageMap
 import org.meshtastic.proto.DeviceProfile
-import java.text.SimpleDateFormat
-import java.util.Locale
+import kotlin.time.Instant.Companion.fromEpochMilliseconds
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
@@ -142,8 +143,16 @@ fun SettingsScreen(
                 } else {
                     deviceProfile = it
                     val nodeName = (it.short_name ?: "").ifBlank { "node" }
-                    val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
-                    val dateStr = dateFormat.format(nowMillis.toInstant().toDate())
+                    val dateStr =
+                        fromEpochMilliseconds(nowMillis)
+                            .toLocalDateTime(TimeZone.currentSystemDefault())
+                            .format(
+                                LocalDateTime.Format {
+                                    year()
+                                    monthNumber()
+                                    day()
+                                },
+                            )
                     val fileName = "Meshtastic_${nodeName}_${dateStr}_nodeConfig.cfg"
                     val intent =
                         Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
