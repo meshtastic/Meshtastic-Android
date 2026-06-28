@@ -35,7 +35,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.Clipboard
@@ -74,9 +78,11 @@ import org.meshtastic.core.resources.short_name
 import org.meshtastic.core.resources.snr
 import org.meshtastic.core.resources.status_message
 import org.meshtastic.core.resources.supported
+import org.meshtastic.core.resources.transport
 import org.meshtastic.core.resources.uptime
 import org.meshtastic.core.resources.user_id
-import org.meshtastic.core.resources.via_mqtt
+import org.meshtastic.core.ui.component.SignedNodeDialog
+import org.meshtastic.core.ui.component.transportInfo
 import org.meshtastic.core.ui.icon.ArrowCircleUp
 import org.meshtastic.core.ui.icon.DeviceNumbers
 import org.meshtastic.core.ui.icon.History
@@ -84,7 +90,6 @@ import org.meshtastic.core.ui.icon.HopCount
 import org.meshtastic.core.ui.icon.KeyOff
 import org.meshtastic.core.ui.icon.Lock
 import org.meshtastic.core.ui.icon.MeshtasticIcons
-import org.meshtastic.core.ui.icon.MqttConnected
 import org.meshtastic.core.ui.icon.Notes
 import org.meshtastic.core.ui.icon.Person
 import org.meshtastic.core.ui.icon.Rssi
@@ -95,6 +100,7 @@ import org.meshtastic.core.ui.icon.role
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.util.createClipEntry
 import org.meshtastic.core.ui.util.formatAgo
+import org.meshtastic.proto.MeshPacket.TransportMechanism
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
@@ -174,14 +180,13 @@ private fun MainNodeDetails(node: Node) {
             SectionDivider()
             SignalRow(node)
         }
-        if (node.viaMqtt || node.manuallyVerified) {
+        if (node.viaMqtt || node.lastTransport != TransportMechanism.TRANSPORT_INTERNAL.value) {
             SectionDivider()
-            MqttAndVerificationRow(node)
+            TransportRow(node)
         }
-        // Most-trusted first: manual-verify (above) → signed (automatic) → has-key (below).
-        if (node.signsPackets) {
+        if (node.manuallyVerified || node.signsPackets) {
             SectionDivider()
-            SignedNodeRow()
+            VerificationRow(node)
         }
         val publicKey = node.publicKey ?: node.user.public_key
         if (publicKey.size > 0) {
@@ -308,16 +313,27 @@ private fun SignalRow(node: Node) {
     }
 }
 
+/** How this node was last heard — LoRa / MQTT / UDP / API. Hidden for internally-generated (own) packets. */
 @Composable
-private fun MqttAndVerificationRow(node: Node) {
+private fun TransportRow(node: Node) {
+    val (icon, label) = transportInfo(node.lastTransport, node.viaMqtt) ?: return
     Row(modifier = Modifier.fillMaxWidth()) {
-        if (node.viaMqtt) {
-            InfoItem(
-                label = stringResource(Res.string.via_mqtt),
-                value = "Yes",
-                icon = MeshtasticIcons.MqttConnected,
-                modifier = Modifier.weight(1f),
-            )
+        InfoItem(
+            label = stringResource(Res.string.transport),
+            value = label,
+            icon = icon,
+            modifier = Modifier.weight(1f),
+        )
+        Spacer(Modifier.weight(1f))
+    }
+}
+
+/** Trust signals: automatic XEdDSA signing (left, tappable) and user-asserted key verification (right). */
+@Composable
+private fun VerificationRow(node: Node) {
+    Row(modifier = Modifier.fillMaxWidth()) {
+        if (node.signsPackets) {
+            SignedNodeItem(Modifier.weight(1f))
         } else {
             Spacer(Modifier.weight(1f))
         }
@@ -334,15 +350,19 @@ private fun MqttAndVerificationRow(node: Node) {
     }
 }
 
+/** "Signed node" trust cell — tap opens the plain-language explanation ([SignedNodeDialog]). */
 @Composable
-private fun SignedNodeRow() {
+private fun SignedNodeItem(modifier: Modifier = Modifier) {
+    var showDialog by remember { mutableStateOf(false) }
+    if (showDialog) SignedNodeDialog(onDismiss = { showDialog = false })
     InfoItem(
         label = stringResource(Res.string.security_signed_node),
         value = stringResource(Res.string.security_signed_node_desc),
         icon = MeshtasticIcons.ShieldCheck,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier,
         iconTint = MaterialTheme.colorScheme.StatusGreen,
         iconSize = 20.dp,
+        onClick = { showDialog = true },
     )
 }
 

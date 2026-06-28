@@ -30,6 +30,7 @@ import org.meshtastic.feature.node.component.NodeItemCompactOnlineRemotePreview
 import org.meshtastic.feature.node.component.NodeItemCompleteActivePreview
 import org.meshtastic.feature.node.component.NodeItemCompleteOnlineRemotePreview
 import org.meshtastic.feature.node.component.NodeItemCompletePreview
+import org.meshtastic.feature.node.component.NodeItemSignedPreview
 import org.meshtastic.feature.node.component.PositionInlineContentPreview
 import org.meshtastic.feature.node.component.TelemetricActionsSectionEmptyPreview
 import org.meshtastic.feature.node.component.TelemetricActionsSectionLocalPreview
@@ -157,6 +158,13 @@ fun ScreenshotAirQualityCards() {
 @Composable
 fun ScreenshotNodeItemComplete() {
     NodeItemCompletePreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotNodeItemSigned() {
+    NodeItemSignedPreview()
 }
 
 @PreviewTest

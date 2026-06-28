@@ -30,6 +30,7 @@ import org.meshtastic.core.navigation.MultiBackstack
 import org.meshtastic.core.navigation.NodeDetailRoute
 import org.meshtastic.core.navigation.NodesRoute
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.ui.util.LocalMeshActivity
 import org.meshtastic.core.ui.util.LocalModemPreset
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 
@@ -72,6 +73,13 @@ fun MeshtasticAppShell(
             .collectAsStateWithLifecycle(initialValue = null)
 
     MeshtasticSnackbarProvider(snackbarManager = uiViewModel.snackbarManager, hostModifier = hostModifier) {
-        CompositionLocalProvider(LocalModemPreset provides modemPreset) { content() }
+        // Provide the activity FLOW (stable ref) — not a collected value — so it costs no recomposition; only the
+        // local-node connection badge collects it, animating in the draw phase. See LocalMeshActivity.
+        CompositionLocalProvider(
+            LocalModemPreset provides modemPreset,
+            LocalMeshActivity provides uiViewModel.meshActivity,
+        ) {
+            content()
+        }
     }
 }

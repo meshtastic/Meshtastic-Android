@@ -18,7 +18,6 @@
 
 package org.meshtastic.core.ui.component
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -38,7 +37,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.Role
@@ -87,13 +85,10 @@ import org.meshtastic.core.ui.icon.Pressure
 import org.meshtastic.core.ui.icon.Temperature
 import org.meshtastic.core.ui.icon.Unmessageable
 import org.meshtastic.core.ui.icon.role
-import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 import org.meshtastic.core.ui.util.LocalModemPreset
 import org.meshtastic.proto.Config
 
-private const val ACTIVE_BORDER_ALPHA = 0.65f
-private const val INACTIVE_BORDER_ALPHA = 0.3f
 private const val COMPACT_ICON_SIZE_DP = 16
 
 @Composable
@@ -140,15 +135,8 @@ fun NodeItemCompact(
     val contentColor = MaterialTheme.colorScheme.onSurface
     val nodeColor =
         (if (isThisNode) thisNode?.colors?.second else thatNode.colors.second)?.let { Color(it) } ?: Color.Transparent
-    val cardContainerColor = CardDefaults.cardColors().containerColor
-    val tintedContainerColor =
-        if (nodeColor == Color.Transparent) cardContainerColor else lerp(cardContainerColor, nodeColor, 0.08f)
-    val cardColors = CardDefaults.cardColors(containerColor = tintedContainerColor)
-    val borderColor =
-        (if (isThisNode) thisNode?.colors?.second else thatNode.colors.second)?.let {
-            Color(it).copy(alpha = if (isActive) ACTIVE_BORDER_ALPHA else INACTIVE_BORDER_ALPHA)
-        }
-    val cardBorder = borderColor?.let { BorderStroke(1.5.dp, it) }
+    val cardColors = CardDefaults.cardColors(containerColor = nodeTintedContainer(nodeColor))
+    val cardBorder = nodeBorderStroke(nodeColor, active = isActive)
 
     val style = if (thatNode.isUnknownUser) FontStyle.Italic else FontStyle.Normal
 
@@ -276,12 +264,7 @@ private fun CompactNameRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        NodeKeyStatusIcon(
-            hasPKC = thatNode.hasPKC,
-            mismatchKey = thatNode.mismatchKey,
-            publicKey = thatNode.user.public_key,
-            modifier = Modifier.size(18.dp),
-        )
+        NodeSecurityIcons(thatNode, iconSize = 18.dp)
         Text(
             text = longName,
             style = MaterialTheme.typography.titleMediumEmphasized.copy(fontStyle = style),
@@ -327,17 +310,11 @@ private fun CompactHealthRow(
         if (showLastHeard && thatNode.lastHeard > 0 && !isFutureDate(thatNode.lastHeard)) {
             add(
                 @Composable {
-                    val statusColor =
-                        if (thatNode.isOnline) {
-                            MaterialTheme.colorScheme.StatusGreen
-                        } else {
-                            contentColor
-                        }
-                    LastHeardInfo(
+                    StatusAwareLastHeard(
                         lastHeard = thatNode.lastHeard,
-                        showLabel = false,
+                        online = thatNode.isOnline,
+                        contentColor = contentColor,
                         relative = lastHeardIsRelative,
-                        contentColor = statusColor,
                     )
                 },
             )
@@ -377,12 +354,14 @@ private fun CompactHealthRow(
             val quality = determineSignalQuality(thatNode.snr, LocalModemPreset.current)
             add(
                 @Composable {
-                    IconInfo(
-                        icon = vectorResource(quality.icon),
-                        contentDescription = stringResource(quality.nameRes),
-                        contentColor = quality.color.invoke(),
-                        text = stringResource(quality.nameRes),
-                    )
+                    StatusSurface {
+                        IconInfo(
+                            icon = vectorResource(quality.icon),
+                            contentDescription = stringResource(quality.nameRes),
+                            contentColor = quality.color.invoke(),
+                            text = stringResource(quality.nameRes),
+                        )
+                    }
                 },
             )
         }

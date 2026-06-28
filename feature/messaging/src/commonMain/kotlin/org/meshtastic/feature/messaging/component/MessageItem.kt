@@ -16,13 +16,13 @@
  */
 package org.meshtastic.feature.messaging.component
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -68,10 +68,16 @@ import org.meshtastic.core.resources.reply
 import org.meshtastic.core.resources.security_signed_verified
 import org.meshtastic.core.ui.component.AutoLinkText
 import org.meshtastic.core.ui.component.HighlightedText
+import org.meshtastic.core.ui.component.NODE_TINT_EMPHASIZED
+import org.meshtastic.core.ui.component.NODE_TINT_MUTED
+import org.meshtastic.core.ui.component.NODE_TINT_NORMAL
 import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.component.Rssi
 import org.meshtastic.core.ui.component.Snr
+import org.meshtastic.core.ui.component.StatusSurface
 import org.meshtastic.core.ui.component.TransportIcon
+import org.meshtastic.core.ui.component.nodeBorderStroke
+import org.meshtastic.core.ui.component.nodeTintedContainer
 import org.meshtastic.core.ui.emoji.EmojiPickerDialog
 import org.meshtastic.core.ui.icon.FormatQuote
 import org.meshtastic.core.ui.icon.HopCount
@@ -185,16 +191,16 @@ fun MessageItem(
     val containsBel = message.text.contains('\u0007')
 
     val nodeColor = Color(if (message.fromLocal) ourNode.colors.second else node.colors.second)
-    val alpha =
-        if (message.filtered) {
-            FILTERED_ALPHA
-        } else if (inSelectionMode) {
-            if (selected) SELECTED_ALPHA else UNSELECTED_ALPHA
-        } else {
-            NORMAL_ALPHA
+    // Match the node card: a faint node wash over the neutral surface + a node outline (more AA than a saturated
+    // fill).
+    val tintFraction =
+        when {
+            inSelectionMode && selected -> NODE_TINT_EMPHASIZED
+            message.filtered || (inSelectionMode && !selected) -> NODE_TINT_MUTED
+            else -> NODE_TINT_NORMAL
         }
-
-    val containerColor = nodeColor.copy(alpha = alpha)
+    val containerColor = nodeTintedContainer(nodeColor, fraction = tintFraction)
+    val cardBorder = nodeBorderStroke(nodeColor, active = selected)
     val contentColor = MaterialTheme.colorScheme.onSurface
     val metadataStyle = MaterialTheme.typography.labelSmall
     val messageShape =
@@ -255,7 +261,7 @@ fun MessageItem(
         color = containerColor,
         contentColor = contentColor,
         shape = messageShape,
-        border = BorderStroke(0.5.dp, nodeColor),
+        border = cardBorder,
     ) {
         Column(modifier = Modifier.width(IntrinsicSize.Max)) {
             OriginalMessageSnippet(
@@ -281,10 +287,26 @@ fun MessageItem(
                     )
                 }
 
-                Row(modifier = Modifier, verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    modifier = Modifier,
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
                     if (!message.fromLocal) {
+                        // XEdDSA is only set on verified broadcasts, never DMs — so this never shows on a DM.
+                        if (message.xeddsaSigned) {
+                            // Solo icon → equal padding so the pill renders as a circle.
+                            StatusSurface(contentPadding = PaddingValues(3.dp)) {
+                                Icon(
+                                    imageVector = MeshtasticIcons.ShieldCheck,
+                                    contentDescription = stringResource(Res.string.security_signed_verified),
+                                    modifier = Modifier.size(16.dp),
+                                    tint = MaterialTheme.colorScheme.StatusGreen,
+                                )
+                            }
+                        }
                         if (message.hopsAway == 0 && !message.viaMqtt) {
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            StatusSurface {
                                 Snr(message.snr)
                                 Rssi(message.rssi)
                             }
@@ -300,12 +322,7 @@ fun MessageItem(
                                     tint = Color.White,
                                 )
                                 Text(
-                                    text =
-                                    if (message.hopsAway >= 0) {
-                                        message.hopsAway.toString()
-                                    } else {
-                                        "?"
-                                    },
+                                    text = if (message.hopsAway >= 0) message.hopsAway.toString() else "?",
                                     style = metadataStyle,
                                     color = Color.White,
                                 )
@@ -314,19 +331,9 @@ fun MessageItem(
                         TransportIcon(
                             transport = message.transportMechanism,
                             viaMqtt = message.viaMqtt,
-                            modifier = Modifier.size(16.dp).padding(start = 4.dp),
+                            modifier = Modifier.size(16.dp),
                             tint = Color.White,
                         )
-                        // XEdDSA is only set on verified broadcasts, never DMs — so this never shows on a DM.
-                        // Green + slightly larger than the white metadata icons so "verified" reads at a glance.
-                        if (message.xeddsaSigned) {
-                            Icon(
-                                imageVector = MeshtasticIcons.ShieldCheck,
-                                contentDescription = stringResource(Res.string.security_signed_verified),
-                                modifier = Modifier.size(18.dp).padding(start = 4.dp),
-                                tint = MaterialTheme.colorScheme.StatusGreen,
-                            )
-                        }
                     }
                     if (containsBel) {
                         Text(text = "\uD83D\uDD14", modifier = Modifier.padding(start = 4.dp))
@@ -366,11 +373,6 @@ fun MessageItem(
     )
 }
 
-private const val SELECTED_ALPHA = 0.6f
-private const val UNSELECTED_ALPHA = 0.2f
-private const val NORMAL_ALPHA = 0.4f
-private const val FILTERED_ALPHA = 0.5f
-
 private enum class ActiveSheet {
     Actions,
     Emoji,
@@ -386,7 +388,10 @@ private fun OriginalMessageSnippet(
     val originalMessage = message.originalMessage
     if (originalMessage != null && originalMessage.packetId != 0) {
         val originalMessageNode = if (originalMessage.fromLocal) ourNode else originalMessage.node
-        val replyContainerColor = Color(originalMessageNode.colors.second).copy(alpha = 0.8f)
+        // Same node-tinted treatment as the bubble (keeps onSurface text AA), but at the emphasized tint so the quoted
+        // header still reads as distinct from the bubble body below it.
+        val replyContainerColor =
+            nodeTintedContainer(Color(originalMessageNode.colors.second), fraction = NODE_TINT_EMPHASIZED)
         val replyContentColor = MaterialTheme.colorScheme.onSurface
         // Rectangle shape — the outer message bubble's Surface clips to its
         // rounded corners, so the reply header inherits the correct top radii

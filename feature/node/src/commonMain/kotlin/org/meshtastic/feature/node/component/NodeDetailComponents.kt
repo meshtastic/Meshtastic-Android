@@ -95,6 +95,7 @@ internal fun InfoItem(
     valueStyle: TextStyle = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
     iconTint: Color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
     iconSize: Dp = 14.dp,
+    onClick: (() -> Unit)? = null,
 ) {
     val clipboard: Clipboard = LocalClipboard.current
     val coroutineScope = rememberCoroutineScope()
@@ -109,7 +110,7 @@ internal fun InfoItem(
             .combinedClickable(
                 onLongClick = { coroutineScope.launch { clipboard.setClipEntry(createClipEntry(value, label)) } },
                 onLongClickLabel = copyLabel, // Clear intent for accessibility
-                onClick = {},
+                onClick = onClick ?: {},
                 role = Role.Button,
             )
             .padding(horizontal = 20.dp, vertical = 8.dp)

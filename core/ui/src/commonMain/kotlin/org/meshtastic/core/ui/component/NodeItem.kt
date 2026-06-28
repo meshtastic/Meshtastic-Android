@@ -18,7 +18,6 @@
 
 package org.meshtastic.core.ui.component
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -42,7 +41,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
@@ -50,6 +48,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -78,8 +77,6 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.util.LocalModemPreset
 import org.meshtastic.proto.Config
 
-private const val ACTIVE_BORDER_ALPHA = 0.65f
-private const val INACTIVE_BORDER_ALPHA = 0.3f
 private const val GRID_COLUMNS = 3
 
 @Composable
@@ -115,15 +112,8 @@ fun NodeItem(
     val contentColor = MaterialTheme.colorScheme.onSurface
     val nodeColor =
         (if (isThisNode) thisNode?.colors?.second else thatNode.colors.second)?.let { Color(it) } ?: Color.Transparent
-    val cardContainerColor = CardDefaults.cardColors().containerColor
-    val tintedContainerColor =
-        if (nodeColor == Color.Transparent) cardContainerColor else lerp(cardContainerColor, nodeColor, 0.08f)
-    val cardColors = CardDefaults.cardColors(containerColor = tintedContainerColor)
-    val borderColor =
-        (if (isThisNode) thisNode?.colors?.second else thatNode.colors.second)?.let {
-            Color(it).copy(alpha = if (isActive) ACTIVE_BORDER_ALPHA else INACTIVE_BORDER_ALPHA)
-        }
-    val cardBorder = borderColor?.let { BorderStroke(1.5.dp, it) }
+    val cardColors = CardDefaults.cardColors(containerColor = nodeTintedContainer(nodeColor))
+    val cardBorder = nodeBorderStroke(nodeColor, active = isActive)
 
     val style =
         if (thatNode.isUnknownUser) {
@@ -317,17 +307,24 @@ private fun NodeSignalRow(thatNode: Node, isThisNode: Boolean, contentColor: Col
                 if (thatNode.hopsAway > 0) {
                     add { HopsInfo(hops = thatNode.hopsAway, contentColor = contentColor) }
                 } else if (thatNode.hopsAway == 0 && !thatNode.viaMqtt) {
-                    if (thatNode.snr < 100f) add { Snr(thatNode.snr) }
-                    if (thatNode.rssi < 0) add { Rssi(thatNode.rssi) }
-                    if (thatNode.snr < 100f && thatNode.rssi < 0) {
-                        val quality = determineSignalQuality(thatNode.snr, LocalModemPreset.current)
+                    val showSnr = thatNode.snr < 100f
+                    val showRssi = thatNode.rssi < 0
+                    if (showSnr || showRssi) {
+                        // SNR/RSSI/quality are the only status-colored metrics here — back just them with a scrim.
                         add {
-                            IconInfo(
-                                icon = vectorResource(quality.icon),
-                                contentDescription = stringResource(Res.string.signal_quality),
-                                contentColor = quality.color.invoke(),
-                                text = stringResource(quality.nameRes),
-                            )
+                            StatusSurface {
+                                if (showSnr) Snr(thatNode.snr)
+                                if (showRssi) Rssi(thatNode.rssi)
+                                if (showSnr && showRssi) {
+                                    val quality = determineSignalQuality(thatNode.snr, LocalModemPreset.current)
+                                    IconInfo(
+                                        icon = vectorResource(quality.icon),
+                                        contentDescription = stringResource(Res.string.signal_quality),
+                                        contentColor = quality.color.invoke(),
+                                        text = stringResource(quality.nameRes),
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -433,6 +430,42 @@ private fun MetricsGrid(items: List<@Composable () -> Unit>) {
     }
 }
 
+/**
+ * [LastHeardInfo] backed by a scrim chip and tinted StatusGreen when [online] — the legible "online" affordance —
+ * rendered plain otherwise. Shared by the complete and compact node rows.
+ */
+@Composable
+internal fun StatusAwareLastHeard(lastHeard: Int, online: Boolean, contentColor: Color, relative: Boolean = true) {
+    if (online) {
+        StatusSurface {
+            LastHeardInfo(
+                lastHeard = lastHeard,
+                showLabel = false,
+                relative = relative,
+                contentColor = MaterialTheme.colorScheme.StatusGreen,
+            )
+        }
+    } else {
+        LastHeardInfo(lastHeard = lastHeard, showLabel = false, relative = relative, contentColor = contentColor)
+    }
+}
+
+/** Key status (always status-colored) + the signed-node shield share one scrim chip so both stay legible. */
+@Composable
+fun NodeSecurityIcons(thatNode: Node, modifier: Modifier = Modifier, iconSize: Dp = 20.dp) {
+    StatusSurface(modifier = modifier) {
+        if (thatNode.signsPackets) {
+            NodeSignedStatusIcon(modifier = Modifier.size(iconSize))
+        }
+        NodeKeyStatusIcon(
+            hasPKC = thatNode.hasPKC,
+            mismatchKey = thatNode.mismatchKey,
+            publicKey = thatNode.user.public_key,
+            modifier = Modifier.size(iconSize),
+        )
+    }
+}
+
 @Composable
 private fun NodeItemHeader(
     thatNode: Node,
@@ -450,16 +483,10 @@ private fun NodeItemHeader(
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         NodeChip(node = thatNode)
-
-        NodeKeyStatusIcon(
-            hasPKC = thatNode.hasPKC,
-            mismatchKey = thatNode.mismatchKey,
-            publicKey = thatNode.user.public_key,
-            modifier = Modifier.size(24.dp),
-        )
+        NodeSecurityIcons(thatNode)
 
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Row(
@@ -482,13 +509,11 @@ private fun NodeItemHeader(
                 )
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                val statusColor =
-                    if (!isThisNode && thatNode.isOnline) {
-                        MaterialTheme.colorScheme.StatusGreen
-                    } else {
-                        contentColor
-                    }
-                LastHeardInfo(lastHeard = thatNode.lastHeard, showLabel = false, contentColor = statusColor)
+                StatusAwareLastHeard(
+                    lastHeard = thatNode.lastHeard,
+                    online = !isThisNode && thatNode.isOnline,
+                    contentColor = contentColor,
+                )
             }
         }
 

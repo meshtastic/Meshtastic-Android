@@ -52,6 +52,7 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Unmessageable
 import org.meshtastic.core.ui.icon.VolumeOff
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
+import org.meshtastic.core.ui.util.LocalMeshActivity
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,10 +67,6 @@ fun NodeStatusIcons(
     contentColor: Color = LocalContentColor.current,
 ) {
     Row(modifier = modifier.padding(4.dp)) {
-        if (isThisNode) {
-            ThisNodeStatusBadge(connectionState = connectionState, deviceType = deviceType)
-        }
-
         if (isUnmessageable) {
             StatusBadge(
                 imageVector = MeshtasticIcons.Unmessageable,
@@ -93,6 +90,9 @@ fun NodeStatusIcons(
                 tooltipText = Res.string.favorite,
                 tint = MaterialTheme.colorScheme.StatusYellow,
             )
+        }
+        if (isThisNode) {
+            ThisNodeStatusBadge(connectionState = connectionState, deviceType = deviceType)
         }
     }
 }
@@ -118,7 +118,23 @@ private fun ThisNodeStatusBadge(connectionState: ConnectionState, deviceType: De
         },
         state = rememberTooltipState(),
     ) {
-        ConnectionsNavIcon(connectionState = connectionState, deviceType = deviceType, modifier = Modifier.size(24.dp))
+        // Mirror the nav-bar connection icon, blinking on mesh activity. Only this local-node badge collects the flow
+        // (at the leaf, in the draw phase) — see LocalMeshActivity. Falls back to the static icon in previews/tests.
+        val meshActivity = LocalMeshActivity.current
+        if (meshActivity != null) {
+            AnimatedConnectionsNavIcon(
+                connectionState = connectionState,
+                deviceType = deviceType,
+                meshActivityFlow = meshActivity,
+                modifier = Modifier.size(24.dp),
+            )
+        } else {
+            ConnectionsNavIcon(
+                connectionState = connectionState,
+                deviceType = deviceType,
+                modifier = Modifier.size(24.dp),
+            )
+        }
     }
 }
 
@@ -138,7 +154,7 @@ private fun StatusBadge(
         Icon(
             imageVector = imageVector,
             contentDescription = stringResource(contentDescription),
-            modifier = Modifier.size(24.dp),
+            modifier = Modifier.size(20.dp),
             tint = tint,
         )
     }
