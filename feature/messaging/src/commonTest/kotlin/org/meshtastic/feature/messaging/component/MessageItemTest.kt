@@ -65,7 +65,7 @@ class MessageItemTest {
         }
 
         // Check that the MQTT icon is displayed
-        onNodeWithContentDescription("via MQTT").assertIsDisplayed()
+        onNodeWithContentDescription("MQTT").assertIsDisplayed()
     }
 
     @Test
@@ -104,7 +104,7 @@ class MessageItemTest {
         }
 
         // Check that the MQTT icon is not displayed
-        onNodeWithContentDescription("via MQTT").assertDoesNotExist()
+        onNodeWithContentDescription("MQTT").assertDoesNotExist()
     }
 
     @Test
