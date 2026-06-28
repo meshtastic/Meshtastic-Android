@@ -456,6 +456,13 @@ class MeshNotificationManagerImpl(
                 it.id != SUMMARY_ID && it.notification.group == GROUP_KEY_MESSAGES
             }
 
+        // No conversations left — drop the summary too, otherwise it lingers in Android Auto after the
+        // last message notification is cancelled (e.g. on reply / mark-as-read).
+        if (activeNotifications.isEmpty()) {
+            notificationManager.cancel(SUMMARY_ID)
+            return
+        }
+
         val ourNode = nodeRepository.value.ourNodeInfo.value
         val meName = ourNode?.user?.long_name ?: getString(Res.string.you)
         val me =
@@ -517,7 +524,11 @@ class MeshNotificationManagerImpl(
         notificationManager.notify(clientNotification.toString().hashCode(), notification)
     }
 
-    override fun cancelMessageNotification(contactKey: String) = notificationManager.cancel(contactKey.hashCode())
+    override fun cancelMessageNotification(contactKey: String) {
+        notificationManager.cancel(contactKey.hashCode())
+        // Rebuild (or clear) the group summary so it doesn't keep showing the dismissed conversation in Android Auto.
+        showGroupSummary()
+    }
 
     override fun cancelLowBatteryNotification(node: Node) = notificationManager.cancel(node.num)
 
@@ -794,6 +805,9 @@ class MeshNotificationManagerImpl(
 
         return NotificationCompat.Action.Builder(android.R.drawable.ic_menu_send, replyLabel, replyPendingIntent)
             .addRemoteInput(remoteInput)
+            // Required for Android Auto to drive reply hands-free without opening any UI.
+            .setSemanticAction(NotificationCompat.Action.SEMANTIC_ACTION_REPLY)
+            .setShowsUserInterface(false)
             .build()
     }
 
@@ -812,7 +826,11 @@ class MeshNotificationManagerImpl(
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
             )
 
-        return NotificationCompat.Action.Builder(android.R.drawable.ic_menu_view, label, pendingIntent).build()
+        return NotificationCompat.Action.Builder(android.R.drawable.ic_menu_view, label, pendingIntent)
+            // Required for Android Auto to mark a conversation read hands-free without opening any UI.
+            .setSemanticAction(NotificationCompat.Action.SEMANTIC_ACTION_MARK_AS_READ)
+            .setShowsUserInterface(false)
+            .build()
     }
 
     private fun createReactionAction(

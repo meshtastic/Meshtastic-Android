@@ -12,12 +12,14 @@
             </intent-filter>
         </service>
 
-        <receiver
-            android:name="org.meshtastic.feature.car.service.CarReplyReceiver"
-            android:exported="false" />
-
         <meta-data
             android:name="androidx.car.app.minCarApiLevel"
             android:value="7" />
+
+        <!-- Required for Android Auto to surface MessagingStyle notifications and recognize the
+             template app. Without this the automotive_app_desc declarations never reach the host. -->
+        <meta-data
+            android:name="com.google.android.gms.car.application"
+            android:resource="@xml/automotive_app_desc" />
     </application>
 </manifest>

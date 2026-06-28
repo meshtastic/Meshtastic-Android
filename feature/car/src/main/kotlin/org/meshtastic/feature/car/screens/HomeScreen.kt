@@ -188,6 +188,7 @@ class HomeScreen(
                 addTab(messagingTab)
                 addTab(nodesTab)
                 addTab(statusTab)
+                setActiveTabContentId(selectedTabId)
                 setTabContents(getTabContents())
             }
             .build()
