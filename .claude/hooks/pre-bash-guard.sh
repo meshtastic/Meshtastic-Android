@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# PreToolUse hook (Bash) for Meshtastic-Android. Two jobs:
+# PreToolUse hook (Bash) for Meshtastic-Android. Three jobs:
 #
 # 1. COMMIT-TIME FORMAT: before a `git commit`, auto-format the STAGED Kotlin
 #    files with spotlessApply and re-stage them, so committed code always passes
@@ -15,6 +15,12 @@
 # 2. DESTRUCTIVE-OP CONFIRM: surface a confirmation (permissionDecision "ask")
 #    before an irreversible git op — force-push or `reset --hard`. Flag-order
 #    robust, unlike a settings.json prefix pattern. Asks, never hard-denies.
+#
+# 3. PRE-PUSH DETEKT GATE: before `git push`, run detekt and BLOCK on violation.
+#    detekt is a blocking CI job but nothing else runs it locally (the commit
+#    hook only does spotlessApply). Closes the recurring "skipped local check ->
+#    CI fail" loss for lint. Test baseline (test/allTests) is NOT gated here —
+#    too slow to run on every push; that one stays on the developer.
 #
 # FAILS OPEN throughout: missing jq / parse errors / non-git commands -> exit 0.
 
@@ -37,6 +43,27 @@ if printf '%s' "$cmd" | grep -q 'git push' \
 fi
 if printf '%s' "$cmd" | grep -Eq 'git[[:space:]]+reset[[:space:]]+--hard'; then
   ask "'git reset --hard' discards uncommitted work irreversibly. Confirm. Flagged by .claude/hooks/pre-bash-guard.sh"
+fi
+
+# --- 3. Pre-push detekt gate ------------------------------------------------
+# Force-push already returned via ask() above; this only runs for a plain push.
+if printf '%s' "$cmd" | grep -q 'git push'; then
+  cwd=$(printf '%s' "$input" | jq -r '.cwd // empty' 2>/dev/null)
+  [ -z "$cwd" ] && cwd="$PWD"
+  repo_root=$(git -C "$cwd" rev-parse --show-toplevel 2>/dev/null) || exit 0
+  export ANDROID_HOME="${ANDROID_HOME:-$HOME/Library/Android/sdk}"
+  # ponytail: detekt-only gate — test/allTests deliberately NOT run here (minutes
+  # per push is too costly; baseline stays the developer's job). Ceiling: detekt
+  # scans all 39 modules each push; scope to changed modules if it ever drags.
+  out=$( (cd "$repo_root" && ./gradlew detekt --console=plain -q) 2>&1 )
+  if [ $? -ne 0 ]; then
+    {
+      printf '%s\n' "detekt failed — blocking the push (it's a blocking CI gate). Last lines:"
+      printf '%s\n' "$out" | tail -n 30
+    } >&2
+    exit 2
+  fi
+  exit 0
 fi
 
 # --- 1. Commit-time spotlessApply on staged Kotlin --------------------------
