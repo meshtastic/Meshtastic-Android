@@ -195,10 +195,12 @@ fun NodeDetailsSectionPreview() {
 @Composable
 fun NodeDetailsSectionSignedPreview() {
     // signsPackets surfaces the "Signed node" row; manuallyVerified shows it sitting most-trusted-first.
+    // lastTransport = 1 (TRANSPORT_LORA) surfaces the "Transport" row.
     val node =
         previewData.mickeyMouse.copy(
             manuallyVerified = true,
             signsPackets = true,
+            lastTransport = 1,
             publicKey = ByteArray(32) { 1 }.toByteString(),
         )
     AppTheme { Surface { NodeDetailsSection(node = node) } }

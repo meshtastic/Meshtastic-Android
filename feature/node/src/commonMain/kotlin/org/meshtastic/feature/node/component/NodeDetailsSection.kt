@@ -78,10 +78,11 @@ import org.meshtastic.core.resources.short_name
 import org.meshtastic.core.resources.snr
 import org.meshtastic.core.resources.status_message
 import org.meshtastic.core.resources.supported
+import org.meshtastic.core.resources.transport
 import org.meshtastic.core.resources.uptime
 import org.meshtastic.core.resources.user_id
-import org.meshtastic.core.resources.via_mqtt
 import org.meshtastic.core.ui.component.SignedNodeDialog
+import org.meshtastic.core.ui.component.transportInfo
 import org.meshtastic.core.ui.icon.ArrowCircleUp
 import org.meshtastic.core.ui.icon.DeviceNumbers
 import org.meshtastic.core.ui.icon.History
@@ -89,7 +90,6 @@ import org.meshtastic.core.ui.icon.HopCount
 import org.meshtastic.core.ui.icon.KeyOff
 import org.meshtastic.core.ui.icon.Lock
 import org.meshtastic.core.ui.icon.MeshtasticIcons
-import org.meshtastic.core.ui.icon.MqttConnected
 import org.meshtastic.core.ui.icon.Notes
 import org.meshtastic.core.ui.icon.Person
 import org.meshtastic.core.ui.icon.Rssi
@@ -100,6 +100,7 @@ import org.meshtastic.core.ui.icon.role
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.util.createClipEntry
 import org.meshtastic.core.ui.util.formatAgo
+import org.meshtastic.proto.MeshPacket.TransportMechanism
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
@@ -179,9 +180,13 @@ private fun MainNodeDetails(node: Node) {
             SectionDivider()
             SignalRow(node)
         }
-        if (node.viaMqtt || node.manuallyVerified || node.signsPackets) {
+        if (node.viaMqtt || node.lastTransport != TransportMechanism.TRANSPORT_INTERNAL.value) {
             SectionDivider()
-            MqttAndVerificationRow(node)
+            TransportRow(node)
+        }
+        if (node.manuallyVerified || node.signsPackets) {
+            SectionDivider()
+            VerificationRow(node)
         }
         val publicKey = node.publicKey ?: node.user.public_key
         if (publicKey.size > 0) {
@@ -308,24 +313,30 @@ private fun SignalRow(node: Node) {
     }
 }
 
+/** How this node was last heard — LoRa / MQTT / UDP / API. Hidden for internally-generated (own) packets. */
 @Composable
-private fun MqttAndVerificationRow(node: Node) {
+private fun TransportRow(node: Node) {
+    val (icon, label) = transportInfo(node.lastTransport, node.viaMqtt) ?: return
     Row(modifier = Modifier.fillMaxWidth()) {
-        // Left slot: signed (tappable, automatic trust) takes priority, else MQTT transport.
-        when {
-            node.signsPackets -> SignedNodeItem(Modifier.weight(1f))
+        InfoItem(
+            label = stringResource(Res.string.transport),
+            value = label,
+            icon = icon,
+            modifier = Modifier.weight(1f),
+        )
+        Spacer(Modifier.weight(1f))
+    }
+}
 
-            node.viaMqtt ->
-                InfoItem(
-                    label = stringResource(Res.string.via_mqtt),
-                    value = "Yes",
-                    icon = MeshtasticIcons.MqttConnected,
-                    modifier = Modifier.weight(1f),
-                )
-
-            else -> Spacer(Modifier.weight(1f))
+/** Trust signals: automatic XEdDSA signing (left, tappable) and user-asserted key verification (right). */
+@Composable
+private fun VerificationRow(node: Node) {
+    Row(modifier = Modifier.fillMaxWidth()) {
+        if (node.signsPackets) {
+            SignedNodeItem(Modifier.weight(1f))
+        } else {
+            Spacer(Modifier.weight(1f))
         }
-        // Right slot: manual key verification (user-asserted trust).
         if (node.manuallyVerified) {
             InfoItem(
                 label = stringResource(Res.string.supported),

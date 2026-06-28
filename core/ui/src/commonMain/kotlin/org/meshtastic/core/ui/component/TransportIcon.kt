@@ -21,18 +21,46 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.internal
-import org.meshtastic.core.resources.via_api
-import org.meshtastic.core.resources.via_mqtt
-import org.meshtastic.core.resources.via_udp
+import org.meshtastic.core.resources.transport_api
+import org.meshtastic.core.resources.transport_lora
+import org.meshtastic.core.resources.transport_mqtt
+import org.meshtastic.core.resources.transport_udp
+import org.meshtastic.core.ui.icon.Antenna
 import org.meshtastic.core.ui.icon.Api
 import org.meshtastic.core.ui.icon.Device
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.MqttConnected
 import org.meshtastic.core.ui.icon.Udp
-import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.MeshPacket.TransportMechanism
+
+/** Icon + short label for a [TransportMechanism] value, or `null` if unknown. Single source for transport badging. */
+@Composable
+fun transportInfo(transport: Int, viaMqtt: Boolean): Pair<ImageVector, String>? = when {
+    viaMqtt || transport == TransportMechanism.TRANSPORT_MQTT.value ->
+        MeshtasticIcons.MqttConnected to stringResource(Res.string.transport_mqtt)
+
+    transport == TransportMechanism.TRANSPORT_LORA.value ||
+        transport == TransportMechanism.TRANSPORT_LORA_ALT1.value ||
+        transport == TransportMechanism.TRANSPORT_LORA_ALT2.value ||
+        transport == TransportMechanism.TRANSPORT_LORA_ALT3.value ->
+        MeshtasticIcons.Antenna to stringResource(Res.string.transport_lora)
+
+    transport == TransportMechanism.TRANSPORT_MULTICAST_UDP.value ||
+        transport == TransportMechanism.TRANSPORT_UNICAST_UDP.value ->
+        MeshtasticIcons.Udp to stringResource(Res.string.transport_udp)
+
+    transport == TransportMechanism.TRANSPORT_API.value ->
+        MeshtasticIcons.Api to stringResource(Res.string.transport_api)
+
+    transport == TransportMechanism.TRANSPORT_INTERNAL.value ->
+        MeshtasticIcons.Device to stringResource(Res.string.internal)
+
+    else -> null
+}
 
 @Composable
 fun TransportIcon(
@@ -41,21 +69,14 @@ fun TransportIcon(
     modifier: Modifier = Modifier,
     tint: Color = LocalContentColor.current,
 ) {
-    val (icon, description) =
-        when {
-            viaMqtt || transport == MeshPacket.TransportMechanism.TRANSPORT_MQTT.value ->
-                MeshtasticIcons.MqttConnected to stringResource(Res.string.via_mqtt)
-
-            transport == MeshPacket.TransportMechanism.TRANSPORT_MULTICAST_UDP.value ->
-                MeshtasticIcons.Udp to stringResource(Res.string.via_udp)
-
-            transport == MeshPacket.TransportMechanism.TRANSPORT_API.value ->
-                MeshtasticIcons.Api to stringResource(Res.string.via_api)
-
-            transport == MeshPacket.TransportMechanism.TRANSPORT_INTERNAL.value ->
-                MeshtasticIcons.Device to stringResource(Res.string.internal)
-
-            else -> return
-        }
+    // Lists only badge "notable" transports; LoRa (and unicast UDP) are the unremarkable default — skip them.
+    val isLora =
+        transport == TransportMechanism.TRANSPORT_LORA.value ||
+            transport == TransportMechanism.TRANSPORT_LORA_ALT1.value ||
+            transport == TransportMechanism.TRANSPORT_LORA_ALT2.value ||
+            transport == TransportMechanism.TRANSPORT_LORA_ALT3.value
+    val isUnicastUdp = transport == TransportMechanism.TRANSPORT_UNICAST_UDP.value
+    if (!viaMqtt && (isLora || isUnicastUdp)) return
+    val (icon, description) = transportInfo(transport, viaMqtt) ?: return
     Icon(icon, contentDescription = description, modifier = modifier, tint = tint)
 }

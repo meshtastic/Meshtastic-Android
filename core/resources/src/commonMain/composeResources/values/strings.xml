@@ -1518,8 +1518,14 @@
     <string name="traffic_management_router_preserve_hops">Preserve Router Hops</string>
     <string name="traffic_management_unknown_packet_threshold">Unknown Packet Threshold</string>
     <string name="transmit_over_lora">Transmit over LoRa</string>
+    <!-- TRANSPORT -->
+    <string name="transport">Transport</string>
+    <string name="transport_api">API</string>
     <string name="transport_ble">BLE</string>
+    <string name="transport_lora">LoRa</string>
+    <string name="transport_mqtt">MQTT</string>
     <string name="transport_tcp">TCP</string>
+    <string name="transport_udp">UDP</string>
     <string name="transport_usb">USB</string>
     <string name="triple_click_adhoc_ping">Triple Click Ad Hoc Ping</string>
     <string name="twenty_four_hours">24H</string>

@@ -1473,8 +1473,14 @@ traffic_management_rate_limit_window
 traffic_management_router_preserve_hops
 traffic_management_unknown_packet_threshold
 transmit_over_lora
+### TRANSPORT ###
+transport
+transport_api
 transport_ble
+transport_lora
+transport_mqtt
 transport_tcp
+transport_udp
 transport_usb
 triple_click_adhoc_ping
 twenty_four_hours
