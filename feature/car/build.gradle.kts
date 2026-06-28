@@ -19,6 +19,7 @@ plugins {
     alias(libs.plugins.meshtastic.android.library)
     alias(libs.plugins.meshtastic.android.library.flavors)
     id("meshtastic.koin")
+    id("dev.mokkery")
 }
 
 android {
@@ -30,6 +31,9 @@ android {
         minSdk = 23
         consumerProguardFiles("proguard-rules.pro")
     }
+
+    // Robolectric provides the Android context that androidx.car.app TestCarContext/ScreenController need.
+    testOptions { unitTests { isIncludeAndroidResources = true } }
 }
 
 dependencies {
@@ -52,6 +56,7 @@ dependencies {
 
     testImplementation(libs.androidx.car.app.testing)
     testImplementation(libs.koin.test)
+    testImplementation(libs.robolectric)
     testImplementation(kotlin("test-junit"))
     testRuntimeOnly(libs.junit.vintage.engine)
 }

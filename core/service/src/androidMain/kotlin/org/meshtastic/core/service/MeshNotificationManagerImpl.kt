@@ -794,6 +794,9 @@ class MeshNotificationManagerImpl(
 
         return NotificationCompat.Action.Builder(android.R.drawable.ic_menu_send, replyLabel, replyPendingIntent)
             .addRemoteInput(remoteInput)
+            // Required for Android Auto to drive reply hands-free without opening any UI.
+            .setSemanticAction(NotificationCompat.Action.SEMANTIC_ACTION_REPLY)
+            .setShowsUserInterface(false)
             .build()
     }
 
@@ -812,7 +815,11 @@ class MeshNotificationManagerImpl(
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
             )
 
-        return NotificationCompat.Action.Builder(android.R.drawable.ic_menu_view, label, pendingIntent).build()
+        return NotificationCompat.Action.Builder(android.R.drawable.ic_menu_view, label, pendingIntent)
+            // Required for Android Auto to mark a conversation read hands-free without opening any UI.
+            .setSemanticAction(NotificationCompat.Action.SEMANTIC_ACTION_MARK_AS_READ)
+            .setShowsUserInterface(false)
+            .build()
     }
 
     private fun createReactionAction(

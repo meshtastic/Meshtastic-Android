@@ -26,7 +26,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.emptyFlow
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.meshtastic.feature.car.alerts.EmergencyHandler
@@ -47,8 +46,7 @@ class MeshtasticCarSession :
         crashlyticsCarTagger.setCarSession(true)
         stateCoordinator.start()
         conversationShortcutManager.startObserving(sessionScope)
-        // Emergency flow wired to emptyFlow() until emergency packet detection is implemented
-        emergencyHandler.startCollecting(emptyFlow())
+        emergencyHandler.startCollecting(stateCoordinator.emergencyAlerts)
 
         lifecycle.addObserver(
             object : DefaultLifecycleObserver {

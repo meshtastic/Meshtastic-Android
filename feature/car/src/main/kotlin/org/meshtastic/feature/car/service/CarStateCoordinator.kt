@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.car.service
 
+import androidx.annotation.VisibleForTesting
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
@@ -27,10 +28,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.Factory
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
@@ -40,11 +45,13 @@ import org.meshtastic.feature.car.model.CarLocalStats
 import org.meshtastic.feature.car.model.CarSessionState
 import org.meshtastic.feature.car.model.ChannelUi
 import org.meshtastic.feature.car.model.ConversationUi
+import org.meshtastic.feature.car.model.EmergencyAlert
 import org.meshtastic.feature.car.model.MessagingUiState
 import org.meshtastic.feature.car.model.NodeDashboardUiState
 import org.meshtastic.feature.car.model.TopologyHeader
 import org.meshtastic.feature.car.util.CarScreenDataBuilder
 import org.meshtastic.feature.car.util.MessageFilter
+import org.meshtastic.proto.PortNum
 
 /** Snapshot of a message for car display (avoids leaking domain models to UI). */
 data class MessageSnapshot(
@@ -105,6 +112,46 @@ class CarStateCoordinator(
 
     private val _localStatsState = MutableStateFlow(CarLocalStats())
     val localStatsState: StateFlow<CarLocalStats> = _localStatsState.asStateFlow()
+
+    /** Test seam: push presentation state directly without driving the repositories (see CarScreensTest). */
+    @VisibleForTesting
+    internal fun setStateForTest(
+        session: CarSessionState = _sessionState.value,
+        messaging: MessagingUiState = _messagingState.value,
+        nodes: NodeDashboardUiState = _nodeDashboardState.value,
+        stats: CarLocalStats = _localStatsState.value,
+    ) {
+        _sessionState.value = session
+        _messagingState.value = messaging
+        _nodeDashboardState.value = nodes
+        _localStatsState.value = stats
+    }
+
+    /**
+     * Emits an [EmergencyAlert] for each new incoming ALERT_APP packet. Sourced from the contacts flow (last packet per
+     * contact), deduped by packet id so the same alert isn't re-raised. ponytail: an alert immediately superseded by a
+     * newer message in the same contact within one emission can be missed — acceptable for the in-car overlay; the core
+     * alert notification still fires regardless.
+     */
+    val emergencyAlerts: kotlinx.coroutines.flow.Flow<EmergencyAlert> =
+        packetRepository
+            .getContacts()
+            .mapNotNull { contacts ->
+                contacts.values.filter { it.dataType == PortNum.ALERT_APP.value }.maxByOrNull { it.time }
+            }
+            .distinctUntilChangedBy { it.id }
+            .map { it.toEmergencyAlert() }
+
+    private fun DataPacket.toEmergencyAlert(): EmergencyAlert {
+        val entry = nodeRepository.nodeDBbyNum.value.entries.find { it.value.user.id == from }
+        return EmergencyAlert(
+            nodeNum = entry?.key ?: 0,
+            nodeName = entry?.value?.user?.long_name ?: from ?: "Unknown",
+            message = alert ?: "",
+            timestamp = time,
+            isActive = true,
+        )
+    }
 
     private val selectedChannel = MutableStateFlow(0)
 
@@ -186,7 +233,7 @@ class CarStateCoordinator(
                 ) { nodeMap, onlineCount, localConfig ->
                     val nodes = CarScreenDataBuilder.sortNodes(nodeMap.values, localConfig.lora?.modem_preset)
                     val totalCount = nodeMap.size
-                    val meshName = nodeRepository.myNodeInfo.value?.firmwareVersion
+                    val meshName = nodeRepository.ourNodeInfo.value?.user?.long_name
 
                     _nodeDashboardState.value =
                         NodeDashboardUiState(
