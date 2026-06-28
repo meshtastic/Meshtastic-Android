@@ -21,6 +21,7 @@ package org.meshtastic.feature.node.component
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.feature.node.model.LogsType
@@ -194,7 +195,12 @@ fun NodeDetailsSectionPreview() {
 @Composable
 fun NodeDetailsSectionSignedPreview() {
     // signsPackets surfaces the "Signed node" row; manuallyVerified shows it sitting most-trusted-first.
-    val node = previewData.mickeyMouse.copy(manuallyVerified = true, signsPackets = true)
+    val node =
+        previewData.mickeyMouse.copy(
+            manuallyVerified = true,
+            signsPackets = true,
+            publicKey = ByteArray(32) { 1 }.toByteString(),
+        )
     AppTheme { Surface { NodeDetailsSection(node = node) } }
 }
 
