@@ -99,3 +99,6 @@ build-scan-*.scan
 # craft pipeline scratch workpad (per-task working notes, not source)
 /workpad.md
 /workpad.*.md
+
+# Agent session handoff log — local-only scratch, not version-controlled
+.agent_memory/
