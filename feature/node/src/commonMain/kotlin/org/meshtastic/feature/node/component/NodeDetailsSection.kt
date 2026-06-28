@@ -35,7 +35,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.Clipboard
@@ -70,7 +74,6 @@ import org.meshtastic.core.resources.role
 import org.meshtastic.core.resources.rssi
 import org.meshtastic.core.resources.security_signed_node
 import org.meshtastic.core.resources.security_signed_node_desc
-import org.meshtastic.core.resources.security_signed_node_help
 import org.meshtastic.core.resources.short_name
 import org.meshtastic.core.resources.snr
 import org.meshtastic.core.resources.status_message
@@ -78,6 +81,7 @@ import org.meshtastic.core.resources.supported
 import org.meshtastic.core.resources.uptime
 import org.meshtastic.core.resources.user_id
 import org.meshtastic.core.resources.via_mqtt
+import org.meshtastic.core.ui.component.SignedNodeDialog
 import org.meshtastic.core.ui.icon.ArrowCircleUp
 import org.meshtastic.core.ui.icon.DeviceNumbers
 import org.meshtastic.core.ui.icon.History
@@ -175,14 +179,9 @@ private fun MainNodeDetails(node: Node) {
             SectionDivider()
             SignalRow(node)
         }
-        if (node.viaMqtt || node.manuallyVerified) {
+        if (node.viaMqtt || node.manuallyVerified || node.signsPackets) {
             SectionDivider()
             MqttAndVerificationRow(node)
-        }
-        // Most-trusted first: manual-verify (above) → signed (automatic) → has-key (below).
-        if (node.signsPackets) {
-            SectionDivider()
-            SignedNodeRow()
         }
         val publicKey = node.publicKey ?: node.user.public_key
         if (publicKey.size > 0) {
@@ -312,16 +311,21 @@ private fun SignalRow(node: Node) {
 @Composable
 private fun MqttAndVerificationRow(node: Node) {
     Row(modifier = Modifier.fillMaxWidth()) {
-        if (node.viaMqtt) {
-            InfoItem(
-                label = stringResource(Res.string.via_mqtt),
-                value = "Yes",
-                icon = MeshtasticIcons.MqttConnected,
-                modifier = Modifier.weight(1f),
-            )
-        } else {
-            Spacer(Modifier.weight(1f))
+        // Left slot: signed (tappable, automatic trust) takes priority, else MQTT transport.
+        when {
+            node.signsPackets -> SignedNodeItem(Modifier.weight(1f))
+
+            node.viaMqtt ->
+                InfoItem(
+                    label = stringResource(Res.string.via_mqtt),
+                    value = "Yes",
+                    icon = MeshtasticIcons.MqttConnected,
+                    modifier = Modifier.weight(1f),
+                )
+
+            else -> Spacer(Modifier.weight(1f))
         }
+        // Right slot: manual key verification (user-asserted trust).
         if (node.manuallyVerified) {
             InfoItem(
                 label = stringResource(Res.string.supported),
@@ -335,16 +339,19 @@ private fun MqttAndVerificationRow(node: Node) {
     }
 }
 
+/** "Signed node" trust cell — tap opens the plain-language explanation ([SignedNodeDialog]). */
 @Composable
-private fun SignedNodeRow() {
+private fun SignedNodeItem(modifier: Modifier = Modifier) {
+    var showDialog by remember { mutableStateOf(false) }
+    if (showDialog) SignedNodeDialog(onDismiss = { showDialog = false })
     InfoItem(
         label = stringResource(Res.string.security_signed_node),
         value = stringResource(Res.string.security_signed_node_desc),
         icon = MeshtasticIcons.ShieldCheck,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier,
         iconTint = MaterialTheme.colorScheme.StatusGreen,
         iconSize = 20.dp,
-        supportingText = stringResource(Res.string.security_signed_node_help),
+        onClick = { showDialog = true },
     )
 }
 

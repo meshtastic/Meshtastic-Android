@@ -37,25 +37,24 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.ShieldCheck
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 
-/**
- * The "signed node" shield (XEdDSA). Tappable like [NodeKeyStatusIcon] — tapping opens a plain-language explanation.
- * Render it next to the key status in [NodeSecurityIcons] (node rows + details) so the affordance is consistent.
- */
+/** The plain-language "signed node" explanation, shared by [NodeSignedStatusIcon] and the node-details signed row. */
+@Composable
+fun SignedNodeDialog(onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(Res.string.security_signed_node)) },
+        text = { Text(stringResource(Res.string.security_signed_node_help)) },
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(Res.string.security_icon_help_dismiss)) }
+        },
+    )
+}
+
+/** The "signed node" shield (XEdDSA), tappable like [NodeKeyStatusIcon] — tap opens [SignedNodeDialog]. */
 @Composable
 fun NodeSignedStatusIcon(modifier: Modifier = Modifier) {
     var showDialog by remember { mutableStateOf(false) }
-    if (showDialog) {
-        AlertDialog(
-            onDismissRequest = { showDialog = false },
-            title = { Text(stringResource(Res.string.security_signed_node)) },
-            text = { Text(stringResource(Res.string.security_signed_node_help)) },
-            confirmButton = {
-                TextButton(onClick = { showDialog = false }) {
-                    Text(stringResource(Res.string.security_icon_help_dismiss))
-                }
-            },
-        )
-    }
+    if (showDialog) SignedNodeDialog(onDismiss = { showDialog = false })
     IconButton(onClick = { showDialog = true }, modifier = modifier) {
         Icon(
             imageVector = MeshtasticIcons.ShieldCheck,
