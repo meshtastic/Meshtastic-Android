@@ -23,10 +23,13 @@ import androidx.appcompat.app.AppCompatActivity.RESULT_OK
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.tooling.preview.Preview
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.format
+import kotlinx.datetime.format.char
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.nowMillis
-import org.meshtastic.core.common.util.toDate
-import org.meshtastic.core.common.util.toInstant
 import org.meshtastic.core.database.DatabaseConstants
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.app_settings
@@ -39,8 +42,18 @@ import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Output
 import org.meshtastic.core.ui.theme.AppTheme
-import java.text.SimpleDateFormat
-import java.util.Locale
+import kotlin.time.Instant.Companion.fromEpochMilliseconds
+
+private val EXPORT_TIMESTAMP_FORMAT =
+    LocalDateTime.Format {
+        year()
+        monthNumber()
+        day()
+        char('_')
+        hour()
+        minute()
+        second()
+    }
 
 /** Section for settings related to data persistence and exports. */
 @Composable
@@ -50,7 +63,10 @@ fun PersistenceSection(
     nodeShortName: String,
     onExportData: (android.net.Uri) -> Unit,
 ) {
-    val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(nowMillis.toInstant().toDate())
+    val timestamp =
+        fromEpochMilliseconds(nowMillis)
+            .toLocalDateTime(TimeZone.currentSystemDefault())
+            .format(EXPORT_TIMESTAMP_FORMAT)
 
     val exportRangeTestLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
