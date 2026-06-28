@@ -114,7 +114,11 @@ class StreamFrameCodec(
      *
      * Thread-safe via an internal mutex — multiple callers can call this concurrently.
      */
-    suspend fun frameAndSend(payload: ByteArray, sendBytes: (ByteArray) -> Unit, flush: () -> Unit = {}) {
+    suspend fun frameAndSend(
+        payload: ByteArray,
+        sendBytes: suspend (ByteArray) -> Unit,
+        flush: suspend () -> Unit = {},
+    ) {
         writeMutex.withLock {
             val header = ByteArray(HEADER_SIZE)
             header[0] = START1
