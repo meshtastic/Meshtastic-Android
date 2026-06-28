@@ -456,6 +456,13 @@ class MeshNotificationManagerImpl(
                 it.id != SUMMARY_ID && it.notification.group == GROUP_KEY_MESSAGES
             }
 
+        // No conversations left — drop the summary too, otherwise it lingers in Android Auto after the
+        // last message notification is cancelled (e.g. on reply / mark-as-read).
+        if (activeNotifications.isEmpty()) {
+            notificationManager.cancel(SUMMARY_ID)
+            return
+        }
+
         val ourNode = nodeRepository.value.ourNodeInfo.value
         val meName = ourNode?.user?.long_name ?: getString(Res.string.you)
         val me =
@@ -517,7 +524,11 @@ class MeshNotificationManagerImpl(
         notificationManager.notify(clientNotification.toString().hashCode(), notification)
     }
 
-    override fun cancelMessageNotification(contactKey: String) = notificationManager.cancel(contactKey.hashCode())
+    override fun cancelMessageNotification(contactKey: String) {
+        notificationManager.cancel(contactKey.hashCode())
+        // Rebuild (or clear) the group summary so it doesn't keep showing the dismissed conversation in Android Auto.
+        showGroupSummary()
+    }
 
     override fun cancelLowBatteryNotification(node: Node) = notificationManager.cancel(node.num)
 

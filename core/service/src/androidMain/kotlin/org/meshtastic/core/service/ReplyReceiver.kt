@@ -20,15 +20,18 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import androidx.core.app.RemoteInput
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.ContactKey
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.repository.MeshNotificationManager
+import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioController
 
 /**
@@ -45,31 +48,46 @@ class ReplyReceiver :
 
     private val meshServiceNotifications: MeshNotificationManager by inject()
 
+    private val packetRepository: PacketRepository by inject()
+
     private val dispatchers: CoroutineDispatchers by inject()
 
     private val scope by lazy { CoroutineScope(dispatchers.io + SupervisorJob()) }
 
     companion object {
+        private const val TAG = "ReplyReceiver"
         const val REPLY_ACTION = "org.meshtastic.app.REPLY_ACTION"
         const val CONTACT_KEY = "contactKey"
         const val KEY_TEXT_REPLY = "key_text_reply"
     }
 
+    @Suppress("TooGenericExceptionCaught") // a reply must never crash the receiver, whatever the radio throws
     override fun onReceive(context: Context, intent: Intent) {
         val remoteInput = RemoteInput.getResultsFromIntent(intent)
+        if (remoteInput == null) {
+            Logger.w(tag = TAG) { "reply received but RemoteInput was null" }
+            return
+        }
 
-        if (remoteInput != null) {
-            val contactKey = intent.getStringExtra(CONTACT_KEY).orEmpty()
-            val message = remoteInput.getCharSequence(KEY_TEXT_REPLY)?.toString().orEmpty()
+        val contactKey = intent.getStringExtra(CONTACT_KEY).orEmpty()
+        val message = remoteInput.getCharSequence(KEY_TEXT_REPLY)?.toString().orEmpty()
+        Logger.i(tag = TAG) { "reply for contactKey=$contactKey len=${message.length}" }
 
-            val pendingResult = goAsync()
-            scope.launch {
-                try {
-                    sendMessage(message, contactKey)
-                    meshServiceNotifications.cancelMessageNotification(contactKey)
-                } finally {
-                    pendingResult.finish()
-                }
+        val pendingResult = goAsync()
+        scope.launch {
+            try {
+                // Send first so the reply isn't lost; then dismiss. The cancel can't break the send.
+                sendMessage(message, contactKey)
+                // Replying implies the conversation has been read — mark it so, like the mark-as-read action.
+                // Android Auto keys notification dismissal off read state, not just cancel().
+                packetRepository.clearUnreadCount(contactKey, nowMillis)
+                Logger.i(tag = TAG) { "reply sent + marked read" }
+            } catch (e: Exception) {
+                Logger.e(tag = TAG, throwable = e) { "reply send failed" }
+            } finally {
+                runCatching { meshServiceNotifications.cancelMessageNotification(contactKey) }
+                    .onFailure { Logger.e(tag = TAG, throwable = it) { "cancel notification failed" } }
+                pendingResult.finish()
             }
         }
     }
