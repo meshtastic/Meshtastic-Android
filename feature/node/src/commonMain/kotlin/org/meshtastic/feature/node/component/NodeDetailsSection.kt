@@ -70,6 +70,7 @@ import org.meshtastic.core.resources.role
 import org.meshtastic.core.resources.rssi
 import org.meshtastic.core.resources.security_signed_node
 import org.meshtastic.core.resources.security_signed_node_desc
+import org.meshtastic.core.resources.security_signed_node_help
 import org.meshtastic.core.resources.short_name
 import org.meshtastic.core.resources.snr
 import org.meshtastic.core.resources.status_message
@@ -343,6 +344,7 @@ private fun SignedNodeRow() {
         modifier = Modifier.fillMaxWidth(),
         iconTint = MaterialTheme.colorScheme.StatusGreen,
         iconSize = 20.dp,
+        supportingText = stringResource(Res.string.security_signed_node_help),
     )
 }
 

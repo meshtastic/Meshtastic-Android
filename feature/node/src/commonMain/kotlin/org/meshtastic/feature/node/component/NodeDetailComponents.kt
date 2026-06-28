@@ -95,6 +95,7 @@ internal fun InfoItem(
     valueStyle: TextStyle = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
     iconTint: Color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
     iconSize: Dp = 14.dp,
+    supportingText: String? = null,
 ) {
     val clipboard: Clipboard = LocalClipboard.current
     val coroutineScope = rememberCoroutineScope()
@@ -130,6 +131,13 @@ internal fun InfoItem(
         }
         Spacer(Modifier.height(4.dp))
         Text(text = value, style = valueStyle, color = MaterialTheme.colorScheme.onSurface)
+        if (supportingText != null) {
+            Text(
+                text = supportingText,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
 
