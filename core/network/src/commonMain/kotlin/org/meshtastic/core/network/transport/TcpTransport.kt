@@ -17,23 +17,31 @@
 package org.meshtastic.core.network.transport
 
 import co.touchlab.kermit.Logger
+import io.ktor.network.selector.SelectorManager
+import io.ktor.network.sockets.InetSocketAddress
+import io.ktor.network.sockets.Socket
+import io.ktor.network.sockets.aSocket
+import io.ktor.network.sockets.openReadChannel
+import io.ktor.network.sockets.openWriteChannel
+import io.ktor.utils.io.ByteReadChannel
+import io.ktor.utils.io.ByteWriteChannel
+import io.ktor.utils.io.readAvailable
+import io.ktor.utils.io.writeFully
+import kotlinx.atomicfu.atomic
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.io.IOException
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.proto.ToRadio
-import java.io.BufferedInputStream
-import java.io.BufferedOutputStream
-import java.io.IOException
-import java.io.OutputStream
-import java.net.InetAddress
-import java.net.Socket
-import java.net.SocketTimeoutException
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicInteger
+import kotlin.concurrent.Volatile
 
 /**
  * Decides whether to reset the reconnect backoff based on session data and uptime.
@@ -46,13 +54,14 @@ internal fun shouldResetBackoff(hadData: Boolean, sessionUptimeMs: Long, thresho
     hadData && sessionUptimeMs >= thresholdMs
 
 /**
- * Shared JVM TCP transport for Meshtastic radios.
+ * Shared TCP transport for Meshtastic radios.
  *
  * Manages the TCP socket lifecycle (connect, read loop, reconnect with backoff) and uses [StreamFrameCodec] for the
  * START1/START2 stream framing protocol. [sendHeartbeat] sends a heartbeat with a monotonically-increasing nonce so the
  * firmware's per-connection duplicate-write filter does not silently drop it.
  *
- * Used by Android and Desktop via the shared `SharedRadioInterfaceService`.
+ * Uses Ktor raw sockets (`ktor-network`) so the implementation is KMP-common — shared by Android, Desktop, and (once
+ * wired) iOS via the shared `SharedRadioInterfaceService`.
  */
 @Suppress("TooManyFunctions", "MagicNumber")
 class TcpTransport(
@@ -82,9 +91,15 @@ class TcpTransport(
         const val MAX_RECONNECT_RETRIES = Int.MAX_VALUE
         const val MIN_BACKOFF_MILLIS = 1_000L
         const val MAX_BACKOFF_MILLIS = 5 * 60 * 1_000L
-        const val SOCKET_TIMEOUT_MS = 5_000
+
+        /** Per-read inactivity timeout. Combined with [SOCKET_RETRIES] this gives the 90s idle-disconnect window. */
+        const val SOCKET_TIMEOUT_MS = 5_000L
         const val SOCKET_RETRIES = 18 // 18 * 5s = 90s inactivity before disconnect
         const val TIMEOUT_LOG_INTERVAL = 5
+
+        /** TCP connect timeout. A failed connect just feeds the reconnect/backoff loop, so it is not fatal. */
+        const val CONNECT_TIMEOUT_MS = 30_000L
+        private const val READ_BUFFER_SIZE = 1024
         private const val MILLIS_PER_SECOND = 1_000L
 
         /**
@@ -106,13 +121,17 @@ class TcpTransport(
         )
 
     // TCP socket state
+    @Volatile private var selectorManager: SelectorManager? = null
+
     @Volatile private var socket: Socket? = null
 
-    @Volatile private var outStream: OutputStream? = null
+    @Volatile private var writeChannel: ByteWriteChannel? = null
 
     @Volatile private var connectionJob: Job? = null
 
     @Volatile private var currentAddress: String? = null
+
+    @Volatile private var connected: Boolean = false
 
     // Metrics
     @Volatile private var connectionStartTime: Long = 0
@@ -127,14 +146,11 @@ class TcpTransport(
 
     @Volatile private var timeoutEvents: Int = 0
 
-    private val heartbeatNonce = AtomicInteger(0)
+    private val heartbeatNonce = atomic(0)
 
     /** Whether the transport is currently connected. */
     val isConnected: Boolean
-        get() {
-            val s = socket ?: return false
-            return s.isConnected && !s.isClosed
-        }
+        get() = connected && socket?.socketContext?.isActive == true
 
     /**
      * Start a TCP connection to the given address with automatic reconnect.
@@ -184,10 +200,18 @@ class TcpTransport(
             val hadData =
                 try {
                     connectAndRead(address)
-                } catch (ex: IOException) {
-                    Logger.w { "$logTag: [$address] TCP connection error" }
+                } catch (ex: TimeoutCancellationException) {
+                    Logger.w(ex) { "$logTag: [$address] TCP connect timed out" }
                     disconnectSocket()
                     false
+                } catch (ex: IOException) {
+                    Logger.w(ex) { "$logTag: [$address] TCP connection error" }
+                    disconnectSocket()
+                    false
+                } catch (ce: CancellationException) {
+                    // Outer-scope cancellation (stop()) — tear down and let it propagate to end the loop.
+                    disconnectSocket()
+                    throw ce
                 } catch (@Suppress("TooGenericExceptionCaught") ex: Throwable) {
                     Logger.e(ex) { "$logTag: [$address] TCP exception" }
                     disconnectSocket()
@@ -203,8 +227,9 @@ class TcpTransport(
                 retryCount = 1
                 backoff = MIN_BACKOFF_MILLIS
             } else if (hadData) {
+                val backoffSec = backoff / MILLIS_PER_SECOND
                 Logger.d {
-                    "$logTag: [$address] Short session (${sessionUptime}ms) — keeping backoff at ${backoff / MILLIS_PER_SECOND}s"
+                    "$logTag: [$address] Short session (${sessionUptime}ms) — keeping backoff at ${backoffSec}s"
                 }
             }
 
@@ -229,12 +254,18 @@ class TcpTransport(
         Logger.i { "$logTag: [$address] Connecting to $host:$port" }
         val attemptStart = nowMillis
 
-        Socket(InetAddress.getByName(host), port).use { sock ->
-            sock.tcpNoDelay = true
-            sock.keepAlive = true
-            sock.soTimeout = SOCKET_TIMEOUT_MS
-            socket = sock
+        val selector = SelectorManager(dispatchers.io)
+        selectorManager = selector
+        val sock =
+            withTimeout(CONNECT_TIMEOUT_MS) {
+                aSocket(selector).tcp().connect(InetSocketAddress(host, port)) {
+                    noDelay = true
+                    keepAlive = true
+                }
+            }
+        socket = sock
 
+        try {
             val connectTime = nowMillis - attemptStart
             connectionStartTime = nowMillis
             resetMetrics()
@@ -242,55 +273,70 @@ class TcpTransport(
 
             Logger.i { "$logTag: [$address] Socket connected in ${connectTime}ms" }
 
-            BufferedOutputStream(sock.getOutputStream()).use { output ->
-                outStream = output
+            val output = sock.openWriteChannel(autoFlush = false)
+            writeChannel = output
+            val input: ByteReadChannel = sock.openReadChannel()
 
-                BufferedInputStream(sock.getInputStream()).use { input ->
-                    // Send wake bytes and signal connected
-                    sendBytesRaw(StreamFrameCodec.WAKE_BYTES)
-                    listener.onConnected()
+            // Send wake bytes and signal connected
+            sendBytesRaw(StreamFrameCodec.WAKE_BYTES)
+            flushBytes()
+            connected = true
+            listener.onConnected()
 
-                    // Read loop
-                    var timeoutCount = 0
-                    while (timeoutCount < SOCKET_RETRIES) {
-                        try {
-                            val c = input.read()
-                            if (c == -1) {
-                                Logger.i { "$logTag: [$address] EOF after $packetsReceived packets" }
-                                break
-                            }
-                            timeoutCount = 0
-                            bytesReceived++
-                            codec.processInputByte(c.toByte())
-                        } catch (_: SocketTimeoutException) {
-                            timeoutCount++
-                            timeoutEvents++
-                            if (timeoutCount % TIMEOUT_LOG_INTERVAL == 0) {
-                                Logger.d { "$logTag: [$address] Timeout $timeoutCount/$SOCKET_RETRIES" }
-                            }
-                        }
-                    }
+            readLoop(address, input)
 
-                    if (timeoutCount >= SOCKET_RETRIES) {
-                        Logger.w { "$logTag: [$address] Closing after $SOCKET_RETRIES consecutive timeouts" }
-                    }
-                }
-            }
-            val hadData = bytesReceived > 0
+            bytesReceived > 0
+        } finally {
             disconnectSocket()
-            hadData
         }
     }
 
+    /**
+     * Read until EOF or [SOCKET_RETRIES] consecutive inactivity timeouts. [withTimeoutOrNull] gives a *resumable*
+     * inactivity timeout: cancelling a parked `readAvailable` leaves the channel usable for the next iteration
+     * (validated in `TcpTransportTest`).
+     */
+    @Suppress("NestedBlockDepth")
+    private suspend fun readLoop(address: String, input: ByteReadChannel) {
+        val buf = ByteArray(READ_BUFFER_SIZE)
+        var timeoutCount = 0
+        while (timeoutCount < SOCKET_RETRIES) {
+            val read = withTimeoutOrNull(SOCKET_TIMEOUT_MS) { input.readAvailable(buf) }
+            when {
+                read == null -> {
+                    timeoutCount++
+                    timeoutEvents++
+                    if (timeoutCount % TIMEOUT_LOG_INTERVAL == 0) {
+                        Logger.d { "$logTag: [$address] Timeout $timeoutCount/$SOCKET_RETRIES" }
+                    }
+                }
+
+                read == -1 -> {
+                    Logger.i { "$logTag: [$address] EOF after $packetsReceived packets" }
+                    return
+                }
+
+                else -> {
+                    timeoutCount = 0
+                    bytesReceived += read
+                    for (i in 0 until read) {
+                        codec.processInputByte(buf[i])
+                    }
+                }
+            }
+        }
+        Logger.w { "$logTag: [$address] Closing after $SOCKET_RETRIES consecutive timeouts" }
+    }
+
     // Guards against recursive disconnects triggered by listener callbacks.
-    private val isDisconnecting = AtomicBoolean(false)
+    private val isDisconnecting = atomic(false)
 
     private fun disconnectSocket() {
-        if (!isDisconnecting.compareAndSet(false, true)) return
+        if (!isDisconnecting.compareAndSet(expect = false, update = true)) return
 
         try {
             val s = socket
-            val hadConnection = s != null || outStream != null
+            val hadConnection = s != null || writeChannel != null
             if (s != null) {
                 val uptime = if (connectionStartTime > 0) nowMillis - connectionStartTime else 0
                 Logger.i {
@@ -300,19 +346,22 @@ class TcpTransport(
                 }
                 try {
                     s.close()
-                } catch (_: IOException) {
-                    // Ignore close errors
+                } catch (ex: IOException) {
+                    Logger.w(ex) { "$logTag: [$currentAddress] Error closing socket" }
                 }
             }
+            selectorManager?.close()
 
             socket = null
-            outStream = null
+            writeChannel = null
+            selectorManager = null
+            connected = false
 
             if (hadConnection) {
                 listener.onDisconnected()
             }
         } finally {
-            isDisconnecting.set(false)
+            isDisconnecting.value = false
         }
     }
 
@@ -320,23 +369,23 @@ class TcpTransport(
 
     // region Byte I/O
 
-    private fun sendBytesRaw(p: ByteArray) {
+    private suspend fun sendBytesRaw(p: ByteArray) {
         val stream =
-            outStream
+            writeChannel
                 ?: run {
                     Logger.w { "$logTag: [$currentAddress] Cannot send ${p.size} bytes: not connected" }
                     return
                 }
         try {
-            stream.write(p)
+            stream.writeFully(p)
         } catch (ex: IOException) {
             Logger.w(ex) { "$logTag: [$currentAddress] TCP write error" }
             disconnectSocket()
         }
     }
 
-    private fun flushBytes() {
-        val stream = outStream ?: return
+    private suspend fun flushBytes() {
+        val stream = writeChannel ?: return
         try {
             stream.flush()
         } catch (ex: IOException) {
