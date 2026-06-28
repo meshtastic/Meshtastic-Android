@@ -42,7 +42,7 @@ internal inline fun <K, V> cachedFlow(
         current[key]?.let {
             return it.value
         }
-        if (cache.compareAndSet(current, current.put(key, newLazy))) {
+        if (cache.compareAndSet(current, current.putting(key, newLazy))) {
             return newLazy.value
         }
     }
