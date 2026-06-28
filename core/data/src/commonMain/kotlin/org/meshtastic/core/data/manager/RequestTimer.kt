@@ -37,7 +37,7 @@ internal class RequestTimer {
 
     /** Records the start time for [requestId]. */
     fun start(requestId: Int) {
-        startTimes.update { it.put(requestId, nowMillis) }
+        startTimes.update { it.putting(requestId, nowMillis) }
     }
 
     /**
@@ -46,7 +46,7 @@ internal class RequestTimer {
      */
     fun appendDuration(requestId: Int, text: String, logLabel: String): String {
         val start = startTimes.value[requestId]
-        startTimes.update { it.remove(requestId) }
+        startTimes.update { it.removing(requestId) }
         if (start == null) return text
         val seconds = (nowMillis - start) / MILLIS_PER_SECOND
         Logger.i { "$logLabel $requestId complete in $seconds s" }

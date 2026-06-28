@@ -63,7 +63,7 @@ class SessionManagerImpl(private val clock: Clock) : SessionManager {
     override fun recordSession(srcNodeNum: Int, passkey: ByteString) {
         if (passkey.size == 0) return
         val now = clock.now()
-        entries.update { it.put(srcNodeNum, SessionEntry(passkey, now)) }
+        entries.update { it.putting(srcNodeNum, SessionEntry(passkey, now)) }
         Logger.d { "Recorded session refresh from $srcNodeNum (${passkey.size} bytes)" }
         refreshFlow.tryEmit(srcNodeNum)
     }

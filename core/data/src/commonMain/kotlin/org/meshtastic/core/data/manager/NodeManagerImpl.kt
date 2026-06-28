@@ -71,19 +71,19 @@ class NodeManagerImpl(
             var nextById = byId
             // If the user.id changed (e.g. firmware reassigned the hex id) drop the stale id entry.
             if (previous != null && previous.user.id.isNotEmpty() && previous.user.id != node.user.id) {
-                nextById = nextById.remove(previous.user.id)
+                nextById = nextById.removing(previous.user.id)
             }
             if (node.user.id.isNotEmpty()) {
-                nextById = nextById.put(node.user.id, node)
+                nextById = nextById.putting(node.user.id, node)
             }
-            return NodeIndex(byNum = byNum.put(num, node), byId = nextById)
+            return NodeIndex(byNum = byNum.putting(num, node), byId = nextById)
         }
 
         fun remove(num: Int): NodeIndex {
             val previous = byNum[num] ?: return this
             return NodeIndex(
-                byNum = byNum.remove(num),
-                byId = if (previous.user.id.isNotEmpty()) byId.remove(previous.user.id) else byId,
+                byNum = byNum.removing(num),
+                byId = if (previous.user.id.isNotEmpty()) byId.removing(previous.user.id) else byId,
             )
         }
 
@@ -92,8 +92,8 @@ class NodeManagerImpl(
                 var byNum = persistentMapOf<Int, Node>()
                 var byId = persistentMapOf<String, Node>()
                 for ((num, node) in nodes) {
-                    byNum = byNum.put(num, node)
-                    if (node.user.id.isNotEmpty()) byId = byId.put(node.user.id, node)
+                    byNum = byNum.putting(num, node)
+                    if (node.user.id.isNotEmpty()) byId = byId.putting(node.user.id, node)
                 }
                 return NodeIndex(byNum, byId)
             }
