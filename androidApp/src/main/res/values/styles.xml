@@ -24,7 +24,7 @@
         <!-- The splash screen icon -->
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash</item>
         <!-- The theme to switch to after the splash screen is dismissed -->
-        <item name="postSplashScreenTheme">@style/Theme.Material3.DynamicColors.DayNight.NoActionBar</item>
+        <item name="postSplashScreenTheme">@style/Theme.AppCompat.DayNight.NoActionBar</item>
     </style>
 
 </resources>
