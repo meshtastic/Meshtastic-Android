@@ -20,10 +20,9 @@ import androidx.lifecycle.ViewModel
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioController
-import org.meshtastic.core.ui.util.getChannelList
+import org.meshtastic.core.ui.util.applyReplacementChannelSet
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
-import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.LocalConfig
@@ -40,17 +39,12 @@ class ScannedQrCodeViewModel(
 
     /** Set the radio config (also updates our saved copy in preferences). */
     fun setChannels(channelSet: ChannelSet) = safeLaunch(tag = "setChannels") {
-        getChannelList(channelSet.settings, channels.value.settings).forEach(::setChannel)
-        radioConfigRepository.replaceAllSettings(channelSet.settings)
+        applyReplacementChannelSet(channelSet, radioController, radioConfigRepository)
 
         val loraConfig = channelSet.lora_config
         if (loraConfig != null && localConfig.value.lora != loraConfig) {
             setConfig(Config(lora = loraConfig))
         }
-    }
-
-    private fun setChannel(channel: Channel) {
-        safeLaunch(tag = "setChannel") { radioController.setLocalChannel(channel) }
     }
 
     // Set the radio config (also updates our saved copy in preferences)

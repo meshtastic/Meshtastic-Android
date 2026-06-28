@@ -17,12 +17,16 @@
 package org.meshtastic.core.ui.util
 
 import androidx.compose.runtime.Composable
+import kotlinx.coroutines.flow.first
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.unknown_age
 import org.meshtastic.proto.Channel
+import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.Position
@@ -78,4 +82,75 @@ fun getChannelList(new: List<ChannelSettings>, old: List<ChannelSettings>): List
             )
         }
     }
+}
+
+/**
+ * Builds an authoritative [Channel] list for a full REPLACE import. Every position in [new] is emitted (PRIMARY at
+ * index 0, SECONDARY for 1..new.lastIndex) and any trailing positions beyond [new]'s range are emitted as DISABLED so
+ * the radio stops using them.
+ *
+ * Unlike [getChannelList], this does NOT skip positions where `currentSettings[i] == new[i]`: the imported set is
+ * authoritative, the local cache must not gate the writes, and silent diff-skips during REPLACE were the source of
+ * stale channels.
+ *
+ * [currentSettings] is consulted only for its size (to determine trailing DISABLED writes); its values are never
+ * compared against [new]. Callers should read it from `radioConfigRepository.channelSetFlow.first().settings`, not from
+ * a `stateInWhileSubscribed` StateFlow's `.value` — the StateFlow placeholder window can return an empty list and
+ * suppress trailing DISABLED writes.
+ *
+ * Edge case: if [new] is empty, every emitted slot (including index 0) is DISABLED rather than wrongly promoting an
+ * empty [ChannelSettings] to PRIMARY.
+ *
+ * @param new The imported [ChannelSettings] list. Every index becomes a write to the radio.
+ * @param currentSettings The current [ChannelSettings] list. Only its size is used; trailing indices past [new] become
+ *   DISABLED writes so leftover slots are cleared.
+ * @return A [Channel] list covering every slot the radio needs written to materialize [new] and clear leftover slots.
+ */
+fun getChannelReplacementList(new: List<ChannelSettings>, currentSettings: List<ChannelSettings>): List<Channel> =
+    buildList {
+        for (i in 0..maxOf(currentSettings.lastIndex, new.lastIndex)) {
+            add(
+                Channel(
+                    role =
+                    when (i) {
+                        // Empty-new is a degenerate import: every slot (including 0) must be DISABLED.
+                        0 -> if (new.isEmpty()) Channel.Role.DISABLED else Channel.Role.PRIMARY
+
+                        in 1..new.lastIndex -> Channel.Role.SECONDARY
+
+                        else -> Channel.Role.DISABLED
+                    },
+                    index = i,
+                    settings = new.getOrNull(i) ?: ChannelSettings(),
+                ),
+            )
+        }
+    }
+
+/**
+ * Applies an imported [ChannelSet] as an authoritative replacement to the radio and local cache.
+ *
+ * Reads the current channel set from [radioConfigRepository]'s flow (avoiding the StateFlow placeholder window), builds
+ * the authoritative replacement list via [getChannelReplacementList], enqueues each channel write to the radio
+ * sequentially via [radioController], then atomically replaces the local cached settings.
+ *
+ * setLocalChannel returns once the packet is enqueued, not after firmware ACK — firmware echoes via
+ * MeshConfigHandlerImpl can still arrive after [radioConfigRepository.replaceAllSettings] and are tracked separately.
+ *
+ * Does NOT handle LoRa config — callers are responsible for comparing and sending `lora_config` if present.
+ *
+ * @param channelSet The imported [ChannelSet] to apply as a replacement.
+ * @param radioController The [RadioController] used to enqueue channel writes.
+ * @param radioConfigRepository The [RadioConfigRepository] providing the current channel flow and cache.
+ */
+suspend fun applyReplacementChannelSet(
+    channelSet: ChannelSet,
+    radioController: RadioController,
+    radioConfigRepository: RadioConfigRepository,
+) {
+    val currentSettings = radioConfigRepository.channelSetFlow.first().settings
+    for (channel in getChannelReplacementList(channelSet.settings, currentSettings)) {
+        radioController.setLocalChannel(channel)
+    }
+    radioConfigRepository.replaceAllSettings(channelSet.settings)
 }
