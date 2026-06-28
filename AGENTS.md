@@ -7,7 +7,7 @@ You are an expert Android/KMP engineer. Maintain architectural boundaries, use M
 <context_and_memory>
 - **Project Goal:** Decouple business logic from Android for multi-platform (Android, Desktop, iOS).
 - **Tech:** Kotlin 2.4+ (JDK 21), Ktor, Okio, Room KMP, Koin 4.2+.
-- **Agent Memory:** Skim the top (most recent) entry of `.agent_memory/session_context.md` for current state — it is capped at ~5 entries; older handovers live in `session_context.archive.md` (read only if you need historical detail).
+- **Agent Memory:** `.agent_memory/` is local-only scratch (git-ignored) — never stage or commit it. Skim the top (most recent) entry of `.agent_memory/session_context.md` for current state — it is capped at ~5 entries; older handovers live in `session_context.archive.md` (read only if you need historical detail).
 - **Skills Directory (CONSULT THESE FIRST):** 
   - `.skills/project-overview/` - Codebase map, namespacing, **Bootstrap Steps**.
   - `.skills/kmp-architecture/` - Expect/actual, source-sets, conventions.
@@ -46,9 +46,3 @@ You are an expert Android/KMP engineer. Maintain architectural boundaries, use M
 <documentation_sync>
 `AGENTS.md` is the source of truth for rules and principles. `.github/copilot-instructions.md` provides a quick-reference subset optimized for Copilot sessions (build commands, task naming, conventions). `CLAUDE.md` and `GEMINI.md` redirect here.
 </documentation_sync>
-
-<!-- SPECKIT START -->
-For additional context about technologies to be used, project structure,
-shell commands, and other important information, read the current plan
-at `specs/20260513-075218-lockdown-mode/plan.md`
-<!-- SPECKIT END -->
