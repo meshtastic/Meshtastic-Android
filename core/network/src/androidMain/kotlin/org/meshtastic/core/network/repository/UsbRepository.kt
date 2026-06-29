@@ -54,7 +54,17 @@ class UsbRepository(
         _serialDevices
             .mapLatest { serialDevices ->
                 val serialProber = usbSerialProberLazy.value
-                buildMap { serialDevices.forEach { (k, v) -> serialProber.probeDevice(v)?.let { put(k, it) } } }
+                // Key by a stable identity, NOT the raw deviceList key (the /dev/bus/usb/BBB/DDD path). Android
+                // reassigns that path on every re-enumeration — each reboot or replug bumps it (…/002 → …/008) — so a
+                // path-keyed map can't recognise the same physical node across a firmware-update reboot, and the
+                // auto-reconnect in SharedRadioInterfaceService (which matches the saved address against these keys)
+                // never re-arms. usbSerialStableKey() survives re-enumeration.
+                buildMap {
+                    serialDevices.values.forEach { device ->
+                        val driver = serialProber.probeDevice(device) ?: return@forEach
+                        put(driver.device.usbSerialStableKey(), driver)
+                    }
+                }
             }
             .stateIn(processLifecycle.coroutineScope, SharingStarted.Eagerly, emptyMap())
 
@@ -90,3 +100,18 @@ class UsbRepository(
         _serialDevices.emit(devices)
     }
 }
+
+/**
+ * Stable identity for a USB serial device that survives re-enumeration.
+ *
+ * Uses vendor + product id, which is permission-free and identical before and after a reboot/replug (and before vs
+ * after the firmware-update DFU bounce, since the app firmware re-enumerates with the same VID/PID). Deliberately does
+ * NOT use [UsbDevice.getSerialNumber] — that requires an active USB permission grant, which is exactly what is missing
+ * immediately after a re-enumeration, so a serial-based key would read back null mid-recovery and break the very
+ * reconnect this is meant to enable.
+ *
+ * ponytail: vendor:product collides if two *identical* boards are attached at once (last one wins in the map). Append
+ * getSerialNumber() — gated on usbManager.hasPermission(device) — only if multi-identical-device support is ever
+ * needed.
+ */
+internal fun UsbDevice.usbSerialStableKey(): String = "$vendorId-$productId"

@@ -76,14 +76,16 @@ class AndroidGetDiscoveredDevicesUseCase(
 
         val usbDevicesFlow =
             usbRepository.serialDevices.map { usb ->
-                usb.map { (_, d) ->
+                usb.map { (stableKey, d) ->
                     DeviceListEntry.Usb(
                         usbData = AndroidUsbDeviceData(d),
                         name = d.device.deviceName,
+                        // Address must be the stable map key, not the device path: the path (deviceName) is reassigned
+                        // on every re-enumeration, so a path-based saved address can't survive a reboot/replug.
                         fullAddress =
                         radioInterfaceService.toInterfaceAddress(
                             org.meshtastic.core.model.InterfaceId.SERIAL,
-                            d.device.deviceName,
+                            stableKey,
                         ),
                         bonded = usbManagerLazy.value.hasPermission(d.device),
                     )

@@ -30,9 +30,11 @@ import org.koin.core.annotation.Single
 @Single
 class ProbeTableProvider {
     fun get(): ProbeTable = UsbSerialProber.getDefaultProbeTable().apply {
-        // RAK 4631:
+        // RAK 4631 (0x239A / 0x8029):
         addProduct(9114, 32809, CdcAcmSerialDriver::class.java)
         // LilyGo TBeam v1.1:
         addProduct(6790, 21972, CdcAcmSerialDriver::class.java)
+        // Elecrow ThinkNode M3 / M4 / M6 and LilyGo T-Echo (0x239A / 0x4405) — native nRF52840 USB CDC:
+        addProduct(9114, 17413, CdcAcmSerialDriver::class.java)
     }
 }

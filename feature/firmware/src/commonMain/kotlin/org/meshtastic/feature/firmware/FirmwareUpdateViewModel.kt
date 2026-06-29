@@ -46,6 +46,7 @@ import org.meshtastic.core.datastore.BootloaderWarningDataSource
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.MyNodeInfo
+import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FirmwareReleaseRepository
 import org.meshtastic.core.repository.NodeRepository
@@ -248,6 +249,11 @@ class FirmwareUpdateViewModel(
                                 is FirmwareUpdateState.Success ->
                                     verifyUpdateResult(originalDeviceAddress, finalState.wasLowSpeedTransfer)
 
+                                // USB/UF2 path intentionally pauses here: the UI launches the file picker and
+                                // saveDfuFile() resumes the flow. Leave the state intact (tempFirmwareFile holds
+                                // the artifact for cleanup after the copy completes).
+                                is FirmwareUpdateState.AwaitingFileSave -> Unit
+
                                 is FirmwareUpdateState.Error -> {
                                     tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
                                 }
@@ -337,6 +343,9 @@ class FirmwareUpdateViewModel(
                         is FirmwareUpdateState.Success ->
                             verifyUpdateResult(originalDeviceAddress, finalState.wasLowSpeedTransfer)
 
+                        // USB/UF2 path pauses here for the user to pick a save location; saveDfuFile() resumes it.
+                        is FirmwareUpdateState.AwaitingFileSave -> Unit
+
                         is FirmwareUpdateState.Error -> {
                             tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
                         }
@@ -367,10 +376,21 @@ class FirmwareUpdateViewModel(
     private suspend fun verifyUpdateResult(address: String?, wasLowSpeedTransfer: Boolean = false) {
         _state.value = FirmwareUpdateState.Verifying
 
-        // Trigger a fresh connection attempt by MeshService using the original prefixed address
+        // Trigger a fresh connection attempt by MeshService using the original prefixed address.
+        //
+        // For USB/serial, do NOT force this: a USB node re-enumerates several times through the bootloader over
+        // ~20s, so a one-shot setDeviceAddress fires into an enumeration gap, fails ("Serial device not found"),
+        // and lands the transport in Disconnected — which preempts the dedicated USB auto-recovery in
+        // SharedRadioInterfaceService (observeUsbRecoveryTriggers), since that only arms from DeviceSleep. Leaving
+        // the transport in DeviceSleep lets that recovery reconnect the moment the device re-attaches on its new
+        // (stable-keyed) address. BLE/TCP have no such hot-plug recovery, so they still need the explicit re-address.
         address?.let { fullAddr ->
-            Logger.i { "Post-update: Requesting MeshService to reconnect to $fullAddr" }
-            radioController.setDeviceAddress(fullAddr)
+            if (radioPrefs.isSerial()) {
+                Logger.i { "Post-update: leaving USB reconnect to USB auto-recovery for ${fullAddr.anonymize}" }
+            } else {
+                Logger.i { "Post-update: Requesting MeshService to reconnect to ${fullAddr.anonymize}" }
+                radioController.setDeviceAddress(fullAddr)
+            }
         }
 
         // Wait for device to reconnect and settle
