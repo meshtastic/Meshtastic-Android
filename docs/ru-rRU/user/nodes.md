@@ -12,7 +12,7 @@ aliases:
 
 # Ноды
 
-The Nodes screen displays all devices visible on your mesh network.
+Экран нод показывает все устройства, видимые в твоей mesh-сети.
 
 ## Список узлов
 

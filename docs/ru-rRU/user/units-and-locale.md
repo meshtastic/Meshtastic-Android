@@ -3,7 +3,7 @@ title: Единицы измерения и локаль
 parent: Руководство пользователя
 nav_order: 16
 last_updated: 2026-05-12
-description: How the app formats temperature, distance, speed, and other measurements based on your device locale.
+description: Как приложение отображает температуру, расстояние, скорость и другие показатели в зависимости от настроек устройства.
 ---
 
 # Единицы измерения и локаль
@@ -18,7 +18,7 @@ description: How the app formats temperature, distance, speed, and other measure
 
 На Android твои предпочтения единиц измерений определяются настройками системы **Язык и регион**. На настольном компьютере (JVM) приложение использует стандартную `Locale` JVM.
 
-> 💡 **Tip:** You never need to toggle units inside the app. Change your system measurement preferences and every screen in Meshtastic updates automatically — node details, telemetry charts, weather, altitude, and more.
+> 💡 **Совет:** тебе никогда не нужно менять единицы измерения в приложении. Измени настройки единиц измерения в системе, и все экраны в Meshtastic обновятся автоматически — детали ноды, графики телеметрии, погода, высота и многое другое.
 
 ---
 
@@ -115,13 +115,13 @@ description: How the app formats temperature, distance, speed, and other measure
 2. Измените свои предпочтения в **Регион** или **Единицы измерения**
 3. Вернуться к Meshtastic — значения обновляются немедленно
 
-> 💡 **Tip:** The app uses `MetricFormatter` from `core:common`. All measurement formatting is handled by a shared KMP utility that respects your platform's locale. Разработчикам, добавляющим новые индикаторы измерений, следует использовать `MetricFormatter`, а не жестко кодировать преобразования единиц.
+> 💡 **Совет:** Приложение использует `MetricFormatter` из `core:common`. Все форматирование измерений обрабатывается общей утилитой KMP, которая учитывает локаль твоей платформы. Разработчикам, добавляющим новые индикаторы измерений, следует использовать `MetricFormatter`, а не жестко кодировать преобразования единиц.
 
 ## Связанные темы
 
-- [Node Metrics](node-metrics) — where temperature, distance, and sensor values are displayed
-- [Telemetry & Sensors](telemetry-and-sensors) — the sensors that produce these measurements
-- [Settings — Radio & User](settings-radio-user) — region setting that drives unit selection
+- [Метрики ноды](node-metrics) — здесь отображаются температура, расстояние и значения датчиков
+- [Телеметрия и датчики](telemetry-and-sensors) — датчики, производящие эти измерения
+- [Настройки — Радио и Пользователь](settings-radio-user) — настройка региона, управляющая выбором единиц
 
 ---
 

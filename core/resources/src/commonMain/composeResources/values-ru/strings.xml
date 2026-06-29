@@ -181,6 +181,7 @@
     <string name="client_notification">Уведомления клиента</string>
     <string name="close">Закрыть</string>
     <string name="close_selection">Закрыть выбранное</string>
+    <string name="co2">CO₂</string>
     <string name="codec_2_enabled">CODEC 2 включен</string>
     <string name="codec2_sample_rate">Частота дискретизации CODEC2</string>
     <string name="coding_rate">Частота кодирования</string>
@@ -304,6 +305,7 @@
     <string name="delivery_confirmed">Доставка подтверждена</string>
     <string name="delivery_confirmed_reboot_warning">Ваше устройство может отключиться и перезагрузиться во время применения настроек.</string>
     <string name="demo_mode">Демо-режим</string>
+    <string name="demo_mode_replay">Демо-режим (повтор)</string>
     <string name="desc_node_filter_clear">очистить фильтр нод</string>
     <string name="description">Описание</string>
     <string name="desktop_notification_title">Meshtastic</string>
@@ -321,6 +323,8 @@
     <string name="device_db_cache_limit">Ограничение кэша БД устройства</string>
     <string name="device_db_cache_limit_summary">Максимальное количество баз данных для этого устройства</string>
     <string name="device_gps">GPS устройства</string>
+    <string name="device_links">Ссылки на устройства</string>
+    <string name="device_links_open_in_browser">Открыть в браузере</string>
     <string name="device_metrics_label_value">%1$s: %2$s</string>
     <string name="device_metrics_log">Интервал передачи</string>
     <string name="device_metrics_numeric_value">%1$s</string>
@@ -340,6 +344,9 @@
     <string name="disconnected">Отключено</string>
     <string name="discovered_network_devices">Найденные сетевые устройства</string>
     <!-- DISCOVERY -->
+    <string name="discovery_delete_session">Удалить сессию</string>
+    <string name="discovery_dwell_minutes">%1$d минут</string>
+    <string name="discovery_dwell_time">Время задержки</string>
     <string name="discovery_stat_channel_utilization">Использование канала</string>
     <string name="discovery_stat_date">Дата</string>
     <string name="discovery_stat_direct">Прямой</string>
@@ -439,6 +446,7 @@
     <string name="ethernet_ip">Ethernet IP:</string>
     <string name="exchange_position">Обменяться местоположением</string>
     <string name="expand_chart">Развернуть диаграмму</string>
+    <string name="expanded">Расширенный</string>
     <string name="expires">Срок действия</string>
     <!-- EXPORT -->
     <string name="export_configuration">Экспорт настроек</string>
@@ -569,6 +577,7 @@
     <string name="gps_mode">Режим GPS (физическое оборудование)</string>
     <string name="gps_receive_gpio">GPIO приёма GPS</string>
     <string name="gps_transmit_gpio">GPIO передачи GPS</string>
+    <string name="grant_permission">Дать разрешение</string>
     <string name="green">Зеленый</string>
     <string name="hardware">Оборудование</string>
     <string name="hardware_model">Модель оборудования</string>
@@ -678,7 +687,16 @@
     <string name="location_disabled">Доступ к местоположению выключен, невозможно отправлять координаты в сеть.</string>
     <string name="location_sharing">Поделиться местоположением</string>
     <!-- LOCKDOWN -->
+    <string name="lockdown_confirm_passphrase">Подтвердить парольную фразу</string>
+    <string name="lockdown_enable_ack">Понимаю</string>
+    <string name="lockdown_enter_passphrase">Введи парольную фразу</string>
     <string name="lockdown_hide_passphrase">Скрыть</string>
+    <string name="lockdown_incorrect_passphrase">Неправильная парольная фраза.</string>
+    <string name="lockdown_passphrase">Пароль</string>
+    <string name="lockdown_passphrases_do_not_match">Пароли не совпадают</string>
+    <string name="lockdown_session_no_time_limit">Без ограничения по времени</string>
+    <string name="lockdown_set_passphrase">Установить парольную фразу</string>
+    <string name="lockdown_show_passphrase">Показать</string>
     <string name="lockdown_submit">Продолжить</string>
     <string name="locked">Заблокировано</string>
     <!-- LOG -->
@@ -771,6 +789,7 @@
     <string name="message_status_sfpp_routing">Маршрутизация по SF++ цепочке…</string>
     <string name="message_status_unknown">Неизвестно</string>
     <string name="messages">Сообщения</string>
+    <string name="micrograms_per_cubic_meter">µg/m³</string>
     <string name="min">Мин</string>
     <string name="minimum_broadcast_seconds">Минимальная трансляция (в секундах)</string>
     <string name="minimum_distance">Умное расстояние</string>
@@ -904,6 +923,8 @@
     <string name="nodes_empty_searching_hint">Ближайшие узлы будут появляться здесь по мере их обнаружения.</string>
     <string name="nodes_empty_searching_title">Поиск узлоов</string>
     <string name="nodes_queued_for_deletion">%1$d нод в очереди для удаления:</string>
+    <string name="noise_floor">Уровень шума</string>
+    <string name="noise_floor_no_reading">Уровень шума: нет показаний</string>
     <string name="none">Нет (выключить)</string>
     <string name="none_quality">Отсутствует</string>
     <string name="not_connected">Нет соединения</string>
@@ -931,10 +952,12 @@
     <string name="one_wire_temperature">Темп. 1-Wire</string>
     <string name="only_favorites">Только Избранные</string>
     <!-- OPEN -->
+    <string name="open_bluetooth_settings">Открыть настройки Bluetooth</string>
     <string name="open_compass">Открыть компас</string>
     <string name="open_settings">Открыть настройки</string>
     <string name="open_source_description">Meshtastic создан с использованием следующих библиотек с открытым исходным кодом. Нажмите на любую библиотеку, чтобы просмотреть ее лицензию.</string>
     <string name="open_source_libraries">Библиотеки с открытым исходным кодом</string>
+    <string name="open_wifi_settings">Открыть настройки Wi-Fi</string>
     <string name="options">Опции</string>
     <string name="orient_north">Ориентация на север</string>
     <!-- OUTPUT -->
@@ -985,6 +1008,9 @@
         <item quantity="many">%1$d секунд</item>
         <item quantity="other">%1$d секунд</item>
     </plurals>
+    <string name="pm1_0">PM1.0</string>
+    <string name="pm10">PM10</string>
+    <string name="pm2_5">PM2.5</string>
     <!-- POSITION -->
     <string name="position">Местоположение</string>
     <string name="position_config_set_fixed_from_phone">Установить местоположение с телефона</string>
@@ -1000,6 +1026,7 @@
     <string name="power_metrics_on_screen_enabled">Включить метрики питания на экране</string>
     <string name="power_metrics_update_interval_seconds">Интервал обновления метрик электропитания</string>
     <string name="powered">Питание</string>
+    <string name="ppm">ppm</string>
     <string name="precise_location">Точность местоположения</string>
     <string name="preferences_language">Язык</string>
     <string name="preferences_system_default">По умолчанию</string>
@@ -1167,6 +1194,7 @@
     <string name="screen_on_for">Включать экран на</string>
     <string name="scroll_to_bottom">Прокрутить вниз</string>
     <string name="search_emoji">Поиск эмодзи...</string>
+    <string name="search_messages">Поиск сообщений…</string>
     <string name="secondary">Вторичный</string>
     <string name="secondary_channel_position_feature">Отключение позиции на первичном канале позволяет периодические передачи позиции на первом вторичном канале с включенной позицией, в противном случае требуется ручной запрос позиции.</string>
     <string name="secondary_no_telemetry">Нет периодической телеметрической передачи</string>
@@ -1187,6 +1215,8 @@
     <string name="security_icon_insecure_precise_only">Небезопасный канал, точное местоположение</string>
     <string name="security_icon_secure">Безопасный</string>
     <string name="security_icon_warning_precise_mqtt">Предупреждение: Небезопасно, точное местоположение; Uplink MQTT</string>
+    <string name="security_signed_node">Подписанная нода</string>
+    <string name="security_signed_verified">Подписано · проверено</string>
     <string name="select">Выбрать</string>
     <string name="select_all">Выбрать все</string>
     <string name="selected">Выбрано</string>
@@ -1207,6 +1237,7 @@
     <string name="server">Сервер</string>
     <string name="session_active">Сессия активна</string>
     <string name="session_refresh_required">Требуется обновление</string>
+    <string name="set_time">Установить время</string>
     <string name="set_up_connection">Настроить соединение</string>
     <string name="set_your_region">Установите ваш регион</string>
     <string name="settings">настройки</string>
@@ -1359,10 +1390,13 @@
     <string name="traffic_management_unknown_packet_threshold">Порог передач неизвестных пакетов</string>
     <string name="transmit_over_lora">Передать через LoRa</string>
     <!-- TRANSPORT -->
+    <string name="transport">Транспорт</string>
+    <string name="transport_api">API</string>
     <string name="transport_ble">BLE</string>
     <string name="transport_lora">LoRa</string>
     <string name="transport_mqtt">MQTT</string>
     <string name="transport_tcp">TCP</string>
+    <string name="transport_udp">UDP</string>
     <string name="transport_usb">USB</string>
     <string name="triple_click_adhoc_ping">Маякнуть при тройном нажатии</string>
     <string name="twenty_four_hours">24ч</string>
@@ -1399,6 +1433,7 @@
     <string name="url_must_contain_placeholders">URL должен содержать placeholders.</string>
     <string name="url_template">Шаблон URL</string>
     <string name="usb">USB</string>
+    <string name="usb_permission_denied">Доступ к USB запрещён. Подключи устройство снова, чтобы попробовать ещё раз.</string>
     <!-- USE -->
     <string name="use_12h_format">Использовать 12-часовой формат времени</string>
     <string name="use_homoglyph_characters_encoding">Компактная кодировка кириллицы</string>
@@ -1469,6 +1504,7 @@
     <string name="wifi_qr_code_error">Неверный формат QR-кода WiFi</string>
     <string name="wifi_qr_code_scan">Сканировать QR-код WiFi</string>
     <string name="wifi_rssi_threshold_defaults_to_80">Порог WiFi RSSI (по умолчанию -80)</string>
+    <string name="wifi_unavailable">Нет подключения к Wi-Fi. Сканирование сети может не обнаружить ближайшие устройства.</string>
     <!-- WIND -->
     <string name="wind">Ветер</string>
     <string name="wind_direction">Напр ветра</string>
