@@ -95,7 +95,7 @@ private fun Throwable.asBleScanStartExceptionOrNull(): BleScanStartException? {
     var depth = 0
     while (current != null && depth < MAX_SCAN_START_FAILURE_CAUSE_DEPTH) {
         if (current.isApplicationRegistrationFailure()) {
-            return BleScanStartException(BleScanStartFailureReason.ApplicationRegistrationFailed, current)
+            return BleScanStartException(BleScanStartFailureReason.ApplicationRegistrationFailed, this)
         }
         current = current.cause
         depth++

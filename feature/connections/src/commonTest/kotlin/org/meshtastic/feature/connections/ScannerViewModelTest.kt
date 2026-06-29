@@ -23,9 +23,13 @@ import dev.mokkery.matcher.any
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.meshtastic.core.ble.BleDevice
+import org.meshtastic.core.ble.BleScanStartException
+import org.meshtastic.core.ble.BleScanStartFailureReason
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.network.repository.DiscoveredService
@@ -103,6 +107,57 @@ class ScannerViewModelTest {
             assertEquals(false, awaitItem())
             cancelAndIgnoreRemainingEvents()
         }
+    }
+
+    @Test
+    fun `scan startup failure clears scanning state disables auto-scan and surfaces error`() = runTest {
+        harness.uiPrefs.setBleAutoScan(true)
+        every { bleScanner.scan(any(), any()) } returns failingScanFlow()
+
+        viewModel.startBleScan()
+
+        assertEquals(false, viewModel.isBleScanning.value)
+        assertEquals(false, viewModel.bleAutoScan.value)
+        assertEquals(
+            "Bluetooth scan couldn't start. Try again, or toggle Bluetooth if the problem continues.",
+            serviceRepository.errorMessage.value,
+        )
+    }
+
+    @Test
+    fun `scan startup failure cooldown prevents immediate retry and allows later manual retry`() = runTest {
+        var scanAttempts = 0
+        every { bleScanner.scan(any(), any()) } returns
+            flow {
+                scanAttempts += 1
+                throw BleScanStartException(
+                    reason = BleScanStartFailureReason.ApplicationRegistrationFailed,
+                    cause = IllegalStateException("Failed to start scan as app cannot be registered"),
+                )
+            }
+
+        viewModel.startBleScan()
+        assertEquals(1, scanAttempts)
+        assertEquals(false, viewModel.isBleScanning.value)
+
+        viewModel.startBleScan()
+        assertEquals(1, scanAttempts)
+
+        harness.testDispatcher.scheduler.advanceTimeBy(BLE_SCAN_START_FAILURE_RETRY_COOLDOWN.inWholeMilliseconds + 1)
+        viewModel.startBleScan()
+
+        assertEquals(2, scanAttempts)
+    }
+
+    @Test
+    fun `stopBleScan is idempotent after failed startup`() = runTest {
+        every { bleScanner.scan(any(), any()) } returns failingScanFlow()
+
+        viewModel.startBleScan()
+        viewModel.stopBleScan()
+        viewModel.stopBleScan()
+
+        assertEquals(false, viewModel.isBleScanning.value)
     }
 
     @Test
@@ -205,7 +260,7 @@ class ScannerViewModelTest {
         val bondedBle = FakeBleDevice(address = "0D:0E:0F:10:11:12", name = "Bonded C", rssi = null)
         val bondedDevice = DeviceListEntry.Ble(device = bondedBle, bonded = true)
 
-        val scanFlow = MutableStateFlow<org.meshtastic.core.ble.BleDevice?>(null)
+        val scanFlow = MutableStateFlow<BleDevice?>(null)
         every { bleScanner.scan(any(), any()) } returns scanFlow.filterNotNull()
 
         viewModel.bleDevicesForUi.test {
@@ -275,7 +330,7 @@ class ScannerViewModelTest {
     @Test
     fun `stopBleScan does not clear scanned devices`() = runTest {
         val device = FakeBleDevice(address = "01:02:03:04:05:06", name = "Node", rssi = -50)
-        val scanFlow = MutableStateFlow<org.meshtastic.core.ble.BleDevice?>(null)
+        val scanFlow = MutableStateFlow<BleDevice?>(null)
         every { bleScanner.scan(any(), any()) } returns scanFlow.filterNotNull()
 
         viewModel.bleDevicesForUi.test {
@@ -578,5 +633,12 @@ class ScannerViewModelTest {
 
         assertEquals(false, viewModel.isNetworkScanning.value)
         assertEquals("t192.168.1.99", radioController.lastSetDeviceAddress)
+    }
+
+    private fun failingScanFlow() = flow<BleDevice> {
+        throw BleScanStartException(
+            reason = BleScanStartFailureReason.ApplicationRegistrationFailed,
+            cause = IllegalStateException("Failed to start scan as app cannot be registered"),
+        )
     }
 }
