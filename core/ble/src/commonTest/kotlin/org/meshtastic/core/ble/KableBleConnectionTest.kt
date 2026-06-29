@@ -33,6 +33,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
@@ -119,6 +120,39 @@ class KableBleConnectionTest {
         scanner.scan(timeout = 1.seconds, serviceUuid = serviceUuid, address = "AA:BB:CC:DD:EE:FF").toList()
 
         assertEquals(KableScanFilter.Address("AA:BB:CC:DD:EE:FF"), scanner.lastFilter)
+    }
+
+    @Test
+    fun `scan wraps Android scanner registration failure`() = runTest {
+        val scanner =
+            TestKableBleScanner(
+                scanResults = flow { throw IllegalStateException("Failed to start scan as app cannot be registered") },
+            )
+
+        val failure = assertFailsWith<BleScanStartException> { scanner.scan(timeout = 1.seconds).toList() }
+
+        assertEquals(BleScanStartFailureReason.ApplicationRegistrationFailed, failure.reason)
+    }
+
+    @Test
+    fun `scan wraps nested scanner registration failure`() = runTest {
+        val innerCause = IllegalStateException("Failed to start scan as app cannot be registered")
+        val scanner =
+            TestKableBleScanner(scanResults = flow { throw IllegalStateException("Outer scanner failure", innerCause) })
+
+        val failure = assertFailsWith<BleScanStartException> { scanner.scan(timeout = 1.seconds).toList() }
+
+        assertEquals(BleScanStartFailureReason.ApplicationRegistrationFailed, failure.reason)
+    }
+
+    @Test
+    fun `scan preserves unrelated illegal state failure`() = runTest {
+        val scanner =
+            TestKableBleScanner(scanResults = flow { throw IllegalStateException("Unexpected scanner state") })
+
+        val failure = assertFailsWith<IllegalStateException> { scanner.scan(timeout = 1.seconds).toList() }
+
+        assertEquals("Unexpected scanner state", failure.message)
     }
 
     private class TestKableBleScanner(private val scanResults: Flow<KableScanResult>) :
