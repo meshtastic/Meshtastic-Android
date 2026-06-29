@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  Default (production) declaration: notification-only car messaging. This is GA and ships to any
+  Play track. The templated experience (<uses name="template" />) is a Google beta restricted to
+  Closed/Internal tracks, so it is added ONLY by androidApp/src/googleCarTemplates/res when built
+  with -PenableCarTemplates=true (that override replaces this file in the merge).
+-->
 <automotiveApp>
-    <uses name="template" />
     <uses name="notification" />
 </automotiveApp>
