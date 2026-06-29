@@ -31,6 +31,7 @@ import org.meshtastic.feature.settings.component.SampleNodeCompactAllFieldsPrevi
 import org.meshtastic.feature.settings.component.SampleNodeCompactNameOnlyPreview
 import org.meshtastic.feature.settings.component.SampleNodeCompactSignalOnlyPreview
 import org.meshtastic.feature.settings.component.SampleNodeCompactToggleMatrixPreview
+import org.meshtastic.feature.settings.component.SampleNodeCompleteDirectSignalPreview
 import org.meshtastic.feature.settings.component.SampleNodeCompleteFahrenheitPreview
 import org.meshtastic.feature.settings.component.SampleNodeCompleteImperialPreview
 import org.meshtastic.feature.settings.component.SampleNodeCompletePreview
@@ -146,6 +147,13 @@ fun ScreenshotNodeLayoutSettingsCompactMinimal() {
 @Composable
 fun ScreenshotSampleNodeComplete() {
     SampleNodeCompletePreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotSampleNodeCompleteDirectSignal() {
+    SampleNodeCompleteDirectSignalPreview()
 }
 
 @PreviewTest

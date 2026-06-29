@@ -279,9 +279,12 @@ private fun NodeBatteryPositionRow(
     }
 }
 
-@Suppress("CyclomaticComplexMethod")
+@Suppress("CyclomaticComplexMethod", "LongMethod")
 @Composable
 private fun NodeSignalRow(thatNode: Node, isThisNode: Boolean, contentColor: Color) {
+    // The signal pill bundles SNR + RSSI + quality into one scrim-backed chip (legibility, see StatusSurface). It's
+    // wider than a 1/3 grid cell, so it renders on its own line at natural width; the short metrics flow in the grid.
+    var signalChip: (@Composable () -> Unit)? = null
     val items =
         buildList<@Composable () -> Unit> {
             if (isThisNode) {
@@ -310,9 +313,13 @@ private fun NodeSignalRow(thatNode: Node, isThisNode: Boolean, contentColor: Col
                     val showSnr = thatNode.snr < 100f
                     val showRssi = thatNode.rssi < 0
                     if (showSnr || showRssi) {
-                        // SNR/RSSI/quality are the only status-colored metrics here — back just them with a scrim.
-                        add {
-                            StatusSurface {
+                        signalChip = {
+                            // Full-width pill: SNR left, RSSI center, quality right — the pre-scrim spread, now
+                            // scrimmed.
+                            StatusSurface(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                            ) {
                                 if (showSnr) Snr(thatNode.snr)
                                 if (showRssi) Rssi(thatNode.rssi)
                                 if (showSnr && showRssi) {
@@ -339,8 +346,11 @@ private fun NodeSignalRow(thatNode: Node, isThisNode: Boolean, contentColor: Col
             }
         }
 
-    if (items.isNotEmpty()) {
-        MetricsGrid(items)
+    if (signalChip != null || items.isNotEmpty()) {
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            signalChip?.invoke()
+            if (items.isNotEmpty()) MetricsGrid(items)
+        }
     }
 }
 

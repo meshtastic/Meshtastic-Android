@@ -165,6 +165,26 @@ fun SampleNodeCompletePreview() {
     }
 }
 
+/** Sample node (direct neighbor, hopsAway = 0) in Complete density — exercises the SNR/RSSI signal pill. */
+@Suppress("PreviewPublic")
+@PreviewLightDark
+@Composable
+fun SampleNodeCompleteDirectSignalPreview() {
+    AppTheme {
+        Surface {
+            Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+                NodeItem(
+                    thisNode = localNode,
+                    thatNode = previewSampleNode(hopsAway = 0),
+                    distanceUnits = 0,
+                    tempInFahrenheit = false,
+                    connectionState = ConnectionState.Connected,
+                )
+            }
+        }
+    }
+}
+
 /** Sample node rendered in Compact density with all fields enabled. */
 @Suppress("PreviewPublic")
 @PreviewLightDark
