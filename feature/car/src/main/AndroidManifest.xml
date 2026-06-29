@@ -2,8 +2,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application>
+        <!-- enabled is gated by the app's `carTemplatesEnabled` manifest placeholder: off by default
+             (production ships notification-only car messaging), on for -PenableCarTemplates=true builds.
+             The decisive gate is automotive_app_desc's <uses name="template" /> (see res/xml); this is
+             defense-in-depth so the templated service can't be bound in production. -->
         <service
             android:name="org.meshtastic.feature.car.service.MeshtasticCarAppService"
+            android:enabled="${carTemplatesEnabled}"
             android:exported="true"
             android:permission="androidx.car.app.CarAppService">
             <intent-filter>

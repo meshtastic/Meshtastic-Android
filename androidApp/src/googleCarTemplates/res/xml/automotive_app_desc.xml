@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Templated Android Auto declaration, included ONLY when building with -PenableCarTemplates=true
+  (wired in androidApp/build.gradle.kts). Being an app-module resource, it overrides feature:car's
+  notification-only automotive_app_desc.xml in the merge, adding <uses name="template" /> so Android
+  Auto recognizes and launches the CarAppService/HomeScreen. Closed/Internal tracks only — Google
+  auto-rejects templated-messaging builds submitted to Open/Production.
+-->
+<automotiveApp>
+    <uses name="notification" />
+    <uses name="template" />
+</automotiveApp>

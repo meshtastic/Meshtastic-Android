@@ -43,8 +43,23 @@ if (keystorePropertiesFile.exists()) {
     keystorePropertiesFile.inputStream().use { keystoreProperties.load(it) }
 }
 
+// The templated Android Auto experience (CarAppService + HomeScreen) is a Google "templated
+// messaging" beta feature that is publishable only to Closed/Internal tracks — Open/Production
+// submissions are auto-rejected (https://developer.android.com/training/cars/communication/templated-messaging).
+// Default builds therefore ship *notification-only* car messaging, which is GA and production-safe.
+// Build a Closed-track templated AAB with: -PenableCarTemplates=true
+// ponytail: gated by a gradle property + res override, not a full build flavor — templated is
+// parked until it leaves Google's beta. Promote to a flavor dimension only if CI must ship both.
+val enableCarTemplates = (findProperty("enableCarTemplates") as String?)?.toBoolean() ?: false
+
 configure<ApplicationExtension> {
     namespace = "org.meshtastic.app"
+
+    // When templates are enabled, this res dir overrides feature:car's notification-only
+    // automotive_app_desc.xml with one that also declares <uses name="template" />.
+    if (enableCarTemplates) {
+        sourceSets.getByName("google").res.srcDir("src/googleCarTemplates/res")
+    }
 
     signingConfigs {
         create("release") {
@@ -114,6 +129,10 @@ configure<ApplicationExtension> {
             )
         }
         ndk { abiFilters += listOf("armeabi-v7a", "arm64-v8a") }
+
+        // Activates the (google-only) CarAppService. Off by default so production builds ship
+        // notification-only car messaging; flipped on by -PenableCarTemplates=true for Closed tracks.
+        manifestPlaceholders["carTemplatesEnabled"] = enableCarTemplates.toString()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

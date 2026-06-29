@@ -144,8 +144,22 @@ class HomeScreen(
         carContext.getCarService(AppManager::class.java).showAlert(alert)
     }
 
+    // Any exception thrown out of onGetTemplate() crashes the Android Auto host ("content not able to
+    // load") and fails Play's Auto review. Degrade to a safe template instead and log for diagnosis.
+    // NOTE: this guards exceptions in OUR build path; a host-side template-contract rejection (e.g. the
+    // messaging surface must be a ListTemplate/SectionedItemTemplate of ConversationItems, not this
+    // TabTemplate dashboard) would not throw here — confirm against the Play pre-launch stack before
+    // promoting templated builds. See -PenableCarTemplates in androidApp/build.gradle.kts.
+    @Suppress("TooGenericExceptionCaught")
+    override fun onGetTemplate(): Template = try {
+        buildHomeTemplate()
+    } catch (e: Exception) {
+        Logger.e(tag = "HomeScreen", throwable = e) { "onGetTemplate failed; showing fallback template" }
+        buildDisconnectedTemplate()
+    }
+
     @Suppress("ReturnCount")
-    override fun onGetTemplate(): Template {
+    private fun buildHomeTemplate(): Template {
         val connectionStatus = stateCoordinator.sessionState.value.connectionStatus
         if (connectionStatus == ConnectionState.Disconnected || connectionStatus == ConnectionState.DeviceSleep) {
             return buildDisconnectedTemplate()

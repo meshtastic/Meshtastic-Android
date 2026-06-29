@@ -30,6 +30,11 @@ android {
     defaultConfig {
         minSdk = 23
         consumerProguardFiles("proguard-rules.pro")
+        // The CarAppService is disabled unless -PenableCarTemplates=true. feature:car resolves the
+        // placeholder in its OWN manifest, so it must read the property directly (the app's value does
+        // not override a library's own placeholder). Default false → production ships it disabled.
+        manifestPlaceholders["carTemplatesEnabled"] =
+            ((findProperty("enableCarTemplates") as String?)?.toBoolean() ?: false).toString()
     }
 
     // Robolectric provides the Android context that androidx.car.app TestCarContext/ScreenController need.
