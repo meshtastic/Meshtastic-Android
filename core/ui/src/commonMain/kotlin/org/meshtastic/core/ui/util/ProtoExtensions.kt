@@ -154,3 +154,20 @@ suspend fun applyReplacementChannelSet(
     }
     radioConfigRepository.replaceAllSettings(channelSet.settings)
 }
+
+/**
+ * Builds the ADD-mode preview list for QR import. Existing channels are preserved at their positions; every incoming
+ * channel is appended in order without deduplication.
+ *
+ * Structural `.distinct()` was previously used here, but it silently dropped incoming channels that matched existing
+ * entries, shifting later channels to wrong indices and hiding them from the user. The caller (UI) lets the user select
+ * which incoming channels to keep.
+ *
+ * @param existing The current [ChannelSettings] list on the radio. Preserved in order.
+ * @param incoming The imported [ChannelSettings] list. Appended in order.
+ * @return The concatenated list `[existing..., incoming...]`.
+ */
+fun mergeChannelSettingsForAdd(
+    existing: List<ChannelSettings>,
+    incoming: List<ChannelSettings>,
+): List<ChannelSettings> = existing + incoming

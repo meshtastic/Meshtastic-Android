@@ -1,0 +1,49 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+# CodeRabbit config — see https://docs.coderabbit.ai/getting-started/yaml-configuration
+language: en-US
+
+reviews:
+  # chill = fewer nitpicks. CI already gates detekt/spotless/tests, and the
+  # maintainers are experienced — we want CodeRabbit for substance, not lint noise.
+  profile: chill
+  high_level_summary: true
+  poem: false
+  # Don't burn reviews on WIP. This repo opens lots of draft PRs; review on "ready".
+  auto_review:
+    enabled: true
+    drafts: false
+  # Stop reviewing once a PR is closed.
+  abort_on_close: true
+
+  path_filters:
+    # Generated / huge / non-source — don't review, just noise + token burn.
+    - "!**/build/**"
+    - "!**/*.png"
+    - "!**/*.webp"
+    - "!**/firmware_releases.json"
+    - "!**/emoji-data.json"
+    - "!**/flatpak-sources.json"
+    # Crowdin-managed translations — owned upstream, not hand-edited here.
+    - "!**/values-*/strings.xml"
+
+  path_instructions:
+    - path: "**/commonMain/**"
+      instructions: >
+        KMP common code. Flag any import of java.* or android.* — these break
+        non-Android targets. Expect KMP equivalents instead (Okio, kotlinx
+        Mutex/atomicfu, NumberFormatter.format() for floats).
+    - path: "**/*.kt"
+      instructions: >
+        Flag leftover // ... existing code ... placeholders, and any logging of
+        PII, location, or cryptographic keys.
+    - path: "**/src/**/strings.xml"
+      instructions: >
+        New string resources must be alphabetically sorted (scripts/sort-strings.py).
+        Flag out-of-order additions.
+
+  # CI is the source of truth for detekt + spotless (Zero Lint Tolerance gate),
+  # so disable detekt here to avoid duplicate comments. Keep the security/CI/shell
+  # scanners CI doesn't run inline.
+  tools:
+    detekt:
+      enabled: false
