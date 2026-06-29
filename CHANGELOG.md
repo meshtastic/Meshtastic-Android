@@ -9,34 +9,10 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
-#### 🏗️ Features
-* fix(security): make XEdDSA signing shield green & prominent by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5980
-* Prevent Range Test from running on public/default channel by @dubsector in https://github.com/meshtastic/Meshtastic-Android/pull/5986
-* feat(network): migrate TcpTransport to ktor-network (commonMain) by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5995
-* feat(ui): StatusSurface AA legibility + node-details signing/transport polish by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5985
 #### 🛠️ Fixes
-* fix(ble): Fail bonding promptly when polled state returns none by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/5982
-* fix(car): wire notifications & emergency, fix TabTemplate crash, pin car-app to stable by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5997
-* fix(qr): Serialize channel import writes by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/5999
-#### 📝 Other Changes
-* refactor(ui): migrate MapView dialog to Compose M3 + drop legacy material dependency by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5988
-* refactor(settings): replace SimpleDateFormat with kotlinx-datetime by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5992
-* refactor(car): drop dead FuzzyNodeNameResolver duplicate by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5994
+* fix(ui): stop node signal pill from wrapping; restore full-width spread by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6007
 
-### Internal (v2.8.0-internal.9)
-Changes since [`v2.8.0-closed.1`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.0-closed.1):
-
-#### 🏗️ Features
-* feat(security): surface XEdDSA packet signing in node & messaging UI by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5976
-#### 🛠️ Fixes
-* fix(usb): Surface permission denial as permanent disconnect by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/5943
-* fix(ble): Restore bounded bonded reconnect fallback by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/5960
-* fix(docs): preserve #anchor when rewriting sibling links for Docusaurus by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5963
-* fix(ble): Bound Android bonding wait by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/5967
-* fix(ble): Avoid duplicate bonding retries after pairing failure by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/5969
-* fix(ble): Stop transport connect after failed bonding by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/5973
-
-### Closed Beta (v2.8.0-closed.1)
+### Closed Beta (v2.8.0-closed.2)
 Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14):
 
 #### 🏗️ Features
@@ -55,6 +31,11 @@ Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/relea
 * feat(lora): consume region→preset compatibility map + TINY presets (protobufs #951) by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5834
 * feat(lockdown): firmware lockdown mode (provision / unlock / lock-now) by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5939
 * feat(lora): gate region→preset map + TINY presets on firmware capability by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5941
+* feat(security): surface XEdDSA packet signing in node & messaging UI by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5976
+* fix(security): make XEdDSA signing shield green & prominent by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5980
+* Prevent Range Test from running on public/default channel by @dubsector in https://github.com/meshtastic/Meshtastic-Android/pull/5986
+* feat(network): migrate TcpTransport to ktor-network (commonMain) by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5995
+* feat(ui): StatusSurface AA legibility + node-details signing/transport polish by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5985
 #### 🛠️ Fixes
 * fix(mqtt): make the MQTT client-id unique per connection by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5755
 * fix(ble): Harden BLE connection lifecycle by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/5795
@@ -83,6 +64,28 @@ Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/relea
 * fix(usb): Add serial presence recovery for USB replug by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/5923
 * fix(data): Persist TAK module config by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/5933
 * fix(usb): Suppress expected serial close warnings by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/5932
+* refactor(connections): Derive DeviceType from InterfaceId by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/5935
+* fix(usb): Surface permission denial as permanent disconnect by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/5943
+* refactor(ble): Make Kable connect fallback explicitly bounded by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/5944
+* refactor(connections): Show one active transport pane by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/5956
+* fix(ble): Restore bounded bonded reconnect fallback by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/5960
+* fix(docs): preserve #anchor when rewriting sibling links for Docusaurus by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5963
+* fix(ble): Bound Android bonding wait by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/5967
+* fix(ble): Avoid duplicate bonding retries after pairing failure by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/5969
+* fix(ble): Stop transport connect after failed bonding by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/5973
+* fix(ble): Fail bonding promptly when polled state returns none by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/5982
+* fix(car): wire notifications & emergency, fix TabTemplate crash, pin car-app to stable by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5997
+* fix(qr): Serialize channel import writes by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/5999
+#### 📝 Other Changes
+* refactor(takserver): commonize TAK SDK pipeline, drop redundant zstd/xpp3 deps by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5871
+* refactor(settings): remove Traffic Management module config by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5878
+* refactor(firmware): dedupe BLE/DFU OTA transport + handler boilerplate by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5918
+* refactor(data): consolidate bundled-asset loading behind BundledAssetReader by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5921
+* refactor(core:ui): drop redundant SinglePaneSceneStrategy from NavDisplay by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5934
+* refactor: drop two over-engineered seams (enum + stdlib Base64) by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5945
+* refactor(ui): migrate MapView dialog to Compose M3 + drop legacy material dependency by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5988
+* refactor(settings): replace SimpleDateFormat with kotlinx-datetime by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5992
+* refactor(car): drop dead FuzzyNodeNameResolver duplicate by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5994
 
 ## New Contributors
 * @LesterCheng made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/5752
