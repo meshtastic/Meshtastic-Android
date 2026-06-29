@@ -141,4 +141,75 @@ class ProtoExtensionsTest {
         assertEquals(2, result[2].index)
         assertEquals(secondaryB, result[2].settings)
     }
+
+    // --- mergeChannelSettingsForAdd tests ---
+
+    @Test
+    fun merge_preserves_all_existing_channels_in_order() {
+        val existing = listOf(ChannelSettings(name = "A"), ChannelSettings(name = "B"))
+
+        val result = mergeChannelSettingsForAdd(existing, incoming = emptyList())
+
+        assertEquals(2, result.size)
+        assertEquals("A", result[0].name)
+        assertEquals("B", result[1].name)
+    }
+
+    @Test
+    fun merge_appends_all_incoming_channels_in_order() {
+        val incoming = listOf(ChannelSettings(name = "C"), ChannelSettings(name = "D"))
+
+        val result = mergeChannelSettingsForAdd(existing = emptyList(), incoming)
+
+        assertEquals(2, result.size)
+        assertEquals("C", result[0].name)
+        assertEquals("D", result[1].name)
+    }
+
+    @Test
+    fun merge_preserves_structurally_equal_channels() {
+        val channel = ChannelSettings(name = "LongFast", psk = byteArrayOf(1).toByteString())
+
+        val result = mergeChannelSettingsForAdd(existing = listOf(channel), incoming = listOf(channel))
+
+        assertEquals(2, result.size)
+    }
+
+    @Test
+    fun merge_preserves_same_name_different_psk() {
+        val existingChan = ChannelSettings(name = "A", psk = byteArrayOf(1).toByteString())
+        val incomingChan = ChannelSettings(name = "A", psk = byteArrayOf(2).toByteString())
+
+        val result = mergeChannelSettingsForAdd(listOf(existingChan), listOf(incomingChan))
+
+        assertEquals(2, result.size)
+    }
+
+    @Test
+    fun merge_preserves_same_psk_different_name() {
+        val psk = byteArrayOf(1, 2).toByteString()
+        val existingChan = ChannelSettings(name = "A", psk = psk)
+        val incomingChan = ChannelSettings(name = "B", psk = psk)
+
+        val result = mergeChannelSettingsForAdd(listOf(existingChan), listOf(incomingChan))
+
+        assertEquals(2, result.size)
+    }
+
+    @Test
+    fun merge_preserves_duplicate_inside_incoming() {
+        val a = ChannelSettings(name = "A", psk = byteArrayOf(1).toByteString())
+        val b = ChannelSettings(name = "B", psk = byteArrayOf(2).toByteString())
+
+        val result = mergeChannelSettingsForAdd(existing = emptyList(), incoming = listOf(a, a, b))
+
+        assertEquals(3, result.size)
+    }
+
+    @Test
+    fun merge_both_empty_produces_empty_list() {
+        val result = mergeChannelSettingsForAdd(existing = emptyList(), incoming = emptyList())
+
+        assertTrue(result.isEmpty())
+    }
 }

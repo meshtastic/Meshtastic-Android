@@ -63,6 +63,7 @@ import org.meshtastic.core.resources.replace
 import org.meshtastic.core.resources.replace_channels_and_settings_description
 import org.meshtastic.core.ui.component.ChannelSelection
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.ui.util.mergeChannelSettingsForAdd
 import org.meshtastic.proto.ChannelSet
 
 @Composable
@@ -107,9 +108,7 @@ fun ScannedQrCodeDialog(
                     ),
                 )
             } else {
-                // To guarantee consistent ordering, using a LinkedHashSet which iterates through
-                // its entries according to the order an item was *first* inserted.
-                val result = (channels.settings + incoming.settings).distinct()
+                val result = mergeChannelSettingsForAdd(channels.settings, incoming.settings)
                 channels.copy(settings = result)
             }
         }
