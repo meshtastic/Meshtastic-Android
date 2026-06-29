@@ -475,7 +475,9 @@
     <string name="traceroute_log">Праћење руте</string>
     <string name="traceroute_no_response">Нема одговора</string>
     <!-- TRAFFIC -->
+    <!-- TRANSPORT -->
     <string name="transport_ble">БЛЕ</string>
+    <string name="transport_lora">LoRA</string>
     <string name="triple_click_adhoc_ping">Троструки клик за Ad Hoc пинг</string>
     <string name="twenty_four_hours">24ч</string>
     <string name="two_days">48 Сати</string>

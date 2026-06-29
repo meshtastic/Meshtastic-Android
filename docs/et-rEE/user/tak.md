@@ -22,7 +22,7 @@ TAK moodul võimaldab Meshtastic sõlmedel:
 - Kuvatakse meeskonnaliikmetena TAK kaardil
 - Receive TAK PLI (Position Location Information) messages
 
-## Setup
+## Seadistamine
 
 ### Prerequisites
 
@@ -107,7 +107,7 @@ Kui on seadistatud:
 - Asukohavärskendused liiguvad Meshtasticu ja TAKi vahel kahesuunaliselt
 - TAK jälgimisseadme sõlmed levitavad PLId automaatselt – nende asukohad kuvatakse ATAK kaartidel ilma ATAK poolse konfita
 
-> ⚠️ **Märkus:** TAK-i integratsioon nõuab spetsiifilisi sõlmerolle ja mooduli konfiguratsiooni. Standard client nodes don't automatically participate in TAK operations.
+> ⚠️ **Märkus:** TAK-i integratsioon nõuab spetsiifilisi sõlmerolle ja mooduli seadistust. Standard client nodes don't automatically participate in TAK operations.
 
 ## Troubleshooting
 

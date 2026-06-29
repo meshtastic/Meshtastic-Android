@@ -1127,7 +1127,10 @@
     <!-- TRAFFIC -->
     <string name="traffic_management_enabled">Modul aktiverad</string>
     <string name="transmit_over_lora">Skicka över LoRa</string>
+    <!-- TRANSPORT -->
     <string name="transport_ble">BLE</string>
+    <string name="transport_lora">LoRa</string>
+    <string name="transport_mqtt">MQTT</string>
     <string name="transport_tcp">TCP</string>
     <string name="transport_usb">USB</string>
     <string name="twenty_four_hours">24T</string>

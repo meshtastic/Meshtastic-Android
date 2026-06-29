@@ -1144,6 +1144,9 @@
     <string name="traffic_management_router_preserve_hops">Păstrează Hops Router</string>
     <string name="traffic_management_unknown_packet_threshold">Prag de pachet necunoscut</string>
     <string name="transmit_over_lora">Transmite peste LoRA</string>
+    <!-- TRANSPORT -->
+    <string name="transport_lora">LoRa</string>
+    <string name="transport_mqtt">MQTT</string>
     <string name="transport_usb">USB</string>
     <string name="triple_click_adhoc_ping">Apăsare triplă pentru ping Ad Hoc</string>
     <string name="twenty_four_hours">24H</string>

@@ -49,7 +49,7 @@ The BME680 **IAQ (Indoor Air Quality)** index is a single 0–500+ value derived
 
 ![IAQ index scale from Excellent to Dangerously Polluted](../../assets/screenshots/node-metrics_iaq_scale.png)
 
-> 💡 **Vihje:** Keskkonnamõõdikute jaoks on vaja kaugsõlmega ühendatud andurit. Not all nodes report environmental data. See [Telemetry & Sensors](telemetry-and-sensors) for a full list of supported sensors.
+> 💡 **Vihje:** Keskkonnamõõdikute jaoks on vaja kaugsõlmega ühendatud andurit. Not all nodes report environmental data. Vaata [Telemeetria & Sensorid](telemetry-and-sensors), et näha toetatud andurite täieliku loendit.
 
 ## Air Quality Metrics
 
@@ -81,7 +81,7 @@ An air-quality log/metrics button appears on the node detail screen **only when 
 - **Refresh / request** the latest air-quality telemetry.
 - **Ekspordi CSV** analüüsimiseks arvutustabeli vaates.
 
-> 💡 **Vihje:** Õhukvaliteedi mõõdikute jaoks on vaja kaugsõlmega ühendatud andurit. If a node has no particulate or CO₂ sensor, the air-quality button won't appear. See [Telemetry & Sensors](telemetry-and-sensors) for supported hardware.
+> 💡 **Vihje:** Õhukvaliteedi mõõdikute jaoks on vaja kaugsõlmega ühendatud andurit. If a node has no particulate or CO₂ sensor, the air-quality button won't appear. Vaata [Telemeetria & Sensorid](telemetry-and-sensors) toetatud raudvara kohta.
 
 ## Signaali mõõdikud
 
@@ -150,7 +150,7 @@ Shows which nodes a given node can directly hear, useful for understanding mesh 
 
 ## Viewing Metrics
 
-1. Navigate to **Nodes**.
+1. Mine **Seadmed**.
 2. Puuduta sõlme, mida soovite kontrollida.
 3. Select the metric category from the detail tabs.
 
@@ -165,7 +165,7 @@ The position tab shows location data for nodes that share GPS:
 ## Related Topics
 
 - [Nodes](nodes) — node list, filtering, and sorting
-- [Telemetry & Sensors](telemetry-and-sensors) — supported sensors and configuration
+- [Telemeetria & Sensorid](telemetry-and-sensors) — toetatud andurid ja seadistus
 - [Signal Meter](signal-meter) — how signal quality is calculated from SNR and RSSI
 - [Discovery](discovery) — traceroute details and neighbor info
 - [Units & Locale](units-and-locale) — temperature, distance, and speed display formats

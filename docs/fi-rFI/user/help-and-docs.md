@@ -11,7 +11,7 @@ aliases:
   - avustaja
 ---
 
-# Ohjeet jasovelluksen sisäinen dokumentaatio
+# Ohjeet ja sovelluksen sisäinen dokumentaatio
 
 Sama käyttöohje sisältyy myös **sovellukseen**, joten voit lukea sitä offline-tilassa poistumatta Meshtasticista. Avaa se kohdasta **Asetukset → Ohjeet & dokumentaatio**.
 

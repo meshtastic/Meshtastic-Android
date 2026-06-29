@@ -858,7 +858,10 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="track_and_share_locations">Rastrear y comparte ubicaciones</string>
     <!-- TRAFFIC -->
     <string name="transmit_over_lora">Transmitir en LoRa</string>
+    <!-- TRANSPORT -->
     <string name="transport_ble">BLE</string>
+    <string name="transport_lora">LoRa</string>
+    <string name="transport_mqtt">MQTT</string>
     <string name="triple_click_adhoc_ping">Triple pulsación para enviar un ping</string>
     <string name="twenty_four_hours">24H</string>
     <string name="two_days">48 Horas</string>

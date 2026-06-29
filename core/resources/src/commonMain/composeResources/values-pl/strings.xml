@@ -784,7 +784,10 @@
     <!-- TRAFFIC -->
     <string name="traffic_management_enabled">Moduł Włączony</string>
     <string name="transmit_over_lora">Nadaj przez LoRa</string>
+    <!-- TRANSPORT -->
     <string name="transport_ble">BLE</string>
+    <string name="transport_lora">LoRa</string>
+    <string name="transport_mqtt">MQTT</string>
     <string name="twenty_four_hours">24H</string>
     <string name="two_days">48 Godzin</string>
     <string name="two_weeks">2W</string>

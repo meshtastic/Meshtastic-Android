@@ -22,7 +22,7 @@ Bluetooth Low Energy is the default and most common connection method on Android
 ### Seadme sidumine
 
 1. Veendu, et Meshtastic seade on sisse lülitatud ja sidumisrežiimis.
-2. Open the app and navigate to the **Connect** tab.
+2. Ava rakendus ja navigeeri vahekaardile **Ühendused**.
 3. Puuduta **Skanni seadmeid** – kuvatakse lähedalasuvad Meshtastic raadiod.
 4. Select your device from the list.
 5. Nõustu Bluetoothi ​​sidumise taotlusega, kui see kuvatakse.
@@ -37,18 +37,18 @@ You can filter devices by transport type using the filter chips at the top:
 
 ### Connection Status
 
-| Icon | State            | Kirjeldus                     |
+| Icon | Olek             | Kirjeldus                     |
 | ---- | ---------------- | ----------------------------- |
 | 🟢   | Ühendatud        | Active radio link established |
 | 🟡   | Ühendan          | Handshake in progress         |
 | 🔴   | Ühendus katkenud | No active connection          |
 | ⚪    | Pole seadistatud | Seadet pole valitud           |
 
-When connecting, a status indicator shows the current connection state:
+Ühenduse loomisel näitab olekuindikaator ühenduse praegust olekut:
 
 ![Connecting status](../../assets/screenshots/connections_connecting.png)
 
-If no devices are found, the app shows an empty state with instructions:
+Kui seadmeid ei leita, kuvab rakendus tühja oleku koos juhistega:
 
 ![Ühtegi seadet ei leitud](../../assets/screenshots/connections_empty_state.png)
 
@@ -62,7 +62,7 @@ If no devices are found, the app shows an empty state with instructions:
 
 USB connections provide a wired alternative, useful for desktop or when Bluetooth is unavailable.
 
-### Setup
+### Seadistamine
 
 1. Connect your radio via USB cable to your device.
 2. Rakendus küsib USB luba – puuduta **Luba**.
@@ -111,8 +111,8 @@ See [Desktop App](desktop) for platform-specific details and keyboard shortcuts.
 
 ## Related Topics
 
-- [Getting Started](onboarding) — first-launch setup and permissions
-- [Settings — Radio & User](settings-radio-user) — Bluetooth and network configuration
+- [Alustamine](onboarding) — esmakäivituse seadistamine ja load
+- [Seaded — Raadio ja kasutaja](settings-radio-user) — sinihamba ​​ja võrgu seadistus
 - [Desktop App](desktop) — desktop-specific connection details
 - [Supported devices](https://meshtastic.org/docs/hardware/devices) — full list of compatible radios on meshtastic.org
 

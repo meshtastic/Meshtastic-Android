@@ -1455,7 +1455,10 @@
     "tags": [
       "Elecrow"
     ],
-    "requiresDfu": false
+    "requiresDfu": false,
+    "images": [
+      "thinknode_m7.svg"
+    ]
   },
   {
     "hwModel": 134,

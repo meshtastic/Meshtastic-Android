@@ -29,7 +29,7 @@ Configure your radio hardware and user identity parameters.
 
 Pärast sätete muutmist puuduta nuppu **Salvesta**, et konfiguratsioon raadiosse salvestada. The device may reboot to apply changes.
 
-## Radio Configuration
+## Raadio seadistus
 
 ### Seadme sätted
 

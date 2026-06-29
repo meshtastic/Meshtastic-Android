@@ -280,6 +280,9 @@
     <string name="timeout">Скончыўся час чакання</string>
     <!-- TRACEROUTE -->
     <!-- TRAFFIC -->
+    <!-- TRANSPORT -->
+    <string name="transport_lora">LoRa</string>
+    <string name="transport_mqtt">MQTT</string>
     <string name="twenty_four_hours">24г</string>
     <string name="two_days">48 Гадзін</string>
     <string name="two_weeks">2тыд</string>

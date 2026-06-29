@@ -3,10 +3,10 @@ title: Getting Started
 parent: User Guide
 nav_order: 1
 last_updated: 2026-05-13
-description: First-launch setup — permissions, onboarding flow, and next steps after connecting your radio.
+description: Esimese käivitamise seadistus — õigused, sissejuhatav voog ja järgmised sammud pärast raadio ühendamist.
 aliases:
   - first-launch
-  - setup
+  - seadistamine
   - intro
 ---
 
@@ -32,7 +32,7 @@ Puuduta **Alusta** seadistusvoo jätkamiseks.
 
 ## Permissions
 
-The app requests several permissions during setup. Each one serves a specific purpose, and some are required for core functionality.
+Rakendus küsib seadistamise ajal mitmeid lube. Each one serves a specific purpose, and some are required for core functionality.
 
 ### Bluetooth Permission
 
@@ -79,7 +79,7 @@ On supported devices, the app may request permission for critical alerts:
 - You can **skip** this step if you don't need breakthrough notifications
 - Configure or revoke later in Android notification settings
 
-## After Setup
+## Peale seadistamist
 
 Kui load on antud, läheb rakendus üle põhiliidesele. Esimene samm peaks olema ühenduse loomine Meshtastic raadioga – üksikasjalike juhiste saamiseks vaata [Ühendused] (connections).
 

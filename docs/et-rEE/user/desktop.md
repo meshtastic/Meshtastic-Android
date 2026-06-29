@@ -98,7 +98,7 @@ The Desktop app uses the same Compose Multiplatform UI with adaptations for larg
 - **Window resizing** — responsive layout adapts to window dimensions
 - **System tray** — minimize to system tray for background mesh operation
 - **Salvemenüü** – paremklõpsa salveikoonil akna kuvamiseks või sulgemiseks
-- **Mouse interaction** — hover states and standard desktop navigation
+- **Hiire interaktsioon** — hõljumisseisundid ja standardne töölaua navigeerimine
 
 ### Notification Preferences
 

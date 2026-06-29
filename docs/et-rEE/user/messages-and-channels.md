@@ -38,7 +38,7 @@ Channels support multiple encryption levels:
 
 ### Adding a Channel
 
-1. Navigate to **Settings → Channels**.
+1. Mine **Sätted → Kanalid**.
 2. Puuduta **Lisa kanal** või skanni QR-koodi.
 3. Configure the channel name and encryption key.
 4. Share the channel URL/QR code with others who need access.
@@ -55,9 +55,9 @@ Direct messages (DMs) are point-to-point encrypted communications between two sp
 2. Vali kontaktide loendist sõlm või puuduta sõlme loendis.
 3. Tippi oma sõnum ja puuduta nuppu **Saada**.
 
-### Message States
+### Sõnumi olek
 
-| State                             | Icon | Meaning                                                                                                           |
+| Olek                              | Icon | Meaning                                                                                                           |
 | --------------------------------- | ---- | ----------------------------------------------------------------------------------------------------------------- |
 | Queued                            | ⏳    | Message waiting to be sent                                                                                        |
 | En route                          | ✓    | Delivered to the radio, awaiting acknowledgment                                                                   |
@@ -78,7 +78,7 @@ When a message fails to deliver, the error indicator shows what went wrong:
 | Aegunud          | No acknowledgment within retry window    | The recipient may be just out of range. Try increasing hop limit or moving to a better position.                                            |
 | Liidest pole     | No radio interface available to send     | Kontrolli, kas raadio on ühendatud ja kanal on seadistatud.                                                                                                 |
 | Max Retransmit   | All retry attempts exhausted             | The mesh path is unreliable. Try a different channel or wait for conditions to improve.                                                     |
-| Kanalit pole     | The destination channel doesn't exist    | Verify both nodes share the same channel configuration.                                                                                                     |
+| Kanalit pole     | The destination channel doesn't exist    | Veendu, et mõlemal sõlmel oleks sama kanali seadistus.                                                                                                      |
 | Too Large        | Sõnum ületab maksimaalset sõnumi mahtu   | Shorten your message (max ~200 characters).                                                                              |
 | Vastust pole     | Node received message but didn't respond | The recipient's radio may be busy or in low-power sleep mode.                                                                                               |
 | Duty Cycle Limit | Regional airtime limit reached           | Your radio has used its allowed transmit time. Wait for the duty cycle window to reset (typically 1 hour in EU regions). |

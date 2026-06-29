@@ -264,6 +264,7 @@
     <string name="traceroute_diff">Hops vèsus %1$d Hops tounen %2$d</string>
     <string name="traceroute_direct">Direk</string>
     <!-- TRAFFIC -->
+    <!-- TRANSPORT -->
     <string name="two_days">48 Èdtan</string>
     <!-- UNKNOWN -->
     <string name="unknown_username">Non itilizatè enkoni</string>

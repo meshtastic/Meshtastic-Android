@@ -131,7 +131,7 @@ Understanding the layered encryption model:
 ## Related Topics
 
 - [Seaded — Moodulid ja administreerimine](settings-module-admin) — MQTT mooduli konfi viide
-- [Messages & Channels](messages-and-channels) — channel encryption and PSK setup
+- [Sõnumid ja kanalid](messages-and-channels) — kanali krüptimine ja PSK seadistamine
 - [MQTT integratsioonijuhend](https://meshtastic.org/docs/software/integrations/mqtt) — üksikasjalik MQTT dokumentatsioon aadressil meshtastic.org
 
 ---

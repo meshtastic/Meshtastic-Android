@@ -27,7 +27,7 @@ Kui telefon on ühendatud Android Auto peakomplektiga (või arenduses kasutatava
 
 The car app does not add a new connection of its own. See kasutab Meshtastici rakenduse olemasolevat ühendust, sõlme ja sõnumi olekut, seega kajastab see seda, millega telefon on juba ühendatud.
 
-> ⚠️ **Märkus:** Autorakenduse reaalajas andmete kuvamiseks peab telefon olema ühendatud Meshtastic raadioga. If the app is disconnected, the car screen reflects that disconnected state.
+> ⚠️ **Märkus:** Autorakenduse reaalajas andmete kuvamiseks peab telefon olema ühendatud Meshtastic raadioga. Kui rakendus on lahti ühendatud, kajastab auto ekraan lahti ühendatud olekut.
 
 ## Sõnumid
 

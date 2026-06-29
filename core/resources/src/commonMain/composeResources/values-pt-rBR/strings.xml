@@ -688,6 +688,9 @@
     <string name="track_point">ponto de rastreamento</string>
     <!-- TRAFFIC -->
     <string name="transmit_over_lora">Transmitir por LoRa</string>
+    <!-- TRANSPORT -->
+    <string name="transport_lora">LoRa</string>
+    <string name="transport_mqtt">MQTT</string>
     <string name="twenty_four_hours">24H</string>
     <string name="two_days">48 Horas</string>
     <string name="two_weeks">2S</string>

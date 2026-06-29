@@ -189,9 +189,27 @@
   },
   "pullRequests": [
     {
-      "id": "10793",
-      "title": "Portduino WASM hello world",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10793",
+      "id": "10807",
+      "title": "Add DeltaPlusProto Edict board variant",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10807",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
+      "id": "10803",
+      "title": "Chop down tft-related loooong ifdefs chains",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10803",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "10802",
+      "title": "Refactor SerialConsole to simplify timeout handling",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10802",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "10801",
+      "title": "Cleanup",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10801",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
@@ -205,12 +223,6 @@
       "title": "Add TiltTelemetryModule for LIS3DH accelerometer mounts",
       "page_url": "https://github.com/meshtastic/firmware/pull/10787",
       "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "10785",
-      "title": "InkHUD: add offline map tile backgrounds and zoom controls",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10785",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
       "id": "10784",
@@ -300,12 +312,6 @@
       "id": "10711",
       "title": "Fix SX126x daemon abort when Tx power exceeds chip limit",
       "page_url": "https://github.com/meshtastic/firmware/pull/10711",
-      "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "10689",
-      "title": "Heltec Vision Master E213: enable 32768hz crystal osc for rtc",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10689",
       "zip_url": "https://discord.com/invite/meshtastic"
     }
   ]

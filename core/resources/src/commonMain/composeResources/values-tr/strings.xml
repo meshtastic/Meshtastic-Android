@@ -576,6 +576,9 @@
     <string name="traceroute_log">Yol izle</string>
     <!-- TRAFFIC -->
     <string name="transmit_over_lora">LoRa üzerinden ilet</string>
+    <!-- TRANSPORT -->
+    <string name="transport_lora">LoRa</string>
+    <string name="transport_mqtt">MQTT</string>
     <string name="twenty_four_hours">24S</string>
     <string name="two_days">48 Saat</string>
     <string name="two_weeks">2H</string>

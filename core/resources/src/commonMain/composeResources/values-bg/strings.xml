@@ -59,7 +59,7 @@
     <string name="air_quality_metrics_module_enabled">Модулът за показатели за качеството на въздуха е активиран</string>
     <string name="air_quality_metrics_update_interval_seconds">Интервал на актуализиране на показателите за качеството на въздуха</string>
     <string name="air_util_definition">Процент от ефирното време за предаване, използвано през последния час.</string>
-    <string name="air_utilization">Използване на ефира</string>
+    <string name="air_utilization">Използ. на ефира</string>
     <!-- ALERT -->
     <string name="all_time">Всички</string>
     <string name="alt">н.в.</string>
@@ -69,6 +69,7 @@
     <string name="analytics_okay">Разрешаване на анализи и докладване за сривове.</string>
     <string name="analytics_platforms">Аналитични платформи:</string>
     <!-- APP -->
+    <string name="app_functions_get_node_list">Получаване на списък с възли</string>
     <string name="app_notifications">Известия от приложението</string>
     <string name="app_settings">Приложение</string>
     <string name="app_too_old">Изисква се актуализация на приложението</string>
@@ -108,6 +109,7 @@
     <string name="call_sign">Опознавателен знак</string>
     <string name="call_sign_summary">Вашият радиолюбителски опознавателен знак, до 8 знака</string>
     <string name="camera_permission">Разрешение за камерата</string>
+    <string name="camera_permission_rationale">Разрешаване на достъп до камерата за сканиране на QR кодове.</string>
     <string name="cancel">Отказ</string>
     <string name="cant_change_no_radio">Каналът не може да бъде сменен, тъй като радиото все още не е свързано. Моля, опитайте отново.</string>
     <string name="cant_shutdown">Изключването не се поддържа на това устройство</string>
@@ -125,7 +127,7 @@
     <string name="channel_invalid">URL адресът на този канал е невалиден и не може да се използва</string>
     <string name="channel_label">Канал</string>
     <string name="channel_name">Име на канал</string>
-    <string name="channel_utilization">Използване на канала</string>
+    <string name="channel_utilization">Използ. на канала</string>
     <string name="channels">Канали</string>
     <!-- CHIRPY -->
     <string name="chirpy">Чирпи</string>
@@ -144,6 +146,7 @@
     <string name="clear">Изчисти</string>
     <string name="clear_selection">Изчистване на избора</string>
     <string name="clear_time_zone">Изчистване на часовата зона</string>
+    <string name="client_notification">Известие за клиента</string>
     <string name="close">Затвори</string>
     <string name="close_selection">Затваряне на избраните</string>
     <string name="co2">CO₂</string>
@@ -170,8 +173,10 @@
     <string name="config_device_use_phone_tz">Използване на часовата зона на телефона</string>
     <string name="config_display_auto_screen_carousel_secs_summary">Автоматично превключва към следващата страница на екрана като въртележка, въз основа на зададения интервал.</string>
     <string name="config_display_compass_north_top_summary">Компасът на екрана извън кръга винаги ще сочи на север.</string>
+    <string name="config_display_displaymode_summary">Замяна на оформлението на екрана по подразбиране.</string>
     <string name="config_display_flip_screen_summary">Обръщане на екрана вертикално.</string>
     <string name="config_display_heading_bold_summary">Удебеляване на текста на заглавието на екрана.</string>
+    <string name="config_display_oled_summary">Замяна на автоматичното разпознаване на OLED екрана.</string>
     <string name="config_display_screen_on_secs_summary">Колко дълго екранът остава включен след натискане на потребителския бутон или получаване на съобщения.</string>
     <string name="config_display_units_summary">Мерни единици, показвани на екрана на устройството.</string>
     <string name="config_display_wake_on_tap_or_motion_summary">Изисква се да има акселерометър на вашето устройство.</string>
@@ -255,6 +260,7 @@
     <string name="device_configuration">Конфигурация на устройството</string>
     <string name="device_db_cache_limit">Лимит на кеша на DB на устройството</string>
     <string name="device_db_cache_limit_summary">Максимален брой бази данни на устройства, които да се съхраняват на този телефон</string>
+    <string name="device_links_i_want_one">Искам един</string>
     <string name="device_links_open_in_browser">Отваряне в браузър</string>
     <string name="device_metrics_label_value">%1$s: %2$s</string>
     <string name="device_metrics_log">Метрики на устройството</string>
@@ -273,7 +279,13 @@
     <string name="disconnected">Прекъсната връзка</string>
     <string name="discovered_network_devices">Открити мрежови устройства</string>
     <!-- DISCOVERY -->
+    <string name="discovery_delete_session">Изтриване на сесията</string>
     <string name="discovery_dwell_minutes">%1$d мин</string>
+    <string name="discovery_keep_screen_awake">Поддържане на екрана активен</string>
+    <string name="discovery_not_connected_description">Свързване с устройство Meshtastic, за започване на сканирането.</string>
+    <string name="discovery_scan_history">История на сканирането</string>
+    <string name="discovery_scan_progress">Напредък на сканирането</string>
+    <string name="discovery_start_scan_disabled">Бутонът за стартиране на сканиране е деактивиран. %1$s</string>
     <string name="discovery_start_scan_reason_24ghz_unsupported">радио хардуерът не поддържа 2.4 GHz</string>
     <string name="discovery_start_scan_reason_default_key">каналът използва ключ за криптиране по подразбиране</string>
     <string name="discovery_stat_analysis">Анализ</string>
@@ -292,6 +304,7 @@
     <string name="discovery_stat_total_messages">Общо съобщения</string>
     <string name="discovery_stat_total_unique_nodes">Общо уникални възли</string>
     <string name="discovery_stat_unique_nodes">Уникални възли</string>
+    <string name="discovery_time_remaining">Остават %1$s</string>
     <string name="discovery_unique_nodes">%1$d уникални възела</string>
     <string name="disk_free_indexed">Свободен диск %1$d</string>
     <!-- DISPLAY -->
@@ -483,6 +496,7 @@
     <string name="hop_limit">Брой отскоци</string>
     <string name="hops_away">Брой отскоци</string>
     <string name="host">Хост</string>
+    <string name="humidity">Влаж</string>
     <string name="i_agree">Съгласен съм.</string>
     <string name="i_agree_to_share_my_location">Прочетох и разбирам горепосоченото. Доброволно се съгласявам с некриптираното предаване на данните от моя възел чрез MQTT.</string>
     <string name="i_know_what_i_m_doing">Знам какво правя.</string>
@@ -546,7 +560,10 @@
     <string name="location_disabled">Достъпът до местоположението е изключен, не може да предостави позиция на мрежата.</string>
     <string name="location_sharing">Споделяне на местоположение</string>
     <!-- LOCKDOWN -->
+    <string name="lockdown_backoff">Опитайте отново след %1$d секунди.</string>
+    <string name="lockdown_enable_ack">Разбирам</string>
     <string name="lockdown_hide_passphrase">Скриване</string>
+    <string name="lockdown_lock_reason">Причина: %1$s</string>
     <string name="lockdown_submit">Изпращане</string>
     <string name="locked">Заключен</string>
     <!-- LOG -->
@@ -696,9 +713,10 @@
     <string name="node_filter_title">Филтриране по</string>
     <string name="node_id">ID на възела</string>
     <string name="node_layout_channel">Канал</string>
-    <string name="node_layout_compact">Компактен</string>
+    <string name="node_layout_compact">Компактно</string>
     <string name="node_layout_compact_fields_header">Компактни полета</string>
-    <string name="node_layout_complete">Пълен</string>
+    <string name="node_layout_complete">Пълно</string>
+    <string name="node_layout_complete_description">Пълното оформление показва всички налични данни за възлите. Полетата без данни се скриват автоматично.</string>
     <string name="node_layout_device_role">Устройство &amp; Роля</string>
     <string name="node_layout_help_signal_bad">Сигналът е слаб. SNR е над −18 dB и RSSI е над −125 dBm.</string>
     <string name="node_layout_help_signal_fair">Сигналът е умерен. SNR е над −12 dB и RSSI е над −120 dBm.</string>
@@ -710,10 +728,12 @@
     <string name="node_layout_no_preview_available">Няма налични възли за преглед.</string>
     <string name="node_layout_power">Захранване</string>
     <string name="node_layout_preview">Преглед</string>
+    <string name="node_layout_section_title">Оформление на възела</string>
     <string name="node_layout_signal_direct_only">Сигнал (Само директен)</string>
     <string name="node_layout_signal_quality_indicator">Индикатор за качество на сигнала</string>
     <string name="node_list_click_label">Отваряне на детайли за възела</string>
     <string name="node_list_help_node_details">Детайли за възела</string>
+    <string name="node_list_help_title">Помощ за списъка с възли</string>
     <string name="node_number">Номер на възела</string>
     <string name="node_sort_alpha">А-Я</string>
     <string name="node_sort_button">Опции за сортиране на възлите</string>
@@ -758,10 +778,12 @@
     <string name="one_week">1С</string>
     <string name="only_favorites">Само любими</string>
     <!-- OPEN -->
+    <string name="open_bluetooth_settings">Отваряне на настройките на Bluetooth</string>
     <string name="open_compass">Отваряне на компас</string>
     <string name="open_settings">Отваряне на настройките</string>
     <string name="open_source_description">Meshtastic е изграден със следните библиотеки с отворен код. Докоснете която и да е библиотека, за да видите нейния лиценз.</string>
     <string name="open_source_libraries">Библиотеки с отворен код</string>
+    <string name="open_wifi_settings">Отваряне на настройките на Wi-Fi</string>
     <string name="options">Опции</string>
     <!-- OUTPUT -->
     <string name="pairing_mode">Режим на сдвояване</string>
@@ -1074,7 +1096,10 @@
     <string name="traffic_management_enabled">Модулът е активиран</string>
     <string name="traffic_management_nodeinfo_direct_response_max_hops">Максимален брой отскоци за директен отговор</string>
     <string name="transmit_over_lora">Предаване през LoRa</string>
+    <!-- TRANSPORT -->
     <string name="transport_ble">BLE</string>
+    <string name="transport_lora">LoRa</string>
+    <string name="transport_mqtt">MQTT</string>
     <string name="transport_tcp">TCP</string>
     <string name="transport_usb">USB</string>
     <string name="twenty_four_hours">24Ч</string>
