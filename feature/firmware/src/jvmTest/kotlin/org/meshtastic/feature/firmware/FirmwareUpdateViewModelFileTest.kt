@@ -293,6 +293,68 @@ class FirmwareUpdateViewModelFileTest {
     }
 
     @Test
+    fun `startUpdate keeps AwaitingFileSave state for USB path`() = runTest {
+        // Regression: the UF2/USB flow ends at AwaitingFileSave — a deliberate pause for the file picker, not a
+        // missing terminal state. startUpdate() must leave it intact; previously it fell into the else branch and
+        // clobbered it to Error, so tapping "Update via USB File Transfer" always failed.
+        every { radioPrefs.devAddr } returns MutableStateFlow("s/dev/ttyUSB0")
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+        val ready = viewModel.state.value
+        assertIs<FirmwareUpdateState.Ready>(ready)
+        assertIs<FirmwareUpdateMethod.Usb>(ready.updateMethod)
+
+        val artifact =
+            FirmwareArtifact(
+                uri = CommonUri.parse("file:///tmp/firmware.uf2"),
+                fileName = "firmware.uf2",
+                isTemporary = true,
+            )
+        everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any()) }
+            .calls {
+                @Suppress("UNCHECKED_CAST")
+                val updateState = it.args[3] as (FirmwareUpdateState) -> Unit
+                updateState(FirmwareUpdateState.AwaitingFileSave(artifact, "firmware.uf2"))
+                artifact
+            }
+
+        viewModel.startUpdate()
+        advanceUntilIdle()
+
+        assertIs<FirmwareUpdateState.AwaitingFileSave>(viewModel.state.value)
+    }
+
+    @Test
+    fun `startUpdateFromFile keeps AwaitingFileSave state for USB path`() = runTest {
+        every { radioPrefs.devAddr } returns MutableStateFlow("s/dev/ttyUSB0")
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+        assertIs<FirmwareUpdateMethod.Usb>((viewModel.state.value as FirmwareUpdateState.Ready).updateMethod)
+
+        val artifact =
+            FirmwareArtifact(
+                uri = CommonUri.parse("file:///tmp/extracted.uf2"),
+                fileName = "extracted.uf2",
+                isTemporary = true,
+            )
+        everySuspend { fileHandler.extractFirmware(any(), any(), any()) } returns artifact
+        everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any(), any()) }
+            .calls {
+                @Suppress("UNCHECKED_CAST")
+                val updateState = it.args[3] as (FirmwareUpdateState) -> Unit
+                updateState(FirmwareUpdateState.AwaitingFileSave(artifact, "extracted.uf2"))
+                artifact
+            }
+
+        viewModel.startUpdateFromFile(CommonUri.parse("file:///downloads/firmware.zip"))
+        advanceUntilIdle()
+
+        assertIs<FirmwareUpdateState.AwaitingFileSave>(viewModel.state.value)
+    }
+
+    @Test
     fun `startUpdateFromFile cleans up on manager error state`() = runTest {
         every { radioPrefs.devAddr } returns MutableStateFlow("s/dev/ttyUSB0")
 
