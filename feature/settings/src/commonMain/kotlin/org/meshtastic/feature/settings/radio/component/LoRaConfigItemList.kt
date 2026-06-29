@@ -33,6 +33,7 @@ import org.meshtastic.core.model.ChannelOption
 import org.meshtastic.core.model.RegionInfo
 import org.meshtastic.core.model.RegionPresetConstraint
 import org.meshtastic.core.model.constraintFor
+import org.meshtastic.core.model.defaultPresetFor
 import org.meshtastic.core.model.numChannels
 import org.meshtastic.core.model.repairPresetFor
 import org.meshtastic.core.resources.Res
@@ -70,6 +71,7 @@ import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.util.hopLimits
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
+import org.meshtastic.proto.Config.LoRaConfig.RegionCode
 
 private val SPREAD_FACTOR_RANGE = 7..12
 private val CODING_RATE_RANGE = 5..8
@@ -159,10 +161,22 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     items = RegionInfo.entries.map { it.regionCode to it.description },
                     selectedItem = formState.value.region,
                     onItemSelected = { region ->
+                        val freshSetup = formState.value.region == RegionCode.UNSET
                         // When the region changes, snap the preset to the region's default if the current one is
                         // no longer legal there (R7); a no-op when the region is unconstrained.
                         val repaired = regionPresetMap.repairPresetFor(region, formState.value.modem_preset)
-                        formState.value = formState.value.copy(region = region, modem_preset = repaired)
+                        // At fresh setup (region was UNSET) adopt the region's advertised default rather than keeping
+                        // a merely-legal preset: the firmware map's default when present, else the app's built-in
+                        // default (e.g. US -> LongTurbo on pre-2.8 firmware that sends no map).
+                        val preset =
+                            if (freshSetup) {
+                                regionPresetMap.constraintFor(region)?.defaultPreset
+                                    ?: defaultPresetFor(region)
+                                    ?: repaired
+                            } else {
+                                repaired
+                            }
+                        formState.value = formState.value.copy(region = region, modem_preset = preset)
                     },
                 )
                 HorizontalDivider()
