@@ -19,7 +19,9 @@ package org.meshtastic.feature.connections
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
+import co.touchlab.kermit.Severity
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -34,9 +36,12 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import org.meshtastic.core.ble.BleDevice
+import org.meshtastic.core.ble.BleScanStartException
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.MeshtasticBleConstants
+import org.meshtastic.core.common.util.safeCatchingAll
 import org.meshtastic.core.datastore.RecentAddressesDataSource
 import org.meshtastic.core.datastore.model.RecentAddress
 import org.meshtastic.core.di.CoroutineDispatchers
@@ -49,12 +54,20 @@ import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.bluetooth_scan_start_failed
+import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.connections.model.DeviceListEntry
 import org.meshtastic.feature.connections.model.DiscoveredDevices
 import org.meshtastic.feature.connections.model.GetDiscoveredDevicesUseCase
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
+
+internal val BLE_SCAN_START_FAILURE_RETRY_COOLDOWN = 15.seconds
+private const val BLE_SCAN_START_FAILURE_MESSAGE_FALLBACK =
+    "Bluetooth scan couldn't start. Try again, or toggle Bluetooth if the problem continues."
 
 /**
  * Platform-neutral ViewModel that drives the Connections screen: device discovery (BLE/USB/TCP), scan state, current
@@ -107,6 +120,9 @@ open class ScannerViewModel(
     private val scannedBleDevices = MutableStateFlow<Map<String, BleDevice>>(emptyMap())
     private val discoveryOrder = MutableStateFlow<List<String>>(emptyList())
     private var scanJob: Job? = null
+    private var scanStartFailureCooldownJob: Job? = null
+    private val scanStartFailureCooldownActive = MutableStateFlow(false)
+    private var scanStartFailureCooldownGeneration = 0
 
     // Generation counter that owns the `_isBleScanning` flag's cleanup. The scan coroutine's `finally` block may run
     // asynchronously on the IO dispatcher after a stop+restart has already kicked off a new scan; without this guard
@@ -272,7 +288,7 @@ open class ScannerViewModel(
      * prior scan cannot reset the flag on this new scan's state.
      */
     fun startBleScan() {
-        if (_isBleScanning.value || bleScanner == null) return
+        if (_isBleScanning.value || bleScanner == null || scanStartFailureCooldownActive.value) return
         // Cancel the other scan first so only one flag is ever true. Both stop methods are idempotent.
         stopNetworkScan()
 
@@ -301,8 +317,13 @@ open class ScannerViewModel(
                                 discoveryOrder.update { it + device.address }
                             }
                         }
+                } catch (ex: BleScanStartException) {
+                    handleBleScanStartFailure(ex, generation)
                 } finally {
-                    if (scanGeneration.value == generation) _isBleScanning.value = false
+                    if (scanGeneration.value == generation) {
+                        _isBleScanning.value = false
+                        scanJob = null
+                    }
                 }
             }
     }
@@ -310,9 +331,6 @@ open class ScannerViewModel(
     /**
      * Starts BLE scanning for screen-entry auto-scan only when no device is already selected. Manual scan toggles call
      * [startBleScan] directly so users can still discover/switch devices while connected.
-     *
-     * This controls only Connections-screen discovery. Selected-device reconnect still performs its fresh-advertisement
-     * scan in `BleRadioTransport.findDevice` before connecting.
      */
     fun startBleAutoScan() {
         if (activeTransport.value != DeviceType.BLE) return
@@ -352,6 +370,41 @@ open class ScannerViewModel(
                 uiPrefs.setNetworkAutoScan(false)
             }
         }
+    }
+
+    private suspend fun handleBleScanStartFailure(exception: BleScanStartException, generation: Int) {
+        if (scanGeneration.value != generation) return
+
+        scanGeneration.value = generation + 1
+        scanJob = null
+        _isBleScanning.value = false
+        uiPrefs.setBleAutoScan(false)
+        startBleScanRetryCooldown()
+
+        Logger.w(exception) {
+            "BLE scan could not start: ${exception.reason.androidCode} (${exception.reason.description})"
+        }
+        val errorMessage =
+            safeCatchingAll { getStringSuspend(Res.string.bluetooth_scan_start_failed) }
+                .getOrDefault(BLE_SCAN_START_FAILURE_MESSAGE_FALLBACK)
+        serviceRepository.setErrorMessage(text = errorMessage, severity = Severity.Warn)
+    }
+
+    private fun startBleScanRetryCooldown() {
+        val generation = ++scanStartFailureCooldownGeneration
+        scanStartFailureCooldownActive.value = true
+        scanStartFailureCooldownJob?.cancel()
+        scanStartFailureCooldownJob =
+            viewModelScope.launch {
+                try {
+                    delay(BLE_SCAN_START_FAILURE_RETRY_COOLDOWN)
+                } finally {
+                    if (scanStartFailureCooldownGeneration == generation) {
+                        scanStartFailureCooldownActive.value = false
+                        scanStartFailureCooldownJob = null
+                    }
+                }
+            }
     }
 
     /**
