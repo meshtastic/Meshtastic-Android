@@ -9,6 +9,7 @@
     "workarounds:all"
   ],
   "commitMessageTopic": "{{depName}}",
+  "osvVulnerabilityAlerts": true,
   "labels": [
     "dependencies"
   ],

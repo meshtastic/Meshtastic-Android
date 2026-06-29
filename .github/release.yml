@@ -2,7 +2,6 @@
 #
 # Labels here must match actual repo labels. Run `gh label list` to verify.
 # Auto-labeler: .github/workflows/pull-request-target.yml
-# AI classifier: .github/workflows/models_pr_triage.yml
 
 changelog:
   exclude:
@@ -16,7 +15,6 @@ changelog:
       - ci
       - build
       - testing
-      - refactor
       - documentation
       - l10n
     authors:

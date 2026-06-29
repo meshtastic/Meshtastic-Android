@@ -82,7 +82,9 @@ jobs:
           CLOSED_TAG: ${{ steps.tags.outputs.closed }}
           OPEN_TAG: ${{ steps.tags.outputs.open }}
         run: |
-          # Helper: generate notes using GitHub API (only works when previous_tag is a release tag)
+          # Helper: generate categorized notes via GitHub API, honoring
+          # .github/release.yml categories + excludes. Works with ANY existing
+          # tag as previous_tag (release OR channel), target = a tag or a SHA.
           generate_notes_api() {
             local target_sha="$1" previous_tag="$2"
             local body
@@ -99,17 +101,6 @@ jobs:
               | sed '/^\*\*Full Changelog\*\*/d' \
               | sed '/./,$!d' \
               | sed -e :a -e '/^\n*$/{$d;N;ba}'
-          }
-
-          # Helper: generate notes using GitHub compare API (works between any two refs)
-          generate_notes_git() {
-            local from_ref="$1" to_ref="$2"
-            gh api "repos/${REPO}/compare/${from_ref}...${to_ref}" \
-              --jq '.commits[]
-                | select(.parents | length == 1)
-                | select((.commit.message | split("\n")[0] | ascii_downcase | test("update changelog(\\.md)?")) | not)
-                | "* \(.commit.message | split("\n")[0]) by \(.commit.author.name) (@\(.author.login // .commit.author.name)) in [`\(.sha[0:9])`](https://github.com/'"${REPO}"'/commit/\(.sha))"' \
-              2>/dev/null || true
           }
 
           # Helper: demote ### headings to #### for nesting under channel sections
@@ -172,19 +163,13 @@ jobs:
           # === Generate segments (oldest to newest, each relative to its predecessor) ===
           SECTIONS=""
           PREV_REF="$PROD_TAG"
-          PREV_IS_PROD=true
 
           for ((i=0; i<N; i++)); do
             LABEL="${TAG_LABELS[$i]}"
             TAG="${TAG_NAMES[$i]}"
             SHA="${TAG_SHAS[$i]}"
 
-            # Use GitHub API when previous ref is a production tag, git log otherwise
-            if [ "$PREV_IS_PROD" = true ]; then
-              NOTES=$(generate_notes_api "$SHA" "$PREV_REF" | demote_headings)
-            else
-              NOTES=$(generate_notes_git "$PREV_REF" "$SHA")
-            fi
+            NOTES=$(generate_notes_api "$SHA" "$PREV_REF" | demote_headings)
 
             if [ -n "$NOTES" ]; then
               SECTION=$(cat <<SECTION
@@ -205,7 +190,6 @@ jobs:
             fi
 
             PREV_REF="$TAG"
-            PREV_IS_PROD=false
           done
 
           # === Unreleased segment (HEAD -> newest tag) ===
@@ -219,12 +203,12 @@ jobs:
             LATEST_TAG="$PROD_TAG"
           fi
           if [ "$HEAD_SHA" != "$(git rev-parse "$LATEST_TAG" 2>/dev/null)" ]; then
-            UNRELEASED_COMMITS=$(generate_notes_git "$LATEST_TAG" "$HEAD_SHA")
-            if [ -n "$UNRELEASED_COMMITS" ]; then
+            UNRELEASED_NOTES=$(generate_notes_api "$HEAD_SHA" "$LATEST_TAG" | demote_headings)
+            if [ -n "$UNRELEASED_NOTES" ]; then
               UNRELEASED_SECTION=$(cat <<SECTION
           ### Unreleased (not yet in any build)
 
-          ${UNRELEASED_COMMITS}
+          ${UNRELEASED_NOTES}
           SECTION
               )
             fi
