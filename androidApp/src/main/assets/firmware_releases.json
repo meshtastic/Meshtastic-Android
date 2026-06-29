@@ -189,12 +189,6 @@
   },
   "pullRequests": [
     {
-      "id": "10809",
-      "title": "Fix `spiLock` deadlocks / frequent watchdog restarts in `WarmNodeStore::save()`",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10809",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
       "id": "10807",
       "title": "Add DeltaPlusProto Edict board variant",
       "page_url": "https://github.com/meshtastic/firmware/pull/10807",
@@ -222,6 +216,12 @@
       "id": "10792",
       "title": "Add helpful checks of channel names and PSK",
       "page_url": "https://github.com/meshtastic/firmware/pull/10792",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "10791",
+      "title": "T5S3 ePaper build fix ",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10791",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
@@ -259,12 +259,6 @@
       "title": "Provide relay info for outbound packets and about subsequent relays",
       "page_url": "https://github.com/meshtastic/firmware/pull/10767",
       "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "10752",
-      "title": "Reset noise floor samples after frequency changes",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10752",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
       "id": "10729",
@@ -318,6 +312,12 @@
       "id": "10711",
       "title": "Fix SX126x daemon abort when Tx power exceeds chip limit",
       "page_url": "https://github.com/meshtastic/firmware/pull/10711",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
+      "id": "10689",
+      "title": "Heltec Vision Master E213: enable 32768hz crystal osc for rtc",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10689",
       "zip_url": "https://discord.com/invite/meshtastic"
     }
   ]
