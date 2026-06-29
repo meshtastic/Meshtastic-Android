@@ -46,6 +46,7 @@ import org.meshtastic.core.datastore.BootloaderWarningDataSource
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.MyNodeInfo
+import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FirmwareReleaseRepository
 import org.meshtastic.core.repository.NodeRepository
@@ -385,9 +386,9 @@ class FirmwareUpdateViewModel(
         // (stable-keyed) address. BLE/TCP have no such hot-plug recovery, so they still need the explicit re-address.
         address?.let { fullAddr ->
             if (radioPrefs.isSerial()) {
-                Logger.i { "Post-update: leaving USB reconnect to USB auto-recovery for $fullAddr" }
+                Logger.i { "Post-update: leaving USB reconnect to USB auto-recovery for ${fullAddr.anonymize}" }
             } else {
-                Logger.i { "Post-update: Requesting MeshService to reconnect to $fullAddr" }
+                Logger.i { "Post-update: Requesting MeshService to reconnect to ${fullAddr.anonymize}" }
                 radioController.setDeviceAddress(fullAddr)
             }
         }
