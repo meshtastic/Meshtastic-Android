@@ -31,9 +31,12 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberComposeBitmapDescriptor
 import com.google.maps.android.compose.rememberUpdatedMarkerState
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.app.map.convertIntToEmoji
+import org.meshtastic.core.model.geofence.toGeofence
 import org.meshtastic.core.model.util.GeoConstants.DEG_D
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.geofence
 import org.meshtastic.core.resources.locked
 import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.feature.map.BaseMapViewModel
@@ -71,11 +74,22 @@ fun WaypointMarkers(
                     Text(text = emojiText, fontSize = 32.sp, modifier = Modifier.padding(2.dp))
                 }
 
+            // Non-visual cue: the geofence is otherwise only an orange overlay, so surface it in the marker's
+            // accessible snippet for screen-reader and color-challenged users.
+            val description = waypoint.description.replace('\n', ' ').replace('\b', ' ')
+            val snippet =
+                if (waypoint.toGeofence() != null) {
+                    val geofenceLabel = stringResource(Res.string.geofence)
+                    if (description.isBlank()) geofenceLabel else "$description · $geofenceLabel"
+                } else {
+                    description
+                }
+
             Marker(
                 state = markerState,
                 icon = icon,
                 title = waypoint.name.replace('\n', ' ').replace('\b', ' '),
-                snippet = waypoint.description.replace('\n', ' ').replace('\b', ' '),
+                snippet = snippet,
                 visible = true,
                 onInfoWindowClick = {
                     if (waypoint.locked_to == 0 || waypoint.locked_to == myNodeNum || !isConnected) {

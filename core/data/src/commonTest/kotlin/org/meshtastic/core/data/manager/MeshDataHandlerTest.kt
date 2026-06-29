@@ -26,6 +26,7 @@ import dev.mokkery.verify
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -107,6 +108,16 @@ class MeshDataHandlerTest {
                 telemetryHandler = telemetryHandler,
                 adminPacketHandler = adminPacketHandler,
                 collectorRegistry = mock(MockMode.autofill),
+                // GeofenceMonitor is a final @Single (mokkery can't mock it) — use a real one over mocked
+                // collaborators. With no geofence-bearing waypoints emitted, onPositionReceived is a no-op.
+                geofenceMonitor =
+                GeofenceMonitor(
+                    packetRepository = lazy { packetRepository },
+                    nodeManager = nodeManager,
+                    serviceNotifications = serviceNotifications,
+                    crossingStore = GeofenceCrossingStore(),
+                    scope = testScope,
+                ),
                 scope = testScope,
             )
 
@@ -116,6 +127,8 @@ class MeshDataHandlerTest {
         every { nodeManager.getNodeById(any()) } returns null
         every { nodeManager.nodeDBbyNodeNum } returns emptyMap()
         every { radioConfigRepository.channelSetFlow } returns MutableStateFlow(ChannelSet())
+        // GeofenceMonitor collects this on init; stub it so the launched collector doesn't NPE on the test scope.
+        every { packetRepository.getWaypoints() } returns emptyFlow()
     }
 
     @Test

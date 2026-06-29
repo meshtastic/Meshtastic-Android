@@ -40,7 +40,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -59,7 +58,6 @@ import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.map.BaseMapViewModel
-import org.meshtastic.proto.Config
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -94,7 +92,7 @@ class MapViewModel(
     private val customTileProviderRepository: CustomTileProviderRepository,
     uiPrefs: UiPrefs,
     savedStateHandle: SavedStateHandle,
-) : BaseMapViewModel(mapPrefs, nodeRepository, packetRepository, radioController) {
+) : BaseMapViewModel(mapPrefs, nodeRepository, packetRepository, radioController, radioConfigRepository) {
 
     private val _selectedWaypointId = MutableStateFlow(savedStateHandle.get<Int>("waypointId"))
     val selectedWaypointId: StateFlow<Int?> = _selectedWaypointId.asStateFlow()
@@ -146,11 +144,6 @@ class MapViewModel(
 
     private val _selectedGoogleMapType = MutableStateFlow(MapType.NORMAL)
     val selectedGoogleMapType: StateFlow<MapType> = _selectedGoogleMapType.asStateFlow()
-
-    val displayUnits =
-        radioConfigRepository.deviceProfileFlow
-            .mapNotNull { it.config?.display?.units }
-            .stateInWhileSubscribed(initialValue = Config.DisplayConfig.DisplayUnits.METRIC)
 
     fun addCustomTileProvider(name: String, urlTemplate: String, localUri: String? = null) {
         viewModelScope.launch {

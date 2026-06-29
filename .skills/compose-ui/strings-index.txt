@@ -651,6 +651,24 @@ generate_input_event_on_ccw
 generate_input_event_on_cw
 generate_input_event_on_press
 generate_qr_code
+### GEOFENCE ###
+geofence
+geofence_box_author_confirm
+geofence_box_author_hint
+geofence_box_author_hint_viewport
+geofence_box_use_view
+geofence_edit_area
+geofence_entered_body
+geofence_entered_title
+geofence_favorites_only
+geofence_left_body
+geofence_left_title
+geofence_notify_on_enter
+geofence_notify_on_exit
+geofence_off
+geofence_radius
+geofence_remove_area
+geofence_set_area
 get_started
 good
 ### GPIO ###
