@@ -1332,7 +1332,10 @@
     <string name="traffic_management_router_preserve_hops">Conserver les sauts du Routeur</string>
     <string name="traffic_management_unknown_packet_threshold">Seuil de paquets inconnu</string>
     <string name="transmit_over_lora">Transmettre par LoRa</string>
+    <!-- TRANSPORT -->
     <string name="transport_ble">BLE</string>
+    <string name="transport_lora">LoRa</string>
+    <string name="transport_mqtt">MQTT</string>
     <string name="transport_tcp">TCP</string>
     <string name="transport_usb">USB</string>
     <string name="triple_click_adhoc_ping">Triple clic pour faire un ping Ad Hoc</string>

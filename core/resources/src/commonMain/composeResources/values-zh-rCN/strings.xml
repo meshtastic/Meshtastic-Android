@@ -19,21 +19,39 @@
     <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">来自 %1$s: %2$s 的消息</string>
+    <string name="a11y_node_battery">电量: %1$d%%</string>
+    <string name="a11y_node_distance_away">%1$s 离开</string>
+    <string name="a11y_node_favorite">收藏</string>
+    <string name="a11y_node_hops_away">%1$d 跳数</string>
+    <string name="a11y_node_last_heard">最后通信时间 %1$s</string>
+    <string name="a11y_node_offline">离线</string>
+    <string name="a11y_node_online">在线</string>
+    <string name="a11y_node_role">角色 %1$s</string>
+    <string name="a11y_node_signal">信号 %1$s</string>
     <string name="accept">接受</string>
     <string name="acknowledgements">开源</string>
     <!-- ACTION -->
+    <string name="action_copy_message">复制消息</string>
+    <string name="action_delete_message">删除消息</string>
+    <string name="action_react_with_emoji">表情回应</string>
     <string name="action_select_device">选择设备</string>
+    <string name="action_select_message">选择消息</string>
+    <string name="action_select_network">选择网络</string>
+    <string name="action_send_reply">发送回复</string>
+    <string name="action_show_message_status">显示消息状态</string>
     <string name="actions">操作</string>
     <string name="adc_multiplier_override">ADC 倍数覆盖</string>
     <string name="adc_multiplier_override_ratio">ADC乘数修正比率</string>
     <!-- ADD -->
     <string name="add">新增</string>
     <string name="add_a_note">添加便笺…</string>
+    <string name="add_channels_description">在二维码中发现了以下频道请选择您想要添加到设备中的频道现有的频道将被保留。</string>
     <string name="add_custom_tile_source">添加网络瓷块源</string>
     <string name="add_favorite">添加至收藏</string>
     <string name="add_layer">添加图层</string>
     <string name="add_local_mbtiles_file">添加本地MBTiles 文件</string>
     <string name="add_network_device">新增</string>
+    <string name="add_network_device_manually">手动添加设备…</string>
     <string name="add_network_layer">添加网络图层</string>
     <string name="address">地址</string>
     <string name="admin_key">管理员密钥</string>
@@ -43,7 +61,9 @@
     <string name="advanced_device_gps">高级设备 GPS</string>
     <string name="advanced_title">高级</string>
     <!-- AIR -->
+    <string name="air_quality">空气质量</string>
     <string name="air_quality_icon">空气质量图标</string>
+    <string name="air_quality_metrics_log">空气质量指标日志</string>
     <string name="air_quality_metrics_module_enabled">启用空气质量计量模块</string>
     <string name="air_quality_metrics_update_interval_seconds">空气质量计量更新间隔</string>
     <string name="air_util_definition">过去一小时内用于传输的空中占用时间百分比。</string>
@@ -65,10 +85,25 @@
     <string name="ambient_lighting">环境照明</string>
     <string name="ambient_lighting_config">环境亮度配置</string>
     <string name="analytics_notice">我们收集分析数据是为了帮助改进这款安卓应用（感谢您的支持），我们会收到关于用户行为的匿名信息。这包括崩溃报告、应用中使用过的屏幕等内容。</string>
-    <string name="analytics_okay">报告崩溃信息</string>
+    <string name="analytics_okay">报告崩溃信息。</string>
     <string name="analytics_platforms">分析平台：</string>
     <string name="any">任意内容</string>
     <!-- APP -->
+    <string name="app_functions_get_channel_info">获取频道信息</string>
+    <string name="app_functions_get_device_status">获取设备状态</string>
+    <string name="app_functions_get_mesh_metrics">获取网状网络指标</string>
+    <string name="app_functions_get_mesh_status">获取网状网络状态</string>
+    <string name="app_functions_get_node_details">获取节点详情</string>
+    <string name="app_functions_get_node_list">获取节点列表</string>
+    <string name="app_functions_get_recent_messages">获取近期消息</string>
+    <string name="app_functions_get_unread_summary">获取未读消息</string>
+    <string name="app_functions_master_summary">允许系统 AI 助手（例如 Gemini）发现并使用网状网络功能</string>
+    <string name="app_functions_master_toggle">允许AI访问</string>
+    <string name="app_functions_read_section">允许AI查看数据</string>
+    <string name="app_functions_send_message">发送消息</string>
+    <string name="app_functions_settings">系统AI</string>
+    <string name="app_functions_settings_summary">控制AI助手可以使用哪些功能</string>
+    <string name="app_functions_write_section">操作权限</string>
     <string name="app_notifications">应用通知</string>
     <string name="app_settings">App</string>
     <string name="app_too_old">需要更新应用程序</string>
@@ -80,6 +115,7 @@
     <string name="audio_config">音频配置</string>
     <string name="available_pins">可用引脚</string>
     <string name="back">后退</string>
+    <string name="backup_restore">备份 &amp; 还原</string>
     <string name="bad">差</string>
     <string name="bandwidth">带宽</string>
     <string name="baro_pressure">Baro</string>
@@ -92,19 +128,26 @@
     <string name="bluetooth">蓝牙</string>
     <string name="bluetooth_available_devices">可用的蓝牙设备</string>
     <string name="bluetooth_config">蓝牙配置</string>
+    <string name="bluetooth_disabled">蓝牙已关闭请打开蓝牙以扫描附近的设备。</string>
     <string name="bluetooth_enabled">启用蓝牙</string>
     <string name="bluetooth_feature_config">配置</string>
-    <string name="bluetooth_feature_config_description">无线的方式来管理您的设备设置和频道</string>
+    <string name="bluetooth_feature_config_description">无线管理您的设备设置和信道。</string>
     <string name="bluetooth_feature_discovery">发现</string>
-    <string name="bluetooth_feature_discovery_description">查找并识别附近的Meshtastic设备</string>
+    <string name="bluetooth_feature_discovery_description">查找并识别附近的Meshtastic设备。</string>
     <string name="bluetooth_permission">蓝牙</string>
     <string name="bold_heading">加粗标题</string>
+    <string name="bonding_failed_permissions">配对失败请授权附近设备权限后重试。</string>
+    <string name="bonding_failed_retry">配对未完成请尝试重新配对。</string>
     <string name="bottom_nav_settings">设置</string>
     <string name="broadcast_interval">广播间隔</string>
+    <string name="busy_noise_floor">当前信道繁忙</string>
     <string name="button_gpio">按钮 GPIO</string>
     <string name="buzzer_gpio">蜂鸣器 GPIO</string>
     <string name="calculating">正在计算……</string>
+    <string name="call_sign">短号</string>
+    <string name="call_sign_summary">业余无线电呼号最多 8 个字符</string>
     <string name="camera_permission">相机权限</string>
+    <string name="camera_permission_rationale">允许访问相机以扫描二维码。</string>
     <string name="cancel">取消</string>
     <string name="cancel_reply">取消回复</string>
     <string name="canned_message">预设消息</string>
@@ -133,6 +176,23 @@
     <string name="channels">频道</string>
     <!-- CHIRPY -->
     <string name="chirpy">Chirpy</string>
+    <string name="chirpy_assistant_title">Chirpy 助手</string>
+    <string name="chirpy_checking">正在检查 Chirpy 助手的可用性…</string>
+    <string name="chirpy_downloading">Chirpy 助手正在下载中…</string>
+    <string name="chirpy_downloading_progress">正在下载 Chirpy 语音模型: %1$d%%</string>
+    <string name="chirpy_downloading_subtitle">Chirpy 语音助手马上就好啦！</string>
+    <string name="chirpy_error_busy">当前信道因为流量太大，已经完全拥堵了！📶 让我们等待一个空闲的时段，然后再重试发送。</string>
+    <string name="chirpy_error_model_unavailable">请充电，固件还在下载中！🔋 给我一点时间来同步数据并启动吧！</string>
+    <string name="chirpy_error_token_budget_exceeded">你发送的数据包太大，超出了我的传输预算容量限制啦！📱 试着缩短一下你的消息，这样我们才能顺利把它路由出去。</string>
+    <string name="chirpy_error_unknown">哎呀！我们遇到了严重的丢包或信号干扰！📡 让我们重新发送一下那个查询请求，看看这次能不能顺利通联。</string>
+    <string name="chirpy_error_unsupported_flavor">我在这个应用版本中是在受限的频率下运行的！🔌 请尝试使用集成了完整 AI 核心。</string>
+    <string name="chirpy_error_unsupported_platform">哎呀！我的天线似乎无法在这个平台上建立连接。📡 请再次检查你的硬件兼容性！</string>
+    <string name="chirpy_intro">嘿，你好呀！📡 我是 Chirpy，你设备上的 Meshtastic 专属助手！我可以帮你进行设备设置、参数配置、故障排查，还能提供网状网络的小贴士。有什么我可以帮你的吗？</string>
+    <string name="chirpy_ready">询问 Chirpy</string>
+    <string name="chirpy_search_placeholder">询问关于 Meshtastic 的问题…</string>
+    <string name="chirpy_suggested_pages_help">以下是一些可能对你有帮助的文档页面：</string>
+    <string name="chirpy_thinking">Chirpy 正在通过网状网络进行路由传输…📡</string>
+    <string name="choose_contrast">对比度级别</string>
     <string name="choose_theme">选择主题</string>
     <!-- CLEAN -->
     <string name="clean_node_database_confirmation">这将从您的数据库中删除 %1$d 节点。 此操作无法撤消。</string>
@@ -143,12 +203,16 @@
     <string name="clean_unknown_nodes">仅清理未知节点</string>
     <string name="clear">清除</string>
     <string name="clear_selection">清除选择</string>
+    <string name="clear_time_zone">重置时区设置</string>
     <string name="client_notification">客户端通知</string>
     <string name="close">关闭</string>
     <string name="close_selection">关闭选中</string>
+    <string name="co2">二氧化碳</string>
     <string name="codec_2_enabled">启用CODEC2</string>
     <string name="codec2_sample_rate">CODEC2 采样率</string>
     <string name="coding_rate">编码率</string>
+    <string name="collapse_chart">折叠图表</string>
+    <string name="collapsed">已折叠</string>
     <string name="communicate_off_the_grid">在没有手机服务的情况下与您的朋友和社区进行网外通信。</string>
     <!-- COMPASS -->
     <string name="compass_bearing">方位信息: %1$s</string>
@@ -182,19 +246,20 @@
     <string name="config_display_wake_on_tap_or_motion_summary">需要在设备上有一个加速计。</string>
     <string name="config_lora_frequency_slot_summary">您的节点运行频率是根据地区、调制解调器预设和此字段计算的。 当0时，插槽会自动根据主频道名称计算，并会从默认的公共插槽中改变。 如果配置了私有的主频道和公立中等频道，则更改到公共默认频道。</string>
     <string name="config_lora_hop_limit_summary">设置节点的最大次数，默认值为 3。 增加频率也会增加拥塞，应该谨慎使用。0个节点广播消息不会得到ACK。</string>
+    <string name="config_lora_modem_preset_licensed_summary">该地区的预设参数仅供持证 (业余无线电) 操作员使用。请在用户配置中启用业余无线电选项，才能选择这些预设.</string>
     <string name="config_lora_modem_preset_summary">可用的调制解调器预置，默认为 “Long Fast”。</string>
     <string name="config_lora_region_summary">使用电台的地区。</string>
     <string name="config_network_eth_enabled_summary">启用以太网将禁用蓝牙连接。TCP节点连接在 Apple 设备上不可用。</string>
     <string name="config_network_udp_enabled_summary">在本地网络上启用通过 UDP广播数据包。</string>
     <string name="config_network_wifi_enabled_summary">启用 WiFi 将禁用应用程序的蓝牙连接。</string>
     <string name="config_position_broadcast_secs_summary">无节点广播位置的最大间隔。</string>
-    <string name="config_position_broadcast_smart_minimum_distance_summary">智能位置广播考虑的最小距离变化（以米为单位）。</string>
+    <string name="config_position_broadcast_smart_minimum_distance_summary">智能位置广播考虑的最小距离变化以米为单位。</string>
     <string name="config_position_broadcast_smart_minimum_interval_secs_summary">如果达到最小距离，位置更新将会发送最快的。</string>
-    <string name="config_position_flags_summary">包含的字段越多，信息就越大，导致通讯时间更长，丢包风险更高.</string>
-    <string name="config_position_gps_update_interval_summary">我们应该多长时间尝试获取GPS位置(&lt;10秒将GPS保持开启)。</string>
+    <string name="config_position_flags_summary">包含位置消息时可选择包含的附加字段。包含的字段越多，消息体积就越大——这会导致占用更长的空中传输时间并增加丢包的风险。</string>
+    <string name="config_position_gps_update_interval_summary">应该以多长的时间尝试获取 GPS 位置(&lt;10秒将GPS保持开启)。</string>
     <string name="config_power_is_power_saving_summary">尽可能让所有设备处于睡眠状态，对于跟踪器和传感器来说，这也包括 LoRa 无线电。如果您想将电台与手机 App 一起使用，或使用没有用户按钮的电台，请不要使用此设置。</string>
-    <string name="config_security_admin_key">授权向该节点发送管理员密钥</string>
-    <string name="config_security_debug_log_api_enabled">通过串行或蓝牙导出设备调试日志</string>
+    <string name="config_security_admin_key">授权向该节点发送管理员密钥。</string>
+    <string name="config_security_debug_log_api_enabled">通过串行或蓝牙导出设备调试日志。</string>
     <string name="config_security_is_managed">设备由 Mesh 管理员管理，用户无法访问任何设备设置。</string>
     <string name="config_security_private_key">用来创建远程设备共享密钥</string>
     <string name="config_security_public_key">从您的私钥生成并发送到网络上的其他节点，让它们能够计算共享的密钥。</string>
@@ -204,12 +269,16 @@
     <string name="configure_location_permissions">配置位置权限</string>
     <string name="configure_notification_permissions">配置通知权限</string>
     <string name="connect">连接</string>
+    <string name="connect_radio_for_remote_admin">连接到一台无线电设备，以管理远程节点。</string>
     <string name="connected">已连接</string>
     <string name="connected_device">已连设备</string>
     <string name="connected_sleeping">已连接至设备，但设备正在休眠中</string>
     <string name="connecting">正在连接</string>
-    <string name="connection_status">当前连接</string>
+    <string name="connection_status">当前连接：</string>
     <string name="connections">连接</string>
+    <string name="contrast">对比度</string>
+    <string name="contrast_high">高</string>
+    <string name="contrast_medium">中等</string>
     <string name="contrast_standard">标准</string>
     <string name="conversations">对话</string>
     <string name="copy">复制</string>
@@ -262,9 +331,13 @@
     <string name="delivery_confirmed">已送达</string>
     <string name="delivery_confirmed_reboot_warning">在应用设置时，您的设备可能会断开连接并重启。</string>
     <string name="demo_mode">演示模式</string>
+    <string name="demo_mode_replay">演示模式（回放）</string>
     <string name="desc_node_filter_clear">清除筛选</string>
     <string name="description">说明</string>
     <string name="desktop_notification_title">Meshtastic</string>
+    <string name="desktop_tray_quit">退出</string>
+    <string name="desktop_tray_show">显示 Meshtastic</string>
+    <string name="desktop_tray_tooltip">Meshtastic 桌面版</string>
     <string name="details">详细信息</string>
     <string name="detection_sensor">检测传感器</string>
     <string name="detection_sensor_config">检测传感器配置</string>
@@ -276,6 +349,9 @@
     <string name="device_db_cache_limit">设备数据库缓存限制</string>
     <string name="device_db_cache_limit_summary">节点在手机上数据缓存限制</string>
     <string name="device_gps">设备 GPS</string>
+    <string name="device_links">设备连接</string>
+    <string name="device_links_i_want_one">我想要一个</string>
+    <string name="device_links_open_in_browser">在浏览器中打开</string>
     <string name="device_metrics_label_value">%1$s: %2$s</string>
     <string name="device_metrics_log">设备指标</string>
     <string name="device_metrics_numeric_value">%1$s</string>
@@ -283,8 +359,10 @@
     <string name="device_metrics_update_interval_seconds">设备计量更新间隔 </string>
     <string name="device_metrics_voltage_value">%1$s: %2$s V</string>
     <string name="device_sleeping">设备休眠中</string>
+    <string name="device_storage_ui_title">设备存储&amp; UI (Read-Only)</string>
     <string name="device_telemetry_enabled">发送设备远程数据</string>
     <string name="device_telemetry_enabled_summary">启用/禁用设备遥测模块，以将指标发送至网络。这些是标称值。拥堵的网络会根据在线节点的数量自动调整为更长的间隔。节点少于个的网络会调整为更快的间隔。</string>
+    <string name="device_theme_language">主题: %1$s, 语言: %2$s</string>
     <string name="dew_point">结露点</string>
     <string name="direct_message">私信</string>
     <string name="direct_message_key">私信密钥</string>
@@ -293,11 +371,80 @@
     <string name="disconnected">已断开连接</string>
     <string name="discovered_network_devices">发现的网络设备</string>
     <!-- DISCOVERY -->
+    <string name="discovery_analysing_results">正在分析结果</string>
+    <string name="discovery_cancelling_scan">正在取消扫描</string>
+    <string name="discovery_connection_warning">未连接请连接到一台 Meshtastic 设备以开始扫描。</string>
+    <string name="discovery_delete_session">删除会话</string>
+    <string name="discovery_delete_session_confirm">你确定要删除这个发现会话吗？此操作无法撤销。</string>
+    <string name="discovery_dwell_minutes">%1$d 最小</string>
+    <string name="discovery_dwell_progress">正在处理数据 %1$s, %2$s 剩余</string>
+    <string name="discovery_dwell_time">停留时间</string>
+    <string name="discovery_dwell_time_description">在每个预设频段/信道上的监听时间</string>
+    <string name="discovery_empty_history">暂无发现会话</string>
+    <string name="discovery_export_report">导出报告</string>
+    <string name="discovery_history">扫描历史记录</string>
+    <string name="discovery_keep_screen_awake">保持屏幕常亮</string>
+    <string name="discovery_keep_screen_awake_description">防止手机休眠模式在长时间扫描期间丢弃无线电数据包推荐开启。</string>
+    <string name="discovery_local_mesh">本地网状网络发现</string>
+    <string name="discovery_lora_presets">LoRa 预设配置</string>
+    <string name="discovery_lora_presets_description">选择一个或多个预设频段/信道进行扫描</string>
+    <string name="discovery_map">网络拓扑地图</string>
+    <string name="discovery_not_connected">未连接</string>
+    <string name="discovery_not_connected_description">请连接到一台 Meshtastic 设备以开始扫描。</string>
+    <string name="discovery_paused">已暂停: %1$s</string>
+    <string name="discovery_preparing">正在扫描</string>
+    <string name="discovery_preset_home_label">%1$s (主页)</string>
+    <string name="discovery_reconnecting">正在重新连接 %1$s</string>
+    <string name="discovery_rerun_analysis">重新分析</string>
+    <string name="discovery_restoring_preset">正在恢复主页预设</string>
+    <string name="discovery_scan_complete">会话已完成</string>
+    <string name="discovery_scan_failed">扫描失败: %1$s</string>
+    <string name="discovery_scan_history">扫描历史</string>
+    <string name="discovery_scan_incomplete">会话未完成</string>
+    <string name="discovery_scan_progress">扫描进度</string>
+    <string name="discovery_scan_summary">扫描数量</string>
+    <string name="discovery_session_detail">会话详情</string>
+    <string name="discovery_shifting_to">正在切换至 %1$s</string>
+    <string name="discovery_start_scan">开始扫描</string>
+    <string name="discovery_start_scan_disabled">开始扫描按钮处于不可点击状态 %1$s</string>
+    <string name="discovery_start_scan_reason_24ghz_unsupported">无线电硬件不支持 2.4 GHz 频段</string>
+    <string name="discovery_start_scan_reason_default_key">该频道使用的是默认加密密钥</string>
+    <string name="discovery_start_scan_reason_no_presets">未选择任何预设</string>
+    <string name="discovery_start_scan_reason_not_connected">设备未连接</string>
+    <string name="discovery_stat_analysis">数据分析分析</string>
+    <string name="discovery_stat_avg_airtime_rate">平均空中占用率</string>
+    <string name="discovery_stat_avg_channel_utilization">平均信道利用率</string>
+    <string name="discovery_stat_bad_packets">错误数据包</string>
     <string name="discovery_stat_channel_utilization">频道使用</string>
     <string name="discovery_stat_date">日期</string>
     <string name="discovery_stat_direct">直频</string>
+    <string name="discovery_stat_duplicate_packets">重复数据包</string>
+    <string name="discovery_stat_dwelling_on">正停留在 %1$s</string>
+    <string name="discovery_stat_failure_rate">失败率</string>
+    <string name="discovery_stat_home_preset">主页预设</string>
+    <string name="discovery_stat_mesh">网状网络</string>
     <string name="discovery_stat_messages">消息</string>
+    <string name="discovery_stat_online_total_nodes">在线节点数 / 总节点数</string>
+    <string name="discovery_stat_packets_rx">接收数据包</string>
+    <string name="discovery_stat_packets_tx">发送数据包</string>
+    <string name="discovery_stat_preset_results">预设结果</string>
+    <string name="discovery_stat_presets_scanned">已扫描的预设</string>
+    <string name="discovery_stat_rf_health">射频健康状况</string>
     <string name="discovery_stat_selected">选择</string>
+    <string name="discovery_stat_sensor_pkts">传感器数据包</string>
+    <string name="discovery_stat_session_overview">会话概览</string>
+    <string name="discovery_stat_status">状态</string>
+    <string name="discovery_stat_success_rate">成功率</string>
+    <string name="discovery_stat_total_dwell_time">停留时间</string>
+    <string name="discovery_stat_total_messages">消息数</string>
+    <string name="discovery_stat_total_unique_nodes">独立节点数量</string>
+    <string name="discovery_stat_unique_nodes">独立节点</string>
+    <string name="discovery_stat_unselected">未选择</string>
+    <string name="discovery_stop_scan">停止扫描</string>
+    <string name="discovery_summary_not_available">AI 分析不可用</string>
+    <string name="discovery_time_remaining">%1$s 剩余时间</string>
+    <string name="discovery_unique_nodes">%1$d 独立节点</string>
+    <string name="discovery_view_map">查看地图</string>
     <string name="disk_free_indexed">存储空间剩余 %1$d</string>
     <!-- DISPLAY -->
     <string name="display">显示</string>
@@ -314,16 +461,60 @@
     <string name="dns">DNS</string>
     <!-- DOC -->
     <string name="doc_clear_search">清除搜索</string>
+    <string name="doc_keywords_android_auto">在开车时通过将手机投屏到汽车导航上来处理消息收发</string>
+    <string name="doc_keywords_app_functions">我们既需要仰望星空,利用systemAI和Gemini 探索智能的上限;也需要脚踏实地用 Meshtastic 这样的技术守住安全的底线</string>
+    <string name="doc_keywords_connections">蓝牙,usb,tcp,配对,串口,wifi</string>
+    <string name="doc_keywords_desktop">桌面端支持,linux,macos,windows,串口</string>
+    <string name="doc_keywords_discovery">发现机制,拓扑结构,网络,扫描,邻居</string>
+    <string name="doc_keywords_firmware">固件,更新,ota,烧录,版本,恢复模式</string>
+    <string name="doc_keywords_help">帮助,操作文档,文档,框架,智能助手,搜索,本地化</string>
+    <string name="doc_keywords_map">地图,路径点,定位,位置,地点,标记</string>
+    <string name="doc_keywords_measurement">格式化器,指标,数值,区域设置,温度,转换,应用程序编程接口</string>
+    <string name="doc_keywords_messages">消息,频道,加密,直接通信,广播,即时通讯,</string>
+    <string name="doc_keywords_mqtt">mqtt,代理服务器,互联网,网桥.上行链路,下行链路</string>
+    <string name="doc_keywords_node_metrics">指标,遥测,信号,信噪比,接收信号强度指示,电池,路由追踪,</string>
+    <string name="doc_keywords_nodes">节点,网状网络,列表,角色,状态,收藏,滤波器</string>
+    <string name="doc_keywords_onboarding">配置,欢迎界面,权限,首次启动</string>
+    <string name="doc_keywords_settings_module">模块,串行通信,遥测,预录制,存储转发,管理</string>
+    <string name="doc_keywords_settings_radio">配置,无线电,长距离低功耗无线技术,地区,调制解调器,设备,电力,安全</string>
+    <string name="doc_keywords_signal_meter">信号,接收信号强度指示,信噪比,信号格数,质量,长距离低功耗无线技术,噪声.仪表</string>
+    <string name="doc_keywords_tak">tak,atak,cursor-on-target,团队意识</string>
+    <string name="doc_keywords_telemetry">遥测,传感器,温度,湿度,压力,功率</string>
+    <string name="doc_keywords_translate">翻译,本地化管理平台,本地化,语言,国际化,贡献</string>
+    <string name="doc_keywords_units">单位,区域设置,公制,英制,温度,距离</string>
+    <string name="doc_keywords_widget">桌面小部件,主屏幕,本地统计数据,速览,电池,占用率</string>
+    <string name="doc_search_placeholder">搜索文档…</string>
+    <string name="doc_section_developer">开发者指南</string>
+    <string name="doc_section_user">使用文档</string>
+    <string name="doc_title_android_auto">Android Auto</string>
+    <string name="doc_title_app_functions">应用功能</string>
     <string name="doc_title_connections">连接数</string>
+    <string name="doc_title_desktop">桌面应用</string>
     <string name="doc_title_discovery">发现</string>
     <string name="doc_title_firmware">固件升级</string>
+    <string name="doc_title_help">帮助 &amp; 应用内文档</string>
+    <string name="doc_title_map">地图 &amp; 路径点</string>
+    <string name="doc_title_measurement">测量 &amp; 格式</string>
+    <string name="doc_title_messages">消息 &amp; 频道</string>
     <string name="doc_title_mqtt">MQTT</string>
+    <string name="doc_title_node_metrics">节点指标</string>
     <string name="doc_title_nodes">节点</string>
+    <string name="doc_title_onboarding">开始使用</string>
+    <string name="doc_title_settings_module">设置 — 模块 &amp; 管理员</string>
+    <string name="doc_title_settings_radio">设置 — 无线电 &amp; 用户</string>
+    <string name="doc_title_signal_meter">信号强度</string>
+    <string name="doc_title_tak">TAK 配置</string>
+    <string name="doc_title_telemetry">遥测 &amp; 传感器</string>
+    <string name="doc_title_translate">翻译此应用</string>
+    <string name="doc_title_units">Units &amp; 区域设置</string>
+    <string name="doc_title_widget">主屏幕小组件</string>
     <string name="done">完成</string>
+    <string name="dont_show_again_for_device">此设备不再显示</string>
     <string name="double_tap_as_button_press">双击作为按钮</string>
     <string name="downlink_enabled">启用下行</string>
     <string name="downlink_feature_description">来自公共互联网网关的消息会被转发到本地 mesh 网络。由于采用零跳策略，来自默认 MQTT 服务器的流量不会传播到该设备之外。</string>
     <string name="download">下载</string>
+    <string name="duplicated_public_key_title">检测到重复公钥</string>
     <string name="dynamic">动态</string>
     <string name="easily_set_up_private_mesh_networks">轻松建立私人网格网络，以便在偏远地区进行安全和可靠的通信。</string>
     <string name="echo_enabled">启用Echo</string>
@@ -349,16 +540,23 @@
     <string name="environment_metrics_use_fahrenheit">环境测量值使用华氏度</string>
     <string name="error">错误</string>
     <string name="error_duty_cycle">触及占空比上限。暂时无法发送消息，请稍后再试。</string>
+    <string name="error_recovery_exhausted">多次尝试后仍无法建立稳定的连接.请重新选择节点进行重试。</string>
+    <string name="establish_session">连接 &amp; 管理</string>
+    <string name="establishing_session">建立远程会话…</string>
     <string name="ethernet_config">以太网选项</string>
     <string name="ethernet_enabled">启用以太网</string>
     <string name="ethernet_ip">以太网 IP 地址：</string>
     <string name="exchange_position">交换位置</string>
+    <string name="expand_chart">展开图表</string>
+    <string name="expanded">展开</string>
     <string name="expires">有效期</string>
     <!-- EXPORT -->
     <string name="export_configuration">导出配置</string>
     <string name="export_data_csv">导出所有数据包</string>
+    <string name="export_gpx">导出 GPX 文件</string>
     <string name="export_keys">导出密钥</string>
     <string name="export_keys_confirmation">导出公钥和私钥到文件。请安全地存储某处。</string>
+    <string name="export_tak_data_package">导出 TAK 数据包</string>
     <string name="external_notification">外部通知</string>
     <string name="external_notification_config">外部通知设置</string>
     <string name="external_notification_enabled">启用外部通知</string>
@@ -368,6 +566,8 @@
     <string name="favorite">收藏</string>
     <string name="favorite_add">添加 '%1$s'到收藏？</string>
     <string name="favorite_remove">不再把'%1$s'添加到收藏？</string>
+    <string name="file_entry">- %1$s (%2$d 字节)</string>
+    <string name="files_available">可用文件 (%1$d)：</string>
     <!-- FILTER -->
     <string name="filter_add_placeholder">添加词语或正则表达式：模式</string>
     <string name="filter_disable_for_contact">禁用过滤</string>
@@ -391,9 +591,10 @@
     <string name="firmware_too_old">需要固件更新。</string>
     <string name="firmware_update_almost_there">即将完成…</string>
     <string name="firmware_update_alpha">开发版本</string>
+    <string name="firmware_update_battery_low">电池电量过低 (%1$d%). 请在更新前为您的设备充电。</string>
     <string name="firmware_update_checking">正在检查更新…</string>
     <string name="firmware_update_connecting_attempt">正在连接设备(尝试 %1$d/%2$d)...</string>
-    <string name="firmware_update_copying">请稍候，正在复制固件…</string>
+    <string name="firmware_update_copying">请稍候，正在复制固件……</string>
     <string name="firmware_update_currently_installed">目前已安装: %1$s</string>
     <string name="firmware_update_device">设备: %1$s</string>
     <string name="firmware_update_disclaimer_chirpy_says">请提前备份旧版本固件及降级教程，以备更新失败时恢复设备</string>
@@ -428,11 +629,14 @@
     <string name="firmware_update_node_info_missing">节点用户信息缺失</string>
     <string name="firmware_update_not_found_in_release">未找到 %1$s 的固件。</string>
     <string name="firmware_update_ota_failed">OTA更新失败: %1$s</string>
+    <string name="firmware_update_rak4631_bootloader_hint">对于 RAK WisBlock RAK4631,请使用厂商提供的串口 DFU 工具 (例如,使用提供的 bootloader .zip 文件配合 adafruit-nrfutil dfu serial 命令) .仅复制 .uf2 文件无法更新 Bootloader。</string>
     <string name="firmware_update_rebooting">正在重启到 DFU……</string>
     <string name="firmware_update_release_notes">更新日志</string>
     <string name="firmware_update_retrieval_failed">无法获取固件文件</string>
     <string name="firmware_update_retry">重试</string>
+    <string name="firmware_update_save_dfu_file">请将 .uf2 文件保存复制到您设备的 DFU 驱动器中。</string>
     <string name="firmware_update_select_file">选择本地文件</string>
+    <string name="firmware_update_slow_bootloader_hint">此设备当前的 Bootloader引导程序更新速度较慢。刷入 OTAFIX Bootloader 可以大幅提升 蓝牙更新的速度。</string>
     <string name="firmware_update_source_local">来源: 本地文件</string>
     <string name="firmware_update_stable">稳定版本</string>
     <string name="firmware_update_starting_dfu">正在启动 DFU...</string>
@@ -444,6 +648,7 @@
     <string name="firmware_update_unknown_error">未知错误</string>
     <string name="firmware_update_unknown_hardware">未知硬件型号: %1$d</string>
     <string name="firmware_update_unknown_release">未知的网络版本</string>
+    <string name="firmware_update_unsupported_transport">此设备不支持通过当前连接进行固件更新.请通过其他方式 (例如蓝牙) 连接以进行更新。</string>
     <string name="firmware_update_uploading">正在上传固件……</string>
     <string name="firmware_update_usb_bootloader_warning">%1$s通常配备的引导加载程序不支持OTA更新。在进行OTA刷写之前，您可能需要通过USB刷写一个支持OTA的引导加载程序。</string>
     <string name="firmware_update_usb_failed">USB 更新失败</string>
@@ -460,6 +665,7 @@
     <string name="flip_screen">翻转屏幕</string>
     <string name="for_more_information_see_our_privacy_policy">欲了解更多信息，请参阅我们的隐私政策。</string>
     <string name="free_memory">可用内存</string>
+    <string name="free_memory_description">可用系统内存</string>
     <string name="freq">频率</string>
     <string name="frequency_slot">频率</string>
     <string name="friendly_name">易记名称</string>
@@ -482,11 +688,13 @@
     <string name="gps_mode">GPS 模式 (物理硬件)</string>
     <string name="gps_receive_gpio">GPS 接收GPIO</string>
     <string name="gps_transmit_gpio">GPS 输出 GPIO</string>
+    <string name="grant_permission">授予权限</string>
     <string name="green">绿</string>
     <string name="hardware">硬件</string>
     <string name="hardware_model">硬件型号</string>
     <string name="heading">航向</string>
     <string name="heartbeat">心跳</string>
+    <string name="help_and_documentation">帮助 &amp; 文档</string>
     <string name="hide_layer">隐藏图层</string>
     <string name="hide_password">隐藏密码</string>
     <string name="history_return_max">历史记录最大返回值</string>
@@ -532,16 +740,25 @@
     <string name="ip_port">端口：</string>
     <string name="ipv4_mode">IPv4模式</string>
     <string name="json_output_enabled">启用JSON输出</string>
+    <string name="key_verification_final_title">密钥验证完成</string>
+    <string name="key_verification_request_title">密钥验证请求</string>
+    <string name="key_verification_title">密钥验证</string>
     <!-- LABEL -->
+    <string name="label_lite_fast">Lite - Fast</string>
+    <string name="label_lite_slow">Lite - Slow</string>
     <string name="label_long_fast">长距离 / 快速模式</string>
     <string name="label_long_moderate">长距离 / 中速模式</string>
     <string name="label_long_slow">长距离 / 低速模式</string>
     <string name="label_long_turbo">长距离 / 高速模式</string>
     <string name="label_medium_fast">中距离 / 快速模式</string>
     <string name="label_medium_slow">中距离 / 低速模式</string>
+    <string name="label_narrow_fast">Narrow - Fast</string>
+    <string name="label_narrow_slow">Narrow - Slow</string>
     <string name="label_short_fast">短距离 / 快速模式</string>
     <string name="label_short_slow">短距离 / 低速模式</string>
     <string name="label_short_turbo">短距离 / 高速模式</string>
+    <string name="label_tiny_fast">Tiny - Fast</string>
+    <string name="label_tiny_slow">Tiny - Slow</string>
     <string name="label_very_long_slow">超长距离 / 低速模式</string>
     <string name="last_heard_filter_label">按最后听到时间筛选：%1$s</string>
     <string name="last_position_update">最后位置更新</string>
@@ -553,10 +770,16 @@
     <string name="led_state">LED 状态</string>
     <string name="legacy_admin_channel">旧版管理频道</string>
     <string name="library_count">%1$d 库</string>
-    <string name="licensed_amateur_radio">业余无线电模式（HAM）</string>
+    <string name="licensed_amateur_radio">业余无线电模式（Ham）</string>
     <string name="licensed_amateur_radio_text">启用此选项将禁用加密并且不兼容默认的Meshtastic网络。</string>
     <!-- LOAD -->
     <string name="load">负载</string>
+    <string name="load_15_min">负载15分钟</string>
+    <string name="load_15_min_description">系统平均负载</string>
+    <string name="load_1_min">负载1分钟</string>
+    <string name="load_1_min_description">1分钟系统平均负载</string>
+    <string name="load_5_min">负载5分钟</string>
+    <string name="load_5_min_description">平均系统负载</string>
     <string name="load_indexed">载入 %1$d</string>
     <string name="loading">正在加载</string>
     <!-- LOCAL -->
@@ -573,10 +796,38 @@
     <string name="local_stats_traffic">流量：TX %1$d / RX %2$d (D： %3$d)</string>
     <string name="local_stats_updated_at">%1$s</string>
     <string name="local_stats_uptime">运行时间： %1$s</string>
+    <string name="local_stats_utilization">字符: %1$s% | 空中发射节点: %2$s%</string>
     <string name="location_disabled">位置访问已关闭，无法向网络提供位置信息</string>
     <string name="location_sharing">位置共享</string>
     <!-- LOCKDOWN -->
+    <string name="lockdown_backoff">请在之后重试 %1$d 秒。</string>
+    <string name="lockdown_boots_remaining">剩余启动次数</string>
+    <string name="lockdown_confirm_passphrase">确认密码短语</string>
+    <string name="lockdown_disable">禁用锁定</string>
+    <string name="lockdown_disable_message">请输入您的密码短语以关闭锁定状态.设备将解密其存储空间并重启。</string>
+    <string name="lockdown_enable">启用锁定功能模式</string>
+    <string name="lockdown_enable_ack">我明白了</string>
+    <string name="lockdown_enable_warning">高能预警:在支持的硬件上启用锁定模式将会锁死调试端口 (SWD) 你可以随时通过输入密码短语来关闭锁定模式如果情况紧急执行一次全设备擦除也能恢复一切。</string>
+    <string name="lockdown_enter_passphrase">输入密码短语</string>
     <string name="lockdown_hide_passphrase">隐藏</string>
+    <string name="lockdown_hours_until_expiry">距离失效还有多少小时</string>
+    <string name="lockdown_incorrect_passphrase">密码短语错误。</string>
+    <string name="lockdown_lock_now">立即锁定</string>
+    <string name="lockdown_lock_reason">原因: %1$s</string>
+    <string name="lockdown_mode">锁定模式</string>
+    <string name="lockdown_mode_setting_up">正在设置…</string>
+    <string name="lockdown_mode_summary_locked">活动状态 — 请输入您的密码短语以解锁此连接。</string>
+    <string name="lockdown_mode_summary_off">加密设备存储空间并要求每次连接时提供密码短语。</string>
+    <string name="lockdown_mode_summary_unlocked">活动状态 — 存储已加密此连接已通过身份验证。</string>
+    <string name="lockdown_passphrase">密码短语</string>
+    <string name="lockdown_passphrases_do_not_match">密码短语不匹配</string>
+    <string name="lockdown_session_boots_remaining">会话: %1$d 剩余重启次数</string>
+    <string name="lockdown_session_expires">过期时间 %1$s</string>
+    <string name="lockdown_session_minutes">会话上限 (分钟)</string>
+    <string name="lockdown_session_minutes_help">每次启动的最大存活时长. 0 = 无限制。</string>
+    <string name="lockdown_session_no_time_limit">无时间限制</string>
+    <string name="lockdown_set_passphrase">设置密码短语</string>
+    <string name="lockdown_show_passphrase">显示</string>
     <string name="lockdown_submit">提交</string>
     <string name="locked">锁定</string>
     <!-- LOG -->
@@ -597,6 +848,7 @@
     <string name="low_battery">电池电量低</string>
     <string name="low_battery_message">节点 %1$s 电量低(%2$d%)</string>
     <string name="low_battery_title">电池电量低: %1$s</string>
+    <string name="low_entropy_key_title">检测到弱加密密钥</string>
     <string name="lux">照度</string>
     <string name="manage_custom_tile_sources">管理自定义瓦片源</string>
     <string name="manage_map_layers">管理地图图层</string>
@@ -614,6 +866,7 @@
     <string name="map_download_region">下载区域</string>
     <string name="map_filter">地图过滤器\n</string>
     <string name="map_layer_formats">地图图层支持 .kml, .kmz, 或 GeoJSON 格式。</string>
+    <string name="map_node_popup_details">%1$s&lt;br&gt;最后通信时间: %2$s&lt;br&gt;最后位置: %3$s&lt;br&gt;电池电量: %4$s</string>
     <string name="map_offline_manager">离线管理</string>
     <string name="map_purge_fail">清除 SQL 缓存失败，请查看 logcat 纪录</string>
     <string name="map_purge_success">清除 %1$s 的 SQL 缓存</string>
@@ -654,12 +907,15 @@
     <string name="message_delivery_status">消息传递状态</string>
     <string name="message_device_managed">此电台由远程管理员管理。</string>
     <string name="message_input_label">信息</string>
+    <string name="message_status_delivered">已发送至网状网络</string>
     <string name="message_status_enroute">正在等待确认</string>
     <string name="message_status_queued">发送队列中</string>
     <string name="message_status_sfpp_confirmed">已在 SF++ 链上确认</string>
     <string name="message_status_sfpp_routing">通过 SF++ 链路路由…</string>
     <string name="message_status_unknown">未知</string>
     <string name="messages">消息</string>
+    <string name="micrograms_per_cubic_meter">微克每立方米</string>
+    <string name="min">最小值</string>
     <string name="minimum_broadcast_seconds">最小广播时间(秒)</string>
     <string name="minimum_distance">自动距离大小</string>
     <string name="minimum_interval">自动时间间隔</string>
@@ -673,8 +929,24 @@
     <string name="mqtt">MQTT</string>
     <string name="mqtt_config">MQTT设置</string>
     <string name="mqtt_enabled">启用MQTT</string>
+    <string name="mqtt_probe_dns_failure">主机未找到</string>
+    <string name="mqtt_probe_other_failure">连接失败</string>
+    <string name="mqtt_probe_rejected">代理服务器拒绝连接: %1$s</string>
+    <string name="mqtt_probe_running">正在使用代理服务器…</string>
+    <string name="mqtt_probe_success">网络可达代理服务器已连接上。</string>
+    <string name="mqtt_probe_success_with_info">网络可达 (%1$s)</string>
+    <string name="mqtt_probe_tcp_failure">无法通过 (TCP) 协议连接到代理服务器</string>
+    <string name="mqtt_probe_timeout">等待超时 %1$d 毫秒</string>
+    <string name="mqtt_probe_tls_failure">TLS 握手失败: %1$s</string>
+    <string name="mqtt_proxy_local">在此手机上开启 MQTT 代理</string>
+    <string name="mqtt_proxy_local_summary">此手机正在为已连接的设备中继 MQTT 流量。关闭此开关可立即切断中继，且不会更改设备本身的 MQTT 设置——当 MQTT 流量过大导致连接不堪重负时，此功能非常有用。重新打开即可恢复中继。</string>
     <string name="mqtt_status_connected">已连接</string>
+    <string name="mqtt_status_connecting">正在连接…</string>
     <string name="mqtt_status_disconnected">已断开连接</string>
+    <string name="mqtt_status_disconnected_with_reason">已断开连接 — %1$s</string>
+    <string name="mqtt_status_inactive">未启用</string>
+    <string name="mqtt_status_reconnecting">正在重新连接…</string>
+    <string name="mqtt_status_reconnecting_with_attempt">正在重新连接 (尝试 %1$d) — %2$s</string>
     <string name="mqtt_test_connection">连接测试</string>
     <string name="must_set_region">您必须先选择一个地区</string>
     <string name="must_update">您必须在应用商店或 Github上更新此应用程序。程序太旧了以至于无法与此装置进行通讯。 请阅读有关此主题的 <a href="https://meshtastic.org/docs/software/android/installation">文档</a>。</string>
@@ -685,6 +957,7 @@
     <string name="mute_always">始终</string>
     <string name="mute_notifications">消息免打扰</string>
     <string name="mute_remove">是否静音通知 '%1$s？</string>
+    <string name="mute_selected">已选择静音</string>
     <string name="mute_status_always">始终静音</string>
     <string name="mute_status_muted_for_days">%1$d 天静音， %2$s 小时</string>
     <string name="mute_status_muted_for_hours">%1$s 小时静音</string>
@@ -705,13 +978,21 @@
     <string name="next">下一步</string>
     <string name="nfc_disabled">NFC 已禁用，请在系统设置中启用它。</string>
     <!-- NO -->
-    <string name="no_custom_tile_sources_found">未找到自定义源</string>
+    <string name="no_bluetooth_devices_hint">请确保您在设备范围之内.</string>
+    <string name="no_bluetooth_devices_seen">未搜索到任何蓝牙设备</string>
+    <string name="no_custom_tile_sources_found">未找到自定义源.</string>
     <string name="no_device_selected">未选择设备</string>
+    <string name="no_devices_found">未发现任何设备</string>
+    <string name="no_files_manifested">未显示任何文件.</string>
     <string name="no_local_stats">没有可用的统计信息 </string>
-    <string name="no_map_layers_loaded">没有加载地图层</string>
+    <string name="no_map_layers_loaded">没有加载地图层.</string>
     <string name="no_network_devices_found">未找到网络设备</string>
+    <string name="no_network_devices_hint">请确保您与设备连接在同一个网络下.</string>
+    <string name="no_network_devices_seen">未发现任何网络设备</string>
     <string name="no_pax_metrics_logs">无可用的 PAX 计量.</string>
-    <string name="no_usb_devices_found">未找到USB设备。</string>
+    <string name="no_usb_devices_found">未找到USB设备</string>
+    <string name="no_usb_devices_hint">请通过 USB 数据线连接设备以使用串口功能.</string>
+    <string name="no_usb_devices_seen">未检测到任何 USB 设备</string>
     <!-- NODE -->
     <string name="node_count_template">(%1$d 在线 / %2$d 显示 / %3$d 总计)</string>
     <string name="node_filter_exclude_infrastructure">排除公共节点</string>
@@ -725,9 +1006,31 @@
     <string name="node_filter_title">筛选条件</string>
     <string name="node_id">节点ID</string>
     <string name="node_layout_channel">频道</string>
+    <string name="node_layout_compact">精简</string>
+    <string name="node_layout_compact_fields_header">精简显示</string>
+    <string name="node_layout_complete">完成</string>
+    <string name="node_layout_complete_description">完整布局会显示所有可用的节点数据.没有数据将被自动隐藏.</string>
+    <string name="node_layout_device_role">设备 &amp; 角色</string>
+    <string name="node_layout_distance_and_bearing">距离与方位</string>
+    <string name="node_layout_help_signal_bad">信号质量差.当前信噪比高于 -18 dB且 接收信号强度高于 -125。</string>
+    <string name="node_layout_help_signal_fair">信号质量中等.当前信噪比高于 -12 dB且 接收信号强度高于 -120 dBm。</string>
+    <string name="node_layout_help_signal_good">信号质量极佳.当前信噪比高于 -7 dB且接收信号强度高于 -115 dBm。</string>
+    <string name="node_layout_help_signal_indicator">将 SNR 和 RSSI 综合为一个质量等级，并以带有描述文字的彩色图标形式显示.此功能仅在完整布局下可见。</string>
+    <string name="node_layout_help_signal_none">未检测到可用信号.当前指标低于所有质量阈值。</string>
     <string name="node_layout_hops_away">跃点数</string>
+    <string name="node_layout_last_heard_time">最后活跃时间</string>
     <string name="node_layout_log_icons">传感器指标</string>
+    <string name="node_layout_no_preview_available">没有可供预览的节点。</string>
     <string name="node_layout_power">电源</string>
+    <string name="node_layout_preview">预览</string>
+    <string name="node_layout_relative_last_heard">相对最后活跃时间</string>
+    <string name="node_layout_section_title">节点布局</string>
+    <string name="node_layout_signal_direct_only">信号（仅限直连）</string>
+    <string name="node_layout_signal_quality_indicator">信号质量指标</string>
+    <string name="node_list_click_label">打开节点详情</string>
+    <string name="node_list_help_node_details">节点详细信息</string>
+    <string name="node_list_help_title">节点列表帮助</string>
+    <string name="node_list_long_click_label">节点选项</string>
     <string name="node_number">节点编号</string>
     <string name="node_sort_alpha">字母顺序</string>
     <string name="node_sort_button">节点排序选项</string>
@@ -744,8 +1047,14 @@
     <!-- NODES -->
     <string name="nodes">节点</string>
     <string name="nodes_at_this_location">在此位置的节点</string>
+    <string name="nodes_empty_disconnected_hint">连接设备以发现附近的节点。</string>
     <string name="nodes_empty_disconnected_title">设备未连接</string>
+    <string name="nodes_empty_searching_hint">附近节点在被发现后将显示在这里。</string>
+    <string name="nodes_empty_searching_title">正在搜索节点</string>
     <string name="nodes_queued_for_deletion">%1$d 节点待删除：</string>
+    <string name="noise_floor">底噪</string>
+    <string name="noise_floor_definition">无线电接收器测量到的背景射频噪声。较低的数值通常表示接收环境较为安静; -85 dBm 是一个表示环境繁忙的参考基准，而非硬性故障阈值。</string>
+    <string name="noise_floor_no_reading">底噪:未获取到数据</string>
     <string name="none">无 (停用)</string>
     <string name="none_quality">无</string>
     <string name="not_connected">尚未联机</string>
@@ -770,12 +1079,15 @@
     <string name="one_hour_short">1H</string>
     <string name="one_month">1M</string>
     <string name="one_week">1 周</string>
+    <string name="one_wire_temperature">1-Wire 温度传感器</string>
     <string name="only_favorites">仅收藏的</string>
     <!-- OPEN -->
+    <string name="open_bluetooth_settings">打开蓝牙设置</string>
     <string name="open_compass">打开指南针...</string>
     <string name="open_settings">打开设置</string>
     <string name="open_source_description">Meshtastic 是用以下开源库构建的。点击任何库查看其许可证。</string>
     <string name="open_source_libraries">开源库</string>
+    <string name="open_wifi_settings">打开 Wi-Fi 设置</string>
     <string name="options">选项</string>
     <string name="orient_north">朝北</string>
     <!-- OUTPUT -->
@@ -793,7 +1105,13 @@
     <string name="password">密码</string>
     <!-- PAX -->
     <string name="pax">PAX</string>
+    <string name="pax_ble_format">B:%1$d</string>
+    <string name="pax_ble_marker">蓝牙: %1$s</string>
     <string name="pax_metrics_log">PAX 计量日志</string>
+    <string name="pax_total_format">人员: %1$d</string>
+    <string name="pax_total_marker">人员: %1$s</string>
+    <string name="pax_wifi_format">W:%1$d</string>
+    <string name="pax_wifi_marker">无线网络: %1$s</string>
     <string name="paxcounter">客流计数</string>
     <string name="paxcounter_config">Paxcount 配置</string>
     <string name="paxcounter_enabled">启用 Paxcount</string>
@@ -811,6 +1129,9 @@
     <plurals name="plurals_seconds">
         <item quantity="other">%1$d 秒</item>
     </plurals>
+    <string name="pm1_0">PM1.0</string>
+    <string name="pm10">PM10</string>
+    <string name="pm2_5">PM2.5</string>
     <!-- POSITION -->
     <string name="position">定位</string>
     <string name="position_config_set_fixed_from_phone">根据当前手机位置设置</string>
@@ -826,6 +1147,7 @@
     <string name="power_metrics_on_screen_enabled">在屏幕上启用电源指标</string>
     <string name="power_metrics_update_interval_seconds">电量计更新间隔</string>
     <string name="powered">已插电</string>
+    <string name="ppm">总质量</string>
     <string name="precise_location">精准位置</string>
     <string name="preferences_language">语言</string>
     <string name="preferences_system_default">系统默认值</string>
@@ -833,6 +1155,16 @@
     <string name="press_and_drag">长按并拖动以重新排序</string>
     <string name="pressure">气压</string>
     <!-- PREVIEW -->
+    <string name="preview_custom_composable_line_one">这是一个自定义组合式组件</string>
+    <string name="preview_custom_composable_line_two">包含多行文本与多种样式</string>
+    <string name="preview_dot">点</string>
+    <string name="preview_footer">页脚位置</string>
+    <string name="preview_gauge">测量</string>
+    <string name="preview_gradient">渐变</string>
+    <string name="preview_header">页眉</string>
+    <string name="preview_item">项目 %1$d</string>
+    <string name="preview_pill">胶囊</string>
+    <string name="preview_text">文本</string>
     <string name="primary">主要</string>
     <string name="primary_channel_feature">定期广播位置和遥测</string>
     <string name="private_key">私钥</string>
@@ -854,6 +1186,8 @@
     <string name="quick_chat_show">显示快速聊天菜单</string>
     <string name="radiation">辐射</string>
     <string name="radio_configuration">设备配置</string>
+    <string name="rainfall_1h">雨量 (1小时)</string>
+    <string name="rainfall_24h">雨量 (24小时)</string>
     <string name="range_test">距离测试</string>
     <string name="range_test_config">范围测试设置</string>
     <string name="range_test_enabled">启用范围测试</string>
@@ -868,8 +1202,10 @@
     <string name="rebroadcast_mode_local_only_desc">忽略来自开放网状网络或无法解密的消息，仅在节点的本地主/次频道上重新广播消息。</string>
     <string name="rebroadcast_mode_none_desc">仅限 SENSOR、TRACKER 和 TAK_TRACKER 角色，此模式将禁止所有重新广播，与 CLIENT_MUTE 角色类似。</string>
     <string name="recent_network_devices">最近使用的网络设备</string>
+    <string name="reconnecting">正在重新连接…</string>
     <string name="red">红</string>
     <string name="refresh">刷新</string>
+    <string name="refresh_metadata">刷新元数据</string>
     <string name="regenerate_keys_confirmation">您确定要重新生成您的私钥吗？\n\n曾与此节点交换过密钥的节点将需要删除该节点并重新交换密钥以恢复安全通信。</string>
     <string name="regenerate_private_key">重新生成私钥</string>
     <string name="region_frequency_plan">区域</string>
@@ -879,6 +1215,7 @@
     <!-- REMOTE -->
     <string name="remote">远程</string>
     <string name="remote_admin">远程管理</string>
+    <string name="remote_admin_unreachable">无法连接节点 — 再试一次或移动更近。</string>
     <string name="remote_hardware">远程硬件</string>
     <string name="remote_hardware_config">远程硬件设置</string>
     <string name="remote_hardware_enabled">启用远程硬件</string>
@@ -886,6 +1223,7 @@
     <!-- REMOVE -->
     <string name="remove">移除</string>
     <string name="remove_favorite">从收藏中移除</string>
+    <string name="remove_filter">清除过滤条件</string>
     <string name="remove_ignored">从忽略中删除</string>
     <string name="remove_layer">移除图层</string>
     <string name="remove_node_text">此节点将从您的列表中删除，直到您的节点再次收到它的数据。</string>
@@ -911,6 +1249,9 @@
     <string name="reset_to_defaults">重置为默认设置</string>
     <string name="retry">重试</string>
     <string name="ringtone">铃声</string>
+    <string name="ringtone_file_empty">文件为空</string>
+    <string name="ringtone_import_error">导入错误: %1$s</string>
+    <string name="ringtone_imported">已导入铃声</string>
     <!-- ROLE -->
     <string name="role">设备角色</string>
     <string name="role_client_base_desc">将来自或收藏节点的数据包视为ROUTER_LATE，所有其他数据包均为CLIENT。</string>
@@ -928,6 +1269,7 @@
     <string name="role_tracker_desc">定位模式 - 用于作为 GPS 跟踪器。从该设备发送的定位数据包优先级较高，每两分钟广播一次。智能位置广播默认为关闭。</string>
     <string name="root_topic">根主题</string>
     <string name="rotary_encoder_1_enabled">启用旋转编码器 #1 </string>
+    <string name="router_role_confirmation_text">我已经阅读了 &lt;a href=\"https://meshtastic.org/docs/configuration/radio/device/#roles\"&gt;设备角色文档&lt;/a&gt; 这篇博客文章&lt;a href=\"http://meshtastic.org/blog/choosing-the-right-device-role\"&gt;选择合适的设备角色&lt;/a&gt;。</string>
     <!-- ROUTING -->
     <string name="routing_error_admin_bad_session_key">会话密钥错误</string>
     <string name="routing_error_admin_public_key_unauthorized">未授权的公钥</string>
@@ -957,15 +1299,20 @@
     <string name="save_rangetest">导出范围测试数据包</string>
     <!-- SCAN -->
     <string name="scan">扫描</string>
+    <string name="scan_bluetooth_devices">扫描蓝牙设备</string>
     <string name="scan_channels_nfc">扫描频道 NFC</string>
     <string name="scan_channels_qr">扫描频道二维码</string>
+    <string name="scan_network_devices">扫描网络设备</string>
     <string name="scan_nfc">NFC扫描</string>
-    <string name="scan_nfc_text">将您的设备靠近NFC标签</string>
+    <string name="scan_nfc_text">将您的设备靠近NFC标签。</string>
     <string name="scan_shared_contact_nfc">扫描共享联系人NFC</string>
     <string name="scan_shared_contact_qr">扫描共享联系人二维码</string>
+    <string name="scanning_bluetooth">正在扫描…</string>
+    <string name="scanning_network">正在扫描…</string>
     <string name="screen_on_for">开启屏幕</string>
     <string name="scroll_to_bottom">滚动到底部</string>
     <string name="search_emoji">搜索Emoji……</string>
+    <string name="search_messages">搜索消息…</string>
     <string name="secondary">次要</string>
     <string name="secondary_channel_position_feature">来自公共互联网网关的消息会被转发到本地 mesh 网络。由于采用零跳策略，来自默认 MQTT 服务器的流量不会传播到该设备之外。</string>
     <string name="secondary_no_telemetry">关闭定期广播遥测</string>
@@ -986,6 +1333,10 @@
     <string name="security_icon_insecure_precise_only">不安全的频道，精准位置</string>
     <string name="security_icon_secure">安全</string>
     <string name="security_icon_warning_precise_mqtt">警告：不安全，精准位置 &amp; MQTT Uplink</string>
+    <string name="security_signed_message_info">已通过发送方的密钥进行验证。</string>
+    <string name="security_signed_node">已签名节点</string>
+    <string name="security_signed_node_desc">自动验证通过</string>
+    <string name="security_signed_verified">已签名 · 已验证</string>
     <string name="select">选择</string>
     <string name="select_all">选择全部</string>
     <string name="selected">选择</string>
@@ -1001,7 +1352,13 @@
     <string name="serial_console">串口控制</string>
     <string name="serial_enabled">启用串口</string>
     <string name="serial_mode">串口模式</string>
+    <string name="serial_rx_pin">接收</string>
+    <string name="serial_tx_pin">发送</string>
     <string name="server">服务器</string>
+    <string name="session_active">会话处于活跃状态</string>
+    <string name="session_refresh_required">请刷新以获取最新状态</string>
+    <string name="set_time">设置时间</string>
+    <string name="set_up_connection">建立连接</string>
     <string name="set_your_region">设置您的地区</string>
     <string name="settings">设置</string>
     <!-- SHARE -->
@@ -1017,6 +1374,7 @@
     <string name="should_update_firmware">推荐固件更新。</string>
     <!-- SHOW -->
     <string name="show_all_key_title">加密密钥</string>
+    <string name="show_iaq_legend">显示空气质量图例</string>
     <string name="show_layer">显示图层</string>
     <string name="show_password">显示密码</string>
     <string name="show_precision_circle">显示精度圈</string>
@@ -1035,13 +1393,18 @@
     <string name="soil_moisture">土壤湿度</string>
     <string name="soil_temperature">土壤温度</string>
     <string name="speed">速度</string>
+    <string name="speed_kmh">%1$d 公里/小时</string>
     <string name="spread_factor">扩散因子</string>
     <string name="ssid">SSID</string>
     <string name="state_broadcast_seconds">状态广播(秒)</string>
     <string name="status_message">状态消息</string>
     <string name="status_message_config">状态消息配置</string>
     <string name="stay_connected_anywhere">随时随地保持联系</string>
+    <string name="store_forward">存储 &amp; 转发</string>
+    <string name="store_forward_config">存储 &amp; 转发配置</string>
+    <string name="store_forward_enabled">存储 &amp; 已启用转发</string>
     <string name="subnet">子版块</string>
+    <string name="success">成功</string>
     <string name="super_deep_sleep_duration_seconds">深度睡眠时间</string>
     <string name="supported">已支持</string>
     <string name="supported_by_community">由 Meshtastic 社区支持</string>
@@ -1060,7 +1423,19 @@
     <string name="tak_role_teamlead">团队组长</string>
     <string name="tak_role_teammember">团队成员</string>
     <string name="tak_role_unspecified">未指定</string>
+    <string name="tak_server">TAK 服务器</string>
+    <string name="tak_server_enabled">启用本地 TAK 服务器</string>
+    <string name="tak_server_enabled_desc">在 8089 端口启动一个本地 TLS 服务器，用于 ATAK/iTAK 客户端连接</string>
+    <string name="tak_server_export_data_package_desc">生成zip压缩包,供 ATAK/iTAK 客户端连接到本服务器使用</string>
+    <string name="tak_server_loading">…</string>
     <string name="tak_server_section">服务器</string>
+    <string name="tak_server_test_card_title">TAK 网状网络测试（调试模式）</string>
+    <string name="tak_server_test_idle">全部发送 %1$d 将测试固件数据发送至网状网络</string>
+    <string name="tak_server_test_result_bytes">%1$dB 节点状态正常</string>
+    <string name="tak_server_test_result_unknown_error">失败</string>
+    <string name="tak_server_test_results">%1$d 成功, %2$d 失败 %3$d/%4$d</string>
+    <string name="tak_server_test_run">运行</string>
+    <string name="tak_server_test_running">正在运行: %1$s</string>
     <string name="tak_team">队伍颜色</string>
     <string name="tak_team_blue">蓝</string>
     <string name="tak_team_brown">棕色</string>
@@ -1097,6 +1472,7 @@
     <string name="traceroute_direct">直连</string>
     <string name="traceroute_duration">持续时间: %1$s 秒</string>
     <string name="traceroute_endpoint_missing">无法显示路由跟踪地图，因为起始节点或目标节点没有位置信息</string>
+    <string name="traceroute_forward_hops">转发跳数</string>
     <plurals name="traceroute_hops">
         <item quantity="other">%d 越点数</item>
     </plurals>
@@ -1104,7 +1480,9 @@
     <string name="traceroute_map_no_data">此轨迹追踪器还没有任何可映射的节点。</string>
     <string name="traceroute_no_response">无响应</string>
     <string name="traceroute_outgoing_route">路由出口</string>
+    <string name="traceroute_return_hops">返回跳数</string>
     <string name="traceroute_return_route">路由回程</string>
+    <string name="traceroute_round_trip">往返时间</string>
     <string name="traceroute_route_back_to_us">路由回退到当前节点：\n\n</string>
     <string name="traceroute_route_towards_dest">路由追踪到目的地：\n\n</string>
     <string name="traceroute_showing_nodes">显示 %1$d/%2$d 节点</string>
@@ -1128,7 +1506,11 @@
     <string name="traffic_management_router_preserve_hops">保留路由跳数</string>
     <string name="traffic_management_unknown_packet_threshold">未知包阈值</string>
     <string name="transmit_over_lora">通过 LoRa 传输</string>
+    <!-- TRANSPORT -->
     <string name="transport_ble">BLE</string>
+    <string name="transport_lora">LoRa</string>
+    <string name="transport_mqtt">MQTT</string>
+    <string name="transport_tcp">TCP</string>
     <string name="transport_usb">USB</string>
     <string name="triple_click_adhoc_ping">快速按3下 向所有节点发送紧急广播</string>
     <string name="twenty_four_hours">24 小时</string>
@@ -1138,6 +1520,7 @@
     <string name="tx_power_dbm">发送强度</string>
     <string name="type">类型</string>
     <string name="type_a_message">输入一条消息</string>
+    <string name="udp_enabled">UDP 广播</string>
     <!-- UNKNOWN -->
     <string name="unknown">未知</string>
     <string name="unknown_age">未知时长</string>
@@ -1148,6 +1531,7 @@
     <string name="unmessageable">无法发送消息</string>
     <string name="unmonitored_or_infrastructure">不受监测或基础设施</string>
     <string name="unmute">取消静音</string>
+    <string name="unmute_selected">取消休眠所选节点</string>
     <string name="unrecognized">无法识别的</string>
     <string name="unset">未设定 - 0</string>
     <string name="up_down_select_input_enabled">启用Up/Down/select 输入</string>
@@ -1163,6 +1547,7 @@
     <string name="url_must_contain_placeholders">URL 必须包含占位符。</string>
     <string name="url_template">URL 模板</string>
     <string name="usb">USB</string>
+    <string name="usb_permission_denied">USB 权限被拒绝.请重新连接设备以重试。</string>
     <!-- USE -->
     <string name="use_12h_format">使用 12 小时制格式</string>
     <string name="use_homoglyph_characters_encoding">紧凑的Cyrillic编码</string>
@@ -1179,9 +1564,9 @@
     <string name="userinfo">用户信息</string>
     <string name="username">用户名</string>
     <string name="uv_lux">紫外线强度</string>
-    <string name="via_api">API</string>
+    <string name="via_api">通过 API</string>
     <string name="via_mqtt">通过 MQTT</string>
-    <string name="via_udp">UDP</string>
+    <string name="via_udp">通过 UDP</string>
     <string name="view_on_map">查看地图</string>
     <string name="view_release">查看发行版</string>
     <string name="voltage">电压</string>
@@ -1195,16 +1580,50 @@
     <string name="weight">重量</string>
     <!-- WIFI -->
     <string name="wifi_config">WiFi设置</string>
+    <string name="wifi_devices">MPWRD-OS 系统 Wi-Fi 配置</string>
     <string name="wifi_enabled">启用 WiFi</string>
     <string name="wifi_ip">Wifi IP地址：</string>
+    <string name="wifi_provision_available_networks">可用网络</string>
+    <string name="wifi_provision_connect_failed">无法连接: %1$s</string>
+    <string name="wifi_provision_description">通过蓝牙将 Wi-Fi 凭证预置/配置到你的 mPWRD-OS 设备中。</string>
+    <string name="wifi_provision_device_found">已发现设备</string>
+    <string name="wifi_provision_device_found_detail">准备开始搜索 Wi-Fi 网络。</string>
+    <string name="wifi_provision_hidden_network">隐藏网络</string>
+    <string name="wifi_provision_mpwrd_disclaimer">了解更多关于 mPWRD-OS 项目\nhttps://github.com/mPWRD-OS</string>
+    <string name="wifi_provision_no_networks">未发现网络</string>
+    <string name="wifi_provision_scan_failed">扫描WiFi网络失败: %1$s</string>
+    <string name="wifi_provision_scan_networks">扫描网络</string>
+    <string name="wifi_provision_scanning_ble">正在搜索设备…</string>
+    <string name="wifi_provision_scanning_wifi">正在扫描…</string>
+    <string name="wifi_provision_sending_credentials">正在应用 WiFi 配置…</string>
     <string name="wifi_provision_signal_strength">%1$d%</string>
+    <string name="wifi_provision_ssid_label">网络名称(SSID)</string>
+    <string name="wifi_provision_ssid_placeholder">输入或选择一个网络</string>
+    <string name="wifi_provision_status_applied">WiFi配置成功！</string>
+    <string name="wifi_provision_status_failed">应用 Wi-Fi 配置失败</string>
+    <string name="wifi_provision_success_description">您的 mPWRD-OS 设备已经加入 Wi-Fi 网络。</string>
+    <string name="wifi_provision_success_device_connected">设备已连接</string>
     <string name="wifi_provision_success_done">完成</string>
     <string name="wifi_provision_success_ip_address">IP 地址</string>
+    <string name="wifi_provision_success_missing_ip">IP 地址不可用</string>
+    <string name="wifi_provision_success_open_ssh">打开 SSH 客户端</string>
+    <string name="wifi_provision_success_open_ssh_fallback">如果没有应用程序自动打开，请复制 SSH 命令并将其粘贴到你的 SSH 客户端中。</string>
+    <string name="wifi_provision_success_setup_description">通过 SSH 登录以更改默认用户名和密码。</string>
+    <string name="wifi_provision_success_setup_title">完成设备设置</string>
+    <string name="wifi_provision_success_ssh_command">ssh %1$s@%2$s</string>
+    <string name="wifi_provision_success_ssh_label">SSH 命令</string>
+    <string name="wifi_provision_success_ssh_unavailable">分配 IP 地址后，SSH 命令即可使用。</string>
     <string name="wifi_provision_success_username">用户名称</string>
+    <string name="wifi_provisioning">为 mPWRD-OS 系统配置 Wi-Fi 网络</string>
     <string name="wifi_qr_code_error">WiFi凭据二维码格式无效</string>
     <string name="wifi_qr_code_scan">扫描 WiFi 二维码</string>
     <string name="wifi_rssi_threshold_defaults_to_80">WiFi RSSI 阈值(默认为-80)</string>
+    <string name="wifi_unavailable">未连接到 Wi-Fi,网络扫描可能找不到附近的设备。</string>
     <!-- WIND -->
     <string name="wind">风</string>
+    <string name="wind_direction">风向</string>
+    <string name="wind_gust">阵风</string>
+    <string name="wind_lull">微风</string>
+    <string name="wind_speed">风速</string>
     <string name="you">你</string>
 </resources>

@@ -1,9 +1,9 @@
 ---
-title: Telemetry & Sensors
+title: Telemeetria & Sensorid
 parent: User Guide
 nav_order: 9
 last_updated: 2026-05-13
-description: Sensor data on the mesh — supported environment, air quality, and power sensors, plus configuration and viewing guides.
+description: Kärgvõrgu andurite andmed — toetatud keskkonna-, õhukvaliteedi- ja võimsusandurid ning konfiguratsiooni- ja vaatamisjuhendid.
 aliases:
   - sensorid
   - environment
@@ -109,7 +109,7 @@ The CO₂ reading is color-coded by severity (Good → Stuffy → Poor → Unsaf
 
 ## Viewing Telemetry
 
-1. Navigate to **Nodes** and select a node.
+1. Mine **Seadmed** ja vali seade.
 2. Telemetry sections show on the detail screen:
    - Device Metrics (always available)
    - Environment Metrics (if sensors present)

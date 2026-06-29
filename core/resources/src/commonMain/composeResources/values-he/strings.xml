@@ -199,6 +199,7 @@
     <string name="traceroute">בדיקת מסלול</string>
     <string name="traceroute_log">בדיקת מסלול</string>
     <!-- TRAFFIC -->
+    <!-- TRANSPORT -->
     <!-- UNKNOWN -->
     <string name="unknown_username">שם המשתמש אינו מוכר</string>
     <!-- URL -->

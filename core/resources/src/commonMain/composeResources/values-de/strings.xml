@@ -61,7 +61,9 @@
     <string name="advanced_device_gps">Erweitertes GPS Gerät</string>
     <string name="advanced_title">Fortgeschritten</string>
     <!-- AIR -->
+    <string name="air_quality">Luftqualität</string>
     <string name="air_quality_icon">Symbol für Luftqualität</string>
+    <string name="air_quality_metrics_log"> Datenprotokoll Luftqualität</string>
     <string name="air_quality_metrics_module_enabled">Modul Luftqualität aktiviert</string>
     <string name="air_quality_metrics_update_interval_seconds">Aktualisierungsintervall der Luftqualität</string>
     <string name="air_util_definition">Prozentuale Sendezeit für die Übertragung innerhalb der letzten Stunde.</string>
@@ -87,6 +89,21 @@
     <string name="analytics_platforms">Analyse Plattformen:</string>
     <string name="any">Beliebig</string>
     <!-- APP -->
+    <string name="app_functions_get_channel_info">Kanalinfo abrufen</string>
+    <string name="app_functions_get_device_status">Gerätestatus abrufen</string>
+    <string name="app_functions_get_mesh_metrics">Mesh Daten abrufen</string>
+    <string name="app_functions_get_mesh_status">Mesh Status abrufen</string>
+    <string name="app_functions_get_node_details">Knotendetails abrufen</string>
+    <string name="app_functions_get_node_list">Knotenliste abrufen</string>
+    <string name="app_functions_get_recent_messages">Letzte Nachrichten abrufen</string>
+    <string name="app_functions_get_unread_summary">Zusammenfassung abrufen</string>
+    <string name="app_functions_master_summary">KI-Assistenten (z.B. Gemini) können Netzfunktionen entdecken und nutzen</string>
+    <string name="app_functions_master_toggle">KI Zugriff erlauben</string>
+    <string name="app_functions_read_section">Lesefunktionen</string>
+    <string name="app_functions_send_message">Nachricht senden</string>
+    <string name="app_functions_settings">System KI</string>
+    <string name="app_functions_settings_summary">Kontrollieren Sie, welche Funktionen für KI Assistenten verfügbar sind</string>
+    <string name="app_functions_write_section">Schreibfunktionen</string>
     <string name="app_notifications">App-Benachrichtigungen</string>
     <string name="app_settings">Anwendung</string>
     <string name="app_too_old">Anwendungsaktualisierung erforderlich</string>
@@ -111,6 +128,7 @@
     <string name="bluetooth">Bluetooth</string>
     <string name="bluetooth_available_devices">Verfügbare Bluetooth Geräte</string>
     <string name="bluetooth_config">Bluetooth Einstellungen</string>
+    <string name="bluetooth_disabled">Bluetooth ist aus. Schalten Sie es an, um nach Geräten in der Nähe zu suchen.</string>
     <string name="bluetooth_enabled">Bluetooth aktiviert</string>
     <string name="bluetooth_feature_config">Einstellungen</string>
     <string name="bluetooth_feature_config_description">Verwalten Sie drahtlos Ihre Geräteeinstellungen und Kanäle.</string>
@@ -118,12 +136,17 @@
     <string name="bluetooth_feature_discovery_description">Suchen und identifizieren Sie Meshtastic Geräte in Ihrer Nähe.</string>
     <string name="bluetooth_permission">Bluetooth</string>
     <string name="bold_heading">Fette Überschrift</string>
+    <string name="bonding_failed_permissions">Kopplung fehlgeschlagen. Erteilen Sie Geräten in der Nähe die Berechtigungen und versuchen Sie es erneut.</string>
+    <string name="bonding_failed_retry">Kopplung nicht abgeschlossen. Versuchen Sie es erneut.</string>
     <string name="bottom_nav_settings">Einstellungen</string>
     <string name="broadcast_interval">Übertragungsintervall</string>
+    <string name="busy_noise_floor">Rauschpegel</string>
     <string name="button_gpio">GPIO Taste</string>
     <string name="buzzer_gpio">GPIO Summer</string>
     <string name="calculating">Wird berechnet...</string>
+    <string name="call_sign">Rufzeichen</string>
     <string name="camera_permission">Kamera-Berechtigungen</string>
+    <string name="camera_permission_rationale">Kamera-Zugriff zum Scannen von QR-Codes erlauben.</string>
     <string name="cancel">Abbrechen</string>
     <string name="cancel_reply">Antwort abbrechen</string>
     <string name="canned_message">Vordefinierte Nachricht</string>
@@ -183,10 +206,12 @@
     <string name="client_notification">Warnmeldung</string>
     <string name="close">Schließen</string>
     <string name="close_selection">Auswahl schließen</string>
+    <string name="co2">CO₂</string>
     <string name="codec_2_enabled">CODEC 2 aktiviert</string>
     <string name="codec2_sample_rate">CODEC2 Abtastrate</string>
     <string name="coding_rate">Fehlerkorrektur</string>
     <string name="collapse_chart">Diagramm ausblenden</string>
+    <string name="collapsed">Einklappen</string>
     <string name="communicate_off_the_grid">Kommunizieren Sie außerhalb des Netzwerks mit Ihren Freunden und der Gemeinschaft ohne Mobilfunkdienst.</string>
     <!-- COMPASS -->
     <string name="compass_bearing">Kurs: %1$s</string>
@@ -340,11 +365,30 @@
     <string name="disconnected">Verbindung getrennt</string>
     <string name="discovered_network_devices">Entdeckte Netzwerkgeräte</string>
     <!-- DISCOVERY -->
+    <string name="discovery_session_detail">Sitzungsdetails</string>
+    <string name="discovery_shifting_to">Verschieben auf %1$s</string>
+    <string name="discovery_start_scan_reason_24ghz_unsupported">Funkgerät unterstützt keine 2,4 GHz</string>
+    <string name="discovery_start_scan_reason_default_key">Kanal verwendet standardmäßigen Verschlüsselungsschlüssel</string>
+    <string name="discovery_start_scan_reason_no_presets">Keine Voreinstellungen ausgewählt</string>
+    <string name="discovery_start_scan_reason_not_connected">Gerät nicht verbunden</string>
+    <string name="discovery_stat_analysis">Analyse</string>
+    <string name="discovery_stat_avg_airtime_rate">Durchschnittliche Sendezeit</string>
+    <string name="discovery_stat_avg_channel_utilization">Durchschnittliche Kanalbelegung</string>
+    <string name="discovery_stat_bad_packets">Fehlerhafte Pakete</string>
     <string name="discovery_stat_channel_utilization">Kanalauslastung</string>
     <string name="discovery_stat_date">Datum</string>
     <string name="discovery_stat_direct">Direkt</string>
+    <string name="discovery_stat_duplicate_packets">Doppelte Pakete</string>
+    <string name="discovery_stat_failure_rate">Fehlerrate</string>
+    <string name="discovery_stat_home_preset">Home Vorlage</string>
     <string name="discovery_stat_mesh">Netz</string>
     <string name="discovery_stat_messages">Nachrichten</string>
+    <string name="discovery_stat_online_total_nodes">Online / Gesamt Knoten</string>
+    <string name="discovery_stat_packets_rx">RX Pakete</string>
+    <string name="discovery_stat_packets_tx">TX Pakete</string>
+    <string name="discovery_stat_preset_results">Voreinstellung Ergebnisse</string>
+    <string name="discovery_stat_presets_scanned">Voreinstellungen gescannt</string>
+    <string name="discovery_stat_rf_health">HF Gesundheit</string>
     <string name="discovery_stat_selected">Ausgewählt</string>
     <string name="discovery_stat_status">Status</string>
     <string name="disk_free_indexed">Laufwerkspeicher frei %1$d</string>
@@ -1346,7 +1390,10 @@
     <string name="traffic_management_router_preserve_hops">Router Sprungweite erhalten</string>
     <string name="traffic_management_unknown_packet_threshold">Unbekannter Paketgrenzwert</string>
     <string name="transmit_over_lora">Übertragen über LoRa</string>
+    <!-- TRANSPORT -->
     <string name="transport_ble">BLE</string>
+    <string name="transport_lora">LoRa</string>
+    <string name="transport_mqtt">MQTT</string>
     <string name="transport_tcp">TCP</string>
     <string name="transport_usb">USB</string>
     <string name="triple_click_adhoc_ping">Dreifachklick für Ping</string>

@@ -1337,7 +1337,10 @@
     <string name="traffic_management_router_preserve_hops">保留路由跳數</string>
     <string name="traffic_management_unknown_packet_threshold">不明封包閾值</string>
     <string name="transmit_over_lora">通過Lora無線電傳輸</string>
+    <!-- TRANSPORT -->
     <string name="transport_ble">低功耗藍牙</string>
+    <string name="transport_lora">LoRa</string>
+    <string name="transport_mqtt">MQTT</string>
     <string name="transport_tcp">TCP</string>
     <string name="transport_usb">USB</string>
     <string name="triple_click_adhoc_ping">三擊執行 Ad Hoc Ping</string>

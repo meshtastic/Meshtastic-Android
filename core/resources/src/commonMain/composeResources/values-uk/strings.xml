@@ -21,6 +21,7 @@
     <string name="a11y_message_from">Повідомлення від %1$s: %2$s</string>
     <string name="a11y_node_battery">батарея: %1$d %</string>
     <string name="a11y_node_distance_away">%1$s від вас</string>
+    <string name="a11y_node_hops_away">%1$d стрибків</string>
     <string name="a11y_node_offline">офлайн</string>
     <string name="a11y_node_online">онлайн</string>
     <string name="accept">Прийняти</string>
@@ -1202,7 +1203,10 @@
     <string name="track_and_share_locations">Відстежуйте та діліться місцезнаходженням</string>
     <!-- TRAFFIC -->
     <string name="transmit_over_lora">Передавати через LoRa</string>
+    <!-- TRANSPORT -->
     <string name="transport_ble">BLE</string>
+    <string name="transport_lora">LoRa</string>
+    <string name="transport_mqtt">MQTT</string>
     <string name="transport_tcp">TCP</string>
     <string name="transport_usb">USB</string>
     <string name="triple_click_adhoc_ping">Швидка перевірка зв'язку потрійним натисканням</string>

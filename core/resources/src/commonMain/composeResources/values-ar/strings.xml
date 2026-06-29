@@ -226,6 +226,9 @@
     <!-- TRACEROUTE -->
     <string name="traceroute_direct">مباشره</string>
     <!-- TRAFFIC -->
+    <!-- TRANSPORT -->
+    <string name="transport_lora">إعدادات لورا</string>
+    <string name="transport_mqtt">MQTT</string>
     <string name="twenty_four_hours">24 ساعة</string>
     <string name="two_days">48 ساعات</string>
     <string name="two_weeks">أسبوعين</string>

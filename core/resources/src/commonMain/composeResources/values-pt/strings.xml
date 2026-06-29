@@ -545,6 +545,9 @@
     <string name="traceroute_log">Traçar rota</string>
     <!-- TRAFFIC -->
     <string name="transmit_over_lora">Enviar por LoRa</string>
+    <!-- TRANSPORT -->
+    <string name="transport_lora">LoRa</string>
+    <string name="transport_mqtt">MQTT</string>
     <string name="twenty_four_hours">24h</string>
     <string name="two_days">48 Horas</string>
     <string name="two_weeks">2sem</string>

@@ -109,7 +109,7 @@ Controls what telemetry data your node shares with the mesh. Telemetry includes 
 | Air Quality Enabled          | Report particulate sensor data          |
 | Power Metrics Enabled        | Report power usage                      |
 
-See [Telemetry & Sensors](telemetry-and-sensors) for supported sensors and configuration recommendations.
+Vaata [Telemeetria & Sensorid](telemetry-and-sensors) toetatud andurite ja sätete soovituste kohta.
 
 ### Eelsalvestatud sõnumi moodul
 
@@ -166,7 +166,7 @@ Juhib toetatud riistvaral NeoPixeli või muid adresseeritavaid RGB LEDe. Can be 
 | Sätted             | Kirjeldus                                                          |
 | ------------------ | ------------------------------------------------------------------ |
 | Lubatud            | LED juhtimise aktiveerimine                                        |
-| LED State          | Sees, Väljas või määrake konkreetne värv                           |
+| LED olek           | Sees, Väljas või määrake konkreetne värv                           |
 | Red / Green / Blue | Individuaalsete värvikanalite väärtused (0–255) |
 
 ### Tuvastusanduri moodul
@@ -196,7 +196,7 @@ Inimeste loendur WiFi ja BLE päringute abil. Counts nearby devices by passively
 
 ### TAK moodul
 
-Meeskonna teadlikkuse komplekti integratsioon ATAKi ja WinTAKi koostalitlusvõime tagamiseks. See [TAK Integration](tak) for detailed setup and usage.
+Meeskonna teadlikkuse komplekti integratsioon ATAKi ja WinTAKi koostalitlusvõime tagamiseks. Vaata [TAK Integration](tak) täpsema seadistamise ja kasutamise kohta.
 
 ## Haldus
 
@@ -205,8 +205,8 @@ Meeskonna teadlikkuse komplekti integratsioon ATAKi ja WinTAKi koostalitlusvõim
 Remotely configure nodes that share your admin key:
 
 1. Select the target node in the node list.
-2. Navigate to **Settings** for that node.
-3. Modify configuration.
+2. Mine selle sõlme **Seadetesse**.
+3. Muuda seadistust.
 4. Puuduta **Salvesta** – muudatused saadetakse kärgvõrgu kaudu.
 
 > ⚠️ **Nõutud:** Administraatori võtit, mis on seadistatud nii sinu kui ka sihtsõlmes.
@@ -217,7 +217,7 @@ Removes stale nodes from your local database that haven't been heard in a config
 
 ### Factory Reset
 
-Resets all settings to factory defaults. **This cannot be undone.**
+Resets all settings to factory defaults. **Seda ei saa tagasi võtta.**
 
 ### Taaskäivita
 
@@ -229,7 +229,7 @@ View detailed diagnostic information:
 
 - Protocol buffers debug output
 - Mesh packet log
-- Connection state details
+- Ühenduse oleku üksikasjad
 
 ### Troubleshooting Remote Admin
 

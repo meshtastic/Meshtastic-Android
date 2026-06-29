@@ -568,7 +568,10 @@
     <!-- TRAFFIC -->
     <string name="traffic_management_enabled">모듈 활성화</string>
     <string name="transmit_over_lora">LoRa로 전송</string>
+    <!-- TRANSPORT -->
     <string name="transport_ble">BLE</string>
+    <string name="transport_lora">LoRa</string>
+    <string name="transport_mqtt">MQTT</string>
     <string name="twenty_four_hours">24시간</string>
     <string name="two_days">48 시간</string>
     <string name="two_weeks">2주</string>

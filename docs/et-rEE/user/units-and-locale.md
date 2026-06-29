@@ -120,7 +120,7 @@ On Android, your measurement system (metric vs imperial) is tied to your region 
 ## Related Topics
 
 - [Node Metrics](node-metrics) — where temperature, distance, and sensor values are displayed
-- [Telemetry & Sensors](telemetry-and-sensors) — the sensors that produce these measurements
+- [Telemeetia & Sensorid](telemetry-and-sensors) — andurid, mis neid mõõtmisi teevad
 - [Settings — Radio & User](settings-radio-user) — region setting that drives unit selection
 
 ---

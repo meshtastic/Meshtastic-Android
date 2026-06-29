@@ -249,6 +249,7 @@
     <string name="traceroute">Traçar ruta</string>
     <string name="traceroute_log">Traçar ruta</string>
     <!-- TRAFFIC -->
+    <!-- TRANSPORT -->
     <string name="two_days">48 Hores</string>
     <!-- UNKNOWN -->
     <string name="unknown_username">Nom d'usuari desconegut</string>

@@ -289,6 +289,7 @@
     </plurals>
     <string name="traceroute_log">Pot</string>
     <!-- TRAFFIC -->
+    <!-- TRANSPORT -->
     <string name="twenty_four_hours">24ur</string>
     <string name="two_days">48 Ur</string>
     <string name="two_weeks">2T</string>

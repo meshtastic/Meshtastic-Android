@@ -1334,6 +1334,11 @@
     <string name="security_icon_insecure_precise_only">Kanava ei ole suojattu, sijaintitieto ei ole tarkka</string>
     <string name="security_icon_secure">Suojattu</string>
     <string name="security_icon_warning_precise_mqtt">Varoitus: Salaamaton yhteys, tarkka sijainti &amp; MQTT-lähetys käytössä</string>
+    <string name="security_signed_message_info">Varmennettu lähettäjän avaimella.</string>
+    <string name="security_signed_node">Allekirjoitettu radio</string>
+    <string name="security_signed_node_desc">Varmennettu automaattisesti</string>
+    <string name="security_signed_node_help">Tämä radio allekirjoittaa lähetyksensä XEdDSA:lla. Tämän radion lähetykset, jotka näet, radio varmentaa sen identiteettiavaimella.</string>
+    <string name="security_signed_verified">Allekirjoitettu · varmennettu</string>
     <string name="select">Valitse</string>
     <string name="select_all">Valitse kaikki</string>
     <string name="selected">Valittu</string>
@@ -1504,8 +1509,14 @@
     <string name="traffic_management_router_preserve_hops">Säilytä välittäjien hypyt</string>
     <string name="traffic_management_unknown_packet_threshold">Tuntemattomien pakettien kynnysarvo</string>
     <string name="transmit_over_lora">Lähetä LoRa:n kautta</string>
+    <!-- TRANSPORT -->
+    <string name="transport">Kuljetus</string>
+    <string name="transport_api">API</string>
     <string name="transport_ble">BLE</string>
+    <string name="transport_lora">LoRa</string>
+    <string name="transport_mqtt">MQTT</string>
     <string name="transport_tcp">TCP</string>
+    <string name="transport_udp">UDP</string>
     <string name="transport_usb">USB</string>
     <string name="triple_click_adhoc_ping">Kolmoisklikkaus Ad Hoc -pingille</string>
     <string name="twenty_four_hours">24t</string>

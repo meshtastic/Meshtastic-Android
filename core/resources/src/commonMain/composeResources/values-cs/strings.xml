@@ -1063,6 +1063,9 @@
     <!-- TRAFFIC -->
     <string name="traffic_management_position_min_interval">Minimální interval pozice (v sekundách)</string>
     <string name="transmit_over_lora">Přenos přes LoRa</string>
+    <!-- TRANSPORT -->
+    <string name="transport_lora">LoRa</string>
+    <string name="transport_mqtt">MQTT</string>
     <string name="transport_usb">USB</string>
     <string name="triple_click_adhoc_ping">Okamžitý ping (trojitý stisk)</string>
     <string name="twenty_four_hours">24H</string>

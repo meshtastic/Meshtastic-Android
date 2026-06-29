@@ -118,7 +118,7 @@ Type in the search field to filter nodes by name or short name. The filter updat
 | **Last heard** (default) | Most recently heard nodes first                                    |
 | **Alphabetical**                            | Sorted by node long name                                           |
 | **Distance**                                | Nearest nodes first (requires position sharing) |
-| **Hops away**                               | Fewest relay hops first                                            |
+| **Стрибків**                                | Fewest relay hops first                                            |
 | **Channel**                                 | Grouped by channel index                                           |
 | **Via MQTT**                                | Grouped by MQTT vs. radio-heard                    |
 | **Favorites**                               | Favorited nodes first                                              |

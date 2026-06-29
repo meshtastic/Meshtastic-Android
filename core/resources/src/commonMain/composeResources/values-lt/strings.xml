@@ -282,6 +282,7 @@
     </plurals>
     <string name="traceroute_log">Žinutės kelias</string>
     <!-- TRAFFIC -->
+    <!-- TRANSPORT -->
     <string name="twenty_four_hours">24 val</string>
     <string name="two_days">48 Valandos</string>
     <string name="two_weeks">2 sav</string>

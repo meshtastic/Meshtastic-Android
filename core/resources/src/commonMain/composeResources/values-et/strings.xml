@@ -1333,6 +1333,10 @@
     <string name="security_icon_insecure_precise_only">Ebaturvaline kanal, asukoht täpne</string>
     <string name="security_icon_secure">Turvaline</string>
     <string name="security_icon_warning_precise_mqtt">Hoiatus: ebaturvaline, täpne asukoht &amp; MQTT saatmine</string>
+    <string name="security_signed_message_info">Tõendatud saatja võtmega.</string>
+    <string name="security_signed_node">Registreeritud sõlm</string>
+    <string name="security_signed_node_desc">Tõendatud automaatselt</string>
+    <string name="security_signed_verified">Registreeritud - tõendatud</string>
     <string name="select">Vali</string>
     <string name="select_all">Vali kõik</string>
     <string name="selected">Valitud</string>
@@ -1503,7 +1507,10 @@
     <string name="traffic_management_router_preserve_hops">Säilita ruuteri hüpped</string>
     <string name="traffic_management_unknown_packet_threshold">Tundmatu pakettide lävi</string>
     <string name="transmit_over_lora">Saada LoRa kaudu</string>
+    <!-- TRANSPORT -->
     <string name="transport_ble">BLE</string>
+    <string name="transport_lora">LoRa</string>
+    <string name="transport_mqtt">MQTT</string>
     <string name="transport_tcp">TCP</string>
     <string name="transport_usb">USB</string>
     <string name="triple_click_adhoc_ping">Kolmekordne klõps Ad Hoc Ping</string>

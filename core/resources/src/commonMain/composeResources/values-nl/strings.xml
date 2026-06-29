@@ -452,6 +452,9 @@
     <string name="traceroute_log">Traceroute</string>
     <!-- TRAFFIC -->
     <string name="transmit_over_lora">Zend over LoRa</string>
+    <!-- TRANSPORT -->
+    <string name="transport_lora">LoRa</string>
+    <string name="transport_mqtt">MQTT</string>
     <string name="twenty_four_hours">24U</string>
     <string name="two_days">48 Uur</string>
     <string name="two_weeks">2W</string>

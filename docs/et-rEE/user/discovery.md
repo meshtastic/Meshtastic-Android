@@ -54,12 +54,12 @@ While a scan runs, Discovery shows its current stage:
 
 | Stage                                                 | What's happening                                                                                       |
 | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| **Preparing**                                         | Saving your current configuration and getting ready to scan.                           |
+| **Preparing**                                         | Praeguste sätete salvestamine ja skannimiseks valmistumine.                            |
 | **Shifting to \<preset\>** | Switching the radio to the next preset to test.                                        |
 | **Reconnecting**                                      | Re-establishing the connection after the preset change.                                |
 | **Dwell**                                             | Listening on the current preset to collect packets, with a countdown to the next step. |
 | **Analysis**                                          | Processing the collected packets and ranking the presets.                              |
-| **Restoring**                                         | Putting your original LoRa configuration back.                                         |
+| **Restoring**                                         | Algsete LoRa seadete taastamine.                                                       |
 
 ![Dwell countdown showing time remaining on the current preset](../../assets/screenshots/discovery_dwell_progress.png)
 
