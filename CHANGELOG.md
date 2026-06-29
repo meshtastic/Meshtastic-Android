@@ -9,37 +9,32 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
-* feat(security): surface XEdDSA packet signing in node & messaging UI (#5976) by James Rich (@jamesarich) in [`5a035ac1f`](https://github.com/meshtastic/Meshtastic-Android/commit/5a035ac1f101d76e5942f157729cb4bb9e0c4b81)
-* chore(deps): update vico to v3.3.0-next.1 (#5975) by renovate[bot] (@renovate[bot]) in [`b8fe31203`](https://github.com/meshtastic/Meshtastic-Android/commit/b8fe3120352d2c559bbfde6a0bdf0aa20f8df807)
-* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs, Baseline) (#5978) by James Rich (@jamesarich) in [`a386e1d84`](https://github.com/meshtastic/Meshtastic-Android/commit/a386e1d84d9d8122f657dd8902b1cde77a440990)
+#### 🏗️ Features
+* fix(security): make XEdDSA signing shield green & prominent by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5980
+* Prevent Range Test from running on public/default channel by @dubsector in https://github.com/meshtastic/Meshtastic-Android/pull/5986
+* feat(network): migrate TcpTransport to ktor-network (commonMain) by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5995
+* feat(ui): StatusSurface AA legibility + node-details signing/transport polish by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5985
+#### 🛠️ Fixes
+* fix(ble): Fail bonding promptly when polled state returns none by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/5982
+* fix(car): wire notifications & emergency, fix TabTemplate crash, pin car-app to stable by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5997
+* fix(qr): Serialize channel import writes by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/5999
+#### 📝 Other Changes
+* refactor(ui): migrate MapView dialog to Compose M3 + drop legacy material dependency by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5988
+* refactor(settings): replace SimpleDateFormat with kotlinx-datetime by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5992
+* refactor(car): drop dead FuzzyNodeNameResolver duplicate by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5994
 
-### Internal (v2.8.0-internal.8)
+### Internal (v2.8.0-internal.9)
 Changes since [`v2.8.0-closed.1`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.0-closed.1):
 
-* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs, Baseline) (#5948) by James Rich (@jamesarich) in [`40627fb02`](https://github.com/meshtastic/Meshtastic-Android/commit/40627fb02addd504df3e3b6713d05673d9ca9af3)
-* refactor: drop two over-engineered seams (enum + stdlib Base64) (#5945) by James Rich (@jamesarich) in [`ab07347e5`](https://github.com/meshtastic/Meshtastic-Android/commit/ab07347e5af5fe680a7d1a32b3551ca6eb12255c)
-* fix(usb): Surface permission denial as permanent disconnect (#5943) by Jeremiah K (@jeremiah-k) in [`09cde67e5`](https://github.com/meshtastic/Meshtastic-Android/commit/09cde67e511d9bc7f61254a1dba4f39cf9fa8207)
-* chore(deps): update aboutlibraries to v15.0.1 (#5949) by renovate[bot] (@renovate[bot]) in [`cb8fbd739`](https://github.com/meshtastic/Meshtastic-Android/commit/cb8fbd73921ce39ae5efcd83005863f0dc128fd9)
-* chore(deps): update ktor to v3.5.1 (#5951) by renovate[bot] (@renovate[bot]) in [`fad8e5f0e`](https://github.com/meshtastic/Meshtastic-Android/commit/fad8e5f0e3dee4eb9913771b407c6a430c028a25)
-* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs, Baseline) (#5952) by James Rich (@jamesarich) in [`aa4d040f4`](https://github.com/meshtastic/Meshtastic-Android/commit/aa4d040f4c0faf441f1e69a1541f377b23b563ae)
-* chore(deps): update com.google.android.gms:play-services-location to v21.4.0 (#5954) by renovate[bot] (@renovate[bot]) in [`4d7157da9`](https://github.com/meshtastic/Meshtastic-Android/commit/4d7157da904f951c76b48edcb3ed326e1e43d2b5)
-* chore(deps): update org.meshtastic:protobufs to v2.7.26-21879a9-snapshot (#5938) by renovate[bot] (@renovate[bot]) in [`3d981895f`](https://github.com/meshtastic/Meshtastic-Android/commit/3d981895fe56046b2dd160b0249619c1d48f919d)
-* chore(deps): update aboutlibraries to v15.0.2 (#5953) by renovate[bot] (@renovate[bot]) in [`df21efb98`](https://github.com/meshtastic/Meshtastic-Android/commit/df21efb98600c516ecbb52832a442a943bcddc23)
-* refactor(ble): Make Kable connect fallback explicitly bounded (#5944) by Jeremiah K (@jeremiah-k) in [`725133ec4`](https://github.com/meshtastic/Meshtastic-Android/commit/725133ec4aa8554ee84cd205e741404c9af996d7)
-* refactor(connections): Show one active transport pane (#5956) by Jeremiah K (@jeremiah-k) in [`33a4ca673`](https://github.com/meshtastic/Meshtastic-Android/commit/33a4ca6731fee1bd94a39ad729a251239751080b)
-* ci: fix Android docs sync (remove stray workflow, prune stale pages) (#5955) by James Rich (@jamesarich) in [`89f41dea5`](https://github.com/meshtastic/Meshtastic-Android/commit/89f41dea53f2cb954bc9ca07fe9983e98ed5fb7b)
-* chore(deps): update kotlin-toolchain to v3.4.2 (#5959) by renovate[bot] (@renovate[bot]) in [`f60525ab2`](https://github.com/meshtastic/Meshtastic-Android/commit/f60525ab22fda815e685c6945c7b5bc5c32b7657)
-* fix(ble): Restore bounded bonded reconnect fallback (#5960) by Jeremiah K (@jeremiah-k) in [`780bec03f`](https://github.com/meshtastic/Meshtastic-Android/commit/780bec03f91823524df96f3d0a08ea60ba4dcdf9)
-* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs, Baseline) (#5958) by James Rich (@jamesarich) in [`b86b44e62`](https://github.com/meshtastic/Meshtastic-Android/commit/b86b44e6294e45fffa52f8747af1399c6fbacf9a)
-* docs: veracity pass, screenshot enrichment & screenshot-pipeline split (#5961) by James Rich (@jamesarich) in [`d8e0c1dd5`](https://github.com/meshtastic/Meshtastic-Android/commit/d8e0c1dd5036188269cdbb75b73995273a740d2c)
-* fix(docs): preserve #anchor when rewriting sibling links for Docusaurus (#5963) by James Rich (@jamesarich) in [`a511fcf5e`](https://github.com/meshtastic/Meshtastic-Android/commit/a511fcf5ecbdb1efad0e0c374783530c4c9b34ca)
-* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs, Baseline) (#5964) by James Rich (@jamesarich) in [`b80862d36`](https://github.com/meshtastic/Meshtastic-Android/commit/b80862d36e45b94ad189257813fa46f699ae0c83)
-* fix(ble): Bound Android bonding wait (#5967) by Jeremiah K (@jeremiah-k) in [`fe019d3fa`](https://github.com/meshtastic/Meshtastic-Android/commit/fe019d3fa5281fc0564c6751ccf3bcd631883fc3)
-* chore(deps): update gradle to v9.6.1 (#5971) by renovate[bot] (@renovate[bot]) in [`1d11adb75`](https://github.com/meshtastic/Meshtastic-Android/commit/1d11adb75eabb7649f9902545f65cb598bc58594)
-* fix(ble): Avoid duplicate bonding retries after pairing failure (#5969) by Jeremiah K (@jeremiah-k) in [`5c83333f9`](https://github.com/meshtastic/Meshtastic-Android/commit/5c83333f94535dba311461b11088e6526d9168ed)
-* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs, Baseline) (#5972) by James Rich (@jamesarich) in [`8e99d1b91`](https://github.com/meshtastic/Meshtastic-Android/commit/8e99d1b91bb908e2a65f3fb73120c92fe48ac486)
-* fix(ble): Stop transport connect after failed bonding (#5973) by Jeremiah K (@jeremiah-k) in [`86580db6c`](https://github.com/meshtastic/Meshtastic-Android/commit/86580db6cfe9c20712b2a24c1658216732d647b7)
-* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs, Baseline) (#5974) by James Rich (@jamesarich) in [`630a4351e`](https://github.com/meshtastic/Meshtastic-Android/commit/630a4351eb003f64e63ab43009aed6951819c65e)
+#### 🏗️ Features
+* feat(security): surface XEdDSA packet signing in node & messaging UI by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5976
+#### 🛠️ Fixes
+* fix(usb): Surface permission denial as permanent disconnect by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/5943
+* fix(ble): Restore bounded bonded reconnect fallback by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/5960
+* fix(docs): preserve #anchor when rewriting sibling links for Docusaurus by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5963
+* fix(ble): Bound Android bonding wait by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/5967
+* fix(ble): Avoid duplicate bonding retries after pairing failure by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/5969
+* fix(ble): Stop transport connect after failed bonding by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/5973
 
 ### Closed Beta (v2.8.0-closed.1)
 Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14):
@@ -91,6 +86,7 @@ Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/relea
 
 ## New Contributors
 * @LesterCheng made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/5752
+* @dubsector made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/5986
 <!-- UNRELEASED_END -->
 
 <!-- RELEASED_START -->
