@@ -19,7 +19,7 @@ package org.meshtastic.core.barcode
 import java.util.concurrent.atomic.AtomicBoolean
 
 /** Allows a scanner session to complete exactly once, either with a scan result or a dismiss result. */
-internal class SingleScanResultGate {
+class SingleScanResultGate {
     private val delivered = AtomicBoolean(false)
 
     /**
