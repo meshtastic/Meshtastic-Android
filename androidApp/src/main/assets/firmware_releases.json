@@ -243,12 +243,6 @@
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
-      "id": "10782",
-      "title": "Update debian Docker tag to trixie-20260623",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10782",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
       "id": "10770",
       "title": "Update pschatzmann_arduino-audio-driver to v0.3.0",
       "page_url": "https://github.com/meshtastic/firmware/pull/10770",
@@ -312,12 +306,6 @@
       "id": "10711",
       "title": "Fix SX126x daemon abort when Tx power exceeds chip limit",
       "page_url": "https://github.com/meshtastic/firmware/pull/10711",
-      "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "10689",
-      "title": "Heltec Vision Master E213: enable 32768hz crystal osc for rtc",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10689",
       "zip_url": "https://discord.com/invite/meshtastic"
     }
   ]
