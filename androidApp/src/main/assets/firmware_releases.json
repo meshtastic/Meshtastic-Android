@@ -189,16 +189,16 @@
   },
   "pullRequests": [
     {
+      "id": "10816",
+      "title": "Update platformio/ststm32 to v19.7.0",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10816",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
       "id": "10807",
       "title": "Add DeltaPlusProto Edict board variant",
       "page_url": "https://github.com/meshtastic/firmware/pull/10807",
       "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "10803",
-      "title": "Chop down tft-related loooong ifdefs chains",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10803",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
       "id": "10802",
@@ -240,6 +240,12 @@
       "id": "10783",
       "title": "Update LovyanGFX to v1.2.24",
       "page_url": "https://github.com/meshtastic/firmware/pull/10783",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "10781",
+      "title": "Add gpsd support to portduino/native",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10781",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
@@ -306,6 +312,12 @@
       "id": "10711",
       "title": "Fix SX126x daemon abort when Tx power exceeds chip limit",
       "page_url": "https://github.com/meshtastic/firmware/pull/10711",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
+      "id": "10689",
+      "title": "Heltec Vision Master E213: enable 32768hz crystal osc for rtc",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10689",
       "zip_url": "https://discord.com/invite/meshtastic"
     }
   ]

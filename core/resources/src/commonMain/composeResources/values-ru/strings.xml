@@ -85,6 +85,9 @@
     <string name="analytics_platforms">Платформы для аналитики:</string>
     <string name="any">Любой</string>
     <!-- APP -->
+    <string name="app_functions_get_node_list">Получить список нод</string>
+    <string name="app_functions_send_message">Отправить сообщение</string>
+    <string name="app_functions_write_section">Написание функций</string>
     <string name="app_notifications">Уведомления приложений</string>
     <string name="app_settings">Приложение</string>
     <string name="app_too_old">Требуется обновление приложения</string>
