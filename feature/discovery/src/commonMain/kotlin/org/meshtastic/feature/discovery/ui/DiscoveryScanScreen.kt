@@ -373,6 +373,14 @@ private fun ScanButton(
             Icon(imageVector = MeshtasticIcons.PlayArrow, contentDescription = null)
             Text(stringResource(Res.string.discovery_start_scan), modifier = Modifier.padding(start = 8.dp))
         }
+        if (!isEnabled && disabledReason.isNotEmpty()) {
+            Text(
+                text = disabledReason,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 4.dp),
+            )
+        }
     }
 }
 
