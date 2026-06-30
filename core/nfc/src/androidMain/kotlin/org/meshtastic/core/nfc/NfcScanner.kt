@@ -17,6 +17,7 @@
 package org.meshtastic.core.nfc
 
 import android.app.Activity
+import android.nfc.FormatException
 import android.nfc.NdefMessage
 import android.nfc.NdefRecord
 import android.nfc.NfcAdapter
@@ -78,6 +79,8 @@ fun NfcWriterEffect(url: String, onResult: (Boolean) -> Unit, onNfcDisabled: (()
 
     DisposableEffect(nfcAdapter, url) {
         if (nfcAdapter == null) {
+            // No NFC hardware: report failure so the armed write UI doesn't hang waiting for a tap.
+            currentOnResult(false)
             onDispose {}
         } else if (!nfcAdapter.isEnabled) {
             currentOnNfcDisabled?.invoke()
@@ -127,6 +130,9 @@ private fun writeNdefUrl(tag: Tag, url: String): Boolean {
         }
     } catch (e: IOException) {
         Logger.w(e) { "Error writing NDEF tag" }
+        false
+    } catch (e: FormatException) {
+        Logger.w(e) { "Malformed NDEF message" }
         false
     } finally {
         try {
