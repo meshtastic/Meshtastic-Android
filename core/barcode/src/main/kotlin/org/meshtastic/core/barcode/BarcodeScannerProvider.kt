@@ -34,6 +34,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -70,6 +71,7 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.util.BarcodeScanner
 import org.meshtastic.core.ui.util.PermissionStatus
 import org.meshtastic.core.ui.util.rememberCameraPermissionState
+import java.util.concurrent.atomic.AtomicBoolean
 
 @Composable
 fun rememberBarcodeScanner(onResult: (String?) -> Unit): BarcodeScanner {
@@ -102,10 +104,6 @@ fun rememberBarcodeScanner(onResult: (String?) -> Unit): BarcodeScanner {
             onResult = {
                 showDialog = false
                 onResult(it)
-            },
-            onDismiss = {
-                showDialog = false
-                onResult(null)
             },
         )
     }
@@ -149,16 +147,27 @@ fun rememberBarcodeScanner(onResult: (String?) -> Unit): BarcodeScanner {
 }
 
 @Composable
-private fun BarcodeScannerDialog(onResult: (String?) -> Unit, onDismiss: () -> Unit) {
+private fun BarcodeScannerDialog(onResult: (String?) -> Unit) {
     var isCameraReady by remember { mutableStateOf(false) }
+    val resultGate = remember { SingleScanResultGate() }
+    val currentOnResult by rememberUpdatedState(onResult)
+    val context = LocalContext.current
+    val mainExecutor = remember(context) { ContextCompat.getMainExecutor(context) }
 
-    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+    fun deliverResult(result: String?) {
+        resultGate.tryDeliver(result) { value -> mainExecutor.execute { currentOnResult(value) } }
+    }
+
+    Dialog(onDismissRequest = { deliverResult(null) }, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         Box(modifier = Modifier.fillMaxSize()) {
-            ScannerView(onResult = onResult, onCameraReady = { isCameraReady = it })
+            ScannerView(onResult = { deliverResult(it) }, onCameraReady = { isCameraReady = it })
             if (isCameraReady) {
                 ScannerReticule()
             }
-            IconButton(onClick = onDismiss, modifier = Modifier.align(Alignment.TopStart).padding(16.dp)) {
+            IconButton(
+                onClick = { deliverResult(null) },
+                modifier = Modifier.align(Alignment.TopStart).padding(16.dp),
+            ) {
                 Icon(
                     imageVector = MeshtasticIcons.Close,
                     contentDescription = stringResource(Res.string.close),
@@ -220,44 +229,83 @@ private fun ScannerReticule() {
 
 @Suppress("LongMethod")
 @Composable
-private fun ScannerView(onResult: (String?) -> Unit, onCameraReady: (Boolean) -> Unit) {
+private fun ScannerView(onResult: (String) -> Unit, onCameraReady: (Boolean) -> Unit) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val cameraExecutor = remember { Dispatchers.Default.asExecutor() }
+    val currentOnResult by rememberUpdatedState(onResult)
+    val currentOnCameraReady by rememberUpdatedState(onCameraReady)
+    val disposed = remember { AtomicBoolean(false) }
+    val boundCameraProvider = remember { mutableStateOf<ProcessCameraProvider?>(null) }
+    val boundPreview = remember { mutableStateOf<Preview?>(null) }
+    val boundImageAnalysis = remember { mutableStateOf<ImageAnalysis?>(null) }
     var surfaceRequest by remember { mutableStateOf<SurfaceRequest?>(null) }
+
+    DisposableEffect(Unit) {
+        disposed.set(false)
+        onDispose {
+            disposed.set(true)
+            boundImageAnalysis.value?.clearAnalyzer()
+            val provider = boundCameraProvider.value
+            val preview = boundPreview.value
+            val imageAnalysis = boundImageAnalysis.value
+            if (provider != null && preview != null && imageAnalysis != null) {
+                try {
+                    provider.unbind(preview, imageAnalysis)
+                } catch (exc: IllegalStateException) {
+                    Logger.e(exc) { "Camera cleanup failed" }
+                } catch (exc: IllegalArgumentException) {
+                    Logger.e(exc) { "Camera cleanup failed" }
+                }
+            }
+            currentOnCameraReady(false)
+        }
+    }
 
     LaunchedEffect(Unit) {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
         cameraProviderFuture.addListener(
             {
-                val cameraProvider = cameraProviderFuture.get()
+                if (!disposed.get()) {
+                    val cameraProvider = cameraProviderFuture.get()
 
-                val preview = Preview.Builder().build()
-                preview.setSurfaceProvider { request ->
-                    surfaceRequest = request
-                    onCameraReady(true)
-                }
+                    val preview = Preview.Builder().build()
+                    preview.setSurfaceProvider { request ->
+                        if (!disposed.get()) {
+                            surfaceRequest = request
+                            currentOnCameraReady(true)
+                        }
+                    }
 
-                val imageAnalysis =
-                    ImageAnalysis.Builder()
-                        .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                        .build()
-                        .also { analysis -> analysis.setAnalyzer(cameraExecutor, createBarcodeAnalyzer(onResult)) }
+                    val imageAnalysis =
+                        ImageAnalysis.Builder()
+                            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                            .build()
+                            .also { analysis ->
+                                analysis.setAnalyzer(cameraExecutor, createBarcodeAnalyzer { currentOnResult(it) })
+                            }
 
-                try {
-                    cameraProvider.unbindAll()
-                    cameraProvider.bindToLifecycle(
-                        lifecycleOwner,
-                        CameraSelector.DEFAULT_BACK_CAMERA,
-                        preview,
-                        imageAnalysis,
-                    )
-                } catch (exc: IllegalStateException) {
-                    Logger.e(exc) { "Use case binding failed" }
-                } catch (exc: IllegalArgumentException) {
-                    Logger.e(exc) { "Use case binding failed" }
-                } catch (exc: UnsupportedOperationException) {
-                    Logger.e(exc) { "Use case binding failed" }
+                    try {
+                        cameraProvider.unbindAll()
+                        cameraProvider.bindToLifecycle(
+                            lifecycleOwner,
+                            CameraSelector.DEFAULT_BACK_CAMERA,
+                            preview,
+                            imageAnalysis,
+                        )
+                        boundCameraProvider.value = cameraProvider
+                        boundPreview.value = preview
+                        boundImageAnalysis.value = imageAnalysis
+                    } catch (exc: IllegalStateException) {
+                        imageAnalysis.clearAnalyzer()
+                        Logger.e(exc) { "Use case binding failed" }
+                    } catch (exc: IllegalArgumentException) {
+                        imageAnalysis.clearAnalyzer()
+                        Logger.e(exc) { "Use case binding failed" }
+                    } catch (exc: UnsupportedOperationException) {
+                        imageAnalysis.clearAnalyzer()
+                        Logger.e(exc) { "Use case binding failed" }
+                    }
                 }
             },
             ContextCompat.getMainExecutor(context),
