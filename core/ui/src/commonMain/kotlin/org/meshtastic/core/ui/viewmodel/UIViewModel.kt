@@ -119,7 +119,10 @@ class UIViewModel(
         uri.dispatchMeshtasticUri(
             onContact = { setSharedContactRequested(it) },
             onChannel = { setRequestChannelSet(it) },
-            onInvalid = onInvalid,
+            onInvalid = {
+                Logger.w { "Import URI rejected: ${uri.toSanitizedImportSummary()}" }
+                onInvalid()
+            },
         )
     }
 
@@ -328,4 +331,14 @@ class UIViewModel(
     companion object {
         private const val DEFAULT_BOOT_TTL = LockdownPassphraseStore.DEFAULT_BOOTS
     }
+}
+
+private fun CommonUri.toSanitizedImportSummary(): String {
+    val fragmentLength = fragment?.length ?: 0
+    val queryKeys = getQueryParameterNames().sorted()
+    // pathSegments values are not logged: a malformed channel URL can still leak structure (e.g.
+    // a malformed "/e/" path). pathSegmentCount is enough to diagnose routing without exposing it.
+    return "rawLength=${toString().length} scheme=$scheme host=$host " +
+        "pathSegmentCount=${pathSegments.size} hasFragment=${fragment != null} " +
+        "fragmentLength=$fragmentLength queryKeys=$queryKeys"
 }
