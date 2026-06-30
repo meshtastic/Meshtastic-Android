@@ -10,7 +10,18 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 ### Unreleased (not yet in any build)
 
 #### 🛠️ Fixes
+* fix(ble): Handle scan registration failure by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6019
+
+### Internal (v2.8.0-internal.11)
+Changes since [`v2.8.0-closed.2`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.0-closed.2):
+
+#### 🛠️ Fixes
 * fix(ui): stop node signal pill from wrapping; restore full-width spread by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6007
+* fix(car): suppress INVISIBLE_MEMBER in CarScreensTest for fdroid build by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6010
+* fix(docs): stop builds from churning tracked docs screenshots by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6012
+* fix(qr): Preserve incoming channels when adding from QR by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6013
+* fix(car): notification-only car messaging for production; park templated behind flag by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6015
+* fix(firmware): repair nRF USB firmware update and post-update reconnect by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6018
 
 ### Closed Beta (v2.8.0-closed.2)
 Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14):
