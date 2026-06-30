@@ -98,7 +98,7 @@ takpacket-sdk = "0.7.0"
 meshtastic-protobufs = "2.7.26-21879a9-SNAPSHOT"
 
 # Gradle Plugins
-develocity = "4.4.3"
+develocity = "4.5.0"
 foojay-resolver = "1.0.0"
 
 
