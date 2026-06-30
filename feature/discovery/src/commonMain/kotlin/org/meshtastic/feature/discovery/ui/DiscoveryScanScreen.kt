@@ -365,21 +365,23 @@ private fun ScanButton(
         val disabledDescription = stringResource(Res.string.discovery_start_scan_disabled, disabledReason)
         val buttonModifier =
             if (!isEnabled) {
-                modifier.fillMaxWidth().semantics { contentDescription = disabledDescription }
+                Modifier.fillMaxWidth().semantics { contentDescription = disabledDescription }
             } else {
-                modifier.fillMaxWidth()
+                Modifier.fillMaxWidth()
             }
-        Button(onClick = onStart, enabled = isEnabled, modifier = buttonModifier) {
-            Icon(imageVector = MeshtasticIcons.PlayArrow, contentDescription = null)
-            Text(stringResource(Res.string.discovery_start_scan), modifier = Modifier.padding(start = 8.dp))
-        }
-        if (!isEnabled && disabledReason.isNotEmpty()) {
-            Text(
-                text = disabledReason,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 4.dp),
-            )
+        Column(modifier = modifier) {
+            Button(onClick = onStart, enabled = isEnabled, modifier = buttonModifier) {
+                Icon(imageVector = MeshtasticIcons.PlayArrow, contentDescription = null)
+                Text(stringResource(Res.string.discovery_start_scan), modifier = Modifier.padding(start = 8.dp))
+            }
+            if (!isEnabled && disabledReason.isNotEmpty()) {
+                Text(
+                    text = disabledReason,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 4.dp),
+                )
+            }
         }
     }
 }
