@@ -112,7 +112,6 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.SelectAll
 import org.meshtastic.core.ui.icon.VolumeMute
 import org.meshtastic.core.ui.icon.VolumeUp
-import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
 import org.meshtastic.core.ui.util.rememberShowToastResource
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.SharedContact
@@ -123,10 +122,8 @@ import kotlin.time.Duration.Companion.days
 fun ContactsScreen(
     onNavigateToShare: () -> Unit,
     sharedContactRequested: SharedContact?,
-    requestChannelSet: ChannelSet?,
     onHandleDeepLink: (CommonUri, onInvalid: () -> Unit) -> Unit,
     onClearSharedContactRequested: () -> Unit,
-    onClearRequestChannelUrl: () -> Unit,
     viewModel: ContactsViewModel,
     onClickNodeChip: (Int) -> Unit,
     onNavigateToMessages: (String) -> Unit,
@@ -192,8 +189,6 @@ fun ContactsScreen(
         selectedCount = viewModel.getTotalMessageCount(selectedContactKeys.toList())
     }
     val isAllMuted = remember(selectedContacts) { selectedContacts.all { it.isMuted } }
-
-    requestChannelSet?.let { ScannedQrCodeDialog(it, onDismiss = { onClearRequestChannelUrl() }) }
 
     // Callback functions for item interaction
     val onContactClick: (Contact) -> Unit = { contact ->

@@ -25,7 +25,6 @@ import org.meshtastic.core.navigation.ChannelsRoute
 import org.meshtastic.core.navigation.ContactsRoute
 import org.meshtastic.core.navigation.NodesRoute
 import org.meshtastic.core.ui.component.ScrollToTopEvent
-import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.SharedContact
 
 @Composable
@@ -34,18 +33,14 @@ fun AdaptiveContactsScreen(
     contactsViewModel: ContactsViewModel,
     scrollToTopEvents: Flow<ScrollToTopEvent>,
     sharedContactRequested: SharedContact?,
-    requestChannelSet: ChannelSet?,
     onHandleDeepLink: (CommonUri, onInvalid: () -> Unit) -> Unit,
     onClearSharedContactRequested: () -> Unit,
-    onClearRequestChannelUrl: () -> Unit,
 ) {
     ContactsScreen(
         onNavigateToShare = { backStack.add(ChannelsRoute.Channels) },
         sharedContactRequested = sharedContactRequested,
-        requestChannelSet = requestChannelSet,
         onHandleDeepLink = onHandleDeepLink,
         onClearSharedContactRequested = onClearSharedContactRequested,
-        onClearRequestChannelUrl = onClearRequestChannelUrl,
         viewModel = contactsViewModel,
         onClickNodeChip = { backStack.add(NodesRoute.NodeDetail(it)) },
         onNavigateToMessages = { contactKey -> backStack.add(ContactsRoute.Messages(contactKey)) },

@@ -87,7 +87,6 @@ fun EntryProviderScope<NavKey>.contactsGraph(
 fun ContactsEntryContent(backStack: NavBackStack<NavKey>, scrollToTopEvents: Flow<ScrollToTopEvent>) {
     val uiViewModel: org.meshtastic.core.ui.viewmodel.UIViewModel = koinViewModel()
     val sharedContactRequested by uiViewModel.sharedContactRequested.collectAsStateWithLifecycle()
-    val requestChannelSet by uiViewModel.requestChannelSet.collectAsStateWithLifecycle()
     val contactsViewModel = koinViewModel<ContactsViewModel>()
 
     AdaptiveContactsScreen(
@@ -95,9 +94,7 @@ fun ContactsEntryContent(backStack: NavBackStack<NavKey>, scrollToTopEvents: Flo
         contactsViewModel = contactsViewModel,
         scrollToTopEvents = scrollToTopEvents,
         sharedContactRequested = sharedContactRequested,
-        requestChannelSet = requestChannelSet,
         onHandleDeepLink = uiViewModel::handleDeepLink,
         onClearSharedContactRequested = uiViewModel::clearSharedContactRequested,
-        onClearRequestChannelUrl = uiViewModel::clearRequestChannelUrl,
     )
 }
