@@ -9,9 +9,13 @@ reviews:
   high_level_summary: true
   poem: false
   # Don't burn reviews on WIP. This repo opens lots of draft PRs; review on "ready".
+  # Skip Renovate dependency updates — CI gates dependencies; we review for substance, not every bump.
   auto_review:
     enabled: true
     drafts: false
+    skip_author:
+      - renovate
+      - renovate[bot]
   # Stop reviewing once a PR is closed.
   abort_on_close: true
 
