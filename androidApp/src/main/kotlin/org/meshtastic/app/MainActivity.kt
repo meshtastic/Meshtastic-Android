@@ -61,6 +61,7 @@ import org.meshtastic.core.barcode.rememberBarcodeScanner
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.network.repository.UsbRepository
 import org.meshtastic.core.nfc.NfcScannerEffect
+import org.meshtastic.core.nfc.NfcWriterEffect
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.channel_invalid
 import org.meshtastic.core.service.MeshService
@@ -77,6 +78,7 @@ import org.meshtastic.core.ui.util.LocalMapMainScreenProvider
 import org.meshtastic.core.ui.util.LocalMapViewProvider
 import org.meshtastic.core.ui.util.LocalNfcScannerProvider
 import org.meshtastic.core.ui.util.LocalNfcScannerSupported
+import org.meshtastic.core.ui.util.LocalNfcWriterProvider
 import org.meshtastic.core.ui.util.LocalNodeMapScreenProvider
 import org.meshtastic.core.ui.util.LocalNodeTrackMapProvider
 import org.meshtastic.core.ui.util.LocalTracerouteMapOverlayInsetsProvider
@@ -185,6 +187,7 @@ class MainActivity : AppCompatActivity() {
             LocalEventBranding provides eventEdition,
             LocalBarcodeScannerProvider provides { onResult -> rememberBarcodeScanner(onResult) },
             LocalNfcScannerProvider provides { onResult, onDisabled -> NfcScannerEffect(onResult, onDisabled) },
+            LocalNfcWriterProvider provides { url, onResult, onDisabled -> NfcWriterEffect(url, onResult, onDisabled) },
             LocalBarcodeScannerSupported provides true,
             LocalNfcScannerSupported provides true,
             LocalAnalyticsIntroProvider provides { AnalyticsIntro() },

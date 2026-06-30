@@ -99,6 +99,17 @@ class ImportFabUiTest {
     }
 
     @Test
+    fun importFab_showsShareContact_whenCallbackProvided() = runComposeUiTest {
+        val testTag = "import_fab"
+        setContent {
+            MeshtasticImportFAB(onImport = {}, onShareContact = {}, isContactContext = true, testTag = testTag)
+        }
+
+        onNodeWithTag(testTag).performClick()
+        onNodeWithTag("share_contact").assertIsDisplayed()
+    }
+
+    @Test
     fun importFab_showsSharedContactDialog_whenProvided() = runComposeUiTest {
         val contact = SharedContact(user = User(long_name = "Suzume Goddess"), node_num = 1)
         setContent {

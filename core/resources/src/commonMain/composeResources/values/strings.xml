@@ -727,7 +727,7 @@
     <string name="incoming_messages">Incoming Messages</string>
     <string name="indoor_air_quality_iaq">Indoor Air Quality (IAQ)</string>
     <string name="info">Information</string>
-    <string name="input_channel_url">Input Channel URL</string>
+    <string name="input_channel_url">Input Shared Channels URL</string>
     <string name="input_shared_contact_url">Input Shared Contact URL</string>
     <string name="installed_firmware_version">Currently Installed</string>
     <string name="internal">Internal</string>
@@ -1311,8 +1311,8 @@
     <!-- SCAN -->
     <string name="scan">Scan</string>
     <string name="scan_bluetooth_devices">Scan for Bluetooth devices</string>
-    <string name="scan_channels_nfc">Scan Channels NFC</string>
-    <string name="scan_channels_qr">Scan Channels QR Code</string>
+    <string name="scan_channels_nfc">Scan Shared Channels NFC</string>
+    <string name="scan_channels_qr">Scan Shared Channels QR Code</string>
     <string name="scan_network_devices">Scan for network devices</string>
     <string name="scan_nfc">Scan NFC</string>
     <string name="scan_nfc_text">Bring your device close to the NFC tag to scan.</string>
@@ -1376,6 +1376,7 @@
     <!-- SHARE -->
     <string name="share">Share</string>
     <string name="share_channels_qr">Share Channels QR Code</string>
+    <string name="share_connected_node">Share Connected Node</string>
     <string name="share_contact">Share Contact</string>
     <string name="share_location">Share Location</string>
     <string name="share_location_description">Use your phone GPS to send locations to your node to instead of using a hardware GPS on your node.</string>
@@ -1644,6 +1645,10 @@
     <string name="wind_gust">Wind Gust</string>
     <string name="wind_lull">Wind Lull</string>
     <string name="wind_speed">Wind Speed</string>
+    <string name="write_nfc">Write to NFC tag</string>
+    <string name="write_nfc_failed">Couldn\'t write to tag. Use a writable, empty NFC tag and hold it steady.</string>
+    <string name="write_nfc_success">Written to tag</string>
+    <string name="write_nfc_text">Hold a writable NFC tag against the back of your phone.</string>
     <string name="you">You</string>
     <string name="zh_CN" translatable="false">简体中文</string>
     <string name="zh_TW" translatable="false">繁體中文</string>
