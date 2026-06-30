@@ -76,7 +76,13 @@ class GeofenceMonitor(
         // received position.
         scope.launch {
             for (sample in samples) {
-                evaluate(sample.nodeNum, sample.lat, sample.lon)
+                try {
+                    evaluate(sample.nodeNum, sample.lat, sample.lon)
+                } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                    // Isolate per-sample failures: an unexpected throw must not kill the sole consumer and silently
+                    // stop geofence tracking for the rest of the session.
+                    Logger.e(e) { "Geofence evaluation failed for node ${sample.nodeNum}; skipping sample" }
+                }
             }
         }
         // A bad emission must not tear down the snapshot for the rest of the session.

@@ -441,7 +441,9 @@ private fun GeofenceSection(
                     }
                 FilterChip(
                     selected = meters == selectedRadius,
-                    onClick = { onWaypointChange(waypoint.copy(geofence_radius = meters)) },
+                    onClick = {
+                        onWaypointChange(waypoint.copy(geofence_radius = meters).normalizeGeofenceNotifications())
+                    },
                     label = { Text(label) },
                 )
             }
@@ -457,7 +459,9 @@ private fun GeofenceSection(
                 Text(stringResource(if (hasBox) Res.string.geofence_edit_area else Res.string.geofence_set_area))
             }
             if (hasBox) {
-                TextButton(onClick = { onWaypointChange(waypoint.copy(bounding_box = null)) }) {
+                TextButton(
+                    onClick = { onWaypointChange(waypoint.copy(bounding_box = null).normalizeGeofenceNotifications()) },
+                ) {
                     Text(stringResource(Res.string.geofence_remove_area))
                 }
             }
@@ -477,12 +481,14 @@ private fun GeofenceNotificationControls(waypoint: Waypoint, onWaypointChange: (
         GeofenceToggleRow(
             label = stringResource(Res.string.geofence_notify_on_enter),
             checked = waypoint.notify_on_enter,
-            onCheckedChange = { onWaypointChange(waypoint.copy(notify_on_enter = it)) },
+            onCheckedChange = {
+                onWaypointChange(waypoint.copy(notify_on_enter = it).normalizeGeofenceNotifications())
+            },
         )
         GeofenceToggleRow(
             label = stringResource(Res.string.geofence_notify_on_exit),
             checked = waypoint.notify_on_exit,
-            onCheckedChange = { onWaypointChange(waypoint.copy(notify_on_exit = it)) },
+            onCheckedChange = { onWaypointChange(waypoint.copy(notify_on_exit = it).normalizeGeofenceNotifications()) },
         )
         if (waypoint.notify_on_enter || waypoint.notify_on_exit) {
             GeofenceToggleRow(
@@ -507,4 +513,17 @@ private fun GeofenceToggleRow(label: String, checked: Boolean, onCheckedChange: 
         Text(label)
         Switch(checked = checked, onCheckedChange = null)
     }
+}
+
+/**
+ * Clears geofence notification flags the UI can no longer expose, so stale values don't silently reappear when a region
+ * is added again: drop all three when no region remains, and drop favorites-only when neither enter nor exit is on.
+ */
+private fun Waypoint.normalizeGeofenceNotifications(): Waypoint = when {
+    geofence_radius <= 0 && bounding_box == null ->
+        copy(notify_on_enter = false, notify_on_exit = false, notify_favorites_only = false)
+
+    !notify_on_enter && !notify_on_exit -> copy(notify_favorites_only = false)
+
+    else -> this
 }

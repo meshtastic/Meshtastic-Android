@@ -24,7 +24,9 @@ import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify
 import dev.mokkery.verifySuspend
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -61,6 +63,7 @@ import org.meshtastic.proto.Position
 import org.meshtastic.proto.Routing
 import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.User
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertNotNull
@@ -87,6 +90,16 @@ class MeshDataHandlerTest {
 
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
+
+    // Separate scope for the real GeofenceMonitor: its serial worker is a never-completing coroutine, so it must NOT
+    // live in the runTest scope (that would trip UncompletedCoroutinesError). Shares the dispatcher so advanceUntilIdle
+    // still drives it; cancelled in tearDown.
+    private val geofenceScope = CoroutineScope(testDispatcher)
+
+    @AfterTest
+    fun tearDown() {
+        geofenceScope.cancel()
+    }
 
     @BeforeTest
     fun setUp() {
@@ -116,7 +129,7 @@ class MeshDataHandlerTest {
                     nodeManager = nodeManager,
                     serviceNotifications = serviceNotifications,
                     crossingStore = GeofenceCrossingStore(),
-                    scope = testScope,
+                    scope = geofenceScope,
                 ),
                 scope = testScope,
             )

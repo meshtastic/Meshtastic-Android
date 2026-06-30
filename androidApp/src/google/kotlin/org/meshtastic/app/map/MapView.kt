@@ -25,6 +25,8 @@ import android.view.WindowManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,6 +36,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -597,15 +600,18 @@ fun MapView(
                 }
             }
 
-            // Live preview of the geofence box being authored (after the first corner tap).
+            // The two-tap flow commits on the second tap, so there is no both-corners-uncommitted state to draw a
+            // rectangle preview from; instead mark the first tapped corner so the user sees it registered.
             boxAuthoringFirstCorner?.let { first ->
-                val second = boxAuthoringSecondCorner ?: first
-                Polygon(
-                    points = rectCorners(first, second),
-                    strokeColor = GEOFENCE_OVERLAY_COLOR,
-                    fillColor = GEOFENCE_OVERLAY_COLOR.copy(alpha = GEOFENCE_FILL_ALPHA),
-                    strokeWidth = GEOFENCE_STROKE_WIDTH,
-                )
+                val cornerState = rememberUpdatedMarkerState(position = first)
+                MarkerComposable(state = cornerState, zIndex = 5f) {
+                    Box(
+                        modifier =
+                        Modifier.size(16.dp)
+                            .background(GEOFENCE_OVERLAY_COLOR, CircleShape)
+                            .border(2.dp, Color.White, CircleShape),
+                    )
+                }
             }
 
             when (mode) {
@@ -1271,15 +1277,6 @@ fun Uri.getFileName(context: android.content.Context): String {
 
 /** Converts protobuf [Position] integer coordinates to a Google Maps [LatLng]. */
 internal fun Position.toLatLng(): LatLng = LatLng((this.latitude_i ?: 0) * DEG_D, (this.longitude_i ?: 0) * DEG_D)
-
-/** The four axis-aligned corners (SW, NW, NE, SE) of the rectangle spanned by two opposite corners. */
-private fun rectCorners(a: LatLng, b: LatLng): List<LatLng> {
-    val south = minOf(a.latitude, b.latitude)
-    val north = maxOf(a.latitude, b.latitude)
-    val west = minOf(a.longitude, b.longitude)
-    val east = maxOf(a.longitude, b.longitude)
-    return listOf(LatLng(south, west), LatLng(north, west), LatLng(north, east), LatLng(south, east))
-}
 
 /** Builds a proto [BoundingBox] (degrees ×1e7) from two opposite corner taps. */
 private fun boundingBoxFromCorners(a: LatLng, b: LatLng): BoundingBox = BoundingBox(
