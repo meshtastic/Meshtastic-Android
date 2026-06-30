@@ -26,23 +26,18 @@ import org.meshtastic.core.navigation.ChannelsRoute
 import org.meshtastic.core.navigation.ContactsRoute
 import org.meshtastic.core.navigation.NodesRoute
 import org.meshtastic.core.ui.component.ScrollToTopEvent
-import org.meshtastic.proto.SharedContact
 
 @Composable
 fun AdaptiveContactsScreen(
     backStack: NavBackStack<NavKey>,
     scrollToTopEvents: Flow<ScrollToTopEvent>,
-    sharedContactRequested: SharedContact?,
     onHandleDeepLink: (CommonUri, onInvalid: () -> Unit) -> Unit,
-    onClearSharedContactRequested: () -> Unit,
 ) {
     val contactsViewModel = koinViewModel<ContactsViewModel>()
 
     ContactsScreen(
         onNavigateToShare = { backStack.add(ChannelsRoute.Channels) },
-        sharedContactRequested = sharedContactRequested,
         onHandleDeepLink = onHandleDeepLink,
-        onClearSharedContactRequested = onClearSharedContactRequested,
         viewModel = contactsViewModel,
         onClickNodeChip = { backStack.add(NodesRoute.NodeDetail(it)) },
         onNavigateToMessages = { contactKey -> backStack.add(ContactsRoute.Messages(contactKey)) },

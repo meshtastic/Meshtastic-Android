@@ -23,8 +23,6 @@
     <ID>ModifierMissing:MessageScreenComponents.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable fun MessageTopBar</ID>
     <ID>ModifierMissing:Share.kt:@Composable fun ShareScreen</ID>
     <ID>ModifierNotUsedAtRoot:QuickChat.kt:modifier = modifier.fillMaxSize().padding(innerPadding)</ID>
-    <ID>ParameterNaming:AdaptiveContactsScreen.kt:onClearSharedContactRequested: () -> Unit</ID>
-    <ID>ParameterNaming:Contacts.kt:onClearSharedContactRequested: () -> Unit</ID>
     <ID>ParameterNaming:Contacts.kt:onDeleteSelected: () -> Unit</ID>
     <ID>ParameterNaming:Contacts.kt:onMuteSelected: () -> Unit</ID>
     <ID>ParameterNaming:MessageScreenComponents.kt:onToggleFilteringDisabled: () -> Unit</ID>

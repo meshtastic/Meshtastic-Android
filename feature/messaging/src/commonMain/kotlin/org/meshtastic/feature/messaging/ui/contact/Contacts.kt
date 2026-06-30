@@ -114,16 +114,13 @@ import org.meshtastic.core.ui.icon.VolumeMute
 import org.meshtastic.core.ui.icon.VolumeUp
 import org.meshtastic.core.ui.util.rememberShowToastResource
 import org.meshtastic.proto.ChannelSet
-import org.meshtastic.proto.SharedContact
 import kotlin.time.Duration.Companion.days
 
 @Suppress("LongMethod", "CyclomaticComplexMethod", "LongParameterList")
 @Composable
 fun ContactsScreen(
     onNavigateToShare: () -> Unit,
-    sharedContactRequested: SharedContact?,
     onHandleDeepLink: (CommonUri, onInvalid: () -> Unit) -> Unit,
-    onClearSharedContactRequested: () -> Unit,
     viewModel: ContactsViewModel,
     onClickNodeChip: (Int) -> Unit,
     onNavigateToMessages: (String) -> Unit,
@@ -255,14 +252,12 @@ fun ContactsScreen(
         floatingActionButton = {
             if (connectionState is ConnectionState.Connected) {
                 MeshtasticImportFAB(
-                    sharedContact = sharedContactRequested,
                     onImport = { uriString ->
                         onHandleDeepLink(CommonUri.parse(uriString)) {
                             scope.launch { showToast(Res.string.channel_invalid) }
                         }
                     },
                     onShareChannels = onNavigateToShare,
-                    onDismissSharedContact = { onClearSharedContactRequested() },
                     isContactContext = false,
                 )
             }

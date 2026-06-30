@@ -19,8 +19,6 @@ package org.meshtastic.feature.messaging.navigation
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
@@ -28,6 +26,7 @@ import androidx.navigation3.runtime.NavKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import org.koin.compose.viewmodel.koinViewModel
+import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.navigation.ContactsRoute
 import org.meshtastic.core.navigation.NodesRoute
 import org.meshtastic.core.navigation.SettingsRoute
@@ -44,9 +43,20 @@ import org.meshtastic.feature.messaging.ui.sharing.ShareScreen
 fun EntryProviderScope<NavKey>.contactsGraph(
     backStack: NavBackStack<NavKey>,
     scrollToTopEvents: Flow<ScrollToTopEvent> = MutableSharedFlow(),
+    // Routed through the app-shell UIViewModel so pending imports land on the same instance
+    // observed by SharedDialogs. The entry must NOT resolve its own UIViewModel via koinViewModel()
+    // because rememberViewModelStoreNavEntryDecorator gives each NavKey its own ViewModelStore,
+    // which would split the producer and consumer of requestChannelSet / sharedContactRequested.
+    // Mandatory: a no-op default can silently recreate the ownership regression by hiding a
+    // missing wiring at a call site. Callers must wire the app-shell handler explicitly.
+    onHandleDeepLink: (CommonUri, onInvalid: () -> Unit) -> Unit,
 ) {
     entry<ContactsRoute.Contacts>(metadata = { ListDetailSceneStrategy.listPane() }) {
-        ContactsEntryContent(backStack = backStack, scrollToTopEvents = scrollToTopEvents)
+        ContactsEntryContent(
+            backStack = backStack,
+            scrollToTopEvents = scrollToTopEvents,
+            onHandleDeepLink = onHandleDeepLink,
+        )
     }
 
     entry<ContactsRoute.Messages>(metadata = { ListDetailSceneStrategy.detailPane() }) { args ->
@@ -84,15 +94,14 @@ fun EntryProviderScope<NavKey>.contactsGraph(
 }
 
 @Composable
-fun ContactsEntryContent(backStack: NavBackStack<NavKey>, scrollToTopEvents: Flow<ScrollToTopEvent>) {
-    val uiViewModel: org.meshtastic.core.ui.viewmodel.UIViewModel = koinViewModel()
-    val sharedContactRequested by uiViewModel.sharedContactRequested.collectAsStateWithLifecycle()
-
+fun ContactsEntryContent(
+    backStack: NavBackStack<NavKey>,
+    scrollToTopEvents: Flow<ScrollToTopEvent>,
+    onHandleDeepLink: (CommonUri, onInvalid: () -> Unit) -> Unit,
+) {
     AdaptiveContactsScreen(
         backStack = backStack,
         scrollToTopEvents = scrollToTopEvents,
-        sharedContactRequested = sharedContactRequested,
-        onHandleDeepLink = uiViewModel::handleDeepLink,
-        onClearSharedContactRequested = uiViewModel::clearSharedContactRequested,
+        onHandleDeepLink = onHandleDeepLink,
     )
 }

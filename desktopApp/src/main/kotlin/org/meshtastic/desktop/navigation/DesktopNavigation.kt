@@ -50,7 +50,11 @@ fun EntryProviderScope<NavKey>.desktopNavGraph(
         onHandleDeepLink = uiViewModel::handleDeepLink,
         onNavigateToConnections = { multiBackstack.navigateTopLevel(TopLevelDestination.Connect.route) },
     )
-    contactsGraph(backStack, uiViewModel.scrollToTopEventFlow)
+    contactsGraph(
+        backStack = backStack,
+        scrollToTopEvents = uiViewModel.scrollToTopEventFlow,
+        onHandleDeepLink = uiViewModel::handleDeepLink,
+    )
     mapGraph(backStack)
     firmwareGraph(backStack)
     settingsGraph(backStack)
