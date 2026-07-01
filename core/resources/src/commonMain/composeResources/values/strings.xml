@@ -1432,6 +1432,7 @@
     <string name="status_message">Status Message</string>
     <string name="status_message_config">Status Message Config</string>
     <string name="stay_connected_anywhere">Stay Connected Anywhere</string>
+    <string name="stop_connecting">Stop Connecting</string>
     <string name="store_forward">Store &amp; Forward</string>
     <string name="store_forward_config">Store &amp; Forward Config</string>
     <string name="store_forward_enabled">Store &amp; Forward enabled</string>

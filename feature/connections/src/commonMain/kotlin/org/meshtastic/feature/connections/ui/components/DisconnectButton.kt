@@ -32,13 +32,18 @@ import org.meshtastic.core.resources.disconnect
  * Centralises the color/label so every call site stays in lock-step.
  */
 @Composable
-fun DisconnectButton(onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true) {
+fun DisconnectButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    label: String = stringResource(Res.string.disconnect),
+) {
     OutlinedButton(
         modifier = modifier.fillMaxWidth(),
         colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
         enabled = enabled,
         onClick = onClick,
     ) {
-        Text(stringResource(Res.string.disconnect))
+        Text(label)
     }
 }
