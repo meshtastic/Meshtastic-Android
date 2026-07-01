@@ -256,6 +256,7 @@
     <string name="generate_input_event_on_ccw">Gerar evento de entrada rodando no sentido anti-horário</string>
     <string name="generate_input_event_on_cw">Gerar evento de entrada rodando no sentido horário</string>
     <string name="generate_input_event_on_press">Gerar evento de entrada ao pressionar</string>
+    <!-- GEOFENCE -->
     <string name="get_started">Vamos começar</string>
     <string name="good">Bom</string>
     <!-- GPIO -->

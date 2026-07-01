@@ -350,10 +350,23 @@
     <string name="discovery_delete_session">Удалить сессию</string>
     <string name="discovery_dwell_minutes">%1$d минут</string>
     <string name="discovery_dwell_time">Время задержки</string>
+    <string name="discovery_not_connected">Нет соединения</string>
+    <string name="discovery_paused">Пауза: %1$s</string>
+    <string name="discovery_rerun_analysis">Перезапуск анализов</string>
+    <string name="discovery_scan_complete">Сессия завершена</string>
+    <string name="discovery_scan_history">История сканирования</string>
+    <string name="discovery_scan_summary">Суммарный скан</string>
+    <string name="discovery_session_detail">Детали сессии</string>
+    <string name="discovery_shifting_to">Шифтинг to %1$s</string>
+    <string name="discovery_start_scan">Начало сканирования</string>
     <string name="discovery_stat_channel_utilization">Использование канала</string>
     <string name="discovery_stat_date">Дата</string>
     <string name="discovery_stat_direct">Прямой</string>
+    <string name="discovery_stat_mesh">Меш</string>
     <string name="discovery_stat_messages">Сообщения</string>
+    <string name="discovery_stat_online_total_nodes">Онлайн / всего нод</string>
+    <string name="discovery_stat_packets_rx">Ракеты RX</string>
+    <string name="discovery_stat_packets_tx">Пакеты TX</string>
     <string name="discovery_stat_selected">Выбрано</string>
     <string name="disk_free_indexed">Свободно на диске %1$d</string>
     <!-- DISPLAY -->
@@ -567,6 +580,7 @@
     <string name="generate_input_event_on_cw">Создать событие ввода для CW</string>
     <string name="generate_input_event_on_press">Создать событие ввода при нажатии</string>
     <string name="generate_qr_code">Сгенерировать QR-код</string>
+    <!-- GEOFENCE -->
     <string name="get_started">Начать работу</string>
     <string name="good">Хороший</string>
     <!-- GPIO -->
@@ -619,7 +633,6 @@
     <string name="incoming_messages">Входящие сообщения</string>
     <string name="indoor_air_quality_iaq">Качество воздуха в помещении (IAQ)</string>
     <string name="info">Информация</string>
-    <string name="input_channel_url">URL входящего канала</string>
     <string name="input_shared_contact_url">Введите URL контакта</string>
     <string name="installed_firmware_version">Текущая версия:</string>
     <string name="internal">Внутренний</string>
@@ -1185,8 +1198,6 @@
     <!-- SCAN -->
     <string name="scan">Сканирования</string>
     <string name="scan_bluetooth_devices">Сканировать Bluetooth-устройства</string>
-    <string name="scan_channels_nfc">Сканировать NFC каналов</string>
-    <string name="scan_channels_qr">Сканировать QR-код каналов</string>
     <string name="scan_network_devices">Сканировать сетевые устройства</string>
     <string name="scan_nfc">Сканировать NFC</string>
     <string name="scan_nfc_text">Поднесите ваше устройство ближе к метке NFC для сканирования.</string>

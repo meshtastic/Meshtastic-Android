@@ -400,6 +400,7 @@
     <string name="generate_input_event_on_cw">Evento generato dalla rotazione in senso orario</string>
     <string name="generate_input_event_on_press">Evento generato dalla Pressione del pulsante</string>
     <string name="generate_qr_code">Genera codice QR</string>
+    <!-- GEOFENCE -->
     <string name="get_started">Inizia ora</string>
     <string name="good">Buono</string>
     <!-- GPIO -->

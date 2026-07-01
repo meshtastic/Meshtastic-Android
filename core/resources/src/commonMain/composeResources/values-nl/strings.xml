@@ -167,6 +167,7 @@
     <string name="friendly_name">Weergavenaam</string>
     <string name="gateway">Gateway</string>
     <string name="generate_input_event_on_press">Genereer invoergebeurtenis bij indrukken</string>
+    <!-- GEOFENCE -->
     <string name="good">Goed</string>
     <!-- GPIO -->
     <string name="gpio_pin">GPIO pin</string>

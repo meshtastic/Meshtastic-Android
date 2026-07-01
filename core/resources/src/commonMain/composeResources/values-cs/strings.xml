@@ -458,6 +458,7 @@
     <string name="generate_input_event_on_cw">Vytvořit vstupní akci při otáčení ve směru hodinových ručiček</string>
     <string name="generate_input_event_on_press">Vytvořit vstupní akci při stisku Press</string>
     <string name="generate_qr_code">Vytvořit QR kód</string>
+    <!-- GEOFENCE -->
     <string name="get_started">Začněte hned</string>
     <string name="good">Silný</string>
     <!-- GPIO -->
@@ -499,7 +500,6 @@
     <string name="incoming_messages">Příchozí zprávy</string>
     <string name="indoor_air_quality_iaq">Kvalita vnitřního ovzduší (IAQ)</string>
     <string name="info">Informace</string>
-    <string name="input_channel_url">Vložit URL adresu kanálu</string>
     <string name="input_shared_contact_url">Vložit URL adresu sdíleného kontaktu</string>
     <string name="installed_firmware_version">Aktuálně instalováno</string>
     <string name="interval_always_on">Vždy zapnuto</string>
@@ -930,8 +930,6 @@
     <!-- SCAN -->
     <string name="scan">Skenovat</string>
     <string name="scan_bluetooth_devices">Vyhledat Bluetooth zařízení</string>
-    <string name="scan_channels_nfc">Naskenovat NFC kanálů</string>
-    <string name="scan_channels_qr">Naskenovat kód QR kanálů</string>
     <string name="scan_network_devices">Vyhledat síťová zařízení</string>
     <string name="scan_nfc">Naskenovat NFC</string>
     <string name="scan_nfc_text">Přiložte zařízení k NFC tagu pro naskenování.</string>

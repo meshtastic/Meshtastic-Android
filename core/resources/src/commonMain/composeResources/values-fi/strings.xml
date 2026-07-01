@@ -671,6 +671,7 @@
     <string name="generate_input_event_on_cw">Luo syötetapahtuma myötäpäivään käännettäessä</string>
     <string name="generate_input_event_on_press">Luo syötetapahtuma painettaessa</string>
     <string name="generate_qr_code">Generoi QR-koodi</string>
+    <!-- GEOFENCE -->
     <string name="get_started">Näin pääset alkuun</string>
     <string name="good">Hyvä</string>
     <!-- GPIO -->
@@ -723,7 +724,6 @@
     <string name="incoming_messages">Saapuvat viestit</string>
     <string name="indoor_air_quality_iaq">Sisäilmanlaatu (IAQ)</string>
     <string name="info">Tiedot</string>
-    <string name="input_channel_url">Syötä kanavan URL-osoite</string>
     <string name="input_shared_contact_url">Syötä jaetun yhteystiedon URL-osoite</string>
     <string name="installed_firmware_version">Asennettu</string>
     <string name="internal">Sisäinen</string>
@@ -1302,8 +1302,6 @@
     <!-- SCAN -->
     <string name="scan">Etsi</string>
     <string name="scan_bluetooth_devices">Etsi Bluetooth-laitteita</string>
-    <string name="scan_channels_nfc">Skannaa kanavat NFC:llä</string>
-    <string name="scan_channels_qr">Skannaa kanavien QR-koodi</string>
     <string name="scan_network_devices">Etsi verkkolaitteita</string>
     <string name="scan_nfc">Skannaa NFC</string>
     <string name="scan_nfc_text">Pidä laite NFC-tunnisteen lähellä skannausta varten.</string>

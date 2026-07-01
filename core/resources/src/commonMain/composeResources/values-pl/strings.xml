@@ -330,6 +330,8 @@
     <string name="gas_resistance">Rezystancja gazu</string>
     <string name="gateway">Brama domyślna</string>
     <string name="generate_qr_code">Generuj Kod QR</string>
+    <!-- GEOFENCE -->
+    <string name="geofence_off">Wyłączony</string>
     <string name="good">dobry</string>
     <!-- GPIO -->
     <string name="gpio">GPIO</string>

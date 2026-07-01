@@ -458,6 +458,7 @@
     <string name="generate_input_event_on_cw">Generează eveniment de intrare pe CW</string>
     <string name="generate_input_event_on_press">Generează eveniment de intrare la apăsare</string>
     <string name="generate_qr_code">Generați codul QR</string>
+    <!-- GEOFENCE -->
     <string name="get_started">Să începem</string>
     <string name="good">Bun</string>
     <!-- GPIO -->
@@ -507,7 +508,6 @@
     <string name="incoming_messages">Mesaje primite</string>
     <string name="indoor_air_quality_iaq">Calitatea aerului interior (IAQ)</string>
     <string name="info">Informaţie</string>
-    <string name="input_channel_url">Introduceți URL-ul canalului</string>
     <string name="input_shared_contact_url">Introducere adresă contact partajată</string>
     <string name="installed_firmware_version">Instalate in acest moment</string>
     <string name="internal">Intern</string>
@@ -964,8 +964,6 @@
     <string name="save_rangetest">Exportă pachetele rangetest</string>
     <!-- SCAN -->
     <string name="scan">Scanare</string>
-    <string name="scan_channels_nfc">Scanare canale NFC</string>
-    <string name="scan_channels_qr">Scanează canale cod QR</string>
     <string name="scan_nfc">Scanați NFC</string>
     <string name="scan_nfc_text">Aduceți dispozitivul aproape de tag-ul NFC pentru a scana.</string>
     <string name="scan_shared_contact_nfc">Scanare contacte partajate NFC</string>

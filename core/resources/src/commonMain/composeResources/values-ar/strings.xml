@@ -96,6 +96,7 @@
     <!-- FIRMWARE -->
     <string name="firmware_too_old">يجب عليك التحديث.</string>
     <string name="firmware_update_failed">التحديث فشل</string>
+    <!-- GEOFENCE -->
     <string name="good">جيد</string>
     <!-- GPIO -->
     <string name="i_know_what_i_m_doing">أنا أعرف ما أفعله.</string>

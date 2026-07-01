@@ -190,6 +190,8 @@
     <string name="frequency_slot">Фреквенцијски слот</string>
     <string name="friendly_name">Пријатељски назив</string>
     <string name="generate_qr_code">Генерисање QR кода</string>
+    <!-- GEOFENCE -->
+    <string name="geofence_off">Искључен</string>
     <string name="good">Добро</string>
     <!-- GPIO -->
     <string name="gpio_pin_for_rotary_encoder_a_port">GPIO пин за A порт ротационог енкодера</string>
