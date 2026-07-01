@@ -585,8 +585,15 @@ open class ScannerViewModel(
         changeDeviceAddress(NO_DEVICE_SELECTED)
     }
 
-    // ponytail: the recovery banner has no manual dismiss — it clears on reconnect or successful recovery. Add a
-    // dismiss action if a persistently-failing recovery (truly bricked device) proves to nag users.
+    /**
+     * Manually retire the pending recovery record (user dismissed the banner). Needed for a device whose bootloader
+     * can't be re-flashed over BLE at all — e.g. a stock nRF Legacy-DFU bootloader that never answers its control point
+     * — where recovery persistently fails and would otherwise nag forever (it only auto-clears on a successful
+     * reconnect or re-flash). The record is re-created next time a DFU update is triggered.
+     */
+    fun dismissRecovery() {
+        safeLaunch(tag = "dismissRecovery") { firmwareRecoveryDataSource.clear() }
+    }
 
     /**
      * If the device that had a pending recovery record has since reconnected normally (e.g. its bootloader timed out

@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -38,6 +39,7 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.grant_permission
 import org.meshtastic.core.resources.open_settings
 import org.meshtastic.core.ui.icon.AppSettingsAlt
+import org.meshtastic.core.ui.icon.Close
 import org.meshtastic.core.ui.icon.ErrorOutline
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.util.PermissionStatus
@@ -52,6 +54,10 @@ import org.meshtastic.core.ui.util.PermissionUiState
  * @param actionLabel the recovery button label.
  * @param onAction invoked when the recovery button is tapped.
  * @param actionIcon optional leading icon for the recovery button.
+ * @param onDismiss optional dismiss handler; when non-null a trailing close (×) button is shown so the user can retire
+ *   a card that can't otherwise be cleared (e.g. a firmware recovery that persistently fails on an unflashable
+ *   bootloader). Omit for cards that must not be dismissable, such as missing-permission prompts.
+ * @param dismissContentDescription accessibility label for the dismiss button.
  */
 @Composable
 fun RecoveryCard(
@@ -60,6 +66,8 @@ fun RecoveryCard(
     onAction: () -> Unit,
     modifier: Modifier = Modifier,
     actionIcon: ImageVector? = null,
+    onDismiss: (() -> Unit)? = null,
+    dismissContentDescription: String? = null,
 ) {
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Surface(
@@ -82,7 +90,17 @@ fun RecoveryCard(
                     text = message,
                     color = MaterialTheme.colorScheme.onErrorContainer,
                     style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.weight(1f),
                 )
+                if (onDismiss != null) {
+                    IconButton(onClick = onDismiss) {
+                        Icon(
+                            imageVector = MeshtasticIcons.Close,
+                            contentDescription = dismissContentDescription,
+                            tint = MaterialTheme.colorScheme.onErrorContainer,
+                        )
+                    }
+                }
             }
         }
 

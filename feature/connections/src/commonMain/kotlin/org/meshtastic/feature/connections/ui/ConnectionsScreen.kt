@@ -62,6 +62,7 @@ import org.meshtastic.core.resources.bluetooth_disabled
 import org.meshtastic.core.resources.connections
 import org.meshtastic.core.resources.firmware_recovery_banner
 import org.meshtastic.core.resources.firmware_recovery_button
+import org.meshtastic.core.resources.firmware_recovery_dismiss
 import org.meshtastic.core.resources.no_device_selected
 import org.meshtastic.core.resources.open_bluetooth_settings
 import org.meshtastic.core.resources.open_wifi_settings
@@ -310,6 +311,11 @@ fun ConnectionsScreen(
                                     actionLabel = stringResource(Res.string.firmware_recovery_button),
                                     onAction = { onConfigNavigate(FirmwareRoute.FirmwareUpdate) },
                                     actionIcon = MeshtasticIcons.Bluetooth,
+                                    // Let the user dismiss a recovery that can't succeed (e.g. an unflashable stock
+                                    // bootloader) so it doesn't nag forever; it otherwise only clears on
+                                    // reconnect/success.
+                                    onDismiss = { scanModel.dismissRecovery() },
+                                    dismissContentDescription = stringResource(Res.string.firmware_recovery_dismiss),
                                 )
                             }
 

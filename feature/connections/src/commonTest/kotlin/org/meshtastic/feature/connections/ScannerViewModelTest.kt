@@ -20,6 +20,7 @@ import app.cash.turbine.test
 import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.matcher.any
+import dev.mokkery.verifySuspend
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterNotNull
@@ -166,6 +167,16 @@ class ScannerViewModelTest {
         testScheduler.advanceUntilIdle()
 
         assertEquals("test_address", radioController.lastSetDeviceAddress)
+    }
+
+    @Test
+    fun `dismissRecovery clears the pending recovery record`() = runTest {
+        // User dismisses a recovery that can't succeed (e.g. an unflashable bootloader) — the record
+        // must be cleared so the banner stops nagging.
+        viewModel.dismissRecovery()
+        testScheduler.advanceUntilIdle()
+
+        verifySuspend { harness.firmwareRecoveryDataSource.clear() }
     }
 
     @Test

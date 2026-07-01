@@ -572,6 +572,7 @@ firmware_edition
 firmware_old
 firmware_recovery_banner
 firmware_recovery_button
+firmware_recovery_dismiss
 firmware_recovery_explanation
 firmware_too_old
 firmware_update_almost_there
