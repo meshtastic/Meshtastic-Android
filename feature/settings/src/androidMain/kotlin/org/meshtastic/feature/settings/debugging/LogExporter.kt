@@ -78,7 +78,7 @@ private suspend fun exportTextToUri(context: Context, targetUri: Uri, content: S
  * already limits us to our own entries, but `--pid` guarantees it even if that permission is ever granted (e.g. via adb
  * on an emulator) so a shared bug report can't leak other apps' logs. Best-effort: a capture failure returns a marker
  * rather than throwing. ProcessBuilder with a merged stderr avoids a pipe-buffer deadlock, and the bounded wait keeps a
- * stuck capture from tying up the IO thread. ponytail: tail-capped to keep the file sane; the ring buffer is bounded.
+ * stuck capture from tying up the IO thread. ponytail: `-t 5000` tail-caps the dump so the exported file stays sane.
  */
 actual fun captureAppLogcat(): String = try {
     val pid = android.os.Process.myPid()
