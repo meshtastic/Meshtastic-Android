@@ -131,6 +131,7 @@ call_sign
 call_sign_summary
 camera_permission
 camera_permission_rationale
+camera_unavailable
 cancel
 cancel_reply
 canned_message

@@ -26,17 +26,22 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -65,7 +70,10 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.camera_permission
 import org.meshtastic.core.resources.camera_permission_rationale
+import org.meshtastic.core.resources.camera_unavailable
 import org.meshtastic.core.resources.close
+import org.meshtastic.core.resources.error
+import org.meshtastic.core.resources.retry
 import org.meshtastic.core.ui.component.PermissionRecoveryCard
 import org.meshtastic.core.ui.icon.Close
 import org.meshtastic.core.ui.icon.MeshtasticIcons
@@ -153,6 +161,8 @@ fun rememberBarcodeScanner(onResult: (String?) -> Unit): BarcodeScanner {
 @Composable
 private fun BarcodeScannerDialog(onResult: (String?) -> Unit) {
     var isCameraReady by remember { mutableStateOf(false) }
+    var hasCameraError by remember { mutableStateOf(false) }
+    var scannerAttempt by remember { mutableIntStateOf(0) }
     val resultGate = remember { SingleScanResultGate() }
     val currentOnResult by rememberUpdatedState(onResult)
     val context = LocalContext.current
@@ -164,9 +174,31 @@ private fun BarcodeScannerDialog(onResult: (String?) -> Unit) {
 
     Dialog(onDismissRequest = { deliverResult(null) }, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         Box(modifier = Modifier.fillMaxSize()) {
-            ScannerView(onResult = { deliverResult(it) }, onCameraReady = { isCameraReady = it })
+            key(scannerAttempt) {
+                ScannerView(
+                    onResult = { deliverResult(it) },
+                    onCameraReady = {
+                        isCameraReady = it
+                        if (it) hasCameraError = false
+                    },
+                    onCameraError = {
+                        isCameraReady = false
+                        hasCameraError = true
+                    },
+                )
+            }
             if (isCameraReady) {
                 ScannerReticule()
+            }
+            if (hasCameraError) {
+                ScannerErrorContent(
+                    onRetry = {
+                        hasCameraError = false
+                        scannerAttempt++
+                    },
+                    onClose = { deliverResult(null) },
+                    modifier = Modifier.align(Alignment.Center),
+                )
             }
             IconButton(
                 onClick = { deliverResult(null) },
@@ -177,6 +209,28 @@ private fun BarcodeScannerDialog(onResult: (String?) -> Unit) {
                     contentDescription = stringResource(Res.string.close),
                     tint = Color.White,
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ScannerErrorContent(onRetry: () -> Unit, onClose: () -> Unit, modifier: Modifier = Modifier) {
+    Surface(modifier = modifier.padding(24.dp), shape = MaterialTheme.shapes.large) {
+        Column(
+            modifier = Modifier.padding(24.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                text = stringResource(Res.string.error),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.semantics { heading() },
+            )
+            Text(text = stringResource(Res.string.camera_unavailable), style = MaterialTheme.typography.bodyMedium)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                TextButton(onClick = onClose) { Text(text = stringResource(Res.string.close)) }
+                FilledTonalButton(onClick = onRetry) { Text(text = stringResource(Res.string.retry)) }
             }
         }
     }
@@ -233,12 +287,13 @@ private fun ScannerReticule() {
 
 @Suppress("LongMethod")
 @Composable
-private fun ScannerView(onResult: (String) -> Unit, onCameraReady: (Boolean) -> Unit) {
+private fun ScannerView(onResult: (String) -> Unit, onCameraReady: (Boolean) -> Unit, onCameraError: () -> Unit) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val cameraExecutor = remember { Dispatchers.Default.asExecutor() }
     val currentOnResult by rememberUpdatedState(onResult)
     val currentOnCameraReady by rememberUpdatedState(onCameraReady)
+    val currentOnCameraError by rememberUpdatedState(onCameraError)
     val disposed = remember { AtomicBoolean(false) }
     val boundCameraProvider = remember { mutableStateOf<ProcessCameraProvider?>(null) }
     val boundPreview = remember { mutableStateOf<Preview?>(null) }
@@ -265,7 +320,11 @@ private fun ScannerView(onResult: (String) -> Unit, onCameraReady: (Boolean) -> 
             {
                 if (disposed.get()) return@addListener
 
-                val cameraProvider = getCameraProvider(cameraProviderFuture) ?: return@addListener
+                val cameraProvider = getCameraProvider(cameraProviderFuture)
+                if (cameraProvider == null) {
+                    if (!disposed.get()) currentOnCameraError()
+                    return@addListener
+                }
 
                 if (disposed.get()) return@addListener
 
@@ -291,6 +350,9 @@ private fun ScannerView(onResult: (String) -> Unit, onCameraReady: (Boolean) -> 
                     boundCameraProvider.value = cameraProvider
                     boundPreview.value = preview
                     boundImageAnalysis.value = imageAnalysis
+                } else if (!disposed.get()) {
+                    currentOnCameraReady(false)
+                    currentOnCameraError()
                 }
             },
             ContextCompat.getMainExecutor(context),
@@ -309,8 +371,10 @@ private fun cleanupCameraUseCases(
     if (cameraProvider != null && preview != null && imageAnalysis != null) {
         try {
             cameraProvider.unbind(preview, imageAnalysis)
-        } catch (exc: RuntimeException) {
-            Logger.e(exc) { "Camera cleanup failed" }
+        } catch (exc: IllegalStateException) {
+            logCameraFailure(exc, "Camera cleanup failed")
+        } catch (exc: IllegalArgumentException) {
+            logCameraFailure(exc, "Camera cleanup failed")
         }
     }
 }
@@ -337,8 +401,22 @@ private fun bindCameraUseCases(
 ): Boolean = try {
     cameraProvider.bindToLifecycle(lifecycleOwner, CameraSelector.DEFAULT_BACK_CAMERA, preview, imageAnalysis)
     true
-} catch (exc: RuntimeException) {
+} catch (exc: IllegalStateException) {
+    imageAnalysis.handleBindFailure(exc)
+} catch (exc: IllegalArgumentException) {
+    imageAnalysis.handleBindFailure(exc)
+} catch (exc: SecurityException) {
+    imageAnalysis.handleBindFailure(exc)
+} catch (exc: UnsupportedOperationException) {
+    imageAnalysis.handleBindFailure(exc)
+}
+
+private fun ImageAnalysis.handleBindFailure(exc: RuntimeException): Boolean {
     clearAnalyzer()
-    Logger.e(exc) { "Use case binding failed" }
-    false
+    logCameraFailure(exc, "Use case binding failed")
+    return false
+}
+
+private fun logCameraFailure(exc: RuntimeException, message: String) {
+    Logger.e(exc) { message }
 }

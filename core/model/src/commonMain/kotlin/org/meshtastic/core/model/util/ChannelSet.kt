@@ -37,10 +37,11 @@ fun CommonUri.toChannelSet(): ChannelSet {
         h.equals(MESHTASTIC_HOST, ignoreCase = true) || h.equals("www.$MESHTASTIC_HOST", ignoreCase = true)
     val segments = pathSegments
     val isCorrectPath = segments.any { it.equals("e", ignoreCase = true) }
+    val hasFragment = !fragment.isNullOrBlank()
 
-    if (fragment.isNullOrBlank() || !isCorrectHost || !isCorrectPath) {
+    if (!hasFragment || !isCorrectHost || !isCorrectPath) {
         throw MalformedMeshtasticUrlException(
-            "Not a valid Meshtastic URL: host=$h, segments=$segments, hasFragment=${!fragment.isNullOrBlank()}",
+            "Not a valid Meshtastic URL: host=$h, segmentCount=${segments.size}, hasFragment=$hasFragment",
         )
     }
 
