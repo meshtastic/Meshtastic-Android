@@ -43,7 +43,9 @@ class ScannedQrCodeViewModel(
     val maxChannels =
         nodeRepository.myNodeInfo
             .map { it?.maxChannels?.takeIf { max -> max > 0 } ?: DEFAULT_MAX_CHANNELS }
-            .stateInWhileSubscribed(initialValue = DEFAULT_MAX_CHANNELS)
+            .stateInWhileSubscribed(
+                initialValue = nodeRepository.myNodeInfo.value?.maxChannels?.takeIf { it > 0 } ?: DEFAULT_MAX_CHANNELS,
+            )
 
     private val localConfig = radioConfigRepository.localConfigFlow.stateInWhileSubscribed(initialValue = LocalConfig())
 

@@ -186,13 +186,15 @@ fun getChannelPreviewForAdd(
     val previewSelections = MutableList(existing.size) { true }
     var remaining = (maxChannels - existing.size).coerceAtLeast(0)
     for (channel in incoming) {
-        val identity = channel.channelIdentity(loraConfig)
-        // Omit semantic duplicates entirely — they are not shown to the user.
-        if (!seen.add(identity)) continue
-        previewSettings += channel
-        val shouldSelect = remaining > 0
-        previewSelections += shouldSelect
-        if (shouldSelect) remaining--
+        val shouldShow = !channel.isPlaceholder()
+        val identity = if (shouldShow) channel.channelIdentity(loraConfig) else null
+        // Omit blank placeholders and semantic duplicates entirely — they are not shown to the user.
+        if (identity != null && seen.add(identity)) {
+            previewSettings += channel
+            val shouldSelect = remaining > 0
+            previewSelections += shouldSelect
+            if (shouldSelect) remaining--
+        }
     }
     return ChannelAddPreview(settings = previewSettings, selections = previewSelections)
 }
@@ -201,7 +203,14 @@ fun getChannelPreviewForAdd(
 data class ChannelAddPreview(val settings: List<ChannelSettings>, val selections: List<Boolean>)
 
 /** Semantic channel identity based on effective name and effective PSK. */
-private data class ChannelIdentity(val name: String, val psk: ByteString)
+private data class ChannelIdentity(val name: String, val psk: ByteString) {
+    // Redact the effective PSK from auto-generated diagnostics so a cryptographic key never leaks
+    // via toString() in exception messages, debug logs, or stack traces.
+    override fun toString(): String = "ChannelIdentity(name=$name, psk=<redacted>)"
+}
+
+/** True when a [ChannelSettings] carries no name and no PSK — a placeholder, not an intended channel. */
+private fun ChannelSettings.isPlaceholder(): Boolean = name.isNullOrBlank() && (psk == null || psk.size == 0)
 
 /** Resolves the [ChannelIdentity] of this [ChannelSettings] under the given [Config.LoRaConfig]. */
 private fun ChannelSettings.channelIdentity(loraConfig: Config.LoRaConfig): ChannelIdentity {
