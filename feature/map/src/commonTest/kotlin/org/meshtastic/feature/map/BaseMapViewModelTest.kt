@@ -34,6 +34,7 @@ import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.testing.FakeNodeRepository
+import org.meshtastic.core.testing.FakeRadioConfigRepository
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.core.testing.TestDataFactory
 import org.meshtastic.proto.Waypoint
@@ -50,6 +51,7 @@ class BaseMapViewModelTest {
     private lateinit var viewModel: BaseMapViewModel
     private lateinit var nodeRepository: FakeNodeRepository
     private lateinit var radioController: FakeRadioController
+    private lateinit var radioConfigRepository: FakeRadioConfigRepository
     private lateinit var waypointPacketsFlow: MutableStateFlow<List<DataPacket>>
     private val mapPrefs: MapPrefs = mock()
     private val packetRepository: PacketRepository = mock()
@@ -59,6 +61,7 @@ class BaseMapViewModelTest {
         Dispatchers.setMain(testDispatcher)
         nodeRepository = FakeNodeRepository()
         radioController = FakeRadioController()
+        radioConfigRepository = FakeRadioConfigRepository()
         radioController.setConnectionState(ConnectionState.Disconnected)
 
         every { mapPrefs.showOnlyFavorites } returns MutableStateFlow(false)
@@ -76,6 +79,7 @@ class BaseMapViewModelTest {
                 nodeRepository = nodeRepository,
                 packetRepository = packetRepository,
                 radioController = radioController,
+                radioConfigRepository = radioConfigRepository,
             )
     }
 

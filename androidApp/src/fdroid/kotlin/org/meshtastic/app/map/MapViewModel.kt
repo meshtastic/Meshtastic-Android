@@ -41,7 +41,7 @@ class MapViewModel(
     radioConfigRepository: RadioConfigRepository,
     buildConfigProvider: BuildConfigProvider,
     savedStateHandle: SavedStateHandle,
-) : BaseMapViewModel(mapPrefs, nodeRepository, packetRepository, radioController) {
+) : BaseMapViewModel(mapPrefs, nodeRepository, packetRepository, radioController, radioConfigRepository) {
 
     private val _selectedWaypointId = MutableStateFlow(savedStateHandle.get<Int>("waypointId"))
     val selectedWaypointId: StateFlow<Int?> = _selectedWaypointId.asStateFlow()

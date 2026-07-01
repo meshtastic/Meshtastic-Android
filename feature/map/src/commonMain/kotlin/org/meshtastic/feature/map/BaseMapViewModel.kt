@@ -31,9 +31,11 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.TracerouteOverlay
+import org.meshtastic.core.model.geofence.activeWaypointPackets
 import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.any
@@ -43,6 +45,7 @@ import org.meshtastic.core.resources.one_hour
 import org.meshtastic.core.resources.two_days
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
+import org.meshtastic.proto.Config.DisplayConfig.DisplayUnits
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.Waypoint
 
@@ -58,9 +61,16 @@ open class BaseMapViewModel(
     protected val nodeRepository: NodeRepository,
     private val packetRepository: PacketRepository,
     private val radioController: RadioController,
+    private val radioConfigRepository: RadioConfigRepository,
 ) : ViewModel() {
 
     val myNodeInfo = nodeRepository.myNodeInfo
+
+    /** Device display units (metric/imperial) for distance/altitude/speed formatting across map surfaces. */
+    val displayUnits: StateFlow<DisplayUnits> =
+        radioConfigRepository.localConfigFlow
+            .map { it.display?.units ?: DisplayUnits.METRIC }
+            .stateInWhileSubscribed(initialValue = DisplayUnits.METRIC)
 
     val ourNodeInfo = nodeRepository.ourNodeInfo
 
@@ -88,15 +98,9 @@ open class BaseMapViewModel(
     val waypoints: StateFlow<Map<Int, DataPacket>> =
         packetRepository
             .getWaypoints()
-            .mapLatest { list ->
-                list
-                    .filter { it.waypoint != null }
-                    .associateBy { packet -> packet.waypoint!!.id }
-                    .filterValues {
-                        val expire = it.waypoint?.expire ?: 0
-                        expire == 0 || expire.toLong() > nowSeconds
-                    }
-            }
+            // Shared with GeofenceMonitor via activeWaypointPackets — dedup by waypoint id + drop expired,
+            // so the map and the geofence engine can't drift (getWaypoints is a row-per-transmission firehose).
+            .mapLatest { list -> list.activeWaypointPackets(nowSeconds) }
             .stateInWhileSubscribed(initialValue = emptyMap())
 
     private val showOnlyFavorites = MutableStateFlow(mapPrefs.showOnlyFavorites.value)

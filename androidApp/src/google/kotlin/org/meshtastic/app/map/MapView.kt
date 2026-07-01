@@ -25,6 +25,8 @@ import android.view.WindowManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,12 +36,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -68,6 +73,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.maps.android.SphericalUtil
 import com.google.maps.android.compose.CameraPositionState
+import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.ComposeMapColorScheme
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapEffect
@@ -77,6 +83,7 @@ import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.MapsComposeExperimentalApi
 import com.google.maps.android.compose.MarkerComposable
 import com.google.maps.android.compose.MarkerInfoWindowComposable
+import com.google.maps.android.compose.Polygon
 import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.TileOverlay
 import com.google.maps.android.compose.rememberCameraPositionState
@@ -93,7 +100,6 @@ import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.app.map.component.ClusterItemsListDialog
 import org.meshtastic.app.map.component.CustomMapLayersSheet
 import org.meshtastic.app.map.component.CustomTileProviderManagerSheet
-import org.meshtastic.app.map.component.EditWaypointDialog
 import org.meshtastic.app.map.component.MapFilterDropdown
 import org.meshtastic.app.map.component.MapTypeDropdown
 import org.meshtastic.app.map.component.NodeClusterMarkers
@@ -104,6 +110,7 @@ import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.TracerouteOverlay
+import org.meshtastic.core.model.geofence.toGeofence
 import org.meshtastic.core.model.util.GeoConstants.DEG_D
 import org.meshtastic.core.model.util.GeoConstants.HEADING_DEG
 import org.meshtastic.core.model.util.metersIn
@@ -112,6 +119,9 @@ import org.meshtastic.core.model.util.mpsToMph
 import org.meshtastic.core.model.util.toString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.alt
+import org.meshtastic.core.resources.cancel
+import org.meshtastic.core.resources.geofence_box_author_hint
+import org.meshtastic.core.resources.geofence_box_use_view
 import org.meshtastic.core.resources.heading
 import org.meshtastic.core.resources.latitude
 import org.meshtastic.core.resources.longitude
@@ -134,9 +144,11 @@ import org.meshtastic.core.ui.util.formatPositionTime
 import org.meshtastic.core.ui.util.rememberLocationPermissionState
 import org.meshtastic.feature.map.BaseMapViewModel.MapFilterState
 import org.meshtastic.feature.map.LastHeardFilter
+import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.component.MapButton
 import org.meshtastic.feature.map.component.MapControlsOverlay
 import org.meshtastic.feature.map.tracerouteNodeSelection
+import org.meshtastic.proto.BoundingBox
 import org.meshtastic.proto.Config.DisplayConfig.DisplayUnits
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.Waypoint
@@ -174,6 +186,15 @@ sealed interface GoogleMapMode {
 
 private const val TRACEROUTE_OFFSET_METERS = 100.0
 private const val TRACEROUTE_BOUNDS_PADDING_PX = 120
+
+// Shared geofence overlay styling (orange, matching the fdroid flavor).
+private val GEOFENCE_OVERLAY_COLOR = Color(0xFFFF9800)
+private const val GEOFENCE_FILL_ALPHA = 0.12f
+private const val GEOFENCE_STROKE_WIDTH = 2f
+
+// Minimum lat/lon delta (~11 m) between the two box-authoring corner taps; below this the box would be degenerate
+// (zero-area) so the second tap is ignored.
+private const val BOX_AUTHORING_MIN_CORNER_DELTA = 1e-4
 
 @Suppress("CyclomaticComplexMethod", "LongMethod")
 @OptIn(MapsComposeExperimentalApi::class, ExperimentalMaterial3Api::class)
@@ -219,6 +240,13 @@ fun MapView(
     val mapFilterState by mapViewModel.mapFilterStateFlow.collectAsStateWithLifecycle()
     val ourNodeInfo by mapViewModel.ourNodeInfo.collectAsStateWithLifecycle()
     var editingWaypoint by remember { mutableStateOf<Waypoint?>(null) }
+    val displayUnits by mapViewModel.displayUnits.collectAsStateWithLifecycle()
+
+    // --- Geofence box authoring (Main mode) ---
+    // When non-null, the user is defining a bounding box for [boxAuthoringDraft] by tapping two corners.
+    var boxAuthoringDraft by remember { mutableStateOf<Waypoint?>(null) }
+    var boxAuthoringFirstCorner by remember { mutableStateOf<LatLng?>(null) }
+    var boxAuthoringSecondCorner by remember { mutableStateOf<LatLng?>(null) }
 
     val selectedGoogleMapType by mapViewModel.selectedGoogleMapType.collectAsStateWithLifecycle()
     val currentCustomTileProviderUrl by mapViewModel.selectedCustomTileProviderUrl.collectAsStateWithLifecycle()
@@ -529,8 +557,28 @@ fun MapView(
                 mapType = effectiveGoogleMapType,
                 isMyLocationEnabled = isLocationTrackingEnabled && locationPermission.isGranted,
             ),
+            onMapClick = { latLng ->
+                if (isMainMode && boxAuthoringDraft != null) {
+                    val first = boxAuthoringFirstCorner
+                    if (first == null) {
+                        boxAuthoringFirstCorner = latLng
+                    } else if (
+                        abs(latLng.latitude - first.latitude) >= BOX_AUTHORING_MIN_CORNER_DELTA &&
+                        abs(latLng.longitude - first.longitude) >= BOX_AUTHORING_MIN_CORNER_DELTA
+                    ) {
+                        // Only commit when the two corners are meaningfully distinct; a near-identical second tap
+                        // would yield a zero-area box, so ignore it and keep waiting for a valid second corner.
+                        boxAuthoringSecondCorner = latLng
+                        val box = boundingBoxFromCorners(first, latLng)
+                        editingWaypoint = boxAuthoringDraft?.copy(bounding_box = box)
+                        boxAuthoringDraft = null
+                        boxAuthoringFirstCorner = null
+                        boxAuthoringSecondCorner = null
+                    }
+                }
+            },
             onMapLongClick = { latLng ->
-                if (isMainMode && isConnected) {
+                if (isMainMode && isConnected && boxAuthoringDraft == null) {
                     editingWaypoint =
                         Waypoint(
                             latitude_i = (latLng.latitude / DEG_D).toInt(),
@@ -549,6 +597,20 @@ fun MapView(
                     mapViewModel.getTileProvider(config)?.let { tileProvider ->
                         TileOverlay(tileProvider = tileProvider, fadeIn = true, transparency = 0f, zIndex = -1f)
                     }
+                }
+            }
+
+            // The two-tap flow commits on the second tap, so there is no both-corners-uncommitted state to draw a
+            // rectangle preview from; instead mark the first tapped corner so the user sees it registered.
+            boxAuthoringFirstCorner?.let { first ->
+                val cornerState = rememberUpdatedMarkerState(position = first)
+                MarkerComposable(state = cornerState, zIndex = 5f) {
+                    Box(
+                        modifier =
+                        Modifier.size(16.dp)
+                            .background(GEOFENCE_OVERLAY_COLOR, CircleShape)
+                            .border(2.dp, Color.White, CircleShape),
+                    )
                 }
             }
 
@@ -585,7 +647,6 @@ fun MapView(
                     )
 
                 is GoogleMapMode.NodeTrack -> {
-                    val displayUnits by mapViewModel.displayUnits.collectAsStateWithLifecycle()
                     if (mode.focusedNode != null && sortedTrackPositions.isNotEmpty()) {
                         NodeTrackOverlay(
                             focusedNode = mode.focusedNode,
@@ -620,7 +681,8 @@ fun MapView(
             editingWaypoint?.let { waypointToEdit ->
                 EditWaypointDialog(
                     waypoint = waypointToEdit,
-                    onSendClicked = { updatedWp ->
+                    displayUnits = displayUnits,
+                    onSend = { updatedWp ->
                         var finalWp = updatedWp
                         if (updatedWp.id == 0) {
                             finalWp = finalWp.copy(id = mapViewModel.generatePacketId())
@@ -631,7 +693,7 @@ fun MapView(
                         mapViewModel.sendWaypoint(finalWp)
                         editingWaypoint = null
                     },
-                    onDeleteClicked = { wpToDelete ->
+                    onDelete = { wpToDelete ->
                         if (wpToDelete.locked_to == 0 && isConnected && wpToDelete.id != 0) {
                             mapViewModel.sendWaypoint(wpToDelete.copy(expire = 1))
                         }
@@ -639,7 +701,58 @@ fun MapView(
                         editingWaypoint = null
                     },
                     onDismissRequest = { editingWaypoint = null },
+                    onBeginBoxAuthoring = { draft ->
+                        boxAuthoringDraft = draft
+                        boxAuthoringFirstCorner = null
+                        boxAuthoringSecondCorner = null
+                        editingWaypoint = null
+                    },
                 )
+            }
+        }
+
+        // Box-authoring affordance: instruct the user to tap two corners, with a cancel that re-opens the editor.
+        boxAuthoringDraft?.let { draft ->
+            Card(
+                modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 72.dp).padding(horizontal = 16.dp),
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = stringResource(Res.string.geofence_box_author_hint),
+                        modifier = Modifier.weight(1f),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    TextButton(
+                        onClick = {
+                            boxAuthoringDraft = null
+                            boxAuthoringFirstCorner = null
+                            boxAuthoringSecondCorner = null
+                            editingWaypoint = draft
+                        },
+                    ) {
+                        Text(stringResource(Res.string.cancel))
+                    }
+                    // Single operable control: commits the currently-visible map bounds as the box, so the box can be
+                    // authored without the two precise corner taps (keyboard/screen-reader accessible path).
+                    Button(
+                        onClick = {
+                            val bounds = cameraPositionState.projection?.visibleRegion?.latLngBounds
+                            if (bounds != null) {
+                                val box = boundingBoxFromCorners(bounds.southwest, bounds.northeast)
+                                editingWaypoint = boxAuthoringDraft?.copy(bounding_box = box)
+                                boxAuthoringDraft = null
+                                boxAuthoringFirstCorner = null
+                                boxAuthoringSecondCorner = null
+                            }
+                        },
+                    ) {
+                        Text(stringResource(Res.string.geofence_box_use_view))
+                    }
+                }
             }
         }
 
@@ -822,7 +935,43 @@ private fun MainMapContent(
         selectedWaypointId = selectedWaypointId,
     )
 
+    if (mapFilterState.showWaypoints) {
+        displayableWaypoints.forEach { waypoint -> WaypointGeofenceOverlay(waypoint) }
+    }
+
     mapLayers.forEach { layerItem -> key(layerItem.id) { MapLayerOverlay(layerItem, mapViewModel) } }
+}
+
+/**
+ * Draws this waypoint's geofence region: a [Circle] for a radius geofence and/or a [Polygon] for a bounding box. Uses
+ * the shared [toGeofence] decoder so the coordinate math stays in one place. Renders nothing when no region is set.
+ */
+@Composable
+private fun WaypointGeofenceOverlay(waypoint: Waypoint) {
+    val geofence = waypoint.toGeofence() ?: return
+    geofence.circle?.let { circle ->
+        Circle(
+            center = LatLng(circle.centerLat, circle.centerLon),
+            radius = circle.radiusMeters.toDouble(),
+            strokeColor = GEOFENCE_OVERLAY_COLOR,
+            fillColor = GEOFENCE_OVERLAY_COLOR.copy(alpha = GEOFENCE_FILL_ALPHA),
+            strokeWidth = GEOFENCE_STROKE_WIDTH,
+        )
+    }
+    geofence.box?.let { box ->
+        Polygon(
+            points =
+            listOf(
+                LatLng(box.south, box.west),
+                LatLng(box.north, box.west),
+                LatLng(box.north, box.east),
+                LatLng(box.south, box.east),
+            ),
+            strokeColor = GEOFENCE_OVERLAY_COLOR,
+            fillColor = GEOFENCE_OVERLAY_COLOR.copy(alpha = GEOFENCE_FILL_ALPHA),
+            strokeWidth = GEOFENCE_STROKE_WIDTH,
+        )
+    }
 }
 
 // endregion
@@ -1128,5 +1277,13 @@ fun Uri.getFileName(context: android.content.Context): String {
 
 /** Converts protobuf [Position] integer coordinates to a Google Maps [LatLng]. */
 internal fun Position.toLatLng(): LatLng = LatLng((this.latitude_i ?: 0) * DEG_D, (this.longitude_i ?: 0) * DEG_D)
+
+/** Builds a proto [BoundingBox] (degrees ×1e7) from two opposite corner taps. */
+private fun boundingBoxFromCorners(a: LatLng, b: LatLng): BoundingBox = BoundingBox(
+    longitude_west_i = (minOf(a.longitude, b.longitude) / DEG_D).toInt(),
+    latitude_south_i = (minOf(a.latitude, b.latitude) / DEG_D).toInt(),
+    longitude_east_i = (maxOf(a.longitude, b.longitude) / DEG_D).toInt(),
+    latitude_north_i = (maxOf(a.latitude, b.latitude) / DEG_D).toInt(),
+)
 
 // endregion

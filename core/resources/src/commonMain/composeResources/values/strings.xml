@@ -675,6 +675,24 @@
     <string name="generate_input_event_on_cw">Generate input event on CW</string>
     <string name="generate_input_event_on_press">Generate input event on Press</string>
     <string name="generate_qr_code">Generate QR Code</string>
+    <!-- GEOFENCE -->
+    <string name="geofence">Geofence</string>
+    <string name="geofence_box_author_confirm">Confirm area</string>
+    <string name="geofence_box_author_hint">Tap two corners to define the area</string>
+    <string name="geofence_box_author_hint_viewport">Pan the map to frame the area, then tap Confirm area</string>
+    <string name="geofence_box_use_view">Use current view</string>
+    <string name="geofence_edit_area">Edit area</string>
+    <string name="geofence_entered_body">%1$s entered %2$s</string>
+    <string name="geofence_entered_title">Entered %1$s</string>
+    <string name="geofence_favorites_only">Favorites only</string>
+    <string name="geofence_left_body">%1$s left %2$s</string>
+    <string name="geofence_left_title">Left %1$s</string>
+    <string name="geofence_notify_on_enter">Notify on enter</string>
+    <string name="geofence_notify_on_exit">Notify on exit</string>
+    <string name="geofence_off">Off</string>
+    <string name="geofence_radius">Geofence radius</string>
+    <string name="geofence_remove_area">Remove area</string>
+    <string name="geofence_set_area">Set area on map</string>
     <string name="get_started">Get started</string>
     <string name="good">Good</string>
     <!-- GPIO -->

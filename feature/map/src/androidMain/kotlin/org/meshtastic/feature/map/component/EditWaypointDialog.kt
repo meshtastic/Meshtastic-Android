@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.app.map.component
+package org.meshtastic.feature.map.component
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
@@ -24,20 +24,28 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -51,6 +59,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -65,12 +74,23 @@ import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.systemTimeZone
+import org.meshtastic.core.model.geofence.GeofenceRadiusPresets
+import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.date
 import org.meshtastic.core.resources.delete
 import org.meshtastic.core.resources.description
 import org.meshtastic.core.resources.expires
+import org.meshtastic.core.resources.geofence
+import org.meshtastic.core.resources.geofence_edit_area
+import org.meshtastic.core.resources.geofence_favorites_only
+import org.meshtastic.core.resources.geofence_notify_on_enter
+import org.meshtastic.core.resources.geofence_notify_on_exit
+import org.meshtastic.core.resources.geofence_off
+import org.meshtastic.core.resources.geofence_radius
+import org.meshtastic.core.resources.geofence_remove_area
+import org.meshtastic.core.resources.geofence_set_area
 import org.meshtastic.core.resources.locked
 import org.meshtastic.core.resources.name
 import org.meshtastic.core.resources.send
@@ -81,18 +101,27 @@ import org.meshtastic.core.ui.emoji.EmojiPickerDialog
 import org.meshtastic.core.ui.icon.CalendarMonth
 import org.meshtastic.core.ui.icon.Lock
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.proto.Config.DisplayConfig.DisplayUnits
 import org.meshtastic.proto.Waypoint
 import kotlin.time.Duration.Companion.hours
 
-@OptIn(ExperimentalMaterial3Api::class)
+/**
+ * Shared waypoint editor used by both the google and fdroid map flavors (DRY — replaces the two drifted per-flavor
+ * copies). Map-engine-specific concerns stay outside: drawing the box overlay and the drag-to-define gesture are
+ * triggered via [onBeginBoxAuthoring], which hands the current draft back to the flavor's map so the user can define
+ * the bounding box there; the flavor re-opens this dialog with the drawn box applied.
+ */
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod", "MagicNumber")
 @Composable
 fun EditWaypointDialog(
     waypoint: Waypoint,
-    onSendClicked: (Waypoint) -> Unit,
-    onDeleteClicked: (Waypoint) -> Unit,
+    displayUnits: DisplayUnits,
+    onSend: (Waypoint) -> Unit,
+    onDelete: (Waypoint) -> Unit,
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
+    onBeginBoxAuthoring: (Waypoint) -> Unit = {},
 ) {
     var waypointInput by remember { mutableStateOf(waypoint) }
     val title = if (waypoint.id == 0) Res.string.waypoint_new else Res.string.waypoint_edit
@@ -103,7 +132,6 @@ fun EditWaypointDialog(
     val context = LocalContext.current
     val tz = systemTimeZone
 
-    // Initialize date and time states from waypointInput.expire
     var selectedDateString by remember { mutableStateOf("") }
     var selectedTimeString by remember { mutableStateOf("") }
     var isExpiryEnabled by remember {
@@ -123,7 +151,7 @@ fun EditWaypointDialog(
                 val date = java.util.Date(instant.toEpochMilliseconds())
                 selectedDateString = dateFormat.format(date)
                 selectedTimeString = timeFormat.format(date)
-            } else { // If enabled but not set, default to 8 hours from now
+            } else {
                 val futureInstant = kotlin.time.Clock.System.now() + 8.hours
                 val date = java.util.Date(futureInstant.toEpochMilliseconds())
                 selectedDateString = dateFormat.format(date)
@@ -148,7 +176,7 @@ fun EditWaypointDialog(
                 )
             },
             text = {
-                Column(modifier = modifier.fillMaxWidth()) {
+                Column(modifier = modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
                     OutlinedTextField(
                         value = waypointInput.name,
                         onValueChange = { waypointInput = waypointInput.copy(name = it.take(29)) },
@@ -220,7 +248,6 @@ fun EditWaypointDialog(
                                 isExpiryEnabled = checked
                                 if (checked) {
                                     val expireValue = waypointInput.expire
-                                    // Default to 8 hours from now if not already set
                                     if (expireValue == 0 || expireValue == Int.MAX_VALUE) {
                                         val futureInstant = kotlin.time.Clock.System.now() + 8.hours
                                         waypointInput = waypointInput.copy(expire = futureInstant.epochSeconds.toInt())
@@ -336,6 +363,16 @@ fun EditWaypointDialog(
                             }
                         }
                     }
+
+                    Spacer(modifier = Modifier.size(8.dp))
+                    HorizontalDivider()
+                    Spacer(modifier = Modifier.size(8.dp))
+                    GeofenceSection(
+                        waypoint = waypointInput,
+                        displayUnits = displayUnits,
+                        onWaypointChange = { waypointInput = it },
+                        onBeginBoxAuthoring = { onBeginBoxAuthoring(waypointInput) },
+                    )
                 }
             },
             confirmButton = {
@@ -344,23 +381,20 @@ fun EditWaypointDialog(
                     horizontalArrangement = Arrangement.End,
                 ) {
                     if (waypoint.id != 0) {
-                        TextButton(
-                            onClick = { onDeleteClicked(waypointInput) },
-                            modifier = Modifier.padding(end = 8.dp),
-                        ) {
+                        TextButton(onClick = { onDelete(waypointInput) }, modifier = Modifier.padding(end = 8.dp)) {
                             Text(stringResource(Res.string.delete), color = MaterialTheme.colorScheme.error)
                         }
                     }
-                    Spacer(modifier = Modifier.weight(1f)) // Pushes delete to left and cancel/send to right
+                    Spacer(modifier = Modifier.weight(1f))
                     TextButton(onClick = onDismissRequest, modifier = Modifier.padding(end = 8.dp)) {
                         Text(stringResource(Res.string.cancel))
                     }
-                    Button(onClick = { onSendClicked(waypointInput) }, enabled = (waypointInput.name).isNotBlank()) {
+                    Button(onClick = { onSend(waypointInput) }, enabled = (waypointInput.name).isNotBlank()) {
                         Text(stringResource(Res.string.send))
                     }
                 }
             },
-            dismissButton = null, // Using custom buttons in confirmButton Row
+            dismissButton = null,
             modifier = modifier,
         )
     } else {
@@ -369,4 +403,127 @@ fun EditWaypointDialog(
             waypointInput = waypointInput.copy(icon = selectedEmoji.codePointAt(0))
         }
     }
+}
+
+/**
+ * Geofence authoring controls. Radius presets are locale-aware (wire value is always metres); the enter/exit toggles
+ * appear only once a circle or box exists, and the favorites-only toggle only once enter or exit is on.
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun GeofenceSection(
+    waypoint: Waypoint,
+    displayUnits: DisplayUnits,
+    onWaypointChange: (Waypoint) -> Unit,
+    onBeginBoxAuthoring: () -> Unit,
+) {
+    val presets = remember(displayUnits) { GeofenceRadiusPresets.forUnits(displayUnits) }
+    val hasBox = waypoint.bounding_box != null
+    val hasRegion = waypoint.geofence_radius > 0 || hasBox
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = stringResource(Res.string.geofence),
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+        )
+        Spacer(modifier = Modifier.size(4.dp))
+        Text(stringResource(Res.string.geofence_radius), style = MaterialTheme.typography.bodyMedium)
+        // Highlight the closest preset so a radius authored on another client (e.g. an imperial/non-preset value)
+        // is still shown as selected rather than appearing as "no selection" and being silently clobbered on edit.
+        val selectedRadius = GeofenceRadiusPresets.nearest(waypoint.geofence_radius, displayUnits)
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            presets.forEach { meters ->
+                val label =
+                    if (meters == 0) {
+                        stringResource(Res.string.geofence_off)
+                    } else {
+                        meters.toDistanceString(displayUnits)
+                    }
+                FilterChip(
+                    selected = meters == selectedRadius,
+                    onClick = {
+                        onWaypointChange(waypoint.copy(geofence_radius = meters).normalizeGeofenceNotifications())
+                    },
+                    label = { Text(label) },
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.size(8.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            OutlinedButton(onClick = onBeginBoxAuthoring) {
+                Text(stringResource(if (hasBox) Res.string.geofence_edit_area else Res.string.geofence_set_area))
+            }
+            if (hasBox) {
+                TextButton(
+                    onClick = { onWaypointChange(waypoint.copy(bounding_box = null).normalizeGeofenceNotifications()) },
+                ) {
+                    Text(stringResource(Res.string.geofence_remove_area))
+                }
+            }
+        }
+
+        if (hasRegion) {
+            Spacer(modifier = Modifier.size(8.dp))
+            GeofenceNotificationControls(waypoint = waypoint, onWaypointChange = onWaypointChange)
+        }
+    }
+}
+
+/** Enter/exit toggles plus the favorites-only toggle (visible only once enter or exit is on). */
+@Composable
+private fun GeofenceNotificationControls(waypoint: Waypoint, onWaypointChange: (Waypoint) -> Unit) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        GeofenceToggleRow(
+            label = stringResource(Res.string.geofence_notify_on_enter),
+            checked = waypoint.notify_on_enter,
+            onCheckedChange = {
+                onWaypointChange(waypoint.copy(notify_on_enter = it).normalizeGeofenceNotifications())
+            },
+        )
+        GeofenceToggleRow(
+            label = stringResource(Res.string.geofence_notify_on_exit),
+            checked = waypoint.notify_on_exit,
+            onCheckedChange = { onWaypointChange(waypoint.copy(notify_on_exit = it).normalizeGeofenceNotifications()) },
+        )
+        if (waypoint.notify_on_enter || waypoint.notify_on_exit) {
+            GeofenceToggleRow(
+                label = stringResource(Res.string.geofence_favorites_only),
+                checked = waypoint.notify_favorites_only,
+                onCheckedChange = { onWaypointChange(waypoint.copy(notify_favorites_only = it)) },
+            )
+        }
+    }
+}
+
+@Composable
+private fun GeofenceToggleRow(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+    Row(
+        // The whole row is one toggleable target so the label names the switch to a screen reader and the
+        // tap target spans the row, not just the thumb.
+        modifier =
+        Modifier.fillMaxWidth().toggleable(value = checked, role = Role.Switch, onValueChange = onCheckedChange),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Text(label)
+        Switch(checked = checked, onCheckedChange = null)
+    }
+}
+
+/**
+ * Clears geofence notification flags the UI can no longer expose, so stale values don't silently reappear when a region
+ * is added again: drop all three when no region remains, and drop favorites-only when neither enter nor exit is on.
+ */
+private fun Waypoint.normalizeGeofenceNotifications(): Waypoint = when {
+    geofence_radius <= 0 && bounding_box == null ->
+        copy(notify_on_enter = false, notify_on_exit = false, notify_favorites_only = false)
+
+    !notify_on_enter && !notify_on_exit -> copy(notify_favorites_only = false)
+
+    else -> this
 }

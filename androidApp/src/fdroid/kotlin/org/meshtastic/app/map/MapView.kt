@@ -18,19 +18,24 @@ package org.meshtastic.app.map
 
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.BasicAlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuGroup
@@ -75,7 +80,6 @@ import org.meshtastic.app.R
 import org.meshtastic.app.map.cluster.RadiusMarkerClusterer
 import org.meshtastic.app.map.component.CacheLayout
 import org.meshtastic.app.map.component.DownloadButton
-import org.meshtastic.app.map.component.EditWaypointDialog
 import org.meshtastic.app.map.model.CustomTileSource
 import org.meshtastic.app.map.model.MarkerWithLabel
 import org.meshtastic.core.common.gpsDisabled
@@ -85,6 +89,7 @@ import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
+import org.meshtastic.core.model.geofence.toGeofence
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.calculating
 import org.meshtastic.core.resources.cancel
@@ -93,6 +98,9 @@ import org.meshtastic.core.resources.close
 import org.meshtastic.core.resources.delete_for_everyone
 import org.meshtastic.core.resources.delete_for_me
 import org.meshtastic.core.resources.expires
+import org.meshtastic.core.resources.geofence
+import org.meshtastic.core.resources.geofence_box_author_confirm
+import org.meshtastic.core.resources.geofence_box_author_hint_viewport
 import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.last_heard_filter_label
 import org.meshtastic.core.resources.location_disabled
@@ -132,6 +140,7 @@ import org.meshtastic.core.ui.util.rememberLocationPermissionState
 import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.feature.map.BaseMapViewModel.MapFilterState
 import org.meshtastic.feature.map.LastHeardFilter
+import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.component.MapButton
 import org.meshtastic.feature.map.component.MapControlsOverlay
 import org.meshtastic.proto.Config.DisplayConfig.DisplayUnits
@@ -157,18 +166,31 @@ import org.osmdroid.views.overlay.infowindow.InfoWindow
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import java.io.File
 import kotlin.math.roundToInt
+import org.meshtastic.proto.BoundingBox as ProtoBoundingBox
+
+/**
+ * Marker subclass for waypoint geofence overlays (circles + boxes). Distinguished from the tile-download / geofence
+ * authoring rectangle Polygons so [updateMarkers] can rebuild only the waypoint geofences on each refresh. The
+ * transient-rectangle cleanups in the download/authoring paths exclude this subclass (`removeAll { it is Polygon && it
+ * !is GeofenceOverlayPolygon }`) so persistent waypoint geofences are not wiped.
+ */
+private class GeofenceOverlayPolygon : Polygon()
 
 private fun MapView.updateMarkers(
     nodeMarkers: List<MarkerWithLabel>,
     waypointMarkers: List<MarkerWithLabel>,
+    geofenceOverlays: List<GeofenceOverlayPolygon>,
     nodeClusterer: RadiusMarkerClusterer,
 ) {
     Logger.d { "Showing on map: ${nodeMarkers.size} nodes ${waypointMarkers.size} waypoints" }
 
     overlays.removeAll { overlay ->
-        overlay is MarkerWithLabel || (overlay is Marker && overlay !in nodeClusterer.items)
+        overlay is MarkerWithLabel ||
+            overlay is GeofenceOverlayPolygon ||
+            (overlay is Marker && overlay !in nodeClusterer.items)
     }
 
+    overlays.addAll(geofenceOverlays)
     overlays.addAll(waypointMarkers)
 
     nodeClusterer.items.clear()
@@ -225,6 +247,12 @@ fun MapView(
 
     var downloadRegionBoundingBox: BoundingBox? by remember { mutableStateOf(null) }
     var myLocationOverlay: MyLocationNewOverlay? by remember { mutableStateOf(null) }
+
+    // Geofence box authoring: when geofenceBoxDraft is non-null the user is positioning a rectangle (reusing the
+    // tile-download rectangle machinery) that becomes the draft's bounding box on confirm. Kept distinct from the
+    // tile-download box (downloadRegionBoundingBox) so the two rectangle modes never collide.
+    var geofenceBoxDraft by remember { mutableStateOf<Waypoint?>(null) }
+    var geofenceBoxBoundingBox: BoundingBox? by remember { mutableStateOf(null) }
 
     var showDownloadButton: Boolean by remember { mutableStateOf(false) }
     var showEditWaypointDialog by remember { mutableStateOf<Waypoint?>(null) }
@@ -327,6 +355,7 @@ fun MapView(
     val waypoints by mapViewModel.waypoints.collectAsStateWithLifecycle(emptyMap())
     val selectedWaypointId by mapViewModel.selectedWaypointId.collectAsStateWithLifecycle()
     val myId by mapViewModel.myId.collectAsStateWithLifecycle()
+    val displayUnits by mapViewModel.displayUnits.collectAsStateWithLifecycle()
 
     LaunchedEffect(selectedWaypointId, waypoints) {
         if (selectedWaypointId != null && waypoints.containsKey(selectedWaypointId)) {
@@ -428,9 +457,12 @@ fun MapView(
                     expireTimeMillis <= now -> "Expired"
                     else -> DateFormatter.formatRelativeTime(expireTimeMillis)
                 }
+            // Non-visual cue: the geofence is otherwise only an orange overlay, so surface it in the marker's
+            // accessible title for screen-reader and color-challenged users.
+            val geofenceLabel = if (pt.toGeofence() != null) " · " + getString(Res.string.geofence) else ""
             MarkerWithLabel(this, label, emoji).apply {
                 id = "${pt.id}"
-                title = "${pt.name} (${getUsername(waypoint.from)}$lock)"
+                title = "${pt.name} (${getUsername(waypoint.from)}$lock)$geofenceLabel"
                 snippet = "[$time] ${pt.description}  " + getString(Res.string.expires) + ": $expireTimeStr"
                 position = GeoPoint((pt.latitude_i ?: 0) * 1e-7, (pt.longitude_i ?: 0) * 1e-7)
                 if (selectedWaypointId == pt.id) {
@@ -439,6 +471,48 @@ fun MapView(
                 setOnLongClickListener {
                     showMarkerLongPressDialog(pt.id)
                     true
+                }
+            }
+        }
+    }
+
+    // Builds the orange geofence overlays (a circle for a radius geofence, a 4-point rect for a bounding box) for every
+    // displayed waypoint. Uses the shared toGeofence() decoder so the coordinate math stays in one place.
+    fun buildGeofenceOverlays(waypoints: Collection<DataPacket>): List<GeofenceOverlayPolygon> {
+        if (!mapFilterState.showWaypoints) return emptyList()
+        return waypoints.flatMap { packet ->
+            val pt = packet.waypoint ?: return@flatMap emptyList()
+            val geofence = pt.toGeofence() ?: return@flatMap emptyList()
+            buildList {
+                geofence.circle?.let { circle ->
+                    add(
+                        GeofenceOverlayPolygon().apply {
+                            points =
+                                Polygon.pointsAsCircle(
+                                    GeoPoint(circle.centerLat, circle.centerLon),
+                                    circle.radiusMeters.toDouble(),
+                                )
+                            outlinePaint.color = GEOFENCE_OVERLAY_COLOR
+                            outlinePaint.strokeWidth = GEOFENCE_STROKE_WIDTH_PX
+                            fillPaint.color = GEOFENCE_FILL_COLOR
+                        },
+                    )
+                }
+                geofence.box?.let { box ->
+                    add(
+                        GeofenceOverlayPolygon().apply {
+                            points =
+                                listOf(
+                                    GeoPoint(box.south, box.west),
+                                    GeoPoint(box.north, box.west),
+                                    GeoPoint(box.north, box.east),
+                                    GeoPoint(box.south, box.east),
+                                )
+                            outlinePaint.color = GEOFENCE_OVERLAY_COLOR
+                            outlinePaint.strokeWidth = GEOFENCE_STROKE_WIDTH_PX
+                            fillPaint.color = GEOFENCE_FILL_COLOR
+                        },
+                    )
                 }
             }
         }
@@ -453,7 +527,7 @@ fun MapView(
 
             override fun longPressHelper(p: GeoPoint): Boolean {
                 performHapticFeedback()
-                val enabled = isConnected && downloadRegionBoundingBox == null
+                val enabled = isConnected && downloadRegionBoundingBox == null && geofenceBoxDraft == null
 
                 if (enabled) {
                     showEditWaypointDialog =
@@ -482,7 +556,7 @@ fun MapView(
     }
 
     fun MapView.generateBoxOverlay() {
-        overlays.removeAll { it is Polygon }
+        overlays.removeAll { it is Polygon && it !is GeofenceOverlayPolygon }
         val zoomFactor = 1.3
         zoomLevelMin = minOf(zoomLevelDouble, zoomLevelMax)
         downloadRegionBoundingBox = boundingBox.zoomIn(zoomFactor)
@@ -498,11 +572,29 @@ fun MapView(
         cacheEstimate = getString(Res.string.map_cache_tiles, tileCount)
     }
 
+    // Positions the geofence rectangle from the current viewport (reusing the tile-download rectangle approach) and
+    // draws an orange preview Polygon. Mirrors generateBoxOverlay(), but stores into geofenceBoxBoundingBox so it
+    // never collides with the tile-download box.
+    fun MapView.generateGeofenceBoxOverlay() {
+        overlays.removeAll { it is Polygon && it !is GeofenceOverlayPolygon }
+        geofenceBoxBoundingBox = boundingBox.zoomIn(GEOFENCE_BOX_ZOOM_FACTOR)
+        val polygon =
+            Polygon().apply {
+                points = Polygon.pointsAsRect(geofenceBoxBoundingBox).map { GeoPoint(it.latitude, it.longitude) }
+                outlinePaint.color = GEOFENCE_OVERLAY_COLOR
+                outlinePaint.strokeWidth = GEOFENCE_STROKE_WIDTH_PX
+                fillPaint.color = GEOFENCE_FILL_COLOR
+            }
+        overlays.add(polygon)
+        invalidate()
+    }
+
     val boxOverlayListener =
         object : MapListener {
             override fun onScroll(event: ScrollEvent): Boolean {
-                if (downloadRegionBoundingBox != null) {
-                    event.source.generateBoxOverlay()
+                when {
+                    downloadRegionBoundingBox != null -> event.source.generateBoxOverlay()
+                    geofenceBoxDraft != null -> event.source.generateGeofenceBoxOverlay()
                 }
                 return true
             }
@@ -546,7 +638,9 @@ fun MapView(
     Scaffold(
         modifier = modifier,
         floatingActionButton = {
-            DownloadButton(showDownloadButton && downloadRegionBoundingBox == null) { showCacheManagerDialog = true }
+            DownloadButton(showDownloadButton && downloadRegionBoundingBox == null && geofenceBoxDraft == null) {
+                showCacheManagerDialog = true
+            }
         },
     ) { innerPadding ->
         Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
@@ -563,19 +657,45 @@ fun MapView(
                         updateMarkers(
                             onNodesChanged(nodes),
                             onWaypointChanged(waypoints.values, selectedWaypointId),
+                            buildGeofenceOverlays(waypoints.values),
                             nodeClusterer,
                         )
                     }
                     mapView.drawOverlays()
                 }, // Renamed map to mapView to avoid conflict
             )
-            if (downloadRegionBoundingBox != null) {
+            if (geofenceBoxDraft != null) {
+                GeofenceBoxAuthoringBar(
+                    onConfirm = {
+                        val draft = geofenceBoxDraft
+                        val bb = geofenceBoxBoundingBox
+                        if (draft != null && bb != null) {
+                            showEditWaypointDialog = draft.copy(bounding_box = bb.toProtoBoundingBox())
+                        } else {
+                            showEditWaypointDialog = draft
+                        }
+                        geofenceBoxDraft = null
+                        geofenceBoxBoundingBox = null
+                        map.overlays.removeAll { it is Polygon && it !is GeofenceOverlayPolygon }
+                        map.invalidate()
+                    },
+                    onCancel = {
+                        val draft = geofenceBoxDraft
+                        geofenceBoxDraft = null
+                        geofenceBoxBoundingBox = null
+                        map.overlays.removeAll { it is Polygon && it !is GeofenceOverlayPolygon }
+                        map.invalidate()
+                        showEditWaypointDialog = draft
+                    },
+                    modifier = Modifier.align(Alignment.BottomCenter),
+                )
+            } else if (downloadRegionBoundingBox != null) {
                 CacheLayout(
                     cacheEstimate = cacheEstimate,
                     onExecuteJob = { startDownload() },
                     onCancelDownload = {
                         downloadRegionBoundingBox = null
-                        map.overlays.removeAll { it is Polygon }
+                        map.overlays.removeAll { it is Polygon && it !is GeofenceOverlayPolygon }
                         map.invalidate()
                     },
                     modifier = Modifier.align(Alignment.BottomCenter),
@@ -662,7 +782,8 @@ fun MapView(
     if (showEditWaypointDialog != null) {
         EditWaypointDialog(
             waypoint = showEditWaypointDialog ?: return, // Safe call
-            onSendClicked = { waypoint ->
+            displayUnits = displayUnits,
+            onSend = { waypoint ->
                 Logger.d { "User clicked send waypoint ${waypoint.id}" }
                 showEditWaypointDialog = null
 
@@ -682,7 +803,7 @@ fun MapView(
                     ),
                 )
             },
-            onDeleteClicked = { waypoint ->
+            onDelete = { waypoint ->
                 Logger.d { "User clicked delete waypoint ${waypoint.id}" }
                 showEditWaypointDialog = null
                 showDeleteWaypointDialog = waypoint
@@ -690,6 +811,12 @@ fun MapView(
             onDismissRequest = {
                 Logger.d { "User clicked cancel marker edit dialog" }
                 showEditWaypointDialog = null
+            },
+            onBeginBoxAuthoring = { draft ->
+                Logger.d { "User began geofence box authoring for waypoint ${draft.id}" }
+                showEditWaypointDialog = null
+                geofenceBoxDraft = draft
+                map.generateGeofenceBoxOverlay()
             },
         )
     }
@@ -992,3 +1119,39 @@ private fun MapsDialog(
 }
 
 private const val WAYPOINT_ZOOM = 15.0
+
+// Geofence / authoring rectangle styling (orange) for the imperative OSMDroid Polygon paints (android.graphics ints).
+private const val GEOFENCE_OVERLAY_COLOR = 0xFFFF9800.toInt()
+private const val GEOFENCE_FILL_COLOR = 0x1FFF9800 // ~12% alpha orange
+private const val GEOFENCE_STROKE_WIDTH_PX = 4f
+private const val GEOFENCE_BOX_ZOOM_FACTOR = 1.3
+
+/** Converts an OSMDroid [BoundingBox] (decimal degrees) to a proto [ProtoBoundingBox] (degrees ×1e7). */
+@Suppress("MagicNumber")
+private fun BoundingBox.toProtoBoundingBox(): ProtoBoundingBox = ProtoBoundingBox(
+    longitude_west_i = (lonWest * 1e7).toInt(),
+    latitude_south_i = (latSouth * 1e7).toInt(),
+    longitude_east_i = (lonEast * 1e7).toInt(),
+    latitude_north_i = (latNorth * 1e7).toInt(),
+)
+
+/** Bottom bar shown while the user positions the geofence rectangle: confirm applies it, cancel re-opens the editor. */
+@Composable
+private fun GeofenceBoxAuthoringBar(onConfirm: () -> Unit, onCancel: () -> Unit, modifier: Modifier = Modifier) {
+    Card(modifier = modifier.padding(16.dp)) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text(
+                text = stringResource(Res.string.geofence_box_author_hint_viewport),
+                modifier = Modifier.weight(1f),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            TextButton(onClick = onCancel) { Text(stringResource(Res.string.cancel)) }
+            Button(onClick = onConfirm) { Text(stringResource(Res.string.geofence_box_author_confirm)) }
+        }
+    }
+}
