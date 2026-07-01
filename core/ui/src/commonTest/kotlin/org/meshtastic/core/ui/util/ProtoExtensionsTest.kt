@@ -16,14 +16,20 @@
  */
 package org.meshtastic.core.ui.util
 
+import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.toByteString
+import org.meshtastic.core.testing.FakeRadioConfigRepository
+import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.proto.Channel
+import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 import org.meshtastic.core.model.Channel as ModelChannel
 
 /**
@@ -143,6 +149,88 @@ class ProtoExtensionsTest {
         assertEquals(Channel.Role.SECONDARY, result[2].role)
         assertEquals(2, result[2].index)
         assertEquals(secondaryB, result[2].settings)
+    }
+
+    @Test
+    fun replacement_apply_paces_every_write_before_replacing_cached_settings() = runTest {
+        val radioController = FakeRadioController()
+        val radioConfigRepository = FakeRadioConfigRepository()
+        val oldSettings =
+            listOf(
+                ChannelSettings(name = "Old Primary"),
+                ChannelSettings(name = "Old Secondary"),
+                ChannelSettings(name = "Old Tertiary"),
+            )
+        val importedSettings = listOf(ChannelSettings(name = "Imported"), ChannelSettings(name = "Private"))
+        val cacheSnapshotsAtDelay = mutableListOf<List<ChannelSettings>>()
+        radioConfigRepository.setChannelSet(ChannelSet(settings = oldSettings))
+
+        applyReplacementChannelSet(
+            channelSet = ChannelSet(settings = importedSettings),
+            radioController = radioController,
+            radioConfigRepository = radioConfigRepository,
+            writeDelay = 1.seconds,
+            delayFn = { cacheSnapshotsAtDelay.add(radioConfigRepository.currentChannelSet.settings) },
+        )
+
+        assertEquals((0..7).toList(), radioController.localChannels.map { it.index })
+        assertEquals(
+            listOf(
+                Channel.Role.PRIMARY,
+                Channel.Role.SECONDARY,
+                Channel.Role.DISABLED,
+                Channel.Role.DISABLED,
+                Channel.Role.DISABLED,
+                Channel.Role.DISABLED,
+                Channel.Role.DISABLED,
+                Channel.Role.DISABLED,
+            ),
+            radioController.localChannels.map { it.role },
+        )
+        assertEquals(importedSettings, radioConfigRepository.currentChannelSet.settings)
+        assertEquals(List(size = 8) { oldSettings }, cacheSnapshotsAtDelay)
+    }
+
+    @Test
+    fun imported_lora_config_settles_before_and_after_write() = runTest {
+        val radioController = FakeRadioController()
+        val current = Config.LoRaConfig(region = Config.LoRaConfig.RegionCode.EU_868)
+        val imported = Config.LoRaConfig(region = Config.LoRaConfig.RegionCode.US)
+        val delays = mutableListOf<Duration>()
+
+        applyImportedLoraConfigAfterChannelReplacement(
+            importedLoraConfig = imported,
+            currentLoraConfig = current,
+            radioController = radioController,
+            settleDelay = 2.seconds,
+            delayFn = { delays.add(it) },
+        )
+
+        assertEquals(listOf(2.seconds, 2.seconds), delays)
+        assertEquals(listOf(Config(lora = imported)), radioController.localConfigs)
+    }
+
+    @Test
+    fun imported_lora_config_is_not_written_when_absent_or_unchanged() = runTest {
+        val radioController = FakeRadioController()
+        val current = Config.LoRaConfig(region = Config.LoRaConfig.RegionCode.US)
+        val delays = mutableListOf<Duration>()
+
+        applyImportedLoraConfigAfterChannelReplacement(
+            importedLoraConfig = null,
+            currentLoraConfig = current,
+            radioController = radioController,
+            delayFn = { delays.add(it) },
+        )
+        applyImportedLoraConfigAfterChannelReplacement(
+            importedLoraConfig = current,
+            currentLoraConfig = current,
+            radioController = radioController,
+            delayFn = { delays.add(it) },
+        )
+
+        assertTrue(delays.isEmpty())
+        assertTrue(radioController.localConfigs.isEmpty())
     }
 
     // --- getChannelPreviewForAdd tests ---

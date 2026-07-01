@@ -53,6 +53,9 @@ class FakeRadioController :
     val lastLocalConfig: Config?
         get() = localConfigs.lastOrNull()
 
+    /** Every [setLocalChannel] call, in order. */
+    val localChannels = mutableListOf<Channel>()
+
     var throwOnSend: Boolean = false
     var lastSetDeviceAddress: String? = null
     var lastSetOwnerUser: User? = null
@@ -66,6 +69,7 @@ class FakeRadioController :
             favoritedNodes.clear()
             sentSharedContacts.clear()
             localConfigs.clear()
+            localChannels.clear()
             throwOnSend = false
             lastSetDeviceAddress = null
             lastSetOwnerUser = null
@@ -107,7 +111,9 @@ class FakeRadioController :
         localConfigs.add(config)
     }
 
-    override suspend fun setLocalChannel(channel: Channel) {}
+    override suspend fun setLocalChannel(channel: Channel) {
+        localChannels.add(channel)
+    }
 
     override suspend fun setOwner(destNum: Int, user: User, packetId: Int) {
         lastSetOwnerUser = user

@@ -17,6 +17,8 @@
 package org.meshtastic.core.ui.util
 
 import androidx.compose.runtime.Composable
+import co.touchlab.kermit.Logger
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import okio.ByteString
 import org.jetbrains.compose.resources.stringResource
@@ -32,10 +34,16 @@ import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.Position
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.seconds
 import org.meshtastic.core.model.Channel as ModelChannel
 
 private const val SECONDS_TO_MILLIS = 1000L
+private const val CHANNEL_REPLACEMENT_SLOT_COUNT = 8
+private const val MAX_LOG_CHANNEL_NAME_LENGTH = 32
+private val CHANNEL_REPLACEMENT_WRITE_DELAY = 1.seconds
+private val LORA_CONFIG_SETTLE_DELAY = 2.seconds
 
 @Composable
 fun Position.formatPositionTime(): String {
@@ -107,11 +115,18 @@ fun getChannelList(new: List<ChannelSettings>, old: List<ChannelSettings>): List
  * @param new The imported [ChannelSettings] list. Every index becomes a write to the radio.
  * @param currentSettings The current [ChannelSettings] list. Only its size is used; trailing indices past [new] become
  *   DISABLED writes so leftover slots are cleared.
+ * @param minimumSlotCount The minimum slot count to emit. Full replacement callers can use this to disable firmware
+ *   slots even when the local cache is stale or shorter than the radio's actual channel list.
  * @return A [Channel] list covering every slot the radio needs written to materialize [new] and clear leftover slots.
  */
-fun getChannelReplacementList(new: List<ChannelSettings>, currentSettings: List<ChannelSettings>): List<Channel> =
+fun getChannelReplacementList(
+    new: List<ChannelSettings>,
+    currentSettings: List<ChannelSettings>,
+    minimumSlotCount: Int = 0,
+): List<Channel> =
     buildList {
-        for (i in 0..maxOf(currentSettings.lastIndex, new.lastIndex)) {
+        val minimumLastIndex = minimumSlotCount.coerceAtLeast(0) - 1
+        for (i in 0..maxOf(currentSettings.lastIndex, new.lastIndex, minimumLastIndex)) {
             add(
                 Channel(
                     role =
@@ -134,28 +149,79 @@ fun getChannelReplacementList(new: List<ChannelSettings>, currentSettings: List<
  * Applies an imported [ChannelSet] as an authoritative replacement to the radio and local cache.
  *
  * Reads the current channel set from [radioConfigRepository]'s flow (avoiding the StateFlow placeholder window), builds
- * the authoritative replacement list via [getChannelReplacementList], enqueues each channel write to the radio
- * sequentially via [radioController], then atomically replaces the local cached settings.
+ * the authoritative replacement list via [getChannelReplacementList], enqueues each channel write to the radio via
+ * [radioController], pauses between writes so the radio can persist and reconfigure each slot, then atomically replaces
+ * the local cached settings.
  *
- * setLocalChannel returns once the packet is enqueued, not after firmware ACK — firmware echoes via
- * MeshConfigHandlerImpl can still arrive after [radioConfigRepository.replaceAllSettings] and are tracked separately.
+ * setLocalChannel returns once the packet is enqueued, not after firmware ACK. The pacing avoids enqueueing a complete
+ * channel replacement plus LoRa reconfiguration faster than real hardware can materialize the later channel slots.
  *
  * Does NOT handle LoRa config — callers are responsible for comparing and sending `lora_config` if present.
  *
  * @param channelSet The imported [ChannelSet] to apply as a replacement.
  * @param radioController The [RadioController] used to enqueue channel writes.
  * @param radioConfigRepository The [RadioConfigRepository] providing the current channel flow and cache.
+ * @param writeDelay Delay after each channel write. Exposed for fast unit tests.
+ * @param delayFn Delay implementation. Exposed for fast unit tests.
  */
 suspend fun applyReplacementChannelSet(
     channelSet: ChannelSet,
     radioController: RadioController,
     radioConfigRepository: RadioConfigRepository,
+    writeDelay: Duration = CHANNEL_REPLACEMENT_WRITE_DELAY,
+    delayFn: suspend (Duration) -> Unit = { delay(it) },
 ) {
     val currentSettings = radioConfigRepository.channelSetFlow.first().settings
-    for (channel in getChannelReplacementList(channelSet.settings, currentSettings)) {
+    val replacements =
+        getChannelReplacementList(
+            new = channelSet.settings,
+            currentSettings = currentSettings,
+            minimumSlotCount = CHANNEL_REPLACEMENT_SLOT_COUNT,
+        )
+    Logger.i {
+        "Applying imported channel replacement writes=${replacements.size} importedSettings=${channelSet.settings.size}"
+    }
+    for (channel in replacements) {
+        Logger.i {
+            "Writing imported channel index=${channel.index} role=${channel.role} name=${channel.settings.logName()}"
+        }
         radioController.setLocalChannel(channel)
+        delayFn(writeDelay)
     }
     radioConfigRepository.replaceAllSettings(channelSet.settings)
+}
+
+/**
+ * Applies an imported LoRa config after channel replacement writes have had time to settle.
+ *
+ * LoRa reconfiguration is expensive on firmware and can race with channel persistence if sent immediately after a full
+ * channel replacement. The pre/post settle delays give the radio time to materialize the imported channels before and
+ * after the LoRa write.
+ */
+suspend fun applyImportedLoraConfigAfterChannelReplacement(
+    importedLoraConfig: Config.LoRaConfig?,
+    currentLoraConfig: Config.LoRaConfig?,
+    radioController: RadioController,
+    settleDelay: Duration = LORA_CONFIG_SETTLE_DELAY,
+    delayFn: suspend (Duration) -> Unit = { delay(it) },
+) {
+    if (importedLoraConfig == null || currentLoraConfig == importedLoraConfig) return
+
+    Logger.i { "Settling before imported LoRa config write" }
+    delayFn(settleDelay)
+    radioController.setLocalConfig(Config(lora = importedLoraConfig))
+    Logger.i { "Settling after imported LoRa config write" }
+    delayFn(settleDelay)
+}
+
+private fun ChannelSettings?.logName(): String {
+    val singleLine = this?.name.orEmpty().replace('\n', ' ').replace('\r', ' ').trim()
+    val sanitized = singleLine.ifEmpty { "<default>" }
+    return if (sanitized.length <= MAX_LOG_CHANNEL_NAME_LENGTH) {
+        sanitized
+    } else {
+        "${sanitized.take(MAX_LOG_CHANNEL_NAME_LENGTH)}..."
+    }
 }
 
 /**
