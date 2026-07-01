@@ -35,7 +35,7 @@ fun EntryProviderScope<NavKey>.connectionsGraph(backStack: NavBackStack<NavKey>)
         // Lets a deep link (e.g. from AI/automation tooling) trigger a connection, or a disconnect via `n`, without
         // manual device selection.
         LaunchedEffect(key.address) {
-            key.address?.let { address ->
+            key.address?.takeIf(String::isNotBlank)?.let { address ->
                 if (address == NO_DEVICE_SELECTED) scanModel.disconnect() else scanModel.changeDeviceAddress(address)
             }
         }

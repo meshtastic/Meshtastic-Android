@@ -49,7 +49,7 @@ sealed interface SettingsRoute : Route {
 
 Both forms resolve through the same `DeepLinkRouter`, so any path below works with either scheme:
 
-```
+```text
 meshtastic://meshtastic/{path}
 https://meshtastic.org/{path}       # App Link, android:autoVerify — also opens in-app on a real device/adb
 ```
