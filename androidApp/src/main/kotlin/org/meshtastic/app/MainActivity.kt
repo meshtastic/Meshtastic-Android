@@ -105,6 +105,13 @@ class MainActivity : AppCompatActivity() {
 
         super.onCreate(savedInstanceState)
 
+        // ponytail: debug-only test affordance so CI/agent tooling can skip onboarding on a fresh
+        // install: `adb shell am start -n <pkg>/.MainActivity --ez skip_onboarding true`. Pair with
+        // `adb shell pm grant <pkg> <permission>` to pre-grant runtime permissions (native, no app code).
+        if (BuildConfig.DEBUG && intent.getBooleanExtra(EXTRA_SKIP_ONBOARDING, false)) {
+            model.onAppIntroCompleted()
+        }
+
         enableEdgeToEdge()
 
         // Explicitly set the cutout mode to ALWAYS for Android 15+ to satisfy Play Console recommendations.
@@ -327,5 +334,9 @@ class MainActivity : AppCompatActivity() {
         if (!selectedAddress.isNullOrBlank() && selectedAddress != NO_DEVICE_SELECTED) return
 
         handleMeshtasticUri("$DEEP_LINK_BASE_URI/connections".toUri())
+    }
+
+    private companion object {
+        const val EXTRA_SKIP_ONBOARDING = "skip_onboarding"
     }
 }

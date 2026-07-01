@@ -77,6 +77,20 @@ Compose Preview Screenshot Testing (AGP/layoutlib) is split into two modules —
 
 Rendering is **host-deterministic** (layoutlib): a local `update` produces references byte-identical to CI, so locally-recorded goldens pass `validate`. `copyDocsScreenshots` overwrites a stale committed `nodes_detail_local.png` each run — `git checkout` it. Public previews consumed cross-module by a wrapper need a `detekt-baseline.xml` entry (PreviewPublic). New screenshot? Pick the module by purpose; see `docs/assets/screenshots/README.md`.
 
+## 3c) Fresh-install manual/agent testing: skip onboarding
+
+Debug builds accept an intent extra to skip the intro flow (`MainActivity.kt`, `BuildConfig.DEBUG`-gated — never reaches release/Play builds). Pair with `pm grant` (native Android, no app code) to pre-accept runtime permissions:
+
+```bash
+adb shell pm grant <pkg> android.permission.BLUETOOTH_SCAN
+adb shell pm grant <pkg> android.permission.BLUETOOTH_CONNECT
+adb shell pm grant <pkg> android.permission.ACCESS_FINE_LOCATION
+adb shell pm grant <pkg> android.permission.POST_NOTIFICATIONS   # API 33+
+adb shell am start -n <pkg>/org.meshtastic.app.MainActivity --ez skip_onboarding true
+```
+
+Use this whenever driving the app from a fresh install/uninstall (screenshot tests, UI automation, agent-driven exploration) instead of clicking through the intro screens.
+
 ## 4) CI Pipeline Architecture
 
 CI is defined in `.github/workflows/reusable-check.yml` and structured as parallel job groups:
