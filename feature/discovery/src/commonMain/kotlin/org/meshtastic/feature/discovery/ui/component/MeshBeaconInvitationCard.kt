@@ -33,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.model.ChannelOption
 import org.meshtastic.core.model.MeshBeaconOffer
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.mesh_beacon_offer_channel
@@ -57,7 +58,9 @@ internal fun MeshBeaconInvitationCard(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val preset = offer.beacon.offer_preset
+    // Resolve to a ChannelOption so the preset shows a localized label and "Discover" only appears when the offered
+    // preset is one we can actually seed a scan with (matches DiscoveryViewModel.discoverOffer's success condition).
+    val presetOption = ChannelOption.from(offer.beacon.offer_preset)
     val region = offer.beacon.offer_region
     ElevatedCard(modifier = modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -83,9 +86,9 @@ internal fun MeshBeaconInvitationCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            preset?.let {
+            presetOption?.let {
                 Text(
-                    text = stringResource(Res.string.mesh_beacon_offer_preset, it.name),
+                    text = stringResource(Res.string.mesh_beacon_offer_preset, it.displayName()),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -98,7 +101,7 @@ internal fun MeshBeaconInvitationCard(
             ) {
                 TextButton(onClick = onDismiss) { Text(stringResource(Res.string.mesh_beacon_offer_dismiss)) }
                 Spacer(modifier = Modifier.weight(1f))
-                if (preset != null) {
+                if (presetOption != null) {
                     OutlinedButton(onClick = onDiscover) { Text(stringResource(Res.string.mesh_beacon_offer_discover)) }
                 }
                 Button(onClick = onJoin) { Text(stringResource(Res.string.mesh_beacon_offer_join)) }

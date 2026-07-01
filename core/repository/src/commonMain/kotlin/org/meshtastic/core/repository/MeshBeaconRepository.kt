@@ -24,11 +24,9 @@ import org.meshtastic.core.model.MeshBeaconOffer
 
 /**
  * Holds Mesh Beacon invitations received during this app session. Beacons are advisory, ephemeral, zero-hop
- * advertisements from other meshes — not messages or contacts — so they're kept in memory only (no persistence); they
- * naturally age out on app restart. Consumed by the Discovery surface, which presents them for the user to Discover /
- * Join / Dismiss.
- *
- * ponytail: in-memory + capped; add Room persistence only if users ask to keep invitations across restarts.
+ * advertisements from other meshes — not messages or contacts — so they're kept in memory only (capped, no
+ * persistence) and naturally age out on app restart. Consumed by the Discovery surface, which presents them for the
+ * user to Discover / Join / Dismiss. Room persistence can be added later if users want invitations to survive restarts.
  */
 class MeshBeaconRepository {
     private val _offers = MutableStateFlow<List<MeshBeaconOffer>>(emptyList())

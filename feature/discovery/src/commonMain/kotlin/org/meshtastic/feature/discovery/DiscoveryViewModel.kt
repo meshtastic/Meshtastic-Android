@@ -115,13 +115,15 @@ class DiscoveryViewModel(
     }
 
     /**
-     * Seeds the scan with just the preset an invitation advertised (without persisting it to [discoveryPrefs], so it
-     * doesn't clobber the user's normal preset selection) — lets the user survey the advertised mesh before joining.
-     * No-op if the offer carries no preset.
+     * Seeds the scan with just the preset an invitation advertised, so the user can survey the advertised mesh before
+     * joining. Persists like [togglePreset] (not a bare [_selectedPresets] write) so the shown selection and saved
+     * prefs never diverge — otherwise the next [togglePreset] would silently persist prefs derived from this seed.
+     * No-op if the offer carries no preset, or a preset with no matching [ChannelOption].
      */
     fun discoverOffer(offer: MeshBeaconOffer) {
-        val preset = offer.beacon.offer_preset?.let { mp -> ChannelOption.entries.firstOrNull { it.modemPreset == mp } }
-        if (preset != null) _selectedPresets.value = setOf(preset)
+        val preset = ChannelOption.from(offer.beacon.offer_preset) ?: return
+        _selectedPresets.value = setOf(preset)
+        discoveryPrefs.setSelectedPresets(setOf(preset.name))
     }
 
     fun dismissOffer(offer: MeshBeaconOffer) {

@@ -17,6 +17,8 @@
 package org.meshtastic.feature.discovery.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
@@ -25,6 +27,7 @@ import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 import org.meshtastic.core.model.util.toChannelSet
 import org.meshtastic.core.navigation.DiscoveryRoute
+import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.feature.discovery.DiscoveryHistoryDetailViewModel
 import org.meshtastic.feature.discovery.DiscoveryHistoryViewModel
@@ -77,9 +80,12 @@ fun EntryProviderScope<NavKey>.discoveryGraph(backStack: NavBackStack<NavKey>) {
 @Composable
 private fun DiscoveryScanScreenEntry(backStack: NavBackStack<NavKey>) {
     val viewModel = koinViewModel<DiscoveryViewModel>()
-    // Reuse the shared QR-import flow to apply a beacon's offered channel: it shows the same ADD/REPLACE +
-    // "this changes your radio" confirmation dialog a scanned channel URL does.
+    // Join reuses the QR channel-import flow (same ADD/REPLACE + "this retunes your radio" confirmation a scanned
+    // channel URL shows). UIViewModel is ViewModel-store-scoped per nav entry (MeshtasticNavDisplay uses
+    // rememberViewModelStoreNavEntryDecorator), so the app-shell SharedDialogs observes a *different* instance —
+    // we must render the dialog here, against this entry's instance, or the offer never surfaces.
     val uiViewModel = koinViewModel<UIViewModel>()
+    val requestChannelSet by uiViewModel.requestChannelSet.collectAsStateWithLifecycle()
     DiscoveryScanScreen(
         viewModel = viewModel,
         onNavigateUp = dropUnlessResumed { backStack.removeLastOrNull() },
@@ -87,4 +93,5 @@ private fun DiscoveryScanScreenEntry(backStack: NavBackStack<NavKey>) {
         onNavigateToHistory = dropUnlessResumed { backStack.add(DiscoveryRoute.DiscoveryHistory) },
         onJoinOffer = { beacon -> beacon.toChannelSet()?.let(uiViewModel::setRequestChannelSet) },
     )
+    requestChannelSet?.let { ScannedQrCodeDialog(incoming = it, onDismiss = { uiViewModel.clearRequestChannelUrl() }) }
 }

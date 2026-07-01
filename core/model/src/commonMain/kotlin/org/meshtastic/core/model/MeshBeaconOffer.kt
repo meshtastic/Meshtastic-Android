@@ -25,9 +25,8 @@ import org.meshtastic.proto.MeshBeacon
  *
  * @param fromNodeNum The node that broadcast the beacon (informational only — beacons are unsigned).
  * @param beacon The decoded advertisement, carrying the display [message][MeshBeacon.message] and the join offer.
- * @param receivedAt When this beacon was received (ms since epoch).
  */
-data class MeshBeaconOffer(val fromNodeNum: Int, val beacon: MeshBeacon, val receivedAt: Long) {
+data class MeshBeaconOffer(val fromNodeNum: Int, val beacon: MeshBeacon) {
     /** Stable identity for dedup/dismiss: a given sender advertising a given channel is one standing invitation. */
     val key: String
         get() = "$fromNodeNum:${beacon.offer_channel?.name.orEmpty()}"

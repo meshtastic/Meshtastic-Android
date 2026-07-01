@@ -229,7 +229,7 @@ class MeshDataHandlerImpl(
         val beacon = MeshBeacon.ADAPTER.decodeOrNull(payload, Logger)
         // Only actionable beacons (carrying a channel offer) that we haven't already seen warrant a notification.
         if (beacon?.offer_channel == null) return
-        val offer = MeshBeaconOffer(fromNodeNum = packet.from, beacon = beacon, receivedAt = nowMillis)
+        val offer = MeshBeaconOffer(fromNodeNum = packet.from, beacon = beacon)
         if (meshBeaconRepository.add(offer)) {
             scope.launch {
                 notificationManager.dispatch(
