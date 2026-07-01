@@ -189,6 +189,12 @@
   },
   "pullRequests": [
     {
+      "id": "10839",
+      "title": "second pass adding beacons admin",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10839",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
       "id": "10807",
       "title": "Add DeltaPlusProto Edict board variant",
       "page_url": "https://github.com/meshtastic/firmware/pull/10807",
@@ -283,24 +289,6 @@
       "title": "Heltec Vision Master E213: enable 32768hz crystal osc for rtc",
       "page_url": "https://github.com/meshtastic/firmware/pull/10689",
       "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "10669",
-      "title": "Allow key verification to work for unknown nodes.",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10669",
-      "zip_url": "s"
-    },
-    {
-      "id": "10666",
-      "title": "Short circuit invalid nodenum check in ham mode.",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10666",
-      "zip_url": "s"
-    },
-    {
-      "id": "10664",
-      "title": "Arduino Nesso N1 support",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10664",
-      "zip_url": "s"
     }
   ]
 }

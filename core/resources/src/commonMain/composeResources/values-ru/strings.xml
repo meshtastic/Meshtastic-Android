@@ -86,6 +86,7 @@
     <string name="any">Любой</string>
     <!-- APP -->
     <string name="app_functions_get_node_list">Получить список нод</string>
+    <string name="app_functions_get_recent_messages">Получать последние сообщения</string>
     <string name="app_functions_send_message">Отправить сообщение</string>
     <string name="app_functions_write_section">Написание функций</string>
     <string name="app_notifications">Уведомления приложений</string>
@@ -350,11 +351,27 @@
     <string name="discovery_delete_session">Удалить сессию</string>
     <string name="discovery_dwell_minutes">%1$d минут</string>
     <string name="discovery_dwell_time">Время задержки</string>
+    <string name="discovery_export_report">Экспортировать отчет</string>
+    <string name="discovery_history">История обнаружения</string>
+    <string name="discovery_keep_screen_awake">Не гасить экран</string>
+    <string name="discovery_keep_screen_awake_description">Предотвращает потерю радиопакетов в режиме Doze на Android во время долгих сканирований. Рекомендуется.</string>
+    <string name="discovery_local_mesh">Локальное обнаружение сети</string>
+    <string name="discovery_lora_presets">Пресеты LoRa</string>
+    <string name="discovery_lora_presets_description">Выбери один или несколько пресетов для сканирования</string>
+    <string name="discovery_map">Карта обнаружения</string>
     <string name="discovery_not_connected">Нет соединения</string>
+    <string name="discovery_not_connected_description">Подключись к устройству Meshtastic, чтобы начать сканирование.</string>
     <string name="discovery_paused">Пауза: %1$s</string>
+    <string name="discovery_preparing">Подготовка сканирования</string>
+    <string name="discovery_preset_home_label">%1$s (Дом)</string>
+    <string name="discovery_reconnecting">Переподключение к %1$s</string>
     <string name="discovery_rerun_analysis">Перезапуск анализов</string>
+    <string name="discovery_restoring_preset">Восстановление домашнего пресета</string>
     <string name="discovery_scan_complete">Сессия завершена</string>
+    <string name="discovery_scan_failed">Сканирование не удалось: %1$s</string>
     <string name="discovery_scan_history">История сканирования</string>
+    <string name="discovery_scan_incomplete">Сессия не завершена</string>
+    <string name="discovery_scan_progress">Прогресс сканирования</string>
     <string name="discovery_scan_summary">Суммарный скан</string>
     <string name="discovery_session_detail">Детали сессии</string>
     <string name="discovery_shifting_to">Шифтинг to %1$s</string>
