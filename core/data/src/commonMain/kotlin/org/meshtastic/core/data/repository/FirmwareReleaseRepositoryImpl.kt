@@ -35,6 +35,7 @@ import org.meshtastic.core.database.entity.asDeviceVersion
 import org.meshtastic.core.database.entity.asEntity
 import org.meshtastic.core.database.entity.asExternalModel
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.model.NetworkFirmwareRelease
 import org.meshtastic.core.model.NetworkFirmwareReleases
 import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.network.FirmwareReleaseRemoteDataSource
@@ -84,10 +85,11 @@ open class FirmwareReleaseRepositoryImpl(
     }
 
     /**
-     * Applies the bundled snapshot whenever it is newer than the cache — not just when the cache is empty. The bundle
-     * is refreshed weekly in CI, so an app update carries fresh data even for users whose network path to
-     * api.meshtastic.org chronically fails. Checked once per process; a cache that is already newer (from a successful
-     * network refresh) is never regressed.
+     * Applies the bundled snapshot per release type whenever it is newer than what is cached for that type — not just
+     * when the cache is empty. The bundle is refreshed weekly in CI, so an app update carries fresh data even for users
+     * whose network path to api.meshtastic.org chronically fails. Checked once per process; a cache that is already
+     * newer (from a successful network refresh) is never regressed, and a type the bundle doesn't ship is left
+     * untouched.
      */
     private suspend fun ensureSeeded() {
         if (seedChecked) return
@@ -95,34 +97,32 @@ open class FirmwareReleaseRepositoryImpl(
             if (seedChecked) return
             safeCatching {
                 val bundled = assetReader.decode<NetworkFirmwareReleases>("firmware_releases.json", json)?.releases
-                if (bundled == null || (bundled.stable.isEmpty() && bundled.alpha.isEmpty())) {
+                if (bundled == null) {
                     Logger.w { "FirmwareReleaseRepository: no bundled releases available to seed from" }
                 } else {
-                    val bundledNewest =
-                        (bundled.stable + bundled.alpha).maxOf {
-                            it.asEntity(FirmwareReleaseType.STABLE).asDeviceVersion()
-                        }
-                    val cachedNewest =
-                        listOfNotNull(
-                            localDataSource.getLatestRelease(FirmwareReleaseType.STABLE),
-                            localDataSource.getLatestRelease(FirmwareReleaseType.ALPHA),
+                    val toApply =
+                        listOf(
+                            FirmwareReleaseType.STABLE to bundled.stable,
+                            FirmwareReleaseType.ALPHA to bundled.alpha,
                         )
-                            .maxOfOrNull { it.asDeviceVersion() }
-                    if (cachedNewest == null || bundledNewest > cachedNewest) {
-                        Logger.i {
-                            "FirmwareReleaseRepository: applying bundled snapshot " +
-                                "($bundledNewest > ${cachedNewest ?: "empty cache"})"
-                        }
-                        localDataSource.replaceRemoteFirmwareReleases(
-                            stable = bundled.stable,
-                            alpha = bundled.alpha,
-                        )
+                            .filter { (type, releases) -> isBundleNewerFor(type, releases) }
+                            .toMap()
+                    if (toApply.isNotEmpty()) {
+                        Logger.i { "FirmwareReleaseRepository: applying bundled snapshot for ${toApply.keys}" }
+                        localDataSource.replaceFirmwareReleases(toApply)
                     }
                 }
             }
                 .onFailure { e -> Logger.w(e) { "FirmwareReleaseRepository: failed to seed cache from bundled JSON" } }
             seedChecked = true
         }
+    }
+
+    /** True when [bundled] contains a release newer than anything cached for [type]. */
+    private suspend fun isBundleNewerFor(type: FirmwareReleaseType, bundled: List<NetworkFirmwareRelease>): Boolean {
+        val bundledNewest = bundled.maxOfOrNull { it.asEntity(type).asDeviceVersion() } ?: return false
+        val cachedNewest = localDataSource.getLatestRelease(type)?.asDeviceVersion()
+        return cachedNewest == null || bundledNewest > cachedNewest
     }
 
     private suspend fun singleFlightRefresh() {
@@ -133,7 +133,9 @@ open class FirmwareReleaseRepositoryImpl(
                 Logger.w { "FirmwareReleaseRepository: remote returned no releases; leaving cache untouched" }
             } else {
                 // Replace rather than upsert so releases pulled or reclassified upstream don't linger as "latest".
-                localDataSource.replaceRemoteFirmwareReleases(stable = releases.stable, alpha = releases.alpha)
+                localDataSource.replaceFirmwareReleases(
+                    mapOf(FirmwareReleaseType.STABLE to releases.stable, FirmwareReleaseType.ALPHA to releases.alpha),
+                )
             }
         }
     }

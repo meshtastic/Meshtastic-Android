@@ -70,19 +70,20 @@ class DeviceLinkRepositoryImpl(
     }
 
     override suspend fun reconcile() {
-        writeMutex.withLock {
-            safeCatching {
-                // The network call is bounded by the HttpClient's own timeout/retry policy — api.meshtastic.org has
-                // been measured taking 20-60s, so a short local deadline would cancel every refresh. The DB write
-                // is NonCancellable so a cancelled caller can't leave the cache half-pruned.
-                val remoteLinks = remoteDataSource.getDeviceLinks()
+        safeCatching {
+            // The network call is bounded by the HttpClient's own timeout/retry policy — api.meshtastic.org has
+            // been measured taking 20-60s, so a short local deadline would cancel every refresh. It runs outside
+            // writeMutex so seeding (and therefore first emission) is never blocked behind a slow fetch. The DB
+            // write is NonCancellable so a cancelled caller can't leave the cache half-pruned.
+            val remoteLinks = remoteDataSource.getDeviceLinks()
+            writeMutex.withLock {
                 withContext(NonCancellable + dispatchers.io) {
                     store(remoteLinks)
                     lastRefreshMillis = nowMillis
                 }
             }
-                .onFailure { e -> Logger.w(e) { "DeviceLinkRepository: network refresh failed" } }
         }
+            .onFailure { e -> Logger.w(e) { "DeviceLinkRepository: network refresh failed" } }
     }
 
     override suspend fun getLinksForTarget(platformioTarget: String, regionCode: String): List<DeviceLink> =

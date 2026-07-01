@@ -36,18 +36,14 @@ class FirmwareReleaseLocalDataSource(
 
     suspend fun deleteAllFirmwareReleases() = withContext(dispatchers.io) { firmwareReleaseDao.deleteAll() }
 
-    /** Transactionally replaces the STABLE and ALPHA rows with the given API lists; LOCAL rows are untouched. */
-    suspend fun replaceRemoteFirmwareReleases(
-        stable: List<NetworkFirmwareRelease>,
-        alpha: List<NetworkFirmwareRelease>,
-    ) = withContext(dispatchers.io) {
-        firmwareReleaseDao.replaceByTypes(
-            types = listOf(FirmwareReleaseType.STABLE, FirmwareReleaseType.ALPHA),
-            releases =
-            stable.map { it.asEntity(FirmwareReleaseType.STABLE) } +
-                alpha.map { it.asEntity(FirmwareReleaseType.ALPHA) },
-        )
-    }
+    /** Transactionally replaces all rows of each given type with its API list; other types are untouched. */
+    suspend fun replaceFirmwareReleases(releasesByType: Map<FirmwareReleaseType, List<NetworkFirmwareRelease>>) =
+        withContext(dispatchers.io) {
+            firmwareReleaseDao.replaceByTypes(
+                types = releasesByType.keys.toList(),
+                releases = releasesByType.flatMap { (type, releases) -> releases.map { it.asEntity(type) } },
+            )
+        }
 
     suspend fun getLatestRelease(releaseType: FirmwareReleaseType): FirmwareReleaseEntity? =
         withContext(dispatchers.io) {

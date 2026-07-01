@@ -166,6 +166,23 @@ class FirmwareReleaseRepositoryImplTest {
     }
 
     @Test
+    fun partialBundleLeavesTypesItDoesNotShipUntouched() = runBlocking {
+        // Cache has data for both types; the bundle ships only a newer stable list.
+        dao.insert(FirmwareReleaseEntity(id = "v2.7.15.567b8ea", releaseType = FirmwareReleaseType.STABLE))
+        dao.insert(FirmwareReleaseEntity(id = "v2.7.25.104df5f", releaseType = FirmwareReleaseType.ALPHA))
+        seed.bundled = Releases(stable = listOf(release("v2.7.26.54e0d8d")))
+
+        val emissions = repository.stableRelease.toList()
+
+        assertEquals("v2.7.26.54e0d8d", emissions.first()?.id, "newer bundled stable applies")
+        assertEquals(
+            listOf("v2.7.25.104df5f"),
+            dao.getReleasesByType(FirmwareReleaseType.ALPHA).map { it.id },
+            "alpha cache survives a stable-only bundle",
+        )
+    }
+
+    @Test
     fun olderBundledSnapshotNeverRegressesCache() = runBlocking {
         // A successful network refresh left the cache newer than the (weekly) bundle.
         dao.insert(FirmwareReleaseEntity(id = "v2.8.0.abc1234", releaseType = FirmwareReleaseType.STABLE))
