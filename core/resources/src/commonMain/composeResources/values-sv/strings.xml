@@ -460,6 +460,7 @@
     <string name="gas_resistance">Gasmotstånd</string>
     <string name="gateway">Gateway</string>
     <string name="generate_qr_code">Generera QR-kod</string>
+    <!-- GEOFENCE -->
     <string name="get_started">Kom igång</string>
     <string name="good">Bra</string>
     <!-- GPIO -->
@@ -507,7 +508,6 @@
     <string name="incoming_messages">Inkommande meddelanden</string>
     <string name="indoor_air_quality_iaq">Luftkvalitet inomhus (IAQ)</string>
     <string name="info">Information</string>
-    <string name="input_channel_url">Lägg till kanal-URL</string>
     <string name="input_shared_contact_url">Lägg in delad kontakts URL</string>
     <string name="installed_firmware_version">Installerad version</string>
     <string name="internal">Internt</string>
@@ -967,8 +967,6 @@
     <!-- SCAN -->
     <string name="scan">Sök</string>
     <string name="scan_bluetooth_devices">Söker efter Bluetooth-enheter</string>
-    <string name="scan_channels_nfc">Skanna kanalen med NFC</string>
-    <string name="scan_channels_qr">Skanna kanalens QR-kod</string>
     <string name="scan_network_devices">Sök efter nätverksenheter</string>
     <string name="scan_nfc">Skanna NFC</string>
     <string name="scan_nfc_text">Placera din enhet nära NFC-taggen för att skanna.</string>

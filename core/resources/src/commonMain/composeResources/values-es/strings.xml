@@ -347,6 +347,7 @@
     <string name="generate_input_event_on_ccw">Hacer una acción al girar en sentido contrario a las agujas del reloj</string>
     <string name="generate_input_event_on_cw">Hacer una acción al girar en sentido de las agujas del reloj</string>
     <string name="generate_input_event_on_press">Hacer una acción al presionar</string>
+    <!-- GEOFENCE -->
     <string name="get_started">Empezar</string>
     <string name="good">Bien</string>
     <!-- GPIO -->

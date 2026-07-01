@@ -582,6 +582,8 @@
     <string name="generate_input_event_on_cw">Générer un événement d'entrée sur CW</string>
     <string name="generate_input_event_on_press">Générer un événement d'entrée sur Appui</string>
     <string name="generate_qr_code">Générer un QR Code</string>
+    <!-- GEOFENCE -->
+    <string name="geofence_off">Éteint</string>
     <string name="get_started">Commencer</string>
     <string name="good">Bon</string>
     <!-- GPIO -->
@@ -632,7 +634,6 @@
     <string name="incoming_messages">Messages entrants</string>
     <string name="indoor_air_quality_iaq">Qualité de l'air intérieur (IAQ)</string>
     <string name="info">Information</string>
-    <string name="input_channel_url">Entrer l'URL du canal</string>
     <string name="input_shared_contact_url">Entrez l'URL du contact partagé</string>
     <string name="installed_firmware_version">Actuellement installés</string>
     <string name="internal">Interne</string>
@@ -1143,8 +1144,6 @@
     <!-- SCAN -->
     <string name="scan">Scanner</string>
     <string name="scan_bluetooth_devices">Recherche de périphériques Bluetooth</string>
-    <string name="scan_channels_nfc">Scanner les canaux NFC</string>
-    <string name="scan_channels_qr">Scanner les canaux QR Code</string>
     <string name="scan_network_devices">Recherche de périphériques réseau</string>
     <string name="scan_nfc">Scan NFC</string>
     <string name="scan_nfc_text">Approchez votre appareil près de la balise NFC à scanner.</string>

@@ -211,6 +211,7 @@
     <string name="generate_input_event_on_ccw">반시계방향 동작</string>
     <string name="generate_input_event_on_cw">시계방향 동작</string>
     <string name="generate_input_event_on_press">누름 동작</string>
+    <!-- GEOFENCE -->
     <string name="good">좋음</string>
     <!-- GPIO -->
     <string name="gpio_pin">GPIO 핀</string>

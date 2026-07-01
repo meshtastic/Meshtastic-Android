@@ -602,6 +602,8 @@
     <string name="generate_input_event_on_cw">Eingabeereignis bei Uhrzeigersinn generieren</string>
     <string name="generate_input_event_on_press">Eingabeereignis beim Drücken generieren</string>
     <string name="generate_qr_code">QR Code Erzeugen</string>
+    <!-- GEOFENCE -->
+    <string name="geofence_off">Aus</string>
     <string name="get_started">Erste Schritte</string>
     <string name="good">Gut</string>
     <!-- GPIO -->
@@ -653,7 +655,6 @@
     <string name="incoming_messages">Eingehende Nachrichten</string>
     <string name="indoor_air_quality_iaq">Luftqualität im Innenbereich (IAQ)</string>
     <string name="info">Information</string>
-    <string name="input_channel_url">Kanal URL eingeben</string>
     <string name="input_shared_contact_url">Geteilte Kontakt URL eingeben</string>
     <string name="installed_firmware_version">Aktuell installiert</string>
     <string name="internal">Intern</string>
@@ -1189,8 +1190,6 @@
     <!-- SCAN -->
     <string name="scan">Suchen</string>
     <string name="scan_bluetooth_devices">Suche nach Bluetoothgeräten</string>
-    <string name="scan_channels_nfc">Kanäle mit NFC scannen</string>
-    <string name="scan_channels_qr">QR-Code für Kanäle Scannen</string>
     <string name="scan_network_devices">Suche nach Netzwerkgeräten</string>
     <string name="scan_nfc">NFC suchen</string>
     <string name="scan_nfc_text">Bringen Sie Ihr Gerät in die Nähe des NFC-Tags zum Scannen.</string>

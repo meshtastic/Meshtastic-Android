@@ -556,6 +556,7 @@
     <string name="generate_input_event_on_cw">順時針旋轉時產生輸入事件</string>
     <string name="generate_input_event_on_press">按下時產生輸入事件</string>
     <string name="generate_qr_code">產生 QR Code</string>
+    <!-- GEOFENCE -->
     <string name="get_started">開始使用</string>
     <string name="good">良好</string>
     <!-- GPIO -->
@@ -607,7 +608,6 @@
     <string name="incoming_messages">收到的訊息</string>
     <string name="indoor_air_quality_iaq">室內空氣品質 (IAQ)</string>
     <string name="info">資訊</string>
-    <string name="input_channel_url">輸入頻道網址</string>
     <string name="input_shared_contact_url">輸入聯絡人分享網址</string>
     <string name="installed_firmware_version">目前已安裝</string>
     <string name="internal">內部傳輸</string>
@@ -1137,8 +1137,6 @@
     <!-- SCAN -->
     <string name="scan">掃描</string>
     <string name="scan_bluetooth_devices">掃描藍牙裝置</string>
-    <string name="scan_channels_nfc">掃描頻道 NFC</string>
-    <string name="scan_channels_qr">掃描頻道 QR Code</string>
     <string name="scan_network_devices">掃描網路裝置</string>
     <string name="scan_nfc">掃描 NFC</string>
     <string name="scan_nfc_text">請將裝置靠近 NFC 標籤以掃描。</string>

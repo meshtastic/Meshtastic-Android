@@ -223,6 +223,7 @@
     <string name="generate_input_event_on_cw">CW ile giriş olayı oluştur</string>
     <string name="generate_input_event_on_press">Basıldığında giriş olayı oluştur</string>
     <string name="generate_qr_code">QR kod oluştur</string>
+    <!-- GEOFENCE -->
     <string name="good">İyi</string>
     <!-- GPIO -->
     <string name="gpio_pin">GPIO pini</string>

@@ -665,6 +665,7 @@
     <string name="generate_input_event_on_cw">CWで入力イベントを生成</string>
     <string name="generate_input_event_on_press">プレスで入力イベントを生成</string>
     <string name="generate_qr_code">QRコード生成</string>
+    <!-- GEOFENCE -->
     <string name="get_started">開始する</string>
     <string name="good">良</string>
     <!-- GPIO -->
@@ -717,7 +718,6 @@
     <string name="incoming_messages">受信メッセージ</string>
     <string name="indoor_air_quality_iaq">屋内空気品質 (IAQ)</string>
     <string name="info">情報</string>
-    <string name="input_channel_url">チャンネルURLを入力</string>
     <string name="input_shared_contact_url">共有連絡先のURLを入力</string>
     <string name="installed_firmware_version">現在インストール済み</string>
     <string name="internal">内部</string>
@@ -1290,8 +1290,6 @@
     <!-- SCAN -->
     <string name="scan">スキャン</string>
     <string name="scan_bluetooth_devices">Bluetooth デバイスをスキャン</string>
-    <string name="scan_channels_nfc">チャンネルの NFC をスキャンする</string>
-    <string name="scan_channels_qr">チャンネルのQRコードをスキャンする</string>
     <string name="scan_network_devices">ネットワークデバイスをスキャン</string>
     <string name="scan_nfc">NFCをスキャンする</string>
     <string name="scan_nfc_text">NFCタグにデバイスを近づけてスキャンしてください。</string>

@@ -486,6 +486,7 @@
     <string name="generate_input_event_on_cw">Генерувати подію при повороті праворуч</string>
     <string name="generate_input_event_on_press">Генерувати подію при натисканні</string>
     <string name="generate_qr_code">Згенерувати QR-код</string>
+    <!-- GEOFENCE -->
     <string name="get_started">З чого почати</string>
     <string name="good">Хороший</string>
     <!-- GPIO -->

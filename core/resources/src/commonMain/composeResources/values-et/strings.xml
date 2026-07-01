@@ -669,6 +669,7 @@
     <string name="generate_input_event_on_cw">Sisendsündmus CW pordis</string>
     <string name="generate_input_event_on_press">Sisendsündmus Vajuta pordis</string>
     <string name="generate_qr_code">Genereeri QR kood</string>
+    <!-- GEOFENCE -->
     <string name="get_started">Algusesse</string>
     <string name="good">Hea</string>
     <!-- GPIO -->
@@ -721,7 +722,6 @@
     <string name="incoming_messages">Sissetulevad sõnumid</string>
     <string name="indoor_air_quality_iaq">Siseõhu kvaliteet (IAQ)</string>
     <string name="info">Informatsioon</string>
-    <string name="input_channel_url">Sisesta kanali URL</string>
     <string name="input_shared_contact_url">Sisesta jagatud kontakti URL</string>
     <string name="installed_firmware_version">Paigaldatud</string>
     <string name="internal">Sisemine</string>
@@ -1300,8 +1300,6 @@
     <!-- SCAN -->
     <string name="scan">Otsi</string>
     <string name="scan_bluetooth_devices">Otsi sinihamba seadmeid</string>
-    <string name="scan_channels_nfc">Kanalite lugemine NFC-ga</string>
-    <string name="scan_channels_qr">Kanalite skanneerimine QR koodiga</string>
     <string name="scan_network_devices">Võrguseadmete otsimine</string>
     <string name="scan_nfc">NFC lugemine</string>
     <string name="scan_nfc_text">Lugemiseks vii seade NFC-sildi lähedale.</string>

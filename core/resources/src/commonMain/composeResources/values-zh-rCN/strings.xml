@@ -675,6 +675,8 @@
     <string name="generate_input_event_on_cw">CW 时生成输入事件</string>
     <string name="generate_input_event_on_press">按下时生成输入事件</string>
     <string name="generate_qr_code">生成二维码</string>
+    <!-- GEOFENCE -->
+    <string name="geofence_off">关闭</string>
     <string name="get_started">开始</string>
     <string name="good">良好</string>
     <!-- GPIO -->
@@ -727,7 +729,6 @@
     <string name="incoming_messages">收到的消息</string>
     <string name="indoor_air_quality_iaq">室内空气质量 (IAQ)</string>
     <string name="info">信息</string>
-    <string name="input_channel_url">输入频道 URL</string>
     <string name="input_shared_contact_url">输入共享联系人 URL</string>
     <string name="installed_firmware_version">当前安装</string>
     <string name="internal">内置</string>
@@ -1300,8 +1301,6 @@
     <!-- SCAN -->
     <string name="scan">扫描</string>
     <string name="scan_bluetooth_devices">扫描蓝牙设备</string>
-    <string name="scan_channels_nfc">扫描频道 NFC</string>
-    <string name="scan_channels_qr">扫描频道二维码</string>
     <string name="scan_network_devices">扫描网络设备</string>
     <string name="scan_nfc">NFC扫描</string>
     <string name="scan_nfc_text">将您的设备靠近NFC标签。</string>

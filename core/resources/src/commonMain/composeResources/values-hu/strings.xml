@@ -335,6 +335,7 @@
     <string name="generate_input_event_on_ccw">Bemeneti esemény generálása óramutató járásával ellentétes irányban</string>
     <string name="generate_input_event_on_cw">Bemeneti esemény generálása óramutató járásával megegyező irányban</string>
     <string name="generate_input_event_on_press">Bemeneti esemény generálása nyomáskor</string>
+    <!-- GEOFENCE -->
     <string name="get_started">Kezdjük el</string>
     <string name="good">Jó</string>
     <!-- GPIO -->

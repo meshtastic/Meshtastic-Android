@@ -476,6 +476,7 @@
     <string name="friendly_name">Приятелско име</string>
     <string name="gateway">Шлюз</string>
     <string name="generate_qr_code">Генериране на QR код</string>
+    <!-- GEOFENCE -->
     <string name="get_started">Започнете</string>
     <string name="good">Добър</string>
     <!-- GPIO -->
