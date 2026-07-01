@@ -27,6 +27,7 @@ import org.meshtastic.proto.Config
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
@@ -189,6 +190,48 @@ class ProtoExtensionsTest {
         )
         assertEquals(importedSettings, radioConfigRepository.currentChannelSet.settings)
         assertEquals(List(size = 8) { oldSettings }, cacheSnapshotsAtDelay)
+    }
+
+    @Test
+    fun replacement_apply_rejects_imported_settings_beyond_slot_count_before_writing() = runTest {
+        val radioController = FakeRadioController()
+        val radioConfigRepository = FakeRadioConfigRepository()
+        val oldSettings = listOf(ChannelSettings(name = "Old"))
+        val oversizedSettings = (0..8).map { index -> ChannelSettings(name = "Imported $index") }
+        radioConfigRepository.setChannelSet(ChannelSet(settings = oldSettings))
+
+        assertFailsWith<IllegalArgumentException> {
+            applyReplacementChannelSet(
+                channelSet = ChannelSet(settings = oversizedSettings),
+                radioController = radioController,
+                radioConfigRepository = radioConfigRepository,
+                writeDelay = 1.seconds,
+                delayFn = {},
+            )
+        }
+
+        assertTrue(radioController.localChannels.isEmpty())
+        assertEquals(oldSettings, radioConfigRepository.currentChannelSet.settings)
+    }
+
+    @Test
+    fun replacement_apply_ignores_cached_settings_beyond_slot_count() = runTest {
+        val radioController = FakeRadioController()
+        val radioConfigRepository = FakeRadioConfigRepository()
+        val oldSettings = (0..9).map { index -> ChannelSettings(name = "Old $index") }
+        val importedSettings = listOf(ChannelSettings(name = "Imported"))
+        radioConfigRepository.setChannelSet(ChannelSet(settings = oldSettings))
+
+        applyReplacementChannelSet(
+            channelSet = ChannelSet(settings = importedSettings),
+            radioController = radioController,
+            radioConfigRepository = radioConfigRepository,
+            writeDelay = 1.seconds,
+            delayFn = {},
+        )
+
+        assertEquals((0..7).toList(), radioController.localChannels.map { it.index })
+        assertEquals(importedSettings, radioConfigRepository.currentChannelSet.settings)
     }
 
     @Test

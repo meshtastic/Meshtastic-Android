@@ -40,8 +40,10 @@ import kotlin.time.Duration.Companion.seconds
 import org.meshtastic.core.model.Channel as ModelChannel
 
 private const val SECONDS_TO_MILLIS = 1000L
+// Firmware channel files expose eight slots: one primary plus up to seven secondary channels.
 private const val CHANNEL_REPLACEMENT_SLOT_COUNT = 8
-private const val MAX_LOG_CHANNEL_NAME_LENGTH = 32
+
+// Full channel replacement writes need conservative settle windows so hardware can persist each slot.
 private val CHANNEL_REPLACEMENT_WRITE_DELAY = 1.seconds
 private val LORA_CONFIG_SETTLE_DELAY = 2.seconds
 
@@ -117,16 +119,22 @@ fun getChannelList(new: List<ChannelSettings>, old: List<ChannelSettings>): List
  *   DISABLED writes so leftover slots are cleared.
  * @param minimumSlotCount The minimum slot count to emit. Full replacement callers can use this to disable firmware
  *   slots even when the local cache is stale or shorter than the radio's actual channel list.
+ * @param maximumSlotCount The maximum slot count to emit. Full replacement callers use this to avoid unsupported
+ *   firmware channel indices even if an imported or cached list is longer than expected.
  * @return A [Channel] list covering every slot the radio needs written to materialize [new] and clear leftover slots.
  */
 fun getChannelReplacementList(
     new: List<ChannelSettings>,
     currentSettings: List<ChannelSettings>,
     minimumSlotCount: Int = 0,
+    maximumSlotCount: Int = Int.MAX_VALUE,
 ): List<Channel> =
     buildList {
         val minimumLastIndex = minimumSlotCount.coerceAtLeast(0) - 1
-        for (i in 0..maxOf(currentSettings.lastIndex, new.lastIndex, minimumLastIndex)) {
+        val maximumLastIndex = maximumSlotCount.coerceAtLeast(0) - 1
+        val endIndex = maxOf(currentSettings.lastIndex, new.lastIndex, minimumLastIndex).coerceAtMost(maximumLastIndex)
+        if (endIndex < 0) return@buildList
+        for (i in 0..endIndex) {
             add(
                 Channel(
                     role =
@@ -171,19 +179,24 @@ suspend fun applyReplacementChannelSet(
     writeDelay: Duration = CHANNEL_REPLACEMENT_WRITE_DELAY,
     delayFn: suspend (Duration) -> Unit = { delay(it) },
 ) {
+    require(channelSet.settings.size <= CHANNEL_REPLACEMENT_SLOT_COUNT) {
+        "Imported channel set exceeds supported channel slot count"
+    }
     val currentSettings = radioConfigRepository.channelSetFlow.first().settings
     val replacements =
         getChannelReplacementList(
             new = channelSet.settings,
             currentSettings = currentSettings,
             minimumSlotCount = CHANNEL_REPLACEMENT_SLOT_COUNT,
+            maximumSlotCount = CHANNEL_REPLACEMENT_SLOT_COUNT,
         )
     Logger.i {
         "Applying imported channel replacement writes=${replacements.size} importedSettings=${channelSet.settings.size}"
     }
     for (channel in replacements) {
         Logger.i {
-            "Writing imported channel index=${channel.index} role=${channel.role} name=${channel.settings.logName()}"
+            "Writing imported channel index=${channel.index} role=${channel.role} " +
+                "hasName=${channel.settings?.name?.isNotBlank() == true}"
         }
         radioController.setLocalChannel(channel)
         delayFn(writeDelay)
@@ -212,16 +225,6 @@ suspend fun applyImportedLoraConfigAfterChannelReplacement(
     radioController.setLocalConfig(Config(lora = importedLoraConfig))
     Logger.i { "Settling after imported LoRa config write" }
     delayFn(settleDelay)
-}
-
-private fun ChannelSettings?.logName(): String {
-    val singleLine = this?.name.orEmpty().replace('\n', ' ').replace('\r', ' ').trim()
-    val sanitized = singleLine.ifEmpty { "<default>" }
-    return if (sanitized.length <= MAX_LOG_CHANNEL_NAME_LENGTH) {
-        sanitized
-    } else {
-        "${sanitized.take(MAX_LOG_CHANNEL_NAME_LENGTH)}..."
-    }
 }
 
 /**
