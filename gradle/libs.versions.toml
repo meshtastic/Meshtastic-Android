@@ -5,7 +5,7 @@ xmlutil = "1.0.0"
 agp = "9.2.1"
 appcompat = "1.7.1"
 car-app = "1.7.0"
-appfunctions = "1.0.0-alpha09"
+appfunctions = "1.0.0-alpha10"
 
 # androidx
 datastore = "1.2.1"
