@@ -20,32 +20,24 @@ import androidx.compose.runtime.Composable
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import kotlinx.coroutines.flow.Flow
+import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.navigation.ChannelsRoute
 import org.meshtastic.core.navigation.ContactsRoute
 import org.meshtastic.core.navigation.NodesRoute
 import org.meshtastic.core.ui.component.ScrollToTopEvent
-import org.meshtastic.proto.ChannelSet
-import org.meshtastic.proto.SharedContact
 
 @Composable
 fun AdaptiveContactsScreen(
     backStack: NavBackStack<NavKey>,
-    contactsViewModel: ContactsViewModel,
     scrollToTopEvents: Flow<ScrollToTopEvent>,
-    sharedContactRequested: SharedContact?,
-    requestChannelSet: ChannelSet?,
     onHandleDeepLink: (CommonUri, onInvalid: () -> Unit) -> Unit,
-    onClearSharedContactRequested: () -> Unit,
-    onClearRequestChannelUrl: () -> Unit,
 ) {
+    val contactsViewModel = koinViewModel<ContactsViewModel>()
+
     ContactsScreen(
         onNavigateToShare = { backStack.add(ChannelsRoute.Channels) },
-        sharedContactRequested = sharedContactRequested,
-        requestChannelSet = requestChannelSet,
         onHandleDeepLink = onHandleDeepLink,
-        onClearSharedContactRequested = onClearSharedContactRequested,
-        onClearRequestChannelUrl = onClearRequestChannelUrl,
         viewModel = contactsViewModel,
         onClickNodeChip = { backStack.add(NodesRoute.NodeDetail(it)) },
         onNavigateToMessages = { contactKey -> backStack.add(ContactsRoute.Messages(contactKey)) },

@@ -112,21 +112,16 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.SelectAll
 import org.meshtastic.core.ui.icon.VolumeMute
 import org.meshtastic.core.ui.icon.VolumeUp
-import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
+import org.meshtastic.core.ui.util.parseDeepLinkOrInvalid
 import org.meshtastic.core.ui.util.rememberShowToastResource
 import org.meshtastic.proto.ChannelSet
-import org.meshtastic.proto.SharedContact
 import kotlin.time.Duration.Companion.days
 
 @Suppress("LongMethod", "CyclomaticComplexMethod", "LongParameterList")
 @Composable
 fun ContactsScreen(
     onNavigateToShare: () -> Unit,
-    sharedContactRequested: SharedContact?,
-    requestChannelSet: ChannelSet?,
     onHandleDeepLink: (CommonUri, onInvalid: () -> Unit) -> Unit,
-    onClearSharedContactRequested: () -> Unit,
-    onClearRequestChannelUrl: () -> Unit,
     viewModel: ContactsViewModel,
     onClickNodeChip: (Int) -> Unit,
     onNavigateToMessages: (String) -> Unit,
@@ -193,8 +188,6 @@ fun ContactsScreen(
     }
     val isAllMuted = remember(selectedContacts) { selectedContacts.all { it.isMuted } }
 
-    requestChannelSet?.let { ScannedQrCodeDialog(it, onDismiss = { onClearRequestChannelUrl() }) }
-
     // Callback functions for item interaction
     val onContactClick: (Contact) -> Unit = { contact ->
         if (isSelectionModeActive) {
@@ -260,14 +253,11 @@ fun ContactsScreen(
         floatingActionButton = {
             if (connectionState is ConnectionState.Connected) {
                 MeshtasticImportFAB(
-                    sharedContact = sharedContactRequested,
                     onImport = { uriString ->
-                        onHandleDeepLink(CommonUri.parse(uriString)) {
-                            scope.launch { showToast(Res.string.channel_invalid) }
-                        }
+                        val onInvalid: () -> Unit = { scope.launch { showToast(Res.string.channel_invalid) } }
+                        parseDeepLinkOrInvalid(uriString, onHandleDeepLink, onInvalid)
                     },
                     onShareChannels = onNavigateToShare,
-                    onDismissSharedContact = { onClearSharedContactRequested() },
                     isContactContext = false,
                 )
             }

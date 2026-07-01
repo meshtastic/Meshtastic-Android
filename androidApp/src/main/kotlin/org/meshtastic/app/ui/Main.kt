@@ -70,6 +70,7 @@ fun MainScreen() {
     }
     val multiBackstack = rememberMultiBackstack(initialTab)
     val backStack = multiBackstack.activeBackStack
+    val scrollToTopEvents = viewModel.scrollToTopEventFlow
 
     AndroidAppVersionCheck(viewModel)
 
@@ -96,10 +97,10 @@ fun MainScreen() {
         ) {
             val provider =
                 entryProvider<NavKey> {
-                    contactsGraph(backStack, viewModel.scrollToTopEventFlow)
+                    contactsGraph(backStack, scrollToTopEvents, onHandleDeepLink = viewModel::handleDeepLink)
                     nodesGraph(
                         backStack = backStack,
-                        scrollToTopEvents = viewModel.scrollToTopEventFlow,
+                        scrollToTopEvents = scrollToTopEvents,
                         onHandleDeepLink = viewModel::handleDeepLink,
                         onNavigateToConnections = {
                             multiBackstack.navigateTopLevel(TopLevelDestination.Connect.route)

@@ -81,6 +81,7 @@ import org.meshtastic.core.ui.icon.Info
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.NoDevice
 import org.meshtastic.core.ui.icon.Nodes
+import org.meshtastic.core.ui.util.parseDeepLinkOrInvalid
 import org.meshtastic.feature.node.component.NodeContextMenu
 import org.meshtastic.feature.node.component.NodeFilterTextField
 import org.meshtastic.feature.node.component.NodeListHelp
@@ -179,9 +180,8 @@ fun NodeListScreen(
                     alignment = androidx.compose.ui.Alignment.BottomEnd,
                 ),
                 onImport = { uriString ->
-                    onHandleDeepLink(org.meshtastic.core.common.util.CommonUri.parse(uriString)) {
-                        scope.launch { showToast(Res.string.channel_invalid) }
-                    }
+                    val onInvalid: () -> Unit = { scope.launch { showToast(Res.string.channel_invalid) } }
+                    parseDeepLinkOrInvalid(uriString, onHandleDeepLink, onInvalid)
                 },
                 onShareContact = { showShareContact = true },
                 isContactContext = true,

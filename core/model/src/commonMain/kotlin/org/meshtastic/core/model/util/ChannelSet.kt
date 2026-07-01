@@ -37,17 +37,19 @@ fun CommonUri.toChannelSet(): ChannelSet {
         h.equals(MESHTASTIC_HOST, ignoreCase = true) || h.equals("www.$MESHTASTIC_HOST", ignoreCase = true)
     val segments = pathSegments
     val isCorrectPath = segments.any { it.equals("e", ignoreCase = true) }
+    val hasFragment = !fragment.isNullOrBlank()
 
-    if (fragment.isNullOrBlank() || !isCorrectHost || !isCorrectPath) {
-        throw MalformedMeshtasticUrlException("Not a valid Meshtastic URL: ${toString().take(40)}")
+    if (!hasFragment || !isCorrectHost || !isCorrectPath) {
+        throw MalformedMeshtasticUrlException(
+            "Not a valid Meshtastic URL: host=$h, segmentCount=${segments.size}, hasFragment=$hasFragment",
+        )
     }
 
     // Older versions of Meshtastic clients (Apple/web) included `?add=true` within the URL fragment.
     // This gracefully handles those cases until the newer version are generally available/used.
     val fragmentBase64 = fragment!!.substringBefore('?').replace('-', '+').replace('_', '/')
     val fragmentBytes =
-        fragmentBase64.decodeBase64()
-            ?: throw MalformedMeshtasticUrlException("Invalid Base64 in URL fragment: $fragmentBase64")
+        fragmentBase64.decodeBase64() ?: throw MalformedMeshtasticUrlException("Invalid Base64 in URL fragment")
     val url = ChannelSet.ADAPTER.decode(fragmentBytes)
     val shouldAdd =
         fragment?.substringAfter('?', "")?.takeUnless { it.isBlank() }?.equals("add=true")

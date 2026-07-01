@@ -149,6 +149,7 @@
     <string name="call_sign_summary">Your amateur radio call sign, up to 8 characters</string>
     <string name="camera_permission">Camera permission</string>
     <string name="camera_permission_rationale">Allow camera access to scan QR codes.</string>
+    <string name="camera_unavailable">Camera could not start. Try again, or close the scanner and reopen it.</string>
     <string name="cancel">Cancel</string>
     <string name="cancel_reply">Cancel reply</string>
     <string name="canned_message">Canned Message</string>

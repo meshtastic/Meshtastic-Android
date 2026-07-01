@@ -46,7 +46,9 @@ class NavigationAssemblyTest {
         setContent {
             val backStack = rememberNavBackStack(NodesRoute.Nodes)
             entryProvider<NavKey> {
-                contactsGraph(backStack, emptyFlow())
+                // contactsGraph.onHandleDeepLink is intentionally mandatory (see contactsGraph kdoc);
+                // tests don't run imports, so a no-op handler is sufficient here.
+                contactsGraph(backStack, emptyFlow(), onHandleDeepLink = { _, _ -> })
                 nodesGraph(backStack = backStack, scrollToTopEvents = emptyFlow())
                 mapGraph(backStack)
                 channelsGraph(backStack)
