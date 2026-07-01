@@ -54,7 +54,7 @@ kotlin {
             dependencies {
                 implementation(libs.androidx.sqlite.bundled)
                 // JVM variant provides the host-platform native for BundledSQLiteDriver
-                runtimeOnly("androidx.sqlite:sqlite-bundled-jvm:2.6.2")
+                runtimeOnly("androidx.sqlite:sqlite-bundled-jvm:2.7.0")
                 implementation(libs.androidx.room.testing)
                 implementation(libs.androidx.test.ext.junit)
                 implementation(libs.junit)
