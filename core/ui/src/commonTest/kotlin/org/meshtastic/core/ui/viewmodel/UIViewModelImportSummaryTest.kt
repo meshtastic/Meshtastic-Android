@@ -35,7 +35,9 @@ class UIViewModelImportSummaryTest {
         assertTrue(summary.contains("pathSegmentCount=2"))
         assertTrue(summary.contains("hasFragment=true"))
         assertTrue(summary.contains("fragmentLength=${fragment.length}"))
-        assertTrue(summary.contains("queryKeys=[add, token]"))
+        assertTrue(summary.contains("queryParameterCount=2"))
+        assertFalse(summary.contains("token"))
+        assertFalse(summary.contains("add"))
     }
 
     @Test

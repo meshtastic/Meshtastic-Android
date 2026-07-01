@@ -336,10 +336,10 @@ class UIViewModel(
 internal fun CommonUri.toSanitizedImportSummary(): String {
     val fragmentLength = fragment?.length ?: 0
     val hasFragment = !fragment.isNullOrBlank()
-    val queryKeys = getQueryParameterNames().sorted()
+    val queryParameterCount = getQueryParameterNames().size
     // pathSegments values are not logged: a malformed channel URL can still leak structure (e.g.
     // a malformed "/e/" path). pathSegmentCount is enough to diagnose routing without exposing it.
     return "rawLength=${toString().length} scheme=$scheme host=$host " +
         "pathSegmentCount=${pathSegments.size} hasFragment=$hasFragment " +
-        "fragmentLength=$fragmentLength queryKeys=$queryKeys"
+        "fragmentLength=$fragmentLength queryParameterCount=$queryParameterCount"
 }

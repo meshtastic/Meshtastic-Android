@@ -107,7 +107,7 @@ fun MeshtasticImportFAB(
         nfcScanner(
             { contents ->
                 isNfcScanning = false
-                onImport(normalizeImportContents(contents) ?: contents.orEmpty())
+                normalizeImportContents(contents)?.let(onImport)
             },
             {
                 isNfcScanning = false
