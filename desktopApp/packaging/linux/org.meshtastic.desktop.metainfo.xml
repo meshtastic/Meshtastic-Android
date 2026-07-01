@@ -72,6 +72,25 @@
     <content_attribute id="social-location">intense</content_attribute>
   </content_rating>
 
+  <screenshots>
+    <screenshot type="default">
+      <caption>Track every node on the mesh at a glance</caption>
+      <image>https://raw.githubusercontent.com/meshtastic/Meshtastic-Android/fce37d60fbb54878549de8bd03cf102e4042808e/desktopApp/packaging/linux/screenshots/meshtastic-desktop-02-nodes.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Chat with your mesh, channel by channel</caption>
+      <image>https://raw.githubusercontent.com/meshtastic/Meshtastic-Android/fce37d60fbb54878549de8bd03cf102e4042808e/desktopApp/packaging/linux/screenshots/meshtastic-desktop-03-messages.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Connect over Bluetooth, USB, or Wi-Fi</caption>
+      <image>https://raw.githubusercontent.com/meshtastic/Meshtastic-Android/fce37d60fbb54878549de8bd03cf102e4042808e/desktopApp/packaging/linux/screenshots/meshtastic-desktop-01-connections.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Full radio and module configuration</caption>
+      <image>https://raw.githubusercontent.com/meshtastic/Meshtastic-Android/fce37d60fbb54878549de8bd03cf102e4042808e/desktopApp/packaging/linux/screenshots/meshtastic-desktop-04-settings.png</image>
+    </screenshot>
+  </screenshots>
+
   <releases>
     <release version="2.7.14" date="2025-05-01">
       <description>
