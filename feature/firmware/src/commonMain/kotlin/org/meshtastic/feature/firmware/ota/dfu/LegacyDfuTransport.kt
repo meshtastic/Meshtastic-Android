@@ -408,13 +408,21 @@ class LegacyDfuTransport(
 
     private suspend fun awaitResponse(timeout: Duration): LegacyDfuResponse = try {
         withTimeout(timeout) {
-            // Drain any stray PRNs that arrive before the response we want.
-            while (true) {
-                val r = notificationChannel.receive()
-                if (r !is LegacyDfuResponse.PacketReceipt) return@withTimeout r
+            // Fail fast + accurately if the bootloader drops the link mid-handshake instead of answering. The stock
+            // same-MAC nRF Legacy bootloader (e.g. AdaDFU) commonly disconnects on the first Control Point command
+            // (stale-bond encryption mismatch); without this the receive() below just blocks until `timeout`, so
+            // the
+            // user waited the full 30s and saw a misleading "No response from Control Point" for what was really an
+            // immediate disconnect.
+            bleConnection.withDisconnectTripwire(onDrop = ::handshakeDropError) {
+                // Drain any stray PRNs that arrive before the response we want.
+                while (true) {
+                    val r = notificationChannel.receive()
+                    if (r !is LegacyDfuResponse.PacketReceipt) return@withDisconnectTripwire r
+                }
+                @Suppress("UNREACHABLE_CODE")
+                error("unreachable")
             }
-            @Suppress("UNREACHABLE_CODE")
-            error("unreachable")
         }
     } catch (_: TimeoutCancellationException) {
         throw DfuException.Timeout("No response from Legacy DFU Control Point after $timeout")
@@ -422,20 +430,28 @@ class LegacyDfuTransport(
 
     private suspend fun awaitPacketReceipt(): LegacyDfuResponse.PacketReceipt = try {
         withTimeout(COMMAND_TIMEOUT) {
-            while (true) {
-                val r = notificationChannel.receive()
-                if (r is LegacyDfuResponse.PacketReceipt) return@withTimeout r
-                if (r is LegacyDfuResponse.Failure) {
-                    throw LegacyDfuException.ProtocolError(r.requestOpcode, r.status)
+            bleConnection.withDisconnectTripwire(onDrop = ::handshakeDropError) {
+                while (true) {
+                    val r = notificationChannel.receive()
+                    if (r is LegacyDfuResponse.PacketReceipt) return@withDisconnectTripwire r
+                    if (r is LegacyDfuResponse.Failure) {
+                        throw LegacyDfuException.ProtocolError(r.requestOpcode, r.status)
+                    }
+                    // Stray Success or Unknown → ignore.
                 }
-                // Stray Success or Unknown → ignore.
+                @Suppress("UNREACHABLE_CODE")
+                error("unreachable")
             }
-            @Suppress("UNREACHABLE_CODE")
-            error("unreachable")
         }
     } catch (_: TimeoutCancellationException) {
         throw DfuException.Timeout("No packet receipt notification after $COMMAND_TIMEOUT")
     }
+
+    /** Error for a link drop while awaiting a Control Point response — distinguishes a disconnect from a true stall. */
+    private fun handshakeDropError(state: BleConnectionState): Throwable = DfuException.ConnectionFailed(
+        "BLE link dropped during DFU handshake (state=$state). A stock nRF bootloader that reuses the device's " +
+            "address can drop the link over a stale bond; the OTAFIX bootloader avoids this.",
+    )
 
     private fun requireSuccess(expectedOpcode: Byte, response: LegacyDfuResponse) {
         when (response) {

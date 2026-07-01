@@ -24,6 +24,7 @@ import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
 import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleScanner
+import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.database.entity.FirmwareRelease
@@ -80,6 +81,7 @@ class SecureDfuHandler(
     private val bleScanner: BleScanner,
     private val bleConnectionFactory: BleConnectionFactory,
     private val dispatchers: CoroutineDispatchers,
+    private val bluetoothRepository: BluetoothRepository,
 ) : FirmwareUpdateHandler {
 
     @Suppress("LongMethod")
@@ -130,79 +132,22 @@ class SecureDfuHandler(
                 // ── 4. Service detection: which DFU protocol does the bootloader speak? ─
                 val protocol = detectBootloaderProtocol(target, updateState)
                 Logger.i { "DFU: Bootloader protocol detected: $protocol" }
-                val transport: DfuUploadTransport =
-                    when (protocol) {
-                        DfuProtocolKind.LEGACY ->
-                            LegacyDfuTransport(bleScanner, bleConnectionFactory, target, dispatchers.default)
 
-                        DfuProtocolKind.SECURE ->
-                            SecureDfuTransport(bleScanner, bleConnectionFactory, target, dispatchers.default)
-                    }
-
-                var completed = false
-                try {
-                    // ── 5. Connect to device in DFU mode ─────────────────────────────
-                    connectWithRetry(transport, updateState)
-
-                    // ── 6. Init packet ────────────────────────────────────────────
-                    updateState(
-                        FirmwareUpdateState.Processing(
-                            ProgressState(UiText.Resource(Res.string.firmware_update_starting_dfu)),
-                        ),
-                    )
-                    Logger.i {
-                        "DFU: Sending init packet (${pkg.initPacket.size} bytes) and firmware " +
-                            "(${pkg.firmware.size} bytes) via $protocol"
-                    }
-                    transport.transferInitPacket(pkg.initPacket).getOrThrow()
-
-                    // ── 7. Firmware ───────────────────────────────────────────────
-                    val uploadMsg = UiText.Resource(Res.string.firmware_update_uploading)
-                    // Surface a "slow bootloader" tip during the upload when the link couldn't negotiate a larger MTU
-                    // (e.g. a stock Adafruit bootloader capped at MTU 23 → 20-byte packets, ~3.7 KB/s).
-                    val slowHint =
-                        if (transport.isLowSpeedTransfer) {
-                            UiText.Resource(Res.string.firmware_update_slow_bootloader_hint)
-                        } else {
-                            null
-                        }
-                    updateState(FirmwareUpdateState.Updating(ProgressState(uploadMsg, 0f, hint = slowHint)))
-
-                    val firmwareSize = pkg.firmware.size
-                    val throughputTracker = ThroughputTracker()
-
-                    transport
-                        .transferFirmware(pkg.firmware) { progress ->
-                            val bytesSent = (progress * firmwareSize).toLong()
-                            throughputTracker.record(bytesSent)
-                            val details =
-                                formatTransferProgress(progress, firmwareSize, throughputTracker.bytesPerSecond())
-                            updateState(
-                                FirmwareUpdateState.Updating(
-                                    ProgressState(uploadMsg, progress, details, hint = slowHint),
-                                ),
-                            )
-                        }
-                        .getOrThrow()
-
-                    // ── 8. Validate ───────────────────────────────────────────────
-                    updateState(
-                        FirmwareUpdateState.Processing(
-                            ProgressState(UiText.Resource(Res.string.firmware_update_validating)),
-                        ),
-                    )
-
-                    completed = true
-                    updateState(FirmwareUpdateState.Success(wasLowSpeedTransfer = transport.isLowSpeedTransfer))
-                    zipFile
-                } finally {
-                    // Send ABORT if cancelled mid-transfer, then always clean up.
-                    // NonCancellable ensures this runs even when the coroutine is being cancelled.
-                    withContext(NonCancellable) {
-                        if (!completed) transport.abort()
-                        transport.close()
-                    }
+                // A stock nRF Legacy bootloader (AdaDFU) re-advertises at the SAME address as the app but with no
+                // bond. A leftover bond makes the OS force stale link encryption the fresh bootloader can't satisfy,
+                // which can drop the link. Drop it first so we connect fresh/unencrypted. Secure DFU sidesteps this
+                // by using MAC+1 (a different, unbonded address), so scope this to legacy.
+                if (protocol == DfuProtocolKind.LEGACY) {
+                    dropStaleBondForLegacyDfu(target)
                 }
+
+                // Legacy DFU has no resume, so a failed session is retried whole (fresh transport + reconnect +
+                // re-handshake), mirroring Nordic's DFU library ("the Legacy DFU will start again"). A stock
+                // bootloader that leaves the first session's control-point handshake unanswered often responds
+                // after a clean reconnect. Secure DFU resumes in place, so it runs a single session.
+                val sessionAttempts = if (protocol == DfuProtocolKind.LEGACY) LEGACY_SESSION_ATTEMPTS else 1
+                runDfuUploadWithRetry(protocol, target, pkg, sessionAttempts, updateState)
+                zipFile
             }
         } catch (e: CancellationException) {
             throw e
@@ -248,6 +193,105 @@ class SecureDfuHandler(
                 predicate = { it.address in targetAddresses },
             )
         return if (legacyHit != null) DfuProtocolKind.LEGACY else DfuProtocolKind.SECURE
+    }
+
+    /**
+     * Remove any stale bond for [target] before connecting to a same-address Legacy DFU bootloader. Best-effort: a
+     * no-op when nothing is bonded, and a failure here doesn't abort the update (we still try to connect). Settles
+     * briefly after removal so the OS bond table clears before the reconnect.
+     */
+    private suspend fun dropStaleBondForLegacyDfu(target: String) {
+        if (!bluetoothRepository.isBonded(target)) return
+        val removed = bluetoothRepository.removeBond(target)
+        Logger.i { "DFU: dropped stale bond for $target before legacy connect -> $removed" }
+        if (removed) delay(BOND_REMOVAL_SETTLE_MS)
+    }
+
+    /**
+     * Run the connect + init + firmware upload, retrying the whole session up to [attempts] times. Each attempt uses a
+     * fresh [DfuUploadTransport] (new GATT connection + re-handshake) since Legacy DFU can't resume mid-stream.
+     */
+    private suspend fun runDfuUploadWithRetry(
+        protocol: DfuProtocolKind,
+        target: String,
+        pkg: DfuZipPackage,
+        attempts: Int,
+        updateState: (FirmwareUpdateState) -> Unit,
+    ) {
+        retryWithDelay(
+            attempts = attempts,
+            retryDelayMillis = SESSION_RETRY_DELAY_MS,
+            onAttempt = { attempt -> Logger.i { "DFU: upload session attempt $attempt/$attempts" } },
+            block = { attempt ->
+                runCatching { runUploadSession(protocol, target, pkg, updateState) }
+                    .onFailure { Logger.w(it) { "DFU: upload session $attempt/$attempts failed: ${it.message}" } }
+            },
+        )
+            .getOrElse { throw it }
+    }
+
+    /** A single connect + init-packet + firmware-upload session over a fresh transport; always cleans up. */
+    private suspend fun runUploadSession(
+        protocol: DfuProtocolKind,
+        target: String,
+        pkg: DfuZipPackage,
+        updateState: (FirmwareUpdateState) -> Unit,
+    ) {
+        val transport: DfuUploadTransport =
+            when (protocol) {
+                DfuProtocolKind.LEGACY ->
+                    LegacyDfuTransport(bleScanner, bleConnectionFactory, target, dispatchers.default)
+
+                DfuProtocolKind.SECURE ->
+                    SecureDfuTransport(bleScanner, bleConnectionFactory, target, dispatchers.default)
+            }
+        var completed = false
+        try {
+            connectWithRetry(transport, updateState)
+
+            updateState(
+                FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_starting_dfu))),
+            )
+            Logger.i {
+                "DFU: Sending init packet (${pkg.initPacket.size} bytes) and firmware " +
+                    "(${pkg.firmware.size} bytes) via $protocol"
+            }
+            transport.transferInitPacket(pkg.initPacket).getOrThrow()
+
+            val uploadMsg = UiText.Resource(Res.string.firmware_update_uploading)
+            val slowHint =
+                if (transport.isLowSpeedTransfer) {
+                    UiText.Resource(Res.string.firmware_update_slow_bootloader_hint)
+                } else {
+                    null
+                }
+            updateState(FirmwareUpdateState.Updating(ProgressState(uploadMsg, 0f, hint = slowHint)))
+
+            val firmwareSize = pkg.firmware.size
+            val throughputTracker = ThroughputTracker()
+            transport
+                .transferFirmware(pkg.firmware) { progress ->
+                    val bytesSent = (progress * firmwareSize).toLong()
+                    throughputTracker.record(bytesSent)
+                    val details = formatTransferProgress(progress, firmwareSize, throughputTracker.bytesPerSecond())
+                    updateState(
+                        FirmwareUpdateState.Updating(ProgressState(uploadMsg, progress, details, hint = slowHint)),
+                    )
+                }
+                .getOrThrow()
+
+            updateState(
+                FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_validating))),
+            )
+
+            completed = true
+            updateState(FirmwareUpdateState.Success(wasLowSpeedTransfer = transport.isLowSpeedTransfer))
+        } finally {
+            withContext(NonCancellable) {
+                if (!completed) transport.abort()
+                transport.close()
+            }
+        }
     }
 
     private suspend fun connectWithRetry(transport: DfuUploadTransport, updateState: (FirmwareUpdateState) -> Unit) {
@@ -331,5 +375,14 @@ class SecureDfuHandler(
     private companion object {
         /** Detection scan timeout — short because we only want to confirm/refute an advertised legacy service. */
         private val DETECT_SCAN_TIMEOUT = 8.seconds
+
+        /** Settle after removing a stale bond so the OS bond table clears before we reconnect to the bootloader. */
+        private const val BOND_REMOVAL_SETTLE_MS = 1_500L
+
+        /** Legacy DFU can't resume, so retry the whole session this many times before giving up. */
+        private const val LEGACY_SESSION_ATTEMPTS = 3
+
+        /** Delay between whole-session retries (lets the bootloader settle / resume advertising). */
+        private const val SESSION_RETRY_DELAY_MS = 2_000L
     }
 }
