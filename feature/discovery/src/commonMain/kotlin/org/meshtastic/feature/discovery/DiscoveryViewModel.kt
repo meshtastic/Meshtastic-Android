@@ -58,10 +58,7 @@ class DiscoveryViewModel(
 
     val homePreset: StateFlow<ChannelOption> =
         radioConfigRepository.localConfigFlow
-            .map { localConfig ->
-                val presetEnum = localConfig.lora?.modem_preset
-                ChannelOption.entries.firstOrNull { it.modemPreset == presetEnum } ?: ChannelOption.DEFAULT
-            }
+            .map { localConfig -> ChannelOption.from(localConfig.lora?.modem_preset) ?: ChannelOption.DEFAULT }
             .stateInWhileSubscribed(initialValue = ChannelOption.DEFAULT)
 
     /** True when the radio is configured for LORA_24 region but hardware doesn't support 2.4 GHz. */
