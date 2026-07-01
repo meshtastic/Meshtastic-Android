@@ -235,7 +235,7 @@ private fun desktopPlatformStubsModule() = module {
             install(ContentNegotiation) { json(get<Json>()) }
             install(DefaultRequest) { url(HttpClientDefaults.API_BASE_URL) }
             install(HttpTimeout) {
-                requestTimeoutMillis = HttpClientDefaults.TIMEOUT_MS
+                requestTimeoutMillis = HttpClientDefaults.REQUEST_TIMEOUT_MS
                 connectTimeoutMillis = HttpClientDefaults.TIMEOUT_MS
                 socketTimeoutMillis = HttpClientDefaults.TIMEOUT_MS
             }

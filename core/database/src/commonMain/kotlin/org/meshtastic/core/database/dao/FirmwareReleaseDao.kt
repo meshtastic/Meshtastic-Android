@@ -18,6 +18,7 @@ package org.meshtastic.core.database.dao
 
 import androidx.room3.Dao
 import androidx.room3.Query
+import androidx.room3.Transaction
 import androidx.room3.Upsert
 import org.meshtastic.core.database.entity.FirmwareReleaseEntity
 import org.meshtastic.core.database.entity.FirmwareReleaseType
@@ -28,6 +29,19 @@ interface FirmwareReleaseDao {
 
     @Query("DELETE FROM firmware_release")
     suspend fun deleteAll()
+
+    @Query("DELETE FROM firmware_release WHERE release_type = :releaseType")
+    suspend fun deleteByType(releaseType: FirmwareReleaseType)
+
+    /**
+     * Replaces all rows of the given [types] with [releases] in one transaction, so releases removed or reclassified
+     * upstream are pruned and a crash mid-refresh can't leave the table half-written. Other types are untouched.
+     */
+    @Transaction
+    suspend fun replaceByTypes(types: List<FirmwareReleaseType>, releases: List<FirmwareReleaseEntity>) {
+        types.forEach { deleteByType(it) }
+        releases.forEach { insert(it) }
+    }
 
     @Query("SELECT * FROM firmware_release")
     suspend fun getAllReleases(): List<FirmwareReleaseEntity>

@@ -18,14 +18,15 @@ package org.meshtastic.core.data.repository
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.Json
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.nowMillis
@@ -71,19 +72,13 @@ class DeviceLinkRepositoryImpl(
     override suspend fun reconcile() {
         writeMutex.withLock {
             safeCatching {
-                // Bound only the network call by the timeout; the DB write runs after so a deadline can't cancel it
-                // mid-write and leave the cache half-pruned.
-                val remoteLinks =
-                    withTimeoutOrNull(NETWORK_REFRESH_TIMEOUT_MS) { remoteDataSource.getDeviceLinks() }
-                if (remoteLinks == null) {
-                    Logger.w {
-                        "DeviceLinkRepository: network refresh timed out after ${NETWORK_REFRESH_TIMEOUT_MS}ms"
-                    }
-                } else {
-                    withContext(NonCancellable + dispatchers.io) {
-                        store(remoteLinks)
-                        lastRefreshMillis = nowMillis
-                    }
+                // The network call is bounded by the HttpClient's own timeout/retry policy — api.meshtastic.org has
+                // been measured taking 20-60s, so a short local deadline would cancel every refresh. The DB write
+                // is NonCancellable so a cancelled caller can't leave the cache half-pruned.
+                val remoteLinks = remoteDataSource.getDeviceLinks()
+                withContext(NonCancellable + dispatchers.io) {
+                    store(remoteLinks)
+                    lastRefreshMillis = nowMillis
                 }
             }
                 .onFailure { e -> Logger.w(e) { "DeviceLinkRepository: network refresh failed" } }
@@ -109,8 +104,12 @@ class DeviceLinkRepositoryImpl(
 
     override fun observeAllLinks(): Flow<List<DeviceLink>> = flow {
         ensureSeeded()
-        refreshIfStale()
-        emitAll(localDataSource.observeAll().map { entities -> entities.map { it.asExternalModel() } })
+        coroutineScope {
+            // Refresh concurrently so a slow API response can't delay the first emission; Room re-emits when the
+            // refreshed rows land.
+            launch { refreshIfStale() }
+            emitAll(localDataSource.observeAll().map { entities -> entities.map { it.asExternalModel() } })
+        }
     }
 
     /** Seeds the table from the bundled snapshot if empty (fresh install, data clear, radio switch). */
@@ -151,8 +150,5 @@ class DeviceLinkRepositoryImpl(
 
     private companion object {
         private val CACHE_EXPIRATION_TIME_MS = TimeConstants.ONE_DAY.inWholeMilliseconds
-
-        /** Maximum time to wait for the remote API before falling back to cached/bundled data. */
-        private const val NETWORK_REFRESH_TIMEOUT_MS = 5_000L
     }
 }

@@ -31,12 +31,15 @@ import org.meshtastic.core.data.util.staleWhileRevalidateFlow
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.FirmwareReleaseEntity
 import org.meshtastic.core.database.entity.FirmwareReleaseType
+import org.meshtastic.core.database.entity.asDeviceVersion
+import org.meshtastic.core.database.entity.asEntity
 import org.meshtastic.core.database.entity.asExternalModel
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.NetworkFirmwareReleases
 import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.network.FirmwareReleaseRemoteDataSource
 import org.meshtastic.core.repository.FirmwareReleaseRepository
+import kotlin.concurrent.Volatile
 
 @Single
 open class FirmwareReleaseRepositoryImpl(
@@ -49,6 +52,11 @@ open class FirmwareReleaseRepositoryImpl(
 
     /** Single-flight guard so concurrent collectors share one network refresh. */
     private val refreshMutex = Mutex()
+
+    /** Guards [seedChecked] so concurrent collectors decode the bundled snapshot at most once per process. */
+    private val seedMutex = Mutex()
+
+    @Volatile private var seedChecked = false
 
     override val stableRelease: Flow<FirmwareRelease?> = getLatestFirmware(FirmwareReleaseType.STABLE)
 
@@ -64,7 +72,10 @@ open class FirmwareReleaseRepositoryImpl(
         },
         fetch = { singleFlightRefresh() },
         context = dispatchers.default,
-        networkTimeoutMs = NETWORK_REFRESH_TIMEOUT_MS,
+        // No collector blocks on the fetch (cache is emitted first), so let the HttpClient's own
+        // timeout/retry policy bound it — api.meshtastic.org routinely takes 20-60s to serve this list,
+        // and a short deadline here cancels every refresh, pinning users to the bundled seed data.
+        networkTimeoutMs = null,
         tag = "FirmwareReleaseRepository",
     )
 
@@ -72,26 +83,58 @@ open class FirmwareReleaseRepositoryImpl(
         localDataSource.deleteAllFirmwareReleases()
     }
 
+    /**
+     * Applies the bundled snapshot whenever it is newer than the cache — not just when the cache is empty. The bundle
+     * is refreshed weekly in CI, so an app update carries fresh data even for users whose network path to
+     * api.meshtastic.org chronically fails. Checked once per process; a cache that is already newer (from a successful
+     * network refresh) is never regressed.
+     */
     private suspend fun ensureSeeded() {
-        if (!localDataSource.hasAnyEntries()) {
+        if (seedChecked) return
+        seedMutex.withLock {
+            if (seedChecked) return
             safeCatching {
-                Logger.d { "FirmwareReleaseRepository: seeding cache from bundled JSON" }
-                val jsonReleases =
-                    assetReader.decode<NetworkFirmwareReleases>("firmware_releases.json", json)
-                        ?: NetworkFirmwareReleases()
-                localDataSource.insertFirmwareReleases(jsonReleases.releases.stable, FirmwareReleaseType.STABLE)
-                localDataSource.insertFirmwareReleases(jsonReleases.releases.alpha, FirmwareReleaseType.ALPHA)
+                val bundled = assetReader.decode<NetworkFirmwareReleases>("firmware_releases.json", json)?.releases
+                if (bundled == null || (bundled.stable.isEmpty() && bundled.alpha.isEmpty())) {
+                    Logger.w { "FirmwareReleaseRepository: no bundled releases available to seed from" }
+                } else {
+                    val bundledNewest =
+                        (bundled.stable + bundled.alpha).maxOf {
+                            it.asEntity(FirmwareReleaseType.STABLE).asDeviceVersion()
+                        }
+                    val cachedNewest =
+                        listOfNotNull(
+                            localDataSource.getLatestRelease(FirmwareReleaseType.STABLE),
+                            localDataSource.getLatestRelease(FirmwareReleaseType.ALPHA),
+                        )
+                            .maxOfOrNull { it.asDeviceVersion() }
+                    if (cachedNewest == null || bundledNewest > cachedNewest) {
+                        Logger.i {
+                            "FirmwareReleaseRepository: applying bundled snapshot " +
+                                "($bundledNewest > ${cachedNewest ?: "empty cache"})"
+                        }
+                        localDataSource.replaceRemoteFirmwareReleases(
+                            stable = bundled.stable,
+                            alpha = bundled.alpha,
+                        )
+                    }
+                }
             }
                 .onFailure { e -> Logger.w(e) { "FirmwareReleaseRepository: failed to seed cache from bundled JSON" } }
+            seedChecked = true
         }
     }
 
     private suspend fun singleFlightRefresh() {
         refreshMutex.withLock {
             Logger.d { "FirmwareReleaseRepository: fetching from remote API" }
-            val networkReleases = remoteDataSource.getFirmwareReleases()
-            localDataSource.insertFirmwareReleases(networkReleases.releases.stable, FirmwareReleaseType.STABLE)
-            localDataSource.insertFirmwareReleases(networkReleases.releases.alpha, FirmwareReleaseType.ALPHA)
+            val releases = remoteDataSource.getFirmwareReleases().releases
+            if (releases.stable.isEmpty() && releases.alpha.isEmpty()) {
+                Logger.w { "FirmwareReleaseRepository: remote returned no releases; leaving cache untouched" }
+            } else {
+                // Replace rather than upsert so releases pulled or reclassified upstream don't linger as "latest".
+                localDataSource.replaceRemoteFirmwareReleases(stable = releases.stable, alpha = releases.alpha)
+            }
         }
     }
 
@@ -99,8 +142,5 @@ open class FirmwareReleaseRepositoryImpl(
 
     companion object {
         private val CACHE_EXPIRATION_TIME_MS = TimeConstants.ONE_HOUR.inWholeMilliseconds
-
-        /** Maximum time to wait for the remote API before falling back to cached/bundled data. */
-        private const val NETWORK_REFRESH_TIMEOUT_MS = 5_000L
     }
 }
