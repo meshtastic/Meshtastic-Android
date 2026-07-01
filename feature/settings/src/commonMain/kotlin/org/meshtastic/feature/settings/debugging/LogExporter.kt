@@ -18,5 +18,8 @@ package org.meshtastic.feature.settings.debugging
 
 import androidx.compose.runtime.Composable
 
-@Composable
-expect fun rememberLogExporter(logsProvider: suspend () -> List<DebugViewModel.UiMeshLog>): (fileName: String) -> Unit
+/** Remembers a launcher that writes [contentProvider]'s text to a user-chosen file. */
+@Composable expect fun rememberLogExporter(contentProvider: suspend () -> String): (fileName: String) -> Unit
+
+/** The app's own logcat buffer. Empty on platforms without a logcat (desktop). */
+expect fun captureAppLogcat(): String

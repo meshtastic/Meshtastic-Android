@@ -21,6 +21,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.meshtastic.core.common.log.InMemoryLogBuffer
 import org.meshtastic.core.common.util.ioDispatcher
 import java.awt.FileDialog
 import java.awt.Frame
@@ -30,14 +31,14 @@ import java.io.OutputStreamWriter
 import java.nio.charset.StandardCharsets
 
 @Composable
-actual fun rememberLogExporter(logsProvider: suspend () -> List<DebugViewModel.UiMeshLog>): (fileName: String) -> Unit {
+actual fun rememberLogExporter(contentProvider: suspend () -> String): (fileName: String) -> Unit {
     val scope = rememberCoroutineScope()
 
     return { fileName ->
         scope.launch {
-            val logs = logsProvider()
-            if (logs.isEmpty()) {
-                Logger.w { "MeshLog export aborted: no logs available" }
+            val content = contentProvider()
+            if (content.isBlank()) {
+                Logger.w { "Log export aborted: no content" }
                 return@launch
             }
 
@@ -54,16 +55,20 @@ actual fun rememberLogExporter(logsProvider: suspend () -> List<DebugViewModel.U
                     val exportFile = File(directory, selectedFile)
                     try {
                         FileOutputStream(exportFile).use { fos ->
-                            OutputStreamWriter(fos, StandardCharsets.UTF_8).use { writer -> formatLogsTo(writer, logs) }
+                            OutputStreamWriter(fos, StandardCharsets.UTF_8).use { writer -> writer.write(content) }
                         }
-                        Logger.i { "MeshLog exported successfully to ${exportFile.absolutePath}" }
+                        Logger.i { "Logs exported successfully to ${exportFile.absolutePath}" }
                     } catch (e: java.io.IOException) {
                         Logger.e(e) { "Failed to export logs to file: ${exportFile.absolutePath}" }
                     }
                 } else {
-                    Logger.w { "MeshLog export aborted: user canceled file dialog" }
+                    Logger.w { "Log export aborted: user canceled file dialog" }
                 }
             }
         }
     }
 }
+
+// Desktop has no system logcat; surface the app's own Kermit output captured by InMemoryLogBuffer (installed at
+// startup).
+actual fun captureAppLogcat(): String = InMemoryLogBuffer.snapshot()

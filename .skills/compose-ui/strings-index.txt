@@ -291,13 +291,18 @@ debug_filter_included
 debug_filter_preset_title
 debug_filters
 debug_log_api_enabled
+debug_logcat_empty
+debug_logcat_refresh
 debug_logs_export
+debug_logs_exported
 debug_panel
 debug_search_clear
 debug_search_next
 debug_search_prev
 debug_store_logs_summary
 debug_store_logs_title
+debug_tab_app_logs
+debug_tab_packets
 default_
 default_mqtt_address
 ### DELETE ###

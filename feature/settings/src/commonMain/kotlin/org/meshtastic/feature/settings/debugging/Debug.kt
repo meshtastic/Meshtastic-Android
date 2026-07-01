@@ -37,12 +37,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -60,20 +63,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.format
-import kotlinx.datetime.format.char
-import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.debug_clear
 import org.meshtastic.core.resources.debug_decoded_payload
 import org.meshtastic.core.resources.debug_panel
 import org.meshtastic.core.resources.debug_store_logs_summary
 import org.meshtastic.core.resources.debug_store_logs_title
+import org.meshtastic.core.resources.debug_tab_app_logs
+import org.meshtastic.core.resources.debug_tab_packets
 import org.meshtastic.core.resources.log_retention_days
 import org.meshtastic.core.resources.log_retention_days_quantity
 import org.meshtastic.core.resources.log_retention_days_summary
@@ -88,11 +87,11 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Settings
 import org.meshtastic.core.ui.theme.AnnotationColor
 import org.meshtastic.feature.settings.debugging.DebugViewModel.UiMeshLog
-import kotlin.time.Instant.Companion.fromEpochMilliseconds
 
 private val REGEX_ANNOTATED_NODE_ID = Regex("\\(![0-9a-fA-F]{8}\\)$", RegexOption.MULTILINE)
 
-@Suppress("LongMethod")
+// Suppressions match this screen's pre-existing detekt baseline entries; editing the body reset the baseline hashes.
+@Suppress("LongMethod", "ViewModelForwarding", "ModifierMissing")
 @Composable
 fun DebugScreen(onNavigateUp: () -> Unit, viewModel: DebugViewModel) {
     val listState = rememberLazyListState()
@@ -126,9 +125,10 @@ fun DebugScreen(onNavigateUp: () -> Unit, viewModel: DebugViewModel) {
         }
     }
     // Prepare a document creator for exporting logs
-    val exportLogsLauncher = rememberLogExporter { viewModel.loadLogsForExport() }
+    val exportLogsLauncher = rememberLogExporter { buildString { formatLogsTo(this, viewModel.loadLogsForExport()) } }
 
     var showSettings by remember { mutableStateOf(false) }
+    var selectedTab by remember { mutableIntStateOf(0) }
 
     Scaffold(
         topBar = {
@@ -139,16 +139,35 @@ fun DebugScreen(onNavigateUp: () -> Unit, viewModel: DebugViewModel) {
                 canNavigateUp = true,
                 onNavigateUp = onNavigateUp,
                 actions = {
-                    IconToggleButton(checked = showSettings, onCheckedChange = { showSettings = it }) {
-                        Icon(imageVector = MeshtasticIcons.Settings, contentDescription = null)
+                    // The settings and delete actions apply to the Packets (MeshLog) list only.
+                    if (selectedTab == 0) {
+                        IconToggleButton(checked = showSettings, onCheckedChange = { showSettings = it }) {
+                            Icon(imageVector = MeshtasticIcons.Settings, contentDescription = null)
+                        }
+                        DebugMenuActions(deleteLogs = { viewModel.requestDeleteAllLogs() })
                     }
-                    DebugMenuActions(deleteLogs = { viewModel.requestDeleteAllLogs() })
                 },
                 onClickChip = {},
             )
         },
     ) { paddingValues ->
         Column(modifier = Modifier.padding(paddingValues).fillMaxSize()) {
+            PrimaryTabRow(selectedTabIndex = selectedTab) {
+                Tab(
+                    selected = selectedTab == 0,
+                    onClick = { selectedTab = 0 },
+                    text = { Text(stringResource(Res.string.debug_tab_packets)) },
+                )
+                Tab(
+                    selected = selectedTab == 1,
+                    onClick = { selectedTab = 1 },
+                    text = { Text(stringResource(Res.string.debug_tab_app_logs)) },
+                )
+            }
+            if (selectedTab == 1) {
+                LogcatContent(modifier = Modifier.fillMaxSize())
+                return@Column
+            }
             LazyColumn(modifier = Modifier.fillMaxSize(), state = listState) {
                 stickyHeader {
                     val animatedAlpha by
@@ -165,22 +184,7 @@ fun DebugScreen(onNavigateUp: () -> Unit, viewModel: DebugViewModel) {
                         logs = logs,
                         filterMode = filterMode,
                         onFilterModeChange = { filterMode = it },
-                        onExportLogs = {
-                            val format =
-                                LocalDateTime.Format {
-                                    year()
-                                    monthNumber()
-                                    day()
-                                    char('_')
-                                    hour()
-                                    minute()
-                                    second()
-                                }
-                            val timestamp =
-                                fromEpochMilliseconds(nowMillis).toLocalDateTime(TimeZone.UTC).format(format)
-                            val fileName = "meshtastic_debug_$timestamp.txt"
-                            exportLogsLauncher(fileName)
-                        },
+                        onExportLogs = { exportLogsLauncher(timestampedExportName("meshtastic_debug")) },
                     )
                     if (showSettings) {
                         DebugLogSettings(viewModel = viewModel)

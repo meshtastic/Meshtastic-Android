@@ -30,40 +30,56 @@ import kotlinx.coroutines.withContext
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.debug_export_failed
-import org.meshtastic.core.resources.debug_export_success
+import org.meshtastic.core.resources.debug_logs_exported
 import org.meshtastic.core.ui.util.showToast
 import java.io.OutputStreamWriter
 import java.nio.charset.StandardCharsets
 
 @Composable
-actual fun rememberLogExporter(logsProvider: suspend () -> List<DebugViewModel.UiMeshLog>): (fileName: String) -> Unit {
+actual fun rememberLogExporter(contentProvider: suspend () -> String): (fileName: String) -> Unit {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val exportLogsLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/plain")) { createdUri ->
             if (createdUri != null) {
-                scope.launch { exportAllLogsToUri(context, createdUri, logsProvider()) }
+                scope.launch { exportTextToUri(context, createdUri, contentProvider()) }
             }
         }
     return { fileName -> exportLogsLauncher.launch(fileName) }
 }
 
-private suspend fun exportAllLogsToUri(context: Context, targetUri: Uri, logs: List<DebugViewModel.UiMeshLog>) =
-    withContext(ioDispatcher) {
-        try {
-            if (logs.isEmpty()) {
-                withContext(Dispatchers.Main) { context.showToast(Res.string.debug_export_failed, "No logs to export") }
-                Logger.w { "MeshLog export aborted: no logs available" }
-                return@withContext
-            }
-
-            context.contentResolver.openOutputStream(targetUri)?.use { os ->
-                OutputStreamWriter(os, StandardCharsets.UTF_8).use { writer -> formatLogsTo(writer, logs) }
-            }
-            Logger.i { "MeshLog exported successfully to $targetUri" }
-            withContext(Dispatchers.Main) { context.showToast(Res.string.debug_export_success, logs.size) }
-        } catch (e: java.io.IOException) {
-            Logger.e(e) { "Failed to export logs to URI: $targetUri" }
-            withContext(Dispatchers.Main) { context.showToast(Res.string.debug_export_failed, e.message ?: "") }
+private suspend fun exportTextToUri(context: Context, targetUri: Uri, content: String) = withContext(ioDispatcher) {
+    try {
+        if (content.isBlank()) {
+            withContext(Dispatchers.Main) { context.showToast(Res.string.debug_export_failed, "No logs to export") }
+            Logger.w { "Log export aborted: no content" }
+            return@withContext
         }
+        context.contentResolver.openOutputStream(targetUri)?.use { os ->
+            OutputStreamWriter(os, StandardCharsets.UTF_8).use { writer -> writer.write(content) }
+        }
+        Logger.i { "Logs exported successfully to $targetUri" }
+        withContext(Dispatchers.Main) { context.showToast(Res.string.debug_logs_exported) }
+    } catch (e: java.io.IOException) {
+        Logger.e(e) { "Failed to export logs to URI: $targetUri" }
+        withContext(Dispatchers.Main) { context.showToast(Res.string.debug_export_failed, e.message ?: "") }
     }
+}
+
+/**
+ * Dumps this app's own logcat, filtered to our process id via `--pid` (API 24+, minSdk is 26). Without READ_LOGS the OS
+ * already limits us to our own entries, but `--pid` guarantees it even if that permission is ever granted (e.g. via adb
+ * on an emulator) so a shared bug report can't leak other apps' logs. Best-effort: a capture failure returns a marker
+ * rather than throwing. ponytail: tail-capped to keep the file sane; the ring buffer is already bounded.
+ */
+actual fun captureAppLogcat(): String = try {
+    val pid = android.os.Process.myPid()
+    Runtime.getRuntime()
+        .exec(arrayOf("logcat", "-d", "-v", "time", "--pid=$pid", "-t", "5000"))
+        .inputStream
+        .bufferedReader()
+        .use { it.readText() }
+} catch (e: java.io.IOException) {
+    Logger.e(e) { "Failed to capture logcat" }
+    "logcat capture failed: ${e.message}"
+}

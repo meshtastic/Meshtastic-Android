@@ -18,7 +18,7 @@ package org.meshtastic.feature.settings.debugging
 
 import androidx.compose.runtime.Composable
 
-@Composable
-actual fun rememberLogExporter(logsProvider: suspend () -> List<DebugViewModel.UiMeshLog>): (fileName: String) -> Unit =
-    { _ ->
-    }
+@Composable actual fun rememberLogExporter(contentProvider: suspend () -> String): (fileName: String) -> Unit = { _ -> }
+
+// ponytail: no logcat on iOS; the App Logs tab shows an empty-state there.
+actual fun captureAppLogcat(): String = ""
