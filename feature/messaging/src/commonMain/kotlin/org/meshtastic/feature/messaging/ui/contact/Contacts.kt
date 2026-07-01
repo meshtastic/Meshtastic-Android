@@ -146,8 +146,8 @@ fun ContactsScreen(
     // Create channel placeholders (always show broadcast contacts, even when empty)
     val channels by viewModel.channels.collectAsStateWithLifecycle()
     val channelPlaceholders =
-        remember(channels.settings.size) {
-            (0 until channels.settings.size).map { ch ->
+        remember(channels) {
+            channels.settings.mapIndexed { ch, _ ->
                 Contact(
                     contactKey = "$ch^all",
                     shortName = "$ch",
