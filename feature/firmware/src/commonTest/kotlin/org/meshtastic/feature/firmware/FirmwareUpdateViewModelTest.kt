@@ -35,6 +35,8 @@ import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.FirmwareReleaseType
 import org.meshtastic.core.datastore.BootloaderWarningDataSource
+import org.meshtastic.core.datastore.FirmwareRecoveryDataSource
+import org.meshtastic.core.datastore.model.PendingFirmwareRecovery
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FirmwareReleaseRepository
@@ -67,6 +69,7 @@ class FirmwareUpdateViewModelTest {
     private val radioController = FakeRadioController()
     private val radioPrefs: RadioPrefs = mock(MockMode.autofill)
     private val bootloaderWarningDataSource: BootloaderWarningDataSource = mock(MockMode.autofill)
+    private val firmwareRecoveryDataSource: FirmwareRecoveryDataSource = mock(MockMode.autofill)
     private val firmwareUpdateManager: FirmwareUpdateManager = mock(MockMode.autofill)
     private val usbManager: FirmwareUsbManager = mock(MockMode.autofill)
     private val fileHandler: FirmwareFileHandler = mock(MockMode.autofill)
@@ -89,6 +92,9 @@ class FirmwareUpdateViewModelTest {
             Result.success(hardware)
 
         everySuspend { bootloaderWarningDataSource.isDismissed(any()) } returns false
+
+        // No stranded-device recovery record by default; recovery tests override this.
+        every { firmwareRecoveryDataSource.pending } returns flowOf(null)
 
         // Setup node info
         nodeRepository.setMyNodeInfo(
@@ -121,6 +127,7 @@ class FirmwareUpdateViewModelTest {
         radioController,
         radioPrefs,
         bootloaderWarningDataSource,
+        firmwareRecoveryDataSource,
         firmwareUpdateManager,
         usbManager,
         fileHandler,
@@ -396,5 +403,30 @@ class FirmwareUpdateViewModelTest {
         val state = viewModel.state.value
         assertIs<FirmwareUpdateState.Ready>(state)
         assertEquals(null, state.release)
+    }
+
+    @Test
+    fun `checkForUpdates enters recovery mode when disconnected with a saved record`() = runTest {
+        // Disconnected (no live device) but a stranded-bootloader record exists → recovery Ready, not "no device".
+        every { radioPrefs.devAddr } returns MutableStateFlow(null)
+        every { firmwareRecoveryDataSource.pending } returns
+            flowOf(
+                PendingFirmwareRecovery(
+                    fullAddress = "x1234abcd",
+                    hwModel = 1,
+                    pioEnv = "tbeam",
+                    releaseType = "STABLE",
+                    deviceName = "My Node",
+                ),
+            )
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        val state = viewModel.state.value
+        assertIs<FirmwareUpdateState.Ready>(state)
+        assertTrue(state.isRecovery, "Expected recovery Ready but was $state")
+        assertEquals("1234abcd", state.address) // fullAddress.drop(1)
+        assertIs<FirmwareUpdateMethod.Ble>(state.updateMethod)
     }
 }

@@ -594,6 +594,9 @@
     <string name="firmware">Firmware</string>
     <string name="firmware_edition">Firmware Edition</string>
     <string name="firmware_old">The radio firmware is too old to talk to this application. For more information on this see <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">our Firmware Installation guide</a>.</string>
+    <string name="firmware_recovery_banner">Finish updating %1$s</string>
+    <string name="firmware_recovery_button">Resume firmware update</string>
+    <string name="firmware_recovery_explanation">This device is in bootloader mode from a firmware update that did not finish. Keep it nearby and it will be re-flashed to complete the update.</string>
     <string name="firmware_too_old">Firmware update required.</string>
     <string name="firmware_update_almost_there">Almost there...</string>
     <string name="firmware_update_alpha">Alpha</string>

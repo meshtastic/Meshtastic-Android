@@ -17,6 +17,7 @@
 package org.meshtastic.feature.connections
 
 import org.koin.core.annotation.KoinViewModel
+import org.meshtastic.core.datastore.FirmwareRecoveryDataSource
 import org.meshtastic.core.datastore.RecentAddressesDataSource
 import org.meshtastic.core.network.repository.NetworkRepository
 import org.meshtastic.core.repository.RadioController
@@ -44,6 +45,7 @@ class JvmScannerViewModel(
     networkRepository: NetworkRepository,
     dispatchers: org.meshtastic.core.di.CoroutineDispatchers,
     uiPrefs: UiPrefs,
+    firmwareRecoveryDataSource: FirmwareRecoveryDataSource,
     bleScanner: org.meshtastic.core.ble.BleScanner? = null,
 ) : ScannerViewModel(
     serviceRepository,
@@ -55,5 +57,6 @@ class JvmScannerViewModel(
     networkRepository,
     dispatchers,
     uiPrefs,
+    firmwareRecoveryDataSource,
     bleScanner,
 )

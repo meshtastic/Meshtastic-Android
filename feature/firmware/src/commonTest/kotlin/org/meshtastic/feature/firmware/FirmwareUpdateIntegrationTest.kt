@@ -34,6 +34,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.datastore.BootloaderWarningDataSource
+import org.meshtastic.core.datastore.FirmwareRecoveryDataSource
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FirmwareReleaseRepository
@@ -62,6 +63,7 @@ class FirmwareUpdateIntegrationTest {
     private val radioController = FakeRadioController()
     private val radioPrefs: RadioPrefs = mock(MockMode.autofill)
     private val bootloaderWarningDataSource: BootloaderWarningDataSource = mock(MockMode.autofill)
+    private val firmwareRecoveryDataSource: FirmwareRecoveryDataSource = mock(MockMode.autofill)
     private val firmwareUpdateManager: FirmwareUpdateManager = mock(MockMode.autofill)
     private val usbManager: FirmwareUsbManager = mock(MockMode.autofill)
     private val fileHandler: FirmwareFileHandler = mock(MockMode.autofill)
@@ -83,6 +85,7 @@ class FirmwareUpdateIntegrationTest {
         everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any(), any()) } returns
             Result.success(hardware)
         everySuspend { bootloaderWarningDataSource.isDismissed(any()) } returns false
+        every { firmwareRecoveryDataSource.pending } returns flowOf(null)
         every { fileHandler.cleanupAllTemporaryFiles() } returns Unit
         everySuspend { fileHandler.deleteFile(any()) } returns Unit
 
@@ -105,6 +108,7 @@ class FirmwareUpdateIntegrationTest {
         radioController,
         radioPrefs,
         bootloaderWarningDataSource,
+        firmwareRecoveryDataSource,
         firmwareUpdateManager,
         usbManager,
         fileHandler,

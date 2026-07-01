@@ -82,6 +82,7 @@ class AndroidScannerViewModelBondingTest {
                 bluetoothRepository = harness.bluetoothRepository,
                 usbRepository = inertUsbRepository(),
                 uiPrefs = harness.uiPrefs,
+                firmwareRecoveryDataSource = harness.firmwareRecoveryDataSource,
                 bleScanner = harness.bleScanner,
             )
     }

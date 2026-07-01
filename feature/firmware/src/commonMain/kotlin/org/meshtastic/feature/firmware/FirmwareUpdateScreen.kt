@@ -92,6 +92,8 @@ import org.meshtastic.core.resources.back
 import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.chirpy
 import org.meshtastic.core.resources.dont_show_again_for_device
+import org.meshtastic.core.resources.firmware_recovery_button
+import org.meshtastic.core.resources.firmware_recovery_explanation
 import org.meshtastic.core.resources.firmware_update_almost_there
 import org.meshtastic.core.resources.firmware_update_alpha
 import org.meshtastic.core.resources.firmware_update_checking
@@ -269,12 +271,15 @@ private fun FirmwareUpdateScaffold(
         ) {
             if (deviceHardware != null) {
                 Spacer(Modifier.height(16.dp))
-                AnimatedVisibility(
-                    visible =
-                    state is FirmwareUpdateState.Ready ||
-                        state is FirmwareUpdateState.Idle ||
-                        state is FirmwareUpdateState.Checking,
-                ) {
+                // Recovery flashes the stored channel's current release, so the channel picker would mislead.
+                val showReleaseSelector =
+                    (
+                        state is FirmwareUpdateState.Ready ||
+                            state is FirmwareUpdateState.Idle ||
+                            state is FirmwareUpdateState.Checking
+                        ) &&
+                        (state as? FirmwareUpdateState.Ready)?.isRecovery != true
+                AnimatedVisibility(visible = showReleaseSelector) {
                     Column {
                         ReleaseTypeSelector(selectedReleaseType, actions.onReleaseTypeSelect)
                         Spacer(Modifier.height(16.dp))
@@ -408,6 +413,16 @@ private fun ReadyState(
         Spacer(Modifier.height(16.dp))
     }
 
+    if (state.isRecovery) {
+        Text(
+            text = stringResource(Res.string.firmware_recovery_explanation),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+        )
+        Spacer(Modifier.height(16.dp))
+    }
+
     Spacer(Modifier.height(16.dp))
 
     if (selectedReleaseType == FirmwareReleaseType.LOCAL) {
@@ -453,10 +468,14 @@ private fun ReadyState(
             )
             Spacer(Modifier.width(8.dp))
             Text(
-                stringResource(
-                    resource = Res.string.firmware_update_method_detail,
-                    stringResource(state.updateMethod.description),
-                ),
+                if (state.isRecovery) {
+                    stringResource(Res.string.firmware_recovery_button)
+                } else {
+                    stringResource(
+                        resource = Res.string.firmware_update_method_detail,
+                        stringResource(state.updateMethod.description),
+                    )
+                },
                 style = ButtonDefaults.textStyleFor(largeHeight),
             )
         }

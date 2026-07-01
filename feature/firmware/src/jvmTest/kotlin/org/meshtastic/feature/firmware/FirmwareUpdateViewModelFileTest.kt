@@ -35,6 +35,7 @@ import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.datastore.BootloaderWarningDataSource
+import org.meshtastic.core.datastore.FirmwareRecoveryDataSource
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FirmwareReleaseRepository
@@ -64,6 +65,7 @@ class FirmwareUpdateViewModelFileTest {
     private val radioController = FakeRadioController()
     private val radioPrefs: RadioPrefs = mock(MockMode.autofill)
     private val bootloaderWarningDataSource: BootloaderWarningDataSource = mock(MockMode.autofill)
+    private val firmwareRecoveryDataSource: FirmwareRecoveryDataSource = mock(MockMode.autofill)
     private val firmwareUpdateManager: FirmwareUpdateManager = mock(MockMode.autofill)
     private val usbManager: FirmwareUsbManager = mock(MockMode.autofill)
     private val fileHandler: FirmwareFileHandler = mock(MockMode.autofill)
@@ -85,6 +87,7 @@ class FirmwareUpdateViewModelFileTest {
         everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any(), any()) } returns
             Result.success(hardware)
         everySuspend { bootloaderWarningDataSource.isDismissed(any()) } returns true
+        every { firmwareRecoveryDataSource.pending } returns flowOf(null)
 
         nodeRepository.setMyNodeInfo(
             TestDataFactory.createMyNodeInfo(myNodeNum = 123, firmwareVersion = "1.9.0", pioEnv = "tbeam"),
@@ -113,6 +116,7 @@ class FirmwareUpdateViewModelFileTest {
         radioController,
         radioPrefs,
         bootloaderWarningDataSource,
+        firmwareRecoveryDataSource,
         firmwareUpdateManager,
         usbManager,
         fileHandler,

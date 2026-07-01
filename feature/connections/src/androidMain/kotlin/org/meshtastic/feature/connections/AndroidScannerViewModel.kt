@@ -26,6 +26,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.ble.BluetoothRepository
+import org.meshtastic.core.datastore.FirmwareRecoveryDataSource
 import org.meshtastic.core.datastore.RecentAddressesDataSource
 import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.network.repository.NetworkRepository
@@ -57,6 +58,7 @@ class AndroidScannerViewModel(
     private val bluetoothRepository: BluetoothRepository,
     private val usbRepository: UsbRepository,
     uiPrefs: UiPrefs,
+    firmwareRecoveryDataSource: FirmwareRecoveryDataSource,
     bleScanner: org.meshtastic.core.ble.BleScanner? = null,
 ) : ScannerViewModel(
     serviceRepository,
@@ -68,6 +70,7 @@ class AndroidScannerViewModel(
     networkRepository,
     dispatchers,
     uiPrefs,
+    firmwareRecoveryDataSource,
     bleScanner,
 ) {
     override fun requestBonding(entry: DeviceListEntry.Ble) {
