@@ -76,4 +76,15 @@ class LogFormatterTest {
         assertTrue(result.contains("I/foo: hello world"))
         assertTrue(result.contains("private_key:<redacted>"))
     }
+
+    @Test
+    fun `redactText redacts keys across lines and keeps the rest`() {
+        val result = redactText("D/x: session_passkey=[hex=dd8042fa0cfd7d17]\nD/x: region=US\nD/x: private_key: bb")
+
+        assertFalse(result.contains("dd8042fa0cfd7d17"), "hex secret must not survive")
+        assertFalse(result.contains(": bb"), "bare-token secret must not survive")
+        assertTrue(result.contains("session_passkey=<redacted>"))
+        assertTrue(result.contains("private_key:<redacted>"))
+        assertTrue(result.contains("region=US"))
+    }
 }

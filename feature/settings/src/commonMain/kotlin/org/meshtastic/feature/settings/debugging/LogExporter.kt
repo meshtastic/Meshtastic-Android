@@ -21,5 +21,8 @@ import androidx.compose.runtime.Composable
 /** Remembers a launcher that writes [contentProvider]'s text to a user-chosen file. */
 @Composable expect fun rememberLogExporter(contentProvider: suspend () -> String): (fileName: String) -> Unit
 
-/** The app's own logcat buffer. Empty on platforms without a logcat (desktop). */
+/**
+ * The app's own logs: Android logcat (filtered to this process) on Android, an in-memory Kermit buffer on desktop.
+ * Empty on platforms with no log capture (currently iOS).
+ */
 expect fun captureAppLogcat(): String

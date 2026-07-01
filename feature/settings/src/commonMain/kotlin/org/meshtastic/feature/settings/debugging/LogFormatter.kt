@@ -83,5 +83,8 @@ private fun appendRedactedPayload(out: Appendable, payload: String) {
     out.append("}\n\n")
 }
 
+/** Redacts sensitive-key values in every line of [text]; used to redact logcat both on screen and on export. */
+internal fun redactText(text: String): String = text.lineSequence().joinToString("\n") { redactLine(it) }
+
 private fun redactLine(line: String): String =
     REDACT_REGEX.replace(line) { "${it.groupValues[1]}${it.groupValues[2]}<redacted>" }

@@ -117,7 +117,8 @@ fun LogcatContent(modifier: Modifier = Modifier) {
     fun refresh() = scope.launch { raw = withContext(ioDispatcher) { captureAppLogcat() } }
     LaunchedEffect(Unit) { refresh() }
 
-    val lines = remember(raw, levels, query) { filterLogcat(raw.orEmpty(), levels, query) }
+    // Redact sensitive keys before display, matching the export path (appendLogcat) so the on-screen view is safe too.
+    val lines = remember(raw, levels, query) { filterLogcat(redactText(raw.orEmpty()), levels, query) }
 
     Column(modifier = modifier.fillMaxSize().padding(8.dp)) {
         OutlinedTextField(

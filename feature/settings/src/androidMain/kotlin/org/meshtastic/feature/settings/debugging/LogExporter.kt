@@ -34,6 +34,7 @@ import org.meshtastic.core.resources.debug_logs_exported
 import org.meshtastic.core.ui.util.showToast
 import java.io.OutputStreamWriter
 import java.nio.charset.StandardCharsets
+import java.util.concurrent.TimeUnit
 
 @Composable
 actual fun rememberLogExporter(contentProvider: suspend () -> String): (fileName: String) -> Unit {
@@ -55,9 +56,15 @@ private suspend fun exportTextToUri(context: Context, targetUri: Uri, content: S
             Logger.w { "Log export aborted: no content" }
             return@withContext
         }
-        context.contentResolver.openOutputStream(targetUri)?.use { os ->
-            OutputStreamWriter(os, StandardCharsets.UTF_8).use { writer -> writer.write(content) }
+        val stream = context.contentResolver.openOutputStream(targetUri)
+        if (stream == null) {
+            Logger.w { "Log export aborted: could not open output stream for $targetUri" }
+            withContext(Dispatchers.Main) {
+                context.showToast(Res.string.debug_export_failed, "Could not open file")
+            }
+            return@withContext
         }
+        stream.use { os -> OutputStreamWriter(os, StandardCharsets.UTF_8).use { writer -> writer.write(content) } }
         Logger.i { "Logs exported successfully to $targetUri" }
         withContext(Dispatchers.Main) { context.showToast(Res.string.debug_logs_exported) }
     } catch (e: java.io.IOException) {
@@ -70,16 +77,19 @@ private suspend fun exportTextToUri(context: Context, targetUri: Uri, content: S
  * Dumps this app's own logcat, filtered to our process id via `--pid` (API 24+, minSdk is 26). Without READ_LOGS the OS
  * already limits us to our own entries, but `--pid` guarantees it even if that permission is ever granted (e.g. via adb
  * on an emulator) so a shared bug report can't leak other apps' logs. Best-effort: a capture failure returns a marker
- * rather than throwing. ponytail: tail-capped to keep the file sane; the ring buffer is already bounded.
+ * rather than throwing. ProcessBuilder with a merged stderr avoids a pipe-buffer deadlock, and the bounded wait keeps a
+ * stuck capture from tying up the IO thread. ponytail: tail-capped to keep the file sane; the ring buffer is bounded.
  */
 actual fun captureAppLogcat(): String = try {
     val pid = android.os.Process.myPid()
-    Runtime.getRuntime()
-        .exec(arrayOf("logcat", "-d", "-v", "time", "--pid=$pid", "-t", "5000"))
-        .inputStream
-        .bufferedReader()
-        .use { it.readText() }
+    val process =
+        ProcessBuilder("logcat", "-d", "-v", "time", "--pid=$pid", "-t", "5000").redirectErrorStream(true).start()
+    val output = process.inputStream.bufferedReader().use { it.readText() }
+    if (!process.waitFor(LOGCAT_TIMEOUT_SECONDS, TimeUnit.SECONDS)) process.destroyForcibly()
+    output
 } catch (e: java.io.IOException) {
     Logger.e(e) { "Failed to capture logcat" }
     "logcat capture failed: ${e.message}"
 }
+
+private const val LOGCAT_TIMEOUT_SECONDS = 5L
