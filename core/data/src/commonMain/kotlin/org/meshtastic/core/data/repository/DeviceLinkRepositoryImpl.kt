@@ -63,6 +63,9 @@ class DeviceLinkRepositoryImpl(
     /** Serializes seeding and network refreshes so concurrent collectors don't duplicate writes. */
     private val writeMutex = Mutex()
 
+    /** Single-flights stale-triggered refreshes so concurrent collectors don't start duplicate fetches. */
+    private val refreshMutex = Mutex()
+
     @Volatile private var lastRefreshMillis = 0L
 
     override suspend fun ensureImported() {
@@ -78,8 +81,11 @@ class DeviceLinkRepositoryImpl(
             val remoteLinks = remoteDataSource.getDeviceLinks()
             writeMutex.withLock {
                 withContext(NonCancellable + dispatchers.io) {
-                    store(remoteLinks)
-                    lastRefreshMillis = nowMillis
+                    // Only an applied payload counts as fresh — an ignored empty response must not suppress
+                    // retries for a whole expiration window while the cache stays stale.
+                    if (store(remoteLinks)) {
+                        lastRefreshMillis = nowMillis
+                    }
                 }
             }
         }
@@ -128,25 +134,27 @@ class DeviceLinkRepositoryImpl(
         }
     }
 
-    /** Best-effort network refresh, gated by [CACHE_EXPIRATION_TIME_MS]. */
+    /** Best-effort network refresh, gated by [CACHE_EXPIRATION_TIME_MS] and single-flighted via [refreshMutex]. */
     private suspend fun refreshIfStale() {
-        if (nowMillis - lastRefreshMillis > CACHE_EXPIRATION_TIME_MS) reconcile()
+        if (nowMillis - lastRefreshMillis <= CACHE_EXPIRATION_TIME_MS) return
+        refreshMutex.withLock { if (nowMillis - lastRefreshMillis > CACHE_EXPIRATION_TIME_MS) reconcile() }
     }
 
     /**
      * Maps resolved API links to the cached domain model, upserts them, and prunes short codes that no longer exist.
      * Internal links (GitHub, YouTube, …) are dropped — they never belong to a device's purchase section. An empty list
-     * is ignored rather than wiping the cache on a bad response.
+     * is ignored rather than wiping the cache on a bad response. Returns whether anything was stored.
      */
-    private suspend fun store(networkLinks: List<NetworkDeviceLink>) {
+    private suspend fun store(networkLinks: List<NetworkDeviceLink>): Boolean {
         val links = networkLinks.filter { it.type != NetworkDeviceLink.TYPE_INTERNAL }.map { it.toDeviceLink() }
         if (links.isEmpty()) {
             Logger.w { "DeviceLinkRepository: no device links to store; leaving cache untouched" }
-            return
+            return false
         }
         localDataSource.upsertAll(links.map { it.asEntity() })
         localDataSource.deleteNotIn(links.map { it.shortCode })
         Logger.i { "DeviceLinkRepository: stored ${links.size} device links" }
+        return true
     }
 
     private companion object {
