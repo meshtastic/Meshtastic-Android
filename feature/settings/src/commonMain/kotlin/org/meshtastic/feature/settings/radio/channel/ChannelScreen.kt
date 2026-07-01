@@ -63,6 +63,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.defaultPresetFor
 import org.meshtastic.core.model.util.getChannelUrl
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.resources.Res
@@ -198,8 +199,15 @@ fun ChannelScreen(
             messageRes = Res.string.are_you_sure_change_default,
             onConfirm = {
                 Logger.d { "Switching back to default channel" }
+                // The default channel takes the region's preferred preset (e.g. US -> LongTurbo) so its derived name,
+                // hash, and frequency match what a freshly-set-up node in that region would use.
+                val preset = defaultPresetFor(viewModel.region) ?: Channel.default.loraConfig.modem_preset
                 val lora =
-                    (Channel.default.loraConfig).copy(region = viewModel.region, tx_enabled = viewModel.txEnabled)
+                    Channel.default.loraConfig.copy(
+                        region = viewModel.region,
+                        modem_preset = preset,
+                        tx_enabled = viewModel.txEnabled,
+                    )
                 installSettings(Channel.default.settings, lora)
                 showResetDialog = false
             },

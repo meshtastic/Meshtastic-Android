@@ -138,4 +138,10 @@ class LoRaRegionPresetsTest {
             )
         assertEquals(ModemPreset.MEDIUM_FAST, oddMap.repairPresetFor(RegionCode.US, ModemPreset.SHORT_FAST))
     }
+
+    @Test
+    fun `region default preset is LongTurbo for US and absent for other regions`() {
+        assertEquals(ModemPreset.LONG_TURBO, defaultPresetFor(RegionCode.US))
+        assertNull(defaultPresetFor(RegionCode.EU_868))
+    }
 }
