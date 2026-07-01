@@ -67,6 +67,7 @@ class DesktopNotificationManager(
             when (notification.category) {
                 Notification.Category.Message -> prefs.messagesEnabled.value
                 Notification.Category.NodeEvent -> prefs.nodeEventsEnabled.value
+                Notification.Category.MeshBeacon -> prefs.nodeEventsEnabled.value
                 Notification.Category.Battery -> prefs.lowBatteryEnabled.value
                 Notification.Category.Alert -> true
                 Notification.Category.Service -> true

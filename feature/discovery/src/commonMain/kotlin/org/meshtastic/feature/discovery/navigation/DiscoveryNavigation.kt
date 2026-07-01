@@ -23,7 +23,9 @@ import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
+import org.meshtastic.core.model.util.toChannelSet
 import org.meshtastic.core.navigation.DiscoveryRoute
+import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.feature.discovery.DiscoveryHistoryDetailViewModel
 import org.meshtastic.feature.discovery.DiscoveryHistoryViewModel
 import org.meshtastic.feature.discovery.DiscoveryMapViewModel
@@ -75,10 +77,14 @@ fun EntryProviderScope<NavKey>.discoveryGraph(backStack: NavBackStack<NavKey>) {
 @Composable
 private fun DiscoveryScanScreenEntry(backStack: NavBackStack<NavKey>) {
     val viewModel = koinViewModel<DiscoveryViewModel>()
+    // Reuse the shared QR-import flow to apply a beacon's offered channel: it shows the same ADD/REPLACE +
+    // "this changes your radio" confirmation dialog a scanned channel URL does.
+    val uiViewModel = koinViewModel<UIViewModel>()
     DiscoveryScanScreen(
         viewModel = viewModel,
         onNavigateUp = dropUnlessResumed { backStack.removeLastOrNull() },
         onNavigateToSummary = { sessionId -> backStack.add(DiscoveryRoute.DiscoverySummary(sessionId)) },
         onNavigateToHistory = dropUnlessResumed { backStack.add(DiscoveryRoute.DiscoveryHistory) },
+        onJoinOffer = { beacon -> beacon.toChannelSet()?.let(uiViewModel::setRequestChannelSet) },
     )
 }

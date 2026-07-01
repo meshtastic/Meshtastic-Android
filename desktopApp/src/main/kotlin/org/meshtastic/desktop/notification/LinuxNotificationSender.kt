@@ -170,6 +170,7 @@ class LinuxNotificationSender(
                 Notification.Category.Battery -> "device.warning"
                 Notification.Category.Alert -> "device.error"
                 Notification.Category.NodeEvent -> "network"
+                Notification.Category.MeshBeacon -> "network"
                 Notification.Category.Service -> "device"
             }
         libnotify.notify_notification_set_category(ptr, category)

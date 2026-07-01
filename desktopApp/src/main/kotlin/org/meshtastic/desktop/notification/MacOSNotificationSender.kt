@@ -61,6 +61,7 @@ class MacOSNotificationSender private constructor(private val bridge: MacNotific
     internal fun categorySubtitle(category: Notification.Category): String = when (category) {
         Notification.Category.Message -> "Message"
         Notification.Category.NodeEvent -> "Node Event"
+        Notification.Category.MeshBeacon -> "Mesh Invitation"
         Notification.Category.Battery -> "Low Battery"
         Notification.Category.Alert -> "Alert"
         Notification.Category.Service -> "Service"

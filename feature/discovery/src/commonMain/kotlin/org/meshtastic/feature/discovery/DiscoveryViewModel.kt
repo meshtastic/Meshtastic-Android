@@ -27,7 +27,9 @@ import org.meshtastic.core.database.dao.DiscoveryDao
 import org.meshtastic.core.database.entity.DiscoverySessionEntity
 import org.meshtastic.core.model.ChannelOption
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.MeshBeaconOffer
 import org.meshtastic.core.repository.DiscoveryPrefs
+import org.meshtastic.core.repository.MeshBeaconRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.safeLaunch
@@ -42,6 +44,7 @@ class DiscoveryViewModel(
     private val serviceRepository: ServiceRepository,
     private val discoveryPrefs: DiscoveryPrefs,
     private val check24GhzCapability: Check24GhzCapability,
+    private val meshBeaconRepository: MeshBeaconRepository,
     radioConfigRepository: RadioConfigRepository,
     discoveryDao: DiscoveryDao,
 ) : ViewModel() {
@@ -49,6 +52,9 @@ class DiscoveryViewModel(
     val scanState: StateFlow<DiscoveryScanState> = scanEngine.scanState
     val currentSession: StateFlow<DiscoverySessionEntity?> = scanEngine.currentSession
     val connectionState: StateFlow<ConnectionState> = serviceRepository.connectionState
+
+    /** Mesh Beacon invitations received from other meshes, newest first. */
+    val beaconOffers: StateFlow<List<MeshBeaconOffer>> = meshBeaconRepository.offers
 
     val homePreset: StateFlow<ChannelOption> =
         radioConfigRepository.localConfigFlow
@@ -106,6 +112,20 @@ class DiscoveryViewModel(
             discoveryPrefs.setSelectedPresets(updated.map { it.name }.toSet())
             updated
         }
+    }
+
+    /**
+     * Seeds the scan with just the preset an invitation advertised (without persisting it to [discoveryPrefs], so it
+     * doesn't clobber the user's normal preset selection) — lets the user survey the advertised mesh before joining.
+     * No-op if the offer carries no preset.
+     */
+    fun discoverOffer(offer: MeshBeaconOffer) {
+        val preset = offer.beacon.offer_preset?.let { mp -> ChannelOption.entries.firstOrNull { it.modemPreset == mp } }
+        if (preset != null) _selectedPresets.value = setOf(preset)
+    }
+
+    fun dismissOffer(offer: MeshBeaconOffer) {
+        meshBeaconRepository.dismiss(offer.key)
     }
 
     fun setDwellDuration(minutes: Int) {
