@@ -143,15 +143,27 @@ class DebugViewModelTest {
     fun `presetFilters includes my node ID and broadcast`() {
         nodeRepository.setMyNodeInfo(org.meshtastic.core.testing.TestDataFactory.createMyNodeInfo(myNodeNum = 12345678))
 
+        // presetFilters reads the real wall clock (nowInstant) for its date element, so bracket that
+        // read: the instant the VM used lies between `before` and `after`, meaning its short-date must
+        // equal one of the two bounds. Keeps the assertion deterministic even when the wall clock
+        // crosses a minute boundary between the VM's read and the test's.
+        val before = org.meshtastic.core.common.util.nowInstant.toEpochMilliseconds()
         val filters = viewModel.presetFilters
+        val after = org.meshtastic.core.common.util.nowInstant.toEpochMilliseconds()
+
+        val validDates =
+            setOf(
+                org.meshtastic.core.common.util.DateFormatter.formatShortDate(before),
+                org.meshtastic.core.common.util.DateFormatter.formatShortDate(after),
+            )
+        (filters[3] in validDates) shouldBe true
+
         filters.shouldBe(
             listOf(
                 "!00bc614e",
                 "!ffffffff",
                 "decoded",
-                org.meshtastic.core.common.util.DateFormatter.formatShortDate(
-                    org.meshtastic.core.common.util.nowInstant.toEpochMilliseconds(),
-                ),
+                filters[3], // validated above against the bracketed wall-clock reads
             ) + org.meshtastic.proto.PortNum.entries.map { it.name },
         )
     }
