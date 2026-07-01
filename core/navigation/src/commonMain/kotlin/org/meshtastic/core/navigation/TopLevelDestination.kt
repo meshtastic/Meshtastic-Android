@@ -36,7 +36,7 @@ enum class TopLevelDestination(val label: StringResource, val route: Route) {
     Nodes(Res.string.nodes, NodesRoute.Nodes),
     Map(Res.string.map, MapRoute.Map()),
     Settings(Res.string.bottom_nav_settings, SettingsRoute.Settings()),
-    Connect(Res.string.connect, ConnectionsRoute.Connections),
+    Connect(Res.string.connect, ConnectionsRoute.Connections()),
     ;
 
     companion object {

@@ -97,7 +97,15 @@ class DeepLinkRouterTest {
 
     @Test
     fun `connections routes to Connections`() {
-        assertEquals(listOf(ConnectionsRoute.Connections), route("/connections"))
+        assertEquals(listOf(ConnectionsRoute.Connections()), route("/connections"))
+    }
+
+    @Test
+    fun `connections with address query param routes to Connections with address`() {
+        assertEquals(
+            listOf(ConnectionsRoute.Connections("t192.168.1.1:4403")),
+            route("/connections?address=t192.168.1.1:4403"),
+        )
     }
 
     // endregion
@@ -418,7 +426,7 @@ class DeepLinkRouterTest {
     @Test
     fun `route segments are case insensitive`() {
         assertEquals(listOf(NodesRoute.Nodes), route("/Nodes"))
-        assertEquals(listOf(ConnectionsRoute.Connections), route("/CONNECTIONS"))
+        assertEquals(listOf(ConnectionsRoute.Connections()), route("/CONNECTIONS"))
     }
 
     // endregion

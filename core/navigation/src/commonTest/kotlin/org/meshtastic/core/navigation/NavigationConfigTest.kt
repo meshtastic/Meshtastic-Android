@@ -40,7 +40,7 @@ class NavigationConfigTest {
             // ChannelsRoute
             ChannelsRoute.Channels,
             // ConnectionsRoute
-            ConnectionsRoute.Connections,
+            ConnectionsRoute.Connections(),
             // ContactsRoute
             ContactsRoute.Contacts,
             ContactsRoute.Messages(contactKey = "test-contact", message = "hello"),
