@@ -9,6 +9,10 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
+#### 🏗️ Features
+* feat: NFC tag writing for shared contacts and channels by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6030
+* feat: Waypoint geofences (editor, map overlays, alert engine)  by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6014
+* feat(lora): default US region to LongTurbo preset by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6009
 #### 🛠️ Fixes
 * fix(discovery): show disabled reason below Start Analysis button by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6027
 
