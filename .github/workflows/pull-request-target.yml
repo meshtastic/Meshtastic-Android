@@ -25,11 +25,11 @@ jobs:
           const labels = new Set();
 
           // Match branch prefix (e.g. feat/..., fix/..., chore-something)
-          // Also parse conventional-commit-style PR titles as a fallback
+          // Also parse conventional-commit-style PR titles as a fallback: type(scope): subject
           const branchPrefix = branch.split(/[\/\-_]/)[0].toLowerCase();
-          const titlePrefix = (title.match(/^(\w+)[\(:]/) || [])[1]?.toLowerCase();
-
-          const prefix = branchPrefix || titlePrefix;
+          const titleMatch = title.match(/^(\w+)(?:\(([^)]+)\))?:/);
+          const titlePrefix = titleMatch?.[1]?.toLowerCase();
+          const titleScope = titleMatch?.[2]?.toLowerCase();
 
           // Map prefixes to changelog-aligned labels
           const prefixMap = {
@@ -53,6 +53,11 @@ jobs:
             'release':  'release',
           };
 
+          // Map conventional-commit scopes to labels not derivable from the type alone
+          const scopeMap = {
+            'desktop': 'desktop',
+          };
+
           // Label from branch prefix
           if (prefixMap[branchPrefix]) labels.add(prefixMap[branchPrefix]);
 
@@ -61,16 +66,25 @@ jobs:
             labels.add(prefixMap[titlePrefix]);
           }
 
-          // Also label 'repo' if .github/ or build-logic/ files were changed
-          if (!labels.has('repo') && !labels.has('ci') && !labels.has('build')) {
+          // Label from PR title scope, e.g. "feat(desktop): ..."
+          if (titleScope && scopeMap[titleScope]) labels.add(scopeMap[titleScope]);
+
+          // Path-based labels from changed files
+          const pathLabels = [
+            { prefix: '.github/', label: 'repo' },
+            { prefix: 'build-logic/', label: 'build' },
+            { prefix: 'desktopApp/', label: 'desktop' },
+          ].filter(({ label }) => !labels.has(label));
+          if (pathLabels.length > 0) {
             try {
               const files = await github.paginate(
                 github.rest.pulls.listFiles,
                 { owner: context.repo.owner, repo: context.repo.repo, pull_number: context.payload.pull_request.number, per_page: 100 },
                 (res) => res.data.map(f => f.filename)
               );
-              if (files.some(f => f.startsWith('.github/'))) labels.add('repo');
-              if (files.some(f => f.startsWith('build-logic/'))) labels.add('build');
+              for (const { prefix, label } of pathLabels) {
+                if (files.some(f => f.startsWith(prefix))) labels.add(label);
+              }
             } catch (e) {
               core.warning(`Could not list PR files (rate limited?): ${e.message}`);
             }
