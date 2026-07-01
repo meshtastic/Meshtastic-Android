@@ -40,7 +40,8 @@ class NavigationConfigTest {
             // ChannelsRoute
             ChannelsRoute.Channels,
             // ConnectionsRoute
-            ConnectionsRoute.Connections,
+            ConnectionsRoute.Connections(),
+            ConnectionsRoute.Connections(address = "t192.168.1.1:4403"),
             // ContactsRoute
             ContactsRoute.Contacts,
             ContactsRoute.Messages(contactKey = "test-contact", message = "hello"),
@@ -176,6 +177,7 @@ class NavigationConfigTest {
                 MapRoute.Map() to MapRoute.Map(waypointId = null),
                 NodesRoute.NodeDetail() to NodesRoute.NodeDetail(destNum = null),
                 SettingsRoute.Settings() to SettingsRoute.Settings(destNum = null),
+                ConnectionsRoute.Connections() to ConnectionsRoute.Connections(address = null),
                 WifiProvisionRoute.WifiProvision() to WifiProvisionRoute.WifiProvision(address = null),
             )
 

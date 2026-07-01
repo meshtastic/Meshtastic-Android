@@ -37,6 +37,9 @@ import org.meshtastic.core.common.util.CommonUri
  * - `/settings/{destNum}/{page}` -> Specific settings page for a node
  * - `/wifi-provision` -> WiFi provisioning screen
  * - `/wifi-provision?address={mac}` -> WiFi provisioning targeting a specific device MAC address
+ * - `/connections?address={prefixedAddress}` -> Connections screen, auto-connecting to a prefixed device address (e.g.
+ *   `t192.168.1.1:4403` for TCP, `xAA:BB:CC:DD:EE:FF` for BLE) — lets external tooling trigger a connection.
+ *   `address=n` disconnects instead of connecting.
  */
 object DeepLinkRouter {
     /**
@@ -60,7 +63,7 @@ object DeepLinkRouter {
             "quickchat",
             -> routeContacts(uri, pathSegments)
 
-            "connections" -> listOf(ConnectionsRoute.Connections)
+            "connections" -> listOf(ConnectionsRoute.Connections(uri.getQueryParameter("address")))
 
             "map" -> routeMap(uri, pathSegments)
 

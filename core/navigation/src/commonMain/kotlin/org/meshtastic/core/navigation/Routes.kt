@@ -32,7 +32,13 @@ sealed interface ChannelsRoute : Route {
 
 @Serializable
 sealed interface ConnectionsRoute : Route {
-    @Serializable data object Connections : ConnectionsRoute, Graph
+    /**
+     * @param address Optional prefixed device address (e.g. `t192.168.1.1:4403`, `xAA:BB:CC:DD:EE:FF`) to auto-connect
+     *   to when this route is deep-linked into, e.g. `/connections?address=t192.168.1.1:4403`.
+     */
+    @Serializable data class Connections(val address: String? = null) :
+        ConnectionsRoute,
+        Graph
 }
 
 @Serializable
