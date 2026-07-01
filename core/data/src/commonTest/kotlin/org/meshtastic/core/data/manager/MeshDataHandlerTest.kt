@@ -40,6 +40,7 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.util.MeshDataMapper
 import org.meshtastic.core.repository.AdminPacketHandler
+import org.meshtastic.core.repository.MeshBeaconRepository
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.MessageFilter
 import org.meshtastic.core.repository.NeighborInfoHandler
@@ -54,7 +55,9 @@ import org.meshtastic.core.repository.StoreForwardPacketHandler
 import org.meshtastic.core.repository.TelemetryPacketHandler
 import org.meshtastic.core.repository.TracerouteHandler
 import org.meshtastic.proto.ChannelSet
+import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Data
+import org.meshtastic.proto.MeshBeacon
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.NeighborInfo
 import org.meshtastic.proto.Paxcount
@@ -66,6 +69,7 @@ import org.meshtastic.proto.User
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -87,6 +91,7 @@ class MeshDataHandlerTest {
     private val storeForwardHandler: StoreForwardPacketHandler = mock(MockMode.autofill)
     private val telemetryHandler: TelemetryPacketHandler = mock(MockMode.autofill)
     private val adminPacketHandler: AdminPacketHandler = mock(MockMode.autofill)
+    private val meshBeaconRepository = MeshBeaconRepository()
 
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
@@ -131,6 +136,7 @@ class MeshDataHandlerTest {
                     crossingStore = GeofenceCrossingStore(),
                     scope = geofenceScope,
                 ),
+                meshBeaconRepository = meshBeaconRepository,
                 scope = testScope,
             )
 
@@ -363,6 +369,51 @@ class MeshDataHandlerTest {
         handler.handleReceivedData(packet, 123)
 
         verify { neighborInfoHandler.handleNeighborInfo(packet) }
+    }
+
+    // --- Mesh Beacon handling ---
+
+    @Test
+    fun `mesh beacon with a join offer is recorded as an invitation`() {
+        val beacon = MeshBeacon(message = "Join us", offer_channel = ChannelSettings(name = "PartyNet"))
+        val packet =
+            MeshPacket(
+                from = 456,
+                decoded = Data(portnum = PortNum.MESH_BEACON_APP, payload = beacon.encode().toByteString()),
+            )
+        every { dataMapper.toDataPacket(packet) } returns
+            DataPacket(
+                from = "!remote",
+                bytes = beacon.encode().toByteString(),
+                dataType = PortNum.MESH_BEACON_APP.value,
+            )
+
+        handler.handleReceivedData(packet, 123)
+
+        val offers = meshBeaconRepository.offers.value
+        assertEquals(1, offers.size)
+        assertEquals("Join us", offers.first().message)
+        assertEquals("PartyNet", offers.first().channelName)
+    }
+
+    @Test
+    fun `mesh beacon without a join offer is ignored`() {
+        val beacon = MeshBeacon(message = "Just saying hi") // no offer_channel → not actionable
+        val packet =
+            MeshPacket(
+                from = 456,
+                decoded = Data(portnum = PortNum.MESH_BEACON_APP, payload = beacon.encode().toByteString()),
+            )
+        every { dataMapper.toDataPacket(packet) } returns
+            DataPacket(
+                from = "!remote",
+                bytes = beacon.encode().toByteString(),
+                dataType = PortNum.MESH_BEACON_APP.value,
+            )
+
+        handler.handleReceivedData(packet, 123)
+
+        assertEquals(0, meshBeaconRepository.offers.value.size)
     }
 
     // --- Store-and-Forward handling ---

@@ -33,6 +33,7 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.meshtastic_alerts_notifications
 import org.meshtastic.core.resources.meshtastic_low_battery_notifications
+import org.meshtastic.core.resources.meshtastic_mesh_beacon_notifications
 import org.meshtastic.core.resources.meshtastic_messages_notifications
 import org.meshtastic.core.resources.meshtastic_new_nodes_notifications
 import org.meshtastic.core.resources.meshtastic_service_notifications
@@ -66,6 +67,7 @@ class AndroidNotificationManager(private val context: Context) : NotificationMan
                 listOf(
                     createChannel(Notification.Category.Message, Res.string.meshtastic_messages_notifications),
                     createChannel(Notification.Category.NodeEvent, Res.string.meshtastic_new_nodes_notifications),
+                    createChannel(Notification.Category.MeshBeacon, Res.string.meshtastic_mesh_beacon_notifications),
                     createChannel(Notification.Category.Battery, Res.string.meshtastic_low_battery_notifications),
                     createChannel(Notification.Category.Alert, Res.string.meshtastic_alerts_notifications),
                     createChannel(Notification.Category.Service, Res.string.meshtastic_service_notifications),
@@ -95,6 +97,12 @@ class AndroidNotificationManager(private val context: Context) : NotificationMan
             ChannelConfig(
                 id = NotificationChannels.NEW_NODES,
                 importance = SystemNotificationManager.IMPORTANCE_DEFAULT,
+            )
+
+        Notification.Category.MeshBeacon ->
+            ChannelConfig(
+                id = NotificationChannels.MESH_BEACON,
+                importance = SystemNotificationManager.IMPORTANCE_LOW,
             )
 
         Notification.Category.Battery ->

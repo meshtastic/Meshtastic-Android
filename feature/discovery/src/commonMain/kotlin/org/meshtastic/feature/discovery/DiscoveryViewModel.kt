@@ -27,7 +27,9 @@ import org.meshtastic.core.database.dao.DiscoveryDao
 import org.meshtastic.core.database.entity.DiscoverySessionEntity
 import org.meshtastic.core.model.ChannelOption
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.MeshBeaconOffer
 import org.meshtastic.core.repository.DiscoveryPrefs
+import org.meshtastic.core.repository.MeshBeaconRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.safeLaunch
@@ -42,6 +44,7 @@ class DiscoveryViewModel(
     private val serviceRepository: ServiceRepository,
     private val discoveryPrefs: DiscoveryPrefs,
     private val check24GhzCapability: Check24GhzCapability,
+    private val meshBeaconRepository: MeshBeaconRepository,
     radioConfigRepository: RadioConfigRepository,
     discoveryDao: DiscoveryDao,
 ) : ViewModel() {
@@ -50,12 +53,12 @@ class DiscoveryViewModel(
     val currentSession: StateFlow<DiscoverySessionEntity?> = scanEngine.currentSession
     val connectionState: StateFlow<ConnectionState> = serviceRepository.connectionState
 
+    /** Mesh Beacon invitations received from other meshes, newest first. */
+    val beaconOffers: StateFlow<List<MeshBeaconOffer>> = meshBeaconRepository.offers
+
     val homePreset: StateFlow<ChannelOption> =
         radioConfigRepository.localConfigFlow
-            .map { localConfig ->
-                val presetEnum = localConfig.lora?.modem_preset
-                ChannelOption.entries.firstOrNull { it.modemPreset == presetEnum } ?: ChannelOption.DEFAULT
-            }
+            .map { localConfig -> ChannelOption.from(localConfig.lora?.modem_preset) ?: ChannelOption.DEFAULT }
             .stateInWhileSubscribed(initialValue = ChannelOption.DEFAULT)
 
     /** True when the radio is configured for LORA_24 region but hardware doesn't support 2.4 GHz. */
@@ -106,6 +109,22 @@ class DiscoveryViewModel(
             discoveryPrefs.setSelectedPresets(updated.map { it.name }.toSet())
             updated
         }
+    }
+
+    /**
+     * Seeds the scan with just the preset an invitation advertised, so the user can survey the advertised mesh before
+     * joining. Persists like [togglePreset] (not a bare [_selectedPresets] write) so the shown selection and saved
+     * prefs never diverge — otherwise the next [togglePreset] would silently persist prefs derived from this seed.
+     * No-op if the offer carries no preset, or a preset with no matching [ChannelOption].
+     */
+    fun discoverOffer(offer: MeshBeaconOffer) {
+        val preset = ChannelOption.from(offer.beacon.offer_preset) ?: return
+        _selectedPresets.value = setOf(preset)
+        discoveryPrefs.setSelectedPresets(setOf(preset.name))
+    }
+
+    fun dismissOffer(offer: MeshBeaconOffer) {
+        meshBeaconRepository.dismiss(offer.key)
     }
 
     fun setDwellDuration(minutes: Int) {

@@ -29,6 +29,7 @@ import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.MeshBeaconOffer
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
@@ -43,6 +44,7 @@ import org.meshtastic.core.model.util.toOneLiner
 import org.meshtastic.core.repository.AdminPacketHandler
 import org.meshtastic.core.repository.DataPair
 import org.meshtastic.core.repository.DiscoveryPacketCollectorRegistry
+import org.meshtastic.core.repository.MeshBeaconRepository
 import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.MessageFilter
@@ -62,8 +64,11 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.critical_alert
 import org.meshtastic.core.resources.error_duty_cycle
 import org.meshtastic.core.resources.getStringSuspend
+import org.meshtastic.core.resources.mesh_beacon_notification_body
+import org.meshtastic.core.resources.mesh_beacon_notification_title
 import org.meshtastic.core.resources.unknown_username
 import org.meshtastic.core.resources.waypoint_received
+import org.meshtastic.proto.MeshBeacon
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.Paxcount
 import org.meshtastic.proto.PortNum
@@ -102,6 +107,7 @@ class MeshDataHandlerImpl(
     private val adminPacketHandler: AdminPacketHandler,
     private val collectorRegistry: DiscoveryPacketCollectorRegistry,
     private val geofenceMonitor: GeofenceMonitor,
+    private val meshBeaconRepository: MeshBeaconRepository,
     @Named("ServiceScope") private val scope: CoroutineScope,
 ) : MeshDataHandler {
 
@@ -199,6 +205,10 @@ class MeshDataHandlerImpl(
                 handleRangeTest(dataPacket, myNodeNum)
             }
 
+            PortNum.MESH_BEACON_APP -> {
+                handleMeshBeacon(packet)
+            }
+
             else -> {}
         }
     }
@@ -206,6 +216,33 @@ class MeshDataHandlerImpl(
     private fun handleRangeTest(dataPacket: DataPacket, myNodeNum: Int) {
         val u = dataPacket.copy(dataType = PortNum.TEXT_MESSAGE_APP.value)
         rememberDataPacket(u, myNodeNum)
+    }
+
+    /**
+     * A Mesh Beacon is an advisory, zero-hop invitation from another mesh — not a contact in the local NodeDB and not a
+     * message. We stash the offer in [MeshBeaconRepository] for the Discovery surface to present, and fire a single
+     * low-priority notification when the invitation is first seen (not on every periodic re-broadcast). Only beacons
+     * carrying a join offer (a channel) are actionable; message-only beacons are ignored.
+     */
+    private fun handleMeshBeacon(packet: MeshPacket) {
+        val payload = packet.decoded?.payload ?: return
+        val beacon = MeshBeacon.ADAPTER.decodeOrNull(payload, Logger)
+        // Only actionable beacons (carrying a channel offer) that we haven't already seen warrant a notification.
+        if (beacon?.offer_channel == null) return
+        val offer = MeshBeaconOffer(fromNodeNum = packet.from, beacon = beacon)
+        if (meshBeaconRepository.add(offer)) {
+            scope.launch {
+                notificationManager.dispatch(
+                    Notification(
+                        title = getStringSuspend(Res.string.mesh_beacon_notification_title),
+                        message = offer.message.ifBlank { getStringSuspend(Res.string.mesh_beacon_notification_body) },
+                        category = Notification.Category.MeshBeacon,
+                        // Literal URI avoids a core:navigation module dep (see NodeManagerImpl).
+                        deepLinkUri = "meshtastic://meshtastic/discovery",
+                    ),
+                )
+            }
+        }
     }
 
     private fun handlePaxCounter(packet: MeshPacket) {

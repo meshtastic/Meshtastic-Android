@@ -24,6 +24,7 @@ import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.model.Channel
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.Config.LoRaConfig
+import org.meshtastic.proto.MeshBeacon
 
 /**
  * Return a [ChannelSet] that represents the ChannelSet encoded by the URL.
@@ -77,6 +78,19 @@ val ChannelSet.primaryChannel: Channel?
     get() = getChannel(0)
 
 fun ChannelSet.hasLoraConfig(): Boolean = lora_config != null
+
+/**
+ * Converts a received [MeshBeacon] join offer into a [ChannelSet], so it can be routed through the existing QR-code
+ * channel-import flow ([org.meshtastic.core.ui.qr.ScannedQrCodeViewModel]). Returns null when the beacon carries no
+ * join offer (an ambient message-only beacon).
+ */
+fun MeshBeacon.toChannelSet(): ChannelSet? {
+    val offerChannel = offer_channel ?: return null
+    // offer_region always has a value (proto default), but it's only meaningful paired with an explicit preset —
+    // without a preset we'd otherwise ship a LoRaConfig with use_preset=false and no custom radio fields set.
+    val loraConfig = offer_preset?.let { LoRaConfig(use_preset = true, modem_preset = it, region = offer_region) }
+    return ChannelSet(settings = listOf(offerChannel), lora_config = loraConfig)
+}
 
 /**
  * Return a URL that represents the [ChannelSet]

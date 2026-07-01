@@ -65,6 +65,8 @@ object DeepLinkRouter {
 
             "connections" -> listOf(ConnectionsRoute.Connections(uri.getQueryParameter("address")))
 
+            "discovery" -> listOf(DiscoveryRoute.DiscoveryGraph)
+
             "map" -> routeMap(uri, pathSegments)
 
             "nodes" -> routeNodes(uri, pathSegments)

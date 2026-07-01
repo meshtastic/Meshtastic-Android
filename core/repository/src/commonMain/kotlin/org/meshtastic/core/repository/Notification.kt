@@ -45,5 +45,8 @@ data class Notification(
         Battery,
         Alert,
         Service,
+
+        /** Advisory Mesh Beacon invitations from other meshes — low-importance, its own channel. */
+        MeshBeacon,
     }
 }

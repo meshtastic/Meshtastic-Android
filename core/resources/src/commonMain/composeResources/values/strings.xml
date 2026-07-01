@@ -910,6 +910,18 @@
     <string name="match_all">Match All | Any</string>
     <string name="match_any">Match Any | All</string>
     <string name="max">Max</string>
+    <!-- MESH -->
+    <string name="mesh_beacon_invitations_title">Mesh invitations</string>
+    <string name="mesh_beacon_notification_body">A nearby mesh invited you to join</string>
+    <string name="mesh_beacon_notification_title">Mesh invitation</string>
+    <string name="mesh_beacon_offer_channel">Channel: %1$s</string>
+    <string name="mesh_beacon_offer_discover">Discover</string>
+    <string name="mesh_beacon_offer_dismiss">Dismiss</string>
+    <string name="mesh_beacon_offer_from_unknown">From an unknown node</string>
+    <string name="mesh_beacon_offer_join">Join</string>
+    <string name="mesh_beacon_offer_preset">Preset: %1$s</string>
+    <string name="mesh_beacon_offer_region">Region: %1$s</string>
+    <string name="mesh_beacon_offer_title">Mesh invitation</string>
     <string name="mesh_map_location">Mesh Map Location</string>
     <string name="mesh_map_location_description">Enables the blue location dot for your phone in the mesh map.</string>
     <!-- MESHTASTIC -->
@@ -919,6 +931,7 @@
     <string name="meshtastic_broadcast_notifications">Broadcast message notifications</string>
     <string name="meshtastic_low_battery_notifications">Low battery notifications</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Low battery notifications (favorite nodes)</string>
+    <string name="meshtastic_mesh_beacon_notifications">Mesh invitation notifications</string>
     <string name="meshtastic_messages_notifications">Direct message notifications</string>
     <string name="meshtastic_new_nodes_notifications">New node notifications</string>
     <string name="meshtastic_service_notifications">Service notifications</string>

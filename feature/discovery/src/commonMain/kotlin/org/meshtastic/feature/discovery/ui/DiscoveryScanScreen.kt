@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -87,6 +88,7 @@ import org.meshtastic.core.resources.discovery_start_scan_reason_default_key
 import org.meshtastic.core.resources.discovery_start_scan_reason_no_presets
 import org.meshtastic.core.resources.discovery_start_scan_reason_not_connected
 import org.meshtastic.core.resources.discovery_stop_scan
+import org.meshtastic.core.resources.mesh_beacon_invitations_title
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.icon.ArrowBack
 import org.meshtastic.core.ui.icon.Close
@@ -98,7 +100,9 @@ import org.meshtastic.core.ui.util.KeepScreenOn
 import org.meshtastic.feature.discovery.DiscoveryScanState
 import org.meshtastic.feature.discovery.DiscoveryViewModel
 import org.meshtastic.feature.discovery.ui.component.DwellProgressIndicator
+import org.meshtastic.feature.discovery.ui.component.MeshBeaconInvitationCard
 import org.meshtastic.feature.discovery.ui.component.PresetPickerCard
+import org.meshtastic.proto.MeshBeacon
 
 private val CONTENT_PADDING = 16.dp
 private val SECTION_SPACING = 16.dp
@@ -115,9 +119,11 @@ fun DiscoveryScanScreen(
     onNavigateToSummary: (sessionId: Long) -> Unit,
     onNavigateToHistory: () -> Unit,
     modifier: Modifier = Modifier,
+    onJoinOffer: (MeshBeacon) -> Unit = {},
 ) {
     val scanState by viewModel.scanState.collectAsStateWithLifecycle()
     val selectedPresets by viewModel.selectedPresets.collectAsStateWithLifecycle()
+    val beaconOffers by viewModel.beaconOffers.collectAsStateWithLifecycle()
     val dwellMinutes by viewModel.dwellDurationMinutes.collectAsStateWithLifecycle()
     val isConnected by viewModel.isConnected.collectAsStateWithLifecycle()
     val usesDefaultKey by viewModel.usesDefaultKey.collectAsStateWithLifecycle()
@@ -199,6 +205,25 @@ fun DiscoveryScanScreen(
             }
 
             if (!isScanning) {
+                // Received Mesh Beacon invitations from other meshes
+                if (beaconOffers.isNotEmpty()) {
+                    item(key = "invitations_header") {
+                        Text(
+                            text = stringResource(Res.string.mesh_beacon_invitations_title),
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.semantics { heading() },
+                        )
+                    }
+                    items(beaconOffers, key = { "invitation_${it.key}" }) { offer ->
+                        MeshBeaconInvitationCard(
+                            offer = offer,
+                            onJoin = { onJoinOffer(offer.beacon) },
+                            onDiscover = { viewModel.discoverOffer(offer) },
+                            onDismiss = { viewModel.dismissOffer(offer) },
+                        )
+                    }
+                }
+
                 // Preset picker
                 item(key = "preset_picker") {
                     PresetPickerCard(
