@@ -7,16 +7,7 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 <!-- UNRELEASED_START -->
 ## [Unreleased]
 
-### Unreleased (not yet in any build)
-
-#### 🏗️ Features
-* feat: NFC tag writing for shared contacts and channels by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6030
-* feat: Waypoint geofences (editor, map overlays, alert engine)  by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6014
-* feat(lora): default US region to LongTurbo preset by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6009
-#### 🛠️ Fixes
-* fix(discovery): show disabled reason below Start Analysis button by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6027
-
-### Closed Beta (v2.8.0-closed.3)
+### Closed Beta (v2.8.0-closed.4)
 Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14):
 
 #### 🏗️ Features
@@ -40,6 +31,9 @@ Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/relea
 * Prevent Range Test from running on public/default channel by @dubsector in https://github.com/meshtastic/Meshtastic-Android/pull/5986
 * feat(network): migrate TcpTransport to ktor-network (commonMain) by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5995
 * feat(ui): StatusSurface AA legibility + node-details signing/transport polish by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5985
+* feat: NFC tag writing for shared contacts and channels by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6030
+* feat: Waypoint geofences (editor, map overlays, alert engine)  by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6014
+* feat(lora): default US region to LongTurbo preset by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6009
 #### 🛠️ Fixes
 * fix(mqtt): make the MQTT client-id unique per connection by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5755
 * fix(ble): Harden BLE connection lifecycle by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/5795
@@ -87,6 +81,7 @@ Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/relea
 * fix(car): notification-only car messaging for production; park templated behind flag by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6015
 * fix(firmware): repair nRF USB firmware update and post-update reconnect by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6018
 * fix(ble): Handle scan registration failure by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6019
+* fix(discovery): show disabled reason below Start Analysis button by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6027
 #### 📝 Other Changes
 * refactor(takserver): commonize TAK SDK pipeline, drop redundant zstd/xpp3 deps by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5871
 * refactor(settings): remove Traffic Management module config by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5878
