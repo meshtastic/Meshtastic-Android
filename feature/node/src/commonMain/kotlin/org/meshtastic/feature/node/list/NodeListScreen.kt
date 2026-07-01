@@ -75,6 +75,7 @@ import org.meshtastic.core.ui.component.MeshtasticImportFAB
 import org.meshtastic.core.ui.component.NodeItem
 import org.meshtastic.core.ui.component.NodeItemCompact
 import org.meshtastic.core.ui.component.ScrollToTopEvent
+import org.meshtastic.core.ui.component.SharedContactDialog
 import org.meshtastic.core.ui.component.smartScrollToTop
 import org.meshtastic.core.ui.icon.Info
 import org.meshtastic.core.ui.icon.MeshtasticIcons
@@ -143,6 +144,11 @@ fun NodeListScreen(
         NodeListHelp(onDismiss = { showHelpSheet = false })
     }
 
+    var showShareContact by remember { mutableStateOf(false) }
+    if (showShareContact) {
+        SharedContactDialog(contact = ourNode, onDismiss = { showShareContact = false })
+    }
+
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -177,6 +183,7 @@ fun NodeListScreen(
                         scope.launch { showToast(Res.string.channel_invalid) }
                     }
                 },
+                onShareContact = { showShareContact = true },
                 isContactContext = true,
             )
         },

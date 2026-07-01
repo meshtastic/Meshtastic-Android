@@ -1334,6 +1334,7 @@ settings
 ### SHARE ###
 share
 share_channels_qr
+share_connected_node
 share_contact
 share_location
 share_location_description
@@ -1599,6 +1600,10 @@ wind_direction
 wind_gust
 wind_lull
 wind_speed
+write_nfc
+write_nfc_failed
+write_nfc_success
+write_nfc_text
 you
 zh_CN
 zh_TW

@@ -24,7 +24,6 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.getSharedContactUrl
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.share_contact
-import org.meshtastic.core.ui.util.rememberQrCodePainter
 import org.meshtastic.proto.SharedContact
 
 /**
@@ -37,15 +36,8 @@ import org.meshtastic.proto.SharedContact
 fun SharedContactDialog(contact: Node?, onDismiss: () -> Unit) {
     if (contact == null) return
     val contactToShare = SharedContact(user = contact.user, node_num = contact.num)
-    val commonUri = contactToShare.getSharedContactUrl()
-    val uriString = commonUri.toString()
-    val qrPainter = rememberQrCodePainter(uriString, 960)
-    QrDialog(
-        title = stringResource(Res.string.share_contact),
-        uriString = uriString,
-        qrPainter = qrPainter,
-        onDismiss = onDismiss,
-    )
+    val uriString = contactToShare.getSharedContactUrl().toString()
+    QrDialog(title = stringResource(Res.string.share_contact), uriString = uriString, onDismiss = onDismiss)
 }
 
 /**

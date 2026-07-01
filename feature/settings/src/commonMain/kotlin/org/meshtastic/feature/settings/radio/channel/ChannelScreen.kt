@@ -89,7 +89,6 @@ import org.meshtastic.core.ui.icon.ChevronRight
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.QrCode
 import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
-import org.meshtastic.core.ui.util.rememberQrCodePainter
 import org.meshtastic.core.ui.util.rememberShowToastResource
 import org.meshtastic.feature.settings.channel.ChannelViewModel
 import org.meshtastic.feature.settings.navigation.ConfigRoute
@@ -295,19 +294,10 @@ fun ChannelScreen(
     }
 }
 
-private const val QR_CODE_SIZE = 960
-
 @Composable
 private fun ChannelShareDialog(channelSet: ChannelSet, shouldAddChannel: Boolean, onDismiss: () -> Unit) {
-    val commonUri = channelSet.getChannelUrl(false, shouldAddChannel)
-    val uriString = commonUri.toString()
-    val qrPainter = rememberQrCodePainter(uriString, QR_CODE_SIZE)
-    QrDialog(
-        title = stringResource(Res.string.share_channels_qr),
-        uriString = uriString,
-        qrPainter = qrPainter,
-        onDismiss = onDismiss,
-    )
+    val uriString = channelSet.getChannelUrl(false, shouldAddChannel).toString()
+    QrDialog(title = stringResource(Res.string.share_channels_qr), uriString = uriString, onDismiss = onDismiss)
 }
 
 @Composable

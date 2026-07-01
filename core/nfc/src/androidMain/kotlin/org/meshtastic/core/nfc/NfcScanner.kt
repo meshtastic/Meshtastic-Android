@@ -17,12 +17,17 @@
 package org.meshtastic.core.nfc
 
 import android.app.Activity
+import android.nfc.FormatException
+import android.nfc.NdefMessage
+import android.nfc.NdefRecord
 import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.nfc.tech.Ndef
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
 import co.touchlab.kermit.Logger
 import java.io.IOException
@@ -55,6 +60,85 @@ fun NfcScannerEffect(onResult: (String?) -> Unit, onNfcDisabled: (() -> Unit)? =
             nfcAdapter.enableReaderMode(activity, readerCallback, flags, null)
 
             onDispose { nfcAdapter.disableReaderMode(activity) }
+        }
+    }
+}
+
+/**
+ * Writes [url] (a Meshtastic shared-contact or channel-set URL) to the next NDEF tag tapped against the phone. Mirrors
+ * [NfcScannerEffect]: keep it composed while a write is armed, dispose to disarm. [onResult] reports write success.
+ */
+@Composable
+fun NfcWriterEffect(url: String, onResult: (Boolean) -> Unit, onNfcDisabled: (() -> Unit)? = null) {
+    val context = LocalContext.current
+    val activity = context as? Activity ?: return
+
+    val nfcAdapter = remember { NfcAdapter.getDefaultAdapter(context) }
+    val currentOnResult by rememberUpdatedState(onResult)
+    val currentOnNfcDisabled by rememberUpdatedState(onNfcDisabled)
+
+    DisposableEffect(nfcAdapter, url) {
+        if (nfcAdapter == null) {
+            // No NFC hardware: report failure so the armed write UI doesn't hang waiting for a tap.
+            currentOnResult(false)
+            onDispose {}
+        } else if (!nfcAdapter.isEnabled) {
+            currentOnNfcDisabled?.invoke()
+            onDispose {}
+        } else {
+            val readerCallback = NfcAdapter.ReaderCallback { tag: Tag -> currentOnResult(writeNdefUrl(tag, url)) }
+
+            val flags =
+                (
+                    NfcAdapter.FLAG_READER_NFC_A or
+                        NfcAdapter.FLAG_READER_NFC_B or
+                        NfcAdapter.FLAG_READER_NFC_F or
+                        NfcAdapter.FLAG_READER_NFC_V
+                    )
+
+            nfcAdapter.enableReaderMode(activity, readerCallback, flags, null)
+
+            onDispose { nfcAdapter.disableReaderMode(activity) }
+        }
+    }
+}
+
+private fun writeNdefUrl(tag: Tag, url: String): Boolean {
+    val ndef = Ndef.get(tag)
+    if (ndef == null) {
+        Logger.w { "Tag does not support NDEF" }
+        return false
+    }
+    val message = NdefMessage(NdefRecord.createUri(url))
+    return try {
+        ndef.connect()
+        when {
+            !ndef.isWritable -> {
+                Logger.w { "NDEF tag is read-only" }
+                false
+            }
+
+            ndef.maxSize < message.byteArrayLength -> {
+                Logger.w { "NDEF tag too small: ${ndef.maxSize} < ${message.byteArrayLength}" }
+                false
+            }
+
+            else -> {
+                ndef.writeNdefMessage(message)
+                true
+            }
+        }
+    } catch (e: IOException) {
+        Logger.w(e) { "Error writing NDEF tag" }
+        false
+    } catch (e: FormatException) {
+        Logger.w(e) { "Malformed NDEF message" }
+        false
+    } finally {
+        try {
+            ndef.close()
+        } catch (e: IOException) {
+            Logger.w(e) { "Error closing NDEF" }
         }
     }
 }
