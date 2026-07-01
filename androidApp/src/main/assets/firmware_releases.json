@@ -189,12 +189,6 @@
   },
   "pullRequests": [
     {
-      "id": "10816",
-      "title": "Update platformio/ststm32 to v19.7.0",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10816",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
       "id": "10807",
       "title": "Add DeltaPlusProto Edict board variant",
       "page_url": "https://github.com/meshtastic/firmware/pull/10807",
@@ -204,12 +198,6 @@
       "id": "10802",
       "title": "Refactor SerialConsole to simplify timeout handling",
       "page_url": "https://github.com/meshtastic/firmware/pull/10802",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10801",
-      "title": "Cleanup",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10801",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
@@ -237,26 +225,8 @@
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
-      "id": "10783",
-      "title": "Update LovyanGFX to v1.2.24",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10783",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10781",
-      "title": "Add gpsd support to portduino/native",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10781",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10770",
-      "title": "Update pschatzmann_arduino-audio-driver to v0.3.0",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10770",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
       "id": "10767",
-      "title": "Provide relay info for outbound packets and about subsequent relays",
+      "title": "Provide relay node info for outbound packets",
       "page_url": "https://github.com/meshtastic/firmware/pull/10767",
       "zip_url": "https://discord.com/invite/meshtastic"
     },
@@ -303,12 +273,6 @@
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
-      "id": "10713",
-      "title": "Fix T1000-E QMA6100P I2C probing",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10713",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
       "id": "10711",
       "title": "Fix SX126x daemon abort when Tx power exceeds chip limit",
       "page_url": "https://github.com/meshtastic/firmware/pull/10711",
@@ -319,6 +283,24 @@
       "title": "Heltec Vision Master E213: enable 32768hz crystal osc for rtc",
       "page_url": "https://github.com/meshtastic/firmware/pull/10689",
       "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
+      "id": "10669",
+      "title": "Allow key verification to work for unknown nodes.",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10669",
+      "zip_url": "s"
+    },
+    {
+      "id": "10666",
+      "title": "Short circuit invalid nodenum check in ham mode.",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10666",
+      "zip_url": "s"
+    },
+    {
+      "id": "10664",
+      "title": "Arduino Nesso N1 support",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10664",
+      "zip_url": "s"
     }
   ]
 }
