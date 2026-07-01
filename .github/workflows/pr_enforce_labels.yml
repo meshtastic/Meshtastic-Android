@@ -2,7 +2,7 @@ name: Check PR Labels
 
 on:
   pull_request:
-    types: [edited, labeled]
+    types: [opened, synchronize, edited, labeled, unlabeled]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
