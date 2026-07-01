@@ -449,8 +449,8 @@ class LegacyDfuTransport(
 
     /** Error for a link drop while awaiting a Control Point response — distinguishes a disconnect from a true stall. */
     private fun handshakeDropError(state: BleConnectionState): Throwable = DfuException.ConnectionFailed(
-        "BLE link dropped during DFU handshake (state=$state). A stock nRF bootloader that reuses the device's " +
-            "address can drop the link over a stale bond; the OTAFIX bootloader avoids this.",
+        "BLE link dropped during DFU handshake (state=$state). The device disconnected before answering a DFU " +
+            "command — most often the stock Adafruit bootloader rebooting to the app. Retry, or use USB recovery.",
     )
 
     private fun requireSuccess(expectedOpcode: Byte, response: LegacyDfuResponse) {
@@ -492,7 +492,18 @@ class LegacyDfuTransport(
     companion object {
         private val CONNECT_TIMEOUT = 15.seconds
         private val COMMAND_TIMEOUT = 30.seconds
-        private val START_RESPONSE_TIMEOUT = 30.seconds
+
+        /**
+         * Time to wait for the START_DFU response notification.
+         *
+         * The stock Adafruit nRF52 bootloader is single-bank: on START it erases the **entire** application bank
+         * (~800 KB ≈ 200 flash pages) before firing the START-procedure response, and because the BLE link is live the
+         * SoftDevice time-slices each page erase against radio events, stretching the erase to ~30-50 s. The old
+         * 30 s cap aborted mid-erase (killing an otherwise-healthy session); Nordic's own DFU library imposes no such
+         * short cap here. 90 s covers the worst-case erase with margin. The disconnect tripwire still fast-fails on a
+         * genuine link drop, so this only extends the *silent-but-connected* wait.
+         */
+        private val START_RESPONSE_TIMEOUT = 90.seconds
         private val VALIDATE_TIMEOUT = 60.seconds
         private val SUBSCRIPTION_SETTLE = 500.milliseconds
 
@@ -509,13 +520,14 @@ class LegacyDfuTransport(
          * notification round-trips per byte and therefore faster throughput, at the cost of a slightly longer recovery
          * window if a packet is dropped (we have to wait until the next PRN boundary to detect the gap).
          *
-         * Set to 30 per the explicit recommendation from the Adafruit OTAFIX bootloader maintainer
-         * (https://github.com/oltaco/Adafruit_nRF52_Bootloader_OTAFIX#recommended-ota-dfu-settings — "Number of
-         * packets: 30"), which is the bootloader Meshtastic nRF52 devices ship with. Nordic's reference library
-         * defaults to 12; values above ~60 are not recommended for any host. Empirically 30 yields ~3x the throughput
-         * of PRN=10 on RAK4631 / OTAFIX without provoking OPERATION_FAILED on the bootloader's flash-write path.
+         * Capped at 10 to match Nordic's own Legacy DFU implementation, which force-limits legacy PRN to ≤10 with the
+         * comment: "DFU bootloaders from SDK 6.0.0 or older were unable to save incoming data to flash as fast as they
+         * are being sent … PRN = 10 may be the highest supported value" and treats status 6 (OPERATION_FAILED) as
+         * "data sent too fast — reduce PRN to 10 or less." The stock Adafruit bootloader shares this SDK11 flash-write
+         * path, so a higher value (we previously used 30, tuned for the faster OTAFIX fork) risks OPERATION_FAILED
+         * mid-stream on stock bootloaders. 10 is the safe ceiling that still batches flow-control ACKs.
          */
-        internal const val PRN_INTERVAL_PACKETS = 30
+        internal const val PRN_INTERVAL_PACKETS = 10
 
         /**
          * Universally-safe Legacy DFU packet size (20 bytes — the original ATT_MTU minus the 3-byte ATT header). Used

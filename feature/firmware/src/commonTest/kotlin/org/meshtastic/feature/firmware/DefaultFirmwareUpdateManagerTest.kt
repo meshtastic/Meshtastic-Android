@@ -24,7 +24,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleScanner
-import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.repository.NodeRepository
@@ -61,7 +60,6 @@ class DefaultFirmwareUpdateManagerTest {
     private val nodeRepository: NodeRepository = mock(MockMode.autofill)
     private val bleScanner: BleScanner = mock(MockMode.autofill)
     private val bleConnectionFactory: BleConnectionFactory = mock(MockMode.autofill)
-    private val bluetoothRepository: BluetoothRepository = mock(MockMode.autofill)
     private val firmwareRetriever = FirmwareRetriever(fileHandler)
     private val dispatchers =
         CoroutineDispatchers(
@@ -78,7 +76,6 @@ class DefaultFirmwareUpdateManagerTest {
             bleScanner = bleScanner,
             bleConnectionFactory = bleConnectionFactory,
             dispatchers = dispatchers,
-            bluetoothRepository = bluetoothRepository,
         )
 
     private val usbUpdateHandler =

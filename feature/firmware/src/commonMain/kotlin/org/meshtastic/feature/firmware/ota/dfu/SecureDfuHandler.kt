@@ -24,7 +24,6 @@ import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
 import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleScanner
-import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.database.entity.FirmwareRelease
@@ -81,7 +80,6 @@ class SecureDfuHandler(
     private val bleScanner: BleScanner,
     private val bleConnectionFactory: BleConnectionFactory,
     private val dispatchers: CoroutineDispatchers,
-    private val bluetoothRepository: BluetoothRepository,
 ) : FirmwareUpdateHandler {
 
     @Suppress("LongMethod")
@@ -133,13 +131,13 @@ class SecureDfuHandler(
                 val protocol = detectBootloaderProtocol(target, updateState)
                 Logger.i { "DFU: Bootloader protocol detected: $protocol" }
 
-                // A stock nRF Legacy bootloader (AdaDFU) re-advertises at the SAME address as the app but with no
-                // bond. A leftover bond makes the OS force stale link encryption the fresh bootloader can't satisfy,
-                // which can drop the link. Drop it first so we connect fresh/unencrypted. Secure DFU sidesteps this
-                // by using MAC+1 (a different, unbonded address), so scope this to legacy.
-                if (protocol == DfuProtocolKind.LEGACY) {
-                    dropStaleBondForLegacyDfu(target)
-                }
+                // NOTE: do NOT drop the bond for a same-address Legacy bootloader. When Meshtastic triggers
+                // buttonless DFU it hands the app's bond keys to the bootloader (peer_data), and the Adafruit
+                // bootloader then advertises the DFU service on the SAME address using whitelist filtering
+                // (BLE_GAP_ADV_FP_FILTER_BOTH) keyed to the bonded peer. Removing the bond strips the phone's
+                // identity so it no longer matches the whitelist — the phone then can't connect at all. The
+                // shared LTK also lets the DFU link encrypt cleanly (verified on-air: AES-128, keySize 16), so the
+                // bond must be KEPT, mirroring Nordic's DfuServiceInitiator.setKeepBond(true)/setRestoreBond(true).
 
                 // Legacy DFU has no resume, so a failed session is retried whole (fresh transport + reconnect +
                 // re-handshake), mirroring Nordic's DFU library ("the Legacy DFU will start again"). A stock
@@ -193,18 +191,6 @@ class SecureDfuHandler(
                 predicate = { it.address in targetAddresses },
             )
         return if (legacyHit != null) DfuProtocolKind.LEGACY else DfuProtocolKind.SECURE
-    }
-
-    /**
-     * Remove any stale bond for [target] before connecting to a same-address Legacy DFU bootloader. Best-effort: a
-     * no-op when nothing is bonded, and a failure here doesn't abort the update (we still try to connect). Settles
-     * briefly after removal so the OS bond table clears before the reconnect.
-     */
-    private suspend fun dropStaleBondForLegacyDfu(target: String) {
-        if (!bluetoothRepository.isBonded(target)) return
-        val removed = bluetoothRepository.removeBond(target)
-        Logger.i { "DFU: dropped stale bond for $target before legacy connect -> $removed" }
-        if (removed) delay(BOND_REMOVAL_SETTLE_MS)
     }
 
     /**
@@ -375,9 +361,6 @@ class SecureDfuHandler(
     private companion object {
         /** Detection scan timeout — short because we only want to confirm/refute an advertised legacy service. */
         private val DETECT_SCAN_TIMEOUT = 8.seconds
-
-        /** Settle after removing a stale bond so the OS bond table clears before we reconnect to the bootloader. */
-        private const val BOND_REMOVAL_SETTLE_MS = 1_500L
 
         /** Legacy DFU can't resume, so retry the whole session this many times before giving up. */
         private const val LEGACY_SESSION_ATTEMPTS = 3
