@@ -38,7 +38,8 @@ import org.meshtastic.core.common.util.CommonUri
  * - `/wifi-provision` -> WiFi provisioning screen
  * - `/wifi-provision?address={mac}` -> WiFi provisioning targeting a specific device MAC address
  * - `/connections?address={prefixedAddress}` -> Connections screen, auto-connecting to a prefixed device address (e.g.
- *   `t192.168.1.1:4403` for TCP, `xAA:BB:CC:DD:EE:FF` for BLE) — lets external tooling trigger a connection
+ *   `t192.168.1.1:4403` for TCP, `xAA:BB:CC:DD:EE:FF` for BLE) — lets external tooling trigger a connection.
+ *   `address=n` disconnects instead of connecting.
  */
 object DeepLinkRouter {
     /**

@@ -108,6 +108,11 @@ class DeepLinkRouterTest {
         )
     }
 
+    @Test
+    fun `connections with n address routes to Connections with disconnect sentinel`() {
+        assertEquals(listOf(ConnectionsRoute.Connections("n")), route("/connections?address=n"))
+    }
+
     // endregion
 
     // region map

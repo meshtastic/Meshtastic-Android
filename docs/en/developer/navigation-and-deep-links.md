@@ -69,6 +69,7 @@ The table below is a snapshot for quick reference — check those two files if i
 |----------|-------|-------|
 | `/connections` | `ConnectionsRoute.Connections(null)` | Connections screen |
 | `/connections?address={prefixedAddress}` | `ConnectionsRoute.Connections(address)` | Auto-connects to a device without manual selection — the address uses the app's internal transport-prefixed format: `t192.168.1.1:4403` (TCP), `xAA:BB:CC:DD:EE:FF` (BLE), `s/dev/ttyUSB0` (serial). Intended for scripts/AI tooling driving the app. |
+| `/connections?address=n` | `ConnectionsRoute.Connections("n")` | Disconnects the current device instead of connecting (`n` = the internal "no device selected" sentinel). |
 | `/wifi-provision` | `WifiProvisionRoute.WifiProvision(null)` | WiFi provisioning screen |
 | `/wifi-provision?address={mac}` | `WifiProvisionRoute.WifiProvision(mac)` | Provisioning targeting a specific device MAC |
 | `/settings` | `SettingsRoute.Settings(null)` | Settings root |
