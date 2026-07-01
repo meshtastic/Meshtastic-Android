@@ -24,10 +24,11 @@ import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config
+import org.meshtastic.proto.LocalConfig
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
@@ -232,6 +233,88 @@ class ProtoExtensionsTest {
 
         assertEquals((0..7).toList(), radioController.localChannels.map { it.index })
         assertEquals(importedSettings, radioConfigRepository.currentChannelSet.settings)
+    }
+
+    @Test
+    fun replacement_apply_normalizes_oversized_raw_import_under_limit_before_writing() = runTest {
+        val radioController = FakeRadioController()
+        val radioConfigRepository = FakeRadioConfigRepository()
+        radioConfigRepository.setChannelSet(ChannelSet(settings = listOf(ChannelSettings(name = "Old"))))
+        // 9 raw entries: 7 unique valid secondaries + 2 blank placeholders -> normalizes to 7 (under the 8-slot limit).
+        val ch0 = ChannelSettings(name = "Ch0", psk = byteArrayOf(1).toByteString())
+        val ch1 = ChannelSettings(name = "Ch1", psk = byteArrayOf(2).toByteString())
+        val ch2 = ChannelSettings(name = "Ch2", psk = byteArrayOf(3).toByteString())
+        val ch3 = ChannelSettings(name = "Ch3", psk = byteArrayOf(4).toByteString())
+        val ch4 = ChannelSettings(name = "Ch4", psk = byteArrayOf(5).toByteString())
+        val ch5 = ChannelSettings(name = "Ch5", psk = byteArrayOf(6).toByteString())
+        val ch6 = ChannelSettings(name = "Ch6", psk = byteArrayOf(7).toByteString())
+        val raw = listOf(ch0, ch1, ChannelSettings(), ch2, ch3, ChannelSettings(), ch4, ch5, ch6)
+
+        applyReplacementChannelSet(
+            channelSet = ChannelSet(settings = raw),
+            radioController = radioController,
+            radioConfigRepository = radioConfigRepository,
+            writeDelay = 1.seconds,
+            delayFn = {},
+        )
+
+        // Cache holds the normalized 7-entry set, not the raw 9-entry import.
+        assertEquals(listOf(ch0, ch1, ch2, ch3, ch4, ch5, ch6), radioConfigRepository.currentChannelSet.settings)
+    }
+
+    @Test
+    fun replacement_apply_rejects_settings_still_oversized_after_normalization_drops_placeholders() = runTest {
+        val radioController = FakeRadioController()
+        val radioConfigRepository = FakeRadioConfigRepository()
+        radioConfigRepository.setChannelSet(ChannelSet(settings = listOf(ChannelSettings(name = "Old"))))
+        // 10 raw entries: 9 genuinely unique + 1 blank placeholder. Normalization drops the blank
+        // (-> 9) but the result still exceeds the 8-slot limit, so the post-normalize bounds check
+        // must reject before any write or cache mutation.
+        val unique = (1..9).map { ChannelSettings(name = "Ch$it", psk = byteArrayOf(it.toByte(), 0).toByteString()) }
+
+        assertFailsWith<IllegalArgumentException> {
+            applyReplacementChannelSet(
+                channelSet = ChannelSet(settings = unique + ChannelSettings()),
+                radioController = radioController,
+                radioConfigRepository = radioConfigRepository,
+                writeDelay = 1.seconds,
+                delayFn = {},
+            )
+        }
+
+        assertTrue(radioController.localChannels.isEmpty())
+    }
+
+    @Test
+    fun replacement_apply_uses_current_local_lora_preset_when_imported_lora_is_absent() = runTest {
+        val radioController = FakeRadioController()
+        val radioConfigRepository = FakeRadioConfigRepository()
+        // Device is on MEDIUM_FAST. The import omits lora_config, so identity resolution must fall
+        // back to the device's current preset to detect this duplicate.
+        radioConfigRepository.setLocalConfigDirect(
+            LocalConfig(
+                lora = Config.LoRaConfig(use_preset = true, modem_preset = Config.LoRaConfig.ModemPreset.MEDIUM_FAST),
+            ),
+        )
+        // Primary carries an explicit preset name; the secondary has an empty name that resolves to
+        // the preset display name. Under MEDIUM_FAST the secondary resolves to "MediumFast" and
+        // duplicates the primary. Under a default/LongFast fallback it would resolve to "LongFast"
+        // and survive — so asserting the secondary is dropped proves the current-local preset was
+        // used for identity (a regression to Config.LoRaConfig() would fail this test).
+        val psk = byteArrayOf(1, 2, 3).toByteString()
+        val primary = ChannelSettings(name = "MediumFast", psk = psk)
+        val unnamedSecondary = ChannelSettings(psk = psk)
+
+        applyReplacementChannelSet(
+            channelSet = ChannelSet(settings = listOf(primary, unnamedSecondary)), // no lora_config
+            radioController = radioController,
+            radioConfigRepository = radioConfigRepository,
+            writeDelay = 1.seconds,
+            delayFn = {},
+        )
+
+        // Secondary dropped as a semantic duplicate of the primary under the device's MEDIUM_FAST preset.
+        assertEquals(listOf(primary), radioConfigRepository.currentChannelSet.settings)
     }
 
     @Test
@@ -474,5 +557,117 @@ class ProtoExtensionsTest {
 
         assertTrue(preview.settings.isEmpty())
         assertTrue(preview.selections.isEmpty())
+    }
+
+    // --- normalizeReplacementSettings tests ---
+
+    @Test
+    fun normalize_empty_list_passes_through() {
+        assertEquals(emptyList(), normalizeReplacementSettings(emptyList(), ModelChannel.default.loraConfig))
+    }
+
+    @Test
+    fun normalize_single_element_passes_through() {
+        val primary = ChannelSettings(name = "Solo", psk = byteArrayOf(1).toByteString())
+
+        assertEquals(listOf(primary), normalizeReplacementSettings(listOf(primary), ModelChannel.default.loraConfig))
+    }
+
+    @Test
+    fun normalize_drops_blank_placeholder_secondary() {
+        val primary = ChannelSettings(name = "Main", psk = byteArrayOf(1, 2).toByteString())
+        val real = ChannelSettings(name = "Chat", psk = byteArrayOf(3).toByteString())
+
+        val result =
+            normalizeReplacementSettings(listOf(primary, ChannelSettings(), real), ModelChannel.default.loraConfig)
+
+        assertEquals(listOf(primary, real), result)
+    }
+
+    @Test
+    fun normalize_preserves_blank_primary() {
+        val blankPrimary = ChannelSettings()
+        val real = ChannelSettings(name = "Chat", psk = byteArrayOf(3).toByteString())
+
+        // Slot 0 is always preserved, even when blank (deliberate disable signal).
+        val result = normalizeReplacementSettings(listOf(blankPrimary, real), ModelChannel.default.loraConfig)
+
+        assertEquals(2, result.size)
+        assertEquals(blankPrimary, result[0])
+        assertEquals(real, result[1])
+    }
+
+    @Test
+    fun normalize_drops_semantic_duplicate_secondary() {
+        val primary = ChannelSettings(name = "Main", psk = byteArrayOf(1).toByteString())
+        val dup = ChannelSettings(name = "Main", psk = byteArrayOf(1).toByteString())
+
+        val result = normalizeReplacementSettings(listOf(primary, dup), ModelChannel.default.loraConfig)
+
+        assertEquals(listOf(primary), result)
+    }
+
+    @Test
+    fun normalize_keeps_same_name_different_psk() {
+        val primary = ChannelSettings(name = "A", psk = byteArrayOf(1).toByteString())
+        val other = ChannelSettings(name = "A", psk = byteArrayOf(2).toByteString())
+
+        val result = normalizeReplacementSettings(listOf(primary, other), ModelChannel.default.loraConfig)
+
+        assertEquals(listOf(primary, other), result)
+    }
+
+    @Test
+    fun normalize_keeps_same_psk_different_name() {
+        val psk = byteArrayOf(1, 2).toByteString()
+        val primary = ChannelSettings(name = "A", psk = psk)
+        val other = ChannelSettings(name = "B", psk = psk)
+
+        val result = normalizeReplacementSettings(listOf(primary, other), ModelChannel.default.loraConfig)
+
+        assertEquals(listOf(primary, other), result)
+    }
+
+    @Test
+    fun normalize_compacts_valid_secondaries_into_sequential_slots() {
+        val primary = ChannelSettings(name = "Main", psk = byteArrayOf(1).toByteString())
+        val b = ChannelSettings(name = "B", psk = byteArrayOf(2).toByteString())
+        val c = ChannelSettings(name = "C", psk = byteArrayOf(3).toByteString())
+
+        // blank + duplicate mixed in; valid B and C must compact to slots 1 and 2 with no gap
+        val result =
+            normalizeReplacementSettings(
+                listOf(
+                    primary,
+                    ChannelSettings(),
+                    b,
+                    ChannelSettings(name = "Main", psk = byteArrayOf(1).toByteString()),
+                    c,
+                ),
+                ModelChannel.default.loraConfig,
+            )
+
+        assertEquals(listOf(primary, b, c), result)
+    }
+
+    @Test
+    fun normalize_null_lora_falls_back_to_defaults_without_crashing() {
+        val primary = ChannelSettings(name = "Main", psk = byteArrayOf(1).toByteString())
+
+        val result = normalizeReplacementSettings(listOf(primary, ChannelSettings()), loraConfig = null)
+
+        assertEquals(listOf(primary), result)
+    }
+
+    @Test
+    fun normalize_all_blank_input_preserves_only_primary() {
+        // Primary is always preserved (even blank); both blank placeholder secondaries are dropped.
+        val result =
+            normalizeReplacementSettings(
+                listOf(ChannelSettings(), ChannelSettings(), ChannelSettings()),
+                ModelChannel.default.loraConfig,
+            )
+
+        assertEquals(1, result.size)
     }
 }
