@@ -43,7 +43,7 @@ compose-screenshot = "0.0.1-alpha15"
 # AGP 9.x (the stable 1.4.x line predates AGP 9 support).
 benchmark = "1.5.0-alpha07"
 profileinstaller = "1.4.1"
-androidx-uiautomator = "2.3.0"
+androidx-uiautomator = "2.4.0"
 
 # Compose Multiplatform
 compose-multiplatform = "1.11.1"
