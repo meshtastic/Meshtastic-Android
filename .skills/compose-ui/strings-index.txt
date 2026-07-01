@@ -1389,6 +1389,7 @@ state_broadcast_seconds
 status_message
 status_message_config
 stay_connected_anywhere
+stop_connecting
 store_forward
 store_forward_config
 store_forward_enabled

@@ -40,6 +40,7 @@ import org.meshtastic.core.resources.connecting
 import org.meshtastic.core.resources.must_set_region
 import org.meshtastic.core.resources.not_connected
 import org.meshtastic.core.resources.reconnecting
+import org.meshtastic.core.resources.stop_connecting
 import org.meshtastic.core.ui.viewmodel.ConnectionStatus
 
 /**
@@ -84,6 +85,6 @@ fun ConnectingDeviceInfo(
             }
         }
 
-        DisconnectButton(onClick = onClickDisconnect)
+        DisconnectButton(onClick = onClickDisconnect, label = stringResource(Res.string.stop_connecting))
     }
 }
