@@ -672,6 +672,23 @@
     <string name="generate_input_event_on_press">Luo syötetapahtuma painettaessa</string>
     <string name="generate_qr_code">Generoi QR-koodi</string>
     <!-- GEOFENCE -->
+    <string name="geofence">Aluerajaus</string>
+    <string name="geofence_box_author_confirm">Vahvista alue</string>
+    <string name="geofence_box_author_hint">Määritä alue napauttamalla kahta kulmaa</string>
+    <string name="geofence_box_author_hint_viewport">Rajaa haluamasi alue karttanäkymään ja napauta vahvista alue</string>
+    <string name="geofence_box_use_view">Käytä nykyistä näkymää</string>
+    <string name="geofence_edit_area">Muokkaa aluetta</string>
+    <string name="geofence_entered_body">%1$s saapui alueelle %2$s</string>
+    <string name="geofence_entered_title">Saapui %1$s</string>
+    <string name="geofence_favorites_only">Vain suosikit</string>
+    <string name="geofence_left_body">%1$s poistui alueelta %2$s</string>
+    <string name="geofence_left_title">Poistui %1$s</string>
+    <string name="geofence_notify_on_enter">Ilmoita saapumisesta</string>
+    <string name="geofence_notify_on_exit">Ilmoita poistumisesta</string>
+    <string name="geofence_off">Pois</string>
+    <string name="geofence_radius">Aluerajauksen säde</string>
+    <string name="geofence_remove_area">Poista alue</string>
+    <string name="geofence_set_area">Aseta alue kartalla</string>
     <string name="get_started">Näin pääset alkuun</string>
     <string name="good">Hyvä</string>
     <!-- GPIO -->
@@ -724,6 +741,7 @@
     <string name="incoming_messages">Saapuvat viestit</string>
     <string name="indoor_air_quality_iaq">Sisäilmanlaatu (IAQ)</string>
     <string name="info">Tiedot</string>
+    <string name="input_channel_url">Anna jaettujen kanavien URL-osoite</string>
     <string name="input_shared_contact_url">Syötä jaetun yhteystiedon URL-osoite</string>
     <string name="installed_firmware_version">Asennettu</string>
     <string name="internal">Sisäinen</string>
@@ -1302,6 +1320,8 @@
     <!-- SCAN -->
     <string name="scan">Etsi</string>
     <string name="scan_bluetooth_devices">Etsi Bluetooth-laitteita</string>
+    <string name="scan_channels_nfc">Skannaa jaetut kanavat NFC:llä</string>
+    <string name="scan_channels_qr">Skannaa jaetut kanavat QR-koodilla</string>
     <string name="scan_network_devices">Etsi verkkolaitteita</string>
     <string name="scan_nfc">Skannaa NFC</string>
     <string name="scan_nfc_text">Pidä laite NFC-tunnisteen lähellä skannausta varten.</string>
@@ -1365,6 +1385,7 @@
     <!-- SHARE -->
     <string name="share">Jaa</string>
     <string name="share_channels_qr">Jaa kanavien QR-koodi</string>
+    <string name="share_connected_node">Jaa yhdistetty radio</string>
     <string name="share_contact">Jaa yhteystieto</string>
     <string name="share_location">Jaa sijainti</string>
     <string name="share_location_description">Lähetä sijaintitiedot puhelimen GPS:llä laitteen oman GPS:n sijasta.</string>
@@ -1630,5 +1651,9 @@
     <string name="wind_gust">Tuulen puuska</string>
     <string name="wind_lull">Alin tuulen nopeus</string>
     <string name="wind_speed">Tuulen nopeus</string>
+    <string name="write_nfc">Kirjoita NFC-tunnisteeseen</string>
+    <string name="write_nfc_failed">Tunnisteeseen kirjoittaminen epäonnistui. Käytä tyhjää, kirjoitettavaa NFC-tunnistetta ja pidä sitä paikallaan.</string>
+    <string name="write_nfc_success">Kirjoitettu tunnisteeseen</string>
+    <string name="write_nfc_text">Pidä kirjoitettavaa NFC-tunnistetta puhelimesi takapuolta vasten.</string>
     <string name="you">Sinä</string>
 </resources>
