@@ -19,6 +19,8 @@ Documentation for using the Meshtastic Android and Desktop app.
 Keep the last 5–8 entries and archive older ones by removing them.
 -->
 
+**July 2026** — [Debug Logs](user/debug-logs) — New page covering the Debug Panel's App logs tab: view, filter, and export the app's own debug logs to attach to a GitHub issue — no adb needed.
+
 **June 2026** — [Help & In-App Docs](user/help-and-docs) — New page covering the in-app documentation browser, search, and the on-device Chirpy AI assistant.
 
 **June 2026** — [Home Screen Widget](user/widget) — New page covering the Android home screen widget that shows your connected radio's local stats at a glance.

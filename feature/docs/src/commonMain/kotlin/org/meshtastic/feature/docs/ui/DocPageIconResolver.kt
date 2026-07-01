@@ -89,6 +89,8 @@ internal fun DocPage.resolveIcon(): ImageVector = when (iconId) {
 
     "help" -> MeshtasticIcons.Notes
 
+    "debug-logs" -> MeshtasticIcons.BugReport
+
     // Developer Guide
     "architecture" -> MeshtasticIcons.ForkLeft
 
