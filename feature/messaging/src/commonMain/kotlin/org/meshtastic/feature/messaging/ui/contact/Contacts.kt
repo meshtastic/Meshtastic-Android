@@ -112,6 +112,7 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.SelectAll
 import org.meshtastic.core.ui.icon.VolumeMute
 import org.meshtastic.core.ui.icon.VolumeUp
+import org.meshtastic.core.ui.util.parseDeepLinkOrInvalid
 import org.meshtastic.core.ui.util.rememberShowToastResource
 import org.meshtastic.proto.ChannelSet
 import kotlin.time.Duration.Companion.days
@@ -253,9 +254,8 @@ fun ContactsScreen(
             if (connectionState is ConnectionState.Connected) {
                 MeshtasticImportFAB(
                     onImport = { uriString ->
-                        onHandleDeepLink(CommonUri.parse(uriString)) {
-                            scope.launch { showToast(Res.string.channel_invalid) }
-                        }
+                        val onInvalid: () -> Unit = { scope.launch { showToast(Res.string.channel_invalid) } }
+                        parseDeepLinkOrInvalid(uriString, onHandleDeepLink, onInvalid)
                     },
                     onShareChannels = onNavigateToShare,
                     isContactContext = false,

@@ -47,7 +47,7 @@ private fun CommonUri.checkSharedContactUrl() {
     val frag = fragment
     if (frag.isNullOrBlank() || !isCorrectHost || !isCorrectPath) {
         throw MalformedMeshtasticUrlException(
-            "Not a valid Meshtastic URL: host=$h, segments=$segments, hasFragment=${!frag.isNullOrBlank()}",
+            "Not a valid Meshtastic URL: host=$h, segmentCount=${segments.size}, hasFragment=${!frag.isNullOrBlank()}",
         )
     }
 }
@@ -61,17 +61,13 @@ private fun decodeSharedContactData(data: String): SharedContact {
             val sanitized = data.replace('-', '+').replace('_', '/')
             sanitized.decodeBase64() ?: throw IllegalArgumentException("Invalid Base64 string")
         } catch (e: IllegalArgumentException) {
-            throw MalformedMeshtasticUrlException(
-                "Failed to Base64 decode SharedContact data: ${e::class.simpleName}: ${e.message}",
-            )
+            throw MalformedMeshtasticUrlException("Failed to Base64 decode SharedContact data: ${e::class.simpleName}")
         }
 
     return try {
         SharedContact.ADAPTER.decode(decodedBytes)
     } catch (e: Exception) {
-        throw MalformedMeshtasticUrlException(
-            "Failed to proto decode SharedContact: ${e::class.simpleName}: ${e.message}",
-        )
+        throw MalformedMeshtasticUrlException("Failed to proto decode SharedContact: ${e::class.simpleName}")
     }
 }
 
