@@ -176,7 +176,7 @@ private fun ChannelConfigScreen(
                 FloatingActionButton(
                     onClick = {
                         if (maxChannels > settingsListInput.size) {
-                            settingsListInput.add(ChannelSettings(psk = Channel.default.settings.psk))
+                            settingsListInput.add(newUnnamedManualChannelSettings())
                             showEditChannelDialog = settingsListInput.lastIndex
                         }
                     },
@@ -272,6 +272,8 @@ private fun ChannelConfigScreen(
         }
     }
 }
+
+private fun newUnnamedManualChannelSettings(): ChannelSettings = ChannelSettings(psk = Channel.default.settings.psk)
 
 /**
  * Determines what [Channel] if any is enabled to conduct automatic location sharing.

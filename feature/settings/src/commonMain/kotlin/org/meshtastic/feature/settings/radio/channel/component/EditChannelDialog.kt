@@ -62,6 +62,7 @@ fun EditChannelDialog(
     var isFocused by remember { mutableStateOf(false) }
 
     var channelInput by remember(channelSettings) { mutableStateOf(channelSettings) }
+    var generatedPskForName by remember(channelSettings) { mutableStateOf(false) }
 
     MeshtasticDialog(
         onDismiss = onDismissRequest,
@@ -87,14 +88,9 @@ fun EditChannelDialog(
                     KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = {
-                        val defaultPsk = Channel.default.settings.psk
-                        val newPsk =
-                            if (channelInput.psk == defaultPsk) {
-                                Channel.getRandomKey()
-                            } else {
-                                channelInput.psk
-                            }
-                        channelInput = channelInput.copy(name = it.trim(), psk = newPsk)
+                        val update = channelInput.withUpdatedName(it, generatedPskForName)
+                        channelInput = update.settings
+                        generatedPskForName = update.generatedPskForName
                     },
                     onFocusChanged = { isFocused = it.isFocused },
                 )
@@ -107,10 +103,14 @@ fun EditChannelDialog(
                     onValueChange = {
                         val fullPsk = Channel(ChannelSettings(psk = it)).psk
                         if (fullPsk.size in setOf(0, 16, 32)) {
+                            generatedPskForName = false
                             channelInput = channelInput.copy(psk = it)
                         }
                     },
-                    onGenerateKey = { channelInput = channelInput.copy(psk = Channel.getRandomKey()) },
+                    onGenerateKey = {
+                        generatedPskForName = false
+                        channelInput = channelInput.copy(psk = Channel.getRandomKey())
+                    },
                 )
 
                 SwitchPreference(
@@ -141,4 +141,26 @@ fun EditChannelDialog(
             }
         },
     )
+}
+
+private data class ChannelNameUpdate(val settings: ChannelSettings, val generatedPskForName: Boolean)
+
+private fun ChannelSettings.withUpdatedName(nameInput: String, generatedPskForName: Boolean): ChannelNameUpdate {
+    val name = nameInput.trim()
+    val defaultPsk = Channel.default.settings.psk
+    val clearGeneratedPsk = name.isBlank() && generatedPskForName
+    val generateNamedPsk = name.isNotBlank() && psk == defaultPsk
+    val nextPsk =
+        when {
+            clearGeneratedPsk -> defaultPsk
+            generateNamedPsk -> Channel.getRandomKey()
+            else -> psk
+        }
+    val nextGeneratedPskForName =
+        when {
+            clearGeneratedPsk -> false
+            generateNamedPsk -> true
+            else -> generatedPskForName
+        }
+    return ChannelNameUpdate(settings = copy(name = name, psk = nextPsk), generatedPskForName = nextGeneratedPskForName)
 }
