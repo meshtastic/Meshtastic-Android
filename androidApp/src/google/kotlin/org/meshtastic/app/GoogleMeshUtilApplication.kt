@@ -16,7 +16,7 @@
  */
 package org.meshtastic.app
 
-import androidx.appfunctions.service.AppFunctionConfiguration
+import androidx.appfunctions.AppFunctionConfiguration
 import org.koin.java.KoinJavaComponent.getKoin
 import org.meshtastic.app.ai.appfunctions.AppFunctionStateSync
 import org.meshtastic.app.ai.appfunctions.MeshtasticAppFunctions
