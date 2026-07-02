@@ -16,6 +16,9 @@
  */
 package org.meshtastic.core.ui.util
 
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.testing.FakeRadioConfigRepository
@@ -154,6 +157,18 @@ class ProtoExtensionsTest {
     }
 
     @Test
+    fun replacement_list_rejects_minimum_slot_count_above_maximum_slot_count() {
+        assertFailsWith<IllegalArgumentException> {
+            getChannelReplacementList(
+                new = listOf(ChannelSettings(name = "Main")),
+                currentSettings = emptyList(),
+                minimumSlotCount = 2,
+                maximumSlotCount = 1,
+            )
+        }
+    }
+
+    @Test
     fun replacement_apply_paces_every_write_before_replacing_cached_settings() = runTest {
         val radioController = FakeRadioController()
         val radioConfigRepository = FakeRadioConfigRepository()
@@ -191,6 +206,102 @@ class ProtoExtensionsTest {
         )
         assertEquals(importedSettings, radioConfigRepository.currentChannelSet.settings)
         assertEquals(List(size = 8) { oldSettings }, cacheSnapshotsAtDelay)
+    }
+
+    @Test
+    fun replacement_apply_reconciles_successful_writes_when_interrupted_during_pacing() = runTest {
+        val radioController = FakeRadioController()
+        val radioConfigRepository = FakeRadioConfigRepository()
+        val oldSettings =
+            listOf(
+                ChannelSettings(name = "Old Primary"),
+                ChannelSettings(name = "Old Secondary"),
+                ChannelSettings(name = "Old Tertiary"),
+            )
+        val importedPrimary = ChannelSettings(name = "Imported")
+        val importedSecondary = ChannelSettings(name = "Private")
+        var delayCount = 0
+        radioConfigRepository.setChannelSet(ChannelSet(settings = oldSettings))
+
+        assertFailsWith<IllegalStateException> {
+            applyReplacementChannelSet(
+                channelSet = ChannelSet(settings = listOf(importedPrimary, importedSecondary)),
+                radioController = radioController,
+                radioConfigRepository = radioConfigRepository,
+                writeDelay = 1.seconds,
+                delayFn = {
+                    delayCount++
+                    if (delayCount == 2) error("stop")
+                },
+            )
+        }
+
+        assertEquals(listOf(0, 1), radioController.localChannels.map { it.index })
+        assertEquals(
+            listOf(importedPrimary, importedSecondary, oldSettings[2]),
+            radioConfigRepository.currentChannelSet.settings,
+        )
+    }
+
+    @Test
+    fun replacement_apply_compacts_cache_when_interrupted_after_all_channel_writes() = runTest {
+        val radioController = FakeRadioController()
+        val radioConfigRepository = FakeRadioConfigRepository()
+        val oldSettings =
+            listOf(
+                ChannelSettings(name = "Old Primary"),
+                ChannelSettings(name = "Old Secondary"),
+                ChannelSettings(name = "Old Tertiary"),
+            )
+        val importedSettings = listOf(ChannelSettings(name = "Imported"), ChannelSettings(name = "Private"))
+        var delayCount = 0
+        radioConfigRepository.setChannelSet(ChannelSet(settings = oldSettings))
+
+        assertFailsWith<IllegalStateException> {
+            applyReplacementChannelSet(
+                channelSet = ChannelSet(settings = importedSettings),
+                radioController = radioController,
+                radioConfigRepository = radioConfigRepository,
+                writeDelay = 1.seconds,
+                delayFn = {
+                    delayCount++
+                    if (delayCount == 8) error("stop")
+                },
+            )
+        }
+
+        assertEquals((0..7).toList(), radioController.localChannels.map { it.index })
+        assertEquals(importedSettings, radioConfigRepository.currentChannelSet.settings)
+    }
+
+    @Test
+    fun replacement_apply_final_cache_update_survives_cancellation() = runTest {
+        val radioController = FakeRadioController()
+        val radioConfigRepository = FakeRadioConfigRepository()
+        val oldSettings = listOf(ChannelSettings(name = "Old Primary"))
+        val importedSettings = listOf(ChannelSettings(name = "Imported"), ChannelSettings(name = "Private"))
+        var delayCount = 0
+        radioConfigRepository.setChannelSet(ChannelSet(settings = oldSettings))
+
+        val applyJob = launch {
+            applyReplacementChannelSet(
+                channelSet = ChannelSet(settings = importedSettings),
+                radioController = radioController,
+                radioConfigRepository = radioConfigRepository,
+                writeDelay = 1.seconds,
+                delayFn = {
+                    delayCount++
+                    if (delayCount == 8) {
+                        currentCoroutineContext().cancel()
+                    }
+                },
+            )
+        }
+        applyJob.join()
+
+        assertTrue(applyJob.isCancelled)
+        assertEquals((0..7).toList(), radioController.localChannels.map { it.index })
+        assertEquals(importedSettings, radioConfigRepository.currentChannelSet.settings)
     }
 
     @Test
@@ -305,15 +416,17 @@ class ProtoExtensionsTest {
         val primary = ChannelSettings(name = "MediumFast", psk = psk)
         val unnamedSecondary = ChannelSettings(psk = psk)
 
-        applyReplacementChannelSet(
-            channelSet = ChannelSet(settings = listOf(primary, unnamedSecondary)), // no lora_config
-            radioController = radioController,
-            radioConfigRepository = radioConfigRepository,
-            writeDelay = 1.seconds,
-            delayFn = {},
-        )
+        val currentLoraConfig =
+            applyReplacementChannelSet(
+                channelSet = ChannelSet(settings = listOf(primary, unnamedSecondary)), // no lora_config
+                radioController = radioController,
+                radioConfigRepository = radioConfigRepository,
+                writeDelay = 1.seconds,
+                delayFn = {},
+            )
 
         // Secondary dropped as a semantic duplicate of the primary under the device's MEDIUM_FAST preset.
+        assertEquals(radioConfigRepository.currentLocalConfig.lora, currentLoraConfig)
         assertEquals(listOf(primary), radioConfigRepository.currentChannelSet.settings)
     }
 
@@ -595,6 +708,17 @@ class ProtoExtensionsTest {
         assertEquals(2, result.size)
         assertEquals(blankPrimary, result[0])
         assertEquals(real, result[1])
+    }
+
+    @Test
+    fun normalize_blank_primary_does_not_seed_duplicate_tracking() {
+        val blankPrimary = ChannelSettings()
+        val publicSecondary = ChannelSettings(psk = byteArrayOf(1).toByteString())
+
+        val result =
+            normalizeReplacementSettings(listOf(blankPrimary, publicSecondary), ModelChannel.default.loraConfig)
+
+        assertEquals(listOf(blankPrimary, publicSecondary), result)
     }
 
     @Test

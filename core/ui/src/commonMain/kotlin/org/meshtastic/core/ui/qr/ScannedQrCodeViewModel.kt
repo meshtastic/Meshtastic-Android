@@ -17,7 +17,6 @@
 package org.meshtastic.core.ui.qr
 
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.repository.NodeRepository
@@ -49,10 +48,10 @@ class ScannedQrCodeViewModel(
 
     /** Set the radio config (also updates our saved copy in preferences). */
     fun setChannels(channelSet: ChannelSet) = safeLaunch(tag = "setChannels") {
-        applyReplacementChannelSet(channelSet, radioController, radioConfigRepository)
+        val currentLoraConfig = applyReplacementChannelSet(channelSet, radioController, radioConfigRepository)
         applyImportedLoraConfigAfterChannelReplacement(
             importedLoraConfig = channelSet.lora_config,
-            currentLoraConfig = radioConfigRepository.localConfigFlow.first().lora,
+            currentLoraConfig = currentLoraConfig,
             radioController = radioController,
         )
     }

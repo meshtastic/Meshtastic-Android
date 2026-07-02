@@ -20,7 +20,6 @@ import androidx.lifecycle.ViewModel
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.first
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.model.util.toChannelSet
@@ -87,10 +86,10 @@ class ChannelViewModel(
 
     /** Set the radio config (also updates our saved copy in preferences). */
     fun setChannels(channelSet: ChannelSet) = safeLaunch(tag = "setChannels") {
-        applyReplacementChannelSet(channelSet, radioController, radioConfigRepository)
+        val currentLoraConfig = applyReplacementChannelSet(channelSet, radioController, radioConfigRepository)
         applyImportedLoraConfigAfterChannelReplacement(
             importedLoraConfig = channelSet.lora_config,
-            currentLoraConfig = radioConfigRepository.localConfigFlow.first().lora,
+            currentLoraConfig = currentLoraConfig,
             radioController = radioController,
         )
     }

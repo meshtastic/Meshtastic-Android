@@ -18,8 +18,10 @@ package org.meshtastic.core.ui.util
 
 import androidx.compose.runtime.Composable
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withContext
 import okio.ByteString
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.DateFormatter
@@ -130,6 +132,7 @@ fun getChannelReplacementList(
     minimumSlotCount: Int = 0,
     maximumSlotCount: Int = Int.MAX_VALUE,
 ): List<Channel> = buildList {
+    require(minimumSlotCount <= maximumSlotCount) { "minimumSlotCount must be <= maximumSlotCount" }
     val minimumLastIndex = minimumSlotCount.coerceAtLeast(0) - 1
     val maximumLastIndex = maximumSlotCount.coerceAtLeast(0) - 1
     val endIndex = maxOf(currentSettings.lastIndex, new.lastIndex, minimumLastIndex).coerceAtMost(maximumLastIndex)
@@ -160,6 +163,7 @@ fun getChannelReplacementList(
  * semantic duplicates (two slots resolving to the same effective channel under the active LoRa preset). Both produce
  * invalid LongFast-looking slots on the radio that cause route failures (`QueueStatus res=6` / `routeErr=6`).
  * - Slot 0 (primary) is always preserved as-is, even if blank (a blank primary is a deliberate disable signal).
+ * - A blank placeholder primary does not participate in duplicate tracking.
  * - Blank placeholder secondaries (no name AND no PSK) are dropped.
  * - Semantic duplicates (same effective name + effective PSK as an earlier kept slot) are dropped.
  * - Remaining valid secondaries compact into sequential slots 1..n.
@@ -175,7 +179,10 @@ fun normalizeReplacementSettings(
     if (settings.size <= 1) return settings
     val effectiveLora = loraConfig ?: Config.LoRaConfig()
     val primary = settings.first()
-    val seen = mutableSetOf(primary.channelIdentity(effectiveLora))
+    val seen = mutableSetOf<ChannelIdentity>()
+    if (!primary.isPlaceholder()) {
+        seen.add(primary.channelIdentity(effectiveLora))
+    }
     val compact = mutableListOf(primary)
     for (index in 1..settings.lastIndex) {
         val candidate = settings[index]
@@ -193,13 +200,15 @@ private fun ChannelSettings.isPlaceholder(): Boolean = name.isNullOrBlank() && (
 /**
  * Applies an imported [ChannelSet] as an authoritative replacement to the radio and local cache.
  *
- * Reads the current channel set from [radioConfigRepository]'s flow (avoiding the StateFlow placeholder window), builds
- * the authoritative replacement list via [getChannelReplacementList], enqueues each channel write to the radio via
- * [radioController], pauses between writes so the radio can persist and reconfigure each slot, then atomically replaces
- * the local cached settings.
+ * Reads the current LoRa config and channel set from [radioConfigRepository]'s flows (avoiding the StateFlow
+ * placeholder window), builds the authoritative replacement list via [getChannelReplacementList], enqueues each channel
+ * write to the radio via [radioController], pauses between writes so the radio can persist and reconfigure each slot,
+ * then atomically replaces the local cached settings.
  *
  * setLocalChannel returns once the packet is enqueued, not after firmware ACK. The pacing avoids enqueueing a complete
- * channel replacement plus LoRa reconfiguration faster than real hardware can materialize the later channel slots.
+ * channel replacement plus LoRa reconfiguration faster than real hardware can materialize the later channel slots. If
+ * the sequence is interrupted after one or more successful writes, the local cache is reconciled to the successfully
+ * enqueued channel settings before the original cancellation or failure continues.
  *
  * Imported settings are normalized via [normalizeReplacementSettings] before any write or bounds check, so blank
  * placeholder secondaries and semantic duplicates never reach the radio or the local cache.
@@ -211,6 +220,7 @@ private fun ChannelSettings.isPlaceholder(): Boolean = name.isNullOrBlank() && (
  * @param radioConfigRepository The [RadioConfigRepository] providing the current channel flow and cache.
  * @param writeDelay Delay after each channel write. Exposed for fast unit tests.
  * @param delayFn Delay implementation. Exposed for fast unit tests.
+ * @return The device's current LoRa config snapshot used by callers to compare against an imported LoRa config.
  */
 suspend fun applyReplacementChannelSet(
     channelSet: ChannelSet,
@@ -218,7 +228,7 @@ suspend fun applyReplacementChannelSet(
     radioConfigRepository: RadioConfigRepository,
     writeDelay: Duration = CHANNEL_REPLACEMENT_WRITE_DELAY,
     delayFn: suspend (Duration) -> Unit = { delay(it) },
-) {
+): Config.LoRaConfig? {
     // Resolve the LoRa preset used for semantic identity: prefer the imported config, fall back to the device's current
     // local config so duplicate detection stays correct when the import omits lora_config (e.g. a non-default preset).
     val currentLoraConfig = radioConfigRepository.localConfigFlow.first().lora
@@ -239,15 +249,55 @@ suspend fun applyReplacementChannelSet(
         "Applying imported channel replacement writes=${replacements.size} " +
             "importedSettings=${channelSet.settings.size} normalizedSettings=${normalizedSettings.size}"
     }
-    for (channel in replacements) {
-        Logger.i {
-            "Writing imported channel index=${channel.index} role=${channel.role} " +
-                "hasName=${channel.settings?.name?.isNotBlank() == true}"
+    val appliedSettings = currentSettings.take(CHANNEL_REPLACEMENT_SLOT_COUNT).toMutableList()
+    var appliedWriteCount = 0
+    var replacementComplete = false
+    try {
+        for (channel in replacements) {
+            Logger.i {
+                "Writing imported channel index=${channel.index} role=${channel.role} " +
+                    "hasName=${channel.settings?.name?.isNotBlank() == true}"
+            }
+            radioController.setLocalChannel(channel)
+            while (appliedSettings.size <= channel.index) {
+                appliedSettings.add(ChannelSettings())
+            }
+            appliedSettings[channel.index] =
+                if (channel.role == Channel.Role.DISABLED) {
+                    ChannelSettings()
+                } else {
+                    channel.settings ?: ChannelSettings()
+                }
+            appliedWriteCount++
+            delayFn(writeDelay)
         }
-        radioController.setLocalChannel(channel)
-        delayFn(writeDelay)
+        replacementComplete = true
+    } finally {
+        if (!replacementComplete) {
+            radioConfigRepository.reconcileInterruptedReplacement(
+                appliedWriteCount = appliedWriteCount,
+                totalWriteCount = replacements.size,
+                appliedSettings = appliedSettings,
+                normalizedSettings = normalizedSettings,
+            )
+        }
     }
-    radioConfigRepository.replaceAllSettings(normalizedSettings)
+    withContext(NonCancellable) { radioConfigRepository.replaceAllSettings(normalizedSettings) }
+    return currentLoraConfig
+}
+
+private suspend fun RadioConfigRepository.reconcileInterruptedReplacement(
+    appliedWriteCount: Int,
+    totalWriteCount: Int,
+    appliedSettings: List<ChannelSettings>,
+    normalizedSettings: List<ChannelSettings>,
+) {
+    if (appliedWriteCount == 0) return
+    val replacementSettings = if (appliedWriteCount == totalWriteCount) normalizedSettings else appliedSettings
+    Logger.w {
+        "Reconciling interrupted channel replacement appliedWrites=$appliedWriteCount totalWrites=$totalWriteCount"
+    }
+    withContext(NonCancellable) { replaceAllSettings(replacementSettings) }
 }
 
 /**
@@ -277,9 +327,8 @@ suspend fun applyImportedLoraConfigAfterChannelReplacement(
  * Builds the filtered ADD-mode preview for QR import: existing channels followed by only the unique incoming channels.
  *
  * Incoming channels that are semantic duplicates (same effective name + effective PSK) of an existing or earlier
- * incoming channel are omitted entirely from the preview — they are not shown to the user. Unique incoming channels are
- * appended in scanned order and selected by default while firmware channel capacity remains; unique channels beyond
- * [maxChannels] stay visible but unchecked.
+ * incoming channel are omitted from the preview. Unique incoming channels are appended in scanned order and selected by
+ * default while firmware channel capacity remains; unique channels beyond [maxChannels] stay visible but unchecked.
  *
  * Semantic identity is resolved via the [Channel] domain model so preset/default channels match correctly across modem
  * presets: empty names resolve to the preset display name, and 1-byte PSK markers expand to the full default key.
