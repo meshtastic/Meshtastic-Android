@@ -117,6 +117,7 @@
     <string name="map_subDescription">rumb: %1$d° distància: %2$s</string>
     <string name="map_tile_download_estimate">Estimació de descàrrega de tessel·les:</string>
     <string name="map_tile_source">Font de tessel·la</string>
+    <!-- MESH -->
     <!-- MESHTASTIC -->
     <string name="meshtastic">Meshtastic</string>
     <string name="meshtastic_app_name">Meshtastic</string>

@@ -551,6 +551,8 @@
     <string name="match_all">Trova tutte le corrispondenze | Qualsiasi</string>
     <string name="match_any">Trova qualsiasi corrispondenza | Tutte</string>
     <string name="max">Max</string>
+    <!-- MESH -->
+    <string name="mesh_beacon_offer_dismiss">Cancella</string>
     <string name="mesh_map_location">Posizione sulla mappa della Mesh</string>
     <string name="mesh_map_location_description">Abilita l'indicatore blu per il tuo telefono sulla mappa della mesh.</string>
     <!-- MESHTASTIC -->

@@ -149,6 +149,7 @@
     <string name="call_sign_summary">Amatööriradion kutsutunnuksesi, enintään 8 merkkiä</string>
     <string name="camera_permission">Kameran käyttöoikeudet</string>
     <string name="camera_permission_rationale">Salli kameran käyttö QR-koodien skannaamista varten.</string>
+    <string name="camera_unavailable">Kameraa ei voitu käynnistää. Yritä uudelleen tai sulje skanneri ja avaa se uudelleen.</string>
     <string name="cancel">Peruuta</string>
     <string name="cancel_reply">Peruuta vastaus</string>
     <string name="canned_message">Esiasetettu viesti</string>
@@ -905,6 +906,8 @@
     <string name="match_all">Täsmää yhteen | kaikkiin</string>
     <string name="match_any">Täsmää yhteen | kaikkiin</string>
     <string name="max">Kaikki</string>
+    <!-- MESH -->
+    <string name="mesh_beacon_offer_dismiss">Hylkää</string>
     <string name="mesh_map_location">Meshtastic kartan sijainti</string>
     <string name="mesh_map_location_description">Ottaa käyttöön puhelimen sijainnin sinisenä pisteenä meshtastic kartalla.</string>
     <!-- MESHTASTIC -->

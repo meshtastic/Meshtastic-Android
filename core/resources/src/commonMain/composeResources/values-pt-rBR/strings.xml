@@ -367,6 +367,8 @@
     <string name="match_all">Corresponda a Todos | Qualquer</string>
     <string name="match_any">Corresponda a Qualquer | Todos</string>
     <string name="max">Máx.</string>
+    <!-- MESH -->
+    <string name="mesh_beacon_offer_dismiss">Ignorar</string>
     <string name="mesh_map_location">Mapa de Localização da Malha</string>
     <string name="mesh_map_location_description">Permite o ponto de localização azul para o seu telefone no mapa da malha.</string>
     <!-- MESHTASTIC -->

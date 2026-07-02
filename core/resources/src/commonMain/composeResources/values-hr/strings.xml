@@ -122,6 +122,7 @@
     <string name="map_subDescription">smjer: %1$d° udaljenost: %2$s</string>
     <string name="map_tile_download_estimate">Procjena preuzimanja:</string>
     <string name="map_tile_source">Izvor karte</string>
+    <!-- MESH -->
     <!-- MESHTASTIC -->
     <string name="meshtastic">Meshtastic</string>
     <string name="meshtastic_app_name">Meshtastic</string>

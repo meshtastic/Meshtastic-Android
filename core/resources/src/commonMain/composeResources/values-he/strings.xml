@@ -117,6 +117,7 @@
     <string name="map_subDescription">כיוון: %1$d° מרחק: %2$s</string>
     <string name="map_tile_download_estimate">הערכת זמן להורדה:</string>
     <string name="map_tile_source">מקור מפות</string>
+    <!-- MESH -->
     <!-- MESHTASTIC -->
     <string name="meshtastic_alerts_notifications">התראות</string>
     <string name="meshtastic_service_notifications">התראות שירות</string>

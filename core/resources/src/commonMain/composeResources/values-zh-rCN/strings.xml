@@ -890,6 +890,8 @@
     <string name="match_all">匹配所有 | 任意</string>
     <string name="match_any">匹配任意 | 所有</string>
     <string name="max">最大值</string>
+    <!-- MESH -->
+    <string name="mesh_beacon_offer_dismiss">忽略</string>
     <string name="mesh_map_location">网格地图位置</string>
     <string name="mesh_map_location_description">在网格地图中为您的手机开启蓝色位置点。</string>
     <!-- MESHTASTIC -->

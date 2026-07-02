@@ -300,6 +300,8 @@
     <string name="map_tile_download_estimate">맵 타일 다운로드 예상:</string>
     <string name="map_tile_source">타일 소스</string>
     <string name="max">최대</string>
+    <!-- MESH -->
+    <string name="mesh_beacon_offer_dismiss">취소</string>
     <!-- MESHTASTIC -->
     <string name="meshtastic">Meshtastic</string>
     <string name="meshtastic_alerts_notifications">경고 알림</string>

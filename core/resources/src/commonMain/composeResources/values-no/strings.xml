@@ -138,6 +138,7 @@
     <string name="map_tile_download_estimate">Tile nedlastingsestimat:</string>
     <string name="map_tile_source">Fliskilde</string>
     <string name="max">Maks</string>
+    <!-- MESH -->
     <!-- MESHTASTIC -->
     <string name="meshtastic_new_nodes_notifications">Varsel om nye noder</string>
     <string name="meshtastic_service_notifications">Tjeneste meldinger</string>

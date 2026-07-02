@@ -879,6 +879,8 @@
     <string name="match_all">すべてに一致 | いずれか</string>
     <string name="match_any">いずれかに一致 | すべて</string>
     <string name="max">最大</string>
+    <!-- MESH -->
+    <string name="mesh_beacon_offer_dismiss">中止</string>
     <string name="mesh_map_location">メッシュマップの位置情報</string>
     <string name="mesh_map_location_description">メッシュマップ上にスマートフォンの青い位置ドットを表示します。</string>
     <!-- MESHTASTIC -->

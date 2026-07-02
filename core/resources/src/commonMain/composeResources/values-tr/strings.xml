@@ -313,6 +313,8 @@
     <string name="map_tile_download_estimate">Tahmini indirme boyutu:</string>
     <string name="map_tile_source">Harita Kaynağı</string>
     <string name="max">Maks</string>
+    <!-- MESH -->
+    <string name="mesh_beacon_offer_dismiss">Vazgeç</string>
     <string name="mesh_map_location">Mesh Harita Konumu</string>
     <string name="mesh_map_location_description">Telefonunuz için mesh haritasında mavi konum noktasını etkinleştirir.</string>
     <!-- MESHTASTIC -->

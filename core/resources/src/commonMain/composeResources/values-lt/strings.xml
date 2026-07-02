@@ -135,6 +135,7 @@
     <string name="map_tile_download_estimate">Plytelių atsisiuntimo apskaičiavimas:</string>
     <string name="map_tile_source">Plytelių šaltinis</string>
     <string name="max">Max</string>
+    <!-- MESH -->
     <!-- MESHTASTIC -->
     <string name="meshtastic_new_nodes_notifications">Naujo įtaiso pranešimas</string>
     <string name="meshtastic_service_notifications">Paslaugos pranešimai</string>

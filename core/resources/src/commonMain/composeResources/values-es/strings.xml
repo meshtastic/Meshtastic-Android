@@ -481,6 +481,8 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="match_all">Coincidir todo | Cualquiera</string>
     <string name="match_any">Coincidir con cualquier | Todo</string>
     <string name="max">Máximo</string>
+    <!-- MESH -->
+    <string name="mesh_beacon_offer_dismiss">Descartar</string>
     <string name="mesh_map_location_description">Habilita el punto de posición azul para tu teléfono en el mapa de la malla.</string>
     <!-- MESHTASTIC -->
     <string name="meshtastic">Meshtastic</string>

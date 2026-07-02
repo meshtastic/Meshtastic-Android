@@ -740,6 +740,8 @@
     <string name="match_all">符合全部條件</string>
     <string name="match_any">符合任一條件</string>
     <string name="max">最大值</string>
+    <!-- MESH -->
+    <string name="mesh_beacon_offer_dismiss">略過</string>
     <string name="mesh_map_location">Mesh Map 地圖位置</string>
     <string name="mesh_map_location_description">在 Mesh 地圖上，為您的手機啟用藍色的定位點。</string>
     <!-- MESHTASTIC -->

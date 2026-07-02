@@ -140,6 +140,7 @@
     <string name="map_tile_download_estimate">Ocena prenosa plošče:</string>
     <string name="map_tile_source">Vir plošcice</string>
     <string name="max">Maks.</string>
+    <!-- MESH -->
     <!-- MESHTASTIC -->
     <string name="meshtastic_new_nodes_notifications">Obvestila novih vozlišč</string>
     <string name="meshtastic_service_notifications">Obvestila storitve</string>

@@ -256,6 +256,7 @@
     <string name="map_tile_download_estimate">Odhad sťahovania dlaždíc:</string>
     <string name="map_tile_source">Zdroj dlaždíc</string>
     <string name="max">Maximum</string>
+    <!-- MESH -->
     <!-- MESHTASTIC -->
     <string name="meshtastic">Meshtastic</string>
     <string name="meshtastic_alerts_notifications">Notifikácie upozornení</string>

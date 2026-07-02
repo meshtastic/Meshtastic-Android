@@ -455,6 +455,8 @@
     <string name="match_all">Dopasuj Wszystkie | Dowolne</string>
     <string name="match_any">Dopasuj Dowolne | Wszystkie</string>
     <string name="max">Maks.</string>
+    <!-- MESH -->
+    <string name="mesh_beacon_offer_dismiss">Zamknij</string>
     <!-- MESHTASTIC -->
     <string name="meshtastic">Meshtastic</string>
     <string name="meshtastic_alerts_notifications">Powiadomienia alertowe</string>

@@ -262,6 +262,8 @@
     <string name="map_type_hybrid">Хибридни</string>
     <string name="map_type_satellite">Сателит</string>
     <string name="max">Максимум</string>
+    <!-- MESH -->
+    <string name="mesh_beacon_offer_dismiss">Отпусти</string>
     <!-- MESHTASTIC -->
     <string name="meshtastic_alerts_notifications">Обавештења о упозорењима</string>
     <string name="meshtastic_low_battery_notifications">Нотификације о ниском нивоу батерије</string>

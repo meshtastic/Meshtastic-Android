@@ -122,6 +122,7 @@
     <string name="map_select_download_region">حدد جهة التحميل</string>
     <string name="map_start_download">ابدأ التحميل</string>
     <string name="max">الأعلى</string>
+    <!-- MESH -->
     <!-- MESHTASTIC -->
     <string name="meshtastic_low_battery_notifications">إشعارات انخفاض شدة البطارية</string>
     <string name="meshtastic_new_nodes_notifications">إشعارات العقدة الجديدة</string>
