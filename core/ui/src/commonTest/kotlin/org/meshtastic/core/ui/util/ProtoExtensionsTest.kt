@@ -19,9 +19,12 @@ package org.meshtastic.core.ui.util
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ChannelSettings
+import org.meshtastic.proto.Config
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import org.meshtastic.core.model.Channel as ModelChannel
 
 /**
  * Coverage for [getChannelReplacementList]. The REPLACE helper must emit an authoritative slot list for QR imports:
@@ -142,74 +145,203 @@ class ProtoExtensionsTest {
         assertEquals(secondaryB, result[2].settings)
     }
 
-    // --- mergeChannelSettingsForAdd tests ---
+    // --- getChannelPreviewForAdd tests ---
 
     @Test
-    fun merge_preserves_all_existing_channels_in_order() {
+    fun preview_existing_channels_are_always_shown_and_selected() {
         val existing = listOf(ChannelSettings(name = "A"), ChannelSettings(name = "B"))
 
-        val result = mergeChannelSettingsForAdd(existing, incoming = emptyList())
+        val preview = getChannelPreviewForAdd(existing, emptyList(), ModelChannel.default.loraConfig, maxChannels = 8)
 
-        assertEquals(2, result.size)
-        assertEquals("A", result[0].name)
-        assertEquals("B", result[1].name)
+        assertEquals(existing, preview.settings)
+        assertTrue(preview.selections.all { it })
     }
 
     @Test
-    fun merge_appends_all_incoming_channels_in_order() {
+    fun preview_unique_incoming_channels_are_shown_and_selected() {
         val incoming = listOf(ChannelSettings(name = "C"), ChannelSettings(name = "D"))
 
-        val result = mergeChannelSettingsForAdd(existing = emptyList(), incoming)
+        val preview = getChannelPreviewForAdd(emptyList(), incoming, ModelChannel.default.loraConfig, maxChannels = 8)
 
-        assertEquals(2, result.size)
-        assertEquals("C", result[0].name)
-        assertEquals("D", result[1].name)
+        assertEquals(incoming, preview.settings)
+        assertTrue(preview.selections.all { it })
     }
 
     @Test
-    fun merge_preserves_structurally_equal_channels() {
-        val channel = ChannelSettings(name = "LongFast", psk = byteArrayOf(1).toByteString())
+    fun preview_incoming_duplicate_of_existing_is_omitted() {
+        val channel = ChannelSettings(name = "Test", psk = byteArrayOf(1).toByteString())
 
-        val result = mergeChannelSettingsForAdd(existing = listOf(channel), incoming = listOf(channel))
+        val preview =
+            getChannelPreviewForAdd(listOf(channel), listOf(channel), ModelChannel.default.loraConfig, maxChannels = 8)
 
-        assertEquals(2, result.size)
+        assertEquals(listOf(channel), preview.settings)
     }
 
     @Test
-    fun merge_preserves_same_name_different_psk() {
+    fun preview_duplicate_inside_incoming_keeps_first_and_omits_later() {
+        val a = ChannelSettings(name = "A", psk = byteArrayOf(1).toByteString())
+        val b = ChannelSettings(name = "B", psk = byteArrayOf(2).toByteString())
+
+        val preview =
+            getChannelPreviewForAdd(emptyList(), listOf(a, a, b), ModelChannel.default.loraConfig, maxChannels = 8)
+
+        assertEquals(listOf(a, b), preview.settings)
+        assertTrue(preview.selections[0])
+        assertTrue(preview.selections[1])
+    }
+
+    @Test
+    fun preview_same_name_different_psk_remains_visible() {
         val existingChan = ChannelSettings(name = "A", psk = byteArrayOf(1).toByteString())
         val incomingChan = ChannelSettings(name = "A", psk = byteArrayOf(2).toByteString())
 
-        val result = mergeChannelSettingsForAdd(listOf(existingChan), listOf(incomingChan))
+        val preview =
+            getChannelPreviewForAdd(
+                listOf(existingChan),
+                listOf(incomingChan),
+                ModelChannel.default.loraConfig,
+                maxChannels = 8,
+            )
 
-        assertEquals(2, result.size)
+        assertEquals(2, preview.settings.size)
+        assertTrue(preview.selections[1])
     }
 
     @Test
-    fun merge_preserves_same_psk_different_name() {
+    fun preview_same_psk_different_name_remains_visible() {
         val psk = byteArrayOf(1, 2).toByteString()
         val existingChan = ChannelSettings(name = "A", psk = psk)
         val incomingChan = ChannelSettings(name = "B", psk = psk)
 
-        val result = mergeChannelSettingsForAdd(listOf(existingChan), listOf(incomingChan))
+        val preview =
+            getChannelPreviewForAdd(
+                listOf(existingChan),
+                listOf(incomingChan),
+                ModelChannel.default.loraConfig,
+                maxChannels = 8,
+            )
 
-        assertEquals(2, result.size)
+        assertEquals(2, preview.settings.size)
+        assertTrue(preview.selections[1])
     }
 
     @Test
-    fun merge_preserves_duplicate_inside_incoming() {
-        val a = ChannelSettings(name = "A", psk = byteArrayOf(1).toByteString())
-        val b = ChannelSettings(name = "B", psk = byteArrayOf(2).toByteString())
+    fun preview_empty_name_default_matches_explicit_preset_name_and_is_omitted() {
+        val loraConfig = ModelChannel.default.loraConfig
+        val existingChan = ChannelSettings(psk = byteArrayOf(1).toByteString()) // resolves to "LongFast"
+        val incomingChan = ChannelSettings(name = "LongFast", psk = byteArrayOf(1).toByteString())
 
-        val result = mergeChannelSettingsForAdd(existing = emptyList(), incoming = listOf(a, a, b))
+        val preview = getChannelPreviewForAdd(listOf(existingChan), listOf(incomingChan), loraConfig, maxChannels = 8)
 
-        assertEquals(3, result.size)
+        assertEquals(listOf(existingChan), preview.settings)
     }
 
     @Test
-    fun merge_both_empty_produces_empty_list() {
-        val result = mergeChannelSettingsForAdd(existing = emptyList(), incoming = emptyList())
+    fun preview_explicit_preset_name_matches_empty_name_default_and_is_omitted() {
+        val loraConfig = ModelChannel.default.loraConfig
+        val existingChan = ChannelSettings(name = "LongFast", psk = byteArrayOf(1).toByteString())
+        val incomingChan = ChannelSettings(psk = byteArrayOf(1).toByteString()) // resolves to "LongFast"
 
-        assertTrue(result.isEmpty())
+        val preview = getChannelPreviewForAdd(listOf(existingChan), listOf(incomingChan), loraConfig, maxChannels = 8)
+
+        assertEquals(listOf(existingChan), preview.settings)
+    }
+
+    @Test
+    fun preview_psk_marker_matches_expanded_default_key_and_is_omitted() {
+        val loraConfig = ModelChannel.default.loraConfig
+        val expandedPsk =
+            ModelChannel(settings = ChannelSettings(psk = byteArrayOf(1).toByteString()), loraConfig = loraConfig).psk
+        val markerChan = ChannelSettings(name = "Test", psk = byteArrayOf(1).toByteString())
+        val expandedChan = ChannelSettings(name = "Test", psk = expandedPsk)
+
+        val preview = getChannelPreviewForAdd(listOf(markerChan), listOf(expandedChan), loraConfig, maxChannels = 8)
+
+        assertEquals(listOf(markerChan), preview.settings)
+    }
+
+    @Test
+    fun preview_non_long_fast_preset_default_duplicate_is_omitted() {
+        val loraConfig = Config.LoRaConfig(use_preset = true, modem_preset = Config.LoRaConfig.ModemPreset.MEDIUM_FAST)
+        val existingChan = ChannelSettings(psk = byteArrayOf(1).toByteString()) // resolves to "MediumFast"
+        val incomingChan = ChannelSettings(name = "MediumFast", psk = byteArrayOf(1).toByteString())
+
+        val preview = getChannelPreviewForAdd(listOf(existingChan), listOf(incomingChan), loraConfig, maxChannels = 8)
+
+        assertEquals(listOf(existingChan), preview.settings)
+    }
+
+    @Test
+    fun preview_omitted_duplicates_do_not_consume_capacity() {
+        val existing = listOf(ChannelSettings(name = "A"), ChannelSettings(name = "B"))
+        val dup = ChannelSettings(name = "A")
+        val unique = listOf(ChannelSettings(name = "C"), ChannelSettings(name = "D"), ChannelSettings(name = "E"))
+
+        val preview =
+            getChannelPreviewForAdd(existing, listOf(dup) + unique, ModelChannel.default.loraConfig, maxChannels = 5)
+
+        // Duplicate A omitted entirely (not in settings); C, D, E all selected because the omitted dup did not consume
+        // capacity.
+        assertEquals(listOf("A", "B", "C", "D", "E"), preview.settings.map { it.name })
+        assertTrue(preview.selections[2]) // C
+        assertTrue(preview.selections[3]) // D
+        assertTrue(preview.selections[4]) // E
+    }
+
+    @Test
+    fun preview_over_capacity_unique_incoming_remains_visible_but_unchecked() {
+        val existing = listOf(ChannelSettings(name = "A"), ChannelSettings(name = "B"))
+        val incoming =
+            listOf(
+                ChannelSettings(name = "C"),
+                ChannelSettings(name = "D"),
+                ChannelSettings(name = "E"),
+                ChannelSettings(name = "F"),
+            )
+
+        val preview = getChannelPreviewForAdd(existing, incoming, ModelChannel.default.loraConfig, maxChannels = 4)
+
+        // All unique incoming are visible; C and D fit (4 total), E and F over capacity remain visible but unchecked.
+        assertEquals(6, preview.settings.size)
+        assertTrue(preview.selections[2]) // C fits
+        assertTrue(preview.selections[3]) // D fits
+        assertFalse(preview.selections[4]) // E over capacity
+        assertFalse(preview.selections[5]) // F over capacity
+    }
+
+    @Test
+    fun preview_existing_at_max_omits_nothing_but_all_incoming_unchecked() {
+        val existing = (1..8).map { ChannelSettings(name = "Ch$it") }
+        val incoming = listOf(ChannelSettings(name = "New"))
+
+        val preview = getChannelPreviewForAdd(existing, incoming, ModelChannel.default.loraConfig, maxChannels = 8)
+
+        // Unique incoming still visible (not a duplicate) but unchecked because capacity is full.
+        assertEquals(9, preview.settings.size)
+        assertFalse(preview.selections[8])
+    }
+
+    @Test
+    fun preview_settings_and_selections_are_always_size_matched() {
+        val existing = listOf(ChannelSettings(name = "A"), ChannelSettings(name = "B"))
+        val incoming =
+            listOf(
+                ChannelSettings(name = "A", psk = byteArrayOf(1).toByteString()), // duplicate of existing
+                ChannelSettings(name = "C"),
+                ChannelSettings(name = "D"),
+            )
+
+        val preview = getChannelPreviewForAdd(existing, incoming, ModelChannel.default.loraConfig, maxChannels = 8)
+
+        assertEquals(preview.settings.size, preview.selections.size)
+    }
+
+    @Test
+    fun preview_both_empty_produces_empty_preview() {
+        val preview =
+            getChannelPreviewForAdd(emptyList(), emptyList(), ModelChannel.default.loraConfig, maxChannels = 8)
+
+        assertTrue(preview.settings.isEmpty())
+        assertTrue(preview.selections.isEmpty())
     }
 }

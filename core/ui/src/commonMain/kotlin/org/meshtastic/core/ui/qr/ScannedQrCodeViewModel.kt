@@ -17,7 +17,9 @@
 package org.meshtastic.core.ui.qr
 
 import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.flow.map
 import org.koin.core.annotation.KoinViewModel
+import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.ui.util.applyReplacementChannelSet
@@ -27,13 +29,23 @@ import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.LocalConfig
 
+internal const val DEFAULT_MAX_CHANNELS = 8
+
 @KoinViewModel
 class ScannedQrCodeViewModel(
     private val radioConfigRepository: RadioConfigRepository,
     private val radioController: RadioController,
+    nodeRepository: NodeRepository,
 ) : ViewModel() {
 
     val channels = radioConfigRepository.channelSetFlow.stateInWhileSubscribed(initialValue = ChannelSet())
+
+    val maxChannels =
+        nodeRepository.myNodeInfo
+            .map { it?.maxChannels?.takeIf { max -> max > 0 } ?: DEFAULT_MAX_CHANNELS }
+            .stateInWhileSubscribed(
+                initialValue = nodeRepository.myNodeInfo.value?.maxChannels?.takeIf { it > 0 } ?: DEFAULT_MAX_CHANNELS,
+            )
 
     private val localConfig = radioConfigRepository.localConfigFlow.stateInWhileSubscribed(initialValue = LocalConfig())
 

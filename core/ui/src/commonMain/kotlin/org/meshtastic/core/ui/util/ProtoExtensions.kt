@@ -18,6 +18,7 @@ package org.meshtastic.core.ui.util
 
 import androidx.compose.runtime.Composable
 import kotlinx.coroutines.flow.first
+import okio.ByteString
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.nowMillis
@@ -28,9 +29,11 @@ import org.meshtastic.core.resources.unknown_age
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
+import org.meshtastic.proto.Config
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.Position
 import kotlin.time.Duration.Companion.days
+import org.meshtastic.core.model.Channel as ModelChannel
 
 private const val SECONDS_TO_MILLIS = 1000L
 
@@ -156,18 +159,61 @@ suspend fun applyReplacementChannelSet(
 }
 
 /**
- * Builds the ADD-mode preview list for QR import. Existing channels are preserved at their positions; every incoming
- * channel is appended in order without deduplication.
+ * Builds the filtered ADD-mode preview for QR import: existing channels followed by only the unique incoming channels.
  *
- * Structural `.distinct()` was previously used here, but it silently dropped incoming channels that matched existing
- * entries, shifting later channels to wrong indices and hiding them from the user. The caller (UI) lets the user select
- * which incoming channels to keep.
+ * Incoming channels that are semantic duplicates (same effective name + effective PSK) of an existing or earlier
+ * incoming channel are omitted entirely from the preview — they are not shown to the user. Unique incoming channels are
+ * appended in scanned order and selected by default while firmware channel capacity remains; unique channels beyond
+ * [maxChannels] stay visible but unchecked.
  *
- * @param existing The current [ChannelSettings] list on the radio. Preserved in order.
- * @param incoming The imported [ChannelSettings] list. Appended in order.
- * @return The concatenated list `[existing..., incoming...]`.
+ * Semantic identity is resolved via the [Channel] domain model so preset/default channels match correctly across modem
+ * presets: empty names resolve to the preset display name, and 1-byte PSK markers expand to the full default key.
+ *
+ * @param existing The current [ChannelSettings] list on the radio. Always shown, always selected.
+ * @param incoming The imported [ChannelSettings] list. Duplicates omitted; uniques appended in order.
+ * @param loraConfig The current [Config.LoRaConfig], used to resolve effective channel identity.
+ * @param maxChannels Firmware channel limit. Unique incoming selections stop when this is reached.
+ * @return A [ChannelAddPreview] whose [settings] and [selections] are aligned and size-matched.
  */
-fun mergeChannelSettingsForAdd(
+fun getChannelPreviewForAdd(
     existing: List<ChannelSettings>,
     incoming: List<ChannelSettings>,
-): List<ChannelSettings> = existing + incoming
+    loraConfig: Config.LoRaConfig,
+    maxChannels: Int,
+): ChannelAddPreview {
+    val seen = existing.map { it.channelIdentity(loraConfig) }.toMutableSet()
+    val previewSettings = existing.toMutableList()
+    val previewSelections = MutableList(existing.size) { true }
+    var remaining = (maxChannels - existing.size).coerceAtLeast(0)
+    for (channel in incoming) {
+        val shouldShow = !channel.isPlaceholder()
+        val identity = if (shouldShow) channel.channelIdentity(loraConfig) else null
+        // Omit blank placeholders and semantic duplicates entirely — they are not shown to the user.
+        if (identity != null && seen.add(identity)) {
+            previewSettings += channel
+            val shouldSelect = remaining > 0
+            previewSelections += shouldSelect
+            if (shouldSelect) remaining--
+        }
+    }
+    return ChannelAddPreview(settings = previewSettings, selections = previewSelections)
+}
+
+/** Filtered ADD-mode preview: the visible channel list paired with its default selections (always size-matched). */
+data class ChannelAddPreview(val settings: List<ChannelSettings>, val selections: List<Boolean>)
+
+/** Semantic channel identity based on effective name and effective PSK. */
+private data class ChannelIdentity(val name: String, val psk: ByteString) {
+    // Redact the effective PSK from auto-generated diagnostics so a cryptographic key never leaks
+    // via toString() in exception messages, debug logs, or stack traces.
+    override fun toString(): String = "ChannelIdentity(name=$name, psk=<redacted>)"
+}
+
+/** True when a [ChannelSettings] carries no name and no PSK — a placeholder, not an intended channel. */
+private fun ChannelSettings.isPlaceholder(): Boolean = name.isNullOrBlank() && (psk == null || psk.size == 0)
+
+/** Resolves the [ChannelIdentity] of this [ChannelSettings] under the given [Config.LoRaConfig]. */
+private fun ChannelSettings.channelIdentity(loraConfig: Config.LoRaConfig): ChannelIdentity {
+    val channel = ModelChannel(settings = this, loraConfig = loraConfig)
+    return ChannelIdentity(name = channel.name, psk = channel.psk)
+}
