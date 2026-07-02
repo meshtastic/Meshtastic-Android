@@ -410,6 +410,9 @@ open class RadioConfigViewModel(
         val updatePlan = getManualChannelUpdatePlan(new, old)
         if (updatePlan.isEmpty()) return
         safeLaunch(tag = "setRemoteChannels") {
+            // Manual channel saves are an ordered batch: only update canonical local state after every write request is
+            // enqueued. If any enqueue fails, safeLaunch reports it and leaves the saved state unchanged instead of
+            // blessing a partial delete/reorder result.
             applyManualChannelUpdatePlan(
                 updatePlan = updatePlan,
                 writeChannel = { channel -> radioConfigUseCase.setRemoteChannel(destNum, channel) },
@@ -958,18 +961,23 @@ open class RadioConfigViewModel(
     }
 }
 
+internal data class ManualChannelUpdateResult(val packetIds: List<Int>)
+
 internal suspend fun applyManualChannelUpdatePlan(
     updatePlan: List<Channel>,
     writeChannel: suspend (Channel) -> Int,
     registerRequestId: (Int) -> Unit,
     writeDelay: Duration = MANUAL_CHANNEL_WRITE_DELAY,
     delayFn: suspend (Duration) -> Unit = { delay(it) },
-) {
+): ManualChannelUpdateResult {
+    val packetIds = mutableListOf<Int>()
     for ((index, channel) in updatePlan.withIndex()) {
         val packetId = writeChannel(channel)
+        packetIds.add(packetId)
         registerRequestId(packetId)
         if (index < updatePlan.lastIndex) {
             delayFn(writeDelay)
         }
     }
+    return ManualChannelUpdateResult(packetIds)
 }
