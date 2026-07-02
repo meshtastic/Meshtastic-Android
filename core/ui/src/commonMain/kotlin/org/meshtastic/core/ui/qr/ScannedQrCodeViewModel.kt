@@ -22,12 +22,11 @@ import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioController
+import org.meshtastic.core.ui.util.applyImportedLoraConfigAfterChannelReplacement
 import org.meshtastic.core.ui.util.applyReplacementChannelSet
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.ChannelSet
-import org.meshtastic.proto.Config
-import org.meshtastic.proto.LocalConfig
 
 internal const val DEFAULT_MAX_CHANNELS = 8
 
@@ -47,20 +46,13 @@ class ScannedQrCodeViewModel(
                 initialValue = nodeRepository.myNodeInfo.value?.maxChannels?.takeIf { it > 0 } ?: DEFAULT_MAX_CHANNELS,
             )
 
-    private val localConfig = radioConfigRepository.localConfigFlow.stateInWhileSubscribed(initialValue = LocalConfig())
-
     /** Set the radio config (also updates our saved copy in preferences). */
     fun setChannels(channelSet: ChannelSet) = safeLaunch(tag = "setChannels") {
-        applyReplacementChannelSet(channelSet, radioController, radioConfigRepository)
-
-        val loraConfig = channelSet.lora_config
-        if (loraConfig != null && localConfig.value.lora != loraConfig) {
-            setConfig(Config(lora = loraConfig))
-        }
-    }
-
-    // Set the radio config (also updates our saved copy in preferences)
-    private fun setConfig(config: Config) {
-        safeLaunch(tag = "setConfig") { radioController.setLocalConfig(config) }
+        val currentLoraConfig = applyReplacementChannelSet(channelSet, radioController, radioConfigRepository)
+        applyImportedLoraConfigAfterChannelReplacement(
+            importedLoraConfig = channelSet.lora_config,
+            currentLoraConfig = currentLoraConfig,
+            radioController = radioController,
+        )
     }
 }
