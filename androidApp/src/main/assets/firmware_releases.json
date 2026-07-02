@@ -189,6 +189,12 @@
   },
   "pullRequests": [
     {
+      "id": "10856",
+      "title": "add missing MESHTASTIC_EXCLUDE_AUDIO and fix tlora-v2-1-1_6 compilation",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10856",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
       "id": "10850",
       "title": "Update LovyanGFX to v1.2.24",
       "page_url": "https://github.com/meshtastic/firmware/pull/10850",
@@ -228,6 +234,12 @@
       "id": "10839",
       "title": "second pass adding beacons admin",
       "page_url": "https://github.com/meshtastic/firmware/pull/10839",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "10834",
+      "title": "Seeed Tracker X1 Support",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10834",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
@@ -300,24 +312,6 @@
       "id": "10719",
       "title": "Pr2.5 tmm hop trimming",
       "page_url": "https://github.com/meshtastic/firmware/pull/10719",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10718",
-      "title": "Monotonic time & prep for router graceful retirement",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10718",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10717",
-      "title": "Update US LoRa modem preset to region defaults for compliance",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10717",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10715",
-      "title": "Fixes on 0x69 address detection",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10715",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     }
   ]

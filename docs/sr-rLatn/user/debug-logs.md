@@ -1,5 +1,5 @@
 ---
-title: Debug Logs
+title: Дебаг логови
 parent: User Guide
 nav_order: 22
 last_updated: 2026-07-01
@@ -11,7 +11,7 @@ aliases:
   - bug-report
 ---
 
-# Debug Logs
+# Дебаг логови
 
 When something misbehaves, the app's debug logs are the single most useful thing you can attach to a bug report. Meshtastic can capture them **for you, from inside the app** — you no longer need `adb` or any desktop tooling to collect them.
 

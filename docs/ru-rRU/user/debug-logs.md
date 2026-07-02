@@ -1,6 +1,6 @@
 ---
 title: Debug Logs
-parent: User Guide
+parent: Инструкция пользователя
 nav_order: 22
 last_updated: 2026-07-01
 description: View and export the app's own debug logs from inside the app, and attach a capture to a GitHub issue to help diagnose bugs — no adb required.
@@ -50,7 +50,7 @@ Attach that file to your GitHub issue.
 
 The desktop app has no system logcat, so the **App logs** tab shows the app's own captured log output instead. Search, filtering, and export work the same way.
 
-## Related Topics
+## Связанные темы
 
 - [Help & In-App Docs](help-and-docs) — reading this documentation offline inside the app
 - [Connections](connections) — if the problem is getting connected to your radio in the first place
