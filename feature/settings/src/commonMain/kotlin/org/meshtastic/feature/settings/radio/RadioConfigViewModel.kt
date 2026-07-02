@@ -403,21 +403,25 @@ open class RadioConfigViewModel(
 
     fun updateChannels(new: List<ChannelSettings>, old: List<ChannelSettings>) {
         val destNum = destNum ?: destNode.value?.num ?: return
-        getChannelList(new, old).forEach { channel ->
-            safeLaunch(tag = "setRemoteChannel") {
+
+        val updatePlan = getManualChannelUpdatePlan(new, old)
+        if (updatePlan.isEmpty()) return
+        safeLaunch(tag = "setRemoteChannels") {
+            for (channel in updatePlan) {
                 val packetId = radioConfigUseCase.setRemoteChannel(destNum, channel)
                 registerRequestId(packetId)
             }
-        }
 
-        if (destNum == myNodeNum) {
-            safeLaunch(tag = "migrateChannels") {
+            if (destNum == myNodeNum) {
                 packetRepository.migrateChannelsByPSK(old, new)
                 radioConfigRepository.replaceAllSettings(new)
             }
+            _radioConfigState.update { it.copy(channelList = new) }
         }
-        _radioConfigState.update { it.copy(channelList = new) }
     }
+
+    private fun getManualChannelUpdatePlan(new: List<ChannelSettings>, old: List<ChannelSettings>): List<Channel> =
+        getChannelList(new, old).sortedBy { it.index }
 
     fun setConfig(config: Config) {
         val destNum = destNum ?: destNode.value?.num ?: return
