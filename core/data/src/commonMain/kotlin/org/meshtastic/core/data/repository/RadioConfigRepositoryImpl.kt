@@ -159,6 +159,8 @@ open class RadioConfigRepositoryImpl(
                 channel_url = channels.getChannelUrl().toString(),
                 config = localConfig,
                 module_config = localModuleConfig,
+                is_unmessagable = node?.user?.is_unmessagable,
+                is_licensed = node?.user?.is_licensed,
                 fixed_position =
                 if (node != null && localConfig.position?.fixed_position == true) {
                     node.position

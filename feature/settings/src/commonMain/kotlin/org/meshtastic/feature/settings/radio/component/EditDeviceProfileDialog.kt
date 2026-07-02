@@ -31,14 +31,19 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.channel_url
 import org.meshtastic.core.resources.fixed_position
+import org.meshtastic.core.resources.licensed_amateur_radio
 import org.meshtastic.core.resources.long_name
 import org.meshtastic.core.resources.module_settings
 import org.meshtastic.core.resources.radio_configuration
 import org.meshtastic.core.resources.save
 import org.meshtastic.core.resources.short_name
+import org.meshtastic.core.resources.unmessageable
 import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.proto.DeviceProfile
+
+private const val UNMESSAGABLE_TAG = 9
+private const val LICENSED_TAG = 10
 
 private enum class ProfileField(val tag: Int, val labelRes: StringResource) {
     LONG_NAME(1, Res.string.long_name),
@@ -47,6 +52,8 @@ private enum class ProfileField(val tag: Int, val labelRes: StringResource) {
     CONFIG(4, Res.string.radio_configuration),
     MODULE_CONFIG(5, Res.string.module_settings),
     FIXED_POSITION(6, Res.string.fixed_position),
+    UNMESSAGABLE(UNMESSAGABLE_TAG, Res.string.unmessageable),
+    LICENSED(LICENSED_TAG, Res.string.licensed_amateur_radio),
 }
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
@@ -69,6 +76,8 @@ fun EditDeviceProfileDialog(
                         ProfileField.CONFIG -> deviceProfile.config != null
                         ProfileField.MODULE_CONFIG -> deviceProfile.module_config != null
                         ProfileField.FIXED_POSITION -> deviceProfile.fixed_position != null
+                        ProfileField.UNMESSAGABLE -> deviceProfile.is_unmessagable != null
+                        ProfileField.LICENSED -> deviceProfile.is_licensed != null
                     }
                 },
             )
@@ -99,6 +108,9 @@ fun EditDeviceProfileDialog(
                     } else {
                         null
                     },
+                    is_unmessagable =
+                    if (state[ProfileField.UNMESSAGABLE] == true) deviceProfile.is_unmessagable else null,
+                    is_licensed = if (state[ProfileField.LICENSED] == true) deviceProfile.is_licensed else null,
                 )
             onConfirm(result)
         },
@@ -115,6 +127,8 @@ fun EditDeviceProfileDialog(
                             ProfileField.CONFIG -> deviceProfile.config != null
                             ProfileField.MODULE_CONFIG -> deviceProfile.module_config != null
                             ProfileField.FIXED_POSITION -> deviceProfile.fixed_position != null
+                            ProfileField.UNMESSAGABLE -> deviceProfile.is_unmessagable != null
+                            ProfileField.LICENSED -> deviceProfile.is_licensed != null
                         }
                     SwitchPreference(
                         title = stringResource(field.labelRes),

@@ -45,6 +45,7 @@ import org.meshtastic.proto.ModuleConfig.TelemetryConfig
 import org.meshtastic.proto.User
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class InstallProfileUseCaseTest {
@@ -106,5 +107,15 @@ class InstallProfileUseCaseTest {
         useCase(1234, profile, org.meshtastic.proto.User(long_name = "Old"))
 
         assertTrue(radioController.editSettingsCalled)
+    }
+
+    @Test
+    fun `invoke installs is_unmessagable but never auto-installs is_licensed`() = runTest {
+        val profile = DeviceProfile(is_unmessagable = true, is_licensed = true)
+
+        useCase(1234, profile, User(long_name = "Old"))
+
+        assertEquals(true, radioController.lastSetOwnerUser?.is_unmessagable)
+        assertEquals(false, radioController.lastSetOwnerUser?.is_licensed)
     }
 }
