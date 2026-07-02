@@ -1,6 +1,6 @@
 ---
-title: Debug Logs
-parent: User Guide
+title: Fehlersuchprotokolle
+parent: Benutzerhandbuch
 nav_order: 22
 last_updated: 2026-07-01
 description: View and export the app's own debug logs from inside the app, and attach a capture to a GitHub issue to help diagnose bugs — no adb required.
@@ -11,7 +11,7 @@ aliases:
   - bug-report
 ---
 
-# Debug Logs
+# Fehlersuchprotokolle
 
 When something misbehaves, the app's debug logs are the single most useful thing you can attach to a bug report. Meshtastic can capture them **for you, from inside the app** — you no longer need `adb` or any desktop tooling to collect them.
 
