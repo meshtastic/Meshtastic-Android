@@ -82,6 +82,7 @@ import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.User
+import kotlin.time.Duration
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -394,6 +395,30 @@ class RadioConfigViewModelTest {
         assertEquals(1, maxConcurrentWrites)
         assertEquals(new, viewModel.radioConfigState.value.channelList)
         verifySuspend(exactly(2)) { radioConfigUseCase.setRemoteChannel(123, any()) }
+    }
+
+    @Test
+    fun `applyManualChannelUpdatePlan paces writes except after final channel`() = runTest {
+        val channelA = Channel(index = 1, role = Channel.Role.SECONDARY, settings = ChannelSettings(name = "A"))
+        val channelB = Channel(index = 2, role = Channel.Role.DISABLED, settings = ChannelSettings())
+        val channelC = Channel(index = 3, role = Channel.Role.DISABLED, settings = ChannelSettings())
+        val writtenIndexes = mutableListOf<Int>()
+        val registeredRequestIds = mutableListOf<Int>()
+        val delays = mutableListOf<Duration>()
+
+        applyManualChannelUpdatePlan(
+            updatePlan = listOf(channelA, channelB, channelC),
+            writeChannel = { channel ->
+                writtenIndexes.add(channel.index)
+                channel.index + 100
+            },
+            registerRequestId = { registeredRequestIds.add(it) },
+            delayFn = { delays.add(it) },
+        )
+
+        assertEquals(listOf(1, 2, 3), writtenIndexes)
+        assertEquals(listOf(101, 102, 103), registeredRequestIds)
+        assertEquals(listOf(MANUAL_CHANNEL_WRITE_DELAY, MANUAL_CHANNEL_WRITE_DELAY), delays)
     }
 
     @Test

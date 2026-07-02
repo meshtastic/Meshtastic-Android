@@ -98,7 +98,10 @@ import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.User
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
+
+internal val MANUAL_CHANNEL_WRITE_DELAY: Duration = 1.seconds
 
 /** Data class that represents the current RadioConfig state. */
 data class RadioConfigState(
@@ -407,10 +410,11 @@ open class RadioConfigViewModel(
         val updatePlan = getManualChannelUpdatePlan(new, old)
         if (updatePlan.isEmpty()) return
         safeLaunch(tag = "setRemoteChannels") {
-            for (channel in updatePlan) {
-                val packetId = radioConfigUseCase.setRemoteChannel(destNum, channel)
-                registerRequestId(packetId)
-            }
+            applyManualChannelUpdatePlan(
+                updatePlan = updatePlan,
+                writeChannel = { channel -> radioConfigUseCase.setRemoteChannel(destNum, channel) },
+                registerRequestId = ::registerRequestId,
+            )
 
             if (destNum == myNodeNum) {
                 packetRepository.migrateChannelsByPSK(old, new)
@@ -950,6 +954,22 @@ open class RadioConfigViewModel(
             } else if (route.isEmpty()) {
                 setResponseStateSuccess()
             }
+        }
+    }
+}
+
+internal suspend fun applyManualChannelUpdatePlan(
+    updatePlan: List<Channel>,
+    writeChannel: suspend (Channel) -> Int,
+    registerRequestId: (Int) -> Unit,
+    writeDelay: Duration = MANUAL_CHANNEL_WRITE_DELAY,
+    delayFn: suspend (Duration) -> Unit = { delay(it) },
+) {
+    for ((index, channel) in updatePlan.withIndex()) {
+        val packetId = writeChannel(channel)
+        registerRequestId(packetId)
+        if (index < updatePlan.lastIndex) {
+            delayFn(writeDelay)
         }
     }
 }
