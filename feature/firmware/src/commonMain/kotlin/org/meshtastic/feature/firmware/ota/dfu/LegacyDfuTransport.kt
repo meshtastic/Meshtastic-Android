@@ -217,7 +217,7 @@ class LegacyDfuTransport(
             // ── 1. START_DFU + image sizes on Packet, then response ─────────────
             writeControlPoint(byteArrayOf(LegacyDfuOpcode.START_DFU, LegacyDfuImageType.APPLICATION))
             writePacket(legacyImageSizesPayload(appSize = firmware.size))
-            requireSuccess(LegacyDfuOpcode.START_DFU, awaitResponse(START_RESPONSE_TIMEOUT))
+            handleStartResponse(awaitResponse(START_RESPONSE_TIMEOUT))
 
             // ── 2. INIT_PARAMS_START → init bytes on Packet → INIT_PARAMS_COMPLETE → response ──
             writeControlPoint(byteArrayOf(LegacyDfuOpcode.INIT_DFU_PARAMS, LegacyDfuOpcode.INIT_PARAMS_START))
@@ -452,6 +452,27 @@ class LegacyDfuTransport(
         "BLE link dropped during DFU handshake (state=$state). The device disconnected before answering a DFU " +
             "command — most often the stock Adafruit bootloader rebooting to the app. Retry, or use USB recovery.",
     )
+
+    /**
+     * Validate the `START_DFU` response, with special handling for `INVALID_STATE`.
+     *
+     * A device whose previous DFU session was interrupted (link drop, app closed mid-stream) keeps its half-finished
+     * transfer state and rejects a fresh `START_DFU` with `INVALID_STATE` until it is reset. This is the common case
+     * when *recovering* a device stranded in the bootloader.
+     *
+     * We do NOT try to RESET on this connection: the stock Adafruit bootloader goes unresponsive immediately after
+     * emitting INVALID_STATE (the link dies by supervision timeout ~5 s later), so a write here never lands. Instead we
+     * fast-fail with [LegacyDfuException.StaleSessionReset]; [SecureDfuHandler] then resets the bootloader over a
+     * *fresh* connection (which is responsive up until START) before retrying. Mirrors the intent of Nordic
+     * `LegacyDfuImpl.resetAndRestart()`.
+     */
+    private fun handleStartResponse(response: LegacyDfuResponse) {
+        if (response is LegacyDfuResponse.Failure && response.status == LegacyDfuStatus.INVALID_STATE) {
+            Logger.w { "Legacy DFU: START rejected with INVALID_STATE (stale session from an interrupted flash)" }
+            throw LegacyDfuException.StaleSessionReset()
+        }
+        requireSuccess(LegacyDfuOpcode.START_DFU, response)
+    }
 
     private fun requireSuccess(expectedOpcode: Byte, response: LegacyDfuResponse) {
         when (response) {

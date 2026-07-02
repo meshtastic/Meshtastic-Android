@@ -59,6 +59,7 @@ import org.meshtastic.core.repository.isSerial
 import org.meshtastic.core.repository.isTcp
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
+import org.meshtastic.core.resources.firmware_recovery_ble_failed
 import org.meshtastic.core.resources.firmware_update_battery_low
 import org.meshtastic.core.resources.firmware_update_copying
 import org.meshtastic.core.resources.firmware_update_extracting
@@ -388,12 +389,19 @@ class FirmwareUpdateViewModel(
                         is FirmwareUpdateState.Success ->
                             verifyUpdateResult(originalDeviceAddress, finalState.wasLowSpeedTransfer)
 
-                        is FirmwareUpdateState.Error ->
+                        is FirmwareUpdateState.Error -> {
+                            // BLE re-flash of a stranded device failed. A stock nRF bootloader can't reliably finish
+                            // an interrupted OTA update over the air, so point the user at USB serial-DFU recovery
+                            // rather than surfacing the low-level connection error.
+                            _state.value =
+                                FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_recovery_ble_failed))
                             tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
+                        }
 
                         else -> {
                             Logger.w { "Firmware recovery returned without terminal state: ${_state.value}" }
-                            _state.value = FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_failed))
+                            _state.value =
+                                FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_recovery_ble_failed))
                             tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
                         }
                     }
@@ -404,7 +412,8 @@ class FirmwareUpdateViewModel(
                     throw e
                 } catch (e: Exception) {
                     Logger.e(e) { "Firmware recovery failed" }
-                    _state.value = FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_failed))
+                    _state.value =
+                        FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_recovery_ble_failed))
                 }
             }
     }

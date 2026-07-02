@@ -204,16 +204,55 @@ class SecureDfuHandler(
         attempts: Int,
         updateState: (FirmwareUpdateState) -> Unit,
     ) {
-        retryWithDelay(
-            attempts = attempts,
-            retryDelayMillis = SESSION_RETRY_DELAY_MS,
-            onAttempt = { attempt -> Logger.i { "DFU: upload session attempt $attempt/$attempts" } },
-            block = { attempt ->
-                runCatching { runUploadSession(protocol, target, pkg, updateState) }
-                    .onFailure { Logger.w(it) { "DFU: upload session $attempt/$attempts failed: ${it.message}" } }
-            },
-        )
-            .getOrElse { throw it }
+        var lastError: Throwable? = null
+        repeat(attempts) { i ->
+            val attempt = i + 1
+            Logger.i { "DFU: upload session attempt $attempt/$attempts" }
+            try {
+                runUploadSession(protocol, target, pkg, updateState)
+                return
+            } catch (e: CancellationException) {
+                throw e
+            } catch (@Suppress("TooGenericExceptionCaught") e: Throwable) {
+                lastError = e
+                Logger.w(e) { "DFU: upload session $attempt/$attempts failed: ${e.message}" }
+                // A stock bootloader holding a wedged session from an interrupted flash rejects START with
+                // INVALID_STATE, then goes unresponsive (the RESET can't land on that connection). A *fresh*
+                // connection is responsive up until START, so reset it there — the device reboots into a clean OTA
+                // session (GPREGRET OTA flag is retained) that the next attempt can flash normally.
+                if (e is LegacyDfuException.StaleSessionReset && attempt < attempts) {
+                    resetStaleBootloader(protocol, target)
+                }
+                if (attempt < attempts) delay(SESSION_RETRY_DELAY_MS)
+            }
+        }
+        throw lastError ?: DfuException.TransferFailed("DFU upload failed after $attempts attempts")
+    }
+
+    private fun createTransport(protocol: DfuProtocolKind, target: String): DfuUploadTransport = when (protocol) {
+        DfuProtocolKind.LEGACY -> LegacyDfuTransport(bleScanner, bleConnectionFactory, target, dispatchers.default)
+        DfuProtocolKind.SECURE -> SecureDfuTransport(bleScanner, bleConnectionFactory, target, dispatchers.default)
+    }
+
+    /**
+     * Reboot a bootloader wedged in a stale DFU session. Connects a fresh transport (which is responsive before any
+     * START) and issues RESET (0x06) via [DfuUploadTransport.abort], then waits for the reboot + re-advertise. Best
+     * effort: any failure here is non-fatal — the caller retries the upload regardless.
+     */
+    private suspend fun resetStaleBootloader(protocol: DfuProtocolKind, target: String) {
+        Logger.i { "DFU: reset-priming stale bootloader before retry" }
+        val transport = createTransport(protocol, target)
+        try {
+            transport.connectToDfuMode()
+                .onSuccess {
+                    transport.abort()
+                    Logger.i { "DFU: reset-prime RESET sent; waiting for clean reboot" }
+                }
+                .onFailure { Logger.w(it) { "DFU: reset-prime connect failed: ${it.message}" } }
+        } finally {
+            withContext(NonCancellable) { transport.close() }
+        }
+        delay(RESET_PRIME_REBOOT_WAIT_MS)
     }
 
     /** A single connect + init-packet + firmware-upload session over a fresh transport; always cleans up. */
@@ -223,14 +262,7 @@ class SecureDfuHandler(
         pkg: DfuZipPackage,
         updateState: (FirmwareUpdateState) -> Unit,
     ) {
-        val transport: DfuUploadTransport =
-            when (protocol) {
-                DfuProtocolKind.LEGACY ->
-                    LegacyDfuTransport(bleScanner, bleConnectionFactory, target, dispatchers.default)
-
-                DfuProtocolKind.SECURE ->
-                    SecureDfuTransport(bleScanner, bleConnectionFactory, target, dispatchers.default)
-            }
+        val transport: DfuUploadTransport = createTransport(protocol, target)
         var completed = false
         try {
             connectWithRetry(transport, updateState)
@@ -367,5 +399,8 @@ class SecureDfuHandler(
 
         /** Delay between whole-session retries (lets the bootloader settle / resume advertising). */
         private const val SESSION_RETRY_DELAY_MS = 2_000L
+
+        /** Wait after a reset-prime RESET for the bootloader to reboot and re-advertise a clean OTA session. */
+        private const val RESET_PRIME_REBOOT_WAIT_MS = 4_000L
     }
 }
