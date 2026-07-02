@@ -13,7 +13,7 @@ reviews:
   auto_review:
     enabled: true
     drafts: false
-    skip_author:
+    ignore_usernames:
       - renovate
       - renovate[bot]
   # Stop reviewing once a PR is closed.
