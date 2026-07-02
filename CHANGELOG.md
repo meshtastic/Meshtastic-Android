@@ -7,6 +7,22 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 <!-- UNRELEASED_START -->
 ## [Unreleased]
 
+### Unreleased (not yet in any build)
+
+#### 🏗️ Features
+* feat(connections): add deep link to trigger a connection by address by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6036
+* feat(desktop): add Flathub screenshots to metainfo.xml by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6042
+* feat(testing): debug-only skip_onboarding intent extra for AI/CI tooling by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6044
+* feat(discovery): surface received Mesh Beacon invitations by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6043
+* feat(firmware): nRF52 legacy BLE DFU — stock-bootloader fixes + stranded-device recovery by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6041
+#### 🖥️ Desktop
+* fix(data): stale firmware/hardware caches — stop cancelling slow API refreshes, prune pulled releases, seed from newer bundles by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6060
+#### 🛠️ Fixes
+* fix(qr): Stabilize scanner lifecycle and imports by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6040
+* fix(connections): label the connecting-card button "Stop Connecting" by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6046
+* fix(messages): Refresh channel placeholders after updates by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6054
+* fix(qr): Filter duplicate ADD imports by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6056
+
 ### Closed Beta (v2.8.0-closed.4)
 Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14):
 
