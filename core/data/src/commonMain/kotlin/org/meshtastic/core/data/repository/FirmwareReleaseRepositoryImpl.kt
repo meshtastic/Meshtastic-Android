@@ -31,12 +31,16 @@ import org.meshtastic.core.data.util.staleWhileRevalidateFlow
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.FirmwareReleaseEntity
 import org.meshtastic.core.database.entity.FirmwareReleaseType
+import org.meshtastic.core.database.entity.asDeviceVersion
+import org.meshtastic.core.database.entity.asEntity
 import org.meshtastic.core.database.entity.asExternalModel
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.model.NetworkFirmwareRelease
 import org.meshtastic.core.model.NetworkFirmwareReleases
 import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.network.FirmwareReleaseRemoteDataSource
 import org.meshtastic.core.repository.FirmwareReleaseRepository
+import kotlin.concurrent.Volatile
 
 @Single
 open class FirmwareReleaseRepositoryImpl(
@@ -49,6 +53,11 @@ open class FirmwareReleaseRepositoryImpl(
 
     /** Single-flight guard so concurrent collectors share one network refresh. */
     private val refreshMutex = Mutex()
+
+    /** Guards [seedChecked] so concurrent collectors decode the bundled snapshot at most once per process. */
+    private val seedMutex = Mutex()
+
+    @Volatile private var seedChecked = false
 
     override val stableRelease: Flow<FirmwareRelease?> = getLatestFirmware(FirmwareReleaseType.STABLE)
 
@@ -64,7 +73,10 @@ open class FirmwareReleaseRepositoryImpl(
         },
         fetch = { singleFlightRefresh() },
         context = dispatchers.default,
-        networkTimeoutMs = NETWORK_REFRESH_TIMEOUT_MS,
+        // No collector blocks on the fetch (cache is emitted first), so let the HttpClient's own
+        // timeout/retry policy bound it — api.meshtastic.org routinely takes 20-60s to serve this list,
+        // and a short deadline here cancels every refresh, pinning users to the bundled seed data.
+        networkTimeoutMs = null,
         tag = "FirmwareReleaseRepository",
     )
 
@@ -72,26 +84,59 @@ open class FirmwareReleaseRepositoryImpl(
         localDataSource.deleteAllFirmwareReleases()
     }
 
+    /**
+     * Applies the bundled snapshot per release type whenever it is newer than what is cached for that type — not just
+     * when the cache is empty. The bundle is refreshed weekly in CI, so an app update carries fresh data even for users
+     * whose network path to api.meshtastic.org chronically fails. Checked once per process; a cache that is already
+     * newer (from a successful network refresh) is never regressed, and a type the bundle doesn't ship is left
+     * untouched.
+     */
     private suspend fun ensureSeeded() {
-        if (!localDataSource.hasAnyEntries()) {
+        if (seedChecked) return
+        seedMutex.withLock {
+            if (seedChecked) return
             safeCatching {
-                Logger.d { "FirmwareReleaseRepository: seeding cache from bundled JSON" }
-                val jsonReleases =
-                    assetReader.decode<NetworkFirmwareReleases>("firmware_releases.json", json)
-                        ?: NetworkFirmwareReleases()
-                localDataSource.insertFirmwareReleases(jsonReleases.releases.stable, FirmwareReleaseType.STABLE)
-                localDataSource.insertFirmwareReleases(jsonReleases.releases.alpha, FirmwareReleaseType.ALPHA)
+                val bundled = assetReader.decode<NetworkFirmwareReleases>("firmware_releases.json", json)?.releases
+                if (bundled == null) {
+                    Logger.w { "FirmwareReleaseRepository: no bundled releases available to seed from" }
+                } else {
+                    val toApply =
+                        listOf(
+                            FirmwareReleaseType.STABLE to bundled.stable,
+                            FirmwareReleaseType.ALPHA to bundled.alpha,
+                        )
+                            .filter { (type, releases) -> isBundleNewerFor(type, releases) }
+                            .toMap()
+                    if (toApply.isNotEmpty()) {
+                        Logger.i { "FirmwareReleaseRepository: applying bundled snapshot for ${toApply.keys}" }
+                        localDataSource.replaceFirmwareReleases(toApply)
+                    }
+                }
             }
                 .onFailure { e -> Logger.w(e) { "FirmwareReleaseRepository: failed to seed cache from bundled JSON" } }
+            seedChecked = true
         }
+    }
+
+    /** True when [bundled] contains a release newer than anything cached for [type]. */
+    private suspend fun isBundleNewerFor(type: FirmwareReleaseType, bundled: List<NetworkFirmwareRelease>): Boolean {
+        val bundledNewest = bundled.maxOfOrNull { it.asEntity(type).asDeviceVersion() } ?: return false
+        val cachedNewest = localDataSource.getLatestRelease(type)?.asDeviceVersion()
+        return cachedNewest == null || bundledNewest > cachedNewest
     }
 
     private suspend fun singleFlightRefresh() {
         refreshMutex.withLock {
             Logger.d { "FirmwareReleaseRepository: fetching from remote API" }
-            val networkReleases = remoteDataSource.getFirmwareReleases()
-            localDataSource.insertFirmwareReleases(networkReleases.releases.stable, FirmwareReleaseType.STABLE)
-            localDataSource.insertFirmwareReleases(networkReleases.releases.alpha, FirmwareReleaseType.ALPHA)
+            val releases = remoteDataSource.getFirmwareReleases().releases
+            if (releases.stable.isEmpty() && releases.alpha.isEmpty()) {
+                Logger.w { "FirmwareReleaseRepository: remote returned no releases; leaving cache untouched" }
+            } else {
+                // Replace rather than upsert so releases pulled or reclassified upstream don't linger as "latest".
+                localDataSource.replaceFirmwareReleases(
+                    mapOf(FirmwareReleaseType.STABLE to releases.stable, FirmwareReleaseType.ALPHA to releases.alpha),
+                )
+            }
         }
     }
 
@@ -99,8 +144,5 @@ open class FirmwareReleaseRepositoryImpl(
 
     companion object {
         private val CACHE_EXPIRATION_TIME_MS = TimeConstants.ONE_HOUR.inWholeMilliseconds
-
-        /** Maximum time to wait for the remote API before falling back to cached/bundled data. */
-        private const val NETWORK_REFRESH_TIMEOUT_MS = 5_000L
     }
 }

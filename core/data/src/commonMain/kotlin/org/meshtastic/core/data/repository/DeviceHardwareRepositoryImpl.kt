@@ -17,7 +17,10 @@
 package org.meshtastic.core.data.repository
 
 import co.touchlab.kermit.Logger
-import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -53,8 +56,15 @@ class DeviceHardwareRepositoryImpl(
     private val dispatchers: CoroutineDispatchers,
 ) : DeviceHardwareRepository {
 
-    /** Single-flight guard so concurrent collectors don't duplicate the full-table refresh. */
-    private val refreshMutex = Mutex()
+    /** Guards [inFlightRefresh] so concurrent callers share one full-table refresh. */
+    private val refreshGuard = Mutex()
+
+    private var inFlightRefresh: Deferred<Unit>? = null
+
+    // This @Single lives for the entire app lifetime, so the SupervisorJob is never cancelled. Refreshes run here
+    // so a caller that stops waiting (the node-details path bounds its wait) can't abort the shared fetch — slow
+    // api.meshtastic.org responses (measured 20-60s) still land in the DB for the next lookup.
+    private val refreshScope = CoroutineScope(dispatchers.io + SupervisorJob())
 
     /**
      * Retrieves device hardware information by its model ID and optional target string.
@@ -83,7 +93,7 @@ class DeviceHardwareRepositoryImpl(
 
         var entities = lookupEntities(hwModel, target)
         if (forceRefresh || entities.isEmpty() || entities.any { it.isStale() }) {
-            singleFlightRefresh()
+            singleFlightRefresh(maxWaitMs = NETWORK_REFRESH_TIMEOUT_MS)
             entities = lookupEntities(hwModel, target)
         }
 
@@ -126,32 +136,35 @@ class DeviceHardwareRepositoryImpl(
     }
 
     /**
-     * Performs a single-flight network refresh: concurrent callers share one in-flight request rather than each
-     * triggering a full API fetch.
+     * Starts (or joins) a single shared refresh running in [refreshScope]. When [maxWaitMs] is set, the caller waits at
+     * most that long before falling back to cached data; the refresh itself always runs to completion, bounded only by
+     * the HttpClient's own timeout/retry policy.
      */
-    private suspend fun singleFlightRefresh() {
-        refreshMutex.withLock {
-            safeCatching {
-                val remoteHardware =
-                    withTimeoutOrNull(NETWORK_REFRESH_TIMEOUT_MS) {
-                        Logger.d { "DeviceHardwareRepository: fetching from remote API" }
-                        remoteDataSource.getAllDeviceHardware()
-                    }
-                if (remoteHardware == null) {
-                    Logger.w {
-                        "DeviceHardwareRepository: network refresh timed out after ${NETWORK_REFRESH_TIMEOUT_MS}ms"
-                    }
-                } else {
-                    Logger.d { "DeviceHardwareRepository: remote returned ${remoteHardware.size} entries" }
-                    withContext(NonCancellable + dispatchers.io) {
-                        localDataSource.insertAllDeviceHardware(remoteHardware)
-                    }
-                    // Refresh msh.to device links from the API after a hardware refresh. Runs outside the hardware
-                    // network timeout so that deadline can't cancel it mid-write.
-                    deviceLinkRepository.reconcile()
-                }
+    private suspend fun singleFlightRefresh(maxWaitMs: Long? = null) {
+        val refresh =
+            refreshGuard.withLock {
+                inFlightRefresh?.takeIf { it.isActive }
+                    ?: refreshScope
+                        .async {
+                            safeCatching {
+                                Logger.d { "DeviceHardwareRepository: fetching from remote API" }
+                                val remoteHardware = remoteDataSource.getAllDeviceHardware()
+                                Logger.d {
+                                    "DeviceHardwareRepository: remote returned ${remoteHardware.size} entries"
+                                }
+                                localDataSource.insertAllDeviceHardware(remoteHardware)
+                                // Refresh msh.to device links from the API after a hardware refresh.
+                                deviceLinkRepository.reconcile()
+                            }
+                                .onFailure { e -> Logger.w(e) { "DeviceHardwareRepository: network refresh failed" } }
+                            Unit
+                        }
+                        .also { inFlightRefresh = it }
             }
-                .onFailure { e -> Logger.w(e) { "DeviceHardwareRepository: network refresh failed" } }
+        if (maxWaitMs == null) {
+            refresh.join()
+        } else if (withTimeoutOrNull(maxWaitMs) { refresh.join() } == null) {
+            Logger.w { "DeviceHardwareRepository: refresh still in flight after ${maxWaitMs}ms; using cached data" }
         }
     }
 
@@ -209,7 +222,7 @@ class DeviceHardwareRepositoryImpl(
     companion object {
         private val CACHE_EXPIRATION_TIME_MS = TimeConstants.ONE_DAY.inWholeMilliseconds
 
-        /** Maximum time to wait for the remote API before falling back to cached/bundled data. */
+        /** Maximum time a blocking lookup waits for an in-flight refresh before returning cached/bundled data. */
         private const val NETWORK_REFRESH_TIMEOUT_MS = 5_000L
     }
 }

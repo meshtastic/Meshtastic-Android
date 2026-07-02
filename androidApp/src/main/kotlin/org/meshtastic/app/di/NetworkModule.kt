@@ -101,7 +101,7 @@ class NetworkModule {
             install(plugin = ContentNegotiation) { json(json) }
             install(DefaultRequest) { url(HttpClientDefaults.API_BASE_URL) }
             install(plugin = HttpTimeout) {
-                requestTimeoutMillis = HttpClientDefaults.TIMEOUT_MS
+                requestTimeoutMillis = HttpClientDefaults.REQUEST_TIMEOUT_MS
                 connectTimeoutMillis = HttpClientDefaults.TIMEOUT_MS
                 socketTimeoutMillis = HttpClientDefaults.TIMEOUT_MS
             }

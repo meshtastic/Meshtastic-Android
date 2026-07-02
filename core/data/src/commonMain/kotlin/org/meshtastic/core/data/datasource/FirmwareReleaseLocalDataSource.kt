@@ -34,16 +34,16 @@ class FirmwareReleaseLocalDataSource(
     private val firmwareReleaseDao
         get() = dbManager.currentDb.value.firmwareReleaseDao()
 
-    suspend fun insertFirmwareReleases(
-        firmwareReleases: List<NetworkFirmwareRelease>,
-        releaseType: FirmwareReleaseType,
-    ) = withContext(dispatchers.io) {
-        firmwareReleases.forEach { firmwareRelease ->
-            firmwareReleaseDao.insert(firmwareRelease.asEntity(releaseType))
-        }
-    }
-
     suspend fun deleteAllFirmwareReleases() = withContext(dispatchers.io) { firmwareReleaseDao.deleteAll() }
+
+    /** Transactionally replaces all rows of each given type with its API list; other types are untouched. */
+    suspend fun replaceFirmwareReleases(releasesByType: Map<FirmwareReleaseType, List<NetworkFirmwareRelease>>) =
+        withContext(dispatchers.io) {
+            firmwareReleaseDao.replaceByTypes(
+                types = releasesByType.keys.toList(),
+                releases = releasesByType.flatMap { (type, releases) -> releases.map { it.asEntity(type) } },
+            )
+        }
 
     suspend fun getLatestRelease(releaseType: FirmwareReleaseType): FirmwareReleaseEntity? =
         withContext(dispatchers.io) {
@@ -55,6 +55,4 @@ class FirmwareReleaseLocalDataSource(
                 return@withContext latestRelease
             }
         }
-
-    suspend fun hasAnyEntries(): Boolean = withContext(dispatchers.io) { firmwareReleaseDao.count() > 0 }
 }

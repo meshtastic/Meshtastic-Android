@@ -25,8 +25,15 @@ import io.ktor.client.plugins.HttpRequestRetryConfig
  * Desktop) when installing [io.ktor.client.plugins.HttpTimeout] and [io.ktor.client.plugins.HttpRequestRetry].
  */
 object HttpClientDefaults {
-    /** Timeout in milliseconds for connect, request, and socket operations. */
+    /** Timeout in milliseconds for connect and socket operations. */
     const val TIMEOUT_MS = 30_000L
+
+    /**
+     * Timeout in milliseconds for a whole request. Deliberately generous: api.meshtastic.org has been measured taking
+     * 20-60s to serve `github/firmware/list` and `resource/deviceHardware`, and callers use stale-while-revalidate
+     * caching so nothing user-facing waits on this deadline.
+     */
+    const val REQUEST_TIMEOUT_MS = 90_000L
 
     /** Maximum number of automatic retries on server errors (5xx) and transient connection/IO failures. */
     const val MAX_RETRIES = 3
