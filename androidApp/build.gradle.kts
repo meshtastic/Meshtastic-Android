@@ -314,7 +314,6 @@ dependencies {
     googleImplementation(libs.mlkit.genai.prompt)
 
     googleImplementation(libs.androidx.appfunctions)
-    googleImplementation(libs.androidx.appfunctions.service)
     add("kspGoogle", libs.androidx.appfunctions.compiler)
 
     fdroidImplementation(libs.osmdroid.android)

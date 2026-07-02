@@ -16,12 +16,12 @@
  */
 package org.meshtastic.app.ai.appfunctions
 
+import androidx.appfunctions.AppFunction
 import androidx.appfunctions.AppFunctionContext
 import androidx.appfunctions.AppFunctionElementNotFoundException
 import androidx.appfunctions.AppFunctionIntValueConstraint
 import androidx.appfunctions.AppFunctionInvalidArgumentException
 import androidx.appfunctions.AppFunctionNotSupportedException
-import androidx.appfunctions.service.AppFunction
 import kotlinx.coroutines.TimeoutCancellationException
 import org.meshtastic.core.data.ai.AiFunctionProvider
 import org.meshtastic.core.data.ai.SendMessageResult
