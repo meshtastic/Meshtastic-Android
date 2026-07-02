@@ -797,6 +797,8 @@
     <string name="match_all">Совпадение всех | Любой</string>
     <string name="match_any">Совпадение любой | Все</string>
     <string name="max">Макс</string>
+    <!-- MESH -->
+    <string name="mesh_beacon_offer_dismiss">Отменить</string>
     <string name="mesh_map_location">Карта расположения нод</string>
     <string name="mesh_map_location_description">Включает синюю точку местоположения для вашего телефона на карте нод.</string>
     <!-- MESHTASTIC -->

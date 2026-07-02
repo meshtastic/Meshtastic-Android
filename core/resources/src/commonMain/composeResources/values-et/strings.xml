@@ -885,6 +885,8 @@
     <string name="match_all">Sobib mõni | kõik</string>
     <string name="match_any">Sobib mõni | kõik</string>
     <string name="max">Maksimaalselt</string>
+    <!-- MESH -->
+    <string name="mesh_beacon_offer_dismiss">Loobu</string>
     <string name="mesh_map_location">Meshtastic kaardi asukoht</string>
     <string name="mesh_map_location_description">Lubab telefoni asukoha kuvamine sinisena kärgvõrgu kaardil.</string>
     <!-- MESHTASTIC -->

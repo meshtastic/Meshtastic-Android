@@ -131,6 +131,7 @@
     <string name="map_subDescription">ang: %1$d° distans: %2$s</string>
     <string name="map_tile_download_estimate">Estimasyon telechajman tèk</string>
     <string name="map_tile_source">Sous Tèk</string>
+    <!-- MESH -->
     <!-- MESHTASTIC -->
     <string name="meshtastic_new_nodes_notifications">Notifikasyon nouvo nœud</string>
     <string name="meshtastic_service_notifications">Notifikasyon sèvis</string>

@@ -666,6 +666,8 @@
     <string name="match_all">Відповідає всім/будь-якому</string>
     <string name="match_any">Відповідає будь-якому/всім</string>
     <string name="max">Макс</string>
+    <!-- MESH -->
+    <string name="mesh_beacon_offer_dismiss">Відхилити</string>
     <!-- MESHTASTIC -->
     <string name="meshtastic">Meshtastic</string>
     <string name="meshtastic_alerts_notifications">Сповіщення про тривоги</string>

@@ -621,6 +621,8 @@
     <string name="map_type_terrain">Терен</string>
     <string name="mark_as_read">Маркиране като прочетено</string>
     <string name="max">Макс</string>
+    <!-- MESH -->
+    <string name="mesh_beacon_offer_dismiss">Отхвърляне</string>
     <string name="mesh_map_location">Местоположение на mesh карта</string>
     <string name="mesh_map_location_description">Активира синята точка за местоположение на телефона ви в mesh карта.</string>
     <!-- MESHTASTIC -->

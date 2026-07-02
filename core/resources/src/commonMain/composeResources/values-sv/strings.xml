@@ -624,6 +624,8 @@
     <string name="match_all">Matcha alla &lt;unk&gt; någon</string>
     <string name="match_any">Matcha någon &lt;unk&gt; alla</string>
     <string name="max">Max</string>
+    <!-- MESH -->
+    <string name="mesh_beacon_offer_dismiss">Stäng</string>
     <string name="mesh_map_location">Mesh Map plats</string>
     <string name="mesh_map_location_description">Aktiverar den blå platspunkten för telefonen i mesh-kartan.</string>
     <!-- MESHTASTIC -->

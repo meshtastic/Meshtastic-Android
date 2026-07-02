@@ -634,6 +634,8 @@
     <string name="match_all">Potrivire toate | oricare</string>
     <string name="match_any">Potrivire oricare | toate</string>
     <string name="max">Maxim</string>
+    <!-- MESH -->
+    <string name="mesh_beacon_offer_dismiss">Renunțați</string>
     <string name="mesh_map_location">Locație hartă plasa</string>
     <string name="mesh_map_location_description">Activează punctul albastru pentru telefon în harta plasei.</string>
     <!-- MESHTASTIC -->

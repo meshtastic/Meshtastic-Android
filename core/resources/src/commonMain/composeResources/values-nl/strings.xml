@@ -237,6 +237,7 @@
     <string name="map_tile_download_estimate">Geschatte download tegels:</string>
     <string name="map_tile_source">Bron tegel</string>
     <string name="max">Maximum</string>
+    <!-- MESH -->
     <!-- MESHTASTIC -->
     <string name="meshtastic_alerts_notifications">Waarschuwingsmeldingen</string>
     <string name="meshtastic_low_battery_notifications">Batterij bijna leeg</string>

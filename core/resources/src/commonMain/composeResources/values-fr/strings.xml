@@ -764,6 +764,8 @@
     <string name="match_all">Correspondre à tout | N'importe quel</string>
     <string name="match_any">Correspondre à n'importe lequel | Tous</string>
     <string name="max">Max</string>
+    <!-- MESH -->
+    <string name="mesh_beacon_offer_dismiss">Rejeter</string>
     <string name="mesh_map_location">Emplacement de la carte de maillage</string>
     <string name="mesh_map_location_description">Active le point de localisation bleu de votre téléphone sur la carte de maillage.</string>
     <!-- MESHTASTIC -->

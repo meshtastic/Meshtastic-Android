@@ -293,6 +293,7 @@
     <string name="map_tile_download_estimate">Estimativa de download do bloco:</string>
     <string name="map_tile_source">Fonte dos blocos</string>
     <string name="max">Máximo</string>
+    <!-- MESH -->
     <!-- MESHTASTIC -->
     <string name="meshtastic">Nome do nó de alternativo</string>
     <string name="meshtastic_alerts_notifications">Notificações de alerta</string>

@@ -119,6 +119,7 @@
     <string name="map_subDescription">rumbo: %1$d distancia:%2$s</string>
     <string name="map_tile_download_estimate">Descarga de 'tile' estimada:</string>
     <string name="map_tile_source">Fonte de 'tile'</string>
+    <!-- MESH -->
     <!-- MESHTASTIC -->
     <string name="meshtastic_service_notifications">Notificacións de servizo</string>
     <!-- MESSAGE -->

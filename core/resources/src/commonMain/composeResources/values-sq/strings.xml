@@ -132,6 +132,7 @@
     <string name="map_subDescription">drejtimi: %1$d° distanca: %2$s</string>
     <string name="map_tile_download_estimate">Parashikimi i shkarkimit të pllakatës:</string>
     <string name="map_tile_source">Burimi i pllakatave</string>
+    <!-- MESH -->
     <!-- MESHTASTIC -->
     <string name="meshtastic_new_nodes_notifications">Njoftimet për nyje të reja</string>
     <string name="meshtastic_service_notifications">Njoftime shërbimi</string>

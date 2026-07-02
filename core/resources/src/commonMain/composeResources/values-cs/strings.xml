@@ -599,6 +599,8 @@
     <string name="map_type_terrain">Terénní</string>
     <string name="mark_as_read">Označit jako přečtené</string>
     <string name="max">Max</string>
+    <!-- MESH -->
+    <string name="mesh_beacon_offer_dismiss">Zavřít</string>
     <string name="mesh_map_location">Poloha v mesh mapě</string>
     <string name="mesh_map_location_description">Zobrazí modrou tečku polohy vašeho telefonu v mesh mapě.</string>
     <!-- MESHTASTIC -->

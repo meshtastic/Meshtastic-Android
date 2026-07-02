@@ -478,6 +478,8 @@
     <string name="match_all">Mind | Bármelyik</string>
     <string name="match_any">Bármelyik | Mind</string>
     <string name="max">Max</string>
+    <!-- MESH -->
+    <string name="mesh_beacon_offer_dismiss">Bezárás</string>
     <string name="mesh_map_location">Mesh-térkép helyzet</string>
     <string name="mesh_map_location_description">Engedélyezi a telefon kék helyjelölőjét a mesh térképen.</string>
     <!-- MESHTASTIC -->

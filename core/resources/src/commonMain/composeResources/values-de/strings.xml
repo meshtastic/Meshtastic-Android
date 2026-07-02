@@ -789,6 +789,8 @@
     <string name="match_all">Alle finden | Irgendwas</string>
     <string name="match_any">Irgendwas finden | Alle</string>
     <string name="max">Maximal</string>
+    <!-- MESH -->
+    <string name="mesh_beacon_offer_dismiss">Verwerfen</string>
     <string name="mesh_map_location">Netzwerk Kartenstandort</string>
     <string name="mesh_map_location_description">Aktiviert den blauen Punkt für Ihr Telefon in der Netzwerkkarte.</string>
     <!-- MESHTASTIC -->
