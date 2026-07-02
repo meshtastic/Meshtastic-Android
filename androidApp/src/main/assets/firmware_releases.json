@@ -189,6 +189,12 @@
   },
   "pullRequests": [
     {
+      "id": "10860",
+      "title": "esp32-common: Do not remove `network-provisioning` component",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10860",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
       "id": "10856",
       "title": "add missing MESHTASTIC_EXCLUDE_AUDIO and fix tlora-v2-1-1_6 compilation",
       "page_url": "https://github.com/meshtastic/firmware/pull/10856",
@@ -234,12 +240,6 @@
       "id": "10839",
       "title": "second pass adding beacons admin",
       "page_url": "https://github.com/meshtastic/firmware/pull/10839",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10829",
-      "title": "exclude the variant from LTO",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10829",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
@@ -306,6 +306,12 @@
       "id": "10719",
       "title": "Pr2.5 tmm hop trimming",
       "page_url": "https://github.com/meshtastic/firmware/pull/10719",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "10718",
+      "title": "Monotonic time & prep for router graceful retirement",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10718",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     }
   ]
