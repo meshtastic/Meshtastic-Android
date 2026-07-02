@@ -311,14 +311,18 @@
     <string name="debug_filter_preset_title">Oletussuodattimet</string>
     <string name="debug_filters">Suodattimet</string>
     <string name="debug_log_api_enabled">Vianetsintälokirajapinta käytössä</string>
+    <string name="debug_logcat_empty">Ei näytettäviä sovelluslokitietoja</string>
     <string name="debug_logcat_refresh">Päivitä</string>
     <string name="debug_logs_export">Vie lokitiedot</string>
+    <string name="debug_logs_exported">Lokitiedot viety</string>
     <string name="debug_panel">Vianetsintäpaneeli</string>
     <string name="debug_search_clear">Tyhjennä haku</string>
     <string name="debug_search_next">Seuraava osuma</string>
     <string name="debug_search_prev">Edellinen osuma</string>
     <string name="debug_store_logs_summary">Poista käytöstä, jos et halua kirjoittaa mesh-lokitietoja levylle</string>
     <string name="debug_store_logs_title">Tallenna mesh-verkon lokitiedot</string>
+    <string name="debug_tab_app_logs">Sovelluslokitiedot</string>
+    <string name="debug_tab_packets">Paketit</string>
     <string name="default_">Oletus</string>
     <!-- DELETE -->
     <string name="delete">Poista</string>
@@ -467,6 +471,7 @@
     <string name="doc_keywords_android_auto">android auto, auto, auton tietokeskus, ajaminen, handsfree, viestintä</string>
     <string name="doc_keywords_app_functions">järjestelmätekoäly, gemini, avustaja, toiminnot, automaatio, ääni</string>
     <string name="doc_keywords_connections">bluetooth, usb, tcp, pariliitos, sarjaportti, wifi</string>
+    <string name="doc_keywords_debug_logs">debug, lokitiedot, logcat, vienti, vikaraportti, ongelma, vianmääritys, diagnostiikka</string>
     <string name="doc_keywords_desktop">desktop, linux, macOS, windows, sarjaportti</string>
     <string name="doc_keywords_discovery">haku, verkon topologia, verkko, skannaus, naapuri</string>
     <string name="doc_keywords_firmware">laiteohjelmisto, päivitys, ota, ohjelmoi, versio, palautus</string>
@@ -492,6 +497,7 @@
     <string name="doc_title_android_auto">Android Auto</string>
     <string name="doc_title_app_functions">Sovelluksen ominaisuudet</string>
     <string name="doc_title_connections">Yhteydet</string>
+    <string name="doc_title_debug_logs">Virheenjäljityslokitiedot</string>
     <string name="doc_title_desktop">Työpöytäsovellus</string>
     <string name="doc_title_discovery">Haku</string>
     <string name="doc_title_firmware">Laiteohjelmiston päivitykset</string>
@@ -591,6 +597,11 @@
     <string name="firmware">Laiteohjelmisto</string>
     <string name="firmware_edition">Laiteohjelmistoversio</string>
     <string name="firmware_old">Radion laiteohjelmisto on liian vanha toimiakseen tämän sovelluksen kanssa. Lisätietoja löydät <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">ohjelmiston asennusoppaasta</a>.</string>
+    <string name="firmware_recovery_banner">Päivitys valmistuu %1$s kuluttua</string>
+    <string name="firmware_recovery_button">Jatka laiteohjelmiston päivitystä</string>
+    <string name="firmware_recovery_explanation">Tämä laite on käynnistyslataustilassa keskeneräiseksi jääneen laiteohjelmistopäivityksen vuoksi. Pidä laite lähellä, niin päivitys suoritetaan loppuun.</string>
+    <string name="firmware_recovery_ble_failed">Päivitystä ei voitu viimeistellä Bluetoothin kautta. Tämän laitteen vakiokäynnistyslatain ei pysty luotettavasti jatkamaan keskeytynyttä OTA-päivitystä. Liitä laite tietokoneeseen USB:llä ja kirjoita laiteohjelmisto uudelleen valmistajan sarjamuotoisella DFU-työkalulla (esimerkiksi adafruit-nrfutil), jotta laite voidaan palauttaa toimintakuntoon.</string>
+    <string name="firmware_recovery_dismiss">Hylkää laiteohjelmiston palautus</string>
     <string name="firmware_too_old">Laiteohjelmistopäivitys vaaditaan.</string>
     <string name="firmware_update_almost_there">Melkein valmista...</string>
     <string name="firmware_update_alpha">Alpha</string>

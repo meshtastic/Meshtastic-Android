@@ -237,12 +237,6 @@
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
-      "id": "10834",
-      "title": "Seeed Tracker X1 Support",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10834",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
       "id": "10829",
       "title": "exclude the variant from LTO",
       "page_url": "https://github.com/meshtastic/firmware/pull/10829",
