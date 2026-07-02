@@ -15,6 +15,7 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 * feat(testing): debug-only skip_onboarding intent extra for AI/CI tooling by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6044
 * feat(discovery): surface received Mesh Beacon invitations by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6043
 * feat(firmware): nRF52 legacy BLE DFU — stock-bootloader fixes + stranded-device recovery by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6041
+* feat(settings): wire is_unmessagable/is_licensed into DeviceProfile export/import by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6065
 #### 🖥️ Desktop
 * fix(data): stale firmware/hardware caches — stop cancelling slow API refreshes, prune pulled releases, seed from newer bundles by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6060
 #### 🛠️ Fixes
