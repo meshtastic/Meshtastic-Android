@@ -1,58 +1,58 @@
 ---
-title: Debug Logs
+title: Virheenjäljityslokitiedot
 parent: Käyttöopas
 nav_order: 22
 last_updated: 2026-07-01
-description: View and export the app's own debug logs from inside the app, and attach a capture to a GitHub issue to help diagnose bugs — no adb required.
+description: Tarkastele ja vie sovelluksen omat virheenjäljityslokitiedot suoraan sovelluksesta ja liitä lokitiedot GitHub-vikaraporttiin ongelmien selvittämisen helpottamiseksi — adb:tä ei tarvita.
 aliases:
-  - debug-logs
+  - debug-lokitiedot
   - logcat
-  - app-logs
-  - bug-report
+  - sovelluslokitiedot
+  - vikailmoitus
 ---
 
-# Debug Logs
+# Virheenjäljityslokitiedot
 
-When something misbehaves, the app's debug logs are the single most useful thing you can attach to a bug report. Meshtastic can capture them **for you, from inside the app** — you no longer need `adb` or any desktop tooling to collect them.
+Kun jokin toimii odottamattomasti, sovelluksen virheenjäljityslokitiedot ovat hyödyllisin liite vikaraporttiin. Meshtastic voi kerätä ne **puolestasi suoraan sovelluksessa** — et enää tarvitse `adb`:tä tai työpöytätyökaluja niiden keräämiseen.
 
-Open the **Debug Panel** from **Settings → Advanced → Debug Panel**.
+Avaa **Virheenjäljityspaneeli** kohdasta **Asetukset → Lisäasetukset → Virheenjäljityspaneeli**.
 
-> 📎 **Filing an issue?** Export your logs (see below) and attach the `.txt` file to your report at [github.com/meshtastic/Meshtastic-Android/issues](https://github.com/meshtastic/Meshtastic-Android/issues). A log capture that covers the moment the problem happened turns "it doesn't work" into something a developer can actually track down.
+> 💡 **Ilmoitatko ongelmasta?** Vie lokitiedot (katso alla) ja liitä `.txt`-tiedosto raporttiisi osoitteessa [github.com/meshtastic/Meshtastic-Android/issues](https://github.com/meshtastic/Meshtastic-Android/issues). Lokitietotallenne, joka kattaa hetken jolloin ongelma ilmeni, auttaa muuttamaan "ei toimi" -kuvauksen sellaiseksi, jonka kehittäjä pystyy oikeasti selvittämään.
 
-## The two tabs
+## Kaksi välilehteä
 
-The Debug Panel has two tabs:
+Virheenjäljityspaneelissa on kaksi välilehteä:
 
-- **Packets** — the decoded mesh traffic your radio has sent and received (protocol-level messages). Useful for diagnosing mesh and routing behavior.
-- **App logs** — the app's own diagnostic log (Android _logcat_), including warnings, errors, and stack traces from the app itself. This is usually what a bug report needs.
+- **Paketit** — radion lähettämä ja vastaanottama purettu mesh-liikenne (protokollatason viestit). Hyödyllinen mesh-verkon ja reitityksen toiminnan diagnosointiin.
+- **Sovelluslokitiedot** — sovelluksen oma diagnostiikkaloki (Androidin _logcat_), joka sisältää varoitukset, virheet ja pinoseurannat itse sovelluksesta. Tätä tarvitaan yleensä vikaraportissa.
 
-Each tab has its own **export** button and produces its own file, so you can grab whichever is relevant — or both.
+Jokaisella välilehdellä on oma **Vie**-painikkeensa, ja kumpikin tuottaa oman tiedostonsa. Voit siis liittää raporttiin vain tarvittavan tiedoston tai molemmat.
 
-## Viewing app logs
+## Sovelluslokitietojen tarkastelu
 
-The **App logs** tab shows the most recent log lines from **this app only** — never other apps on your device.
+**Sovelluslokitiedot**-välilehti näyttää viimeisimmät lokirivit **vain tästä sovelluksesta** — ei koskaan muista laitteesi sovelluksista.
 
-- **Search** — type in the search box to filter to matching lines.
-- **Level filter** — the **V / D / I / W / E** chips toggle Verbose, Debug, Info, Warn, and Error lines. Tap a level to hide it; tap again to bring it back. Fatal lines are always shown.
-- **Refresh** — the refresh icon re-reads the latest logs.
+- **Haku** — kirjoita hakukenttään suodattaaksesi vastaavat lokirivit.
+- **Tasosuodatin** — **V / D / I / W / E** -painikkeilla voit näyttää tai piilottaa Verbose-, Debug-, Info-, Warn- ja Error-lokirivit. Piilota taso napauttamalla sitä. Napauta uudelleen, niin se tulee takaisin näkyviin. Vakavat virheet näytetään aina.
+- **Päivitä** — päivityskuvake lukee uusimmat lokitiedot uudelleen.
 
-Error and warning lines are tinted so problems stand out.
+Virhe- ja varoitusrivit on korostettu, jotta ongelmat erottuvat paremmin.
 
-## Exporting
+## Lokien vienti
 
-Tap the **download** icon to save the current logs to a file. You choose where it goes through the system file picker, and the file is named with a timestamp (for example `meshtastic_logcat_20260701_143312.txt`) so repeated exports never overwrite each other.
+Napauta **latauskuvaketta** tallentaaksesi nykyiset lokitiedot tiedostoon. Valitset tallennuspaikan järjestelmän tiedostonvalitsimessa, ja tiedosto nimetään aikaleimalla (esimerkiksi `meshtastic_logcat_20260701_143312.txt`), jotta aiemmat viennit eivät ylikirjoitu.
 
-Attach that file to your GitHub issue.
+Liitä tämä tiedosto GitHub-vikaraporttiisi.
 
-> 🔒 **Privacy:** Exports automatically **redact** sensitive values such as channel keys and admin/session keys before writing the file. Even so, logs can contain node names, positions, and other identifying details — glance through the file before sharing it publicly, and share privately if you have any doubt.
+> 🔒 **Tietosuoja:** Viedyt lokitiedot **peittävät automaattisesti** arkaluonteiset tiedot, kuten kanava- sekä ylläpito ja istuntoavaimet, ennen tiedoston kirjoittamista. Siitä huolimatta lokitiedot voivat sisältää radion nimiä, sijainteja ja muita tunnistetietoja. Tarkista tiedosto ennen sen julkista jakamista, ja jaa se yksityisesti, jos olet epävarma.
 
 ## Työpöytä
 
-The desktop app has no system logcat, so the **App logs** tab shows the app's own captured log output instead. Search, filtering, and export work the same way.
+Työpöytäsovelluksessa ei ole järjestelmän logcat-lokitietoa, joten **Sovelluslokit**-välilehti näyttää sen sijaan sovelluksen itse keräämät lokit. Haku, suodatus ja vienti toimivat samalla tavalla.
 
 ## Aiheeseen liittyvät aiheet
 
-- [Help & In-App Docs](help-and-docs) — reading this documentation offline inside the app
-- [Connections](connections) — if the problem is getting connected to your radio in the first place
+- [Ohjeet ja sovelluksen sisäinen dokumentaatio](help-and-docs) — tämän dokumentaation lukeminen offline-tilassa sovelluksessa
+- [Yhteydet](connections) — jos ongelma liittyy radion yhdistämiseen
 
 ---
