@@ -24,6 +24,7 @@ import org.meshtastic.core.common.util.currentLocaleQualifier
 import org.meshtastic.core.resources.doc_keywords_android_auto
 import org.meshtastic.core.resources.doc_keywords_app_functions
 import org.meshtastic.core.resources.doc_keywords_connections
+import org.meshtastic.core.resources.doc_keywords_debug_logs
 import org.meshtastic.core.resources.doc_keywords_desktop
 import org.meshtastic.core.resources.doc_keywords_discovery
 import org.meshtastic.core.resources.doc_keywords_firmware
@@ -45,6 +46,7 @@ import org.meshtastic.core.resources.doc_keywords_widget
 import org.meshtastic.core.resources.doc_title_android_auto
 import org.meshtastic.core.resources.doc_title_app_functions
 import org.meshtastic.core.resources.doc_title_connections
+import org.meshtastic.core.resources.doc_title_debug_logs
 import org.meshtastic.core.resources.doc_title_desktop
 import org.meshtastic.core.resources.doc_title_discovery
 import org.meshtastic.core.resources.doc_title_firmware
@@ -454,6 +456,16 @@ class DefaultDocBundleLoader : DocBundleLoader {
                 listOf("help", "docs-browser", "chirpy", "assistant"),
                 1900,
                 "help",
+            ),
+            UserPageDef(
+                "debug-logs",
+                CoreRes.string.doc_title_debug_logs,
+                CoreRes.string.doc_keywords_debug_logs,
+                "en/user/debug-logs.html",
+                22,
+                listOf("debug-logs", "logcat", "app-logs", "bug-report"),
+                3200,
+                "debug-logs",
             ),
         )
 

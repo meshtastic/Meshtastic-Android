@@ -312,13 +312,18 @@
     <string name="debug_filter_preset_title">Preset Filters</string>
     <string name="debug_filters">Filters</string>
     <string name="debug_log_api_enabled">Debug log API enabled</string>
+    <string name="debug_logcat_empty">No app logs to show</string>
+    <string name="debug_logcat_refresh">Refresh</string>
     <string name="debug_logs_export">Export Logs</string>
+    <string name="debug_logs_exported">Logs exported</string>
     <string name="debug_panel">Debug Panel</string>
     <string name="debug_search_clear">Clear search</string>
     <string name="debug_search_next">Next match</string>
     <string name="debug_search_prev">Previous match</string>
     <string name="debug_store_logs_summary">Disable to skip writing mesh logs to disk</string>
     <string name="debug_store_logs_title">Store mesh logs</string>
+    <string name="debug_tab_app_logs">App logs</string>
+    <string name="debug_tab_packets">Packets</string>
     <string name="default_">Default</string>
     <string name="default_mqtt_address" translatable="false">mqtt.meshtastic.org</string>
     <!-- DELETE -->
@@ -468,6 +473,7 @@
     <string name="doc_keywords_android_auto">android auto,car,head unit,driving,hands free,messaging</string>
     <string name="doc_keywords_app_functions">system ai,gemini,assistant,functions,automation,voice</string>
     <string name="doc_keywords_connections">bluetooth,usb,tcp,pairing,serial,wifi</string>
+    <string name="doc_keywords_debug_logs">debug,logs,logcat,export,bug report,issue,troubleshooting,diagnostics</string>
     <string name="doc_keywords_desktop">desktop,linux,macos,windows,serial</string>
     <string name="doc_keywords_discovery">discovery,topology,network,scan,neighbor</string>
     <string name="doc_keywords_firmware">firmware,update,ota,flash,version,recovery</string>
@@ -493,6 +499,7 @@
     <string name="doc_title_android_auto">Android Auto</string>
     <string name="doc_title_app_functions">App Functions</string>
     <string name="doc_title_connections">Connections</string>
+    <string name="doc_title_debug_logs">Debug Logs</string>
     <string name="doc_title_desktop">Desktop App</string>
     <string name="doc_title_discovery">Discovery</string>
     <string name="doc_title_firmware">Firmware Updates</string>

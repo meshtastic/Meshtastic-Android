@@ -48,6 +48,7 @@ import androidx.compose.ui.window.isTraySupported
 import androidx.compose.ui.window.rememberTrayState
 import androidx.compose.ui.window.rememberWindowState
 import co.touchlab.kermit.Logger
+import co.touchlab.kermit.platformLogWriter
 import coil3.ImageLoader
 import coil3.annotation.ExperimentalCoilApi
 import coil3.compose.setSingletonImageLoaderFactory
@@ -66,6 +67,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.core.context.startKoin
 import org.meshtastic.core.common.BuildConfigProvider
+import org.meshtastic.core.common.log.InMemoryLogBuffer
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.database.desktopDataDir
 import org.meshtastic.core.navigation.MultiBackstack
@@ -115,6 +117,8 @@ private fun svgPainterResource(path: String, density: Density): Painter = rememb
 @OptIn(ExperimentalCoilApi::class)
 fun main(args: Array<String>) = application {
     val koinApp = remember {
+        // Keep console output and also capture into the in-memory buffer the Debug screen views/exports.
+        Logger.setLogWriters(listOf(platformLogWriter(), InMemoryLogBuffer))
         Logger.i { "Meshtastic Desktop — Starting" }
         startKoin { modules(desktopPlatformModule(), desktopModule()) }
     }
