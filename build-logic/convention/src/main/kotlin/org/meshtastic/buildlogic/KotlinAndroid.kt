@@ -223,7 +223,7 @@ private val SHARED_COMPILER_ARGS =
     listOf(
         "-Xexpect-actual-classes",
         "-Xskip-prerelease-check",
-        "-Xbackend-threads=0",
+        // No -Xbackend-threads: parallel codegen races and crashes release builds (KT-83578).
     )
 
 private const val JDK_VERSION = 21
