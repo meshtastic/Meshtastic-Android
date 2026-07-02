@@ -301,6 +301,7 @@
     <string name="debug_filter_preset_title">Filtres prédéfinis</string>
     <string name="debug_filters">Filtres</string>
     <string name="debug_log_api_enabled">API de journalisation de débogage activée</string>
+    <string name="debug_logcat_refresh">Actualiser</string>
     <string name="debug_logs_export">Exporter les logs</string>
     <string name="debug_panel">Panneau de débogage</string>
     <string name="debug_search_clear">Effacer la recherche</string>

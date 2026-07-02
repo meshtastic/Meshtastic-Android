@@ -306,6 +306,7 @@
     <string name="debug_filter_preset_title">プリセットフィルタ</string>
     <string name="debug_filters">フィルタ</string>
     <string name="debug_log_api_enabled">デバッグログAPIを有効化</string>
+    <string name="debug_logcat_refresh">更新</string>
     <string name="debug_logs_export">ログのエクスポート</string>
     <string name="debug_panel">デバッグ</string>
     <string name="debug_search_clear">検索をクリア</string>

@@ -189,6 +189,18 @@
   },
   "pullRequests": [
     {
+      "id": "10850",
+      "title": "Update LovyanGFX to v1.2.24",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10850",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "10849",
+      "title": "Update Quency-D_chsc6x digest to 3b2b6ce",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10849",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
       "id": "10846",
       "title": "InkHUD: GPS improvements",
       "page_url": "https://github.com/meshtastic/firmware/pull/10846",
@@ -216,6 +228,12 @@
       "id": "10839",
       "title": "second pass adding beacons admin",
       "page_url": "https://github.com/meshtastic/firmware/pull/10839",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "10829",
+      "title": "exclude the variant from LTO",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10829",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
