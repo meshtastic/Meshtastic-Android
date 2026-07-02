@@ -55,6 +55,7 @@ class FakeRadioController :
 
     var throwOnSend: Boolean = false
     var lastSetDeviceAddress: String? = null
+    var lastSetOwnerUser: User? = null
     var editSettingsCalled = false
     var startProvideLocationCalled = false
     var stopProvideLocationCalled = false
@@ -67,6 +68,7 @@ class FakeRadioController :
             localConfigs.clear()
             throwOnSend = false
             lastSetDeviceAddress = null
+            lastSetOwnerUser = null
             editSettingsCalled = false
             startProvideLocationCalled = false
             stopProvideLocationCalled = false
@@ -107,7 +109,9 @@ class FakeRadioController :
 
     override suspend fun setLocalChannel(channel: Channel) {}
 
-    override suspend fun setOwner(destNum: Int, user: User, packetId: Int) {}
+    override suspend fun setOwner(destNum: Int, user: User, packetId: Int) {
+        lastSetOwnerUser = user
+    }
 
     override suspend fun setHamMode(destNum: Int, hamParameters: HamParameters, packetId: Int) {}
 

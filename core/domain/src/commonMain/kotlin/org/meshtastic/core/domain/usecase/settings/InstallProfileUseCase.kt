@@ -46,13 +46,17 @@ open class InstallProfileUseCase constructor(private val radioController: RadioC
         }
     }
 
+    // is_licensed is deliberately not installed here: enabling ham mode is a dedicated onboarding flow
+    // (set_ham_mode — rewrites the owner, disables encryption, applies tx power/frequency) that a plain
+    // set_owner would bypass, leaving the radio flagged licensed without those required side effects.
     private suspend fun AdminEditScope.installOwner(profile: DeviceProfile, currentUser: User?) {
-        if (profile.long_name != null || profile.short_name != null) {
+        if (profile.long_name != null || profile.short_name != null || profile.is_unmessagable != null) {
             currentUser?.let {
                 setOwner(
                     it.copy(
                         long_name = profile.long_name ?: it.long_name,
                         short_name = profile.short_name ?: it.short_name,
+                        is_unmessagable = profile.is_unmessagable ?: it.is_unmessagable,
                     ),
                 )
             }
