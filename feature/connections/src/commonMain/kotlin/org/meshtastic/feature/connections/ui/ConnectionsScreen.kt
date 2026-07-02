@@ -54,11 +54,15 @@ import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
+import org.meshtastic.core.navigation.FirmwareRoute
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.bluetooth_disabled
 import org.meshtastic.core.resources.connections
+import org.meshtastic.core.resources.firmware_recovery_banner
+import org.meshtastic.core.resources.firmware_recovery_button
+import org.meshtastic.core.resources.firmware_recovery_dismiss
 import org.meshtastic.core.resources.no_device_selected
 import org.meshtastic.core.resources.open_bluetooth_settings
 import org.meshtastic.core.resources.open_wifi_settings
@@ -124,6 +128,7 @@ fun ConnectionsScreen(
 
     val selectedDevice by scanModel.selectedNotNullFlow.collectAsStateWithLifecycle()
     val persistedDeviceName by scanModel.persistedDeviceName.collectAsStateWithLifecycle()
+    val pendingRecovery by scanModel.pendingRecovery.collectAsStateWithLifecycle()
 
     val bleDevices by scanModel.bleDevicesForUi.collectAsStateWithLifecycle()
     val discoveredTcpDevices by scanModel.discoveredTcpDevicesForUi.collectAsStateWithLifecycle()
@@ -292,6 +297,27 @@ fun ConnectionsScreen(
                                 }
                             }
                         }
+
+                        // A device stranded in bootloader mode by an interrupted update can be re-flashed without
+                        // reconnecting first. Shown only while disconnected so the Firmware screen enters its recovery
+                        // path (it uses the live connection when connected); cleared automatically once the device
+                        // returns on its own.
+                        pendingRecovery
+                            ?.takeIf { connectionState !is ConnectionState.Connected }
+                            ?.let { recovery ->
+                                Spacer(modifier = Modifier.height(8.dp))
+                                RecoveryCard(
+                                    message = stringResource(Res.string.firmware_recovery_banner, recovery.deviceName),
+                                    actionLabel = stringResource(Res.string.firmware_recovery_button),
+                                    onAction = { onConfigNavigate(FirmwareRoute.FirmwareUpdate) },
+                                    actionIcon = MeshtasticIcons.Bluetooth,
+                                    // Let the user dismiss a recovery that can't succeed (e.g. an unflashable stock
+                                    // bootloader) so it doesn't nag forever; it otherwise only clears on
+                                    // reconnect/success.
+                                    onDismiss = { scanModel.dismissRecovery() },
+                                    dismissContentDescription = stringResource(Res.string.firmware_recovery_dismiss),
+                                )
+                            }
 
                         // Region warning sits outside the animated card so it does not affect the
                         // CONNECTED ↔ CONNECTING ↔ NO_DEVICE size transition.

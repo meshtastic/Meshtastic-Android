@@ -217,7 +217,7 @@ class LegacyDfuTransport(
             // ── 1. START_DFU + image sizes on Packet, then response ─────────────
             writeControlPoint(byteArrayOf(LegacyDfuOpcode.START_DFU, LegacyDfuImageType.APPLICATION))
             writePacket(legacyImageSizesPayload(appSize = firmware.size))
-            requireSuccess(LegacyDfuOpcode.START_DFU, awaitResponse(START_RESPONSE_TIMEOUT))
+            handleStartResponse(awaitResponse(START_RESPONSE_TIMEOUT))
 
             // ── 2. INIT_PARAMS_START → init bytes on Packet → INIT_PARAMS_COMPLETE → response ──
             writeControlPoint(byteArrayOf(LegacyDfuOpcode.INIT_DFU_PARAMS, LegacyDfuOpcode.INIT_PARAMS_START))
@@ -408,13 +408,21 @@ class LegacyDfuTransport(
 
     private suspend fun awaitResponse(timeout: Duration): LegacyDfuResponse = try {
         withTimeout(timeout) {
-            // Drain any stray PRNs that arrive before the response we want.
-            while (true) {
-                val r = notificationChannel.receive()
-                if (r !is LegacyDfuResponse.PacketReceipt) return@withTimeout r
+            // Fail fast + accurately if the bootloader drops the link mid-handshake instead of answering. The stock
+            // same-MAC nRF Legacy bootloader (e.g. AdaDFU) commonly disconnects on the first Control Point command
+            // (stale-bond encryption mismatch); without this the receive() below just blocks until `timeout`, so
+            // the
+            // user waited the full 30s and saw a misleading "No response from Control Point" for what was really an
+            // immediate disconnect.
+            bleConnection.withDisconnectTripwire(onDrop = ::handshakeDropError) {
+                // Drain any stray PRNs that arrive before the response we want.
+                while (true) {
+                    val r = notificationChannel.receive()
+                    if (r !is LegacyDfuResponse.PacketReceipt) return@withDisconnectTripwire r
+                }
+                @Suppress("UNREACHABLE_CODE")
+                error("unreachable")
             }
-            @Suppress("UNREACHABLE_CODE")
-            error("unreachable")
         }
     } catch (_: TimeoutCancellationException) {
         throw DfuException.Timeout("No response from Legacy DFU Control Point after $timeout")
@@ -422,19 +430,48 @@ class LegacyDfuTransport(
 
     private suspend fun awaitPacketReceipt(): LegacyDfuResponse.PacketReceipt = try {
         withTimeout(COMMAND_TIMEOUT) {
-            while (true) {
-                val r = notificationChannel.receive()
-                if (r is LegacyDfuResponse.PacketReceipt) return@withTimeout r
-                if (r is LegacyDfuResponse.Failure) {
-                    throw LegacyDfuException.ProtocolError(r.requestOpcode, r.status)
+            bleConnection.withDisconnectTripwire(onDrop = ::handshakeDropError) {
+                while (true) {
+                    val r = notificationChannel.receive()
+                    if (r is LegacyDfuResponse.PacketReceipt) return@withDisconnectTripwire r
+                    if (r is LegacyDfuResponse.Failure) {
+                        throw LegacyDfuException.ProtocolError(r.requestOpcode, r.status)
+                    }
+                    // Stray Success or Unknown → ignore.
                 }
-                // Stray Success or Unknown → ignore.
+                @Suppress("UNREACHABLE_CODE")
+                error("unreachable")
             }
-            @Suppress("UNREACHABLE_CODE")
-            error("unreachable")
         }
     } catch (_: TimeoutCancellationException) {
         throw DfuException.Timeout("No packet receipt notification after $COMMAND_TIMEOUT")
+    }
+
+    /** Error for a link drop while awaiting a Control Point response — distinguishes a disconnect from a true stall. */
+    private fun handshakeDropError(state: BleConnectionState): Throwable = DfuException.ConnectionFailed(
+        "BLE link dropped during DFU handshake (state=$state). The device disconnected before answering a DFU " +
+            "command — most often the stock Adafruit bootloader rebooting to the app. Retry, or use USB recovery.",
+    )
+
+    /**
+     * Validate the `START_DFU` response, with special handling for `INVALID_STATE`.
+     *
+     * A device whose previous DFU session was interrupted (link drop, app closed mid-stream) keeps its half-finished
+     * transfer state and rejects a fresh `START_DFU` with `INVALID_STATE` until it is reset. This is the common case
+     * when *recovering* a device stranded in the bootloader.
+     *
+     * We do NOT try to RESET on this connection: the stock Adafruit bootloader goes unresponsive immediately after
+     * emitting INVALID_STATE (the link dies by supervision timeout ~5 s later), so a write here never lands. Instead we
+     * fast-fail with [LegacyDfuException.StaleSessionReset]; [SecureDfuHandler] then resets the bootloader over a
+     * *fresh* connection (which is responsive up until START) before retrying. Mirrors the intent of Nordic
+     * `LegacyDfuImpl.resetAndRestart()`.
+     */
+    private fun handleStartResponse(response: LegacyDfuResponse) {
+        if (response is LegacyDfuResponse.Failure && response.status == LegacyDfuStatus.INVALID_STATE) {
+            Logger.w { "Legacy DFU: START rejected with INVALID_STATE (stale session from an interrupted flash)" }
+            throw LegacyDfuException.StaleSessionReset()
+        }
+        requireSuccess(LegacyDfuOpcode.START_DFU, response)
     }
 
     private fun requireSuccess(expectedOpcode: Byte, response: LegacyDfuResponse) {
@@ -476,7 +513,18 @@ class LegacyDfuTransport(
     companion object {
         private val CONNECT_TIMEOUT = 15.seconds
         private val COMMAND_TIMEOUT = 30.seconds
-        private val START_RESPONSE_TIMEOUT = 30.seconds
+
+        /**
+         * Time to wait for the START_DFU response notification.
+         *
+         * The stock Adafruit nRF52 bootloader is single-bank: on START it erases the **entire** application bank (~800
+         * KB ≈ 200 flash pages) before firing the START-procedure response, and because the BLE link is live the
+         * SoftDevice time-slices each page erase against radio events, stretching the erase to ~30-50 s. The old 30 s
+         * cap aborted mid-erase (killing an otherwise-healthy session); Nordic's own DFU library imposes no such short
+         * cap here. 90 s covers the worst-case erase with margin. The disconnect tripwire still fast-fails on a genuine
+         * link drop, so this only extends the *silent-but-connected* wait.
+         */
+        private val START_RESPONSE_TIMEOUT = 90.seconds
         private val VALIDATE_TIMEOUT = 60.seconds
         private val SUBSCRIPTION_SETTLE = 500.milliseconds
 
@@ -493,13 +541,14 @@ class LegacyDfuTransport(
          * notification round-trips per byte and therefore faster throughput, at the cost of a slightly longer recovery
          * window if a packet is dropped (we have to wait until the next PRN boundary to detect the gap).
          *
-         * Set to 30 per the explicit recommendation from the Adafruit OTAFIX bootloader maintainer
-         * (https://github.com/oltaco/Adafruit_nRF52_Bootloader_OTAFIX#recommended-ota-dfu-settings — "Number of
-         * packets: 30"), which is the bootloader Meshtastic nRF52 devices ship with. Nordic's reference library
-         * defaults to 12; values above ~60 are not recommended for any host. Empirically 30 yields ~3x the throughput
-         * of PRN=10 on RAK4631 / OTAFIX without provoking OPERATION_FAILED on the bootloader's flash-write path.
+         * Capped at 10 to match Nordic's own Legacy DFU implementation, which force-limits legacy PRN to ≤10 with the
+         * comment: "DFU bootloaders from SDK 6.0.0 or older were unable to save incoming data to flash as fast as they
+         * are being sent … PRN = 10 may be the highest supported value" and treats status 6 (OPERATION_FAILED) as "data
+         * sent too fast — reduce PRN to 10 or less." The stock Adafruit bootloader shares this SDK11 flash-write path,
+         * so a higher value (we previously used 30, tuned for the faster OTAFIX fork) risks OPERATION_FAILED mid-stream
+         * on stock bootloaders. 10 is the safe ceiling that still batches flow-control ACKs.
          */
-        internal const val PRN_INTERVAL_PACKETS = 30
+        internal const val PRN_INTERVAL_PACKETS = 10
 
         /**
          * Universally-safe Legacy DFU packet size (20 bytes — the original ATT_MTU minus the 3-byte ATT header). Used

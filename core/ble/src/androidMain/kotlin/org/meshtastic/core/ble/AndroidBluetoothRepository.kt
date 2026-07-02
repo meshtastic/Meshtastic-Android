@@ -49,6 +49,7 @@ private val CREATED_BOND_NONE_GRACE = BOND_STATE_POLL_INTERVAL + BOND_STATE_POLL
 internal const val BOND_FAILED_OR_REJECTED_MESSAGE = "Bonding failed or rejected"
 
 /** Android implementation of [BluetoothRepository]. */
+@Suppress("TooManyFunctions")
 @Single
 class AndroidBluetoothRepository(
     private val context: Context,
@@ -121,6 +122,27 @@ class AndroidBluetoothRepository(
             if (!bonded) {
                 throw Exception("Timed out waiting for bonding to complete")
             }
+        } finally {
+            updateBluetoothState()
+        }
+    }
+
+    @Suppress("TooGenericExceptionCaught", "SwallowedException", "ReturnCount")
+    @SuppressLint("MissingPermission")
+    override suspend fun removeBond(address: String): Boolean {
+        val remoteDevice = bluetoothAdapter?.getRemoteDevice(address)
+        if (remoteDevice == null || remoteDevice.bondState == android.bluetooth.BluetoothDevice.BOND_NONE) {
+            return false
+        }
+        return try {
+            // removeBond() is a public-but-hidden BluetoothDevice API (no SDK stub); reflection is the standard access
+            // path used across the Android BLE/DFU ecosystem (incl. Nordic's DFU library).
+            val removed = remoteDevice.javaClass.getMethod("removeBond").invoke(remoteDevice) as? Boolean ?: false
+            Logger.i { "removeBond($address) -> $removed" }
+            removed
+        } catch (e: Exception) {
+            Logger.w(e) { "removeBond($address) reflection failed" }
+            false
         } finally {
             updateBluetoothState()
         }

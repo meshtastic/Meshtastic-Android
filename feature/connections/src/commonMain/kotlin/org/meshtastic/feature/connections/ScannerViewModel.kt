@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
@@ -42,7 +43,9 @@ import org.meshtastic.core.ble.BleScanStartException
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.MeshtasticBleConstants
 import org.meshtastic.core.common.util.safeCatchingAll
+import org.meshtastic.core.datastore.FirmwareRecoveryDataSource
 import org.meshtastic.core.datastore.RecentAddressesDataSource
+import org.meshtastic.core.datastore.model.PendingFirmwareRecovery
 import org.meshtastic.core.datastore.model.RecentAddress
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.ConnectionState
@@ -87,6 +90,7 @@ open class ScannerViewModel(
     private val networkRepository: NetworkRepository,
     private val dispatchers: CoroutineDispatchers,
     private val uiPrefs: UiPrefs,
+    private val firmwareRecoveryDataSource: FirmwareRecoveryDataSource,
     private val bleScanner: BleScanner? = null,
 ) : ViewModel() {
 
@@ -161,6 +165,7 @@ open class ScannerViewModel(
             .onEach { state ->
                 if (state is ConnectionState.Connected) {
                     stopAllScans()
+                    clearRecoveryIfConnectedDeviceReturned()
                 }
             }
             .launchIn(viewModelScope)
@@ -238,6 +243,13 @@ open class ScannerViewModel(
     /** Recently-used TCP addresses for the Connections device list. */
     val recentTcpDevicesForUi: StateFlow<List<DeviceListEntry>> =
         discoveredDevicesFlow.map { it.recentTcpDevices }.distinctUntilChanged().stateInWhileSubscribed(emptyList())
+
+    /**
+     * A firmware update that didn't finish, leaving a device stranded in bootloader mode. Non-null drives the recovery
+     * banner on the Connections screen, whose tap deep-links into the Firmware Update screen to re-flash the device.
+     */
+    val pendingRecovery: StateFlow<PendingFirmwareRecovery?> =
+        firmwareRecoveryDataSource.pending.distinctUntilChanged().stateInWhileSubscribed(initialValue = null)
 
     // ── Current selection ────────────────────────────────────────────────────────────────────
 
@@ -571,6 +583,29 @@ open class ScannerViewModel(
     fun disconnect() {
         radioPrefs.setDevName(null)
         changeDeviceAddress(NO_DEVICE_SELECTED)
+    }
+
+    /**
+     * Manually retire the pending recovery record (user dismissed the banner). Needed for a device whose bootloader
+     * can't be re-flashed over BLE at all — e.g. a stock nRF Legacy-DFU bootloader that never answers its control point
+     * — where recovery persistently fails and would otherwise nag forever (it only auto-clears on a successful
+     * reconnect or re-flash). The record is re-created next time a DFU update is triggered.
+     */
+    fun dismissRecovery() {
+        safeLaunch(tag = "dismissRecovery") { firmwareRecoveryDataSource.clear() }
+    }
+
+    /**
+     * If the device that had a pending recovery record has since reconnected normally (e.g. its bootloader timed out
+     * and booted a valid app, or a prior update actually succeeded), retire the record so the banner doesn't linger.
+     */
+    private fun clearRecoveryIfConnectedDeviceReturned() {
+        safeLaunch(tag = "clearRecovery") {
+            val recovery = firmwareRecoveryDataSource.pending.first() ?: return@safeLaunch
+            if (recovery.fullAddress == radioInterfaceService.currentDeviceAddressFlow.value) {
+                firmwareRecoveryDataSource.clear()
+            }
+        }
     }
 
     private fun resolveActiveTransport(preferred: DeviceType?, selectedAddress: String?): DeviceType =

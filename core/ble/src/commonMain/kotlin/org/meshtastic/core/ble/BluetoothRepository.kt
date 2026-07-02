@@ -34,6 +34,15 @@ interface BluetoothRepository {
 
     /** Initiates bonding with the given device. */
     suspend fun bond(device: BleDevice)
+
+    /**
+     * Removes any existing bond for [address]. Returns true if a bond was present and removal was initiated.
+     *
+     * Needed before connecting to a nRF Legacy-DFU bootloader that re-advertises at the *same* address as the app (e.g.
+     * AdaDFU): a leftover bond makes the OS force stale link encryption the fresh bootloader can't satisfy, so it drops
+     * the link on the first DFU command. Default no-op for platforms/impls that don't manage bonds.
+     */
+    suspend fun removeBond(address: String): Boolean = false
 }
 
 /** Represents the state of Bluetooth on the device. */

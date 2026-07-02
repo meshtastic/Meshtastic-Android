@@ -32,6 +32,7 @@ import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.meshtastic.core.ble.BleDevice
 import org.meshtastic.core.ble.BleScanner
+import org.meshtastic.core.datastore.FirmwareRecoveryDataSource
 import org.meshtastic.core.datastore.RecentAddressesDataSource
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.network.repository.DiscoveredService
@@ -70,6 +71,7 @@ class ScannerViewModelHarness(val testDispatcher: TestDispatcher = UnconfinedTes
     val radioInterfaceService: RadioInterfaceService = mock(MockMode.autofill)
     val radioPrefs: RadioPrefs = mock(MockMode.autofill)
     val recentAddressesDataSource: RecentAddressesDataSource = mock(MockMode.autofill)
+    val firmwareRecoveryDataSource: FirmwareRecoveryDataSource = mock(MockMode.autofill)
     val networkRepository: NetworkRepository = mock(MockMode.autofill)
     val bleScanner: BleScanner = mock(MockMode.autofill)
 
@@ -106,6 +108,7 @@ class ScannerViewModelHarness(val testDispatcher: TestDispatcher = UnconfinedTes
         every { radioInterfaceService.isMockTransport() } returns false
         every { radioInterfaceService.currentDeviceAddressFlow } returns currentDeviceAddressFlow
         every { recentAddressesDataSource.recentAddresses } returns MutableStateFlow(emptyList())
+        every { firmwareRecoveryDataSource.pending } returns flowOf(null)
         every { networkRepository.resolvedList } returns resolvedServicesFlow
         every { networkRepository.networkAvailable } returns flowOf(true)
         // Default: a non-completing scan flow so the BLE scan stays "active" until explicitly cancelled.
@@ -129,6 +132,7 @@ class ScannerViewModelHarness(val testDispatcher: TestDispatcher = UnconfinedTes
         networkRepository = networkRepository,
         dispatchers = dispatchers,
         uiPrefs = uiPrefs,
+        firmwareRecoveryDataSource = firmwareRecoveryDataSource,
         bleScanner = bleScanner,
     )
 

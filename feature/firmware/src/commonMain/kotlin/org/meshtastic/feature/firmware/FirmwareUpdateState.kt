@@ -52,6 +52,11 @@ sealed interface FirmwareUpdateState {
         val showBootloaderWarning: Boolean,
         val updateMethod: FirmwareUpdateMethod,
         val currentFirmwareVersion: String? = null,
+        /**
+         * True when reached while disconnected to re-flash a device stranded in bootloader mode after an interrupted
+         * update (see [FirmwareUpdateViewModel.checkForUpdates]). Drives recovery-specific copy and routing.
+         */
+        val isRecovery: Boolean = false,
     ) : FirmwareUpdateState
 
     /** Firmware file is being downloaded from the release server. */

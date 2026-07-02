@@ -66,13 +66,27 @@ class MultiBackstack(val startTab: NavKey, private val currentTabState: MutableS
         }
     }
 
-    /** Sets the active tab and replaces its stack with the provided route path. */
+    /**
+     * Applies a deep-link backstack.
+     *
+     * If the path's root is a top-level tab (Connections/Nodes/Map/Settings/Messages), switch to that tab and replace
+     * its stack with the full path. If the root is instead a nested route that no tab owns — e.g. `FirmwareGraph`
+     * (reached from both Settings and Connections) or `WifiProvision` — push the path onto the *current* tab's stack
+     * rather than switching [currentTabRoute] to a key that has no backstack. Doing the latter made [activeBackStack]
+     * throw `Stack for <route> not found` and crashed the app on those deep links (e.g.
+     * `meshtastic://.../firmware/update`).
+     */
     fun handleDeepLink(navKeys: List<NavKey>) {
         val rootKey = navKeys.firstOrNull() ?: return
-        val topLevel = TopLevelDestination.fromNavKey(rootKey)?.route ?: rootKey
-        currentTabRoute = topLevel
-        val stack = backStacks[topLevel] ?: return
-        stack.replaceAll(navKeys)
+        val topLevel = TopLevelDestination.fromNavKey(rootKey)?.route
+        if (topLevel != null) {
+            currentTabRoute = topLevel
+            backStacks[topLevel]?.replaceAll(navKeys)
+        } else {
+            // Nested route not owned by a tab: push onto the current tab's stack (mirrors how in-app code
+            // navigates to these via backStack.add) so the deep link opens and back returns to the app.
+            backStacks[currentTabRoute]?.addAll(navKeys)
+        }
     }
 }
 

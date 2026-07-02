@@ -119,6 +119,41 @@ class MultiBackstackTest {
     }
 
     @Test
+    fun `handleDeepLink to a nested non-tab route pushes onto current tab without crashing`() {
+        // Regression: deep-linking to firmware/update (root = FirmwareGraph, which is NOT a top-level
+        // tab) used to set currentTabRoute to FirmwareGraph — a key with no backstack — making the
+        // activeBackStack getter throw "Stack for FirmwareGraph not found" and crash the app.
+        val startTab = TopLevelDestination.Connect.route
+        val multiBackstack = createMultiBackstack(startTab)
+
+        val connectStack = NavBackStack<NavKey>().apply { addAll(listOf(TopLevelDestination.Connect.route)) }
+        multiBackstack.backStacks = mapOf(TopLevelDestination.Connect.route to connectStack)
+
+        multiBackstack.handleDeepLink(listOf(FirmwareRoute.FirmwareGraph, FirmwareRoute.FirmwareUpdate))
+
+        // currentTabRoute must stay a real tab (not corrupted to FirmwareGraph)
+        assertEquals(TopLevelDestination.Connect.route, multiBackstack.currentTabRoute)
+        // the firmware routes are pushed onto the current tab's stack, and reading it does not throw
+        assertEquals(3, multiBackstack.activeBackStack.size)
+        assertEquals(TopLevelDestination.Connect.route, multiBackstack.activeBackStack.first())
+        assertEquals(FirmwareRoute.FirmwareUpdate, multiBackstack.activeBackStack.last())
+    }
+
+    @Test
+    fun `handleDeepLink to unknown nested route on missing tab is a no-op and never throws`() {
+        // Defensive: even if the current tab somehow has no backstack, a nested-route deep link must
+        // not throw (the getter would). Here backStacks is empty for the current tab.
+        val startTab = TopLevelDestination.Connect.route
+        val multiBackstack = createMultiBackstack(startTab)
+        multiBackstack.backStacks = emptyMap()
+
+        // Should simply do nothing rather than crash.
+        multiBackstack.handleDeepLink(listOf(FirmwareRoute.FirmwareGraph, FirmwareRoute.FirmwareUpdate))
+
+        assertEquals(TopLevelDestination.Connect.route, multiBackstack.currentTabRoute)
+    }
+
+    @Test
     fun `handleDeepLink from different tab switches tab and sets stack`() {
         // Start on Connect tab
         val startTab = TopLevelDestination.Connect.route

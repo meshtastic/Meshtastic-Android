@@ -198,4 +198,14 @@ sealed class LegacyDfuException(message: String, cause: Throwable? = null) : Dfu
     /** Bytes received reported by device differs from bytes sent past last PRN window. */
     class PacketReceiptMismatch(expected: Long, actual: Long) :
         LegacyDfuException("Packet receipt mismatch: expected $expected bytes received, device reports $actual")
+
+    /**
+     * START_DFU was rejected with `INVALID_STATE` because the bootloader still holds a previous, interrupted DFU
+     * session. The transport has issued a RESET; retrying the whole session (fresh reconnect) will start over on the
+     * now-clean bootloader. Retryable — distinct from a hard [ProtocolError].
+     */
+    class StaleSessionReset :
+        LegacyDfuException(
+            "Bootloader rejected START with INVALID_STATE (leftover from an interrupted flash); reset and retrying.",
+        )
 }

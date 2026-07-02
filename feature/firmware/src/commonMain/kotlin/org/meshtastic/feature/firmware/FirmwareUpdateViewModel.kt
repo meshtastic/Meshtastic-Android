@@ -43,6 +43,8 @@ import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.FirmwareReleaseType
 import org.meshtastic.core.datastore.BootloaderWarningDataSource
+import org.meshtastic.core.datastore.FirmwareRecoveryDataSource
+import org.meshtastic.core.datastore.model.PendingFirmwareRecovery
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.MyNodeInfo
@@ -57,6 +59,7 @@ import org.meshtastic.core.repository.isSerial
 import org.meshtastic.core.repository.isTcp
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
+import org.meshtastic.core.resources.firmware_recovery_ble_failed
 import org.meshtastic.core.resources.firmware_update_battery_low
 import org.meshtastic.core.resources.firmware_update_copying
 import org.meshtastic.core.resources.firmware_update_extracting
@@ -92,6 +95,7 @@ class FirmwareUpdateViewModel(
     private val radioController: RadioController,
     private val radioPrefs: RadioPrefs,
     private val bootloaderWarningDataSource: BootloaderWarningDataSource,
+    private val firmwareRecoveryDataSource: FirmwareRecoveryDataSource,
     private val firmwareUpdateManager: FirmwareUpdateManager,
     private val usbManager: FirmwareUsbManager,
     private val fileHandler: FirmwareFileHandler,
@@ -118,6 +122,9 @@ class FirmwareUpdateViewModel(
     private var updateJob: Job? = null
     private var tempFirmwareFile: FirmwareArtifact? = null
     private var originalDeviceAddress: String? = null
+
+    /** Set when [checkForUpdates] enters recovery mode (disconnected + a saved record); consumed by [startUpdate]. */
+    private var pendingRecovery: PendingFirmwareRecovery? = null
 
     init {
         // Cleanup potential leftovers
@@ -158,8 +165,9 @@ class FirmwareUpdateViewModel(
                     val ourNode = nodeRepository.myNodeInfo.value
                     val address = radioPrefs.devAddr.value?.drop(1)
                     if (address == null || ourNode == null) {
-                        _state.value =
-                            FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_no_device))
+                        // Not connected: offer to re-flash a device stranded in bootloader mode if we saved a
+                        // recovery record when its (now-interrupted) update was triggered. Otherwise, no device.
+                        enterRecoveryModeOrError()
                         return@launch
                     }
                     getDeviceHardware(ourNode)?.let { deviceHardware ->
@@ -226,9 +234,59 @@ class FirmwareUpdateViewModel(
             }
     }
 
+    /**
+     * Disconnected entry point: if a firmware update was interrupted and left a device stranded in bootloader mode,
+     * rebuild a recovery-flavored [FirmwareUpdateState.Ready] from the saved record so the user can re-flash it without
+     * first reconnecting (the bootloader exposes no mesh service to connect to). No record ⇒ the usual "no device".
+     */
+    private suspend fun enterRecoveryModeOrError() {
+        val recovery = firmwareRecoveryDataSource.pending.first()
+        if (recovery == null) {
+            _state.value = FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_no_device))
+            return
+        }
+        pendingRecovery = recovery
+        val hardware =
+            deviceHardwareRepository.getDeviceHardwareByModel(recovery.hwModel, recovery.pioEnv).getOrElse {
+                _state.value =
+                    FirmwareUpdateState.Error(
+                        UiText.Resource(Res.string.firmware_update_unknown_hardware, recovery.hwModel),
+                    )
+                null
+            } ?: return
+
+        _deviceHardware.value = hardware
+        _currentFirmwareVersion.value = null
+        val type =
+            runCatching { FirmwareReleaseType.valueOf(recovery.releaseType) }.getOrDefault(FirmwareReleaseType.STABLE)
+        _selectedReleaseType.value = type
+
+        firmwareReleaseRepository.getReleaseFlow(type).collectLatest { release ->
+            _selectedRelease.value = release
+            _state.value =
+                FirmwareUpdateState.Ready(
+                    release = release,
+                    deviceHardware = hardware,
+                    address = recovery.fullAddress.drop(1),
+                    showBootloaderWarning = false,
+                    updateMethod = FirmwareUpdateMethod.Ble,
+                    currentFirmwareVersion = null,
+                    isRecovery = true,
+                )
+        }
+    }
+
     fun startUpdate() {
         val currentState = _state.value as? FirmwareUpdateState.Ready ?: return
         val release = currentState.release ?: return
+        if (currentState.isRecovery) {
+            startRecoveryUpdate(currentState, release)
+        } else {
+            startNormalUpdate(currentState, release)
+        }
+    }
+
+    private fun startNormalUpdate(currentState: FirmwareUpdateState.Ready, release: FirmwareRelease) {
         originalDeviceAddress = radioPrefs.devAddr.value
 
         viewModelScope.launch {
@@ -237,6 +295,9 @@ class FirmwareUpdateViewModel(
                 updateJob =
                     viewModelScope.launch {
                         try {
+                            // Persist a recovery record before flashing so a stranded bootloader (interrupted upload,
+                            // app closed, missed reconnect) can be re-flashed later while disconnected.
+                            maybeRecordRecovery(currentState)
                             tempFirmwareFile =
                                 firmwareUpdateManager.startUpdate(
                                     release = release,
@@ -278,6 +339,82 @@ class FirmwareUpdateViewModel(
                     }
             }
         }
+    }
+
+    /**
+     * Persist a [PendingFirmwareRecovery] for the current BLE nRF-DFU update, so an interrupted flash that strands the
+     * device in bootloader mode can be recovered later. Scoped to BLE + non-ESP32 + a re-fetchable release channel
+     * (STABLE/ALPHA); ESP32 OTA and local-file flashes are intentionally not recoverable in this flow.
+     */
+    private suspend fun maybeRecordRecovery(state: FirmwareUpdateState.Ready) {
+        val type = _selectedReleaseType.value
+        val recoverable =
+            state.updateMethod is FirmwareUpdateMethod.Ble &&
+                !state.deviceHardware.isEsp32Arc &&
+                type != FirmwareReleaseType.LOCAL
+        if (!recoverable) return
+        val fullAddress = radioPrefs.devAddr.value
+        val pioEnv = nodeRepository.myNodeInfo.value?.pioEnv
+        if (fullAddress == null || pioEnv == null) return
+        firmwareRecoveryDataSource.set(
+            PendingFirmwareRecovery(
+                fullAddress = fullAddress,
+                hwModel = state.deviceHardware.hwModel,
+                pioEnv = pioEnv,
+                releaseType = type.name,
+                deviceName = radioPrefs.devName.value ?: state.deviceHardware.displayName,
+            ),
+        )
+    }
+
+    /**
+     * Re-flash a device stranded in bootloader mode. Routes straight to BLE DFU (the device is disconnected, so the
+     * connection-type dispatch can't run) and reuses the same verify/cleanup tail as a normal update.
+     */
+    private fun startRecoveryUpdate(currentState: FirmwareUpdateState.Ready, release: FirmwareRelease) {
+        originalDeviceAddress = pendingRecovery?.fullAddress
+        updateJob?.cancel()
+        updateJob =
+            viewModelScope.launch {
+                try {
+                    tempFirmwareFile =
+                        firmwareUpdateManager.recoverDfuDevice(
+                            release = release,
+                            hardware = currentState.deviceHardware,
+                            address = currentState.address,
+                            updateState = { _state.value = it },
+                        )
+
+                    when (val finalState = _state.value) {
+                        is FirmwareUpdateState.Success ->
+                            verifyUpdateResult(originalDeviceAddress, finalState.wasLowSpeedTransfer)
+
+                        is FirmwareUpdateState.Error -> {
+                            // BLE re-flash of a stranded device failed. A stock nRF bootloader can't reliably finish
+                            // an interrupted OTA update over the air, so point the user at USB serial-DFU recovery
+                            // rather than surfacing the low-level connection error.
+                            _state.value =
+                                FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_recovery_ble_failed))
+                            tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
+                        }
+
+                        else -> {
+                            Logger.w { "Firmware recovery returned without terminal state: ${_state.value}" }
+                            _state.value =
+                                FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_recovery_ble_failed))
+                            tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
+                        }
+                    }
+                } catch (e: CancellationException) {
+                    Logger.w(e) { "Firmware recovery cancelled" }
+                    _state.value = FirmwareUpdateState.Idle
+                    checkForUpdates()
+                    throw e
+                } catch (e: Exception) {
+                    Logger.e(e) { "Firmware recovery failed" }
+                    _state.value = FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_recovery_ble_failed))
+                }
+            }
     }
 
     fun saveDfuFile(uri: CommonUri) {
@@ -407,6 +544,9 @@ class FirmwareUpdateViewModel(
             Logger.w { "Post-update verification timed out for $address" }
             _state.value = FirmwareUpdateState.VerificationFailed
         } else {
+            // Device is back and healthy — retire any recovery record (covers both normal and recovery updates).
+            pendingRecovery = null
+            firmwareRecoveryDataSource.clear()
             _state.value = FirmwareUpdateState.Success(wasLowSpeedTransfer)
         }
     }
