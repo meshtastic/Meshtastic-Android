@@ -255,6 +255,7 @@
     <string name="debug_filter_preset_title">Förinställda filter</string>
     <string name="debug_filters">Filter</string>
     <string name="debug_log_api_enabled">API för debugloggen igång</string>
+    <string name="debug_logcat_refresh">Uppdatera</string>
     <string name="debug_logs_export">Exportera loggar</string>
     <string name="debug_panel">Felsökningspanel</string>
     <string name="debug_search_clear">Rensa sökning</string>

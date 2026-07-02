@@ -282,6 +282,7 @@
     <string name="debug_filter_preset_title">預設篩選條件</string>
     <string name="debug_filters">篩選</string>
     <string name="debug_log_api_enabled">啟用除錯日誌 API</string>
+    <string name="debug_logcat_refresh">重新整理</string>
     <string name="debug_logs_export">匯出日誌</string>
     <string name="debug_panel">偵錯面板</string>
     <string name="debug_search_clear">清除搜尋結果</string>

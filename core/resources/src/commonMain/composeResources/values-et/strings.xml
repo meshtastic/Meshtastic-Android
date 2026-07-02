@@ -309,6 +309,7 @@
     <string name="debug_filter_preset_title">Eelseadistatud filtrid</string>
     <string name="debug_filters">Filtrid</string>
     <string name="debug_log_api_enabled">Silumislogi API lubatud</string>
+    <string name="debug_logcat_refresh">Värskenda</string>
     <string name="debug_logs_export">Salvesta logi</string>
     <string name="debug_panel">Arendaja paneel</string>
     <string name="debug_search_clear">Puhasta otsing</string>

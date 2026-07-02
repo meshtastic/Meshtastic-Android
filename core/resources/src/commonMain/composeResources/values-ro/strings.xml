@@ -235,6 +235,7 @@
     <string name="debug_filter_preset_title">Presetări filtre</string>
     <string name="debug_filters">Filtre</string>
     <string name="debug_log_api_enabled">Debug log API activat</string>
+    <string name="debug_logcat_refresh">Reimprospatare</string>
     <string name="debug_logs_export">Export jurnale</string>
     <string name="debug_panel">Panou de depanare</string>
     <string name="debug_search_clear">Ștergeți căutarea</string>

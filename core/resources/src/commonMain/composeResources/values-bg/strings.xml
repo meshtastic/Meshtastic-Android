@@ -229,6 +229,7 @@
     <string name="debug_filter_included">Филтъра включва</string>
     <string name="debug_filter_preset_title">Предварително зададени филтри</string>
     <string name="debug_filters">Филтри</string>
+    <string name="debug_logcat_refresh">Опресняване</string>
     <string name="debug_logs_export">Експортиране на журнали</string>
     <string name="debug_panel">Панел за отстраняване на грешки</string>
     <string name="debug_search_clear">Изчистване на търсенето</string>

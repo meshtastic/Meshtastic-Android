@@ -311,6 +311,7 @@
     <string name="debug_filter_preset_title">Oletussuodattimet</string>
     <string name="debug_filters">Suodattimet</string>
     <string name="debug_log_api_enabled">Vianetsintälokirajapinta käytössä</string>
+    <string name="debug_logcat_refresh">Päivitä</string>
     <string name="debug_logs_export">Vie lokitiedot</string>
     <string name="debug_panel">Vianetsintäpaneeli</string>
     <string name="debug_search_clear">Tyhjennä haku</string>
@@ -907,7 +908,17 @@
     <string name="match_any">Täsmää yhteen | kaikkiin</string>
     <string name="max">Kaikki</string>
     <!-- MESH -->
+    <string name="mesh_beacon_invitations_title">Mesh-verkon kutsut</string>
+    <string name="mesh_beacon_notification_body">Lähellä oleva mesh-verkko kutsuu sinut liittymään</string>
+    <string name="mesh_beacon_notification_title">Mesh-verkon kutsu</string>
+    <string name="mesh_beacon_offer_channel">Kanava: %1$s</string>
+    <string name="mesh_beacon_offer_discover">Haku</string>
     <string name="mesh_beacon_offer_dismiss">Hylkää</string>
+    <string name="mesh_beacon_offer_from_unknown">Tuntemattomasta radiosta</string>
+    <string name="mesh_beacon_offer_join">Liity</string>
+    <string name="mesh_beacon_offer_preset">Esiasetus: %1$s</string>
+    <string name="mesh_beacon_offer_region">Alue: %1$s</string>
+    <string name="mesh_beacon_offer_title">Mesh-verkon kutsu</string>
     <string name="mesh_map_location">Meshtastic kartan sijainti</string>
     <string name="mesh_map_location_description">Ottaa käyttöön puhelimen sijainnin sinisenä pisteenä meshtastic kartalla.</string>
     <!-- MESHTASTIC -->
@@ -917,6 +928,7 @@
     <string name="meshtastic_broadcast_notifications">Yleislähetysviestien ilmoitukset</string>
     <string name="meshtastic_low_battery_notifications">Akun vähäisen varauksen ilmoitukset</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Akun vähäisen varauksen ilmoitukset (suosikkilaitteet)</string>
+    <string name="meshtastic_mesh_beacon_notifications">Mesh-verkon ilmoitukset</string>
     <string name="meshtastic_messages_notifications">Suorien viestien ilmoitukset</string>
     <string name="meshtastic_new_nodes_notifications">Uuden laitteen ilmoitukset</string>
     <string name="meshtastic_service_notifications">Palveluilmoitukset</string>
@@ -1425,6 +1437,7 @@
     <string name="status_message">Tilaviesti</string>
     <string name="status_message_config">Tilaviestin asetukset</string>
     <string name="stay_connected_anywhere">Pysy yhteydessä kaikkialla</string>
+    <string name="stop_connecting">Lopeta yhdistäminen</string>
     <string name="store_forward">Varastoi &amp; välitä</string>
     <string name="store_forward_config">Varastoi &amp; välitä asetukset</string>
     <string name="store_forward_enabled">Varastoi &amp; välitä käytössä</string>

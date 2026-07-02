@@ -151,6 +151,7 @@
     <!-- DISTANCE -->
     <string name="distance">Udaljenost</string>
     <!-- DOC -->
+    <string name="doc_title_debug_logs">Дебаг логови</string>
     <string name="doc_title_firmware">Ажурирања фирмвера</string>
     <string name="doc_title_nodes">Чворови</string>
     <string name="double_tap_as_button_press">Двоструки додир као дугме</string>

@@ -244,6 +244,7 @@
     <string name="debug_filter_preset_title">Готові фільтри</string>
     <string name="debug_filters">Фільтри</string>
     <string name="debug_log_api_enabled">API журналу відладки увімкнено</string>
+    <string name="debug_logcat_refresh">Оновити</string>
     <string name="debug_logs_export">Експортувати журнали</string>
     <string name="debug_panel">Панель налагодження</string>
     <string name="debug_search_clear">Очистити пошук</string>
