@@ -78,13 +78,13 @@ import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.User
-import kotlin.time.Duration
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlin.time.Duration
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class RadioConfigViewModelTest {
@@ -390,6 +390,41 @@ class RadioConfigViewModelTest {
     }
 
     @Test
+    fun `updateChannels keeps canonical channel list unchanged when ordered write fails`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        val channelA = ChannelSettings(name = "A")
+        val channelB = ChannelSettings(name = "B")
+        val channelC = ChannelSettings(name = "C")
+        val channelD = ChannelSettings(name = "D")
+        val old = listOf(channelA, channelB, channelC, channelD)
+        val new = listOf(channelA, channelD)
+        val writtenIndexes = mutableListOf<Int>()
+
+        every { radioConfigRepository.channelSetFlow } returns MutableStateFlow(ChannelSet(settings = old))
+        nodeRepository.setNodes(listOf(node))
+        viewModel = createViewModel()
+        runCurrent()
+
+        everySuspend { radioConfigUseCase.setRemoteChannel(any(), any()) } calls
+            {
+                val channel = it.args[1] as Channel
+                writtenIndexes.add(channel.index)
+                if (writtenIndexes.size == 2) {
+                    throw IllegalStateException("boom")
+                }
+                channel.index + 100
+            }
+
+        viewModel.updateChannels(new, old)
+        advanceUntilIdle()
+
+        assertEquals(listOf(1, 2), writtenIndexes)
+        assertEquals(old, viewModel.radioConfigState.value.channelList)
+        verifySuspend(exactly(0)) { packetRepository.migrateChannelsByPSK(any(), any()) }
+        verifySuspend(exactly(0)) { radioConfigRepository.replaceAllSettings(any()) }
+    }
+
+    @Test
     fun `applyManualChannelUpdatePlan paces writes except after final channel`() = runTest {
         val channelA = Channel(index = 1, role = Channel.Role.SECONDARY, settings = ChannelSettings(name = "A"))
         val channelB = Channel(index = 2, role = Channel.Role.DISABLED, settings = ChannelSettings())
@@ -398,17 +433,19 @@ class RadioConfigViewModelTest {
         val registeredRequestIds = mutableListOf<Int>()
         val delays = mutableListOf<Duration>()
 
-        applyManualChannelUpdatePlan(
-            updatePlan = listOf(channelA, channelB, channelC),
-            writeChannel = { channel ->
-                writtenIndexes.add(channel.index)
-                channel.index + 100
-            },
-            registerRequestId = { registeredRequestIds.add(it) },
-            delayFn = { delays.add(it) },
-        )
+        val result =
+            applyManualChannelUpdatePlan(
+                updatePlan = listOf(channelA, channelB, channelC),
+                writeChannel = { channel ->
+                    writtenIndexes.add(channel.index)
+                    channel.index + 100
+                },
+                registerRequestId = { registeredRequestIds.add(it) },
+                delayFn = { delays.add(it) },
+            )
 
         assertEquals(listOf(1, 2, 3), writtenIndexes)
+        assertEquals(listOf(101, 102, 103), result.packetIds)
         assertEquals(listOf(101, 102, 103), registeredRequestIds)
         assertEquals(listOf(MANUAL_CHANNEL_WRITE_DELAY, MANUAL_CHANNEL_WRITE_DELAY), delays)
     }
