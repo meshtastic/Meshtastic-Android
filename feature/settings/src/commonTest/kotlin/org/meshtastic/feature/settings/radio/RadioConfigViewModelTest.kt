@@ -34,6 +34,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -63,6 +64,7 @@ import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.testing.FakeLockdownCoordinator
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.feature.settings.navigation.ConfigRoute
+import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config
@@ -349,6 +351,41 @@ class RadioConfigViewModelTest {
 
         verifySuspend { radioConfigUseCase.setRemoteChannel(123, any()) }
         assertEquals(new, viewModel.radioConfigState.value.channelList)
+    }
+
+    @Test
+    fun `updateChannels writes changed channels sequentially in index order`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        nodeRepository.setNodes(listOf(node))
+        viewModel = createViewModel()
+
+        val channelA = ChannelSettings(name = "A")
+        val channelB = ChannelSettings(name = "B")
+        val channelC = ChannelSettings(name = "C")
+        val old = listOf(channelA, channelB, channelC)
+        val new = listOf(channelA, channelC, channelB)
+        val writtenIndexes = mutableListOf<Int>()
+        var activeWrites = 0
+        var maxConcurrentWrites = 0
+
+        everySuspend { radioConfigUseCase.setRemoteChannel(any(), any()) } calls
+            {
+                val channel = it.args[1] as Channel
+                activeWrites++
+                maxConcurrentWrites = maxOf(maxConcurrentWrites, activeWrites)
+                writtenIndexes.add(channel.index)
+                delay(1)
+                activeWrites--
+                writtenIndexes.size
+            }
+
+        viewModel.updateChannels(new, old)
+        advanceUntilIdle()
+
+        assertEquals(listOf(1, 2), writtenIndexes)
+        assertEquals(1, maxConcurrentWrites)
+        assertEquals(new, viewModel.radioConfigState.value.channelList)
+        verifySuspend(exactly(2)) { radioConfigUseCase.setRemoteChannel(123, any()) }
     }
 
     @Test
