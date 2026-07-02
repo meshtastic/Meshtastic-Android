@@ -80,6 +80,8 @@ fun RadioConfigItemList(
     onNavigate: (Route) -> Unit,
 ) {
     val enabled = state.connected && !state.responseState.isWaiting() && !isManaged
+    // ponytail: Debug Log/App Logs read local device data, not the radio, so they stay usable offline.
+    val debugPanelEnabled = !state.responseState.isWaiting() && !isManaged
 
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         RadioConfigSection(isManaged, enabled, onRouteClick)
@@ -93,7 +95,7 @@ fun RadioConfigItemList(
         AdministrationSection(enabled, onNavigate)
 
         if (state.isLocal) {
-            AdvancedSection(isManaged, isOtaCapable, enabled, onNavigate)
+            AdvancedSection(isManaged, isOtaCapable, enabled, debugPanelEnabled, onNavigate)
         }
     }
 }
@@ -190,7 +192,13 @@ private fun AdministrationSection(enabled: Boolean, onNavigate: (Route) -> Unit)
 }
 
 @Composable
-private fun AdvancedSection(isManaged: Boolean, isOtaCapable: Boolean, enabled: Boolean, onNavigate: (Route) -> Unit) {
+private fun AdvancedSection(
+    isManaged: Boolean,
+    isOtaCapable: Boolean,
+    enabled: Boolean,
+    debugPanelEnabled: Boolean,
+    onNavigate: (Route) -> Unit,
+) {
     ExpressiveSection(title = stringResource(Res.string.advanced_title)) {
         if (isManaged) {
             ManagedMessage()
@@ -222,7 +230,7 @@ private fun AdvancedSection(isManaged: Boolean, isOtaCapable: Boolean, enabled: 
         ListItem(
             text = stringResource(Res.string.debug_panel),
             leadingIcon = MeshtasticIcons.BugReport,
-            enabled = enabled,
+            enabled = debugPanelEnabled,
             onClick = { onNavigate(SettingsRoute.DebugPanel) },
         )
     }
