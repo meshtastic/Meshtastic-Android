@@ -412,8 +412,7 @@ class FirmwareUpdateViewModel(
                     throw e
                 } catch (e: Exception) {
                     Logger.e(e) { "Firmware recovery failed" }
-                    _state.value =
-                        FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_recovery_ble_failed))
+                    _state.value = FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_recovery_ble_failed))
                 }
             }
     }

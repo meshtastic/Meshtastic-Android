@@ -261,7 +261,7 @@ class LegacyDfuTransportTest {
     }
 
     @Test
-    fun `transferFirmware maps START_DFU INVALID_STATE to StaleSessionReset (recovery restart path)`() = runTest {
+    fun `transferFirmware maps START_DFU INVALID_STATE to StaleSessionReset for recovery restart`() = runTest {
         val env = createConnectedTransport()
         env.responder.scheme = LegacyResponderScheme.RejectStartInvalidState
 
@@ -518,6 +518,7 @@ class LegacyDfuTransportTest {
         private fun startResponse(): ByteArray = when (scheme) {
             LegacyResponderScheme.RejectStart ->
                 byteArrayOf(LegacyDfuOpcode.RESPONSE_CODE, LegacyDfuOpcode.START_DFU, LegacyDfuStatus.NOT_SUPPORTED)
+
             LegacyResponderScheme.RejectStartInvalidState ->
                 byteArrayOf(LegacyDfuOpcode.RESPONSE_CODE, LegacyDfuOpcode.START_DFU, LegacyDfuStatus.INVALID_STATE)
 

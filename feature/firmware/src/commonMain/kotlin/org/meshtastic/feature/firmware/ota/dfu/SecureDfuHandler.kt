@@ -243,7 +243,8 @@ class SecureDfuHandler(
         Logger.i { "DFU: reset-priming stale bootloader before retry" }
         val transport = createTransport(protocol, target)
         try {
-            transport.connectToDfuMode()
+            transport
+                .connectToDfuMode()
                 .onSuccess {
                     transport.abort()
                     Logger.i { "DFU: reset-prime RESET sent; waiting for clean reboot" }

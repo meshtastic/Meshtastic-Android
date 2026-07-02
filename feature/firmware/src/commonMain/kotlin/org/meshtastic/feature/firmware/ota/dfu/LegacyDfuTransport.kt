@@ -517,12 +517,12 @@ class LegacyDfuTransport(
         /**
          * Time to wait for the START_DFU response notification.
          *
-         * The stock Adafruit nRF52 bootloader is single-bank: on START it erases the **entire** application bank
-         * (~800 KB ≈ 200 flash pages) before firing the START-procedure response, and because the BLE link is live the
-         * SoftDevice time-slices each page erase against radio events, stretching the erase to ~30-50 s. The old
-         * 30 s cap aborted mid-erase (killing an otherwise-healthy session); Nordic's own DFU library imposes no such
-         * short cap here. 90 s covers the worst-case erase with margin. The disconnect tripwire still fast-fails on a
-         * genuine link drop, so this only extends the *silent-but-connected* wait.
+         * The stock Adafruit nRF52 bootloader is single-bank: on START it erases the **entire** application bank (~800
+         * KB ≈ 200 flash pages) before firing the START-procedure response, and because the BLE link is live the
+         * SoftDevice time-slices each page erase against radio events, stretching the erase to ~30-50 s. The old 30 s
+         * cap aborted mid-erase (killing an otherwise-healthy session); Nordic's own DFU library imposes no such short
+         * cap here. 90 s covers the worst-case erase with margin. The disconnect tripwire still fast-fails on a genuine
+         * link drop, so this only extends the *silent-but-connected* wait.
          */
         private val START_RESPONSE_TIMEOUT = 90.seconds
         private val VALIDATE_TIMEOUT = 60.seconds
@@ -543,10 +543,10 @@ class LegacyDfuTransport(
          *
          * Capped at 10 to match Nordic's own Legacy DFU implementation, which force-limits legacy PRN to ≤10 with the
          * comment: "DFU bootloaders from SDK 6.0.0 or older were unable to save incoming data to flash as fast as they
-         * are being sent … PRN = 10 may be the highest supported value" and treats status 6 (OPERATION_FAILED) as
-         * "data sent too fast — reduce PRN to 10 or less." The stock Adafruit bootloader shares this SDK11 flash-write
-         * path, so a higher value (we previously used 30, tuned for the faster OTAFIX fork) risks OPERATION_FAILED
-         * mid-stream on stock bootloaders. 10 is the safe ceiling that still batches flow-control ACKs.
+         * are being sent … PRN = 10 may be the highest supported value" and treats status 6 (OPERATION_FAILED) as "data
+         * sent too fast — reduce PRN to 10 or less." The stock Adafruit bootloader shares this SDK11 flash-write path,
+         * so a higher value (we previously used 30, tuned for the faster OTAFIX fork) risks OPERATION_FAILED mid-stream
+         * on stock bootloaders. 10 is the safe ceiling that still batches flow-control ACKs.
          */
         internal const val PRN_INTERVAL_PACKETS = 10
 
