@@ -400,11 +400,8 @@ class RadioConfigViewModelTest {
     @Test
     fun `updateChannels keeps canonical channel list unchanged when ordered write fails`() = runTest {
         val node = Node(num = 123, user = User(id = "!123"))
-        val channelA = ChannelSettings(name = "A")
-        val channelB = ChannelSettings(name = "B")
-        val channelC = ChannelSettings(name = "C")
-        val channelD = ChannelSettings(name = "D")
-        val old = listOf(channelA, channelB, channelC, channelD)
+        val old = fourChannelFixture()
+        val (channelA, _, _, channelD) = old
         val new = listOf(channelA, channelD)
         val writtenIndexes = mutableListOf<Int>()
 
@@ -436,11 +433,8 @@ class RadioConfigViewModelTest {
     @Test
     fun `updateChannels serializes overlapping channel saves`() = runTest {
         val node = Node(num = 123, user = User(id = "!123"))
-        val channelA = ChannelSettings(name = "A")
-        val channelB = ChannelSettings(name = "B")
-        val channelC = ChannelSettings(name = "C")
-        val channelD = ChannelSettings(name = "D")
-        val old = listOf(channelA, channelB, channelC, channelD)
+        val old = fourChannelFixture()
+        val (channelA, _, channelC, channelD) = old
         val firstNew = listOf(channelA, channelD)
         val secondNew = listOf(channelA, channelC)
         val writtenChannels = mutableListOf<String>()
@@ -1059,6 +1053,12 @@ class RadioConfigViewModelTest {
 
         verifySuspend { radioConfigUseCase.setConfig(123, Config(security = decoded)) }
     }
+    private fun fourChannelFixture() = listOf(
+        ChannelSettings(name = "A"),
+        ChannelSettings(name = "B"),
+        ChannelSettings(name = "C"),
+        ChannelSettings(name = "D"),
+    )
 
     private fun myNodeInfo(myNodeNum: Int) = MyNodeInfo(
         myNodeNum = myNodeNum,
