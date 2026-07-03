@@ -189,12 +189,6 @@
   },
   "pullRequests": [
     {
-      "id": "10860",
-      "title": "esp32-common: Do not remove `network-provisioning` component",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10860",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
       "id": "10856",
       "title": "add missing MESHTASTIC_EXCLUDE_AUDIO and fix tlora-v2-1-1_6 compilation",
       "page_url": "https://github.com/meshtastic/firmware/pull/10856",
@@ -207,18 +201,6 @@
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
-      "id": "10849",
-      "title": "Update Quency-D_chsc6x digest to 3b2b6ce",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10849",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10846",
-      "title": "InkHUD: GPS improvements",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10846",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
       "id": "10845",
       "title": "Fix ESP32-S2 nugget build",
       "page_url": "https://github.com/meshtastic/firmware/pull/10845",
@@ -228,18 +210,6 @@
       "id": "10844",
       "title": "Fix audio module availability",
       "page_url": "https://github.com/meshtastic/firmware/pull/10844",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10841",
-      "title": "XEdDSA packet signing UI (BaseUI)",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10841",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10839",
-      "title": "second pass adding beacons admin",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10839",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
@@ -313,6 +283,24 @@
       "title": "Monotonic time & prep for router graceful retirement",
       "page_url": "https://github.com/meshtastic/firmware/pull/10718",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "10717",
+      "title": "Update US LoRa modem preset to region defaults for compliance",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10717",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "10715",
+      "title": "Fixes on 0x69 address detection",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10715",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "10689",
+      "title": "Heltec Vision Master E213: enable 32768hz crystal osc for rtc",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10689",
+      "zip_url": "https://discord.com/invite/meshtastic"
     }
   ]
 }
