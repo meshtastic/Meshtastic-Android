@@ -34,6 +34,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -63,6 +64,7 @@ import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.testing.FakeLockdownCoordinator
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.feature.settings.navigation.ConfigRoute
+import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config
@@ -82,6 +84,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlin.time.Duration
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class RadioConfigViewModelTest {
@@ -349,6 +352,138 @@ class RadioConfigViewModelTest {
 
         verifySuspend { radioConfigUseCase.setRemoteChannel(123, any()) }
         assertEquals(new, viewModel.radioConfigState.value.channelList)
+    }
+
+    @Test
+    fun `updateChannels writes changed channels sequentially in index order`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        nodeRepository.setNodes(listOf(node))
+        viewModel = createViewModel()
+
+        val channelA = ChannelSettings(name = "A")
+        val channelB = ChannelSettings(name = "B")
+        val channelC = ChannelSettings(name = "C")
+        val old = listOf(channelA, channelB, channelC)
+        val new = listOf(channelA, channelC, channelB)
+        val writtenIndexes = mutableListOf<Int>()
+        var activeWrites = 0
+        var maxConcurrentWrites = 0
+
+        everySuspend { radioConfigUseCase.setRemoteChannel(any(), any()) } calls
+            {
+                val channel = it.args[1] as Channel
+                activeWrites++
+                maxConcurrentWrites = maxOf(maxConcurrentWrites, activeWrites)
+                writtenIndexes.add(channel.index)
+                delay(1)
+                activeWrites--
+                writtenIndexes.size
+            }
+
+        viewModel.updateChannels(new, old)
+        advanceUntilIdle()
+
+        assertEquals(listOf(1, 2), writtenIndexes)
+        assertEquals(1, maxConcurrentWrites)
+        assertEquals(new, viewModel.radioConfigState.value.channelList)
+        verifySuspend(exactly(2)) { radioConfigUseCase.setRemoteChannel(123, any()) }
+    }
+
+    @Test
+    fun `updateChannels keeps canonical channel list unchanged when ordered write fails`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        val old = fourChannelFixture()
+        val (channelA, _, _, channelD) = old
+        val new = listOf(channelA, channelD)
+        val writtenIndexes = mutableListOf<Int>()
+
+        every { radioConfigRepository.channelSetFlow } returns MutableStateFlow(ChannelSet(settings = old))
+        nodeRepository.setNodes(listOf(node))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
+        viewModel = createViewModel()
+        runCurrent()
+
+        everySuspend { radioConfigUseCase.setRemoteChannel(any(), any()) } calls
+            {
+                val channel = it.args[1] as Channel
+                writtenIndexes.add(channel.index)
+                if (writtenIndexes.size == 2) {
+                    throw IllegalStateException("boom")
+                }
+                channel.index + 100
+            }
+
+        viewModel.updateChannels(new, old)
+        advanceUntilIdle()
+
+        assertEquals(listOf(1, 2), writtenIndexes)
+        assertEquals(old, viewModel.radioConfigState.value.channelList)
+        verifySuspend(exactly(0)) { packetRepository.migrateChannelsByPSK(any(), any()) }
+        verifySuspend(exactly(0)) { radioConfigRepository.replaceAllSettings(any()) }
+    }
+
+    @Test
+    fun `updateChannels serializes overlapping channel saves`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        val old = fourChannelFixture()
+        val (channelA, _, channelC, channelD) = old
+        val firstNew = listOf(channelA, channelD)
+        val secondNew = listOf(channelA, channelC)
+        val writtenChannels = mutableListOf<String>()
+        var firstWrite = true
+
+        every { radioConfigRepository.channelSetFlow } returns MutableStateFlow(ChannelSet(settings = old))
+        nodeRepository.setNodes(listOf(node))
+        viewModel = createViewModel()
+        runCurrent()
+
+        everySuspend { radioConfigUseCase.setRemoteChannel(any(), any()) } calls
+            {
+                val channel = it.args[1] as Channel
+                writtenChannels.add("${channel.index}:${channel.role}:${channel.settings?.name.orEmpty()}")
+                if (firstWrite) {
+                    firstWrite = false
+                    delay(10_000)
+                }
+                writtenChannels.size
+            }
+
+        viewModel.updateChannels(firstNew, old)
+        runCurrent()
+        viewModel.updateChannels(secondNew, old)
+        advanceUntilIdle()
+
+        assertEquals(
+            listOf("1:SECONDARY:D", "2:DISABLED:", "3:DISABLED:", "1:SECONDARY:C", "2:DISABLED:", "3:DISABLED:"),
+            writtenChannels,
+        )
+        assertEquals(secondNew, viewModel.radioConfigState.value.channelList)
+    }
+
+    @Test
+    fun `applyManualChannelUpdatePlan paces writes except after final channel`() = runTest {
+        val channelA = Channel(index = 1, role = Channel.Role.SECONDARY, settings = ChannelSettings(name = "A"))
+        val channelB = Channel(index = 2, role = Channel.Role.DISABLED, settings = ChannelSettings())
+        val channelC = Channel(index = 3, role = Channel.Role.DISABLED, settings = ChannelSettings())
+        val writtenIndexes = mutableListOf<Int>()
+        val registeredRequestIds = mutableListOf<Int>()
+        val delays = mutableListOf<Duration>()
+
+        val result =
+            applyManualChannelUpdatePlan(
+                updatePlan = listOf(channelA, channelB, channelC),
+                writeChannel = { channel ->
+                    writtenIndexes.add(channel.index)
+                    channel.index + 100
+                },
+                registerRequestId = { registeredRequestIds.add(it) },
+                delayFn = { delays.add(it) },
+            )
+
+        assertEquals(listOf(1, 2, 3), writtenIndexes)
+        assertEquals(listOf(101, 102, 103), result.packetIds)
+        assertEquals(listOf(101, 102, 103), registeredRequestIds)
+        assertEquals(listOf(MANUAL_CHANNEL_WRITE_DELAY, MANUAL_CHANNEL_WRITE_DELAY), delays)
     }
 
     @Test
@@ -853,6 +988,13 @@ class RadioConfigViewModelTest {
 
         verifySuspend(exactly(0)) { radioConfigUseCase.getConfig(any(), any()) }
     }
+
+    private fun fourChannelFixture() = listOf(
+        ChannelSettings(name = "A"),
+        ChannelSettings(name = "B"),
+        ChannelSettings(name = "C"),
+        ChannelSettings(name = "D"),
+    )
 
     private fun myNodeInfo(myNodeNum: Int) = MyNodeInfo(
         myNodeNum = myNodeNum,
