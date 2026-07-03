@@ -410,6 +410,7 @@ class RadioConfigViewModelTest {
 
         every { radioConfigRepository.channelSetFlow } returns MutableStateFlow(ChannelSet(settings = old))
         nodeRepository.setNodes(listOf(node))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
         viewModel = createViewModel()
         runCurrent()
 
@@ -430,6 +431,47 @@ class RadioConfigViewModelTest {
         assertEquals(old, viewModel.radioConfigState.value.channelList)
         verifySuspend(exactly(0)) { packetRepository.migrateChannelsByPSK(any(), any()) }
         verifySuspend(exactly(0)) { radioConfigRepository.replaceAllSettings(any()) }
+    }
+
+    @Test
+    fun `updateChannels serializes overlapping channel saves`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        val channelA = ChannelSettings(name = "A")
+        val channelB = ChannelSettings(name = "B")
+        val channelC = ChannelSettings(name = "C")
+        val channelD = ChannelSettings(name = "D")
+        val old = listOf(channelA, channelB, channelC, channelD)
+        val firstNew = listOf(channelA, channelD)
+        val secondNew = listOf(channelA, channelC)
+        val writtenChannels = mutableListOf<String>()
+        var firstWrite = true
+
+        every { radioConfigRepository.channelSetFlow } returns MutableStateFlow(ChannelSet(settings = old))
+        nodeRepository.setNodes(listOf(node))
+        viewModel = createViewModel()
+        runCurrent()
+
+        everySuspend { radioConfigUseCase.setRemoteChannel(any(), any()) } calls
+            {
+                val channel = it.args[1] as Channel
+                writtenChannels.add("${channel.index}:${channel.role}:${channel.settings?.name.orEmpty()}")
+                if (firstWrite) {
+                    firstWrite = false
+                    delay(10_000)
+                }
+                writtenChannels.size
+            }
+
+        viewModel.updateChannels(firstNew, old)
+        runCurrent()
+        viewModel.updateChannels(secondNew, old)
+        advanceUntilIdle()
+
+        assertEquals(
+            listOf("1:SECONDARY:D", "2:DISABLED:", "3:DISABLED:", "1:SECONDARY:C", "2:DISABLED:", "3:DISABLED:"),
+            writtenChannels,
+        )
+        assertEquals(secondNew, viewModel.radioConfigState.value.channelList)
     }
 
     @Test

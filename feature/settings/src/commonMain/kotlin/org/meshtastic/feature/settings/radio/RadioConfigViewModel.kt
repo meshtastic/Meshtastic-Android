@@ -33,6 +33,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.InjectedParam
 import org.koin.core.annotation.KoinViewModel
@@ -221,6 +223,7 @@ open class RadioConfigViewModel(
     val mqttProbeStatus: StateFlow<MqttProbeStatus?> = _mqttProbeStatus.asStateFlow()
 
     private var probeJob: Job? = null
+    private val channelUpdateMutex = Mutex()
 
     /**
      * Run a one-shot reachability/credentials probe against an MQTT broker. Cancels any in-flight probe before starting
@@ -412,18 +415,21 @@ open class RadioConfigViewModel(
         safeLaunch(tag = "setRemoteChannels") {
             // Manual channel saves are an ordered batch: only update canonical local state after every write request is
             // enqueued. If any enqueue fails, safeLaunch reports it and leaves the saved state unchanged instead of
-            // blessing a partial delete/reorder result.
-            applyManualChannelUpdatePlan(
-                updatePlan = updatePlan,
-                writeChannel = { channel -> radioConfigUseCase.setRemoteChannel(destNum, channel) },
-                registerRequestId = ::registerRequestId,
-            )
+            // blessing a partial delete/reorder result. Serialize batches so two ordered write plans cannot interleave
+            // on the radio link.
+            channelUpdateMutex.withLock {
+                applyManualChannelUpdatePlan(
+                    updatePlan = updatePlan,
+                    writeChannel = { channel -> radioConfigUseCase.setRemoteChannel(destNum, channel) },
+                    registerRequestId = ::registerRequestId,
+                )
 
-            if (destNum == myNodeNum) {
-                packetRepository.migrateChannelsByPSK(old, new)
-                radioConfigRepository.replaceAllSettings(new)
+                if (destNum == myNodeNum) {
+                    packetRepository.migrateChannelsByPSK(old, new)
+                    radioConfigRepository.replaceAllSettings(new)
+                }
+                _radioConfigState.update { it.copy(channelList = new) }
             }
-            _radioConfigState.update { it.copy(channelList = new) }
         }
     }
 
