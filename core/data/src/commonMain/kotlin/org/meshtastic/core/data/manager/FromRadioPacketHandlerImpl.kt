@@ -132,6 +132,11 @@ class FromRadioPacketHandlerImpl(
         serviceStateWriter.setClientNotification(cn)
 
         scope.handledLaunch {
+            if (cn.isOtaStatusNotification()) {
+                Logger.i { "OTA status ClientNotification received; skipping duplicate generic alert" }
+                return@handledLaunch
+            }
+
             val inform = cn.key_verification_number_inform
             val request = cn.key_verification_number_request
             val verificationFinal = cn.key_verification_final
@@ -170,4 +175,15 @@ class FromRadioPacketHandlerImpl(
             )
         }
     }
+}
+
+private const val OTA_KEYWORD = "OTA"
+private const val OTA_CONFIRM_PREFIX = "Rebooting to"
+private val OTA_REJECTION_PREFIXES = listOf("Cannot start OTA", "OTA Loader", "Unable to switch to the OTA partition")
+
+internal fun ClientNotification.isOtaStatusNotification(): Boolean {
+    val message = message.trim()
+    if (message.isBlank() || !message.contains(OTA_KEYWORD)) return false
+
+    return message.startsWith(OTA_CONFIRM_PREFIX) || OTA_REJECTION_PREFIXES.any { message.startsWith(it) }
 }

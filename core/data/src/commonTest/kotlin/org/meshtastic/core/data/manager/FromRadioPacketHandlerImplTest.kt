@@ -43,6 +43,7 @@ import org.meshtastic.proto.QueueStatus
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import org.meshtastic.proto.NodeInfo as ProtoNodeInfo
 
@@ -202,5 +203,21 @@ class FromRadioPacketHandlerImplTest {
         }
 
         verify { serviceRepository.setClientNotification(notification) }
+    }
+
+    @Test
+    fun `OTA status client notifications are identified`() {
+        assertTrue(ClientNotification(message = "Rebooting to WiFi OTA").isOtaStatusNotification())
+        assertTrue(ClientNotification(message = "OTA Loader does not support WiFi").isOtaStatusNotification())
+        assertTrue(
+            ClientNotification(message = "Cannot start OTA: OTA Loader partition not found.").isOtaStatusNotification(),
+        )
+        assertTrue(ClientNotification(message = "Unable to switch to the OTA partition.").isOtaStatusNotification())
+    }
+
+    @Test
+    fun `non OTA client notifications are not identified as OTA status`() {
+        assertFalse(ClientNotification(message = "test").isOtaStatusNotification())
+        assertFalse(ClientNotification(message = "Low battery").isOtaStatusNotification())
     }
 }

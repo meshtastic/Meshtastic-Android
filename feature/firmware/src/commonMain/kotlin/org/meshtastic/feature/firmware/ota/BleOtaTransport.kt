@@ -88,7 +88,7 @@ class BleOtaTransport(
         }
     }
 
-    @Suppress("MagicNumber", "LongMethod")
+    @Suppress("MagicNumber", "LongMethod", "ThrowsCount")
     override suspend fun connect(): Result<Unit> = safeCatching {
         otaService = null
         notificationJob?.cancel()

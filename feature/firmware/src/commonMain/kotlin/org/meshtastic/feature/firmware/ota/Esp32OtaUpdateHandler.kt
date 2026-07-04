@@ -252,6 +252,7 @@ class Esp32OtaUpdateHandler(
         // tests fall back to empty and the Downloading state still emits with a blank message.
         val downloadingMsg =
             safeCatchingAll { getStringSuspend(Res.string.firmware_update_downloading_percent, 0) }
+                .onFailure { e -> Logger.w(e) { "ESP32 OTA: Failed to resolve downloading message string" } }
                 .getOrDefault("")
                 .stripFormatArgs()
 
@@ -296,6 +297,7 @@ class Esp32OtaUpdateHandler(
         }
     }
 
+    @Suppress("ThrowsCount") // CancellationException rethrow + two post-confirm failure paths
     private suspend fun connectToDevice(
         transport: UnifiedOtaProtocol,
         attempts: Int,
