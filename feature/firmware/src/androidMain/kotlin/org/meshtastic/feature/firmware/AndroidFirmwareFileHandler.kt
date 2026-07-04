@@ -17,6 +17,7 @@
 package org.meshtastic.feature.firmware
 
 import android.content.Context
+import android.provider.OpenableColumns
 import co.touchlab.kermit.Logger
 import com.eygraber.uri.toAndroidUri
 import io.ktor.client.HttpClient
@@ -169,6 +170,8 @@ class AndroidFirmwareFileHandler(private val context: Context, private val clien
                 entry = zipInput.nextEntry
             }
         }
+        // Prefer the shortest matching entry name — official release bundles contain one
+        // matching firmware per target; the heuristic picks the canonical name if multiple match.
         matchingEntries.minByOrNull { it.first.name.length }?.second?.toFirmwareArtifact()
     }
 
@@ -220,6 +223,8 @@ class AndroidFirmwareFileHandler(private val context: Context, private val clien
             Logger.w(e) { "Failed to extract firmware from URI" }
             return@withContext null
         }
+        // Prefer the shortest matching entry name — official release bundles contain one
+        // matching firmware per target; the heuristic picks the canonical name if multiple match.
         matchingEntries.minByOrNull { it.first.name.length }?.second?.toFirmwareArtifact()
     }
 
@@ -253,6 +258,28 @@ class AndroidFirmwareFileHandler(private val context: Context, private val clien
         tempFile.parentFile?.mkdirs()
         inputStream.use { input -> tempFile.outputStream().use { output -> input.copyTo(output) } }
         tempFile.toFirmwareArtifact()
+    }
+
+    override suspend fun getDisplayName(uri: CommonUri): String? = withContext(ioDispatcher) {
+        val platformUri = uri.toAndroidUri()
+        context.contentResolver.query(
+            platformUri,
+            arrayOf(OpenableColumns.DISPLAY_NAME),
+            null,
+            null,
+            null,
+        )?.use { cursor ->
+            val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+            if (nameIndex >= 0 && cursor.moveToFirst()) {
+                cursor
+                    .getString(nameIndex)
+                    ?.takeIf { it.isNotBlank() }
+                    ?.let {
+                        return@withContext it
+                    }
+            }
+        }
+        if (platformUri.scheme == "file") uri.pathSegments.lastOrNull()?.takeIf { it.isNotBlank() } else null
     }
 
     override suspend fun extractZipEntries(artifact: FirmwareArtifact): Map<String, ByteArray> =

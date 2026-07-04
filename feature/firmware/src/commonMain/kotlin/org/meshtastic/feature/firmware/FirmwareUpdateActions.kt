@@ -23,6 +23,8 @@ data class FirmwareUpdateActions(
     val onStartUpdate: () -> Unit,
     val onPickFile: () -> Unit,
     val onSaveFile: (String) -> Unit,
+    val onConfirmLocalFile: () -> Unit,
+    val onDismissLocalFile: () -> Unit,
     val onRetry: () -> Unit,
     val onCancel: () -> Unit,
     val onDone: () -> Unit,

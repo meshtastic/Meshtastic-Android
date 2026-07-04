@@ -64,6 +64,9 @@ interface FirmwareFileHandler {
      */
     suspend fun importFromUri(uri: CommonUri): FirmwareArtifact?
 
+    /** Resolve a user-visible display filename for [uri], or `null` when the provider does not expose one. */
+    suspend fun getDisplayName(uri: CommonUri): String?
+
     /** Copy [source] to the platform URI [destinationUri], returning the number of bytes written. */
     suspend fun copyToUri(source: FirmwareArtifact, destinationUri: CommonUri): Long
 
@@ -126,3 +129,140 @@ internal fun isValidFirmwareFile(filename: String, target: String, fileExtension
         filename.contains(target) &&
         (regex.matches(filename) || filename.startsWith("$target-") || filename.startsWith("$target."))
 }
+
+data class PendingLocalFirmwareFile(
+    val uri: CommonUri,
+    val fileName: String,
+    val deviceName: String,
+    val platformioTarget: String,
+    val updateMethod: FirmwareUpdateMethod,
+    val address: String,
+)
+
+internal fun validatePendingLocalFirmwareFile(
+    pendingFile: PendingLocalFirmwareFile,
+    currentState: FirmwareUpdateState.Ready,
+): LocalFirmwareFileValidation {
+    val validation =
+        validateLocalFirmwareFileName(pendingFile.fileName, currentState.deviceHardware, currentState.updateMethod)
+    if (validation is LocalFirmwareFileValidation.Invalid) {
+        return validation
+    }
+
+    val currentTarget = currentState.deviceHardware.platformioTarget.ifEmpty { currentState.deviceHardware.hwModelSlug }
+    return if (
+        currentTarget == pendingFile.platformioTarget &&
+        currentState.updateMethod == pendingFile.updateMethod &&
+        currentState.address == pendingFile.address
+    ) {
+        LocalFirmwareFileValidation.Valid
+    } else {
+        LocalFirmwareFileValidation.Invalid(LocalFirmwareFileValidationReason.TargetMismatch)
+    }
+}
+
+internal sealed interface LocalFirmwareFileValidation {
+    data object Valid : LocalFirmwareFileValidation
+
+    data class Invalid(val reason: LocalFirmwareFileValidationReason) : LocalFirmwareFileValidation
+}
+
+internal enum class LocalFirmwareFileValidationReason {
+    MissingTarget,
+    MissingArchiveFirmware,
+    RequiresOtaZip,
+    RequiresBin,
+    RequiresUf2,
+    TargetMismatch,
+    UnsupportedUpdateMethod,
+}
+
+internal fun validateLocalFirmwareFileName(
+    fileName: String,
+    hardware: DeviceHardware,
+    updateMethod: FirmwareUpdateMethod,
+): LocalFirmwareFileValidation {
+    val normalizedFileName = fileName.substringAfterLast('/').substringAfterLast('\\').lowercase()
+    val target = hardware.platformioTarget.ifEmpty { hardware.hwModelSlug }.lowercase()
+    if (target.isBlank()) {
+        return LocalFirmwareFileValidation.Invalid(LocalFirmwareFileValidationReason.MissingTarget)
+    }
+
+    return when (updateMethod) {
+        FirmwareUpdateMethod.Ble ->
+            if (hardware.isEsp32Arc) {
+                validateEsp32LocalFirmware(normalizedFileName, target)
+            } else {
+                validateNrf52LocalFirmware(normalizedFileName, target)
+            }
+
+        FirmwareUpdateMethod.Wifi -> validateEsp32LocalFirmware(normalizedFileName, target)
+
+        FirmwareUpdateMethod.Usb -> validateUsbLocalFirmware(normalizedFileName, target)
+
+        FirmwareUpdateMethod.Unknown ->
+            LocalFirmwareFileValidation.Invalid(LocalFirmwareFileValidationReason.UnsupportedUpdateMethod)
+    }
+}
+
+/**
+ * Returns the firmware payload file extension this platform's update handler expects to receive.
+ *
+ * nRF52 BLE consumes the Nordic DFU `.zip` package directly via [SecureDfuHandler]; ESP32 (BLE or WiFi) streams a raw
+ * `.bin`; USB copies a `.uf2` to the mass-storage drive. Returns `null` for [FirmwareUpdateMethod.Unknown], which does
+ * not support local files.
+ */
+internal fun localFirmwarePayloadExtension(hardware: DeviceHardware, updateMethod: FirmwareUpdateMethod): String? =
+    when (updateMethod) {
+        FirmwareUpdateMethod.Ble -> if (hardware.isEsp32Arc) ".bin" else ".zip"
+        FirmwareUpdateMethod.Wifi -> ".bin"
+        FirmwareUpdateMethod.Usb -> ".uf2"
+        FirmwareUpdateMethod.Unknown -> null
+    }
+
+private fun validateNrf52LocalFirmware(fileName: String, target: String): LocalFirmwareFileValidation =
+    validateSuffixedLocalFirmware(
+        fileName = fileName,
+        target = target,
+        requiredSuffix = "-ota.zip",
+        fileExtension = ".zip",
+        missingSuffixReason = LocalFirmwareFileValidationReason.RequiresOtaZip,
+    )
+
+private fun validateEsp32LocalFirmware(fileName: String, target: String): LocalFirmwareFileValidation =
+    validateSuffixedLocalFirmware(
+        fileName = fileName,
+        target = target,
+        requiredSuffix = ".bin",
+        fileExtension = ".bin",
+        missingSuffixReason = LocalFirmwareFileValidationReason.RequiresBin,
+    )
+
+private fun validateUsbLocalFirmware(fileName: String, target: String): LocalFirmwareFileValidation =
+    validateSuffixedLocalFirmware(
+        fileName = fileName,
+        target = target,
+        requiredSuffix = ".uf2",
+        fileExtension = ".uf2",
+        missingSuffixReason = LocalFirmwareFileValidationReason.RequiresUf2,
+    )
+
+private fun validateSuffixedLocalFirmware(
+    fileName: String,
+    target: String,
+    requiredSuffix: String,
+    fileExtension: String,
+    missingSuffixReason: LocalFirmwareFileValidationReason,
+): LocalFirmwareFileValidation {
+    if (!fileName.endsWith(requiredSuffix)) {
+        return LocalFirmwareFileValidation.Invalid(missingSuffixReason)
+    }
+    return validateTargetMatch(fileName, target, fileExtension)
+}
+
+private fun validateTargetMatch(fileName: String, target: String, fileExtension: String): LocalFirmwareFileValidation =
+    if (isValidFirmwareFile(fileName, target, fileExtension)) {
+        LocalFirmwareFileValidation.Valid
+    } else {
+        LocalFirmwareFileValidation.Invalid(LocalFirmwareFileValidationReason.TargetMismatch)
+    }

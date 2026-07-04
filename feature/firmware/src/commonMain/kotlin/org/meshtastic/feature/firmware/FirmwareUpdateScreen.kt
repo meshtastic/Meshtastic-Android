@@ -35,6 +35,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -68,6 +69,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -97,6 +99,9 @@ import org.meshtastic.core.resources.firmware_recovery_explanation
 import org.meshtastic.core.resources.firmware_update_almost_there
 import org.meshtastic.core.resources.firmware_update_alpha
 import org.meshtastic.core.resources.firmware_update_checking
+import org.meshtastic.core.resources.firmware_update_confirm_file_button
+import org.meshtastic.core.resources.firmware_update_confirm_file_message
+import org.meshtastic.core.resources.firmware_update_confirm_file_title
 import org.meshtastic.core.resources.firmware_update_currently_installed
 import org.meshtastic.core.resources.firmware_update_device
 import org.meshtastic.core.resources.firmware_update_disclaimer_chirpy_says
@@ -171,17 +176,18 @@ fun FirmwareUpdateScreen(onNavigateUp: () -> Unit, viewModel: FirmwareUpdateView
     val deviceHardware by viewModel.deviceHardware.collectAsStateWithLifecycle()
     val currentVersion by viewModel.currentFirmwareVersion.collectAsStateWithLifecycle()
     val selectedRelease by viewModel.selectedRelease.collectAsStateWithLifecycle()
+    val pendingLocalFirmwareFile by viewModel.pendingLocalFirmwareFile.collectAsStateWithLifecycle()
 
     var showExitConfirmation by remember { mutableStateOf(false) }
 
     val filePickerLauncher = rememberOpenFileLauncher { uri: CommonUri? ->
-        uri?.let { viewModel.startUpdateFromFile(it) }
+        uri?.let { viewModel.prepareLocalFirmwareFile(it) }
     }
 
     val saveFileLauncher = rememberSaveFileLauncher { uri -> viewModel.saveDfuFile(uri) }
 
     val actions =
-        remember(viewModel, onNavigateUp) {
+        remember(viewModel, onNavigateUp, state) {
             FirmwareUpdateActions(
                 onReleaseTypeSelect = viewModel::setReleaseType,
                 onStartUpdate = viewModel::startUpdate,
@@ -191,6 +197,8 @@ fun FirmwareUpdateScreen(onNavigateUp: () -> Unit, viewModel: FirmwareUpdateView
                     }
                 },
                 onSaveFile = { fileName -> saveFileLauncher(fileName, "application/octet-stream") },
+                onConfirmLocalFile = viewModel::confirmLocalFirmwareFile,
+                onDismissLocalFile = viewModel::dismissLocalFirmwareFile,
                 onRetry = viewModel::checkForUpdates,
                 onCancel = { showExitConfirmation = true },
                 onDone = { onNavigateUp() },
@@ -222,6 +230,14 @@ fun FirmwareUpdateScreen(onNavigateUp: () -> Unit, viewModel: FirmwareUpdateView
         )
     }
 
+    pendingLocalFirmwareFile?.let { pendingFile ->
+        LocalFirmwareFileConfirmationDialog(
+            pendingFile = pendingFile,
+            onConfirm = actions.onConfirmLocalFile,
+            onDismiss = actions.onDismissLocalFile,
+        )
+    }
+
     FirmwareUpdateScaffold(
         modifier = modifier,
         onNavigateUp = onNavigateUp,
@@ -231,6 +247,49 @@ fun FirmwareUpdateScreen(onNavigateUp: () -> Unit, viewModel: FirmwareUpdateView
         deviceHardware = deviceHardware,
         currentVersion = currentVersion,
         selectedRelease = selectedRelease,
+    )
+}
+
+@Composable
+private fun LocalFirmwareFileConfirmationDialog(
+    pendingFile: PendingLocalFirmwareFile,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    MeshtasticDialog(
+        onDismiss = onDismiss,
+        title = stringResource(Res.string.firmware_update_confirm_file_title),
+        confirmText = stringResource(Res.string.firmware_update_confirm_file_button),
+        onConfirm = onConfirm,
+        dismissText = stringResource(Res.string.cancel),
+        text = {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = stringResource(Res.string.firmware_update_confirm_file_message),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                Spacer(Modifier.height(12.dp))
+                SelectionContainer {
+                    Text(
+                        text = pendingFile.fileName,
+                        modifier = Modifier.fillMaxWidth(),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontFamily = FontFamily.Monospace,
+                    )
+                }
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    text = stringResource(Res.string.firmware_update_device, pendingFile.deviceName),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    text = stringResource(Res.string.firmware_update_target, pendingFile.platformioTarget),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        },
     )
 }
 

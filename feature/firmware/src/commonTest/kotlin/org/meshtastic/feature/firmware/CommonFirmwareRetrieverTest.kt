@@ -472,6 +472,8 @@ abstract class CommonFirmwareRetrieverTest {
 
         override suspend fun importFromUri(uri: CommonUri): FirmwareArtifact? = null
 
+        override suspend fun getDisplayName(uri: CommonUri): String? = uri.pathSegments.lastOrNull()
+
         override suspend fun extractZipEntries(artifact: FirmwareArtifact): Map<String, ByteArray> = emptyMap()
 
         override suspend fun deleteFile(file: FirmwareArtifact) {}
