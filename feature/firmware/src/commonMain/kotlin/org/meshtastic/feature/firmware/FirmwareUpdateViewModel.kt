@@ -172,57 +172,56 @@ class FirmwareUpdateViewModel(
                         enterRecoveryModeOrError()
                         return@launch
                     }
-                    getDeviceHardware(ourNode)?.let { deviceHardware ->
+                    val releaseFlow =
+                        if (_selectedReleaseType.value == FirmwareReleaseType.LOCAL) {
+                            flowOf(null)
+                        } else {
+                            firmwareReleaseRepository.getReleaseFlow(_selectedReleaseType.value)
+                        }
+
+                    releaseFlow.collectLatest { release ->
+                        _selectedRelease.value = release
+                        val deviceHardware = getDeviceHardware(ourNode) ?: return@collectLatest
                         _deviceHardware.value = deviceHardware
                         _currentFirmwareVersion.value = ourNode.firmwareVersion
 
-                        val releaseFlow =
-                            if (_selectedReleaseType.value == FirmwareReleaseType.LOCAL) {
-                                flowOf(null)
-                            } else {
-                                firmwareReleaseRepository.getReleaseFlow(_selectedReleaseType.value)
-                            }
-
-                        releaseFlow.collectLatest { release ->
-                            _selectedRelease.value = release
-                            val dismissed = bootloaderWarningDataSource.isDismissed(address)
-                            val firmwareUpdateMethod =
-                                when {
-                                    radioPrefs.isSerial() -> {
-                                        // Serial OTA is not yet supported for ESP32 — only nRF52/RP2040 UF2.
-                                        if (deviceHardware.isEsp32Arc) {
-                                            FirmwareUpdateMethod.Unknown
-                                        } else {
-                                            FirmwareUpdateMethod.Usb
-                                        }
+                        val dismissed = bootloaderWarningDataSource.isDismissed(address)
+                        val firmwareUpdateMethod =
+                            when {
+                                radioPrefs.isSerial() -> {
+                                    // Serial OTA is not yet supported for ESP32 — only nRF52/RP2040 UF2.
+                                    if (deviceHardware.isEsp32Arc) {
+                                        FirmwareUpdateMethod.Unknown
+                                    } else {
+                                        FirmwareUpdateMethod.Usb
                                     }
-
-                                    radioPrefs.isBle() -> FirmwareUpdateMethod.Ble
-
-                                    radioPrefs.isTcp() -> {
-                                        // WiFi OTA is ESP32-only; nRF52/RP2040 have no TCP update path.
-                                        if (deviceHardware.isEsp32Arc) {
-                                            FirmwareUpdateMethod.Wifi
-                                        } else {
-                                            FirmwareUpdateMethod.Unknown
-                                        }
-                                    }
-
-                                    else -> FirmwareUpdateMethod.Unknown
                                 }
-                            _state.value =
-                                FirmwareUpdateState.Ready(
-                                    release = release,
-                                    deviceHardware = deviceHardware,
-                                    address = address,
-                                    showBootloaderWarning =
-                                    deviceHardware.requiresBootloaderUpgradeForOta == true &&
-                                        !dismissed &&
-                                        radioPrefs.isBle(),
-                                    updateMethod = firmwareUpdateMethod,
-                                    currentFirmwareVersion = ourNode.firmwareVersion,
-                                )
-                        }
+
+                                radioPrefs.isBle() -> FirmwareUpdateMethod.Ble
+
+                                radioPrefs.isTcp() -> {
+                                    // WiFi OTA is ESP32-only; nRF52/RP2040 have no TCP update path.
+                                    if (deviceHardware.isEsp32Arc) {
+                                        FirmwareUpdateMethod.Wifi
+                                    } else {
+                                        FirmwareUpdateMethod.Unknown
+                                    }
+                                }
+
+                                else -> FirmwareUpdateMethod.Unknown
+                            }
+                        _state.value =
+                            FirmwareUpdateState.Ready(
+                                release = release,
+                                deviceHardware = deviceHardware,
+                                address = address,
+                                showBootloaderWarning =
+                                deviceHardware.requiresBootloaderUpgradeForOta == true &&
+                                    !dismissed &&
+                                    radioPrefs.isBle(),
+                                updateMethod = firmwareUpdateMethod,
+                                currentFirmwareVersion = ourNode.firmwareVersion,
+                            )
                     }
                 }
                     .onFailure { e ->

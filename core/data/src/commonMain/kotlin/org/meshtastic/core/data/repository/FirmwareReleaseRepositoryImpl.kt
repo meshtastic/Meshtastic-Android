@@ -113,8 +113,8 @@ open class FirmwareReleaseRepositoryImpl(
                     }
                 }
             }
+                .onSuccess { seedChecked = true }
                 .onFailure { e -> Logger.w(e) { "FirmwareReleaseRepository: failed to seed cache from bundled JSON" } }
-            seedChecked = true
         }
     }
 

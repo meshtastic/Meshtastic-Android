@@ -54,7 +54,13 @@ class FirmwareReleaseRepositoryImplTest {
 
     /** Serves `firmware_releases.json` from [bundled] via the real decode path, or nothing when null. */
     private class FakeBundledAssetReader(var bundled: Releases? = null) : BundledAssetReader {
+        var failuresBeforeSuccess = 0
+
         override fun open(name: String): Source? {
+            if (failuresBeforeSuccess > 0) {
+                failuresBeforeSuccess -= 1
+                error("Bundled asset read failed")
+            }
             val releases = bundled ?: return null
             if (name != "firmware_releases.json") return null
             val bytes = Json.encodeToString(NetworkFirmwareReleases(releases = releases)).encodeToByteArray()
@@ -152,6 +158,20 @@ class FirmwareReleaseRepositoryImplTest {
 
         assertEquals("v2.7.15.567b8ea", emissions.first()?.id)
         assertEquals(listOf("v2.7.25.104df5f"), dao.getReleasesByType(FirmwareReleaseType.ALPHA).map { it.id })
+    }
+
+    @Test
+    fun failedBundledSeedIsRetriedOnNextCollection() = runBlocking {
+        seed.failuresBeforeSuccess = 1
+        seed.bundled = Releases(stable = listOf(release("v2.7.15.567b8ea")))
+        api.response = NetworkFirmwareReleases()
+
+        val initialEmissions = repository.stableRelease.toList()
+
+        val emissions = repository.stableRelease.toList()
+
+        assertEquals(null, initialEmissions.first())
+        assertEquals("v2.7.15.567b8ea", emissions.first()?.id)
     }
 
     @Test
