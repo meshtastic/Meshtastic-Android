@@ -168,12 +168,13 @@ class Esp32OtaUpdateHandlerTest {
         val serviceRepository = FakeServiceRepository()
         val radioController = FakeRadioController()
         val nodeRepository = newNodeRepository()
-        val handler = makeHandler(serviceRepository, radioController, nodeRepository, newFileHandler())
+        val handler =
+            makeHandler(serviceRepository, radioController, nodeRepository, newFileHandler()).apply {
+                otaPreflightTimeoutMs = 10L
+            }
         val states = mutableListOf<FirmwareUpdateState>()
 
-        // No emitter: the firmware never responds. Preflight waits the full OTA_PREFLIGHT_TIMEOUT_MS (5 s) then
-        // resolves to Timeout. The test pays that wall-clock cost deliberately — there is no faster way to drive
-        // the timeout path without exposing the const as injectable.
+        // No emitter: the firmware never responds, so the overridden preflight timeout resolves quickly.
         handler.startUpdate(release, hardware, BLE_TARGET, states::add, firmwareUri)
 
         assertNull(radioController.lastSetDeviceAddress, "Timeout preflight must NOT disconnect mesh service")
@@ -185,7 +186,7 @@ class Esp32OtaUpdateHandlerTest {
     }
 
     private companion object {
-        // Valid BLE MAC target so startUpdate routes through startBleUpdate (rebootMode = 1 → modeName "BLE").
+        // Valid BLE MAC target so startUpdate routes through the BLE OTA preflight path.
         const val BLE_TARGET = "AA:BB:CC:DD:EE:FF"
     }
 }

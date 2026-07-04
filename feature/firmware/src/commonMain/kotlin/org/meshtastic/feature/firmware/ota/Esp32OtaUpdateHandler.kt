@@ -44,7 +44,7 @@ import org.meshtastic.core.resources.firmware_update_hash_rejected
 import org.meshtastic.core.resources.firmware_update_not_found_in_release
 import org.meshtastic.core.resources.firmware_update_ota_failed
 import org.meshtastic.core.resources.firmware_update_ota_timeout
-import org.meshtastic.core.resources.firmware_update_ota_unsupported
+import org.meshtastic.core.resources.firmware_update_ota_unsupported_reason
 import org.meshtastic.core.resources.firmware_update_starting_ota
 import org.meshtastic.core.resources.firmware_update_uploading
 import org.meshtastic.core.resources.firmware_update_waiting_reboot
@@ -59,6 +59,8 @@ import org.meshtastic.feature.firmware.stripFormatArgs
 
 private const val RETRY_DELAY = 2000L
 private const val PERCENT_MAX = 100
+private const val REBOOT_MODE_BLE = 1
+private const val REBOOT_MODE_WIFI = 2
 
 // Time to wait for the firmware to confirm OTA entry before tearing down the mesh transport.
 // The firmware emits a ClientNotification ("Rebooting to <mode> OTA" on success, a "Cannot start OTA: ..." /
@@ -101,6 +103,8 @@ class Esp32OtaUpdateHandler(
     private val dispatchers: CoroutineDispatchers,
 ) : FirmwareUpdateHandler {
 
+    internal var otaPreflightTimeoutMs: Long = OTA_PREFLIGHT_TIMEOUT_MS
+
     /** Entry point for FirmwareUpdateHandler interface. Routes to BLE (target is a MAC) or WiFi (anything else). */
     override suspend fun startUpdate(
         release: FirmwareRelease,
@@ -126,7 +130,7 @@ class Esp32OtaUpdateHandler(
         updateState = updateState,
         firmwareUri = firmwareUri,
         transportFactory = { BleOtaTransport(bleScanner, bleConnectionFactory, address, dispatchers.default) },
-        rebootMode = 1,
+        rebootMode = REBOOT_MODE_BLE,
         connectionAttempts = 5,
     )
 
@@ -142,7 +146,7 @@ class Esp32OtaUpdateHandler(
         updateState = updateState,
         firmwareUri = firmwareUri,
         transportFactory = { WifiOtaTransport(deviceIp, WifiOtaTransport.DEFAULT_PORT) },
-        rebootMode = 2,
+        rebootMode = REBOOT_MODE_WIFI,
         connectionAttempts = 10,
     )
 
@@ -349,7 +353,7 @@ class Esp32OtaUpdateHandler(
         val uploadingMsg = UiText.Resource(Res.string.firmware_update_uploading)
         updateState(FirmwareUpdateState.Updating(ProgressState(uploadingMsg, 0f)))
         val chunkSize =
-            if (rebootMode == 1) {
+            if (rebootMode == REBOOT_MODE_BLE) {
                 BleOtaTransport.RECOMMENDED_CHUNK_SIZE
             } else {
                 WifiOtaTransport.RECOMMENDED_CHUNK_SIZE
@@ -406,7 +410,7 @@ class Esp32OtaUpdateHandler(
         baselineMessage: String?,
         updateState: (FirmwareUpdateState) -> Unit,
     ): OtaPreflightResult =
-        when (val preflight = awaitOtaConfirmation(OTA_PREFLIGHT_TIMEOUT_MS, rebootMode, baselineMessage)) {
+        when (val preflight = awaitOtaConfirmation(otaPreflightTimeoutMs, rebootMode, baselineMessage)) {
             is OtaPreflightResult.Confirmed -> {
                 Logger.i { "ESP32 OTA: Preflight confirmed; releasing mesh transport for OTA" }
                 disconnectMeshService()
@@ -417,13 +421,17 @@ class Esp32OtaUpdateHandler(
 
             is OtaPreflightResult.Rejected -> {
                 Logger.w { "ESP32 OTA: Firmware rejected OTA entry (${preflight.message}); mesh transport preserved" }
-                updateState(FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_ota_unsupported)))
+                updateState(
+                    FirmwareUpdateState.Error(
+                        UiText.Resource(Res.string.firmware_update_ota_unsupported_reason, preflight.message),
+                    ),
+                )
                 preflight
             }
 
             is OtaPreflightResult.Timeout -> {
                 Logger.w {
-                    "ESP32 OTA: No firmware confirmation within ${OTA_PREFLIGHT_TIMEOUT_MS}ms; mesh transport preserved"
+                    "ESP32 OTA: No firmware confirmation within ${otaPreflightTimeoutMs}ms; mesh transport preserved"
                 }
                 updateState(FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_ota_timeout)))
                 preflight
@@ -440,7 +448,7 @@ class Esp32OtaUpdateHandler(
         rebootMode: Int,
         baselineMessage: String?,
     ): OtaPreflightResult {
-        val modeName = if (rebootMode == 1) "BLE" else "WiFi"
+        val modeName = otaModeName(rebootMode)
         val matched =
             withTimeoutOrNull(timeoutMs) {
                 serviceRepository.clientNotification.first { cn ->
@@ -461,5 +469,11 @@ class Esp32OtaUpdateHandler(
 
             else -> OtaPreflightResult.Rejected(matched.message)
         }
+    }
+
+    private fun otaModeName(rebootMode: Int): String = when (rebootMode) {
+        REBOOT_MODE_BLE -> "BLE"
+        REBOOT_MODE_WIFI -> "WiFi"
+        else -> rebootMode.toString()
     }
 }
