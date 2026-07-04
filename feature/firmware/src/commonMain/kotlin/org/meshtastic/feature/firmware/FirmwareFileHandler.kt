@@ -139,25 +139,27 @@ data class PendingLocalFirmwareFile(
     val address: String,
 )
 
+/** pioEnv-aware target: falls back to [DeviceHardware.hwModelSlug] when [DeviceHardware.platformioTarget] is unset. */
+internal val DeviceHardware.effectiveTarget: String
+    get() = platformioTarget.ifEmpty { hwModelSlug }
+
 internal fun validatePendingLocalFirmwareFile(
     pendingFile: PendingLocalFirmwareFile,
     currentState: FirmwareUpdateState.Ready,
 ): LocalFirmwareFileValidation {
-    val validation =
-        validateLocalFirmwareFileName(pendingFile.fileName, currentState.deviceHardware, currentState.updateMethod)
-    if (validation is LocalFirmwareFileValidation.Invalid) {
-        return validation
-    }
+    val currentTarget = currentState.deviceHardware.effectiveTarget
+    return when {
+        currentTarget != pendingFile.platformioTarget ->
+            LocalFirmwareFileValidation.Invalid(LocalFirmwareFileValidationReason.TargetMismatch)
 
-    val currentTarget = currentState.deviceHardware.platformioTarget.ifEmpty { currentState.deviceHardware.hwModelSlug }
-    return if (
-        currentTarget == pendingFile.platformioTarget &&
-        currentState.updateMethod == pendingFile.updateMethod &&
-        currentState.address == pendingFile.address
-    ) {
-        LocalFirmwareFileValidation.Valid
-    } else {
-        LocalFirmwareFileValidation.Invalid(LocalFirmwareFileValidationReason.TargetMismatch)
+        // The user selected the file under a different connection (method or address) than the
+        // one active now — the file may still match the target, but the confirmation context is stale.
+        currentState.updateMethod != pendingFile.updateMethod || currentState.address != pendingFile.address ->
+            LocalFirmwareFileValidation.Invalid(LocalFirmwareFileValidationReason.ConfirmationContextChanged)
+
+        // Context matches — revalidate the filename against the current method before flashing.
+        else ->
+            validateLocalFirmwareFileName(pendingFile.fileName, currentState.deviceHardware, currentState.updateMethod)
     }
 }
 
@@ -174,6 +176,7 @@ internal enum class LocalFirmwareFileValidationReason {
     RequiresBin,
     RequiresUf2,
     TargetMismatch,
+    ConfirmationContextChanged,
     UnsupportedUpdateMethod,
 }
 
@@ -183,7 +186,7 @@ internal fun validateLocalFirmwareFileName(
     updateMethod: FirmwareUpdateMethod,
 ): LocalFirmwareFileValidation {
     val normalizedFileName = fileName.substringAfterLast('/').substringAfterLast('\\').lowercase()
-    val target = hardware.platformioTarget.ifEmpty { hardware.hwModelSlug }.lowercase()
+    val target = hardware.effectiveTarget.lowercase()
     if (target.isBlank()) {
         return LocalFirmwareFileValidation.Invalid(LocalFirmwareFileValidationReason.MissingTarget)
     }

@@ -622,6 +622,7 @@
     <string name="firmware_update_confirm_file_message">Review the full selected filename before flashing. Flashing starts only after you confirm.</string>
     <string name="firmware_update_confirm_file_title">Confirm Firmware File</string>
     <string name="firmware_update_connecting_attempt">Connecting to device (attempt %1$d/%2$d)...</string>
+    <string name="firmware_update_context_changed">Device connection changed while confirming. Please reselect the firmware file.</string>
     <string name="firmware_update_copying">High-five! Wait, copying firmware...</string>
     <string name="firmware_update_currently_installed">Currently Installed: %1$s</string>
     <string name="firmware_update_device">Device: %1$s</string>
@@ -641,8 +642,7 @@
     <string name="firmware_update_flashing">Flashing device, please wait...</string>
     <string name="firmware_update_hang_tight">Hang tight, we are working on it...</string>
     <string name="firmware_update_hash_rejected">Firmware hash rejected. Device may require hash provisioning or bootloader update.</string>
-    <string name="firmware_update_invalid_local_file">Invalid firmware file</string>
-    <string name="firmware_update_invalid_local_file_detail">The selected file \"%1$s\" does not match %2$s (%3$s). Choose the firmware file for this target.</string>
+    <string name="firmware_update_invalid_local_file_detail">The selected file "%1$s" does not match %2$s (%3$s). Choose the firmware file for this target.</string>
     <string name="firmware_update_keep_device_close">Keep your device close to your phone.</string>
     <string name="firmware_update_latest">Update To: %1$s</string>
     <string name="firmware_update_local_file">Local File</string>
@@ -658,7 +658,9 @@
     <string name="firmware_update_rak4631_bootloader_hint">For RAK WisBlock RAK4631, use the vendor's serial DFU tool (for example, adafruit-nrfutil dfu serial with the provided bootloader .zip file). Copying the .uf2 file alone will not update the bootloader.</string>
     <string name="firmware_update_rebooting">Rebooting to DFU...</string>
     <string name="firmware_update_release_notes">Release Notes</string>
+    <string name="firmware_update_requires_bin">%1$s requires a target-matching .bin file.</string>
     <string name="firmware_update_requires_ota_zip">%1$s requires a target-matching OTA .zip file.</string>
+    <string name="firmware_update_requires_uf2">%1$s requires a target-matching .uf2 file.</string>
     <string name="firmware_update_retrieval_failed">Could not retrieve firmware file.</string>
     <string name="firmware_update_retry">Retry</string>
     <string name="firmware_update_save_dfu_file">Please save the .uf2 file to your device's DFU drive.</string>

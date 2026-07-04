@@ -214,7 +214,7 @@ class JvmFirmwareFileHandler(private val client: HttpClient) : FirmwareFileHandl
         fileExtension: String,
         preferredFilename: String?,
     ): FirmwareArtifact? {
-        val target = hardware.platformioTarget.ifEmpty { hardware.hwModelSlug }
+        val target = hardware.effectiveTarget
         if (target.isEmpty() && preferredFilename == null) return null
 
         val targetLowerCase = target.lowercase()
@@ -248,8 +248,6 @@ class JvmFirmwareFileHandler(private val client: HttpClient) : FirmwareFileHandl
                 entry = zipInput.nextEntry
             }
         }
-        // Prefer the shortest matching entry name — official release bundles contain one
-        // matching firmware per target; the heuristic picks the canonical name if multiple match.
         return matchingEntries.minByOrNull { it.first.name.length }?.second?.toFirmwareArtifact()
     }
 

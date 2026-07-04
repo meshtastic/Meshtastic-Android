@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.firmware
 
+import androidx.lifecycle.ViewModelStore
 import dev.mokkery.MockMode
 import dev.mokkery.answering.calls
 import dev.mokkery.answering.returns
@@ -23,6 +24,9 @@ import dev.mokkery.every
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
+import dev.mokkery.verify.VerifyMode.Companion.atLeast
+import dev.mokkery.verify.VerifyMode.Companion.exactly
+import dev.mokkery.verifySuspend
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -47,12 +51,16 @@ import org.meshtastic.core.testing.TestDataFactory
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertIs
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
  * JVM-only ViewModel tests for paths that require [CommonUri.parse] (which delegates to `java.net.URI` on JVM). Covers
- * [FirmwareUpdateViewModel.saveDfuFile] and [FirmwareUpdateViewModel.startUpdateFromFile].
+ * [FirmwareUpdateViewModel.saveDfuFile] and [FirmwareUpdateViewModel.confirmLocalFirmwareFile].
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class FirmwareUpdateViewModelFileTest {
@@ -102,6 +110,8 @@ class FirmwareUpdateViewModelFileTest {
 
         every { fileHandler.cleanupAllTemporaryFiles() } returns Unit
         everySuspend { fileHandler.deleteFile(any()) } returns Unit
+        everySuspend { fileHandler.getDisplayName(any()) } calls { (it.args[0] as CommonUri).pathSegments.lastOrNull() }
+        everySuspend { fileHandler.extractFirmware(any(), any(), any(), any()) } returns null
     }
 
     @AfterTest
@@ -122,6 +132,8 @@ class FirmwareUpdateViewModelFileTest {
         fileHandler,
         TestApplicationCoroutineScope(testDispatcher),
     )
+
+    private fun firmwareUri(fileName: String): CommonUri = CommonUri.parse("file:///downloads/$fileName")
 
     // -----------------------------------------------------------------------
     // saveDfuFile()
@@ -154,11 +166,11 @@ class FirmwareUpdateViewModelFileTest {
     }
 
     // -----------------------------------------------------------------------
-    // startUpdateFromFile()
+    // prepareLocalFirmwareFile() / confirmLocalFirmwareFile()
     // -----------------------------------------------------------------------
 
     @Test
-    fun `startUpdateFromFile with BLE and invalid address shows error`() = runTest {
+    fun `confirmLocalFirmwareFile with BLE and invalid address shows error`() = runTest {
         // Use a BLE prefix but non-MAC address to trigger validation failure
         every { radioPrefs.devAddr } returns MutableStateFlow("xnot-a-mac-address")
 
@@ -169,14 +181,16 @@ class FirmwareUpdateViewModelFileTest {
         assertIs<FirmwareUpdateState.Ready>(state)
         assertIs<FirmwareUpdateMethod.Ble>(state.updateMethod)
 
-        viewModel.startUpdateFromFile(CommonUri.parse("file:///firmware.zip"))
+        viewModel.prepareLocalFirmwareFile(firmwareUri("firmware-tbeam-2.8.0-ota.zip"))
+        advanceUntilIdle()
+        viewModel.confirmLocalFirmwareFile()
         advanceUntilIdle()
 
         assertIs<FirmwareUpdateState.Error>(viewModel.state.value)
     }
 
     @Test
-    fun `startUpdateFromFile extracts and starts update`() = runTest {
+    fun `confirmLocalFirmwareFile starts update after pending selection`() = runTest {
         // Serial nRF52 → USB method (no BLE address validation)
         every { radioPrefs.devAddr } returns MutableStateFlow("s/dev/ttyUSB0")
 
@@ -187,15 +201,6 @@ class FirmwareUpdateViewModelFileTest {
         assertIs<FirmwareUpdateState.Ready>(state)
         assertIs<FirmwareUpdateMethod.Usb>(state.updateMethod)
 
-        // Mock extraction
-        val extractedArtifact =
-            FirmwareArtifact(
-                uri = CommonUri.parse("file:///tmp/extracted-firmware.uf2"),
-                fileName = "extracted-firmware.uf2",
-                isTemporary = true,
-            )
-        everySuspend { fileHandler.extractFirmware(any(), any(), any()) } returns extractedArtifact
-
         // Mock startUpdate to transition to Success
         everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any(), any()) }
             .calls {
@@ -205,7 +210,13 @@ class FirmwareUpdateViewModelFileTest {
                 null
             }
 
-        viewModel.startUpdateFromFile(CommonUri.parse("file:///downloads/firmware.zip"))
+        viewModel.prepareLocalFirmwareFile(firmwareUri("firmware-tbeam-2.8.0.uf2"))
+        advanceUntilIdle()
+
+        assertEquals("firmware-tbeam-2.8.0.uf2", viewModel.pendingLocalFirmwareFile.value?.fileName)
+        verifySuspend(exactly(0)) { firmwareUpdateManager.startUpdate(any(), any(), any(), any(), any()) }
+
+        viewModel.confirmLocalFirmwareFile()
         advanceUntilIdle()
 
         // Should reach Success, Verifying, or VerificationFailed (verification timeout in test)
@@ -219,27 +230,149 @@ class FirmwareUpdateViewModelFileTest {
     }
 
     @Test
-    fun `startUpdateFromFile handles extraction failure`() = runTest {
+    fun `dismissLocalFirmwareFile clears pending selection`() = runTest {
         every { radioPrefs.devAddr } returns MutableStateFlow("s/dev/ttyUSB0")
 
         viewModel = createViewModel()
         advanceUntilIdle()
 
-        // Mock extraction to throw
-        everySuspend { fileHandler.extractFirmware(any(), any(), any()) } calls
-            {
-                throw RuntimeException("Corrupt zip file")
-            }
+        viewModel.prepareLocalFirmwareFile(firmwareUri("firmware-tbeam-2.8.0.uf2"))
+        advanceUntilIdle()
 
-        viewModel.startUpdateFromFile(CommonUri.parse("file:///downloads/corrupt.zip"))
+        assertEquals("firmware-tbeam-2.8.0.uf2", viewModel.pendingLocalFirmwareFile.value?.fileName)
+
+        viewModel.dismissLocalFirmwareFile()
+
+        assertNull(viewModel.pendingLocalFirmwareFile.value)
+    }
+
+    @Test
+    fun `prepareLocalFirmwareFile shows error when archive has no matching target`() = runTest {
+        every { radioPrefs.devAddr } returns MutableStateFlow("s/dev/ttyUSB0")
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        viewModel.prepareLocalFirmwareFile(firmwareUri("corrupt.zip"))
         advanceUntilIdle()
 
         val state = viewModel.state.value
         assertIs<FirmwareUpdateState.Error>(state)
+        assertNull(viewModel.pendingLocalFirmwareFile.value)
+        verifySuspend(exactly(0)) { firmwareUpdateManager.startUpdate(any(), any(), any(), any(), any()) }
     }
 
     @Test
-    fun `startUpdateFromFile passes BLE extension for BLE method`() = runTest {
+    fun `prepareLocalFirmwareFile extracts nrf firmware from release bundle`() = runTest {
+        val bundleUri = firmwareUri("firmware-nrf52840-2.8.0.zip")
+        val extractedArtifact =
+            FirmwareArtifact(
+                uri = firmwareUri("firmware-tbeam-2.8.0-ota.zip"),
+                fileName = "firmware-tbeam-2.8.0-ota.zip",
+                isTemporary = true,
+            )
+        everySuspend { fileHandler.extractFirmware(any(), any(), any(), any()) } returns extractedArtifact
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        viewModel.prepareLocalFirmwareFile(bundleUri)
+        advanceUntilIdle()
+
+        val pendingFile = viewModel.pendingLocalFirmwareFile.value
+        assertEquals("firmware-tbeam-2.8.0-ota.zip", pendingFile?.fileName)
+        assertEquals(extractedArtifact.uri, pendingFile?.uri)
+        verifySuspend(exactly(0)) { firmwareUpdateManager.startUpdate(any(), any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun `prepareLocalFirmwareFile extracts esp32 firmware from release bundle`() = runTest {
+        val espHardware = DeviceHardware(hwModel = 1, architecture = "esp32", platformioTarget = "tbeam")
+        everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any(), any()) } returns
+            Result.success(espHardware)
+        val bundleUri = firmwareUri("firmware-esp32-2.8.0.zip")
+        val extractedArtifact =
+            FirmwareArtifact(
+                uri = firmwareUri("firmware-tbeam-2.8.0.bin"),
+                fileName = "firmware-tbeam-2.8.0.bin",
+                isTemporary = true,
+            )
+        everySuspend { fileHandler.extractFirmware(any(), any(), any(), any()) } returns extractedArtifact
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        viewModel.prepareLocalFirmwareFile(bundleUri)
+        advanceUntilIdle()
+
+        val pendingFile = viewModel.pendingLocalFirmwareFile.value
+        assertEquals("firmware-tbeam-2.8.0.bin", pendingFile?.fileName)
+        assertEquals(extractedArtifact.uri, pendingFile?.uri)
+    }
+
+    @Test
+    fun `prepareLocalFirmwareFile extracts usb firmware from release bundle`() = runTest {
+        every { radioPrefs.devAddr } returns MutableStateFlow("s/dev/ttyUSB0")
+        val bundleUri = firmwareUri("firmware-nrf52840-2.8.0.zip")
+        val extractedArtifact =
+            FirmwareArtifact(
+                uri = firmwareUri("firmware-tbeam-2.8.0.uf2"),
+                fileName = "firmware-tbeam-2.8.0.uf2",
+                isTemporary = true,
+            )
+        everySuspend { fileHandler.extractFirmware(any(), any(), any(), any()) } returns extractedArtifact
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        viewModel.prepareLocalFirmwareFile(bundleUri)
+        advanceUntilIdle()
+
+        val pendingFile = viewModel.pendingLocalFirmwareFile.value
+        assertEquals("firmware-tbeam-2.8.0.uf2", pendingFile?.fileName)
+        assertEquals(extractedArtifact.uri, pendingFile?.uri)
+    }
+
+    @Test
+    fun `dismissLocalFirmwareFile deletes extracted bundle firmware`() = runTest {
+        val extractedArtifact =
+            FirmwareArtifact(
+                uri = firmwareUri("firmware-tbeam-2.8.0-ota.zip"),
+                fileName = "firmware-tbeam-2.8.0-ota.zip",
+                isTemporary = true,
+            )
+        everySuspend { fileHandler.extractFirmware(any(), any(), any(), any()) } returns extractedArtifact
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        viewModel.prepareLocalFirmwareFile(firmwareUri("firmware-nrf52840-2.8.0.zip"))
+        advanceUntilIdle()
+        viewModel.dismissLocalFirmwareFile()
+        advanceUntilIdle()
+
+        assertNull(viewModel.pendingLocalFirmwareFile.value)
+        verifySuspend { fileHandler.deleteFile(extractedArtifact) }
+    }
+
+    @Test
+    fun `checkForUpdates clears pending local firmware selection`() = runTest {
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        viewModel.prepareLocalFirmwareFile(firmwareUri("firmware-tbeam-2.8.0-ota.zip"))
+        advanceUntilIdle()
+
+        assertEquals("firmware-tbeam-2.8.0-ota.zip", viewModel.pendingLocalFirmwareFile.value?.fileName)
+
+        viewModel.checkForUpdates()
+        advanceUntilIdle()
+
+        assertNull(viewModel.pendingLocalFirmwareFile.value)
+    }
+
+    @Test
+    fun `confirmLocalFirmwareFile starts ESP32 BLE update without zip extraction`() = runTest {
         // BLE with valid MAC address
         every { radioPrefs.devAddr } returns MutableStateFlow("x11:22:33:44:55:66")
         val espHardware = DeviceHardware(hwModel = 1, architecture = "esp32", platformioTarget = "tbeam")
@@ -253,10 +386,7 @@ class FirmwareUpdateViewModelFileTest {
         assertIs<FirmwareUpdateState.Ready>(state)
         assertIs<FirmwareUpdateMethod.Ble>(state.updateMethod)
 
-        // Mock extraction that returns null (no matching firmware found)
-        everySuspend { fileHandler.extractFirmware(any(), any(), any()) } returns null
-
-        // Mock startUpdate — the firmwareUri should be the original URI since extraction returned null
+        // Mock startUpdate — the firmwareUri should be the original URI after filename validation.
         everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any(), any()) }
             .calls {
                 @Suppress("UNCHECKED_CAST")
@@ -265,8 +395,13 @@ class FirmwareUpdateViewModelFileTest {
                 null
             }
 
-        viewModel.startUpdateFromFile(CommonUri.parse("file:///downloads/firmware.zip"))
+        val selectedUri = firmwareUri("firmware-tbeam-2.8.0.bin")
+        viewModel.prepareLocalFirmwareFile(selectedUri)
         advanceUntilIdle()
+        viewModel.confirmLocalFirmwareFile()
+        advanceUntilIdle()
+
+        verifySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any(), firmwareUri = selectedUri) }
 
         val finalState = viewModel.state.value
         assertTrue(
@@ -278,7 +413,7 @@ class FirmwareUpdateViewModelFileTest {
     }
 
     @Test
-    fun `startUpdateFromFile is no-op when state is not Ready`() = runTest {
+    fun `prepareLocalFirmwareFile is no-op when state is not Ready`() = runTest {
         viewModel = createViewModel()
         advanceUntilIdle()
 
@@ -289,10 +424,10 @@ class FirmwareUpdateViewModelFileTest {
 
         assertIs<FirmwareUpdateState.Error>(viewModel.state.value)
 
-        viewModel.startUpdateFromFile(CommonUri.parse("file:///firmware.zip"))
+        viewModel.prepareLocalFirmwareFile(firmwareUri("firmware-tbeam-2.8.0.uf2"))
         advanceUntilIdle()
 
-        // Should still be Error — startUpdateFromFile returned early
+        // Should still be Error — prepareLocalFirmwareFile returned early
         assertIs<FirmwareUpdateState.Error>(viewModel.state.value)
     }
 
@@ -330,7 +465,7 @@ class FirmwareUpdateViewModelFileTest {
     }
 
     @Test
-    fun `startUpdateFromFile keeps AwaitingFileSave state for USB path`() = runTest {
+    fun `confirmLocalFirmwareFile keeps AwaitingFileSave state for USB path`() = runTest {
         every { radioPrefs.devAddr } returns MutableStateFlow("s/dev/ttyUSB0")
 
         viewModel = createViewModel()
@@ -343,7 +478,6 @@ class FirmwareUpdateViewModelFileTest {
                 fileName = "extracted.uf2",
                 isTemporary = true,
             )
-        everySuspend { fileHandler.extractFirmware(any(), any(), any()) } returns artifact
         everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any(), any()) }
             .calls {
                 @Suppress("UNCHECKED_CAST")
@@ -352,21 +486,20 @@ class FirmwareUpdateViewModelFileTest {
                 artifact
             }
 
-        viewModel.startUpdateFromFile(CommonUri.parse("file:///downloads/firmware.zip"))
+        viewModel.prepareLocalFirmwareFile(firmwareUri("firmware-tbeam-2.8.0.uf2"))
+        advanceUntilIdle()
+        viewModel.confirmLocalFirmwareFile()
         advanceUntilIdle()
 
         assertIs<FirmwareUpdateState.AwaitingFileSave>(viewModel.state.value)
     }
 
     @Test
-    fun `startUpdateFromFile cleans up on manager error state`() = runTest {
+    fun `confirmLocalFirmwareFile cleans up on manager error state`() = runTest {
         every { radioPrefs.devAddr } returns MutableStateFlow("s/dev/ttyUSB0")
 
         viewModel = createViewModel()
         advanceUntilIdle()
-
-        val extractedArtifact = FirmwareArtifact(uri = CommonUri.parse("file:///tmp/extracted.uf2"), isTemporary = true)
-        everySuspend { fileHandler.extractFirmware(any(), any(), any()) } returns extractedArtifact
 
         // Mock startUpdate to transition to Error
         val errorText = UiText.DynamicString("Flash failed")
@@ -375,13 +508,139 @@ class FirmwareUpdateViewModelFileTest {
                 @Suppress("UNCHECKED_CAST")
                 val updateState = it.args[3] as (FirmwareUpdateState) -> Unit
                 updateState(FirmwareUpdateState.Error(errorText))
-                extractedArtifact
+                FirmwareArtifact(uri = CommonUri.parse("file:///tmp/extracted.uf2"), isTemporary = true)
             }
 
-        viewModel.startUpdateFromFile(CommonUri.parse("file:///firmware.zip"))
+        viewModel.prepareLocalFirmwareFile(firmwareUri("firmware-tbeam-2.8.0.uf2"))
+        advanceUntilIdle()
+        viewModel.confirmLocalFirmwareFile()
         advanceUntilIdle()
 
         val state = viewModel.state.value
         assertIs<FirmwareUpdateState.Error>(state)
+        assertNull(viewModel.pendingLocalFirmwareFile.value)
+        verifySuspend { fileHandler.deleteFile(any()) }
+    }
+
+    @Test
+    fun `prepareLocalFirmwareFile is cancelled when state changes before resolution starts`() = runTest {
+        // This test verifies that clearPendingLocalFirmwareFile (called by cancelUpdate)
+        // cancels the in-flight prepareJob before its body executes. The _state.value !=
+        // currentState stale-state guard inside the coroutine is defense-in-depth and is
+        // not exercised by this test because StandardTestDispatcher never runs the body.
+        viewModel = createViewModel()
+        advanceUntilIdle()
+        val readyState = viewModel.state.value
+        assertIs<FirmwareUpdateState.Ready>(readyState)
+
+        // Start prepare — launches a coroutine that suspends on getDisplayName.
+        viewModel.prepareLocalFirmwareFile(firmwareUri("firmware-tbeam-2.8.0-ota.zip"))
+
+        // Change state during the suspend — cancelUpdate cancels the prepare job and resets state.
+        viewModel.cancelUpdate()
+        advanceUntilIdle()
+
+        // Pending selection should NOT be set.
+        assertNull(viewModel.pendingLocalFirmwareFile.value)
+        // State should NOT be Error.
+        assertFalse(viewModel.state.value is FirmwareUpdateState.Error)
+    }
+
+    @Test
+    fun `prepareLocalFirmwareFile shows error when filename is unavailable`() = runTest {
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        // Override the @BeforeTest stub: getDisplayName returns null → resolve cannot continue.
+        everySuspend { fileHandler.getDisplayName(any()) } returns null
+
+        viewModel.prepareLocalFirmwareFile(firmwareUri("firmware-tbeam-2.8.0-ota.zip"))
+        advanceUntilIdle()
+
+        val state = viewModel.state.value
+        assertIs<FirmwareUpdateState.Error>(state)
+    }
+
+    @Test
+    fun `onCleared cleans up pending local firmware artifact`() = runTest {
+        val viewModel = createViewModel()
+        advanceUntilIdle()
+
+        // Prepare a bundle file so pendingLocalFirmwareArtifact is set. nrf52 + BLE expects an
+        // .ota.zip payload, so the extracted artifact must match that extension or
+        // validateExtractedLocalFirmware rejects it and pending is never populated.
+        val extractedArtifact =
+            FirmwareArtifact(
+                uri = CommonUri.parse("file:///tmp/extracted-firmware-ota.zip"),
+                fileName = "firmware-tbeam-2.8.0-ota.zip",
+                isTemporary = true,
+            )
+        everySuspend { fileHandler.extractFirmware(any(), any(), any(), any()) } returns extractedArtifact
+
+        viewModel.prepareLocalFirmwareFile(firmwareUri("firmware-nrf52840-2.8.0.zip"))
+        advanceUntilIdle()
+
+        // Verify pending was set (artifact extracted from bundle).
+        assertNotNull(viewModel.pendingLocalFirmwareFile.value)
+
+        // Trigger onCleared via the idiomatic AndroidX ViewModelStore pattern.
+        val store = ViewModelStore()
+        store.put("firmwareUpdateViewModel", viewModel)
+        store.clear()
+
+        // applicationScope uses the same testDispatcher, so advanceUntilIdle flushes the
+        // ATOMIC + NonCancellable cleanup coroutine.
+        advanceUntilIdle()
+
+        // Verify the extracted artifact was cleaned up.
+        verifySuspend(atLeast(1)) { fileHandler.deleteFile(extractedArtifact) }
+    }
+
+    @Test
+    fun `confirmLocalFirmwareFile is no-op when pending selection was cancelled`() = runTest {
+        // After cancelUpdate clears the pending selection, confirmLocalFirmwareFile should
+        // read null and return immediately — no error surfaced, no update started.
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        // Prepare a valid file so pending is set (nrf52 + BLE expects .ota.zip).
+        viewModel.prepareLocalFirmwareFile(firmwareUri("firmware-tbeam-2.8.0-ota.zip"))
+        advanceUntilIdle()
+        assertNotNull(viewModel.pendingLocalFirmwareFile.value)
+
+        // State changes away from Ready before user confirms (cancelUpdate → Idle).
+        viewModel.cancelUpdate()
+        advanceUntilIdle()
+        assertNull(viewModel.pendingLocalFirmwareFile.value)
+
+        // Confirm should be a no-op: pending was cleared by cancelUpdate.
+        viewModel.confirmLocalFirmwareFile()
+        advanceUntilIdle()
+
+        assertNull(viewModel.pendingLocalFirmwareFile.value)
+        assertFalse(viewModel.state.value is FirmwareUpdateState.Error)
+        verifySuspend(exactly(0)) { firmwareUpdateManager.startUpdate(any(), any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun `prepareLocalFirmwareFile shows error for Unknown update method`() = runTest {
+        // TCP + nRF52 (non-ESP32) resolves to FirmwareUpdateMethod.Unknown — local files are
+        // not supported there; validateLocalFirmwareFileName returns UnsupportedUpdateMethod
+        // and localFirmwarePayloadExtension returns null (no bundle extraction attempted).
+        every { radioPrefs.devAddr } returns MutableStateFlow("t192.168.1.100")
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        val state = viewModel.state.value
+        assertIs<FirmwareUpdateState.Ready>(state)
+        assertIs<FirmwareUpdateMethod.Unknown>(state.updateMethod)
+
+        viewModel.prepareLocalFirmwareFile(firmwareUri("firmware-tbeam-2.8.0-ota.zip"))
+        advanceUntilIdle()
+
+        assertIs<FirmwareUpdateState.Error>(viewModel.state.value)
+        assertNull(viewModel.pendingLocalFirmwareFile.value)
+        verifySuspend(exactly(0)) { firmwareUpdateManager.startUpdate(any(), any(), any(), any(), any()) }
     }
 }

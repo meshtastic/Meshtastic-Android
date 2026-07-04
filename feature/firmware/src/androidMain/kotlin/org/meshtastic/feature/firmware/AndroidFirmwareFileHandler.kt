@@ -223,8 +223,6 @@ class AndroidFirmwareFileHandler(private val context: Context, private val clien
             Logger.w(e) { "Failed to extract firmware from URI" }
             return@withContext null
         }
-        // Prefer the shortest matching entry name — official release bundles contain one
-        // matching firmware per target; the heuristic picks the canonical name if multiple match.
         matchingEntries.minByOrNull { it.first.name.length }?.second?.toFirmwareArtifact()
     }
 
@@ -262,22 +260,31 @@ class AndroidFirmwareFileHandler(private val context: Context, private val clien
 
     override suspend fun getDisplayName(uri: CommonUri): String? = withContext(ioDispatcher) {
         val platformUri = uri.toAndroidUri()
-        context.contentResolver.query(
-            platformUri,
-            arrayOf(OpenableColumns.DISPLAY_NAME),
-            null,
-            null,
-            null,
-        )?.use { cursor ->
-            val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-            if (nameIndex >= 0 && cursor.moveToFirst()) {
-                cursor
-                    .getString(nameIndex)
-                    ?.takeIf { it.isNotBlank() }
-                    ?.let {
-                        return@withContext it
-                    }
+        if (platformUri.scheme == "content") {
+            // query() can throw SecurityException (revoked permission) or IllegalArgumentException
+            // (malformed URI) even after the scheme guard; fall through to the file-scheme branch on failure.
+            runCatching {
+                context.contentResolver.query(
+                    platformUri,
+                    arrayOf(OpenableColumns.DISPLAY_NAME),
+                    null,
+                    null,
+                    null,
+                )
             }
+                .onFailure { e -> Logger.w(e) { "Failed to query display name from content provider" } }
+                .getOrNull()
+                ?.use { cursor ->
+                    val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                    if (nameIndex >= 0 && cursor.moveToFirst()) {
+                        cursor
+                            .getString(nameIndex)
+                            ?.takeIf { it.isNotBlank() }
+                            ?.let {
+                                return@withContext it
+                            }
+                    }
+                }
         }
         if (platformUri.scheme == "file") uri.pathSegments.lastOrNull()?.takeIf { it.isNotBlank() } else null
     }
