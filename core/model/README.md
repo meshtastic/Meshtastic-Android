@@ -26,12 +26,17 @@ implementation(projects.core.model)
 - **`androidMain`**: Contains Android-specific utilities and implementations for `expect` declarations.
 - **`androidUnitTest`**: Contains unit tests that require Android-specific features (like `Parcel` testing via Robolectric).
 
-## Module dependency graph
+
+## Dependency Graph
 
 <!--region graph-->
 ```mermaid
 graph TB
   :core:model[model]:::kmp-library
+  :core:model --> :core:proto
+  :core:model --> :core:common
+  :core:model --> :core:resources
+  :core:model -.-> :core:testing
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

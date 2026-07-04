@@ -17,11 +17,11 @@
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
+import org.gradle.kotlin.dsl.register
 import org.meshtastic.buildlogic.configureDokkaAggregation
 import org.meshtastic.buildlogic.configureGraphTasks
 import org.meshtastic.buildlogic.configureKover
 import org.meshtastic.buildlogic.configureKoverAggregation
-import org.meshtastic.buildlogic.isDesktopOnly
 
 /**
  * Root convention plugin applied to the top-level project.
@@ -38,7 +38,7 @@ class RootConventionPlugin : Plugin<Project> {
             val modules = allModules()
 
             apply(plugin = "org.jetbrains.dokka")
-            configureDokkaAggregation(modules)
+            configureDokkaAggregation(modules.filter { it !in DOKKA_EXCLUDED_MODULES })
 
             apply(plugin = "org.jetbrains.kotlinx.kover")
             configureKover()
@@ -46,7 +46,6 @@ class RootConventionPlugin : Plugin<Project> {
 
             // Register graph tasks on the root project itself
             configureGraphTasks()
-
             registerKmpSmokeCompileTask()
         }
     }
@@ -66,17 +65,22 @@ private fun Project.registerKmpSmokeCompileTask() {
 
         kmp.forEach { path ->
             dependsOn("$path:compileKotlinJvm")
-            if (!isDesktopOnly) {
-                dependsOn("$path:compileKotlinIosSimulatorArm64")
-            }
+            dependsOn("$path:compileKotlinIosSimulatorArm64")
         }
+
+        // Compile androidDeviceTest sources so instrumented test breakages are caught early.
+        // These tests require a device/emulator to *run*, but compilation alone is cheap.
+        DEVICE_TEST_MODULES.forEach { path -> dependsOn("$path:compileAndroidDeviceTest") }
     }
 }
+
+/** KMP modules that declare `withDeviceTest {}` and therefore have `compileAndroidDeviceTest` tasks. */
+private val DEVICE_TEST_MODULES = listOf(":core:database", ":core:model")
 
 /** All modules included in `settings.gradle.kts`. Update this list when adding or removing modules. */
 private val ALL_MODULES_FULL =
     listOf(
-        ":app",
+        ":androidApp",
         ":core:api",
         ":core:barcode",
         ":core:ble",
@@ -107,17 +111,23 @@ private val ALL_MODULES_FULL =
         ":feature:firmware",
         ":feature:wifi-provision",
         ":feature:widget",
-        ":desktop",
+        ":desktopApp",
     )
 
-/** Android-only modules excluded in desktop-only builds. */
-private val ANDROID_ONLY_MODULES = setOf(":app", ":core:api", ":core:barcode", ":feature:widget")
-
-private fun Project.allModules(): List<String> =
-    if (isDesktopOnly) ALL_MODULES_FULL.filter { it !in ANDROID_ONLY_MODULES } else ALL_MODULES_FULL
+/** Android-only modules that don't apply the KMP plugin. */
+private val ANDROID_ONLY_MODULES = setOf(":androidApp", ":core:api", ":core:barcode", ":feature:widget")
 
 /**
- * Modules that apply the KMP plugin and should be compiled for JVM + iOS targets. Excludes pure-Android modules (:app,
- * :core:api, :core:barcode, :feature:widget) and the desktop JVM-only module.
+ * Modules excluded from Dokka aggregation. :core:proto contains only auto-generated Wire classes (no KDoc value) and
+ * its TAKPacket-SDK dependency doesn't publish iOS metadata JARs, causing `transformCommonMainDependenciesMetadata` to
+ * fail during Dokka resolution.
  */
-private fun Project.kmpModules(): List<String> = allModules().filter { it !in ANDROID_ONLY_MODULES + ":desktop" }
+private val DOKKA_EXCLUDED_MODULES = setOf(":core:proto")
+
+private fun allModules(): List<String> = ALL_MODULES_FULL
+
+/**
+ * Modules that apply the KMP plugin and should be compiled for JVM + iOS targets. Excludes pure-Android modules
+ * (:androidApp, :core:api, :core:barcode, :feature:widget) and the desktop JVM-only module.
+ */
+private fun kmpModules(): List<String> = allModules().filter { it !in ANDROID_ONLY_MODULES + ":desktopApp" }

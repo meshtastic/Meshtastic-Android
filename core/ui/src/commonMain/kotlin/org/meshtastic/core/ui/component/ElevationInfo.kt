@@ -29,6 +29,7 @@ import org.meshtastic.core.resources.altitude
 import org.meshtastic.core.resources.elevation_suffix
 import org.meshtastic.core.ui.icon.Elevation
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.proto.Config.DisplayConfig.DisplayUnits
 
 @Composable
@@ -51,6 +52,6 @@ fun ElevationInfo(
 
 @Composable
 @Preview
-private fun ElevationInfoPreview() {
-    MaterialTheme { ElevationInfo(altitude = 100, system = DisplayUnits.METRIC, suffix = "ASL") }
+fun ElevationInfoPreview() {
+    AppTheme { ElevationInfo(altitude = 100, system = DisplayUnits.METRIC, suffix = "ASL") }
 }

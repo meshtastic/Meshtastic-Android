@@ -3,12 +3,22 @@
   <ManuallySuppressedIssues/>
   <CurrentIssues>
     <ID>Kdoc:LegacyDfuTransport.kt:LegacyDfuTransport$/** * Stream [firmware] to the Packet characteristic, awaiting a [LegacyDfuResponse.PacketReceipt] every * [PRN_INTERVAL_PACKETS] packets and verifying the bytes-received count. * * Watches the connection state in parallel with the write loop; if the link drops mid-stream we cancel the write * coroutine and surface a [DfuException.ConnectionFailed] immediately rather than waiting indefinitely for a write * that will never complete. */</ID>
+    <ID>ModifierMissing:FirmwareUpdateScreen.kt:@Composable internal fun CheckingState</ID>
+    <ID>ModifierMissing:FirmwareUpdateScreen.kt:@Composable internal fun DisclaimerDialog</ID>
+    <ID>ModifierMissing:FirmwareUpdateScreen.kt:@Composable internal fun ErrorState</ID>
+    <ID>ModifierMissing:FirmwareUpdateScreen.kt:@Composable internal fun SuccessState</ID>
+    <ID>ModifierMissing:FirmwareUpdateScreen.kt:@Composable internal fun VerifyingState</ID>
     <ID>MultipleEmitters:FirmwareUpdateScreen.kt:@Composable @Suppress("LongMethod") private fun ReadyState</ID>
+    <ID>MultipleEmitters:FirmwareUpdateScreen.kt:@Composable internal fun CheckingState</ID>
+    <ID>MultipleEmitters:FirmwareUpdateScreen.kt:@Composable internal fun ErrorState</ID>
+    <ID>MultipleEmitters:FirmwareUpdateScreen.kt:@Composable internal fun VerifyingState</ID>
     <ID>MultipleEmitters:FirmwareUpdateScreen.kt:@Composable private fun AwaitingFileSaveState</ID>
-    <ID>MultipleEmitters:FirmwareUpdateScreen.kt:@Composable private fun CheckingState</ID>
-    <ID>MultipleEmitters:FirmwareUpdateScreen.kt:@Composable private fun ErrorState</ID>
     <ID>MultipleEmitters:FirmwareUpdateScreen.kt:@Composable private fun VerificationFailedState</ID>
-    <ID>MultipleEmitters:FirmwareUpdateScreen.kt:@Composable private fun VerifyingState</ID>
+    <ID>PreviewPublic:FirmwarePreviews.kt:@PreviewLightDark @Composable fun CheckingStatePreview</ID>
+    <ID>PreviewPublic:FirmwarePreviews.kt:@PreviewLightDark @Composable fun DisclaimerDialogPreview</ID>
+    <ID>PreviewPublic:FirmwarePreviews.kt:@PreviewLightDark @Composable fun ErrorStatePreview</ID>
+    <ID>PreviewPublic:FirmwarePreviews.kt:@PreviewLightDark @Composable fun SuccessStatePreview</ID>
+    <ID>PreviewPublic:FirmwarePreviews.kt:@PreviewLightDark @Composable fun VerifyingStatePreview</ID>
     <ID>TooGenericExceptionCaught:FirmwareUpdateViewModel.kt:FirmwareUpdateViewModel$e: Exception</ID>
   </CurrentIssues>
 </SmellBaseline>

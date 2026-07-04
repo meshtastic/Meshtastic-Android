@@ -48,7 +48,6 @@
     <ID>ModifierMissing:ChannelConfigScreen.kt:@Composable fun ChannelConfigScreen</ID>
     <ID>ModifierMissing:ChannelScreen.kt:@Composable @Suppress("LongMethod") fun ChannelScreen</ID>
     <ID>ModifierMissing:CleanNodeDatabaseScreen.kt:@Composable fun CleanNodeDatabaseScreen</ID>
-    <ID>ModifierMissing:ContrastPickerDialog.kt:@Composable fun ContrastPickerDialog</ID>
     <ID>ModifierMissing:Debug.kt:@Suppress("LongMethod") @Composable fun DebugScreen</ID>
     <ID>ModifierMissing:DesktopSettingsScreen.kt:@Suppress("LongMethod") @Composable fun DesktopSettingsScreen</ID>
     <ID>ModifierMissing:DetectionSensorConfigItemList.kt:@Composable fun DetectionSensorConfigScreen</ID>
@@ -101,6 +100,11 @@
     <ID>ParameterNaming:PositionConfigScreen.android.kt:onLocationReceived: (Position) -> Unit</ID>
     <ID>ParameterNaming:PositionConfigScreen.jvm.kt:onLocationReceived: (Position) -> Unit</ID>
     <ID>ParameterNaming:PositionConfigScreen.kt:onLocationReceived: (Position) -> Unit</ID>
+    <ID>PreviewPublic:AppInfoSection.kt:@Preview(showBackground = true) @Composable fun AppInfoSectionPreview</ID>
+    <ID>PreviewPublic:AppearanceSection.kt:@Preview(showBackground = true) @Composable fun AppearanceSectionPreview</ID>
+    <ID>PreviewPublic:NodeLayoutSettingsPreviews.kt:@PreviewLightDark @Composable fun NodeLayoutSettingsCompactPreview</ID>
+    <ID>PreviewPublic:NodeLayoutSettingsPreviews.kt:@PreviewLightDark @Composable fun NodeLayoutSettingsCompletePreview</ID>
+    <ID>PreviewPublic:PersistenceSection.kt:@Preview(showBackground = true) @Composable fun PersistenceSectionPreview</ID>
     <ID>ReturnCount:RadioConfigViewModel.kt:RadioConfigViewModel$private fun processPacketResponse</ID>
     <ID>TooGenericExceptionCaught:DebugViewModel.kt:DebugViewModel$e: Exception</ID>
     <ID>TooManyFunctions:RadioConfigViewModel.kt:RadioConfigViewModel : ViewModel</ID>

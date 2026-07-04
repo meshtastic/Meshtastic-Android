@@ -14,13 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+
 package org.meshtastic.feature.node.component
 
 import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuGroup
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
@@ -29,22 +34,26 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.add_favorite
 import org.meshtastic.core.resources.ignore
-import org.meshtastic.core.resources.mute_always
+import org.meshtastic.core.resources.message
+import org.meshtastic.core.resources.mute_notifications
 import org.meshtastic.core.resources.remove
 import org.meshtastic.core.resources.remove_favorite
 import org.meshtastic.core.resources.remove_ignored
+import org.meshtastic.core.resources.trace_route
 import org.meshtastic.core.resources.unmute
 import org.meshtastic.core.ui.icon.DeleteNode
 import org.meshtastic.core.ui.icon.DoDisturb
 import org.meshtastic.core.ui.icon.Favorite
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Message
 import org.meshtastic.core.ui.icon.NotFavorite
+import org.meshtastic.core.ui.icon.Route
 import org.meshtastic.core.ui.icon.VolumeOff
 import org.meshtastic.core.ui.icon.VolumeUp
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 
 /**
- * Shared context menu for node actions (favorite, ignore, mute, remove).
+ * Shared context menu for node actions (favorite, mute, message, trace route, ignore, remove).
  *
  * Used by both Android and Desktop adaptive node list screens.
  */
@@ -53,18 +62,26 @@ fun NodeContextMenu(
     expanded: Boolean,
     node: Node,
     onFavorite: () -> Unit,
-    onIgnore: () -> Unit,
     onMute: () -> Unit,
+    onMessage: () -> Unit,
+    onTraceRoute: () -> Unit,
+    onIgnore: () -> Unit,
     onRemove: () -> Unit,
     onDismiss: () -> Unit,
 ) {
     DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
-        FavoriteMenuItem(node, onFavorite, onDismiss)
-        IgnoreMenuItem(node, onIgnore, onDismiss)
-        if (node.capabilities.canMuteNode) {
-            MuteMenuItem(node, onMute, onDismiss)
+        DropdownMenuGroup(shapes = MenuDefaults.groupShapes()) {
+            FavoriteMenuItem(node, onFavorite, onDismiss)
+            if (node.capabilities.canMuteNode) {
+                MuteMenuItem(node, onMute, onDismiss)
+            }
+            MessageMenuItem(node, onMessage, onDismiss)
+            TraceRouteMenuItem(node, onTraceRoute, onDismiss)
         }
-        RemoveMenuItem(node, onRemove, onDismiss)
+        DropdownMenuGroup(shapes = MenuDefaults.groupShapes()) {
+            IgnoreMenuItem(node, onIgnore, onDismiss)
+            RemoveMenuItem(node, onRemove, onDismiss)
+        }
     }
 }
 
@@ -125,7 +142,33 @@ private fun MuteMenuItem(node: Node, onMute: () -> Unit, onDismiss: () -> Unit) 
                 contentDescription = null,
             )
         },
-        text = { Text(text = stringResource(if (isMuted) Res.string.unmute else Res.string.mute_always)) },
+        text = { Text(text = stringResource(if (isMuted) Res.string.unmute else Res.string.mute_notifications)) },
+    )
+}
+
+@Composable
+private fun MessageMenuItem(node: Node, onMessage: () -> Unit, onDismiss: () -> Unit) {
+    DropdownMenuItem(
+        onClick = {
+            onMessage()
+            onDismiss()
+        },
+        enabled = !node.isIgnored,
+        leadingIcon = { Icon(imageVector = MeshtasticIcons.Message, contentDescription = null) },
+        text = { Text(text = stringResource(Res.string.message)) },
+    )
+}
+
+@Composable
+private fun TraceRouteMenuItem(node: Node, onTraceRoute: () -> Unit, onDismiss: () -> Unit) {
+    DropdownMenuItem(
+        onClick = {
+            onTraceRoute()
+            onDismiss()
+        },
+        enabled = !node.isIgnored,
+        leadingIcon = { Icon(imageVector = MeshtasticIcons.Route, contentDescription = null) },
+        text = { Text(text = stringResource(Res.string.trace_route)) },
     )
 }
 

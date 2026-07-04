@@ -141,7 +141,7 @@ class SecureDfuHandler(
                 var completed = false
                 try {
                     // ── 5. Connect to device in DFU mode ─────────────────────────────
-                    if (!connectWithRetry(transport, updateState)) return@withContext null
+                    connectWithRetry(transport, updateState)
 
                     // ── 6. Init packet ────────────────────────────────────────────
                     updateState(
@@ -252,13 +252,11 @@ class SecureDfuHandler(
         return if (legacyHit != null) DfuProtocolKind.LEGACY else DfuProtocolKind.SECURE
     }
 
-    private suspend fun connectWithRetry(
-        transport: DfuUploadTransport,
-        updateState: (FirmwareUpdateState) -> Unit,
-    ): Boolean {
+    private suspend fun connectWithRetry(transport: DfuUploadTransport, updateState: (FirmwareUpdateState) -> Unit) {
         updateState(
             FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_waiting_reboot))),
         )
+        var lastError: Throwable? = null
         for (attempt in 1..CONNECT_ATTEMPTS) {
             updateState(
                 FirmwareUpdateState.Processing(
@@ -269,12 +267,16 @@ class SecureDfuHandler(
             )
             val result = transport.connectToDfuMode()
             if (result.isSuccess) {
-                return true
+                return
             }
-            Logger.w { "DFU: Connect attempt $attempt/$CONNECT_ATTEMPTS failed: ${result.exceptionOrNull()?.message}" }
+            lastError = result.exceptionOrNull()
+            Logger.w { "DFU: Connect attempt $attempt/$CONNECT_ATTEMPTS failed: ${lastError?.message}" }
             if (attempt < CONNECT_ATTEMPTS) delay(RETRY_DELAY_MS)
         }
-        return false
+        throw DfuException.ConnectionFailed(
+            "Failed to connect to DFU device after $CONNECT_ATTEMPTS attempts",
+            lastError,
+        )
     }
 
     private suspend fun obtainZipFile(

@@ -46,7 +46,7 @@ fun MeshtasticAppShell(
         onNavigateToTracerouteMap = { destNum, requestId, logUuid ->
             multiBackstack.handleDeepLink(
                 listOf(
-                    NodesRoute.NodesGraph,
+                    NodesRoute.Nodes,
                     NodeDetailRoute.TracerouteMap(destNum = destNum, requestId = requestId, logUuid = logUuid),
                 ),
             )

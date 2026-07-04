@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
     <string name="accept">אישור</string>
     <!-- ACTION -->
     <string name="action_delete_message">מחק הודעה</string>
@@ -37,6 +38,7 @@
     <string name="channel_invalid">כתובת ערוץ זה אינו תקין ולא ניתן לעשות בו שימוש</string>
     <string name="channel_label">ערוץ</string>
     <string name="channel_name">שם הערוץ</string>
+    <!-- CHIRPY -->
     <string name="choose_theme">בחר ערכת עיצוב</string>
     <!-- CLEAN -->
     <string name="clear">נקה</string>
@@ -64,6 +66,7 @@
     <!-- DISPLAY -->
     <!-- DISTANCE -->
     <string name="distance">מרחק</string>
+    <!-- DOC -->
     <!-- ENCRYPTION -->
     <!-- ENVIRONMENT -->
     <string name="error">שגיאה</string>
@@ -128,6 +131,7 @@
     <!-- NODE -->
     <string name="node_filter_include_unknown">כלול לא ידועים</string>
     <string name="node_filter_placeholder">פילטר</string>
+    <string name="node_layout_channel">ערוץ</string>
     <string name="node_sort_alpha">א-ת</string>
     <string name="node_sort_channel">ערוץ</string>
     <string name="node_sort_distance">מרחק</string>

@@ -76,15 +76,6 @@ fun EntryProviderScope<NavKey>.nodesGraph(
     onHandleDeepLink: (org.meshtastic.core.common.util.CommonUri, onInvalid: () -> Unit) -> Unit = { _, _ -> },
     onNavigateToConnections: () -> Unit = {},
 ) {
-    entry<NodesRoute.NodesGraph>(metadata = { ListDetailSceneStrategy.listPane() }) {
-        AdaptiveNodeListScreen(
-            backStack = backStack,
-            scrollToTopEvents = scrollToTopEvents,
-            onHandleDeepLink = onHandleDeepLink,
-            onNavigateToConnections = onNavigateToConnections,
-        )
-    }
-
     entry<NodesRoute.Nodes>(metadata = { ListDetailSceneStrategy.listPane() }) {
         AdaptiveNodeListScreen(
             backStack = backStack,
@@ -94,30 +85,16 @@ fun EntryProviderScope<NavKey>.nodesGraph(
         )
     }
 
-    nodeDetailGraph(backStack, scrollToTopEvents, onHandleDeepLink, onNavigateToConnections)
+    nodeDetailGraph(backStack)
 }
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Suppress("LongMethod")
-fun EntryProviderScope<NavKey>.nodeDetailGraph(
-    backStack: NavBackStack<NavKey>,
-    scrollToTopEvents: Flow<ScrollToTopEvent>,
-    onHandleDeepLink: (org.meshtastic.core.common.util.CommonUri, onInvalid: () -> Unit) -> Unit = { _, _ -> },
-    onNavigateToConnections: () -> Unit = {},
-) {
-    entry<NodesRoute.NodeDetailGraph>(metadata = { ListDetailSceneStrategy.listPane() }) { args ->
-        AdaptiveNodeListScreen(
-            backStack = backStack,
-            scrollToTopEvents = scrollToTopEvents,
-            onHandleDeepLink = onHandleDeepLink,
-            onNavigateToConnections = onNavigateToConnections,
-        )
-    }
-
+fun EntryProviderScope<NavKey>.nodeDetailGraph(backStack: NavBackStack<NavKey>) {
     entry<NodesRoute.NodeDetail>(metadata = { ListDetailSceneStrategy.detailPane() }) { args ->
         val nodeDetailViewModel: NodeDetailViewModel = koinViewModel()
         val compassViewModel: CompassViewModel = koinViewModel()
-        val destNum = args.destNum ?: 0 // Handle nullable destNum if needed
+        val destNum = args.destNum ?: 0
         NodeDetailScreen(
             nodeId = destNum,
             viewModel = nodeDetailViewModel,
@@ -149,7 +126,12 @@ fun EntryProviderScope<NavKey>.nodeDetailGraph(
 
     entry<NodeDetailRoute.TracerouteMap>(metadata = { ListDetailSceneStrategy.extraPane() }) { args ->
         val tracerouteMapScreen = org.meshtastic.core.ui.util.LocalTracerouteMapScreenProvider.current
-        tracerouteMapScreen(args.destNum, args.requestId, args.logUuid) { backStack.removeLastOrNull() }
+        tracerouteMapScreen(
+            args.destNum,
+            args.requestId,
+            args.logUuid,
+            dropUnlessResumed { backStack.removeLastOrNull() },
+        )
     }
 
     NodeDetailScreen.entries.forEach { routeInfo ->

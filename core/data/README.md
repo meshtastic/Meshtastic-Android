@@ -13,12 +13,24 @@ The `:core:data` module implements the Repository pattern, serving as the primar
 ### 2. Data Sources
 Internal components that handle raw data fetching from APIs or disk.
 
-## Module dependency graph
+
+## Dependency Graph
 
 <!--region graph-->
 ```mermaid
 graph TB
   :core:data[data]:::kmp-library
+  :core:data --> :core:repository
+  :core:data -.-> :core:common
+  :core:data -.-> :core:database
+  :core:data -.-> :core:datastore
+  :core:data -.-> :core:di
+  :core:data -.-> :core:model
+  :core:data -.-> :core:network
+  :core:data -.-> :core:prefs
+  :core:data -.-> :core:proto
+  :core:data -.-> :core:takserver
+  :core:data -.-> :core:testing
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

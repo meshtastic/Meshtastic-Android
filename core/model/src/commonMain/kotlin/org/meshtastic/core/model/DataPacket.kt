@@ -194,13 +194,6 @@ data class DataPacket(
         fun nodeNumToDefaultId(n: Int): String = formatString("!%08x", n)
 
         @Suppress("MagicNumber")
-        fun idToDefaultNodeNum(id: String?): Int? =
-            runCatching {
-                if (id?.startsWith('!') == true) {
-                    id.substring(1).toLong(16).toInt()
-                } else {
-                    id?.toLong(16)?.toInt()
-                }
-            }.getOrNull()
+        fun idToDefaultNodeNum(id: String?): Int? = runCatching { if (id?.startsWith('!') == true) id.substring(1).toLong(16).toInt() else id?.toLong(16)?.toInt() }.getOrNull()
     }
 }

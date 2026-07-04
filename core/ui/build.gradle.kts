@@ -18,15 +18,15 @@
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.meshtastic.kmp.library.compose)
+    alias(libs.plugins.meshtastic.kotlinx.serialization)
     id("meshtastic.kmp.jvm.android")
     id("meshtastic.koin")
 }
 
 kotlin {
-    android {
-        namespace = "org.meshtastic.core.ui"
-        androidResources.enable = false
-    }
+    // Required for CMP files/ resources (emoji-data.json) to be packaged as Android assets.
+    // Without this, Res.readBytes() throws MissingResourceException at runtime.
+    android { androidResources.enable = true }
 
     sourceSets {
         commonMain.dependencies {
@@ -48,7 +48,9 @@ kotlin {
             implementation(libs.compose.multiplatform.foundation)
             api(libs.compose.multiplatform.ui.tooling.preview)
 
+            implementation(libs.coil)
             implementation(libs.kermit)
+            implementation(libs.kotlinx.serialization.json)
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.qrcode.kotlin)
             implementation(libs.jetbrains.compose.material3.adaptive)

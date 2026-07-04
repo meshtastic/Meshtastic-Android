@@ -44,7 +44,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
-import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
+import com.patrykandpatrick.vico.compose.cartesian.data.lineModel
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.MetricFormatter
@@ -143,11 +143,11 @@ private fun SignalMetricsChart(
         LaunchedEffect(rssiData, snrData) {
             modelProducer.runTransaction {
                 if (rssiData.isNotEmpty()) {
-                    /* Use separate lineSeries calls to associate them with different vertical axes */
-                    lineSeries { series(x = rssiData.map { it.rx_time }, y = rssiData.map { it.rx_rssi }) }
+                    /* Use separate lineModel calls to associate them with different vertical axes */
+                    lineModel { series(x = rssiData.map { it.rx_time }, y = rssiData.map { it.rx_rssi }) }
                 }
                 if (snrData.isNotEmpty()) {
-                    lineSeries { series(x = snrData.map { it.rx_time }, y = snrData.map { it.rx_snr }) }
+                    lineModel { series(x = snrData.map { it.rx_time }, y = snrData.map { it.rx_snr }) }
                 }
             }
         }

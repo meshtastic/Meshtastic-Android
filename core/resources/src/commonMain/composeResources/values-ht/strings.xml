@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
     <string name="accept">Aksepte</string>
     <!-- ACTION -->
     <string name="action_delete_message">Efase mesaj la</string>
@@ -41,6 +42,7 @@
     <string name="channel_invalid">Kanal URL sa a pa valab e yo pa kapab itilize li</string>
     <string name="channel_label">kanal</string>
     <string name="channel_name">Non kanal</string>
+    <!-- CHIRPY -->
     <string name="choose_theme">Chwazi tèm</string>
     <!-- CLEAN -->
     <string name="clear">Netwaye</string>
@@ -68,6 +70,7 @@
     <!-- DISPLAY -->
     <!-- DISTANCE -->
     <string name="distance">Distans</string>
+    <!-- DOC -->
     <string name="edit">Modifye</string>
     <string name="eight_hours">8 Èdtan</string>
     <!-- ENCRYPTION -->
@@ -148,6 +151,8 @@
     <!-- NODE -->
     <string name="node_filter_include_unknown">Enkli enkoni</string>
     <string name="node_filter_placeholder">Filtre</string>
+    <string name="node_layout_channel">kanal</string>
+    <string name="node_layout_hops_away">Hops Lwen</string>
     <string name="node_sort_channel">kanal</string>
     <string name="node_sort_distance">Distans</string>
     <string name="node_sort_hops_away">Sote lwen</string>

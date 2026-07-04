@@ -19,10 +19,10 @@ package org.meshtastic.core.domain.usecase.settings
 import app.cash.turbine.test
 import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
-import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.Node
@@ -77,7 +77,7 @@ class IsOtaCapableUseCaseTest {
                 hwModel = HardwareModel.TBEAM.value,
                 requiresDfu = false,
             )
-        everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any()) } returns Result.success(hw)
+        dev.mokkery.every { deviceHardwareRepository.observeDeviceHardware(any(), any()) } returns flowOf(hw)
 
         useCase().test {
             assertTrue(awaitItem())
@@ -95,7 +95,7 @@ class IsOtaCapableUseCaseTest {
         dev.mokkery.every { radioPrefs.devAddr } returns MutableStateFlow("x12345678") // x for BLE
 
         val hw = DeviceHardware(activelySupported = false, hwModel = HardwareModel.TBEAM.value)
-        everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any()) } returns Result.success(hw)
+        dev.mokkery.every { deviceHardwareRepository.observeDeviceHardware(any(), any()) } returns flowOf(hw)
 
         useCase().test {
             assertFalse(awaitItem())
@@ -119,7 +119,7 @@ class IsOtaCapableUseCaseTest {
                 hwModel = HardwareModel.TBEAM.value,
                 requiresDfu = true,
             )
-        everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any()) } returns Result.success(hw)
+        dev.mokkery.every { deviceHardwareRepository.observeDeviceHardware(any(), any()) } returns flowOf(hw)
 
         useCase().test {
             assertTrue(awaitItem())
@@ -136,7 +136,7 @@ class IsOtaCapableUseCaseTest {
             MutableStateFlow(org.meshtastic.core.model.ConnectionState.Connected)
         dev.mokkery.every { radioPrefs.devAddr } returns MutableStateFlow("x12345678") // x for BLE
 
-        everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any()) } returns Result.failure(Exception())
+        dev.mokkery.every { deviceHardwareRepository.observeDeviceHardware(any(), any()) } returns flowOf(null)
 
         useCase().test {
             assertFalse(awaitItem())

@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
     <string name="accept">قبول</string>
     <!-- ACTION -->
     <!-- ADD -->
@@ -48,6 +49,7 @@
     <string name="channel_label">عربي</string>
     <string name="channel_name">اسم القناة</string>
     <string name="channels">القنوات</string>
+    <!-- CHIRPY -->
     <!-- CLEAN -->
     <string name="clear">مسح</string>
     <string name="close">أغلق</string>
@@ -70,6 +72,8 @@
     <string name="display">إعدادات الشاشة</string>
     <!-- DISTANCE -->
     <string name="distance">المسافة</string>
+    <!-- DOC -->
+    <string name="doc_title_mqtt">MQTT</string>
     <string name="edit">تعديل</string>
     <string name="eight_hours">8 ساعات</string>
     <!-- ENCRYPTION -->
@@ -139,6 +143,7 @@
     <!-- NODE -->
     <string name="node_filter_include_unknown">عربي</string>
     <string name="node_filter_placeholder">عربي</string>
+    <string name="node_layout_channel">عربي</string>
     <string name="node_sort_alpha">عربي</string>
     <string name="node_sort_button">عربي</string>
     <string name="node_sort_channel">عربي</string>

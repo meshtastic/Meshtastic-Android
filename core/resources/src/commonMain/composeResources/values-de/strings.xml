@@ -16,8 +16,18 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">Nachricht von %1$s: %2$s</string>
+    <string name="a11y_node_battery">Akku %1$d%%</string>
+    <string name="a11y_node_distance_away">%1$s Abwesend</string>
+    <string name="a11y_node_favorite">Favorit</string>
+    <string name="a11y_node_hops_away">%1$d Sprünge entfernt</string>
+    <string name="a11y_node_last_heard">Zuletzt gehört %1$s</string>
+    <string name="a11y_node_offline">Offline</string>
+    <string name="a11y_node_online">Online</string>
+    <string name="a11y_node_role">Rolle %1$s</string>
+    <string name="a11y_node_signal">Signal %1$s</string>
     <string name="accept">Akzeptieren</string>
     <string name="acknowledgements">Danksagungen</string>
     <!-- ACTION -->
@@ -41,7 +51,7 @@
     <string name="add_layer">Ebene hinzufügen</string>
     <string name="add_local_mbtiles_file">Lokale MB Kacheldatei hinzufügen</string>
     <string name="add_network_device">Hinzufügen</string>
-    <string name="add_network_device_manually">Gerät manuell hinzufügen.</string>
+    <string name="add_network_device_manually">Gerät manuell hinzufügen…</string>
     <string name="add_network_layer">Netzwerkebene hinzufügen</string>
     <string name="address">Adresse</string>
     <string name="admin_key">Administrativer Schlüssel</string>
@@ -138,7 +148,22 @@
     <string name="channel_url">Kanal URL</string>
     <string name="channel_utilization">Kanalauslastung</string>
     <string name="channels">Kanäle</string>
+    <!-- CHIRPY -->
     <string name="chirpy">Chirpy</string>
+    <string name="chirpy_assistant_title">Chirpy Assistent</string>
+    <string name="chirpy_checking">Chirpy Verfügbarkeit…</string>
+    <string name="chirpy_downloading">Chirpy wird heruntergeladen…</string>
+    <string name="chirpy_downloading_progress">Chirpy Modell herunterladen: %1$d%%</string>
+    <string name="chirpy_downloading_subtitle">Dies geschieht nur einmal. Chirpy wird bald bereit sein!</string>
+    <string name="chirpy_error_busy">Whoa! Der Kanal ist gerade völlig überlastet – hier herrscht reger Datenverkehr! 📶 Lassen Sie uns auf ein freies Zeitfenster warten und die Übertragung dann erneut versuchen.</string>
+    <string name="chirpy_error_model_unavailable">Meine Batterie lädt gerade, oder meine Firmware wird noch heruntergeladen! 🔋 Geben Sie mir ein paar Augenblicke, um mich zu synchronisieren und hochzufahren!</string>
+    <string name="chirpy_error_token_budget_exceeded">Diese Nutzlast ist zu groß für mein Übertragungsbudget! 📱 Versuchen Sie bitte, ihre Nachricht zu kürzen, damit wir sie reibungslos weiterleiten können.</string>
+    <string name="chirpy_error_unknown">Hoppla! Wir sind auf starken Paketverlust oder Signalstörungen gestoßen! 📡 Lassen Sie uns die Anfrage noch einmal senden und schauen, ob wir diesmal durchkommen.</string>
+    <string name="chirpy_error_unsupported_flavor">Ich operiere in dieser App-Variante nur mit eingeschränkter Frequenz! 🔌 Versuchen Sie es stattdessen mit einer Version, die über eine vollständige KI Integration verfügt.</string>
+    <string name="chirpy_error_unsupported_platform">Oh nein! Meine Antenne scheint auf dieser Plattform keine Verbindung herstellen zu können. 📡 Bitte überprüfen Sie noch einmal die Kompatibilität Ihrer Hardware!</string>
+    <string name="chirpy_intro">Hallo! 📡 Ich bin Chirpy, ihr lokaler Meshtastic Assistent! Ich kann Ihnen bei der Einrichtung, Konfiguration, Fehlerbehebung und mit Tipps rund um das Mesh-Netzwerk helfen. Wobei kann ich Ihnen behilflich sein?</string>
+    <string name="chirpy_ready">Fragen Sie Chirpy</string>
+    <string name="chirpy_search_placeholder">Fragen Sie nach Meshtastic…</string>
     <string name="choose_contrast">Kontrast</string>
     <string name="choose_theme">Design auswählen</string>
     <!-- CLEAN -->
@@ -324,6 +349,32 @@
     <string name="distance_measurements">Entfernungsmessungen</string>
     <string name="distance_measurements_description">Zeigt den Abstand zwischen Ihrem Telefon und anderen Meshtastic Knoten mit einem Standort an.</string>
     <string name="dns">DNS</string>
+    <!-- DOC -->
+    <string name="doc_clear_search">Neue Suche</string>
+    <string name="doc_keywords_telemetry">Telemetrie,Sensor,Temperatur,Luftfeuchtigkeit,Druck, Energie</string>
+    <string name="doc_keywords_translate">Übersetzen,Crowdin,Lokalisierung,Sprache,i18n,Mitmachen</string>
+    <string name="doc_keywords_units">Einheiten, Sprache, Metrische, Imperiale, Temperatur, Distanz</string>
+    <string name="doc_search_placeholder">Dokumentation durchsuchen…</string>
+    <string name="doc_section_developer">Entwicklerhandbuch</string>
+    <string name="doc_section_user">Benutzerhandbuch</string>
+    <string name="doc_title_connections">Verbindungen</string>
+    <string name="doc_title_desktop">Desktop App</string>
+    <string name="doc_title_discovery">Entdecken</string>
+    <string name="doc_title_firmware">Firmwareaktualisierungen</string>
+    <string name="doc_title_map">Karte &amp; Wegpunkte</string>
+    <string name="doc_title_measurement">Messen &amp; Formatierung</string>
+    <string name="doc_title_messages">Nachrichten &amp; Kanäle</string>
+    <string name="doc_title_mqtt">MQTT</string>
+    <string name="doc_title_node_metrics">Knoten Kenndaten</string>
+    <string name="doc_title_nodes">Knoten</string>
+    <string name="doc_title_onboarding">Erste Schritte</string>
+    <string name="doc_title_settings_module">Einstellungen — Module &amp; Administration</string>
+    <string name="doc_title_settings_radio">Einstellungen — Radio &amp; Benutzer</string>
+    <string name="doc_title_signal_meter">Signalmesser</string>
+    <string name="doc_title_tak">TAK Integration</string>
+    <string name="doc_title_telemetry">Telemetrie &amp; Sensoren</string>
+    <string name="doc_title_translate">Die App übersetzen</string>
+    <string name="doc_title_units">Einheiten &amp; Sprache</string>
     <string name="done">Fertig</string>
     <string name="dont_show_again_for_device">Für dieses Gerät nicht erneut anzeigen</string>
     <string name="double_tap_as_button_press">Doppelklick als Taste</string>
@@ -502,12 +553,13 @@
     <string name="hardware_model">Geräte-Modell</string>
     <string name="heading">Überschrift</string>
     <string name="heartbeat">Puls</string>
+    <string name="help_and_documentation">Hilfe &amp; Dokumentation</string>
     <string name="hide_layer">Ebene ausblenden</string>
     <string name="hide_password">Passwort verbergen</string>
     <string name="history_return_max">Verlauf Rückgabewert maximal</string>
     <string name="history_return_window">Zeitraum Rückgabewert</string>
     <string name="hop_limit">Anzahl der Weiterleitungen</string>
-    <string name="hops_away">Zwischenschritte entfernt</string>
+    <string name="hops_away">Sprünge entfernt</string>
     <string name="host">Host</string>
     <string name="host_metrics_log">Host Kennzahlen</string>
     <string name="humidity">Feuchtigkeit</string>
@@ -579,11 +631,11 @@
     <string name="licensed_amateur_radio_text">Das Aktivieren dieser Option deaktiviert die Verschlüsselung und ist nicht mit dem Standardnetzwerk von Meshtastic kompatibel.</string>
     <!-- LOAD -->
     <string name="load">Last</string>
-    <string name="load_15_min">Last 15 Min.</string>
+    <string name="load_15_min">Last 15 Min</string>
     <string name="load_15_min_description">Durchschnittliche Systemlast von 15 Minuten</string>
-    <string name="load_1_min">Last 1 Min.</string>
+    <string name="load_1_min">Last 1 Min</string>
     <string name="load_1_min_description">Durchschnittliche Systemlast von 1 Minute</string>
-    <string name="load_5_min">Last 5 Min.</string>
+    <string name="load_5_min">Last 5 Min</string>
     <string name="load_5_min_description">Durchschnittliche Systemlast von 5 Minuten</string>
     <string name="load_indexed">Last %1$d</string>
     <string name="loading">Wird geladen</string>
@@ -715,11 +767,11 @@
     <string name="mqtt_probe_timeout">Zeitüberschreitung nach %1$d ms</string>
     <string name="mqtt_probe_tls_failure">TLS Aushandlung fehlgeschlagen: %1$s</string>
     <string name="mqtt_status_connected">Verbunden</string>
-    <string name="mqtt_status_connecting">Wird verbunden</string>
+    <string name="mqtt_status_connecting">Wird verbunden…</string>
     <string name="mqtt_status_disconnected">Verbindung getrennt</string>
     <string name="mqtt_status_disconnected_with_reason">Verbindung getrennt - %1$s</string>
     <string name="mqtt_status_inactive">Inaktiv</string>
-    <string name="mqtt_status_reconnecting">Erneut verbinden</string>
+    <string name="mqtt_status_reconnecting">Erneut verbinden…</string>
     <string name="mqtt_status_reconnecting_with_attempt">Erneut verbinden (Versuch %1$d) - %2$s</string>
     <string name="mqtt_test_connection">Verbindung testen</string>
     <string name="must_set_region">Sie müssen eine Region festlegen!</string>
@@ -731,6 +783,7 @@
     <string name="mute_always">Immer</string>
     <string name="mute_notifications">Benachrichtigungen stummschalten</string>
     <string name="mute_remove">Benachrichtigungen für '%1$s ' einschalten?</string>
+    <string name="mute_selected">Auswahl stumm schalten</string>
     <string name="mute_status_always">Immer stumm</string>
     <string name="mute_status_muted_for_days">Stumm für %1$d Tage, %2$s Stunden</string>
     <string name="mute_status_muted_for_hours">Stumm für %1$s Stunden</string>
@@ -751,7 +804,7 @@
     <string name="next">Weiter</string>
     <string name="nfc_disabled">NFC ist deaktiviert. Bitte aktivieren Sie es in den Systemeinstellungen.</string>
     <!-- NO -->
-    <string name="no_bluetooth_devices_hint">Stelle sicher, daß Du in der Reichweite des Gerätes bist.</string>
+    <string name="no_bluetooth_devices_hint">Stelle sicher, dass Du in der Reichweite des Gerätes bist.</string>
     <string name="no_bluetooth_devices_seen">Keine Bluetoothgeräte gefunden</string>
     <string name="no_custom_tile_sources_found">Keine eigenen Kachelquellen gefunden.</string>
     <string name="no_device_selected">Kein Gerät ausgewählt</string>
@@ -760,7 +813,7 @@
     <string name="no_local_stats">Keine Statistiken verfügbar</string>
     <string name="no_map_layers_loaded">Keine Kartenebenen geladen.</string>
     <string name="no_network_devices_found">Keine Netzwerkgeräte gefunden</string>
-    <string name="no_network_devices_hint">Stelle sicher, daß Du im selben Netzwerk bist wie das Gerät.</string>
+    <string name="no_network_devices_hint">Stelle sicher, dass Du im selben Netzwerk bist wie das Gerät.</string>
     <string name="no_network_devices_seen">Kein Netzwerkgerät gefunden</string>
     <string name="no_pax_metrics_logs">Keine Daten für den Besucherzähler verfügbar.</string>
     <string name="no_usb_devices_found">Kein USB-Gerät gefunden.</string>
@@ -778,12 +831,38 @@
     <string name="node_filter_show_ignored">Nur ignorierte Knoten anzeigen</string>
     <string name="node_filter_title">Filtern nach</string>
     <string name="node_id">Knoten-ID</string>
+    <string name="node_layout_channel">Kanal</string>
+    <string name="node_layout_compact">Kompakt</string>
+    <string name="node_layout_compact_fields_header">Kompakte Felder</string>
+    <string name="node_layout_complete">Fertig</string>
+    <string name="node_layout_complete_description">Das vollständige Layout zeigt alle verfügbaren Knotendaten an. Felder ohne Daten werden automatisch ausgeblendet.</string>
+    <string name="node_layout_device_role">Gerät &amp; Rolle</string>
+    <string name="node_layout_distance_and_bearing">Entfernung und Peilung</string>
+    <string name="node_layout_help_signal_bad">Das Signal ist schlecht, das Signal-Rauschverhältnis ist über −18 dB und die Signalstärke ist über −125 dBm.</string>
+    <string name="node_layout_help_signal_fair">Das Signal ist mäßig, das Signal-Rauschverhältnis ist über −12 dB und die Signalstärke ist über −120 dBm.</string>
+    <string name="node_layout_help_signal_good">Das Signal ist stark, das Signal-Rauschverhältnis ist über −7 dB und die Signalstärke ist über −115 dBm.</string>
+    <string name="node_layout_help_signal_indicator">Kombiniert SNR und RSSI zu einem Qualitätsniveau, das als farbiges Symbol mit einer Beschreibung angezeigt wird.</string>
+    <string name="node_layout_help_signal_none">Kein nutzbares Signal erkannt. Unterhalb aller Qualitätsgrenzen.</string>
+    <string name="node_layout_hops_away">Sprünge entfernt</string>
+    <string name="node_layout_last_heard_time">Zuletzt gesehen</string>
+    <string name="node_layout_log_icons">Umweltdaten</string>
+    <string name="node_layout_no_preview_available">Keine Knoten für die Vorschau vorhanden.</string>
+    <string name="node_layout_power">Leistung</string>
+    <string name="node_layout_preview">Vorschau</string>
+    <string name="node_layout_relative_last_heard">Relative Zeit zuletzt gesehen</string>
+    <string name="node_layout_section_title">Knotenlayout</string>
+    <string name="node_layout_signal_direct_only">Signal (nur direkt)</string>
+    <string name="node_layout_signal_quality_indicator">Signalqualität</string>
+    <string name="node_list_click_label">Knotendetails öffnen</string>
+    <string name="node_list_help_node_details">Knotendetails</string>
+    <string name="node_list_help_title">Hilfe Knotenliste</string>
+    <string name="node_list_long_click_label">Knoten Einstellungen</string>
     <string name="node_number">Knotennummer</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_button">Sortieroptionen</string>
     <string name="node_sort_channel">Kanal</string>
     <string name="node_sort_distance">Entfernung</string>
-    <string name="node_sort_hops_away">Zwischenschritte entfernt</string>
+    <string name="node_sort_hops_away">Sprünge entfernt</string>
     <string name="node_sort_last_heard">Zuletzt gehört</string>
     <string name="node_sort_title">Sortieren nach</string>
     <string name="node_sort_via_favorite">über Favorit</string>
@@ -823,7 +902,7 @@
     <string name="one_hour_short">1 Stunde</string>
     <string name="one_month">1 Monat</string>
     <string name="one_week">1 Woche</string>
-    <string name="one_wire_temperature">1-Wire Temperature</string>
+    <string name="one_wire_temperature">1-Draht Temperatur</string>
     <string name="only_favorites">Nur Favoriten</string>
     <string name="open_compass">Kompass öffnen</string>
     <string name="open_settings">Einstellungen öffnen</string>
@@ -852,7 +931,7 @@
     <string name="pax_total_format">Besucher: %1$d</string>
     <string name="pax_total_marker">Besucher: %1$s</string>
     <string name="pax_wifi_format">W:%1$d</string>
-    <string name="pax_wifi_marker">WLAN: %1$s</string>
+    <string name="pax_wifi_marker">Wlan: %1$s</string>
     <string name="paxcounter">Besucherzähler</string>
     <string name="paxcounter_config">Einstellung Besucherzähler</string>
     <string name="paxcounter_enabled">Besucherzähler aktiviert</string>
@@ -1135,6 +1214,7 @@
     <string name="store_forward_config">Speichern &amp; Weiterleiten Einstellungen</string>
     <string name="store_forward_enabled">Speichern &amp; Weiterleiten aktiviert</string>
     <string name="subnet">Subnet</string>
+    <string name="success">Erfolgreich</string>
     <string name="super_deep_sleep_duration_seconds">Dauer Supertiefschlaf</string>
     <string name="supported">Unterstützt</string>
     <string name="supported_by_community">Unterstützt von der Meshtastic Gemeinschaft</string>
@@ -1146,15 +1226,26 @@
     <string name="tak_role">Mitgliedsrolle</string>
     <string name="tak_role_forwardobserver">Aufklärer</string>
     <string name="tak_role_hq">Hauptquartier</string>
-    <string name="tak_role_k9">Hundeführer</string>
+    <string name="tak_role_k9">Hundeführer (K9)</string>
     <string name="tak_role_medic">Sanitäter</string>
     <string name="tak_role_rto">Funker</string>
     <string name="tak_role_sniper">Scharfschütze</string>
     <string name="tak_role_teamlead">Teamleiter</string>
     <string name="tak_role_teammember">Teammitglied</string>
     <string name="tak_role_unspecified">Unspecified</string>
+    <string name="tak_server">TAK Server</string>
     <string name="tak_server_enabled">Lokalen TAK Server aktivieren</string>
-    <string name="tak_server_enabled_desc">Startet einen TCP Server auf Port 8089 für ATAK Verbindungen</string>
+    <string name="tak_server_enabled_desc">Startet einen lokalen TLS-Server auf Port 8089 für ATAK/iTAK Verbindungen</string>
+    <string name="tak_server_export_data_package_desc">Erstelle .zip für ATAK/iTAK um sich mit diesem Server zu verbinden</string>
+    <string name="tak_server_loading">…</string>
+    <string name="tak_server_section">Server</string>
+    <string name="tak_server_test_card_title">TAK Mesh Test (Debug)</string>
+    <string name="tak_server_test_idle">Alle %1$d Tests an das Netz senden</string>
+    <string name="tak_server_test_result_bytes">%1$dB ✓</string>
+    <string name="tak_server_test_result_unknown_error">✗</string>
+    <string name="tak_server_test_results">%1$d bestanden, %2$d fehlgeschlagen von %3$d/%4$d</string>
+    <string name="tak_server_test_run">Ausführen</string>
+    <string name="tak_server_test_running">Ausführen: %1$s</string>
     <string name="tak_team">Teamfarbe</string>
     <string name="tak_team_blue">Blau</string>
     <string name="tak_team_brown">Braun</string>
@@ -1184,6 +1275,7 @@
     <string name="timestamp">Zeitstempel</string>
     <string name="tls_enabled">TLS aktiviert</string>
     <string name="toggle_my_position">Standort einschalten</string>
+    <string name="trace_route">Route verfolgen</string>
     <!-- TRACEROUTE -->
     <string name="traceroute">Traceroute</string>
     <string name="traceroute_diff">%1$d Sprünge vorwärts %2$d Sprünge zurück</string>
@@ -1236,7 +1328,7 @@
     <string name="tx_power_dbm">Sendeleistung</string>
     <string name="type">Typ</string>
     <string name="type_a_message">Eine Nachricht schreiben</string>
-    <string name="udp_enabled">Aktiviert</string>
+    <string name="udp_enabled">UDP Übertragung</string>
     <!-- UNKNOWN -->
     <string name="unknown">Unbekannt</string>
     <string name="unknown_age">Alter unbekannt</string>
@@ -1247,6 +1339,7 @@
     <string name="unmessageable">Nicht erreichbar</string>
     <string name="unmonitored_or_infrastructure">Unbeaufsichtigt oder Infrastruktur</string>
     <string name="unmute">Stummschaltung aufheben</string>
+    <string name="unmute_selected">Auswahl aktivieren</string>
     <string name="unrecognized">Unbekannt</string>
     <string name="unset">Nicht gesetzt - 0</string>
     <string name="up_down_select_input_enabled">Up/Down/Select Eingang aktiviert</string>
@@ -1302,12 +1395,13 @@
     <string name="wifi_provision_description">Stellen Sie Ihrem mPWRD-OS Gerät WLAN Zugangsdaten über Bluetooth zur Verfügung.</string>
     <string name="wifi_provision_device_found">Gerät gefunden</string>
     <string name="wifi_provision_device_found_detail">Bereit zur Suche nach WLAN Netzwerken.</string>
+    <string name="wifi_provision_hidden_network">Verstecktes Netzwerk</string>
     <string name="wifi_provision_mpwrd_disclaimer">Erfahren Sie mehr über das mPWRD-OS Projekt\nhttps://github.com/mPWRD-OS</string>
     <string name="wifi_provision_no_networks">Keine Netzwerke gefunden</string>
     <string name="wifi_provision_scan_failed">Suche nach WLAN Netzwerken fehlgeschlagen: %1$s</string>
     <string name="wifi_provision_scan_networks">Suche nach Netzwerken</string>
     <string name="wifi_provision_scanning_ble">Gerät wird gesucht...</string>
-    <string name="wifi_provision_scanning_wifi">Suche...</string>
+    <string name="wifi_provision_scanning_wifi">Scanne…</string>
     <string name="wifi_provision_sending_credentials">WLAN Konfiguration wird angewendet...</string>
     <string name="wifi_provision_signal_strength">%1$d%</string>
     <string name="wifi_provision_ssid_label">Netzwerkname (SSID)</string>

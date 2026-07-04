@@ -1,61 +1,55 @@
 # Skill: Meshtastic Design Standards
 
 ## Description
-Brand identity, color palette, accessibility, and icon specifications for Meshtastic clients. All UI must comply with these standards.
+Android-specific guidance for applying the Meshtastic design standards. All visual rules, color palettes, accessibility requirements, and cross-platform conventions live upstream.
 
-> **Upstream source:** <https://github.com/meshtastic/design> — if this skill diverges from upstream, upstream wins.
+> **Source of truth:** [`meshtastic/design/standards/`](https://github.com/meshtastic/design/tree/main/standards)
+> Read `meshtastic_design_standards_latest.md` for the full spec (colors, M3 mapping, accessibility, units/locale, agent checklist).
+> If this skill diverges from upstream, **upstream wins**.
 
-## 1. Brand Colors
+## 1. How to Use the Standards
 
-- **Primary/Foreground:** `#2C2D3C` (RGB 44 45 60)
-- **Secondary/Background/Accent:** `#67EA94` (RGB 103 234 148)
+Before implementing any UI:
+1. **Read the upstream standards** — they include a full agent implementation checklist
+2. **Check the settings validation doc** — [`meshtastic/design/validation/settings-validation-android.md`](https://github.com/meshtastic/design/blob/main/validation/settings-validation-android.md) has field-by-field validation rules for every config/module setting
+3. Apply the Android-specific mappings below
 
-## 2. Extended Color Palette
+## 2. Android / Compose Mappings
 
-### Neutral Scale (derived from Primary `#2C2D3C`)
+### Theme Tokens
+The upstream standards define M3 role mappings (Section 8). In this codebase:
+- Theme is defined in `core/ui/` — `MeshtasticTheme` composable
+- Use M3 tokens (`MaterialTheme.colorScheme.primary`, `.surface`, etc.) — never raw hex values
+- Dynamic color (Android 12+): supported in the `google` flavor via `dynamicColorScheme()`
 
-| Name | Hex | Usage |
-|------|-----|-------|
-| Neutral 950 | `#0F1017` | Darkest background |
-| Neutral 900 | `#1A1B26` | Dark mode background |
-| Neutral 800 | `#2C2D3C` | **Primary** — dark mode surface / light mode text |
-| Neutral 700 | `#3D3E50` | Dark mode elevated surface |
-| Neutral 600 | `#555668` | Dark mode secondary text |
-| Neutral 500 | `#6E7082` | Placeholder text |
-| Neutral 400 | `#9496A6` | Disabled / tertiary |
-| Neutral 300 | `#B8BAC8` | Borders (light mode) |
-| Neutral 200 | `#D5D6E0` | Dividers |
-| Neutral 100 | `#ECEDF3` | Light mode surface / card |
-| Neutral 50  | `#F5F6FA` | Light mode background |
+### Brand Colors → Compose
+| Standard Name | Hex | Compose Usage |
+|---------------|-----|---------------|
+| Primary | `#2C2D3C` | `MaterialTheme.colorScheme.primary` |
+| Accent | `#67EA94` | `MaterialTheme.colorScheme.tertiary` (never as text on light bg) |
+| Green 600 | `#3FB86D` | Use for success text on light backgrounds |
+| Error | `#E05252` | `MaterialTheme.colorScheme.error` |
+| Link | `#9BA8E0` | Blue 400 — for clickable text |
 
-### Green Scale (derived from Accent `#67EA94`)
+### Key Rules (Android-specific)
+- **Icons:** Use `MeshtasticIcons` (from `core/ui/icon/`), not `material.icons.Icons`
+- **Touch targets:** 44×44dp minimum (M3 default is 48dp — compliant)
+- **Typography:** Default body = 16sp. Support Dynamic Type via `MaterialTheme.typography`
+- **Message bubbles:** Use `onSurface` for text color, never node identity colors
 
-| Name | Hex | Usage |
-|------|-----|-------|
-| Green 100 | `#E5FCEE` | Success tint background |
-| Green 300 | `#B5F5CE` | Light highlight |
-| Green 400 | `#8FF0B2` | Hover / active accent |
-| Green 500 | `#67EA94` | **Accent** — primary action / brand highlight |
-| Green 600 | `#3FB86D` | Text on light backgrounds |
-| Green 700 | `#2D8F52` | Strong / dark green text |
+## 3. App Icons
 
-### Semantic Colors
+- Launcher icons: separate SVGs (foreground/background), 108px square, logo 58px wide/high
+- Generate with [Image Asset Studio](https://developer.android.com/studio/write/image-asset-studio#create-adaptive). Name: `ic_launcher2`
+- Action bar: `logo/svg/Mesh_Logo_White.svg`, 0% padding, HOLO_DARK theme, named `app_icon`
 
-| Name | Hex | Usage |
-|------|-----|-------|
-| Info | `#5C6BC0` | Informational indicators / links |
-| Info Light | `#E8EAF6` | Info tint background |
-| Warning | `#E8A33E` | Caution / attention |
-| Warning Light | `#FFF3E0` | Warning tint background |
-| Error | `#E05252` | Errors / destructive actions |
-| Error Light | `#FDEAEA` | Error tint background |
+## 4. Settings Validation Reference
 
-## 3. Accessibility
+When implementing or modifying settings screens, consult the upstream validation spec:
+[`settings-validation-android.md`](https://github.com/meshtastic/design/blob/main/validation/settings-validation-android.md)
 
-All foreground/background pairings must meet WCAG AA contrast (4.5:1 minimum). Use `Green 600` (`#3FB86D`) or `Green 700` (`#2D8F52`) for green text on light backgrounds — never the raw accent `#67EA94`, which does not meet contrast requirements on white.
-
-## 4. Android App Icons
-
-- Launcher icons use separate SVGs for foreground and background, 108px square, with the logo 58px wide/high.
-- Regenerate with [Image Asset Studio](https://developer.android.com/studio/write/image-asset-studio#create-adaptive). Name the icon `ic_launcher2`.
-- Action bar icons: import `logo/svg/Mesh_Logo_White.svg` with 0% padding, HOLO_DARK theme, named `app_icon`.
+It documents every field's:
+- Valid ranges and byte limits
+- UI component type (stepper, picker, secure input, etc.)
+- Dirty-tracking patterns
+- Edge cases (e.g., BLE PIN must be exactly 6 digits, Wi-Fi SSID max 32 UTF-8 bytes)

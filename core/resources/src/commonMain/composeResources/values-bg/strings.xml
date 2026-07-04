@@ -16,13 +16,21 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">Съобщение от %1$s: %2$s</string>
+    <string name="a11y_node_battery">батерия %1$d%%</string>
+    <string name="a11y_node_favorite">любим</string>
+    <string name="a11y_node_offline">офлайн</string>
+    <string name="a11y_node_online">онлайн</string>
+    <string name="a11y_node_role">роля %1$s</string>
+    <string name="a11y_node_signal">сигнал %1$s</string>
     <string name="accept">Приеми</string>
     <string name="acknowledgements">Благодарности</string>
     <!-- ACTION -->
     <string name="action_copy_message">Копиране на съобщението</string>
     <string name="action_delete_message">Изтриване на съобщението</string>
+    <string name="action_react_with_emoji">Реагирайте с емоджи</string>
     <string name="action_select_device">Изберете устройство</string>
     <string name="action_select_message">Изберете съобщение</string>
     <string name="action_select_network">Изберете мрежа</string>
@@ -105,15 +113,19 @@
     <string name="channel_3">Канал 3</string>
     <string name="channel_4">Канал 4</string>
     <string name="channel_5">Канал 5</string>
-    <string name="channel_6">Канал 6</string>
-    <string name="channel_7">Канал 7</string>
+    <string name="channel_6">Channel 6</string>
+    <string name="channel_7">/*Канал 7</string>
     <string name="channel_8">Канал 8</string>
     <string name="channel_invalid">URL адресът на този канал е невалиден и не може да се използва</string>
     <string name="channel_label">Канал</string>
     <string name="channel_name">Име на канал</string>
     <string name="channel_utilization">Използване на канала</string>
     <string name="channels">Канали</string>
+    <!-- CHIRPY -->
     <string name="chirpy">Чирпи</string>
+    <string name="chirpy_ready">Попитайте Chirpy</string>
+    <string name="chirpy_search_placeholder">Попитайте за Meshtastic…</string>
+    <string name="chirpy_suggested_pages_help">Ето някои страници с документация, които биха могли да помогнат:</string>
     <string name="choose_contrast">Ниво на контраста</string>
     <string name="choose_theme">Избор на тема</string>
     <!-- CLEAN -->
@@ -262,6 +274,27 @@
     <string name="distance_measurements">Измервания на разстояния</string>
     <string name="distance_measurements_description">Показване на разстоянието между вашия телефон и други възли на Meshtastic с позиции.</string>
     <string name="dns">DNS</string>
+    <!-- DOC -->
+    <string name="doc_clear_search">Изчистване на търсенето</string>
+    <string name="doc_search_placeholder">Търсене в документацията…</string>
+    <string name="doc_section_developer">Ръководство за разработчици</string>
+    <string name="doc_section_user">Ръководство за потребители</string>
+    <string name="doc_title_connections">Връзки</string>
+    <string name="doc_title_desktop">Настолно приложение</string>
+    <string name="doc_title_discovery">Откриване</string>
+    <string name="doc_title_firmware">Актуализации на фърмуера</string>
+    <string name="doc_title_map">Карта &amp; Пътни точки</string>
+    <string name="doc_title_measurement">Измерване &amp; Форматиране</string>
+    <string name="doc_title_messages">Съобщения &amp; Канали</string>
+    <string name="doc_title_mqtt">MQTT</string>
+    <string name="doc_title_nodes">Възли</string>
+    <string name="doc_title_onboarding">Първи стъпки</string>
+    <string name="doc_title_settings_module">Настройки — Модули &amp; Админ</string>
+    <string name="doc_title_settings_radio">Настройки — Радио &amp; Потребител</string>
+    <string name="doc_title_signal_meter">Измервател на сигнала</string>
+    <string name="doc_title_tak">Интеграция с TAK</string>
+    <string name="doc_title_telemetry">Телеметрия &amp; Сензори</string>
+    <string name="doc_title_translate">Превод на приложението</string>
     <string name="done">Готово</string>
     <string name="dont_show_again_for_device">Да не се показва отново за това устройство</string>
     <string name="downlink_enabled">Downlink активиран</string>
@@ -339,6 +372,7 @@
     <string name="firmware_update_battery_low">Батерията е твърде изтощена (%1$d%). Моля, заредете устройството си преди актуализиране.</string>
     <string name="firmware_update_checking">Проверка за актуализации...</string>
     <string name="firmware_update_connecting_attempt">Свързване с устройството (опит %1$d/%2$d)...</string>
+    <string name="firmware_update_copying">High-five! Чакай, копирам фърмуера...</string>
     <string name="firmware_update_currently_installed">Текущия инсталиран: %1$s</string>
     <string name="firmware_update_device">Устройство: %1$s</string>
     <string name="firmware_update_disclaimer_chirpy_says">Чирпи казва, \"Keep your ladder handy!\"</string>
@@ -614,6 +648,7 @@
     <string name="no_network_devices_found">Няма намерени мрежови устройства</string>
     <string name="no_network_devices_hint">Уверете се, че сте свързани към същата мрежа като устройството.</string>
     <string name="no_network_devices_seen">Не се виждат мрежови устройства</string>
+    <string name="no_pax_metrics_logs">Няма налични показатели PAX</string>
     <string name="no_usb_devices_found">Няма намерени USB устройства</string>
     <string name="no_usb_devices_hint">Свързване на устройството чрез сериен или USB порт.</string>
     <string name="no_usb_devices_seen">Не се виждат USB устройства</string>
@@ -628,6 +663,15 @@
     <string name="node_filter_show_ignored">Показване само на игнорираните възли</string>
     <string name="node_filter_title">Филтриране по</string>
     <string name="node_id">ID на възела</string>
+    <string name="node_layout_channel">Канал</string>
+    <string name="node_layout_device_role">Устройство &amp; Роля</string>
+    <string name="node_layout_hops_away">Брой отскоци</string>
+    <string name="node_layout_log_icons">Показатели на околната среда</string>
+    <string name="node_layout_no_preview_available">Няма налични възли за преглед.</string>
+    <string name="node_layout_power">Захранване</string>
+    <string name="node_layout_preview">Преглед</string>
+    <string name="node_layout_signal_direct_only">Сигнал (Само директен)</string>
+    <string name="node_layout_signal_quality_indicator">Индикатор за качество на сигнала</string>
     <string name="node_number">Номер на възела</string>
     <string name="node_sort_alpha">А-Я</string>
     <string name="node_sort_button">Опции за сортиране на възлите</string>
@@ -910,6 +954,7 @@
     <string name="speed_kmh">%1$d Km/h</string>
     <string name="ssid">SSID</string>
     <string name="stay_connected_anywhere">Останете свързани навсякъде</string>
+    <string name="success">Успех</string>
     <string name="super_deep_sleep_duration_seconds">Продължителност на супер дълбок сън</string>
     <string name="supported">Поддържан</string>
     <string name="supported_by_community">Поддържа се от общността Meshtastic</string>
@@ -925,8 +970,12 @@
     <string name="tak_role_teamlead">Ръководител на екипа</string>
     <string name="tak_role_teammember">Член на екипа</string>
     <string name="tak_role_unspecified">Неопределена</string>
+    <string name="tak_server">TAK сървър</string>
     <string name="tak_server_enabled">Активиране на локален TAK сървър</string>
-    <string name="tak_server_enabled_desc">Стартира TCP сървър на порт 8089 за ATAK връзки</string>
+    <string name="tak_server_loading">…</string>
+    <string name="tak_server_section">Сървър</string>
+    <string name="tak_server_test_result_bytes">%1$dB ✓</string>
+    <string name="tak_server_test_result_unknown_error">✗</string>
     <string name="tak_team">Цвят на екипа</string>
     <string name="tak_team_blue">Син</string>
     <string name="tak_team_brown">Кафяв</string>
@@ -953,6 +1002,7 @@
     <string name="time_zone">Часова зона</string>
     <string name="timestamp">Времево клеймо</string>
     <string name="tls_enabled">TLS е активиран</string>
+    <string name="trace_route">Проследяване на маршрута</string>
     <!-- TRACEROUTE -->
     <string name="traceroute">Трасиране на маршрут</string>
     <string name="traceroute_diff">Отскоци към %1$d Отскоци на връщане %2$d</string>
@@ -983,7 +1033,6 @@
     <string name="tx_power_dbm">Мощност на предаване</string>
     <string name="type">Тип</string>
     <string name="type_a_message">Въведете съобщение</string>
-    <string name="udp_enabled">Активиран</string>
     <!-- UNKNOWN -->
     <string name="unknown">Неизвестно</string>
     <string name="unknown_age">Неизвестна възраст</string>
@@ -1016,7 +1065,9 @@
     <string name="user">Потребител</string>
     <string name="user_config">Конфигуриране на потребителя</string>
     <string name="user_id">ID на потребителя</string>
+    <string name="user_info">Информация за потребителя</string>
     <string name="user_string">Потребителски низ</string>
+    <string name="userinfo">Информация за потребителя</string>
     <string name="username">Потребителско име</string>
     <string name="via_api">чрез API</string>
     <string name="via_mqtt">с MQTT</string>
@@ -1040,6 +1091,7 @@
     <string name="wifi_provision_connect_failed">Не можа да се свърже: %1$s</string>
     <string name="wifi_provision_description">Предоставете идентификационни данни за Wi-Fi на вашето mPWRD-OS устройство чрез Bluetooth.</string>
     <string name="wifi_provision_device_found_detail">Готово за сканиране за WiFi мрежи.</string>
+    <string name="wifi_provision_hidden_network">Скрита мрежа</string>
     <string name="wifi_provision_mpwrd_disclaimer">Научете повече за проекта mPWRD-OS \nhttps://github.com/mPWRD-OS</string>
     <string name="wifi_provision_no_networks">Няма намерени мрежи</string>
     <string name="wifi_provision_scan_failed">Неуспешно сканиране за WiFi мрежи: %1$s</string>

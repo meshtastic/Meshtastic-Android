@@ -17,20 +17,23 @@
 package org.meshtastic.core.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
 
 /** Manages independent backstacks for multiple tabs. */
-class MultiBackstack(val startTab: NavKey) {
+class MultiBackstack(val startTab: NavKey, private val currentTabState: MutableState<NavKey>) {
     var backStacks: Map<NavKey, NavBackStack<NavKey>> = emptyMap()
 
-    var currentTabRoute: NavKey by mutableStateOf(TopLevelDestination.fromNavKey(startTab)?.route ?: startTab)
+    var currentTabRoute: NavKey by currentTabState
         private set
 
     val activeBackStack: NavBackStack<NavKey>
@@ -73,16 +76,32 @@ class MultiBackstack(val startTab: NavKey) {
     }
 }
 
+/** Saver that persists the active tab ordinal across process death. */
+private val CurrentTabSaver =
+    Saver<MutableState<NavKey>, Int>(
+        save = { state ->
+            TopLevelDestination.entries.indexOfFirst { it.route::class == state.value::class }.takeIf { it >= 0 }
+        },
+        restore = { ordinal ->
+            mutableStateOf(TopLevelDestination.entries.getOrNull(ordinal)?.route ?: TopLevelDestination.Connect.route)
+        },
+    )
+
 /** Remembers a [MultiBackstack] for managing independent tab navigation histories with Navigation 3. */
 @Composable
-fun rememberMultiBackstack(initialTab: NavKey = TopLevelDestination.Connections.route): MultiBackstack {
+fun rememberMultiBackstack(initialTab: NavKey = TopLevelDestination.Connect.route): MultiBackstack {
     val stacks = mutableMapOf<NavKey, NavBackStack<NavKey>>()
 
     TopLevelDestination.entries.forEach { dest ->
         key(dest.route) { stacks[dest.route] = rememberNavBackStack(MeshtasticNavSavedStateConfig, dest.route) }
     }
 
-    val multiBackstack = remember { MultiBackstack(initialTab) }
+    val currentTabState =
+        rememberSaveable(saver = CurrentTabSaver) {
+            mutableStateOf(TopLevelDestination.fromNavKey(initialTab)?.route ?: initialTab)
+        }
+
+    val multiBackstack = remember { MultiBackstack(initialTab, currentTabState) }
     multiBackstack.backStacks = stacks
 
     return multiBackstack

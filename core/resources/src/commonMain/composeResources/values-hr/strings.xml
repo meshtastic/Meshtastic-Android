@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
     <string name="accept">Prihvati</string>
     <!-- ACTION -->
     <string name="action_delete_message">Obriši poruku</string>
@@ -38,6 +39,7 @@
     <string name="channel_invalid">Ovaj URL kanala je nevažeći i ne može se koristiti</string>
     <string name="channel_label">Kanal</string>
     <string name="channel_name">Naziv kanala</string>
+    <!-- CHIRPY -->
     <string name="choose_theme">Odaberi temu</string>
     <!-- CLEAN -->
     <string name="clear">Očisti</string>
@@ -69,6 +71,7 @@
     <!-- DISPLAY -->
     <!-- DISTANCE -->
     <string name="distance">Udaljenost</string>
+    <!-- DOC -->
     <string name="edit">Uredi</string>
     <string name="eight_hours">8 Sati</string>
     <!-- ENCRYPTION -->
@@ -138,6 +141,7 @@
     <!-- NODE -->
     <string name="node_filter_include_unknown">Uključujući nepoznate</string>
     <string name="node_filter_placeholder">Filtriraj</string>
+    <string name="node_layout_channel">Kanal</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_channel">Kanal</string>
     <string name="node_sort_distance">Udaljenost</string>

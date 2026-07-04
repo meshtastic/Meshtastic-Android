@@ -5,7 +5,7 @@ excludeAgent: "code-review"
 
 # CI Workflow Rules
 
-- Prefer explicit Gradle task paths (`app:lintFdroidDebug`) over shorthand (`lintDebug`).
+- Prefer explicit Gradle task paths (`androidApp:lintFdroidDebug`) over shorthand (`lintDebug`).
 - CI uses `.github/ci-gradle.properties` — don't assume local `gradle.properties` values.
 - CI passes `-Pci=true` to enable full processor usage via `maxParallelForks`.
 - Use `fetch-depth: 0` only where needed (spotless ratcheting, version code). Use `fetch-depth: 1` otherwise.

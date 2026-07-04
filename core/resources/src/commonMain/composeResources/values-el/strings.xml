@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
     <string name="accept">Αποδοχή</string>
     <!-- ACTION -->
     <!-- ADD -->
@@ -51,6 +52,7 @@
     <string name="channel_label">Κανάλι</string>
     <string name="channel_name">Όνομα Καναλιού</string>
     <string name="channels">Κανάλια</string>
+    <!-- CHIRPY -->
     <string name="choose_theme">Επέλεξε θέμα</string>
     <!-- CLEAN -->
     <string name="clear">Καθαρό, Εκκαθάριση,</string>
@@ -81,6 +83,8 @@
     <string name="display">Οθόνη</string>
     <!-- DISTANCE -->
     <string name="distance">Απόσταση</string>
+    <!-- DOC -->
+    <string name="doc_title_mqtt">MQTT</string>
     <string name="edit">Επεξεργασία</string>
     <string name="eight_hours">8 Ώρες</string>
     <!-- ENCRYPTION -->
@@ -156,6 +160,7 @@
     <!-- NO -->
     <!-- NODE -->
     <string name="node_filter_placeholder">Φίλτρο</string>
+    <string name="node_layout_channel">Κανάλι</string>
     <string name="node_sort_alpha">A-Ω</string>
     <string name="node_sort_channel">Κανάλι</string>
     <string name="node_sort_distance">Απόσταση</string>

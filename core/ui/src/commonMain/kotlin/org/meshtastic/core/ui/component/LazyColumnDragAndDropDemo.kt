@@ -63,37 +63,40 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.preview_footer
 import org.meshtastic.core.resources.preview_header
 import org.meshtastic.core.resources.preview_item
+import org.meshtastic.core.ui.theme.AppTheme
 
 // Derived in part from:
 // https://github.com/androidx/androidx/blob/c92ad2941368202b2d78b8d14c71bf81e9525944/compose/foundation/foundation/integration-tests/foundation-demos/src/main/java/androidx/compose/foundation/demos/LazyColumnDragAndDropDemo.kt
 @Preview
 @Composable
 fun LazyColumnDragAndDropDemo() {
-    var list by remember { mutableStateOf(List(50) { it }) }
+    AppTheme {
+        var list by remember { mutableStateOf(List(50) { it }) }
 
-    val listState = rememberLazyListState()
-    val dragDropState =
-        rememberDragDropState(listState, headerCount = 1) { fromIndex, toIndex ->
-            if (fromIndex in list.indices && toIndex in list.indices) {
-                list = list.toMutableList().apply { add(toIndex, removeAt(fromIndex)) }
+        val listState = rememberLazyListState()
+        val dragDropState =
+            rememberDragDropState(listState, headerCount = 1) { fromIndex, toIndex ->
+                if (fromIndex in list.indices && toIndex in list.indices) {
+                    list = list.toMutableList().apply { add(toIndex, removeAt(fromIndex)) }
+                }
             }
-        }
 
-    LazyColumn(
-        modifier = Modifier.dragContainer(dragDropState = dragDropState, haptics = LocalHapticFeedback.current),
-        state = listState,
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-    ) {
-        item { Text(stringResource(Res.string.preview_header), Modifier.fillMaxWidth().padding(20.dp)) }
+        LazyColumn(
+            modifier = Modifier.dragContainer(dragDropState = dragDropState, haptics = LocalHapticFeedback.current),
+            state = listState,
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            item { Text(stringResource(Res.string.preview_header), Modifier.fillMaxWidth().padding(20.dp)) }
 
-        itemsIndexed(list, key = { _, item -> item }) { index, item ->
-            DraggableItem(dragDropState, index + 1) {
-                Card { Text(stringResource(Res.string.preview_item, item), Modifier.fillMaxWidth().padding(20.dp)) }
+            itemsIndexed(list, key = { _, item -> item }) { index, item ->
+                DraggableItem(dragDropState, index + 1) {
+                    Card { Text(stringResource(Res.string.preview_item, item), Modifier.fillMaxWidth().padding(20.dp)) }
+                }
             }
-        }
 
-        item { Text(stringResource(Res.string.preview_footer), Modifier.fillMaxWidth().padding(20.dp)) }
+            item { Text(stringResource(Res.string.preview_footer), Modifier.fillMaxWidth().padding(20.dp)) }
+        }
     }
 }
 

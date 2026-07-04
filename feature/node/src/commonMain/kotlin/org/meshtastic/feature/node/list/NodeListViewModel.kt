@@ -20,22 +20,28 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
+import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.NodeListDensity
 import org.meshtastic.core.model.NodeSortOption
 import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.node.detail.NodeManagementActions
+import org.meshtastic.feature.node.detail.NodeRequestActions
 import org.meshtastic.feature.node.domain.usecase.GetFilteredNodesUseCase
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.Config
@@ -49,7 +55,9 @@ class NodeListViewModel(
     private val serviceRepository: ServiceRepository,
     private val radioController: RadioController,
     private val radioInterfaceService: RadioInterfaceService,
+    private val deviceHardwareRepository: DeviceHardwareRepository,
     val nodeManagementActions: NodeManagementActions,
+    private val nodeRequestActions: NodeRequestActions,
     private val getFilteredNodesUseCase: GetFilteredNodesUseCase,
     val nodeFilterPreferences: NodeFilterPreferences,
 ) : ViewModel() {
@@ -66,6 +74,21 @@ class NodeListViewModel(
         radioInterfaceService.currentDeviceAddressFlow
             .map { address -> address?.let { DeviceType.fromAddress(it) } }
             .stateInWhileSubscribed(initialValue = null)
+
+    val nodeListDensity: StateFlow<NodeListDensity> =
+        nodeFilterPreferences.nodeListDensity
+            .map { name -> NodeListDensity.fromName(name) }
+            .stateInWhileSubscribed(initialValue = NodeListDensity.COMPLETE)
+
+    val shouldShowPower = nodeFilterPreferences.shouldShowPower
+    val shouldShowLastHeard = nodeFilterPreferences.shouldShowLastHeard
+    val lastHeardIsRelative = nodeFilterPreferences.lastHeardIsRelative
+    val shouldShowLocation = nodeFilterPreferences.shouldShowLocation
+    val shouldShowHops = nodeFilterPreferences.shouldShowHops
+    val shouldShowSignal = nodeFilterPreferences.shouldShowSignal
+    val shouldShowChannel = nodeFilterPreferences.shouldShowChannel
+    val shouldShowRole = nodeFilterPreferences.shouldShowRole
+    val shouldShowTelemetry = nodeFilterPreferences.shouldShowTelemetry
 
     private val nodeSortOption = nodeFilterPreferences.nodeSortOption
 
@@ -123,6 +146,30 @@ class NodeListViewModel(
     val unfilteredNodeList: StateFlow<List<Node>> =
         nodeRepository.getNodes().stateInWhileSubscribed(initialValue = emptyList())
 
+    private val _deviceImageUrls = MutableStateFlow<Map<Int, String>>(emptyMap())
+
+    /** Maps hw_model int value → device image URL from the flasher CDN. */
+    val deviceImageUrls: StateFlow<Map<Int, String>> = _deviceImageUrls.asStateFlow()
+
+    init {
+        // Resolve device image URLs as nodes arrive
+        viewModelScope.launch {
+            nodeList.collect { nodes ->
+                val newModels = nodes.map { it.user.hw_model.value }.distinct().filter { it !in _deviceImageUrls.value }
+                for (hwModel in newModels) {
+                    resolveDeviceImageUrl(hwModel)
+                }
+            }
+        }
+    }
+
+    private suspend fun resolveDeviceImageUrl(hwModel: Int) {
+        val hw = deviceHardwareRepository.getDeviceHardwareByModel(hwModel).getOrNull() ?: return
+        val imageFile = hw.images?.getOrNull(1) ?: hw.images?.getOrNull(0) ?: return
+        val url = "$FLASHER_DEVICE_IMAGE_BASE_URL$imageFile"
+        _deviceImageUrls.value = _deviceImageUrls.value + (hwModel to url)
+    }
+
     var nodeFilterText: String
         get() = _nodeFilterText.value
         set(value) {
@@ -149,8 +196,22 @@ class NodeListViewModel(
 
     fun removeNode(node: Node) = nodeManagementActions.requestRemoveNode(viewModelScope, node)
 
+    /** Returns the contact key for navigating to a direct message conversation with this node. */
+    fun getDirectMessageRoute(node: Node): String {
+        val ourNode = ourNodeInfo.value
+        val hasPKC = ourNode?.hasPKC == true && node.hasPKC
+        val channel = if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else node.channel
+        return "${channel}${node.user.id}"
+    }
+
+    /** Initiates a trace route request to the specified node. */
+    fun traceRoute(node: Node) {
+        nodeRequestActions.requestTraceroute(viewModelScope, node.num, node.user.long_name)
+    }
+
     companion object {
         private const val KEY_FILTER_TEXT = "filter_text"
+        private const val FLASHER_DEVICE_IMAGE_BASE_URL = "https://flasher.meshtastic.org/img/devices/"
     }
 }
 

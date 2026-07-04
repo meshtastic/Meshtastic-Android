@@ -50,7 +50,7 @@ import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianLayerRangeProvider
-import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
+import com.patrykandpatrick.vico.compose.cartesian.data.lineModel
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
 import org.jetbrains.compose.resources.stringResource
@@ -274,7 +274,7 @@ private fun DeviceMetricsChart(
             modelProducer.runTransaction {
                 /* Series for Left Axis (0-100%) */
                 if (leftLayerSeriesStyles.isNotEmpty()) {
-                    lineSeries {
+                    lineModel {
                         if (batteryData.isNotEmpty()) {
                             series(
                                 x = batteryData.map { it.time },
@@ -297,7 +297,7 @@ private fun DeviceMetricsChart(
                 }
                 /* Series for Right Axis (Voltage) */
                 if (voltageData.isNotEmpty()) {
-                    lineSeries {
+                    lineModel {
                         series(
                             x = voltageData.map { it.time },
                             y = voltageData.map { it.device_metrics?.voltage ?: 0f },
@@ -399,7 +399,12 @@ private fun DeviceMetricsChartPreview() {
 
 @Composable
 @Suppress("LongMethod")
-private fun DeviceMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick: () -> Unit) {
+private fun DeviceMetricsCard(
+    telemetry: Telemetry,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    timeTextOverride: String? = null,
+) {
     val deviceMetrics = telemetry.device_metrics
     val time = telemetry.time.toLong() * MS_PER_SEC
     val channelUtilizationLabel = stringResource(Res.string.channel_utilization)
@@ -412,7 +417,7 @@ private fun DeviceMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick
             /* Time, Battery, and Voltage */
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(
-                    text = DateFormatter.formatDateTime(time),
+                    text = timeTextOverride ?: DateFormatter.formatDateTime(time),
                     style = MaterialTheme.typography.titleMediumEmphasized,
                     fontWeight = FontWeight.Bold,
                 )
@@ -476,8 +481,8 @@ private fun DeviceMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick
 @PreviewLightDark
 @Suppress("detekt:MagicNumber") // Compose preview with fake data
 @Composable
-private fun DeviceMetricsCardPreview() {
-    val now = nowSeconds.toInt()
+fun DeviceMetricsCardPreview() {
+    val now = 1700000000
     val telemetry =
         Telemetry(
             time = now,
@@ -490,7 +495,14 @@ private fun DeviceMetricsCardPreview() {
                 uptime_seconds = 7200,
             ),
         )
-    AppTheme { DeviceMetricsCard(telemetry = telemetry, isSelected = false, onClick = {}) }
+    AppTheme {
+        DeviceMetricsCard(
+            telemetry = telemetry,
+            isSelected = false,
+            onClick = {},
+            timeTextOverride = "2023-11-14 22:13",
+        )
+    }
 }
 
 @PreviewLightDark

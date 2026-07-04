@@ -20,16 +20,10 @@ plugins {
     alias(libs.plugins.kotlin.parcelize)
     id("meshtastic.kmp.jvm.android")
     id("meshtastic.koin")
-    alias(libs.plugins.flatpak.gradle.generator)
 }
 
 kotlin {
-    jvm()
-
-    android {
-        androidResources.enable = false
-        withHostTest { isIncludeAndroidResources = true }
-    }
+    android { withHostTest { isIncludeAndroidResources = true } }
 
     sourceSets {
         commonMain.dependencies {
@@ -44,18 +38,4 @@ kotlin {
 
         commonTest.dependencies { implementation(libs.kotlinx.coroutines.test) }
     }
-}
-
-tasks.flatpakGradleGenerator {
-    outputFile = file("../../flatpak-sources-core-common.json")
-    downloadDirectory.set("./offline-repository")
-    excludeConfigurations.set(
-        listOf(
-            "androidHostTestCompileClasspath",
-            "androidHostTestLintChecksClasspath",
-            "androidHostTestRuntimeClasspath",
-            "testCompileClasspath",
-            "testRuntimeClasspath",
-        ),
-    )
 }

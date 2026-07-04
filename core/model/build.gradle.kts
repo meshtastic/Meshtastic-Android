@@ -21,14 +21,10 @@ plugins {
     alias(libs.plugins.kotlin.parcelize)
     id("meshtastic.kmp.jvm.android")
     id("meshtastic.publishing")
-    alias(libs.plugins.flatpak.gradle.generator)
 }
 
 kotlin {
-    jvm()
-
     android {
-        androidResources.enable = false
         withHostTest { isIncludeAndroidResources = true }
         withDeviceTest { instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner" }
     }
@@ -72,24 +68,4 @@ publishing {
             artifactId = baseId.replace("model-", "meshtastic-android-model-")
         }
     }
-}
-
-tasks.flatpakGradleGenerator {
-    outputFile = file("../../flatpak-sources-core-model.json")
-    downloadDirectory.set("./offline-repository")
-    excludeConfigurations.set(
-        listOf(
-            "androidRuntimeClasspath",
-            "androidMainLintChecksClasspath",
-            "androidHostTestRuntimeClasspath",
-            "androidHostTestLintChecksClasspath",
-            "androidHostTestCompileClasspath",
-            "androidDeviceTestRuntimeClasspath",
-            "androidDeviceTestLintChecksClasspath",
-            "androidDeviceTestCompileClasspath",
-            "androidCompileClasspath",
-            "testCompileClasspath",
-            "testRuntimeClasspath",
-        ),
-    )
 }

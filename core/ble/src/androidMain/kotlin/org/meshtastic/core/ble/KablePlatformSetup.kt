@@ -79,3 +79,10 @@ internal actual fun Peripheral.requestHighConnectionPriority(): Boolean {
         .onFailure { Logger.w(it) { "requestConnectionPriority(High) threw" } }
         .getOrDefault(false)
 }
+
+internal actual fun Peripheral.requestBalancedConnectionPriority(): Boolean {
+    val androidPeripheral = this as? AndroidPeripheral ?: return false
+    return runCatching { androidPeripheral.requestConnectionPriority(AndroidPeripheral.Priority.Balanced) }
+        .onFailure { Logger.w(it) { "requestConnectionPriority(Balanced) threw" } }
+        .getOrDefault(false)
+}

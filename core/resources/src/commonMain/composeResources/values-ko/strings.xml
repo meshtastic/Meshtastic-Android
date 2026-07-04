@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
     <string name="accept">수락</string>
     <!-- ACTION -->
     <string name="actions">작업</string>
@@ -84,6 +85,7 @@
     <string name="channel_label">채널</string>
     <string name="channel_name">채널명</string>
     <string name="channels">채널</string>
+    <!-- CHIRPY -->
     <string name="choose_theme">테마 선택</string>
     <!-- CLEAN -->
     <string name="clear">삭제</string>
@@ -148,6 +150,9 @@
     <!-- DISTANCE -->
     <string name="distance">거리</string>
     <string name="dns">DNS</string>
+    <!-- DOC -->
+    <string name="doc_title_mqtt">MQTT</string>
+    <string name="doc_title_nodes">노드</string>
     <string name="downlink_enabled">다운링크 활성화</string>
     <string name="download">다운로드</string>
     <string name="echo_enabled">에코 활성화</string>
@@ -335,6 +340,9 @@
     <string name="node_filter_placeholder">필터</string>
     <string name="node_filter_title">필터</string>
     <string name="node_id">노드 ID</string>
+    <string name="node_layout_channel">채널</string>
+    <string name="node_layout_hops_away">Hops 수</string>
+    <string name="node_layout_power">전원</string>
     <string name="node_number">노드 번호</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_button">노드 정렬</string>
@@ -521,6 +529,7 @@
     <string name="state_broadcast_seconds">상태 전송 간격 (초)</string>
     <string name="supported">지원됨</string>
     <!-- TAK -->
+    <string name="tak_server_section">서버</string>
     <string name="tak_team_blue">파랑</string>
     <string name="tak_team_green">초록</string>
     <string name="tak_team_red">빨강</string>
@@ -535,6 +544,7 @@
     <string name="timestamp">타임스탬프</string>
     <string name="tls_enabled">TLS 사용</string>
     <string name="toggle_my_position">내 위치 토글</string>
+    <string name="trace_route">추적 루트</string>
     <!-- TRACEROUTE -->
     <string name="traceroute">추적 루트</string>
     <string name="traceroute_diff">Hops towards %1$d Hops back %2$d</string>
@@ -552,7 +562,6 @@
     <string name="tx_enabled">전송 활성화</string>
     <string name="tx_power_dbm">전송 출력</string>
     <string name="type">타입</string>
-    <string name="udp_enabled">활성화</string>
     <!-- UNKNOWN -->
     <string name="unknown">알 수 없는</string>
     <string name="unknown_age">수명 확인 되지 않음</string>

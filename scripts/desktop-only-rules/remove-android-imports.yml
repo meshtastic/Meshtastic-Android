@@ -1,7 +1,0 @@
-id: remove-android-imports
-language: kotlin
-severity: warning
-message: "Remove com.android import for desktop-only build"
-rule:
-  pattern: "import com.android.$$$REST"
-fix: "// [desktop-only] android import removed"

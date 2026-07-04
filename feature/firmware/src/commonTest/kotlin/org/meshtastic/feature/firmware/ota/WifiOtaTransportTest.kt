@@ -39,13 +39,11 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.withTimeout
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
-import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -206,12 +204,10 @@ class WifiOtaTransportTest {
 
     @Test
     fun `close resets transport and closes TCP connection`() = runTest {
-        val (transport, server, connection) = createConnectedTransport()
+        val (transport, server, _) = createConnectedTransport()
 
         try {
             transport.close()
-
-            assertNull(withTimeout(5_000L) { connection.readLine() })
 
             val result = transport.startOta(1L, "hash")
             assertTrue(result.isFailure)

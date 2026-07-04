@@ -16,8 +16,18 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">來自 %1$s 的訊息：%2$s</string>
+    <string name="a11y_node_battery">電池 %1$d%%</string>
+    <string name="a11y_node_distance_away">距離 %1$s</string>
+    <string name="a11y_node_favorite">最愛</string>
+    <string name="a11y_node_hops_away">距離 %1$d 跳</string>
+    <string name="a11y_node_last_heard">最後收到 %1$s</string>
+    <string name="a11y_node_offline">離線</string>
+    <string name="a11y_node_online">線上</string>
+    <string name="a11y_node_role">角色 %1$s</string>
+    <string name="a11y_node_signal">訊號 %1$s</string>
     <string name="accept">接受</string>
     <string name="acknowledgements">致謝</string>
     <!-- ACTION -->
@@ -35,11 +45,13 @@
     <!-- ADD -->
     <string name="add">新增</string>
     <string name="add_a_note">新增私人備註…</string>
+    <string name="add_channels_description">在 QR Code 中找到以下頻道。請選擇您想新增至裝置的頻道，現有頻道將予以保留。</string>
     <string name="add_custom_tile_source">加入自定義圖磚來源</string>
     <string name="add_favorite">新增至我的最愛</string>
     <string name="add_layer">添加圖層</string>
     <string name="add_local_mbtiles_file">新增本機 MBTiles 檔案</string>
     <string name="add_network_device">新增</string>
+    <string name="add_network_device_manually">手動新增裝置…</string>
     <string name="add_network_layer">新增線上圖層</string>
     <string name="address">地址</string>
     <string name="admin_key">管理員金鑰</string>
@@ -85,6 +97,7 @@
     <string name="audio_config">音頻設置</string>
     <string name="available_pins">可用腳位</string>
     <string name="back">返回</string>
+    <string name="backup_restore">備份 &amp; 還原</string>
     <string name="bad">不良</string>
     <string name="bandwidth">帶寬</string>
     <string name="baro_pressure">氣壓</string>
@@ -135,7 +148,24 @@
     <string name="channel_url">頻道網址</string>
     <string name="channel_utilization">頻道利用率</string>
     <string name="channels">頻道</string>
+    <!-- CHIRPY -->
     <string name="chirpy">Chirpy</string>
+    <string name="chirpy_assistant_title">Chirpy 助理</string>
+    <string name="chirpy_checking">正在檢查 Chirpy 是否可用…</string>
+    <string name="chirpy_downloading">Chirpy 下載中…</string>
+    <string name="chirpy_downloading_progress">正在下載 Chirpy 模型：%1$d%%</string>
+    <string name="chirpy_downloading_subtitle">這只會發生一次，Chirpy 即將準備就緒！</string>
+    <string name="chirpy_error_busy">哇！頻道目前嚴重壅塞！📶 讓我們等待空閒時段後重試傳輸。</string>
+    <string name="chirpy_error_model_unavailable">電池正在充電或韌體仍在下載中！🔋 請給我一點時間同步並啟動！</string>
+    <string name="chirpy_error_token_budget_exceeded">這個訊息內容對我的傳輸容量來說太大了！📱 請試著縮短訊息，讓我們能順利路由。</string>
+    <string name="chirpy_error_unknown">哎呀！遇到嚴重的封包遺失或訊號干擾！📡讓我們重新傳送請求，看看能否連線成功。</string>
+    <string name="chirpy_error_unsupported_flavor">我在這個應用程式版本上的頻率受到限制！🔌 請嘗試使用具備完整 AI Core 整合的版本。</string>
+    <string name="chirpy_error_unsupported_platform">糟糕！我的天線似乎無法在此平台上建立連線。📡 請再次確認您的硬體相容性！</string>
+    <string name="chirpy_intro">嗨！📡 我是 Chirpy，您的裝置端 Meshtastic 助理！我可以協助設定、組態、疑難排解及 mesh 網路技巧。有什麼我可以幫您的嗎？</string>
+    <string name="chirpy_ready">詢問 Chirpy</string>
+    <string name="chirpy_search_placeholder">詢問有關 Meshtastic 的問題…</string>
+    <string name="chirpy_suggested_pages_help">以下是一些可能有幫助的說明文件頁面：</string>
+    <string name="chirpy_thinking">Chirpy 正在透過 mesh 路由中… 📡</string>
     <string name="choose_contrast">對比度等級</string>
     <string name="choose_theme">選擇主題</string>
     <!-- CLEAN -->
@@ -210,6 +240,7 @@
     <string name="configure_location_permissions">設定定位權限</string>
     <string name="configure_notification_permissions">設定通知權限</string>
     <string name="connect">連線</string>
+    <string name="connect_radio_for_remote_admin">連接至無線電裝置以管理遠端節點。</string>
     <string name="connected">已連線</string>
     <string name="connected_device">連接裝置</string>
     <string name="connected_sleeping">已連接裝置，但該裝置正在休眠中</string>
@@ -319,7 +350,49 @@
     <string name="distance_measurements">距離量測</string>
     <string name="distance_measurements_description">顯示您手機與其他有定位資訊的 Meshtastic 節點之間的距離。</string>
     <string name="dns">DNS</string>
+    <!-- DOC -->
+    <string name="doc_clear_search">清除搜尋結果</string>
+    <string name="doc_keywords_connections">藍牙,usb,tcp,配對,序列,wifi</string>
+    <string name="doc_keywords_desktop">桌面,linux,macos,windows,序列</string>
+    <string name="doc_keywords_discovery">探索,拓撲,網路,掃描,鄰居</string>
+    <string name="doc_keywords_firmware">韌體,更新,ota,燒錄,版本,復原</string>
+    <string name="doc_keywords_map">地圖,航點,gps,位置,定位,標記</string>
+    <string name="doc_keywords_measurement">格式化,公制,數字,語系,溫度,換算,api</string>
+    <string name="doc_keywords_messages">訊息,頻道,加密,直接,廣播,快速對話</string>
+    <string name="doc_keywords_mqtt">mqtt,代理,網際網路,橋接,上行,下行</string>
+    <string name="doc_keywords_node_metrics">指標,遙測,訊號,snr,rssi,電池,路由追蹤</string>
+    <string name="doc_keywords_nodes">節點,mesh,清單,角色,狀態,最愛,篩選</string>
+    <string name="doc_keywords_onboarding">設定,歡迎,權限,首次啟動</string>
+    <string name="doc_keywords_settings_module">模組,序列,遙測,罐頭訊息,儲存轉發,管理</string>
+    <string name="doc_keywords_settings_radio">設定,無線電,lora,地區,數據機,裝置,電源,安全性</string>
+    <string name="doc_keywords_signal_meter">訊號,rssi,snr,格數,品質,lora,雜訊,儀表</string>
+    <string name="doc_keywords_tak">tak,atak,cursor-on-target,team-awareness</string>
+    <string name="doc_keywords_telemetry">遙測,感測器,溫度,濕度,壓力,電源</string>
+    <string name="doc_keywords_translate">翻譯,crowdin,本地化,語言,i18n,貢獻</string>
+    <string name="doc_keywords_units">單位,語系,公制,英制,溫度,距離</string>
+    <string name="doc_search_placeholder">搜尋說明文件…</string>
+    <string name="doc_section_developer">開發者指南</string>
+    <string name="doc_section_user">使用者指南</string>
+    <string name="doc_title_connections">連線</string>
+    <string name="doc_title_desktop">桌面應用程式</string>
+    <string name="doc_title_discovery">尋找</string>
+    <string name="doc_title_firmware">韌體更新</string>
+    <string name="doc_title_map">地圖 &amp; 航點</string>
+    <string name="doc_title_measurement">測量 &amp; 格式化</string>
+    <string name="doc_title_messages">訊息 &amp; 頻道</string>
+    <string name="doc_title_mqtt">MQTT</string>
+    <string name="doc_title_node_metrics">節點指標</string>
+    <string name="doc_title_nodes">節點</string>
+    <string name="doc_title_onboarding"># 入門指南</string>
+    <string name="doc_title_settings_module">設定 — 模組 &amp; 管理</string>
+    <string name="doc_title_settings_radio">設定 — 無線電 &amp; 使用者</string>
+    <string name="doc_title_signal_meter">訊號儀表</string>
+    <string name="doc_title_tak">TAK 整合</string>
+    <string name="doc_title_telemetry">遙測 &amp; 感測器</string>
+    <string name="doc_title_translate">翻譯此應用程式</string>
+    <string name="doc_title_units">單位 &amp; 語系</string>
     <string name="done">完成</string>
+    <string name="dont_show_again_for_device">不再為此裝置顯示</string>
     <string name="double_tap_as_button_press">雙擊觸發按鈕功能</string>
     <string name="downlink_enabled">已啓用下行</string>
     <string name="downlink_feature_description">網際網路閘道的訊息會轉發到本地網狀網路，但因為採用零跳躍政策，來自預設 MQTT 伺服器的流量只會到達本裝置，不會再轉發給其他節點。</string>
@@ -350,9 +423,15 @@
     <string name="environment_metrics_use_fahrenheit">環境指標以華氏溫度顯示</string>
     <string name="error">錯誤</string>
     <string name="error_duty_cycle">達到循環工作週期限制。目前無法發送訊息，請稍後再試。</string>
+    <string name="establish_session">連線 &amp; 管理</string>
+    <string name="establishing_session">正在建立遠端連線…</string>
     <string name="ethernet_config">乙太網路選項</string>
     <string name="ethernet_enabled">啟用以太網</string>
     <string name="ethernet_ip">乙太網路 IP：</string>
+    <string name="event_welcome_burning_man">歡迎來到 Burning Man！🔥</string>
+    <string name="event_welcome_defcon">歡迎來到 DEFCON！💀</string>
+    <string name="event_welcome_hamvention">歡迎來到 Hamvention！🍖📻</string>
+    <string name="event_welcome_open_sauce">歡迎來到 Open Sauce！🔧</string>
     <string name="exchange_position">交換位置</string>
     <string name="expand_chart">展開圖表</string>
     <string name="expires">到期時間</string>
@@ -428,10 +507,12 @@
     <string name="firmware_update_node_info_missing">缺少節點使用者資訊。</string>
     <string name="firmware_update_not_found_in_release">在發行版本中找不到 %1$s 的韌體。</string>
     <string name="firmware_update_ota_failed">OTA 更新失敗: %1$s</string>
+    <string name="firmware_update_rak4631_bootloader_hint">對於 RAK WisBlock RAK4631，請使用廠商的序列 DFU 工具（例如，搭配提供的 bootloader .zip 檔使用 adafruit-nrfutil dfu serial）。僅複製 .uf2 檔案並不會更新 bootloader。</string>
     <string name="firmware_update_rebooting">正在進入 DFU 模式⋯⋯</string>
     <string name="firmware_update_release_notes">版本說明</string>
     <string name="firmware_update_retrieval_failed">無法取得韌體檔案。</string>
     <string name="firmware_update_retry">重試</string>
+    <string name="firmware_update_save_dfu_file">請將 .uf2 檔案儲存至裝置的 DFU 磁碟機。</string>
     <string name="firmware_update_select_file">選擇本機檔案</string>
     <string name="firmware_update_source_local">來源：本機檔案</string>
     <string name="firmware_update_stable">穩定版</string>
@@ -488,6 +569,7 @@
     <string name="hardware_model">硬體型號</string>
     <string name="heading">航向</string>
     <string name="heartbeat">心跳封包</string>
+    <string name="help_and_documentation">說明 &amp; 文件</string>
     <string name="hide_layer">隱藏圖層</string>
     <string name="hide_password">隱藏密碼</string>
     <string name="history_return_max">歴史紀錄最大返回值</string>
@@ -537,12 +619,16 @@
     <string name="key_verification_request_title">金鑰驗證請求</string>
     <string name="key_verification_title">金鑰驗證</string>
     <!-- LABEL -->
+    <string name="label_lite_fast">Lite - Fast</string>
+    <string name="label_lite_slow">Lite - Slow</string>
     <string name="label_long_fast">Long - Fast</string>
     <string name="label_long_moderate">Long - Moderate</string>
     <string name="label_long_slow">Long - Slow</string>
     <string name="label_long_turbo">Long - Turbo</string>
     <string name="label_medium_fast">Medium - Fast</string>
     <string name="label_medium_slow">Medium - Slow</string>
+    <string name="label_narrow_fast">Narrow - Fast</string>
+    <string name="label_narrow_slow">Narrow - Slow</string>
     <string name="label_short_fast">Short - Fast</string>
     <string name="label_short_slow">Short - Slow</string>
     <string name="label_short_turbo">Short - Turbo</string>
@@ -623,6 +709,7 @@
     <string name="map_download_region">下載區域</string>
     <string name="map_filter">地圖選項\n</string>
     <string name="map_layer_formats">自訂圖層支援 .kml、.kmz 或 GeoJSON 檔案。</string>
+    <string name="map_node_popup_details">%1$s&lt;br&gt;最後收到：%2$s&lt;br&gt;最後位置：%3$s&lt;br&gt;電池：%4$s</string>
     <string name="map_offline_manager">離線管理</string>
     <string name="map_purge_fail">SQL快取清除失敗，請查看 logcat 以獲取詳細資訊。</string>
     <string name="map_purge_success">清除 %1$s 的 SQL 快取</string>
@@ -692,6 +779,7 @@
     <string name="mqtt_probe_success_with_info">可供連線（%1$s）</string>
     <string name="mqtt_probe_tcp_failure">無法連線至 Broker 中繼伺服器（TCP）</string>
     <string name="mqtt_probe_timeout">經過 %1$d 毫秒後逾時</string>
+    <string name="mqtt_probe_tls_failure">TLS 交握失敗：%1$s</string>
     <string name="mqtt_status_connected">已連線</string>
     <string name="mqtt_status_connecting">正在連接…</string>
     <string name="mqtt_status_disconnected">已中斷連線</string>
@@ -709,6 +797,7 @@
     <string name="mute_always">總是</string>
     <string name="mute_notifications">靜音通知</string>
     <string name="mute_remove">取消「%1$s」的通知靜音？</string>
+    <string name="mute_selected">已靜音選取項目</string>
     <string name="mute_status_always">永久靜音</string>
     <string name="mute_status_muted_for_days">已靜音 %1$d 天 %2$s 小時</string>
     <string name="mute_status_muted_for_hours">已靜音 %1$s 小時</string>
@@ -729,14 +818,21 @@
     <string name="next">繼續</string>
     <string name="nfc_disabled">NFC 已停用，請在系統設定中啟用。</string>
     <!-- NO -->
+    <string name="no_bluetooth_devices_hint">請確認您在裝置的訊號範圍內。</string>
+    <string name="no_bluetooth_devices_seen">未偵測到藍牙裝置</string>
     <string name="no_custom_tile_sources_found">沒有自定義圖專來源。</string>
     <string name="no_device_selected">未選擇裝置</string>
+    <string name="no_devices_found">找不到裝置</string>
     <string name="no_files_manifested">未發現任何檔案。</string>
     <string name="no_local_stats">沒有可用的統計資料</string>
     <string name="no_map_layers_loaded">未載入自訂圖層。</string>
     <string name="no_network_devices_found">找不到網路裝置</string>
+    <string name="no_network_devices_hint">請確認您與裝置連接至相同的網路。</string>
+    <string name="no_network_devices_seen">未偵測到網路裝置</string>
     <string name="no_pax_metrics_logs">無可用的 PAX 人流計量資料。</string>
     <string name="no_usb_devices_found">找不到 USB 裝置</string>
+    <string name="no_usb_devices_hint">請透過序列埠或 USB 連接裝置。</string>
+    <string name="no_usb_devices_seen">未偵測到 USB 裝置</string>
     <!-- NODE -->
     <string name="node_count_template">(線上 %1$d / 顯示 %2$d / 總計 %3$d)</string>
     <string name="node_filter_exclude_infrastructure">排除基礎架構</string>
@@ -749,6 +845,32 @@
     <string name="node_filter_show_ignored">僅顯示已忽略的節點</string>
     <string name="node_filter_title">篩選條件</string>
     <string name="node_id">節點 ID</string>
+    <string name="node_layout_channel">頻道</string>
+    <string name="node_layout_compact">精巧</string>
+    <string name="node_layout_compact_fields_header">精簡欄位</string>
+    <string name="node_layout_complete">完整</string>
+    <string name="node_layout_complete_description">完整版面會顯示所有可用的節點資料，無資料的欄位將自動隱藏。</string>
+    <string name="node_layout_device_role">裝置 &amp; 角色</string>
+    <string name="node_layout_distance_and_bearing">距離與方位</string>
+    <string name="node_layout_help_signal_bad">訊號微弱。SNR 高於 −18 dB 且 RSSI 高於 −125 dBm。</string>
+    <string name="node_layout_help_signal_fair">訊號普通。SNR 高於 −12 dB 且 RSSI 高於 −120 dBm。</string>
+    <string name="node_layout_help_signal_good">訊號良好。SNR 高於 −7 dB 且 RSSI 高於 −115 dBm。</string>
+    <string name="node_layout_help_signal_indicator">將 SNR 與 RSSI 合併為一個品質等級，以彩色圖示與說明呈現。僅在完整版面中顯示。</string>
+    <string name="node_layout_help_signal_none">未偵測到可用訊號，低於所有品質門檻值。</string>
+    <string name="node_layout_hops_away">節點距</string>
+    <string name="node_layout_last_heard_time">最後收到時間</string>
+    <string name="node_layout_log_icons">環境計量資料</string>
+    <string name="node_layout_no_preview_available">沒有可預覽的節點。</string>
+    <string name="node_layout_power">電力</string>
+    <string name="node_layout_preview">預覽</string>
+    <string name="node_layout_relative_last_heard">最後收到時間</string>
+    <string name="node_layout_section_title">節點版面配置</string>
+    <string name="node_layout_signal_direct_only">訊號（僅直接連線）</string>
+    <string name="node_layout_signal_quality_indicator">訊號品質指示器</string>
+    <string name="node_list_click_label">開啟節點詳細資訊</string>
+    <string name="node_list_help_node_details">節點詳細資訊</string>
+    <string name="node_list_help_title">節點清單說明</string>
+    <string name="node_list_long_click_label">節點選項</string>
     <string name="node_number">節點編號</string>
     <string name="node_sort_alpha">依名字排序</string>
     <string name="node_sort_button">節點排序選項</string>
@@ -765,7 +887,10 @@
     <!-- NODES -->
     <string name="nodes">節點</string>
     <string name="nodes_at_this_location">位於此處的節點</string>
+    <string name="nodes_empty_disconnected_hint">連接裝置以探索附近的節點。</string>
     <string name="nodes_empty_disconnected_title">尚未連線裝置</string>
+    <string name="nodes_empty_searching_hint">附近的節點在被探索到時將顯示於此。</string>
+    <string name="nodes_empty_searching_title">正在搜尋節點</string>
     <string name="nodes_queued_for_deletion">%1$d 個節點已排定移除：</string>
     <string name="none">無（停用）</string>
     <string name="none_quality">無</string>
@@ -867,6 +992,8 @@
     <string name="preview_gauge">儀表板</string>
     <string name="preview_gradient">梯度</string>
     <string name="preview_header">標頭</string>
+    <string name="preview_item">項目 %1$d</string>
+    <string name="preview_pill">膠囊</string>
     <string name="preview_text">文字</string>
     <string name="primary">主要</string>
     <string name="primary_channel_feature">定期廣播位置與遙測資料</string>
@@ -907,6 +1034,7 @@
     <string name="recent_network_devices">最近的網路裝置</string>
     <string name="red">紅色</string>
     <string name="refresh">重新整理</string>
+    <string name="refresh_metadata">重新整理中繼資料</string>
     <string name="regenerate_keys_confirmation">您確定要重新產生密鑰嗎?\n\n連線過的其他節點需要刪除並重新交換金鑰後才能恢復加密通訊連線。</string>
     <string name="regenerate_private_key">重新產生私鑰</string>
     <string name="region_frequency_plan">地區</string>
@@ -916,6 +1044,7 @@
     <!-- REMOTE -->
     <string name="remote">遠端</string>
     <string name="remote_admin">遠端管理</string>
+    <string name="remote_admin_unreachable">無法連線至節點，請再試一次或靠近裝置。</string>
     <string name="remote_hardware">遠程硬件</string>
     <string name="remote_hardware_config">遠端硬體設定</string>
     <string name="remote_hardware_enabled">啟動遠端硬體</string>
@@ -968,6 +1097,7 @@
     <string name="role_tracker_desc">優先廣播 GPS 位置封包。</string>
     <string name="root_topic">根話題</string>
     <string name="rotary_encoder_1_enabled">啟用旋轉編碼器#1</string>
+    <string name="router_role_confirmation_text">我已閱讀&lt;a href=\"https://meshtastic.org/docs/configuration/radio/device/#roles\"&gt;裝置角色說明文件&lt;/a&gt;以及關於&lt;a href=\"http://meshtastic.org/blog/choosing-the-right-device-role\"&gt;選擇正確裝置角色&lt;/a&gt;的部落格文章。</string>
     <!-- ROUTING -->
     <string name="routing_error_admin_bad_session_key">無效的會話金鑰</string>
     <string name="routing_error_admin_public_key_unauthorized">無法識別公鑰</string>
@@ -996,8 +1126,10 @@
     <string name="save_rangetest">匯出範圍測試封包</string>
     <!-- SCAN -->
     <string name="scan">掃描</string>
+    <string name="scan_bluetooth_devices">掃描藍牙裝置</string>
     <string name="scan_channels_nfc">掃描頻道 NFC</string>
     <string name="scan_channels_qr">掃描頻道 QR Code</string>
+    <string name="scan_network_devices">掃描網路裝置</string>
     <string name="scan_nfc">掃描 NFC</string>
     <string name="scan_nfc_text">請將裝置靠近 NFC 標籤以掃描。</string>
     <string name="scan_shared_contact_nfc">掃描聯絡人分享 NFC</string>
@@ -1045,6 +1177,9 @@
     <string name="serial_rx_pin">RX</string>
     <string name="serial_tx_pin">TX</string>
     <string name="server">伺服器</string>
+    <string name="session_active">連線階段進行中</string>
+    <string name="session_refresh_required">需要重新整理</string>
+    <string name="set_up_connection">設定連線</string>
     <string name="set_your_region">設定您的地區</string>
     <string name="settings">設定</string>
     <!-- SHARE -->
@@ -1085,7 +1220,11 @@
     <string name="status_message">狀態訊息</string>
     <string name="status_message_config">狀態訊息設定</string>
     <string name="stay_connected_anywhere">隨時隨地保持連線</string>
+    <string name="store_forward">儲存 &amp; 轉發</string>
+    <string name="store_forward_config">儲存 &amp; 轉發設定</string>
+    <string name="store_forward_enabled">已啟用儲存 &amp; 轉發</string>
     <string name="subnet">子網路</string>
+    <string name="success">成功</string>
     <string name="super_deep_sleep_duration_seconds">超深度睡眠時長</string>
     <string name="supported">已支援</string>
     <string name="supported_by_community">由 Meshtastic 社群協作</string>
@@ -1104,8 +1243,19 @@
     <string name="tak_role_teamlead">隊長</string>
     <string name="tak_role_teammember">隊伍成員</string>
     <string name="tak_role_unspecified">未指定</string>
+    <string name="tak_server">TAK 伺服器</string>
     <string name="tak_server_enabled">啓用本地 TAK 伺服器</string>
-    <string name="tak_server_enabled_desc">在 8089 埠啟動一個用於 ATAK 連線的 TCP 伺服器</string>
+    <string name="tak_server_enabled_desc">在連接埠 8089 啟動本地 TLS 伺服器，供 ATAK/iTAK 連線使用</string>
+    <string name="tak_server_export_data_package_desc">產生 .zip 檔供 ATAK/iTAK 連線至此伺服器</string>
+    <string name="tak_server_loading">…</string>
+    <string name="tak_server_section">伺服器</string>
+    <string name="tak_server_test_card_title">TAK Mesh 測試（除錯）</string>
+    <string name="tak_server_test_idle">傳送所有 %1$d 個測試固定裝置至 mesh</string>
+    <string name="tak_server_test_result_bytes">%1$dB ✓</string>
+    <string name="tak_server_test_result_unknown_error">✗</string>
+    <string name="tak_server_test_results">%1$d 個通過，%2$d 個失敗，共 %3$d/%4$d</string>
+    <string name="tak_server_test_run">執行</string>
+    <string name="tak_server_test_running">執行中：%1$s</string>
     <string name="tak_team">隊伍顏色</string>
     <string name="tak_team_blue">Blue - 藍色</string>
     <string name="tak_team_brown">咖啡色</string>
@@ -1135,6 +1285,7 @@
     <string name="timestamp">時間戳記</string>
     <string name="tls_enabled">TLS已啟用</string>
     <string name="toggle_my_position">切換我的位置</string>
+    <string name="trace_route">路由追蹤</string>
     <!-- TRACEROUTE -->
     <string name="traceroute">路由追蹤</string>
     <string name="traceroute_diff">跳轉數 往程 %1$d 次，返程 %2$d 次</string>
@@ -1176,6 +1327,7 @@
     <string name="traffic_management_unknown_packet_threshold">不明封包閾值</string>
     <string name="transmit_over_lora">通過Lora無線電傳輸</string>
     <string name="transport_ble">低功耗藍牙</string>
+    <string name="transport_tcp">TCP</string>
     <string name="transport_usb">USB</string>
     <string name="triple_click_adhoc_ping">三擊執行 Ad Hoc Ping</string>
     <string name="twenty_four_hours">二十四小時</string>
@@ -1185,7 +1337,7 @@
     <string name="tx_power_dbm">發射功率</string>
     <string name="type">類別</string>
     <string name="type_a_message">請輸入訊息</string>
-    <string name="udp_enabled">已啟用</string>
+    <string name="udp_enabled">UDP 廣播</string>
     <!-- UNKNOWN -->
     <string name="unknown">不明</string>
     <string name="unknown_age">未知年齡</string>
@@ -1196,6 +1348,7 @@
     <string name="unmessageable">不接收訊息</string>
     <string name="unmonitored_or_infrastructure">無監控裝置或基礎設施</string>
     <string name="unmute">解除靜默</string>
+    <string name="unmute_selected">取消靜音選取項目</string>
     <string name="unrecognized">無法識別</string>
     <string name="unset">預設值 - 0</string>
     <string name="up_down_select_input_enabled">啟用上下選擇輸入</string>
@@ -1251,6 +1404,7 @@
     <string name="wifi_provision_description">透過藍牙為您的 mPWRD-OS 裝置設定 Wi-Fi 憑證。</string>
     <string name="wifi_provision_device_found">找到裝置</string>
     <string name="wifi_provision_device_found_detail">準備好掃描 Wi-Fi 網路了。</string>
+    <string name="wifi_provision_hidden_network">隱藏網路</string>
     <string name="wifi_provision_mpwrd_disclaimer">進一步了解 mPWRD-OS 專案\nhttps://github.com/mPWRD-OS</string>
     <string name="wifi_provision_no_networks">找不到網路</string>
     <string name="wifi_provision_scan_failed">無法搜尋到 Wi-Fi 網路：%1$s</string>
@@ -1263,8 +1417,18 @@
     <string name="wifi_provision_ssid_placeholder">手動輸入或選擇一個網路</string>
     <string name="wifi_provision_status_applied">Wi-Fi 已設定完成！</string>
     <string name="wifi_provision_status_failed">無法套用 Wi-Fi 設定</string>
+    <string name="wifi_provision_success_description">您的 mPWRD-OS 裝置已加入 Wi-Fi 網路。</string>
+    <string name="wifi_provision_success_device_connected">裝置已連線</string>
     <string name="wifi_provision_success_done">完成</string>
     <string name="wifi_provision_success_ip_address">IP 位址</string>
+    <string name="wifi_provision_success_missing_ip">IP 位址無法取得</string>
+    <string name="wifi_provision_success_open_ssh">開啟 SSH 用戶端</string>
+    <string name="wifi_provision_success_open_ssh_fallback">若未自動開啟應用程式，請複製 SSH 指令並貼至您的 SSH 用戶端。</string>
+    <string name="wifi_provision_success_setup_description">請透過 SSH 登入以變更預設的使用者名稱與密碼。</string>
+    <string name="wifi_provision_success_setup_title">完成裝置設定</string>
+    <string name="wifi_provision_success_ssh_command">ssh %1$s@%2$s</string>
+    <string name="wifi_provision_success_ssh_label">SSH 指令</string>
+    <string name="wifi_provision_success_ssh_unavailable">IP 位址分配完成後，即可使用 SSH 指令。</string>
     <string name="wifi_provision_success_username">使用者名稱</string>
     <string name="wifi_provisioning">mPWRD-OS 的 Wi-Fi 設定</string>
     <string name="wifi_qr_code_error">錯誤的 Wi-Fi 驗證QR code格式</string>

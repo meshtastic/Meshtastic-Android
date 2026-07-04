@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
     <string name="accept">Samþykkja</string>
     <!-- ACTION -->
     <string name="action_delete_message">Eyða skilaboðum</string>
@@ -34,6 +35,7 @@
     <!-- CHANNEL -->
     <string name="channel_invalid">Þetta rásar URL er ógilt og ónothæft</string>
     <string name="channel_name">Heiti rásar</string>
+    <!-- CHIRPY -->
     <string name="choose_theme">Veldu þema</string>
     <!-- CLEAN -->
     <string name="clear">Hreinsa</string>
@@ -58,6 +60,7 @@
     <string name="disconnected">Aftengd</string>
     <!-- DISPLAY -->
     <!-- DISTANCE -->
+    <!-- DOC -->
     <!-- ENCRYPTION -->
     <!-- ENVIRONMENT -->
     <string name="error_duty_cycle">Hámarsksendingartíma náð. Ekki hægt að senda skilaboð, vinsamlegast reynið aftur síðar.</string>

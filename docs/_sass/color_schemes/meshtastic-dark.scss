@@ -1,0 +1,40 @@
+// Meshtastic Material 3 — Dark color scheme for just-the-docs
+// Source: core/ui/.../Color.kt §8.3 (Dark Scheme)
+//
+// Brand colors:
+//   Primary (Dark):   #67EA94  (Green 500)
+//   Surface (Dark):   #1A1B26  (Neutral 900)
+
+$color-scheme: dark;
+
+// Body / page background
+$body-background-color: #1A1B26;       // Neutral 900  — surfaceDark
+$sidebar-color: #1A1B26;              // Neutral 900
+$body-text-color: #ECEDF3;            // Neutral 100  — onSurfaceDark
+$body-heading-color: #ECEDF3;         // Neutral 100
+
+// Links
+$link-color: #67EA94;                 // Green 500    — primaryDark
+$nav-link-color: #67EA94;             // Green 500
+
+// Navigation
+$nav-child-link-color: #B8BAC8;       // Neutral 300  — secondaryDark
+$search-result-preview-color: #B8BAC8;
+
+// Code
+$code-background-color: #0F1017;      // Neutral 950  — surfaceContainerLowestDark
+$code-linenumber-color: #9496A6;      // Neutral 400
+
+// Borders
+$border-color: #3D3E50;               // Neutral 700  — outlineVariantDark
+$table-background-color: #242533;     // Interpolated  — surfaceContainerDark
+
+// Buttons
+$btn-primary-color: #67EA94;          // Green 500
+$base-button-color: #2C2D3C;          // Neutral 800
+
+// Feedback / callouts
+$feedback-color: #242533;             // surfaceContainerDark
+
+// Search
+$search-background-color: #242533;    // surfaceContainerDark

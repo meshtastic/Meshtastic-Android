@@ -14,11 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+
 package org.meshtastic.core.ui.component
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
@@ -29,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.Clipboard
 import androidx.compose.ui.platform.LocalClipboard
@@ -49,14 +51,14 @@ fun ListItem(
     text: String,
     modifier: Modifier = Modifier,
     supportingText: String? = null,
-    textColor: Color = LocalContentColor.current,
-    supportingTextColor: Color = LocalContentColor.current,
+    textColor: Color = Color.Unspecified,
+    supportingTextColor: Color = Color.Unspecified,
     copyable: Boolean = false,
     enabled: Boolean = true,
     leadingIcon: ImageVector? = null,
-    leadingIconTint: Color = LocalContentColor.current,
+    leadingIconTint: Color = Color.Unspecified,
     trailingIcon: ImageVector? = MeshtasticIcons.ChevronRight,
-    trailingIconTint: Color = LocalContentColor.current,
+    trailingIconTint: Color = Color.Unspecified,
     onClick: (() -> Unit)? = null,
 ) {
     val clipboard: Clipboard = LocalClipboard.current
@@ -89,10 +91,10 @@ fun SwitchListItem(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    textColor: Color = LocalContentColor.current,
+    textColor: Color = Color.Unspecified,
     enabled: Boolean = true,
     leadingIcon: ImageVector? = null,
-    leadingIconTint: Color = LocalContentColor.current,
+    leadingIconTint: Color = Color.Unspecified,
 ) {
     BasicListItem(
         text = text,
@@ -113,58 +115,73 @@ fun SwitchListItem(
  * This is a core component that should facilitate most list item use cases. Please carefully consider if modifying this
  * is really necessary before doing so.
  *
+ * Uses the M3 Expressive interactive [ListItem] overload which provides built-in shape morphing on press/hover and
+ * proper disabled styling.
+ *
  * @see [LinkedCoordinatesItem] for example usage
  */
 @Composable
 fun BasicListItem(
     text: String,
     modifier: Modifier = Modifier,
-    textColor: Color = LocalContentColor.current,
+    textColor: Color = Color.Unspecified,
     supportingText: String? = null,
-    supportingTextColor: Color = LocalContentColor.current,
+    supportingTextColor: Color = Color.Unspecified,
     enabled: Boolean = true,
     leadingIcon: ImageVector? = null,
-    leadingIconTint: Color = LocalContentColor.current,
+    leadingIconTint: Color = Color.Unspecified,
     trailingContent: @Composable (() -> Unit)? = null,
     onClick: (() -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
 ) {
-    ListItem(
-        modifier =
-        if (onLongClick != null) {
-            modifier.combinedClickable(enabled = enabled, onLongClick = onLongClick, onClick = onClick ?: {})
-        } else if (onClick != null) {
-            modifier.clickable(enabled = enabled, onClick = onClick)
-        } else {
-            modifier
-        },
-        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-        headlineContent = { Text(text = text, color = textColor) },
-        supportingContent = supportingText?.let { { Text(text = it, color = supportingTextColor) } },
-        leadingContent = leadingIcon.icon(leadingIconTint),
-        trailingContent = trailingContent,
-    )
+    if (onClick != null) {
+        ListItem(
+            onClick = onClick,
+            modifier = modifier,
+            enabled = enabled,
+            onLongClick = onLongClick,
+            shapes = ListItemDefaults.shapes(shape = RectangleShape),
+            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+            leadingContent = leadingIcon.icon(leadingIconTint),
+            trailingContent = trailingContent,
+            supportingContent = supportingText?.let { { Text(text = it, color = supportingTextColor) } },
+            content = { Text(text = text, color = textColor) },
+        )
+    } else {
+        ListItem(
+            modifier = modifier,
+            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+            headlineContent = { Text(text = text, color = textColor) },
+            supportingContent = supportingText?.let { { Text(text = it, color = supportingTextColor) } },
+            leadingContent = leadingIcon.icon(leadingIconTint),
+            trailingContent = trailingContent,
+        )
+    }
 }
 
 @Composable
-fun ImageVector?.icon(tint: Color = LocalContentColor.current): @Composable (() -> Unit)? =
-    this?.let { { Icon(imageVector = it, contentDescription = null, modifier = Modifier.size(24.dp), tint = tint) } }
+fun ImageVector?.icon(tint: Color = Color.Unspecified): @Composable (() -> Unit)? = this?.let {
+    {
+        val resolvedTint = if (tint == Color.Unspecified) LocalContentColor.current else tint
+        Icon(imageVector = it, contentDescription = null, modifier = Modifier.size(24.dp), tint = resolvedTint)
+    }
+}
 
 @Preview(showBackground = true)
 @Composable
-private fun ListItemPreview() {
+fun ListItemPreview() {
     AppTheme { ListItem(text = "Text", leadingIcon = MeshtasticIcons.Android, enabled = true) {} }
 }
 
 @Preview(showBackground = true)
 @Composable
-private fun ListItemDisabledPreview() {
+fun ListItemDisabledPreview() {
     AppTheme { ListItem(text = "Text", leadingIcon = MeshtasticIcons.Android, enabled = false) {} }
 }
 
 @Preview(showBackground = true)
 @Composable
-private fun SwitchListItemPreview() {
+fun SwitchListItemPreview() {
     AppTheme { SwitchListItem(text = "Text", leadingIcon = MeshtasticIcons.Android, checked = true, onClick = {}) }
 }
 

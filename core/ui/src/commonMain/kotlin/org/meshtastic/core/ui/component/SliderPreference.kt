@@ -16,6 +16,9 @@
  */
 package org.meshtastic.core.ui.component
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -23,6 +26,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -46,6 +50,15 @@ fun <T> SliderPreference(
     val valueRange = 0f..(items.size - 1).toFloat()
     val steps = (items.size - 2).coerceAtLeast(0)
 
+    // Spring-animated thumb position for expressive feel
+    val animatedValue by
+        animateFloatAsState(
+            targetValue = selectedIndex.coerceIn(valueRange),
+            animationSpec =
+            spring(stiffness = Spring.StiffnessMediumLow, dampingRatio = Spring.DampingRatioMediumBouncy),
+            label = "sliderSpring",
+        )
+
     ListItem(
         modifier = modifier,
         headlineContent = {
@@ -60,7 +73,7 @@ fun <T> SliderPreference(
             Column {
                 summary?.let { Text(text = it, modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)) }
                 Slider(
-                    value = selectedIndex.coerceIn(valueRange),
+                    value = animatedValue,
                     onValueChange = {
                         val index = it.roundToInt()
                         if (index in items.indices) {
@@ -79,7 +92,7 @@ fun <T> SliderPreference(
 @Suppress("MagicNumber")
 @Preview(showBackground = true)
 @Composable
-private fun SliderPreferencePreview() {
+fun SliderPreferencePreview() {
     val items = listOf(1L to "One", 2L to "Two", 3L to "Three", 4L to "Four", 5L to "Five")
     AppTheme {
         SliderPreference(
@@ -96,7 +109,7 @@ private fun SliderPreferencePreview() {
 @Suppress("MagicNumber")
 @Preview(showBackground = true)
 @Composable
-private fun SliderPreferenceDisabledPreview() {
+fun SliderPreferenceDisabledPreview() {
     val items = listOf(1L to "One", 2L to "Two", 3L to "Three", 4L to "Four", 5L to "Five")
     AppTheme {
         SliderPreference(

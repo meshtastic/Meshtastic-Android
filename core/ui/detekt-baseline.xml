@@ -16,7 +16,6 @@
     <ID>ComposableParamOrder:SatelliteCountInfo.kt:@Composable fun SatelliteCountInfo</ID>
     <ID>ComposableParamOrder:SignalInfo.kt:@Composable fun SignalInfo</ID>
     <ID>ComposableParamOrder:SwitchPreference.kt:@Composable fun SwitchPreference</ID>
-    <ID>CompositionLocalAllowlist:ContrastLevel.kt:/** * Composition local providing the current [ContrastLevel]. * * Read by components that need to adapt their rendering for accessibility (e.g. message bubbles, signal indicators). */ val LocalContrastLevel = staticCompositionLocalOf { ContrastLevel.STANDARD }</ID>
     <ID>CompositionLocalAllowlist:LocalAnalyticsIntroProvider.kt:val LocalAnalyticsIntroProvider = compositionLocalOf&lt;@Composable () -> Unit> { {} }</ID>
     <ID>CompositionLocalAllowlist:LocalBarcodeScannerProvider.kt:val LocalBarcodeScannerProvider = compositionLocalOf&lt;@Composable (onResult: (String?) -> Unit) -> BarcodeScanner> { { object : BarcodeScanner { override fun startScan() { // Default NO-OP } } } }</ID>
     <ID>CompositionLocalAllowlist:LocalBarcodeScannerProvider.kt:val LocalBarcodeScannerSupported = compositionLocalOf { false }</ID>
@@ -32,7 +31,6 @@
     <ID>CompositionLocalAllowlist:MapViewProvider.kt:val LocalMapViewProvider = compositionLocalOf&lt;MapViewProvider?> { null }</ID>
     <ID>ContentSlotReused:AdaptiveTwoPane.kt:second: @Composable ColumnScope.() -> Unit</ID>
     <ID>FunctionTypeModifierSpacing:Theme.kt:@Composable()</ID>
-    <ID>LambdaParameterEventTrailing:MainAppBar.kt:onClickChip: (Node) -> Unit</ID>
     <ID>LambdaParameterInRestartableEffect:EmojiPickerDialog.kt:onCategoryChanged: (Int) -> Unit</ID>
     <ID>LambdaParameterInRestartableEffect:PlatformUtils.kt:check: () -> Boolean</ID>
     <ID>LambdaParameterInRestartableEffect:TracerouteAlertHandler.kt:onNavigateToMap: (destinationNodeNum: Int, requestId: Int, logUuid: String?) -> Unit</ID>
@@ -95,12 +93,41 @@
     <ID>PreviewPublic:AlertPreviews.kt:@Preview(showBackground = true, name = "Icon and Text Alert") @Composable fun PreviewIconAlert</ID>
     <ID>PreviewPublic:AlertPreviews.kt:@Preview(showBackground = true, name = "Multiple Choice Alert") @Composable fun PreviewMultipleChoiceAlert</ID>
     <ID>PreviewPublic:AlertPreviews.kt:@Preview(showBackground = true, name = "Simple Text Alert") @Composable fun PreviewTextAlert</ID>
+    <ID>PreviewPublic:BitwisePreference.kt:@Preview(showBackground = true) @Composable fun BitwisePreferencePreview</ID>
+    <ID>PreviewPublic:ChannelInfo.kt:@PreviewLightDark @Composable fun ChannelInfoPreview</ID>
+    <ID>PreviewPublic:ChannelItem.kt:@Preview @Composable fun ChannelItemPreview</ID>
+    <ID>PreviewPublic:DistanceInfo.kt:@PreviewLightDark @Composable fun DistanceInfoPreview</ID>
+    <ID>PreviewPublic:DropDownPreference.kt:@Preview(showBackground = true) @Composable fun DropDownPreferencePreview</ID>
+    <ID>PreviewPublic:EditIPv4Preference.kt:@Preview(showBackground = true) @Composable fun EditIPv4PreferencePreview</ID>
+    <ID>PreviewPublic:EditListPreference.kt:@Preview(showBackground = true) @Composable fun EditListPreferencePreview</ID>
+    <ID>PreviewPublic:EditPasswordPreference.kt:@Preview(showBackground = true) @Composable fun EditPasswordPreferencePreview</ID>
+    <ID>PreviewPublic:EditTextPreference.kt:@Preview(showBackground = true) @Composable fun EditTextPreferencePreview</ID>
+    <ID>PreviewPublic:ElevationInfo.kt:@Composable @Preview fun ElevationInfoPreview</ID>
+    <ID>PreviewPublic:HopsInfo.kt:@PreviewLightDark @Composable fun HopsInfoPreview</ID>
+    <ID>PreviewPublic:IconInfo.kt:@Composable @Preview fun IconInfoPreview</ID>
+    <ID>PreviewPublic:ImportFab.kt:@Preview(showBackground = true, name = "Channel Context with Sharing") @Composable fun PreviewImportFABChannel</ID>
+    <ID>PreviewPublic:ImportFab.kt:@Preview(showBackground = true, name = "Contact Context") @Composable fun PreviewImportFABContact</ID>
     <ID>PreviewPublic:IndoorAirQuality.kt:@Preview(showBackground = true) @Composable fun IAQScalePreview</ID>
+    <ID>PreviewPublic:LastHeardInfo.kt:@PreviewLightDark @Composable fun LastHeardInfoPreview</ID>
     <ID>PreviewPublic:LazyColumnDragAndDropDemo.kt:@Preview @Composable fun LazyColumnDragAndDropDemo</ID>
+    <ID>PreviewPublic:ListItem.kt:@Preview(showBackground = true) @Composable fun ListItemDisabledPreview</ID>
+    <ID>PreviewPublic:ListItem.kt:@Preview(showBackground = true) @Composable fun ListItemPreview</ID>
+    <ID>PreviewPublic:ListItem.kt:@Preview(showBackground = true) @Composable fun SwitchListItemPreview</ID>
     <ID>PreviewPublic:MaterialBatteryInfo.kt:@PreviewLightDark @Composable fun MaterialBatteryInfoPreview</ID>
+    <ID>PreviewPublic:NodeChip.kt:@Suppress("MagicNumber") @Preview @Composable fun NodeChipPreview</ID>
+    <ID>PreviewPublic:PositionPrecisionPreference.kt:@Preview(showBackground = true) @Composable fun PositionPrecisionPreferencePreview</ID>
+    <ID>PreviewPublic:PreferenceCategory.kt:@Preview(showBackground = true) @Composable fun PreferenceCategoryPreview</ID>
+    <ID>PreviewPublic:RegularPreference.kt:@Preview(showBackground = true) @Composable fun RegularPreferencePreview</ID>
+    <ID>PreviewPublic:SatelliteCountInfo.kt:@PreviewLightDark @Composable fun SatelliteCountInfoPreview</ID>
+    <ID>PreviewPublic:SecurityIcon.kt:@Preview(name = "All Security Icons with Dialog") @Composable fun PreviewAllSecurityIconsWithDialog</ID>
     <ID>PreviewPublic:SignalInfo.kt:@Composable @Preview(showBackground = true) fun SignalInfoSimplePreview</ID>
     <ID>PreviewPublic:SignalInfo.kt:@PreviewLightDark @Composable fun SignalInfoPreview</ID>
-    <ID>ViewModelForwarding:MeshtasticAppShell.kt:MeshtasticCommonAppSetup( uiViewModel = uiViewModel, onNavigateToTracerouteMap = { destNum, requestId, logUuid -> multiBackstack.handleDeepLink( listOf( NodesRoute.NodesGraph, NodeDetailRoute.TracerouteMap(destNum = destNum, requestId = requestId, logUuid = logUuid), ), ) }, )</ID>
+    <ID>PreviewPublic:SliderPreference.kt:@Suppress("MagicNumber") @Preview(showBackground = true) @Composable fun SliderPreferenceDisabledPreview</ID>
+    <ID>PreviewPublic:SliderPreference.kt:@Suppress("MagicNumber") @Preview(showBackground = true) @Composable fun SliderPreferencePreview</ID>
+    <ID>PreviewPublic:SwitchPreference.kt:@Preview(showBackground = true) @Composable fun SwitchPreferencePreview</ID>
+    <ID>PreviewPublic:TextDividerPreference.kt:@Preview(showBackground = true) @Composable fun TextDividerPreferencePreview</ID>
+    <ID>PreviewPublic:TitledCard.kt:@PreviewLightDark @Composable fun TitledCardPreview</ID>
+    <ID>ViewModelForwarding:MeshtasticAppShell.kt:MeshtasticCommonAppSetup( uiViewModel = uiViewModel, onNavigateToTracerouteMap = { destNum, requestId, logUuid -> multiBackstack.handleDeepLink( listOf( NodesRoute.Nodes, NodeDetailRoute.TracerouteMap(destNum = destNum, requestId = requestId, logUuid = logUuid), ), ) }, )</ID>
     <ID>ViewModelForwarding:MeshtasticCommonAppSetup.kt:FirmwareVersionCheck(viewModel = uiViewModel)</ID>
     <ID>ViewModelForwarding:MeshtasticCommonAppSetup.kt:SharedDialogs(uiViewModel = uiViewModel)</ID>
     <ID>ViewModelForwarding:MeshtasticCommonAppSetup.kt:TracerouteAlertHandler(uiViewModel = uiViewModel, onNavigateToMap = onNavigateToTracerouteMap)</ID>

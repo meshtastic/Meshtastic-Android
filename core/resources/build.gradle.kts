@@ -21,8 +21,6 @@ plugins {
 }
 
 kotlin {
-    jvm()
-
     android {
         androidResources {
             enable = true

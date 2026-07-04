@@ -36,5 +36,8 @@ val nowSeconds: Long
 val systemTimeZone: TimeZone
     get() = TimeZone.currentSystemDefault()
 
+/** Clamps a seconds-since-epoch timestamp so it never exceeds the current wall-clock time. */
+fun clampTimestampToNow(epochSeconds: Int): Int = minOf(epochSeconds, nowSeconds.toInt())
+
 /** Converts these milliseconds to an [Instant]. */
 fun Long.toInstant(): Instant = Instant.fromEpochMilliseconds(this)

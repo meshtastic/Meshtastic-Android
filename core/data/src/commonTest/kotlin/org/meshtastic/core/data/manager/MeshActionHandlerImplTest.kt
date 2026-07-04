@@ -400,7 +400,7 @@ class MeshActionHandlerImplTest {
         everySuspend { radioConfigRepository.setLocalConfig(any()) } returns Unit
 
         val config = Config(lora = Config.LoRaConfig(hop_limit = 5))
-        val payload = Config.ADAPTER.encode(config)
+        val payload = config.encode()
 
         handler.handleSetConfig(payload, MY_NODE_NUM)
         advanceUntilIdle()
@@ -418,7 +418,7 @@ class MeshActionHandlerImplTest {
         everySuspend { radioConfigRepository.setLocalModuleConfig(any()) } returns Unit
 
         val moduleConfig = ModuleConfig(mqtt = ModuleConfig.MQTTConfig(enabled = true))
-        val payload = ModuleConfig.ADAPTER.encode(moduleConfig)
+        val payload = moduleConfig.encode()
 
         handler.handleSetModuleConfig(0, MY_NODE_NUM, payload)
         advanceUntilIdle()
@@ -433,7 +433,7 @@ class MeshActionHandlerImplTest {
         myNodeNumFlow.value = MY_NODE_NUM
 
         val moduleConfig = ModuleConfig(mqtt = ModuleConfig.MQTTConfig(enabled = true))
-        val payload = ModuleConfig.ADAPTER.encode(moduleConfig)
+        val payload = moduleConfig.encode()
 
         handler.handleSetModuleConfig(0, REMOTE_NODE_NUM, payload)
         advanceUntilIdle()
@@ -450,7 +450,7 @@ class MeshActionHandlerImplTest {
         everySuspend { radioConfigRepository.updateChannelSettings(any()) } returns Unit
 
         val channel = Channel(index = 1)
-        val payload = Channel.ADAPTER.encode(channel)
+        val payload = channel.encode()
 
         handler.handleSetChannel(payload, MY_NODE_NUM)
         advanceUntilIdle()
@@ -487,7 +487,7 @@ class MeshActionHandlerImplTest {
         handler = createHandler(testScope)
 
         val user = User(id = "!remote01", long_name = "Remote", short_name = "RM")
-        val payload = User.ADAPTER.encode(user)
+        val payload = user.encode()
 
         handler.handleSetRemoteOwner(1, REMOTE_NODE_NUM, payload)
 
@@ -531,7 +531,7 @@ class MeshActionHandlerImplTest {
         handler = createHandler(testScope)
 
         val channel = Channel(index = 2)
-        val payload = Channel.ADAPTER.encode(channel)
+        val payload = channel.encode()
 
         handler.handleSetRemoteChannel(1, REMOTE_NODE_NUM, payload)
 

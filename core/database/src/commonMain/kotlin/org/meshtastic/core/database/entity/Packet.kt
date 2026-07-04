@@ -33,8 +33,8 @@ import org.meshtastic.core.model.util.getShortDateTime
 
 data class PacketEntity(
     @Embedded val packet: Packet,
-    @Relation(entity = ReactionEntity::class, parentColumn = "packet_id", entityColumn = "reply_id")
-    val reactions: List<ReactionEntity> = emptyList(),
+    @Relation(entity = ReactionEntity::class, parentColumns = ["packet_id"], entityColumns = ["reply_id"])
+    val reactions: List<ReactionEntity>,
 ) {
     suspend fun toMessage(getNode: suspend (userId: String?) -> Node) = with(packet) {
         val node = getNode(data.from)

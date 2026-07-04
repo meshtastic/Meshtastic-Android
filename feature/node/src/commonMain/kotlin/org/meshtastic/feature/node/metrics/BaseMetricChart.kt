@@ -140,7 +140,7 @@ fun GenericMetricChart(
                 // x-step, Vico computes the GCD of consecutive x-value differences which can
                 // be as small as 1 second, making the chart logically enormous. A 60-second
                 // floor keeps the internal slot count reasonable for any practical interval.
-                getXStep = { model -> maxOf(model.getXDeltaGcd(), MIN_X_STEP_SECONDS) },
+                getXStep = { model, _, _ -> maxOf(model.getXDeltaGcd(), MIN_X_STEP_SECONDS) },
             ),
             modelProducer = modelProducer,
             modifier = modifier,

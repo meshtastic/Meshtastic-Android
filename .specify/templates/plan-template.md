@@ -1,6 +1,7 @@
 # Implementation Plan: [FEATURE]
 
 **Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
+
 **Input**: Feature specification from `/specs/[###-feature-name]/spec.md`
 
 **Note**: This template is filled in by the `/speckit.plan` command. See `.specify/templates/plan-template.md` for the execution workflow.
@@ -13,37 +14,50 @@
 
 <!--
   ACTION REQUIRED: Replace the content in this section with the technical details
-  for the feature. Most fields below are pre-filled with project defaults —
-  adjust only what's feature-specific.
+  for the project. The structure here is presented in advisory capacity to guide
+  the iteration process.
 -->
 
-**Language/Version**: Kotlin 2.3+ targeting JDK 21  
-**Primary Dependencies**: Compose Multiplatform, Material 3 Adaptive, Koin 4.2+ (K2 Compiler Plugin), Room KMP, DataStore KMP  
-**Storage**: [DataStore KMP for preferences / Room KMP for entities / N/A]  
-**Testing**: KMP `allTests` for `feature:*` and `core:*` modules; `testFdroidDebugUnitTest` for `app`  
-**Target Platform**: Android, Desktop (JVM), iOS — all via `commonMain`  
-**Project Type**: Mobile/desktop app (Kotlin Multiplatform)  
-**Performance Goals**: [e.g., 60fps scrolling, <1s response or NEEDS CLARIFICATION]  
-**Constraints**: All UI in `commonMain`; no `java.*`/`android.*` in common; CMP float pre-formatting via `NumberFormatter.format()`  
-**Scale/Scope**: [e.g., N new files, M modified files across feature/X, core/Y]
+**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]
+
+**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]
+
+**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]
+
+**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]
+
+**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
+
+**Project Type**: [e.g., library/cli/web-service/mobile-app/compiler/desktop-app or NEEDS CLARIFICATION]
+
+**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]
+
+**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]
+
+**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
 
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-| Principle | Status | Notes |
-|-----------|--------|-------|
-| I. Kotlin Multiplatform Core | ⬜ | All code in `commonMain`. No `java.*`/`android.*` imports. |
-| II. Zero Lint Tolerance | ⬜ | `spotlessApply` + `detekt` required before merge. |
-| III. Compose Multiplatform UI | ⬜ | CMP composables, `NumberFormatter.format()` for floats, Navigation 3 patterns. |
-| IV. Privacy First | ⬜ | No PII/location/key logging. Proto submodule read-only. |
-| V. Design Standards Compliance | ⬜ | UI-GATE review required before UI work. |
-| VI. Verify Before Push | ⬜ | Full verification: `./gradlew spotlessApply spotlessCheck detekt assembleDebug test allTests`. |
-| VII. Coroutine Safety | ⬜ | `safeCatching {}` not `runCatching {}`. Project `ioDispatcher` not `Dispatchers.IO`. |
-| VIII. Resource Discipline | ⬜ | `stringResource(Res.string.key)`, `MeshtasticIcons`, `sort-strings.py` after adding strings. |
-| IX. Branch & Scope Hygiene | ⬜ | Branch prefix, upstream base, ~5-commit scope limit. |
+- **I. Kotlin Multiplatform Core**: Identify every touched source set/module and confirm
+  all business logic remains in `commonMain`; document any platform-specific work that is
+  isolated to `androidMain`/platform shells.
+- **II. Zero Lint Tolerance**: List the exact formatting and static-analysis commands that
+  will be run for the touched modules, at minimum `spotlessCheck` and `detekt`.
+- **III. Compose Multiplatform UI**: If UI is in scope, confirm the design uses Compose
+  Multiplatform patterns, `MeshtasticNavDisplay`/`NavigationBackHandler` where relevant,
+  and pre-formats floats with `NumberFormatter.format()`.
+- **IV. Privacy First**: Confirm the change does not log or expose PII, location data,
+  cryptographic keys, or modify the read-only `core/proto` submodule.
+- **V. Design Standards Compliance**: For any user-facing UI, record how the design was
+  checked against the Meshtastic Client Design Standards. For cross-platform features,
+  link the upstream behavior spec from `meshtastic/design/features/` or justify N/A.
+- **VI. Verify Before Push**: Record the exact local verification commands and the expected
+  post-push CI check command (`gh pr checks` or `gh run list`) before implementation starts.
 
-**Gate Result**: [⬜ Pending / ✅ All principles satisfied / ❌ Violations requiring justification]
+If any gate cannot be met, the exception MUST be justified in the Complexity Tracking
+section below and explicitly called out in the PR description.
 
 ## Project Structure
 
@@ -60,91 +74,51 @@ specs/[###-feature]/
 ```
 
 ### Source Code (repository root)
-
 <!--
-  ACTION REQUIRED: Fill in with the actual files affected by this feature.
-  Use the module layout below as a guide. Delete unused modules.
+  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
+  for this feature. Delete unused options and expand the chosen structure with
+  real paths (e.g., apps/admin, packages/something). The delivered plan must
+  not include Option labels.
 -->
 
 ```text
-feature/[name]/                          ← Primary changes
-├── src/commonMain/kotlin/org/meshtastic/feature/[name]/
-│   ├── component/
-│   │   ├── [ExistingComposable].kt      ← Modify
-│   │   └── [NewComposable].kt           ← NEW
-│   ├── list/
-│   │   ├── [Screen].kt                  ← Modify — [description]
-│   │   └── [ViewModel].kt              ← Modify — [description]
-│   └── model/
-│       └── [NewModel].kt               ← NEW — [description]
+# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
+src/
+├── models/
+├── services/
+├── cli/
+└── lib/
 
-core/[module]/                           ← Core layer changes
-├── src/commonMain/kotlin/org/meshtastic/core/[module]/
-│   └── [File].kt                        ← Modify — [description]
+tests/
+├── contract/
+├── integration/
+└── unit/
 
-feature/settings/                        ← Settings integration (if applicable)
-├── src/commonMain/kotlin/org/meshtastic/feature/settings/
-│   └── [SettingsSection].kt             ← NEW — [description]
+# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
+backend/
+├── src/
+│   ├── models/
+│   ├── services/
+│   └── api/
+└── tests/
 
-core/resources/
-└── src/commonMain/composeResources/values/strings.xml  ← Add string resources
+frontend/
+├── src/
+│   ├── components/
+│   ├── pages/
+│   └── services/
+└── tests/
+
+# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
+api/
+└── [same as backend above]
+
+ios/ or android/
+└── [platform-specific structure: feature modules, UI flows, platform tests]
 ```
 
-**Structure Decision**: [Document the selected structure and why existing modules
-are modified rather than creating new ones, per KMP module architecture.]
-
-## Module Impact
-
-| Module | Change Type | Files Affected | Risk |
-|--------|-------------|----------------|------|
-| `feature/[name]` | New + Modify | [count] | [Low/Medium/High] |
-| `core/[module]` | Modify | [count] | [Low/Medium/High] |
-| `core/resources` | Modify | 1 file (strings.xml) | Low |
-
-## Integration Points
-
-<!--
-  Document how this feature integrates with existing systems:
-  navigation routes, DataStore keys, DI modules, etc.
--->
-
-## Design Constraints
-
-<!--
-  List technical constraints specific to this feature.
-  Include M3/Expressive, accessibility, and CMP constraints.
--->
-
-- All UI lives in `commonMain` — not platform-specific
-- Strings accessed via `stringResource(Res.string.key)` — never hardcoded
-- Icons use `MeshtasticIcons` exclusively (from `core/ui/icon/`)
-- Error handling uses `safeCatching {}` not `runCatching {}`
-- Dispatchers via `org.meshtastic.core.common.util.ioDispatcher`
-- Float values must be pre-formatted with `NumberFormatter.format()` (CMP constraint)
-
-## Risk Assessment
-
-| Risk | Likelihood | Impact | Mitigation |
-|------|-----------|--------|------------|
-| [Risk description] | [Low/Med/High] | [Low/Med/High] | [Mitigation with task reference] |
-
-## Phase Alignment with Tasks
-
-<!--
-  ACTION REQUIRED: Fill in after tasks.md is generated by /speckit.tasks.
-  Reference actual task IDs from tasks.md — do NOT use plan-internal numbering.
--->
-
-| Phase | Purpose | Key Tasks | Dependencies |
-|-------|---------|-----------|--------------|
-| 1. Setup | [Purpose] | [Task IDs] | None |
-| N. Polish | [Purpose] | [Task IDs] | All prior phases |
-
-### Critical Path
-
-```
-Phase 1 → Phase 2 → ... → Phase N
-```
+**Structure Decision**: [Document the selected structure and reference the real
+directories captured above]
 
 ## Complexity Tracking
 
@@ -152,4 +126,5 @@ Phase 1 → Phase 2 → ... → Phase N
 
 | Violation | Why Needed | Simpler Alternative Rejected Because |
 |-----------|------------|-------------------------------------|
-| *None* | — | — |
+| [e.g., 4th project] | [current need] | [why 3 projects insufficient] |
+| [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient] |

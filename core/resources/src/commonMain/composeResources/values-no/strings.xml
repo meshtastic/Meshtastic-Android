@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
     <string name="accept">Godta</string>
     <!-- ACTION -->
     <string name="action_delete_message">Slett meldingen</string>
@@ -42,6 +43,7 @@
     <string name="channel_invalid">Denne kanall URL er ugyldig og kan ikke benyttes</string>
     <string name="channel_label">Kanal</string>
     <string name="channel_name">Kanal Navn</string>
+    <!-- CHIRPY -->
     <string name="choose_theme">Velg tema</string>
     <!-- CLEAN -->
     <string name="clear">Tøm</string>
@@ -73,6 +75,7 @@
     <!-- DISPLAY -->
     <!-- DISTANCE -->
     <string name="distance">Distanse</string>
+    <!-- DOC -->
     <string name="edit">Rediger</string>
     <string name="eight_hours">8 Timer</string>
     <!-- ENCRYPTION -->
@@ -155,6 +158,8 @@
     <!-- NODE -->
     <string name="node_filter_include_unknown">Inkluder ukjent</string>
     <string name="node_filter_placeholder">Filter</string>
+    <string name="node_layout_channel">Kanal</string>
+    <string name="node_layout_hops_away">Hopp Unna</string>
     <string name="node_sort_alpha">A-Å</string>
     <string name="node_sort_channel">Kanal</string>
     <string name="node_sort_distance">Distanse</string>

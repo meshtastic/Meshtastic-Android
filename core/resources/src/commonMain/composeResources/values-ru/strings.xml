@@ -16,8 +16,16 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">От %1$s: %2$s</string>
+    <string name="a11y_node_battery">заряд батареи %1$d%%</string>
+    <string name="a11y_node_favorite">избранный</string>
+    <string name="a11y_node_last_heard">последний раз услышан %1$s</string>
+    <string name="a11y_node_offline">оффлайн</string>
+    <string name="a11y_node_online">онлайн</string>
+    <string name="a11y_node_role">роль %1$s</string>
+    <string name="a11y_node_signal">сигнал %1$s</string>
     <string name="accept">Принять</string>
     <string name="acknowledgements">Подтверждения</string>
     <!-- ACTION -->
@@ -138,7 +146,24 @@
     <string name="channel_url">URL канала</string>
     <string name="channel_utilization">ChUtil</string>
     <string name="channels">Каналы</string>
+    <!-- CHIRPY -->
     <string name="chirpy">Щебетун</string>
+    <string name="chirpy_assistant_title">Весёлый помощник</string>
+    <string name="chirpy_checking">Проверка доступности Chirpy…</string>
+    <string name="chirpy_downloading">Chirpy загружается…</string>
+    <string name="chirpy_downloading_progress">Загрузка модели Chirpy: %1$d%%</string>
+    <string name="chirpy_downloading_subtitle">Это произошло только один раз. Chirpy скоро будет готов!</string>
+    <string name="chirpy_error_busy">Ух ё! Канал сейчас совершенно перегружен из-за сильного трафика! 📶 Давай подождём свободного промежутка и попробуем передать снова.</string>
+    <string name="chirpy_error_model_unavailable">Моя батарея заряжается или моя прошивка всё ещё загружается! 🔋 Дай мне немного времени, чтобы синхронизироваться и загрузиться!</string>
+    <string name="chirpy_error_token_budget_exceeded">Эта нагрузка слишком велика для моего бюджета передачи! 📱 Попробуй сократить сообщение, чтобы я мог передать его без проблем.</string>
+    <string name="chirpy_error_unknown">Упс! Произошла сильная потеря пакетов или помехи сигнала! 📡 Давай повторно отправим этот запрос и посмотрим, сможет ли он пройти.</string>
+    <string name="chirpy_error_unsupported_flavor">Я работаю на ограниченной частоте в этой версии приложения! 🔌 Попробуй использовать версию с полной интеграцией ИИ-ядра.</string>
+    <string name="chirpy_error_unsupported_platform">О нет! Похоже, моя антенна не может установить соединение на этой платформе. 📡 Пожалуйста, дважды проверь совместимость своего оборудования!</string>
+    <string name="chirpy_intro">Привет! 📡 Я Chirpy - твой помощник по Meshtastic на устройстве! Я могу помочь с настройкой, конфигурацией, устранением неполадок и советами по mesh-сетям. Чем я могу тебе помочь?</string>
+    <string name="chirpy_ready">Спроси Chirpy</string>
+    <string name="chirpy_search_placeholder">Спроси о Meshtastic…</string>
+    <string name="chirpy_suggested_pages_help">Вот несколько страниц документации, которые могут помочь:</string>
+    <string name="chirpy_thinking">Chirpy прокладывает маршрут через сеть… 📡</string>
     <string name="choose_contrast">Уровень контрастности</string>
     <string name="choose_theme">Выберите тему</string>
     <!-- CLEAN -->
@@ -326,6 +351,47 @@
     <string name="distance_measurements">Измерения расстояния</string>
     <string name="distance_measurements_description">Показать расстояния между вашим телефоном и другими нодами Meshstatic с позициями.</string>
     <string name="dns">Служба доменных имен (DNS)</string>
+    <!-- DOC -->
+    <string name="doc_clear_search">Очистить условия поиска</string>
+    <string name="doc_keywords_connections">bluetooth,usb,tcp,pairing,serial,wifi</string>
+    <string name="doc_keywords_desktop">desktop,linux,macos,windows,serial</string>
+    <string name="doc_keywords_discovery">discovery,topology,network,scan,neighbor</string>
+    <string name="doc_keywords_firmware">firmware,update,ota,flash,version,recovery</string>
+    <string name="doc_keywords_map">map,waypoint,gps,position,location,marker</string>
+    <string name="doc_keywords_measurement">formatter,metric,number,locale,temperature,conversion,api</string>
+    <string name="doc_keywords_messages">message,channel,encryption,direct,broadcast,quick-chat</string>
+    <string name="doc_keywords_mqtt">mqtt,broker,internet,bridge,uplink,downlink</string>
+    <string name="doc_keywords_node_metrics">metrics,telemetry,signal,snr,rssi,battery,traceroute</string>
+    <string name="doc_keywords_nodes">node,mesh,list,role,status,favorite,filter</string>
+    <string name="doc_keywords_onboarding">setup,welcome,permissions,first-launch</string>
+    <string name="doc_keywords_settings_module">module,serial,telemetry,canned,store-forward,administration</string>
+    <string name="doc_keywords_settings_radio">settings,radio,lora,region,modem,device,power,security</string>
+    <string name="doc_keywords_signal_meter">signal,rssi,snr,bars,quality,lora,noise,meter</string>
+    <string name="doc_keywords_tak">tak,atak,cursor-on-target,team-awareness</string>
+    <string name="doc_keywords_telemetry">telemetry,sensor,temperature,humidity,pressure,power</string>
+    <string name="doc_keywords_translate">translate,crowdin,localization,language,i18n,contribute</string>
+    <string name="doc_keywords_units">units,locale,metric,imperial,temperature,distance</string>
+    <string name="doc_search_placeholder">Поиск по документации…</string>
+    <string name="doc_section_developer">Руководство разработчика</string>
+    <string name="doc_section_user">Руководство пользователя</string>
+    <string name="doc_title_connections">Соединения</string>
+    <string name="doc_title_desktop">Десктопное приложение</string>
+    <string name="doc_title_discovery">Обнаружение</string>
+    <string name="doc_title_firmware">Обновления прошивки</string>
+    <string name="doc_title_map">Карта и путевые точки</string>
+    <string name="doc_title_measurement">Измерение и форматирование</string>
+    <string name="doc_title_messages">Сообщения и каналы</string>
+    <string name="doc_title_mqtt">MQTT</string>
+    <string name="doc_title_node_metrics">Метрики ноды</string>
+    <string name="doc_title_nodes">Ноды</string>
+    <string name="doc_title_onboarding">Начало работы</string>
+    <string name="doc_title_settings_module">Настройки - Модули и администрирование</string>
+    <string name="doc_title_settings_radio">Настройки - Радио и пользователь</string>
+    <string name="doc_title_signal_meter">Измеритель сигнала</string>
+    <string name="doc_title_tak">Интеграция TAK</string>
+    <string name="doc_title_telemetry">Телеметрия и датчики</string>
+    <string name="doc_title_translate">Перевести приложение</string>
+    <string name="doc_title_units">Ед.изм. и локализация</string>
     <string name="done">Готово</string>
     <string name="dont_show_again_for_device">Больше не показывать для этого устройства</string>
     <string name="double_tap_as_button_press">Двойное нажатие как кнопка</string>
@@ -363,6 +429,7 @@
     <string name="ethernet_config">Настройки Ethernet</string>
     <string name="ethernet_enabled">Ethernet включен</string>
     <string name="ethernet_ip">Ethernet IP:</string>
+    <string name="event_welcome_defcon">Добро пожаловать на военные сборы! 💀</string>
     <string name="event_welcome_hamvention">Добро пожаловать на охоту на лис! 📻</string>
     <string name="event_welcome_open_sauce">Добро пожаловать на масленицу! 🥞</string>
     <string name="exchange_position">Обменяться местоположением</string>
@@ -502,6 +569,7 @@
     <string name="hardware_model">Модель оборудования</string>
     <string name="heading">Курс</string>
     <string name="heartbeat">Heartbeat</string>
+    <string name="help_and_documentation">Справка и документация</string>
     <string name="hide_layer">Скрыть слой</string>
     <string name="hide_password">Скрыть пароль</string>
     <string name="history_return_max">Макс возврат истории</string>
@@ -735,6 +803,7 @@
     <string name="mute_always">Всегда</string>
     <string name="mute_notifications">Отключить уведомления</string>
     <string name="mute_remove">Откл. уведомления для '%1$s?</string>
+    <string name="mute_selected">Отключить звук выбранному</string>
     <string name="mute_status_always">Всегда заглушен</string>
     <string name="mute_status_muted_for_days">Обеззвучен на %1$d дней, %2$s часов</string>
     <string name="mute_status_muted_for_hours">Обеззвучен на %1$s часов</string>
@@ -782,6 +851,32 @@
     <string name="node_filter_show_ignored">Показать только игнорируемые ноды</string>
     <string name="node_filter_title">Фильтр по</string>
     <string name="node_id">ID ноды</string>
+    <string name="node_layout_channel">Канал</string>
+    <string name="node_layout_compact">Компактность</string>
+    <string name="node_layout_compact_fields_header">Компактные поля</string>
+    <string name="node_layout_complete">Полнота</string>
+    <string name="node_layout_complete_description">Полная схема отображает все доступные данные нод. Поля без данных автоматически скрываются.</string>
+    <string name="node_layout_device_role">Роль устройства</string>
+    <string name="node_layout_distance_and_bearing">Расстояние и азимут</string>
+    <string name="node_layout_help_signal_bad">Сигнал плохой. SNR выше −18 дБ, а RSSI выше −125 дБм.</string>
+    <string name="node_layout_help_signal_fair">Сигнал умеренный. SNR выше −12 дБ, а RSSI — выше −120 дБм.</string>
+    <string name="node_layout_help_signal_good">Сигнал сильный. SNR выше −7 дБ, а RSSI выше −115 дБм.</string>
+    <string name="node_layout_help_signal_indicator">Объединяет SNR и RSSI в уровень качества, отображаемый в виде цветного значка с описанием. Отображается только в полной компоновке.</string>
+    <string name="node_layout_help_signal_none">Не обнаружен пригодный сигнал. Ниже всех порогов качества.</string>
+    <string name="node_layout_hops_away">Прыжков</string>
+    <string name="node_layout_last_heard_time">Время последнего вещания</string>
+    <string name="node_layout_log_icons">Метрики окружения</string>
+    <string name="node_layout_no_preview_available">Нет доступных нод для предпросмотра.</string>
+    <string name="node_layout_power">Питание</string>
+    <string name="node_layout_preview">Предпросмотр</string>
+    <string name="node_layout_relative_last_heard">Относительное время последнего вещания</string>
+    <string name="node_layout_section_title">Расположение нод</string>
+    <string name="node_layout_signal_direct_only">Сигнал (только прямой)</string>
+    <string name="node_layout_signal_quality_indicator">Индикатор качества сигнала</string>
+    <string name="node_list_click_label">Открыть детали ноды</string>
+    <string name="node_list_help_node_details">Детали ноды</string>
+    <string name="node_list_help_title">Справка по списку нод</string>
+    <string name="node_list_long_click_label">Параметры ноды</string>
     <string name="node_number">Номер ноды</string>
     <string name="node_sort_alpha">А-Я</string>
     <string name="node_sort_button">Варианты сортировки нод</string>
@@ -1147,6 +1242,7 @@
     <string name="store_forward_config">Настройка Store &amp; Forward</string>
     <string name="store_forward_enabled">Store &amp; Forward включена</string>
     <string name="subnet">Подсеть</string>
+    <string name="success">Успешно</string>
     <string name="super_deep_sleep_duration_seconds">Длительность супер-глубокого сна</string>
     <string name="supported">Поддерживается</string>
     <string name="supported_by_community">Поддерживается Meshtastic Community</string>
@@ -1165,8 +1261,19 @@
     <string name="tak_role_teamlead">Руководитель команды</string>
     <string name="tak_role_teammember">Участник команды</string>
     <string name="tak_role_unspecified">Не определена</string>
+    <string name="tak_server">Сервер TAK</string>
     <string name="tak_server_enabled">Включить локальный сервер TAK</string>
-    <string name="tak_server_enabled_desc">Запустить TCP-сервер на порту 8089 для подключений ATAK</string>
+    <string name="tak_server_enabled_desc">Запускает локальный TLS-сервер на порту 8089 для подключений ATAK/iTAK</string>
+    <string name="tak_server_export_data_package_desc">Создайте .zip для ATAK/iTAK, чтобы подключиться к этому серверу</string>
+    <string name="tak_server_loading">...</string>
+    <string name="tak_server_section">Сервер</string>
+    <string name="tak_server_test_card_title">Сетевой тест TAK (Отладка)</string>
+    <string name="tak_server_test_idle">Отправить все %1$d тестовых приспособлений в сеть</string>
+    <string name="tak_server_test_result_bytes">%1$dБ ✓</string>
+    <string name="tak_server_test_result_unknown_error">✗</string>
+    <string name="tak_server_test_results">%1$d пройдено, %2$d неудачно из %3$d/%4$d</string>
+    <string name="tak_server_test_run">Запустить</string>
+    <string name="tak_server_test_running">Запущено: %1$s</string>
     <string name="tak_team">Цвет команды</string>
     <string name="tak_team_blue">Синий</string>
     <string name="tak_team_brown">Коричневый</string>
@@ -1196,6 +1303,7 @@
     <string name="timestamp">Отметка времени</string>
     <string name="tls_enabled">TLS включен</string>
     <string name="toggle_my_position">Переключить мою позицию</string>
+    <string name="trace_route">Трассировка маршрута</string>
     <!-- TRACEROUTE -->
     <string name="traceroute">Трассировка маршрута</string>
     <string name="traceroute_diff">Нод к %1$d нод назад от %2$d</string>
@@ -1236,7 +1344,7 @@
     <string name="traffic_management_rate_limit_enabled">Ограничение скорости</string>
     <string name="traffic_management_rate_limit_max_packets">Макс пакетов в окне</string>
     <string name="traffic_management_rate_limit_window">Окно ограничения скорости (сек.)</string>
-    <string name="traffic_management_router_preserve_hops">Сохраняить хопы маршрутизатора</string>
+    <string name="traffic_management_router_preserve_hops">Сохранять хопы маршрутизатора</string>
     <string name="traffic_management_unknown_packet_threshold">Порог передач неизвестных пакетов</string>
     <string name="transmit_over_lora">Передать через LoRa</string>
     <string name="transport_ble">BLE</string>
@@ -1250,7 +1358,7 @@
     <string name="tx_power_dbm">Мощность передатчика</string>
     <string name="type">Тип</string>
     <string name="type_a_message">Написать сообщение</string>
-    <string name="udp_enabled">Включено</string>
+    <string name="udp_enabled">UDP трансляция</string>
     <!-- UNKNOWN -->
     <string name="unknown">Неизвестно</string>
     <string name="unknown_age">Неизвестный возраст</string>
@@ -1261,6 +1369,7 @@
     <string name="unmessageable">Без сообщений</string>
     <string name="unmonitored_or_infrastructure">Неконтролируемая или инфраструктура</string>
     <string name="unmute">Включить микрофон</string>
+    <string name="unmute_selected">Вернуть звук выбранному</string>
     <string name="unrecognized">Нераспознанный</string>
     <string name="unset">Не задано - 0</string>
     <string name="up_down_select_input_enabled">Вверх/Вниз/Выбирать включён</string>
@@ -1316,6 +1425,7 @@
     <string name="wifi_provision_description">Предоставьте учетные данные для доступа к Wi-Fi на вашем устройстве с mPWRD-OS через Bluetooth.</string>
     <string name="wifi_provision_device_found">Найденное устройство</string>
     <string name="wifi_provision_device_found_detail">Готов к сканированию Wi-Fi сетей.</string>
+    <string name="wifi_provision_hidden_network">Скрытая сеть</string>
     <string name="wifi_provision_mpwrd_disclaimer">Узнайте больше о проекте mPWRD-OS\nhttps://github.com/mPWRD-OS</string>
     <string name="wifi_provision_no_networks">Сети не найдены</string>
     <string name="wifi_provision_scan_failed">Не удалось просканировать сети Wi-Fi: %1$s</string>

@@ -79,6 +79,16 @@ private val SCAN_TIMEOUT = 5.seconds
 private val GATT_CLEANUP_TIMEOUT = 5.seconds
 
 /**
+ * Delay after onConnect before downgrading BLE connection priority to Balanced.
+ *
+ * The initial config drain (fromRadio burst) typically completes within 2–5 seconds on most devices, but slower radios
+ * (ESP32 with large node databases, many channels, or dense position history) can take significantly longer. 30 seconds
+ * provides generous margin while still ensuring we don't sustain the 7.5 ms connection interval indefinitely, which
+ * significantly increases battery draw on both the phone and the radio.
+ */
+private val PRIORITY_DOWNGRADE_DELAY = 30.seconds
+
+/**
  * A [RadioTransport] implementation for BLE devices using the common BLE abstractions (which are powered by Kable).
  *
  * This class handles the high-level connection lifecycle for Meshtastic radios over BLE, including:
@@ -361,15 +371,7 @@ class BleRadioTransport(
                 val maxLen = bleConnection.maximumWriteValueLength(BleWriteType.WITHOUT_RESPONSE)
                 Logger.i { "[$address] BLE Radio Session Ready. Max write length (WITHOUT_RESPONSE): $maxLen bytes" }
 
-                // Ask the platform for a low-latency / high-throughput connection interval
-                // (~7.5 ms on Android). The Meshtastic firmware happily accepts this and it
-                // materially speeds up the initial config drain and any bulk fromRadio reads.
-                if (bleConnection.requestHighConnectionPriority()) {
-                    Logger.d { "[$address] Requested high BLE connection priority" }
-                    // Wait for the connection parameter update to succeed before starting the heavy traffic
-                    // in onConnect(). Otherwise, the Android BLE stack may disconnect with GATT 147.
-                    delay(1.seconds)
-                }
+                requestHighPriorityAndScheduleDowngrade()
 
                 this@BleRadioTransport.callback.onConnect()
             }
@@ -394,6 +396,24 @@ class BleRadioTransport(
                 } catch (ignored: Exception) {
                     Logger.w(ignored) { "[$address] disconnect() failed after profile error" }
                 }
+            }
+        }
+    }
+
+    /**
+     * Requests high BLE connection priority for the initial config burst, then schedules a downgrade to balanced
+     * priority after [PRIORITY_DOWNGRADE_DELAY] to conserve battery.
+     */
+    private suspend fun CoroutineScope.requestHighPriorityAndScheduleDowngrade() {
+        if (bleConnection.requestHighConnectionPriority()) {
+            Logger.d { "[$address] Requested high BLE connection priority" }
+            // Wait for the connection parameter update before starting heavy traffic.
+            delay(1.seconds)
+        }
+        launch {
+            delay(PRIORITY_DOWNGRADE_DELAY)
+            if (bleConnection.requestBalancedConnectionPriority()) {
+                Logger.d { "[$address] Downgraded to balanced BLE connection priority" }
             }
         }
     }

@@ -20,7 +20,7 @@ Thank you for your interest in contributing to Meshtastic-Android! We welcome co
 - Add comments where necessary, especially for complex logic.
 - Keep methods and classes focused and concise.
 - **Strings:** Use localised strings via the **Compose Multiplatform Resource** library in `:core:resources`.
-  - Do **not** use the legacy `app/src/main/res/values/strings.xml`.
+  - Do **not** use the legacy `androidApp/src/main/res/values/strings.xml`.
   - **Definition:** Add strings to `core/resources/src/commonMain/composeResources/values/strings.xml`.
   - **Usage:**
     ```kotlin
@@ -55,8 +55,10 @@ Meshtastic-Android uses unit tests, Robolectric JVM tests, and instrumented UI t
 
 - Add or update tests for any new features or bug fixes.
 - Ensure all tests pass by running:
-  - `./gradlew test` for unit and Robolectric tests
+  - `./gradlew test` for unit and Robolectric tests (pure-Android modules)
+  - `./gradlew allTests` for KMP module tests (`core:*`, `feature:*`)
   - `./gradlew connectedAndroidTest` for instrumented tests
+  > Both `test` **and** `allTests` must pass. `allTests` covers KMP modules; `test` covers pure-Android modules. Neither alone is sufficient.
 - For UI components, write Robolectric Compose tests where possible for faster execution.
 - If your change is difficult to test, explain why in your pull request.
 

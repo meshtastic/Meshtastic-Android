@@ -38,23 +38,23 @@ plugins {
     alias(libs.plugins.spotless) apply false
     alias(libs.plugins.dokka)
     alias(libs.plugins.test.retry) apply false
-    alias(libs.plugins.flatpak.gradle.generator)
     alias(libs.plugins.meshtastic.root)
+    id("meshtastic.docs")
+}
+
+plugins.withId("org.meshtastic.flatpak.sources") {
+    extensions.configure<org.meshtastic.flatpak.sources.FlatpakSourcesExtension> {
+        outputFile.set(layout.buildDirectory.file("flatpak-sources.json"))
+        mustRunAfterTasks.set(listOf(":desktopApp:assemble", ":desktopApp:packageUberJarForCurrentOS"))
+        // Force-resolve platform-specific native artifacts not resolved on the generation host
+        targetPlatforms.set(setOf("linux-x64", "linux-arm64"))
+        platformDependencies.set(setOf(
+            "org.jetbrains.skiko:skiko-awt-runtime-{platform}:0.144.6",
+            "org.jetbrains.compose.desktop:desktop-jvm-{platform}:1.11.0",
+        ))
+    }
 }
 
 dependencies {
     dokkaPlugin(libs.dokka.android.documentation.plugin)
-}
-
-tasks.flatpakGradleGenerator {
-    outputFile = file("flatpak-sources-root.json")
-    downloadDirectory = "./offline-repository"
-    excludeConfigurations.set(
-        listOf(
-            "dokkaHtmlModuleOutputDirectoriesResolver~internal",
-            "koverExternalArtifacts",
-            "testCompileClasspath",
-            "testRuntimeClasspath",
-        )
-    )
 }

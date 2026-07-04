@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
     <string name="accept">Elfogadni</string>
     <string name="acknowledgements">Visszaigazolások (ACK-ek)</string>
     <!-- ACTION -->
@@ -111,6 +112,7 @@
     <string name="channel_label">Csatorna</string>
     <string name="channel_name">Csatorna neve</string>
     <string name="channels">Csatornák</string>
+    <!-- CHIRPY -->
     <string name="choose_theme">Válasszon témát</string>
     <!-- CLEAN -->
     <string name="clean_node_database_confirmation">Ez %1$d csomópontot távolít el az adatbázisból. A művelet nem vonható vissza.</string>
@@ -254,6 +256,10 @@
     <string name="distance_filters_description">Szűrd a csomópont-listát és a mesh térképet a telefon közelsége alapján.</string>
     <string name="distance_measurements">Távolságmérés</string>
     <string name="distance_measurements_description">Megjeleníti a távolságot a telefonod és más, pozícióval rendelkező Meshtastic csomópontok között.</string>
+    <!-- DOC -->
+    <string name="doc_clear_search">Keresés törlése</string>
+    <string name="doc_title_mqtt">MQTT</string>
+    <string name="doc_title_nodes">Csomópontok</string>
     <string name="double_tap_as_button_press">Dupla koppintás mint gomb</string>
     <string name="downlink_enabled">Letöltés engedélyezve</string>
     <string name="downlink_feature_description">A nyilvános internetes átjáróból érkező üzenetek továbbításra kerülnek a helyi mesh hálózatra. A zéró-ugrási szabály miatt az alapértelmezett MQTT szerver forgalma nem terjed tovább ennél az eszköznél.</string>
@@ -534,6 +540,10 @@
     <string name="node_filter_show_ignored">Csak a mellőzött csomópontok megjelenítése</string>
     <string name="node_filter_title">Szűrés</string>
     <string name="node_id">Csomópont-azonosító</string>
+    <string name="node_layout_channel">Csatorna</string>
+    <string name="node_layout_hops_away">Ugrás Messzire</string>
+    <string name="node_layout_log_icons">Környezeti metrikák</string>
+    <string name="node_layout_power">Energia</string>
     <string name="node_number">Csomópont-szám</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_button">Csomópont-rendezési beállítások</string>
@@ -809,6 +819,7 @@
     <string name="sx126x_rx_boosted_gain">RX fokozott erősítés</string>
     <string name="system_settings">Rendszerbeállítások</string>
     <!-- TAK -->
+    <string name="tak_server_section">Szerver</string>
     <string name="tak_team_blue">Kék</string>
     <string name="tak_team_green">Zöld</string>
     <string name="tak_team_red">Piros</string>
@@ -824,6 +835,7 @@
     <string name="timestamp">Időbélyeg</string>
     <string name="tls_enabled">TLS engedélyezve</string>
     <string name="toggle_my_position">Saját pozíció váltása</string>
+    <string name="trace_route">Traceroute</string>
     <!-- TRACEROUTE -->
     <string name="traceroute">Traceroute</string>
     <string name="traceroute_diff">Ugrások oda %1$d Vissza %2$d</string>
@@ -850,7 +862,6 @@
     <string name="tx_power_dbm">Adásteljesítmény</string>
     <string name="type">Típus</string>
     <string name="type_a_message">Írj üzenetet</string>
-    <string name="udp_enabled">Engedélyezve</string>
     <!-- UNKNOWN -->
     <string name="unknown">Ismeretlen</string>
     <string name="unknown_age">Ismeretlen ideje</string>

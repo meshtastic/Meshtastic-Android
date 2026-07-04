@@ -22,7 +22,6 @@ plugins {
 kotlin {
     android {
         namespace = "org.meshtastic.feature.wifiprovision"
-        androidResources.enable = false
         withHostTest {}
     }
 
@@ -35,7 +34,6 @@ kotlin {
             implementation(projects.core.resources)
             implementation(projects.core.ui)
 
-            implementation(libs.jetbrains.navigation3.ui)
             implementation(libs.kotlinx.serialization.json)
         }
     }

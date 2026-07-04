@@ -1,4 +1,5 @@
-installed: []
+installed:
+- agent-governance
 settings:
   auto_execute_hooks: true
 hooks:
@@ -82,6 +83,13 @@ hooks:
     prompt: Commit constitution changes?
     description: Auto-commit after constitution update
     condition: null
+  - extension: agent-governance
+    command: speckit.agent-governance.refresh
+    enabled: true
+    optional: true
+    prompt: Refresh agent governance after constitution changes?
+    description: Generates the active agent platform governance file
+    condition: null
   after_specify:
   - extension: git
     command: speckit.git.commit
@@ -106,6 +114,13 @@ hooks:
     prompt: Commit plan changes?
     description: Auto-commit after implementation planning
     condition: null
+  - extension: agent-governance
+    command: speckit.agent-governance.refresh
+    enabled: true
+    optional: true
+    prompt: Refresh agent governance after planning?
+    description: Keeps the active agent platform governance file aligned
+    condition: null
   after_tasks:
   - extension: git
     command: speckit.git.commit
@@ -113,6 +128,13 @@ hooks:
     optional: true
     prompt: Commit task changes?
     description: Auto-commit after task generation
+    condition: null
+  - extension: agent-governance
+    command: speckit.agent-governance.refresh
+    enabled: true
+    optional: true
+    prompt: Refresh agent governance after task generation?
+    description: Keeps the active agent platform governance file aligned
     condition: null
   after_implement:
   - extension: git
@@ -128,6 +150,13 @@ hooks:
     optional: true
     prompt: Run verify to validate implementation against specification?
     description: Post-implementation verification gate
+    condition: null
+  - extension: review
+    command: speckit.review.run
+    enabled: true
+    optional: true
+    prompt: Run PR review on implemented changes?
+    description: Comprehensive review after implementation
     condition: null
   after_checklist:
   - extension: git

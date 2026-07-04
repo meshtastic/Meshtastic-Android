@@ -32,7 +32,7 @@ import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianLayerRangeProvider
-import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
+import com.patrykandpatrick.vico.compose.cartesian.data.lineModel
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import org.jetbrains.compose.resources.stringResource
@@ -205,7 +205,7 @@ fun EnvironmentMetricsChart(
             modelProducer.runTransaction {
                 /* Pressure on its own layer/axis */
                 if (showPressure && pressureData.isNotEmpty()) {
-                    lineSeries {
+                    lineModel {
                         series(
                             x = pressureData.map { it.time },
                             y = pressureData.map { Environment.BAROMETRIC_PRESSURE.getValue(it)!! },
@@ -216,7 +216,7 @@ fun EnvironmentMetricsChart(
                 otherMetrics.forEach { metric ->
                     val metricData = otherMetricsData[metric] ?: emptyList()
                     if (metricData.isNotEmpty()) {
-                        lineSeries {
+                        lineModel {
                             series(x = metricData.map { it.time }, y = metricData.map { metric.getValue(it)!! })
                         }
                     }

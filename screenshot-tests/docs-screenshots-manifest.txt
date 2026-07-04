@@ -1,0 +1,40 @@
+# Manifest of reference images to copy to docs/screenshots/ for the docs pipeline.
+# One glob pattern per line, matched against paths under src/screenshotTestDebug/reference/.
+# All tests use @PreviewLightDark — only light variants (_Light_) are included for docs.
+
+# Core UI components
+**/ComponentScreenshotTestsKt/Screenshot*_Light_*.png
+
+# Preference components
+**/PreferenceComponentScreenshotTestsKt/Screenshot*_Light_*.png
+
+# Alert dialogs
+**/AlertScreenshotTestsKt/Screenshot*_Light_*.png
+
+# Feature: Connections
+**/ConnectionsScreenshotTestsKt/Screenshot*_Light_*.png
+
+# Feature: Firmware
+**/FirmwareScreenshotTestsKt/Screenshot*_Light_*.png
+
+# Feature: Intro
+**/IntroScreenshotTestsKt/Screenshot*_Light_*.png
+
+# Feature: Settings
+**/SettingsScreenshotTestsKt/Screenshot*_Light_*.png
+
+# Feature: WiFi Provision
+**/WifiProvisionScreenshotTestsKt/Screenshot*_Light_*.png
+
+# Feature: Docs
+**/DocsScreenshotTestsKt/Screenshot*_Light_*.png
+
+# Feature: Map
+**/MapScreenshotTestsKt/Screenshot*_Light_*.png
+
+# Feature: Messaging
+**/MessagingScreenshotTestsKt/Screenshot*_Light_*.png
+
+# Feature: Nodes
+**/NodeScreenshotTestsKt/Screenshot*_Light_*.png
+

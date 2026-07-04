@@ -44,7 +44,6 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.common.util.formatString
-import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.util.TimeConstants.MS_PER_SEC
 import org.meshtastic.core.resources.Res
@@ -506,14 +505,18 @@ private fun EnvironmentMetricsCard(
 }
 
 @Composable
-private fun EnvironmentMetricsContent(telemetry: Telemetry, environmentDisplayFahrenheit: Boolean) {
+private fun EnvironmentMetricsContent(
+    telemetry: Telemetry,
+    environmentDisplayFahrenheit: Boolean,
+    timeTextOverride: String? = null,
+) {
     val envMetrics = telemetry.environment_metrics ?: org.meshtastic.proto.EnvironmentMetrics()
     val time = telemetry.time.toLong() * MS_PER_SEC
     Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
         /* Time and Temperature */
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(
-                text = DateFormatter.formatDateTime(time),
+                text = timeTextOverride ?: DateFormatter.formatDateTime(time),
                 style = MaterialTheme.typography.titleMediumEmphasized,
                 fontWeight = FontWeight.Bold,
             )
@@ -541,7 +544,7 @@ private fun EnvironmentMetricsContent(telemetry: Telemetry, environmentDisplayFa
 @PreviewLightDark
 @Suppress("MagicNumber") // Compose preview with fake data
 @Composable
-private fun PreviewEnvironmentMetricsContent() {
+fun PreviewEnvironmentMetricsContent() {
     val fakeEnvMetrics =
         org.meshtastic.proto.EnvironmentMetrics(
             temperature = 22.5f,
@@ -563,6 +566,14 @@ private fun PreviewEnvironmentMetricsContent() {
             rainfall_1h = 1.5f,
             rainfall_24h = 12.3f,
         )
-    val fakeTelemetry = Telemetry(time = nowSeconds.toInt(), environment_metrics = fakeEnvMetrics)
-    AppTheme { Surface { EnvironmentMetricsContent(telemetry = fakeTelemetry, environmentDisplayFahrenheit = false) } }
+    val fakeTelemetry = Telemetry(time = 1700000000, environment_metrics = fakeEnvMetrics)
+    AppTheme {
+        Surface {
+            EnvironmentMetricsContent(
+                telemetry = fakeTelemetry,
+                environmentDisplayFahrenheit = false,
+                timeTextOverride = "2023-11-14 22:13",
+            )
+        }
+    }
 }

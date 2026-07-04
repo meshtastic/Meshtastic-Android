@@ -40,7 +40,7 @@ fun AdaptiveContactsScreen(
     onClearRequestChannelUrl: () -> Unit,
 ) {
     ContactsScreen(
-        onNavigateToShare = { backStack.add(ChannelsRoute.ChannelsGraph) },
+        onNavigateToShare = { backStack.add(ChannelsRoute.Channels) },
         sharedContactRequested = sharedContactRequested,
         requestChannelSet = requestChannelSet,
         onHandleDeepLink = onHandleDeepLink,

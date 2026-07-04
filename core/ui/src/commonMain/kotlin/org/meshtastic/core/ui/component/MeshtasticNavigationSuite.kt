@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme.colorScheme
@@ -68,7 +69,7 @@ import org.meshtastic.core.ui.viewmodel.UIViewModel
  * This implementation uses the [MultiBackstack] state holder to manage independent histories for each tab, aligning
  * with Navigation 3 best practices for state preservation during tab switching.
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun MeshtasticNavigationSuite(
     multiBackstack: MultiBackstack,
@@ -141,7 +142,7 @@ private fun handleNavigation(
         val currentKey = multiBackstack.activeBackStack.lastOrNull()
         when (destination) {
             TopLevelDestination.Nodes -> {
-                val onNodesList = currentKey is NodesRoute.NodesGraph || currentKey is NodesRoute.Nodes
+                val onNodesList = currentKey is NodesRoute.Nodes
                 if (!onNodesList) {
                     multiBackstack.navigateTopLevel(destination.route)
                 } else {
@@ -149,9 +150,8 @@ private fun handleNavigation(
                 }
             }
 
-            TopLevelDestination.Conversations -> {
-                val onConversationsList =
-                    currentKey is ContactsRoute.ContactsGraph || currentKey is ContactsRoute.Contacts
+            TopLevelDestination.Messages -> {
+                val onConversationsList = currentKey is ContactsRoute.Contacts
                 if (!onConversationsList) {
                     multiBackstack.navigateTopLevel(destination.route)
                 } else {
@@ -180,7 +180,7 @@ private fun NavigationIconContent(
     selectedDevice: String?,
     uiViewModel: UIViewModel,
 ) {
-    val isConnectionsRoute = destination == TopLevelDestination.Connections
+    val isConnectionsRoute = destination == TopLevelDestination.Connect
 
     TooltipBox(
         positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
@@ -211,7 +211,7 @@ private fun NavigationIconContent(
         } else {
             BadgedBox(
                 badge = {
-                    if (destination == TopLevelDestination.Conversations) {
+                    if (destination == TopLevelDestination.Messages) {
                         var lastNonZeroCount by remember { mutableIntStateOf(unreadMessageCount) }
                         if (unreadMessageCount > 0) {
                             lastNonZeroCount = unreadMessageCount

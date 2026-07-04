@@ -68,6 +68,25 @@ internal fun Project.configureKotlinAndroid(commonExtension: CommonExtension) {
     configureKotlin<KotlinAndroidProjectExtension>()
 }
 
+/**
+ * Whether the current build host can run the Kotlin/Native compiler.
+ *
+ * Kotlin/Native supports linux-x86_64, windows-x86_64, macos-arm64, and macos-x86_64. Other hosts (notably
+ * linux-aarch64 CI runners) must skip Apple-target registration to avoid configuration-time crashes when KSP / Dokka
+ * introspect the iOS compilations.
+ */
+private fun supportsKotlinNative(): Boolean {
+    val os = System.getProperty("os.name").orEmpty().lowercase()
+    val arch = System.getProperty("os.arch").orEmpty().lowercase()
+    val isX64 = arch == "amd64" || arch == "x86_64"
+    return when {
+        os.contains("mac") || os.contains("darwin") -> true
+        os.contains("linux") -> isX64
+        os.contains("windows") -> isX64
+        else -> false
+    }
+}
+
 /** Configure Kotlin Multiplatform options */
 internal fun Project.configureKotlinMultiplatform() {
     // Note: we used to force `org.jetbrains.skiko` to a hard-coded version here to
@@ -81,49 +100,64 @@ internal fun Project.configureKotlinMultiplatform() {
         // Standard KMP targets for Meshtastic
         jvm()
 
-        if (!isDesktopOnly) {
-            // Configure the iOS targets for compile-only validation
-            // We only add these for modules that already have KMP structure
+        // iOS targets for compile-only validation. Only register on hosts where
+        // Kotlin/Native can run — KSP attaches to every Kotlin target's compilation
+        // and crashes at configuration time on unsupported hosts (e.g. linux-aarch64)
+        // with "Could not create task ':…:kspKotlinIosArm64' > Unknown host target".
+        // Supported set: https://kotlinlang.org/docs/native-target-support.html
+        if (supportsKotlinNative()) {
             iosArm64()
             iosSimulatorArm64()
+        }
 
-            // Configure the Android target if the plugin is applied
-            pluginManager.withPlugin("com.android.kotlin.multiplatform.library") {
-                extensions.findByType<KotlinMultiplatformAndroidLibraryTarget>()?.apply {
-                    compileSdk = configProperties.getProperty("COMPILE_SDK").toInt()
-                    minSdk = configProperties.getProperty("MIN_SDK").toInt()
+        // Configure the Android target if the plugin is applied
+        pluginManager.withPlugin("com.android.kotlin.multiplatform.library") {
+            extensions.findByType<KotlinMultiplatformAndroidLibraryTarget>()?.apply {
+                compileSdk = configProperties.getProperty("COMPILE_SDK").toInt()
+                minSdk = configProperties.getProperty("MIN_SDK").toInt()
 
-                    // Set the namespace automatically if not already set
-                    if (namespace == null) {
-                        val pkg = this@configureKotlinMultiplatform.path.removePrefix(":").replace(":", ".")
-                        namespace = "org.meshtastic.$pkg"
-                    }
+                // Default: disable Android resources for most KMP modules.
+                // Modules that need resources (e.g. core:resources) override this
+                // explicitly in their build.gradle.kts android {} block.
+                androidResources.enable = false
+
+                // Set the namespace automatically if not already set
+                if (namespace == null) {
+                    val pkg = this@configureKotlinMultiplatform.path.removePrefix(":").replace(":", ".")
+                    namespace = "org.meshtastic.$pkg"
                 }
             }
-        } else {
-            // In desktop-only mode, create placeholder androidMain/iosMain source sets so
-            // module build scripts that reference them via the DSL accessor don't fail.
-            // These source sets are inert — no target compiles them.
-            sourceSets.apply { create("androidMain") { dependsOn(getByName("commonMain")) } }
         }
     }
 
-    if (!isDesktopOnly) {
-        // Disable iOS native test link & run tasks.
-        // iOS targets exist only for compile-time validation; linking test
-        // executables is extremely slow and causes `./gradlew test` to hang.
-        tasks.configureEach {
-            val taskName = name.lowercase()
-            if (taskName.contains("iosarm64") || taskName.contains("iossimulatorarm64")) {
-                val isDisabledIosTask =
-                    (taskName.startsWith("link") && taskName.contains("test")) ||
-                        taskName == "iosarm64test" ||
-                        taskName == "iossimulatorarm64test" ||
-                        taskName.endsWith("testbinaries")
-                if (isDisabledIosTask) {
-                    enabled = false
-                }
+    // Disable iOS native test link & run tasks.
+    // iOS targets exist only for compile-time validation; linking test
+    // executables is extremely slow and causes `./gradlew test` to hang.
+    tasks.configureEach {
+        val taskName = name.lowercase()
+        if (taskName.contains("iosarm64") || taskName.contains("iossimulatorarm64")) {
+            val isDisabledIosTask =
+                (taskName.startsWith("link") && taskName.contains("test")) ||
+                    taskName == "iosarm64test" ||
+                    taskName == "iossimulatorarm64test" ||
+                    taskName.endsWith("testbinaries")
+            if (isDisabledIosTask) {
+                enabled = false
             }
+        }
+    }
+
+    // TAKPacket-SDK doesn't publish iOS metadata JARs (the .klib exists but the metadata
+    // .jar returns 404). iOS native compilation resolves fine via .klib, but
+    // `transformCommonMainDependenciesMetadata` (triggered by Dokka/publishing) fails.
+    // Exclude the SDK only from the CompilationDependenciesMetadata configs that feed
+    // the metadata transform — NOT from Implementation/Resolvable configs which feed the
+    // actual compiler classpath.
+    val iosMetadataConfigs =
+        setOf("iosArm64CompilationDependenciesMetadata", "iosSimulatorArm64CompilationDependenciesMetadata")
+    configurations.configureEach {
+        if (name in iosMetadataConfigs) {
+            exclude(mapOf("group" to "org.meshtastic", "module" to "takpacket-sdk"))
         }
     }
 
@@ -275,9 +309,7 @@ private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() {
     if (isPublishedModule) {
         val toolchains = extensions.getByType(JavaToolchainService::class.java)
         tasks.withType<Test>().configureEach {
-            javaLauncher.set(
-                toolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(APP_JDK)) }
-            )
+            javaLauncher.set(toolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(APP_JDK)) })
         }
     }
 }

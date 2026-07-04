@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
     <string name="accept">Accetta</string>
     <string name="acknowledgements">Ringraziamenti</string>
     <!-- ACTION -->
@@ -118,6 +119,7 @@
     <string name="channel_name">Nome del canale</string>
     <string name="channel_utilization">Canale di utilizzo</string>
     <string name="channels">Canali</string>
+    <!-- CHIRPY -->
     <string name="chirpy">Chirpy</string>
     <string name="choose_theme">Scegli tema</string>
     <!-- CLEAN -->
@@ -276,6 +278,12 @@
     <string name="distance_measurements">Misure di distanza</string>
     <string name="distance_measurements_description">Visualizza la distanza tra il telefono e gli altri nodi Meshtastic con posizione attiva.</string>
     <string name="dns">DNS</string>
+    <!-- DOC -->
+    <string name="doc_clear_search">Azzera ricerca</string>
+    <string name="doc_title_connections">Connessioni</string>
+    <string name="doc_title_mqtt">MQTT</string>
+    <string name="doc_title_nodes">Nodi</string>
+    <string name="doc_title_onboarding">Come iniziare</string>
     <string name="done">Fatto</string>
     <string name="double_tap_as_button_press">Doppio tocco come pressione pulsante</string>
     <string name="downlink_enabled">Downlink attivato</string>
@@ -613,6 +621,10 @@
     <string name="node_filter_show_ignored">Visualizza solo i nodi ignorati</string>
     <string name="node_filter_title">Filtra per</string>
     <string name="node_id">ID Nodo</string>
+    <string name="node_layout_channel">Canale</string>
+    <string name="node_layout_hops_away">Distanza in Hop</string>
+    <string name="node_layout_log_icons">Metriche Ambientali</string>
+    <string name="node_layout_power">Alimentazione</string>
     <string name="node_number">Numero Nodo</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_button">Opzioni ordinamento nodi</string>
@@ -904,6 +916,7 @@
     <string name="sx126x_rx_boosted_gain">Migliora guadagno in Ricezione</string>
     <string name="system_settings">Impostazioni di Sistema</string>
     <!-- TAK -->
+    <string name="tak_server_section">Server</string>
     <string name="tak_team_blue">Blu</string>
     <string name="tak_team_green">Verde</string>
     <string name="tak_team_red">Rosso</string>
@@ -920,6 +933,7 @@
     <string name="timestamp">Data e ora</string>
     <string name="tls_enabled">TLS abilitato</string>
     <string name="toggle_my_position">Attiva/disattiva posizione</string>
+    <string name="trace_route">Trace Route</string>
     <!-- TRACEROUTE -->
     <string name="traceroute">Traceroute</string>
     <string name="traceroute_diff">Hops verso di lui %1$d Hops di ritorno %2$d</string>
@@ -952,7 +966,6 @@
     <string name="tx_power_dbm">Potenza di Trasmissione</string>
     <string name="type">Tipo</string>
     <string name="type_a_message">Inserisci un messaggio</string>
-    <string name="udp_enabled">Abilitato</string>
     <!-- UNKNOWN -->
     <string name="unknown">Sconosciuto</string>
     <string name="unknown_age">Età sconosciuta</string>

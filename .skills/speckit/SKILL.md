@@ -52,7 +52,7 @@ The standard SDD cycle for a new feature:
 
 ```text
 1. /speckit.specify "Feature description here"
-   → Creates specs/<NNN>-feature-name/spec.md
+   → Creates specs/<YYYYMMDD-HHMMSS>-feature-name/spec.md
    → Auto-creates feature branch via git hook
 
 2. /speckit.clarify
@@ -85,11 +85,11 @@ This runs: specify → (review gate) → plan → (review gate) → tasks → im
 
 ## File Structure
 
-Spec Kit produces files under `specs/<NNN>-feature-name/`:
+Spec Kit produces files under `specs/<YYYYMMDD-HHMMSS>-feature-name/`:
 
 ```
 specs/
-└── 001-feature-name/
+└── 20260513-160000-feature-name/
     ├── spec.md              # Feature specification (FRs, NFRs, SCs, user stories)
     ├── plan.md              # Implementation plan (architecture, phases)
     ├── tasks.md             # Dependency-ordered task list
@@ -108,17 +108,14 @@ specs/
 The project constitution at `.specify/memory/constitution.md` defines non-negotiable principles.
 All specs, plans, and tasks are validated against it during `/speckit.analyze`.
 
-Current constitution (v1.2.3) enforces 9 principles:
+Current constitution (v1.2.0) enforces 6 principles:
 
 1. **KMP Core** — Business logic in `commonMain` only
 2. **Zero Lint Tolerance** — `spotlessCheck` + `detekt` must pass
 3. **Compose Multiplatform UI** — CMP, not Android-only Compose
 4. **Privacy First** — No PII/location/key exposure
-5. **Design Standards Compliance** — Review against Meshtastic design standards
+5. **Design Standards Compliance** — Review against Meshtastic design standards; cross-platform features must reference an upstream spec from `meshtastic/design/features/`
 6. **Verify Before Push** — Local verification before any `git push`
-7. **Coroutine Safety** — `safeCatching` over `runCatching`, project `ioDispatcher`
-8. **Resource Discipline** — `stringResource(Res.string.key)`, `MeshtasticIcons`, sort-strings
-9. **Branch & Scope Hygiene** — Naming conventions, upstream branching, scope limits
 
 ## Extension Hooks
 
@@ -132,35 +129,19 @@ Git hooks are configured in `.specify/extensions.yml` and run automatically:
 
 ### Branch Naming
 
-Feature branches created by `/speckit.git.feature` follow sequential numbering:
-`<NNN>-feature-name` (e.g., `001-local-mesh-discovery`)
+Feature branches created by `/speckit.git.feature` use timestamp-based numbering:
+`YYYYMMDD-HHMMSS-feature-name` (e.g., `20260511-211823-compose-screenshot-testing`)
+
+This avoids merge conflicts when multiple specs are developed on parallel branches.
 
 Non-spec branches follow conventional commit-style prefixes:
 `feat/`, `fix/`, `chore/`, `docs/`, `build/`, `ci/`, `refactor/`, `test/`, `deps/`
 
 ### Task ID Namespacing
 
-To avoid collision when multiple specs exist, prefix task IDs by feature:
-
-| Spec | Prefix | Example |
-|------|--------|---------|
-| 001-local-mesh-discovery | `D` | D001, D002, ... |
-| 002-node-list-layout | `NL-T` | NL-T001, NL-T002, ... |
-| 003-app-docs-markdown | `T` | T000, T010, ... |
-| 004-messaging | `MSG-T` | MSG-T001, MSG-T002, ... |
-| 005-device-connections | `DC-T` | DC-T001, DC-T002, ... |
-| 006-firmware-update | `FW-T` | FW-T001, FW-T002, ... |
-| 007-node-detail-metrics | `NDM-T` | NDM-T001, NDM-T002, ... |
-| 008-radio-app-settings | `SET-T` | SET-T001, SET-T002, ... |
-| 009-map-view | `MAP-T` | MAP-T001, MAP-T002, ... |
-| 010-onboarding | `OB-T` | OB-T001, OB-T002, ... |
-| 011-wifi-provisioning | `WFP-T` | WFP-T001, WFP-T002, ... |
-| 012-core-data | `DAT-T` | DAT-T001, DAT-T002, ... |
-| 013-core-ble | `BLE-T` | BLE-T001, BLE-T002, ... |
-| 014-core-network | `NET-T` | NET-T001, NET-T002, ... |
-| 015-core-database | `DB-T` | DB-T001, DB-T002, ... |
-| 016-core-service | `SVC-T` | SVC-T001, SVC-T002, ... |
-| 017-core-model | `MDL-T` | MDL-T001, MDL-T002, ... |
+To avoid collision when multiple specs exist, prefix task IDs with a short feature mnemonic
+(e.g., `SST-T001` for screenshot testing, `DISC-T001` for discovery). The prefix is defined
+per-spec in the tasks.md header.
 
 ### Design Standards Gate
 

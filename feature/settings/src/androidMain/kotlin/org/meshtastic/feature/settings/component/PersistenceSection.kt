@@ -111,6 +111,6 @@ fun PersistenceSection(
 
 @Preview(showBackground = true)
 @Composable
-private fun PersistenceSectionPreview() {
+fun PersistenceSectionPreview() {
     AppTheme { PersistenceSection(cacheLimit = 100, onSetCacheLimit = {}, nodeShortName = "TEST", onExportData = {}) }
 }

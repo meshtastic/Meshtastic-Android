@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
     <string name="accept">Prihvati</string>
     <!-- ACTION -->
     <string name="action_delete_message">Обриши поруку</string>
@@ -74,6 +75,7 @@
     <string name="channel_name">Naziv kanala</string>
     <string name="channel_url">Линк канала</string>
     <string name="channels">Канали</string>
+    <!-- CHIRPY -->
     <string name="choose_theme">Одабери тему</string>
     <!-- CLEAN -->
     <string name="clear">Očisti</string>
@@ -142,6 +144,9 @@
     <string name="display">Приказ</string>
     <!-- DISTANCE -->
     <string name="distance">Udaljenost</string>
+    <!-- DOC -->
+    <string name="doc_title_firmware">Ажурирања фирмвера</string>
+    <string name="doc_title_nodes">Чворови</string>
     <string name="double_tap_as_button_press">Двоструки додир као дугме</string>
     <string name="edit">Измени</string>
     <string name="eight_hours">8 Сати</string>
@@ -283,6 +288,10 @@
     <!-- NODE -->
     <string name="node_filter_include_unknown">Uključi nepoznato</string>
     <string name="node_filter_placeholder">Filter</string>
+    <string name="node_layout_channel">Kanal</string>
+    <string name="node_layout_hops_away">Скокова удаљено</string>
+    <string name="node_layout_log_icons">Метрике сензора</string>
+    <string name="node_layout_power">Снага</string>
     <string name="node_number">Број чвора</string>
     <string name="node_sort_alpha">A-Š</string>
     <string name="node_sort_channel">Kanal</string>
@@ -431,6 +440,7 @@
     <string name="supported">Подржан</string>
     <string name="sx126x_rx_boosted_gain">Појачање пријемника</string>
     <!-- TAK -->
+    <string name="tak_server_section">Сервер</string>
     <string name="telemetry">Телеметрија (сензори)</string>
     <string name="telemetry_config">Конфигурација телеметрије</string>
     <string name="temperature">Темп.</string>
@@ -442,6 +452,7 @@
     <string name="time_zone">Временска зона</string>
     <string name="timeout">Isteklo vreme</string>
     <string name="timestamp">Временска ознака</string>
+    <string name="trace_route">Праћење руте</string>
     <!-- TRACEROUTE -->
     <string name="traceroute">Праћење руте</string>
     <string name="traceroute_diff">Skokova ka %1$d Skokova nazad %2$d</string>
@@ -460,7 +471,6 @@
     <string name="two_days">48 Сати</string>
     <string name="two_weeks">2n</string>
     <string name="tx_enabled">Трансмитер укључен</string>
-    <string name="udp_enabled">Омогућено</string>
     <!-- UNKNOWN -->
     <string name="unknown">Непознато</string>
     <string name="unknown_age">Непозната старост</string>

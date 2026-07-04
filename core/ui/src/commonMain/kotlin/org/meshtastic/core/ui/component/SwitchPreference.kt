@@ -14,14 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+
 package org.meshtastic.core.ui.component
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.selection.toggleable
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.CircularWavyProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Switch
@@ -29,8 +31,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import org.meshtastic.core.ui.theme.AppTheme
 
 @Composable
 fun SwitchPreference(
@@ -44,32 +48,19 @@ fun SwitchPreference(
     containerColor: Color? = null,
     loading: Boolean = false,
 ) {
-    val defaultColors = ListItemDefaults.colors()
-
-    @Suppress("DEPRECATION")
-    val currentColors =
-        if (enabled) {
-            defaultColors
-        } else {
-            defaultColors.copy(
-                headlineColor = defaultColors.headlineColor.copy(alpha = 0.5f),
-                supportingTextColor = defaultColors.supportingTextColor.copy(alpha = 0.5f),
-            )
-        }
-            .let { if (containerColor != null) it.copy(containerColor = containerColor) else it }
+    val currentColors = ListItemDefaults.colors(containerColor = containerColor ?: Color.Unspecified)
 
     ListItem(
+        checked = checked,
+        onCheckedChange = onCheckedChange,
+        modifier = padding?.let { Modifier.padding(it) } ?: modifier,
+        enabled = enabled,
+        shapes = ListItemDefaults.shapes(shape = RectangleShape),
         colors = currentColors,
-        modifier =
-        (padding?.let { Modifier.padding(it) } ?: modifier).toggleable(
-            value = checked,
-            enabled = enabled,
-            onValueChange = onCheckedChange,
-        ),
         trailingContent = {
             AnimatedContent(targetState = loading) { loading ->
                 if (loading) {
-                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                    CircularWavyProgressIndicator(modifier = Modifier.size(24.dp))
                 } else {
                     Switch(enabled = enabled, checked = checked, onCheckedChange = null)
                 }
@@ -80,12 +71,12 @@ fun SwitchPreference(
                 Text(text = summary)
             }
         },
-        headlineContent = { Text(text = title) },
+        content = { Text(text = title) },
     )
 }
 
 @Preview(showBackground = true)
 @Composable
-private fun SwitchPreferencePreview() {
-    SwitchPreference(title = "Setting", checked = true, enabled = true, onCheckedChange = {})
+fun SwitchPreferencePreview() {
+    AppTheme { SwitchPreference(title = "Setting", checked = true, enabled = true, onCheckedChange = {}) }
 }

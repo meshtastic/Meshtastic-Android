@@ -19,12 +19,14 @@ import org.meshtastic.core.resources.your_string_key
 Text(text = stringResource(Res.string.your_string_key))
 ```
 
-## Module dependency graph
+
+## Dependency Graph
 
 <!--region graph-->
 ```mermaid
 graph TB
   :core:resources[resources]:::kmp-library-compose
+  :core:resources -.-> :core:common
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

@@ -21,6 +21,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
@@ -37,6 +38,9 @@ import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.ModuleConfig
+
+private const val MAX_LED_CURRENT = 31
+private const val MAX_RGB_VALUE = 255
 
 @Composable
 fun AmbientLightingConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
@@ -67,36 +71,72 @@ fun AmbientLightingConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> U
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
-                EditTextPreference(
-                    title = stringResource(Res.string.current),
-                    value = formState.value.current,
+                LedColorFields(
+                    config = formState.value,
                     enabled = state.connected,
-                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy(current = it) },
-                )
-                EditTextPreference(
-                    title = stringResource(Res.string.red),
-                    value = formState.value.red,
-                    enabled = state.connected,
-                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy(red = it) },
-                )
-                EditTextPreference(
-                    title = stringResource(Res.string.green),
-                    value = formState.value.green,
-                    enabled = state.connected,
-                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy(green = it) },
-                )
-
-                EditTextPreference(
-                    title = stringResource(Res.string.blue),
-                    value = formState.value.blue,
-                    enabled = state.connected,
-                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy(blue = it) },
+                    focusManager = focusManager,
+                    onConfigChange = { formState.value = it },
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun LedColorFields(
+    config: ModuleConfig.AmbientLightingConfig,
+    enabled: Boolean,
+    focusManager: FocusManager,
+    onConfigChange: (ModuleConfig.AmbientLightingConfig) -> Unit,
+) {
+    androidx.compose.foundation.layout.Column {
+        EditTextPreference(
+            title = stringResource(Res.string.current),
+            value = config.current,
+            enabled = enabled,
+            isError = config.current !in 0..MAX_LED_CURRENT,
+            keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+            onValueChanged = {
+                if (it in 0..MAX_LED_CURRENT) {
+                    onConfigChange(config.copy(current = it))
+                }
+            },
+        )
+        EditTextPreference(
+            title = stringResource(Res.string.red),
+            value = config.red,
+            enabled = enabled,
+            isError = config.red !in 0..MAX_RGB_VALUE,
+            keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+            onValueChanged = {
+                if (it in 0..MAX_RGB_VALUE) {
+                    onConfigChange(config.copy(red = it))
+                }
+            },
+        )
+        EditTextPreference(
+            title = stringResource(Res.string.green),
+            value = config.green,
+            enabled = enabled,
+            isError = config.green !in 0..MAX_RGB_VALUE,
+            keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+            onValueChanged = {
+                if (it in 0..MAX_RGB_VALUE) {
+                    onConfigChange(config.copy(green = it))
+                }
+            },
+        )
+        EditTextPreference(
+            title = stringResource(Res.string.blue),
+            value = config.blue,
+            enabled = enabled,
+            isError = config.blue !in 0..MAX_RGB_VALUE,
+            keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+            onValueChanged = {
+                if (it in 0..MAX_RGB_VALUE) {
+                    onConfigChange(config.copy(blue = it))
+                }
+            },
+        )
     }
 }

@@ -79,7 +79,7 @@ private val noOpProvision: (String, String, Boolean) -> Unit = { _, _, _ -> }
 
 @PreviewLightDark
 @Composable
-private fun ScanningBlePreview() {
+fun ScanningBlePreview() {
     AppTheme { Surface(Modifier.fillMaxSize()) { ScanningBleContent() } }
 }
 
@@ -89,7 +89,7 @@ private fun ScanningBlePreview() {
 
 @PreviewLightDark
 @Composable
-private fun DeviceFoundPreview() {
+fun DeviceFoundPreview() {
     AppTheme {
         Surface(Modifier.fillMaxSize()) {
             DeviceFoundContent(deviceName = "mpwrd-nm-A1B2", onProceed = noOp, onCancel = noOp)
@@ -121,7 +121,7 @@ private fun ScanningNetworksPreview() {
 
 @PreviewLightDark
 @Composable
-private fun ConnectedWithNetworksPreview() {
+fun ConnectedWithNetworksPreview() {
     AppTheme {
         Surface(Modifier.fillMaxSize()) {
             ConnectedContent(
@@ -197,7 +197,7 @@ private fun ConnectedProvisioningPreview() {
 
 @PreviewLightDark
 @Composable
-private fun ConnectedSuccessPreview() {
+fun ConnectedSuccessPreview() {
     AppTheme {
         Surface(Modifier.fillMaxSize()) {
             ConnectedContent(
@@ -216,7 +216,7 @@ private fun ConnectedSuccessPreview() {
 
 @PreviewLightDark
 @Composable
-private fun ConnectedFailedPreview() {
+fun ConnectedFailedPreview() {
     AppTheme {
         Surface(Modifier.fillMaxSize()) {
             ConnectedContent(
@@ -307,7 +307,7 @@ private fun ProvisionStatusCardProvisioningPreview() {
 
 @PreviewLightDark
 @Composable
-private fun ProvisionStatusCardSuccessPreview() {
+fun ProvisionStatusCardSuccessPreview() {
     AppTheme {
         Surface {
             Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
@@ -331,7 +331,7 @@ private fun ProvisionStatusCardFailedPreview() {
 
 @PreviewLightDark
 @Composable
-private fun NetworkRowPreview() {
+fun NetworkRowPreview() {
     AppTheme {
         Surface {
             Column(modifier = Modifier.fillMaxWidth()) {
@@ -361,6 +361,6 @@ private fun NetworkRowLongSsidPreview() {
 
 @PreviewLightDark
 @Composable
-private fun MpwrdDisclaimerBannerPreview() {
+fun MpwrdDisclaimerBannerPreview() {
     AppTheme { Surface { Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) { MpwrdDisclaimerBanner() } } }
 }

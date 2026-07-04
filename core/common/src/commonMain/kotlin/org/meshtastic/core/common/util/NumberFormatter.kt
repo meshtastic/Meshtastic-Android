@@ -23,13 +23,17 @@ import kotlin.math.roundToLong
 object NumberFormatter {
     /** Formats a double value with the specified number of decimal places. */
     fun format(value: Double, decimalPlaces: Int): String {
+        if (value.isNaN() || value.isInfinite()) return "—"
         val factor = 10.0.pow(decimalPlaces)
         val rounded = (value * factor).roundToLong()
         return formatFixedPoint(rounded, decimalPlaces)
     }
 
     /** Formats a float value with the specified number of decimal places. */
-    fun format(value: Float, decimalPlaces: Int): String = format(value.toDouble(), decimalPlaces)
+    fun format(value: Float, decimalPlaces: Int): String {
+        if (value.isNaN() || value.isInfinite()) return "—"
+        return format(value.toDouble(), decimalPlaces)
+    }
 
     private fun formatFixedPoint(scaledValue: Long, decimalPlaces: Int): String {
         if (decimalPlaces == 0) return scaledValue.toString()

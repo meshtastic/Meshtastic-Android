@@ -43,6 +43,7 @@ import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import org.meshtastic.core.ui.theme.AppTheme
 import kotlin.jvm.JvmName
 
 @Composable
@@ -207,13 +208,15 @@ internal expect fun Enum<*>.isDeprecatedEnumEntry(): Boolean
 
 @Preview(showBackground = true)
 @Composable
-private fun DropDownPreferencePreview() {
-    DropDownPreference(
-        title = "Settings",
-        summary = "Lorem ipsum dolor sit amet",
-        enabled = true,
-        items = listOf(DropDownItem("TEST1", "text1"), DropDownItem("TEST2", "text2")),
-        selectedItem = "TEST2",
-        onItemSelected = {},
-    )
+fun DropDownPreferencePreview() {
+    AppTheme {
+        DropDownPreference(
+            title = "Settings",
+            summary = "Lorem ipsum dolor sit amet",
+            enabled = true,
+            items = listOf(DropDownItem("TEST1", "text1"), DropDownItem("TEST2", "text2")),
+            selectedItem = "TEST2",
+            onItemSelected = {},
+        )
+    }
 }

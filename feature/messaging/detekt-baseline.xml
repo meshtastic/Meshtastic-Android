@@ -31,6 +31,10 @@
     <ID>ParameterNaming:MessageScreenComponents.kt:onToggleFilteringDisabled: () -> Unit = {}</ID>
     <ID>ParameterNaming:MessageScreenComponents.kt:onToggleShowFiltered: () -> Unit</ID>
     <ID>ParameterNaming:MessageScreenComponents.kt:onToggleShowFiltered: () -> Unit = {}</ID>
-    <ID>ViewModelForwarding:AdaptiveContactsScreen.kt:ContactsScreen( onNavigateToShare = { backStack.add(ChannelsRoute.ChannelsGraph) }, sharedContactRequested = sharedContactRequested, requestChannelSet = requestChannelSet, onHandleDeepLink = onHandleDeepLink, onClearSharedContactRequested = onClearSharedContactRequested, onClearRequestChannelUrl = onClearRequestChannelUrl, viewModel = contactsViewModel, onClickNodeChip = { backStack.add(NodesRoute.NodeDetail(it)) }, onNavigateToMessages = { contactKey -> backStack.add(ContactsRoute.Messages(contactKey)) }, onNavigateToNodeDetails = { backStack.add(NodesRoute.NodeDetail(it)) }, scrollToTopEvents = scrollToTopEvents, activeContactKey = null, )</ID>
+    <ID>PreviewPublic:Message.kt:@PreviewLightDark @Composable fun MessageInputPreview</ID>
+    <ID>PreviewPublic:QuickChatPreviews.kt:@PreviewLightDark @Composable fun EditQuickChatDialogPreview</ID>
+    <ID>PreviewPublic:QuickChatPreviews.kt:@PreviewLightDark @Composable fun QuickChatItemPreview</ID>
+    <ID>PreviewPublic:ReactionPreviews.kt:@PreviewLightDark @Composable fun ReactionItemPreview</ID>
+    <ID>ViewModelForwarding:AdaptiveContactsScreen.kt:ContactsScreen( onNavigateToShare = { backStack.add(ChannelsRoute.Channels) }, sharedContactRequested = sharedContactRequested, requestChannelSet = requestChannelSet, onHandleDeepLink = onHandleDeepLink, onClearSharedContactRequested = onClearSharedContactRequested, onClearRequestChannelUrl = onClearRequestChannelUrl, viewModel = contactsViewModel, onClickNodeChip = { backStack.add(NodesRoute.NodeDetail(it)) }, onNavigateToMessages = { contactKey -> backStack.add(ContactsRoute.Messages(contactKey)) }, onNavigateToNodeDetails = { backStack.add(NodesRoute.NodeDetail(it)) }, scrollToTopEvents = scrollToTopEvents, activeContactKey = null, )</ID>
   </CurrentIssues>
 </SmellBaseline>

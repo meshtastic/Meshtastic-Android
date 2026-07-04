@@ -1,0 +1,406 @@
+name: UI & Docs Governance
+
+on:
+  pull_request_target:
+    branches: [main]
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+  schedule:
+    - cron: "0 6 * * 1" # Every Monday at 6 AM UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  # ── Job 1: Staleness — flag PRs that change UI without updating docs ────────
+  staleness:
+    name: Docs staleness check
+    runs-on: ubuntu-24.04-arm
+    if: >-
+      github.event.pull_request != null
+      && !contains(github.event.pull_request.labels.*.name, 'skip-docs-check')
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Detect changed files
+        id: changed
+        run: |
+          BASE="${{ github.event.pull_request.base.sha }}"
+          HEAD="${{ github.event.pull_request.head.sha }}"
+
+          changed=$(git diff --name-only "$BASE" "$HEAD")
+
+          views_changed=$(echo "$changed" | grep -E \
+            '^feature/.*/src/commonMain/.*/(ui|component|screen)/|^feature/.*/src/androidMain/.*/ui/|^core/ui/src/commonMain/' \
+            | grep -v 'Test\|Preview\|__Snapshots__' || true)
+
+          docs_changed=$(echo "$changed" | grep -E '^docs/en/(user|developer)/' || true)
+
+          echo "views_changed<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$views_changed" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+          echo "docs_changed<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$docs_changed" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+          if [[ -n "$views_changed" && -z "$docs_changed" ]]; then
+            echo "stale=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "stale=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Post warning comment
+        if: steps.changed.outputs.stale == 'true'
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const viewsChanged = `${{ steps.changed.outputs.views_changed }}`.trim();
+            const body = [
+              '## 📄 Docs staleness check — advisory',
+              '',
+              'This PR modifies user-facing UI source files but does not update any page under `docs/en/user/` or `docs/en/developer/`.',
+              '',
+              '> ⚠️ Doc changes propagate to **3 consumers**: in-app docs browser, Jekyll site (GitHub Pages), and meshtastic.org (Docusaurus sync). Updating a page in `docs/en/` automatically flows to all three.',
+              '',
+              '**Changed source files:**',
+              '```',
+              viewsChanged,
+              '```',
+              '',
+              '**What to check:**',
+              '| Changed area | Likely doc page |',
+              '|---|---|',
+              '| `feature/messaging/` | `docs/en/user/messages-and-channels.md` |',
+              '| `feature/node/` | `docs/en/user/nodes.md` or `docs/en/user/node-metrics.md` |',
+              '| `feature/map/` | `docs/en/user/map-and-waypoints.md` |',
+              '| `feature/connections/` | `docs/en/user/connections.md` |',
+              '| `feature/settings/` | `docs/en/user/settings-radio-user.md` or `docs/en/user/settings-module-admin.md` |',
+              '| `feature/firmware/` | `docs/en/user/firmware.md` |',
+              '| `feature/intro/` | `docs/en/user/onboarding.md` |',
+              '| `feature/discovery/` | `docs/en/user/discovery.md` |',
+              '| `feature/docs/` | Internal docs infrastructure |',
+              '| `core/ui/` | `docs/en/developer/codebase.md` or component-specific user pages |',
+              '',
+              '**New page checklist** (if adding a new doc page):',
+              '1. Create the `.md` file in `docs/en/user/` or `docs/en/developer/` with `last_updated` frontmatter',
+              '2. Register in `DocBundleLoader.kt` with string resources (in-app browser)',
+              '3. Jekyll and Docusaurus sync pick up new pages automatically — no config change needed',
+              '',
+              'If this PR does **not** require a doc update (e.g., internal refactor, bug fix, test change), add the **`skip-docs-check`** label to dismiss this check.',
+              '',
+              '> **Cross-platform note:** This check is advisory while doc coverage matures. Both Android and Apple repos use the same `skip-docs-check` label and advisory severity. See `meshtastic/design` standards for shared conventions.',
+            ].join('\n');
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find(c =>
+              c.user.login === 'github-actions[bot]' &&
+              c.body.includes('Docs staleness check')
+            );
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
+
+      - name: Dismiss stale comment when docs are updated
+        if: steps.changed.outputs.stale == 'false'
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find(c =>
+              c.user.login === 'github-actions[bot]' &&
+              c.body.includes('Docs staleness check')
+            );
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body: '## ✅ Docs staleness check passed\n\nThis PR includes updates to `docs/en/` alongside the source changes. Thank you!',
+              });
+            }
+
+      - name: Advisory status
+        if: steps.changed.outputs.stale == 'true'
+        run: |
+          echo "::warning::UI source files changed without corresponding docs/en/ updates."
+          echo "Add the 'skip-docs-check' label if this PR does not require a doc update."
+          echo "NOTE: This check is advisory while docs coverage matures across platforms."
+          echo "To upgrade to blocking, change this step to 'exit 1'."
+
+  # ── Job 2: Quality gates — link validation, coverage, registry, freshness ───
+  validate:
+    name: Docs quality gates
+    runs-on: ubuntu-24.04-arm
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+
+      - name: Validate internal links
+        run: node scripts/validate-doc-links.js docs/en
+
+      - name: Check doc coverage
+        run: node scripts/check-doc-coverage.js .
+
+      - name: Validate DocBundleLoader registry
+        run: |
+          loader="feature/docs/src/commonMain/kotlin/org/meshtastic/feature/docs/data/DocBundleLoader.kt"
+          missing=0
+          for f in docs/en/user/*.md docs/en/developer/*.md; do
+            slug=$(basename "$f" .md)
+            if ! grep -q "\"$slug\"" "$loader"; then
+              echo "ERROR: $slug not registered in DocBundleLoader.kt"
+              missing=$((missing + 1))
+            fi
+          done
+          if [ "$missing" -gt 0 ]; then
+            echo ""
+            echo "FAILED: $missing page(s) missing from DocBundleLoader.kt in-app index."
+            exit 1
+          fi
+          echo "All doc pages registered in DocBundleLoader."
+
+      - name: Check doc freshness
+        # Advisory — warns on stale pages but does not block PRs
+        continue-on-error: true
+        run: node scripts/check-doc-freshness.js docs --max-age-days=180
+
+  # ── Job 3: Preview staleness — flag UI changes without preview updates ──────
+  preview-staleness:
+    name: Preview staleness check
+    runs-on: ubuntu-24.04-arm
+    if: >-
+      github.event.pull_request != null
+      && !contains(github.event.pull_request.labels.*.name, 'skip-preview-check')
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Detect changed files
+        id: changed
+        run: |
+          BASE="${{ github.event.pull_request.base.sha }}"
+          HEAD="${{ github.event.pull_request.head.sha }}"
+
+          changed=$(git diff --name-only "$BASE" "$HEAD")
+
+          # UI composables changed (screens, components — excluding tests and previews)
+          ui_changed=$(echo "$changed" | grep -E \
+            '^(feature|core/ui)/.*/src/commonMain/.*/.*\.(kt)$' \
+            | grep -E '/(ui|component|screen)/' \
+            | grep -v 'Test\|Preview\|__Snapshots__' || true)
+
+          # Preview files changed
+          preview_changed=$(echo "$changed" | grep -E 'Preview.*\.kt$' || true)
+
+          # Screenshot test files changed
+          screenshot_tests_changed=$(echo "$changed" | grep -E '^screenshot-tests/src/screenshotTest/.*\.kt$' || true)
+
+          # Reference images changed
+          refs_changed=$(echo "$changed" | grep -E '^screenshot-tests/src/screenshotTestDebug/reference/.*\.png$' || true)
+
+          echo "ui_changed<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$ui_changed" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+          echo "preview_changed<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$preview_changed" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+          echo "screenshot_tests_changed<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$screenshot_tests_changed" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+          echo "refs_changed<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$refs_changed" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+          # Preview staleness: UI changed but no preview updates
+          if [[ -n "$ui_changed" && -z "$preview_changed" ]]; then
+            echo "preview_stale=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "preview_stale=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          # Screenshot staleness: previews changed but no reference image updates
+          if [[ -n "$preview_changed" && -z "$refs_changed" ]]; then
+            echo "screenshot_stale=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "screenshot_stale=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Post preview advisory
+        if: steps.changed.outputs.preview_stale == 'true'
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const uiChanged = `${{ steps.changed.outputs.ui_changed }}`.trim();
+            const body = [
+              '## 🖼️ Preview staleness check — advisory',
+              '',
+              'This PR modifies UI composables but does not update any `*Previews.kt` files.',
+              '',
+              '> Previews power screenshot tests and in-app docs screenshots. Keeping them current ensures visual regression coverage stays accurate.',
+              '',
+              '**Changed UI files:**',
+              '```',
+              uiChanged,
+              '```',
+              '',
+              '**What to check:**',
+              '| Pattern | Preview file convention |',
+              '|---|---|',
+              '| `feature/{name}/…/ui/` or `component/` | `feature/{name}/…/*Previews.kt` |',
+              '| `core/ui/…/` | `core/ui/…/` (previews colocated) |',
+              '',
+              '**Adding previews checklist:**',
+              '1. Create or update a `*Previews.kt` file in the same module with `@PreviewLightDark`',
+              '2. Add `@Suppress("PreviewPublic")` if the preview is consumed by screenshot-tests',
+              '3. Add corresponding `@PreviewTest` function in `screenshot-tests/src/screenshotTest/`',
+              '4. Run `./gradlew :screenshot-tests:updateDebugScreenshotTest` to generate reference images',
+              '',
+              'If this PR does **not** require preview updates (e.g., logic-only change, non-visual refactor), add the **`skip-preview-check`** label to dismiss.',
+            ].join('\n');
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find(c =>
+              c.user.login === 'github-actions[bot]' &&
+              c.body.includes('Preview staleness check')
+            );
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
+
+      - name: Post screenshot advisory
+        if: steps.changed.outputs.screenshot_stale == 'true'
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const previewChanged = `${{ steps.changed.outputs.preview_changed }}`.trim();
+            const body = [
+              '## 📸 Screenshot reference staleness — advisory',
+              '',
+              'This PR modifies preview composables but does not update screenshot reference images.',
+              '',
+              '> Reference images in `screenshot-tests/src/screenshotTestDebug/reference/` must be regenerated when previews change, or `validateDebugScreenshotTest` will fail.',
+              '',
+              '**Changed preview files:**',
+              '```',
+              previewChanged,
+              '```',
+              '',
+              '**How to update:**',
+              '```bash',
+              './gradlew :screenshot-tests:updateDebugScreenshotTest',
+              '```',
+              'Then commit the updated reference PNGs.',
+              '',
+              'If this change is intentionally preview-only (e.g., adding a preview that doesn\'t need a test yet), add the **`skip-preview-check`** label.',
+            ].join('\n');
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find(c =>
+              c.user.login === 'github-actions[bot]' &&
+              c.body.includes('Screenshot reference staleness')
+            );
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
+
+      - name: Dismiss comments when resolved
+        if: >-
+          steps.changed.outputs.preview_stale == 'false'
+          && steps.changed.outputs.screenshot_stale == 'false'
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            for (const marker of ['Preview staleness check', 'Screenshot reference staleness']) {
+              const existing = comments.find(c =>
+                c.user.login === 'github-actions[bot]' &&
+                c.body.includes(marker)
+              );
+              if (existing) {
+                await github.rest.issues.updateComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: existing.id,
+                  body: `## ✅ ${marker} passed\n\nPreview and screenshot references are up to date.`,
+                });
+              }
+            }

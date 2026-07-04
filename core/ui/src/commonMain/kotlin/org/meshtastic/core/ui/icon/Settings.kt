@@ -27,6 +27,7 @@ import org.meshtastic.core.resources.ic_bug_report
 import org.meshtastic.core.resources.ic_cleaning_services
 import org.meshtastic.core.resources.ic_data_usage
 import org.meshtastic.core.resources.ic_format_paint
+import org.meshtastic.core.resources.ic_info
 import org.meshtastic.core.resources.ic_language
 import org.meshtastic.core.resources.ic_list
 import org.meshtastic.core.resources.ic_notifications
@@ -72,3 +73,5 @@ val MeshtasticIcons.Storage: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_storage)
 val MeshtasticIcons.Watch: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_app_settings_alt)
+val MeshtasticIcons.HelpOutline: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_info)

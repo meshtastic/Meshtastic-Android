@@ -1,0 +1,37 @@
+---
+layout: default
+---
+
+{% assign locale_code = page.locale | default: "en" %}
+{% assign locale_info = site.data.locales[locale_code] %}
+{% assign page_path = page.path %}
+{% assign path_parts = page_path | split: "/" %}
+{% assign remaining_parts = path_parts | slice: 1, path_parts.size %}
+{% assign en_relative = remaining_parts | join: "/" | replace: ".md", "" %}
+{% assign en_path = "en/" | append: en_relative %}
+
+<div class="locale-page-banner" {% if locale_info.dir == "rtl" %}dir="rtl"{% endif %}>
+  <p class="locale-notice">
+    🌐 <strong>{{ locale_info.name }}</strong> — Community translation
+    <a href="{{ en_path | relative_url }}">View in English</a>
+  </p>
+</div>
+
+<div {% if locale_info.dir == "rtl" %}dir="rtl" lang="{{ locale_code }}"{% else %}lang="{{ locale_code }}"{% endif %}>
+{{ content }}
+</div>
+
+<style>
+  .locale-page-banner {
+    background: rgba(103, 234, 148, 0.1);
+    border: 1px solid rgba(103, 234, 148, 0.3);
+    border-radius: 12px;
+    padding: 10px 16px;
+    margin-bottom: 1.5rem;
+    font-size: 0.85rem;
+  }
+  .locale-notice a {
+    margin-left: 12px;
+    font-weight: 500;
+  }
+</style>

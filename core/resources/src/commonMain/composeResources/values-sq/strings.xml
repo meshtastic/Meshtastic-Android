@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
     <string name="accept">Prano</string>
     <!-- ACTION -->
     <string name="action_delete_message">Fshini mesazhin</string>
@@ -41,6 +42,7 @@
     <string name="channel_invalid">Ky URL kanal është i pavlefshëm dhe nuk mund të përdoret</string>
     <string name="channel_label">Kanal</string>
     <string name="channel_name">Emri i kanalit radio</string>
+    <!-- CHIRPY -->
     <string name="choose_theme">Zgjidh temën</string>
     <!-- CLEAN -->
     <string name="clear">Pastro</string>
@@ -68,6 +70,7 @@
     <!-- DISPLAY -->
     <!-- DISTANCE -->
     <string name="distance">Distanca</string>
+    <!-- DOC -->
     <string name="edit">Redakto</string>
     <string name="eight_hours">8 Orë</string>
     <!-- ENCRYPTION -->
@@ -149,6 +152,8 @@
     <!-- NODE -->
     <string name="node_filter_include_unknown">Përfshi të panjohurat</string>
     <string name="node_filter_placeholder">Filtrimi</string>
+    <string name="node_layout_channel">Kanal</string>
+    <string name="node_layout_hops_away">Hops larg</string>
     <string name="node_sort_channel">Kanal</string>
     <string name="node_sort_distance">Distanca</string>
     <string name="node_sort_hops_away">Hop-e larg</string>

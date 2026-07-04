@@ -51,7 +51,13 @@ class StoreForwardPacketHandlerImpl(
 
     override fun handleStoreAndForward(packet: MeshPacket, dataPacket: DataPacket, myNodeNum: Int) {
         val payload = packet.decoded?.payload ?: return
-        val u = StoreAndForward.ADAPTER.decode(payload)
+        val u =
+            try {
+                StoreAndForward.ADAPTER.decode(payload)
+            } catch (e: IOException) {
+                Logger.e(e) { "Failed to parse StoreAndForward packet" }
+                return
+            }
         handleReceivedStoreAndForward(dataPacket, u, myNodeNum)
     }
 

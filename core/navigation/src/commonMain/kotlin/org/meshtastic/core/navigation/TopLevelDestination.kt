@@ -20,9 +20,9 @@ import androidx.navigation3.runtime.NavKey
 import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.bottom_nav_settings
-import org.meshtastic.core.resources.connections
-import org.meshtastic.core.resources.conversations
+import org.meshtastic.core.resources.connect
 import org.meshtastic.core.resources.map
+import org.meshtastic.core.resources.messages
 import org.meshtastic.core.resources.nodes
 
 /**
@@ -32,11 +32,11 @@ import org.meshtastic.core.resources.nodes
  * and Desktop navigation shells.
  */
 enum class TopLevelDestination(val label: StringResource, val route: Route) {
-    Conversations(Res.string.conversations, ContactsRoute.ContactsGraph),
-    Nodes(Res.string.nodes, NodesRoute.NodesGraph),
+    Messages(Res.string.messages, ContactsRoute.Contacts),
+    Nodes(Res.string.nodes, NodesRoute.Nodes),
     Map(Res.string.map, MapRoute.Map()),
-    Settings(Res.string.bottom_nav_settings, SettingsRoute.SettingsGraph()),
-    Connections(Res.string.connections, ConnectionsRoute.ConnectionsGraph),
+    Settings(Res.string.bottom_nav_settings, SettingsRoute.Settings()),
+    Connect(Res.string.connect, ConnectionsRoute.Connections),
     ;
 
     companion object {

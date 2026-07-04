@@ -42,6 +42,6 @@ fun HopsInfo(hops: Int, modifier: Modifier = Modifier, contentColor: Color = Mat
 
 @PreviewLightDark
 @Composable
-private fun HopsInfoPreview() {
+fun HopsInfoPreview() {
     AppTheme { HopsInfo(hops = 3) }
 }

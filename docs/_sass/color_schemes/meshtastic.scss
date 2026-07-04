@@ -1,0 +1,39 @@
+// Meshtastic Material 3 — Light color scheme for just-the-docs
+// Source: core/ui/.../Color.kt §8.2 (Light Scheme)
+//
+// Brand colors:
+//   Primary (Light):  #2D8F52  (Green 700)
+//   Surface (Light):  #F5F6FA  (Neutral 50)
+
+$color-scheme: light;
+
+// Body / page background
+$body-background-color: #F5F6FA;       // Neutral 50   — surfaceLight
+$sidebar-color: #ECEDF3;              // Neutral 100  — surfaceContainerLight
+$body-text-color: #2C2D3C;            // Neutral 800  — onSurfaceLight
+$body-heading-color: #2C2D3C;         // Neutral 800
+
+// Links
+$link-color: #2D8F52;                 // Green 700    — primaryLight
+$nav-link-color: #2D8F52;             // Green 700
+
+// Navigation
+$nav-child-link-color: #555668;       // Neutral 600  — secondaryLight
+$search-result-preview-color: #555668;
+
+// Code
+$code-background-color: #ECEDF3;      // Neutral 100
+$code-linenumber-color: #9496A6;      // Neutral 400
+
+// Borders
+$border-color: #D5D6E0;               // Neutral 200  — outlineVariantLight
+$table-background-color: #F5F6FA;     // Neutral 50
+
+// Buttons
+$btn-primary-color: #2D8F52;          // Green 700
+
+// Feedback / callouts
+$feedback-color: #E0E1EB;             // surfaceContainerHighLight
+
+// Search
+$search-background-color: #FFFFFF;    // surfaceContainerLowestLight

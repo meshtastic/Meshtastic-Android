@@ -51,6 +51,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
@@ -138,11 +139,16 @@ fun MessageScreen(
     var showDeleteDialog by rememberSaveable { mutableStateOf(false) }
     var sharedContact by rememberSaveable { mutableStateOf<Node?>(null) }
     val selectedMessageIds = rememberSaveable { mutableStateOf(emptySet<Long>()) }
-    val messageInputState = rememberTextFieldState(message)
+    val messageInputState = rememberTextFieldState(message.ifEmpty { viewModel.draftMessage.value })
     val showQuickChat by viewModel.showQuickChat.collectAsStateWithLifecycle()
     val filteredCount by viewModel.filteredCount.collectAsStateWithLifecycle()
     val showFiltered by viewModel.showFiltered.collectAsStateWithLifecycle()
     val filteringDisabled = contactSettings[contactKey]?.filteringDisabled ?: false
+
+    // Sync text field changes back to ViewModel draft
+    LaunchedEffect(messageInputState) {
+        snapshotFlow { messageInputState.text.toString() }.collect { text -> viewModel.setDraftMessage(text) }
+    }
 
     // Prevent the message TextField from stealing focus when the screen opens
     LaunchedEffect(contactKey) { focusManager.clearFocus() }
@@ -233,6 +239,7 @@ fun MessageScreen(
                         viewModel.sendMessage(event.text, contactKey, event.replyingToPacketId)
                         if (event.replyingToPacketId != null) replyingToPacketId = null
                         messageInputState.clearText()
+                        viewModel.clearDraftMessage()
                     }
 
                     is MessageScreenEvent.SendReaction ->
@@ -521,7 +528,7 @@ private fun MessageInput(
 
 @PreviewLightDark
 @Composable
-private fun MessageInputPreview() {
+fun MessageInputPreview() {
     AppTheme {
         Surface {
             Column(modifier = Modifier.padding(8.dp)) {

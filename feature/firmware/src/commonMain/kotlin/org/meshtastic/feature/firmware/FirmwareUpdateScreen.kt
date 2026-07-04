@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @file:Suppress("TooManyFunctions")
 
 package org.meshtastic.feature.firmware
@@ -39,7 +40,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -336,8 +336,8 @@ private fun FirmwareUpdateContent(
 }
 
 @Composable
-private fun VerifyingState() {
-    CircularProgressIndicator(modifier = Modifier.size(64.dp))
+internal fun VerifyingState() {
+    CircularWavyProgressIndicator(modifier = Modifier.size(64.dp))
     Spacer(Modifier.height(24.dp))
     Text(stringResource(Res.string.firmware_update_verifying), style = MaterialTheme.typography.titleMedium)
     Spacer(Modifier.height(8.dp))
@@ -351,8 +351,8 @@ private fun VerifyingState() {
 }
 
 @Composable
-private fun CheckingState() {
-    CircularProgressIndicator(modifier = Modifier.size(64.dp))
+internal fun CheckingState() {
+    CircularWavyProgressIndicator(modifier = Modifier.size(64.dp))
     Spacer(Modifier.height(24.dp))
     Text(stringResource(Res.string.firmware_update_checking), style = MaterialTheme.typography.bodyLarge)
 }
@@ -446,7 +446,7 @@ private fun ReadyState(
 }
 
 @Composable
-private fun DisclaimerDialog(updateMethod: FirmwareUpdateMethod, onDismiss: () -> Unit, onConfirm: () -> Unit) {
+internal fun DisclaimerDialog(updateMethod: FirmwareUpdateMethod, onDismiss: () -> Unit, onConfirm: () -> Unit) {
     MeshtasticDialog(
         onDismiss = onDismiss,
         title = stringResource(Res.string.firmware_update_disclaimer_title),
@@ -763,7 +763,7 @@ private fun AwaitingFileSaveState(state: FirmwareUpdateState.AwaitingFileSave, o
         )
     }
 
-    CircularProgressIndicator(modifier = Modifier.size(64.dp))
+    CircularWavyProgressIndicator(modifier = Modifier.size(64.dp))
     Spacer(Modifier.height(24.dp))
     Text(
         stringResource(Res.string.firmware_update_save_dfu_file),
@@ -832,7 +832,7 @@ private fun VerificationFailedState(onRetry: () -> Unit, onIgnore: () -> Unit) {
 }
 
 @Composable
-private fun ErrorState(error: UiText, onRetry: () -> Unit) {
+internal fun ErrorState(error: UiText, onRetry: () -> Unit) {
     Icon(
         MeshtasticIcons.Dangerous,
         contentDescription = null,
@@ -855,7 +855,7 @@ private fun ErrorState(error: UiText, onRetry: () -> Unit) {
 }
 
 @Composable
-private fun SuccessState(onDone: () -> Unit) {
+internal fun SuccessState(onDone: () -> Unit) {
     val haptic = LocalHapticFeedback.current
     LaunchedEffect(Unit) { haptic.performHapticFeedback(HapticFeedbackType.LongPress) }
 

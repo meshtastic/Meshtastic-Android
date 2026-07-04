@@ -17,26 +17,8 @@
 
 pluginManagement {
     repositories {
-        google()
         mavenCentral()
         gradlePluginPortal()
-        maven {
-            url = uri("https://jitpack.io")
-            content {
-                includeGroupByRegex("com\\.github\\..*")
-            }
-        }
-        maven { url = uri("../offline-repository") }
-    }
-}
-
-// Version mirrored in libs.versions.toml for Renovate tracking.
-plugins {
-    id("com.gradle.develocity") version "4.4.1"
-}
-
-dependencyResolutionManagement {
-    repositories {
         google {
             content {
                 includeGroupByRegex("com\\.android.*")
@@ -44,12 +26,19 @@ dependencyResolutionManagement {
                 includeGroupByRegex("androidx.*")
             }
         }
+        maven { url = uri("../offline-repository") }
+    }
+}
+
+dependencyResolutionManagement {
+    repositories {
         mavenCentral()
         gradlePluginPortal()
-        maven {
-            url = uri("https://jitpack.io")
+        google {
             content {
-                includeGroupByRegex("com\\.github\\..*")
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
             }
         }
         maven { url = uri("../offline-repository") }
@@ -61,8 +50,8 @@ dependencyResolutionManagement {
     }
 }
 
-// Shared Develocity and Build Cache configuration
-apply(from = "../gradle/develocity.settings.gradle")
+// Build Cache configuration (HTTP remote cache + local)
+apply(from = "../gradle/build-cache.settings.gradle")
 
 rootProject.name = "build-logic"
 include(":convention")

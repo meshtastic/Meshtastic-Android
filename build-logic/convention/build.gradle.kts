@@ -15,13 +15,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     `kotlin-dsl`
     alias(libs.plugins.spotless)
     alias(libs.plugins.detekt)
-    alias(libs.plugins.flatpak.gradle.generator)
 }
 
 group = "org.meshtastic.buildlogic"
@@ -39,6 +39,11 @@ dependencies {
     // This allows the use of the 'libs' type-safe accessor in the Kotlin source of the plugins
     implementation(files(libs.javaClass.superclass.protectionDomain.codeSource.location))
 
+    // Self-updating embedded Gradle Kotlin version
+    val gradleKotlinVersion = KotlinVersion.CURRENT.toString()
+
+    // ── Convention plugin compile dependencies ──────────────────────────────
+    // These are standard compile-time dependencies used by our convention plugins.
     compileOnly(libs.android.gradleApiPlugin)
     compileOnly(libs.serialization.gradlePlugin)
     compileOnly(libs.android.tools.common)
@@ -51,6 +56,7 @@ dependencies {
     compileOnly(libs.google.services.gradlePlugin)
     compileOnly(libs.koin.gradlePlugin)
     compileOnly(libs.kover.gradlePlugin)
+    // Mokkery needs `implementation` because convention plugins reference its types at compile time
     implementation(libs.mokkery.gradlePlugin)
     compileOnly(libs.kotlin.gradlePlugin)
     compileOnly(libs.ksp.gradlePlugin)
@@ -95,12 +101,6 @@ detekt {
     allRules = false
     baseline = file("detekt-baseline.xml")
     source.setFrom(files("src/main/java", "src/main/kotlin"))
-}
-
-tasks.flatpakGradleGenerator {
-    outputFile = file("../../flatpak-sources-convention.json")
-    downloadDirectory.set("./offline-repository")
-    excludeConfigurations.set(listOf("testCompileClasspath", "testRuntimeClasspath"))
 }
 
 gradlePlugin {
@@ -192,6 +192,11 @@ gradlePlugin {
         register("root") {
             id = "meshtastic.root"
             implementationClass = "RootConventionPlugin"
+        }
+
+        register("docs") {
+            id = "meshtastic.docs"
+            implementationClass = "org.meshtastic.buildlogic.DocsTasks"
         }
 
         register("publishing") {

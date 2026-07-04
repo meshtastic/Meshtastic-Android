@@ -16,10 +16,6 @@
  */
 package org.meshtastic.core.ui.component
 
-import androidx.compose.runtime.Composable
-
-@Composable actual fun rememberTimeTickWithLifecycle(): Long = 0L
-
 internal actual fun <T : Enum<T>> enumEntriesOf(selectedItem: T): List<T> = emptyList()
 
 internal actual fun Enum<*>.isDeprecatedEnumEntry(): Boolean = false

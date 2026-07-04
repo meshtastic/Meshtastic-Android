@@ -122,7 +122,7 @@ const session = await joinSession({
             name: "speckit_load",
             description:
                 "Load the primary artifacts (spec.md, plan.md, tasks.md) for a specific feature spec. " +
-                "Provide the spec ID (directory name, e.g. '001-local-mesh-discovery') or a partial match. " +
+                "Provide the spec ID (directory name, e.g. '20260511-211823-compose-screenshot-testing') or a partial match. " +
                 "Optionally load only specific artifacts.",
             parameters: {
                 type: "object",

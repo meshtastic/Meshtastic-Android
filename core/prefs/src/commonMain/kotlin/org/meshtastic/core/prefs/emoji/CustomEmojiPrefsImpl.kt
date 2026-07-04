@@ -19,6 +19,7 @@ package org.meshtastic.core.prefs.emoji
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -42,6 +43,9 @@ class CustomEmojiPrefsImpl(
     override val customEmojiFrequency: StateFlow<String?> =
         dataStore.data.map { it[KEY_EMOJI_FREQ_PREF] }.stateIn(scope, SharingStarted.Eagerly, null)
 
+    override val preferredSkinToneIndex: StateFlow<Int> =
+        dataStore.data.map { it[KEY_SKIN_TONE_PREF] ?: 0 }.stateIn(scope, SharingStarted.Eagerly, 0)
+
     override fun setCustomEmojiFrequency(frequency: String?) {
         scope.launch {
             dataStore.edit { prefs ->
@@ -54,8 +58,13 @@ class CustomEmojiPrefsImpl(
         }
     }
 
+    override fun setPreferredSkinToneIndex(index: Int) {
+        scope.launch { dataStore.edit { prefs -> prefs[KEY_SKIN_TONE_PREF] = index } }
+    }
+
     companion object {
         const val KEY_EMOJI_FREQ = "pref_key_custom_emoji_freq"
         val KEY_EMOJI_FREQ_PREF = stringPreferencesKey(KEY_EMOJI_FREQ)
+        val KEY_SKIN_TONE_PREF = intPreferencesKey("pref_key_skin_tone")
     }
 }

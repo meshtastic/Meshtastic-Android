@@ -296,6 +296,7 @@ fun MessageItem(
                             transport = message.transportMechanism,
                             viaMqtt = message.viaMqtt,
                             modifier = Modifier.size(16.dp).padding(start = 4.dp),
+                            tint = Color.White,
                         )
                     }
                     if (containsBel) {

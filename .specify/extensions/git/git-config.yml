@@ -2,7 +2,7 @@
 # Copied to .specify/extensions/git/git-config.yml on install
 
 # Branch numbering strategy: "sequential" (001, 002, ...) or "timestamp" (YYYYMMDD-HHMMSS)
-branch_numbering: sequential
+branch_numbering: timestamp
 
 # Commit message used by `git commit` during repository initialization
 init_commit_message: "[Spec Kit] Initial commit"
@@ -11,7 +11,7 @@ init_commit_message: "[Spec Kit] Initial commit"
 # Set "default" to enable for all commands, then override per-command.
 # Each key can be true/false. Message is customizable per-command.
 auto_commit:
-  default: false
+  default: true
   before_clarify:
     enabled: false
     message: "[Spec Kit] Save progress before clarification"
@@ -34,7 +34,7 @@ auto_commit:
     enabled: false
     message: "[Spec Kit] Save progress before issue sync"
   after_constitution:
-    enabled: false
+    enabled: true
     message: "[Spec Kit] Add project constitution"
   after_specify:
     enabled: false

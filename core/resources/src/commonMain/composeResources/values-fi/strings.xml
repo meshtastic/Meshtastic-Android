@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">Viesti käyttäjältä %1$s: %2$s</string>
     <string name="accept">Hyväksy</string>
@@ -138,6 +139,7 @@
     <string name="channel_url">Kanavan URL-osoite</string>
     <string name="channel_utilization">Kanavan käyttöaste</string>
     <string name="channels">Kanavat</string>
+    <!-- CHIRPY -->
     <string name="chirpy">Chirpy</string>
     <string name="choose_contrast">Kontrastin taso</string>
     <string name="choose_theme">Valitse teema</string>
@@ -324,6 +326,12 @@
     <string name="distance_measurements">Etäisyyden mittaukset</string>
     <string name="distance_measurements_description">Näytä etäisyys puhelimen ja muiden sijainnin jakavien Meshtastic laitteiden välillä.</string>
     <string name="dns">DNS</string>
+    <!-- DOC -->
+    <string name="doc_clear_search">Tyhjennä haku</string>
+    <string name="doc_title_connections">Yhteydet</string>
+    <string name="doc_title_discovery">Haku</string>
+    <string name="doc_title_mqtt">MQTT</string>
+    <string name="doc_title_nodes">Laitteet</string>
     <string name="done">Valmis</string>
     <string name="dont_show_again_for_device">Älä näytä enää tälle laitteelle</string>
     <string name="double_tap_as_button_press">Kaksoisnapautus painikkeena</string>
@@ -732,6 +740,7 @@
     <string name="mute_always">Aina</string>
     <string name="mute_notifications">Mykistä ilmoitukset</string>
     <string name="mute_remove">Poistetaanko ‘%1$s’ mykistys?</string>
+    <string name="mute_selected">Mykistä valittu</string>
     <string name="mute_status_always">Pysyvästi mykistetty</string>
     <string name="mute_status_muted_for_days">Mykistetty %1$d päiväksi, %2$s tunniksi</string>
     <string name="mute_status_muted_for_hours">Mykistetty %1$s tunniksi</string>
@@ -779,6 +788,10 @@
     <string name="node_filter_show_ignored">Näytä vain huomioimattomat solmut</string>
     <string name="node_filter_title">Suodata otsikon mukaan</string>
     <string name="node_id">Laiteen ID</string>
+    <string name="node_layout_channel">Kanava</string>
+    <string name="node_layout_hops_away">Hyppyjä</string>
+    <string name="node_layout_log_icons">Ympäristöarvot</string>
+    <string name="node_layout_power">Virta</string>
     <string name="node_number">Laitteen numero</string>
     <string name="node_sort_alpha">A-Ö</string>
     <string name="node_sort_button">Lajitteluvaihtoehdot</string>
@@ -1136,6 +1149,7 @@
     <string name="store_forward_config">Varastoi &amp; välitä asetukset</string>
     <string name="store_forward_enabled">Varastoi &amp; välitä käytössä</string>
     <string name="subnet">Aliverkko</string>
+    <string name="success">Valmis</string>
     <string name="super_deep_sleep_duration_seconds">Super-syväunen kesto</string>
     <string name="supported">Tuettu</string>
     <string name="supported_by_community">Meshtastic-yhteisön tukema</string>
@@ -1154,8 +1168,19 @@
     <string name="tak_role_teamlead">Joukkueen johtaja</string>
     <string name="tak_role_teammember">Tiimin jäsen</string>
     <string name="tak_role_unspecified">Määrittelemätön</string>
+    <string name="tak_server">TAK palvelin</string>
     <string name="tak_server_enabled">Ota paikallinen TAK-palvelin käyttöön</string>
-    <string name="tak_server_enabled_desc">Käynnistää TCP-palvelimen porttiin 8089 ATAK-yhteyksiä varten</string>
+    <string name="tak_server_enabled_desc">Avaa paikallisen salatun TLS-palvelinyhteyden porttiin 8089, jotta ATAK/iTAK voi yhdistää siihen</string>
+    <string name="tak_server_export_data_package_desc">Luo .zip-asetustiedosto ATAK/iTAK-sovellukselle, jotta se voi yhdistää tähän palvelimeen</string>
+    <string name="tak_server_loading">…</string>
+    <string name="tak_server_section">Palvelin</string>
+    <string name="tak_server_test_card_title">TAK Mesh -testitila (debug)</string>
+    <string name="tak_server_test_idle">Lähetä kaikki %1$d testisanomat mesh-verkkoon</string>
+    <string name="tak_server_test_result_bytes">%1$dB ✓</string>
+    <string name="tak_server_test_result_unknown_error">✗</string>
+    <string name="tak_server_test_results">%1$d onnistui, %2$d epäonnistui yhteensä %3$d/%4$d testistä</string>
+    <string name="tak_server_test_run">Suorita</string>
+    <string name="tak_server_test_running">Käynnissä: %1$s</string>
     <string name="tak_team">Tiimin väri</string>
     <string name="tak_team_blue">Sininen</string>
     <string name="tak_team_brown">Ruskea</string>
@@ -1185,6 +1210,7 @@
     <string name="timestamp">Aikaleima</string>
     <string name="tls_enabled">TLS käytössä</string>
     <string name="toggle_my_position">Kytke sijainti päälle</string>
+    <string name="trace_route">Reitinselvitys</string>
     <!-- TRACEROUTE -->
     <string name="traceroute">Reitinselvitys</string>
     <string name="traceroute_diff">Reititettyjä hyppyjä %1$d, joista %2$d hyppyä takaisin</string>
@@ -1237,7 +1263,6 @@
     <string name="tx_power_dbm">Lähetysteho</string>
     <string name="type">Kirjoita</string>
     <string name="type_a_message">Kirjoita viesti</string>
-    <string name="udp_enabled">Käytössä</string>
     <!-- UNKNOWN -->
     <string name="unknown">Tuntematon</string>
     <string name="unknown_age">Tuntematon ikä</string>
@@ -1248,6 +1273,7 @@
     <string name="unmessageable">Ei vastaanota viestejä</string>
     <string name="unmonitored_or_infrastructure">Ei seurannassa tai toimii infrastruktuurilaitteena</string>
     <string name="unmute">Poista mykistys</string>
+    <string name="unmute_selected">Poista mykistys valitusta</string>
     <string name="unrecognized">Tuntematon</string>
     <string name="unset">Ei asetettu – 0</string>
     <string name="up_down_select_input_enabled">Ylös/Alas/Valitse syöte käytössä</string>
@@ -1303,6 +1329,7 @@
     <string name="wifi_provision_description">Siirrä WiFi-tunnukset mPWRD-OS-laitteeseen Bluetoothin kautta.</string>
     <string name="wifi_provision_device_found">Laite löytyi</string>
     <string name="wifi_provision_device_found_detail">Valmis etsimään WiFi-verkkoja.</string>
+    <string name="wifi_provision_hidden_network">Piilotettu verkko</string>
     <string name="wifi_provision_mpwrd_disclaimer">Lue lisää mPWRD-OS-projektista\nhttps://github.com/mPWRD-OS</string>
     <string name="wifi_provision_no_networks">Verkkoja ei löytynyt</string>
     <string name="wifi_provision_scan_failed">WiFi-verkkojen haku epäonnistui: %1$s</string>

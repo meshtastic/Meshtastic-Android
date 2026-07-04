@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
     <string name="accept">Aceptar</string>
     <string name="acknowledgements">Agradecimientos</string>
     <!-- ACTION -->
@@ -109,6 +110,7 @@
     <string name="channel_label">Canal</string>
     <string name="channel_name">Nombre del canal</string>
     <string name="channels">Canales</string>
+    <!-- CHIRPY -->
     <string name="choose_theme">Elegir tema</string>
     <!-- CLEAN -->
     <string name="clean_node_database_confirmation">Esto eliminará los nodos %1$d de su base de datos. Esta acción no se puede deshacer.</string>
@@ -250,6 +252,12 @@
     <string name="distance_measurements">Mediciones de Distancia</string>
     <string name="distance_measurements_description">Muestra la distancia entre tu teléfono y otros nodos Meshtastic posicionados.</string>
     <string name="dns">DNS</string>
+    <!-- DOC -->
+    <string name="doc_clear_search">Borrar búsqueda</string>
+    <string name="doc_title_connections">Conexiones</string>
+    <string name="doc_title_mqtt">MQTT</string>
+    <string name="doc_title_nodes">Nodos</string>
+    <string name="doc_title_onboarding">Primeros Pasos</string>
     <string name="done">Hecho</string>
     <string name="double_tap_as_button_press">Doble pulsación como botón</string>
     <string name="downlink_enabled">Baja de Paquetes Permitida</string>
@@ -532,6 +540,10 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="node_filter_show_ignored">Solo mostrar nodos ignorados</string>
     <string name="node_filter_title">Filtrar por</string>
     <string name="node_id">Identificación del nodo</string>
+    <string name="node_layout_channel">Canal</string>
+    <string name="node_layout_hops_away">Saltos de distancia</string>
+    <string name="node_layout_log_icons">Métricas de Entorno</string>
+    <string name="node_layout_power">Consumo</string>
     <string name="node_number">Número del nodo</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_button">Opciones de orden de Nodos</string>
@@ -801,6 +813,7 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="sx126x_rx_boosted_gain">Aumentar ganancia de RX</string>
     <string name="system_settings">Ajustes del sistema</string>
     <!-- TAK -->
+    <string name="tak_server_section">Servidor</string>
     <string name="tak_team_blue">Azul</string>
     <string name="tak_team_green">Verde</string>
     <string name="tak_team_red">Rojo</string>
@@ -816,6 +829,7 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="timestamp">Fecha</string>
     <string name="tls_enabled">TLS activado</string>
     <string name="toggle_my_position">Cambiar mi posición</string>
+    <string name="trace_route">Trazar ruta</string>
     <!-- TRACEROUTE -->
     <string name="traceroute">Traceroute</string>
     <string name="traceroute_diff">Salta hacia %1$d Salta de vuelta %2$d</string>
@@ -840,7 +854,6 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="tx_power_dbm">Potencia de transmisión</string>
     <string name="type">Tipo</string>
     <string name="type_a_message">Escribe un mensaje</string>
-    <string name="udp_enabled">Habilitado</string>
     <!-- UNKNOWN -->
     <string name="unknown">Desconocido</string>
     <string name="unknown_age">Edad desconocida</string>

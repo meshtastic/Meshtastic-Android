@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
     <string name="accept">Glac</string>
     <!-- ACTION -->
     <string name="action_delete_message">Ar mhaith leat teachtaireacht a scriosadh</string>
@@ -41,6 +42,7 @@
     <string name="channel_invalid">Tá an URL Cainéil seo neamhdhleathach agus ní féidir é a úsáid</string>
     <string name="channel_label">Cainéal</string>
     <string name="channel_name">Ainm Cainéal</string>
+    <!-- CHIRPY -->
     <string name="choose_theme">Roghnaigh téama</string>
     <!-- CLEAN -->
     <string name="clear">Glan</string>
@@ -71,6 +73,7 @@
     <!-- DISPLAY -->
     <!-- DISTANCE -->
     <string name="distance">Sáth</string>
+    <!-- DOC -->
     <string name="edit">Cuir in eagar</string>
     <string name="eight_hours">8 Uair an chloig</string>
     <!-- ENCRYPTION -->
@@ -152,6 +155,8 @@
     <!-- NODE -->
     <string name="node_filter_include_unknown">Cuir Anaithnid san áireamh</string>
     <string name="node_filter_placeholder">Scagaire</string>
+    <string name="node_layout_channel">Cainéal</string>
+    <string name="node_layout_hops_away">Céimeanna uaidh</string>
     <string name="node_sort_channel">Cainéal</string>
     <string name="node_sort_distance">Sáth</string>
     <string name="node_sort_hops_away">Cúlaithe</string>

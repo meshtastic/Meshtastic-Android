@@ -4,5 +4,6 @@
   <CurrentIssues>
     <ID>ComposableParamOrder:PermissionScreenLayout.kt:@Composable internal fun PermissionScreenLayout</ID>
     <ID>ParameterNaming:WelcomeScreen.kt:onGetStarted: () -> Unit</ID>
+    <ID>PreviewPublic:WelcomeScreen.kt:@Preview @Composable fun WelcomeScreenPreview</ID>
   </CurrentIssues>
 </SmellBaseline>

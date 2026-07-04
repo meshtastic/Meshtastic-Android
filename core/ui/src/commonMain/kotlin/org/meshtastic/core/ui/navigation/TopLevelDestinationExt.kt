@@ -29,9 +29,9 @@ import org.meshtastic.core.resources.ic_wifi
 val TopLevelDestination.icon: DrawableResource
     get() =
         when (this) {
-            TopLevelDestination.Conversations -> Res.drawable.ic_forum
+            TopLevelDestination.Messages -> Res.drawable.ic_forum
             TopLevelDestination.Nodes -> Res.drawable.ic_nodes
             TopLevelDestination.Map -> Res.drawable.ic_map
             TopLevelDestination.Settings -> Res.drawable.ic_settings
-            TopLevelDestination.Connections -> Res.drawable.ic_wifi
+            TopLevelDestination.Connect -> Res.drawable.ic_wifi
         }

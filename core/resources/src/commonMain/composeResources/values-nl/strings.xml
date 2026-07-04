@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
     <string name="accept">Accepteer</string>
     <!-- ACTION -->
     <string name="action_delete_message">Bericht verwijderen</string>
@@ -69,6 +70,7 @@
     <string name="channel_label">Kanaal</string>
     <string name="channel_name">Kanaalnaam</string>
     <string name="channels">Kanalen</string>
+    <!-- CHIRPY -->
     <string name="choose_theme">Kies thema</string>
     <!-- CLEAN -->
     <string name="clear">Wis</string>
@@ -120,6 +122,8 @@
     <string name="display_units">Geef eenheden weer</string>
     <!-- DISTANCE -->
     <string name="distance">Afstand</string>
+    <!-- DOC -->
+    <string name="doc_title_mqtt">MQTT</string>
     <string name="downlink_enabled">Downlink ingeschakeld</string>
     <string name="dynamic">Dynamisch</string>
     <string name="echo_enabled">Echo ingeschakeld</string>
@@ -262,6 +266,9 @@
     <string name="node_filter_include_unknown">Include onbekend</string>
     <string name="node_filter_placeholder">Filter</string>
     <string name="node_id">Node ID</string>
+    <string name="node_layout_channel">Kanaal</string>
+    <string name="node_layout_hops_away">Aantal sprongen</string>
+    <string name="node_layout_power">Vermogen</string>
     <string name="node_number">Node Nummer</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_button">Node sorteeropties</string>
@@ -412,6 +419,7 @@
     <string name="ssid">SSID</string>
     <string name="supported">Ondersteund</string>
     <!-- TAK -->
+    <string name="tak_server_section">Server</string>
     <string name="tak_team_blue">Blauw</string>
     <string name="tak_team_green">Groen</string>
     <string name="tak_team_red">Rood</string>

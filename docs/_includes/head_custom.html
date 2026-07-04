@@ -1,0 +1,167 @@
+<!-- Inter font from Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  /* M3-inspired typography */
+  :root {
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', ui-monospace, monospace;
+  }
+
+  body,
+  .site-title,
+  .search-input {
+    font-family: var(--font-sans) !important;
+  }
+
+  code, pre, .highlight {
+    font-family: var(--font-mono) !important;
+    font-size: 0.875em;
+  }
+
+  /* M3 surface elevation & rounding */
+  .main-content table {
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .main-content blockquote {
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    border-left-width: 4px;
+  }
+
+  .main-content pre {
+    border-radius: 12px;
+  }
+
+  .main-content code {
+    border-radius: 6px;
+    padding: 0.15em 0.4em;
+  }
+
+  /* Smooth transitions for theme switching */
+  body,
+  .side-bar,
+  .main,
+  .main-content,
+  .site-header,
+  .search-input,
+  .search-results,
+  a {
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  }
+
+  /* Theme toggle button styling */
+  .theme-toggle {
+    background: none;
+    border: 1px solid var(--border-color, #D5D6E0);
+    border-radius: 20px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: inherit;
+    margin: 0 auto;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+  }
+
+  .theme-toggle:hover {
+    background-color: rgba(128, 128, 128, 0.1);
+  }
+
+  .theme-toggle-wrap {
+    text-align: center;
+    padding: 12px 0 4px;
+  }
+
+  /* Heading weight refinement */
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  h1 { font-weight: 700; letter-spacing: -0.02em; }
+
+  /* Smooth anchor scroll */
+  html { scroll-behavior: smooth; }
+
+  /* Language switcher */
+  .language-switcher {
+    display: inline-block;
+    position: relative;
+    margin-left: 8px;
+  }
+
+  .language-switcher-btn {
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 500;
+    font-family: var(--font-sans);
+    list-style: none;
+    padding: 4px 10px;
+    border: 1px solid var(--border-color, #D5D6E0);
+    border-radius: 16px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: background-color 0.2s ease;
+  }
+
+  .language-switcher-btn:hover {
+    background-color: rgba(128, 128, 128, 0.1);
+  }
+
+  .language-switcher[open] .language-switcher-list {
+    display: block;
+  }
+
+  .language-switcher-list {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    left: auto;
+    z-index: 100;
+    list-style: none;
+    padding: 8px 0;
+    margin: 4px 0 0;
+    min-width: 140px;
+    background: var(--body-background-color, #fff);
+    border: 1px solid var(--border-color, #D5D6E0);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+
+  .language-switcher-list li {
+    padding: 0;
+  }
+
+  .language-switcher-list a {
+    display: block;
+    padding: 6px 16px;
+    text-decoration: none;
+    font-size: 0.85rem;
+    color: inherit;
+  }
+
+  .language-switcher-list a:hover {
+    background-color: rgba(103, 234, 148, 0.15);
+  }
+</style>
+
+<script>
+  // Respect OS preference on first visit, then remember user choice
+  (function() {
+    var stored = localStorage.getItem('jtd-theme');
+    if (stored) return; // will be applied by jtd.setTheme below
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      localStorage.setItem('jtd-theme', 'meshtastic-dark');
+    }
+  })();
+</script>

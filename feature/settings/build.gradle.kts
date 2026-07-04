@@ -22,11 +22,6 @@ plugins {
 }
 
 kotlin {
-    android {
-        namespace = "org.meshtastic.feature.settings"
-        androidResources.enable = false
-    }
-
     sourceSets {
         commonMain.dependencies {
             implementation(projects.core.common)
@@ -47,7 +42,6 @@ kotlin {
 
             implementation(libs.kotlinx.collections.immutable)
             implementation(libs.aboutlibraries.compose.m3)
-            implementation(libs.jetbrains.navigation3.ui)
         }
 
         androidMain.dependencies {

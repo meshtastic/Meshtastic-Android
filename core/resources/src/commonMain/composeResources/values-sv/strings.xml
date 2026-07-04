@@ -16,11 +16,29 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
+    <string name="a11y_label_value">%1$s: %2$s</string>
+    <string name="a11y_message_from">Meddelande från %1$s: %2$s</string>
+    <string name="a11y_node_battery">batteri %1$d%%</string>
+    <string name="a11y_node_distance_away">%1$s bort</string>
+    <string name="a11y_node_favorite">favorit</string>
+    <string name="a11y_node_hops_away">%1$d hopp bort</string>
+    <string name="a11y_node_last_heard">hördes senast %1$s</string>
+    <string name="a11y_node_offline">offline</string>
+    <string name="a11y_node_online">online</string>
+    <string name="a11y_node_role">roll %1$s</string>
+    <string name="a11y_node_signal">mottagning %1$s</string>
     <string name="accept">Acceptera</string>
     <string name="acknowledgements">Bekräftelser</string>
     <!-- ACTION -->
+    <string name="action_copy_message">Kopiera meddelande</string>
     <string name="action_delete_message">Ta bort meddelande</string>
+    <string name="action_react_with_emoji">Reagera med emoji</string>
     <string name="action_select_device">Välj enhet</string>
+    <string name="action_select_message">Välj meddelanden</string>
+    <string name="action_select_network">Välj nätverk</string>
+    <string name="action_send_reply">Skicka svar</string>
+    <string name="action_show_message_status">Visa meddelandestatus</string>
     <string name="actions">Åtgärder</string>
     <!-- ADD -->
     <string name="add">Lägg till</string>
@@ -28,6 +46,8 @@
     <string name="add_favorite">Lägg till i favoriter</string>
     <string name="add_layer">Lägg till lager</string>
     <string name="add_network_device">Lägg till</string>
+    <string name="add_network_device_manually">Lägg till enhet manuellt…</string>
+    <string name="add_network_layer">Lägg till nätverkslager</string>
     <string name="address">Adress</string>
     <string name="admin_key">Admin-nyckel</string>
     <string name="admin_keys">Admin-nycklar</string>
@@ -70,6 +90,7 @@
     <string name="audio_config">Inställningar för ljud</string>
     <string name="available_pins">Tillgängliga pin</string>
     <string name="back">Tillbaka</string>
+    <string name="backup_restore">Säkerhetskopiera &amp; återställ</string>
     <string name="bad">Dålig</string>
     <string name="bandwidth">Bandbredd</string>
     <string name="baro_pressure">Tryck</string>
@@ -83,6 +104,9 @@
     <string name="bluetooth_config">Bluetooth-inställningar</string>
     <string name="bluetooth_enabled">Bluetooth är aktiverad</string>
     <string name="bluetooth_feature_config">Konfiguration</string>
+    <string name="bluetooth_feature_config_description">Hantera enhetsinställningarna och kanalerna trådlöst.</string>
+    <string name="bluetooth_feature_discovery">Upptäckt</string>
+    <string name="bluetooth_feature_discovery_description">Hitta och identifiera Meshtastic-enheter nära dig.</string>
     <string name="bluetooth_permission">Bluetooth</string>
     <string name="bold_heading">Fetstil för rubriktext</string>
     <string name="bottom_nav_settings">Inställningar</string>
@@ -114,7 +138,9 @@
     <string name="channel_name">Kanalnamn</string>
     <string name="channel_url">Kanal-URL</string>
     <string name="channels">Kanaler</string>
+    <!-- CHIRPY -->
     <string name="chirpy">Chirpy</string>
+    <string name="choose_contrast">Kontrastnivå</string>
     <string name="choose_theme">Välj tema</string>
     <!-- CLEAN -->
     <string name="clean_node_database_confirmation">Detta kommer att ta bort %1$d noder från din databas. Denna åtgärd kan inte ångras.</string>
@@ -125,23 +151,28 @@
     <string name="clean_unknown_nodes">Rensa endast okända noder</string>
     <string name="clear">Rensa</string>
     <string name="clear_selection">Avmarkera</string>
+    <string name="clear_time_zone">Ta bort tidszon</string>
     <string name="client_notification">Meddelande från enheten</string>
     <string name="close">Stäng</string>
     <string name="close_selection">Stäng markerade</string>
     <string name="codec_2_enabled">CODEC 2 aktiverat</string>
     <string name="codec2_sample_rate">CODEC2 samplingshastighet</string>
     <string name="coding_rate">Kodningshastighet</string>
+    <string name="collapse_chart">Minimera diagram</string>
     <string name="communicate_off_the_grid">Kommunicera med din släkt och dina vänner utan online- och mobiltjänster.</string>
     <!-- COMPASS -->
     <string name="compass_bearing">Riktning: %1$s</string>
     <string name="compass_bearing_na">Riktning: okänd</string>
     <string name="compass_distance">Avstånd: %1$s</string>
+    <string name="compass_location_disabled">Platstjänst är inaktiverad. Slå på platstjänst.</string>
     <string name="compass_no_location_fix">Väntar på en GPS-position för att beräkna avstånd och riktning.</string>
     <string name="compass_no_location_permission">Platstillstånd krävs för att visa avstånd och riktning.</string>
     <string name="compass_no_magnetometer">Denna enhet har ingen kompass. Riktning okänd.</string>
     <string name="compass_north_top">Kompassens norrläge uppåt</string>
     <string name="compass_orientation">Kompassriktning</string>
     <string name="compass_title">Kompass</string>
+    <string name="compass_uncertainty">Uppskattad area: \u00b1%1$s (\u00b1%2$s)</string>
+    <string name="compass_uncertainty_unknown">Uppskattat område: okänd noggrannhet</string>
     <string name="compromised_keys">Läkta nycklar upptäcktes, välj OK för att återskapa.</string>
     <!-- CONFIG -->
     <string name="config_device_doubleTapAsButtonPress_summary">Dubbelklick på supporterad accelerometer räknas som användarknapp.</string>
@@ -169,7 +200,7 @@
     <string name="config_position_broadcast_secs_summary">Längsta tid som kan förflyta utan att en nod sänder en position.</string>
     <string name="config_position_broadcast_smart_minimum_distance_summary">Minsta förändring av position för att smart position ska sända (meter).</string>
     <string name="config_position_broadcast_smart_minimum_interval_secs_summary">Hur ofta position ska skickas om minsta angivna förflyttning skett.</string>
-    <string name="config_position_flags_summary">Valfria fält att inkludera vid sammansättning av positionsmeddelanden. Ju fler fält som väljs, desto större kommer meddelandet att bli. Längre meddelanden leder till högre sändningsutnyttnande och en högre risk för paketförlust.</string>
+    <string name="config_position_flags_summary">Valfria fält att inkludera vid sammansättning av positionsmeddelanden. Ju fler fält som väljs, desto större kommer meddelandet att bli. Längre meddelanden leder till högre sändningsutnyttjande och en högre risk för paketförlust.</string>
     <string name="config_position_gps_update_interval_summary">Hur ofta ska vi försöka få en GPS-position (&lt;10sec håller GPS aktiv).</string>
     <string name="config_power_is_power_saving_summary">Kommer att pausa allt så mycket som möjligt. För tracker- och sensor-rollen kommer detta också att omfatta lora radio. Använd inte den här inställningen om du vill använda enheten med telefonapparna eller använder en enhet utan en hårdvaruknapp.</string>
     <string name="config_security_admin_key">Den publika nyckeln som ger rätt att skicka administratörsmeddelanden till den här noden.</string>
@@ -177,16 +208,22 @@
     <string name="config_security_is_managed">Enheten hanteras av en mesh-administratör. Användaren kan inte ändra enhetsinställningarna.</string>
     <string name="config_security_private_key">Används för att skapa en delad nyckel med en fjärrnod.</string>
     <string name="config_security_serial_enabled">Seriell kommunikation över Stream API.</string>
+    <string name="configure_bluetooth_permissions">Ställ in Bluetooth-behörigheter</string>
     <string name="configure_critical_alerts">Konfigurera kritiska larm</string>
     <string name="configure_location_permissions">Konfigurera platsbehörigheter</string>
     <string name="configure_notification_permissions">Konfigurera aviseringsbehörigheter</string>
     <string name="connect">Anslut</string>
+    <string name="connect_radio_for_remote_admin">Anslut till en radio för att hantera fjärrnoder.</string>
     <string name="connected">Ansluten</string>
     <string name="connected_device">Ansluten enhet</string>
     <string name="connected_sleeping">Ansluten till radioenhet, men den är i sovläge</string>
     <string name="connecting">Ansluter</string>
     <string name="connection_status">Aktuella anslutningar:</string>
     <string name="connections">Anslutning</string>
+    <string name="contrast">Kontrast</string>
+    <string name="contrast_high">Hög</string>
+    <string name="contrast_medium">Medel</string>
+    <string name="contrast_standard">Förval</string>
     <string name="conversations">Konversationer</string>
     <string name="copy">Kopiera</string>
     <string name="create_your_own_networks">Skapa egna nätverk</string>
@@ -215,11 +252,13 @@
     <string name="debug_filter_included">Filtrera inkluderade</string>
     <string name="debug_filter_preset_title">Förinställda filter</string>
     <string name="debug_filters">Filter</string>
+    <string name="debug_log_api_enabled">API för debugloggen igång</string>
     <string name="debug_logs_export">Exportera loggar</string>
     <string name="debug_panel">Felsökningspanel</string>
     <string name="debug_search_clear">Rensa sökning</string>
     <string name="debug_search_next">Nästa träff</string>
     <string name="debug_search_prev">Föregående träff</string>
+    <string name="debug_store_logs_summary">Inaktivera för att inte spara nätloggar till disk</string>
     <string name="debug_store_logs_title">Spara meshnätsloggar</string>
     <string name="default_">Förvald</string>
     <!-- DELETE -->
@@ -233,9 +272,13 @@
     <string name="delete_messages_title">Ta bort  meddelanden?</string>
     <string name="delete_selection">Radera markerade</string>
     <string name="delivery_confirmed">Sändning bekräftad</string>
+    <string name="delivery_confirmed_reboot_warning">Enheten kan koppla bort och starta om medan inställningar tillämpas.</string>
+    <string name="demo_mode">Demoläge</string>
     <string name="desc_node_filter_clear">rensa filtrering av noder</string>
     <string name="description">Beskrivning</string>
     <string name="desktop_notification_title">Meshtastic</string>
+    <string name="desktop_tray_quit">Avsluta</string>
+    <string name="desktop_tray_show">Visa Meshtastic</string>
     <string name="details">Detaljer</string>
     <string name="detection_sensor">Detekteringssensor</string>
     <string name="detection_sensor_config">Inställningar för detekteringssensor</string>
@@ -245,10 +288,15 @@
     <string name="device_configuration">Konfiguration av enhet</string>
     <string name="device_db_cache_limit">Gräns för enhetens DB-cache</string>
     <string name="device_gps">Enhetens GPS</string>
+    <string name="device_metrics_label_value">%1$s: %2$s</string>
     <string name="device_metrics_log">Enhetens mätvärden</string>
+    <string name="device_metrics_numeric_value">%1$s</string>
+    <string name="device_metrics_percent_value">%1$s: %2$s%%</string>
     <string name="device_metrics_update_interval_seconds">Uppdateringsintervall för enhetsdata</string>
+    <string name="device_metrics_voltage_value">%1$s: %2$s V</string>
     <string name="device_sleeping">Enheten i sovläge</string>
     <string name="device_telemetry_enabled">Skicka enhetstelemetri</string>
+    <string name="device_theme_language">Tema: %1$s, Språk: %2$s</string>
     <string name="dew_point">Daggpunkt</string>
     <string name="direct_message">Direktmeddelande</string>
     <string name="direct_message_key">Knapp för direktmeddelanden</string>
@@ -259,6 +307,7 @@
     <string name="disk_free_indexed">Ledigt lagringutrymme %1$d</string>
     <!-- DISPLAY -->
     <string name="display">Display</string>
+    <string name="display_config">Enhetsskärm</string>
     <string name="display_mode">Visningsläge</string>
     <string name="display_time_in_12h_format">Visar tiden i 12-timmarsformat när denna är aktiverad.</string>
     <string name="display_units">Visa enheter</string>
@@ -269,11 +318,21 @@
     <string name="distance_measurements">Avståndsmätning</string>
     <string name="distance_measurements_description">Visa avståndet mellan din telefon och andra Meshtastic noder med kända positioner.</string>
     <string name="dns">DNS</string>
+    <!-- DOC -->
+    <string name="doc_clear_search">Rensa sökning</string>
+    <string name="doc_section_developer">Guide för utvecklare</string>
+    <string name="doc_section_user">Användarguide</string>
+    <string name="doc_title_discovery">Upptäckt</string>
+    <string name="doc_title_mqtt">MQTT</string>
+    <string name="doc_title_nodes">Noder</string>
+    <string name="doc_title_onboarding">Kom igång</string>
     <string name="done">Klart</string>
+    <string name="dont_show_again_for_device">Visa inte igen för denna enhet</string>
     <string name="double_tap_as_button_press">Dubbeltryck som knapptryck</string>
     <string name="downlink_enabled">Nedlänk aktiverad</string>
     <string name="downlink_feature_description">Meddelanden från en offentlig internetgateway vidarebefordras till det lokala nätverket. På grund av noll-hopp-policyn kommer trafiken från standardservern MQTT inte att sprida sig längre än den här enheten.</string>
     <string name="download">Ladda ner</string>
+    <string name="duplicated_public_key_title">Dubblett publik nyckel upptäckt</string>
     <string name="dynamic">Dynamisk</string>
     <string name="easily_set_up_private_mesh_networks">Konfigurera enkelt privata nätverk för säker och tillförlitlig kommunikation i avlägsna områden.</string>
     <string name="echo_enabled">Eko aktiverad</string>
@@ -312,19 +371,25 @@
     <string name="external_notification_enabled">Externa aviseringar aktiverad</string>
     <string name="factory_reset">Återställ till standardinställningar</string>
     <string name="fair">Ok</string>
+    <string name="fallback_node_name">Meshtastic %1$s</string>
     <string name="favorite">Favorit</string>
     <string name="favorite_add">Lägg till '%1$s' som en favoritnod?</string>
     <string name="favorite_remove">Ta bort '%1$s' som en favoritnod?</string>
+    <string name="file_entry">- %1$s (%2$d bytes)</string>
+    <string name="files_available">Tillgängliga filer (%1$d):</string>
     <!-- FILTER -->
+    <string name="filter_add_placeholder">Lägg till ord eller regex:mönster</string>
     <string name="filter_disable_for_contact">Inaktivera filtrering</string>
     <string name="filter_enable">Aktivera filtrering</string>
     <string name="filter_enable_for_contact">Aktivera filtrering</string>
     <string name="filter_enable_summary">Dölj meddelanden som innehåller filterord</string>
+    <string name="filter_hide_count">Dölj %1$d filtrerade</string>
     <string name="filter_icon">Filter</string>
     <string name="filter_message_label">Filtrerad</string>
     <string name="filter_no_words">Inga filterord konfigurerade</string>
     <string name="filter_regex_pattern">Regex-mönster</string>
     <string name="filter_settings">Meddelandefilter</string>
+    <string name="filter_show_count">Visa %1$d filtrerade</string>
     <string name="filter_whole_word">Matcha hela ord</string>
     <string name="filter_words">Filtrera ord</string>
     <string name="filter_words_summary">Meddelanden som innehåller dessa ord kommer att döljas</string>
@@ -336,6 +401,7 @@
     <string name="firmware_update_almost_there">Alldeles snart...</string>
     <string name="firmware_update_alpha">Alfa</string>
     <string name="firmware_update_checking">Söker efter uppdateringar...</string>
+    <string name="firmware_update_connecting_attempt">Ansluter till enhet (försök %1$d/%2$d)...</string>
     <string name="firmware_update_currently_installed">Installerad version: %1$s</string>
     <string name="firmware_update_device">Enhet: %1$s</string>
     <string name="firmware_update_disclaimer_chirpy_says">Chirpy säger: \"Håll i dig!\"</string>
@@ -352,7 +418,9 @@
     <string name="firmware_update_keep_device_close">Håll din enhet nära telefonen.</string>
     <string name="firmware_update_latest">Uppdatera till: %1$s</string>
     <string name="firmware_update_local_file">Lokal fil</string>
+    <string name="firmware_update_method_detail">Uppdatera via %1$s</string>
     <string name="firmware_update_method_usb">USB filöverföring</string>
+    <string name="firmware_update_method_wifi">Trådlös uppdatering</string>
     <string name="firmware_update_no_device">Ingen ansluten enhet</string>
     <string name="firmware_update_not_found_in_release">Kunde inte hitta fast programvara för %1$s i utgåvan.</string>
     <string name="firmware_update_release_notes">Versionsinformation</string>
@@ -377,6 +445,7 @@
     <string name="flip_screen">Vänd skärmen</string>
     <string name="for_more_information_see_our_privacy_policy">För mer information, se vår integritetspolicy.</string>
     <string name="free_memory">Ledigt minne</string>
+    <string name="free_memory_description">Tillgängligt systemminne som byte</string>
     <string name="freq">Frekv.</string>
     <string name="frequency_slot">Frekvens-slot</string>
     <string name="friendly_name">Visningsnamn</string>
@@ -444,6 +513,7 @@
     <string name="ipv4_mode">IPv4-läge</string>
     <string name="json_output_enabled">JSON-utdata aktiverad</string>
     <!-- LABEL -->
+    <string name="label_lite_fast">Lite - Fast</string>
     <string name="label_long_fast">Lång räckvidd - snabbt</string>
     <string name="label_long_moderate">Lång räckvidd - måttligt</string>
     <string name="label_long_slow">Lång räckvidd - långsamt</string>
@@ -463,12 +533,27 @@
     <string name="led_heartbeat">LED pulsering</string>
     <string name="led_state">LED-läge</string>
     <string name="legacy_admin_channel">Äldre typ av adminkanal</string>
+    <string name="library_count">%1$d bibliotek</string>
+    <string name="licensed_amateur_radio">Licensierad radioamatör (ham)</string>
     <string name="licensed_amateur_radio_text">Aktivering detta alternativ inaktiverar kryptering och är inte kompatibelt med standard Meshtastic-nätverk.</string>
     <!-- LOAD -->
     <string name="load">Ladda</string>
+    <string name="load_15_min">Ladda 15 min</string>
+    <string name="load_1_min">Ladda 1 min</string>
+    <string name="load_5_min">Ladda 5 min</string>
     <string name="load_indexed">Ladda %1$d</string>
     <string name="loading">Laddar</string>
     <!-- LOCAL -->
+    <string name="local_stats_bad">Felaktiga %1$d</string>
+    <string name="local_stats_battery">Batteri: %1$d%</string>
+    <string name="local_stats_diagnostics_prefix">Diagnostik: %1$s</string>
+    <string name="local_stats_dropped">Släppta %1$d</string>
+    <string name="local_stats_heap_value">%1$d / %2$d</string>
+    <string name="local_stats_nodes">Noder: %1$d aktiva / %2$d totalt</string>
+    <string name="local_stats_noise">Brus %1$d dBm</string>
+    <string name="local_stats_traffic">Trafik: TX %1$d / RX %2$d (D: %3$d)</string>
+    <string name="local_stats_updated_at">%1$s</string>
+    <string name="local_stats_uptime">Upptid: %1$s</string>
     <string name="location_disabled">Platsåtkomst är avstängd, kan inte leverera position till meshnätverket.</string>
     <string name="location_sharing">Positionsdelning</string>
     <string name="locked">Låst</string>
@@ -490,6 +575,7 @@
     <string name="low_battery">Lågt batteri</string>
     <string name="low_battery_message">Noden %1$s har ett lågt batteri (%2$d%)</string>
     <string name="low_battery_title">Lågt batteri: %1$s</string>
+    <string name="low_entropy_key_title">Upptäckte svag krypteringsnyckel</string>
     <string name="lux">Lux</string>
     <string name="manage_custom_tile_sources">Hantera kartkällor</string>
     <string name="manage_map_layers">Hantera kartlager</string>
@@ -506,6 +592,8 @@
     <string name="map_download_errors">Nedladdning slutförd med %1$d fel</string>
     <string name="map_download_region">Ladda ner region</string>
     <string name="map_filter">Kartfilter\n</string>
+    <string name="map_layer_formats">Kartalager stödjer .kml, .kmz och GeoJSON format.</string>
+    <string name="map_node_popup_details">%1$s&lt;br&gt;Hördes senast: %2$s&lt;br&gt;Senaste position: %3$s&lt;br&gt;Batteri: %4$s</string>
     <string name="map_offline_manager">Offline-hanterare</string>
     <string name="map_purge_fail">SQL-cache rensning misslyckades, se logcat för detaljer</string>
     <string name="map_purge_success">SQL-cache rensad för %1$s</string>
@@ -548,6 +636,7 @@
     <string name="message_status_queued">Kvittens köad</string>
     <string name="message_status_unknown">Okänd</string>
     <string name="messages">Meddelanden</string>
+    <string name="min">Min</string>
     <string name="minimum_broadcast_seconds">Minsta sändningsintervall (sekunder)</string>
     <string name="minimum_distance">Smart distans</string>
     <string name="minimum_interval">Smart intervall</string>
@@ -555,13 +644,17 @@
     <string name="module_settings">Modul konfiguration</string>
     <string name="modules_already_unlocked">Modulerna är redan upplåsta</string>
     <string name="modules_unlocked">Modulerna är upplåsta</string>
+    <string name="more_reactions">Fler reaktioner</string>
     <!-- MQTT -->
     <string name="mqtt">MQTT</string>
     <string name="mqtt_config">MQTT-konfiguration</string>
     <string name="mqtt_enabled">MQTT är aktiverat</string>
     <string name="mqtt_probe_other_failure">Anslutningen misslyckades</string>
+    <string name="mqtt_probe_success_with_info">Nåbara (%1$s)</string>
     <string name="mqtt_status_connected">Ansluten</string>
+    <string name="mqtt_status_connecting">Ansluter...</string>
     <string name="mqtt_status_disconnected">Frånkopplad</string>
+    <string name="mqtt_status_inactive">Inaktiv</string>
     <string name="mqtt_test_connection">Testa anslutningen</string>
     <string name="must_set_region">Du måste ställa in en region!</string>
     <string name="must_update">Du måste uppdatera detta program i app-butiken (eller Github). Det är för gammalt för att prata med denna radioenhet. Läs vår <a href="https://meshtastic.org/docs/software/android/installation">dokumentation</a> i detta ämne.</string>
@@ -592,8 +685,11 @@
     <string name="next">Nästa</string>
     <string name="nfc_disabled">NFC är inaktiverat. Aktivera det i systeminställningar.</string>
     <!-- NO -->
+    <string name="no_bluetooth_devices_seen">Inga bluetooth-enheter hittades</string>
     <string name="no_device_selected">Ingen enhet vald</string>
+    <string name="no_devices_found">Hittade inga enheter</string>
     <string name="no_local_stats">Ingen tillgänglig statistik</string>
+    <string name="no_network_devices_hint">Säkerställ att du och din enhet är anslutna till samma nätverk.</string>
     <!-- NODE -->
     <string name="node_count_template">(%1$d aktiva / %2$d visas / %3$d totalt)</string>
     <string name="node_filter_exclude_infrastructure">Dölj infrastruktur</string>
@@ -605,6 +701,15 @@
     <string name="node_filter_show_ignored">Visa endast ignorerade noder</string>
     <string name="node_filter_title">Filtrera på</string>
     <string name="node_id">Nod-ID</string>
+    <string name="node_layout_channel">Kanal</string>
+    <string name="node_layout_distance_and_bearing">Avstånd och bäring</string>
+    <string name="node_layout_help_signal_bad">Dålig mottagning. SNR över −18 dB och RSSI över −125 dBm.</string>
+    <string name="node_layout_help_signal_fair">Medelbra mottagning. SNR över −12 dB och RSSI över −120 dBm.</string>
+    <string name="node_layout_help_signal_good">Bra mottagning. SNR över −7 dB och RSSI över −115 dBm.</string>
+    <string name="node_layout_hops_away">Hopp bort</string>
+    <string name="node_layout_last_heard_time">Hördes senast klockan</string>
+    <string name="node_layout_log_icons">Miljövärden</string>
+    <string name="node_layout_power">Ström</string>
     <string name="node_number">Nodnummer</string>
     <string name="node_sort_alpha">A-Ö</string>
     <string name="node_sort_button">Sorteringsalternativ för noder</string>
@@ -626,6 +731,7 @@
     <string name="none">Ingen (inaktivera)</string>
     <string name="none_quality">Ingen</string>
     <string name="not_connected">Ej ansluten</string>
+    <string name="note">Anteckning</string>
     <string name="notes">Anteckningar</string>
     <string name="notification_permissions_description">Meshtastic använder aviseringar för att hålla dig uppdaterad om nya meddelanden och andra viktiga händelser. Du kan uppdatera dina aviseringsbehörigheter när som helst från inställningar.</string>
     <!-- NOTIFICATIONS -->
@@ -649,6 +755,7 @@
     <string name="only_favorites">Endast favoriter</string>
     <string name="open_compass">Visa kompass</string>
     <string name="open_settings">Öppna inställningar</string>
+    <string name="open_source_libraries">Öppet källkods bibliotek</string>
     <string name="options">Alternativ</string>
     <string name="orient_north">Orientera mot norr</string>
     <!-- OUTPUT -->
@@ -664,6 +771,13 @@
     <string name="password">Lösenord</string>
     <!-- PAX -->
     <string name="pax">PAX</string>
+    <string name="pax_ble_format">B:%1$d</string>
+    <string name="pax_ble_marker">BLE: %1$s</string>
+    <string name="pax_metrics_log">PAX nyckeltal</string>
+    <string name="pax_total_format">PAX: %1$d</string>
+    <string name="pax_total_marker">PAX: %1$s</string>
+    <string name="pax_wifi_format">W:%1$d</string>
+    <string name="pax_wifi_marker">WiFi: %1$s</string>
     <string name="paxcounter">Paxcounter</string>
     <string name="paxcounter_config">Konfiguration av PAX-räknare</string>
     <string name="paxcounter_enabled">PAX-räknare aktiverad</string>
@@ -675,6 +789,14 @@
     <plurals name="plurals_hours">
         <item quantity="one">%1$d timme</item>
         <item quantity="other">%1$d timmar</item>
+    </plurals>
+    <plurals name="plurals_minutes">
+        <item quantity="one">%1$d minut</item>
+        <item quantity="other">%1$d minuter</item>
+    </plurals>
+    <plurals name="plurals_seconds">
+        <item quantity="one">%1$d sekund</item>
+        <item quantity="other">%1$d sekunder</item>
     </plurals>
     <!-- POSITION -->
     <string name="position">Plats</string>
@@ -697,6 +819,14 @@
     <string name="press_and_drag">Tryck och dra för att ändra ordning</string>
     <string name="pressure">Tryck</string>
     <!-- PREVIEW -->
+    <string name="preview_dot">Punkt</string>
+    <string name="preview_footer">Sidfot</string>
+    <string name="preview_gauge">Mätare</string>
+    <string name="preview_gradient">Gradient</string>
+    <string name="preview_header">Rubrik</string>
+    <string name="preview_item">Föremål %1$d</string>
+    <string name="preview_pill">Piller</string>
+    <string name="preview_text">Text</string>
     <string name="primary">Primär</string>
     <string name="primary_channel_feature">Periodisk sändning av position och telemetri</string>
     <string name="private_key">Privat nyckel</string>
@@ -717,6 +847,8 @@
     <string name="quick_chat_show">Visa snabbchattsmenyn</string>
     <string name="radiation">Strålning</string>
     <string name="radio_configuration">Konfiguration av radioenhet</string>
+    <string name="rainfall_1h">Regn (1h)</string>
+    <string name="rainfall_24h">Regn (24h)</string>
     <string name="range_test">Räckvidd</string>
     <string name="range_test_config">Räckvidstest konfiguration</string>
     <string name="range_test_enabled">Räckvidstest aktiverat</string>
@@ -732,9 +864,15 @@
     <string name="rebroadcast_mode_none_desc">Endast för SENSOR, TRACKER och TAK_TRACKER. Stoppar all annan vidarebefordran av meddelanden.</string>
     <string name="recent_network_devices">Senaste nätverksenheterna</string>
     <string name="red">Rött</string>
+    <string name="refresh">Uppdatera</string>
+    <string name="refresh_metadata">Uppdatera metadata</string>
     <string name="regenerate_keys_confirmation">Är du säker på att du vill skapa ny privat nyckel?\n\nNoder som tidigare har bytt nycklar med den här noden måste ta bort den gamla anslutningen och utbyta nycklar på nytt för att kunna återuppta säker kommunikation.</string>
     <string name="regenerate_private_key">Förnya nyckel</string>
     <string name="region_frequency_plan">Region</string>
+    <plurals name="relays">
+        <item quantity="one">Hört %1$d relä</item>
+        <item quantity="other">Hört %1$d reläer</item>
+    </plurals>
     <!-- REMOTE -->
     <string name="remote">Fjärr</string>
     <string name="remote_admin">Fjärradministration</string>
@@ -745,6 +883,7 @@
     <!-- REMOVE -->
     <string name="remove">Ta bort</string>
     <string name="remove_favorite">Ta bort från Favoriter</string>
+    <string name="remove_filter">Rensa filter</string>
     <string name="remove_ignored">Ta bort från ignorerade</string>
     <string name="remove_layer">Ta bort lager</string>
     <string name="remove_node_text">Denna nod kommer att tas bort från din lista till dess att din nod tar emot data från den igen.</string>
@@ -767,6 +906,8 @@
     <string name="reset_to_defaults">Återställ till standardinställningar</string>
     <string name="retry">Försök igen</string>
     <string name="ringtone">Ringsignal</string>
+    <string name="ringtone_file_empty">Filen är tom</string>
+    <string name="ringtone_imported">Importerad ringsignal</string>
     <!-- ROLE -->
     <string name="role">Enhetens roll</string>
     <string name="role_client_base_desc">Hantera paket till och från favoritnoder som ROUTER_LATE och alla andra paket som CLIENT.</string>
@@ -811,14 +952,19 @@
     <string name="save_rangetest">Exportera räckviddspaket</string>
     <!-- SCAN -->
     <string name="scan">Sök</string>
+    <string name="scan_bluetooth_devices">Söker efter Bluetooth-enheter</string>
     <string name="scan_channels_nfc">Skanna kanalen med NFC</string>
     <string name="scan_channels_qr">Skanna kanalens QR-kod</string>
+    <string name="scan_network_devices">Sök efter nätverksenheter</string>
     <string name="scan_nfc">Skanna NFC</string>
     <string name="scan_nfc_text">Placera din enhet nära NFC-taggen för att skanna.</string>
     <string name="scan_shared_contact_nfc">Skanna delad kontakt via NFC</string>
     <string name="scan_shared_contact_qr">Skanna delad kontakts QR-kod</string>
+    <string name="scanning_bluetooth">Söker...</string>
+    <string name="scanning_network">Söker...</string>
     <string name="screen_on_for">Håll skärmen tänd</string>
     <string name="scroll_to_bottom">Gå till slutet</string>
+    <string name="search_emoji">Sök efter emoji...</string>
     <string name="secondary">Sekundär</string>
     <string name="secondary_channel_position_feature">Inaktivering av position på den primära kanalen tillåter periodiska positionsuppdateringar på den första sekundära kanalen med positionen aktiverad, annars krävs manuell positionsbegäran.</string>
     <string name="secondary_no_telemetry">Inga periodiska sändningar av telemetri</string>
@@ -854,7 +1000,10 @@
     <string name="serial_console">Seriell konsol</string>
     <string name="serial_enabled">Seriell aktiverad</string>
     <string name="serial_mode">Seriellt läge</string>
+    <string name="serial_rx_pin">RX</string>
+    <string name="serial_tx_pin">TX</string>
     <string name="server">Server</string>
+    <string name="session_active">Session aktiv</string>
     <string name="set_your_region">Ange din region</string>
     <string name="settings">inställningar</string>
     <!-- SHARE -->
@@ -893,15 +1042,39 @@
     <string name="status_message">Statusmeddelande</string>
     <string name="status_message_config">Inställningar för statusmeddelande</string>
     <string name="stay_connected_anywhere">Håll dig uppkopplad var som helst</string>
+    <string name="success">Lyckades</string>
     <string name="super_deep_sleep_duration_seconds">Tid för djup strömsparläge</string>
     <string name="supported">Stöds</string>
     <string name="supported_by_community">Stöds av Meshtastic Community</string>
     <string name="sx126x_rx_boosted_gain">RX förstärkt gain</string>
     <string name="system_settings">Systeminställningar</string>
     <!-- TAK -->
+    <string name="tak">TAK (ATAK)</string>
+    <string name="tak_config">TAK inställning</string>
+    <string name="tak_role_forwardobserver">Spaning</string>
+    <string name="tak_role_hq">Huvudkvarter</string>
+    <string name="tak_role_k9">Voffsing</string>
+    <string name="tak_role_medic">Sjukvårdare</string>
+    <string name="tak_role_rto">Signalist</string>
+    <string name="tak_role_sniper">Prickskytt</string>
+    <string name="tak_role_teamlead">Gruppledare</string>
+    <string name="tak_role_teammember">Gruppmedlem</string>
+    <string name="tak_role_unspecified">Ospecificerad</string>
+    <string name="tak_server_section">Server</string>
+    <string name="tak_team">Lagfärg</string>
     <string name="tak_team_blue">Blått</string>
+    <string name="tak_team_brown">Brun</string>
+    <string name="tak_team_cyan">Turkos</string>
+    <string name="tak_team_dark_blue">Mörkblå</string>
+    <string name="tak_team_dark_green">Mörkgrön</string>
     <string name="tak_team_green">Grönt</string>
+    <string name="tak_team_magenta">Magenta</string>
+    <string name="tak_team_orange">Orange</string>
+    <string name="tak_team_purple">Lila</string>
     <string name="tak_team_red">Rött</string>
+    <string name="tak_team_unspecified_color">Ospecificerad</string>
+    <string name="tak_team_white">Vit</string>
+    <string name="tak_team_yellow">Gul</string>
     <string name="telemetry">Telemetri</string>
     <string name="telemetry_config">Telemetri konfiguration</string>
     <string name="temperature">Temp</string>
@@ -915,6 +1088,7 @@
     <string name="timestamp">Tidsstämpel</string>
     <string name="tls_enabled">TLS är aktiverat</string>
     <string name="toggle_my_position">Växla min position</string>
+    <string name="trace_route">Spåra rutt</string>
     <!-- TRACEROUTE -->
     <string name="traceroute">Traceroute (spåra rutt)</string>
     <string name="traceroute_diff">Hopp mot %1$d Hopp tillbaka %2$d</string>
@@ -939,6 +1113,8 @@
     <string name="traffic_management_enabled">Modul aktiverad</string>
     <string name="transmit_over_lora">Skicka över LoRa</string>
     <string name="transport_ble">BLE</string>
+    <string name="transport_tcp">TCP</string>
+    <string name="transport_usb">USB</string>
     <string name="twenty_four_hours">24T</string>
     <string name="two_days">48 timmar</string>
     <string name="two_weeks">2V</string>
@@ -946,7 +1122,6 @@
     <string name="tx_power_dbm">Sändningseffekt</string>
     <string name="type">Typ</string>
     <string name="type_a_message">Skriv ett meddelande</string>
-    <string name="udp_enabled">Aktiverad</string>
     <!-- UNKNOWN -->
     <string name="unknown">Okänd</string>
     <string name="unknown_age">Okänd ålder</string>
@@ -970,6 +1145,7 @@
     <string name="url_cannot_be_empty">URL kan inte vara odefinierad.</string>
     <string name="url_must_contain_placeholders">URL måste innehålla platshållare.</string>
     <string name="url_template">URL-mall</string>
+    <string name="usb">USB</string>
     <!-- USE -->
     <string name="use_12h_format">Använd 12-timmarsformat</string>
     <string name="use_i2s_as_buzzer">Använd I2S som summer</string>
@@ -1003,6 +1179,11 @@
     <string name="wifi_config">WiFi-alternativ</string>
     <string name="wifi_enabled">WiFi är aktiverat</string>
     <string name="wifi_ip">Wifi IP:</string>
+    <string name="wifi_provision_no_networks">Hittade inga nätverk</string>
+    <string name="wifi_provision_scan_failed">Misslyckades med att söka efter WiFi-nätverk: %1$s</string>
+    <string name="wifi_provision_scan_networks">Sök efter nätverk</string>
+    <string name="wifi_provision_scanning_ble">Söker efter enhet …</string>
+    <string name="wifi_provision_scanning_wifi">Söker...</string>
     <string name="wifi_provision_success_done">Klart</string>
     <string name="wifi_provision_success_ip_address">IP-adress</string>
     <string name="wifi_provision_success_username">Användarnamn</string>

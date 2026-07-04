@@ -24,6 +24,7 @@ jobs:
   check-workflow-status:
     name: Check Workflow Status
     runs-on: ubuntu-24.04-arm
+    timeout-minutes: 5
     permissions: {}
     needs:
       - android-check

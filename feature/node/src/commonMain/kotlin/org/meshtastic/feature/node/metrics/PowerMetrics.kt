@@ -42,14 +42,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
-import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
+import com.patrykandpatrick.vico.compose.cartesian.data.lineModel
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -212,7 +211,7 @@ private fun PowerMetricsChart(
         LaunchedEffect(selectedChannel, currentData, voltageData) {
             modelProducer.runTransaction {
                 if (currentData.isNotEmpty()) {
-                    lineSeries {
+                    lineModel {
                         series(
                             x = currentData.map { it.time },
                             y = currentData.map { retrieveCurrent(selectedChannel, it) },
@@ -220,7 +219,7 @@ private fun PowerMetricsChart(
                     }
                 }
                 if (voltageData.isNotEmpty()) {
-                    lineSeries {
+                    lineModel {
                         series(
                             x = voltageData.map { it.time },
                             y = voltageData.map { retrieveVoltage(selectedChannel, it) },
@@ -363,11 +362,7 @@ private fun hasChannelData(voltage: Float?, current: Float?): Boolean = voltage 
 @Composable
 private fun PowerChannelColumn(titleRes: StringResource, voltage: Float, current: Float) {
     Column {
-        Text(
-            text = stringResource(titleRes),
-            style = TextStyle(fontWeight = FontWeight.Bold),
-            fontSize = MaterialTheme.typography.labelLarge.fontSize,
-        )
+        Text(text = stringResource(titleRes), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
         MetricValueRow(color = PowerMetric.VOLTAGE.color, text = MetricFormatter.voltage(voltage))
         MetricValueRow(color = PowerMetric.CURRENT.color, text = MetricFormatter.current(current))
     }

@@ -13,17 +13,26 @@ The module uses **Ktor** as its primary HTTP client for high-performance, asynch
 - **`DeviceHardwareRemoteDataSource`**: Fetches definitions for supported Meshtastic hardware devices.
 
 ### 3. Shared Transports
-- **`BleRadioInterface`**: Multiplatform BLE transport powered by Kable.
 - **`TCPInterface`**: Multiplatform TCP transport.
 - **`SerialTransport`**: JVM-shared USB/Serial transport powered by jSerialComm.
 - **`BaseRadioTransportFactory`**: Common factory for instantiating the KMP transports.
 
-## Module dependency graph
+> **BLE transport** lives in [`:core:ble`](../ble/README.md), not here. `BaseRadioTransportFactory` delegates to it when an address with the `x` prefix is resolved.
+
+
+## Dependency Graph
 
 <!--region graph-->
 ```mermaid
 graph TB
   :core:network[network]:::kmp-library
+  :core:network --> :core:repository
+  :core:network -.-> :core:common
+  :core:network -.-> :core:di
+  :core:network -.-> :core:model
+  :core:network -.-> :core:proto
+  :core:network -.-> :core:ble
+  :core:network -.-> :core:testing
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

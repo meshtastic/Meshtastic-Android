@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
     <string name="accept">Acceptar</string>
     <!-- ACTION -->
     <string name="action_delete_message">Esborrar missatge</string>
@@ -35,6 +36,7 @@
     <string name="channel_invalid">La URL d'aquest canal és invàlida i no es pot fer servir</string>
     <string name="channel_label">Canal</string>
     <string name="channel_name">Nom del canal</string>
+    <!-- CHIRPY -->
     <string name="choose_theme">Escollir tema</string>
     <!-- CLEAN -->
     <string name="clear">Netejar</string>
@@ -63,6 +65,7 @@
     <!-- DISPLAY -->
     <!-- DISTANCE -->
     <string name="distance">Distància</string>
+    <!-- DOC -->
     <string name="edit">Editar</string>
     <string name="eight_hours">8 Hores</string>
     <!-- ENCRYPTION -->
@@ -138,6 +141,7 @@
     <string name="node_filter_only_direct">Només veure nodes directes</string>
     <string name="node_filter_only_online">Oculta nodes offline</string>
     <string name="node_filter_placeholder">Filtre</string>
+    <string name="node_layout_channel">Canal</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_button">Opcions per ordenar nodes</string>
     <string name="node_sort_channel">Canal</string>

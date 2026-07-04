@@ -27,23 +27,17 @@ interface Graph : Route
 
 @Serializable
 sealed interface ChannelsRoute : Route {
-    @Serializable data object ChannelsGraph : ChannelsRoute, Graph
-
-    @Serializable data object Channels : ChannelsRoute
+    @Serializable data object Channels : ChannelsRoute, Graph
 }
 
 @Serializable
 sealed interface ConnectionsRoute : Route {
-    @Serializable data object ConnectionsGraph : ConnectionsRoute, Graph
-
-    @Serializable data object Connections : ConnectionsRoute
+    @Serializable data object Connections : ConnectionsRoute, Graph
 }
 
 @Serializable
 sealed interface ContactsRoute : Route {
-    @Serializable data object ContactsGraph : ContactsRoute, Graph
-
-    @Serializable data object Contacts : ContactsRoute
+    @Serializable data object Contacts : ContactsRoute, Graph
 
     @Serializable data class Messages(val contactKey: String, val message: String = "") : ContactsRoute
 
@@ -59,13 +53,7 @@ sealed interface MapRoute : Route {
 
 @Serializable
 sealed interface NodesRoute : Route {
-    @Serializable data object NodesGraph : NodesRoute, Graph
-
-    @Serializable data object Nodes : NodesRoute
-
-    @Serializable data class NodeDetailGraph(val destNum: Int? = null) :
-        NodesRoute,
-        Graph
+    @Serializable data object Nodes : NodesRoute, Graph
 
     @Serializable data class NodeDetail(val destNum: Int? = null) : NodesRoute
 }
@@ -96,11 +84,9 @@ sealed interface NodeDetailRoute : Route {
 
 @Serializable
 sealed interface SettingsRoute : Route {
-    @Serializable data class SettingsGraph(val destNum: Int? = null) :
+    @Serializable data class Settings(val destNum: Int? = null) :
         SettingsRoute,
         Graph
-
-    @Serializable data class Settings(val destNum: Int? = null) : SettingsRoute
 
     @Serializable data object DeviceConfiguration : SettingsRoute
 
@@ -174,11 +160,23 @@ sealed interface SettingsRoute : Route {
 
     @Serializable data object CleanNodeDb : SettingsRoute
 
+    @Serializable data object TakServer : SettingsRoute
+
     @Serializable data object DebugPanel : SettingsRoute
 
     @Serializable data object About : SettingsRoute
 
     @Serializable data object FilterSettings : SettingsRoute
+
+    @Serializable data object NodeList : SettingsRoute
+
+    // endregion
+
+    // region help & documentation routes
+
+    @Serializable data object HelpDocs : SettingsRoute
+
+    @Serializable data class HelpDocPage(val pageId: String) : SettingsRoute
 
     // endregion
 }

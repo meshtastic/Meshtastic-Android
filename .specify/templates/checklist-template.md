@@ -26,11 +26,8 @@
 - [ ] CHK002 — Principle II (Zero Lint Tolerance): `spotlessApply` + `detekt` pass? [Consistency]
 - [ ] CHK003 — Principle III (CMP UI): Compose Multiplatform composables? `NumberFormatter.format()` for floats? Navigation 3 patterns? [Consistency]
 - [ ] CHK004 — Principle IV (Privacy First): No PII/location/key logging? Proto submodule untouched? [Consistency]
-- [ ] CHK005 — Principle V (Design Standards): UI reviewed against Meshtastic design standards? [Consistency]
+- [ ] CHK005 — Principle V (Design Standards): UI reviewed against Meshtastic design standards? Cross-platform features linked to upstream spec in `meshtastic/design/features/`? [Consistency]
 - [ ] CHK006 — Principle VI (Verify Before Push): Full verification passing locally? [Consistency]
-- [ ] CHK007 — Principle VII (Coroutine Safety): `safeCatching {}` used? Project `ioDispatcher`? [Consistency]
-- [ ] CHK008 — Principle VIII (Resource Discipline): `stringResource(Res.string.key)`? `MeshtasticIcons`? `sort-strings.py` run? [Consistency]
-- [ ] CHK009 — Principle IX (Branch & Scope Hygiene): Branch naming? Scope limit? [Consistency]
 
 ## [Category 1]
 

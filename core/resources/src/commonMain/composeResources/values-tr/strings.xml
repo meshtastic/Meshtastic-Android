@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
     <string name="accept">Kabul et</string>
     <!-- ACTION -->
     <string name="action_delete_message">Mesajı sil</string>
@@ -89,6 +90,7 @@
     <string name="channel_label">Kanal</string>
     <string name="channel_name">Kanal Adı</string>
     <string name="channels">Kanallar</string>
+    <!-- CHIRPY -->
     <string name="choose_theme">Tema seçin</string>
     <!-- CLEAN -->
     <string name="clear">Temizle</string>
@@ -159,6 +161,11 @@
     <string name="distance_filters">Mesafe Filtresi</string>
     <string name="distance_measurements">Uzaklık Ölçüsü</string>
     <string name="dns">DNS</string>
+    <!-- DOC -->
+    <string name="doc_clear_search">Aramayı sil</string>
+    <string name="doc_title_connections">Bağlantılar</string>
+    <string name="doc_title_mqtt">MQTT</string>
+    <string name="doc_title_nodes">Nodelar</string>
     <string name="downlink_enabled">Aşağı bağlantı etkinleştirildi</string>
     <string name="download">İndir</string>
     <string name="dynamic">Dinamik</string>
@@ -343,6 +350,9 @@
     <string name="node_filter_include_unknown">Bilinmeyenleri dahil et</string>
     <string name="node_filter_placeholder">Filtre</string>
     <string name="node_id">Düğüm ID</string>
+    <string name="node_layout_channel">Kanal</string>
+    <string name="node_layout_hops_away">Atlama Üzerinden</string>
+    <string name="node_layout_power">Güç</string>
     <string name="node_number">Düğüm Numarası</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_button">Düğüm sıralama seçenekleri</string>
@@ -527,6 +537,7 @@
     <string name="state_broadcast_seconds">Durum yayını (saniye)</string>
     <string name="supported">Desteklenen</string>
     <!-- TAK -->
+    <string name="tak_server_section">Sunucu</string>
     <string name="tak_team_blue">Mavi</string>
     <string name="tak_team_green">Yeşil</string>
     <string name="tak_team_red">Kırmızı</string>
@@ -541,6 +552,7 @@
     <string name="timestamp">Zaman Damgası</string>
     <string name="tls_enabled">TLS etkin</string>
     <string name="toggle_my_position">Konumunumu aç/kapa</string>
+    <string name="trace_route">Rotayı Takip Et</string>
     <!-- TRACEROUTE -->
     <string name="traceroute">Yol izle</string>
     <string name="traceroute_diff">İleri atlama %1$d Geri atlama %2$d</string>
@@ -557,7 +569,6 @@
     <string name="two_weeks">2H</string>
     <string name="type">Tip</string>
     <string name="type_a_message">Mesaj yaz</string>
-    <string name="udp_enabled">Açık</string>
     <!-- UNKNOWN -->
     <string name="unknown">Bilinmeyen</string>
     <string name="unknown_age">Bilinmeyen Yaş</string>

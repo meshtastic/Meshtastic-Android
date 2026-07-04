@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
     <string name="accept">Priimti</string>
     <!-- ACTION -->
     <string name="action_delete_message">Ištrinti pranešimą</string>
@@ -42,6 +43,7 @@
     <string name="channel_invalid">Šio kanalo URL yra neteisingas ir negali būti naudojamas</string>
     <string name="channel_label">Kanalas</string>
     <string name="channel_name">Kanalo pavadinimas</string>
+    <!-- CHIRPY -->
     <string name="choose_theme">Pasirinkite Aplinką</string>
     <!-- CLEAN -->
     <string name="clear">Išvalyti</string>
@@ -72,6 +74,7 @@
     <!-- DISPLAY -->
     <!-- DISTANCE -->
     <string name="distance">Atstumas</string>
+    <!-- DOC -->
     <string name="edit">Redaguoti</string>
     <string name="eight_hours">8 Valandos</string>
     <!-- ENCRYPTION -->
@@ -152,6 +155,8 @@
     <!-- NODE -->
     <string name="node_filter_include_unknown">Įtraukti nežinomus</string>
     <string name="node_filter_placeholder">Filtras</string>
+    <string name="node_layout_channel">Kanalas</string>
+    <string name="node_layout_hops_away">Persiuntimų kiekis</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_channel">Kanalas</string>
     <string name="node_sort_distance">Atstumas</string>

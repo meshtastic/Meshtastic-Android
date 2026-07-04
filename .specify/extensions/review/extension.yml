@@ -1,0 +1,81 @@
+schema_version: "1.0"
+
+extension:
+  id: "review"
+  name: "Review Extension"
+  version: "1.0.1"
+  description: "Post-implementation comprehensive code review with specialized agents for code quality, comments, tests, error handling, type design, and simplification."
+  author: "ismaelJimenez"
+  repository: "https://github.com/ismaelJimenez/spec-kit-review"
+  license: "MIT"
+  homepage: "https://github.com/ismaelJimenez/spec-kit-review"
+
+requires:
+  speckit_version: ">=0.1.0"
+
+  commands:
+    - "speckit.implement"
+
+provides:
+  config:
+    - name: "review-config.yml"
+      template: "config-template.yml"
+      description: "Review extension configuration — confidence threshold and agent toggles"
+      required: false
+
+  scripts:
+    - name: "detect-changed-files.sh"
+      file: "scripts/bash/detect-changed-files.sh"
+      executable: true
+    - name: "detect-changed-files.ps1"
+      file: "scripts/powershell/detect-changed-files.ps1"
+      executable: true
+
+  commands:
+    - name: "speckit.review.run"
+      file: "commands/run.md"
+      description: "Comprehensive code review using specialized agents"
+    - name: "speckit.review.code"
+      file: "commands/code.md"
+      description: "General code quality review — project guideline compliance, bug detection, code quality"
+    - name: "speckit.review.comments"
+      file: "commands/comments.md"
+      description: "Code comment accuracy verification, documentation completeness, comment rot detection"
+    - name: "speckit.review.tests"
+      file: "commands/tests.md"
+      description: "Test coverage quality analysis — behavioral coverage, critical gap identification, test resilience evaluation"
+    - name: "speckit.review.errors"
+      file: "commands/errors.md"
+      description: "Error handling review — silent failure detection, catch block analysis, error logging"
+    - name: "speckit.review.types"
+      file: "commands/types.md"
+      description: "Type design analysis — encapsulation, invariant expression, usefulness, and enforcement"
+    - name: "speckit.review.simplify"
+      file: "commands/simplify.md"
+      description: "Code simplification suggestions — clarity, unnecessary complexity, redundant abstractions"
+
+hooks:
+  after_implement:
+    command: "speckit.review.run"
+    optional: true
+    prompt: "Run PR review on implemented changes?"
+    description: "Comprehensive review after implementation"
+    condition: null
+
+tags:
+  - "review"
+  - "code-quality"
+  - "pr-review"
+  - "testing"
+  - "error-handling"
+
+defaults:
+  agents:
+    code: true
+    comments: true
+    tests: true
+    errors: true
+    types: true
+    simplify: true
+
+

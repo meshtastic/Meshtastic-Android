@@ -16,7 +16,6 @@
  */
 package org.meshtastic.feature.settings.radio
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
@@ -27,7 +26,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -112,7 +114,7 @@ data class RadioConfigState(
 @KoinViewModel
 @Suppress("LongParameterList")
 open class RadioConfigViewModel(
-    @InjectedParam savedStateHandle: SavedStateHandle,
+    @InjectedParam private val destNum: Int?,
     private val radioConfigRepository: RadioConfigRepository,
     private val packetRepository: PacketRepository,
     private val serviceRepository: ServiceRepository,
@@ -181,14 +183,6 @@ open class RadioConfigViewModel(
         _mqttProbeStatus.value = null
     }
 
-    private val destNumFlow = MutableStateFlow(savedStateHandle.get<Int>("destNum"))
-
-    fun initDestNum(id: Int?) {
-        if (destNumFlow.value != id) {
-            destNumFlow.value = id
-        }
-    }
-
     private val _destNode = MutableStateFlow<Node?>(null)
     val destNode: StateFlow<Node?>
         get() = _destNode
@@ -209,7 +203,8 @@ open class RadioConfigViewModel(
         locationService.getCurrentLocation()
 
     init {
-        combine(destNumFlow, nodeRepository.nodeDBbyNum) { id, nodes -> nodes[id] ?: nodes.values.firstOrNull() }
+        nodeRepository.nodeDBbyNum
+            .map { nodes -> if (destNum != null) nodes[destNum] else nodes.values.firstOrNull() }
             .distinctUntilChanged()
             .onEach {
                 _destNode.value = it
@@ -219,19 +214,40 @@ open class RadioConfigViewModel(
 
         radioConfigRepository.deviceProfileFlow.onEach { _currentDeviceProfile.value = it }.launchIn(viewModelScope)
 
-        radioConfigRepository.localConfigFlow
-            .onEach { lc -> if (radioConfigState.value.isLocal) _radioConfigState.update { it.copy(radioConfig = lc) } }
-            .launchIn(viewModelScope)
-
-        radioConfigRepository.channelSetFlow
-            .onEach { cs ->
-                if (radioConfigState.value.isLocal) _radioConfigState.update { it.copy(channelList = cs.settings) }
+        // Derive isLocal from the immutable destNum and the (possibly changing) myNodeInfo.
+        // flatMapLatest cancels the previous inner flow on every change, so there is
+        // no window where stale local config can leak through.
+        nodeRepository.myNodeInfo
+            .map { ni ->
+                val isLocal = (destNum == null) || (destNum == ni?.myNodeNum)
+                isLocal
             }
-            .launchIn(viewModelScope)
-
-        radioConfigRepository.moduleConfigFlow
-            .onEach { lmc ->
-                if (radioConfigState.value.isLocal) _radioConfigState.update { it.copy(moduleConfig = lmc) }
+            .distinctUntilChanged()
+            .flatMapLatest { isLocal ->
+                if (isLocal) {
+                    combine(
+                        radioConfigRepository.channelSetFlow,
+                        radioConfigRepository.localConfigFlow,
+                        radioConfigRepository.moduleConfigFlow,
+                    ) { cs, lc, mc ->
+                        _radioConfigState.update {
+                            it.copy(isLocal = true, channelList = cs.settings, radioConfig = lc, moduleConfig = mc)
+                        }
+                    }
+                } else {
+                    // Remote admin: clear local config once, then stay idle.
+                    // Remote responses arrive via processPacketResponse.
+                    flowOf(Unit).onEach {
+                        _radioConfigState.update {
+                            it.copy(
+                                isLocal = false,
+                                channelList = emptyList(),
+                                radioConfig = LocalConfig(),
+                                moduleConfig = LocalModuleConfig(),
+                            )
+                        }
+                    }
+                }
             }
             .launchIn(viewModelScope)
 
@@ -247,11 +263,6 @@ open class RadioConfigViewModel(
 
         combine(serviceRepository.connectionState, radioConfigState) { connState, _ ->
             _radioConfigState.update { it.copy(connected = connState == ConnectionState.Connected) }
-        }
-            .launchIn(viewModelScope)
-
-        combine(nodeRepository.myNodeInfo, destNumFlow) { ni, id ->
-            _radioConfigState.update { it.copy(isLocal = (id == null) || (id == ni?.myNodeNum)) }
         }
             .launchIn(viewModelScope)
 
@@ -284,7 +295,7 @@ open class RadioConfigViewModel(
     }
 
     fun setOwner(user: User) {
-        val destNum = destNode.value?.num ?: return
+        val destNum = destNum ?: destNode.value?.num ?: return
         safeLaunch(tag = "setOwner") {
             _radioConfigState.update { it.copy(userConfig = user) }
             val packetId = radioConfigUseCase.setOwner(destNum, user)
@@ -293,7 +304,7 @@ open class RadioConfigViewModel(
     }
 
     fun updateChannels(new: List<ChannelSettings>, old: List<ChannelSettings>) {
-        val destNum = destNode.value?.num ?: return
+        val destNum = destNum ?: destNode.value?.num ?: return
         getChannelList(new, old).forEach { channel ->
             safeLaunch(tag = "setRemoteChannel") {
                 val packetId = radioConfigUseCase.setRemoteChannel(destNum, channel)
@@ -311,7 +322,7 @@ open class RadioConfigViewModel(
     }
 
     fun setConfig(config: Config) {
-        val destNum = destNode.value?.num ?: return
+        val destNum = destNum ?: destNode.value?.num ?: return
         safeLaunch(tag = "setConfig") {
             _radioConfigState.update { state ->
                 state.copy(
@@ -335,7 +346,7 @@ open class RadioConfigViewModel(
 
     @Suppress("CyclomaticComplexMethod")
     fun setModuleConfig(config: ModuleConfig) {
-        val destNum = destNode.value?.num ?: return
+        val destNum = destNum ?: destNode.value?.num ?: return
         safeLaunch(tag = "setModuleConfig") {
             _radioConfigState.update { state ->
                 state.copy(
@@ -367,13 +378,13 @@ open class RadioConfigViewModel(
     }
 
     fun setRingtone(ringtone: String) {
-        val destNum = destNode.value?.num ?: return
+        val destNum = destNum ?: destNode.value?.num ?: return
         _radioConfigState.update { it.copy(ringtone = ringtone) }
         safeLaunch(tag = "setRingtone") { radioConfigUseCase.setRingtone(destNum, ringtone) }
     }
 
     fun setCannedMessages(messages: String) {
-        val destNum = destNode.value?.num ?: return
+        val destNum = destNum ?: destNode.value?.num ?: return
         _radioConfigState.update { it.copy(cannedMessageMessages = messages) }
         safeLaunch(tag = "setCannedMessages") { radioConfigUseCase.setCannedMessages(destNum, messages) }
     }
@@ -420,12 +431,12 @@ open class RadioConfigViewModel(
     }
 
     fun setFixedPosition(position: Position) {
-        val destNum = destNode.value?.num ?: return
+        val destNum = destNum ?: destNode.value?.num ?: return
         safeLaunch(tag = "setFixedPosition") { radioConfigUseCase.setFixedPosition(destNum, position) }
     }
 
     fun removeFixedPosition() {
-        val destNum = destNode.value?.num ?: return
+        val destNum = destNum ?: destNode.value?.num ?: return
         safeLaunch(tag = "removeFixedPosition") { radioConfigUseCase.removeFixedPosition(destNum) }
     }
 
@@ -456,7 +467,7 @@ open class RadioConfigViewModel(
     }
 
     fun installProfile(protobuf: DeviceProfile) {
-        val destNum = destNode.value?.num ?: return
+        val destNum = destNum ?: destNode.value?.num ?: return
         safeLaunch(tag = "installProfile") { installProfileUseCase(destNum, protobuf, destNode.value?.user) }
     }
 
@@ -465,8 +476,19 @@ open class RadioConfigViewModel(
         _radioConfigState.update { it.copy(responseState = ResponseState.Empty) }
     }
 
+    /**
+     * Sets the initial loading state for remote config sub-screens. Must be called before the first
+     * `collectAsStateWithLifecycle` read so the LoadingOverlay is visible from the very first composition frame.
+     */
+    fun ensureLoadingForRemote() {
+        val state = _radioConfigState.value
+        if (!state.isLocal && state.responseState is ResponseState.Empty) {
+            _radioConfigState.update { it.copy(responseState = ResponseState.Loading()) }
+        }
+    }
+
     fun setResponseStateLoading(route: Enum<*>) {
-        val destNum = destNumFlow.value ?: destNode.value?.num ?: return
+        val destNum = destNum ?: destNode.value?.num ?: return
 
         _radioConfigState.update { it.copy(route = route.name, responseState = ResponseState.Loading()) }
 
@@ -613,7 +635,7 @@ open class RadioConfigViewModel(
     }
 
     private fun processPacketResponse(packet: MeshPacket) {
-        val destNum = destNode.value?.num ?: return
+        val destNum = destNum ?: destNode.value?.num ?: return
         val result = processRadioResponseUseCase(packet, destNum, requestIds.value) ?: return
         val route = radioConfigState.value.route
 

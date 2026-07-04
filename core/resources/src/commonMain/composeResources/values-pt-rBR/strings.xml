@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
     <string name="accept">Aceitar</string>
     <!-- ACTION -->
     <string name="action_delete_message">Excluir %1$s mensagem</string>
@@ -88,6 +89,7 @@
     <string name="channel_label">Canal</string>
     <string name="channel_name">Nome do canal</string>
     <string name="channels">Canais</string>
+    <!-- CHIRPY -->
     <string name="choose_theme">Escolher tema</string>
     <!-- CLEAN -->
     <string name="clean_node_database_confirmation">Isto irá remover %1$d nós de seu banco de dados. Esta ação não pode ser desfeita.</string>
@@ -186,6 +188,11 @@
     <string name="distance_filters_description">Filtre a lista de nós e o mapa da malha baseado na proximidade do seu telefone.</string>
     <string name="distance_measurements">Medição de Distâncias</string>
     <string name="distance_measurements_description">Exiba a distância entre o telefone e outros nós do Meshtastic com posições.</string>
+    <!-- DOC -->
+    <string name="doc_clear_search">Limpar busca</string>
+    <string name="doc_title_connections">Conexões</string>
+    <string name="doc_title_mqtt">MQTT</string>
+    <string name="doc_title_nodes">Nós</string>
     <string name="done">Concluído</string>
     <string name="downlink_enabled">Downlink ativado</string>
     <string name="download">Baixar</string>
@@ -410,6 +417,9 @@
     <string name="node_filter_only_online">Ocultar nós offline</string>
     <string name="node_filter_placeholder">Filtro</string>
     <string name="node_id">ID do Nó</string>
+    <string name="node_layout_channel">Canal</string>
+    <string name="node_layout_hops_away">Qtd de saltos</string>
+    <string name="node_layout_power">Energia</string>
     <string name="node_number">Número do Nó</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_button">Opções de ordenação do nó</string>
@@ -640,6 +650,7 @@
     <string name="supported">Suportado</string>
     <string name="supported_by_community">Apoiado pela Comunidade Meshtastic</string>
     <!-- TAK -->
+    <string name="tak_server_section">Servidor</string>
     <string name="tak_team_blue">Azul</string>
     <string name="tak_team_green">Verde</string>
     <string name="tak_team_red">Vermelho</string>

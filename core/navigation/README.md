@@ -32,12 +32,16 @@ fun openNodeDetail(backStack: NavBackStack<NavKey>, destNum: Int) {
 }
 ```
 
-## Module dependency graph
+
+## Dependency Graph
 
 <!--region graph-->
 ```mermaid
 graph TB
   :core:navigation[navigation]:::kmp-library-compose
+  :core:navigation -.-> :core:common
+  :core:navigation -.-> :core:resources
+  :core:navigation -.-> :core:testing
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

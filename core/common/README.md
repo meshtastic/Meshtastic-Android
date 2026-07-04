@@ -1,6 +1,9 @@
 # `:core:common`
 
 ## Overview
+
+**Targets:** Android · JVM (Desktop) · iOS
+
 The `:core:common` module contains low-level utility functions, extensions, and common data structures that do not depend on any other Meshtastic-specific modules. It is designed to be highly reusable across the project.
 
 ## Key Components
@@ -17,7 +20,8 @@ Centralized utility for display strings — temperature, voltage, current, perce
 ### 3. `BuildConfigProvider.kt`
 An interface for accessing build-time configuration in a multiplatform-friendly way.
 
-## Module dependency graph
+
+## Dependency Graph
 
 <!--region graph-->
 ```mermaid

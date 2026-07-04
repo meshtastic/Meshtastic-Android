@@ -16,7 +16,6 @@
  */
 package org.meshtastic.feature.settings.radio
 
-import androidx.lifecycle.SavedStateHandle
 import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
 import dev.mokkery.every
@@ -117,7 +116,7 @@ class ProfileRoundTripTest {
 
         viewModel =
             RadioConfigViewModel(
-                savedStateHandle = SavedStateHandle(),
+                destNum = null,
                 radioConfigRepository = radioConfigRepository,
                 packetRepository = packetRepository,
                 serviceRepository = serviceRepository,

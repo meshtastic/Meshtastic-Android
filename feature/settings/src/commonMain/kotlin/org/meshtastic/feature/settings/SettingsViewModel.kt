@@ -20,6 +20,7 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -42,6 +43,7 @@ import org.meshtastic.core.domain.usecase.settings.SetThemeUseCase
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.NodeListDensity
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.MeshLogPrefs
@@ -191,4 +193,94 @@ class SettingsViewModel(
         val myNodeNum = myNodeNum ?: return
         exportDataUseCase(writer, myNodeNum, filterPortnum)
     }
+
+    // Node list layout preferences
+    val nodeListDensity = uiPrefs.nodeListDensity
+    val shouldShowPower = uiPrefs.shouldShowPower
+    val shouldShowLastHeard = uiPrefs.shouldShowLastHeard
+    val lastHeardIsRelative = uiPrefs.lastHeardIsRelative
+    val shouldShowLocation = uiPrefs.shouldShowLocation
+    val shouldShowHops = uiPrefs.shouldShowHops
+    val shouldShowSignal = uiPrefs.shouldShowSignal
+    val shouldShowChannel = uiPrefs.shouldShowChannel
+    val shouldShowRole = uiPrefs.shouldShowRole
+    val shouldShowTelemetry = uiPrefs.shouldShowTelemetry
+
+    fun setNodeListDensity(value: String) = uiPrefs.setNodeListDensity(value)
+
+    fun setShouldShowPower(value: Boolean) = uiPrefs.setShouldShowPower(value)
+
+    fun setShouldShowLastHeard(value: Boolean) = uiPrefs.setShouldShowLastHeard(value)
+
+    fun setLastHeardIsRelative(value: Boolean) = uiPrefs.setLastHeardIsRelative(value)
+
+    fun setShouldShowLocation(value: Boolean) = uiPrefs.setShouldShowLocation(value)
+
+    fun setShouldShowHops(value: Boolean) = uiPrefs.setShouldShowHops(value)
+
+    fun setShouldShowSignal(value: Boolean) = uiPrefs.setShouldShowSignal(value)
+
+    fun setShouldShowChannel(value: Boolean) = uiPrefs.setShouldShowChannel(value)
+
+    fun setShouldShowRole(value: Boolean) = uiPrefs.setShouldShowRole(value)
+
+    fun setShouldShowTelemetry(value: Boolean) = uiPrefs.setShouldShowTelemetry(value)
+
+    // Aggregated node list settings — nested combines because typed overloads max at 5 args
+    val nodeListSettings =
+        combine(
+            combine(
+                nodeListDensity,
+                shouldShowPower,
+                shouldShowLastHeard,
+                lastHeardIsRelative,
+                shouldShowLocation,
+            ) { density, power, lastHeard, heardRelative, location ->
+                NodeListSettingsState(
+                    density = NodeListDensity.fromName(density),
+                    showPower = power,
+                    showLastHeard = lastHeard,
+                    lastHeardIsRelative = heardRelative,
+                    showLocation = location,
+                )
+            },
+            combine(shouldShowHops, shouldShowSignal, shouldShowChannel, shouldShowRole, shouldShowTelemetry) {
+                    hops,
+                    signal,
+                    channel,
+                    role,
+                    telemetry,
+                ->
+                NodeListSettingsState(
+                    showHops = hops,
+                    showSignal = signal,
+                    showChannel = channel,
+                    showRole = role,
+                    showTelemetry = telemetry,
+                )
+            },
+        ) { first, second ->
+            first.copy(
+                showHops = second.showHops,
+                showSignal = second.showSignal,
+                showChannel = second.showChannel,
+                showRole = second.showRole,
+                showTelemetry = second.showTelemetry,
+            )
+        }
+            .stateInWhileSubscribed(initialValue = NodeListSettingsState())
 }
+
+/** Aggregated state for node list display settings to reduce recomposition overhead. */
+data class NodeListSettingsState(
+    val density: NodeListDensity = NodeListDensity.COMPLETE,
+    val showPower: Boolean = false,
+    val showLastHeard: Boolean = false,
+    val lastHeardIsRelative: Boolean = false,
+    val showLocation: Boolean = false,
+    val showHops: Boolean = false,
+    val showSignal: Boolean = false,
+    val showChannel: Boolean = false,
+    val showRole: Boolean = false,
+    val showTelemetry: Boolean = false,
+)

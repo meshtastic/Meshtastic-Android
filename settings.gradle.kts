@@ -18,18 +18,23 @@
 pluginManagement {
     includeBuild("build-logic")
     repositories {
-        google()
+        google {
+            content {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
+            }
+        }
         mavenCentral()
         gradlePluginPortal()
-        maven { url = uri("https://jitpack.io") }
         maven { url = uri("./offline-repository") }
     }
 }
 
 plugins {
+    id("com.gradle.develocity") version "4.4.2"
     id("org.gradle.toolchains.foojay-resolver") version "1.0.0"
-    id("com.gradle.develocity") version "4.4.1"
-    id("com.gradle.common-custom-user-data-gradle-plugin") version "2.6.0"
+    id("org.meshtastic.flatpak.sources.settings") version "0.1.2"
 }
 
 @Suppress("UnstableApiUsage")
@@ -65,8 +70,22 @@ rootProject.name = "MeshtasticAndroid"
 // https://docs.gradle.org/current/userguide/declaring_dependencies.html#sec:type-safe-project-accessors
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
-// Shared Develocity and Build Cache configuration
-apply(from = "gradle/develocity.settings.gradle")
+// Build Cache configuration (HTTP remote cache + local)
+apply(from = "gradle/build-cache.settings.gradle")
+
+// Build Scans — publish in CI only for debugging and performance profiling.
+develocity {
+    buildScan {
+        capture {
+            fileFingerprints = true
+        }
+        val isCi = providers.environmentVariable("CI").isPresent
+        publishing.onlyIf { isCi }
+        uploadInBackground = !isCi
+        termsOfUseUrl = "https://gradle.com/help/legal-terms-of-use"
+        termsOfUseAgree = "yes"
+    }
+}
 
 @Suppress("UnstableApiUsage")
 toolchainManagement {
@@ -78,12 +97,6 @@ toolchainManagement {
         }
     }
 }
-
-// Desktop-only mode: skip Android-only modules when ANDROID_HOME is unavailable (e.g. Flatpak builds).
-// Activate via: DESKTOP_ONLY=true ./gradlew :desktop:packageUberJarForCurrentOS
-val desktopOnly =
-    providers.gradleProperty("desktop.only").orNull?.toBoolean() == true ||
-        System.getenv("DESKTOP_ONLY")?.toBoolean() == true
 
 include(
     ":core:ble",
@@ -111,17 +124,14 @@ include(
     ":feature:map",
     ":feature:node",
     ":feature:settings",
+    ":feature:docs",
     ":feature:firmware",
     ":feature:wifi-provision",
-    ":desktop",
+    ":desktopApp",
+    ":androidApp",
     ":wear",
+    ":core:api",
+    ":core:barcode",
+    ":feature:widget",
+    ":screenshot-tests",
 )
-
-if (!desktopOnly) {
-    include(
-        ":app",
-        ":core:api",
-        ":core:barcode",
-        ":feature:widget",
-    )
-}

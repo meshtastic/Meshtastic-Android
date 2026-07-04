@@ -35,7 +35,7 @@ A step-by-step workflow for implementing a new feature in the Meshtastic-Android
   ```bash
   ./gradlew spotlessCheck spotlessApply detekt assembleDebug test allTests
   ```
-- If the feature adds a new reflection-heavy dependency, add keep rules to **both** `app/proguard-rules.pro` and `desktop/proguard-rules.pro`, then verify release builds:
+- If the feature adds a new reflection-heavy dependency, add keep rules to **both** `androidApp/proguard-rules.pro` and `desktopApp/proguard-rules.pro`, then verify release builds:
   ```bash
-  ./gradlew assembleFdroidRelease :desktop:runRelease
+  ./gradlew assembleFdroidRelease :desktopApp:runRelease
   ```

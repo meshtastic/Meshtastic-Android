@@ -1,7 +1,7 @@
 # `:feature:map`
 
 ## Overview
-The `:feature:map` module provides the mapping interface for the application. Map rendering is decomposed into three focused `CompositionLocal` provider contracts, each with per-flavor implementations in `:app`.
+The `:feature:map` module provides the mapping interface for the application. Map rendering is decomposed into three focused `CompositionLocal` provider contracts, each with per-flavor implementations in `:androidApp`.
 
 ## Architecture
 
@@ -28,8 +28,8 @@ All providers are injected via `CompositionLocal` in `MainActivity.kt` and consu
 
 ## Map Providers
 
-- **Google Maps (`google` flavor)**: Uses Google Play Services Maps SDK. Implementations in `app/src/google/kotlin/org/meshtastic/app/map/`.
-- **OpenStreetMap (`fdroid` flavor)**: Uses `osmdroid` for a fully open-source experience. Implementations in `app/src/fdroid/kotlin/org/meshtastic/app/map/`.
+- **Google Maps (`google` flavor)**: Uses Google Play Services Maps SDK. Implementations in `androidApp/src/google/kotlin/org/meshtastic/app/map/`.
+- **OpenStreetMap (`fdroid` flavor)**: Uses `osmdroid` for a fully open-source experience. Implementations in `androidApp/src/fdroid/kotlin/org/meshtastic/app/map/`.
 
 ## Features
 - **Live Node Tracking**: Real-time position updates for nodes on the mesh.
@@ -38,12 +38,25 @@ All providers are injected via `CompositionLocal` in `MainActivity.kt` and consu
 - **Traceroute Visualization**: Dedicated map view showing route segments between mesh nodes.
 - **Offline Maps**: Support for pre-downloaded map tiles (via `osmdroid`).
 
-## Module dependency graph
+
+## Dependency Graph
 
 <!--region graph-->
 ```mermaid
 graph TB
   :feature:map[map]:::kmp-feature
+  :feature:map -.-> :core:data
+  :feature:map -.-> :core:database
+  :feature:map -.-> :core:datastore
+  :feature:map -.-> :core:model
+  :feature:map -.-> :core:navigation
+  :feature:map -.-> :core:prefs
+  :feature:map -.-> :core:proto
+  :feature:map -.-> :core:service
+  :feature:map -.-> :core:resources
+  :feature:map -.-> :core:ui
+  :feature:map -.-> :core:di
+  :feature:map -.-> :core:testing
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

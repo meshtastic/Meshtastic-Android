@@ -22,7 +22,6 @@ import org.meshtastic.buildlogic.configureGraphTasks
 import org.meshtastic.buildlogic.configureKmpTestDependencies
 import org.meshtastic.buildlogic.configureKotlinMultiplatform
 import org.meshtastic.buildlogic.configureTestOptions
-import org.meshtastic.buildlogic.isDesktopOnly
 import org.meshtastic.buildlogic.libs
 import org.meshtastic.buildlogic.plugin
 
@@ -30,10 +29,8 @@ class KmpLibraryConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             apply(plugin = libs.plugin("kotlin-multiplatform").get().pluginId)
-            if (!isDesktopOnly) {
-                apply(plugin = libs.plugin("android-kotlin-multiplatform-library").get().pluginId)
-                apply(plugin = "meshtastic.android.lint")
-            }
+            apply(plugin = libs.plugin("android-kotlin-multiplatform-library").get().pluginId)
+            apply(plugin = "meshtastic.android.lint")
             apply(plugin = "meshtastic.detekt")
             apply(plugin = "meshtastic.spotless")
             apply(plugin = "meshtastic.dokka")
@@ -45,9 +42,7 @@ class KmpLibraryConventionPlugin : Plugin<Project> {
             configureKmpTestDependencies()
             configureTestOptions()
             configureGraphTasks()
-            if (!isDesktopOnly) {
-                configureAndroidMarketplaceFallback()
-            }
+            configureAndroidMarketplaceFallback()
         }
     }
 }

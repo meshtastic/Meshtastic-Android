@@ -1,28 +1,5 @@
 # `:core:ble`
 
-## Module dependency graph
-
-<!--region graph-->
-```mermaid
-graph TB
-  :core:ble[ble]:::kmp-library
-
-classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
-classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
-classDef compose-desktop-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
-classDef android-feature fill:#FFD6A5,stroke:#000,stroke-width:2px,color:#000;
-classDef android-library fill:#9BF6FF,stroke:#000,stroke-width:2px,color:#000;
-classDef android-library-compose fill:#9BF6FF,stroke:#000,stroke-width:2px,color:#000;
-classDef android-test fill:#A0C4FF,stroke:#000,stroke-width:2px,color:#000;
-classDef jvm-library fill:#BDB2FF,stroke:#000,stroke-width:2px,color:#000;
-classDef kmp-feature fill:#FFD6A5,stroke:#000,stroke-width:2px,color:#000;
-classDef kmp-library-compose fill:#FFC1CC,stroke:#000,stroke-width:2px,color:#000;
-classDef kmp-library fill:#FFC1CC,stroke:#000,stroke-width:2px,color:#000;
-classDef unknown fill:#FFADAD,stroke:#000,stroke-width:2px,color:#000;
-
-```
-<!--endregion-->
-
 ## Overview
 
 The `:core:ble` module contains the foundation for Bluetooth Low Energy (BLE) communication in the Meshtastic Android app. It uses the **Kable** multiplatform BLE library to provide a unified, Coroutine-based architecture across all supported targets (Android, Desktop, and future iOS).
@@ -81,3 +58,30 @@ The module follows a clean multiplatform architecture approach:
 ## Testing
 
 The module includes unit tests for key components, utilizing Kable's architecture and standard coroutine testing tools to ensure logic correctness.
+
+## Dependency Graph
+
+<!--region graph-->
+```mermaid
+graph TB
+  :core:ble[ble]:::kmp-library
+  :core:ble -.-> :core:common
+  :core:ble -.-> :core:di
+  :core:ble -.-> :core:model
+  :core:ble -.-> :core:testing
+
+classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
+classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
+classDef compose-desktop-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
+classDef android-feature fill:#FFD6A5,stroke:#000,stroke-width:2px,color:#000;
+classDef android-library fill:#9BF6FF,stroke:#000,stroke-width:2px,color:#000;
+classDef android-library-compose fill:#9BF6FF,stroke:#000,stroke-width:2px,color:#000;
+classDef android-test fill:#A0C4FF,stroke:#000,stroke-width:2px,color:#000;
+classDef jvm-library fill:#BDB2FF,stroke:#000,stroke-width:2px,color:#000;
+classDef kmp-feature fill:#FFD6A5,stroke:#000,stroke-width:2px,color:#000;
+classDef kmp-library-compose fill:#FFC1CC,stroke:#000,stroke-width:2px,color:#000;
+classDef kmp-library fill:#FFC1CC,stroke:#000,stroke-width:2px,color:#000;
+classDef unknown fill:#FFADAD,stroke:#000,stroke-width:2px,color:#000;
+
+```
+<!--endregion-->

@@ -33,11 +33,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.baro_pressure
@@ -221,16 +223,39 @@ fun UptimeInfo(
 fun HardwareInfo(
     hwModel: String,
     modifier: Modifier = Modifier,
+    deviceImageUrl: String? = null,
     contentColor: Color = MaterialTheme.colorScheme.onSurface,
 ) {
-    IconInfo(
+    Row(
         modifier = modifier,
-        icon = MeshtasticIcons.HardwareModel,
-        contentDescription = stringResource(Res.string.hardware_model),
-        text = hwModel,
-        style = MaterialTheme.typography.labelSmall,
-        contentColor = contentColor,
-    )
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
+    ) {
+        if (deviceImageUrl != null) {
+            AsyncImage(
+                model = deviceImageUrl,
+                contentDescription = stringResource(Res.string.hardware_model),
+                modifier = Modifier.size(SIZE_ICON.dp),
+                contentScale = ContentScale.Fit,
+                fallback = rememberVectorPainter(MeshtasticIcons.HardwareModel),
+                error = rememberVectorPainter(MeshtasticIcons.HardwareModel),
+            )
+        } else {
+            Icon(
+                imageVector = MeshtasticIcons.HardwareModel,
+                contentDescription = stringResource(Res.string.hardware_model),
+                modifier = Modifier.size(SIZE_ICON.dp),
+                tint = contentColor.copy(alpha = 0.65f),
+            )
+        }
+        Text(
+            text = hwModel,
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+            color = contentColor.copy(alpha = 0.95f),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
 }
 
 @Composable

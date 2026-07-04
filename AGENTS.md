@@ -7,7 +7,7 @@ You are an expert Android/KMP engineer. Maintain architectural boundaries, use M
 <context_and_memory>
 - **Project Goal:** Decouple business logic from Android for multi-platform (Android, Desktop, iOS).
 - **Tech:** Kotlin 2.3+ (JDK 21), Ktor, Okio, Room KMP, Koin 4.2+.
-- **Agent Memory:** Consult `.agent_memory/session_context.md` for the latest task-specific handovers and project state.
+- **Agent Memory:** Skim the top (most recent) entry of `.agent_memory/session_context.md` for current state — it is capped at ~5 entries; older handovers live in `session_context.archive.md` (read only if you need historical detail).
 - **Skills Directory (CONSULT THESE FIRST):** 
   - `.skills/project-overview/` - Codebase map, namespacing, **Bootstrap Steps**.
   - `.skills/kmp-architecture/` - Expect/actual, source-sets, conventions.
@@ -24,7 +24,7 @@ You are an expert Android/KMP engineer. Maintain architectural boundaries, use M
 <process_essentials>
 - **Think First:** Read only what you need. Consult indices (like `strings-index.txt`) before reading large files.
 - **Hygiene:** Run `python3 scripts/sort-strings.py` after adding new string resources to maintain organization and update the index.
-- **Memory Persistence:** Update `.agent_memory/session_context.md` at the end of every session or major task.
+- **Memory Persistence:** Add a new entry to the TOP of `.agent_memory/session_context.md` at the end of every session or major task. Keep it capped at ~5 entries — move anything older to `session_context.archive.md`.
 - **Bootstrap First:** Run the mandatory bootstrap steps in `.skills/project-overview/SKILL.md` before any build.
 - **Plan Before Execution:** Use `.agent_plans/` (git-ignored) for complex refactors.
 - **Baseline Verification:** Always run: `./gradlew spotlessApply spotlessCheck detekt assembleDebug test allTests`
@@ -49,5 +49,4 @@ You are an expert Android/KMP engineer. Maintain architectural boundaries, use M
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan
-at `specs/002-node-list-layout/plan.md`
 <!-- SPECKIT END -->

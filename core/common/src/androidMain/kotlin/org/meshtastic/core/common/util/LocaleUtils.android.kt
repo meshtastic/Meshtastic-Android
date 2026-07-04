@@ -21,6 +21,14 @@ import android.icu.util.ULocale
 import android.os.Build
 import java.util.Locale
 
+actual fun currentLocaleCode(): String = Locale.getDefault().language
+
+actual fun currentLocaleQualifier(): String {
+    val locale = Locale.getDefault()
+    val country = locale.country
+    return if (country.isNotEmpty()) "${locale.language}-r$country" else locale.language
+}
+
 @Suppress("MagicNumber")
 actual fun getSystemMeasurementSystem(): MeasurementSystem {
     val locale = Locale.getDefault()

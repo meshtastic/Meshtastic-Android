@@ -1,15 +1,22 @@
 # Feature Specification: [FEATURE NAME]
 
-**Feature Branch**: `[###-feature-name]`  
-**Created**: [DATE]  
-**Status**: Draft  
+**Feature Branch**: `[###-feature-name]`
+**Created**: [DATE]
+**Status**: Draft
 **Input**: User description: "$ARGUMENTS"
+**Cross-Platform Spec**: <!-- Link to meshtastic/design/features/ spec, or "N/A — platform-specific only" with justification -->
 
 ## Summary
 
 <!--
   Provide a brief (2-3 sentence) summary of the feature, its purpose, and what
   user problem it solves. Mention which modules are primarily affected.
+
+  CROSS-PLATFORM CHECK: Before writing this spec, check meshtastic/design/features/
+  for an existing cross-platform behavior spec. If one exists, this spec should describe
+  the Android-specific scope and acceptance criteria — not redefine the cross-platform
+  behavior. If none exists and this feature affects multiple platforms, create one first
+  using the TEMPLATE.md in that repo.
 -->
 
 ## Goals
@@ -30,7 +37,7 @@
   IMPORTANT: User stories should be PRIORITIZED as user journeys ordered by importance.
   Each user story/journey must be INDEPENDENTLY TESTABLE - meaning if you implement just ONE of them,
   you should still have a viable MVP (Minimum Viable Product) that delivers value.
-  
+
   Assign priorities (P1, P2, P3, etc.) to each story, where P1 is the most critical.
   Think of each story as a standalone slice of functionality that can be:
   - Developed independently
@@ -94,6 +101,22 @@
 - What happens when [boundary condition]?
 - How does system handle [error scenario]?
 
+## Requirements *(mandatory)*
+
+<!--
+  ACTION REQUIRED: The content in this section represents placeholders.
+  Fill them out with the right functional requirements.
+-->
+
+### Functional Requirements
+
+- **FR-001**: System MUST [specific capability]
+- **FR-002**: System MUST [specific capability]
+
+### Non-Functional Requirements
+
+- **NFR-001**: [Performance, accessibility, or quality requirement]
+
 ## Architecture
 
 <!--
@@ -114,27 +137,11 @@
 | [Component] | `feature/[name]/component/` | [Purpose] |
 | [Existing Component] | `core/ui/component/` | [Reuse purpose] |
 
-## Requirements *(mandatory)*
-
-<!--
-  ACTION REQUIRED: The content in this section represents placeholders.
-  Fill them out with the right functional requirements.
--->
-
-### Functional Requirements
-
-- **FR-001**: System MUST [specific capability]
-- **FR-002**: System MUST [specific capability]
-
-### Non-Functional Requirements
-
-- **NFR-001**: [Performance, accessibility, or quality requirement]
-
 ## Source-Set Impact
 
 <!--
   ACTION REQUIRED: Identify which KMP source sets this feature affects.
-  All business logic and UI MUST be in commonMain (Constitution §I, §III).
+  All business logic and UI MUST be in commonMain (Constitution I, III).
 -->
 
 | Source Set | Impact | Justification |
@@ -147,7 +154,7 @@
 
 <!--
   ACTION REQUIRED: Note any UI elements that must be reviewed against the
-  Meshtastic Client Design Standards (Constitution §V). Flag intentional
+  Meshtastic Client Design Standards (Constitution V). Flag intentional
   deviations with rationale.
 -->
 
@@ -159,7 +166,7 @@
 ## Privacy Assessment
 
 <!--
-  ACTION REQUIRED: Confirm this feature does not violate Constitution §IV.
+  ACTION REQUIRED: Confirm this feature does not violate Constitution IV.
   If the feature handles any sensitive data, document the safeguards.
 -->
 

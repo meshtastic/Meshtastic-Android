@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">来自 %1$s: %2$s 的消息</string>
     <string name="accept">接受</string>
@@ -128,6 +129,7 @@
     <string name="channel_url">频道URL</string>
     <string name="channel_utilization">ChUtil</string>
     <string name="channels">频道</string>
+    <!-- CHIRPY -->
     <string name="chirpy">Chirpy</string>
     <string name="choose_theme">选择主题</string>
     <!-- CLEAN -->
@@ -302,6 +304,13 @@
     <string name="distance_measurements">距离测量</string>
     <string name="distance_measurements_description">显示您的手机和其他带有位置的 Meshtastic 节点之间的距离。</string>
     <string name="dns">DNS</string>
+    <!-- DOC -->
+    <string name="doc_clear_search">清除搜索</string>
+    <string name="doc_title_connections">连接数</string>
+    <string name="doc_title_discovery">发现</string>
+    <string name="doc_title_firmware">固件升级</string>
+    <string name="doc_title_mqtt">MQTT</string>
+    <string name="doc_title_nodes">节点</string>
     <string name="done">完成</string>
     <string name="double_tap_as_button_press">双击作为按钮</string>
     <string name="downlink_enabled">启用下行</string>
@@ -704,6 +713,10 @@
     <string name="node_filter_show_ignored">仅显示忽略的节点</string>
     <string name="node_filter_title">筛选条件</string>
     <string name="node_id">节点ID</string>
+    <string name="node_layout_channel">频道</string>
+    <string name="node_layout_hops_away">跃点数</string>
+    <string name="node_layout_log_icons">传感器指标</string>
+    <string name="node_layout_power">电源</string>
     <string name="node_number">节点编号</string>
     <string name="node_sort_alpha">字母顺序</string>
     <string name="node_sort_button">节点排序选项</string>
@@ -1032,6 +1045,7 @@
     <string name="tak_role_teamlead">团队组长</string>
     <string name="tak_role_teammember">团队成员</string>
     <string name="tak_role_unspecified">未指定</string>
+    <string name="tak_server_section">服务器</string>
     <string name="tak_team">队伍颜色</string>
     <string name="tak_team_blue">蓝</string>
     <string name="tak_team_brown">棕色</string>
@@ -1061,6 +1075,7 @@
     <string name="timestamp">时间戳</string>
     <string name="tls_enabled">启用TLS</string>
     <string name="toggle_my_position">切换我的位置</string>
+    <string name="trace_route">追踪路径</string>
     <!-- TRACEROUTE -->
     <string name="traceroute">追踪器</string>
     <string name="traceroute_diff">越点数：去程 %1$d，回程 %2$d</string>
@@ -1108,7 +1123,6 @@
     <string name="tx_power_dbm">发送强度</string>
     <string name="type">类型</string>
     <string name="type_a_message">输入一条消息</string>
-    <string name="udp_enabled">启用</string>
     <!-- UNKNOWN -->
     <string name="unknown">未知</string>
     <string name="unknown_age">未知时长</string>

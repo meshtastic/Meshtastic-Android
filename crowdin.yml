@@ -10,3 +10,12 @@ files:
     translation: /fastlane/metadata/android/%locale%/%original_file_name%
   - source: /fastlane/metadata/android/en-US/changelogs/default.txt
     translation: /fastlane/metadata/android/%locale%/changelogs/%original_file_name%
+  # In-app docs — user guide only (developer guide is English-only)
+  # English sources live under docs/en/; translations land at docs/{android_code}/
+  # Uses %android_code% to output Android/CMP qualifier format directly (pt-rBR, zh-rCN, fr)
+  - source: /docs/en/user/*.md
+    translation: /docs/%android_code%/user/%original_file_name%
+    type: md
+  - source: /docs/en/index.md
+    translation: /docs/%android_code%/%original_file_name%
+    type: md

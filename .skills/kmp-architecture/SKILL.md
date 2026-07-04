@@ -52,10 +52,10 @@ Guidelines on managing Kotlin Multiplatform (KMP) source-sets, expected abstract
 1. Ensure all new logic compiles against the KMP core (`jvm()`, `iosArm64()`, etc.).
 2. Do not use platform-specific constructs in `commonMain` or you break the iOS/Desktop builds.
 3. Test using `kmpSmokeCompile` to verify cross-platform compilation.
-4. For desktop wiring, copy the pattern in `desktop/src/main/kotlin/org/meshtastic/desktop/di/DesktopKoinModule.kt` and use `NoopStubs.kt` to temporarily mock missing platform implementations.
+4. For desktop wiring, copy the pattern in `desktopApp/src/main/kotlin/org/meshtastic/desktop/di/DesktopKoinModule.kt` and use `NoopStubs.kt` to temporarily mock missing platform implementations.
 
 ## Reference Anchors
 - **Shared Okio I/O:** `core/domain/src/commonMain/kotlin/org/meshtastic/core/domain/usecase/settings/ImportProfileUseCase.kt`
-- **Desktop DI Stubs:** `desktop/src/main/kotlin/org/meshtastic/desktop/stub/NoopStubs.kt`
+- **Desktop DI Stubs:** `desktopApp/src/main/kotlin/org/meshtastic/desktop/stub/NoopStubs.kt`
 - **Version Catalog:** `gradle/libs.versions.toml`
 - **Convention Plugins:** `build-logic/convention/`

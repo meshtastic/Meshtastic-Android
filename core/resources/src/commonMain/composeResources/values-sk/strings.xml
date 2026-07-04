@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
     <string name="accept">Prijať</string>
     <!-- ACTION -->
     <string name="action_delete_message">Vymazať správu</string>
@@ -69,6 +70,7 @@
     <string name="channel_label">Kanál</string>
     <string name="channel_name">Názov kanála</string>
     <string name="channels">Kanále</string>
+    <!-- CHIRPY -->
     <string name="choose_theme">Výber témy</string>
     <!-- CLEAN -->
     <string name="clear">Zmazať</string>
@@ -130,6 +132,9 @@
     <string name="display">Obrazovka</string>
     <!-- DISTANCE -->
     <string name="distance">Vzdialenosť</string>
+    <!-- DOC -->
+    <string name="doc_clear_search">Vymazať vyhľadávanie</string>
+    <string name="doc_title_mqtt">MQTT</string>
     <string name="edit">Upraviť</string>
     <string name="eight_hours">8 Hodín</string>
     <!-- ENCRYPTION -->
@@ -287,6 +292,9 @@
     <string name="node_filter_show_ignored">Zobraziť len ignorované Uzly</string>
     <string name="node_filter_title">Filtrovať podľa</string>
     <string name="node_id">ID Uzla</string>
+    <string name="node_layout_channel">Kanál</string>
+    <string name="node_layout_hops_away">Počet skokov</string>
+    <string name="node_layout_power">Napájanie</string>
     <string name="node_number">Číslo Uzla</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_button">Nastavenie triedenia uzlov</string>

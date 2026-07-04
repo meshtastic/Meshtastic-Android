@@ -18,39 +18,40 @@ package org.meshtastic.core.takserver
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import org.meshtastic.core.model.Node
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.minutes
+
+/** A CoT message received from a connected TAK client, paired with the client's identity. */
+data class InboundCoTMessage(val cotMessage: CoTMessage, val clientInfo: TAKClientInfo? = null)
 
 interface TAKServerManager {
     val isRunning: StateFlow<Boolean>
     val connectionCount: StateFlow<Int>
-    val inboundMessages: Flow<CoTMessage>
+    val inboundMessages: SharedFlow<InboundCoTMessage>
 
     /** Start the TAK server using [scope]. Port is fixed at [TAKServer] construction time. */
     fun start(scope: CoroutineScope)
 
     fun stop()
 
-    fun broadcastNode(node: Node, team: String = DEFAULT_TAK_TEAM_NAME, role: String = DEFAULT_TAK_ROLE_NAME)
-
     fun broadcast(cotMessage: CoTMessage)
+
+    /** Broadcast raw XML verbatim to TAK clients, bypassing CoTMessage parsing. */
+    fun broadcastRawXml(xml: String)
 }
 
-class TAKServerManagerImpl(private val takServer: TAKServer) : TAKServerManager {
+internal class TAKServerManagerImpl(private val takServer: TAKServer) : TAKServerManager {
 
     private var scope: CoroutineScope? = null
-    private val lastBroadcastPositionsMutex = Mutex()
 
     private val _isRunning = MutableStateFlow(false)
     override val isRunning: StateFlow<Boolean> = _isRunning.asStateFlow()
@@ -58,30 +59,42 @@ class TAKServerManagerImpl(private val takServer: TAKServer) : TAKServerManager 
     // Mirror TAKServer's event-driven connection count — no polling needed
     override val connectionCount: StateFlow<Int> = takServer.connectionCount
 
-    private val _inboundMessages = MutableSharedFlow<CoTMessage>()
-    override val inboundMessages: Flow<CoTMessage> = _inboundMessages.asFlow()
+    private val _inboundMessages = MutableSharedFlow<InboundCoTMessage>(extraBufferCapacity = 64)
+    override val inboundMessages: SharedFlow<InboundCoTMessage> = _inboundMessages.asSharedFlow()
 
-    // Unbounded channel preserves FIFO ordering of inbound CoT messages under load.
-    // onMessage is a non-suspend callback, so we trySend (always succeeds for UNLIMITED)
-    // and a single consumer coroutine drains into _inboundMessages in order.
-    private var inboundChannel: Channel<CoTMessage>? = null
-    private var inboundDrainJob: Job? = null
+    // Offline message queue — buffers mesh-originated CoT messages when no TAK
+    // clients are connected, then drains them when a client reconnects. Entries
+    // expire after OFFLINE_QUEUE_TTL to avoid delivering stale situational data.
+    private data class QueuedMessage(val cotMessage: CoTMessage, val enqueuedAt: kotlin.time.Instant)
 
-    private var lastBroadcastPositions = mutableMapOf<Int, Int>()
+    private val offlineQueue = ArrayDeque<QueuedMessage>()
+    private val offlineQueueMutex = Mutex()
+
+    companion object {
+        private val OFFLINE_QUEUE_TTL = 5.minutes
+        private const val OFFLINE_QUEUE_MAX_SIZE = 50
+    }
 
     override fun start(scope: CoroutineScope) {
-        this.scope = scope
         if (_isRunning.value) {
             Logger.w { "TAKServerManager already running" }
             return
         }
+        // Assign scope AFTER the guard so a second concurrent start() can never
+        // overwrite the active scope without actually restarting the server.
+        this.scope = scope
 
         scope.launch {
             // Wire up inbound message handler BEFORE starting so no messages are lost.
-            val channel = Channel<CoTMessage>(Channel.UNLIMITED)
-            inboundChannel = channel
-            inboundDrainJob = scope.launch { channel.consumeAsFlow().collect { _inboundMessages.emit(it) } }
-            takServer.onMessage = { cotMessage -> channel.trySend(cotMessage) }
+            // Use tryEmit (non-suspending) with extraBufferCapacity to avoid launching a
+            // new coroutine per message, which would create unbounded coroutines under
+            // high message rates and could reorder messages.
+            takServer.onMessage = { cotMessage, clientInfo ->
+                if (!_inboundMessages.tryEmit(InboundCoTMessage(cotMessage, clientInfo))) {
+                    Logger.w { "TAK inbound message buffer full; dropping message from ${clientInfo?.id}" }
+                }
+            }
+            takServer.onClientConnected = { drainOfflineQueue() }
 
             val result = takServer.start(scope)
             if (result.isSuccess) {
@@ -91,81 +104,68 @@ class TAKServerManagerImpl(private val takServer: TAKServer) : TAKServerManager 
                 Logger.e(result.exceptionOrNull()) { "Failed to start TAK Server" }
                 // Clear onMessage if start failed so we don't hold a reference unnecessarily
                 takServer.onMessage = null
-                inboundDrainJob?.cancel()
-                inboundDrainJob = null
-                channel.close()
-                inboundChannel = null
             }
         }
     }
 
     override fun stop() {
-        takServer.stop()
-        takServer.onMessage = null
-        inboundChannel?.close()
-        inboundChannel = null
-        inboundDrainJob?.cancel()
-        inboundDrainJob = null
+        // Flip the running flag and null out the scope BEFORE stopping the server so
+        // any broadcast()/drainOfflineQueue() that races stop() sees _isRunning=false
+        // and exits early instead of launching coroutines on a scope that is about to
+        // be discarded.
         _isRunning.value = false
         scope = null
+        takServer.onMessage = null
+        takServer.stop()
         Logger.i { "TAK Server stopped" }
     }
 
-    override fun broadcastNode(node: Node, team: String, role: String) {
-        if (!_isRunning.value) return
-        val currentScope = scope ?: return
-
-        currentScope.launch {
-            if (!takServer.hasConnections()) return@launch
-
-            val position = node.validPosition
-            if (position == null) {
-                broadcastNodeInfoOnly(node, team, role)
-                return@launch
-            }
-
-            val shouldBroadcast =
-                lastBroadcastPositionsMutex.withLock {
-                    val last = lastBroadcastPositions[node.num]
-                    if (position.time == last) {
-                        false
-                    } else {
-                        lastBroadcastPositions[node.num] = position.time
-                        true
-                    }
-                }
-            if (!shouldBroadcast) return@launch
-
-            val cotMessage =
-                position.toCoTMessage(
-                    uid = node.user.id,
-                    callsign = node.user.toTakCallsign(),
-                    team = team,
-                    role = role,
-                    battery = node.deviceMetrics.battery_level ?: 100,
-                )
-
-            takServer.broadcast(cotMessage)
-        }
-    }
-
-    private fun broadcastNodeInfoOnly(node: Node, team: String, role: String) {
-        val currentScope = scope ?: return
-        val cotMessage =
-            node.user.toCoTMessage(
-                position = null,
-                team = team,
-                role = role,
-                battery = node.deviceMetrics.battery_level ?: 100,
-            )
-
-        currentScope.launch {
-            if (!takServer.hasConnections()) return@launch
-            takServer.broadcast(cotMessage)
-        }
-    }
-
     override fun broadcast(cotMessage: CoTMessage) {
-        scope?.launch { takServer.broadcast(cotMessage) }
+        if (!_isRunning.value) return
+        scope?.launch {
+            if (takServer.hasConnections()) {
+                takServer.broadcast(cotMessage)
+            } else {
+                // No TAK clients connected — queue for delivery when one reconnects
+                offlineQueueMutex.withLock {
+                    // Evict expired entries
+                    val cutoff = Clock.System.now() - OFFLINE_QUEUE_TTL
+                    while (offlineQueue.isNotEmpty() && offlineQueue.first().enqueuedAt < cutoff) {
+                        offlineQueue.removeFirst()
+                    }
+                    // Cap size to prevent unbounded growth
+                    if (offlineQueue.size >= OFFLINE_QUEUE_MAX_SIZE) {
+                        offlineQueue.removeFirst()
+                    }
+                    offlineQueue.addLast(QueuedMessage(cotMessage, Clock.System.now()))
+                }
+            }
+        }
+    }
+
+    override fun broadcastRawXml(xml: String) {
+        if (!_isRunning.value) return
+        scope?.launch { takServer.broadcastRawXml(xml) }
+    }
+
+    /**
+     * Drain any queued messages to the newly connected TAK client. Called by the server when a TAK client connects
+     * (Connected event).
+     */
+    internal fun drainOfflineQueue() {
+        if (!_isRunning.value) return
+        scope?.launch {
+            val messages =
+                offlineQueueMutex.withLock {
+                    val cutoff = Clock.System.now() - OFFLINE_QUEUE_TTL
+                    val valid = offlineQueue.filter { it.enqueuedAt >= cutoff }.map { it.cotMessage }
+                    offlineQueue.clear()
+                    valid
+                }
+            if (messages.isNotEmpty()) {
+                Logger.i { "Draining ${messages.size} queued message(s) to reconnected TAK client" }
+                messages.forEach { takServer.broadcast(it) }
+            }
+        }
     }
 }

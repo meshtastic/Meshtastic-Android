@@ -21,11 +21,6 @@ plugins {
 }
 
 kotlin {
-    android {
-        namespace = "org.meshtastic.core.nfc"
-        androidResources.enable = false
-    }
-
     sourceSets {
         commonMain.dependencies { implementation(libs.kermit) }
 

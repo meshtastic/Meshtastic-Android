@@ -16,8 +16,11 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">Message de %1$s: %2$s</string>
+    <string name="a11y_node_offline">hors-ligne</string>
+    <string name="a11y_node_online">en ligne</string>
     <string name="accept">Accepter</string>
     <string name="acknowledgements">Remerciements</string>
     <!-- ACTION -->
@@ -138,7 +141,17 @@
     <string name="channel_url">URL du canal</string>
     <string name="channel_utilization">UtilCanal</string>
     <string name="channels">Canaux</string>
+    <!-- CHIRPY -->
     <string name="chirpy">Chirpy</string>
+    <string name="chirpy_error_busy">Woah! Le canal est totalement bondé avec un lourd trafic actuellement ! 📶 Attende pour un moment plus calme et réessayer la transmission.</string>
+    <string name="chirpy_error_model_unavailable">Ma batterie se charge ou mon firmware est toujours en téléchargement ! 🔋Donne-moi un peu de temps pour me synchroniser et m'allumer !</string>
+    <string name="chirpy_error_token_budget_exceeded">Ce payload est trop grand pour mon budget de transmission ! 📱Essaye de raccourcir ton message pour qu'on puisse l'envoyer sans problème.</string>
+    <string name="chirpy_error_unknown">Oups ! On a heurté une grosse perte de packet ou une interférence du signal ! 📡 Retransmet cette requête et voyons siont arrive à passer.</string>
+    <string name="chirpy_error_unsupported_flavor">J'opère sur une fréquence limitée sur version de l'app! 🔌 ntm l ia.</string>
+    <string name="chirpy_error_unsupported_platform">Oh non ! Mon antenne n'arrive pas à établir une connexion sur cette plate-forme.📡 Veuillez revérifier la compatibilité de l'hardwaree!</string>
+    <string name="chirpy_search_placeholder">Pose des questions sur Meshtastic…</string>
+    <string name="chirpy_suggested_pages_help">Voici quelques pages de documentations qui pourrait aider:</string>
+    <string name="chirpy_thinking">Chirpy traverse le mesh.📡</string>
     <string name="choose_contrast">Niveau de contraste</string>
     <string name="choose_theme">Choisir un thème</string>
     <!-- CLEAN -->
@@ -321,6 +334,16 @@
     <string name="distance_measurements">Mesures de distance</string>
     <string name="distance_measurements_description">Afficher la distance entre votre téléphone et les autres nœuds Meshtastic avec des positions.</string>
     <string name="dns">DNS</string>
+    <!-- DOC -->
+    <string name="doc_clear_search">Effacer la recherche</string>
+    <string name="doc_section_user">Guide de l'utilisateur</string>
+    <string name="doc_title_connections">Connexions</string>
+    <string name="doc_title_desktop">Application pour ordinateur</string>
+    <string name="doc_title_discovery">Découverte</string>
+    <string name="doc_title_firmware">Mises à jour du firmware</string>
+    <string name="doc_title_mqtt">MQTT</string>
+    <string name="doc_title_nodes">Nœuds</string>
+    <string name="doc_title_onboarding">Commencer</string>
     <string name="done">Terminé</string>
     <string name="dont_show_again_for_device">Ne plus afficher pour cet appareil</string>
     <string name="double_tap_as_button_press">Double clic comme appui sur le bouton</string>
@@ -769,6 +792,10 @@
     <string name="node_filter_show_ignored">Afficher uniquement les nœuds ignorés</string>
     <string name="node_filter_title">Filtrer par</string>
     <string name="node_id">Identifiant (ID) du nœud</string>
+    <string name="node_layout_channel">Canal</string>
+    <string name="node_layout_hops_away">Sauts</string>
+    <string name="node_layout_log_icons">Métriques d'environnement</string>
+    <string name="node_layout_power">Alimentation</string>
     <string name="node_number">Numéro de nœud</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_button">Options de tri des nœuds</string>
@@ -1145,7 +1172,7 @@
     <string name="tak_role_teammember">Membre de l'équipe</string>
     <string name="tak_role_unspecified">Non spécifié</string>
     <string name="tak_server_enabled">Activer le serveur TAK local</string>
-    <string name="tak_server_enabled_desc">Démarre un serveur TCP sur le port 8089 pour les connexions ATAK</string>
+    <string name="tak_server_section">Serveur</string>
     <string name="tak_team">Couleur de l'équipe</string>
     <string name="tak_team_blue">Bleu</string>
     <string name="tak_team_brown">Marron</string>
@@ -1175,6 +1202,7 @@
     <string name="timestamp">Horodatage</string>
     <string name="tls_enabled">TLS activé</string>
     <string name="toggle_my_position">Basculer ma position</string>
+    <string name="trace_route">Tracer la route</string>
     <!-- TRACEROUTE -->
     <string name="traceroute">Traceroute</string>
     <string name="traceroute_diff">Sauts vers %1$d Sauts retour %2$d</string>
@@ -1227,7 +1255,6 @@
     <string name="tx_power_dbm">Puissance d'émission</string>
     <string name="type">Type</string>
     <string name="type_a_message">Composer un message</string>
-    <string name="udp_enabled">Activé</string>
     <!-- UNKNOWN -->
     <string name="unknown">Inconnu</string>
     <string name="unknown_age">Age inconnu</string>

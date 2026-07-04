@@ -32,10 +32,8 @@ import org.meshtastic.core.database.MeshtasticDatabase.Companion.configureCommon
 
 /** Returns a [RoomDatabase.Builder] configured for Android with the given [dbName]. */
 actual fun getDatabaseBuilder(dbName: String): RoomDatabase.Builder<MeshtasticDatabase> {
-    val app = ContextServices.app
-    val dbFile = app.getDatabasePath(dbName)
+    val dbFile = ContextServices.app.getDatabasePath(dbName)
     return Room.databaseBuilder<MeshtasticDatabase>(
-        context = app.applicationContext,
         name = dbFile.absolutePath,
         factory = { MeshtasticDatabaseConstructor.initialize() },
     )
@@ -44,10 +42,7 @@ actual fun getDatabaseBuilder(dbName: String): RoomDatabase.Builder<MeshtasticDa
 
 /** Returns a [RoomDatabase.Builder] configured for an in-memory Android database. */
 actual fun getInMemoryDatabaseBuilder(): RoomDatabase.Builder<MeshtasticDatabase> =
-    Room.inMemoryDatabaseBuilder<MeshtasticDatabase>(
-        context = ContextServices.app.applicationContext,
-        factory = { MeshtasticDatabaseConstructor.initialize() },
-    )
+    Room.inMemoryDatabaseBuilder<MeshtasticDatabase>(factory = { MeshtasticDatabaseConstructor.initialize() })
         .configureCommon()
 
 /** Returns the Android directory where database files are stored. */

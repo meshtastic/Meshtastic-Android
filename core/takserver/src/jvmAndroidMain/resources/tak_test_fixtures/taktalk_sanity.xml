@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<event version="2.0" uid="TAKTALK-MESSAGE-sanity-test-aspen-to-ethel" type="m-t-t" how="null" time="2026-05-27T20:00:00.000Z" start="2026-05-27T20:00:00.000Z" stale="2026-05-27T20:06:00.000Z">
+  <point lat="0.0" lon="0.0" hae="9999999.0" ce="9999999.0" le="9999999.0"/>
+  <detail>
+    <callsign>ASPEN</callsign>
+    <lang>English</lang>
+    <text>TAK-Talk sanity test from ASPEN.</text>
+    <chatroom-id>1</chatroom-id>
+    <voice/>
+    <marti><dest callsign="ETHEL"/></marti>
+  </detail>
+</event>

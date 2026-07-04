@@ -79,6 +79,52 @@
       },
       "registered_skills": [],
       "installed_at": "2026-05-09T19:50:38.413050+00:00"
+    },
+    "review": {
+      "version": "1.0.1",
+      "source": "local",
+      "manifest_hash": "sha256:3f9eedfc8079662edfb8d1f9c07a161be4e66111ea57621061f1658e91710d83",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "copilot": [
+          "speckit.review.run",
+          "speckit.review.code",
+          "speckit.review.comments",
+          "speckit.review.tests",
+          "speckit.review.errors",
+          "speckit.review.types",
+          "speckit.review.simplify"
+        ],
+        "opencode": [
+          "speckit.review.run",
+          "speckit.review.code",
+          "speckit.review.comments",
+          "speckit.review.tests",
+          "speckit.review.errors",
+          "speckit.review.types",
+          "speckit.review.simplify"
+        ]
+      },
+      "registered_skills": [],
+      "installed_at": "2026-05-09T00:25:20.640435+00:00"
+    },
+    "agent-governance": {
+      "version": "1.2.0",
+      "source": "local",
+      "manifest_hash": "sha256:99b9bb818d30379426ffd15e31660bf7e762eb90d1cca22ebcd4dd27b78f94a2",
+      "enabled": false,
+      "priority": 10,
+      "registered_commands": {
+        "copilot": [
+          "speckit.agent-governance.refresh"
+        ],
+        "opencode": [
+          "speckit.agent-governance.refresh"
+        ]
+      },
+      "registered_skills": [],
+      "installed_at": "2026-05-21T18:07:24.505929+00:00"
     }
   }
 }

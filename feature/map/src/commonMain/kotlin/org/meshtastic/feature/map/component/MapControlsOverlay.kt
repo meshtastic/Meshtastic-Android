@@ -14,12 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+
 package org.meshtastic.feature.map.component
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingToolbarDefaults
 import androidx.compose.material3.HorizontalFloatingToolbar
@@ -40,6 +42,7 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.MyLocation
 import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.core.ui.icon.Tune
+import org.meshtastic.core.ui.theme.StatusColors.StatusBlue
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 
 /**
@@ -103,7 +106,7 @@ fun MapControlsOverlay(
         if (showRefresh) {
             if (isRefreshing) {
                 Box(modifier = Modifier.padding(8.dp)) {
-                    CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                    CircularWavyProgressIndicator(modifier = Modifier.size(24.dp))
                 }
             } else {
                 MapButton(
@@ -125,9 +128,11 @@ fun MapControlsOverlay(
 
 @Composable
 private fun CompassButton(onClick: () -> Unit, bearing: Float, isFollowing: Boolean) {
+    // Tint, not `primary` — tinting the icon `primary` painted it the same color as its own primary-colored
+    // button background, making the compass disappear while following.
     val iconTint =
         when {
-            isFollowing -> MaterialTheme.colorScheme.primary
+            isFollowing -> MaterialTheme.colorScheme.StatusBlue
             bearing == 0f -> MaterialTheme.colorScheme.StatusRed
             else -> null
         }

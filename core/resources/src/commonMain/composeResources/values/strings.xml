@@ -16,8 +16,18 @@
   -->
 
 <resources>
+    <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">Message from %1$s: %2$s</string>
+    <string name="a11y_node_battery">battery %1$d%%</string>
+    <string name="a11y_node_distance_away">%1$s away</string>
+    <string name="a11y_node_favorite">favorite</string>
+    <string name="a11y_node_hops_away">%1$d hops away</string>
+    <string name="a11y_node_last_heard">last heard %1$s</string>
+    <string name="a11y_node_offline">offline</string>
+    <string name="a11y_node_online">online</string>
+    <string name="a11y_node_role">role %1$s</string>
+    <string name="a11y_node_signal">signal %1$s</string>
     <string name="accept">Accept</string>
     <string name="acknowledgements">Acknowledgements</string>
     <!-- ACTION -->
@@ -138,7 +148,24 @@
     <string name="channel_url">Channel URL</string>
     <string name="channel_utilization">ChUtil</string>
     <string name="channels">Channels</string>
+    <!-- CHIRPY -->
     <string name="chirpy">Chirpy</string>
+    <string name="chirpy_assistant_title">Chirpy Assistant</string>
+    <string name="chirpy_checking">Checking Chirpy availability…</string>
+    <string name="chirpy_downloading">Chirpy is downloading…</string>
+    <string name="chirpy_downloading_progress">Downloading Chirpy model: %1$d%%</string>
+    <string name="chirpy_downloading_subtitle">This only happens once. Chirpy will be ready soon!</string>
+    <string name="chirpy_error_busy">Whoa! The channel is totally congested right now with heavy traffic! 📶 Let's wait for a clear slot and retry our transmission.</string>
+    <string name="chirpy_error_model_unavailable">My battery is charging or my firmware is still downloading! 🔋 Give me a few moments to sync up and boot!</string>
+    <string name="chirpy_error_token_budget_exceeded">That payload is too large for my transmission budget! 📱 Try shortening your message so we can route it smoothly.</string>
+    <string name="chirpy_error_unknown">Oops! We hit some heavy packet loss or signal interference! 📡 Let's re-transmit that query and see if we can get through.</string>
+    <string name="chirpy_error_unsupported_flavor">I'm operating on a limited frequency on this app flavor! 🔌 Try using a version with full AI Core integration.</string>
+    <string name="chirpy_error_unsupported_platform">Oh no! My antenna can't seem to establish a connection on this platform. 📡 Please double-check your hardware compatibility!</string>
+    <string name="chirpy_intro">Hey there! 📡 I\'m Chirpy, your on-device Meshtastic assistant! I can help with setup, configuration, troubleshooting, and mesh networking tips. What can I help you with?</string>
+    <string name="chirpy_ready">Ask Chirpy</string>
+    <string name="chirpy_search_placeholder">Ask about Meshtastic…</string>
+    <string name="chirpy_suggested_pages_help">Here are some documentation pages that might help:</string>
+    <string name="chirpy_thinking">Chirpy is routing through the mesh… 📡</string>
     <string name="choose_contrast">Contrast level</string>
     <string name="choose_theme">Choose theme</string>
     <!-- CLEAN -->
@@ -326,6 +353,47 @@
     <string name="distance_measurements">Distance Measurements</string>
     <string name="distance_measurements_description">Display the distance between your phone and other Meshtastic nodes with positions.</string>
     <string name="dns">DNS</string>
+    <!-- DOC -->
+    <string name="doc_clear_search">Clear search</string>
+    <string name="doc_keywords_connections">bluetooth,usb,tcp,pairing,serial,wifi</string>
+    <string name="doc_keywords_desktop">desktop,linux,macos,windows,serial</string>
+    <string name="doc_keywords_discovery">discovery,topology,network,scan,neighbor</string>
+    <string name="doc_keywords_firmware">firmware,update,ota,flash,version,recovery</string>
+    <string name="doc_keywords_map">map,waypoint,gps,position,location,marker</string>
+    <string name="doc_keywords_measurement">formatter,metric,number,locale,temperature,conversion,api</string>
+    <string name="doc_keywords_messages">message,channel,encryption,direct,broadcast,quick-chat</string>
+    <string name="doc_keywords_mqtt">mqtt,broker,internet,bridge,uplink,downlink</string>
+    <string name="doc_keywords_node_metrics">metrics,telemetry,signal,snr,rssi,battery,traceroute</string>
+    <string name="doc_keywords_nodes">node,mesh,list,role,status,favorite,filter</string>
+    <string name="doc_keywords_onboarding">setup,welcome,permissions,first-launch</string>
+    <string name="doc_keywords_settings_module">module,serial,telemetry,canned,store-forward,administration</string>
+    <string name="doc_keywords_settings_radio">settings,radio,lora,region,modem,device,power,security</string>
+    <string name="doc_keywords_signal_meter">signal,rssi,snr,bars,quality,lora,noise,meter</string>
+    <string name="doc_keywords_tak">tak,atak,cursor-on-target,team-awareness</string>
+    <string name="doc_keywords_telemetry">telemetry,sensor,temperature,humidity,pressure,power</string>
+    <string name="doc_keywords_translate">translate,crowdin,localization,language,i18n,contribute</string>
+    <string name="doc_keywords_units">units,locale,metric,imperial,temperature,distance</string>
+    <string name="doc_search_placeholder">Search documentation…</string>
+    <string name="doc_section_developer">Developer Guide</string>
+    <string name="doc_section_user">User Guide</string>
+    <string name="doc_title_connections">Connections</string>
+    <string name="doc_title_desktop">Desktop App</string>
+    <string name="doc_title_discovery">Discovery</string>
+    <string name="doc_title_firmware">Firmware Updates</string>
+    <string name="doc_title_map">Map &amp; Waypoints</string>
+    <string name="doc_title_measurement">Measurement &amp; Formatting</string>
+    <string name="doc_title_messages">Messages &amp; Channels</string>
+    <string name="doc_title_mqtt">MQTT</string>
+    <string name="doc_title_node_metrics">Node Metrics</string>
+    <string name="doc_title_nodes">Nodes</string>
+    <string name="doc_title_onboarding">Getting Started</string>
+    <string name="doc_title_settings_module">Settings — Modules &amp; Admin</string>
+    <string name="doc_title_settings_radio">Settings — Radio &amp; User</string>
+    <string name="doc_title_signal_meter">Signal Meter</string>
+    <string name="doc_title_tak">TAK Integration</string>
+    <string name="doc_title_telemetry">Telemetry &amp; Sensors</string>
+    <string name="doc_title_translate">Translate the App</string>
+    <string name="doc_title_units">Units &amp; Locale</string>
     <string name="done">Done</string>
     <string name="dont_show_again_for_device">Don't show again for this device</string>
     <string name="double_tap_as_button_press">Double Tap as Button</string>
@@ -507,6 +575,7 @@
     <string name="hardware_model">Hardware model</string>
     <string name="heading">Heading</string>
     <string name="heartbeat">Heartbeat</string>
+    <string name="help_and_documentation">Help &amp; Documentation</string>
     <string name="hide_layer">Hide Layer</string>
     <string name="hide_password">Hide password</string>
     <string name="history_return_max">History return max</string>
@@ -786,6 +855,32 @@
     <string name="node_filter_show_ignored">Only show ignored Nodes</string>
     <string name="node_filter_title">Filter by</string>
     <string name="node_id">Node ID</string>
+    <string name="node_layout_channel">Channel</string>
+    <string name="node_layout_compact">Compact</string>
+    <string name="node_layout_compact_fields_header">Compact Fields</string>
+    <string name="node_layout_complete">Complete</string>
+    <string name="node_layout_complete_description">The Complete layout displays all available node data. Fields with no data are automatically hidden.</string>
+    <string name="node_layout_device_role">Device &amp; Role</string>
+    <string name="node_layout_distance_and_bearing">Distance and Bearing</string>
+    <string name="node_layout_help_signal_bad">Signal is poor. SNR is above −18 dB and RSSI is above −125 dBm.</string>
+    <string name="node_layout_help_signal_fair">Signal is moderate. SNR is above −12 dB and RSSI is above −120 dBm.</string>
+    <string name="node_layout_help_signal_good">Signal is strong. SNR is above −7 dB and RSSI is above −115 dBm.</string>
+    <string name="node_layout_help_signal_indicator">Combines SNR and RSSI into a quality level shown as a colored icon with description. Displayed in the Complete layout only.</string>
+    <string name="node_layout_help_signal_none">No usable signal detected. Below all quality thresholds.</string>
+    <string name="node_layout_hops_away">Hops Away</string>
+    <string name="node_layout_last_heard_time">Last Heard Time</string>
+    <string name="node_layout_log_icons">Environment Metrics</string>
+    <string name="node_layout_no_preview_available">No nodes available for preview.</string>
+    <string name="node_layout_power">Power</string>
+    <string name="node_layout_preview">Preview</string>
+    <string name="node_layout_relative_last_heard">Relative Last Heard Time</string>
+    <string name="node_layout_section_title">Node Layout</string>
+    <string name="node_layout_signal_direct_only">Signal (Direct Only)</string>
+    <string name="node_layout_signal_quality_indicator">Signal Quality Indicator</string>
+    <string name="node_list_click_label">Open node details</string>
+    <string name="node_list_help_node_details">Node Details</string>
+    <string name="node_list_help_title">Node List Help</string>
+    <string name="node_list_long_click_label">Node options</string>
     <string name="node_number">Node Number</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_button">Node sorting options</string>
@@ -1165,8 +1260,19 @@
     <string name="tak_role_teamlead">Team Lead</string>
     <string name="tak_role_teammember">Team Member</string>
     <string name="tak_role_unspecified">Unspecified</string>
+    <string name="tak_server">TAK Server</string>
     <string name="tak_server_enabled">Enable Local TAK Server</string>
-    <string name="tak_server_enabled_desc">Starts a TCP server on port 8089 for ATAK connections</string>
+    <string name="tak_server_enabled_desc">Starts a local TLS server on port 8089 for ATAK/iTAK connections</string>
+    <string name="tak_server_export_data_package_desc">Generate .zip for ATAK/iTAK to connect to this server</string>
+    <string name="tak_server_loading">…</string>
+    <string name="tak_server_section">Server</string>
+    <string name="tak_server_test_card_title">TAK Mesh Test (Debug)</string>
+    <string name="tak_server_test_idle">Send all %1$d test fixtures to mesh</string>
+    <string name="tak_server_test_result_bytes">%1$dB ✓</string>
+    <string name="tak_server_test_result_unknown_error">✗</string>
+    <string name="tak_server_test_results">%1$d passed, %2$d failed of %3$d/%4$d</string>
+    <string name="tak_server_test_run">Run</string>
+    <string name="tak_server_test_running">Running: %1$s</string>
     <string name="tak_team">Team Color</string>
     <string name="tak_team_blue">Blue</string>
     <string name="tak_team_brown">Brown</string>
@@ -1196,6 +1302,7 @@
     <string name="timestamp">Timestamp</string>
     <string name="tls_enabled">TLS enabled</string>
     <string name="toggle_my_position">Toggle my position</string>
+    <string name="trace_route">Trace Route</string>
     <!-- TRACEROUTE -->
     <string name="traceroute">Traceroute</string>
     <string name="traceroute_diff">Hops towards %1$d Hops back %2$d</string>
@@ -1248,7 +1355,7 @@
     <string name="tx_power_dbm">Transmit Power</string>
     <string name="type">Type</string>
     <string name="type_a_message">Type a message</string>
-    <string name="udp_enabled">Enabled</string>
+    <string name="udp_enabled">UDP broadcasting</string>
     <!-- UNKNOWN -->
     <string name="unknown">Unknown</string>
     <string name="unknown_age">Unknown Age</string>

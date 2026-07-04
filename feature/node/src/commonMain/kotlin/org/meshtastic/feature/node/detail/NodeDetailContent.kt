@@ -14,6 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+
 package org.meshtastic.feature.node.detail
 
 import androidx.compose.animation.Crossfade
@@ -24,7 +26,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.CircularWavyProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,7 +41,6 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.loading
 import org.meshtastic.feature.node.component.AdministrationSection
 import org.meshtastic.feature.node.component.DeviceActions
-import org.meshtastic.feature.node.component.DeviceDetailsSection
 import org.meshtastic.feature.node.component.NodeDetailsSection
 import org.meshtastic.feature.node.component.NotesSection
 import org.meshtastic.feature.node.model.NodeDetailAction
@@ -73,7 +75,7 @@ fun NodeDetailContent(
         } else {
             val loadingDescription = stringResource(Res.string.loading)
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(modifier = Modifier.semantics { contentDescription = loadingDescription })
+                CircularWavyProgressIndicator(modifier = Modifier.semantics { contentDescription = loadingDescription })
             }
         }
     }
@@ -100,7 +102,13 @@ fun NodeDetailList(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp),
     ) {
-        item { NodeDetailsSection(node) }
+        item {
+            NodeDetailsSection(
+                node = node,
+                deviceHardware = uiState.metricsState.deviceHardware,
+                reportedTarget = uiState.metricsState.reportedTarget,
+            )
+        }
         item {
             DeviceActions(
                 node = node,
@@ -113,9 +121,6 @@ fun NodeDetailList(
                 isFahrenheit = uiState.metricsState.isFahrenheit,
                 isLocal = uiState.metricsState.isLocal,
             )
-        }
-        if (uiState.metricsState.deviceHardware != null) {
-            item { DeviceDetailsSection(uiState.metricsState) }
         }
         item { NotesSection(node = node, onSaveNotes = onSaveNotes) }
         if (!uiState.metricsState.isManaged) {

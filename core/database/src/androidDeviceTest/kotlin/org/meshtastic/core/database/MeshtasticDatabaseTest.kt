@@ -18,12 +18,15 @@ package org.meshtastic.core.database
 
 import androidx.room3.Room
 import androidx.room3.testing.MigrationTestHelper
+import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.meshtastic.core.database.MeshtasticDatabase.Companion.configureCommon
+import java.io.File
 import java.io.IOException
 
 @RunWith(AndroidJUnit4::class)
@@ -35,16 +38,21 @@ class MeshtasticDatabaseTest {
 
     @get:Rule
     val helper: MigrationTestHelper =
-        MigrationTestHelper(InstrumentationRegistry.getInstrumentation(), MeshtasticDatabase::class.java)
+        MigrationTestHelper(
+            instrumentation = InstrumentationRegistry.getInstrumentation(),
+            file = File("schemas"),
+            driver = BundledSQLiteDriver(),
+            databaseClass = MeshtasticDatabase::class,
+        )
 
     @org.junit.Ignore("KMP Android Library does not package Room schemas into test assets currently")
     @Test
     @Throws(IOException::class)
-    fun migrateAll() {
+    fun migrateAll(): Unit = runBlocking {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
 
         // Create earliest version of the database.
-        helper.createDatabase(TEST_DB, 3).apply { close() }
+        helper.createDatabase(version = 3).close()
 
         // Open latest version of the database. Room validates the schema
         // once all migrations execute.
@@ -55,9 +63,6 @@ class MeshtasticDatabaseTest {
         )
             .configureCommon()
             .build()
-            .apply {
-                openHelper.writableDatabase
-                close()
-            }
+            .close()
     }
 }

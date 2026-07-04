@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
     <string name="accept">Прыняць</string>
     <!-- ACTION -->
     <!-- ADD -->
@@ -48,6 +49,7 @@
     <string name="channel_label">Канал</string>
     <string name="channel_name">Назва канала</string>
     <string name="channels">Каналы</string>
+    <!-- CHIRPY -->
     <!-- CLEAN -->
     <string name="clear">Скінуць</string>
     <string name="close">Закрыть</string>
@@ -85,6 +87,9 @@
     <string name="display">Экран</string>
     <!-- DISTANCE -->
     <string name="distance">Адлегласць</string>
+    <!-- DOC -->
+    <string name="doc_title_mqtt">MQTT</string>
+    <string name="doc_title_onboarding">Начало работы</string>
     <string name="download">Сцягнуць</string>
     <string name="edit">Змяніць</string>
     <string name="eight_hours">8 Гадзін</string>
@@ -164,6 +169,7 @@
     <string name="node_filter_only_online">Схаваць вузлы па-за сеткай</string>
     <string name="node_filter_placeholder">Фільтраваць</string>
     <string name="node_filter_title">Фільтраваць па</string>
+    <string name="node_layout_channel">Канал</string>
     <string name="node_sort_alpha">Па алфавіце</string>
     <string name="node_sort_button">Параметры сартавання вузлоў</string>
     <string name="node_sort_channel">Канал</string>
@@ -260,6 +266,7 @@
     <string name="speed">Хуткасць</string>
     <string name="ssid">SSID</string>
     <!-- TAK -->
+    <string name="tak_server_section">Сервер</string>
     <string name="tak_team_blue">Сіні</string>
     <string name="tak_team_green">Зялёны</string>
     <string name="tak_team_red">Чырвоны</string>
@@ -272,7 +279,6 @@
     <string name="two_days">48 Гадзін</string>
     <string name="two_weeks">2тыд</string>
     <string name="type">Тып</string>
-    <string name="udp_enabled">Уключана</string>
     <!-- UNKNOWN -->
     <string name="unrecognized">Нераспазнанае</string>
     <!-- URL -->

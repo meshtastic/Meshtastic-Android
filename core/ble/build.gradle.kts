@@ -18,17 +18,10 @@
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     id("meshtastic.koin")
-    alias(libs.plugins.flatpak.gradle.generator)
 }
 
 kotlin {
-    jvm()
-
-    android {
-        namespace = "org.meshtastic.core.ble"
-        androidResources.enable = false
-        withHostTest { isIncludeAndroidResources = true }
-    }
+    android { withHostTest { isIncludeAndroidResources = true } }
 
     sourceSets {
         commonMain.dependencies {
@@ -51,21 +44,4 @@ kotlin {
             implementation(projects.core.testing)
         }
     }
-}
-
-tasks.flatpakGradleGenerator {
-    outputFile = file("../../flatpak-sources-core-ble.json")
-    downloadDirectory.set("./offline-repository")
-    excludeConfigurations.set(
-        listOf(
-            "androidRuntimeClasspath",
-            "androidCompileClasspath",
-            "androidMainLintChecksClasspath",
-            "androidHostTestCompileClasspath",
-            "androidHostTestLintChecksClasspath",
-            "androidHostTestRuntimeClasspath",
-            "testCompileClasspath",
-            "testRuntimeClasspath",
-        ),
-    )
 }

@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
     <string name="accept">Akceptuj</string>
     <string name="acknowledgements">Potwierdzenia</string>
     <!-- ACTION -->
@@ -90,6 +91,7 @@
     <string name="channel_label">Kanał</string>
     <string name="channel_name">Nazwa Kanału</string>
     <string name="channels">Kanały</string>
+    <!-- CHIRPY -->
     <string name="choose_theme">Wybierz motyw</string>
     <!-- CLEAN -->
     <string name="clean_node_database_confirmation">Usuniesz %1$d węzłów z bazy danych. Tej akcji nie można cofnąć.</string>
@@ -226,6 +228,10 @@
     <!-- DISTANCE -->
     <string name="distance">Odległość</string>
     <string name="dns">DNS</string>
+    <!-- DOC -->
+    <string name="doc_clear_search">Wyczyść wyszukiwanie</string>
+    <string name="doc_title_mqtt">MQTT</string>
+    <string name="doc_title_nodes">Węzły</string>
     <string name="done">Wykonano</string>
     <string name="double_tap_as_button_press">Podwójne dotknięcie jako naciśnięcie przycisku</string>
     <string name="downlink_enabled">Odbiór włączony</string>
@@ -501,6 +507,10 @@
     <string name="node_filter_show_ignored">Pokaż tylko ignorowane węzły</string>
     <string name="node_filter_title">Filtry</string>
     <string name="node_id">ID węzła</string>
+    <string name="node_layout_channel">Kanał</string>
+    <string name="node_layout_hops_away">Skoków</string>
+    <string name="node_layout_log_icons">Metryki środowiskowe</string>
+    <string name="node_layout_power">Zasilanie</string>
     <string name="node_number">Numer węzła</string>
     <string name="node_sort_alpha">Nazwa</string>
     <string name="node_sort_button">Opcje sortowania węzłów</string>
@@ -720,6 +730,7 @@
     <string name="supported">Obsługiwane</string>
     <string name="system_settings">Ustawienia systemowe</string>
     <!-- TAK -->
+    <string name="tak_server_section">Serwer</string>
     <string name="tak_team_blue">Niebieski</string>
     <string name="tak_team_green">Zielony</string>
     <string name="tak_team_red">Czerwony</string>
@@ -735,6 +746,7 @@
     <string name="timestamp">Znacznik czasu</string>
     <string name="tls_enabled">Włącz TLS</string>
     <string name="toggle_my_position">Pokaż moją pozycję</string>
+    <string name="trace_route">Śledzenie trasy</string>
     <!-- TRACEROUTE -->
     <string name="traceroute">Pokaż trasę</string>
     <string name="traceroute_diff">Skoki do: %1$d. Skoki od: %2$d</string>
@@ -764,7 +776,6 @@
     <string name="tx_enabled">Nadawanie włączone</string>
     <string name="tx_power_dbm">Moc nadawania</string>
     <string name="type">Typ</string>
-    <string name="udp_enabled">Włączony</string>
     <!-- UNKNOWN -->
     <string name="unknown">Nieznany</string>
     <string name="unknown_age">Unknown Age</string>

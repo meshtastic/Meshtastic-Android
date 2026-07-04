@@ -16,7 +16,6 @@
  */
 package org.meshtastic.feature.settings.radio
 
-import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import dev.mokkery.MockMode
 import dev.mokkery.answering.calls
@@ -49,6 +48,7 @@ import org.meshtastic.core.domain.usecase.settings.RadioResponseResult
 import org.meshtastic.core.domain.usecase.settings.ToggleAnalyticsUseCase
 import org.meshtastic.core.domain.usecase.settings.ToggleHomoglyphEncodingUseCase
 import org.meshtastic.core.model.MqttProbeStatus
+import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.AnalyticsPrefs
 import org.meshtastic.core.repository.FileService
@@ -76,6 +76,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -139,8 +140,8 @@ class RadioConfigViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun createViewModel() = RadioConfigViewModel(
-        savedStateHandle = SavedStateHandle(),
+    private fun createViewModel(destNum: Int? = null) = RadioConfigViewModel(
+        destNum = destNum,
         radioConfigRepository = radioConfigRepository,
         packetRepository = packetRepository,
         serviceRepository = serviceRepository,
@@ -402,19 +403,34 @@ class RadioConfigViewModelTest {
     }
 
     @Test
-    fun `initDestNum updates value correctly including null`() = runTest {
-        viewModel = createViewModel()
-
-        // Initial setup should take the flow value, but let's just force update it
-        viewModel.initDestNum(123)
-        assertEquals(
-            123,
-            viewModel.destNode.value?.num ?: 123,
-        ) // the flow combine might need yielding, but we can just check it doesn't crash
-
-        // The bug was that null was ignored. Here we test we can pass null
-        // Since we can't easily read destNumFlow directly, we can just call it to ensure no crashes
-        viewModel.initDestNum(null)
+    fun `destNum from SavedStateHandle resolves destNode`() = runTest {
+        val node = Node(num = 456, user = User(id = "!456"))
+        nodeRepository.setNodes(listOf(node))
+        viewModel =
+            RadioConfigViewModel(
+                destNum = 456,
+                radioConfigRepository = radioConfigRepository,
+                packetRepository = packetRepository,
+                serviceRepository = serviceRepository,
+                nodeRepository = nodeRepository,
+                locationRepository = locationRepository,
+                mapConsentPrefs = mapConsentPrefs,
+                analyticsPrefs = analyticsPrefs,
+                homoglyphEncodingPrefs = homoglyphEncodingPrefs,
+                toggleAnalyticsUseCase = toggleAnalyticsUseCase,
+                toggleHomoglyphEncodingUseCase = toggleHomoglyphEncodingUseCase,
+                importProfileUseCase = importProfileUseCase,
+                exportProfileUseCase = exportProfileUseCase,
+                exportSecurityConfigUseCase = exportSecurityConfigUseCase,
+                installProfileUseCase = installProfileUseCase,
+                radioConfigUseCase = radioConfigUseCase,
+                adminActionsUseCase = adminActionsUseCase,
+                processRadioResponseUseCase = processRadioResponseUseCase,
+                locationService = locationService,
+                fileService = fileService,
+                mqttManager = mqttManager,
+            )
+        assertEquals(456, viewModel.destNode.value?.num)
     }
 
     @Test
@@ -595,5 +611,108 @@ class RadioConfigViewModelTest {
         // It's hard to assert sendError directly without a mock on a channel, but we can verify it doesn't stay loading
         // actually sendError updates the state? No, sendError sends an event.
         // But the requestIds gets cleared.
+    }
+
+    @Test
+    fun `ensureLoadingForRemote sets loading state for remote nodes`() = runTest {
+        val localNode = Node(num = 100, user = User(id = "!100"))
+        val remoteNode = Node(num = 456, user = User(id = "!456"))
+        nodeRepository.setNodes(listOf(localNode, remoteNode))
+        nodeRepository.setMyNodeInfo(
+            MyNodeInfo(
+                myNodeNum = 100,
+                hasGPS = false,
+                model = null,
+                firmwareVersion = null,
+                couldUpdate = false,
+                shouldUpdate = false,
+                currentPacketId = 0,
+                messageTimeoutMsec = 0,
+                minAppVersion = 0,
+                maxChannels = 8,
+                hasWifi = false,
+                channelUtilization = 0f,
+                airUtilTx = 0f,
+                deviceId = null,
+            ),
+        )
+
+        val remoteVm = createViewModel(destNum = 456)
+
+        // Remote VM starts with Empty responseState
+        assertEquals(ResponseState.Empty, remoteVm.radioConfigState.value.responseState)
+        assertFalse(remoteVm.radioConfigState.value.isLocal)
+
+        // ensureLoadingForRemote should transition to Loading
+        remoteVm.ensureLoadingForRemote()
+        assertTrue(remoteVm.radioConfigState.value.responseState is ResponseState.Loading)
+    }
+
+    @Test
+    fun `ensureLoadingForRemote is no-op for local nodes`() = runTest {
+        val localNode = Node(num = 100, user = User(id = "!100"))
+        nodeRepository.setNodes(listOf(localNode))
+        nodeRepository.setMyNodeInfo(
+            MyNodeInfo(
+                myNodeNum = 100,
+                hasGPS = false,
+                model = null,
+                firmwareVersion = null,
+                couldUpdate = false,
+                shouldUpdate = false,
+                currentPacketId = 0,
+                messageTimeoutMsec = 0,
+                minAppVersion = 0,
+                maxChannels = 8,
+                hasWifi = false,
+                channelUtilization = 0f,
+                airUtilTx = 0f,
+                deviceId = null,
+            ),
+        )
+
+        val localVm = createViewModel(destNum = 100)
+
+        // Local VM should have isLocal = true
+        assertTrue(localVm.radioConfigState.value.isLocal)
+
+        // ensureLoadingForRemote should NOT change responseState
+        localVm.ensureLoadingForRemote()
+        assertEquals(ResponseState.Empty, localVm.radioConfigState.value.responseState)
+    }
+
+    @Test
+    fun `ensureLoadingForRemote is no-op when already loading`() = runTest {
+        val localNode = Node(num = 100, user = User(id = "!100"))
+        val remoteNode = Node(num = 456, user = User(id = "!456"))
+        nodeRepository.setNodes(listOf(localNode, remoteNode))
+        nodeRepository.setMyNodeInfo(
+            MyNodeInfo(
+                myNodeNum = 100,
+                hasGPS = false,
+                model = null,
+                firmwareVersion = null,
+                couldUpdate = false,
+                shouldUpdate = false,
+                currentPacketId = 0,
+                messageTimeoutMsec = 0,
+                minAppVersion = 0,
+                maxChannels = 8,
+                hasWifi = false,
+                channelUtilization = 0f,
+                airUtilTx = 0f,
+                deviceId = null,
+            ),
+        )
+
+        val remoteVm = createViewModel(destNum = 456)
+
+        // Set loading first
+        remoteVm.ensureLoadingForRemote()
+        assertTrue(remoteVm.radioConfigState.value.responseState is ResponseState.Loading)
+
+        // Calling again should still be Loading (no-op, not a new instance)
+        remoteVm.ensureLoadingForRemote()
+        assertTrue(remoteVm.radioConfigState.value.responseState is ResponseState.Loading)
     }
 }

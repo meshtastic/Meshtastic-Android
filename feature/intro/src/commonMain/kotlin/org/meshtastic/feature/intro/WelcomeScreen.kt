@@ -116,8 +116,9 @@ internal fun WelcomeScreen(onGetStarted: () -> Unit) {
     }
 }
 
+@Suppress("PreviewPublic")
 @PreviewLightDark
 @Composable
-private fun WelcomeScreenPreview() {
+fun WelcomeScreenPreview() {
     AppTheme { Surface { WelcomeScreen(onGetStarted = {}) } }
 }

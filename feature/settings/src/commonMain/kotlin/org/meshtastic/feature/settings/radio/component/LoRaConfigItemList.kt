@@ -64,11 +64,28 @@ import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.util.hopLimits
 import org.meshtastic.proto.Config
 
+private val SPREAD_FACTOR_RANGE = 7..12
+private val CODING_RATE_RANGE = 5..8
+
 @Composable
 fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val loraConfig = state.radioConfig.lora ?: Config.LoRaConfig()
-    val primarySettings = state.channelList.getOrNull(0) ?: return
+    val primarySettings = state.channelList.getOrNull(0)
+
+    if (primarySettings == null) {
+        RadioConfigScreenList(
+            title = stringResource(Res.string.lora),
+            onBack = onBack,
+            configState = rememberConfigState(initialValue = loraConfig),
+            enabled = false,
+            responseState = state.responseState,
+            onDismissPacketResponse = viewModel::clearPacketResponse,
+            onSave = {},
+        ) {}
+        return
+    }
+
     val formState = rememberConfigState(initialValue = loraConfig)
 
     val primaryChannel = remember(formState.value) { Channel(primarySettings, formState.value) }
@@ -115,28 +132,11 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                         onItemSelected = { formState.value = formState.value.copy(modem_preset = it) },
                     )
                 } else {
-                    EditTextPreference(
-                        title = stringResource(Res.string.bandwidth),
-                        value = formState.value.bandwidth,
-                        enabled = state.connected && !formState.value.use_preset,
-                        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                        onValueChanged = { formState.value = formState.value.copy(bandwidth = it) },
-                    )
-                    HorizontalDivider()
-                    EditTextPreference(
-                        title = stringResource(Res.string.spread_factor),
-                        value = formState.value.spread_factor,
-                        enabled = state.connected && !formState.value.use_preset,
-                        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                        onValueChanged = { formState.value = formState.value.copy(spread_factor = it) },
-                    )
-                    HorizontalDivider()
-                    EditTextPreference(
-                        title = stringResource(Res.string.coding_rate),
-                        value = formState.value.coding_rate,
-                        enabled = state.connected && !formState.value.use_preset,
-                        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                        onValueChanged = { formState.value = formState.value.copy(coding_rate = it) },
+                    ManualModemSettings(
+                        config = formState.value,
+                        enabled = state.connected,
+                        focusManager = focusManager,
+                        onConfigChange = { formState.value = it },
                     )
                 }
             }
@@ -248,5 +248,49 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun ManualModemSettings(
+    config: Config.LoRaConfig,
+    enabled: Boolean,
+    focusManager: androidx.compose.ui.focus.FocusManager,
+    onConfigChange: (Config.LoRaConfig) -> Unit,
+) {
+    androidx.compose.foundation.layout.Column {
+        EditTextPreference(
+            title = stringResource(Res.string.bandwidth),
+            value = config.bandwidth,
+            enabled = enabled,
+            keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+            onValueChanged = { onConfigChange(config.copy(bandwidth = it)) },
+        )
+        HorizontalDivider()
+        EditTextPreference(
+            title = stringResource(Res.string.spread_factor),
+            value = config.spread_factor,
+            enabled = enabled,
+            isError = config.spread_factor !in SPREAD_FACTOR_RANGE,
+            keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+            onValueChanged = {
+                if (it in SPREAD_FACTOR_RANGE) {
+                    onConfigChange(config.copy(spread_factor = it))
+                }
+            },
+        )
+        HorizontalDivider()
+        EditTextPreference(
+            title = stringResource(Res.string.coding_rate),
+            value = config.coding_rate,
+            enabled = enabled,
+            isError = config.coding_rate !in CODING_RATE_RANGE,
+            keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+            onValueChanged = {
+                if (it in CODING_RATE_RANGE) {
+                    onConfigChange(config.copy(coding_rate = it))
+                }
+            },
+        )
     }
 }

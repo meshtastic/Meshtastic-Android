@@ -38,8 +38,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,6 +46,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -136,17 +135,17 @@ fun ConnectionsScreen(
             onDenied = { scanModel.stopNetworkScan() },
         )
 
-    // Auto-start BLE scan on screen entry when the user has previously opted in. Stop on screen exit to save battery.
-    // We use `Unit` as the key so the effect is stable across recompositions — the toggle button manages scan
-    // start/stop directly and must not be interrupted by this effect re-firing when `bleAutoScan` changes.
-    // A LaunchedEffect watches bleAutoScan separately to handle the DataStore delivering `true` after the initial
-    // `false` (disk read latency), without triggering a dispose/restart cycle that kills an in-progress scan.
-    LaunchedEffect(bleAutoScan) { if (bleAutoScan && !scanModel.isBleScanning.value) scanModel.startBleScan() }
-    DisposableEffect(Unit) { onDispose { scanModel.stopBleScan() } }
+    // Auto-start BLE scan when the screen is visible (lifecycle ≥ STARTED) and the user has previously opted in.
+    // LifecycleStartEffect stops scanning on ON_STOP (app backgrounded) and restarts on ON_START — preventing
+    // continuous background BLE radio usage that drains the battery.
+    LifecycleStartEffect(bleAutoScan) {
+        if (bleAutoScan && !scanModel.isBleScanning.value) scanModel.startBleScan()
+        onStopOrDispose { scanModel.stopBleScan() }
+    }
 
-    DisposableEffect(networkAutoScan, localNetworkPermissionGranted) {
+    LifecycleStartEffect(networkAutoScan, localNetworkPermissionGranted) {
         if (networkAutoScan && localNetworkPermissionGranted) scanModel.startNetworkScan()
-        onDispose { scanModel.stopNetworkScan() }
+        onStopOrDispose { scanModel.stopNetworkScan() }
     }
 
     /* Animate waiting for the configurations */

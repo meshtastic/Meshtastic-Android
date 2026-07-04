@@ -14,17 +14,39 @@ Handles the complex logic of reading and writing configuration to the Meshtastic
 ### 3. `AboutScreen`
 Displays version information, licenses, and project links.
 
+## Validation Reference
+- See [settings-validation.md](settings-validation.md) for detailed radio/module settings validation rules used by this module.
+
 ## Features
 - **Channel Configuration**: Manage encryption keys, channel names, and radio frequency settings.
 - **Node Database Management**: Options to clear or prune the local and remote node databases.
 - **App Preferences**: Theme selection, unit system (metric/imperial), and notification settings.
 
-## Module dependency graph
+
+## Dependency Graph
 
 <!--region graph-->
 ```mermaid
 graph TB
   :feature:settings[settings]:::kmp-feature
+  :feature:settings -.-> :core:barcode
+  :feature:settings -.-> :core:nfc
+  :feature:settings -.-> :core:common
+  :feature:settings -.-> :core:data
+  :feature:settings -.-> :core:database
+  :feature:settings -.-> :core:datastore
+  :feature:settings -.-> :core:domain
+  :feature:settings -.-> :core:model
+  :feature:settings -.-> :core:navigation
+  :feature:settings -.-> :core:network
+  :feature:settings -.-> :core:proto
+  :feature:settings -.-> :core:repository
+  :feature:settings -.-> :core:service
+  :feature:settings -.-> :core:resources
+  :feature:settings -.-> :core:ui
+  :feature:settings -.-> :core:di
+  :feature:settings -.-> :core:takserver
+  :feature:settings -.-> :core:testing
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

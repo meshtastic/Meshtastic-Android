@@ -66,9 +66,14 @@ class FakeFilterPrefs : FilterPrefs {
 
 class FakeCustomEmojiPrefs : CustomEmojiPrefs {
     override val customEmojiFrequency = MutableStateFlow<String?>(null)
+    override val preferredSkinToneIndex = MutableStateFlow(0)
 
     override fun setCustomEmojiFrequency(frequency: String?) {
         customEmojiFrequency.value = frequency
+    }
+
+    override fun setPreferredSkinToneIndex(index: Int) {
+        preferredSkinToneIndex.value = index
     }
 }
 
@@ -183,6 +188,66 @@ class FakeUiPrefs : UiPrefs {
 
     override fun setShouldProvideNodeLocation(nodeNum: Int, provide: Boolean) {
         nodeLocationEnabled.getOrPut(nodeNum) { MutableStateFlow(provide) }.value = provide
+    }
+
+    override val nodeListDensity = MutableStateFlow("COMPLETE")
+
+    override fun setNodeListDensity(value: String) {
+        nodeListDensity.value = value
+    }
+
+    override val shouldShowPower = MutableStateFlow(true)
+
+    override fun setShouldShowPower(value: Boolean) {
+        shouldShowPower.value = value
+    }
+
+    override val shouldShowLastHeard = MutableStateFlow(true)
+
+    override fun setShouldShowLastHeard(value: Boolean) {
+        shouldShowLastHeard.value = value
+    }
+
+    override val lastHeardIsRelative = MutableStateFlow(false)
+
+    override fun setLastHeardIsRelative(value: Boolean) {
+        lastHeardIsRelative.value = value
+    }
+
+    override val shouldShowLocation = MutableStateFlow(true)
+
+    override fun setShouldShowLocation(value: Boolean) {
+        shouldShowLocation.value = value
+    }
+
+    override val shouldShowHops = MutableStateFlow(true)
+
+    override fun setShouldShowHops(value: Boolean) {
+        shouldShowHops.value = value
+    }
+
+    override val shouldShowSignal = MutableStateFlow(true)
+
+    override fun setShouldShowSignal(value: Boolean) {
+        shouldShowSignal.value = value
+    }
+
+    override val shouldShowChannel = MutableStateFlow(true)
+
+    override fun setShouldShowChannel(value: Boolean) {
+        shouldShowChannel.value = value
+    }
+
+    override val shouldShowRole = MutableStateFlow(true)
+
+    override fun setShouldShowRole(value: Boolean) {
+        shouldShowRole.value = value
+    }
+
+    override val shouldShowTelemetry = MutableStateFlow(true)
+
+    override fun setShouldShowTelemetry(value: Boolean) {
+        shouldShowTelemetry.value = value
     }
 }
 

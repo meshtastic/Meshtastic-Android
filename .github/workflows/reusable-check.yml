@@ -12,9 +12,6 @@ on:
       run_coverage:
         type: boolean
         default: true
-      run_desktop_builds:
-        type: boolean
-        default: true
       run_desktop_flatpak_src:
         type: boolean
         default: false
@@ -47,17 +44,17 @@ env:
   GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
   GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
   GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}
-  # Fallback VERSION_CODE for the lint-check job itself (which computes the real
-  # value from git). Downstream jobs override this with the git-derived value.
+  # Fallback VERSION_CODE for jobs that don't consume the setup output.
   VERSION_CODE: ${{ github.run_number }}
 
 jobs:
-  # ── Lint & Static Analysis ──────────────────────────────────────────
-  lint-check:
-    runs-on: ubuntu-24.04
+  # ── Fast Setup (version code + cache config) ────────────────────────
+  # Lightweight job that unblocks lint, tests, and builds in parallel.
+  setup:
+    runs-on: ubuntu-24.04-arm
     permissions:
       contents: read
-    timeout-minutes: 30
+    timeout-minutes: 5
     outputs:
       cache_read_only: ${{ steps.cache_config.outputs.cache_read_only }}
       version_code: ${{ steps.version_code.outputs.version_code }}
@@ -68,7 +65,7 @@ jobs:
         with:
           fetch-depth: 0
           filter: 'blob:none'
-          submodules: true
+          submodules: false
 
       - name: Determine cache read-only setting
         id: cache_config
@@ -89,27 +86,83 @@ jobs:
           VERSION_CODE=$((COMMIT_COUNT + OFFSET))
           echo "version_code=$VERSION_CODE" >> "$GITHUB_OUTPUT"
 
+  # ── Lint & Static Analysis ──────────────────────────────────────────
+  lint-check:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    timeout-minutes: 30
+    needs: setup
+    env:
+      VERSION_CODE: ${{ needs.setup.outputs.version_code }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          filter: 'blob:none'
+          submodules: true
+
       - name: Gradle Setup
         uses: ./.github/actions/gradle-setup
         with:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-          cache_read_only: ${{ steps.cache_config.outputs.cache_read_only }}
+          cache_read_only: ${{ needs.setup.outputs.cache_read_only }}
+          install_jetbrains_jdk: 'true'
 
       - name: Lint, Analysis & KMP Smoke Compile
         if: inputs.run_lint == true
-        run: ./gradlew spotlessCheck detekt app:lintFdroidDebug app:lintGoogleDebug core:barcode:lintFdroidDebug core:barcode:lintGoogleDebug core:api:lintDebug kmpSmokeCompile -Pci=true --continue --scan
+        run: ./gradlew spotlessCheck detekt androidApp:lintFdroidDebug androidApp:lintGoogleDebug core:barcode:lintFdroidDebug core:barcode:lintGoogleDebug core:api:lintDebug kmpSmokeCompile -Pci=true --continue
 
       - name: KMP Smoke Compile (lint skipped)
         if: inputs.run_lint == false
-        run: ./gradlew kmpSmokeCompile -Pci=true --continue --scan
+        run: ./gradlew kmpSmokeCompile -Pci=true --continue
+
+  # ── Screenshot Test Validation ──────────────────────────────────────
+  screenshot-check:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    timeout-minutes: 20
+    needs: setup
+    if: inputs.run_lint == true
+    env:
+      VERSION_CODE: ${{ needs.setup.outputs.version_code }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          submodules: true
+
+      - name: Gradle Setup
+        uses: ./.github/actions/gradle-setup
+        with:
+          gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          cache_read_only: ${{ needs.setup.outputs.cache_read_only }}
+
+      - name: Screenshot Test Validation
+        run: ./gradlew :screenshot-tests:validateDebugScreenshotTest -Pci=true
+
+      - name: Upload screenshot diff report
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: screenshot-diff-report
+          path: screenshot-tests/build/reports/screenshotTest/
+          retention-days: 14
+          if-no-files-found: warn
 
   # ── Reproducible Build Verification ─────────────────────────────────
+  # Only runs on main push and merge-queue (not PRs) to keep PR feedback fast.
   rb-check:
     runs-on: ubuntu-24.04
     permissions:
       contents: read
     timeout-minutes: 30
-    if: inputs.run_lint == true
+    if: inputs.run_lint == true && (github.event_name == 'push' || github.event_name == 'merge_group')
 
     steps:
       - name: Checkout code
@@ -141,13 +194,13 @@ jobs:
           # See: https://github.com/meshtastic/Meshtastic-Android/issues/3231
 
           echo "── Step 1: Verify aboutlibraries.json determinism ──"
-          rm -f app/src/main/resources/aboutlibraries.json
-          ./gradlew :app:exportLibraryDefinitions -Pci=true --no-configuration-cache
-          cp app/src/main/resources/aboutlibraries.json /tmp/aboutlibraries-run1.json
+          rm -f androidApp/src/main/resources/aboutlibraries.json
+          ./gradlew :androidApp:exportLibraryDefinitions -Pci=true --no-configuration-cache
+          cp androidApp/src/main/resources/aboutlibraries.json /tmp/aboutlibraries-run1.json
 
-          rm -f app/src/main/resources/aboutlibraries.json
-          ./gradlew :app:exportLibraryDefinitions -Pci=true --no-configuration-cache --rerun-tasks
-          cp app/src/main/resources/aboutlibraries.json /tmp/aboutlibraries-run2.json
+          rm -f androidApp/src/main/resources/aboutlibraries.json
+          ./gradlew :androidApp:exportLibraryDefinitions -Pci=true --no-configuration-cache --rerun-tasks
+          cp androidApp/src/main/resources/aboutlibraries.json /tmp/aboutlibraries-run2.json
 
           if ! diff -q /tmp/aboutlibraries-run1.json /tmp/aboutlibraries-run2.json; then
             echo "::error::aboutlibraries.json is NOT deterministic across runs!"
@@ -157,9 +210,9 @@ jobs:
           echo "✅ aboutlibraries.json is deterministic"
 
           echo "── Step 2: Build fdroid release APK ──"
-          ./gradlew :app:assembleFdroidRelease -Pci=true -Pmeshtastic.disableAbiSplits=true --no-configuration-cache
+          ./gradlew :androidApp:assembleFdroidRelease -Pci=true -Pmeshtastic.disableAbiSplits=true --no-configuration-cache
 
-          APK=$(find app/build/outputs/apk/fdroid/release -name "*.apk" | head -1)
+          APK=$(find androidApp/build/outputs/apk/fdroid/release -name "*.apk" | head -1)
           if [ -z "$APK" ]; then
             echo "::error::No fdroid release APK found"
             exit 1
@@ -284,16 +337,16 @@ jobs:
   # Tests are split into 3 shards that run in parallel:
   #   shard-core:    core:* KMP module tests (allTests)
   #   shard-feature: feature:* KMP module tests (allTests)
-  #   shard-app:     Pure-Android/JVM tests (app, desktop, core:barcode, etc.)
+  #   shard-app:     Pure-Android/JVM tests (androidApp, desktopApp, core:barcode, etc.)
   test-shards:
     runs-on: ubuntu-24.04
     permissions:
       contents: read
     timeout-minutes: 45
-    needs: lint-check
+    needs: setup
     if: inputs.run_unit_tests == true
     env:
-      VERSION_CODE: ${{ needs.lint-check.outputs.version_code }}
+      VERSION_CODE: ${{ needs.setup.outputs.version_code }}
     strategy:
       fail-fast: false
       matrix:
@@ -348,17 +401,17 @@ jobs:
               :feature:settings:koverXmlReport
           - name: shard-app
             tasks: >-
-              :app:testFdroidDebugUnitTest
-              :app:testGoogleDebugUnitTest
-              :desktop:test
+              :androidApp:testFdroidDebugUnitTest
+              :androidApp:testGoogleDebugUnitTest
+              :desktopApp:test
               :core:barcode:testFdroidDebugUnitTest
               :core:barcode:testGoogleDebugUnitTest
             kover: >-
-              :app:koverXmlReportFdroidDebug
-              :app:koverXmlReportGoogleDebug
+              :androidApp:koverXmlReportFdroidDebug
+              :androidApp:koverXmlReportGoogleDebug
               :core:barcode:koverXmlReportFdroidDebug
               :core:barcode:koverXmlReportGoogleDebug
-              :desktop:koverXmlReport
+              :desktopApp:koverXmlReport
 
     steps:
       - name: Checkout code
@@ -371,7 +424,7 @@ jobs:
         uses: ./.github/actions/gradle-setup
         with:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-          cache_read_only: ${{ needs.lint-check.outputs.cache_read_only }}
+          cache_read_only: ${{ needs.setup.outputs.cache_read_only }}
 
       - name: Run Tests & Coverage (${{ matrix.shard.name }})
         run: |
@@ -379,7 +432,7 @@ jobs:
           if [[ "${{ inputs.run_coverage }}" == "true" ]]; then
             kover_tasks="${{ matrix.shard.kover }}"
           fi
-          ./gradlew ${{ matrix.shard.tasks }} $kover_tasks -Pci=true --continue --scan
+          ./gradlew ${{ matrix.shard.tasks }} $kover_tasks -Pci=true --continue
 
       - name: Upload test results to Codecov
         if: ${{ !cancelled() }}
@@ -418,9 +471,9 @@ jobs:
     permissions:
       contents: read
     timeout-minutes: 60
-    needs: lint-check
+    needs: setup
     env:
-      VERSION_CODE: ${{ needs.lint-check.outputs.version_code }}
+      VERSION_CODE: ${{ needs.setup.outputs.version_code }}
 
     steps:
       - name: Checkout code
@@ -433,17 +486,17 @@ jobs:
         uses: ./.github/actions/gradle-setup
         with:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-          cache_read_only: ${{ needs.lint-check.outputs.cache_read_only }}
+          cache_read_only: ${{ needs.setup.outputs.cache_read_only }}
 
       - name: Build Android APKs
-        run: ./gradlew app:assembleFdroidDebug app:assembleGoogleDebug -Pci=true --parallel --configuration-cache --continue --scan
+        run: ./gradlew androidApp:assembleFdroidDebug androidApp:assembleGoogleDebug -Pci=true --parallel --configuration-cache --continue
 
       - name: Upload debug artifact
         if: ${{ inputs.upload_artifacts }}
         uses: actions/upload-artifact@v7
         with:
           name: app-debug-apks
-          path: app/build/outputs/apk/*/debug/*.apk
+          path: androidApp/build/outputs/apk/*/debug/*.apk
           retention-days: 7
 
       - name: Report App Size
@@ -452,7 +505,7 @@ jobs:
           echo "### App Size Report" >> $GITHUB_STEP_SUMMARY
           echo "| Artifact | Size |" >> $GITHUB_STEP_SUMMARY
           echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
-          find app/build/outputs/apk -name "*.apk" -exec du -h {} + | awk '{print "| " $2 " | " $1 " |"}' >> $GITHUB_STEP_SUMMARY
+          find androidApp/build/outputs/apk -name "*.apk" -exec du -h {} + | awk '{print "| " $2 " | " $1 " |"}' >> $GITHUB_STEP_SUMMARY
 
   # ── Desktop Build ───────────────────────────────────────────────────
   build-desktop:
@@ -462,13 +515,13 @@ jobs:
     permissions:
       contents: read
     timeout-minutes: 60
-    needs: lint-check
+    needs: setup
     strategy:
       fail-fast: false
       matrix:
         os: [macos-latest, windows-latest, ubuntu-24.04, ubuntu-24.04-arm]
     env:
-      VERSION_CODE: ${{ needs.lint-check.outputs.version_code }}
+      VERSION_CODE: ${{ needs.setup.outputs.version_code }}
 
     steps:
       - name: Checkout code
@@ -481,17 +534,18 @@ jobs:
         uses: ./.github/actions/gradle-setup
         with:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-          cache_read_only: ${{ needs.lint-check.outputs.cache_read_only }}
+          cache_read_only: ${{ needs.setup.outputs.cache_read_only }}
+          install_jetbrains_jdk: 'true'
 
       - name: Build Desktop
-        run: ./gradlew :desktop:createDistributable -Pci=true --scan
+        run: ./gradlew :desktopApp:createDistributable -Pci=true
 
       - name: Upload Desktop artifact
         if: ${{ inputs.upload_artifacts }}
         uses: actions/upload-artifact@v7
         with:
           name: desktop-app-${{ runner.os }}-${{ runner.arch }}
-          path: desktop/build/compose/binaries/main/app/
+          path: desktopApp/build/compose/binaries/main/app/
           retention-days: 7
 
   # ── Flatpak Sources ───────────────────────────────────────────────────
@@ -502,13 +556,13 @@ jobs:
     permissions:
       contents: read
     timeout-minutes: 60
-    needs: lint-check
+    needs: setup
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-24.04, ubuntu-24.04-arm]
     env:
-      VERSION_CODE: ${{ needs.lint-check.outputs.version_code }}
+      VERSION_CODE: ${{ needs.setup.outputs.version_code }}
 
     steps:
       - name: Checkout code
@@ -522,33 +576,26 @@ jobs:
         with:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           cache_read_only: true
-      
-      - name: Python Setup
-        uses: actions/setup-python@v6
-        with:
-          python-version: '3.x'
+          install_jetbrains_jdk: 'true'
 
-      - name: Install ast-grep
-        run: pip install ast-grep-cli
-
-      # Remove Android/iOS targets and other non-desktop bits
-      # that would break the flatpakGradleGenerator
-      - name: Prepare Offline Desktop Build
-        run: ./scripts/desktop-only-prep.sh
-
+      # Isolated Gradle user home — see explanation in release.yml.
+      # packageUberJarForCurrentOS is what the in-flatpak build invokes; it resolves the FULL
+      # runtime classpath. :assemble alone would miss runtime-only deps (skiko, ktor-cio, …).
       - name: Generate Flatpak Sources
-        env:
-          DESKTOP_ONLY: true
         run: >
-          ./gradlew :build-logic:convention:flatpakGradleGenerator flatpakGradleGenerator
-          --no-configuration-cache --refresh-dependencies --no-parallel
-      
-      - run: ls -lah flatpak-sources*.json
+          ./gradlew --no-build-cache --no-configuration-cache
+          -Dgradle.user.home=${{ runner.temp }}/flatpak-gradle-home
+          :desktopApp:packageUberJarForCurrentOS :captureFlatpakSources
+
+      - name: Stage manifest
+        run: cp build/flatpak-sources.json flatpak-sources.json
+
+      - run: ls -lah flatpak-sources.json
 
       - name: Upload Flatpak Sources
         if: ${{ inputs.upload_artifacts }}
         uses: actions/upload-artifact@v7
         with:
           name: flatpak-sources-${{ runner.arch }}
-          path: flatpak-sources*.json
+          path: flatpak-sources.json
           retention-days: 7

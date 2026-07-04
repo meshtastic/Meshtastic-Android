@@ -1,8 +1,7 @@
 name: Issue Triage (Models)
 
 on:
-  issues:
-    types: [opened]
+  workflow_dispatch:
 
 permissions:
   issues: write

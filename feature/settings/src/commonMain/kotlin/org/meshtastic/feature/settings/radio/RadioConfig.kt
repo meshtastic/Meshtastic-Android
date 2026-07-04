@@ -52,6 +52,7 @@ import org.meshtastic.core.resources.nodedb_reset
 import org.meshtastic.core.resources.radio_configuration
 import org.meshtastic.core.resources.reboot
 import org.meshtastic.core.resources.shutdown
+import org.meshtastic.core.resources.tak_server
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.icon.AdminPanelSettings
 import org.meshtastic.core.ui.icon.AppSettingsAlt
@@ -231,6 +232,13 @@ private fun AdvancedSection(isManaged: Boolean, isOtaCapable: Boolean, enabled: 
             leadingIcon = MeshtasticIcons.CleaningServices,
             enabled = enabled,
             onClick = { onNavigate(SettingsRoute.CleanNodeDb) },
+        )
+
+        ListItem(
+            text = stringResource(Res.string.tak_server),
+            leadingIcon = MeshtasticIcons.Settings,
+            enabled = enabled,
+            onClick = { onNavigate(SettingsRoute.TakServer) },
         )
 
         ListItem(

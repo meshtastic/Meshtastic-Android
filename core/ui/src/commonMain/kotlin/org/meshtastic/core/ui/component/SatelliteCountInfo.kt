@@ -46,6 +46,6 @@ fun SatelliteCountInfo(
 
 @PreviewLightDark
 @Composable
-private fun SatelliteCountInfoPreview() {
+fun SatelliteCountInfoPreview() {
     AppTheme { SatelliteCountInfo(satCount = 5) }
 }

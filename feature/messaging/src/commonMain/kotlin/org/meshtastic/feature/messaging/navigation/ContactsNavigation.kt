@@ -45,10 +45,6 @@ fun EntryProviderScope<NavKey>.contactsGraph(
     backStack: NavBackStack<NavKey>,
     scrollToTopEvents: Flow<ScrollToTopEvent> = MutableSharedFlow(),
 ) {
-    entry<ContactsRoute.ContactsGraph>(metadata = { ListDetailSceneStrategy.listPane() }) {
-        ContactsEntryContent(backStack = backStack, scrollToTopEvents = scrollToTopEvents)
-    }
-
     entry<ContactsRoute.Contacts>(metadata = { ListDetailSceneStrategy.listPane() }) {
         ContactsEntryContent(backStack = backStack, scrollToTopEvents = scrollToTopEvents)
     }

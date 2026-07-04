@@ -79,6 +79,6 @@ fun AppearanceSection(onShowLanguagePicker: () -> Unit, onShowThemePicker: () ->
 
 @Preview(showBackground = true)
 @Composable
-private fun AppearanceSectionPreview() {
+fun AppearanceSectionPreview() {
     AppTheme { AppearanceSection(onShowLanguagePicker = {}, onShowThemePicker = {}) }
 }

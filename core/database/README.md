@@ -20,12 +20,19 @@ The `NodeInfoDao` implements specific logic to protect against impersonation and
 -   **Wipe Protection**: Receiving an `is_licensed=true` packet (which normally clears the public key for compliance) will **not** clear an existing valid public key if one is already known. This prevents attackers from sending fake licensed packets to wipe keys from the DB.
 -   **Conflict Detection**: If a new key arrives for an existing node ID that conflicts with a known valid key, the key is set to `ERROR_BYTE_STRING` to flag the potential impersonation.
 
-## Module dependency graph
+
+## Dependency Graph
 
 <!--region graph-->
 ```mermaid
 graph TB
   :core:database[database]:::kmp-library
+  :core:database --> :core:common
+  :core:database --> :core:model
+  :core:database -.-> :core:di
+  :core:database -.-> :core:proto
+  :core:database -.-> :core:resources
+  :core:database -.-> :core:testing
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

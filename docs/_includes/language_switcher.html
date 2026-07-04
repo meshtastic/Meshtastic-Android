@@ -1,0 +1,99 @@
+{% comment %}
+  Language switcher for translated docs pages.
+  Renders a dropdown-style link list showing available translations of the current page.
+  Include this in any page or layout that should offer locale switching.
+
+  Usage: {% include language_switcher.html %}
+
+  Logic:
+  - Dynamically detects the current language and page name.
+  - Dynamically updates the switcher button's native language name.
+  - Correctly matches English pages to translated equivalents and vice versa.
+  - Pre-verifies existing files to only render valid, non-404 options.
+{% endcomment %}
+
+{% assign current_path = page.path %}
+{% assign locales = site.data.locales %}
+
+{% if locales and current_path %}
+  {% assign path_parts = current_path | split: "/" %}
+  {% assign first_segment = path_parts[0] %}
+
+  {% comment %}
+    Identify the current page's language code and native language name.
+    If the first segment is defined in locales.yml, we are on a translation.
+    Otherwise, we are in default English.
+  {% endcomment %}
+  {% if locales[first_segment] %}
+    {% assign current_lang_code = first_segment %}
+    {% assign current_lang_name = locales[first_segment].name %}
+  {% else %}
+    {% assign current_lang_code = "en" %}
+    {% assign current_lang_name = "English" %}
+  {% endif %}
+
+  {% comment %}
+    Extract the relative base path (independent of locale prefix and file extension).
+    E.g., "en/user/connections.md" and "be-rBY/user/connections.md" both resolve to "user/connections".
+  {% endcomment %}
+  {% assign remaining_parts = path_parts | slice: 1, path_parts.size %}
+  {% assign base_path = remaining_parts | join: "/" | replace: ".md", "" %}
+
+  {% comment %}
+    Pre-render the dropdown list items.
+  {% endcomment %}
+  {% capture dropdown_items %}
+    {% if current_lang_code != "en" %}
+      {% if base_path == "index" %}
+        {% assign en_path = "en/" %}
+      {% else %}
+        {% assign en_path = "en/" | append: base_path %}
+      {% endif %}
+      <li><a href="{{ en_path | relative_url }}" lang="en">English</a></li>
+    {% endif %}
+
+    {% for locale in locales %}
+      {% assign locale_code = locale[0] %}
+      {% assign locale_info = locale[1] %}
+
+      {% if locale_code == current_lang_code %}
+        {% continue %}
+      {% endif %}
+
+      {% assign locale_file = locale_code | append: "/" | append: base_path | append: ".md" %}
+
+      {% assign page_exists = false %}
+      {% for p in site.pages %}
+        {% if p.path == locale_file %}
+          {% assign page_exists = true %}
+          {% break %}
+        {% endif %}
+      {% endfor %}
+
+      {% if page_exists %}
+        {% if base_path == "index" %}
+          {% assign locale_path = locale_code | append: "/" %}
+        {% else %}
+          {% assign locale_path = locale_code | append: "/" | append: base_path %}
+        {% endif %}
+        <li><a href="{{ locale_path | relative_url }}" lang="{{ locale_code }}" {% if locale_info.dir == "rtl" %}dir="rtl"{% endif %}>{{ locale_info.name }}</a></li>
+      {% endif %}
+    {% endfor %}
+  {% endcapture %}
+
+  {% assign dropdown_items_stripped = dropdown_items | strip %}
+
+  {% comment %}
+    Only render the switcher if there is at least one other language option available.
+  {% endcomment %}
+  {% if dropdown_items_stripped != "" %}
+    <details class="language-switcher" aria-label="Language options">
+      <summary class="language-switcher-btn" title="View in another language">
+        🌐 <span class="lang-current">{{ current_lang_name }}</span>
+      </summary>
+      <ul class="language-switcher-list">
+        {{ dropdown_items }}
+      </ul>
+    </details>
+  {% endif %}
+{% endif %}

@@ -26,14 +26,6 @@ import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 
 /** Navigation graph for for the top level ChannelScreen - [ChannelsRoute.Channels]. */
 fun EntryProviderScope<NavKey>.channelsGraph(backStack: NavBackStack<NavKey>) {
-    entry<ChannelsRoute.ChannelsGraph> {
-        ChannelScreen(
-            radioConfigViewModel = koinViewModel<RadioConfigViewModel>(),
-            onNavigate = { route -> backStack.add(route) },
-            onNavigateUp = dropUnlessResumed { backStack.removeLastOrNull() },
-        )
-    }
-
     entry<ChannelsRoute.Channels> {
         ChannelScreen(
             radioConfigViewModel = koinViewModel<RadioConfigViewModel>(),

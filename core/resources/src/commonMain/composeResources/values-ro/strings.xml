@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
     <string name="a11y_label_value">%1$s:%2$s</string>
     <string name="a11y_message_from">Mesaj de la %1$s %2$s</string>
     <string name="accept">Accept</string>
@@ -124,6 +125,7 @@
     <string name="channel_url">Adresa canalului</string>
     <string name="channel_utilization">ChUtil</string>
     <string name="channels">Canale</string>
+    <!-- CHIRPY -->
     <string name="chirpy">Chirpy</string>
     <string name="choose_theme">Alege tema</string>
     <!-- CLEAN -->
@@ -300,6 +302,11 @@
     <string name="distance_measurements">Măsurătorile distanței</string>
     <string name="distance_measurements_description">Afișează distanța dintre telefonul dvs. și alte noduri Meshtastice cu poziții.</string>
     <string name="dns">DNS</string>
+    <!-- DOC -->
+    <string name="doc_clear_search">Ștergeți căutarea</string>
+    <string name="doc_title_discovery">Descoperiți</string>
+    <string name="doc_title_mqtt">MQTT</string>
+    <string name="doc_title_nodes">Noduri</string>
     <string name="done">Gata</string>
     <string name="double_tap_as_button_press">Apăsare dublă ca buton</string>
     <string name="downlink_enabled">Downlink activat</string>
@@ -708,6 +715,10 @@
     <string name="node_filter_show_ignored">Arată doar nodurile ignorate</string>
     <string name="node_filter_title">Filtrare după</string>
     <string name="node_id">ID-ul Nodului</string>
+    <string name="node_layout_channel">Canal</string>
+    <string name="node_layout_hops_away">Salturi distanță</string>
+    <string name="node_layout_log_icons">Indicatori de mediu</string>
+    <string name="node_layout_power">Alimentare</string>
     <string name="node_number">Număr modul</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_button">Opțiuni sortare noduri</string>
@@ -1051,7 +1062,7 @@
     <string name="tak_role_teammember">Membrii Echipei</string>
     <string name="tak_role_unspecified">Nespecificat</string>
     <string name="tak_server_enabled">Activare server TAK local</string>
-    <string name="tak_server_enabled_desc">Pornește un server TCP pe portul 8089 pentru conexiunile ATAK</string>
+    <string name="tak_server_section">Server</string>
     <string name="tak_team">Culoarea echipei</string>
     <string name="tak_team_blue">Albastru</string>
     <string name="tak_team_brown">Maro</string>
@@ -1131,7 +1142,6 @@
     <string name="tx_power_dbm">Putere transmisie</string>
     <string name="type">Tip</string>
     <string name="type_a_message">Scrie un mesaj</string>
-    <string name="udp_enabled">Activat</string>
     <!-- UNKNOWN -->
     <string name="unknown">Necunoscut</string>
     <string name="unknown_age">Vârstă necunoscută</string>

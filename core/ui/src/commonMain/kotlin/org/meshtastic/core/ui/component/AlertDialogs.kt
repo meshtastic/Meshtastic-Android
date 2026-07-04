@@ -25,6 +25,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -66,6 +67,7 @@ import org.meshtastic.core.ui.util.annotatedStringFromHtml
  * @param dismissable Whether the dialog can be dismissed by clicking outside or pressing back.
  */
 @Composable
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 fun MeshtasticDialog(
     modifier: Modifier = Modifier,
@@ -137,7 +139,7 @@ fun MeshtasticDialog(
                 text = titleText,
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.headlineSmallEmphasized,
             )
         },
         text = {
@@ -167,7 +169,7 @@ fun MeshtasticDialog(
                 }
             }
         },
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(28.dp),
     )
 }
 

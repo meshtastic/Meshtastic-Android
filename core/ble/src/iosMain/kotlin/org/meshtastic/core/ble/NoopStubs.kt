@@ -30,3 +30,5 @@ internal actual fun createPeripheral(address: String, builderAction: PeripheralB
 internal actual fun Peripheral.negotiatedMaxWriteLength(): Int? = null
 
 internal actual fun Peripheral.requestHighConnectionPriority(): Boolean = false
+
+internal actual fun Peripheral.requestBalancedConnectionPriority(): Boolean = false

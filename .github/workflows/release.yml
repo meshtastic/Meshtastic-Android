@@ -150,9 +150,9 @@ jobs:
           GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
           GOOGLE_PLAY_JSON_KEY: ${{ secrets.GOOGLE_PLAY_JSON_KEY }}
         run: |
-          rm -f ./app/google-services.json
-          echo $GSERVICES > ./app/google-services.json
-          echo $KEYSTORE | base64 -di > ./app/$KEYSTORE_FILENAME
+          rm -f ./androidApp/google-services.json
+          echo $GSERVICES > ./androidApp/google-services.json
+          echo $KEYSTORE | base64 -di > ./androidApp/$KEYSTORE_FILENAME
           echo "$KEYSTORE_PROPERTIES" > ./keystore.properties
           echo "datadogApplicationId=$DATADOG_APPLICATION_ID" >> ./secrets.properties
           echo "datadogClientToken=$DATADOG_CLIENT_TOKEN" >> ./secrets.properties
@@ -172,14 +172,14 @@ jobs:
         run: bundle exec fastlane internal
 
       - name: List outputs
-        run: ls -R app/build/outputs/
+        run: ls -R androidApp/build/outputs/
 
       - name: Upload Google AAB artifact
         if: always()
         uses: actions/upload-artifact@v7
         with:
           name: google-aab
-          path: app/build/outputs/bundle/googleRelease/app-google-release.aab
+          path: androidApp/build/outputs/bundle/googleRelease/androidApp-google-release.aab
           retention-days: 1
 
       - name: Upload Google APK artifact
@@ -187,20 +187,20 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: google-apk
-          path: app/build/outputs/apk/google/release/*.apk
+          path: androidApp/build/outputs/apk/google/release/*.apk
           retention-days: 1
 
       - name: Attest Google AAB provenance
         if: success()
         uses: actions/attest-build-provenance@v4
         with:
-          subject-path: app/build/outputs/bundle/googleRelease/app-google-release.aab
+          subject-path: androidApp/build/outputs/bundle/googleRelease/androidApp-google-release.aab
 
       - name: Attest Google APK provenance
         if: success()
         uses: actions/attest-build-provenance@v4
         with:
-          subject-path: app/build/outputs/apk/google/release/*.apk
+          subject-path: androidApp/build/outputs/apk/google/release/*.apk
 
   release-fdroid:
     runs-on: ubuntu-24.04
@@ -229,7 +229,7 @@ jobs:
           KEYSTORE_FILENAME: ${{ secrets.KEYSTORE_FILENAME }}
           KEYSTORE_PROPERTIES: ${{ secrets.KEYSTORE_PROPERTIES }}
         run: |
-          echo $KEYSTORE | base64 -di > ./app/$KEYSTORE_FILENAME
+          echo $KEYSTORE | base64 -di > ./androidApp/$KEYSTORE_FILENAME
           echo "$KEYSTORE_PROPERTIES" > ./keystore.properties
 
       - name: Setup Fastlane
@@ -245,21 +245,21 @@ jobs:
         run: bundle exec fastlane fdroid_build
 
       - name: List outputs
-        run: ls -R app/build/outputs/
+        run: ls -R androidApp/build/outputs/
 
       - name: Upload F-Droid APK artifact
         if: always()
         uses: actions/upload-artifact@v7
         with:
           name: fdroid-apk
-          path: app/build/outputs/apk/fdroid/release/*.apk
+          path: androidApp/build/outputs/apk/fdroid/release/*.apk
           retention-days: 1
 
       - name: Attest F-Droid APK provenance
         if: success()
         uses: actions/attest-build-provenance@v4
         with:
-          subject-path: app/build/outputs/apk/fdroid/release/*.apk
+          subject-path: androidApp/build/outputs/apk/fdroid/release/*.apk
 
   release-desktop:
     if: ${{ inputs.build_desktop }}
@@ -286,6 +286,7 @@ jobs:
         with:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           cache_read_only: 'false'
+          install_jetbrains_jdk: 'true'
 
       - name: Install dependencies for AppImage
         if: runner.os == 'Linux'
@@ -307,13 +308,13 @@ jobs:
         # `-PaboutLibraries.release=true` as member access on `-PaboutLibraries`,
         # splitting the token and feeding `.release=true` to Gradle as a task name.
         run: >
-          ./gradlew :desktop:packageReleaseDistributionForCurrentOS
-          ${{ contains(runner.os, 'macOS') && ':desktop:packageReleaseUberJarForCurrentOS' }}
+          ./gradlew :desktopApp:packageReleaseDistributionForCurrentOS
+          ${{ contains(runner.os, 'macOS') && ':desktopApp:packageReleaseUberJarForCurrentOS' || '' }}
           '-PaboutLibraries.release=true' --no-daemon
 
       - name: List Desktop Binaries
         if: runner.os == 'Linux' || runner.os == 'macOS'
-        run: ls -R desktop/build/compose/binaries/main-release
+        run: ls -R desktopApp/build/compose/binaries/main-release
 
       - name: Upload Desktop Artifacts
         if: always()
@@ -321,13 +322,13 @@ jobs:
         with:
           name: desktop-${{ runner.os }}-${{ runner.arch }}
           path: |
-            desktop/build/compose/binaries/main-release/*/*.dmg
-            desktop/build/compose/binaries/main-release/*/*.msi
-            desktop/build/compose/binaries/main-release/*/*.exe
-            desktop/build/compose/binaries/main-release/*/*.deb
-            desktop/build/compose/binaries/main-release/*/*.rpm
-            desktop/build/compose/binaries/main-release/*/*.AppImage
-            desktop/build/compose/jars/*-release.jar
+            desktopApp/build/compose/binaries/main-release/*/*.dmg
+            desktopApp/build/compose/binaries/main-release/*/*.msi
+            desktopApp/build/compose/binaries/main-release/*/*.exe
+            desktopApp/build/compose/binaries/main-release/*/*.deb
+            desktopApp/build/compose/binaries/main-release/*/*.rpm
+            desktopApp/build/compose/binaries/main-release/*/*.AppImage
+            desktopApp/build/compose/jars/*-release.jar
           retention-days: 1
           if-no-files-found: ignore
 
@@ -336,13 +337,13 @@ jobs:
         uses: actions/attest-build-provenance@v4
         with:
           subject-path: |
-            desktop/build/compose/binaries/main-release/*/*.dmg
-            desktop/build/compose/binaries/main-release/*/*.msi
-            desktop/build/compose/binaries/main-release/*/*.exe
-            desktop/build/compose/binaries/main-release/*/*.deb
-            desktop/build/compose/binaries/main-release/*/*.rpm
-            desktop/build/compose/binaries/main-release/*/*.AppImage
-            desktop/build/compose/jars/*-release.jar
+            desktopApp/build/compose/binaries/main-release/*/*.dmg
+            desktopApp/build/compose/binaries/main-release/*/*.msi
+            desktopApp/build/compose/binaries/main-release/*/*.exe
+            desktopApp/build/compose/binaries/main-release/*/*.deb
+            desktopApp/build/compose/binaries/main-release/*/*.rpm
+            desktopApp/build/compose/binaries/main-release/*/*.AppImage
+            desktopApp/build/compose/jars/*-release.jar
 
   create-flatpak-src:
     if: ${{ inputs.build_flatpak_src }}
@@ -369,36 +370,33 @@ jobs:
         with:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           cache_read_only: 'true'
+          install_jetbrains_jdk: 'true'
 
-      - name: Python Setup
-        uses: actions/setup-python@v6
-        with:
-          python-version: '3.x'
-
-      - name: Install ast-grep
-        run: pip install ast-grep-cli
-
-      # Remove Android/iOS targets and other non-desktop bits
-      # that would break the flatpakGradleGenerator
-      - name: Prepare Offline Desktop Build
-        run: ./scripts/desktop-only-prep.sh
-
+      # Uses an isolated Gradle user home so every artifact actually traverses the
+      # network — the flatpak-sources plugin captures URLs via BuildOperationListener and
+      # only sees ExternalResourceReadBuildOperation events for cache misses. With the
+      # shared cache, downloads would be skipped and the manifest would be (nearly) empty.
+      # We drive packageUberJarForCurrentOS — the same task the in-flatpak build invokes —
+      # so the runtime classpath is fully resolved (skiko, ktor-cio, kable-btleplug-ffi, …
+      # are runtime-only and would be missed by :assemble).
       - name: Generate Flatpak Sources
-        env:
-          DESKTOP_ONLY: true
         run: >
-          ./gradlew :build-logic:convention:flatpakGradleGenerator flatpakGradleGenerator
-          --no-configuration-cache --refresh-dependencies --no-parallel
+          ./gradlew --no-build-cache --no-configuration-cache
+          -Dgradle.user.home=${{ runner.temp }}/flatpak-gradle-home
+          :desktopApp:packageUberJarForCurrentOS :captureFlatpakSources
+
+      - name: Stage manifest
+        run: cp build/flatpak-sources.json flatpak-sources.json
 
       - name: List Flatpak source files
-        run: ls -R flatpak-sources*.json
+        run: ls -l flatpak-sources.json
 
       - name: Upload Flatpak source artifacts
         if: always()
         uses: actions/upload-artifact@v7
         with:
           name: flatpak-multisrc-${{ runner.arch }}
-          path: flatpak-sources*.json
+          path: flatpak-sources.json
           retention-days: 1
 
   release-flatpak-src:
@@ -410,14 +408,18 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           pattern: flatpak-multisrc-*
-          merge-multiple: true
-      
+          path: flatpak-multisrc
+
       - name: List Flatpak source files
-        run: ls -R flatpak-sources*.json
+        run: ls -R flatpak-multisrc/
+
+      - name: Validate Flatpak source files
+        run: jq empty flatpak-multisrc/*/flatpak-sources.json
 
       - name: Combine Flatpak source files
         run: >
-          jq -s 'add | unique_by(.dest + "/" + .["dest-filename"])' flatpak-sources*.json
+          jq -s 'add | unique_by(.dest + "/" + .["dest-filename"])'
+          flatpak-multisrc/*/flatpak-sources.json
           > flatpak-sources.json
 
       - name: Upload combined Flatpak source artifact

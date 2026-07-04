@@ -105,15 +105,40 @@ jobs:
   promote-release:
     runs-on: ubuntu-24.04-arm
     needs: [ prepare-build-info ]
+    env:
+      FROM_TRACK: ${{ inputs.from_channel == 'closed' && 'NewAlpha' || (inputs.from_channel == 'open' && 'beta' || 'internal') }}
+      TO_TRACK: ${{ inputs.channel == 'closed' && 'NewAlpha' || (inputs.channel == 'open' && 'beta' || 'production') }}
+      USER_FRACTION: ${{ (inputs.channel == 'production' && '0.1') || (inputs.channel == 'open' && '0.5') || '1.0' }}
     steps:
-      - name: Promote to next channel
-        uses: kevin-david/promote-play-release@v1.2.0
+      - name: Checkout code
+        uses: actions/checkout@v6
         with:
-          service-account-json-raw: ${{ secrets.GOOGLE_PLAY_JSON_KEY }}
-          package-name: 'com.geeksville.mesh'
-          from-track: ${{ inputs.from_channel == 'closed' && 'NewAlpha' || (inputs.from_channel == 'open' && 'beta' || 'internal') }}
-          to-track: ${{ inputs.channel == 'closed' && 'NewAlpha' || (inputs.channel == 'open' && 'beta' || 'production') }}
-          user-fraction: ${{ (inputs.channel == 'production' && '0.1') || (inputs.channel == 'open' && '0.5') || '1.0' }}
+          ref: ${{ inputs.commit_sha || inputs.tag_name }}
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '4.0.4'
+          bundler-cache: true
+
+      - name: Decode Play Store credentials
+        run: echo '${{ secrets.GOOGLE_PLAY_JSON_KEY }}' > fastlane/play-store-credentials.json
+
+      - name: Promote to next channel
+        run: |
+          bundle exec fastlane supply \
+            --track "$FROM_TRACK" \
+            --track_promote_to "$TO_TRACK" \
+            --rollout "$USER_FRACTION" \
+            --changes_not_sent_for_review true \
+            --skip_upload_metadata \
+            --skip_upload_changelogs \
+            --skip_upload_images \
+            --skip_upload_screenshots
+
+      - name: Clean up credentials
+        if: always()
+        run: rm -f fastlane/play-store-credentials.json
 
   update-github-release:
     runs-on: ubuntu-24.04-arm

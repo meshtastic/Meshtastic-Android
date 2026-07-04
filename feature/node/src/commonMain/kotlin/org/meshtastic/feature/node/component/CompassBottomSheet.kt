@@ -14,6 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+
 package org.meshtastic.feature.node.component
 
 import androidx.compose.foundation.Canvas
@@ -26,6 +28,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -99,7 +102,11 @@ fun CompassSheetContent(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(text = stringResource(Res.string.compass_title), style = MaterialTheme.typography.headlineSmall)
-        Text(text = uiState.targetName, style = MaterialTheme.typography.titleMedium, color = uiState.targetColor)
+        Text(
+            text = uiState.targetName,
+            style = MaterialTheme.typography.titleMediumEmphasized,
+            color = uiState.targetColor,
+        )
 
         CompassDial(
             heading = uiState.heading,

@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
     <string name="accept">同意</string>
     <string name="acknowledgements">謝辞</string>
     <!-- ACTION -->
@@ -96,6 +97,7 @@
     <string name="channel_name">チャンネル名</string>
     <string name="channel_url">チャンネル URL</string>
     <string name="channels">チャンネル</string>
+    <!-- CHIRPY -->
     <string name="choose_theme">テーマを選択</string>
     <!-- CLEAN -->
     <string name="clear">削除</string>
@@ -192,6 +194,12 @@
     <string name="display_units">表示単位</string>
     <!-- DISTANCE -->
     <string name="distance">距離</string>
+    <!-- DOC -->
+    <string name="doc_clear_search">検索をクリア</string>
+    <string name="doc_title_connections">コネクション</string>
+    <string name="doc_title_discovery">ディスカバリー</string>
+    <string name="doc_title_mqtt">MQTT</string>
+    <string name="doc_title_nodes">ノード</string>
     <string name="downlink_enabled">ダウンリンクの有効化</string>
     <string name="dynamic">動的</string>
     <string name="echo_enabled">Echoを有効化</string>
@@ -417,6 +425,9 @@
     <string name="node_filter_show_ignored">無視されたノードのみ表示</string>
     <string name="node_filter_title">絞り込み</string>
     <string name="node_id">ノード ID</string>
+    <string name="node_layout_channel">チャンネル</string>
+    <string name="node_layout_hops_away">ホップ数</string>
+    <string name="node_layout_power">電源</string>
     <string name="node_number">ノード番号</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_button">ノードの並べ替えオプション</string>
@@ -629,6 +640,7 @@
     <string name="tak_role_teamlead">チームリーダー</string>
     <string name="tak_role_teammember">チームメンバー</string>
     <string name="tak_role_unspecified">未指定</string>
+    <string name="tak_server_section">サーバー</string>
     <string name="tak_team">チームカラー</string>
     <string name="tak_team_blue">青</string>
     <string name="tak_team_brown">茶色</string>

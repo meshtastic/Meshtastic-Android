@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">Zpráva od %1$s: %2$s</string>
     <string name="accept">Přijmout</string>
@@ -75,6 +76,7 @@
     <string name="audio_config">Konfigurace zvuku</string>
     <string name="available_pins">Dostupné piny</string>
     <string name="back">Zpět</string>
+    <string name="backup_restore">Zálohování a obnovení</string>
     <string name="bad">Špatný</string>
     <string name="bandwidth">Šířka pásma</string>
     <string name="baro_pressure">Tlak</string>
@@ -123,6 +125,7 @@
     <string name="channel_url">URL kanálu</string>
     <string name="channel_utilization">ChUtil</string>
     <string name="channels">Kanály</string>
+    <!-- CHIRPY -->
     <string name="choose_contrast">Úroveň kontrastu</string>
     <string name="choose_theme">Vyberte vzhled</string>
     <!-- CLEAN -->
@@ -287,6 +290,12 @@
     <string name="distance_filters_description">Filtrovat seznam uzlů a mesh mapu podle vzdálenosti od vašeho telefonu.</string>
     <string name="distance_measurements">Měření vzdálenosti</string>
     <string name="distance_measurements_description">Zobrazí vzdálenost mezi vaším telefonem a ostatními uzly Meshtastic s určenou polohou.</string>
+    <!-- DOC -->
+    <string name="doc_clear_search">Vymazat hledání</string>
+    <string name="doc_title_connections">Připojení</string>
+    <string name="doc_title_discovery">Objevujte</string>
+    <string name="doc_title_mqtt">MQTT</string>
+    <string name="doc_title_nodes">Uzly</string>
     <string name="done">Hotovo</string>
     <string name="double_tap_as_button_press">Dvojité klepnutí jako stisk tlačítka</string>
     <string name="downlink_enabled">Stahování povoleno</string>
@@ -439,6 +448,7 @@
     <string name="hardware_model">Hardwarový model</string>
     <string name="heading">Směr</string>
     <string name="heartbeat">Pulzující LED</string>
+    <string name="help_and_documentation">Nápověda a dokumentace</string>
     <string name="hide_layer">Skrýt vrstvu</string>
     <string name="hide_password">Skrýt heslo</string>
     <string name="hop_limit">Počet skoků</string>
@@ -598,8 +608,10 @@
     <string name="mqtt">MQTT</string>
     <string name="mqtt_config">Nastavení MQTT</string>
     <string name="mqtt_enabled">MQTT povoleno</string>
+    <string name="mqtt_probe_success">Dosažitelný. Broker přijal přihlašovací údaje.</string>
     <string name="mqtt_status_connected">Připojeno</string>
     <string name="mqtt_status_disconnected">Odpojeno</string>
+    <string name="mqtt_test_connection">Test připojení</string>
     <string name="must_set_region">Musíte nastavit region!</string>
     <string name="must_update">Musíte aktualizovat aplikaci v obchodu Google Play (nebo z Githubu). Je příliš stará pro komunikaci s touto verzí firmware vysílače. Přečtěte si prosím naše <a href="https://meshtastic.org/docs/software/android/installation">dokumenty</a> na toto téma.</string>
     <!-- MUTE -->
@@ -650,6 +662,24 @@
     <string name="node_filter_show_ignored">Zobrazit jen ignorované uzly</string>
     <string name="node_filter_title">Filtrovat podle</string>
     <string name="node_id">Identifikátor uzlu</string>
+    <string name="node_layout_channel">Kanál</string>
+    <string name="node_layout_compact">Kompaktní</string>
+    <string name="node_layout_compact_fields_header">Kompaktní pole</string>
+    <string name="node_layout_complete">Kompletní</string>
+    <string name="node_layout_complete_description">Kompletní rozložení zobrazuje všechna dostupná data uzlu. Pole bez dat jsou automaticky skryta.</string>
+    <string name="node_layout_device_role">Zařízení a Role</string>
+    <string name="node_layout_distance_and_bearing">Vzdálenost a směr</string>
+    <string name="node_layout_help_signal_bad">Kvalita signálu je nízká. Poměr signálu k šumu (SNR) je vyšší než −18 dB a síla přijímaného signálu (RSSI) je vyšší než −125 dBm.</string>
+    <string name="node_layout_help_signal_indicator">Kombinuje SNR a RSSI do úrovně kvality zobrazené jako barevná ikona s popisem. Zobrazeno pouze v úplném rozložení.</string>
+    <string name="node_layout_hops_away">Počet skoků</string>
+    <string name="node_layout_log_icons">Metriky prostředí</string>
+    <string name="node_layout_power">Napájení</string>
+    <string name="node_layout_preview">Náhled</string>
+    <string name="node_layout_section_title">Rozložení uzlu</string>
+    <string name="node_layout_signal_direct_only">Signál (pouze přímé spojení)</string>
+    <string name="node_layout_signal_quality_indicator">Indikátor kvality signálu</string>
+    <string name="node_list_help_node_details">Detaily uzlu</string>
+    <string name="node_list_help_title">Nápověda pro seznam uzlů</string>
     <string name="node_number">Číslo uzlu</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_button">Možnosti řazení uzlů</string>
@@ -954,6 +984,7 @@
     <string name="sx126x_rx_boosted_gain">Zvýšené zesílení přijímače (RX)</string>
     <string name="system_settings">Nastavení systému</string>
     <!-- TAK -->
+    <string name="tak_server_section">Server</string>
     <string name="tak_team_blue">Modrá</string>
     <string name="tak_team_green">Zelená</string>
     <string name="tak_team_red">Červená</string>
@@ -1006,7 +1037,6 @@
     <string name="tx_power_dbm">Vysílací výkon</string>
     <string name="type">Typ</string>
     <string name="type_a_message">Napište zprávu</string>
-    <string name="udp_enabled">Povoleno</string>
     <!-- UNKNOWN -->
     <string name="unknown">Neznámé</string>
     <string name="unknown_age">Neznámé stáří</string>

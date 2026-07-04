@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<event version="2.0" uid="medevac-01" type="b-r-f-h-c" time="2026-03-15T20:00:00Z" start="2026-03-15T20:00:00Z" stale="2026-03-15T20:10:00Z" how="h-e">
+  <point lat="33.1252" lon="-107.2570" hae="100" ce="10" le="10"/>
+  <detail>
+    <contact callsign="Casevac-1"/>
+    <_medevac_ title="M-1" medline_remarks="2 litter 1 amb" freq="38.90" precedence="Urgent" urgent="2" priority="1" hoist="true" extraction_equipment="true" ventilator="false" blood="false" litter="2" ambulatory="1" security="N" hlz_marking="Smoke" zone_prot_marker="Green smoke" us_military="2" us_civilian="0" non_us_military="1" non_us_civilian="0" epw="0" child="0" terrain_slope="true" terrain_slope_dir="NE" terrain_rough="false" terrain_loose="true" terrain_trees="false" terrain_wires="false" terrain_other="false">
+      <zMistsMap>
+        <zMist title="ZMIST-1" z="GSW" m="Penetrating" i="L thigh" s="Stable" t="TQ 1810Z"/>
+      </zMistsMap>
+    </_medevac_>
+    <remarks/>
+    <archive/>
+  </detail>
+</event>

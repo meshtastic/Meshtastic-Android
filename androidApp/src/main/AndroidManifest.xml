@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2025 Meshtastic LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="GoogleAppIndexingWarning">
+
+    <!-- If a device is missing a GPS - we will still be able to work though , must be before uses-permission-->
+    <uses-feature
+        android:name="android.hardware.location"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.location.gps"
+        android:required="false" />
+
+    <!-- Request legacy Bluetooth permissions on older devices -->
+    <uses-permission android:name="android.permission.BLUETOOTH"
+        android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"
+        android:maxSdkVersion="30" />
+
+    <!-- API 31+ Bluetooth permissions -->
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN"
+        android:usesPermissionFlags="neverForLocation"
+        tools:targetApi="s" />
+
+    <!-- API 33+ Notification runtime permissions -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- Permissions required for providing location (from phone GPS) to mesh -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <!-- This permission is required for analytics - and soon the MQTT gateway -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <!--
+      Android 17 (API 37) Local Network Protection: targetSdk=37 apps are blocked
+      from local-network access by default. Required for both NSD/mDNS device
+      discovery on the Connections screen and the built-in TAK Server's localhost
+      loopback binding. Requested at runtime via rememberRequestLocalNetworkPermission.
+      See: https://developer.android.com/privacy-and-security/local-network-permission
+    -->
+    <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
+
+    <!--
+      This permission is optional but recommended so we can be smart
+      about when to send data.
+     -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- We run our mesh code as a foreground service - FIXME, find a way to stop doing this -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
+
+    <!-- Needed to open our bluetooth connection to our paired device (after reboot) -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <!-- Camera permission for QR Code scanning -->
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <!-- NFC permission for sharing channels and contacts -->
+    <uses-permission android:name="android.permission.NFC" />
+
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+
+    <uses-feature
+        android:name="android.hardware.bluetooth_le"
+        android:required="false" />
+
+    <uses-feature
+        android:name="android.hardware.nfc"
+        android:required="false" />
+
+    <!-- for USB serial access -->
+    <uses-feature
+        android:name="android.hardware.usb.host"
+        android:required="false" />
+
+    <!-- Declare geo: intent visibility for Android 11+ (needed for resolveActivity with map apps) -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="geo" />
+        </intent>
+    </queries>
+
+    <application
+        android:name="org.meshtastic.app.MeshUtilApplication"
+        android:allowBackup="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:hardwareAccelerated="true"
+        android:theme="@style/SplashTheme"
+        android:localeConfig="@xml/locales_config"
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:enableOnBackInvokedCallback="true">
+
+        <uses-library
+            android:name="org.apache.http.legacy"
+            android:required="false" />
+
+
+        <!-- Default crash collection and analytics off until we (possibly) turn it on in application.onCreate -->
+        <meta-data
+            android:name="firebase_crashlytics_collection_enabled"
+            android:value="false" />
+        <meta-data
+            android:name="firebase_analytics_collection_enabled"
+            android:value="false" />
+
+        <!-- Disable AdID collection for privacy -->
+        <meta-data
+            android:name="google_analytics_adid_collection_enabled"
+            android:value="false" />
+        <meta-data
+            android:name="google_analytics_default_allow_ad_personalization_signals"
+            android:value="false" />
+
+        <!-- Disable SSAID collection to reduce PII footprint -->
+        <meta-data
+            android:name="google_analytics_ssaid_collection_enabled"
+            android:value="false" />
+
+        <!-- Disable automatic screen reporting to reduce background noise -->
+        <meta-data
+            android:name="google_analytics_automatic_screen_reporting_enabled"
+            android:value="false" />
+
+        <!-- Set default analytics storage consent to denied for Advanced Consent Mode -->
+        <meta-data
+            android:name="google_analytics_default_allow_analytics_storage"
+            android:value="false" />
+
+        <!-- This is the public API for doing mesh radio operations from android apps -->
+        <service
+            android:name="org.meshtastic.core.service.MeshService"
+            android:enabled="true"
+            android:foregroundServiceType="connectedDevice|location"
+            android:exported="true" tools:ignore="ExportedActivity">
+            <intent-filter>
+                <action android:name="com.geeksville.mesh.Service" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name="org.meshtastic.core.service.PhoneWearableListenerService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" />
+                <data android:scheme="wear" android:host="*" android:pathPrefix="/request_sync" />
+                <data android:scheme="wear" android:host="*" android:pathPrefix="/send_message" />
+                <data android:scheme="wear" android:host="*" android:pathPrefix="/open_on_phone" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"
+            android:enabled="false"
+            android:exported="false">
+            <meta-data
+                android:name="autoStoreLocales"
+                android:value="true" />
+        </service>
+
+        <activity
+            android:name="org.meshtastic.app.MainActivity"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustResize"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="meshtastic" android:host="meshtastic" />
+            </intent-filter>
+
+            <intent-filter android:autoVerify="true">
+                <!--
+                  The QR codes to share channel settings and contacts are shared as meshtastic URLS.
+                  We also support NFC NDEF Discovery for the same URLS.
+
+                  An approximate example:
+                  https://meshtastic.org/e/YXNkZnF3ZXJhc2RmcXdlcmFzZGZxd2Vy
+                  https://meshtastic.org/v/#CNar9vwDEi0KCSEzZjgyOTVkNhIPV2F0ZXJmYWxsIDIg4piGGgPimaciBu2eP4KV1igJOAI
+                -->
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.nfc.action.NDEF_DISCOVERED" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="https" />
+                <data android:host="meshtastic.org" />
+                <data android:pathPrefix="/e/" />
+                <data android:pathPrefix="/E/" />
+                <data android:pathPrefix="/v/" />
+                <data android:pathPrefix="/V/" />
+            </intent-filter>
+
+            <!-- App Links for modern RESTful navigation paths -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="http" />
+                <data android:scheme="https" />
+                <data android:host="meshtastic.org" />
+                
+                <data android:pathPrefix="/share" />
+                <data android:pathPrefix="/connections" />
+                <data android:pathPrefix="/map" />
+                <data android:pathPrefix="/messages" />
+                <data android:pathPrefix="/quickchat" />
+                <data android:pathPrefix="/nodes" />
+                <data android:pathPrefix="/settings" />
+                <data android:pathPrefix="/channels" />
+                <data android:pathPrefix="/firmware" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
+            </intent-filter>
+
+            <!-- The USB devices we want to be informed about -->
+            <meta-data
+                android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
+                android:resource="@xml/device_filter" />
+        </activity>
+
+        <receiver android:name="org.meshtastic.core.service.BootCompleteReceiver"
+            android:exported="false">
+            <!-- handle boot events -->
+            <intent-filter>
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <!--For HTC devices per https://stackoverflow.com/questions/20441308/boot-completed-not-working-android/46294732#46294732 -->
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
+
+                <!-- for testing -->
+                <action android:name="com.geeksville.mesh.SIM_BOOT" />
+            </intent-filter>
+
+            <!-- Also restart our service if the app gets upgraded -->
+            <intent-filter>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <!-- I was using PACKAGE_REPLACED, but MY_PACKAGE_REPLACED is newer and seems cleaner
+                <data
+                    android:scheme="package"
+                    android:path="com.geeksville.mesh" /> -->
+            </intent-filter>
+        </receiver>
+        <receiver android:name="org.meshtastic.core.service.ReplyReceiver" android:exported="false" />
+        <receiver android:name="org.meshtastic.core.service.MarkAsReadReceiver" android:exported="false" />
+        <receiver android:name="org.meshtastic.core.service.ReactionReceiver" android:exported="false" />
+
+        <receiver
+            android:name="org.meshtastic.feature.widget.LocalStatsWidgetReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_local_stats_info" />
+        </receiver>
+
+        <!-- allow for plugin discovery -->
+        <activity
+            android:name="com.atakmap.app.component"
+            android:exported="true"
+            tools:ignore="MissingClass">
+            <intent-filter android:label="@string/app_name">
+                <action android:name="com.atakmap.app.component" />
+            </intent-filter>
+        </activity>
+
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data
+                android:name="androidx.work.WorkManagerInitializer"
+                android:value="androidx.startup"
+                tools:node="remove" />
+        </provider>
+
+    </application>
+
+</manifest>

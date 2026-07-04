@@ -16,6 +16,7 @@ jobs:
   check-changes:
     if: github.repository == 'meshtastic/Meshtastic-Android' && !( github.head_ref == 'scheduled-updates' || github.head_ref == 'l10n_main' )
     runs-on: ubuntu-24.04-arm
+    timeout-minutes: 10
     outputs:
       android: ${{ steps.filter.outputs.android }}
     steps:
@@ -30,11 +31,12 @@ jobs:
               - '.github/workflows/**'
               - '.github/actions/**'
               # Product modules validated by reusable-check
-              - 'app/**'
+              - 'androidApp/**'
               - 'baselineprofile/**'
-              - 'desktop/**'
+              - 'desktopApp/**'
               - 'core/**'
               - 'feature/**'
+              - 'screenshot-tests/**'
               # Shared build infrastructure
               - 'build-logic/**'
               - 'config/**'
@@ -53,6 +55,7 @@ jobs:
   verify-check-changes-filter:
     if: github.repository == 'meshtastic/Meshtastic-Android' && !( github.head_ref == 'scheduled-updates' || github.head_ref == 'l10n_main' )
     runs-on: ubuntu-24.04-arm
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v6
       - name: Verify module roots are represented in check-changes filter
@@ -95,7 +98,7 @@ jobs:
 
   # 2. VALIDATION & BUILD: Delegate to reusable-check.yml
   # We disable coverage and desktop builds for PRs to keep feedback fast
-  # (< 10 mins). Desktop compilation is already covered by the :desktop:test
+  # (< 10 mins). Desktop compilation is already covered by the :desktopApp:test
   # task in the shard-app test shard.
   validate-and-build:
     needs: check-changes
@@ -105,7 +108,6 @@ jobs:
       run_lint: true
       run_unit_tests: true
       run_coverage: false
-      run_desktop_builds: false
       upload_artifacts: true
     secrets: inherit
 
@@ -113,6 +115,7 @@ jobs:
   check-workflow-status:
     name: Check Workflow Status
     runs-on: ubuntu-24.04-arm
+    timeout-minutes: 5
     permissions: {}
     needs: [check-changes, verify-check-changes-filter, validate-and-build]
     if: always()

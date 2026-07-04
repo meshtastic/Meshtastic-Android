@@ -1,9 +1,9 @@
 {
-  "ai": "opencode",
-  "branch_numbering": "sequential",
-  "context_file": "AGENTS.md",
+  "ai": "copilot",
+  "branch_numbering": "timestamp",
+  "context_file": ".github/copilot-instructions.md",
   "here": true,
-  "integration": "opencode",
+  "integration": "copilot",
   "script": "sh",
   "speckit_version": "0.8.8.dev0"
 }

@@ -39,10 +39,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.debug_default_search
@@ -73,7 +71,7 @@ fun DebugSearchNavigation(
         Text(
             text = "${searchState.currentMatchIndex + 1}/${searchState.allMatches.size}",
             modifier = Modifier.padding(end = 4.dp),
-            style = TextStyle(fontSize = 12.sp),
+            style = MaterialTheme.typography.labelSmall,
         )
         IconButton(onClick = onPreviousMatch, enabled = searchState.hasMatches, modifier = Modifier.size(32.dp)) {
             Icon(

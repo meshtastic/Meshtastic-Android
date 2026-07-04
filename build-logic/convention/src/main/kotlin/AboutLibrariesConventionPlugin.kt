@@ -66,7 +66,6 @@ class AboutLibrariesConventionPlugin : Plugin<Project> {
                         (it.name.endsWith("Resources") || it.name.endsWith("JavaRes"))
                 }
                 .configureEach { dependsOn("exportLibraryDefinitions") }
-
         }
     }
 }

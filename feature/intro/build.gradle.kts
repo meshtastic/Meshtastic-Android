@@ -21,11 +21,7 @@ plugins {
 }
 
 kotlin {
-    android {
-        namespace = "org.meshtastic.feature.intro"
-        androidResources.enable = false
-        withHostTest { isIncludeAndroidResources = true }
-    }
+    android { withHostTest { isIncludeAndroidResources = true } }
 
     sourceSets {
         commonMain.dependencies {
@@ -34,8 +30,6 @@ kotlin {
             implementation(projects.core.repository)
             implementation(projects.core.ui)
             implementation(projects.core.resources)
-
-            implementation(libs.jetbrains.navigation3.ui)
         }
         androidMain.dependencies { implementation(projects.core.service) }
     }

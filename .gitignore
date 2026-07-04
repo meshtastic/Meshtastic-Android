@@ -28,6 +28,9 @@ keystore.properties
 # Kotlin compiler
 .kotlin
 
+# Generated docs screenshots (regenerated from reference images)
+docs/screenshots/
+
 # VS code
 .vscode/settings.json
 
@@ -48,6 +51,12 @@ keystore.properties
 build-and-install-android.sh
 wireless-install.sh
 
+# Generated docs artifacts
+docs/_site/
+docs/.jekyll-cache/
+docs/.jekyll-metadata
+docs/Gemfile.lock
+
 # Git worktrees
 .worktrees/
 /firebase-debug.log.jdk/
@@ -55,11 +64,30 @@ firebase-debug.log
 .agent_plans/
 .agent_refs/
 .agent_artifacts/
+# Firebase Studio / Antigravity auto-provisioned skills — not used by this project
+.agents/
 
 # Local library development clones
 /coil/
 /kable/
 .opencode/
+# Synced docs in composeResources (generated from docs/ source by syncDocsToComposeResources task)
+feature/docs/src/commonMain/composeResources/files/docs/
+# Synced translated docs (generated from docs/{locale}/ by syncTranslatedDocsToComposeResources task)
+feature/docs/src/commonMain/composeResources/files/*/docs/
 
-# flatpakGradleGenerator output
-flatpak-sources*.json
+/desktop/bin/
+/build-logic/convention/bin/
+/.specify/extensions/.cache/
+# Jekyll local config (comments out remote_theme for local builds)
+docs/_config_local.yml
+
+# Flatpak source manifests and repositories
+flatpak-sources-*.json
+flatpak-sources.json
+offline-repository/
+# Share team-wide Claude config (token-guard deny rules + subagents); keep per-user local settings ignored
+.claude/*
+!.claude/settings.json
+!.claude/agents/
+build-scan-*.scan

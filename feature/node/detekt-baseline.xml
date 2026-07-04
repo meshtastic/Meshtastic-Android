@@ -66,6 +66,23 @@
     <ID>ParameterNaming:SignalMetrics.kt:onPointSelected: (Double) -> Unit</ID>
     <ID>ParameterNaming:TimeFrameSelector.kt:onTimeFrameSelected: (TimeFrame) -> Unit</ID>
     <ID>ParameterNaming:TracerouteChart.kt:onPointSelected: (Double) -> Unit</ID>
+    <ID>PreviewPublic:CommonCharts.kt:@PreviewLightDark @Composable fun LegendPreview</ID>
+    <ID>PreviewPublic:DeviceMetrics.kt:@PreviewLightDark @Suppress("detekt:MagicNumber") // Compose preview with fake data @Composable fun DeviceMetricsCardPreview</ID>
+    <ID>PreviewPublic:EnvironmentMetrics.kt:@PreviewLightDark @Suppress("MagicNumber") // Compose preview with fake data @Composable fun PreviewEnvironmentMetricsContent</ID>
+    <ID>PreviewPublic:NodeDetailComponentPreviews.kt:@PreviewLightDark @Composable fun DeviceActionsLocalPreview</ID>
+    <ID>PreviewPublic:NodeDetailComponentPreviews.kt:@PreviewLightDark @Composable fun DeviceActionsRemotePreview</ID>
+    <ID>PreviewPublic:NodeDetailComponentPreviews.kt:@PreviewLightDark @Composable fun NodeDetailsSectionPreview</ID>
+    <ID>PreviewPublic:NodeDetailComponentPreviews.kt:@PreviewLightDark @Composable fun PositionInlineContentPreview</ID>
+    <ID>PreviewPublic:NodeDetailComponentPreviews.kt:@PreviewLightDark @Composable fun TelemetricActionsSectionEmptyPreview</ID>
+    <ID>PreviewPublic:NodeDetailComponentPreviews.kt:@PreviewLightDark @Composable fun TelemetricActionsSectionPreview</ID>
+    <ID>PreviewPublic:NodeDetailPreviews.kt:@PreviewLightDark @Composable fun NodeDetailContentLoadingPreview</ID>
+    <ID>PreviewPublic:NodeDetailPreviews.kt:@PreviewLightDark @Composable fun NodeDetailContentLocalPreview</ID>
+    <ID>PreviewPublic:NodeDetailPreviews.kt:@PreviewLightDark @Composable fun NodeDetailContentRemotePreview</ID>
+    <ID>PreviewPublic:NodeListItemPreviews.kt:@PreviewLightDark @Composable fun NodeItemCompactActivePreview</ID>
+    <ID>PreviewPublic:NodeListItemPreviews.kt:@PreviewLightDark @Composable fun NodeItemCompactAllFieldsPreview</ID>
+    <ID>PreviewPublic:NodeListItemPreviews.kt:@PreviewLightDark @Composable fun NodeItemCompactMinimalPreview</ID>
+    <ID>PreviewPublic:NodeListItemPreviews.kt:@PreviewLightDark @Composable fun NodeItemCompleteActivePreview</ID>
+    <ID>PreviewPublic:NodeListItemPreviews.kt:@PreviewLightDark @Composable fun NodeItemCompletePreview</ID>
     <ID>TooGenericExceptionCaught:MetricsViewModel.kt:MetricsViewModel$e: Exception</ID>
     <ID>TooGenericExceptionCaught:NodeManagementActions.kt:NodeManagementActions$ex: Exception</ID>
     <ID>ViewModelForwarding:NodeDetailScreens.kt:NodeDetailScaffold( modifier = modifier, uiState = uiState, viewModel = viewModel, navigateToMessages = navigateToMessages, onNavigate = onNavigate, onNavigateUp = onNavigateUp, compassViewModel = compassViewModel, )</ID>
