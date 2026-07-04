@@ -179,11 +179,15 @@ class FirmwareUpdateViewModel(
                             firmwareReleaseRepository.getReleaseFlow(_selectedReleaseType.value)
                         }
 
-                    releaseFlow.collectLatest { release ->
-                        _selectedRelease.value = release
-                        val deviceHardware = getDeviceHardware(ourNode) ?: return@collectLatest
+                    val deviceHardware = getDeviceHardware(ourNode)
+                    if (deviceHardware != null) {
                         _deviceHardware.value = deviceHardware
                         _currentFirmwareVersion.value = ourNode.firmwareVersion
+                    }
+
+                    releaseFlow.collectLatest { release ->
+                        _selectedRelease.value = release
+                        if (deviceHardware == null) return@collectLatest
 
                         val dismissed = bootloaderWarningDataSource.isDismissed(address)
                         val firmwareUpdateMethod =
@@ -570,14 +574,21 @@ class FirmwareUpdateViewModel(
 
         return if (hwModelInt != null) {
             deviceHardwareRepository.getDeviceHardwareByModel(hwModelInt, target).getOrElse {
+                clearDeviceMetadata()
                 _state.value =
                     FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_unknown_hardware, hwModelInt))
                 null
             }
         } else {
+            clearDeviceMetadata()
             _state.value = FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_node_info_missing))
             null
         }
+    }
+
+    private fun clearDeviceMetadata() {
+        _deviceHardware.value = null
+        _currentFirmwareVersion.value = null
     }
 }
 

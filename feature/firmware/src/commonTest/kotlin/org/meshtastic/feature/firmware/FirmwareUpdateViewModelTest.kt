@@ -309,15 +309,22 @@ class FirmwareUpdateViewModelTest {
 
     @Test
     fun `checkForUpdates sets error when hardware lookup fails`() = runTest {
+        advanceUntilIdle()
+        assertIs<FirmwareUpdateState.Ready>(viewModel.state.value)
+        assertIs<DeviceHardware>(viewModel.deviceHardware.value)
+        assertEquals("0.9.0", viewModel.currentFirmwareVersion.value)
+
         val release = FirmwareRelease(id = "2", title = "2.0.0", zipUrl = "url", releaseNotes = "notes")
         every { firmwareReleaseRepository.stableRelease } returns flowOf(release)
         everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any(), any()) } returns
             Result.failure(IllegalStateException("Unknown hardware"))
 
-        viewModel = createViewModel()
+        viewModel.checkForUpdates()
         advanceUntilIdle()
 
         assertEquals(release, viewModel.selectedRelease.value)
+        assertEquals(null, viewModel.deviceHardware.value)
+        assertEquals(null, viewModel.currentFirmwareVersion.value)
         assertIs<FirmwareUpdateState.Error>(viewModel.state.value)
     }
 
