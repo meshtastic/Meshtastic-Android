@@ -29,6 +29,7 @@ import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.RadioPrefs
+import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.feature.firmware.ota.Esp32OtaUpdateHandler
 import org.meshtastic.feature.firmware.ota.dfu.SecureDfuHandler
 import kotlin.test.Test
@@ -58,6 +59,7 @@ class DefaultFirmwareUpdateManagerTest {
     private val fileHandler: FirmwareFileHandler = mock(MockMode.autofill)
     private val radioController: RadioController = mock(MockMode.autofill)
     private val nodeRepository: NodeRepository = mock(MockMode.autofill)
+    private val serviceRepository: ServiceRepository = mock(MockMode.autofill)
     private val bleScanner: BleScanner = mock(MockMode.autofill)
     private val bleConnectionFactory: BleConnectionFactory = mock(MockMode.autofill)
     private val firmwareRetriever = FirmwareRetriever(fileHandler)
@@ -91,6 +93,7 @@ class DefaultFirmwareUpdateManagerTest {
             firmwareFileHandler = fileHandler,
             radioController = radioController,
             nodeRepository = nodeRepository,
+            serviceRepository = serviceRepository,
             bleScanner = bleScanner,
             bleConnectionFactory = bleConnectionFactory,
             dispatchers = dispatchers,
