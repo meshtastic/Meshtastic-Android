@@ -52,6 +52,8 @@ import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.feature.discovery.ai.DiscoverySummaryAiProvider
+import org.meshtastic.proto.Channel
+import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.NeighborInfo
@@ -101,6 +103,12 @@ class DiscoveryScanEngine(
     private var scanScope: CoroutineScope? = null
     private var dwellJob: Job? = null
     private var originalLoRaConfig: Config.LoRaConfig? = null
+
+    /** The radio's primary channel at scan start; restored after a custom-channel target overwrites it (FR-005). */
+    private var originalPrimaryChannel: ChannelSettings? = null
+
+    /** True once a custom-channel target has retuned the primary channel, so restore only writes when needed. */
+    private var tunedPrimaryChannel: Boolean = false
     private var sessionId: Long = 0
 
     /** Nodes collected for the current preset dwell. Keyed by nodeNum. */
@@ -138,14 +146,19 @@ class DiscoveryScanEngine(
 
     // region Public API
 
+    /** Convenience overload: scan a list of public presets (each becomes a preset [ScanTarget] labelled by name). */
+    suspend fun startScan(presets: List<ChannelOption>, dwellDurationSeconds: Long) =
+        startScanTargets(presets.map { ScanTarget(preset = it, label = it.name) }, dwellDurationSeconds)
+
     /**
-     * Starts a discovery scan across the given [presets].
+     * Starts a discovery scan across the given [targets] — public presets and/or beacon-advertised custom channels.
+     * (Distinct name from the [ChannelOption] overload: both would erase to the same JVM signature otherwise.)
      *
-     * @param presets The LoRa presets to cycle through.
-     * @param dwellDurationSeconds How long to listen on each preset.
+     * @param targets The scan queue ([ScanTarget]).
+     * @param dwellDurationSeconds How long to listen on each target.
      */
-    suspend fun startScan(presets: List<ChannelOption>, dwellDurationSeconds: Long) {
-        require(presets.isNotEmpty()) { "At least one preset is required" }
+    suspend fun startScanTargets(targets: List<ScanTarget>, dwellDurationSeconds: Long) {
+        require(targets.isNotEmpty()) { "At least one scan target is required" }
         require(dwellDurationSeconds > 0) { "Dwell duration must be positive" }
 
         mutex.withLock {
@@ -156,9 +169,11 @@ class DiscoveryScanEngine(
 
             _scanState.value = DiscoveryScanState.Preparing
 
-            // Capture the entire original LoRa config to restore it accurately later
+            // Capture the entire original LoRa config and primary channel to restore them accurately later.
             val initialLoraConfig = radioConfigRepository.localConfigFlow.first().lora
             originalLoRaConfig = initialLoraConfig
+            originalPrimaryChannel = radioConfigRepository.channelSetFlow.first().settings.firstOrNull()
+            tunedPrimaryChannel = false
 
             val homePresetStr =
                 if (initialLoraConfig?.use_preset == true) {
@@ -176,7 +191,7 @@ class DiscoveryScanEngine(
             val session =
                 DiscoverySessionEntity(
                     timestamp = nowMillis,
-                    presetsScanned = presets.joinToString(",") { it.name },
+                    presetsScanned = targets.joinToString(",") { it.label },
                     homePreset = homePresetStr,
                     completionStatus = "in_progress",
                     userLatitude = latDouble,
@@ -189,14 +204,14 @@ class DiscoveryScanEngine(
             collectorRegistry.collector = this
 
             // Set initial state so the scan loop's isActive guard succeeds
-            _scanState.value = DiscoveryScanState.Shifting(presets.first().name)
-            currentPresetName = presets.first().name
+            _scanState.value = DiscoveryScanState.Shifting(targets.first().label)
+            currentPresetName = targets.first().label
             totalDwellSeconds = dwellDurationSeconds
 
             // Launch scan coroutine
             val scope = CoroutineScope(dispatchers.io + SupervisorJob())
             scanScope = scope
-            scope.launch { runScanLoop(presets, dwellDurationSeconds) }
+            scope.launch { runScanLoop(targets, dwellDurationSeconds) }
         }
     }
 
@@ -272,11 +287,11 @@ class DiscoveryScanEngine(
     // region Scan loop
 
     @Suppress("ReturnCount")
-    private suspend fun runScanLoop(presets: List<ChannelOption>, dwellDurationSeconds: Long) {
-        for (preset in presets) {
+    private suspend fun runScanLoop(targets: List<ScanTarget>, dwellDurationSeconds: Long) {
+        for (target in targets) {
             if (!isActive) return
 
-            currentPresetName = preset.name
+            currentPresetName = target.label
             mutex.withLock {
                 collectedNodes.clear()
                 deviceMetricsLog.clear()
@@ -284,12 +299,12 @@ class DiscoveryScanEngine(
             }
             totalDwellSeconds = dwellDurationSeconds
 
-            // Shift to the new preset
-            _scanState.value = DiscoveryScanState.Shifting(preset.name)
-            shiftPreset(preset)
+            // Shift to the new target (preset, plus a custom primary channel for beacon-channel targets)
+            _scanState.value = DiscoveryScanState.Shifting(target.label)
+            shiftTarget(target)
 
             // Wait for reconnection
-            _scanState.value = DiscoveryScanState.Reconnecting(preset.name)
+            _scanState.value = DiscoveryScanState.Reconnecting(target.label)
             if (!waitForConnection()) {
                 pauseAndAbort()
                 return
@@ -299,13 +314,13 @@ class DiscoveryScanEngine(
             requestNeighborInfoAtDwellBoundary()
 
             // Dwell
-            if (!runDwell(preset.name, dwellDurationSeconds)) {
+            if (!runDwell(target.label, dwellDurationSeconds)) {
                 pauseAndAbort()
                 return
             }
             if (!isActive) return
 
-            // Persist this preset's results
+            // Persist this target's results
             persistCurrentDwellResults()
         }
 
@@ -333,11 +348,28 @@ class DiscoveryScanEngine(
         cancelScanInternal()
     }
 
-    private suspend fun shiftPreset(preset: ChannelOption) {
-        val loraConfig = Config.LoRaConfig(use_preset = true, modem_preset = preset.modemPreset)
-        val config = Config(lora = loraConfig)
-        radioController.setLocalConfig(config)
-        Logger.i { "DiscoveryScanEngine: shifted to ${preset.name} (use_preset=true)" }
+    private suspend fun shiftTarget(target: ScanTarget) {
+        if (target.channel == null) {
+            // Public-preset target — identical to the original preset-only scan (region left at the firmware default).
+            radioController.setLocalConfig(
+                Config(lora = Config.LoRaConfig(use_preset = true, modem_preset = target.preset.modemPreset)),
+            )
+            Logger.i { "DiscoveryScanEngine: shifted to ${target.label} (use_preset=true)" }
+        } else {
+            // Beacon custom-channel target: apply the offered preset+region, then tune the primary channel to the
+            // offered name+PSK so nodes on that mesh are heard. The original primary channel is restored after the
+            // scan.
+            val region = target.region ?: originalLoRaConfig?.region ?: Config.LoRaConfig.RegionCode.UNSET
+            radioController.setLocalConfig(
+                Config(
+                    lora =
+                    Config.LoRaConfig(use_preset = true, modem_preset = target.preset.modemPreset, region = region),
+                ),
+            )
+            radioController.setLocalChannel(Channel(index = 0, role = Channel.Role.PRIMARY, settings = target.channel))
+            tunedPrimaryChannel = true
+            Logger.i { "DiscoveryScanEngine: shifted to ${target.label} (custom channel)" }
+        }
         // The firmware often restarts the radio or reboots after a LoRa config change.
         // Wait a short moment to ensure we don't consider it 'connected' right before it drops.
         delay(3000)
@@ -642,8 +674,14 @@ class DiscoveryScanEngine(
 
     private suspend fun restoreHomePreset() {
         val config = originalLoRaConfig ?: return
-        val fullConfig = Config(lora = config)
-        radioController.setLocalConfig(fullConfig)
+        // Restore the primary channel first (only when a custom-channel target overwrote it), then the LoRa config —
+        // both are no-ops on a public-only scan, so that path stays unchanged (FR-005 no-regression).
+        if (tunedPrimaryChannel) {
+            originalPrimaryChannel?.let {
+                radioController.setLocalChannel(Channel(index = 0, role = Channel.Role.PRIMARY, settings = it))
+            }
+        }
+        radioController.setLocalConfig(Config(lora = config))
         Logger.i { "DiscoveryScanEngine: restored original LoRa config" }
         // The firmware often restarts the radio or reboots after a LoRa config change.
         delay(3000)

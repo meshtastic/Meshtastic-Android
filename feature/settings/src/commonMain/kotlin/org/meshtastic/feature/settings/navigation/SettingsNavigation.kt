@@ -57,6 +57,7 @@ import org.meshtastic.feature.settings.radio.component.DisplayConfigScreen
 import org.meshtastic.feature.settings.radio.component.ExternalNotificationConfigScreenCommon
 import org.meshtastic.feature.settings.radio.component.LoRaConfigScreen
 import org.meshtastic.feature.settings.radio.component.MQTTConfigScreen
+import org.meshtastic.feature.settings.radio.component.MeshBeaconConfigScreen
 import org.meshtastic.feature.settings.radio.component.NeighborInfoConfigScreen
 import org.meshtastic.feature.settings.radio.component.NetworkConfigScreen
 import org.meshtastic.feature.settings.radio.component.PaxcounterConfigScreen
@@ -214,6 +215,9 @@ fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
 
                 ModuleRoute.TAK ->
                     TAKConfigScreen(viewModel, onBack = dropUnlessResumed { backStack.removeLastOrNull() })
+
+                ModuleRoute.MESH_BEACON ->
+                    MeshBeaconConfigScreen(viewModel, onBack = dropUnlessResumed { backStack.removeLastOrNull() })
             }
         }
     }

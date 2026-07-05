@@ -155,8 +155,10 @@ fun ScannedQrCodeDialog(
             channelSet.copy(
                 settings =
                 channelSet.settings.filterIndexed { i, _ ->
-                    val isExisting = i < channels.settings.size
-                    isExisting || channelSelections.getOrNull(i) == true
+                    // Primary (index 0) is always kept; existing secondaries can be dropped to free a slot for the
+                    // incoming channel when the radio is full (Apple FR-017 "replace a secondary, never the
+                    // primary").
+                    i == 0 || channelSelections.getOrNull(i) == true
                 },
             )
         }
@@ -232,13 +234,16 @@ fun ScannedQrCodeDialog(
                         index,
                         channel,
                     ->
-                    val isExisting = !shouldReplace && index < channels.settings.size
+                    val isPrimary = index == 0
                     val channelObj = Channel(channel, channelSet.lora_config ?: Channel.default.loraConfig)
                     ChannelSelection(
                         index = index,
                         title = channel.name.ifEmpty { modemPresetName },
-                        enabled = !isExisting,
-                        isSelected = if (isExisting) true else channelSelections[index],
+                        // Primary is always kept. In ADD mode existing secondaries become deselectable so the user can
+                        // drop one to make room for the incoming channel on a full radio; REPLACE keeps its prior
+                        // all-selectable behavior.
+                        enabled = if (shouldReplace) true else !isPrimary,
+                        isSelected = if (!shouldReplace && isPrimary) true else channelSelections[index],
                         onSelected = {
                             if (it || selectedChannelSet.settings.size > 1) {
                                 channelSelections[index] = it

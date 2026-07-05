@@ -28,6 +28,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -40,6 +41,7 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.util.MeshDataMapper
 import org.meshtastic.core.repository.AdminPacketHandler
+import org.meshtastic.core.repository.MeshBeaconPrefs
 import org.meshtastic.core.repository.MeshBeaconRepository
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.MessageFilter
@@ -91,7 +93,6 @@ class MeshDataHandlerTest {
     private val storeForwardHandler: StoreForwardPacketHandler = mock(MockMode.autofill)
     private val telemetryHandler: TelemetryPacketHandler = mock(MockMode.autofill)
     private val adminPacketHandler: AdminPacketHandler = mock(MockMode.autofill)
-    private val meshBeaconRepository = MeshBeaconRepository()
 
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
@@ -100,6 +101,18 @@ class MeshDataHandlerTest {
     // live in the runTest scope (that would trip UncompletedCoroutinesError). Shares the dispatcher so advanceUntilIdle
     // still drives it; cancelled in tearDown.
     private val geofenceScope = CoroutineScope(testDispatcher)
+
+    // Real repository over an in-memory prefs fake — its persistence write-through is exercised without a DataStore.
+    private val fakeBeaconPrefs =
+        object : MeshBeaconPrefs {
+            private val flow = MutableStateFlow<List<String>>(emptyList())
+            override val storedBeacons: StateFlow<List<String>> = flow
+
+            override fun setStoredBeacons(records: List<String>) {
+                flow.value = records
+            }
+        }
+    private val meshBeaconRepository = MeshBeaconRepository(fakeBeaconPrefs, geofenceScope)
 
     @AfterTest
     fun tearDown() {
@@ -410,6 +423,23 @@ class MeshDataHandlerTest {
                 bytes = beacon.encode().toByteString(),
                 dataType = PortNum.MESH_BEACON_APP.value,
             )
+
+        handler.handleReceivedData(packet, 123)
+
+        assertEquals(0, meshBeaconRepository.offers.value.size)
+    }
+
+    @Test
+    fun `our own mesh beacon is ignored`() {
+        // Spec FR-001: ignore beacons from the scanning node itself (else a listen+broadcast node self-notifies).
+        val beacon = MeshBeacon(message = "Join us", offer_channel = ChannelSettings(name = "PartyNet"))
+        val packet =
+            MeshPacket(
+                from = 123, // == myNodeNum below
+                decoded = Data(portnum = PortNum.MESH_BEACON_APP, payload = beacon.encode().toByteString()),
+            )
+        every { dataMapper.toDataPacket(packet) } returns
+            DataPacket(from = "!self", bytes = beacon.encode().toByteString(), dataType = PortNum.MESH_BEACON_APP.value)
 
         handler.handleReceivedData(packet, 123)
 

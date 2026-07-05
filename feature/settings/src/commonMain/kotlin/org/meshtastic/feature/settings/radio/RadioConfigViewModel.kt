@@ -585,6 +585,13 @@ open class RadioConfigViewModel(
     fun setResponseStateLoading(route: Enum<*>) {
         val destNum = destNum ?: destNode.value?.num ?: return
 
+        // A module without a per-module get (no ModuleConfigType, e.g. MeshBeacon) reads from the connect-time config
+        // sync — just select the route and render, skipping the loading/request round-trip that would never complete.
+        if (route is ModuleRoute && !route.refreshable) {
+            _radioConfigState.update { it.copy(route = route.name, responseState = ResponseState.Empty) }
+            return
+        }
+
         _radioConfigState.update { it.copy(route = route.name, responseState = ResponseState.Loading()) }
 
         when (route) {

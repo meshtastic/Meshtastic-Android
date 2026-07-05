@@ -43,6 +43,8 @@ import org.meshtastic.core.resources.discovery_lora_presets_description
 import org.meshtastic.core.resources.discovery_preset_home_label
 import org.meshtastic.core.resources.discovery_stat_selected
 import org.meshtastic.core.resources.discovery_stat_unselected
+import org.meshtastic.core.resources.mesh_beacon_preset_indicator
+import org.meshtastic.core.ui.icon.CellTower
 import org.meshtastic.core.ui.icon.Check
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 
@@ -58,6 +60,7 @@ internal fun ChannelOption.displayName(): String =
 private val DEPRECATED_PRESETS = setOf(ChannelOption.VERY_LONG_SLOW, ChannelOption.LONG_SLOW)
 
 /** A card containing a [FlowRow] of [FilterChip] items for preset selection. */
+@Suppress("LongMethod")
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun PresetPickerCard(
@@ -66,6 +69,7 @@ fun PresetPickerCard(
     onTogglePreset: (ChannelOption) -> Unit,
     enabled: Boolean,
     modifier: Modifier = Modifier,
+    beaconPresets: Set<ChannelOption> = emptySet(),
 ) {
     ElevatedCard(modifier = modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(CARD_PADDING)) {
@@ -98,6 +102,8 @@ fun PresetPickerCard(
                             }
                         val selectedDesc = stringResource(Res.string.discovery_stat_selected)
                         val unselectedDesc = stringResource(Res.string.discovery_stat_unselected)
+                        val fromBeacon = preset in beaconPresets
+                        val beaconDesc = stringResource(Res.string.mesh_beacon_preset_indicator)
                         FilterChip(
                             selected = selected,
                             onClick = { onTogglePreset(preset) },
@@ -113,6 +119,19 @@ fun PresetPickerCard(
                                     Icon(
                                         imageVector = MeshtasticIcons.Check,
                                         contentDescription = null,
+                                        modifier = Modifier.size(FilterChipDefaults.IconSize),
+                                    )
+                                }
+                            } else {
+                                null
+                            },
+                            // A tower badge marks presets a nearby beacon advertised (Apple 014-mesh-beacons FR-004).
+                            trailingIcon =
+                            if (fromBeacon) {
+                                {
+                                    Icon(
+                                        imageVector = MeshtasticIcons.CellTower,
+                                        contentDescription = beaconDesc,
                                         modifier = Modifier.size(FilterChipDefaults.IconSize),
                                     )
                                 }

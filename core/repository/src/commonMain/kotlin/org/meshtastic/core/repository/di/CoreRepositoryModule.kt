@@ -19,7 +19,9 @@ package org.meshtastic.core.repository.di
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Provided
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.di.ApplicationCoroutineScope
 import org.meshtastic.core.repository.HomoglyphPrefs
+import org.meshtastic.core.repository.MeshBeaconPrefs
 import org.meshtastic.core.repository.MeshBeaconRepository
 import org.meshtastic.core.repository.MessageQueue
 import org.meshtastic.core.repository.NodeRepository
@@ -30,7 +32,11 @@ import org.meshtastic.core.repository.usecase.SendMessageUseCaseImpl
 
 @Module
 class CoreRepositoryModule {
-    @Single fun provideMeshBeaconRepository(): MeshBeaconRepository = MeshBeaconRepository()
+    @Single
+    fun provideMeshBeaconRepository(
+        @Provided meshBeaconPrefs: MeshBeaconPrefs,
+        @Provided applicationScope: ApplicationCoroutineScope,
+    ): MeshBeaconRepository = MeshBeaconRepository(meshBeaconPrefs, applicationScope)
 
     @Single
     fun provideSendMessageUseCase(

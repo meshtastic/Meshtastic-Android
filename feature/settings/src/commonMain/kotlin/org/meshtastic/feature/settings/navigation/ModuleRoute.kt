@@ -40,6 +40,7 @@ import org.meshtastic.core.resources.ic_speed
 import org.meshtastic.core.resources.ic_terminal
 import org.meshtastic.core.resources.ic_usb
 import org.meshtastic.core.resources.ic_volume_up
+import org.meshtastic.core.resources.mesh_beacon
 import org.meshtastic.core.resources.mqtt
 import org.meshtastic.core.resources.neighbor_info
 import org.meshtastic.core.resources.paxcounter
@@ -61,6 +62,9 @@ enum class ModuleRoute(
     val type: Int = 0,
     val isSupported: (Capabilities) -> Boolean = { true },
     val isApplicable: (Config.DeviceConfig.Role?) -> Boolean = { true },
+    // False when the firmware has no ModuleConfigType to request this module per-request; the editor then relies on the
+    // connect-time config sync instead of a get (MeshBeacon: MeshBeaconConfig is in ModuleConfig but not in the enum).
+    val refreshable: Boolean = true,
 ) {
     MQTT(Res.string.mqtt, SettingsRoute.MQTT, Res.drawable.ic_cloud, AdminMessage.ModuleConfigType.MQTT_CONFIG.value),
     SERIAL(
@@ -150,6 +154,16 @@ enum class ModuleRoute(
         isSupported = { it.supportsTakConfig },
         isApplicable = { it == Config.DeviceConfig.Role.TAK || it == Config.DeviceConfig.Role.TAK_TRACKER },
     ),
+
+    // MeshBeaconConfig has no AdminMessage.ModuleConfigType value upstream — the editor reads from the connect-time
+    // config sync, so refreshable=false (no per-module get is issued). Gated to firmware that ships the beacon module.
+    MESH_BEACON(
+        Res.string.mesh_beacon,
+        SettingsRoute.MeshBeacon,
+        Res.drawable.ic_perm_scan_wifi,
+        isSupported = { it.supportsMeshBeacon },
+        refreshable = false,
+    ),
     ;
 
     val bitfield: Int
@@ -184,7 +198,11 @@ enum class ModuleRoute(
                 STATUS_MESSAGE -> 0x0000
 
                 // Not excludable yet
-                TAK -> 0x0000 // Not excludable yet
+                TAK -> 0x0000
+
+                // Not excludable yet
+
+                MESH_BEACON -> 0x0000 // Not excludable yet
             }
 
     companion object {
