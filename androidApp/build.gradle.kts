@@ -289,6 +289,12 @@ dependencies {
 
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.glance.preview)
+    // LeakCanary auto-installs via a manifest-declared ContentProvider -- no init code needed.
+    // Debug-only (0 method count in release, per LeakCanary's own design). Added after adversarial
+    // mesh-fuzz testing surfaced a GC-thrash concern in the debug log view; this gives continuous,
+    // automatic leak detection (dumped heap + leak trace + notification) for future soak/fuzz runs
+    // instead of manually polling `dumpsys meminfo`.
+    debugImplementation(libs.leakcanary.android)
 
     googleImplementation(projects.feature.car)
     googleImplementation(libs.location.services)
