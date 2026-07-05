@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.data.repository
 
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -43,6 +44,8 @@ import org.meshtastic.proto.ModuleConfig
  * Class responsible for radio configuration data. Combines access to [nodeDB], [ChannelSet], [LocalConfig] &
  * [LocalModuleConfig].
  */
+private const val MAX_FILE_MANIFEST_ENTRIES = 4096
+
 @Single
 @Suppress("TooManyFunctions") // All functions mandated by RadioConfigRepository interface; logically grouped by concern
 open class RadioConfigRepositoryImpl(
@@ -126,7 +129,17 @@ open class RadioConfigRepositoryImpl(
     override val fileManifestFlow: Flow<List<FileInfo>> = _fileManifestFlow.asStateFlow()
 
     override suspend fun addFileInfo(info: FileInfo) {
-        _fileManifestFlow.value += info
+        // A real device's manifest is bounded by its flash storage (realistically a handful to a few
+        // hundred entries). A rogue/adversarial peer, however, can emit FileInfo packets in a tight loop
+        // for the lifetime of a session -- clearFileManifest only runs on the *next* handshake, so nothing
+        // else bounds this accumulator in between. Cap it defensively, same pattern as the early-packet
+        // buffer in MeshMessageProcessorImpl.
+        val current = _fileManifestFlow.value
+        if (current.size >= MAX_FILE_MANIFEST_ENTRIES) {
+            Logger.w { "File manifest capped at $MAX_FILE_MANIFEST_ENTRIES entries, dropping further FileInfo" }
+            return
+        }
+        _fileManifestFlow.value = current + info
     }
 
     override suspend fun clearFileManifest() {
