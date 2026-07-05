@@ -22,8 +22,11 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -47,8 +50,22 @@ class MeshBeaconPrefsImpl(
             }
             .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
+    // Single conflated writer: rapid add()/dismiss() calls each publish the full latest list here, and one collector
+    // serializes the DataStore writes (latest-wins). Avoids launch-per-call races that could persist a stale snapshot.
+    // runCatching keeps a best-effort write failure (e.g. disk I/O) from escaping as an uncaught coroutine exception —
+    // the next add/dismiss retries, and on restart we hydrate from the last successful write.
+    private val pendingWrite = MutableStateFlow<List<String>?>(null)
+
+    init {
+        scope.launch {
+            pendingWrite.filterNotNull().collectLatest { records ->
+                runCatching { dataStore.edit { it[KEY_STORED_BEACONS] = records.joinToString(RECORD_DELIMITER) } }
+            }
+        }
+    }
+
     override fun setStoredBeacons(records: List<String>) {
-        scope.launch { dataStore.edit { it[KEY_STORED_BEACONS] = records.joinToString(RECORD_DELIMITER) } }
+        pendingWrite.value = records
     }
 
     private companion object {

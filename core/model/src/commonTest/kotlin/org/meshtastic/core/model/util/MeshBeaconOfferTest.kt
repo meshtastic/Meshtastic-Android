@@ -53,6 +53,21 @@ class MeshBeaconOfferTest {
     }
 
     @Test
+    fun `unnamed primary matches a beacon that names the preset explicitly yielding ADD`() {
+        // The radio's primary has an empty name (resolves to the preset display name "LongFast" for the slot hash); a
+        // beacon offering a channel literally named "LongFast" on the same preset+region is the same slot -> ADD.
+        // Without effective-name resolution the empty primary would hash "" and misclassify as SWITCH.
+        val emptyPrimary = listOf(ChannelSettings(name = ""))
+        val beacon =
+            MeshBeacon(
+                offer_channel = ChannelSettings(name = "LongFast"),
+                offer_preset = ModemPreset.LONG_FAST,
+                offer_region = RegionCode.US,
+            )
+        assertEquals(BeaconJoinOption.ADD, beacon.beaconJoinOption(radioLora, emptyPrimary))
+    }
+
+    @Test
     fun `different preset forces SWITCH`() {
         val beacon =
             MeshBeacon(

@@ -154,11 +154,7 @@ class DiscoveryViewModel(
                 val fresh = presets - autoSelectedBeaconPresets
                 if (fresh.isNotEmpty()) {
                     autoSelectedBeaconPresets += fresh
-                    _selectedPresets.update { current ->
-                        val updated = current + fresh
-                        discoveryPrefs.setSelectedPresets(updated.map { it.name }.toSet())
-                        updated
-                    }
+                    updateSelectedPresets { it + fresh }
                 }
             }
         }
@@ -178,9 +174,17 @@ class DiscoveryViewModel(
         _selectedBeaconChannels.update { if (id in it) it - id else it + id }
     }
 
-    fun togglePreset(preset: ChannelOption) {
+    fun togglePreset(preset: ChannelOption) = updateSelectedPresets { current ->
+        if (preset in current) current - preset else current + preset
+    }
+
+    /**
+     * Atomically mutates the selected-preset set and mirrors it to prefs, so the shown selection and saved prefs never
+     * diverge. Shared by [togglePreset], [discoverOffer], and the beacon-preset pre-select.
+     */
+    private fun updateSelectedPresets(transform: (Set<ChannelOption>) -> Set<ChannelOption>) {
         _selectedPresets.update { current ->
-            val updated = if (preset in current) current - preset else current + preset
+            val updated = transform(current)
             discoveryPrefs.setSelectedPresets(updated.map { it.name }.toSet())
             updated
         }
@@ -194,11 +198,7 @@ class DiscoveryViewModel(
      */
     fun discoverOffer(offer: MeshBeaconOffer) {
         val preset = ChannelOption.from(offer.beacon.offer_preset) ?: return
-        _selectedPresets.update { current ->
-            val updated = current + preset
-            discoveryPrefs.setSelectedPresets(updated.map { it.name }.toSet())
-            updated
-        }
+        updateSelectedPresets { it + preset }
     }
 
     fun dismissOffer(offer: MeshBeaconOffer) {

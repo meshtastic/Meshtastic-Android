@@ -60,6 +60,7 @@ import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.ModuleConfig.MeshBeaconConfig
 
 private const val MESSAGE_MAX_BYTES = 100
+private const val CHANNEL_NAME_MAX_BYTES = 11 // ChannelSettings.name max_size:12 (buffer incl. null terminator)
 private const val MIN_INTERVAL_SECS = 3600
 
 private fun Int.withFlag(flag: Int, on: Boolean): Int = if (on) this or flag else this and flag.inv()
@@ -84,7 +85,10 @@ fun MeshBeaconConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, 
 
     val listenFlag = MeshBeaconConfig.Flags.FLAG_LISTEN_ENABLED.value
     val broadcastFlag = MeshBeaconConfig.Flags.FLAG_BROADCAST_ENABLED.value
-    val intervalValid = formState.value.broadcast_interval_secs >= MIN_INTERVAL_SECS
+    // Only require a valid interval when broadcasting is actually on — otherwise a default (interval=0) config could
+    // never be saved, blocking even a listen-only toggle (FR-013 applies to the broadcast, not the whole form).
+    val broadcastEnabled = formState.value.flags.hasFlag(broadcastFlag)
+    val intervalValid = !broadcastEnabled || formState.value.broadcast_interval_secs >= MIN_INTERVAL_SECS
 
     RadioConfigScreenList(
         modifier = modifier,
@@ -158,7 +162,7 @@ fun MeshBeaconConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, 
                 EditTextPreference(
                     title = stringResource(Res.string.mesh_beacon_offer_channel_name),
                     value = formState.value.broadcast_offer_channel?.name.orEmpty(),
-                    maxSize = MESSAGE_MAX_BYTES,
+                    maxSize = CHANNEL_NAME_MAX_BYTES,
                     enabled = state.connected,
                     isError = false,
                     keyboardOptions = KeyboardOptions.Default,

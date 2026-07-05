@@ -53,7 +53,11 @@ data class MeshBeaconOffer(val fromNodeNum: Int, val beacon: MeshBeacon, val snr
     companion object {
         private const val RECORD_FIELD_COUNT = 4
 
-        /** Inverse of [encode]; returns null for a malformed or undecodable record. */
+        /**
+         * Inverse of [encode]; returns null for a structurally malformed record (wrong field count, unparseable node
+         * number, or an undecodable beacon payload). An unparseable snr/rssi falls back to 0 — they are non-critical
+         * display metrics, not identity, so a bad numeric there does not discard an otherwise-valid invitation.
+         */
         @Suppress("ReturnCount")
         fun decode(record: String): MeshBeaconOffer? {
             val parts = record.split('|', limit = RECORD_FIELD_COUNT)

@@ -129,7 +129,10 @@ internal fun MeshBeaconInvitationCard(
                     } else {
                         Res.string.mesh_beacon_offer_join
                     }
-                Button(onClick = onJoin) { Text(stringResource(joinLabel)) }
+                // NONE (no offered channel) can't be joined — toJoinChannelSet returns null — so disable the action.
+                Button(onClick = onJoin, enabled = joinOption != BeaconJoinOption.NONE) {
+                    Text(stringResource(joinLabel))
+                }
             }
         }
     }

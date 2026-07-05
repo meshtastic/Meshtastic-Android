@@ -117,8 +117,10 @@ fun MeshBeacon.beaconJoinOption(currentLora: LoRaConfig?, currentChannels: List<
     if (!presetMatches || !regionMatches) return BeaconJoinOption.SWITCH
     // With an explicit slot override we can't compare the offered mesh's slot; be safe and switch.
     if (lora.channel_num != 0 || lora.numChannels <= 0) return BeaconJoinOption.SWITCH
-    val currentSlot = lora.channelNum(currentChannels.firstOrNull()?.name.orEmpty())
-    val offeredSlot = lora.channelNum(offer.name)
+    // Hash the *effective* names: an empty channel name resolves to its preset display name ("LongFast", …), which is
+    // what firmware hashes for the slot — comparing raw "" on both sides would misclassify an unnamed primary.
+    val currentSlot = lora.channelNum(Channel(currentChannels.firstOrNull() ?: ChannelSettings(), lora).name)
+    val offeredSlot = lora.channelNum(Channel(offer, lora).name)
     return if (offeredSlot == currentSlot) BeaconJoinOption.ADD else BeaconJoinOption.SWITCH
 }
 

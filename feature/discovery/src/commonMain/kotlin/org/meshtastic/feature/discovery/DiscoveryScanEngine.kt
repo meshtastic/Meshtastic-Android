@@ -175,6 +175,14 @@ class DiscoveryScanEngine(
             originalPrimaryChannel = radioConfigRepository.channelSetFlow.first().settings.firstOrNull()
             tunedPrimaryChannel = false
 
+            // A custom-channel target overwrites the primary channel; without a captured original we could not restore
+            // it and would strand the radio on the beacon's channel. Abort rather than proceed silently.
+            if (originalPrimaryChannel == null && targets.any { it.channel != null }) {
+                Logger.w { "DiscoveryScanEngine: primary channel not captured; aborting custom-channel scan" }
+                _scanState.value = DiscoveryScanState.Idle
+                return
+            }
+
             val homePresetStr =
                 if (initialLoraConfig?.use_preset == true) {
                     ChannelOption.from(initialLoraConfig.modem_preset)?.name ?: ChannelOption.DEFAULT.name
@@ -349,21 +357,29 @@ class DiscoveryScanEngine(
     }
 
     private suspend fun shiftTarget(target: ScanTarget) {
+        // Start from the captured original config so unrelated fields (hop_limit, tx_power, tx_enabled, …) are carried
+        // over instead of zeroed by a fresh LoRaConfig — a from-scratch config can e.g. break the dwell-boundary
+        // NeighborInfo request. Only the preset (and, for custom channels, region + channel_num) is overridden.
+        val base = originalLoRaConfig ?: Config.LoRaConfig()
         if (target.channel == null) {
-            // Public-preset target — identical to the original preset-only scan (region left at the firmware default).
+            // Public-preset target — dwell on the preset using the radio's existing primary channel (unchanged).
             radioController.setLocalConfig(
-                Config(lora = Config.LoRaConfig(use_preset = true, modem_preset = target.preset.modemPreset)),
+                Config(lora = base.copy(use_preset = true, modem_preset = target.preset.modemPreset)),
             )
             Logger.i { "DiscoveryScanEngine: shifted to ${target.label} (use_preset=true)" }
         } else {
-            // Beacon custom-channel target: apply the offered preset+region, then tune the primary channel to the
-            // offered name+PSK so nodes on that mesh are heard. The original primary channel is restored after the
-            // scan.
-            val region = target.region ?: originalLoRaConfig?.region ?: Config.LoRaConfig.RegionCode.UNSET
+            // Beacon custom-channel target: apply the offered preset+region, reset channel_num so firmware derives the
+            // frequency from the new name, then tune the primary channel to the offered name+PSK so nodes on that mesh
+            // are heard. The original primary channel is restored after the scan.
             radioController.setLocalConfig(
                 Config(
                     lora =
-                    Config.LoRaConfig(use_preset = true, modem_preset = target.preset.modemPreset, region = region),
+                    base.copy(
+                        use_preset = true,
+                        modem_preset = target.preset.modemPreset,
+                        region = target.region ?: base.region,
+                        channel_num = 0,
+                    ),
                 ),
             )
             radioController.setLocalChannel(Channel(index = 0, role = Channel.Role.PRIMARY, settings = target.channel))

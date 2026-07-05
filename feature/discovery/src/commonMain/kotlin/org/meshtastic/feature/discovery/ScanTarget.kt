@@ -39,9 +39,11 @@ data class ScanTarget(
 
 /**
  * A distinct custom channel a beacon advertised, presented as a selectable row in scan setup (FR-007). Deduped by [id]
- * (name + preset), since the same channel on the same preset is one row regardless of how many nodes beaconed it.
+ * (name + preset + PSK), since the same channel on the same preset is one row regardless of how many nodes beaconed it
+ * — but a different PSK is a different network, so it must not collapse into another row (that would send the user to
+ * the wrong mesh).
  */
 data class BeaconChannel(val name: String, val psk: ByteString, val preset: ChannelOption?, val region: RegionCode) {
     val id: String
-        get() = "$name|${preset?.name.orEmpty()}"
+        get() = "$name|${preset?.name.orEmpty()}|${psk.hex()}"
 }

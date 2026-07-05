@@ -30,7 +30,7 @@ import org.meshtastic.core.model.MeshBeaconOffer
  * Dismiss. The list is capped and deduped in memory (the source of truth) and written through to [MeshBeaconPrefs] so
  * invitations survive an app restart until the user explicitly dismisses them (Apple `014-mesh-beacons` FR-015).
  *
- * ponytail: persisted as opaque delimited records in a Preferences DataStore, not a Room table — the set is tiny (≤
+ * Note: persisted as opaque delimited records in a Preferences DataStore, not a Room table — the set is tiny (≤
  * [MAX_OFFERS]) and never queried. Promote to a Room entity alongside the discovery tables if querying/joins appear.
  */
 class MeshBeaconRepository(private val prefs: MeshBeaconPrefs, scope: CoroutineScope) {
@@ -42,8 +42,11 @@ class MeshBeaconRepository(private val prefs: MeshBeaconPrefs, scope: CoroutineS
         // DataStore load wins; the guard also makes our own write-through re-emissions no-ops.
         scope.launch {
             prefs.storedBeacons.collect { records ->
-                if (_offers.value.isEmpty() && records.isNotEmpty()) {
-                    _offers.value = records.mapNotNull(MeshBeaconOffer::decode).take(MAX_OFFERS)
+                if (records.isEmpty()) return@collect
+                // Fold the empty-guard into the atomic update so a live beacon that arrived first (or a concurrent
+                // add/dismiss) is never clobbered by the async DataStore snapshot.
+                _offers.update { current ->
+                    if (current.isEmpty()) records.mapNotNull(MeshBeaconOffer::decode).take(MAX_OFFERS) else current
                 }
             }
         }
