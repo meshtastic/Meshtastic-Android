@@ -19,9 +19,14 @@ package org.meshtastic.core.data.repository
 import androidx.datastore.core.DataStore
 import dev.mokkery.MockMode
 import dev.mokkery.mock
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
 import org.meshtastic.core.datastore.ChannelSetDataSource
 import org.meshtastic.core.datastore.LocalConfigDataSource
 import org.meshtastic.core.datastore.ModuleConfigDataSource
@@ -66,6 +71,28 @@ class RadioConfigRepositoryImplTest {
 
         val manifest = repository.fileManifestFlow.first()
         assertEquals(cap, manifest.size)
+    }
+
+    // Regression guard for the read-then-write race in addFileInfo (flagged in review): handleFileInfo
+    // dispatches each packet on its own scope.handledLaunch, so addFileInfo runs concurrently. The old
+    // `val c = flow.value; flow.value = c + info` could drop updates (two callers read the same list,
+    // one append is lost) or bypass the cap. update{} makes it atomic. Firing many concurrent adds below
+    // the cap must land every one -- no lost updates. (Trivially true when single-threaded; actually
+    // exercises the race on multi-threaded targets like the JVM.)
+    @Test
+    fun `concurrent addFileInfo does not lose updates`() = runTest {
+        val repository = createRepository()
+        val n = 2000 // below the 4096 cap, so every add must be retained
+
+        withContext(Dispatchers.Default) {
+            coroutineScope {
+                (0 until n)
+                    .map { i -> async { repository.addFileInfo(FileInfo(file_name = "f$i.bin", size_bytes = i)) } }
+                    .awaitAll()
+            }
+        }
+
+        assertEquals(n, repository.fileManifestFlow.first().size)
     }
 
     @Test

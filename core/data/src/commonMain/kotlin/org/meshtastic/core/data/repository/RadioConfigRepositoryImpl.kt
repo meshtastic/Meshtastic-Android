@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.update
 import org.koin.core.annotation.Single
 import org.meshtastic.core.datastore.ChannelSetDataSource
 import org.meshtastic.core.datastore.LocalConfigDataSource
@@ -134,12 +135,23 @@ open class RadioConfigRepositoryImpl(
         // for the lifetime of a session -- clearFileManifest only runs on the *next* handshake, so nothing
         // else bounds this accumulator in between. Cap it defensively, same pattern as the early-packet
         // buffer in MeshMessageProcessorImpl.
-        val current = _fileManifestFlow.value
-        if (current.size >= MAX_FILE_MANIFEST_ENTRIES) {
-            Logger.w { "File manifest capped at $MAX_FILE_MANIFEST_ENTRIES entries, dropping further FileInfo" }
-            return
+        //
+        // handleFileInfo dispatches each packet on its own scope.handledLaunch, so addFileInfo calls can
+        // run concurrently -- a plain read-then-write would race (lost updates, or two callers both seeing
+        // size-1 and bypassing the cap). update{} makes the read/cap/append atomic (CAS retry loop).
+        var capped = false
+        _fileManifestFlow.update { current ->
+            if (current.size >= MAX_FILE_MANIFEST_ENTRIES) {
+                capped = true
+                current
+            } else {
+                capped = false
+                current + info
+            }
         }
-        _fileManifestFlow.value = current + info
+        if (capped) {
+            Logger.w { "File manifest capped at $MAX_FILE_MANIFEST_ENTRIES entries, dropping further FileInfo" }
+        }
     }
 
     override suspend fun clearFileManifest() {
