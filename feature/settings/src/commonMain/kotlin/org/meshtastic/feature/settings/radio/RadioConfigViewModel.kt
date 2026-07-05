@@ -19,7 +19,9 @@ package org.meshtastic.feature.settings.radio
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -35,6 +37,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.InjectedParam
 import org.koin.core.annotation.KoinViewModel
@@ -79,6 +82,7 @@ import org.meshtastic.core.resources.key_backup_restored
 import org.meshtastic.core.resources.key_backup_saved
 import org.meshtastic.core.resources.timeout
 import org.meshtastic.core.ui.util.SnackbarManager
+import org.meshtastic.core.resources.unknown_error
 import org.meshtastic.core.ui.util.getChannelList
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.feature.settings.navigation.ConfigRoute
@@ -224,6 +228,7 @@ open class RadioConfigViewModel(
 
     private var probeJob: Job? = null
     private val channelUpdateMutex = Mutex()
+    private var manualChannelBatchEnqueueing = false
 
     /**
      * Run a one-shot reachability/credentials probe against an MQTT broker. Cancels any in-flight probe before starting
@@ -410,31 +415,76 @@ open class RadioConfigViewModel(
     fun updateChannels(new: List<ChannelSettings>, old: List<ChannelSettings>) {
         val destNum = destNum ?: destNode.value?.num ?: return
 
-        val updatePlan = getManualChannelUpdatePlan(new, old)
-        if (updatePlan.isEmpty()) return
         safeLaunch(tag = "setRemoteChannels") {
             // Manual channel saves are an ordered batch: only update canonical local state after every write request is
-            // enqueued. If any enqueue fails, safeLaunch reports it and leaves the saved state unchanged instead of
-            // blessing a partial delete/reorder result. Serialize batches so two ordered write plans cannot interleave
-            // on the radio link.
+            // enqueued. Serialize batches so two ordered write plans cannot interleave on the radio link, and diff
+            // each queued save against the canonical list at the moment it starts.
             channelUpdateMutex.withLock {
-                applyManualChannelUpdatePlan(
-                    updatePlan = updatePlan,
-                    writeChannel = { channel -> radioConfigUseCase.setRemoteChannel(destNum, channel) },
-                    registerRequestId = ::registerRequestId,
-                )
+                val current = radioConfigState.value.channelList.ifEmpty { old }
+                val updatePlan = getManualChannelUpdatePlan(new, current)
+                if (updatePlan.isEmpty()) return@withLock
+                beginManualChannelBatch(updatePlan.size)
 
-                if (destNum == myNodeNum) {
-                    packetRepository.migrateChannelsByPSK(old, new)
-                    radioConfigRepository.replaceAllSettings(new)
+                try {
+                    applyManualChannelUpdatePlan(
+                        updatePlan = updatePlan,
+                        currentSettings = current,
+                        finalSettings = new,
+                        writeChannel = { channel -> radioConfigUseCase.setRemoteChannel(destNum, channel) },
+                        registerRequestId = ::registerRequestId,
+                        onInterrupted = { result ->
+                            reconcileInterruptedManualChannelUpdate(
+                                destNum = destNum,
+                                oldSettings = current,
+                                appliedSettings = result.appliedSettings,
+                            )
+                        },
+                    )
+                    commitManualChannelSettings(destNum = destNum, oldSettings = current, newSettings = new)
+                    finishManualChannelBatch()
+                } catch (e: CancellationException) {
+                    abortManualChannelBatch()
+                    throw e
+                } catch (e: Throwable) {
+                    abortManualChannelBatch()
+                    Logger.w(e) { "Manual channel update failed after enqueue" }
+                    e.message?.let(::sendError) ?: sendError(Res.string.unknown_error)
                 }
-                _radioConfigState.update { it.copy(channelList = new) }
             }
         }
     }
 
     private fun getManualChannelUpdatePlan(new: List<ChannelSettings>, old: List<ChannelSettings>): List<Channel> =
         getChannelList(new, old).sortedBy { it.index }
+
+    private suspend fun commitManualChannelSettings(
+        destNum: Int,
+        oldSettings: List<ChannelSettings>,
+        newSettings: List<ChannelSettings>,
+    ) {
+        withContext(NonCancellable) {
+            if (destNum == myNodeNum) {
+                packetRepository.migrateChannelsByPSK(oldSettings, newSettings)
+                radioConfigRepository.replaceAllSettings(newSettings)
+            }
+            _radioConfigState.update { it.copy(channelList = newSettings) }
+        }
+    }
+
+    private suspend fun reconcileInterruptedManualChannelUpdate(
+        destNum: Int,
+        oldSettings: List<ChannelSettings>,
+        appliedSettings: List<ChannelSettings>,
+    ) {
+        withContext(NonCancellable) {
+            Logger.w { "Reconciling interrupted manual channel update appliedSettings=${appliedSettings.size}" }
+            if (destNum == myNodeNum) {
+                packetRepository.migrateChannelsByPSK(oldSettings, appliedSettings)
+                radioConfigRepository.replaceAllSettings(appliedSettings)
+            }
+            _radioConfigState.update { it.copy(channelList = appliedSettings) }
+        }
+    }
 
     fun setConfig(config: Config) {
         val destNum = destNum ?: destNode.value?.num ?: return
@@ -757,6 +807,33 @@ open class RadioConfigViewModel(
         }
     }
 
+    private fun beginManualChannelBatch(total: Int) {
+        manualChannelBatchEnqueueing = true
+        _radioConfigState.update { state ->
+            state.copy(route = "", responseState = ResponseState.Loading(total = total))
+        }
+    }
+
+    private fun finishManualChannelBatch() {
+        manualChannelBatchEnqueueing = false
+        if (requestIds.value.isEmpty()) {
+            setResponseStateSuccess()
+        }
+    }
+
+    private fun abortManualChannelBatch() {
+        manualChannelBatchEnqueueing = false
+        requestIds.value = hashSetOf()
+    }
+
+    private fun completeSetRequestOrProgressBatch() {
+        if (manualChannelBatchEnqueueing) {
+            incrementCompleted()
+        } else {
+            setResponseStateSuccess()
+        }
+    }
+
     protected fun setResponseStateSuccess() {
         _radioConfigState.update { state ->
             if (state.responseState is ResponseState.Loading) {
@@ -832,7 +909,7 @@ open class RadioConfigViewModel(
                     val data = packet.decoded!!
                     requestIds.update { it.apply { remove(data.request_id) } }
                     if (requestIds.value.isEmpty()) {
-                        setResponseStateSuccess()
+                        completeSetRequestOrProgressBatch()
                     } else {
                         incrementCompleted()
                     }
@@ -961,29 +1038,66 @@ open class RadioConfigViewModel(
             if (route.isNotEmpty() && !AdminRoute.entries.any { it.name == route }) {
                 clearPacketResponse()
             } else if (route.isEmpty()) {
-                setResponseStateSuccess()
+                completeSetRequestOrProgressBatch()
             }
         }
     }
 }
 
-internal data class ManualChannelUpdateResult(val packetIds: List<Int>)
+internal data class ManualChannelUpdateResult(val packetIds: List<Int>, val appliedSettings: List<ChannelSettings>)
+
+internal data class InterruptedManualChannelUpdate(
+    val appliedSettings: List<ChannelSettings>,
+    val appliedWriteCount: Int,
+)
 
 internal suspend fun applyManualChannelUpdatePlan(
     updatePlan: List<Channel>,
+    currentSettings: List<ChannelSettings>,
+    finalSettings: List<ChannelSettings>,
     writeChannel: suspend (Channel) -> Int,
     registerRequestId: (Int) -> Unit,
+    onInterrupted: suspend (InterruptedManualChannelUpdate) -> Unit = {},
     writeDelay: Duration = MANUAL_CHANNEL_WRITE_DELAY,
     delayFn: suspend (Duration) -> Unit = { delay(it) },
 ): ManualChannelUpdateResult {
     val packetIds = mutableListOf<Int>()
-    for ((index, channel) in updatePlan.withIndex()) {
-        val packetId = writeChannel(channel)
-        packetIds.add(packetId)
-        registerRequestId(packetId)
-        if (index < updatePlan.lastIndex) {
-            delayFn(writeDelay)
+    val appliedSettings = currentSettings.toMutableList()
+    var appliedWriteCount = 0
+    var updateComplete = false
+    try {
+        for ((index, channel) in updatePlan.withIndex()) {
+            val packetId = writeChannel(channel)
+            packetIds.add(packetId)
+            registerRequestId(packetId)
+            appliedSettings.applyManualChannelWrite(channel)
+            appliedWriteCount++
+            if (index < updatePlan.lastIndex) {
+                delayFn(writeDelay)
+            }
+        }
+        updateComplete = true
+    } finally {
+        if (!updateComplete && appliedWriteCount > 0) {
+            onInterrupted(
+                InterruptedManualChannelUpdate(
+                    appliedSettings = appliedSettings.toList(),
+                    appliedWriteCount = appliedWriteCount,
+                ),
+            )
         }
     }
-    return ManualChannelUpdateResult(packetIds)
+    return ManualChannelUpdateResult(packetIds = packetIds, appliedSettings = finalSettings)
+}
+
+private fun MutableList<ChannelSettings>.applyManualChannelWrite(channel: Channel) {
+    while (size <= channel.index) {
+        add(ChannelSettings())
+    }
+    this[channel.index] =
+        if (channel.role == Channel.Role.DISABLED) {
+            ChannelSettings()
+        } else {
+            channel.settings ?: ChannelSettings()
+        }
 }
