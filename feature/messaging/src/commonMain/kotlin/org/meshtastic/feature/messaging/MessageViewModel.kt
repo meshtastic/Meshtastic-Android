@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import org.koin.core.annotation.KoinViewModel
+import org.meshtastic.core.common.util.currentLocaleCode
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.model.ContactSettings
 import org.meshtastic.core.model.Message
@@ -53,6 +54,9 @@ import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.repository.usecase.SendMessageUseCase
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
+import org.meshtastic.feature.messaging.translation.DownloadResult
+import org.meshtastic.feature.messaging.translation.MessageTranslationService
+import org.meshtastic.feature.messaging.translation.TranslationResult
 import org.meshtastic.proto.ChannelSet
 
 @Suppress("LongParameterList", "TooManyFunctions")
@@ -70,7 +74,53 @@ class MessageViewModel(
     private val homoglyphEncodingPrefs: HomoglyphPrefs,
     private val notificationManager: NotificationManager,
     private val sendMessageUseCase: SendMessageUseCase,
+    private val messageTranslationService: MessageTranslationService,
 ) : ViewModel() {
+    private val translationLocale = currentLocaleCode()
+
+    val translationAvailable: StateFlow<Boolean> =
+        flow { emit(messageTranslationService.isLanguageAvailable(translationLocale)) }
+            .stateInWhileSubscribed(initialValue = false)
+
+    private val _translationDownloadPrompt = MutableStateFlow<TranslationResult.ModelDownloadRequired?>(null)
+    val translationDownloadPrompt: StateFlow<TranslationResult.ModelDownloadRequired?> =
+        _translationDownloadPrompt.asStateFlow()
+
+    private var pendingTranslationMessage: Message? = null
+
+    fun translateMessage(message: Message) = safeLaunch(context = ioDispatcher, tag = "translateMessage") {
+        applyTranslationResult(message, messageTranslationService.translate(message.text, translationLocale))
+    }
+
+    fun confirmTranslationDownload() {
+        val message = pendingTranslationMessage ?: return
+        _translationDownloadPrompt.value = null
+        safeLaunch(context = ioDispatcher, tag = "downloadTranslationModel") {
+            val downloadResult = messageTranslationService.downloadLanguageModel(translationLocale)
+            if (downloadResult is DownloadResult.Success) {
+                applyTranslationResult(message, messageTranslationService.translate(message.text, translationLocale))
+            }
+        }
+    }
+
+    fun dismissTranslationDownloadPrompt() {
+        pendingTranslationMessage = null
+        _translationDownloadPrompt.value = null
+    }
+
+    private suspend fun applyTranslationResult(message: Message, result: TranslationResult) {
+        when (result) {
+            is TranslationResult.Success -> packetRepository.updateTranslatedText(message.uuid, result.translatedText)
+
+            is TranslationResult.ModelDownloadRequired -> {
+                pendingTranslationMessage = message
+                _translationDownloadPrompt.value = result
+            }
+
+            TranslationResult.Unavailable -> Unit
+        }
+    }
+
     private val _title = MutableStateFlow("")
     val title: StateFlow<String> = _title.asStateFlow()
 

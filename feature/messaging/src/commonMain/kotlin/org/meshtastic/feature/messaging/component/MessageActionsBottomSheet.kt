@@ -48,6 +48,9 @@ import org.meshtastic.core.resources.action_react_with_emoji
 import org.meshtastic.core.resources.action_select_message
 import org.meshtastic.core.resources.action_send_reply
 import org.meshtastic.core.resources.action_show_message_status
+import org.meshtastic.core.resources.action_show_original_message
+import org.meshtastic.core.resources.action_show_translated_message
+import org.meshtastic.core.resources.action_translate_message
 import org.meshtastic.core.resources.copy
 import org.meshtastic.core.resources.delete
 import org.meshtastic.core.resources.device_metrics_label_value
@@ -57,9 +60,13 @@ import org.meshtastic.core.resources.reply
 import org.meshtastic.core.resources.security_signed_message_info
 import org.meshtastic.core.resources.security_signed_verified
 import org.meshtastic.core.resources.select
+import org.meshtastic.core.resources.show_original
+import org.meshtastic.core.resources.show_translation
+import org.meshtastic.core.resources.translate
 import org.meshtastic.core.ui.icon.AddReaction
 import org.meshtastic.core.ui.icon.Copy
 import org.meshtastic.core.ui.icon.Delete
+import org.meshtastic.core.ui.icon.Language
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Reply
 import org.meshtastic.core.ui.icon.SelectAll
@@ -75,10 +82,15 @@ fun MessageActionsContent(
     onCopy: () -> Unit,
     onSelect: () -> Unit,
     onDelete: () -> Unit,
+    onStatus: (() -> Unit),
     statusString: Pair<StringResource, StringResource>? = null,
     status: MessageStatus? = null,
     xeddsaSigned: Boolean = false,
-    onStatus: (() -> Unit),
+    translationAvailable: Boolean = false,
+    hasTranslation: Boolean = false,
+    showingOriginal: Boolean = false,
+    onTranslate: () -> Unit = {},
+    onToggleTranslation: () -> Unit = {},
 ) {
     Column {
         QuickEmojiRow(quickEmojis = quickEmojis, onReact = onReact, onMoreReactions = onMoreReactions)
@@ -152,6 +164,31 @@ fun MessageActionsContent(
                 onClick = onSelect,
             ),
         )
+
+        if (translationAvailable) {
+            val label =
+                when {
+                    !hasTranslation -> stringResource(Res.string.translate)
+                    showingOriginal -> stringResource(Res.string.show_translation)
+                    else -> stringResource(Res.string.show_original)
+                }
+            val onClickLabel =
+                when {
+                    !hasTranslation -> stringResource(Res.string.action_translate_message)
+                    showingOriginal -> stringResource(Res.string.action_show_translated_message)
+                    else -> stringResource(Res.string.action_show_original_message)
+                }
+            ListItem(
+                headlineContent = { Text(label) },
+                leadingContent = { Icon(MeshtasticIcons.Language, contentDescription = label) },
+                modifier =
+                Modifier.clickable(
+                    onClickLabel = onClickLabel,
+                    role = Role.Button,
+                    onClick = if (hasTranslation) onToggleTranslation else onTranslate,
+                ),
+            )
+        }
 
         ListItem(
             headlineContent = { Text(stringResource(Res.string.delete)) },

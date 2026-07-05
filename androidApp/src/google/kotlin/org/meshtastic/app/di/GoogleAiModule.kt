@@ -24,6 +24,7 @@ import org.koin.core.annotation.Single
 import org.meshtastic.app.ai.GeminiNanoDocAssistant
 import org.meshtastic.app.discovery.GeminiNanoSummaryProvider
 import org.meshtastic.app.translation.MlKitDocTranslator
+import org.meshtastic.app.translation.MlKitMessageTranslator
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.feature.discovery.DiscoverySummaryGenerator
 import org.meshtastic.feature.discovery.ai.DiscoverySummaryAiProvider
@@ -32,6 +33,7 @@ import org.meshtastic.feature.docs.data.DocBundleLoader
 import org.meshtastic.feature.docs.data.KeywordSearchEngine
 import org.meshtastic.feature.docs.translation.DocTranslationCache
 import org.meshtastic.feature.docs.translation.DocTranslationService
+import org.meshtastic.feature.messaging.translation.MessageTranslationService
 
 // TODO: Enable Firebase App Check (with Play Integrity provider) if hybrid/cloud
 //  fallback is ever adopted. App Check only gates cloud proxy requests — on-device
@@ -56,4 +58,6 @@ class GoogleAiModule {
         DocTranslationCache(cacheDir = context.cacheDir.toOkioPath(), fileSystem = FileSystem.SYSTEM)
 
     @Single fun docTranslationService(cache: DocTranslationCache): DocTranslationService = MlKitDocTranslator(cache)
+
+    @Single fun messageTranslationService(): MessageTranslationService = MlKitMessageTranslator()
 }

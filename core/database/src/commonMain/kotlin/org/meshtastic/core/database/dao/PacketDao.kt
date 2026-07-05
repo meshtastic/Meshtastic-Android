@@ -568,6 +568,9 @@ interface PacketDao {
     @Query("UPDATE packet SET message_text = :text WHERE uuid = :uuid")
     suspend fun updateMessageText(uuid: Long, text: String)
 
+    @Query("UPDATE packet SET translated_text = :translatedText WHERE uuid = :uuid")
+    suspend fun updateTranslatedText(uuid: Long, translatedText: String?)
+
     @Query("SELECT COUNT(*) FROM packet WHERE port_num = 1 AND (message_text IS NULL OR message_text = '')")
     suspend fun countPacketsNeedingBackfill(): Int
 

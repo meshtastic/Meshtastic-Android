@@ -35,6 +35,7 @@ import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -42,6 +43,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -78,8 +80,12 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.util.getChannel
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.cancel
+import org.meshtastic.core.resources.download
 import org.meshtastic.core.resources.message_input_label
 import org.meshtastic.core.resources.send
+import org.meshtastic.core.resources.translate_download_model_body
+import org.meshtastic.core.resources.translate_download_model_title
 import org.meshtastic.core.resources.type_a_message
 import org.meshtastic.core.resources.unknown_channel
 import org.meshtastic.core.ui.component.SharedContactDialog
@@ -151,6 +157,8 @@ fun MessageScreen(
     val searchResults by viewModel.searchResults.collectAsStateWithLifecycle()
     val searchResultIndex by viewModel.searchResultIndex.collectAsStateWithLifecycle()
     val currentSearchResult by viewModel.currentSearchResult.collectAsStateWithLifecycle()
+    val translationAvailable by viewModel.translationAvailable.collectAsStateWithLifecycle()
+    val translationDownloadPrompt by viewModel.translationDownloadPrompt.collectAsStateWithLifecycle()
 
     // Sync text field changes back to ViewModel draft
     LaunchedEffect(messageInputState) {
@@ -299,6 +307,24 @@ fun MessageScreen(
 
     sharedContact?.let { contact -> SharedContactDialog(contact = contact, onDismiss = { sharedContact = null }) }
 
+    translationDownloadPrompt?.let { prompt ->
+        AlertDialog(
+            onDismissRequest = viewModel::dismissTranslationDownloadPrompt,
+            title = { Text(stringResource(Res.string.translate_download_model_title)) },
+            text = { Text(stringResource(Res.string.translate_download_model_body, prompt.estimatedSizeMb)) },
+            confirmButton = {
+                TextButton(onClick = viewModel::confirmTranslationDownload) {
+                    Text(stringResource(Res.string.download))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = viewModel::dismissTranslationDownloadPrompt) {
+                    Text(stringResource(Res.string.cancel))
+                }
+            },
+        )
+    }
+
     val originalMessage by
         remember(replyingToPacketId, pagedMessages.itemCount) {
             derivedStateOf {
@@ -425,6 +451,7 @@ fun MessageScreen(
                     showFiltered = showFiltered,
                     filteringDisabled = filteringDisabled,
                     searchQuery = if (isSearchActive) searchQuery else "",
+                    translationAvailable = translationAvailable,
                 ),
                 handlers =
                 MessageListHandlers(
@@ -436,6 +463,7 @@ fun MessageScreen(
                     onDeleteMessages = { viewModel.deleteMessages(it) },
                     onSendMessage = { text, key -> viewModel.sendMessage(text, key) },
                     onReply = { message -> replyingToPacketId = message?.packetId },
+                    onTranslate = { message -> viewModel.translateMessage(message) },
                 ),
                 quickEmojis = viewModel.frequentEmojis,
             )

@@ -123,6 +123,9 @@ interface PacketRepository {
     /** Updates the identifier of a persisted packet. */
     suspend fun updateMessageId(d: DataPacket, id: Int)
 
+    /** Persists (or clears, with `null`) the on-device translation of a message's text. */
+    suspend fun updateTranslatedText(uuid: Long, translatedText: String?)
+
     /** Deletes messages by their database UUIDs. */
     suspend fun deleteMessages(uuidList: List<Long>)
 

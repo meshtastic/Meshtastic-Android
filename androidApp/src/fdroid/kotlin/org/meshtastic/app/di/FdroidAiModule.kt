@@ -24,6 +24,8 @@ import org.meshtastic.feature.docs.ai.AIDocAssistant
 import org.meshtastic.feature.docs.ai.KeywordFallbackAssistant
 import org.meshtastic.feature.docs.translation.DocTranslationService
 import org.meshtastic.feature.docs.translation.NoOpDocTranslator
+import org.meshtastic.feature.messaging.translation.MessageTranslationService
+import org.meshtastic.feature.messaging.translation.NoOpMessageTranslator
 
 /** Provides keyword-only fallback AI assistant for the F-Droid flavor (no on-device model). */
 @Module
@@ -33,4 +35,6 @@ class FdroidAiModule {
     @Single fun discoverySummaryAiProvider(fallback: AlgorithmicSummaryProvider): DiscoverySummaryAiProvider = fallback
 
     @Single fun docTranslationService(): DocTranslationService = NoOpDocTranslator()
+
+    @Single fun messageTranslationService(): MessageTranslationService = NoOpMessageTranslator()
 }

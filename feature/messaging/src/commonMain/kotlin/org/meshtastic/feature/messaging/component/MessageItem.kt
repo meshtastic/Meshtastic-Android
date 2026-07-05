@@ -114,6 +114,8 @@ fun MessageItem(
     hasSamePrev: Boolean = false,
     hasSameNext: Boolean = false,
     searchQuery: String = "",
+    translationAvailable: Boolean = false,
+    onTranslate: () -> Unit = {},
 ) = Column(
     modifier =
     modifier
@@ -128,6 +130,7 @@ fun MessageItem(
         ),
 ) {
     var activeSheet by remember { mutableStateOf<ActiveSheet?>(null) }
+    var showOriginal by remember(message.uuid) { mutableStateOf(false) }
     val clipboardManager = LocalClipboard.current
     val coroutineScope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -170,6 +173,17 @@ fun MessageItem(
                         },
                         xeddsaSigned = message.xeddsaSigned,
                         onStatus = onStatusClick,
+                        translationAvailable = translationAvailable,
+                        hasTranslation = message.translatedText != null,
+                        showingOriginal = showOriginal,
+                        onTranslate = {
+                            activeSheet = null
+                            onTranslate()
+                        },
+                        onToggleTranslation = {
+                            activeSheet = null
+                            showOriginal = !showOriginal
+                        },
                     )
                 }
 
@@ -272,16 +286,17 @@ fun MessageItem(
             )
 
             Column(modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)) {
+                val displayText = if (showOriginal) message.text else message.translatedText ?: message.text
                 if (searchQuery.isNotEmpty()) {
                     HighlightedText(
-                        text = message.text,
+                        text = displayText,
                         query = searchQuery,
                         style = MaterialTheme.typography.bodyLarge,
                         color = contentColor,
                     )
                 } else {
                     AutoLinkText(
-                        text = message.text,
+                        text = displayText,
                         style = MaterialTheme.typography.bodyLarge,
                         color = contentColor,
                     )

@@ -99,6 +99,9 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
     override suspend fun clearAllUnreadCounts() =
         withContext(dispatchers.io + NonCancellable) { dbManager.currentDb.value.packetDao().clearAllUnreadCounts() }
 
+    override suspend fun updateTranslatedText(uuid: Long, translatedText: String?) =
+        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().updateTranslatedText(uuid, translatedText) }
+
     override suspend fun updateLastReadMessage(contact: String, messageUuid: Long, lastReadTimestamp: Long) =
         withContext(dispatchers.io + NonCancellable) {
             val dao = dbManager.currentDb.value.packetDao()

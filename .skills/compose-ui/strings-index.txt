@@ -21,6 +21,9 @@ action_select_message
 action_select_network
 action_send_reply
 action_show_message_status
+action_show_original_message
+action_show_translated_message
+action_translate_message
 actions
 adc_multiplier_override
 adc_multiplier_override_ratio
@@ -578,6 +581,7 @@ firmware
 firmware_edition
 firmware_old
 firmware_recovery_banner
+firmware_recovery_ble_failed
 firmware_recovery_button
 firmware_recovery_dismiss
 firmware_recovery_explanation
@@ -1390,8 +1394,10 @@ should_update_firmware
 show_all_key_title
 show_iaq_legend
 show_layer
+show_original
 show_password
 show_precision_circle
+show_translation
 show_waypoints
 shutdown
 shutdown_node_name
@@ -1518,6 +1524,9 @@ traffic_management_rate_limit_max_packets
 traffic_management_rate_limit_window
 traffic_management_router_preserve_hops
 traffic_management_unknown_packet_threshold
+translate
+translate_download_model_body
+translate_download_model_title
 transmit_over_lora
 ### TRANSPORT ###
 transport
