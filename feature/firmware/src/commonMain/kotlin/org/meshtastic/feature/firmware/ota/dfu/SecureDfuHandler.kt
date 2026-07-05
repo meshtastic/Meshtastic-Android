@@ -114,7 +114,7 @@ internal class DfuFallbackCoordinator(private val detection: BootloaderDetection
         val orderedProtocols = detection.orderedProtocols()
         Logger.i { "DFU: detection=$detection → protocols=$orderedProtocols" }
 
-        var priorError: Throwable? = null
+        var primaryError: Throwable? = null
         for ((index, protocol) in orderedProtocols.withIndex()) {
             val isPrimary = index == 0
             val hasAlternateProtocol = index < orderedProtocols.lastIndex
@@ -132,14 +132,15 @@ internal class DfuFallbackCoordinator(private val detection: BootloaderDetection
                 DfuUploadResult.Success -> return
 
                 is DfuUploadResult.Failure -> {
-                    if (result.protocolEngaged || !hasAlternateProtocol) {
-                        priorError?.let { result.error.addSuppressed(it) }
-                        throw result.error
+                    if (isPrimary) {
+                        primaryError = result.error
                     }
-                    priorError = result.error
+                    if (!hasAlternateProtocol || !shouldTryAlternateAfterFailure(isPrimary, result.protocolEngaged)) {
+                        throw primaryError.withSuppressedAlternate(result.error)
+                    }
                     Logger.w {
-                        "DFU: $protocol failed before protocol engagement (detection=$detection); " +
-                            "will try alternate protocol: ${result.error::class.simpleName}"
+                        "DFU: $protocol failed; trying alternate protocol (detection=$detection, " +
+                            "protocolEngaged=${result.protocolEngaged}): ${result.error::class.simpleName}"
                     }
                 }
             }
@@ -172,6 +173,30 @@ internal class DfuFallbackCoordinator(private val detection: BootloaderDetection
             LEGACY_SESSION_ATTEMPTS
 
         else -> LIMITED_SESSION_ATTEMPTS
+    }
+
+    private fun shouldTryAlternateAfterFailure(isPrimary: Boolean, protocolEngaged: Boolean): Boolean {
+        if (!isPrimary) return false
+        return when (detection) {
+            // Unknown can mean the primary Legacy advertisement was missed, so a pre-engagement failure is the useful
+            // fallback signal.
+            BootloaderDetection.Unknown -> !protocolEngaged
+
+            // Conclusive detections already observed the selected protocol's service. If it never engages, retrying the
+            // opposite service is usually a long doomed scan. Keep fallback only as insurance for a stale/wrong
+            // conclusive signal after the observed service was actually reached.
+            BootloaderDetection.LegacyObserved,
+            BootloaderDetection.SecureObserved,
+            -> protocolEngaged
+        }
+    }
+
+    private fun Throwable?.withSuppressedAlternate(alternateError: Throwable): Throwable {
+        val primary = this ?: return alternateError
+        if (primary !== alternateError) {
+            primary.addSuppressed(alternateError)
+        }
+        return primary
     }
 }
 

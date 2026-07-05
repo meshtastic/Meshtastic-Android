@@ -74,8 +74,9 @@ class DfuFallbackCoordinatorTest {
             }
         }
             .also { thrown ->
-                assertEquals(1, thrown.suppressedExceptions.size, "prior error should be suppressed on final throw")
-                assertEquals("connect failed", thrown.suppressedExceptions.first().message)
+                assertEquals("connect failed", thrown.message)
+                assertEquals(1, thrown.suppressedExceptions.size, "alternate error should be suppressed on primary")
+                assertEquals("also failed", thrown.suppressedExceptions.first().message)
             }
         assertEquals(listOf(DfuProtocolKind.LEGACY, DfuProtocolKind.SECURE), protocols)
     }
@@ -105,13 +106,27 @@ class DfuFallbackCoordinatorTest {
     }
 
     @Test
-    fun `LegacyObserved gives Secure fallback 1 session attempt`() = runTest {
+    fun `LegacyObserved skips Secure fallback when Legacy never engages`() = runTest {
+        val coordinator = DfuFallbackCoordinator(BootloaderDetection.LegacyObserved)
+        val protocols = mutableListOf<DfuProtocolKind>()
+        assertFailsWith<RuntimeException> {
+            coordinator.execute { protocol, _ ->
+                protocols.add(protocol)
+                DfuUploadResult.Failure(RuntimeException("legacy connect failed"), protocolEngaged = false)
+            }
+        }
+            .also { thrown -> assertEquals("legacy connect failed", thrown.message) }
+        assertEquals(listOf(DfuProtocolKind.LEGACY), protocols)
+    }
+
+    @Test
+    fun `LegacyObserved gives Secure fallback 1 session attempt after Legacy engages`() = runTest {
         val coordinator = DfuFallbackCoordinator(BootloaderDetection.LegacyObserved)
         val attemptCounts = mutableListOf<Int>()
         coordinator.execute { protocol, attempts ->
             attemptCounts.add(attempts)
             if (protocol == DfuProtocolKind.LEGACY) {
-                DfuUploadResult.Failure(RuntimeException("legacy connect failed"), protocolEngaged = false)
+                DfuUploadResult.Failure(RuntimeException("legacy protocol failed"), protocolEngaged = true)
             } else {
                 DfuUploadResult.Success
             }
@@ -134,22 +149,37 @@ class DfuFallbackCoordinatorTest {
     }
 
     @Test
-    fun `SecureObserved falls back from Secure to Legacy on pre-engagement failure`() = runTest {
+    fun `SecureObserved skips Legacy fallback when Secure never engages`() = runTest {
+        val coordinator = DfuFallbackCoordinator(BootloaderDetection.SecureObserved)
+        val protocols = mutableListOf<DfuProtocolKind>()
+        assertFailsWith<RuntimeException> {
+            coordinator.execute { protocol, _ ->
+                protocols.add(protocol)
+                DfuUploadResult.Failure(RuntimeException("secure connect failed"), protocolEngaged = false)
+            }
+        }
+            .also { thrown -> assertEquals("secure connect failed", thrown.message) }
+        assertEquals(listOf(DfuProtocolKind.SECURE), protocols)
+    }
+
+    @Test
+    fun `SecureObserved throws Secure error with Legacy suppressed when both fail`() = runTest {
         val coordinator = DfuFallbackCoordinator(BootloaderDetection.SecureObserved)
         val protocols = mutableListOf<DfuProtocolKind>()
         assertFailsWith<RuntimeException> {
             coordinator.execute { protocol, _ ->
                 protocols.add(protocol)
                 if (protocol == DfuProtocolKind.SECURE) {
-                    DfuUploadResult.Failure(RuntimeException("secure connect failed"), protocolEngaged = false)
+                    DfuUploadResult.Failure(RuntimeException("secure protocol failed"), protocolEngaged = true)
                 } else {
                     DfuUploadResult.Failure(RuntimeException("legacy also failed"), protocolEngaged = false)
                 }
             }
         }
             .also { thrown ->
-                assertEquals(1, thrown.suppressedExceptions.size, "prior error should be suppressed on final throw")
-                assertEquals("secure connect failed", thrown.suppressedExceptions.first().message)
+                assertEquals("secure protocol failed", thrown.message)
+                assertEquals(1, thrown.suppressedExceptions.size, "alternate error should be suppressed on primary")
+                assertEquals("legacy also failed", thrown.suppressedExceptions.first().message)
             }
         assertEquals(listOf(DfuProtocolKind.SECURE, DfuProtocolKind.LEGACY), protocols)
     }
