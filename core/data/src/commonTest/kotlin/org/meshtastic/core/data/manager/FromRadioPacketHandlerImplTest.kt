@@ -21,6 +21,7 @@ import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.mock
 import dev.mokkery.verify
+import org.meshtastic.core.model.util.isOtaStatusNotification
 import org.meshtastic.core.repository.MeshConfigFlowManager
 import org.meshtastic.core.repository.MeshConfigHandler
 import org.meshtastic.core.repository.MqttManager
@@ -219,5 +220,7 @@ class FromRadioPacketHandlerImplTest {
     fun `non OTA client notifications are not identified as OTA status`() {
         assertFalse(ClientNotification(message = "test").isOtaStatusNotification())
         assertFalse(ClientNotification(message = "Low battery").isOtaStatusNotification())
+        assertFalse(ClientNotification(message = "ROTATE credentials").isOtaStatusNotification())
+        assertFalse(ClientNotification(message = "Quota exceeded").isOtaStatusNotification())
     }
 }

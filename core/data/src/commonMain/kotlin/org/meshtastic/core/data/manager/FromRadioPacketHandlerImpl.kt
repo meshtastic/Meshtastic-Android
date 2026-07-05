@@ -22,6 +22,7 @@ import kotlinx.coroutines.SupervisorJob
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.ioDispatcher
+import org.meshtastic.core.model.util.isOtaStatusNotification
 import org.meshtastic.core.repository.FromRadioPacketHandler
 import org.meshtastic.core.repository.LockdownCoordinator
 import org.meshtastic.core.repository.MeshConfigFlowManager
@@ -175,15 +176,4 @@ class FromRadioPacketHandlerImpl(
             )
         }
     }
-}
-
-private const val OTA_KEYWORD = "OTA"
-private const val OTA_CONFIRM_PREFIX = "Rebooting to"
-private val OTA_REJECTION_PREFIXES = listOf("Cannot start OTA", "OTA Loader", "Unable to switch to the OTA partition")
-
-internal fun ClientNotification.isOtaStatusNotification(): Boolean {
-    val message = message.trim()
-    if (message.isBlank() || !message.contains(OTA_KEYWORD)) return false
-
-    return message.startsWith(OTA_CONFIRM_PREFIX) || OTA_REJECTION_PREFIXES.any { message.startsWith(it) }
 }

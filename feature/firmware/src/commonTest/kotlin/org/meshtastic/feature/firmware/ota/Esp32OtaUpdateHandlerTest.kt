@@ -34,7 +34,6 @@ import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioController
-import org.meshtastic.core.testing.FakeServiceRepository
 import org.meshtastic.core.testing.TestDataFactory
 import org.meshtastic.feature.firmware.FirmwareArtifact
 import org.meshtastic.feature.firmware.FirmwareFileHandler
@@ -43,7 +42,6 @@ import org.meshtastic.feature.firmware.FirmwareUpdateState
 import org.meshtastic.proto.ClientNotification
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertIs
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -55,10 +53,11 @@ import kotlin.test.assertTrue
  * - Confirmed → mesh disconnect (`setDeviceAddress("n")`) is invoked, then the handler proceeds into the BLE transport
  *   phase, which fails fast on the mocked BLE deps. We bound the call with `withTimeoutOrNull` so the post-preflight
  *   BLE-connect retry loop is cancelled before it costs real wall-clock time.
- * - Rejected / Timeout → mesh transport is preserved (no `setDeviceAddress`) and an `Error` state is emitted; the
- *   handler returns cleanly with no exception to chase.
+ * - Rejected → mesh transport is preserved (no `setDeviceAddress`) and an `Error` state is emitted; the handler returns
+ *   cleanly with no exception to chase.
+ * - Silent firmware → legacy fallback disconnects the mesh transport and proceeds toward OTA connection attempts.
  *
- * The firmware response is simulated by mutating [FakeServiceRepository.clientNotification] from a sibling coroutine
+ * The firmware response is simulated by mutating [FakeRadioController.clientNotification] from a sibling coroutine
  * scheduled to fire after `triggerRebootOta`. Because baseline is captured BEFORE the trigger (see `performUpdate`), a
  * value written afterward is recognized as the response, not the baseline.
  */
@@ -77,7 +76,6 @@ class Esp32OtaUpdateHandlerTest {
         )
 
     private fun makeHandler(
-        serviceRepository: FakeServiceRepository,
         radioController: FakeRadioController,
         nodeRepository: FakeNodeRepository,
         fileHandler: FirmwareFileHandler,
@@ -86,7 +84,6 @@ class Esp32OtaUpdateHandlerTest {
         firmwareFileHandler = fileHandler,
         radioController = radioController,
         nodeRepository = nodeRepository,
-        serviceRepository = serviceRepository,
         bleScanner = mock(MockMode.autofill),
         bleConnectionFactory = mock(MockMode.autofill),
         dispatchers = dispatchers,
@@ -110,16 +107,15 @@ class Esp32OtaUpdateHandlerTest {
 
     @Test
     fun `Confirmed preflight releases the mesh transport`() = runBlocking {
-        val serviceRepository = FakeServiceRepository()
         val radioController = FakeRadioController()
         val nodeRepository = newNodeRepository()
-        val handler = makeHandler(serviceRepository, radioController, nodeRepository, newFileHandler())
+        val handler = makeHandler(radioController, nodeRepository, newFileHandler())
         val states = mutableListOf<FirmwareUpdateState>()
 
         // Simulate the firmware emitting its "Rebooting to BLE OTA" confirmation shortly after the trigger fires.
         val emitter = runSideEffect {
             delay(50)
-            serviceRepository.setClientNotification(ClientNotification(message = "Rebooting to BLE OTA"))
+            radioController.setClientNotification(ClientNotification(message = "Rebooting to BLE OTA"))
         }
 
         try {
@@ -131,22 +127,22 @@ class Esp32OtaUpdateHandlerTest {
         }
 
         assertEquals("n", radioController.lastSetDeviceAddress, "Confirmed preflight must disconnect mesh service")
+        assertNull(radioController.clientNotification.value, "Confirmed preflight must clear its consumed status")
     }
 
     // ── Rejected ───────────────────────────────────────────────────────────
 
     @Test
     fun `Rejected preflight preserves mesh transport and surfaces Error`() = runBlocking {
-        val serviceRepository = FakeServiceRepository()
         val radioController = FakeRadioController()
         val nodeRepository = newNodeRepository()
-        val handler = makeHandler(serviceRepository, radioController, nodeRepository, newFileHandler())
+        val handler = makeHandler(radioController, nodeRepository, newFileHandler())
         val states = mutableListOf<FirmwareUpdateState>()
 
         val emitter = runSideEffect {
             delay(50)
             // OTA-keyed message that is NOT the canonical "Rebooting to <mode> OTA" success prefix → Rejected.
-            serviceRepository.setClientNotification(
+            radioController.setClientNotification(
                 ClientNotification(message = "Cannot start OTA: OTA Loader partition not found."),
             )
         }
@@ -158,31 +154,25 @@ class Esp32OtaUpdateHandlerTest {
         }
 
         assertNull(radioController.lastSetDeviceAddress, "Rejected preflight must NOT disconnect mesh service")
+        assertNull(radioController.clientNotification.value, "Rejected preflight must clear its consumed status")
         assertTrue(states.any { it is FirmwareUpdateState.Error }, "Rejected preflight must emit Error state")
     }
 
-    // ── Timeout ────────────────────────────────────────────────────────────
+    // ── Legacy fallback ────────────────────────────────────────────────────
 
     @Test
-    fun `Timeout preflight preserves mesh transport and surfaces Error`() = runBlocking {
-        val serviceRepository = FakeServiceRepository()
+    fun `Silent preflight falls back to legacy OTA reconnect path`() = runBlocking {
         val radioController = FakeRadioController()
         val nodeRepository = newNodeRepository()
         val handler =
-            makeHandler(serviceRepository, radioController, nodeRepository, newFileHandler()).apply {
-                otaPreflightTimeoutMs = 10L
-            }
+            makeHandler(radioController, nodeRepository, newFileHandler()).apply { otaPreflightTimeoutMs = 10L }
         val states = mutableListOf<FirmwareUpdateState>()
 
-        // No emitter: the firmware never responds, so the overridden preflight timeout resolves quickly.
-        handler.startUpdate(release, hardware, BLE_TARGET, states::add, firmwareUri)
+        // No emitter: older firmware may be silent, so the overridden preflight timeout should resolve quickly into
+        // the same disconnect/reconnect path the app used before preflight confirmation existed.
+        withTimeoutOrNull(3000L) { handler.startUpdate(release, hardware, BLE_TARGET, states::add, firmwareUri) }
 
-        assertNull(radioController.lastSetDeviceAddress, "Timeout preflight must NOT disconnect mesh service")
-        val terminal = states.lastOrNull()
-        assertIs<FirmwareUpdateState.Error>(terminal, "Timeout preflight must emit Error state")
-        // kotlin.test's assertIs returns its non-null typed argument on iOS, which would make this test
-        // function return FirmwareUpdateState.Error instead of Unit. Explicit Unit terminates the block.
-        Unit
+        assertEquals("n", radioController.lastSetDeviceAddress, "Silent preflight must still disconnect mesh service")
     }
 
     private companion object {

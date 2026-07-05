@@ -19,6 +19,7 @@
 package org.meshtastic.core.model.util
 
 import org.meshtastic.proto.Channel
+import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.ModuleConfig
@@ -39,6 +40,12 @@ fun Any?.anonymize(maxLen: Int = 3) = if (this != null) "...${this.toString().ta
 
 // A toString that makes sure all newlines are removed (for nice logging).
 fun Any.toOneLineString() = this.toString().replace('\n', ' ')
+
+private val OTA_STATUS_PATTERN = Regex("\\bOTA\\b", RegexOption.IGNORE_CASE)
+
+/** Returns true when firmware surfaced an OTA status message through ClientNotification. */
+fun ClientNotification.isOtaStatusNotification(): Boolean =
+    message.isNotBlank() && OTA_STATUS_PATTERN.containsMatchIn(message)
 
 fun Config.toOneLineString(): String {
     // Wire toString uses field=value format

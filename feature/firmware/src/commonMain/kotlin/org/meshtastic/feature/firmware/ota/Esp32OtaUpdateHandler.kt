@@ -27,13 +27,12 @@ import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.common.util.ioDispatcher
-import org.meshtastic.core.common.util.safeCatchingAll
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.util.isOtaStatusNotification
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioController
-import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.firmware_update_connecting_attempt
@@ -43,7 +42,6 @@ import org.meshtastic.core.resources.firmware_update_extracting
 import org.meshtastic.core.resources.firmware_update_hash_rejected
 import org.meshtastic.core.resources.firmware_update_not_found_in_release
 import org.meshtastic.core.resources.firmware_update_ota_failed
-import org.meshtastic.core.resources.firmware_update_ota_timeout
 import org.meshtastic.core.resources.firmware_update_ota_unsupported_reason
 import org.meshtastic.core.resources.firmware_update_starting_ota
 import org.meshtastic.core.resources.firmware_update_uploading
@@ -72,11 +70,8 @@ private const val OTA_PREFLIGHT_TIMEOUT_MS = 5000L
 private const val GATT_RELEASE_DELAY_MS = 1000L
 
 // Firmware emits one of these human-readable messages via meshtastic.ClientNotification before rebooting.
-// "Rebooting to BLE OTA" / "Rebooting to WiFi OTA" → success. Any other OTA-containing message → rejection
-// (e.g. "OTA Loader does not support BLE", "Cannot start OTA: Cannot find OTA Loader partition.",
-// "Unable to switch to the OTA partition.").
+// "Rebooting to BLE OTA" / "Rebooting to WiFi OTA" -> success. Any other OTA status message -> rejection.
 private const val OTA_CONFIRM_PREFIX = "Rebooting to"
-private const val OTA_KEYWORD = "OTA"
 
 // A BLE target is a 6-octet MAC (e.g. AA:BB:CC:DD:EE:FF). Matching the exact MAC shape — not merely "contains a colon"
 // — keeps an IPv6 WiFi target (which also has colons) from being misrouted to the BLE path.
@@ -97,7 +92,6 @@ class Esp32OtaUpdateHandler(
     private val firmwareFileHandler: FirmwareFileHandler,
     private val radioController: RadioController,
     private val nodeRepository: NodeRepository,
-    private val serviceRepository: ServiceRepository,
     private val bleScanner: BleScanner,
     private val bleConnectionFactory: BleConnectionFactory,
     private val dispatchers: CoroutineDispatchers,
@@ -175,22 +169,23 @@ class Esp32OtaUpdateHandler(
                 // Clear any stale notification from a previous attempt so the firmware's response is always
                 // treated as a fresh emission (StateFlow conflates identical values — a retry would otherwise
                 // time out waiting for a value that the flow already holds).
-                serviceRepository.clearClientNotification()
+                radioController.clearClientNotification()
 
                 // Snapshot the current notification message BEFORE sending the OTA trigger. After the clear
                 // above this is null today, but capturing it remains defense-in-depth: if the clear is ever
                 // removed or the value is repopulated between the clear and the trigger, the predicate must
                 // still distinguish the response from a pre-existing value.
-                val baselineMessage = serviceRepository.clientNotification.value?.message
+                val baselineMessage = radioController.clientNotification.value?.message
                 triggerRebootOta(rebootMode, sha256Bytes)
 
                 // Step 3: Preflight — wait for the firmware to confirm OTA entry BEFORE tearing down the mesh
                 // transport. The mesh ACK only confirms packet delivery; it does NOT mean the device's OTA loader
                 // supports the requested transport. The firmware surfaces loader-capability failures as a
                 // meshtastic.ClientNotification warning ("OTA Loader does not support <mode>", etc.) emitted before
-                // its scheduled reboot, so we race that signal against a bounded timeout. On rejection or timeout we
-                // fail fast and leave the mesh connection intact — no disconnect, no OTA-transport retry loop.
-                if (runOtaPreflight(rebootMode, baselineMessage, updateState) !is OtaPreflightResult.Confirmed) {
+                // its scheduled reboot, so we race that signal against a bounded timeout. On rejection we fail fast
+                // and leave the mesh connection intact. On timeout we preserve legacy behavior by releasing the
+                // mesh transport and trying the OTA path; older firmware may not emit the preflight notification.
+                if (!runOtaPreflight(rebootMode, baselineMessage, updateState).continueToOtaTransport) {
                     return@withContext cleanupArtifact
                 }
 
@@ -246,15 +241,15 @@ class Esp32OtaUpdateHandler(
         hardware: DeviceHardware,
         firmwareUri: CommonUri?,
         updateState: (FirmwareUpdateState) -> Unit,
-    ): FirmwareArtifact? {
-        // safeCatchingAll swallows Skiko ExceptionInInitializerError on headless JVM tests where
-        // compose-resources can't load native libs. Production resolves the localized string normally;
-        // tests fall back to empty and the Downloading state still emits with a blank message.
-        val downloadingMsg =
-            safeCatchingAll { getStringSuspend(Res.string.firmware_update_downloading_percent, 0) }
-                .onFailure { e -> Logger.w(e) { "ESP32 OTA: Failed to resolve downloading message string" } }
-                .getOrDefault("")
-                .stripFormatArgs()
+    ): FirmwareArtifact? = if (firmwareUri != null) {
+        updateState(
+            FirmwareUpdateState.Processing(
+                ProgressState(message = UiText.Resource(Res.string.firmware_update_extracting)),
+            ),
+        )
+        firmwareFileHandler.importFromUri(firmwareUri)
+    } else {
+        val downloadingMsg = getStringSuspend(Res.string.firmware_update_downloading_percent, 0).stripFormatArgs()
 
         updateState(
             FirmwareUpdateState.Downloading(
@@ -262,38 +257,29 @@ class Esp32OtaUpdateHandler(
             ),
         )
 
-        return if (firmwareUri != null) {
-            updateState(
-                FirmwareUpdateState.Processing(
-                    ProgressState(message = UiText.Resource(Res.string.firmware_update_extracting)),
-                ),
-            )
-            firmwareFileHandler.importFromUri(firmwareUri)
-        } else {
-            val firmwareFile =
-                firmwareRetriever.retrieveEsp32Firmware(release, hardware) { progress ->
-                    val percent = (progress * PERCENT_MAX).toInt()
-                    updateState(
-                        FirmwareUpdateState.Downloading(
-                            ProgressState(
-                                message = UiText.DynamicString(downloadingMsg),
-                                progress = progress,
-                                details = "$percent%",
-                            ),
-                        ),
-                    )
-                }
-
-            if (firmwareFile == null) {
+        val firmwareFile =
+            firmwareRetriever.retrieveEsp32Firmware(release, hardware) { progress ->
+                val percent = (progress * PERCENT_MAX).toInt()
                 updateState(
-                    FirmwareUpdateState.Error(
-                        UiText.Resource(Res.string.firmware_update_not_found_in_release, hardware.displayName),
+                    FirmwareUpdateState.Downloading(
+                        ProgressState(
+                            message = UiText.DynamicString(downloadingMsg),
+                            progress = progress,
+                            details = "$percent%",
+                        ),
                     ),
                 )
-                null
-            } else {
-                firmwareFile
             }
+
+        if (firmwareFile == null) {
+            updateState(
+                FirmwareUpdateState.Error(
+                    UiText.Resource(Res.string.firmware_update_not_found_in_release, hardware.displayName),
+                ),
+            )
+            null
+        } else {
+            firmwareFile
         }
     }
 
@@ -387,25 +373,33 @@ class Esp32OtaUpdateHandler(
     /**
      * Outcome of waiting for the device to confirm OTA entry after [triggerRebootOta]. The firmware emits a single
      * [org.meshtastic.proto.ClientNotification] before its scheduled reboot covering all cases: success ("Rebooting to
-     * <BLE|WiFi> OTA") or rejection (any other OTA-containing message — partition missing, loader incompatible, switch
-     * failed). See firmware `AdminModule.cpp` `ota_request_tag` handler.
+     * <BLE|WiFi> OTA") or rejection (any other OTA status message — partition missing, loader incompatible, switch
+     * failed). Older firmware may be silent, which falls back to the previous disconnect/reconnect path.
      */
     private sealed interface OtaPreflightResult {
+        val continueToOtaTransport: Boolean
+
         /** Firmware confirmed it is rebooting into the OTA loader. */
-        data object Confirmed : OtaPreflightResult
+        data object Confirmed : OtaPreflightResult {
+            override val continueToOtaTransport = true
+        }
 
         /** Firmware rejected the OTA request; [message] is the verbatim rejection reason. */
-        data class Rejected(val message: String) : OtaPreflightResult
+        data class Rejected(val message: String) : OtaPreflightResult {
+            override val continueToOtaTransport = false
+        }
 
-        /** No ClientNotification arrived within the bound — firmware may be silent or the link dropped. */
-        data object Timeout : OtaPreflightResult
+        /** No ClientNotification arrived within the bound; continue with the legacy fixed-delay path. */
+        data object LegacyFallback : OtaPreflightResult {
+            override val continueToOtaTransport = true
+        }
     }
 
     /**
      * Run the OTA preflight gate. On [OtaPreflightResult.Confirmed] this releases the mesh transport (with the GATT
-     * release delay) and returns Confirmed. On rejection/timeout it emits the appropriate [FirmwareUpdateState.Error]
-     * and returns the failure result so the caller can abort while preserving the cleanup artifact (and the mesh
-     * transport, which is NOT touched on the failure paths).
+     * release delay) and returns Confirmed. On rejection it emits [FirmwareUpdateState.Error] and returns the failure
+     * result so the caller can abort while preserving the cleanup artifact and mesh transport. On legacy fallback it
+     * releases the mesh transport and continues to the OTA connection attempts just as older app versions did.
      */
     private suspend fun runOtaPreflight(
         rebootMode: Int,
@@ -415,9 +409,7 @@ class Esp32OtaUpdateHandler(
         when (val preflight = awaitOtaConfirmation(otaPreflightTimeoutMs, rebootMode, baselineMessage)) {
             is OtaPreflightResult.Confirmed -> {
                 Logger.i { "ESP32 OTA: Preflight confirmed; releasing mesh transport for OTA" }
-                disconnectMeshService()
-                // Give BLE stack time to fully release the GATT connection
-                delay(GATT_RELEASE_DELAY_MS)
+                releaseMeshTransportForOta()
                 preflight
             }
 
@@ -431,14 +423,20 @@ class Esp32OtaUpdateHandler(
                 preflight
             }
 
-            is OtaPreflightResult.Timeout -> {
+            is OtaPreflightResult.LegacyFallback -> {
                 Logger.w {
-                    "ESP32 OTA: No firmware confirmation within ${otaPreflightTimeoutMs}ms; mesh transport preserved"
+                    "ESP32 OTA: No firmware confirmation within ${otaPreflightTimeoutMs}ms; using legacy OTA reconnect"
                 }
-                updateState(FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_ota_timeout)))
+                releaseMeshTransportForOta()
                 preflight
             }
         }
+
+    private suspend fun releaseMeshTransportForOta() {
+        disconnectMeshService()
+        // Give BLE stack time to fully release the GATT connection.
+        delay(GATT_RELEASE_DELAY_MS)
+    }
 
     /**
      * Race the firmware's OTA-entry ClientNotification against [timeoutMs]. The [baselineMessage] is captured by the
@@ -453,18 +451,20 @@ class Esp32OtaUpdateHandler(
         val modeName = otaModeName(rebootMode)
         val matched =
             withTimeoutOrNull(timeoutMs) {
-                serviceRepository.clientNotification.first { cn ->
-                    val msg = cn?.message
-                    msg != null && msg != baselineMessage && msg.contains(OTA_KEYWORD)
+                radioController.clientNotification.first { cn ->
+                    cn != null && cn.message != baselineMessage && cn.isOtaStatusNotification()
                 }
             }
-        return when {
-            matched == null -> OtaPreflightResult.Timeout
+        matched ?: return OtaPreflightResult.LegacyFallback
 
+        radioController.clearClientNotification()
+
+        return when {
             // Defense-in-depth: require both the canonical "Rebooting to" prefix AND the requested mode name in the
             // message. Firmware is consistent today, but this guards against a future firmware bug that acks the wrong
             // mode — a wrong-mode confirmation would route the host to a transport the device did not enter.
-            matched.message.startsWith(OTA_CONFIRM_PREFIX) && matched.message.contains(modeName) -> {
+            matched.message.startsWith(OTA_CONFIRM_PREFIX, ignoreCase = true) &&
+                matched.message.contains(modeName, ignoreCase = true) -> {
                 Logger.i { "ESP32 OTA: Firmware confirmed $modeName OTA entry: ${matched.message}" }
                 OtaPreflightResult.Confirmed
             }
