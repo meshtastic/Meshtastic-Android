@@ -32,6 +32,11 @@ object DatabaseConstants {
 
     const val LEGACY_DB_CLEANED_KEY: String = "legacy_db_cleaned"
 
+    // Cross-transport unification: map a node / transport address to the DB file that node's data lives in.
+    // Keys are dynamic (suffixed with the node num / normalized address), mirroring the `db_last_used:` pattern.
+    const val NODE_DB_FOR_PREFIX: String = "node_db_for:"
+    const val ADDR_DB_FOR_PREFIX: String = "addr_db_for:"
+
     // Display/truncation and hash sizing for DB names
     const val DB_NAME_HASH_LEN: Int = 10
     const val DB_NAME_SEPARATOR_LEN: Int = 1

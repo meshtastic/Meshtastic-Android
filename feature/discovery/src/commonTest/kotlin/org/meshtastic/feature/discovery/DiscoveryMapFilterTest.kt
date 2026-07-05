@@ -171,6 +171,8 @@ private class MapTestDao : DiscoveryDao {
     override fun getAllSessions(): Flow<List<DiscoverySessionEntity>> =
         flowOf(sessions.values.sortedByDescending { it.timestamp })
 
+    override suspend fun getAllSessionsSnapshot(): List<DiscoverySessionEntity> = sessions.values.toList()
+
     override suspend fun getSession(sessionId: Long) = sessions[sessionId]
 
     override fun getSessionFlow(sessionId: Long): Flow<DiscoverySessionEntity?> = MutableStateFlow(sessions[sessionId])

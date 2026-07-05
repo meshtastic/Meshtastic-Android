@@ -283,6 +283,10 @@ interface NodeInfoDao {
     @Query("DELETE FROM metadata WHERE num=:num")
     suspend fun deleteMetadata(num: Int)
 
+    /** Snapshot used by DatabaseMerger to carry per-node DeviceMetadata across transports (newest timestamp wins). */
+    @Query("SELECT * FROM metadata")
+    suspend fun getAllMetadataSnapshot(): List<MetadataEntity>
+
     @Query("SELECT * FROM nodes WHERE num=:num")
     @Transaction
     suspend fun getNodeByNum(num: Int): NodeWithRelations?

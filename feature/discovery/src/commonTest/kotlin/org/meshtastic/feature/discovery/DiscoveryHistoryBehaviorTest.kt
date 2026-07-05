@@ -185,6 +185,8 @@ private class HistoryTestDao : DiscoveryDao {
 
     override fun getAllSessions(): Flow<List<DiscoverySessionEntity>> = sessionsFlow
 
+    override suspend fun getAllSessionsSnapshot(): List<DiscoverySessionEntity> = sessions.values.toList()
+
     override suspend fun getSession(sessionId: Long) = sessions[sessionId]
 
     override fun getSessionFlow(sessionId: Long): Flow<DiscoverySessionEntity?> = MutableStateFlow(sessions[sessionId])

@@ -39,6 +39,10 @@ interface DiscoveryDao {
     @Query("SELECT * FROM discovery_session ORDER BY timestamp DESC")
     fun getAllSessions(): Flow<List<DiscoverySessionEntity>>
 
+    /** Snapshot used by DatabaseMerger to append a transport's discovery sessions to the unified DB. */
+    @Query("SELECT * FROM discovery_session")
+    suspend fun getAllSessionsSnapshot(): List<DiscoverySessionEntity>
+
     @Query("SELECT * FROM discovery_session WHERE id = :sessionId")
     suspend fun getSession(sessionId: Long): DiscoverySessionEntity?
 

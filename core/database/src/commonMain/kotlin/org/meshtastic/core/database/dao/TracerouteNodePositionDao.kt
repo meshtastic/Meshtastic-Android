@@ -31,5 +31,8 @@ interface TracerouteNodePositionDao {
     @Query("DELETE FROM traceroute_node_position WHERE log_uuid = :logUuid")
     suspend fun deleteByLogUuid(logUuid: String)
 
+    @Query("SELECT * FROM traceroute_node_position")
+    suspend fun getAllSnapshot(): List<TracerouteNodePositionEntity>
+
     @Upsert suspend fun insertAll(entities: List<TracerouteNodePositionEntity>)
 }

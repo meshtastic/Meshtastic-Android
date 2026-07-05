@@ -32,6 +32,14 @@ interface DatabaseManager {
     /** Switches the active database to the one associated with the given [address]. */
     suspend fun switchActiveDatabase(address: String?)
 
+    /**
+     * Associates the currently-active connection with the physical node [nodeNum] learned from the radio handshake, so
+     * the same node reached over a different transport (BLE / TCP / USB) shares one database. The first transport to
+     * report a node claims the active DB for it; a later transport folds its own data in and switches to the claimed
+     * DB. Idempotent once a node/transport pair has been unified.
+     */
+    suspend fun associateNode(nodeNum: Int)
+
     /** Returns true if a database exists for the given device address. */
     fun hasDatabaseFor(address: String?): Boolean
 }
