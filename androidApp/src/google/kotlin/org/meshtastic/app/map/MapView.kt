@@ -20,7 +20,6 @@ package org.meshtastic.app.map
 
 import android.app.Activity
 import android.content.Intent
-import android.graphics.Color
 import android.net.Uri
 import android.view.WindowManager
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -159,6 +158,7 @@ import org.meshtastic.proto.Waypoint
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.roundToInt
+import android.graphics.Color as AndroidColor
 
 // region --- Map Mode ---
 
@@ -196,6 +196,11 @@ private const val TRACEROUTE_BOUNDS_PADDING_PX = 120
 private val GEOFENCE_OVERLAY_COLOR = Color(0xFFFF9800)
 private const val GEOFENCE_FILL_ALPHA = 0.12f
 private const val GEOFENCE_STROKE_WIDTH = 2f
+
+// simplestyle-spec fallbacks for imported GeoJSON overlays that omit these keys; tune here.
+// 0.35 lets stacked contour bands read as a gradient.
+private const val DEFAULT_GEOJSON_FILL_OPACITY = 0.35f
+private const val DEFAULT_GEOJSON_STROKE_WIDTH = 2f
 
 // Minimum lat/lon delta (~11 m) between the two box-authoring corner taps; below this the box would be degenerate
 // (zero-area) so the second tap is ignored.
@@ -1212,8 +1217,9 @@ private fun MapLayerOverlay(layerItem: MapLayerItem, mapViewModel: MapViewModel)
                     LayerType.KML -> KmlLayer(map, inputStream, context)
 
                     LayerType.GEOJSON ->
-                        GeoJsonLayer(map, JSONObject(inputStream.bufferedReader().use { it.readText() }))
-                            .also { it.applySimpleStyleSpec() }
+                        GeoJsonLayer(map, JSONObject(inputStream.bufferedReader().use { it.readText() })).also {
+                            it.applySimpleStyleSpec()
+                        }
                 }
             } catch (e: Exception) {
                 Logger.withTag("MapView").e(e) { "Error loading map layer: ${layerItem.name}" }
@@ -1257,30 +1263,36 @@ private fun Layer.safeAddLayerToMap() {
 /**
  * Apply simplestyle-spec (https://github.com/mapbox/simplestyle-spec) properties to a GeoJSON layer.
  *
- * Google's [GeoJsonLayer] otherwise applies one default style to every feature, so exports that carry
- * per-feature colors render unstyled. In particular, Meshtastic Site Planner coverage contours set
- * `fill`/`stroke` (plus a legacy `color`) and `fill-opacity`; read those and style each polygon/line so
- * the coverage draws in its dBm colors instead of the default black outline.
+ * Google's [GeoJsonLayer] otherwise applies one default style to every feature, so exports that carry per-feature
+ * colors render unstyled. In particular, Meshtastic Site Planner coverage contours set `fill`/`stroke` (plus a legacy
+ * `color`) and `fill-opacity`; read those and style each polygon/line so the coverage draws in its dBm colors instead
+ * of the default black outline.
  */
 private fun GeoJsonLayer.applySimpleStyleSpec() {
     for (feature in features) {
         val fill = feature.cssColor("fill") ?: feature.cssColor("color")
         val stroke = feature.cssColor("stroke") ?: feature.cssColor("color")
-        val fillOpacity = feature.getProperty("fill-opacity")?.toFloatOrNull() ?: 0.35f
-        val strokeWidth = feature.getProperty("stroke-width")?.toFloatOrNull() ?: 2f
+        val fillOpacity = feature.getProperty("fill-opacity")?.toFloatOrNull()
+        val strokeWidth = feature.getProperty("stroke-width")?.toFloatOrNull() ?: DEFAULT_GEOJSON_STROKE_WIDTH
         when (feature.geometry?.geometryType) {
-            "Polygon", "MultiPolygon" ->
-                feature.polygonStyle = GeoJsonPolygonStyle().apply {
-                    fill?.let { fillColor = it.withAlpha(fillOpacity) }
-                    stroke?.let { strokeColor = it }
-                    this.strokeWidth = strokeWidth
-                }
+            "Polygon",
+            "MultiPolygon",
+            ->
+                feature.polygonStyle =
+                    GeoJsonPolygonStyle().apply {
+                        fill?.let { fillColor = it.resolveFillAlpha(fillOpacity) }
+                        stroke?.let { strokeColor = it }
+                        this.strokeWidth = strokeWidth
+                    }
 
-            "LineString", "MultiLineString" ->
-                feature.lineStringStyle = GeoJsonLineStringStyle().apply {
-                    stroke?.let { color = it }
-                    width = strokeWidth
-                }
+            "LineString",
+            "MultiLineString",
+            ->
+                feature.lineStringStyle =
+                    GeoJsonLineStringStyle().apply {
+                        stroke?.let { color = it }
+                        width = strokeWidth
+                    }
 
             else -> Unit // Points keep the default marker.
         }
@@ -1288,6 +1300,16 @@ private fun GeoJsonLayer.applySimpleStyleSpec() {
 }
 
 private fun GeoJsonFeature.cssColor(key: String): Int? = getProperty(key)?.let { parseCssColor(it) }
+
+/**
+ * Resolve a polygon fill's alpha: `fill-opacity` wins when present; otherwise keep any alpha the color already carries
+ * (`rgba()`/`#AARRGGBB`), falling back to [DEFAULT_GEOJSON_FILL_OPACITY] for opaque fills.
+ */
+private fun Int.resolveFillAlpha(fillOpacity: Float?): Int = when {
+    fillOpacity != null -> withAlpha(fillOpacity)
+    AndroidColor.alpha(this) < 255 -> this
+    else -> withAlpha(DEFAULT_GEOJSON_FILL_OPACITY)
+}
 
 /** Parse a hex (`#RRGGBB`/`#AARRGGBB`), `rgb()/rgba()`, or named color to an ARGB int; null if invalid. */
 private fun parseCssColor(raw: String): Int? {
@@ -1297,9 +1319,9 @@ private fun parseCssColor(raw: String): Int? {
             val parts = value.substringAfter('(').substringBefore(')').split(',').map { it.trim() }
             if (parts.size < 3) return null
             val alpha = if (parts.size >= 4) (parts[3].toFloat() * 255f).roundToInt() else 255
-            Color.argb(alpha, parts[0].toInt(), parts[1].toInt(), parts[2].toInt())
+            AndroidColor.argb(alpha, parts[0].toInt(), parts[1].toInt(), parts[2].toInt())
         } else {
-            Color.parseColor(value) // #hex or named color
+            AndroidColor.parseColor(value) // #hex or named color
         }
     } catch (e: IllegalArgumentException) {
         Logger.withTag("MapView").w(e) { "Unparseable GeoJSON color: $raw" }
@@ -1307,8 +1329,12 @@ private fun parseCssColor(raw: String): Int? {
     }
 }
 
-private fun Int.withAlpha(opacity: Float): Int =
-    Color.argb((opacity.coerceIn(0f, 1f) * 255f).roundToInt(), Color.red(this), Color.green(this), Color.blue(this))
+private fun Int.withAlpha(opacity: Float): Int = AndroidColor.argb(
+    (opacity.coerceIn(0f, 1f) * 255f).roundToInt(),
+    AndroidColor.red(this),
+    AndroidColor.green(this),
+    AndroidColor.blue(this),
+)
 
 // endregion
 
