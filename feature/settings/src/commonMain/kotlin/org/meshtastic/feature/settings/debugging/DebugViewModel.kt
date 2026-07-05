@@ -22,10 +22,12 @@ import co.touchlab.kermit.Logger
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.withContext
@@ -35,6 +37,7 @@ import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.nowInstant
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.model.MeshLog
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.getTracerouteResponse
 import org.meshtastic.core.model.util.decodeOrNull
 import org.meshtastic.core.model.util.toReadableString
@@ -202,6 +205,13 @@ class LogFilterManager {
     }
 }
 
+/**
+ * Throttle for the expensive mesh-log decode pipeline (see [DebugViewModel.meshLog]). Chosen to stay well under human
+ * perception for a debug log view while bounding decode frequency during a packet flood; not a correctness requirement,
+ * just a GC-thrash guard.
+ */
+private const val LOG_DECODE_DEBOUNCE_MS = 200L
+
 @KoinViewModel
 @Suppress("TooManyFunctions")
 class DebugViewModel(
@@ -212,9 +222,17 @@ class DebugViewModel(
     private val dispatchers: org.meshtastic.core.di.CoroutineDispatchers,
 ) : ViewModel() {
 
+    @OptIn(FlowPreview::class)
     val meshLog: StateFlow<ImmutableList<UiMeshLog>> =
         meshLogRepository
             .getAllLogs()
+            // Room re-emits this Flow on every insert into the mesh_log table. Under a packet
+            // flood (hostile mesh traffic, a runaway sender, etc.) that can fire many times a
+            // second; without throttling, mapLatest keeps restarting a full re-decode of up to
+            // DEFAULT_MAX_LOGS (5000) rows -- including proto toString() + node-DB lookups --
+            // faster than it can complete, thrashing the GC instead of making progress.
+            // Debouncing caps the decode rate independent of the insert rate.
+            .debounce(LOG_DECODE_DEBOUNCE_MS)
             .mapLatest { logs -> withContext(dispatchers.default) { toUiState(logs) } }
             .stateInWhileSubscribed(initialValue = persistentListOf())
 
@@ -293,36 +311,48 @@ class DebugViewModel(
         Logger.d { "DebugViewModel cleared" }
     }
 
-    private fun toUiState(databaseLogs: List<MeshLog>) = databaseLogs
-        .map {
-            UiMeshLog(
-                uuid = it.uuid,
-                messageType = it.message_type,
-                formattedReceivedDate = DateFormatter.formatDateTime(it.received_date),
-                logMessage = annotateMeshLogMessage(it),
-                decodedPayload = decodePayloadFromMeshLog(it),
-            )
-        }
-        .toImmutableList()
-
-    /** Transform the input [MeshLog] by enhancing the raw message with annotations. */
-    private fun annotateMeshLogMessage(meshLog: MeshLog): String = when (meshLog.message_type) {
-        "LogRecord" -> meshLog.fromRadio.log_record.toString().replace("\\n\"", "\"")
-
-        "Packet" -> meshLog.meshPacket?.let { packet -> annotatePacketLog(packet) } ?: meshLog.raw_message
-
-        "NodeInfo" ->
-            meshLog.nodeInfo?.let { nodeInfo -> annotateRawMessage(meshLog.raw_message, nodeInfo.num) }
-                ?: meshLog.raw_message
-
-        "MyNodeInfo" ->
-            meshLog.myNodeInfo?.let { nodeInfo -> annotateRawMessage(meshLog.raw_message, nodeInfo.my_node_num) }
-                ?: meshLog.raw_message
-
-        else -> meshLog.raw_message
+    private fun toUiState(databaseLogs: List<MeshLog>): ImmutableList<UiMeshLog> {
+        // Snapshot the node DB once per decode pass, not once per row. With up to
+        // DEFAULT_MAX_LOGS (5000) rows and meshes that can carry hundreds/thousands of nodes
+        // (see push_fake_nodedb), re-materializing `nodeDBbyNum.values.toList()` inside the
+        // per-row loop was an O(rows * nodes) hotspot that compounded the flood-induced
+        // re-decode thrash described above.
+        val nodeList = nodeRepository.nodeDBbyNum.value.values.toList()
+        val myNodeNum = nodeRepository.myNodeInfo.value?.myNodeNum
+        return databaseLogs
+            .map {
+                UiMeshLog(
+                    uuid = it.uuid,
+                    messageType = it.message_type,
+                    formattedReceivedDate = DateFormatter.formatDateTime(it.received_date),
+                    logMessage = annotateMeshLogMessage(it, nodeList, myNodeNum),
+                    decodedPayload = decodePayloadFromMeshLog(it),
+                )
+            }
+            .toImmutableList()
     }
 
-    private fun annotatePacketLog(packet: MeshPacket): String {
+    /** Transform the input [MeshLog] by enhancing the raw message with annotations. */
+    private fun annotateMeshLogMessage(meshLog: MeshLog, nodeList: List<Node>, myNodeNum: Int?): String =
+        when (meshLog.message_type) {
+            "LogRecord" -> meshLog.fromRadio.log_record.toString().replace("\\n\"", "\"")
+
+            "Packet" ->
+                meshLog.meshPacket?.let { packet -> annotatePacketLog(packet, nodeList, myNodeNum) }
+                    ?: meshLog.raw_message
+
+            "NodeInfo" ->
+                meshLog.nodeInfo?.let { nodeInfo -> annotateRawMessage(meshLog.raw_message, nodeInfo.num) }
+                    ?: meshLog.raw_message
+
+            "MyNodeInfo" ->
+                meshLog.myNodeInfo?.let { nodeInfo -> annotateRawMessage(meshLog.raw_message, nodeInfo.my_node_num) }
+                    ?: meshLog.raw_message
+
+            else -> meshLog.raw_message
+        }
+
+    private fun annotatePacketLog(packet: MeshPacket, nodeList: List<Node>, myNodeNum: Int?): String {
         val decoded = packet.decoded
         val basePacket = packet.copy(decoded = null)
         val baseText = basePacket.toString().trimEnd()
@@ -339,9 +369,6 @@ class DebugViewModel(
         val placeholder = "___RELAY_NODE___"
 
         if (relayNode != 0) {
-            val myNodeNum = nodeRepository.myNodeInfo.value?.myNodeNum
-            val nodeList = nodeRepository.nodeDBbyNum.value.values.toList()
-
             Packet.getRelayNode(relayNode, nodeList, myNodeNum)?.let { node ->
                 val relayId = node.user.id
                 val relayName = node.user.long_name

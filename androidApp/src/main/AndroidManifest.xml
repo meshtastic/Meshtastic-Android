@@ -118,7 +118,31 @@
         android:theme="@style/SplashTheme"
         android:localeConfig="@xml/locales_config"
         android:networkSecurityConfig="@xml/network_security_config"
-        android:enableOnBackInvokedCallback="true">
+        android:enableOnBackInvokedCallback="true"
+        android:largeHeap="true">
+        <!--
+          Reproduced live via adversarial mesh-fuzz testing: a 2000-node NodeDB (push_fake_nodedb's own
+          largest fixture; large public-event meshes like MeshCon/DEF CON/Burning Man are a supported
+          scenario, not just an adversarial edge case) combined with sustained hostile traffic (chaos fuzz)
+          and repeated reconnects in one long-lived process drove the default ~256MB Dalvik heap to
+          exhaustion: OutOfMemoryError at
+          androidx.datastore.core.DataStoreImpl.readAndInitOrPropagateAndThrowFailure, on an otherwise
+          unrelated settings read; any allocation would have thrown at that point, the heap was simply
+          full. largeHeap raises the ceiling (device dependent, commonly 2 to 4x) rather than reducing
+          footprint; it buys headroom for legitimately large meshes while the real fix (bounding/streaming
+          the in-memory log + node caches; see DebugViewModel and MeshMessageProcessorImpl) remains the
+          long-term mitigation.
+
+          TREAT THIS AS A TEMPORARY STOPGAP, not a permanent setting. It is a global,
+          whole-app flag with a global cost: a larger heap increases the working set the GC scans
+          each cycle, which can raise GC pause times / jank for ALL sessions, including typical
+          small-mesh use on low-RAM devices, which never come near the OOM this guards against. That
+          tradeoff (a tail-scenario safety net paid for by every user) is why Android's own docs
+          caution against relying on largeHeap alone. Remove it once the cache-bounding/streaming work
+          in DebugViewModel + MeshMessageProcessorImpl fully bounds footprint; validate that removal
+          on a low-RAM device AND under the large-mesh + chaos-fuzz soak that motivated this, not just
+          the flagship test device.
+        -->
 
         <uses-library
             android:name="org.apache.http.legacy"

@@ -16,10 +16,12 @@
  */
 package org.meshtastic.core.data.repository
 
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.update
 import org.koin.core.annotation.Single
 import org.meshtastic.core.datastore.ChannelSetDataSource
 import org.meshtastic.core.datastore.LocalConfigDataSource
@@ -43,6 +45,8 @@ import org.meshtastic.proto.ModuleConfig
  * Class responsible for radio configuration data. Combines access to [nodeDB], [ChannelSet], [LocalConfig] &
  * [LocalModuleConfig].
  */
+private const val MAX_FILE_MANIFEST_ENTRIES = 4096
+
 @Single
 @Suppress("TooManyFunctions") // All functions mandated by RadioConfigRepository interface; logically grouped by concern
 open class RadioConfigRepositoryImpl(
@@ -126,7 +130,28 @@ open class RadioConfigRepositoryImpl(
     override val fileManifestFlow: Flow<List<FileInfo>> = _fileManifestFlow.asStateFlow()
 
     override suspend fun addFileInfo(info: FileInfo) {
-        _fileManifestFlow.value += info
+        // A real device's manifest is bounded by its flash storage (realistically a handful to a few
+        // hundred entries). A rogue/adversarial peer, however, can emit FileInfo packets in a tight loop
+        // for the lifetime of a session -- clearFileManifest only runs on the *next* handshake, so nothing
+        // else bounds this accumulator in between. Cap it defensively, same pattern as the early-packet
+        // buffer in MeshMessageProcessorImpl.
+        //
+        // handleFileInfo dispatches each packet on its own scope.handledLaunch, so addFileInfo calls can
+        // run concurrently -- a plain read-then-write would race (lost updates, or two callers both seeing
+        // size-1 and bypassing the cap). update{} makes the read/cap/append atomic (CAS retry loop).
+        var capped = false
+        _fileManifestFlow.update { current ->
+            if (current.size >= MAX_FILE_MANIFEST_ENTRIES) {
+                capped = true
+                current
+            } else {
+                capped = false
+                current + info
+            }
+        }
+        if (capped) {
+            Logger.w { "File manifest capped at $MAX_FILE_MANIFEST_ENTRIES entries, dropping further FileInfo" }
+        }
     }
 
     override suspend fun clearFileManifest() {

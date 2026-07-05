@@ -278,6 +278,10 @@ osmbonuspack = { module = "com.github.MKergall:osmbonuspack", version = "6.9.0" 
 osmdroid-android = { module = "org.osmdroid:osmdroid-android", version.ref = "osmdroid-android" }
 osmdroid-geopackage = { module = "org.osmdroid:osmdroid-geopackage", version.ref = "osmdroid-android" }
 kermit = { module = "co.touchlab:kermit", version = "2.1.0" }
+# Debug-only leak/GC-thrash detector -- see feature/settings/.../debugging/DebugViewModel.kt and
+# core/data/.../manager/MeshMessageProcessorImpl.kt for the adversarial-mesh-fuzz bugs this class of
+# tooling is meant to catch going forward. Stable release (not the 3.0-alpha line).
+leakcanary-android = { module = "com.squareup.leakcanary:leakcanary-android", version = "2.14" }
 
 usb-serial-android = { module = "com.github.mik3y:usb-serial-for-android", version = "3.10.0" }
 vico-compose = { group = "com.patrykandpatrick.vico", name = "compose", version.ref = "vico" }
