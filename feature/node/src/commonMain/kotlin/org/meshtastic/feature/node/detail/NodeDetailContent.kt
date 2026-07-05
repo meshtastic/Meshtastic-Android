@@ -124,6 +124,7 @@ fun NodeDetailList(
                 displayUnits = uiState.metricsState.displayUnits,
                 isFahrenheit = uiState.metricsState.isFahrenheit,
                 isLocal = uiState.metricsState.isLocal,
+                airQualityHistory = uiState.metricsState.airQualityMetrics,
             )
         }
         item { NotesSection(node = node, onSaveNotes = onSaveNotes) }

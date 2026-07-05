@@ -91,6 +91,7 @@ app_settings
 app_too_old
 app_version
 apply
+aqi
 are_you_sure
 are_you_sure_change_default
 audio
@@ -578,6 +579,7 @@ firmware
 firmware_edition
 firmware_old
 firmware_recovery_banner
+firmware_recovery_ble_failed
 firmware_recovery_button
 firmware_recovery_dismiss
 firmware_recovery_explanation
