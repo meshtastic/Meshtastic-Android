@@ -1,7 +1,7 @@
 name: "Pull Request Labeler"
 on:
   pull_request_target:
-    types: [opened, synchronize]
+    types: [opened, synchronize, reopened, labeled, unlabeled]
 # Do not execute arbitrary code on this workflow.
 # See warnings at https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#pull_request_target
 
@@ -105,4 +105,24 @@ jobs:
             }
           } else {
             core.info('No labels matched for this PR.');
+          }
+
+          // Enforce that the PR ends up with a required label. Done here (not in a
+          // separate pull_request workflow) so the check sees labels this job just
+          // applied: label events fired by GITHUB_TOKEN don't re-trigger workflows,
+          // so a separate checker would read an empty label set at `opened` and stay
+          // red forever. Bot PRs are labeled by their own flows and are skipped.
+          const author = context.payload.pull_request.user.login;
+          const headRef = context.payload.pull_request.head.ref;
+          const skipAuthors = ['renovate[bot]', 'github-actions[bot]', 'dependabot[bot]'];
+          const skipRefs = ['scheduled-updates', 'l10n_main'];
+          if (!skipAuthors.includes(author) && !skipRefs.includes(headRef)) {
+            const requiredLabels = ['bugfix', 'enhancement', 'automation', 'dependencies', 'repo', 'release', 'refactor', 'desktop', 'chore', 'ci', 'build', 'testing', 'documentation'];
+            const effectiveLabels = new Set([
+              ...context.payload.pull_request.labels.map(l => l.name),
+              ...labels,
+            ]);
+            if (!requiredLabels.some(l => effectiveLabels.has(l))) {
+              core.setFailed(`PR must have at least one of the following labels before it can be merged: ${requiredLabels.join(', ')}.`);
+            }
           }
