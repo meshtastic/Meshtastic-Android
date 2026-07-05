@@ -172,22 +172,18 @@ class FirmwareUpdateViewModel(
                         enterRecoveryModeOrError()
                         return@launch
                     }
+                    val deviceHardware = getDeviceHardware(ourNode) ?: return@launch
+                    _deviceHardware.value = deviceHardware
+                    _currentFirmwareVersion.value = ourNode.firmwareVersion
+
                     val releaseFlow =
                         if (_selectedReleaseType.value == FirmwareReleaseType.LOCAL) {
                             flowOf(null)
                         } else {
                             firmwareReleaseRepository.getReleaseFlow(_selectedReleaseType.value)
                         }
-
-                    val deviceHardware = getDeviceHardware(ourNode)
-                    if (deviceHardware != null) {
-                        _deviceHardware.value = deviceHardware
-                        _currentFirmwareVersion.value = ourNode.firmwareVersion
-                    }
-
                     releaseFlow.collectLatest { release ->
                         _selectedRelease.value = release
-                        if (deviceHardware == null) return@collectLatest
 
                         val dismissed = bootloaderWarningDataSource.isDismissed(address)
                         val firmwareUpdateMethod =
@@ -247,12 +243,14 @@ class FirmwareUpdateViewModel(
     private suspend fun enterRecoveryModeOrError() {
         val recovery = firmwareRecoveryDataSource.pending.first()
         if (recovery == null) {
+            clearDeviceMetadata()
             _state.value = FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_no_device))
             return
         }
         pendingRecovery = recovery
         val hardware =
             deviceHardwareRepository.getDeviceHardwareByModel(recovery.hwModel, recovery.pioEnv).getOrElse {
+                clearDeviceMetadata()
                 _state.value =
                     FirmwareUpdateState.Error(
                         UiText.Resource(Res.string.firmware_update_unknown_hardware, recovery.hwModel),
@@ -587,6 +585,7 @@ class FirmwareUpdateViewModel(
     }
 
     private fun clearDeviceMetadata() {
+        _selectedRelease.value = null
         _deviceHardware.value = null
         _currentFirmwareVersion.value = null
     }

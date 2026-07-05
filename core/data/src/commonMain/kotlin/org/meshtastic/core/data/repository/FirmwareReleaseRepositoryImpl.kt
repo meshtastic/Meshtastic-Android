@@ -122,14 +122,17 @@ open class FirmwareReleaseRepositoryImpl(
 
             val bundled = bundledSnapshot?.releases ?: return
 
-            // Re-evaluate against the current active DB on every call — it may have switched devices.
-            val toApply =
-                listOf(FirmwareReleaseType.STABLE to bundled.stable, FirmwareReleaseType.ALPHA to bundled.alpha)
-                    .filter { (type, releases) -> isBundleNewerFor(type, releases) }
-                    .toMap()
-            if (toApply.isNotEmpty()) {
-                Logger.i { "FirmwareReleaseRepository: applying bundled snapshot for ${toApply.keys}" }
-                localDataSource.replaceFirmwareReleases(toApply)
+            refreshMutex.withLock {
+                // Re-evaluate against the current active DB under the same lock as network refresh so an older bundled
+                // snapshot cannot overwrite fresher data that just arrived from the API.
+                val toApply =
+                    listOf(FirmwareReleaseType.STABLE to bundled.stable, FirmwareReleaseType.ALPHA to bundled.alpha)
+                        .filter { (type, releases) -> isBundleNewerFor(type, releases) }
+                        .toMap()
+                if (toApply.isNotEmpty()) {
+                    Logger.i { "FirmwareReleaseRepository: applying bundled snapshot for ${toApply.keys}" }
+                    localDataSource.replaceFirmwareReleases(toApply)
+                }
             }
         }
     }
