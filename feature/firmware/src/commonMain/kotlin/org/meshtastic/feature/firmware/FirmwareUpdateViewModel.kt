@@ -65,6 +65,7 @@ import org.meshtastic.core.resources.firmware_update_archive_missing_target
 import org.meshtastic.core.resources.firmware_update_battery_low
 import org.meshtastic.core.resources.firmware_update_context_changed
 import org.meshtastic.core.resources.firmware_update_copying
+import org.meshtastic.core.resources.firmware_update_extracting
 import org.meshtastic.core.resources.firmware_update_failed
 import org.meshtastic.core.resources.firmware_update_filename_unavailable
 import org.meshtastic.core.resources.firmware_update_flashing
@@ -555,12 +556,13 @@ class FirmwareUpdateViewModel(
         return if (payloadExtension == null) {
             LocalFirmwareResolution.Invalid(reason = fallbackReason, fileName = fileName)
         } else {
-            val extractedArtifact =
-                safeCatching { fileHandler.extractFirmware(uri, state.deviceHardware, payloadExtension) }
-                    .getOrElse { e ->
-                        Logger.w(e) { "Failed to extract local firmware archive" }
-                        null
-                    }
+            val extractingState =
+                FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_extracting)))
+            _state.value = extractingState
+            val extractedArtifact = extractLocalFirmwareArchive(uri, fileName, state, payloadExtension)
+            if (_state.value == extractingState) {
+                _state.value = state
+            }
             if (extractedArtifact == null) {
                 LocalFirmwareResolution.Invalid(
                     reason = LocalFirmwareFileValidationReason.MissingArchiveFirmware,
@@ -570,6 +572,29 @@ class FirmwareUpdateViewModel(
                 validateExtractedLocalFirmware(extractedArtifact, fileName, state)
             }
         }
+    }
+
+    private suspend fun extractLocalFirmwareArchive(
+        uri: CommonUri,
+        fileName: String,
+        state: FirmwareUpdateState.Ready,
+        payloadExtension: String,
+    ): FirmwareArtifact? {
+        val preferredFilenames =
+            preferredLocalFirmwareArchiveFilenames(fileName, state.deviceHardware, state.updateMethod)
+        for (preferredFilename in preferredFilenames) {
+            safeCatching { fileHandler.extractFirmware(uri, state.deviceHardware, payloadExtension, preferredFilename) }
+                .onFailure { e -> Logger.w(e) { "Failed to extract preferred local firmware $preferredFilename" } }
+                .getOrNull()
+                ?.let {
+                    return it
+                }
+        }
+        return safeCatching { fileHandler.extractFirmware(uri, state.deviceHardware, payloadExtension) }
+            .getOrElse { e ->
+                Logger.w(e) { "Failed to extract local firmware archive" }
+                null
+            }
     }
 
     private fun validateExtractedLocalFirmware(

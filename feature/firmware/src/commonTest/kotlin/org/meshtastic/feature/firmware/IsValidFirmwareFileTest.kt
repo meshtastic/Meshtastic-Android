@@ -48,13 +48,13 @@ class IsValidFirmwareFileTest {
     }
 
     @Test
-    fun `filename starting with target-dash matches`() {
-        assertTrue(isValidFirmwareFile("heltec-v3-firmware-2.7.17.bin", "heltec-v3", ".bin"))
+    fun `filename starting with target and version matches`() {
+        assertTrue(isValidFirmwareFile("heltec-v3-2.7.17.bin", "heltec-v3", ".bin"))
     }
 
     @Test
-    fun `filename starting with target-dot matches`() {
-        assertTrue(isValidFirmwareFile("heltec-v3.firmware.bin", "heltec-v3", ".bin"))
+    fun `filename starting with target and extension matches`() {
+        assertTrue(isValidFirmwareFile("heltec-v3.bin", "heltec-v3", ".bin"))
     }
 
     @Test
@@ -105,6 +105,22 @@ class IsValidFirmwareFileTest {
     fun `rejects target substring without boundary`() {
         // "pico" appears in "pico2w" but "pico" should not match "pico2w" without a boundary char
         assertFalse(isValidFirmwareFile("firmware-pico2w-2.7.17.uf2", "pico", ".uf2"))
+    }
+
+    @Test
+    fun `rejects target prefix collisions`() {
+        assertFalse(isValidFirmwareFile("firmware-tbeam-s3-core-2.8.0.bin", "tbeam", ".bin"))
+        assertFalse(isValidFirmwareFile("firmware-t-echo-lite-2.8.0.bin", "t-echo", ".bin"))
+        assertFalse(isValidFirmwareFile("firmware-t-deck-pro-2.8.0.bin", "t-deck", ".bin"))
+        assertFalse(isValidFirmwareFile("firmware-nano-g1-explorer-2.8.0.bin", "nano-g1", ".bin"))
+    }
+
+    @Test
+    fun `accepts full colliding target names`() {
+        assertTrue(isValidFirmwareFile("firmware-tbeam-s3-core-2.8.0.bin", "tbeam-s3-core", ".bin"))
+        assertTrue(isValidFirmwareFile("firmware-t-echo-lite-2.8.0.bin", "t-echo-lite", ".bin"))
+        assertTrue(isValidFirmwareFile("firmware-t-deck-pro-2.8.0.bin", "t-deck-pro", ".bin"))
+        assertTrue(isValidFirmwareFile("firmware-nano-g1-explorer-2.8.0.bin", "nano-g1-explorer", ".bin"))
     }
 
     // ── Edge cases ──────────────────────────────────────────────────────────
@@ -292,6 +308,53 @@ class IsValidFirmwareFileTest {
         assertInvalidReason(
             LocalFirmwareFileValidationReason.ConfirmationContextChanged,
             validatePendingLocalFirmwareFile(pendingFile, readyState),
+        )
+    }
+
+    @Test
+    fun `pending local firmware prioritizes changed context over target mismatch`() {
+        val hardware = DeviceHardware(architecture = "nrf52", platformioTarget = "tbeam")
+        val readyState =
+            readyState(hardware = hardware, updateMethod = FirmwareUpdateMethod.Ble, address = "11:22:33:44:55:77")
+        val pendingFile =
+            pendingFile(
+                fileName = "firmware-rak4631-2.8.0-ota.zip",
+                platformioTarget = "rak4631",
+                updateMethod = FirmwareUpdateMethod.Ble,
+                address = "11:22:33:44:55:66",
+            )
+
+        assertInvalidReason(
+            LocalFirmwareFileValidationReason.ConfirmationContextChanged,
+            validatePendingLocalFirmwareFile(pendingFile, readyState),
+        )
+    }
+
+    @Test
+    fun `preferred local firmware archive filenames follow retriever order`() {
+        val esp32Hardware = DeviceHardware(architecture = "esp32", platformioTarget = "tbeam")
+        val nrfHardware = DeviceHardware(architecture = "nrf52", platformioTarget = "rak4631")
+        val usbHardware = DeviceHardware(architecture = "rp2040", platformioTarget = "pico")
+
+        assertEquals(
+            listOf("firmware-tbeam-2.7.15-update.bin", "firmware-tbeam-2.7.15.bin"),
+            preferredLocalFirmwareArchiveFilenames(
+                "firmware-esp32-2.7.15.zip",
+                esp32Hardware,
+                FirmwareUpdateMethod.Wifi,
+            ),
+        )
+        assertEquals(
+            listOf("firmware-rak4631-2.8.0-ota.zip"),
+            preferredLocalFirmwareArchiveFilenames(
+                "firmware-nrf52840-2.8.0.zip",
+                nrfHardware,
+                FirmwareUpdateMethod.Ble,
+            ),
+        )
+        assertEquals(
+            listOf("firmware-pico-2.8.0.uf2"),
+            preferredLocalFirmwareArchiveFilenames("firmware-rp2040-2.8.0.zip", usbHardware, FirmwareUpdateMethod.Usb),
         )
     }
 

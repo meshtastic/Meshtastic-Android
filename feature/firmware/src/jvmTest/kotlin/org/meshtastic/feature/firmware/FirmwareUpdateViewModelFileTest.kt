@@ -27,6 +27,7 @@ import dev.mokkery.mock
 import dev.mokkery.verify.VerifyMode.Companion.atLeast
 import dev.mokkery.verify.VerifyMode.Companion.exactly
 import dev.mokkery.verifySuspend
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,6 +35,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.common.util.CommonUri
@@ -44,7 +46,9 @@ import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FirmwareReleaseRepository
 import org.meshtastic.core.repository.RadioPrefs
+import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
+import org.meshtastic.core.resources.firmware_update_extracting
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.core.testing.TestDataFactory
@@ -286,6 +290,41 @@ class FirmwareUpdateViewModelFileTest {
     }
 
     @Test
+    fun `prepareLocalFirmwareFile shows extracting progress while resolving bundle`() = runTest {
+        val bundleUri = firmwareUri("firmware-nrf52840-2.8.0.zip")
+        val extractionStarted = CompletableDeferred<Unit>()
+        val allowExtraction = CompletableDeferred<Unit>()
+        val extractedArtifact =
+            FirmwareArtifact(
+                uri = firmwareUri("firmware-tbeam-2.8.0-ota.zip"),
+                fileName = "firmware-tbeam-2.8.0-ota.zip",
+                isTemporary = true,
+            )
+        everySuspend { fileHandler.extractFirmware(any(), any(), any(), any()) }
+            .calls {
+                extractionStarted.complete(Unit)
+                allowExtraction.await()
+                extractedArtifact
+            }
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        viewModel.prepareLocalFirmwareFile(bundleUri)
+        runCurrent()
+
+        assertTrue(extractionStarted.isCompleted)
+        val processing = assertIs<FirmwareUpdateState.Processing>(viewModel.state.value)
+        val message = assertIs<UiText.Resource>(processing.progressState.message)
+        assertEquals(Res.string.firmware_update_extracting, message.res)
+
+        allowExtraction.complete(Unit)
+        advanceUntilIdle()
+
+        assertEquals("firmware-tbeam-2.8.0-ota.zip", viewModel.pendingLocalFirmwareFile.value?.fileName)
+    }
+
+    @Test
     fun `prepareLocalFirmwareFile extracts esp32 firmware from release bundle`() = runTest {
         val espHardware = DeviceHardware(hwModel = 1, architecture = "esp32", platformioTarget = "tbeam")
         everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any(), any()) } returns
@@ -308,6 +347,35 @@ class FirmwareUpdateViewModelFileTest {
         val pendingFile = viewModel.pendingLocalFirmwareFile.value
         assertEquals("firmware-tbeam-2.8.0.bin", pendingFile?.fileName)
         assertEquals(extractedArtifact.uri, pendingFile?.uri)
+    }
+
+    @Test
+    fun `prepareLocalFirmwareFile prefers esp32 update binary from release bundle`() = runTest {
+        val espHardware = DeviceHardware(hwModel = 1, architecture = "esp32", platformioTarget = "tbeam")
+        everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any(), any()) } returns
+            Result.success(espHardware)
+        val requestedPreferredFilenames = mutableListOf<String?>()
+        val extractedArtifact =
+            FirmwareArtifact(
+                uri = firmwareUri("firmware-tbeam-2.7.15-update.bin"),
+                fileName = "firmware-tbeam-2.7.15-update.bin",
+                isTemporary = true,
+            )
+        everySuspend { fileHandler.extractFirmware(any(), any(), any(), any()) }
+            .calls {
+                val preferredFilename = it.args[3] as String?
+                requestedPreferredFilenames += preferredFilename
+                if (preferredFilename == "firmware-tbeam-2.7.15-update.bin") extractedArtifact else null
+            }
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        viewModel.prepareLocalFirmwareFile(firmwareUri("firmware-esp32-2.7.15.zip"))
+        advanceUntilIdle()
+
+        assertEquals(listOf<String?>("firmware-tbeam-2.7.15-update.bin"), requestedPreferredFilenames)
+        assertEquals("firmware-tbeam-2.7.15-update.bin", viewModel.pendingLocalFirmwareFile.value?.fileName)
     }
 
     @Test
