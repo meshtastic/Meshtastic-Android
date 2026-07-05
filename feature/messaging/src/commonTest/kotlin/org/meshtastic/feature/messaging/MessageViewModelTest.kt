@@ -45,6 +45,8 @@ import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.repository.usecase.SendMessageUseCase
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.TestDataFactory
+import org.meshtastic.core.ui.util.SnackbarManager
+import org.meshtastic.feature.messaging.translation.MessageTranslationService
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.DeviceProfile
 import org.meshtastic.proto.LocalConfig
@@ -70,6 +72,8 @@ class MessageViewModelTest {
     private val homoglyphPrefs: HomoglyphPrefs = mock(MockMode.autofill)
     private val uiPrefs: UiPrefs = mock(MockMode.autofill)
     private val notificationManager: org.meshtastic.core.repository.NotificationManager = mock(MockMode.autofill)
+    private val messageTranslationService: MessageTranslationService = mock(MockMode.autofill)
+    private val snackbarManager: SnackbarManager = SnackbarManager()
 
     private val testDispatcher = StandardTestDispatcher()
 
@@ -124,6 +128,8 @@ class MessageViewModelTest {
                 homoglyphEncodingPrefs = homoglyphPrefs,
                 uiPrefs = uiPrefs,
                 notificationManager = notificationManager,
+                messageTranslationService = messageTranslationService,
+                snackbarManager = snackbarManager,
             )
     }
 

@@ -21,6 +21,8 @@ action_select_message
 action_select_network
 action_send_reply
 action_show_message_status
+action_toggle_translation
+action_translate_message
 actions
 adc_multiplier_override
 adc_multiplier_override_ratio
@@ -578,6 +580,7 @@ firmware
 firmware_edition
 firmware_old
 firmware_recovery_banner
+firmware_recovery_ble_failed
 firmware_recovery_button
 firmware_recovery_dismiss
 firmware_recovery_explanation
@@ -928,6 +931,7 @@ message_status_queued
 message_status_sfpp_confirmed
 message_status_sfpp_routing
 message_status_unknown
+message_translated_label
 messages
 micrograms_per_cubic_meter
 min
@@ -1390,8 +1394,10 @@ should_update_firmware
 show_all_key_title
 show_iaq_legend
 show_layer
+show_original
 show_password
 show_precision_circle
+show_translation
 show_waypoints
 shutdown
 shutdown_node_name
@@ -1518,6 +1524,14 @@ traffic_management_rate_limit_max_packets
 traffic_management_rate_limit_window
 traffic_management_router_preserve_hops
 traffic_management_unknown_packet_threshold
+translate
+### TRANSLATION ###
+translation_download_message
+translation_download_title
+translation_downloading
+translation_failed
+translation_model_download_failed
+translation_not_required
 transmit_over_lora
 ### TRANSPORT ###
 transport

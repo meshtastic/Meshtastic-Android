@@ -97,6 +97,10 @@ data class Message(
     val transportMechanism: Int = 0,
     /** True when the radio verified this broadcast's XEdDSA signature ([MeshPacket.xeddsa_signed]). */
     val xeddsaSigned: Boolean = false,
+    /** On-device translation of [text], persisted so the user can toggle back to it without re-translating. */
+    val translatedText: String? = null,
+    /** Whether the bubble currently displays [translatedText] instead of [text]. */
+    val showTranslated: Boolean = false,
 ) {
     fun getStatusStringRes(): Pair<StringResource, StringResource> {
         val title = if (routingError > 0) Res.string.error else Res.string.message_delivery_status

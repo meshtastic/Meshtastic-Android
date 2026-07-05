@@ -548,6 +548,13 @@ interface PacketDao {
     )
     suspend fun updateFilteredBySender(senderIdPattern: String, filtered: Boolean)
 
+    /** Persists an on-device translation and switches the message to display it in one write. */
+    @Query("UPDATE packet SET translated_text = :translatedText, show_translated = 1 WHERE uuid = :uuid")
+    suspend fun setTranslation(uuid: Long, translatedText: String)
+
+    @Query("UPDATE packet SET show_translated = :show WHERE uuid = :uuid")
+    suspend fun setShowTranslated(uuid: Long, show: Boolean)
+
     // region ── FTS5 Search ──
 
     @Query(

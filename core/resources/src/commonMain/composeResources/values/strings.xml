@@ -39,6 +39,8 @@
     <string name="action_select_network">Select network</string>
     <string name="action_send_reply">Send reply</string>
     <string name="action_show_message_status">Show message status</string>
+    <string name="action_toggle_translation">Toggle between original and translated text</string>
+    <string name="action_translate_message">Translate message</string>
     <string name="actions">Actions</string>
     <string name="adc_multiplier_override">ADC multiplier override</string>
     <string name="adc_multiplier_override_ratio">ADC multiplier override ratio</string>
@@ -602,10 +604,10 @@
     <string name="firmware_edition">Firmware Edition</string>
     <string name="firmware_old">The radio firmware is too old to talk to this application. For more information on this see <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">our Firmware Installation guide</a>.</string>
     <string name="firmware_recovery_banner">Finish updating %1$s</string>
-    <string name="firmware_recovery_button">Resume firmware update</string>
-    <string name="firmware_recovery_explanation">This device is in bootloader mode from a firmware update that did not finish. Keep it nearby and it will be re-flashed to complete the update.</string>
     <string name="firmware_recovery_ble_failed">Couldn\'t finish the update over Bluetooth. This device\'s stock bootloader can\'t reliably complete an interrupted update over the air. Connect it to a computer with USB and re-flash it using the vendor\'s serial DFU tool (for example adafruit-nrfutil) to recover the device.</string>
+    <string name="firmware_recovery_button">Resume firmware update</string>
     <string name="firmware_recovery_dismiss">Dismiss firmware recovery</string>
+    <string name="firmware_recovery_explanation">This device is in bootloader mode from a firmware update that did not finish. Keep it nearby and it will be re-flashed to complete the update.</string>
     <string name="firmware_too_old">Firmware update required.</string>
     <string name="firmware_update_almost_there">Almost there...</string>
     <string name="firmware_update_alpha">Alpha</string>
@@ -959,6 +961,7 @@
     <string name="message_status_sfpp_confirmed">Confirmed on SF++ chain</string>
     <string name="message_status_sfpp_routing">Routing via SF++ chain…</string>
     <string name="message_status_unknown">Unknown</string>
+    <string name="message_translated_label">Translated</string>
     <string name="messages">Messages</string>
     <string name="micrograms_per_cubic_meter">µg/m³</string>
     <string name="min">Min</string>
@@ -1433,8 +1436,10 @@
     <string name="show_all_key_title">Encryption Key Meanings</string>
     <string name="show_iaq_legend">Show air quality legend</string>
     <string name="show_layer">Show Layer</string>
+    <string name="show_original">Show original</string>
     <string name="show_password">Show password</string>
     <string name="show_precision_circle">Show Precision Circles</string>
+    <string name="show_translation">Show translation</string>
     <string name="show_waypoints">Show Waypoints</string>
     <string name="shutdown">Shutdown</string>
     <string name="shutdown_node_name">Node: %1$s</string>
@@ -1564,6 +1569,14 @@
     <string name="traffic_management_rate_limit_window">Rate Limit Window (secs)</string>
     <string name="traffic_management_router_preserve_hops">Preserve Router Hops</string>
     <string name="traffic_management_unknown_packet_threshold">Unknown Packet Threshold</string>
+    <string name="translate">Translate</string>
+    <!-- TRANSLATION -->
+    <string name="translation_download_message">Translating messages requires a one-time language model download (about %1$d MB).</string>
+    <string name="translation_download_title">Download translation model?</string>
+    <string name="translation_downloading">Downloading translation model…</string>
+    <string name="translation_failed">Unable to translate message</string>
+    <string name="translation_model_download_failed">Translation model download failed</string>
+    <string name="translation_not_required">Message is already in your language</string>
     <string name="transmit_over_lora">Transmit over LoRa</string>
     <!-- TRANSPORT -->
     <string name="transport">Transport</string>

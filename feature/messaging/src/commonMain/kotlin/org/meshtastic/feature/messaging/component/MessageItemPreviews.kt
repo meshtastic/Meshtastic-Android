@@ -145,6 +145,27 @@ private fun MessageItemPreview() {
             originalMessage = received,
             viaMqtt = true,
         )
+    val translatedMessage =
+        Message(
+            text = "Hola, ¿cómo estás?",
+            translatedText = "Hello, how are you?",
+            showTranslated = true,
+            time = "10:25",
+            fromLocal = false,
+            status = MessageStatus.RECEIVED,
+            snr = 2.0f,
+            rssi = 80,
+            hopsAway = 1,
+            uuid = 4L,
+            receivedTime = nowMillis,
+            node = NodePreviewParameterProvider().minnieMouse,
+            read = false,
+            routingError = 0,
+            packetId = 4547,
+            emojis = listOf(),
+            replyId = null,
+            viaMqtt = false,
+        )
     val filteredMessage =
         Message(
             text = "This message was filtered",
@@ -205,6 +226,22 @@ private fun MessageItemPreview() {
                 node = receivedWithOriginalMessage.node,
                 selected = false,
                 ourNode = sent.node,
+                onReply = {},
+                sendReaction = {},
+                onShowReactions = {},
+                onClick = {},
+                onLongClick = {},
+                onDoubleClick = {},
+                onClickChip = {},
+                onNavigateToOriginalMessage = {},
+            )
+
+            MessageItem(
+                message = translatedMessage,
+                node = translatedMessage.node,
+                selected = false,
+                ourNode = sent.node,
+                translationAvailable = true,
                 onReply = {},
                 sendReaction = {},
                 onShowReactions = {},

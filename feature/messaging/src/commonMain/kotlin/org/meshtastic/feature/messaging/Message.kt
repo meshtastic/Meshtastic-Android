@@ -97,6 +97,7 @@ import org.meshtastic.feature.messaging.component.MessageTopBar
 import org.meshtastic.feature.messaging.component.QuickChatRow
 import org.meshtastic.feature.messaging.component.ReplySnippet
 import org.meshtastic.feature.messaging.component.ScrollToBottomFab
+import org.meshtastic.feature.messaging.component.TranslationModelDownloadDialog
 
 private const val ROUNDED_CORNER_PERCENT = 100
 private const val MAX_LINES = 3
@@ -151,6 +152,8 @@ fun MessageScreen(
     val searchResults by viewModel.searchResults.collectAsStateWithLifecycle()
     val searchResultIndex by viewModel.searchResultIndex.collectAsStateWithLifecycle()
     val currentSearchResult by viewModel.currentSearchResult.collectAsStateWithLifecycle()
+    val translationAvailable by viewModel.translationAvailable.collectAsStateWithLifecycle()
+    val translationDialogState by viewModel.translationDialogState.collectAsStateWithLifecycle()
 
     // Sync text field changes back to ViewModel draft
     LaunchedEffect(messageInputState) {
@@ -283,6 +286,10 @@ fun MessageScreen(
                         coroutineScope.launch { clipboardManager.setClipEntry(createClipEntry(event.text, event.text)) }
                         selectedMessageIds.value = emptySet()
                     }
+
+                    is MessageScreenEvent.TranslateMessage -> viewModel.translateMessage(event.message)
+
+                    is MessageScreenEvent.ToggleShowTranslated -> viewModel.toggleShowTranslated(event.message)
                 }
             }
 
@@ -296,6 +303,12 @@ fun MessageScreen(
             onDismiss = { showDeleteDialog = false },
         )
     }
+
+    TranslationModelDownloadDialog(
+        state = translationDialogState,
+        onConfirm = viewModel::confirmTranslationModelDownload,
+        onDismiss = viewModel::dismissTranslationDialog,
+    )
 
     sharedContact?.let { contact -> SharedContactDialog(contact = contact, onDismiss = { sharedContact = null }) }
 
@@ -319,7 +332,10 @@ fun MessageScreen(
                                     (0 until pagedMessages.itemCount)
                                         .mapNotNull { pagedMessages[it] }
                                         .filter { it.uuid in selectedMessageIds.value }
-                                        .joinToString("\n") { it.text }
+                                        .joinToString("\n") {
+                                            // Copy what the bubble displays (matches the sheet's Copy action)
+                                            if (it.showTranslated) it.translatedText ?: it.text else it.text
+                                        }
                                 onEvent(MessageScreenEvent.CopyToClipboard(copiedText))
                             }
 
@@ -425,6 +441,7 @@ fun MessageScreen(
                     showFiltered = showFiltered,
                     filteringDisabled = filteringDisabled,
                     searchQuery = if (isSearchActive) searchQuery else "",
+                    translationAvailable = translationAvailable,
                 ),
                 handlers =
                 MessageListHandlers(
@@ -436,6 +453,8 @@ fun MessageScreen(
                     onDeleteMessages = { viewModel.deleteMessages(it) },
                     onSendMessage = { text, key -> viewModel.sendMessage(text, key) },
                     onReply = { message -> replyingToPacketId = message?.packetId },
+                    onTranslate = { onEvent(MessageScreenEvent.TranslateMessage(it)) },
+                    onToggleTranslation = { onEvent(MessageScreenEvent.ToggleShowTranslated(it)) },
                 ),
                 quickEmojis = viewModel.frequentEmojis,
             )
