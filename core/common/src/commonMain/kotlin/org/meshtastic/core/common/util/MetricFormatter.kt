@@ -49,12 +49,20 @@ object MetricFormatter {
 
     fun rssi(value: Int): String = "$value dBm"
 
-    fun windSpeed(metersPerSecond: Float, decimalPlaces: Int = 1): String =
-        "${NumberFormatter.format(metersPerSecond, decimalPlaces)} m/s"
+    fun windSpeed(metersPerSecond: Float, isImperial: Boolean, decimalPlaces: Int = 1): String {
+        val value = if (isImperial) metersPerSecond * MPH_PER_MPS else metersPerSecond
+        val unit = if (isImperial) "mph" else "m/s"
+        return "${NumberFormatter.format(value, decimalPlaces)} $unit"
+    }
 
-    fun rainfall(millimeters: Float, decimalPlaces: Int = 1): String =
-        "${NumberFormatter.format(millimeters, decimalPlaces)} mm"
+    fun rainfall(millimeters: Float, isImperial: Boolean, decimalPlaces: Int = 1): String {
+        val value = if (isImperial) millimeters / MM_PER_INCH else millimeters
+        val unit = if (isImperial) "in" else "mm"
+        return "${NumberFormatter.format(value, decimalPlaces)} $unit"
+    }
 }
 
 private const val FAHRENHEIT_SCALE = 1.8f
 private const val FAHRENHEIT_OFFSET = 32
+private const val MPH_PER_MPS = 2.23694f
+private const val MM_PER_INCH = 25.4f

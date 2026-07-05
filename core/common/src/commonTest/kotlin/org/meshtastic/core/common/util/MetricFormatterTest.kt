@@ -123,21 +123,31 @@ class MetricFormatterTest {
 
     @Test
     fun windSpeed() {
-        assertEquals("12.3 m/s", MetricFormatter.windSpeed(12.34f))
+        assertEquals("12.3 m/s", MetricFormatter.windSpeed(12.34f, isImperial = false))
     }
 
     @Test
     fun windSpeedZero() {
-        assertEquals("0.0 m/s", MetricFormatter.windSpeed(0.0f))
+        assertEquals("0.0 m/s", MetricFormatter.windSpeed(0.0f, isImperial = false))
+    }
+
+    @Test
+    fun windSpeedImperial() {
+        assertEquals("27.6 mph", MetricFormatter.windSpeed(12.34f, isImperial = true))
     }
 
     @Test
     fun rainfall() {
-        assertEquals("2.5 mm", MetricFormatter.rainfall(2.54f))
+        assertEquals("2.5 mm", MetricFormatter.rainfall(2.54f, isImperial = false))
     }
 
     @Test
     fun rainfallZero() {
-        assertEquals("0.0 mm", MetricFormatter.rainfall(0.0f))
+        assertEquals("0.0 mm", MetricFormatter.rainfall(0.0f, isImperial = false))
+    }
+
+    @Test
+    fun rainfallImperial() {
+        assertEquals("0.10 in", MetricFormatter.rainfall(2.54f, isImperial = true, decimalPlaces = 2))
     }
 }
