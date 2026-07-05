@@ -211,7 +211,18 @@ class MeshMessageProcessorImpl(
             if (packets.isEmpty()) return@launch
 
             Logger.d { "replayEarlyPackets reason=$reason count=${packets.size}" }
-            packets.forEach { processReceivedMeshPacket(it, myNodeNum) }
+            // Each buffered packet is processed independently, wrapped the same way processFromRadio
+            // guards the live path: a single malformed/adversarial packet (e.g. a corrupted NodeInfo
+            // that fails proto decode deep inside handleNodeInfo) must not throw out of this
+            // scope.launch coroutine and crash the process -- that would turn one bad packet
+            // received early in a (re)connect into a full app crash / remote DoS. Log and skip it,
+            // then keep draining the rest of the batch.
+            packets.forEach { packet ->
+                safeCatching { processReceivedMeshPacket(packet, myNodeNum) }
+                    .onFailure {
+                        Logger.e(it) { "Dropped a buffered early packet after a handler error; replay continued" }
+                    }
+            }
         }
     }
 

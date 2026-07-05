@@ -206,6 +206,50 @@ class MeshMessageProcessorImplTest {
         verifySuspend { serviceRepository.emitMeshPacket(any()) }
     }
 
+    // ---------- flushEarlyReceivedPackets: handler resilience ----------
+
+    @Test
+    fun `a throwing dataHandler for one buffered packet does not stop the flush or crash`() = runTest(testDispatcher) {
+        processor = createProcessor(backgroundScope)
+        isNodeDbReady.value = false
+        // Regression guard for a crash found via adversarial mesh-fuzz testing (corrupted/garbage NodeInfo
+        // packets injected into a live replay session): a malformed packet buffered before the node DB /
+        // myNodeNum were ready, then replayed by flushEarlyReceivedPackets, threw an uncaught
+        // ProtocolException/EOFException from deep inside handleReceivedData -> handleNodeInfo's proto
+        // decode. Unlike the live path (guarded by safeCatching in processFromRadio), that exception
+        // escaped the bare `scope.launch` in flushEarlyReceivedPackets and crashed the whole app process
+        // (observed live: "FATAL EXCEPTION" at MeshMessageProcessorImpl.kt:214, PID killed, "keeps
+        // stopping" dialog on device). Fixed by wrapping each buffered packet's processing in safeCatching.
+        every { dataHandler.handleReceivedData(any(), any(), any(), any()) } throws
+            RuntimeException("corrupted NodeInfo")
+
+        val poisoned =
+            MeshPacket(
+                id = 1,
+                from = 999,
+                decoded = Data(portnum = PortNum.NODEINFO_APP, payload = ByteString.EMPTY),
+                rx_time = 1000,
+            )
+        val healthy =
+            MeshPacket(
+                id = 2,
+                from = 998,
+                decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP, payload = ByteString.EMPTY),
+                rx_time = 1001,
+            )
+
+        processor.handleReceivedMeshPacket(poisoned, myNodeNum)
+        processor.handleReceivedMeshPacket(healthy, myNodeNum)
+        advanceUntilIdle()
+
+        isNodeDbReady.value = true
+        advanceUntilIdle() // must not throw -- this is the crash repro point
+
+        // Both packets were attempted -- the poisoned packet's throw did not stop the rest of the batch.
+        verify { nodeManager.updateNode(999, any(), any()) }
+        verify { nodeManager.updateNode(998, any(), any()) }
+    }
+
     // ---------- handleReceivedMeshPacket: rx_time normalization ----------
 
     @Test
