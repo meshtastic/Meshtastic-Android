@@ -161,17 +161,40 @@ class FirmwareReleaseRepositoryImplTest {
     }
 
     @Test
-    fun failedBundledSeedIsRetriedOnNextCollection() = runBlocking {
+    fun failedBundledDecodeIsNotRetried() = runBlocking {
+        // A broken bundled asset is a permanent failure — retrying on every collection just burns I/O.
         seed.failuresBeforeSuccess = 1
         seed.bundled = Releases(stable = listOf(release("v2.7.15.567b8ea")))
         api.response = NetworkFirmwareReleases()
 
         val initialEmissions = repository.stableRelease.toList()
-
+        // Subsequent collection must NOT retry the decode (the second call would succeed if it did).
         val emissions = repository.stableRelease.toList()
 
         assertEquals(null, initialEmissions.first())
-        assertEquals("v2.7.15.567b8ea", emissions.first()?.id)
+        assertEquals(null, emissions.first(), "failed bundled decode is permanent; no retry on subsequent collections")
+    }
+
+    @Test
+    fun reSeedsWhenActiveDatabaseSwitches() = runBlocking {
+        // Reproduces the original bug: the active Room DB switches per selected device. A process-wide
+        // seed gate set during the first collection (against the default DB) skipped seeding the newly
+        // activated device DB, leaving the firmware picker empty.
+        seed.bundled = Releases(stable = listOf(release("v2.7.15.567b8ea")))
+        api.response = NetworkFirmwareReleases()
+
+        val firstEmissions = repository.stableRelease.toList()
+        assertEquals("v2.7.15.567b8ea", firstEmissions.first()?.id, "first collection seeds DB-A")
+
+        // The selected device's DB becomes active — it has no firmware_release rows.
+        dbProvider.switchToNewDatabase()
+
+        val secondEmissions = repository.stableRelease.toList()
+        assertEquals(
+            "v2.7.15.567b8ea",
+            secondEmissions.first()?.id,
+            "DB switch re-evaluates the bundled snapshot against the now-empty active DB and re-seeds it",
+        )
     }
 
     @Test
