@@ -40,8 +40,8 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.domain.usecase.settings.AdminActionsUseCase
 import org.meshtastic.core.domain.usecase.settings.ExportProfileUseCase
-import org.meshtastic.core.domain.usecase.settings.ExportSecurityConfigUseCase
 import org.meshtastic.core.domain.usecase.settings.ImportProfileUseCase
+import org.meshtastic.core.domain.usecase.settings.ImportSecurityConfigUseCase
 import org.meshtastic.core.domain.usecase.settings.InstallProfileUseCase
 import org.meshtastic.core.domain.usecase.settings.ProcessRadioResponseUseCase
 import org.meshtastic.core.domain.usecase.settings.RadioConfigUseCase
@@ -58,10 +58,12 @@ import org.meshtastic.core.repository.MapConsentPrefs
 import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.SecurityKeyBackupStore
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.testing.FakeLockdownCoordinator
 import org.meshtastic.core.testing.FakeNodeRepository
+import org.meshtastic.core.ui.util.SnackbarManager
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
@@ -99,7 +101,7 @@ class RadioConfigViewModelTest {
 
     private val importProfileUseCase: ImportProfileUseCase = mock(MockMode.autofill)
     private val exportProfileUseCase: ExportProfileUseCase = mock(MockMode.autofill)
-    private val exportSecurityConfigUseCase: ExportSecurityConfigUseCase = mock(MockMode.autofill)
+    private val importSecurityConfigUseCase: ImportSecurityConfigUseCase = mock(MockMode.autofill)
     private val installProfileUseCase: InstallProfileUseCase = mock(MockMode.autofill)
     private val radioConfigUseCase: RadioConfigUseCase = mock(MockMode.autofill)
     private val adminActionsUseCase: AdminActionsUseCase = mock(MockMode.autofill)
@@ -108,6 +110,8 @@ class RadioConfigViewModelTest {
     private val fileService: FileService = mock(MockMode.autofill)
     private val mqttManager: MqttManager = mock(MockMode.autofill)
     private val uiPrefs: UiPrefs = mock(MockMode.autofill)
+    private val securityKeyBackupStore: SecurityKeyBackupStore = mock(MockMode.autofill)
+    private val snackbarManager: SnackbarManager = mock(MockMode.autofill)
 
     private lateinit var viewModel: RadioConfigViewModel
 
@@ -156,7 +160,9 @@ class RadioConfigViewModelTest {
         homoglyphEncodingPrefs = homoglyphEncodingPrefs,
         importProfileUseCase = importProfileUseCase,
         exportProfileUseCase = exportProfileUseCase,
-        exportSecurityConfigUseCase = exportSecurityConfigUseCase,
+        importSecurityConfigUseCase = importSecurityConfigUseCase,
+        securityKeyBackupStore = securityKeyBackupStore,
+        snackbarManager = snackbarManager,
         installProfileUseCase = installProfileUseCase,
         radioConfigUseCase = radioConfigUseCase,
         adminActionsUseCase = adminActionsUseCase,
@@ -551,7 +557,9 @@ class RadioConfigViewModelTest {
                 homoglyphEncodingPrefs = homoglyphEncodingPrefs,
                 importProfileUseCase = importProfileUseCase,
                 exportProfileUseCase = exportProfileUseCase,
-                exportSecurityConfigUseCase = exportSecurityConfigUseCase,
+                importSecurityConfigUseCase = importSecurityConfigUseCase,
+                securityKeyBackupStore = securityKeyBackupStore,
+                snackbarManager = snackbarManager,
                 installProfileUseCase = installProfileUseCase,
                 radioConfigUseCase = radioConfigUseCase,
                 adminActionsUseCase = adminActionsUseCase,

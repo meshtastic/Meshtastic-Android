@@ -70,7 +70,7 @@ import org.meshtastic.proto.Config
 import kotlin.random.Random
 
 @Composable
-expect fun ExportSecurityConfigButton(
+expect fun SecurityKeyBackupActions(
     viewModel: RadioConfigViewModel,
     enabled: Boolean,
     securityConfig: Config.SecurityConfig,
@@ -157,7 +157,7 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                     icon = MeshtasticIcons.Warning,
                     onClick = { showKeyGenerationDialog = true },
                 )
-                ExportSecurityConfigButton(
+                SecurityKeyBackupActions(
                     viewModel = viewModel,
                     enabled = state.connected,
                     securityConfig = securityConfig,

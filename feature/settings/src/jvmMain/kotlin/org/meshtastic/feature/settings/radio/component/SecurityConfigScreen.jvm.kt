@@ -21,11 +21,11 @@ import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.Config
 
 @Composable
-actual fun ExportSecurityConfigButton(
+actual fun SecurityKeyBackupActions(
     viewModel: RadioConfigViewModel,
     enabled: Boolean,
     securityConfig: Config.SecurityConfig,
 ) {
-    // Desktop currently does not implement a specific "export security config" button
-    // within the config screen. If it did, we'd add it here.
+    // Desktop currently does not implement key backup/restore within the config screen.
+    // If it did, we'd add it here.
 }

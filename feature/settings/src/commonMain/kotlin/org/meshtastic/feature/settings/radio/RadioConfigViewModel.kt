@@ -37,11 +37,12 @@ import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.InjectedParam
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.CommonUri
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.domain.usecase.settings.AdminActionsUseCase
 import org.meshtastic.core.domain.usecase.settings.ExportProfileUseCase
-import org.meshtastic.core.domain.usecase.settings.ExportSecurityConfigUseCase
 import org.meshtastic.core.domain.usecase.settings.ImportProfileUseCase
+import org.meshtastic.core.domain.usecase.settings.ImportSecurityConfigUseCase
 import org.meshtastic.core.domain.usecase.settings.InstallProfileUseCase
 import org.meshtastic.core.domain.usecase.settings.ProcessRadioResponseUseCase
 import org.meshtastic.core.domain.usecase.settings.RadioConfigUseCase
@@ -64,11 +65,18 @@ import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.SecurityKeyBackupStore
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.cant_shutdown
+import org.meshtastic.core.resources.key_backup_deleted
+import org.meshtastic.core.resources.key_backup_not_found
+import org.meshtastic.core.resources.key_backup_restore_failed
+import org.meshtastic.core.resources.key_backup_restored
+import org.meshtastic.core.resources.key_backup_saved
 import org.meshtastic.core.resources.timeout
+import org.meshtastic.core.ui.util.SnackbarManager
 import org.meshtastic.core.ui.util.getChannelList
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.feature.settings.navigation.ConfigRoute
@@ -131,7 +139,7 @@ open class RadioConfigViewModel(
     private val homoglyphEncodingPrefs: HomoglyphPrefs,
     protected val importProfileUseCase: ImportProfileUseCase,
     protected val exportProfileUseCase: ExportProfileUseCase,
-    protected val exportSecurityConfigUseCase: ExportSecurityConfigUseCase,
+    protected val importSecurityConfigUseCase: ImportSecurityConfigUseCase,
     private val installProfileUseCase: InstallProfileUseCase,
     private val radioConfigUseCase: RadioConfigUseCase,
     private val adminActionsUseCase: AdminActionsUseCase,
@@ -140,6 +148,8 @@ open class RadioConfigViewModel(
     private val fileService: FileService,
     private val mqttManager: MqttManager,
     private val lockdownCoordinator: LockdownCoordinator,
+    private val securityKeyBackupStore: SecurityKeyBackupStore,
+    private val snackbarManager: SnackbarManager,
 ) : ViewModel() {
 
     val lockdownTokenInfo = serviceRepository.lockdownTokenInfo
@@ -553,11 +563,54 @@ open class RadioConfigViewModel(
         }
     }
 
-    fun exportSecurityConfig(uri: CommonUri, securityConfig: Config.SecurityConfig) {
-        safeLaunch(tag = "exportSecurityConfig") {
-            fileService.write(uri) { sink ->
-                exportSecurityConfigUseCase(sink, securityConfig).onSuccess { /* Success */ }.onFailure { throw it }
+    /** Whether an encrypted key backup exists for the node currently being configured. */
+    fun securityKeyBackupExists(): Boolean {
+        val nodeNum = destNum ?: destNode.value?.num ?: return false
+        return securityKeyBackupStore.get(nodeNum) != null
+    }
+
+    /** Saves the node's current public/private keys to OS-backed encrypted storage, keyed by node number. */
+    fun backupSecurityKeys(securityConfig: Config.SecurityConfig) {
+        val nodeNum = destNum ?: destNode.value?.num ?: return
+        safeLaunch(tag = "backupSecurityKeys") {
+            securityKeyBackupStore.save(
+                nodeNum = nodeNum,
+                publicKeyBase64 = securityConfig.public_key.base64(),
+                privateKeyBase64 = securityConfig.private_key.base64(),
+                timestamp = nowMillis,
+            )
+            snackbarManager.showSnackbar(message = UiText.Resource(Res.string.key_backup_saved).resolve())
+        }
+    }
+
+    /** Restores the previously backed-up keys for this node and pushes them to the device via admin config. */
+    fun restoreSecurityKeys() {
+        val nodeNum = destNum ?: destNode.value?.num ?: return
+        safeLaunch(tag = "restoreSecurityKeys") {
+            val stored = securityKeyBackupStore.get(nodeNum)
+            if (stored == null) {
+                snackbarManager.showSnackbar(message = UiText.Resource(Res.string.key_backup_not_found).resolve())
+                return@safeLaunch
             }
+            importSecurityConfigUseCase(stored)
+                .onSuccess {
+                    setConfig(Config(security = it))
+                    snackbarManager.showSnackbar(message = UiText.Resource(Res.string.key_backup_restored).resolve())
+                }
+                .onFailure {
+                    snackbarManager.showSnackbar(
+                        message = UiText.Resource(Res.string.key_backup_restore_failed).resolve(),
+                    )
+                }
+        }
+    }
+
+    /** Deletes the encrypted key backup for this node, if any. */
+    fun deleteSecurityKeyBackup() {
+        val nodeNum = destNum ?: destNode.value?.num ?: return
+        safeLaunch(tag = "deleteSecurityKeyBackup") {
+            securityKeyBackupStore.delete(nodeNum)
+            snackbarManager.showSnackbar(message = UiText.Resource(Res.string.key_backup_deleted).resolve())
         }
     }
 
