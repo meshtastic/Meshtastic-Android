@@ -102,6 +102,13 @@ data class Message(
     /** Whether the bubble currently displays [translatedText] instead of [text]. */
     val showTranslated: Boolean = false,
 ) {
+    /**
+     * The text the UI displays (and copies): the persisted translation when [showTranslated] is set, except while
+     * [searching] — search matches and highlights apply to the original [text].
+     */
+    fun displayedText(searching: Boolean = false): String =
+        if (showTranslated && translatedText != null && !searching) translatedText else text
+
     fun getStatusStringRes(): Pair<StringResource, StringResource> {
         val title = if (routingError > 0) Res.string.error else Res.string.message_delivery_status
         val text =

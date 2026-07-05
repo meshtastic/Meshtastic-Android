@@ -20,6 +20,7 @@ import co.touchlab.kermit.Logger
 import com.google.mlkit.common.model.DownloadConditions
 import com.google.mlkit.common.model.RemoteModelManager
 import com.google.mlkit.nl.languageid.LanguageIdentification
+import com.google.mlkit.nl.languageid.LanguageIdentifier
 import com.google.mlkit.nl.translate.TranslateLanguage
 import com.google.mlkit.nl.translate.TranslateRemoteModel
 import com.google.mlkit.nl.translate.Translation
@@ -28,6 +29,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import org.meshtastic.feature.messaging.translation.DownloadResult
 import org.meshtastic.feature.messaging.translation.MessageTranslationService
 import org.meshtastic.feature.messaging.translation.TranslationResult
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.coroutines.resume
 
 /**
@@ -77,6 +79,8 @@ class MlKitMessageTranslator : MessageTranslationService {
                     translator.close()
                 }
             translated?.let { TranslationResult.Success(it) } ?: TranslationResult.Unavailable
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Logger.w(tag = TAG) { "Translation to $targetLocale failed: ${e.message}" }
             TranslationResult.Unavailable
@@ -148,6 +152,6 @@ class MlKitMessageTranslator : MessageTranslationService {
     companion object {
         private const val TAG = "MlKitMessageTranslator"
         private const val ESTIMATED_MODEL_SIZE_MB = 30
-        private const val UNDETERMINED_LANGUAGE_TAG = "und"
+        private val UNDETERMINED_LANGUAGE_TAG = LanguageIdentifier.UNDETERMINED_LANGUAGE_TAG
     }
 }

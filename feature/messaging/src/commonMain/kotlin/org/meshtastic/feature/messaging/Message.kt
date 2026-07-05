@@ -334,7 +334,7 @@ fun MessageScreen(
                                         .filter { it.uuid in selectedMessageIds.value }
                                         .joinToString("\n") {
                                             // Copy what the bubble displays (matches the sheet's Copy action)
-                                            if (it.showTranslated) it.translatedText ?: it.text else it.text
+                                            it.displayedText(searching = isSearchActive && searchQuery.isNotEmpty())
                                         }
                                 onEvent(MessageScreenEvent.CopyToClipboard(copiedText))
                             }

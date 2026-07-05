@@ -138,7 +138,7 @@ fun MessageItem(
     val isLocal = node.num == ourNode.num
     // While searching, always show the original text — FTS matches and highlights apply to it, not the translation.
     val showsTranslation = message.showTranslated && message.translatedText != null && searchQuery.isEmpty()
-    val bodyText = if (showsTranslation) message.translatedText.orEmpty() else message.text
+    val bodyText = message.displayedText(searching = searchQuery.isNotEmpty())
     if (activeSheet != null) {
         ModalBottomSheet(onDismissRequest = { activeSheet = null }, sheetState = sheetState) {
             when (activeSheet) {
@@ -177,21 +177,7 @@ fun MessageItem(
                         },
                         xeddsaSigned = message.xeddsaSigned,
                         onStatus = onStatusClick,
-                        translationRowState =
-                        when {
-                            // Toggling a persisted translation is just a DB flag flip — offer it even when
-                            // the translation engine is no longer available for the current locale.
-                            message.translatedText != null ->
-                                if (message.showTranslated) {
-                                    TranslationRowState.ShowOriginal
-                                } else {
-                                    TranslationRowState.ShowTranslation
-                                }
-
-                            !translationAvailable || message.text.isBlank() -> null
-
-                            else -> TranslationRowState.Translate
-                        },
+                        translationRowState = translationRowStateFor(message, translationAvailable),
                         onTranslate = {
                             activeSheet = null
                             onTranslate()
@@ -410,6 +396,17 @@ fun MessageItem(
 private enum class ActiveSheet {
     Actions,
     Emoji,
+}
+
+private fun translationRowStateFor(message: Message, translationAvailable: Boolean): TranslationRowState? = when {
+    // Toggling a persisted translation is just a DB flag flip — offer it even when
+    // the translation engine is no longer available for the current locale.
+    message.translatedText != null ->
+        if (message.showTranslated) TranslationRowState.ShowOriginal else TranslationRowState.ShowTranslation
+
+    !translationAvailable || message.text.isBlank() -> null
+
+    else -> TranslationRowState.Translate
 }
 
 @Composable
