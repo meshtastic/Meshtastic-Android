@@ -27,9 +27,7 @@ import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioController
-import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.map.BaseMapViewModel
-import org.meshtastic.proto.LocalConfig
 
 @Suppress("LongParameterList")
 @KoinViewModel
@@ -57,11 +55,6 @@ class MapViewModel(
         set(value) {
             mapPrefs.setMapStyle(value)
         }
-
-    val localConfig = radioConfigRepository.localConfigFlow.stateInWhileSubscribed(initialValue = LocalConfig())
-
-    val config
-        get() = localConfig.value
 
     val applicationId = buildConfigProvider.applicationId
 }

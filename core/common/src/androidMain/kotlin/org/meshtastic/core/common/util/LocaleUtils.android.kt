@@ -35,25 +35,6 @@ actual fun currentLocaleQualifier(): String {
 actual fun getSystemMeasurementSystem(): MeasurementSystem {
     val locale = Locale.getDefault()
 
-    // Android 14+ (API 34) introduced user-settable locale preferences.
-    if (Build.VERSION.SDK_INT >= 34) {
-        try {
-            val localePrefsClass = Class.forName("androidx.core.text.util.LocalePreferences")
-            val getMeasurementSystemMethod =
-                localePrefsClass.getMethod("getMeasurementSystem", Locale::class.java, Boolean::class.javaPrimitiveType)
-            val result = getMeasurementSystemMethod.invoke(null, locale, true) as String
-            return when (result) {
-                "us",
-                "uk",
-                -> MeasurementSystem.IMPERIAL
-
-                else -> MeasurementSystem.METRIC
-            }
-        } catch (@Suppress("TooGenericExceptionCaught") ignored: Exception) {
-            // Fallback
-        }
-    }
-
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
         when (LocaleData.getMeasurementSystem(ULocale.forLocale(locale))) {
             LocaleData.MeasurementSystem.SI -> MeasurementSystem.METRIC

@@ -32,6 +32,7 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.TracerouteOverlay
 import org.meshtastic.core.model.geofence.activeWaypointPackets
+import org.meshtastic.core.model.util.DistanceUnit
 import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
@@ -66,11 +67,12 @@ open class BaseMapViewModel(
 
     val myNodeInfo = nodeRepository.myNodeInfo
 
-    /** Device display units (metric/imperial) for distance/altitude/speed formatting across map surfaces. */
-    val displayUnits: StateFlow<DisplayUnits> =
-        radioConfigRepository.localConfigFlow
-            .map { it.display?.units ?: DisplayUnits.METRIC }
-            .stateInWhileSubscribed(initialValue = DisplayUnits.METRIC)
+    /**
+     * OS locale display units (metric/imperial) for distance/altitude/speed formatting across map surfaces. StateFlow
+     * kept for the existing collectAsState call sites; value is a one-time snapshot at construction and does not react
+     * to a mid-session locale change (ViewModel survives config changes).
+     */
+    val displayUnits: StateFlow<DisplayUnits> = MutableStateFlow(DistanceUnit.getFromLocale()).asStateFlow()
 
     val ourNodeInfo = nodeRepository.ourNodeInfo
 

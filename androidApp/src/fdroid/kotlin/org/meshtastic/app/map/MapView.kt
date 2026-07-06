@@ -143,7 +143,6 @@ import org.meshtastic.feature.map.LastHeardFilter
 import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.component.MapButton
 import org.meshtastic.feature.map.component.MapControlsOverlay
-import org.meshtastic.proto.Config.DisplayConfig.DisplayUnits
 import org.meshtastic.proto.Waypoint
 import org.osmdroid.bonuspack.utils.BonusPackHelper.getBitmapFromVectorDrawable
 import org.osmdroid.config.Configuration
@@ -372,7 +371,6 @@ fun MapView(
     fun MapView.onNodesChanged(nodes: Collection<Node>): List<MarkerWithLabel> {
         val nodesWithPosition = nodes.filter { it.validPosition != null }
         val ourNode = mapViewModel.ourNodeInfo.value
-        val displayUnits = mapViewModel.config.display?.units ?: DisplayUnits.METRIC
         val mapFilterStateValue = mapViewModel.mapFilterStateFlow.value // Access mapFilterState directly
         return nodesWithPosition.mapNotNull { node ->
             if (mapFilterStateValue.onlyFavorites && !node.isFavorite && !node.equals(ourNode)) {

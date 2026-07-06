@@ -28,11 +28,14 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
+import org.meshtastic.core.common.util.MeasurementSystem
+import org.meshtastic.core.common.util.getSystemMeasurementSystem
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.NodeListDensity
 import org.meshtastic.core.model.NodeSortOption
+import org.meshtastic.core.model.util.DistanceUnit
 import org.meshtastic.core.repository.AdminController
 import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.DeviceHardwareRepository
@@ -127,13 +130,17 @@ class NodeListViewModel(
                 excludeMqtt = excludeMqtt,
             )
         }
+
+    // OS locale rarely changes mid-session; snapshot once instead of per filter/sort emission.
+    private val distanceUnits = DistanceUnit.getFromLocale().value
+    private val tempInFahrenheit = getSystemMeasurementSystem() == MeasurementSystem.IMPERIAL
     val nodesUiState: StateFlow<NodesUiState> =
-        combine(nodeSortOption, nodeFilter, radioConfigRepository.deviceProfileFlow) { sort, nodeFilter, profile ->
+        combine(nodeSortOption, nodeFilter) { sort, nodeFilter ->
             NodesUiState(
                 sort = sort,
                 filter = nodeFilter,
-                distanceUnits = profile.config?.display?.units?.value ?: 0,
-                tempInFahrenheit = profile.module_config?.telemetry?.environment_display_fahrenheit ?: false,
+                distanceUnits = distanceUnits,
+                tempInFahrenheit = tempInFahrenheit,
             )
         }
             .stateInWhileSubscribed(initialValue = NodesUiState())
