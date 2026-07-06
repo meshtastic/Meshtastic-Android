@@ -135,6 +135,7 @@
     <string name="bluetooth_feature_discovery">发现</string>
     <string name="bluetooth_feature_discovery_description">查找并识别附近的Meshtastic设备。</string>
     <string name="bluetooth_permission">蓝牙</string>
+    <string name="bluetooth_scan_start_failed">蓝牙扫描无法启动请重试。</string>
     <string name="bold_heading">加粗标题</string>
     <string name="bonding_failed_permissions">配对失败请授权附近设备权限后重试。</string>
     <string name="bonding_failed_retry">配对未完成请尝试重新配对。</string>
@@ -148,6 +149,7 @@
     <string name="call_sign_summary">业余无线电呼号最多 8 个字符</string>
     <string name="camera_permission">相机权限</string>
     <string name="camera_permission_rationale">允许访问相机以扫描二维码。</string>
+    <string name="camera_unavailable">相机无法启动请重试。</string>
     <string name="cancel">取消</string>
     <string name="cancel_reply">取消回复</string>
     <string name="canned_message">预设消息</string>
@@ -246,7 +248,7 @@
     <string name="config_display_wake_on_tap_or_motion_summary">需要在设备上有一个加速计。</string>
     <string name="config_lora_frequency_slot_summary">您的节点运行频率是根据地区、调制解调器预设和此字段计算的。 当0时，插槽会自动根据主频道名称计算，并会从默认的公共插槽中改变。 如果配置了私有的主频道和公立中等频道，则更改到公共默认频道。</string>
     <string name="config_lora_hop_limit_summary">设置节点的最大次数，默认值为 3。 增加频率也会增加拥塞，应该谨慎使用。0个节点广播消息不会得到ACK。</string>
-    <string name="config_lora_modem_preset_licensed_summary">该地区的预设参数仅供持证 (业余无线电) 操作员使用。请在用户配置中启用业余无线电选项，才能选择这些预设.</string>
+    <string name="config_lora_modem_preset_licensed_summary">该地区的预设参数仅供持证 (业余无线电) 仅限操作员使用.请启用持证业余无线电模式 (Ham) 在用户配置中进行选择。</string>
     <string name="config_lora_modem_preset_summary">可用的调制解调器预置，默认为 “Long Fast”。</string>
     <string name="config_lora_region_summary">使用电台的地区。</string>
     <string name="config_network_eth_enabled_summary">启用以太网将禁用蓝牙连接。TCP节点连接在 Apple 设备上不可用。</string>
@@ -308,14 +310,18 @@
     <string name="debug_filter_preset_title">重置筛选</string>
     <string name="debug_filters">筛选器</string>
     <string name="debug_log_api_enabled">启用调试日志 API </string>
+    <string name="debug_logcat_empty">没有应用日志可以显示</string>
     <string name="debug_logcat_refresh">刷新</string>
     <string name="debug_logs_export">导出程序日志</string>
+    <string name="debug_logs_exported">日志已导出</string>
     <string name="debug_panel">调试面板</string>
     <string name="debug_search_clear">清除搜索</string>
     <string name="debug_search_next">下一匹配</string>
     <string name="debug_search_prev">上一匹配</string>
     <string name="debug_store_logs_summary">禁用以跳过将msh日志写入磁盘。</string>
     <string name="debug_store_logs_title">储存mesh日志</string>
+    <string name="debug_tab_app_logs">应用日志</string>
+    <string name="debug_tab_packets">数据包</string>
     <string name="default_">默认</string>
     <!-- DELETE -->
     <string name="delete">删除</string>
@@ -465,6 +471,7 @@
     <string name="doc_keywords_android_auto">在开车时通过将手机投屏到汽车导航上来处理消息收发</string>
     <string name="doc_keywords_app_functions">我们既需要仰望星空,利用systemAI和Gemini 探索智能的上限;也需要脚踏实地用 Meshtastic 这样的技术守住安全的底线</string>
     <string name="doc_keywords_connections">蓝牙,usb,tcp,配对,串口,wifi</string>
+    <string name="doc_keywords_debug_logs">调试,日志,日志抓取工具,导出,错误报告,问题,故障排查,诊断</string>
     <string name="doc_keywords_desktop">桌面端支持,linux,macos,windows,串口</string>
     <string name="doc_keywords_discovery">发现机制,拓扑结构,网络,扫描,邻居</string>
     <string name="doc_keywords_firmware">固件,更新,ota,烧录,版本,恢复模式</string>
@@ -490,6 +497,7 @@
     <string name="doc_title_android_auto">Android Auto</string>
     <string name="doc_title_app_functions">应用功能</string>
     <string name="doc_title_connections">连接数</string>
+    <string name="doc_title_debug_logs">调试日志</string>
     <string name="doc_title_desktop">桌面应用</string>
     <string name="doc_title_discovery">发现</string>
     <string name="doc_title_firmware">固件升级</string>
@@ -589,6 +597,11 @@
     <string name="firmware">固件</string>
     <string name="firmware_edition">固件版本</string>
     <string name="firmware_old">版本过旧，无法与此应用程序通讯。欲了解更多信息，请参阅 Meshtastic 网站上的<a href="https://meshtastic.org/docs/getting-started/flashing-firmware">韧体安装指南</a>。</string>
+    <string name="firmware_recovery_banner">完成更新 %1$s</string>
+    <string name="firmware_recovery_button">继续固件升级</string>
+    <string name="firmware_recovery_explanation">此设备目前处于引导程序模式，原因是之前的固件更新未能完成请将其保持在手机附近系统将重新刷入固件以完成更新。</string>
+    <string name="firmware_recovery_ble_failed">无法通过蓝牙完成更新该设备的原生引导程序无法可靠地完成被中断的无线更新。请使用 USB 数据线将其连接到电脑，并使用厂商提供的串口 DFU 工具（例如 adafruit-nrfutil）重新刷入固件，以恢复设备。</string>
+    <string name="firmware_recovery_dismiss">取消固件恢复</string>
     <string name="firmware_too_old">需要固件更新。</string>
     <string name="firmware_update_almost_there">即将完成…</string>
     <string name="firmware_update_alpha">开发版本</string>
@@ -677,7 +690,23 @@
     <string name="generate_input_event_on_press">按下时生成输入事件</string>
     <string name="generate_qr_code">生成二维码</string>
     <!-- GEOFENCE -->
+    <string name="geofence">地图围栏</string>
+    <string name="geofence_box_author_confirm">确认区域</string>
+    <string name="geofence_box_author_hint">点击两个角来定义该区域</string>
+    <string name="geofence_box_author_hint_viewport">拖动地图以框选该区域然后点击‘确认区域</string>
+    <string name="geofence_box_use_view">使用当前视图</string>
+    <string name="geofence_edit_area">编辑区域</string>
+    <string name="geofence_entered_body">%1$s 进入围栏 %2$s</string>
+    <string name="geofence_entered_title">进入围栏 %1$s</string>
+    <string name="geofence_favorites_only">仅包含收藏地点</string>
+    <string name="geofence_left_body">%1$s 离开围栏 %2$s</string>
+    <string name="geofence_left_title">离开围栏 %1$s</string>
+    <string name="geofence_notify_on_enter">进入时通知</string>
+    <string name="geofence_notify_on_exit">离开时通知</string>
     <string name="geofence_off">关闭</string>
+    <string name="geofence_radius">围栏范围大小</string>
+    <string name="geofence_remove_area">删除区域</string>
+    <string name="geofence_set_area">在地图上划定范围</string>
     <string name="get_started">开始</string>
     <string name="good">良好</string>
     <!-- GPIO -->
@@ -730,6 +759,7 @@
     <string name="incoming_messages">收到的消息</string>
     <string name="indoor_air_quality_iaq">室内空气质量 (IAQ)</string>
     <string name="info">信息</string>
+    <string name="input_channel_url">输入共享频道链接</string>
     <string name="input_shared_contact_url">输入共享联系人 URL</string>
     <string name="installed_firmware_version">当前安装</string>
     <string name="internal">内置</string>
@@ -779,7 +809,7 @@
     <string name="load_15_min">负载15分钟</string>
     <string name="load_15_min_description">系统平均负载</string>
     <string name="load_1_min">负载1分钟</string>
-    <string name="load_1_min_description">1分钟系统平均负载</string>
+    <string name="load_1_min_description">分钟系统平均负载</string>
     <string name="load_5_min">负载5分钟</string>
     <string name="load_5_min_description">平均系统负载</string>
     <string name="load_indexed">载入 %1$d</string>
@@ -892,7 +922,17 @@
     <string name="match_any">匹配任意 | 所有</string>
     <string name="max">最大值</string>
     <!-- MESH -->
+    <string name="mesh_beacon_invitations_title">Mesh 活动邀请</string>
+    <string name="mesh_beacon_notification_body">附近的一个 Mesh邀请你加入</string>
+    <string name="mesh_beacon_notification_title">Mesh 组网加入邀请</string>
+    <string name="mesh_beacon_offer_channel">频道: %1$s</string>
+    <string name="mesh_beacon_offer_discover">设备发现</string>
     <string name="mesh_beacon_offer_dismiss">忽略</string>
+    <string name="mesh_beacon_offer_from_unknown">来自一个未知节点</string>
+    <string name="mesh_beacon_offer_join">Join</string>
+    <string name="mesh_beacon_offer_preset">预设: %1$s</string>
+    <string name="mesh_beacon_offer_region">地区: %1$s</string>
+    <string name="mesh_beacon_offer_title">Mesh 组网邀请</string>
     <string name="mesh_map_location">网格地图位置</string>
     <string name="mesh_map_location_description">在网格地图中为您的手机开启蓝色位置点。</string>
     <!-- MESHTASTIC -->
@@ -902,6 +942,7 @@
     <string name="meshtastic_broadcast_notifications">广播消息提醒</string>
     <string name="meshtastic_low_battery_notifications">低电量通知</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">低电量通知 (收藏节点)</string>
+    <string name="meshtastic_mesh_beacon_notifications">Mesh 组网邀请通知</string>
     <string name="meshtastic_messages_notifications">私信提醒</string>
     <string name="meshtastic_new_nodes_notifications">新节点通知</string>
     <string name="meshtastic_service_notifications">服务通知</string>
@@ -982,20 +1023,20 @@
     <string name="next">下一步</string>
     <string name="nfc_disabled">NFC 已禁用，请在系统设置中启用它。</string>
     <!-- NO -->
-    <string name="no_bluetooth_devices_hint">请确保您在设备范围之内.</string>
+    <string name="no_bluetooth_devices_hint">请确保您在设备范围之内。</string>
     <string name="no_bluetooth_devices_seen">未搜索到任何蓝牙设备</string>
-    <string name="no_custom_tile_sources_found">未找到自定义源.</string>
+    <string name="no_custom_tile_sources_found">未找到自定义源。</string>
     <string name="no_device_selected">未选择设备</string>
     <string name="no_devices_found">未发现任何设备</string>
-    <string name="no_files_manifested">未显示任何文件.</string>
+    <string name="no_files_manifested">未显示任何文件。</string>
     <string name="no_local_stats">没有可用的统计信息 </string>
-    <string name="no_map_layers_loaded">没有加载地图层.</string>
+    <string name="no_map_layers_loaded">没有加载地图层。</string>
     <string name="no_network_devices_found">未找到网络设备</string>
-    <string name="no_network_devices_hint">请确保您与设备连接在同一个网络下.</string>
+    <string name="no_network_devices_hint">请确保您与设备连接在同一个网络下。</string>
     <string name="no_network_devices_seen">未发现任何网络设备</string>
     <string name="no_pax_metrics_logs">无可用的 PAX 计量.</string>
     <string name="no_usb_devices_found">未找到USB设备</string>
-    <string name="no_usb_devices_hint">请通过 USB 数据线连接设备以使用串口功能.</string>
+    <string name="no_usb_devices_hint">请通过 USB 数据线连接设备以使用串口功能。</string>
     <string name="no_usb_devices_seen">未检测到任何 USB 设备</string>
     <!-- NODE -->
     <string name="node_count_template">(%1$d 在线 / %2$d 显示 / %3$d 总计)</string>
@@ -1013,7 +1054,7 @@
     <string name="node_layout_compact">精简</string>
     <string name="node_layout_compact_fields_header">精简显示</string>
     <string name="node_layout_complete">完成</string>
-    <string name="node_layout_complete_description">完整布局会显示所有可用的节点数据.没有数据将被自动隐藏.</string>
+    <string name="node_layout_complete_description">完整布局会显示所有可用的节点数据.没有数据将被自动隐藏。</string>
     <string name="node_layout_device_role">设备 &amp; 角色</string>
     <string name="node_layout_distance_and_bearing">距离与方位</string>
     <string name="node_layout_help_signal_bad">信号质量差.当前信噪比高于 -18 dB且 接收信号强度高于 -125。</string>
@@ -1304,6 +1345,8 @@
     <!-- SCAN -->
     <string name="scan">扫描</string>
     <string name="scan_bluetooth_devices">扫描蓝牙设备</string>
+    <string name="scan_channels_nfc">通过 NFC 扫描共享频道</string>
+    <string name="scan_channels_qr">扫描共享频道二维码</string>
     <string name="scan_network_devices">扫描网络设备</string>
     <string name="scan_nfc">NFC扫描</string>
     <string name="scan_nfc_text">将您的设备靠近NFC标签。</string>
@@ -1338,6 +1381,7 @@
     <string name="security_signed_message_info">已通过发送方的密钥进行验证。</string>
     <string name="security_signed_node">已签名节点</string>
     <string name="security_signed_node_desc">自动验证通过</string>
+    <string name="security_signed_node_help">该节点使用 XEdDSA 算法对其广播进行签名。你看到的来自该节点的广播，均通过其身份密钥由无线电进行了验证。</string>
     <string name="security_signed_verified">已签名 · 已验证</string>
     <string name="select">选择</string>
     <string name="select_all">选择全部</string>
@@ -1366,6 +1410,7 @@
     <!-- SHARE -->
     <string name="share">分享</string>
     <string name="share_channels_qr">共享频道二维码</string>
+    <string name="share_connected_node">分享已连接的节点</string>
     <string name="share_contact">分享联系人</string>
     <string name="share_location">分享位置</string>
     <string name="share_location_description">使用您的手机 GPS 位置而不是使用您节点上的硬件GPS。</string>
@@ -1402,6 +1447,7 @@
     <string name="status_message">状态消息</string>
     <string name="status_message_config">状态消息配置</string>
     <string name="stay_connected_anywhere">随时随地保持联系</string>
+    <string name="stop_connecting">停止连接</string>
     <string name="store_forward">存储 &amp; 转发</string>
     <string name="store_forward_config">存储 &amp; 转发配置</string>
     <string name="store_forward_enabled">存储 &amp; 已启用转发</string>
@@ -1509,10 +1555,13 @@
     <string name="traffic_management_unknown_packet_threshold">未知包阈值</string>
     <string name="transmit_over_lora">通过 LoRa 传输</string>
     <!-- TRANSPORT -->
+    <string name="transport">传输方式</string>
+    <string name="transport_api">应用程序编程接口</string>
     <string name="transport_ble">BLE</string>
     <string name="transport_lora">LoRa</string>
     <string name="transport_mqtt">MQTT</string>
     <string name="transport_tcp">TCP</string>
+    <string name="transport_udp">用户数据报协议</string>
     <string name="transport_usb">USB</string>
     <string name="triple_click_adhoc_ping">快速按3下 向所有节点发送紧急广播</string>
     <string name="twenty_four_hours">24 小时</string>
@@ -1627,5 +1676,9 @@
     <string name="wind_gust">阵风</string>
     <string name="wind_lull">微风</string>
     <string name="wind_speed">风速</string>
+    <string name="write_nfc">写入 NFC 标签</string>
+    <string name="write_nfc_failed">无法写入标签请使用一张可写入的空白 NFC 标签，并保持手机与标签贴合稳定。</string>
+    <string name="write_nfc_success">数据已成功写入标签</string>
+    <string name="write_nfc_text">请将一张可写入的 NFC 标签贴在手机背面。</string>
     <string name="you">你</string>
 </resources>

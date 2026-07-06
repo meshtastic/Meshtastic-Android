@@ -96,12 +96,12 @@ Useful for monitoring solar charging or battery health on remote nodes.
 
 Nodes with particulate matter or CO₂ sensors report air quality data:
 
-| Metrisch              | Unit  | Beschreibung                 |
-| --------------------- | ----- | ---------------------------- |
-| PM1.0 | µg/m³ | Ultrafine particulate matter |
-| PM2.5 | µg/m³ | Fine particulate matter      |
-| PM10                  | µg/m³ | Coarse particulate matter    |
-| CO₂                   | ppm   | Carbon dioxide concentration |
+| Metrisch              | Einheit | Beschreibung                 |
+| --------------------- | ------- | ---------------------------- |
+| PM1.0 | µg/m³   | Ultrafine particulate matter |
+| PM2.5 | µg/m³   | Fine particulate matter      |
+| PM10                  | µg/m³   | Coarse particulate matter    |
+| CO₂                   | ppm     | Carbon dioxide concentration |
 
 The CO₂ reading is color-coded by severity (Good → Stuffy → Poor → Unsafe → Evacuate). See [Node Metrics — Air Quality](node-metrics#air-quality-metrics) for the exact ppm bands and colors.
 

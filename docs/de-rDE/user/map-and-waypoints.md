@@ -25,7 +25,7 @@ The map displays:
 
 ### Node Markers
 
-Each node that reports a position is shown as a **node chip** marker displaying the node's short name. The chip is colored by the node's own identity color (a stable color derived from its node number) — the same chip used in the node list, so a node looks the same everywhere. Marker color does **not** encode online/offline status. When a node's position updates live, its marker briefly pulses. Nearby markers are clustered as you zoom out.
+Each node that reports a position is shown as a **node chip** marker displaying the node's short name. Der Chip ist in der individuellen Identitätsfarbe des Knotens gehalten (einer festen Farbe, die sich aus der Knotennummer ableitet) – es handelt sich um denselben Chip wie in der Knotenliste, sodass ein Knoten überall gleich aussieht. Marker color does **not** encode online/offline status. When a node's position updates live, its marker briefly pulses. Nearby markers are clustered as you zoom out.
 
 ### Kartensteuerung
 
@@ -55,7 +55,7 @@ Waypoints are shared geographic points of interest that all mesh members can see
 | ------------ | ------------------------------------------------------- |
 | Name         | Short identifier (max 30 characters) |
 | Beschreibung | Optional longer description                             |
-| Icon         | Visual marker emoji on the map                          |
+| Symbol       | Visual marker emoji on the map                          |
 | Gesperrt     | If locked, only the creator can edit or delete          |
 | Expiration   | Optional auto-remove time                               |
 

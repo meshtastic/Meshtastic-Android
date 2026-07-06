@@ -43,9 +43,9 @@ Environmental sensor data (requires compatible hardware):
 | Gaswiderstand                        | BME680                |
 | IAQ (Air Quality) | BME680                |
 
-Environment metrics are charted over time for easy trend analysis — temperature, humidity, and pressure each get their own line chart with the measurement unit displayed on the Y axis.
+Umgebungsmesswerte werden zur einfachen Trendanalyse im Zeitverlauf dargestellt – Temperatur, Luftfeuchtigkeit und Luftdruck erhalten jeweils ein eigenes Liniendiagramm, wobei die Maßeinheit auf der Y-Achse angezeigt wird.
 
-The BME680 **IAQ (Indoor Air Quality)** index is a single 0–500+ value derived from gas resistance, shown against a color-coded scale from _Excellent_ to _Dangerously Polluted_:
+Der **IAQ-Index (Indoor Air Quality / Raumluftqualität)** des BME680 ist ein einzelner Wert im Bereich von 0 bis über 500, der aus dem Gaswiderstand abgeleitet und auf einer farbcodierten Skala von _Ausgezeichnet_ bis _Gefährlich belastet_ dargestellt wird:
 
 ![IAQ index scale from Excellent to Dangerously Polluted](../../assets/screenshots/node-metrics_iaq_scale.png)
 
@@ -53,22 +53,22 @@ The BME680 **IAQ (Indoor Air Quality)** index is a single 0–500+ value derived
 
 ## Air Quality Metrics
 
-Air Quality is a dedicated metrics view for nodes equipped with a particulate-matter and/or CO₂ sensor. It is **separate from the BME680 IAQ reading** listed under Environment Metrics — IAQ is a single gas-resistance-derived index, while the Air Quality view charts the underlying particulate and CO₂ measurements.
+Air Quality is a dedicated metrics view for nodes equipped with a particulate-matter and/or CO₂ sensor. Dies ist **unabhängig vom BME680-IAQ-Messwert**, der unter „Environment Metrics“ (Umgebungsmesswerte) aufgeführt ist – IAQ ist ein einzelner, aus dem Gaswiderstand abgeleiteter Index, während die Luftqualitätsansicht die zugrundeliegenden Messwerte für Feinstaub und CO₂ grafisch darstellt.
 
-| Metrisch              | Unit  | Beschreibung                                         |
-| --------------------- | ----- | ---------------------------------------------------- |
-| PM1.0 | µg/m³ | Particulate matter up to 1.0 micron  |
-| PM2.5 | µg/m³ | Particulate matter up to 2.5 microns |
-| PM10                  | µg/m³ | Particulate matter up to 10 microns                  |
-| CO₂                   | ppm   | Carbon dioxide concentration                         |
+| Metrisch              | Einheit | Beschreibung                                         |
+| --------------------- | ------- | ---------------------------------------------------- |
+| PM1.0 | µg/m³   | Particulate matter up to 1.0 micron  |
+| PM2.5 | µg/m³   | Particulate matter up to 2.5 microns |
+| PM10                  | µg/m³   | Particulate matter up to 10 microns                  |
+| CO₂                   | ppm     | Carbon dioxide concentration                         |
 
 CO₂ readings are color-coded by severity to make air quality easy to read at a glance:
 
 | Band     | CO₂ Range (ppm) | Farbe    |
 | -------- | ---------------------------------- | -------- |
 | Gut      | < 1000    | Grün     |
-| Stuffy   | < 2000    | Amber    |
-| Poor     | < 5000    | Orange   |
+| Stuffy   | < 2000    | Gelb     |
+| Schlecht | < 5000    | Orange   |
 | Unsafe   | < 30000   | Rot      |
 | Evacuate | ≥ 30000                            | Dark red |
 
@@ -96,7 +96,7 @@ Radio signal quality information:
 
 ### Signal Quality Reference
 
-Signal quality is rated from **SNR relative to the active LoRa modem preset's demodulation floor**, not from fixed thresholds — a given SNR means different things on different presets (e.g. −15 dB is fine on LongSlow but unusable on ShortFast). RSSI is shown but is not part of the rating. Letting `limit` be the preset's SNR limit:
+Die Signalqualität wird auf der Grundlage des **Signal-Rauschabstand im Verhältnis zur Demodulationsschwelle der aktiven LoRa-Modem-Voreinstellung** bewertet, nicht anhand fester Schwellenwerte – ein bestimmter Wert des Signal-Rauschabstand hat je nach Voreinstellung unterschiedliche Bedeutungen (z. B. sind −15 dB bei „LongSlow“ in Ordnung, bei „ShortFast“ jedoch unbrauchbar). RSSI is shown but is not part of the rating. Letting `limit` be the preset's SNR limit:
 
 | Quality                  | Criteria                                         |
 | ------------------------ | ------------------------------------------------ |
@@ -107,7 +107,7 @@ Signal quality is rated from **SNR relative to the active LoRa modem preset's de
 
 See [Understanding the Signal Meter](signal-meter) for the full explanation.
 
-Local Stats from your connected radio are also shown in Signal Quality when available. These logs include noise floor, traffic counters, relay counters, online node counts, and radio uptime. The noise floor chart uses a dashed reference line at -85 dBm to help identify a busy RF environment. Use **Request** to ask the connected radio for a fresh Local Stats telemetry report, **Clear** to remove Local Stats logs for that node, and **Save** to export the visible Local Stats history as CSV.
+Local Stats from your connected radio are also shown in Signal Quality when available. These logs include noise floor, traffic counters, relay counters, online node counts, and radio uptime. The noise floor chart uses a dashed reference line at -85 dBm to help identify a busy RF environment. Verwenden Sie **Anfordern**, um beim verbundenen Funkgerät einen aktuellen Telemetriebericht zu den lokalen Statistiken (Local Stats) abzurufen, **Löschen**, um die Protokolle der lokalen Statistiken für diesen Knoten zu löschen, und **Speichern**, um den sichtbaren Verlauf der lokalen Statistiken als CSV-Datei zu exportieren.
 
 ## Energiedaten
 

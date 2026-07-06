@@ -17,7 +17,7 @@ When something misbehaves, the app's debug logs are the single most useful thing
 
 Open the **Debug Panel** from **Settings → Advanced → Debug Panel**.
 
-> 📎 **Filing an issue?** Export your logs (see below) and attach the `.txt` file to your report at [github.com/meshtastic/Meshtastic-Android/issues](https://github.com/meshtastic/Meshtastic-Android/issues). A log capture that covers the moment the problem happened turns "it doesn't work" into something a developer can actually track down.
+> 📎 **Möchtest du ein Problem melden?** Exportiere deine Logs (siehe unten) und hänge die `.txt`-Datei an deinen Bericht unter [github.com/meshtastic/Meshtastic-Android/issues](https://github.com/meshtastic/Meshtastic-Android/issues) an. A log capture that covers the moment the problem happened turns "it doesn't work" into something a developer can actually track down.
 
 ## The two tabs
 
@@ -40,11 +40,11 @@ Error and warning lines are tinted so problems stand out.
 
 ## Exporting
 
-Tap the **download** icon to save the current logs to a file. You choose where it goes through the system file picker, and the file is named with a timestamp (for example `meshtastic_logcat_20260701_143312.txt`) so repeated exports never overwrite each other.
+Tap the **download** icon to save the current logs to a file. Sie wählen den Speicherort über die Dateiauswahl des Systems aus, und die Datei wird mit einem Zeitstempel versehen (zum Beispiel `meshtastic_logcat_20260701_143312.txt`), sodass sich wiederholte Exporte nicht gegenseitig überschreiben.
 
 Attach that file to your GitHub issue.
 
-> 🔒 **Privacy:** Exports automatically **redact** sensitive values such as channel keys and admin/session keys before writing the file. Even so, logs can contain node names, positions, and other identifying details — glance through the file before sharing it publicly, and share privately if you have any doubt.
+> 🔒 **Privacy:** Exports automatically **redact** sensitive values such as channel keys and admin/session keys before writing the file. Dennoch können Protokolldateien Knotennamen, Positionen und andere identifizierende Angaben enthalten – werfen Sie einen Blick in die Datei, bevor Sie sie öffentlich machen, und geben Sie sie nur privat weiter, falls Sie unsicher sind.
 
 ## Desktop
 

@@ -37,12 +37,12 @@ You can filter devices by transport type using the filter chips at the top:
 
 ### Connection Status
 
-| Icon | State               | Beschreibung                  |
-| ---- | ------------------- | ----------------------------- |
-| 🟢   | Verbunden           | Active radio link established |
-| 🟡   | Wird verbunden      | Handshake in progress         |
-| 🔴   | Verbindung getrennt | No active connection          |
-| ⚪    | Not configured      | Kein Gerät ausgewählt         |
+| Symbol | Status              | Beschreibung                  |
+| ------ | ------------------- | ----------------------------- |
+| 🟢     | Verbunden           | Active radio link established |
+| 🟡     | Wird verbunden      | Handshake in progress         |
+| 🔴     | Verbindung getrennt | No active connection          |
+| ⚪      | Not configured      | Kein Gerät ausgewählt         |
 
 When connecting, a status indicator shows the current connection state:
 

@@ -525,6 +525,7 @@
     <string name="firmware">Firmware</string>
     <string name="firmware_edition">Firmware-Version</string>
     <string name="firmware_old">Die Funkgerät-Firmware ist zu alt, um mit dieser App kommunizieren zu können. Für mehr Informationen darüber besuchen Sie <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">unsere Firmware-Installationsanleitung</a>.</string>
+    <string name="firmware_recovery_ble_failed">Das Update konnte nicht über Bluetooth abgeschlossen werden. Der Standard-Bootloader dieses Geräts kann ein unterbrochenes Over-the-Air-Update nicht zuverlässig zu Ende führen. Schließen Sie das Gerät per USB an einen Computer an und flashen Sie es neu mit dem seriellen DFU-Tool des Herstellers (z. B. adafruit-nrfutil), um es wiederherzustellen.</string>
     <string name="firmware_too_old">Firmware Aktualisierung erforderlich.</string>
     <string name="firmware_update_almost_there">Fast fertig...</string>
     <string name="firmware_update_alpha">Alpha</string>
@@ -727,7 +728,9 @@
     <string name="location_disabled">Standortzugriff ist deaktiviert, es kann kein Standort zum Mesh bereitgestellt werden.</string>
     <string name="location_sharing">Standortfreigabe</string>
     <!-- LOCKDOWN -->
+    <string name="lockdown_enable_warning">Hinweis: Die Aktivierung des Lockdown-Modus sperrt den Debug-Port (SWD) auf unterstützter Hardware. Sie können den Lockdown jederzeit mithilfe Ihrer Passphrase aufheben; zudem stellt ein vollständiges Zurücksetzen des Geräts bei Bedarf den ursprünglichen Zustand wieder her.</string>
     <string name="lockdown_hide_passphrase">Ausblenden</string>
+    <string name="lockdown_show_passphrase">Anzeigen</string>
     <string name="lockdown_submit">Absenden</string>
     <string name="locked">Gesperrt</string>
     <!-- LOG -->
@@ -793,6 +796,7 @@
     <string name="max">Maximal</string>
     <!-- MESH -->
     <string name="mesh_beacon_offer_dismiss">Verwerfen</string>
+    <string name="mesh_beacon_offer_join">Beitreten</string>
     <string name="mesh_map_location">Netzwerk Kartenstandort</string>
     <string name="mesh_map_location_description">Aktiviert den blauen Punkt für Ihr Telefon in der Netzwerkkarte.</string>
     <!-- MESHTASTIC -->
@@ -818,6 +822,7 @@
     <string name="message_status_sfpp_routing">Routen über den SF++ Weg.</string>
     <string name="message_status_unknown">Unbekannt</string>
     <string name="messages">Nachrichten</string>
+    <string name="micrograms_per_cubic_meter">µg/m³</string>
     <string name="min">Minimum</string>
     <string name="minimum_broadcast_seconds">Minimale Übertragungszeit (Sekunden)</string>
     <string name="minimum_distance">Intelligente Entfernung</string>
@@ -841,6 +846,7 @@
     <string name="mqtt_probe_tcp_failure">Broker (TCP) nicht erreichbar</string>
     <string name="mqtt_probe_timeout">Zeitüberschreitung nach %1$d ms</string>
     <string name="mqtt_probe_tls_failure">TLS Aushandlung fehlgeschlagen: %1$s</string>
+    <string name="mqtt_proxy_local_summary">Dieses Telefon leitet den MQTT-Datenverkehr für das verbundene Gerät weiter. Deaktivieren Sie diese Funktion, um die Weiterleitung sofort zu unterbrechen, ohne die MQTT-Einstellungen des Geräts zu ändern – dies ist nützlich, wenn der MQTT-Datenverkehr die Verbindung überlastet. Aktivieren Sie sie wieder, um die Weiterleitung fortzusetzen.</string>
     <string name="mqtt_status_connected">Verbunden</string>
     <string name="mqtt_status_connecting">Wird verbunden…</string>
     <string name="mqtt_status_disconnected">Verbindung getrennt</string>
@@ -951,6 +957,7 @@
     <string name="nodes_empty_searching_hint">Knoten in der Nähe erscheinen hier, sobald sie erreicht wurden.</string>
     <string name="nodes_empty_searching_title">Suche nach Knoten</string>
     <string name="nodes_queued_for_deletion">%1$d Knoten in der Warteschlange zum Löschen:</string>
+    <string name="noise_floor_definition">Das vom Funkempfänger gemessene HF-Hintergrundrauschen. Niedrigere Werte deuten in der Regel auf eine störungsärmere Empfangsumgebung hin; -85 dBm ist ein Referenzwert für eine hohe Auslastung, kein fester Schwellenwert für einen Ausfall.</string>
     <string name="none">Nichts (deaktiviert)</string>
     <string name="none_quality">Keine</string>
     <string name="not_connected">Nicht verbunden</string>
@@ -1026,6 +1033,9 @@
         <item quantity="one">%1$d Sekunde</item>
         <item quantity="other">%1$d Sekunden</item>
     </plurals>
+    <string name="pm1_0">PM1.0</string>
+    <string name="pm10">PM10</string>
+    <string name="pm2_5">PM2.5</string>
     <!-- POSITION -->
     <string name="position">Standort</string>
     <string name="position_config_set_fixed_from_phone">Vom aktuellen Telefonstandort festlegen</string>
@@ -1041,6 +1051,7 @@
     <string name="power_metrics_on_screen_enabled">Energiedatenanzeige aktiviert</string>
     <string name="power_metrics_update_interval_seconds">Aktualisierungsintervall für Energiedaten</string>
     <string name="powered">Angeschaltet</string>
+    <string name="ppm">ppm</string>
     <string name="precise_location">Genauer Standort</string>
     <string name="preferences_language">Sprache</string>
     <string name="preferences_system_default">System</string>
@@ -1394,10 +1405,12 @@
     <string name="traffic_management_unknown_packet_threshold">Unbekannter Paketgrenzwert</string>
     <string name="transmit_over_lora">Übertragen über LoRa</string>
     <!-- TRANSPORT -->
+    <string name="transport_api">API</string>
     <string name="transport_ble">BLE</string>
     <string name="transport_lora">LoRa</string>
     <string name="transport_mqtt">MQTT</string>
     <string name="transport_tcp">TCP</string>
+    <string name="transport_udp">UDP</string>
     <string name="transport_usb">USB</string>
     <string name="triple_click_adhoc_ping">Dreifachklick für Ping</string>
     <string name="twenty_four_hours">24H</string>

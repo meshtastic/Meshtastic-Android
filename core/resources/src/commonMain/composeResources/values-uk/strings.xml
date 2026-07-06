@@ -24,6 +24,8 @@
     <string name="a11y_node_hops_away">%1$d стрибків</string>
     <string name="a11y_node_offline">офлайн</string>
     <string name="a11y_node_online">онлайн</string>
+    <string name="a11y_node_role">роль %1$s</string>
+    <string name="a11y_node_signal">сигнал %1$s</string>
     <string name="accept">Прийняти</string>
     <string name="acknowledgements">Подяки</string>
     <!-- ACTION -->
@@ -78,6 +80,8 @@
     <string name="analytics_platforms">Аналітичні платформи:</string>
     <string name="any">Будь-який</string>
     <!-- APP -->
+    <string name="app_functions_send_message">Надіслати повідомлення</string>
+    <string name="app_functions_write_section">Функції запису</string>
     <string name="app_notifications">Сповіщення застосунку</string>
     <string name="app_settings">Застосунок</string>
     <string name="app_too_old">Потрібне оновлення програми</string>
@@ -112,6 +116,7 @@
     <string name="calculating">Обчислюю…</string>
     <string name="call_sign">Позивний</string>
     <string name="camera_permission">Дозвіл доступу до камери</string>
+    <string name="camera_unavailable">Не вдалося запустити камеру. Спробуйте ще раз, або закрийте сканер і повторно відкрийте його.</string>
     <string name="cancel">Скасувати</string>
     <string name="cancel_reply">Скасувати відповідь</string>
     <string name="canned_message">Шаблонне повідомлення</string>
@@ -142,6 +147,7 @@
     <string name="chirpy">Chirpy</string>
     <string name="chirpy_assistant_title">Помічник Chirpy</string>
     <string name="chirpy_downloading">Chirpy завантажується…</string>
+    <string name="chirpy_error_unsupported_platform">О ні! Здається, моя антена не може встановити з'єднання на цій платформі. 📡 Будь ласка, уважно перевірте сумісність з апаратурою!</string>
     <string name="chirpy_ready">Запитати Chirpy</string>
     <string name="chirpy_search_placeholder">Запитати про Meshtastic…</string>
     <string name="choose_contrast">Рівень контрасту</string>
@@ -252,6 +258,7 @@
     <string name="debug_search_prev">Попередій збіг</string>
     <string name="debug_store_logs_summary">Вимкнути запис логів мережі на диск</string>
     <string name="debug_store_logs_title">Сховище для логування</string>
+    <string name="debug_tab_packets">Пакетів</string>
     <string name="default_">За замовчуванням</string>
     <!-- DELETE -->
     <string name="delete">Видалити</string>
@@ -271,6 +278,7 @@
     <string name="desc_node_filter_clear">очистити фільтр вузлів</string>
     <string name="description">Опис</string>
     <string name="desktop_notification_title">Meshtastic</string>
+    <string name="desktop_tray_quit">Вийти</string>
     <string name="details">Подробиці</string>
     <string name="detection_sensor">Датчик виявлення</string>
     <string name="detection_sensor_config">Налаштування датчика виявлення</string>
@@ -300,8 +308,11 @@
     <string name="disconnected">Відключено</string>
     <string name="discovered_network_devices">Виявлені мережеві пристрої</string>
     <!-- DISCOVERY -->
+    <string name="discovery_delete_session">Видалити сеанс</string>
     <string name="discovery_dwell_minutes">%1$d хв</string>
     <string name="discovery_export_report">Експортувати звіт</string>
+    <string name="discovery_lora_presets">Пресети LoRa</string>
+    <string name="discovery_not_connected">Не під'єднано</string>
     <string name="discovery_paused">Призупинено: %1$s</string>
     <string name="discovery_scan_history">Історія сканувань</string>
     <string name="discovery_start_scan">Почати сканування</string>
@@ -314,6 +325,7 @@
     <string name="discovery_stop_scan">Зупинити сканування</string>
     <string name="discovery_time_remaining">%1$s залишилось</string>
     <string name="discovery_unique_nodes">%1$d унікальних вузлів</string>
+    <string name="discovery_view_map">Переглянути мапу</string>
     <string name="disk_free_indexed">Вільне місце %1$d</string>
     <!-- DISPLAY -->
     <string name="display">Дисплей</string>
@@ -409,6 +421,7 @@
     <string name="filter_enable_for_contact">Увімкнути фільтрацію</string>
     <string name="filter_enable_summary">Приховати повідомлення, які містять слова для фільтрації</string>
     <string name="filter_icon">Фільтри</string>
+    <string name="filter_message_label">Відфільтровано</string>
     <string name="filter_no_words">Жодного фільтра не налаштовано</string>
     <string name="filter_regex_pattern">Шаблон регулярного виразу</string>
     <string name="filter_settings">Фільтр повідомлень</string>
@@ -447,6 +460,7 @@
     <string name="firmware_update_method_wifi">WiFi OTA</string>
     <string name="firmware_update_no_device">Немає під'єднаних пристроїв</string>
     <string name="firmware_update_not_found_in_release">Не вдалося знайти прошивку %1$s в релізі.</string>
+    <string name="firmware_update_ota_failed">Помилка оновлення ОТА: %1$s</string>
     <string name="firmware_update_rebooting">Перезавантаження у DFU...</string>
     <string name="firmware_update_release_notes">Примітки до релізу</string>
     <string name="firmware_update_retrieval_failed">Не вдалося отримати файл прошивки.</string>
@@ -488,6 +502,8 @@
     <string name="generate_input_event_on_press">Генерувати подію при натисканні</string>
     <string name="generate_qr_code">Згенерувати QR-код</string>
     <!-- GEOFENCE -->
+    <string name="geofence_edit_area">Редагувати область</string>
+    <string name="geofence_left_title">Залишилось %1$s</string>
     <string name="get_started">З чого почати</string>
     <string name="good">Хороший</string>
     <!-- GPIO -->
@@ -511,7 +527,7 @@
     <string name="history_return_max">Максимальний обсяг історії</string>
     <string name="history_return_window">Максимальне вікно історії</string>
     <string name="hop_limit">Кількість стрибків</string>
-    <string name="hops_away">Кількість стрибків повідомлення</string>
+    <string name="hops_away">Стрибків</string>
     <string name="host">Хост</string>
     <string name="host_metrics_log">Показники хоста</string>
     <string name="humidity">Вологість</string>
@@ -669,6 +685,9 @@
     <string name="max">Макс</string>
     <!-- MESH -->
     <string name="mesh_beacon_offer_dismiss">Відхилити</string>
+    <string name="mesh_beacon_offer_join">Приєднатися</string>
+    <string name="mesh_beacon_offer_preset">Пресет: %1$s</string>
+    <string name="mesh_beacon_offer_region">Регіон: %1$s</string>
     <!-- MESHTASTIC -->
     <string name="meshtastic">Meshtastic</string>
     <string name="meshtastic_alerts_notifications">Сповіщення про тривоги</string>
@@ -793,7 +812,7 @@
     <string name="node_sort_button">Опції сортування вузлів</string>
     <string name="node_sort_channel">Канал</string>
     <string name="node_sort_distance">Відстань</string>
-    <string name="node_sort_hops_away">Кількість ретрансляцій</string>
+    <string name="node_sort_hops_away">Стрибків</string>
     <string name="node_sort_last_heard">Востаннє в мережі</string>
     <string name="node_sort_title">Сортувати за</string>
     <string name="node_sort_via_favorite">через Обране</string>
@@ -1052,6 +1071,7 @@
     <string name="scan">Сканувати</string>
     <string name="scan_bluetooth_devices">Пошук пристроїв Bluetooth</string>
     <string name="scan_network_devices">Пошук мережевих пристроїв</string>
+    <string name="scan_nfc">Сканувати NFC</string>
     <string name="scanning_bluetooth">Сканування…</string>
     <string name="scanning_network">Сканування…</string>
     <string name="screen_on_for">Екран включено для</string>
@@ -1152,6 +1172,7 @@
     <string name="tak_role_teammember">Член команди</string>
     <string name="tak_role_unspecified">Невизначений</string>
     <string name="tak_server_section">Сервер</string>
+    <string name="tak_server_test_result_bytes">%1$dB ✓</string>
     <string name="tak_server_test_result_unknown_error">✗</string>
     <string name="tak_team_blue">Синій</string>
     <string name="tak_team_brown">Коричневий</string>
@@ -1208,10 +1229,12 @@
     <!-- TRAFFIC -->
     <string name="transmit_over_lora">Передавати через LoRa</string>
     <!-- TRANSPORT -->
+    <string name="transport_api">API</string>
     <string name="transport_ble">BLE</string>
     <string name="transport_lora">LoRa</string>
     <string name="transport_mqtt">MQTT</string>
     <string name="transport_tcp">TCP</string>
+    <string name="transport_udp">UDP</string>
     <string name="transport_usb">USB</string>
     <string name="triple_click_adhoc_ping">Швидка перевірка зв'язку потрійним натисканням</string>
     <string name="twenty_four_hours">24Г</string>

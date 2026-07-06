@@ -13,7 +13,7 @@ aliases:
 
 # App Functions
 
-App Functions expose Meshtastic capabilities to the Android system and to on-device AI assistants (such as Gemini) through the Android App Functions API. With them enabled, an assistant can discover and trigger mesh workflows for you — for example sending a message or checking your mesh status — without you opening the app.
+App Functions expose Meshtastic capabilities to the Android system and to on-device AI assistants (such as Gemini) through the Android App Functions API. Wenn diese aktiviert sind, kann ein Assistent Mesh-Workflows für Sie finden und auslösen – zum Beispiel das Senden einer Nachricht oder das Überprüfen Ihres Mesh-Status –, ohne dass Sie die App öffnen müssen.
 
 > ⚠️ **Note:** App Functions are available on **Google-flavor Android builds only**.
 
@@ -26,7 +26,7 @@ App Functions are controlled from **Settings → System AI** (the in-app screen 
 - A **master toggle** labeled **"Allow AI access"**, with the subtitle _"Let system AI assistants (e.g. Gemini) discover and use mesh functions"_. When off, no functions are exposed to the system.
 - An **individual toggle for each function**, so you can expose only the capabilities you want.
 
-The functions are grouped into a **Write** section (functions that change something or send data to your mesh) and a **Read** section (functions that only return information).
+Die Funktionen sind in einen **Schreib**-Bereich (Funktionen, die etwas ändern oder Daten an Ihr Mesh senden) und einen **Lese**-Bereich (Funktionen, die lediglich Informationen zurückgeben) unterteilt.
 
 ![App Functions screen with master and per-function toggles](../../assets/screenshots/app-functions_settings.png)
 

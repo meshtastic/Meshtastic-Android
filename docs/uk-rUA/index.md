@@ -1,5 +1,5 @@
 ---
-title: Home
+title: Головна
 layout: default
 nav_order: 0
 ---
@@ -12,9 +12,9 @@ Use the sidebar navigation to browse the **User Guide** for app features and the
 
 ---
 
-## Quick Links
+## Швидкі посилання
 
-| Guide                                                                 | Опис                                                           |
+| Посібник                                                              | Опис                                                           |
 | --------------------------------------------------------------------- | -------------------------------------------------------------- |
 | [Getting Started](user/onboarding)                                    | Connect your first radio and send a message                    |
 | [Messages & Channels](user/messages-and-channels) | Channel broadcasts, direct messages, reactions, and encryption |

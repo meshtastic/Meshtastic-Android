@@ -95,6 +95,6 @@ Once connected to a radio, explore:
 - [Map & Waypoints](map-and-waypoints) — view node positions
 - [Settings](settings-radio-user) — configure your radio and user profile
 
-New to Meshtastic? The [getting started guide](https://meshtastic.org/docs/getting-started) on meshtastic.org covers hardware selection, initial radio configuration, and your first mesh setup.
+New to Meshtastic? Die [Anleitung für den Einstieg](https://meshtastic.org/docs/getting-started) auf meshtastic.org behandelt die Hardware-Auswahl, die anfängliche Funkkonfiguration und die Einrichtung deines ersten Mesh-Netzwerks.
 
 ---
