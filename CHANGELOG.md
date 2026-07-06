@@ -7,6 +7,19 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 <!-- UNRELEASED_START -->
 ## [Unreleased]
 
+### Unreleased (not yet in any build)
+
+#### 🏗️ Features
+* feat(messaging): @mention with deep-link to node detail (#6098) by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6108
+* feat(node): label power channels and fix pressure axis scale by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6111
+#### 🖥️ Desktop
+* fix(geofence): restrict crossing alerts to creator, add per-geofence opt-in by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6117
+#### 🛠️ Fixes
+* fix(ui): align AdaptiveTwoPane split to the adaptive directive breakpoint by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6112
+* fix(settings): Apply manual channel writes in order by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6077
+* fix(settings): Generate fresh PSK for named manual channels by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6076
+* fix(discovery): let default-channel users start a scan by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6120
+
 ### Internal (v2.8.0-internal.16)
 Changes since [`v2.8.0-closed.5`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.0-closed.5):
 
