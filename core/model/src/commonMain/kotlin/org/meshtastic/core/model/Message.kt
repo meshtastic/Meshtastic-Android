@@ -86,10 +86,15 @@ fun getMessageRoutingErrorStringResFrom(routingError: Int): StringResource = whe
     -> Res.string.message_routing_error_max_retransmit
 
     Routing.Error.NO_CHANNEL.value -> Res.string.message_routing_error_no_channel
+
     Routing.Error.TOO_LARGE.value -> Res.string.message_routing_error_too_large
+
     Routing.Error.PKI_FAILED.value -> Res.string.message_routing_error_pki_failed
+
     Routing.Error.PKI_UNKNOWN_PUBKEY.value -> Res.string.message_routing_error_pki_unknown_pubkey
+
     Routing.Error.PKI_SEND_FAIL_PUBLIC_KEY.value -> Res.string.message_routing_error_pki_send_fail_public_key
+
     else -> getStringResFrom(routingError)
 }
 
