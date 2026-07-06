@@ -886,7 +886,8 @@ class RadioConfigViewModelTest {
         val config = Config.SecurityConfig(public_key = "pub".encodeUtf8(), private_key = "priv".encodeUtf8())
         viewModel.backupSecurityKeys(config)
 
-        verify { securityKeyBackupStore.save(123, any(), any(), any()) }
+        // Pin the exact base64 so a public/private swap or encoding change is caught.
+        verify { securityKeyBackupStore.save(123, "cHVi", "cHJpdg==", any()) }
     }
 
     @Test
