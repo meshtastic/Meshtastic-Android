@@ -16,15 +16,12 @@
  */
 package org.meshtastic.feature.messaging.component
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -33,6 +30,7 @@ import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.message_delivery_status
+import org.meshtastic.core.ui.component.StatusSurface
 import org.meshtastic.core.ui.icon.Acknowledged
 import org.meshtastic.core.ui.icon.AddLink
 import org.meshtastic.core.ui.icon.CloudUpload
@@ -72,17 +70,16 @@ fun MessageStatusIcon(status: MessageStatus, modifier: Modifier = Modifier, tint
  * Delivery status shown as text next to the bubble (meshtastic/design#43) — the descriptive wording, not just an icon.
  * The icon and color reinforce the text; they are never the sole signal. The parent bubble carries the same wording in
  * its merged [contentDescription] for TalkBack, so this row stays a visual-only reinforcement.
+ *
+ * Rendered on a [StatusSurface] like the neighboring Snr/Rssi/shield chips: the status-token colors only hold WCAG
+ * contrast against the dark scrim (see ColorContrastTest / StatusSurfaceTest), and the bubble backdrop can be light.
  */
 @Composable
 fun MessageStatusLabel(message: Message, modifier: Modifier = Modifier) {
     val status = message.status ?: MessageStatus.UNKNOWN
     val (_, textRes) = message.getStatusStringRes()
     val tint = messageStatusColor(message)
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
+    StatusSurface(modifier = modifier) {
         MessageStatusIcon(status = status, modifier = Modifier.size(14.dp), tint = tint)
         Text(text = stringResource(textRes), style = MaterialTheme.typography.labelSmall, color = tint)
     }
@@ -104,5 +101,6 @@ private fun messageStatusColor(message: Message): Color = when (message.status) 
 
     MessageStatus.ERROR -> MaterialTheme.colorScheme.StatusRed
 
-    else -> MaterialTheme.colorScheme.onSurfaceVariant
+    // On the dark StatusScrim a light neutral stays legible; onSurfaceVariant would be too dim.
+    else -> Color.White
 }
