@@ -352,7 +352,6 @@
     <string name="exchange_position">Schimb de poziție</string>
     <string name="expand_chart">Extindeți graficul</string>
     <string name="expires">Expiră la</string>
-    <!-- EXPORT -->
     <string name="export_configuration">Exportă configurația</string>
     <string name="export_data_csv">Exportă toate pachetele</string>
     <string name="external_notification">Notificare externă</string>
@@ -521,6 +520,7 @@
     <string name="ip_port">Port:</string>
     <string name="ipv4_mode">Mod IPv4</string>
     <string name="json_output_enabled">Ieșire JSON activată</string>
+    <!-- KEY -->
     <string name="key_verification_final_title">Verificare cheie finalizată</string>
     <string name="key_verification_request_title">Solicitare de verificare cheie</string>
     <string name="key_verification_title">Verificare cheie</string>
@@ -637,6 +637,7 @@
     <string name="max">Maxim</string>
     <!-- MESH -->
     <string name="mesh_beacon_offer_dismiss">Renunțați</string>
+    <string name="mesh_beacon_preset_none">Niciunul</string>
     <string name="mesh_map_location">Locație hartă plasa</string>
     <string name="mesh_map_location_description">Activează punctul albastru pentru telefon în harta plasei.</string>
     <!-- MESHTASTIC -->
@@ -1144,6 +1145,7 @@
     <string name="traffic_management_rate_limit_window">Evaluează fereastra limită (secunde)</string>
     <string name="traffic_management_router_preserve_hops">Păstrează Hops Router</string>
     <string name="traffic_management_unknown_packet_threshold">Prag de pachet necunoscut</string>
+    <!-- TRANSLATION -->
     <string name="transmit_over_lora">Transmite peste LoRA</string>
     <!-- TRANSPORT -->
     <string name="transport_lora">LoRa</string>

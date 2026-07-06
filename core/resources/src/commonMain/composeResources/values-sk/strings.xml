@@ -153,7 +153,6 @@
     <string name="ethernet_enabled">Ethernet zapnutý</string>
     <string name="ethernet_ip">Eternet IP:</string>
     <string name="exchange_position">Vymeniť si pozície</string>
-    <!-- EXPORT -->
     <string name="export_configuration">Exportovať konfiguráciu</string>
     <string name="external_notification">Externá notifikácia</string>
     <string name="factory_reset">Obnova do výrobných nastavení</string>
@@ -200,6 +199,7 @@
     <string name="ip_address">IP adresa:</string>
     <string name="ip_port">Port:</string>
     <string name="ipv4_mode">IPv4 režim</string>
+    <!-- KEY -->
     <!-- LABEL -->
     <string name="label_long_fast">Ďaleký Dosah - Rýchlo</string>
     <string name="label_long_moderate">Ďaleký Dosah - Mierne</string>
@@ -257,6 +257,7 @@
     <string name="map_tile_source">Zdroj dlaždíc</string>
     <string name="max">Maximum</string>
     <!-- MESH -->
+    <string name="mesh_beacon_preset_none">Žiadny</string>
     <!-- MESHTASTIC -->
     <string name="meshtastic">Meshtastic</string>
     <string name="meshtastic_alerts_notifications">Notifikácie upozornení</string>
@@ -469,6 +470,7 @@
     </plurals>
     <string name="traceroute_log">Trasovanie</string>
     <!-- TRAFFIC -->
+    <!-- TRANSLATION -->
     <string name="transmit_over_lora">Vysielať cez sieť LoRa</string>
     <!-- TRANSPORT -->
     <string name="transport_lora">LoRa</string>

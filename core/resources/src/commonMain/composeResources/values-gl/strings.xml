@@ -77,7 +77,6 @@
     <!-- ENVIRONMENT -->
     <string name="error">Erro</string>
     <string name="error_duty_cycle">O límite do Ciclo de Traballo de Sinal foi alcanzado. Non se pode enviar mensaxes agora, inténtao despois.</string>
-    <!-- EXPORT -->
     <string name="factory_reset">Restablecemento de fábrica</string>
     <!-- FILTER -->
     <string name="filter_icon">Filtro</string>
@@ -95,6 +94,7 @@
     <string name="intro_show">Amosar introdución</string>
     <string name="ip_address">Enderezo IP:</string>
     <string name="ip_port">Porto:</string>
+    <!-- KEY -->
     <!-- LABEL -->
     <!-- LOAD -->
     <!-- LOCAL -->
@@ -214,6 +214,7 @@
     <string name="traceroute">Traza-ruta</string>
     <string name="traceroute_log">Traza-ruta</string>
     <!-- TRAFFIC -->
+    <!-- TRANSLATION -->
     <!-- TRANSPORT -->
     <string name="two_days">48 Horas</string>
     <!-- UNKNOWN -->

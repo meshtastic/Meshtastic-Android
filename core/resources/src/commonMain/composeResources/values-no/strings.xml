@@ -89,7 +89,6 @@
     <!-- ENVIRONMENT -->
     <string name="error">Feil</string>
     <string name="error_duty_cycle">Grensen for sykluser er nådd. Kan ikke sende meldinger akkurat nå, prøv igjen senere.</string>
-    <!-- EXPORT -->
     <string name="factory_reset">Tilbakestill til fabrikkstandard</string>
     <string name="fair">Middelmådig</string>
     <!-- FILTER -->
@@ -112,6 +111,7 @@
     <string name="interval_unset">Lås opp</string>
     <string name="intro_show">Vis introduksjon</string>
     <string name="ip_address">IP-adresse:</string>
+    <!-- KEY -->
     <!-- LABEL -->
     <!-- LOAD -->
     <!-- LOCAL -->
@@ -139,6 +139,7 @@
     <string name="map_tile_source">Fliskilde</string>
     <string name="max">Maks</string>
     <!-- MESH -->
+    <string name="mesh_beacon_preset_none">Ingen</string>
     <!-- MESHTASTIC -->
     <string name="meshtastic_new_nodes_notifications">Varsel om nye noder</string>
     <string name="meshtastic_service_notifications">Tjeneste meldinger</string>
@@ -287,6 +288,7 @@
     </plurals>
     <string name="traceroute_log">Traceroute</string>
     <!-- TRAFFIC -->
+    <!-- TRANSLATION -->
     <!-- TRANSPORT -->
     <string name="twenty_four_hours">24t</string>
     <string name="two_days">48 Timer</string>

@@ -115,6 +115,7 @@
     <string name="audio_config">Audioeinstellungen</string>
     <string name="available_pins">Verfügbare Pins</string>
     <string name="back">Zurück</string>
+    <string name="backup_keys">Schlüssel sichern</string>
     <string name="backup_restore">Sichern &amp; Wiederherstellen</string>
     <string name="bad">Schlecht</string>
     <string name="bandwidth">Bandbreite</string>
@@ -488,11 +489,8 @@
     <string name="exchange_position">Standort austauschen</string>
     <string name="expand_chart">Diagramm einblenden</string>
     <string name="expires">Gültig bis</string>
-    <!-- EXPORT -->
     <string name="export_configuration">Einstellungen exportieren</string>
     <string name="export_data_csv">Alle Pakete exportieren</string>
-    <string name="export_keys">Schlüssel exportieren</string>
-    <string name="export_keys_confirmation">Exportiert den öffentlichen und privaten Schlüssel in eine Datei. Bitte speichern Sie diese an einem sicheren Ort.</string>
     <string name="export_tak_data_package">TAK Datenpaket exportieren</string>
     <string name="external_notification">Externe Benachrichtigung</string>
     <string name="external_notification_config">Einstellungen für externe Benachrichtigungen</string>
@@ -670,6 +668,7 @@
     <string name="ip_port">Port:</string>
     <string name="ipv4_mode">IPv4 Modus</string>
     <string name="json_output_enabled">JSON-Ausgabe aktiviert</string>
+    <!-- KEY -->
     <string name="key_verification_final_title">Schlüsselprüfung abgeschlossen</string>
     <string name="key_verification_request_title">Anfrage zur Schlüsselprüfung</string>
     <string name="key_verification_title">Schlüsselprüfung</string>
@@ -797,6 +796,7 @@
     <!-- MESH -->
     <string name="mesh_beacon_offer_dismiss">Verwerfen</string>
     <string name="mesh_beacon_offer_join">Beitreten</string>
+    <string name="mesh_beacon_preset_none">Keins</string>
     <string name="mesh_map_location">Netzwerk Kartenstandort</string>
     <string name="mesh_map_location_description">Aktiviert den blauen Punkt für Ihr Telefon in der Netzwerkkarte.</string>
     <!-- MESHTASTIC -->
@@ -1403,6 +1403,8 @@
     <string name="traffic_management_rate_limit_window">Zeitfenster für Begrenzung (Sek.)</string>
     <string name="traffic_management_router_preserve_hops">Router Sprungweite erhalten</string>
     <string name="traffic_management_unknown_packet_threshold">Unbekannter Paketgrenzwert</string>
+    <string name="translate">Translate</string>
+    <!-- TRANSLATION -->
     <string name="transmit_over_lora">Übertragen über LoRa</string>
     <!-- TRANSPORT -->
     <string name="transport_api">API</string>

@@ -86,7 +86,6 @@
     <string name="encryption_psk">مفتاح مشترك</string>
     <!-- ENVIRONMENT -->
     <string name="error">غلط</string>
-    <!-- EXPORT -->
     <string name="fair">مناسب</string>
     <string name="favorite">المفضلة</string>
     <string name="favorite_add">إضافة '%1$s' كعقدة مفضلة؟</string>
@@ -107,6 +106,7 @@
     <string name="info">معلومات</string>
     <string name="interval_unset">إلغاء تعيين</string>
     <string name="ip_address">عنوان الـ IP:</string>
+    <!-- KEY -->
     <!-- LABEL -->
     <!-- LOAD -->
     <!-- LOCAL -->
@@ -123,6 +123,7 @@
     <string name="map_start_download">ابدأ التحميل</string>
     <string name="max">الأعلى</string>
     <!-- MESH -->
+    <string name="mesh_beacon_preset_none">لا يوجد</string>
     <!-- MESHTASTIC -->
     <string name="meshtastic_low_battery_notifications">إشعارات انخفاض شدة البطارية</string>
     <string name="meshtastic_new_nodes_notifications">إشعارات العقدة الجديدة</string>
@@ -228,6 +229,7 @@
     <!-- TRACEROUTE -->
     <string name="traceroute_direct">مباشره</string>
     <!-- TRAFFIC -->
+    <!-- TRANSLATION -->
     <!-- TRANSPORT -->
     <string name="transport_lora">إعدادات لورا</string>
     <string name="transport_mqtt">MQTT</string>

@@ -181,7 +181,6 @@
     <string name="error_duty_cycle">Limite do ciclo de trabalho atingido. Não é possível enviar mensagens no momento. Tente novamente mais tarde.</string>
     <string name="ethernet_enabled">Ethernet ativada</string>
     <string name="exchange_position">Intercâmbio de posições</string>
-    <!-- EXPORT -->
     <string name="export_configuration">Exportar configuração</string>
     <string name="external_notification">Notificação externa</string>
     <string name="external_notification_config">Configuração de Notificação Externa</string>
@@ -250,6 +249,7 @@
     <string name="ip_port">Porta:</string>
     <string name="ipv4_mode">Modo IPv4</string>
     <string name="json_output_enabled">Saída JSON ativada</string>
+    <!-- KEY -->
     <!-- LABEL -->
     <string name="latitude">Latitude</string>
     <string name="led_state">Estado do LED</string>
@@ -294,6 +294,7 @@
     <string name="map_tile_source">Fonte dos blocos</string>
     <string name="max">Máximo</string>
     <!-- MESH -->
+    <string name="mesh_beacon_preset_none">Nenhum</string>
     <!-- MESHTASTIC -->
     <string name="meshtastic">Nome do nó de alternativo</string>
     <string name="meshtastic_alerts_notifications">Notificações de alerta</string>
@@ -546,6 +547,7 @@
     </plurals>
     <string name="traceroute_log">Traçar rota</string>
     <!-- TRAFFIC -->
+    <!-- TRANSLATION -->
     <string name="transmit_over_lora">Enviar por LoRa</string>
     <!-- TRANSPORT -->
     <string name="transport_lora">LoRa</string>

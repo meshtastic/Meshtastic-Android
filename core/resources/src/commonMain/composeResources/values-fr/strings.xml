@@ -114,6 +114,7 @@
     <string name="audio_config">Configuration audio</string>
     <string name="available_pins">Broches disponibles</string>
     <string name="back">Retour</string>
+    <string name="backup_keys">Sauvegarder les clés</string>
     <string name="backup_restore">Sauvegarder &amp; Restaurer</string>
     <string name="bad">Mauvais</string>
     <string name="bandwidth">Bande Passante</string>
@@ -467,11 +468,8 @@
     <string name="exchange_position">Demander position</string>
     <string name="expand_chart">Agrandir le graphique</string>
     <string name="expires">Expire</string>
-    <!-- EXPORT -->
     <string name="export_configuration">Exporter la configuration</string>
     <string name="export_data_csv">Exporter tous les paquets</string>
-    <string name="export_keys">Exporter les clés</string>
-    <string name="export_keys_confirmation">Exporte les clés publiques et privées vers un fichier. Veuillez stocker quelque part en toute sécurité.</string>
     <string name="export_tak_data_package">Exporter le paquet de données TAK</string>
     <string name="external_notification">Notification externe</string>
     <string name="external_notification_config">Configuration de notification externe</string>
@@ -647,6 +645,7 @@
     <string name="ip_port">Port :</string>
     <string name="ipv4_mode">Mode IPv4</string>
     <string name="json_output_enabled">Sortie JSON activée</string>
+    <!-- KEY -->
     <string name="key_verification_final_title">Vérification de la clé terminée</string>
     <string name="key_verification_request_title">Requête de vérification de clé</string>
     <string name="key_verification_title">Vérification de la clé</string>
@@ -767,6 +766,7 @@
     <string name="max">Max</string>
     <!-- MESH -->
     <string name="mesh_beacon_offer_dismiss">Rejeter</string>
+    <string name="mesh_beacon_preset_none">Aucun</string>
     <string name="mesh_map_location">Emplacement de la carte de maillage</string>
     <string name="mesh_map_location_description">Active le point de localisation bleu de votre téléphone sur la carte de maillage.</string>
     <!-- MESHTASTIC -->
@@ -1333,6 +1333,7 @@
     <string name="traffic_management_rate_limit_window">Fenêtre de limitation de taux (secs)</string>
     <string name="traffic_management_router_preserve_hops">Conserver les sauts du Routeur</string>
     <string name="traffic_management_unknown_packet_threshold">Seuil de paquets inconnu</string>
+    <!-- TRANSLATION -->
     <string name="transmit_over_lora">Transmettre par LoRa</string>
     <!-- TRANSPORT -->
     <string name="transport_ble">BLE</string>

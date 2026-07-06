@@ -181,10 +181,7 @@
     <string name="ethernet_enabled">이더넷 활성화</string>
     <string name="exchange_position">위치 교환</string>
     <string name="expires">만료</string>
-    <!-- EXPORT -->
     <string name="export_configuration">설정 내보내기</string>
-    <string name="export_keys">키 내보내기</string>
-    <string name="export_keys_confirmation">공개 및 개인 키를 파일로 내 보냅니다. 안전하게 보관하십시오.</string>
     <string name="external_notification">외부 알림</string>
     <string name="external_notification_config">외부 알림 설정</string>
     <string name="external_notification_enabled">외부 알림 활성화</string>
@@ -253,6 +250,7 @@
     <string name="ip_port">포트:</string>
     <string name="ipv4_mode">IPv4 모드</string>
     <string name="json_output_enabled">JSON 사용</string>
+    <!-- KEY -->
     <!-- LABEL -->
     <string name="last_position_update">최근 위치 업데이트</string>
     <string name="latitude">위도</string>
@@ -302,6 +300,7 @@
     <string name="max">최대</string>
     <!-- MESH -->
     <string name="mesh_beacon_offer_dismiss">취소</string>
+    <string name="mesh_beacon_preset_none">없음</string>
     <!-- MESHTASTIC -->
     <string name="meshtastic">Meshtastic</string>
     <string name="meshtastic_alerts_notifications">경고 알림</string>
@@ -570,6 +569,7 @@
     <string name="traceroute_log">추적 루트</string>
     <!-- TRAFFIC -->
     <string name="traffic_management_enabled">모듈 활성화</string>
+    <!-- TRANSLATION -->
     <string name="transmit_over_lora">LoRa로 전송</string>
     <!-- TRANSPORT -->
     <string name="transport_ble">BLE</string>

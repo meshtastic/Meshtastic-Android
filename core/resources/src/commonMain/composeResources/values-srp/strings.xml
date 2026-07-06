@@ -169,7 +169,6 @@
     <string name="error_duty_cycle">Достигнут је лимит циклуса рада. Не могу слати поруке тренутно, молимо вас покушајте касније.</string>
     <string name="ethernet_config">Етернет опције</string>
     <string name="expires">Истиче</string>
-    <!-- EXPORT -->
     <string name="external_notification">Спољна обавештења</string>
     <string name="external_notification_config">Подешавање спољних обавештења</string>
     <string name="factory_reset">Рестартовање на фабричка подешавања</string>
@@ -218,6 +217,7 @@
     <string name="interval_unset">Уклони</string>
     <string name="intro_show">Прикажи упутства</string>
     <string name="ip_address">IP адреса:</string>
+    <!-- KEY -->
     <!-- LABEL -->
     <string name="label_long_fast">Дугачки домет - Брзо</string>
     <string name="label_long_moderate">Дугачки домет - Умерено</string>
@@ -265,6 +265,7 @@
     <string name="max">Максимум</string>
     <!-- MESH -->
     <string name="mesh_beacon_offer_dismiss">Отпусти</string>
+    <string name="mesh_beacon_preset_none">Ништа</string>
     <!-- MESHTASTIC -->
     <string name="meshtastic_alerts_notifications">Обавештења о упозорењима</string>
     <string name="meshtastic_low_battery_notifications">Нотификације о ниском нивоу батерије</string>
@@ -480,6 +481,7 @@
     <string name="traceroute_log">Праћење руте</string>
     <string name="traceroute_no_response">Нема одговора</string>
     <!-- TRAFFIC -->
+    <!-- TRANSLATION -->
     <!-- TRANSPORT -->
     <string name="transport_ble">БЛЕ</string>
     <string name="transport_lora">LoRA</string>

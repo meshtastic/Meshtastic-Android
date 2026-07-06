@@ -81,7 +81,6 @@
     <!-- ENVIRONMENT -->
     <string name="error">Pogreška</string>
     <string name="error_duty_cycle">Dosegnuto je ograničenje radnog ciklusa. Trenutačno nije moguće poslati poruke, pokušajte ponovno kasnije.</string>
-    <!-- EXPORT -->
     <string name="factory_reset">Vraćanje na tvorničke postavke</string>
     <!-- FILTER -->
     <string name="filter_icon">Filtriraj</string>
@@ -98,6 +97,7 @@
     <string name="interval_unset">Nepostavljeno</string>
     <string name="intro_show">Prikaži uvod</string>
     <string name="ip_address">IP Adresa:</string>
+    <!-- KEY -->
     <!-- LABEL -->
     <!-- LOAD -->
     <!-- LOCAL -->
@@ -219,6 +219,7 @@
     <string name="traceroute">Traceroute</string>
     <string name="traceroute_log">Traceroute</string>
     <!-- TRAFFIC -->
+    <!-- TRANSLATION -->
     <!-- TRANSPORT -->
     <string name="two_days">48 Sati</string>
     <!-- UNKNOWN -->

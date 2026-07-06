@@ -102,8 +102,6 @@
     <string name="environment">Асяроддзе</string>
     <string name="error">Памылка</string>
     <string name="ethernet_ip">Ethernet IP:</string>
-    <!-- EXPORT -->
-    <string name="export_keys">Экспартаваць ключы</string>
     <string name="fallback_node_name">Meshtastic %1$s</string>
     <!-- FILTER -->
     <string name="filter_icon">Фільтраваць</string>
@@ -129,6 +127,7 @@
     <string name="ip">IP</string>
     <string name="ip_address">IP-адрас:</string>
     <string name="ip_port">Порт:</string>
+    <!-- KEY -->
     <!-- LABEL -->
     <!-- LOAD -->
     <!-- LOCAL -->
@@ -144,6 +143,7 @@
     <string name="map_type_satellite">Спадарожнік</string>
     <string name="map_type_terrain">Рэльеф</string>
     <!-- MESH -->
+    <string name="mesh_beacon_preset_none">Нічога</string>
     <!-- MESHTASTIC -->
     <string name="meshtastic">Meshtastic</string>
     <string name="meshtastic_app_name">Meshtastic</string>
@@ -282,6 +282,7 @@
     <string name="timeout">Скончыўся час чакання</string>
     <!-- TRACEROUTE -->
     <!-- TRAFFIC -->
+    <!-- TRANSLATION -->
     <!-- TRANSPORT -->
     <string name="transport_lora">LoRa</string>
     <string name="transport_mqtt">MQTT</string>

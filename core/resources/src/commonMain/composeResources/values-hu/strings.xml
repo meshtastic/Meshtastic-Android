@@ -299,11 +299,8 @@
     <string name="ethernet_ip">Ethernet IP:</string>
     <string name="exchange_position">Pozíciócsere</string>
     <string name="expires">Lejárat</string>
-    <!-- EXPORT -->
     <string name="export_configuration">Beállítás exportálása</string>
     <string name="export_data_csv">Minden csomag exportálása</string>
-    <string name="export_keys">Kulcsok exportálása</string>
-    <string name="export_keys_confirmation">A nyilvános és privát kulcsokat fájlba exportálja. Kérlek, tárold biztonságos helyen.</string>
     <string name="external_notification">Külső értesítés</string>
     <string name="external_notification_config">Külső értesítés beállításai</string>
     <string name="external_notification_enabled">Külső értesítés engedélyezve</string>
@@ -393,6 +390,7 @@
     <string name="ip_port">Port:</string>
     <string name="ipv4_mode">IPv4 mód</string>
     <string name="json_output_enabled">JSON kimenet engedélyezve</string>
+    <!-- KEY -->
     <!-- LABEL -->
     <string name="label_long_fast">Nagy hatótáv – Gyors</string>
     <string name="label_long_moderate">Nagy hatótáv – Közepes</string>
@@ -480,6 +478,7 @@
     <string name="max">Max</string>
     <!-- MESH -->
     <string name="mesh_beacon_offer_dismiss">Bezárás</string>
+    <string name="mesh_beacon_preset_none">Semmi</string>
     <string name="mesh_map_location">Mesh-térkép helyzet</string>
     <string name="mesh_map_location_description">Engedélyezi a telefon kék helyjelölőjét a mesh térképen.</string>
     <!-- MESHTASTIC -->
@@ -869,6 +868,7 @@
     <string name="track_and_share_locations">Kövesd és oszd meg a helyzeted</string>
     <string name="track_point">nyomvonalpont</string>
     <!-- TRAFFIC -->
+    <!-- TRANSLATION -->
     <string name="transmit_over_lora">Továbbítás LoRa-n keresztül</string>
     <!-- TRANSPORT -->
     <string name="transport_lora">LoRa</string>

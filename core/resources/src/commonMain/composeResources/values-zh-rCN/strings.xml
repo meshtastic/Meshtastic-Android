@@ -115,6 +115,7 @@
     <string name="audio_config">音频配置</string>
     <string name="available_pins">可用引脚</string>
     <string name="back">后退</string>
+    <string name="backup_keys">备份密钥</string>
     <string name="backup_restore">备份 &amp; 还原</string>
     <string name="bad">差</string>
     <string name="bandwidth">带宽</string>
@@ -559,12 +560,9 @@
     <string name="expand_chart">展开图表</string>
     <string name="expanded">展开</string>
     <string name="expires">有效期</string>
-    <!-- EXPORT -->
     <string name="export_configuration">导出配置</string>
     <string name="export_data_csv">导出所有数据包</string>
     <string name="export_gpx">导出 GPX 文件</string>
-    <string name="export_keys">导出密钥</string>
-    <string name="export_keys_confirmation">导出公钥和私钥到文件。请安全地存储某处。</string>
     <string name="export_tak_data_package">导出 TAK 数据包</string>
     <string name="external_notification">外部通知</string>
     <string name="external_notification_config">外部通知设置</string>
@@ -598,10 +596,10 @@
     <string name="firmware_edition">固件版本</string>
     <string name="firmware_old">版本过旧，无法与此应用程序通讯。欲了解更多信息，请参阅 Meshtastic 网站上的<a href="https://meshtastic.org/docs/getting-started/flashing-firmware">韧体安装指南</a>。</string>
     <string name="firmware_recovery_banner">完成更新 %1$s</string>
-    <string name="firmware_recovery_button">继续固件升级</string>
-    <string name="firmware_recovery_explanation">此设备目前处于引导程序模式，原因是之前的固件更新未能完成请将其保持在手机附近系统将重新刷入固件以完成更新。</string>
     <string name="firmware_recovery_ble_failed">无法通过蓝牙完成更新该设备的原生引导程序无法可靠地完成被中断的无线更新。请使用 USB 数据线将其连接到电脑，并使用厂商提供的串口 DFU 工具（例如 adafruit-nrfutil）重新刷入固件，以恢复设备。</string>
+    <string name="firmware_recovery_button">继续固件升级</string>
     <string name="firmware_recovery_dismiss">取消固件恢复</string>
+    <string name="firmware_recovery_explanation">此设备目前处于引导程序模式，原因是之前的固件更新未能完成请将其保持在手机附近系统将重新刷入固件以完成更新。</string>
     <string name="firmware_too_old">需要固件更新。</string>
     <string name="firmware_update_almost_there">即将完成…</string>
     <string name="firmware_update_alpha">开发版本</string>
@@ -772,6 +770,7 @@
     <string name="ip_port">端口：</string>
     <string name="ipv4_mode">IPv4模式</string>
     <string name="json_output_enabled">启用JSON输出</string>
+    <!-- KEY -->
     <string name="key_verification_final_title">密钥验证完成</string>
     <string name="key_verification_request_title">密钥验证请求</string>
     <string name="key_verification_title">密钥验证</string>
@@ -933,6 +932,7 @@
     <string name="mesh_beacon_offer_preset">预设: %1$s</string>
     <string name="mesh_beacon_offer_region">地区: %1$s</string>
     <string name="mesh_beacon_offer_title">Mesh 组网邀请</string>
+    <string name="mesh_beacon_preset_none">无</string>
     <string name="mesh_map_location">网格地图位置</string>
     <string name="mesh_map_location_description">在网格地图中为您的手机开启蓝色位置点。</string>
     <!-- MESHTASTIC -->
@@ -1553,6 +1553,7 @@
     <string name="traffic_management_rate_limit_window">速度限制窗口 (秒)</string>
     <string name="traffic_management_router_preserve_hops">保留路由跳数</string>
     <string name="traffic_management_unknown_packet_threshold">未知包阈值</string>
+    <!-- TRANSLATION -->
     <string name="transmit_over_lora">通过 LoRa 传输</string>
     <!-- TRANSPORT -->
     <string name="transport">传输方式</string>

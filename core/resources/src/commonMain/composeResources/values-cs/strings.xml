@@ -354,11 +354,8 @@
     <string name="ethernet_enabled">Ethernet povolen</string>
     <string name="exchange_position">Vyžádat pozici</string>
     <string name="expires">Platnost do</string>
-    <!-- EXPORT -->
     <string name="export_configuration">Exportovat nastavení</string>
     <string name="export_data_csv">Exportovat všechny pakety</string>
-    <string name="export_keys">Exportovat klíče</string>
-    <string name="export_keys_confirmation">Exportuje veřejné a soukromé klíče do souboru. Uložte je prosím bezpečně.</string>
     <string name="external_notification">Externí oznámení</string>
     <string name="external_notification_config">Nastavení externího oznámení</string>
     <string name="external_notification_enabled">Externí oznámení povoleno</string>
@@ -511,6 +508,7 @@
     <string name="ip_port">Port:</string>
     <string name="ipv4_mode">Režim IPv4</string>
     <string name="json_output_enabled">JSON výstup povolen</string>
+    <!-- KEY -->
     <!-- LABEL -->
     <string name="last_heard_filter_label">Filtrovat podle času posledního slyšení: %1$s</string>
     <string name="last_position_update">Poslední aktualizace pozice</string>
@@ -601,6 +599,7 @@
     <string name="max">Max</string>
     <!-- MESH -->
     <string name="mesh_beacon_offer_dismiss">Zavřít</string>
+    <string name="mesh_beacon_preset_none">Žádný</string>
     <string name="mesh_map_location">Poloha v mesh mapě</string>
     <string name="mesh_map_location_description">Zobrazí modrou tečku polohy vašeho telefonu v mesh mapě.</string>
     <!-- MESHTASTIC -->
@@ -1062,6 +1061,8 @@
     <string name="track_point">bod trasy</string>
     <!-- TRAFFIC -->
     <string name="traffic_management_position_min_interval">Minimální interval pozice (v sekundách)</string>
+    <string name="translate">Překlad</string>
+    <!-- TRANSLATION -->
     <string name="transmit_over_lora">Přenos přes LoRa</string>
     <!-- TRANSPORT -->
     <string name="transport_lora">LoRa</string>

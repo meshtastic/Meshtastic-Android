@@ -551,12 +551,9 @@
     <string name="expand_chart">Laienda diagrammi</string>
     <string name="expanded">Laiendatud</string>
     <string name="expires">Aegub</string>
-    <!-- EXPORT -->
     <string name="export_configuration">Salvesta sätted</string>
     <string name="export_data_csv">Ekspordi kõik paketid</string>
     <string name="export_gpx">Salvesta GPX</string>
-    <string name="export_keys">Salvesta võtmed</string>
-    <string name="export_keys_confirmation">Ekspordib avalikud- ja privaatvõtmed faili. Palun hoidke kuskil turvalises kohas.</string>
     <string name="export_tak_data_package">Salvesta TAK andmepakett</string>
     <string name="external_notification">Välised teated</string>
     <string name="external_notification_config">Välisete teadete sätted</string>
@@ -735,6 +732,7 @@
     <string name="ip_port">Port:</string>
     <string name="ipv4_mode">IPv4 režiim</string>
     <string name="json_output_enabled">JSON väljund lubatud</string>
+    <!-- KEY -->
     <string name="key_verification_final_title">Võtme kontrollimine on lõpule viidud</string>
     <string name="key_verification_request_title">Võtme kinnitamise taotlus</string>
     <string name="key_verification_title">Võtme kontrollimine</string>
@@ -888,6 +886,7 @@
     <string name="max">Maksimaalselt</string>
     <!-- MESH -->
     <string name="mesh_beacon_offer_dismiss">Loobu</string>
+    <string name="mesh_beacon_preset_none">Puudub</string>
     <string name="mesh_map_location">Meshtastic kaardi asukoht</string>
     <string name="mesh_map_location_description">Lubab telefoni asukoha kuvamine sinisena kärgvõrgu kaardil.</string>
     <!-- MESHTASTIC -->
@@ -1507,6 +1506,7 @@
     <string name="traffic_management_rate_limit_window">Kiiruse piirangu aken (sekundites)</string>
     <string name="traffic_management_router_preserve_hops">Säilita ruuteri hüpped</string>
     <string name="traffic_management_unknown_packet_threshold">Tundmatu pakettide lävi</string>
+    <!-- TRANSLATION -->
     <string name="transmit_over_lora">Saada LoRa kaudu</string>
     <!-- TRANSPORT -->
     <string name="transport_ble">BLE</string>

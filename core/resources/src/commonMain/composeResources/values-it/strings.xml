@@ -74,6 +74,7 @@
     <string name="audio_config">Configurazione Audio</string>
     <string name="available_pins">Pin disponibili</string>
     <string name="back">Indietro</string>
+    <string name="backup_keys">Backup chiavi</string>
     <string name="bad">Scarso</string>
     <string name="bandwidth">Larghezza di banda</string>
     <string name="baro_pressure">Pressione atmosferica</string>
@@ -327,11 +328,8 @@
     <string name="ethernet_ip">IP Ethernet:</string>
     <string name="exchange_position">Scambia posizione</string>
     <string name="expires">Scade</string>
-    <!-- EXPORT -->
     <string name="export_configuration">Esporta configurazione</string>
     <string name="export_data_csv">Esporta tutti i pacchetti</string>
-    <string name="export_keys">Esporta Chiavi</string>
-    <string name="export_keys_confirmation">Esporta le chiavi pubbliche e private in un file. Si prega di memorizzarlo da qualche parte in modo sicuro.</string>
     <string name="external_notification">Notifica Esterna</string>
     <string name="external_notification_config">Configurazione Notifiche Esterne</string>
     <string name="external_notification_enabled">Notifica esterna attivata</string>
@@ -462,6 +460,7 @@
     <string name="ip_port">Porta:</string>
     <string name="ipv4_mode">Modalità IPv4</string>
     <string name="json_output_enabled">Output JSON abilitato</string>
+    <!-- KEY -->
     <!-- LABEL -->
     <string name="label_long_fast">Distanza Grande / Lento</string>
     <string name="label_long_moderate">Lungo Raggio - Moderato</string>
@@ -553,6 +552,7 @@
     <string name="max">Max</string>
     <!-- MESH -->
     <string name="mesh_beacon_offer_dismiss">Cancella</string>
+    <string name="mesh_beacon_preset_none">Nessuno</string>
     <string name="mesh_map_location">Posizione sulla mappa della Mesh</string>
     <string name="mesh_map_location_description">Abilita l'indicatore blu per il tuo telefono sulla mappa della mesh.</string>
     <!-- MESHTASTIC -->
@@ -974,6 +974,7 @@
     <string name="track_point">punto di interesse</string>
     <!-- TRAFFIC -->
     <string name="traffic_management_enabled">Modulo abilitato</string>
+    <!-- TRANSLATION -->
     <string name="transmit_over_lora">Trasmettere su LoRa</string>
     <!-- TRANSPORT -->
     <string name="transport_ble">BLE</string>

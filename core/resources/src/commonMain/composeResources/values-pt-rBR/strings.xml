@@ -223,10 +223,7 @@
     <string name="ethernet_enabled">Ethernet ativado</string>
     <string name="exchange_position">Trocar posições</string>
     <string name="expires">Expira em</string>
-    <!-- EXPORT -->
     <string name="export_configuration">Exportar configurações</string>
-    <string name="export_keys">Exportar chaves</string>
-    <string name="export_keys_confirmation">Exporta as chaves públicas e privadas para um arquivo. Por favor, armazene em algum lugar com segurança.</string>
     <string name="external_notification">Notificação Externa</string>
     <string name="external_notification_config">Configuração de Notificações Externas</string>
     <string name="external_notification_enabled">Notificação Externa habilitada</string>
@@ -308,6 +305,7 @@
     <string name="ip_port">Porta:</string>
     <string name="ipv4_mode">Modo IPv4</string>
     <string name="json_output_enabled">Saída JSON ativada</string>
+    <!-- KEY -->
     <!-- LABEL -->
     <string name="last_position_update">Atualização da última posição</string>
     <string name="latest_alpha_firmware">Último alfa</string>
@@ -369,6 +367,7 @@
     <string name="max">Máx.</string>
     <!-- MESH -->
     <string name="mesh_beacon_offer_dismiss">Ignorar</string>
+    <string name="mesh_beacon_preset_none">Nenhum</string>
     <string name="mesh_map_location">Mapa de Localização da Malha</string>
     <string name="mesh_map_location_description">Permite o ponto de localização azul para o seu telefone no mapa da malha.</string>
     <!-- MESHTASTIC -->
@@ -690,6 +689,7 @@
     <string name="track_and_share_locations">Rastreie e Compartilhe Locais</string>
     <string name="track_point">ponto de rastreamento</string>
     <!-- TRAFFIC -->
+    <!-- TRANSLATION -->
     <string name="transmit_over_lora">Transmitir por LoRa</string>
     <!-- TRANSPORT -->
     <string name="transport_lora">LoRa</string>
