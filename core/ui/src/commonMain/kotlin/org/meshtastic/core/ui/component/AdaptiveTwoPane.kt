@@ -35,6 +35,7 @@ import androidx.compose.material3.adaptive.layout.ThreePaneScaffoldValue
 import androidx.compose.material3.adaptive.layout.calculatePaneScaffoldDirective
 import androidx.compose.material3.adaptive.layout.rememberPaneExpansionState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -63,6 +64,12 @@ fun AdaptiveTwoPane(
 ) {
     val directive = calculatePaneScaffoldDirective(currentWindowAdaptiveInfoV2())
 
+    // Wrap the slots in movable content so their internal state survives when the layout flips between the stacked
+    // column and the two-pane scaffold (e.g. on resize / fold), and so neither slot is emitted directly from two
+    // branches. The ColumnScope is passed through, so the compact branch keeps the shared-column behaviour.
+    val firstPane = remember { movableContentOf<ColumnScope>(first) }
+    val secondPane = remember { movableContentOf<ColumnScope>(second) }
+
     if (directive.maxHorizontalPartitions > 1) {
         // Expanded: canonical supporting-pane layout with a draggable divider. Both panes are forced visible because
         // we only reach this branch when the directive allows two partitions.
@@ -75,8 +82,8 @@ fun AdaptiveTwoPane(
                 secondary = PaneAdaptedValue.Expanded,
                 tertiary = PaneAdaptedValue.Hidden,
             ),
-            mainPane = { AnimatedPane { Column { first() } } },
-            supportingPane = { AnimatedPane { Column { second() } } },
+            mainPane = { AnimatedPane { Column { firstPane(this) } } },
+            supportingPane = { AnimatedPane { Column { secondPane(this) } } },
             paneExpansionState = rememberPaneExpansionState(),
             paneExpansionDragHandle = { state ->
                 val interactionSource = remember { MutableInteractionSource() }
@@ -95,8 +102,8 @@ fun AdaptiveTwoPane(
         // Compact / medium: keep both slots stacked in a single column (the supporting content must stay visible on
         // phones — this is not a navigable list-detail flow).
         Column(modifier = modifier) {
-            first()
-            second()
+            firstPane(this)
+            secondPane(this)
         }
     }
 }
@@ -104,9 +111,9 @@ fun AdaptiveTwoPane(
 /** Screenshot-test sample; public so `:screenshot-tests` can render it at compact, medium, and expanded widths. */
 @Suppress("MagicNumber")
 @Composable
-fun AdaptiveTwoPaneSample() {
+fun AdaptiveTwoPaneSample(modifier: Modifier = Modifier) {
     AppTheme {
-        Surface {
+        Surface(modifier = modifier) {
             AdaptiveTwoPane(
                 first = {
                     Card(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
