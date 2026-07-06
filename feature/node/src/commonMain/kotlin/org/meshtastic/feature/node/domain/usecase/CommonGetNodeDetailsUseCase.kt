@@ -25,14 +25,13 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onStart
 import org.koin.core.annotation.Single
-import org.meshtastic.core.common.util.MeasurementSystem
-import org.meshtastic.core.common.util.getSystemMeasurementSystem
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.DeviceLink
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.util.DistanceUnit
 import org.meshtastic.core.model.util.hasValidEnvironmentMetrics
 import org.meshtastic.core.model.util.isDirectSignal
 import org.meshtastic.core.repository.DeviceHardwareRepository
@@ -184,7 +183,7 @@ constructor(
             val isLocal = node.num == identity.ourNode?.num
             val pioEnv = if (isLocal) identity.myInfo?.pioEnv else null
 
-            val isImperial = getSystemMeasurementSystem() == MeasurementSystem.IMPERIAL
+            val displayUnits = DistanceUnit.getFromLocale()
 
             val metricsState =
                 MetricsState(
@@ -194,8 +193,8 @@ constructor(
                     deviceLinks = deviceLinks,
                     reportedTarget = pioEnv,
                     isManaged = identity.profile.config?.security?.is_managed ?: false,
-                    isFahrenheit = isImperial,
-                    displayUnits = if (isImperial) DisplayUnits.IMPERIAL else DisplayUnits.METRIC,
+                    isFahrenheit = displayUnits == DisplayUnits.IMPERIAL,
+                    displayUnits = displayUnits,
                     deviceMetrics = logs.telemetry.filter { it.device_metrics != null },
                     localStats = logs.telemetry.filter { it.local_stats != null },
                     powerMetrics = logs.telemetry.filter { it.power_metrics != null },
