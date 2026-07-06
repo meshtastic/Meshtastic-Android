@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
+import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDragHandle
@@ -83,7 +84,7 @@ fun AdaptiveTwoPane(
                     modifier =
                     Modifier.paneExpansionDraggable(
                         state = state,
-                        minTouchTargetSize = 48.dp,
+                        minTouchTargetSize = LocalMinimumInteractiveComponentSize.current,
                         interactionSource = interactionSource,
                     ),
                     interactionSource = interactionSource,
@@ -100,7 +101,7 @@ fun AdaptiveTwoPane(
     }
 }
 
-/** Screenshot-test sample; public so `:screenshot-tests` can render it at compact and expanded widths. */
+/** Screenshot-test sample; public so `:screenshot-tests` can render it at compact, medium, and expanded widths. */
 @Suppress("MagicNumber")
 @Composable
 fun AdaptiveTwoPaneSample() {
