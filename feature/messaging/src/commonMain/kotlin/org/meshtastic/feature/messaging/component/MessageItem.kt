@@ -20,6 +20,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
@@ -48,10 +49,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -63,6 +66,7 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.Reaction
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.a11y_message_from
+import org.meshtastic.core.resources.action_show_message_status
 import org.meshtastic.core.resources.filter_message_label
 import org.meshtastic.core.resources.message_translated_label
 import org.meshtastic.core.resources.reply
@@ -87,6 +91,8 @@ import org.meshtastic.core.ui.icon.ShieldCheck
 import org.meshtastic.core.ui.theme.MessageItemColors
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.util.createClipEntry
+
+internal const val MESSAGE_STATUS_LABEL_TEST_TAG = "message_status_label"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
@@ -117,6 +123,7 @@ fun MessageItem(
     hasSameNext: Boolean = false,
     searchQuery: String = "",
     translationAvailable: Boolean = false,
+    isDirectMessage: Boolean = false,
     onTranslate: () -> Unit = {},
     onToggleTranslation: () -> Unit = {},
 ) = Column(
@@ -137,6 +144,8 @@ fun MessageItem(
     val coroutineScope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val isLocal = node.num == ourNode.num
+    val statusString = message.getStatusStringRes(isDirectMessage)
+    val isDirectImplicitAck = message.status == MessageStatus.DELIVERED && isDirectMessage
     // While searching, always show the original text — FTS matches and highlights apply to it, not the translation.
     val showsTranslation = message.showTranslated && message.translatedText != null && searchQuery.isEmpty()
     val bodyText = message.displayedText(searching = searchQuery.isNotEmpty())
@@ -169,7 +178,7 @@ fun MessageItem(
                             activeSheet = null
                             onDelete()
                         },
-                        statusString = message.getStatusStringRes(),
+                        statusString = statusString,
                         status =
                         if (isLocal) {
                             message.status
@@ -380,12 +389,19 @@ fun MessageItem(
                         )
                     }
                     if (message.fromLocal) {
-                        MessageStatusIcon(
-                            status = message.status ?: MessageStatus.UNKNOWN,
-                            modifier = Modifier.size(18.dp),
-                        )
+                        val status = message.status ?: MessageStatus.UNKNOWN
+                        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
+                            MessageStatusLabel(
+                                status = status,
+                                text = stringResource(statusString.second),
+                                metadataStyle = metadataStyle,
+                                isWarning = isDirectImplicitAck,
+                                onStatusClick = onStatusClick,
+                            )
+                        }
+                    } else {
+                        Spacer(modifier = Modifier.weight(1f))
                     }
-                    Spacer(modifier = Modifier.weight(1f))
                     Text(modifier = Modifier.padding(start = 16.dp), text = message.time, style = metadataStyle)
                 }
             }
@@ -409,6 +425,46 @@ fun MessageItem(
 private enum class ActiveSheet {
     Actions,
     Emoji,
+}
+
+@Composable
+private fun MessageStatusLabel(
+    status: MessageStatus,
+    text: String,
+    metadataStyle: TextStyle,
+    isWarning: Boolean,
+    onStatusClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val statusColor = messageStatusColor(status, isWarning = isWarning)
+    Row(
+        modifier =
+        modifier
+            .fillMaxWidth()
+            .testTag(MESSAGE_STATUS_LABEL_TEST_TAG)
+            .clickable(
+                onClickLabel = stringResource(Res.string.action_show_message_status),
+                role = Role.Button,
+                onClick = onStatusClick,
+            ),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(3.dp),
+    ) {
+        MessageStatusIcon(
+            status = status,
+            modifier = Modifier.size(14.dp),
+            tint = statusColor,
+            includeContentDescription = false,
+        )
+        Text(
+            text = text,
+            modifier = Modifier.weight(1f, fill = false),
+            style = metadataStyle,
+            color = statusColor,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
 }
 
 private fun translationRowStateFor(message: Message, translationAvailable: Boolean): TranslationRowState? = when {

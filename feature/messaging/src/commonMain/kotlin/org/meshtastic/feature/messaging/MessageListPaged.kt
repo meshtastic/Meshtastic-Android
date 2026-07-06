@@ -53,8 +53,8 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
+import org.meshtastic.core.model.ContactKey
 import org.meshtastic.core.model.Message
-import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.Reaction
@@ -113,12 +113,15 @@ internal fun MessageListPaged(
 
     // Optimization: Pre-calculate map for O(1) lookup in list items to avoid O(N) linear search during scrolling.
     val nodeMap = remember(state.nodes) { state.nodes.associateBy { it.num } }
+    val isDirectMessageConversation =
+        remember(state.contactKey) { ContactKey(state.contactKey).addressString != NodeAddress.ID_BROADCAST }
 
     var showStatusDialog by remember { mutableStateOf<Message?>(null) }
     showStatusDialog?.let { message ->
         MessageStatusDialog(
             message = message,
-            resendOption = message.status?.equals(MessageStatus.ERROR) ?: false,
+            isDirectMessage = isDirectMessageConversation,
+            resendOption = message.isStatusRetryable(isDirectMessageConversation),
             onResend = {
                 handlers.onDeleteMessages(listOf(message.uuid))
                 handlers.onSendMessage(message.text, state.contactKey)
@@ -165,6 +168,7 @@ internal fun MessageListPaged(
         inSelectionMode = inSelectionMode,
         coroutineScope = coroutineScope,
         haptics = haptics,
+        isDirectMessageConversation = isDirectMessageConversation,
         onShowStatusDialog = { showStatusDialog = it },
         onShowReactions = { showReactionDialog = it },
         modifier = modifier,
@@ -182,6 +186,7 @@ private fun MessageListPagedContent(
     inSelectionMode: Boolean,
     coroutineScope: CoroutineScope,
     haptics: HapticFeedback,
+    isDirectMessageConversation: Boolean,
     onShowStatusDialog: (Message) -> Unit,
     onShowReactions: (List<Reaction>) -> Unit,
     modifier: Modifier = Modifier,
@@ -249,6 +254,7 @@ private fun MessageListPagedContent(
                                 inSelectionMode = inSelectionMode,
                                 coroutineScope = coroutineScope,
                                 haptics = haptics,
+                                isDirectMessageConversation = isDirectMessageConversation,
                                 listState = listState,
                                 onShowStatusDialog = onShowStatusDialog,
                                 onShowReactions = onShowReactions,
@@ -267,6 +273,7 @@ private fun MessageListPagedContent(
                             inSelectionMode = inSelectionMode,
                             coroutineScope = coroutineScope,
                             haptics = haptics,
+                            isDirectMessageConversation = isDirectMessageConversation,
                             listState = listState,
                             onShowStatusDialog = onShowStatusDialog,
                             onShowReactions = onShowReactions,
@@ -309,6 +316,7 @@ private fun RenderPagedChatMessageRow(
     inSelectionMode: Boolean,
     coroutineScope: CoroutineScope,
     haptics: HapticFeedback,
+    isDirectMessageConversation: Boolean,
     listState: LazyListState,
     onShowStatusDialog: (Message) -> Unit,
     onShowReactions: (List<Reaction>) -> Unit,
@@ -381,6 +389,7 @@ private fun RenderPagedChatMessageRow(
         quickEmojis = quickEmojis,
         searchQuery = state.searchQuery,
         translationAvailable = state.translationAvailable,
+        isDirectMessage = isDirectMessageConversation,
         onTranslate = { handlers.onTranslate(message) },
         onToggleTranslation = { handlers.onToggleTranslation(message) },
     )
