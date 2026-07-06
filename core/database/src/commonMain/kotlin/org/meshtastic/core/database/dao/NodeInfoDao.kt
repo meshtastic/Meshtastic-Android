@@ -320,6 +320,22 @@ interface NodeInfoDao {
     suspend fun setPowerChannelLabels(num: Int, labels: List<String>)
 
     /**
+     * Sets a single power-channel [label] (0-based [channelIndex]) atomically: the read-modify-write runs inside a
+     * transaction that reads the current labels from the DB, so concurrent edits to different channels can't clobber
+     * each other via a stale read. Earlier channels keep their slot (blank padding); trailing blanks are dropped.
+     *
+     * Reads via [getNodeByNum] rather than a scalar `SELECT power_channel_labels`: Room reads a `List<String>` query
+     * result as one String per row (returning the raw JSON text), not as the column's converted `List<String>`.
+     */
+    @Transaction
+    suspend fun updatePowerChannelLabel(num: Int, channelIndex: Int, label: String) {
+        val labels = (getNodeByNum(num)?.node?.powerChannelLabels ?: emptyList()).toMutableList()
+        while (labels.size <= channelIndex) labels.add("")
+        labels[channelIndex] = label.trim()
+        setPowerChannelLabels(num, labels.dropLastWhile { it.isBlank() })
+    }
+
+    /**
      * Batch version of [getVerifiedNodeForUpsert]. Pre-fetches all existing nodes and public-key conflicts in two
      * queries instead of N individual queries, then processes each node in memory.
      */

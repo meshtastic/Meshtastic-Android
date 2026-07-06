@@ -65,4 +65,26 @@ class PowerChannelLabelsDaoTest {
         assertNotNull(result)
         assertEquals(listOf("Solar", "Battery"), result.node.powerChannelLabels)
     }
+
+    @Test
+    fun updateMergesFreshFromDbSoChannelsDontClobber() = runTest {
+        dao.upsert(node(9))
+        // Each call reads the current labels from the DB inside its transaction, so setting a second
+        // channel keeps the first — the race the read-modify-write in the ViewModel used to allow.
+        dao.updatePowerChannelLabel(9, channelIndex = 0, label = "Solar")
+        dao.updatePowerChannelLabel(9, channelIndex = 1, label = "Battery")
+
+        assertEquals(listOf("Solar", "Battery"), dao.getNodeByNum(9)?.node?.powerChannelLabels)
+    }
+
+    @Test
+    fun updatePadsTrimsAndDropsTrailingBlanks() = runTest {
+        dao.upsert(node(10))
+        dao.updatePowerChannelLabel(10, channelIndex = 2, label = "  Load  ")
+        assertEquals(listOf("", "", "Load"), dao.getNodeByNum(10)?.node?.powerChannelLabels)
+
+        // Clearing the last label shrinks the stored list rather than leaving trailing blanks.
+        dao.updatePowerChannelLabel(10, channelIndex = 2, label = "")
+        assertEquals(emptyList(), dao.getNodeByNum(10)?.node?.powerChannelLabels)
+    }
 }

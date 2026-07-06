@@ -163,7 +163,7 @@ fun PowerMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
                     PowerChannelLabelEditor(
                         modifier = Modifier.padding(horizontal = 16.dp),
                         currentLabel = channelLabels.getOrNull(selectedChannel.ordinal).orEmpty(),
-                        placeholder = stringResource(selectedChannel.strRes),
+                        channelName = stringResource(selectedChannel.strRes),
                         onSave = { label -> viewModel.setPowerChannelLabel(nodeNum, selectedChannel.ordinal, label) },
                     )
                 }
@@ -202,7 +202,7 @@ fun PowerMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
 @Composable
 private fun PowerChannelLabelEditor(
     currentLabel: String,
-    placeholder: String,
+    channelName: String,
     onSave: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -217,7 +217,8 @@ private fun PowerChannelLabelEditor(
         value = label,
         onValueChange = { label = it },
         modifier = modifier.fillMaxWidth(),
-        placeholder = { Text(placeholder) },
+        // Floating label (not a placeholder) so the channel stays identifiable after a custom name is typed.
+        label = { Text(channelName) },
         singleLine = true,
         trailingIcon = {
             IconButton(onClick = save, enabled = edited) {

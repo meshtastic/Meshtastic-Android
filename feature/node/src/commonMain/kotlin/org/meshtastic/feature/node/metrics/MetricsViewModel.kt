@@ -187,12 +187,9 @@ open class MetricsViewModel(
     /** Persists a user-editable label (e.g. "Solar", "Battery") for a power-metrics channel (0-based index). */
     fun setPowerChannelLabel(nodeNum: Int, channelIndex: Int, label: String) =
         safeLaunch(context = dispatchers.io, tag = "setPowerChannelLabel") {
-            val labels = (state.value.node?.powerChannelLabels ?: emptyList()).toMutableList()
-            // Pad with blank placeholders so earlier channels keep their index; trailing blanks are dropped below.
-            while (labels.size <= channelIndex) labels.add("")
-            labels[channelIndex] = label.trim()
-            // Keep the stored list minimal so clearing a label shrinks it instead of leaving trailing blanks.
-            nodeRepository.setPowerChannelLabels(nodeNum, labels.dropLastWhile { it.isBlank() })
+            // Atomic in the DAO: reads current labels from the DB (not stale ViewModel state) so quick successive
+            // saves to different channels can't clobber each other.
+            nodeRepository.updatePowerChannelLabel(nodeNum, channelIndex, label)
         }
 
     fun deleteLog(uuid: String) =

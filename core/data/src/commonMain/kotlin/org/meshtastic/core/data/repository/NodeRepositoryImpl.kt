@@ -250,8 +250,8 @@ class NodeRepositoryImpl(
     override suspend fun setNodeNotes(num: Int, notes: String) =
         withContext(dispatchers.io) { nodeInfoWriteDataSource.setNodeNotes(num, notes) }
 
-    override suspend fun setPowerChannelLabels(num: Int, labels: List<String>) =
-        withContext(dispatchers.io) { nodeInfoWriteDataSource.setPowerChannelLabels(num, labels) }
+    override suspend fun updatePowerChannelLabel(num: Int, channelIndex: Int, label: String) =
+        withContext(dispatchers.io) { nodeInfoWriteDataSource.updatePowerChannelLabel(num, channelIndex, label) }
 
     private fun MyNodeInfo.toEntity() = MyNodeEntity(
         myNodeNum = myNodeNum,
