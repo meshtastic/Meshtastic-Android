@@ -85,7 +85,7 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 
 - **Urban mesh (many nodes, short distances):** Use **Long Fast** (default) or **Short Fast**. Higher speed means less airtime congestion when many nodes share the channel.
 - **Rural/sparse mesh (few nodes, long distances):** Use **Long Moderate**. Range matters more than speed when nodes are far apart.
-- **EU 866/868 MHz regulatory compliance:** Use **Lite Fast**, **Lite Slow**, **Narrow Fast**, or **Narrow Slow** — these are optimized for the EU SRD/868 MHz bands with narrower bandwidths.
+- **Einhaltung der EU-Vorschriften für 866/868 MHz:** Verwenden Sie **Lite Fast**, **Lite Slow**, **Narrow Fast** oder **Narrow Slow** – diese sind für die EU-SRD-/868-MHz-Bänder mit geringerer Bandbreite optimiert.
 - **Fixed infrastructure links:** Use **Short Turbo** or **Long Turbo** for dedicated point-to-point links with good antennas and line-of-sight.
 - **Mixed environments:** Stick with **Long Fast** — it's the community default and ensures compatibility with others in your area.
 

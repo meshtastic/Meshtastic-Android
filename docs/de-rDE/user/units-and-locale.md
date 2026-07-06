@@ -8,7 +8,7 @@ description: How the app formats temperature, distance, speed, and other measure
 
 # Units, Measurement & Locale
 
-The Meshtastic app automatically displays temperatures, distances, speeds, and times in the units your device is configured to use — no settings to change inside the app.
+Die Meshtastic-App zeigt Temperaturen, Entfernungen, Geschwindigkeiten und Zeiten automatisch in den Einheiten an, auf die Ihr Gerät konfiguriert ist – es sind keine Einstellungen innerhalb der App zu ändern.
 
 ---
 
@@ -88,7 +88,7 @@ Rainfall measurements (1-hour and 24-hour totals) are transmitted as **mm** and 
 
 Some units are international standards and are displayed the same way regardless of your locale:
 
-| Measurement                      | Unit                           | Why                                   |
+| Measurement                      | Einheit                        | Warum                                 |
 | -------------------------------- | ------------------------------ | ------------------------------------- |
 | Luftdruck                        | hPa                            | International meteorological standard |
 | Heading / bearing                | ° (degrees) | Universal navigation convention       |
@@ -105,7 +105,7 @@ All timestamps throughout the app — last heard, message times, telemetry logs,
 | **24-Hour Time** | Clock format     | 14:30 vs 2:30 PM |
 | **Date Format**  | Date ordering    | 09/05/2026 vs 05/09/2026                         |
 
-The app also uses **relative time** where it makes sense — for example, "5 min ago" or "2 hours ago" in the node list — which is automatically localised into your device language.
+Die App verwendet zudem **relative Zeitangaben**, wo dies sinnvoll ist – zum Beispiel „vor 5 Min.“ oder „vor 2 Stunden“ in der Knotenliste –, die automatisch in die Sprache Ihres Geräts lokalisiert werden.
 
 ## Changing Your Measurement System (Android)
 

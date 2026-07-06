@@ -5,7 +5,7 @@ nav_order: 21
 last_updated: 2026-06-25
 description: Browse this documentation inside the app, search it, and ask Chirpy — the on-device AI assistant — questions about Meshtastic.
 aliases:
-  - help
+  - Hilfe
   - docs-browser
   - chirpy
   - assistant

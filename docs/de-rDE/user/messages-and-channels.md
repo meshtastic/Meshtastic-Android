@@ -27,12 +27,12 @@ Every Meshtastic device comes with a default **LongFast** channel. This is an un
 
 Channels support multiple encryption levels:
 
-| Icon | Security Level                       | Beschreibung                                                                                                                           |
-| ---- | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
-| 🔒   | PSK (256-bit AES) | Fully encrypted with a strong pre-shared key. Only nodes with the matching key can read messages.      |
-| 🔐   | PSK (128-bit AES) | Encrypted with a shorter key. Secure for most uses but 256-bit is preferred for sensitive data.        |
-| 🔓   | Default / Open                       | Uses the well-known default key. **Any Meshtastic device** on the same preset can read these messages. |
-| ⚠️   | Insecure + Position                  | Open channel that also broadcasts your GPS position. Use with caution in public meshes.                |
+| Symbol | Security Level                       | Beschreibung                                                                                                                           |
+| ------ | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| 🔒     | PSK (256-bit AES) | Fully encrypted with a strong pre-shared key. Only nodes with the matching key can read messages.      |
+| 🔐     | PSK (128-bit AES) | Encrypted with a shorter key. Secure for most uses but 256-bit is preferred for sensitive data.        |
+| 🔓     | Default / Open                       | Uses the well-known default key. **Any Meshtastic device** on the same preset can read these messages. |
+| ⚠️     | Insecure + Position                  | Open channel that also broadcasts your GPS position. Use with caution in public meshes.                |
 
 > 🔒 **Security Tip:** Always configure a unique PSK for private communications. The default channel is intentionally open so new users can discover the mesh — but you should create a separate encrypted channel for anything sensitive.
 
@@ -57,15 +57,15 @@ Direct messages (DMs) are point-to-point encrypted communications between two sp
 
 ### Message States
 
-| State                             | Icon | Meaning                                                                                                           |
-| --------------------------------- | ---- | ----------------------------------------------------------------------------------------------------------------- |
-| Queued                            | ⏳    | Message waiting to be sent                                                                                        |
-| En route                          | ✓    | Delivered to the radio, awaiting acknowledgment                                                                   |
-| Zugestellt                        | ✓✓   | Acknowledgment received from recipient                                                                            |
-| Received                          | ✓    | Message received from the mesh (incoming)                                                      |
-| S&F Routing   | 🔗   | Store & Forward: message being routed through an S&F node |
-| S&F Confirmed | 🔗   | Store & Forward: delivery confirmed via S&F node          |
-| Fehler                            | ✗    | Delivery failed after retries                                                                                     |
+| Status                            | Symbol | Meaning                                                                                                           |
+| --------------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------- |
+| Queued                            | ⏳      | Message waiting to be sent                                                                                        |
+| En route                          | ✓      | Delivered to the radio, awaiting acknowledgment                                                                   |
+| Zugestellt                        | ✓✓     | Acknowledgment received from recipient                                                                            |
+| Received                          | ✓      | Message received from the mesh (incoming)                                                      |
+| S&F Routing   | 🔗     | Store & Forward: message being routed through an S&F node |
+| S&F Confirmed | 🔗     | Store & Forward: delivery confirmed via S&F node          |
+| Fehler                            | ✗      | Delivery failed after retries                                                                                     |
 
 ### Delivery Errors
 
@@ -99,7 +99,7 @@ Pre-configured messages for rapid communication:
 
 ![Quick chat option](../../assets/screenshots/messages_quick_chat.png)
 
-Each quick chat entry has a short **Name** (the button label), the **Message** it inserts, and an **Instantly send** toggle — when enabled, tapping the button sends the message immediately instead of placing it in the input field for editing:
+Jeder Quick-Chat-Eintrag besteht aus einem kurzen **Namen** (der Schaltflächenbeschriftung), der einzufügenden **Nachricht** und einer Option zum **Sofortigen Senden**: Ist diese aktiviert, wird die Nachricht beim Tippen auf die Schaltfläche sofort versendet, anstatt zur Bearbeitung in das Eingabefeld eingefügt zu werden.
 
 ![New quick chat dialog with name, message, and instantly-send toggle](../../assets/screenshots/messages_edit_quick_chat.png)
 

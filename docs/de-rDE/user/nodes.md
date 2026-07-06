@@ -27,7 +27,7 @@ The node list shows every node your radio has heard, including:
 
 ### Node Status Indicators
 
-| Badge      | Meaning                             |
+| Abzeichen  | Meaning                             |
 | ---------- | ----------------------------------- |
 | 🟢 Online  | Node heard within the last 2 hours  |
 | ⚪ Offline  | Node not heard for over 2 hours     |
@@ -61,7 +61,7 @@ Most users should keep the default **Client** role. Consider a different role wh
 
 - **Router** — You have a node in a fixed, elevated location with reliable power (rooftop, hilltop). Routers stay awake continuously to relay messages for others and are essential for extending mesh coverage. Don't use Router on battery-powered handheld devices.
 - **Router Late** — An infrastructure node that always rebroadcasts packets once but only after all other routing modes have had their turn. Provides supplemental coverage for local clusters without competing with primary routers.
-- **Client Base** — Treats traffic from/to your favorited nodes with Router Late priority (ensuring those messages get extra relay coverage) while handling everything else as a normal Client.
+- **Client Base** — Behandelt Datenverkehr von/zu Ihren bevorzugten Knoten mit der Priorität „Router Late“ (wodurch sichergestellt wird, dass diese Nachrichten eine zusätzliche Relaisabdeckung erhalten), während der übrige Verkehr wie bei einem normalen Client gehandhabt wird.
 - **Client Mute** — You want to receive mesh traffic but not contribute to relaying. Useful for monitoring-only devices or to reduce congestion in dense areas.
 - **Tracker** — An unattended device whose sole purpose is broadcasting its GPS position (e.g., a vehicle, pet, or asset). Sleeps between broadcasts to conserve battery.
 - **Sensor** — An unattended device reporting environmental telemetry (temperature, humidity, air quality). Similar power profile to Tracker.
@@ -73,7 +73,7 @@ Most users should keep the default **Client** role. Consider a different role wh
 
 Nodes display encryption status icons next to their name:
 
-| Icon        | Meaning                                                                                                             |
+| Symbol      | Meaning                                                                                                             |
 | ----------- | ------------------------------------------------------------------------------------------------------------------- |
 | 🔒 Locked   | Communication uses PKI (public key infrastructure) — end-to-end encrypted with verified identity |
 | 🔓 Unlocked | Communication uses shared channel PSK — encrypted but identity not individually verified                            |
@@ -113,7 +113,7 @@ Type in the search field to filter nodes by name or short name. The filter updat
 
 ### Sort Options
 
-| Sort                                        | Beschreibung                                                       |
+| Sortieren                                   | Beschreibung                                                       |
 | ------------------------------------------- | ------------------------------------------------------------------ |
 | **Last heard** (default) | Most recently heard nodes first                                    |
 | **Alphabetical**                            | Sorted by node long name                                           |
@@ -145,7 +145,7 @@ Inline status indicators show key metrics at a glance:
 
 ### Device Links ("I want one")
 
-When a node's hardware is recognized, the detail view shows a collapsible **"I want one"** section linking to places to buy or learn more about that device: the vendor's product page, product variants, and regional marketplace listings (such as AliExpress, Amazon, and supported retailers), filtered to your country. Each link opens through the `msh.to` redirect service. Devices with no matching links don't show the section.
+Sobald die Hardware eines Knotens erkannt wird, zeigt die Detailansicht einen ausklappbaren Bereich mit der Bezeichnung **„Ich möchte eins“** an. Dieser enthält Links zu Bezugsquellen oder weiterführenden Informationen zu dem jeweiligen Gerät – etwa zur Produktseite des Herstellers, zu Produktvarianten sowie zu Angeboten auf regionalen Marktplätzen (wie AliExpress, Amazon und unterstützten Händlern), gefiltert nach Ihrem Land. Each link opens through the `msh.to` redirect service. Devices with no matching links don't show the section.
 
 A full, browsable directory of every link is also available under **Settings → Device Links**.
 

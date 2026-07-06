@@ -56,11 +56,11 @@ The Android app uses **Compose Multiplatform resources** for all user-visible st
 
 ```
 core/resources/src/commonMain/composeResources/
-├── values/              ← English (default)
+├── values/              ← Englisch (Standard)
 │   └── strings.xml
-├── values-de/           ← German
+├── values-de/           ← Deutsch
 │   └── strings.xml
-├── values-fr/           ← French
+├── values-fr/           ← Französisch
 │   └── strings.xml
 └── ...
 ```
@@ -69,13 +69,13 @@ In-app documentation follows a similar pattern under `docs/`:
 
 ```
 docs/
-├── en/user/             ← English source (default)
+├── en/user/             ← Englisch  (Standard)
 │   ├── onboarding.md
 │   └── ...
-├── fr-rFR/user/         ← French (France)
+├── fr-rFR/user/         ← Französisch (Frankreich)
 │   ├── onboarding.md
 │   └── ...
-├── de-rDE/user/         ← German (Germany)
+├── de-rDE/user/         ← Deustch (Deutschland)
 │   └── ...
 └── ...
 ```
@@ -97,6 +97,6 @@ The app automatically selects the correct locale based on your device's **Langua
 
 ## Questions?
 
-If you have questions about a specific string's context or need help getting started, open a discussion on the [Meshtastic GitHub Discussions](https://github.com/meshtastic/Meshtastic-Android/discussions) page.
+Wenn du Fragen zum Kontext einer bestimmten Zeichenkette hast oder Hilfe bei den ersten Schritten benötigst, starte eine Diskussion auf der Seite [Meshtastic GitHub Diskussion](https://github.com/meshtastic/Meshtastic-Android/discussions).
 
 Vielen Dank, dass Sie dabei geholfen haben, die Reichweite von Meshtastic zu vergrößern!

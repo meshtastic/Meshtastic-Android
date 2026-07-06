@@ -19,7 +19,7 @@ Meshtastic integrates with Android Auto so you can stay in touch with your mesh 
 
 ## Übersicht
 
-When your phone is connected to an Android Auto head unit (or the Desktop Head Unit emulator used for development), Meshtastic appears as a messaging app built with the Android Car App Library. The car interface presents a tabbed Home screen optimized for driving-safe, glanceable use:
+Wenn Ihr Telefon mit einer Android-Auto-Head-Unit (oder dem für die Entwicklung genutzten Desktop-Head-Unit-Emulator) verbunden ist, erscheint Meshtastic als Messaging-App, die auf Basis der Android Car App Bibliothek entwickelt wurde. The car interface presents a tabbed Home screen optimized for driving-safe, glanceable use:
 
 - **Messages** — recent conversations, with hands-free reading and replies.
 - **Nodes** — the mesh node list, with a node-detail view.

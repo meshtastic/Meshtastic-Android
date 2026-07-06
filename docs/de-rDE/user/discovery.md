@@ -14,18 +14,18 @@ aliases:
 
 # Entdecken
 
-Discovery tools help you understand **how** your mesh network is connected — which nodes can hear each other, what paths messages take, and where bottlenecks or weak links exist.
+Discovery-Tools helfen Ihnen zu verstehen, **wie** Ihr Mesh-Netzwerk vernetzt ist – welche Knoten einander erreichen können, welche Wege Nachrichten nehmen und wo Engpässe oder Schwachstellen bestehen.
 
 The app offers two complementary approaches:
 
-- **Local Mesh Discovery (Scanner)** — an automated mode that cycles your connected radio through different LoRa presets, listens on each, and ranks which preset performs best at your location.
+- **Lokale Netzwerk Erkennung (Scanner)** – ein automatischer Modus, der das angeschlossene Funkmodul nacheinander auf verschiedene LoRa Voreinstellungen umschaltet, auf jeder dieser Einstellungen lauscht und bewertet, welche davon an Ihrem Standort die beste Leistung erbringt.
 - **Manual exploration** — traceroute, Neighbor Info, and the node list, which you can use at any time to investigate specific paths and topology.
 
 ---
 
 ## Local Mesh Discovery (Scanner)
 
-Local Mesh Discovery is a dedicated scanning mode that helps you find the best LoRa modem preset for your location and see which nodes are active on each preset. It cycles your connected radio through one or more presets you choose, listens (or "dwells") on each one for a set time to collect packets, then analyzes and ranks the results.
+Local Mesh Discovery is a dedicated scanning mode that helps you find the best LoRa modem preset for your location and see which nodes are active on each preset. Es schaltet das angeschlossene Funkgerät nacheinander auf eine oder mehrere von Ihnen gewählte Voreinstellungen, verweilt jeweils für eine festgelegte Zeit auf dem Kanal, um Datenpakete zu erfassen, und analysiert sowie bewertet anschließend die Ergebnisse.
 
 Open it from **Settings → Local Mesh Discovery**.
 
@@ -52,7 +52,7 @@ The **Start** button stays disabled — with an explanation of why — until the
 
 While a scan runs, Discovery shows its current stage:
 
-| Stage                                                 | What's happening                                                                                       |
+| Phase                                                 | What's happening                                                                                       |
 | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
 | **Preparing**                                         | Saving your current configuration and getting ready to scan.                           |
 | **Shifting to \<preset\>** | Switching the radio to the next preset to test.                                        |

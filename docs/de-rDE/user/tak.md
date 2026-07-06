@@ -12,7 +12,7 @@ aliases:
 
 # TAK Integration
 
-Meshtastic integrates with the Team Awareness Kit (TAK) ecosystem, enabling interoperability between Meshtastic mesh devices and TAK applications like ATAK and WinTAK.
+Meshtastic lässt sich in das Team Awareness Kit (TAK)-Ökosystem integrieren und ermöglicht so die Interoperabilität zwischen Meshtastic Geräten und TAK-Anwendungen wie ATAK und WinTAK.
 
 ## Übersicht
 
@@ -111,7 +111,7 @@ Once configured:
 
 ## Fehlerbehebung
 
-| Problem                          | Cause                                 | Solution                                                                |
+| Problem                          | Ursache                               | Solution                                                                |
 | -------------------------------- | ------------------------------------- | ----------------------------------------------------------------------- |
 | Node doesn't appear on ATAK map  | TAK module disabled or wrong role     | Verify TAK module is enabled and node role is TAK or TAK Tracker        |
 | Position updates are stale       | GPS fix lost or interval too long     | Check GPS status; reduce position broadcast interval in Position Config |
