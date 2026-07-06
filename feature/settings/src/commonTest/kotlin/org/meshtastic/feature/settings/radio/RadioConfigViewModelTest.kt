@@ -508,6 +508,109 @@ class RadioConfigViewModelTest {
     }
 
     @Test
+    fun `updateChannels does not start manual batch while another radio request is pending`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        nodeRepository.setNodes(listOf(node))
+        viewModel = createViewModel()
+
+        val old = listOf(ChannelSettings(name = "Old"))
+        val new = listOf(ChannelSettings(name = "New"))
+
+        everySuspend { radioConfigUseCase.getOwner(any()) } calls
+            {
+                delay(10_000)
+                42
+            }
+        everySuspend { radioConfigUseCase.setRemoteChannel(any(), any()) } returns 100
+
+        viewModel.setResponseStateLoading(ConfigRoute.USER)
+        runCurrent()
+
+        viewModel.updateChannels(new, old)
+        runCurrent()
+
+        assertEquals(ConfigRoute.USER.name, viewModel.radioConfigState.value.route)
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Loading)
+        verifySuspend(exactly(0)) { radioConfigUseCase.setRemoteChannel(any(), any()) }
+
+        advanceUntilIdle()
+    }
+
+    @Test
+    fun `aborted manual batch preserves unrelated pending request`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        val packetFlow = MutableSharedFlow<MeshPacket>()
+        val old = fourChannelFixture()
+        val (channelA, _, _, channelD) = old
+        val new = listOf(channelA, channelD)
+        val owner = User(id = "!123", long_name = "Updated")
+        var writeCount = 0
+
+        every { serviceRepository.meshPacketFlow } returns packetFlow
+        nodeRepository.setNodes(listOf(node))
+        viewModel = createViewModel()
+
+        everySuspend { radioConfigUseCase.getOwner(any()) } returns 42
+        everySuspend { radioConfigUseCase.setRemoteChannel(any(), any()) } calls
+            {
+                writeCount++
+                if (writeCount == 2) {
+                    viewModel.setResponseStateLoading(ConfigRoute.USER)
+                    throw IllegalStateException("boom")
+                }
+                100
+            }
+        every { processRadioResponseUseCase(any(), 123, any()) } calls
+            {
+                val pendingRequestIds = it.args[2] as Set<Int>
+                if (42 in pendingRequestIds) RadioResponseResult.Owner(owner) else null
+            }
+
+        viewModel.updateChannels(new, old)
+        runCurrent()
+        advanceTimeBy(MANUAL_CHANNEL_WRITE_DELAY.inWholeMilliseconds)
+        runCurrent()
+
+        packetFlow.emit(MeshPacket(decoded = Data(request_id = 42)))
+        runCurrent()
+
+        assertEquals(owner, viewModel.radioConfigState.value.userConfig)
+    }
+
+    @Test
+    fun `aborted manual batch cancels batch timeout before packet id reuse`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        val old = fourChannelFixture()
+        val (channelA, _, _, channelD) = old
+        val new = listOf(channelA, channelD)
+        var writeCount = 0
+
+        nodeRepository.setNodes(listOf(node))
+        viewModel = createViewModel()
+
+        everySuspend { radioConfigUseCase.setRemoteChannel(any(), any()) } calls
+            {
+                writeCount++
+                if (writeCount == 2) throw IllegalStateException("boom")
+                100
+            }
+        everySuspend { radioConfigUseCase.getOwner(any()) } returns 100
+
+        viewModel.updateChannels(new, old)
+        runCurrent()
+        advanceTimeBy(MANUAL_CHANNEL_WRITE_DELAY.inWholeMilliseconds)
+        runCurrent()
+
+        viewModel.setResponseStateLoading(ConfigRoute.USER)
+        runCurrent()
+
+        advanceTimeBy(29_500)
+        runCurrent()
+
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Loading)
+    }
+
+    @Test
     fun `applyManualChannelUpdatePlan paces writes except after final channel`() = runTest {
         val channelA = Channel(index = 1, role = Channel.Role.SECONDARY, settings = ChannelSettings(name = "A"))
         val channelB = Channel(index = 2, role = Channel.Role.DISABLED, settings = ChannelSettings())

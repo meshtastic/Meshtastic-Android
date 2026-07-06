@@ -229,6 +229,7 @@ open class RadioConfigViewModel(
     private var probeJob: Job? = null
     private val channelUpdateMutex = Mutex()
     private var manualChannelBatchEnqueueing = false
+    private val manualChannelBatchRequestIds = mutableSetOf<Int>()
 
     /**
      * Run a one-shot reachability/credentials probe against an MQTT broker. Cancels any in-flight probe before starting
@@ -260,6 +261,7 @@ open class RadioConfigViewModel(
         get() = _destNode
 
     private val requestIds = MutableStateFlow(hashSetOf<Int>())
+    private val requestTimeoutJobs = mutableMapOf<Int, Job>()
     private val _radioConfigState = MutableStateFlow(RadioConfigState())
     val radioConfigState: StateFlow<RadioConfigState> = _radioConfigState
 
@@ -424,7 +426,7 @@ open class RadioConfigViewModel(
                 val current = radioConfigState.value.channelList.ifEmpty { old }
                 val updatePlan = getManualChannelUpdatePlan(new, current)
                 if (updatePlan.isEmpty()) return@withLock
-                beginManualChannelBatch(updatePlan.size)
+                if (!beginManualChannelBatch(updatePlan.size)) return@withLock
 
                 try {
                     applyManualChannelUpdatePlan(
@@ -432,7 +434,7 @@ open class RadioConfigViewModel(
                         currentSettings = current,
                         finalSettings = new,
                         writeChannel = { channel -> radioConfigUseCase.setRemoteChannel(destNum, channel) },
-                        registerRequestId = ::registerRequestId,
+                        registerRequestId = ::registerManualChannelBatchRequestId,
                         onInterrupted = { result ->
                             reconcileInterruptedManualChannelUpdate(
                                 destNum = destNum,
@@ -696,7 +698,7 @@ open class RadioConfigViewModel(
     }
 
     fun clearPacketResponse() {
-        requestIds.value = hashSetOf()
+        clearRequestIds()
         _radioConfigState.update { it.copy(responseState = ResponseState.Empty) }
     }
 
@@ -808,23 +810,30 @@ open class RadioConfigViewModel(
         }
     }
 
-    private fun beginManualChannelBatch(total: Int) {
+    private fun beginManualChannelBatch(total: Int): Boolean {
+        if (requestIds.value.isNotEmpty() || radioConfigState.value.responseState is ResponseState.Loading) {
+            Logger.w { "Manual channel update skipped while another radio request is pending" }
+            return false
+        }
+        manualChannelBatchRequestIds.clear()
         manualChannelBatchEnqueueing = true
         _radioConfigState.update { state ->
             state.copy(route = "", responseState = ResponseState.Loading(total = total))
         }
+        return true
     }
 
     private fun finishManualChannelBatch() {
         manualChannelBatchEnqueueing = false
         if (requestIds.value.isEmpty()) {
+            manualChannelBatchRequestIds.clear()
             setResponseStateSuccess()
         }
     }
 
     private fun abortManualChannelBatch() {
         manualChannelBatchEnqueueing = false
-        requestIds.value = hashSetOf()
+        removeManualChannelBatchRequestIds()
     }
 
     private fun completeSetRequestOrProgressBatch() {
@@ -867,7 +876,8 @@ open class RadioConfigViewModel(
     }
 
     private fun registerRequestId(packetId: Int) {
-        requestIds.update { it.apply { add(packetId) } }
+        requestTimeoutJobs.remove(packetId)?.cancel()
+        requestIds.update { it.withPacketId(packetId) }
         _radioConfigState.update { state ->
             if (state.responseState is ResponseState.Loading) {
                 val total = maxOf(requestIds.value.size, state.responseState.total)
@@ -881,15 +891,41 @@ open class RadioConfigViewModel(
         }
 
         val requestTimeout = 30.seconds
-        safeLaunch(tag = "requestTimeout") {
-            delay(requestTimeout)
-            if (requestIds.value.contains(packetId)) {
-                requestIds.update { it.apply { remove(packetId) } }
-                if (requestIds.value.isEmpty()) {
-                    sendError(Res.string.timeout)
+        requestTimeoutJobs[packetId] =
+            safeLaunch(tag = "requestTimeout") {
+                delay(requestTimeout)
+                if (requestIds.value.contains(packetId)) {
+                    removeRequestId(packetId)
+                    if (requestIds.value.isEmpty()) {
+                        sendError(Res.string.timeout)
+                    }
                 }
             }
-        }
+    }
+
+    private fun registerManualChannelBatchRequestId(packetId: Int) {
+        manualChannelBatchRequestIds.add(packetId)
+        registerRequestId(packetId)
+    }
+
+    private fun clearRequestIds() {
+        requestTimeoutJobs.values.forEach { it.cancel() }
+        requestTimeoutJobs.clear()
+        manualChannelBatchRequestIds.clear()
+        requestIds.value = hashSetOf()
+    }
+
+    private fun removeRequestId(packetId: Int) {
+        requestTimeoutJobs.remove(packetId)?.cancel()
+        manualChannelBatchRequestIds.remove(packetId)
+        requestIds.update { it.withoutPacketId(packetId) }
+    }
+
+    private fun removeManualChannelBatchRequestIds() {
+        val packetIds = manualChannelBatchRequestIds.toSet()
+        packetIds.forEach { requestTimeoutJobs.remove(it)?.cancel() }
+        manualChannelBatchRequestIds.clear()
+        requestIds.update { ids -> ids.withoutPacketIds(packetIds) }
     }
 
     private fun processPacketResponse(packet: MeshPacket) {
@@ -908,7 +944,7 @@ open class RadioConfigViewModel(
             is RadioResponseResult.Success -> {
                 if (route.isEmpty()) {
                     val data = packet.decoded!!
-                    requestIds.update { it.apply { remove(data.request_id) } }
+                    removeRequestId(data.request_id)
                     if (requestIds.value.isEmpty()) {
                         completeSetRequestOrProgressBatch()
                     } else {
@@ -1033,7 +1069,7 @@ open class RadioConfigViewModel(
         }
 
         val requestId = packet.decoded?.request_id ?: return
-        requestIds.update { it.apply { remove(requestId) } }
+        removeRequestId(requestId)
 
         if (requestIds.value.isEmpty()) {
             if (route.isNotEmpty() && !AdminRoute.entries.any { it.name == route }) {
@@ -1102,3 +1138,10 @@ private fun MutableList<ChannelSettings>.applyManualChannelWrite(channel: Channe
             channel.settings ?: ChannelSettings()
         }
 }
+
+private fun HashSet<Int>.withPacketId(packetId: Int): HashSet<Int> = HashSet(this).apply { add(packetId) }
+
+private fun HashSet<Int>.withoutPacketId(packetId: Int): HashSet<Int> = HashSet(this).apply { remove(packetId) }
+
+private fun HashSet<Int>.withoutPacketIds(packetIds: Set<Int>): HashSet<Int> =
+    HashSet(this).apply { removeAll(packetIds) }
