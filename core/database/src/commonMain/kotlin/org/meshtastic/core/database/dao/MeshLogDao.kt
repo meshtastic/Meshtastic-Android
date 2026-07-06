@@ -18,6 +18,7 @@ package org.meshtastic.core.database.dao
 
 import androidx.room3.Dao
 import androidx.room3.Insert
+import androidx.room3.OnConflictStrategy
 import androidx.room3.Query
 import kotlinx.coroutines.flow.Flow
 import org.meshtastic.core.database.entity.MeshLog
@@ -46,6 +47,16 @@ interface MeshLogDao {
     fun getLogsFrom(fromNum: Int, portNum: Int, maxItem: Int): Flow<List<MeshLog>>
 
     @Insert suspend fun insert(log: MeshLog)
+
+    /**
+     * Snapshot + IGNORE-insert used by DatabaseMerger to carry telemetry/position/traceroute history across transports.
+     * uuid is a unique string per row, so IGNORE is just belt-and-suspenders against a rare clash.
+     */
+    @Query("SELECT * FROM log")
+    suspend fun getAllLogsSnapshot(): List<MeshLog>
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertIgnore(logs: List<MeshLog>)
 
     @Query("DELETE FROM log")
     suspend fun deleteAll()

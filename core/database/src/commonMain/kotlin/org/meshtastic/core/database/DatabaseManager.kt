@@ -22,6 +22,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -44,6 +45,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.util.normalizeAddress
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.di.CoroutineDispatchers
 import kotlin.concurrent.Volatile
@@ -67,6 +69,11 @@ open class DatabaseManager(
 
     private fun lastUsedKey(dbName: String) = longPreferencesKey("db_last_used:$dbName")
 
+    private fun addrDbKey(address: String?) =
+        stringPreferencesKey("${DatabaseConstants.ADDR_DB_FOR_PREFIX}${normalizeAddress(address)}")
+
+    private fun nodeDbKey(nodeNum: Int) = stringPreferencesKey("${DatabaseConstants.NODE_DB_FOR_PREFIX}$nodeNum")
+
     private var backfillJob: Job? = null
 
     @Volatile private var hasDelayedFirstDeviceBackfill = false
@@ -83,9 +90,7 @@ open class DatabaseManager(
         managerScope.launch {
             datastore.edit { it[cacheLimitKey] = clamped }
             // Enforce asynchronously with current active DB protected
-            val active =
-                _currentDb.value?.let { buildDbName(_currentAddress.value) } ?: DatabaseConstants.DEFAULT_DB_NAME
-            enforceCacheLimit(activeDbName = active)
+            enforceCacheLimit(activeDbName = currentDbName)
         }
     }
 
@@ -105,6 +110,13 @@ open class DatabaseManager(
     private val _currentAddress = MutableStateFlow<String?>(null)
     val currentAddress: StateFlow<String?> = _currentAddress
 
+    /**
+     * Name of the currently active database. Tracked explicitly rather than recomputed from the address, because
+     * cross-transport aliasing ([associateNode]) decouples the two: a secondary transport's address maps to the DB
+     * claimed by the first transport, which `buildDbName(address)` would never produce. Written under [mutex].
+     */
+    @Volatile private var currentDbName: String = DatabaseConstants.DEFAULT_DB_NAME
+
     /** Initialize the active database for [address]. */
     suspend fun init(address: String?) {
         switchActiveDatabase(address)
@@ -118,12 +130,24 @@ open class DatabaseManager(
     private fun getOrOpenDatabase(dbName: String): MeshtasticDatabase =
         dbCache.getOrPut(dbName) { getDatabaseBuilder(dbName).build() }
 
+    /**
+     * Resolves the DB name to use for [address], honoring a cross-transport alias when one exists. A secondary
+     * transport (e.g. TCP) that has been unified with a node points at the DB the first transport (e.g. BLE) claimed;
+     * without an alias this falls back to the address-hashed name — today's default — for a first-time or primary
+     * connection. See [associateNode].
+     */
+    private suspend fun resolveDbName(address: String?): String {
+        val fallback = buildDbName(address)
+        if (fallback == DatabaseConstants.DEFAULT_DB_NAME) return fallback
+        return datastore.data.first()[addrDbKey(address)] ?: fallback
+    }
+
     /** Switch active database to the one associated with [address]. Serialized via mutex. */
     override suspend fun switchActiveDatabase(address: String?) = mutex.withLock {
-        val dbName = buildDbName(address)
+        val dbName = resolveDbName(address)
 
         // Remember the previously active DB name (any) so we can record its last-used time as well.
-        val previousDbName = _currentDb.value?.let { buildDbName(_currentAddress.value) }
+        val previousDbName = if (_currentDb.value != null) currentDbName else null
 
         // Fast path: no-op if already on this address
         if (_currentAddress.value == address && _currentDb.value != null) {
@@ -140,6 +164,7 @@ open class DatabaseManager(
         // collectors, causing "Connection pool is closed" crashes.
         _currentDb.value = db
         _currentAddress.value = address
+        currentDbName = dbName
         markLastUsed(dbName)
         // Also mark the previous DB as used "just now" so LRU has an accurate, recent timestamp
         previousDbName?.let { markLastUsed(it) }
@@ -167,6 +192,78 @@ open class DatabaseManager(
         Logger.i { "Switched active DB to ${anonymizeDbName(dbName)} for address ${anonymizeAddress(address)}" }
     }
 
+    @Suppress("TooGenericExceptionCaught")
+    override suspend fun associateNode(nodeNum: Int) {
+        mutex.withLock {
+            val sourceName = currentDbName
+            // Never claim or merge into the sentinel "no device" DB.
+            if (sourceName == DatabaseConstants.DEFAULT_DB_NAME) return@withLock
+
+            val claimed = datastore.data.first()[nodeDbKey(nodeNum)]
+            when {
+                claimed == null -> {
+                    // First transport to learn this node: its current DB becomes the node's canonical DB.
+                    // No address alias is needed — a primary connection already resolves to this DB via buildDbName.
+                    datastore.edit { it[nodeDbKey(nodeNum)] = sourceName }
+                    Logger.i { "Claimed ${anonymizeDbName(sourceName)} as canonical DB for node $nodeNum" }
+                }
+
+                claimed == sourceName -> Unit
+
+                // Already unified — nothing to do.
+
+                else -> {
+                    // Secondary transport reached an already-known node: fold this DB into the canonical one,
+                    // switch the active DB to it, alias this address to it, and retire the now-merged source.
+                    val source = _currentDb.value ?: return@withLock
+                    val dest = withContext(dispatchers.io) { getOrOpenDatabase(claimed) }
+
+                    // Redirect live writers to the canonical DB BEFORE merging. Otherwise a concurrent withDb
+                    // write (connect triggers a full NodeDB re-dump) could land in `source` after the merge has
+                    // already snapshotted it, then be lost when `source` is retired — and withDb's closed-pool
+                    // retry can't recover it because the write itself succeeded. New writers now capture `dest`;
+                    // any still holding `source` are covered by that retry once retireDatabase closes it.
+                    _currentDb.value = dest
+                    currentDbName = claimed
+                    try {
+                        withContext(dispatchers.io) { DatabaseMerger.merge(source, dest) }
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        // merge() is atomic, so on failure `dest` is unchanged. Roll the active DB back to
+                        // `source` so the address still resolves consistently and the merge retries next connect.
+                        _currentDb.value = source
+                        currentDbName = sourceName
+                        Logger.w(e) {
+                            "Merge into ${anonymizeDbName(claimed)} failed; kept ${anonymizeDbName(sourceName)} active"
+                        }
+                        return@withLock
+                    }
+
+                    markLastUsed(claimed)
+                    datastore.edit { it[addrDbKey(_currentAddress.value)] = claimed }
+                    Logger.i {
+                        "Unified ${anonymizeDbName(sourceName)} into ${anonymizeDbName(claimed)} for node $nodeNum"
+                    }
+
+                    // Retire the merged source off the critical path; its data now lives in the canonical DB.
+                    managerScope.launch(dispatchers.io) { retireDatabase(sourceName) }
+                }
+            }
+        }
+    }
+
+    /** Closes, deletes, and forgets a database whose contents have been merged into another. */
+    private suspend fun retireDatabase(dbName: String) = mutex.withLock {
+        runCatching {
+            closeCachedDatabase(dbName)
+            deleteDatabase(dbName)
+            datastore.edit { it.remove(lastUsedKey(dbName)) }
+        }
+            .onSuccess { Logger.i { "Retired merged DB ${anonymizeDbName(dbName)}" } }
+            .onFailure { Logger.w(it) { "Failed to retire merged database ${anonymizeDbName(dbName)}" } }
+    }
+
     /**
      * Closes and removes a cached database by name. Safe to call even if the database was already closed or not in the
      * cache. Does NOT delete the underlying file — the database can be re-opened on next access.
@@ -188,7 +285,7 @@ open class DatabaseManager(
     @Suppress("TooGenericExceptionCaught")
     override suspend fun <T> withDb(block: suspend (MeshtasticDatabase) -> T): T? = withContext(limitedIo) {
         val db = _currentDb.value ?: return@withContext null
-        val active = buildDbName(_currentAddress.value)
+        val active = currentDbName
         markLastUsed(active)
         try {
             block(db)

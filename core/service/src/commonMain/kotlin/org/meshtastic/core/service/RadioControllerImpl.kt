@@ -19,6 +19,9 @@ package org.meshtastic.core.service
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.launch
 import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.repository.AdminController
@@ -86,6 +89,18 @@ class RadioControllerImpl(
     ),
     NodeController by NodeControllerImpl(commandSender, nodeManager, packetRepository, scope),
     QueryController by QueryControllerImpl(commandSender, nodeManager, uiPrefs) {
+
+    init {
+        // Unify per-node databases across transports. When the handshake reports our node number, tell the
+        // DatabaseManager to claim (or merge into) that node's canonical DB, so the same node reached over BLE, TCP,
+        // or USB shares one stored history. Keyed on (address, node) so a second transport for the same node re-fires
+        // even though the node number itself is unchanged.
+        scope.launch {
+            combine(meshPrefs.deviceAddress, nodeManager.myNodeNum) { address, nodeNum -> address to nodeNum }
+                .distinctUntilChanged()
+                .collect { (_, nodeNum) -> nodeNum?.let { databaseManager.associateNode(it) } }
+        }
+    }
 
     // ── Connection State ────────────────────────────────────────────────────
 
