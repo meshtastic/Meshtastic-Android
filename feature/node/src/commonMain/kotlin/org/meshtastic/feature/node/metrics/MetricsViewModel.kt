@@ -184,6 +184,14 @@ open class MetricsViewModel(
 
     fun getUser(nodeNum: Int) = nodeRepository.getUser(nodeNum)
 
+    /** Persists a user-editable label (e.g. "Solar", "Battery") for a power-metrics channel (0-based index). */
+    fun setPowerChannelLabel(nodeNum: Int, channelIndex: Int, label: String) =
+        safeLaunch(context = dispatchers.io, tag = "setPowerChannelLabel") {
+            // Atomic in the DAO: reads current labels from the DB (not stale ViewModel state) so quick successive
+            // saves to different channels can't clobber each other.
+            nodeRepository.updatePowerChannelLabel(nodeNum, channelIndex, label)
+        }
+
     fun deleteLog(uuid: String) =
         safeLaunch(context = dispatchers.io, tag = "deleteLog") { meshLogRepository.deleteLog(uuid) }
 

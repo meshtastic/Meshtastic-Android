@@ -27,6 +27,7 @@ import org.meshtastic.core.database.entity.MetadataEntity
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.database.entity.NodeWithRelations
+import org.meshtastic.core.model.mergePowerChannelLabel
 import org.meshtastic.proto.HardwareModel
 
 @Suppress("TooManyFunctions")
@@ -144,6 +145,7 @@ interface NodeInfoDao {
     @Suppress("CyclomaticComplexMethod", "MagicNumber")
     private fun handleExistingNodeUpsertValidation(existingNode: NodeEntity, incomingNode: NodeEntity): NodeEntity {
         val resolvedNotes = incomingNode.notes.ifBlank { existingNode.notes }
+        val resolvedPowerChannelLabels = incomingNode.powerChannelLabels.ifEmpty { existingNode.powerChannelLabels }
 
         val isPlaceholder = incomingNode.user.hw_model == HardwareModel.UNSET
         val hasExistingUser = existingNode.user.hw_model != HardwareModel.UNSET
@@ -157,6 +159,7 @@ interface NodeInfoDao {
                 shortName = existingNode.shortName,
                 manuallyVerified = existingNode.manuallyVerified,
                 notes = resolvedNotes,
+                powerChannelLabels = resolvedPowerChannelLabels,
             )
         }
 
@@ -166,6 +169,7 @@ interface NodeInfoDao {
             user = incomingNode.user.copy(public_key = resolvedKey ?: ByteString.EMPTY),
             publicKey = resolvedKey,
             notes = resolvedNotes,
+            powerChannelLabels = resolvedPowerChannelLabels,
         )
     }
 
@@ -312,6 +316,23 @@ interface NodeInfoDao {
 
     @Query("UPDATE nodes SET notes = :notes WHERE num = :num")
     suspend fun setNodeNotes(num: Int, notes: String)
+
+    @Query("UPDATE nodes SET power_channel_labels = :labels WHERE num = :num")
+    suspend fun setPowerChannelLabels(num: Int, labels: List<String>)
+
+    /**
+     * Sets a single power-channel [label] (0-based [channelIndex]) atomically: the read-modify-write runs inside a
+     * transaction that reads the current labels from the DB, so concurrent edits to different channels can't clobber
+     * each other via a stale read. Earlier channels keep their slot (blank padding); trailing blanks are dropped.
+     *
+     * Reads via [getNodeByNum] rather than a scalar `SELECT power_channel_labels`: Room reads a `List<String>` query
+     * result as one String per row (returning the raw JSON text), not as the column's converted `List<String>`.
+     */
+    @Transaction
+    suspend fun updatePowerChannelLabel(num: Int, channelIndex: Int, label: String) {
+        val existing = getNodeByNum(num)?.node?.powerChannelLabels ?: emptyList()
+        setPowerChannelLabels(num, mergePowerChannelLabel(existing, channelIndex, label))
+    }
 
     /**
      * Batch version of [getVerifiedNodeForUpsert]. Pre-fetches all existing nodes and public-key conflicts in two
