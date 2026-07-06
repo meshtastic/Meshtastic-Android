@@ -339,11 +339,6 @@ private fun NodeSignalRow(thatNode: Node, isThisNode: Boolean, contentColor: Col
                     add { ChannelInfo(channel = thatNode.channel, contentColor = contentColor) }
                 }
             }
-
-            val satCount = thatNode.validPosition?.sats_in_view ?: 0
-            if (satCount > 0) {
-                add { SatelliteCountInfo(satCount = satCount, contentColor = contentColor) }
-            }
         }
 
     if (signalChip != null || items.isNotEmpty()) {
