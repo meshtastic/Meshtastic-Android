@@ -67,6 +67,13 @@ class DesktopNotificationManagerTest {
         override fun setLowBatteryEnabled(enabled: Boolean) {
             lowBatteryEnabled.value = enabled
         }
+
+        override val geofenceAlertOptIns = MutableStateFlow<Set<Int>>(emptySet())
+
+        override fun setGeofenceAlertOptIn(waypointId: Int, enabled: Boolean) {
+            geofenceAlertOptIns.value =
+                geofenceAlertOptIns.value.toMutableSet().apply { if (enabled) add(waypointId) else remove(waypointId) }
+        }
     }
 
     @Test
