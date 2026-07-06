@@ -22,7 +22,11 @@ import org.meshtastic.core.resources.error
 import org.meshtastic.core.resources.message_delivery_status
 import org.meshtastic.core.resources.message_status_delivered
 import org.meshtastic.core.resources.message_status_delivered_recipient
+import org.meshtastic.core.resources.message_status_encrypt_failed
 import org.meshtastic.core.resources.message_status_failed
+import org.meshtastic.core.resources.message_status_no_channel
+import org.meshtastic.core.resources.message_status_recipient_key_unavailable
+import org.meshtastic.core.resources.message_status_recipient_needs_key
 import org.meshtastic.core.resources.message_status_relayed_unconfirmed
 import org.meshtastic.core.resources.message_status_sending
 import org.meshtastic.core.resources.message_status_too_large
@@ -254,6 +258,20 @@ class MessageTest {
             messageWith(MessageStatus.ERROR, routingError = Routing.Error.TOO_LARGE.value).getStatusStringRes()
 
         assertEquals(Res.string.message_status_too_large, text)
+    }
+
+    @Test
+    fun getStatusStringRes_distinctErrors_useActionableWording() {
+        fun textFor(error: Routing.Error) =
+            messageWith(MessageStatus.ERROR, routingError = error.value).getStatusStringRes().second
+
+        assertEquals(Res.string.message_status_no_channel, textFor(Routing.Error.NO_CHANNEL))
+        assertEquals(Res.string.message_status_encrypt_failed, textFor(Routing.Error.PKI_FAILED))
+        assertEquals(
+            Res.string.message_status_recipient_key_unavailable,
+            textFor(Routing.Error.PKI_SEND_FAIL_PUBLIC_KEY),
+        )
+        assertEquals(Res.string.message_status_recipient_needs_key, textFor(Routing.Error.PKI_UNKNOWN_PUBKEY))
     }
 
     @Test

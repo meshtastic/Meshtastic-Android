@@ -22,7 +22,11 @@ import org.meshtastic.core.resources.error
 import org.meshtastic.core.resources.message_delivery_status
 import org.meshtastic.core.resources.message_status_delivered
 import org.meshtastic.core.resources.message_status_delivered_recipient
+import org.meshtastic.core.resources.message_status_encrypt_failed
 import org.meshtastic.core.resources.message_status_failed
+import org.meshtastic.core.resources.message_status_no_channel
+import org.meshtastic.core.resources.message_status_recipient_key_unavailable
+import org.meshtastic.core.resources.message_status_recipient_needs_key
 import org.meshtastic.core.resources.message_status_relayed_unconfirmed
 import org.meshtastic.core.resources.message_status_sending
 import org.meshtastic.core.resources.message_status_sfpp_confirmed
@@ -72,6 +76,19 @@ fun getStringResFrom(routingError: Int): StringResource = when (routingError) {
     Routing.Error.RATE_LIMIT_EXCEEDED.value -> Res.string.routing_error_rate_limit_exceeded
     Routing.Error.PKI_SEND_FAIL_PUBLIC_KEY.value -> Res.string.routing_error_pki_send_fail_public_key
     else -> Res.string.unrecognized
+}
+
+/**
+ * Actionable inline wording for a send [routingError] (design#43 source-of-truth). A handful of errors get their own
+ * plain-language line; everything else collapses to a single "failed to deliver" message.
+ */
+private fun errorStatusStringRes(routingError: Int): StringResource = when (routingError) {
+    Routing.Error.TOO_LARGE.value -> Res.string.message_status_too_large
+    Routing.Error.NO_CHANNEL.value -> Res.string.message_status_no_channel
+    Routing.Error.PKI_FAILED.value -> Res.string.message_status_encrypt_failed
+    Routing.Error.PKI_SEND_FAIL_PUBLIC_KEY.value -> Res.string.message_status_recipient_key_unavailable
+    Routing.Error.PKI_UNKNOWN_PUBKEY.value -> Res.string.message_status_recipient_needs_key
+    else -> Res.string.message_status_failed
 }
 
 data class Message(
@@ -142,12 +159,7 @@ data class Message(
                         Res.string.message_status_relayed_unconfirmed
                     }
 
-                MessageStatus.ERROR ->
-                    if (routingError == Routing.Error.TOO_LARGE.value) {
-                        Res.string.message_status_too_large
-                    } else {
-                        Res.string.message_status_failed
-                    }
+                MessageStatus.ERROR -> errorStatusStringRes(routingError)
 
                 MessageStatus.UNKNOWN,
                 null,

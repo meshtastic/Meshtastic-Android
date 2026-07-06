@@ -991,11 +991,15 @@
     <string name="message_input_label">Message</string>
     <string name="message_status_delivered">Delivered to mesh</string>
     <string name="message_status_delivered_recipient">Delivered to recipient</string>
+    <string name="message_status_encrypt_failed">Could not send encrypted message</string>
     <string name="message_status_enroute">Waiting to be acknowledged</string>
     <string name="message_status_failed">Failed to deliver to mesh</string>
+    <string name="message_status_no_channel">No channel selected</string>
     <string name="message_status_queued">Queued for sending</string>
+    <string name="message_status_recipient_key_unavailable">Recipient key unavailable</string>
+    <string name="message_status_recipient_needs_key">Recipient needs your key</string>
     <string name="message_status_relayed_unconfirmed">Relayed, not confirmed by recipient</string>
-    <string name="message_status_sending">Sending…</string>
+    <string name="message_status_sending">Sending...</string>
     <string name="message_status_sfpp_confirmed">Confirmed on SF++ chain</string>
     <string name="message_status_sfpp_routing">Routing via SF++ chain…</string>
     <string name="message_status_too_large">Message is too large to send</string>
