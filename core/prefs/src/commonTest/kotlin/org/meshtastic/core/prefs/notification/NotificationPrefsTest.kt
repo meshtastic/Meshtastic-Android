@@ -116,4 +116,22 @@ class NotificationPrefsTest {
         assertFalse(2 in ids)
         assertTrue(max + 2 in ids) // newest kept
     }
+
+    @Test
+    fun `geofenceAlertOptIns retoggle refreshes eviction order`() = testScope.runTest {
+        val max = NotificationPrefsImpl.MAX_GEOFENCE_OPT_INS
+        (1..max).forEach { notificationPrefs.setGeofenceAlertOptIn(it, enabled = true) } // 1 = oldest
+
+        notificationPrefs.setGeofenceAlertOptIn(
+            1,
+            enabled = true,
+        ) // re-toggle → 1 becomes most-recent, 2 now oldest
+        notificationPrefs.setGeofenceAlertOptIn(max + 1, enabled = true) // forces one eviction
+
+        val ids = notificationPrefs.geofenceAlertOptIns.value
+        assertEquals(max, ids.size)
+        assertTrue(1 in ids) // retoggled id survived
+        assertFalse(2 in ids) // 2 became the oldest and was evicted
+        assertTrue(max + 1 in ids)
+    }
 }

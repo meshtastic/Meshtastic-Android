@@ -731,9 +731,10 @@ fun MapView(
                     alertsEnabled = waypoint.id in optIns,
                     onToggleAlerts = { mapViewModel.setGeofenceAlertOptIn(waypoint.id, it) },
                     onDismissRequest = { geofenceInfoWaypoint = null },
-                    // Unlocked foreign geofences can still be edited/re-broadcast; locked ones stay read-only.
+                    // Unlocked foreign geofences can still be edited/re-broadcast (only while connected, since editing
+                    // means re-sending); locked ones stay read-only.
                     onEdit =
-                    if (waypoint.locked_to == 0) {
+                    if (waypoint.locked_to == 0 && isConnected) {
                         {
                             geofenceInfoWaypoint = null
                             editingWaypoint = waypoint

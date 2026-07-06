@@ -48,7 +48,6 @@ import org.meshtastic.core.repository.MessageFilter
 import org.meshtastic.core.repository.NeighborInfoHandler
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NotificationManager
-import org.meshtastic.core.repository.NotificationPrefs
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
@@ -57,6 +56,7 @@ import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.StoreForwardPacketHandler
 import org.meshtastic.core.repository.TelemetryPacketHandler
 import org.meshtastic.core.repository.TracerouteHandler
+import org.meshtastic.core.testing.FakeNotificationPrefs
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Data
@@ -148,10 +148,7 @@ class MeshDataHandlerTest {
                     nodeManager = nodeManager,
                     serviceNotifications = serviceNotifications,
                     crossingStore = GeofenceCrossingStore(),
-                    notificationPrefs =
-                    mock<NotificationPrefs>(MockMode.autofill).apply {
-                        every { geofenceAlertOptIns } returns MutableStateFlow<Set<Int>>(emptySet())
-                    },
+                    notificationPrefs = FakeNotificationPrefs(),
                     scope = geofenceScope,
                 ),
                 meshBeaconRepository = meshBeaconRepository,
