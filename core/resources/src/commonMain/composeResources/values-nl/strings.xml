@@ -146,7 +146,6 @@
     <string name="error_duty_cycle">Limiet van Duty Cycle bereikt. Kan nu geen berichten verzenden, probeer het later opnieuw.</string>
     <string name="ethernet_enabled">Ethernet ingeschakeld</string>
     <string name="exchange_position">Positie uitwisselen</string>
-    <!-- EXPORT -->
     <string name="export_configuration">Configuratie exporteren</string>
     <string name="external_notification">Externe Melding</string>
     <string name="factory_reset">Reset naar fabrieksinstellingen</string>
@@ -200,6 +199,7 @@
     <string name="ip_port">Poort:</string>
     <string name="ipv4_mode">IPv4 modus</string>
     <string name="json_output_enabled">JSON uitvoer ingeschakeld</string>
+    <!-- KEY -->
     <!-- LABEL -->
     <string name="latitude">Breedtegraad</string>
     <string name="led_state">LED status</string>
@@ -238,6 +238,7 @@
     <string name="map_tile_source">Bron tegel</string>
     <string name="max">Maximum</string>
     <!-- MESH -->
+    <string name="mesh_beacon_preset_none">Geen</string>
     <!-- MESHTASTIC -->
     <string name="meshtastic_alerts_notifications">Waarschuwingsmeldingen</string>
     <string name="meshtastic_low_battery_notifications">Batterij bijna leeg</string>
@@ -453,6 +454,7 @@
     </plurals>
     <string name="traceroute_log">Traceroute</string>
     <!-- TRAFFIC -->
+    <!-- TRANSLATION -->
     <string name="transmit_over_lora">Zend over LoRa</string>
     <!-- TRANSPORT -->
     <string name="transport_lora">LoRa</string>

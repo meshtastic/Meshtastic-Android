@@ -98,6 +98,7 @@
     <string name="audio_config">音頻設置</string>
     <string name="available_pins">可用腳位</string>
     <string name="back">返回</string>
+    <string name="backup_keys">備份金鑰</string>
     <string name="backup_restore">備份 &amp; 還原</string>
     <string name="bad">不良</string>
     <string name="bandwidth">帶寬</string>
@@ -441,11 +442,8 @@
     <string name="exchange_position">交換位置</string>
     <string name="expand_chart">展開圖表</string>
     <string name="expires">到期時間</string>
-    <!-- EXPORT -->
     <string name="export_configuration">匯出設定</string>
     <string name="export_data_csv">匯出所有封包</string>
-    <string name="export_keys">匯出金鑰</string>
-    <string name="export_keys_confirmation">請將匯出後的私鑰及公鑰妥善保存。</string>
     <string name="export_tak_data_package">匯出 TAK 資料封包</string>
     <string name="external_notification">外部通知</string>
     <string name="external_notification_config">外部通知規劃</string>
@@ -621,6 +619,7 @@
     <string name="ip_port">IP連接埠：</string>
     <string name="ipv4_mode">第四代IP模式</string>
     <string name="json_output_enabled">JSON輸出已啟用</string>
+    <!-- KEY -->
     <string name="key_verification_final_title">金鑰驗證已完成</string>
     <string name="key_verification_request_title">金鑰驗證請求</string>
     <string name="key_verification_title">金鑰驗證</string>
@@ -743,6 +742,7 @@
     <string name="max">最大值</string>
     <!-- MESH -->
     <string name="mesh_beacon_offer_dismiss">略過</string>
+    <string name="mesh_beacon_preset_none">無</string>
     <string name="mesh_map_location">Mesh Map 地圖位置</string>
     <string name="mesh_map_location_description">在 Mesh 地圖上，為您的手機啟用藍色的定位點。</string>
     <!-- MESHTASTIC -->
@@ -1337,6 +1337,8 @@
     <string name="traffic_management_rate_limit_window">速率限制開放窗口期（秒）</string>
     <string name="traffic_management_router_preserve_hops">保留路由跳數</string>
     <string name="traffic_management_unknown_packet_threshold">不明封包閾值</string>
+    <string name="translate">翻譯</string>
+    <!-- TRANSLATION -->
     <string name="transmit_over_lora">通過Lora無線電傳輸</string>
     <!-- TRANSPORT -->
     <string name="transport_ble">低功耗藍牙</string>

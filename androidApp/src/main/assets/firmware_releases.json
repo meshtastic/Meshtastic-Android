@@ -189,33 +189,39 @@
   },
   "pullRequests": [
     {
-      "id": "10860",
-      "title": "esp32-common: Do not remove `network-provisioning` component",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10860",
+      "id": "10894",
+      "title": "Reduce heap usage on ST7789 display targets with reduced-memory mode",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10894",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
-      "id": "10856",
-      "title": "add missing MESHTASTIC_EXCLUDE_AUDIO and fix tlora-v2-1-1_6 compilation",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10856",
+      "id": "10887",
+      "title": "InkHUD: persist incoming broadcasts on all channels",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10887",
       "zip_url": "https://discord.com/invite/meshtastic"
     },
     {
-      "id": "10850",
-      "title": "Update LovyanGFX to v1.2.24",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10850",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+      "id": "10884",
+      "title": "Implement SD card backup/restore of preferences; add SD support for Cardputer Advanced",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10884",
+      "zip_url": "https://discord.com/invite/meshtastic"
     },
     {
-      "id": "10849",
-      "title": "Update Quency-D_chsc6x digest to 3b2b6ce",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10849",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+      "id": "10881",
+      "title": "feat(rak4631_eth_gw): advertise a DHCP hostname derived from the device name",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10881",
+      "zip_url": "https://discord.com/invite/meshtastic"
     },
     {
-      "id": "10846",
-      "title": "InkHUD: GPS improvements",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10846",
+      "id": "10870",
+      "title": "Fix message scroll being reset every frame on E-Ink displays",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10870",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
+      "id": "10864",
+      "title": "More fuzz tests and small fixes for the findings",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10864",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
@@ -231,28 +237,10 @@
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
-      "id": "10841",
-      "title": "XEdDSA packet signing UI (BaseUI)",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10841",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10839",
-      "title": "second pass adding beacons admin",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10839",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
       "id": "10807",
       "title": "Add DeltaPlusProto Edict board variant",
       "page_url": "https://github.com/meshtastic/firmware/pull/10807",
       "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "10802",
-      "title": "Refactor SerialConsole to simplify timeout handling",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10802",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
       "id": "10792",
@@ -297,12 +285,6 @@
       "zip_url": "https://discord.com/invite/meshtastic"
     },
     {
-      "id": "10724",
-      "title": "Use upstream fusion library",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10724",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
       "id": "10719",
       "title": "Pr2.5 tmm hop trimming",
       "page_url": "https://github.com/meshtastic/firmware/pull/10719",
@@ -313,6 +295,18 @@
       "title": "Monotonic time & prep for router graceful retirement",
       "page_url": "https://github.com/meshtastic/firmware/pull/10718",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "10717",
+      "title": "Update US LoRa modem preset to region defaults for compliance",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10717",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "10689",
+      "title": "Heltec Vision Master E213: enable 32768hz crystal osc for rtc",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10689",
+      "zip_url": "https://discord.com/invite/meshtastic"
     }
   ]
 }

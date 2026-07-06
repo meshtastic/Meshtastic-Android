@@ -87,6 +87,7 @@
     <!-- APP -->
     <string name="app_functions_get_node_list">Получить список нод</string>
     <string name="app_functions_get_recent_messages">Получать последние сообщения</string>
+    <string name="app_functions_master_summary">Позвольте системным ИИ-ассистентам (например, Gemini) обнаруживать и использовать функции сети</string>
     <string name="app_functions_read_section">Функции чтения</string>
     <string name="app_functions_send_message">Отправить сообщение</string>
     <string name="app_functions_settings_summary">Контролируй, какие функции доступны помощникам ИИ</string>
@@ -102,6 +103,7 @@
     <string name="audio_config">Настройка звука</string>
     <string name="available_pins">Доступные контакты</string>
     <string name="back">Назад</string>
+    <string name="backup_keys">Резервное копирование</string>
     <string name="backup_restore">Резервная копия и восстановление</string>
     <string name="bad">Плохой</string>
     <string name="bandwidth">Ширина канала</string>
@@ -296,14 +298,18 @@
     <string name="debug_filter_preset_title">Готовые фильтры</string>
     <string name="debug_filters">Фильтры</string>
     <string name="debug_log_api_enabled">API журнала отладки включен</string>
+    <string name="debug_logcat_empty">Нет журналов приложения</string>
     <string name="debug_logcat_refresh">Обновить</string>
     <string name="debug_logs_export">Выгрузить логи</string>
+    <string name="debug_logs_exported">Журналы экспортированы</string>
     <string name="debug_panel">Панель отладки</string>
     <string name="debug_search_clear">Очистить условия поиска</string>
     <string name="debug_search_next">Следующее совпадение</string>
     <string name="debug_search_prev">Предыдущее совпадение</string>
     <string name="debug_store_logs_summary">Выключить запись сетевых журналов на диск</string>
     <string name="debug_store_logs_title">Хранить журналы mesh-сети</string>
+    <string name="debug_tab_app_logs">Журналы приложения</string>
+    <string name="debug_tab_packets">Пакеты</string>
     <string name="default_">По умолчанию</string>
     <!-- DELETE -->
     <string name="delete">Удалить</string>
@@ -395,11 +401,20 @@
     <string name="discovery_session_detail">Детали сессии</string>
     <string name="discovery_shifting_to">Шифтинг to %1$s</string>
     <string name="discovery_start_scan">Начало сканирования</string>
+    <string name="discovery_start_scan_disabled">Кнопка начала сканирования отключена. %1$s</string>
+    <string name="discovery_start_scan_reason_24ghz_unsupported">радиооборудование не поддерживает 2,4 ГГц</string>
+    <string name="discovery_start_scan_reason_default_key">канал использует ключ шифрования по умолчанию</string>
     <string name="discovery_start_scan_reason_no_presets">пресеты не выбраны</string>
     <string name="discovery_start_scan_reason_not_connected">устройство не подключено</string>
+    <string name="discovery_stat_analysis">Анализ</string>
+    <string name="discovery_stat_avg_airtime_rate">Средний показатель времени в эфире</string>
+    <string name="discovery_stat_avg_channel_utilization">Среднее использование канала</string>
+    <string name="discovery_stat_bad_packets">Битые пакеты</string>
     <string name="discovery_stat_channel_utilization">Использование канала</string>
     <string name="discovery_stat_date">Дата</string>
     <string name="discovery_stat_direct">Прямой</string>
+    <string name="discovery_stat_duplicate_packets">Дублированные пакеты</string>
+    <string name="discovery_stat_failure_rate">Уровень неудачи</string>
     <string name="discovery_stat_home_preset">Домашний пресет</string>
     <string name="discovery_stat_mesh">Меш</string>
     <string name="discovery_stat_messages">Сообщения</string>
@@ -407,11 +422,20 @@
     <string name="discovery_stat_packets_rx">Ракеты RX</string>
     <string name="discovery_stat_packets_tx">Пакеты TX</string>
     <string name="discovery_stat_preset_results">Результаты пресета</string>
+    <string name="discovery_stat_presets_scanned">Предустановки просканированы</string>
     <string name="discovery_stat_selected">Выбрано</string>
+    <string name="discovery_stat_sensor_pkts">Пакеты датчика</string>
+    <string name="discovery_stat_session_overview">Обзор сессии</string>
     <string name="discovery_stat_status">Состояние</string>
+    <string name="discovery_stat_success_rate">Уровень успеха</string>
+    <string name="discovery_stat_total_dwell_time">Общее время пребывания</string>
+    <string name="discovery_stat_total_messages">Всего сообщений</string>
     <string name="discovery_stat_total_unique_nodes">Всего уникальных нод</string>
     <string name="discovery_stat_unique_nodes">Уникальные ноды</string>
+    <string name="discovery_stat_unselected">Не выбрано</string>
     <string name="discovery_stop_scan">Остановить сканирование</string>
+    <string name="discovery_summary_not_available">Анализ ИИ недоступен</string>
+    <string name="discovery_time_remaining">Осталось %1$s</string>
     <string name="discovery_unique_nodes">%1$d уникальных нод</string>
     <string name="discovery_view_map">Посмотреть карту</string>
     <string name="disk_free_indexed">Свободно на диске %1$d</string>
@@ -430,10 +454,14 @@
     <string name="dns">Служба доменных имен (DNS)</string>
     <!-- DOC -->
     <string name="doc_clear_search">Очистить условия поиска</string>
+    <string name="doc_keywords_android_auto">android auto,car,head unit,driving,hands free,messaging</string>
+    <string name="doc_keywords_app_functions">system ai,gemini,assistant,functions,automation,voice</string>
     <string name="doc_keywords_connections">bluetooth,usb,tcp,pairing,serial,wifi</string>
+    <string name="doc_keywords_debug_logs">debug,logs,logcat,export,bug report,issue,troubleshooting,diagnostics</string>
     <string name="doc_keywords_desktop">desktop,linux,macos,windows,serial</string>
     <string name="doc_keywords_discovery">discovery,topology,network,scan,neighbor</string>
     <string name="doc_keywords_firmware">firmware,update,ota,flash,version,recovery</string>
+    <string name="doc_keywords_help">help,documentation,docs,chirpy,assistant,search,offline</string>
     <string name="doc_keywords_map">map,waypoint,gps,position,location,marker</string>
     <string name="doc_keywords_measurement">formatter,metric,number,locale,temperature,conversion,api</string>
     <string name="doc_keywords_messages">message,channel,encryption,direct,broadcast,quick-chat</string>
@@ -448,15 +476,18 @@
     <string name="doc_keywords_telemetry">telemetry,sensor,temperature,humidity,pressure,power</string>
     <string name="doc_keywords_translate">translate,crowdin,localization,language,i18n,contribute</string>
     <string name="doc_keywords_units">units,locale,metric,imperial,temperature,distance</string>
+    <string name="doc_keywords_widget">widget,home screen,local stats,glance,battery,utilization</string>
     <string name="doc_search_placeholder">Поиск по документации…</string>
     <string name="doc_section_developer">Руководство разработчика</string>
     <string name="doc_section_user">Руководство пользователя</string>
     <string name="doc_title_android_auto">Android авто</string>
     <string name="doc_title_app_functions">Функции прилож-я</string>
     <string name="doc_title_connections">Соединения</string>
+    <string name="doc_title_debug_logs">Журнал отладки</string>
     <string name="doc_title_desktop">Десктопное приложение</string>
     <string name="doc_title_discovery">Обнаружение</string>
     <string name="doc_title_firmware">Обновления прошивки</string>
+    <string name="doc_title_help">Справка и документация в приложении</string>
     <string name="doc_title_map">Карта и путевые точки</string>
     <string name="doc_title_measurement">Измерение и форматирование</string>
     <string name="doc_title_messages">Сообщения и каналы</string>
@@ -471,6 +502,7 @@
     <string name="doc_title_telemetry">Телеметрия и датчики</string>
     <string name="doc_title_translate">Перевести приложение</string>
     <string name="doc_title_units">Ед.изм. и локализация</string>
+    <string name="doc_title_widget">Виджет на главный экран</string>
     <string name="done">Готово</string>
     <string name="dont_show_again_for_device">Больше не показывать для этого устройства</string>
     <string name="double_tap_as_button_press">Двойное нажатие как кнопка</string>
@@ -503,6 +535,7 @@
     <string name="environment_metrics_use_fahrenheit">Использовать метрику окружения в Fahrenheit</string>
     <string name="error">Ошибка</string>
     <string name="error_duty_cycle">Достигнут лимит отправки сообщений в единицу времени. Не удается отправить сообщения прямо сейчас, пожалуйста, повторите попытку позже.</string>
+    <string name="error_recovery_exhausted">Не удалось установить стабильное соединение после нескольких попыток. Пожалуйста, выберите ноду снова, чтобы попробовать ещё раз.</string>
     <string name="establish_session">Подключение и управление</string>
     <string name="establishing_session">Установка удалённой сессии…</string>
     <string name="ethernet_config">Настройки Ethernet</string>
@@ -512,11 +545,9 @@
     <string name="expand_chart">Развернуть диаграмму</string>
     <string name="expanded">Расширенный</string>
     <string name="expires">Срок действия</string>
-    <!-- EXPORT -->
     <string name="export_configuration">Экспорт настроек</string>
     <string name="export_data_csv">Экспортировать все пакеты</string>
-    <string name="export_keys">Экспортировать ключи</string>
-    <string name="export_keys_confirmation">Экспортирует публичный и приватный ключи в файл. Пожалуйста, храните их где-нибудь в безопасности.</string>
+    <string name="export_gpx">Экспорт GPX</string>
     <string name="export_tak_data_package">Экспорт пакета данных TAK</string>
     <string name="external_notification">Внешние уведомления</string>
     <string name="external_notification_config">Настройка внешнего уведомления</string>
@@ -549,6 +580,9 @@
     <string name="firmware">Прошивка</string>
     <string name="firmware_edition">Версия прошивки</string>
     <string name="firmware_old">Прошивка радиостанции слишком стара для взаимодействия с данным приложением. Чтобы получить больше сведений, посетите <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">наше руководство по установке прошивки</a>.</string>
+    <string name="firmware_recovery_ble_failed">Не удалось завершить обновление через Bluetooth. Стоковый загрузчик этого устройства не может надежно завершить прерванное обновление по воздуху. Подключи его к компьютеру через USB и перепрошей с помощью фирменного серийного DFU-инструмента (например, adafruit-nrfutil), чтобы восстановить устройство.</string>
+    <string name="firmware_recovery_dismiss">Отменить восстановление прошивки</string>
+    <string name="firmware_recovery_explanation">Это устройство находится в режиме загрузчика из-за того, что обновление прошивки не завершилось. Держи его рядом, и оно будет перепрошито для завершения обновления.</string>
     <string name="firmware_too_old">Требуется обновление прошивки.</string>
     <string name="firmware_update_almost_there">Почти готово...</string>
     <string name="firmware_update_alpha">Альфа</string>
@@ -591,6 +625,7 @@
     <string name="firmware_update_retry">Повторить</string>
     <string name="firmware_update_save_dfu_file">Пожалуйста, сохраните файл .uf2 на DFU-носитель вашего устройства.</string>
     <string name="firmware_update_select_file">Выберите локальный файл</string>
+    <string name="firmware_update_slow_bootloader_hint">Обновление загрузчика этого устройства идёт медленно. Прошивка загрузчика OTAFIX позволяет намного быстрее обновлять через BLE.</string>
     <string name="firmware_update_source_local">Выберите локальный файл</string>
     <string name="firmware_update_stable">Стабильная</string>
     <string name="firmware_update_starting_dfu">Запуск прошивки...</string>
@@ -602,6 +637,7 @@
     <string name="firmware_update_unknown_error">Неизвестная ошибка</string>
     <string name="firmware_update_unknown_hardware">Неизвестная модель оборудования: %1$d</string>
     <string name="firmware_update_unknown_release">Неизвестная внешняя версия</string>
+    <string name="firmware_update_unsupported_transport">Обновления прошивки не поддерживаются через это соединение для данного устройства. Подключитесь другим способом (например, через Bluetooth), чтобы обновить.</string>
     <string name="firmware_update_uploading">Загрузка прошивки...</string>
     <string name="firmware_update_usb_bootloader_warning">%1$s обычно поставляется с загрузчиком, который не поддерживает OTA обновления. Может потребоваться прошивка OTA-совместимого загрузчика по USB перед прошивкой OTA.</string>
     <string name="firmware_update_usb_failed">Ошибка обновления USB</string>
@@ -696,6 +732,7 @@
     <string name="ip_port">Порт:</string>
     <string name="ipv4_mode">Режим IPv4</string>
     <string name="json_output_enabled">Вывод JSON включен</string>
+    <!-- KEY -->
     <string name="key_verification_final_title">Проверка ключа завершена</string>
     <string name="key_verification_request_title">Запрос проверки ключа</string>
     <string name="key_verification_title">Проверка ключа</string>
@@ -770,6 +807,9 @@
     <string name="lockdown_lock_now">Заблокировать сейчас</string>
     <string name="lockdown_lock_reason">Причина: %1$s</string>
     <string name="lockdown_mode">Режим блокировки</string>
+    <string name="lockdown_mode_summary_locked">Активно — введи свой пароль чтобы разблокировать это соединение.</string>
+    <string name="lockdown_mode_summary_off">Зашифровать хранилище устройства и требовать пароль при каждом подключении.</string>
+    <string name="lockdown_mode_summary_unlocked">Активно — хранилище зашифровано, это соединение аутентифицировано.</string>
     <string name="lockdown_passphrase">Пароль</string>
     <string name="lockdown_passphrases_do_not_match">Пароли не совпадают</string>
     <string name="lockdown_session_no_time_limit">Без ограничения по времени</string>
@@ -848,9 +888,11 @@
     <string name="mesh_beacon_notification_title">Приглашение в сеть</string>
     <string name="mesh_beacon_offer_channel">Канал: %1$s</string>
     <string name="mesh_beacon_offer_dismiss">Отменить</string>
+    <string name="mesh_beacon_offer_from_unknown">С неизвестной ноды</string>
     <string name="mesh_beacon_offer_preset">Пресет: %1$s</string>
     <string name="mesh_beacon_offer_region">Регион: %1$s</string>
     <string name="mesh_beacon_offer_title">Приглашение в сеть</string>
+    <string name="mesh_beacon_preset_none">Отсутствует</string>
     <string name="mesh_map_location">Карта расположения нод</string>
     <string name="mesh_map_location_description">Включает синюю точку местоположения для вашего телефона на карте нод.</string>
     <!-- MESHTASTIC -->
@@ -902,6 +944,7 @@
     <string name="mqtt_probe_timeout">Тайм-аут после %1$d мс</string>
     <string name="mqtt_probe_tls_failure">Ошибка TLS-рукопожатия: %1$s</string>
     <string name="mqtt_proxy_local">MQTT-прокси на этом телефоне</string>
+    <string name="mqtt_proxy_local_summary">Этот телефон передаёт MQTT-трафик для подключённого устройства. Выключите, чтобы сразу прекратить передачу, не изменяя настройки MQTT устройства — полезно, когда трафик MQTT перегружает соединение. Включите обратно, чтобы продолжить передачу.</string>
     <string name="mqtt_status_connected">Подключено</string>
     <string name="mqtt_status_connecting">Подключение…</string>
     <string name="mqtt_status_disconnected">Отключено</string>
@@ -1015,6 +1058,7 @@
     <string name="nodes_empty_searching_title">Поиск узлоов</string>
     <string name="nodes_queued_for_deletion">%1$d нод в очереди для удаления:</string>
     <string name="noise_floor">Уровень шума</string>
+    <string name="noise_floor_definition">Фоновый радиошум, измеряемый радиоприемником. Более низкие значения обычно указывают на более тихое окружение для приемника; -85 дБм — это ориентировочная отметка загруженности, а не жесткий порог отказа.</string>
     <string name="noise_floor_no_reading">Уровень шума: нет показаний</string>
     <string name="none">Нет (выключить)</string>
     <string name="none_quality">Отсутствует</string>
@@ -1484,6 +1528,7 @@
     <string name="traffic_management_rate_limit_window">Окно ограничения скорости (сек.)</string>
     <string name="traffic_management_router_preserve_hops">Сохранять хопы маршрутизатора</string>
     <string name="traffic_management_unknown_packet_threshold">Порог передач неизвестных пакетов</string>
+    <!-- TRANSLATION -->
     <string name="transmit_over_lora">Передать через LoRa</string>
     <!-- TRANSPORT -->
     <string name="transport">Транспорт</string>

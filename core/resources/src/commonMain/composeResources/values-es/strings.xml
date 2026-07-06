@@ -295,11 +295,8 @@
     <string name="ethernet_ip">IP Ethernet:</string>
     <string name="exchange_position">Intercambiar Posición</string>
     <string name="expires">Caduca</string>
-    <!-- EXPORT -->
     <string name="export_configuration">Exportar configuración</string>
     <string name="export_data_csv">Exportar todos los paquetes</string>
-    <string name="export_keys">Exportar claves</string>
-    <string name="export_keys_confirmation">Exporta claves públicas y privadas a un archivo. Por favor, almacena en algún lugar de forma segura.</string>
     <string name="external_notification">Notificaciones Externas</string>
     <string name="external_notification_config">Configuración de las notificaciones externas</string>
     <string name="external_notification_enabled">Notificaciones externas activadas</string>
@@ -407,6 +404,7 @@ Rango de Valores 0 - 500.</string>
     <string name="ip_port">Puerto:</string>
     <string name="ipv4_mode">Modo IPv4</string>
     <string name="json_output_enabled">Salida JSON activada</string>
+    <!-- KEY -->
     <!-- LABEL -->
     <string name="last_heard_filter_label">Filtrar por tiempo de la última escucha: %1$s</string>
     <string name="last_position_update">Última actualización</string>
@@ -483,6 +481,7 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="max">Máximo</string>
     <!-- MESH -->
     <string name="mesh_beacon_offer_dismiss">Descartar</string>
+    <string name="mesh_beacon_preset_none">Ninguna</string>
     <string name="mesh_map_location_description">Habilita el punto de posición azul para tu teléfono en el mapa de la malla.</string>
     <!-- MESHTASTIC -->
     <string name="meshtastic">Meshtastic</string>
@@ -860,6 +859,7 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="traceroute_showing_nodes">Mostrando %1$d/%2$d nodos</string>
     <string name="track_and_share_locations">Rastrear y comparte ubicaciones</string>
     <!-- TRAFFIC -->
+    <!-- TRANSLATION -->
     <string name="transmit_over_lora">Transmitir en LoRa</string>
     <!-- TRANSPORT -->
     <string name="transport_ble">BLE</string>

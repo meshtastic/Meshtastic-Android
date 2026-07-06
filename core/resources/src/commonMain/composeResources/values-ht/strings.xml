@@ -84,7 +84,6 @@
     <!-- ENVIRONMENT -->
     <string name="error">Erè</string>
     <string name="error_duty_cycle">Limit sik devwa rive. Pa ka voye mesaj kounye a, tanpri eseye ankò pita.</string>
-    <!-- EXPORT -->
     <string name="factory_reset">Reyajiste nan faktori</string>
     <string name="fair">Mwayen</string>
     <!-- FILTER -->
@@ -106,6 +105,7 @@
     <string name="interval_unset">Pa konfigire</string>
     <string name="intro_show">Montre entwodiksyon</string>
     <string name="ip_address">Adrès IP:</string>
+    <!-- KEY -->
     <!-- LABEL -->
     <!-- LOAD -->
     <!-- LOCAL -->
@@ -132,6 +132,7 @@
     <string name="map_tile_download_estimate">Estimasyon telechajman tèk</string>
     <string name="map_tile_source">Sous Tèk</string>
     <!-- MESH -->
+    <string name="mesh_beacon_preset_none">Pa gen</string>
     <!-- MESHTASTIC -->
     <string name="meshtastic_new_nodes_notifications">Notifikasyon nouvo nœud</string>
     <string name="meshtastic_service_notifications">Notifikasyon sèvis</string>
@@ -266,6 +267,7 @@
     <string name="traceroute_diff">Hops vèsus %1$d Hops tounen %2$d</string>
     <string name="traceroute_direct">Direk</string>
     <!-- TRAFFIC -->
+    <!-- TRANSLATION -->
     <!-- TRANSPORT -->
     <string name="two_days">48 Èdtan</string>
     <!-- UNKNOWN -->

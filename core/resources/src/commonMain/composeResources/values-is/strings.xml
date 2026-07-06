@@ -67,7 +67,6 @@
     <!-- ENCRYPTION -->
     <!-- ENVIRONMENT -->
     <string name="error_duty_cycle">Hámarsksendingartíma náð. Ekki hægt að senda skilaboð, vinsamlegast reynið aftur síðar.</string>
-    <!-- EXPORT -->
     <string name="factory_reset">Grunnstilla</string>
     <!-- FILTER -->
     <!-- FIRMWARE -->
@@ -83,6 +82,7 @@
     <string name="interval_unset">Óstillt</string>
     <string name="intro_show">Sýna kynningu</string>
     <string name="ip_address">IP Tala:</string>
+    <!-- KEY -->
     <!-- LABEL -->
     <!-- LOAD -->
     <!-- LOCAL -->
@@ -181,6 +181,7 @@
     <string name="traceroute">Ferilkönnun</string>
     <string name="traceroute_log">Ferilkönnun</string>
     <!-- TRAFFIC -->
+    <!-- TRANSLATION -->
     <!-- TRANSPORT -->
     <!-- UNKNOWN -->
     <string name="unknown_username">Óþekkt notendanafn</string>

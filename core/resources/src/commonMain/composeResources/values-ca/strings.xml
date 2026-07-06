@@ -75,7 +75,6 @@
     <!-- ENVIRONMENT -->
     <string name="error">Error</string>
     <string name="error_duty_cycle">Límit del cicle de treball assolit. No es podran enviar més missatges, intenta-ho més tard.</string>
-    <!-- EXPORT -->
     <string name="factory_reset">Restauració dels paràmetres de fàbrica</string>
     <string name="fallback_node_name">Meshtastic %1$s</string>
     <!-- FILTER -->
@@ -93,6 +92,7 @@
     <string name="interval_unset">No configurat</string>
     <string name="intro_show">Mostrar Introducció</string>
     <string name="ip_address">Adreça IP:</string>
+    <!-- KEY -->
     <!-- LABEL -->
     <!-- LOAD -->
     <!-- LOCAL -->
@@ -251,6 +251,7 @@
     <string name="traceroute">Traçar ruta</string>
     <string name="traceroute_log">Traçar ruta</string>
     <!-- TRAFFIC -->
+    <!-- TRANSLATION -->
     <!-- TRANSPORT -->
     <string name="two_days">48 Hores</string>
     <!-- UNKNOWN -->

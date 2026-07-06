@@ -91,6 +91,7 @@
     <string name="audio_config">Inställningar för ljud</string>
     <string name="available_pins">Tillgängliga pin</string>
     <string name="back">Tillbaka</string>
+    <string name="backup_keys">Säkerhetskopiera nycklar</string>
     <string name="backup_restore">Säkerhetskopiera &amp; återställ</string>
     <string name="bad">Dålig</string>
     <string name="bandwidth">Bandbredd</string>
@@ -370,11 +371,8 @@
     <string name="ethernet_ip">Ethernet IP:</string>
     <string name="exchange_position">Utbyt position</string>
     <string name="expires">Upphör att gälla</string>
-    <!-- EXPORT -->
     <string name="export_configuration">Exportera konfiguration</string>
     <string name="export_data_csv">Exportera alla paket</string>
-    <string name="export_keys">Exportera nycklar</string>
-    <string name="export_keys_confirmation">Exporterar publika och privata nycklar till en fil. Förvara någonstans säkert.</string>
     <string name="external_notification">Extern avisering</string>
     <string name="external_notification_config">Inställningar för extern avisering</string>
     <string name="external_notification_enabled">Externa aviseringar aktiverad</string>
@@ -521,6 +519,7 @@
     <string name="ip_port">Port:</string>
     <string name="ipv4_mode">IPv4-läge</string>
     <string name="json_output_enabled">JSON-utdata aktiverad</string>
+    <!-- KEY -->
     <!-- LABEL -->
     <string name="label_lite_fast">Lite - Fast</string>
     <string name="label_long_fast">Lång räckvidd - snabbt</string>
@@ -627,6 +626,7 @@
     <string name="max">Max</string>
     <!-- MESH -->
     <string name="mesh_beacon_offer_dismiss">Stäng</string>
+    <string name="mesh_beacon_preset_none">Ingen</string>
     <string name="mesh_map_location">Mesh Map plats</string>
     <string name="mesh_map_location_description">Aktiverar den blå platspunkten för telefonen i mesh-kartan.</string>
     <!-- MESHTASTIC -->
@@ -1127,6 +1127,7 @@
     <string name="track_point">Muspinne</string>
     <!-- TRAFFIC -->
     <string name="traffic_management_enabled">Modul aktiverad</string>
+    <!-- TRANSLATION -->
     <string name="transmit_over_lora">Skicka över LoRa</string>
     <!-- TRANSPORT -->
     <string name="transport_ble">BLE</string>

@@ -57,6 +57,7 @@
     <string name="audio">Ses</string>
     <string name="audio_config">Ses Ayarı</string>
     <string name="available_pins">Mevcut pinler</string>
+    <string name="backup_keys">Anahtarları Yedekle</string>
     <string name="bad">Kötü</string>
     <string name="bandwidth">Bant genişliği</string>
     <string name="battery">Pil</string>
@@ -195,7 +196,6 @@
     <string name="error_duty_cycle">Zaman limitine (duty cycle) ulaşıldı. Şu anda mesaj gönderilemiyor, lütfen daha sonra tekrar deneyin.</string>
     <string name="ethernet_enabled">Ethernet etkin</string>
     <string name="exchange_position">Konum takas et</string>
-    <!-- EXPORT -->
     <string name="export_configuration">Ayarları dışa aktar</string>
     <string name="external_notification">Dış Bildirim</string>
     <string name="external_notification_config">Harici Bildirim Ayarı</string>
@@ -269,6 +269,7 @@
     <string name="ip_port">Bağlantı noktası:</string>
     <string name="ipv4_mode">IPv4 modu</string>
     <string name="json_output_enabled">JSON çıktısı etkin</string>
+    <!-- KEY -->
     <!-- LABEL -->
     <string name="latitude">Enlem</string>
     <string name="led_state">LED durumu</string>
@@ -315,6 +316,7 @@
     <string name="max">Maks</string>
     <!-- MESH -->
     <string name="mesh_beacon_offer_dismiss">Vazgeç</string>
+    <string name="mesh_beacon_preset_none">Yok</string>
     <string name="mesh_map_location">Mesh Harita Konumu</string>
     <string name="mesh_map_location_description">Telefonunuz için mesh haritasında mavi konum noktasını etkinleştirir.</string>
     <!-- MESHTASTIC -->
@@ -578,6 +580,7 @@
     </plurals>
     <string name="traceroute_log">Yol izle</string>
     <!-- TRAFFIC -->
+    <!-- TRANSLATION -->
     <string name="transmit_over_lora">LoRa üzerinden ilet</string>
     <!-- TRANSPORT -->
     <string name="transport_lora">LoRa</string>

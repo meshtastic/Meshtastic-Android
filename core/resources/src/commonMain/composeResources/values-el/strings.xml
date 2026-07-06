@@ -97,7 +97,6 @@
     <string name="encryption_psk">Κοινόχρηστο Κλειδί</string>
     <!-- ENVIRONMENT -->
     <string name="error">Σφάλμα</string>
-    <!-- EXPORT -->
     <string name="factory_reset">Επαναφορά εργοστασιακών ρυθμίσεων</string>
     <string name="favorite">Αγαπημένο</string>
     <!-- FILTER -->
@@ -118,6 +117,7 @@
     <string name="ip">IP</string>
     <string name="ip_address">IP διεύθυνση:</string>
     <string name="ip_port">Θύρα:</string>
+    <!-- KEY -->
     <!-- LABEL -->
     <string name="latitude">Γεωγραφικό Πλάτος</string>
     <!-- LOAD -->
@@ -253,6 +253,7 @@
     <string name="traceroute">Traceroute</string>
     <string name="traceroute_log">Traceroute</string>
     <!-- TRAFFIC -->
+    <!-- TRANSLATION -->
     <!-- TRANSPORT -->
     <string name="transport_lora">LoRa</string>
     <string name="transport_mqtt">MQTT</string>

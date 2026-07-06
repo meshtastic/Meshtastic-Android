@@ -115,6 +115,7 @@
     <string name="audio_config">Ääniasetukset</string>
     <string name="available_pins">Käytettävissä olevat pinnit</string>
     <string name="back">Edellinen</string>
+    <string name="backup_keys">Varmuuskopioi avaimet</string>
     <string name="backup_restore">Varmuuskopioi &amp; palauta</string>
     <string name="bad">Huono</string>
     <string name="bandwidth">Kaistanleveys</string>
@@ -559,12 +560,9 @@
     <string name="expand_chart">Laajenna kaavio</string>
     <string name="expanded">Avattu</string>
     <string name="expires">Päättyy</string>
-    <!-- EXPORT -->
     <string name="export_configuration">Asetusten vienti</string>
     <string name="export_data_csv">Vie kaikki paketit</string>
     <string name="export_gpx">Vie GPX</string>
-    <string name="export_keys">Vie avaimet</string>
-    <string name="export_keys_confirmation">Vie julkiset ja yksityiset avaimet tiedostoon. Säilytä tiedosto turvallisessa paikassa.</string>
     <string name="export_tak_data_package">Vie TAK-datapaketti</string>
     <string name="external_notification">Ulkoiset ilmoitukset</string>
     <string name="external_notification_config">Ulkoisten ilmoituksien asetukset</string>
@@ -598,10 +596,10 @@
     <string name="firmware_edition">Laiteohjelmistoversio</string>
     <string name="firmware_old">Radion laiteohjelmisto on liian vanha toimiakseen tämän sovelluksen kanssa. Lisätietoja löydät <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">ohjelmiston asennusoppaasta</a>.</string>
     <string name="firmware_recovery_banner">Päivitys valmistuu %1$s kuluttua</string>
-    <string name="firmware_recovery_button">Jatka laiteohjelmiston päivitystä</string>
-    <string name="firmware_recovery_explanation">Tämä laite on käynnistyslataustilassa keskeneräiseksi jääneen laiteohjelmistopäivityksen vuoksi. Pidä laite lähellä, niin päivitys suoritetaan loppuun.</string>
     <string name="firmware_recovery_ble_failed">Päivitystä ei voitu viimeistellä Bluetoothin kautta. Tämän laitteen vakiokäynnistyslatain ei pysty luotettavasti jatkamaan keskeytynyttä OTA-päivitystä. Liitä laite tietokoneeseen USB:llä ja kirjoita laiteohjelmisto uudelleen valmistajan sarjamuotoisella DFU-työkalulla (esimerkiksi adafruit-nrfutil), jotta laite voidaan palauttaa toimintakuntoon.</string>
+    <string name="firmware_recovery_button">Jatka laiteohjelmiston päivitystä</string>
     <string name="firmware_recovery_dismiss">Hylkää laiteohjelmiston palautus</string>
+    <string name="firmware_recovery_explanation">Tämä laite on käynnistyslataustilassa keskeneräiseksi jääneen laiteohjelmistopäivityksen vuoksi. Pidä laite lähellä, niin päivitys suoritetaan loppuun.</string>
     <string name="firmware_too_old">Laiteohjelmistopäivitys vaaditaan.</string>
     <string name="firmware_update_almost_there">Melkein valmista...</string>
     <string name="firmware_update_alpha">Alpha</string>
@@ -767,6 +765,7 @@
     <string name="ip_port">Portti:</string>
     <string name="ipv4_mode">IPv4-tila</string>
     <string name="json_output_enabled">JSON ulostulo käytössä</string>
+    <!-- KEY -->
     <string name="key_verification_final_title">Avaimen varmennus valmis</string>
     <string name="key_verification_request_title">Avaimen varmennuspyyntö</string>
     <string name="key_verification_title">Avaimen varmennus</string>
@@ -930,6 +929,7 @@
     <string name="mesh_beacon_offer_preset">Esiasetus: %1$s</string>
     <string name="mesh_beacon_offer_region">Alue: %1$s</string>
     <string name="mesh_beacon_offer_title">Mesh-verkon kutsu</string>
+    <string name="mesh_beacon_preset_none">ei mitään</string>
     <string name="mesh_map_location">Meshtastic kartan sijainti</string>
     <string name="mesh_map_location_description">Ottaa käyttöön puhelimen sijainnin sinisenä pisteenä meshtastic kartalla.</string>
     <!-- MESHTASTIC -->
@@ -1555,6 +1555,7 @@
     <string name="traffic_management_rate_limit_window">Lähetysrajoituksen aikajakso (sekunteina)</string>
     <string name="traffic_management_router_preserve_hops">Säilytä välittäjien hypyt</string>
     <string name="traffic_management_unknown_packet_threshold">Tuntemattomien pakettien kynnysarvo</string>
+    <!-- TRANSLATION -->
     <string name="transmit_over_lora">Lähetä LoRa:n kautta</string>
     <!-- TRANSPORT -->
     <string name="transport">Kuljetus</string>

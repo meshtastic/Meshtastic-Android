@@ -88,7 +88,6 @@
     <!-- ENVIRONMENT -->
     <string name="error">Klaida</string>
     <string name="error_duty_cycle">Pasiektas veikimo ciklo limitas. Šiuo metu negalima siųsti žinučių, bandykite vėliau.</string>
-    <!-- EXPORT -->
     <string name="factory_reset">Gamyklinis atstatymas</string>
     <string name="fair">Pakankamas</string>
     <!-- FILTER -->
@@ -109,6 +108,7 @@
     <string name="interval_unset">Nenustatyta</string>
     <string name="intro_show">Rodyti įvadą</string>
     <string name="ip_address">IP adresas:</string>
+    <!-- KEY -->
     <!-- LABEL -->
     <!-- LOAD -->
     <!-- LOCAL -->
@@ -136,6 +136,7 @@
     <string name="map_tile_source">Plytelių šaltinis</string>
     <string name="max">Max</string>
     <!-- MESH -->
+    <string name="mesh_beacon_preset_none">Nėra</string>
     <!-- MESHTASTIC -->
     <string name="meshtastic_new_nodes_notifications">Naujo įtaiso pranešimas</string>
     <string name="meshtastic_service_notifications">Paslaugos pranešimai</string>
@@ -284,6 +285,7 @@
     </plurals>
     <string name="traceroute_log">Žinutės kelias</string>
     <!-- TRAFFIC -->
+    <!-- TRANSLATION -->
     <!-- TRANSPORT -->
     <string name="twenty_four_hours">24 val</string>
     <string name="two_days">48 Valandos</string>

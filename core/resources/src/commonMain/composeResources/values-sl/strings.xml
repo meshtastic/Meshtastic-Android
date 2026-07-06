@@ -91,7 +91,6 @@
     <!-- ENVIRONMENT -->
     <string name="error">Napaka</string>
     <string name="error_duty_cycle">Dosežena je omejitev delovnega cikla. Trenutno ne morete pošiljati sporočil, poskusite kasneje.</string>
-    <!-- EXPORT -->
     <string name="factory_reset">Povrnitev tovarniških nastavitev</string>
     <string name="fair">Precejšen</string>
     <!-- FILTER -->
@@ -114,6 +113,7 @@
     <string name="interval_unset">Ni nastavljeno</string>
     <string name="intro_show">Pokaži napoved</string>
     <string name="ip_address">IP naslov:</string>
+    <!-- KEY -->
     <!-- LABEL -->
     <!-- LOAD -->
     <!-- LOCAL -->
@@ -141,6 +141,7 @@
     <string name="map_tile_source">Vir plošcice</string>
     <string name="max">Maks.</string>
     <!-- MESH -->
+    <string name="mesh_beacon_preset_none">Brez</string>
     <!-- MESHTASTIC -->
     <string name="meshtastic_new_nodes_notifications">Obvestila novih vozlišč</string>
     <string name="meshtastic_service_notifications">Obvestila storitve</string>
@@ -291,6 +292,7 @@
     </plurals>
     <string name="traceroute_log">Pot</string>
     <!-- TRAFFIC -->
+    <!-- TRANSLATION -->
     <!-- TRANSPORT -->
     <string name="twenty_four_hours">24ur</string>
     <string name="two_days">48 Ur</string>

@@ -378,12 +378,9 @@
     <string name="exchange_position">Размяна на позиция</string>
     <string name="expand_chart">Разгъване на диаграмата</string>
     <string name="expires">Изтича</string>
-    <!-- EXPORT -->
     <string name="export_configuration">Експортиране на конфигурацията</string>
     <string name="export_data_csv">Експортиране на всички пакети</string>
     <string name="export_gpx">Експортиране на GPX</string>
-    <string name="export_keys">Експортиране на ключовете</string>
-    <string name="export_keys_confirmation">Експортира публичния и частния ключове във файл. Моля, съхранявайте го на сигурно място.</string>
     <string name="external_notification">Външно известие</string>
     <string name="external_notification_config">Конфигуриране на външни известия</string>
     <string name="external_notification_enabled">Външните известия са активирани</string>
@@ -526,6 +523,7 @@
     <string name="ip_address">IP адрес:</string>
     <string name="ip_port">Порт:</string>
     <string name="ipv4_mode">Режим на IPv4</string>
+    <!-- KEY -->
     <string name="key_verification_final_title">Проверката на ключа е завършена</string>
     <string name="key_verification_request_title">Заявка за проверка на ключ</string>
     <string name="key_verification_title">Проверка на ключ</string>
@@ -624,6 +622,7 @@
     <string name="max">Макс</string>
     <!-- MESH -->
     <string name="mesh_beacon_offer_dismiss">Отхвърляне</string>
+    <string name="mesh_beacon_preset_none">Няма</string>
     <string name="mesh_map_location">Местоположение на mesh карта</string>
     <string name="mesh_map_location_description">Активира синята точка за местоположение на телефона ви в mesh карта.</string>
     <!-- MESHTASTIC -->
@@ -1099,6 +1098,8 @@
     <string name="traffic_management">Управление на трафика</string>
     <string name="traffic_management_enabled">Модулът е активиран</string>
     <string name="traffic_management_nodeinfo_direct_response_max_hops">Максимален брой отскоци за директен отговор</string>
+    <string name="translate">Превод</string>
+    <!-- TRANSLATION -->
     <string name="transmit_over_lora">Предаване през LoRa</string>
     <!-- TRANSPORT -->
     <string name="transport_ble">BLE</string>

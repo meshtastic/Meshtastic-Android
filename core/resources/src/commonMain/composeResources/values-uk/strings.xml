@@ -93,6 +93,7 @@
     <string name="audio_config">Налаштування аудіо</string>
     <string name="available_pins">Доступні піни</string>
     <string name="back">Назад</string>
+    <string name="backup_keys">Резервні ключі</string>
     <string name="bad">Поганий</string>
     <string name="bandwidth">Ширина смуги пропускання</string>
     <string name="baro_pressure">Бар</string>
@@ -399,12 +400,9 @@
     <string name="exchange_position">Обмін місцеположенням</string>
     <string name="expand_chart">Розгорнути графік</string>
     <string name="expires">Діє до</string>
-    <!-- EXPORT -->
     <string name="export_configuration">Експортувати налаштування</string>
     <string name="export_data_csv">Експортувати всі пакети</string>
     <string name="export_gpx">Експортувати GPX</string>
-    <string name="export_keys">Експортувати ключі</string>
-    <string name="export_keys_confirmation">Експортує відкриті та закриті ключі у файл. Будь ласка, збережіть їх в надійному місці.</string>
     <string name="external_notification">Зовнішні сповіщення</string>
     <string name="external_notification_config">Налаштування зовнішніх сповіщень</string>
     <string name="external_notification_enabled">Зовнішні сповіщення увімкнено</string>
@@ -565,6 +563,7 @@
     <string name="ip_port">Порт:</string>
     <string name="ipv4_mode">Режим IPv4</string>
     <string name="json_output_enabled">Вивід JSON увімкнено</string>
+    <!-- KEY -->
     <string name="key_verification_final_title">Перевірку ключа завершено</string>
     <string name="key_verification_request_title">Запит ключа верифікації</string>
     <string name="key_verification_title">Ключ верифікації</string>
@@ -688,6 +687,7 @@
     <string name="mesh_beacon_offer_join">Приєднатися</string>
     <string name="mesh_beacon_offer_preset">Пресет: %1$s</string>
     <string name="mesh_beacon_offer_region">Регіон: %1$s</string>
+    <string name="mesh_beacon_preset_none">Жоден</string>
     <!-- MESHTASTIC -->
     <string name="meshtastic">Meshtastic</string>
     <string name="meshtastic_alerts_notifications">Сповіщення про тривоги</string>
@@ -1227,6 +1227,7 @@
     <string name="traceroute_showing_nodes">Показується %1$d/%2$d вузлів</string>
     <string name="track_and_share_locations">Відстежуйте та діліться місцезнаходженням</string>
     <!-- TRAFFIC -->
+    <!-- TRANSLATION -->
     <string name="transmit_over_lora">Передавати через LoRa</string>
     <!-- TRANSPORT -->
     <string name="transport_api">API</string>

@@ -547,12 +547,9 @@
     <string name="expand_chart">チャートを展開</string>
     <string name="expanded">展開済み</string>
     <string name="expires">有効期限</string>
-    <!-- EXPORT -->
     <string name="export_configuration">設定をエクスポート</string>
     <string name="export_data_csv">すべてのパケットをエクスポート</string>
     <string name="export_gpx">GPX をエクスポート</string>
-    <string name="export_keys">鍵をエクスポート</string>
-    <string name="export_keys_confirmation">公開鍵と秘密鍵をファイルにエクスポートします。安全な場所に保管してください。</string>
     <string name="export_tak_data_package">TAK データパッケージをエクスポート</string>
     <string name="external_notification">外部通知</string>
     <string name="external_notification_config">外部通知設定</string>
@@ -731,6 +728,7 @@
     <string name="ip_port">ポート：</string>
     <string name="ipv4_mode">IPv4 モード</string>
     <string name="json_output_enabled">JSON出力の有効化</string>
+    <!-- KEY -->
     <string name="key_verification_final_title">鍵の検証が完了しました</string>
     <string name="key_verification_request_title">鍵の検証リクエスト</string>
     <string name="key_verification_title">鍵の検証</string>
@@ -882,6 +880,7 @@
     <string name="max">最大</string>
     <!-- MESH -->
     <string name="mesh_beacon_offer_dismiss">中止</string>
+    <string name="mesh_beacon_preset_none">なし</string>
     <string name="mesh_map_location">メッシュマップの位置情報</string>
     <string name="mesh_map_location_description">メッシュマップ上にスマートフォンの青い位置ドットを表示します。</string>
     <!-- MESHTASTIC -->
@@ -1497,6 +1496,7 @@
     <string name="traffic_management_rate_limit_window">レート制限のウィンドウ（秒）</string>
     <string name="traffic_management_router_preserve_hops">ルーターのホップを保持</string>
     <string name="traffic_management_unknown_packet_threshold">不明なパケットのしきい値</string>
+    <!-- TRANSLATION -->
     <string name="transmit_over_lora">LoRaで送信</string>
     <!-- TRANSPORT -->
     <string name="transport">接続方式</string>

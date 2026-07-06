@@ -75,7 +75,6 @@
     <!-- ENVIRONMENT -->
     <string name="error">שגיאה</string>
     <string name="error_duty_cycle">הגעת לרף ה-duty cycle. לא ניתן לשלוח הודעות כרגע, בבקשה נסה שוב מאוחר יותר.</string>
-    <!-- EXPORT -->
     <string name="factory_reset">איפוס להגדרות היצרן</string>
     <!-- FILTER -->
     <string name="filter_icon">פילטר</string>
@@ -93,6 +92,7 @@
     <string name="intro_show">הראה מקדמה</string>
     <string name="ip_address">‏כתובת IP:</string>
     <string name="ip_port">פורט:</string>
+    <!-- KEY -->
     <!-- LABEL -->
     <!-- LOAD -->
     <!-- LOCAL -->
@@ -201,6 +201,7 @@
     <string name="traceroute">בדיקת מסלול</string>
     <string name="traceroute_log">בדיקת מסלול</string>
     <!-- TRAFFIC -->
+    <!-- TRANSLATION -->
     <!-- TRANSPORT -->
     <!-- UNKNOWN -->
     <string name="unknown_username">שם המשתמש אינו מוכר</string>
