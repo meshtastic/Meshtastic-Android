@@ -186,7 +186,7 @@ private fun ChannelConfigScreen(
                 FloatingActionButton(
                     onClick = {
                         if (maxChannels > settingsListInput.size) {
-                            settingsListInput.add(newUnnamedManualChannelSettings())
+                            settingsListInput.add(Channel.default.settings)
                             pskEditStatesInput.add(ChannelPskEditState(canGeneratePskForName = true))
                             showEditChannelDialog = settingsListInput.lastIndex
                         }
@@ -256,14 +256,16 @@ private fun ChannelConfigScreen(
                             negativeText = stringResource(Res.string.cancel),
                             onNegativeClicked = {
                                 focusManager.clearFocus()
-                                settingsListInput.clear()
-                                settingsListInput.addAll(settingsList)
+                                settingsListInput.replaceWith(settingsList)
                                 pskEditStatesInput.replaceAll(settingsList.size, ChannelPskEditState())
                             },
                             positiveText = stringResource(Res.string.send),
                             onPositiveClicked = {
                                 focusManager.clearFocus()
-                                onPositiveClicked(settingsListInput)
+                                val committedSettings = settingsListInput.toList()
+                                onPositiveClicked(committedSettings)
+                                settingsListInput.replaceWith(committedSettings)
+                                pskEditStatesInput.replaceAll(committedSettings.size, ChannelPskEditState())
                             },
                         )
                     }
@@ -288,8 +290,6 @@ private fun ChannelConfigScreen(
     }
 }
 
-private fun newUnnamedManualChannelSettings(): ChannelSettings = Channel.default.settings
-
 private val channelPskEditStatesSaver =
     listSaver<SnapshotStateList<ChannelPskEditState>, Int>(
         save = { states -> states.map { it.toSaveableFlags() } },
@@ -298,6 +298,11 @@ private val channelPskEditStatesSaver =
 
 internal fun <T> MutableList<T>.move(fromIndex: Int, toIndex: Int) {
     add(toIndex, removeAt(fromIndex))
+}
+
+internal fun <T> MutableList<T>.replaceWith(values: List<T>) {
+    clear()
+    addAll(values)
 }
 
 internal fun MutableList<ChannelPskEditState>.replaceAll(size: Int, value: ChannelPskEditState) {

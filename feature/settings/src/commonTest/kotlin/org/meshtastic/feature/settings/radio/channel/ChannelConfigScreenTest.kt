@@ -66,4 +66,22 @@ class ChannelConfigScreenTest {
         assertEquals(3, list.size)
         assertTrue(list.all { it == fillValue })
     }
+
+    @Test
+    fun `replaceWith clears and refills with committed values`() {
+        val list = mutableListOf("draft", "stale")
+
+        list.replaceWith(listOf("committed"))
+
+        assertEquals(listOf("committed"), list)
+    }
+
+    @Test
+    fun `replaceAll clears committed channel psk generation eligibility`() {
+        val list = mutableListOf(ChannelPskEditState(canGeneratePskForName = true, generatedPskForName = true))
+
+        list.replaceAll(size = 1, value = ChannelPskEditState())
+
+        assertEquals(listOf(ChannelPskEditState()), list)
+    }
 }
