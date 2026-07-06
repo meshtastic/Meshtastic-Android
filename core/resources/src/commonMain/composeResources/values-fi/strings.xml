@@ -422,7 +422,6 @@
     <string name="discovery_start_scan">Aloita skannaus</string>
     <string name="discovery_start_scan_disabled">Skannausta ei voi aloittaa. %1$s</string>
     <string name="discovery_start_scan_reason_24ghz_unsupported">radion laitteisto ei tue 2,4 GHz:n taajuutta</string>
-    <string name="discovery_start_scan_reason_default_key">kanava käyttää oletussalausavainta</string>
     <string name="discovery_start_scan_reason_no_presets">esiasetuksia ei ole valittu</string>
     <string name="discovery_start_scan_reason_not_connected">laitetta ei ole yhdistetty</string>
     <string name="discovery_stat_analysis">Analyysi</string>

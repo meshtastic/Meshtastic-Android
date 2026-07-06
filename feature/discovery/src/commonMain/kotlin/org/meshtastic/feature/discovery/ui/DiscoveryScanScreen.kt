@@ -86,7 +86,6 @@ import org.meshtastic.core.resources.discovery_shifting_to
 import org.meshtastic.core.resources.discovery_start_scan
 import org.meshtastic.core.resources.discovery_start_scan_disabled
 import org.meshtastic.core.resources.discovery_start_scan_reason_24ghz_unsupported
-import org.meshtastic.core.resources.discovery_start_scan_reason_default_key
 import org.meshtastic.core.resources.discovery_start_scan_reason_no_presets
 import org.meshtastic.core.resources.discovery_start_scan_reason_not_connected
 import org.meshtastic.core.resources.discovery_stop_scan
@@ -134,7 +133,6 @@ fun DiscoveryScanScreen(
     val currentChannels by viewModel.currentChannels.collectAsStateWithLifecycle()
     val dwellMinutes by viewModel.dwellDurationMinutes.collectAsStateWithLifecycle()
     val isConnected by viewModel.isConnected.collectAsStateWithLifecycle()
-    val usesDefaultKey by viewModel.usesDefaultKey.collectAsStateWithLifecycle()
     val is24GhzBlocked by viewModel.is24GhzBlocked.collectAsStateWithLifecycle()
     val isLora24Region by viewModel.isLora24Region.collectAsStateWithLifecycle()
     val currentSession by viewModel.currentSession.collectAsStateWithLifecycle()
@@ -193,7 +191,6 @@ fun DiscoveryScanScreen(
                         scanState = scanState,
                         isConnected = isConnected,
                         hasPresetsSelected = selectedPresets.isNotEmpty() || selectedBeaconChannels.isNotEmpty(),
-                        usesDefaultKey = usesDefaultKey,
                         is24GhzUnsupported = isLora24Region && is24GhzBlocked,
                         onStart = viewModel::startScan,
                         onStop = viewModel::stopScan,
@@ -387,7 +384,6 @@ private fun ScanButton(
     scanState: DiscoveryScanState,
     isConnected: Boolean,
     hasPresetsSelected: Boolean,
-    usesDefaultKey: Boolean,
     is24GhzUnsupported: Boolean,
     onStart: () -> Unit,
     onStop: () -> Unit,
@@ -404,11 +400,10 @@ private fun ScanButton(
             Text(stringResource(Res.string.discovery_stop_scan), modifier = Modifier.padding(start = 8.dp))
         }
     } else {
-        val isEnabled = isConnected && hasPresetsSelected && !usesDefaultKey && !is24GhzUnsupported
+        val isEnabled = isConnected && hasPresetsSelected && !is24GhzUnsupported
         val disabledReason =
             when {
                 !isConnected -> stringResource(Res.string.discovery_start_scan_reason_not_connected)
-                usesDefaultKey -> stringResource(Res.string.discovery_start_scan_reason_default_key)
                 is24GhzUnsupported -> stringResource(Res.string.discovery_start_scan_reason_24ghz_unsupported)
                 !hasPresetsSelected -> stringResource(Res.string.discovery_start_scan_reason_no_presets)
                 else -> ""
