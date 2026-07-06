@@ -121,7 +121,9 @@ class SecurityKeyBackupStoreImpl : SecurityKeyBackupStore {
         if (ksFile.exists()) {
             FileInputStream(ksFile).use { ks.load(it, KEYSTORE_PASSWORD) }
             val entry = ks.getEntry(KEY_ALIAS, protection)
-            if (entry is KeyStore.SecretKeyEntry) return entry.secretKey
+            // Fail loudly rather than regenerate: overwriting the master key would orphan every existing .enc backup.
+            check(entry is KeyStore.SecretKeyEntry) { "Keystore exists but master key $KEY_ALIAS is missing/invalid" }
+            return entry.secretKey
         }
         val keyGen = KeyGenerator.getInstance(AES_ALGORITHM)
         keyGen.init(AES_KEY_BITS)

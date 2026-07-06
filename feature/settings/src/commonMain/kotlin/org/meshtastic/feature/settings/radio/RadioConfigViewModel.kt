@@ -570,9 +570,15 @@ open class RadioConfigViewModel(
     }
 
     /** Saves the node's current public/private keys to OS-backed encrypted storage, keyed by node number. */
-    fun backupSecurityKeys(securityConfig: Config.SecurityConfig) {
+    fun backupSecurityKeys(securityConfig: Config.SecurityConfig, onComplete: () -> Unit = {}) {
         val nodeNum = destNum ?: destNode.value?.num ?: return
         safeLaunch(tag = "backupSecurityKeys") {
+            // Guard against the empty SecurityConfig() fallback: backing up blanks and later restoring them would
+            // overwrite the device's real keys.
+            if (securityConfig.public_key.size == 0 || securityConfig.private_key.size == 0) {
+                snackbarManager.showSnackbar(message = UiText.Resource(Res.string.key_backup_restore_failed).resolve())
+                return@safeLaunch
+            }
             securityKeyBackupStore.save(
                 nodeNum = nodeNum,
                 publicKeyBase64 = securityConfig.public_key.base64(),
@@ -580,6 +586,7 @@ open class RadioConfigViewModel(
                 timestamp = nowMillis,
             )
             snackbarManager.showSnackbar(message = UiText.Resource(Res.string.key_backup_saved).resolve())
+            onComplete()
         }
     }
 
@@ -606,11 +613,12 @@ open class RadioConfigViewModel(
     }
 
     /** Deletes the encrypted key backup for this node, if any. */
-    fun deleteSecurityKeyBackup() {
+    fun deleteSecurityKeyBackup(onComplete: () -> Unit = {}) {
         val nodeNum = destNum ?: destNode.value?.num ?: return
         safeLaunch(tag = "deleteSecurityKeyBackup") {
             securityKeyBackupStore.delete(nodeNum)
             snackbarManager.showSnackbar(message = UiText.Resource(Res.string.key_backup_deleted).resolve())
+            onComplete()
         }
     }
 

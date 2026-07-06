@@ -63,8 +63,7 @@ actual fun SecurityKeyBackupActions(
             onDismiss = { showBackupDialog = false },
             onConfirm = {
                 showBackupDialog = false
-                viewModel.backupSecurityKeys(securityConfig)
-                refreshTrigger++
+                viewModel.backupSecurityKeys(securityConfig) { refreshTrigger++ }
             },
         )
     }
@@ -86,8 +85,7 @@ actual fun SecurityKeyBackupActions(
             onDismiss = { showDeleteDialog = false },
             onConfirm = {
                 showDeleteDialog = false
-                viewModel.deleteSecurityKeyBackup()
-                refreshTrigger++
+                viewModel.deleteSecurityKeyBackup { refreshTrigger++ }
             },
         )
     }
