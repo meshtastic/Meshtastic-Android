@@ -427,6 +427,7 @@ open class RadioConfigViewModel(
                 val updatePlan = getManualChannelUpdatePlan(new, current)
                 if (updatePlan.isEmpty()) return@withLock
                 if (!beginManualChannelBatch(updatePlan.size)) return@withLock
+                val batchRequestIds = mutableSetOf<Int>()
 
                 try {
                     applyManualChannelUpdatePlan(
@@ -434,7 +435,10 @@ open class RadioConfigViewModel(
                         currentSettings = current,
                         finalSettings = new,
                         writeChannel = { channel -> radioConfigUseCase.setRemoteChannel(destNum, channel) },
-                        registerRequestId = ::registerManualChannelBatchRequestId,
+                        registerRequestId = { packetId ->
+                            batchRequestIds.add(packetId)
+                            registerManualChannelBatchRequestId(packetId)
+                        },
                         onInterrupted = { result ->
                             reconcileInterruptedManualChannelUpdate(
                                 destNum = destNum,
@@ -446,10 +450,10 @@ open class RadioConfigViewModel(
                     commitManualChannelSettings(destNum = destNum, oldSettings = current, newSettings = new)
                     finishManualChannelBatch()
                 } catch (e: CancellationException) {
-                    abortManualChannelBatch()
+                    abortManualChannelBatch(batchRequestIds)
                     throw e
                 } catch (e: Throwable) {
-                    abortManualChannelBatch()
+                    abortManualChannelBatch(batchRequestIds)
                     Logger.w(e) { "Manual channel update failed after enqueue" }
                     e.message?.let(::sendError) ?: sendError(Res.string.unknown_error)
                 }
@@ -811,11 +815,10 @@ open class RadioConfigViewModel(
     }
 
     private fun beginManualChannelBatch(total: Int): Boolean {
-        if (requestIds.value.isNotEmpty() || radioConfigState.value.responseState is ResponseState.Loading) {
+        if (hasUnrelatedPendingRequest() || hasPendingRequestRegistration()) {
             Logger.w { "Manual channel update skipped while another radio request is pending" }
             return false
         }
-        manualChannelBatchRequestIds.clear()
         manualChannelBatchEnqueueing = true
         _radioConfigState.update { state ->
             state.copy(route = "", responseState = ResponseState.Loading(total = total))
@@ -826,14 +829,13 @@ open class RadioConfigViewModel(
     private fun finishManualChannelBatch() {
         manualChannelBatchEnqueueing = false
         if (requestIds.value.isEmpty()) {
-            manualChannelBatchRequestIds.clear()
             setResponseStateSuccess()
         }
     }
 
-    private fun abortManualChannelBatch() {
+    private fun abortManualChannelBatch(batchRequestIds: Set<Int>) {
         manualChannelBatchEnqueueing = false
-        removeManualChannelBatchRequestIds()
+        removeRequestIds(batchRequestIds)
     }
 
     private fun completeSetRequestOrProgressBatch() {
@@ -908,6 +910,12 @@ open class RadioConfigViewModel(
         registerRequestId(packetId)
     }
 
+    private fun hasUnrelatedPendingRequest(): Boolean = requestIds.value.any { it !in manualChannelBatchRequestIds }
+
+    private fun hasPendingRequestRegistration(): Boolean = requestIds.value.isEmpty() &&
+        manualChannelBatchRequestIds.isEmpty() &&
+        radioConfigState.value.responseState is ResponseState.Loading
+
     private fun clearRequestIds() {
         requestTimeoutJobs.values.forEach { it.cancel() }
         requestTimeoutJobs.clear()
@@ -921,10 +929,9 @@ open class RadioConfigViewModel(
         requestIds.update { it.withoutPacketId(packetId) }
     }
 
-    private fun removeManualChannelBatchRequestIds() {
-        val packetIds = manualChannelBatchRequestIds.toSet()
+    private fun removeRequestIds(packetIds: Set<Int>) {
         packetIds.forEach { requestTimeoutJobs.remove(it)?.cancel() }
-        manualChannelBatchRequestIds.clear()
+        manualChannelBatchRequestIds.removeAll(packetIds)
         requestIds.update { ids -> ids.withoutPacketIds(packetIds) }
     }
 
