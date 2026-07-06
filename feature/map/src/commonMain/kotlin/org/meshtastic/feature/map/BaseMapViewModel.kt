@@ -67,7 +67,11 @@ open class BaseMapViewModel(
 
     val myNodeInfo = nodeRepository.myNodeInfo
 
-    /** OS locale display units (metric/imperial) for distance/altitude/speed formatting across map surfaces. */
+    /**
+     * OS locale display units (metric/imperial) for distance/altitude/speed formatting across map surfaces. StateFlow
+     * kept for the existing collectAsState call sites; value is a one-time snapshot at construction and does not react
+     * to a mid-session locale change (ViewModel survives config changes).
+     */
     val displayUnits: StateFlow<DisplayUnits> = MutableStateFlow(DistanceUnit.getFromLocale()).asStateFlow()
 
     val ourNodeInfo = nodeRepository.ourNodeInfo

@@ -130,13 +130,17 @@ class NodeListViewModel(
                 excludeMqtt = excludeMqtt,
             )
         }
+
+    // OS locale rarely changes mid-session; snapshot once instead of per filter/sort emission.
+    private val distanceUnits = DistanceUnit.getFromLocale().value
+    private val tempInFahrenheit = getSystemMeasurementSystem() == MeasurementSystem.IMPERIAL
     val nodesUiState: StateFlow<NodesUiState> =
         combine(nodeSortOption, nodeFilter) { sort, nodeFilter ->
             NodesUiState(
                 sort = sort,
                 filter = nodeFilter,
-                distanceUnits = DistanceUnit.getFromLocale().value,
-                tempInFahrenheit = getSystemMeasurementSystem() == MeasurementSystem.IMPERIAL,
+                distanceUnits = distanceUnits,
+                tempInFahrenheit = tempInFahrenheit,
             )
         }
             .stateInWhileSubscribed(initialValue = NodesUiState())

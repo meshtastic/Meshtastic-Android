@@ -550,6 +550,9 @@ private fun EnvironmentMetricsContent(
 
         VoltageCurrentDisplay(envMetrics)
         RadiationDisplay(envMetrics)
+        // ponytail: environmentDisplayFahrenheit == (displayUnits == IMPERIAL) — both derive from the same
+        // getSystemMeasurementSystem(), so it doubles as the imperial flag for wind/rainfall. Thread a separate
+        // flag only if temperature and distance units are ever sourced independently (e.g. UK Celsius + miles).
         WindDisplay(envMetrics, environmentDisplayFahrenheit)
         RainfallDisplay(envMetrics, environmentDisplayFahrenheit)
         OneWireTemperatureDisplay(envMetrics, environmentDisplayFahrenheit)
