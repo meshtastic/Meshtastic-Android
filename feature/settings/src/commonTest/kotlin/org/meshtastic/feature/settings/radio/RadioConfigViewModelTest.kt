@@ -34,6 +34,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -67,6 +68,7 @@ import org.meshtastic.core.testing.FakeLockdownCoordinator
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.ui.util.SnackbarManager
 import org.meshtastic.feature.settings.navigation.ConfigRoute
+import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config
@@ -84,8 +86,11 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import kotlin.time.Duration
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class RadioConfigViewModelTest {
@@ -357,6 +362,315 @@ class RadioConfigViewModelTest {
 
         verifySuspend { radioConfigUseCase.setRemoteChannel(123, any()) }
         assertEquals(new, viewModel.radioConfigState.value.channelList)
+    }
+
+    @Test
+    fun `updateChannels writes changed channels sequentially in index order`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        nodeRepository.setNodes(listOf(node))
+        viewModel = createViewModel()
+
+        val channelA = ChannelSettings(name = "A")
+        val channelB = ChannelSettings(name = "B")
+        val channelC = ChannelSettings(name = "C")
+        val old = listOf(channelA, channelB, channelC)
+        val new = listOf(channelA, channelC, channelB)
+        val writtenIndexes = mutableListOf<Int>()
+        var activeWrites = 0
+        var maxConcurrentWrites = 0
+
+        everySuspend { radioConfigUseCase.setRemoteChannel(any(), any()) } calls
+            {
+                val channel = it.args[1] as Channel
+                activeWrites++
+                maxConcurrentWrites = maxOf(maxConcurrentWrites, activeWrites)
+                writtenIndexes.add(channel.index)
+                delay(1)
+                activeWrites--
+                writtenIndexes.size
+            }
+
+        viewModel.updateChannels(new, old)
+        advanceUntilIdle()
+
+        assertEquals(listOf(1, 2), writtenIndexes)
+        assertEquals(1, maxConcurrentWrites)
+        assertEquals(new, viewModel.radioConfigState.value.channelList)
+        verifySuspend(exactly(2)) { radioConfigUseCase.setRemoteChannel(123, any()) }
+    }
+
+    @Test
+    fun `updateChannels waits for all ordered writes before success`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        val packetFlow = MutableSharedFlow<MeshPacket>()
+        every { serviceRepository.meshPacketFlow } returns packetFlow
+        every { processRadioResponseUseCase(any(), 123, any()) } returns RadioResponseResult.Success
+        nodeRepository.setNodes(listOf(node))
+        viewModel = createViewModel()
+
+        val channelA = ChannelSettings(name = "A")
+        val channelB = ChannelSettings(name = "B")
+        val channelC = ChannelSettings(name = "C")
+        val old = listOf(channelA, channelB, channelC)
+        val new = listOf(channelA, channelC, channelB)
+        var nextPacketId = 40
+
+        everySuspend { radioConfigUseCase.setRemoteChannel(any(), any()) } calls { ++nextPacketId }
+
+        viewModel.updateChannels(new, old)
+        runCurrent()
+
+        packetFlow.emit(MeshPacket(decoded = Data(request_id = 41)))
+        runCurrent()
+
+        val midBatchState = viewModel.radioConfigState.value.responseState
+        assertTrue(midBatchState is ResponseState.Loading)
+        assertEquals(2, midBatchState.total)
+        assertEquals(1, midBatchState.completed)
+
+        advanceTimeBy(MANUAL_CHANNEL_WRITE_DELAY.inWholeMilliseconds)
+        runCurrent()
+
+        packetFlow.emit(MeshPacket(decoded = Data(request_id = 42)))
+        runCurrent()
+
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Success)
+    }
+
+    @Test
+    fun `updateChannels reconciles applied channel writes when ordered write fails`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        val old = fourChannelFixture()
+        val (channelA, _, _, channelD) = old
+        val new = listOf(channelA, channelD)
+        val partiallyApplied = listOf(channelA, channelD, old[2], old[3])
+        val writtenIndexes = mutableListOf<Int>()
+
+        every { radioConfigRepository.channelSetFlow } returns MutableStateFlow(ChannelSet(settings = old))
+        nodeRepository.setNodes(listOf(node))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
+        viewModel = createViewModel()
+        runCurrent()
+
+        everySuspend { radioConfigUseCase.setRemoteChannel(any(), any()) } calls
+            {
+                val channel = it.args[1] as Channel
+                writtenIndexes.add(channel.index)
+                if (writtenIndexes.size == 2) {
+                    throw IllegalStateException("boom")
+                }
+                channel.index + 100
+            }
+
+        viewModel.updateChannels(new, old)
+        advanceUntilIdle()
+
+        assertEquals(listOf(1, 2), writtenIndexes)
+        assertEquals(partiallyApplied, viewModel.radioConfigState.value.channelList)
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Error)
+        verifySuspend { packetRepository.migrateChannelsByPSK(old, partiallyApplied) }
+        verifySuspend { radioConfigRepository.replaceAllSettings(partiallyApplied) }
+    }
+
+    @Test
+    fun `updateChannels serializes overlapping channel saves`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        val old = fourChannelFixture()
+        val (channelA, _, channelC, channelD) = old
+        val firstNew = listOf(channelA, channelD)
+        val secondNew = listOf(channelA, channelC)
+        val writtenChannels = mutableListOf<String>()
+        var firstWrite = true
+
+        every { radioConfigRepository.channelSetFlow } returns MutableStateFlow(ChannelSet(settings = old))
+        nodeRepository.setNodes(listOf(node))
+        viewModel = createViewModel()
+        runCurrent()
+
+        everySuspend { radioConfigUseCase.setRemoteChannel(any(), any()) } calls
+            {
+                val channel = it.args[1] as Channel
+                writtenChannels.add("${channel.index}:${channel.role}:${channel.settings?.name.orEmpty()}")
+                if (firstWrite) {
+                    firstWrite = false
+                    delay(10_000)
+                }
+                writtenChannels.size
+            }
+
+        viewModel.updateChannels(firstNew, old)
+        runCurrent()
+        viewModel.updateChannels(secondNew, old)
+        advanceUntilIdle()
+
+        assertEquals(listOf("1:SECONDARY:D", "2:DISABLED:", "3:DISABLED:", "1:SECONDARY:C"), writtenChannels)
+        assertEquals(secondNew, viewModel.radioConfigState.value.channelList)
+    }
+
+    @Test
+    fun `updateChannels does not start manual batch while another radio request is pending`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        nodeRepository.setNodes(listOf(node))
+        viewModel = createViewModel()
+
+        val old = listOf(ChannelSettings(name = "Old"))
+        val new = listOf(ChannelSettings(name = "New"))
+
+        everySuspend { radioConfigUseCase.getOwner(any()) } calls
+            {
+                delay(10_000)
+                42
+            }
+        everySuspend { radioConfigUseCase.setRemoteChannel(any(), any()) } returns 100
+
+        viewModel.setResponseStateLoading(ConfigRoute.USER)
+        runCurrent()
+
+        viewModel.updateChannels(new, old)
+        runCurrent()
+
+        assertEquals(ConfigRoute.USER.name, viewModel.radioConfigState.value.route)
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Loading)
+        verifySuspend(exactly(0)) { radioConfigUseCase.setRemoteChannel(any(), any()) }
+
+        advanceUntilIdle()
+    }
+
+    @Test
+    fun `aborted manual batch preserves unrelated pending request`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        val packetFlow = MutableSharedFlow<MeshPacket>()
+        val old = fourChannelFixture()
+        val (channelA, _, _, channelD) = old
+        val new = listOf(channelA, channelD)
+        val owner = User(id = "!123", long_name = "Updated")
+        var writeCount = 0
+
+        every { serviceRepository.meshPacketFlow } returns packetFlow
+        nodeRepository.setNodes(listOf(node))
+        viewModel = createViewModel()
+
+        everySuspend { radioConfigUseCase.getOwner(any()) } returns 42
+        everySuspend { radioConfigUseCase.setRemoteChannel(any(), any()) } calls
+            {
+                writeCount++
+                if (writeCount == 2) {
+                    viewModel.setResponseStateLoading(ConfigRoute.USER)
+                    throw IllegalStateException("boom")
+                }
+                100
+            }
+        every { processRadioResponseUseCase(any(), 123, any()) } calls
+            {
+                val pendingRequestIds = it.args[2] as Set<Int>
+                if (42 in pendingRequestIds) RadioResponseResult.Owner(owner) else null
+            }
+
+        viewModel.updateChannels(new, old)
+        runCurrent()
+        advanceTimeBy(MANUAL_CHANNEL_WRITE_DELAY.inWholeMilliseconds)
+        runCurrent()
+
+        packetFlow.emit(MeshPacket(decoded = Data(request_id = 42)))
+        runCurrent()
+
+        assertEquals(owner, viewModel.radioConfigState.value.userConfig)
+    }
+
+    @Test
+    fun `aborted manual batch cancels batch timeout before packet id reuse`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        val old = fourChannelFixture()
+        val (channelA, _, _, channelD) = old
+        val new = listOf(channelA, channelD)
+        var writeCount = 0
+
+        nodeRepository.setNodes(listOf(node))
+        viewModel = createViewModel()
+
+        everySuspend { radioConfigUseCase.setRemoteChannel(any(), any()) } calls
+            {
+                writeCount++
+                if (writeCount == 2) throw IllegalStateException("boom")
+                100
+            }
+        everySuspend { radioConfigUseCase.getOwner(any()) } returns 100
+
+        viewModel.updateChannels(new, old)
+        runCurrent()
+        advanceTimeBy(MANUAL_CHANNEL_WRITE_DELAY.inWholeMilliseconds)
+        runCurrent()
+
+        viewModel.setResponseStateLoading(ConfigRoute.USER)
+        runCurrent()
+
+        advanceTimeBy(29_500)
+        runCurrent()
+
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Loading)
+    }
+
+    @Test
+    fun `applyManualChannelUpdatePlan paces writes except after final channel`() = runTest {
+        val channelA = Channel(index = 1, role = Channel.Role.SECONDARY, settings = ChannelSettings(name = "A"))
+        val channelB = Channel(index = 2, role = Channel.Role.DISABLED, settings = ChannelSettings())
+        val channelC = Channel(index = 3, role = Channel.Role.DISABLED, settings = ChannelSettings())
+        val writtenIndexes = mutableListOf<Int>()
+        val registeredRequestIds = mutableListOf<Int>()
+        val delays = mutableListOf<Duration>()
+
+        val result =
+            applyManualChannelUpdatePlan(
+                updatePlan = listOf(channelA, channelB, channelC),
+                currentSettings = listOf(ChannelSettings(name = "old")),
+                finalSettings = listOf(ChannelSettings(name = "new")),
+                writeChannel = { channel ->
+                    writtenIndexes.add(channel.index)
+                    channel.index + 100
+                },
+                registerRequestId = { registeredRequestIds.add(it) },
+                delayFn = { delays.add(it) },
+            )
+
+        assertEquals(listOf(1, 2, 3), writtenIndexes)
+        assertEquals(listOf(101, 102, 103), result.packetIds)
+        assertEquals(listOf(ChannelSettings(name = "new")), result.finalSettings)
+        assertEquals(listOf(101, 102, 103), registeredRequestIds)
+        assertEquals(listOf(MANUAL_CHANNEL_WRITE_DELAY, MANUAL_CHANNEL_WRITE_DELAY), delays)
+    }
+
+    @Test
+    fun `applyManualChannelUpdatePlan invokes onInterrupted when writeChannel fails mid-plan`() = runTest {
+        val channelA = Channel(index = 1, role = Channel.Role.SECONDARY, settings = ChannelSettings(name = "A"))
+        val channelB = Channel(index = 2, role = Channel.Role.SECONDARY, settings = ChannelSettings(name = "B"))
+        val channelC = Channel(index = 3, role = Channel.Role.SECONDARY, settings = ChannelSettings(name = "C"))
+        val writtenIndexes = mutableListOf<Int>()
+
+        var interrupted: InterruptedManualChannelUpdate? = null
+
+        val error =
+            assertFailsWith<IllegalStateException> {
+                applyManualChannelUpdatePlan(
+                    updatePlan = listOf(channelA, channelB, channelC),
+                    currentSettings = listOf(ChannelSettings(name = "old")),
+                    finalSettings = listOf(ChannelSettings(name = "new")),
+                    writeChannel = { channel ->
+                        writtenIndexes.add(channel.index)
+                        if (channel.index == 2) throw IllegalStateException("boom")
+                        channel.index + 100
+                    },
+                    registerRequestId = {},
+                    onInterrupted = { interrupted = it },
+                    delayFn = {},
+                )
+            }
+
+        assertEquals("boom", error.message)
+        // Channel A (index 1) completed before channel B (index 2) threw.
+        assertEquals(listOf(1, 2), writtenIndexes)
+        assertNotNull(interrupted)
+        assertEquals(1, interrupted!!.appliedWriteCount)
+        assertEquals("A", interrupted!!.appliedSettings[1].name)
     }
 
     @Test
@@ -918,6 +1232,13 @@ class RadioConfigViewModelTest {
 
         verifySuspend { radioConfigUseCase.setConfig(123, Config(security = decoded)) }
     }
+
+    private fun fourChannelFixture() = listOf(
+        ChannelSettings(name = "A"),
+        ChannelSettings(name = "B"),
+        ChannelSettings(name = "C"),
+        ChannelSettings(name = "D"),
+    )
 
     private fun myNodeInfo(myNodeNum: Int) = MyNodeInfo(
         myNodeNum = myNodeNum,
