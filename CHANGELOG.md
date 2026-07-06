@@ -9,6 +9,21 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
+#### 🏗️ Features
+* Style GeoJSON overlays from simplestyle-spec (fill/stroke) by @garthvh in https://github.com/meshtastic/Meshtastic-Android/pull/6088
+* feat(discovery): Mesh Beacon client with iOS 014-mesh-beacons parity by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6097
+* feat(messaging): translate chat messages in-place with on-device ML Kit (google flavor only) by @thebentern in https://github.com/meshtastic/Meshtastic-Android/pull/6103
+* feat(database): unify device database across transports by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6096
+* feat: compute EPA NowCast AQI from PM2.5 history by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6102
+* Add secure key backup/restore/delete for security config by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6105
+#### 🛠️ Fixes
+* fix: harden against adversarial mesh-fuzz findings (crash, GC-thrash, unbounded growth, OOM) by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6093
+* fix: remove satellite-count chip from node-list metrics row by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6100
+* fix: derive phone-UI units from OS locale, not radio display config by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6101
+
+### Internal (v2.8.0-internal.15)
+Changes since [`v2.8.0-closed.5`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.0-closed.5):
+
 #### 🛠️ Fixes
 * fix(ci): rename skip_author to ignore_usernames in .coderabbit.yaml by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6069
 * fix(qr): Apply channel replacements reliably by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6072
@@ -115,6 +130,7 @@ Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/relea
 ## New Contributors
 * @LesterCheng made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/5752
 * @dubsector made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/5986
+* @garthvh made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/6088
 <!-- UNRELEASED_END -->
 
 <!-- RELEASED_START -->
