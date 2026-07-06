@@ -39,6 +39,8 @@
     <string name="action_select_network">ネットワークを選択</string>
     <string name="action_send_reply">返信</string>
     <string name="action_show_message_status">メッセージの状態を表示</string>
+    <string name="action_toggle_translation">原文と翻訳を切り替え</string>
+    <string name="action_translate_message">メッセージを翻訳</string>
     <string name="actions">アクション</string>
     <string name="adc_multiplier_override">ADC倍率のオーバーライド</string>
     <string name="adc_multiplier_override_ratio">ADC倍率のオーバーライド比</string>
@@ -109,12 +111,15 @@
     <string name="app_too_old">アプリを更新して下さい。</string>
     <string name="app_version">バージョン</string>
     <string name="apply">適用</string>
+    <string name="aqi">AQI</string>
     <string name="are_you_sure">よろしいですか？</string>
     <string name="are_you_sure_change_default">デフォルトチャンネルに変更しますか？</string>
     <string name="audio">オーディオ</string>
     <string name="audio_config">音声設定</string>
     <string name="available_pins">使用可能な端子</string>
     <string name="back">戻る</string>
+    <string name="backup_keys">鍵をバックアップ</string>
+    <string name="backup_keys_confirmation">公開鍵と秘密鍵を、このデバイスの安全な暗号化ストレージに保存します。</string>
     <string name="backup_restore">バックアップと復元</string>
     <string name="bad">不良</string>
     <string name="bandwidth">帯域</string>
@@ -135,6 +140,7 @@
     <string name="bluetooth_feature_discovery">探索</string>
     <string name="bluetooth_feature_discovery_description">あなたの近くにあるMeshtasticデバイスを見つけて識別します。</string>
     <string name="bluetooth_permission">Bluetooth</string>
+    <string name="bluetooth_scan_start_failed">Bluetooth スキャンを開始できませんでした。もう一度お試しください。問題が続く場合は Bluetooth をオフ/オンしてください。</string>
     <string name="bold_heading">太字の見出し</string>
     <string name="bonding_failed_permissions">ペアリングに失敗しました。付近のデバイスの権限を許可して、もう一度お試しください。</string>
     <string name="bonding_failed_retry">ペアリングが完了しませんでした。もう一度ペアリングしてください。</string>
@@ -148,6 +154,7 @@
     <string name="call_sign_summary">アマチュア無線のコールサイン（最大8文字）</string>
     <string name="camera_permission">カメラの権限</string>
     <string name="camera_permission_rationale">QR コードをスキャンするために、カメラへのアクセスを許可してください。</string>
+    <string name="camera_unavailable">カメラを起動できませんでした。もう一度試すか、スキャナーを閉じて開き直してください。</string>
     <string name="cancel">キャンセル</string>
     <string name="cancel_reply">返信をキャンセル</string>
     <string name="canned_message">定型メッセージ</string>
@@ -306,20 +313,26 @@
     <string name="debug_filter_preset_title">プリセットフィルタ</string>
     <string name="debug_filters">フィルタ</string>
     <string name="debug_log_api_enabled">デバッグログAPIを有効化</string>
+    <string name="debug_logcat_empty">表示するアプリログがありません</string>
     <string name="debug_logcat_refresh">更新</string>
     <string name="debug_logs_export">ログのエクスポート</string>
+    <string name="debug_logs_exported">ログをエクスポートしました</string>
     <string name="debug_panel">デバッグ</string>
     <string name="debug_search_clear">検索をクリア</string>
     <string name="debug_search_next">次の一致</string>
     <string name="debug_search_prev">前の一致</string>
     <string name="debug_store_logs_summary">無効にすると、メッシュログをファイルに保存することがスキップされます</string>
     <string name="debug_store_logs_title">メッシュログを保存</string>
+    <string name="debug_tab_app_logs">アプリログ</string>
+    <string name="debug_tab_packets">パケット</string>
     <string name="default_">デフォルト</string>
     <!-- DELETE -->
     <string name="delete">削除</string>
     <string name="delete_custom_tile_source">ネットワークタイルソースを削除</string>
     <string name="delete_for_everyone">全員のデバイスから削除</string>
     <string name="delete_for_me">自分のデバイスから削除</string>
+    <string name="delete_key_backup">鍵のバックアップを削除</string>
+    <string name="delete_key_backup_confirmation">このデバイスに保存されている暗号化された鍵のバックアップを削除します。この操作は取り消せません。</string>
     <plurals name="delete_messages">
         <item quantity="other">%1$s 件のメッセージを削除しますか？</item>
     </plurals>
@@ -461,6 +474,7 @@
     <string name="doc_keywords_android_auto">Android Auto,車,カーナビ,運転,ハンズフリー,メッセージ,android auto,car,head unit,driving,hands free,messaging</string>
     <string name="doc_keywords_app_functions">システムAI,Gemini,アシスタント,機能,自動化,音声,system ai,gemini,assistant,functions,automation,voice</string>
     <string name="doc_keywords_connections">Bluetooth,接続,ペアリング,シリアル,WiFi,bluetooth,usb,tcp,pairing,serial,wifi</string>
+    <string name="doc_keywords_debug_logs">デバッグ,ログ,logcat,エクスポート,バグ報告,問題,トラブルシューティング,診断,debug,logs,logcat,export,bug report,issue,troubleshooting,diagnostics</string>
     <string name="doc_keywords_desktop">デスクトップ,Linux,macOS,Windows,シリアル,desktop,linux,macos,windows,serial</string>
     <string name="doc_keywords_discovery">探索,ディスカバリー,トポロジー,ネットワーク,スキャン,隣接ノード,discovery,topology,network,scan,neighbor</string>
     <string name="doc_keywords_firmware">ファームウェア,更新,アップデート,OTA,書き込み,バージョン,リカバリー,firmware,update,ota,flash,version,recovery</string>
@@ -486,6 +500,7 @@
     <string name="doc_title_android_auto">Android Auto</string>
     <string name="doc_title_app_functions">アプリ機能</string>
     <string name="doc_title_connections">接続</string>
+    <string name="doc_title_debug_logs">デバッグログ</string>
     <string name="doc_title_desktop">デスクトップアプリ</string>
     <string name="doc_title_discovery">探索</string>
     <string name="doc_title_firmware">ファームウェア更新</string>
@@ -582,6 +597,11 @@
     <string name="firmware">ファームウェア</string>
     <string name="firmware_edition">ファームウェアエディション</string>
     <string name="firmware_old">デバイスのファームウェアが古く、アプリと通信ができません。詳細は<a href="https://meshtastic.org/docs/getting-started/flashing-firmware">Firmware Installation guide</a> に記載されています。</string>
+    <string name="firmware_recovery_banner">%1$s の更新を完了</string>
+    <string name="firmware_recovery_ble_failed">Bluetooth 経由で更新を完了できませんでした。このデバイスの標準ブートローダーは、中断された更新を OTA で確実に完了できません。デバイスを復旧するには、USB でコンピューターに接続し、ベンダーのシリアル DFU ツール（例：adafruit-nrfutil）を使って再書き込みしてください。</string>
+    <string name="firmware_recovery_button">ファームウェア更新を再開</string>
+    <string name="firmware_recovery_dismiss">ファームウェアの復旧を閉じる</string>
+    <string name="firmware_recovery_explanation">このデバイスは、完了しなかったファームウェア更新によりブートローダーモードになっています。近くに置いておくと、更新を完了するために再書き込みされます。</string>
     <string name="firmware_too_old">ファームウェアの更新が必要です。</string>
     <string name="firmware_update_almost_there">もうすぐ完了します…</string>
     <string name="firmware_update_alpha">アルファ版</string>
@@ -664,6 +684,23 @@
     <string name="generate_input_event_on_press">プレスで入力イベントを生成</string>
     <string name="generate_qr_code">QRコード生成</string>
     <!-- GEOFENCE -->
+    <string name="geofence">ジオフェンス</string>
+    <string name="geofence_box_author_confirm">エリアを確定</string>
+    <string name="geofence_box_author_hint">2つの角をタップしてエリアを指定します</string>
+    <string name="geofence_box_author_hint_viewport">マップを動かしてエリアを合わせ、「エリアを確定」をタップします</string>
+    <string name="geofence_box_use_view">現在の表示範囲を使用</string>
+    <string name="geofence_edit_area">エリアを編集</string>
+    <string name="geofence_entered_body">%1$s が %2$s に進入しました</string>
+    <string name="geofence_entered_title">%1$s に進入</string>
+    <string name="geofence_favorites_only">お気に入りのみ</string>
+    <string name="geofence_left_body">%1$s が %2$s から退出しました</string>
+    <string name="geofence_left_title">%1$s から退出</string>
+    <string name="geofence_notify_on_enter">進入時に通知</string>
+    <string name="geofence_notify_on_exit">退出時に通知</string>
+    <string name="geofence_off">オフ</string>
+    <string name="geofence_radius">ジオフェンスの半径</string>
+    <string name="geofence_remove_area">エリアを削除</string>
+    <string name="geofence_set_area">マップ上でエリアを設定</string>
     <string name="get_started">開始する</string>
     <string name="good">良</string>
     <!-- GPIO -->
@@ -716,6 +753,7 @@
     <string name="incoming_messages">受信メッセージ</string>
     <string name="indoor_air_quality_iaq">屋内空気品質 (IAQ)</string>
     <string name="info">情報</string>
+    <string name="input_channel_url">共有チャンネルの URL を入力</string>
     <string name="input_shared_contact_url">共有連絡先のURLを入力</string>
     <string name="installed_firmware_version">現在インストール済み</string>
     <string name="internal">内部</string>
@@ -729,6 +767,11 @@
     <string name="ipv4_mode">IPv4 モード</string>
     <string name="json_output_enabled">JSON出力の有効化</string>
     <!-- KEY -->
+    <string name="key_backup_deleted">鍵のバックアップを削除しました</string>
+    <string name="key_backup_not_found">このノードの鍵のバックアップが見つかりません</string>
+    <string name="key_backup_restore_failed">バックアップからの鍵の復元に失敗しました</string>
+    <string name="key_backup_restored">鍵を復元しました。デバイスに保存しています</string>
+    <string name="key_backup_saved">鍵を安全にバックアップしました</string>
     <string name="key_verification_final_title">鍵の検証が完了しました</string>
     <string name="key_verification_request_title">鍵の検証リクエスト</string>
     <string name="key_verification_title">鍵の検証</string>
@@ -879,8 +922,43 @@
     <string name="match_any">いずれかに一致 | すべて</string>
     <string name="max">最大</string>
     <!-- MESH -->
+    <string name="mesh_beacon">メッシュビーコン</string>
+    <string name="mesh_beacon_broadcast">ビーコンを発信</string>
+    <string name="mesh_beacon_broadcast_summary">このメッシュを近くのノードに定期的に告知します</string>
+    <string name="mesh_beacon_channels_title">ビーコンのチャンネル</string>
+    <string name="mesh_beacon_interval">発信間隔（秒）</string>
+    <string name="mesh_beacon_interval_error">最小 %1$d 秒</string>
+    <string name="mesh_beacon_invitations_title">メッシュへの招待</string>
+    <string name="mesh_beacon_listen">ビーコンを受信</string>
+    <string name="mesh_beacon_listen_summary">近くのメッシュが発信する招待を受け取ります</string>
+    <string name="mesh_beacon_message">ビーコンメッセージ</string>
+    <string name="mesh_beacon_message_error">最大 %1$d バイト</string>
+    <string name="mesh_beacon_notification_body">近くのメッシュから参加への招待が届きました</string>
+    <string name="mesh_beacon_notification_title">メッシュへの招待</string>
+    <string name="mesh_beacon_offer_add">チャンネルを追加</string>
+    <string name="mesh_beacon_offer_channel">チャンネル：%1$s</string>
+    <string name="mesh_beacon_offer_channel_key">提示されたチャンネル鍵（base64）</string>
+    <string name="mesh_beacon_offer_channel_name">提示されたチャンネル名</string>
+    <string name="mesh_beacon_offer_discover">探索</string>
     <string name="mesh_beacon_offer_dismiss">中止</string>
+    <string name="mesh_beacon_offer_from_unknown">不明なノードから</string>
+    <string name="mesh_beacon_offer_join">参加</string>
+    <string name="mesh_beacon_offer_preset">プリセット：%1$s</string>
+    <string name="mesh_beacon_offer_preset_setting">提示されたプリセット</string>
+    <string name="mesh_beacon_offer_region">リージョン：%1$s</string>
+    <string name="mesh_beacon_offer_region_setting">提示されたリージョン</string>
+    <string name="mesh_beacon_offer_signal">信号：%1$s / %2$s</string>
+    <string name="mesh_beacon_offer_title">メッシュへの招待</string>
+    <string name="mesh_beacon_on_preset">送信プリセット</string>
+    <string name="mesh_beacon_on_region">送信リージョン</string>
+    <string name="mesh_beacon_preset_indicator">近くのビーコンによって告知</string>
     <string name="mesh_beacon_preset_none">なし</string>
+    <string name="mesh_beacon_send_as_node">発信元のノード番号（0 = このノード）</string>
+    <string name="mesh_beacon_target">ターゲット %1$d</string>
+    <string name="mesh_beacon_target_add">ターゲットを追加</string>
+    <string name="mesh_beacon_target_channel_index">チャンネルインデックス</string>
+    <string name="mesh_beacon_target_remove">ターゲットを削除</string>
+    <string name="mesh_beacon_targets">発信ターゲット</string>
     <string name="mesh_map_location">メッシュマップの位置情報</string>
     <string name="mesh_map_location_description">メッシュマップ上にスマートフォンの青い位置ドットを表示します。</string>
     <!-- MESHTASTIC -->
@@ -890,6 +968,7 @@
     <string name="meshtastic_broadcast_notifications">ブロードキャストメッセージの通知</string>
     <string name="meshtastic_low_battery_notifications">バッテリー残量低下通知</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">バッテリー残量低下通知 (お気に入りノード)</string>
+    <string name="meshtastic_mesh_beacon_notifications">メッシュ招待の通知</string>
     <string name="meshtastic_messages_notifications">ダイレクトメッセージの通知</string>
     <string name="meshtastic_new_nodes_notifications">新しいノードの通知</string>
     <string name="meshtastic_service_notifications">サービス通知</string>
@@ -905,6 +984,7 @@
     <string name="message_status_sfpp_confirmed">SF++ チェーンで確認済み</string>
     <string name="message_status_sfpp_routing">SF++ チェーン経由でルーティング中…</string>
     <string name="message_status_unknown">不明</string>
+    <string name="message_translated_label">翻訳済み</string>
     <string name="messages">メッセージ</string>
     <string name="micrograms_per_cubic_meter">µg/m³</string>
     <string name="min">最小</string>
@@ -1239,6 +1319,8 @@
     <string name="resend">再送信</string>
     <string name="reset">リセット</string>
     <string name="reset_to_defaults">デフォルトにリセット</string>
+    <string name="restore_keys">鍵を復元</string>
+    <string name="restore_keys_confirmation">バックアップした公開鍵と秘密鍵をこのノードに復元します。</string>
     <string name="retry">再試行</string>
     <string name="ringtone">着信音</string>
     <string name="ringtone_file_empty">ファイルが空です</string>
@@ -1292,6 +1374,8 @@
     <!-- SCAN -->
     <string name="scan">スキャン</string>
     <string name="scan_bluetooth_devices">Bluetooth デバイスをスキャン</string>
+    <string name="scan_channels_nfc">共有チャンネルの NFC をスキャン</string>
+    <string name="scan_channels_qr">共有チャンネルの QR コードをスキャン</string>
     <string name="scan_network_devices">ネットワークデバイスをスキャン</string>
     <string name="scan_nfc">NFCをスキャンする</string>
     <string name="scan_nfc_text">NFCタグにデバイスを近づけてスキャンしてください。</string>
@@ -1355,6 +1439,7 @@
     <!-- SHARE -->
     <string name="share">シェア</string>
     <string name="share_channels_qr">チャンネルのQRコードを共有</string>
+    <string name="share_connected_node">接続中のノードを共有</string>
     <string name="share_contact">連絡先を共有</string>
     <string name="share_location">位置情報を共有</string>
     <string name="share_location_description">ノードのハードウェア GPS を使用する代わりに、スマートフォンの GPS を使ってノードに位置情報を送信します。</string>
@@ -1367,8 +1452,10 @@
     <string name="show_all_key_title">暗号鍵の意味</string>
     <string name="show_iaq_legend">空気品質の凡例を表示</string>
     <string name="show_layer">レイヤーを表示</string>
+    <string name="show_original">原文を表示</string>
     <string name="show_password">パスワードを表示</string>
     <string name="show_precision_circle">精度サークルを表示</string>
+    <string name="show_translation">翻訳を表示</string>
     <string name="show_waypoints">ウェイポイントを表示</string>
     <string name="shutdown">シャットダウン</string>
     <string name="shutdown_node_name">ノード：%1$s</string>
@@ -1391,6 +1478,7 @@
     <string name="status_message">ステータスメッセージ</string>
     <string name="status_message_config">ステータスメッセージ設定</string>
     <string name="stay_connected_anywhere">どこでもつながる</string>
+    <string name="stop_connecting">接続を停止</string>
     <string name="store_forward">ストアアンドフォワード</string>
     <string name="store_forward_config">ストアアンドフォワード設定</string>
     <string name="store_forward_enabled">ストアアンドフォワード有効</string>
@@ -1496,7 +1584,14 @@
     <string name="traffic_management_rate_limit_window">レート制限のウィンドウ（秒）</string>
     <string name="traffic_management_router_preserve_hops">ルーターのホップを保持</string>
     <string name="traffic_management_unknown_packet_threshold">不明なパケットのしきい値</string>
+    <string name="translate">翻訳</string>
     <!-- TRANSLATION -->
+    <string name="translation_download_message">メッセージの翻訳には、言語モデルの一度限りのダウンロード（約 %1$d MB）が必要です。</string>
+    <string name="translation_download_title">翻訳モデルをダウンロードしますか？</string>
+    <string name="translation_downloading">翻訳モデルをダウンロードしています…</string>
+    <string name="translation_failed">メッセージを翻訳できません</string>
+    <string name="translation_model_download_failed">翻訳モデルのダウンロードに失敗しました</string>
+    <string name="translation_not_required">メッセージはすでにあなたの言語です</string>
     <string name="transmit_over_lora">LoRaで送信</string>
     <!-- TRANSPORT -->
     <string name="transport">接続方式</string>
@@ -1620,5 +1715,9 @@
     <string name="wind_gust">突風</string>
     <string name="wind_lull">風の弱まり</string>
     <string name="wind_speed">風速</string>
+    <string name="write_nfc">NFC タグに書き込む</string>
+    <string name="write_nfc_failed">タグに書き込めませんでした。書き込み可能な空の NFC タグを使い、動かさずに近づけてください。</string>
+    <string name="write_nfc_success">タグに書き込みました</string>
+    <string name="write_nfc_text">書き込み可能な NFC タグをスマートフォンの背面に近づけてください。</string>
     <string name="you">あなた</string>
 </resources>

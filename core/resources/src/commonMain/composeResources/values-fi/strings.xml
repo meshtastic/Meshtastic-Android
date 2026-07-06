@@ -39,6 +39,8 @@
     <string name="action_select_network">Valitse verkko</string>
     <string name="action_send_reply">Lähetä vastaus</string>
     <string name="action_show_message_status">Näytä viestin tila</string>
+    <string name="action_toggle_translation">Vaihda alkuperäisen ja käännetyn tekstin välillä</string>
+    <string name="action_translate_message">Käännä viesti</string>
     <string name="actions">Toiminnot</string>
     <string name="adc_multiplier_override">ADC-kertoimen ohitus</string>
     <string name="adc_multiplier_override_ratio">Korvaava AD-muuntimen kerroin</string>
@@ -109,6 +111,7 @@
     <string name="app_too_old">Sovelluspäivitys vaaditaan</string>
     <string name="app_version">Versio</string>
     <string name="apply">Hyväksy</string>
+    <string name="aqi">AQI</string>
     <string name="are_you_sure">Oletko varma?</string>
     <string name="are_you_sure_change_default">Oletko varma, että haluat vaihtaa oletuskanavan?</string>
     <string name="audio">Ääni</string>
@@ -116,6 +119,7 @@
     <string name="available_pins">Käytettävissä olevat pinnit</string>
     <string name="back">Edellinen</string>
     <string name="backup_keys">Varmuuskopioi avaimet</string>
+    <string name="backup_keys_confirmation">Tallentaa julkiset ja yksityiset avaimet tämän laitteen suojattuun, salattuun tallennustilaan.</string>
     <string name="backup_restore">Varmuuskopioi &amp; palauta</string>
     <string name="bad">Huono</string>
     <string name="bandwidth">Kaistanleveys</string>
@@ -330,6 +334,8 @@
     <string name="delete_custom_tile_source">Poista verkkokarttalähde</string>
     <string name="delete_for_everyone">Poista kaikilta</string>
     <string name="delete_for_me">Poista minulta</string>
+    <string name="delete_key_backup">Poista avaimen varmuuskopio</string>
+    <string name="delete_key_backup_confirmation">Poistaa tälle laitteelle tallennetun salatun avaimen varmuuskopion. Toimintoa ei voi peruuttaa.</string>
     <plurals name="delete_messages">
         <item quantity="one">Poistetaanko viesti?</item>
         <item quantity="other">Poistetaanko %1$s viestiä?</item>
@@ -766,6 +772,11 @@
     <string name="ipv4_mode">IPv4-tila</string>
     <string name="json_output_enabled">JSON ulostulo käytössä</string>
     <!-- KEY -->
+    <string name="key_backup_deleted">Avaimen varmuuskopio poistettu</string>
+    <string name="key_backup_not_found">Tälle radiolle ei löytynyt avaimen varmuuskopiota</string>
+    <string name="key_backup_restore_failed">Avainten palauttaminen varmuuskopiosta epäonnistui</string>
+    <string name="key_backup_restored">Avaimet palautettu — tallennetaan laitteelle</string>
+    <string name="key_backup_saved">Avaimet varmuuskopioitu turvallisesti</string>
     <string name="key_verification_final_title">Avaimen varmennus valmis</string>
     <string name="key_verification_request_title">Avaimen varmennuspyyntö</string>
     <string name="key_verification_title">Avaimen varmennus</string>
@@ -918,18 +929,43 @@
     <string name="match_any">Täsmää yhteen | kaikkiin</string>
     <string name="max">Kaikki</string>
     <!-- MESH -->
+    <string name="mesh_beacon">Verkkokutsu</string>
+    <string name="mesh_beacon_broadcast">Lähetä verkkokutsu</string>
+    <string name="mesh_beacon_broadcast_summary">Lähetä tämän verkon kutsua säännöllisesti lähellä oleville radioille</string>
+    <string name="mesh_beacon_channels_title">Verkkokutsun kanavat</string>
+    <string name="mesh_beacon_interval">Lähetysväli (sekuntia)</string>
+    <string name="mesh_beacon_interval_error">Vähintään %1$d sekuntia</string>
     <string name="mesh_beacon_invitations_title">Mesh-verkon kutsut</string>
+    <string name="mesh_beacon_listen">Kuuntele verkkokutsuja</string>
+    <string name="mesh_beacon_listen_summary">Vastaanota lähellä olevien mesh-verkkojen lähettämiä verkkokutsuja</string>
+    <string name="mesh_beacon_message">Verkkokutsuviesti</string>
+    <string name="mesh_beacon_message_error">Enintään %1$d tavua</string>
     <string name="mesh_beacon_notification_body">Lähellä oleva mesh-verkko kutsuu sinut liittymään</string>
     <string name="mesh_beacon_notification_title">Mesh-verkon kutsu</string>
+    <string name="mesh_beacon_offer_add">Lisää kanava</string>
     <string name="mesh_beacon_offer_channel">Kanava: %1$s</string>
+    <string name="mesh_beacon_offer_channel_key">Tarjottu kanava-avain (Base64)</string>
+    <string name="mesh_beacon_offer_channel_name">Tarjottu kanavan nimi</string>
     <string name="mesh_beacon_offer_discover">Haku</string>
     <string name="mesh_beacon_offer_dismiss">Hylkää</string>
     <string name="mesh_beacon_offer_from_unknown">Tuntemattomasta radiosta</string>
     <string name="mesh_beacon_offer_join">Liity</string>
     <string name="mesh_beacon_offer_preset">Esiasetus: %1$s</string>
+    <string name="mesh_beacon_offer_preset_setting">Tarjottu esiasetus</string>
     <string name="mesh_beacon_offer_region">Alue: %1$s</string>
+    <string name="mesh_beacon_offer_region_setting">Tarjottu alue</string>
+    <string name="mesh_beacon_offer_signal">Signaali: %1$s / %2$s</string>
     <string name="mesh_beacon_offer_title">Mesh-verkon kutsu</string>
+    <string name="mesh_beacon_on_preset">Lähetä esiasetus</string>
+    <string name="mesh_beacon_on_region">Lähetä alue</string>
+    <string name="mesh_beacon_preset_indicator">Lähellä olevan verkkokutsun ilmoittama</string>
     <string name="mesh_beacon_preset_none">ei mitään</string>
+    <string name="mesh_beacon_send_as_node">Lähetä radion numerolla (0 = tämä radio)</string>
+    <string name="mesh_beacon_target">Kohde %1$d</string>
+    <string name="mesh_beacon_target_add">Lisää kohde</string>
+    <string name="mesh_beacon_target_channel_index">Kanavan hakemisto</string>
+    <string name="mesh_beacon_target_remove">Poista kohde</string>
+    <string name="mesh_beacon_targets">Lähetyksen kohteet</string>
     <string name="mesh_map_location">Meshtastic kartan sijainti</string>
     <string name="mesh_map_location_description">Ottaa käyttöön puhelimen sijainnin sinisenä pisteenä meshtastic kartalla.</string>
     <!-- MESHTASTIC -->
@@ -955,6 +991,7 @@
     <string name="message_status_sfpp_confirmed">Vahvistettu SF++-ketjussa</string>
     <string name="message_status_sfpp_routing">Reititetään SF++ ketjun kautta…</string>
     <string name="message_status_unknown">Tuntematon</string>
+    <string name="message_translated_label">Käännetyt</string>
     <string name="messages">Viestit</string>
     <string name="micrograms_per_cubic_meter">µg/m³</string>
     <string name="min">Minimi</string>
@@ -1293,6 +1330,8 @@
     <string name="resend">Lähetä uudestaan</string>
     <string name="reset">Palauta</string>
     <string name="reset_to_defaults">Palauta oletusasetukset</string>
+    <string name="restore_keys">Palauta avaimet</string>
+    <string name="restore_keys_confirmation">Palauttaa tähän radioon varmuuskopioidut julkiset ja yksityiset avaimet.</string>
     <string name="retry">Yritä uudelleen</string>
     <string name="ringtone">Soittoääni</string>
     <string name="ringtone_file_empty">Tiedosto on tyhjä</string>
@@ -1424,8 +1463,10 @@
     <string name="show_all_key_title">Salausavainten merkitykset</string>
     <string name="show_iaq_legend">Näytä ilmanlaadun selite</string>
     <string name="show_layer">Näytä taso</string>
+    <string name="show_original">Näytä alkuperäinen</string>
     <string name="show_password">Näytä salasana</string>
     <string name="show_precision_circle">Näytä tarkkuuspiirit</string>
+    <string name="show_translation">Näytä käännös</string>
     <string name="show_waypoints">Näytä reittipisteet</string>
     <string name="shutdown">Sammuta</string>
     <string name="shutdown_node_name">Laite: %1$s</string>
@@ -1555,7 +1596,14 @@
     <string name="traffic_management_rate_limit_window">Lähetysrajoituksen aikajakso (sekunteina)</string>
     <string name="traffic_management_router_preserve_hops">Säilytä välittäjien hypyt</string>
     <string name="traffic_management_unknown_packet_threshold">Tuntemattomien pakettien kynnysarvo</string>
+    <string name="translate">Käännä</string>
     <!-- TRANSLATION -->
+    <string name="translation_download_message">Viestien kääntäminen edellyttää kielimallin kertalatausta (noin %1$d Mt).</string>
+    <string name="translation_download_title">Ladataanko käännösmalli?</string>
+    <string name="translation_downloading">Ladataan käännösmallia…</string>
+    <string name="translation_failed">Viestin kääntäminen epäonnistui</string>
+    <string name="translation_model_download_failed">Käännösmallin lataus epäonnistui</string>
+    <string name="translation_not_required">Viesti on jo omalla kielelläsi</string>
     <string name="transmit_over_lora">Lähetä LoRa:n kautta</string>
     <!-- TRANSPORT -->
     <string name="transport">Kuljetus</string>
