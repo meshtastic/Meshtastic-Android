@@ -3,7 +3,7 @@ title: コネクション
 parent: User Guide
 nav_order: 2
 last_updated: 2026-06-25
-description: Connect your phone or desktop to a Meshtastic radio via Bluetooth, USB, or TCP/IP.
+description: スマートフォンやデスクトップを、Bluetooth・USB・TCP/IP で Meshtastic 無線機に接続します。
 aliases:
   - bluetooth
   - usb
@@ -13,108 +13,108 @@ aliases:
 
 # コネクション
 
-Meshtastic supports multiple transport methods to communicate between your phone/desktop and a radio node.
+Meshtastic は、スマートフォン／デスクトップと無線機ノード間の通信に複数の接続方式をサポートしています。
 
-## Bluetooth (BLE)
+## Bluetooth（BLE）
 
-Bluetooth Low Energy is the default and most common connection method on Android.
+Bluetooth Low Energy は、Android で標準的かつ最も一般的な接続方法です。
 
-### Pairing a Device
+### デバイスをペアリングする
 
-1. Ensure your Meshtastic radio is powered on and in pairing mode.
-2. Open the app and navigate to the **Connect** tab.
-3. Tap **Scan for Devices** — nearby Meshtastic radios will appear.
-4. Select your device from the list.
-5. Accept the Bluetooth pairing prompt if shown.
+1. Meshtastic 無線機の電源が入っていて、ペアリングモードになっていることを確認します。
+2. アプリを開き、「**接続**」タブに移動します。
+3. 「**デバイスをスキャン**」をタップすると、近くの Meshtastic 無線機が表示されます。
+4. リストからデバイスを選択します。
+5. Bluetooth のペアリング確認が表示されたら承認します。
 
-![Scanning for Bluetooth devices, with a discovered radio in the list](../../assets/screenshots/connections_bluetooth_scan.png)
+![Bluetooth デバイスをスキャンし、見つかった無線機がリストに表示されている様子](../../assets/screenshots/connections_bluetooth_scan.png)
 
-You can filter devices by transport type using the filter chips at the top:
+上部のフィルターチップを使って、接続方式ごとにデバイスを絞り込めます：
 
-![Transport filter chips](../../assets/screenshots/connections_transport_filters.png)
+![接続方式のフィルターチップ](../../assets/screenshots/connections_transport_filters.png)
 
-> 💡 **Tip:** If your device doesn't appear, check that Bluetooth and Location permissions are granted, and that the radio is not already connected to another device.
+> 💡 **ヒント：** デバイスが表示されない場合は、Bluetooth と位置情報の権限が許可されているか、また無線機が別のデバイスにすでに接続されていないかを確認してください。
 
-### Connection Status
+### 接続ステータス
 
-| Icon | State          | 説明                            |
-| ---- | -------------- | ----------------------------- |
-| 🟢   | 接続済            | Active radio link established |
-| 🟡   | 接続中            | Handshake in progress         |
-| 🔴   | 切断             | No active connection          |
-| ⚪    | Not configured | デバイスが選択されていません                |
+| アイコン | 状態  | 説明             |
+| ---- | --- | -------------- |
+| 🟢   | 接続済 | 無線リンクが確立しています  |
+| 🟡   | 接続中 | ハンドシェイク中       |
+| 🔴   | 切断  | 接続がありません       |
+| ⚪    | 未設定 | デバイスが選択されていません |
 
-When connecting, a status indicator shows the current connection state:
+接続時には、ステータスインジケーターが現在の接続状態を表示します：
 
-![Connecting status](../../assets/screenshots/connections_connecting.png)
+![接続中のステータス](../../assets/screenshots/connections_connecting.png)
 
-If no devices are found, the app shows an empty state with instructions:
+デバイスが見つからない場合、アプリは操作手順とともに空の状態を表示します：
 
-![No devices found](../../assets/screenshots/connections_empty_state.png)
+![デバイスが見つからない状態](../../assets/screenshots/connections_empty_state.png)
 
-### Troubleshooting Bluetooth
+### Bluetooth のトラブルシューティング
 
-- **Device not found:** Toggle Bluetooth off/on, ensure location is enabled.
-- **Connection drops:** Move closer to the radio; check for interference.
-- **Pairing rejected:** Forget the device in Android Bluetooth settings and retry.
+- **デバイスが見つからない：** Bluetooth をオフ／オンし、位置情報が有効になっていることを確認します。
+- **接続が切れる：** 無線機に近づき、電波干渉がないか確認します。
+- **ペアリングが拒否される：** Android の Bluetooth 設定でデバイスの登録を解除し、やり直します。
 
-## USB Serial
+## USB シリアル
 
-USB connections provide a wired alternative, useful for desktop or when Bluetooth is unavailable.
+USB 接続は有線での代替手段で、デスクトップや Bluetooth が使えない場合に便利です。
 
-### Setup
+### セットアップ
 
-1. Connect your radio via USB cable to your device.
-2. The app will prompt for USB permission — tap **Allow**.
-3. The connection is established automatically.
+1. USB ケーブルで無線機をデバイスに接続します。
+2. アプリが USB の使用許可を求めるので、「**許可**」をタップします。
+3. 接続が自動的に確立されます。
 
-> ⚠️ **Note:** USB connections require OTG support on Android devices.
+> ⚠️ **注意：** USB 接続には、Android デバイスの OTG 対応が必要です。
 
-## TCP/IP (Network)
+## TCP/IP（ネットワーク）
 
-Some Meshtastic radios support WiFi/Ethernet connectivity, allowing TCP-based connections over your local network. Get the radio onto your network first — using the radio's own WiFi settings (via the firmware web interface or another connection) — then connect to it from the app.
+一部の Meshtastic 無線機は WiFi／Ethernet 接続に対応しており、ローカルネットワーク経由の TCP 接続が可能です。 まず、無線機自身の WiFi 設定（ファームウェアのウェブインターフェースや別の接続方法を使用）で無線機をネットワークに接続し、その後アプリから接続します。
 
-### Connecting over the Network
+### ネットワーク経由で接続する
 
-1. Make sure the radio is on the same local network as your phone/desktop.
-2. On the Connect screen, select the **Network** transport filter.
-3. Choose the radio one of two ways:
-   - **Scan Network Devices** — toggle this on to auto-discover radios that advertise themselves on the local network (mDNS / `_meshtastic._tcp`). Discovered devices appear in the list; tap one to connect.
-   - **Add Network Device Manually** — enter the radio's IP address (or hostname) and port (default: `4403`).
-4. Previously-used network addresses are remembered under **Recent Network Devices** for quick reconnection (long-press to remove one).
+1. 無線機がスマートフォン／デスクトップと同じローカルネットワーク上にあることを確認します。
+2. 接続画面で、「**ネットワーク**」の接続方式フィルターを選択します。
+3. 無線機は次の 2 通りの方法で選べます：
+   - **ネットワークデバイスをスキャン：** これをオンにすると、ローカルネットワーク上で自身を告知している無線機（mDNS ／ `_meshtastic._tcp`）を自動的に探索します。 見つかったデバイスがリストに表示されるので、タップして接続します。
+   - **ネットワークデバイスを手動で追加：** 無線機の IP アドレス（またはホスト名）とポート（既定：`4403`）を入力します。
+4. 以前使用したネットワークアドレスは「**最近のネットワークデバイス**」に記憶され、すばやく再接続できます（長押しで削除できます）。
 
-> 💡 **Tip:** Network discovery uses mDNS, which only works when both devices are on the same subnet. On Android 17+ the app needs the local-network permission for scanning; if discovery finds nothing, add the device manually by IP.
+> 💡 **ヒント：** ネットワーク探索は mDNS を使用するため、両方のデバイスが同じサブネット上にある場合にのみ機能します。 Android 17 以降では、スキャンにローカルネットワークの権限が必要です。探索で何も見つからない場合は、IP アドレスでデバイスを手動追加してください。
 
-### When to Use TCP
+### TCP を使う場面
 
-- Radio is on the same local network
-- Testing with a simulated radio
-- Environments where Bluetooth has interference issues
+- 無線機が同じローカルネットワーク上にある
+- シミュレートされた無線機でテストする
+- Bluetooth の電波干渉が問題になる環境
 
-## Reconnection Behavior
+## 再接続の動作
 
-The app reconnects to the **last selected device** on startup. You can switch transports from the Connect screen at any time.
+アプリは起動時に「**最後に選択したデバイス**」へ再接続します。 接続方式は、接続画面からいつでも切り替えられます。
 
-To disconnect, tap the disconnect button on the Connect screen:
+切断するには、接続画面の切断ボタンをタップします：
 
-![Disconnect from radio](../../assets/screenshots/connections_disconnect.png)
+![無線機から切断](../../assets/screenshots/connections_disconnect.png)
 
-## Desktop Connections
+## デスクトップでの接続
 
-On Desktop (Linux/macOS/Windows), the app supports:
+デスクトップ（Linux／macOS／Windows）では、アプリは次の接続方式に対応しています：
 
-- **Bluetooth (BLE)** — via the Kable library; works on macOS, Linux, and Windows
-- **USB Serial** — primary wired connection method
-- **TCP/IP** — for network-connected radios
+- **Bluetooth（BLE）：** Kable ライブラリを使用。macOS、Linux、Windows で動作します
+- **USB シリアル：** 主要な有線接続方法
+- **TCP/IP：** ネットワーク接続された無線機向け
 
-See [Desktop App](desktop) for platform-specific details and keyboard shortcuts.
+プラットフォームごとの詳細やキーボードショートカットについては、[デスクトップアプリ](desktop) を参照してください。
 
-## Related Topics
+## 関連トピック
 
-- [Getting Started](onboarding) — first-launch setup and permissions
-- [Settings — Radio & User](settings-radio-user) — Bluetooth and network configuration
-- [Desktop App](desktop) — desktop-specific connection details
-- [Supported devices](https://meshtastic.org/docs/hardware/devices) — full list of compatible radios on meshtastic.org
+- [はじめに](onboarding)：初回起動時のセットアップと権限
+- [設定：無線機とユーザー](settings-radio-user)：Bluetooth とネットワークの設定
+- [デスクトップアプリ](desktop)：デスクトップ固有の接続に関する詳細
+- [対応デバイス](https://meshtastic.org/docs/hardware/devices)：meshtastic.org にある互換無線機の一覧
 
 ---
 
