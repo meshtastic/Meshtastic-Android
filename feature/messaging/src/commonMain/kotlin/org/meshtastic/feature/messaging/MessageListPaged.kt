@@ -63,6 +63,8 @@ import org.meshtastic.feature.messaging.component.MessageStatusDialog
 import org.meshtastic.feature.messaging.component.ReactionDialog
 import org.meshtastic.feature.messaging.component.UnreadMessagesDivider
 
+private const val HEX_RADIX = 16
+
 internal data class MessageListHandlers(
     val onUnreadChanged: (Long, Long) -> Unit,
     val onSendReaction: (String, Int) -> Unit,
@@ -297,7 +299,7 @@ private fun MessageListPagedContent(
     }
 }
 
-@Suppress("LongParameterList")
+@Suppress("LongParameterList", "LongMethod")
 @Composable
 private fun RenderPagedChatMessageRow(
     message: Message,
@@ -323,6 +325,10 @@ private fun RenderPagedChatMessageRow(
         }
     val node = nodeMap[message.node.num] ?: message.node
 
+    // Resolve an @mention token ("!<hex>" = numeric node id) back to its node for live name + tap-to-open.
+    val resolveMention: (String) -> Node? =
+        remember(nodeMap) { { id -> id.removePrefix("!").toLongOrNull(HEX_RADIX)?.toInt()?.let { nodeMap[it] } } }
+
     MessageItem(
         modifier = modifier,
         node = node,
@@ -340,6 +346,7 @@ private fun RenderPagedChatMessageRow(
         onSelect = { state.selectedIds.toggle(message.uuid) },
         onDelete = { handlers.onDeleteMessages(listOf(message.uuid)) },
         onClickChip = handlers.onClickChip,
+        resolveMention = resolveMention,
         onStatusClick = { onShowStatusDialog(message) },
         onReply = { handlers.onReply(message) },
         emojis = message.emojis,

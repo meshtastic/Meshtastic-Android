@@ -5,7 +5,7 @@
     <ID>ComposableParamOrder:MessageActions.kt:@Composable internal fun MessageActions</ID>
     <ID>ComposableParamOrder:MessageItem.kt:@OptIn(ExperimentalMaterial3Api::class) @Suppress("LongMethod", "CyclomaticComplexMethod") @Composable fun MessageItem</ID>
     <ID>ComposableParamOrder:MessageListPaged.kt:@Suppress("LongMethod", "CyclomaticComplexMethod") @Composable private fun MessageListPagedContent</ID>
-    <ID>ComposableParamOrder:MessageListPaged.kt:@Suppress("LongParameterList") @Composable private fun RenderPagedChatMessageRow</ID>
+    <ID>ComposableParamOrder:MessageListPaged.kt:@Suppress("LongParameterList", "LongMethod") @Composable private fun RenderPagedChatMessageRow</ID>
     <ID>ComposableParamOrder:MessageScreenComponents.kt:@Composable fun QuickChatRow</ID>
     <ID>ComposableParamOrder:QuickChat.kt:@Composable fun QuickChatScreen</ID>
     <ID>ComposableParamOrder:QuickChat.kt:@Composable private fun OutlinedTextFieldWithCounter</ID>

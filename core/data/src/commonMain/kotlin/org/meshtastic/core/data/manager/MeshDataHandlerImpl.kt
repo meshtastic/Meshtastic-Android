@@ -38,6 +38,7 @@ import org.meshtastic.core.model.destination
 import org.meshtastic.core.model.isBroadcast
 import org.meshtastic.core.model.isFromLocal
 import org.meshtastic.core.model.source
+import org.meshtastic.core.model.textMentionsNode
 import org.meshtastic.core.model.util.MeshDataMapper
 import org.meshtastic.core.model.util.decodeOrNull
 import org.meshtastic.core.model.util.toOneLiner
@@ -414,7 +415,11 @@ class MeshDataHandlerImpl(
     ) {
         val conversationMuted = packetRepository.value.getContactSettings(contactKey).isMuted
         val nodeMuted = nodeManager.getNodeById(dataPacket.from.orEmpty())?.isMuted == true
-        val isSilent = conversationMuted || nodeMuted
+        // A mention of our own id is a targeted ping, so it should still notify even in a muted channel/contact.
+        val mentionsMe =
+            dataPacket.dataType == PortNum.TEXT_MESSAGE_APP.value &&
+                textMentionsNode(dataPacket.text, nodeManager.getMyId())
+        val isSilent = (conversationMuted || nodeMuted) && !mentionsMe
         if (dataPacket.dataType == PortNum.ALERT_APP.value && !isSilent) {
             scope.launch {
                 notificationManager.dispatch(
