@@ -155,6 +155,11 @@ class FakeNodeRepository :
         _nodeDBbyNum.value = _nodeDBbyNum.value + (num to node.copy(notes = notes))
     }
 
+    override suspend fun setPowerChannelLabels(num: Int, labels: List<String>) {
+        val node = _nodeDBbyNum.value[num] ?: return
+        _nodeDBbyNum.value = _nodeDBbyNum.value + (num to node.copy(powerChannelLabels = labels))
+    }
+
     override suspend fun upsert(node: Node) {
         _nodeDBbyNum.value = _nodeDBbyNum.value + (node.num to node)
     }

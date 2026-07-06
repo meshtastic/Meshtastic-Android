@@ -66,6 +66,10 @@ class SwitchingNodeInfoWriteDataSource(
         withContext(dispatchers.io) { dbManager.withDb { it.nodeInfoDao().setNodeNotes(num, notes) } }
     }
 
+    override suspend fun setPowerChannelLabels(num: Int, labels: List<String>) {
+        withContext(dispatchers.io) { dbManager.withDb { it.nodeInfoDao().setPowerChannelLabels(num, labels) } }
+    }
+
     override suspend fun backfillDenormalizedNames() {
         withContext(dispatchers.io) { dbManager.withDb { it.nodeInfoDao().backfillDenormalizedNames() } }
     }

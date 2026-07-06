@@ -233,7 +233,9 @@ fun EnvironmentMetricsChart(
                 },
             )
 
-        val pressureRangeProvider = remember { CartesianLayerRangeProvider.fixed(minY = 700.0, maxY = 1200.0) }
+        // Fixed sea-level-relative domain (design#53) so small real pressure changes are visually
+        // comparable across sessions/nodes instead of being swamped by a 700-1200 hPa altitude range.
+        val pressureRangeProvider = remember { CartesianLayerRangeProvider.fixed(minY = 950.0, maxY = 1050.0) }
         val layers = mutableListOf<LineCartesianLayer>()
         if (showPressure && pressureData.isNotEmpty()) {
             layers.add(
@@ -244,7 +246,7 @@ fun EnvironmentMetricsChart(
                     ),
                     verticalAxisPosition = Axis.Position.Vertical.Start,
                     // Fixed range per Oscar's UX guidance: barometric pressure should NOT autoscale,
-                    // otherwise trends (storms) are invisible. 700-1200 hPa covers sea-level to altitude.
+                    // otherwise trends (storms) are invisible.
                     rangeProvider = pressureRangeProvider,
                 ),
             )

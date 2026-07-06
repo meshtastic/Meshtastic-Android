@@ -154,6 +154,14 @@ interface NodeRepository {
     suspend fun setNodeNotes(num: Int, notes: String)
 
     /**
+     * Updates the user-editable power-channel labels for a node (e.g. "Solar", "Battery"), indexed by channel - 1.
+     *
+     * @param num The node number.
+     * @param labels The labels to persist.
+     */
+    suspend fun setPowerChannelLabels(num: Int, labels: List<String>)
+
+    /**
      * Upserts a [Node] into the persistent database.
      *
      * @param node The [Node] model to save.

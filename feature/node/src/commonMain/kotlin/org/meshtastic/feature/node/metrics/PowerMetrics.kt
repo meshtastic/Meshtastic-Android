@@ -30,8 +30,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -42,7 +47,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
@@ -68,7 +75,10 @@ import org.meshtastic.core.resources.channel_7
 import org.meshtastic.core.resources.channel_8
 import org.meshtastic.core.resources.current
 import org.meshtastic.core.resources.power_metrics_log
+import org.meshtastic.core.resources.save
 import org.meshtastic.core.resources.voltage
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Save
 import org.meshtastic.core.ui.theme.GraphColors.Gold
 import org.meshtastic.core.ui.theme.GraphColors.InfantryBlue
 import org.meshtastic.core.ui.util.rememberSaveFileLauncher
@@ -113,6 +123,7 @@ fun PowerMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
             }
         }
     var selectedChannel by rememberSaveable { mutableStateOf(PowerChannel.ONE) }
+    val channelLabels = state.node?.powerChannelLabels.orEmpty()
 
     BaseMetricScreen(
         onNavigateUp = onNavigateUp,
@@ -138,12 +149,23 @@ fun PowerMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     availableChannels.forEach { channel ->
+                        val customLabel = channelLabels.getOrNull(channel.ordinal).orEmpty()
                         FilterChip(
                             selected = selectedChannel == channel,
                             onClick = { selectedChannel = channel },
-                            label = { Text(stringResource(channel.strRes)) },
+                            label = { Text(customLabel.ifBlank { stringResource(channel.strRes) }) },
                         )
                     }
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                val nodeNum = state.node?.num
+                if (nodeNum != null) {
+                    PowerChannelLabelEditor(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        currentLabel = channelLabels.getOrNull(selectedChannel.ordinal).orEmpty(),
+                        placeholder = stringResource(selectedChannel.strRes),
+                        onSave = { label -> viewModel.setPowerChannelLabel(nodeNum, selectedChannel.ordinal, label) },
+                    )
                 }
             }
         },
@@ -166,12 +188,44 @@ fun PowerMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
                 ) { _, telemetry ->
                     PowerMetricsCard(
                         telemetry = telemetry,
+                        channelLabels = channelLabels,
                         isSelected = telemetry.time.toDouble() == selectedX,
                         onClick = { onCardClick(telemetry.time.toDouble()) },
                     )
                 }
             }
         },
+    )
+}
+
+/** Lets the user assign a role/name (e.g. "Solar", "Battery") to the currently selected power channel. */
+@Composable
+private fun PowerChannelLabelEditor(
+    currentLabel: String,
+    placeholder: String,
+    onSave: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var label by remember(currentLabel) { mutableStateOf(currentLabel) }
+    val edited = label.trim() != currentLabel.trim()
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val save: () -> Unit = {
+        onSave(label.trim())
+        keyboardController?.hide()
+    }
+    OutlinedTextField(
+        value = label,
+        onValueChange = { label = it },
+        modifier = modifier.fillMaxWidth(),
+        placeholder = { Text(placeholder) },
+        singleLine = true,
+        trailingIcon = {
+            IconButton(onClick = save, enabled = edited) {
+                Icon(imageVector = MeshtasticIcons.Save, contentDescription = stringResource(Res.string.save))
+            }
+        },
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+        keyboardActions = KeyboardActions(onDone = { save() }),
     )
 }
 
@@ -284,7 +338,12 @@ private fun PowerMetricsChart(
 
 @Composable
 @Suppress("CyclomaticComplexMethod", "LongMethod")
-private fun PowerMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick: () -> Unit) {
+private fun PowerMetricsCard(
+    telemetry: Telemetry,
+    channelLabels: List<String>,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+) {
     val time = telemetry.time.toLong() * MS_PER_SEC
     SelectableMetricCard(isSelected = isSelected, onClick = onClick) {
         Row(modifier = Modifier.fillMaxWidth()) {
@@ -302,8 +361,8 @@ private fun PowerMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick:
 
                 val pm = telemetry.power_metrics
                 if (pm != null) {
-                    PowerChannelsRow1(pm)
-                    PowerChannelsExtraRows(pm)
+                    PowerChannelsRow1(pm, channelLabels)
+                    PowerChannelsExtraRows(pm, channelLabels)
                 }
             }
         }
@@ -311,23 +370,38 @@ private fun PowerMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick:
 }
 
 @Composable
-private fun PowerChannelsRow1(pm: org.meshtastic.proto.PowerMetrics) {
+private fun PowerChannelsRow1(pm: org.meshtastic.proto.PowerMetrics, channelLabels: List<String>) {
     Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
         if (pm.ch1_current != null || pm.ch1_voltage != null) {
-            PowerChannelColumn(Res.string.channel_1, pm.ch1_voltage ?: 0f, pm.ch1_current ?: 0f)
+            PowerChannelColumn(
+                Res.string.channel_1,
+                channelLabels.getOrNull(PowerChannel.ONE.ordinal),
+                pm.ch1_voltage ?: 0f,
+                pm.ch1_current ?: 0f,
+            )
         }
         if (pm.ch2_current != null || pm.ch2_voltage != null) {
-            PowerChannelColumn(Res.string.channel_2, pm.ch2_voltage ?: 0f, pm.ch2_current ?: 0f)
+            PowerChannelColumn(
+                Res.string.channel_2,
+                channelLabels.getOrNull(PowerChannel.TWO.ordinal),
+                pm.ch2_voltage ?: 0f,
+                pm.ch2_current ?: 0f,
+            )
         }
         if (pm.ch3_current != null || pm.ch3_voltage != null) {
-            PowerChannelColumn(Res.string.channel_3, pm.ch3_voltage ?: 0f, pm.ch3_current ?: 0f)
+            PowerChannelColumn(
+                Res.string.channel_3,
+                channelLabels.getOrNull(PowerChannel.THREE.ordinal),
+                pm.ch3_voltage ?: 0f,
+                pm.ch3_current ?: 0f,
+            )
         }
     }
 }
 
 @Composable
 @Suppress("CyclomaticComplexMethod")
-private fun PowerChannelsExtraRows(pm: org.meshtastic.proto.PowerMetrics) {
+private fun PowerChannelsExtraRows(pm: org.meshtastic.proto.PowerMetrics, channelLabels: List<String>) {
     val hasCh456 =
         hasChannelData(pm.ch4_voltage, pm.ch4_current) ||
             hasChannelData(pm.ch5_voltage, pm.ch5_current) ||
@@ -338,13 +412,28 @@ private fun PowerChannelsExtraRows(pm: org.meshtastic.proto.PowerMetrics) {
         Spacer(modifier = Modifier.height(4.dp))
         Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
             if (hasChannelData(pm.ch4_voltage, pm.ch4_current)) {
-                PowerChannelColumn(Res.string.channel_4, pm.ch4_voltage ?: 0f, pm.ch4_current ?: 0f)
+                PowerChannelColumn(
+                    Res.string.channel_4,
+                    channelLabels.getOrNull(PowerChannel.FOUR.ordinal),
+                    pm.ch4_voltage ?: 0f,
+                    pm.ch4_current ?: 0f,
+                )
             }
             if (hasChannelData(pm.ch5_voltage, pm.ch5_current)) {
-                PowerChannelColumn(Res.string.channel_5, pm.ch5_voltage ?: 0f, pm.ch5_current ?: 0f)
+                PowerChannelColumn(
+                    Res.string.channel_5,
+                    channelLabels.getOrNull(PowerChannel.FIVE.ordinal),
+                    pm.ch5_voltage ?: 0f,
+                    pm.ch5_current ?: 0f,
+                )
             }
             if (hasChannelData(pm.ch6_voltage, pm.ch6_current)) {
-                PowerChannelColumn(Res.string.channel_6, pm.ch6_voltage ?: 0f, pm.ch6_current ?: 0f)
+                PowerChannelColumn(
+                    Res.string.channel_6,
+                    channelLabels.getOrNull(PowerChannel.SIX.ordinal),
+                    pm.ch6_voltage ?: 0f,
+                    pm.ch6_current ?: 0f,
+                )
             }
         }
     }
@@ -352,10 +441,20 @@ private fun PowerChannelsExtraRows(pm: org.meshtastic.proto.PowerMetrics) {
         Spacer(modifier = Modifier.height(4.dp))
         Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
             if (hasChannelData(pm.ch7_voltage, pm.ch7_current)) {
-                PowerChannelColumn(Res.string.channel_7, pm.ch7_voltage ?: 0f, pm.ch7_current ?: 0f)
+                PowerChannelColumn(
+                    Res.string.channel_7,
+                    channelLabels.getOrNull(PowerChannel.SEVEN.ordinal),
+                    pm.ch7_voltage ?: 0f,
+                    pm.ch7_current ?: 0f,
+                )
             }
             if (hasChannelData(pm.ch8_voltage, pm.ch8_current)) {
-                PowerChannelColumn(Res.string.channel_8, pm.ch8_voltage ?: 0f, pm.ch8_current ?: 0f)
+                PowerChannelColumn(
+                    Res.string.channel_8,
+                    channelLabels.getOrNull(PowerChannel.EIGHT.ordinal),
+                    pm.ch8_voltage ?: 0f,
+                    pm.ch8_current ?: 0f,
+                )
             }
         }
     }
@@ -364,9 +463,13 @@ private fun PowerChannelsExtraRows(pm: org.meshtastic.proto.PowerMetrics) {
 private fun hasChannelData(voltage: Float?, current: Float?): Boolean = voltage != null || current != null
 
 @Composable
-private fun PowerChannelColumn(titleRes: StringResource, voltage: Float, current: Float) {
+private fun PowerChannelColumn(titleRes: StringResource, customLabel: String?, voltage: Float, current: Float) {
     Column {
-        Text(text = stringResource(titleRes), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+        Text(
+            text = customLabel?.takeIf { it.isNotBlank() } ?: stringResource(titleRes),
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.Bold,
+        )
         MetricValueRow(color = PowerMetric.VOLTAGE.color, text = MetricFormatter.voltage(voltage))
         MetricValueRow(color = PowerMetric.CURRENT.color, text = MetricFormatter.current(current))
     }

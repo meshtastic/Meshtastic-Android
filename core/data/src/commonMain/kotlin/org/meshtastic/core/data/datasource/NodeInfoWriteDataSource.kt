@@ -39,5 +39,7 @@ interface NodeInfoWriteDataSource {
 
     suspend fun setNodeNotes(num: Int, notes: String)
 
+    suspend fun setPowerChannelLabels(num: Int, labels: List<String>)
+
     suspend fun backfillDenormalizedNames()
 }

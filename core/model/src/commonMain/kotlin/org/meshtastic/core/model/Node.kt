@@ -63,6 +63,8 @@ data class Node(
     val paxcounter: Paxcount = Paxcount(),
     val publicKey: ByteString? = null,
     val notes: String = "",
+    /** User-editable labels per power-metrics channel (e.g. "Solar", "Battery"), indexed by channel - 1. */
+    val powerChannelLabels: List<String> = emptyList(),
     val manuallyVerified: Boolean = false,
     /** True when this node signs its broadcasts via XEdDSA (NodeInfo.has_xeddsa_signed). Automatic trust. */
     val signsPackets: Boolean = false,

@@ -144,6 +144,7 @@ interface NodeInfoDao {
     @Suppress("CyclomaticComplexMethod", "MagicNumber")
     private fun handleExistingNodeUpsertValidation(existingNode: NodeEntity, incomingNode: NodeEntity): NodeEntity {
         val resolvedNotes = incomingNode.notes.ifBlank { existingNode.notes }
+        val resolvedPowerChannelLabels = incomingNode.powerChannelLabels.ifEmpty { existingNode.powerChannelLabels }
 
         val isPlaceholder = incomingNode.user.hw_model == HardwareModel.UNSET
         val hasExistingUser = existingNode.user.hw_model != HardwareModel.UNSET
@@ -157,6 +158,7 @@ interface NodeInfoDao {
                 shortName = existingNode.shortName,
                 manuallyVerified = existingNode.manuallyVerified,
                 notes = resolvedNotes,
+                powerChannelLabels = resolvedPowerChannelLabels,
             )
         }
 
@@ -166,6 +168,7 @@ interface NodeInfoDao {
             user = incomingNode.user.copy(public_key = resolvedKey ?: ByteString.EMPTY),
             publicKey = resolvedKey,
             notes = resolvedNotes,
+            powerChannelLabels = resolvedPowerChannelLabels,
         )
     }
 
@@ -312,6 +315,9 @@ interface NodeInfoDao {
 
     @Query("UPDATE nodes SET notes = :notes WHERE num = :num")
     suspend fun setNodeNotes(num: Int, notes: String)
+
+    @Query("UPDATE nodes SET power_channel_labels = :labels WHERE num = :num")
+    suspend fun setPowerChannelLabels(num: Int, labels: List<String>)
 
     /**
      * Batch version of [getVerifiedNodeForUpsert]. Pre-fetches all existing nodes and public-key conflicts in two

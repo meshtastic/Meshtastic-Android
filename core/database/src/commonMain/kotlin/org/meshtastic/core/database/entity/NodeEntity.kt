@@ -63,6 +63,7 @@ data class NodeWithRelations(
         paxcounter = node.paxcounter,
         publicKey = node.publicKey ?: node.user.public_key,
         notes = node.notes,
+        powerChannelLabels = node.powerChannelLabels,
         nodeStatus = node.nodeStatus,
         lastTransport = node.lastTransport,
         metadata = metadata?.proto,
@@ -91,6 +92,7 @@ data class NodeWithRelations(
             paxcounter = paxcounter,
             publicKey = publicKey ?: user.public_key,
             notes = notes,
+            powerChannelLabels = powerChannelLabels,
             manuallyVerified = manuallyVerified,
             nodeStatus = nodeStatus,
             lastTransport = lastTransport,
@@ -146,6 +148,7 @@ data class NodeEntity(
     @ColumnInfo(typeAffinity = ColumnInfo.BLOB) var paxcounter: Paxcount = Paxcount(),
     @ColumnInfo(name = "public_key") var publicKey: ByteString? = null,
     @ColumnInfo(name = "notes", defaultValue = "") var notes: String = "",
+    @ColumnInfo(name = "power_channel_labels", defaultValue = "[]") var powerChannelLabels: List<String> = emptyList(),
     @ColumnInfo(name = "manually_verified", defaultValue = "0")
     var manuallyVerified: Boolean = false, // ONLY set true when scanned/imported manually
     @ColumnInfo(name = "node_status") var nodeStatus: String? = null,
@@ -215,6 +218,7 @@ data class NodeEntity(
         paxcounter = paxcounter,
         publicKey = publicKey ?: user.public_key,
         notes = notes,
+        powerChannelLabels = powerChannelLabels,
         nodeStatus = nodeStatus,
         lastTransport = lastTransport,
         signsPackets = signsPackets,

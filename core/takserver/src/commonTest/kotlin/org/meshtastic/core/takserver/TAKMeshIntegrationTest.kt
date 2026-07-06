@@ -325,6 +325,8 @@ class TAKMeshIntegrationTest {
         override suspend fun installConfig(mi: MyNodeInfo, nodes: List<Node>) {}
 
         override suspend fun insertMetadata(nodeNum: Int, metadata: DeviceMetadata) {}
+
+        override suspend fun setPowerChannelLabels(num: Int, labels: List<String>) {}
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
