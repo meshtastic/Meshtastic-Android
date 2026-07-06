@@ -45,9 +45,6 @@ jobs:
         with:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
 
-      - name: Build Dokka HTML documentation
-        run: ./gradlew dokkaGeneratePublicationHtml --no-configuration-cache
-
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -58,18 +55,23 @@ jobs:
       - name: Generate Docs Site
         run: ./gradlew generateDocsBundle validateDocsBundle publishDocsSite -Pdocs.channel=root -Pci=true
 
-      - name: Compile Jekyll Docs Site
+      # Dokka (Gradle) and Jekyll (Ruby) are independent — Dokka's output is only
+      # copied in afterwards — so run them concurrently to overlap the two slowest
+      # steps (~10 min Dokka vs ~5 min Jekyll) instead of summing them (~16 -> ~11 min).
+      - name: Build Dokka + Jekyll concurrently
         run: |
+          set -euo pipefail
           BUNDLE_GEMFILE=docs/Gemfile bundle exec jekyll build \
             --source build/_site \
             --destination build/jekyll_site \
-            --baseurl /${{ github.event.repository.name }}
+            --baseurl /${{ github.event.repository.name }} &
+          jekyll_pid=$!
+          ./gradlew dokkaGeneratePublicationHtml --no-configuration-cache
+          wait "$jekyll_pid"
           touch build/jekyll_site/.nojekyll
 
       - name: Assemble Pages artifact
-        run: |
-          # Copy Dokka output into compiled jekyll_site/api/
-          cp -r build/dokka/html build/jekyll_site/api
+        run: cp -r build/dokka/html build/jekyll_site/api  # Dokka HTML -> /api
 
       - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v5
