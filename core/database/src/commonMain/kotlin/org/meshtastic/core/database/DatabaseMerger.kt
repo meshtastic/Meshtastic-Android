@@ -16,6 +16,8 @@
  */
 package org.meshtastic.core.database
 
+import androidx.room3.immediateTransaction
+import androidx.room3.useWriterConnection
 import co.touchlab.kermit.Logger
 
 /**
@@ -34,15 +36,25 @@ import co.touchlab.kermit.Logger
 object DatabaseMerger {
 
     suspend fun merge(source: MeshtasticDatabase, dest: MeshtasticDatabase) {
-        val packets = mergePackets(source, dest)
-        mergeReactions(source, dest)
-        mergeContactSettings(source, dest)
-        mergeNodes(source, dest)
-        mergeMetadata(source, dest)
-        // Logs must precede traceroute positions: the latter has a CASCADE foreign key onto log.uuid.
-        mergeLogs(source, dest)
-        mergeTraceroutePositions(source, dest)
-        mergeDiscovery(source, dest)
+        // All destination writes run in a single transaction so a crash or exception mid-merge rolls
+        // back cleanly instead of leaving `dest` half-merged. This also makes a retried merge safe: if
+        // associateNode re-runs (e.g. a crash before the address alias is persisted), the rolled-back
+        // partial writes never happened, so the fresh-id packet/discovery re-inserts can't duplicate.
+        // Reads from `source` use its own connection pool and don't participate in this transaction.
+        var packets = 0
+        dest.useWriterConnection { transactor ->
+            transactor.immediateTransaction {
+                packets = mergePackets(source, dest)
+                mergeReactions(source, dest)
+                mergeContactSettings(source, dest)
+                mergeNodes(source, dest)
+                mergeMetadata(source, dest)
+                // Logs must precede traceroute positions: the latter has a CASCADE foreign key onto log.uuid.
+                mergeLogs(source, dest)
+                mergeTraceroutePositions(source, dest)
+                mergeDiscovery(source, dest)
+            }
+        }
         Logger.i { "Merged $packets packets across transports into unified node DB" }
     }
 

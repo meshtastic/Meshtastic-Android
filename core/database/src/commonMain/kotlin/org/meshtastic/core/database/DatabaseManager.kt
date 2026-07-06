@@ -192,6 +192,7 @@ open class DatabaseManager(
         Logger.i { "Switched active DB to ${anonymizeDbName(dbName)} for address ${anonymizeAddress(address)}" }
     }
 
+    @Suppress("TooGenericExceptionCaught")
     override suspend fun associateNode(nodeNum: Int) {
         mutex.withLock {
             val sourceName = currentDbName
@@ -216,12 +217,29 @@ open class DatabaseManager(
                     // switch the active DB to it, alias this address to it, and retire the now-merged source.
                     val source = _currentDb.value ?: return@withLock
                     val dest = withContext(dispatchers.io) { getOrOpenDatabase(claimed) }
-                    withContext(dispatchers.io) { DatabaseMerger.merge(source, dest) }
 
-                    // Emit the canonical DB before retiring the source (same emit-before-close discipline as
-                    // switchActiveDatabase) so in-flight withDb calls retry against it, not a closed pool.
+                    // Redirect live writers to the canonical DB BEFORE merging. Otherwise a concurrent withDb
+                    // write (connect triggers a full NodeDB re-dump) could land in `source` after the merge has
+                    // already snapshotted it, then be lost when `source` is retired — and withDb's closed-pool
+                    // retry can't recover it because the write itself succeeded. New writers now capture `dest`;
+                    // any still holding `source` are covered by that retry once retireDatabase closes it.
                     _currentDb.value = dest
                     currentDbName = claimed
+                    try {
+                        withContext(dispatchers.io) { DatabaseMerger.merge(source, dest) }
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        // merge() is atomic, so on failure `dest` is unchanged. Roll the active DB back to
+                        // `source` so the address still resolves consistently and the merge retries next connect.
+                        _currentDb.value = source
+                        currentDbName = sourceName
+                        Logger.w(e) {
+                            "Merge into ${anonymizeDbName(claimed)} failed; kept ${anonymizeDbName(sourceName)} active"
+                        }
+                        return@withLock
+                    }
+
                     markLastUsed(claimed)
                     datastore.edit { it[addrDbKey(_currentAddress.value)] = claimed }
                     Logger.i {
