@@ -123,6 +123,8 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Un
                     EnvironmentMetricsCard(
                         telemetry = telemetry,
                         environmentDisplayFahrenheit = state.isFahrenheit,
+                        isImperial =
+                        state.displayUnits == org.meshtastic.proto.Config.DisplayConfig.DisplayUnits.IMPERIAL,
                         isSelected = telemetry.time.toDouble() == selectedX,
                         onClick = { onCardClick(telemetry.time.toDouble()) },
                     )
@@ -511,11 +513,12 @@ private fun OneWireTemperatureDisplay(
 private fun EnvironmentMetricsCard(
     telemetry: Telemetry,
     environmentDisplayFahrenheit: Boolean,
+    isImperial: Boolean,
     isSelected: Boolean,
     onClick: () -> Unit,
 ) {
     SelectableMetricCard(isSelected = isSelected, onClick = onClick) {
-        EnvironmentMetricsContent(telemetry, environmentDisplayFahrenheit)
+        EnvironmentMetricsContent(telemetry, environmentDisplayFahrenheit, isImperial)
     }
 }
 
@@ -523,6 +526,7 @@ private fun EnvironmentMetricsCard(
 private fun EnvironmentMetricsContent(
     telemetry: Telemetry,
     environmentDisplayFahrenheit: Boolean,
+    isImperial: Boolean,
     timeTextOverride: String? = null,
 ) {
     val envMetrics = telemetry.environment_metrics ?: org.meshtastic.proto.EnvironmentMetrics()
@@ -550,11 +554,8 @@ private fun EnvironmentMetricsContent(
 
         VoltageCurrentDisplay(envMetrics)
         RadiationDisplay(envMetrics)
-        // ponytail: environmentDisplayFahrenheit == (displayUnits == IMPERIAL) — both derive from the same
-        // getSystemMeasurementSystem(), so it doubles as the imperial flag for wind/rainfall. Thread a separate
-        // flag only if temperature and distance units are ever sourced independently (e.g. UK Celsius + miles).
-        WindDisplay(envMetrics, environmentDisplayFahrenheit)
-        RainfallDisplay(envMetrics, environmentDisplayFahrenheit)
+        WindDisplay(envMetrics, isImperial)
+        RainfallDisplay(envMetrics, isImperial)
         OneWireTemperatureDisplay(envMetrics, environmentDisplayFahrenheit)
     }
 }
@@ -590,6 +591,7 @@ fun PreviewEnvironmentMetricsContent() {
             EnvironmentMetricsContent(
                 telemetry = fakeTelemetry,
                 environmentDisplayFahrenheit = false,
+                isImperial = false,
                 timeTextOverride = "2023-11-14 22:13",
             )
         }
