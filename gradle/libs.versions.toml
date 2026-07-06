@@ -65,6 +65,7 @@ maps-compose = "8.3.0"
 # ML Kit
 mlkit-barcode-scanning = "17.3.0"
 mlkit-genai-prompt = "1.0.0-beta2"
+mlkit-language-id = "17.0.6"
 mlkit-translate = "17.0.3"
 
 # CameraX
@@ -201,6 +202,7 @@ maps-compose-utils = { module = "com.google.maps.android:maps-compose-utils", ve
 maps-compose-widgets = { module = "com.google.maps.android:maps-compose-widgets", version.ref = "maps-compose" }
 mlkit-barcode-scanning = { module = "com.google.mlkit:barcode-scanning", version.ref = "mlkit-barcode-scanning" }
 mlkit-genai-prompt = { module = "com.google.mlkit:genai-prompt", version.ref = "mlkit-genai-prompt" }
+mlkit-language-id = { module = "com.google.mlkit:language-id", version.ref = "mlkit-language-id" }
 mlkit-translate = { module = "com.google.mlkit:translate", version.ref = "mlkit-translate" }
 play-services-maps = { module = "com.google.android.gms:play-services-maps", version = "20.0.0" }
 zxing-core = { module = "com.google.zxing:core", version = "3.5.4" }

@@ -87,6 +87,8 @@ import org.meshtastic.feature.docs.ai.AIDocAssistant
 import org.meshtastic.feature.docs.ai.KeywordFallbackAssistant
 import org.meshtastic.feature.docs.translation.DocTranslationService
 import org.meshtastic.feature.docs.translation.NoOpDocTranslator
+import org.meshtastic.feature.messaging.translation.MessageTranslationService
+import org.meshtastic.feature.messaging.translation.NoOpMessageTranslator
 import org.meshtastic.feature.node.compass.CompassHeadingProvider
 import org.meshtastic.feature.node.compass.MagneticFieldProvider
 import org.meshtastic.feature.node.compass.PhoneLocationProvider
@@ -225,6 +227,7 @@ private fun desktopPlatformStubsModule() = module {
     single<AIDocAssistant> { get<KeywordFallbackAssistant>() }
     single<DiscoverySummaryAiProvider> { get<AlgorithmicSummaryProvider>() }
     single<DocTranslationService> { NoOpDocTranslator() }
+    single<MessageTranslationService> { NoOpMessageTranslator() }
 
     // Desktop uses the real ApiService implementation (no flavor stub needed)
     single<ApiService> { ApiServiceImpl(client = get()) }

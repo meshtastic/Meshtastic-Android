@@ -66,5 +66,12 @@ kotlin {
             implementation(projects.core.testing)
             implementation(libs.kotlinx.coroutines.test)
         }
+
+        val androidHostTest by getting {
+            dependencies {
+                // JVM variant provides the host-platform native for BundledSQLiteDriver (same as core:database)
+                runtimeOnly("androidx.sqlite:sqlite-bundled-jvm:2.7.0")
+            }
+        }
     }
 }

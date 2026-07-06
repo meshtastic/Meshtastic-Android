@@ -64,6 +64,7 @@ import org.meshtastic.core.model.Reaction
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.a11y_message_from
 import org.meshtastic.core.resources.filter_message_label
+import org.meshtastic.core.resources.message_translated_label
 import org.meshtastic.core.resources.reply
 import org.meshtastic.core.resources.security_signed_verified
 import org.meshtastic.core.ui.component.AutoLinkText
@@ -114,6 +115,9 @@ fun MessageItem(
     hasSamePrev: Boolean = false,
     hasSameNext: Boolean = false,
     searchQuery: String = "",
+    translationAvailable: Boolean = false,
+    onTranslate: () -> Unit = {},
+    onToggleTranslation: () -> Unit = {},
 ) = Column(
     modifier =
     modifier
@@ -132,6 +136,9 @@ fun MessageItem(
     val coroutineScope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val isLocal = node.num == ourNode.num
+    // While searching, always show the original text — FTS matches and highlights apply to it, not the translation.
+    val showsTranslation = message.showTranslated && message.translatedText != null && searchQuery.isEmpty()
+    val bodyText = message.displayedText(searching = searchQuery.isNotEmpty())
     if (activeSheet != null) {
         ModalBottomSheet(onDismissRequest = { activeSheet = null }, sheetState = sheetState) {
             when (activeSheet) {
@@ -150,7 +157,7 @@ fun MessageItem(
                         onCopy = {
                             activeSheet = null
                             coroutineScope.launch {
-                                clipboardManager.setClipEntry(createClipEntry(message.text, "message"))
+                                clipboardManager.setClipEntry(createClipEntry(bodyText, "message"))
                             }
                         },
                         onSelect = {
@@ -170,6 +177,15 @@ fun MessageItem(
                         },
                         xeddsaSigned = message.xeddsaSigned,
                         onStatus = onStatusClick,
+                        translationRowState = translationRowStateFor(message, translationAvailable),
+                        onTranslate = {
+                            activeSheet = null
+                            onTranslate()
+                        },
+                        onToggleTranslation = {
+                            activeSheet = null
+                            onToggleTranslation()
+                        },
                     )
                 }
 
@@ -220,7 +236,7 @@ fun MessageItem(
                 },
             )
     val senderName = if (message.fromLocal) ourNode.user.long_name else node.user.long_name
-    val messageA11yText = stringResource(Res.string.a11y_message_from, senderName, message.text)
+    val messageA11yText = stringResource(Res.string.a11y_message_from, senderName, bodyText)
     if (showUserName && !message.fromLocal) {
         Row(
             modifier = Modifier.padding(horizontal = 8.dp),
@@ -280,11 +296,7 @@ fun MessageItem(
                         color = contentColor,
                     )
                 } else {
-                    AutoLinkText(
-                        text = message.text,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = contentColor,
-                    )
+                    AutoLinkText(text = bodyText, style = MaterialTheme.typography.bodyLarge, color = contentColor)
                 }
 
                 Row(
@@ -346,6 +358,14 @@ fun MessageItem(
                             modifier = Modifier.padding(start = 8.dp, end = 4.dp),
                         )
                     }
+                    if (showsTranslation) {
+                        Text(
+                            text = stringResource(Res.string.message_translated_label),
+                            style = metadataStyle,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(start = 8.dp, end = 4.dp),
+                        )
+                    }
                     if (message.fromLocal) {
                         MessageStatusIcon(
                             status = message.status ?: MessageStatus.UNKNOWN,
@@ -376,6 +396,17 @@ fun MessageItem(
 private enum class ActiveSheet {
     Actions,
     Emoji,
+}
+
+private fun translationRowStateFor(message: Message, translationAvailable: Boolean): TranslationRowState? = when {
+    // Toggling a persisted translation is just a DB flag flip — offer it even when
+    // the translation engine is no longer available for the current locale.
+    message.translatedText != null ->
+        if (message.showTranslated) TranslationRowState.ShowOriginal else TranslationRowState.ShowTranslation
+
+    !translationAvailable || message.text.isBlank() -> null
+
+    else -> TranslationRowState.Translate
 }
 
 @Composable

@@ -70,6 +70,8 @@ internal data class MessageListHandlers(
     val onDeleteMessages: (List<Long>) -> Unit,
     val onSendMessage: (String, String) -> Unit,
     val onReply: (Message?) -> Unit,
+    val onTranslate: (Message) -> Unit = {},
+    val onToggleTranslation: (Message) -> Unit = {},
 )
 
 internal data class MessageListPagedState(
@@ -84,6 +86,7 @@ internal data class MessageListPagedState(
     val showFiltered: Boolean = false,
     val filteringDisabled: Boolean = false,
     val searchQuery: String = "",
+    val translationAvailable: Boolean = false,
 )
 
 private fun MutableState<Set<Long>>.toggle(uuid: Long) {
@@ -370,6 +373,9 @@ private fun RenderPagedChatMessageRow(
         hasSameNext = hasSameNext,
         quickEmojis = quickEmojis,
         searchQuery = state.searchQuery,
+        translationAvailable = state.translationAvailable,
+        onTranslate = { handlers.onTranslate(message) },
+        onToggleTranslation = { handlers.onToggleTranslation(message) },
     )
 }
 

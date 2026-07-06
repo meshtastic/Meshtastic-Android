@@ -57,6 +57,7 @@ import org.meshtastic.core.resources.ic_share
 import org.meshtastic.core.resources.ic_sort
 import org.meshtastic.core.resources.ic_system_update
 import org.meshtastic.core.resources.ic_thumb_up
+import org.meshtastic.core.resources.ic_translate
 import org.meshtastic.core.resources.ic_upload
 
 val MeshtasticIcons.Add: ImageVector
@@ -136,3 +137,5 @@ val MeshtasticIcons.BarChart: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_bar_chart)
 val MeshtasticIcons.List: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_list)
+val MeshtasticIcons.Translate: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_translate)

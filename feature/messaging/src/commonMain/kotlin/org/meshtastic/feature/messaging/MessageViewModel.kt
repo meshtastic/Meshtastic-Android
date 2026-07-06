@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import org.koin.core.annotation.KoinViewModel
+import org.meshtastic.core.common.util.currentLocaleCode
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.model.ContactSettings
 import org.meshtastic.core.model.Message
@@ -51,9 +52,37 @@ import org.meshtastic.core.repository.QuickChatActionRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.repository.usecase.SendMessageUseCase
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.UiText
+import org.meshtastic.core.resources.translation_failed
+import org.meshtastic.core.resources.translation_model_download_failed
+import org.meshtastic.core.resources.translation_not_required
+import org.meshtastic.core.ui.util.SnackbarManager
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
+import org.meshtastic.feature.messaging.translation.DownloadResult
+import org.meshtastic.feature.messaging.translation.MessageTranslationService
+import org.meshtastic.feature.messaging.translation.TranslationResult
 import org.meshtastic.proto.ChannelSet
+
+/**
+ * Test seam for resolving [UiText] to a plain string. Unit tests replace [resolve] so ViewModel snackbar paths don't
+ * depend on the compose-resources runtime (same pattern as NodeDetailUiTextResolver).
+ */
+internal object MessagingUiTextResolver {
+    var resolve: suspend (UiText) -> String = { it.resolve() }
+}
+
+/** State of the translation-model download dialog on the message screen. */
+sealed interface TranslationDialogState {
+    data object Hidden : TranslationDialogState
+
+    /** Ask the user to confirm downloading the missing [languageTags] models (~[estimatedSizeMb] MB). */
+    data class DownloadPrompt(val message: Message, val languageTags: List<String>, val estimatedSizeMb: Int) :
+        TranslationDialogState
+
+    data class Downloading(val message: Message) : TranslationDialogState
+}
 
 @Suppress("LongParameterList", "TooManyFunctions")
 @KoinViewModel
@@ -70,6 +99,8 @@ class MessageViewModel(
     private val homoglyphEncodingPrefs: HomoglyphPrefs,
     private val notificationManager: NotificationManager,
     private val sendMessageUseCase: SendMessageUseCase,
+    private val messageTranslationService: MessageTranslationService,
+    private val snackbarManager: SnackbarManager,
 ) : ViewModel() {
     private val _title = MutableStateFlow("")
     val title: StateFlow<String> = _title.asStateFlow()
@@ -301,6 +332,71 @@ class MessageViewModel(
 
     fun deleteMessages(uuidList: List<Long>) =
         safeLaunch(context = ioDispatcher, tag = "deleteMessages") { packetRepository.deleteMessages(uuidList) }
+
+    // region ── Translation ──
+
+    /** Whether on-device translation into the current locale is possible (always false on F-Droid/desktop). */
+    val translationAvailable: StateFlow<Boolean> =
+        flow { emit(messageTranslationService.isLanguageAvailable(currentLocaleCode())) }
+            .stateInWhileSubscribed(initialValue = false)
+
+    private val _translationDialogState = MutableStateFlow<TranslationDialogState>(TranslationDialogState.Hidden)
+    val translationDialogState: StateFlow<TranslationDialogState> = _translationDialogState.asStateFlow()
+
+    /** Translates [message] into the device language, or just re-shows a previously persisted translation. */
+    // Translation methods use plain safeLaunch (like sendMessage): every call inside is a main-safe suspend
+    // function (the repository hops to IO internally), and tests stay on the deterministic test scheduler.
+    fun translateMessage(message: Message) = safeLaunch(tag = "translateMessage") {
+        if (message.translatedText != null) {
+            packetRepository.setShowTranslated(message.uuid, true)
+            return@safeLaunch
+        }
+        when (val result = messageTranslationService.translate(message.text, currentLocaleCode())) {
+            is TranslationResult.Success ->
+                packetRepository.setMessageTranslation(message.uuid, result.translatedText)
+
+            is TranslationResult.NotRequired ->
+                snackbarManager.showSnackbar(
+                    MessagingUiTextResolver.resolve(UiText.Resource(Res.string.translation_not_required)),
+                )
+
+            is TranslationResult.ModelDownloadRequired ->
+                _translationDialogState.value =
+                    TranslationDialogState.DownloadPrompt(message, result.languageTags, result.estimatedSizeMb)
+
+            is TranslationResult.Unavailable ->
+                snackbarManager.showSnackbar(
+                    MessagingUiTextResolver.resolve(UiText.Resource(Res.string.translation_failed)),
+                )
+        }
+    }
+
+    fun toggleShowTranslated(message: Message) = safeLaunch(tag = "toggleShowTranslated") {
+        packetRepository.setShowTranslated(message.uuid, !message.showTranslated)
+    }
+
+    fun confirmTranslationModelDownload() {
+        val prompt = _translationDialogState.value as? TranslationDialogState.DownloadPrompt ?: return
+        safeLaunch(tag = "downloadTranslationModel") {
+            _translationDialogState.value = TranslationDialogState.Downloading(prompt.message)
+            val result = messageTranslationService.downloadLanguageModels(prompt.languageTags)
+            _translationDialogState.value = TranslationDialogState.Hidden
+            when (result) {
+                is DownloadResult.Success -> translateMessage(prompt.message)
+
+                is DownloadResult.Failed ->
+                    snackbarManager.showSnackbar(
+                        MessagingUiTextResolver.resolve(UiText.Resource(Res.string.translation_model_download_failed)),
+                    )
+            }
+        }
+    }
+
+    fun dismissTranslationDialog() {
+        _translationDialogState.value = TranslationDialogState.Hidden
+    }
+
+    // endregion
 
     fun clearUnreadCount(contact: String, messageUuid: Long, lastReadTimestamp: Long) =
         safeLaunch(context = ioDispatcher, tag = "clearUnreadCount") {

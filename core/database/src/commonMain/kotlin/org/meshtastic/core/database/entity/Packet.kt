@@ -62,6 +62,8 @@ data class PacketEntity(
             filtered = filtered,
             transportMechanism = data.transportMechanism,
             xeddsaSigned = data.xeddsaSigned,
+            translatedText = translatedText,
+            showTranslated = showTranslated,
         )
     }
 }
@@ -97,6 +99,8 @@ data class Packet(
     @ColumnInfo(name = "sfpp_hash") val sfpp_hash: ByteString? = null,
     @ColumnInfo(name = "filtered", defaultValue = "0") val filtered: Boolean = false,
     @ColumnInfo(name = "message_text", defaultValue = "") val messageText: String = "",
+    @ColumnInfo(name = "translated_text") val translatedText: String? = null,
+    @ColumnInfo(name = "show_translated", defaultValue = "0") val showTranslated: Boolean = false,
 ) {
     companion object {
         const val RELAY_NODE_SUFFIX_MASK = 0xFF

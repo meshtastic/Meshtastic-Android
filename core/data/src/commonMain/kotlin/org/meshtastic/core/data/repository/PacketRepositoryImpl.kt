@@ -236,6 +236,12 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
     override suspend fun updateMessageId(d: DataPacket, id: Int) =
         withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().updateMessageId(d, id) }
 
+    override suspend fun setMessageTranslation(uuid: Long, translatedText: String) =
+        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().setTranslation(uuid, translatedText) }
+
+    override suspend fun setShowTranslated(uuid: Long, showTranslated: Boolean) =
+        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().setShowTranslated(uuid, showTranslated) }
+
     override suspend fun getPacketById(id: Int): DataPacket? =
         withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().getPacketById(id)?.data }
 

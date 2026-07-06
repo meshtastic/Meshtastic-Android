@@ -16,10 +16,17 @@
  */
 package org.meshtastic.feature.messaging
 
+import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.Node
 
 /** Defines the various user interactions that can occur on the MessageScreen. */
 internal sealed interface MessageScreenEvent {
+    /** Translate a message into the device language (the translation is persisted). */
+    data class TranslateMessage(val message: Message) : MessageScreenEvent
+
+    /** Toggle a translated message between showing the original and the translated text. */
+    data class ToggleShowTranslated(val message: Message) : MessageScreenEvent
+
     /** Send a new text message. */
     data class SendMessage(val text: String, val replyingToPacketId: Int? = null) : MessageScreenEvent
 
