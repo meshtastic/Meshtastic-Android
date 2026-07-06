@@ -53,21 +53,23 @@ import org.meshtastic.proto.ModuleSettings
 @Composable
 fun EditChannelDialog(
     channelSettings: ChannelSettings,
-    onAddClick: (ChannelSettings) -> Unit,
+    onAddClick: (ChannelSettings, ChannelPskEditState) -> Unit,
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
     modemPresetName: String = stringResource(Res.string.default_),
+    initialPskEditState: ChannelPskEditState = ChannelPskEditState(),
 ) {
     val focusManager = LocalFocusManager.current
     var isFocused by remember { mutableStateOf(false) }
 
     var channelInput by remember(channelSettings) { mutableStateOf(channelSettings) }
+    var pskEditState by remember(channelSettings, initialPskEditState) { mutableStateOf(initialPskEditState) }
 
     MeshtasticDialog(
         onDismiss = onDismissRequest,
         dismissText = stringResource(Res.string.cancel),
         confirmText = stringResource(Res.string.save),
-        onConfirm = { onAddClick(channelInput) },
+        onConfirm = { onAddClick(channelInput, pskEditState) },
         modifier = modifier,
         title = "", // Title is handled internally by specific items if needed, or we could add one
         text = {
@@ -87,14 +89,9 @@ fun EditChannelDialog(
                     KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = {
-                        val defaultPsk = Channel.default.settings.psk
-                        val newPsk =
-                            if (channelInput.psk == defaultPsk) {
-                                Channel.getRandomKey()
-                            } else {
-                                channelInput.psk
-                            }
-                        channelInput = channelInput.copy(name = it.trim(), psk = newPsk)
+                        val update = channelInput.applyChannelNameEdit(it, pskEditState)
+                        channelInput = update.settings
+                        pskEditState = update.pskEditState
                     },
                     onFocusChanged = { isFocused = it.isFocused },
                 )
@@ -107,10 +104,14 @@ fun EditChannelDialog(
                     onValueChange = {
                         val fullPsk = Channel(ChannelSettings(psk = it)).psk
                         if (fullPsk.size in setOf(0, 16, 32)) {
+                            pskEditState = pskEditState.copy(generatedPskForName = false, pskExplicitlyEdited = true)
                             channelInput = channelInput.copy(psk = it)
                         }
                     },
-                    onGenerateKey = { channelInput = channelInput.copy(psk = Channel.getRandomKey()) },
+                    onGenerateKey = {
+                        pskEditState = pskEditState.copy(generatedPskForName = false, pskExplicitlyEdited = true)
+                        channelInput = channelInput.copy(psk = Channel.getRandomKey())
+                    },
                 )
 
                 SwitchPreference(
@@ -140,5 +141,43 @@ fun EditChannelDialog(
                 )
             }
         },
+    )
+}
+
+data class ChannelPskEditState(
+    val canGeneratePskForName: Boolean = false,
+    val generatedPskForName: Boolean = false,
+    val pskExplicitlyEdited: Boolean = false,
+)
+
+internal data class ChannelNameUpdate(val settings: ChannelSettings, val pskEditState: ChannelPskEditState)
+
+internal fun ChannelSettings.applyChannelNameEdit(
+    nameInput: String,
+    pskEditState: ChannelPskEditState,
+): ChannelNameUpdate {
+    val name = nameInput.trim()
+    val defaultPsk = Channel.default.settings.psk
+    val clearGeneratedPsk = name.isBlank() && pskEditState.generatedPskForName && !pskEditState.pskExplicitlyEdited
+    val generateNamedPsk =
+        name.isNotBlank() &&
+            psk == defaultPsk &&
+            pskEditState.canGeneratePskForName &&
+            !pskEditState.pskExplicitlyEdited
+    val nextPsk =
+        when {
+            clearGeneratedPsk -> defaultPsk
+            generateNamedPsk -> Channel.getRandomKey()
+            else -> psk
+        }
+    val nextGeneratedPskForName =
+        when {
+            clearGeneratedPsk -> false
+            generateNamedPsk -> true
+            else -> pskEditState.generatedPskForName
+        }
+    return ChannelNameUpdate(
+        settings = copy(name = name, psk = nextPsk),
+        pskEditState = pskEditState.copy(generatedPskForName = nextGeneratedPskForName),
     )
 }
