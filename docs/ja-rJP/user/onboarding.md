@@ -1,100 +1,100 @@
 ---
-title: Getting Started
+title: はじめに
 parent: User Guide
 nav_order: 1
 last_updated: 2026-05-13
-description: First-launch setup — permissions, onboarding flow, and next steps after connecting your radio.
+description: 初回起動時のセットアップ：権限、オンボーディングの流れ、無線機を接続した後の次のステップ。
 aliases:
-  - first-launch
-  - setup
-  - intro
+  - 初回起動
+  - セットアップ
+  - 概要
 ---
 
-# Getting Started
+# はじめに
 
-Welcome to Meshtastic! This guide walks you through the initial setup of the Meshtastic Android app.
+Meshtastic へようこそ！ このガイドでは、Meshtastic Android アプリの初期設定を順を追って説明します。
 
-## First Launch
+## 初回起動
 
-When you open the app for the first time, you'll be guided through an introductory flow that helps configure essential permissions and settings. Each step can be completed in order, or you can skip and configure permissions later in Android settings.
+アプリを初めて開くと、必要な権限と設定を構成するための導入フローが案内されます。 各ステップは順番に完了することも、スキップして後で Android の設定で権限を構成することもできます。
 
-### Welcome Screen
+### ようこそ画面
 
-The welcome screen introduces Meshtastic and its core capabilities:
+ようこそ画面では、Meshtastic とその主な機能を紹介します：
 
-- Off-grid mesh communication
-- No cellular or internet required
-- End-to-end encrypted messaging
+- オフグリッドのメッシュ通信
+- 携帯電話やインターネットは不要
+- エンドツーエンドで暗号化されたメッセージング
 
-Tap **Get Started** to proceed through the setup flow.
+**開始する**をタップして、セットアップフローを進めます。
 
-![Welcome screen](../../assets/screenshots/onboarding_welcome.png)
+![ようこそ画面](../../assets/screenshots/onboarding_welcome.png)
 
-## Permissions
+## 権限
 
-The app requests several permissions during setup. Each one serves a specific purpose, and some are required for core functionality.
+アプリはセットアップ中にいくつかの権限を要求します。 それぞれに特定の目的があり、一部は主要な機能に必要です。
 
-### Bluetooth Permission
+### Bluetooth の権限
 
-Bluetooth is the primary connection method between your phone and Meshtastic radio:
+Bluetooth は、スマートフォンと Meshtastic 無線機の主な接続方法です：
 
-- **Bluetooth scanning** — discover nearby Meshtastic radios
-- **Bluetooth connect** — establish and maintain connections with paired radios
+- **Bluetooth スキャン**：近くの Meshtastic 無線機を検出します
+- **Bluetooth 接続**：ペアリング済みの無線機との接続を確立して維持します
 
-Grant both permissions when prompted. Without Bluetooth, you'll need to use USB or TCP connections instead.
+プロンプトが表示されたら、両方の権限を許可してください。 Bluetooth がない場合は、代わりに USB または TCP 接続を使用する必要があります。
 
-### Location Permission
+### 位置情報の権限
 
-> ⚠️ **Why is location required for Bluetooth?** Android requires location permission to discover nearby Bluetooth Low Energy devices. This is an Android system requirement, not a Meshtastic-specific choice.
+> ⚠️ **なぜ Bluetooth に位置情報が必要なのですか？** Android では、近くの Bluetooth Low Energy デバイスを検出するために位置情報の権限が必要です。 これは Android システムの要件であり、Meshtastic 固有の仕様ではありません。
 
-Meshtastic also uses your location for:
+Meshtastic は、次の目的でも位置情報を使用します：
 
-- Showing your position on the mesh map
-- Calculating distances to other nodes
-- Sharing your GPS coordinates with other mesh members (if enabled)
+- メッシュマップ上に自分の位置を表示する
+- 他のノードまでの距離を計算する
+- 他のメッシュメンバーと GPS 座標を共有する（有効な場合）
 
-Grant **"While using the app"** or **"Always"** depending on your preference:
+お好みに応じて、\*\*「アプリの使用中のみ」**または**「常に許可」\*\*を選択してください：
 
-- **While using the app** — position updates only when the app is open
-- **Always** — enables background position updates for always-on mesh presence
+- **アプリの使用中のみ**：アプリが開いているときだけ位置情報を更新します
+- **常に許可**：常時メッシュに存在するために、バックグラウンドでの位置情報更新を有効にします
 
-If denied, Bluetooth scanning will not function and your node will not report a position.
+拒否すると、Bluetooth スキャンが機能せず、ノードは位置情報を報告しません。
 
-### Notifications Permission
+### 通知の権限
 
-Notifications alert you to:
+通知は、次のことをお知らせします：
 
-- Incoming messages from channels and direct messages
-- Connection status changes (connected, disconnected, reconnecting)
-- Firmware update availability
+- チャンネルおよびダイレクトメッセージの受信
+- 接続状態の変化（接続済み、切断、再接続中）
+- ファームウェア更新の有無
 
-> 💡 **Tip:** You can fine-tune notification preferences later in Android system settings. The app creates separate notification channels for messages, connection events, and background service status.
+> 💡 **ヒント：** 通知の設定は、後で Android のシステム設定で細かく調整できます。 アプリは、メッセージ、接続イベント、バックグラウンドサービスの状態ごとに別々の通知チャンネルを作成します。
 
-### Critical Alerts Permission
+### 重要なアラートの権限
 
-On supported devices, the app may request permission for critical alerts:
+対応デバイスでは、アプリが重要なアラートの権限を要求することがあります：
 
-- These are high-priority notifications that can break through Do Not Disturb mode
-- Useful for emergency mesh alerts or urgent messages
-- You can **skip** this step if you don't need breakthrough notifications
-- Configure or revoke later in Android notification settings
+- これらは、サイレントモードを突破できる高優先度の通知です
+- 緊急のメッシュアラートや至急のメッセージに役立ちます
+- 突破通知が不要な場合は、このステップを**スキップ**できます
+- 後で Android の通知設定で構成または取り消しができます
 
-## After Setup
+## セットアップ後
 
-Once permissions are granted, the app transitions to the main interface. Your first action should be connecting to a Meshtastic radio — see [Connections](connections) for detailed instructions.
+権限を許可すると、アプリはメイン画面に移行します。 最初に行うべきことは、Meshtastic 無線機への接続です。詳しい手順は[接続](connections)を参照してください。
 
-> 💡 **Tip:** If you skipped any permissions during setup, you can grant them later through **Android Settings → Apps → Meshtastic → Permissions**. The app will prompt you again if a missing permission blocks a feature you try to use.
+> 💡 **ヒント：** セットアップ中に権限をスキップした場合は、後で\*\*「Android 設定 → アプリ → Meshtastic → 権限」\*\*から許可できます。 不足している権限が、使おうとする機能を妨げる場合は、アプリが再度確認を求めます。
 
-## What's Next?
+## 次のステップ
 
-Once connected to a radio, explore:
+無線機に接続したら、次を確認してみましょう：
 
-- [Connections](connections) — pair your first radio device
-- [Messages & Channels](messages-and-channels) — send your first message
-- [Nodes](nodes) — see who's on your mesh
-- [Map & Waypoints](map-and-waypoints) — view node positions
-- [Settings](settings-radio-user) — configure your radio and user profile
+- [接続](connections)：最初の無線機デバイスをペアリングする
+- [メッセージとチャンネル](messages-and-channels)：最初のメッセージを送信する
+- [ノード](nodes)：メッシュに参加しているノードを確認する
+- [マップとウェイポイント](map-and-waypoints)：ノードの位置を表示する
+- [設定](settings-radio-user)：無線機とユーザープロフィールを構成する
 
-New to Meshtastic? The [getting started guide](https://meshtastic.org/docs/getting-started) on meshtastic.org covers hardware selection, initial radio configuration, and your first mesh setup.
+Meshtastic は初めてですか？ meshtastic.org の[入門ガイド](https://meshtastic.org/docs/getting-started)では、ハードウェアの選択、無線機の初期設定、最初のメッシュのセットアップについて説明しています。
 
 ---

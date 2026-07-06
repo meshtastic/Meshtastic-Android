@@ -189,6 +189,12 @@
   },
   "pullRequests": [
     {
+      "id": "10902",
+      "title": "BLE lifecycle memory: true BLE-off on nRF52, NimBLE host pools to PSRAM on S3",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10902",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
       "id": "10887",
       "title": "InkHUD: persist incoming broadcasts on all channels",
       "page_url": "https://github.com/meshtastic/firmware/pull/10887",
@@ -205,12 +211,6 @@
       "title": "Fix message scroll being reset every frame on E-Ink displays",
       "page_url": "https://github.com/meshtastic/firmware/pull/10870",
       "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "10864",
-      "title": "More fuzz tests and small fixes for the findings",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10864",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
       "id": "10845",
@@ -289,12 +289,6 @@
       "title": "Update US LoRa modem preset to region defaults for compliance",
       "page_url": "https://github.com/meshtastic/firmware/pull/10717",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10689",
-      "title": "Heltec Vision Master E213: enable 32768hz crystal osc for rtc",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10689",
-      "zip_url": "https://discord.com/invite/meshtastic"
     }
   ]
 }
