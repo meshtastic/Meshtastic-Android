@@ -1045,7 +1045,7 @@ open class RadioConfigViewModel(
     }
 }
 
-internal data class ManualChannelUpdateResult(val packetIds: List<Int>, val appliedSettings: List<ChannelSettings>)
+internal data class ManualChannelUpdateResult(val packetIds: List<Int>, val finalSettings: List<ChannelSettings>)
 
 internal data class InterruptedManualChannelUpdate(
     val appliedSettings: List<ChannelSettings>,
@@ -1088,7 +1088,7 @@ internal suspend fun applyManualChannelUpdatePlan(
             )
         }
     }
-    return ManualChannelUpdateResult(packetIds = packetIds, appliedSettings = finalSettings)
+    return ManualChannelUpdateResult(packetIds = packetIds, finalSettings = finalSettings)
 }
 
 private fun MutableList<ChannelSettings>.applyManualChannelWrite(channel: Channel) {

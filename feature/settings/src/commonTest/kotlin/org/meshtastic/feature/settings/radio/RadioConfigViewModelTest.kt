@@ -86,7 +86,9 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import kotlin.time.Duration
 
@@ -529,9 +531,43 @@ class RadioConfigViewModelTest {
 
         assertEquals(listOf(1, 2, 3), writtenIndexes)
         assertEquals(listOf(101, 102, 103), result.packetIds)
-        assertEquals(listOf(ChannelSettings(name = "new")), result.appliedSettings)
+        assertEquals(listOf(ChannelSettings(name = "new")), result.finalSettings)
         assertEquals(listOf(101, 102, 103), registeredRequestIds)
         assertEquals(listOf(MANUAL_CHANNEL_WRITE_DELAY, MANUAL_CHANNEL_WRITE_DELAY), delays)
+    }
+
+    @Test
+    fun `applyManualChannelUpdatePlan invokes onInterrupted when writeChannel fails mid-plan`() = runTest {
+        val channelA = Channel(index = 1, role = Channel.Role.SECONDARY, settings = ChannelSettings(name = "A"))
+        val channelB = Channel(index = 2, role = Channel.Role.SECONDARY, settings = ChannelSettings(name = "B"))
+        val channelC = Channel(index = 3, role = Channel.Role.SECONDARY, settings = ChannelSettings(name = "C"))
+        val writtenIndexes = mutableListOf<Int>()
+
+        var interrupted: InterruptedManualChannelUpdate? = null
+
+        val error =
+            assertFailsWith<IllegalStateException> {
+                applyManualChannelUpdatePlan(
+                    updatePlan = listOf(channelA, channelB, channelC),
+                    currentSettings = listOf(ChannelSettings(name = "old")),
+                    finalSettings = listOf(ChannelSettings(name = "new")),
+                    writeChannel = { channel ->
+                        writtenIndexes.add(channel.index)
+                        if (channel.index == 2) throw IllegalStateException("boom")
+                        channel.index + 100
+                    },
+                    registerRequestId = {},
+                    onInterrupted = { interrupted = it },
+                    delayFn = {},
+                )
+            }
+
+        assertEquals("boom", error.message)
+        // Channel A (index 1) completed before channel B (index 2) threw.
+        assertEquals(listOf(1, 2), writtenIndexes)
+        assertNotNull(interrupted)
+        assertEquals(1, interrupted!!.appliedWriteCount)
+        assertEquals("A", interrupted!!.appliedSettings[1].name)
     }
 
     @Test
