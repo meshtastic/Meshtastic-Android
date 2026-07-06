@@ -24,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Message
@@ -79,7 +80,8 @@ fun MessageStatusLabel(message: Message, modifier: Modifier = Modifier) {
     val status = message.status ?: MessageStatus.UNKNOWN
     val (_, textRes) = message.getStatusStringRes()
     val tint = messageStatusColor(message)
-    StatusSurface(modifier = modifier) {
+    // The bubble's merged contentDescription already speaks the status; clear this row so TalkBack doesn't repeat it.
+    StatusSurface(modifier = modifier.clearAndSetSemantics {}) {
         MessageStatusIcon(status = status, modifier = Modifier.size(14.dp), tint = tint)
         Text(text = stringResource(textRes), style = MaterialTheme.typography.labelSmall, color = tint)
     }

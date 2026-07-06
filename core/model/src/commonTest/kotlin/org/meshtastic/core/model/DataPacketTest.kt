@@ -24,6 +24,7 @@ import org.meshtastic.core.resources.message_status_delivered
 import org.meshtastic.core.resources.message_status_delivered_recipient
 import org.meshtastic.core.resources.message_status_failed
 import org.meshtastic.core.resources.message_status_relayed_unconfirmed
+import org.meshtastic.core.resources.message_status_sending
 import org.meshtastic.core.resources.message_status_too_large
 import org.meshtastic.core.resources.message_status_unknown
 import org.meshtastic.core.resources.routing_error_none
@@ -223,6 +224,12 @@ class MessageTest {
         val (_, text) = messageWith(MessageStatus.DELIVERED, isBroadcast = false).getStatusStringRes()
 
         assertEquals(Res.string.message_status_relayed_unconfirmed, text)
+    }
+
+    @Test
+    fun getStatusStringRes_queuedOrEnroute_readsSending() {
+        assertEquals(Res.string.message_status_sending, messageWith(MessageStatus.QUEUED).getStatusStringRes().second)
+        assertEquals(Res.string.message_status_sending, messageWith(MessageStatus.ENROUTE).getStatusStringRes().second)
     }
 
     @Test

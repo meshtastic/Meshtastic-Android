@@ -118,7 +118,9 @@ data class Message(
      * differently, and every send error collapses to the same actionable line except the permanent "too large" case.
      */
     fun getStatusStringRes(): Pair<StringResource, StringResource> {
-        val title = if (routingError > 0) Res.string.error else Res.string.message_delivery_status
+        // Tie the title to the status, not routingError: a status-only transition back to QUEUED/ENROUTE can leave a
+        // stale non-zero routingError behind, which would otherwise show an "Error" title over a "Sending…" line.
+        val title = if (status == MessageStatus.ERROR) Res.string.error else Res.string.message_delivery_status
         val text =
             when (status) {
                 // Explicit ack from the recipient itself.
