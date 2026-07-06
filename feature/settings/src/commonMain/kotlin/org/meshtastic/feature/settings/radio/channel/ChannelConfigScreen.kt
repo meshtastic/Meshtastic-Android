@@ -126,7 +126,7 @@ private fun ChannelConfigScreen(
         }
     val pskEditStatesInput =
         rememberSaveable(saver = channelPskEditStatesSaver) {
-            List(settingsList.size) { ChannelPskEditState() }.toMutableStateList()
+            List(settingsListInput.size) { ChannelPskEditState() }.toMutableStateList()
         }
 
     val listState = rememberLazyListState()
@@ -296,16 +296,16 @@ private val channelPskEditStatesSaver =
         restore = { flags -> flags.map { it.toChannelPskEditState() }.toMutableStateList() },
     )
 
-private fun <T> MutableList<T>.move(fromIndex: Int, toIndex: Int) {
+internal fun <T> MutableList<T>.move(fromIndex: Int, toIndex: Int) {
     add(toIndex, removeAt(fromIndex))
 }
 
-private fun MutableList<ChannelPskEditState>.replaceAll(size: Int, value: ChannelPskEditState) {
+internal fun MutableList<ChannelPskEditState>.replaceAll(size: Int, value: ChannelPskEditState) {
     clear()
     repeat(size) { add(value) }
 }
 
-private fun ChannelPskEditState.toSaveableFlags(): Int {
+internal fun ChannelPskEditState.toSaveableFlags(): Int {
     var flags = 0
     if (canGeneratePskForName) flags = flags or CAN_GENERATE_PSK_FOR_NAME_FLAG
     if (generatedPskForName) flags = flags or GENERATED_PSK_FOR_NAME_FLAG
@@ -313,7 +313,7 @@ private fun ChannelPskEditState.toSaveableFlags(): Int {
     return flags
 }
 
-private fun Int.toChannelPskEditState(): ChannelPskEditState = ChannelPskEditState(
+internal fun Int.toChannelPskEditState(): ChannelPskEditState = ChannelPskEditState(
     canGeneratePskForName = this and CAN_GENERATE_PSK_FOR_NAME_FLAG != 0,
     generatedPskForName = this and GENERATED_PSK_FOR_NAME_FLAG != 0,
     pskExplicitlyEdited = this and PSK_EXPLICITLY_EDITED_FLAG != 0,
