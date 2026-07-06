@@ -17,6 +17,7 @@
 package org.meshtastic.feature.messaging.component
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -33,6 +34,7 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.sample_message
 import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.proto.Routing
 
 @Suppress("PreviewPublic")
 @PreviewLightDark
@@ -78,6 +80,130 @@ fun MessageItemSignedPreview() {
                     onDoubleClick = {},
                     onClickChip = {},
                     onNavigateToOriginalMessage = {},
+                )
+            }
+        }
+    }
+}
+
+@Suppress("PreviewPublic")
+@PreviewLightDark
+@Composable
+fun MessageItemStatusStatesPreview() {
+    val ourNode = NodePreviewParameterProvider().mickeyMouse
+    val messages =
+        listOf(
+            StatusPreviewMessage(
+                outgoingStatusPreviewMessage(
+                    text = "Explicit recipient ACK",
+                    time = "10:00",
+                    status = MessageStatus.RECEIVED,
+                    node = ourNode,
+                ),
+            ),
+            StatusPreviewMessage(
+                outgoingStatusPreviewMessage(
+                    text = "Channel implicit ACK",
+                    time = "10:01",
+                    status = MessageStatus.DELIVERED,
+                    node = ourNode,
+                ),
+            ),
+            StatusPreviewMessage(
+                outgoingStatusPreviewMessage(
+                    text = "Direct implicit ACK",
+                    time = "10:02",
+                    status = MessageStatus.DELIVERED,
+                    node = ourNode,
+                ),
+                isDirectMessage = true,
+            ),
+            StatusPreviewMessage(
+                outgoingStatusPreviewMessage(
+                    text = "Queued for send",
+                    time = "10:03",
+                    status = MessageStatus.QUEUED,
+                    node = ourNode,
+                ),
+            ),
+            StatusPreviewMessage(
+                outgoingStatusPreviewMessage(
+                    text = "No ACK received",
+                    time = "10:04",
+                    status = MessageStatus.ERROR,
+                    routingError = Routing.Error.MAX_RETRANSMIT.value,
+                    node = ourNode,
+                ),
+            ),
+            StatusPreviewMessage(
+                outgoingStatusPreviewMessage(
+                    text = "No channel selected",
+                    time = "10:05",
+                    status = MessageStatus.ERROR,
+                    routingError = Routing.Error.NO_CHANNEL.value,
+                    node = ourNode,
+                ),
+            ),
+            StatusPreviewMessage(
+                outgoingStatusPreviewMessage(
+                    text = "Encrypted send failed",
+                    time = "10:06",
+                    status = MessageStatus.ERROR,
+                    routingError = Routing.Error.PKI_FAILED.value,
+                    node = ourNode,
+                ),
+            ),
+            StatusPreviewMessage(
+                outgoingStatusPreviewMessage(
+                    text = "Recipient key unavailable",
+                    time = "10:07",
+                    status = MessageStatus.ERROR,
+                    routingError = Routing.Error.PKI_SEND_FAIL_PUBLIC_KEY.value,
+                    node = ourNode,
+                ),
+            ),
+            StatusPreviewMessage(
+                outgoingStatusPreviewMessage(
+                    text = "Recipient needs your key",
+                    time = "10:08",
+                    status = MessageStatus.ERROR,
+                    routingError = Routing.Error.PKI_UNKNOWN_PUBKEY.value,
+                    node = ourNode,
+                ),
+            ),
+            StatusPreviewMessage(
+                outgoingStatusPreviewMessage(
+                    text = "Too large to send",
+                    time = "10:09",
+                    status = MessageStatus.ERROR,
+                    routingError = Routing.Error.TOO_LARGE.value,
+                    node = ourNode,
+                ),
+            ),
+        )
+
+    AppTheme {
+        Column(
+            modifier =
+            Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.background).padding(vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+            messages.forEach { preview ->
+                MessageItem(
+                    message = preview.message,
+                    node = preview.message.node,
+                    selected = false,
+                    ourNode = ourNode,
+                    onReply = {},
+                    sendReaction = {},
+                    onShowReactions = {},
+                    onClick = {},
+                    onLongClick = {},
+                    onDoubleClick = {},
+                    onClickChip = {},
+                    onNavigateToOriginalMessage = {},
+                    onStatusClick = {},
+                    isDirectMessage = preview.isDirectMessage,
                 )
             }
         }
@@ -269,3 +395,30 @@ private fun MessageItemPreview() {
         }
     }
 }
+
+private data class StatusPreviewMessage(val message: Message, val isDirectMessage: Boolean = false)
+
+private fun outgoingStatusPreviewMessage(
+    text: String,
+    time: String,
+    status: MessageStatus,
+    node: org.meshtastic.core.model.Node,
+    routingError: Int = 0,
+) = Message(
+    text = text,
+    time = time,
+    fromLocal = true,
+    status = status,
+    snr = 0f,
+    rssi = 0,
+    hopsAway = 0,
+    uuid = time.filter(Char::isDigit).toLong(),
+    receivedTime = nowMillis,
+    node = node,
+    read = false,
+    routingError = routingError,
+    packetId = time.filter(Char::isDigit).toInt(),
+    emojis = listOf(),
+    replyId = null,
+    viaMqtt = false,
+)

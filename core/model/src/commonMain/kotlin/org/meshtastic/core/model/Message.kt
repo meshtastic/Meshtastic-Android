@@ -18,12 +18,18 @@ package org.meshtastic.core.model
 
 import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.delivery_confirmed
 import org.meshtastic.core.resources.error
 import org.meshtastic.core.resources.message_delivery_status
+import org.meshtastic.core.resources.message_routing_error_max_retransmit
+import org.meshtastic.core.resources.message_routing_error_no_channel
+import org.meshtastic.core.resources.message_routing_error_pki_failed
+import org.meshtastic.core.resources.message_routing_error_pki_send_fail_public_key
+import org.meshtastic.core.resources.message_routing_error_pki_unknown_pubkey
+import org.meshtastic.core.resources.message_routing_error_too_large
 import org.meshtastic.core.resources.message_status_delivered
 import org.meshtastic.core.resources.message_status_enroute
-import org.meshtastic.core.resources.message_status_queued
+import org.meshtastic.core.resources.message_status_recipient_delivered
+import org.meshtastic.core.resources.message_status_relayed_not_confirmed
 import org.meshtastic.core.resources.message_status_sfpp_confirmed
 import org.meshtastic.core.resources.message_status_sfpp_routing
 import org.meshtastic.core.resources.message_status_unknown
@@ -72,6 +78,70 @@ fun getStringResFrom(routingError: Int): StringResource = when (routingError) {
     else -> Res.string.unrecognized
 }
 
+fun getMessageRoutingErrorStringResFrom(routingError: Int): StringResource = when (routingError) {
+    Routing.Error.GOT_NAK.value,
+    Routing.Error.TIMEOUT.value,
+    Routing.Error.MAX_RETRANSMIT.value,
+    Routing.Error.NO_RESPONSE.value,
+    -> Res.string.message_routing_error_max_retransmit
+
+    Routing.Error.NO_CHANNEL.value -> Res.string.message_routing_error_no_channel
+
+    Routing.Error.TOO_LARGE.value -> Res.string.message_routing_error_too_large
+
+    Routing.Error.PKI_FAILED.value -> Res.string.message_routing_error_pki_failed
+
+    Routing.Error.PKI_UNKNOWN_PUBKEY.value -> Res.string.message_routing_error_pki_unknown_pubkey
+
+    Routing.Error.PKI_SEND_FAIL_PUBLIC_KEY.value -> Res.string.message_routing_error_pki_send_fail_public_key
+
+    else -> getStringResFrom(routingError)
+}
+
+fun getMessageStatusStringRes(
+    status: MessageStatus?,
+    routingError: Int,
+    isDirectMessage: Boolean = false,
+): Pair<StringResource, StringResource> {
+    val title = if (routingError > 0) Res.string.error else Res.string.message_delivery_status
+    val text =
+        when (status) {
+            MessageStatus.RECEIVED -> Res.string.message_status_recipient_delivered
+
+            MessageStatus.QUEUED -> Res.string.message_status_enroute
+
+            MessageStatus.ENROUTE -> Res.string.message_status_enroute
+
+            MessageStatus.SFPP_ROUTING -> Res.string.message_status_sfpp_routing
+
+            MessageStatus.SFPP_CONFIRMED -> Res.string.message_status_sfpp_confirmed
+
+            MessageStatus.DELIVERED ->
+                if (isDirectMessage) {
+                    Res.string.message_status_relayed_not_confirmed
+                } else {
+                    Res.string.message_status_delivered
+                }
+
+            MessageStatus.ERROR -> getMessageRoutingErrorStringResFrom(routingError)
+
+            MessageStatus.UNKNOWN,
+            null,
+            -> Res.string.message_status_unknown
+        }
+    return title to text
+}
+
+fun isMessageStatusRetryable(status: MessageStatus?, routingError: Int, isDirectMessage: Boolean = false): Boolean =
+    when {
+        status == MessageStatus.DELIVERED && isDirectMessage -> true
+        status != MessageStatus.ERROR -> false
+        routingError in nonRetryableMessageRoutingErrors -> false
+        else -> true
+    }
+
+private val nonRetryableMessageRoutingErrors = setOf(Routing.Error.NO_CHANNEL.value, Routing.Error.TOO_LARGE.value)
+
 data class Message(
     val uuid: Long,
     val receivedTime: Long,
@@ -109,28 +179,9 @@ data class Message(
     fun displayedText(searching: Boolean = false): String =
         if (showTranslated && translatedText != null && !searching) translatedText else text
 
-    fun getStatusStringRes(): Pair<StringResource, StringResource> {
-        val title = if (routingError > 0) Res.string.error else Res.string.message_delivery_status
-        val text =
-            when (status) {
-                MessageStatus.RECEIVED -> Res.string.delivery_confirmed
+    fun getStatusStringRes(isDirectMessage: Boolean = false): Pair<StringResource, StringResource> =
+        getMessageStatusStringRes(status, routingError, isDirectMessage)
 
-                MessageStatus.QUEUED -> Res.string.message_status_queued
-
-                MessageStatus.ENROUTE -> Res.string.message_status_enroute
-
-                MessageStatus.SFPP_ROUTING -> Res.string.message_status_sfpp_routing
-
-                MessageStatus.SFPP_CONFIRMED -> Res.string.message_status_sfpp_confirmed
-
-                MessageStatus.DELIVERED -> Res.string.message_status_delivered
-
-                MessageStatus.ERROR -> getStringResFrom(routingError)
-
-                MessageStatus.UNKNOWN,
-                null,
-                -> Res.string.message_status_unknown
-            }
-        return title to text
-    }
+    fun isStatusRetryable(isDirectMessage: Boolean = false): Boolean =
+        isMessageStatusRetryable(status, routingError, isDirectMessage)
 }

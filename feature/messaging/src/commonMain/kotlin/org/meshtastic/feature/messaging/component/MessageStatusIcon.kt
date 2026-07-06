@@ -17,8 +17,12 @@
 package org.meshtastic.feature.messaging.component
 
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.takeOrElse
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.resources.Res
@@ -32,9 +36,18 @@ import org.meshtastic.core.ui.icon.MessageEnroute
 import org.meshtastic.core.ui.icon.MessageError
 import org.meshtastic.core.ui.icon.MqttDelivered
 import org.meshtastic.core.ui.icon.Warning
+import org.meshtastic.core.ui.theme.StatusColors.StatusBlue
+import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
+import org.meshtastic.core.ui.theme.StatusColors.StatusRed
+import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 
 @Composable
-fun MessageStatusIcon(status: MessageStatus, modifier: Modifier = Modifier) {
+fun MessageStatusIcon(
+    status: MessageStatus,
+    modifier: Modifier = Modifier,
+    tint: Color = Color.Unspecified,
+    includeContentDescription: Boolean = true,
+) {
     val icon =
         when (status) {
             MessageStatus.RECEIVED -> MeshtasticIcons.Acknowledged
@@ -46,9 +59,40 @@ fun MessageStatusIcon(status: MessageStatus, modifier: Modifier = Modifier) {
             MessageStatus.ERROR -> MeshtasticIcons.MessageError
             else -> MeshtasticIcons.Warning
         }
+    val contentDescription =
+        if (includeContentDescription) {
+            stringResource(Res.string.message_delivery_status)
+        } else {
+            null
+        }
     Icon(
         modifier = modifier,
         imageVector = icon,
-        contentDescription = stringResource(Res.string.message_delivery_status),
+        contentDescription = contentDescription,
+        tint = tint.takeOrElse { LocalContentColor.current },
     )
+}
+
+@Composable
+internal fun messageStatusColor(status: MessageStatus, isWarning: Boolean = false): Color {
+    val colorScheme = MaterialTheme.colorScheme
+    if (isWarning) {
+        return colorScheme.StatusYellow
+    }
+    return when (status) {
+        MessageStatus.RECEIVED,
+        MessageStatus.DELIVERED,
+        MessageStatus.SFPP_CONFIRMED,
+        -> colorScheme.StatusGreen
+
+        MessageStatus.QUEUED,
+        MessageStatus.UNKNOWN,
+        -> colorScheme.StatusYellow
+
+        MessageStatus.ENROUTE,
+        MessageStatus.SFPP_ROUTING,
+        -> colorScheme.StatusBlue
+
+        MessageStatus.ERROR -> colorScheme.StatusRed
+    }
 }

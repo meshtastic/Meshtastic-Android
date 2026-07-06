@@ -20,10 +20,25 @@ import okio.ByteString.Companion.encodeUtf8
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.error
 import org.meshtastic.core.resources.message_delivery_status
+import org.meshtastic.core.resources.message_routing_error_max_retransmit
+import org.meshtastic.core.resources.message_routing_error_no_channel
+import org.meshtastic.core.resources.message_routing_error_pki_failed
+import org.meshtastic.core.resources.message_routing_error_pki_send_fail_public_key
+import org.meshtastic.core.resources.message_routing_error_pki_unknown_pubkey
+import org.meshtastic.core.resources.message_routing_error_too_large
 import org.meshtastic.core.resources.message_status_delivered
+import org.meshtastic.core.resources.message_status_enroute
+import org.meshtastic.core.resources.message_status_recipient_delivered
+import org.meshtastic.core.resources.message_status_relayed_not_confirmed
 import org.meshtastic.core.resources.message_status_unknown
+import org.meshtastic.core.resources.routing_error_max_retransmit
+import org.meshtastic.core.resources.routing_error_no_channel
 import org.meshtastic.core.resources.routing_error_no_route
 import org.meshtastic.core.resources.routing_error_none
+import org.meshtastic.core.resources.routing_error_pki_failed
+import org.meshtastic.core.resources.routing_error_pki_send_fail_public_key
+import org.meshtastic.core.resources.routing_error_pki_unknown_pubkey
+import org.meshtastic.core.resources.routing_error_too_large
 import org.meshtastic.core.resources.unrecognized
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Routing
@@ -216,6 +231,51 @@ class MessageTest {
     }
 
     @Test
+    fun getStatusStringRes_returnsDirectImplicitAckResourceForDirectMessages() {
+        val (title, text) = messageWith(status = MessageStatus.DELIVERED).getStatusStringRes(isDirectMessage = true)
+
+        assertEquals(Res.string.message_delivery_status, title)
+        assertEquals(Res.string.message_status_relayed_not_confirmed, text)
+    }
+
+    @Test
+    fun getStatusStringRes_returnsRecipientDeliveryResource() {
+        val message =
+            Message(
+                uuid = 1L,
+                receivedTime = 0L,
+                node = Node.createFallback(1, "Node"),
+                text = "hello",
+                fromLocal = true,
+                time = "now",
+                read = false,
+                status = MessageStatus.RECEIVED,
+                routingError = 0,
+                packetId = 1,
+                emojis = emptyList(),
+                snr = 0f,
+                rssi = 0,
+                hopsAway = 0,
+                replyId = null,
+            )
+
+        val (title, text) = message.getStatusStringRes()
+
+        assertEquals(Res.string.message_delivery_status, title)
+        assertEquals(Res.string.message_status_recipient_delivered, text)
+    }
+
+    @Test
+    fun getStatusStringRes_returnsSendingResourceForPendingMessages() {
+        for (status in listOf(MessageStatus.QUEUED, MessageStatus.ENROUTE)) {
+            val (title, text) = messageWith(status = status).getStatusStringRes()
+
+            assertEquals(Res.string.message_delivery_status, title)
+            assertEquals(Res.string.message_status_enroute, text)
+        }
+    }
+
+    @Test
     fun getStatusStringRes_returnsErrorResourcesForRoutingFailures() {
         val message =
             Message(
@@ -240,6 +300,31 @@ class MessageTest {
 
         assertEquals(Res.string.error, title)
         assertEquals(Res.string.routing_error_no_route, text)
+    }
+
+    @Test
+    fun getStatusStringRes_returnsMessageSpecificRoutingResources() {
+        val mappings =
+            listOf(
+                Routing.Error.MAX_RETRANSMIT.value to Res.string.message_routing_error_max_retransmit,
+                Routing.Error.GOT_NAK.value to Res.string.message_routing_error_max_retransmit,
+                Routing.Error.TIMEOUT.value to Res.string.message_routing_error_max_retransmit,
+                Routing.Error.NO_RESPONSE.value to Res.string.message_routing_error_max_retransmit,
+                Routing.Error.NO_CHANNEL.value to Res.string.message_routing_error_no_channel,
+                Routing.Error.PKI_FAILED.value to Res.string.message_routing_error_pki_failed,
+                Routing.Error.PKI_SEND_FAIL_PUBLIC_KEY.value to
+                    Res.string.message_routing_error_pki_send_fail_public_key,
+                Routing.Error.PKI_UNKNOWN_PUBKEY.value to Res.string.message_routing_error_pki_unknown_pubkey,
+                Routing.Error.TOO_LARGE.value to Res.string.message_routing_error_too_large,
+            )
+
+        for ((routingError, expectedText) in mappings) {
+            val (title, text) =
+                messageWith(status = MessageStatus.ERROR, routingError = routingError).getStatusStringRes()
+
+            assertEquals(Res.string.error, title)
+            assertEquals(expectedText, text)
+        }
     }
 
     @Test
@@ -274,4 +359,66 @@ class MessageTest {
         assertEquals(Res.string.routing_error_none, getStringResFrom(Routing.Error.NONE.value))
         assertEquals(Res.string.unrecognized, getStringResFrom(Int.MAX_VALUE))
     }
+
+    @Test
+    fun getStringResFrom_keepsSharedRoutingResourcesForGenericContexts() {
+        val mappings =
+            listOf(
+                Routing.Error.MAX_RETRANSMIT.value to Res.string.routing_error_max_retransmit,
+                Routing.Error.NO_CHANNEL.value to Res.string.routing_error_no_channel,
+                Routing.Error.PKI_FAILED.value to Res.string.routing_error_pki_failed,
+                Routing.Error.PKI_SEND_FAIL_PUBLIC_KEY.value to Res.string.routing_error_pki_send_fail_public_key,
+                Routing.Error.PKI_UNKNOWN_PUBKEY.value to Res.string.routing_error_pki_unknown_pubkey,
+                Routing.Error.TOO_LARGE.value to Res.string.routing_error_too_large,
+            )
+
+        for ((routingError, expectedText) in mappings) {
+            assertEquals(expectedText, getStringResFrom(routingError))
+        }
+    }
+
+    @Test
+    fun isMessageStatusRetryable_allowsRetryForRetryableMessageStatusesOnly() {
+        assertTrue(
+            messageWith(status = MessageStatus.ERROR, routingError = Routing.Error.MAX_RETRANSMIT.value)
+                .isStatusRetryable(),
+        )
+        val retryableRoutingErrors =
+            listOf(
+                Routing.Error.PKI_FAILED.value,
+                Routing.Error.PKI_SEND_FAIL_PUBLIC_KEY.value,
+                Routing.Error.PKI_UNKNOWN_PUBKEY.value,
+            )
+
+        for (routingError in retryableRoutingErrors) {
+            assertTrue(messageWith(status = MessageStatus.ERROR, routingError = routingError).isStatusRetryable())
+        }
+        assertTrue(messageWith(status = MessageStatus.DELIVERED).isStatusRetryable(isDirectMessage = true))
+
+        val nonRetryableRoutingErrors = listOf(Routing.Error.NO_CHANNEL.value, Routing.Error.TOO_LARGE.value)
+
+        for (routingError in nonRetryableRoutingErrors) {
+            assertFalse(messageWith(status = MessageStatus.ERROR, routingError = routingError).isStatusRetryable())
+        }
+        assertFalse(messageWith(status = MessageStatus.DELIVERED).isStatusRetryable())
+        assertFalse(messageWith(status = MessageStatus.ENROUTE).isStatusRetryable())
+    }
+
+    private fun messageWith(status: MessageStatus?, routingError: Int = 0) = Message(
+        uuid = 1L,
+        receivedTime = 0L,
+        node = Node.createFallback(1, "Node"),
+        text = "hello",
+        fromLocal = true,
+        time = "now",
+        read = false,
+        status = status,
+        routingError = routingError,
+        packetId = 1,
+        emojis = emptyList(),
+        snr = 0f,
+        rssi = 0,
+        hopsAway = 0,
+        replyId = null,
+    )
 }

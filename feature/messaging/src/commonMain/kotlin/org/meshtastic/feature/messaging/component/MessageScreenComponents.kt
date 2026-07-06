@@ -663,8 +663,14 @@ fun UnreadMessagesDivider(modifier: Modifier = Modifier) {
 // region ── MessageStatusDialog ──
 
 @Composable
-fun MessageStatusDialog(message: Message, resendOption: Boolean, onResend: () -> Unit, onDismiss: () -> Unit) {
-    val (title, text) = message.getStatusStringRes()
+fun MessageStatusDialog(
+    message: Message,
+    resendOption: Boolean,
+    onResend: () -> Unit,
+    onDismiss: () -> Unit,
+    isDirectMessage: Boolean = false,
+) {
+    val (title, text) = message.getStatusStringRes(isDirectMessage)
     DeliveryInfo(
         title = title,
         resendOption = resendOption,
