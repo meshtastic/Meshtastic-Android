@@ -110,6 +110,7 @@ fun MessageItem(
     onSelect: () -> Unit = {},
     onDelete: () -> Unit = {},
     onClickChip: (Node) -> Unit = {},
+    resolveMention: (String) -> Node? = { null },
     onNavigateToOriginalMessage: (Int) -> Unit = {},
     onStatusClick: () -> Unit = {},
     hasSamePrev: Boolean = false,
@@ -296,7 +297,19 @@ fun MessageItem(
                         color = contentColor,
                     )
                 } else {
-                    AutoLinkText(text = bodyText, style = MaterialTheme.typography.bodyLarge, color = contentColor)
+                    val mentionDisplayName =
+                        remember(resolveMention) {
+                            { id: String ->
+                                resolveMention(id)?.let { it.user.long_name.ifEmpty { it.user.short_name } }
+                            }
+                        }
+                    AutoLinkText(
+                        text = bodyText,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = contentColor,
+                        mentionName = mentionDisplayName,
+                        onMentionClick = { id -> resolveMention(id)?.let(onClickChip) },
+                    )
                 }
 
                 Row(

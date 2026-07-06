@@ -19,7 +19,9 @@ package org.meshtastic.core.ui.component
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
@@ -32,6 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
+import org.meshtastic.core.model.MENTION_TOKEN_REGEX
 import org.meshtastic.core.ui.theme.HyperlinkBlue
 
 private val DefaultTextLinkStyles =
@@ -52,7 +55,15 @@ private val EMAIL_REGEX =
 
 private val PHONE_REGEX = Regex("""(?:\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}""")
 
-/** A [Text] component that automatically detects and linkifies URLs, email addresses, and phone numbers. */
+private val MentionSpanStyle = SpanStyle(color = HyperlinkBlue, fontWeight = FontWeight.Bold)
+
+/**
+ * A [Text] component that automatically detects and linkifies URLs, email addresses, and phone numbers.
+ *
+ * When [mentionName] is supplied, `@!<hex>` mention tokens are additionally rendered as tappable text showing the
+ * *current* display name resolved live (the hex id is the only thing stored on the wire), invoking [onMentionClick]
+ * with the `!<hex>` id on tap.
+ */
 @Composable
 fun AutoLinkText(
     text: String,
@@ -61,31 +72,77 @@ fun AutoLinkText(
     linkStyles: TextLinkStyles = DefaultTextLinkStyles,
     color: Color = Color.Unspecified,
     textAlign: TextAlign? = null,
+    mentionName: ((String) -> String?)? = null,
+    onMentionClick: ((String) -> Unit)? = null,
 ) {
-    val annotatedString = remember(text, linkStyles) { buildAnnotatedStringWithLinks(text, linkStyles) }
+    // Keep the click handler out of the annotated-string cache key so a fresh lambda per recomposition
+    // doesn't force a rebuild; only text/name changes should.
+    val currentOnMentionClick by rememberUpdatedState(onMentionClick)
+    val annotatedString =
+        remember(text, linkStyles, mentionName) {
+            buildAnnotatedStringWithLinks(text, linkStyles, mentionName) { id -> currentOnMentionClick?.invoke(id) }
+        }
     Text(text = annotatedString, modifier = modifier, style = style.copy(color = color), textAlign = textAlign)
 }
 
-private fun buildAnnotatedStringWithLinks(text: String, linkStyles: TextLinkStyles): AnnotatedString =
-    buildAnnotatedString {
-        append(text)
+private fun buildAnnotatedStringWithLinks(
+    text: String,
+    linkStyles: TextLinkStyles,
+    mentionName: ((String) -> String?)?,
+    onMentionClick: (String) -> Unit,
+): AnnotatedString {
+    // Substitute each mention token with its live display name up front, tracking display-space ranges.
+    // URL/email/phone detection then runs over the substituted text so every offset lines up.
+    val mentions = mutableListOf<Pair<IntRange, String>>() // display range -> "!hex" id
+    val display =
+        if (mentionName == null) {
+            text
+        } else {
+            buildString {
+                var cursor = 0
+                for (match in MENTION_TOKEN_REGEX.findAll(text)) {
+                    append(text, cursor, match.range.first)
+                    val id = match.groupValues[1]
+                    val start = length
+                    append("@").append(mentionName(id) ?: id)
+                    mentions.add((start until length) to id)
+                    cursor = match.range.last + 1
+                }
+                append(text, cursor, text.length)
+            }
+        }
+
+    return buildAnnotatedString {
+        append(display)
+
+        val usedIndices = mutableSetOf<Int>()
+
+        for ((range, id) in mentions) {
+            addLink(
+                LinkAnnotation.Clickable(tag = "mention", styles = TextLinkStyles(MentionSpanStyle)) {
+                    onMentionClick(id)
+                },
+                range.first,
+                range.last + 1,
+            )
+            range.forEach { usedIndices.add(it) }
+        }
 
         val matches = mutableListOf<Pair<IntRange, String>>()
 
-        WEB_URL_REGEX.findAll(text).forEach { match ->
+        WEB_URL_REGEX.findAll(display).forEach { match ->
             val url = match.value
             val fullUrl = if (url.startsWith("www.", ignoreCase = true)) "https://$url" else url
             matches.add(match.range to fullUrl)
         }
 
-        EMAIL_REGEX.findAll(text).forEach { match -> matches.add(match.range to "mailto:${match.value}") }
+        EMAIL_REGEX.findAll(display).forEach { match -> matches.add(match.range to "mailto:${match.value}") }
 
-        PHONE_REGEX.findAll(text).forEach { match -> matches.add(match.range to "tel:${match.value}") }
+        PHONE_REGEX.findAll(display).forEach { match -> matches.add(match.range to "tel:${match.value}") }
 
         // Sort by start position, then by length (longer first)
         val sortedMatches = matches.sortedWith(compareBy({ it.first.first }, { -(it.first.last - it.first.first) }))
 
-        val usedIndices = mutableSetOf<Int>()
         for ((range, url) in sortedMatches) {
             if (range.any { it in usedIndices }) continue
 
@@ -93,6 +150,7 @@ private fun buildAnnotatedStringWithLinks(text: String, linkStyles: TextLinkStyl
             range.forEach { usedIndices.add(it) }
         }
     }
+}
 
 /**
  * A [Text] component that highlights occurrences of [query] within [text] using the tertiary container color. Each
