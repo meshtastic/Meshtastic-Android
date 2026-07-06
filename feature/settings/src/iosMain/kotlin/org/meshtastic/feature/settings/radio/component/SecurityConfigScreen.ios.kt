@@ -21,10 +21,10 @@ import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.Config
 
 @Composable
-actual fun ExportSecurityConfigButton(
+actual fun SecurityKeyBackupActions(
     viewModel: RadioConfigViewModel,
     enabled: Boolean,
     securityConfig: Config.SecurityConfig,
 ) {
-    // No-op for iOS for now
+    // No-op for iOS for now; iOS already has its own native Backup/Restore/Delete flow via Keychain.
 }

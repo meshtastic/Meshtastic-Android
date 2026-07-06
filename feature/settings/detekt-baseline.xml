@@ -23,6 +23,7 @@
     <ID>LongMethod:PowerConfigItemList.kt:@Composable fun PowerConfigScreen</ID>
     <ID>LongMethod:RadioConfigViewModel.kt:RadioConfigViewModel$fun setResponseStateLoading</ID>
     <ID>LongMethod:RadioConfigViewModel.kt:RadioConfigViewModel$private fun processPacketResponse</ID>
+    <ID>LongMethod:SecurityConfigScreen.android.kt:@Composable actual fun SecurityKeyBackupActions</ID>
     <ID>LongMethod:SerialConfigItemList.kt:@Composable fun SerialConfigScreen</ID>
     <ID>LongMethod:StoreForwardConfigItemList.kt:@Composable fun StoreForwardConfigScreen</ID>
     <ID>LongMethod:TelemetryConfigItemList.kt:@Composable fun TelemetryConfigScreen</ID>
@@ -71,7 +72,7 @@
     <ID>ModifierMissing:RadioConfig.kt:@Composable fun RadioConfigItemList</ID>
     <ID>ModifierMissing:RangeTestConfigItemList.kt:@Composable fun RangeTestConfigScreen</ID>
     <ID>ModifierMissing:RemoteHardwareConfigItemList.kt:@Composable fun RemoteHardwareConfigScreen</ID>
-    <ID>ModifierMissing:SecurityConfigScreen.android.kt:@Composable actual fun ExportSecurityConfigButton</ID>
+    <ID>ModifierMissing:SecurityConfigScreen.android.kt:@Composable actual fun SecurityKeyBackupActions</ID>
     <ID>ModifierMissing:SecurityConfigScreen.kt:@Composable @Suppress("LongMethod") fun SecurityConfigScreenCommon</ID>
     <ID>ModifierMissing:SerialConfigItemList.kt:@Composable fun SerialConfigScreen</ID>
     <ID>ModifierMissing:SettingsScreen.kt:@Suppress("LongMethod", "CyclomaticComplexMethod") @Composable fun SettingsScreen</ID>
@@ -85,7 +86,7 @@
     <ID>MultipleEmitters:MQTTConfigItemList.kt:@Composable private fun MqttAddressAndProbe</ID>
     <ID>MultipleEmitters:PacketResponseStateDialog.kt:@Composable private fun ErrorContent</ID>
     <ID>MultipleEmitters:PacketResponseStateDialog.kt:@Composable private fun SuccessContent</ID>
-    <ID>MultipleEmitters:SecurityConfigScreen.android.kt:@Composable actual fun ExportSecurityConfigButton</ID>
+    <ID>MultipleEmitters:SecurityConfigScreen.android.kt:@Composable actual fun SecurityKeyBackupActions</ID>
     <ID>MutableStateAutoboxing:DesktopSettingsScreen.kt:mutableStateOf(0)</ID>
     <ID>ParameterNaming:ChannelConfigScreen.kt:onPositiveClicked: (List&lt;ChannelSettings>) -> Unit</ID>
     <ID>ParameterNaming:CleanNodeDatabaseScreen.kt:onCheckedChanged: (Boolean) -> Unit</ID>
@@ -112,6 +113,6 @@
     <ID>ViewModelForwarding:Debug.kt:DebugLogSettings(viewModel = viewModel)</ID>
     <ID>ViewModelForwarding:Debug.kt:DebugSearchStateWithViewModel( viewModel = viewModel, modifier = Modifier.graphicsLayer(alpha = animatedAlpha), searchState = searchState, filterTexts = filterTexts, presetFilters = viewModel.presetFilters, logs = logs, filterMode = filterMode, onFilterModeChange = { filterMode = it }, onExportLogs = { val format = LocalDateTime.Format { year() monthNumber() day() char('_') hour() minute() second() } val timestamp = fromEpochMilliseconds(nowMillis).toLocalDateTime(TimeZone.UTC).format(format) val fileName = "meshtastic_debug_$timestamp.txt" exportLogsLauncher(fileName) }, )</ID>
     <ID>ViewModelForwarding:PositionConfigScreen.kt:DeviceLocationButton( viewModel = viewModel, enabled = state.connected, onLocationReceived = { locationInput = it }, )</ID>
-    <ID>ViewModelForwarding:SecurityConfigScreen.kt:ExportSecurityConfigButton( viewModel = viewModel, enabled = state.connected, securityConfig = securityConfig, )</ID>
+    <ID>ViewModelForwarding:SecurityConfigScreen.kt:SecurityKeyBackupActions( viewModel = viewModel, enabled = state.connected, securityConfig = securityConfig, )</ID>
   </CurrentIssues>
 </SmellBaseline>

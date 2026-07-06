@@ -117,6 +117,8 @@
     <string name="audio_config">Audio Config</string>
     <string name="available_pins">Available pins</string>
     <string name="back">Back</string>
+    <string name="backup_keys">Backup Keys</string>
+    <string name="backup_keys_confirmation">Saves the public and private keys to secure, encrypted storage on this device.</string>
     <string name="backup_restore">Backup &amp; Restore</string>
     <string name="bad">Bad</string>
     <string name="bandwidth">Bandwidth</string>
@@ -333,6 +335,8 @@
     <string name="delete_custom_tile_source">Delete Network Tile Source</string>
     <string name="delete_for_everyone">Delete for everyone</string>
     <string name="delete_for_me">Delete for me</string>
+    <string name="delete_key_backup">Delete Key Backup</string>
+    <string name="delete_key_backup_confirmation">Deletes the encrypted key backup stored on this device. This cannot be undone.</string>
     <plurals name="delete_messages">
         <item quantity="one">Delete message?</item>
         <item quantity="other">Delete %1$s messages?</item>
@@ -564,12 +568,9 @@
     <string name="expand_chart">Expand chart</string>
     <string name="expanded">Expanded</string>
     <string name="expires">Expires</string>
-    <!-- EXPORT -->
     <string name="export_configuration">Export configuration</string>
     <string name="export_data_csv">Export all packets</string>
     <string name="export_gpx">Export GPX</string>
-    <string name="export_keys">Export Keys</string>
-    <string name="export_keys_confirmation">Exports public and private keys to a file. Please store somewhere securely.</string>
     <string name="export_tak_data_package">Export TAK Data Package</string>
     <string name="external_notification">External Notification</string>
     <string name="external_notification_config">External Notification Config</string>
@@ -773,6 +774,12 @@
     <string name="ip_port">Port:</string>
     <string name="ipv4_mode">IPv4 mode</string>
     <string name="json_output_enabled">JSON output enabled</string>
+    <!-- KEY -->
+    <string name="key_backup_deleted">Key backup deleted</string>
+    <string name="key_backup_not_found">No key backup found for this node</string>
+    <string name="key_backup_restore_failed">Failed to restore keys from backup</string>
+    <string name="key_backup_restored">Keys restored — saving to device</string>
+    <string name="key_backup_saved">Keys backed up securely</string>
     <string name="key_verification_final_title">Key Verification Complete</string>
     <string name="key_verification_request_title">Key Verification Request</string>
     <string name="key_verification_title">Key Verification</string>
@@ -1330,6 +1337,8 @@
     <string name="resend">Resend</string>
     <string name="reset">Reset</string>
     <string name="reset_to_defaults">Reset to defaults</string>
+    <string name="restore_keys">Restore Keys</string>
+    <string name="restore_keys_confirmation">Restores the backed-up public and private keys to this node.</string>
     <string name="retry">Retry</string>
     <string name="ringtone">Ringtone</string>
     <string name="ringtone_file_empty">File is empty</string>

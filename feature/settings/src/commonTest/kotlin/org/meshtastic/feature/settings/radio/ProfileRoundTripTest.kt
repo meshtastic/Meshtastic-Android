@@ -36,8 +36,8 @@ import okio.BufferedSource
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.domain.usecase.settings.AdminActionsUseCase
 import org.meshtastic.core.domain.usecase.settings.ExportProfileUseCase
-import org.meshtastic.core.domain.usecase.settings.ExportSecurityConfigUseCase
 import org.meshtastic.core.domain.usecase.settings.ImportProfileUseCase
+import org.meshtastic.core.domain.usecase.settings.ImportSecurityConfigUseCase
 import org.meshtastic.core.domain.usecase.settings.InstallProfileUseCase
 import org.meshtastic.core.domain.usecase.settings.ProcessRadioResponseUseCase
 import org.meshtastic.core.domain.usecase.settings.RadioConfigUseCase
@@ -51,9 +51,11 @@ import org.meshtastic.core.repository.MapConsentPrefs
 import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.SecurityKeyBackupStore
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.testing.FakeLockdownCoordinator
 import org.meshtastic.core.testing.FakeNodeRepository
+import org.meshtastic.core.ui.util.SnackbarManager
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceProfile
@@ -81,7 +83,9 @@ class ProfileRoundTripTest {
     private val mapConsentPrefs: MapConsentPrefs = mock(MockMode.autofill)
     private val analyticsPrefs: AnalyticsPrefs = mock(MockMode.autofill)
     private val homoglyphEncodingPrefs: HomoglyphPrefs = mock(MockMode.autofill)
-    private val exportSecurityConfigUseCase: ExportSecurityConfigUseCase = mock(MockMode.autofill)
+    private val importSecurityConfigUseCase: ImportSecurityConfigUseCase = mock(MockMode.autofill)
+    private val securityKeyBackupStore: SecurityKeyBackupStore = mock(MockMode.autofill)
+    private val snackbarManager: SnackbarManager = mock(MockMode.autofill)
     private val installProfileUseCase: InstallProfileUseCase = mock(MockMode.autofill)
     private val radioConfigUseCase: RadioConfigUseCase = mock(MockMode.autofill)
     private val adminActionsUseCase: AdminActionsUseCase = mock(MockMode.autofill)
@@ -125,7 +129,7 @@ class ProfileRoundTripTest {
                 homoglyphEncodingPrefs = homoglyphEncodingPrefs,
                 importProfileUseCase = ImportProfileUseCase(),
                 exportProfileUseCase = ExportProfileUseCase(),
-                exportSecurityConfigUseCase = exportSecurityConfigUseCase,
+                importSecurityConfigUseCase = importSecurityConfigUseCase,
                 installProfileUseCase = installProfileUseCase,
                 radioConfigUseCase = radioConfigUseCase,
                 adminActionsUseCase = adminActionsUseCase,
@@ -134,6 +138,8 @@ class ProfileRoundTripTest {
                 fileService = fileService,
                 mqttManager = mqttManager,
                 lockdownCoordinator = FakeLockdownCoordinator(),
+                securityKeyBackupStore = securityKeyBackupStore,
+                snackbarManager = snackbarManager,
             )
     }
 

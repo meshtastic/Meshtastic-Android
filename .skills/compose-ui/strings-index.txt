@@ -99,6 +99,8 @@ audio
 audio_config
 available_pins
 back
+backup_keys
+backup_keys_confirmation
 backup_restore
 bad
 bandwidth
@@ -312,6 +314,8 @@ delete
 delete_custom_tile_source
 delete_for_everyone
 delete_for_me
+delete_key_backup
+delete_key_backup_confirmation
 delete_messages
 delete_messages_title
 delete_selection
@@ -540,12 +544,9 @@ exchange_position
 expand_chart
 expanded
 expires
-### EXPORT ###
 export_configuration
 export_data_csv
 export_gpx
-export_keys
-export_keys_confirmation
 export_tak_data_package
 external_notification
 external_notification_config
@@ -749,6 +750,12 @@ ip_address
 ip_port
 ipv4_mode
 json_output_enabled
+### KEY ###
+key_backup_deleted
+key_backup_not_found
+key_backup_restore_failed
+key_backup_restored
+key_backup_saved
 key_verification_final_title
 key_verification_request_title
 key_verification_title
@@ -1288,6 +1295,8 @@ requesting_from
 resend
 reset
 reset_to_defaults
+restore_keys
+restore_keys_confirmation
 retry
 ringtone
 ringtone_file_empty
