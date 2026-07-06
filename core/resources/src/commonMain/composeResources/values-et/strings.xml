@@ -409,7 +409,6 @@
     <string name="discovery_start_scan">Alusta skaneerimine</string>
     <string name="discovery_start_scan_disabled">Skaneerimise alustamise nupp on keelatud. %1$s</string>
     <string name="discovery_start_scan_reason_24ghz_unsupported">raadio riistvara ei toeta 2,4 GHz</string>
-    <string name="discovery_start_scan_reason_default_key">kanal kasutab vaikimisi krüpteerimisvõtit</string>
     <string name="discovery_start_scan_reason_no_presets">pole valitud eelseadistust</string>
     <string name="discovery_start_scan_reason_not_connected">seade pole ühendatud</string>
     <string name="discovery_stat_analysis">Analüüs</string>

@@ -370,7 +370,6 @@
     <string name="discovery_session_detail">Sitzungsdetails</string>
     <string name="discovery_shifting_to">Verschieben auf %1$s</string>
     <string name="discovery_start_scan_reason_24ghz_unsupported">Funkgerät unterstützt keine 2,4 GHz</string>
-    <string name="discovery_start_scan_reason_default_key">Kanal verwendet standardmäßigen Verschlüsselungsschlüssel</string>
     <string name="discovery_start_scan_reason_no_presets">Keine Voreinstellungen ausgewählt</string>
     <string name="discovery_start_scan_reason_not_connected">Gerät nicht verbunden</string>
     <string name="discovery_stat_analysis">Analyse</string>

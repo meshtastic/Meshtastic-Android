@@ -418,7 +418,6 @@
     <string name="discovery_start_scan">スキャン開始</string>
     <string name="discovery_start_scan_disabled">スキャン開始ボタンは無効です。%1$s</string>
     <string name="discovery_start_scan_reason_24ghz_unsupported">無線ハードウェアが 2.4 GHz に対応していません</string>
-    <string name="discovery_start_scan_reason_default_key">チャンネルがデフォルトの暗号鍵を使用しています</string>
     <string name="discovery_start_scan_reason_no_presets">プリセットが選択されていません</string>
     <string name="discovery_start_scan_reason_not_connected">デバイスが接続されていません</string>
     <string name="discovery_stat_analysis">分析</string>

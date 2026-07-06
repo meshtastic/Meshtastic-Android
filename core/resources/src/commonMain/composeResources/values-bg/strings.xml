@@ -288,7 +288,6 @@
     <string name="discovery_scan_progress">Напредък на сканирането</string>
     <string name="discovery_start_scan_disabled">Бутонът за стартиране на сканиране е деактивиран. %1$s</string>
     <string name="discovery_start_scan_reason_24ghz_unsupported">радио хардуерът не поддържа 2.4 GHz</string>
-    <string name="discovery_start_scan_reason_default_key">каналът използва ключ за криптиране по подразбиране</string>
     <string name="discovery_stat_analysis">Анализ</string>
     <string name="discovery_stat_avg_channel_utilization">Средно използване на канала</string>
     <string name="discovery_stat_channel_utilization">Използване на канала</string>

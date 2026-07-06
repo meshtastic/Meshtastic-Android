@@ -416,7 +416,6 @@
     <string name="discovery_start_scan">开始扫描</string>
     <string name="discovery_start_scan_disabled">开始扫描按钮处于不可点击状态 %1$s</string>
     <string name="discovery_start_scan_reason_24ghz_unsupported">无线电硬件不支持 2.4 GHz 频段</string>
-    <string name="discovery_start_scan_reason_default_key">该频道使用的是默认加密密钥</string>
     <string name="discovery_start_scan_reason_no_presets">未选择任何预设</string>
     <string name="discovery_start_scan_reason_not_connected">设备未连接</string>
     <string name="discovery_stat_analysis">数据分析分析</string>

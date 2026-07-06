@@ -414,7 +414,6 @@
     <string name="discovery_start_scan">Начало сканирования</string>
     <string name="discovery_start_scan_disabled">Кнопка начала сканирования отключена. %1$s</string>
     <string name="discovery_start_scan_reason_24ghz_unsupported">радиооборудование не поддерживает 2,4 ГГц</string>
-    <string name="discovery_start_scan_reason_default_key">канал использует ключ шифрования по умолчанию</string>
     <string name="discovery_start_scan_reason_no_presets">пресеты не выбраны</string>
     <string name="discovery_start_scan_reason_not_connected">устройство не подключено</string>
     <string name="discovery_stat_analysis">Анализ</string>

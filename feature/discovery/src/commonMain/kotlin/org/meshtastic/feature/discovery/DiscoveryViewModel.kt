@@ -123,15 +123,6 @@ class DiscoveryViewModel(
             .map { it is ConnectionState.Connected }
             .stateInWhileSubscribed(initialValue = false)
 
-    /** True when the primary channel uses the default (well-known) PSK — scanning is unsafe. */
-    val usesDefaultKey: StateFlow<Boolean> =
-        radioConfigRepository.channelSetFlow
-            .map { channelSet ->
-                val primaryPsk = channelSet.settings.firstOrNull()?.psk
-                primaryPsk == null || primaryPsk.size == 0 || (primaryPsk.size == 1 && primaryPsk[0].toInt() <= 1)
-            }
-            .stateInWhileSubscribed(initialValue = true)
-
     val sessions: StateFlow<List<DiscoverySessionEntity>> =
         discoveryDao.getAllSessions().stateInWhileSubscribed(initialValue = emptyList())
 

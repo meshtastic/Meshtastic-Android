@@ -424,7 +424,6 @@
     <string name="discovery_start_scan">Start Scan</string>
     <string name="discovery_start_scan_disabled">Start scan button disabled. %1$s</string>
     <string name="discovery_start_scan_reason_24ghz_unsupported">radio hardware does not support 2.4 GHz</string>
-    <string name="discovery_start_scan_reason_default_key">channel uses default encryption key</string>
     <string name="discovery_start_scan_reason_no_presets">no presets selected</string>
     <string name="discovery_start_scan_reason_not_connected">device not connected</string>
     <string name="discovery_stat_analysis">Analysis</string>
