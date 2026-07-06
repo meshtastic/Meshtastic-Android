@@ -23,6 +23,7 @@ import org.meshtastic.core.database.MeshtasticDatabase
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.database.getInMemoryDatabaseBuilder
+import org.meshtastic.core.testing.setupTestContext
 import org.meshtastic.proto.User
 import kotlin.test.AfterTest
 import kotlin.test.Test
@@ -49,6 +50,7 @@ abstract class CommonNodeInfoDaoTest {
         )
 
     suspend fun createDb() {
+        setupTestContext()
         database = getInMemoryDatabaseBuilder().build()
         dao = database.nodeInfoDao()
         dao.setMyNodeInfo(myNodeInfo)
@@ -61,6 +63,7 @@ abstract class CommonNodeInfoDaoTest {
 
     @Test
     fun testGetMyNodeInfo() = runTest {
+        createDb()
         val info = dao.getMyNodeInfo().first()
         assertNotNull(info)
         assertEquals(myNodeInfo.myNodeNum, info.myNodeNum)
@@ -68,6 +71,7 @@ abstract class CommonNodeInfoDaoTest {
 
     @Test
     fun testUpsertNode() = runTest {
+        createDb()
         val node =
             NodeEntity(
                 num = 1234,
@@ -82,6 +86,7 @@ abstract class CommonNodeInfoDaoTest {
 
     @Test
     fun testNodeDBbyNum() = runTest {
+        createDb()
         val node1 = NodeEntity(num = 1, user = User(id = "!1"))
         val node2 = NodeEntity(num = 2, user = User(id = "!2"))
         dao.putAll(listOf(node1, node2))
@@ -94,6 +99,7 @@ abstract class CommonNodeInfoDaoTest {
 
     @Test
     fun testDeleteNode() = runTest {
+        createDb()
         val node = NodeEntity(num = 1, user = User(id = "!1"))
         dao.upsert(node)
         dao.deleteNode(1)
@@ -103,6 +109,7 @@ abstract class CommonNodeInfoDaoTest {
 
     @Test
     fun testClearNodeInfo() = runTest {
+        createDb()
         val node1 = NodeEntity(num = 1, user = User(id = "!1"), isFavorite = true)
         val node2 = NodeEntity(num = 2, user = User(id = "!2"), isFavorite = false)
         dao.putAll(listOf(node1, node2))
