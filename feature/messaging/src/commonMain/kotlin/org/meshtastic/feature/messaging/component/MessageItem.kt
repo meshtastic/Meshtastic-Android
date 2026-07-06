@@ -58,7 +58,6 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Message
-import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.Reaction
 import org.meshtastic.core.resources.Res
@@ -237,7 +236,13 @@ fun MessageItem(
                 },
             )
     val senderName = if (message.fromLocal) ourNode.user.long_name else node.user.long_name
-    val messageA11yText = stringResource(Res.string.a11y_message_from, senderName, bodyText)
+    // Fold the delivery status into the merged bubble description so TalkBack hears it too — the visible status row
+    // below is otherwise swallowed by mergeDescendants, so color/icon alone would never reach a screen reader.
+    val statusA11y = stringResource(message.getStatusStringRes().second)
+    val messageA11yText =
+        stringResource(Res.string.a11y_message_from, senderName, bodyText).let { base ->
+            if (message.fromLocal) "$base, $statusA11y" else base
+        }
     if (showUserName && !message.fromLocal) {
         Row(
             modifier = Modifier.padding(horizontal = 8.dp),
@@ -380,10 +385,7 @@ fun MessageItem(
                         )
                     }
                     if (message.fromLocal) {
-                        MessageStatusIcon(
-                            status = message.status ?: MessageStatus.UNKNOWN,
-                            modifier = Modifier.size(18.dp),
-                        )
+                        MessageStatusLabel(message = message)
                     }
                     Spacer(modifier = Modifier.weight(1f))
                     Text(modifier = Modifier.padding(start = 16.dp), text = message.time, style = metadataStyle)

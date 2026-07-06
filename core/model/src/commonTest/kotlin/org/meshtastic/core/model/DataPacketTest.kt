@@ -21,8 +21,11 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.error
 import org.meshtastic.core.resources.message_delivery_status
 import org.meshtastic.core.resources.message_status_delivered
+import org.meshtastic.core.resources.message_status_delivered_recipient
+import org.meshtastic.core.resources.message_status_failed
+import org.meshtastic.core.resources.message_status_relayed_unconfirmed
+import org.meshtastic.core.resources.message_status_too_large
 import org.meshtastic.core.resources.message_status_unknown
-import org.meshtastic.core.resources.routing_error_no_route
 import org.meshtastic.core.resources.routing_error_none
 import org.meshtastic.core.resources.unrecognized
 import org.meshtastic.proto.PortNum
@@ -188,58 +191,72 @@ class MessageTest {
         assertTrue(message.filtered)
     }
 
-    @Test
-    fun getStatusStringRes_returnsDeliveryResources() {
-        val message =
-            Message(
-                uuid = 1L,
-                receivedTime = 0L,
-                node = Node.createFallback(1, "Node"),
-                text = "hello",
-                fromLocal = true,
-                time = "now",
-                read = false,
-                status = MessageStatus.DELIVERED,
-                routingError = 0,
-                packetId = 1,
-                emojis = emptyList(),
-                snr = 0f,
-                rssi = 0,
-                hopsAway = 0,
-                replyId = null,
-            )
+    private fun messageWith(status: MessageStatus?, routingError: Int = 0, isBroadcast: Boolean = false) = Message(
+        uuid = 1L,
+        receivedTime = 0L,
+        node = Node.createFallback(1, "Node"),
+        text = "hello",
+        fromLocal = true,
+        time = "now",
+        read = false,
+        status = status,
+        routingError = routingError,
+        packetId = 1,
+        emojis = emptyList(),
+        snr = 0f,
+        rssi = 0,
+        hopsAway = 0,
+        replyId = null,
+        isBroadcast = isBroadcast,
+    )
 
-        val (title, text) = message.getStatusStringRes()
+    @Test
+    fun getStatusStringRes_channelImplicitAck_readsDeliveredToMesh() {
+        val (title, text) = messageWith(MessageStatus.DELIVERED, isBroadcast = true).getStatusStringRes()
 
         assertEquals(Res.string.message_delivery_status, title)
         assertEquals(Res.string.message_status_delivered, text)
     }
 
     @Test
-    fun getStatusStringRes_returnsErrorResourcesForRoutingFailures() {
-        val message =
-            Message(
-                uuid = 1L,
-                receivedTime = 0L,
-                node = Node.createFallback(1, "Node"),
-                text = "hello",
-                fromLocal = true,
-                time = "now",
-                read = false,
-                status = MessageStatus.ERROR,
-                routingError = Routing.Error.NO_ROUTE.value,
-                packetId = 1,
-                emojis = emptyList(),
-                snr = 0f,
-                rssi = 0,
-                hopsAway = 0,
-                replyId = null,
-            )
+    fun getStatusStringRes_dmImplicitAck_readsRelayedUnconfirmed() {
+        val (_, text) = messageWith(MessageStatus.DELIVERED, isBroadcast = false).getStatusStringRes()
 
-        val (title, text) = message.getStatusStringRes()
+        assertEquals(Res.string.message_status_relayed_unconfirmed, text)
+    }
+
+    @Test
+    fun getStatusStringRes_explicitAck_readsDeliveredToRecipient() {
+        val (_, text) = messageWith(MessageStatus.RECEIVED).getStatusStringRes()
+
+        assertEquals(Res.string.message_status_delivered_recipient, text)
+    }
+
+    @Test
+    fun getStatusStringRes_routingFailure_collapsesToFailed() {
+        val (title, text) =
+            messageWith(MessageStatus.ERROR, routingError = Routing.Error.NO_ROUTE.value).getStatusStringRes()
 
         assertEquals(Res.string.error, title)
-        assertEquals(Res.string.routing_error_no_route, text)
+        assertEquals(Res.string.message_status_failed, text)
+    }
+
+    @Test
+    fun getStatusStringRes_tooLarge_readsPermanentError() {
+        val (_, text) =
+            messageWith(MessageStatus.ERROR, routingError = Routing.Error.TOO_LARGE.value).getStatusStringRes()
+
+        assertEquals(Res.string.message_status_too_large, text)
+    }
+
+    @Test
+    fun isStatusRetryable_offersRetryForDmUnconfirmedAndFailures_butNotTooLarge() {
+        assertTrue(messageWith(MessageStatus.DELIVERED, isBroadcast = false).isStatusRetryable())
+        assertTrue(messageWith(MessageStatus.ERROR, routingError = Routing.Error.NO_ROUTE.value).isStatusRetryable())
+        assertFalse(messageWith(MessageStatus.DELIVERED, isBroadcast = true).isStatusRetryable())
+        assertFalse(messageWith(MessageStatus.ERROR, routingError = Routing.Error.TOO_LARGE.value).isStatusRetryable())
+        assertFalse(messageWith(MessageStatus.ENROUTE).isStatusRetryable())
+        assertFalse(messageWith(MessageStatus.RECEIVED).isStatusRetryable())
     }
 
     @Test

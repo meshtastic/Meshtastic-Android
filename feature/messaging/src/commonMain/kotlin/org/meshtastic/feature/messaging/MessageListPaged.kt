@@ -54,7 +54,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import org.meshtastic.core.model.Message
-import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.Reaction
@@ -118,7 +117,7 @@ internal fun MessageListPaged(
     showStatusDialog?.let { message ->
         MessageStatusDialog(
             message = message,
-            resendOption = message.status?.equals(MessageStatus.ERROR) ?: false,
+            resendOption = message.isStatusRetryable(),
             onResend = {
                 handlers.onDeleteMessages(listOf(message.uuid))
                 handlers.onSendMessage(message.text, state.contactKey)

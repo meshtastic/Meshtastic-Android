@@ -18,14 +18,16 @@ package org.meshtastic.core.model
 
 import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.delivery_confirmed
 import org.meshtastic.core.resources.error
 import org.meshtastic.core.resources.message_delivery_status
 import org.meshtastic.core.resources.message_status_delivered
-import org.meshtastic.core.resources.message_status_enroute
-import org.meshtastic.core.resources.message_status_queued
+import org.meshtastic.core.resources.message_status_delivered_recipient
+import org.meshtastic.core.resources.message_status_failed
+import org.meshtastic.core.resources.message_status_relayed_unconfirmed
+import org.meshtastic.core.resources.message_status_sending
 import org.meshtastic.core.resources.message_status_sfpp_confirmed
 import org.meshtastic.core.resources.message_status_sfpp_routing
+import org.meshtastic.core.resources.message_status_too_large
 import org.meshtastic.core.resources.message_status_unknown
 import org.meshtastic.core.resources.routing_error_admin_bad_session_key
 import org.meshtastic.core.resources.routing_error_admin_public_key_unauthorized
@@ -93,6 +95,8 @@ data class Message(
     val relayNode: Int? = null,
     val relays: Int = 0,
     val filtered: Boolean = false,
+    /** True when this message was addressed to a channel (broadcast) rather than a single node (DM). */
+    val isBroadcast: Boolean = false,
     /** The transport mechanism this packet arrived over (see [MeshPacket.TransportMechanism]). */
     val transportMechanism: Int = 0,
     /** True when the radio verified this broadcast's XEdDSA signature ([MeshPacket.xeddsa_signed]). */
@@ -109,28 +113,54 @@ data class Message(
     fun displayedText(searching: Boolean = false): String =
         if (showTranslated && translatedText != null && !searching) translatedText else text
 
+    /**
+     * Actionable, spec-aligned delivery-status wording (meshtastic/design#43). Channel vs DM implicit acks read
+     * differently, and every send error collapses to the same actionable line except the permanent "too large" case.
+     */
     fun getStatusStringRes(): Pair<StringResource, StringResource> {
         val title = if (routingError > 0) Res.string.error else Res.string.message_delivery_status
         val text =
             when (status) {
-                MessageStatus.RECEIVED -> Res.string.delivery_confirmed
+                // Explicit ack from the recipient itself.
+                MessageStatus.RECEIVED -> Res.string.message_status_delivered_recipient
 
-                MessageStatus.QUEUED -> Res.string.message_status_queued
-
-                MessageStatus.ENROUTE -> Res.string.message_status_enroute
+                MessageStatus.QUEUED,
+                MessageStatus.ENROUTE,
+                -> Res.string.message_status_sending
 
                 MessageStatus.SFPP_ROUTING -> Res.string.message_status_sfpp_routing
 
                 MessageStatus.SFPP_CONFIRMED -> Res.string.message_status_sfpp_confirmed
 
-                MessageStatus.DELIVERED -> Res.string.message_status_delivered
+                // Implicit ack: for a channel it means "on the mesh"; for a DM the recipient never confirmed.
+                MessageStatus.DELIVERED ->
+                    if (isBroadcast) {
+                        Res.string.message_status_delivered
+                    } else {
+                        Res.string.message_status_relayed_unconfirmed
+                    }
 
-                MessageStatus.ERROR -> getStringResFrom(routingError)
+                MessageStatus.ERROR ->
+                    if (routingError == Routing.Error.TOO_LARGE.value) {
+                        Res.string.message_status_too_large
+                    } else {
+                        Res.string.message_status_failed
+                    }
 
                 MessageStatus.UNKNOWN,
                 null,
                 -> Res.string.message_status_unknown
             }
         return title to text
+    }
+
+    /**
+     * Whether a resend affordance should be offered (design#43): DM implicit acks the recipient never confirmed, and
+     * delivery failures — but never the permanent "too large" error.
+     */
+    fun isStatusRetryable(): Boolean = when (status) {
+        MessageStatus.DELIVERED -> !isBroadcast
+        MessageStatus.ERROR -> routingError != Routing.Error.TOO_LARGE.value
+        else -> false
     }
 }

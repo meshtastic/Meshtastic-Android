@@ -30,6 +30,7 @@ import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.Reaction
+import org.meshtastic.core.model.isBroadcast
 import org.meshtastic.core.model.util.getShortDateTime
 
 data class PacketEntity(
@@ -60,6 +61,7 @@ data class PacketEntity(
             relayNode = data.relayNode,
             relays = data.relays,
             filtered = filtered,
+            isBroadcast = data.isBroadcast,
             transportMechanism = data.transportMechanism,
             xeddsaSigned = data.xeddsaSigned,
             translatedText = translatedText,

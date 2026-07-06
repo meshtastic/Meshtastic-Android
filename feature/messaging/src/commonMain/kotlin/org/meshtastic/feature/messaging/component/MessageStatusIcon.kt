@@ -16,10 +16,20 @@
  */
 package org.meshtastic.feature.messaging.component
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.message_delivery_status
@@ -32,9 +42,13 @@ import org.meshtastic.core.ui.icon.MessageEnroute
 import org.meshtastic.core.ui.icon.MessageError
 import org.meshtastic.core.ui.icon.MqttDelivered
 import org.meshtastic.core.ui.icon.Warning
+import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
+import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
+import org.meshtastic.core.ui.theme.StatusColors.StatusRed
+import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 
 @Composable
-fun MessageStatusIcon(status: MessageStatus, modifier: Modifier = Modifier) {
+fun MessageStatusIcon(status: MessageStatus, modifier: Modifier = Modifier, tint: Color = LocalContentColor.current) {
     val icon =
         when (status) {
             MessageStatus.RECEIVED -> MeshtasticIcons.Acknowledged
@@ -50,5 +64,45 @@ fun MessageStatusIcon(status: MessageStatus, modifier: Modifier = Modifier) {
         modifier = modifier,
         imageVector = icon,
         contentDescription = stringResource(Res.string.message_delivery_status),
+        tint = tint,
     )
+}
+
+/**
+ * Delivery status shown as text next to the bubble (meshtastic/design#43) — the descriptive wording, not just an icon.
+ * The icon and color reinforce the text; they are never the sole signal. The parent bubble carries the same wording in
+ * its merged [contentDescription] for TalkBack, so this row stays a visual-only reinforcement.
+ */
+@Composable
+fun MessageStatusLabel(message: Message, modifier: Modifier = Modifier) {
+    val status = message.status ?: MessageStatus.UNKNOWN
+    val (_, textRes) = message.getStatusStringRes()
+    val tint = messageStatusColor(message)
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        MessageStatusIcon(status = status, modifier = Modifier.size(14.dp), tint = tint)
+        Text(text = stringResource(textRes), style = MaterialTheme.typography.labelSmall, color = tint)
+    }
+}
+
+@Composable
+private fun messageStatusColor(message: Message): Color = when (message.status) {
+    MessageStatus.RECEIVED,
+    MessageStatus.SFPP_CONFIRMED,
+    -> MaterialTheme.colorScheme.StatusGreen
+
+    MessageStatus.DELIVERED ->
+        if (message.isBroadcast) MaterialTheme.colorScheme.StatusGreen else MaterialTheme.colorScheme.StatusOrange
+
+    MessageStatus.QUEUED,
+    MessageStatus.ENROUTE,
+    MessageStatus.SFPP_ROUTING,
+    -> MaterialTheme.colorScheme.StatusYellow
+
+    MessageStatus.ERROR -> MaterialTheme.colorScheme.StatusRed
+
+    else -> MaterialTheme.colorScheme.onSurfaceVariant
 }
