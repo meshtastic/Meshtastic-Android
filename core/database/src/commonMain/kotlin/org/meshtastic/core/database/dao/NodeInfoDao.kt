@@ -27,6 +27,7 @@ import org.meshtastic.core.database.entity.MetadataEntity
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.database.entity.NodeWithRelations
+import org.meshtastic.core.model.mergePowerChannelLabel
 import org.meshtastic.proto.HardwareModel
 
 @Suppress("TooManyFunctions")
@@ -329,10 +330,8 @@ interface NodeInfoDao {
      */
     @Transaction
     suspend fun updatePowerChannelLabel(num: Int, channelIndex: Int, label: String) {
-        val labels = (getNodeByNum(num)?.node?.powerChannelLabels ?: emptyList()).toMutableList()
-        while (labels.size <= channelIndex) labels.add("")
-        labels[channelIndex] = label.trim()
-        setPowerChannelLabels(num, labels.dropLastWhile { it.isBlank() })
+        val existing = getNodeByNum(num)?.node?.powerChannelLabels ?: emptyList()
+        setPowerChannelLabels(num, mergePowerChannelLabel(existing, channelIndex, label))
     }
 
     /**

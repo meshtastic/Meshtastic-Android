@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.map
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeSortOption
+import org.meshtastic.core.model.mergePowerChannelLabel
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.LocalStats
@@ -157,11 +158,8 @@ class FakeNodeRepository :
 
     override suspend fun updatePowerChannelLabel(num: Int, channelIndex: Int, label: String) {
         val node = _nodeDBbyNum.value[num] ?: return
-        val labels = node.powerChannelLabels.toMutableList()
-        while (labels.size <= channelIndex) labels.add("")
-        labels[channelIndex] = label.trim()
-        _nodeDBbyNum.value =
-            _nodeDBbyNum.value + (num to node.copy(powerChannelLabels = labels.dropLastWhile { it.isBlank() }))
+        val merged = mergePowerChannelLabel(node.powerChannelLabels, channelIndex, label)
+        _nodeDBbyNum.value = _nodeDBbyNum.value + (num to node.copy(powerChannelLabels = merged))
     }
 
     override suspend fun upsert(node: Node) {
