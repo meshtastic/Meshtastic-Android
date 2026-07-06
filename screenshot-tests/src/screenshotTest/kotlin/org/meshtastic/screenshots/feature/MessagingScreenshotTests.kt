@@ -24,6 +24,7 @@ import org.meshtastic.feature.messaging.MessageInputPreview
 import org.meshtastic.feature.messaging.QuickChatItemPreview
 import org.meshtastic.feature.messaging.component.MessageItemSignedPreview
 import org.meshtastic.feature.messaging.component.MessageSearchBarPreview
+import org.meshtastic.feature.messaging.component.MessageStatusStatesPreview
 import org.meshtastic.feature.messaging.component.ReactionItemPreview
 
 @PreviewTest
@@ -66,4 +67,11 @@ fun ScreenshotMessageSearchBar() {
 @Composable
 fun ScreenshotMessageItemSigned() {
     MessageItemSignedPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotMessageStatusStates() {
+    MessageStatusStatesPreview()
 }

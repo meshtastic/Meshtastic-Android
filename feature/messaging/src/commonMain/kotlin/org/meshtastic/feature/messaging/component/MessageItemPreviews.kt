@@ -33,6 +33,7 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.sample_message
 import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.proto.Routing
 
 @Suppress("PreviewPublic")
 @PreviewLightDark
@@ -70,6 +71,67 @@ fun MessageItemSignedPreview() {
                     node = msg.node,
                     selected = false,
                     ourNode = NodePreviewParameterProvider().mickeyMouse,
+                    onReply = {},
+                    sendReaction = {},
+                    onShowReactions = {},
+                    onClick = {},
+                    onLongClick = {},
+                    onDoubleClick = {},
+                    onClickChip = {},
+                    onNavigateToOriginalMessage = {},
+                )
+            }
+        }
+    }
+}
+
+@Suppress("PreviewPublic")
+@PreviewLightDark
+@Composable
+fun MessageStatusStatesPreview() {
+    val base =
+        Message(
+            text = "Net check — anyone copy?",
+            time = "14:02",
+            fromLocal = true,
+            status = MessageStatus.ENROUTE,
+            snr = 0f,
+            rssi = 0,
+            hopsAway = 0,
+            uuid = 100L,
+            receivedTime = nowMillis,
+            node = NodePreviewParameterProvider().mickeyMouse,
+            read = false,
+            routingError = 0,
+            packetId = 6000,
+            emojis = listOf(),
+            replyId = null,
+        )
+    // One bubble per design#43 delivery state, all outgoing (local).
+    val states =
+        listOf(
+            base.copy(uuid = 100L, status = MessageStatus.ENROUTE), // Sending…
+            base.copy(uuid = 101L, status = MessageStatus.DELIVERED, isBroadcast = true), // Delivered to mesh
+            base.copy(uuid = 102L, status = MessageStatus.DELIVERED, isBroadcast = false), // Relayed, unconfirmed
+            base.copy(uuid = 103L, status = MessageStatus.RECEIVED), // Delivered to recipient
+            base.copy(uuid = 104L, status = MessageStatus.ERROR, routingError = Routing.Error.NO_ROUTE.value), // Failed
+            base.copy(
+                uuid = 105L,
+                status = MessageStatus.ERROR,
+                routingError = Routing.Error.TOO_LARGE.value,
+            ), // Too large
+        )
+    AppTheme {
+        Column(
+            modifier =
+            Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.background).padding(vertical = 16.dp),
+        ) {
+            states.forEach { msg ->
+                MessageItem(
+                    message = msg,
+                    node = msg.node,
+                    selected = false,
+                    ourNode = msg.node,
                     onReply = {},
                     sendReaction = {},
                     onShowReactions = {},
