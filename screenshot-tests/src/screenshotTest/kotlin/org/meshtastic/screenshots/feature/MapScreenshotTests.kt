@@ -20,10 +20,26 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.android.tools.screenshot.PreviewTest
 import org.meshtastic.feature.map.component.MapControlsOverlayPreview
+import org.meshtastic.feature.map.component.WaypointInfoDialogOptedInPreview
+import org.meshtastic.feature.map.component.WaypointInfoDialogReadOnlyPreview
 
 @PreviewTest
 @PreviewLightDark
 @Composable
 fun ScreenshotMapControlsOverlay() {
     MapControlsOverlayPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotWaypointInfoDialogReadOnly() {
+    WaypointInfoDialogReadOnlyPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotWaypointInfoDialogOptedIn() {
+    WaypointInfoDialogOptedInPreview()
 }
