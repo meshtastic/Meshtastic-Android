@@ -1093,6 +1093,7 @@ class RadioConfigViewModelTest {
 
         verifySuspend { radioConfigUseCase.setConfig(123, Config(security = decoded)) }
     }
+
     private fun fourChannelFixture() = listOf(
         ChannelSettings(name = "A"),
         ChannelSettings(name = "B"),

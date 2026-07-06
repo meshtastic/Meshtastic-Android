@@ -81,8 +81,8 @@ import org.meshtastic.core.resources.key_backup_restore_failed
 import org.meshtastic.core.resources.key_backup_restored
 import org.meshtastic.core.resources.key_backup_saved
 import org.meshtastic.core.resources.timeout
-import org.meshtastic.core.ui.util.SnackbarManager
 import org.meshtastic.core.resources.unknown_error
+import org.meshtastic.core.ui.util.SnackbarManager
 import org.meshtastic.core.ui.util.getChannelList
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.feature.settings.navigation.ConfigRoute
@@ -412,6 +412,7 @@ open class RadioConfigViewModel(
         }
     }
 
+    @Suppress("TooGenericExceptionCaught")
     fun updateChannels(new: List<ChannelSettings>, old: List<ChannelSettings>) {
         val destNum = destNum ?: destNode.value?.num ?: return
 
