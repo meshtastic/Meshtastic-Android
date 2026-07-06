@@ -1,30 +1,30 @@
 ---
-title: Home
+title: ホーム
 layout: default
 nav_order: 0
 ---
 
-# Meshtastic Android App Documentation
+# Meshtastic Android アプリのドキュメント
 
-User and developer documentation for the Meshtastic Android, Desktop, and iOS applications powered by KMP (Kotlin Multiplatform).
+KMP（Kotlin Multiplatform）で構築された Meshtastic の Android、デスクトップ、iOS アプリ向けの、ユーザーおよび開発者向けドキュメントです。
 
-Use the sidebar navigation to browse the **User Guide** for app features and the **Developer Guide** for contributing to the project.
-
----
-
-## Quick Links
-
-| Guide                                                                 | 説明                                                             |
-| --------------------------------------------------------------------- | -------------------------------------------------------------- |
-| [Getting Started](user/onboarding)                                    | Connect your first radio and send a message                    |
-| [Messages & Channels](user/messages-and-channels) | Channel broadcasts, direct messages, reactions, and encryption |
-| [Nodes](user/nodes)                                                   | Understanding the mesh network node list                       |
-| [Signal Meter](user/signal-meter)                                     | How the LoRa signal quality meter works                        |
-| [Units & Locale](user/units-and-locale)           | How temperatures, distances, and times adapt to your region    |
-| [Desktop App](user/desktop)                                           | Linux, macOS, and Windows desktop usage                        |
-| [Architecture](developer/architecture)                                | App architecture overview for contributors                     |
-| [Contributing](developer/contributing)                                | Branch naming, PR workflow, and verification commands          |
+サイドバーのナビゲーションから、アプリの機能については**ユーザーガイド**を、プロジェクトへの貢献については**開発者ガイド**をご覧ください。
 
 ---
 
-> This documentation is served from the same markdown source that powers the in-app **Help & Documentation** browser.
+## クイックリンク
+
+| ガイド                                       | 説明                                   |
+| ----------------------------------------- | ------------------------------------ |
+| [はじめに](user/onboarding)                   | 最初の無線機を接続してメッセージを送信する                |
+| [メッセージとチャンネル](user/messages-and-channels) | チャンネルのブロードキャスト、ダイレクトメッセージ、リアクション、暗号化 |
+| [ノード](user/nodes)                         | メッシュネットワークのノードリストを理解する               |
+| [信号メーター](user/signal-meter)               | LoRa の信号品質メーターの仕組み                   |
+| [単位とロケール](user/units-and-locale)          | 温度・距離・時刻が地域に合わせて変わる仕組み               |
+| [デスクトップアプリ](user/desktop)                 | Linux、macOS、Windows でのデスクトップ利用       |
+| [アーキテクチャ](developer/architecture)         | コントリビューター向けのアプリアーキテクチャ概要             |
+| [コントリビューション](developer/contributing)      | ブランチ命名、PR ワークフロー、検証コマンド              |
+
+---
+
+> このドキュメントは、アプリ内の**ヘルプとドキュメント**ブラウザと同じ Markdown ソースから提供されています。

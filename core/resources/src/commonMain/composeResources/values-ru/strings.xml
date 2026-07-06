@@ -37,6 +37,8 @@
     <string name="action_select_network">Выбрать сеть</string>
     <string name="action_send_reply">Отправить ответ</string>
     <string name="action_show_message_status">Показать статус сообщения</string>
+    <string name="action_toggle_translation">Переключение между исходным и переведенным текстом</string>
+    <string name="action_translate_message">Перевести сообщение</string>
     <string name="actions">Действия</string>
     <string name="adc_multiplier_override">Коэффициент переопределения ADC</string>
     <string name="adc_multiplier_override_ratio">Коэффициент переопределения ADC</string>
@@ -85,9 +87,15 @@
     <string name="analytics_platforms">Платформы для аналитики:</string>
     <string name="any">Любой</string>
     <!-- APP -->
+    <string name="app_functions_get_channel_info">Получить сведения о канале</string>
+    <string name="app_functions_get_device_status">Получить состояние устройства</string>
+    <string name="app_functions_get_mesh_metrics">Получить метрики сети</string>
+    <string name="app_functions_get_mesh_status">Получить статус сети</string>
+    <string name="app_functions_get_node_details">Получить сведения о ноде</string>
     <string name="app_functions_get_node_list">Получить список нод</string>
     <string name="app_functions_get_recent_messages">Получать последние сообщения</string>
     <string name="app_functions_master_summary">Позвольте системным ИИ-ассистентам (например, Gemini) обнаруживать и использовать функции сети</string>
+    <string name="app_functions_master_toggle">Разрешить ИИ доступ</string>
     <string name="app_functions_read_section">Функции чтения</string>
     <string name="app_functions_send_message">Отправить сообщение</string>
     <string name="app_functions_settings_summary">Контролируй, какие функции доступны помощникам ИИ</string>
@@ -104,6 +112,7 @@
     <string name="available_pins">Доступные контакты</string>
     <string name="back">Назад</string>
     <string name="backup_keys">Резервное копирование</string>
+    <string name="backup_keys_confirmation">Сохранить публичные и приватные ключи в безопасном зашифрованном хранилище на этом устройстве.</string>
     <string name="backup_restore">Резервная копия и восстановление</string>
     <string name="bad">Плохой</string>
     <string name="bandwidth">Ширина канала</string>
@@ -316,6 +325,8 @@
     <string name="delete_custom_tile_source">Удалить источник сетевых плиток</string>
     <string name="delete_for_everyone">Удалить для всех</string>
     <string name="delete_for_me">Удалить у меня</string>
+    <string name="delete_key_backup">Удалить резервную копию ключа</string>
+    <string name="delete_key_backup_confirmation">Удалить зашифрованную резервную копию ключа, хранящуюся на этом устройстве. Это нельзя отменить.</string>
     <plurals name="delete_messages">
         <item quantity="one">Удалить сообщение?</item>
         <item quantity="few">Удалить %1$s сообщения?</item>
@@ -580,7 +591,9 @@
     <string name="firmware">Прошивка</string>
     <string name="firmware_edition">Версия прошивки</string>
     <string name="firmware_old">Прошивка радиостанции слишком стара для взаимодействия с данным приложением. Чтобы получить больше сведений, посетите <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">наше руководство по установке прошивки</a>.</string>
+    <string name="firmware_recovery_banner">Завершение обновления %1$s</string>
     <string name="firmware_recovery_ble_failed">Не удалось завершить обновление через Bluetooth. Стоковый загрузчик этого устройства не может надежно завершить прерванное обновление по воздуху. Подключи его к компьютеру через USB и перепрошей с помощью фирменного серийного DFU-инструмента (например, adafruit-nrfutil), чтобы восстановить устройство.</string>
+    <string name="firmware_recovery_button">Возобновить обновление прошивки</string>
     <string name="firmware_recovery_dismiss">Отменить восстановление прошивки</string>
     <string name="firmware_recovery_explanation">Это устройство находится в режиме загрузчика из-за того, что обновление прошивки не завершилось. Держи его рядом, и оно будет перепрошито для завершения обновления.</string>
     <string name="firmware_too_old">Требуется обновление прошивки.</string>
@@ -665,9 +678,19 @@
     <string name="generate_input_event_on_press">Создать событие ввода при нажатии</string>
     <string name="generate_qr_code">Сгенерировать QR-код</string>
     <!-- GEOFENCE -->
+    <string name="geofence">Геозона</string>
+    <string name="geofence_box_author_confirm">Подтвердить область</string>
+    <string name="geofence_box_author_hint">Нажмите два угла, для определения области</string>
     <string name="geofence_box_use_view">Использовать текущий вид</string>
+    <string name="geofence_edit_area">Редактировать область</string>
+    <string name="geofence_entered_title">Введено %1$s</string>
     <string name="geofence_favorites_only">Только избранные</string>
+    <string name="geofence_left_body">%1$s оставил %2$s</string>
+    <string name="geofence_notify_on_enter">Уведомлять при входе</string>
+    <string name="geofence_notify_on_exit">Уведомлять при выходе</string>
     <string name="geofence_off">Выкл</string>
+    <string name="geofence_remove_area">Удалить область</string>
+    <string name="geofence_set_area">Задать область на карте</string>
     <string name="get_started">Начать работу</string>
     <string name="good">Хороший</string>
     <!-- GPIO -->
@@ -733,6 +756,11 @@
     <string name="ipv4_mode">Режим IPv4</string>
     <string name="json_output_enabled">Вывод JSON включен</string>
     <!-- KEY -->
+    <string name="key_backup_deleted">Резервная копия ключа удалена</string>
+    <string name="key_backup_not_found">Для этой ноды не найдено резервной копии ключа</string>
+    <string name="key_backup_restore_failed">Не удалось восстановить ключи из резервной копии</string>
+    <string name="key_backup_restored">Ключи восстановлены — сохраняю на устройство</string>
+    <string name="key_backup_saved">Ключи надежно сохранены</string>
     <string name="key_verification_final_title">Проверка ключа завершена</string>
     <string name="key_verification_request_title">Запрос проверки ключа</string>
     <string name="key_verification_title">Проверка ключа</string>
@@ -812,6 +840,7 @@
     <string name="lockdown_mode_summary_unlocked">Активно — хранилище зашифровано, это соединение аутентифицировано.</string>
     <string name="lockdown_passphrase">Пароль</string>
     <string name="lockdown_passphrases_do_not_match">Пароли не совпадают</string>
+    <string name="lockdown_session_minutes">Ограничение сессии (минуты)</string>
     <string name="lockdown_session_no_time_limit">Без ограничения по времени</string>
     <string name="lockdown_set_passphrase">Установить парольную фразу</string>
     <string name="lockdown_show_passphrase">Показать</string>
@@ -884,15 +913,30 @@
     <string name="max">Макс</string>
     <!-- MESH -->
     <string name="mesh_beacon_invitations_title">Приглашения в сеть</string>
+    <string name="mesh_beacon_message">Сообщение маяка</string>
     <string name="mesh_beacon_notification_body">Ближайшая сеть пригласила тебя присоединиться</string>
     <string name="mesh_beacon_notification_title">Приглашение в сеть</string>
+    <string name="mesh_beacon_offer_add">Добавить канал</string>
     <string name="mesh_beacon_offer_channel">Канал: %1$s</string>
+    <string name="mesh_beacon_offer_channel_key">Предлагаемый ключ канала (base64)</string>
+    <string name="mesh_beacon_offer_channel_name">Предложенное имя канала</string>
     <string name="mesh_beacon_offer_dismiss">Отменить</string>
     <string name="mesh_beacon_offer_from_unknown">С неизвестной ноды</string>
+    <string name="mesh_beacon_offer_join">Присоединиться</string>
     <string name="mesh_beacon_offer_preset">Пресет: %1$s</string>
+    <string name="mesh_beacon_offer_preset_setting">Предлагаемый пресет</string>
     <string name="mesh_beacon_offer_region">Регион: %1$s</string>
+    <string name="mesh_beacon_offer_region_setting">Предлагаемый регион</string>
+    <string name="mesh_beacon_offer_signal">Сигнал: %1$s / %2$s</string>
     <string name="mesh_beacon_offer_title">Приглашение в сеть</string>
+    <string name="mesh_beacon_on_preset">Передать преднастройку</string>
+    <string name="mesh_beacon_on_region">Передать регион</string>
     <string name="mesh_beacon_preset_none">Отсутствует</string>
+    <string name="mesh_beacon_target">Цель %1$d</string>
+    <string name="mesh_beacon_target_add">Добавить цель</string>
+    <string name="mesh_beacon_target_channel_index">Индекс канала</string>
+    <string name="mesh_beacon_target_remove">Удалить цель</string>
+    <string name="mesh_beacon_targets">Цели передачи</string>
     <string name="mesh_map_location">Карта расположения нод</string>
     <string name="mesh_map_location_description">Включает синюю точку местоположения для вашего телефона на карте нод.</string>
     <!-- MESHTASTIC -->
@@ -918,6 +962,7 @@
     <string name="message_status_sfpp_confirmed">Подтверждено в цепочке SF++</string>
     <string name="message_status_sfpp_routing">Маршрутизация по SF++ цепочке…</string>
     <string name="message_status_unknown">Неизвестно</string>
+    <string name="message_translated_label">Переведено</string>
     <string name="messages">Сообщения</string>
     <string name="micrograms_per_cubic_meter">µg/m³</string>
     <string name="min">Мин</string>
@@ -1264,6 +1309,8 @@
     <string name="resend">Отправить</string>
     <string name="reset">Сброс</string>
     <string name="reset_to_defaults">Сброс значений по умолчанию</string>
+    <string name="restore_keys">Восстановить ключи</string>
+    <string name="restore_keys_confirmation">Восстановить сохранённые публичные и приватные ключи на этой ноде.</string>
     <string name="retry">Повторить</string>
     <string name="ringtone">Рингтон</string>
     <string name="ringtone_file_empty">Файл пуст</string>
@@ -1395,8 +1442,10 @@
     <string name="show_all_key_title">Ключ шифрования</string>
     <string name="show_iaq_legend">Показать легенду качества воздуха</string>
     <string name="show_layer">Показать слой</string>
+    <string name="show_original">Показать исходник</string>
     <string name="show_password">Показать пароль</string>
     <string name="show_precision_circle">Показывать точные круги</string>
+    <string name="show_translation">Показать перевод</string>
     <string name="show_waypoints">Показать путевые точки</string>
     <string name="shutdown">Выключение</string>
     <string name="shutdown_node_name">Узел: %1$s</string>
@@ -1528,7 +1577,14 @@
     <string name="traffic_management_rate_limit_window">Окно ограничения скорости (сек.)</string>
     <string name="traffic_management_router_preserve_hops">Сохранять хопы маршрутизатора</string>
     <string name="traffic_management_unknown_packet_threshold">Порог передач неизвестных пакетов</string>
+    <string name="translate">Перевести</string>
     <!-- TRANSLATION -->
+    <string name="translation_download_message">Для перевода сообщений требуется однократная загрузка языковой модели (примерно %1$d МБ).</string>
+    <string name="translation_download_title">Скачать модель перевода?</string>
+    <string name="translation_downloading">Скачивание модели перевода…</string>
+    <string name="translation_failed">Не удалось перевести сообщение</string>
+    <string name="translation_model_download_failed">Скачивание модели перевода не удалось</string>
+    <string name="translation_not_required">Сообщение уже на вашем языке</string>
     <string name="transmit_over_lora">Передать через LoRa</string>
     <!-- TRANSPORT -->
     <string name="transport">Транспорт</string>

@@ -189,12 +189,6 @@
   },
   "pullRequests": [
     {
-      "id": "10894",
-      "title": "Reduce heap usage on ST7789 display targets with reduced-memory mode",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10894",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
       "id": "10887",
       "title": "InkHUD: persist incoming broadcasts on all channels",
       "page_url": "https://github.com/meshtastic/firmware/pull/10887",
@@ -204,12 +198,6 @@
       "id": "10884",
       "title": "Implement SD card backup/restore of preferences; add SD support for Cardputer Advanced",
       "page_url": "https://github.com/meshtastic/firmware/pull/10884",
-      "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "10881",
-      "title": "feat(rak4631_eth_gw): advertise a DHCP hostname derived from the device name",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10881",
       "zip_url": "https://discord.com/invite/meshtastic"
     },
     {
