@@ -693,6 +693,8 @@
     <string name="generate_qr_code">Generate QR Code</string>
     <!-- GEOFENCE -->
     <string name="geofence">Geofence</string>
+    <string name="geofence_alerts_opt_in">Notify me of crossings</string>
+    <string name="geofence_alerts_opt_in_desc">Get an alert when nodes enter or leave this geofence</string>
     <string name="geofence_box_author_confirm">Confirm area</string>
     <string name="geofence_box_author_hint">Tap two corners to define the area</string>
     <string name="geofence_box_author_hint_viewport">Pan the map to frame the area, then tap Confirm area</string>

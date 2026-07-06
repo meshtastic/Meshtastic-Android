@@ -50,6 +50,8 @@ fun WaypointMarkers(
     myNodeNum: Int,
     isConnected: Boolean,
     onEditWaypointRequest: (Waypoint) -> Unit,
+    isMyWaypoint: (Int) -> Boolean,
+    onShowGeofenceInfo: (Waypoint) -> Unit,
     selectedWaypointId: Int? = null,
 ) {
     val scope = rememberCoroutineScope()
@@ -92,10 +94,14 @@ fun WaypointMarkers(
                 snippet = snippet,
                 visible = true,
                 onInfoWindowClick = {
-                    if (waypoint.locked_to == 0 || waypoint.locked_to == myNodeNum || !isConnected) {
-                        onEditWaypointRequest(waypoint)
-                    } else {
-                        scope.launch { context.showToast(Res.string.locked) }
+                    when {
+                        // Foreign geofences: read-only view hosting the receiver-local crossing-alert opt-in.
+                        waypoint.toGeofence() != null && !isMyWaypoint(waypoint.id) -> onShowGeofenceInfo(waypoint)
+
+                        waypoint.locked_to == 0 || waypoint.locked_to == myNodeNum || !isConnected ->
+                            onEditWaypointRequest(waypoint)
+
+                        else -> scope.launch { context.showToast(Res.string.locked) }
                     }
                 },
             )

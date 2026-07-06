@@ -34,6 +34,7 @@ import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.testing.FakeNodeRepository
+import org.meshtastic.core.testing.FakeNotificationPrefs
 import org.meshtastic.core.testing.FakeRadioConfigRepository
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.core.testing.TestDataFactory
@@ -80,6 +81,7 @@ class BaseMapViewModelTest {
                 packetRepository = packetRepository,
                 radioController = radioController,
                 radioConfigRepository = radioConfigRepository,
+                notificationPrefs = FakeNotificationPrefs(),
             )
     }
 

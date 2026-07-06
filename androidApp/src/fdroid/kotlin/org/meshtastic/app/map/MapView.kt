@@ -143,6 +143,7 @@ import org.meshtastic.feature.map.LastHeardFilter
 import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.component.MapButton
 import org.meshtastic.feature.map.component.MapControlsOverlay
+import org.meshtastic.feature.map.component.WaypointInfoDialog
 import org.meshtastic.proto.Waypoint
 import org.osmdroid.bonuspack.utils.BonusPackHelper.getBitmapFromVectorDrawable
 import org.osmdroid.config.Configuration
@@ -256,6 +257,7 @@ fun MapView(
     var showDownloadButton: Boolean by remember { mutableStateOf(false) }
     var showEditWaypointDialog by remember { mutableStateOf<Waypoint?>(null) }
     var showDeleteWaypointDialog by remember { mutableStateOf<Waypoint?>(null) }
+    var showGeofenceInfoDialog by remember { mutableStateOf<Waypoint?>(null) }
     var showCacheManagerDialog by remember { mutableStateOf(false) }
     var showCurrentCacheInfo by remember { mutableStateOf(false) }
     var showPurgeTileSourceDialog by remember { mutableStateOf(false) }
@@ -424,11 +426,15 @@ fun MapView(
         performHapticFeedback()
         Logger.d { "marker long pressed id=$id" }
         val waypoint = waypoints[id]?.waypoint ?: return
-        // edit only when unlocked or lockedTo myNodeNum
-        if (waypoint.locked_to in setOf(0, mapViewModel.myNodeNum ?: 0) && isConnected) {
-            showEditWaypointDialog = waypoint
-        } else {
-            showDeleteWaypointDialog = waypoint
+        when {
+            // Foreign geofences: read-only view hosting the receiver-local crossing-alert opt-in.
+            waypoint.toGeofence() != null && !mapViewModel.isMyWaypoint(id) -> showGeofenceInfoDialog = waypoint
+
+            // edit only when unlocked or lockedTo myNodeNum
+            waypoint.locked_to in setOf(0, mapViewModel.myNodeNum ?: 0) && isConnected ->
+                showEditWaypointDialog = waypoint
+
+            else -> showDeleteWaypointDialog = waypoint
         }
     }
 
@@ -815,6 +821,28 @@ fun MapView(
                 showEditWaypointDialog = null
                 geofenceBoxDraft = draft
                 map.generateGeofenceBoxOverlay()
+            },
+        )
+    }
+
+    showGeofenceInfoDialog?.let { waypoint ->
+        val optIns by mapViewModel.geofenceAlertOptIns.collectAsStateWithLifecycle()
+        WaypointInfoDialog(
+            waypoint = waypoint,
+            displayUnits = displayUnits,
+            alertsEnabled = waypoint.id in optIns,
+            onToggleAlerts = { mapViewModel.setGeofenceAlertOptIn(waypoint.id, it) },
+            onDismissRequest = { showGeofenceInfoDialog = null },
+            // Unlocked foreign geofences can still be edited/re-broadcast (only while connected, since editing means
+            // re-sending); locked ones stay read-only.
+            onEdit =
+            if (waypoint.locked_to == 0 && isConnected) {
+                {
+                    showGeofenceInfoDialog = null
+                    showEditWaypointDialog = waypoint
+                }
+            } else {
+                null
             },
         )
     }

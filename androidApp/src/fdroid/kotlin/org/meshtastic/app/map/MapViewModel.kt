@@ -24,6 +24,7 @@ import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.NotificationPrefs
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioController
@@ -37,9 +38,17 @@ class MapViewModel(
     nodeRepository: NodeRepository,
     radioController: RadioController,
     radioConfigRepository: RadioConfigRepository,
+    notificationPrefs: NotificationPrefs,
     buildConfigProvider: BuildConfigProvider,
     savedStateHandle: SavedStateHandle,
-) : BaseMapViewModel(mapPrefs, nodeRepository, packetRepository, radioController, radioConfigRepository) {
+) : BaseMapViewModel(
+    mapPrefs,
+    nodeRepository,
+    packetRepository,
+    radioController,
+    radioConfigRepository,
+    notificationPrefs,
+) {
 
     private val _selectedWaypointId = MutableStateFlow(savedStateHandle.get<Int>("waypointId"))
     val selectedWaypointId: StateFlow<Int?> = _selectedWaypointId.asStateFlow()

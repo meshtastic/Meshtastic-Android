@@ -52,6 +52,7 @@ import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.NotificationPrefs
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioController
@@ -91,8 +92,16 @@ class MapViewModel(
     radioController: RadioController,
     private val customTileProviderRepository: CustomTileProviderRepository,
     uiPrefs: UiPrefs,
+    notificationPrefs: NotificationPrefs,
     savedStateHandle: SavedStateHandle,
-) : BaseMapViewModel(mapPrefs, nodeRepository, packetRepository, radioController, radioConfigRepository) {
+) : BaseMapViewModel(
+    mapPrefs,
+    nodeRepository,
+    packetRepository,
+    radioController,
+    radioConfigRepository,
+    notificationPrefs,
+) {
 
     private val _selectedWaypointId = MutableStateFlow(savedStateHandle.get<Int>("waypointId"))
     val selectedWaypointId: StateFlow<Int?> = _selectedWaypointId.asStateFlow()

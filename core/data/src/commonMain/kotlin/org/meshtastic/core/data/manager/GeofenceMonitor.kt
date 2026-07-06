@@ -20,16 +20,18 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.geofence.activeWaypointPackets
-import org.meshtastic.core.model.geofence.notifiesOnCrossing
+import org.meshtastic.core.model.geofence.geofencesToMonitor
 import org.meshtastic.core.model.geofence.toGeofence
 import org.meshtastic.core.model.util.GeoConstants.DEG_D
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.NodeManager
+import org.meshtastic.core.repository.NotificationPrefs
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.geofence
@@ -50,7 +52,10 @@ import kotlin.concurrent.Volatile
  *
  * Hooked from [MeshDataHandlerImpl.handlePosition]; holds the active geofence-bearing waypoints in memory (refreshed
  * from [PacketRepository.getWaypoints], normalised via [activeWaypointPackets] so stale/expired transmissions can't
- * fire). Crossing state lives in [GeofenceCrossingStore] (in-memory, baseline-on-first-sighting).
+ * fire). By default only waypoints created by THIS device are tracked — geofences are mesh-broadcast, so without that
+ * filter every receiver in range would alert on the creator's crossings — but the user can opt in to specific foreign
+ * geofences via [NotificationPrefs.geofenceAlertOptIns]. Crossing state lives in [GeofenceCrossingStore] (in-memory,
+ * baseline-on-first-sighting).
  *
  * Received positions are funnelled through a single ordered worker so that two positions for the same node can never be
  * evaluated out of order (which would corrupt the inside/outside baseline and fire a spurious or missed alert).
@@ -61,6 +66,7 @@ class GeofenceMonitor(
     private val nodeManager: NodeManager,
     private val serviceNotifications: MeshNotificationManager,
     private val crossingStore: GeofenceCrossingStore,
+    private val notificationPrefs: NotificationPrefs,
     @Named("ServiceScope") private val scope: CoroutineScope,
 ) {
 
@@ -85,18 +91,19 @@ class GeofenceMonitor(
                 }
             }
         }
-        // A bad emission must not tear down the snapshot for the rest of the session.
+        // A bad emission must not tear down the snapshot for the rest of the session. Combined with myNodeNum (so the
+        // creator-only filter recomputes once our node number is known — waypoints can arrive before we're connected)
+        // and the opt-in set (so subscribing to a foreign geofence takes effect immediately).
         scope.launch {
-            packetRepository.value
-                .getWaypoints()
+            combine(
+                packetRepository.value.getWaypoints(),
+                nodeManager.myNodeNum,
+                notificationPrefs.geofenceAlertOptIns,
+            ) { packets, myNodeNum, optIns ->
+                packets.activeWaypointPackets(nowSeconds).values.geofencesToMonitor(myNodeNum, optIns)
+            }
                 .catch { Logger.e(it) { "Geofence waypoint stream failed; geofence tracking paused" } }
-                .collect { packets ->
-                    val active =
-                        packets
-                            .activeWaypointPackets(nowSeconds)
-                            .values
-                            .mapNotNull { it.waypoint }
-                            .filter { it.notifiesOnCrossing }
+                .collect { active ->
                     activeGeofences = active
                     crossingStore.retainOnly(active.map { it.id }.toSet())
                 }
