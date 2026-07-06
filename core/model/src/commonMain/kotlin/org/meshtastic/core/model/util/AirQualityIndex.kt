@@ -32,8 +32,9 @@ object AirQualityIndex {
     private const val NOWCAST_WINDOW_HOURS = 12
     private const val SECONDS_PER_HOUR = 3600L
 
-    /** EPA requires at least 2 of the 12 hourly buckets, including the most recent hour, or NowCast isn't reported. */
+    /** EPA requires the most recent hour plus at least 2 of the 3 most recent hours, or NowCast isn't reported. */
     private const val MIN_VALID_HOURS = 2
+    private const val RECENT_WINDOW_HOURS = 3
 
     private const val MIN_WEIGHT_FACTOR = 0.5
 
@@ -41,7 +42,8 @@ object AirQualityIndex {
      * Computes the NowCast PM2.5 concentration (µg/m³) from a node's PM2.5 [readings] (epoch-seconds to µg/m³ pairs),
      * relative to [nowEpochSeconds]. Readings are binned into hourly buckets (0 = most recent hour) and averaged within
      * each bucket. Returns null if there isn't enough history yet: the most recent hour must have a reading, and at
-     * least [MIN_VALID_HOURS] of the last [NOWCAST_WINDOW_HOURS] hours must be populated.
+     * least [MIN_VALID_HOURS] of the [RECENT_WINDOW_HOURS] most recent hours must be populated — EPA's minimum-data
+     * rule, so stale data spread across the older end of the 12h window can't produce a value.
      */
     fun computeNowCastPm25(readings: List<Pair<Long, Double>>, nowEpochSeconds: Long): Double? {
         val sums = DoubleArray(NOWCAST_WINDOW_HOURS)
@@ -56,7 +58,8 @@ object AirQualityIndex {
         val hourlyAverages = List(NOWCAST_WINDOW_HOURS) { i -> if (counts[i] > 0) sums[i] / counts[i] else null }
         val present = hourlyAverages.withIndex().mapNotNull { (i, v) -> v?.let { i to it } }
 
-        return if (hourlyAverages[0] == null || present.size < MIN_VALID_HOURS) {
+        val recentValid = hourlyAverages.take(RECENT_WINDOW_HOURS).count { it != null }
+        return if (hourlyAverages[0] == null || recentValid < MIN_VALID_HOURS) {
             null
         } else {
             val max = present.maxOf { it.second }

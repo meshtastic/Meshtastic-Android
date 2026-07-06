@@ -72,8 +72,11 @@ private fun buildAirQualityCards(
     // A present reading of 0 is a valid value (e.g. clean air at 0 µg/m³), so only the `?.` null-check (an
     // absent metric) hides a card — matching the #5793 chart/CSV zero-suppression fix.
     metrics.pm10_standard?.let { pm -> add(VectorMetricInfo(pm10Label, "$pm $ugm3", icon)) }
-    metrics.pm25_standard?.let { pm -> add(VectorMetricInfo(pm25Label, "$pm $ugm3", icon)) }
-    aqi?.let { (aqiValue, severity) -> add(VectorMetricInfo(aqiLabel, "$aqiValue (${severity.label})", icon)) }
+    metrics.pm25_standard?.let { pm ->
+        add(VectorMetricInfo(pm25Label, "$pm $ugm3", icon))
+        // AQI sits alongside the raw PM2.5 reading, so only show it when that raw reading is present.
+        aqi?.let { (aqiValue, severity) -> add(VectorMetricInfo(aqiLabel, "$aqiValue (${severity.label})", icon)) }
+    }
     metrics.pm100_standard?.let { pm -> add(VectorMetricInfo(pm100Label, "$pm $ugm3", icon)) }
     metrics.co2?.let { co2 -> add(VectorMetricInfo(co2Label, "$co2 $ppmUnit", icon)) }
 }
@@ -104,7 +107,11 @@ internal fun AirQualityInfoCards(node: Node, pm25History: List<Telemetry> = empt
     val ugm3 = stringResource(Res.string.micrograms_per_cubic_meter)
     val ppmUnit = stringResource(Res.string.ppm)
 
-    val aqi = remember(pm25History) { nowCastAqi(pm25History) }
+    // Not remembered on pm25History alone: NowCast depends on nowSeconds, so a value cached until new telemetry
+    // arrives would keep showing after its most recent reading ages out of the 12h window. Recomputing per
+    // recomposition (cheap) reads fresh nowSeconds; the equal-by-value Pair keeps `cards` below from churning.
+    // ponytail: no dedicated wall-clock ticker — the node-detail screen already stops recomposing with the node.
+    val aqi = nowCastAqi(pm25History)
     val icon = MeshtasticIcons.AirQuality
     val cards =
         remember(metrics, aqi, ugm3, ppmUnit, icon) {

@@ -64,6 +64,14 @@ class AirQualityIndexTest {
     }
 
     @Test
+    fun computeNowCastPm25_returns_null_when_second_valid_hour_is_outside_recent_three() {
+        // Two valid hours in the 12h window (now + 11h ago), but only one within the most recent 3 hours.
+        // EPA requires 2 of the 3 most recent hours, so this must not report a value.
+        val readings = listOf(NOW to 20.0, NOW - 11 * SECONDS_PER_HOUR to 20.0)
+        assertNull(AirQualityIndex.computeNowCastPm25(readings, NOW))
+    }
+
+    @Test
     fun computeNowCastPm25_averages_stable_readings_with_weight_factor_one() {
         // No variation across hours -> weight factor stays at 1, so NowCast is a plain average.
         val readings = listOf(NOW to 20.0, NOW - SECONDS_PER_HOUR to 20.0, NOW - 2 * SECONDS_PER_HOUR to 20.0)
