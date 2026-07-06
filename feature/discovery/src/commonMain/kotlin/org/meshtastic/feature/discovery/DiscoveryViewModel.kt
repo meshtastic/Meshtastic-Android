@@ -36,6 +36,8 @@ import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.discovery.scan.Check24GhzCapability
 import org.meshtastic.feature.discovery.scan.HardwareCapabilityResult
+import org.meshtastic.proto.ChannelSettings
+import org.meshtastic.proto.Config.LoRaConfig
 import org.meshtastic.proto.Config.LoRaConfig.RegionCode
 
 @KoinViewModel
@@ -55,6 +57,45 @@ class DiscoveryViewModel(
 
     /** Mesh Beacon invitations received from other meshes, newest first. */
     val beaconOffers: StateFlow<List<MeshBeaconOffer>> = meshBeaconRepository.offers
+
+    /** Modem presets advertised by any received beacon — flagged in the scan-setup picker (FR-004). */
+    val beaconPresets: StateFlow<Set<ChannelOption>> =
+        meshBeaconRepository.offers
+            .map { offers -> offers.mapNotNull { ChannelOption.from(it.beacon.offer_preset) }.toSet() }
+            .stateInWhileSubscribed(initialValue = emptySet())
+
+    /** Distinct custom channels advertised by beacons — offered as selectable scan targets (FR-007). */
+    val beaconChannels: StateFlow<List<BeaconChannel>> =
+        meshBeaconRepository.offers
+            .map { offers ->
+                offers
+                    .mapNotNull { offer ->
+                        val ch = offer.beacon.offer_channel ?: return@mapNotNull null
+                        val name =
+                            ch.name.ifBlank {
+                                return@mapNotNull null
+                            }
+                        BeaconChannel(
+                            name = name,
+                            psk = ch.psk,
+                            preset = ChannelOption.from(offer.beacon.offer_preset),
+                            region = offer.beacon.offer_region,
+                        )
+                    }
+                    .distinctBy { it.id }
+            }
+            .stateInWhileSubscribed(initialValue = emptyList())
+
+    private val _selectedBeaconChannels = MutableStateFlow<Set<String>>(emptySet())
+    val selectedBeaconChannels: StateFlow<Set<String>> = _selectedBeaconChannels.asStateFlow()
+
+    /** The radio's current LoRa config — drives the add-vs-switch decision for a beacon join. */
+    val currentLora: StateFlow<LoRaConfig?> =
+        radioConfigRepository.localConfigFlow.map { it.lora }.stateInWhileSubscribed(initialValue = null)
+
+    /** The radio's current channel settings (index 0 = primary) — drives the add-vs-switch decision. */
+    val currentChannels: StateFlow<List<ChannelSettings>> =
+        radioConfigRepository.channelSetFlow.map { it.settings }.stateInWhileSubscribed(initialValue = emptyList())
 
     val homePreset: StateFlow<ChannelOption> =
         radioConfigRepository.localConfigFlow
@@ -94,6 +135,12 @@ class DiscoveryViewModel(
     val sessions: StateFlow<List<DiscoverySessionEntity>> =
         discoveryDao.getAllSessions().stateInWhileSubscribed(initialValue = emptyList())
 
+    /** Beacon presets we've already auto-selected once, so a user's later deselection is never undone (FR-004). */
+    private val autoSelectedBeaconPresets = mutableSetOf<ChannelOption>()
+
+    /** Beacon channels we've already auto-selected once (union-only, FR-007). */
+    private val autoSelectedBeaconChannels = mutableSetOf<String>()
+
     init {
         safeLaunch(tag = "markInterruptedSessions") { discoveryDao.markInterruptedSessions() }
         safeLaunch(tag = "check24GhzCapability") {
@@ -101,26 +148,57 @@ class DiscoveryViewModel(
             _is24GhzBlocked.value =
                 result is HardwareCapabilityResult.Unsupported || result is HardwareCapabilityResult.Unknown
         }
+        // Pre-select each beacon-advertised preset once (union-only) as beacons arrive — never clearing user choices.
+        safeLaunch(tag = "preselectBeaconPresets") {
+            beaconPresets.collect { presets ->
+                val fresh = presets - autoSelectedBeaconPresets
+                if (fresh.isNotEmpty()) {
+                    autoSelectedBeaconPresets += fresh
+                    updateSelectedPresets { it + fresh }
+                }
+            }
+        }
+        // Pre-select each beacon custom channel once (union-only), never clearing user choices (FR-007).
+        safeLaunch(tag = "preselectBeaconChannels") {
+            beaconChannels.collect { channels ->
+                val fresh = channels.map { it.id }.toSet() - autoSelectedBeaconChannels
+                if (fresh.isNotEmpty()) {
+                    autoSelectedBeaconChannels += fresh
+                    _selectedBeaconChannels.update { it + fresh }
+                }
+            }
+        }
     }
 
-    fun togglePreset(preset: ChannelOption) {
+    fun toggleBeaconChannel(id: String) {
+        _selectedBeaconChannels.update { if (id in it) it - id else it + id }
+    }
+
+    fun togglePreset(preset: ChannelOption) = updateSelectedPresets { current ->
+        if (preset in current) current - preset else current + preset
+    }
+
+    /**
+     * Atomically mutates the selected-preset set and mirrors it to prefs, so the shown selection and saved prefs never
+     * diverge. Shared by [togglePreset], [discoverOffer], and the beacon-preset pre-select.
+     */
+    private fun updateSelectedPresets(transform: (Set<ChannelOption>) -> Set<ChannelOption>) {
         _selectedPresets.update { current ->
-            val updated = if (preset in current) current - preset else current + preset
+            val updated = transform(current)
             discoveryPrefs.setSelectedPresets(updated.map { it.name }.toSet())
             updated
         }
     }
 
     /**
-     * Seeds the scan with just the preset an invitation advertised, so the user can survey the advertised mesh before
-     * joining. Persists like [togglePreset] (not a bare [_selectedPresets] write) so the shown selection and saved
-     * prefs never diverge — otherwise the next [togglePreset] would silently persist prefs derived from this seed.
-     * No-op if the offer carries no preset, or a preset with no matching [ChannelOption].
+     * Adds the preset an invitation advertised to the scan selection (union, never clearing the user's existing choices
+     * — matches Apple 014-mesh-beacons FR-003), so the user can survey the advertised mesh before joining. Persists
+     * like [togglePreset] so the shown selection and saved prefs never diverge. No-op if the offer carries no preset,
+     * or a preset with no matching [ChannelOption].
      */
     fun discoverOffer(offer: MeshBeaconOffer) {
         val preset = ChannelOption.from(offer.beacon.offer_preset) ?: return
-        _selectedPresets.value = setOf(preset)
-        discoveryPrefs.setSelectedPresets(setOf(preset.name))
+        updateSelectedPresets { it + preset }
     }
 
     fun dismissOffer(offer: MeshBeaconOffer) {
@@ -134,8 +212,24 @@ class DiscoveryViewModel(
 
     fun startScan() {
         safeLaunch(tag = "startScan") {
-            scanEngine.startScan(
-                presets = selectedPresets.value.toList(),
+            val presetTargets = selectedPresets.value.map { ScanTarget(preset = it, label = it.name) }
+            val selectedIds = selectedBeaconChannels.value
+            val channelTargets =
+                beaconChannels.value
+                    .filter { it.id in selectedIds }
+                    .map { bc ->
+                        val preset = bc.preset ?: homePreset.value
+                        ScanTarget(
+                            preset = preset,
+                            label = "${preset.name} · ${bc.name}",
+                            channel = ChannelSettings(name = bc.name, psk = bc.psk),
+                            region = bc.region.takeIf { it != RegionCode.UNSET },
+                        )
+                    }
+            val targets = presetTargets + channelTargets
+            if (targets.isEmpty()) return@safeLaunch
+            scanEngine.startScanTargets(
+                targets = targets,
                 dwellDurationSeconds = dwellDurationMinutes.value.toLong() * SECONDS_PER_MINUTE,
             )
         }

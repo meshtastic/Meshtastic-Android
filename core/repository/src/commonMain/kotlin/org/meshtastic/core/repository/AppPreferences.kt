@@ -370,3 +370,13 @@ interface DiscoveryPrefs {
         const val DEFAULT_DWELL_MINUTES = 15
     }
 }
+
+/**
+ * Reactive persistence for received Mesh Beacon invitations. Records are opaque, self-describing strings (see
+ * `MeshBeaconOffer.encode`) so this prefs layer stays free of proto/model types.
+ */
+interface MeshBeaconPrefs {
+    val storedBeacons: StateFlow<List<String>>
+
+    fun setStoredBeacons(records: List<String>)
+}

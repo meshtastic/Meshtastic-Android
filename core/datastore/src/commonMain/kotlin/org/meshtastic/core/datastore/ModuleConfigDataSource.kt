@@ -81,6 +81,8 @@ class ModuleConfigDataSource(
 
             config.tak != null -> current.copy(tak = config.tak)
 
+            config.mesh_beacon != null -> current.copy(mesh_beacon = config.mesh_beacon)
+
             else -> current
         }
     }

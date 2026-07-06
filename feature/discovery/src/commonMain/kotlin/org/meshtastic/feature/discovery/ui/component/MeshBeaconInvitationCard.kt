@@ -33,9 +33,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.model.ChannelOption
 import org.meshtastic.core.model.MeshBeaconOffer
+import org.meshtastic.core.model.util.BeaconJoinOption
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.mesh_beacon_offer_add
 import org.meshtastic.core.resources.mesh_beacon_offer_channel
 import org.meshtastic.core.resources.mesh_beacon_offer_discover
 import org.meshtastic.core.resources.mesh_beacon_offer_dismiss
@@ -43,6 +46,7 @@ import org.meshtastic.core.resources.mesh_beacon_offer_from_unknown
 import org.meshtastic.core.resources.mesh_beacon_offer_join
 import org.meshtastic.core.resources.mesh_beacon_offer_preset
 import org.meshtastic.core.resources.mesh_beacon_offer_region
+import org.meshtastic.core.resources.mesh_beacon_offer_signal
 import org.meshtastic.core.resources.mesh_beacon_offer_title
 import org.meshtastic.proto.Config.LoRaConfig.RegionCode
 
@@ -50,9 +54,11 @@ import org.meshtastic.proto.Config.LoRaConfig.RegionCode
  * A single received Mesh Beacon invitation. Presents the advertised channel/region/preset and lets the user survey the
  * mesh first ([onDiscover], shown only when a preset is offered), join it ([onJoin]), or dismiss the invitation.
  */
+@Suppress("LongMethod")
 @Composable
 internal fun MeshBeaconInvitationCard(
     offer: MeshBeaconOffer,
+    joinOption: BeaconJoinOption,
     onJoin: () -> Unit,
     onDiscover: () -> Unit,
     onDismiss: () -> Unit,
@@ -93,6 +99,18 @@ internal fun MeshBeaconInvitationCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
+            if (offer.rssi != 0 || offer.snr != 0f) {
+                Text(
+                    text =
+                    stringResource(
+                        Res.string.mesh_beacon_offer_signal,
+                        MetricFormatter.snr(offer.snr),
+                        MetricFormatter.rssi(offer.rssi),
+                    ),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
 
             Row(
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
@@ -104,7 +122,17 @@ internal fun MeshBeaconInvitationCard(
                 if (presetOption != null) {
                     OutlinedButton(onClick = onDiscover) { Text(stringResource(Res.string.mesh_beacon_offer_discover)) }
                 }
-                Button(onClick = onJoin) { Text(stringResource(Res.string.mesh_beacon_offer_join)) }
+                // "Add channel" joins with no reboot (same frequency slot); otherwise "Join" retunes + reboots.
+                val joinLabel =
+                    if (joinOption == BeaconJoinOption.ADD) {
+                        Res.string.mesh_beacon_offer_add
+                    } else {
+                        Res.string.mesh_beacon_offer_join
+                    }
+                // NONE (no offered channel) can't be joined — toJoinChannelSet returns null — so disable the action.
+                Button(onClick = onJoin, enabled = joinOption != BeaconJoinOption.NONE) {
+                    Text(stringResource(joinLabel))
+                }
             }
         }
     }

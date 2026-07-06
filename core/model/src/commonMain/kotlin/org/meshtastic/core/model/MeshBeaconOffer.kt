@@ -16,6 +16,8 @@
  */
 package org.meshtastic.core.model
 
+import okio.ByteString.Companion.decodeBase64
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.proto.MeshBeacon
 
 /**
@@ -25,8 +27,10 @@ import org.meshtastic.proto.MeshBeacon
  *
  * @param fromNodeNum The node that broadcast the beacon (informational only — beacons are unsigned).
  * @param beacon The decoded advertisement, carrying the display [message][MeshBeacon.message] and the join offer.
+ * @param snr Signal-to-noise ratio of the received beacon packet, in dB (0 when unknown).
+ * @param rssi Received signal strength of the beacon packet, in dBm (0 when unknown).
  */
-data class MeshBeaconOffer(val fromNodeNum: Int, val beacon: MeshBeacon) {
+data class MeshBeaconOffer(val fromNodeNum: Int, val beacon: MeshBeacon, val snr: Float = 0f, val rssi: Int = 0) {
     /** Stable identity for dedup/dismiss: a given sender advertising a given channel is one standing invitation. */
     val key: String
         get() = "$fromNodeNum:${beacon.offer_channel?.name.orEmpty()}"
@@ -36,4 +40,32 @@ data class MeshBeaconOffer(val fromNodeNum: Int, val beacon: MeshBeacon) {
 
     val channelName: String?
         get() = beacon.offer_channel?.name?.ifBlank { null }
+
+    /**
+     * Serializes to a single-line record `fromNodeNum|snr|rssi|<base64 MeshBeacon>` for lightweight prefs persistence.
+     * The base64 alphabet never contains `|`, so the delimiter is unambiguous.
+     */
+    fun encode(): String {
+        val beaconB64 = MeshBeacon.ADAPTER.encode(beacon).toByteString().base64()
+        return "$fromNodeNum|$snr|$rssi|$beaconB64"
+    }
+
+    companion object {
+        private const val RECORD_FIELD_COUNT = 4
+
+        /**
+         * Inverse of [encode]; returns null for a structurally malformed record (wrong field count, unparseable node
+         * number, or an undecodable beacon payload). An unparseable snr/rssi falls back to 0 — they are non-critical
+         * display metrics, not identity, so a bad numeric there does not discard an otherwise-valid invitation.
+         */
+        @Suppress("ReturnCount")
+        fun decode(record: String): MeshBeaconOffer? {
+            val parts = record.split('|', limit = RECORD_FIELD_COUNT)
+            if (parts.size != RECORD_FIELD_COUNT) return null
+            val node = parts[0].toIntOrNull() ?: return null
+            val beaconBytes = parts.last().decodeBase64()?.toByteArray() ?: return null
+            val beacon = runCatching { MeshBeacon.ADAPTER.decode(beaconBytes) }.getOrNull() ?: return null
+            return MeshBeaconOffer(node, beacon, parts[1].toFloatOrNull() ?: 0f, parts[2].toIntOrNull() ?: 0)
+        }
+    }
 }

@@ -158,6 +158,8 @@ sealed interface SettingsRoute : Route {
 
     @Serializable data object TAK : SettingsRoute
 
+    @Serializable data object MeshBeacon : SettingsRoute
+
     // endregion
 
     // region advanced config routes

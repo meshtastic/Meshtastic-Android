@@ -602,10 +602,10 @@
     <string name="firmware_edition">Firmware Edition</string>
     <string name="firmware_old">The radio firmware is too old to talk to this application. For more information on this see <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">our Firmware Installation guide</a>.</string>
     <string name="firmware_recovery_banner">Finish updating %1$s</string>
-    <string name="firmware_recovery_button">Resume firmware update</string>
-    <string name="firmware_recovery_explanation">This device is in bootloader mode from a firmware update that did not finish. Keep it nearby and it will be re-flashed to complete the update.</string>
     <string name="firmware_recovery_ble_failed">Couldn\'t finish the update over Bluetooth. This device\'s stock bootloader can\'t reliably complete an interrupted update over the air. Connect it to a computer with USB and re-flash it using the vendor\'s serial DFU tool (for example adafruit-nrfutil) to recover the device.</string>
+    <string name="firmware_recovery_button">Resume firmware update</string>
     <string name="firmware_recovery_dismiss">Dismiss firmware recovery</string>
+    <string name="firmware_recovery_explanation">This device is in bootloader mode from a firmware update that did not finish. Keep it nearby and it will be re-flashed to complete the update.</string>
     <string name="firmware_too_old">Firmware update required.</string>
     <string name="firmware_update_almost_there">Almost there...</string>
     <string name="firmware_update_alpha">Alpha</string>
@@ -923,17 +923,43 @@
     <string name="match_any">Match Any | All</string>
     <string name="max">Max</string>
     <!-- MESH -->
+    <string name="mesh_beacon">Mesh Beacon</string>
+    <string name="mesh_beacon_broadcast">Broadcast a beacon</string>
+    <string name="mesh_beacon_broadcast_summary">Periodically advertise this mesh to nearby nodes</string>
+    <string name="mesh_beacon_channels_title">Beacon channels</string>
+    <string name="mesh_beacon_interval">Broadcast interval (seconds)</string>
+    <string name="mesh_beacon_interval_error">Minimum %1$d seconds</string>
     <string name="mesh_beacon_invitations_title">Mesh invitations</string>
+    <string name="mesh_beacon_listen">Listen for beacons</string>
+    <string name="mesh_beacon_listen_summary">Capture invitations advertised by nearby meshes</string>
+    <string name="mesh_beacon_message">Beacon message</string>
+    <string name="mesh_beacon_message_error">Maximum %1$d bytes</string>
     <string name="mesh_beacon_notification_body">A nearby mesh invited you to join</string>
     <string name="mesh_beacon_notification_title">Mesh invitation</string>
+    <string name="mesh_beacon_offer_add">Add channel</string>
     <string name="mesh_beacon_offer_channel">Channel: %1$s</string>
+    <string name="mesh_beacon_offer_channel_key">Offered channel key (base64)</string>
+    <string name="mesh_beacon_offer_channel_name">Offered channel name</string>
     <string name="mesh_beacon_offer_discover">Discover</string>
     <string name="mesh_beacon_offer_dismiss">Dismiss</string>
     <string name="mesh_beacon_offer_from_unknown">From an unknown node</string>
     <string name="mesh_beacon_offer_join">Join</string>
     <string name="mesh_beacon_offer_preset">Preset: %1$s</string>
+    <string name="mesh_beacon_offer_preset_setting">Offered preset</string>
     <string name="mesh_beacon_offer_region">Region: %1$s</string>
+    <string name="mesh_beacon_offer_region_setting">Offered region</string>
+    <string name="mesh_beacon_offer_signal">Signal: %1$s / %2$s</string>
     <string name="mesh_beacon_offer_title">Mesh invitation</string>
+    <string name="mesh_beacon_on_preset">Transmit preset</string>
+    <string name="mesh_beacon_on_region">Transmit region</string>
+    <string name="mesh_beacon_preset_indicator">Advertised by a nearby beacon</string>
+    <string name="mesh_beacon_preset_none">None</string>
+    <string name="mesh_beacon_send_as_node">Broadcast as node number (0 = this node)</string>
+    <string name="mesh_beacon_target">Target %1$d</string>
+    <string name="mesh_beacon_target_add">Add target</string>
+    <string name="mesh_beacon_target_channel_index">Channel index</string>
+    <string name="mesh_beacon_target_remove">Remove target</string>
+    <string name="mesh_beacon_targets">Broadcast targets</string>
     <string name="mesh_map_location">Mesh Map Location</string>
     <string name="mesh_map_location_description">Enables the blue location dot for your phone in the mesh map.</string>
     <!-- MESHTASTIC -->

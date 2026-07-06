@@ -81,6 +81,13 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
      */
     val supportsLockdown = atLeast(V2_8_0)
 
+    /**
+     * Support for the Mesh Beacon module (`ModuleConfig.MeshBeaconConfig` broadcast/listen). The proto is upstream but
+     * the firmware module traces to a community fork; gate the config editor to 2.8.0+ so older radios don't show a
+     * config they'd silently ignore.
+     */
+    val supportsMeshBeacon = atLeast(V2_8_0)
+
     companion object {
         private val V2_6_8 = DeviceVersion("2.6.8")
         private val V2_6_9 = DeviceVersion("2.6.9")

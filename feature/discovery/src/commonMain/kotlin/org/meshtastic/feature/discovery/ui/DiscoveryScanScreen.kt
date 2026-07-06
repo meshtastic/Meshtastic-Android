@@ -61,6 +61,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.model.util.beaconJoinOption
+import org.meshtastic.core.model.util.toJoinChannelSet
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.back
 import org.meshtastic.core.resources.discovery_analysing_results
@@ -99,10 +101,11 @@ import org.meshtastic.core.ui.icon.Warning
 import org.meshtastic.core.ui.util.KeepScreenOn
 import org.meshtastic.feature.discovery.DiscoveryScanState
 import org.meshtastic.feature.discovery.DiscoveryViewModel
+import org.meshtastic.feature.discovery.ui.component.BeaconChannelsCard
 import org.meshtastic.feature.discovery.ui.component.DwellProgressIndicator
 import org.meshtastic.feature.discovery.ui.component.MeshBeaconInvitationCard
 import org.meshtastic.feature.discovery.ui.component.PresetPickerCard
-import org.meshtastic.proto.MeshBeacon
+import org.meshtastic.proto.ChannelSet
 
 private val CONTENT_PADDING = 16.dp
 private val SECTION_SPACING = 16.dp
@@ -119,11 +122,16 @@ fun DiscoveryScanScreen(
     onNavigateToSummary: (sessionId: Long) -> Unit,
     onNavigateToHistory: () -> Unit,
     modifier: Modifier = Modifier,
-    onJoinOffer: (MeshBeacon) -> Unit = {},
+    onJoinOffer: (ChannelSet) -> Unit = {},
 ) {
     val scanState by viewModel.scanState.collectAsStateWithLifecycle()
     val selectedPresets by viewModel.selectedPresets.collectAsStateWithLifecycle()
     val beaconOffers by viewModel.beaconOffers.collectAsStateWithLifecycle()
+    val beaconPresets by viewModel.beaconPresets.collectAsStateWithLifecycle()
+    val beaconChannels by viewModel.beaconChannels.collectAsStateWithLifecycle()
+    val selectedBeaconChannels by viewModel.selectedBeaconChannels.collectAsStateWithLifecycle()
+    val currentLora by viewModel.currentLora.collectAsStateWithLifecycle()
+    val currentChannels by viewModel.currentChannels.collectAsStateWithLifecycle()
     val dwellMinutes by viewModel.dwellDurationMinutes.collectAsStateWithLifecycle()
     val isConnected by viewModel.isConnected.collectAsStateWithLifecycle()
     val usesDefaultKey by viewModel.usesDefaultKey.collectAsStateWithLifecycle()
@@ -184,7 +192,7 @@ fun DiscoveryScanScreen(
                     ScanButton(
                         scanState = scanState,
                         isConnected = isConnected,
-                        hasPresetsSelected = selectedPresets.isNotEmpty(),
+                        hasPresetsSelected = selectedPresets.isNotEmpty() || selectedBeaconChannels.isNotEmpty(),
                         usesDefaultKey = usesDefaultKey,
                         is24GhzUnsupported = isLora24Region && is24GhzBlocked,
                         onStart = viewModel::startScan,
@@ -215,9 +223,14 @@ fun DiscoveryScanScreen(
                         )
                     }
                     items(beaconOffers, key = { "invitation_${it.key}" }) { offer ->
+                        val joinOption =
+                            remember(offer, currentLora, currentChannels) {
+                                offer.beacon.beaconJoinOption(currentLora, currentChannels)
+                            }
                         MeshBeaconInvitationCard(
                             offer = offer,
-                            onJoin = { onJoinOffer(offer.beacon) },
+                            joinOption = joinOption,
+                            onJoin = { offer.beacon.toJoinChannelSet(joinOption, currentLora)?.let(onJoinOffer) },
                             onDiscover = { viewModel.discoverOffer(offer) },
                             onDismiss = { viewModel.dismissOffer(offer) },
                         )
@@ -231,7 +244,20 @@ fun DiscoveryScanScreen(
                         homePreset = homePreset,
                         onTogglePreset = viewModel::togglePreset,
                         enabled = true,
+                        beaconPresets = beaconPresets,
                     )
+                }
+
+                // Beacon channels — custom channels advertised by beacons (hidden when none recorded)
+                if (beaconChannels.isNotEmpty()) {
+                    item(key = "beacon_channels") {
+                        BeaconChannelsCard(
+                            channels = beaconChannels,
+                            selectedIds = selectedBeaconChannels,
+                            onToggle = viewModel::toggleBeaconChannel,
+                            enabled = true,
+                        )
+                    }
                 }
 
                 // Dwell time picker

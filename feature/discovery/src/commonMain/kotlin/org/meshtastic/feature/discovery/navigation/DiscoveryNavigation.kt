@@ -25,7 +25,6 @@ import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
-import org.meshtastic.core.model.util.toChannelSet
 import org.meshtastic.core.navigation.DiscoveryRoute
 import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
 import org.meshtastic.core.ui.viewmodel.UIViewModel
@@ -81,9 +80,11 @@ fun EntryProviderScope<NavKey>.discoveryGraph(backStack: NavBackStack<NavKey>) {
 private fun DiscoveryScanScreenEntry(backStack: NavBackStack<NavKey>) {
     val viewModel = koinViewModel<DiscoveryViewModel>()
     // Join reuses the QR channel-import flow (same ADD/REPLACE + "this retunes your radio" confirmation a scanned
-    // channel URL shows). UIViewModel is ViewModel-store-scoped per nav entry (MeshtasticNavDisplay uses
-    // rememberViewModelStoreNavEntryDecorator), so the app-shell SharedDialogs observes a *different* instance —
-    // we must render the dialog here, against this entry's instance, or the offer never surfaces.
+    // channel URL shows). The screen decides add-vs-switch and hands us the ready ChannelSet (add = no lora_config →
+    // no reboot; switch = lora_config present → replace + reboot). UIViewModel is ViewModel-store-scoped per nav entry
+    // (MeshtasticNavDisplay uses rememberViewModelStoreNavEntryDecorator), so the app-shell SharedDialogs observes a
+    // *different* instance — we must render the dialog here, against this entry's instance, or the offer never
+    // surfaces.
     val uiViewModel = koinViewModel<UIViewModel>()
     val requestChannelSet by uiViewModel.requestChannelSet.collectAsStateWithLifecycle()
     DiscoveryScanScreen(
@@ -91,7 +92,7 @@ private fun DiscoveryScanScreenEntry(backStack: NavBackStack<NavKey>) {
         onNavigateUp = dropUnlessResumed { backStack.removeLastOrNull() },
         onNavigateToSummary = { sessionId -> backStack.add(DiscoveryRoute.DiscoverySummary(sessionId)) },
         onNavigateToHistory = dropUnlessResumed { backStack.add(DiscoveryRoute.DiscoveryHistory) },
-        onJoinOffer = { beacon -> beacon.toChannelSet()?.let(uiViewModel::setRequestChannelSet) },
+        onJoinOffer = uiViewModel::setRequestChannelSet,
     )
     requestChannelSet?.let { ScannedQrCodeDialog(incoming = it, onDismiss = { uiViewModel.clearRequestChannelUrl() }) }
 }

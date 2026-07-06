@@ -206,7 +206,7 @@ class MeshDataHandlerImpl(
             }
 
             PortNum.MESH_BEACON_APP -> {
-                handleMeshBeacon(packet)
+                handleMeshBeacon(packet, myNodeNum)
             }
 
             else -> {}
@@ -224,12 +224,16 @@ class MeshDataHandlerImpl(
      * low-priority notification when the invitation is first seen (not on every periodic re-broadcast). Only beacons
      * carrying a join offer (a channel) are actionable; message-only beacons are ignored.
      */
-    private fun handleMeshBeacon(packet: MeshPacket) {
+    @Suppress("ReturnCount")
+    private fun handleMeshBeacon(packet: MeshPacket, myNodeNum: Int) {
+        // Ignore our own beacons (spec FR-001) — once broadcast is enabled a node that also listens would self-notify.
+        if (packet.from == myNodeNum) return
         val payload = packet.decoded?.payload ?: return
         val beacon = MeshBeacon.ADAPTER.decodeOrNull(payload, Logger)
         // Only actionable beacons (carrying a channel offer) that we haven't already seen warrant a notification.
         if (beacon?.offer_channel == null) return
-        val offer = MeshBeaconOffer(fromNodeNum = packet.from, beacon = beacon)
+        val offer =
+            MeshBeaconOffer(fromNodeNum = packet.from, beacon = beacon, snr = packet.rx_snr, rssi = packet.rx_rssi)
         if (meshBeaconRepository.add(offer)) {
             scope.launch {
                 notificationManager.dispatch(
