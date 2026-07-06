@@ -35,6 +35,7 @@ import com.patrykandpatrick.vico.compose.cartesian.data.CartesianLayerRangeProvi
 import com.patrykandpatrick.vico.compose.cartesian.data.lineModel
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
+import com.patrykandpatrick.vico.compose.common.data.ExtraStore
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.resources.Res
@@ -133,6 +134,25 @@ private val LEGEND_DATA_4 =
                 metricKey = entry,
             )
         }
+
+private const val PRESSURE_DEFAULT_MIN = 950.0
+private const val PRESSURE_DEFAULT_MAX = 1050.0
+private const val PRESSURE_WINDOW_HPA = PRESSURE_DEFAULT_MAX - PRESSURE_DEFAULT_MIN
+
+/**
+ * Y-axis bounds for the barometric-pressure layer, given the plotted data's [dataMin]/[dataMax].
+ *
+ * Uses a fixed [PRESSURE_WINDOW_HPA]-wide window so a given pressure change is always the same visual size (design#53's
+ * "consistent scale"). Near sea level this is the standard [PRESSURE_DEFAULT_MIN]–[PRESSURE_DEFAULT_MAX]; for a node at
+ * altitude (lower station pressure) the same-width window slides down so readings aren't clipped. It only widens past
+ * the fixed width if a single node's readings genuinely span more than the window.
+ */
+internal fun pressureAxisRange(dataMin: Double, dataMax: Double): Pair<Double, Double> = when {
+    dataMax - dataMin > PRESSURE_WINDOW_HPA -> dataMin to dataMax
+    dataMin < PRESSURE_DEFAULT_MIN -> dataMin to (dataMin + PRESSURE_WINDOW_HPA)
+    dataMax > PRESSURE_DEFAULT_MAX -> (dataMax - PRESSURE_WINDOW_HPA) to dataMax
+    else -> PRESSURE_DEFAULT_MIN to PRESSURE_DEFAULT_MAX
+}
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
@@ -233,9 +253,17 @@ fun EnvironmentMetricsChart(
                 },
             )
 
-        // Fixed sea-level-relative domain (design#53) so small real pressure changes are visually
-        // comparable across sessions/nodes instead of being swamped by a 700-1200 hPa altitude range.
-        val pressureRangeProvider = remember { CartesianLayerRangeProvider.fixed(minY = 950.0, maxY = 1050.0) }
+        // Fixed-width pressure window (design#53) so a given change is always the same visual size,
+        // sliding to the node's elevation so high-altitude readings aren't clipped. See [pressureAxisRange].
+        val pressureRangeProvider = remember {
+            object : CartesianLayerRangeProvider {
+                override fun getMinY(minY: Double, maxY: Double, extraStore: ExtraStore) =
+                    pressureAxisRange(minY, maxY).first
+
+                override fun getMaxY(minY: Double, maxY: Double, extraStore: ExtraStore) =
+                    pressureAxisRange(minY, maxY).second
+            }
+        }
         val layers = mutableListOf<LineCartesianLayer>()
         if (showPressure && pressureData.isNotEmpty()) {
             layers.add(

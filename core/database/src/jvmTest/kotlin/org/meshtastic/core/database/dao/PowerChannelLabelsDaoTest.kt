@@ -39,8 +39,7 @@ class PowerChannelLabelsDaoTest {
     private val database: MeshtasticDatabase = getInMemoryDatabaseBuilder().build()
     private val dao: NodeInfoDao = database.nodeInfoDao()
 
-    @AfterTest
-    fun tearDown() = database.close()
+    @AfterTest fun tearDown() = database.close()
 
     private fun node(num: Int, labels: List<String> = emptyList()) = NodeEntity(
         num = num,
