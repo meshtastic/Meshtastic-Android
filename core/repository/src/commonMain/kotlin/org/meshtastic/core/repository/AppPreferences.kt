@@ -204,6 +204,14 @@ interface NotificationPrefs {
     val lowBatteryEnabled: StateFlow<Boolean>
 
     fun setLowBatteryEnabled(enabled: Boolean)
+
+    /**
+     * Waypoint ids of foreign (not locally-created) geofences the user has opted in to receiving crossing alerts for.
+     * Geofences are mesh-broadcast, so by default only the creator is alerted; this is the per-geofence opt-in.
+     */
+    val geofenceAlertOptIns: StateFlow<Set<Int>>
+
+    fun setGeofenceAlertOptIn(waypointId: Int, enabled: Boolean)
 }
 
 /** Reactive interface for general map preferences. */

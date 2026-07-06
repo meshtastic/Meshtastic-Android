@@ -670,6 +670,8 @@ generate_input_event_on_press
 generate_qr_code
 ### GEOFENCE ###
 geofence
+geofence_alerts_opt_in
+geofence_alerts_opt_in_desc
 geofence_box_author_confirm
 geofence_box_author_hint
 geofence_box_author_hint_viewport

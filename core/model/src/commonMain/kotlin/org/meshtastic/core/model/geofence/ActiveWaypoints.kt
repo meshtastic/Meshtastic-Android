@@ -17,6 +17,8 @@
 package org.meshtastic.core.model.geofence
 
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.isFromLocal
+import org.meshtastic.proto.Waypoint
 
 /**
  * Collapse a raw waypoint-packet list into the set of currently active waypoints, keyed by waypoint id.
@@ -33,3 +35,14 @@ fun List<DataPacket>.activeWaypointPackets(nowSeconds: Long): Map<Int, DataPacke
         val expire = it.waypoint?.expire ?: 0
         expire == 0 || expire.toLong() > nowSeconds
     }
+
+/**
+ * The geofences whose crossings THIS device should raise notifications for: waypoints we created ([isFromLocal]) plus
+ * any the user has explicitly opted into ([optedInIds]). Foreign geofences are excluded by default because waypoints
+ * are mesh-broadcast — every receiver stores them, so without this gate everyone in range would alert on the creator's
+ * crossings. Only waypoints that actually request crossing notifications ([notifiesOnCrossing]) survive.
+ */
+fun Collection<DataPacket>.geofencesToMonitor(myNodeNum: Int?, optedInIds: Set<Int>): List<Waypoint> =
+    filter { it.isFromLocal(myNodeNum) || (it.waypoint?.id in optedInIds) }
+        .mapNotNull { it.waypoint }
+        .filter { it.notifiesOnCrossing }

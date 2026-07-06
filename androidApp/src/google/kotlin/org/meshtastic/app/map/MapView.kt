@@ -150,6 +150,7 @@ import org.meshtastic.feature.map.LastHeardFilter
 import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.component.MapButton
 import org.meshtastic.feature.map.component.MapControlsOverlay
+import org.meshtastic.feature.map.component.WaypointInfoDialog
 import org.meshtastic.feature.map.tracerouteNodeSelection
 import org.meshtastic.proto.BoundingBox
 import org.meshtastic.proto.Config.DisplayConfig.DisplayUnits
@@ -250,6 +251,7 @@ fun MapView(
     val mapFilterState by mapViewModel.mapFilterStateFlow.collectAsStateWithLifecycle()
     val ourNodeInfo by mapViewModel.ourNodeInfo.collectAsStateWithLifecycle()
     var editingWaypoint by remember { mutableStateOf<Waypoint?>(null) }
+    var geofenceInfoWaypoint by remember { mutableStateOf<Waypoint?>(null) }
     val displayUnits by mapViewModel.displayUnits.collectAsStateWithLifecycle()
 
     // --- Geofence box authoring (Main mode) ---
@@ -648,6 +650,7 @@ fun MapView(
                         myNodeNum = myNodeNum,
                         isConnected = isConnected,
                         onEditWaypointRequest = { editingWaypoint = it },
+                        onShowGeofenceInfo = { geofenceInfoWaypoint = it },
                         selectedWaypointId = selectedWaypointId,
                         mapLayers = mapLayers,
                         mapViewModel = mapViewModel,
@@ -716,6 +719,27 @@ fun MapView(
                         boxAuthoringFirstCorner = null
                         boxAuthoringSecondCorner = null
                         editingWaypoint = null
+                    },
+                )
+            }
+
+            geofenceInfoWaypoint?.let { waypoint ->
+                val optIns by mapViewModel.geofenceAlertOptIns.collectAsStateWithLifecycle()
+                WaypointInfoDialog(
+                    waypoint = waypoint,
+                    displayUnits = displayUnits,
+                    alertsEnabled = waypoint.id in optIns,
+                    onToggleAlerts = { mapViewModel.setGeofenceAlertOptIn(waypoint.id, it) },
+                    onDismissRequest = { geofenceInfoWaypoint = null },
+                    // Unlocked foreign geofences can still be edited/re-broadcast; locked ones stay read-only.
+                    onEdit =
+                    if (waypoint.locked_to == 0) {
+                        {
+                            geofenceInfoWaypoint = null
+                            editingWaypoint = waypoint
+                        }
+                    } else {
+                        null
                     },
                 )
             }
@@ -901,6 +925,7 @@ private fun MainMapContent(
     myNodeNum: Int?,
     isConnected: Boolean,
     onEditWaypointRequest: (Waypoint) -> Unit,
+    onShowGeofenceInfo: (Waypoint) -> Unit,
     selectedWaypointId: Int?,
     mapLayers: List<MapLayerItem>,
     mapViewModel: MapViewModel,
@@ -942,6 +967,8 @@ private fun MainMapContent(
         myNodeNum = myNodeNum ?: 0,
         isConnected = isConnected,
         onEditWaypointRequest = onEditWaypointRequest,
+        isMyWaypoint = mapViewModel::isMyWaypoint,
+        onShowGeofenceInfo = onShowGeofenceInfo,
         selectedWaypointId = selectedWaypointId,
     )
 

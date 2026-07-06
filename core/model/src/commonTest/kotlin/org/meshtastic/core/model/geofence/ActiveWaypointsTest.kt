@@ -53,4 +53,38 @@ class ActiveWaypointsTest {
         assertTrue(result.containsKey(2))
         assertTrue(result.containsKey(3))
     }
+
+    private val myNodeNum = 7
+
+    private fun geofence(id: Int) = Waypoint(id = id, geofence_radius = 100, notify_on_enter = true)
+
+    private fun localPacket(wp: Waypoint) = DataPacket(to = "!abcdabcd", channel = 0, waypoint = wp) // from = ^local
+
+    private fun remotePacket(wp: Waypoint) =
+        DataPacket(to = "!abcdabcd", channel = 0, waypoint = wp).also { it.from = "!00000009" } // node 9
+
+    @Test
+    fun geofencesToMonitorKeepsOwnDropsForeign() {
+        val packets = listOf(localPacket(geofence(1)), remotePacket(geofence(2)))
+
+        val monitored = packets.geofencesToMonitor(myNodeNum, optedInIds = emptySet()).map { it.id }
+
+        assertEquals(listOf(1), monitored) // only the locally-created geofence
+    }
+
+    @Test
+    fun geofencesToMonitorIncludesOptedInForeign() {
+        val packets = listOf(localPacket(geofence(1)), remotePacket(geofence(2)))
+
+        val monitored = packets.geofencesToMonitor(myNodeNum, optedInIds = setOf(2)).map { it.id }.sorted()
+
+        assertEquals(listOf(1, 2), monitored) // opting into #2 adds the foreign geofence back
+    }
+
+    @Test
+    fun geofencesToMonitorDropsWaypointsWithNoCrossingNotifications() {
+        val silent = localPacket(Waypoint(id = 1, geofence_radius = 100)) // notify_on_enter/exit both false
+
+        assertTrue(listOf(silent).geofencesToMonitor(myNodeNum, optedInIds = emptySet()).isEmpty())
+    }
 }

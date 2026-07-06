@@ -25,6 +25,7 @@ import dev.mokkery.verify.VerifyMode.Companion.exactly
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -34,6 +35,7 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.NodeManager
+import org.meshtastic.core.repository.NotificationPrefs
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.Waypoint
@@ -72,33 +74,59 @@ class GeofenceMonitorTest {
         notify_favorites_only = favoritesOnly,
     )
 
+    private data class Mocks(
+        val packetRepository: PacketRepository,
+        val nodeManager: NodeManager,
+        val notifications: MeshNotificationManager,
+        val notificationPrefs: NotificationPrefs,
+    )
+
     private fun mocks(
         wp: Waypoint,
         senderIsFavorite: Boolean = false,
-    ): Triple<PacketRepository, NodeManager, MeshNotificationManager> {
+        createdByLocal: Boolean = true,
+        optedInIds: Set<Int> = emptySet(),
+    ): Mocks {
         val packetRepository: PacketRepository = mock(MockMode.autofill)
         val nodeManager: NodeManager = mock(MockMode.autofill)
         val notifications: MeshNotificationManager = mock(MockMode.autofill)
-        every { packetRepository.getWaypoints() } returns
-            flowOf(listOf(DataPacket(to = "!abcdabcd", channel = 0, waypoint = wp)))
+        val notificationPrefs: NotificationPrefs = mock(MockMode.autofill)
+        // from defaults to ^local (locally created); a remote creator uses another node's hex id.
+        val packet =
+            DataPacket(to = "!abcdabcd", channel = 0, waypoint = wp).also {
+                if (!createdByLocal) it.from = "!0000000$sender"
+            }
+        every { packetRepository.getWaypoints() } returns flowOf(listOf(packet))
+        every { nodeManager.myNodeNum } returns MutableStateFlow(myNodeNum)
         every { nodeManager.nodeDBbyNodeNum } returns mapOf(sender to Node(num = sender, isFavorite = senderIsFavorite))
-        return Triple(packetRepository, nodeManager, notifications)
+        every { notificationPrefs.geofenceAlertOptIns } returns MutableStateFlow(optedInIds)
+        return Mocks(packetRepository, nodeManager, notifications, notificationPrefs)
     }
 
     private fun expectNoNotification(
         wp: Waypoint,
         senderIsFavorite: Boolean = false,
+        createdByLocal: Boolean = true,
+        optedInIds: Set<Int> = emptySet(),
         drive: (GeofenceMonitor) -> Unit,
     ) = runTest {
         val scope = TestScope(StandardTestDispatcher(testScheduler))
-        val (repo, nodes, notifications) = mocks(wp, senderIsFavorite)
-        val monitor = GeofenceMonitor(lazy { repo }, nodes, notifications, GeofenceCrossingStore(), scope)
+        val m = mocks(wp, senderIsFavorite, createdByLocal, optedInIds)
+        val monitor =
+            GeofenceMonitor(
+                lazy { m.packetRepository },
+                m.nodeManager,
+                m.notifications,
+                GeofenceCrossingStore(),
+                m.notificationPrefs,
+                scope,
+            )
         scope.advanceUntilIdle() // collect the active-geofence snapshot
 
         drive(monitor)
         scope.advanceUntilIdle()
 
-        verifySuspend(exactly(0)) { notifications.updateWaypointNotification(any(), any(), any(), any(), any()) }
+        verifySuspend(exactly(0)) { m.notifications.updateWaypointNotification(any(), any(), any(), any(), any()) }
         scope.cancel() // stop the serial worker so runTest sees no leaked coroutine
     }
 
@@ -116,6 +144,12 @@ class GeofenceMonitorTest {
     @Test
     fun ownPositionIsNeverEvaluated() = expectNoNotification(waypoint()) { m ->
         m.onPositionReceived(myNodeNum, myNodeNum, inside) // sender == self
+    }
+
+    @Test
+    fun remoteCreatedGeofenceDoesNotNotify() = expectNoNotification(waypoint(), createdByLocal = false) { m ->
+        m.onPositionReceived(sender, myNodeNum, outside) // baseline
+        m.onPositionReceived(sender, myNodeNum, inside) // genuine ENTER, but we didn't create this geofence
     }
 
     @Test

@@ -32,9 +32,11 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.TracerouteOverlay
 import org.meshtastic.core.model.geofence.activeWaypointPackets
+import org.meshtastic.core.model.isFromLocal
 import org.meshtastic.core.model.util.DistanceUnit
 import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.NotificationPrefs
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioController
@@ -63,6 +65,7 @@ open class BaseMapViewModel(
     private val packetRepository: PacketRepository,
     private val radioController: RadioController,
     private val radioConfigRepository: RadioConfigRepository,
+    private val notificationPrefs: NotificationPrefs,
 ) : ViewModel() {
 
     val myNodeInfo = nodeRepository.myNodeInfo
@@ -104,6 +107,15 @@ open class BaseMapViewModel(
             // so the map and the geofence engine can't drift (getWaypoints is a row-per-transmission firehose).
             .mapLatest { list -> list.activeWaypointPackets(nowSeconds) }
             .stateInWhileSubscribed(initialValue = emptyMap())
+
+    /** Waypoint ids of foreign geofences the user opted in to crossing alerts for (see [NotificationPrefs]). */
+    val geofenceAlertOptIns: StateFlow<Set<Int>> = notificationPrefs.geofenceAlertOptIns
+
+    fun setGeofenceAlertOptIn(waypointId: Int, enabled: Boolean) =
+        notificationPrefs.setGeofenceAlertOptIn(waypointId, enabled)
+
+    /** True if the waypoint with [id] was created by this device (vs. received from another node over the mesh). */
+    fun isMyWaypoint(id: Int): Boolean = waypoints.value[id]?.isFromLocal(myNodeNum) == true
 
     private val showOnlyFavorites = MutableStateFlow(mapPrefs.showOnlyFavorites.value)
     val showOnlyFavoritesOnMap: StateFlow<Boolean> = showOnlyFavorites.asStateFlow()
