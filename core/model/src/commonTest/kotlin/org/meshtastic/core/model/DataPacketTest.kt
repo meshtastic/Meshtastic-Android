@@ -307,6 +307,9 @@ class MessageTest {
         val mappings =
             listOf(
                 Routing.Error.MAX_RETRANSMIT.value to Res.string.message_routing_error_max_retransmit,
+                Routing.Error.GOT_NAK.value to Res.string.message_routing_error_max_retransmit,
+                Routing.Error.TIMEOUT.value to Res.string.message_routing_error_max_retransmit,
+                Routing.Error.NO_RESPONSE.value to Res.string.message_routing_error_max_retransmit,
                 Routing.Error.NO_CHANNEL.value to Res.string.message_routing_error_no_channel,
                 Routing.Error.PKI_FAILED.value to Res.string.message_routing_error_pki_failed,
                 Routing.Error.PKI_SEND_FAIL_PUBLIC_KEY.value to

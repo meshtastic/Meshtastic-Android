@@ -79,7 +79,12 @@ fun getStringResFrom(routingError: Int): StringResource = when (routingError) {
 }
 
 fun getMessageRoutingErrorStringResFrom(routingError: Int): StringResource = when (routingError) {
-    Routing.Error.MAX_RETRANSMIT.value -> Res.string.message_routing_error_max_retransmit
+    Routing.Error.GOT_NAK.value,
+    Routing.Error.TIMEOUT.value,
+    Routing.Error.MAX_RETRANSMIT.value,
+    Routing.Error.NO_RESPONSE.value,
+    -> Res.string.message_routing_error_max_retransmit
+
     Routing.Error.NO_CHANNEL.value -> Res.string.message_routing_error_no_channel
     Routing.Error.TOO_LARGE.value -> Res.string.message_routing_error_too_large
     Routing.Error.PKI_FAILED.value -> Res.string.message_routing_error_pki_failed
