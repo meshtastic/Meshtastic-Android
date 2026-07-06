@@ -61,6 +61,7 @@ import org.meshtastic.feature.node.model.LogsType
 import org.meshtastic.feature.node.model.NodeDetailAction
 import org.meshtastic.feature.node.model.isEffectivelyUnmessageable
 import org.meshtastic.proto.Config
+import org.meshtastic.proto.Telemetry
 
 @Composable
 fun DeviceActions(
@@ -74,6 +75,7 @@ fun DeviceActions(
     isFahrenheit: Boolean,
     modifier: Modifier = Modifier,
     isLocal: Boolean = false,
+    airQualityHistory: List<Telemetry> = emptyList(),
 ) {
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         SectionCard(title = Res.string.actions) {
@@ -95,6 +97,7 @@ fun DeviceActions(
             isFahrenheit = isFahrenheit,
             onAction = onAction,
             isLocal = isLocal,
+            airQualityHistory = airQualityHistory,
         )
     }
 }

@@ -93,6 +93,7 @@ app_settings
 app_too_old
 app_version
 apply
+aqi
 are_you_sure
 are_you_sure_change_default
 audio

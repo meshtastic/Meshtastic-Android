@@ -63,6 +63,7 @@ import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.feature.node.model.LogsType
 import org.meshtastic.feature.node.model.NodeDetailAction
 import org.meshtastic.proto.Config
+import org.meshtastic.proto.Telemetry
 
 private data class TelemetricFeature(
     val titleRes: StringResource,
@@ -87,6 +88,7 @@ internal fun TelemetricActionsSection(
     isFahrenheit: Boolean,
     onAction: (NodeDetailAction) -> Unit,
     isLocal: Boolean = false,
+    airQualityHistory: List<Telemetry> = emptyList(),
 ) {
     val features =
         rememberTelemetricFeatures(
@@ -97,6 +99,7 @@ internal fun TelemetricActionsSection(
             displayUnits,
             isFahrenheit,
             isLocal,
+            airQualityHistory,
         )
 
     SectionCard(title = Res.string.telemetry) {
@@ -128,90 +131,99 @@ private fun rememberTelemetricFeatures(
     displayUnits: Config.DisplayConfig.DisplayUnits,
     isFahrenheit: Boolean,
     isLocal: Boolean,
-): List<TelemetricFeature> =
-    remember(node, ourNode, lastTracerouteTime, lastRequestNeighborsTime, displayUnits, isFahrenheit, isLocal) {
-        listOf(
-            TelemetricFeature(
-                titleRes = Res.string.userinfo,
-                icon = Res.drawable.ic_person,
-                requestAction = { NodeMenuAction.RequestUserInfo(it) },
-                isVisible = { !isLocal },
-            ),
-            TelemetricFeature(
-                titleRes = LogsType.TRACEROUTE.titleRes,
-                icon = LogsType.TRACEROUTE.icon,
-                requestAction = { NodeMenuAction.TraceRoute(it) },
-                logsType = LogsType.TRACEROUTE,
-                cooldownTimestamp = lastTracerouteTime,
-                isVisible = { !isLocal },
-            ),
-            TelemetricFeature(
-                titleRes = LogsType.NEIGHBOR_INFO.titleRes,
-                icon = LogsType.NEIGHBOR_INFO.icon,
-                requestAction = { NodeMenuAction.RequestNeighborInfo(it) },
-                logsType = LogsType.NEIGHBOR_INFO,
-                isVisible = { it.capabilities.canRequestNeighborInfo },
-                cooldownTimestamp = lastRequestNeighborsTime,
-                cooldownDuration = REQUEST_NEIGHBORS_COOL_DOWN_TIME_MS,
-            ),
-            TelemetricFeature(
-                titleRes = LogsType.SIGNAL.titleRes,
-                icon = LogsType.SIGNAL.icon,
-                requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.LOCAL_STATS) },
-                logsType = LogsType.SIGNAL,
-            ),
-            TelemetricFeature(
-                titleRes = LogsType.DEVICE.titleRes,
-                icon = LogsType.DEVICE.icon,
-                requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.DEVICE) },
-                logsType = LogsType.DEVICE,
-            ),
-            TelemetricFeature(
-                titleRes = LogsType.ENVIRONMENT.titleRes,
-                icon = Res.drawable.ic_thermostat,
-                requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.ENVIRONMENT) },
-                logsType = LogsType.ENVIRONMENT,
-                content = { node, _ -> EnvironmentMetrics(node, displayUnits, isFahrenheit) },
-                hasContent = { it.hasEnvironmentMetrics },
-            ),
-            TelemetricFeature(
-                titleRes = Res.string.request_air_quality_metrics,
-                icon = Res.drawable.ic_air,
-                requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.AIR_QUALITY) },
-                logsType = LogsType.AIR_QUALITY,
-                content = { node, _ -> AirQualityInfoCards(node) },
-                hasContent = { it.hasAirQualityMetrics },
-            ),
-            TelemetricFeature(
-                titleRes = LogsType.POWER.titleRes,
-                icon = LogsType.POWER.icon,
-                requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.POWER) },
-                logsType = LogsType.POWER,
-                content = { node, _ -> PowerMetrics(node) },
-                hasContent = { it.hasPowerMetrics },
-            ),
-            TelemetricFeature(
-                titleRes = LogsType.HOST.titleRes,
-                icon = LogsType.HOST.icon,
-                requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.HOST) },
-                logsType = LogsType.HOST,
-            ),
-            TelemetricFeature(
-                titleRes = LogsType.PAX.titleRes,
-                icon = LogsType.PAX.icon,
-                requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.PAX) },
-                logsType = LogsType.PAX,
-            ),
-            TelemetricFeature(
-                titleRes = LogsType.POSITIONS.titleRes,
-                icon = LogsType.POSITIONS.icon,
-                requestAction = if (isLocal) null else { n -> NodeMenuAction.RequestPosition(n) },
-                logsType = LogsType.POSITIONS,
-                content = { node, action -> PositionInlineContent(node, ourNode, displayUnits, action) },
-                hasContent = { it.latitude != 0.0 || it.longitude != 0.0 },
-            ),
-        )
-    }
+    airQualityHistory: List<Telemetry>,
+): List<TelemetricFeature> = remember(
+    node,
+    ourNode,
+    lastTracerouteTime,
+    lastRequestNeighborsTime,
+    displayUnits,
+    isFahrenheit,
+    isLocal,
+    airQualityHistory,
+) {
+    listOf(
+        TelemetricFeature(
+            titleRes = Res.string.userinfo,
+            icon = Res.drawable.ic_person,
+            requestAction = { NodeMenuAction.RequestUserInfo(it) },
+            isVisible = { !isLocal },
+        ),
+        TelemetricFeature(
+            titleRes = LogsType.TRACEROUTE.titleRes,
+            icon = LogsType.TRACEROUTE.icon,
+            requestAction = { NodeMenuAction.TraceRoute(it) },
+            logsType = LogsType.TRACEROUTE,
+            cooldownTimestamp = lastTracerouteTime,
+            isVisible = { !isLocal },
+        ),
+        TelemetricFeature(
+            titleRes = LogsType.NEIGHBOR_INFO.titleRes,
+            icon = LogsType.NEIGHBOR_INFO.icon,
+            requestAction = { NodeMenuAction.RequestNeighborInfo(it) },
+            logsType = LogsType.NEIGHBOR_INFO,
+            isVisible = { it.capabilities.canRequestNeighborInfo },
+            cooldownTimestamp = lastRequestNeighborsTime,
+            cooldownDuration = REQUEST_NEIGHBORS_COOL_DOWN_TIME_MS,
+        ),
+        TelemetricFeature(
+            titleRes = LogsType.SIGNAL.titleRes,
+            icon = LogsType.SIGNAL.icon,
+            requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.LOCAL_STATS) },
+            logsType = LogsType.SIGNAL,
+        ),
+        TelemetricFeature(
+            titleRes = LogsType.DEVICE.titleRes,
+            icon = LogsType.DEVICE.icon,
+            requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.DEVICE) },
+            logsType = LogsType.DEVICE,
+        ),
+        TelemetricFeature(
+            titleRes = LogsType.ENVIRONMENT.titleRes,
+            icon = Res.drawable.ic_thermostat,
+            requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.ENVIRONMENT) },
+            logsType = LogsType.ENVIRONMENT,
+            content = { node, _ -> EnvironmentMetrics(node, displayUnits, isFahrenheit) },
+            hasContent = { it.hasEnvironmentMetrics },
+        ),
+        TelemetricFeature(
+            titleRes = Res.string.request_air_quality_metrics,
+            icon = Res.drawable.ic_air,
+            requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.AIR_QUALITY) },
+            logsType = LogsType.AIR_QUALITY,
+            content = { node, _ -> AirQualityInfoCards(node, airQualityHistory) },
+            hasContent = { it.hasAirQualityMetrics },
+        ),
+        TelemetricFeature(
+            titleRes = LogsType.POWER.titleRes,
+            icon = LogsType.POWER.icon,
+            requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.POWER) },
+            logsType = LogsType.POWER,
+            content = { node, _ -> PowerMetrics(node) },
+            hasContent = { it.hasPowerMetrics },
+        ),
+        TelemetricFeature(
+            titleRes = LogsType.HOST.titleRes,
+            icon = LogsType.HOST.icon,
+            requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.HOST) },
+            logsType = LogsType.HOST,
+        ),
+        TelemetricFeature(
+            titleRes = LogsType.PAX.titleRes,
+            icon = LogsType.PAX.icon,
+            requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.PAX) },
+            logsType = LogsType.PAX,
+        ),
+        TelemetricFeature(
+            titleRes = LogsType.POSITIONS.titleRes,
+            icon = LogsType.POSITIONS.icon,
+            requestAction = if (isLocal) null else { n -> NodeMenuAction.RequestPosition(n) },
+            logsType = LogsType.POSITIONS,
+            content = { node, action -> PositionInlineContent(node, ourNode, displayUnits, action) },
+            hasContent = { it.latitude != 0.0 || it.longitude != 0.0 },
+        ),
+    )
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Suppress("LongMethod")
