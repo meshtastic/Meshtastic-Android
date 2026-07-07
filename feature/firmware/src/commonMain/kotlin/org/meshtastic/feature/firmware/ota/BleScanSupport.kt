@@ -81,12 +81,12 @@ internal suspend fun scanForBleDevice(
                 .scan(timeout = scanTimeout, serviceUuid = serviceUuid)
                 .onEach { d ->
                     if (foundDevices.add(d.address)) {
-                        Logger.d { "$tag: Scan found device: ${d.address} (name=${d.name})" }
+                        Logger.d { "$tag: Scan found candidate device (name=${d.name})" }
                     }
                 }
                 .firstOrNull(predicate)
         if (device != null) {
-            Logger.i { "$tag: Found target device at ${device.address}" }
+            Logger.i { "$tag: Found target device" }
             return device
         }
         Logger.w { "$tag: Target not in ${foundDevices.size} devices found" }

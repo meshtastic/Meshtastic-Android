@@ -62,7 +62,11 @@ interface BleConnection {
     /** Disconnects from the current device. */
     suspend fun disconnect()
 
-    /** Executes a block within a discovered profile. */
+    /**
+     * Executes [setup] after the requested BLE profile is available. This is shared by radio, OTA, and DFU flows, so
+     * implementations should keep profile-entry setup bounded and avoid transfer-hot-path work here when a caller can
+     * reuse an already discovered [BleService].
+     */
     suspend fun <T> profile(
         serviceUuid: Uuid,
         timeout: Duration = 30.seconds,

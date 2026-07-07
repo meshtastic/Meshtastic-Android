@@ -260,6 +260,8 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
         val cScope = connectionScope ?: error("No active connection scope")
         val service = KableBleService(p, serviceUuid)
         return withTimeout(timeout) {
+            // Shared BLE profile guard: wait for Kable service discovery before handing out the service, and map a
+            // connection-scope shutdown during caller setup to NotConnectedException instead of waiting for timeout.
             withContext(ioDispatcher) {
                 val profileExecution = async {
                     p.services.first { it != null }

@@ -281,10 +281,12 @@ open class DatabaseManager(
         Logger.d { "Closed inactive database ${anonymizeDbName(dbName)} to free connections" }
     }
 
-    // Short-term runtime containment: serialize withDb calls to reduce Room/SQLite connection-pool churn seen during
-    // device/firmware update flows. Preserve DB-critical blocks through cancellation, then re-check cancellation so
-    // stale callers do not continue after the DB releases. Revisit after direct currentDb.value callers are audited and
-    // safe DB concurrency can be restored.
+    // Short-term runtime containment: route withDb entry through a single-lane dispatcher to narrow the Room/SQLite
+    // connection-pool churn window seen during device/firmware update flows. Room suspend DAOs may continue on Room's
+    // own executor after suspension, so this is not a strict global DB-I/O serialization guarantee. Preserve bounded
+    // one-shot DB-critical blocks through cancellation, then re-check cancellation so stale callers do not continue
+    // after the DB releases. Long-lived Flow/Paging reads must stay out of withDb; revisit after direct currentDb.value
+    // callers are audited and safe DB concurrency can be restored.
     private val limitedIo = dispatchers.io.limitedParallelism(1)
 
     /** Execute [block] with the current DB instance. Retries once if the pool closes during a DB switch. */
@@ -294,7 +296,7 @@ open class DatabaseManager(
         return withContext(limitedIo) {
             val queuedMillis = nowMillis - queuedAt
             if (queuedMillis >= WITH_DB_SLOW_OPERATION_MS) {
-                Logger.w { "withDb waited ${queuedMillis}ms for serialized DB access" }
+                Logger.w { "withDb waited ${queuedMillis}ms for the temporary DB containment lane" }
             }
 
             val startedAt = nowMillis
@@ -303,7 +305,10 @@ open class DatabaseManager(
             } finally {
                 val elapsedMillis = nowMillis - startedAt
                 if (elapsedMillis >= WITH_DB_SLOW_OPERATION_MS) {
-                    Logger.w { "withDb callback took ${elapsedMillis}ms on serialized DB dispatcher" }
+                    Logger.w {
+                        "withDb callback took ${elapsedMillis}ms on the temporary DB containment lane; persistent " +
+                            "slow logs indicate DB access path should be revisited"
+                    }
                 }
             }
         }
@@ -337,6 +342,7 @@ open class DatabaseManager(
     }
 
     private suspend fun <T> runCancellableDbBlock(db: MeshtasticDatabase, block: suspend (MeshtasticDatabase) -> T): T {
+        // Keep withDb callbacks bounded and one-shot: NonCancellable can hold the containment lane until this returns.
         currentCoroutineContext().ensureActive()
         val result = withContext(NonCancellable) { block(db) }
         currentCoroutineContext().ensureActive()

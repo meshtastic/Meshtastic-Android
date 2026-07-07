@@ -43,7 +43,7 @@ class BleOtaTransportTest {
         seedOtaCharacteristics: Boolean = true,
     ): Triple<BleOtaTransport, FakeBleScanner, FakeBleConnection> {
         if (seedOtaCharacteristics) {
-            // ponytail: seed at the choke point instead of every connect() site — the new
+            // Seed at the choke point instead of every connect() site — the new
             // service.requireOtaCharacteristics() validation in BleOtaTransport.connect() rejects
             // services missing these, so default to present; negative tests opt out.
             connection.service.addCharacteristic(OTA_NOTIFY_CHARACTERISTIC)
@@ -138,7 +138,10 @@ class BleOtaTransportTest {
         assertTrue(result.isFailure)
         val exception = result.exceptionOrNull()
         assertIs<OtaProtocolException.ConnectionFailed>(exception)
-        assertTrue(exception.message?.contains("OTA service") == true)
+        val message = exception.message.orEmpty()
+        assertTrue(message.contains("OTA service"))
+        assertTrue(message.contains("TX notify characteristic"))
+        assertTrue(message.contains("OTA write characteristic"))
     }
 
     @Test
@@ -289,6 +292,34 @@ class BleOtaTransportTest {
         assertTrue(result.isSuccess, "streamFirmware failed: ${result.exceptionOrNull()}")
         assertTrue(progressValues.size >= 2, "Should have at least 2 progress reports, got $progressValues")
         assertEquals(1.0f, progressValues.last())
+    }
+
+    @Test
+    fun `streamFirmware reuses discovered OTA service for chunk writes`() = runTest {
+        val scanner = FakeBleScanner()
+        val connection = FakeBleConnection()
+        val (transport) = createTransport(scanner, connection)
+        connection.maxWriteValueLength = 200
+        scanner.emitDevice(FakeBleDevice(address))
+        transport.connect().getOrThrow()
+        val profileCallsAfterConnect = connection.profileCalls
+
+        emitResponse(connection, "OK")
+        transport.startOta(600L, "hash").getOrThrow()
+
+        emitResponse(connection, "ACK")
+        emitResponse(connection, "ACK")
+        emitResponse(connection, "OK")
+
+        val result = transport.streamFirmware(ByteArray(600) { it.toByte() }, 512) {}
+
+        assertTrue(result.isSuccess, "streamFirmware failed: ${result.exceptionOrNull()}")
+        assertEquals(1, profileCallsAfterConnect, "connect should discover the OTA profile once")
+        assertEquals(
+            profileCallsAfterConnect,
+            connection.profileCalls,
+            "writes should reuse the discovered OTA service",
+        )
     }
 
     @Test
