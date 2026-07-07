@@ -189,6 +189,24 @@
   },
   "pullRequests": [
     {
+      "id": "10928",
+      "title": "Add chunked PhoneAPI transport payloads",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10928",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
+      "id": "10927",
+      "title": "Add Meshnology W10 AIOT Dev Kit (SX1262 via MCP23017 I2C expander)",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10927",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "10926",
+      "title": "WIP: Big Display Node",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10926",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
       "id": "10921",
       "title": "Align Base UI message status wording",
       "page_url": "https://github.com/meshtastic/firmware/pull/10921",
@@ -201,6 +219,12 @@
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
+      "id": "10918",
+      "title": "Add RAK WisMesh Repeater Mini V2 and HP variants",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10918",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
       "id": "10917",
       "title": "Firmware for Seeed XIAO ESP32C6 and WIO-SX1262 for XIAO",
       "page_url": "https://github.com/meshtastic/firmware/pull/10917",
@@ -210,12 +234,6 @@
       "id": "10915",
       "title": "Update TDK InvenSense ICM42670P to v1.0.9",
       "page_url": "https://github.com/meshtastic/firmware/pull/10915",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10911",
-      "title": "Add Meshnology W10 AIOT Dev Kit (SX1262 via MCP23017 I2C expander)",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10911",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
@@ -241,12 +259,6 @@
       "title": "nrf52: add rotary encoder press pin as deep sleep wake source",
       "page_url": "https://github.com/meshtastic/firmware/pull/10893",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10887",
-      "title": "InkHUD: persist incoming broadcasts on all channels",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10887",
-      "zip_url": "https://discord.com/invite/meshtastic"
     },
     {
       "id": "10884",
