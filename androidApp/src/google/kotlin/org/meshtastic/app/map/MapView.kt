@@ -18,8 +18,10 @@
 
 package org.meshtastic.app.map
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
+import android.location.Location
 import android.net.Uri
 import android.view.WindowManager
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -61,6 +63,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import co.touchlab.kermit.Logger
+import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
@@ -97,9 +100,11 @@ import com.google.maps.android.data.geojson.GeoJsonPolygonStyle
 import com.google.maps.android.data.kml.KmlLayer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import org.jetbrains.compose.resources.stringResource
 import org.json.JSONObject
 import org.koin.compose.viewmodel.koinViewModel
+import org.meshtastic.app.BuildConfig
 import org.meshtastic.app.map.component.ClusterItemsListDialog
 import org.meshtastic.app.map.component.CustomMapLayersSheet
 import org.meshtastic.app.map.component.CustomTileProviderManagerSheet
@@ -150,12 +155,14 @@ import org.meshtastic.feature.map.LastHeardFilter
 import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.component.MapButton
 import org.meshtastic.feature.map.component.MapControlsOverlay
+import org.meshtastic.feature.map.component.SitePlannerParams
 import org.meshtastic.feature.map.component.WaypointInfoDialog
 import org.meshtastic.feature.map.tracerouteNodeSelection
 import org.meshtastic.proto.BoundingBox
 import org.meshtastic.proto.Config.DisplayConfig.DisplayUnits
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.Waypoint
+import kotlin.coroutines.resume
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.roundToInt
@@ -509,6 +516,8 @@ fun MapView(
 
     // --- Tile & layers state ---
     var showLayersBottomSheet by remember { mutableStateOf(false) }
+    // Non-null while the Site Planner estimate dialog/runner is open, holding the initial (prefilled) params.
+    var sitePlannerInitial by remember { mutableStateOf<SitePlannerParams?>(null) }
 
     val onAddLayerClicked = {
         val intent =
@@ -839,6 +848,13 @@ fun MapView(
                     onClick = { showLayersBottomSheet = true },
                 )
             },
+            // Debug/test affordance: hands params to the local Site Planner dev server and imports the result.
+            onSitePlannerClick =
+            if (BuildConfig.DEBUG) {
+                { sitePlannerInitial = ourNodeInfo.toSitePlannerParams() }
+            } else {
+                null
+            },
             isLocationTrackingEnabled = isLocationTrackingEnabled,
             onToggleLocationTracking = {
                 when {
@@ -895,6 +911,34 @@ fun MapView(
                 onAddNetworkLayer = { name, url -> mapViewModel.addNetworkMapLayer(name, url) },
             )
         }
+    }
+    // Site Planner deep link from a node's detail screen — open the estimate dialog prefilled with that node.
+    val sitePlannerRequest by mapViewModel.sitePlannerRequest.collectAsStateWithLifecycle()
+    LaunchedEffect(sitePlannerRequest) {
+        sitePlannerRequest?.let { node ->
+            sitePlannerInitial = node.toSitePlannerParams()
+            mapViewModel.consumeSitePlannerRequest()
+        }
+    }
+    sitePlannerInitial?.let { initial ->
+        // Phone GPS: only when permission is already granted; otherwise the field stays manual.
+        val onRequestCurrentLocation: (suspend () -> Pair<Double, Double>?)? =
+            if (locationPermission.isGranted) {
+                { fusedLocationClient.awaitLastLocation()?.let { it.latitude to it.longitude } }
+            } else {
+                null
+            }
+        // Our connected node's reported position: only when it has a valid fix.
+        val onUseNodeLocation: (() -> Pair<Double, Double>)? =
+            ourNodeInfo?.takeIf { it.validPosition != null }?.let { node -> { node.latitude to node.longitude } }
+        SitePlannerHost(
+            initialParams = initial,
+            onDismiss = { sitePlannerInitial = null },
+            onImport = { name, geoJson -> mapViewModel.addGeoJsonLayer(name, geoJson) },
+            onRequestCurrentLocation = onRequestCurrentLocation,
+            onUseNodeLocation = onUseNodeLocation,
+            onUseMapCenter = { cameraPositionState.position.target.let { it.latitude to it.longitude } },
+        )
     }
     showClusterItemsDialog?.let {
         ClusterItemsListDialog(
@@ -1393,6 +1437,19 @@ fun Uri.getFileName(context: android.content.Context): String {
 
 /** Converts protobuf [Position] integer coordinates to a Google Maps [LatLng]. */
 internal fun Position.toLatLng(): LatLng = LatLng((this.latitude_i ?: 0) * DEG_D, (this.longitude_i ?: 0) * DEG_D)
+
+/** Seed Site Planner params from a node (its name + position), falling back to sensible defaults when absent. */
+private fun Node?.toSitePlannerParams(): SitePlannerParams = SitePlannerParams(
+    name = this?.user?.long_name?.takeIf { it.isNotBlank() } ?: "Coverage",
+    latitude = this?.latitude ?: 0.0,
+    longitude = this?.longitude ?: 0.0,
+)
+
+/** One-shot last known location as a suspend call. Guarded by a permission check at the call site. */
+@SuppressLint("MissingPermission")
+private suspend fun FusedLocationProviderClient.awaitLastLocation(): Location? = suspendCancellableCoroutine { cont ->
+    lastLocation.addOnSuccessListener { cont.resume(it) }.addOnFailureListener { cont.resume(null) }
+}
 
 /** Builds a proto [BoundingBox] (degrees ×1e7) from two opposite corner taps. */
 private fun boundingBoxFromCorners(a: LatLng, b: LatLng): BoundingBox = BoundingBox(

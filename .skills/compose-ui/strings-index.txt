@@ -1450,6 +1450,23 @@ shutdown_on_power_loss
 shutdown_warning
 signal
 signal_quality
+### SITE ###
+site_planner
+site_planner_antenna_gain_dbi
+site_planner_antenna_height_meters
+site_planner_color_scale
+site_planner_estimate
+site_planner_estimating
+site_planner_failed
+site_planner_frequency_mhz
+site_planner_invalid_latitude
+site_planner_invalid_longitude
+site_planner_invalid_positive
+site_planner_subtitle
+site_planner_tx_power_watts
+site_planner_use_current_location
+site_planner_use_map_center
+site_planner_use_node_location
 skip
 slot
 smart_position

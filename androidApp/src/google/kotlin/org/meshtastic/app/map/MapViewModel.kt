@@ -39,16 +39,19 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import org.koin.core.annotation.KoinViewModel
+import org.meshtastic.app.MapFileImportBus
 import org.meshtastic.app.map.model.CustomTileProviderConfig
 import org.meshtastic.app.map.prefs.map.GoogleMapsPrefs
 import org.meshtastic.app.map.repository.CustomTileProviderRepository
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.NodeRepository
@@ -105,6 +108,17 @@ class MapViewModel(
 
     private val _selectedWaypointId = MutableStateFlow(savedStateHandle.get<Int>("waypointId"))
     val selectedWaypointId: StateFlow<Int?> = _selectedWaypointId.asStateFlow()
+
+    // Site Planner deep link from node detail: MapRoute.Map(sitePlannerNodeNum) → resolve to the node so the map can
+    // open the estimate dialog pre-filled with its position. Cleared once consumed so it doesn't re-open.
+    private val pendingSitePlannerNodeNum = MutableStateFlow(savedStateHandle.get<Int>("sitePlannerNodeNum"))
+    val sitePlannerRequest: StateFlow<Node?> =
+        combine(pendingSitePlannerNodeNum, nodeRepository.nodeDBbyNum) { num, db -> num?.let { db[it] } }
+            .stateInWhileSubscribed(initialValue = null)
+
+    fun consumeSitePlannerRequest() {
+        pendingSitePlannerNodeNum.value = null
+    }
 
     fun setWaypointId(id: Int?) {
         if (_selectedWaypointId.value != id) {
@@ -362,6 +376,15 @@ class MapViewModel(
         }
         loadPersistedLayers()
 
+        // Import a map file handed to us via an "Open in / Send to Meshtastic" intent (see MapFileImportBus).
+        viewModelScope.launch {
+            MapFileImportBus.pending.collect { uri ->
+                uri ?: return@collect
+                MapFileImportBus.pending.value = null
+                addMapLayer(uri, uri.getFileName(application))
+            }
+        }
+
         selectedWaypointId.value?.let { wpId ->
             viewModelScope.launch {
                 val wpMap = waypoints.first { it.containsKey(wpId) }
@@ -580,6 +603,37 @@ class MapViewModel(
             null
         }
     }
+
+    /**
+     * Import a GeoJSON string (e.g. handed back by the Site Planner headless bridge) as a visible local overlay,
+     * reusing the same internal-storage-backed layer plumbing as file imports.
+     */
+    fun addGeoJsonLayer(name: String, geoJson: String) {
+        viewModelScope.launch {
+            val displayName = name.ifBlank { "Coverage" }
+            val safeFileName = displayName.replace(Regex("[^A-Za-z0-9._-]"), "_")
+            val uri = writeStringToInternalStorage(geoJson, "${safeFileName}_${Uuid.random()}.geojson")
+            if (uri != null) {
+                _mapLayers.value =
+                    _mapLayers.value + MapLayerItem(name = displayName, uri = uri, layerType = LayerType.GEOJSON)
+            } else {
+                Logger.withTag("MapViewModel").e("Failed to write GeoJSON layer to internal storage.")
+            }
+        }
+    }
+
+    private suspend fun writeStringToInternalStorage(content: String, fileName: String): Uri? =
+        withContext(dispatchers.io) {
+            try {
+                val directory = File(application.filesDir, "map_layers").apply { if (!exists()) mkdirs() }
+                val outputFile = File(directory, fileName)
+                outputFile.writeText(content)
+                Uri.fromFile(outputFile)
+            } catch (e: IOException) {
+                Logger.withTag("MapViewModel").e(e) { "Error writing GeoJSON to internal storage" }
+                null
+            }
+        }
 
     fun toggleLayerVisibility(layerId: String) {
         var toggledLayer: MapLayerItem? = null

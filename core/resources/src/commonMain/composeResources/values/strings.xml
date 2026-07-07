@@ -1492,6 +1492,23 @@
     <string name="shutdown_warning">⚠️ This will SHUTDOWN the node. Physical interaction will be required to turn it back on.</string>
     <string name="signal">Signal</string>
     <string name="signal_quality">Signal Quality</string>
+    <!-- SITE -->
+    <string name="site_planner">Site Planner</string>
+    <string name="site_planner_antenna_gain_dbi">Antenna gain (dBi)</string>
+    <string name="site_planner_antenna_height_meters">Antenna height (m)</string>
+    <string name="site_planner_color_scale">Color palette</string>
+    <string name="site_planner_estimate">Estimate coverage</string>
+    <string name="site_planner_estimating">Estimating coverage…</string>
+    <string name="site_planner_failed">Coverage estimate failed</string>
+    <string name="site_planner_frequency_mhz">Frequency (MHz)</string>
+    <string name="site_planner_invalid_latitude">Enter −90 to 90</string>
+    <string name="site_planner_invalid_longitude">Enter −180 to 180</string>
+    <string name="site_planner_invalid_positive">Must be greater than 0</string>
+    <string name="site_planner_subtitle">Estimate RF coverage for a transmitter</string>
+    <string name="site_planner_tx_power_watts">TX power (W)</string>
+    <string name="site_planner_use_current_location">Use current location</string>
+    <string name="site_planner_use_map_center">Use map center</string>
+    <string name="site_planner_use_node_location">Use current node location</string>
     <string name="skip">Skip</string>
     <string name="slot">Slot</string>
     <string name="smart_position">Smart Position</string>

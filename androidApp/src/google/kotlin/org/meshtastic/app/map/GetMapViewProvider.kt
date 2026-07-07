@@ -16,6 +16,10 @@
  */
 package org.meshtastic.app.map
 
+import org.meshtastic.app.BuildConfig
 import org.meshtastic.core.ui.util.MapViewProvider
 
 fun getMapViewProvider(): MapViewProvider = GoogleMapViewProvider()
+
+/** Site Planner (coverage-estimate) availability — Google flavor, debug-gated while it targets a local dev server. */
+fun sitePlannerAvailable(): Boolean = BuildConfig.DEBUG

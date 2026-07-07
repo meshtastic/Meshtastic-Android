@@ -19,3 +19,6 @@ package org.meshtastic.app.map
 import org.meshtastic.core.ui.util.MapViewProvider
 
 fun getMapViewProvider(): MapViewProvider = FdroidMapViewProvider()
+
+/** Site Planner (coverage-estimate) is Google-flavor only; the F-Droid map has no overlay-layer support. */
+fun sitePlannerAvailable(): Boolean = false

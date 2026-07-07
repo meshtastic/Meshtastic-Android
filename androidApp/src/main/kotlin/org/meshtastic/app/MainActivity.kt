@@ -54,6 +54,7 @@ import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 import org.meshtastic.app.intro.AnalyticsIntro
 import org.meshtastic.app.map.getMapViewProvider
+import org.meshtastic.app.map.sitePlannerAvailable
 import org.meshtastic.app.node.component.InlineMap
 import org.meshtastic.app.node.metrics.getTracerouteMapOverlayInsets
 import org.meshtastic.app.ui.MainScreen
@@ -81,6 +82,7 @@ import org.meshtastic.core.ui.util.LocalNfcScannerSupported
 import org.meshtastic.core.ui.util.LocalNfcWriterProvider
 import org.meshtastic.core.ui.util.LocalNodeMapScreenProvider
 import org.meshtastic.core.ui.util.LocalNodeTrackMapProvider
+import org.meshtastic.core.ui.util.LocalSitePlannerAvailable
 import org.meshtastic.core.ui.util.LocalTracerouteMapOverlayInsetsProvider
 import org.meshtastic.core.ui.util.LocalTracerouteMapProvider
 import org.meshtastic.core.ui.util.LocalTracerouteMapScreenProvider
@@ -199,6 +201,7 @@ class MainActivity : AppCompatActivity() {
             LocalNfcScannerSupported provides true,
             LocalAnalyticsIntroProvider provides { AnalyticsIntro() },
             LocalMapViewProvider provides getMapViewProvider(),
+            LocalSitePlannerAvailable provides sitePlannerAvailable(),
             LocalInlineMapProvider provides { node, modifier -> InlineMap(node, modifier) },
             LocalNodeTrackMapProvider provides
                 { destNum, positions, modifier, selectedPositionTime, onPositionSelected ->
@@ -262,9 +265,7 @@ class MainActivity : AppCompatActivity() {
         val appLinkData: Uri? = intent.data
 
         when (appLinkAction) {
-            Intent.ACTION_VIEW -> {
-                appLinkData?.let { handleMeshtasticUri(it) }
-            }
+            Intent.ACTION_VIEW -> handleViewIntent(appLinkData)
 
             NfcAdapter.ACTION_NDEF_DISCOVERED -> {
                 val rawMessages =
@@ -295,12 +296,7 @@ class MainActivity : AppCompatActivity() {
 
             Intent.ACTION_MAIN -> {}
 
-            Intent.ACTION_SEND -> {
-                val text = intent.getStringExtra(Intent.EXTRA_TEXT)
-                if (text != null) {
-                    createShareIntent(text).send()
-                }
-            }
+            Intent.ACTION_SEND -> handleSendIntent(intent)
 
             else -> {
                 Logger.w { "Unexpected action $appLinkAction" }
@@ -308,10 +304,44 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun handleViewIntent(uri: Uri?) {
+        when {
+            uri == null -> {}
+
+            // A file handed to us via "Open in Meshtastic" (Files, Share Sheet, drag-and-drop) rather than a
+            // meshtastic:// / https deep link — import it as a map overlay.
+            uri.scheme == "content" || uri.scheme == "file" -> importMapFile(uri)
+
+            else -> handleMeshtasticUri(uri)
+        }
+    }
+
+    private fun handleSendIntent(intent: Intent) {
+        val stream = IntentCompat.getParcelableExtra(intent, Intent.EXTRA_STREAM, Uri::class.java)
+        val text = intent.getStringExtra(Intent.EXTRA_TEXT)
+        when {
+            stream != null -> importMapFile(stream)
+
+            // shared .geojson/.kml file (e.g. Site Planner)
+            text != null -> createShareIntent(text).send()
+        }
+    }
+
     private fun handleMeshtasticUri(uri: Uri) {
         Logger.d { "Handling Meshtastic URI: $uri" }
 
         model.handleDeepLink(uri.toKmpUri()) { lifecycleScope.launch { showToast(Res.string.channel_invalid) } }
+    }
+
+    /**
+     * Hand a map file received via an OS "Open in / Send to Meshtastic" intent to the map, then bring the Map tab
+     * forward so the imported overlay is visible. Only the Google-flavor map consumes this (see [MapFileImportBus]);
+     * the read grant on [uri] lives as long as this activity, which is long enough for the map to copy the file in.
+     */
+    private fun importMapFile(uri: Uri) {
+        Logger.d { "Importing shared map file: $uri" }
+        MapFileImportBus.pending.value = uri
+        handleMeshtasticUri("$DEEP_LINK_BASE_URI/map".toUri())
     }
 
     private fun createShareIntent(message: String): PendingIntent {
