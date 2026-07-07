@@ -123,6 +123,7 @@ import org.meshtastic.core.model.util.GeoConstants.HEADING_DEG
 import org.meshtastic.core.model.util.metersIn
 import org.meshtastic.core.model.util.mpsToKmph
 import org.meshtastic.core.model.util.mpsToMph
+import org.meshtastic.core.model.util.primaryChannel
 import org.meshtastic.core.model.util.toString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.alt
@@ -158,12 +159,15 @@ import org.meshtastic.feature.map.component.SitePlannerParams
 import org.meshtastic.feature.map.component.WaypointInfoDialog
 import org.meshtastic.feature.map.tracerouteNodeSelection
 import org.meshtastic.proto.BoundingBox
+import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.Config.DisplayConfig.DisplayUnits
+import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.Waypoint
 import kotlin.coroutines.resume
 import kotlin.math.abs
 import kotlin.math.max
+import kotlin.math.pow
 import kotlin.math.roundToInt
 import android.graphics.Color as AndroidColor
 
@@ -256,6 +260,7 @@ fun MapView(
     var mapFilterMenuExpanded by remember { mutableStateOf(false) }
     val mapFilterState by mapViewModel.mapFilterStateFlow.collectAsStateWithLifecycle()
     val ourNodeInfo by mapViewModel.ourNodeInfo.collectAsStateWithLifecycle()
+    val channelSet by mapViewModel.channelSet.collectAsStateWithLifecycle()
     var editingWaypoint by remember { mutableStateOf<Waypoint?>(null) }
     var geofenceInfoWaypoint by remember { mutableStateOf<Waypoint?>(null) }
     val displayUnits by mapViewModel.displayUnits.collectAsStateWithLifecycle()
@@ -850,7 +855,7 @@ fun MapView(
             // Google flavor only: hands params to the hosted Site Planner and imports the returned coverage.
             onSitePlannerClick =
             if (sitePlannerAvailable()) {
-                { sitePlannerInitial = ourNodeInfo.toSitePlannerParams() }
+                { sitePlannerInitial = ourNodeInfo.toSitePlannerParams(channelSet) }
             } else {
                 null
             },
@@ -915,7 +920,7 @@ fun MapView(
     val sitePlannerRequest by mapViewModel.sitePlannerRequest.collectAsStateWithLifecycle()
     LaunchedEffect(sitePlannerRequest) {
         sitePlannerRequest?.let { node ->
-            sitePlannerInitial = node.toSitePlannerParams()
+            sitePlannerInitial = node.toSitePlannerParams(channelSet)
             mapViewModel.consumeSitePlannerRequest()
         }
     }
@@ -1443,12 +1448,47 @@ fun Uri.getFileName(context: android.content.Context): String {
 /** Converts protobuf [Position] integer coordinates to a Google Maps [LatLng]. */
 internal fun Position.toLatLng(): LatLng = LatLng((this.latitude_i ?: 0) * DEG_D, (this.longitude_i ?: 0) * DEG_D)
 
-/** Seed Site Planner params from a node (its name + position), falling back to sensible defaults when absent. */
-private fun Node?.toSitePlannerParams(): SitePlannerParams = SitePlannerParams(
-    name = this?.user?.long_name?.takeIf { it.isNotBlank() } ?: "Coverage",
-    latitude = this?.latitude ?: 0.0,
-    longitude = this?.longitude ?: 0.0,
-)
+/**
+ * Seed Site Planner params from a node (name + position) and, when a radio is connected, from its actual config:
+ * transmit frequency (from the primary channel), transmit power (dBm→W), and a receiver sensitivity derived from the
+ * modem preset. Antenna gain/height aren't in the device config, so they keep the planner's stock defaults.
+ */
+private fun Node?.toSitePlannerParams(channelSet: ChannelSet?): SitePlannerParams {
+    val lora = channelSet?.lora_config
+    val freqMhz = channelSet?.primaryChannel?.radioFreq?.toDouble()?.takeIf { it > 0.0 }
+    return SitePlannerParams(
+        name = this?.user?.long_name?.takeIf { it.isNotBlank() } ?: "Coverage",
+        latitude = this?.latitude ?: 0.0,
+        longitude = this?.longitude ?: 0.0,
+        txFreqMhz = freqMhz ?: SitePlannerParams.DEFAULT_TX_FREQ_MHZ,
+        txPowerWatts = dbmToWatts(lora?.tx_power ?: 0) ?: SitePlannerParams.DEFAULT_TX_POWER_WATTS,
+        rxSensitivityDbm = sensitivityDbmFor(lora?.modem_preset),
+    )
+}
+
+/**
+ * Meshtastic tx_power is dBm; the planner wants watts. 0 (or less) means "use region max" in firmware — unknown here.
+ */
+@Suppress("MagicNumber")
+private fun dbmToWatts(dbm: Int): Double? = if (dbm <= 0) null else 10.0.pow((dbm - 30).toDouble() / 10.0)
+
+/**
+ * Approximate receiver sensitivity (dBm) per Meshtastic modem preset, from the Site Planner's own parameters.md table.
+ * Unmapped presets fall back to the planner's default so the estimate still runs.
+ */
+@Suppress("MagicNumber")
+private fun sensitivityDbmFor(preset: ModemPreset?): Double = when (preset) {
+    ModemPreset.SHORT_TURBO -> -126.0
+    ModemPreset.SHORT_FAST -> -129.0
+    ModemPreset.SHORT_SLOW -> -131.5
+    ModemPreset.MEDIUM_FAST -> -134.0
+    ModemPreset.MEDIUM_SLOW -> -136.5
+    ModemPreset.LONG_FAST -> -139.0
+    ModemPreset.LONG_MODERATE -> -142.0
+    ModemPreset.LONG_SLOW -> -144.5
+    ModemPreset.VERY_LONG_SLOW -> -147.5
+    else -> SitePlannerParams.DEFAULT_RX_SENSITIVITY_DBM
+}
 
 /** One-shot last known location as a suspend call. Guarded by a permission check at the call site. */
 @SuppressLint("MissingPermission")

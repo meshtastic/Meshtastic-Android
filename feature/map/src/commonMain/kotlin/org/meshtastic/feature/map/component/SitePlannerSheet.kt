@@ -15,15 +15,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 @file:OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@file:Suppress("TooManyFunctions") // small, single-purpose section composables mirroring the planner's panels
 
 package org.meshtastic.feature.map.component
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -45,6 +49,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -54,6 +59,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
@@ -75,14 +81,25 @@ import org.meshtastic.core.resources.site_planner_antenna_height_meters
 import org.meshtastic.core.resources.site_planner_color_scale
 import org.meshtastic.core.resources.site_planner_estimate
 import org.meshtastic.core.resources.site_planner_frequency_mhz
+import org.meshtastic.core.resources.site_planner_high_resolution
 import org.meshtastic.core.resources.site_planner_invalid_latitude
 import org.meshtastic.core.resources.site_planner_invalid_longitude
 import org.meshtastic.core.resources.site_planner_invalid_positive
+import org.meshtastic.core.resources.site_planner_invalid_rx_sensitivity
+import org.meshtastic.core.resources.site_planner_max_range_km
+import org.meshtastic.core.resources.site_planner_rx_height_meters
+import org.meshtastic.core.resources.site_planner_rx_sensitivity_dbm
+import org.meshtastic.core.resources.site_planner_section_display
+import org.meshtastic.core.resources.site_planner_section_receiver
+import org.meshtastic.core.resources.site_planner_section_simulation
+import org.meshtastic.core.resources.site_planner_section_transmitter
 import org.meshtastic.core.resources.site_planner_subtitle
 import org.meshtastic.core.resources.site_planner_tx_power_watts
 import org.meshtastic.core.resources.site_planner_use_current_location
 import org.meshtastic.core.resources.site_planner_use_map_center
 import org.meshtastic.core.resources.site_planner_use_node_location
+import org.meshtastic.core.ui.icon.ExpandLess
+import org.meshtastic.core.ui.icon.ExpandMore
 import org.meshtastic.core.ui.icon.Map
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.MyLocation
@@ -104,6 +121,41 @@ private class SiteFormState(initial: SitePlannerParams) {
     var height by mutableStateOf(initial.txHeightMeters.toString())
     var gain by mutableStateOf(initial.txGainDbi.toString())
     var colorScale by mutableStateOf(initial.colorScale)
+
+    // Advanced (coverage-affecting) fields.
+    var rxSensitivity by mutableStateOf(initial.rxSensitivityDbm.toString())
+    var rxHeight by mutableStateOf(initial.rxHeightMeters.toString())
+    var maxRange by mutableStateOf(initial.maxRangeKm.toString())
+    var highResolution by mutableStateOf(initial.highResolution)
+
+    // Validation — computed from the (observable) string fields, so callers just read the booleans.
+    private val latValue
+        get() = lat.toDoubleOrNull()
+
+    private val lonValue
+        get() = lon.toDoubleOrNull()
+
+    val latBad
+        get() = latValue.let { it == null || it !in -LAT_LIMIT..LAT_LIMIT }
+
+    val lonBad
+        get() = lonValue.let { it == null || it !in -LON_LIMIT..LON_LIMIT }
+
+    val powerBad
+        get() = (power.toDoubleOrNull() ?: 0.0) <= 0.0
+
+    val freqBad
+        get() = (freq.toDoubleOrNull() ?: 0.0) <= 0.0
+
+    val rxSensBad
+        get() =
+            rxSensitivity.toDoubleOrNull()?.let {
+                it !in SitePlannerParams.MIN_RX_SENSITIVITY_DBM..SitePlannerParams.MAX_RX_SENSITIVITY_DBM
+            } ?: false
+
+    // Guard the null-island (0,0) case so an empty ocean run can't be submitted.
+    val canSubmit
+        get() = !latBad && !lonBad && !powerBad && !freqBad && !rxSensBad && (latValue != 0.0 || lonValue != 0.0)
 }
 
 /**
@@ -141,18 +193,6 @@ private fun SiteFormContent(
     onUseNodeLocation: (() -> Unit)?,
     onUseMapCenter: (() -> Unit)?,
 ) {
-    val latDeg = state.lat.toDoubleOrNull()
-    val lonDeg = state.lon.toDoubleOrNull()
-    val latBad = latDeg == null || latDeg !in -LAT_LIMIT..LAT_LIMIT
-    val lonBad = lonDeg == null || lonDeg !in -LON_LIMIT..LON_LIMIT
-    val powerBad = (state.power.toDoubleOrNull() ?: 0.0) <= 0.0
-    val freqBad = (state.freq.toDoubleOrNull() ?: 0.0) <= 0.0
-    // Also guard the null-island (0,0) case so an empty ocean run can't be submitted.
-    val canSubmit = !latBad && !lonBad && !powerBad && !freqBad && (latDeg != 0.0 || lonDeg != 0.0)
-    val latMsg = stringResource(Res.string.site_planner_invalid_latitude)
-    val lonMsg = stringResource(Res.string.site_planner_invalid_longitude)
-    val posMsg = stringResource(Res.string.site_planner_invalid_positive)
-
     Column(
         modifier =
         Modifier.fillMaxWidth()
@@ -171,23 +211,92 @@ private fun SiteFormContent(
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        SiteField(state.name, { state.name = it }, Res.string.name, keyboardType = KeyboardType.Text)
-        LocationChips(onUseCurrentLocation, onUseNodeLocation, onUseMapCenter)
-        TransmitterFields(
-            state = state,
-            latError = if (latBad) latMsg else null,
-            lonError = if (lonBad) lonMsg else null,
-            powerError = if (powerBad) posMsg else null,
-            freqError = if (freqBad) posMsg else null,
-        )
-        PalettePicker(state.colorScale) { state.colorScale = it }
+        // Sections mirror the planner's own panel order + default-open state (Site Parameters drawer):
+        // Site / Transmitter (open) → Receiver → Simulation Options → Display (open).
+        TransmitterSection(state, onUseCurrentLocation, onUseNodeLocation, onUseMapCenter)
+        ReceiverSection(state)
+        SimulationSection(state)
+        DisplaySection(state)
         Button(
             onClick = { onSubmit(buildSubmitParams(state, initial)) },
-            enabled = canSubmit,
+            enabled = state.canSubmit,
             modifier = Modifier.fillMaxWidth(),
         ) {
             Text(stringResource(Res.string.site_planner_estimate))
         }
+    }
+}
+
+/** A collapsible titled section, matching the planner's `Section` panels. */
+@Composable
+private fun FormSection(title: String, defaultExpanded: Boolean, content: @Composable ColumnScope.() -> Unit) {
+    var expanded by remember { mutableStateOf(defaultExpanded) }
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth().clickable { expanded = !expanded },
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(title, style = MaterialTheme.typography.titleSmall, modifier = Modifier.semantics { heading() })
+            Icon(if (expanded) MeshtasticIcons.ExpandLess else MeshtasticIcons.ExpandMore, contentDescription = null)
+        }
+        if (expanded) content()
+    }
+}
+
+@Composable
+private fun TransmitterSection(
+    state: SiteFormState,
+    onUseCurrentLocation: (() -> Unit)?,
+    onUseNodeLocation: (() -> Unit)?,
+    onUseMapCenter: (() -> Unit)?,
+) {
+    val posMsg = stringResource(Res.string.site_planner_invalid_positive)
+    FormSection(stringResource(Res.string.site_planner_section_transmitter), defaultExpanded = true) {
+        SiteField(state.name, { state.name = it }, Res.string.name, keyboardType = KeyboardType.Text)
+        LocationChips(onUseCurrentLocation, onUseNodeLocation, onUseMapCenter)
+        TransmitterFields(
+            state = state,
+            latError = if (state.latBad) stringResource(Res.string.site_planner_invalid_latitude) else null,
+            lonError = if (state.lonBad) stringResource(Res.string.site_planner_invalid_longitude) else null,
+            powerError = if (state.powerBad) posMsg else null,
+            freqError = if (state.freqBad) posMsg else null,
+        )
+    }
+}
+
+@Composable
+private fun ReceiverSection(state: SiteFormState) {
+    FormSection(stringResource(Res.string.site_planner_section_receiver), defaultExpanded = false) {
+        SiteField(
+            state.rxSensitivity,
+            { state.rxSensitivity = it },
+            Res.string.site_planner_rx_sensitivity_dbm,
+            error = if (state.rxSensBad) stringResource(Res.string.site_planner_invalid_rx_sensitivity) else null,
+        )
+        SiteField(state.rxHeight, { state.rxHeight = it }, Res.string.site_planner_rx_height_meters)
+    }
+}
+
+@Composable
+private fun SimulationSection(state: SiteFormState) {
+    FormSection(stringResource(Res.string.site_planner_section_simulation), defaultExpanded = false) {
+        SiteField(state.maxRange, { state.maxRange = it }, Res.string.site_planner_max_range_km)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(stringResource(Res.string.site_planner_high_resolution))
+            Switch(checked = state.highResolution, onCheckedChange = { state.highResolution = it })
+        }
+    }
+}
+
+@Composable
+private fun DisplaySection(state: SiteFormState) {
+    FormSection(stringResource(Res.string.site_planner_section_display), defaultExpanded = true) {
+        PalettePicker(state.colorScale) { state.colorScale = it }
     }
 }
 
@@ -319,4 +428,11 @@ private fun buildSubmitParams(state: SiteFormState, initial: SitePlannerParams):
     txHeightMeters = state.height.toDoubleOrNull() ?: initial.txHeightMeters,
     txGainDbi = state.gain.toDoubleOrNull() ?: initial.txGainDbi,
     colorScale = state.colorScale,
+    rxSensitivityDbm = state.rxSensitivity.toDoubleOrNull() ?: initial.rxSensitivityDbm,
+    rxHeightMeters = state.rxHeight.toDoubleOrNull() ?: initial.rxHeightMeters,
+    maxRangeKm = state.maxRange.toDoubleOrNull() ?: initial.maxRangeKm,
+    highResolution = state.highResolution,
+    minDbm = initial.minDbm,
+    maxDbm = initial.maxDbm,
+    overlayTransparency = initial.overlayTransparency,
 )

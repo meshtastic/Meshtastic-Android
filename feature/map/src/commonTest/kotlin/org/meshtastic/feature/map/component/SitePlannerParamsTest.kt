@@ -23,7 +23,7 @@ import kotlin.test.assertTrue
 class SitePlannerParamsTest {
 
     @Test
-    fun `toQueryUrl emits the planner's flat contract with run and bridge flags`() {
+    fun `toQueryUrl emits the planner's flat contract with advanced defaults and run and bridge flags`() {
         val url =
             SitePlannerParams(
                 name = "Tower A",
@@ -37,11 +37,32 @@ class SitePlannerParamsTest {
             )
                 .toQueryUrl("http://localhost:5173")
 
+        // Advanced params carry their (planner-matching) defaults; high_res is omitted while false.
         assertEquals(
             "http://localhost:5173/?lat=51.05&lon=-114.07&name=Tower%20A" +
-                "&tx_power=0.5&tx_freq=915.0&tx_height=12.0&tx_gain=5.5&color_scale=turbo&run=1&bridge=1",
+                "&tx_power=0.5&tx_freq=915.0&tx_height=12.0&tx_gain=5.5&color_scale=turbo" +
+                "&rx_sensitivity=-130.0&rx_height=1.0&max_range=30.0" +
+                "&min_dbm=-130.0&max_dbm=-80.0&overlay_transparency=50&run=1&bridge=1",
             url,
         )
+    }
+
+    @Test
+    fun `toQueryUrl emits advanced overrides and high_res only when enabled`() {
+        val url =
+            SitePlannerParams(
+                name = "N",
+                latitude = 1.0,
+                longitude = 2.0,
+                rxSensitivityDbm = -139.0,
+                maxRangeKm = 60.0,
+                highResolution = true,
+            )
+                .toQueryUrl("http://localhost:5173")
+
+        assertTrue(url.contains("&rx_sensitivity=-139.0"), url)
+        assertTrue(url.contains("&max_range=60.0"), url)
+        assertTrue(url.contains("&high_res=1"), url)
     }
 
     @Test
