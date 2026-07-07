@@ -104,7 +104,6 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import org.jetbrains.compose.resources.stringResource
 import org.json.JSONObject
 import org.koin.compose.viewmodel.koinViewModel
-import org.meshtastic.app.BuildConfig
 import org.meshtastic.app.map.component.ClusterItemsListDialog
 import org.meshtastic.app.map.component.CustomMapLayersSheet
 import org.meshtastic.app.map.component.CustomTileProviderManagerSheet
@@ -848,9 +847,9 @@ fun MapView(
                     onClick = { showLayersBottomSheet = true },
                 )
             },
-            // Debug/test affordance: hands params to the local Site Planner dev server and imports the result.
+            // Google flavor only: hands params to the hosted Site Planner and imports the returned coverage.
             onSitePlannerClick =
-            if (BuildConfig.DEBUG) {
+            if (sitePlannerAvailable()) {
                 { sitePlannerInitial = ourNodeInfo.toSitePlannerParams() }
             } else {
                 null
@@ -934,7 +933,13 @@ fun MapView(
         SitePlannerHost(
             initialParams = initial,
             onDismiss = { sitePlannerInitial = null },
-            onImport = { name, geoJson -> mapViewModel.addGeoJsonLayer(name, geoJson) },
+            onImport = { name, geoJson, latitude, longitude ->
+                mapViewModel.addGeoJsonLayer(name, geoJson)
+                // Recenter on the estimate's transmitter so the freshly-imported coverage is on-screen.
+                coroutineScope.launch {
+                    cameraPositionState.animate(CameraUpdateFactory.newLatLng(LatLng(latitude, longitude)))
+                }
+            },
             onRequestCurrentLocation = onRequestCurrentLocation,
             onUseNodeLocation = onUseNodeLocation,
             onUseMapCenter = { cameraPositionState.position.target.let { it.latitude to it.longitude } },

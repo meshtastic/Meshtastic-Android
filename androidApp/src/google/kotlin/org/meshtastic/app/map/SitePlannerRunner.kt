@@ -46,6 +46,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -61,10 +62,10 @@ import org.meshtastic.core.resources.site_planner_failed
 import org.meshtastic.feature.map.component.SitePlannerParams
 import org.meshtastic.feature.map.component.SitePlannerSheet
 
-// Local dev server, reached from the emulator via `adb reverse tcp:5173 tcp:5173` (localhost cleartext is already
-// permitted by network_security_config). Switch to the deployed planner URL once the hand-off changes ship
-// (site-planner #73 + the native bridge hook). ponytail: hardcoded test target; make it a setting if this graduates.
-private const val SITE_PLANNER_BASE_URL = "http://localhost:5173"
+// The official hosted Site Planner (static PWA on GitHub Pages). The estimate flow loads it headless with
+// run=1&bridge=1; the native bridge + color_scale it needs ship in site-planner #74, so the run will time out
+// until that PR merges and this URL redeploys. ponytail: make it a setting if a self-hosted planner is needed.
+private const val SITE_PLANNER_BASE_URL = "https://site.meshtastic.org"
 private const val SITE_PLANNER_TIMEOUT_MS = 45_000L
 
 /**
@@ -79,7 +80,7 @@ private const val SITE_PLANNER_TIMEOUT_MS = 45_000L
 fun SitePlannerHost(
     initialParams: SitePlannerParams,
     onDismiss: () -> Unit,
-    onImport: (name: String, geoJson: String) -> Unit,
+    onImport: (name: String, geoJson: String, latitude: Double, longitude: Double) -> Unit,
     onRequestCurrentLocation: (suspend () -> Pair<Double, Double>?)? = null,
     onUseNodeLocation: (() -> Pair<Double, Double>)? = null,
     onUseMapCenter: (() -> Pair<Double, Double>)? = null,
@@ -129,7 +130,7 @@ fun SitePlannerHost(
                 SitePlannerRunner(
                     url = current.toQueryUrl(SITE_PLANNER_BASE_URL),
                     onResult = { geoJson ->
-                        onImport(current.name, geoJson)
+                        onImport(current.name, geoJson, current.latitude, current.longitude)
                         onDismiss()
                     },
                     onError = { detail ->
@@ -137,7 +138,10 @@ fun SitePlannerHost(
                         Toast.makeText(context, failedText, Toast.LENGTH_SHORT).show()
                         onDismiss()
                     },
-                    modifier = Modifier.matchParentSize(),
+                    // Headless: fully transparent so the WebGL first-paint frame never flashes through, but still
+                    // attached + sized (280dp) so the sim gets a WebGL context. alpha(0) is a compositor property —
+                    // the view stays VISIBLE, so the page's requestAnimationFrame/autorun keep running.
+                    modifier = Modifier.matchParentSize().alpha(0f),
                 )
                 Surface(
                     modifier = Modifier.matchParentSize(),
@@ -184,6 +188,7 @@ private fun SitePlannerRunner(
         factory = { context ->
             val main = Handler(Looper.getMainLooper())
             WebView(context).apply {
+                setBackgroundColor(android.graphics.Color.TRANSPARENT) // no opaque black backing before first paint
                 settings.javaScriptEnabled = true
                 settings.domStorageEnabled = true
                 addJavascriptInterface(
