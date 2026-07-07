@@ -31,7 +31,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -279,34 +281,72 @@ open class DatabaseManager(
         Logger.d { "Closed inactive database ${anonymizeDbName(dbName)} to free connections" }
     }
 
-    private val limitedIo = dispatchers.io.limitedParallelism(4)
+    // Short-term runtime containment: route withDb entry through a single-lane dispatcher to narrow the Room/SQLite
+    // connection-pool churn window seen during device/firmware update flows. Room suspend DAOs may continue on Room's
+    // own executor after suspension, so this is not a strict global DB-I/O serialization guarantee. Preserve bounded
+    // one-shot DB-critical blocks through cancellation, then re-check cancellation so stale callers do not continue
+    // after the DB releases. Long-lived Flow/Paging reads must stay out of withDb; revisit after direct currentDb.value
+    // callers are audited and safe DB concurrency can be restored.
+    private val limitedIo = dispatchers.io.limitedParallelism(1)
 
     /** Execute [block] with the current DB instance. Retries once if the pool closes during a DB switch. */
     @Suppress("TooGenericExceptionCaught")
-    override suspend fun <T> withDb(block: suspend (MeshtasticDatabase) -> T): T? = withContext(limitedIo) {
-        val db = _currentDb.value ?: return@withContext null
+    override suspend fun <T> withDb(block: suspend (MeshtasticDatabase) -> T): T? {
+        val queuedAt = nowMillis
+        return withContext(limitedIo) {
+            val queuedMillis = nowMillis - queuedAt
+            if (queuedMillis >= WITH_DB_SLOW_OPERATION_MS) {
+                Logger.w { "withDb waited ${queuedMillis}ms for the temporary DB containment lane" }
+            }
+
+            val startedAt = nowMillis
+            try {
+                withCurrentDb(block)
+            } finally {
+                val elapsedMillis = nowMillis - startedAt
+                if (elapsedMillis >= WITH_DB_SLOW_OPERATION_MS) {
+                    Logger.w {
+                        "withDb callback took ${elapsedMillis}ms on the temporary DB containment lane; persistent " +
+                            "slow logs indicate DB access path should be revisited"
+                    }
+                }
+            }
+        }
+    }
+
+    @Suppress("ReturnCount", "ThrowsCount", "TooGenericExceptionCaught")
+    private suspend fun <T> withCurrentDb(block: suspend (MeshtasticDatabase) -> T): T? {
+        val db = _currentDb.value ?: return null
         val active = currentDbName
         markLastUsed(active)
         try {
-            block(db)
+            return runCancellableDbBlock(db, block)
         } catch (e: CancellationException) {
             throw e // Preserve structured concurrency cancellation propagation.
         } catch (e: Exception) {
             // If the active database switched while we held a reference to the old one,
             // and the exception indicates a closed pool/connection, retry with the new DB.
             val retryDb = _currentDb.value
-            if (retryDb != null && retryDb !== db && isDbClosedException(e)) {
-                Logger.w { "withDb: database closed during switch (${e.message}), retrying with current DB" }
-                try {
-                    block(retryDb)
-                } catch (retryEx: Exception) {
-                    retryEx.addSuppressed(e)
-                    throw retryEx
-                }
-            } else {
-                throw e
+            if (retryDb == null || retryDb === db || !isDbClosedException(e)) throw e
+
+            Logger.w { "withDb: database closed during switch (${e.message}), retrying with current DB" }
+            return try {
+                runCancellableDbBlock(retryDb, block)
+            } catch (retryCancel: CancellationException) {
+                throw retryCancel
+            } catch (retryEx: Exception) {
+                retryEx.addSuppressed(e)
+                throw retryEx
             }
         }
+    }
+
+    private suspend fun <T> runCancellableDbBlock(db: MeshtasticDatabase, block: suspend (MeshtasticDatabase) -> T): T {
+        // Keep withDb callbacks bounded and one-shot: NonCancellable can hold the containment lane until this returns.
+        currentCoroutineContext().ensureActive()
+        val result = withContext(NonCancellable) { block(db) }
+        currentCoroutineContext().ensureActive()
+        return result
     }
 
     private fun isDbClosedException(e: Exception): Boolean = generateSequence<Throwable>(e) { it.cause }
@@ -317,6 +357,7 @@ open class DatabaseManager(
 
     private companion object {
         private const val BACKFILL_COLD_START_DELAY_MS = 2_000L
+        private const val WITH_DB_SLOW_OPERATION_MS = 1_000L
         val DB_TERMS = listOf("pool", "database", "connection", "sqlite")
     }
 

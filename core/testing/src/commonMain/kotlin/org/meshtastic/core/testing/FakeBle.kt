@@ -120,6 +120,9 @@ class FakeBleConnection :
     /** Number of times [connectAndAwait] has been invoked (including failures). */
     var connectAndAwaitCalls: Int = 0
 
+    /** Number of times [profile] has been invoked. */
+    var profileCalls: Int = 0
+
     /** Externally simulate a remote disconnect (e.g. node power-cycle) for tests that exercise reconnect. */
     fun simulateRemoteDisconnect(reason: DisconnectReason = DisconnectReason.Timeout) {
         _connectionState.value = BleConnectionState.Disconnected(reason)
@@ -168,6 +171,7 @@ class FakeBleConnection :
         timeout: Duration,
         setup: suspend CoroutineScope.(BleService) -> T,
     ): T {
+        profileCalls++
         if (serviceUuid in missingServices) {
             throw NoSuchElementException("Service $serviceUuid not found")
         }
