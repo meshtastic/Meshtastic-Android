@@ -112,16 +112,18 @@ class MeshBeaconOfferTest {
     }
 
     @Test
-    fun `SWITCH preserves current lora fields and only overrides preset region and channel_num`() {
-        // Regression: the beacon proto advertises no hop_limit/tx_power/tx_enabled — a switch must not zero them.
+    fun `SWITCH ships a fresh lora config so stale RF pins never survive the retune`() {
+        // The join must NOT copy the current config: a stale channel_num / override / manual preset would strand the
+        // radio on the old slot. use_preset is set, the offered preset+region applied, and every RF field left blank.
         val current =
             radioLora.copy(
                 modem_preset = ModemPreset.MEDIUM_FAST,
                 region = RegionCode.EU_868,
-                hop_limit = 3,
+                hop_limit = 7,
                 tx_power = 27,
                 tx_enabled = true,
                 channel_num = 5,
+                override_frequency = 915.5f,
             )
         val beacon =
             MeshBeacon(
@@ -131,24 +133,26 @@ class MeshBeaconOfferTest {
             )
         val lora = beacon.toJoinChannelSet(BeaconJoinOption.SWITCH, current)?.lora_config
         assertNotNull(lora)
-        assertEquals(3, lora.hop_limit, "hop_limit must be preserved, not zeroed")
-        assertEquals(27, lora.tx_power, "tx_power must be preserved")
-        assertEquals(true, lora.tx_enabled, "tx_enabled must be preserved")
+        assertEquals(true, lora.use_preset, "use_preset must be set")
         assertEquals(ModemPreset.LONG_FAST, lora.modem_preset, "offered preset applied")
         assertEquals(RegionCode.US, lora.region, "offered region applied")
         assertEquals(0, lora.channel_num, "channel_num reset to 0 for frequency derivation")
+        assertEquals(0f, lora.override_frequency, "stale override_frequency dropped — firmware re-derives it")
+        assertEquals(0, lora.tx_power, "stale tx_power dropped — firmware picks the region max")
+        assertEquals(3, lora.hop_limit, "hop_limit falls back to the standard default, not the stale value")
     }
 
     @Test
-    fun `SWITCH without an offered preset still resets channel_num and keeps the current preset`() {
+    fun `SWITCH without an offered preset keeps the current preset and region and resets channel_num`() {
         // A channel-only beacon (no preset) must still reset channel_num=0 so firmware re-derives the frequency from
-        // the new primary name — otherwise a radio with an explicit channel_num override lands on the wrong slot.
+        // the new primary name, keep the current preset, and carry the current region (a zero region disables TX).
         val current = radioLora.copy(modem_preset = ModemPreset.MEDIUM_FAST, channel_num = 5)
         val beacon = MeshBeacon(offer_channel = ChannelSettings(name = "PartyNet"))
         val lora = beacon.toJoinChannelSet(BeaconJoinOption.SWITCH, current)?.lora_config
         assertNotNull(lora, "SWITCH must always carry lora so channel_num resets")
         assertEquals(0, lora.channel_num, "channel_num reset to 0 even without an offered preset")
         assertEquals(ModemPreset.MEDIUM_FAST, lora.modem_preset, "current preset kept when none offered")
+        assertEquals(RegionCode.US, lora.region, "current region carried when none offered")
     }
 
     @Test
