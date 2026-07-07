@@ -740,6 +740,8 @@
     <string name="shutdown_warning">⚠️ Spowoduje to WYŁĄCZENIE węzła. Do ponownego włączenia węzła, konieczna będzie fizyczna interakcja.</string>
     <string name="signal">Sygnał:</string>
     <string name="signal_quality">Jakość sygnału</string>
+    <!-- SITE -->
+    <string name="site_planner_section_display">Wyświetlacz</string>
     <string name="skip">Pomiń</string>
     <string name="smart_position">Inteligentne Pozycjonowanie</string>
     <string name="snr">SNR:</string>

@@ -267,6 +267,8 @@
     <!-- SHOW -->
     <string name="show_password">Паказаць пароль</string>
     <string name="signal_quality">Якасць сігнала</string>
+    <!-- SITE -->
+    <string name="site_planner_section_display">Экран</string>
     <string name="skip">Прапусціць</string>
     <string name="snr">сігнал-шум</string>
     <string name="speed">Хуткасць</string>

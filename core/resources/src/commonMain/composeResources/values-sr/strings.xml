@@ -447,6 +447,8 @@
     <string name="shutdown">Искључи</string>
     <string name="signal">Signal</string>
     <string name="signal_quality">Kvalitet signala</string>
+    <!-- SITE -->
+    <string name="site_planner_section_display">Приказ</string>
     <string name="smart_position">Паметно позиционирање</string>
     <string name="snr">SNR</string>
     <string name="snr_definition">Однос сигнал/шум SNR је мера која се користи у комуникацијама за квантитативно одређивање нивоа жељеног сигнала у односу на ниво позадинског шума. У Мештастик и другим бежичним системима, већи SNR указује на јаснији сигнал који може побољшати поузданост и квалитет преноса података.</string>

@@ -817,6 +817,8 @@
     <string name="shutdown_warning">⚠️ Ez LEÁLLÍTJA a csomópontot. Újraindításhoz fizikai beavatkozás szükséges.</string>
     <string name="signal">Jel</string>
     <string name="signal_quality">Jelminőség</string>
+    <!-- SITE -->
+    <string name="site_planner_section_display">Kijelző</string>
     <string name="skip">Kihagyás</string>
     <string name="slot">Sávhely</string>
     <string name="smart_position">Intelligens pozíció</string>

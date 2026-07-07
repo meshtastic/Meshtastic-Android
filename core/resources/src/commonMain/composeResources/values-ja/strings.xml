@@ -1461,6 +1461,8 @@
     <string name="shutdown_warning">⚠️ ノードをシャットダウンします。再びオンにするには物理的な操作が必要になります。</string>
     <string name="signal">信号</string>
     <string name="signal_quality">信号品質</string>
+    <!-- SITE -->
+    <string name="site_planner_section_display">表示</string>
     <string name="skip">スキップ</string>
     <string name="slot">スロット</string>
     <string name="smart_position">スマート位置情報</string>

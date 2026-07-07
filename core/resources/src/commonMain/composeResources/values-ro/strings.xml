@@ -1039,6 +1039,8 @@
     <string name="shutdown_warning">⚠️ Aceasta va OPRI nodul. Pentru a-l repune în funcțiune, va fi necesară o intervenție fizică.</string>
     <string name="signal">Semnal</string>
     <string name="signal_quality">Calitatea semnalului</string>
+    <!-- SITE -->
+    <string name="site_planner_section_display">Ecran</string>
     <string name="skip">Treci peste</string>
     <string name="slot">Slot</string>
     <string name="smart_position">Poziție inteligentă</string>

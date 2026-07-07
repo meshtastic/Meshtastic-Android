@@ -237,6 +237,8 @@
     <string name="share">Κοινοποίηση</string>
     <!-- SHOW -->
     <string name="shutdown">Τερματισμός λειτουργίας</string>
+    <!-- SITE -->
+    <string name="site_planner_section_display">Οθόνη</string>
     <string name="ssid">SSID</string>
     <!-- TAK -->
     <string name="tak_team_blue">Μπλε</string>

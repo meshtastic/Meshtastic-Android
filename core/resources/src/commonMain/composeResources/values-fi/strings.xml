@@ -1483,6 +1483,8 @@
     <string name="shutdown_warning">⚠️ Tämä SAMMUTTAA laitteen. Saat laitteen takaisin toimintaan kytkemällä virran päälle.</string>
     <string name="signal">Signaali </string>
     <string name="signal_quality">Signaalin laatu</string>
+    <!-- SITE -->
+    <string name="site_planner_section_display">Näyttö</string>
     <string name="skip">Ohita</string>
     <string name="slot">Paikka</string>
     <string name="smart_position">Älykäs sijainti</string>

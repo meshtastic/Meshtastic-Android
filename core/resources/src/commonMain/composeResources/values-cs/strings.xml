@@ -998,6 +998,8 @@
     <string name="shutdown_warning">⚠️ Tímto dojde k VYPNUTÍ uzlu. K jeho opětovnému zapnutí bude nutný fyzický zásah.</string>
     <string name="signal">Signál</string>
     <string name="signal_quality">Kvalita signálu</string>
+    <!-- SITE -->
+    <string name="site_planner_section_display">Obrazovka</string>
     <string name="skip">Přeskočit</string>
     <string name="smart_position">Chytrá poloha</string>
     <string name="snr">SNR</string>

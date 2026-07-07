@@ -1383,6 +1383,8 @@
     <string name="shutdown_warning">⚠️ See LÜLITAB sõlme välja. Uuesti sisselülitamiseks on vaja füüsilist sekkumist.</string>
     <string name="signal">Levi</string>
     <string name="signal_quality">Levi Kvaliteet</string>
+    <!-- SITE -->
+    <string name="site_planner_section_display">Ekraan</string>
     <string name="skip">Jäta vahele</string>
     <string name="slot">Pesa</string>
     <string name="smart_position">Nutikas asukoht</string>

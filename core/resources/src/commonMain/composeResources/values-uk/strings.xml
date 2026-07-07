@@ -1140,6 +1140,8 @@
     <string name="shutdown_warning">⚠️ Це призведе до ВИМКНЕННЯ вузла. Знадобиться фізична взаємодія для його увімкнення.</string>
     <string name="signal">Сигнал</string>
     <string name="signal_quality">Якість сигналу</string>
+    <!-- SITE -->
+    <string name="site_planner_section_display">Дисплей</string>
     <string name="skip">Пропустити</string>
     <string name="slot">Слот</string>
     <string name="smart_position">Інтелектуальне передавання позиції</string>

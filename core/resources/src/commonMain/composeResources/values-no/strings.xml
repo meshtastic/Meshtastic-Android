@@ -269,6 +269,7 @@
     <string name="shutdown">Avslutt</string>
     <string name="signal">Signal</string>
     <string name="signal_quality">Signalstyrke</string>
+    <!-- SITE -->
     <string name="snr">SNR</string>
     <string name="snr_definition">Signal-to-Noise Ratio, et mål som brukes i kommunikasjon for å sette nivået av et ønsket signal til bakgrunnstrøynivået. I Meshtastic og andre trådløse systemer tyder et høyere SNR på et klarere signal som kan forbedre påliteligheten og kvaliteten på dataoverføringen.</string>
     <!-- TAK -->

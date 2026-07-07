@@ -1490,6 +1490,8 @@
     <string name="shutdown_warning">⚠️ Эта нода будет ВЫКЛЮЧЕНА. Для её включения потребуется физическое взаимодействие.</string>
     <string name="signal">Сигнал</string>
     <string name="signal_quality">Качество сигнала</string>
+    <!-- SITE -->
+    <string name="site_planner_section_display">Дисплей</string>
     <string name="skip">Пропустить</string>
     <string name="slot">Слот</string>
     <string name="smart_position">Умная позиция</string>

@@ -650,6 +650,8 @@
     <string name="shutdown">Desligar</string>
     <string name="signal">Sinal</string>
     <string name="signal_quality">Qualidade do sinal</string>
+    <!-- SITE -->
+    <string name="site_planner_section_display">Tela</string>
     <string name="skip">Pular</string>
     <string name="slot">Slot</string>
     <string name="snr">SNR</string>
