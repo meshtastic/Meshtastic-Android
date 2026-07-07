@@ -9,6 +9,14 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
+#### 🏗️ Features
+* feat(map): Site Planner coverage integration — import + estimate by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6136
+#### 🛠️ Fixes
+* fix(runtime): harden BLE profile, OTA setup, and DB access by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6126
+
+### Internal (v2.8.0-internal.18)
+Changes since [`v2.8.0-closed.6`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.0-closed.6):
+
 #### 🛠️ Fixes
 * fix(discovery): ship a fresh LoRaConfig when switching to a beacon's preset by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6135
 
