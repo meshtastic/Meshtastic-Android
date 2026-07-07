@@ -54,6 +54,10 @@ on:
         required: false
       GRADLE_CACHE_PASSWORD:
         required: false
+      INTERNAL_BUILDS_HOST:
+        required: false
+      INTERNAL_BUILDS_HOST_PAT:
+        required: false
       APPLE_SIGNING_IDENTITY:
         required: false
       APPLE_ID:
@@ -441,6 +445,8 @@ jobs:
       - release-fdroid
       - release-desktop
       - release-flatpak-src
+    env:
+      INTERNAL_BUILDS_HOST: ${{ secrets.INTERNAL_BUILDS_HOST }}
     permissions:
       contents: write
       id-token: write
@@ -468,4 +474,18 @@ jobs:
           generate_release_notes: true
           files: ./artifacts/**/*
           draft: true
+          prerelease: true
+
+      - name: Create or Update internal GitHub Release
+        continue-on-error: true
+        if: ${{ env.INTERNAL_BUILDS_HOST != '' }}
+        uses: softprops/action-gh-release@v3
+        with:
+          repository: ${{ secrets.INTERNAL_BUILDS_HOST }}
+          token: ${{ secrets.INTERNAL_BUILDS_HOST_PAT }}
+          tag_name: ${{ inputs.tag_name }}
+          name: ${{ inputs.tag_name }} (${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }})
+          generate_release_notes: false
+          files: ./artifacts/**/*
+          draft: false
           prerelease: true
