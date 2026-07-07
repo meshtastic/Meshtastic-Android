@@ -307,7 +307,6 @@
     <string name="message">Mensagem</string>
     <string name="message_delivery_status">Estado da entrega</string>
     <string name="message_input_label">Mensagem</string>
-    <string name="message_status_enroute">A aguardar confirmação</string>
     <string name="message_status_queued">Na fila de envio</string>
     <string name="messages">Mensagens</string>
     <string name="minimum_broadcast_seconds">Transmissão mínima (segundos)</string>

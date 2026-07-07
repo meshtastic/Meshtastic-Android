@@ -640,7 +640,6 @@
     <string name="message_device_managed">Това радио се управлява и може да бъде променяно само от отдалечен администратор.</string>
     <string name="message_input_label">Съобщение</string>
     <string name="message_status_delivered">Доставено до mesh</string>
-    <string name="message_status_enroute">Изчакване за потвърждение</string>
     <string name="message_status_queued">Наредено на опашка за изпращане</string>
     <string name="message_status_sfpp_routing"></string>
     <string name="message_status_unknown">Неизвестно</string>

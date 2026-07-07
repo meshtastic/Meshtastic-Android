@@ -497,7 +497,6 @@
     <string name="message_delivery_status">Üzenet kézbesítésének állapota</string>
     <string name="message_device_managed">Ez a rádió felügyelt, és csak távoli admin módosíthatja.</string>
     <string name="message_input_label">Üzenet</string>
-    <string name="message_status_enroute">Visszajelzésre vár</string>
     <string name="message_status_queued">Elküldésre vár</string>
     <string name="message_status_unknown">Ismeretlen</string>
     <string name="messages">Üzenetek</string>

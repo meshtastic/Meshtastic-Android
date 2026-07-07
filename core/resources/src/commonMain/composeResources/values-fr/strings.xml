@@ -786,7 +786,6 @@
     <string name="message_device_managed">Cette radio est gérée et ne peut être modifiée que par un administrateur distant.</string>
     <string name="message_input_label">Message</string>
     <string name="message_status_delivered">Délivré au nœud</string>
-    <string name="message_status_enroute">En attente d'accusé de réception</string>
     <string name="message_status_queued">En file d'attente pour l'envoi</string>
     <string name="message_status_sfpp_confirmed">Confirmé via chaîne SF++</string>
     <string name="message_status_sfpp_routing">Routage via chaîne SF++…</string>

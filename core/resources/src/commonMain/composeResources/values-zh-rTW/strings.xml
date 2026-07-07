@@ -762,7 +762,6 @@
     <string name="message_device_managed">該裝置已受託管理，並只能由遠端管理員進行變更。</string>
     <string name="message_input_label">訊息:</string>
     <string name="message_status_delivered">已傳送至 Mesh</string>
-    <string name="message_status_enroute">正在等待確認</string>
     <string name="message_status_queued">發送佇列中</string>
     <string name="message_status_sfpp_confirmed">已在 SF++ 鏈上確認</string>
     <string name="message_status_sfpp_routing">透過 SF++ 鏈路由…</string>

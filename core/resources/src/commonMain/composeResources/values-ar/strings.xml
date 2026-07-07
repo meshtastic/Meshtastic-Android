@@ -131,7 +131,6 @@
     <!-- MESSAGE -->
     <string name="message">رسالة</string>
     <string name="message_input_label">رسالة</string>
-    <string name="message_status_enroute">في انتظار رد الاستلام</string>
     <string name="message_status_queued">في دور الإرسال</string>
     <string name="messages">الرسائل</string>
     <string name="module_settings">إعدادات الجهاز</string>

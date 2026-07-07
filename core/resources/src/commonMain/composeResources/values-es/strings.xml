@@ -498,7 +498,6 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="message_delivery_status">Estado de entrega del mensaje</string>
     <string name="message_device_managed">Esta radio es gestionada y sólo puede ser cambiada por un administrador remoto.</string>
     <string name="message_input_label">Mensaje</string>
-    <string name="message_status_enroute">Esperando ser reconocido</string>
     <string name="message_status_queued">En cola para enviar</string>
     <string name="message_status_unknown">Desconocido</string>
     <string name="messages">Mensajes</string>

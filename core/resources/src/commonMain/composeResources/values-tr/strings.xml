@@ -331,7 +331,6 @@
     <string name="message">Mesaj</string>
     <string name="message_delivery_status">Mesaj teslim durumu</string>
     <string name="message_input_label">Mesaj</string>
-    <string name="message_status_enroute">Ulaştı bildirisi bekleniyor</string>
     <string name="message_status_queued">Gönderilmek üzere sırada</string>
     <string name="message_status_unknown">Bilinmeyen</string>
     <string name="messages">Mesajlar</string>

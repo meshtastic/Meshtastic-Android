@@ -905,7 +905,6 @@
     <string name="message_device_managed">Seda raadio on hallatud ja muudab ainult kaughaldur.</string>
     <string name="message_input_label">Sõnum</string>
     <string name="message_status_delivered">Kärgvõrku kohale jõudnud</string>
-    <string name="message_status_enroute">Ootab kinnitamist</string>
     <string name="message_status_queued">Saatmise järjekorras</string>
     <string name="message_status_sfpp_confirmed">Kinnitatud SF++ ahel</string>
     <string name="message_status_sfpp_routing">Marsruutimine SF++ ahela kaudu…</string>

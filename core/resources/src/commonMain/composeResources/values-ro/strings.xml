@@ -657,7 +657,6 @@
     <string name="message_device_managed">Acest radio este gestionat și poate fi schimbat doar de un administrator de la distanță.</string>
     <string name="message_input_label">Mesaj</string>
     <string name="message_status_delivered">Livrat la Mesh</string>
-    <string name="message_status_enroute">În așteptarea confirmării</string>
     <string name="message_status_queued">În coadă pentru trimitere</string>
     <string name="message_status_sfpp_confirmed">Confirmat pe lanțul SF++</string>
     <string name="message_status_sfpp_routing">Rutare prin lanțul SF++…</string>

@@ -705,7 +705,6 @@
     <string name="message_device_managed">Цей пристрій керований та може бути змінений тільки віддаленим адміністратором.</string>
     <string name="message_input_label">Повідомлення</string>
     <string name="message_status_delivered">Доставлено в мережу</string>
-    <string name="message_status_enroute">Очікування на підтвердження</string>
     <string name="message_status_queued">У черзі для надсилання</string>
     <string name="message_status_sfpp_confirmed">Підтверджений на ланцюжку SF++</string>
     <string name="message_status_sfpp_routing">Маршрутизація через SF++ ланцюжок…</string>

@@ -270,7 +270,6 @@
     <string name="message">Správa</string>
     <string name="message_delivery_status">Stav doručenia správy</string>
     <string name="message_input_label">Správa</string>
-    <string name="message_status_enroute">Čaká sa na potvrdenie</string>
     <string name="message_status_queued">Vo fronte na odoslanie</string>
     <string name="messages">Správy</string>
     <string name="module_settings">Konfigurácia modulu</string>

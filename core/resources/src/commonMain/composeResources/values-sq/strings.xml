@@ -141,7 +141,6 @@
     <string name="message">Mesazh</string>
     <string name="message_delivery_status">Statusi i dorëzimit të mesazhit</string>
     <string name="message_input_label">Mesazh</string>
-    <string name="message_status_enroute">Pritet të pranohet</string>
     <string name="message_status_queued">Në radhë për dërgim</string>
     <string name="messages">訊息</string>
     <string name="module_settings">Konfigurimi i modulit</string>

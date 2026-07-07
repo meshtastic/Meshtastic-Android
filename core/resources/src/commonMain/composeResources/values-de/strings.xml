@@ -815,7 +815,6 @@
     <string name="message_device_managed">Dieses Radio wird verwaltet und kann nur durch Fernverwaltung geändert werden.</string>
     <string name="message_input_label">Nachricht</string>
     <string name="message_status_delivered">Versand ins Netz</string>
-    <string name="message_status_enroute">Warte auf Bestätigung</string>
     <string name="message_status_queued">Zur Sende-Warteschlange hinzugefügt</string>
     <string name="message_status_sfpp_confirmed">Bestätigt auf dem SF++ Weg.</string>
     <string name="message_status_sfpp_routing">Routen über den SF++ Weg.</string>
