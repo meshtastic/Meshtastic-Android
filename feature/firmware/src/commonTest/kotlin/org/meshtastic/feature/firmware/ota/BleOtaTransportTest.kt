@@ -22,6 +22,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.ble.BleWriteType
 import org.meshtastic.core.ble.MeshtasticBleConstants.OTA_NOTIFY_CHARACTERISTIC
+import org.meshtastic.core.ble.MeshtasticBleConstants.OTA_WRITE_CHARACTERISTIC
 import org.meshtastic.core.testing.FakeBleConnection
 import org.meshtastic.core.testing.FakeBleConnectionFactory
 import org.meshtastic.core.testing.FakeBleDevice
@@ -39,7 +40,15 @@ class BleOtaTransportTest {
     private fun createTransport(
         scanner: FakeBleScanner = FakeBleScanner(),
         connection: FakeBleConnection = FakeBleConnection(),
+        seedOtaCharacteristics: Boolean = true,
     ): Triple<BleOtaTransport, FakeBleScanner, FakeBleConnection> {
+        if (seedOtaCharacteristics) {
+            // ponytail: seed at the choke point instead of every connect() site — the new
+            // service.requireOtaCharacteristics() validation in BleOtaTransport.connect() rejects
+            // services missing these, so default to present; negative tests opt out.
+            connection.service.addCharacteristic(OTA_NOTIFY_CHARACTERISTIC)
+            connection.service.addCharacteristic(OTA_WRITE_CHARACTERISTIC)
+        }
         val transport =
             BleOtaTransport(
                 scanner = scanner,
@@ -116,6 +125,39 @@ class BleOtaTransportTest {
 
         assertTrue(result.isFailure)
         assertIs<OtaProtocolException.ConnectionFailed>(result.exceptionOrNull())
+    }
+
+    @Test
+    fun `connect fails when OTA characteristics are missing`() = runTest {
+        val (transport, scanner) = createTransport(seedOtaCharacteristics = false)
+
+        scanner.emitDevice(FakeBleDevice(address))
+
+        val result = transport.connect()
+
+        assertTrue(result.isFailure)
+        val exception = result.exceptionOrNull()
+        assertIs<OtaProtocolException.ConnectionFailed>(exception)
+        assertTrue(exception.message?.contains("OTA service") == true)
+    }
+
+    @Test
+    fun `connect fails when notification observation fails before subscription`() = runTest {
+        val scanner = FakeBleScanner()
+        val connection = FakeBleConnection()
+        val failure = IllegalStateException("observe failed before CCCD")
+        connection.service.observeBeforeSubscriptionExceptionByCharacteristic[OTA_NOTIFY_CHARACTERISTIC] = failure
+        val (transport) = createTransport(scanner, connection)
+
+        scanner.emitDevice(FakeBleDevice(address))
+
+        val result = transport.connect()
+
+        assertTrue(result.isFailure)
+        val exception = result.exceptionOrNull()
+        assertIs<OtaProtocolException.ConnectionFailed>(exception)
+        val cause = assertIs<IllegalStateException>(exception.cause)
+        assertEquals(failure.message, cause.message)
     }
 
     // -----------------------------------------------------------------------

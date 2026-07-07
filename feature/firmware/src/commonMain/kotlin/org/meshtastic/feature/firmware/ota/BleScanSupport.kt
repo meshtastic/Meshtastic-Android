@@ -20,7 +20,9 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.onEach
@@ -104,6 +106,7 @@ internal suspend fun scanForBleDevice(
 internal suspend fun <T> Channel<T>.receiveWithin(timeout: Duration, onTimeout: () -> Throwable): T = try {
     withTimeout(timeout) { receive() }
 } catch (@Suppress("SwallowedException") e: TimeoutCancellationException) {
+    currentCoroutineContext().ensureActive()
     throw onTimeout()
 }
 

@@ -20,18 +20,26 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import org.meshtastic.core.ble.BleCharacteristic
 import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleConnectionState
 import org.meshtastic.core.ble.BleDevice
 import org.meshtastic.core.ble.BleScanner
+import org.meshtastic.core.ble.BleService
 import org.meshtastic.core.ble.BleWriteType
 import org.meshtastic.core.ble.MeshtasticBleConstants.OTA_NOTIFY_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.OTA_SERVICE_UUID
@@ -56,7 +64,7 @@ class BleOtaTransport(
     private val otaChar = BleCharacteristic(OTA_WRITE_CHARACTERISTIC)
     private val txChar = BleCharacteristic(OTA_NOTIFY_CHARACTERISTIC)
 
-    private val responseChannel = Channel<String>(Channel.UNLIMITED)
+    @Volatile private var responseChannel = Channel<String>(Channel.UNLIMITED)
 
     // Written from the connectionState collector (Dispatchers.Default) and read by the streaming loop's
     // connection-loss guard (Dispatchers.IO); @Volatile ensures the guard sees a mid-transfer disconnect.
@@ -73,8 +81,12 @@ class BleOtaTransport(
         }
     }
 
-    @Suppress("MagicNumber")
+    @Suppress("MagicNumber", "LongMethod")
     override suspend fun connect(): Result<Unit> = safeCatching {
+        responseChannel.close()
+        val connectResponseChannel = Channel<String>(Channel.UNLIMITED)
+        responseChannel = connectResponseChannel
+
         Logger.i { "BLE OTA: Waiting $REBOOT_DELAY for device to reboot into OTA mode..." }
         delay(REBOOT_DELAY)
 
@@ -101,44 +113,72 @@ class BleOtaTransport(
                 throw OtaProtocolException.ConnectionFailed("Failed to connect to device at address ${device.address}")
             }
         } catch (@Suppress("SwallowedException") e: kotlinx.coroutines.TimeoutCancellationException) {
+            currentCoroutineContext().ensureActive()
             Logger.w { "BLE OTA: Timed out waiting to connect to ${device.address}. Error: ${e.message}" }
             throw OtaProtocolException.Timeout("Timed out connecting to device at address ${device.address}")
         }
 
         Logger.i { "BLE OTA: Connected to ${device.address}, discovering services..." }
 
-        bleConnection.profile(OTA_SERVICE_UUID) { service ->
-            // Log negotiated MTU for diagnostics
-            val maxLen = bleConnection.maximumWriteValueLength(BleWriteType.WITHOUT_RESPONSE)
-            Logger.i { "BLE OTA: Service ready. Max write value length: $maxLen bytes" }
+        try {
+            bleConnection.profile(OTA_SERVICE_UUID) { service ->
+                service.requireOtaCharacteristics()
 
-            // Collect responses. onSubscription fires when the CCCD write completes — a precise readiness
-            // signal; the settle below is a conservative cushion.
-            val subscribed = CompletableDeferred<Unit>()
-            service
-                .observe(txChar) {
-                    Logger.d { "BLE OTA: TX characteristic subscribed" }
-                    subscribed.complete(Unit)
+                // Log negotiated MTU for diagnostics
+                val maxLen = bleConnection.maximumWriteValueLength(BleWriteType.WITHOUT_RESPONSE)
+                Logger.i { "BLE OTA: Service ready. Max write value length: $maxLen bytes" }
+
+                // Collect notification responses. Kable writes the CCCD descriptor as part of flow collection
+                // startup. Prefer the onSubscription readiness callback, but bound the wait because some OTA loaders
+                // never report the CCCD write completion even though notifications still flow.
+                val notificationsReady = CompletableDeferred<Unit>()
+                launch(start = CoroutineStart.UNDISPATCHED) {
+                    service
+                        .observe(txChar) {
+                            Logger.d { "BLE OTA: TX characteristic subscribed" }
+                            notificationsReady.complete(Unit)
+                        }
+                        .onEach { notifyBytes ->
+                            try {
+                                val response = notifyBytes.decodeToString()
+                                Logger.d { "BLE OTA: Received response: $response" }
+                                connectResponseChannel.trySend(response)
+                            } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                                Logger.e(e) { "BLE OTA: Failed to decode response bytes" }
+                            }
+                        }
+                        .catch { e ->
+                            Logger.e(e) { "BLE OTA: Error in TX characteristic notification flow" }
+                            if (!notificationsReady.isCompleted) {
+                                notificationsReady.completeExceptionally(e)
+                            }
+                            connectResponseChannel.close(e)
+                        }
+                        .collect()
                 }
-                .onEach { notifyBytes ->
-                    try {
-                        val response = notifyBytes.decodeToString()
-                        Logger.d { "BLE OTA: Received response: $response" }
-                        responseChannel.trySend(response)
-                    } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-                        Logger.e(e) { "BLE OTA: Failed to decode response bytes" }
+
+                val confirmed = withTimeoutOrNull(SUBSCRIPTION_SETTLE) { notificationsReady.await() } != null
+                if (confirmed) {
+                    Logger.i { "BLE OTA: TX notifications subscribed" }
+                } else {
+                    Logger.w {
+                        "BLE OTA: TX notification subscription not confirmed after $SUBSCRIPTION_SETTLE; " +
+                            "continuing with bounded settle fallback"
                     }
                 }
-                .catch { e ->
-                    if (!subscribed.isCompleted) subscribed.completeExceptionally(e)
-                    Logger.e(e) { "BLE OTA: Error in TX characteristic subscription" }
-                }
-                .launchIn(this)
-
-            subscribed.await()
-            // Conservative settle after CCCD confirmation before issuing commands.
-            delay(SUBSCRIPTION_SETTLE)
-            Logger.i { "BLE OTA: Service discovered and ready" }
+                Logger.i { "BLE OTA: Service discovered and ready" }
+            }
+        } catch (e: TimeoutCancellationException) {
+            currentCoroutineContext().ensureActive()
+            Logger.w { "BLE OTA: Timed out waiting for OTA service discovery. Error: ${e.message}" }
+            throw OtaProtocolException.Timeout("Timed out waiting for BLE OTA service discovery")
+        } catch (e: OtaProtocolException) {
+            throw e
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+            Logger.w(e) { "BLE OTA: Failed to prepare OTA service" }
+            throw OtaProtocolException.ConnectionFailed("Failed to prepare BLE OTA service", e)
         }
     }
 
@@ -299,6 +339,23 @@ class BleOtaTransport(
 
     private suspend fun waitForResponse(timeout: Duration): String = responseChannel.receiveWithin(timeout) {
         OtaProtocolException.Timeout("Timeout waiting for response after $timeout")
+    }
+
+    private fun BleService.requireOtaCharacteristics() {
+        val missing = mutableListOf<String>()
+        if (!hasCharacteristic(txChar)) {
+            missing.add("TX notify characteristic $txChar")
+        }
+        if (!hasCharacteristic(otaChar)) {
+            missing.add("OTA write characteristic $otaChar")
+        }
+
+        if (missing.isNotEmpty()) {
+            throw OtaProtocolException.ConnectionFailed(
+                "ESP32 OTA service was missing required characteristics after BLE service discovery: " +
+                    missing.joinToString(separator = "; "),
+            )
+        }
     }
 
     companion object {
