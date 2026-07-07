@@ -1,6 +1,6 @@
 # Local Flatpak Verification
 
-Replicates vid's `org.meshtastic.desktop` GHA flatpak build on your machine so you
+Replicates vid's `org.meshtastic.MeshtasticDesktop` GHA flatpak build on your machine so you
 can validate `flatpak-sources.json` end-to-end without round-tripping through his repo.
 
 ## What it tests that our CI doesn't
@@ -9,7 +9,7 @@ Our CI (`:desktopApp:packageUberJarForCurrentOS :captureFlatpakSources`) only pr
 Vid's CI is where the manifest actually gets *consumed* by `flatpak-builder`. This script
 runs that step locally:
 
-1. Clones `vidplace7/org.meshtastic.desktop`.
+1. Clones `vidplace7/org.meshtastic.MeshtasticDesktop`.
 2. Overlays a patched manifest that:
    - Swaps the `meshtastic/Meshtastic-Android.git` source for a `type: dir` pointing at
      **your local checkout** (so you can test uncommitted changes).
@@ -77,5 +77,5 @@ executing the Gradle build, or run the full script on a Linux host.
 
 - `verify.sh` — entry point. Idempotent: re-running just re-syncs the overlay and re-runs flatpak-builder.
 - `desktop-offline.yaml` — patched manifest. Kept in sync manually with vid's upstream;
-  diff against `https://raw.githubusercontent.com/vidplace7/org.meshtastic.desktop/main/org.meshtastic.desktop.yaml`
+  diff against `https://raw.githubusercontent.com/vidplace7/org.meshtastic.MeshtasticDesktop/main/org.meshtastic.MeshtasticDesktop.yaml`
   if vid changes something material.

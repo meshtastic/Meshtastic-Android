@@ -73,7 +73,7 @@ val generateBuildConfig =
             |    const val VERSION_CODE: Int = ${versionInfo.versionCode}
             |    const val VERSION_NAME: String = "${versionInfo.versionName}"
             |    const val IS_DEBUG: Boolean = $resolvedIsDebug
-            |    const val APPLICATION_ID: String = "org.meshtastic.desktop"
+            |    const val APPLICATION_ID: String = "org.meshtastic.MeshtasticDesktop"
             |    const val MIN_FW_VERSION: String = "${versionInfo.minFwVersion}"
             |    const val ABS_MIN_FW_VERSION: String = "${versionInfo.absMinFwVersion}"
             |}
@@ -114,7 +114,7 @@ compose.desktop {
                 "-Xmx2G",
                 "-Dapple.awt.application.name=Meshtastic Desktop",
                 "-Dcom.apple.mrj.application.apple.menu.about.name=Meshtastic Desktop",
-                "-Dcom.apple.bundle.identifier=org.meshtastic.desktop",
+                "-Dcom.apple.bundle.identifier=org.meshtastic.MeshtasticDesktop",
             )
         jvmArgs(*desktopJvmArgs.toTypedArray())
 
@@ -150,7 +150,7 @@ compose.desktop {
             macOS {
                 iconFile.set(project.file("src/main/resources/icon.icns"))
                 minimumSystemVersion = "12.0"
-                bundleID = "org.meshtastic.desktop"
+                bundleID = "org.meshtastic.MeshtasticDesktop"
                 appCategory = "public.app-category.utilities"
                 entitlementsFile.set(project.file("entitlements.plist"))
                 infoPlist {
