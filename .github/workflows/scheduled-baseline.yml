@@ -1,0 +1,124 @@
+name: Scheduled Baseline Profile & Graphs
+
+on:
+  schedule:
+    # Once a day. Baseline-profile regeneration needs a booted emulator (~14 min)
+    # and the profile/graphs rarely change, so this is decoupled from the frequent
+    # firmware/hardware/translation job in scheduled-updates.yml.
+    - cron: '0 0 * * *'
+  workflow_dispatch:       # Allow manual triggering
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-24.04
+    if: github.repository == 'meshtastic/Meshtastic-Android'
+    permissions:
+      contents: write      # To commit files and push branches
+      pull-requests: write # To create pull requests
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7.0.0
+        with:
+          token: ${{ secrets.CROWDIN_GITHUB_TOKEN }}
+
+      - name: Gradle Setup
+        uses: ./.github/actions/gradle-setup
+        with:
+          gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          cache_read_only: 'false'
+
+      - name: Update Graphs
+        run: ./gradlew graphUpdate
+        continue-on-error: true
+
+      # ── Baseline Profile regeneration ───────────────────────────────────
+      # Generation needs a booted emulator; continue-on-error keeps flakiness
+      # from blocking the graphs PR.
+      - name: Enable KVM (for the emulator)
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Generate Baseline Profile
+        id: generate_baseline
+        continue-on-error: true # Emulator flakiness must not block the graphs PR.
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis # google flavor needs GMS (Maps) on the device image
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          # Writes androidApp/src/google/generated/baselineProfiles/ via the androidx.baselineprofile plugin.
+          # --no-configuration-cache: the underlying connectedGoogleNonMinifiedReleaseAndroidTest task is not
+          # config-cache serializable (SeparateTestModuleTestData / ResolutionBackedFileCollection), and the
+          # project enables org.gradle.configuration-cache by default — same workaround used in reusable-check.yml.
+          script: ./gradlew :androidApp:generateGoogleReleaseBaselineProfile -Pci=true --no-configuration-cache
+
+      - name: Detect baseline profile changes
+        id: baseline
+        run: |
+          profile_dir="androidApp/src/google/generated/baselineProfiles"
+          outcome="${{ steps.generate_baseline.outcome }}"
+          if [ "$outcome" != "success" ]; then
+            echo "::warning::Baseline profile generation failed (outcome: $outcome). Skipping."
+            echo "status=error" >> "$GITHUB_OUTPUT"
+          elif [ -n "$(git status --porcelain "$profile_dir" 2>/dev/null)" ]; then
+            echo "status=updated" >> "$GITHUB_OUTPUT"
+          else
+            echo "status=unchanged" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build PR body
+        id: pr_body
+        run: |
+          baseline_status="${{ steps.baseline.outputs.status }}"
+
+          body="This PR includes automated updates from the scheduled workflow:"
+          body+=$'\n'
+
+          case "$baseline_status" in
+            updated)   body+=$'\n'"- ✅ \`androidApp\` baseline profile regenerated on an emulator." ;;
+            unchanged) body+=$'\n'"- ✔️ \`androidApp\` baseline profile regenerated — no changes detected." ;;
+            error)     body+=$'\n'"- ⚠️ \`androidApp\` baseline profile generation failed — skipped (see workflow logs)." ;;
+            *)         body+=$'\n'"- ❓ \`androidApp\` baseline profile — unknown status." ;;
+          esac
+
+          body+=$'\n'"- Updated module dependency graphs in README.md files (if changed)."
+          body+=$'\n'
+          body+=$'\n'"Please review the changes."
+
+          {
+            echo "content<<PREOF"
+            echo "$body"
+            echo "PREOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create Pull Request if changes occurred
+        uses: peter-evans/create-pull-request@v8
+        with:
+          token: ${{ secrets.CROWDIN_GITHUB_TOKEN }}
+          commit-message: |
+            chore: Scheduled updates (Graphs, Baseline Profile)
+
+            Automated updates for:
+            - Module dependency graphs
+            - androidApp baseline profile
+          title: 'chore: Scheduled updates (Graphs, Baseline Profile)'
+          body: ${{ steps.pr_body.outputs.content }}
+          branch: 'scheduled-baseline'
+          base: 'main'
+          delete-branch: true
+          # Only stage the baseline-profile dir when generation actually produced changes. When the emulator
+          # boots far enough for Gradle to create an *empty* baselineProfiles/ dir but generation then fails,
+          # `git add <glob>` aborts with "pathspec did not match any files", which would hard-fail this step
+          # and defeat the continue-on-error on the generation step above.
+          add-paths: |
+            ${{ steps.baseline.outputs.status == 'updated' && 'androidApp/src/google/generated/baselineProfiles/**' || '' }}
+            **/README.md
+          labels: |
+            automation

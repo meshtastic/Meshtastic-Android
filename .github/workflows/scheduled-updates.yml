@@ -2,7 +2,9 @@ name: Scheduled Updates (Firmware, Hardware, Translations)
 
 on:
   schedule:
-    - cron: '0 */6 * * *' # Run every 6 hours (raised from 4h to absorb the added baseline-profile step)
+    # Hourly. This job is cheap (curl + Crowdin + PR, no build) — the slow
+    # emulator/graph work lives in scheduled-baseline.yml on a daily cron.
+    - cron: '0 * * * *'
   workflow_dispatch:       # Allow manual triggering
 
 jobs:
@@ -102,66 +104,12 @@ jobs:
         run: sudo chown -R $USER:$USER .
 
       # Early warning for overlength store-listing translations just pulled from
-      # Crowdin. Non-blocking on purpose: a hard failure here would abort the
-      # firmware/hardware/graphs job and stop the PR from being created. The
-      # hard gate is the check-metadata job in pull-request.yml, which runs
-      # against the PR this workflow opens.
+      # Crowdin. Non-blocking on purpose: a hard failure here would abort the job
+      # and stop the PR from being created. The hard gate is the check-metadata
+      # job in pull-request.yml, which runs against the PR this workflow opens.
       - name: Check store metadata lengths
         continue-on-error: true
         run: python3 scripts/check-metadata-length.py
-
-      - name: Gradle Setup
-        uses: ./.github/actions/gradle-setup
-        with:
-          gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-          cache_read_only: 'false'
-
-      - name: Update Graphs
-        run: ./gradlew graphUpdate
-        continue-on-error: true
-
-      # ── Baseline Profile regeneration ───────────────────────────────────
-      # Runs on every scheduled tick (and manual dispatch). Generation needs a booted emulator
-      # (~10 min); continue-on-error keeps flakiness from blocking the firmware/translation PR.
-      - name: Enable KVM (for the emulator)
-        run: |
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
-            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-          sudo udevadm control --reload-rules
-          sudo udevadm trigger --name-match=kvm
-
-      - name: Generate Baseline Profile
-        id: generate_baseline
-        continue-on-error: true # Emulator flakiness must not block the firmware/translation PR.
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 34
-          target: google_apis # google flavor needs GMS (Maps) on the device image
-          arch: x86_64
-          profile: pixel_6
-          disable-animations: true
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          # Writes androidApp/src/google/generated/baselineProfiles/ via the androidx.baselineprofile plugin.
-          # --no-configuration-cache: the underlying connectedGoogleNonMinifiedReleaseAndroidTest task is not
-          # config-cache serializable (SeparateTestModuleTestData / ResolutionBackedFileCollection), and the
-          # project enables org.gradle.configuration-cache by default — same workaround used in reusable-check.yml.
-          script: ./gradlew :androidApp:generateGoogleReleaseBaselineProfile -Pci=true --no-configuration-cache
-
-      - name: Detect baseline profile changes
-        id: baseline
-        run: |
-          profile_dir="androidApp/src/google/generated/baselineProfiles"
-          outcome="${{ steps.generate_baseline.outcome }}"
-          if [ "$outcome" = "skipped" ]; then
-            echo "status=skipped" >> "$GITHUB_OUTPUT"
-          elif [ "$outcome" != "success" ]; then
-            echo "::warning::Baseline profile generation failed (outcome: $outcome). Skipping."
-            echo "status=error" >> "$GITHUB_OUTPUT"
-          elif [ -n "$(git status --porcelain "$profile_dir" 2>/dev/null)" ]; then
-            echo "status=updated" >> "$GITHUB_OUTPUT"
-          else
-            echo "status=unchanged" >> "$GITHUB_OUTPUT"
-          fi
 
       - name: Build PR body
         id: pr_body
@@ -170,7 +118,6 @@ jobs:
           firmware_detail="${{ steps.firmware.outputs.detail }}"
           hardware_status="${{ steps.hardware.outputs.status }}"
           hardware_detail="${{ steps.hardware.outputs.detail }}"
-          baseline_status="${{ steps.baseline.outputs.status }}"
 
           body="This PR includes automated updates from the scheduled workflow:"
           body+=$'\n'
@@ -191,19 +138,9 @@ jobs:
             *)         body+=$'\n'"- ❓ \`device_hardware.json\` — unknown status." ;;
           esac
 
-          # Baseline profile (daily / manual only)
-          case "$baseline_status" in
-            updated)   body+=$'\n'"- ✅ \`androidApp\` baseline profile regenerated on an emulator." ;;
-            unchanged) body+=$'\n'"- ✔️ \`androidApp\` baseline profile regenerated — no changes detected." ;;
-            error)     body+=$'\n'"- ⚠️ \`androidApp\` baseline profile generation failed — skipped (see workflow logs)." ;;
-            skipped)   ;; # Not a daily/manual run — omit the line entirely.
-            *)         ;;
-          esac
-
-          # Crowdin & graphs (always attempted)
+          # Crowdin (always attempted)
           body+=$'\n'"- Source strings were uploaded to Crowdin."
           body+=$'\n'"- Latest translations were downloaded from Crowdin (if available)."
-          body+=$'\n'"- Updated module dependency graphs in README.md files (if changed)."
           body+=$'\n'
           body+=$'\n'"Please review the changes."
 
@@ -219,48 +156,26 @@ jobs:
         with:
           token: ${{ secrets.CROWDIN_GITHUB_TOKEN }}
           commit-message: |
-            chore: Scheduled updates (Firmware, Hardware, Translations, Graphs, Baseline)
+            chore: Scheduled updates (Firmware, Hardware, Translations)
 
             Automated updates for:
             - Firmware releases list
             - Device hardware list
             - Crowdin source string uploads
             - Crowdin translation downloads
-            - Module dependency graphs
-            - androidApp baseline profile
-          title: 'chore: Scheduled updates (Firmware, Hardware, Translations, Graphs, Baseline)'
+          title: 'chore: Scheduled updates (Firmware, Hardware, Translations)'
           body: ${{ steps.pr_body.outputs.content }}
           branch: 'scheduled-updates'
           base: 'main'
           delete-branch: true
-          # Only stage the baseline-profile dir when generation actually produced changes. When the emulator
-          # boots far enough for Gradle to create an *empty* baselineProfiles/ dir but generation then fails,
-          # `git add <glob>` aborts with "pathspec did not match any files", which would hard-fail this step
-          # and defeat the continue-on-error on the generation step above.
           add-paths: |
             androidApp/src/main/assets/firmware_releases.json
             androidApp/src/main/assets/device_hardware.json
-            ${{ steps.baseline.outputs.status == 'updated' && 'androidApp/src/google/generated/baselineProfiles/**' || '' }}
             fastlane/metadata/android/**
             **/strings.xml
-            **/README.md
             docs/**/*.md
           labels: |
             automation
             l10n
             firmware
             hardware
-
-  check-workflow-status:
-    name: Check Workflow Status
-    runs-on: ubuntu-24.04-arm
-    permissions: {}
-    needs:
-        - update_assets
-    if: always()
-    steps:
-      - name: Check Workflow Status
-        if: "contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')"
-        run: |
-          echo "One of the dependent jobs failed or was cancelled. Failing the workflow."
-          exit 1
