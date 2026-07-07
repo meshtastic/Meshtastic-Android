@@ -97,7 +97,7 @@ class FirmwareReleaseRepositoryImplTest {
         repository =
             FirmwareReleaseRepositoryImpl(
                 remoteDataSource = FirmwareReleaseRemoteDataSource(api, dispatchers),
-                localDataSource = FirmwareReleaseLocalDataSource(dbProvider, dispatchers),
+                localDataSource = FirmwareReleaseLocalDataSource(dbProvider),
                 assetReader = seed,
                 json = Json { ignoreUnknownKeys = true },
                 dispatchers = dispatchers,

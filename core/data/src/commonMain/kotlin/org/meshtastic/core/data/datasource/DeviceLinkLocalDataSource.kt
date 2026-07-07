@@ -16,31 +16,32 @@
  */
 package org.meshtastic.core.data.datasource
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.flatMapLatest
 import org.koin.core.annotation.Single
 import org.meshtastic.core.database.DatabaseProvider
 import org.meshtastic.core.database.entity.DeviceLinkEntity
-import org.meshtastic.core.di.CoroutineDispatchers
 
 @Single
-class DeviceLinkLocalDataSource(
-    private val dbManager: DatabaseProvider,
-    private val dispatchers: CoroutineDispatchers,
-) {
-    private val deviceLinkDao
-        get() = dbManager.currentDb.value.deviceLinkDao()
+class DeviceLinkLocalDataSource(private val dbManager: DatabaseProvider) {
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun observeAll(): Flow<List<DeviceLinkEntity>> =
+        dbManager.currentDb.flatMapLatest { db -> db.deviceLinkDao().observeAll() }
 
-    fun observeAll(): Flow<List<DeviceLinkEntity>> = deviceLinkDao.observeAll()
+    suspend fun getAll(): List<DeviceLinkEntity> = dbManager.withDb { it.deviceLinkDao().getAll() }.orEmpty()
 
-    suspend fun getAll(): List<DeviceLinkEntity> = withContext(dispatchers.io) { deviceLinkDao.getAll() }
+    suspend fun upsertAll(links: List<DeviceLinkEntity>) {
+        dbManager.withDb { it.deviceLinkDao().upsertAll(links) }
+    }
 
-    suspend fun upsertAll(links: List<DeviceLinkEntity>) =
-        withContext(dispatchers.io) { deviceLinkDao.upsertAll(links) }
+    suspend fun deleteNotIn(keep: List<String>) {
+        dbManager.withDb { it.deviceLinkDao().deleteNotIn(keep) }
+    }
 
-    suspend fun deleteNotIn(keep: List<String>) = withContext(dispatchers.io) { deviceLinkDao.deleteNotIn(keep) }
+    suspend fun deleteAll() {
+        dbManager.withDb { it.deviceLinkDao().deleteAll() }
+    }
 
-    suspend fun deleteAll() = withContext(dispatchers.io) { deviceLinkDao.deleteAll() }
-
-    suspend fun count(): Int = withContext(dispatchers.io) { deviceLinkDao.count() }
+    suspend fun count(): Int = dbManager.withDb { it.deviceLinkDao().count() } ?: 0
 }
