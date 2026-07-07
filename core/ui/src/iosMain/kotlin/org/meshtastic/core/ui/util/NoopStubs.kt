@@ -46,7 +46,7 @@ actual fun rememberSaveFileLauncher(
 @Composable
 actual fun rememberOpenFileLauncher(onUriReceived: (CommonUri?) -> Unit): (mimeType: String) -> Unit = { _ -> }
 
-@Composable actual fun rememberReadTextFromUri(): suspend (CommonUri, Int) -> String? = { _, _ -> null }
+@Composable actual fun rememberReadTextFromUri(): suspend (uri: CommonUri, maxChars: Int) -> String? = { _, _ -> null }
 
 @Composable actual fun KeepScreenOn(enabled: Boolean) {}
 

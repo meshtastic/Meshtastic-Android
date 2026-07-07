@@ -1230,6 +1230,7 @@ private fun offsetPolyline(
 
 // region --- Map Layers ---
 
+@OptIn(MapsComposeExperimentalApi::class)
 @Composable
 private fun MapLayerOverlay(layerItem: MapLayerItem, mapViewModel: MapViewModel) {
     val context = LocalContext.current

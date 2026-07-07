@@ -109,7 +109,7 @@ class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = Main
 
     override fun resetReceivedBuffer() {
         @Suppress("EmptyWhileBlock", "ControlFlowWithEmptyBody")
-        while (_receivedData.tryReceive().isSuccess) Unit
+        while (_receivedData.tryReceive().isSuccess) {}
     }
 
     // --- Helper methods for testing ---

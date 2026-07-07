@@ -257,12 +257,15 @@ class HomeScreen(
                 }
             }
 
-        return ConversationItem.Builder()
-            .setId(conversation.contactKey)
-            .setTitle(CarText.create(conversation.displayName))
-            .setMessages(messages)
-            .setSelf(selfPerson)
-            .setConversationCallback(callback)
+        // car-app 1.7 deprecated the no-arg Builder + individual setters in favor of the
+        // required-args constructor (id, title, self, messages, conversationCallback).
+        return ConversationItem.Builder(
+            conversation.contactKey,
+            CarText.create(conversation.displayName),
+            selfPerson,
+            messages,
+            callback,
+        )
             .setGroupConversation(conversation.contactKey.contains(NodeAddress.ID_BROADCAST))
             .build()
     }
