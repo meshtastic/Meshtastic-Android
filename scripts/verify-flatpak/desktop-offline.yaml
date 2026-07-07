@@ -11,7 +11,6 @@ runtime: org.freedesktop.Platform
 runtime-version: '25.08'
 sdk: org.freedesktop.Sdk
 sdk-extensions:
-  - org.freedesktop.Sdk.Extension.openjdk17
   - org.freedesktop.Sdk.Extension.openjdk21
 command: meshtastic-wrapper.sh
 
@@ -76,7 +75,7 @@ modules:
       - sed -i 's|distributionUrl=.*|distributionUrl=gradle-all.zip|' gradle/wrapper/gradle-wrapper.properties
       - echo "org.gradle.java.installations.auto-detect=false" >> gradle.properties
       - echo "org.gradle.java.installations.auto-download=false" >> gradle.properties
-      - echo "org.gradle.java.installations.paths=/usr/lib/sdk/openjdk21/jvm/openjdk-21,/usr/lib/sdk/openjdk17/jvm/openjdk-17" >> gradle.properties
+      - echo "org.gradle.java.installations.paths=/usr/lib/sdk/openjdk21/jvm/openjdk-21" >> gradle.properties
       - >
         sed -i
         's/^\(\s*\)vendor\.set(JvmVendorSpec\.JETBRAINS)/\1\/\/ vendor.set(JvmVendorSpec.JETBRAINS)/'
