@@ -473,7 +473,6 @@
     <string name="message">Wiadomość</string>
     <string name="message_delivery_status">Status doręczenia wiadomości</string>
     <string name="message_input_label">Wiadomość</string>
-    <string name="message_status_enroute">Oczekiwanie na potwierdzenie</string>
     <string name="message_status_queued">Zakolejkowane do wysłania</string>
     <string name="message_status_unknown">Nieznany</string>
     <string name="messages">Wiadomości</string>

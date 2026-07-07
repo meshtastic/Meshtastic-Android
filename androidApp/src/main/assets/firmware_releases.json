@@ -189,9 +189,57 @@
   },
   "pullRequests": [
     {
+      "id": "10921",
+      "title": "Align Base UI message status wording",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10921",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "10920",
+      "title": "Add waypoint & geofence support with notifications for BaseUI and InkHUD",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10920",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "10917",
+      "title": "Firmware for Seeed XIAO ESP32C6 and WIO-SX1262 for XIAO",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10917",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
+      "id": "10915",
+      "title": "Update TDK InvenSense ICM42670P to v1.0.9",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10915",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "10911",
+      "title": "Add Meshnology W10 AIOT Dev Kit (SX1262 via MCP23017 I2C expander)",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10911",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "10910",
+      "title": "Add Meshnology W12 (WiFi LoRa 32 V5) LR2021 board support",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10910",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "10908",
+      "title": "feat: Support Elecrow ThinkNode M9",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10908",
+      "zip_url": "+446.5 KB"
+    },
+    {
       "id": "10902",
       "title": "BLE lifecycle memory: true BLE-off on nRF52, NimBLE host pools to PSRAM on S3",
       "page_url": "https://github.com/meshtastic/firmware/pull/10902",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "10893",
+      "title": "nrf52: add rotary encoder press pin as deep sleep wake source",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10893",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
@@ -205,6 +253,12 @@
       "title": "Implement SD card backup/restore of preferences; add SD support for Cardputer Advanced",
       "page_url": "https://github.com/meshtastic/firmware/pull/10884",
       "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
+      "id": "10878",
+      "title": "fixed tlora-v2-1-1_16 led heartbeat not blinking and stuck at single s…",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10878",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
       "id": "10870",
@@ -259,36 +313,6 @@
       "title": "Provide relay node info for outbound packets",
       "page_url": "https://github.com/meshtastic/firmware/pull/10767",
       "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "10729",
-      "title": "Update meshtastic/web to v2.7.1",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10729",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10725",
-      "title": "feat(mesh): Shift mobile roles contention window to lower priority (10687)",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10725",
-      "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "10719",
-      "title": "Pr2.5 tmm hop trimming",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10719",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10718",
-      "title": "Monotonic time & prep for router graceful retirement",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10718",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10717",
-      "title": "Update US LoRa modem preset to region defaults for compliance",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10717",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     }
   ]
 }

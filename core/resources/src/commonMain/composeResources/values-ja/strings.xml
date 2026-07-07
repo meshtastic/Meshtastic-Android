@@ -978,7 +978,6 @@
     <string name="message_device_managed">この無線機は管理されており、リモート管理者のみが変更できます。</string>
     <string name="message_input_label">メッセージ</string>
     <string name="message_status_delivered">メッシュに配信済み</string>
-    <string name="message_status_enroute">相手の受信確認待ち</string>
     <string name="message_status_queued">送信待ち</string>
     <string name="message_status_sfpp_confirmed">SF++ チェーンで確認済み</string>
     <string name="message_status_sfpp_routing">SF++ チェーン経由でルーティング中…</string>

@@ -248,7 +248,6 @@
     <string name="message">Bericht</string>
     <string name="message_delivery_status">Bericht afleverstatus</string>
     <string name="message_input_label">Bericht</string>
-    <string name="message_status_enroute">Wachten op bevestiging</string>
     <string name="message_status_queued">In behandeling</string>
     <string name="messages">Berichten</string>
     <string name="minimum_broadcast_seconds">Minimale broadcast (seconden)</string>

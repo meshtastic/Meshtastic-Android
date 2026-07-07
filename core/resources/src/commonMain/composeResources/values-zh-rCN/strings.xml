@@ -952,7 +952,6 @@
     <string name="message_device_managed">此电台由远程管理员管理。</string>
     <string name="message_input_label">信息</string>
     <string name="message_status_delivered">已发送至网状网络</string>
-    <string name="message_status_enroute">正在等待确认</string>
     <string name="message_status_queued">发送队列中</string>
     <string name="message_status_sfpp_confirmed">已在 SF++ 链上确认</string>
     <string name="message_status_sfpp_routing">通过 SF++ 链路路由…</string>

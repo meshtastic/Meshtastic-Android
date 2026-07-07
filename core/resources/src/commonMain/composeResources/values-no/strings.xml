@@ -147,7 +147,6 @@
     <string name="message">Melding</string>
     <string name="message_delivery_status">Melding leveringsstatus</string>
     <string name="message_input_label">Melding</string>
-    <string name="message_status_enroute">Venter på bekreftelse</string>
     <string name="message_status_queued">I kø for å sende</string>
     <string name="module_settings">Modul konfigurasjon</string>
     <!-- MQTT -->

@@ -619,7 +619,6 @@
     <string name="message_device_managed">Toto rádio je spravováno vzdáleným správcem a změny může provádět jen on.</string>
     <string name="message_input_label">Zpráva</string>
     <string name="message_status_delivered">Doručeno do mesh sítě</string>
-    <string name="message_status_enroute">Čeká na potvrzení</string>
     <string name="message_status_queued">Ve frontě k odeslání</string>
     <string name="message_status_unknown">Neznámé</string>
     <string name="messages">Zprávy</string>

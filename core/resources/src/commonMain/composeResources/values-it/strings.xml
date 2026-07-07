@@ -571,7 +571,6 @@
     <string name="message_delivery_status">Stato di consegna messaggi</string>
     <string name="message_device_managed">Questa radio è gestita e può essere modificata solo da un amministratore remoto.</string>
     <string name="message_input_label">Messaggio</string>
-    <string name="message_status_enroute">In attesa di conferma</string>
     <string name="message_status_queued">In coda per l'invio</string>
     <string name="message_status_sfpp_confirmed">Confermato sulla catena SF++</string>
     <string name="message_status_sfpp_routing">Percorso tramite catena SF++…</string>

@@ -148,7 +148,6 @@
     <string name="message">Μήνυμα</string>
     <string name="message_delivery_status">Κατάσταση παράδοσης μηνύματος</string>
     <string name="message_input_label">Μήνυμα</string>
-    <string name="message_status_enroute">Αναμονή για αναγνώριση</string>
     <string name="messages">Μηνύματα</string>
     <string name="module_settings">Ρυθμίσεις πρόσθετου</string>
     <!-- MQTT -->

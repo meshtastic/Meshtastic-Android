@@ -385,7 +385,6 @@
     <string name="message_delivery_status">Status de entrega de mensagem</string>
     <string name="message_device_managed">Este rádio é gerenciado e só pode ser alterado por um administrador remoto.</string>
     <string name="message_input_label">Mensagem</string>
-    <string name="message_status_enroute">Esperando para ser reconhecido</string>
     <string name="message_status_queued">Programado para envio</string>
     <string name="message_status_unknown">Desconhecido</string>
     <string name="messages">Mensagens</string>

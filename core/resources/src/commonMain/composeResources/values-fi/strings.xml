@@ -689,6 +689,8 @@
     <string name="generate_qr_code">Generoi QR-koodi</string>
     <!-- GEOFENCE -->
     <string name="geofence">Aluerajaus</string>
+    <string name="geofence_alerts_opt_in">Ilmoita aluerajan ylityksistä</string>
+    <string name="geofence_alerts_opt_in_desc">Saat ilmoituksen, kun radiot saapuvat tälle aluerajaukselle tai poistuvat siltä</string>
     <string name="geofence_box_author_confirm">Vahvista alue</string>
     <string name="geofence_box_author_hint">Määritä alue napauttamalla kahta kulmaa</string>
     <string name="geofence_box_author_hint_viewport">Rajaa haluamasi alue karttanäkymään ja napauta vahvista alue</string>
@@ -984,9 +986,17 @@
     <string name="message_delivery_status">Viestin toimitustila</string>
     <string name="message_device_managed">Tätä radiota hallitaan etänä, ja sitä voi muuttaa vain etähallinnassa oleva ylläpitäjä.</string>
     <string name="message_input_label">Viesti</string>
+    <string name="message_routing_error_max_retransmit">Toimitus mesh-verkkoon epäonnistui</string>
+    <string name="message_routing_error_no_channel">Kanavaa ei ole valittu</string>
+    <string name="message_routing_error_pki_failed">Salattua viestiä ei voitu lähettää</string>
+    <string name="message_routing_error_pki_send_fail_public_key">Vastaanottajan avain ei ole käytettävissä</string>
+    <string name="message_routing_error_pki_unknown_pubkey">Vastaanottaja tarvitsee avaimesi</string>
+    <string name="message_routing_error_too_large">Viesti on liian suuri lähetettäväksi</string>
     <string name="message_status_delivered">Toimitettu mesh-verkkoon</string>
-    <string name="message_status_enroute">Odottaa vahvistusta</string>
+    <string name="message_status_enroute">Lähetetään...</string>
     <string name="message_status_queued">Jonossa lähetettäväksi</string>
+    <string name="message_status_recipient_delivered">Toimitettu vastaanottajalle</string>
+    <string name="message_status_relayed_not_confirmed">Välitetty, mutta vastaanottaja ei ole vahvistanut vastaanottoa</string>
     <string name="message_status_sfpp_confirmed">Vahvistettu SF++-ketjussa</string>
     <string name="message_status_sfpp_routing">Reititetään SF++ ketjun kautta…</string>
     <string name="message_status_unknown">Tuntematon</string>

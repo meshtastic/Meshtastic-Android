@@ -276,7 +276,6 @@
     <string name="message">Порука</string>
     <string name="message_delivery_status">Статус пријема поруке</string>
     <string name="message_input_label">Порука</string>
-    <string name="message_status_enroute">Чека на потврду</string>
     <string name="message_status_queued">У реду за слање</string>
     <string name="message_status_unknown">Непознато</string>
     <string name="messages">Поруке</string>

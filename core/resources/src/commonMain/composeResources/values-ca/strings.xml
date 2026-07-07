@@ -126,7 +126,6 @@
     <string name="message">Missatge</string>
     <string name="message_delivery_status">Estat d'entrega del missatge</string>
     <string name="message_input_label">Missatge</string>
-    <string name="message_status_enroute">Esperant confirmació</string>
     <string name="message_status_queued">En cua per enviar</string>
     <string name="module_settings">Configuració de mòdul</string>
     <!-- MQTT -->

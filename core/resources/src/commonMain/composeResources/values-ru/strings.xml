@@ -61,7 +61,9 @@
     <string name="advanced_device_gps">Расширенное GPS устройство</string>
     <string name="advanced_title">Расширенные</string>
     <!-- AIR -->
+    <string name="air_quality">Качество воздуха</string>
     <string name="air_quality_icon">Значок качества воздуха</string>
+    <string name="air_quality_metrics_log">Журнал метрик качества воздуха</string>
     <string name="air_quality_metrics_module_enabled">Модуль измерения качества воздуха включен</string>
     <string name="air_quality_metrics_update_interval_seconds">Интервал обновления данных качества воздуха</string>
     <string name="air_util_definition">Процент времени эфира для передачи в течение последнего часа.</string>
@@ -98,6 +100,7 @@
     <string name="app_functions_master_toggle">Разрешить ИИ доступ</string>
     <string name="app_functions_read_section">Функции чтения</string>
     <string name="app_functions_send_message">Отправить сообщение</string>
+    <string name="app_functions_settings">System AI</string>
     <string name="app_functions_settings_summary">Контролируй, какие функции доступны помощникам ИИ</string>
     <string name="app_functions_write_section">Написание функций</string>
     <string name="app_notifications">Уведомления приложений</string>
@@ -105,6 +108,7 @@
     <string name="app_too_old">Требуется обновление приложения</string>
     <string name="app_version">Версия</string>
     <string name="apply">Применить</string>
+    <string name="aqi">AQI</string>
     <string name="are_you_sure">Вы уверены?</string>
     <string name="are_you_sure_change_default">Вы уверены, что хотите перейти на канал по умолчанию?</string>
     <string name="audio">Звук</string>
@@ -142,6 +146,7 @@
     <string name="button_gpio">Кнопка GPIO</string>
     <string name="buzzer_gpio">Зуммер GPIO</string>
     <string name="calculating">Вычисление…</string>
+    <string name="call_sign">Позывной</string>
     <string name="call_sign_summary">Твой позывной радиолюбителя, до 8 символов</string>
     <string name="camera_permission">Разрешение камеры</string>
     <string name="camera_permission_rationale">Разреши доступ к камере, для сканирования QR-кодов.</string>
@@ -433,6 +438,7 @@
     <string name="discovery_stat_packets_tx">Пакеты TX</string>
     <string name="discovery_stat_preset_results">Результаты пресета</string>
     <string name="discovery_stat_presets_scanned">Предустановки просканированы</string>
+    <string name="discovery_stat_rf_health">RF Health</string>
     <string name="discovery_stat_selected">Выбрано</string>
     <string name="discovery_stat_sensor_pkts">Пакеты датчика</string>
     <string name="discovery_stat_session_overview">Обзор сессии</string>
@@ -678,16 +684,22 @@
     <string name="generate_qr_code">Сгенерировать QR-код</string>
     <!-- GEOFENCE -->
     <string name="geofence">Геозона</string>
+    <string name="geofence_alerts_opt_in">Уведомлять меня о перекрёстках</string>
+    <string name="geofence_alerts_opt_in_desc">Получать оповещение при входе или выходе из этой геозоны</string>
     <string name="geofence_box_author_confirm">Подтвердить область</string>
     <string name="geofence_box_author_hint">Нажмите два угла, для определения области</string>
+    <string name="geofence_box_author_hint_viewport">Перемести карту для рамки области, затем нажмите Подтвердить область</string>
     <string name="geofence_box_use_view">Использовать текущий вид</string>
     <string name="geofence_edit_area">Редактировать область</string>
+    <string name="geofence_entered_body">%1$s вошел %2$s</string>
     <string name="geofence_entered_title">Введено %1$s</string>
     <string name="geofence_favorites_only">Только избранные</string>
     <string name="geofence_left_body">%1$s оставил %2$s</string>
+    <string name="geofence_left_title">Покинул %1$s</string>
     <string name="geofence_notify_on_enter">Уведомлять при входе</string>
     <string name="geofence_notify_on_exit">Уведомлять при выходе</string>
     <string name="geofence_off">Выкл</string>
+    <string name="geofence_radius">Радиус геозоны</string>
     <string name="geofence_remove_area">Удалить область</string>
     <string name="geofence_set_area">Задать область на карте</string>
     <string name="get_started">Начать работу</string>
@@ -742,6 +754,7 @@
     <string name="incoming_messages">Входящие сообщения</string>
     <string name="indoor_air_quality_iaq">Качество воздуха в помещении (IAQ)</string>
     <string name="info">Информация</string>
+    <string name="input_channel_url">Введи URL общих каналов</string>
     <string name="input_shared_contact_url">Введите URL контакта</string>
     <string name="installed_firmware_version">Текущая версия:</string>
     <string name="internal">Внутренний</string>
@@ -821,6 +834,7 @@
     <string name="location_sharing">Поделиться местоположением</string>
     <!-- LOCKDOWN -->
     <string name="lockdown_backoff">Попробуй снова через %1$d секунд.</string>
+    <string name="lockdown_boots_remaining">Осталось загрузок</string>
     <string name="lockdown_confirm_passphrase">Подтвердить парольную фразу</string>
     <string name="lockdown_disable">Отключить блокировку</string>
     <string name="lockdown_disable_message">Введи пароль для отключения блокировки. Устройство расшифрует хранилище и перезагрузится.</string>
@@ -834,12 +848,16 @@
     <string name="lockdown_lock_now">Заблокировать сейчас</string>
     <string name="lockdown_lock_reason">Причина: %1$s</string>
     <string name="lockdown_mode">Режим блокировки</string>
+    <string name="lockdown_mode_setting_up">Настройка…</string>
     <string name="lockdown_mode_summary_locked">Активно — введи свой пароль чтобы разблокировать это соединение.</string>
     <string name="lockdown_mode_summary_off">Зашифровать хранилище устройства и требовать пароль при каждом подключении.</string>
     <string name="lockdown_mode_summary_unlocked">Активно — хранилище зашифровано, это соединение аутентифицировано.</string>
     <string name="lockdown_passphrase">Пароль</string>
     <string name="lockdown_passphrases_do_not_match">Пароли не совпадают</string>
+    <string name="lockdown_session_boots_remaining">Сессия: %1$d перезагрузок осталось</string>
+    <string name="lockdown_session_expires">Истекает %1$s</string>
     <string name="lockdown_session_minutes">Ограничение сессии (минуты)</string>
+    <string name="lockdown_session_minutes_help">Ограничение времени работы на один запуск. 0 = без ограничений.</string>
     <string name="lockdown_session_no_time_limit">Без ограничения по времени</string>
     <string name="lockdown_set_passphrase">Установить парольную фразу</string>
     <string name="lockdown_show_passphrase">Показать</string>
@@ -911,14 +929,24 @@
     <string name="match_any">Совпадение любой | Все</string>
     <string name="max">Макс</string>
     <!-- MESH -->
+    <string name="mesh_beacon">Маяк сети</string>
+    <string name="mesh_beacon_broadcast">Трансляция маяка</string>
+    <string name="mesh_beacon_broadcast_summary">Периодически рекламировать эту сеть на близлежащие ноды</string>
+    <string name="mesh_beacon_channels_title">Каналы маяка</string>
+    <string name="mesh_beacon_interval">Интервал трансляции (в секундах)</string>
+    <string name="mesh_beacon_interval_error">Минимум %1$d секунд</string>
     <string name="mesh_beacon_invitations_title">Приглашения в сеть</string>
+    <string name="mesh_beacon_listen">Слушать маяки</string>
+    <string name="mesh_beacon_listen_summary">Захват приглашений, рекламируемых ближайшими сетями</string>
     <string name="mesh_beacon_message">Сообщение маяка</string>
+    <string name="mesh_beacon_message_error">Максимум %1$d байт</string>
     <string name="mesh_beacon_notification_body">Ближайшая сеть пригласила тебя присоединиться</string>
     <string name="mesh_beacon_notification_title">Приглашение в сеть</string>
     <string name="mesh_beacon_offer_add">Добавить канал</string>
     <string name="mesh_beacon_offer_channel">Канал: %1$s</string>
     <string name="mesh_beacon_offer_channel_key">Предлагаемый ключ канала (base64)</string>
     <string name="mesh_beacon_offer_channel_name">Предложенное имя канала</string>
+    <string name="mesh_beacon_offer_discover">Обнаруживать</string>
     <string name="mesh_beacon_offer_dismiss">Отменить</string>
     <string name="mesh_beacon_offer_from_unknown">С неизвестной ноды</string>
     <string name="mesh_beacon_offer_join">Присоединиться</string>
@@ -930,7 +958,9 @@
     <string name="mesh_beacon_offer_title">Приглашение в сеть</string>
     <string name="mesh_beacon_on_preset">Передать преднастройку</string>
     <string name="mesh_beacon_on_region">Передать регион</string>
+    <string name="mesh_beacon_preset_indicator">Рекламируется ближайшим маяком</string>
     <string name="mesh_beacon_preset_none">Отсутствует</string>
+    <string name="mesh_beacon_send_as_node">Транслировать как номер ноды (0 = эта нода)</string>
     <string name="mesh_beacon_target">Цель %1$d</string>
     <string name="mesh_beacon_target_add">Добавить цель</string>
     <string name="mesh_beacon_target_channel_index">Индекс канала</string>
@@ -955,9 +985,17 @@
     <string name="message_delivery_status">Статус доставки сообщения</string>
     <string name="message_device_managed">Это радио управляется и может быть изменено только удаленным администратором.</string>
     <string name="message_input_label">Сообщение</string>
+    <string name="message_routing_error_max_retransmit">Не удалось доставить в сеть</string>
+    <string name="message_routing_error_no_channel">Канал не выбран</string>
+    <string name="message_routing_error_pki_failed">Не удалось отправить зашифрованное сообщение</string>
+    <string name="message_routing_error_pki_send_fail_public_key">Ключ получателя недоступен</string>
+    <string name="message_routing_error_pki_unknown_pubkey">Получателю нужен ваш ключ</string>
+    <string name="message_routing_error_too_large">Слишком большое сообщение для отправки</string>
     <string name="message_status_delivered">Отправлено в сеть</string>
-    <string name="message_status_enroute">Ожидание подтверждения</string>
+    <string name="message_status_enroute">Отправка...</string>
     <string name="message_status_queued">В очереди на отправку</string>
+    <string name="message_status_recipient_delivered">Доставлено получателю</string>
+    <string name="message_status_relayed_not_confirmed">Передано, не подтверждено получателем</string>
     <string name="message_status_sfpp_confirmed">Подтверждено в цепочке SF++</string>
     <string name="message_status_sfpp_routing">Маршрутизация по SF++ цепочке…</string>
     <string name="message_status_unknown">Неизвестно</string>

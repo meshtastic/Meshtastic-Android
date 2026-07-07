@@ -646,7 +646,6 @@
     <string name="message_device_managed">Denna radio hanteras och kan endast ändras av en fjärradministratör.</string>
     <string name="message_input_label">Meddelande</string>
     <string name="message_status_delivered">Levererad till nät</string>
-    <string name="message_status_enroute">Inväntar kvittens</string>
     <string name="message_status_queued">Kvittens köad</string>
     <string name="message_status_unknown">Okänd</string>
     <string name="messages">Meddelanden</string>

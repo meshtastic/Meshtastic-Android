@@ -150,7 +150,6 @@
     <!-- MESSAGE -->
     <string name="message">Паведамленне</string>
     <string name="message_input_label">Паведамленне</string>
-    <string name="message_status_enroute">Чакае пацвярджэння</string>
     <string name="message_status_queued">У чарзе на адпраўку</string>
     <string name="messages">Паведамленні</string>
     <!-- MQTT -->

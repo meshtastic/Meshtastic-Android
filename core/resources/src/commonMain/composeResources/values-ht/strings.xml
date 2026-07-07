@@ -140,7 +140,6 @@
     <string name="message">Mesaj</string>
     <string name="message_delivery_status">Eta livrezon mesaj</string>
     <string name="message_input_label">Mesaj</string>
-    <string name="message_status_enroute">Ap tann pou li rekonèt</string>
     <string name="message_status_queued">Kwen pou voye</string>
     <string name="module_settings">Konfigirasyon modil</string>
     <!-- MQTT -->
