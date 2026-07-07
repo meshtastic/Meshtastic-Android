@@ -148,20 +148,18 @@ fun MeshBeacon.toJoinChannelSet(option: BeaconJoinOption, currentLora: LoRaConfi
         BeaconJoinOption.ADD -> ChannelSet(settings = listOf(offerChannel))
 
         BeaconJoinOption.SWITCH -> {
-            // Ship a fresh LoRaConfig rather than a copy of the current one: any stale RF pin on the connected radio
+            // Start from the shared device default ([Channel.default] — use_preset=true, hop_limit/tx_enabled set,
+            // every RF field blank) rather than a copy of the current config: any stale RF pin on the connected radio
             // — an explicit channel_num, override_frequency, or manual bandwidth/spread_factor/coding_rate — would
             // otherwise strand it on the old slot. use_preset + the default (zero) channel_num/override_frequency lets
             // firmware re-derive the frequency from the offered channel name (Apple FR-006). This is sent as a full
-            // LoRaConfig replacement, so carry region (a zero region disables transmit) and set the standard
-            // hop_limit/tx_enabled defaults; the beacon proto advertises no other RF fields.
+            // LoRaConfig replacement, so carry region (a zero region disables transmit); the beacon proto advertises
+            // no other RF fields.
             val base = currentLora ?: LoRaConfig()
             val loraConfig =
-                LoRaConfig(
-                    use_preset = true,
+                Channel.default.loraConfig.copy(
                     modem_preset = offer_preset ?: base.modem_preset,
                     region = if (offer_region != RegionCode.UNSET) offer_region else base.region,
-                    hop_limit = 3,
-                    tx_enabled = true,
                 )
             ChannelSet(settings = listOf(offerChannel), lora_config = loraConfig)
         }
