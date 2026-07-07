@@ -49,7 +49,7 @@ kotlin {
         }
 
         // Room / SQLite runtime shared between Android and Desktop JVM targets
-        val jvmAndroidMain by getting {
+        getByName("jvmAndroidMain") {
             dependencies {
                 implementation(libs.androidx.room.runtime)
                 implementation(libs.androidx.room.paging)
@@ -67,7 +67,7 @@ kotlin {
             implementation(libs.kotlinx.coroutines.test)
         }
 
-        val androidHostTest by getting {
+        getByName("androidHostTest") {
             dependencies {
                 // JVM variant provides the host-platform native for BundledSQLiteDriver (same as core:database)
                 runtimeOnly("androidx.sqlite:sqlite-bundled-jvm:2.7.0")

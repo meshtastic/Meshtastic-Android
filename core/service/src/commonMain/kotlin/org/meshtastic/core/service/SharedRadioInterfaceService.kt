@@ -717,7 +717,7 @@ class SharedRadioInterfaceService(
         // would replay stale bytes ahead of the next session's firmware handshake, since the channel
         // outlives the orchestrator's per-start scope.
         @Suppress("EmptyWhileBlock", "ControlFlowWithEmptyBody")
-        while (_receivedData.tryReceive().isSuccess) Unit
+        while (_receivedData.tryReceive().isSuccess) {}
     }
 
     override fun onConnect() {

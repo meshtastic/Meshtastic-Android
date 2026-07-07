@@ -270,7 +270,7 @@ class AiFunctionProviderImpl(
                 when {
                     totalCount == 0 -> 0
                     onlineCount == 0 -> HEALTH_SCORE_DEGRADED
-                    else -> (HEALTH_SCORE_BASE + (HEALTH_SCORE_ONLINE_RATIO * onlineCount) / totalCount).toInt()
+                    else -> HEALTH_SCORE_BASE + (HEALTH_SCORE_ONLINE_RATIO * onlineCount) / totalCount
                 }
 
             // Find most recent packet: max lastHeard across all nodes (convert seconds to ms)

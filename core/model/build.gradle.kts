@@ -60,7 +60,7 @@ kotlin {
             api(libs.androidx.annotation)
             api(libs.androidx.core.ktx)
         }
-        val androidDeviceTest by getting {
+        getByName("androidDeviceTest") {
             dependencies {
                 implementation(libs.androidx.test.ext.junit)
                 implementation(libs.androidx.test.runner)

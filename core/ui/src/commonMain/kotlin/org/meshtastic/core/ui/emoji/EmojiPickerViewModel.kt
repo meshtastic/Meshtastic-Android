@@ -52,10 +52,10 @@ internal class EmojiPickerViewModel(
                 emojiRepository.preload()
                 _isLoaded.value = true
             } catch (e: MissingResourceException) {
-                Logger.e("EmojiPickerViewModel", e) { "Failed to load emoji data" }
+                Logger.e(tag = "EmojiPickerViewModel", throwable = e) { "Failed to load emoji data" }
                 _loadError.value = true
             } catch (e: IllegalStateException) {
-                Logger.e("EmojiPickerViewModel", e) { "Failed to load emoji data" }
+                Logger.e(tag = "EmojiPickerViewModel", throwable = e) { "Failed to load emoji data" }
                 _loadError.value = true
             }
         }
