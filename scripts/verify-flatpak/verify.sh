@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Local replica of vid's flatpak CI (vidplace7/org.meshtastic.desktop,
+# Local replica of vid's flatpak CI (vidplace7/org.meshtastic.MeshtasticDesktop,
 # .github/workflows/build-flatpak.yml) but flipped to true-offline mode: our
 # flatpak-sources.json is included and --share=network is removed from the
 # build phase.
@@ -56,7 +56,7 @@ WORK="$REPO_ROOT/build/flatpak-verify"
 OVERLAY="$REPO_ROOT/scripts/verify-flatpak/desktop-offline.yaml"
 SOURCES_JSON="$REPO_ROOT/flatpak-sources.json"
 GRADLE_HOME_ISOLATED="$REPO_ROOT/build/flatpak-gradle-home"
-VID_REPO="https://github.com/vidplace7/org.meshtastic.desktop.git"
+VID_REPO="https://github.com/vidplace7/org.meshtastic.MeshtasticDesktop.git"
 
 # bilelmoussaoui's image is what vid's CI uses; freedesktop-24.08 is the latest
 # tag available. The 25.08 runtime declared in the manifest is pulled from
@@ -89,17 +89,17 @@ elif [[ ! -f "$SOURCES_JSON" ]]; then
 fi
 
 if [[ $REBUILD_ONLY -eq 1 ]]; then
-    [[ -d "$WORK/org.meshtastic.desktop/.git" ]] || \
+    [[ -d "$WORK/org.meshtastic.MeshtasticDesktop/.git" ]] || \
         fail "--rebuild-only needs an existing workspace at $WORK; run without it once first."
 else
     step "Preparing workspace at $WORK"
     mkdir -p "$WORK"
-    if [[ ! -d "$WORK/org.meshtastic.desktop/.git" ]]; then
-        git clone --depth 1 --recurse-submodules "$VID_REPO" "$WORK/org.meshtastic.desktop"
+    if [[ ! -d "$WORK/org.meshtastic.MeshtasticDesktop/.git" ]]; then
+        git clone --depth 1 --recurse-submodules "$VID_REPO" "$WORK/org.meshtastic.MeshtasticDesktop"
     else
-        git -C "$WORK/org.meshtastic.desktop" fetch --depth 1 origin main
-        git -C "$WORK/org.meshtastic.desktop" reset --hard origin/main
-        git -C "$WORK/org.meshtastic.desktop" submodule update --init --recursive --depth 1
+        git -C "$WORK/org.meshtastic.MeshtasticDesktop" fetch --depth 1 origin main
+        git -C "$WORK/org.meshtastic.MeshtasticDesktop" reset --hard origin/main
+        git -C "$WORK/org.meshtastic.MeshtasticDesktop" submodule update --init --recursive --depth 1
     fi
 fi
 
@@ -107,8 +107,8 @@ fi
 #   overlay yaml = the manifest we're testing
 #   flatpak-sources.json = the artifact we're validating
 step "Wiring overlay manifest + our flatpak-sources.json"
-cp "$OVERLAY" "$WORK/org.meshtastic.desktop/org.meshtastic.desktop.yaml"
-cp "$SOURCES_JSON" "$WORK/org.meshtastic.desktop/flatpak-sources.json"
+cp "$OVERLAY" "$WORK/org.meshtastic.MeshtasticDesktop/org.meshtastic.MeshtasticDesktop.yaml"
+cp "$SOURCES_JSON" "$WORK/org.meshtastic.MeshtasticDesktop/flatpak-sources.json"
 
 if [[ $REBUILD_ONLY -eq 0 ]]; then
     step "Snapshotting Meshtastic-Android checkout (excluding build/, .gradle/)"
@@ -119,7 +119,7 @@ if [[ $REBUILD_ONLY -eq 0 ]]; then
         --exclude='*/.gradle/' \
         --exclude='/.idea/' \
         --exclude='/local.properties' \
-        "$REPO_ROOT/" "$WORK/org.meshtastic.desktop/meshtastic-android/"
+        "$REPO_ROOT/" "$WORK/org.meshtastic.MeshtasticDesktop/meshtastic-android/"
 fi
 
 step "Pulling builder image: $BUILDER_IMAGE ($DOCKER_PLATFORM)"
@@ -128,7 +128,7 @@ docker pull --platform "$DOCKER_PLATFORM" "$BUILDER_IMAGE" >/dev/null
 DOCKER_RUN_ARGS=(
     --rm
     --privileged
-    -v "$WORK/org.meshtastic.desktop:/work"
+    -v "$WORK/org.meshtastic.MeshtasticDesktop:/work"
     -w /work
     --platform "$DOCKER_PLATFORM"
     --security-opt seccomp=unconfined
@@ -154,7 +154,7 @@ docker run "${DOCKER_RUN_ARGS[@]}" "$BUILDER_IMAGE" bash -c "set -e
     flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
     flatpak-builder --user --repo=repo --install-deps-from=flathub --force-clean \
         --disable-rofiles-fuse $BUILDER_EXTRA_FLAGS \
-        builddir org.meshtastic.desktop.yaml
+        builddir org.meshtastic.MeshtasticDesktop.yaml
     echo
     echo '=== $SUCCESS_MSG ==='
 "

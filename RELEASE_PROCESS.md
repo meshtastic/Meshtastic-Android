@@ -94,7 +94,7 @@ Desktop uses the same version resolution chain as Android — both read `VERSION
 
 ### Flatpak
 
-Flatpak packaging is maintained externally at [vidplace7/org.meshtastic.desktop](https://github.com/vidplace7/org.meshtastic.desktop). It builds `:desktop:packageUberJarForCurrentOS` (not the native distribution pipeline) and includes its own AppStream metainfo, `.desktop` entry, and JBR bundling.
+Flatpak packaging is maintained externally at [vidplace7/org.meshtastic.MeshtasticDesktop](https://github.com/vidplace7/org.meshtastic.MeshtasticDesktop). It builds `:desktop:packageUberJarForCurrentOS` (not the native distribution pipeline) and includes its own AppStream metainfo, `.desktop` entry, and JBR bundling.
 
 ## Build Attestations & Provenance
 

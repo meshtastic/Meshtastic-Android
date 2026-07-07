@@ -50,7 +50,7 @@ If you encounter any problems or have questions, [ask us on the discord](https:/
 
 ### Desktop
 
-**Meshtastic Desktop** installers (macOS DMG, Windows MSI/EXE, Linux DEB/RPM/AppImage) are available from [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases). A Flatpak package is maintained at [vidplace7/org.meshtastic.desktop](https://github.com/vidplace7/org.meshtastic.desktop).
+**Meshtastic Desktop** installers (macOS DMG, Windows MSI/EXE, Linux DEB/RPM/AppImage) are available from [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases). A Flatpak package is maintained at [vidplace7/org.meshtastic.MeshtasticDesktop](https://github.com/vidplace7/org.meshtastic.MeshtasticDesktop).
 
 ## Documentation
 
