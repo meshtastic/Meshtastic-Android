@@ -64,8 +64,8 @@ import org.meshtastic.feature.map.component.SitePlannerParams
 import org.meshtastic.feature.map.component.SitePlannerSheet
 
 // The official hosted Site Planner (static PWA on GitHub Pages). The estimate flow loads it headless with
-// run=1&bridge=1; the native bridge + color_scale it needs ship in site-planner #74, so the run will time out
-// until that PR merges and this URL redeploys. ponytail: make it a setting if a self-hosted planner is needed.
+// run=1&bridge=1; the native bridge + full flat query contract it relies on shipped in site-planner #74.
+// ponytail: make it a setting if a self-hosted planner is ever needed.
 private const val SITE_PLANNER_BASE_URL = "https://site.meshtastic.org"
 private const val SITE_PLANNER_TIMEOUT_MS = 45_000L
 
