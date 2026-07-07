@@ -12,6 +12,7 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 #### 🏗️ Features
 * feat(messaging): @mention with deep-link to node detail (#6098) by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6108
 * feat(node): label power channels and fix pressure axis scale by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6111
+* Show outgoing message status text by @RCGV1 in https://github.com/meshtastic/Meshtastic-Android/pull/6121
 #### 🖥️ Desktop
 * fix(geofence): restrict crossing alerts to creator, add per-geofence opt-in by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6117
 #### 🛠️ Fixes
