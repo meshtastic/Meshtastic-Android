@@ -30,6 +30,35 @@
             android:resource="@xml/app_metadata" />
 
         <!--
+          Register as an "Open in / Send to Meshtastic" target for GeoJSON/KML map files (e.g. the Meshtastic Site
+          Planner's "Send to App" share). Google flavor only — it's the flavor that renders map overlays. Merged into
+          the MainActivity declared in the base manifest. application/json is broad, but the map importer validates the
+          file extension and ignores anything that isn't a supported layer.
+        -->
+        <activity
+            android:name="org.meshtastic.app.MainActivity"
+            tools:node="merge">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="application/geo+json" />
+                <data android:mimeType="application/vnd.geo+json" />
+                <data android:mimeType="application/json" />
+                <data android:mimeType="application/vnd.google-earth.kml+xml" />
+                <data android:mimeType="application/vnd.google-earth.kmz" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="application/geo+json" />
+                <data android:mimeType="application/vnd.geo+json" />
+                <data android:mimeType="application/json" />
+                <data android:mimeType="application/vnd.google-earth.kml+xml" />
+                <data android:mimeType="application/vnd.google-earth.kmz" />
+            </intent-filter>
+        </activity>
+
+        <!--
           AppFunctions 1.0.0-alpha10 discontinued the appfunctions-service artifact whose
           manifest used to contribute these two delegate services; apps must now declare
           them (mirrors the alpha09 appfunctions-service AAR manifest, classes relocated

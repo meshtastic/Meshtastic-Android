@@ -35,7 +35,9 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.map_filter
 import org.meshtastic.core.resources.orient_north
 import org.meshtastic.core.resources.refresh
+import org.meshtastic.core.resources.site_planner
 import org.meshtastic.core.resources.toggle_my_position
+import org.meshtastic.core.ui.icon.CellTower
 import org.meshtastic.core.ui.icon.LocationDisabled
 import org.meshtastic.core.ui.icon.MapCompass
 import org.meshtastic.core.ui.icon.MeshtasticIcons
@@ -72,6 +74,7 @@ fun MapControlsOverlay(
     filterDropdownContent: @Composable () -> Unit = {},
     mapTypeContent: @Composable () -> Unit = {},
     layersContent: @Composable () -> Unit = {},
+    onSitePlannerClick: (() -> Unit)? = null,
     isLocationTrackingEnabled: Boolean = false,
     onToggleLocationTracking: () -> Unit = {},
     showRefresh: Boolean = false,
@@ -101,6 +104,15 @@ fun MapControlsOverlay(
 
         // Layers button (flavor-specific)
         layersContent()
+
+        // Site Planner coverage estimate (optional; provided by the Google flavor)
+        onSitePlannerClick?.let { onClick ->
+            MapButton(
+                icon = MeshtasticIcons.CellTower,
+                contentDescription = stringResource(Res.string.site_planner),
+                onClick = onClick,
+            )
+        }
 
         // Refresh button (optional)
         if (showRefresh) {
