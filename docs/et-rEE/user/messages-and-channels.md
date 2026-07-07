@@ -77,11 +77,11 @@ When a message fails to deliver, the error indicator shows what went wrong:
 | Got NAK          | The next-hop node refused to relay       | The relay node may be congested. Wait and retry.                                                                                            |
 | Aegunud          | No acknowledgment within retry window    | The recipient may be just out of range. Try increasing hop limit or moving to a better position.                                            |
 | Liidest pole     | No radio interface available to send     | Kontrolli, kas raadio on ühendatud ja kanal on seadistatud.                                                                                                 |
-| Max Retransmit   | All retry attempts exhausted             | The mesh path is unreliable. Try a different channel or wait for conditions to improve.                                                     |
+| Failed to deliver to mesh | All retry attempts exhausted | Move closer, improve signal, or wait for mesh conditions to improve. |
 | Kanalit pole     | The destination channel doesn't exist    | Veendu, et mõlemal sõlmel oleks sama kanali seadistus.                                                                                                      |
-| Too Large        | Sõnum ületab maksimaalset sõnumi mahtu   | Shorten your message (max ~200 characters).                                                                              |
+| Message is too large to send | Sõnum ületab maksimaalset sõnumi mahtu | Shorten the message and try again. |
 | Vastust pole     | Node received message but didn't respond | The recipient's radio may be busy or in low-power sleep mode.                                                                                               |
-| Duty Cycle Limit | Regional airtime limit reached           | Your radio has used its allowed transmit time. Wait for the duty cycle window to reset (typically 1 hour in EU regions). |
+| Duty cycle limit | Regional airtime limit reached | Wait for the duty cycle window to reset. |
 | Vigane päring    | Malformed or invalid message             | This usually indicates a software bug. Try restarting the app.                                                                              |
 
 > 💡 **Vihje:** Enamik kohaletoimetamise vigu laheneb iseenesest. If a node is intermittently reachable, the mesh will retry. For persistent "No Route" errors, check that intermediate Router nodes are online.
@@ -174,4 +174,3 @@ Messages are queued and transmitted based on priority:
 - [Kanali konf](https://meshtastic.org/docs/configuration/radio/channels) — üksikasjalikud kanali seaded leiate aadressilt meshtastic.org
 
 ---
-

@@ -20,24 +20,40 @@ import okio.ByteString.Companion.encodeUtf8
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.error
 import org.meshtastic.core.resources.message_delivery_status
+import org.meshtastic.core.resources.message_routing_error_admin_bad_session_key
+import org.meshtastic.core.resources.message_routing_error_admin_public_key_unauthorized
+import org.meshtastic.core.resources.message_routing_error_bad_request
+import org.meshtastic.core.resources.message_routing_error_duty_cycle_limit
 import org.meshtastic.core.resources.message_routing_error_max_retransmit
 import org.meshtastic.core.resources.message_routing_error_no_channel
+import org.meshtastic.core.resources.message_routing_error_no_interface
+import org.meshtastic.core.resources.message_routing_error_no_response
+import org.meshtastic.core.resources.message_routing_error_not_authorized
 import org.meshtastic.core.resources.message_routing_error_pki_failed
 import org.meshtastic.core.resources.message_routing_error_pki_send_fail_public_key
 import org.meshtastic.core.resources.message_routing_error_pki_unknown_pubkey
+import org.meshtastic.core.resources.message_routing_error_rate_limit_exceeded
 import org.meshtastic.core.resources.message_routing_error_too_large
 import org.meshtastic.core.resources.message_status_delivered
 import org.meshtastic.core.resources.message_status_enroute
 import org.meshtastic.core.resources.message_status_recipient_delivered
 import org.meshtastic.core.resources.message_status_relayed_not_confirmed
 import org.meshtastic.core.resources.message_status_unknown
+import org.meshtastic.core.resources.routing_error_admin_bad_session_key
+import org.meshtastic.core.resources.routing_error_admin_public_key_unauthorized
+import org.meshtastic.core.resources.routing_error_bad_request
+import org.meshtastic.core.resources.routing_error_duty_cycle_limit
 import org.meshtastic.core.resources.routing_error_max_retransmit
 import org.meshtastic.core.resources.routing_error_no_channel
+import org.meshtastic.core.resources.routing_error_no_interface
+import org.meshtastic.core.resources.routing_error_no_response
 import org.meshtastic.core.resources.routing_error_no_route
 import org.meshtastic.core.resources.routing_error_none
+import org.meshtastic.core.resources.routing_error_not_authorized
 import org.meshtastic.core.resources.routing_error_pki_failed
 import org.meshtastic.core.resources.routing_error_pki_send_fail_public_key
 import org.meshtastic.core.resources.routing_error_pki_unknown_pubkey
+import org.meshtastic.core.resources.routing_error_rate_limit_exceeded
 import org.meshtastic.core.resources.routing_error_too_large
 import org.meshtastic.core.resources.unrecognized
 import org.meshtastic.proto.PortNum
@@ -309,13 +325,21 @@ class MessageTest {
                 Routing.Error.MAX_RETRANSMIT.value to Res.string.message_routing_error_max_retransmit,
                 Routing.Error.GOT_NAK.value to Res.string.message_routing_error_max_retransmit,
                 Routing.Error.TIMEOUT.value to Res.string.message_routing_error_max_retransmit,
-                Routing.Error.NO_RESPONSE.value to Res.string.message_routing_error_max_retransmit,
                 Routing.Error.NO_CHANNEL.value to Res.string.message_routing_error_no_channel,
+                Routing.Error.NO_INTERFACE.value to Res.string.message_routing_error_no_interface,
+                Routing.Error.DUTY_CYCLE_LIMIT.value to Res.string.message_routing_error_duty_cycle_limit,
+                Routing.Error.RATE_LIMIT_EXCEEDED.value to Res.string.message_routing_error_rate_limit_exceeded,
+                Routing.Error.NO_RESPONSE.value to Res.string.message_routing_error_no_response,
+                Routing.Error.BAD_REQUEST.value to Res.string.message_routing_error_bad_request,
+                Routing.Error.NOT_AUTHORIZED.value to Res.string.message_routing_error_not_authorized,
                 Routing.Error.PKI_FAILED.value to Res.string.message_routing_error_pki_failed,
                 Routing.Error.PKI_SEND_FAIL_PUBLIC_KEY.value to
                     Res.string.message_routing_error_pki_send_fail_public_key,
                 Routing.Error.PKI_UNKNOWN_PUBKEY.value to Res.string.message_routing_error_pki_unknown_pubkey,
                 Routing.Error.TOO_LARGE.value to Res.string.message_routing_error_too_large,
+                Routing.Error.ADMIN_BAD_SESSION_KEY.value to Res.string.message_routing_error_admin_bad_session_key,
+                Routing.Error.ADMIN_PUBLIC_KEY_UNAUTHORIZED.value to
+                    Res.string.message_routing_error_admin_public_key_unauthorized,
             )
 
         for ((routingError, expectedText) in mappings) {
@@ -366,10 +390,19 @@ class MessageTest {
             listOf(
                 Routing.Error.MAX_RETRANSMIT.value to Res.string.routing_error_max_retransmit,
                 Routing.Error.NO_CHANNEL.value to Res.string.routing_error_no_channel,
+                Routing.Error.NO_INTERFACE.value to Res.string.routing_error_no_interface,
+                Routing.Error.DUTY_CYCLE_LIMIT.value to Res.string.routing_error_duty_cycle_limit,
+                Routing.Error.RATE_LIMIT_EXCEEDED.value to Res.string.routing_error_rate_limit_exceeded,
+                Routing.Error.NO_RESPONSE.value to Res.string.routing_error_no_response,
+                Routing.Error.BAD_REQUEST.value to Res.string.routing_error_bad_request,
+                Routing.Error.NOT_AUTHORIZED.value to Res.string.routing_error_not_authorized,
                 Routing.Error.PKI_FAILED.value to Res.string.routing_error_pki_failed,
                 Routing.Error.PKI_SEND_FAIL_PUBLIC_KEY.value to Res.string.routing_error_pki_send_fail_public_key,
                 Routing.Error.PKI_UNKNOWN_PUBKEY.value to Res.string.routing_error_pki_unknown_pubkey,
                 Routing.Error.TOO_LARGE.value to Res.string.routing_error_too_large,
+                Routing.Error.ADMIN_BAD_SESSION_KEY.value to Res.string.routing_error_admin_bad_session_key,
+                Routing.Error.ADMIN_PUBLIC_KEY_UNAUTHORIZED.value to
+                    Res.string.routing_error_admin_public_key_unauthorized,
             )
 
         for ((routingError, expectedText) in mappings) {
@@ -385,9 +418,18 @@ class MessageTest {
         )
         val retryableRoutingErrors =
             listOf(
+                Routing.Error.NO_INTERFACE.value,
+                Routing.Error.NO_RESPONSE.value,
+                Routing.Error.NO_CHANNEL.value,
+                Routing.Error.BAD_REQUEST.value,
+                Routing.Error.NOT_AUTHORIZED.value,
+                Routing.Error.DUTY_CYCLE_LIMIT.value,
                 Routing.Error.PKI_FAILED.value,
                 Routing.Error.PKI_SEND_FAIL_PUBLIC_KEY.value,
                 Routing.Error.PKI_UNKNOWN_PUBKEY.value,
+                Routing.Error.ADMIN_BAD_SESSION_KEY.value,
+                Routing.Error.ADMIN_PUBLIC_KEY_UNAUTHORIZED.value,
+                Routing.Error.RATE_LIMIT_EXCEEDED.value,
             )
 
         for (routingError in retryableRoutingErrors) {
@@ -395,7 +437,7 @@ class MessageTest {
         }
         assertTrue(messageWith(status = MessageStatus.DELIVERED).isStatusRetryable(isDirectMessage = true))
 
-        val nonRetryableRoutingErrors = listOf(Routing.Error.NO_CHANNEL.value, Routing.Error.TOO_LARGE.value)
+        val nonRetryableRoutingErrors = listOf(Routing.Error.TOO_LARGE.value)
 
         for (routingError in nonRetryableRoutingErrors) {
             assertFalse(messageWith(status = MessageStatus.ERROR, routingError = routingError).isStatusRetryable())

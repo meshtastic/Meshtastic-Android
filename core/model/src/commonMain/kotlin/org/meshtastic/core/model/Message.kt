@@ -20,11 +20,19 @@ import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.error
 import org.meshtastic.core.resources.message_delivery_status
+import org.meshtastic.core.resources.message_routing_error_admin_bad_session_key
+import org.meshtastic.core.resources.message_routing_error_admin_public_key_unauthorized
+import org.meshtastic.core.resources.message_routing_error_bad_request
+import org.meshtastic.core.resources.message_routing_error_duty_cycle_limit
 import org.meshtastic.core.resources.message_routing_error_max_retransmit
 import org.meshtastic.core.resources.message_routing_error_no_channel
+import org.meshtastic.core.resources.message_routing_error_no_interface
+import org.meshtastic.core.resources.message_routing_error_no_response
+import org.meshtastic.core.resources.message_routing_error_not_authorized
 import org.meshtastic.core.resources.message_routing_error_pki_failed
 import org.meshtastic.core.resources.message_routing_error_pki_send_fail_public_key
 import org.meshtastic.core.resources.message_routing_error_pki_unknown_pubkey
+import org.meshtastic.core.resources.message_routing_error_rate_limit_exceeded
 import org.meshtastic.core.resources.message_routing_error_too_large
 import org.meshtastic.core.resources.message_status_delivered
 import org.meshtastic.core.resources.message_status_enroute
@@ -78,22 +86,39 @@ fun getStringResFrom(routingError: Int): StringResource = when (routingError) {
     else -> Res.string.unrecognized
 }
 
+@Suppress("CyclomaticComplexMethod")
 fun getMessageRoutingErrorStringResFrom(routingError: Int): StringResource = when (routingError) {
     Routing.Error.GOT_NAK.value,
     Routing.Error.TIMEOUT.value,
     Routing.Error.MAX_RETRANSMIT.value,
-    Routing.Error.NO_RESPONSE.value,
     -> Res.string.message_routing_error_max_retransmit
 
     Routing.Error.NO_CHANNEL.value -> Res.string.message_routing_error_no_channel
 
+    Routing.Error.NO_INTERFACE.value -> Res.string.message_routing_error_no_interface
+
+    Routing.Error.DUTY_CYCLE_LIMIT.value -> Res.string.message_routing_error_duty_cycle_limit
+
+    Routing.Error.RATE_LIMIT_EXCEEDED.value -> Res.string.message_routing_error_rate_limit_exceeded
+
     Routing.Error.TOO_LARGE.value -> Res.string.message_routing_error_too_large
+
+    Routing.Error.NO_RESPONSE.value -> Res.string.message_routing_error_no_response
+
+    Routing.Error.BAD_REQUEST.value -> Res.string.message_routing_error_bad_request
+
+    Routing.Error.NOT_AUTHORIZED.value -> Res.string.message_routing_error_not_authorized
 
     Routing.Error.PKI_FAILED.value -> Res.string.message_routing_error_pki_failed
 
     Routing.Error.PKI_UNKNOWN_PUBKEY.value -> Res.string.message_routing_error_pki_unknown_pubkey
 
     Routing.Error.PKI_SEND_FAIL_PUBLIC_KEY.value -> Res.string.message_routing_error_pki_send_fail_public_key
+
+    Routing.Error.ADMIN_BAD_SESSION_KEY.value -> Res.string.message_routing_error_admin_bad_session_key
+
+    Routing.Error.ADMIN_PUBLIC_KEY_UNAUTHORIZED.value ->
+        Res.string.message_routing_error_admin_public_key_unauthorized
 
     else -> getStringResFrom(routingError)
 }
@@ -140,7 +165,7 @@ fun isMessageStatusRetryable(status: MessageStatus?, routingError: Int, isDirect
         else -> true
     }
 
-private val nonRetryableMessageRoutingErrors = setOf(Routing.Error.NO_CHANNEL.value, Routing.Error.TOO_LARGE.value)
+private val nonRetryableMessageRoutingErrors = setOf(Routing.Error.TOO_LARGE.value)
 
 data class Message(
     val uuid: Long,
