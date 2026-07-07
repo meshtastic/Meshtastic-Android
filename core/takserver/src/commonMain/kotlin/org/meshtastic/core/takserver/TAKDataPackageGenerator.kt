@@ -46,10 +46,16 @@ object TAKDataPackageGenerator {
     private const val CLIENT_P12_FILE_NAME = "client.p12"
     private const val PACKAGE_NAME = "Meshtastic_TAK_Server"
 
-    private val xmlSerializer = XML {
-        xmlDeclMode = XmlDeclMode.Charset
-        indentString = "  "
-    }
+    // XML.compat preserves xmlutil's pre-1.0 serialization defaults. The non-deprecated 1.0 builders
+    // (XML.recommended/XML.V1) intentionally change serialization defaults, which would alter the CoT
+    // XML wire format consumed by ATAK/TAK servers. Staying on the compat policy until that migration
+    // can be validated against real TAK interop; suppress the soft-deprecation on the factory itself.
+    @Suppress("DEPRECATION")
+    private val xmlSerializer =
+        XML.compat {
+            xmlDeclMode = XmlDeclMode.Charset
+            indentString = "  "
+        }
 
     /**
      * Platform-specific hook for reading the bundled TLS certificate bytes. Default implementation lives in

@@ -19,8 +19,7 @@ package org.meshtastic.app.map.model
 class CustomTileSource {
 
     companion object {
-        fun getTileSource(index: Int) {
-            index
-        }
+        // No-op stub for the Google flavor (osmdroid tile sources are fdroid-only).
+        fun getTileSource(index: Int) {}
     }
 }

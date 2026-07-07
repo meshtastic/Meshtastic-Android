@@ -114,6 +114,9 @@ class MQTTRepositoryImpl(
         scope.launch { safeCatching { c?.close() }.onFailure { e -> Logger.w(e) { "MQTT clean disconnect failed" } } }
     }
 
+    // json_enabled is deprecated in the protobuf schema but remains the only way to toggle MQTT JSON
+    // publish/consume, so we must keep reading it until the firmware/proto provides a replacement.
+    @Suppress("DEPRECATION")
     @OptIn(ExperimentalSerializationApi::class)
     override val proxyMessageFlow: Flow<MqttClientProxyMessage> = callbackFlow {
         // Append a per-connection random id. myId identifies the *node* (and is null →

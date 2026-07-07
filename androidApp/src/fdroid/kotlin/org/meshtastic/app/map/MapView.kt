@@ -1046,8 +1046,8 @@ private fun CacheInfoDialog(mapView: MapView, onDismiss: () -> Unit) {
         onDismiss = onDismiss,
         negativeButton = { TextButton(onClick = { onDismiss() }) { Text(text = stringResource(Res.string.close)) } },
     ) {
-        val capacityMb = (cacheCapacity / (1024 * 1024)).toLong()
-        val usageMb = (currentCacheUsage / (1024 * 1024)).toLong()
+        val capacityMb = cacheCapacity / (1024 * 1024)
+        val usageMb = currentCacheUsage / (1024 * 1024)
         Text(modifier = Modifier.padding(16.dp), text = stringResource(Res.string.map_cache_info, capacityMb, usageMb))
     }
 }

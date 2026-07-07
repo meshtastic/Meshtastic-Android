@@ -38,6 +38,7 @@ import kotlin.test.Test
 
 class KoinVerificationTest {
 
+    @OptIn(org.koin.core.annotation.KoinExperimentalAPI::class)
     @Test
     fun verifyKoinConfiguration() {
         AppKoinModule()

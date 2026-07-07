@@ -44,7 +44,7 @@ kotlin {
             implementation(projects.core.testing)
         }
 
-        val androidHostTest by getting {
+        getByName("androidHostTest") {
             dependencies {
                 implementation(projects.core.testing)
                 implementation(libs.kotlinx.coroutines.test)

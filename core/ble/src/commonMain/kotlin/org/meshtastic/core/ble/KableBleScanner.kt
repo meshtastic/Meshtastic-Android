@@ -46,6 +46,10 @@ internal fun resolveKableScanFilter(serviceUuid: Uuid?, address: String?): Kable
     else -> KableScanFilter.None
 }
 
+// Kable's Advertisement.identifier is an expect typealias: String on Android/JVM/JS but Uuid on Apple.
+// toString() looks redundant when compiling the Android/JVM view (hence the warning) but is required to
+// normalize the Apple Uuid to the String this result carries, so it must stay.
+@Suppress("REDUNDANT_CALL_OF_CONVERSION_METHOD")
 private fun Advertisement.toScanResult(): KableScanResult =
     KableScanResult(identifier = identifier.toString(), name = name, advertisement = this)
 

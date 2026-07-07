@@ -18,6 +18,7 @@ package org.meshtastic.buildlogic
 
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.project
 import org.jetbrains.dokka.gradle.DokkaExtension
 import java.net.URI
 
@@ -73,5 +74,5 @@ fun Project.configureDokkaAggregation(subprojectPaths: List<String>) {
     // Add each subproject as a Dokka dependency using declared paths rather than
     // iterating live subproject objects. This avoids cross-project configuration
     // access and is compatible with Gradle Isolated Projects.
-    subprojectPaths.forEach { path -> dependencies.add("dokka", project(path)) }
+    subprojectPaths.forEach { path -> dependencies.add("dokka", dependencies.project(path)) }
 }

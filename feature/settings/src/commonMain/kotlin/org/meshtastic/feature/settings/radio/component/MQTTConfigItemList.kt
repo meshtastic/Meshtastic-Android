@@ -89,6 +89,9 @@ import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.ModuleConfig
 
+// json_enabled is deprecated in the protobuf schema but remains the only toggle for MQTT JSON
+// publish/consume, so the settings UI must keep exposing it until the proto provides a replacement.
+@Suppress("DEPRECATION")
 @Composable
 fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()

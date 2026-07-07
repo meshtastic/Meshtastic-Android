@@ -49,7 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
-import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
+import com.patrykandpatrick.vico.compose.cartesian.data.lineModel
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -223,7 +223,7 @@ private fun AirQualityChart(
                 activeMetrics.forEachIndexed { index, metric ->
                     val metricData = metricDataSets[index]
                     if (metricData.isNotEmpty()) {
-                        lineSeries {
+                        lineModel {
                             series(x = metricData.map { it.time }, y = metricData.map { metric.getValue(it) ?: 0f })
                         }
                     }

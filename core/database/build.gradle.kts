@@ -50,7 +50,7 @@ kotlin {
             implementation(libs.androidx.room.testing)
         }
 
-        val androidHostTest by getting {
+        getByName("androidHostTest") {
             dependencies {
                 implementation(libs.androidx.sqlite.bundled)
                 // JVM variant provides the host-platform native for BundledSQLiteDriver
@@ -60,7 +60,7 @@ kotlin {
                 implementation(libs.junit)
             }
         }
-        val androidDeviceTest by getting {
+        getByName("androidDeviceTest") {
             dependencies {
                 implementation(libs.androidx.room.testing)
                 implementation(libs.androidx.test.ext.junit)

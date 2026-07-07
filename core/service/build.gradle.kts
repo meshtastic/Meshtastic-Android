@@ -52,7 +52,7 @@ kotlin {
             implementation(libs.koin.androidx.workmanager)
         }
 
-        val androidHostTest by getting {
+        getByName("androidHostTest") {
             dependencies {
                 implementation(projects.core.testing)
                 implementation(libs.androidx.test.ext.junit)

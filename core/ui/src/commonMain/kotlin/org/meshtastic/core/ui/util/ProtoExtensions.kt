@@ -195,7 +195,7 @@ fun normalizeReplacementSettings(
 }
 
 /** True when a [ChannelSettings] carries no name and no PSK — a placeholder, not an intended channel. */
-private fun ChannelSettings.isPlaceholder(): Boolean = name.isNullOrBlank() && (psk == null || psk.size == 0)
+private fun ChannelSettings.isPlaceholder(): Boolean = name.isNullOrBlank() && psk.size == 0
 
 /**
  * Applies an imported [ChannelSet] as an authoritative replacement to the radio and local cache.

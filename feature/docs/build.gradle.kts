@@ -57,8 +57,8 @@ kotlin {
  *
  * This task runs automatically before resource generation tasks.
  */
-val syncDocsToComposeResources by
-    tasks.registering(Sync::class) {
+val syncDocsToComposeResources =
+    tasks.register<Sync>("syncDocsToComposeResources") {
         description = "Syncs docs/en/ markdown source into composeResources for in-app bundling"
         group = "docs"
 
@@ -102,8 +102,8 @@ tasks
 // clean, or commit deliberately when refreshing the docs/Jekyll image set. Add a CI staleness gate
 // if drift becomes a problem.
 
-val syncTranslatedDocsToComposeResources by
-    tasks.registering(Copy::class) {
+val syncTranslatedDocsToComposeResources =
+    tasks.register<Copy>("syncTranslatedDocsToComposeResources") {
         description = "Syncs Crowdin-translated docs into locale-qualified composeResources"
         group = "docs"
 

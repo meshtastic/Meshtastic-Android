@@ -42,7 +42,7 @@ kotlin {
 
         androidMain.dependencies { implementation(libs.usb.serial.android) }
 
-        val androidHostTest by getting {
+        getByName("androidHostTest") {
             dependencies {
                 implementation(projects.core.testing)
                 implementation(libs.kotlinx.coroutines.test)

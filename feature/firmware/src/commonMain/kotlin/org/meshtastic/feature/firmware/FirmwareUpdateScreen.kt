@@ -145,7 +145,6 @@ import org.meshtastic.core.ui.icon.Dangerous
 import org.meshtastic.core.ui.icon.Folder
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Refresh
-import org.meshtastic.core.ui.icon.SystemUpdate
 import org.meshtastic.core.ui.icon.Usb
 import org.meshtastic.core.ui.icon.Warning
 import org.meshtastic.core.ui.icon.Wifi
@@ -462,7 +461,6 @@ private fun ReadyState(
                     FirmwareUpdateMethod.Ble -> MeshtasticIcons.Bluetooth
                     FirmwareUpdateMethod.Usb -> MeshtasticIcons.Usb
                     FirmwareUpdateMethod.Wifi -> MeshtasticIcons.Wifi
-                    else -> MeshtasticIcons.SystemUpdate
                 },
                 contentDescription = null,
             )

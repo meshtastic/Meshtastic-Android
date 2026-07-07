@@ -55,7 +55,7 @@ kotlin {
             implementation(libs.jetbrains.lifecycle.runtime)
         }
 
-        val jvmMain by getting {
+        getByName("jvmMain") {
             dependencies {
                 implementation(libs.ktor.client.java)
                 implementation(libs.jserialcomm)

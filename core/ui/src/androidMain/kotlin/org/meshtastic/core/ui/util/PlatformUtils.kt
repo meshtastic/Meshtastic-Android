@@ -332,6 +332,10 @@ actual fun isWifiUnavailable(): Boolean {
  * the transport reduction can delegate to the platform-agnostic [anyNetworkScanTransportAvailable] helper (which is
  * unit-tested in `commonTest`).
  */
+// ConnectivityManager.allNetworks is deprecated (API 31+) in favor of NetworkCallback-based discovery,
+// but a synchronous snapshot of active networks is exactly what this transport probe needs. Suppress
+// until a callback-based rewrite is warranted.
+@Suppress("DEPRECATION")
 private fun ConnectivityManager.hasLocalNetwork(): Boolean {
     val transports =
         allNetworks.mapNotNull { network ->

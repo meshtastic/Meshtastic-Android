@@ -28,7 +28,7 @@ kotlin {
     android { withHostTest {} }
 
     sourceSets {
-        val jvmTest by getting {
+        getByName("jvmTest") {
             dependencies {
                 implementation(libs.konsist)
                 implementation(libs.junit)

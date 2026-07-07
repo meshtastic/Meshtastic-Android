@@ -34,7 +34,10 @@ import org.meshtastic.core.repository.StoredSecurityKeys
 @Single(binds = [SecurityKeyBackupStore::class])
 class SecurityKeyBackupStoreImpl(app: Application) : SecurityKeyBackupStore {
 
-    @Suppress("TooGenericExceptionCaught")
+    // androidx.security.crypto (MasterKey / EncryptedSharedPreferences) is deprecated by Google with no
+    // drop-in AndroidX replacement yet. Migrating encrypted storage is a separate, security-sensitive
+    // effort; suppress until a stable replacement (e.g. Tink) is adopted.
+    @Suppress("TooGenericExceptionCaught", "DEPRECATION")
     private val prefs: SharedPreferences? by lazy {
         try {
             val masterKey = MasterKey.Builder(app).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build()

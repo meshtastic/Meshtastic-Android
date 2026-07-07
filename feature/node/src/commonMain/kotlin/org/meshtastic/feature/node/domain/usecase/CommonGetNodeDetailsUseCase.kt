@@ -176,8 +176,13 @@ constructor(
             val logs = args[LOGS_INDEX] as LogsGroup
             val identity = args[IDENTITY_INDEX] as IdentityGroup
             val metadata = args[METADATA_INDEX] as MetadataGroup
+
+            @Suppress("UNCHECKED_CAST")
             val requests = args[REQUESTS_INDEX] as Pair<List<MeshLog>, List<MeshLog>>
-            val (hw, deviceLinks) = args[HARDWARE_INDEX] as Pair<DeviceHardware?, List<DeviceLink>>
+
+            @Suppress("UNCHECKED_CAST")
+            val hardwareAndLinks = args[HARDWARE_INDEX] as Pair<DeviceHardware?, List<DeviceLink>>
+            val (hw, deviceLinks) = hardwareAndLinks
 
             val (trReqs, niReqs) = requests
             val isLocal = node.num == identity.ourNode?.num
