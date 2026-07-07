@@ -17,6 +17,7 @@
 package org.meshtastic.app.map
 
 import android.annotation.SuppressLint
+import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.webkit.JavascriptInterface
@@ -73,7 +74,7 @@ private const val SITE_PLANNER_TIMEOUT_MS = 45_000L
  * headless WebView that loads the planner with `run=1&bridge=1`, waits for it to hand back the styled GeoJSON, and
  * imports it via [onImport]. Location shortcuts re-seed the coordinates from the device GPS
  * ([onRequestCurrentLocation], when permission is granted), this node ([onUseNodeLocation]), or the map center
- * ([onUseMapCenter]). Debug/test affordance — local dev server.
+ * ([onUseMapCenter]). Google-flavor affordance; targets the official hosted planner.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -200,6 +201,17 @@ private fun SitePlannerRunner(
                 )
                 webViewClient =
                     object : WebViewClient() {
+                        // Keep the __meshtasticNative bridge exclusive to the planner's own origin: block any
+                        // navigation
+                        // elsewhere (redirect/compromise/open-redirect) so foreign content can never reach
+                        // onCoverage().
+                        // Sub-resource fetches (tiles, XHR) aren't navigations, so this doesn't affect the sim itself.
+                        override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+                            val target = request?.url ?: return false
+                            val trusted = Uri.parse(SITE_PLANNER_BASE_URL)
+                            return target.scheme != trusted.scheme || target.host != trusted.host
+                        }
+
                         override fun onReceivedError(
                             view: WebView?,
                             request: WebResourceRequest?,

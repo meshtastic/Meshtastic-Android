@@ -19,9 +19,9 @@ package org.meshtastic.core.ui.util
 import androidx.compose.runtime.compositionLocalOf
 
 /**
- * Whether the Site Planner coverage-estimate flow is available (Google flavor only, and currently debug-gated while it
- * targets a local dev server). Gates the "Estimate coverage" action on the node detail screen; the map's own control is
- * gated equivalently in the Google MapView. Defaults to false so F-Droid/release never surface a dead action.
+ * Whether the Site Planner coverage-estimate flow is available (Google flavor only, backed by the official hosted
+ * planner). Gates the "Estimate coverage" action on the node detail screen; the map's own control is gated equivalently
+ * in the Google MapView. Defaults to false so F-Droid/release never surface a dead action.
  *
  * Flavor-injected feature availability, mirroring the other Local*Provider seams in this package (all baselined for
  * this rule); a plain boolean local is the lightest way to gate a commonMain UI action on a flavor capability.

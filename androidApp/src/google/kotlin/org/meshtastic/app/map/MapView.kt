@@ -1493,7 +1493,13 @@ private fun sensitivityDbmFor(preset: ModemPreset?): Double = when (preset) {
 /** One-shot last known location as a suspend call. Guarded by a permission check at the call site. */
 @SuppressLint("MissingPermission")
 private suspend fun FusedLocationProviderClient.awaitLastLocation(): Location? = suspendCancellableCoroutine { cont ->
-    lastLocation.addOnSuccessListener { cont.resume(it) }.addOnFailureListener { cont.resume(null) }
+    // lastLocation can throw SecurityException synchronously if permission is revoked between the compose-time
+    // isGranted check and this call; treat that as "no location" rather than crashing the estimate flow.
+    try {
+        lastLocation.addOnSuccessListener { cont.resume(it) }.addOnFailureListener { cont.resume(null) }
+    } catch (_: SecurityException) {
+        cont.resume(null)
+    }
 }
 
 /** Builds a proto [BoundingBox] (degrees ×1e7) from two opposite corner taps. */
