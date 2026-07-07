@@ -29,15 +29,20 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.async
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.job
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
+import org.meshtastic.core.common.util.ioDispatcher
 import kotlin.concurrent.Volatile
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
@@ -245,6 +250,7 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
         _deviceFlow.emit(null)
     }
 
+    @Suppress("ThrowsCount")
     override suspend fun <T> profile(
         serviceUuid: Uuid,
         timeout: Duration,
@@ -253,7 +259,32 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
         val p = peripheral ?: error("Not connected")
         val cScope = connectionScope ?: error("No active connection scope")
         val service = KableBleService(p, serviceUuid)
-        return withTimeout(timeout) { cScope.setup(service) }
+        return withTimeout(timeout) {
+            withContext(ioDispatcher) {
+                val profileExecution = async {
+                    p.services.first { it != null }
+                    cScope.setup(service)
+                }
+
+                val disconnectHandle =
+                    cScope.coroutineContext.job.invokeOnCompletion {
+                        profileExecution.cancel(CancellationException("Connection lost during BLE profile execution"))
+                    }
+
+                try {
+                    profileExecution.await()
+                } catch (e: CancellationException) {
+                    currentCoroutineContext().ensureActive()
+                    if (!cScope.coroutineContext.job.isActive) {
+                        throw NotConnectedException("Connection lost during BLE profile execution")
+                    }
+                    throw e
+                } finally {
+                    disconnectHandle.dispose()
+                    profileExecution.cancel()
+                }
+            }
+        }
     }
 
     override fun maximumWriteValueLength(writeType: BleWriteType): Int? = peripheral?.negotiatedMaxWriteLength()
