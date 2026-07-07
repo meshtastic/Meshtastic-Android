@@ -439,6 +439,8 @@
     <string name="shutdown">Vypnúť</string>
     <string name="signal">Signál</string>
     <string name="signal_quality">Kvalita signálu</string>
+    <!-- SITE -->
+    <string name="site_planner_section_display">Obrazovka</string>
     <string name="smart_position">Inteligentná poloha</string>
     <string name="snr">SNR</string>
     <string name="snr_definition">Pomer signálu od šumu (SNR), miera používaná v komunikácii na kvantifikáciu úrovne požadovaného signálu k úrovni hluku pozadia. V Meshtastic a iných bezdrôtových systémoch znamená vyšší SNR jasnejší signál, ktorý môže zvýšiť spoľahlivosť a kvalitu prenosu údajov.</string>

@@ -1043,6 +1043,8 @@
     <string name="shutdown_warning">⚠️ Detta kommer STÄNGA AV noden. Fysisk interaktion kommer att krävas för att slå på den.</string>
     <string name="signal">Signal</string>
     <string name="signal_quality">Signalkvalité</string>
+    <!-- SITE -->
+    <string name="site_planner_section_display">Display</string>
     <string name="skip">Hoppa över</string>
     <string name="slot">Lucka</string>
     <string name="smart_position">Smart position</string>

@@ -264,6 +264,7 @@
     <string name="shutdown">Išjungti</string>
     <string name="signal">Signalas</string>
     <string name="signal_quality">Signalo kokybė</string>
+    <!-- SITE -->
     <string name="snr">SNR</string>
     <!-- TAK -->
     <string name="tak_team_red">Raudona</string>

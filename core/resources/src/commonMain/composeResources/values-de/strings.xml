@@ -1280,6 +1280,8 @@
     <string name="shutdown_warning">⚠️ Dies wird den Knoten ausschalten. Eine physische Interaktion ist nötig, um ihn wieder einzuschalten.</string>
     <string name="signal">Signal</string>
     <string name="signal_quality">Signalqualität</string>
+    <!-- SITE -->
+    <string name="site_planner_section_display">Anzeige</string>
     <string name="skip">Überspringen</string>
     <string name="slot">Position</string>
     <string name="smart_position">Intelligente Position</string>

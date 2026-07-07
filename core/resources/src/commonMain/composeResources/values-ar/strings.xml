@@ -223,6 +223,8 @@
     <!-- SHOW -->
     <string name="signal">الإشارة</string>
     <string name="signal_quality">جودة الإشارة</string>
+    <!-- SITE -->
+    <string name="site_planner_section_display">إعدادات الشاشة</string>
     <!-- TAK -->
     <string name="timeout">استغرق وقت طويل</string>
     <!-- TRACEROUTE -->

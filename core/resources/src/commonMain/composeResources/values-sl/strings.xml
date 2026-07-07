@@ -271,6 +271,7 @@
     <string name="shutdown">Ugasni</string>
     <string name="signal">Signal</string>
     <string name="signal_quality">Kakovost signala</string>
+    <!-- SITE -->
     <string name="snr">SNR</string>
     <string name="snr_definition">Razmerje med signalom in šumom je merilo, ki se uporablja v komunikacijah za količinsko opredelitev ravni želenega signala glede na raven hrupa v ozadju. V Meshtastic in drugih brezžičnih sistemih višji SNR pomeni jasnejši signal, ki lahko poveča zanesljivost in kakovost prenosa podatkov.</string>
     <!-- TAK -->

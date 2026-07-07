@@ -1223,6 +1223,8 @@
     <string name="shutdown_warning">⚠️ Vous allez ETEINDRE le nœud. Une interaction physique sera requise pour le rallumer.</string>
     <string name="signal">Signal</string>
     <string name="signal_quality">Qualité du signal</string>
+    <!-- SITE -->
+    <string name="site_planner_section_display">Écran</string>
     <string name="skip">Ignorer</string>
     <string name="slot">Emplacement</string>
     <string name="smart_position">Position Intelligente</string>

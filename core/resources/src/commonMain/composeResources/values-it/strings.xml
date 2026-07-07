@@ -914,6 +914,8 @@
     <string name="shutdown_warning">⚠️ Il nodo verrà SPENTO. Sarà necessario un intervento manuale per riaccenderlo.</string>
     <string name="signal">Segnale</string>
     <string name="signal_quality">Qualità Segnale</string>
+    <!-- SITE -->
+    <string name="site_planner_section_display">Schermo</string>
     <string name="skip">Ignora</string>
     <string name="slot">Slot</string>
     <string name="smart_position">Posizione Smart</string>

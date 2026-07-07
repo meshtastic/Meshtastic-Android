@@ -189,6 +189,18 @@
   },
   "pullRequests": [
     {
+      "id": "10935",
+      "title": "Fix size report stale baseline",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10935",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "10934",
+      "title": "Re-enable wantresponse and other fields in simradio when on the decoded path",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10934",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
       "id": "10928",
       "title": "Add chunked PhoneAPI transport payloads",
       "page_url": "https://github.com/meshtastic/firmware/pull/10928",
@@ -319,12 +331,6 @@
       "title": "build(native-macos): enable UDP multicast mesh",
       "page_url": "https://github.com/meshtastic/firmware/pull/10784",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10767",
-      "title": "Provide relay node info for outbound packets",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10767",
-      "zip_url": "https://discord.com/invite/meshtastic"
     }
   ]
 }

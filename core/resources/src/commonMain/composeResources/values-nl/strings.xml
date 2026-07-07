@@ -424,6 +424,8 @@
     <string name="shutdown">Zet uit</string>
     <string name="signal">Signaal</string>
     <string name="signal_quality">Signaalkwaliteit</string>
+    <!-- SITE -->
+    <string name="site_planner_section_display">Weergave</string>
     <string name="slot">Slot</string>
     <string name="snr">SNR</string>
     <string name="snr_definition">Signal-to-Noise Ratio, een meeting die wordt gebruikt in de communicatie om het niveau van een gewenst signaal tegenover achtergrondlawaai te kwantificeren. In Meshtastische en andere draadloze systemen geeft een hoger SNR een zuiverder signaal aan dat de betrouwbaarheid en kwaliteit van de gegevensoverdracht kan verbeteren.</string>

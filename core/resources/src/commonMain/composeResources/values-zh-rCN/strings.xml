@@ -1430,6 +1430,8 @@
     <string name="shutdown_warning">⚠️ 警告！此操作将会关闭该节点。你需要使用电源开关按键才能重启设备~</string>
     <string name="signal">信号</string>
     <string name="signal_quality">信号质量</string>
+    <!-- SITE -->
+    <string name="site_planner_section_display">显示</string>
     <string name="skip">跳过</string>
     <string name="slot">槽位</string>
     <string name="smart_position">智能位置</string>

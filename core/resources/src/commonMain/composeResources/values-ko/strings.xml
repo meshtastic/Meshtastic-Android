@@ -535,6 +535,8 @@
     <string name="shutdown">종료</string>
     <string name="signal">신호</string>
     <string name="signal_quality">신호 감도</string>
+    <!-- SITE -->
+    <string name="site_planner_section_display">화면</string>
     <string name="slot">슬롯</string>
     <string name="snr">SNR</string>
     <string name="snr_definition">통신에서 원하는 신호의 수준을 배경 잡음의 수준과 비교하여 정량화하는 데 사용되는 신호 대 잡음비 Signal-to-Noise Ratio, SNR는 Meshtastic와 같은 무선 시스템에서 SNR이 높을수록 더 선명한 신호를 나타내어 데이터 전송의 안정성과 품질을 향상시킬 수 있습니다.</string>

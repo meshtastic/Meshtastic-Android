@@ -1018,6 +1018,8 @@
     <string name="shutdown_warning">⚠️ Това ще ИЗКЛЮЧИ възела. Ще е необходимо физическо взаимодействие, за да се включи отново.</string>
     <string name="signal">Сигнал</string>
     <string name="signal_quality">Качество на сигнала</string>
+    <!-- SITE -->
+    <string name="site_planner_section_display">Дисплей</string>
     <string name="skip">Пропускане</string>
     <string name="slot">Слот</string>
     <string name="smart_position">Интелигентна позиция</string>

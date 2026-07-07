@@ -255,6 +255,7 @@
     <string name="shutdown">Fèmen</string>
     <string name="signal">Siynal</string>
     <string name="signal_quality">Kalite Siynal</string>
+    <!-- SITE -->
     <string name="snr_definition">Rapò Siynal sou Bri, yon mezi ki itilize nan kominikasyon pou mezire nivo siynal vle a kont nivo bri ki nan anviwònman an. Nan Meshtastic ak lòt sistèm san fil, yon SNR pi wo endike yon siynal pi klè ki ka amelyore fyab ak kalite transmisyon done.</string>
     <!-- TAK -->
     <string name="theme">Tèm</string>
