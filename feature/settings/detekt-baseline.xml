@@ -58,7 +58,7 @@
     <ID>ModifierMissing:ExternalNotificationConfigScreen.android.kt:@Suppress("TooGenericExceptionCaught") @Composable actual fun RingtoneTrailingIcon</ID>
     <ID>ModifierMissing:FilterSettingsScreen.kt:@Composable fun FilterSettingsScreen</ID>
     <ID>ModifierMissing:LoRaConfigItemList.kt:@Composable fun LoRaConfigScreen</ID>
-    <ID>ModifierMissing:MQTTConfigItemList.kt:@Composable fun MQTTConfigScreen</ID>
+    <ID>ModifierMissing:MQTTConfigItemList.kt:@Suppress("DEPRECATION") @Composable fun MQTTConfigScreen</ID>
     <ID>ModifierMissing:MapReportingPreference.kt:@Suppress("LongMethod") @Composable fun MapReportingPreference</ID>
     <ID>ModifierMissing:ModuleConfigurationScreen.kt:@Composable fun ModuleConfigurationScreen</ID>
     <ID>ModifierMissing:NeighborInfoConfigItemList.kt:@Composable fun NeighborInfoConfigScreen</ID>
