@@ -27,12 +27,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.AirQualityIndex
+import org.meshtastic.core.model.util.UnitConversions.toTempString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.aqi
 import org.meshtastic.core.resources.co2
+import org.meshtastic.core.resources.co2_humidity
+import org.meshtastic.core.resources.co2_temperature
 import org.meshtastic.core.resources.micrograms_per_cubic_meter
 import org.meshtastic.core.resources.pm10
 import org.meshtastic.core.resources.pm1_0
@@ -41,7 +45,9 @@ import org.meshtastic.core.resources.ppm
 import org.meshtastic.core.ui.component.Co2Severity
 import org.meshtastic.core.ui.component.PmAqiSeverity
 import org.meshtastic.core.ui.icon.AirQuality
+import org.meshtastic.core.ui.icon.Humidity
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Temperature
 import org.meshtastic.feature.node.model.VectorMetricInfo
 import org.meshtastic.proto.AirQualityMetrics
 import org.meshtastic.proto.Telemetry
@@ -57,17 +63,23 @@ private fun nowCastAqi(pm25History: List<Telemetry>): Pair<Int, PmAqiSeverity>? 
     return PmAqiSeverity.fromAqi(aqiValue)?.let { aqiValue to it }
 }
 
+@Suppress("LongParameterList")
 private fun buildAirQualityCards(
     metrics: AirQualityMetrics,
     aqi: Pair<Int, PmAqiSeverity>?,
     ugm3: String,
     ppmUnit: String,
     icon: ImageVector,
+    tempIcon: ImageVector,
+    humidityIcon: ImageVector,
+    isFahrenheit: Boolean,
     pm10Label: StringResource,
     pm25Label: StringResource,
     aqiLabel: StringResource,
     pm100Label: StringResource,
     co2Label: StringResource,
+    co2TempLabel: StringResource,
+    co2HumidityLabel: StringResource,
 ): List<VectorMetricInfo> = buildList {
     // A present reading of 0 is a valid value (e.g. clean air at 0 µg/m³), so only the `?.` null-check (an
     // absent metric) hides a card — matching the #5793 chart/CSV zero-suppression fix.
@@ -79,6 +91,14 @@ private fun buildAirQualityCards(
     }
     metrics.pm100_standard?.let { pm -> add(VectorMetricInfo(pm100Label, "$pm $ugm3", icon)) }
     metrics.co2?.let { co2 -> add(VectorMetricInfo(co2Label, "$co2 $ppmUnit", icon)) }
+    // The SCD4x CO₂ sensor also reports its own temperature/humidity (#5873) — surfaced here so a node can double as a
+    // weather station without a separate BME sensor. `?.` hides only genuinely-absent readings.
+    metrics.co2_temperature?.let { temp ->
+        add(VectorMetricInfo(co2TempLabel, temp.toTempString(isFahrenheit), tempIcon))
+    }
+    metrics.co2_humidity?.let { hum ->
+        add(VectorMetricInfo(co2HumidityLabel, "${NumberFormatter.format(hum, 0)}%", humidityIcon))
+    }
 }
 
 private fun metricValueColor(
@@ -102,7 +122,11 @@ private fun metricValueColor(
  * shown — never a computed AQI from insufficient data.
  */
 @Composable
-internal fun AirQualityInfoCards(node: Node, pm25History: List<Telemetry> = emptyList()) {
+internal fun AirQualityInfoCards(
+    node: Node,
+    pm25History: List<Telemetry> = emptyList(),
+    isFahrenheit: Boolean = false,
+) {
     val metrics = node.airQualityMetrics
     val ugm3 = stringResource(Res.string.micrograms_per_cubic_meter)
     val ppmUnit = stringResource(Res.string.ppm)
@@ -113,19 +137,26 @@ internal fun AirQualityInfoCards(node: Node, pm25History: List<Telemetry> = empt
     // ponytail: no dedicated wall-clock ticker — the node-detail screen already stops recomposing with the node.
     val aqi = nowCastAqi(pm25History)
     val icon = MeshtasticIcons.AirQuality
+    val tempIcon = MeshtasticIcons.Temperature
+    val humidityIcon = MeshtasticIcons.Humidity
     val cards =
-        remember(metrics, aqi, ugm3, ppmUnit, icon) {
+        remember(metrics, aqi, ugm3, ppmUnit, icon, tempIcon, humidityIcon, isFahrenheit) {
             buildAirQualityCards(
                 metrics,
                 aqi,
                 ugm3,
                 ppmUnit,
                 icon,
+                tempIcon,
+                humidityIcon,
+                isFahrenheit,
                 Res.string.pm1_0,
                 Res.string.pm2_5,
                 Res.string.aqi,
                 Res.string.pm10,
                 Res.string.co2,
+                Res.string.co2_temperature,
+                Res.string.co2_humidity,
             )
         }
 

@@ -215,6 +215,8 @@
     <string name="close">Close</string>
     <string name="close_selection">Close selection</string>
     <string name="co2">CO₂</string>
+    <string name="co2_humidity">CO₂ Hum</string>
+    <string name="co2_temperature">CO₂ Temp</string>
     <string name="codec_2_enabled">CODEC 2 enabled</string>
     <string name="codec2_sample_rate">CODEC2 sample rate</string>
     <string name="coding_rate">Coding Rate</string>

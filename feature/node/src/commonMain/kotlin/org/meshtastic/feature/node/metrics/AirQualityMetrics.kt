@@ -57,6 +57,7 @@ import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.util.TimeConstants.MS_PER_SEC
+import org.meshtastic.core.model.util.UnitConversions.toTempString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.air_quality_metrics_log
 import org.meshtastic.core.resources.co2
@@ -173,6 +174,7 @@ fun AirQualityMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Uni
                 ) { _, telemetry ->
                     AirQualityMetricsCard(
                         telemetry = telemetry,
+                        isFahrenheit = state.isFahrenheit,
                         isSelected = telemetry.time.toDouble() == selectedX,
                         onClick = { onCardClick(telemetry.time.toDouble()) },
                     )
@@ -275,6 +277,7 @@ private fun AirQualityMetricsCard(
     telemetry: Telemetry,
     isSelected: Boolean,
     onClick: () -> Unit,
+    isFahrenheit: Boolean = false,
     timeTextOverride: String? = null,
 ) {
     val aq = telemetry.air_quality_metrics ?: return
@@ -307,6 +310,14 @@ private fun AirQualityMetricsCard(
                             color = severity?.color ?: MaterialTheme.colorScheme.onSurface,
                         )
                     }
+                    // SCD4x CO₂ sensors also report temperature/humidity (#5873); present-and-zero is valid, so only
+                    // `?.` (absent field) hides a row.
+                    aq.co2_temperature?.let {
+                        Text("CO₂ Temp: ${it.toTempString(isFahrenheit)}", style = MaterialTheme.typography.bodySmall)
+                    }
+                    aq.co2_humidity?.let {
+                        Text("CO₂ Hum: ${NumberFormatter.format(it, 0)}%", style = MaterialTheme.typography.bodySmall)
+                    }
                 }
             }
         }
@@ -322,7 +333,14 @@ fun PreviewAirQualityCards() {
             Telemetry(
                 time = 1700000000,
                 air_quality_metrics =
-                AirQualityMetricsProto(pm10_standard = 4, pm25_standard = 9, pm100_standard = 12, co2 = 620),
+                AirQualityMetricsProto(
+                    pm10_standard = 4,
+                    pm25_standard = 9,
+                    pm100_standard = 12,
+                    co2 = 620,
+                    co2_temperature = 21.5f,
+                    co2_humidity = 58f,
+                ),
             ) to "2023-11-14 20:13",
             Telemetry(
                 time = 1700003600,
