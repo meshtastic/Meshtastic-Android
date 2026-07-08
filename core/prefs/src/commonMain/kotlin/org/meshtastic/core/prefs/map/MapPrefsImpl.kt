@@ -27,6 +27,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -96,6 +97,10 @@ class MapPrefsImpl(
         }
     }
 
+    // dataStore.data's first emission is the persisted value (unlike the eager StateFlow, which starts at emptySet()).
+    override suspend fun awaitHiddenLayerUrls(): Set<String> =
+        dataStore.data.map { it[KEY_HIDDEN_LAYER_URLS_PREF] ?: emptySet() }.first()
+
     override val networkMapLayers: StateFlow<Set<String>> =
         dataStore.data
             .map { it[KEY_NETWORK_MAP_LAYERS_PREF] ?: emptySet() }
@@ -108,6 +113,9 @@ class MapPrefsImpl(
             }
         }
     }
+
+    override suspend fun awaitNetworkMapLayers(): Set<String> =
+        dataStore.data.map { it[KEY_NETWORK_MAP_LAYERS_PREF] ?: emptySet() }.first()
 
     companion object {
         val KEY_MAP_STYLE_PREF = intPreferencesKey("map_style_id")

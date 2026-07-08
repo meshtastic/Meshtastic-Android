@@ -83,7 +83,8 @@ class MapLayersManager(
         scope.launch(dispatchers.io) {
             try {
                 val layersDir = File(application.filesDir, LAYERS_DIR)
-                val hiddenLayerUrls = mapPrefs.hiddenLayerUrls.value
+                // await* (not .value) so a cold-start load doesn't see the StateFlow's initial empty default.
+                val hiddenLayerUrls = mapPrefs.awaitHiddenLayerUrls()
                 val loadedItems =
                     if (layersDir.exists() && layersDir.isDirectory) {
                         layersDir.listFiles().orEmpty().mapNotNull { file ->
@@ -103,7 +104,7 @@ class MapLayersManager(
                     }
 
                 val networkItems =
-                    mapPrefs.networkMapLayers.value.mapNotNull { networkString ->
+                    mapPrefs.awaitNetworkMapLayers().mapNotNull { networkString ->
                         val parts = networkString.split(NETWORK_LAYER_DELIMITER)
                         if (parts.size == NETWORK_LAYER_FIELDS) {
                             val uri = parts[2].toUri()

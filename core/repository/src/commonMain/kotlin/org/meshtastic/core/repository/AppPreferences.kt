@@ -246,11 +246,17 @@ interface MapPrefs {
     /** Atomically mutate [hiddenLayerUrls]; [transform] runs against the persisted value, avoiding lost updates. */
     fun updateHiddenLayerUrls(transform: (Set<String>) -> Set<String>)
 
+    /** Persisted [hiddenLayerUrls]; suspends for the first disk load to avoid a cold-start empty default. */
+    suspend fun awaitHiddenLayerUrls(): Set<String>
+
     /** Persisted network (URL-backed) map layers, each encoded as `id|:|name|:|uri`. */
     val networkMapLayers: StateFlow<Set<String>>
 
     /** Atomically mutate [networkMapLayers]; [transform] runs against the persisted value, avoiding lost updates. */
     fun updateNetworkMapLayers(transform: (Set<String>) -> Set<String>)
+
+    /** Persisted [networkMapLayers]; suspends for the first disk load to avoid a cold-start empty default. */
+    suspend fun awaitNetworkMapLayers(): Set<String>
 }
 
 /** Reactive interface for map consent. */

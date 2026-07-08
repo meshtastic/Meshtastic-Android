@@ -282,11 +282,15 @@ class FakeMapPrefs : MapPrefs {
         hiddenLayerUrls.value = transform(hiddenLayerUrls.value)
     }
 
+    override suspend fun awaitHiddenLayerUrls(): Set<String> = hiddenLayerUrls.value
+
     override val networkMapLayers = MutableStateFlow<Set<String>>(emptySet())
 
     override fun updateNetworkMapLayers(transform: (Set<String>) -> Set<String>) {
         networkMapLayers.value = transform(networkMapLayers.value)
     }
+
+    override suspend fun awaitNetworkMapLayers(): Set<String> = networkMapLayers.value
 }
 
 class FakeMapConsentPrefs : MapConsentPrefs {

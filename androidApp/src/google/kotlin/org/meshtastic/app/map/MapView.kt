@@ -1291,7 +1291,8 @@ private fun MapLayerOverlay(layerItem: MapLayerItem, mapViewModel: MapViewModel)
         val layer =
             try {
                 when (layerItem.layerType) {
-                    LayerType.KML -> KmlLayer(map, inputStream, context)
+                    // KmlLayer parses the stream in its constructor but doesn't close it — close it ourselves.
+                    LayerType.KML -> inputStream.use { KmlLayer(map, it, context) }
 
                     LayerType.GEOJSON ->
                         GeoJsonLayer(map, JSONObject(inputStream.bufferedReader().use { it.readText() })).also {
