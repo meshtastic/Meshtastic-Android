@@ -146,6 +146,7 @@ fun MessageItem(
     val isLocal = node.num == ourNode.num
     val statusString = message.getStatusStringRes(isDirectMessage)
     val isDirectImplicitAck = message.status == MessageStatus.DELIVERED && isDirectMessage
+    val isRetryableFailure = message.status == MessageStatus.ERROR && message.isStatusRetryable(isDirectMessage)
     // While searching, always show the original text — FTS matches and highlights apply to it, not the translation.
     val showsTranslation = message.showTranslated && message.translatedText != null && searchQuery.isEmpty()
     val bodyText = message.displayedText(searching = searchQuery.isNotEmpty())
@@ -395,7 +396,7 @@ fun MessageItem(
                                 status = status,
                                 text = stringResource(statusString.second),
                                 metadataStyle = metadataStyle,
-                                isWarning = isDirectImplicitAck,
+                                isWarning = isDirectImplicitAck || isRetryableFailure,
                                 onStatusClick = onStatusClick,
                             )
                         }

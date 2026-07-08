@@ -77,11 +77,11 @@ When a message fails to deliver, the error indicator shows what went wrong:
 | Got NAK          | The next-hop node refused to relay       | The relay node may be congested. Wait and retry.                                                                                            |
 | Isteklo vreme    | No acknowledgment within retry window    | The recipient may be just out of range. Try increasing hop limit or moving to a better position.                                            |
 | Nema interfejsa  | No radio interface available to send     | Check that your radio is connected and the channel is configured.                                                                                           |
-| Max Retransmit   | All retry attempts exhausted             | The mesh path is unreliable. Try a different channel or wait for conditions to improve.                                                     |
+| Failed to deliver to mesh | All retry attempts exhausted | Move closer, improve signal, or wait for mesh conditions to improve. |
 | Nema kanala      | The destination channel doesn't exist    | Verify both nodes share the same channel configuration.                                                                                                     |
-| Too Large        | Message exceeds maximum payload size     | Shorten your message (max ~200 characters).                                                                              |
+| Message is too large to send | Message exceeds maximum payload size | Shorten the message and try again. |
 | Нема одговора    | Node received message but didn't respond | The recipient's radio may be busy or in low-power sleep mode.                                                                                               |
-| Duty Cycle Limit | Regional airtime limit reached           | Your radio has used its allowed transmit time. Wait for the duty cycle window to reset (typically 1 hour in EU regions). |
+| Duty cycle limit | Regional airtime limit reached | Wait for the duty cycle window to reset. |
 | Loš zahtev       | Malformed or invalid message             | This usually indicates a software bug. Try restarting the app.                                                                              |
 
 > 💡 **Tip:** Most delivery errors resolve themselves. If a node is intermittently reachable, the mesh will retry. For persistent "No Route" errors, check that intermediate Router nodes are online.
