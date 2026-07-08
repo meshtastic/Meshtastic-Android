@@ -45,6 +45,7 @@ jobs:
         with:
           fetch-depth: 0 # git rev-list --count needs full history for the versionCode
           token: ${{ secrets.CROWDIN_GITHUB_TOKEN }}
+          persist-credentials: false # no git push here; gh does the authed work via GH_TOKEN
 
       - name: Download debug APKs
         uses: actions/download-artifact@v8
@@ -67,24 +68,22 @@ jobs:
           done
           ls -l upload
 
-      # Delete the previous snapshot release AND its tag, then let action-gh-release recreate
-      # both at HEAD. This prunes the now-stale (differently-named) APKs so they don't pile up,
-      # and sidesteps the Releases API refusing to retarget an already-existing tag.
+      # Delete the previous snapshot release AND its tag, then recreate both at HEAD. This
+      # prunes the now-stale (differently-named) APKs so they don't pile up, and sidesteps the
+      # Releases API refusing to retarget an already-existing tag.
       - name: Remove previous snapshot release
         run: gh release delete snapshot --yes --cleanup-tag || true
 
       - name: Publish snapshot release
-        uses: softprops/action-gh-release@v3
-        with:
-          token: ${{ secrets.CROWDIN_GITHUB_TOKEN }}
-          tag_name: snapshot
-          name: Snapshot ${{ env.VERSION_CODE }} (${{ github.sha }})
-          target_commitish: ${{ github.sha }}
-          body: |
-            Automated debug build from the latest commit on `main` (${{ github.sha }}), versionCode ${{ env.VERSION_CODE }}.
-            Unsigned/debug-keyed, F-Droid and Google flavors. Not for production use — this release is replaced on every push to main.
+        run: |
+          cat > notes.md <<EOF
+          Automated debug build from the latest commit on \`main\` ($GITHUB_SHA), versionCode $VERSION_CODE.
+          Unsigned/debug-keyed, F-Droid and Google flavors. Not for production use — this release is replaced on every push to main.
 
-            **Obtainium:** enable *Include prereleases*. Each build's APK filename carries the versionCode, so updates are detected.
-          files: upload/*.apk
-          prerelease: true
-          generate_release_notes: false
+          **Obtainium:** enable *Include prereleases*. Each build's APK filename carries the versionCode, so updates are detected.
+          EOF
+          gh release create snapshot upload/*.apk \
+            --title "Snapshot $VERSION_CODE ($GITHUB_SHA)" \
+            --target "$GITHUB_SHA" \
+            --prerelease \
+            --notes-file notes.md
