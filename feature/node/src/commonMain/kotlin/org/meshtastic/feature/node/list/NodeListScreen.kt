@@ -62,6 +62,7 @@ import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.NodeListDensity
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.channel_invalid
+import org.meshtastic.core.resources.hop_histogram_title
 import org.meshtastic.core.resources.node_count_template
 import org.meshtastic.core.resources.node_list_help_title
 import org.meshtastic.core.resources.nodes
@@ -77,6 +78,7 @@ import org.meshtastic.core.ui.component.NodeItemCompact
 import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.core.ui.component.SharedContactDialog
 import org.meshtastic.core.ui.component.smartScrollToTop
+import org.meshtastic.core.ui.icon.BarChart
 import org.meshtastic.core.ui.icon.Info
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.NoDevice
@@ -84,6 +86,7 @@ import org.meshtastic.core.ui.icon.Nodes
 import org.meshtastic.core.ui.util.parseDeepLinkOrInvalid
 import org.meshtastic.feature.node.component.NodeContextMenu
 import org.meshtastic.feature.node.component.NodeFilterTextField
+import org.meshtastic.feature.node.component.NodeHopHistogramSheet
 import org.meshtastic.feature.node.component.NodeListHelp
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
@@ -145,6 +148,11 @@ fun NodeListScreen(
         NodeListHelp(onDismiss = { showHelpSheet = false })
     }
 
+    var showHopHistogram by remember { mutableStateOf(false) }
+    if (showHopHistogram) {
+        NodeHopHistogramSheet(nodes = unfilteredNodes, onDismiss = { showHopHistogram = false })
+    }
+
     var showShareContact by remember { mutableStateOf(false) }
     if (showShareContact) {
         SharedContactDialog(contact = ourNode, onDismiss = { showShareContact = false })
@@ -161,6 +169,12 @@ fun NodeListScreen(
                 canNavigateUp = false,
                 onNavigateUp = {},
                 actions = {
+                    IconButton(onClick = { showHopHistogram = true }) {
+                        Icon(
+                            imageVector = MeshtasticIcons.BarChart,
+                            contentDescription = stringResource(Res.string.hop_histogram_title),
+                        )
+                    }
                     IconButton(onClick = { showHelpSheet = true }) {
                         Icon(
                             imageVector = MeshtasticIcons.Info,
