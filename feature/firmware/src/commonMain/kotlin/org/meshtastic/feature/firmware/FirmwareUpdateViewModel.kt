@@ -152,6 +152,8 @@ class FirmwareUpdateViewModel(
     @OptIn(DelicateCoroutinesApi::class)
     override fun onCleared() {
         super.onCleared()
+        prepareJob?.cancel()
+        prepareJob = null
         // viewModelScope is already cancelled when onCleared() runs, so launch cleanup on the
         // application-wide scope (SupervisorJob + ioDispatcher). ATOMIC start + NonCancellable
         // context keeps cleanup running even if something tries to cancel it mid-flight.
