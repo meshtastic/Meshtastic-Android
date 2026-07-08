@@ -86,7 +86,7 @@ jobs:
           temp_event_firmware_file="/tmp/new_event_firmware.json"
 
           echo "Fetching latest event firmware metadata..."
-          http_code=$(curl -s -o "$temp_event_firmware_file" -w '%{http_code}' https://api.meshtastic.org/resource/eventFirmware || true)
+          http_code=$(curl -s --max-time 90 -o "$temp_event_firmware_file" -w '%{http_code}' https://api.meshtastic.org/resource/eventFirmware || true)
           http_code="${http_code:-0}"
 
           if [ "$http_code" -lt 200 ] || [ "$http_code" -ge 300 ]; then
@@ -142,13 +142,22 @@ jobs:
 
       - name: Build PR body
         id: pr_body
+        env:
+          # Hoisted into env: (not interpolated directly in the script) so no step output can inject shell — see
+          # zizmor template-injection. Values are fixed strings today, but detail may carry API text in future.
+          FIRMWARE_STATUS: ${{ steps.firmware.outputs.status }}
+          FIRMWARE_DETAIL: ${{ steps.firmware.outputs.detail }}
+          HARDWARE_STATUS: ${{ steps.hardware.outputs.status }}
+          HARDWARE_DETAIL: ${{ steps.hardware.outputs.detail }}
+          EVENT_FIRMWARE_STATUS: ${{ steps.event_firmware.outputs.status }}
+          EVENT_FIRMWARE_DETAIL: ${{ steps.event_firmware.outputs.detail }}
         run: |
-          firmware_status="${{ steps.firmware.outputs.status }}"
-          firmware_detail="${{ steps.firmware.outputs.detail }}"
-          hardware_status="${{ steps.hardware.outputs.status }}"
-          hardware_detail="${{ steps.hardware.outputs.detail }}"
-          event_firmware_status="${{ steps.event_firmware.outputs.status }}"
-          event_firmware_detail="${{ steps.event_firmware.outputs.detail }}"
+          firmware_status="$FIRMWARE_STATUS"
+          firmware_detail="$FIRMWARE_DETAIL"
+          hardware_status="$HARDWARE_STATUS"
+          hardware_detail="$HARDWARE_DETAIL"
+          event_firmware_status="$EVENT_FIRMWARE_STATUS"
+          event_firmware_detail="$EVENT_FIRMWARE_DETAIL"
 
           body="This PR includes automated updates from the scheduled workflow:"
           body+=$'\n'

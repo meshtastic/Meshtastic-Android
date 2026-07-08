@@ -18,6 +18,7 @@ package org.meshtastic.app.di
 
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
+import org.meshtastic.core.model.EventFirmwareResponse
 import org.meshtastic.core.model.NetworkDeviceHardware
 import org.meshtastic.core.model.NetworkDeviceLinksResponse
 import org.meshtastic.core.model.NetworkFirmwareReleases
@@ -42,5 +43,8 @@ class FDroidNetworkModule {
 
         override suspend fun getFirmwareReleases(): NetworkFirmwareReleases =
             throw UnsupportedOperationException("getFirmwareReleases is not supported on F-Droid builds.")
+
+        override suspend fun getEventFirmware(): EventFirmwareResponse =
+            throw UnsupportedOperationException("getEventFirmware is not supported on F-Droid builds.")
     }
 }

@@ -45,13 +45,19 @@ class EventFirmwareRepositoryImplTest {
 
     /** Only [getEventFirmware] is exercised; the other endpoints are never called by this repository. */
     private class FakeApiService(var response: EventFirmwareResponse) : ApiService {
+        var eventFirmwareCalls = 0
+            private set
+
         override suspend fun getDeviceHardware(): List<NetworkDeviceHardware> = error("unused")
 
         override suspend fun getDeviceLinks(): NetworkDeviceLinksResponse = error("unused")
 
         override suspend fun getFirmwareReleases(): NetworkFirmwareReleases = error("unused")
 
-        override suspend fun getEventFirmware(): EventFirmwareResponse = response
+        override suspend fun getEventFirmware(): EventFirmwareResponse {
+            eventFirmwareCalls++
+            return response
+        }
     }
 
     /** Serves only `event_firmware.json`, serializing [editions] so the repo decodes via the real path. */
@@ -151,6 +157,19 @@ class EventFirmwareRepositoryImplTest {
         api.response = EventFirmwareResponse(editions = emptyList())
 
         assertEquals("hamvention", repository.getEdition("HAMVENTION")?.displayName)
+    }
+
+    @Test
+    fun failedRefreshDoesNotRetryOnEveryCall() = runBlocking {
+        // Empty response never advances the success timestamp; without the retry cooldown the second call would
+        // re-enter the stale branch and fetch again. The cooldown (minutes) means a second immediate call skips it.
+        seed.editions = listOf(edition("HAMVENTION"))
+        api.response = EventFirmwareResponse(editions = emptyList())
+
+        repository.getEdition("HAMVENTION")
+        repository.getEdition("HAMVENTION")
+
+        assertEquals(1, api.eventFirmwareCalls)
     }
 
     @Test

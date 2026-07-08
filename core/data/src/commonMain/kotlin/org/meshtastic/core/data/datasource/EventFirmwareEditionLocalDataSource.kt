@@ -36,7 +36,12 @@ class EventFirmwareEditionLocalDataSource(
     suspend fun upsertAll(editions: List<EventFirmwareEditionEntity>) =
         withContext(dispatchers.io) { dao.upsertAll(editions) }
 
-    suspend fun deleteNotIn(keep: List<String>) = withContext(dispatchers.io) { dao.deleteNotIn(keep) }
+    // No-op on empty: `NOT IN ()` is always true in SQLite, so forwarding an empty list would wipe the whole table.
+    // Callers only prune against a non-empty upstream payload; an empty list means "keep everything".
+    suspend fun deleteNotIn(keep: List<String>) {
+        if (keep.isEmpty()) return
+        withContext(dispatchers.io) { dao.deleteNotIn(keep) }
+    }
 
     suspend fun count(): Int = withContext(dispatchers.io) { dao.count() }
 }

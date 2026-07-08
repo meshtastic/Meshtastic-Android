@@ -41,6 +41,7 @@ import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.network.EventFirmwareRemoteDataSource
 import org.meshtastic.core.repository.EventFirmwareRepository
 import kotlin.concurrent.Volatile
+import kotlin.time.Duration.Companion.minutes
 
 /**
  * Caches event-firmware display metadata in the DB, seeded from the bundled `event_firmware.json` snapshot and
@@ -62,6 +63,12 @@ class EventFirmwareRepositoryImpl(
 
     @Volatile private var lastRefreshMillis = 0L
 
+    // Advanced on every refresh *attempt* (success, empty, or failure), unlike lastRefreshMillis which only advances on
+    // a stored non-empty payload. Without this, an offline device (a common, expected state) would re-enter the stale
+    // branch and block up to NETWORK_REFRESH_TIMEOUT_MS on every getEdition() call, since the failed Deferred is no
+    // longer active. The cooldown caps retries while offline without waiting the full CACHE_EXPIRATION_TIME_MS.
+    @Volatile private var lastAttemptMillis = 0L
+
     /** Guards [inFlightRefresh] so concurrent callers share one network fetch. */
     private val refreshGuard = Mutex()
 
@@ -74,7 +81,9 @@ class EventFirmwareRepositoryImpl(
 
     override suspend fun getEdition(editionName: String): EventFirmwareEdition? = withContext(dispatchers.io) {
         ensureSeeded()
-        if (nowMillis - lastRefreshMillis > CACHE_EXPIRATION_TIME_MS) {
+        val stale = nowMillis - lastRefreshMillis > CACHE_EXPIRATION_TIME_MS
+        val retryCooldownElapsed = nowMillis - lastAttemptMillis > REFRESH_RETRY_COOLDOWN_MS
+        if (stale && retryCooldownElapsed) {
             singleFlightRefresh(maxWaitMs = NETWORK_REFRESH_TIMEOUT_MS)
         }
         localDataSource.getByEdition(editionName)?.asExternalModel()
@@ -105,6 +114,7 @@ class EventFirmwareRepositoryImpl(
                 inFlightRefresh?.takeIf { it.isActive }
                     ?: refreshScope
                         .async {
+                            lastAttemptMillis = nowMillis
                             safeCatching {
                                 val editions = remoteDataSource.getEventFirmware().editions
                                 if (editions.isNotEmpty()) {
@@ -126,6 +136,9 @@ class EventFirmwareRepositoryImpl(
     private companion object {
         private const val ASSET_NAME = "event_firmware.json"
         private val CACHE_EXPIRATION_TIME_MS = TimeConstants.ONE_DAY.inWholeMilliseconds
+
+        /** Minimum gap between refresh *attempts*, so a failing/empty fetch (e.g. offline) doesn't retry every call. */
+        private val REFRESH_RETRY_COOLDOWN_MS = 5.minutes.inWholeMilliseconds
 
         /** Maximum time a blocking lookup waits for an in-flight refresh before returning cached/bundled data. */
         private const val NETWORK_REFRESH_TIMEOUT_MS = 5_000L

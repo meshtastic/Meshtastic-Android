@@ -26,6 +26,9 @@ import org.meshtastic.core.model.EventFirmwareEdition
 import org.meshtastic.core.model.EventFirmwareLink
 import org.meshtastic.core.model.EventFirmwareTheme
 
+/** Lenient so decoding a cached column survives a model that gained fields since it was written (forward-compat). */
+private val entityJson = Json { ignoreUnknownKeys = true }
+
 /**
  * An event-firmware display record, cached from the Meshtastic API (`/resource/eventFirmware`) during refresh. The
  * nested [links]/[theme]/[firmware] objects are stored pre-serialized rather than via Room type converters — this is
@@ -63,9 +66,9 @@ fun EventFirmwareEdition.asEntity() = EventFirmwareEditionEntity(
     accentColor = accentColor,
     tag = tag,
     domain = domain,
-    themeJson = theme?.let { Json.encodeToString(it) },
-    firmwareJson = firmware?.let { Json.encodeToString(it) },
-    linksJson = Json.encodeToString(links),
+    themeJson = theme?.let { entityJson.encodeToString(it) },
+    firmwareJson = firmware?.let { entityJson.encodeToString(it) },
+    linksJson = entityJson.encodeToString(links),
 )
 
 fun EventFirmwareEditionEntity.asExternalModel() = EventFirmwareEdition(
@@ -80,7 +83,9 @@ fun EventFirmwareEditionEntity.asExternalModel() = EventFirmwareEdition(
     accentColor = accentColor,
     tag = tag,
     domain = domain,
-    theme = themeJson?.let { runCatching { Json.decodeFromString<EventFirmwareTheme>(it) }.getOrNull() },
-    firmware = firmwareJson?.let { runCatching { Json.decodeFromString<EventFirmwareBuild>(it) }.getOrNull() },
-    links = runCatching { Json.decodeFromString<List<EventFirmwareLink>>(linksJson) }.getOrDefault(emptyList()),
+    theme = themeJson?.let { runCatching { entityJson.decodeFromString<EventFirmwareTheme>(it) }.getOrNull() },
+    firmware =
+    firmwareJson?.let { runCatching { entityJson.decodeFromString<EventFirmwareBuild>(it) }.getOrNull() },
+    links =
+    runCatching { entityJson.decodeFromString<List<EventFirmwareLink>>(linksJson) }.getOrDefault(emptyList()),
 )

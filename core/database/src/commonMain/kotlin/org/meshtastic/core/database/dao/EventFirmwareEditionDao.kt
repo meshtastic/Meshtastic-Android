@@ -28,6 +28,11 @@ interface EventFirmwareEditionDao {
     @Query("SELECT * FROM event_firmware_edition WHERE edition = :edition")
     suspend fun getByEdition(edition: String): EventFirmwareEditionEntity?
 
+    /**
+     * Deletes rows whose edition is not in [keep]. WARNING: `NOT IN ()` is always true in SQLite, so an **empty**
+     * [keep] deletes every row — call sites must guard against passing an empty list (see
+     * `EventFirmwareEditionLocalDataSource.deleteNotIn`, which no-ops on empty).
+     */
     @Query("DELETE FROM event_firmware_edition WHERE edition NOT IN (:keep)")
     suspend fun deleteNotIn(keep: List<String>)
 
