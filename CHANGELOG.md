@@ -11,8 +11,13 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 #### 🏗️ Features
 * feat(map): Site Planner coverage integration — import + estimate by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6136
+* feat(node): show CO₂ sensor temperature & humidity on Air Quality page by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6143
+* feat(node): histogram of nodes per hop distance (#5745) by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6146
+* feat(map): F-Droid map-layer parity — share layer UI + logic in common source (#6138) by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6148
 #### 🛠️ Fixes
 * fix(runtime): harden BLE profile, OTA setup, and DB access by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6126
+* fix(messaging): use stored contact_key to avoid duplicate LazyColumn key crash (#6131) by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6142
+* fix(metrics): air-quality chart legend follows plotted data, not selection by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6145
 
 ### Internal (v2.8.0-internal.18)
 Changes since [`v2.8.0-closed.6`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.0-closed.6):
