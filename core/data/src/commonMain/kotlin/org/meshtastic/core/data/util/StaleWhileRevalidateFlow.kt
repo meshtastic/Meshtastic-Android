@@ -84,7 +84,7 @@ internal fun <T : Any> staleWhileRevalidateFlow(
     val fresh =
         safeCatching { loadFromCache() }
             .onFailure { e -> Logger.w(e) { "$tag: cache reload failed after fetch" } }
-            .getOrNull()
+            .getOrElse { cached }
     if (fresh != cached) {
         emit(fresh)
     }
