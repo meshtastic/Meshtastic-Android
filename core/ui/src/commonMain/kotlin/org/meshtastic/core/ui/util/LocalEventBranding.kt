@@ -26,7 +26,7 @@ import androidx.compose.ui.layout.ContentScale
 import coil3.compose.AsyncImage
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.todayIn
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.vectorResource
@@ -98,7 +98,7 @@ fun EventBrandingIcon(
 fun EventFirmwareEdition.hasEnded(): Boolean {
     val end = eventEnd?.let { runCatching { LocalDate.parse(it) }.getOrNull() } ?: return false
     val zone = timeZone?.let { runCatching { TimeZone.of(it) }.getOrNull() } ?: TimeZone.currentSystemDefault()
-    return Clock.System.now().toLocalDateTime(zone).date > end
+    return Clock.System.todayIn(zone) > end
 }
 
 /** Parses the edition's `#RRGGBB` [EventFirmwareEdition.accentColor] into a [Color], or `null` if absent/malformed. */

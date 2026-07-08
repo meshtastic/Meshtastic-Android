@@ -21,9 +21,9 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonIgnoreUnknownKeys
 
 /**
- * Response envelope for event-firmware display metadata. Matches the bundled `event_firmware.json` and the planned `GET
- * /resource/eventFirmware` API, sharing the `{version, generatedAt, source, <payload>[]}` shape used by
- * [NetworkDeviceLinksResponse]. See `schemas/event_firmware.schema.json` for the authoring contract.
+ * Response envelope for event-firmware display metadata. Matches the bundled `event_firmware.json` and the live `GET
+ * https://api.meshtastic.org/resource/eventFirmware` API (the source of truth), sharing the `{version, generatedAt,
+ * source, <payload>[]}` shape used by [NetworkDeviceLinksResponse].
  */
 @Serializable
 @OptIn(ExperimentalSerializationApi::class)
