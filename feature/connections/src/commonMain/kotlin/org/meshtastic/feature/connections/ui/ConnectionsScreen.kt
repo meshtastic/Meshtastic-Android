@@ -60,6 +60,8 @@ import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.bluetooth_disabled
 import org.meshtastic.core.resources.connections
+import org.meshtastic.core.resources.firmware_event_ended_banner
+import org.meshtastic.core.resources.firmware_event_ended_button
 import org.meshtastic.core.resources.firmware_recovery_banner
 import org.meshtastic.core.resources.firmware_recovery_button
 import org.meshtastic.core.resources.firmware_recovery_dismiss
@@ -77,7 +79,9 @@ import org.meshtastic.core.ui.icon.Bluetooth
 import org.meshtastic.core.ui.icon.Language
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.NoDevice
+import org.meshtastic.core.ui.util.LocalEventBranding
 import org.meshtastic.core.ui.util.PermissionStatus
+import org.meshtastic.core.ui.util.hasEnded
 import org.meshtastic.core.ui.util.isBluetoothDisabled
 import org.meshtastic.core.ui.util.isWifiUnavailable
 import org.meshtastic.core.ui.util.rememberBluetoothPermissionState
@@ -316,6 +320,23 @@ fun ConnectionsScreen(
                                     // reconnect/success.
                                     onDismiss = { scanModel.dismissRecovery() },
                                     dismissContentDescription = stringResource(Res.string.firmware_recovery_dismiss),
+                                )
+                            }
+
+                        // Once an event is over, nudge users still on that event's firmware back to standard
+                        // firmware. Driven purely by the metadata end date (LocalEventBranding is only populated
+                        // while connected to event firmware), so it appears whenever an ended-event device is
+                        // connected and disappears on its own once the device is re-flashed to vanilla. Not
+                        // dismissable — it stays until the underlying condition is actually resolved.
+                        LocalEventBranding.current
+                            ?.takeIf { it.hasEnded() }
+                            ?.let { endedEvent ->
+                                Spacer(modifier = Modifier.height(8.dp))
+                                RecoveryCard(
+                                    message =
+                                    stringResource(Res.string.firmware_event_ended_banner, endedEvent.displayName),
+                                    actionLabel = stringResource(Res.string.firmware_event_ended_button),
+                                    onAction = { onConfigNavigate(FirmwareRoute.FirmwareUpdate) },
                                 )
                             }
 

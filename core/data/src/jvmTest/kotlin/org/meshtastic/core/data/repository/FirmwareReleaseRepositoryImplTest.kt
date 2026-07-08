@@ -27,6 +27,7 @@ import org.meshtastic.core.data.datasource.FirmwareReleaseLocalDataSource
 import org.meshtastic.core.database.entity.FirmwareReleaseEntity
 import org.meshtastic.core.database.entity.FirmwareReleaseType
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.model.EventFirmwareResponse
 import org.meshtastic.core.model.NetworkDeviceHardware
 import org.meshtastic.core.model.NetworkDeviceLinksResponse
 import org.meshtastic.core.model.NetworkFirmwareRelease
@@ -50,6 +51,8 @@ class FirmwareReleaseRepositoryImplTest {
         override suspend fun getDeviceLinks(): NetworkDeviceLinksResponse = error("unused")
 
         override suspend fun getFirmwareReleases(): NetworkFirmwareReleases = response
+
+        override suspend fun getEventFirmware(): EventFirmwareResponse = error("unused")
     }
 
     /** Serves `firmware_releases.json` from [bundled] via the real decode path, or nothing when null. */

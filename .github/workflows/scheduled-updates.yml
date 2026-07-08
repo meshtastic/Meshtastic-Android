@@ -79,6 +79,35 @@ jobs:
             fi
           fi
 
+      - name: Update event firmware metadata
+        id: event_firmware
+        run: |
+          event_firmware_file_path="androidApp/src/main/assets/event_firmware.json"
+          temp_event_firmware_file="/tmp/new_event_firmware.json"
+
+          echo "Fetching latest event firmware metadata..."
+          http_code=$(curl -s --max-time 90 -o "$temp_event_firmware_file" -w '%{http_code}' https://api.meshtastic.org/resource/eventFirmware || true)
+          http_code="${http_code:-0}"
+
+          if [ "$http_code" -lt 200 ] || [ "$http_code" -ge 300 ]; then
+            echo "::warning::Event firmware API returned HTTP $http_code. Skipping event firmware update."
+            echo "status=error" >> "$GITHUB_OUTPUT"
+            echo "detail=HTTP $http_code from event firmware API" >> "$GITHUB_OUTPUT"
+          elif ! jq empty "$temp_event_firmware_file" 2>/dev/null; then
+            echo "::warning::Event firmware API returned invalid JSON data. Skipping event firmware update."
+            echo "status=error" >> "$GITHUB_OUTPUT"
+            echo "detail=Invalid JSON response from event firmware API" >> "$GITHUB_OUTPUT"
+          else
+            if [ ! -f "$event_firmware_file_path" ] || ! jq --sort-keys . "$temp_event_firmware_file" | diff -q - <(jq --sort-keys . "$event_firmware_file_path"); then
+              echo "Changes detected in event firmware metadata or local file missing. Updating $event_firmware_file_path."
+              cp "$temp_event_firmware_file" "$event_firmware_file_path"
+              echo "status=updated" >> "$GITHUB_OUTPUT"
+            else
+              echo "No changes detected in event firmware metadata."
+              echo "status=unchanged" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
       - name: Sync with Crowdin
         uses: crowdin/github-action@v2
         with:
@@ -113,11 +142,22 @@ jobs:
 
       - name: Build PR body
         id: pr_body
+        env:
+          # Hoisted into env: (not interpolated directly in the script) so no step output can inject shell — see
+          # zizmor template-injection. Values are fixed strings today, but detail may carry API text in future.
+          FIRMWARE_STATUS: ${{ steps.firmware.outputs.status }}
+          FIRMWARE_DETAIL: ${{ steps.firmware.outputs.detail }}
+          HARDWARE_STATUS: ${{ steps.hardware.outputs.status }}
+          HARDWARE_DETAIL: ${{ steps.hardware.outputs.detail }}
+          EVENT_FIRMWARE_STATUS: ${{ steps.event_firmware.outputs.status }}
+          EVENT_FIRMWARE_DETAIL: ${{ steps.event_firmware.outputs.detail }}
         run: |
-          firmware_status="${{ steps.firmware.outputs.status }}"
-          firmware_detail="${{ steps.firmware.outputs.detail }}"
-          hardware_status="${{ steps.hardware.outputs.status }}"
-          hardware_detail="${{ steps.hardware.outputs.detail }}"
+          firmware_status="$FIRMWARE_STATUS"
+          firmware_detail="$FIRMWARE_DETAIL"
+          hardware_status="$HARDWARE_STATUS"
+          hardware_detail="$HARDWARE_DETAIL"
+          event_firmware_status="$EVENT_FIRMWARE_STATUS"
+          event_firmware_detail="$EVENT_FIRMWARE_DETAIL"
 
           body="This PR includes automated updates from the scheduled workflow:"
           body+=$'\n'
@@ -136,6 +176,14 @@ jobs:
             unchanged) body+=$'\n'"- ✔️ \`device_hardware.json\` checked — no changes detected." ;;
             error)     body+=$'\n'"- ⚠️ \`device_hardware.json\` skipped — ${hardware_detail}." ;;
             *)         body+=$'\n'"- ❓ \`device_hardware.json\` — unknown status." ;;
+          esac
+
+          # Event firmware status
+          case "$event_firmware_status" in
+            updated)   body+=$'\n'"- ✅ \`event_firmware.json\` updated from the Meshtastic API." ;;
+            unchanged) body+=$'\n'"- ✔️ \`event_firmware.json\` checked — no changes detected." ;;
+            error)     body+=$'\n'"- ⚠️ \`event_firmware.json\` skipped — ${event_firmware_detail}." ;;
+            *)         body+=$'\n'"- ❓ \`event_firmware.json\` — unknown status." ;;
           esac
 
           # Crowdin (always attempted)
@@ -161,6 +209,7 @@ jobs:
             Automated updates for:
             - Firmware releases list
             - Device hardware list
+            - Event firmware metadata
             - Crowdin source string uploads
             - Crowdin translation downloads
           title: 'chore: Scheduled updates (Firmware, Hardware, Translations)'
@@ -171,6 +220,7 @@ jobs:
           add-paths: |
             androidApp/src/main/assets/firmware_releases.json
             androidApp/src/main/assets/device_hardware.json
+            androidApp/src/main/assets/event_firmware.json
             fastlane/metadata/android/**
             **/strings.xml
             docs/**/*.md

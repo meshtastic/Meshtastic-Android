@@ -20,11 +20,16 @@ import androidx.compose.ui.graphics.Color
 import org.meshtastic.core.model.EventFirmwareEdition
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class EventBrandingTest {
 
     private fun accent(hex: String?) = EventFirmwareEdition(edition = "X", accentColor = hex).accentColorOrNull()
+
+    private fun ended(end: String?, tz: String? = null) =
+        EventFirmwareEdition(edition = "X", eventEnd = end, timeZone = tz).hasEnded()
 
     @Test
     fun parsesRrggbbWithHash() {
@@ -41,5 +46,28 @@ class EventBrandingTest {
         assertNull(accent(null))
         assertNull(accent("#12345")) // too short
         assertNull(accent("#GGGGGG")) // not hex
+    }
+
+    @Test
+    fun hasEndedTrueForPastDate() {
+        assertTrue(ended("2000-01-01"))
+        assertTrue(ended("2000-01-01", tz = "America/New_York"))
+    }
+
+    @Test
+    fun hasEndedFalseForFutureDate() {
+        assertFalse(ended("9999-01-01"))
+    }
+
+    @Test
+    fun hasEndedFalseWhenEndDateMissingOrUnparseable() {
+        assertFalse(ended(null))
+        assertFalse(ended("not-a-date"))
+    }
+
+    @Test
+    fun hasEndedFallsBackToSystemZoneWhenTimeZoneUnparseable() {
+        // Bad IANA id must not throw — it falls back to the device zone, and a long-past date is still ended.
+        assertTrue(ended("2000-01-01", tz = "Not/AZone"))
     }
 }
