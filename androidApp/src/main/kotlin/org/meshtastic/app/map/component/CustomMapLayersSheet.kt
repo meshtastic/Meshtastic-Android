@@ -68,7 +68,7 @@ import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.core.ui.icon.Visibility
 import org.meshtastic.core.ui.icon.VisibilityOff
 
-@Suppress("LongMethod")
+@Suppress("LongMethod", "ParameterNaming") // onAddLayerClicked is the established callback name used by both flavors
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun CustomMapLayersSheet(
@@ -78,9 +78,10 @@ fun CustomMapLayersSheet(
     onAddLayerClicked: () -> Unit,
     onRefreshLayer: (String) -> Unit,
     onAddNetworkLayer: (String, String) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     var showAddNetworkLayerDialog by remember { mutableStateOf(false) }
-    LazyColumn(contentPadding = PaddingValues(bottom = 16.dp)) {
+    LazyColumn(modifier = modifier, contentPadding = PaddingValues(bottom = 16.dp)) {
         item {
             Text(
                 modifier = Modifier.padding(16.dp),
@@ -182,6 +183,7 @@ fun CustomMapLayersSheet(
     }
 }
 
+@Suppress("ModifierMissing") // wraps MeshtasticDialog, which owns its own layout; no meaningful modifier slot
 @Composable
 fun AddNetworkLayerDialog(onDismiss: () -> Unit, onConfirm: (String, String) -> Unit) {
     var name by remember { mutableStateOf("") }
