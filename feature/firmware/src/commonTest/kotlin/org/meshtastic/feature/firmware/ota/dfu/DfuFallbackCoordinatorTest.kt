@@ -63,9 +63,11 @@ class DfuFallbackCoordinatorTest {
     fun `Unknown falls back from Legacy to Secure on pre-engagement failure`() = runTest {
         val coordinator = DfuFallbackCoordinator(BootloaderDetection.Unknown)
         val protocols = mutableListOf<DfuProtocolKind>()
+        val attemptCounts = mutableListOf<Int>()
         assertFailsWith<RuntimeException> {
-            coordinator.execute { protocol, _ ->
+            coordinator.execute { protocol, attempts ->
                 protocols.add(protocol)
+                attemptCounts.add(attempts)
                 if (protocol == DfuProtocolKind.LEGACY) {
                     DfuUploadResult.Failure(RuntimeException("connect failed"), protocolEngaged = false)
                 } else {
@@ -79,6 +81,7 @@ class DfuFallbackCoordinatorTest {
                 assertEquals("also failed", thrown.suppressedExceptions.first().message)
             }
         assertEquals(listOf(DfuProtocolKind.LEGACY, DfuProtocolKind.SECURE), protocols)
+        assertEquals(listOf(1, 1), attemptCounts)
     }
 
     @Test
@@ -138,14 +141,14 @@ class DfuFallbackCoordinatorTest {
     }
 
     @Test
-    fun `Unknown gives Legacy primary 3 session attempts`() = runTest {
+    fun `Unknown gives Legacy primary 1 session attempt`() = runTest {
         val coordinator = DfuFallbackCoordinator(BootloaderDetection.Unknown)
         val attemptCounts = mutableListOf<Int>()
         coordinator.execute { _, attempts ->
             attemptCounts.add(attempts)
             DfuUploadResult.Success
         }
-        assertEquals(listOf(3), attemptCounts) // LEGACY_SESSION_ATTEMPTS — Unknown→Legacy needs reset-prime budget too
+        assertEquals(listOf(1), attemptCounts) // LIMITED_SESSION_ATTEMPTS keeps speculative Unknown probes bounded
     }
 
     @Test

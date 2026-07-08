@@ -160,16 +160,13 @@ internal class DfuFallbackCoordinator(private val detection: BootloaderDetection
 
     /**
      * Session retry budget for the given protocol in this detection context.
-     * - Legacy primary when detection is [BootloaderDetection.LegacyObserved] OR [BootloaderDetection.Unknown]:
-     *   [LEGACY_SESSION_ATTEMPTS] (3). Unknown can still be a Legacy bootloader whose advertisement the detection scan
-     *   missed, so its Legacy primary needs the same reset-prime budget as a confirmed Legacy detection.
-     * - Everything else (Secure primary, alternate protocols): [LIMITED_SESSION_ATTEMPTS] (1) to bound probe/fallback
-     *   time.
+     * - Confirmed Legacy primary ([BootloaderDetection.LegacyObserved]): [LEGACY_SESSION_ATTEMPTS] (3) to cover the
+     *   stale-session reset-prime recovery path.
+     * - Unknown Legacy primary and alternate protocols: [LIMITED_SESSION_ATTEMPTS] (1) to keep speculative probes short
+     *   enough that a Secure bootloader still has time to accept its fallback attempt.
      */
     private fun sessionAttemptsFor(protocol: DfuProtocolKind, isPrimary: Boolean): Int = when {
-        protocol == DfuProtocolKind.LEGACY &&
-            isPrimary &&
-            (detection == BootloaderDetection.LegacyObserved || detection == BootloaderDetection.Unknown) ->
+        protocol == DfuProtocolKind.LEGACY && isPrimary && detection == BootloaderDetection.LegacyObserved ->
             LEGACY_SESSION_ATTEMPTS
 
         else -> LIMITED_SESSION_ATTEMPTS
@@ -397,7 +394,7 @@ class SecureDfuHandler(
                 is DfuUploadResult.Failure -> {
                     lastError = result.error
                     protocolEngaged = protocolEngaged || result.protocolEngaged
-                    Logger.w {
+                    Logger.w(result.error) {
                         "DFU: upload session $attempt/$attempts failed ($protocol): ${result.error::class.simpleName}"
                     }
                     // A stock bootloader holding a wedged session from an interrupted flash rejects START with
@@ -538,7 +535,7 @@ class SecureDfuHandler(
                     "DFU: Connect attempt $attempt/$CONNECT_ATTEMPTS via $protocol (scan service=$serviceUuid)"
                 }
                 transport.connectToDfuMode().onFailure {
-                    Logger.w {
+                    Logger.w(it) {
                         "DFU: Connect attempt $attempt/$CONNECT_ATTEMPTS via $protocol failed: ${it.message}"
                     }
                 }
