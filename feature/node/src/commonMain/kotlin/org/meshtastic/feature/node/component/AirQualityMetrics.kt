@@ -63,7 +63,6 @@ private fun nowCastAqi(pm25History: List<Telemetry>): Pair<Int, PmAqiSeverity>? 
     return PmAqiSeverity.fromAqi(aqiValue)?.let { aqiValue to it }
 }
 
-@Suppress("LongParameterList")
 private fun buildAirQualityCards(
     metrics: AirQualityMetrics,
     aqi: Pair<Int, PmAqiSeverity>?,
@@ -73,31 +72,26 @@ private fun buildAirQualityCards(
     tempIcon: ImageVector,
     humidityIcon: ImageVector,
     isFahrenheit: Boolean,
-    pm10Label: StringResource,
-    pm25Label: StringResource,
-    aqiLabel: StringResource,
-    pm100Label: StringResource,
-    co2Label: StringResource,
-    co2TempLabel: StringResource,
-    co2HumidityLabel: StringResource,
 ): List<VectorMetricInfo> = buildList {
     // A present reading of 0 is a valid value (e.g. clean air at 0 µg/m³), so only the `?.` null-check (an
     // absent metric) hides a card — matching the #5793 chart/CSV zero-suppression fix.
-    metrics.pm10_standard?.let { pm -> add(VectorMetricInfo(pm10Label, "$pm $ugm3", icon)) }
+    metrics.pm10_standard?.let { pm -> add(VectorMetricInfo(Res.string.pm1_0, "$pm $ugm3", icon)) }
     metrics.pm25_standard?.let { pm ->
-        add(VectorMetricInfo(pm25Label, "$pm $ugm3", icon))
+        add(VectorMetricInfo(Res.string.pm2_5, "$pm $ugm3", icon))
         // AQI sits alongside the raw PM2.5 reading, so only show it when that raw reading is present.
-        aqi?.let { (aqiValue, severity) -> add(VectorMetricInfo(aqiLabel, "$aqiValue (${severity.label})", icon)) }
+        aqi?.let { (aqiValue, severity) ->
+            add(VectorMetricInfo(Res.string.aqi, "$aqiValue (${severity.label})", icon))
+        }
     }
-    metrics.pm100_standard?.let { pm -> add(VectorMetricInfo(pm100Label, "$pm $ugm3", icon)) }
-    metrics.co2?.let { co2 -> add(VectorMetricInfo(co2Label, "$co2 $ppmUnit", icon)) }
+    metrics.pm100_standard?.let { pm -> add(VectorMetricInfo(Res.string.pm10, "$pm $ugm3", icon)) }
+    metrics.co2?.let { co2 -> add(VectorMetricInfo(Res.string.co2, "$co2 $ppmUnit", icon)) }
     // The SCD4x CO₂ sensor also reports its own temperature/humidity (#5873) — surfaced here so a node can double as a
     // weather station without a separate BME sensor. `?.` hides only genuinely-absent readings.
     metrics.co2_temperature?.let { temp ->
-        add(VectorMetricInfo(co2TempLabel, temp.toTempString(isFahrenheit), tempIcon))
+        add(VectorMetricInfo(Res.string.co2_temperature, temp.toTempString(isFahrenheit), tempIcon))
     }
     metrics.co2_humidity?.let { hum ->
-        add(VectorMetricInfo(co2HumidityLabel, "${NumberFormatter.format(hum, 0)}%", humidityIcon))
+        add(VectorMetricInfo(Res.string.co2_humidity, "${NumberFormatter.format(hum, 0)}%", humidityIcon))
     }
 }
 
@@ -141,23 +135,7 @@ internal fun AirQualityInfoCards(
     val humidityIcon = MeshtasticIcons.Humidity
     val cards =
         remember(metrics, aqi, ugm3, ppmUnit, icon, tempIcon, humidityIcon, isFahrenheit) {
-            buildAirQualityCards(
-                metrics,
-                aqi,
-                ugm3,
-                ppmUnit,
-                icon,
-                tempIcon,
-                humidityIcon,
-                isFahrenheit,
-                Res.string.pm1_0,
-                Res.string.pm2_5,
-                Res.string.aqi,
-                Res.string.pm10,
-                Res.string.co2,
-                Res.string.co2_temperature,
-                Res.string.co2_humidity,
-            )
+            buildAirQualityCards(metrics, aqi, ugm3, ppmUnit, icon, tempIcon, humidityIcon, isFahrenheit)
         }
 
     if (cards.isEmpty()) return
