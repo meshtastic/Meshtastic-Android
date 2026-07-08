@@ -354,7 +354,6 @@ private fun NodeSignalRow(thatNode: Node, isThisNode: Boolean, contentColor: Col
 private fun gatherSensors(node: Node, tempInFahrenheit: Boolean, contentColor: Color): List<@Composable () -> Unit> {
     val items = mutableListOf<@Composable () -> Unit>()
     val env = node.environmentMetrics
-    val aq = node.airQualityMetrics
     val pax = node.paxcounter
 
     if (pax.ble != 0 || pax.wifi != 0) {
@@ -365,22 +364,11 @@ private fun gatherSensors(node: Node, tempInFahrenheit: Boolean, contentColor: C
         val temp = MetricFormatter.temperature(env.temperature ?: 0f, tempInFahrenheit)
         items.add { TemperatureInfo(temp = temp, contentColor = contentColor) }
     }
-    else if ((aq.co2_temperature?: 0f) != 0f) {
-        val temp = MetricFormatter.temperature(aq.co2_temperature ?: 0f, tempInFahrenheit)
-        items.add { TemperatureInfo(temp = temp, contentColor = contentColor) }
-    }
-
     if ((env.relative_humidity ?: 0f) != 0f) {
         items.add {
             HumidityInfo(humidity = MetricFormatter.humidity(env.relative_humidity ?: 0f), contentColor = contentColor)
         }
     }
-    else if ((aq.co2_humidity?: 0f) != 0f) {
-        items.add {
-            HumidityInfo(humidity = MetricFormatter.humidity(aq.co2_humidity ?: 0f), contentColor = contentColor)
-        }
-    }
-
     if ((env.barometric_pressure ?: 0f) != 0f) {
         items.add {
             PressureInfo(
