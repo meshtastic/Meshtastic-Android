@@ -42,7 +42,6 @@ class FirmwareReleaseLocalDataSource(private val dbManager: DatabaseProvider) {
     }
 
     suspend fun getLatestRelease(releaseType: FirmwareReleaseType): FirmwareReleaseEntity? = dbManager.withDb {
-        val releases = it.firmwareReleaseDao().getReleasesByType(releaseType)
-        if (releases.isEmpty()) null else releases.maxBy { entity -> entity.asDeviceVersion() }
+        it.firmwareReleaseDao().getReleasesByType(releaseType).maxByOrNull { entity -> entity.asDeviceVersion() }
     }
 }

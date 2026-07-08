@@ -352,15 +352,24 @@ open class DatabaseManager(
     private fun isDbClosedException(e: Exception): Boolean = generateSequence<Throwable>(e) { it.cause }
         .any { throwable ->
             val msg = throwable.message?.lowercase() ?: return@any false
+            val hasDbContext = DB_TERMS.any { it in msg }
             // Room can surface switched/pool-churn failures as SQLite BUSY/acquire timeout, not only "closed".
-            ("closed" in msg && DB_TERMS.any { it in msg }) || TRANSIENT_DB_POOL_TERMS.any { it in msg }
+            ("closed" in msg && hasDbContext) || (TRANSIENT_DB_POOL_TERMS.any { it in msg } && hasDbContext)
         }
 
     private companion object {
         private const val BACKFILL_COLD_START_DELAY_MS = 2_000L
         private const val WITH_DB_SLOW_OPERATION_MS = 1_000L
         val DB_TERMS = listOf("pool", "database", "connection", "sqlite")
-        val TRANSIENT_DB_POOL_TERMS = listOf("timed out attempting to acquire", "error code: 5", "database is locked")
+        val TRANSIENT_DB_POOL_TERMS =
+            listOf(
+                "timed out attempting to acquire",
+                "error code: 5",
+                "database is locked",
+                "sqlite_busy",
+                "busy",
+                "locked",
+            )
     }
 
     /**
