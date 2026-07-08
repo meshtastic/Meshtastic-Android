@@ -54,7 +54,10 @@ internal fun <T : Any> staleWhileRevalidateFlow(
     networkTimeoutMs: Long? = DEFAULT_NETWORK_TIMEOUT_MS,
     tag: String = "StaleWhileRevalidate",
 ): Flow<T?> = flow {
-    val cached = loadFromCache()
+    val cached =
+        safeCatching { loadFromCache() }
+            .onFailure { e -> Logger.w(e) { "$tag: cache read failed" } }
+            .getOrNull()
     emit(cached)
 
     if (!shouldFetch(cached)) return@flow
@@ -78,7 +81,10 @@ internal fun <T : Any> staleWhileRevalidateFlow(
         Logger.w { "$tag: network fetch timed out after ${networkTimeoutMs}ms" }
     }
 
-    val fresh = loadFromCache()
+    val fresh =
+        safeCatching { loadFromCache() }
+            .onFailure { e -> Logger.w(e) { "$tag: cache reload failed after fetch" } }
+            .getOrNull()
     if (fresh != cached) {
         emit(fresh)
     }
