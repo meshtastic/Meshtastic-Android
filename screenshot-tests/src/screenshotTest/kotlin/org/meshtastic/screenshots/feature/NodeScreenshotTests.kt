@@ -21,6 +21,8 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.android.tools.screenshot.PreviewTest
 import org.meshtastic.feature.node.component.DeviceActionsLocalPreview
 import org.meshtastic.feature.node.component.DeviceActionsRemotePreview
+import org.meshtastic.feature.node.component.HopHistogramContentPreview
+import org.meshtastic.feature.node.component.HopHistogramEmptyPreview
 import org.meshtastic.feature.node.component.NodeDetailsSectionPreview
 import org.meshtastic.feature.node.component.NodeDetailsSectionSignedPreview
 import org.meshtastic.feature.node.component.NodeItemCompactActivePreview
@@ -214,4 +216,22 @@ fun ScreenshotNodeItemCompleteOnlineRemote() {
 @Composable
 fun ScreenshotNodeDetailContentMinimal() {
     NodeDetailContentMinimalPreview()
+}
+
+// ---------------------------------------------------------------------------
+// Nodes-per-hop histogram (issue #5745)
+// ---------------------------------------------------------------------------
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotHopHistogramContent() {
+    HopHistogramContentPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotHopHistogramEmpty() {
+    HopHistogramEmptyPreview()
 }

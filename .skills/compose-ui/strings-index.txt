@@ -711,6 +711,9 @@ hide_layer
 hide_password
 history_return_max
 history_return_window
+hop_histogram_empty
+hop_histogram_title
+hop_histogram_window_all
 hop_limit
 hops_away
 host

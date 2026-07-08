@@ -735,6 +735,9 @@
     <string name="hide_password">Hide password</string>
     <string name="history_return_max">History return max</string>
     <string name="history_return_window">History return window</string>
+    <string name="hop_histogram_empty">No nodes heard in this window</string>
+    <string name="hop_histogram_title">Nodes per Hop</string>
+    <string name="hop_histogram_window_all">All</string>
     <string name="hop_limit">Number of Hops</string>
     <string name="hops_away">Hops Away</string>
     <string name="host">Host</string>
