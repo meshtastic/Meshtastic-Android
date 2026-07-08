@@ -28,6 +28,7 @@
     <string name="a11y_node_online">ühenduses</string>
     <string name="a11y_node_role">roll %1$s</string>
     <string name="a11y_node_signal">signaal %1$s</string>
+    <string name="a11y_nodes_at_hop">Hüpet %1$d: %2$d seadmeni</string>
     <string name="accept">Nõustu</string>
     <string name="acknowledgements">Tänusõnad</string>
     <!-- ACTION -->
@@ -691,6 +692,8 @@
     <string name="hide_password">Peida parool</string>
     <string name="history_return_max">Ajalookirjete maksimaalne arv</string>
     <string name="history_return_window">Ajalookirjete aken</string>
+    <string name="hop_histogram_empty">Selles akna sõlmedest pole ühtegi kuulda</string>
+    <string name="hop_histogram_title">Sõlme hüppe kohta</string>
     <string name="hop_limit">Hüpete arv</string>
     <string name="hops_away">Hüppe kaugusel</string>
     <string name="host">Host</string>

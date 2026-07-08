@@ -14,7 +14,7 @@ The Meshtastic app automatically displays temperatures, distances, speeds, and t
 
 ## Как работи
 
-Meshtastic radios always transmit data in **metric units** (meters, °C, km/h, hPa, etc.). When the app receives this data, it uses the `MetricFormatter` utility to convert and display values in whatever unit system your device's locale specifies.
+Meshtastic radios always transmit data in **metric units** (meters, °C, km/h, hPa, etc.). When the app receives this data, it converts and displays values in whatever unit system your device's locale specifies.
 
 On Android, your measurement preferences are determined by your system **Language & Region** settings. On Desktop (JVM), the app uses the JVM's default `Locale`.
 
@@ -115,12 +115,13 @@ On Android, your measurement system (metric vs imperial) is tied to your region 
 2. Change your **Region** or **Measurement units** preference
 3. Return to Meshtastic — values update immediately
 
-> 💡 **Tip:** The app uses `MetricFormatter` from `core:common`. All measurement formatting is handled by a shared KMP utility that respects your platform's locale. Developers adding new measurement displays should use `MetricFormatter` rather than hard-coding unit conversions.
+> 💡 **Tip:** All measurement formatting is handled centrally and respects your platform's locale, so units stay consistent everywhere in the app.
 
 ## Related Topics
 
 - [Node Metrics](node-metrics) — where temperature, distance, and sensor values are displayed
 - [Telemetry & Sensors](telemetry-and-sensors) — the sensors that produce these measurements
+- [Measurement & Formatting](../developer/measurement) — developer reference for the formatting utilities
 - [Settings — Radio & User](settings-radio-user) — region setting that drives unit selection
 
 ---

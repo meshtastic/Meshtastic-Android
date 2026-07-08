@@ -103,7 +103,9 @@ Hiukkas- tai CO₂-antureilla varustetut radiot raportoivat ilmanlaatutietoja:
 | PM10                  | µg/m³   | Karkeat hiukkaset         |
 | CO₂                   | ppm     | Hiilidioksidipitoisuus    |
 
-CO₂-arvo on värikoodattu vakavuuden mukaan (Hyvä → Tunkkainen → Huono → Epäturvallinen → Evakuoi). Katso [Radion metriikat — ilmanlaatu](node-metrics#air-quality-metrics) tarkat ppm-kaistat ja värit.
+Myös CO₂ anturit, kuten SCD4x, ilmoittavat oman lämpötilansa ja ilmankosteutensa, jotka näytetään edellä olevien mittausten yhteydessä. PM2.5-historiasta sovellus laskee lisäksi **EPA NowCast AQI** -arvon.
+
+CO₂-arvo on värikoodattu vakavuuden mukaan (Hyvä → Tunkkainen → Huono → Epäturvallinen → Evakuoi). Katso [Radion mittarit — Ilmanlaatu](node-metrics#air-quality-metrics), josta löytyvät tarkat ppm-arvot, värit ja AQI-luokituksen tiedot.
 
 Ilmanlaatutiedot voidaan näyttää tietokortteina radion tietonäytössä, esittää kaavioina ajan kuluessa ja viedä CSV-tiedostoon.
 

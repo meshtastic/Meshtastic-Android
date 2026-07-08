@@ -55,12 +55,15 @@ BME680:n **IAQ (Indoor Air Quality)** -indeksi on yksi arvo väliltä 0–500+, 
 
 Ilmanlaatu on erillinen mittarinäkymä radioille, joissa on hiukkas- ja/tai CO₂-anturi. Se on **erillinen BME680:n IAQ-lukemasta**, joka on lueteltu ympäristömittareissa — IAQ on yksittäinen kaasuvastukseen perustuva indeksi, kun taas ilmanlaatunäkymä esittää varsinaiset hiukkas- ja CO₂-mittaukset kaavioina.
 
-| Metrijärjestelmä      | Yksikkö | Kuvaus                                      |
-| --------------------- | ------- | ------------------------------------------- |
-| PM1.0 | µg/m³   | Enintään 1,0 mikrometrin kokoiset hiukkaset |
-| PM2.5 | µg/m³   | Enintään 2,5 mikrometrin kokoiset hiukkaset |
-| PM10                  | µg/m³   | Enintään 10 mikrometrin kokoiset hiukkaset  |
-| CO₂                   | ppm     | Hiilidioksidipitoisuus                      |
+| Metrijärjestelmä      | Yksikkö     | Kuvaus                                                                                                                                                                                                                                                                                     |
+| --------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| PM1.0 | µg/m³       | Enintään 1,0 mikrometrin kokoiset hiukkaset                                                                                                                                                                                                                                                |
+| PM2.5 | µg/m³       | Enintään 2,5 mikrometrin kokoiset hiukkaset                                                                                                                                                                                                                                                |
+| PM10                  | µg/m³       | Enintään 10 mikrometrin kokoiset hiukkaset                                                                                                                                                                                                                                                 |
+| AQI                   | EPA-indeksi | EPA:n **NowCast**-AQI, joka lasketaan viimeaikaisesta PM2.5-historiastasi ja esitetään värikoodatulla ilmanlaadun luokituksella. Näytetään PM2.5-arvon yhteydessä, kun mittauksia on kertynyt riittävästi. |
+| CO₂                   | ppm         | Hiilidioksidipitoisuus                                                                                                                                                                                                                                                                     |
+| CO₂ lämpötila         | °C / °F     | CO₂ anturin ilmoittama lämpötila (esim. SCD4x)                                                                                                                                                                                                          |
+| CO₂ kosteus           | %           | CO₂ anturin ilmoittama suhteellinen ilmankosteus                                                                                                                                                                                                                                           |
 
 CO₂-lukemat on värikoodattu vakavuusasteen mukaan, jotta ilmanlaadun arviointi onnistuu yhdellä silmäyksellä:
 
@@ -102,7 +105,7 @@ Signaalin laatu arvioidaan **SNR**-arvon perusteella suhteessa käytössä oleva
 | ----------- | ---------------------------------- |
 | Hyvä        | SNR esiasetuksen rajan yläpuolella |
 | Kohtalainen | enintään 5,5 dB rajan alapuolella  |
-| Huono       | enintään 7,5 dB rajan alapuolella  |
+| Huono       | 5,5–7,5 dB rajan alapuolella       |
 | ei mitään   | yli 7,5 dB rajan alapuolella       |
 
 Katso [Signaalimittarin toiminta](signal-meter), jos haluat täydellisen selityksen.

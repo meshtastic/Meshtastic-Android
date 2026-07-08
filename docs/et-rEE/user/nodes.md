@@ -118,7 +118,7 @@ Type in the search field to filter nodes by name or short name. Filter uueneb re
 | **Last heard** (default) | Most recently heard nodes first                                    |
 | **Alphabetical**                            | Sorted by node long name                                           |
 | **Distance**                                | Nearest nodes first (requires position sharing) |
-| **Hops away**                               | Fewest relay hops first                                            |
+| **Hüppe kaugusel**                          | Vähim vahendatud hüppeid esimesena                                 |
 | **Channel**                                 | Grouped by channel index                                           |
 | **Läbi MQTT**                               | Rühmitatud MQTT ver raadiost kuuldud järgi                         |
 | **Favorites**                               | Favorited nodes first                                              |
@@ -139,7 +139,7 @@ Inline status indicators show key metrics at a glance:
 | --------------- | ------------------------------------------------------------- |
 | Signal quality  | ![Signal](../../assets/screenshots/nodes_signal_info.png)     |
 | Battery level   | ![Battery](../../assets/screenshots/nodes_battery_info.png)   |
-| Hop count       | ![Hops](../../assets/screenshots/nodes_hops_info.png)         |
+| Hüppete loendur | ![Hüpet](../../assets/screenshots/nodes_hops_info.png)        |
 | Viimati kuuldud | ![Last heard](../../assets/screenshots/nodes_last_heard.png)  |
 | Kaugus          | ![Distance](../../assets/screenshots/nodes_distance_info.png) |
 

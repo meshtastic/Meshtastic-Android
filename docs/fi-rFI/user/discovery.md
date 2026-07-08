@@ -44,7 +44,6 @@ Ennen aloittamista määritä nämä asetukset:
 **Käynnistä**-painike ei ole käytettävissä ja näyttää syyn, kunnes skannaus voidaan suorittaa. Yleisiä syitä, miksi se on pois käytöstä:
 
 - Laite **ei ole yhdistetty**
-- Nykyinen kanava käyttää **oletuskanava-avainta** (käytä ensin yksilöllistä avainta — katso [Viestit ja kanavat](messages-and-channels)).
 - **Esiasetuksia ei ole valittu** skannattavaksi.
 - Valittu esiasetus käyttää **2,4 GHz -taajuutta**, jota laitteistosi ei tue.
 

@@ -14,7 +14,7 @@ Meshtastic-sovellus näyttää automaattisesti lämpötilat, etäisyydet, nopeud
 
 ## Miten se toimii
 
-Meshtastic-radiot lähettävät aina datan **metrisissä yksiköissä** (metrit, °C, km/h, hPa jne.). Kun sovellus vastaanottaa tämän datan, se käyttää 'MetricFormatter'-toimintoa muuntaakseen ja näyttääkseen arvot sen yksikköjärjestelmän mukaan, jonka laitteesi tai alueasetuksesi määrittää.
+Meshtastic-radiot lähettävät aina datan **metrisissä yksiköissä** (metrit, °C, km/h, hPa jne.). Kun sovellus vastaanottaa nämä tiedot, se muuntaa ja näyttää arvot laitteesi alueasetusten mukaisessa yksikköjärjestelmässä.
 
 Androidissa mittausasetukset määräytyvät järjestelmän **Kieli ja alue** -asetusten mukaan. Työpöytäversiossa (JVM) sovellus käyttää JVM:n oletus-`Locale`-asetusta.
 
@@ -115,12 +115,13 @@ Androidissa mittausjärjestelmäsi (metrinen vs imperial) on sidottu alueasetuks
 2. Vaihda **Alue**- tai **Mittausyksiköt**-asetusta
 3. Palaa Meshtasticiin — arvot päivittyvät välittömästi
 
-> 💡 **Vinkki:** Sovellus käyttää `core:common`-moduulin `MetricFormatter`-luokkaa. Kaikkien mittausten muotoilu hoidetaan yhteisellä KMP-apuohjelmalla, joka noudattaa käyttöympäristösi alueasetuksia. Uusia mittausnäkymiä lisäävien kehittäjien tulisi käyttää `MetricFormatter`-toimintoa sen sijaan, että yksikkömuunnokset toteutetaan kovakoodattuna.
+> 💡 **Vinkki:** Kaikki mittausten muotoilut tehdään keskitetysti ja ne noudattavat käyttöympäristösi alueasetuksia, joten yksiköt pysyvät yhtenäisinä kaikkialla sovelluksessa.
 
 ## Aiheeseen liittyvät aiheet
 
 - [Radion mittarit](node-metrics) — missä lämpötila-, etäisyys- ja anturiarvot näytetään
 - [Telemetria ja anturit](telemetry-and-sensors) — anturit, jotka tuottavat nämä mittaukset
+- [Mittaus ja muotoilu](../developer/measurement) — kehittäjien viite muotoiluapuohjelmista
 - [Asetukset — Radio ja käyttäjä](settings-radio-user) — alueasetus, joka määrittää käytettävät mittayksiköt
 
 ---

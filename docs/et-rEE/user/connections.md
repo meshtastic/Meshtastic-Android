@@ -23,7 +23,7 @@ Bluetooth Low Energy is the default and most common connection method on Android
 
 1. Veendu, et Meshtastic seade on sisse lülitatud ja sidumisrežiimis.
 2. Ava rakendus ja navigeeri vahekaardile **Ühendused**.
-3. Puuduta **Skanni seadmeid** – kuvatakse lähedalasuvad Meshtastic raadiod.
+3. Tap **Scan for Bluetooth devices** — nearby Meshtastic radios will appear.
 4. Select your device from the list.
 5. Nõustu Bluetoothi ​​sidumise taotlusega, kui see kuvatakse.
 

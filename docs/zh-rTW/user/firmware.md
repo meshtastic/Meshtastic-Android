@@ -2,8 +2,8 @@
 title: 韌體更新
 parent: 使用者指南
 nav_order: 13
-last_updated: 2026-05-13
-description: 透過藍牙更新您的無線電裝置韌體 — 包含 OTA 流程、版本頻道、更新前檢查與復原機制。
+last_updated: 2026-07-07
+description: Update your radio firmware over Bluetooth or USB — OTA process, version channels, pre-flight checks, and recovery.
 aliases:
   - 韌體
   - 更新
@@ -17,7 +17,7 @@ aliases:
 
 ## 檢查更新
 
-1. 前往「設定 → 韌體更新」，或點選顯示的韌體通知。
+1. Open the connected radio's configuration and, under **Advanced**, tap **Firmware Update** — or tap the firmware notification if one is shown. The entry appears only for OTA-capable devices.
 2. 應用程式將檢查可用的韌體版本。
 3. 如有可用更新將顯示版本號碼與更新記錄摘要。
 
@@ -39,19 +39,26 @@ Android 使用者最常用的更新方式：
 
 ![Firmware disclaimer](../../assets/screenshots/firmware_disclaimer.png)
 
-### USB 燒錄
+### In-App USB Update
 
-適用於裝置復原，或 OTA 無法使用的情況：
+When your radio is connected over **USB/serial** (rather than Bluetooth), the Firmware Update screen offers **USB File Transfer**. The app reboots the device into DFU mode, then prompts you to save the `.uf2` file to the device's DFU drive using the system file picker. This option appears only on a USB/serial connection — it is not available over Bluetooth.
+
+> ℹ️ **nRF bootloader note:** Some devices (e.g. RAK WisBlock RAK4631) need their bootloader flashed with the vendor's serial DFU tool (such as `adafruit-nrfutil`) — copying the `.uf2` alone won't update the bootloader. The app surfaces a hint when this applies.
+
+### Other Flashing Options
+
+For recovery or when neither OTA nor in-app USB is available:
 
 - 請使用〔Meshtastic 網頁燒錄工具〕(https://flasher.meshtastic.org)
 - 或在桌面版使用〔Meshtastic CLI 工具〕(https://meshtastic.org/docs/getting-started/flashing-firmware)
 
 ## 版本頻道
 
-| 頻道        | 描述說明                |
-| --------- | ------------------- |
-| 穩定版       | 建議大多數使用者採用；已測試的正式版本 |
-| Alpha 測試版 | 預覽版本；可能包含錯誤         |
+| 頻道        | 描述說明                                                                       |
+| --------- | -------------------------------------------------------------------------- |
+| 穩定版       | 建議大多數使用者採用；已測試的正式版本                                                        |
+| Alpha 測試版 | 預覽版本；可能包含錯誤                                                                |
+| 本機檔案      | Flash a firmware file you select yourself, instead of a downloaded release |
 
 ## 更新前檢查清單
 
@@ -73,7 +80,7 @@ Once the update succeeds:
 - 無線電裝置將自動重新開機
 - 藍牙連線將自動重新建立
 - 確認您的設定完整無缺
-- 在「設定 → 關於」中確認韌體版本
+- Confirm the new version under **Currently Installed** on the Firmware Update screen — it's also shown on the node's detail page and the Connections screen
 
 ![Firmware update success](../../assets/screenshots/firmware_success.png)
 

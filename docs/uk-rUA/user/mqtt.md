@@ -56,6 +56,8 @@ A gateway node with internet access (WiFi or Ethernet) publishes mesh messages t
 
 The community maintains a public broker at `mqtt.meshtastic.org`. This is intended for general use and testing.
 
+> ℹ️ **Note:** Connections to `mqtt.meshtastic.org` always use TLS (port 8883), even if the TLS toggle is off. For any other broker, TLS is used only when you enable it (port 8883 with TLS, 1883 without).
+
 > 🔒 **Privacy:** Messages on the public broker are readable by anyone subscribed. Always use channel encryption for private communications.
 
 ### Private Broker

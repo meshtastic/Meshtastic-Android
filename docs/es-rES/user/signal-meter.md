@@ -52,12 +52,12 @@ The app rates your signal quality (None, Bad, Fair, or Good) from **SNR alone, m
 
 Because the rating is relative to the preset limit, the _same_ SNR can rate differently on different presets — `-15 dB` is healthy on `LongSlow` but unusable on `ShortFast`. Letting `limit` be the active preset's SNR Limit, here is how the app picks the bars (or color):
 
-| Level     | Bars | Criteria                             | Meaning                                                                                  |
-| --------- | ---- | ------------------------------------ | ---------------------------------------------------------------------------------------- |
-| Bien      | 3    | SNR **above** the preset's `limit`   | Signal is comfortably above the demodulation floor — healthy connection. |
-| Aceptable | 2    | within `5.5 dB` below the `limit`    | Decodable, but getting close to the floor.                               |
-| Mal       | 1    | within `7.5 dB` below the `limit`    | At the very edge of what the preset can recover.                         |
-| Ninguna   | 0    | more than `7.5 dB` below the `limit` | Below the floor — transmission lost to noise.                            |
+| Level     | Bars | Criteria                                        | Meaning                                                                                  |
+| --------- | ---- | ----------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Bien      | 3    | SNR **above** the preset's `limit`              | Signal is comfortably above the demodulation floor — healthy connection. |
+| Aceptable | 2    | up to `5.5 dB` below the `limit`                | Decodable, but getting close to the floor.                               |
+| Mal       | 1    | between `5.5 dB` and `7.5 dB` below the `limit` | At the very edge of what the preset can recover.                         |
+| Ninguna   | 0    | more than `7.5 dB` below the `limit`            | Below the floor — transmission lost to noise.                            |
 
 > **Note:** The fixed SNR thresholds you may have seen elsewhere (`-7 dB` / `-15 dB`) are now only used for coloring individual hops in traceroute results — not for the per-node signal meter described here.
 

@@ -74,6 +74,8 @@ Asetusten muuttamisen jälkeen napauta **Tallenna** kirjoittaaksesi määritykse
 | ~~Long Slow~~      | ~30 km  | 0.18 kbps | −17.5 dB | ⚠️ **Vanhentunut** — edelleen valittavissa, mutta voidaan poistaa tulevassa laiteohjelmistoversiossa                               |
 | ~~Very Long Slow~~ | ~40+ km | 0.09 kbps | −20 dB                   | ⚠️ **Vanhentunut** — edelleen valittavissa, mutta voidaan poistaa tulevassa laiteohjelmistoversiossa                               |
 
+> ℹ️ **Huomautus:** Tässä taulukossa käytetään yleisesti käytössä olevia lyhyitä nimiä. Sovelluksen esiasetusvalikossa ne näkyvät nimillä **Lyhyt kantama - Nopea**, **Pitkä kantama - Nopea**, **Lite - Nopea**, **Kapea - Nopea** ja niin edelleen.
+
 #### Modeemiesiasetuksen valitseminen
 
 Modeemiesiasetus määrittää tärkeimmän kompromissin **kantaman** ja **tiedonsiirtonopeuden** välillä:

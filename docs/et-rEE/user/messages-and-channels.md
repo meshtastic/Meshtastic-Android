@@ -74,8 +74,8 @@ When a message fails to deliver, the error indicator shows what went wrong:
 | Tõrge            | Meaning                                  | What to Do                                                                                                                                                                  |
 | ---------------- | ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | No Route         | No path exists to the destination node   | The recipient may be offline or out of mesh range. Try later or move closer.                                                                |
-| Got NAK          | The next-hop node refused to relay       | The relay node may be congested. Wait and retry.                                                                                            |
-| Aegunud          | No acknowledgment within retry window    | The recipient may be just out of range. Try increasing hop limit or moving to a better position.                                            |
+| Got NAK          | Järgmise-hüppe sõlm keeldus edastamast   | The relay node may be congested. Wait and retry.                                                                                            |
+| Aegunud          | No acknowledgment within retry window    | The recipient may be just out of range. Proovi hüppe limiiti suurendada või paremasse positsiooni liikuda.                                  |
 | Liidest pole     | No radio interface available to send     | Kontrolli, kas raadio on ühendatud ja kanal on seadistatud.                                                                                                 |
 | Max Retransmit   | All retry attempts exhausted             | The mesh path is unreliable. Try a different channel or wait for conditions to improve.                                                     |
 | Kanalit pole     | The destination channel doesn't exist    | Veendu, et mõlemal sõlmel oleks sama kanali seadistus.                                                                                                      |
@@ -116,11 +116,15 @@ You can search the full history of any conversation directly from the chat scree
 
 ![Message search bar with result counter and previous/next arrows](../../assets/screenshots/messages_search_bar.png)
 
-> 💡 **Vihje:** Otsing toimub täisteksti põhjal ja jääb vestlusse, kust sa selle avasid – see ei otsi teistest kanalitest ega kontaktide hulgast. Matching is fast even on long histories because messages are indexed locally.
+> 💡 **Vihje:** Otsing toimub täisteksti põhjal ja jääb vestlusse, kust sa selle avasid – see ei otsi teistest kanalitest ega kontaktide hulgast. It matches against the messages already stored on your device, so it works fully offline.
 
 ### Message Bubbles
 
 Messages appear as chat bubbles — sent messages on the right, received messages on the left. Each bubble shows the sender, timestamp, and delivery status. Messages with replies include a quoted preview of the original message above the response.
+
+### Mentions
+
+Type `@` while composing to mention a node — a picker suggests matching contacts as you type. In a received message, a mention appears as a highlighted chip showing the node's name; tap it to jump straight to that node's detail page.
 
 ### Reactions
 
@@ -143,6 +147,7 @@ Long-press any message to access:
 - **Copy** — copy message text to clipboard
 - **Reply** — quote the message in your response
 - **React** — add an emoji reaction
+- **Translate** — translate a received message into your device language and toggle between the original and translated text (Google Play build only; uses on-device translation)
 - **Delete** — remove a message you sent (local deletion)
 
 ### Message Priority

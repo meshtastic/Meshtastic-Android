@@ -14,7 +14,7 @@ Meshtastic rakendus kuvab automaatselt temperatuure, vahemaid, kiirusi ja aegu �
 
 ## How It Works
 
-Meshtastic raadiod edastavad andmeid alati **meetrilistes ühikutes** (meetrid, °C, km/h, hPa jne). When the app receives this data, it uses the `MetricFormatter` utility to convert and display values in whatever unit system your device's locale specifies.
+Meshtastic raadiod edastavad andmeid alati **meetrilistes ühikutes** (meetrid, °C, km/h, hPa jne). When the app receives this data, it converts and displays values in whatever unit system your device's locale specifies.
 
 On Android, your measurement preferences are determined by your system **Language & Region** settings. On Desktop (JVM), the app uses the JVM's default `Locale`.
 
@@ -52,7 +52,7 @@ The app uses natural scaling — short distances stay in meters or feet, while l
 
 - **Node list** — distance and bearing to each node
 - **Node detail** — altitude, distance from your position
-- **Map** — waypoint distances, traceroute hop distances
+- **Kaart** — teekonnapunktide vahemaad, traceroute'i hüppevahemaad
 - **Compass** — distance to selected node
 
 ## Kiirus
@@ -115,12 +115,13 @@ On Android, your measurement system (metric vs imperial) is tied to your region 
 2. Change your **Region** or **Measurement units** preference
 3. Tagasi Meshtastic juurde — väärtused värskendatakse kohe
 
-> 💡 **Tip:** The app uses `MetricFormatter` from `core:common`. All measurement formatting is handled by a shared KMP utility that respects your platform's locale. Developers adding new measurement displays should use `MetricFormatter` rather than hard-coding unit conversions.
+> 💡 **Tip:** All measurement formatting is handled centrally and respects your platform's locale, so units stay consistent everywhere in the app.
 
 ## Related Topics
 
 - [Node Metrics](node-metrics) — where temperature, distance, and sensor values are displayed
 - [Telemeetia & Sensorid](telemetry-and-sensors) — andurid, mis neid mõõtmisi teevad
+- [Measurement & Formatting](../developer/measurement) — developer reference for the formatting utilities
 - [Settings — Radio & User](settings-radio-user) — region setting that drives unit selection
 
 ---

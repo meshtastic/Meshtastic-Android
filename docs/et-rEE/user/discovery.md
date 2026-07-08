@@ -44,7 +44,6 @@ Before starting, configure these controls:
 The **Start** button stays disabled — with an explanation of why — until the scan can run. Common reasons it's disabled:
 
 - The device is **not connected**.
-- The current channel is using the **default channel key** (use a unique key first — see [Messages & Channels](messages-and-channels)).
 - **No presets** have been selected to scan.
 - The selected preset uses **2.4 GHz**, which your hardware doesn't support.
 
@@ -102,7 +101,7 @@ Traceroute reveals the exact path a message takes from your node to any other no
 1. Mine valikuni **Sõlmed** ja puuduta sõlme, mida soovid jälgida.
 2. Sõlme üksikasjade ekraanil puuduta **Traceroute**.
 3. The app sends a traceroute request and waits for the response.
-4. Results display each hop in order, with signal quality at every step.
+4. Tulemused kuvatakse iga hüppe kohta, koos signaali kvaliteediga igal sammul.
 
 ### Reading the Results
 
@@ -112,21 +111,21 @@ A traceroute result looks like this:
 You → Node A (SNR: 8.5, RSSI: -95) → Node B (SNR: 5.2, RSSI: -108) → Target
 ```
 
-Each hop represents a relay node that forwarded the message. The SNR and RSSI values at each hop tell you about the link quality on that specific segment.
+Iga hüpe näitab vahendussõlme, mis sõnumi edastas. The SNR and RSSI values at each hop tell you about the link quality on that specific segment.
 
-| What to look for                                                           | What it means                                                               |
-| -------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| All hops show Good SNR (> 5 dB)                         | Healthy path — messages flow reliably                                       |
-| One hop shows Bad SNR (< 0 dB) | Weak link — this relay segment is fragile                                   |
-| Many hops (4+)                                          | Long path — consider repositioning a node to shorten it                     |
-| Different path on retry                                                    | Mesh is adapting — multiple routes exist (this is good!) |
+| What to look for                                                         | What it means                                                               |
+| ------------------------------------------------------------------------ | --------------------------------------------------------------------------- |
+| Kõikidel hüpetel on hea SNR (> 5 dB)                  | Healthy path — messages flow reliably                                       |
+| Ühel hüpel halb SNR (< 0 dB) | Weak link — this relay segment is fragile                                   |
+| Mitu hüppet (4+)                                      | Long path — consider repositioning a node to shorten it                     |
+| Different path on retry                                                  | Mesh is adapting — multiple routes exist (this is good!) |
 
 > 💡 **Vihje:** Käivita traceroute'i mitu korda mõne minuti tagant. If the path changes, your mesh has redundant routes — a sign of a well-connected network.
 
 ### Troubleshooting with Traceroute
 
 - **"No route found"** — The target node may be offline, out of range, or on a different channel. Check that both nodes share at least one channel with the same encryption key.
-- **Traceroute times out** — The path may be too long (exceeds hop limit) or a relay node is congested. Try increasing the hop limit in **Settings → LoRa Config**.
+- **Traceroute aegus** — Tee võib olla liiga pikk (ületab hüppete limiidi) või on vahendussõlm ülekoormatud. Proovi hüppe limiiti suurendada menüüs **Seaded → LoRa konfiguratsioon**.
 - **Asymmetric paths** — A traceroute from A→B may take a different path than B→A. This is normal — radio propagation is not always symmetric.
 
 ---
@@ -164,7 +163,7 @@ The node list itself is a powerful discovery tool when you use its filtering and
 
 ### Assessing Connectivity
 
-- Sort by **Hops away** to see which nodes are directly reachable (0 hops) versus relayed.
+- Sorteeri **Hüpete arvu järgi**, et näha, millised sõlmed on otse kättesaadavad (0 hüpet) ja millised vahendatavate sõlmedega.
 - Sort by **Distance** to find nearby nodes and verify they're reachable.
 - Kasuta **Välista MQTT** raadio teel (mitte internetisilla kaudu) ligipääsetavatele sõlmedele keskendumiseks.
 

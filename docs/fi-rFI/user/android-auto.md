@@ -2,7 +2,7 @@
 title: Android Auto
 parent: Käyttöopas
 nav_order: 18
-last_updated: 2026-06-11
+last_updated: 2026-07-07
 description: Käytä Meshtasticia hands-free-tilassa Android Auto -laitteessa — lue viestit ääneen, vastaa puheella ja tarkista radiot sekä mesh-verkon tila ajon aikana.
 aliases:
   - android-auto
@@ -17,9 +17,11 @@ Meshtastic integroituu Android Auton kanssa, joten voit pysyä yhteydessä mesh-
 
 > ⚠️ **Huom:** Android Auto -tuki on saatavilla vain **Google-version Android-laitteissa**. Sitä ei ole mukana F-Droid-versiossa, eikä se ole saatavilla työpöydällä tai iOS:ssä.
 
+> ℹ️ **Mitä on saatavilla tällä hetkellä:** Google Play -versio tarjoaa tällä hetkellä **vain ilmoituksiin perustuvan** viestituen autoon – saapuvat viestit luetaan auton näytöllä, ja voit vastata niihin sen ilmoitusohjaimilla. Alla kuvattu välilehdellinen **Viestit / Radiot / Tila** -kokemus on Android Car App Libraryyn perustuva beetaversio (Googlen Android Car -mallit ovat toistaiseksi rajoitettuja suljettuihin/sisäisiin Play-jakeluihin), joten se näkyy vain versioissa, jotka on käännetty asetuksella `-PenableCarTemplates=true`. Tämän sivun loppuosa kuvaa tätä beetakokemusta.
+
 ## Yleiskatsaus
 
-Kun puhelin on yhdistetty Android Auto -pääyksikköön (tai kehityksessä käytettävään Desktop Head Unit -emulaattoriin), Meshtastic näkyy viestisovelluksena, joka on toteutettu Android Car App Library -kirjastolla. Auton käyttöliittymä näyttää välilehdellisen aloitusnäkymän, joka on optimoitu ajoturvalliseen ja nopeasti silmäiltävään käyttöön:
+Kun puhelimesi on yhdistetty Android Auto -laitteeseen (tai kehityksessä käytettävään Desktop Head Unit -emulaattoriin), beetaversio näyttää Meshtasticin Android Car App Libraryyn perustuvana viestisovelluksena, jossa on ajon aikaiseen käyttöön optimoitu välilehdellinen aloitusnäyttö:
 
 - **Viestit** — viimeisimmät keskustelut, ääneen luettava ja äänellä vastattava.
 - **Radiot** — mesh-verkon radiolista, sisältää radion yksityiskohtaisen näkymän.

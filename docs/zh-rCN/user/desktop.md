@@ -2,7 +2,7 @@
 title: Desktop App
 parent: User Guide
 nav_order: 14
-last_updated: 2026-06-11
+last_updated: 2026-07-07
 description: Install and use the Meshtastic Desktop app on Linux, macOS, and Windows — connections, feature parity, and keyboard shortcuts.
 aliases:
   - desktop
@@ -60,19 +60,19 @@ Bluetooth Low Energy is supported on Desktop via the [Kable](https://github.com/
 
 ## Feature Parity
 
-| Feature                                      | Android | Desktop | 注                                              |
-| -------------------------------------------- | ------- | ------- | ---------------------------------------------- |
-| Messaging                                    | ✓       | ✓       | Full parity                                    |
-| Node List                                    | ✓       | ✓       | Full parity                                    |
-| 地图                                           | ✓       | ✓       | Full parity                                    |
-| 设置                                           | ✓       | ✓       | Full parity                                    |
-| Bluetooth (BLE)           | ✓       | ✓       | Via Kable on desktop                           |
-| Firmware Update OTA                          | ✓       | ✗       | Use web flasher                                |
-| Notifications                                | ✓       | ✓       | Native OS notifications                        |
-| Widgets                                      | ✓       | ✗       | Android-only                                   |
-| Android Auto                                 | ✓       | ✗       | Android-only — not available on Desktop or iOS |
-| AI Assistant (Chirpy)     | ✓\*     | ✗       | Google flavor Android only                     |
-| App Functions (system AI) | ✓†      | ✗       | Google flavor Android only                     |
+| Feature                                      | Android | Desktop | 注                                                                          |
+| -------------------------------------------- | ------- | ------- | -------------------------------------------------------------------------- |
+| Messaging                                    | ✓       | ✓       | Full parity                                                                |
+| Node List                                    | ✓       | ✓       | Full parity                                                                |
+| 地图                                           | ✓       | ◐       | Map tab exists on desktop, but the interactive map view is Android-only    |
+| 设置                                           | ✓       | ✓       | Full parity                                                                |
+| Bluetooth (BLE)           | ✓       | ✓       | Via Kable on desktop                                                       |
+| 固件更新                                         | ✓       | ◐       | Desktop supports in-app USB firmware update; BLE/Wi-Fi OTA is Android-only |
+| Notifications                                | ✓       | ✓       | Native OS notifications                                                    |
+| Widgets                                      | ✓       | ✗       | Android-only                                                               |
+| Android Auto                                 | ✓       | ✗       | Android-only — not available on Desktop or iOS                             |
+| AI Assistant (Chirpy)     | ✓\*     | ✗       | Google flavor Android only                                                 |
+| App Functions (system AI) | ✓†      | ✗       | Google flavor Android only                                                 |
 
 \*Chirpy AI requires Android 14+ on Google flavor builds with supported hardware.
 
@@ -84,14 +84,17 @@ The Desktop app uses the same Compose Multiplatform UI with adaptations for larg
 
 ### Keyboard Shortcuts
 
-| Shortcut            | Action                 |
-| ------------------- | ---------------------- |
-| **⌘Q** / **Ctrl+Q** | Quit the application   |
-| **⌘,** / **Ctrl+,** | 打开设置                   |
-| **⌘1** / **Ctrl+1** | Switch to Messages tab |
-| **⌘2** / **Ctrl+2** | Switch to Nodes tab    |
-| **⌘3** / **Ctrl+3** | Switch to Map tab      |
-| **⌘4** / **Ctrl+4** | Switch to Connect tab  |
+All shortcuts use the **Meta** key — that's ⌘ (Command) on macOS and the Super / Windows key on Linux and Windows. (`Ctrl` is not bound.)
+
+| Shortcut   | Action                 |
+| ---------- | ---------------------- |
+| **Meta+Q** | Quit the application   |
+| **Meta+,** | 打开设置                   |
+| **Meta+1** | Switch to Messages tab |
+| **Meta+2** | Switch to Nodes tab    |
+| **Meta+3** | Switch to Map tab      |
+| **Meta+4** | Switch to Connect tab  |
+| **Meta+/** | Open About             |
 
 ### Window & System Tray
 
@@ -123,7 +126,6 @@ Individual doc pages render with full formatting:
 ```bash
 git clone https://github.com/meshtastic/Meshtastic-Android.git
 cd Meshtastic-Android
-git submodule update --init
 ./gradlew :desktopApp:run
 ```
 
@@ -134,7 +136,8 @@ Requirements:
 
 ## Known Limitations
 
-- No OTA firmware updates (use web flasher)
+- Firmware updates over the air (BLE/Wi-Fi) are Android-only; on desktop, use the in-app USB update or the [Web Flasher](https://flasher.meshtastic.org)
+- The interactive map view is Android-only — the Map tab is present but does not render a map on desktop
 - Some Android-specific features (widgets, specific notification channels) are unavailable
 - Performance may vary on low-spec hardware running Compose Desktop
 - BLE bonding is not yet supported on desktop (pairing works without bonding)
@@ -142,7 +145,7 @@ Requirements:
 ## Related Topics
 
 - [Connections](connections) — connection methods overview
-- [Firmware Updates](firmware) — use the [Web Flasher](https://flasher.meshtastic.org) for desktop firmware updates
+- [Firmware Updates](firmware) — in-app USB update on desktop, or the [Web Flasher](https://flasher.meshtastic.org)
 
 ---
 

@@ -55,12 +55,15 @@ Der **IAQ-Index (Indoor Air Quality / Raumluftqualität)** des BME680 ist ein ei
 
 Air Quality is a dedicated metrics view for nodes equipped with a particulate-matter and/or CO₂ sensor. Dies ist **unabhängig vom BME680-IAQ-Messwert**, der unter „Environment Metrics“ (Umgebungsmesswerte) aufgeführt ist – IAQ ist ein einzelner, aus dem Gaswiderstand abgeleiteter Index, während die Luftqualitätsansicht die zugrundeliegenden Messwerte für Feinstaub und CO₂ grafisch darstellt.
 
-| Metrisch              | Einheit | Beschreibung                                         |
-| --------------------- | ------- | ---------------------------------------------------- |
-| PM1.0 | µg/m³   | Particulate matter up to 1.0 micron  |
-| PM2.5 | µg/m³   | Particulate matter up to 2.5 microns |
-| PM10                  | µg/m³   | Particulate matter up to 10 microns                  |
-| CO₂                   | ppm     | Carbon dioxide concentration                         |
+| Metrisch              | Einheit   | Beschreibung                                                                                                                                                                                                               |
+| --------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| PM1.0 | µg/m³     | Particulate matter up to 1.0 micron                                                                                                                                                                        |
+| PM2.5 | µg/m³     | Particulate matter up to 2.5 microns                                                                                                                                                                       |
+| PM10                  | µg/m³     | Particulate matter up to 10 microns                                                                                                                                                                                        |
+| AQI                   | EPA index | EPA **NowCast** AQI computed from your recent PM2.5 history, with a color-coded severity label. Shown next to PM2.5 once enough readings have accumulated. |
+| CO₂                   | ppm       | Carbon dioxide concentration                                                                                                                                                                                               |
+| CO₂ temperature       | °C / °F   | Temperature reported by the CO₂ sensor itself (e.g. SCD4x)                                                                                                              |
+| CO₂ humidity          | %         | Relative humidity reported by the CO₂ sensor                                                                                                                                                                               |
 
 CO₂ readings are color-coded by severity to make air quality easy to read at a glance:
 
@@ -98,12 +101,12 @@ Radio signal quality information:
 
 Die Signalqualität wird auf der Grundlage des **Signal-Rauschabstand im Verhältnis zur Demodulationsschwelle der aktiven LoRa-Modem-Voreinstellung** bewertet, nicht anhand fester Schwellenwerte – ein bestimmter Wert des Signal-Rauschabstand hat je nach Voreinstellung unterschiedliche Bedeutungen (z. B. sind −15 dB bei „LongSlow“ in Ordnung, bei „ShortFast“ jedoch unbrauchbar). RSSI is shown but is not part of the rating. Letting `limit` be the preset's SNR limit:
 
-| Quality                  | Criteria                                         |
-| ------------------------ | ------------------------------------------------ |
-| Gut                      | SNR above the preset's limit                     |
-| Ordentliche Signalstärke | within 5.5 dB below the limit    |
-| Schlecht                 | within 7.5 dB below the limit    |
-| Keins                    | more than 7.5 dB below the limit |
+| Quality                  | Criteria                                                                  |
+| ------------------------ | ------------------------------------------------------------------------- |
+| Gut                      | SNR above the preset's limit                                              |
+| Ordentliche Signalstärke | up to 5.5 dB below the limit                              |
+| Schlecht                 | between 5.5 dB and 7.5 dB below the limit |
+| Keins                    | more than 7.5 dB below the limit                          |
 
 See [Understanding the Signal Meter](signal-meter) for the full explanation.
 

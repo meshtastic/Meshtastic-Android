@@ -116,11 +116,15 @@ Voit hakea koko keskusteluhistorian suoraan chat-näkymästä:
 
 ![Viestihaku-palkki tuloslaskurilla ja nuolilla](../../assets/screenshots/messages_search_bar.png)
 
-> 💡 Vinkki: Haku on täystekstihaku ja toimii vain siinä keskustelussa, josta avasit sen — se ei hae muista kanavista tai kontakteista. Osumat löytyvät nopeasti myös pitkistä historiatiedoista, koska viestit on indeksoitu paikallisesti.
+> 💡 Vinkki: Haku on täystekstihaku ja toimii vain siinä keskustelussa, josta avasit sen — se ei hae muista kanavista tai kontakteista. Se hakee osumat laitteellesi jo tallennetuista viesteistä, joten se toimii täysin offline-tilassa.
 
 ### Viestikuplat
 
 Viestit näkyvät chat-kuplina — lähetetyt viestit oikealla, vastaanotetut vasemmalla. Jokainen kupla näyttää lähettäjän, aikaleiman ja toimitustilan. Vastaukselliset viestit sisältävät alkuperäisen viestin esikatselun vastauksen yläpuolella.
+
+### Maininnat
+
+Kirjoita viestiä laatiessasi `@` mainitaksesi radion — valitsin ehdottaa kirjoittaessasi vastaavia yhteystietoja. Vastaanotetussa viestissä maininta näkyy korostettuna tunnisteena, jossa näkyy radion nimi. Napauta sitä siirtyäksesi suoraan kyseisen radion tietosivulle.
 
 ### Reaktiot
 
@@ -143,6 +147,7 @@ Pitkä painallus missä tahansa viestissä avaa:
 - **Kopioi** — kopioi viestin teksti leikepöydälle
 - **Vastaa** — lainaa viesti vastaukseesi
 - **Reagoi** — lisää emoji-reaktio
+- **Käännä** — kääntää vastaanotetun viestin laitteesi kielelle ja mahdollistaa vaihtamisen alkuperäisen ja käännetyn tekstin välillä (vain Google Play -versiossa; käyttää laitteella toimivaa käännöstä)
 - **Poista** — poista lähettämäsi viesti (paikallinen poisto)
 
 ### Viestien prioriteetti

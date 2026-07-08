@@ -2,8 +2,8 @@
 title: Laiteohjelmiston päivitykset
 parent: Käyttöopas
 nav_order: 13
-last_updated: 2026-05-13
-description: Päivitä radion laiteohjelmisto Bluetoothin kautta — OTA-päivitys, versiohaarat, esitarkistukset ja palautus.
+last_updated: 2026-07-07
+description: Päivitä radiosi laiteohjelmisto bluetoothin tai USB:n kautta — OTA-päivitys, versiokanavat, tarkistukset ennen päivitystä ja palautus.
 aliases:
   - firmware
   - päivitä
@@ -17,7 +17,7 @@ Pidä Meshtastic-radiosi ajan tasalla uusimmalla firmwarella, jossa on uusia omi
 
 ## Päivitysten tarkistaminen
 
-1. Siirry kohtaan **Asetukset — Firmware-päivitys** tai napauta päivitysilmoitusta, jos sellainen näkyy.
+1. Avaa yhdistetyn radion asetukset ja valitse **Lisäasetukset → Laiteohjelmiston päivitys** — tai napauta laiteohjelmistopäivitysilmoitusta, jos sellainen näkyy. Tämä vaihtoehto näkyy vain laitteilla, jotka tukevat OTA-päivityksiä.
 2. Sovellus tarkistaa saatavilla olevat firmware-versiot.
 3. Saatavilla olevat päivitykset näyttävät versionumeron ja muutoslokin yhteenvedon.
 
@@ -39,19 +39,26 @@ Yleisin päivitystapa Android-käyttäjille:
 
 ![Laiteohjelmiston vastuuvapauslauseke](../../assets/screenshots/firmware_disclaimer.png)
 
-### USB-ohjelmointi
+### USB-päivitys sovelluksesta
 
-Palautusta varten tai jos OTA ei ole käytettävissä:
+Kun radio on yhdistetty **USB:n tai sarjayhteyden** kautta (bluetoothin sijaan), **laiteohjelmiston päivitys** -näkymässä on käytettävissä **USB-tiedostonsiirto**. Sovellus käynnistää laitteen uudelleen DFU-tilaan ja pyytää sitten tallentamaan `.uf2`-tiedoston laitteen DFU-asemaan järjestelmän tiedostonvalitsimen avulla. Tämä vaihtoehto näkyy vain USB tai sarjayhteydellä — sitä ei voi käyttää bluetoothin kautta.
+
+> ℹ️ **nRF-käynnistyslatain:** Jotkin laitteet (esimerkiksi RAK WisBlock RAK4631) edellyttävät, että käynnistyslatain päivitetään valmistajan sarjamuotoisella DFU-työkalulla (kuten `adafruit-nrfutil`). Pelkän `.uf2`-tiedoston kopioiminen ei päivitä käynnistyslatainta. Sovellus näyttää tästä vihjeen, kun se on tarpeen.
+
+### Muut päivitysvaihtoehdot
+
+Käytä näitä palautukseen tai silloin, kun OTA- tai sovelluksen USB-päivitys ei ole käytettävissä:
 
 - Käytä [Meshtastic Web Flasheriä](https://flasher.meshtastic.org)
 - Tai [Meshtastic CLI -työkalua](https://meshtastic.org/docs/getting-started/flashing-firmware) työpöytäympäristössä
 
 ## Versiokanavat
 
-| Kanava | Kuvaus                                                                |
-| ------ | --------------------------------------------------------------------- |
-| Vakaa  | Suositeltu useimmille käyttäjille: testatut julkaisut |
-| Alpha  | Esijulkaisut voivat sisältää virheitä                                 |
+| Kanava               | Kuvaus                                                                   |
+| -------------------- | ------------------------------------------------------------------------ |
+| Vakaa                | Suositeltu useimmille käyttäjille: testatut julkaisut    |
+| Alpha                | Esijulkaisut voivat sisältää virheitä                                    |
+| Paikallinen tiedosto | Asenna itse valitsemasi laiteohjelmistotiedosto ladatun julkaisun sijaan |
 
 ## Päivitystä edeltävä tarkistuslista
 
@@ -73,7 +80,7 @@ Kun päivitys onnistuu:
 - Radio käynnistyy uudelleen automaattisesti
 - Bluetooth-yhteys muodostuu uudelleen
 - Varmista, että asetuksesi ovat säilyneet
-- Tarkista firmware-versio kohdasta **Asetukset — Tietoja**
+- Vahvista uusi versio **Asennettu tällä hetkellä** -kohdasta **Laiteohjelmiston päivitys** -näkymässä — sama tieto näkyy myös radion tiedoissa ja **Yhteydet**-näkymässä
 
 ![Firmware-päivitys onnistui](../../assets/screenshots/firmware_success.png)
 

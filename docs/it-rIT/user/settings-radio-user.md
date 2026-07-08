@@ -74,6 +74,8 @@ After modifying settings, tap **Save** to write the configuration to your radio.
 | ~~Long Slow~~      | ~30 km  | 0,18 kbps                 | −17.5 dB | ⚠️ **Deprecated** — still selectable but may be removed in a future firmware release                     |
 | ~~Very Long Slow~~ | ~40+ km | 0.09 kbps | −20 dB                   | ⚠️ **Deprecated** — still selectable but may be removed in a future firmware release                     |
 
+> ℹ️ **Note:** This table uses the common short names. In the app's preset dropdown they read as **Short Range - Fast**, **Long Range - Fast**, **Lite - Fast**, **Narrow - Fast**, and so on.
+
 #### Choosing a Modem Preset
 
 The modem preset controls the fundamental tradeoff between **range** and **data rate**:

@@ -116,11 +116,15 @@ You can search the full history of any conversation directly from the chat scree
 
 ![Message search bar with result counter and previous/next arrows](../../assets/screenshots/messages_search_bar.png)
 
-> 💡 **Tip:** Search is full-text and stays within the conversation you opened it from — it doesn't search across other channels or contacts. Matching is fast even on long histories because messages are indexed locally.
+> 💡 **Tip:** Search is full-text and stays within the conversation you opened it from — it doesn't search across other channels or contacts. It matches against the messages already stored on your device, so it works fully offline.
 
 ### 訊息泡泡
 
 訊息以對話泡泡的形式顯示 — 已傳送的訊息在右側，收到的訊息在左側。 每個泡泡顯示傳送者、時間戳記及傳遞狀態。 含有回覆的訊息，會在回覆內容上方顯示原始訊息的引用預覽。
+
+### Mentions
+
+Type `@` while composing to mention a node — a picker suggests matching contacts as you type. In a received message, a mention appears as a highlighted chip showing the node's name; tap it to jump straight to that node's detail page.
 
 ### 訊息回應
 
@@ -143,6 +147,7 @@ You can search the full history of any conversation directly from the chat scree
 - 複製 — 將訊息文字複製至剪貼簿
 - 回覆 — 在回覆中引用該訊息
 - 回應 — 新增表情符號回應
+- **Translate** — translate a received message into your device language and toggle between the original and translated text (Google Play build only; uses on-device translation)
 - 刪除 — 移除您傳送的訊息（僅限本機刪除）
 
 ### 訊息優先順序
