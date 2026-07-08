@@ -189,6 +189,12 @@
   },
   "pullRequests": [
     {
+      "id": "10936",
+      "title": "Snake!",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10936",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
       "id": "10935",
       "title": "Fix size report stale baseline",
       "page_url": "https://github.com/meshtastic/firmware/pull/10935",
@@ -258,7 +264,7 @@
       "id": "10908",
       "title": "feat: Support Elecrow ThinkNode M9",
       "page_url": "https://github.com/meshtastic/firmware/pull/10908",
-      "zip_url": "+446.5 KB"
+      "zip_url": "+454.1 KB"
     },
     {
       "id": "10902",
@@ -325,12 +331,6 @@
       "title": "Add TiltTelemetryModule for LIS3DH accelerometer mounts",
       "page_url": "https://github.com/meshtastic/firmware/pull/10787",
       "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "10784",
-      "title": "build(native-macos): enable UDP multicast mesh",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10784",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     }
   ]
 }
