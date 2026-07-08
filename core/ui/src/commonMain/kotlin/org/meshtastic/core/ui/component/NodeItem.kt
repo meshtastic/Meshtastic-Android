@@ -364,8 +364,7 @@ private fun gatherSensors(node: Node, tempInFahrenheit: Boolean, contentColor: C
     if ((env.temperature ?: 0f) != 0f) {
         val temp = MetricFormatter.temperature(env.temperature ?: 0f, tempInFahrenheit)
         items.add { TemperatureInfo(temp = temp, contentColor = contentColor) }
-    }
-    else if ((aq.co2_temperature?: 0f) != 0f) {
+    } else if ((aq.co2_temperature ?: 0f) != 0f) {
         val temp = MetricFormatter.temperature(aq.co2_temperature ?: 0f, tempInFahrenheit)
         items.add { TemperatureInfo(temp = temp, contentColor = contentColor) }
     }
@@ -374,8 +373,7 @@ private fun gatherSensors(node: Node, tempInFahrenheit: Boolean, contentColor: C
         items.add {
             HumidityInfo(humidity = MetricFormatter.humidity(env.relative_humidity ?: 0f), contentColor = contentColor)
         }
-    }
-    else if ((aq.co2_humidity?: 0f) != 0f) {
+    } else if ((aq.co2_humidity ?: 0f) != 0f) {
         items.add {
             HumidityInfo(humidity = MetricFormatter.humidity(aq.co2_humidity ?: 0f), contentColor = contentColor)
         }
