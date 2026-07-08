@@ -2,8 +2,8 @@
 title: Püsivara värskendus
 parent: User Guide
 nav_order: 13
-last_updated: 2026-05-13
-description: Raadio püsivara uuendamine sinihamba ​​kaudu – OTA protsess, versioonikanalid, lennueelsed kontrollid ja taastamine.
+last_updated: 2026-07-07
+description: Update your radio firmware over Bluetooth or USB — OTA process, version channels, pre-flight checks, and recovery.
 aliases:
   - firmware
   - värskendus
@@ -17,7 +17,7 @@ Hoia oma Meshtastic raadio ajakohasena uusima püsivaraga, et saada uusi funktsi
 
 ## Kontrollin värskendust
 
-1. Mine menüüsse **Seaded → Püsivara värskendus** või puuduta püsivara teavitust, kui see kuvatakse.
+1. Open the connected radio's configuration and, under **Advanced**, tap **Firmware Update** — or tap the firmware notification if one is shown. The entry appears only for OTA-capable devices.
 2. The app checks for available firmware versions.
 3. Saadaval olevad värskendused näitavad versiooninumbrit ja muudatuste logi kokkuvõtet.
 
@@ -39,19 +39,26 @@ Kõige levinum värskendamisviis Androidi kasutajate seas:
 
 ![Firmware disclaimer](../../assets/screenshots/firmware_disclaimer.png)
 
-### USB Flashing
+### In-App USB Update
 
-For recovery or when OTA is unavailable:
+When your radio is connected over **USB/serial** (rather than Bluetooth), the Firmware Update screen offers **USB File Transfer**. The app reboots the device into DFU mode, then prompts you to save the `.uf2` file to the device's DFU drive using the system file picker. This option appears only on a USB/serial connection — it is not available over Bluetooth.
+
+> ℹ️ **nRF bootloader note:** Some devices (e.g. RAK WisBlock RAK4631) need their bootloader flashed with the vendor's serial DFU tool (such as `adafruit-nrfutil`) — copying the `.uf2` alone won't update the bootloader. The app surfaces a hint when this applies.
+
+### Other Flashing Options
+
+For recovery or when neither OTA nor in-app USB is available:
 
 - Kasuta [Meshtastic Web Flasherit](https://flasher.meshtastic.org)
 - Või arvutil [Meshtastic CLI tööriist](https://meshtastic.org/docs/getting-started/flashing-firmware)
 
 ## Version Channels
 
-| Kanal     | Kirjeldus                                   |
-| --------- | ------------------------------------------- |
-| Stabiilne | Recommended for most users; tested releases |
-| Alfa      | Preview releases; may contain bugs          |
+| Kanal     | Kirjeldus                                                                  |
+| --------- | -------------------------------------------------------------------------- |
+| Stabiilne | Recommended for most users; tested releases                                |
+| Alfa      | Preview releases; may contain bugs                                         |
+| Lokaalne  | Flash a firmware file you select yourself, instead of a downloaded release |
 
 ## Eelvärskenduse kontrollnimekiri
 
@@ -73,7 +80,7 @@ Kui värskendus õnnestub:
 - The radio will reboot automatically
 - Bluetooth connection will re-establish
 - Verify your settings are intact
-- Check the firmware version in **Settings → About**
+- Confirm the new version under **Currently Installed** on the Firmware Update screen — it's also shown on the node's detail page and the Connections screen
 
 ![Püsivara värskendus õnnestus](/assets/screenshots/firmware_success.png)
 

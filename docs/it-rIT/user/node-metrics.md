@@ -55,12 +55,15 @@ The BME680 **IAQ (Indoor Air Quality)** index is a single 0–500+ value derived
 
 Air Quality is a dedicated metrics view for nodes equipped with a particulate-matter and/or CO₂ sensor. It is **separate from the BME680 IAQ reading** listed under Environment Metrics — IAQ is a single gas-resistance-derived index, while the Air Quality view charts the underlying particulate and CO₂ measurements.
 
-| Metrico               | Unit  | Descrizione                                          |
-| --------------------- | ----- | ---------------------------------------------------- |
-| PM1.0 | µg/m³ | Particulate matter up to 1.0 micron  |
-| PM2.5 | µg/m³ | Particulate matter up to 2.5 microns |
-| PM10                  | µg/m³ | Particulate matter up to 10 microns                  |
-| CO₂                   | ppm   | Carbon dioxide concentration                         |
+| Metrico               | Unit      | Descrizione                                                                                                                                                                                                                |
+| --------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| PM1.0 | µg/m³     | Particulate matter up to 1.0 micron                                                                                                                                                                        |
+| PM2.5 | µg/m³     | Particulate matter up to 2.5 microns                                                                                                                                                                       |
+| PM10                  | µg/m³     | Particulate matter up to 10 microns                                                                                                                                                                                        |
+| AQI                   | EPA index | EPA **NowCast** AQI computed from your recent PM2.5 history, with a color-coded severity label. Shown next to PM2.5 once enough readings have accumulated. |
+| CO₂                   | ppm       | Carbon dioxide concentration                                                                                                                                                                                               |
+| CO₂ temperature       | °C / °F   | Temperature reported by the CO₂ sensor itself (e.g. SCD4x)                                                                                                              |
+| CO₂ humidity          | %         | Relative humidity reported by the CO₂ sensor                                                                                                                                                                               |
 
 CO₂ readings are color-coded by severity to make air quality easy to read at a glance:
 
@@ -98,12 +101,12 @@ Radio signal quality information:
 
 Signal quality is rated from **SNR relative to the active LoRa modem preset's demodulation floor**, not from fixed thresholds — a given SNR means different things on different presets (e.g. −15 dB is fine on LongSlow but unusable on ShortFast). RSSI is shown but is not part of the rating. Letting `limit` be the preset's SNR limit:
 
-| Quality  | Criteria                                         |
-| -------- | ------------------------------------------------ |
-| Buono    | SNR above the preset's limit                     |
-| Discreto | within 5.5 dB below the limit    |
-| Scarso   | within 7.5 dB below the limit    |
-| Nessuno  | more than 7.5 dB below the limit |
+| Quality  | Criteria                                                                  |
+| -------- | ------------------------------------------------------------------------- |
+| Buono    | SNR above the preset's limit                                              |
+| Discreto | up to 5.5 dB below the limit                              |
+| Scarso   | between 5.5 dB and 7.5 dB below the limit |
+| Nessuno  | more than 7.5 dB below the limit                          |
 
 See [Understanding the Signal Meter](signal-meter) for the full explanation.
 

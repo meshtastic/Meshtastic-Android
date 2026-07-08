@@ -56,6 +56,8 @@ Internet-yhteydellinen gateway-radio (WiFi tai Ethernet) julkaisee mesh-viestit 
 
 Yhteisö ylläpitää julkista välityspalvelinta osoitteessa `mqtt.meshtastic.org`. Tämä on tarkoitettu yleiseen käyttöön ja testaukseen.
 
+> ℹ️ **Huomautus:** Yhteydet palvelimeen `mqtt.meshtastic.org` käyttävät aina TLS-salausta (portti 8883), vaikka TLS-kytkin olisi poistettu käytöstä. Kaikkien muiden välityspalvelimien kohdalla TLS-salausta käytetään vain, kun otat sen käyttöön (TLS:llä portti 8883, ilman TLS:ää portti 1883).
+
 > 🔒 **Tietosuoja:** Julkisen välityspalvelimen viestit ovat kaikkien tilaajien luettavissa. Käytä aina kanavasalausta yksityiseen viestintään.
 
 ### Oma välityspalvelin

@@ -23,7 +23,7 @@ Bluetooth Low Energy は、Android で標準的かつ最も一般的な接続方
 
 1. Meshtastic 無線機の電源が入っていて、ペアリングモードになっていることを確認します。
 2. アプリを開き、「**接続**」タブに移動します。
-3. 「**デバイスをスキャン**」をタップすると、近くの Meshtastic 無線機が表示されます。
+3. Tap **Scan for Bluetooth devices** — nearby Meshtastic radios will appear.
 4. リストからデバイスを選択します。
 5. Bluetooth のペアリング確認が表示されたら承認します。
 

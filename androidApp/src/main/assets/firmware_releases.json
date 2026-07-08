@@ -189,6 +189,12 @@
   },
   "pullRequests": [
     {
+      "id": "10937",
+      "title": "Update meshtastic/device-ui digest to effbb92",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10937",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
       "id": "10936",
       "title": "Snake!",
       "page_url": "https://github.com/meshtastic/firmware/pull/10936",
@@ -318,12 +324,6 @@
       "id": "10792",
       "title": "Add helpful checks of channel names and PSK",
       "page_url": "https://github.com/meshtastic/firmware/pull/10792",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10791",
-      "title": "T5S3 ePaper build fix ",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10791",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     }
   ]

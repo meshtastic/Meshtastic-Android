@@ -2,7 +2,7 @@
 title: Työpöytäsovellus
 parent: Käyttöopas
 nav_order: 14
-last_updated: 2026-06-11
+last_updated: 2026-07-07
 description: Asenna ja käytä Meshtastic-työpöytäsovellusta Linuxilla, macOS:llä ja Windowsilla — yhteydet, ominaisuuksien yhtenevyys ja pikanäppäimet.
 aliases:
   - työpöytä
@@ -60,19 +60,19 @@ Bluetooth Low Energy on tuettu työpöydällä [Kable](https://github.com/JuulLa
 
 ## Ominaisuuksien yhtenevyys
 
-| Ominaisuus                                                  | Android | Työpöytä | Viestit                                                              |
-| ----------------------------------------------------------- | ------- | -------- | -------------------------------------------------------------------- |
-| Viestit                                                     | ✓       | ✓        | Täysi yhtenevyys                                                     |
-| Radiolista                                                  | ✓       | ✓        | Täysi yhtenevyys                                                     |
-| Kartta                                                      | ✓       | ✓        | Täysi yhtenevyys                                                     |
-| Asetukset                                                   | ✓       | ✓        | Täysi yhtenevyys                                                     |
-| Bluetooth (BLE)                          | ✓       | ✓        | Työpöydällä Kable-kirjaston kautta                                   |
-| Laiteohjelmistopäivitys OTA                                 | ✓       | ✗        | Käytä web-flasheria                                                  |
-| Ilmoitukset                                                 | ✓       | ✓        | Käyttöjärjestelmän natiivit ilmoitukset                              |
-| Widgetit                                                    | ✓       | ✗        | Vain Android                                                         |
-| Vain Android                                                | ✓       | ✗        | Vain Android — ei saatavilla työpöydällä tai iOS:llä |
-| Tekoälyavustaja (Chirpy)                 | ✓\*     | ✗        | Vain Google-version Android-laitteissa                               |
-| Sovellustoiminnot (järjestelmän tekoäly) | ✓†      | ✗        | Vain Google-version Android-laitteissa                               |
+| Ominaisuus                                                  | Android | Työpöytä | Viestit                                                                                                                                                                                 |
+| ----------------------------------------------------------- | ------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Viestit                                                     | ✓       | ✓        | Täysi yhtenevyys                                                                                                                                                                        |
+| Radiolista                                                  | ✓       | ✓        | Täysi yhtenevyys                                                                                                                                                                        |
+| Kartta                                                      | ✓       | ◐        | Kartta-välilehti on käytettävissä myös Desktop-versiossa, mutta interaktiivinen karttanäkymä on käytettävissä vain Androidissa                                                          |
+| Asetukset                                                   | ✓       | ✓        | Täysi yhtenevyys                                                                                                                                                                        |
+| Bluetooth (BLE)                          | ✓       | ✓        | Työpöydällä Kable-kirjaston kautta                                                                                                                                                      |
+| Laiteohjelmiston päivitys                                   | ✓       | ◐        | Työpöytä-versio tukee laiteohjelmiston päivittämistä USB:n kautta suoraan sovelluksesta. BLE-/Wi-Fi-OTA-päivitykset ovat käytettävissä vain Androidissa |
+| Ilmoitukset                                                 | ✓       | ✓        | Käyttöjärjestelmän natiivit ilmoitukset                                                                                                                                                 |
+| Widgetit                                                    | ✓       | ✗        | Vain Android                                                                                                                                                                            |
+| Vain Android                                                | ✓       | ✗        | Vain Android — ei saatavilla työpöydällä tai iOS:llä                                                                                                                    |
+| Tekoälyavustaja (Chirpy)                 | ✓\*     | ✗        | Vain Google-version Android-laitteissa                                                                                                                                                  |
+| Sovellustoiminnot (järjestelmän tekoäly) | ✓†      | ✗        | Vain Google-version Android-laitteissa                                                                                                                                                  |
 
 \*Chirpy AI vaatii Android 14+ -version Google-version Android-laitteissa, joissa on tuettu laitteisto.
 
@@ -84,14 +84,17 @@ Työpöytäsovellus käyttää samaa Compose Multiplatform -käyttöliittymää,
 
 ### Pikanäppäimet
 
-| Pikanäppäin         | Toiminto                    |
-| ------------------- | --------------------------- |
-| **⌘Q** / **Ctrl+Q** | Sulje sovellus              |
-| **⌘,** / **Ctrl+,** | Avaa asetukset              |
-| **⌘1** / **Ctrl+1** | Vaihda Viestit-välilehdelle |
-| **⌘2** / **Ctrl+2** | Vaihda Radiot-välilehdelle  |
-| **⌘3** / **Ctrl+3** | Vaihda Kartta-välilehdelle  |
-| **⌘4** / **Ctrl+4** | Vaihda Yhdistä-välilehdelle |
+Kaikissa pikanäppäimissä käytetään **Meta**-näppäintä — se on ⌘ (komento) macOS:ssa sekä Super-/Windows-näppäin Linuxissa ja Windowsissa. (`Ctrl`-näppäintä ei ole määritetty.)
+
+| Pikanäppäin | Toiminto                    |
+| ----------- | --------------------------- |
+| **Meta+Q**  | Sulje sovellus              |
+| **Meta+,**  | Avaa asetukset              |
+| **Meta+1**  | Vaihda Viestit-välilehdelle |
+| **Meta+2**  | Vaihda Radiot-välilehdelle  |
+| **Meta+3**  | Vaihda Kartta-välilehdelle  |
+| **Meta+4**  | Vaihda Yhdistä-välilehdelle |
+| **Meta+/**  | Avaa tietoja                |
 
 ### Ikkuna ja järjestelmätarjotin
 
@@ -123,7 +126,6 @@ Yksittäiset dokumenttisivut renderöidään täydellä muotoilulla:
 ```bash
 git clone https://github.com/meshtastic/Meshtastic-Android.git
 cd Meshtastic-Android
-git submodule update --init
 ./gradlew :desktopApp:run
 ```
 
@@ -134,7 +136,8 @@ Vaatimukset:
 
 ## Tunnetut rajoitukset
 
-- Ei OTA-laiteohjelmistopäivityksiä (käytä web-flasheria)
+- Langattomat laiteohjelmistopäivitykset (BLE/Wi-Fi OTA) ovat käytettävissä vain Androidissa. Työpöytä-versiossa käytä sovelluksen USB-päivitystä tai [Web Flasheria](https://flasher.meshtastic.org)
+- Interaktiivinen karttanäkymä on käytettävissä vain Androidissa — Kartta-välilehti on työpöytä-versiossa näkyvissä, mutta karttaa ei näytetä
 - Jotkin Android-kohtaiset ominaisuudet (widgetit, tietyt ilmoituskanavat) eivät ole käytettävissä
 - Suorituskyky voi vaihdella heikkotehoisella laitteistolla ajettaessa Compose Desktopia
 - BLE-paritus ei vielä tallenna laiteparia työpöydällä (paritus toimii ilman tallennusta)
@@ -142,7 +145,7 @@ Vaatimukset:
 ## Aiheeseen liittyvät aiheet
 
 - [Yhteydet](connections) — yhteystapojen yleiskatsaus
-- [Laiteohjelmistopäivitykset](firmware) — käytä [Web Flasheria](https://flasher.meshtastic.org) työpöydän laiteohjelmistopäivityksiin
+- [Laiteohjelmistopäivitykset](firmware) — USB-päivitys suoraan työpöytä-sovelluksessa tai [Web Flasher](https://flasher.meshtastic.org)
 
 ---
 

@@ -2,7 +2,7 @@
 title: Android auto
 parent: Kasutaja juhis
 nav_order: 18
-last_updated: 2026-06-11
+last_updated: 2026-07-07
 description: Kasuta Meshtasticut käed-vabad režiimis Android Auto peakomplektis – loe sõnumeid valjusti ette, vasta häälega ning kontrolli sõlmede ja võrgu olekut sõidu ajal.
 aliases:
   - android auto
@@ -17,9 +17,11 @@ Meshtastic integreerub Android Autoga, nii et saad sõidu ajal oma kärgvõrguga
 
 > ⚠️ **Märkus:** Android Auto tugi on saadaval ainult **Google'i-tüüpi Androidi versioonides**. It is not included in the F-Droid build, and it is not available on Desktop or iOS.
 
+> ℹ️ **What ships today:** The Google Play build provides **notification-only** car messaging — incoming messages are announced on the head unit and you reply through its notification controls. The full tabbed **Messages / Nodes / Status** experience described below is a beta built on the Android Car App Library (Google's templated car UI is currently restricted to Closed/Internal Play tracks), so it appears only in builds compiled with `-PenableCarTemplates=true`. The rest of this page documents that beta experience.
+
 ## Overview
 
-Kui telefon on ühendatud Android Auto peakomplektiga (või arenduses kasutatava töölaua peakomplekti emulaatoriga), kuvatakse Meshtastic Android Car App Library abil loodud sõnumsiderakendusena. The car interface presents a tabbed Home screen optimized for driving-safe, glanceable use:
+When your phone is connected to an Android Auto head unit (or the Desktop Head Unit emulator used for development), the beta build presents Meshtastic as a messaging app built with the Android Car App Library, with a tabbed Home screen optimized for driving-safe, glanceable use:
 
 - **Messages** — recent conversations, with hands-free reading and replies.
 - **Nodes** — the mesh node list, with a node-detail view.

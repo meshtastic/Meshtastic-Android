@@ -44,7 +44,6 @@ Before starting, configure these controls:
 The **Start** button stays disabled — with an explanation of why — until the scan can run. Common reasons it's disabled:
 
 - The device is **not connected**.
-- The current channel is using the **default channel key** (use a unique key first — see [Messages & Channels](messages-and-channels)).
 - **No presets** have been selected to scan.
 - The selected preset uses **2.4 GHz**, which your hardware doesn't support.
 

@@ -18,11 +18,11 @@ Käännöksiin osallistuminen auttaa tekemään Meshtasticista saavutettavamman 
 
 ## Mitä käännetään
 
-| Resurssi            | Lähteen sijainti                      | Viestit                                                             |
-| ------------------- | ------------------------------------- | ------------------------------------------------------------------- |
-| UI-tekstit          | `composeResources/values/strings.xml` | Painikkeet, otsikot, viestit ja kaikki käyttäjälle näkyvä teksti    |
-| Käyttöoppaan sivut  | `docs/user/*.md`                      | Sovelluksen sisäinen dokumentaatio Ohjeet ja dokumentaatio -osiossa |
-| Fastlane-metatiedot | fastlane/metadata/android/en-US/      | Sovelluskaupan listauksen otsikko, kuvaus ja muutoslokit            |
+| Resurssi            | Lähteen sijainti                                                    | Viestit                                                             |
+| ------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| UI-tekstit          | `core/resources/src/commonMain/composeResources/values/strings.xml` | Painikkeet, otsikot, viestit ja kaikki käyttäjälle näkyvä teksti    |
+| Käyttöoppaan sivut  | `docs/en/user/*.md`                                                 | Sovelluksen sisäinen dokumentaatio Ohjeet ja dokumentaatio -osiossa |
+| Fastlane-metatiedot | fastlane/metadata/android/en-US/                                    | Sovelluskaupan listauksen otsikko, kuvaus ja muutoslokit            |
 
 > ⚠️ **Huomautus:** Kehittäjän oppaan sivut ovat saatavilla vain englanniksi. Koodiin keskittyvää dokumentaatiota, joka on suunnattu kehitystyöhön osallistuville, ei käännetä.
 

@@ -52,14 +52,14 @@ The app rates your signal quality (None, Bad, Fair, or Good) from **SNR alone, m
 
 Because the rating is relative to the preset limit, the _same_ SNR can rate differently on different presets — `-15 dB` is healthy on `LongSlow` but unusable on `ShortFast`. Letting `limit` be the active preset's SNR Limit, here is how the app picks the bars (or color):
 
-| Level    | Bars | Criteria                             | Meaning                                                                                  |
-| -------- | ---- | ------------------------------------ | ---------------------------------------------------------------------------------------- |
-| Hea      | 3    | SNR **above** the preset's `limit`   | Signal is comfortably above the demodulation floor — healthy connection. |
-| Rahuldav | 2    | within `5.5 dB` below the `limit`    | Decodable, but getting close to the floor.                               |
-| Halb     | 1    | within `7.5 dB` below the `limit`    | At the very edge of what the preset can recover.                         |
-| Puudub   | 0    | more than `7.5 dB` below the `limit` | Below the floor — transmission lost to noise.                            |
+| Level    | Bars | Criteria                                        | Meaning                                                                                  |
+| -------- | ---- | ----------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Hea      | 3    | SNR **above** the preset's `limit`              | Signal is comfortably above the demodulation floor — healthy connection. |
+| Rahuldav | 2    | up to `5.5 dB` below the `limit`                | Decodable, but getting close to the floor.                               |
+| Halb     | 1    | between `5.5 dB` and `7.5 dB` below the `limit` | At the very edge of what the preset can recover.                         |
+| Puudub   | 0    | more than `7.5 dB` below the `limit`            | Below the floor — transmission lost to noise.                            |
 
-> **Note:** The fixed SNR thresholds you may have seen elsewhere (`-7 dB` / `-15 dB`) are now only used for coloring individual hops in traceroute results — not for the per-node signal meter described here.
+> **Märkus:** Fikseeritud SNR lävesid, mida võisid mujal näha (`-7 dB` / `-15 dB`), kasutatakse nüüd ainult üksikute hüpete rõhutamiseks traceroute'i tulemustes – mitte siin kirjeldatud sõlmepõhise signaalimõõtja jaoks.
 
 ---
 
@@ -77,7 +77,7 @@ In the app, signal data is shown in several places:
 
 - **Node list** — signal bars icon next to each node
 - **Node detail** — SNR, RSSI, and signal quality in the device metrics section
-- **Traceroute** — per-hop signal quality for each relay node
+- **Traceroute** — iga vahendussõlme signaali kvaliteet hüppe kohta
 - **Signal metrics** — historical SNR and RSSI data in the metrics charts
 
 ![Node entry showing SNR, RSSI values and colored signal bars](../../assets/screenshots/nodes_signal_info.png)

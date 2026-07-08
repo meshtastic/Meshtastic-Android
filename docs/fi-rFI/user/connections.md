@@ -23,7 +23,7 @@ Bluetooth Low Energy on oletus ja yleisin yhteystapa Androidilla.
 
 1. Varmista, että Meshtastic-radio on päällä ja paritustilassa.
 2. Avaa sovellus ja siirry **Yhdistä**-välilehdelle.
-3. Paina **Etsi laitteita** — lähellä olevat Meshtastic-radiot tulevat näkyviin.
+3. Napauta **Hae bluetooth-laitteita** — lähellä olevat Meshtastic-radiot ilmestyvät näkyville.
 4. Valitse laitteesi listasta.
 5. Hyväksy Bluetooth-pariliitospyyntö, jos se tulee näkyviin.
 

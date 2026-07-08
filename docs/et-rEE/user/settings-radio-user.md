@@ -46,7 +46,7 @@ Pärast sätete muutmist puuduta nuppu **Salvesta**, et konfiguratsioon raadioss
 | ----------------- | ----------------------------------------------------------------------- | ----------------------------------------- |
 | Regioon           | Regulatory region for frequency bands                                   | Unset (must configure) |
 | Modemi vaikesäte  | Speed/range tradeoff                                                    | PikkKauge                                 |
-| Hop Limit         | Maximum retransmit hops                                                 | 3                                         |
+| Hüppete limiit    | Maks uuesti saadetud hüpet                                              | 3                                         |
 | TX võimsus        | Transmission power (dBm); 0 = max allowed for region | 0 (region max)         |
 | Frequency Offset  | Fine-tune frequency (MHz)                            | 0                                         |
 | Channel Bandwidth | Bandwidth setting                                                       | Default for preset                        |
@@ -73,6 +73,8 @@ Pärast sätete muutmist puuduta nuppu **Salvesta**, et konfiguratsioon raadioss
 | Narrow Slow        | ~10 km  | 1,1 kbps                 | −12,5 dB  | EL 868 MHz sagedusala (62,5 kHz ribalaius); võrreldav Long Fast                |
 | ~~Long Slow~~      | ~30 km  | 0,18 kbps                | −17,5 dB  | ⚠️ **Vananenud** — endiselt valitav, kuid võidakse tulevases püsivara versioonis eemaldada        |
 | ~~Very Long Slow~~ | ~40+ km | 0,09 kbps                | −20 dB    | ⚠️ **Vananenud** — endiselt valitav, kuid võidakse tulevases püsivara versioonis eemaldada        |
+
+> ℹ️ **Note:** This table uses the common short names. In the app's preset dropdown they read as **Short Range - Fast**, **Long Range - Fast**, **Lite - Fast**, **Narrow - Fast**, and so on.
 
 #### Choosing a Modem Preset
 

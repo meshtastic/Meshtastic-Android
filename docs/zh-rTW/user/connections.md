@@ -23,7 +23,7 @@ Meshtastic 支援多種傳輸方式，以便您的手機或電腦與無線電節
 
 1. 請確認您的 Meshtastic 無線電裝置已開機，並進入配對模式。
 2. 開啟應用程式，並前往「連線」頁籤。
-3. 點選「掃描裝置」——附近的 Meshtastic 無線電裝置將會顯示。
+3. Tap **Scan for Bluetooth devices** — nearby Meshtastic radios will appear.
 4. 從清單中選取您的裝置。
 5. 若出現藍牙配對提示，請點選接受。
 

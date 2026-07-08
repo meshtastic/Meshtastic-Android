@@ -23,7 +23,7 @@ Bluetooth Low Energy is the default and most common connection method on Android
 
 1. Ensure your Meshtastic radio is powered on and in pairing mode.
 2. Open the app and navigate to the **Connect** tab.
-3. Tap **Scan for Devices** — nearby Meshtastic radios will appear.
+3. Tap **Scan for Bluetooth devices** — nearby Meshtastic radios will appear.
 4. Select your device from the list.
 5. Accept the Bluetooth pairing prompt if shown.
 

@@ -56,6 +56,8 @@ MQTT 模組可將您的節點連接至 MQTT 代理伺服器，實現以下功能
 
 社群在 mqtt.meshtastic.org 維護一個公開的代理伺服器。 此伺服器供一般使用與測試之用。
 
+> ℹ️ **Note:** Connections to `mqtt.meshtastic.org` always use TLS (port 8883), even if the TLS toggle is off. For any other broker, TLS is used only when you enable it (port 8883 with TLS, 1883 without).
+
 > 🔒 隱私：公開代理伺服器上的訊息，任何訂閱者均可讀取。 私人通訊請務必啟用頻道加密。
 
 ### 私有代理伺服器
