@@ -23,3 +23,67 @@ jobs:
       run_unit_tests: false
       upload_artifacts: true
     secrets: inherit
+
+  # Republishes the debug APKs validate-and-build already produced as a rolling "snapshot"
+  # prerelease that moves to HEAD on every push to main, so testers get a stable download
+  # link instead of digging through Actions artifacts (which require a GitHub login and
+  # expire after 7 days).
+  publish-snapshot:
+    needs: validate-and-build
+    if: github.repository == 'meshtastic/Meshtastic-Android'
+    runs-on: ubuntu-24.04-arm
+    permissions:
+      contents: write
+    env:
+      # CROWDIN_GITHUB_TOKEN (a PAT), not the default GITHUB_TOKEN, because the repo's tag
+      # rulesets block the default token from creating/deleting tags — same token every other
+      # tag-touching workflow here uses.
+      GH_TOKEN: ${{ secrets.CROWDIN_GITHUB_TOKEN }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7.0.0
+        with:
+          fetch-depth: 0 # git rev-list --count needs full history for the versionCode
+          token: ${{ secrets.CROWDIN_GITHUB_TOKEN }}
+          persist-credentials: false # no git push here; gh does the authed work via GH_TOKEN
+
+      - name: Download debug APKs
+        uses: actions/download-artifact@v8
+        with:
+          name: app-debug-apks
+          path: artifacts
+
+      # A moving tag reuses the same release URL forever, and Obtainium fingerprints the
+      # asset URL — so without a changing filename it would never detect a new build.
+      # Embed the (monotonic) versionCode in each APK name; same formula the app build uses.
+      - name: Rename APKs with versionCode
+        run: |
+          COMMIT_COUNT=$(git rev-list --count HEAD)
+          OFFSET=$(grep '^VERSION_CODE_OFFSET=' config.properties | cut -d'=' -f2)
+          VERSION_CODE=$((COMMIT_COUNT + OFFSET))
+          echo "VERSION_CODE=$VERSION_CODE" >> "$GITHUB_ENV"
+          mkdir -p upload
+          find artifacts -name '*.apk' | while read -r f; do
+            cp "$f" "upload/$(basename "$f" .apk)-${VERSION_CODE}.apk"
+          done
+          ls -l upload
+
+      # Delete the previous snapshot release AND its tag, then recreate both at HEAD. This
+      # prunes the now-stale (differently-named) APKs so they don't pile up, and sidesteps the
+      # Releases API refusing to retarget an already-existing tag.
+      - name: Remove previous snapshot release
+        run: gh release delete snapshot --yes --cleanup-tag || true
+
+      - name: Publish snapshot release
+        run: |
+          cat > notes.md <<EOF
+          Automated debug build from the latest commit on \`main\` ($GITHUB_SHA), versionCode $VERSION_CODE.
+          Unsigned/debug-keyed, F-Droid and Google flavors. Not for production use — this release is replaced on every push to main.
+
+          **Obtainium:** enable *Include prereleases*. Each build's APK filename carries the versionCode, so updates are detected.
+          EOF
+          gh release create snapshot upload/*.apk \
+            --title "Snapshot $VERSION_CODE ($GITHUB_SHA)" \
+            --target "$GITHUB_SHA" \
+            --prerelease \
+            --notes-file notes.md

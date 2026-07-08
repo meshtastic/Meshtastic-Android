@@ -23,12 +23,21 @@ release is published (un-drafted) when a build is promoted to closed or higher.
 | **stable** | Production | published, marked *Latest* | ✅ Yes |
 | **open** beta | Beta (Open) | published prerelease, tag `vX.Y.Z-open.N` | ✅ Yes |
 | **closed** beta | Alpha (Closed) | published prerelease, tag `vX.Y.Z-closed.N` | ✅ Yes |
+| **snapshot** | — (not on Play) | rolling prerelease, tag `snapshot` | ✅ Yes |
 
-Only **one** test build is "live" on GitHub at a time: as a build is promoted,
-its release object moves forward (its tag changes from `-closed.N` to `-open.N`
-to the clean production tag). So a `-closed`/`-open` build is installable only
-while it is currently parked in that channel — once promoted onward, the old
-channel tag no longer has a release.
+Only **one** promoted test build is "live" on GitHub at a time: as a build is
+promoted, its release object moves forward (its tag changes from `-closed.N` to
+`-open.N` to the clean production tag). So a `-closed`/`-open` build is
+installable only while it is currently parked in that channel — once promoted
+onward, the old channel tag no longer has a release.
+
+**Snapshot** is different: it's an automated debug build of the latest commit on
+`main`, rebuilt and re-published under the single moving `snapshot` tag on every
+push. It never goes to Play. Because debug builds use a `.debug` application-ID
+suffix (`com.geeksville.mesh.fdroid.debug` / `com.geeksville.mesh.google.debug`)
+and the debug signing key, a snapshot installs as its **own separate app** — it
+sits alongside a Play/stable/beta install, so the uninstall-first warning above
+does **not** apply to it.
 
 ## Setup
 
@@ -60,14 +69,34 @@ channel tag no longer has a release.
 - **Filter release titles by regular expression:** `-closed\.`
 - **Filter APKs by regular expression:** see [Picking the APK](#picking-the-apk)
 
-### Bleeding edge (newest test build, any channel)
+### Bleeding edge (newest promoted test build, any channel)
 
 - **Include prereleases:** on
-- *(no release-title filter)*
+- **Filter release titles by regular expression:** `-(closed|open)\.`
 - **Filter APKs by regular expression:** see [Picking the APK](#picking-the-apk)
 
-Obtainium installs the newest published prerelease — whatever is currently in
-open or closed.
+Obtainium installs the newest promoted prerelease — whatever is currently in
+open or closed. The title filter is required to skip the always-newer `snapshot`
+prerelease; without it Obtainium would follow snapshot instead.
+
+### Snapshot (latest commit on `main`)
+
+- **Include prereleases:** on
+- **Filter release titles by regular expression:** `^Snapshot`
+- **Filter APKs by regular expression:** debug-signed names, see below
+
+Follows `main` directly — updates on every push. These are **debug builds**
+(`.debug` package, debug key), so they install as a separate app and won't
+disturb a stable/beta install. The APKs are named `…-debug-<versionCode>.apk`
+(not `-release.apk`), so use debug-suffixed filters:
+
+| You want | Regex |
+|---|---|
+| Google flavor, most phones (arm64) | `google-arm64-v8a-debug-\d+\.apk` |
+| fdroid flavor, most phones (arm64) | `fdroid-arm64-v8a-debug-\d+\.apk` |
+| fdroid flavor, one-size-fits-all | `fdroid-universal-debug-\d+\.apk` |
+
+Snapshot releases attach only the debug APKs — no `.aab` or desktop installers.
 
 > **If your channel filter finds nothing:** when no build is parked in that
 > exact channel, the title filter matches no current release (old channel tags
