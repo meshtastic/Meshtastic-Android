@@ -17,7 +17,6 @@
 package org.meshtastic.app.map
 
 import android.annotation.SuppressLint
-import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.webkit.JavascriptInterface
@@ -52,6 +51,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
+import androidx.core.net.toUri
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -209,7 +209,7 @@ private fun SitePlannerRunner(
                         // Sub-resource fetches (tiles, XHR) aren't navigations, so this doesn't affect the sim itself.
                         override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
                             val target = request?.url ?: return false
-                            val trusted = Uri.parse(SITE_PLANNER_BASE_URL)
+                            val trusted = SITE_PLANNER_BASE_URL.toUri()
                             return target.scheme != trusted.scheme || target.host != trusted.host
                         }
 

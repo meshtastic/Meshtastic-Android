@@ -19,6 +19,7 @@ package org.meshtastic.app.map
 import android.app.Application
 import android.net.Uri
 import androidx.core.net.toFile
+import androidx.core.net.toUri
 import co.touchlab.kermit.Logger
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
@@ -105,7 +106,7 @@ class MapLayersManager(
                     mapPrefs.networkMapLayers.value.mapNotNull { networkString ->
                         val parts = networkString.split(NETWORK_LAYER_DELIMITER)
                         if (parts.size == NETWORK_LAYER_FIELDS) {
-                            val uri = Uri.parse(parts[2])
+                            val uri = parts[2].toUri()
                             MapLayerItem(
                                 id = parts[0],
                                 name = parts[1],
@@ -176,7 +177,7 @@ class MapLayersManager(
         if (name.isBlank() || url.isBlank()) return "Invalid name or URL for network layer."
         val uri =
             try {
-                Uri.parse(url)
+                url.toUri()
             } catch (@Suppress("SwallowedException", "TooGenericExceptionCaught") e: Exception) {
                 return "Invalid URL."
             }

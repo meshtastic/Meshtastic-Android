@@ -17,6 +17,7 @@
 package org.meshtastic.app.map
 
 import android.graphics.Color
+import androidx.core.graphics.toColorInt
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -185,7 +186,7 @@ private fun parseCssColor(raw: String): Int? {
             val alpha = if (parts.size >= 4) (parts[3].toFloat() * OPAQUE).roundToInt() else OPAQUE
             Color.argb(alpha, parts[0].toInt(), parts[1].toInt(), parts[2].toInt())
         } else {
-            Color.parseColor(value) // #hex or named color
+            value.toColorInt() // #hex or named color
         }
     } catch (e: IllegalArgumentException) {
         Logger.withTag(TAG).w(e) { "Unparseable GeoJSON color: $raw" }
