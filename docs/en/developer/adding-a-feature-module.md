@@ -101,9 +101,11 @@ sealed interface MyFeatureRoute : Route {
 package org.meshtastic.feature.myfeature.navigation
 
 import androidx.navigation3.runtime.EntryProviderScope
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
 import org.meshtastic.core.navigation.MyFeatureRoute
 
-fun EntryProviderScope<*>.myFeatureEntries() {
+fun EntryProviderScope<NavKey>.myFeatureGraph(backStack: NavBackStack<NavKey>) {
     entry<MyFeatureRoute.MyFeatureHome> {
         MyFeatureScreen()
     }

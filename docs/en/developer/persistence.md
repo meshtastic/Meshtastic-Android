@@ -74,16 +74,7 @@ Higher-level preferences abstraction:
 
 ## What Docs Intentionally Skip
 
-The `feature:docs` module does **not** use Room or any persistent database:
-- Documentation content is packaged as build-time assets
-- The docs corpus is versioned with the app binary
-- No migration story is needed for docs content
-- Optional UX state (last viewed page) could use `core:prefs` but is not part of the docs data model
-
-This is an intentional design decision to keep documentation:
-- Fully offline without database overhead
-- Replaceable with each app update
-- Simple to validate and test
+The `feature:docs` module uses **no** Room or persistent database. Documentation ships as build-time assets versioned with the app binary, so it stays fully offline, is replaced on each update, and needs no migration story. Optional UX state (e.g. last viewed page) could live in `core:prefs` but isn't part of the docs data model.
 
 ## Best Practices
 

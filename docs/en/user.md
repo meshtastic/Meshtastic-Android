@@ -19,6 +19,10 @@ Documentation for using the Meshtastic Android and Desktop app.
 Keep the last 5–8 entries and archive older ones by removing them.
 -->
 
+**July 2026** — [Messages & Channels](user/messages-and-channels) — Documented tap-to-open `@mentions` and on-device message translation (Google Play build only).
+
+**July 2026** — [Node Metrics](user/node-metrics) — Air Quality now shows an EPA NowCast AQI reading and the CO₂ sensor's own temperature & humidity.
+
 **July 2026** — [Debug Logs](user/debug-logs) — New page covering the Debug Panel's App logs tab: view, filter, and export the app's own debug logs to attach to a GitHub issue — no adb needed.
 
 **June 2026** — [Help & In-App Docs](user/help-and-docs) — New page covering the in-app documentation browser, search, and the on-device Chirpy AI assistant.
@@ -30,16 +34,6 @@ Keep the last 5–8 entries and archive older ones by removing them.
 **June 2026** — [Node Metrics](user/node-metrics) — Added Air Quality metrics (PM1.0, PM2.5, PM10, and CO₂ with severity color bands), a separate view from the BME680 IAQ reading.
 
 **June 2026** — [Messages & Channels](user/messages-and-channels) — Added full-text message search within a conversation, with a result counter and previous/next navigation.
-
-**June 2026** — [Android Auto](user/android-auto) — New page covering Meshtastic in Android Auto.
-
-**June 2026** — [App Functions](user/app-functions) — New page covering App Functions, which exposes app actions to the Android system AI on Google flavor builds.
-
-**May 2026** — [Translate the App](user/translate) — New page explaining how to contribute translations to the Meshtastic app via Crowdin.
-
-**May 2026** — [Units & Locale](user/units-and-locale) — New page explaining how the app automatically adapts temperatures, distances, speeds, and times to your device's regional settings.
-
-**May 2026** — [Signal Meter](user/signal-meter) — New page explaining how the LoRa signal quality meter works, why negative SNR values are normal, and how to interpret RSSI vs. SNR.
 
 <!-- WHATS_NEW_END -->
 

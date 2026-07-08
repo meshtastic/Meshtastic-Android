@@ -137,7 +137,7 @@ Tests run automatically on:
 - Push to `main`
 - Pre-release validation
 
-The CI workflow uses `ubuntu-24.04` with JDK 21 and Gradle caching.
+CI runs on GitHub-hosted Ubuntu 24.04 runners (most jobs use the `ubuntu-24.04-arm` ARM runners, a few use `ubuntu-24.04`) with JDK 21 and Gradle caching.
 
 ---
 
