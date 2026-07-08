@@ -18,10 +18,14 @@ package org.meshtastic.core.ui.util
 
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.Color
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.DrawableResource
 import org.meshtastic.core.model.EventFirmwareEdition
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.img_event_hamvention
+import kotlin.time.Clock
 
 /**
  * Provides the active [EventFirmwareEdition] (if any) to the composition tree. When a connected device reports an event
@@ -39,6 +43,18 @@ val LocalEventBranding = compositionLocalOf<EventFirmwareEdition?> { null }
 fun eventIconFor(editionName: String): DrawableResource? = when (editionName) {
     "HAMVENTION" -> Res.drawable.img_event_hamvention
     else -> null
+}
+
+/**
+ * Whether the event's last day is in the past, evaluated in the event's own [timeZone][EventFirmwareEdition.timeZone]
+ * (falling back to the device time zone). Used to nudge users off event firmware once the event is over. Returns
+ * `false` when [eventEnd][EventFirmwareEdition.eventEnd] is absent or unparseable — an unknown end date is never
+ * treated as ended.
+ */
+fun EventFirmwareEdition.hasEnded(): Boolean {
+    val end = eventEnd?.let { runCatching { LocalDate.parse(it) }.getOrNull() } ?: return false
+    val zone = timeZone?.let { runCatching { TimeZone.of(it) }.getOrNull() } ?: TimeZone.currentSystemDefault()
+    return Clock.System.now().toLocalDateTime(zone).date > end
 }
 
 /** Parses the edition's `#RRGGBB` [EventFirmwareEdition.accentColor] into a [Color], or `null` if absent/malformed. */

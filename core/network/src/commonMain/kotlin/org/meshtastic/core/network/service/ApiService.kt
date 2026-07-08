@@ -20,6 +20,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import org.koin.core.annotation.Single
+import org.meshtastic.core.model.EventFirmwareResponse
 import org.meshtastic.core.model.NetworkDeviceHardware
 import org.meshtastic.core.model.NetworkDeviceLinksResponse
 import org.meshtastic.core.model.NetworkFirmwareReleases
@@ -34,6 +35,9 @@ interface ApiService {
 
     /** Fetches the list of available firmware releases from the Meshtastic API. */
     suspend fun getFirmwareReleases(): NetworkFirmwareReleases
+
+    /** Fetches event-firmware display metadata (editions, welcome messages, links) from the Meshtastic API. */
+    suspend fun getEventFirmware(): EventFirmwareResponse
 }
 
 /**
@@ -51,4 +55,6 @@ class ApiServiceImpl(private val client: HttpClient) : ApiService {
     override suspend fun getDeviceLinks(): NetworkDeviceLinksResponse = client.get("resource/deviceLinks").body()
 
     override suspend fun getFirmwareReleases(): NetworkFirmwareReleases = client.get("github/firmware/list").body()
+
+    override suspend fun getEventFirmware(): EventFirmwareResponse = client.get("resource/eventFirmware").body()
 }

@@ -582,6 +582,8 @@ firebase_link
 ### FIRMWARE ###
 firmware
 firmware_edition
+firmware_event_ended_banner
+firmware_event_ended_button
 firmware_old
 firmware_recovery_banner
 firmware_recovery_ble_failed
