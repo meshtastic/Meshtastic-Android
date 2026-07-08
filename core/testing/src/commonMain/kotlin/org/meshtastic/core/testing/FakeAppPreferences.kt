@@ -278,14 +278,14 @@ class FakeMapPrefs : MapPrefs {
 
     override val hiddenLayerUrls = MutableStateFlow<Set<String>>(emptySet())
 
-    override fun setHiddenLayerUrls(value: Set<String>) {
-        hiddenLayerUrls.value = value
+    override fun updateHiddenLayerUrls(transform: (Set<String>) -> Set<String>) {
+        hiddenLayerUrls.value = transform(hiddenLayerUrls.value)
     }
 
     override val networkMapLayers = MutableStateFlow<Set<String>>(emptySet())
 
-    override fun setNetworkMapLayers(value: Set<String>) {
-        networkMapLayers.value = value
+    override fun updateNetworkMapLayers(transform: (Set<String>) -> Set<String>) {
+        networkMapLayers.value = transform(networkMapLayers.value)
     }
 }
 

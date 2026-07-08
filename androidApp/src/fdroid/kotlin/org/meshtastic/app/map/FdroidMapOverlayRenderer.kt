@@ -60,7 +60,7 @@ class FdroidMapOverlayRenderer {
     // id -> currently-drawn overlay. Touched only from reconcile()'s (single-flight) coroutine.
     private val rendered = mutableMapOf<String, Rendered>()
 
-    private fun signatureOf(item: MapLayerItem) = "${item.uri}|${item.isRefreshing}"
+    private fun signatureOf(item: MapLayerItem) = "${item.uri}|${item.refreshToken}"
 
     /** Reconcile the map's overlays with [layers]. [openStream] resolves a layer to its data (file or network). */
     suspend fun reconcile(

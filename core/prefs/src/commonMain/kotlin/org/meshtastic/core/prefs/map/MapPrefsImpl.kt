@@ -89,8 +89,11 @@ class MapPrefsImpl(
             .map { it[KEY_HIDDEN_LAYER_URLS_PREF] ?: emptySet() }
             .stateIn(scope, SharingStarted.Eagerly, emptySet())
 
-    override fun setHiddenLayerUrls(value: Set<String>) {
-        scope.launch { dataStore.edit { it[KEY_HIDDEN_LAYER_URLS_PREF] = value } }
+    override fun updateHiddenLayerUrls(transform: (Set<String>) -> Set<String>) {
+        // Compute the new set inside the edit transaction (DataStore serializes edits) to avoid lost updates.
+        scope.launch {
+            dataStore.edit { it[KEY_HIDDEN_LAYER_URLS_PREF] = transform(it[KEY_HIDDEN_LAYER_URLS_PREF] ?: emptySet()) }
+        }
     }
 
     override val networkMapLayers: StateFlow<Set<String>> =
@@ -98,8 +101,12 @@ class MapPrefsImpl(
             .map { it[KEY_NETWORK_MAP_LAYERS_PREF] ?: emptySet() }
             .stateIn(scope, SharingStarted.Eagerly, emptySet())
 
-    override fun setNetworkMapLayers(value: Set<String>) {
-        scope.launch { dataStore.edit { it[KEY_NETWORK_MAP_LAYERS_PREF] = value } }
+    override fun updateNetworkMapLayers(transform: (Set<String>) -> Set<String>) {
+        scope.launch {
+            dataStore.edit {
+                it[KEY_NETWORK_MAP_LAYERS_PREF] = transform(it[KEY_NETWORK_MAP_LAYERS_PREF] ?: emptySet())
+            }
+        }
     }
 
     companion object {

@@ -39,7 +39,13 @@ data class MapLayerItem(
     val isVisible: Boolean = true,
     val layerType: LayerType,
     val isNetwork: Boolean = false,
+    /** UI indicator: whether a refresh is in flight (drives the sheet/toolbar spinner). */
     val isRefreshing: Boolean = false,
+    /**
+     * Monotonic counter bumped on refresh so the flavor renderers reliably re-read the layer. A [StateFlow] conflates
+     * transient values, so a bounced boolean flag can be missed — an ever-increasing token cannot.
+     */
+    val refreshToken: Int = 0,
 )
 
 private val KML_EXTENSIONS = listOf("kml", "kmz", "vnd.google-earth.kml+xml", "vnd.google-earth.kmz")

@@ -1284,7 +1284,7 @@ private fun MapLayerOverlay(layerItem: MapLayerItem, mapViewModel: MapViewModel)
     val context = LocalContext.current
     var currentLayer by remember { mutableStateOf<Layer?>(null) }
 
-    MapEffect(layerItem.id, layerItem.isRefreshing) { map ->
+    MapEffect(layerItem.id, layerItem.refreshToken) { map ->
         currentLayer?.safeRemoveLayerFromMap()
         currentLayer = null
         val inputStream = mapViewModel.getInputStreamFromUri(layerItem) ?: return@MapEffect

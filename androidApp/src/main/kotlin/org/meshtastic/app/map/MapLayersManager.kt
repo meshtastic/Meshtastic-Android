@@ -192,7 +192,7 @@ class MapLayersManager(
         val newItem = MapLayerItem(name = name, uri = uri, layerType = layerType, isNetwork = true)
         _mapLayers.update { it + newItem }
         val encoded = listOf(newItem.id, newItem.name, newItem.uri).joinToString(NETWORK_LAYER_DELIMITER)
-        mapPrefs.setNetworkMapLayers(mapPrefs.networkMapLayers.value + encoded)
+        mapPrefs.updateNetworkMapLayers { it + encoded }
         return null
     }
 
@@ -202,8 +202,7 @@ class MapLayersManager(
         _mapLayers.update { layers -> layers.map { if (it.id == layerId) it.copy(isVisible = nowVisible) else it } }
 
         val uri = target.uri?.toString() ?: return
-        val hidden = mapPrefs.hiddenLayerUrls.value
-        mapPrefs.setHiddenLayerUrls(if (nowVisible) hidden - uri else hidden + uri)
+        mapPrefs.updateHiddenLayerUrls { if (nowVisible) it - uri else it + uri }
     }
 
     fun removeMapLayer(layerId: String) {
@@ -211,24 +210,23 @@ class MapLayersManager(
             val layerToRemove = _mapLayers.value.find { it.id == layerId }
             layerToRemove?.uri?.let { uri ->
                 if (layerToRemove.isNetwork) {
-                    mapPrefs.setNetworkMapLayers(
-                        mapPrefs.networkMapLayers.value
-                            .filterNot { it.startsWith("$layerId$NETWORK_LAYER_DELIMITER") }
-                            .toSet(),
-                    )
+                    mapPrefs.updateNetworkMapLayers { entries ->
+                        entries.filterNot { it.startsWith("$layerId$NETWORK_LAYER_DELIMITER") }.toSet()
+                    }
                 } else {
                     deleteFileFromInternalStorage(uri)
                 }
-                mapPrefs.setHiddenLayerUrls(mapPrefs.hiddenLayerUrls.value - uri.toString())
+                mapPrefs.updateHiddenLayerUrls { it - uri.toString() }
             }
             _mapLayers.update { layers -> layers.filterNot { it.id == layerId } }
         }
     }
 
-    /** Bounce a layer's [MapLayerItem.isRefreshing] so the render layer re-reads it (used for network refresh). */
+    /** Bump a layer's [MapLayerItem.refreshToken] so renderers re-read it (used for network-layer refresh). */
     fun refreshMapLayer(layerId: String) {
-        _mapLayers.update { layers -> layers.map { if (it.id == layerId) it.copy(isRefreshing = true) else it } }
-        _mapLayers.update { layers -> layers.map { if (it.id == layerId) it.copy(isRefreshing = false) else it } }
+        _mapLayers.update { layers ->
+            layers.map { if (it.id == layerId) it.copy(refreshToken = it.refreshToken + 1) else it }
+        }
     }
 
     fun refreshAllVisibleNetworkLayers() {

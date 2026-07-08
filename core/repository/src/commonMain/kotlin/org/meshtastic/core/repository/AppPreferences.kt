@@ -243,12 +243,14 @@ interface MapPrefs {
     /** URIs of imported map layers the user has toggled off; a layer is visible unless its URI is in this set. */
     val hiddenLayerUrls: StateFlow<Set<String>>
 
-    fun setHiddenLayerUrls(value: Set<String>)
+    /** Atomically mutate [hiddenLayerUrls]; [transform] runs against the persisted value, avoiding lost updates. */
+    fun updateHiddenLayerUrls(transform: (Set<String>) -> Set<String>)
 
     /** Persisted network (URL-backed) map layers, each encoded as `id|:|name|:|uri`. */
     val networkMapLayers: StateFlow<Set<String>>
 
-    fun setNetworkMapLayers(value: Set<String>)
+    /** Atomically mutate [networkMapLayers]; [transform] runs against the persisted value, avoiding lost updates. */
+    fun updateNetworkMapLayers(transform: (Set<String>) -> Set<String>)
 }
 
 /** Reactive interface for map consent. */
