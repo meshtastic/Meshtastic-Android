@@ -57,7 +57,7 @@ Serial communication over USB:
 ## TCP/IP
 
 **Module:** `core:network`  
-**Platforms:** Android, Desktop, iOS
+**Platforms:** Android, Desktop (iOS: code compiles, but there's no iOS app target or `RadioTransportFactory` yet — see Transport Factory below)
 
 Network-based transport for WiFi-enabled radios:
 - TCP socket connection to radio's IP address

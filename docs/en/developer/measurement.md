@@ -148,6 +148,7 @@ Date and time formatting uses the `DateFormatter` `expect object` with platform-
 | `formatTime()` | "2:30 PM" |
 | `formatTimeWithSeconds()` | "2:30:45 PM" |
 | `formatDate()` | "2026-05-13" |
+| `formatDateTimeShort()` | "5/13/26 2:30 PM" |
 
 Unlike `MetricFormatter`, `DateFormatter` is declared with `expect`/`actual` (an `expect object` in `commonMain`, an `actual object` per platform) because date formatting inherently depends on platform locale APIs.
 

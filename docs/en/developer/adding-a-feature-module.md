@@ -2,7 +2,7 @@
 title: Adding a Feature Module
 parent: Developer Guide
 nav_order: 3
-last_updated: 2026-05-13
+last_updated: 2026-07-08
 aliases:
   - new-module
   - feature-module
@@ -27,7 +27,7 @@ plugins {
 }
 
 kotlin {
-    androidLibrary { withHostTest { } }
+    android { withHostTest { isIncludeAndroidResources = true } }
 
     sourceSets {
         commonMain.dependencies {

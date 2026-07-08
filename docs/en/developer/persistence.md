@@ -2,7 +2,7 @@
 title: Persistence
 parent: Developer Guide
 nav_order: 6
-last_updated: 2026-06-11
+last_updated: 2026-07-08
 aliases:
   - room
   - database
@@ -49,6 +49,10 @@ The primary structured data store:
 | `DeviceHardwareEntity` | Cached device hardware catalog |
 | `FirmwareReleaseEntity` | Cached firmware release info |
 | `TracerouteNodePositionEntity` | Traceroute hop position data |
+| `DiscoverySessionEntity` | A Local Mesh Discovery scan session (timestamp, presets scanned, home preset) |
+| `DiscoveryPresetResultEntity` | Per-preset result within a discovery session |
+| `DiscoveredNodeEntity` | Nodes found during a discovery preset scan |
+| `DeviceLinkEntity` | Cached `msh.to` device links from the Meshtastic API |
 
 > 💡 **Note:** Waypoints, telemetry, and channel data are stored within the `Packet` entity (using the `port_num` field to distinguish packet types) rather than in separate tables.
 

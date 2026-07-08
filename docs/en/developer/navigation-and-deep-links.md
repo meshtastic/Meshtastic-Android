@@ -2,7 +2,7 @@
 title: Navigation & Deep Links
 parent: Developer Guide
 nav_order: 4
-last_updated: 2026-07-01
+last_updated: 2026-07-08
 aliases:
   - deeplinks
   - navigation-3
@@ -57,8 +57,9 @@ https://meshtastic.org/{path}       # App Link, android:autoVerify — also open
 `adb shell am start -a android.intent.action.VIEW -d "meshtastic://meshtastic/{path}"` is the fastest way to
 trigger any route below from a shell or automation script without touching the UI.
 
-**Source of truth:** the exhaustive, always-current list of segments lives as KDoc on
+**Source of truth:** the always-current list of segments lives in the `when` block in
 [`DeepLinkRouter.route()`](../../../core/navigation/src/commonMain/kotlin/org/meshtastic/core/navigation/DeepLinkRouter.kt)
+(the class-level KDoc above it is illustrative, not exhaustive)
 and as executable spec in
 [`DeepLinkRouterTest.kt`](../../../core/navigation/src/commonTest/kotlin/org/meshtastic/core/navigation/DeepLinkRouterTest.kt).
 The table below is a snapshot for quick reference — check those two files if it looks out of date.
@@ -76,6 +77,7 @@ The table below is a snapshot for quick reference — check those two files if i
 | `/settings/helpDocs` | `SettingsRoute.HelpDocs` | Docs browser |
 | `/settings/helpDocs/{pageId}` | `SettingsRoute.HelpDocPage(pageId)` | Specific doc page |
 | `/settings/help-docs` | `SettingsRoute.HelpDocs` | Compatibility alias |
+| `/discovery` | `DiscoveryRoute.DiscoveryGraph` | Local Mesh Discovery entry point |
 | `/settings/local-mesh-discovery/session/{sessionId}` | `DiscoveryRoute.DiscoverySummary(sessionId)` | Discovery session result |
 | `/nodes` | `NodesRoute.Nodes` | Node list |
 | `/nodes/{destNum}` | `NodesRoute.NodeDetail(destNum)` | Node detail |

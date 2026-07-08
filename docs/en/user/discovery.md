@@ -2,7 +2,7 @@
 title: Discovery
 parent: User Guide
 nav_order: 12
-last_updated: 2026-06-11
+last_updated: 2026-07-08
 description: Explore your mesh network — the Local Mesh Discovery scanner, traceroute paths, neighbor maps, and node discovery tools.
 aliases:
   - mesh-discovery
@@ -115,8 +115,8 @@ Each hop represents a relay node that forwarded the message. The SNR and RSSI va
 
 | What to look for | What it means |
 |------------------|---------------|
-| All hops show Good SNR (> 5 dB) | Healthy path — messages flow reliably |
-| One hop shows Bad SNR (< 0 dB) | Weak link — this relay segment is fragile |
+| All hops show Good SNR (≥ −7 dB, green) | Healthy path — messages flow reliably |
+| One hop shows Bad SNR (< −15 dB, red) | Weak link — this relay segment is fragile |
 | Many hops (4+) | Long path — consider repositioning a node to shorten it |
 | Different path on retry | Mesh is adapting — multiple routes exist (this is good!) |
 
