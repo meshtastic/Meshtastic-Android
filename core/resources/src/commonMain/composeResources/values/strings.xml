@@ -642,7 +642,7 @@
     <string name="firmware_update_flashing">Flashing device, please wait...</string>
     <string name="firmware_update_hang_tight">Hang tight, we are working on it...</string>
     <string name="firmware_update_hash_rejected">Firmware hash rejected. Device may require hash provisioning or bootloader update.</string>
-    <string name="firmware_update_invalid_local_file_detail">The selected file "%1$s" does not match %2$s (%3$s). Choose the firmware file for this target.</string>
+    <string name="firmware_update_invalid_local_file_detail">The selected file \"%1$s\" does not match %2$s (%3$s). Choose the firmware file for this target.</string>
     <string name="firmware_update_keep_device_close">Keep your device close to your phone.</string>
     <string name="firmware_update_latest">Update To: %1$s</string>
     <string name="firmware_update_local_file">Local File</string>
