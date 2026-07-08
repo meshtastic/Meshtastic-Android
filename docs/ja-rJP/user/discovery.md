@@ -1,9 +1,9 @@
 ---
-title: ディスカバリー
+title: 探索
 parent: User Guide
 nav_order: 12
-last_updated: 2026-06-11
-description: Explore your mesh network — the Local Mesh Discovery scanner, traceroute paths, neighbor maps, and node discovery tools.
+last_updated: 2026-07-08
+description: メッシュネットワークを探索します。ローカルメッシュ探索スキャナー、ルート追跡の経路、隣接ノードのマップ、ノード探索ツールを説明します。
 aliases:
   - mesh-discovery
   - local-discovery
@@ -12,176 +12,176 @@ aliases:
   - neighbor-info
 ---
 
-# ディスカバリー
+# 探索
 
-Discovery tools help you understand **how** your mesh network is connected — which nodes can hear each other, what paths messages take, and where bottlenecks or weak links exist.
+探索ツールは、メッシュネットワークが**どのように**つながっているか（どのノードが互いに受信できるか、メッセージがどの経路を通るか、ボトルネックや弱いリンクがどこにあるか）を把握するのに役立ちます。
 
-The app offers two complementary approaches:
+アプリは、互いを補完する 2 つの方法を提供します：
 
-- **Local Mesh Discovery (Scanner)** — an automated mode that cycles your connected radio through different LoRa presets, listens on each, and ranks which preset performs best at your location.
-- **Manual exploration** — traceroute, Neighbor Info, and the node list, which you can use at any time to investigate specific paths and topology.
-
----
-
-## Local Mesh Discovery (Scanner)
-
-Local Mesh Discovery is a dedicated scanning mode that helps you find the best LoRa modem preset for your location and see which nodes are active on each preset. It cycles your connected radio through one or more presets you choose, listens (or "dwells") on each one for a set time to collect packets, then analyzes and ranks the results.
-
-Open it from **Settings → Local Mesh Discovery**.
-
-> ⚠️ **Note:** Discovery temporarily changes your radio's LoRa settings while it scans, then restores your original configuration when it finishes. Your device must be connected to run a scan.
-
-### Setting Up a Scan
-
-Before starting, configure these controls:
-
-| Control                | 説明                                                                                                                                                                                                                             |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **LoRa preset picker** | Select one or more presets to scan. Discovery dwells on each selected preset in turn.                                                                                                          |
-| **Dwell time**         | Time to listen on each preset. Choose from 1, 5, 15, 30, 45, 60, 90, 120, or 180 minutes. Longer dwell times collect more packets and give a clearer picture, but take longer. |
-| **Keep screen awake**  | Optional toggle that prevents the screen from sleeping during a long scan.                                                                                                                                     |
-
-The **Start** button stays disabled — with an explanation of why — until the scan can run. Common reasons it's disabled:
-
-- The device is **not connected**.
-- **No presets** have been selected to scan.
-- The selected preset uses **2.4 GHz**, which your hardware doesn't support.
-
-### Live Progress
-
-While a scan runs, Discovery shows its current stage:
-
-| Stage                                                 | What's happening                                                                                       |
-| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| **Preparing**                                         | Saving your current configuration and getting ready to scan.                           |
-| **Shifting to \<preset\>** | Switching the radio to the next preset to test.                                        |
-| **Reconnecting**                                      | Re-establishing the connection after the preset change.                                |
-| **Dwell**                                             | Listening on the current preset to collect packets, with a countdown to the next step. |
-| **Analysis**                                          | Processing the collected packets and ranking the presets.                              |
-| **Restoring**                                         | Putting your original LoRa configuration back.                                         |
-
-![Dwell countdown showing time remaining on the current preset](../../assets/screenshots/discovery_dwell_progress.png)
-
-### Reading the Results
-
-When the scan completes, Discovery presents a per-preset result card for each preset it tested, plus an overall summary.
-
-![Per-preset result card with ranking and collected metrics](../../assets/screenshots/discovery_preset_result.png)
-
-Metrics include:
-
-| Metric                                   | What it tells you                                                                              |
-| ---------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| RF health                                | Overall quality of the radio environment on that preset.                       |
-| Channel utilization                      | How busy the airwaves were during the dwell.                                   |
-| Airtime                                  | Transmission time observed.                                                    |
-| Direct vs. relayed nodes | How many mesh nodes were heard directly versus via a relay.                    |
-| Bad / duplicate packets                  | Counts of corrupt and repeated packets, indicating congestion or interference. |
-
-Additional features available from the results:
-
-- **Scan History** — saved sessions you can revisit; view or delete past scans.
-- **Discovery Map** — a map of the nodes found during the scan.
-- **Report export** — export a report as a PDF on Android, or as text on other platforms.
-
-> 💡 **Tip:** On Android, Discovery can generate an on-device AI summary (Gemini Nano) of your results. If the on-device model isn't available, an algorithmic summary is used instead — so you always get a readable interpretation of the scan.
+- **ローカルメッシュ探索（スキャナー）**：接続中の無線機をさまざまな LoRa プリセットで順に切り替え、それぞれで受信し、あなたの場所でどのプリセットが最も性能が良いかをランク付けする自動モードです。
+- **手動での探索**：ルート追跡、隣接ノード情報、ノードリスト。特定の経路やトポロジーを調べるために、いつでも使えます。
 
 ---
 
-## Manual Exploration
+## ローカルメッシュ探索（スキャナー）
 
-The tools below are available at any time from the node list and node detail screens. Use them to investigate specific paths and build a topology picture, alongside or instead of a full scan.
+ローカルメッシュ探索は、あなたの場所に最適な LoRa モデムプリセットを見つけ、各プリセットでどのノードがアクティブかを確認できる、専用のスキャンモードです。 接続中の無線機を、選択した 1 つ以上のプリセットで順に切り替え、パケットを収集するために各プリセットで一定時間受信（「滞在」）し、その後、結果を分析してランク付けします。
+
+「**設定 → ローカルメッシュ探索**」から開きます。
+
+> ⚠️ **注意：** 探索は、スキャン中に無線機の LoRa 設定を一時的に変更し、完了時に元の構成に戻します。 スキャンを実行するには、デバイスが接続されている必要があります。
+
+### スキャンを設定する
+
+開始する前に、次のコントロールを設定します：
+
+| コントロール            | 説明                                                                                                    |
+| ----------------- | ----------------------------------------------------------------------------------------------------- |
+| **LoRa プリセットの選択** | スキャンするプリセットを 1 つ以上選択します。 探索は、選択した各プリセットに順番に滞在します。                                                     |
+| **滞在時間**          | 各プリセットで受信する時間。 1、5、15、30、45、60、90、120、180 分から選択します。 滞在時間を長くすると、より多くのパケットを収集してより明確な状況が分かりますが、時間もかかります。 |
+| **画面をスリープさせない**   | 長いスキャン中に画面がスリープするのを防ぐ、任意のトグルです。                                                                       |
+
+「**開始**」ボタンは、スキャンを実行できるようになるまで（理由の説明とともに）無効のままです。 無効になる主な理由：
+
+- デバイスが**接続されていない**。
+- スキャンする**プリセットが選択されていない**。
+- 選択したプリセットが、ハードウェアが対応していない **2.4 GHz** を使用している。
+
+### リアルタイムの進行状況
+
+スキャンの実行中、探索は現在の段階を表示します：
+
+| 段階                                               | 実行中の内容                                            |
+| ------------------------------------------------ | ------------------------------------------------- |
+| **準備中**                                          | 現在の構成を保存し、スキャンの準備をしています。                          |
+| **\<preset\> に切り替え中** | テストする次のプリセットに無線機を切り替えています。                        |
+| **再接続中**                                         | プリセット変更後に接続を再確立しています。                             |
+| **滞在**                                           | 現在のプリセットで受信してパケットを収集しており、次のステップまでのカウントダウンが表示されます。 |
+| **分析**                                           | 収集したパケットを処理し、プリセットをランク付けしています。                    |
+| **復元中**                                          | 元の LoRa 構成に戻しています。                                |
+
+![現在のプリセットの残り時間を示す滞在のカウントダウン](../../assets/screenshots/discovery_dwell_progress.png)
+
+### 結果の見方
+
+スキャンが完了すると、探索はテストした各プリセットのプリセット別の結果カードと、全体の概要を表示します。
+
+![ランキングと収集したメトリクスを含むプリセット別の結果カード](../../assets/screenshots/discovery_preset_result.png)
+
+メトリクスには次が含まれます：
+
+| メトリクス      | 分かること                              |
+| ---------- | ---------------------------------- |
+| RF の健全性    | そのプリセットにおける無線環境の総合的な品質。            |
+| チャンネル利用率   | 滞在中に電波がどれだけ混雑していたか。                |
+| 電波利用時間     | 観測された送信時間。                         |
+| 直接受信と中継ノード | 直接受信できたメッシュノードと、中継経由のノードの数。        |
+| 不良／重複パケット  | 破損したパケットと繰り返されたパケットの数で、輻輳や干渉を示します。 |
+
+結果から利用できる追加機能：
+
+- **スキャン履歴**：後で見直せる保存済みのセッション。過去のスキャンを表示または削除できます。
+- **探索マップ**：スキャン中に見つかったノードのマップ。
+- **レポートのエクスポート**：Android では PDF として、他のプラットフォームではテキストとしてレポートをエクスポートします。
+
+> 💡 **ヒント：** Android では、探索が結果のオンデバイス AI 要約（Gemini Nano）を生成できます。 オンデバイスのモデルが利用できない場合は、代わりにアルゴリズムによる要約が使われるため、常にスキャンの読みやすい解釈が得られます。
+
+---
+
+## 手動での探索
+
+以下のツールは、ノードリストとノードの詳細画面からいつでも利用できます。 完全なスキャンと併用して、またはその代わりに、特定の経路を調べてトポロジーの全体像を組み立てるのに使えます。
 
 ## ルート追跡
 
-Traceroute reveals the exact path a message takes from your node to any other node on the mesh. It's the single most useful tool for debugging connectivity problems.
+ルート追跡は、メッセージが自分のノードから、メッシュ上の他の任意のノードへ通る正確な経路を明らかにします。 接続の問題をデバッグするのに、最も役立つツールです。
 
-### Running a Traceroute
+### ルート追跡を実行する
 
-1. Navigate to **Nodes** and tap the node you want to trace.
-2. On the node detail screen, tap **Traceroute**.
-3. The app sends a traceroute request and waits for the response.
-4. Results display each hop in order, with signal quality at every step.
+1. 「**ノード**」に移動し、追跡したいノードをタップします。
+2. ノードの詳細画面で、「**ルート追跡**」をタップします。
+3. アプリがルート追跡の要求を送信し、応答を待ちます。
+4. 結果には、各ホップが順番に、各段階の信号品質とともに表示されます。
 
-### Reading the Results
+### 結果の見方
 
-A traceroute result looks like this:
+ルート追跡の結果は次のように表示されます：
 
 ```
-You → Node A (SNR: 8.5, RSSI: -95) → Node B (SNR: 5.2, RSSI: -108) → Target
+自分 → ノード A (SNR: 8.5, RSSI: -95) → ノード B (SNR: 5.2, RSSI: -108) → ターゲット
 ```
 
-Each hop represents a relay node that forwarded the message. The SNR and RSSI values at each hop tell you about the link quality on that specific segment.
+各ホップは、メッセージを転送した中継ノードを表します。 各ホップの SNR と RSSI の値から、その特定の区間のリンク品質が分かります。
 
-| What to look for                                                           | What it means                                                               |
-| -------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| All hops show Good SNR (> 5 dB)                         | Healthy path — messages flow reliably                                       |
-| One hop shows Bad SNR (< 0 dB) | Weak link — this relay segment is fragile                                   |
-| Many hops (4+)                                          | Long path — consider repositioning a node to shorten it                     |
-| Different path on retry                                                    | Mesh is adapting — multiple routes exist (this is good!) |
+| 確認すべき点                         | 意味                                   |
+| ------------------------------ | ------------------------------------ |
+| すべてのホップが良い SNR（−7 dB 以上、緑）を示す  | 健全な経路。メッセージが確実に流れます                  |
+| 1 つのホップが悪い SNR（−15 dB 未満、赤）を示す | 弱いリンク。この中継区間は脆弱です                    |
+| ホップ数が多い（4 以上）                  | 長い経路。短くするためにノードの再配置を検討してください         |
+| 再試行で経路が変わる                     | メッシュが適応しています。複数の経路が存在します（これは良いことです！） |
 
-> 💡 **Tip:** Run traceroute several times over a few minutes. If the path changes, your mesh has redundant routes — a sign of a well-connected network.
+> 💡 **ヒント：** ルート追跡を数分間かけて何度か実行してください。 経路が変わる場合、メッシュには冗長な経路があり、よくつながったネットワークの兆候です。
 
-### Troubleshooting with Traceroute
+### ルート追跡によるトラブルシューティング
 
-- **"No route found"** — The target node may be offline, out of range, or on a different channel. Check that both nodes share at least one channel with the same encryption key.
-- **Traceroute times out** — The path may be too long (exceeds hop limit) or a relay node is congested. Try increasing the hop limit in **Settings → LoRa Config**.
-- **Asymmetric paths** — A traceroute from A→B may take a different path than B→A. This is normal — radio propagation is not always symmetric.
+- **「経路が見つかりません」**：対象のノードがオフラインか、圏外か、別のチャンネルにいる可能性があります。 両方のノードが、同じ暗号化鍵を持つチャンネルを少なくとも 1 つ共有しているか確認してください。
+- **ルート追跡がタイムアウトする**：経路が長すぎる（ホップ数上限を超える）か、中継ノードが混雑している可能性があります。 「**設定 → LoRa 設定**」でホップ数上限を増やしてみてください。
+- **非対称な経路**：A→B のルート追跡は、B→A とは異なる経路を通ることがあります。 これは正常です。電波の伝搬は常に対称とは限りません。
 
 ---
 
 ## 隣接ノード情報
 
-The Neighbor Info module lets each node broadcast a list of the nodes it can **directly hear** (single-hop). When multiple nodes share their neighbor lists, you can piece together a topology map of the entire mesh.
+隣接ノード情報モジュールを使うと、各ノードが**直接受信できる**（シングルホップの）ノードのリストをブロードキャストできます。 複数のノードが隣接ノードのリストを共有すると、メッシュ全体のトポロジーマップを組み立てられます。
 
-### Enabling Neighbor Info
+### 隣接ノード情報を有効にする
 
-1. Navigate to **Settings → Module Config → Neighbor Info**.
-2. Enable the module.
-3. Set the broadcast interval (default: 900 seconds / 15 minutes).
+1. 「**設定 → モジュール設定 → 隣接ノード情報**」に移動します。
+2. モジュールを有効にします。
+3. ブロードキャスト間隔を設定します（デフォルト：900 秒／15 分）。
 
-Once enabled, your node periodically broadcasts its neighbor table. Other nodes with Neighbor Info enabled do the same.
+有効にすると、ノードは隣接ノードのテーブルを定期的にブロードキャストします。 隣接ノード情報を有効にしている他のノードも、同じことを行います。
 
-### Viewing Neighbor Data
+### 隣接ノードのデータを表示する
 
-- Open any node's detail screen and look for the **Neighbors** section.
-- Each neighbor entry shows the node that was directly heard and its signal quality.
-- Combine neighbor data from multiple nodes to understand the full mesh topology.
+- 任意のノードの詳細画面を開き、「**隣接ノード**」セクションを探します。
+- 各隣接ノードの項目には、直接受信したノードとその信号品質が表示されます。
+- 複数のノードの隣接ノードデータを組み合わせて、メッシュ全体のトポロジーを把握します。
 
-> ⚠️ **Note:** Neighbor Info increases airtime usage because every enabled node periodically broadcasts its neighbor list. On busy meshes with many nodes, consider longer broadcast intervals (3600 seconds or more) to avoid congestion.
-
----
-
-## Node List as a Discovery Tool
-
-The node list itself is a powerful discovery tool when you use its filtering and sorting features effectively.
-
-### Finding New Nodes
-
-- Sort by **Last heard** to see the most recently active nodes at the top.
-- Enable **Include unknown** to see nodes that have appeared on the mesh but haven't sent user info yet — these are often newly powered-on devices.
-
-### Assessing Connectivity
-
-- Sort by **Hops away** to see which nodes are directly reachable (0 hops) versus relayed.
-- Sort by **Distance** to find nearby nodes and verify they're reachable.
-- Use **Exclude MQTT** to focus on nodes reachable over radio (not via internet bridge).
-
-### Infrastructure Audit
-
-- Disable **Exclude infrastructure** to see Router, Repeater, Router Late, and Client Base nodes.
-- Check their signal quality and last-heard times to verify your infrastructure nodes are healthy.
-
-See [Nodes](nodes) for full details on filtering and sorting options.
+> ⚠️ **注意：** 隣接ノード情報は、有効にした各ノードが隣接ノードのリストを定期的にブロードキャストするため、電波利用時間の消費が増えます。 ノードの多い混雑したメッシュでは、輻輳を避けるために、より長いブロードキャスト間隔（3600 秒以上）を検討してください。
 
 ---
 
-## Tips for Mesh Exploration
+## 探索ツールとしてのノードリスト
 
-- **Start with traceroute** — it gives you immediate, actionable information about a specific path.
-- **Enable Neighbor Info on key nodes** — especially routers and repeaters, to build a picture of the backbone.
-- **Check the map** — node positions on the [Map](map-and-waypoints) combined with signal data help you understand why some links are strong and others are weak.
-- **Compare signal over time** — use the [Signal Meter](signal-meter) guide to interpret SNR and RSSI values correctly.
+ノードリスト自体も、絞り込みと並べ替えの機能を効果的に使えば、強力な探索ツールになります。
+
+### 新しいノードを見つける
+
+- 「**最後の通信**」で並べ替えると、最近アクティブだったノードが先頭に表示されます。
+- 「**不明なノードを含む**」を有効にすると、メッシュに現れたもののまだユーザー情報を送信していないノードが表示されます。これらは、電源を入れたばかりのデバイスであることがよくあります。
+
+### 接続性を評価する
+
+- 「**ホップ数**」で並べ替えると、直接到達できるノード（0 ホップ）と中継されるノードが分かります。
+- 「**距離**」で並べ替えると、近くのノードを見つけて、到達できるか確認できます。
+- 「**MQTT を除外**」を使うと、（インターネットブリッジ経由ではなく）無線で到達できるノードに絞り込めます。
+
+### インフラの監査
+
+- 「**インフラを除外**」を無効にすると、ルーター、リピーター、ルーター・レイト、クライアント・ベースのノードが表示されます。
+- 信号品質と最後の通信時刻を確認して、インフラのノードが健全であることを確かめます。
+
+絞り込みと並べ替えのオプションの詳細については、[ノード](nodes) を参照してください。
+
+---
+
+## メッシュ探索のヒント
+
+- **まずルート追跡から**：特定の経路について、すぐに役立つ情報が得られます。
+- **主要なノードで隣接ノード情報を有効に**：特にルーターやリピーターで有効にして、バックボーンの全体像を組み立てます。
+- **マップを確認**：[マップ](map-and-waypoints) 上のノードの位置と信号データを組み合わせると、なぜあるリンクは強く、別のリンクは弱いのかが分かります。
+- **信号を時系列で比較**：[信号メーター](signal-meter) のガイドを使って、SNR と RSSI の値を正しく解釈します。
 
 ---
 

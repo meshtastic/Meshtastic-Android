@@ -19,8 +19,8 @@ On Android, Meshtastic provides a home screen **widget** that shows live local s
 The widget displays the **connected radio's** current local stats:
 
 - **Battery** — the radio's battery level, or _Powered_ when running on external power
-- **ChUtil** — channel utilization (how busy the LoRa channel is, as a percentage)
-- **AirUtil** — airtime utilization (how much of the duty cycle your radio is transmitting)
+- **ChUtil** — kanali kasutus (kui hõivatud on LoRa kanal protsentides)
+- **AirUtil** — eetriaega (kui suurt osa töötsüklist teie raadio edastab)
 - **Traffic** — packets transmitted / received, and duplicates seen
 - **Relays** — packets relayed and relay cancellations (shown when the radio is relaying)
 
@@ -41,6 +41,6 @@ Tap the widget to open the app, or use its refresh control to request fresh stat
 
 - [Node Metrics](node-metrics) — the full Signal Quality and Local Stats history inside the app
 - [Connections](connections) — connect to a radio so the widget has stats to show
-- [Discovery](discovery) — channel and airtime utilization across the mesh
+- [Avasta](Discovery) — kanali ja eetriaja kasutamine kärgvõrgu ulatuses
 
 ---

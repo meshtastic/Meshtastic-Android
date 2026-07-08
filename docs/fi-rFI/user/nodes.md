@@ -2,12 +2,13 @@
 title: Laitteet
 parent: Käyttöopas
 nav_order: 4
-last_updated: 2026-06-25
+last_updated: 2026-07-08
 description: Selaa, suodata ja lajittele verkon radioita — tarkastele tietoja, signaalin laatua, rooleja ja pikatoimintoja.
 aliases:
   - radiolista
   - mesh-radiot
   - vertaisradiot
+  - Hyppymääräjakauma
 ---
 
 # Laitteet
@@ -122,6 +123,10 @@ Kirjoita hakukenttään suodattaaksesi radioita nimen tai lyhyen nimen perusteel
 | **Kanava**                                      | Ryhmitelty kanavaindeksin mukaan                                                  |
 | **MQTT:n kautta**               | Ryhmitelty MQTT:n kautta kuultuihin ja radiolla kuultuihin        |
 | **Suosikkien kautta**                           | Suosikkiradiot ensin                                                              |
+
+## Radiot hyppymäärän mukaan
+
+Avaa pylväskaavio, joka näyttää radioiden määrän kullakin hyppyetäisyydellä, napauttamalla radioluettelon sovelluspalkissa olevaa hyppyhistogrammikuvaketta (0 = suora yhteys, 1 = yksi välityshyppy ja niin edelleen). Suodata kaavio **Viimeksi kuultu** -ajanjakson mukaan — Kaikki ajat, 1 tunti, 8 tuntia tai 24 tuntia — nähdäksesi, miltä mesh-verkko näyttää juuri nyt verrattuna pidempään ajanjaksoon. Tämä on nopea tapa arvioida, kuinka laaja ja kuormittunut paikallinen mesh-verkkosi on.
 
 ## Radion tiedot
 

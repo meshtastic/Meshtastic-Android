@@ -1,9 +1,9 @@
 ---
-title: Messages & Channels
+title: メッセージとチャンネル
 parent: User Guide
 nav_order: 3
-last_updated: 2026-06-25
-description: Send and receive messages, manage channels, configure encryption, search conversations, and use quick chat, reactions, and message actions.
+last_updated: 2026-07-08
+description: メッセージの送受信、チャンネルの管理、暗号化の設定、会話の検索、クイックチャット・リアクション・メッセージ操作の使い方を説明します。
 aliases:
   - channels
   - direct-messages
@@ -11,172 +11,174 @@ aliases:
   - conversations
 ---
 
-# Messages & Channels
+# メッセージとチャンネル
 
-Meshtastic supports two communication modes: **channel broadcasts** and **direct messages**.
+Meshtastic は、**チャンネルブロードキャスト**と**ダイレクトメッセージ**の 2 つの通信モードをサポートしています。
 
 ## チャンネル
 
-Channels are shared communication groups. All nodes configured with the same channel key can read and send messages on that channel.
+チャンネルは、共有された通信グループです。 同じチャンネル鍵を設定したすべてのノードが、そのチャンネルでメッセージを読み書きできます。
 
-### Default Channel
+### デフォルトチャンネル
 
-Every Meshtastic device comes with a default **LongFast** channel. This is an unencrypted channel used for general mesh communication.
+すべての Meshtastic デバイスには、デフォルトの **LongFast** チャンネルが用意されています。 これは、一般的なメッシュ通信に使われる暗号化されていないチャンネルです。
 
-### Channel Security
+### チャンネルのセキュリティ
 
-Channels support multiple encryption levels:
+チャンネルは複数の暗号化レベルに対応しています：
 
-| Icon | Security Level                       | 説明                                                                                                                                     |
-| ---- | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
-| 🔒   | PSK (256-bit AES) | Fully encrypted with a strong pre-shared key. Only nodes with the matching key can read messages.      |
-| 🔐   | PSK (128-bit AES) | Encrypted with a shorter key. Secure for most uses but 256-bit is preferred for sensitive data.        |
-| 🔓   | Default / Open                       | Uses the well-known default key. **Any Meshtastic device** on the same preset can read these messages. |
-| ⚠️   | Insecure + Position                  | Open channel that also broadcasts your GPS position. Use with caution in public meshes.                |
+| アイコン | セキュリティレベル        | 説明                                                                     |
+| ---- | ---------------- | ---------------------------------------------------------------------- |
+| 🔒   | PSK（256 ビット AES） | 強力な事前共有鍵で完全に暗号化されます。 一致する鍵を持つノードだけがメッセージを読めます。                         |
+| 🔐   | PSK（128 ビット AES） | より短い鍵で暗号化されます。 ほとんどの用途で安全ですが、機密性の高いデータには 256 ビットが推奨されます。               |
+| 🔓   | デフォルト／オープン       | よく知られたデフォルトの鍵を使用します。 同じプリセットの**あらゆる Meshtastic デバイス**が、これらのメッセージを読めます。 |
+| ⚠️   | 非セキュア＋位置情報       | GPS 位置情報も一斉送信するオープンチャンネルです。 公開メッシュでは注意して使用してください。                      |
 
-> 🔒 **Security Tip:** Always configure a unique PSK for private communications. The default channel is intentionally open so new users can discover the mesh — but you should create a separate encrypted channel for anything sensitive.
+> 🔒 **セキュリティのヒント：** プライベートな通信には、必ず固有の PSK を設定してください。 デフォルトチャンネルは、新規ユーザーがメッシュを見つけられるよう意図的にオープンになっています。ただし、機密性の高い内容には別途、暗号化されたチャンネルを作成してください。
 
-### Adding a Channel
+### チャンネルを追加する
 
-1. Navigate to **Settings → Channels**.
-2. Tap **Add Channel** or scan a QR code.
-3. Configure the channel name and encryption key.
-4. Share the channel URL/QR code with others who need access.
+1. 「**設定 → チャンネル**」に移動します。
+2. 「**チャンネルを追加**」をタップするか、QR コードをスキャンします。
+3. チャンネル名と暗号化鍵を設定します。
+4. アクセスが必要な相手に、チャンネルの URL／QR コードを共有します。
 
-Tapping a channel shows its details and sharing options.
+チャンネルをタップすると、その詳細と共有オプションが表示されます。
 
-## Direct Messages
+## ダイレクトメッセージ
 
-Direct messages (DMs) are point-to-point encrypted communications between two specific nodes.
+ダイレクトメッセージ（DM）は、特定の 2 つのノード間で行われる、ポイントツーポイントの暗号化通信です。
 
-### Sending a Direct Message
+### ダイレクトメッセージを送信する
 
-1. Open the **Messages** tab.
-2. Select a node from your contacts list or tap a node in the node list.
-3. Type your message and tap **Send**.
+1. 「**メッセージ**」タブを開きます。
+2. 連絡先リストからノードを選択するか、ノードリストでノードをタップします。
+3. メッセージを入力し、「**送信**」をタップします。
 
-### Message States
+### メッセージの状態
 
-| State                             | Icon | Meaning                                                                                                           |
-| --------------------------------- | ---- | ----------------------------------------------------------------------------------------------------------------- |
-| Queued                            | ⏳    | Message waiting to be sent                                                                                        |
-| En route                          | ✓    | Delivered to the radio, awaiting acknowledgment                                                                   |
-| Delivered                         | ✓✓   | Acknowledgment received from recipient                                                                            |
-| Received                          | ✓    | Message received from the mesh (incoming)                                                      |
-| S&F Routing   | 🔗   | Store & Forward: message being routed through an S&F node |
-| S&F Confirmed | 🔗   | Store & Forward: delivery confirmed via S&F node          |
-| エラー                               | ✗    | Delivery failed after retries                                                                                     |
+ステータスラベルは、**自分が**送信したメッセージの下にのみ表示されます（他のユーザーからの受信メッセージにはステータスラベルは表示されません）：
 
-### Delivery Errors
+| 状態                   | 意味                                                                         |
+| -------------------- | -------------------------------------------------------------------------- |
+| 送信中…                 | キューに入っているか、すでに無線機に渡された状態で、まだどちらとも確定していません（キュー内と送信中のどちらも同じ表示になります）          |
+| 受信者に配信済み             | ダイレクトメッセージで最も確実な確認です。受信確認が返ってきています                                         |
+| メッシュに配信済み            | チャンネルブロードキャストでは、メッセージがメッシュに届いたことを示します（ブロードキャストには受信者ごとの確認応答はありません）          |
+| 中継済み、受信者による確認なし      | ダイレクトメッセージでは警告色で表示されます。メッセージは中継されましたが、まだ受信確認が返ってきていません                     |
+| SF++ チェーン経由でルーティング中… | Store & Forward Plus Plus チェーンによってルーティング／バッファリングされています |
+| SF++ チェーンで確認済み       | SF++ チェーン経由で配信が確認されました                                                     |
+| エラー                  | 配信に失敗しました。具体的な理由はステータスをタップして確認してください（下記の「配信エラー」を参照）                        |
 
-When a message fails to deliver, the error indicator shows what went wrong:
+### 配信エラー
 
-| エラー              | Meaning                                  | What to Do                                                                                                                                                                  |
-| ---------------- | ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| No Route         | No path exists to the destination node   | The recipient may be offline or out of mesh range. Try later or move closer.                                                                |
-| Got NAK          | The next-hop node refused to relay       | The relay node may be congested. Wait and retry.                                                                                            |
-| タイムアウト           | No acknowledgment within retry window    | The recipient may be just out of range. Try increasing hop limit or moving to a better position.                                            |
-| インターフェースがありません   | No radio interface available to send     | Check that your radio is connected and the channel is configured.                                                                                           |
-| Max Retransmit   | All retry attempts exhausted             | The mesh path is unreliable. Try a different channel or wait for conditions to improve.                                                     |
-| チャンネルがありません      | The destination channel doesn't exist    | Verify both nodes share the same channel configuration.                                                                                                     |
-| Too Large        | Message exceeds maximum payload size     | Shorten your message (max ~200 characters).                                                                              |
-| No Response      | Node received message but didn't respond | The recipient's radio may be busy or in low-power sleep mode.                                                                                               |
-| Duty Cycle Limit | Regional airtime limit reached           | Your radio has used its allowed transmit time. Wait for the duty cycle window to reset (typically 1 hour in EU regions). |
-| 不正な要求            | Malformed or invalid message             | This usually indicates a software bug. Try restarting the app.                                                                              |
+メッセージの配信に失敗すると、エラーインジケーターが何が問題だったかを示します：
 
-> 💡 **Tip:** Most delivery errors resolve themselves. If a node is intermittently reachable, the mesh will retry. For persistent "No Route" errors, check that intermediate Router nodes are online.
+| エラー            | 意味                          | 対処方法                                                                     |
+| -------------- | --------------------------- | ------------------------------------------------------------------------ |
+| ルートなし          | 宛先ノードへの経路が存在しません            | 受信者がオフラインか、メッシュの範囲外の可能性があります。 時間をおくか、距離を縮めてください。                         |
+| NAK を受信        | 次のホップのノードが中継を拒否しました         | 中継ノードが混雑している可能性があります。 しばらく待ってから再試行してください。                                |
+| タイムアウト         | 再試行の時間内に受信確認がありませんでした       | 受信者がちょうど範囲外にいる可能性があります。 ホップ数上限を増やすか、より良い場所に移動してみてください。                   |
+| インターフェースがありません | 送信に使える無線インターフェースがありません      | 無線機が接続され、チャンネルが設定されているか確認してください。                                         |
+| 最大再送回数         | すべての再試行を使い切りました             | メッシュ経路が不安定です。 別のチャンネルを試すか、状況が改善するのを待ってください。                              |
+| チャンネルがありません    | 宛先のチャンネルが存在しません             | 両方のノードが同じチャンネル設定を共有しているか確認してください。                                        |
+| サイズ超過          | メッセージが最大ペイロードサイズを超えています     | メッセージを短くしてください（最大約 200 文字）。                                              |
+| 応答なし           | ノードはメッセージを受信しましたが、応答しませんでした | 受信者の無線機が処理中か、低電力のスリープモードの可能性があります。                                       |
+| デューティサイクル制限    | 地域ごとの電波利用時間の上限に達しました        | 無線機が許可された送信時間を使い切りました。 デューティサイクルの期間がリセットされるまで待ってください（EU リージョンでは通常 1 時間）。 |
+| 不正な要求          | 不正な形式または無効なメッセージです          | 通常はソフトウェアの不具合を示します。 アプリを再起動してみてください。                                     |
 
-## Message Features
+> 💡 **ヒント：** ほとんどの配信エラーは自然に解消します。 ノードに断続的に到達できる場合、メッシュは再試行します。 「ルートなし」エラーが続く場合は、中間のルーターノードがオンラインになっているか確認してください。
 
-### Quick Chat
+## メッセージの機能
 
-Pre-configured messages for rapid communication:
+### クイックチャット
 
-- Access via the Quick Chat button in the message input area
-- Choose from built-in phrases or custom messages
-- Customize quick chat messages in **Settings → Quick Chat**
-- Useful when typing is impractical (gloves, small screen, urgent)
+すばやくやり取りするための、あらかじめ設定されたメッセージです：
 
-![Quick chat option](../../assets/screenshots/messages_quick_chat.png)
+- メッセージ入力欄のクイックチャットボタンから利用できます
+- 組み込みの定型文またはカスタムメッセージから選べます
+- クイックチャットのメッセージは「**設定 → クイックチャット**」でカスタマイズできます
+- 入力が難しい場面（手袋の着用、小さな画面、急いでいるとき）に便利です
 
-Each quick chat entry has a short **Name** (the button label), the **Message** it inserts, and an **Instantly send** toggle — when enabled, tapping the button sends the message immediately instead of placing it in the input field for editing:
+![クイックチャットのオプション](../../assets/screenshots/messages_quick_chat.png)
 
-![New quick chat dialog with name, message, and instantly-send toggle](../../assets/screenshots/messages_edit_quick_chat.png)
+各クイックチャット項目には、短い**名前**（ボタンのラベル）、挿入される**メッセージ**、そして**即時送信**トグルがあります。有効にすると、ボタンをタップした時点で、メッセージが入力欄に置かれて編集できる状態になるのではなく、すぐに送信されます：
 
-The channel list shows each channel with its latest message preview.
+![名前・メッセージ・即時送信トグルを備えた新規クイックチャットのダイアログ](../../assets/screenshots/messages_edit_quick_chat.png)
 
-### Searching Messages
+チャンネルリストには、各チャンネルが最新メッセージのプレビューとともに表示されます。
 
-You can search the full history of any conversation directly from the chat screen:
+### メッセージを検索する
 
-1. Open a conversation (a channel or a direct message).
-2. Tap the **search icon** in the top bar.
-3. Type into the **Search messages…** field. The search runs as you type, across all stored messages in that conversation.
-4. Use the **N / M** result counter and the **previous / next arrows** to jump between matches, which are highlighted in the conversation.
+チャット画面から、どの会話でもその全履歴を直接検索できます：
 
-![Message search bar with result counter and previous/next arrows](../../assets/screenshots/messages_search_bar.png)
+1. 会話（チャンネルまたはダイレクトメッセージ）を開きます。
+2. 上部バーの**検索アイコン**をタップします。
+3. 「**メッセージを検索…**」欄に入力します。 検索は入力に応じて、その会話に保存されているすべてのメッセージを対象に実行されます。
+4. **N／M** の結果カウンターと**前へ／次への矢印**を使って、一致箇所間を移動できます。一致箇所は会話内でハイライト表示されます。
 
-> 💡 **Tip:** Search is full-text and stays within the conversation you opened it from — it doesn't search across other channels or contacts. It matches against the messages already stored on your device, so it works fully offline.
+![結果カウンターと前へ／次への矢印を備えたメッセージ検索バー](../../assets/screenshots/messages_search_bar.png)
 
-### Message Bubbles
+> 💡 **ヒント：** 検索は全文検索で、開いた会話の中だけを対象とします。他のチャンネルや連絡先をまたいで検索することはありません。 デバイスにすでに保存されているメッセージを対象に照合するため、完全にオフラインで動作します。
 
-Messages appear as chat bubbles — sent messages on the right, received messages on the left. Each bubble shows the sender, timestamp, and delivery status. Messages with replies include a quoted preview of the original message above the response.
+### メッセージの吹き出し
 
-### Mentions
+メッセージはチャットの吹き出しとして表示され、送信メッセージは右側、受信メッセージは左側に並びます。 各吹き出しには、送信者・タイムスタンプ・配信状況が表示されます。 返信付きのメッセージでは、応答の上に元メッセージの引用プレビューが表示されます。
 
-Type `@` while composing to mention a node — a picker suggests matching contacts as you type. In a received message, a mention appears as a highlighted chip showing the node's name; tap it to jump straight to that node's detail page.
+### メンション
 
-### Reactions
+メッセージ作成中に `@` を入力するとノードにメンションできます。入力に応じて、一致する連絡先がピッカーに提案されます。 受信メッセージでは、メンションはノード名を表示したハイライト付きのチップとして現れます。タップすると、そのノードの詳細ページに直接移動できます。
 
-React to messages with emoji:
+### リアクション
 
-- **Long-press** a message to open the actions menu
-- Tap **Add Reaction** to choose an emoji
-- Reactions appear below the message bubble
-- Multiple users can react to the same message
-- React to your own messages or others' messages
+絵文字でメッセージにリアクションできます：
 
-![Emoji reaction badges displayed beneath a message](../../assets/screenshots/messages_reaction.png)
+- メッセージを**長押し**すると操作メニューが開きます
+- 「**リアクションを追加**」をタップして絵文字を選びます
+- リアクションはメッセージの吹き出しの下に表示されます
+- 複数のユーザーが同じメッセージにリアクションできます
+- 自分のメッセージにも、他の人のメッセージにもリアクションできます
 
-> 💡 **Tip:** Reactions are lightweight — they use minimal mesh bandwidth compared to full text messages.
+![メッセージの下に表示された絵文字リアクションのバッジ](../../assets/screenshots/messages_reaction.png)
 
-### Message Actions
+> 💡 **ヒント：** リアクションは軽量で、通常のテキストメッセージに比べてメッシュの帯域をほとんど消費しません。
 
-Long-press any message to access:
+### メッセージの操作
 
-- **Copy** — copy message text to clipboard
-- **Reply** — quote the message in your response
-- **React** — add an emoji reaction
-- **Translate** — translate a received message into your device language and toggle between the original and translated text (Google Play build only; uses on-device translation)
-- **Delete** — remove a message you sent (local deletion)
+任意のメッセージを長押しすると、次の操作を利用できます：
 
-### Message Priority
+- **コピー：** メッセージのテキストをクリップボードにコピーします
+- **返信：** そのメッセージを引用して返信します
+- **リアクション：** 絵文字のリアクションを追加します
+- **翻訳：** 受信メッセージをデバイスの言語に翻訳し、原文と翻訳を切り替えます（Google Play 版のみ。オンデバイス翻訳を使用します）
+- **削除：** 自分が送信したメッセージを削除します（端末内での削除）
 
-Messages are queued and transmitted based on priority:
+### メッセージの優先度
 
-1. Emergency/alert messages (highest)
-2. Direct messages
-3. Channel broadcasts (lowest)
+メッセージは優先度に基づいてキューに入れられ、送信されます：
 
-### Message Limits
+1. 緊急／警報メッセージ（最高）
+2. ダイレクトメッセージ
+3. チャンネルブロードキャスト（最低）
 
-- **Maximum length:** 200 bytes (approximately 200 characters for ASCII text)
-- **Rate limiting:** The mesh enforces airtime fairness; heavy message volume may be throttled
-- **Delivery:** Messages are retried automatically if no acknowledgment is received
+### メッセージの制限
 
-## Best Practices
+- **最大長：** 200 バイト（ASCII テキストで約 200 文字）
+- **レート制限：** メッシュは電波利用時間の公平性を確保するため、大量のメッセージは制限されることがあります
+- **配信：** 受信確認がない場合、メッセージは自動的に再送されます
 
-- Use channels for group coordination
-- Use direct messages for private person-to-person communication
-- Keep messages short — mesh bandwidth is limited
-- Configure encryption for sensitive communications
+## ベストプラクティス
 
-## Related Topics
+- グループでの連携にはチャンネルを使います
+- 個人間のプライベートな通信にはダイレクトメッセージを使います
+- メッセージは短くしてください。メッシュの帯域は限られています
+- 機密性の高い通信には暗号化を設定します
 
-- [Nodes](nodes) — tap a node to start a direct message
-- [Settings — Radio & User](settings-radio-user) — configure channel encryption and presets
-- [MQTT](mqtt) — bridge channel messages to the internet
-- [Channel configuration](https://meshtastic.org/docs/configuration/radio/channels) — detailed channel settings on meshtastic.org
+## 関連トピック
+
+- [ノード](nodes)：ノードをタップするとダイレクトメッセージを開始できます
+- [設定：無線機とユーザー](settings-radio-user)：チャンネルの暗号化とプリセットを設定します
+- [MQTT](mqtt)：チャンネルのメッセージをインターネットに橋渡しします
+- [チャンネル設定](https://meshtastic.org/docs/configuration/radio/channels)：meshtastic.org にある詳細なチャンネル設定
 
 ---
 

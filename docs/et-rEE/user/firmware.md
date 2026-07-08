@@ -3,9 +3,9 @@ title: Püsivara värskendus
 parent: User Guide
 nav_order: 13
 last_updated: 2026-07-07
-description: Update your radio firmware over Bluetooth or USB — OTA process, version channels, pre-flight checks, and recovery.
+description: Raadio püsivara uuendamine sinihamba ​​või USB kaudu – OTA protsess, versioonikanalid, lennueelsed kontrollid ja taastamine.
 aliases:
-  - firmware
+  - püsivara
   - värskendus
   - ota
   - flash
@@ -17,33 +17,33 @@ Hoia oma Meshtastic raadio ajakohasena uusima püsivaraga, et saada uusi funktsi
 
 ## Kontrollin värskendust
 
-1. Open the connected radio's configuration and, under **Advanced**, tap **Firmware Update** — or tap the firmware notification if one is shown. The entry appears only for OTA-capable devices.
-2. The app checks for available firmware versions.
+1. Ava ühendatud raadio konfiguratsioon ja puuduta jaotises **Täpsemalt** valikut **Püsivara värskendus**. The entry appears only for OTA-capable devices.
+2. Rakendus kontrollib saadaolevaid püsivara versioone.
 3. Saadaval olevad värskendused näitavad versiooninumbrit ja muudatuste logi kokkuvõtet.
 
 ## Värskendamise meetod
 
-### OTA (Over-The-Air) via Bluetooth
+### OTA (Over-The-Air) sinihamba abil
 
 Kõige levinum värskendamisviis Androidi kasutajate seas:
 
-1. Ensure your radio is connected via Bluetooth.
+1. Veendu, et raadio on sinihamba ​​kaudu ühendatud.
 2. Mine püsivara värskenduse lehele.
-3. Select the desired firmware version.
+3. Vali soovitud püsivara versioon.
 4. OTA alustamiseks puuduta nuppu **Uuenda**.
 5. Oota, kuni värskendus on lõppenud – **ära katkesta ühendust** värskenduse ajal.
 
 ![Püsivara kontrollib värskendusi](../../assets/screenshots/firmware_checking.png)
 
-> ⚠️ **Hoiatus:** Püsivara värskenduse katkestamine võib sinu seadme rikkuda. Ensure your radio has sufficient battery (>50% recommended) and maintain Bluetooth proximity during the entire process.
+> ⚠️ **Hoiatus:** Püsivara värskenduse katkestamine võib sinu seadme rikkuda. Veendu, et raadiol oleks piisav aku (soovitatav on >50%) ja säilita kogu protsessi vältel sinihamba ​​​​lähedus.
 
-![Firmware disclaimer](../../assets/screenshots/firmware_disclaimer.png)
+[Püsivara hoiatus](../../assets/screenshots/firmware_disclaimer.png)
 
-### In-App USB Update
+### Rakendusesisene USB värskendus
 
-When your radio is connected over **USB/serial** (rather than Bluetooth), the Firmware Update screen offers **USB File Transfer**. The app reboots the device into DFU mode, then prompts you to save the `.uf2` file to the device's DFU drive using the system file picker. This option appears only on a USB/serial connection — it is not available over Bluetooth.
+Kui raadio on ühendatud **USB/jadaühenduse** (mitte sinihamba) kaudu, pakub püsivara värskendamise ekraan **USB failiedastust**. The app reboots the device into DFU mode, then prompts you to save the `.uf2` file to the device's DFU drive using the system file picker. See valik kuvatakse ainult USB/jadaühenduse korral – see pole sinihamba ​​kaudu saadaval.
 
-> ℹ️ **nRF bootloader note:** Some devices (e.g. RAK WisBlock RAK4631) need their bootloader flashed with the vendor's serial DFU tool (such as `adafruit-nrfutil`) — copying the `.uf2` alone won't update the bootloader. The app surfaces a hint when this applies.
+> ℹ️ **nRF alglaaduri märkus:** Mõned seadmed (nt RAK WisBlock RAK4631) vajavad alglaaduri vilkumist tootja jadaühenduse DFU tööriistaga (näiteks `adafruit-nrfutil`) – ainuüksi `.uf2` kopeerimine ei värskenda alglaadurit. The app surfaces a hint when this applies.
 
 ### Other Flashing Options
 
@@ -52,7 +52,7 @@ For recovery or when neither OTA nor in-app USB is available:
 - Kasuta [Meshtastic Web Flasherit](https://flasher.meshtastic.org)
 - Või arvutil [Meshtastic CLI tööriist](https://meshtastic.org/docs/getting-started/flashing-firmware)
 
-## Version Channels
+## Versioonikanalid
 
 | Kanal     | Kirjeldus                                                                  |
 | --------- | -------------------------------------------------------------------------- |
@@ -62,25 +62,25 @@ For recovery or when neither OTA nor in-app USB is available:
 
 ## Eelvärskenduse kontrollnimekiri
 
-Before updating:
+Enne uuendamist:
 
 - [ ] Aku > 50%
-- [ ] Stable Bluetooth connection
+- [ ] Stabiilne sinihamba ühendus
 - [ ] Note your current settings (they may reset on major version changes)
 - [ ] Check the release notes for breaking changes
 
 ## Eelvärskendus
 
-After the firmware is written, the app verifies the update and waits for the device to come back online:
+Pärast püsivara kirjutamist kontrollib rakendus värskendust ja ootab, kuni seade taas võrku lülitub:
 
-![Verifying update and waiting for the device to reconnect](../../assets/screenshots/firmware_verifying.png)
+![Uuenduse kontrollimine ja seadme taasühendumise ootamine](../../assets/screenshots/firmware_verifying.png)
 
 Kui värskendus õnnestub:
 
 - The radio will reboot automatically
-- Bluetooth connection will re-establish
+- Sinihamba ühendus taastatakse
 - Verify your settings are intact
-- Confirm the new version under **Currently Installed** on the Firmware Update screen — it's also shown on the node's detail page and the Connections screen
+- Kontrolli uut versiooni püsivara värskenduse ekraanil jaotises **Praegu installitud** – see kuvatakse ka sõlme üksikasjade lehel ja ühenduste ekraanil
 
 ![Püsivara värskendus õnnestus](/assets/screenshots/firmware_success.png)
 
@@ -102,15 +102,15 @@ If your device fails to boot:
 
 1. Try connecting via USB to a computer
 2. Use the web flasher in recovery/DFU mode
-3. Flash a known-good firmware version
+3. Flashi teadaolevalt toimiv püsivara versioon
 4. Seadmepõhiste taastamissammude kohta vaata Meshtastic Discordist
 
 ### Compatibility Warnings
 
 The app may show warnings when:
 
-- Connected radio firmware is below minimum supported version
-- Major version mismatch between app and firmware
+- Ühendatud raadio püsivara versioon on madalam kui minimaalselt toetatud versioon
+- Rakenduse ja püsivara versioonide mittevastavus
 - Deprecated features need migration
 
 > ⚠️ **Tähtis:** Ühilduvuse tagamiseks värskenda Meshtastic rakendust enne püsivara värskendust.

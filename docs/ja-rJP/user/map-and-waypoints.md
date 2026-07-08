@@ -1,110 +1,133 @@
 ---
-title: Map & Waypoints
+title: マップとウェイポイント
 parent: User Guide
 nav_order: 6
-last_updated: 2026-06-25
-description: View node positions on the map, create and share waypoints, and manage position sharing and privacy.
+last_updated: 2026-07-08
+description: マップ上でノードの位置を確認し、ウェイポイントの作成・共有、マップレイヤーとサイトプランナーの管理、位置共有とプライバシーの制御を行います。
 aliases:
   - map
   - waypoints
   - gps
   - location
+  - site-planner
+  - map-layers
+  - geojson
+  - kml
 ---
 
-# Map & Waypoints
+# マップとウェイポイント
 
-The Map screen shows the geographic positions of nodes on your mesh, along with shared waypoints.
+マップ画面には、メッシュ上のノードの地理的な位置が、共有されたウェイポイントとともに表示されます。
 
-## Map View
+## マップビュー
 
-The map displays:
+マップには次のものが表示されます：
 
-- **Node positions** — colored markers for each node reporting location
-- **Waypoints** — shared points of interest
-- **Your position** — your current GPS location
+- **ノードの位置：** 位置を報告している各ノードの色付きマーカー
+- **ウェイポイント：** 共有された注目地点
+- **自分の位置：** 現在の GPS 位置
 
-### Node Markers
+### ノードのマーカー
 
-Each node that reports a position is shown as a **node chip** marker displaying the node's short name. The chip is colored by the node's own identity color (a stable color derived from its node number) — the same chip used in the node list, so a node looks the same everywhere. Marker color does **not** encode online/offline status. When a node's position updates live, its marker briefly pulses. Nearby markers are clustered as you zoom out.
+位置を報告している各ノードは、そのノードの短縮名を表示する**ノードチップ**マーカーとして表示されます。 チップは、そのノード固有のアイデンティティカラー（ノード番号から導かれる一定の色）で色付けされます。ノードリストで使われるのと同じチップなので、どこでも同じ見た目になります。 マーカーの色は、オンライン／オフラインの状態を**表しません**。 ノードの位置がライブで更新されると、そのマーカーが短く脈打つように点滅します。 縮小すると、近くのマーカーはまとめて表示（クラスタリング）されます。
 
-### Map Controls
+### マップの操作
 
-- **Zoom** — pinch or use +/- buttons
-- **Pan** — drag to explore
-- **Center** — select the location button to center on your position
-- **Node tap** — tap a node marker to view details
+- **ズーム：** ピンチ操作、または +/− ボタンを使います
+- **移動：** ドラッグして見て回ります
+- **中央に配置：** 位置ボタンを選ぶと、自分の位置を中央に表示します
+- **ノードのタップ：** ノードのマーカーをタップすると詳細を表示します
 
-The floating toolbar provides quick access to compass, layer switching, node filters, refresh, and location tracking. Tap the compass to reorient north-up, or tap the location button to center on your current position.
+フローティングツールバーから、コンパス、レイヤーの切り替え、ノードの絞り込み、更新、位置追跡にすばやくアクセスできます。 コンパスをタップすると北を上に向け直し、位置ボタンをタップすると現在の位置を中央に表示します。
 
-![Map controls overlay](../../assets/screenshots/map_controls_overlay.png)
+![マップ操作のオーバーレイ](../../assets/screenshots/map_controls_overlay.png)
 
-## Waypoints
+## ウェイポイント
 
-Waypoints are shared geographic points of interest that all mesh members can see.
+ウェイポイントは、メッシュの全メンバーが見られる、共有された地理的な注目地点です。
 
-### Creating a Waypoint
+### ウェイポイントを作成する
 
-1. Long-press on the map at the desired location.
-2. Enter a name and optional description.
-3. Choose an icon/emoji for the waypoint.
-4. Tap **Send** to share with the mesh.
+1. マップ上の目的の場所を長押しします。
+2. 名前と、任意で説明を入力します。
+3. ウェイポイントのアイコン／絵文字を選びます。
+4. 「**送信**」をタップしてメッシュに共有します。
 
-### Waypoint Properties
+### ウェイポイントのプロパティ
 
-| Property   | 説明                                                      |
-| ---------- | ------------------------------------------------------- |
-| 名前         | Short identifier (max 30 characters) |
-| 説明         | Optional longer description                             |
-| Icon       | Visual marker emoji on the map                          |
-| ロック済み      | If locked, only the creator can edit or delete          |
-| Expiration | Optional auto-remove time                               |
+| プロパティ  | 説明                          |
+| ------ | --------------------------- |
+| 名前     | 短い識別子（最大 29 文字）             |
+| 説明     | 任意の、より詳しい説明                 |
+| アイコン   | マップ上の視覚的なマーカー絵文字            |
+| ロック済み  | ロックすると、作成者だけが編集・削除できます      |
+| 有効期限   | 任意の、自動削除する日時                |
+| ジオフェンス | 任意の、進入／退出を通知するエリア。詳しくは後述します |
 
-### Waypoint Expiration
+### ウェイポイントの有効期限
 
-Waypoints can be set to expire automatically:
+ウェイポイントは、自動的に期限切れになるよう設定できます：
 
-- **Never** (default) — waypoint remains until manually deleted
-- **Timed** — waypoint is automatically removed after the specified duration (e.g., "remove after 2 hours"). Useful for temporary markers like rally points, hazards, or meeting locations.
+- **なし**（デフォルト）：手動で削除するまでウェイポイントは残ります
+- **期限付き**：特定の日時を指定します。その時刻を過ぎると、ウェイポイントは自動的に削除されます。 集合地点、危険箇所、待ち合わせ場所などの一時的なマーカーに便利です。
 
-Expired waypoints are automatically hidden from the map so they don't clutter the display. The expiration countdown begins when the waypoint is created, not when other nodes receive it.
+期限切れのウェイポイントは、表示が煩雑にならないよう、自動的にマップから隠されます。 有効期限のカウントダウンは、指定した絶対時刻を基準とし、ウェイポイントが作成または受信されてからの経過時間ではありません。
 
-### Managing Waypoints
+### ウェイポイントのジオフェンス
 
-- Tap a waypoint on the map to view its details and coordinates
-- Edit or delete waypoints you created
-- **Locked waypoints** cannot be modified or deleted by other nodes — only the original creator can change them
-- Unlocked waypoints can be edited by any mesh member
+どのウェイポイントにも**ジオフェンス**（通知エリア）を設定できます。これにより、ノードがそのエリアに進入または退出したときに、あなたや他のメンバーに通知が届きます：
 
-## Position Sharing
+1. プリセットのチップから**ジオフェンスの半径**を設定する（無効にするには**オフ**）か、「**マップ上でエリアを設定**」をタップして、任意の四角形のエリアを描画します。
+2. エリアを設定したら、「**進入時に通知**」や「**退出時に通知**」を切り替えます。
+3. 任意で「**お気に入りのみ**」を有効にすると、通知をお気に入りのノードに限定できます。
 
-### Enabling Position Sharing
+ウェイポイント（およびそのジオフェンス）はメッシュ全体にブロードキャストされるため、デフォルトでは**作成者**だけに通知されます。 他の人がジオフェンス付きのウェイポイントを共有した場合、その詳細ビューに「**通過を通知する**」というオプトインが表示され、あなたも進入／退出の通知を受け取れます。
 
-Your node shares its GPS position based on:
+### ウェイポイントを管理する
 
-- **Fixed interval** — broadcast position at regular intervals
-- **Smart position** — broadcast when movement exceeds a threshold
-- **Manual** — only share when explicitly requested
+- マップ上のウェイポイントをタップすると、その詳細と座標を表示します
+- 自分が作成したウェイポイントを編集または削除できます
+- **ロックされたウェイポイント**は、他のノードから変更・削除できません。元の作成者だけが変更できます
+- ロックされていないウェイポイントは、どのメッシュメンバーでも編集できます
 
-Configure position behavior in **Settings → Position**.
+## マップレイヤー
 
-### Privacy Considerations
+マップのレイヤーアイコンをタップすると「**マップレイヤーの管理**」が開き、`.kml`、`.kmz`、または GeoJSON 形式の独自のオーバーレイをインポートできます。Meshtastic でファイルを開くか、別のアプリからアプリに共有することでインポートします。 インポートしたレイヤーは、それぞれ表示／非表示を切り替えるトグルと、削除するオプションとともに一覧表示されます。 これは Google Play 版と F-Droid 版の両方で利用できます。
 
-> 🔒 **Privacy:** Position data is broadcast to all nodes on your channel. If you don't want your location shared, disable GPS position in settings or use a fixed/fake position.
+### サイトプランナー
 
-## Map Sources
+**サイトプランナー**は、送信機の RF カバレッジを推定し、色分けされたオーバーレイとしてマップに描画します。 マップの操作から開くか、ノードの詳細ページから「**カバレッジを推定**」で開きます（位置が判明しているノードでのみ表示されます）。 送信機（位置、周波数、送信出力、アンテナ利得と高さ）、受信機（感度、高さ）、シミュレーションのオプション（最大範囲、高解像度の地形、カラーパレット）を設定してから、推定を実行します。 マップレイヤーと同様に、サイトプランナーも Google Play 版と F-Droid 版の両方で動作します。
 
-The app supports multiple map tile sources:
+## 位置の共有
 
-- OpenStreetMap (default)
-- Satellite imagery (where available)
-- Offline tiles (download map areas for offline use)
+### 位置の共有を有効にする
 
-## Related Topics
+ノードは、次のいずれかに基づいて GPS 位置を共有します：
 
-- [Nodes](nodes) — view and filter your node list
-- [Node Metrics](node-metrics) — signal quality and position history for individual nodes
-- [Discovery](discovery) — traceroute and neighbor info for understanding mesh topology
-- [Units & Locale](units-and-locale) — distance and coordinate display formats
+- **固定間隔：** 一定間隔で位置をブロードキャストします
+- **スマート位置：** 移動がしきい値を超えたときにブロードキャストします
+- **手動：** 明示的に要求されたときのみ共有します
+
+位置の動作は「**設定 → 位置**」で設定します。
+
+### プライバシーに関する注意
+
+> 🔒 **プライバシー：** 位置データは、チャンネル上のすべてのノードにブロードキャストされます。 位置を共有したくない場合は、設定で GPS 位置を無効にするか、固定／ダミーの位置を使用してください。
+
+## マップソース
+
+アプリは複数のマップタイルソースに対応しています：
+
+- OpenStreetMap（デフォルト）
+- 衛星画像（利用可能な場合）
+- オフラインタイル（オフラインで使うためにマップのエリアをダウンロード）
+
+## 関連トピック
+
+- [ノード](nodes)：ノードリストの表示と絞り込み
+- [ノードメトリクス](node-metrics)：各ノードの信号品質と位置履歴
+- [探索](discovery)：メッシュのトポロジーを把握するためのルート追跡と隣接ノード情報
+- [単位とロケール](units-and-locale)：距離と座標の表示形式
 
 ---
 

@@ -2,7 +2,7 @@
 title: Getting Started
 parent: User Guide
 nav_order: 1
-last_updated: 2026-05-13
+last_updated: 2026-07-08
 description: Esimese käivitamise seadistus — õigused, sissejuhatav voog ja järgmised sammud pärast raadio ühendamist.
 aliases:
   - first-launch
@@ -34,14 +34,14 @@ Puuduta **Alusta** seadistusvoo jätkamiseks.
 
 Rakendus küsib seadistamise ajal mitmeid lube. Each one serves a specific purpose, and some are required for core functionality.
 
-### Bluetooth Permission
+### Sinihamba load
 
 Sinihammas on peamine ühendusmeetod sinu telefoni ja Meshtastic raadio vahel:
 
 - **Bluetoothi ​​skann** – avasta lähedalasuvad Meshtastic raadiod
 - **Sinihamba ühendus** – loo ja halda seotud seadmete ühendusi
 
-Grant both permissions when prompted. Without Bluetooth, you'll need to use USB or TCP connections instead.
+Grant both permissions when prompted. Ilma sinihambata peate kasutama USB- või TCP-ühendusi.
 
 ### Location Permission
 
@@ -58,25 +58,25 @@ Grant **"While using the app"** or **"Always"** depending on your preference:
 - **Rakenduse kasutamise ajal** – asukohta uuendatakse kui rakendus on avatud
 - **Alati** – lubab taustal asukoha värskendusi, et kärgvõrgu oleks alati sisse lülitatud
 
-If denied, Bluetooth scanning will not function and your node will not report a position.
+Kui keelatud, siis sinihamba otsing ei toimi ja sõlm ei edasta asukohta.
 
-### Notifications Permission
+### Märguannete load
 
-Notifications alert you to:
+Märguanded teavitavad teid järgmisest:
 
-- Incoming messages from channels and direct messages
-- Connection status changes (connected, disconnected, reconnecting)
-- Püsivara värskenduse võimalikus
+- Sissetulevad sõnumid kanalitelt ja otsesõnumid
+- New nodes joining the mesh
+- Low battery on a remote node
 
-> 💡 **Vihje:** Märguannete eelistusi saad hiljem Androidi süsteemiseadetes täpsustada. The app creates separate notification channels for messages, connection events, and background service status.
+> 💡 **Vihje:** Teavituste eelistusi saab hiljem Androidi süsteemiseadetes täpsustada – rakendus loob iga kategooria kohta eraldi teavituskanali (lisaks mõned sisemised, näiteks taustateenus), nii et saad need eraldi lubada või vaigistada.
 
 ### Critical Alerts Permission
 
 On supported devices, the app may request permission for critical alerts:
 
-- These are high-priority notifications that can break through Do Not Disturb mode
+- Need on kõrge prioriteediga märguanded, mis võivad režiimist „Ära sega” läbi murda
 - Useful for emergency mesh alerts or urgent messages
-- You can **skip** this step if you don't need breakthrough notifications
+- Võid selle sammu **vahele jätta**, kui te kõrge prioriteediga märguandeid ei vaja
 - Configure or revoke later in Android notification settings
 
 ## Peale seadistamist
@@ -90,7 +90,7 @@ Kui load on antud, läheb rakendus üle põhiliidesele. Esimene samm peaks olema
 Kui raadioga on ühendus loodud, uuri:
 
 - [Ühendused(connections) — seo oma esimene raadioseade
-- [Messages & Channels](messages-and-channels) — send your first message
+- [Sõnumid ja kanalid](messages-and-channels) — saada oma esimene sõnum
 - [Seadmed](nodes) — vaata, kes on sinu võrgus
 - [Map & Waypoints](map-and-waypoints) — view node positions
 - [Settings](settings-radio-user) — configure your radio and user profile

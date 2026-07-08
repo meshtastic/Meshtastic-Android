@@ -2,12 +2,13 @@
 title: 節點
 parent: User Guide
 nav_order: 4
-last_updated: 2026-06-25
+last_updated: 2026-07-08
 description: Browse, filter, and sort mesh nodes — view details, signal quality, roles, and quick actions.
 aliases:
   - node-list
   - mesh-nodes
   - peers
+  - hop-histogram
 ---
 
 # 節點
@@ -122,6 +123,10 @@ Type in the search field to filter nodes by name or short name. The filter updat
 | **Channel**                                 | Grouped by channel index                                           |
 | **Via MQTT**                                | Grouped by MQTT vs. radio-heard                    |
 | **Favorites**                               | Favorited nodes first                                              |
+
+## Nodes per Hop
+
+Tap the hop-histogram icon in the node list's app bar to open a bar chart of how many nodes sit at each hop distance (0 = direct, 1 = one relay away, and so on). Filter the chart to a **last heard** window — All time, 1 hour, 8 hours, or 24 hours — to see how the mesh looks right now versus over a longer period. It's a quick way to gauge how busy and spread out your local mesh is.
 
 ## Node Detail
 

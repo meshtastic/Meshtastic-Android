@@ -2,7 +2,7 @@
 title: Kuidas Meshtastic signaalimõõtur töötab
 parent: User Guide
 nav_order: 15
-last_updated: 2026-06-25
+last_updated: 2026-07-08
 description: How the signal meter rates quality from SNR relative to the LoRa modem preset — spread spectrum, presets, and what the bars really mean.
 aliases:
   - signal
@@ -52,12 +52,12 @@ The app rates your signal quality (None, Bad, Fair, or Good) from **SNR alone, m
 
 Because the rating is relative to the preset limit, the _same_ SNR can rate differently on different presets — `-15 dB` is healthy on `LongSlow` but unusable on `ShortFast`. Letting `limit` be the active preset's SNR Limit, here is how the app picks the bars (or color):
 
-| Level    | Bars | Criteria                                        | Meaning                                                                                  |
-| -------- | ---- | ----------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| Hea      | 3    | SNR **above** the preset's `limit`              | Signal is comfortably above the demodulation floor — healthy connection. |
-| Rahuldav | 2    | up to `5.5 dB` below the `limit`                | Decodable, but getting close to the floor.                               |
-| Halb     | 1    | between `5.5 dB` and `7.5 dB` below the `limit` | At the very edge of what the preset can recover.                         |
-| Puudub   | 0    | more than `7.5 dB` below the `limit`            | Below the floor — transmission lost to noise.                            |
+| Level    | Bars | Criteria                               | Meaning                                                                                  |
+| -------- | ---- | -------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Hea      | 3    | SNR **above** the preset's `limit`     | Signal is comfortably above the demodulation floor — healthy connection. |
+| Rahuldav | 2    | less than `5.5 dB` below the `limit`   | Decodable, but getting close to the floor.                               |
+| Halb     | 1    | `5.5 dB` to `7.5 dB` below the `limit` | At the very edge of what the preset can recover.                         |
+| Puudub   | 0    | more than `7.5 dB` below the `limit`   | Below the floor — transmission lost to noise.                            |
 
 > **Märkus:** Fikseeritud SNR lävesid, mida võisid mujal näha (`-7 dB` / `-15 dB`), kasutatakse nüüd ainult üksikute hüpete rõhutamiseks traceroute'i tulemustes – mitte siin kirjeldatud sõlmepõhise signaalimõõtja jaoks.
 

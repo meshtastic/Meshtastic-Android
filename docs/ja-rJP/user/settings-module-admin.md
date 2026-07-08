@@ -1,247 +1,247 @@
 ---
-title: Settings — Modules & Admin
+title: 設定：モジュールと管理
 parent: User Guide
 nav_order: 8
-last_updated: 2026-05-20
-description: Configure optional feature modules (MQTT, telemetry, canned messages, TAK, and more) and perform device administration.
+last_updated: 2026-07-08
+description: オプションの機能モジュール（MQTT、テレメトリ、定型メッセージ、TAK など）を設定し、デバイスの管理を行います。
 aliases:
   - modules
   - module-config
   - administration
 ---
 
-# Settings — Modules & Admin
+# 設定：モジュールと管理
 
-Configure optional feature modules and perform device administration. Modules extend Meshtastic with specialized capabilities — each can be independently enabled or disabled.
+オプションの機能モジュールを設定し、デバイスの管理を行います。 モジュールは、専用の機能で Meshtastic を拡張します。それぞれ個別に有効・無効を切り替えられます。
 
-> 💡 **Tip:** You only need to enable the modules you actually use. Disabling unused modules reduces airtime, saves battery, and simplifies your configuration.
+> 💡 **ヒント：** 実際に使うモジュールだけを有効にすれば十分です。 使わないモジュールを無効にすると、電波利用時間が減り、バッテリーを節約でき、設定もシンプルになります。
 
-Module settings use a card-based layout with toggle switches, dropdowns, text fields, and sliders:
+モジュールの設定は、トグルスイッチ、ドロップダウン、テキストフィールド、スライダーを備えたカード形式のレイアウトを使用します：
 
-![Toggle switch](../../assets/screenshots/settings_switch.png)
+![トグルスイッチ](../../assets/screenshots/settings_switch.png)
 
-![Dropdown selector](../../assets/screenshots/settings_dropdown.png)
+![ドロップダウンセレクター](../../assets/screenshots/settings_dropdown.png)
 
-![Text field](../../assets/screenshots/settings_text_field.png)
+![テキストフィールド](../../assets/screenshots/settings_text_field.png)
 
-![Settings card layout](../../assets/screenshots/settings_titled_card.png)
+![設定のカードレイアウト](../../assets/screenshots/settings_titled_card.png)
 
-## Module Configuration
+## モジュールの設定
 
-### MQTT Module
+### MQTT モジュール
 
-Bridges mesh messages to and from an MQTT broker for internet connectivity. This is how you extend your mesh beyond radio range or integrate with home automation systems.
+インターネット接続のために、メッシュのメッセージを MQTT サーバーとの間で橋渡しします。 これにより、無線の到達範囲を超えてメッシュを拡張したり、ホームオートメーションシステムと連携したりできます。
 
-| Setting         | 説明                                                                       |
-| --------------- | ------------------------------------------------------------------------ |
-| Enabled         | Toggle MQTT bridge                                                       |
-| サーバー            | MQTT broker address                                                      |
-| ユーザー名           | Authentication username                                                  |
-| パスワード           | Authentication password                                                  |
-| Encryption      | Encrypt MQTT payloads                                                    |
-| ~~JSON Output~~ | ⚠️ **Deprecated** — JSON support removed from firmware; field is ignored |
-| TLS             | Use secure connection                                                    |
-| Root Topic      | Base MQTT topic path                                                     |
-| Map Report      | Publish position for public map                                          |
+| 設定項目        | 説明                                                    |
+| ----------- | ----------------------------------------------------- |
+| 有効          | MQTT ブリッジを切り替え                                        |
+| サーバー        | MQTT サーバーのアドレス                                        |
+| ユーザー名       | 認証用のユーザー名                                             |
+| パスワード       | 認証用のパスワード                                             |
+| 暗号化         | MQTT ペイロードを暗号化                                        |
+| ~~JSON 出力~~ | ⚠️ **非推奨**：JSON のサポートはファームウェアから削除されました。このフィールドは無視されます |
+| TLS         | セキュアな接続を使用                                            |
+| ルートトピック     | MQTT のベーストピックパス                                       |
+| マップ報告       | 公開マップ用に位置を公開                                          |
 
-See [MQTT](mqtt) for a detailed usage guide including encryption, privacy, and broker setup.
+暗号化、プライバシー、サーバーの設定を含む詳しい使い方は、[MQTT](mqtt) を参照してください。
 
-### Serial Module
+### シリアルモジュール
 
-Enables serial port communication for external device integrations (GPS modules, sensors, or custom hardware). When enabled, the node's serial port can send and receive protobuf or text data, allowing external microcontrollers or computers to interact with the mesh.
+外部デバイスとの連携（GPS モジュール、センサー、カスタムハードウェア）のために、シリアルポート通信を有効にします。 有効にすると、ノードのシリアルポートで protobuf またはテキストデータを送受信でき、外部のマイコンやコンピューターがメッシュとやり取りできるようになります。
 
-| Setting    | 説明                              |
-| ---------- | ------------------------------- |
-| Enabled    | Activate serial communication   |
-| Echo       | Echo received serial data back  |
-| Mode       | Text, Protobuf, or NMEA output  |
-| RX/TX Pins | GPIO pins for serial connection |
-| Baud Rate  | Serial communication speed      |
+| 設定項目     | 説明                        |
+| -------- | ------------------------- |
+| 有効       | シリアル通信を有効化                |
+| エコー      | 受信したシリアルデータをそのまま返す        |
+| モード      | テキスト、Protobuf、または NMEA 出力 |
+| RX/TX ピン | シリアル接続用の GPIO ピン          |
+| ボーレート    | シリアル通信の速度                 |
 
-### External Notification Module
+### 外部通知モジュール
 
-Controls buzzer, LED, or vibration alerts on your radio hardware. Useful for devices that need to physically signal when a message arrives — particularly helpful for unattended or outdoor installations.
+無線機ハードウェアのブザー、LED、振動によるアラートを制御します。 メッセージ到着時に物理的に知らせる必要があるデバイスに便利です。特に無人設置や屋外設置で役立ちます。
 
-| Setting                          | 説明                          |
-| -------------------------------- | --------------------------- |
-| Enabled                          | Activate notifications      |
-| Alert Message                    | Notify on incoming messages |
-| Alert Message Buzzer             | Use buzzer for messages     |
-| Alert Message Vibra              | Use vibration for messages  |
-| Alert Bell                       | Notify on bell character    |
-| Output (GPIO) | Pin for notification output |
-| Active                           | High or Low active          |
-| Duration (ms) | Notification length         |
-| Use I2S as Buzzer                | Use I2S audio output        |
+| 設定項目          | 説明                |
+| ------------- | ----------------- |
+| 有効            | 通知を有効化            |
+| メッセージ通知       | メッセージ受信時に通知       |
+| メッセージのブザー通知   | メッセージにブザーを使用      |
+| メッセージの振動通知    | メッセージに振動を使用       |
+| ベル通知          | ベル文字の受信時に通知       |
+| 出力（GPIO）      | 通知出力用のピン          |
+| アクティブ         | アクティブハイまたはアクティブロー |
+| 継続時間（ミリ秒）     | 通知の長さ             |
+| I2S をブザーとして使用 | I2S 音声出力を使用       |
 
-### Store & Forward Module
+### Store & Forward モジュール
 
-Buffers messages for nodes that were temporarily offline, then replays them when those nodes reconnect. Essential for meshes where nodes go in and out of range regularly — ensures messages aren't lost during brief disconnections.
+一時的にオフラインだったノードのためにメッセージをバッファリングし、それらのノードが再接続したときに再送します。 ノードが頻繁に圏内・圏外を行き来するメッシュに不可欠です。短時間の切断中にメッセージが失われないようにします。
 
-| Setting                                    | 説明                         |
-| ------------------------------------------ | -------------------------- |
-| Enabled                                    | Activate store and forward |
-| Heartbeat (s)           | Announcement interval      |
-| Records                                    | Maximum stored messages    |
-| History Return (max)    | Max messages to replay     |
-| History Return (window) | Time window for replay     |
+| 設定項目      | 説明                                                     |
+| --------- | ------------------------------------------------------ |
+| 有効        | ストア＆フォワードを有効化                                          |
+| ハートビート    | このノードのストア＆フォワード機能を定期的に告知する                             |
+| レコード数     | 保存するメッセージの最大数                                          |
+| 履歴の返送（最大） | 再送するメッセージの最大数                                          |
+| 履歴の返送（期間） | 再送する時間の範囲                                              |
+| サーバー      | メッシュのストア＆フォワードサーバーとして動作する（十分なメモリが必要、例：PSRAM 搭載の ESP32） |
 
-> 💡 **Tip:** Store and Forward works best on nodes with ample memory (ESP32 with PSRAM). Router nodes are ideal candidates since they're typically always-on.
+> 💡 **ヒント：** ストア＆フォワードは、十分なメモリを持つノード（PSRAM 搭載の ESP32）で最も良く機能します。 ルーターノードは通常は常時起動しているため、理想的な候補です。
 
-### Range Test Module
+### レンジテストモジュール
 
-Automated range testing tool for evaluating link quality between nodes. When enabled, the node periodically transmits test messages with incrementing counters. A receiver node logs these messages, allowing you to walk or drive away and later analyze at what distance messages stopped arriving.
+ノード間のリンク品質を評価するための、自動レンジテストツールです。 有効にすると、ノードはカウンターを増やしながらテストメッセージを定期的に送信します。 受信側のノードがこれらのメッセージを記録するため、歩いたり車で移動したりして、後からどの距離でメッセージが届かなくなったかを分析できます。
 
-| Setting                                | 説明                                |
-| -------------------------------------- | --------------------------------- |
-| Enabled                                | Activate range testing            |
-| Sender Interval (s) | Time between test transmissions   |
-| Save CSV                               | Log received test data to SD card |
+| 設定項目    | 説明                    |
+| ------- | --------------------- |
+| 有効      | レンジテストを有効化            |
+| 送信間隔（秒） | テスト送信の間隔              |
+| CSV を保存 | 受信したテストデータを SD カードに記録 |
 
-### Telemetry Module
+### テレメトリモジュール
 
-Controls what telemetry data your node shares with the mesh. Telemetry includes device health (battery, uptime) and environmental sensor data (temperature, humidity, pressure).
+ノードがメッシュと共有するテレメトリデータを制御します。 テレメトリには、デバイスの状態（バッテリー、連続稼働時間）と環境センサーのデータ（温度、湿度、気圧）が含まれます。
 
-| Setting                      | 説明                                      |
-| ---------------------------- | --------------------------------------- |
-| Device Metrics Interval      | How often to report device metrics      |
-| Environment Metrics Interval | How often to report environment sensors |
-| Air Quality Enabled          | Report particulate sensor data          |
-| Power Metrics Enabled        | Report power usage                      |
+| 設定項目         | 説明               |
+| ------------ | ---------------- |
+| デバイスメトリクスの間隔 | デバイスメトリクスを報告する頻度 |
+| 環境メトリクスの間隔   | 環境センサーを報告する頻度    |
+| 大気質を有効化      | 粒子状物質センサーのデータを報告 |
+| 電力メトリクスを有効化  | 電力使用量を報告         |
 
-See [Telemetry & Sensors](telemetry-and-sensors) for supported sensors and configuration recommendations.
+対応センサーと設定の推奨事項については、[テレメトリとセンサー](telemetry-and-sensors) を参照してください。
 
-### Canned Message Module
+### 定型メッセージモジュール
 
-Pre-configured messages accessible from the device's physical buttons (for radios with rotary encoders, keypads, or similar input hardware). Define a list of quick-send messages that can be transmitted without a phone connected — ideal for field use.
+デバイスの物理ボタンからアクセスできる、あらかじめ設定されたメッセージです（ロータリーエンコーダー、キーパッド、または同様の入力ハードウェアを備えた無線機向け）。 スマートフォンを接続していなくても送信できる、クイック送信メッセージのリストを定義します。フィールドでの使用に最適です。
 
-| Setting            | 説明                                                          |
-| ------------------ | ----------------------------------------------------------- |
-| ~~Enabled~~        | ⚠️ **Deprecated** — current firmware may ignore this toggle |
-| メッセージ              | Newline-separated list of messages                          |
-| Send Bell          | Play bell sound on send                                     |
-| Rotary Encoder     | Enable rotary encoder input                                 |
-| Up/Down/Press Pins | GPIO pin assignments for input                              |
+| 設定項目        | 説明                                      |
+| ----------- | --------------------------------------- |
+| ~~有効~~      | ⚠️ **非推奨**：現在のファームウェアはこのトグルを無視することがあります |
+| メッセージ       | 改行で区切ったメッセージのリスト                        |
+| ベルを送信       | 送信時にベル音を鳴らす                             |
+| ロータリーエンコーダー | ロータリーエンコーダー入力を有効化                       |
+| 上／下／押下ピン    | 入力用の GPIO ピンの割り当て                       |
 
-### Audio Module
+### オーディオモジュール
 
-Codec2 audio support for low-bandwidth voice communication over the mesh. This is an **experimental** feature that encodes voice into very small data packets using the Codec2 codec.
+メッシュ上での低帯域幅の音声通信のための、Codec2 音声サポートです。 これは、Codec2 コーデックを使って音声を非常に小さなデータパケットにエンコードする、**実験的**な機能です。
 
-| Setting         | 説明                               |
-| --------------- | -------------------------------- |
-| Enabled         | Activate audio module            |
-| Codec2 Rate     | Audio quality/bandwidth tradeoff |
-| I2S Word Select | GPIO pin for I2S WS              |
-| I2S Data In     | GPIO pin for I2S DIN             |
-| I2S Data Out    | GPIO pin for I2S DOUT            |
+| 設定項目        | 説明                  |
+| ----------- | ------------------- |
+| 有効          | オーディオモジュールを有効化      |
+| Codec2 レート  | 音質と帯域幅のトレードオフ       |
+| I2S ワードセレクト | I2S WS 用の GPIO ピン   |
+| I2S データ入力   | I2S DIN 用の GPIO ピン  |
+| I2S データ出力   | I2S DOUT 用の GPIO ピン |
 
-> ⚠️ **Note:** Audio requires specific hardware (I2S microphone and speaker). Voice quality is very low-bandwidth — think "understandable radio voice," not phone-call quality.
+> ⚠️ **注意：** オーディオには特定のハードウェア（I2S マイクとスピーカー）が必要です。 音質は非常に低帯域です。「聞き取れる無線の声」程度で、電話並みの品質ではないと考えてください。
 
-### Remote Hardware Module
+### リモートハードウェアモジュール
 
-GPIO control over the mesh network. Allows a remote node to read or write GPIO pins on another node — useful for activating relays, reading switches, or controlling external hardware from a distance.
+メッシュネットワーク経由での GPIO 制御です。 リモートのノードが、別のノードの GPIO ピンを読み書きできるようにします。リレーの作動、スイッチの読み取り、離れた場所からの外部ハードウェア制御に便利です。
 
-| Setting              | 説明                                                              |
-| -------------------- | --------------------------------------------------------------- |
-| Enabled              | Activate remote GPIO access                                     |
-| Allow Undefined Pins | Allow access to any GPIO pin (security risk) |
+| 設定項目     | 説明                                    |
+| -------- | ------------------------------------- |
+| 有効       | リモート GPIO アクセスを有効化                    |
+| 未定義ピンを許可 | 任意の GPIO ピンへのアクセスを許可（セキュリティリスク）       |
+| 利用可能なピン  | このノードがリモートの読み書き用に公開する GPIO ピン（最大 4 個） |
 
-> ⚠️ **Warning:** Enabling "Allow Undefined Pins" gives remote nodes access to all GPIO pins, which could interfere with the radio's own hardware. Only enable on dedicated GPIO nodes.
+> ⚠️ **警告：** 「未定義ピンを許可」を有効にすると、リモートのノードがすべての GPIO ピンにアクセスでき、無線機自体のハードウェアに干渉するおそれがあります。 GPIO 専用のノードでのみ有効にしてください。
 
-### Neighbor Info Module
+### 隣接ノード情報モジュール
 
-Broadcasts information about directly heard neighbors, enabling mesh topology mapping. Each enabled node periodically shares a list of the other nodes it can hear and their signal quality.
+直接受信した隣接ノードの情報をブロードキャストし、メッシュのトポロジーマッピングを可能にします。 有効にした各ノードは、受信できる他のノードとその信号品質のリストを定期的に共有します。
 
-| Setting                                | 説明                                   |
-| -------------------------------------- | ------------------------------------ |
-| Enabled                                | Activate neighbor broadcasting       |
-| Update Interval (s) | How often to broadcast neighbor list |
+| 設定項目     | 説明                                                                              |
+| -------- | ------------------------------------------------------------------------------- |
+| 有効       | 隣接ノードのブロードキャストを有効化                                                              |
+| 更新間隔（秒）  | 隣接ノードのリストをブロードキャストする頻度                                                          |
+| LoRa で送信 | MQTT／スマートフォンだけでなく、LoRa 経由でも隣接ノード情報をブロードキャストします。 デフォルトの鍵と名前を使用しているチャンネルでは利用できません |
 
-See [Discovery](discovery) for how to use neighbor data for mesh topology exploration.
+隣接ノードのデータをメッシュのトポロジー探索に使う方法については、[探索](discovery) を参照してください。
 
-### Ambient Lighting Module
+### アンビエントライティングモジュール
 
-Controls onboard NeoPixel or other addressable RGB LEDs on supported hardware. Can be used for visual status indicators, notification lights, or decorative effects.
+対応ハードウェア上の、オンボードの NeoPixel やその他のアドレサブル RGB LED を制御します。 視覚的なステータス表示、通知ライト、装飾的な演出に使用できます。
 
-| Setting            | 説明                                                         |
-| ------------------ | ---------------------------------------------------------- |
-| Enabled            | Activate LED control                                       |
-| LED State          | On, Off, or set specific color                             |
-| Red / Green / Blue | Individual color channel values (0–255) |
+| 設定項目    | 説明               |
+| ------- | ---------------- |
+| LED の状態 | LED のオン／オフを切り替え  |
+| 電流      | LED の電流制限（0〜31）  |
+| 赤／緑／青   | 各色チャンネルの値（0〜255） |
 
-### Detection Sensor Module
+### 検知センサーモジュール
 
-Turns your node into a motion or door sensor alert system. When a GPIO pin detects a state change (motion detected, door opened), the node broadcasts an alert message over the mesh.
+ノードを、動きやドアを検知するセンサーアラートシステムに変えます。 GPIO ピンが状態の変化（動きの検知、ドアの開放）を検出すると、ノードはメッシュ経由でアラートメッセージをブロードキャストします。
 
-| Setting                                  | 説明                                                                      |
-| ---------------------------------------- | ----------------------------------------------------------------------- |
-| Enabled                                  | Activate detection sensor                                               |
-| Monitor Pin                              | GPIO pin connected to sensor                                            |
-| Detection Triggered High                 | Trigger when pin goes high (vs. low) |
-| Minimum Broadcast (s) | Minimum time between alert broadcasts                                   |
-| State Broadcast (s)   | Periodic state broadcast interval                                       |
-| Send Bell                                | Include bell character in alerts                                        |
-| Friendly Name                            | Custom name for this sensor                                             |
+| 設定項目            | 説明                                          |
+| --------------- | ------------------------------------------- |
+| 有効              | 検知センサーを有効化                                  |
+| 監視ピン            | センサーに接続された GPIO ピン                          |
+| 検知トリガーの種類       | ピンの状態を検知イベントにどう対応させるか（例：アクティブハイ／ロー、エッジトリガー） |
+| 入力プルアップモードを使用   | ピンの内蔵プルアップ抵抗を有効にする                          |
+| 最小ブロードキャスト間隔（秒） | アラートのブロードキャスト間の最小時間                         |
+| 状態ブロードキャスト（秒）   | 定期的な状態ブロードキャストの間隔                           |
+| ベルを送信           | アラートにベル文字を含める                               |
+| 分かりやすい名前        | このセンサーのカスタム名                                |
 
-### Paxcounter Module
+### Paxcounter モジュール
 
-People counter using WiFi and BLE probe requests. Counts nearby devices by passively listening for probe requests that phones and laptops emit when scanning for networks. Available only on ESP32 devices.
+WiFi と BLE のプローブ要求を使った人数カウンターです。 スマートフォンやノートパソコンがネットワークを探すときに発するプローブ要求を受動的に受信して、近くのデバイスを数えます。 ESP32 デバイスでのみ利用できます。
 
-| Setting                                | 説明                         |
-| -------------------------------------- | -------------------------- |
-| Enabled                                | Activate people counting   |
-| Update Interval (s) | How often to report counts |
+| 設定項目    | 説明          |
+| ------- | ----------- |
+| 有効      | 人数カウントを有効化  |
+| 更新間隔（秒） | カウントを報告する頻度 |
 
-> 💡 **Tip:** Paxcounter is useful for estimating foot traffic at trailheads, event venues, or other locations. Counts are approximate — one person may carry multiple devices.
+> 💡 **ヒント：** Paxcounter は、登山口やイベント会場などの人出を推定するのに便利です。 カウントはおおよその値です。1 人が複数のデバイスを持っていることがあります。
 
-### TAK Module
+### TAK モジュール
 
-Team Awareness Kit integration for interoperability with ATAK and WinTAK. See [TAK Integration](tak) for detailed setup and usage.
+ATAK および WinTAK と相互運用するための、Team Awareness Kit 連携です。 詳しい設定と使い方は、[TAK 連携](tak) を参照してください。
 
 ## 管理
 
 ### リモート管理
 
-Remotely configure nodes that share your admin key:
+管理者鍵を共有しているノードをリモートで設定します：
 
-1. Select the target node in the node list.
-2. Navigate to **Settings** for that node.
-3. Modify configuration.
-4. Tap **Save** — changes are sent over the mesh.
+1. ノードリストで対象のノードを選択します。
+2. そのノードの「**設定**」に移動します。
+3. 設定を変更します。
+4. 「**保存**」をタップします。変更がメッシュ経由で送信されます。
 
-> ⚠️ **Requires:** Admin key configured on both your node and the target node.
+> ⚠️ **必要条件：** 自分のノードと対象のノードの両方に管理者鍵が設定されていること。
 
-### Clean Node Database
+### ノードデータベースの整理
 
-Removes stale nodes from your local database that haven't been heard in a configurable time window.
+設定可能な期間内に受信していない古いノードを、ローカルデータベースから削除します。
 
-### Factory Reset
+### 工場出荷時リセット
 
-Resets all settings to factory defaults. **This cannot be undone.**
+すべての設定を工場出荷時のデフォルトにリセットします。 **この操作は取り消せません。**
 
 ### 再起動
 
-Remotely reboot a connected or administered node.
+接続中または管理中のノードをリモートで再起動します。
 
 ### デバッグ
 
-View detailed diagnostic information:
+診断出力の表示・絞り込み・エクスポートを行う「**パケット**」タブと「**アプリログ**」タブを開きます。 詳しい手順は、[デバッグログ](debug-logs) を参照してください。
 
-- Protocol buffers debug output
-- Mesh packet log
-- Connection state details
+### リモート管理のトラブルシューティング
 
-### Troubleshooting Remote Admin
+- **「対象ノードから応答がありません」**：対象が圏外、オフライン、または管理者鍵が一致していない可能性があります。 両方のノードで管理者鍵が一致しているか確認してください。
+- **変更が適用されない**：一部の設定は、反映に再起動が必要です。 保存後に「再起動」を実行してみてください。
+- **リモートの設定が表示されない**：自分のノードに、対象ノードの管理者鍵があることを確認してください。 管理チャンネルは、管理者鍵を設定すると自動的に構成されます。
 
-- **"No response from target node"** — the target may be out of range, offline, or have a mismatched admin key. Verify the admin key matches on both nodes.
-- **Changes not applying** — some settings require a reboot to take effect. Try the Reboot action after saving.
-- **Can't see remote settings** — ensure your node has the admin key for the target node. The admin channel is configured automatically when an admin key is set.
+## 関連トピック
 
-## Related Topics
-
-- [Settings — Radio & User](settings-radio-user) — core radio and user profile settings
-- [Module configuration reference](https://meshtastic.org/docs/configuration/module) — detailed module docs on meshtastic.org
-- [FAQ](https://meshtastic.org/docs/about/faq) — common questions on meshtastic.org
+- [設定：無線機とユーザー](settings-radio-user)：基本の無線機とユーザープロファイルの設定
+- [モジュール設定リファレンス](https://meshtastic.org/docs/configuration/module)：meshtastic.org にある詳細なモジュールのドキュメント
+- [FAQ](https://meshtastic.org/docs/about/faq)：meshtastic.org のよくある質問
 
 ---
 

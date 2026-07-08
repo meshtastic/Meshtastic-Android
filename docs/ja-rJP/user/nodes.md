@@ -2,160 +2,165 @@
 title: ノード
 parent: User Guide
 nav_order: 4
-last_updated: 2026-06-25
-description: Browse, filter, and sort mesh nodes — view details, signal quality, roles, and quick actions.
+last_updated: 2026-07-08
+description: メッシュノードの閲覧・絞り込み・並べ替え。詳細、信号品質、役割、クイック操作を確認できます。
 aliases:
   - node-list
   - mesh-nodes
   - peers
+  - hop-histogram
 ---
 
 # ノード
 
-The Nodes screen displays all devices visible on your mesh network.
+ノード画面には、メッシュネットワーク上で見えているすべてのデバイスが表示されます。
 
-## Node List
+## ノードリスト
 
-The node list shows every node your radio has heard, including:
+ノードリストには、無線機が受信したすべてのノードが、次の情報とともに表示されます：
 
-- **Node name** — user-configured long name
-- **Short name** — 4-character identifier
-- **Signal quality** — last heard signal strength
-- **Last heard** — time since last communication
-- **Distance** — estimated distance (if positions are shared)
-- **Battery** — remote node battery level (if telemetry is enabled)
+- **ノード名：** ユーザーが設定した正式名称
+- **短縮名：** 4 文字の識別子
+- **信号品質：** 最後に受信したときの信号強度
+- **最後の通信：** 最後に通信してからの経過時間
+- **距離：** 推定距離（位置情報が共有されている場合）
+- **バッテリー：** リモートノードのバッテリー残量（テレメトリが有効な場合）
 
-### Node Status Indicators
+### ノードのステータス表示
 
-| Badge      | Meaning                             |
-| ---------- | ----------------------------------- |
-| 🟢 Online  | Node heard within the last 2 hours  |
-| ⚪ Offline  | Node not heard for over 2 hours     |
-| ⭐ Favorite | Node marked as favorite by the user |
+| バッジ      | 意味                 |
+| -------- | ------------------ |
+| 🟢 オンライン | 過去 2 時間以内に受信したノード  |
+| ⚪ オフライン  | 2 時間を超えて受信していないノード |
+| ⭐ お気に入り  | ユーザーがお気に入りに設定したノード |
 
-A node is considered **online** if it was heard within the last 2 hours, and **offline** otherwise — there is no separate "away" tier.
+ノードは、過去 2 時間以内に受信していれば**オンライン**、そうでなければ**オフライン**とみなされます。「離席中」のような中間の段階はありません。
 
-### Node Roles
+### ノードの役割
 
-Nodes can be configured with different roles that affect their mesh behavior:
+ノードには、メッシュ上での動作に影響するさまざまな役割を設定できます：
 
-| 役割                               | 説明                                                                                                                                                     |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| クライアント                           | Standard end-user device                                                                                                                               |
-| クライアント・ベース                       | Treats favorited-node traffic as Router Late priority; all other traffic as Client                                                                     |
-| クライアント・ミュート                      | Receives but doesn't retransmit                                                                                                                        |
-| クライアント・非表示                       | Like Client Mute, plus hides from node list                                                                                                            |
-| ルーター                             | Prioritizes message forwarding; stays awake to relay                                                                                                   |
-| ルーター・レイト                         | Infrastructure node that rebroadcasts once, but only after all other modes (provides supplemental coverage)                         |
-| ~~Router Client~~                | ⚠️ **Deprecated** (removed in firmware 2.3.15) — no longer selectable; use Router or Client instead |
-| ~~Repeater~~                     | ⚠️ **Deprecated** (removed in firmware 2.7.11) — no longer selectable; use Router instead           |
-| トラッカー                            | Optimized for position reporting at regular intervals                                                                                                  |
-| センサー                             | Optimized for telemetry reporting                                                                                                                      |
-| TAK                              | Interoperates with TAK systems (sends/receives CoT)                                                                                 |
-| TAK Tracker                      | TAK position reporting only                                                                                                                            |
-| Lost & Found | Continuous position beacon for recovery                                                                                                                |
+| 役割              | 説明                                                                                                    |
+| --------------- | ----------------------------------------------------------------------------------------------------- |
+| クライアント          | 標準的なエンドユーザーのデバイス                                                                                      |
+| クライアント・ベース      | お気に入りノードの通信をルーター・レイトの優先度で扱い、それ以外の通信はクライアントとして扱います                                                     |
+| クライアント・ミュート     | 受信しますが、再送信はしません                                                                                       |
+| クライアント・非表示      | クライアント・ミュートと同様で、さらにノードリストから隠れます                                                                       |
+| ルーター            | メッセージの転送を優先し、中継のために起動し続けます                                                                            |
+| ルーター・レイト        | 1 回だけ再送信するインフラノードですが、他のすべてのモードの後にのみ行います（補助的なカバレッジを提供します）                                              |
+| ~~ルーター・クライアント~~ | ⚠️ **非推奨**（ファームウェア 2.3.15 で削除）。選択できなくなりました。代わりにルーターまたはクライアントを使用してください |
+| ~~リピーター~~       | ⚠️ **非推奨**（ファームウェア 2.7.11 で削除）。選択できなくなりました。代わりにルーターを使用してください          |
+| トラッカー           | 一定間隔での位置報告に最適化されています                                                                                  |
+| センサー            | テレメトリ報告に最適化されています                                                                                     |
+| TAK             | TAK システムと相互運用します（CoT を送受信）                                                                            |
+| TAK Tracker     | TAK の位置報告のみ                                                                                           |
+| ロスト＆ファウンド       | 回収のために位置を継続的に発信します                                                                                    |
 
-### Choosing a Role
+### 役割を選ぶ
 
-Most users should keep the default **Client** role. Consider a different role when:
+ほとんどのユーザーは、デフォルトの**クライアント**役割のままにしてください。 次のような場合は、別の役割を検討してください：
 
-- **Router** — You have a node in a fixed, elevated location with reliable power (rooftop, hilltop). Routers stay awake continuously to relay messages for others and are essential for extending mesh coverage. Don't use Router on battery-powered handheld devices.
-- **Router Late** — An infrastructure node that always rebroadcasts packets once but only after all other routing modes have had their turn. Provides supplemental coverage for local clusters without competing with primary routers.
-- **Client Base** — Treats traffic from/to your favorited nodes with Router Late priority (ensuring those messages get extra relay coverage) while handling everything else as a normal Client.
-- **Client Mute** — You want to receive mesh traffic but not contribute to relaying. Useful for monitoring-only devices or to reduce congestion in dense areas.
-- **Tracker** — An unattended device whose sole purpose is broadcasting its GPS position (e.g., a vehicle, pet, or asset). Sleeps between broadcasts to conserve battery.
-- **Sensor** — An unattended device reporting environmental telemetry (temperature, humidity, air quality). Similar power profile to Tracker.
-- **TAK / TAK Tracker** — Only needed if interoperating with ATAK/WinTAK systems. See [TAK Integration](tak) for details.
+- **ルーター：** 電源が安定した、固定された高所（屋上、丘の上など）にノードを設置している場合。 ルーターは他のノードのメッセージを中継するために常に起動し続け、メッシュのカバレッジ拡大に不可欠です。 バッテリー駆動のハンドヘルドデバイスではルーターを使用しないでください。
+- **ルーター・レイト：** パケットを常に 1 回だけ再送信するインフラノードですが、他のすべてのルーティングモードの番が終わった後にのみ行います。 主要なルーターと競合することなく、ローカルのクラスターに補助的なカバレッジを提供します。
+- **クライアント・ベース：** お気に入りノードとの間の通信をルーター・レイトの優先度で扱い（それらのメッセージが追加の中継カバレッジを得られるようにします）、それ以外はすべて通常のクライアントとして処理します。
+- **クライアント・ミュート：** メッシュの通信を受信したいが、中継には貢献したくない場合。 監視専用のデバイスや、混雑した地域での輻輳軽減に便利です。
+- **トラッカー：** GPS 位置の発信だけを目的とする無人デバイス（車両、ペット、資産など）。 発信の合間はスリープしてバッテリーを節約します。
+- **センサー：** 環境テレメトリ（気温、湿度、大気質）を報告する無人デバイス。 電力プロファイルはトラッカーと同様です。
+- **TAK／TAK Tracker：** ATAK／WinTAK システムと相互運用する場合にのみ必要です。 詳しくは [TAK 連携](tak) を参照してください。
 
-> 💡 **Tip:** The mesh works best when most nodes are **Client** or **Router**. Too many Mute nodes reduces mesh resilience; too many Routers in a dense area can cause congestion. A good rule of thumb: one Router per 5–10 Clients in your area.
+> 💡 **ヒント：** メッシュは、ほとんどのノードが**クライアント**または**ルーター**のときに最も良く機能します。 ミュートノードが多すぎるとメッシュの耐障害性が低下し、混雑した地域にルーターが多すぎると輻輳を招くことがあります。 目安としては、地域内のクライアント 5〜10 台につきルーター 1 台です。
 
-### Encryption Indicators
+### 暗号化の表示
 
-Nodes display encryption status icons next to their name:
+ノードは、名前の横に暗号化ステータスのアイコンを表示します：
 
-| Icon        | Meaning                                                                                                             |
-| ----------- | ------------------------------------------------------------------------------------------------------------------- |
-| 🔒 Locked   | Communication uses PKI (public key infrastructure) — end-to-end encrypted with verified identity |
-| 🔓 Unlocked | Communication uses shared channel PSK — encrypted but identity not individually verified                            |
-| ⚠️ Mismatch | Public key mismatch — the node's key has changed since last seen (investigate before trusting)   |
+| アイコン     | 意味                                                  |
+| -------- | --------------------------------------------------- |
+| 🔒 ロック   | 通信は PKI（公開鍵基盤）を使用します。本人性が検証された、エンドツーエンドの暗号化です       |
+| 🔓 ロック解除 | 通信は共有チャンネルの PSK を使用します。暗号化されていますが、本人性は個別には検証されていません |
+| ⚠️ 不一致   | 公開鍵の不一致。前回確認時からノードの鍵が変わっています（信頼する前に調べてください）         |
 
-> 💡 **Tip:** PKI encryption (firmware 2.5+) provides stronger security than channel PSK because each node has a unique key pair. If you see a key mismatch warning, the node may have been reset or compromised.
+> 💡 **ヒント：** PKI 暗号化（ファームウェア 2.5 以降）は、各ノードが固有の鍵ペアを持つため、チャンネル PSK より強力なセキュリティを提供します。 鍵の不一致の警告が表示された場合、そのノードはリセットされたか、侵害された可能性があります。
 
-## Quick Actions
+## クイック操作
 
-From the node list, you can:
+ノードリストから、次のことができます：
 
-- **Tap** a node to view its detail page
-- **Long-press** for quick actions:
-  - Mark/remove favorite
-  - Mute/unmute notifications
-  - Send a direct message
-  - Trace route
-  - Ignore/unignore
-  - Remove node
+- ノードを**タップ**すると詳細ページを表示します
+- **長押し**でクイック操作を表示します：
+  - お気に入りに追加／解除
+  - 通知のミュート／解除
+  - ダイレクトメッセージを送信
+  - 経路をトレース
+  - 無視／無視の解除
+  - ノードを削除
 
-## Filtering & Sorting
+## 絞り込みと並べ替え
 
-### Text Search
+### テキスト検索
 
-Type in the search field to filter nodes by name or short name. The filter updates in real time as you type.
+検索欄に入力すると、名前または短縮名でノードを絞り込めます。 絞り込みは、入力に応じてリアルタイムで更新されます。
 
-### Filter Toggles
+### 絞り込みトグル
 
-| 絞り込み                       | 説明                                                                                             |
-| -------------------------- | ---------------------------------------------------------------------------------------------- |
-| **Only online**            | Show only nodes heard within the last 2 hours                                                  |
-| **Only direct**            | Show only nodes with direct (non-relayed) connections                       |
-| **Include unknown**        | Show nodes that haven't sent user info yet                                                     |
-| **Exclude infrastructure** | Hide infrastructure-role nodes (Router, Repeater, Router Late, Client Base) |
-| **Exclude MQTT**           | Hide nodes heard only via MQTT internet bridge                                                 |
-| **Show ignored**           | Show nodes you've previously dismissed or muted                                                |
+| 絞り込み           | 説明                                                 |
+| -------------- | -------------------------------------------------- |
+| **オンラインのみ**    | 過去 2 時間以内に受信したノードのみを表示します                          |
+| **直接のみ**       | 直接（中継されていない）接続のノードのみを表示します                         |
+| **不明なノードを含む**  | まだユーザー情報を送信していないノードを表示します                          |
+| **インフラを除外**    | インフラ役割のノード（ルーター、リピーター、ルーター・レイト、クライアント・ベース）を非表示にします |
+| **MQTT を除外**   | MQTT のインターネットブリッジ経由でのみ受信したノードを非表示にします              |
+| **無視したノードを表示** | 以前に非表示またはミュートにしたノードを表示します                          |
 
-### Sort Options
+### 並べ替えオプション
 
-| Sort                                        | 説明                                                                 |
-| ------------------------------------------- | ------------------------------------------------------------------ |
-| **Last heard** (default) | Most recently heard nodes first                                    |
-| **Alphabetical**                            | Sorted by node long name                                           |
-| **Distance**                                | Nearest nodes first (requires position sharing) |
-| **Hops away**                               | Fewest relay hops first                                            |
-| **Channel**                                 | Grouped by channel index                                           |
-| **Via MQTT**                                | Grouped by MQTT vs. radio-heard                    |
-| **Favorites**                               | Favorited nodes first                                              |
+| 並べ替え             | 説明                         |
+| ---------------- | -------------------------- |
+| **最後の通信**（デフォルト） | 最近受信したノードを先頭に表示します         |
+| **アルファベット順**     | ノードの正式名称で並べ替えます            |
+| **距離**           | 近いノードを先頭に表示します（位置情報の共有が必要） |
+| **ホップ数**         | 中継ホップ数が少ないノードを先頭に表示します     |
+| **チャンネル**        | チャンネルインデックスごとにグループ化します     |
+| **MQTT 経由**      | MQTT 経由と無線受信でグループ化します      |
+| **お気に入り**        | お気に入りのノードを先頭に表示します         |
 
-## Node Detail
+## ホップごとのノード数
 
-Tapping a node opens the detail view with comprehensive information. See [Node Metrics](node-metrics) for full details on metrics and telemetry.
+ノードリストのアプリバーにあるホップヒストグラムのアイコンをタップすると、各ホップ距離にいくつのノードがあるかを示す棒グラフが開きます（0 = 直接、1 = 中継 1 回、以下同様）。 グラフを**最後の通信**の期間（すべての期間、1 時間、8 時間、24 時間）で絞り込むと、現在のメッシュの様子と、より長い期間での様子を比較できます。 ローカルメッシュがどれだけ混雑し、どれだけ広がっているかを手早く把握できます。
 
-![Node detail view](../../assets/screenshots/nodes_node_list.png)
+## ノードの詳細
 
-The detail screen includes device info, position, and action buttons:
+ノードをタップすると、詳しい情報を含む詳細ビューが開きます。 メトリクスとテレメトリの詳細については、[ノードメトリクス](node-metrics) を参照してください。
 
-![Node detail section](../../assets/screenshots/nodes_detail_section.png)
+![ノードの詳細ビュー](../../assets/screenshots/nodes_node_list.png)
 
-Inline status indicators show key metrics at a glance:
+詳細画面には、デバイス情報、位置、操作ボタンが含まれます：
 
-| Indicator      | Screenshot                                                    |
-| -------------- | ------------------------------------------------------------- |
-| Signal quality | ![Signal](../../assets/screenshots/nodes_signal_info.png)     |
-| Battery level  | ![Battery](../../assets/screenshots/nodes_battery_info.png)   |
-| Hop count      | ![Hops](../../assets/screenshots/nodes_hops_info.png)         |
-| 最後の通信          | ![Last heard](../../assets/screenshots/nodes_last_heard.png)  |
-| 距離             | ![Distance](../../assets/screenshots/nodes_distance_info.png) |
+![ノードの詳細セクション](../../assets/screenshots/nodes_detail_section.png)
 
-### Device Links ("I want one")
+インラインのステータス表示で、主要なメトリクスをひと目で確認できます：
 
-When a node's hardware is recognized, the detail view shows a collapsible **"I want one"** section linking to places to buy or learn more about that device: the vendor's product page, product variants, and regional marketplace listings (such as AliExpress, Amazon, and supported retailers), filtered to your country. Each link opens through the `msh.to` redirect service. Devices with no matching links don't show the section.
+| 指標      | スクリーンショット                                                 |
+| ------- | --------------------------------------------------------- |
+| 信号品質    | ![信号](../../assets/screenshots/nodes_signal_info.png)     |
+| バッテリー残量 | ![バッテリー](../../assets/screenshots/nodes_battery_info.png) |
+| ホップ数    | ![ホップ](../../assets/screenshots/nodes_hops_info.png)      |
+| 最後の通信   | ![最後の通信](../../assets/screenshots/nodes_last_heard.png)   |
+| 距離      | ![距離](../../assets/screenshots/nodes_distance_info.png)   |
 
-A full, browsable directory of every link is also available under **Settings → Device Links**.
+### デバイスのリンク（「購入はこちら」）
 
-## Related Topics
+ノードのハードウェアが認識されると、詳細ビューに折りたたみ式の\*\*「購入はこちら」\*\*セクションが表示され、そのデバイスを購入したり詳しく知ったりできる場所（ベンダーの製品ページ、製品バリエーション、AliExpress・Amazon・対応小売店などの地域のマーケットプレイスの掲載）が、あなたの国に合わせて絞り込まれて表示されます。 各リンクは `msh.to` のリダイレクトサービスを通じて開きます。 一致するリンクがないデバイスでは、このセクションは表示されません。
 
-- [Node Metrics](node-metrics) — detailed telemetry dashboards for each node
-- [Messages & Channels](messages-and-channels) — send a direct message to a node
-- [Map & Waypoints](map-and-waypoints) — view node positions geographically
-- [Discovery](discovery) — traceroute and neighbor info for topology exploration
-- [Signal Meter](signal-meter) — understand what the signal bars mean
+すべてのリンクを一覧できる完全なディレクトリは、「**設定 → デバイスのリンク**」からも利用できます。
+
+## 関連トピック
+
+- [ノードメトリクス](node-metrics)：各ノードの詳細なテレメトリダッシュボード
+- [メッセージとチャンネル](messages-and-channels)：ノードにダイレクトメッセージを送信
+- [マップとウェイポイント](map-and-waypoints)：ノードの位置を地図上で確認
+- [探索](discovery)：トポロジー探索のための経路トレースと隣接ノード情報
+- [信号メーター](signal-meter)：信号バーの意味を理解する
 
 ---
 

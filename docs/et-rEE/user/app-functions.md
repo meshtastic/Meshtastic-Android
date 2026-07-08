@@ -13,7 +13,7 @@ aliases:
 
 # App Functions
 
-Rakendusfunktsioonid avaldavad Meshtasticu võimalused Androidi süsteemile ja seadmesisestele tehisintellekti assistentidele (näiteks Gemini) Androidi rakenduste funktsioonide API kaudu. With them enabled, an assistant can discover and trigger mesh workflows for you — for example sending a message or checking your mesh status — without you opening the app.
+Rakendusfunktsioonid avaldavad Meshtasticu võimalused Androidi süsteemile ja seadmesisestele tehisintellekti assistentidele (näiteks Gemini) Androidi rakenduste funktsioonide API kaudu. Kui need on lubatud, saab assistent sinu eest kärgvõrgu töövooge avastada ja käivitada – näiteks sõnumi saata või kärgvõrgu olekut kontrollida – ilma, et peaksid rakendust avama.
 
 > ⚠️ **Märkus:** Rakenduse funktsioonid on saadaval ainult **Google'i-tüüpi Androidi versioonides**.
 
@@ -23,7 +23,7 @@ Rakendusfunktsioonid avaldavad Meshtasticu võimalused Androidi süsteemile ja s
 
 Rakenduse funktsioone saab juhtida menüüst **Seaded → Süsteemi TI** (rakenduse sisemine ekraan on tähistatud kui „Süsteemi TI“). The screen has:
 
-- A **master toggle** labeled **"Allow AI access"**, with the subtitle _"Let system AI assistants (e.g. Gemini) discover and use mesh functions"_. When off, no functions are exposed to the system.
+- **Pealüliti** sildiga **"Luba tehisintellektile juurdepääs"** alapealkirjaga _"Luba süsteemi tehisintellekti assistentidel (nt Gemini) kärgvõrgu funktsioone avastada ja kasutada"_. When off, no functions are exposed to the system.
 - An **individual toggle for each function**, so you can expose only the capabilities you want.
 
 The functions are grouped into a **Write** section (functions that change something or send data to your mesh) and a **Read** section (functions that only return information).
@@ -32,9 +32,9 @@ The functions are grouped into a **Write** section (functions that change someth
 
 ### Write Functions
 
-| Function         | What it does                                                                                                            |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| **Send Message** | Sends a text message to a contact (direct message) or to a channel, up to 237 bytes. |
+| Function         | What it does                                                                                                |
+| ---------------- | ----------------------------------------------------------------------------------------------------------- |
+| **Send Message** | Saadab kontaktile (otsesõnum) või kanalile tekstisõnumi, kuni 237 baiti. |
 
 ### Read Functions
 
@@ -42,7 +42,7 @@ The functions are grouped into a **Write** section (functions that change someth
 | ----------------------- | ----------------------------------------------------------- |
 | **Get Mesh Status**     | Overall mesh status.                        |
 | **Get Node List**       | The list of nodes on your mesh.             |
-| **Get Channel Info**    | Information about your channels.            |
+| **Saa kanali info**     | Teave kanalite kohta.                       |
 | **Get Device Status**   | Status of your connected radio.             |
 | **Get Node Details**    | Detailed information about a specific node. |
 | **Get Recent Messages** | Recent messages from your conversations.    |
@@ -55,7 +55,7 @@ The functions are grouped into a **Write** section (functions that change someth
 
 ## Related Topics
 
-- [Messages & Channels](messages-and-channels) — sending messages directly in the app
+- [Sõnumid ja kanalid](user/messages-and-channels)— sõnumite saatmine otse rakenduses
 - [Nodes](nodes) — the node list the read functions draw from
 - [Node Metrics](node-metrics) — the telemetry behind Get Mesh Metrics
 

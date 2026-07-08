@@ -48,7 +48,7 @@ The Status tab summarizes your current connection and mesh status at a glance �
 
 ## Related Topics
 
-- [Messages & Channels](messages-and-channels) — full messaging features on your phone
+- [Sõnumid ja kanalid](user/messages-and-channels) - täielikud sõnumsidefunktsioonid teie telefonis
 - [Nodes](nodes) — detailed node list and node-detail information
 - [Connections](connections) — how the app connects to your radio
 

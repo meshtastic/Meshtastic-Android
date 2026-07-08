@@ -1,128 +1,128 @@
 ---
-title: Units, Measurement & Locale
+title: 単位・計測・ロケール
 parent: User Guide
 nav_order: 16
-last_updated: 2026-05-12
-description: How the app formats temperature, distance, speed, and other measurements based on your device locale.
+last_updated: 2026-07-08
+description: アプリが、デバイスのロケールに基づいて温度・距離・速度などの計測値をどう表示するかを説明します。
 ---
 
-# Units, Measurement & Locale
+# 単位・計測・ロケール
 
-The Meshtastic app automatically displays temperatures, distances, speeds, and times in the units your device is configured to use — no settings to change inside the app.
+Meshtastic アプリは、温度・距離・速度・時刻を、デバイスで設定されている単位で自動的に表示します。アプリ内で変更する設定はありません。
 
 ---
 
-## How It Works
+## 仕組み
 
-Meshtastic radios always transmit data in **metric units** (meters, °C, km/h, hPa, etc.). When the app receives this data, it converts and displays values in whatever unit system your device's locale specifies.
+Meshtastic の無線機は、常に**メートル法の単位**（メートル、°C、m/s、hPa など）でデータを送信します。 アプリはこのデータを受信すると、デバイスのロケールで指定された単位系に変換して値を表示します。
 
-On Android, your measurement preferences are determined by your system **Language & Region** settings. On Desktop (JVM), the app uses the JVM's default `Locale`.
+Android では、計測の設定はシステムの**言語と地域**の設定によって決まります。 デスクトップ（JVM）では、アプリは JVM のデフォルトの `Locale` を使用します。
 
-> 💡 **Tip:** You never need to toggle units inside the app. Change your system measurement preferences and every screen in Meshtastic updates automatically — node details, telemetry charts, weather, altitude, and more.
+> 💡 **ヒント：** アプリ内で単位を切り替える必要はまったくありません。 システムの計測設定を変更すると、Meshtastic のすべての画面（ノードの詳細、テレメトリのグラフ、天気、標高など）が自動的に更新されます。
 
 ---
 
 ## 温度
 
-Temperature values from environment sensors are transmitted as **°C** and displayed based on your device's temperature unit preference.
+環境センサーの温度値は **°C** で送信され、デバイスの温度単位の設定に基づいて表示されます。
 
-![Environment metrics with temperature](../../assets/screenshots/nodes_environment_metrics.png)
+![温度を含む環境メトリクス](../../assets/screenshots/nodes_environment_metrics.png)
 
-| Your Setting | You See |
+| あなたの設定 | 表示   |
+| ------ | ---- |
+| 摂氏     | 22°C |
+| 華氏     | 72°F |
+
+これは、アプリ全体のすべての温度表示に影響します：ノードの環境テレメトリ、土壌温度、露点、テレメトリグラフの軸。
+
+## 距離と標高
+
+ノード間の距離と GPS の標高は**メートル**で送信され、自動的にスケーリングされて変換されます。
+
+![距離情報の表示](../../assets/screenshots/nodes_distance_info.png)
+
+| あなたの設定       | 短い距離     | 長い距離                   | 標高       |
+| ------------ | -------- | ---------------------- | -------- |
+| メートル法        | 350 m    | 2.5 km | 1,200 m  |
+| ヤード・ポンド法（米国） | 1,148 ft | 1.6 mi | 3,937 ft |
+
+アプリは自然なスケーリングを使用します。短い距離はメートルやフィートのままで、長い距離は自動的にキロメートルやマイルに切り替わります。
+
+### 表示される場所
+
+- **ノードリスト**：各ノードまでの距離と方位
+- **ノードの詳細**：標高、自分の位置からの距離
+- **マップ**：ウェイポイントまでの距離、ルート追跡のホップ距離
+- **コンパス**：選択したノードまでの距離
+
+## 速度
+
+GPS の対地速度は、ロケールで優先される速度単位で表示されます。
+
+| あなたの設定       | 表示      |
 | ------------ | ------- |
-| Celsius      | 22°C    |
-| Fahrenheit   | 72°F    |
-
-This affects all temperature displays throughout the app: node environment telemetry, soil temperature, dew point, and telemetry chart axes.
-
-## Distance & Altitude
-
-Distances between nodes and GPS altitudes are transmitted as **meters** and automatically scaled and converted.
-
-![Distance info display](../../assets/screenshots/nodes_distance_info.png)
-
-| Your Setting                     | Small Distance | Large Distance         | 標高       |
-| -------------------------------- | -------------- | ---------------------- | -------- |
-| Metric                           | 350 m          | 2.5 km | 1,200 m  |
-| Imperial (US) | 1,148 ft       | 1.6 mi | 3,937 ft |
-
-The app uses natural scaling — short distances stay in meters or feet, while longer distances switch to kilometres or miles automatically.
-
-### Where these appear
-
-- **Node list** — distance and bearing to each node
-- **Node detail** — altitude, distance from your position
-- **Map** — waypoint distances, traceroute hop distances
-- **Compass** — distance to selected node
-
-## Speed
-
-GPS ground speed is displayed in your locale's preferred speed unit.
-
-| Your Setting                     | You See |
-| -------------------------------- | ------- |
-| Metric                           | 12 km/h |
-| Imperial (US) | 7 mph   |
+| メートル法        | 12 km/h |
+| ヤード・ポンド法（米国） | 7 mph   |
 
 ## 風力
 
-Wind speed and gust data from environment sensors are transmitted as **m/s** and converted for display.
+環境センサーの風速と突風のデータは **m/s** で送信され、表示用に変換されます。
 
-| Your Setting                     | You See |
-| -------------------------------- | ------- |
-| Metric                           | 5 m/s   |
-| Imperial (US) | 11 mph  |
+| あなたの設定       | 表示     |
+| ------------ | ------ |
+| メートル法        | 5 m/s  |
+| ヤード・ポンド法（米国） | 11 mph |
 
-Wind readings appear in the **Node Detail** environment section and the **Environment Telemetry** charts.
+風の測定値は、「**ノードの詳細**」の環境セクションと「**環境テレメトリ**」のグラフに表示されます。
 
-## Rainfall
+## 降水量
 
-Rainfall measurements (1-hour and 24-hour totals) are transmitted as **mm** and converted for display.
+降水量の測定値（1 時間および 24 時間の合計）は **mm** で送信され、表示用に変換されます。
 
-| Your Setting                     | You See                |
-| -------------------------------- | ---------------------- |
-| Metric                           | 12 mm                  |
-| Imperial (US) | 0.5 in |
+| あなたの設定       | 表示                     |
+| ------------ | ---------------------- |
+| メートル法        | 12 mm                  |
+| ヤード・ポンド法（米国） | 0.5 in |
 
-## Units That Never Change
+## 変わらない単位
 
-Some units are international standards and are displayed the same way regardless of your locale:
+一部の単位は国際標準であり、ロケールに関係なく同じように表示されます：
 
-| Measurement                      | Unit                           | Why                                   |
-| -------------------------------- | ------------------------------ | ------------------------------------- |
-| Barometric pressure              | hPa                            | International meteorological standard |
-| Heading / bearing                | ° (degrees) | Universal navigation convention       |
-| 放射線                              | μR/hr                          | Standard dosimetry unit               |
-| GPS coordinates                  | decimal degrees                | Universal geographic standard         |
-| Humidity, battery, soil moisture | %                              | Universal                             |
+| 計測項目          | 単位    | 理由          |
+| ------------- | ----- | ----------- |
+| 大気圧           | hPa   | 国際的な気象標準    |
+| 方位／進行方向       | °（度）  | 普遍的な航法の慣例   |
+| 放射線           | μR/hr | 標準的な線量測定の単位 |
+| GPS 座標        | 十進法の度 | 普遍的な地理標準    |
+| 湿度、バッテリー、土壌水分 | %     | 普遍的         |
 
-## Date & Time
+## 日付と時刻
 
-All timestamps throughout the app — last heard, message times, telemetry logs, chart axes — follow your device's date and time preferences.
+アプリ全体のすべてのタイムスタンプ（最後の通信、メッセージの時刻、テレメトリのログ、グラフの軸）は、デバイスの日付と時刻の設定に従います。
 
-| Setting          | What It Controls | Example                                          |
-| ---------------- | ---------------- | ------------------------------------------------ |
-| **24-Hour Time** | Clock format     | 14:30 vs 2:30 PM |
-| **Date Format**  | Date ordering    | 09/05/2026 vs 05/09/2026                         |
+| 設定          | 制御する内容 | 例                                                |
+| ----------- | ------ | ------------------------------------------------ |
+| **24 時間表示** | 時刻の形式  | 14:30 vs 2:30 PM |
+| **日付形式**    | 日付の並び順 | 09/05/2026 vs 05/09/2026                         |
 
-The app also uses **relative time** where it makes sense — for example, "5 min ago" or "2 hours ago" in the node list — which is automatically localised into your device language.
+アプリは、意味がある場面では**相対時間**も使用します。たとえばノードリストの「5 分前」や「2 時間前」で、これらはデバイスの言語に自動的にローカライズされます。
 
-## Changing Your Measurement System (Android)
+## 計測系を変更する（Android）
 
-On Android, your measurement system (metric vs imperial) is tied to your region setting:
+Android では、計測系（メートル法かヤード・ポンド法か）は地域設定に連動しています：
 
-1. Open **Android Settings → System → Language & Region**
-2. Change your **Region** or **Measurement units** preference
-3. Return to Meshtastic — values update immediately
+1. 「**Android の設定 → システム → 言語と地域**」を開きます
+2. 「**地域**」または「**計測単位**」の設定を変更します
+3. Meshtastic に戻ります。値がすぐに更新されます
 
-> 💡 **Tip:** All measurement formatting is handled centrally and respects your platform's locale, so units stay consistent everywhere in the app.
+> 💡 **ヒント：** すべての計測値の書式は一元的に処理され、プラットフォームのロケールに従うため、単位はアプリ全体で一貫しています。
 
-## Related Topics
+## 関連トピック
 
-- [Node Metrics](node-metrics) — where temperature, distance, and sensor values are displayed
-- [Telemetry & Sensors](telemetry-and-sensors) — the sensors that produce these measurements
-- [Measurement & Formatting](../developer/measurement) — developer reference for the formatting utilities
-- [Settings — Radio & User](settings-radio-user) — region setting that drives unit selection
+- [ノードメトリクス](node-metrics)：温度・距離・センサー値が表示される場所
+- [テレメトリとセンサー](telemetry-and-sensors)：これらの計測値を生成するセンサー
+- [計測と書式](../developer/measurement)：書式ユーティリティの開発者向けリファレンス
+- [設定：無線機とユーザー](settings-radio-user)：単位の選択を決める地域設定
 
 ---
 

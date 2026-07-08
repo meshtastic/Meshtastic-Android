@@ -1,136 +1,135 @@
 ---
-title: TAK Integration
+title: TAK 連携
 parent: User Guide
 nav_order: 10
-last_updated: 2026-05-13
-description: Interoperate with ATAK and WinTAK — CoT position sharing, TAK roles, and plugin setup.
+last_updated: 2026-07-08
+description: ATAK および WinTAK と相互運用します。CoT による位置共有、TAK の役割、プラグインの設定を説明します。
 aliases:
   - tak
   - atak
   - team-awareness-kit
 ---
 
-# TAK Integration
+# TAK 連携
 
-Meshtastic integrates with the Team Awareness Kit (TAK) ecosystem, enabling interoperability between Meshtastic mesh devices and TAK applications like ATAK and WinTAK.
+Meshtastic は Team Awareness Kit（TAK）エコシステムと連携し、Meshtastic のメッシュデバイスと、ATAK や WinTAK などの TAK アプリケーションとの相互運用を可能にします。
 
-## Overview
+## 概要
 
-The TAK module allows Meshtastic nodes to:
+TAK モジュールを使うと、Meshtastic のノードは次のことができます：
 
-- Share position data in TAK-compatible CoT (Cursor on Target) format
-- Appear as team members on TAK map displays
-- Receive TAK PLI (Position Location Information) messages
+- TAK 互換の CoT（Cursor on Target）形式で位置データを共有する
+- TAK のマップ表示上にチームメンバーとして表示される
+- TAK の PLI（位置情報）メッセージを受信する
 
-## Setup
+## セットアップ
 
-### Prerequisites
+### 前提条件
 
-- ATAK (Android Team Awareness Kit) or WinTAK installed
-- Meshtastic ATAK Plugin installed
-- TAK module enabled on your Meshtastic radio
+- ATAK（Android Team Awareness Kit）または WinTAK がインストールされていること
+- Meshtastic ATAK プラグインがインストールされていること
+- Meshtastic 無線機で TAK モジュールが有効になっていること
 
 ### 設定
 
-1. Navigate to **Settings → Module Config → TAK**.
-2. Enable the TAK module.
-3. Configure the TAK team/group settings:
+1. 「**設定 → モジュール設定 → TAK**」に移動します。
+2. TAK モジュールを有効にします。
+3. TAK のチーム／グループ設定を構成します：
 
-![Module toggle switch](../../assets/screenshots/settings_switch.png)
+![モジュールのトグルスイッチ](../../assets/screenshots/settings_switch.png)
 
-| Setting | 説明                         |
-| ------- | -------------------------- |
-| Enabled | Activate TAK interop       |
-| Mode    | TAK-compatible output mode |
+| 設定項目 | 説明           |
+| ---- | ------------ |
+| 有効   | TAK 相互運用を有効化 |
+| モード  | TAK 互換の出力モード |
 
-### ATAK Plugin Setup
+### ATAK プラグインのセットアップ
 
-1. Install the Meshtastic ATAK Plugin from the plugin repository.
-2. Open ATAK and enable the Meshtastic plugin.
-3. The plugin bridges messages between ATAK and your mesh network.
+1. プラグインリポジトリから Meshtastic ATAK プラグインをインストールします。
+2. ATAK を開き、Meshtastic プラグインを有効にします。
+3. プラグインは、ATAK とメッシュネットワークの間でメッセージを橋渡しします。
 
-### Local TAK Server
+### ローカル TAK サーバー
 
-The app can also run a **local TAK server** so ATAK/iTAK clients on the same device or network can connect directly, without a remote TAK server. Open **Settings → Module Config → TAK → TAK Server**:
+アプリは**ローカル TAK サーバー**を実行することもでき、同じデバイスやネットワーク上の ATAK／iTAK クライアントが、リモートの TAK サーバーなしで直接接続できます。 「**設定 → モジュール設定 → TAK → TAK サーバー**」を開きます：
 
-![Local TAK Server settings with enable toggle and export option](../../assets/screenshots/tak_server_enabled.png)
+![有効化トグルとエクスポートオプションを備えたローカル TAK サーバーの設定](../../assets/screenshots/tak_server_enabled.png)
 
-- **Enable Local TAK Server** — starts a local TLS server on port **8089** for ATAK/iTAK connections.
-- **Export TAK Data Package** — generates a `.zip` data package that ATAK/iTAK can import to connect to this server.
+- **ローカル TAK サーバーを有効化**：ATAK／iTAK 接続用に、ポート **8089** でローカルの TLS サーバーを起動します。
+- **TAK データパッケージをエクスポート**：ATAK／iTAK がこのサーバーに接続するためにインポートできる `.zip` データパッケージを生成します。
 
-## TAK Roles
+## TAK の役割
 
-Nodes configured with TAK-related roles behave differently from standard clients:
+TAK 関連の役割を設定したノードは、標準のクライアントとは動作が異なります：
 
-| 役割              | 説明                                                                                                                                                                                                                                                                                  |
-| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **TAK**         | Full TAK interoperability — sends and receives CoT data, chat messages, and PLI updates. Functions as a standard client plus TAK bridge.                                                                                                            |
-| **TAK Tracker** | Position-only TAK output — automatically broadcasts PLI at regular intervals without user interaction. Optimized for unattended position beacons (vehicles, equipment, waypoints). Does not relay chat messages. |
+| 役割              | 説明                                                                                                          |
+| --------------- | ----------------------------------------------------------------------------------------------------------- |
+| **TAK**         | 完全な TAK 相互運用。CoT データ、チャットメッセージ、PLI 更新を送受信します。 標準のクライアントとして機能し、さらに TAK ブリッジも兼ねます。                            |
+| **TAK Tracker** | 位置情報のみの TAK 出力。ユーザーの操作なしに、一定間隔で自動的に PLI をブロードキャストします。 無人の位置ビーコン（車両、機材、ウェイポイント）に最適化されています。 チャットメッセージは中継しません。 |
 
-> 💡 **Tip:** Use **TAK Tracker** for devices that only need to report position (e.g., a radio mounted in a vehicle). Use **TAK** for devices where users actively participate in TAK operations.
+> 💡 **ヒント：** 位置の報告だけが必要なデバイス（例：車両に取り付けた無線機）には **TAK Tracker** を使用します。 ユーザーが TAK の運用に積極的に参加するデバイスには **TAK** を使用します。
 
-### CoT (Cursor on Target) Format
+### CoT（Cursor on Target）形式
 
-TAK messages use the Cursor on Target XML format — a military standard for sharing situational awareness data. Meshtastic converts its internal protobuf messages to CoT format when bridging to TAK systems, so no manual format conversion is needed.
+TAK のメッセージは Cursor on Target の XML 形式を使用します。これは状況認識データを共有するための軍事標準です。 Meshtastic は、TAK システムに橋渡しする際に内部の protobuf メッセージを CoT 形式に変換するため、手動での形式変換は必要ありません。
 
-## TAK Identity
+## TAK のアイデンティティ
 
-When using TAK roles, your node broadcasts identity information that appears on TAK maps:
+TAK の役割を使用すると、ノードは TAK のマップに表示されるアイデンティティ情報をブロードキャストします：
 
-| Setting  | 説明                                                                                                               |
-| -------- | ---------------------------------------------------------------------------------------------------------------- |
-| Team     | Your team color on the TAK map (e.g., Blue, Red, Cyan, Green) |
-| 役割       | Your operational role (Team Member, Team Lead, HQ, Medic, RTO, etc.)          |
-| Callsign | Your TAK callsign (defaults to your Meshtastic long name)                                     |
+| 設定項目    | 説明                                     |
+| ------- | -------------------------------------- |
+| チームカラー  | TAK のマップ上でのチームの色（例：ブルー、レッド、シアン、グリーン）   |
+| メンバーロール | 運用上の役割（チームメンバー、チームリード、HQ、メディック、RTO など） |
 
-These settings appear in **Settings → Module Config → TAK** when the TAK module is enabled.
+これらの設定は、TAK モジュールが有効なときに「**設定 → モジュール設定 → TAK**」に表示されます。 TAK のコールサインは別個の設定ではありません。Meshtastic のノード名から自動的に導かれます。
 
-> 💡 **Tip:** Team/role colors are the standard TAK affiliation colors. Coordinate with your TAK team to use consistent team assignments.
+> 💡 **ヒント：** チーム／役割の色は、TAK の標準的な所属色です。 一貫したチーム割り当てを使うよう、TAK チームと調整してください。
 
-## Wire Format (V1 / V2)
+## ワイヤ形式（V1／V2）
 
-Meshtastic supports two TAK wire formats:
+Meshtastic は 2 つの TAK ワイヤ形式に対応しており、接続中の無線機のファームウェアに基づいて自動的に選択されます。手動での設定は必要ありません：
 
-| Format                          | Compatibility                                                   | Features                                                  |
-| ------------------------------- | --------------------------------------------------------------- | --------------------------------------------------------- |
-| V1 (Legacy)  | ATAK Plugin v1.x, older firmware                | Basic CoT position sharing only                           |
-| V2 (Current) | ATAK Plugin v2.x, firmware 2.3+ | Full CoT support including chat, routes, zstd compression |
+| 形式       | 互換性                                              | 機能                                                                                           |
+| -------- | ------------------------------------------------ | -------------------------------------------------------------------------------------------- |
+| V1（レガシー） | ファームウェア 2.7.x 以前 | ポート 72 での素の protobuf エンコード。 位置共有（PLI）とチャット（GeoChat）のみに対応。図形、マーカー、ルート、その他の型付き CoT イベントは破棄されます |
+| V2（現行）   | ファームウェア 2.8.0 以降 | ポート 78 でのコンパクトな zstd 圧縮エンコード。 V1 が対応するすべてに加えて、図形、マーカー、ルート、航空機、casevac、緊急、タスクの CoT タイプを追加します  |
 
-The app automatically selects V2 when both sides support it. No manual configuration needed — the TAK module negotiates format based on firmware capabilities.
+ノードは V2 を実行していても、古いノードからのレガシーな V1 パケットを引き続き中継するため、ファームウェアが混在したメッシュでも動作し続けます。
 
-## Usage with ATAK
+## ATAK での使用
 
-Once configured:
+設定が完了すると：
 
-- Meshtastic nodes appear as markers on the ATAK map with callsign labels
-- Chat messages can bridge between mesh and TAK networks
-- Position updates flow bidirectionally between Meshtastic and TAK
-- TAK Tracker nodes broadcast PLI automatically — their positions appear on ATAK maps without any ATAK-side configuration
+- Meshtastic のノードが、コールサインのラベル付きで ATAK のマップにマーカーとして表示されます
+- チャットメッセージを、メッシュと TAK ネットワークの間で橋渡しできます
+- 位置の更新が、Meshtastic と TAK の間で双方向に流れます
+- TAK Tracker のノードは自動的に PLI をブロードキャストします。ATAK 側の設定なしで、その位置が ATAK のマップに表示されます
 
-> ⚠️ **Note:** TAK integration requires specific node roles and module configuration. Standard client nodes don't automatically participate in TAK operations.
+> ⚠️ **注意：** TAK 連携には、特定のノードの役割とモジュールの設定が必要です。 標準のクライアントノードは、自動的には TAK の運用に参加しません。
 
-## Troubleshooting
+## トラブルシューティング
 
-| Problem                          | Cause                                 | Solution                                                                |
-| -------------------------------- | ------------------------------------- | ----------------------------------------------------------------------- |
-| Node doesn't appear on ATAK map  | TAK module disabled or wrong role     | Verify TAK module is enabled and node role is TAK or TAK Tracker        |
-| Position updates are stale       | GPS fix lost or interval too long     | Check GPS status; reduce position broadcast interval in Position Config |
-| ATAK plugin shows "disconnected" | BLE connection lost or plugin crashed | Reconnect Bluetooth in Meshtastic app, then restart ATAK plugin         |
-| Chat messages not bridging       | V1 format doesn't support chat        | Ensure both nodes run firmware 2.3+ for V2 wire format  |
-| CoT data not flowing             | Channel mismatch                      | All TAK nodes must be on the same channel with matching encryption      |
+| 問題                    | 原因                                                                    | 解決策                                                                          |
+| --------------------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| ノードが ATAK のマップに表示されない | TAK モジュールが無効、または役割が正しくない                                              | TAK モジュールが有効で、ノードの役割が TAK または TAK Tracker になっているか確認する                        |
+| 位置の更新が古い              | GPS 測位が失われた、または間隔が長すぎる                                                | GPS の状態を確認し、位置情報設定で位置のブロードキャスト間隔を短くする                                        |
+| ATAK プラグインが「切断」と表示する  | BLE 接続が失われた、またはプラグインがクラッシュした                                          | Meshtastic アプリで Bluetooth を再接続し、その後 ATAK プラグインを再起動する                         |
+| 図形、マーカー、ルートが橋渡しされない   | 送信側のノードがレガシーな V1（ファームウェア 2.7.x 以前）である | V2 ワイヤ形式にするため、送信側のノードのファームウェアを 2.8.0 以降に更新する |
+| CoT データが流れない          | チャンネルの不一致                                                             | すべての TAK ノードが、暗号化が一致した同じチャンネル上にある必要がある                                       |
 
-## Security Considerations
+## セキュリティに関する注意
 
-- TAK data shares your position and callsign information
-- Ensure your channel encryption is configured when using TAK in sensitive environments
-- The TAK module respects the same channel encryption as other Meshtastic messages
+- TAK データは、あなたの位置とコールサインの情報を共有します
+- 機密性の高い環境で TAK を使用する場合は、チャンネルの暗号化を設定してください
+- TAK モジュールは、他の Meshtastic メッセージと同じチャンネル暗号化に従います
 
-## Related Topics
+## 関連トピック
 
-- [Settings — Modules & Admin](settings-module-admin) — TAK module configuration
-- [Nodes](nodes) — TAK and TAK Tracker roles in the node list
-- [Map & Waypoints](map-and-waypoints) — node positions on the map
-- [ATAK plugin guide](https://meshtastic.org/docs/software/integrations/atak-plugin) — detailed ATAK setup on meshtastic.org
+- [設定：モジュールと管理](settings-module-admin)：TAK モジュールの設定
+- [ノード](nodes)：ノードリストの TAK と TAK Tracker の役割
+- [マップとウェイポイント](map-and-waypoints)：マップ上のノードの位置
+- [ATAK プラグインガイド](https://meshtastic.org/docs/software/integrations/atak-plugin)：meshtastic.org にある詳細な ATAK セットアップ
 
 ---
 

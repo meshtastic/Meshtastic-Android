@@ -1,102 +1,102 @@
 ---
-title: Translate the App
+title: アプリを翻訳する
 parent: User Guide
 nav_order: 17
 last_updated: 2026-06-25
-description: How the app and its documentation are translated via Crowdin, and guidelines for contributing translations.
+description: アプリとそのドキュメントが Crowdin を通じてどう翻訳されるか、および翻訳に貢献するためのガイドラインを説明します。
 aliases:
   - translate
   - crowdin
   - localization
 ---
 
-# Translate the App
+# アプリを翻訳する
 
-Contributing translations helps make Meshtastic accessible to a wider audience. The app uses [Crowdin](https://crowdin.com/) to manage community translations for both the user interface and in-app documentation.
-
----
-
-## What Gets Translated
-
-| Resource          | Source Location                                                     | Notes                                                                  |
-| ----------------- | ------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| UI strings        | `core/resources/src/commonMain/composeResources/values/strings.xml` | Buttons, labels, messages, and all user-visible text                   |
-| User Guide pages  | `docs/en/user/*.md`                                                 | In-app documentation shown in Help & Documentation |
-| Fastlane metadata | `fastlane/metadata/android/en-US/`                                  | App Store listing title, description, and changelogs                   |
-
-> ⚠️ **Note:** Developer Guide pages are English-only. Code-focused documentation targeting contributors is not translated.
+翻訳への貢献は、Meshtastic をより多くの人が使えるようにするのに役立ちます。 アプリは、ユーザーインターフェースとアプリ内ドキュメントの両方のコミュニティ翻訳を管理するために [Crowdin](https://crowdin.com/) を使用しています。
 
 ---
 
-## How to Contribute
+## 翻訳される対象
 
-1. **Visit the Crowdin project.** Open the [Meshtastic Android Crowdin project](https://crowdin.com/project/meshtastic-android) and sign in or create a free account.
-2. **Choose your language.** Select an existing language or request a new one by opening a [GitHub issue](https://github.com/meshtastic/Meshtastic-Android/issues/new).
-3. **Translate strings.** Crowdin shows the English source on the left and your translation on the right. Translate each string and save.
-4. **Review context.** Many strings include screenshots or context comments — check these to understand where the text appears in the app.
-5. **Submit.** Approved translations are automatically merged into the next release.
+| リソース           | ソースの場所                                                              | 備考                                  |
+| -------------- | ------------------------------------------------------------------- | ----------------------------------- |
+| UI 文字列         | `core/resources/src/commonMain/composeResources/values/strings.xml` | ボタン、ラベル、メッセージ、およびユーザーに表示されるすべてのテキスト |
+| ユーザーガイドのページ    | `docs/en/user/*.md`                                                 | 「ヘルプとドキュメント」に表示されるアプリ内ドキュメント        |
+| Fastlane メタデータ | `fastlane/metadata/android/en-US/`                                  | アプリストアの掲載タイトル、説明、変更履歴               |
 
-> 💡 **Tip:** Keep translations short. UI strings often appear in buttons, chips, or narrow columns. If a translation is significantly longer than the English original, consider abbreviating where the meaning stays clear.
-
----
-
-## Adding a New Language
-
-If your language is not yet listed on Crowdin:
-
-1. Open an issue on [GitHub](https://github.com/meshtastic/Meshtastic-Android/issues/new) requesting the new locale.
-2. A maintainer will add the language to Crowdin and configure `crowdin.yml`.
-3. Once added, you can begin translating immediately.
+> ⚠️ **注意：** 開発者ガイドのページは英語のみです。 コントリビューター向けの、コード中心のドキュメントは翻訳されません。
 
 ---
 
-## How Translations Are Organized
+## 貢献する方法
 
-The Android app uses **Compose Multiplatform resources** for all user-visible strings:
+1. **Crowdin プロジェクトにアクセスします。** [Meshtastic Android の Crowdin プロジェクト](https://crowdin.com/project/meshtastic-android) を開き、サインインするか、無料アカウントを作成します。
+2. **言語を選びます。** 既存の言語を選択するか、[GitHub の issue](https://github.com/meshtastic/Meshtastic-Android/issues/new) を作成して新しい言語をリクエストします。
+3. **文字列を翻訳します。** Crowdin では、左側に英語の原文、右側に自分の翻訳が表示されます。 各文字列を翻訳して保存します。
+4. **コンテキストを確認します。** 多くの文字列には、スクリーンショットやコンテキストのコメントが含まれています。これらを確認して、テキストがアプリのどこに表示されるかを把握してください。
+5. **送信します。** 承認された翻訳は、次のリリースに自動的にマージされます。
+
+> 💡 **ヒント：** 翻訳は短くしてください。 UI 文字列は、ボタン、チップ、狭い列に表示されることがよくあります。 翻訳が英語の原文よりも大幅に長くなる場合は、意味が明確なままになる範囲で短縮することを検討してください。
+
+---
+
+## 新しい言語を追加する
+
+自分の言語がまだ Crowdin に掲載されていない場合：
+
+1. [GitHub](https://github.com/meshtastic/Meshtastic-Android/issues/new) で issue を作成し、新しいロケールをリクエストします。
+2. メンテナーが Crowdin にその言語を追加し、`crowdin.yml` を設定します。
+3. 追加されたら、すぐに翻訳を始められます。
+
+---
+
+## 翻訳の構成
+
+Android アプリは、ユーザーに表示されるすべての文字列に **Compose Multiplatform リソース**を使用しています：
 
 ```
 core/resources/src/commonMain/composeResources/
-├── values/              ← English (default)
+├── values/              ← 英語（デフォルト）
 │   └── strings.xml
-├── values-de/           ← German
+├── values-de/           ← ドイツ語
 │   └── strings.xml
-├── values-fr/           ← French
+├── values-fr/           ← フランス語
 │   └── strings.xml
 └── ...
 ```
 
-In-app documentation follows a similar pattern under `docs/`:
+アプリ内ドキュメントも、`docs/` の下で同様のパターンに従います：
 
 ```
 docs/
-├── en/user/             ← English source (default)
+├── en/user/             ← 英語ソース（デフォルト）
 │   ├── onboarding.md
 │   └── ...
-├── fr-rFR/user/         ← French (France)
+├── fr-rFR/user/         ← フランス語（フランス）
 │   ├── onboarding.md
 │   └── ...
-├── de-rDE/user/         ← German (Germany)
+├── de-rDE/user/         ← ドイツ語（ドイツ）
 │   └── ...
 └── ...
 ```
 
-Locale folders use the Android resource convention `{lang}-r{REGION}` (e.g. `fr-rFR`, `de-rDE`, `ja-rJP`), matching the `values-*` directories used for app strings.
+ロケールフォルダーは、Android のリソース規則 `{lang}-r{REGION}`（例：`fr-rFR`、`de-rDE`、`ja-rJP`）を使用し、アプリ文字列に使われる `values-*` ディレクトリと対応しています。
 
-The app automatically selects the correct locale based on your device's **Language & Region** settings.
-
----
-
-## Translation Guidelines
-
-- **Do not translate** technical terms like "LoRa", "MQTT", "BLE", "TAK", "SNR", or "RSSI" — these are universal.
-- **Keep placeholders intact.** Strings like `%1$s` or `%d` are filled in at runtime. Do not remove or reorder them unless the grammar of your language requires it.
-- **Match tone.** The app uses a friendly, direct voice. Avoid overly formal language.
-- **Test if possible.** Switch your device language and open the app to see how translations look in context.
+アプリは、デバイスの**言語と地域**の設定に基づいて、正しいロケールを自動的に選択します。
 
 ---
 
-## Questions?
+## 翻訳ガイドライン
 
-If you have questions about a specific string's context or need help getting started, open a discussion on the [Meshtastic GitHub Discussions](https://github.com/meshtastic/Meshtastic-Android/discussions) page.
+- 「LoRa」「MQTT」「BLE」「TAK」「SNR」「RSSI」などの技術用語は**翻訳しないでください**。これらは共通です。
+- **プレースホルダーはそのまま保ちます。** `%1$s` や `%d` のような文字列は、実行時に値が埋め込まれます。 自分の言語の文法上必要な場合を除き、削除したり並び替えたりしないでください。
+- **トーンを合わせます。** アプリは、親しみやすく率直な語り口を使っています。 過度に堅い言葉は避けてください。
+- **可能ならテストします。** デバイスの言語を切り替えてアプリを開き、翻訳が実際の文脈でどう見えるか確認してください。
 
-Thank you for helping expand the reach of Meshtastic!
+---
+
+## 質問がありますか？
+
+特定の文字列のコンテキストについて質問がある場合や、始め方について助けが必要な場合は、[Meshtastic GitHub Discussions](https://github.com/meshtastic/Meshtastic-Android/discussions) のページでディスカッションを作成してください。
+
+Meshtastic の普及にご協力いただき、ありがとうございます！

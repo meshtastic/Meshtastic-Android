@@ -17,7 +17,7 @@ aliases:
 
 ## 檢查更新
 
-1. Open the connected radio's configuration and, under **Advanced**, tap **Firmware Update** — or tap the firmware notification if one is shown. The entry appears only for OTA-capable devices.
+1. Open the connected radio's configuration and, under **Advanced**, tap **Firmware Update**. The entry appears only for OTA-capable devices.
 2. 應用程式將檢查可用的韌體版本。
 3. 如有可用更新將顯示版本號碼與更新記錄摘要。
 

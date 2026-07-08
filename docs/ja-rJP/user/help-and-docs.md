@@ -1,9 +1,9 @@
 ---
-title: Help & In-App Docs
+title: ヘルプとアプリ内ドキュメント
 parent: User Guide
 nav_order: 21
 last_updated: 2026-06-25
-description: Browse this documentation inside the app, search it, and ask Chirpy — the on-device AI assistant — questions about Meshtastic.
+description: このドキュメントをアプリ内で閲覧・検索し、オンデバイスの AI アシスタント Chirpy に Meshtastic について質問できます。
 aliases:
   - help
   - docs-browser
@@ -11,39 +11,39 @@ aliases:
   - assistant
 ---
 
-# Help & In-App Docs
+# ヘルプとアプリ内ドキュメント
 
-This same user documentation ships **inside the app**, so you can read it offline without leaving Meshtastic. Open it from **Settings → Help & Documentation**.
+このユーザードキュメントは**アプリ内**にも同梱されており、Meshtastic を離れることなくオフラインで読めます。 「**設定 → ヘルプとドキュメント**」から開きます。
 
-## Browsing
+## 閲覧する
 
-The docs browser lists every user-guide page. Tap a page to read it; images and cross-links work just like they do here.
+ドキュメントブラウザーには、ユーザーガイドのすべてのページが一覧表示されます。 ページをタップすると読めます。画像や相互リンクも、ここと同じように機能します。
 
-![In-app documentation browser table of contents](../../assets/screenshots/docs-browser_toc.png)
+![アプリ内ドキュメントブラウザーの目次](../../assets/screenshots/docs-browser_toc.png)
 
-### Search
+### 検索
 
-Tap the search icon and type to filter pages by title and keywords — results update as you type.
+検索アイコンをタップして入力すると、タイトルとキーワードでページを絞り込めます。結果は入力に応じて更新されます。
 
-![Searching the in-app documentation](../../assets/screenshots/docs-browser_search.png)
+![アプリ内ドキュメントの検索](../../assets/screenshots/docs-browser_search.png)
 
-A page open in the browser:
+ブラウザーで開いたページ：
 
-![A documentation page rendered in the app](../../assets/screenshots/docs-browser_page.png)
+![アプリ内で表示されたドキュメントページ](../../assets/screenshots/docs-browser_page.png)
 
-## Chirpy — the AI Assistant
+## Chirpy：AI アシスタント
 
-**Chirpy** answers plain-language questions about Meshtastic using this bundled documentation as its source. Tap the Chirpy button in the docs browser, type a question, and it replies with an answer and links to the relevant pages.
+**Chirpy** は、この同梱ドキュメントを情報源として、Meshtastic に関する平易な質問に答えます。 ドキュメントブラウザーで Chirpy ボタンをタップして質問を入力すると、回答と、関連ページへのリンクが返ってきます。
 
-![Chirpy AI assistant answering a question with page links](../../assets/screenshots/docs-browser_chirpy.png)
+![ページリンク付きで質問に答える Chirpy AI アシスタント](../../assets/screenshots/docs-browser_chirpy.png)
 
-> 🔒 **Privacy:** On supported Google-flavor devices, Chirpy runs **on-device** using Gemini Nano — your questions never leave your phone. A small model downloads on first use.
+> 🔒 **プライバシー：** 対応する Google 版のデバイスでは、Chirpy は Gemini Nano を使って**オンデバイス**で動作します。質問がスマートフォンの外に出ることはありません。 初回使用時に、小さなモデルがダウンロードされます。
 
-> ⚠️ **Note:** On F-Droid, Desktop, and iOS builds, Chirpy falls back to a **keyword search** over the documentation rather than a generative model. If your device doesn't support on-device AI, the assistant is hidden and you can still browse and search the docs normally.
+> ⚠️ **注意：** F-Droid 版、デスクトップ版、iOS 版では、Chirpy は生成モデルではなく、ドキュメントに対する**キーワード検索**にフォールバックします。 デバイスがオンデバイス AI に対応していない場合、アシスタントは非表示になり、ドキュメントの閲覧と検索は通常どおり行えます。
 
-## Related Topics
+## 関連トピック
 
-- [Translate the App](translate) — how these pages get localized into other languages
-- [App Functions](app-functions) — the separate system-AI integration (distinct from Chirpy)
+- [アプリを翻訳する](translate)：これらのページが他の言語にどう翻訳されるか
+- [アプリ機能](app-functions)：Chirpy とは別の、システム AI 連携
 
 ---

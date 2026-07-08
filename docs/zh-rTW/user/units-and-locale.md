@@ -2,7 +2,7 @@
 title: Units, Measurement & Locale
 parent: User Guide
 nav_order: 16
-last_updated: 2026-05-12
+last_updated: 2026-07-08
 description: How the app formats temperature, distance, speed, and other measurements based on your device locale.
 ---
 
@@ -14,7 +14,7 @@ The Meshtastic app automatically displays temperatures, distances, speeds, and t
 
 ## 運作方式
 
-Meshtastic radios always transmit data in **metric units** (meters, °C, km/h, hPa, etc.). When the app receives this data, it converts and displays values in whatever unit system your device's locale specifies.
+Meshtastic radios always transmit data in **metric units** (meters, °C, m/s, hPa, etc.). When the app receives this data, it converts and displays values in whatever unit system your device's locale specifies.
 
 On Android, your measurement preferences are determined by your system **Language & Region** settings. On Desktop (JVM), the app uses the JVM's default `Locale`.
 

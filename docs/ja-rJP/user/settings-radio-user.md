@@ -1,9 +1,9 @@
 ---
-title: Settings — Radio & User
+title: 設定：無線機とユーザー
 parent: User Guide
 nav_order: 7
-last_updated: 2026-05-20
-description: Configure your radio hardware, LoRa presets, user profile, position sharing, power management, and security.
+last_updated: 2026-07-08
+description: 無線機のハードウェア、LoRa プリセット、ユーザープロファイル、位置共有、電源管理、セキュリティを設定します。
 aliases:
   - 設定
   - radio-config
@@ -11,168 +11,168 @@ aliases:
   - lora
 ---
 
-# Settings — Radio & User
+# 設定：無線機とユーザー
 
-Configure your radio hardware and user identity parameters.
+無線機のハードウェアと、ユーザーの識別情報のパラメーターを設定します。
 
-## User Settings
+## ユーザー設定
 
-### User Profile
+### ユーザープロファイル
 
-| Setting           | 説明                                                                                    |
-| ----------------- | ------------------------------------------------------------------------------------- |
-| Long Name         | Your display name (up to 39 characters)                            |
-| Short Name        | 4-character abbreviated name                                                          |
-| Licensed Operator | Enable if you hold an amateur radio license (enables higher power) |
+| 設定項目     | 説明                                        |
+| -------- | ----------------------------------------- |
+| 正式名称     | 表示名（最大 39 文字）                             |
+| 短縮名      | 4 文字の短縮名                                  |
+| 免許を持つ運用者 | アマチュア無線の免許を持っている場合に有効にします（より高い出力が可能になります） |
 
-### Applying Changes
+### 変更を適用する
 
-After modifying settings, tap **Save** to write the configuration to your radio. The device may reboot to apply changes.
+設定を変更したら、「**保存**」をタップして構成を無線機に書き込みます。 変更を適用するために、デバイスが再起動することがあります。
 
-## Radio Configuration
+## 無線機の設定
 
 ### デバイスの設定
 
-| Setting                                    | 説明                                                                      | デフォルト    |
-| ------------------------------------------ | ----------------------------------------------------------------------- | -------- |
-| 役割                                         | Node behavior (Client, Router, etc.) | クライアント   |
-| Rebroadcast Mode                           | How the node retransmits messages                                       | すべて      |
-| Node Info Broadcast (s) | Interval for broadcasting node info                                     | 10800    |
-| Double-tap Button                          | Action for double-tap button press                                      | Disabled |
+| 設定項目              | 説明                    | デフォルト  |
+| ----------------- | --------------------- | ------ |
+| 役割                | ノードの動作（クライアント、ルーターなど） | クライアント |
+| 再ブロードキャストモード      | ノードがメッセージを再送信する方法     | すべて    |
+| ノード情報のブロードキャスト（秒） | ノード情報をブロードキャストする間隔    | 10800  |
+| ダブルタップボタン         | ボタンをダブルタップしたときの動作     | 無効     |
 
 ### LoRa設定
 
-| Setting           | 説明                                                                      | デフォルト                                     |
-| ----------------- | ----------------------------------------------------------------------- | ----------------------------------------- |
-| リージョン             | Regulatory region for frequency bands                                   | Unset (must configure) |
-| モデムプリセット          | Speed/range tradeoff                                                    | LongFast                                  |
-| Hop Limit         | Maximum retransmit hops                                                 | 3                                         |
-| TX Power          | Transmission power (dBm); 0 = max allowed for region | 0 (region max)         |
-| Frequency Offset  | Fine-tune frequency (MHz)                            | 0                                         |
-| Channel Bandwidth | Bandwidth setting                                                       | Default for preset                        |
+| 設定項目     | 説明                           | デフォルト       |
+| -------- | ---------------------------- | ----------- |
+| リージョン    | 周波数帯の規制リージョン                 | 未設定（要設定）    |
+| モデムプリセット | 速度と距離のトレードオフ                 | LongFast    |
+| ホップ数上限   | 再送信の最大ホップ数                   | 3           |
+| 送信出力     | 送信出力（dBm）。0 = リージョンで許可された最大値 | 0（リージョン最大）  |
+| 周波数オフセット | 周波数の微調整（MHz）                 | 0           |
+| チャンネル帯域幅 | 帯域幅の設定                       | プリセットのデフォルト |
 
-> ⚠️ **Important:** You **must** set your region before transmitting. Operating without the correct region may violate local radio regulations. See the [region configuration guide](https://meshtastic.org/docs/getting-started/initial-config) on meshtastic.org for details.
+> ⚠️ **重要：** 送信する前に、必ずリージョンを設定する**必要があります**。 正しいリージョンを設定せずに運用すると、現地の無線規制に違反するおそれがあります。 詳しくは、meshtastic.org の [リージョン設定ガイド](https://meshtastic.org/docs/getting-started/initial-config) を参照してください。
 
-### Modem Presets
+### モデムプリセット
 
-> 💡 **Tip:** The **SNR Limit** values are negative on purpose. LoRa can decode signals _below_ the noise floor, so a more-negative limit means the preset tolerates a weaker, noisier signal (more range). See [How the Signal Meter Works](signal-meter) for the full explanation.
+> 💡 **ヒント：** **SNR 限界**の値は意図的に負の数になっています。 LoRa はノイズフロア&#x3092;_&#x4E0B;回&#x308B;_&#x4FE1;号でも復調できるため、より負の大きい限界値ほど、そのプリセットは弱くノイズの多い信号に耐えられます（より遠くまで届きます）。 詳しい説明は、[信号メーターの仕組み](signal-meter) を参照してください。
 
-| Preset             | Range                   | Speed                     | SNR Limit                | Best For                                                                                                 |
-| ------------------ | ----------------------- | ------------------------- | ------------------------ | -------------------------------------------------------------------------------------------------------- |
-| Short Turbo        | ~1 km   | 21.9 kbps | −5 dB                    | Dense urban with line-of-sight; data-heavy applications                                                  |
-| Short Fast         | ~3 km   | 10.9 kbps | −7.5 dB  | Urban neighborhoods; buildings within a few blocks                                                       |
-| Short Slow         | ~5 km   | 5.5 kbps  | −10 dB                   | Suburban short-range; moderate building density                                                          |
-| Medium Fast        | ~5 km   | 5.5 kbps  | −10 dB                   | Suburban areas; moderate building density                                                                |
-| Medium Slow        | ~8 km   | 1.1 kbps  | −12.5 dB | Suburban/rural; moderate range with slower speed                                                         |
-| Long Turbo         | ~10 km  | 4.4 kbps  | −10 dB                   | Similar range to Long Fast but with 500 kHz bandwidth; faster throughput                                 |
-| Long Fast          | ~10 km  | 1.1 kbps  | −12.5 dB | **General use (default)** — balanced range and speed                                  |
-| Long Moderate      | ~20 km  | 0.34 kbps | −15 dB                   | Rural with some terrain; occasional use                                                                  |
-| Lite Fast          | ~5 km   | 5.5 kbps  | −10 dB                   | EU 866 MHz SRD band (125 kHz BW); comparable to Medium Fast                           |
-| Lite Slow          | ~10 km  | 1.1 kbps  | −12.5 dB | EU 866 MHz SRD band (125 kHz BW); comparable to Long Fast                             |
-| Narrow Fast        | ~5 km   | 2.7 kbps  | −10 dB                   | EU 868 MHz band (62.5 kHz BW); avoids interference with other devices |
-| Narrow Slow        | ~10 km  | 1.1 kbps  | −12.5 dB | EU 868 MHz band (62.5 kHz BW); comparable to Long Fast                |
-| ~~Long Slow~~      | ~30 km  | 0.18 kbps | −17.5 dB | ⚠️ **Deprecated** — still selectable but may be removed in a future firmware release                     |
-| ~~Very Long Slow~~ | ~40+ km | 0.09 kbps | −20 dB                   | ⚠️ **Deprecated** — still selectable but may be removed in a future firmware release                     |
+| プリセット              | 距離                      | 速度                        | SNR 限界                   | 最適な用途                                                     |
+| ------------------ | ----------------------- | ------------------------- | ------------------------ | --------------------------------------------------------- |
+| Short Turbo        | ~1 km   | 21.9 kbps | −7.5 dB  | 見通しのある高密度な都市部。データ量の多い用途                                   |
+| Short Fast         | ~3 km   | 10.9 kbps | −7.5 dB  | 都市の住宅街。数ブロック以内の建物                                         |
+| Short Slow         | ~5 km   | 5.5 kbps  | −10 dB                   | 郊外の短距離。中程度の建物密度                                           |
+| Medium Fast        | ~5 km   | 5.5 kbps  | −12.5 dB | 郊外エリア。中程度の建物密度                                            |
+| Medium Slow        | ~8 km   | 1.1 kbps  | −15 dB                   | 郊外・地方。中程度の距離で低速                                           |
+| Long Turbo         | ~10 km  | 4.4 kbps  | −12.5 dB | Long Fast と同程度の距離だが 500 kHz 帯域幅。スループットが速い                 |
+| Long Fast          | ~10 km  | 1.1 kbps  | −17.5 dB | **一般用途（デフォルト）**：距離と速度のバランスが良い                             |
+| Long Moderate      | ~20 km  | 0.34 kbps | −17.5 dB | 起伏のある地方。ときどき使う用途                                          |
+| Lite Fast          | ~5 km   | 5.5 kbps  | −12.5 dB | EU 866 MHz SRD 帯（125 kHz 帯域幅）。Medium Fast に相当             |
+| Lite Slow          | ~10 km  | 1.1 kbps  | −15 dB                   | EU 866 MHz SRD 帯（125 kHz 帯域幅）。Long Fast に相当               |
+| Narrow Fast        | ~5 km   | 2.7 kbps  | −10 dB                   | EU 868 MHz 帯（62.5 kHz 帯域幅）。他のデバイスとの干渉を避ける |
+| Narrow Slow        | ~10 km  | 1.1 kbps  | −12.5 dB | EU 868 MHz 帯（62.5 kHz 帯域幅）。Long Fast に相当  |
+| ~~Long Slow~~      | ~30 km  | 0.18 kbps | −20 dB                   | ⚠️ **非推奨**：まだ選択できますが、将来のファームウェアリリースで削除される可能性があります         |
+| ~~Very Long Slow~~ | ~40+ km | 0.09 kbps | −20 dB                   | ⚠️ **非推奨**：まだ選択できますが、将来のファームウェアリリースで削除される可能性があります         |
 
-> ℹ️ **Note:** This table uses the common short names. In the app's preset dropdown they read as **Short Range - Fast**, **Long Range - Fast**, **Lite - Fast**, **Narrow - Fast**, and so on.
+> ℹ️ **注意：** この表では、一般的な短い名前を使用しています。 アプリのプリセットのドロップダウンでは、**Short Range - Fast**、**Long Range - Fast**、**Lite - Fast**、**Narrow - Fast** のように表示されます。
 
-#### Choosing a Modem Preset
+#### モデムプリセットを選ぶ
 
-The modem preset controls the fundamental tradeoff between **range** and **data rate**:
+モデムプリセットは、**距離**と**データ速度**の基本的なトレードオフを制御します：
 
-- **Slower presets** use more spreading, making signals decodable at weaker signal levels (lower SNR limit). This means longer range but fewer bytes per second.
-- **Faster presets** pack more data per transmission but require a stronger signal to decode.
+- **遅いプリセット**は拡散をより多く使い、より弱い信号レベルでも復調できるようにします（SNR 限界が低い）。 これは、より遠くまで届く一方で、1 秒あたりのバイト数が少ないことを意味します。
+- **速いプリセット**は 1 回の送信でより多くのデータを詰め込みますが、復調にはより強い信号が必要です。
 
-**Practical guidance:**
+**実用的な指針：**
 
-- **Urban mesh (many nodes, short distances):** Use **Long Fast** (default) or **Short Fast**. Higher speed means less airtime congestion when many nodes share the channel.
-- **Rural/sparse mesh (few nodes, long distances):** Use **Long Moderate**. Range matters more than speed when nodes are far apart.
-- **EU 866/868 MHz regulatory compliance:** Use **Lite Fast**, **Lite Slow**, **Narrow Fast**, or **Narrow Slow** — these are optimized for the EU SRD/868 MHz bands with narrower bandwidths.
-- **Fixed infrastructure links:** Use **Short Turbo** or **Long Turbo** for dedicated point-to-point links with good antennas and line-of-sight.
-- **Mixed environments:** Stick with **Long Fast** — it's the community default and ensures compatibility with others in your area.
+- **都市部のメッシュ（多数のノード、短距離）：** **Long Fast**（デフォルト）または **Short Fast** を使用します。 速度が速いほど、多くのノードがチャンネルを共有するときの電波利用時間の輻輳が減ります。
+- **地方・まばらなメッシュ（少数のノード、長距離）：** **Long Moderate** を使用します。 ノードが離れている場合は、速度よりも距離が重要です。
+- **EU 866／868 MHz の規制対応：** **Lite Fast**、**Lite Slow**、**Narrow Fast**、**Narrow Slow** を使用します。これらは、より狭い帯域幅で EU の SRD／868 MHz 帯に最適化されています。
+- **固定インフラのリンク：** 良好なアンテナと見通しがある専用のポイントツーポイントリンクには、**Short Turbo** または **Long Turbo** を使用します。
+- **混在した環境：** **Long Fast** のままにします。これはコミュニティのデフォルトで、地域内の他のユーザーとの互換性を確保します。
 
-> ⚠️ **Important:** All nodes on the same channel **must** use the same modem preset. Nodes with mismatched presets cannot communicate even if they share the same frequency and encryption key.
+> ⚠️ **重要：** 同じチャンネル上のすべてのノードは、同じモデムプリセットを使用する**必要があります**。 プリセットが一致しないノードは、同じ周波数と暗号化鍵を共有していても通信できません。
 
-> 💡 **Tip:** The range estimates above assume flat terrain and modest antennas. Elevation advantage (hilltop, rooftop) dramatically increases effective range. A well-placed Router with Long Fast can often outperform a ground-level node with Long Slow.
+> 💡 **ヒント：** 上記の距離の目安は、平坦な地形と一般的なアンテナを前提としています。 高所（丘の上、屋上）にあると、実効的な距離が大幅に伸びます。 適切に設置された Long Fast のルーターは、地上に置かれた Long Slow のノードを上回ることがよくあります。
 
 ### 表示設定
 
-| Setting             | 説明                                                                                   |
-| ------------------- | ------------------------------------------------------------------------------------ |
-| Screen Timeout      | Time before display sleeps                                                           |
-| Display Units       | Metric or Imperial                                                                   |
-| OLED Type           | Auto, SSD1306, SH1106, SH1107                                                        |
-| Compass Orientation | Rotation offset for compass display (0°, 90°, 180°, 270°)         |
-| ~~Compass North~~   | ⚠️ **Deprecated** — replaced by Compass Orientation; still visible in older firmware |
+| 設定項目       | 説明                                               |
+| ---------- | ------------------------------------------------ |
+| 画面のタイムアウト  | ディスプレイがスリープするまでの時間                               |
+| 表示単位       | メートル法またはヤード・ポンド法                                 |
+| OLED の種類   | 自動、SSD1306、SH1106、SH1107                         |
+| コンパスの向き    | コンパス表示の回転オフセット（0°、90°、180°、270°）                 |
+| ~~コンパスの北~~ | ⚠️ **非推奨**：コンパスの向きに置き換えられました。古いファームウェアではまだ表示されます |
 
 ### 位置情報設定
 
-| Setting                                   | 説明                                 |
-| ----------------------------------------- | ---------------------------------- |
-| GPS Enabled                               | Enable/disable GPS                 |
-| GPS Update Interval                       | How often to acquire GPS fix       |
-| Position Broadcast (s) | How often to share position        |
-| Smart Position                            | Enable movement-based broadcasting |
-| 固定位置                                      | Use a manually set position        |
+| 設定項目           | 説明                 |
+| -------------- | ------------------ |
+| GPS を有効化       | GPS の有効／無効         |
+| GPS の更新間隔      | GPS 測位を取得する頻度      |
+| 位置のブロードキャスト（秒） | 位置を共有する頻度          |
+| スマート位置         | 移動に基づくブロードキャストを有効化 |
+| 固定位置           | 手動で設定した位置を使用       |
 
 ### 電源設定
 
-| Setting                                 | 説明                                      |
-| --------------------------------------- | --------------------------------------- |
-| Power Saving                            | Enable low-power sleep mode             |
-| Shutdown After (s)   | Auto-shutdown idle timer                |
-| ADC Multiplier                          | Battery voltage calibration factor      |
-| Wait Bluetooth (s)   | Time to wait for BLE connection at boot |
-| Mesh SDS Timeout (s) | Super-deep-sleep timeout                |
+| 設定項目               | 説明                  |
+| ------------------ | ------------------- |
+| 省電力                | 低電力のスリープモードを有効化     |
+| シャットダウンまでの時間（秒）    | アイドル時の自動シャットダウンタイマー |
+| ADC 倍率             | バッテリー電圧の校正係数        |
+| Bluetooth 待機時間（秒）  | 起動時に BLE 接続を待つ時間    |
+| メッシュ SDS タイムアウト（秒） | スーパーディープスリープのタイムアウト |
 
 ### ネットワーク設定
 
-| Setting       | 説明                                                   |
-| ------------- | ---------------------------------------------------- |
-| WiFi Enabled  | Enable WiFi radio (ESP32 devices) |
-| WiFi SSID     | Network name to connect to                           |
-| WiFi PSK      | Network password                                     |
-| NTP Server    | Time synchronization server                          |
-| Syslog Server | Remote logging server                                |
+| 設定項目        | 説明                      |
+| ----------- | ----------------------- |
+| WiFi を有効化   | WiFi 無線を有効化（ESP32 デバイス） |
+| WiFi SSID   | 接続先のネットワーク名             |
+| WiFi PSK    | ネットワークのパスワード            |
+| NTP サーバー    | 時刻同期サーバー                |
+| Syslog サーバー | リモートログサーバー              |
 
-![IP address field](../../assets/screenshots/settings_ipv4_field.png)
+![IP アドレスの入力欄](../../assets/screenshots/settings_ipv4_field.png)
 
 ### Bluetooth 設定
 
-| Setting           | 説明                                                                        |
-| ----------------- | ------------------------------------------------------------------------- |
-| Bluetooth Enabled | Enable/disable BLE radio                                                  |
-| Pairing Mode      | Fixed PIN, Random PIN, or No PIN                                          |
-| PINコード            | PIN code for pairing (default: 123456) |
+| 設定項目           | 説明                            |
+| -------------- | ----------------------------- |
+| Bluetooth を有効化 | BLE 無線の有効／無効                  |
+| ペアリングモード       | 固定 PIN、ランダム PIN、または PIN なし    |
+| 固定 PIN         | ペアリング用の PIN コード（デフォルト：123456） |
 
 ### セキュリティ設定
 
-| Setting                   | 説明                                                                         |
-| ------------------------- | -------------------------------------------------------------------------- |
-| 公開鍵                       | Your node's public key (read-only)                      |
-| 管理者キー                     | Key for remote administration                                              |
-| 秘密鍵                       | Your node's private key (handle securely)               |
-| ~~Admin Channel Enabled~~ | ⚠️ Removed — now configured automatically when an admin key is set         |
-| Debug Log                 | Output live debug logging over serial/bluetooth                            |
-| Serial Enabled            | Enable serial console access (moved from Device Config) |
-| 管理モード                     | Restrict non-admin channel changes                                         |
+| 設定項目            | 説明                                      |
+| --------------- | --------------------------------------- |
+| 公開鍵             | ノードの公開鍵（読み取り専用）                         |
+| 管理者鍵            | リモート管理用の鍵                               |
+| 秘密鍵             | ノードの秘密鍵（安全に取り扱ってください）                   |
+| ~~管理チャンネルを有効化~~ | ⚠️ 削除されました：管理者キーを設定すると自動的に構成されるようになりました |
+| デバッグログ          | シリアル／Bluetooth 経由でライブのデバッグログを出力         |
+| シリアルを有効化        | シリアルコンソールへのアクセスを有効化（デバイスの設定から移動）        |
+| 管理モード           | 管理者以外によるチャンネル変更を制限                      |
 
-![Password field](../../assets/screenshots/settings_password_field.png)
+![パスワードの入力欄](../../assets/screenshots/settings_password_field.png)
 
-Settings use standard preference controls — dropdowns, toggles, and sliders:
+設定には、標準的な設定コントロール（ドロップダウン、トグル、スライダー）を使用します：
 
-| Control  | Screenshot                                                  |
-| -------- | ----------------------------------------------------------- |
-| Dropdown | ![Dropdown](../../assets/screenshots/settings_dropdown.png) |
-| Toggle   | ![Toggle](../../assets/screenshots/settings_switch.png)     |
-| Slider   | ![Slider](../../assets/screenshots/settings_slider.png)     |
+| コントロール  | スクリーンショット                                                  |
+| ------- | ---------------------------------------------------------- |
+| ドロップダウン | ![ドロップダウン](../../assets/screenshots/settings_dropdown.png) |
+| トグル     | ![トグル](../../assets/screenshots/settings_switch.png)       |
+| スライダー   | ![スライダー](../../assets/screenshots/settings_slider.png)     |
 
-## Related Topics
+## 関連トピック
 
-- [Settings — Modules & Admin](settings-module-admin) — optional feature modules and device administration
-- [Signal Meter](signal-meter) — how modem presets affect signal quality thresholds
-- [LoRa configuration](https://meshtastic.org/docs/configuration/radio/lora) — detailed LoRa settings reference on meshtastic.org
-- [Initial configuration](https://meshtastic.org/docs/getting-started/initial-config) — region setup guide on meshtastic.org
+- [設定：モジュールと管理](settings-module-admin)：オプションの機能モジュールとデバイスの管理
+- [信号メーター](signal-meter)：モデムプリセットが信号品質のしきい値に与える影響
+- [LoRa 設定](https://meshtastic.org/docs/configuration/radio/lora)：meshtastic.org にある詳細な LoRa 設定リファレンス
+- [初期設定](https://meshtastic.org/docs/getting-started/initial-config)：meshtastic.org にあるリージョン設定ガイド
 
 ---
 

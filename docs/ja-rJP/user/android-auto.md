@@ -3,7 +3,7 @@ title: Android Auto
 parent: User Guide
 nav_order: 18
 last_updated: 2026-07-07
-description: Use Meshtastic hands-free on an Android Auto head unit — read messages aloud, reply by voice, and check nodes and mesh status while driving.
+description: Android Auto のヘッドユニットで Meshtastic をハンズフリーで使えます。メッセージの読み上げ、音声での返信、運転中のノードとメッシュ状態の確認ができます。
 aliases:
   - android-auto
   - car
@@ -13,44 +13,44 @@ aliases:
 
 # Android Auto
 
-Meshtastic integrates with Android Auto so you can stay in touch with your mesh while driving, without taking your hands off the wheel or your eyes off the road.
+Meshtastic は Android Auto と連携しており、ハンドルから手を、道路から目を離すことなく、運転中もメッシュとつながっていられます。
 
-> ⚠️ **Note:** Android Auto support is available on **Google-flavor Android builds only**. It is not included in the F-Droid build, and it is not available on Desktop or iOS.
+> ⚠️ **注意：** Android Auto のサポートは、**Google 版の Android ビルドでのみ**利用できます。 F-Droid 版には含まれておらず、デスクトップや iOS でも利用できません。
 
-> ℹ️ **What ships today:** The Google Play build provides **notification-only** car messaging — incoming messages are announced on the head unit and you reply through its notification controls. The full tabbed **Messages / Nodes / Status** experience described below is a beta built on the Android Car App Library (Google's templated car UI is currently restricted to Closed/Internal Play tracks), so it appears only in builds compiled with `-PenableCarTemplates=true`. The rest of this page documents that beta experience.
+> ℹ️ **現在提供されている機能：** Google Play 版は、**通知のみ**の車載メッセージング機能を提供します。受信メッセージがヘッドユニットで通知され、その通知コントロールから返信します。 以下で説明する、タブ形式の完全な**メッセージ／ノード／ステータス**体験は、Android Car App Library 上に構築されたベータ版で（Google のテンプレート型車載 UI は現在、Play の Closed／Internal トラックに制限されています）、`-PenableCarTemplates=true` でコンパイルしたビルドにのみ表示されます。 このページの残りの部分では、そのベータ体験について説明します。
 
-## Overview
+## 概要
 
-When your phone is connected to an Android Auto head unit (or the Desktop Head Unit emulator used for development), the beta build presents Meshtastic as a messaging app built with the Android Car App Library, with a tabbed Home screen optimized for driving-safe, glanceable use:
+スマートフォンが Android Auto のヘッドユニット（または開発用の Desktop Head Unit エミュレーター）に接続されると、ベータ版のビルドは、Android Car App Library で構築されたメッセージングアプリとして Meshtastic を表示し、運転中でも安全にひと目で使えるよう最適化された、タブ形式のホーム画面を備えます：
 
-- **Messages** — recent conversations, with hands-free reading and replies.
-- **Nodes** — the mesh node list, with a node-detail view.
-- **Status** — current connection and mesh status.
+- **メッセージ**：最近の会話。ハンズフリーの読み上げと返信ができます。
+- **ノード**：メッシュのノードリスト。ノード詳細ビューを備えます。
+- **ステータス**：現在の接続とメッシュの状態。
 
-The car app does not add a new connection of its own. It uses the Meshtastic app's existing connection, node, and message state, so it reflects whatever your phone is already connected to.
+車載アプリは、独自の新しい接続を追加しません。 Meshtastic アプリの既存の接続・ノード・メッセージの状態を使うため、スマートフォンがすでに接続している対象をそのまま反映します。
 
-> ⚠️ **Note:** Your phone must be connected to a Meshtastic radio for the car app to show live data. If the app is disconnected, the car screen reflects that disconnected state.
+> ⚠️ **注意：** 車載アプリがライブデータを表示するには、スマートフォンが Meshtastic 無線機に接続されている必要があります。 アプリが切断されている場合、車載画面はその切断状態を反映します。
 
 ## メッセージ
 
-The Messages tab lists your recent conversations. While driving, you can:
+メッセージタブには、最近の会話が一覧表示されます。 運転中は、次のことができます：
 
-- **Have messages read aloud** so you don't need to look at the screen.
-- **Reply by voice or text** using your head unit's reply control, dictating your response hands-free.
+- **メッセージを読み上げてもらう**ことで、画面を見る必要がなくなります。
+- ヘッドユニットの返信コントロールを使って**音声またはテキストで返信**し、ハンズフリーで応答を音声入力できます。
 
 ## ノード
 
-The Nodes tab shows your mesh node list in a car-friendly layout. Selecting a node opens a node-detail view with key information about that node. See [Nodes](nodes) for the full meaning of the information shown.
+ノードタブには、メッシュのノードリストが車載向けのレイアウトで表示されます。 ノードを選択すると、そのノードの主要な情報を含むノード詳細ビューが開きます。 表示される情報の詳しい意味については、[ノード](nodes) を参照してください。
 
-## Status
+## ステータス
 
-The Status tab summarizes your current connection and mesh status at a glance — useful for confirming you're still connected to your radio without opening your phone.
+ステータスタブは、現在の接続とメッシュの状態をひと目で分かるようにまとめます。スマートフォンを開かずに、無線機にまだ接続されているか確認するのに便利です。
 
-## Related Topics
+## 関連トピック
 
-- [Messages & Channels](messages-and-channels) — full messaging features on your phone
-- [Nodes](nodes) — detailed node list and node-detail information
-- [Connections](connections) — how the app connects to your radio
+- [メッセージとチャンネル](messages-and-channels)：スマートフォンでの完全なメッセージング機能
+- [ノード](nodes)：詳細なノードリストとノード詳細の情報
+- [コネクション](connections)：アプリが無線機に接続する方法
 
 ---
 

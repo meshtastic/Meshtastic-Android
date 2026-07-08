@@ -1,9 +1,9 @@
 ---
-title: App Functions
+title: アプリ機能
 parent: User Guide
 nav_order: 19
 last_updated: 2026-06-11
-description: Expose mesh capabilities to the Android system and on-device AI assistants (e.g. Gemini) so they can run mesh workflows without opening the app.
+description: メッシュの機能を Android システムやオンデバイスの AI アシスタント（例：Gemini）に公開し、アプリを開かずにメッシュのワークフローを実行できるようにします。
 aliases:
   - app-functions
   - system-ai
@@ -11,53 +11,53 @@ aliases:
   - assistant-functions
 ---
 
-# App Functions
+# アプリ機能
 
-App Functions expose Meshtastic capabilities to the Android system and to on-device AI assistants (such as Gemini) through the Android App Functions API. With them enabled, an assistant can discover and trigger mesh workflows for you — for example sending a message or checking your mesh status — without you opening the app.
+アプリ機能は、Android App Functions API を通じて、Meshtastic の機能を Android システムやオンデバイスの AI アシスタント（Gemini など）に公開します。 有効にすると、アシスタントがあなたに代わってメッシュのワークフロー（例：メッセージの送信やメッシュ状態の確認）を見つけて実行でき、アプリを開く必要がありません。
 
-> ⚠️ **Note:** App Functions are available on **Google-flavor Android builds only**.
+> ⚠️ **注意：** アプリ機能は、**Google 版の Android ビルドでのみ**利用できます。
 
-> ⚠️ **Note:** This is separate from the in-app **Chirpy** assistant. App Functions let the _system_ AI assistant act on your mesh; Chirpy is a conversational assistant inside the Meshtastic app itself.
+> ⚠️ **注意：** これは、アプリ内の **Chirpy** アシスタントとは別のものです。 アプリ機能&#x306F;_&#x30B7;ステ&#x30E0;_&#x306E; AI アシスタントがあなたのメッシュを操作できるようにするもので、Chirpy は Meshtastic アプリ内の対話型アシスタントです。
 
-## Enabling App Functions
+## アプリ機能を有効にする
 
-App Functions are controlled from **Settings → System AI** (the in-app screen is labeled "System AI"). The screen has:
+アプリ機能は「**設定 → システム AI**」から制御します（アプリ内の画面は「System AI」と表示されます）。 この画面には次があります：
 
-- A **master toggle** labeled **"Allow AI access"**, with the subtitle _"Let system AI assistants (e.g. Gemini) discover and use mesh functions"_. When off, no functions are exposed to the system.
-- An **individual toggle for each function**, so you can expose only the capabilities you want.
+- 「**AI のアクセスを許可**」というラベルの**マスタートグル**。サブタイトルは _「システムの AI アシスタント（例：Gemini）がメッシュ機能を見つけて使えるようにする」_ です。 オフの場合、システムには機能が一切公開されません。
+- **各機能ごとの個別トグル**。公開したい機能だけを公開できます。
 
-The functions are grouped into a **Write** section (functions that change something or send data to your mesh) and a **Read** section (functions that only return information).
+機能は、**書き込み**セクション（何かを変更したり、メッシュにデータを送信したりする機能）と、**読み取り**セクション（情報を返すだけの機能）に分かれています。
 
-![App Functions screen with master and per-function toggles](../../assets/screenshots/app-functions_settings.png)
+![マスタートグルと機能ごとのトグルを備えたアプリ機能の画面](../../assets/screenshots/app-functions_settings.png)
 
-### Write Functions
+### 書き込み機能
 
-| Function         | What it does                                                                                                            |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| **Send Message** | Sends a text message to a contact (direct message) or to a channel, up to 237 bytes. |
+| 機能           | 内容                                                   |
+| ------------ | ---------------------------------------------------- |
+| **メッセージを送信** | 連絡先（ダイレクトメッセージ）またはチャンネルに、最大 237 バイトのテキストメッセージを送信します。 |
 
-### Read Functions
+### 読み取り機能
 
-| Function                | What it returns                                             |
-| ----------------------- | ----------------------------------------------------------- |
-| **Get Mesh Status**     | Overall mesh status.                        |
-| **Get Node List**       | The list of nodes on your mesh.             |
-| **Get Channel Info**    | Information about your channels.            |
-| **Get Device Status**   | Status of your connected radio.             |
-| **Get Node Details**    | Detailed information about a specific node. |
-| **Get Recent Messages** | Recent messages from your conversations.    |
-| **Get Unread Summary**  | A summary of unread messages.               |
-| **Get Mesh Metrics**    | Telemetry and metrics from your mesh.       |
+| 機能               | 返す内容                |
+| ---------------- | ------------------- |
+| **メッシュ状態を取得**    | メッシュ全体の状態。          |
+| **ノードリストを取得**    | メッシュ上のノードのリスト。      |
+| **チャンネル情報を取得**   | チャンネルに関する情報。        |
+| **デバイス状態を取得**    | 接続中の無線機の状態。         |
+| **ノード詳細を取得**     | 特定のノードに関する詳細情報。     |
+| **最近のメッセージを取得**  | 会話からの最近のメッセージ。      |
+| **未読の概要を取得**     | 未読メッセージの概要。         |
+| **メッシュメトリクスを取得** | メッシュからのテレメトリとメトリクス。 |
 
-## Privacy
+## プライバシー
 
-> 🔒 **Privacy:** The **Send Message** function lets an assistant send messages to your mesh on your behalf. Only enable functions you trust the assistant to use. The read functions expose node, message, and metric data to the assistant — enable only what you're comfortable sharing. Each function has its own toggle, and the master toggle turns all of them off at once.
+> 🔒 **プライバシー：** 「**メッセージを送信**」機能は、アシスタントがあなたに代わってメッシュにメッセージを送信できるようにします。 アシスタントに使わせても信頼できる機能だけを有効にしてください。 読み取り機能は、ノード・メッセージ・メトリクスのデータをアシスタントに公開します。共有しても差し支えないものだけを有効にしてください。 各機能には独自のトグルがあり、マスタートグルはそれらすべてを一度にオフにします。
 
-## Related Topics
+## 関連トピック
 
-- [Messages & Channels](messages-and-channels) — sending messages directly in the app
-- [Nodes](nodes) — the node list the read functions draw from
-- [Node Metrics](node-metrics) — the telemetry behind Get Mesh Metrics
+- [メッセージとチャンネル](messages-and-channels)：アプリで直接メッセージを送信する
+- [ノード](nodes)：読み取り機能が参照するノードリスト
+- [ノードメトリクス](node-metrics)：「メッシュメトリクスを取得」の背後にあるテレメトリ
 
 ---
 

@@ -1,27 +1,27 @@
 ---
-title: Debug Logs
+title: Arendaja logid
 parent: Kasutaja juhis
 nav_order: 22
-last_updated: 2026-07-01
-description: View and export the app's own debug logs from inside the app, and attach a capture to a GitHub issue to help diagnose bugs — no adb required.
+last_updated: 2026-07-08
+description: Vaata ja ekspordi rakenduse arendajalogi rakenduse seest ning lisa GitHubi probleemile jäädvustus vigade diagnoosimiseks – adb-d pole vaja.
 aliases:
-  - debug-logs
+  - arendaja-logid
   - logcat
   - app-logs
   - bug-report
 ---
 
-# Debug Logs
+# Arendaja logid
 
-When something misbehaves, the app's debug logs are the single most useful thing you can attach to a bug report. Meshtastic can capture them **for you, from inside the app** — you no longer need `adb` or any desktop tooling to collect them.
+Kui midagi töötab valesti, on rakenduse arendajalogid kõige kasulikum asi, mida saad veateatele lisada. Meshtastic can capture them **for you, from inside the app** — you no longer need `adb` or any desktop tooling to collect them.
 
-Open the **Debug Panel** from **Settings → Advanced → Debug Panel**.
+Ava **Arendajapaneel**, valides **Seaded → Täpsemad → Arendajapaneel**.
 
 > 📎 **Filing an issue?** Export your logs (see below) and attach the `.txt` file to your report at [github.com/meshtastic/Meshtastic-Android/issues](https://github.com/meshtastic/Meshtastic-Android/issues). A log capture that covers the moment the problem happened turns "it doesn't work" into something a developer can actually track down.
 
 ## The two tabs
 
-The Debug Panel has two tabs:
+Arendajapaneelil on kaks vahekaarti:
 
 - **Packets** — the decoded mesh traffic your radio has sent and received (protocol-level messages). Useful for diagnosing mesh and routing behavior.
 - **App logs** — the app's own diagnostic log (Android _logcat_), including warnings, errors, and stack traces from the app itself. This is usually what a bug report needs.
@@ -33,7 +33,7 @@ Each tab has its own **export** button and produces its own file, so you can gra
 The **App logs** tab shows the most recent log lines from **this app only** — never other apps on your device.
 
 - **Search** — type in the search box to filter to matching lines.
-- **Level filter** — the **V / D / I / W / E** chips toggle Verbose, Debug, Info, Warn, and Error lines. Tap a level to hide it; tap again to bring it back. Fatal lines are always shown.
+- **Tasemefilter** — **V / D / I / W / E** kiibid lülitavad sisse üksikasjaliku, arendaja-, teabe-, hoiatus- ja vearea. Tap a level to hide it; tap again to bring it back. Fatal lines are always shown.
 - **Refresh** — the refresh icon re-reads the latest logs.
 
 Error and warning lines are tinted so problems stand out.
@@ -44,7 +44,7 @@ Tap the **download** icon to save the current logs to a file. You choose where i
 
 Attach that file to your GitHub issue.
 
-> 🔒 **Privacy:** Exports automatically **redact** sensitive values such as channel keys and admin/session keys before writing the file. Even so, logs can contain node names, positions, and other identifying details — glance through the file before sharing it publicly, and share privately if you have any doubt.
+> 🔒 **Privacy:** Exports automatically **redact** private keys, admin keys, and session passkeys before writing the file. Kanali PSKid **ei** redigeerita ja logid võivad sisaldada ka sõlmede nimesid, asukohti ja muid tuvastavaid üksikasju – enne avalikult jagamist vaadake fail üle ja jagage seda privaatselt, kui teil on kahtlusi.
 
 ## Töölaud
 

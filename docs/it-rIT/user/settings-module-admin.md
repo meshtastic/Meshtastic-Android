@@ -2,7 +2,7 @@
 title: Settings — Modules & Admin
 parent: User Guide
 nav_order: 8
-last_updated: 2026-05-20
+last_updated: 2026-07-08
 description: Configure optional feature modules (MQTT, telemetry, canned messages, TAK, and more) and perform device administration.
 aliases:
   - modules
@@ -78,13 +78,14 @@ Controls buzzer, LED, or vibration alerts on your radio hardware. Useful for dev
 
 Buffers messages for nodes that were temporarily offline, then replays them when those nodes reconnect. Essential for meshes where nodes go in and out of range regularly — ensures messages aren't lost during brief disconnections.
 
-| Impostazione                               | Descrizione                |
-| ------------------------------------------ | -------------------------- |
-| Abilitato                                  | Activate store and forward |
-| Heartbeat (s)           | Announcement interval      |
-| Record                                     | Maximum stored messages    |
-| History Return (max)    | Max messages to replay     |
-| History Return (window) | Time window for replay     |
+| Impostazione                               | Descrizione                                                                                                                                      |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Abilitato                                  | Activate store and forward                                                                                                                       |
+| Heartbeat                                  | Periodically announce this node's store-and-forward capability                                                                                   |
+| Record                                     | Maximum stored messages                                                                                                                          |
+| History Return (max)    | Max messages to replay                                                                                                                           |
+| History Return (window) | Time window for replay                                                                                                                           |
+| Server                                     | Act as a store-and-forward server for the mesh (requires ample memory, e.g. ESP32 with PSRAM) |
 
 > 💡 **Tip:** Store and Forward works best on nodes with ample memory (ESP32 with PSRAM). Router nodes are ideal candidates since they're typically always-on.
 
@@ -145,6 +146,7 @@ GPIO control over the mesh network. Allows a remote node to read or write GPIO p
 | -------------------- | --------------------------------------------------------------- |
 | Abilitato            | Activate remote GPIO access                                     |
 | Allow Undefined Pins | Allow access to any GPIO pin (security risk) |
+| Available Pins       | Up to 4 GPIO pins this node exposes for remote read/write       |
 
 > ⚠️ **Warning:** Enabling "Allow Undefined Pins" gives remote nodes access to all GPIO pins, which could interfere with the radio's own hardware. Only enable on dedicated GPIO nodes.
 
@@ -152,10 +154,11 @@ GPIO control over the mesh network. Allows a remote node to read or write GPIO p
 
 Broadcasts information about directly heard neighbors, enabling mesh topology mapping. Each enabled node periodically shares a list of the other nodes it can hear and their signal quality.
 
-| Impostazione                           | Descrizione                          |
-| -------------------------------------- | ------------------------------------ |
-| Abilitato                              | Activate neighbor broadcasting       |
-| Update Interval (s) | How often to broadcast neighbor list |
+| Impostazione                           | Descrizione                                                                                                                          |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Abilitato                              | Activate neighbor broadcasting                                                                                                       |
+| Update Interval (s) | How often to broadcast neighbor list                                                                                                 |
+| Trasmettere su LoRa                    | Also broadcast neighbor info over LoRa, not just MQTT/phone. Unavailable on a channel using the default key and name |
 
 See [Discovery](discovery) for how to use neighbor data for mesh topology exploration.
 
@@ -165,23 +168,24 @@ Controls onboard NeoPixel or other addressable RGB LEDs on supported hardware. C
 
 | Impostazione       | Descrizione                                                |
 | ------------------ | ---------------------------------------------------------- |
-| Abilitato          | Activate LED control                                       |
-| Stato LED          | On, Off, or set specific color                             |
+| Stato LED          | Turn the LED on or off                                     |
+| Attuale            | LED current limit (0–31)                |
 | Red / Green / Blue | Individual color channel values (0–255) |
 
 ### Detection Sensor Module
 
 Turns your node into a motion or door sensor alert system. When a GPIO pin detects a state change (motion detected, door opened), the node broadcasts an alert message over the mesh.
 
-| Impostazione                             | Descrizione                                                             |
-| ---------------------------------------- | ----------------------------------------------------------------------- |
-| Abilitato                                | Activate detection sensor                                               |
-| Pin Monitor                              | GPIO pin connected to sensor                                            |
-| Rilevamento Trigger su HIGH              | Trigger when pin goes high (vs. low) |
-| Minimum Broadcast (s) | Minimum time between alert broadcasts                                   |
-| State Broadcast (s)   | Periodic state broadcast interval                                       |
-| Invia Campanella                         | Include bell character in alerts                                        |
-| Nome Descrittivo                         | Custom name for this sensor                                             |
+| Impostazione                             | Descrizione                                                                                                                             |
+| ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Abilitato                                | Activate detection sensor                                                                                                               |
+| Pin Monitor                              | GPIO pin connected to sensor                                                                                                            |
+| Detection Trigger Type                   | How the pin's state maps to a detection event (e.g. active high/low, edge-triggered) |
+| Use Input Pullup Mode                    | Enable the pin's internal pull-up resistor                                                                                              |
+| Minimum Broadcast (s) | Minimum time between alert broadcasts                                                                                                   |
+| State Broadcast (s)   | Periodic state broadcast interval                                                                                                       |
+| Invia Campanella                         | Include bell character in alerts                                                                                                        |
+| Nome Descrittivo                         | Custom name for this sensor                                                                                                             |
 
 ### Paxcounter Module
 
@@ -225,11 +229,7 @@ Remotely reboot a connected or administered node.
 
 ### Pannello Di Debug
 
-View detailed diagnostic information:
-
-- Protocol buffers debug output
-- Mesh packet log
-- Connection state details
+Opens the **Packets** and **App logs** tabs for viewing, filtering, and exporting diagnostic output. See [Debug Logs](debug-logs) for the full walkthrough.
 
 ### Troubleshooting Remote Admin
 

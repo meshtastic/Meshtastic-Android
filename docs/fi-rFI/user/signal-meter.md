@@ -2,7 +2,7 @@
 title: Kuinka Meshtastic-signaalimittari toimii
 parent: Käyttöopas
 nav_order: 15
-last_updated: 2026-06-25
+last_updated: 2026-07-08
 description: Miten signaalimittari arvioi signaalin laadun SNR-arvon perusteella suhteessa LoRa-modeemiesiasetukseen — hajaspektri, esiasetukset ja mitä palkit todellisuudessa tarkoittavat.
 aliases:
   - signaali
@@ -55,7 +55,7 @@ Koska arviointi perustuu esiasetuksen rajaan, _sama_ SNR-arvo voi saada eri arvo
 | Taso        | Palkit | Kriteerit                              | Merkitys                                                                                   |
 | ----------- | ------ | -------------------------------------- | ------------------------------------------------------------------------------------------ |
 | Hyvä        | 3      | SNR **esiasetuksen rajan yläpuolella** | Signaali on selvästi demodulaation alarajan yläpuolella — hyvä yhteys.     |
-| Kohtalainen | 2      | enintään 5,5 dB rajan alapuolella      | Signaali voidaan vielä purkaa, mutta se on lähellä demodulaation alarajaa. |
+| Kohtalainen | 2      | alle 5,5 dB rajan alapuolella          | Signaali voidaan vielä purkaa, mutta se on lähellä demodulaation alarajaa. |
 | Huono       | 1      | 5,5–7,5 dB rajan alapuolella           | Signaali on aivan esiasetuksen palautumiskyvyn rajalla.                    |
 | ei mitään   | 0      | yli 7,5 dB "rajan" alapuolella         | Signaali on demodulaation alarajan alapuolella — lähetys hukkuu kohinaan.  |
 

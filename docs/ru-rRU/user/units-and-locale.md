@@ -2,7 +2,7 @@
 title: Единицы измерения и локаль
 parent: Руководство пользователя
 nav_order: 16
-last_updated: 2026-05-12
+last_updated: 2026-07-08
 description: Как приложение отображает температуру, расстояние, скорость и другие показатели в зависимости от настроек устройства.
 ---
 
@@ -14,7 +14,7 @@ description: Как приложение отображает температу
 
 ## Как это работает
 
-Радиостанции Meshtastic всегда передают данные в **метрических единицах** (метры, °C, км/ч, гПа и т.д.). When the app receives this data, it converts and displays values in whatever unit system your device's locale specifies.
+Meshtastic radios always transmit data in **metric units** (meters, °C, m/s, hPa, etc.). When the app receives this data, it converts and displays values in whatever unit system your device's locale specifies.
 
 На Android твои предпочтения единиц измерений определяются настройками системы **Язык и регион**. На настольном компьютере (JVM) приложение использует стандартную `Locale` JVM.
 

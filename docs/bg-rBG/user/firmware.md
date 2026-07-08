@@ -17,7 +17,7 @@ aliases:
 
 ## Проверка за актуализации
 
-1. Open the connected radio's configuration and, under **Advanced**, tap **Firmware Update** — or tap the firmware notification if one is shown. The entry appears only for OTA-capable devices.
+1. Open the connected radio's configuration and, under **Advanced**, tap **Firmware Update**. The entry appears only for OTA-capable devices.
 2. Приложението проверява за налични версии на фърмуера.
 3. Available updates show the version number and changelog summary.
 

@@ -2,7 +2,7 @@
 title: 訊息與頻道
 parent: 使用者指南
 nav_order: 3
-last_updated: 2026-06-25
+last_updated: 2026-07-08
 description: Send and receive messages, manage channels, configure encryption, search conversations, and use quick chat, reactions, and message actions.
 aliases:
   - 頻道
@@ -57,15 +57,17 @@ Meshtastic 支援兩種通訊模式：頻道廣播與私訊。
 
 ### 訊息狀態
 
-| 狀態                          | 圖示 | 含義                                         |
-| --------------------------- | -- | ------------------------------------------ |
-| 佇列中                         | ⏳  | 訊息等待傳送中                                    |
-| 傳送中                         | ✓  | 已傳至無線電裝置，等待確認回應                            |
-| 已送達                         | ✓✓ | 已收到收件者的確認回應                                |
-| 已接收                         | ✓  | 已從 mesh 網路接收訊息（傳入）                         |
-| S&F 路由中 | 🔗 | 儲存與轉送：訊息正透過 S&F 節點進行路由 |
-| S&F 已確認 | 🔗 | 儲存與轉送：已透過 S&F 節點確認傳遞成功 |
-| 錯誤                          | ✗  | 重試後仍傳遞失敗                                   |
+A status label appears under **your own** outgoing messages only (incoming messages from others show no status label):
+
+| 狀態                                  | 含義                                                                                                                                   |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Sending…                            | Queued or already handed to the radio, not yet resolved either way (queued and en-route both show this same text) |
+| Delivered to recipient              | The strongest confirmation for a direct message — an acknowledgment came back                                                        |
+| 已傳送至 Mesh                           | For a channel broadcast, the message reached the mesh (broadcasts have no per-recipient ack)                      |
+| Relayed, not confirmed by recipient | For a direct message, shown in a warning color — the message was relayed but no acknowledgment has come back yet                     |
+| 透過 SF++ 鏈路由…                        | Being routed/buffered by the Store & Forward Plus Plus chain                                                     |
+| 已在 SF++ 鏈上確認                        | Confirmed delivered via the SF++ chain                                                                                               |
+| 錯誤                                  | Delivery failed — tap the status for the specific reason (see Delivery Errors below)                              |
 
 ### 傳遞錯誤
 

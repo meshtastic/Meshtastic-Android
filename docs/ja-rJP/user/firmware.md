@@ -1,9 +1,9 @@
 ---
-title: Firmware Updates
+title: ファームウェア更新
 parent: User Guide
 nav_order: 13
 last_updated: 2026-07-07
-description: Update your radio firmware over Bluetooth or USB — OTA process, version channels, pre-flight checks, and recovery.
+description: 無線機のファームウェアを Bluetooth または USB で更新します。OTA の手順、バージョンチャンネル、事前チェック、復旧について説明します。
 aliases:
   - firmware
   - update
@@ -11,116 +11,116 @@ aliases:
   - flash
 ---
 
-# Firmware Updates
+# ファームウェア更新
 
-Keep your Meshtastic radio up to date with the latest firmware for new features, bug fixes, and security improvements.
+新機能、バグ修正、セキュリティ改善のために、Meshtastic 無線機を最新のファームウェアに保ちましょう。
 
-## Checking for Updates
+## 更新を確認する
 
-1. Open the connected radio's configuration and, under **Advanced**, tap **Firmware Update** — or tap the firmware notification if one is shown. The entry appears only for OTA-capable devices.
-2. The app checks for available firmware versions.
-3. Available updates show the version number and changelog summary.
+1. 接続中の無線機の設定を開き、「**詳細設定**」で「**ファームウェア更新**」をタップします。 この項目は、OTA に対応したデバイスでのみ表示されます。
+2. アプリが、利用可能なファームウェアバージョンを確認します。
+3. 利用可能な更新には、バージョン番号と変更履歴の概要が表示されます。
 
-## Update Methods
+## 更新方法
 
-### OTA (Over-The-Air) via Bluetooth
+### Bluetooth 経由の OTA（無線更新）
 
-The most common update method for Android users:
+Android ユーザーにとって最も一般的な更新方法です：
 
-1. Ensure your radio is connected via Bluetooth.
-2. Navigate to the Firmware Update screen.
-3. Select the desired firmware version.
-4. Tap **Update** to begin the OTA process.
-5. Wait for the update to complete — **do not disconnect** during the update.
+1. 無線機が Bluetooth で接続されていることを確認します。
+2. ファームウェア更新画面に移動します。
+3. 希望するファームウェアバージョンを選択します。
+4. 「**更新**」をタップして OTA 処理を開始します。
+5. 更新が完了するまで待ちます。更新中は**接続を切断しないでください**。
 
-![Firmware checking for updates](../../assets/screenshots/firmware_checking.png)
+![ファームウェアの更新を確認中](../../assets/screenshots/firmware_checking.png)
 
-> ⚠️ **Warning:** Interrupting a firmware update can brick your device. Ensure your radio has sufficient battery (>50% recommended) and maintain Bluetooth proximity during the entire process.
+> ⚠️ **警告：** ファームウェア更新を中断すると、デバイスが起動不能になることがあります。 無線機のバッテリーが十分にある（50% 以上を推奨）ことを確認し、処理の間ずっと Bluetooth の通信範囲内に置いてください。
 
-![Firmware disclaimer](../../assets/screenshots/firmware_disclaimer.png)
+![ファームウェアの免責事項](../../assets/screenshots/firmware_disclaimer.png)
 
-### In-App USB Update
+### アプリ内での USB 更新
 
-When your radio is connected over **USB/serial** (rather than Bluetooth), the Firmware Update screen offers **USB File Transfer**. The app reboots the device into DFU mode, then prompts you to save the `.uf2` file to the device's DFU drive using the system file picker. This option appears only on a USB/serial connection — it is not available over Bluetooth.
+無線機が（Bluetooth ではなく）**USB／シリアル**で接続されている場合、ファームウェア更新画面に「**USB ファイル転送**」が表示されます。 アプリはデバイスを DFU モードで再起動し、システムのファイル選択画面を使って `.uf2` ファイルをデバイスの DFU ドライブに保存するよう促します。 このオプションは USB／シリアル接続でのみ表示され、Bluetooth では利用できません。
 
-> ℹ️ **nRF bootloader note:** Some devices (e.g. RAK WisBlock RAK4631) need their bootloader flashed with the vendor's serial DFU tool (such as `adafruit-nrfutil`) — copying the `.uf2` alone won't update the bootloader. The app surfaces a hint when this applies.
+> ℹ️ **nRF ブートローダーに関する注意：** 一部のデバイス（例：RAK WisBlock RAK4631）では、ベンダーのシリアル DFU ツール（`adafruit-nrfutil` など）でブートローダーを書き込む必要があります。`.uf2` をコピーするだけではブートローダーは更新されません。 これに該当する場合、アプリがヒントを表示します。
 
-### Other Flashing Options
+### その他の書き込み方法
 
-For recovery or when neither OTA nor in-app USB is available:
+復旧時、または OTA とアプリ内 USB のどちらも使えない場合：
 
-- Use the [Meshtastic Web Flasher](https://flasher.meshtastic.org)
-- Or the [Meshtastic CLI tool](https://meshtastic.org/docs/getting-started/flashing-firmware) on desktop
+- [Meshtastic Web Flasher](https://flasher.meshtastic.org) を使用する
+- または、デスクトップで [Meshtastic CLI ツール](https://meshtastic.org/docs/getting-started/flashing-firmware) を使用する
 
-## Version Channels
+## バージョンチャンネル
 
-| チャンネル    | 説明                                                                         |
-| -------- | -------------------------------------------------------------------------- |
-| Stable   | Recommended for most users; tested releases                                |
-| Alpha    | Preview releases; may contain bugs                                         |
-| ローカルファイル | Flash a firmware file you select yourself, instead of a downloaded release |
+| チャンネル    | 説明                                      |
+| -------- | --------------------------------------- |
+| 安定版      | ほとんどのユーザーに推奨。テスト済みのリリース                 |
+| アルファ版    | プレビューリリース。バグを含む場合があります                  |
+| ローカルファイル | ダウンロードしたリリースではなく、自分で選んだファームウェアファイルを書き込む |
 
-## Pre-Update Checklist
+## 更新前のチェックリスト
 
-Before updating:
+更新する前に：
 
-- [ ] Battery > 50%
-- [ ] Stable Bluetooth connection
-- [ ] Note your current settings (they may reset on major version changes)
-- [ ] Check the release notes for breaking changes
+- [ ] バッテリー 50% 以上
+- [ ] 安定した Bluetooth 接続
+- [ ] 現在の設定を控えておく（メジャーバージョンの変更時にリセットされることがあります）
+- [ ] 破壊的変更がないか、リリースノートを確認する
 
-## Post-Update
+## 更新後
 
-After the firmware is written, the app verifies the update and waits for the device to come back online:
+ファームウェアの書き込み後、アプリは更新を検証し、デバイスが再びオンラインになるのを待ちます：
 
-![Verifying update and waiting for the device to reconnect](../../assets/screenshots/firmware_verifying.png)
+![更新を検証し、デバイスの再接続を待っている様子](../../assets/screenshots/firmware_verifying.png)
 
-Once the update succeeds:
+更新が成功すると：
 
-- The radio will reboot automatically
-- Bluetooth connection will re-establish
-- Verify your settings are intact
-- Confirm the new version under **Currently Installed** on the Firmware Update screen — it's also shown on the node's detail page and the Connections screen
+- 無線機が自動的に再起動します
+- Bluetooth 接続が再確立されます
+- 設定が保持されているか確認します
+- ファームウェア更新画面の「**現在インストール済み**」で新しいバージョンを確認します。バージョンは、ノードの詳細ページや接続画面にも表示されます
 
-![Firmware update success](../../assets/screenshots/firmware_success.png)
+![ファームウェア更新の成功](../../assets/screenshots/firmware_success.png)
 
-## Troubleshooting
+## トラブルシューティング
 
-### Update Stuck
+### 更新が止まる
 
-If the update appears frozen:
+更新が固まったように見える場合：
 
-- Wait at least 5 minutes before intervening
-- If truly stuck, power-cycle the radio
-- Attempt the update again
+- 手を加える前に、少なくとも 5 分待つ
+- 本当に止まっている場合は、無線機の電源を入れ直す
+- もう一度更新を試みる
 
-![Firmware update error](../../assets/screenshots/firmware_error.png)
+![ファームウェア更新のエラー](../../assets/screenshots/firmware_error.png)
 
-### Device Won't Boot After Update
+### 更新後にデバイスが起動しない
 
-If your device fails to boot:
+デバイスが起動しない場合：
 
-1. Try connecting via USB to a computer
-2. Use the web flasher in recovery/DFU mode
-3. Flash a known-good firmware version
-4. Check the Meshtastic Discord for device-specific recovery steps
+1. USB でコンピューターに接続してみる
+2. リカバリー／DFU モードで Web Flasher を使用する
+3. 動作確認済みのファームウェアバージョンを書き込む
+4. デバイス固有の復旧手順については、Meshtastic の Discord を確認する
 
-### Compatibility Warnings
+### 互換性の警告
 
-The app may show warnings when:
+次の場合、アプリが警告を表示することがあります：
 
-- Connected radio firmware is below minimum supported version
-- Major version mismatch between app and firmware
-- Deprecated features need migration
+- 接続中の無線機のファームウェアが、対応する最小バージョンを下回っている
+- アプリとファームウェアの間でメジャーバージョンが一致していない
+- 非推奨の機能に移行が必要
 
-> ⚠️ **Important:** Always update the Meshtastic app before or alongside firmware updates to ensure compatibility.
+> ⚠️ **重要：** 互換性を確保するため、ファームウェア更新の前、または同時に、必ず Meshtastic アプリを更新してください。
 
-## Related Topics
+## 関連トピック
 
-- [Connections](connections) — reconnecting after a firmware update
-- [Flashing firmware guide](https://meshtastic.org/docs/getting-started/flashing-firmware) — full firmware flashing walkthrough on meshtastic.org
-- [Supported devices](https://meshtastic.org/docs/hardware/devices) — check firmware compatibility by device
-- [FAQ](https://meshtastic.org/docs/about/faq) — common questions on meshtastic.org
+- [コネクション](connections)：ファームウェア更新後の再接続
+- [ファームウェア書き込みガイド](https://meshtastic.org/docs/getting-started/flashing-firmware)：meshtastic.org にあるファームウェア書き込みの完全な手順
+- [対応デバイス](https://meshtastic.org/docs/hardware/devices)：デバイスごとのファームウェア互換性を確認
+- [FAQ](https://meshtastic.org/docs/about/faq)：meshtastic.org のよくある質問
 
 ---
 

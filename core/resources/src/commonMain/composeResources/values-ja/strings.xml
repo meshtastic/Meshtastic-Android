@@ -28,6 +28,7 @@
     <string name="a11y_node_online">オンライン</string>
     <string name="a11y_node_role">役割 %1$s</string>
     <string name="a11y_node_signal">信号 %1$s</string>
+    <string name="a11y_nodes_at_hop">ホップ %1$d：%2$d ノード</string>
     <string name="accept">同意</string>
     <string name="acknowledgements">謝辞</string>
     <!-- ACTION -->
@@ -215,6 +216,8 @@
     <string name="close">閉じる</string>
     <string name="close_selection">選択を閉じる</string>
     <string name="co2">CO₂</string>
+    <string name="co2_humidity">CO₂ 湿度</string>
+    <string name="co2_temperature">CO₂ 温度</string>
     <string name="codec_2_enabled">CODEC 2 を有効化</string>
     <string name="codec2_sample_rate">CODEC2 サンプルレート</string>
     <string name="coding_rate">符号化レート</string>
@@ -684,6 +687,8 @@
     <string name="generate_qr_code">QRコード生成</string>
     <!-- GEOFENCE -->
     <string name="geofence">ジオフェンス</string>
+    <string name="geofence_alerts_opt_in">通過を通知する</string>
+    <string name="geofence_alerts_opt_in_desc">ノードがこのジオフェンスに進入または退出したときに通知を受け取ります</string>
     <string name="geofence_box_author_confirm">エリアを確定</string>
     <string name="geofence_box_author_hint">2つの角をタップしてエリアを指定します</string>
     <string name="geofence_box_author_hint_viewport">マップを動かしてエリアを合わせ、「エリアを確定」をタップします</string>
@@ -724,6 +729,8 @@
     <string name="hide_password">パスワードを非表示</string>
     <string name="history_return_max">リクエスト可能な最大の履歴件数</string>
     <string name="history_return_window">リクエスト可能な履歴の期間  (分)</string>
+    <string name="hop_histogram_empty">この期間に受信したノードはありません</string>
+    <string name="hop_histogram_title">ホップごとのノード数</string>
     <string name="hop_limit">ホップ数</string>
     <string name="hops_away">ホップ数</string>
     <string name="host">ホスト</string>
@@ -977,8 +984,17 @@
     <string name="message_delivery_status">メッセージ配信状況</string>
     <string name="message_device_managed">この無線機は管理されており、リモート管理者のみが変更できます。</string>
     <string name="message_input_label">メッセージ</string>
+    <string name="message_routing_error_max_retransmit">メッシュへの配信に失敗しました</string>
+    <string name="message_routing_error_no_channel">チャンネルが選択されていません</string>
+    <string name="message_routing_error_pki_failed">暗号化メッセージを送信できませんでした</string>
+    <string name="message_routing_error_pki_send_fail_public_key">受信者の鍵を利用できません</string>
+    <string name="message_routing_error_pki_unknown_pubkey">受信者にあなたの鍵が必要です</string>
+    <string name="message_routing_error_too_large">メッセージが大きすぎて送信できません</string>
     <string name="message_status_delivered">メッシュに配信済み</string>
+    <string name="message_status_enroute">送信中…</string>
     <string name="message_status_queued">送信待ち</string>
+    <string name="message_status_recipient_delivered">受信者に配信済み</string>
+    <string name="message_status_relayed_not_confirmed">中継済み、受信者による確認なし</string>
     <string name="message_status_sfpp_confirmed">SF++ チェーンで確認済み</string>
     <string name="message_status_sfpp_routing">SF++ チェーン経由でルーティング中…</string>
     <string name="message_status_unknown">不明</string>
@@ -1462,7 +1478,31 @@
     <string name="signal">信号</string>
     <string name="signal_quality">信号品質</string>
     <!-- SITE -->
+    <string name="site_planner">サイトプランナー</string>
+    <string name="site_planner_antenna_gain_dbi">アンテナ利得（dBi）</string>
+    <string name="site_planner_antenna_height_meters">アンテナの高さ（m）</string>
+    <string name="site_planner_color_scale">カラーパレット</string>
+    <string name="site_planner_estimate">カバレッジを推定</string>
+    <string name="site_planner_estimating">カバレッジを推定中…</string>
+    <string name="site_planner_failed">カバレッジの推定に失敗しました</string>
+    <string name="site_planner_frequency_mhz">周波数（MHz）</string>
+    <string name="site_planner_high_resolution">高解像度の地形</string>
+    <string name="site_planner_invalid_latitude">−90〜90 を入力してください</string>
+    <string name="site_planner_invalid_longitude">−180〜180 を入力してください</string>
+    <string name="site_planner_invalid_positive">0 より大きい値にしてください</string>
+    <string name="site_planner_invalid_rx_sensitivity">−150〜−30 dBm を入力してください</string>
+    <string name="site_planner_max_range_km">最大範囲（km）</string>
+    <string name="site_planner_rx_height_meters">受信機の高さ（m）</string>
+    <string name="site_planner_rx_sensitivity_dbm">受信機の感度（dBm）</string>
     <string name="site_planner_section_display">表示</string>
+    <string name="site_planner_section_receiver">受信機</string>
+    <string name="site_planner_section_simulation">シミュレーションのオプション</string>
+    <string name="site_planner_section_transmitter">サイト／送信機</string>
+    <string name="site_planner_subtitle">送信機の RF カバレッジを推定します</string>
+    <string name="site_planner_tx_power_watts">送信出力（W）</string>
+    <string name="site_planner_use_current_location">現在地を使用</string>
+    <string name="site_planner_use_map_center">マップの中心を使用</string>
+    <string name="site_planner_use_node_location">現在のノードの位置を使用</string>
     <string name="skip">スキップ</string>
     <string name="slot">スロット</string>
     <string name="smart_position">スマート位置情報</string>
