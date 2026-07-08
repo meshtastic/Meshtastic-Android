@@ -16,7 +16,6 @@
  */
 package org.meshtastic.core.ui.component
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -42,20 +41,18 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import org.jetbrains.compose.resources.painterResource
 import org.meshtastic.core.model.EventFirmwareEdition
 import org.meshtastic.core.ui.icon.CalendarMonth
 import org.meshtastic.core.ui.icon.ChevronRight
 import org.meshtastic.core.ui.icon.LinkIcon
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Place
+import org.meshtastic.core.ui.util.EventBrandingIcon
 import org.meshtastic.core.ui.util.accentColorOrNull
-import org.meshtastic.core.ui.util.eventIconFor
 
 /**
  * Bottom sheet shown when the user taps the event branding in [MainAppBar]. Surfaces the event metadata the bundled
@@ -108,14 +105,11 @@ private fun EventHeader(edition: EventFirmwareEdition, accent: Color?) {
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        eventIconFor(edition.edition)?.let { icon ->
-            Image(
-                painter = painterResource(icon),
-                contentDescription = null,
-                contentScale = ContentScale.Fit,
-                modifier = Modifier.size(48.dp).clip(CircleShape),
-            )
-        }
+        EventBrandingIcon(
+            edition = edition,
+            modifier = Modifier.size(48.dp).clip(CircleShape),
+            contentDescription = null,
+        )
         Text(
             text = edition.displayName,
             style = MaterialTheme.typography.headlineSmall,

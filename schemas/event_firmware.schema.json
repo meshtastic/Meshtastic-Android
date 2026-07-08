@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://meshtastic.org/schemas/event_firmware.schema.json",
   "title": "Event Firmware Metadata",
-  "description": "Offline-first display metadata for event-specific firmware editions. The bundled androidApp/src/main/assets/event_firmware.json shares the {version, generatedAt, source, <payload>[]} envelope used by device_links.json so a future Meshtastic API (planned GET /resource/eventFirmware) can reuse the same shape. Each record identifies its edition by the FirmwareEdition proto enum name in the `edition` field. This schema is the authoring contract for the bundled file and is bumped as the shape evolves; the runtime JSON parser is independently tolerant of unknown fields.",
+  "description": "Offline-first display metadata for event-specific firmware editions. The bundled androidApp/src/main/assets/event_firmware.json shares the {version, generatedAt, source, <payload>[]} envelope used by device_links.json and mirrors the live Meshtastic API (GET https://api.meshtastic.org/resource/eventFirmware, currently version 2). Each record identifies its edition by the FirmwareEdition proto enum name in the `edition` field. This schema is the authoring contract for the bundled file and is bumped as the shape evolves; the runtime JSON parser is independently tolerant of unknown fields.",
   "type": "object",
   "required": ["version", "editions"],
   "additionalProperties": false,
@@ -74,6 +74,24 @@
           "pattern": "^#[0-9A-Fa-f]{6}$",
           "description": "Brand/accent color (#RRGGBB) for ambient event theming."
         },
+        "tag": {
+          "type": ["string", "null"],
+          "description": "Short label for the event, e.g. \"Hamvention\"."
+        },
+        "domain": {
+          "type": ["string", "null"],
+          "description": "Per-event microsite host, e.g. \"hamvention.meshtastic.org\"."
+        },
+        "theme": {
+          "type": ["object", "null"],
+          "description": "Richer branding layered over accentColor. Optional; not all editions carry it.",
+          "$ref": "#/$defs/theme"
+        },
+        "firmware": {
+          "type": ["object", "null"],
+          "description": "The event's own firmware build (version + download). Null for editions without a dedicated build.",
+          "$ref": "#/$defs/firmware"
+        },
         "links": {
           "type": "array",
           "description": "Labeled links for the event (website, schedule, map, …).",
@@ -88,6 +106,43 @@
       "properties": {
         "label": { "type": "string", "description": "Display text for the link." },
         "url": { "type": "string", "format": "uri", "description": "Destination URL." }
+      }
+    },
+    "theme": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Event theme. additionalProperties is true so the server can add branding fields (e.g. fonts) without a schema bump; clients tolerate unknown keys.",
+      "properties": {
+        "name": { "type": ["string", "null"], "description": "Theme name, e.g. \"Radio Adventure\"." },
+        "tagline": { "type": ["string", "null"], "description": "Short tagline shown with the branding." },
+        "colors": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "description": "Named brand colors (#RRGGBB); any may be null.",
+          "properties": {
+            "primary": { "type": ["string", "null"] },
+            "secondary": { "type": ["string", "null"] },
+            "accent": { "type": ["string", "null"] }
+          }
+        },
+        "palette": {
+          "type": "array",
+          "description": "Ordered brand color swatches (#RRGGBB).",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "firmware": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Event firmware release metadata.",
+      "properties": {
+        "slug": { "type": ["string", "null"], "description": "Build slug, e.g. \"dayton2026\"." },
+        "version": { "type": ["string", "null"], "description": "Firmware version string." },
+        "id": { "type": ["string", "null"], "description": "Release id." },
+        "title": { "type": ["string", "null"], "description": "Human-readable release title." },
+        "zipUrl": { "type": ["string", "null"], "format": "uri", "description": "Download URL for the firmware zip." },
+        "releaseNotes": { "type": ["string", "null"], "description": "Markdown release notes." }
       }
     }
   }

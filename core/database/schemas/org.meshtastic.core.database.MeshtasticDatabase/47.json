@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 47,
-    "identityHash": "59bc9dbed13f9a1d762eaa5850762a22",
+    "identityHash": "902c451b0845b51265520d6e7a7c6b25",
     "entities": [
       {
         "tableName": "my_node",
@@ -1600,7 +1600,7 @@
       },
       {
         "tableName": "event_firmware_edition",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`edition` TEXT NOT NULL, `display_name` TEXT NOT NULL, `welcome_message` TEXT NOT NULL, `event_start` TEXT, `event_end` TEXT, `time_zone` TEXT, `location` TEXT, `icon_url` TEXT, `accent_color` TEXT, `links_json` TEXT NOT NULL, PRIMARY KEY(`edition`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`edition` TEXT NOT NULL, `display_name` TEXT NOT NULL, `welcome_message` TEXT NOT NULL, `event_start` TEXT, `event_end` TEXT, `time_zone` TEXT, `location` TEXT, `icon_url` TEXT, `accent_color` TEXT, `tag` TEXT, `domain` TEXT, `theme_json` TEXT, `firmware_json` TEXT, `links_json` TEXT NOT NULL, PRIMARY KEY(`edition`))",
         "fields": [
           {
             "fieldPath": "edition",
@@ -1651,6 +1651,26 @@
             "affinity": "TEXT"
           },
           {
+            "fieldPath": "tag",
+            "columnName": "tag",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "domain",
+            "columnName": "domain",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "themeJson",
+            "columnName": "theme_json",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "firmwareJson",
+            "columnName": "firmware_json",
+            "affinity": "TEXT"
+          },
+          {
             "fieldPath": "linksJson",
             "columnName": "links_json",
             "affinity": "TEXT",
@@ -1667,7 +1687,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '59bc9dbed13f9a1d762eaa5850762a22')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '902c451b0845b51265520d6e7a7c6b25')"
     ]
   }
 }

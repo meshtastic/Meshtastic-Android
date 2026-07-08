@@ -21,14 +21,16 @@ import androidx.room3.Entity
 import androidx.room3.PrimaryKey
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import org.meshtastic.core.model.EventFirmwareBuild
 import org.meshtastic.core.model.EventFirmwareEdition
 import org.meshtastic.core.model.EventFirmwareLink
+import org.meshtastic.core.model.EventFirmwareTheme
 
 /**
- * An event-firmware display record, cached from the Meshtastic API (`/resource/eventFirmware`) during refresh. [links]
- * is stored pre-serialized rather than via a Room type converter — it's the only entity that needs a
- * `List<EventFirmwareLink>` column, so a shared [org.meshtastic.core.database.Converters] entry would be unused
- * elsewhere.
+ * An event-firmware display record, cached from the Meshtastic API (`/resource/eventFirmware`) during refresh. The
+ * nested [links]/[theme]/[firmware] objects are stored pre-serialized rather than via Room type converters — this is
+ * the only entity that needs those column types, so shared [org.meshtastic.core.database.Converters] entries would be
+ * unused elsewhere.
  */
 @Serializable
 @Entity(tableName = "event_firmware_edition")
@@ -42,6 +44,10 @@ data class EventFirmwareEditionEntity(
     val location: String? = null,
     @ColumnInfo(name = "icon_url") val iconUrl: String? = null,
     @ColumnInfo(name = "accent_color") val accentColor: String? = null,
+    val tag: String? = null,
+    val domain: String? = null,
+    @ColumnInfo(name = "theme_json") val themeJson: String? = null,
+    @ColumnInfo(name = "firmware_json") val firmwareJson: String? = null,
     @ColumnInfo(name = "links_json") val linksJson: String = "[]",
 )
 
@@ -55,6 +61,10 @@ fun EventFirmwareEdition.asEntity() = EventFirmwareEditionEntity(
     location = location,
     iconUrl = iconUrl,
     accentColor = accentColor,
+    tag = tag,
+    domain = domain,
+    themeJson = theme?.let { Json.encodeToString(it) },
+    firmwareJson = firmware?.let { Json.encodeToString(it) },
     linksJson = Json.encodeToString(links),
 )
 
@@ -68,5 +78,9 @@ fun EventFirmwareEditionEntity.asExternalModel() = EventFirmwareEdition(
     location = location,
     iconUrl = iconUrl,
     accentColor = accentColor,
+    tag = tag,
+    domain = domain,
+    theme = themeJson?.let { runCatching { Json.decodeFromString<EventFirmwareTheme>(it) }.getOrNull() },
+    firmware = firmwareJson?.let { runCatching { Json.decodeFromString<EventFirmwareBuild>(it) }.getOrNull() },
     links = runCatching { Json.decodeFromString<List<EventFirmwareLink>>(linksJson) }.getOrDefault(emptyList()),
 )

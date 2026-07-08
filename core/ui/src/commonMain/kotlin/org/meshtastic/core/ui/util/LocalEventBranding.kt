@@ -16,14 +16,23 @@
  */
 package org.meshtastic.core.ui.util
 
+import androidx.compose.foundation.Image
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.layout.ContentScale
+import coil3.compose.AsyncImage
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.model.EventFirmwareEdition
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.ic_meshtastic
 import org.meshtastic.core.resources.img_event_hamvention
 import kotlin.time.Clock
 
@@ -37,12 +46,47 @@ import kotlin.time.Clock
 val LocalEventBranding = compositionLocalOf<EventFirmwareEdition?> { null }
 
 /**
- * Bundled branding drawable for an edition, or `null`. The metadata's `iconUrl` is null until icons are hosted, so the
- * one drawable we ship stays code-mapped here; remove this once icons are loaded from [EventFirmwareEdition.iconUrl].
+ * Bundled branding drawable for an edition, or `null`. Used as the offline fallback by [EventBrandingIcon] when a
+ * hosted [EventFirmwareEdition.iconUrl] is absent or fails to load.
  */
 fun eventIconFor(editionName: String): DrawableResource? = when (editionName) {
     "HAMVENTION" -> Res.drawable.img_event_hamvention
     else -> null
+}
+
+/**
+ * Event branding icon: loads the hosted [EventFirmwareEdition.iconUrl] when present, falling back to the bundled
+ * per-edition drawable ([eventIconFor]), and finally the Meshtastic logo. The fallback painter also backs Coil's
+ * loading/error states so there is never an empty slot.
+ */
+@Composable
+fun EventBrandingIcon(
+    edition: EventFirmwareEdition,
+    modifier: Modifier = Modifier,
+    contentDescription: String? = edition.displayName,
+) {
+    val bundled = eventIconFor(edition.edition)
+    val fallback =
+        bundled?.let { painterResource(it) } ?: rememberVectorPainter(vectorResource(Res.drawable.ic_meshtastic))
+    val url = edition.iconUrl
+    if (url.isNullOrBlank()) {
+        Image(
+            painter = fallback,
+            contentDescription = contentDescription,
+            contentScale = ContentScale.Fit,
+            modifier = modifier,
+        )
+    } else {
+        AsyncImage(
+            model = url,
+            contentDescription = contentDescription,
+            modifier = modifier,
+            contentScale = ContentScale.Fit,
+            placeholder = fallback,
+            error = fallback,
+            fallback = fallback,
+        )
+    }
 }
 
 /**

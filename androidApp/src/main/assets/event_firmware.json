@@ -1,63 +1,183 @@
 {
-  "version": 1,
-  "generatedAt": "2026-06-23T00:00:00Z",
+  "version": 2,
+  "generatedAt": "2026-06-30T00:00:00Z",
   "source": "bundled",
   "editions": [
     {
       "edition": "HAMVENTION",
-      "displayName": "Hamvention",
+      "displayName": "Dayton Hamvention 2026",
       "welcomeMessage": "Welcome to Hamvention! 🍖📻",
+      "tag": "Hamvention",
       "eventStart": "2026-05-15",
       "eventEnd": "2026-05-17",
       "timeZone": "America/New_York",
       "location": "Xenia, Ohio, USA",
-      "iconUrl": null,
-      "accentColor": "#005DAA",
+      "iconUrl": "https://api.meshtastic.org/resource/eventFirmware/hamvention.png",
+      "accentColor": "#BF1E2E",
+      "domain": "hamvention.meshtastic.org",
       "links": [
-        { "label": "Event Website", "url": "https://hamvention.org" }
-      ]
+        {
+          "label": "Event Website",
+          "url": "https://hamvention.org"
+        }
+      ],
+      "theme": {
+        "name": "Radio Adventure",
+        "tagline": "Exploring the many avenues amateur radio has to offer.",
+        "colors": {
+          "primary": "#BF1E2E",
+          "secondary": null,
+          "accent": null
+        },
+        "palette": [
+          "#BF1E2E"
+        ],
+        "fonts": null
+      },
+      "firmware": {
+        "slug": "dayton2026",
+        "version": "2.7.23.07741e6",
+        "id": "v2.7.23.07741e6",
+        "title": "Meshtastic Firmware 2.7.23.07741e6",
+        "zipUrl": "https://github.com/meshtastic/meshtastic.github.io/raw/master/event/dayton2026/firmware-2.7.23.07741e6.zip",
+        "releaseNotes": "## Welcome to Dayton Hamvention 2026!\n\nThis firmware has been customized for Hamvention with factory default configurations.\n\n### ⚠️ Important: Backup Before Flashing\n\nIf your device has existing settings or encryption keys, **backup your keys / configurations** before proceeding. Flashing will reset your device to factory settings for the event.\n\n### Quick Start\n\n1. Ensure a **data-capable USB cable** is connected\n2. Select your device type\n3. Choose \"Full Erase and Install\"\n4. After flashing, download the Meshtastic app and pair via Bluetooth\n5. If you updated from a previous version or installed a UF2 on an NRF52 device, you will need to perform a factory reset on the device to activate the Hamvention mode.\n\n**73 and happy meshing from Dayton!**"
+      }
     },
     {
       "edition": "OPEN_SAUCE",
-      "displayName": "Open Sauce",
+      "displayName": "Open Sauce 2026",
       "welcomeMessage": "Welcome to Open Sauce! 🔧",
-      "eventStart": "2026-07-18",
+      "tag": "Open Sauce",
+      "eventStart": "2026-07-17",
       "eventEnd": "2026-07-19",
       "timeZone": "America/Los_Angeles",
       "location": "San Mateo, California, USA",
       "iconUrl": null,
       "accentColor": "#E94F1D",
+      "domain": "opensauce.meshtastic.org",
       "links": [
-        { "label": "Event Website", "url": "https://opensauce.com" }
-      ]
+        {
+          "label": "Event Website",
+          "url": "https://opensauce.com"
+        }
+      ],
+      "theme": {
+        "name": "Makers & Mesh",
+        "tagline": "Where makers, science, and mesh collide.",
+        "colors": {
+          "primary": "#E94F1D",
+          "secondary": null,
+          "accent": null
+        },
+        "palette": [
+          "#E94F1D"
+        ],
+        "fonts": null
+      },
+      "firmware": {
+        "slug": "opensauce2026",
+        "version": "2.7.26.004b486",
+        "id": "v2.7.26.004b486",
+        "title": "Meshtastic Firmware 2.7.26.004b486",
+        "zipUrl": "https://github.com/meshtastic/meshtastic.github.io/raw/master/event/opensauce2026/firmware-2.7.26.004b486.zip",
+        "releaseNotes": "## Welcome to Open Sauce 2026! 🔧\n\nThis firmware has been customized for Open Sauce with factory default configurations.\n\n### ⚠️ Important: Backup Before Flashing\n\nIf your device has existing settings or encryption keys, **backup your keys / configurations** before proceeding. Flashing will reset your device to factory settings for the event.\n\n### Quick Start\n\n1. Ensure a **data-capable USB cable** is connected\n2. Select your device type\n3. Choose \"Full Erase and Install\"\n4. After flashing, download the Meshtastic app and pair via Bluetooth\n5. If you updated from a previous version or installed a UF2 on an NRF52 device, you will need to perform a factory reset on the device to activate the Open Sauce mode.\n\n**Happy meshing from San Mateo!**"
+      }
     },
     {
       "edition": "DEFCON",
-      "displayName": "DEFCON",
-      "welcomeMessage": "Welcome to DEFCON! 💀",
+      "displayName": "DEF CON 34",
+      "welcomeMessage": "Welcome to DEF CON 34! 💀",
+      "tag": "DEFCON",
       "eventStart": "2026-08-06",
       "eventEnd": "2026-08-09",
       "timeZone": "America/Los_Angeles",
-      "location": "Las Vegas, Nevada, USA",
+      "location": "Las Vegas Convention Center, Las Vegas, Nevada, USA",
       "iconUrl": null,
-      "accentColor": "#C0392B",
+      "accentColor": "#0D294A",
+      "domain": "defcon.meshtastic.org",
       "links": [
-        { "label": "Event Website", "url": "https://defcon.org" }
-      ]
+        {
+          "label": "Event Website",
+          "url": "https://defcon.org"
+        },
+        {
+          "label": "DEF CON 34 Theme",
+          "url": "https://defcon.org/html/defcon-34/dc-34-theme.html"
+        },
+        {
+          "label": "Mastodon",
+          "url": "https://defcon.social"
+        }
+      ],
+      "theme": {
+        "name": "Agency",
+        "tagline": "Agency is self-determination. It's about making choices that increase yours, AND helping others to control theirs.",
+        "colors": {
+          "primary": "#0D294A",
+          "secondary": "#017FA4",
+          "accent": "#E0004E"
+        },
+        "palette": [
+          "#0D294A",
+          "#017FA4",
+          "#105F66",
+          "#6CCDB8",
+          "#F1B435",
+          "#E0004E"
+        ],
+        "fonts": {
+          "heading": "Lato",
+          "body": "Atkinson Hyperlegible"
+        }
+      },
+      "firmware": {
+        "slug": "defcon2026",
+        "version": null,
+        "id": null,
+        "title": null,
+        "zipUrl": null,
+        "releaseNotes": null
+      }
     },
     {
       "edition": "BURNING_MAN",
-      "displayName": "Burning Man",
+      "displayName": "Burning Man 2026",
       "welcomeMessage": "Welcome to Burning Man! 🔥",
+      "tag": "Burning Man",
       "eventStart": "2026-08-30",
       "eventEnd": "2026-09-07",
       "timeZone": "America/Los_Angeles",
       "location": "Black Rock City, Nevada, USA",
       "iconUrl": null,
-      "accentColor": "#E8552D",
+      "accentColor": "#EC8819",
+      "domain": "burningman.meshtastic.org",
       "links": [
-        { "label": "Event Website", "url": "https://burningman.org" }
-      ]
+        {
+          "label": "Event Website",
+          "url": "https://burningman.org"
+        }
+      ],
+      "theme": {
+        "name": "Axis Mundi",
+        "tagline": "The axis of the world — a celestial column connecting earth, sky, and the realms between.",
+        "colors": {
+          "primary": "#EC8819",
+          "secondary": null,
+          "accent": null
+        },
+        "palette": [
+          "#EC8819"
+        ],
+        "fonts": null
+      },
+      "firmware": {
+        "slug": "burningman2026",
+        "version": null,
+        "id": null,
+        "title": null,
+        "zipUrl": null,
+        "releaseNotes": null
+      }
     }
   ]
 }

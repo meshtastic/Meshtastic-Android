@@ -24,8 +24,11 @@ import okio.Source
 import org.meshtastic.core.data.datasource.BundledAssetReader
 import org.meshtastic.core.data.datasource.EventFirmwareEditionLocalDataSource
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.model.EventFirmwareBuild
 import org.meshtastic.core.model.EventFirmwareEdition
 import org.meshtastic.core.model.EventFirmwareResponse
+import org.meshtastic.core.model.EventFirmwareTheme
+import org.meshtastic.core.model.EventFirmwareThemeColors
 import org.meshtastic.core.model.NetworkDeviceHardware
 import org.meshtastic.core.model.NetworkDeviceLinksResponse
 import org.meshtastic.core.model.NetworkFirmwareReleases
@@ -148,6 +151,37 @@ class EventFirmwareRepositoryImplTest {
         api.response = EventFirmwareResponse(editions = emptyList())
 
         assertEquals("hamvention", repository.getEdition("HAMVENTION")?.displayName)
+    }
+
+    @Test
+    fun v2FieldsRoundTripThroughCache() = runBlocking {
+        seed.editions =
+            listOf(
+                EventFirmwareEdition(
+                    edition = "HAMVENTION",
+                    displayName = "Dayton Hamvention 2026",
+                    welcomeMessage = "hi",
+                    tag = "Hamvention",
+                    domain = "hamvention.meshtastic.org",
+                    theme =
+                    EventFirmwareTheme(
+                        name = "Radio Adventure",
+                        palette = listOf("#BF1E2E"),
+                        colors = EventFirmwareThemeColors(primary = "#BF1E2E"),
+                    ),
+                    firmware = EventFirmwareBuild(version = "2.7.23.07741e6", zipUrl = "https://example/f.zip"),
+                ),
+            )
+
+        val got = repository.getEdition("HAMVENTION")!!
+
+        assertEquals("Hamvention", got.tag)
+        assertEquals("hamvention.meshtastic.org", got.domain)
+        assertEquals("Radio Adventure", got.theme?.name)
+        assertEquals("#BF1E2E", got.theme?.colors?.primary)
+        assertEquals(listOf("#BF1E2E"), got.theme?.palette)
+        assertEquals("2.7.23.07741e6", got.firmware?.version)
+        assertEquals("https://example/f.zip", got.firmware?.zipUrl)
     }
 
     @Test
