@@ -189,12 +189,6 @@
   },
   "pullRequests": [
     {
-      "id": "10937",
-      "title": "Update meshtastic/device-ui digest to effbb92",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10937",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
       "id": "10936",
       "title": "Snake!",
       "page_url": "https://github.com/meshtastic/firmware/pull/10936",
@@ -217,12 +211,6 @@
       "title": "Add chunked PhoneAPI transport payloads",
       "page_url": "https://github.com/meshtastic/firmware/pull/10928",
       "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "10927",
-      "title": "Add Meshnology W10 AIOT Dev Kit (SX1262 via MCP23017 I2C expander)",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10927",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
       "id": "10926",
@@ -319,6 +307,30 @@
       "title": "Add DeltaPlusProto Edict board variant",
       "page_url": "https://github.com/meshtastic/firmware/pull/10807",
       "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
+      "id": "10792",
+      "title": "Add helpful checks of channel names and PSK",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10792",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "10791",
+      "title": "T5S3 ePaper build fix ",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10791",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "10787",
+      "title": "Add TiltTelemetryModule for LIS3DH accelerometer mounts",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10787",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
+      "id": "10784",
+      "title": "build(native-macos): enable UDP multicast mesh",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10784",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     }
   ]
 }

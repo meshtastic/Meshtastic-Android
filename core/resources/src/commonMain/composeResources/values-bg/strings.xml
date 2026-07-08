@@ -75,6 +75,7 @@
     <string name="app_too_old">Изисква се актуализация на приложението</string>
     <string name="app_version">Версия</string>
     <string name="apply">Приложи</string>
+    <string name="aqi">AQI</string>
     <string name="are_you_sure">Сигурни ли сте?</string>
     <string name="are_you_sure_change_default">Сигурни ли сте, че искате да промените канала по подразбиране?</string>
     <string name="audio">Аудио</string>
@@ -237,6 +238,7 @@
     <string name="debug_search_prev">Предишно съответствие</string>
     <string name="debug_store_logs_summary">Деактивирайте, за да пропуснете записването на журналите на mesh мрежата на диска</string>
     <string name="debug_store_logs_title">Съхраняване на mesh мрежови журнали</string>
+    <string name="debug_tab_packets">Пакети</string>
     <string name="default_">По подразбиране</string>
     <!-- DELETE -->
     <string name="delete">Изтриване</string>
