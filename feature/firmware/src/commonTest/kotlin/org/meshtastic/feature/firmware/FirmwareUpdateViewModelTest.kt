@@ -26,6 +26,7 @@ import dev.mokkery.mock
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -44,6 +45,7 @@ import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.firmware_update_battery_low
+import org.meshtastic.core.resources.firmware_update_unknown_hardware
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.core.testing.TestDataFactory
@@ -309,13 +311,25 @@ class FirmwareUpdateViewModelTest {
 
     @Test
     fun `checkForUpdates sets error when hardware lookup fails`() = runTest {
+        advanceUntilIdle()
+        assertIs<FirmwareUpdateState.Ready>(viewModel.state.value)
+        assertEquals("1.0.0", viewModel.selectedRelease.value?.title)
+        assertIs<DeviceHardware>(viewModel.deviceHardware.value)
+        assertEquals("0.9.0", viewModel.currentFirmwareVersion.value)
+
+        every { firmwareReleaseRepository.stableRelease } returns flow { error("cache read failed") }
         everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any(), any()) } returns
             Result.failure(IllegalStateException("Unknown hardware"))
 
-        viewModel = createViewModel()
+        viewModel.checkForUpdates()
         advanceUntilIdle()
 
-        assertIs<FirmwareUpdateState.Error>(viewModel.state.value)
+        assertEquals(null, viewModel.selectedRelease.value)
+        assertEquals(null, viewModel.deviceHardware.value)
+        assertEquals(null, viewModel.currentFirmwareVersion.value)
+        val errorState = assertIs<FirmwareUpdateState.Error>(viewModel.state.value)
+        val error = assertIs<UiText.Resource>(errorState.error)
+        assertEquals(Res.string.firmware_update_unknown_hardware, error.res)
     }
 
     @Test
@@ -428,5 +442,38 @@ class FirmwareUpdateViewModelTest {
         assertTrue(state.isRecovery, "Expected recovery Ready but was $state")
         assertEquals("1234abcd", state.address) // fullAddress.drop(1)
         assertIs<FirmwareUpdateMethod.Ble>(state.updateMethod)
+    }
+
+    @Test
+    fun `recovery hardware lookup failure clears stale device metadata`() = runTest {
+        advanceUntilIdle()
+        assertIs<FirmwareUpdateState.Ready>(viewModel.state.value)
+        assertEquals("1.0.0", viewModel.selectedRelease.value?.title)
+        assertIs<DeviceHardware>(viewModel.deviceHardware.value)
+        assertEquals("0.9.0", viewModel.currentFirmwareVersion.value)
+
+        every { radioPrefs.devAddr } returns MutableStateFlow(null)
+        every { firmwareRecoveryDataSource.pending } returns
+            flowOf(
+                PendingFirmwareRecovery(
+                    fullAddress = "x1234abcd",
+                    hwModel = 999,
+                    pioEnv = "unknown",
+                    releaseType = "STABLE",
+                    deviceName = "Stale Node",
+                ),
+            )
+        everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any(), any()) } returns
+            Result.failure(IllegalStateException("Unknown hardware"))
+
+        viewModel.checkForUpdates()
+        advanceUntilIdle()
+
+        assertEquals(null, viewModel.selectedRelease.value)
+        assertEquals(null, viewModel.deviceHardware.value)
+        assertEquals(null, viewModel.currentFirmwareVersion.value)
+        val errorState = assertIs<FirmwareUpdateState.Error>(viewModel.state.value)
+        val error = assertIs<UiText.Resource>(errorState.error)
+        assertEquals(Res.string.firmware_update_unknown_hardware, error.res)
     }
 }
