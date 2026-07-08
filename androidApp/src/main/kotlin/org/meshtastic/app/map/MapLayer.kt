@@ -19,6 +19,7 @@ package org.meshtastic.app.map
 import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
+import co.touchlab.kermit.Logger
 import org.meshtastic.core.common.util.nowMillis
 import kotlin.uuid.Uuid
 
@@ -60,18 +61,27 @@ fun resolveLayerType(extensionOrMime: String?): LayerType? = when (extensionOrMi
     else -> null
 }
 
-/** Resolve a display file name for [this] URI, querying the content resolver for `content://` URIs. */
+/**
+ * Resolve a display file name for [this] URI, querying the content resolver for `content://` URIs. Untrusted providers
+ * (share/open-with from other apps) can throw or return a null display name, so guard both and fall back to the URI's
+ * last path segment.
+ */
 @Suppress("NestedBlockDepth")
 fun Uri.getFileName(context: Context): String {
     var name = lastPathSegment ?: "layer_$nowMillis"
     if (scheme == "content") {
-        context.contentResolver.query(this, null, null, null, null)?.use { cursor ->
-            if (cursor.moveToFirst()) {
-                val displayNameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-                if (displayNameIndex != -1) {
-                    name = cursor.getString(displayNameIndex)
+        try {
+            context.contentResolver.query(this, null, null, null, null)?.use { cursor ->
+                if (cursor.moveToFirst()) {
+                    val displayNameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                    if (displayNameIndex != -1) {
+                        cursor.getString(displayNameIndex)?.let { name = it }
+                    }
                 }
             }
+        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+            // Keep the lastPathSegment fallback assigned above rather than crashing the import.
+            Logger.withTag("MapLayer").w(e) { "Failed to resolve display name for content URI; using fallback" }
         }
     }
     return name

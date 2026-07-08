@@ -144,10 +144,13 @@ class MapLayersManager(
                 return@launch
             }
 
-            val finalFileName = if (fileName != null) "$layerName.$extension" else "layer_${Uuid.random()}.$extension"
+            // Sanitize the on-disk name: fileName comes from an untrusted DISPLAY_NAME/lastPathSegment (share/open-with
+            // from other apps), so strip anything that could let it escape map_layers/ (mirrors addGeoJsonLayer).
+            val safeBase = layerName.replace(FILE_NAME_UNSAFE, "_")
+            val finalFileName = if (fileName != null) "$safeBase.$extension" else "layer_${Uuid.random()}.$extension"
             val localFileUri = copyFileToInternalStorage(uri, finalFileName)
             if (localFileUri != null) {
-                _mapLayers.value += MapLayerItem(name = layerName, uri = localFileUri, layerType = layerType)
+                _mapLayers.update { it + MapLayerItem(name = layerName, uri = localFileUri, layerType = layerType) }
             } else {
                 Logger.withTag(TAG).e("Failed to copy file to internal storage.")
             }
@@ -161,10 +164,10 @@ class MapLayersManager(
     fun addGeoJsonLayer(name: String, geoJson: String) {
         scope.launch {
             val displayName = name.ifBlank { "Coverage" }
-            val safeFileName = displayName.replace(Regex("[^A-Za-z0-9._-]"), "_")
+            val safeFileName = displayName.replace(FILE_NAME_UNSAFE, "_")
             val uri = writeStringToInternalStorage(geoJson, "${safeFileName}_${Uuid.random()}.geojson")
             if (uri != null) {
-                _mapLayers.value += MapLayerItem(name = displayName, uri = uri, layerType = LayerType.GEOJSON)
+                _mapLayers.update { it + MapLayerItem(name = displayName, uri = uri, layerType = LayerType.GEOJSON) }
             } else {
                 Logger.withTag(TAG).e("Failed to write GeoJSON layer to internal storage.")
             }
@@ -187,20 +190,20 @@ class MapLayersManager(
         val layerType = if (path.endsWith(".geojson") || path.endsWith(".json")) LayerType.GEOJSON else LayerType.KML
 
         val newItem = MapLayerItem(name = name, uri = uri, layerType = layerType, isNetwork = true)
-        _mapLayers.value += newItem
+        _mapLayers.update { it + newItem }
         val encoded = listOf(newItem.id, newItem.name, newItem.uri).joinToString(NETWORK_LAYER_DELIMITER)
         mapPrefs.setNetworkMapLayers(mapPrefs.networkMapLayers.value + encoded)
         return null
     }
 
     fun toggleLayerVisibility(layerId: String) {
-        val current = _mapLayers.value.find { it.id == layerId } ?: return
-        val toggled = current.copy(isVisible = !current.isVisible)
-        _mapLayers.value = _mapLayers.value.map { if (it.id == layerId) toggled else it }
+        val target = _mapLayers.value.find { it.id == layerId } ?: return
+        val nowVisible = !target.isVisible
+        _mapLayers.update { layers -> layers.map { if (it.id == layerId) it.copy(isVisible = nowVisible) else it } }
 
-        val uri = toggled.uri?.toString() ?: return
+        val uri = target.uri?.toString() ?: return
         val hidden = mapPrefs.hiddenLayerUrls.value
-        mapPrefs.setHiddenLayerUrls(if (toggled.isVisible) hidden - uri else hidden + uri)
+        mapPrefs.setHiddenLayerUrls(if (nowVisible) hidden - uri else hidden + uri)
     }
 
     fun removeMapLayer(layerId: String) {
@@ -218,7 +221,7 @@ class MapLayersManager(
                 }
                 mapPrefs.setHiddenLayerUrls(mapPrefs.hiddenLayerUrls.value - uri.toString())
             }
-            _mapLayers.value = _mapLayers.value.filterNot { it.id == layerId }
+            _mapLayers.update { layers -> layers.filterNot { it.id == layerId } }
         }
     }
 
@@ -240,7 +243,10 @@ class MapLayersManager(
                 if (layerItem.isNetwork && (uriToLoad.scheme == "http" || uriToLoad.scheme == "https")) {
                     val response = httpClient.get(uriToLoad.toString())
                     if (!response.status.isSuccess()) {
-                        Logger.withTag(TAG).e { "HTTP ${response.status} fetching layer: $uriToLoad" }
+                        // Log only host, not the full URL (paths can carry user-identifying info).
+                        Logger.withTag(TAG).e {
+                            "HTTP ${response.status} fetching network layer from ${uriToLoad.host}"
+                        }
                         return@withContext null
                     }
                     response.bodyAsChannel().toInputStream()
@@ -248,7 +254,8 @@ class MapLayersManager(
                     application.contentResolver.openInputStream(uriToLoad)
                 }
             } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-                Logger.withTag(TAG).e(e) { "Error opening InputStream from URI: $uriToLoad" }
+                // Redact the URI: a content:///file:// path can include a user-chosen file name.
+                Logger.withTag(TAG).e(e) { "Error opening InputStream for layer (scheme=${uriToLoad.scheme})" }
                 null
             }
         }
@@ -256,10 +263,12 @@ class MapLayersManager(
 
     private suspend fun copyFileToInternalStorage(uri: Uri, fileName: String): Uri? = withContext(dispatchers.io) {
         try {
-            val inputStream = application.contentResolver.openInputStream(uri)
+            // openInputStream can return null (documented) — fail rather than return a Uri for a file never
+            // written.
+            val inputStream = application.contentResolver.openInputStream(uri) ?: return@withContext null
             val directory = File(application.filesDir, LAYERS_DIR).apply { if (!exists()) mkdirs() }
             val outputFile = File(directory, fileName)
-            inputStream?.use { input -> FileOutputStream(outputFile).use { output -> input.copyTo(output) } }
+            inputStream.use { input -> FileOutputStream(outputFile).use { output -> input.copyTo(output) } }
             Uri.fromFile(outputFile)
         } catch (e: IOException) {
             Logger.withTag(TAG).e(e) { "Error copying file to internal storage" }
@@ -296,5 +305,8 @@ class MapLayersManager(
         const val LAYERS_DIR = "map_layers"
         const val NETWORK_LAYER_DELIMITER = "|:|"
         const val NETWORK_LAYER_FIELDS = 3 // id|:|name|:|uri
+
+        // Characters not allowed in an on-disk layer file name; strips path separators so imports can't traverse.
+        val FILE_NAME_UNSAFE = Regex("[^A-Za-z0-9._-]")
     }
 }
