@@ -197,6 +197,8 @@ client_notification
 close
 close_selection
 co2
+co2_humidity
+co2_temperature
 codec_2_enabled
 codec2_sample_rate
 coding_rate
