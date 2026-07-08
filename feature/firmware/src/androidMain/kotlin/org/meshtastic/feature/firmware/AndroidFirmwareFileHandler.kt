@@ -17,6 +17,7 @@
 package org.meshtastic.feature.firmware
 
 import android.content.Context
+import android.provider.OpenableColumns
 import co.touchlab.kermit.Logger
 import com.eygraber.uri.toAndroidUri
 import io.ktor.client.HttpClient
@@ -134,7 +135,7 @@ class AndroidFirmwareFileHandler(private val context: Context, private val clien
         preferredFilename: String?,
     ): FirmwareArtifact? = withContext(ioDispatcher) {
         val localZipFile = zipFile.toLocalFileOrNull() ?: return@withContext null
-        val target = hardware.platformioTarget.ifEmpty { hardware.hwModelSlug }
+        val target = hardware.effectiveTarget
         if (target.isEmpty() && preferredFilename == null) return@withContext null
 
         val targetLowerCase = target.lowercase()
@@ -169,6 +170,8 @@ class AndroidFirmwareFileHandler(private val context: Context, private val clien
                 entry = zipInput.nextEntry
             }
         }
+        // Prefer the shortest matching entry name — official release bundles contain one
+        // matching firmware per target; the heuristic picks the canonical name if multiple match.
         matchingEntries.minByOrNull { it.first.name.length }?.second?.toFirmwareArtifact()
     }
 
@@ -178,7 +181,7 @@ class AndroidFirmwareFileHandler(private val context: Context, private val clien
         fileExtension: String,
         preferredFilename: String?,
     ): FirmwareArtifact? = withContext(ioDispatcher) {
-        val target = hardware.platformioTarget.ifEmpty { hardware.hwModelSlug }
+        val target = hardware.effectiveTarget
         if (target.isEmpty() && preferredFilename == null) return@withContext null
 
         val targetLowerCase = target.lowercase()
@@ -253,6 +256,37 @@ class AndroidFirmwareFileHandler(private val context: Context, private val clien
         tempFile.parentFile?.mkdirs()
         inputStream.use { input -> tempFile.outputStream().use { output -> input.copyTo(output) } }
         tempFile.toFirmwareArtifact()
+    }
+
+    override suspend fun getDisplayName(uri: CommonUri): String? = withContext(ioDispatcher) {
+        val platformUri = uri.toAndroidUri()
+        if (platformUri.scheme == "content") {
+            // query() can throw SecurityException (revoked permission) or IllegalArgumentException
+            // (malformed URI) even after the scheme guard; fall through to the file-scheme branch on failure.
+            runCatching {
+                context.contentResolver.query(
+                    platformUri,
+                    arrayOf(OpenableColumns.DISPLAY_NAME),
+                    null,
+                    null,
+                    null,
+                )
+            }
+                .onFailure { e -> Logger.w(e) { "Failed to query display name from content provider" } }
+                .getOrNull()
+                ?.use { cursor ->
+                    val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                    if (nameIndex >= 0 && cursor.moveToFirst()) {
+                        cursor
+                            .getString(nameIndex)
+                            ?.takeIf { it.isNotBlank() }
+                            ?.let {
+                                return@withContext it
+                            }
+                    }
+                }
+        }
+        if (platformUri.scheme == "file") uri.pathSegments.lastOrNull()?.takeIf { it.isNotBlank() } else null
     }
 
     override suspend fun extractZipEntries(artifact: FirmwareArtifact): Map<String, ByteArray> =

@@ -168,6 +168,19 @@ class JvmFirmwareFileHandler(private val client: HttpClient) : FirmwareFileHandl
         dest.toFirmwareArtifact()
     }
 
+    override suspend fun getDisplayName(uri: CommonUri): String? = withContext(ioDispatcher) {
+        val localFile = uri.toLocalFileOrNull()
+        localFile?.name?.takeIf { it.isNotBlank() }
+            ?: run {
+                val scheme = runCatching { URI(uri.toString()).scheme }.getOrNull()
+                if (scheme == "file") {
+                    uri.pathSegments.lastOrNull()?.takeIf { it.isNotBlank() }
+                } else {
+                    null
+                }
+            }
+    }
+
     override suspend fun extractZipEntries(artifact: FirmwareArtifact): Map<String, ByteArray> =
         withContext(ioDispatcher) {
             val entries = mutableMapOf<String, ByteArray>()
@@ -201,7 +214,7 @@ class JvmFirmwareFileHandler(private val client: HttpClient) : FirmwareFileHandl
         fileExtension: String,
         preferredFilename: String?,
     ): FirmwareArtifact? {
-        val target = hardware.platformioTarget.ifEmpty { hardware.hwModelSlug }
+        val target = hardware.effectiveTarget
         if (target.isEmpty() && preferredFilename == null) return null
 
         val targetLowerCase = target.lowercase()
