@@ -77,6 +77,7 @@ private const val SITE_PLANNER_TIMEOUT_MS = 45_000L
  * ([onUseMapCenter]). Google-flavor affordance; targets the official hosted planner.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Suppress("LongMethod", "LambdaParameterInRestartableEffect")
 @Composable
 fun SitePlannerHost(
     initialParams: SitePlannerParams,

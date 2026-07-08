@@ -22,7 +22,6 @@ import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.core.stringSetPreferencesKey
 import com.google.maps.android.compose.MapType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -45,10 +44,6 @@ interface GoogleMapsPrefs {
 
     fun setSelectedCustomTileUrl(value: String?)
 
-    val hiddenLayerUrls: StateFlow<Set<String>>
-
-    fun setHiddenLayerUrls(value: Set<String>)
-
     val cameraTargetLat: StateFlow<Double>
 
     fun setCameraTargetLat(value: Double)
@@ -68,10 +63,6 @@ interface GoogleMapsPrefs {
     val cameraBearing: StateFlow<Float>
 
     fun setCameraBearing(value: Float)
-
-    val networkMapLayers: StateFlow<Set<String>>
-
-    fun setNetworkMapLayers(value: Set<String>)
 }
 
 @Single
@@ -111,15 +102,6 @@ class GoogleMapsPrefsImpl(
                 }
             }
         }
-    }
-
-    override val hiddenLayerUrls: StateFlow<Set<String>> =
-        dataStore.data
-            .map { it[KEY_HIDDEN_LAYER_URLS_PREF] ?: emptySet() }
-            .stateIn(scope, SharingStarted.Eagerly, emptySet())
-
-    override fun setHiddenLayerUrls(value: Set<String>) {
-        scope.launch { dataStore.edit { it[KEY_HIDDEN_LAYER_URLS_PREF] = value } }
     }
 
     override val cameraTargetLat: StateFlow<Double> =
@@ -173,24 +155,13 @@ class GoogleMapsPrefsImpl(
         scope.launch { dataStore.edit { it[KEY_CAMERA_BEARING_PREF] = value } }
     }
 
-    override val networkMapLayers: StateFlow<Set<String>> =
-        dataStore.data
-            .map { it[KEY_NETWORK_MAP_LAYERS_PREF] ?: emptySet() }
-            .stateIn(scope, SharingStarted.Eagerly, emptySet())
-
-    override fun setNetworkMapLayers(value: Set<String>) {
-        scope.launch { dataStore.edit { it[KEY_NETWORK_MAP_LAYERS_PREF] = value } }
-    }
-
     companion object {
         val KEY_SELECTED_GOOGLE_MAP_TYPE_PREF = stringPreferencesKey("selected_google_map_type")
         val KEY_SELECTED_CUSTOM_TILE_URL_PREF = stringPreferencesKey("selected_custom_tile_url")
-        val KEY_HIDDEN_LAYER_URLS_PREF = stringSetPreferencesKey("hidden_layer_urls")
         val KEY_CAMERA_TARGET_LAT_PREF = doublePreferencesKey("camera_target_lat")
         val KEY_CAMERA_TARGET_LNG_PREF = doublePreferencesKey("camera_target_lng")
         val KEY_CAMERA_ZOOM_PREF = floatPreferencesKey("camera_zoom")
         val KEY_CAMERA_TILT_PREF = floatPreferencesKey("camera_tilt")
         val KEY_CAMERA_BEARING_PREF = floatPreferencesKey("camera_bearing")
-        val KEY_NETWORK_MAP_LAYERS_PREF = stringSetPreferencesKey("network_map_layers")
     }
 }

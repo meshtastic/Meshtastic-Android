@@ -28,11 +28,6 @@ import com.google.android.gms.maps.model.TileProvider
 import com.google.android.gms.maps.model.UrlTileProvider
 import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.MapType
-import io.ktor.client.HttpClient
-import io.ktor.client.request.get
-import io.ktor.client.statement.bodyAsChannel
-import io.ktor.http.isSuccess
-import io.ktor.utils.io.jvm.javaio.toInputStream
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,12 +36,10 @@ import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import org.koin.core.annotation.KoinViewModel
-import org.meshtastic.app.MapFileImportBus
 import org.meshtastic.app.map.model.CustomTileProviderConfig
 import org.meshtastic.app.map.prefs.map.GoogleMapsPrefs
 import org.meshtastic.app.map.repository.CustomTileProviderRepository
@@ -86,7 +79,7 @@ data class MapCameraPosition(
 class MapViewModel(
     private val application: Application,
     private val dispatchers: CoroutineDispatchers,
-    private val httpClient: HttpClient,
+    private val mapLayersManager: MapLayersManager,
     mapPrefs: MapPrefs,
     private val googleMapsPrefs: GoogleMapsPrefs,
     nodeRepository: NodeRepository,
@@ -366,23 +359,13 @@ class MapViewModel(
         urlTemplate.contains("{x}", ignoreCase = true) &&
         urlTemplate.contains("{y}", ignoreCase = true)
 
-    private val _mapLayers = MutableStateFlow<List<MapLayerItem>>(emptyList())
-    val mapLayers: StateFlow<List<MapLayerItem>> = _mapLayers.asStateFlow()
+    /** Imported overlay layers; owned by the flavor-neutral [MapLayersManager] and rendered by [MapLayerOverlay]. */
+    val mapLayers: StateFlow<List<MapLayerItem>> = mapLayersManager.mapLayers
 
     init {
         viewModelScope.launch {
             customTileProviderRepository.getCustomTileProviders().first()
             loadPersistedMapType()
-        }
-        loadPersistedLayers()
-
-        // Import a map file handed to us via an "Open in / Send to Meshtastic" intent (see MapFileImportBus).
-        viewModelScope.launch {
-            MapFileImportBus.pending.collect { uri ->
-                uri ?: return@collect
-                MapFileImportBus.pending.value = null
-                addMapLayer(uri, uri.getFileName(application))
-            }
         }
 
         selectedWaypointId.value?.let { wpId ->
@@ -436,153 +419,11 @@ class MapViewModel(
         }
     }
 
-    private fun loadPersistedLayers() {
-        viewModelScope.launch(dispatchers.io) {
-            try {
-                val layersDir = File(application.filesDir, "map_layers")
-                if (layersDir.exists() && layersDir.isDirectory) {
-                    val persistedLayerFiles = layersDir.listFiles()
-
-                    if (persistedLayerFiles != null) {
-                        val hiddenLayerUrls = googleMapsPrefs.hiddenLayerUrls.value
-                        val loadedItems =
-                            persistedLayerFiles.mapNotNull { file ->
-                                if (file.isFile) {
-                                    val layerType =
-                                        when (file.extension.lowercase()) {
-                                            "kml",
-                                            "kmz",
-                                            -> LayerType.KML
-
-                                            "geojson",
-                                            "json",
-                                            -> LayerType.GEOJSON
-
-                                            else -> null
-                                        }
-
-                                    layerType?.let {
-                                        val uri = Uri.fromFile(file)
-                                        MapLayerItem(
-                                            name = file.nameWithoutExtension,
-                                            uri = uri,
-                                            isVisible = !hiddenLayerUrls.contains(uri.toString()),
-                                            layerType = it,
-                                        )
-                                    }
-                                } else {
-                                    null
-                                }
-                            }
-
-                        val networkItems =
-                            googleMapsPrefs.networkMapLayers.value.mapNotNull { networkString ->
-                                try {
-                                    val parts = networkString.split("|:|")
-                                    if (parts.size == 3) {
-                                        val id = parts[0]
-                                        val name = parts[1]
-                                        val uri = Uri.parse(parts[2])
-                                        MapLayerItem(
-                                            id = id,
-                                            name = name,
-                                            uri = uri,
-                                            isVisible = !hiddenLayerUrls.contains(uri.toString()),
-                                            layerType = LayerType.KML,
-                                            isNetwork = true,
-                                        )
-                                    } else {
-                                        null
-                                    }
-                                } catch (e: Exception) {
-                                    null
-                                }
-                            }
-
-                        _mapLayers.value = loadedItems + networkItems
-                        if (_mapLayers.value.isNotEmpty()) {
-                            Logger.withTag("MapViewModel").i("Loaded ${_mapLayers.value.size} persisted map layers.")
-                        }
-                    }
-                } else {
-                    Logger.withTag("MapViewModel").i("Map layers directory does not exist. No layers loaded.")
-                }
-            } catch (e: Exception) {
-                Logger.withTag("MapViewModel").e(e) { "Error loading persisted map layers" }
-                _mapLayers.value = emptyList()
-            }
-        }
-    }
-
-    fun addMapLayer(uri: Uri, fileName: String?) {
-        viewModelScope.launch {
-            val layerName = fileName?.substringBeforeLast('.') ?: "Layer ${mapLayers.value.size + 1}"
-
-            val extension =
-                fileName?.substringAfterLast('.', "")?.lowercase()
-                    ?: application.contentResolver.getType(uri)?.split('/')?.last()
-
-            val kmlExtensions = listOf("kml", "kmz", "vnd.google-earth.kml+xml", "vnd.google-earth.kmz")
-            val geoJsonExtensions = listOf("geojson", "json")
-
-            val layerType =
-                when (extension) {
-                    in kmlExtensions -> LayerType.KML
-                    in geoJsonExtensions -> LayerType.GEOJSON
-                    else -> null
-                }
-
-            if (layerType == null) {
-                Logger.withTag("MapViewModel").e("Unsupported map layer file type: $extension")
-                return@launch
-            }
-
-            val finalFileName =
-                if (fileName != null) {
-                    "$layerName.$extension"
-                } else {
-                    "layer_${Uuid.random()}.$extension"
-                }
-
-            val localFileUri = copyFileToInternalStorage(uri, finalFileName)
-
-            if (localFileUri != null) {
-                val newItem = MapLayerItem(name = layerName, uri = localFileUri, layerType = layerType)
-                _mapLayers.value = _mapLayers.value + newItem
-            } else {
-                Logger.withTag("MapViewModel").e("Failed to copy file to internal storage.")
-            }
-        }
-    }
+    fun addMapLayer(uri: Uri, fileName: String?) = mapLayersManager.addMapLayer(uri, fileName)
 
     fun addNetworkMapLayer(name: String, url: String) {
-        viewModelScope.launch {
-            if (name.isBlank() || url.isBlank()) {
-                _errorFlow.emit("Invalid name or URL for network layer.")
-                return@launch
-            }
-            try {
-                val uri = Uri.parse(url)
-                if (uri.scheme != "http" && uri.scheme != "https") {
-                    _errorFlow.emit("URL must be http or https.")
-                    return@launch
-                }
-
-                val path = uri.path?.lowercase() ?: ""
-                val layerType =
-                    when {
-                        path.endsWith(".geojson") || path.endsWith(".json") -> LayerType.GEOJSON
-                        else -> LayerType.KML // Default to KML
-                    }
-
-                val newItem = MapLayerItem(name = name, uri = uri, layerType = layerType, isNetwork = true)
-                _mapLayers.value = _mapLayers.value + newItem
-
-                val networkLayerString = "${newItem.id}|:|${newItem.name}|:|${newItem.uri}"
-                googleMapsPrefs.setNetworkMapLayers(googleMapsPrefs.networkMapLayers.value + networkLayerString)
-            } catch (e: Exception) {
-                _errorFlow.emit("Invalid URL.")
-            }
+        mapLayersManager.addNetworkMapLayer(name, url)?.let { error ->
+            viewModelScope.launch { _errorFlow.emit(error) }
         }
     }
 
@@ -604,88 +445,15 @@ class MapViewModel(
         }
     }
 
-    /**
-     * Import a GeoJSON string (e.g. handed back by the Site Planner headless bridge) as a visible local overlay,
-     * reusing the same internal-storage-backed layer plumbing as file imports.
-     */
-    fun addGeoJsonLayer(name: String, geoJson: String) {
-        viewModelScope.launch {
-            val displayName = name.ifBlank { "Coverage" }
-            val safeFileName = displayName.replace(Regex("[^A-Za-z0-9._-]"), "_")
-            val uri = writeStringToInternalStorage(geoJson, "${safeFileName}_${Uuid.random()}.geojson")
-            if (uri != null) {
-                _mapLayers.value =
-                    _mapLayers.value + MapLayerItem(name = displayName, uri = uri, layerType = LayerType.GEOJSON)
-            } else {
-                Logger.withTag("MapViewModel").e("Failed to write GeoJSON layer to internal storage.")
-            }
-        }
-    }
+    fun addGeoJsonLayer(name: String, geoJson: String) = mapLayersManager.addGeoJsonLayer(name, geoJson)
 
-    private suspend fun writeStringToInternalStorage(content: String, fileName: String): Uri? =
-        withContext(dispatchers.io) {
-            try {
-                val directory = File(application.filesDir, "map_layers").apply { if (!exists()) mkdirs() }
-                val outputFile = File(directory, fileName)
-                outputFile.writeText(content)
-                Uri.fromFile(outputFile)
-            } catch (e: IOException) {
-                Logger.withTag("MapViewModel").e(e) { "Error writing GeoJSON to internal storage" }
-                null
-            }
-        }
+    fun toggleLayerVisibility(layerId: String) = mapLayersManager.toggleLayerVisibility(layerId)
 
-    fun toggleLayerVisibility(layerId: String) {
-        var toggledLayer: MapLayerItem? = null
-        val updatedLayers =
-            _mapLayers.value.map {
-                if (it.id == layerId) {
-                    toggledLayer = it.copy(isVisible = !it.isVisible)
-                    toggledLayer
-                } else {
-                    it
-                }
-            }
-        _mapLayers.value = updatedLayers
+    fun removeMapLayer(layerId: String) = mapLayersManager.removeMapLayer(layerId)
 
-        toggledLayer?.let {
-            if (it.isVisible) {
-                googleMapsPrefs.setHiddenLayerUrls(googleMapsPrefs.hiddenLayerUrls.value - it.uri.toString())
-            } else {
-                googleMapsPrefs.setHiddenLayerUrls(googleMapsPrefs.hiddenLayerUrls.value + it.uri.toString())
-            }
-        }
-    }
+    fun refreshMapLayer(layerId: String) = mapLayersManager.refreshMapLayer(layerId)
 
-    fun removeMapLayer(layerId: String) {
-        viewModelScope.launch {
-            val layerToRemove = _mapLayers.value.find { it.id == layerId }
-            layerToRemove?.uri?.let { uri ->
-                if (layerToRemove.isNetwork) {
-                    googleMapsPrefs.setNetworkMapLayers(
-                        googleMapsPrefs.networkMapLayers.value.filterNot { it.startsWith("$layerId|:|") }.toSet(),
-                    )
-                } else {
-                    deleteFileToInternalStorage(uri)
-                }
-                googleMapsPrefs.setHiddenLayerUrls(googleMapsPrefs.hiddenLayerUrls.value - uri.toString())
-            }
-            _mapLayers.value = _mapLayers.value.filterNot { it.id == layerId }
-        }
-    }
-
-    fun refreshMapLayer(layerId: String) {
-        viewModelScope.launch {
-            _mapLayers.update { layers -> layers.map { if (it.id == layerId) it.copy(isRefreshing = true) else it } }
-            // By resetting the layer data in the UI (implied by just refreshing),
-            // we trigger a reload in the Composable.
-            _mapLayers.update { layers -> layers.map { if (it.id == layerId) it.copy(isRefreshing = false) else it } }
-        }
-    }
-
-    fun refreshAllVisibleNetworkLayers() {
-        _mapLayers.value.filter { it.isNetwork && it.isVisible }.forEach { refreshMapLayer(it.id) }
-    }
+    fun refreshAllVisibleNetworkLayers() = mapLayersManager.refreshAllVisibleNetworkLayers()
 
     private suspend fun deleteFileToInternalStorage(uri: Uri) {
         withContext(dispatchers.io) {
@@ -700,27 +468,8 @@ class MapViewModel(
         }
     }
 
-    @Suppress("Recycle")
-    suspend fun getInputStreamFromUri(layerItem: MapLayerItem): InputStream? {
-        val uriToLoad = layerItem.uri ?: return null
-        return withContext(dispatchers.io) {
-            try {
-                if (layerItem.isNetwork && (uriToLoad.scheme == "http" || uriToLoad.scheme == "https")) {
-                    val response = httpClient.get(uriToLoad.toString())
-                    if (!response.status.isSuccess()) {
-                        Logger.withTag("MapViewModel").e { "HTTP ${response.status} fetching layer: $uriToLoad" }
-                        return@withContext null
-                    }
-                    response.bodyAsChannel().toInputStream()
-                } else {
-                    application.contentResolver.openInputStream(uriToLoad)
-                }
-            } catch (e: Exception) {
-                Logger.withTag("MapViewModel").e(e) { "Error opening InputStream from URI: $uriToLoad" }
-                null
-            }
-        }
-    }
+    suspend fun getInputStreamFromUri(layerItem: MapLayerItem): InputStream? =
+        mapLayersManager.getInputStreamFromUri(layerItem)
 
     override fun onCleared() {
         super.onCleared()
@@ -729,18 +478,3 @@ class MapViewModel(
 
     override fun getUser(userId: String?) = nodeRepository.getUser(userId ?: NodeAddress.ID_BROADCAST)
 }
-
-enum class LayerType {
-    KML,
-    GEOJSON,
-}
-
-data class MapLayerItem(
-    val id: String = Uuid.random().toString(),
-    val name: String,
-    val uri: Uri? = null,
-    val isVisible: Boolean = true,
-    val layerType: LayerType,
-    val isNetwork: Boolean = false,
-    val isRefreshing: Boolean = false,
-)

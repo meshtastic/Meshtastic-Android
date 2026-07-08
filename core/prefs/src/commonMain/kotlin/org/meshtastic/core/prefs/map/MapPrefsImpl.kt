@@ -22,6 +22,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
@@ -83,6 +84,24 @@ class MapPrefsImpl(
         scope.launch { dataStore.edit { it[KEY_LAST_HEARD_TRACK_FILTER_PREF] = seconds } }
     }
 
+    override val hiddenLayerUrls: StateFlow<Set<String>> =
+        dataStore.data
+            .map { it[KEY_HIDDEN_LAYER_URLS_PREF] ?: emptySet() }
+            .stateIn(scope, SharingStarted.Eagerly, emptySet())
+
+    override fun setHiddenLayerUrls(value: Set<String>) {
+        scope.launch { dataStore.edit { it[KEY_HIDDEN_LAYER_URLS_PREF] = value } }
+    }
+
+    override val networkMapLayers: StateFlow<Set<String>> =
+        dataStore.data
+            .map { it[KEY_NETWORK_MAP_LAYERS_PREF] ?: emptySet() }
+            .stateIn(scope, SharingStarted.Eagerly, emptySet())
+
+    override fun setNetworkMapLayers(value: Set<String>) {
+        scope.launch { dataStore.edit { it[KEY_NETWORK_MAP_LAYERS_PREF] = value } }
+    }
+
     companion object {
         val KEY_MAP_STYLE_PREF = intPreferencesKey("map_style_id")
         val KEY_SHOW_ONLY_FAVORITES_PREF = booleanPreferencesKey("show_only_favorites")
@@ -90,5 +109,7 @@ class MapPrefsImpl(
         val KEY_SHOW_PRECISION_CIRCLE_PREF = booleanPreferencesKey("show_precision_circle")
         val KEY_LAST_HEARD_FILTER_PREF = longPreferencesKey("last_heard_filter")
         val KEY_LAST_HEARD_TRACK_FILTER_PREF = longPreferencesKey("last_heard_track_filter")
+        val KEY_HIDDEN_LAYER_URLS_PREF = stringSetPreferencesKey("hidden_layer_urls")
+        val KEY_NETWORK_MAP_LAYERS_PREF = stringSetPreferencesKey("network_map_layers")
     }
 }

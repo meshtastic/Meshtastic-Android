@@ -16,6 +16,10 @@
  */
 package org.meshtastic.app.map
 
+import android.app.Activity
+import android.content.Intent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -45,12 +49,14 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -79,6 +85,7 @@ import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.app.R
 import org.meshtastic.app.map.cluster.RadiusMarkerClusterer
 import org.meshtastic.app.map.component.CacheLayout
+import org.meshtastic.app.map.component.CustomMapLayersSheet
 import org.meshtastic.app.map.component.DownloadButton
 import org.meshtastic.app.map.model.CustomTileSource
 import org.meshtastic.app.map.model.MarkerWithLabel
@@ -104,6 +111,7 @@ import org.meshtastic.core.resources.geofence_box_author_hint_viewport
 import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.last_heard_filter_label
 import org.meshtastic.core.resources.location_disabled
+import org.meshtastic.core.resources.manage_map_layers
 import org.meshtastic.core.resources.map_cache_info
 import org.meshtastic.core.resources.map_cache_manager
 import org.meshtastic.core.resources.map_cache_size
@@ -132,6 +140,7 @@ import org.meshtastic.core.ui.icon.Check
 import org.meshtastic.core.ui.icon.Favorite
 import org.meshtastic.core.ui.icon.Layers
 import org.meshtastic.core.ui.icon.Lens
+import org.meshtastic.core.ui.icon.Map
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.PinDrop
 import org.meshtastic.core.ui.util.PermissionStatus
@@ -143,6 +152,7 @@ import org.meshtastic.feature.map.LastHeardFilter
 import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.component.MapButton
 import org.meshtastic.feature.map.component.MapControlsOverlay
+import org.meshtastic.feature.map.component.SitePlannerParams
 import org.meshtastic.feature.map.component.WaypointInfoDialog
 import org.meshtastic.proto.Waypoint
 import org.osmdroid.bonuspack.utils.BonusPackHelper.getBitmapFromVectorDrawable
@@ -229,6 +239,7 @@ private fun cacheManagerCallback(onTaskComplete: () -> Unit, onTaskFailed: (Int)
  * @param navigateToNodeDetails Callback to navigate to the details screen of a selected node.
  */
 @Suppress("CyclomaticComplexMethod", "LongMethod")
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapView(
     modifier: Modifier = Modifier,
@@ -300,6 +311,44 @@ fun MapView(
         )
 
     val nodeClusterer = remember { RadiusMarkerClusterer(context) }
+
+    // --- Imported map layers (GeoJSON/KML overlays) — shared model/logic, F-Droid OSMdroid render ---
+    val mapLayers by mapViewModel.mapLayers.collectAsStateWithLifecycle()
+    val layerRenderer = remember { FdroidMapOverlayRenderer() }
+    var showLayersBottomSheet by remember { mutableStateOf(false) }
+    var sitePlannerInitial by remember { mutableStateOf<SitePlannerParams?>(null) }
+    val ourNodeInfo by mapViewModel.ourNodeInfo.collectAsStateWithLifecycle()
+    val channelSet by mapViewModel.channelSet.collectAsStateWithLifecycle()
+
+    val filePickerLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                result.data?.data?.let { uri -> mapViewModel.addMapLayer(uri, uri.getFileName(context)) }
+            }
+        }
+    val onAddLayerClicked = {
+        val intent =
+            Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                addCategory(Intent.CATEGORY_OPENABLE)
+                type = "*/*"
+                putExtra(
+                    Intent.EXTRA_MIME_TYPES,
+                    arrayOf(
+                        "application/vnd.google-earth.kml+xml",
+                        "application/vnd.google-earth.kmz",
+                        "application/vnd.geo+json",
+                        "application/geo+json",
+                        "application/json",
+                    ),
+                )
+            }
+        filePickerLauncher.launch(intent)
+    }
+
+    // Draw imported layers on the OSMdroid map, reconciling whenever the list changes; strip them on dispose (the
+    // MapView is kept alive by setDestroyMode(false), so leftover overlays would otherwise persist).
+    LaunchedEffect(mapLayers) { layerRenderer.reconcile(map, mapLayers, mapViewModel::getInputStreamFromUri) }
+    DisposableEffect(Unit) { onDispose { layerRenderer.removeAll(map) } }
 
     fun MapView.toggleMyLocation() {
         if (context.gpsDisabled()) {
@@ -718,10 +767,24 @@ fun MapView(
                     },
                     mapTypeContent = {
                         MapButton(
-                            icon = MeshtasticIcons.Layers,
+                            icon = MeshtasticIcons.Map,
                             contentDescription = stringResource(Res.string.map_style_selection),
                             onClick = { showMapStyleDialog = true },
                         )
+                    },
+                    layersContent = {
+                        MapButton(
+                            icon = MeshtasticIcons.Layers,
+                            contentDescription = stringResource(Res.string.manage_map_layers),
+                            onClick = { showLayersBottomSheet = true },
+                        )
+                    },
+                    // Hands node/channel-derived params to the hosted Site Planner and imports the returned coverage.
+                    onSitePlannerClick =
+                    if (sitePlannerAvailable()) {
+                        { sitePlannerInitial = ourNodeInfo.toSitePlannerParams(channelSet) }
+                    } else {
+                        null
                     },
                     isLocationTrackingEnabled = myLocationOverlay != null,
                     onToggleLocationTracking = {
@@ -751,6 +814,50 @@ fun MapView(
                 mapViewModel.mapStyleId = it
                 map.setTileSource(loadOnlineTileSourceBase())
             },
+        )
+    }
+
+    if (showLayersBottomSheet) {
+        ModalBottomSheet(onDismissRequest = { showLayersBottomSheet = false }) {
+            CustomMapLayersSheet(
+                mapLayers = mapLayers,
+                onToggleVisibility = mapViewModel::toggleLayerVisibility,
+                onRemoveLayer = mapViewModel::removeMapLayer,
+                onAddLayerClicked = onAddLayerClicked,
+                onRefreshLayer = mapViewModel::refreshMapLayer,
+                onAddNetworkLayer = { name, url -> mapViewModel.addNetworkMapLayer(name, url) },
+            )
+        }
+    }
+
+    // Site Planner deep link from a node's detail screen — open the estimate dialog prefilled with that node.
+    val sitePlannerRequest by mapViewModel.sitePlannerRequest.collectAsStateWithLifecycle()
+    LaunchedEffect(sitePlannerRequest) {
+        sitePlannerRequest?.let { node ->
+            sitePlannerInitial = node.toSitePlannerParams(channelSet)
+            mapViewModel.consumeSitePlannerRequest()
+        }
+    }
+    sitePlannerInitial?.let { initial ->
+        SitePlannerHost(
+            initialParams = initial,
+            onDismiss = { sitePlannerInitial = null },
+            onImport = { name, geoJson, latitude, longitude ->
+                mapViewModel.addGeoJsonLayer(name, geoJson)
+                // Recenter on the estimate's transmitter so the freshly-imported coverage is on-screen.
+                map.controller.animateTo(GeoPoint(latitude, longitude))
+            },
+            // OSMdroid GPS fix (only when tracking is active + permission granted); no Play-services location on
+            // F-Droid.
+            onRequestCurrentLocation =
+            if (locationPermission.isGranted) {
+                { myLocationOverlay?.myLocation?.let { it.latitude to it.longitude } }
+            } else {
+                null
+            },
+            onUseNodeLocation =
+            ourNodeInfo?.takeIf { it.validPosition != null }?.let { node -> { node.latitude to node.longitude } },
+            onUseMapCenter = { map.mapCenter.let { it.latitude to it.longitude } },
         )
     }
 

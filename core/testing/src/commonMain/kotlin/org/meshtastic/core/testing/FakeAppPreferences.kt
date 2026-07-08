@@ -275,6 +275,18 @@ class FakeMapPrefs : MapPrefs {
     override fun setLastHeardTrackFilter(seconds: Long) {
         lastHeardTrackFilter.value = seconds
     }
+
+    override val hiddenLayerUrls = MutableStateFlow<Set<String>>(emptySet())
+
+    override fun setHiddenLayerUrls(value: Set<String>) {
+        hiddenLayerUrls.value = value
+    }
+
+    override val networkMapLayers = MutableStateFlow<Set<String>>(emptySet())
+
+    override fun setNetworkMapLayers(value: Set<String>) {
+        networkMapLayers.value = value
+    }
 }
 
 class FakeMapConsentPrefs : MapConsentPrefs {
