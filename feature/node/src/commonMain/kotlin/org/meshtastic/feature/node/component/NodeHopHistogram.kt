@@ -41,6 +41,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -51,11 +52,11 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.nowInstant
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.a11y_nodes_at_hop
+import org.meshtastic.core.resources.all_time
 import org.meshtastic.core.resources.eight_hours
 import org.meshtastic.core.resources.hop_histogram_empty
 import org.meshtastic.core.resources.hop_histogram_title
-import org.meshtastic.core.resources.hop_histogram_window_all
-import org.meshtastic.core.resources.hops_away
 import org.meshtastic.core.resources.one_hour
 import org.meshtastic.core.resources.twenty_four_hours
 import kotlin.time.Duration.Companion.hours
@@ -127,18 +128,18 @@ internal fun HopHistogramContent(nodes: List<Node>, window: HopWindow, onSelectW
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         } else {
-            val hopsLabel = stringResource(Res.string.hops_away)
-            buckets.forEachIndexed { hop, count ->
-                HopBar(hop = hop, count = count, maxCount = maxCount, hopsLabel = hopsLabel)
-            }
+            buckets.forEachIndexed { hop, count -> HopBar(hop = hop, count = count, maxCount = maxCount) }
         }
     }
 }
 
 @Composable
-private fun HopBar(hop: Int, count: Int, maxCount: Int, hopsLabel: String) {
+private fun HopBar(hop: Int, count: Int, maxCount: Int) {
+    // Merge the row into one spoken node so a screen reader announces "Hop 3: 2 nodes" rather than
+    // reading the hop number, progress-bar percentage, and count as three disjoint elements.
+    val description = stringResource(Res.string.a11y_nodes_at_hop, hop, count)
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().clearAndSetSemantics { contentDescription = description },
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -146,7 +147,7 @@ private fun HopBar(hop: Int, count: Int, maxCount: Int, hopsLabel: String) {
             text = hop.toString(),
             style = MaterialTheme.typography.titleMedium,
             textAlign = TextAlign.Center,
-            modifier = Modifier.widthIn(min = 20.dp).semantics { contentDescription = "$hopsLabel $hop" },
+            modifier = Modifier.widthIn(min = 20.dp),
         )
         LinearProgressIndicator(
             progress = { if (maxCount > 0) count.toFloat() / maxCount else 0f },
@@ -166,7 +167,7 @@ private fun HopBar(hop: Int, count: Int, maxCount: Int, hopsLabel: String) {
 /** "Last heard" windows offered above the histogram. A `null` [hours] means no time filter (all known nodes). */
 @Suppress("MagicNumber")
 enum class HopWindow(val hours: Long?, val label: StringResource) {
-    ALL(null, Res.string.hop_histogram_window_all),
+    ALL(null, Res.string.all_time),
     ONE_HOUR(1, Res.string.one_hour),
     EIGHT_HOURS(8, Res.string.eight_hours),
     ONE_DAY(24, Res.string.twenty_four_hours),

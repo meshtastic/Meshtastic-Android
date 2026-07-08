@@ -10,6 +10,7 @@ a11y_node_offline
 a11y_node_online
 a11y_node_role
 a11y_node_signal
+a11y_nodes_at_hop
 accept
 acknowledgements
 ### ACTION ###
@@ -713,7 +714,6 @@ history_return_max
 history_return_window
 hop_histogram_empty
 hop_histogram_title
-hop_histogram_window_all
 hop_limit
 hops_away
 host

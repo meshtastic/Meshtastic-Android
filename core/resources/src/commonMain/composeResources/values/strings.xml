@@ -28,6 +28,7 @@
     <string name="a11y_node_online">online</string>
     <string name="a11y_node_role">role %1$s</string>
     <string name="a11y_node_signal">signal %1$s</string>
+    <string name="a11y_nodes_at_hop">Hop %1$d: %2$d nodes</string>
     <string name="accept">Accept</string>
     <string name="acknowledgements">Acknowledgements</string>
     <!-- ACTION -->
@@ -737,7 +738,6 @@
     <string name="history_return_window">History return window</string>
     <string name="hop_histogram_empty">No nodes heard in this window</string>
     <string name="hop_histogram_title">Nodes per Hop</string>
-    <string name="hop_histogram_window_all">All</string>
     <string name="hop_limit">Number of Hops</string>
     <string name="hops_away">Hops Away</string>
     <string name="host">Host</string>
