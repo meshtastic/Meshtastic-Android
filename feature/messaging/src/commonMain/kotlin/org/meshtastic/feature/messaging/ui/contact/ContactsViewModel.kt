@@ -142,16 +142,12 @@ class ContactsViewModel(
                 val myNodeNum = params.myNodeNum
 
                 packetRepository.getContactsPaged().map { pagingData ->
-                    pagingData.map { packetData: DataPacket ->
-                        // Determine if this is my message (originated on this device)
+                    pagingData.map { (contactKey, packetData) ->
+                        // Use the stored contact_key as the identity. Recomputing it here from a
+                        // possibly-null myNodeNum collapses distinct conversations onto one key and
+                        // crashes the LazyColumn with a duplicate-key error (#6131).
                         val fromLocal = packetData.isFromLocal(myNodeNum)
                         val toBroadcast = packetData.isBroadcast
-
-                        // Reconstruct contactKey exactly as rememberDataPacket() computes it:
-                        // For outgoing or broadcast: use the "to" field (recipient / ^all)
-                        // For incoming DMs: use the "from" field (the other party)
-                        val contactId = if (fromLocal || toBroadcast) packetData.to else packetData.from
-                        val contactKey = "${packetData.channel}$contactId"
 
                         // grab usernames from NodeInfo
                         val userId = if (fromLocal) packetData.to else packetData.from

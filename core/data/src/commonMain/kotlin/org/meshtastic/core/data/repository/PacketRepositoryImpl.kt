@@ -61,7 +61,7 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
         .flatMapLatest { db -> db.packetDao().getContactKeys() }
         .map { map -> map.mapValues { it.value.data } }
 
-    override fun getContactsPaged(): Flow<PagingData<DataPacket>> = Pager(
+    override fun getContactsPaged(): Flow<PagingData<Pair<String, DataPacket>>> = Pager(
         config =
         PagingConfig(
             pageSize = CONTACTS_PAGE_SIZE,
@@ -71,7 +71,7 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
         pagingSourceFactory = { dbManager.currentDb.value.packetDao().getContactKeysPaged() },
     )
         .flow
-        .map { pagingData -> pagingData.map { it.data } }
+        .map { pagingData -> pagingData.map { it.contact_key to it.data } }
 
     override suspend fun getMessageCount(contact: String): Int =
         withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().getMessageCount(contact) }
