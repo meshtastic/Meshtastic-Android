@@ -34,6 +34,10 @@ Things that trip up first-time contributors — check these before requesting re
 Keep the last 5–8 entries and trim older ones from the bottom.
 -->
 
+**July 2026** — Map layer stack (`MapLayer.kt`, `MapLayersManager`, GeoJSON/KML import, Site Planner) extracted from the Google flavor into shared `androidApp/src/main` source (#6148) — F-Droid now renders imported overlays via a new OSMdroid-based renderer, so both flavors compile one implementation.
+
+**July 2026** — [Persistence](developer/persistence) — Local Mesh Discovery sessions and cached `msh.to` device links now persist to Room (`DiscoverySessionEntity`, `DiscoveryPresetResultEntity`, `DiscoveredNodeEntity`, `DeviceLinkEntity`).
+
 **June 2026** — [Architecture](developer/architecture) / [Codebase](developer/codebase) — Protos migrated from the `core/proto` git submodule to the `org.meshtastic:protobufs` Maven artifact; there is no longer a local proto module to build or sync.
 
 **June 2026** — AIDL/`IMeshService` removed (#5586). The mesh service is now in-process only, driven entirely through `RadioController` — no cross-process binder, no `aidl` stubs.
@@ -45,10 +49,6 @@ Keep the last 5–8 entries and trim older ones from the bottom.
 **June 2026** — [Testing](developer/testing) — Added the `:baselineprofile` module (#5735): a Macrobenchmark cold-start journey generates a Baseline Profile for `:androidApp` to AOT-compile hot startup paths.
 
 **June 2026** — [Persistence](developer/persistence) — FTS5 full-text message search (#5373): a `PacketFts` virtual table mirrors `Packet.messageText`, kept in sync by Room-managed triggers.
-
-**May 2026** — [Measurement & Formatting](developer/measurement) — New page documenting the `MetricFormatter` API, locale-aware unit conversion patterns, and how to add new measurement types.
-
-**May 2026** — [Testing](developer/testing) — Compose Preview Screenshot Testing (CST) integrated: `screenshot-tests/` module, `@PreviewTest` wrappers, CI validation, docs asset pipeline.
 
 <!-- DEV_WHATS_NEW_END -->
 

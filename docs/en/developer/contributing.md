@@ -2,7 +2,7 @@
 title: Contributing
 parent: Developer Guide
 nav_order: 8
-last_updated: 2026-05-13
+last_updated: 2026-07-08
 aliases:
   - contributing
   - pull-request
@@ -29,12 +29,12 @@ Branches use conventional-commit style prefixes:
 | `test/<scope>` | Test additions or fixes |
 | `deps/<scope>` | Dependency updates |
 
-Numeric spec prefixes (e.g., `003-app-docs-markdown`) are also valid for spec-driven work.
+Timestamp-based spec prefixes (`YYYYMMDD-HHMMSS-feature-name`, as created by `/speckit.git.feature`) are also valid for spec-driven work.
 
 Examples:
 - `feat/desktop-ble-transport`
 - `fix/bluetooth-reconnect`
-- `003-app-docs-markdown`
+- `20260601-074653-air-quality-telemetry`
 
 ## Development Workflow
 

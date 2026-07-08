@@ -2,7 +2,7 @@
 title: Settings — Modules & Admin
 parent: User Guide
 nav_order: 8
-last_updated: 2026-05-20
+last_updated: 2026-07-08
 description: Configure optional feature modules (MQTT, telemetry, canned messages, TAK, and more) and perform device administration.
 aliases:
   - modules
@@ -81,10 +81,11 @@ Buffers messages for nodes that were temporarily offline, then replays them when
 | Setting | Description |
 |---------|-------------|
 | Enabled | Activate store and forward |
-| Heartbeat (s) | Announcement interval |
+| Heartbeat | Periodically announce this node's store-and-forward capability |
 | Records | Maximum stored messages |
 | History Return (max) | Max messages to replay |
 | History Return (window) | Time window for replay |
+| Server | Act as a store-and-forward server for the mesh (requires ample memory, e.g. ESP32 with PSRAM) |
 
 > 💡 **Tip:** Store and Forward works best on nodes with ample memory (ESP32 with PSRAM). Router nodes are ideal candidates since they're typically always-on.
 
@@ -145,6 +146,7 @@ GPIO control over the mesh network. Allows a remote node to read or write GPIO p
 |---------|-------------|
 | Enabled | Activate remote GPIO access |
 | Allow Undefined Pins | Allow access to any GPIO pin (security risk) |
+| Available Pins | Up to 4 GPIO pins this node exposes for remote read/write |
 
 > ⚠️ **Warning:** Enabling "Allow Undefined Pins" gives remote nodes access to all GPIO pins, which could interfere with the radio's own hardware. Only enable on dedicated GPIO nodes.
 
@@ -156,6 +158,7 @@ Broadcasts information about directly heard neighbors, enabling mesh topology ma
 |---------|-------------|
 | Enabled | Activate neighbor broadcasting |
 | Update Interval (s) | How often to broadcast neighbor list |
+| Transmit Over LoRa | Also broadcast neighbor info over LoRa, not just MQTT/phone. Unavailable on a channel using the default key and name |
 
 See [Discovery](discovery) for how to use neighbor data for mesh topology exploration.
 
@@ -165,8 +168,8 @@ Controls onboard NeoPixel or other addressable RGB LEDs on supported hardware. C
 
 | Setting | Description |
 |---------|-------------|
-| Enabled | Activate LED control |
-| LED State | On, Off, or set specific color |
+| LED State | Turn the LED on or off |
+| Current | LED current limit (0–31) |
 | Red / Green / Blue | Individual color channel values (0–255) |
 
 ### Detection Sensor Module
@@ -177,7 +180,8 @@ Turns your node into a motion or door sensor alert system. When a GPIO pin detec
 |---------|-------------|
 | Enabled | Activate detection sensor |
 | Monitor Pin | GPIO pin connected to sensor |
-| Detection Triggered High | Trigger when pin goes high (vs. low) |
+| Detection Trigger Type | How the pin's state maps to a detection event (e.g. active high/low, edge-triggered) |
+| Use Input Pullup Mode | Enable the pin's internal pull-up resistor |
 | Minimum Broadcast (s) | Minimum time between alert broadcasts |
 | State Broadcast (s) | Periodic state broadcast interval |
 | Send Bell | Include bell character in alerts |
@@ -225,10 +229,7 @@ Remotely reboot a connected or administered node.
 
 ### Debug Panel
 
-View detailed diagnostic information:
-- Protocol buffers debug output
-- Mesh packet log
-- Connection state details
+Opens the **Packets** and **App logs** tabs for viewing, filtering, and exporting diagnostic output. See [Debug Logs](debug-logs) for the full walkthrough.
 
 ### Troubleshooting Remote Admin
 
