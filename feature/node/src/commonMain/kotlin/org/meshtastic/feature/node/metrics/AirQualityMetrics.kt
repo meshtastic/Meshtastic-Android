@@ -61,6 +61,8 @@ import org.meshtastic.core.model.util.UnitConversions.toTempString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.air_quality_metrics_log
 import org.meshtastic.core.resources.co2
+import org.meshtastic.core.resources.co2_humidity
+import org.meshtastic.core.resources.co2_temperature
 import org.meshtastic.core.resources.pm10
 import org.meshtastic.core.resources.pm1_0
 import org.meshtastic.core.resources.pm2_5
@@ -313,10 +315,16 @@ private fun AirQualityMetricsCard(
                     // SCD4x CO₂ sensors also report temperature/humidity (#5873); present-and-zero is valid, so only
                     // `?.` (absent field) hides a row.
                     aq.co2_temperature?.let {
-                        Text("CO₂ Temp: ${it.toTempString(isFahrenheit)}", style = MaterialTheme.typography.bodySmall)
+                        Text(
+                            "${stringResource(Res.string.co2_temperature)}: ${it.toTempString(isFahrenheit)}",
+                            style = MaterialTheme.typography.bodySmall,
+                        )
                     }
                     aq.co2_humidity?.let {
-                        Text("CO₂ Hum: ${NumberFormatter.format(it, 0)}%", style = MaterialTheme.typography.bodySmall)
+                        Text(
+                            "${stringResource(Res.string.co2_humidity)}: ${NumberFormatter.format(it, 0)}%",
+                            style = MaterialTheme.typography.bodySmall,
+                        )
                     }
                 }
             }
