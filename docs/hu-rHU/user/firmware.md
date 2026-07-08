@@ -17,7 +17,7 @@ Keep your Meshtastic radio up to date with the latest firmware for new features,
 
 ## Checking for Updates
 
-1. Open the connected radio's configuration and, under **Advanced**, tap **Firmware Update** — or tap the firmware notification if one is shown. The entry appears only for OTA-capable devices.
+1. Open the connected radio's configuration and, under **Advanced**, tap **Firmware Update**. The entry appears only for OTA-capable devices.
 2. The app checks for available firmware versions.
 3. Available updates show the version number and changelog summary.
 

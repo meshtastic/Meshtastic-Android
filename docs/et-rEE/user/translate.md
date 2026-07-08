@@ -1,22 +1,22 @@
 ---
-title: Translate the App
+title: Tõlgi rakendus
 parent: User Guide
 nav_order: 17
 last_updated: 2026-06-25
-description: How the app and its documentation are translated via Crowdin, and guidelines for contributing translations.
+description: Kuidas rakendust ja selle dokumentatsiooni Crowdini kaudu tõlgitakse ja tõlgete panustamise juhised.
 aliases:
   - tõlgi
   - crowdin
   - localization
 ---
 
-# Translate the App
+# Tõlgi rakendus
 
 Tõlgete koostamisele kaasaaitamine aitab Meshtasticut laiemale publikule kättesaadavaks teha. Rakendus kasutab nii kasutajaliidese kui ka rakendusesisese dokumentatsiooni kogukonna tõlgete haldamiseks [Crowdinit](https://crowdin.com/).
 
 ---
 
-## What Gets Translated
+## Mida tõlgitakse
 
 | Resource          | Source Location                                                     | Sõnumid                                                                |
 | ----------------- | ------------------------------------------------------------------- | ---------------------------------------------------------------------- |
@@ -24,7 +24,7 @@ Tõlgete koostamisele kaasaaitamine aitab Meshtasticut laiemale publikule kätte
 | User Guide pages  | `docs/en/user/*.md`                                                 | In-app documentation shown in Help & Documentation |
 | Fastlane metadata | `fastlane/metadata/android/en-US/`                                  | App Store listing title, description, and changelogs                   |
 
-> ⚠️ **Note:** Developer Guide pages are English-only. Code-focused documentation targeting contributors is not translated.
+> ⚠️ **Note:** Developer Guide pages are English-only. Kaastöölistele suunatud koodikeskset dokumentatsiooni ei tõlgita.
 
 ---
 
@@ -32,7 +32,7 @@ Tõlgete koostamisele kaasaaitamine aitab Meshtasticut laiemale publikule kätte
 
 1. **Külasta Crowdini projekti.** Ava [Meshtastic Android Crowdini projekt](https://crowdin.com/project/meshtastic-android) ja logi sisse või loo tasuta konto.
 2. **Vali keel.** Vali olemasolev keel või taotle uut, avades [GitHubi probleemi](https://github.com/meshtastic/Meshtastic-Android/issues/new).
-3. **Tõlgi stringe.** Crowdin kuvab ingliskeelse allika vasakul ja sinu tõlke paremal. Translate each string and save.
+3. **Tõlgi stringe.** Crowdin kuvab ingliskeelse allika vasakul ja sinu tõlke paremal. Tõlki iga string ja salvesta.
 4. **Review context.** Many strings include screenshots or context comments — check these to understand where the text appears in the app.
 5. **Submit.** Approved translations are automatically merged into the next release.
 

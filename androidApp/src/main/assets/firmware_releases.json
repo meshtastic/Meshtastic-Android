@@ -189,6 +189,12 @@
   },
   "pullRequests": [
     {
+      "id": "10947",
+      "title": "Fixed pin state setup when SX126X_ANT_SW is defined",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10947",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
       "id": "10936",
       "title": "Snake!",
       "page_url": "https://github.com/meshtastic/firmware/pull/10936",
@@ -198,12 +204,6 @@
       "id": "10935",
       "title": "Fix size report stale baseline",
       "page_url": "https://github.com/meshtastic/firmware/pull/10935",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10934",
-      "title": "Re-enable wantresponse and other fields in simradio when on the decoded path",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10934",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {

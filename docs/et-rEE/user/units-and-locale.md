@@ -2,7 +2,7 @@
 title: Units, Measurement & Locale
 parent: User Guide
 nav_order: 16
-last_updated: 2026-05-12
+last_updated: 2026-07-08
 description: How the app formats temperature, distance, speed, and other measurements based on your device locale.
 ---
 
@@ -14,11 +14,11 @@ Meshtastic rakendus kuvab automaatselt temperatuure, vahemaid, kiirusi ja aegu �
 
 ## How It Works
 
-Meshtastic raadiod edastavad andmeid alati **meetrilistes ühikutes** (meetrid, °C, km/h, hPa jne). When the app receives this data, it converts and displays values in whatever unit system your device's locale specifies.
+Meshtastic radios always transmit data in **metric units** (meters, °C, m/s, hPa, etc.). When the app receives this data, it converts and displays values in whatever unit system your device's locale specifies.
 
 On Android, your measurement preferences are determined by your system **Language & Region** settings. On Desktop (JVM), the app uses the JVM's default `Locale`.
 
-> 💡 **Tip:** You never need to toggle units inside the app. Change your system measurement preferences and every screen in Meshtastic updates automatically — node details, telemetry charts, weather, altitude, and more.
+> 💡 **Tip:** You never need to toggle units inside the app. Muuda oma süsteemi mõõtmiste eelistusi ja kõik Meshtasticu ekraanid värskendatakse automaatselt – sõlmede üksikasjad, telemeetriadiagrammid, ilm, kõrgus ja palju muud.
 
 ---
 

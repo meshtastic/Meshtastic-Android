@@ -2,7 +2,7 @@
 title: Начало работы
 parent: Руководство пользователя
 nav_order: 1
-last_updated: 2026-05-13
+last_updated: 2026-07-08
 description: Настройка при первом запуске — разрешения, процесс знакомства с приложением и следующие шаги после подключения твоей радиостанции.
 aliases:
   - first-launch
@@ -65,10 +65,10 @@ Meshtastic также использует местоположение для:
 Уведомления оповещают тебя о:
 
 - Входящие сообщения из каналов и личных сообщений
-- Изменения состояния подключения (подключено, отключено, переподключение)
-- Доступность обновления прошивки
+- New nodes joining the mesh
+- Low battery on a remote node
 
-> 💡 **Совет:** Ты можешь настроить предпочтения уведомлений позже в системных настройках Android. Приложение создает отдельные каналы уведомлений для сообщений, событий подключения и фонового состояния службы.
+> 💡 **Tip:** You can fine-tune notification preferences later in Android system settings — the app creates a separate notification channel per category (plus a few internal ones, like the background service), so you can enable or silence them individually.
 
 ### Разрешение на критические уведомления
 

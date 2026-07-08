@@ -2,7 +2,7 @@
 title: Připojení
 parent: User Guide
 nav_order: 2
-last_updated: 2026-06-25
+last_updated: 2026-07-08
 description: Connect your phone or desktop to a Meshtastic radio via Bluetooth, USB, or TCP/IP.
 aliases:
   - bluetooth
@@ -79,8 +79,8 @@ Some Meshtastic radios support WiFi/Ethernet connectivity, allowing TCP-based co
 1. Make sure the radio is on the same local network as your phone/desktop.
 2. On the Connect screen, select the **Network** transport filter.
 3. Choose the radio one of two ways:
-   - **Scan Network Devices** — toggle this on to auto-discover radios that advertise themselves on the local network (mDNS / `_meshtastic._tcp`). Discovered devices appear in the list; tap one to connect.
-   - **Add Network Device Manually** — enter the radio's IP address (or hostname) and port (default: `4403`).
+   - **Scan for network devices** — toggle this on to auto-discover radios that advertise themselves on the local network (mDNS / `_meshtastic._tcp`). Discovered devices appear in the list; tap one to connect.
+   - **Add device manually…** — enter the radio's IP address (or hostname) and port (default: `4403`).
 4. Previously-used network addresses are remembered under **Recent Network Devices** for quick reconnection (long-press to remove one).
 
 > 💡 **Tip:** Network discovery uses mDNS, which only works when both devices are on the same subnet. On Android 17+ the app needs the local-network permission for scanning; if discovery finds nothing, add the device manually by IP.

@@ -2,7 +2,7 @@
 title: Aloittaminen
 parent: Käyttöopas
 nav_order: 1
-last_updated: 2026-05-13
+last_updated: 2026-07-08
 description: Ensimmäisen käynnistyksen määritys — käyttöoikeudet, käyttöönottoprosessi ja seuraavat vaiheet radion yhdistämisen jälkeen.
 aliases:
   - ensimmäinen käynnistys
@@ -65,10 +65,10 @@ Jos käyttöoikeus evätään, Bluetooth-skannaus ei toimi eikä radiosi raporto
 Ilmoitukset kertovat sinulle:
 
 - Saapuvista viesteistä kanavilta ja yksityisviesteistä
-- Yhteyden tilan muutoksista (yhdistetty, yhteys katkaistu, yhdistetään uudelleen)
-- Laiteohjelmistopäivitysten saatavuudesta
+- Uusista mesh-verkkoon liittyvistä radioista
+- Etäradion akun vähäisestä virrasta
 
-> 💡 **Vinkki:** Voit myöhemmin hienosäätää ilmoitusasetuksia Androidin järjestelmäasetuksissa. Sovellus luo erilliset ilmoituskanavat viesteille, yhteystapahtumille ja taustapalvelun tilalle.
+> 💡 **Vinkki:** Voit myöhemmin säätää ilmoitusasetuksia Androidin järjestelmäasetuksissa. Sovellus luo jokaiselle ilmoitusluokalle oman ilmoituskanavan (sekä muutamia sisäisiä kanavia, kuten taustapalvelulle), joten voit ottaa ne käyttöön tai mykistää ne yksitellen.
 
 ### Kriittisten hälytysten käyttöoikeus
 

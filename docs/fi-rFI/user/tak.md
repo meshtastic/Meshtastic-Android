@@ -2,7 +2,7 @@
 title: TAK-integraatio
 parent: Käyttöopas
 nav_order: 10
-last_updated: 2026-05-13
+last_updated: 2026-07-08
 description: ATAK:n ja WinTAK:n yhteentoimivuus — CoT-sijaintijako, TAK-roolit ja lisäosien käyttöönotto.
 aliases:
   - tak
@@ -77,26 +77,25 @@ TAK-viestit käyttävät Cursor on Target XML -muotoa — sotilaskäytössä ole
 
 Kun käytät TAK-rooleja, radiosi lähettää identiteettitietoja, jotka näkyvät TAK-kartoilla:
 
-| Asetus      | Kuvaus                                                                                                                              |
-| ----------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| Tiimi       | TAK-kartan tiimiväri (esim. sininen, punainen, syaani, vihreä)                                   |
-| Rooli       | Operatiivinen roolisi (tiimin jäsen, tiimin johtaja, esikunta, ensihoitaja, viestivastaava jne.) |
-| Kutsutunnus | TAK-kutsutunnuksesi (oletuksena Meshtastic-laitteesi pitkä nimi)                                                 |
+| Asetus        | Kuvaus                                                                                                                              |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Tiimin väri   | TAK-kartan tiimiväri (esim. sininen, punainen, syaani, vihreä)                                   |
+| Jäsenen rooli | Operatiivinen roolisi (tiimin jäsen, tiimin johtaja, esikunta, ensihoitaja, viestivastaava jne.) |
 
-Nämä asetukset näkyvät kohdassa **Asetukset → Moduulin asetukset → TAK**, kun TAK-moduuli on käytössä.
+Nämä asetukset näkyvät kohdassa **Asetukset → Moduulin asetukset → TAK**, kun TAK-moduuli on käytössä. TAK-kutsutunnuksesi ei ole erillinen asetus — se muodostetaan automaattisesti Meshtastic-radiosi nimestä.
 
 > 💡 **Vinkki:** Tiimi- ja roolivärit ovat TAK-järjestelmän standardeja ryhmävärikoodauksia. Koordinoi TAK-tiimisi kanssa yhtenäisten tiimimääritysten käyttämiseksi.
 
 ## Wire Format (V1 / V2)
 
-Meshtastic tukee kahta TAK-wire-formaattia:
+Meshtastic tukee kahta TAK-siirtomuotoa, jotka valitaan automaattisesti yhdistetyn radion laiteohjelmiston perusteella — manuaalisia asetuksia ei tarvita:
 
-| Muoto                                | Yhteensopivuus                                                  | Ominaisuudet                                               |
-| ------------------------------------ | --------------------------------------------------------------- | ---------------------------------------------------------- |
-| V1 (vanha versio) | ATAK Plugin v1.x, vanhempi firmware             | Perustason CoT-sijainnin jakaminen                         |
-| V2 (nykyinen)     | ATAK Plugin v2.x, firmware 2.3+ | Täysi CoT-tuki sisältäen chatin, reitit ja zstd-pakkauksen |
+| Muoto                                | Yhteensopivuus                                                     | Ominaisuudet                                                                                                                                                                                                                                                              |
+| ------------------------------------ | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| V1 (vanha versio) | Laiteohjelmisto 2.7.x ja vanhemmat | Raaka protobuf-koodaus portissa 72. Tukee vain sijainnin jakamista (PLI) ja keskusteluja (GeoChat) — muodot, merkinnät, reitit ja muut tyypitetyt CoT-tapahtumat jätetään välittämättä                              |
+| V2 (nykyinen)     | Laiteohjelmisto 2.8.0+             | Pakkausmuoto käyttää zstd-pakkausta portissa 78. Tukee V1:n ominaisuuksien lisäksi myös muotoja, merkintöjä, reittejä, ilma-aluksia, lääkintäevakuointeja (CASEVAC), hätätilanteita ja tehtävätyyppisiä CoT-tapahtumia |
 
-Sovellus valitsee automaattisesti V2-version, kun molemmat puolet tukevat sitä. Manuaalista asetusta ei tarvita — TAK-moduuli neuvottelee formaatin firmware-version perusteella.
+Radio välittää edelleen vanhojen radioiden V1-paketteja myös käyttäessään itse V2:ta, joten eri laiteohjelmistoversioita käyttävät mesh-verkot toimivat keskenään.
 
 ## Käyttö ATAK:n kanssa
 
@@ -111,13 +110,13 @@ Kun asetukset on määritetty:
 
 ## Vianetsintä
 
-| Ongelma                                 | Syy                                                | Ratkaisu                                                                                        |
-| --------------------------------------- | -------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| Radio ei näy ATAK-kartalla              | TAK-moduuli pois käytöstä tai väärä rooli          | Varmista, että TAK-moduuli on käytössä ja rooli on joko TAK tai TAK Tracker                     |
-| Sijaintipäivitykset ovat vanhentuneita  | GPS-signaali katkennut tai lähetysväli liian pitkä | Tarkista GPS-tila; lyhennä sijaintilähetyksen väliä kohdassa Sijainnin asetukset                |
-| ATAK-lisäosa näyttää “yhteys katkennut” | Bluetooth-yhteys katkennut tai lisäosa on kaatunut | Yhdistä Bluetooth uudelleen Meshtastic-sovelluksessa ja käynnistä ATAK-lisäosa uudelleen        |
-| Viestit eivät välity                    | V1-muoto ei tue chatia                             | Varmista, että molemmilla laitteilla on firmware 2.3+ ja V2-wire-muoto käytössä |
-| CoT-data ei kulje                       | Kanava ei täsmää                                   | Kaikkien TAK-laitteiden täytyy olla samalla kanavalla ja yhteensopivalla salauksella            |
+| Ongelma                                      | Syy                                                                                                                                   | Ratkaisu                                                                                                                                      |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Radio ei näy ATAK-kartalla                   | TAK-moduuli pois käytöstä tai väärä rooli                                                                                             | Varmista, että TAK-moduuli on käytössä ja rooli on joko TAK tai TAK Tracker                                                                   |
+| Sijaintipäivitykset ovat vanhentuneita       | GPS-signaali katkennut tai lähetysväli liian pitkä                                                                                    | Tarkista GPS-tila; lyhennä sijaintilähetyksen väliä kohdassa Sijainnin asetukset                                                              |
+| ATAK-lisäosa näyttää “yhteys katkennut”      | Bluetooth-yhteys katkennut tai lisäosa on kaatunut                                                                                    | Yhdistä Bluetooth uudelleen Meshtastic-sovelluksessa ja käynnistä ATAK-lisäosa uudelleen                                                      |
+| Muotoja, merkintöjä tai reittejä ei välitetä | Lähettävä radio käyttää vanhaa V1-protokollaa (laiteohjelmisto 2.7.x tai vanhempi) | Päivitä lähettävän radion laiteohjelmisto versioon 2.8.0 tai uudempaan, jotta V2-siirtomuoto on käytettävissä |
+| CoT-data ei kulje                            | Kanava ei täsmää                                                                                                                      | Kaikkien TAK-laitteiden täytyy olla samalla kanavalla ja yhteensopivalla salauksella                                                          |
 
 ## Tietoturvahuomiot
 

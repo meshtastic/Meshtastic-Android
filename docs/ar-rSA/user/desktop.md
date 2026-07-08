@@ -60,19 +60,19 @@ Bluetooth Low Energy is supported on Desktop via the [Kable](https://github.com/
 
 ## Feature Parity
 
-| Feature                                      | Android | Desktop | Notes                                                                      |
-| -------------------------------------------- | ------- | ------- | -------------------------------------------------------------------------- |
-| Messaging                                    | ✓       | ✓       | Full parity                                                                |
-| Node List                                    | ✓       | ✓       | Full parity                                                                |
-| الخريطة                                      | ✓       | ◐       | Map tab exists on desktop, but the interactive map view is Android-only    |
-| الإعدادات                                    | ✓       | ✓       | Full parity                                                                |
-| Bluetooth (BLE)           | ✓       | ✓       | Via Kable on desktop                                                       |
-| Firmware Update                              | ✓       | ◐       | Desktop supports in-app USB firmware update; BLE/Wi-Fi OTA is Android-only |
-| Notifications                                | ✓       | ✓       | Native OS notifications                                                    |
-| Widgets                                      | ✓       | ✗       | Android-only                                                               |
-| Android Auto                                 | ✓       | ✗       | Android-only — not available on Desktop or iOS                             |
-| AI Assistant (Chirpy)     | ✓\*     | ✗       | Google flavor Android only                                                 |
-| App Functions (system AI) | ✓†      | ✗       | Google flavor Android only                                                 |
+| Feature                                      | Android | Desktop | Notes                                                                                     |
+| -------------------------------------------- | ------- | ------- | ----------------------------------------------------------------------------------------- |
+| Messaging                                    | ✓       | ✓       | Full parity                                                                               |
+| Node List                                    | ✓       | ✓       | Full parity                                                                               |
+| الخريطة                                      | ✓       | ◐       | Map tab exists on desktop, but the interactive map view is Android-only                   |
+| الإعدادات                                    | ✓       | ✓       | Full parity                                                                               |
+| Bluetooth (BLE)           | ✓       | ✓       | Via Kable on desktop                                                                      |
+| Firmware Update                              | ✓       | ✓       | In-app USB, BLE, and Wi-Fi (ESP32) update all work the same as Android |
+| Notifications                                | ✓       | ✓       | Native OS notifications                                                                   |
+| Widgets                                      | ✓       | ✗       | Android-only                                                                              |
+| Android Auto                                 | ✓       | ✗       | Android-only — not available on Desktop or iOS                                            |
+| AI Assistant (Chirpy)     | ✓\*     | ✗       | Google flavor Android only                                                                |
+| App Functions (system AI) | ✓†      | ✗       | Google flavor Android only                                                                |
 
 \*Chirpy AI requires Android 14+ on Google flavor builds with supported hardware.
 
@@ -136,7 +136,6 @@ Requirements:
 
 ## Known Limitations
 
-- Firmware updates over the air (BLE/Wi-Fi) are Android-only; on desktop, use the in-app USB update or the [Web Flasher](https://flasher.meshtastic.org)
 - The interactive map view is Android-only — the Map tab is present but does not render a map on desktop
 - Some Android-specific features (widgets, specific notification channels) are unavailable
 - Performance may vary on low-spec hardware running Compose Desktop
@@ -145,7 +144,7 @@ Requirements:
 ## Related Topics
 
 - [Connections](connections) — connection methods overview
-- [Firmware Updates](firmware) — in-app USB update on desktop, or the [Web Flasher](https://flasher.meshtastic.org)
+- [Firmware Updates](firmware) — USB, BLE, and Wi-Fi update all work the same as on Android
 
 ---
 

@@ -2,7 +2,7 @@
 title: Debug Logs
 parent: Посібник користувача
 nav_order: 22
-last_updated: 2026-07-01
+last_updated: 2026-07-08
 description: View and export the app's own debug logs from inside the app, and attach a capture to a GitHub issue to help diagnose bugs — no adb required.
 aliases:
   - debug-logs
@@ -44,7 +44,7 @@ Tap the **download** icon to save the current logs to a file. You choose where i
 
 Attach that file to your GitHub issue.
 
-> 🔒 **Privacy:** Exports automatically **redact** sensitive values such as channel keys and admin/session keys before writing the file. Even so, logs can contain node names, positions, and other identifying details — glance through the file before sharing it publicly, and share privately if you have any doubt.
+> 🔒 **Privacy:** Exports automatically **redact** private keys, admin keys, and session passkeys before writing the file. Channel PSKs are **not** redacted, and logs can also contain node names, positions, and other identifying details — glance through the file before sharing it publicly, and share privately if you have any doubt.
 
 ## Desktop
 

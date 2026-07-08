@@ -2,7 +2,7 @@
 title: How the Meshtastic Signal Meter Works
 parent: User Guide
 nav_order: 15
-last_updated: 2026-06-25
+last_updated: 2026-07-08
 description: How the signal meter rates quality from SNR relative to the LoRa modem preset — spread spectrum, presets, and what the bars really mean.
 aliases:
   - signal
@@ -52,12 +52,12 @@ The app rates your signal quality (None, Bad, Fair, or Good) from **SNR alone, m
 
 Da die Bewertung relativ zum voreingestellten Grenzwert erfolgt, kann _derselbe_ Signal-Rauschabstand je nach Voreinstellung unterschiedlich bewertet werden: `-15 dB` gelten bei `LongSlow` als guter Wert, sind jedoch bei `ShortFast` unbrauchbar. Letting `limit` be the active preset's SNR Limit, here is how the app picks the bars (or color):
 
-| Niveau                   | Balken | Criteria                                        | Meaning                                                                                  |
-| ------------------------ | ------ | ----------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| Gut                      | 3      | SNR **above** the preset's `limit`              | Signal is comfortably above the demodulation floor — healthy connection. |
-| Ordentliche Signalstärke | 2      | up to `5.5 dB` below the `limit`                | Decodable, but getting close to the floor.                               |
-| Schlecht                 | 1      | between `5.5 dB` and `7.5 dB` below the `limit` | At the very edge of what the preset can recover.                         |
-| Keins                    | 0      | more than `7.5 dB` below the `limit`            | Below the floor — transmission lost to noise.                            |
+| Niveau                   | Balken | Criteria                               | Meaning                                                                                  |
+| ------------------------ | ------ | -------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Gut                      | 3      | SNR **above** the preset's `limit`     | Signal is comfortably above the demodulation floor — healthy connection. |
+| Ordentliche Signalstärke | 2      | less than `5.5 dB` below the `limit`   | Decodable, but getting close to the floor.                               |
+| Schlecht                 | 1      | `5.5 dB` to `7.5 dB` below the `limit` | At the very edge of what the preset can recover.                         |
+| Keins                    | 0      | more than `7.5 dB` below the `limit`   | Below the floor — transmission lost to noise.                            |
 
 > **Hinweis:** Die festen Schwellenwerte des Signal-Rauschabstandes, die Sie möglicherweise an anderer Stelle gesehen haben (`-7 dB` / `-15 dB`), werden mittlerweile nur noch zur farblichen Kennzeichnung einzelner Sprünge in Traceroute Ergebnissen verwendet – nicht für die hier beschriebene Signalstärkeanzeige pro Knoten.
 

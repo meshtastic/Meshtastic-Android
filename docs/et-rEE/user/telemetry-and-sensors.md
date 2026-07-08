@@ -23,13 +23,13 @@ Telemeetria võimaldab anduritega varustatud sõlmedel levitada keskkonna-, ener
 
 Kõik Meshtastic sõlmed edastavad seadme põhitelemeetriat:
 
-| Meetriline         | Kirjeldus                      | Tüüpiline ulatus                   |
-| ------------------ | ------------------------------ | ---------------------------------- |
-| Battery Level      | Charge percentage              | 0–100%                             |
-| Vool               | Battery voltage                | 3,0–4,2V (LiPo) |
-| Kanali kasutus     | % of airtime used locally      | 0–100%                             |
-| Air Utilization TX | % of airtime used by this node | 0–100%                             |
-| Töötamise aeg      | Seconds since last boot        | Varies                             |
+| Meetriline       | Kirjeldus                      | Tüüpiline ulatus                   |
+| ---------------- | ------------------------------ | ---------------------------------- |
+| Battery Level    | Charge percentage              | 0–100%                             |
+| Vool             | Battery voltage                | 3,0–4,2V (LiPo) |
+| Kanali kasutus   | % of airtime used locally      | 0–100%                             |
+| Eetri kasutus TX | % of airtime used by this node | 0–100%                             |
+| Töötamise aeg    | Seconds since last boot        | Varies                             |
 
 ## Environment Sensors
 
@@ -125,7 +125,7 @@ The CO₂ reading is color-coded by severity (Good → Stuffy → Poor → Unsaf
 
 - **No environment data showing?** The remote node needs a physical sensor connected (e.g., BME280 on I2C). Device telemetry (battery, uptime) is always available, but environment metrics require hardware.
 - **Vananenud näidud?** Kontrolli aruandlusintervalli – väga pikad intervallid (7200+ sekundit) tähendavad harva andmete uuendamist. Also verify the remote node is still online.
-- **Sensor conflict on I2C bus?** Some sensors share I2C addresses. Kui samal siinil on mitu andurit, kontrolli raadio jadapordi silumisväljundis aadresside kokkupõrkeid.
+- **Sensor conflict on I2C bus?** Some sensors share I2C addresses. Kui samal siinil on mitu andurit, kontrolli raadio jadapordi arendajaväljundis aadresside kokkupõrkeid.
 
 ## Related Topics
 

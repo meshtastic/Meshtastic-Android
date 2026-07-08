@@ -2,7 +2,7 @@
 title: Radion mittarit
 parent: Käyttöopas
 nav_order: 5
-last_updated: 2026-06-25
+last_updated: 2026-07-08
 description: Telemetrianäkymät jokaiselle verkon radiolle — laitteen kunto, ympäristöanturit, ilmanlaatu, signaalin laatu, virta, reitinselvitys ja sijaintihistoria.
 aliases:
   - mittarit
@@ -104,7 +104,7 @@ Signaalin laatu arvioidaan **SNR**-arvon perusteella suhteessa käytössä oleva
 | Laatu       | Kriteerit                          |
 | ----------- | ---------------------------------- |
 | Hyvä        | SNR esiasetuksen rajan yläpuolella |
-| Kohtalainen | enintään 5,5 dB rajan alapuolella  |
+| Kohtalainen | alle 5,5 dB rajan alapuolella      |
 | Huono       | 5,5–7,5 dB rajan alapuolella       |
 | ei mitään   | yli 7,5 dB rajan alapuolella       |
 

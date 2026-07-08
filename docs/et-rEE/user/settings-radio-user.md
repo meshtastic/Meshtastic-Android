@@ -2,7 +2,7 @@
 title: Settings — Radio & User
 parent: User Guide
 nav_order: 7
-last_updated: 2026-05-20
+last_updated: 2026-07-08
 description: Configure your radio hardware, LoRa presets, user profile, position sharing, power management, and security.
 aliases:
   - sätted
@@ -42,14 +42,14 @@ Pärast sätete muutmist puuduta nuppu **Salvesta**, et konfiguratsioon raadioss
 
 ### LoRa sätted
 
-| Setting           | Kirjeldus                                                               | Vaikimisi                                 |
-| ----------------- | ----------------------------------------------------------------------- | ----------------------------------------- |
-| Regioon           | Regulatory region for frequency bands                                   | Unset (must configure) |
-| Modemi vaikesäte  | Speed/range tradeoff                                                    | PikkKauge                                 |
-| Hüppete limiit    | Maks uuesti saadetud hüpet                                              | 3                                         |
-| TX võimsus        | Transmission power (dBm); 0 = max allowed for region | 0 (region max)         |
-| Frequency Offset  | Fine-tune frequency (MHz)                            | 0                                         |
-| Channel Bandwidth | Bandwidth setting                                                       | Default for preset                        |
+| Setting          | Kirjeldus                                                               | Vaikimisi                                 |
+| ---------------- | ----------------------------------------------------------------------- | ----------------------------------------- |
+| Regioon          | Regulatory region for frequency bands                                   | Unset (must configure) |
+| Modemi vaikesäte | Speed/range tradeoff                                                    | PikkKauge                                 |
+| Hüppete limiit   | Maks uuesti saadetud hüpet                                              | 3                                         |
+| TX võimsus       | Transmission power (dBm); 0 = max allowed for region | 0 (region max)         |
+| Frequency Offset | Fine-tune frequency (MHz)                            | 0                                         |
+| Kanali ribalaius | Bandwidth setting                                                       | Default for preset                        |
 
 > ⚠️ **Tähtis:** Enne edastamist **peate** oma piirkonna määrama. Operating without the correct region may violate local radio regulations. Lisateabe saamiseks vaadake [regiooni seadistamise juhendit](https://meshtastic.org/docs/getting-started/initial-config) aadressil meshtastic.org.
 
@@ -59,19 +59,19 @@ Pärast sätete muutmist puuduta nuppu **Salvesta**, et konfiguratsioon raadioss
 
 | Preset             | Range                   | Kiirus                   | SNR Limit | Best For                                                                                          |
 | ------------------ | ----------------------- | ------------------------ | --------- | ------------------------------------------------------------------------------------------------- |
-| Short Turbo        | ~1 km   | 21,9 kbps                | −5 dB     | Dense urban with line-of-sight; data-heavy applications                                           |
+| Short Turbo        | ~1 km   | 21,9 kbps                | −7,5 dB   | Dense urban with line-of-sight; data-heavy applications                                           |
 | Short Fast         | ~3 km   | 10,9 kbps                | −7,5 dB   | Urban neighborhoods; buildings within a few blocks                                                |
 | Short Slow         | ~5 km   | 5.5 kbps | −10 dB    | Suburban short-range; moderate building density                                                   |
-| Medium Fast        | ~5 km   | 5.5 kbps | −10 dB    | Suburban areas; moderate building density                                                         |
-| Medium Slow        | ~8 km   | 1,1 kbps                 | −12,5 dB  | Suburban/rural; moderate range with slower speed                                                  |
-| Long Turbo         | ~10 km  | 4,4 kbps                 | −10 dB    | Sarnane ulatus kui Pikk Kauge, aga 500 kHz ribalaiusega; kiirem läbilaskevõime                    |
-| Long Fast          | ~10 km  | 1,1 kbps                 | −12,5 dB  | **General use (default)** — balanced range and speed                           |
-| Long Moderate      | ~20 km  | 0,34 kbps                | −15 dB    | Rural with some terrain; occasional use                                                           |
-| Lite Fast          | ~5 km   | 5,5 kbps                 | −10 dB    | EL 866 MHz SRD sagedusala (125 kHz ribalaius); võrreldav Medium Fast           |
-| Lite Slow          | ~10 km  | 1,1 kbps                 | −12,5 dB  | EL 866 MHz SRD sagedusala (125 kHz ribalaius); võrreldav Long Fast             |
+| Medium Fast        | ~5 km   | 5.5 kbps | −12,5 dB  | Suburban areas; moderate building density                                                         |
+| Medium Slow        | ~8 km   | 1,1 kbps                 | −15 dB    | Suburban/rural; moderate range with slower speed                                                  |
+| Long Turbo         | ~10 km  | 4,4 kbps                 | −12,5 dB  | Sarnane ulatus kui Pikk Kauge, aga 500 kHz ribalaiusega; kiirem läbilaskevõime                    |
+| Long Fast          | ~10 km  | 1,1 kbps                 | −17,5 dB  | **General use (default)** — balanced range and speed                           |
+| Long Moderate      | ~20 km  | 0,34 kbps                | −17,5 dB  | Rural with some terrain; occasional use                                                           |
+| Lite Fast          | ~5 km   | 5,5 kbps                 | −12,5 dB  | EL 866 MHz SRD sagedusala (125 kHz ribalaius); võrreldav Medium Fast           |
+| Lite Slow          | ~10 km  | 1,1 kbps                 | −15 dB    | EL 866 MHz SRD sagedusala (125 kHz ribalaius); võrreldav Long Fast             |
 | Narrow Fast        | ~5 km   | 2,7 kbps                 | −10 dB    | EL 868 MHz sagedusala (62,5 kHz sagedusriba); väldib häireid teiste seadmetega |
 | Narrow Slow        | ~10 km  | 1,1 kbps                 | −12,5 dB  | EL 868 MHz sagedusala (62,5 kHz ribalaius); võrreldav Long Fast                |
-| ~~Long Slow~~      | ~30 km  | 0,18 kbps                | −17,5 dB  | ⚠️ **Vananenud** — endiselt valitav, kuid võidakse tulevases püsivara versioonis eemaldada        |
+| ~~Long Slow~~      | ~30 km  | 0,18 kbps                | −20 dB    | ⚠️ **Vananenud** — endiselt valitav, kuid võidakse tulevases püsivara versioonis eemaldada        |
 | ~~Very Long Slow~~ | ~40+ km | 0,09 kbps                | −20 dB    | ⚠️ **Vananenud** — endiselt valitav, kuid võidakse tulevases püsivara versioonis eemaldada        |
 
 > ℹ️ **Note:** This table uses the common short names. In the app's preset dropdown they read as **Short Range - Fast**, **Long Range - Fast**, **Lite - Fast**, **Narrow - Fast**, and so on.
@@ -85,7 +85,7 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 
 **Practical guidance:**
 
-- **Urban mesh (many nodes, short distances):** Use **Long Fast** (default) or **Short Fast**. Higher speed means less airtime congestion when many nodes share the channel.
+- **Urban mesh (many nodes, short distances):** Use **Long Fast** (default) or **Short Fast**. Suurem kiirus tähendab väiksemat eetriaega, kui kanalit jagavad paljud sõlmed.
 - **Rural/sparse mesh (few nodes, long distances):** Use **Long Moderate**. Range matters more than speed when nodes are far apart.
 - **EU 866/868 MHz regulatory compliance:** Use **Lite Fast**, **Lite Slow**, **Narrow Fast**, or **Narrow Slow** — these are optimized for the EU SRD/868 MHz bands with narrower bandwidths.
 - **Fixed infrastructure links:** Use **Short Turbo** or **Long Turbo** for dedicated point-to-point links with good antennas and line-of-sight.
@@ -122,7 +122,7 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 | Power Saving                            | Enable low-power sleep mode             |
 | Shutdown After (s)   | Auto-shutdown idle timer                |
 | ADC Multiplier                          | Battery voltage calibration factor      |
-| Wait Bluetooth (s)   | Time to wait for BLE connection at boot |
+| Oota sinihammast(id) | Time to wait for BLE connection at boot |
 | Mesh SDS Timeout (s) | Super-deep-sleep timeout                |
 
 ### Võrgu sätted
@@ -139,23 +139,23 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 
 ### Sinihamba sätted
 
-| Setting           | Kirjeldus                                                           |
-| ----------------- | ------------------------------------------------------------------- |
-| Bluetooth Enabled | Enable/disable BLE radio                                            |
-| Sidumisreziim     | Määratud PIN kood, juhuslik PIN kood või PIN koodi pole             |
-| Fikseeritud PIN   | Sidumise PIN (vaikimisi: 123456) |
+| Setting            | Kirjeldus                                                           |
+| ------------------ | ------------------------------------------------------------------- |
+| Sinihammas lubatud | Enable/disable BLE radio                                            |
+| Sidumisreziim      | Määratud PIN kood, juhuslik PIN kood või PIN koodi pole             |
+| Fikseeritud PIN    | Sidumise PIN (vaikimisi: 123456) |
 
 ### Turva sätted
 
-| Setting                   | Kirjeldus                                                                             |
-| ------------------------- | ------------------------------------------------------------------------------------- |
-| Avalik võti               | Your node's public key (read-only)                                 |
-| Administraatori võti      | Key for remote administration                                                         |
-| Salajane võti             | Your node's private key (handle securely)                          |
-| ~~Admin Channel Enabled~~ | ⚠️ Eemaldatud — nüüd seadistatakse automaatselt, kui administraatori võti on määratud |
-| Debug Log                 | Edasta reaalajas silumislogi jadapordi/sinihamba ​​kaudu                              |
-| Jadaport lubatud          | Luba jadapordi konsoolile juurdepääs (teisaldatud seadme konfist)  |
-| Hallatud režiim           | Restrict non-admin channel changes                                                    |
+| Setting                 | Kirjeldus                                                                             |
+| ----------------------- | ------------------------------------------------------------------------------------- |
+| Avalik võti             | Your node's public key (read-only)                                 |
+| Administraatori võti    | Key for remote administration                                                         |
+| Salajane võti           | Your node's private key (handle securely)                          |
+| ~~Admin kanal lubatud~~ | ⚠️ Eemaldatud — nüüd seadistatakse automaatselt, kui administraatori võti on määratud |
+| Arendaja logi           | Edasta reaalajas arendajalogi jadapordi/sinihamba ​​kaudu                             |
+| Jadaühendus lubatud     | Luba jadapordi konsoolile juurdepääs (teisaldatud seadme konfist)  |
+| Hallatud režiim         | Piira mitte-administraatori kanali muudatusi                                          |
 
 ![Parooli väli](../../assets/screenshots/settings_password_field.png)
 

@@ -2,7 +2,7 @@
 title: Asetukset — Radio ja käyttäjä
 parent: Käyttöopas
 nav_order: 7
-last_updated: 2026-05-20
+last_updated: 2026-07-08
 description: Määritä radion laitteisto, LoRa-esiasetukset, käyttäjäprofiili, sijainnin jakaminen, virranhallinta ja tietoturva.
 aliases:
   - asetukset
@@ -59,19 +59,19 @@ Asetusten muuttamisen jälkeen napauta **Tallenna** kirjoittaaksesi määritykse
 
 | Esiasetus          | Kantama                 | Nopeus                    | SNR-raja                 | Paras käyttöön                                                                                                                     |
 | ------------------ | ----------------------- | ------------------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
-| Short Turbo        | ~1 km   | 21.9 kbps | −5 dB                    | Tiheä kaupunkiympäristö suoralla näköyhteydellä; paljon dataa siirtävät sovellukset                                                |
+| Short Turbo        | ~1 km   | 21.9 kbps | −7.5 dB  | Tiheä kaupunkiympäristö suoralla näköyhteydellä; paljon dataa siirtävät sovellukset                                                |
 | Short Fast         | ~3 km   | 10.9 kbps | −7.5 dB  | Kaupunkialueet, rakennuksia muutaman korttelin säteellä                                                                            |
 | Short Slow         | ~5 km   | 5.5 kbps  | −10 dB                   | Lyhyen kantaman esikaupunkialueet; kohtalainen rakennustiheys                                                                      |
-| Medium Fast        | ~5 km   | 5.5 kbps  | −10 dB                   | Esikaupunkialueet; kohtalainen rakennustiheys                                                                                      |
-| Medium Slow        | ~8 km   | 1.1 kbps  | −12.5 dB | Esikaupunki-/maaseutualueet; kohtalainen kantama ja hitaampi nopeus                                                                |
-| Long Turbo         | ~10 km  | 4.4 kbps  | −10 dB                   | Samankaltainen kantama kuin Long Fast -asetuksella, mutta 500 kHz:n kaistanleveydellä; suurempi tiedonsiirtonopeus |
-| Long Fast          | ~10 km  | 1.1 kbps  | −12.5 dB | **Yleiskäyttö (oletus)** — tasapaino kantaman ja nopeuden välillä                                               |
-| Long Moderate      | ~20 km  | 0.34 kbps | −15 dB                   | Maaseutualueet, joissa on jonkin verran maastonmuotoja; satunnainen käyttö                                                         |
-| Lite Fast          | ~5 km   | 5.5 kbps  | −10 dB                   | EU 866 MHz SRD -alue (125 kHz BW); verrattavissa Medium Fast -asetukseen                                        |
-| Lite Slow          | ~10 km  | 1.1 kbps  | −12.5 dB | EU 866 MHz SRD -alue (125 kHz BW); verrattavissa Long Fast -asetukseen                                          |
+| Medium Fast        | ~5 km   | 5.5 kbps  | −12.5 dB | Esikaupunkialueet; kohtalainen rakennustiheys                                                                                      |
+| Medium Slow        | ~8 km   | 1.1 kbps  | −15 dB                   | Esikaupunki-/maaseutualueet; kohtalainen kantama ja hitaampi nopeus                                                                |
+| Long Turbo         | ~10 km  | 4.4 kbps  | −12.5 dB | Samankaltainen kantama kuin Long Fast -asetuksella, mutta 500 kHz:n kaistanleveydellä; suurempi tiedonsiirtonopeus |
+| Long Fast          | ~10 km  | 1.1 kbps  | −17.5 dB | **Yleiskäyttö (oletus)** — tasapaino kantaman ja nopeuden välillä                                               |
+| Long Moderate      | ~20 km  | 0.34 kbps | −17.5 dB | Maaseutualueet, joissa on jonkin verran maastonmuotoja; satunnainen käyttö                                                         |
+| Lite Fast          | ~5 km   | 5.5 kbps  | −12.5 dB | EU 866 MHz SRD -alue (125 kHz BW); verrattavissa Medium Fast -asetukseen                                        |
+| Lite Slow          | ~10 km  | 1.1 kbps  | −15 dB                   | EU 866 MHz SRD -alue (125 kHz BW); verrattavissa Long Fast -asetukseen                                          |
 | Narrow Fast        | ~5 km   | 2.7 kbps  | −10 dB                   | EU 868 MHz -alue (62,5 kHz BW); välttää häiriöitä muiden laitteiden kanssa                                      |
 | Narrow Slow        | ~10 km  | 1.1 kbps  | −12.5 dB | EU 868 MHz -alue (62,5 kHz BW); verrattavissa Long Fast -asetukseen                                             |
-| ~~Long Slow~~      | ~30 km  | 0.18 kbps | −17.5 dB | ⚠️ **Vanhentunut** — edelleen valittavissa, mutta voidaan poistaa tulevassa laiteohjelmistoversiossa                               |
+| ~~Long Slow~~      | ~30 km  | 0.18 kbps | −20 dB                   | ⚠️ **Vanhentunut** — edelleen valittavissa, mutta voidaan poistaa tulevassa laiteohjelmistoversiossa                               |
 | ~~Very Long Slow~~ | ~40+ km | 0.09 kbps | −20 dB                   | ⚠️ **Vanhentunut** — edelleen valittavissa, mutta voidaan poistaa tulevassa laiteohjelmistoversiossa                               |
 
 > ℹ️ **Huomautus:** Tässä taulukossa käytetään yleisesti käytössä olevia lyhyitä nimiä. Sovelluksen esiasetusvalikossa ne näkyvät nimillä **Lyhyt kantama - Nopea**, **Pitkä kantama - Nopea**, **Lite - Nopea**, **Kapea - Nopea** ja niin edelleen.

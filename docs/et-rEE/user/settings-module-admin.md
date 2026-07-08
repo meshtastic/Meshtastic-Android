@@ -2,7 +2,7 @@
 title: Sätted - moodulid & admin
 parent: User Guide
 nav_order: 8
-last_updated: 2026-05-20
+last_updated: 2026-07-08
 description: Muuda valikulisi funktsioonimooduleid (MQTT, telemeetria, salvestatud sõnumid, TAK ja palju muud) ja teosta seadme haldamist.
 aliases:
   - moodul
@@ -48,7 +48,7 @@ Vaata [MQTT](mqtt) üksikasjalikumat kasutusjuhendit, mis sisaldab teavet krüpt
 
 ### Jadapordi moodul
 
-Võimaldab jadapordi sidet väliste seadmete integreerimiseks (GPS-moodulid, andurid või kohandatud riistvara). Kui lubatud, saab sõlme jadaport saata ja vastu võtta protobuf- või tekstiandmeid, võimaldades välistel mikrokontrolleritel või arvutitel võrguga suhelda.
+Võimaldab jadapordi sidet väliste seadmete integreerimiseks (GPS-moodulid, andurid või kohandatud riistvara). Kui lubatud, saab sõlme jadaühendus saata ja vastu võtta protobuf- või tekstiandmeid, võimaldades välistel mikrokontrolleritel või arvutitel võrguga suhelda.
 
 | Sätted          | Kirjeldus                      |
 | --------------- | ------------------------------ |
@@ -64,7 +64,7 @@ Juhib raadio riistvara summeri-, LED- või vibratsioonihoiatusi. Useful for devi
 
 | Sätted                           | Kirjeldus                     |
 | -------------------------------- | ----------------------------- |
-| Lubatud                          | Activate notifications        |
+| Lubatud                          | Aktiveeri märguanded          |
 | Alert Message                    | Notify on incoming messages   |
 | Alert Message Buzzer             | Use buzzer for messages       |
 | Alert Message Vibra              | Use vibration for messages    |
@@ -78,13 +78,14 @@ Juhib raadio riistvara summeri-, LED- või vibratsioonihoiatusi. Useful for devi
 
 Buffers messages for nodes that were temporarily offline, then replays them when those nodes reconnect. Essential for meshes where nodes go in and out of range regularly — ensures messages aren't lost during brief disconnections.
 
-| Sätted                                     | Kirjeldus                  |
-| ------------------------------------------ | -------------------------- |
-| Lubatud                                    | Activate store and forward |
-| Südamelöök(id)          | Announcement interval      |
-| Records                                    | Maximum stored messages    |
-| History Return (max)    | Max messages to replay     |
-| History Return (window) | Time window for replay     |
+| Sätted                                     | Kirjeldus                                                                                                                                        |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Lubatud                                    | Activate store and forward                                                                                                                       |
+| Südamelöögid                               | Periodically announce this node's store-and-forward capability                                                                                   |
+| Records                                    | Maximum stored messages                                                                                                                          |
+| History Return (max)    | Max messages to replay                                                                                                                           |
+| History Return (window) | Time window for replay                                                                                                                           |
+| Server                                     | Act as a store-and-forward server for the mesh (requires ample memory, e.g. ESP32 with PSRAM) |
 
 > 💡 **Vihje:** Salvesta ja edasta töötab kõige paremini rohke mäluga sõlmedes (ESP32 koos PSRAM-iga). Router nodes are ideal candidates since they're typically always-on.
 
@@ -143,8 +144,9 @@ GPIO control over the mesh network. Võimaldab kaugsõlmel lugeda või kirjutada
 
 | Sätted                     | Kirjeldus                                                               |
 | -------------------------- | ----------------------------------------------------------------------- |
-| Lubatud                    | Activate remote GPIO access                                             |
+| Lubatud                    | Aktiveeri kaugjuurdepääs GPIO-le                                        |
 | Luba määratlemata sisendid | Luba juurdepääs mis tahes GPIO sisendile (turvarisk) |
+| Available Pins             | Up to 4 GPIO pins this node exposes for remote read/write               |
 
 > ⚠️ **Hoiatus:** Funktsiooni „Luba määratlemata sisendkontaktid” lubamine annab kaugsõlmedele juurdepääsu kõigile GPIO sisendile, mis võib häirida raadio enda riistvara. Only enable on dedicated GPIO nodes.
 
@@ -152,12 +154,13 @@ GPIO control over the mesh network. Võimaldab kaugsõlmel lugeda või kirjutada
 
 Levitab teavet otse kuuldud naabrite kohta, võimaldades kärgvõrgu topoloogia kaardistamist. Iga lubatud sõlm jagab perioodiliselt nimekirja teistest sõlmedest, mida ta kuuleb ja nende signaali kvaliteedist.
 
-| Sätted                                     | Kirjeldus                             |
-| ------------------------------------------ | ------------------------------------- |
-| Lubatud                                    | Aktiveeri naabrite leviring           |
-| Värskendusintervall(id) | Kui tihti naabrite nimekirja levitada |
+| Sätted                                     | Kirjeldus                                                                                                                                   |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Lubatud                                    | Aktiveeri naabrite leviring                                                                                                                 |
+| Värskendusintervall(id) | Kui tihti naabrite nimekirja levitada                                                                                                       |
+| Transmit Over LoRa                         | Edasta naabriinfot ka LoRa kaudu, mitte ainult MQTT/telefoni kaudu. Vaikimisi võtit ja nime kasutavat kanalit pole saadaval |
 
-See [Discovery](discovery) for how to use neighbor data for mesh topology exploration.
+Vaata [Avasta](Discovery) kuidas kasutada naabri-andmeid kärgvõrgu topoloogia uurimiseks.
 
 ### Ambientvalguse moodul
 
@@ -165,23 +168,24 @@ Juhib toetatud riistvaral NeoPixeli või muid adresseeritavaid RGB LEDe. Can be 
 
 | Sätted             | Kirjeldus                                                          |
 | ------------------ | ------------------------------------------------------------------ |
-| Lubatud            | LED juhtimise aktiveerimine                                        |
-| LED olek           | Sees, Väljas või määrake konkreetne värv                           |
+| LED olek           | Turn the LED on or off                                             |
+| Pinge              | LED current limit (0–31)                        |
 | Red / Green / Blue | Individuaalsete värvikanalite väärtused (0–255) |
 
 ### Tuvastusanduri moodul
 
 Turns your node into a motion or door sensor alert system. Kui GPIO sisend tuvastab oleku muutuse (liikumine tuvastatud, uks avatud), levitab sõlm kärgvõrgu kaudu hoiatusteate.
 
-| Sätted                                     | Kirjeldus                                                                  |
-| ------------------------------------------ | -------------------------------------------------------------------------- |
-| Lubatud                                    | Aktiveeri tuvastusandur                                                    |
-| Ekraani sisend                             | GPIO sisend on anduriga ühendatud                                          |
-| Tuvastus käivitus kõrgel tasemel           | Käivitub, kui sisend läheb kõrgeks (võrreldes madalaga) |
-| Minimaalne leviring(id) | Minimaalne aeg hoiatusteadete levitamisel                                  |
-| Riiklik ringhääling(ud) | Perioodilise oleku levitamise intervall                                    |
-| Saada hoiatuskell                          | Lisa märguannetesse hoiatuskella sümbol                                    |
-| Friendly Name                              | Custom name for this sensor                                                |
+| Sätted                                     | Kirjeldus                                                                                                                               |
+| ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Lubatud                                    | Aktiveeri tuvastusandur                                                                                                                 |
+| Ekraani sisend                             | GPIO sisend on anduriga ühendatud                                                                                                       |
+| Detection Trigger Type                     | How the pin's state maps to a detection event (e.g. active high/low, edge-triggered) |
+| Use Input Pullup Mode                      | Enable the pin's internal pull-up resistor                                                                                              |
+| Minimaalne leviring(id) | Minimaalne aeg hoiatusteadete levitamisel                                                                                               |
+| Riiklik ringhääling(ud) | Perioodilise oleku levitamise intervall                                                                                                 |
+| Saada hoiatuskell                          | Lisa märguannetesse hoiatuskella sümbol                                                                                                 |
+| Friendly Name                              | Custom name for this sensor                                                                                                             |
 
 ### Paxloenduri moodul
 
@@ -225,11 +229,7 @@ Remotely reboot a connected or administered node.
 
 ### Arendaja paneel
 
-View detailed diagnostic information:
-
-- Protocol buffers debug output
-- Mesh packet log
-- Ühenduse oleku üksikasjad
+Opens the **Packets** and **App logs** tabs for viewing, filtering, and exporting diagnostic output. See [Debug Logs](debug-logs) for the full walkthrough.
 
 ### Troubleshooting Remote Admin
 

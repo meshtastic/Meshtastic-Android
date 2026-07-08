@@ -58,7 +58,7 @@ Kogukond haldab avaliku vahendajat aadressil `mqtt.meshtastic.org`. This is inte
 
 > ℹ️ **Note:** Connections to `mqtt.meshtastic.org` always use TLS (port 8883), even if the TLS toggle is off. For any other broker, TLS is used only when you enable it (port 8883 with TLS, 1883 without).
 
-> 🔒 **Privaatsus:** Avaliku vahendaja sõnumeid saavad lugeda kõik tellijad. Always use channel encryption for private communications.
+> 🔒 **Privaatsus:** Avaliku vahendaja sõnumeid saavad lugeda kõik tellijad. Privaatse suhtluse jaoks kasutage alati kanali krüpteerimist.
 
 ### Private Broker
 
@@ -85,7 +85,7 @@ Kui kaardiaruandlus on lubatud, avaldab sõlm oma asukoha Meshtasticu kogukonnak
 | **Üleslink** | Sõnumid kärgvõrgust → MQTT maakler |
 | **Allalink** | Sõnumid MQTT maaklerist → kärgvõrk |
 
-Configure per-channel which directions are active to control message flow and airtime usage.
+Konfi iga kanali kohta, millised suunad on aktiivsed, et kontrollida sõnumivoogu ja eetriaega.
 
 ## Message Formats
 
@@ -95,7 +95,7 @@ MQTT kasutab protobuf-sõnumivormingut:
 | ------------ | -------------------------------------- | -------------------------- |
 | **Protobuf** | Binaarne Meshtastic protobuf kodeering | Node-to-node mesh bridging |
 
-> ⚠️ **Märkus:** JSON väljundi tugi eemaldati püsivarast. The `json_enabled` setting is still visible in the app for legacy compatibility but has no effect on current firmware versions.
+> ⚠️ **Märkus:** JSON väljundi tugi eemaldati püsivarast. Säte `json_enabled` on rakenduses endiselt nähtav, et näha ka pärandühilduvust, kuid see ei mõjuta praegusi püsivara versioone.
 
 ## Encryption & Privacy
 
@@ -127,7 +127,7 @@ Understanding the layered encryption model:
 ### Messages Not Bridging
 
 - **Kontrolli üleslingi/allalingi seadeid** — kui lubatud on ainult üleslink, liiguvad sõnumid võrgust MQTT-sse, aga mitte tagasi. Luba vastuvõtval lüüsil allalink.
-- **Channel mismatch** — both gateways must share the same channel with the same PSK. A mismatch means messages are encrypted with different keys and appear as garbage.
+- **Kanali mittevastavus** – mõlemad lüüsid peavad jagama sama kanalit sama PSK-ga. A mismatch means messages are encrypted with different keys and appear as garbage.
 - **Topic mismatch** — ensure both gateways use the same root topic. The default `msh` works for the public broker.
 
 ## Related Topics

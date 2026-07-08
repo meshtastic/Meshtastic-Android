@@ -2,7 +2,7 @@
 title: Entdecken
 parent: User Guide
 nav_order: 12
-last_updated: 2026-06-11
+last_updated: 2026-07-08
 description: Explore your mesh network — the Local Mesh Discovery scanner, traceroute paths, neighbor maps, and node discovery tools.
 aliases:
   - mesh-discovery
@@ -113,12 +113,12 @@ You → Node A (SNR: 8.5, RSSI: -95) → Node B (SNR: 5.2, RSSI: -108) → Targe
 
 Each hop represents a relay node that forwarded the message. The SNR and RSSI values at each hop tell you about the link quality on that specific segment.
 
-| What to look for                                                           | What it means                                                               |
-| -------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| All hops show Good SNR (> 5 dB)                         | Healthy path — messages flow reliably                                       |
-| One hop shows Bad SNR (< 0 dB) | Weak link — this relay segment is fragile                                   |
-| Many hops (4+)                                          | Long path — consider repositioning a node to shorten it                     |
-| Different path on retry                                                    | Mesh is adapting — multiple routes exist (this is good!) |
+| What to look for                                                                  | What it means                                                               |
+| --------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| All hops show Good SNR (≥ −7 dB, green)                        | Healthy path — messages flow reliably                                       |
+| One hop shows Bad SNR (< −15 dB, red) | Weak link — this relay segment is fragile                                   |
+| Many hops (4+)                                                 | Long path — consider repositioning a node to shorten it                     |
+| Different path on retry                                                           | Mesh is adapting — multiple routes exist (this is good!) |
 
 > 💡 **Tip:** Run traceroute several times over a few minutes. If the path changes, your mesh has redundant routes — a sign of a well-connected network.
 

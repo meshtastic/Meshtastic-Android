@@ -2,7 +2,7 @@
 title: 尋找
 parent: 使用者指南
 nav_order: 12
-last_updated: 2026-06-11
+last_updated: 2026-07-08
 description: Explore your mesh network — the Local Mesh Discovery scanner, traceroute paths, neighbor maps, and node discovery tools.
 aliases:
   - mesh-探索
@@ -113,12 +113,12 @@ The tools below are available at any time from the node list and node detail scr
 
 每個跳躍點代表一個轉送該訊息的中繼節點。 每個跳躍點的 SNR 與 RSSI 數值可反映該路段的連線品質。
 
-| 判讀重點                                          | 代表意義                           |
-| --------------------------------------------- | ------------------------------ |
-| 所有跳躍點的 SNR 均佳（> 5 dB）                         | 路徑狀況良好 — 訊息可穩定傳送               |
-| 某跳躍點的 SNR 不佳（< 0 dB） | 訊號薄弱 — 此中繼路段不穩定                |
-| 跳躍點過多（4 個以上）                                  | 路徑過長 — 建議調整節點位置以縮短路徑           |
-| 重試時走不同路徑                                      | Mesh 網路正在自動調整 — 存在多條路由（這是好現象！） |
+| 判讀重點                                                                              | 代表意義                           |
+| --------------------------------------------------------------------------------- | ------------------------------ |
+| All hops show Good SNR (≥ −7 dB, green)                        | 路徑狀況良好 — 訊息可穩定傳送               |
+| One hop shows Bad SNR (< −15 dB, red) | 訊號薄弱 — 此中繼路段不穩定                |
+| 跳躍點過多（4 個以上）                                                                      | 路徑過長 — 建議調整節點位置以縮短路徑           |
+| 重試時走不同路徑                                                                          | Mesh 網路正在自動調整 — 存在多條路由（這是好現象！） |
 
 > 💡 提示：請在幾分鐘內多次執行路由追蹤。 若路徑發生變化，代表您的 mesh 網路具備備援路由 — 這是網路連線良好的象徵。
 

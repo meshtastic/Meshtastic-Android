@@ -52,27 +52,27 @@ For network-connected radios:
 
 ### Sinihammas (BLE)
 
-Bluetooth Low Energy is supported on Desktop via the [Kable](https://github.com/JuulLabs/kable) library:
+Sinihamba madal voolutarve on lauaarvutites toetatud [Kable](https://github.com/JuulLabs/kable) teegi kaudu:
 
-1. Ensure your system has a Bluetooth adapter.
+1. Veendu, et süsteemil on sinihamba adapter.
 2. Rakendus otsib automaatselt lähedalasuvaid Meshtastic raadioid.
 3. Select your device from the Connect screen.
 
 ## Feature Parity
 
-| Feature                                      | Android | Desktop | Sõnumid                                                                    |
-| -------------------------------------------- | ------- | ------- | -------------------------------------------------------------------------- |
-| Messaging                                    | ✓       | ✓       | Full parity                                                                |
-| Node List                                    | ✓       | ✓       | Full parity                                                                |
-| Kaart                                        | ✓       | ◐       | Map tab exists on desktop, but the interactive map view is Android-only    |
-| Sätted                                       | ✓       | ✓       | Full parity                                                                |
-| Sinihammas (BLE)          | ✓       | ✓       | Via Kable on desktop                                                       |
-| Püsivara uuendus                             | ✓       | ◐       | Desktop supports in-app USB firmware update; BLE/Wi-Fi OTA is Android-only |
-| Notifications                                | ✓       | ✓       | Native OS notifications                                                    |
-| Widgets                                      | ✓       | ✗       | Android-only                                                               |
-| Android auto                                 | ✓       | ✗       | Android-only — not available on Desktop or iOS                             |
-| AI Assistant (Chirpy)     | ✓\*     | ✗       | Google flavor Android only                                                 |
-| App Functions (system AI) | ✓†      | ✗       | Google flavor Android only                                                 |
+| Feature                                      | Android | Desktop | Sõnumid                                                                                                     |
+| -------------------------------------------- | ------- | ------- | ----------------------------------------------------------------------------------------------------------- |
+| Messaging                                    | ✓       | ✓       | Full parity                                                                                                 |
+| Node List                                    | ✓       | ✓       | Full parity                                                                                                 |
+| Kaart                                        | ✓       | ◐       | Map tab exists on desktop, but the interactive map view is Android-only                                     |
+| Sätted                                       | ✓       | ✓       | Full parity                                                                                                 |
+| Sinihammas (BLE)          | ✓       | ✓       | Via Kable on desktop                                                                                        |
+| Püsivara uuendus                             | ✓       | ✓       | Rakendusesisese USB, BLE ja Wi-Fi (ESP32) värskendused toimivad samamoodi nagu Androidis |
+| Märguanded                                   | ✓       | ✓       | Emakeelsed op.süsteemi märguanded                                                           |
+| Widgets                                      | ✓       | ✗       | Android-only                                                                                                |
+| Android auto                                 | ✓       | ✗       | Android-only — not available on Desktop or iOS                                                              |
+| AI Assistant (Chirpy)     | ✓\*     | ✗       | Google flavor Android only                                                                                  |
+| App Functions (system AI) | ✓†      | ✗       | Google flavor Android only                                                                                  |
 
 \*Chirpy AI requires Android 14+ on Google flavor builds with supported hardware.
 
@@ -105,11 +105,11 @@ All shortcuts use the **Meta** key — that's ⌘ (Command) on macOS and the Sup
 
 ### Notification Preferences
 
-The Desktop app provides in-app toggles for controlling which notifications are shown — messages, new nodes, and low battery alerts. Access these from **Settings → Notifications** within the app.
+Töölauarakendus pakub rakendusesiseste kuvatavate märguannete juhtimist – sõnumite, uute sõlmede ja aku tühjenemise märguanded. Nendele pääsed ligi rakenduses menüüst **Seaded → Märguanded**.
 
 ## Built-in Documentation Browser
 
-The Desktop app includes a built-in documentation browser for quick access to help content without leaving the application.
+Töölauarakendusel on sisseehitatud dokumentatsioonibrauser, mis võimaldab kiiret juurdepääsu abisisule ilma rakendusest lahkumata.
 
 ![Docs browser with table of contents](../../assets/screenshots/docs-browser_toc.png)
 
@@ -136,16 +136,15 @@ Requirements:
 
 ## Known Limitations
 
-- Firmware updates over the air (BLE/Wi-Fi) are Android-only; on desktop, use the in-app USB update or the [Web Flasher](https://flasher.meshtastic.org)
 - The interactive map view is Android-only — the Map tab is present but does not render a map on desktop
-- Some Android-specific features (widgets, specific notification channels) are unavailable
+- Mõned Androidile omased funktsioonid (vidinad, kindlad teavituskanalid) pole saadaval
 - Performance may vary on low-spec hardware running Compose Desktop
 - Lauaarvutid ei toeta veel BLE liitmist (sidumine toimib ilma ühendamiseta)
 
 ## Related Topics
 
 - [Connections](connections) — connection methods overview
-- [Firmware Updates](firmware) — in-app USB update on desktop, or the [Web Flasher](https://flasher.meshtastic.org)
+- [Püsivara uuendus](firmware) — USB, BLE ja Wi-Fi värskendused toimivad samamoodi nagu Androidis
 
 ---
 

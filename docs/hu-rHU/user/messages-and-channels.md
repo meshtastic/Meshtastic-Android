@@ -2,7 +2,7 @@
 title: Messages & Channels
 parent: User Guide
 nav_order: 3
-last_updated: 2026-06-25
+last_updated: 2026-07-08
 description: Send and receive messages, manage channels, configure encryption, search conversations, and use quick chat, reactions, and message actions.
 aliases:
   - channels
@@ -57,15 +57,17 @@ Direct messages (DMs) are point-to-point encrypted communications between two sp
 
 ### Message States
 
-| State                             | Icon | Meaning                                                                                                           |
-| --------------------------------- | ---- | ----------------------------------------------------------------------------------------------------------------- |
-| Queued                            | ⏳    | Message waiting to be sent                                                                                        |
-| En route                          | ✓    | Delivered to the radio, awaiting acknowledgment                                                                   |
-| Delivered                         | ✓✓   | Acknowledgment received from recipient                                                                            |
-| Received                          | ✓    | Message received from the mesh (incoming)                                                      |
-| S&F Routing   | 🔗   | Store & Forward: message being routed through an S&F node |
-| S&F Confirmed | 🔗   | Store & Forward: delivery confirmed via S&F node          |
-| Hiba                              | ✗    | Delivery failed after retries                                                                                     |
+A status label appears under **your own** outgoing messages only (incoming messages from others show no status label):
+
+| State                               | Meaning                                                                                                                              |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Sending…                            | Queued or already handed to the radio, not yet resolved either way (queued and en-route both show this same text) |
+| Delivered to recipient              | The strongest confirmation for a direct message — an acknowledgment came back                                                        |
+| Delivered to mesh                   | For a channel broadcast, the message reached the mesh (broadcasts have no per-recipient ack)                      |
+| Relayed, not confirmed by recipient | For a direct message, shown in a warning color — the message was relayed but no acknowledgment has come back yet                     |
+| Routing via SF++ chain…             | Being routed/buffered by the Store & Forward Plus Plus chain                                                     |
+| Confirmed on SF++ chain             | Confirmed delivered via the SF++ chain                                                                                               |
+| Hiba                                | Delivery failed — tap the status for the specific reason (see Delivery Errors below)                              |
 
 ### Delivery Errors
 

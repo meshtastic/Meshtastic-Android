@@ -2,7 +2,7 @@
 title: Node Metrics
 parent: User Guide
 nav_order: 5
-last_updated: 2026-06-25
+last_updated: 2026-07-08
 description: Telemetry dashboards for each mesh node — device health, environment sensors, air quality, signal quality, power, traceroute, and position history.
 aliases:
   - metrics
@@ -101,12 +101,12 @@ Radio signal quality information:
 
 Signal quality is rated from **SNR relative to the active LoRa modem preset's demodulation floor**, not from fixed thresholds — a given SNR means different things on different presets (e.g. −15 dB is fine on LongSlow but unusable on ShortFast). RSSI is shown but is not part of the rating. Letting `limit` be the preset's SNR limit:
 
-| Quality | Criteria                                                                  |
-| ------- | ------------------------------------------------------------------------- |
-| 良好      | SNR above the preset's limit                                              |
-| 普通      | up to 5.5 dB below the limit                              |
-| 不良      | between 5.5 dB and 7.5 dB below the limit |
-| 無       | more than 7.5 dB below the limit                          |
+| Quality | Criteria                                                         |
+| ------- | ---------------------------------------------------------------- |
+| 良好      | SNR above the preset's limit                                     |
+| 普通      | less than 5.5 dB below the limit                 |
+| 不良      | 5.5 dB to 7.5 dB below the limit |
+| 無       | more than 7.5 dB below the limit                 |
 
 See [Understanding the Signal Meter](signal-meter) for the full explanation.
 

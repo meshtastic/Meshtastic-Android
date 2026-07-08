@@ -1,46 +1,46 @@
 ---
-title: Home Screen Widget
+title: ホーム画面ウィジェット
 parent: User Guide
 nav_order: 20
 last_updated: 2026-06-25
-description: Add the Meshtastic home screen widget to glance at your connected radio's local stats without opening the app.
+description: Meshtastic のホーム画面ウィジェットを追加すると、アプリを開かずに、接続中の無線機のローカル統計をひと目で確認できます。
 aliases:
   - widget
   - home-screen-widget
   - local-stats-widget
 ---
 
-# Home Screen Widget
+# ホーム画面ウィジェット
 
-On Android, Meshtastic provides a home screen **widget** that shows live local statistics from your connected radio at a glance — no need to open the app.
+Android では、Meshtastic はホーム画面の**ウィジェット**を提供しており、接続中の無線機のライブなローカル統計をひと目で確認できます。アプリを開く必要はありません。
 
-## What It Shows
+## 表示される内容
 
-The widget displays the **connected radio's** current local stats:
+ウィジェットは、**接続中の無線機**の現在のローカル統計を表示します：
 
-- **Battery** — the radio's battery level, or _Powered_ when running on external power
-- **ChUtil** — channel utilization (how busy the LoRa channel is, as a percentage)
-- **AirUtil** — airtime utilization (how much of the duty cycle your radio is transmitting)
-- **Traffic** — packets transmitted / received, and duplicates seen
-- **Relays** — packets relayed and relay cancellations (shown when the radio is relaying)
+- **Battery**：無線機のバッテリー残量。外部電源で動作している場合は _Powered_（給電中）
+- **ChUtil**：チャンネル利用率（LoRa チャンネルがどれだけ混雑しているかを割合で表示）
+- **AirUtil**：電波利用率（無線機がデューティサイクルのうちどれだけ送信しているか）
+- **Traffic**：送受信したパケットと、検出した重複
+- **Relays**：中継したパケットと、中継のキャンセル（無線機が中継しているときに表示）
 
-Tap the widget to open the app, or use its refresh control to request fresh stats.
+ウィジェットをタップするとアプリが開きます。更新コントロールを使うと、最新の統計を要求できます。
 
-> 💡 **Tip:** The values reflect the radio you are currently connected to. If the app isn't connected to a radio, the widget shows the last known stats until it reconnects.
+> 💡 **ヒント：** 値は、現在接続している無線機を反映します。 アプリが無線機に接続していない場合、ウィジェットは再接続するまで、最後に分かっている統計を表示します。
 
-## Adding the Widget
+## ウィジェットを追加する
 
-1. Long-press an empty area of your Android home screen.
-2. Tap **Widgets**.
-3. Find **Meshtastic** in the list and drag the **Local Stats** widget to your home screen.
-4. Resize it as needed — the layout adapts to the available space.
+1. Android のホーム画面の空いている場所を長押しします。
+2. 「**ウィジェット**」をタップします。
+3. リストで **Meshtastic** を見つけ、「**Local Stats**」ウィジェットをホーム画面にドラッグします。
+4. 必要に応じてサイズを変更します。レイアウトは利用可能なスペースに合わせて調整されます。
 
-> ⚠️ **Note:** The widget is Android-only. It is not available on the Desktop or iOS builds.
+> ⚠️ **注意：** このウィジェットは Android 専用です。 デスクトップ版や iOS 版では利用できません。
 
-## Related Topics
+## 関連トピック
 
-- [Node Metrics](node-metrics) — the full Signal Quality and Local Stats history inside the app
-- [Connections](connections) — connect to a radio so the widget has stats to show
-- [Discovery](discovery) — channel and airtime utilization across the mesh
+- [ノードメトリクス](node-metrics)：アプリ内の完全な信号品質とローカル統計の履歴
+- [コネクション](connections)：ウィジェットに表示する統計が得られるよう、無線機に接続する
+- [探索](discovery)：メッシュ全体のチャンネル利用率と電波利用率
 
 ---

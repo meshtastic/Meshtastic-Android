@@ -2,8 +2,8 @@
 title: TAK Integration
 parent: User Guide
 nav_order: 10
-last_updated: 2026-05-13
-description: Koostöö ATAKi ja WinTAKiga — CoT positsiooni jagamine, TAK rollid ja pluginate seadistamine.
+last_updated: 2026-07-08
+description: Koostöö ATAKi ja WinTAKiga — CoT asukoha jagamine, TAK rollid ja pluginate seadistamine.
 aliases:
   - tak
   - atak
@@ -62,10 +62,10 @@ The app can also run a **local TAK server** so ATAK/iTAK clients on the same dev
 
 TAKiga seotud rollidega seadistatud sõlmed käituvad tavalistest klientidest erinevalt:
 
-| Roll                  | Kirjeldus                                                                                                                                                                                                                                                                                       |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **TAK**               | Täielik TAK koostalitlusvõime – saadab ja võtab vastu CoT andmeid, vestlussõnumeid ja PLI-uuendusi. Functions as a standard client plus TAK bridge.                                                                                                             |
-| **TAK jälgimisseade** | Ainult asukohapõhine TAK väljund – levitab PLI automaatselt regulaarsete intervallidega ilma kasutaja sekkumiseta. Optimized for unattended position beacons (vehicles, equipment, waypoints). Does not relay chat messages. |
+| Roll                  | Kirjeldus                                                                                                                                                                                                                                                                                                  |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **TAK**               | Täielik TAK koostalitlusvõime – saadab ja võtab vastu CoT andmeid, vestlussõnumeid ja PLI-uuendusi. Functions as a standard client plus TAK bridge.                                                                                                                        |
+| **TAK jälgimisseade** | Ainult asukohapõhine TAK väljund – levitab PLI automaatselt regulaarsete intervallidega ilma kasutaja sekkumiseta. Optimeeritud järelevalveta asukohamajakate (sõidukid, seadmed, teekonnapunktid) jaoks. Does not relay chat messages. |
 
 > 💡 **Vihje:** Kasuta **TAK jälgimisseadet** seadmete puhul, mis peavad edastama ainult asukohta (nt sõidukisse paigaldatud raadio). Use **TAK** for devices where users actively participate in TAK operations.
 
@@ -77,26 +77,25 @@ TAK messages use the Cursor on Target XML format — a military standard for sha
 
 TAK rollide kasutamisel levitab sinu sõlm identiteediteavet, mis kuvatakse TAK kaartidel:
 
-| Sätted  | Kirjeldus                                                                                            |
-| ------- | ---------------------------------------------------------------------------------------------------- |
-| Tiim    | Sinu meeskonna värv TAK kaardil (nt sinine, punane, tsüaansinine, roheline)       |
-| Roll    | Sinu operatiivne roll (meeskonnaliige, meeskonnajuht, peakorter, meedik, RTO jne) |
-| Kutsung | Sinu TAK kutsung (vaikimisi sinu Meshtastic pikk nimi)                            |
+| Sätted         | Kirjeldus                                                                                            |
+| -------------- | ---------------------------------------------------------------------------------------------------- |
+| Meeskonna värv | Sinu meeskonna värv TAK kaardil (nt sinine, punane, tsüaansinine, roheline)       |
+| Liikme roll    | Sinu operatiivne roll (meeskonnaliige, meeskonnajuht, peakorter, meedik, RTO jne) |
 
-Need sätted kuvatakse menüüs **Seaded → Mooduli konfiguratsioon → TAK**, kui TAK moodul on lubatud.
+Need sätted kuvatakse menüüs **Seaded → Mooduli konfiguratsioon → TAK**, kui TAK moodul on lubatud. Your TAK callsign isn't a separate setting — it's derived automatically from your Meshtastic node name.
 
 > 💡 **Vihje:** Meeskonna/rolli värvid on TAK standardsed kuuluvusvärvid. Koordineeri oma TAK meeskonnaga järjepidevat meeskonnatöö jagamist.
 
-## Wire Format (V1 / V2)
+## Sõnumivorming (V1 / V2)
 
-Meshtastic toetab kahte TAK wire-formaati:
+Meshtastic supports two TAK wire formats, chosen automatically based on the connected radio's firmware — no manual configuration needed:
 
-| Format                          | Compatibility                                                   | Features                                                  |
-| ------------------------------- | --------------------------------------------------------------- | --------------------------------------------------------- |
-| V1 (Legacy)  | ATAK plugin v1.x, vanem püsivara                | Basic CoT position sharing only                           |
-| V2 (Current) | ATAK plugin v2.x, püsivara 2.3+ | Full CoT support including chat, routes, zstd compression |
+| Format                           | Compatibility                                           | Features                                                                                                                                                                                                           |
+| -------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| V1 (Legacy)   | Püsivara 2.7.x ja vanem | Bare protobuf encoding on port 72. Supports position sharing (PLI) and chat (GeoChat) only — shapes, markers, routes, and other typed CoT events are dropped |
+| V2 (praegune) | Püsivara 2.8.0+         | Compact, zstd-compressed encoding on port 78. Adds shapes, markers, routes, aircraft, casevac, emergency, and task CoT types on top of everything V1 supports                                      |
 
-The app automatically selects V2 when both sides support it. Manuaalset konfigureerimist pole vaja – TAK-moodul lepib vormingu kokku püsivara võimaluste põhjal.
+Sõlm edastab vanematelt sõlmedelt pärit V1 pakette isegi V2 kasutamise ajal, seega sega-püsivaraga võrgud töötavad edasi.
 
 ## Kasutamine koos ATAKiga
 
@@ -111,13 +110,13 @@ Kui on seadistatud:
 
 ## Troubleshooting
 
-| Problem                                     | Cause                                 | Solution                                                                           |
-| ------------------------------------------- | ------------------------------------- | ---------------------------------------------------------------------------------- |
-| Sõlme ei kuvata ATAK kaardile               | TAK moodul on keelatud või vale roll  | Veendu, et TAK moodul on lubatud ja sõlme roll on TAK või TAK jälgimisseade        |
-| Asukohavärskendused on aegunud              | GPS fix lost or interval too long     | Kontrolli GPSi olekut; vähenda asukoha konfis asukoha levitamise intervalli        |
-| ATAK plugin kuvab teadet „ühendus katkenud” | BLE connection lost or plugin crashed | Ühenda Meshtastic rakenduses sinihammas uuesti ja seejärel taaskäivita ATAK plugin |
-| Chat messages not bridging                  | V1 format doesn't support chat        | Ensure both nodes run firmware 2.3+ for V2 wire format             |
-| CoT data not flowing                        | Channel mismatch                      | All TAK nodes must be on the same channel with matching encryption                 |
+| Problem                                     | Cause                                                                                                     | Solution                                                                                                   |
+| ------------------------------------------- | --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Sõlme ei kuvata ATAK kaardile               | TAK moodul on keelatud või vale roll                                                                      | Veendu, et TAK moodul on lubatud ja sõlme roll on TAK või TAK jälgimisseade                                |
+| Asukohavärskendused on aegunud              | GPS fix lost or interval too long                                                                         | Kontrolli GPSi olekut; vähenda asukoha konfis asukoha levitamise intervalli                                |
+| ATAK plugin kuvab teadet „ühendus katkenud” | BLE connection lost or plugin crashed                                                                     | Ühenda Meshtastic rakenduses sinihammas uuesti ja seejärel taaskäivita ATAK plugin                         |
+| Shapes, markers, or routes not bridging     | Sending node is on legacy V1 (firmware 2.7.x or older) | Värskenda saatva sõlme püsivara versioonile 2.8.0+ sõnumivormingu V2 jaoks |
+| CoT data not flowing                        | Kanali mittevastavus                                                                                      | Kõik TAK-sõlmed peavad olema samal kanalil ja sama krüpteeringuga                                          |
 
 ## Security Considerations
 

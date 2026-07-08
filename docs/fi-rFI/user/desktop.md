@@ -60,19 +60,19 @@ Bluetooth Low Energy on tuettu työpöydällä [Kable](https://github.com/JuulLa
 
 ## Ominaisuuksien yhtenevyys
 
-| Ominaisuus                                                  | Android | Työpöytä | Viestit                                                                                                                                                                                 |
-| ----------------------------------------------------------- | ------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Viestit                                                     | ✓       | ✓        | Täysi yhtenevyys                                                                                                                                                                        |
-| Radiolista                                                  | ✓       | ✓        | Täysi yhtenevyys                                                                                                                                                                        |
-| Kartta                                                      | ✓       | ◐        | Kartta-välilehti on käytettävissä myös Desktop-versiossa, mutta interaktiivinen karttanäkymä on käytettävissä vain Androidissa                                                          |
-| Asetukset                                                   | ✓       | ✓        | Täysi yhtenevyys                                                                                                                                                                        |
-| Bluetooth (BLE)                          | ✓       | ✓        | Työpöydällä Kable-kirjaston kautta                                                                                                                                                      |
-| Laiteohjelmiston päivitys                                   | ✓       | ◐        | Työpöytä-versio tukee laiteohjelmiston päivittämistä USB:n kautta suoraan sovelluksesta. BLE-/Wi-Fi-OTA-päivitykset ovat käytettävissä vain Androidissa |
-| Ilmoitukset                                                 | ✓       | ✓        | Käyttöjärjestelmän natiivit ilmoitukset                                                                                                                                                 |
-| Widgetit                                                    | ✓       | ✗        | Vain Android                                                                                                                                                                            |
-| Vain Android                                                | ✓       | ✗        | Vain Android — ei saatavilla työpöydällä tai iOS:llä                                                                                                                    |
-| Tekoälyavustaja (Chirpy)                 | ✓\*     | ✗        | Vain Google-version Android-laitteissa                                                                                                                                                  |
-| Sovellustoiminnot (järjestelmän tekoäly) | ✓†      | ✗        | Vain Google-version Android-laitteissa                                                                                                                                                  |
+| Ominaisuus                                                  | Android | Työpöytä | Viestit                                                                                                                        |
+| ----------------------------------------------------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Viestit                                                     | ✓       | ✓        | Täysi yhtenevyys                                                                                                               |
+| Radiolista                                                  | ✓       | ✓        | Täysi yhtenevyys                                                                                                               |
+| Kartta                                                      | ✓       | ◐        | Kartta-välilehti on käytettävissä myös Desktop-versiossa, mutta interaktiivinen karttanäkymä on käytettävissä vain Androidissa |
+| Asetukset                                                   | ✓       | ✓        | Täysi yhtenevyys                                                                                                               |
+| Bluetooth (BLE)                          | ✓       | ✓        | Työpöydällä Kable-kirjaston kautta                                                                                             |
+| Laiteohjelmiston päivitys                                   | ✓       | ✓        | Sovelluksen USB-, BLE- ja Wi-Fi-päivitykset (ESP32) toimivat samalla tavalla kuin Androidissa               |
+| Ilmoitukset                                                 | ✓       | ✓        | Käyttöjärjestelmän natiivit ilmoitukset                                                                                        |
+| Widgetit                                                    | ✓       | ✗        | Vain Android                                                                                                                   |
+| Vain Android                                                | ✓       | ✗        | Vain Android — ei saatavilla työpöydällä tai iOS:llä                                                           |
+| Tekoälyavustaja (Chirpy)                 | ✓\*     | ✗        | Vain Google-version Android-laitteissa                                                                                         |
+| Sovellustoiminnot (järjestelmän tekoäly) | ✓†      | ✗        | Vain Google-version Android-laitteissa                                                                                         |
 
 \*Chirpy AI vaatii Android 14+ -version Google-version Android-laitteissa, joissa on tuettu laitteisto.
 
@@ -136,7 +136,6 @@ Vaatimukset:
 
 ## Tunnetut rajoitukset
 
-- Langattomat laiteohjelmistopäivitykset (BLE/Wi-Fi OTA) ovat käytettävissä vain Androidissa. Työpöytä-versiossa käytä sovelluksen USB-päivitystä tai [Web Flasheria](https://flasher.meshtastic.org)
 - Interaktiivinen karttanäkymä on käytettävissä vain Androidissa — Kartta-välilehti on työpöytä-versiossa näkyvissä, mutta karttaa ei näytetä
 - Jotkin Android-kohtaiset ominaisuudet (widgetit, tietyt ilmoituskanavat) eivät ole käytettävissä
 - Suorituskyky voi vaihdella heikkotehoisella laitteistolla ajettaessa Compose Desktopia
@@ -145,7 +144,7 @@ Vaatimukset:
 ## Aiheeseen liittyvät aiheet
 
 - [Yhteydet](connections) — yhteystapojen yleiskatsaus
-- [Laiteohjelmistopäivitykset](firmware) — USB-päivitys suoraan työpöytä-sovelluksessa tai [Web Flasher](https://flasher.meshtastic.org)
+- [Laiteohjelmistopäivitykset](firmware) — USB-, BLE- ja Wi-Fi-päivitykset toimivat samalla tavalla kuin Androidissa
 
 ---
 

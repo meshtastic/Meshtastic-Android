@@ -1,9 +1,9 @@
 ---
-title: Node Metrics
+title: ノードメトリクス
 parent: User Guide
 nav_order: 5
-last_updated: 2026-06-25
-description: Telemetry dashboards for each mesh node — device health, environment sensors, air quality, signal quality, power, traceroute, and position history.
+last_updated: 2026-07-08
+description: 各メッシュノードのテレメトリダッシュボード。デバイスの状態、環境センサー、大気質、信号品質、電力、ルート追跡、位置履歴を表示します。
 aliases:
   - metrics
   - telemetry
@@ -11,166 +11,166 @@ aliases:
   - signal
 ---
 
-# Node Metrics
+# ノードメトリクス
 
-The node detail screen provides comprehensive telemetry and metrics for each node on your mesh.
+ノードの詳細画面では、メッシュ上の各ノードについて、包括的なテレメトリとメトリクスを確認できます。
 
-## Device Metrics
+## デバイスメトリクス
 
-Basic operating information reported by each node:
+各ノードが報告する基本的な動作情報です：
 
-| Metric        | 説明                                  |
-| ------------- | ----------------------------------- |
-| Battery Level | Current battery percentage          |
-| 電圧            | Battery voltage reading             |
-| チャンネル全体の利用率   | Percentage of airtime consumed      |
-| Airtime       | Transmission time used by this node |
-| 連続稼働時間        | Time since last reboot              |
+| メトリクス       | 説明             |
+| ----------- | -------------- |
+| バッテリー残量     | 現在のバッテリー残量（％）  |
+| 電圧          | バッテリー電圧の測定値    |
+| チャンネル全体の利用率 | 消費した電波利用時間の割合  |
+| 電波利用時間      | このノードが使用した送信時間 |
+| 連続稼働時間      | 前回の再起動からの経過時間  |
 
-Device metrics are displayed as individual cards with trend sparklines showing battery level, voltage, channel utilization, airtime, and uptime over time.
+デバイスメトリクスは、バッテリー残量・電圧・チャンネル利用率・電波利用時間・連続稼働時間の推移を示すトレンドのスパークライン付きの個別カードとして表示されます。
 
-> 💡 **Tip:** Tap any metric card to expand it into a full chart with historical data points. Pinch to zoom the time axis.
+> 💡 **ヒント：** メトリクスカードをタップすると、履歴データ点を含む詳細なグラフに展開できます。 時間軸はピンチ操作で拡大縮小できます。
 
-## Environment Metrics
+## 環境メトリクス
 
-Environmental sensor data (requires compatible hardware):
+環境センサーのデータです（対応ハードウェアが必要）：
 
-| Metric                               | Sensor Examples       |
-| ------------------------------------ | --------------------- |
-| 温度                                   | BME280, BME680, SHT31 |
-| 湿度                                   | BME280, BME680, SHT31 |
-| 大気圧                                  | BME280, BMP280        |
-| ガス圧                                  | BME680                |
-| IAQ (Air Quality) | BME680                |
+| メトリクス    | センサーの例                |
+| -------- | --------------------- |
+| 温度       | BME280, BME680, SHT31 |
+| 湿度       | BME280, BME680, SHT31 |
+| 大気圧      | BME280, BMP280        |
+| ガス抵抗     | BME680                |
+| IAQ（大気質） | BME680                |
 
-Environment metrics are charted over time for easy trend analysis — temperature, humidity, and pressure each get their own line chart with the measurement unit displayed on the Y axis.
+環境メトリクスは、傾向を分析しやすいよう時系列でグラフ化されます。温度・湿度・気圧はそれぞれ独立した折れ線グラフになり、測定単位が Y 軸に表示されます。
 
-The BME680 **IAQ (Indoor Air Quality)** index is a single 0–500+ value derived from gas resistance, shown against a color-coded scale from _Excellent_ to _Dangerously Polluted_:
+BME680 の \*\*IAQ（室内空気質）\*\*指数は、ガス抵抗から算出される 0〜500+ の単一の値で、_非常に良い_ から _危険なほど汚染_ までの色分けされたスケールで表示されます：
 
-![IAQ index scale from Excellent to Dangerously Polluted](../../assets/screenshots/node-metrics_iaq_scale.png)
+![「非常に良い」から「危険なほど汚染」までの IAQ 指数スケール](../../assets/screenshots/node-metrics_iaq_scale.png)
 
-> 💡 **Tip:** Environment metrics require a sensor connected to the remote node. Not all nodes report environmental data. See [Telemetry & Sensors](telemetry-and-sensors) for a full list of supported sensors.
+> 💡 **ヒント：** 環境メトリクスには、リモートノードに接続されたセンサーが必要です。 すべてのノードが環境データを報告するわけではありません。 対応センサーの一覧については、[テレメトリとセンサー](telemetry-and-sensors) を参照してください。
 
-## Air Quality Metrics
+## 大気質メトリクス
 
-Air Quality is a dedicated metrics view for nodes equipped with a particulate-matter and/or CO₂ sensor. It is **separate from the BME680 IAQ reading** listed under Environment Metrics — IAQ is a single gas-resistance-derived index, while the Air Quality view charts the underlying particulate and CO₂ measurements.
+大気質は、粒子状物質センサーや CO₂ センサーを搭載したノード向けの専用メトリクスビューです。 これは、環境メトリクスに記載されている **BME680 の IAQ の測定値とは別のもの**です。IAQ はガス抵抗から算出される単一の指数であるのに対し、大気質ビューはその基となる粒子状物質と CO₂ の測定値をグラフ化します。
 
-| Metric                | Unit      | 説明                                                                                                                                                                                                                         |
-| --------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| PM1.0 | µg/m³     | Particulate matter up to 1.0 micron                                                                                                                                                                        |
-| PM2.5 | µg/m³     | Particulate matter up to 2.5 microns                                                                                                                                                                       |
-| PM10                  | µg/m³     | Particulate matter up to 10 microns                                                                                                                                                                                        |
-| AQI                   | EPA index | EPA **NowCast** AQI computed from your recent PM2.5 history, with a color-coded severity label. Shown next to PM2.5 once enough readings have accumulated. |
-| CO₂                   | ppm       | Carbon dioxide concentration                                                                                                                                                                                               |
-| CO₂ temperature       | °C / °F   | Temperature reported by the CO₂ sensor itself (e.g. SCD4x)                                                                                                              |
-| CO₂ humidity          | %         | Relative humidity reported by the CO₂ sensor                                                                                                                                                                               |
+| メトリクス                 | 単位      | 説明                                                                                                                             |
+| --------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| PM1.0 | µg/m³   | 1.0 ミクロンまでの粒子状物質                                                                                               |
+| PM2.5 | µg/m³   | 2.5 ミクロンまでの粒子状物質                                                                                               |
+| PM10                  | µg/m³   | 10 ミクロンまでの粒子状物質                                                                                                                |
+| AQI                   | EPA 指数  | 最近の PM2.5 の履歴から算出される EPA の **NowCast** AQI で、色分けされた深刻度ラベルが付きます。 十分な測定値が蓄積されると、PM2.5 の横に表示されます。 |
+| CO₂                   | ppm     | 二酸化炭素の濃度                                                                                                                       |
+| CO₂ 温度                | °C / °F | CO₂ センサー自体が報告する温度（例：SCD4x）                                                                                                     |
+| CO₂ 湿度                | %       | CO₂ センサーが報告する相対湿度                                                                                                              |
 
-CO₂ readings are color-coded by severity to make air quality easy to read at a glance:
+CO₂ の測定値は、大気質をひと目で把握できるよう、深刻度に応じて色分けされます：
 
-| Band     | CO₂ Range (ppm) | Color    |
-| -------- | ---------------------------------- | -------- |
-| 良        | < 1000    | 緑        |
-| Stuffy   | < 2000    | Amber    |
-| Poor     | < 5000    | 柿色       |
-| Unsafe   | < 30000   | 赤        |
-| Evacuate | ≥ 30000                            | Dark red |
+| 区分     | CO₂ の範囲（ppm）                     | 色    |
+| ------ | -------------------------------- | ---- |
+| 良      | < 1000  | 緑    |
+| 空気がこもる | < 2000  | 黄色   |
+| 不良     | < 5000  | オレンジ |
+| 危険     | < 30000 | 赤    |
+| 退避     | ≥ 30000                          | 濃い赤  |
 
-![Air quality readings with color-coded CO₂ severity](../../assets/screenshots/node-metrics_air_quality.png)
+![CO₂ の深刻度が色分けされた大気質の測定値](../../assets/screenshots/node-metrics_air_quality.png)
 
-An air-quality log/metrics button appears on the node detail screen **only when the node has reported air-quality telemetry**. From the Air Quality view you can:
+大気質のログ／メトリクスボタンは、**ノードが大気質のテレメトリを報告したときにのみ**、ノードの詳細画面に表示されます。 大気質ビューでは、次のことができます：
 
-- Select a **time frame** for the charts.
-- Filter with **metric chips** — only metrics that have data are shown.
-- **Refresh / request** the latest air-quality telemetry.
-- **Export to CSV** for analysis in a spreadsheet.
+- グラフの**期間**を選択します。
+- **メトリクスチップ**で絞り込みます。データがあるメトリクスのみが表示されます。
+- 最新の大気質テレメトリを**更新／要求**します。
+- 表計算ソフトで分析できるよう、**CSV にエクスポート**します。
 
-> 💡 **Tip:** Air Quality metrics require a compatible air-quality sensor on the remote node. If a node has no particulate or CO₂ sensor, the air-quality button won't appear. See [Telemetry & Sensors](telemetry-and-sensors) for supported hardware.
+> 💡 **ヒント：** 大気質メトリクスには、リモートノードに対応する大気質センサーが必要です。 ノードに粒子状物質センサーや CO₂ センサーがない場合、大気質ボタンは表示されません。 対応ハードウェアについては、[テレメトリとセンサー](telemetry-and-sensors) を参照してください。
 
-## Signal Metrics
+## 信号メトリクス
 
-Radio signal quality information:
+無線信号の品質に関する情報です：
 
-| Metric      | 説明                                                                             |
-| ----------- | ------------------------------------------------------------------------------ |
-| SN比         | Signal-to-Noise Ratio (higher is better)                    |
-| RSSI        | Received Signal Strength Indicator (closer to 0 is better)  |
-| Noise Floor | Local background RF noise in dBm (more negative is quieter) |
-| Hop Count   | Number of mesh hops for last message                                           |
+| メトリクス  | 説明                                   |
+| ------ | ------------------------------------ |
+| SN比    | 信号対ノイズ比（高いほど良い）                      |
+| RSSI   | 受信信号強度インジケーター（0 に近いほど良い）             |
+| ノイズフロア | ローカルの背景 RF ノイズ（dBm、値が小さい（負が大きい）ほど静か） |
+| ホップ数   | 直前のメッセージのメッシュホップ数                    |
 
-### Signal Quality Reference
+### 信号品質の目安
 
-Signal quality is rated from **SNR relative to the active LoRa modem preset's demodulation floor**, not from fixed thresholds — a given SNR means different things on different presets (e.g. −15 dB is fine on LongSlow but unusable on ShortFast). RSSI is shown but is not part of the rating. Letting `limit` be the preset's SNR limit:
+信号品質は、固定のしきい値ではなく、**現在の LoRa モデムプリセットの復調限界に対する SNR** で評価されます。同じ SNR でもプリセットによって意味が異なります（例：−15 dB は LongSlow では問題ありませんが、ShortFast では使い物になりません）。 RSSI は表示されますが、評価には含まれません。 `limit` をプリセットの SNR 限界とすると：
 
-| Quality | Criteria                                                                  |
-| ------- | ------------------------------------------------------------------------- |
-| 良       | SNR above the preset's limit                                              |
-| 普通      | up to 5.5 dB below the limit                              |
-| 不良      | between 5.5 dB and 7.5 dB below the limit |
-| なし      | more than 7.5 dB below the limit                          |
+| 品質 | 基準                                                    |
+| -- | ----------------------------------------------------- |
+| 良  | SNR がプリセットの限界を上回る                                     |
+| 普通 | 限界より 5.5 dB 未満低い                      |
+| 不良 | 限界より 5.5 dB〜7.5 dB 低い |
+| なし | 限界より 7.5 dB を超えて低い                    |
 
-See [Understanding the Signal Meter](signal-meter) for the full explanation.
+詳しい説明は、[信号メーターを理解する](signal-meter) を参照してください。
 
-Local Stats from your connected radio are also shown in Signal Quality when available. These logs include noise floor, traffic counters, relay counters, online node counts, and radio uptime. The noise floor chart uses a dashed reference line at -85 dBm to help identify a busy RF environment. Use **Request** to ask the connected radio for a fresh Local Stats telemetry report, **Clear** to remove Local Stats logs for that node, and **Save** to export the visible Local Stats history as CSV.
+接続中の無線機のローカル統計も、利用可能な場合は信号品質に表示されます。 これらのログには、ノイズフロア、トラフィックカウンター、中継カウンター、オンラインノード数、無線機の連続稼働時間が含まれます。 ノイズフロアのグラフでは、混雑した RF 環境を見分けやすいよう、-85 dBm に破線の基準線が引かれます。 「**要求**」で接続中の無線機に最新のローカル統計テレメトリレポートを要求し、「**消去**」でそのノードのローカル統計ログを削除し、「**保存**」で表示中のローカル統計の履歴を CSV としてエクスポートします。
 
-## Power Metrics
+## 電力メトリクス
 
-Power management telemetry (requires INA sensor or compatible hardware):
+電力管理のテレメトリです（INA センサーまたは対応ハードウェアが必要）：
 
-| Metric      | 説明                      |
-| ----------- | ----------------------- |
-| Bus Voltage | Supply voltage          |
-| 電流          | Power draw in milliamps |
-| 電源          | Calculated wattage      |
+| メトリクス | 説明           |
+| ----- | ------------ |
+| バス電圧  | 供給電圧         |
+| 電流    | 消費電流（ミリアンペア） |
+| 電力    | 計算されたワット数    |
 
 ## ルート追跡
 
-Traceroute shows the path a message takes through the mesh:
+ルート追跡は、メッセージがメッシュ内を通る経路を表示します：
 
-1. From the node detail screen, tap **Traceroute**.
-2. The app sends a traceroute request to the target node.
-3. Results show each hop with SNR/RSSI values.
+1. ノードの詳細画面で、「**ルート追跡**」をタップします。
+2. アプリが対象のノードにルート追跡の要求を送信します。
+3. 結果には、各ホップが SNR／RSSI の値とともに表示されます。
 
-### Reading Traceroute Results
+### ルート追跡の結果の見方
 
 ```
-You → Node A (SNR: 8.5) → Node B (SNR: 5.2) → Target
+自分 → ノード A (SNR: 8.5) → ノード B (SNR: 5.2) → ターゲット
 ```
 
-Each hop represents a relay node that forwarded the message.
+各ホップは、メッセージを転送した中継ノードを表します。
 
 ## 位置ログ
 
-Historical position data for nodes that share their location:
+位置情報を共有しているノードの、過去の位置データです：
 
-- GPS coordinates
+- GPS 座標
 - 標高
-- Speed (if moving)
-- Timestamp for each position report
+- 速度（移動中の場合）
+- 各位置報告のタイムスタンプ
 
 ## 隣接ノード情報
 
-Shows which nodes a given node can directly hear, useful for understanding mesh topology.
+あるノードが直接受信できるノードを表示します。メッシュのトポロジーを把握するのに役立ちます。
 
-## Viewing Metrics
+## メトリクスを表示する
 
-1. Navigate to **Nodes**.
-2. Tap the node you want to inspect.
-3. Select the metric category from the detail tabs.
+1. 「**ノード**」に移動します。
+2. 確認したいノードをタップします。
+3. 詳細タブからメトリクスのカテゴリを選択します。
 
-![Node detail — local device](../../assets/screenshots/nodes_detail_local.png)
+![ノードの詳細：ローカルデバイス](../../assets/screenshots/nodes_detail_local.png)
 
-The position tab shows location data for nodes that share GPS:
+位置タブには、GPS を共有しているノードの位置データが表示されます：
 
-![Position inline content](../../assets/screenshots/nodes_position.png)
+![位置のインラインコンテンツ](../../assets/screenshots/nodes_position.png)
 
-> ⚠️ **Note:** Metrics are only available when they have been reported by the remote node. Metrics update at intervals configured on each node's telemetry settings.
+> ⚠️ **注意：** メトリクスは、リモートノードが報告した場合にのみ利用できます。 メトリクスは、各ノードのテレメトリ設定で構成された間隔で更新されます。
 
-## Related Topics
+## 関連トピック
 
-- [Nodes](nodes) — node list, filtering, and sorting
-- [Telemetry & Sensors](telemetry-and-sensors) — supported sensors and configuration
-- [Signal Meter](signal-meter) — how signal quality is calculated from SNR and RSSI
-- [Discovery](discovery) — traceroute details and neighbor info
-- [Units & Locale](units-and-locale) — temperature, distance, and speed display formats
+- [ノード](nodes)：ノードリスト、絞り込み、並べ替え
+- [テレメトリとセンサー](telemetry-and-sensors)：対応センサーと設定
+- [信号メーター](signal-meter)：SNR と RSSI から信号品質を計算する方法
+- [探索](discovery)：ルート追跡の詳細と隣接ノード情報
+- [単位とロケール](units-and-locale)：温度・距離・速度の表示形式
 
 ---

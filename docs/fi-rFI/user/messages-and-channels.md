@@ -2,7 +2,7 @@
 title: Viestit ja kanavat
 parent: Käyttöopas
 nav_order: 3
-last_updated: 2026-06-25
+last_updated: 2026-07-08
 description: Lähetä ja vastaanota viestejä, hallitse kanavia, määritä salaus, hae keskusteluja sekä käytä pikachatia, reaktioita ja viestitoimintoja.
 aliases:
   - kanavat
@@ -57,15 +57,17 @@ Yksityisviestit (DM) ovat kahden radion välistä päästä päähän salattua v
 
 ### Viestin tilat
 
-| Tila                                              | Ikoni | Tarkoitus                                                                 |
-| ------------------------------------------------- | ----- | ------------------------------------------------------------------------- |
-| Jonossa                                           | ⏳     | Viestiä odotetaan lähetettäväksi                                          |
-| Matkalla                                          | ✓     | Toimitettu radiolle, odottaa kuittausta                                   |
-| Toimitettu                                        | ✓✓    | Kuittaus vastaanotettu vastaanottajalta                                   |
-| Vastaanotettu                                     | ✓     | Viesti vastaanotettu mesh-verkosta (saapuva)           |
-| Varastoi & välitä             | 🔗    | Viestiä reititetään Varastoi & välitä -radion kautta  |
-| Varastoi & välitä vahvistettu | 🔗    | Toimitus vahvistettu Varastoi & välitä -radion kautta |
-| Virhe                                             | ✗     | Toimitus epäonnistui uudelleenyritysten jälkeen                           |
+Tilateksti näkyy vain **omissa** lähtevissä viesteissäsi (muiden lähettämissä saapuvissa viesteissä ei näytetä tilaa):
+
+| Tila                                                           | Merkitys                                                                                                                                                             |
+| -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Lähetetään…                                                    | Jonossa tai jo siirretty radiolle, mutta lopullista tilaa ei ole vielä vahvistettu (jonossa ja lähetetään näyttävät molemmat tämän saman tekstin) |
+| Toimitettu vastaanottajalle                                    | Vahvin mahdollinen vahvistus suoralle viestille — vastaanottokuittaus on saatu                                                                                       |
+| Toimitettu mesh-verkkoon                                       | Kanavalähetyksessä viesti on saavuttanut mesh-verkon (kanavalähetyksille ei lähetetä vastaanottajakohtaista kuittausta)                           |
+| Välitetty, mutta vastaanottaja ei ole vahvistanut vastaanottoa | Suorassa viestissä tämä näytetään varoitusvärillä — viesti on välitetty eteenpäin, mutta vastaanottokuittausta ei ole vielä saatu                                    |
+| Reititetään SF++ ketjun kautta…                                | Reititetty tai puskuroitu varastoi & välitä Plus Plus -ketjussa                                                                                  |
+| Vahvistettu SF++-ketjussa                                      | Toimitus vahvistettu varastoi & välitä++ -ketjun kautta                                                                                          |
+| Virhe                                                          | Toimitus epäonnistui — napauta tilaa nähdäksesi tarkemman syyn (katso alla kohta toimitusvirheet)                                                 |
 
 ### Toimitusvirheet
 

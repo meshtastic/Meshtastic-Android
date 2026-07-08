@@ -2,11 +2,11 @@
 title: Avastamine
 parent: User Guide
 nav_order: 12
-last_updated: 2026-06-11
-description: Avasta oma kärgvõrku – kohalik kärgvõrgu avastaja skanner, traceroute'i teed, naaberkaardid ja sõlmede avastamise tööriistad.
+last_updated: 2026-07-08
+description: Avasta oma kärgvõrku – kohalik kärgvõrgu avastaja skanner, traceroute'i teed, naabri-kaardid ja sõlmede avastamise tööriistad.
 aliases:
-  - mesh-discovery
-  - local-discovery
+  - kärgvõrgu-avastamine
+  - kohalik-avastamine
   - network-scan
   - traceroute
   - neighbor-info
@@ -14,7 +14,7 @@ aliases:
 
 # Avastamine
 
-Discovery tools help you understand **how** your mesh network is connected — which nodes can hear each other, what paths messages take, and where bottlenecks or weak links exist.
+Avastamistööriistad aitavad mõista, **kuidas** kärgvõrk on ühendatud – millised sõlmed üksteist kuulevad, milliseid teid sõnumid läbivad ja kus esinevad kitsaskohad või nõrgad lülid.
 
 The app offers two complementary approaches:
 
@@ -25,7 +25,7 @@ The app offers two complementary approaches:
 
 ## Kohalik kärgvõrgu avastaja (skanner)
 
-Kohalik kärgvõrdu avastaja on spetsiaalne skaneerimisrežiim, mis aitab leida oma asukoha jaoks parima LoRa modemi eelseadistuse ja näha, millised sõlmed on igal eelseadistusel aktiivsed. It cycles your connected radio through one or more presets you choose, listens (or "dwells") on each one for a set time to collect packets, then analyzes and ranks the results.
+Kohalik kärgvõrdu avastaja on spetsiaalne skaneerimisrežiim, mis aitab leida oma asukoha jaoks parima LoRa modemi eelseadistuse ja näha, millised sõlmed on igal eelseadistusel aktiivsed. See kerib ühendatud raadio läbi ühe või mitu valitud eelseadet, kuulab (või "ootab") igaüht neist määratud aja jooksul pakettide kogumiseks ning seejärel analüüsib ja järjestab tulemused.
 
 Ava **Sätted → Kohalik kärgvõrgu avastaja**.
 
@@ -35,11 +35,11 @@ Ava **Sätted → Kohalik kärgvõrgu avastaja**.
 
 Before starting, configure these controls:
 
-| Control                | Kirjeldus                                                                                                                                                                                                                      |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **LoRa preset picker** | Select one or more presets to scan. Discovery dwells on each selected preset in turn.                                                                                                          |
-| **Dwell time**         | Time to listen on each preset. Choose from 1, 5, 15, 30, 45, 60, 90, 120, or 180 minutes. Longer dwell times collect more packets and give a clearer picture, but take longer. |
-| **Keep screen awake**  | Valikuline lüliti, mis takistab ekraani pika skannimise ajal magamaminekut.                                                                                                                                    |
+| Control                | Kirjeldus                                                                                                                                                                                                                                |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **LoRa preset picker** | Select one or more presets to scan. Otsing peatub kordamööda iga valitud eelseadistuse juures, et kuulata liiklust.                                                                                      |
+| **Kuulamisaeg**        | Time to listen on each preset. Choose from 1, 5, 15, 30, 45, 60, 90, 120, or 180 minutes. Pikemad kuulamisajad koguvad rohkem pakette ja annavad selgema pildi, kuid võtavad kauem aega. |
+| **Keep screen awake**  | Valikuline lüliti, mis takistab ekraani pika skannimise ajal magamaminekut.                                                                                                                                              |
 
 The **Start** button stays disabled — with an explanation of why — until the scan can run. Common reasons it's disabled:
 
@@ -49,22 +49,22 @@ The **Start** button stays disabled — with an explanation of why — until the
 
 ### Live Progress
 
-While a scan runs, Discovery shows its current stage:
+Skanni ajal näitab Discovery selle praegust etappi:
 
 | Stage                                                 | What's happening                                                                                       |
 | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
 | **Preparing**                                         | Praeguste sätete salvestamine ja skannimiseks valmistumine.                            |
 | **Shifting to \<preset\>** | Switching the radio to the next preset to test.                                        |
 | **Reconnecting**                                      | Re-establishing the connection after the preset change.                                |
-| **Dwell**                                             | Listening on the current preset to collect packets, with a countdown to the next step. |
+| **Kuulamine**                                         | Listening on the current preset to collect packets, with a countdown to the next step. |
 | **Analysis**                                          | Processing the collected packets and ranking the presets.                              |
 | **Restoring**                                         | Algsete LoRa seadete taastamine.                                                       |
 
-![Dwell countdown showing time remaining on the current preset](../../assets/screenshots/discovery_dwell_progress.png)
+![Kuulamis loendur näitab praeguse eelseadistuse järelejäänud aega](../../assets/screenshots/discovery_dwell_progress.png)
 
 ### Reading the Results
 
-When the scan completes, Discovery presents a per-preset result card for each preset it tested, plus an overall summary.
+Kui skann on lõppenud, kuvab Discovery iga testitud eelseadistuse kohta tulemuste kaardi ja üldise kokkuvõtte.
 
 ![Eelmääratud tulemuste kaart koos edetabeli ja kogutud näitajatega](../../assets/screenshots/discovery_preset_result.png)
 
@@ -73,7 +73,7 @@ Metrics include:
 | Meetriline                               | What it tells you                                                                              |
 | ---------------------------------------- | ---------------------------------------------------------------------------------------------- |
 | RF health                                | Overall quality of the radio environment on that preset.                       |
-| Channel utilization                      | How busy the airwaves were during the dwell.                                   |
+| Kanali kasutus                           | Kui hõivatud olid eetrisagedused kuulamise ajal.                               |
 | Airtime                                  | Transmission time observed.                                                    |
 | Direct vs. relayed nodes | How many mesh nodes were heard directly versus via a relay.                    |
 | Bad / duplicate packets                  | Counts of corrupt and repeated packets, indicating congestion or interference. |
@@ -81,7 +81,7 @@ Metrics include:
 Additional features available from the results:
 
 - **Scan History** — saved sessions you can revisit; view or delete past scans.
-- **Discovery Map** — a map of the nodes found during the scan.
+- **Avastuskaart** – skanni käigus leitud sõlmede kaart.
 - **Aruande eksport** – ekspordi aruanne PDF-failina Androidis või tekstina muudel platvormidel.
 
 > 💡 **Vihje:** Androidis saab Discovery genereerida tulemustest seadmesisese tehisintellekti kokkuvõtte (Gemini Nano). If the on-device model isn't available, an algorithmic summary is used instead — so you always get a readable interpretation of the scan.
@@ -94,7 +94,7 @@ The tools below are available at any time from the node list and node detail scr
 
 ## Marsruudi
 
-Traceroute reveals the exact path a message takes from your node to any other node on the mesh. It's the single most useful tool for debugging connectivity problems.
+Traceroute reveals the exact path a message takes from your node to any other node on the mesh. See on kõige kasulikum tööriist ühenduvusprobleemide tõrkeotsinguks.
 
 ### Running a Traceroute
 
@@ -113,18 +113,18 @@ You → Node A (SNR: 8.5, RSSI: -95) → Node B (SNR: 5.2, RSSI: -108) → Targe
 
 Iga hüpe näitab vahendussõlme, mis sõnumi edastas. The SNR and RSSI values at each hop tell you about the link quality on that specific segment.
 
-| What to look for                                                         | What it means                                                               |
-| ------------------------------------------------------------------------ | --------------------------------------------------------------------------- |
-| Kõikidel hüpetel on hea SNR (> 5 dB)                  | Healthy path — messages flow reliably                                       |
-| Ühel hüpel halb SNR (< 0 dB) | Weak link — this relay segment is fragile                                   |
-| Mitu hüppet (4+)                                      | Long path — consider repositioning a node to shorten it                     |
-| Different path on retry                                                  | Mesh is adapting — multiple routes exist (this is good!) |
+| What to look for                                                                  | What it means                                                               |
+| --------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| All hops show Good SNR (≥ −7 dB, green)                        | Healthy path — messages flow reliably                                       |
+| One hop shows Bad SNR (< −15 dB, red) | Weak link — this relay segment is fragile                                   |
+| Mitu hüppet (4+)                                               | Long path — consider repositioning a node to shorten it                     |
+| Different path on retry                                                           | Mesh is adapting — multiple routes exist (this is good!) |
 
 > 💡 **Vihje:** Käivita traceroute'i mitu korda mõne minuti tagant. If the path changes, your mesh has redundant routes — a sign of a well-connected network.
 
 ### Troubleshooting with Traceroute
 
-- **"No route found"** — The target node may be offline, out of range, or on a different channel. Check that both nodes share at least one channel with the same encryption key.
+- **"Marsruuti ei leitud"** — Sihtsõlm võib olla võrguühenduseta, leviulatusest väljas või teisel kanalil. Kontrolli, et mõlemad sõlmed jagaksid vähemalt ühte kanalit sama krüpteerimisvõtmega.
 - **Traceroute aegus** — Tee võib olla liiga pikk (ületab hüppete limiidi) või on vahendussõlm ülekoormatud. Proovi hüppe limiiti suurendada menüüs **Seaded → LoRa konfiguratsioon**.
 - **Asymmetric paths** — A traceroute from A→B may take a different path than B→A. This is normal — radio propagation is not always symmetric.
 
@@ -136,11 +136,11 @@ Naabriinfo moodul võimaldab igal sõlmel levitada nimekirja sõlmedest, mida se
 
 ### Enabling Neighbor Info
 
-1. Mine menüüsse **Seaded → Mooduli konfiguratsioon → Naabri info**.
+1. Mine menüüsse **Seaded → Mooduli konfiguratsioon → Naabriinfo**.
 2. Luba moodul.
 3. Määra levintervall (vaikimisi: 900 sekundit / 15 minutit).
 
-Kui see on lubatud, levitab sõlm perioodiliselt oma naabertabelit. Teised sõlmed, millel on naabriinfo lubatud, teevad sama.
+Kui see on lubatud, levitab sõlm perioodiliselt oma naabri-tabelit. Teised sõlmed, millel on naabriinfo lubatud, teevad sama.
 
 ### Viewing Neighbor Data
 
@@ -152,9 +152,9 @@ Kui see on lubatud, levitab sõlm perioodiliselt oma naabertabelit. Teised sõlm
 
 ---
 
-## Node List as a Discovery Tool
+## Sõlmede loend avastusvahendina
 
-The node list itself is a powerful discovery tool when you use its filtering and sorting features effectively.
+Sõlmede loend ise on võimas avastusvahend, kui kasutada selle filtreerimis- ja sortimisfunktsioone tõhusalt.
 
 ### Finding New Nodes
 

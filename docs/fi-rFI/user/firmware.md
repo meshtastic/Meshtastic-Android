@@ -17,7 +17,7 @@ Pidä Meshtastic-radiosi ajan tasalla uusimmalla firmwarella, jossa on uusia omi
 
 ## Päivitysten tarkistaminen
 
-1. Avaa yhdistetyn radion asetukset ja valitse **Lisäasetukset → Laiteohjelmiston päivitys** — tai napauta laiteohjelmistopäivitysilmoitusta, jos sellainen näkyy. Tämä vaihtoehto näkyy vain laitteilla, jotka tukevat OTA-päivityksiä.
+1. Avaa yhdistetyn radion asetukset ja valitse **Lisäasetukset → Laiteohjelmiston päivitys**. Tämä vaihtoehto näkyy vain laitteilla, jotka tukevat OTA-päivityksiä.
 2. Sovellus tarkistaa saatavilla olevat firmware-versiot.
 3. Saatavilla olevat päivitykset näyttävät versionumeron ja muutoslokin yhteenvedon.
 

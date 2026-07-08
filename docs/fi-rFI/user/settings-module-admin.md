@@ -2,7 +2,7 @@
 title: Asetukset — Moduulit ja ylläpito
 parent: Käyttöopas
 nav_order: 8
-last_updated: 2026-05-20
+last_updated: 2026-07-08
 description: Määritä valinnaiset ominaisuusmoduulit (MQTT, telemetria, valmiit viestit, TAK ja muut) sekä suorita laitteen ylläpitotoimia.
 aliases:
   - moduulit
@@ -78,13 +78,14 @@ Ohjaa radion laitteiston summeri-, LED- tai värinähälytyksiä. Hyödyllinen l
 
 Puskuroi viestejä radioille, jotka ovat tilapäisesti poissa verkosta, ja toimittaa ne, kun nämä radiot yhdistyvät uudelleen. Välttämätön verkoissa, joissa radiot siirtyvät säännöllisesti kuuluvuusalueelle ja sen ulkopuolelle — varmistaa, etteivät viestit katoa lyhyiden yhteyskatkosten aikana.
 
-| Asetus                                             | Kuvaus                                             |
-| -------------------------------------------------- | -------------------------------------------------- |
-| Käytössä                                           | Ota Varastoi & välitä käyttöön |
-| Valvontasignaali (s)            | Ilmoitusväli                                       |
-| Tiedot                                             | Tallennettujen viestien enimmäismäärä              |
-| Historian palautus (enintään)   | Toistettavien viestien enimmäismäärä               |
-| Historian palautus (aikaikkuna) | Aikaikkuna viestien toistolle                      |
+| Asetus                                             | Kuvaus                                                                                                                                                                |
+| -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Käytössä                                           | Ota Varastoi & välitä käyttöön                                                                                                                    |
+| Valvontasignaali                                   | Ilmoita tämän radion varastoi & välitä -ominaisuudesta säännöllisesti                                                                             |
+| Tiedot                                             | Tallennettujen viestien enimmäismäärä                                                                                                                                 |
+| Historian palautus (enintään)   | Toistettavien viestien enimmäismäärä                                                                                                                                  |
+| Historian palautus (aikaikkuna) | Aikaikkuna viestien toistolle                                                                                                                                         |
+| Palvelin                                           | Toimi mesh-verkon varastoi & välitä -palvelimena (edellyttää riittävästi muistia, esimerkiksi ESP32 PSRAM:lla) |
 
 > 💡 **Vinkki:** Varastoi & välitä toimii parhaiten radioissa, joissa on runsaasti muistia (ESP32 ja PSRAM). Router-roolin radiot ovat ihanteellisia ehdokkaita, koska ne ovat yleensä jatkuvasti käynnissä.
 
@@ -145,6 +146,7 @@ GPIO-ohjaus mesh-verkon kautta. Mahdollistaa etäradion lukea tai kirjoittaa GPI
 | ------------------------------- | --------------------------------------------------------------------------- |
 | Käytössä                        | Ota etä-GPIO-käyttö käyttöön                                                |
 | Salli määrittelemättömät pinnit | Salli pääsy mihin tahansa GPIO-nastaan (tietoturvariski) |
+| Käytettävissä olevat pinnit     | Enintään 4 tämän radion etälukuun tai kirjoitukseen tarjoamaa GPIO-pinniä   |
 
 > ⚠️ **Varoitus:** Määrittelemättömien pinnien salliminen antaa etäradioille pääsyn kaikkiin GPIO-pinneihin, mikä voi häiritä radion omaa laitteistoa. Ota käyttöön vain erillisissä GPIO-radioissa.
 
@@ -152,10 +154,11 @@ GPIO-ohjaus mesh-verkon kautta. Mahdollistaa etäradion lukea tai kirjoittaa GPI
 
 Lähettää tietoa suoraan kuulluista naapureista mahdollistaen verkon topologian kartoituksen. Jokainen käyttöön otettu radio jakaa säännöllisesti luettelon muista radioista, jotka se kuulee, sekä niiden signaalin laadun.
 
-| Asetus                              | Kuvaus                                  |
-| ----------------------------------- | --------------------------------------- |
-| Käytössä                            | Ota naapuritiedon lähetys käyttöön      |
-| Päivitysväli (s) | Kuinka usein naapuriluettelo lähetetään |
+| Asetus                              | Kuvaus                                                                                                                                                                                              |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Käytössä                            | Ota naapuritiedon lähetys käyttöön                                                                                                                                                                  |
+| Päivitysväli (s) | Kuinka usein naapuriluettelo lähetetään                                                                                                                                                             |
+| Lähetä LoRan kautta                 | Lähetä myös naapuritiedot LoRa:n kautta, ei pelkästään MQTT:n tai puhelimen kautta. Ei käytettävissä kanavalla, joka käyttää oletusavainta ja nimeä |
 
 Katso [Haku](discovery) saadaksesi lisätietoja naapuritietojen käyttämisestä verkon topologian tutkimiseen.
 
@@ -165,23 +168,24 @@ Ohjaa tuetuissa laitteissa olevaa NeoPixeliä tai muita osoitteellisia RGB-LEDej
 
 | Asetus                      | Kuvaus                                                     |
 | --------------------------- | ---------------------------------------------------------- |
-| Käytössä                    | Ota LED-ohjaus käyttöön                                    |
-| Ledin tila                  | Päällä, pois tai määritä tietty väri                       |
+| Ledin tila                  | Kytke LED päälle tai pois päältä                           |
+| Virta                       | LED-virran rajoitus (0–31)              |
 | Punainen / vihreä / sininen | Yksittäisten värikanavien arvot (0–255) |
 
 ### Tunnistusanturimoduuli
 
 Muuttaa radiosi liike- tai ovitunnistimeen perustuvaksi hälytysjärjestelmäksi. Kun GPIO-pinni havaitsee tilamuutoksen (liike havaittu, ovi avattu), radio lähettää hälytysviestin verkkoon.
 
-| Asetus                                          | Kuvaus                                                                                        |
-| ----------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| Käytössä                                        | Ota tunnistusanturi käyttöön                                                                  |
-| Valvonta pinni                                  | Anturiin kytketty GPIO-pinni                                                                  |
-| Havaitsemisen tunnistus korkea                  | Laukaise, kun pinni siirtyy korkeaan tilaan (vs. matalaan) |
-| Lähetyksen vähimmäisväli (s) | Hälytyslähetysten vähimmäisaika                                                               |
-| Tilalähetys (s)              | Tilatiedon lähetysväli                                                                        |
-| Lähetä äänimerkki                               | Sisällytä soittomerkkimerkki hälytyksiin                                                      |
-| Käyttäjäystävälinen nimi                        | Tälle anturille määritetty nimi                                                               |
+| Asetus                                          | Kuvaus                                                                                                                                    |
+| ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Käytössä                                        | Ota tunnistusanturi käyttöön                                                                                                              |
+| Valvonta pinni                                  | Anturiin kytketty GPIO-pinni                                                                                                              |
+| Havaitsemisen laukaisutyyppi                    | Miten pinnin tila vastaa havaitsemistapahtumaa (esim. aktiivinen korkea/matala taso tai reunalaukaisu) |
+| Käytä sisäistä ylösvetovastusta                 | Ota pinnin sisäinen ylösvetovastus käyttöön                                                                                               |
+| Lähetyksen vähimmäisväli (s) | Hälytyslähetysten vähimmäisaika                                                                                                           |
+| Tilalähetys (s)              | Tilatiedon lähetysväli                                                                                                                    |
+| Lähetä äänimerkki                               | Sisällytä soittomerkkimerkki hälytyksiin                                                                                                  |
+| Käyttäjäystävälinen nimi                        | Tälle anturille määritetty nimi                                                                                                           |
 
 ### PAX-laskurimoduuli
 
@@ -225,11 +229,7 @@ Käynnistä yhdistetty tai ylläpidettävä radio etänä uudelleen.
 
 ### Vianetsintäpaneeli
 
-Näytä yksityiskohtaiset diagnostiikkatiedot:
-
-- Protokollapuskureiden virheenkorjaustuloste
-- Mesh-pakettiloki
-- Yhteyden tilatiedot
+Avaa **Paketit**- ja **Sovelluslokit**-välilehdet diagnostiikkatietojen tarkastelua, suodatusta ja vientiä varten. Katso [Virheenjäljityslokit](debug-logs), jossa on täydellinen käyttöohje.
 
 ### Etähallinnan vianmääritys
 

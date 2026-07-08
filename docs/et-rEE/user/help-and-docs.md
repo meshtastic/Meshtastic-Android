@@ -23,7 +23,7 @@ The docs browser lists every user-guide page. Tap a page to read it; images and 
 
 ### Search
 
-Tap the search icon and type to filter pages by title and keywords — results update as you type.
+Lehtede pealkirja ja märksõnade järgi filtreerimiseks puuduta otsinguikooni ja tippi – tulemused värskendatakse tippimise ajal.
 
 ![Searching the in-app documentation](../../assets/screenshots/docs-browser_search.png)
 
@@ -43,7 +43,7 @@ A page open in the browser:
 
 ## Related Topics
 
-- [Translate the App](translate) — how these pages get localized into other languages
+- [Tõlgi rakendus] (translate) — kuidas need lehed teistesse keeltesse lokaliseeritakse
 - [App Functions](app-functions) — the separate system-AI integration (distinct from Chirpy)
 
 ---

@@ -3,7 +3,7 @@ title: MQTT
 parent: User Guide
 nav_order: 11
 last_updated: 2026-05-13
-description: Bridge your mesh to the internet — MQTT broker setup, encryption layers, and map reporting.
+description: メッシュをインターネットに橋渡しします。MQTT サーバーの設定、暗号化の各レイヤー、マップ報告について説明します。
 aliases:
   - mqtt
   - internet-bridge
@@ -12,129 +12,129 @@ aliases:
 
 # MQTT
 
-MQTT bridges your Meshtastic mesh network to the internet, enabling long-range communication beyond radio range.
+MQTT は、Meshtastic のメッシュネットワークをインターネットに橋渡しし、無線の到達範囲を超えた長距離通信を可能にします。
 
-## Overview
+## 概要
 
-The MQTT module connects your node to an MQTT broker, allowing:
+MQTT モジュールは、ノードを MQTT サーバーに接続し、次のことを可能にします：
 
-- Messages to reach nodes on different physical meshes via the internet
-- Integration with home automation and monitoring systems
-- Publishing node positions to the public Meshtastic map
-- Custom data pipelines for logging and alerting
+- インターネット経由で、物理的に異なるメッシュ上のノードにメッセージを届ける
+- ホームオートメーションや監視システムとの連携
+- ノードの位置を公開の Meshtastic マップに公開する
+- ログ記録や通知のためのカスタムデータパイプライン
 
-## How It Works
+## 仕組み
 
 ```
-[Your Node] → Radio → [Gateway Node with WiFi] → MQTT Broker → [Remote Gateway] → Radio → [Remote Node]
+[自分のノード] → 無線 → [WiFi 付きゲートウェイノード] → MQTT サーバー → [リモートゲートウェイ] → 無線 → [リモートノード]
 ```
 
-A gateway node with internet access (WiFi or Ethernet) publishes mesh messages to an MQTT topic. Remote gateways subscribed to the same topic inject those messages into their local mesh.
+インターネットに接続されたゲートウェイノード（WiFi または Ethernet）が、メッシュのメッセージを MQTT トピックに公開します。 同じトピックを購読しているリモートのゲートウェイが、それらのメッセージを自分のローカルメッシュに取り込みます。
 
 ## 設定
 
-### Enabling MQTT
+### MQTT を有効にする
 
-1. Navigate to **Settings → Module Config → MQTT**.
-2. Enable the MQTT module.
-3. Configure the broker connection:
+1. 「**設定 → モジュール設定 → MQTT**」に移動します。
+2. MQTT モジュールを有効にします。
+3. サーバーへの接続を設定します：
 
-![MQTT toggle switch](../../assets/screenshots/settings_switch.png)
+![MQTT のトグルスイッチ](../../assets/screenshots/settings_switch.png)
 
-| Setting         | 説明                                                                                            | デフォルト                                               |
-| --------------- | --------------------------------------------------------------------------------------------- | --------------------------------------------------- |
-| Server Address  | MQTT broker hostname                                                                          | mqtt.meshtastic.org |
-| ユーザー名           | Broker authentication                                                                         | meshdev                                             |
-| パスワード           | Broker authentication                                                                         | large4cats                                          |
-| Root Topic      | Base topic for messages                                                                       | msh                                                 |
-| Encryption      | Encrypt MQTT payload                                                                          | Enabled                                             |
-| ~~JSON Output~~ | ⚠️ **Deprecated** — JSON packet support has been removed from firmware; this field is ignored | Disabled                                            |
-| TLS             | Secure connection to broker                                                                   | Disabled                                            |
-| Map Reporting   | Report position to public map                                                                 | Disabled                                            |
+| 設定項目        | 説明                                                        | デフォルト                                               |
+| ----------- | --------------------------------------------------------- | --------------------------------------------------- |
+| サーバーアドレス    | MQTT サーバーのホスト名                                            | mqtt.meshtastic.org |
+| ユーザー名       | サーバーの認証                                                   | meshdev                                             |
+| パスワード       | サーバーの認証                                                   | large4cats                                          |
+| ルートトピック     | メッセージのベーストピック                                             | msh                                                 |
+| 暗号化         | MQTT ペイロードを暗号化                                            | 有効                                                  |
+| ~~JSON 出力~~ | ⚠️ **非推奨**：JSON パケットのサポートはファームウェアから削除されました。このフィールドは無視されます | 無効                                                  |
+| TLS         | サーバーへのセキュアな接続                                             | 無効                                                  |
+| マップ報告       | 公開マップに位置を報告                                               | 無効                                                  |
 
-### Default Meshtastic Broker
+### デフォルトの Meshtastic サーバー
 
-The community maintains a public broker at `mqtt.meshtastic.org`. This is intended for general use and testing.
+コミュニティが `mqtt.meshtastic.org` で公開サーバーを運用しています。 これは一般的な利用やテストを目的としています。
 
-> ℹ️ **Note:** Connections to `mqtt.meshtastic.org` always use TLS (port 8883), even if the TLS toggle is off. For any other broker, TLS is used only when you enable it (port 8883 with TLS, 1883 without).
+> ℹ️ **注意：** `mqtt.meshtastic.org` への接続は、TLS のトグルがオフでも常に TLS（ポート 8883）を使用します。 それ以外のサーバーでは、TLS は有効にした場合にのみ使用されます（TLS ありはポート 8883、なしは 1883）。
 
-> 🔒 **Privacy:** Messages on the public broker are readable by anyone subscribed. Always use channel encryption for private communications.
+> 🔒 **プライバシー：** 公開サーバー上のメッセージは、購読している誰もが読めます。 プライベートな通信には、必ずチャンネルの暗号化を使用してください。
 
-### Private Broker
+### プライベートサーバー
 
-For better privacy and control, you can run your own MQTT broker:
+プライバシーと制御を高めるために、独自の MQTT サーバーを運用できます：
 
-- Mosquitto (lightweight, open-source)
+- Mosquitto（軽量、オープンソース）
 - HiveMQ
 - EMQX
 
-Configure your node to point to your private broker with appropriate credentials.
+適切な認証情報を設定して、ノードがプライベートサーバーに接続するよう構成します。
 
-## Map Reporting
+## マップ報告
 
-When Map Reporting is enabled, your node publishes its position to the Meshtastic community map:
+マップ報告を有効にすると、ノードは自分の位置を Meshtastic のコミュニティマップに公開します：
 
-- Visible at [meshmap.net](https://meshmap.net) and similar community map services
-- Only position and node info are shared
-- Disable this if you don't want your location publicly visible
+- [meshmap.net](https://meshmap.net) や、同様のコミュニティマップサービスで表示されます
+- 共有されるのは位置とノード情報のみです
+- 位置を公開したくない場合は、これを無効にしてください
 
-## Uplink vs Downlink
+## アップリンクとダウンリンク
 
-| Direction    | 説明                               |
-| ------------ | -------------------------------- |
-| **Uplink**   | Messages from mesh → MQTT broker |
-| **Downlink** | Messages from MQTT broker → mesh |
+| 方向         | 説明                      |
+| ---------- | ----------------------- |
+| **アップリンク** | メッシュ → MQTT サーバーへのメッセージ |
+| **ダウンリンク** | MQTT サーバー → メッシュへのメッセージ |
 
-Configure per-channel which directions are active to control message flow and airtime usage.
+メッセージの流れと電波利用時間を制御するため、どの方向を有効にするかをチャンネルごとに設定します。
 
-## Message Formats
+## メッセージ形式
 
-MQTT uses protobuf message format:
+MQTT は protobuf のメッセージ形式を使用します：
 
-| Format       | 説明                                  | Use case                   |
-| ------------ | ----------------------------------- | -------------------------- |
-| **Protobuf** | Binary Meshtastic protobuf encoding | Node-to-node mesh bridging |
+| 形式           | 説明                              | 用途           |
+| ------------ | ------------------------------- | ------------ |
+| **Protobuf** | バイナリの Meshtastic protobuf エンコード | ノード間のメッシュ橋渡し |
 
-> ⚠️ **Note:** JSON output support was removed from firmware. The `json_enabled` setting is still visible in the app for legacy compatibility but has no effect on current firmware versions.
+> ⚠️ **注意：** JSON 出力のサポートはファームウェアから削除されました。 `json_enabled` の設定は、以前との互換性のためにアプリ上には表示されますが、現在のファームウェアバージョンには影響しません。
 
-## Encryption & Privacy
+## 暗号化とプライバシー
 
-Understanding the layered encryption model:
+階層化された暗号化モデルを理解する：
 
-1. **Channel encryption** happens on the mesh _before_ MQTT. If your channel has a PSK, the MQTT payload is already encrypted — the broker and any subscribers see only the ciphertext.
-2. **MQTT encryption** (the module setting) adds an additional encryption layer for transit to the broker. This protects metadata and routing information.
-3. **TLS** encrypts the TCP connection to the broker itself, preventing network-level eavesdropping.
+1. **チャンネルの暗号化**は、MQTT &#x306E;_&#x524D;&#x306B;_&#x30E1;ッシュ上で行われます。 チャンネルに PSK が設定されている場合、MQTT ペイロードはすでに暗号化されています。サーバーや購読者には暗号文しか見えません。
+2. **MQTT の暗号化**（モジュールの設定）は、サーバーへの転送のために追加の暗号化レイヤーを加えます。 これはメタデータやルーティング情報を保護します。
+3. **TLS** はサーバーへの TCP 接続自体を暗号化し、ネットワークレベルの盗聴を防ぎます。
 
-> 🔒 **Important:** The default public channel has a well-known key. Messages on the default channel sent via MQTT are effectively **unencrypted** — anyone can decode them. Always use a custom PSK for private communications.
+> 🔒 **重要：** デフォルトの公開チャンネルは、よく知られた鍵を使用しています。 デフォルトチャンネルで MQTT 経由で送信されるメッセージは、実質的に**暗号化されていません**。誰でも解読できます。 プライベートな通信には、必ずカスタムの PSK を使用してください。
 
-## Best Practices
+## ベストプラクティス
 
-- Use channel-level encryption (PSK) on channels that bridge to MQTT
-- Don't enable MQTT on nodes without internet access (it will buffer and waste memory)
-- Use a private broker for sensitive deployments
-- Be mindful of airtime when downlinking messages from busy MQTT topics — every downlinked message consumes radio airtime on your local mesh
-- Consider enabling uplink-only if you only need to monitor your mesh remotely without injecting messages back
+- MQTT に橋渡しするチャンネルでは、チャンネルレベルの暗号化（PSK）を使用します
+- インターネットに接続できないノードでは MQTT を有効にしないでください（バッファリングしてメモリを浪費します）
+- 機密性の高い運用にはプライベートサーバーを使用します
+- 混雑した MQTT トピックからメッセージをダウンリンクする際は、電波利用時間に注意してください。ダウンリンクされたメッセージはすべて、ローカルメッシュの無線の電波利用時間を消費します
+- メッセージを送り返さず、リモートでメッシュを監視するだけでよい場合は、アップリンクのみを有効にすることを検討してください
 
-## Troubleshooting
+## トラブルシューティング
 
-### MQTT Not Connecting
+### MQTT が接続できない
 
-- **Check WiFi** — the gateway node must have an active internet connection (WiFi or Ethernet). MQTT does not work over the LoRa radio link itself.
-- **Verify credentials** — incorrect username or password will silently fail on most brokers. Double-check for trailing spaces.
-- **Firewall** — port 1883 (MQTT) or 8883 (MQTT+TLS) must be open. Some networks block non-standard ports.
-- **DNS resolution** — if using a custom broker hostname, verify the node can resolve it. Try the broker's IP address directly.
+- **WiFi を確認：** ゲートウェイノードには、有効なインターネット接続（WiFi または Ethernet）が必要です。 MQTT は LoRa の無線リンク自体では動作しません。
+- **認証情報を確認：** ユーザー名やパスワードが正しくないと、ほとんどのサーバーでは何も表示されずに失敗します。 末尾のスペースがないか、よく確認してください。
+- **ファイアウォール：** ポート 1883（MQTT）または 8883（MQTT+TLS）が開いている必要があります。 一部のネットワークは、標準外のポートをブロックします。
+- **DNS 解決：** カスタムのサーバーホスト名を使う場合は、ノードがそれを解決できるか確認してください。 サーバーの IP アドレスを直接試してみてください。
 
-### Messages Not Bridging
+### メッセージが橋渡しされない
 
-- **Check uplink/downlink settings** — if only uplink is enabled, messages flow from mesh to MQTT but not back. Enable downlink on the receiving gateway.
-- **Channel mismatch** — both gateways must share the same channel with the same PSK. A mismatch means messages are encrypted with different keys and appear as garbage.
-- **Topic mismatch** — ensure both gateways use the same root topic. The default `msh` works for the public broker.
+- **アップリンク／ダウンリンクの設定を確認：** アップリンクのみが有効な場合、メッセージはメッシュから MQTT へ流れますが、戻ってきません。 受信側のゲートウェイでダウンリンクを有効にしてください。
+- **チャンネルの不一致：** 両方のゲートウェイが、同じ PSK を持つ同じチャンネルを共有している必要があります。 不一致の場合、メッセージは異なる鍵で暗号化され、判読できないデータとして表示されます。
+- **トピックの不一致：** 両方のゲートウェイが同じルートトピックを使用しているか確認してください。 デフォルトの `msh` は公開サーバーで機能します。
 
-## Related Topics
+## 関連トピック
 
-- [Settings — Modules & Admin](settings-module-admin) — MQTT module configuration reference
-- [Messages & Channels](messages-and-channels) — channel encryption and PSK setup
-- [MQTT integration guide](https://meshtastic.org/docs/software/integrations/mqtt) — detailed MQTT documentation on meshtastic.org
+- [設定：モジュールと管理](settings-module-admin)：MQTT モジュールの設定リファレンス
+- [メッセージとチャンネル](messages-and-channels)：チャンネルの暗号化と PSK の設定
+- [MQTT 連携ガイド](https://meshtastic.org/docs/software/integrations/mqtt)：meshtastic.org にある詳細な MQTT ドキュメント
 
 ---
 

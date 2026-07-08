@@ -2,7 +2,7 @@
 title: Yksiköt, mittaus ja kieli- ja alueasetukset
 parent: Käyttöopas
 nav_order: 16
-last_updated: 2026-05-12
+last_updated: 2026-07-08
 description: Miten sovellus muotoilee lämpötilan, etäisyyden, nopeuden ja muut mittayksiköt laitteesi alueasetusten perusteella.
 ---
 
@@ -14,7 +14,7 @@ Meshtastic-sovellus näyttää automaattisesti lämpötilat, etäisyydet, nopeud
 
 ## Miten se toimii
 
-Meshtastic-radiot lähettävät aina datan **metrisissä yksiköissä** (metrit, °C, km/h, hPa jne.). Kun sovellus vastaanottaa nämä tiedot, se muuntaa ja näyttää arvot laitteesi alueasetusten mukaisessa yksikköjärjestelmässä.
+Meshtastic-radiot lähettävät tiedot aina **metrisissä yksiköissä** (metri, °C, m/s, hPa jne.). Kun sovellus vastaanottaa nämä tiedot, se muuntaa ja näyttää arvot laitteesi alueasetusten mukaisessa yksikköjärjestelmässä.
 
 Androidissa mittausasetukset määräytyvät järjestelmän **Kieli ja alue** -asetusten mukaan. Työpöytäversiossa (JVM) sovellus käyttää JVM:n oletus-`Locale`-asetusta.
 

@@ -2,13 +2,17 @@
 title: 地圖與航點
 parent: 使用者指南
 nav_order: 6
-last_updated: 2026-06-25
-description: 在地圖上檢視節點位置、建立與分享航點，以及管理位置分享與隱私設定。
+last_updated: 2026-07-08
+description: View node positions on the map, create and share waypoints, manage map layers and Site Planner, and control position sharing and privacy.
 aliases:
   - map
   - waypoints
   - gps
   - location
+  - site-planner
+  - map-layers
+  - geojson
+  - kml
 ---
 
 # 地圖與航點
@@ -51,22 +55,33 @@ Each node that reports a position is shown as a **node chip** marker displaying 
 
 ### 航點屬性
 
-| 屬性   | 描述說明            |
-| ---- | --------------- |
-| 名稱   | 簡短名稱（最多 30 個字元） |
-| 描述說明 | 選填的較長說明         |
-| 圖示   | 地圖上的視覺標記表情符號    |
-| 鎖定   | 若已鎖定，僅建立者可編輯或刪除 |
-| 到期時間 | 選填的自動移除時間       |
+| 屬性       | 描述說明                                                    |
+| -------- | ------------------------------------------------------- |
+| 名稱       | Short identifier (max 29 characters) |
+| 描述說明     | 選填的較長說明                                                 |
+| 圖示       | 地圖上的視覺標記表情符號                                            |
+| 鎖定       | 若已鎖定，僅建立者可編輯或刪除                                         |
+| 到期時間     | Optional auto-remove date and time                      |
+| Geofence | Optional enter/exit alert area — see below              |
 
 ### 航點到期設定
 
 航點可設定為自動到期：
 
 - 永不到期（預設）— 航點將保留至手動刪除為止
-- 定時到期 — 航點將在指定時間後自動移除（例如：「2 小時後移除」）。 適用於臨時標記，例如集合點、危險區域或會面地點。
+- **Timed** — pick a specific date and time; the waypoint is automatically removed once that time passes. 適用於臨時標記，例如集合點、危險區域或會面地點。
 
-已到期的航點將自動從地圖上隱藏，以避免畫面雜亂。 到期倒數計時從航點建立時開始，而非從其他節點收到時起算。
+已到期的航點將自動從地圖上隱藏，以避免畫面雜亂。 The expiration countdown is based on the absolute time you picked, not a duration from when the waypoint was created or received.
+
+### Waypoint Geofences
+
+Any waypoint can also define a **geofence** — an alert area — so you or others get notified when a node enters or leaves it:
+
+1. Set a **geofence radius** from the preset chips (or **Off** to disable), or tap **Set area on map** to draw a custom rectangular area instead.
+2. Once a region is set, toggle **Notify on enter** and/or **Notify on exit**.
+3. Optionally enable **Favorites only** to limit alerts to your favorited nodes.
+
+Since waypoints (and their geofences) are broadcast to the whole mesh, only the **creator** is alerted by default. If someone else shares a geofenced waypoint with you, its detail view offers a **"Notify me of crossings"** opt-in so you can also receive enter/exit alerts for it.
 
 ### 管理航點
 
@@ -74,6 +89,14 @@ Each node that reports a position is shown as a **node chip** marker displaying 
 - 編輯或刪除您建立的航點
 - 已鎖定的航點無法被其他節點修改或刪除 — 僅原始建立者可進行變更
 - 未鎖定的航點可由任何 mesh 成員編輯
+
+## 地圖圖層
+
+Tap the layers icon on the map to open **Manage Map Layers**, where you can import your own overlays in `.kml`, `.kmz`, or GeoJSON format — either by opening a file with Meshtastic or sharing it into the app from another app. Imported layers are listed with a toggle to show/hide each one and an option to remove it. This is available on both the Google Play and F-Droid builds.
+
+### Site Planner
+
+**Site Planner** estimates RF coverage for a transmitter and draws it on the map as a color-coded overlay. Open it from a map control, or from a node's detail page via **Estimate coverage** (shown only for nodes with a known position). Configure the transmitter (location, frequency, TX power, antenna gain and height), the receiver (sensitivity, height), and simulation options (max range, high-resolution terrain, color palette), then run the estimate. Like map layers, Site Planner works on both the Google Play and F-Droid builds.
 
 ## 位置分享
 
