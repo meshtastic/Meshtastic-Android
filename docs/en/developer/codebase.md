@@ -44,6 +44,7 @@ Meshtastic-Android/
 │   ├── datastore/
 │   ├── di/
 │   ├── domain/
+│   ├── konsist/
 │   ├── model/
 │   ├── navigation/
 │   ├── network/
@@ -62,8 +63,9 @@ Meshtastic-Android/
 │   ├── convention/
 │   └── flatpak/
 ├── docs/                   # Documentation source (markdown)
-│   ├── user/
-│   └── developer/
+│   └── en/                 # English sources (translations land in docs/{lang}/)
+│       ├── user/
+│       └── developer/
 ├── gradle/                 # Gradle wrapper and version catalog
 │   └── libs.versions.toml
 ├── specs/                  # Feature specifications

@@ -83,6 +83,7 @@ Shared infrastructure used by all features:
 | `core:resources` | Shared string resources |
 | `core:model` | Domain models |
 | `core:data` | Data layer abstractions |
+| `core:domain` | Use cases / business logic |
 | `core:database` | Room KMP database |
 | `core:datastore` | DataStore preferences |
 | `core:prefs` | App preferences |
@@ -91,7 +92,11 @@ Shared infrastructure used by all features:
 | `core:di` | DI utilities |
 | `core:network` | HTTP/serial/transport |
 | `core:ble` | Bluetooth LE abstractions |
+| `core:barcode` | QR / barcode scanning (channel-share QR codes) |
+| `core:nfc` | NFC read/write support |
+| `core:takserver` | Embedded TAK server integration |
 | `core:testing` | Test utilities |
+| `core:konsist` | Konsist architecture/convention tests |
 
 Protobuf models are no longer a local module — they come from the external `org.meshtastic:protobufs` Maven artifact (pinned in `gradle/libs.versions.toml`).
 

@@ -115,11 +115,15 @@ You can search the full history of any conversation directly from the chat scree
 
 ![Message search bar with result counter and previous/next arrows](../../assets/screenshots/messages_search_bar.png)
 
-> 💡 **Tip:** Search is full-text and stays within the conversation you opened it from — it doesn't search across other channels or contacts. Matching is fast even on long histories because messages are indexed locally.
+> 💡 **Tip:** Search is full-text and stays within the conversation you opened it from — it doesn't search across other channels or contacts. It matches against the messages already stored on your device, so it works fully offline.
 
 ### Message Bubbles
 
 Messages appear as chat bubbles — sent messages on the right, received messages on the left. Each bubble shows the sender, timestamp, and delivery status. Messages with replies include a quoted preview of the original message above the response.
+
+### Mentions
+
+Type `@` while composing to mention a node — a picker suggests matching contacts as you type. In a received message, a mention appears as a highlighted chip showing the node's name; tap it to jump straight to that node's detail page.
 
 ### Reactions
 
@@ -140,6 +144,7 @@ Long-press any message to access:
 - **Copy** — copy message text to clipboard
 - **Reply** — quote the message in your response
 - **React** — add an emoji reaction
+- **Translate** — translate a received message into your device language and toggle between the original and translated text (Google Play build only; uses on-device translation)
 - **Delete** — remove a message you sent (local deletion)
 
 ### Message Priority
