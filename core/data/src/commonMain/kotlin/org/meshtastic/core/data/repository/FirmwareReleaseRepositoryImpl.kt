@@ -104,27 +104,31 @@ open class FirmwareReleaseRepositoryImpl(
      */
     private suspend fun ensureSeeded() {
         if (bundleDecodeFailed) return // don't retry the bundled asset on every collection once it has failed
-        seedMutex.withLock {
-            // Decode the bundled JSON once per process; the asset never changes between launches.
-            if (bundledSnapshot == null && !bundleDecodeFailed) {
-                safeCatching { assetReader.decode<NetworkFirmwareReleases>("firmware_releases.json", json) }
-                    .onSuccess { snapshot -> bundledSnapshot = snapshot }
-                    .onFailure { e ->
-                        Logger.w(e) { "FirmwareReleaseRepository: failed to decode bundled JSON" }
+
+        // seedMutex guards only the decode + snapshot cache; the DB apply runs outside it (so concurrent
+        // collectors don't block on a Room write or on refreshMutex) and under refreshMutex (so it can't
+        // race singleFlightRefresh and overwrite fresher data that just arrived from the API).
+        val bundled =
+            seedMutex.withLock {
+                // Decode the bundled JSON once per process; the asset never changes between launches.
+                if (bundledSnapshot == null && !bundleDecodeFailed) {
+                    safeCatching { assetReader.decode<NetworkFirmwareReleases>("firmware_releases.json", json) }
+                        .onSuccess { snapshot -> bundledSnapshot = snapshot }
+                        .onFailure { e ->
+                            Logger.w(e) { "FirmwareReleaseRepository: failed to decode bundled JSON" }
+                            bundleDecodeFailed = true
+                        }
+                    // Decode returning null (asset missing) also stops further retries.
+                    if (bundledSnapshot == null && !bundleDecodeFailed) {
+                        Logger.w { "FirmwareReleaseRepository: no bundled releases available to seed from" }
                         bundleDecodeFailed = true
                     }
-                // Decode returning null (asset missing) also stops further retries.
-                if (bundledSnapshot == null && !bundleDecodeFailed) {
-                    Logger.w { "FirmwareReleaseRepository: no bundled releases available to seed from" }
-                    bundleDecodeFailed = true
                 }
-            }
+                bundledSnapshot?.releases
+            } ?: return
 
-            val bundled = bundledSnapshot?.releases ?: return
-
+        safeCatching {
             refreshMutex.withLock {
-                // Re-evaluate against the current active DB under the same lock as network refresh so an older bundled
-                // snapshot cannot overwrite fresher data that just arrived from the API.
                 val toApply =
                     listOf(FirmwareReleaseType.STABLE to bundled.stable, FirmwareReleaseType.ALPHA to bundled.alpha)
                         .filter { (type, releases) -> isBundleNewerFor(type, releases) }
@@ -135,6 +139,7 @@ open class FirmwareReleaseRepositoryImpl(
                 }
             }
         }
+            .onFailure { e -> Logger.w(e) { "FirmwareReleaseRepository: failed to apply bundled snapshot" } }
     }
 
     /** True when [bundled] contains a release newer than anything cached for [type]. */
