@@ -165,6 +165,8 @@ class FirmwareUpdateViewModel(
                 if (pendingArtifact != null && pendingArtifact != tempFirmwareFile) {
                     cleanupTemporaryFiles(fileHandler, pendingArtifact)
                 }
+                safeCatching { fileHandler.cleanupAllTemporaryFiles() }
+                    .onFailure { Logger.w(it) { "Failed to cleanup remaining temp files" } }
             }
         }
     }
@@ -476,29 +478,40 @@ class FirmwareUpdateViewModel(
         clearPendingLocalFirmwareFile()
         prepareJob =
             viewModelScope.launch {
-                val fileName =
-                    safeCatching { fileHandler.getDisplayName(uri)?.takeIf { it.isNotBlank() } }
-                        .getOrElse { e ->
-                            Logger.w(e) { "Failed to resolve local firmware filename" }
-                            null
+                try {
+                    val fileName =
+                        safeCatching { fileHandler.getDisplayName(uri)?.takeIf { it.isNotBlank() } }
+                            .getOrElse { e ->
+                                Logger.w(e) { "Failed to resolve local firmware filename" }
+                                null
+                            }
+
+                    // State may have changed during the suspend call (e.g. cancelUpdate, checkForUpdates).
+                    // Do not write errors or reopen the confirmation dialog for a stale selection.
+                    when {
+                        _state.value != currentState -> Unit
+
+                        fileName == null ->
+                            _state.value =
+                                FirmwareUpdateState.Error(
+                                    UiText.Resource(Res.string.firmware_update_filename_unavailable),
+                                )
+
+                        else -> {
+                            val resolution = resolveLocalFirmwareFile(uri, fileName, currentState)
+                            if (_state.value != currentState) {
+                                cleanupResolvedLocalFirmwareFile(resolution)
+                            } else {
+                                applyLocalFirmwareResolution(resolution, currentState)
+                            }
                         }
-
-                // State may have changed during the suspend call (e.g. cancelUpdate, checkForUpdates).
-                // Do not write errors or reopen the confirmation dialog for a stale selection.
-                when {
-                    _state.value != currentState -> Unit
-
-                    fileName == null ->
-                        _state.value =
-                            FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_filename_unavailable))
-
-                    else -> {
-                        val resolution = resolveLocalFirmwareFile(uri, fileName, currentState)
-                        if (_state.value != currentState) {
-                            cleanupResolvedLocalFirmwareFile(resolution)
-                        } else {
-                            applyLocalFirmwareResolution(resolution, currentState)
-                        }
+                    }
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    Logger.e(e) { "Error preparing local firmware file" }
+                    if (_state.value == currentState) {
+                        _state.value = FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_failed))
                     }
                 }
             }
@@ -874,10 +887,7 @@ private suspend fun cleanupTemporaryFiles(
     fileHandler: FirmwareFileHandler,
     tempFirmwareFile: FirmwareArtifact?,
 ): FirmwareArtifact? {
-    safeCatching {
-        tempFirmwareFile?.takeIf { it.isTemporary }?.let { fileHandler.deleteFile(it) }
-        fileHandler.cleanupAllTemporaryFiles()
-    }
+    safeCatching { tempFirmwareFile?.takeIf { it.isTemporary }?.let { fileHandler.deleteFile(it) } }
         .onFailure { e -> Logger.w(e) { "Failed to cleanup temp files" } }
     return null
 }

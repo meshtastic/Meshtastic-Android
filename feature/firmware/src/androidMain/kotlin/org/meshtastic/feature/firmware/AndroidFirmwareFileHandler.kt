@@ -135,7 +135,7 @@ class AndroidFirmwareFileHandler(private val context: Context, private val clien
         preferredFilename: String?,
     ): FirmwareArtifact? = withContext(ioDispatcher) {
         val localZipFile = zipFile.toLocalFileOrNull() ?: return@withContext null
-        val target = hardware.platformioTarget.ifEmpty { hardware.hwModelSlug }
+        val target = hardware.effectiveTarget
         if (target.isEmpty() && preferredFilename == null) return@withContext null
 
         val targetLowerCase = target.lowercase()
@@ -181,7 +181,7 @@ class AndroidFirmwareFileHandler(private val context: Context, private val clien
         fileExtension: String,
         preferredFilename: String?,
     ): FirmwareArtifact? = withContext(ioDispatcher) {
-        val target = hardware.platformioTarget.ifEmpty { hardware.hwModelSlug }
+        val target = hardware.effectiveTarget
         if (target.isEmpty() && preferredFilename == null) return@withContext null
 
         val targetLowerCase = target.lowercase()
