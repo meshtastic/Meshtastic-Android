@@ -47,7 +47,6 @@ import org.meshtastic.core.model.TracerouteMapAvailability
 import org.meshtastic.core.model.evaluateTracerouteMapAvailability
 import org.meshtastic.core.model.service.TracerouteResponse
 import org.meshtastic.core.model.util.dispatchMeshtasticUri
-import org.meshtastic.core.model.util.isOtaStatusNotification
 import org.meshtastic.core.navigation.DeepLinkRouter
 import org.meshtastic.core.repository.EventFirmwareRepository
 import org.meshtastic.core.repository.FirmwareReleaseRepository
@@ -257,11 +256,6 @@ class UIViewModel(
         serviceRepository.clientNotification
             .filterNotNull()
             .onEach { notification ->
-                if (notification.isOtaStatusNotification()) {
-                    Logger.i { "Suppressing OTA status ClientNotification generic alert" }
-                    return@onEach
-                }
-
                 val isCompromised = notification.low_entropy_key != null || notification.duplicated_public_key != null
                 showAlert(
                     titleRes = Res.string.client_notification,
