@@ -97,6 +97,14 @@ internal enum class AirQuality(val labelRes: StringResource, val unit: String, v
     }
 }
 
+/**
+ * The subset of [candidates] with at least one reading in [telemetries]. The chart only draws series that have data, so
+ * the legend must use this rather than the raw selection — otherwise a default-selected series (PM2.5) shows a legend
+ * entry on nodes that never report it (issue #5873). Internal so it can be unit-tested.
+ */
+internal fun metricsWithData(candidates: List<AirQuality>, telemetries: List<Telemetry>): List<AirQuality> =
+    candidates.filter { metric -> telemetries.any { metric.getValue(it) != null } }
+
 private val LEGEND_DATA =
     AirQuality.entries.map { metric -> LegendData(nameRes = metric.labelRes, color = metric.color, isLine = true) }
 
@@ -193,10 +201,11 @@ private fun AirQualityChart(
     modifier: Modifier = Modifier,
 ) {
     val activeMetrics = AirQuality.entries.filter { it in selectedMetrics }
+    val drawnMetrics = metricsWithData(activeMetrics, telemetries)
     val metricLabels = activeMetrics.associateWith { stringResource(it.labelRes) }
     MetricChartScaffold(
         isEmpty = telemetries.isEmpty() || activeMetrics.isEmpty(),
-        legendData = LEGEND_DATA.filter { ld -> activeMetrics.any { it.labelRes == ld.nameRes } },
+        legendData = LEGEND_DATA.filter { ld -> drawnMetrics.any { it.labelRes == ld.nameRes } },
         modifier = modifier,
     ) { modelProducer, chartModifier ->
         val marker =

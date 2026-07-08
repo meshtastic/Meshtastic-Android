@@ -69,4 +69,21 @@ class AirQualityMetricsTest {
             assertNull(it.getValue(t), "${it.name} should be null without air_quality_metrics")
         }
     }
+
+    @Test
+    fun `metricsWithData drops selected series that have no reading so the legend is not ever-present`() {
+        // Issue 5873, CO2-only node: PM2.5 is default-selected but never reported, so it must not survive into the
+        // legend.
+        val co2Only = listOf(telemetry(AirQualityMetrics(co2 = 450)))
+        assertEquals(listOf(AirQuality.CO2), metricsWithData(listOf(AirQuality.PM2_5, AirQuality.CO2), co2Only))
+    }
+
+    @Test
+    fun `metricsWithData keeps a series once it has any reading in the frame`() {
+        val mixed = listOf(telemetry(AirQualityMetrics(co2 = 450)), telemetry(AirQualityMetrics(pm25_standard = 8)))
+        assertEquals(
+            listOf(AirQuality.PM2_5, AirQuality.CO2),
+            metricsWithData(listOf(AirQuality.PM2_5, AirQuality.CO2), mixed),
+        )
+    }
 }
