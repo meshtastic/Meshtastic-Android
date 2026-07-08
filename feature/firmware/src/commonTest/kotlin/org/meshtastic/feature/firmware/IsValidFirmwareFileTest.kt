@@ -123,6 +123,17 @@ class IsValidFirmwareFileTest {
         assertTrue(isValidFirmwareFile("firmware-nano-g1-explorer-2.8.0.bin", "nano-g1-explorer", ".bin"))
     }
 
+    @Test
+    fun `accepts older local firmware filename shapes`() {
+        // Older naming where "firmware" appears as a segment after the target.
+        assertTrue(isValidFirmwareFile("heltec-v3-firmware-2.7.17.bin", "heltec-v3", ".bin"))
+        assertTrue(isValidFirmwareFile("heltec-v3.firmware.bin", "heltec-v3", ".bin"))
+        // Standard release names still work.
+        assertTrue(isValidFirmwareFile("firmware-heltec-v3-2.7.17.bin", "heltec-v3", ".bin"))
+        assertTrue(isValidFirmwareFile("heltec-v3-2.7.17.bin", "heltec-v3", ".bin"))
+        assertTrue(isValidFirmwareFile("heltec-v3.bin", "heltec-v3", ".bin"))
+    }
+
     // ── Edge cases ──────────────────────────────────────────────────────────
 
     @Test

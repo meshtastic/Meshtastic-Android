@@ -129,7 +129,7 @@ internal fun isValidFirmwareFile(filename: String, target: String, fileExtension
 
     val targetToken = Regex.escape(target)
     val extensionToken = Regex.escape(fileExtension)
-    val targetPattern = Regex("(^|.*[\\-_])$targetToken(([\\-_.]v?\\d).*$extensionToken$|$extensionToken$)")
+    val targetPattern = Regex("(^|.*[\\-_])$targetToken(([\\-_.](v?\\d|firmware)).*$extensionToken$|$extensionToken$)")
     return targetPattern.matches(filename)
 }
 
