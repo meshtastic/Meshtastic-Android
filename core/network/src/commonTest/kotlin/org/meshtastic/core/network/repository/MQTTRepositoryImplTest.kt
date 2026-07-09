@@ -51,12 +51,16 @@ import org.meshtastic.mqtt.ReasonCode
 import org.meshtastic.mqtt.packet.Subscription
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
+import org.meshtastic.proto.Data
 import org.meshtastic.proto.LocalModuleConfig
+import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.ModuleConfig
+import org.meshtastic.proto.ServiceEnvelope
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -423,6 +427,89 @@ class MQTTRepositoryImplTest {
         assertTrue(jsonStr.contains("\"type\":\"text\""))
         assertTrue(jsonStr.contains("\"from\":12345678"))
         assertTrue(jsonStr.contains("\"payload\":\"Hello World\""))
+    }
+
+    // endregion
+
+    // region isUndeliverableDownlink — Tier 1 drop filter for MQTT client-proxy downlink packets.
+
+    private fun envelopeBytes(
+        channelId: String = "LongFast",
+        gatewayId: String = "!aabbccdd",
+        packet: MeshPacket? = MeshPacket(),
+    ): ByteArray =
+        ServiceEnvelope.ADAPTER.encode(ServiceEnvelope(packet = packet, channel_id = channelId, gateway_id = gatewayId))
+
+    @Test
+    fun `payload-less packet is undeliverable`() {
+        // The observed LongFast flood: a packet with neither decoded nor encrypted set.
+        val bytes = envelopeBytes(packet = MeshPacket(from = 1, to = 2))
+        assertTrue(isUndeliverableDownlink(bytes, myId = "!12345678"))
+    }
+
+    @Test
+    fun `decoded packet is deliverable`() {
+        val bytes = envelopeBytes(packet = MeshPacket(decoded = Data()))
+        assertFalse(isUndeliverableDownlink(bytes, myId = "!12345678"))
+    }
+
+    @Test
+    fun `encrypted packet is deliverable`() {
+        val bytes = envelopeBytes(packet = MeshPacket(encrypted = byteArrayOf(1, 2, 3).toByteString()))
+        assertFalse(isUndeliverableDownlink(bytes, myId = "!12345678"))
+    }
+
+    @Test
+    fun `PKI payload-less packet is deliverable (guard)`() {
+        val bytes = envelopeBytes(channelId = "PKI", packet = MeshPacket(from = 1))
+        assertFalse(isUndeliverableDownlink(bytes, myId = "!12345678"))
+    }
+
+    @Test
+    fun `own echo payload-less packet is deliverable (guard)`() {
+        val bytes = envelopeBytes(gatewayId = "!12345678", packet = MeshPacket(from = 1))
+        assertFalse(isUndeliverableDownlink(bytes, myId = "!12345678"))
+    }
+
+    @Test
+    fun `a different gateway's payload-less packet is undeliverable`() {
+        val bytes = envelopeBytes(gatewayId = "!deadbeef", packet = MeshPacket(from = 1))
+        assertTrue(isUndeliverableDownlink(bytes, myId = "!12345678"))
+    }
+
+    @Test
+    fun `null myId does not suppress dropping`() {
+        val bytes = envelopeBytes(gatewayId = "!deadbeef", packet = MeshPacket(from = 1))
+        assertTrue(isUndeliverableDownlink(bytes, myId = null))
+    }
+
+    @Test
+    fun `packet-less envelope is deliverable (fail open)`() {
+        val bytes = envelopeBytes(packet = null)
+        assertFalse(isUndeliverableDownlink(bytes, myId = "!12345678"))
+    }
+
+    @Test
+    fun `garbage bytes are deliverable (fail open)`() {
+        // Non-protobuf bytes must never be dropped.
+        val bytes = byteArrayOf(0xFF.toByte(), 0xFF.toByte(), 0xFF.toByte(), 0x42)
+        assertFalse(isUndeliverableDownlink(bytes, myId = "!12345678"))
+    }
+
+    @Test
+    fun `payload-less downlink stubs are dropped before forwarding`() = runTest {
+        val harness = createHarness()
+        val stub = envelopeBytes(packet = MeshPacket(from = 1, to = 2)) // no payload → dropped
+        val real = envelopeBytes(packet = MeshPacket(decoded = Data())) // has payload → forwarded
+
+        val nextMessage = backgroundScope.async { harness.repository.proxyMessageFlow.first() }
+        runCurrent()
+        harness.client.emitMessage(MqttMessage(topic = "msh/2/e/alpha/node", payload = stub, retain = false))
+        harness.client.emitMessage(MqttMessage(topic = "msh/2/e/alpha/node", payload = real, retain = false))
+
+        // first() returns the first *forwarded* message; the stub was dropped, so it must be `real`.
+        val proxyMessage = nextMessage.await()
+        assertContentEquals(real, proxyMessage.data_?.toByteArray())
     }
 
     // endregion
