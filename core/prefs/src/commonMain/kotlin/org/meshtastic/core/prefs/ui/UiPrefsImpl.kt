@@ -135,6 +135,13 @@ class UiPrefsImpl(
         scope.launch { dataStore.edit { it[KEY_SHOW_QUICK_CHAT_PREF] = show } }
     }
 
+    override val eventFontsEnabled: StateFlow<Boolean> =
+        dataStore.data.map { it[KEY_EVENT_FONTS_ENABLED] ?: true }.stateIn(scope, SharingStarted.Eagerly, true)
+
+    override fun setEventFontsEnabled(enabled: Boolean) {
+        scope.launch { dataStore.edit { it[KEY_EVENT_FONTS_ENABLED] = enabled } }
+    }
+
     override val bleAutoScan: StateFlow<Boolean> =
         dataStore.data.map { it[KEY_BLE_AUTO_SCAN] ?: false }.stateIn(scope, SharingStarted.Eagerly, false)
 
@@ -268,6 +275,7 @@ class UiPrefsImpl(
     companion object {
         val KEY_HAS_SHOWN_NOT_PAIRED_WARNING_PREF = booleanPreferencesKey("has_shown_not_paired_warning")
         val KEY_SHOW_QUICK_CHAT_PREF = booleanPreferencesKey("show-quick-chat")
+        val KEY_EVENT_FONTS_ENABLED = booleanPreferencesKey("event-fonts-enabled")
 
         val KEY_APP_INTRO_COMPLETED = booleanPreferencesKey("app_intro_completed")
         val KEY_THEME = intPreferencesKey("theme")

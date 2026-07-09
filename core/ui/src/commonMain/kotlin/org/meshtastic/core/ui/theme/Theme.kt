@@ -27,6 +27,7 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 
 private val lightScheme =
@@ -128,7 +129,12 @@ fun AppTheme(
             null
         } ?: if (darkTheme) darkScheme else lightScheme
 
-    MaterialExpressiveTheme(colorScheme = colorScheme, typography = AppTypography, motionScheme = expressive()) {
+    // When a device is on event firmware (and fonts are available + not opted out), swap the whole typescale to the
+    // event typeface. Null everywhere else (desktop, F-Droid, non-event) → default typography.
+    val eventFonts = LocalEventTypographyFonts.current
+    val typography = remember(eventFonts) { eventFonts?.let { AppTypography.withEventFonts(it) } ?: AppTypography }
+
+    MaterialExpressiveTheme(colorScheme = colorScheme, typography = typography, motionScheme = expressive()) {
         content()
     }
 }

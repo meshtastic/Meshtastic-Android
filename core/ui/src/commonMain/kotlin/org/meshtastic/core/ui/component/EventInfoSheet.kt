@@ -32,6 +32,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -45,12 +46,16 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.EventFirmwareEdition
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.event_use_event_fonts
 import org.meshtastic.core.ui.icon.CalendarMonth
 import org.meshtastic.core.ui.icon.ChevronRight
 import org.meshtastic.core.ui.icon.LinkIcon
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Place
+import org.meshtastic.core.ui.theme.LocalEventFontsToggle
 import org.meshtastic.core.ui.util.EventBrandingIcon
 import org.meshtastic.core.ui.util.accentColorOrNull
 
@@ -88,6 +93,24 @@ fun EventInfoSheet(edition: EventFirmwareEdition, onDismiss: () -> Unit) {
                         LinkRow(label = link.label.ifBlank { link.url }, tint = iconTint) {
                             uriHandler.openUri(link.url)
                         }
+                    }
+                }
+
+                // Only shown when the event actually ships custom fonts and the platform can load them (Google flavor).
+                val fontsToggle = LocalEventFontsToggle.current
+                if (fontsToggle.available) {
+                    HorizontalDivider()
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.event_use_event_fonts),
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.weight(1f),
+                        )
+                        Switch(checked = fontsToggle.enabled, onCheckedChange = fontsToggle.onChange)
                     }
                 }
             }

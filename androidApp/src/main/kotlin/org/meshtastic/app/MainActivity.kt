@@ -37,6 +37,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.core.content.IntentCompat
 import androidx.core.net.toUri
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -50,6 +51,7 @@ import kotlinx.coroutines.launch
 import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 import org.meshtastic.app.intro.AnalyticsIntro
@@ -68,6 +70,10 @@ import org.meshtastic.core.resources.channel_invalid
 import org.meshtastic.core.service.MeshService
 import org.meshtastic.core.service.startService
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.ui.theme.EventFontResolver
+import org.meshtastic.core.ui.theme.EventFontsToggle
+import org.meshtastic.core.ui.theme.LocalEventFontsToggle
+import org.meshtastic.core.ui.theme.LocalEventTypographyFonts
 import org.meshtastic.core.ui.theme.MODE_DYNAMIC
 import org.meshtastic.core.ui.util.LocalAnalyticsIntroProvider
 import org.meshtastic.core.ui.util.LocalBarcodeScannerProvider
@@ -192,8 +198,20 @@ class MainActivity : AppCompatActivity() {
     @Composable
     private fun AppCompositionLocals(content: @Composable () -> Unit) {
         val eventEdition by model.eventEdition.collectAsStateWithLifecycle()
+        val eventFontsEnabled by model.eventFontsEnabled.collectAsStateWithLifecycle()
+        val eventFontResolver = koinInject<EventFontResolver>()
+        // Resolve once per edition; null on F-Droid / non-event / editions without fonts.
+        val resolvedEventFonts =
+            remember(eventEdition, eventFontResolver) { eventFontResolver.resolve(eventEdition?.theme?.fonts) }
         CompositionLocalProvider(
             LocalEventBranding provides eventEdition,
+            LocalEventTypographyFonts provides resolvedEventFonts?.takeIf { eventFontsEnabled },
+            LocalEventFontsToggle provides
+                EventFontsToggle(
+                    available = resolvedEventFonts != null,
+                    enabled = eventFontsEnabled,
+                    onChange = model::setEventFontsEnabled,
+                ),
             LocalBarcodeScannerProvider provides { onResult -> rememberBarcodeScanner(onResult) },
             LocalNfcScannerProvider provides { onResult, onDisabled -> NfcScannerEffect(onResult, onDisabled) },
             LocalNfcWriterProvider provides { url, onResult, onDisabled -> NfcWriterEffect(url, onResult, onDisabled) },

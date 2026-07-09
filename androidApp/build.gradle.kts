@@ -305,6 +305,8 @@ dependencies {
     // maps-compose-widgets requests androidx.compose.material:material version-less (expects a BOM
     // we exclude). Name it with a version so the version is published in the app's graph metadata.
     googleImplementation(libs.androidx.compose.material)
+    // Downloadable Google Fonts for event-firmware branding (Play Services font provider — Google flavor only).
+    googleImplementation(libs.androidx.compose.ui.text.google.fonts)
     googleImplementation(libs.dd.sdk.android.logs)
     googleImplementation(libs.dd.sdk.android.rum)
     googleImplementation(libs.dd.sdk.android.session.replay)

@@ -128,6 +128,11 @@ class UIViewModel(
 
     val theme: StateFlow<Int> = uiPrefs.theme
 
+    /** Opt-out for applying an event edition's custom typeface app-wide. */
+    val eventFontsEnabled: StateFlow<Boolean> = uiPrefs.eventFontsEnabled
+
+    fun setEventFontsEnabled(enabled: Boolean) = uiPrefs.setEventFontsEnabled(enabled)
+
     val firmwareEdition = meshLogRepository.getMyNodeInfo().map { nodeInfo -> nodeInfo?.firmware_edition }
 
     val eventEdition: StateFlow<EventFirmwareEdition?> =

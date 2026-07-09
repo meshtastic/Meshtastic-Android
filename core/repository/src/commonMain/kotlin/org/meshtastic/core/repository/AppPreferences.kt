@@ -124,6 +124,11 @@ interface UiPrefs {
 
     fun setShowQuickChat(show: Boolean)
 
+    /** Whether to apply an event edition's custom typeface app-wide (opt-out; default on). */
+    val eventFontsEnabled: StateFlow<Boolean>
+
+    fun setEventFontsEnabled(enabled: Boolean)
+
     /** Whether BLE scanning should auto-start when the Connections screen is opened. */
     val bleAutoScan: StateFlow<Boolean>
 

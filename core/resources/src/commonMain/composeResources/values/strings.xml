@@ -567,6 +567,7 @@
     <string name="ethernet_config">Ethernet Options</string>
     <string name="ethernet_enabled">Ethernet enabled</string>
     <string name="ethernet_ip">Ethernet IP:</string>
+    <string name="event_use_event_fonts">Use event fonts</string>
     <string name="exchange_position">Exchange position</string>
     <string name="expand_chart">Expand chart</string>
     <string name="expanded">Expanded</string>
