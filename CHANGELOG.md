@@ -9,24 +9,14 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
-#### 📝 Other Changes
-* docs: second-pass audit of docs/en — fix drift and document new features by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6157
-
-### Internal (v2.8.0-internal.19)
-Changes since [`v2.8.0-closed.6`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.0-closed.6):
-
 #### 🏗️ Features
-* feat(map): Site Planner coverage integration — import + estimate by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6136
-* feat(node): show CO₂ sensor temperature & humidity on Air Quality page by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6143
-* feat(node): histogram of nodes per hop distance (#5745) by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6146
-* feat(map): F-Droid map-layer parity — share layer UI + logic in common source (#6138) by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6148
+* feat(firmware): Confirm local firmware files before flashing by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6083
 #### 🛠️ Fixes
-* fix(discovery): ship a fresh LoRaConfig when switching to a beacon's preset by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6135
-* fix(runtime): harden BLE profile, OTA setup, and DB access by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6126
-* fix(messaging): use stored contact_key to avoid duplicate LazyColumn key crash (#6131) by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6142
-* fix(metrics): air-quality chart legend follows plotted data, not selection by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6145
+* fix(firmware): Keep bundled release discovery available by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6082
+* fix(dfu): Detect legacy bootloaders before secure fallback by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6079
+* fix(firmware): Retry ESP32 OTA service connections cleanly by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6081
 
-### Closed Beta (v2.8.0-closed.6)
+### Closed Beta (v2.8.0-closed.7)
 Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14):
 
 #### 🏗️ Features
@@ -68,6 +58,11 @@ Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/relea
 * feat(messaging): @mention with deep-link to node detail (#6098) by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6108
 * feat(node): label power channels and fix pressure axis scale by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6111
 * Show outgoing message status text by @RCGV1 in https://github.com/meshtastic/Meshtastic-Android/pull/6121
+* feat(map): Site Planner coverage integration — import + estimate by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6136
+* feat(node): show CO₂ sensor temperature & humidity on Air Quality page by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6143
+* feat(node): histogram of nodes per hop distance (#5745) by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6146
+* feat(map): F-Droid map-layer parity — share layer UI + logic in common source (#6138) by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6148
+* Promote CO2 temperatures to summary if no other temp is present. by @DaneEvans in https://github.com/meshtastic/Meshtastic-Android/pull/6153
 #### 🖥️ Desktop
 * fix(data): stale firmware/hardware caches — stop cancelling slow API refreshes, prune pulled releases, seed from newer bundles by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6060
 * fix(geofence): restrict crossing alerts to creator, add per-geofence opt-in by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6117
@@ -133,6 +128,10 @@ Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/relea
 * fix(settings): Apply manual channel writes in order by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6077
 * fix(settings): Generate fresh PSK for named manual channels by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6076
 * fix(discovery): let default-channel users start a scan by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6120
+* fix(discovery): ship a fresh LoRaConfig when switching to a beacon's preset by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6135
+* fix(runtime): harden BLE profile, OTA setup, and DB access by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6126
+* fix(messaging): use stored contact_key to avoid duplicate LazyColumn key crash (#6131) by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6142
+* fix(metrics): air-quality chart legend follows plotted data, not selection by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6145
 #### 📝 Other Changes
 * refactor(takserver): commonize TAK SDK pipeline, drop redundant zstd/xpp3 deps by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5871
 * refactor(settings): remove Traffic Management module config by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5878
