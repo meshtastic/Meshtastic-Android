@@ -16,20 +16,16 @@
  */
 package org.meshtastic.feature.messaging.ui.contact
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import androidx.paging.PagingData
-import androidx.paging.cachedIn
-import androidx.paging.map
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.model.Contact
 import org.meshtastic.core.model.ContactKey
-import org.meshtastic.core.model.ContactSettings
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.NodeAddress
@@ -47,12 +43,28 @@ import kotlin.collections.map as collectionsMap
 
 @KoinViewModel
 class ContactsViewModel(
+    private val savedStateHandle: SavedStateHandle,
     private val nodeRepository: NodeRepository,
     private val packetRepository: PacketRepository,
     radioConfigRepository: RadioConfigRepository,
     connectionStateProvider: ConnectionStateProvider,
 ) : ViewModel() {
     val ourNodeInfo = nodeRepository.ourNodeInfo
+
+    // ponytail: stored as a comma-joined String (not a Set) — savedstate on all KMP targets only
+    // guarantees primitive types, and there are only ever two section keys.
+    private val collapsedSectionsCsv = savedStateHandle.getStateFlow(KEY_COLLAPSED_SECTIONS, "")
+
+    /** Collapsed conversation-list section keys (see [ContactSection]), persisted across process death. */
+    val collapsedSections: StateFlow<Set<String>> =
+        collapsedSectionsCsv.map { it.toSectionSet() }.stateInWhileSubscribed(initialValue = emptySet())
+
+    fun toggleSectionCollapse(sectionKey: String) {
+        // Read the authoritative saved value, not collapsedSections.value (which is emptySet when unsubscribed).
+        val current = collapsedSectionsCsv.value.toSectionSet()
+        val updated = if (sectionKey in current) current - sectionKey else current + sectionKey
+        savedStateHandle[KEY_COLLAPSED_SECTIONS] = updated.joinToString(",")
+    }
 
     val connectionState = connectionStateProvider.connectionState
 
@@ -65,12 +77,13 @@ class ContactsViewModel(
         combine(nodeRepository.myNodeInfo, nodeRepository.myId) { info, id -> Pair(info, id) }
 
     /**
-     * Non-paginated contact list.
+     * Flat contact list (channels + DMs) with empty-channel placeholders merged in, consumed by both ContactsScreen and
+     * ShareScreen. ContactsScreen groups it into collapsible Channels/DirectMessages sections at render time.
      *
-     * NOTE: This is kept for ShareScreen which needs a simple, non-paginated list of contacts. The main ContactsScreen
-     * uses [contactListPaged] instead for better performance with large contact lists.
-     *
-     * @see contactListPaged for the paginated version used in ContactsScreen
+     * ponytail: not paged. Contact counts on a mesh are bounded (channels ≤ 8, DMs = nodes you've messaged), and a
+     * LazyColumn only composes visible rows regardless. If a mesh ever grows large enough that recomputing per-row
+     * unread/message counts on every emission hurts, restore paging via [PacketRepository.getContactsPaged] and inject
+     * the two section headers with PagingData.insertSeparators over a query ordered channels-first.
      */
     val contactList =
         combine(identityFlow, packetRepository.getContacts(), channels, packetRepository.getContactSettings()) {
@@ -130,60 +143,6 @@ class ContactsViewModel(
         }
             .stateInWhileSubscribed(initialValue = emptyList())
 
-    val contactListPaged: Flow<PagingData<Contact>> =
-        combine(identityFlow, channels, packetRepository.getContactSettings()) { identity, channelSet, settings ->
-            val (myNodeInfo, myId) = identity
-            ContactsPagedParams(myNodeInfo?.myNodeNum, channelSet, settings, myId)
-        }
-            .flatMapLatest { params ->
-                val channelSet = params.channelSet
-                val settings = params.settings
-                val myId = params.myId
-                val myNodeNum = params.myNodeNum
-
-                packetRepository.getContactsPaged().map { pagingData ->
-                    pagingData.map { (contactKey, packetData) ->
-                        // Use the stored contact_key as the identity. Recomputing it here from a
-                        // possibly-null myNodeNum collapses distinct conversations onto one key and
-                        // crashes the LazyColumn with a duplicate-key error (#6131).
-                        val fromLocal = packetData.isFromLocal(myNodeNum)
-                        val toBroadcast = packetData.isBroadcast
-
-                        // grab usernames from NodeInfo
-                        val userId = if (fromLocal) packetData.to else packetData.from
-                        val user = nodeRepository.getUser(userId ?: NodeAddress.ID_BROADCAST)
-                        val node = nodeRepository.getNode(userId ?: NodeAddress.ID_BROADCAST)
-
-                        val shortName = user.short_name
-                        val longName =
-                            if (toBroadcast) {
-                                channelSet.getChannel(packetData.channel)?.name ?: "Channel ${packetData.channel}"
-                            } else {
-                                user.long_name
-                            }
-
-                        Contact(
-                            contactKey = contactKey,
-                            shortName = if (toBroadcast) packetData.channel.toString() else shortName,
-                            longName = longName,
-                            lastMessageTime = if (packetData.time != 0L) packetData.time else null,
-                            lastMessageText = if (fromLocal) packetData.text else "$shortName: ${packetData.text}",
-                            unreadCount = packetRepository.getUnreadCount(contactKey),
-                            messageCount = packetRepository.getMessageCount(contactKey),
-                            isMuted = settings[contactKey]?.isMuted == true,
-                            isUnmessageable = user.is_unmessagable ?: false,
-                            nodeColors =
-                            if (!toBroadcast) {
-                                node.colors
-                            } else {
-                                null
-                            },
-                        )
-                    }
-                }
-            }
-            .cachedIn(viewModelScope)
-
     fun getNode(userId: String?) = nodeRepository.getNode(userId ?: NodeAddress.ID_BROADCAST)
 
     fun deleteContacts(contacts: List<String>) =
@@ -205,7 +164,7 @@ class ContactsViewModel(
 
     /**
      * Get the total message count for a list of contact keys. This queries the repository directly, so it works even if
-     * contacts aren't loaded in the paged list.
+     * a contact isn't currently loaded in the list.
      */
     suspend fun getTotalMessageCount(contactKeys: List<String>): Int = if (contactKeys.isEmpty()) {
         0
@@ -213,10 +172,23 @@ class ContactsViewModel(
         contactKeys.sumOf { contactKey -> packetRepository.getMessageCount(contactKey) }
     }
 
-    private data class ContactsPagedParams(
-        val myNodeNum: Int?,
-        val channelSet: ChannelSet,
-        val settings: Map<String, ContactSettings>,
-        val myId: String?,
-    )
+    companion object {
+        private const val KEY_COLLAPSED_SECTIONS = "collapsed_contact_sections"
+    }
 }
+
+private fun String.toSectionSet(): Set<String> = split(",").filter { it.isNotEmpty() }.toSet()
+
+/** The two conversation-list sections a [Contact] is grouped into. */
+enum class ContactSection(val key: String) {
+    CHANNELS("channels"),
+    DIRECT_MESSAGES("direct_messages"),
+}
+
+/** Channel/broadcast contact keys carry a leading channel-digit prefix (e.g. `"0^all"`); DM keys don't. */
+fun Contact.section(): ContactSection =
+    if (contactKey.getOrNull(1) == '^' || contactKey.endsWith("^all") || contactKey.endsWith("^broadcast")) {
+        ContactSection.CHANNELS
+    } else {
+        ContactSection.DIRECT_MESSAGES
+    }

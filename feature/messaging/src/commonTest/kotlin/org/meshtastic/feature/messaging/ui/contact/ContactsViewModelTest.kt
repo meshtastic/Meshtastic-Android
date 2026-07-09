@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.messaging.ui.contact
 
+import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
@@ -38,7 +39,9 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ContactsViewModelTest {
@@ -60,6 +63,7 @@ class ContactsViewModelTest {
 
         viewModel =
             ContactsViewModel(
+                savedStateHandle = SavedStateHandle(),
                 nodeRepository = nodeRepository,
                 packetRepository = packetRepository,
                 radioConfigRepository = radioConfigRepository,
@@ -84,12 +88,50 @@ class ContactsViewModelTest {
 
         // Re-init VM
         viewModel =
-            ContactsViewModel(nodeRepository, packetRepository, radioConfigRepository, connectionStateProvider)
+            ContactsViewModel(
+                SavedStateHandle(),
+                nodeRepository,
+                packetRepository,
+                radioConfigRepository,
+                connectionStateProvider,
+            )
 
         viewModel.unreadCountTotal.test {
             assertEquals(0, awaitItem())
             countFlow.value = 5
             assertEquals(5, awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `toggleSectionCollapse flips section membership`() = runTest(testDispatcher) {
+        viewModel.collapsedSections.test {
+            assertEquals(emptySet(), awaitItem())
+
+            viewModel.toggleSectionCollapse(ContactSection.CHANNELS.key)
+            assertTrue(ContactSection.CHANNELS.key in awaitItem())
+
+            viewModel.toggleSectionCollapse(ContactSection.CHANNELS.key)
+            assertFalse(ContactSection.CHANNELS.key in awaitItem())
+
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `collapsedSections restores persisted state from SavedStateHandle`() = runTest(testDispatcher) {
+        viewModel =
+            ContactsViewModel(
+                SavedStateHandle(mapOf("collapsed_contact_sections" to ContactSection.DIRECT_MESSAGES.key)),
+                nodeRepository,
+                packetRepository,
+                radioConfigRepository,
+                connectionStateProvider,
+            )
+
+        viewModel.collapsedSections.test {
+            assertEquals(setOf(ContactSection.DIRECT_MESSAGES.key), awaitItem())
             cancelAndIgnoreRemainingEvents()
         }
     }
