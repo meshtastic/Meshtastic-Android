@@ -30,6 +30,7 @@ kotlin {
             implementation(projects.core.database)
             implementation(projects.core.ble)
             implementation(projects.core.datastore)
+            implementation(libs.kotlinx.atomicfu)
             implementation(libs.androidx.room.runtime)
             api(libs.kermit)
 

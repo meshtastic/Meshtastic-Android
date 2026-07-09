@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.testing
 
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.channels.Channel
@@ -121,4 +122,12 @@ class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = Main
     fun setConnectionState(state: ConnectionState) {
         _connectionState.value = state
     }
+
+    private val gattCacheInvalidationRequested = atomic(false)
+
+    override fun requestGattCacheInvalidationOnNextConnect() {
+        gattCacheInvalidationRequested.value = true
+    }
+
+    override fun consumeGattCacheInvalidationRequest(): Boolean = gattCacheInvalidationRequested.getAndSet(false)
 }

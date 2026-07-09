@@ -476,4 +476,48 @@ class FirmwareUpdateViewModelTest {
         val error = assertIs<UiText.Resource>(errorState.error)
         assertEquals(Res.string.firmware_update_unknown_hardware, error.res)
     }
+
+    @Test
+    fun `BLE post-update reconnect requests GATT cache invalidation`() = runTest {
+        advanceUntilIdle()
+
+        everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any()) }
+            .calls {
+                @Suppress("UNCHECKED_CAST")
+                val updateState = it.args[3] as (FirmwareUpdateState) -> Unit
+                updateState(FirmwareUpdateState.Success())
+                null
+            }
+
+        viewModel.startUpdate()
+        advanceUntilIdle()
+
+        assertTrue(
+            radioController.gattCacheInvalidationRequested,
+            "BLE post-update reconnect should request GATT cache invalidation",
+        )
+    }
+
+    @Test
+    fun `TCP post-update reconnect does not request GATT cache invalidation`() = runTest {
+        advanceUntilIdle()
+
+        every { radioPrefs.devAddr } returns MutableStateFlow("tcp:192.168.1.100")
+
+        everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any()) }
+            .calls {
+                @Suppress("UNCHECKED_CAST")
+                val updateState = it.args[3] as (FirmwareUpdateState) -> Unit
+                updateState(FirmwareUpdateState.Success())
+                null
+            }
+
+        viewModel.startUpdate()
+        advanceUntilIdle()
+
+        assertFalse(
+            radioController.gattCacheInvalidationRequested,
+            "TCP post-update reconnect should not request GATT cache invalidation",
+        )
+    }
 }

@@ -98,6 +98,10 @@ class NoopRadioInterfaceService : RadioInterfaceService {
 
     override fun setDeviceAddress(deviceAddr: String?): Boolean = false
 
+    override fun requestGattCacheInvalidationOnNextConnect() {}
+
+    override fun consumeGattCacheInvalidationRequest(): Boolean = false
+
     override fun toInterfaceAddress(interfaceId: InterfaceId, rest: String): String = ""
 
     override fun onConnect() {}
