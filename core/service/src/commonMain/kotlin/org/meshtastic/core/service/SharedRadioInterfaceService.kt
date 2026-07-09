@@ -391,6 +391,7 @@ class SharedRadioInterfaceService(
             // Tear the gate down BEFORE stopTransportLocked() so a concurrent state-listener
             // emission arriving while we wait for the mutex cannot re-start the transport.
             connectionRequested = false
+            gattCacheInvalidationRequested.value = false
             ignoreExceptionSuspend { stopTransportLocked() }
         }
     }
@@ -500,6 +501,8 @@ class SharedRadioInterfaceService(
             return false
         }
 
+        val previousAddress = getBondedDeviceAddress()
+
         analytics.track("mesh_bond")
 
         Logger.d { "Setting bonded device to ${sanitized?.anonymize}" }
@@ -515,6 +518,9 @@ class SharedRadioInterfaceService(
                 // transport for a device the user explicitly tore down. Only start a fresh
                 // transport when an address was actually selected.
                 connectionRequested = sanitized != null
+                if (sanitized != null && previousAddress != null && sanitized != previousAddress) {
+                    gattCacheInvalidationRequested.value = false
+                }
                 ignoreExceptionSuspend { stopTransportLocked() }
                 if (sanitized != null) {
                     startTransportLocked()
