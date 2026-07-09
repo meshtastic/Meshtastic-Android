@@ -21,6 +21,8 @@ import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.mock
 import dev.mokkery.verify
+import org.meshtastic.core.model.util.isOtaStatusNotification
+import org.meshtastic.core.repository.FirmwareUpdateStatusRepository
 import org.meshtastic.core.repository.MeshConfigFlowManager
 import org.meshtastic.core.repository.MeshConfigHandler
 import org.meshtastic.core.repository.MqttManager
@@ -43,6 +45,7 @@ import org.meshtastic.proto.QueueStatus
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import org.meshtastic.proto.NodeInfo as ProtoNodeInfo
 
@@ -56,6 +59,7 @@ class FromRadioPacketHandlerImplTest {
     private val configHandler: MeshConfigHandler = mock(MockMode.autofill)
     private val xmodemManager: XModemManager = mock(MockMode.autofill)
     private val lockdownCoordinator = FakeLockdownCoordinator()
+    private val firmwareUpdateStatusRepository = FirmwareUpdateStatusRepository()
 
     private lateinit var handler: FromRadioPacketHandlerImpl
 
@@ -71,6 +75,7 @@ class FromRadioPacketHandlerImplTest {
                 packetHandler,
                 notificationManager,
                 lockdownCoordinator,
+                firmwareUpdateStatusRepository,
             )
     }
 
@@ -202,5 +207,23 @@ class FromRadioPacketHandlerImplTest {
         }
 
         verify { serviceRepository.setClientNotification(notification) }
+    }
+
+    @Test
+    fun `OTA status client notifications are identified`() {
+        assertTrue(ClientNotification(message = "Rebooting to WiFi OTA").isOtaStatusNotification())
+        assertTrue(ClientNotification(message = "OTA Loader does not support WiFi").isOtaStatusNotification())
+        assertTrue(
+            ClientNotification(message = "Cannot start OTA: OTA Loader partition not found.").isOtaStatusNotification(),
+        )
+        assertTrue(ClientNotification(message = "Unable to switch to the OTA partition.").isOtaStatusNotification())
+    }
+
+    @Test
+    fun `non OTA client notifications are not identified as OTA status`() {
+        assertFalse(ClientNotification(message = "test").isOtaStatusNotification())
+        assertFalse(ClientNotification(message = "Low battery").isOtaStatusNotification())
+        assertFalse(ClientNotification(message = "ROTATE credentials").isOtaStatusNotification())
+        assertFalse(ClientNotification(message = "Quota exceeded").isOtaStatusNotification())
     }
 }
