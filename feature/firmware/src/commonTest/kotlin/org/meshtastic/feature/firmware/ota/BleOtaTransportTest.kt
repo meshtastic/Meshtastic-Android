@@ -163,6 +163,41 @@ class BleOtaTransportTest {
         assertEquals(failure.message, cause.message)
     }
 
+    /**
+     * Regression: after a cache refresh leaves stale services, the first [bleConnection.profile] throws
+     * [OtaProtocolException.ConnectionFailed] from `requireOtaCharacteristics`. When the cache was invalidated
+     * (`invalidateServiceCache()` returned true), the transport must disconnect, reconnect once, and retry the profile
+     * — which succeeds because the reconnect surfaces the freshly-advertised OTA characteristics.
+     */
+    @Test
+    fun `connect reconnects once when cache refresh leaves stale OTA services`() = runTest {
+        val scanner = FakeBleScanner()
+        val connection = FakeBleConnection()
+        // Seed no characteristics → first profile() rejects the service as missing OTA chars.
+        val (transport) = createTransport(scanner, connection, seedOtaCharacteristics = false)
+
+        // Cache invalidation succeeds, arming the single reconnect retry in discoverAndPrepareOtaService().
+        connection.invalidateServiceCacheResult = true
+        // The forced disconnect surfaces the OTA loader's real service table; seed it for the retry.
+        connection.onDisconnect = {
+            connection.service.addCharacteristic(OTA_NOTIFY_CHARACTERISTIC)
+            connection.service.addCharacteristic(OTA_WRITE_CHARACTERISTIC)
+        }
+
+        scanner.emitDevice(FakeBleDevice(address))
+
+        val result = transport.connect()
+
+        assertTrue(
+            result.isSuccess,
+            "connect() must succeed after one cache-refresh retry: ${result.exceptionOrNull()}",
+        )
+        assertTrue(
+            connection.connectAndAwaitCalls >= 2,
+            "expected initial connect + one reconnect, got ${connection.connectAndAwaitCalls}",
+        )
+    }
+
     // -----------------------------------------------------------------------
     // startOta()
     // -----------------------------------------------------------------------

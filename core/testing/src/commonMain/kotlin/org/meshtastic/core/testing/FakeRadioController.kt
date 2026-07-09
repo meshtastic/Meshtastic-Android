@@ -62,6 +62,8 @@ class FakeRadioController :
     var editSettingsCalled = false
     var startProvideLocationCalled = false
     var stopProvideLocationCalled = false
+    var gattCacheInvalidationRequested = false
+        private set
 
     init {
         registerResetAction {
@@ -76,6 +78,7 @@ class FakeRadioController :
             editSettingsCalled = false
             startProvideLocationCalled = false
             stopProvideLocationCalled = false
+            gattCacheInvalidationRequested = false
         }
     }
 
@@ -205,6 +208,10 @@ class FakeRadioController :
 
     override suspend fun setDeviceAddress(address: String) {
         lastSetDeviceAddress = address
+    }
+
+    override fun requestGattCacheInvalidationOnNextConnect() {
+        gattCacheInvalidationRequested = true
     }
 
     // --- Helper methods for testing ---

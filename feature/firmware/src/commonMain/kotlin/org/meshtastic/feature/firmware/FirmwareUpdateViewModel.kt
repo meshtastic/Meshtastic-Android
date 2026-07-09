@@ -48,6 +48,7 @@ import org.meshtastic.core.datastore.FirmwareRecoveryDataSource
 import org.meshtastic.core.datastore.model.PendingFirmwareRecovery
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.repository.DeviceHardwareRepository
@@ -808,6 +809,14 @@ class FirmwareUpdateViewModel(
                 Logger.i { "Post-update: leaving USB reconnect to USB auto-recovery for ${fullAddr.anonymize}" }
             } else {
                 Logger.i { "Post-update: Requesting MeshService to reconnect to ${fullAddr.anonymize}" }
+                // GATT cache invalidation is only needed for BLE reconnects — the device
+                // reboots into a different GATT profile on the same MAC address. TCP/USB
+                // don't have this problem, and leaving a stale BLE-only request around
+                // could trigger an unnecessary refresh on a later BLE connection.
+                if (isBluetoothInterfaceAddress(fullAddr)) {
+                    Logger.d { "Post-update: Requesting GATT cache invalidation before BLE reconnect" }
+                    radioController.requestGattCacheInvalidationOnNextConnect()
+                }
                 radioController.setDeviceAddress(fullAddr)
             }
         }
@@ -906,6 +915,9 @@ private suspend fun cleanupTemporaryFiles(
 
 private fun isValidBluetoothAddress(address: String?): Boolean =
     address != null && BLUETOOTH_ADDRESS_REGEX.matches(address)
+
+private fun isBluetoothInterfaceAddress(address: String): Boolean =
+    address.startsWith(InterfaceId.BLUETOOTH.id) || address.startsWith("!")
 
 private fun FirmwareReleaseRepository.getReleaseFlow(type: FirmwareReleaseType): Flow<FirmwareRelease?> = when (type) {
     FirmwareReleaseType.STABLE -> stableRelease

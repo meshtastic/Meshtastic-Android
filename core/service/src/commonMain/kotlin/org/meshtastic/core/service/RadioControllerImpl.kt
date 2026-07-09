@@ -134,6 +134,10 @@ class RadioControllerImpl(
         onDeviceAddressChanged?.invoke()
     }
 
+    override fun requestGattCacheInvalidationOnNextConnect() {
+        radioInterfaceService.requestGattCacheInvalidationOnNextConnect()
+    }
+
     private suspend fun switchDevice(deviceAddr: String) {
         val currentAddr = meshPrefs.deviceAddress.value
         if (deviceAddr != currentAddr) {

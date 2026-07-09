@@ -131,19 +131,49 @@ class BleOtaTransport(
             throw OtaProtocolException.Timeout("Timed out connecting to OTA device")
         }
 
+        val cacheInvalidated = bleConnection.invalidateServiceCache()
+        Logger.d { "BLE OTA: GATT cache invalidation requested: $cacheInvalidated" }
+        if (cacheInvalidated) {
+            Logger.i { "BLE OTA: Invalidated stale GATT service cache before OTA discovery" }
+        } else {
+            Logger.d { "BLE OTA: GATT cache invalidation not available; proceeding with existing service cache" }
+        }
+
         Logger.i { "BLE OTA: Connected to OTA device, discovering services..." }
 
         try {
+            discoverAndPrepareOtaService(device, connectResponseChannel, cacheInvalidated)
+        } catch (e: TimeoutCancellationException) {
+            otaService = null
+            currentCoroutineContext().ensureActive()
+            Logger.w { "BLE OTA: Timed out waiting for OTA service discovery. Error: ${e.message}" }
+            throw OtaProtocolException.Timeout("Timed out waiting for BLE OTA service discovery")
+        } catch (e: OtaProtocolException) {
+            otaService = null
+            throw e
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            otaService = null
+            throw e
+        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+            otaService = null
+            Logger.w(e) { "BLE OTA: Failed to prepare OTA service" }
+            throw OtaProtocolException.ConnectionFailed("Failed to prepare BLE OTA service", e)
+        }
+    }
+
+    @Suppress("LongMethod")
+    private suspend fun discoverAndPrepareOtaService(
+        device: BleDevice,
+        connectResponseChannel: Channel<String>,
+        cacheInvalidated: Boolean,
+    ) {
+        suspend fun prepareProfile() {
             bleConnection.profile(OTA_SERVICE_UUID) { service ->
                 service.requireOtaCharacteristics()
 
-                // Log negotiated MTU for diagnostics
                 val maxLen = bleConnection.maximumWriteValueLength(BleWriteType.WITHOUT_RESPONSE)
                 Logger.i { "BLE OTA: Service ready. Max write value length: $maxLen bytes" }
 
-                // Collect notification responses. Kable writes the CCCD descriptor as part of flow collection
-                // startup. Prefer the onSubscription readiness callback, but bound the wait because some OTA loaders
-                // never report the CCCD write completion even though notifications still flow.
                 val notificationsReady = CompletableDeferred<Unit>()
                 notificationJob =
                     launch(start = CoroutineStart.UNDISPATCHED) {
@@ -183,21 +213,26 @@ class BleOtaTransport(
                 otaService = service
                 Logger.i { "BLE OTA: Service discovered and ready" }
             }
-        } catch (e: TimeoutCancellationException) {
+        }
+
+        try {
+            prepareProfile()
+        } catch (e: OtaProtocolException.ConnectionFailed) {
+            if (!cacheInvalidated) throw e
+            Logger.i {
+                "BLE OTA: OTA characteristics missing after cache refresh; reconnecting to force service rediscovery"
+            }
+            notificationJob?.cancel()
+            notificationJob = null
             otaService = null
-            currentCoroutineContext().ensureActive()
-            Logger.w { "BLE OTA: Timed out waiting for OTA service discovery. Error: ${e.message}" }
-            throw OtaProtocolException.Timeout("Timed out waiting for BLE OTA service discovery")
-        } catch (e: OtaProtocolException) {
-            otaService = null
-            throw e
-        } catch (e: kotlinx.coroutines.CancellationException) {
-            otaService = null
-            throw e
-        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-            otaService = null
-            Logger.w(e) { "BLE OTA: Failed to prepare OTA service" }
-            throw OtaProtocolException.ConnectionFailed("Failed to prepare BLE OTA service", e)
+            bleConnection.disconnect()
+            delay(CACHE_REFRESH_RECONNECT_DELAY)
+            val reconnectState = bleConnection.connectAndAwait(device, CONNECTION_TIMEOUT)
+            if (reconnectState is BleConnectionState.Disconnected) {
+                throw OtaProtocolException.ConnectionFailed("Failed to reconnect to OTA device after cache refresh")
+            }
+            Logger.i { "BLE OTA: Reconnected after cache refresh for OTA service rediscovery" }
+            prepareProfile()
         }
     }
 
@@ -377,9 +412,17 @@ class BleOtaTransport(
         }
 
         if (missing.isNotEmpty()) {
+            val discovered = discoveredCharacteristicUuids()
+            val diagnostic =
+                if (discovered.isNotEmpty()) {
+                    " (discovered characteristics: $discovered)"
+                } else {
+                    " (no characteristics discovered for OTA service)"
+                }
             throw OtaProtocolException.ConnectionFailed(
                 "ESP32 OTA service was missing required characteristics after BLE service discovery: " +
-                    missing.joinToString(separator = "; "),
+                    missing.joinToString(separator = "; ") +
+                    diagnostic,
             )
         }
     }
@@ -391,6 +434,7 @@ class BleOtaTransport(
         private val ACK_TIMEOUT = 10.seconds
         private val VERIFICATION_TIMEOUT = 10.seconds
         private val REBOOT_DELAY = 5.seconds
+        private val CACHE_REFRESH_RECONNECT_DELAY = 1.seconds
         const val RECOMMENDED_CHUNK_SIZE = 512
 
         /** Fallback write payload when the MTU has not been negotiated (23-byte ATT MTU minus the 3-byte header). */

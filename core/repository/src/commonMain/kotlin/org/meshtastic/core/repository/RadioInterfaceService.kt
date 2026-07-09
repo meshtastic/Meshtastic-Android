@@ -130,6 +130,23 @@ interface RadioInterfaceService : RadioTransportCallback {
      */
     suspend fun restartTransport()
 
+    /**
+     * Requests that the next BLE transport connection invalidates Android's GATT service cache before service
+     * discovery. Used after OTA firmware updates where the device reboots with a potentially different BLE service
+     * table on the same MAC address.
+     *
+     * The flag is one-shot: consumed on the first connect after being set.
+     */
+    fun requestGattCacheInvalidationOnNextConnect()
+
+    /**
+     * Consumes and returns the GATT cache invalidation request. Returns `true` exactly once after
+     * [requestGattCacheInvalidationOnNextConnect] was called, then resets to `false`.
+     *
+     * Intended to be called by the BLE transport during connection setup.
+     */
+    fun consumeGattCacheInvalidationRequest(): Boolean
+
     /** Returns the current device address. */
     fun getDeviceAddress(): String?
 

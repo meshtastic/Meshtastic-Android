@@ -56,6 +56,7 @@ import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.RadioNotConnectedException
 import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.network.transport.HeartbeatSender
+import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioTransport
 import org.meshtastic.core.repository.RadioTransportCallback
 import kotlin.concurrent.Volatile
@@ -119,6 +120,12 @@ private val SUBSCRIPTION_READY_TIMEOUT = 5.seconds
  * significantly increases battery draw on both the phone and the radio.
  */
 private val PRIORITY_DOWNGRADE_DELAY = 30.seconds
+
+/**
+ * Settle delay after disconnecting to let the BLE stack release GATT resources before reconnecting post cache
+ * invalidation.
+ */
+private val POST_INVALIDATION_RECONNECT_DELAY = 500.milliseconds
 
 /**
  * A [RadioTransport] implementation for BLE devices using the common BLE abstractions (which are powered by Kable).
@@ -364,6 +371,29 @@ class BleRadioTransport(
 
         if (state !is BleConnectionState.Connected) {
             throw RadioNotConnectedException("Failed to connect to device at address $address")
+        }
+
+        // Post-OTA GATT cache invalidation: the device rebooted with potentially different
+        // BLE service table handles. Refresh Android's cache and reconnect to force fresh
+        // service discovery before proceeding with profile setup.
+        val radioServiceForCache = callback as? RadioInterfaceService
+        if (radioServiceForCache?.consumeGattCacheInvalidationRequest() == true) {
+            val invalidated = bleConnection.invalidateServiceCache()
+            Logger.d { "[${address.anonymize()}] Post-OTA GATT cache invalidation requested: $invalidated" }
+            if (invalidated) {
+                Logger.i {
+                    "[${address.anonymize()}] Reconnecting after GATT cache refresh to force service rediscovery"
+                }
+                bleConnection.disconnect()
+                delay(POST_INVALIDATION_RECONNECT_DELAY)
+                val reconnectState = bleConnection.connectAndAwait(device, CONNECTION_TIMEOUT)
+                if (reconnectState !is BleConnectionState.Connected) {
+                    throw RadioNotConnectedException(
+                        "Failed to reconnect after post-OTA GATT cache refresh (state=$reconnectState)",
+                    )
+                }
+                Logger.i { "[${address.anonymize()}] Reconnected after GATT cache refresh" }
+            }
         }
 
         val gattConnectedAt = nowMillis

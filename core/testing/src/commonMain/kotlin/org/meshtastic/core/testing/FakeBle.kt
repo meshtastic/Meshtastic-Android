@@ -114,6 +114,15 @@ class FakeBleConnection :
     /** Negotiated write length exposed to callers; `null` means unknown / not negotiated. */
     var maxWriteValueLength: Int? = null
 
+    /** Result returned by [invalidateServiceCache]; defaults to `false` to match the [BleConnection] default. */
+    var invalidateServiceCacheResult: Boolean = false
+
+    /** Number of times [invalidateServiceCache] has been invoked. */
+    var invalidateServiceCacheCalls: Int = 0
+
+    /** Optional callback invoked at the end of [disconnect] (e.g. seed freshly-discovered services on reconnect). */
+    var onDisconnect: (() -> Unit)? = null
+
     /** Number of times [disconnect] has been invoked. */
     var disconnectCalls: Int = 0
 
@@ -164,6 +173,7 @@ class FakeBleConnection :
             currentDevice.setState(BleConnectionState.Disconnected())
         }
         _device.value = null
+        onDisconnect?.invoke()
     }
 
     override suspend fun <T> profile(
@@ -182,6 +192,11 @@ class FakeBleConnection :
     }
 
     override fun maximumWriteValueLength(writeType: BleWriteType): Int? = maxWriteValueLength
+
+    override fun invalidateServiceCache(): Boolean {
+        invalidateServiceCacheCalls++
+        return invalidateServiceCacheResult
+    }
 }
 
 class FakeBleWrite(val characteristic: BleCharacteristic, val data: ByteArray, val writeType: BleWriteType) {
