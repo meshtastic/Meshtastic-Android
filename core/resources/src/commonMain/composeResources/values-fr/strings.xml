@@ -360,6 +360,7 @@
     <string name="dew_point">Point de rosée</string>
     <string name="direct_message">Message direct</string>
     <string name="direct_message_key">Clé de message direct</string>
+    <string name="direct_messages">Messages directs</string>
     <string name="discard_changes">Ignorer</string>
     <string name="disconnect">Déconnecter</string>
     <string name="disconnected">Déconnecté</string>

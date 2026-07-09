@@ -8,7 +8,7 @@ aliases:
   - püsivara
   - värskendus
   - ota
-  - flash
+  - püsivarauuendus
 ---
 
 # Püsivara värskendus
@@ -45,7 +45,7 @@ Kui raadio on ühendatud **USB/jadaühenduse** (mitte sinihamba) kaudu, pakub p�
 
 > ℹ️ **nRF alglaaduri märkus:** Mõned seadmed (nt RAK WisBlock RAK4631) vajavad alglaaduri vilkumist tootja jadaühenduse DFU tööriistaga (näiteks `adafruit-nrfutil`) – ainuüksi `.uf2` kopeerimine ei värskenda alglaadurit. The app surfaces a hint when this applies.
 
-### Other Flashing Options
+### Muud püsivarauuenduse valikud
 
 For recovery or when neither OTA nor in-app USB is available:
 
@@ -54,11 +54,11 @@ For recovery or when neither OTA nor in-app USB is available:
 
 ## Versioonikanalid
 
-| Kanal     | Kirjeldus                                                                  |
-| --------- | -------------------------------------------------------------------------- |
-| Stabiilne | Recommended for most users; tested releases                                |
-| Alfa      | Preview releases; may contain bugs                                         |
-| Lokaalne  | Flash a firmware file you select yourself, instead of a downloaded release |
+| Kanal     | Kirjeldus                                                               |
+| --------- | ----------------------------------------------------------------------- |
+| Stabiilne | Recommended for most users; tested releases                             |
+| Alfa      | Preview releases; may contain bugs                                      |
+| Lokaalne  | Püsivarauuenda ise valitud püsivara failga, allalaetud versiooni asemel |
 
 ## Eelvärskenduse kontrollnimekiri
 
@@ -101,8 +101,8 @@ Kui värskendus näib olevat hangunud:
 If your device fails to boot:
 
 1. Try connecting via USB to a computer
-2. Use the web flasher in recovery/DFU mode
-3. Flashi teadaolevalt toimiv püsivara versioon
+2. Kasuta veebi püsivarauuendust taaste/DFU režiimis
+3. Püsivarauuenda teadaolevalt toimiva püsivara versiooniga
 4. Seadmepõhiste taastamissammude kohta vaata Meshtastic Discordist
 
 ### Compatibility Warnings

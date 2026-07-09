@@ -140,6 +140,7 @@
     <string name="device_metrics_log">Метрика уређаја</string>
     <string name="device_sleeping">Uređaj je u stanju spavanja</string>
     <string name="direct_message">Директне поруке</string>
+    <string name="direct_messages">Директне поруке</string>
     <string name="disconnect">Прекините везу</string>
     <string name="disconnected">Raskačeno</string>
     <!-- DISCOVERY -->

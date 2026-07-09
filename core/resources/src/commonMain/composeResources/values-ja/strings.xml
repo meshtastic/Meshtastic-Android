@@ -379,6 +379,7 @@
     <string name="dew_point">露点</string>
     <string name="direct_message">ダイレクトメッセージ</string>
     <string name="direct_message_key">ダイレクトメッセージの鍵</string>
+    <string name="direct_messages">ダイレクトメッセージ</string>
     <string name="discard_changes">破棄</string>
     <string name="disconnect">切断</string>
     <string name="disconnected">切断</string>

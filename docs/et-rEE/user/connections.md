@@ -72,7 +72,7 @@ USB ühendused pakuvad juhtmega alternatiivi, mis on kasulik lauaarvutite puhul 
 
 ## TCP/IP (Network)
 
-Some Meshtastic radios support WiFi/Ethernet connectivity, allowing TCP-based connections over your local network. Get the radio onto your network first — using the radio's own WiFi settings (via the firmware web interface or another connection) — then connect to it from the app.
+Some Meshtastic radios support WiFi/Ethernet connectivity, allowing TCP-based connections over your local network. Ühenda raadio esmalt oma võrku – kasutades raadio enda WiFi-seadeid (püsivara veebiliidese või muu ühenduse kaudu) – ja seejärel loo ühendus rakenduse kaudu.
 
 ### Connecting over the Network
 

@@ -384,6 +384,7 @@
     <string name="dew_point">Kastepiste</string>
     <string name="direct_message">Yksityisviesti</string>
     <string name="direct_message_key">Suoran viestin avain</string>
+    <string name="direct_messages">Yksityisviestit</string>
     <string name="discard_changes">Hylkää</string>
     <string name="disconnect">Katkaise yhteys</string>
     <string name="disconnected">Ei yhdistetty</string>

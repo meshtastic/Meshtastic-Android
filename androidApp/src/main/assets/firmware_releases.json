@@ -189,21 +189,15 @@
   },
   "pullRequests": [
     {
-      "id": "10950",
-      "title": "esp32: fix NimBLE use-after-free crash when disabling bluetooth while connected",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10950",
+      "id": "10954",
+      "title": "Flatpak: rename Meshtastic -> MeshtasticD",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10954",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
       "id": "10949",
       "title": "Make Safe File actually safe",
       "page_url": "https://github.com/meshtastic/firmware/pull/10949",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10948",
-      "title": "fix(router): null-check packetPool/clientNotificationPool allocations",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10948",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
@@ -291,12 +285,6 @@
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
-      "id": "10884",
-      "title": "Implement SD card backup/restore of preferences; add SD support for Cardputer Advanced",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10884",
-      "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
       "id": "10878",
       "title": "fixed tlora-v2-1-1_16 led heartbeat not blinking and stuck at single s…",
       "page_url": "https://github.com/meshtastic/firmware/pull/10878",
@@ -325,6 +313,12 @@
       "title": "Add DeltaPlusProto Edict board variant",
       "page_url": "https://github.com/meshtastic/firmware/pull/10807",
       "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
+      "id": "10792",
+      "title": "Add helpful checks of channel names and PSK",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10792",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     }
   ]
 }

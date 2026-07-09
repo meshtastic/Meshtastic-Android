@@ -20,12 +20,12 @@ Meshtastic arvuti rakendus jagab oma põhikoodibaasi Androidiga Kotlin Multiplat
 
 ### Linux
 
-- Download the `.deb` or `.AppImage` package from the releases page
+- Lae väljalaske lehelt alla pakett `.deb` või `.AppImage`
 - Or build from source using `./gradlew :desktopApp:run`
 
 ### macOS
 
-- Download the `.dmg` package from releases
+- Lae väljalaske lehelt `.dmg` pakett
 - Or build from source
 
 ### Windows

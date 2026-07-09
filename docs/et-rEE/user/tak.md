@@ -88,7 +88,7 @@ Need sätted kuvatakse menüüs **Seaded → Mooduli konfiguratsioon → TAK**, 
 
 ## Sõnumivorming (V1 / V2)
 
-Meshtastic supports two TAK wire formats, chosen automatically based on the connected radio's firmware — no manual configuration needed:
+Meshtastic toetab kahte TAK sõnumivormingut, mis valitakse ühendatud raadio püsivara põhjal automaatselt – käsitsi konfigureerimist pole vaja:
 
 | Format                           | Compatibility                                           | Features                                                                                                                                                                                                           |
 | -------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -110,13 +110,13 @@ Kui on seadistatud:
 
 ## Troubleshooting
 
-| Problem                                     | Cause                                                                                                     | Solution                                                                                                   |
-| ------------------------------------------- | --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| Sõlme ei kuvata ATAK kaardile               | TAK moodul on keelatud või vale roll                                                                      | Veendu, et TAK moodul on lubatud ja sõlme roll on TAK või TAK jälgimisseade                                |
-| Asukohavärskendused on aegunud              | GPS fix lost or interval too long                                                                         | Kontrolli GPSi olekut; vähenda asukoha konfis asukoha levitamise intervalli                                |
-| ATAK plugin kuvab teadet „ühendus katkenud” | BLE connection lost or plugin crashed                                                                     | Ühenda Meshtastic rakenduses sinihammas uuesti ja seejärel taaskäivita ATAK plugin                         |
-| Shapes, markers, or routes not bridging     | Sending node is on legacy V1 (firmware 2.7.x or older) | Värskenda saatva sõlme püsivara versioonile 2.8.0+ sõnumivormingu V2 jaoks |
-| CoT data not flowing                        | Kanali mittevastavus                                                                                      | Kõik TAK-sõlmed peavad olema samal kanalil ja sama krüpteeringuga                                          |
+| Problem                                     | Cause                                                                                                                | Solution                                                                                                   |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Sõlme ei kuvata ATAK kaardile               | TAK moodul on keelatud või vale roll                                                                                 | Veendu, et TAK moodul on lubatud ja sõlme roll on TAK või TAK jälgimisseade                                |
+| Asukohavärskendused on aegunud              | GPS fix lost or interval too long                                                                                    | Kontrolli GPSi olekut; vähenda asukoha konfis asukoha levitamise intervalli                                |
+| ATAK plugin kuvab teadet „ühendus katkenud” | BLE connection lost or plugin crashed                                                                                | Ühenda Meshtastic rakenduses sinihammas uuesti ja seejärel taaskäivita ATAK plugin                         |
+| Shapes, markers, or routes not bridging     | Saatja sõlm kasutab pärandversiooni V1 (püsivara 2.7.x või vanem) | Värskenda saatva sõlme püsivara versioonile 2.8.0+ sõnumivormingu V2 jaoks |
+| CoT data not flowing                        | Kanali mittevastavus                                                                                                 | Kõik TAK-sõlmed peavad olema samal kanalil ja sama krüpteeringuga                                          |
 
 ## Security Considerations
 

@@ -362,6 +362,7 @@
     <string name="dew_point">Taupunkt</string>
     <string name="direct_message">Direktnachricht</string>
     <string name="direct_message_key">Schlüssel für direkte Nachrichten</string>
+    <string name="direct_messages">Direktnachrichten</string>
     <string name="discard_changes">Verwerfen</string>
     <string name="disconnect">Verbindung trennen</string>
     <string name="disconnected">Verbindung getrennt</string>

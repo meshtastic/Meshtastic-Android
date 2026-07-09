@@ -277,6 +277,7 @@
     <string name="device_theme_language">Тема: %1$s, Език: %2$s</string>
     <string name="dew_point">Точка на оросяване</string>
     <string name="direct_message">Директно съобщение</string>
+    <string name="direct_messages">Директни съобщения</string>
     <string name="discard_changes">Отхвърляне</string>
     <string name="disconnect">Прекъсване на връзката</string>
     <string name="disconnected">Прекъсната връзка</string>
