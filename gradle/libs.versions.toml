@@ -189,7 +189,7 @@ jetbrains-compose-material3-adaptive-navigation-suite = { module = "org.jetbrain
 firebase-ai = { module = "com.google.firebase:firebase-ai" }
 firebase-ai-ondevice = { module = "com.google.firebase:firebase-ai-ondevice", version = "16.0.0-beta03" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
-firebase-bom = { module = "com.google.firebase:firebase-bom", version = "34.15.0" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version = "34.16.0" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 location-services = { module = "com.google.android.gms:play-services-location", version = "21.4.0" }
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
