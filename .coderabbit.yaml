@@ -16,6 +16,12 @@ reviews:
     ignore_usernames:
       - renovate
       - renovate[bot]
+      # Workflow-authored PRs (changelog updates, scheduled firmware/hardware/
+      # translation bumps) — machine-generated content, nothing to review.
+      - github-actions
+      - github-actions[bot]
+    ignore_title_keywords:
+      - "chore: Scheduled updates"
   # Stop reviewing once a PR is closed.
   abort_on_close: true
 
@@ -29,6 +35,8 @@ reviews:
     - "!**/flatpak-sources.json"
     # Crowdin-managed translations — owned upstream, not hand-edited here.
     - "!**/values-*/strings.xml"
+    # Spec Kit scaffolding — vendored tooling, not hand-maintained here.
+    - "!.specify/**"
 
   path_instructions:
     - path: "**/commonMain/**"
@@ -51,3 +59,36 @@ reviews:
   tools:
     detekt:
       enabled: false
+    gitleaks:
+      enabled: true
+    shellcheck:
+      enabled: true
+    actionlint:
+      enabled: true
+
+  # Auto-generated docstrings/tests/autofix are noisy for a repo with strict
+  # human-authored KDoc and KMP-aware tests; leave finishing touches off.
+  finishing_touches:
+    docstrings:
+      enabled: false
+    unit_tests:
+      enabled: false
+
+  # No KDoc-coverage mandate in this repo; the default warning-at-80% check
+  # would nag every PR.
+  pre_merge_checks:
+    docstrings:
+      mode: "off"
+
+knowledge_base:
+  # Feed CodeRabbit the same guidance human/AI contributors follow, including
+  # the repo-specific .skills/ modules and Copilot path instructions it
+  # wouldn't pick up by default.
+  code_guidelines:
+    enabled: true
+    filePatterns:
+      - "AGENTS.md"
+      - "CLAUDE.md"
+      - ".skills/**/SKILL.md"
+      - ".github/copilot-instructions.md"
+      - ".github/instructions/*.instructions.md"
