@@ -131,6 +131,14 @@ class BleOtaTransport(
             throw OtaProtocolException.Timeout("Timed out connecting to OTA device")
         }
 
+        val cacheInvalidated = bleConnection.invalidateServiceCache()
+        Logger.d { "BLE OTA: GATT cache invalidation requested: $cacheInvalidated" }
+        if (cacheInvalidated) {
+            Logger.i { "BLE OTA: Invalidated stale GATT service cache before OTA discovery" }
+        } else {
+            Logger.d { "BLE OTA: GATT cache invalidation not available; proceeding with existing service cache" }
+        }
+
         Logger.i { "BLE OTA: Connected to OTA device, discovering services..." }
 
         try {
@@ -377,9 +385,17 @@ class BleOtaTransport(
         }
 
         if (missing.isNotEmpty()) {
+            val discovered = discoveredCharacteristicUuids()
+            val diagnostic =
+                if (discovered.isNotEmpty()) {
+                    " (discovered characteristics: $discovered)"
+                } else {
+                    " (no characteristics discovered for OTA service)"
+                }
             throw OtaProtocolException.ConnectionFailed(
                 "ESP32 OTA service was missing required characteristics after BLE service discovery: " +
-                    missing.joinToString(separator = "; "),
+                    missing.joinToString(separator = "; ") +
+                    diagnostic,
             )
         }
     }
