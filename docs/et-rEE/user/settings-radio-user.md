@@ -74,7 +74,7 @@ Pärast sätete muutmist puuduta nuppu **Salvesta**, et konfiguratsioon raadioss
 | ~~Long Slow~~      | ~30 km  | 0,18 kbps                | −20 dB    | ⚠️ **Vananenud** — endiselt valitav, kuid võidakse tulevases püsivara versioonis eemaldada        |
 | ~~Very Long Slow~~ | ~40+ km | 0,09 kbps                | −20 dB    | ⚠️ **Vananenud** — endiselt valitav, kuid võidakse tulevases püsivara versioonis eemaldada        |
 
-> ℹ️ **Note:** This table uses the common short names. In the app's preset dropdown they read as **Short Range - Fast**, **Long Range - Fast**, **Lite - Fast**, **Narrow - Fast**, and so on.
+> ℹ️ **Märkus:** Selles tabelis kasutatakse üldlevinud lühinimesid. In the app's preset dropdown they read as **Short Range - Fast**, **Long Range - Fast**, **Lite - Fast**, **Narrow - Fast**, and so on.
 
 #### Choosing a Modem Preset
 
@@ -91,7 +91,7 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 - **Fixed infrastructure links:** Use **Short Turbo** or **Long Turbo** for dedicated point-to-point links with good antennas and line-of-sight.
 - **Mixed environments:** Stick with **Long Fast** — it's the community default and ensures compatibility with others in your area.
 
-> ⚠️ **Tähtis:** Kõik samal kanalil olevad sõlmed **peavad** kasutama sama modemi eelseadistust. Nodes with mismatched presets cannot communicate even if they share the same frequency and encryption key.
+> ⚠️ **Tähtis:** Kõik samal kanalil olevad sõlmed **peavad** kasutama sama modemi eelseadistust. Erinevate eelseadetega sõlmed ei saa suhelda isegi siis, kui neil on sama sagedus ja krüpteerimisvõti.
 
 > 💡 **Vihje:** ulatuse hinnangud eeldavad tasast maastikku ja mõõdukaid antenne. Elevation advantage (hilltop, rooftop) dramatically increases effective range. A well-placed Router with Long Fast can often outperform a ground-level node with Long Slow.
 
@@ -121,7 +121,7 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 | --------------------------------------- | --------------------------------------- |
 | Power Saving                            | Enable low-power sleep mode             |
 | Shutdown After (s)   | Auto-shutdown idle timer                |
-| ADC Multiplier                          | Battery voltage calibration factor      |
+| ADC Multiplier                          | Aku pinge kalibreerimistegur            |
 | Oota sinihammast(id) | Time to wait for BLE connection at boot |
 | Mesh SDS Timeout (s) | Super-deep-sleep timeout                |
 
@@ -133,7 +133,7 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 | WiFi SSID     | Network name to connect to                 |
 | WiFi PSK      | Network password                           |
 | NTP server    | Time synchronization server                |
-| Syslog Server | Remote logging server                      |
+| Syslog Server | Kauglogimise server                        |
 
 ![IP address field](../../assets/screenshots/settings_ipv4_field.png)
 
@@ -150,7 +150,7 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 | Setting                 | Kirjeldus                                                                             |
 | ----------------------- | ------------------------------------------------------------------------------------- |
 | Avalik võti             | Your node's public key (read-only)                                 |
-| Administraatori võti    | Key for remote administration                                                         |
+| Administraatori võti    | Kaughalduse võti                                                                      |
 | Salajane võti           | Your node's private key (handle securely)                          |
 | ~~Admin kanal lubatud~~ | ⚠️ Eemaldatud — nüüd seadistatakse automaatselt, kui administraatori võti on määratud |
 | Arendaja logi           | Edasta reaalajas arendajalogi jadapordi/sinihamba ​​kaudu                             |

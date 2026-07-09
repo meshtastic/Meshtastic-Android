@@ -256,7 +256,7 @@
     <string name="config_display_wake_on_tap_or_motion_summary">Vajalik, et teie seadmes oleks kiirendusmõõtur.</string>
     <string name="config_lora_frequency_slot_summary">Teie sõlme töösagedus arvutatakse piirkonna, modemi eelseadistuse ja selle välja põhjal. Kui see on 0, arvutatakse pesa automaatselt primaarse kanali nime põhjal ja see muutub vaikimisi avalikust pesast. Muutke see tagasi avalikuks vaikepesaks, kui privaatsed primaarsed ja avalikud sekundaarsed kanalid on konfigureeritud.</string>
     <string name="config_lora_hop_limit_summary">Määrab hüpete maksimaalse arvu, vaikimisi on see 3. Hüpete suurendamine suurendab ka ülekoormust ja seda tuleks kasutada ettevaatlikult. 0 hüppega leviedastussõnumid ei saa ACK-sid.</string>
-    <string name="config_lora_modem_preset_licensed_summary">Selle piirkonna eelseadistused on ainult litsentseeritud (amatöörraadio) operaatoritele. Nende valimiseks lubage kasutaja konfis litsentseeritud amatöörraadio (amatöör).</string>
+    <string name="config_lora_modem_preset_licensed_summary">Selle piirkonna eelseadistused on ainult litsentseeritud (amatöörraadio) operaatoritele. Nende valimiseks luba kasutaja konfis litsentseeritud amatöörraadio (amatöör).</string>
     <string name="config_lora_modem_preset_summary">Saadaval olevad modemi eelseadistused, vaikesäte on Long Fast.</string>
     <string name="config_lora_region_summary">Raadio kasutama hakkamise piirkond.</string>
     <string name="config_network_eth_enabled_summary">Etherneti lubamine keelab sinihamba ühenduse rakendusega. TCP-sõlmede ühendused pole Apple'i seadmetes saadaval.</string>
@@ -619,7 +619,7 @@
     <string name="firmware_update_checking">Otsin uuendusi...</string>
     <string name="firmware_update_confirm_file_button">Alusta püsivarauuendust</string>
     <string name="firmware_update_confirm_file_message">Enne püsivarauuendust vaata valitud failinimi kogu pikkuses üle. Uuendus algab peale sinu kinnitust.</string>
-    <string name="firmware_update_confirm_file_title">Kinnitage püsivara fail</string>
+    <string name="firmware_update_confirm_file_title">Kinnita püsivara fail</string>
     <string name="firmware_update_connecting_attempt">Seadmega ühenduse loomine (katse %1$d/%2$d)...</string>
     <string name="firmware_update_context_changed">Seadme ühendus muutus kinnitamise ajal. Palun vali püsivara fail uuesti.</string>
     <string name="firmware_update_copying">Löö patsu! Oota veidi, püsivara laetakse...</string>
@@ -1624,10 +1624,12 @@
     <string name="translation_model_download_failed">Tõlkemudeli allalaadimine ebaõnnestus</string>
     <string name="transmit_over_lora">Saada LoRa kaudu</string>
     <!-- TRANSPORT -->
+    <string name="transport_api">API</string>
     <string name="transport_ble">BLE</string>
     <string name="transport_lora">LoRa</string>
     <string name="transport_mqtt">MQTT</string>
     <string name="transport_tcp">TCP</string>
+    <string name="transport_udp">UDP</string>
     <string name="transport_usb">USB</string>
     <string name="triple_click_adhoc_ping">Kolmekordne klõps Ad Hoc Ping</string>
     <string name="twenty_four_hours">24T</string>

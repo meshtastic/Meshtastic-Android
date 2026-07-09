@@ -21,8 +21,8 @@ Basic operating information reported by each node:
 
 | Meetriline     | Kirjeldus                           |
 | -------------- | ----------------------------------- |
-| Battery Level  | Current battery percentage          |
-| Vool           | Battery voltage reading             |
+| Aku tase       | Praegune aku protsent               |
+| Vool           | Aku pinge näit                      |
 | Kanali kasutus | Percentage of airtime consumed      |
 | Airtime        | Transmission time used by this node |
 | Töötamise aeg  | Time since last reboot              |

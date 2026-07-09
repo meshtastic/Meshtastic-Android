@@ -17,7 +17,7 @@ Meshtastic integreerub Android Autoga, nii et saad sõidu ajal oma kärgvõrguga
 
 > ⚠️ **Märkus:** Android Auto tugi on saadaval ainult **Google'i-tüüpi Androidi versioonides**. It is not included in the F-Droid build, and it is not available on Desktop or iOS.
 
-> ℹ️ **What ships today:** The Google Play build provides **notification-only** car messaging — incoming messages are announced on the head unit and you reply through its notification controls. The full tabbed **Messages / Nodes / Status** experience described below is a beta built on the Android Car App Library (Google's templated car UI is currently restricted to Closed/Internal Play tracks), so it appears only in builds compiled with `-PenableCarTemplates=true`. The rest of this page documents that beta experience.
+> ℹ️ **Mis on täna saadaval:** Google Play versioon pakub **ainult teavitused** autosõnumeid – sissetulevad sõnumid antakse teada peakomplektis ja saate vastata teavitusnuppude kaudu. The full tabbed **Messages / Nodes / Status** experience described below is a beta built on the Android Car App Library (Google's templated car UI is currently restricted to Closed/Internal Play tracks), so it appears only in builds compiled with `-PenableCarTemplates=true`. The rest of this page documents that beta experience.
 
 ## Overview
 
@@ -48,7 +48,7 @@ The Status tab summarizes your current connection and mesh status at a glance �
 
 ## Related Topics
 
-- [Sõnumid ja kanalid](user/messages-and-channels) - täielikud sõnumsidefunktsioonid teie telefonis
+- [Sõnumid ja kanalid](user/messages-and-channels) - täielikud sõnumsidefunktsioonid sinu telefonis
 - [Nodes](nodes) — detailed node list and node-detail information
 - [Connections](connections) — how the app connects to your radio
 

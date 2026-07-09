@@ -313,12 +313,6 @@
       "title": "Add DeltaPlusProto Edict board variant",
       "page_url": "https://github.com/meshtastic/firmware/pull/10807",
       "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "10792",
-      "title": "Add helpful checks of channel names and PSK",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10792",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     }
   ]
 }

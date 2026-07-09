@@ -66,7 +66,7 @@ Märguanded teavitavad teid järgmisest:
 
 - Sissetulevad sõnumid kanalitelt ja otsesõnumid
 - New nodes joining the mesh
-- Low battery on a remote node
+- Kaugsõlmel on aku tühjenenud
 
 > 💡 **Vihje:** Teavituste eelistusi saab hiljem Androidi süsteemiseadetes täpsustada – rakendus loob iga kategooria kohta eraldi teavituskanali (lisaks mõned sisemised, näiteks taustateenus), nii et saad need eraldi lubada või vaigistada.
 

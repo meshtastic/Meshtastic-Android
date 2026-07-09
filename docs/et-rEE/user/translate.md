@@ -40,7 +40,7 @@ Tõlgete koostamisele kaasaaitamine aitab Meshtasticut laiemale publikule kätte
 
 ---
 
-## Adding a New Language
+## Lisa uus keel
 
 Kui teie keelt Crowdinis veel pole:
 

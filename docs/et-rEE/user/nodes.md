@@ -60,7 +60,7 @@ Sõlmedele saab määrata erinevaid rolle, mis mõjutavad nende kärgvõrgus kä
 
 Most users should keep the default **Client** role. Consider a different role when:
 
-- **Router** — You have a node in a fixed, elevated location with reliable power (rooftop, hilltop). Routers stay awake continuously to relay messages for others and are essential for extending mesh coverage. Don't use Router on battery-powered handheld devices.
+- **Router** — You have a node in a fixed, elevated location with reliable power (rooftop, hilltop). Routers stay awake continuously to relay messages for others and are essential for extending mesh coverage. Ära kasuta ruuter akutoitel töötavatel käsiseadetel.
 - **Ruuter hiline** – infrastruktuurisõlm, mis levitab pakette alati üks kord uuesti, aga alles pärast seda, kui kõik teised marsruutimisrežiimid on oma käigu teinud. Provides supplemental coverage for local clusters without competing with primary routers.
 - **Client Base** — Treats traffic from/to your favorited nodes with Router Late priority (ensuring those messages get extra relay coverage) while handling everything else as a normal Client.
 - **Client Mute** — You want to receive mesh traffic but not contribute to relaying. Useful for monitoring-only devices or to reduce congestion in dense areas.
@@ -74,11 +74,11 @@ Most users should keep the default **Client** role. Consider a different role wh
 
 Nodes display encryption status icons next to their name:
 
-| Icon            | Meaning                                                                                                             |
-| --------------- | ------------------------------------------------------------------------------------------------------------------- |
-| 🔒 Lukustatud   | Communication uses PKI (public key infrastructure) — end-to-end encrypted with verified identity |
-| 🔓 Lukust lahti | Suhtlus kasutab jagatud kanali PSK – krüpteeritud, kuid isikut pole individuaalselt kontrollitud                    |
-| ⚠️ Ebakõla      | Public key mismatch — the node's key has changed since last seen (investigate before trusting)   |
+| Icon            | Meaning                                                                                                                    |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| 🔒 Lukustatud   | Communication uses PKI (public key infrastructure) — end-to-end encrypted with verified identity        |
+| 🔓 Lukust lahti | Suhtlus kasutab jagatud kanali PSK – krüpteeritud, kuid isikut pole individuaalselt kontrollitud                           |
+| ⚠️ Ebakõla      | Avaliku võtme mittevastavus — sõlme võti on viimasest nägemisest saadik muutunud (enne usaldamist uuri) |
 
 > 💡 **Vihje:** PKI krüpteering (püsivara 2,5+) pakub tugevamat turvalisust kui kanali PSK, kuna igal sõlmel on unikaalne võtmepaar. Kui näed võtme mittevastavuse hoiatust, võib sõlm olla lähtestatud või ohustatud.
 
@@ -143,7 +143,7 @@ Inline status indicators show key metrics at a glance:
 | Indicator       | Screenshot                                                    |
 | --------------- | ------------------------------------------------------------- |
 | Signal quality  | ![Signal](../../assets/screenshots/nodes_signal_info.png)     |
-| Battery level   | ![Battery](../../assets/screenshots/nodes_battery_info.png)   |
+| Aku tase        | ![Aku](../../assets/screenshots/nodes_battery_info.png)       |
 | Hüppete loendur | ![Hüpet](../../assets/screenshots/nodes_hops_info.png)        |
 | Viimati kuuldud | ![Last heard](../../assets/screenshots/nodes_last_heard.png)  |
 | Kaugus          | ![Distance](../../assets/screenshots/nodes_distance_info.png) |

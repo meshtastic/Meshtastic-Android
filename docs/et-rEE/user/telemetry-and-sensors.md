@@ -25,8 +25,8 @@ Kõik Meshtastic sõlmed edastavad seadme põhitelemeetriat:
 
 | Meetriline       | Kirjeldus                      | Tüüpiline ulatus                   |
 | ---------------- | ------------------------------ | ---------------------------------- |
-| Battery Level    | Charge percentage              | 0–100%                             |
-| Vool             | Battery voltage                | 3,0–4,2V (LiPo) |
+| Aku tase         | Charge percentage              | 0–100%                             |
+| Vool             | Aku pinge                      | 3,0–4,2V (LiPo) |
 | Kanali kasutus   | % of airtime used locally      | 0–100%                             |
 | Eetri kasutus TX | % of airtime used by this node | 0–100%                             |
 | Töötamise aeg    | Seconds since last boot        | Varies                             |
@@ -71,7 +71,7 @@ Nodes with INA-series power sensors can report:
 | Pinge       | Power consumption (mA) |
 | Toide       | Calculated power (mW)  |
 
-Useful for monitoring solar charging or battery health on remote nodes.
+Kasulik päikesepaneelide laadimise või aku seisundi jälgimiseks kaugsõlmedes.
 
 ## Configuring Telemetry
 
@@ -88,7 +88,7 @@ Useful for monitoring solar charging or battery health on remote nodes.
 | Urban mesh (many nodes) | 3600                          | 3600                               |
 | Rural mesh (few nodes)  | 900                           | 900                                |
 | Weather station                            | 900                           | 300                                |
-| Battery conservation                       | 7200                          | 7200                               |
+| Aku säilitus                               | 7200                          | 7200                               |
 
 > ⚠️ **Märkus:** Lühemad intervallid suurendavad saate kasutusaega ja aku tühjenemist.
 
@@ -123,8 +123,8 @@ The CO₂ reading is color-coded by severity (Good → Stuffy → Poor → Unsaf
 
 ## Troubleshooting
 
-- **No environment data showing?** The remote node needs a physical sensor connected (e.g., BME280 on I2C). Device telemetry (battery, uptime) is always available, but environment metrics require hardware.
-- **Vananenud näidud?** Kontrolli aruandlusintervalli – väga pikad intervallid (7200+ sekundit) tähendavad harva andmete uuendamist. Also verify the remote node is still online.
+- **Keskkonnaandmeid ei kuvata?** Kaugühenduse jaoks on vaja ühendada füüsiline andur (nt BME280 I2C-l). Seadme telemeetria (aku, tööaeg) on ​​alati saadaval, kuid keskkonnamõõdikute jaoks on vaja riistvara.
+- **Vananenud näidud?** Kontrolli aruandlusintervalli – väga pikad intervallid (7200+ sekundit) tähendavad harva andmete uuendamist. Samuti veendu, et kaugsõlm on endiselt võrgus.
 - **Sensor conflict on I2C bus?** Some sensors share I2C addresses. Kui samal siinil on mitu andurit, kontrolli raadio jadapordi arendajaväljundis aadresside kokkupõrkeid.
 
 ## Related Topics

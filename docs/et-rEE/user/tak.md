@@ -51,7 +51,7 @@ TAK moodul võimaldab Meshtastic sõlmedel:
 
 ### Local TAK Server
 
-The app can also run a **local TAK server** so ATAK/iTAK clients on the same device or network can connect directly, without a remote TAK server. Open **Settings → Module Config → TAK → TAK Server**:
+Rakendus saab käitada ka **kohalikku TAK serverit**, nii et samas seadmes või võrgus olevad ATAK/iTAK-kliendid saavad otseühenduse luua ilma kaug-TAK serverita. Open **Settings → Module Config → TAK → TAK Server**:
 
 ![Local TAK Server settings with enable toggle and export option](../../assets/screenshots/tak_server_enabled.png)
 
