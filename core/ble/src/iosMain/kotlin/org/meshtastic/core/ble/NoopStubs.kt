@@ -32,3 +32,5 @@ internal actual fun Peripheral.negotiatedMaxWriteLength(): Int? = null
 internal actual fun Peripheral.requestHighConnectionPriority(): Boolean = false
 
 internal actual fun Peripheral.requestBalancedConnectionPriority(): Boolean = false
+
+internal actual fun Peripheral.refreshGattCache(): Boolean = false

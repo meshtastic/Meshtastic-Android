@@ -54,6 +54,11 @@ class KableBleService(private val peripheral: Peripheral, private val serviceUui
         svc.serviceUuid == serviceUuid && svc.characteristics.any { it.characteristicUuid == characteristic.uuid }
     } == true
 
+    override fun discoveredCharacteristicUuids(): List<Uuid> = peripheral.services.value
+        ?.find { it.serviceUuid == serviceUuid }
+        ?.characteristics
+        ?.map { it.characteristicUuid } ?: emptyList()
+
     override fun observe(characteristic: BleCharacteristic) =
         peripheral.observe(characteristicOf(serviceUuid, characteristic.uuid))
 
@@ -294,6 +299,8 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
     override fun requestHighConnectionPriority(): Boolean = peripheral?.requestHighConnectionPriority() == true
 
     override fun requestBalancedConnectionPriority(): Boolean = peripheral?.requestBalancedConnectionPriority() == true
+
+    override fun invalidateServiceCache(): Boolean = peripheral?.refreshGattCache() == true
 
     /** Ensures the previous peripheral's GATT resources are fully released. */
     private suspend fun cleanUpPeripheral(tag: String) {

@@ -35,4 +35,6 @@ internal actual fun Peripheral.requestHighConnectionPriority(): Boolean = false
 
 internal actual fun Peripheral.requestBalancedConnectionPriority(): Boolean = false
 
+internal actual fun Peripheral.refreshGattCache(): Boolean = false
+
 private const val DEFAULT_JVM_MTU = 512

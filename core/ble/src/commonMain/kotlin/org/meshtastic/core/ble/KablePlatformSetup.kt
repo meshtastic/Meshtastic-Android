@@ -44,3 +44,17 @@ internal expect fun Peripheral.requestHighConnectionPriority(): Boolean
  * operations complete. On platforms without an equivalent API (JVM/iOS) this is a no-op.
  */
 internal expect fun Peripheral.requestBalancedConnectionPriority(): Boolean
+
+/**
+ * Clears the platform's cached GATT service table for the connected [Peripheral].
+ *
+ * Kable keeps Android's `BluetoothGatt` on an internal connection object owned by the peripheral. This extension
+ * searches the peripheral and its active connection for that field, then invokes the hidden `refresh()` API to clear
+ * the per-device service cache.
+ *
+ * Necessary when a device reboots into a different GATT profile (e.g., ESP32 OTA loader) using the same BLE MAC.
+ *
+ * Returns `true` if the cache was invalidated. On platforms without a cache (JVM/iOS) this is a no-op returning
+ * `false`.
+ */
+internal expect fun Peripheral.refreshGattCache(): Boolean
