@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -43,6 +44,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -101,7 +103,13 @@ fun EventInfoSheet(edition: EventFirmwareEdition, onDismiss: () -> Unit) {
                 if (fontsToggle.available) {
                     HorizontalDivider()
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier =
+                        Modifier.fillMaxWidth()
+                            .toggleable(
+                                value = fontsToggle.enabled,
+                                onValueChange = fontsToggle.onChange,
+                                role = Role.Switch,
+                            ),
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
@@ -110,7 +118,8 @@ fun EventInfoSheet(edition: EventFirmwareEdition, onDismiss: () -> Unit) {
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.weight(1f),
                         )
-                        Switch(checked = fontsToggle.enabled, onCheckedChange = fontsToggle.onChange)
+                        // Row owns the toggle; null keeps the Switch visual-only (no double-fire).
+                        Switch(checked = fontsToggle.enabled, onCheckedChange = null)
                     }
                 }
             }
