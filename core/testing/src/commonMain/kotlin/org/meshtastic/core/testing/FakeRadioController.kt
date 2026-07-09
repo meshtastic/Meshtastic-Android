@@ -57,6 +57,12 @@ class FakeRadioController :
     val localChannels = mutableListOf<Channel>()
 
     var throwOnSend: Boolean = false
+
+    /**
+     * When set, a channel write throws once [localChannels] has reached this many entries — simulates a mid-write
+     * failure.
+     */
+    var failChannelWriteAfter: Int? = null
     var lastSetDeviceAddress: String? = null
     var lastSetOwnerUser: User? = null
     var editSettingsCalled = false
@@ -71,6 +77,7 @@ class FakeRadioController :
             localConfigs.clear()
             localChannels.clear()
             throwOnSend = false
+            failChannelWriteAfter = null
             lastSetDeviceAddress = null
             lastSetOwnerUser = null
             editSettingsCalled = false
@@ -121,11 +128,16 @@ class FakeRadioController :
 
     override suspend fun setHamMode(destNum: Int, hamParameters: HamParameters, packetId: Int) {}
 
-    override suspend fun setConfig(destNum: Int, config: Config, packetId: Int) {}
+    override suspend fun setConfig(destNum: Int, config: Config, packetId: Int) {
+        localConfigs.add(config)
+    }
 
     override suspend fun setModuleConfig(destNum: Int, config: ModuleConfig, packetId: Int) {}
 
-    override suspend fun setRemoteChannel(destNum: Int, channel: Channel, packetId: Int) {}
+    override suspend fun setRemoteChannel(destNum: Int, channel: Channel, packetId: Int) {
+        failChannelWriteAfter?.let { if (localChannels.size >= it) error("Fake channel write failure") }
+        localChannels.add(channel)
+    }
 
     override suspend fun setFixedPosition(destNum: Int, position: Position) {}
 
@@ -192,6 +204,8 @@ class FakeRadioController :
             }
         scope.block()
     }
+
+    override suspend fun editLocalSettings(block: suspend AdminEditScope.() -> Unit) = editSettings(0, block)
 
     override fun generatePacketId(): Int = 1
 

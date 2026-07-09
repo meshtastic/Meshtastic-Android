@@ -224,6 +224,8 @@ internal class AdminControllerImpl(
         commandSender.sendAdmin(destNum) { AdminMessage(commit_edit_settings = true) }
     }
 
+    override suspend fun editLocalSettings(block: suspend AdminEditScope.() -> Unit) = editSettings(myNodeNum, block)
+
     /** Binds the [AdminEditScope] operations to a fixed destination, delegating to this controller's set* methods. */
     private inner class EditSettingsSession(private val destNum: Int) : AdminEditScope {
         override suspend fun setOwner(user: User) = setOwner(destNum, user, commandSender.generatePacketId())
