@@ -31,6 +31,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFontFamilyResolver
+import co.touchlab.kermit.Logger
+import kotlin.coroutines.cancellation.CancellationException
 
 private val lightScheme =
     lightColorScheme(
@@ -143,7 +145,15 @@ fun AppTheme(
     val fontResolver = LocalFontFamilyResolver.current
     LaunchedEffect(eventFonts, fontResolver) {
         val fonts = eventFonts ?: return@LaunchedEffect
-        listOfNotNull(fonts.heading, fonts.body).forEach { family -> runCatching { fontResolver.preload(family) } }
+        listOfNotNull(fonts.heading, fonts.body).forEach { family ->
+            try {
+                fontResolver.preload(family)
+            } catch (e: CancellationException) {
+                throw e // preload suspends; never swallow structured-concurrency cancellation
+            } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                Logger.w(e) { "Event font preload failed for $family; falling back to the default typeface" }
+            }
+        }
     }
 
     MaterialExpressiveTheme(colorScheme = colorScheme, typography = typography, motionScheme = expressive()) {
