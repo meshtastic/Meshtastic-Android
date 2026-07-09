@@ -281,6 +281,23 @@ open class DatabaseManager(
         Logger.d { "Closed inactive database ${anonymizeDbName(dbName)} to free connections" }
     }
 
+    /**
+     * Closes and reopens the active database under [mutex], but only if it hasn't switched since the caller snapshotted
+     * it. Returns the reopened DB, or null if another coroutine already switched to a different device.
+     */
+    private suspend fun reopenActiveDatabaseIfStillCurrent(
+        expectedDb: MeshtasticDatabase,
+        expectedDbName: String,
+    ): MeshtasticDatabase? = mutex.withLock {
+        if (_currentDb.value !== expectedDb || currentDbName != expectedDbName) return null
+
+        closeCachedDatabase(expectedDbName)
+        val reopened = withContext(dispatchers.io) { getOrOpenDatabase(expectedDbName) }
+        _currentDb.value = reopened
+        currentDbName = expectedDbName
+        reopened
+    }
+
     // Short-term runtime containment: route withDb entry through a single-lane dispatcher to narrow the Room/SQLite
     // connection-pool churn window seen during device/firmware update flows. Room suspend DAOs may continue on Room's
     // own executor after suspension, so this is not a strict global DB-I/O serialization guarantee. Preserve bounded
@@ -327,17 +344,33 @@ open class DatabaseManager(
             // If the active database switched while we held a reference to the old one,
             // and the exception indicates a closed pool/connection, retry with the new DB.
             val retryDb = _currentDb.value
-            if (retryDb == null || retryDb === db || !isDbClosedException(e)) throw e
-
-            Logger.w { "withDb: database closed during switch (${e.message}), retrying with current DB" }
-            return try {
-                runCancellableDbBlock(retryDb, block)
-            } catch (retryCancel: CancellationException) {
-                throw retryCancel
-            } catch (retryEx: Exception) {
-                retryEx.addSuppressed(e)
-                throw retryEx
+            if (retryDb != null && retryDb !== db && isDbClosedException(e)) {
+                Logger.w { "withDb: database closed during switch (${e.message}), retrying with current DB" }
+                return try {
+                    runCancellableDbBlock(retryDb, block)
+                } catch (retryCancel: CancellationException) {
+                    throw retryCancel
+                } catch (retryEx: Exception) {
+                    retryEx.addSuppressed(e)
+                    throw retryEx
+                }
             }
+
+            // Same active DB but Room's connection pool is wedged — close and reopen once.
+            if (retryDb === db && isDbPoolAcquireTimeoutException(e)) {
+                val reopened = reopenActiveDatabaseIfStillCurrent(db, active) ?: throw e
+                Logger.w { "withDb: reopened active DB after transient Room connection-pool timeout" }
+                return try {
+                    runCancellableDbBlock(reopened, block)
+                } catch (retryCancel: CancellationException) {
+                    throw retryCancel
+                } catch (retryEx: Exception) {
+                    retryEx.addSuppressed(e)
+                    throw retryEx
+                }
+            }
+
+            throw e
         }
     }
 
@@ -357,19 +390,20 @@ open class DatabaseManager(
             ("closed" in msg && hasDbContext) || (TRANSIENT_DB_POOL_TERMS.any { it in msg } && hasDbContext)
         }
 
-    private companion object {
+    internal companion object {
         private const val BACKFILL_COLD_START_DELAY_MS = 2_000L
         private const val WITH_DB_SLOW_OPERATION_MS = 1_000L
         val DB_TERMS = listOf("pool", "database", "connection", "sqlite")
         val TRANSIENT_DB_POOL_TERMS =
-            listOf(
-                "timed out attempting to acquire",
-                "error code: 5",
-                "database is locked",
-                "sqlite_busy",
-                "busy",
-                "locked",
-            )
+            listOf("timed out attempting to acquire", "error code: 5", "database is locked", "sqlite_busy")
+
+        fun isDbPoolAcquireTimeoutException(e: Exception): Boolean = generateSequence<Throwable>(e) { it.cause }
+            .any { throwable ->
+                val msg = throwable.message?.lowercase() ?: return@any false
+                "timed out attempting to acquire" in msg &&
+                    ("reader connection" in msg || "writer connection" in msg) &&
+                    DB_TERMS.any { it in msg }
+            }
     }
 
     /**
