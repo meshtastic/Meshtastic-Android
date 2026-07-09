@@ -18,7 +18,7 @@ On Android, Meshtastic provides a home screen **widget** that shows live local s
 
 The widget displays the **connected radio's** current local stats:
 
-- **Battery** — the radio's battery level, or _Powered_ when running on external power
+- **Aku** – raadio aku tase või _Toitel_, kui see töötab välise toiteallikaga
 - **ChUtil** — kanali kasutus (kui hõivatud on LoRa kanal protsentides)
 - **AirUtil** — eetriaega (kui suurt osa töötsüklist teie raadio edastab)
 - **Traffic** — packets transmitted / received, and duplicates seen

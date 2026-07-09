@@ -88,13 +88,13 @@ Rainfall measurements (1-hour and 24-hour totals) are transmitted as **mm** and 
 
 Some units are international standards and are displayed the same way regardless of your locale:
 
-| Measurement                      | Unit                           | Why                                   |
-| -------------------------------- | ------------------------------ | ------------------------------------- |
-| Baromeetrii rõhk                 | hPa                            | International meteorological standard |
-| Heading / bearing                | ° (degrees) | Universal navigation convention       |
-| Radiatsioon                      | μR/hr                          | Standard dosimetry unit               |
-| GPS coordinates                  | decimal degrees                | Universal geographic standard         |
-| Humidity, battery, soil moisture | %                              | Universal                             |
+| Measurement                 | Unit                           | Why                                   |
+| --------------------------- | ------------------------------ | ------------------------------------- |
+| Baromeetrii rõhk            | hPa                            | International meteorological standard |
+| Heading / bearing           | ° (degrees) | Universal navigation convention       |
+| Radiatsioon                 | μR/hr                          | Standard dosimetry unit               |
+| GPS coordinates             | decimal degrees                | Universal geographic standard         |
+| Niiskus, aku, mulla niiskus | %                              | Universal                             |
 
 ## Date & Time
 

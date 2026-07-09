@@ -56,8 +56,8 @@ For recovery or when neither OTA nor in-app USB is available:
 
 | Kanal     | Kirjeldus                                                               |
 | --------- | ----------------------------------------------------------------------- |
-| Stabiilne | Recommended for most users; tested releases                             |
-| Alfa      | Preview releases; may contain bugs                                      |
+| Stabiilne | Soovitatav enamusele kasutajatele; testitud versioonid                  |
+| Alfa      | Eelvaateversioonid; võivad sisaldada vigu                               |
 | Lokaalne  | Püsivarauuenda ise valitud püsivara failga, allalaetud versiooni asemel |
 
 ## Eelvärskenduse kontrollnimekiri

@@ -20,7 +20,7 @@ Meshtastic arvuti rakendus jagab oma põhikoodibaasi Androidiga Kotlin Multiplat
 
 ### Linux
 
-- Lae väljalaske lehelt alla pakett `.deb` või `.AppImage`
+- Lae väljalaske lehelt pakett `.deb` või `.AppImage`
 - Or build from source using `./gradlew :desktopApp:run`
 
 ### macOS
@@ -30,7 +30,7 @@ Meshtastic arvuti rakendus jagab oma põhikoodibaasi Androidiga Kotlin Multiplat
 
 ### Windows
 
-- Download the `.msi` installer from releases
+- Lae väljalaske lehelt `.msi` installifail
 - Or build from source
 
 ## Connecting Your Radio

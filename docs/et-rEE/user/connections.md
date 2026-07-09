@@ -40,7 +40,7 @@ You can filter devices by transport type using the filter chips at the top:
 | Icon | Olek             | Kirjeldus                     |
 | ---- | ---------------- | ----------------------------- |
 | 🟢   | Ühendatud        | Active radio link established |
-| 🟡   | Ühendan          | Handshake in progress         |
+| 🟡   | Ühendan          | Kätlemine on pooleli          |
 | 🔴   | Ühendus katkenud | No active connection          |
 | ⚪    | Pole seadistatud | Seadet pole valitud           |
 
@@ -70,9 +70,9 @@ USB ühendused pakuvad juhtmega alternatiivi, mis on kasulik lauaarvutite puhul 
 
 > ⚠️ **Märkus:** USB ühenduste jaoks on Android-seadmetes vaja OTG tuge.
 
-## TCP/IP (Network)
+## TCP/IP (võrk)
 
-Some Meshtastic radios support WiFi/Ethernet connectivity, allowing TCP-based connections over your local network. Ühenda raadio esmalt oma võrku – kasutades raadio enda WiFi-seadeid (püsivara veebiliidese või muu ühenduse kaudu) – ja seejärel loo ühendus rakenduse kaudu.
+Mõned Meshtastic raadiod toetavad WiFi/Etherneti ühendust, võimaldades TCP-põhiseid ühendusi kohaliku võrgu kaudu. Ühenda raadio esmalt oma võrku – kasutades raadio enda WiFi-seadeid (püsivara veebiliidese või muu ühenduse kaudu) – ja seejärel loo ühendus rakenduse kaudu.
 
 ### Connecting over the Network
 
@@ -83,9 +83,9 @@ Some Meshtastic radios support WiFi/Ethernet connectivity, allowing TCP-based co
    - **Add device manually…** — enter the radio's IP address (or hostname) and port (default: `4403`).
 4. Previously-used network addresses are remembered under **Recent Network Devices** for quick reconnection (long-press to remove one).
 
-> 💡 **Vihje:** Võrgu tuvastamine kasutab mDNS-i, mis töötab ainult siis, kui mõlemad seadmed on samas alamvõrgus. Android 17+ puhul vajab rakendus skanniks kohaliku võrgu luba; kui otsing ei leia midagi, lisage seade käsitsi IP-aadressi järgi.
+> 💡 **Vihje:** Võrgu tuvastamine kasutab mDNS-i, mis töötab ainult siis, kui mõlemad seadmed on samas alamvõrgus. Android 17+ puhul vajab rakendus skanniks kohaliku võrgu luba; kui otsing ei leia midagi, lisa seade käsitsi IP-aadressi järgi.
 
-### When to Use TCP
+### Millal kasutada TCP
 
 - Radio is on the same local network
 - Testing with a simulated radio
@@ -105,7 +105,7 @@ On Desktop (Linux/macOS/Windows), the app supports:
 
 - **Sinihammas (BLE)** — Kable'i teegi kaudu; töötab macOS-is, Linuxis ja Windowsis
 - **USB port** – peamine juhtmega ühendusmeetod
-- **TCP/IP** — for network-connected radios
+- **TCP/IP** – võrguühendusega raadiote jaoks
 
 See [Desktop App](desktop) for platform-specific details and keyboard shortcuts.
 

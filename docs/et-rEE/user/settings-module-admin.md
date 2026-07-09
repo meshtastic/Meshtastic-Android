@@ -62,17 +62,17 @@ Võimaldab jadapordi sidet väliste seadmete integreerimiseks (GPS-moodulid, and
 
 Juhib raadio riistvara summeri-, LED- või vibratsioonihoiatusi. Useful for devices that need to physically signal when a message arrives — particularly helpful for unattended or outdoor installations.
 
-| Sätted                           | Kirjeldus                     |
-| -------------------------------- | ----------------------------- |
-| Lubatud                          | Aktiveeri märguanded          |
-| Alert Message                    | Notify on incoming messages   |
-| Alert Message Buzzer             | Use buzzer for messages       |
-| Alert Message Vibra              | Use vibration for messages    |
-| Hoiatuskell                      | Teavita hoiatuskella märgist  |
-| Output (GPIO) | Sisend teavitusväljundi jaoks |
-| Active                           | High or Low active            |
-| Duration (ms) | Notification length           |
-| Use I2S as Buzzer                | Use I2S audio output          |
+| Sätted                            | Kirjeldus                     |
+| --------------------------------- | ----------------------------- |
+| Lubatud                           | Aktiveeri märguanded          |
+| Alert Message                     | Notify on incoming messages   |
+| Alert Message Buzzer              | Use buzzer for messages       |
+| Alert Message Vibra               | Use vibration for messages    |
+| Hoiatuskell                       | Teavita hoiatuskella märgist  |
+| Väljund (GPIO) | Sisend teavitusväljundi jaoks |
+| Active                            | High or Low active            |
+| Duration (ms)  | Notification length           |
+| Use I2S as Buzzer                 | Use I2S audio output          |
 
 ### Salvesta & edasta moodul
 
@@ -101,7 +101,7 @@ Automated range testing tool for evaluating link quality between nodes. Kui luba
 
 ### Telemeetria moodul
 
-Controls what telemetry data your node shares with the mesh. Telemetry includes device health (battery, uptime) and environmental sensor data (temperature, humidity, pressure).
+Controls what telemetry data your node shares with the mesh. Telemeetria sisaldab seadme tervist (aku, tööaeg) ja keskkonnaandurite andmeid (temperatuur, niiskus, rõhk).
 
 | Sätted                       | Kirjeldus                               |
 | ---------------------------- | --------------------------------------- |
@@ -140,15 +140,15 @@ Codec2 audio support for low-bandwidth voice communication over the mesh. This i
 
 ### Kaugriistvara moodul
 
-GPIO control over the mesh network. Võimaldab kaugsõlmel lugeda või kirjutada GPIO sisendkontakte teisel sõlmel – kasulik releede aktiveerimiseks, lülitite lugemiseks või välise riistvara kaugjuhtimiseks.
+GPIO juhtimine kärgvõrgu kaudu. Võimaldab kaugsõlmel lugeda või kirjutada GPIO sisendkontakte teisel sõlmel – kasulik releede aktiveerimiseks, lülitite lugemiseks või välise riistvara kaugjuhtimiseks.
 
 | Sätted                     | Kirjeldus                                                               |
 | -------------------------- | ----------------------------------------------------------------------- |
 | Lubatud                    | Aktiveeri kaugjuurdepääs GPIO-le                                        |
 | Luba määratlemata sisendid | Luba juurdepääs mis tahes GPIO sisendile (turvarisk) |
-| Available Pins             | Up to 4 GPIO pins this node exposes for remote read/write               |
+| Available Pins             | Kuni 4 GPIO sisendit, mida see sõlm kauglugemiseks/-kirjutamiseks avab  |
 
-> ⚠️ **Hoiatus:** Funktsiooni „Luba määratlemata sisendkontaktid” lubamine annab kaugsõlmedele juurdepääsu kõigile GPIO sisendile, mis võib häirida raadio enda riistvara. Only enable on dedicated GPIO nodes.
+> ⚠️ **Hoiatus:** Funktsiooni „Luba määratlemata sisendkontaktid” lubamine annab kaugsõlmedele juurdepääsu kõigile GPIO sisendile, mis võib häirida raadio enda riistvara. Luba ainult spetsiaalsetel GPIO sõlmedel.
 
 ### Naabriinfo moodul
 
@@ -206,7 +206,7 @@ Meeskonna teadlikkuse komplekti integratsioon ATAKi ja WinTAKi koostalitlusvõim
 
 ### Kaughaldus
 
-Remotely configure nodes that share your admin key:
+Administraatori võtit jagavate sõlmede kaugkonfigureerimine:
 
 1. Select the target node in the node list.
 2. Mine selle sõlme **Seadetesse**.
@@ -225,15 +225,15 @@ Resets all settings to factory defaults. **Seda ei saa tagasi võtta.**
 
 ### Taaskäivita
 
-Remotely reboot a connected or administered node.
+Ühendatud või hallatava sõlme kaugkäivitamine.
 
 ### Arendaja paneel
 
 Opens the **Packets** and **App logs** tabs for viewing, filtering, and exporting diagnostic output. See [Debug Logs](debug-logs) for the full walkthrough.
 
-### Troubleshooting Remote Admin
+### Kaug-admin tõrkeotsing
 
-- **"No response from target node"** — the target may be out of range, offline, or have a mismatched admin key. Verify the admin key matches on both nodes.
+- **"Sihtsõlmelt ei ole vastust"** — sihtsõlm võib olla leviulatusest väljas, võrguühenduseta või sellel võib olla sobimatu administraatori võti. Verify the admin key matches on both nodes.
 - **Changes not applying** — some settings require a reboot to take effect. Try the Reboot action after saving.
 - **Ei näe kaugseadeid** — veendu, et sõlmel oleks sihtsõlme administraatori võti ja et administraatori kanal oleks turbekonfiguratsioonis lubatud. Administraatori kanal seadistatakse automaatselt, kui administraatori võti on määratud.
 

@@ -40,11 +40,11 @@ Error and warning lines are tinted so problems stand out.
 
 ## Exporting
 
-Tap the **download** icon to save the current logs to a file. You choose where it goes through the system file picker, and the file is named with a timestamp (for example `meshtastic_logcat_20260701_143312.txt`) so repeated exports never overwrite each other.
+Praeguste logide faili salvestamiseks puuduta ikooni **allalaadimine**. You choose where it goes through the system file picker, and the file is named with a timestamp (for example `meshtastic_logcat_20260701_143312.txt`) so repeated exports never overwrite each other.
 
 Attach that file to your GitHub issue.
 
-> 🔒 **Privacy:** Exports automatically **redact** private keys, admin keys, and session passkeys before writing the file. Kanali PSKid **ei** redigeerita ja logid võivad sisaldada ka sõlmede nimesid, asukohti ja muid tuvastavaid üksikasju – enne avalikult jagamist vaadake fail üle ja jagage seda privaatselt, kui teil on kahtlusi.
+> 🔒 **Privacy:** Exports automatically **redact** private keys, admin keys, and session passkeys before writing the file. Kanali PSKid **ei** redigeerita ja logid võivad sisaldada ka sõlmede nimesid, asukohti ja muid tuvastavaid üksikasju – enne avalikult jagamist vaadake fail üle ja jaga seda privaatselt, kui teil on kahtlusi.
 
 ## Töölaud
 
