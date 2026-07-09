@@ -146,6 +146,16 @@ class KableBleConnectionTest {
     }
 
     @Test
+    fun `scan wraps missing scan permission failure`() = runTest {
+        val message = "Missing required android.permission.ACCESS_COARSE_LOCATION for scanning"
+        val scanner = TestKableBleScanner(scanResults = flow { throw IllegalStateException(message) })
+
+        val failure = assertFailsWith<BleScanStartException> { scanner.scan(timeout = 1.seconds).toList() }
+
+        assertEquals(BleScanStartFailureReason.MissingScanPermission, failure.reason)
+    }
+
+    @Test
     fun `scan preserves unrelated illegal state failure`() = runTest {
         val scanner =
             TestKableBleScanner(scanResults = flow { throw IllegalStateException("Unexpected scanner state") })

@@ -98,13 +98,18 @@ private fun Throwable.asBleScanStartExceptionOrNull(): BleScanStartException? {
     var current: Throwable? = this
     var depth = 0
     while (current != null && depth < MAX_SCAN_START_FAILURE_CAUSE_DEPTH) {
-        if (current.isApplicationRegistrationFailure()) {
-            return BleScanStartException(BleScanStartFailureReason.ApplicationRegistrationFailed, this)
-        }
+        val reason = current.scanStartFailureReasonOrNull()
+        if (reason != null) return BleScanStartException(reason, this)
         current = current.cause
         depth++
     }
     return null
+}
+
+private fun Throwable.scanStartFailureReasonOrNull(): BleScanStartFailureReason? = when {
+    isApplicationRegistrationFailure() -> BleScanStartFailureReason.ApplicationRegistrationFailed
+    isMissingScanPermission() -> BleScanStartFailureReason.MissingScanPermission
+    else -> null
 }
 
 // Kable exposes Android scan-start registration failure as an IllegalStateException message,
@@ -113,4 +118,12 @@ private fun Throwable.isApplicationRegistrationFailure(): Boolean = this is Ille
     message?.let { failureMessage ->
         failureMessage.contains("app cannot be registered", ignoreCase = true) ||
             failureMessage.contains("SCAN_FAILED_APPLICATION_REGISTRATION_FAILED", ignoreCase = true)
+    } == true
+
+// Kable's scan-permission check throws a plain IllegalStateException "Missing required <permission> for scanning"
+// (ACCESS_COARSE/FINE_LOCATION on Android <12, BLUETOOTH_SCAN on 12+). Match the stable message anchors.
+private fun Throwable.isMissingScanPermission(): Boolean = this is IllegalStateException &&
+    message?.let { failureMessage ->
+        failureMessage.contains("Missing required", ignoreCase = true) &&
+            failureMessage.contains("for scanning", ignoreCase = true)
     } == true
