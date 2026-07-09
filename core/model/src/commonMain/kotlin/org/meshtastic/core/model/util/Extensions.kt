@@ -19,6 +19,7 @@
 package org.meshtastic.core.model.util
 
 import org.meshtastic.proto.Channel
+import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.ModuleConfig
@@ -139,3 +140,13 @@ fun getInitials(fullName: String): String {
 }
 
 fun String.withoutEmojis(): String = filterNot { char -> char.isSurrogate() }
+
+private val OTA_PATTERN = Regex("\\bOTA\\b", RegexOption.IGNORE_CASE)
+
+/**
+ * OTA-status detector matching the firmware update preflight gate's criterion: any ClientNotification whose message
+ * contains "OTA" as a whole word (e.g. "Rebooting to BLE OTA", "Cannot start OTA: ...") is consumed by the firmware
+ * update flow and suppressed as a generic alert. Uses word-boundary matching so unrelated messages containing the
+ * substring (e.g. "ROTATE", "QUOTA") are not misclassified.
+ */
+fun ClientNotification.isOtaStatusNotification(): Boolean = message.isNotBlank() && OTA_PATTERN.containsMatchIn(message)

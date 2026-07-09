@@ -22,6 +22,8 @@ import kotlinx.coroutines.SupervisorJob
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.ioDispatcher
+import org.meshtastic.core.model.util.isOtaStatusNotification
+import org.meshtastic.core.repository.FirmwareUpdateStatusRepository
 import org.meshtastic.core.repository.FromRadioPacketHandler
 import org.meshtastic.core.repository.LockdownCoordinator
 import org.meshtastic.core.repository.MeshConfigFlowManager
@@ -54,6 +56,7 @@ class FromRadioPacketHandlerImpl(
     private val packetHandler: PacketHandler,
     private val notificationManager: NotificationManager,
     private val lockdownCoordinator: LockdownCoordinator,
+    private val firmwareUpdateStatusRepository: FirmwareUpdateStatusRepository,
 ) : FromRadioPacketHandler {
 
     // Application-scoped coroutine context for suspend work (e.g. getStringSuspend).
@@ -132,6 +135,11 @@ class FromRadioPacketHandlerImpl(
         serviceStateWriter.setClientNotification(cn)
 
         scope.handledLaunch {
+            if (cn.isOtaStatusNotification() && firmwareUpdateStatusRepository.status.value.isOtaUpdateActive) {
+                Logger.i { "OTA status ClientNotification received; skipping duplicate generic alert" }
+                return@handledLaunch
+            }
+
             val inform = cn.key_verification_number_inform
             val request = cn.key_verification_number_request
             val verificationFinal = cn.key_verification_final
