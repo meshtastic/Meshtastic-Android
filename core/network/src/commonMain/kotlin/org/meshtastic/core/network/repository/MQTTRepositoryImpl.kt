@@ -40,6 +40,7 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.MqttJsonPayload
+import org.meshtastic.core.model.util.decodeOrNull
 import org.meshtastic.core.model.util.subscribeList
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
@@ -56,6 +57,7 @@ import org.meshtastic.mqtt.transport.tcp.TcpTransportFactory
 import org.meshtastic.mqtt.transport.ws.WebSocketTransportFactory
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.MqttClientProxyMessage
+import org.meshtastic.proto.ServiceEnvelope
 import kotlin.concurrent.Volatile
 import kotlin.uuid.Uuid
 
@@ -162,7 +164,13 @@ class MQTTRepositoryImpl(
                     )
                 }
             }
-            add(Subscription("$rootTopic${DEFAULT_TOPIC_LEVEL}PKI/+", maxQos = QoS.AT_LEAST_ONCE, noLocal = true))
+            add(
+                Subscription(
+                    "$rootTopic$DEFAULT_TOPIC_LEVEL$PKI_CHANNEL_ID/+",
+                    maxQos = QoS.AT_LEAST_ONCE,
+                    noLocal = true,
+                ),
+            )
         }
 
         // Collect from the SharedFlow before connecting to avoid missing retained messages
@@ -248,6 +256,20 @@ class MQTTRepositoryImpl(
                 Logger.e(e) { "Failed to parse MQTT JSON: ${e.message}" }
             }
         } else {
+            // Drop provably-undeliverable downlink packets before spending BLE bandwidth on
+            // them. In client-proxy mode the public broker floods payload-less packet-header
+            // stubs the node can only decrypt-fail and discard; stopping them here saves BLE
+            // airtime, a decrypt attempt, and a node-side warning per packet.
+            if (isUndeliverableDownlink(payload, nodeRepository.myId.value)) {
+                Logger.d {
+                    if (buildConfigProvider.isDebug) {
+                        "MQTT downlink dropped (no payload): $topic"
+                    } else {
+                        "MQTT downlink dropped (no payload)"
+                    }
+                }
+                return
+            }
             trySend(MqttClientProxyMessage(topic = topic, data_ = payload.toByteString(), retained = msg.retain))
         }
     }
@@ -390,4 +412,36 @@ internal fun extractHost(address: String): String {
         }
     // Remove path (if any), then remove port
     return afterScheme.substringBefore("/").substringBefore(":")
+}
+
+private const val PKI_CHANNEL_ID = "PKI"
+
+/**
+ * Returns true when a downlink [ServiceEnvelope] is provably un-usable by the node and should be dropped before
+ * forwarding over BLE (MQTT client-proxy mode).
+ *
+ * Fails open — returns false (forward) for anything it cannot positively prove undeliverable: unparseable bytes,
+ * traffic on the `PKI` channel (public-key-encrypted direct messages the node accepts without first decrypting), our
+ * own echoed-back packets (used as implicit ACKs), a packet-less envelope, or any packet that actually carries a
+ * payload. The only drop case is Tier 1: a [MeshPacket] with neither `decoded` nor `encrypted` set — no legitimate
+ * Meshtastic packet is payload-less.
+ *
+ * Extracted as an internal top-level function so [MQTTRepositoryImplTest] can exercise every branch without spinning up
+ * the full repository.
+ *
+ * @param payload the raw MQTT payload bytes (a serialized ServiceEnvelope on the binary topic).
+ * @param myId this device's node id in `!xxxxxxxx` hex form, or null before the local node loads.
+ */
+internal fun isUndeliverableDownlink(payload: ByteArray, myId: String?): Boolean {
+    // Decode without a logger: this is fail-open and, on a public broker, may see arbitrary bytes on the binary
+    // topic. Passing Logger would emit an error log per unparseable downlink — expensive noise for an expected case.
+    val envelope = ServiceEnvelope.ADAPTER.decodeOrNull(payload) ?: return false // fail open on garbage
+    // Guards — never drop: PKI-channel traffic (accepted without decryption) or our own echoed-back
+    // packets (used as implicit ACKs).
+    val isGuarded = envelope.channel_id == PKI_CHANNEL_ID || (myId != null && envelope.gateway_id == myId)
+    // Tier 1: a packet with neither `decoded` nor `encrypted` carries nothing the node can use.
+    // A packet-less envelope (packet == null) has nothing to prove, so it is treated as deliverable.
+    val packet = envelope.packet
+    val hasNoPayload = packet != null && packet.decoded == null && packet.encrypted == null
+    return hasNoPayload && !isGuarded
 }
