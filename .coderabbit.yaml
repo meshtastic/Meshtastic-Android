@@ -41,17 +41,33 @@ reviews:
   path_instructions:
     - path: "**/commonMain/**"
       instructions: >
-        KMP common code. Flag any import of java.* or android.* — these break
-        non-Android targets. Expect KMP equivalents instead (Okio, kotlinx
-        Mutex/atomicfu, NumberFormatter.format() for floats).
+        KMP common code. Flag any import of java.* or android.* — these break non-Android targets. Expect KMP equivalents instead (Okio, kotlinx Mutex/atomicfu, NumberFormatter.format() for floats).
     - path: "**/*.kt"
       instructions: >
-        Flag leftover // ... existing code ... placeholders, and any logging of
-        PII, location, or cryptographic keys.
+        Flag leftover // ... existing code ... placeholders, and any logging of PII, location, or cryptographic keys.
     - path: "**/src/**/strings.xml"
       instructions: >
-        New string resources must be alphabetically sorted (scripts/sort-strings.py).
-        Flag out-of-order additions.
+        New string resources must be alphabetically sorted (scripts/sort-strings.py). Flag out-of-order additions.
+    - path: baselineprofile/
+      instructions: Keep baseline profile generation tied to the `google` flavor and connected devices/emulators, and commit the generated profile output to `androidApp/src/google/generated/baselineProfiles/baseline-prof.txt`.
+    - path: docs/
+      instructions: Treat non-English locale folders as Crowdin-managed output; edit the English sources under `docs/en/` and register new pages through `feature/docs/` instead of hand-editing translated locale directories.
+    - path: screenshot-tests/
+      instructions: When updating docs screenshots, keep `docs-screenshots-manifest.txt` and `docs-screenshot-aliases.properties` in sync with the generated files, and rerun `copyDocsScreenshots` after regenerating screenshots.
+    - path: docs-screenshots/
+      instructions: Keep this module generate-only for documentation screenshots; do not add it to the CI validation gate that is reserved for `screenshot-tests`.
+    - path: desktopApp/
+      instructions: Keep desktop release ProGuard rules aligned with `androidApp/proguard-rules.pro`, and preserve the desktop-specific runtime wiring needed for `Dispatchers.Main` on JVM.
+    - path: androidApp/
+      instructions: Keep the Android app’s `MeshService` declaration and manifest wiring in sync with the implementation that lives in `core:service`.
+    - path: core/service/
+      instructions: Keep `RadioControllerImpl` composed from its sub-controllers via interface delegation; admin sends are fire-and-forget, and any config mutation must go through `editSettings { }` transactions.
+    - path: feature/docs/
+      instructions: Treat the Compose resources under `src/commonMain/composeResources/files/` as generated output from `/docs/en/**` and translated docs sync tasks; do not hand-edit those copied files.
+    - path: feature/map/
+      instructions: Route map access through the injected `CompositionLocal` provider contracts; do not depend directly on Google Maps or osmdroid from feature code.
+    - path: feature/car/
+      instructions: Run unit tests with `./gradlew :feature:car:testGoogleDebugUnitTest`, and keep Robolectric pinned to SDK 36 for this module.
 
   # CI is the source of truth for detekt + spotless (Zero Lint Tolerance gate),
   # so disable detekt here to avoid duplicate comments. Keep the security/CI/shell
