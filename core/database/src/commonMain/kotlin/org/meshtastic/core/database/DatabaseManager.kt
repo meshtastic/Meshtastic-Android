@@ -281,6 +281,44 @@ open class DatabaseManager(
         Logger.d { "Closed inactive database ${anonymizeDbName(dbName)} to free connections" }
     }
 
+    /**
+     * Reopens the active database under [mutex], but only if it hasn't switched since the caller snapshotted it.
+     *
+     * The replaced Room instance is intentionally left open for the rest of the process. [currentDb] is a derived
+     * StateFlow, so there is no deterministic handoff point where every app-wide collector has stopped using the old
+     * instance.
+     *
+     * Returns the reopened DB, or null if another coroutine already switched to a different device.
+     */
+    private suspend fun reopenActiveDatabaseIfStillCurrent(
+        expectedDb: MeshtasticDatabase,
+        expectedDbName: String,
+    ): MeshtasticDatabase? = mutex.withLock {
+        if (_currentDb.value !== expectedDb || currentDbName != expectedDbName) return null
+
+        val cached = dbCache[expectedDbName]
+        if (cached !== expectedDb) {
+            Logger.w { "withDb: active DB cache entry changed before reopen; skipping active DB reopen" }
+            return null
+        }
+
+        // Build a fresh instance directly (not through getOrPut) before touching the cache,
+        // so a failed or cancelled build leaves the existing cache entry and _currentDb consistent.
+        val reopened = withContext(dispatchers.io) { getDatabaseBuilder(expectedDbName).build() }
+        dbCache[expectedDbName] = reopened
+        _currentDb.value = reopened
+
+        // Intentionally do not close expectedDb here. The public currentDb Flow is derived from
+        // _currentDb through stateIn, so downstream flatMapLatest collectors may still be using the
+        // replaced Room instance after this function emits the reopened DB. Closing the old pool here
+        // can surface "Connection pool is closed" to app-wide DB observers that do not have closed-pool
+        // recovery. This mirrors switchActiveDatabase's no-sync-close discipline; the leaked pool is
+        // bounded by rare active-DB reopen recovery events and is reclaimed on process death. Revisit
+        // once switching DB observers have explicit closed-pool resubscribe/retry handling.
+
+        reopened
+    }
+
     // Short-term runtime containment: route withDb entry through a single-lane dispatcher to narrow the Room/SQLite
     // connection-pool churn window seen during device/firmware update flows. Room suspend DAOs may continue on Room's
     // own executor after suspension, so this is not a strict global DB-I/O serialization guarantee. Preserve bounded
@@ -314,7 +352,7 @@ open class DatabaseManager(
         }
     }
 
-    @Suppress("ReturnCount", "ThrowsCount", "TooGenericExceptionCaught")
+    @Suppress("ReturnCount", "ThrowsCount", "TooGenericExceptionCaught", "CyclomaticComplexMethod")
     private suspend fun <T> withCurrentDb(block: suspend (MeshtasticDatabase) -> T): T? {
         val db = _currentDb.value ?: return null
         val active = currentDbName
@@ -327,17 +365,40 @@ open class DatabaseManager(
             // If the active database switched while we held a reference to the old one,
             // and the exception indicates a closed pool/connection, retry with the new DB.
             val retryDb = _currentDb.value
-            if (retryDb == null || retryDb === db || !isDbClosedException(e)) throw e
-
-            Logger.w { "withDb: database closed during switch (${e.message}), retrying with current DB" }
-            return try {
-                runCancellableDbBlock(retryDb, block)
-            } catch (retryCancel: CancellationException) {
-                throw retryCancel
-            } catch (retryEx: Exception) {
-                retryEx.addSuppressed(e)
-                throw retryEx
+            if (retryDb != null && retryDb !== db && isDbClosedException(e)) {
+                Logger.w { "withDb: database closed during switch (${e.message}), retrying with current DB" }
+                return try {
+                    runCancellableDbBlock(retryDb, block)
+                } catch (retryCancel: CancellationException) {
+                    throw retryCancel
+                } catch (retryEx: Exception) {
+                    retryEx.addSuppressed(e)
+                    throw retryEx
+                }
             }
+
+            // Same active DB but Room's connection pool is wedged — reopen onto a fresh active instance once.
+            if (retryDb === db && isDbPoolAcquireTimeoutException(e)) {
+                val reopened = reopenActiveDatabaseIfStillCurrent(db, active)
+                val recoveredDb = reopened ?: _currentDb.value?.takeIf { it !== db } ?: throw e
+                Logger.w {
+                    if (reopened != null) {
+                        "withDb: reopened active DB after transient Room connection-pool timeout"
+                    } else {
+                        "withDb: active DB switched during timeout recovery; retrying with current DB"
+                    }
+                }
+                return try {
+                    runCancellableDbBlock(recoveredDb, block)
+                } catch (retryCancel: CancellationException) {
+                    throw retryCancel
+                } catch (retryEx: Exception) {
+                    retryEx.addSuppressed(e)
+                    throw retryEx
+                }
+            }
+
+            throw e
         }
     }
 
@@ -349,16 +410,36 @@ open class DatabaseManager(
         return result
     }
 
-    private fun isDbClosedException(e: Exception): Boolean = generateSequence<Throwable>(e) { it.cause }
-        .any { throwable ->
-            val msg = throwable.message?.lowercase() ?: return@any false
-            "closed" in msg && DB_TERMS.any { it in msg }
-        }
+    private fun isDbClosedException(e: Exception): Boolean = isDbPoolAcquireTimeoutException(e) ||
+        generateSequence<Throwable>(e) { it.cause }
+            .any { throwable ->
+                val msg = throwable.message?.lowercase() ?: return@any false
+                val hasDbContext = DB_TERMS.any { it in msg }
+                ("closed" in msg && hasDbContext) || "database is locked" in msg || "sqlite_busy" in msg
+            }
 
-    private companion object {
+    internal companion object {
         private const val BACKFILL_COLD_START_DELAY_MS = 2_000L
         private const val WITH_DB_SLOW_OPERATION_MS = 1_000L
         val DB_TERMS = listOf("pool", "database", "connection", "sqlite")
+
+        private const val ROOM_POOL_ACQUIRE_TIMEOUT_PHRASE = "timed out attempting to acquire"
+        private const val ROOM_READER_CONNECTION_PHRASE = "reader connection"
+        private const val ROOM_WRITER_CONNECTION_PHRASE = "writer connection"
+
+        /**
+         * Room KMP currently exposes pool-acquire timeouts as exception message text instead of a stable common typed
+         * signal. Keep this fallback narrow so BLE/GATT/transport connection errors do not trigger DB reopen recovery.
+         */
+        private fun isRoomPoolAcquireTimeoutMessage(message: String): Boolean =
+            ROOM_POOL_ACQUIRE_TIMEOUT_PHRASE in message &&
+                (ROOM_READER_CONNECTION_PHRASE in message || ROOM_WRITER_CONNECTION_PHRASE in message)
+
+        fun isDbPoolAcquireTimeoutException(e: Exception): Boolean = generateSequence<Throwable>(e) { it.cause }
+            .any { throwable ->
+                val msg = throwable.message?.lowercase() ?: return@any false
+                isRoomPoolAcquireTimeoutMessage(msg)
+            }
     }
 
     /**

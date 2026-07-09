@@ -94,7 +94,7 @@ class DeviceLinkRepositoryImplTest {
     @BeforeTest
     fun setup() {
         dbProvider = FakeDatabaseProvider()
-        local = DeviceLinkLocalDataSource(dbProvider, dispatchers)
+        local = DeviceLinkLocalDataSource(dbProvider)
         api = FakeApiService(NetworkDeviceLinksResponse())
         seed = FakeBundledAssetReader(emptyList(), json)
         repository =
