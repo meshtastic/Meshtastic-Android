@@ -28,6 +28,7 @@ import io.ktor.utils.io.ByteWriteChannel
 import io.ktor.utils.io.readLine
 import io.ktor.utils.io.writeFully
 import io.ktor.utils.io.writeStringUtf8
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
@@ -62,8 +63,15 @@ class WifiOtaTransport(private val deviceIpAddress: String, private val port: In
             selectorManager = selector
 
             val tcpSocket =
-                withTimeout(CONNECTION_TIMEOUT_MS) {
-                    aSocket(selector).tcp().connect(InetSocketAddress(deviceIpAddress, port))
+                try {
+                    withTimeout(CONNECTION_TIMEOUT_MS) {
+                        aSocket(selector).tcp().connect(InetSocketAddress(deviceIpAddress, port))
+                    }
+                } catch (e: TimeoutCancellationException) {
+                    throw OtaProtocolException.ConnectionFailed(
+                        "TCP connect to $deviceIpAddress:$port timed out after ${CONNECTION_TIMEOUT_MS}ms",
+                        e,
+                    )
                 }
             socket = tcpSocket
 
@@ -191,11 +199,15 @@ class WifiOtaTransport(private val deviceIpAddress: String, private val port: In
         wc.flush()
     }
 
-    private suspend fun readResponse(timeoutMs: Long = COMMAND_TIMEOUT_MS): String = withTimeout(timeoutMs) {
-        val rc = readChannel ?: throw OtaProtocolException.ConnectionFailed("Not connected")
-        val response = rc.readLine() ?: throw OtaProtocolException.ConnectionFailed("Connection closed")
-        Logger.d { "WiFi OTA: Received response: $response" }
-        response
+    private suspend fun readResponse(timeoutMs: Long = COMMAND_TIMEOUT_MS): String = try {
+        withTimeout(timeoutMs) {
+            val rc = readChannel ?: throw OtaProtocolException.ConnectionFailed("Not connected")
+            val response = rc.readLine() ?: throw OtaProtocolException.ConnectionFailed("Connection closed")
+            Logger.d { "WiFi OTA: Received response: $response" }
+            response
+        }
+    } catch (e: TimeoutCancellationException) {
+        throw OtaProtocolException.ConnectionFailed("Timed out waiting for OTA response after ${timeoutMs}ms", e)
     }
 
     companion object {

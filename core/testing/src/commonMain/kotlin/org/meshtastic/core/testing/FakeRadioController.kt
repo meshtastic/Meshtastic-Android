@@ -212,4 +212,8 @@ class FakeRadioController :
     fun setConnectionState(state: ConnectionState) {
         _connectionState.value = state
     }
+
+    fun setClientNotification(notification: ClientNotification?) {
+        _clientNotification.value = notification
+    }
 }
