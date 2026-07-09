@@ -137,6 +137,7 @@
     <string name="bluetooth_feature_discovery">Обнаружение</string>
     <string name="bluetooth_feature_discovery_description">Найдите и определите устройства Meshtastic рядом с вами.</string>
     <string name="bluetooth_permission">Bluetooth</string>
+    <string name="bluetooth_scan_missing_permission">Сканирование Bluetooth требует разрешения. Дайте разрешение на поиск устройств поблизости (или местоположения).</string>
     <string name="bluetooth_scan_start_failed">Невозможно запустить сканирование Bluetooth. Попробуй снова или включи/выключи Bluetooth, если проблема не исчезнет.</string>
     <string name="bold_heading">Выделять заголовок жирным</string>
     <string name="bonding_failed_permissions">Сопряжение не удалось. Дай соседнему устройству разрешения и попробуй снова.</string>
@@ -211,6 +212,8 @@
     <string name="close">Закрыть</string>
     <string name="close_selection">Закрыть выбранное</string>
     <string name="co2">CO₂</string>
+    <string name="co2_humidity">Влажн CO₂</string>
+    <string name="co2_temperature">Темп CO₂</string>
     <string name="codec_2_enabled">CODEC 2 включен</string>
     <string name="codec2_sample_rate">Частота дискретизации CODEC2</string>
     <string name="coding_rate">Частота кодирования</string>
@@ -557,6 +560,7 @@
     <string name="ethernet_config">Настройки Ethernet</string>
     <string name="ethernet_enabled">Ethernet включен</string>
     <string name="ethernet_ip">Ethernet IP:</string>
+    <string name="event_use_event_theme">Использовать тему событий</string>
     <string name="exchange_position">Обменяться местоположением</string>
     <string name="expand_chart">Развернуть диаграмму</string>
     <string name="expanded">Расширенный</string>
@@ -595,6 +599,8 @@
     <!-- FIRMWARE -->
     <string name="firmware">Прошивка</string>
     <string name="firmware_edition">Версия прошивки</string>
+    <string name="firmware_event_ended_banner">%1$s завершен. Вернитесь к стандартной Meshtastic прошивке, чтобы восстановить нормальные функции.</string>
+    <string name="firmware_event_ended_button">Обновление прошивки</string>
     <string name="firmware_old">Прошивка радиостанции слишком стара для взаимодействия с данным приложением. Чтобы получить больше сведений, посетите <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">наше руководство по установке прошивки</a>.</string>
     <string name="firmware_recovery_banner">Завершение обновления %1$s</string>
     <string name="firmware_recovery_ble_failed">Не удалось завершить обновление через Bluetooth. Стоковый загрузчик этого устройства не может надежно завершить прерванное обновление по воздуху. Подключи его к компьютеру через USB и перепрошей с помощью фирменного серийного DFU-инструмента (например, adafruit-nrfutil), чтобы восстановить устройство.</string>
@@ -604,9 +610,14 @@
     <string name="firmware_too_old">Требуется обновление прошивки.</string>
     <string name="firmware_update_almost_there">Почти готово...</string>
     <string name="firmware_update_alpha">Альфа</string>
+    <string name="firmware_update_archive_missing_target">Прошивка для %2$s (%3$s) не найдена в разделе \"%1$s\".</string>
     <string name="firmware_update_battery_low">Слишком низкий заряд (%1$d%). Пожалуйста, зарядите устройство перед обновлением.</string>
     <string name="firmware_update_checking">Проверка обновлений...</string>
+    <string name="firmware_update_confirm_file_button">Начать прошивку</string>
+    <string name="firmware_update_confirm_file_message">Проверь полное имя файла перед установкой. Прошивка начинается только после подтверждения.</string>
+    <string name="firmware_update_confirm_file_title">Подтверждение файла прошивки</string>
     <string name="firmware_update_connecting_attempt">Подключение к устройству (попытка %1$d/%2$d)...</string>
+    <string name="firmware_update_context_changed">Соединение с устройством изменено при подтверждении. Пожалуйста, выберете файл прошивки.</string>
     <string name="firmware_update_copying">Дай пять! Подожди, идет копирование прошивки...</string>
     <string name="firmware_update_currently_installed">Текущая версия: %1$s</string>
     <string name="firmware_update_device">Устройство: %1$s</string>
@@ -622,9 +633,11 @@
     <string name="firmware_update_error">Ошибка: %1$s</string>
     <string name="firmware_update_extracting">Извлечение прошивки...</string>
     <string name="firmware_update_failed">Ошибка обновления</string>
+    <string name="firmware_update_filename_unavailable">Не удалось прочитать имя файла. Выберите локальный файл прошивки с видимым именем.</string>
     <string name="firmware_update_flashing">Прошивка устройства, подождите...</string>
     <string name="firmware_update_hang_tight">Держитесь крепче, работаем...</string>
     <string name="firmware_update_hash_rejected">Хэш прошивки отклонен. Устройство может потребовать подготовки хэша или обновления загрузчика.</string>
+    <string name="firmware_update_invalid_local_file_detail">Выбранный файл \"%1$s\" не соответствует %2$s (%3$s). Выберите файл прошивки для этой цели.</string>
     <string name="firmware_update_keep_device_close">Держите устройство поближе к телефону.</string>
     <string name="firmware_update_latest">Обновить до: %1$s</string>
     <string name="firmware_update_local_file">Локальный файл</string>
@@ -632,16 +645,22 @@
     <string name="firmware_update_method_detail">Обновить по %1$s</string>
     <string name="firmware_update_method_usb">Передача файлов через USB</string>
     <string name="firmware_update_method_wifi">WiFi OTA</string>
+    <string name="firmware_update_missing_target">Информация о целевой прошивке недоступна для этого устройства.</string>
     <string name="firmware_update_no_device">Нет подключенных устройств</string>
     <string name="firmware_update_node_info_missing">Отсутствует информация о пользователе ноды.</string>
     <string name="firmware_update_not_found_in_release">Не удалось найти в релизе прошивку для %1$s.</string>
     <string name="firmware_update_ota_failed">Ошибка обновления OTA: %1$s</string>
+    <string name="firmware_update_ota_unsupported_reason">OTA загрузчик этого устройства отклонил запрошенный метод обновления: %1$s</string>
     <string name="firmware_update_rak4631_bootloader_hint">Для RAK WisBlock RAK4631 используйте фирменный серийный инструмент DFU (например, adafruit-nrfutil dfu serial с предоставленным zip-файлом загрузчика). Простое копирование файла .uf2 не обновит загрузчик.</string>
     <string name="firmware_update_rebooting">Перезагрузка в DFU...</string>
     <string name="firmware_update_release_notes">Список изменений</string>
+    <string name="firmware_update_requires_bin">Для %1$s требуется файл .bin.</string>
+    <string name="firmware_update_requires_ota_zip">Для %1$s требуется сжатый файл OTA .zip.</string>
+    <string name="firmware_update_requires_uf2">Для %1$s требуется файл .uf2.</string>
     <string name="firmware_update_retrieval_failed">Не удалось получить файл прошивки.</string>
     <string name="firmware_update_retry">Повторить</string>
     <string name="firmware_update_save_dfu_file">Пожалуйста, сохраните файл .uf2 на DFU-носитель вашего устройства.</string>
+    <string name="firmware_update_searching_device">Поиск OTA устройства в сети...</string>
     <string name="firmware_update_select_file">Выберите локальный файл</string>
     <string name="firmware_update_slow_bootloader_hint">Обновление загрузчика этого устройства идёт медленно. Прошивка загрузчика OTAFIX позволяет намного быстрее обновлять через BLE.</string>
     <string name="firmware_update_source_local">Выберите локальный файл</string>
@@ -656,6 +675,7 @@
     <string name="firmware_update_unknown_hardware">Неизвестная модель оборудования: %1$d</string>
     <string name="firmware_update_unknown_release">Неизвестная внешняя версия</string>
     <string name="firmware_update_unsupported_transport">Обновления прошивки не поддерживаются через это соединение для данного устройства. Подключитесь другим способом (например, через Bluetooth), чтобы обновить.</string>
+    <string name="firmware_update_unsupported_update_method">Локальные файлы прошивки для этого метода обновления не поддерживаются.</string>
     <string name="firmware_update_uploading">Загрузка прошивки...</string>
     <string name="firmware_update_usb_bootloader_warning">%1$s обычно поставляется с загрузчиком, который не поддерживает OTA обновления. Может потребоваться прошивка OTA-совместимого загрузчика по USB перед прошивкой OTA.</string>
     <string name="firmware_update_usb_failed">Ошибка обновления USB</string>
@@ -726,6 +746,8 @@
     <string name="hide_password">Скрыть пароль</string>
     <string name="history_return_max">Макс возврат истории</string>
     <string name="history_return_window">Окно возврата истории</string>
+    <string name="hop_histogram_empty">В этом окне нет нод</string>
+    <string name="hop_histogram_title">Нод на хоп</string>
     <string name="hop_limit">Количество прыжков</string>
     <string name="hops_away">Прыжков</string>
     <string name="host">Хост</string>
@@ -1491,7 +1513,31 @@
     <string name="signal">Сигнал</string>
     <string name="signal_quality">Качество сигнала</string>
     <!-- SITE -->
+    <string name="site_planner">Планировщик места</string>
+    <string name="site_planner_antenna_gain_dbi">Усиление антенны (dBi)</string>
+    <string name="site_planner_antenna_height_meters">Высота антенны (м)</string>
+    <string name="site_planner_color_scale">Цветовая палитра</string>
+    <string name="site_planner_estimate">Оценка покрытия</string>
+    <string name="site_planner_estimating">Оценка покрытия…</string>
+    <string name="site_planner_failed">Оценка покрытия не удалась</string>
+    <string name="site_planner_frequency_mhz">Частота (МГц)</string>
+    <string name="site_planner_high_resolution">Местность с высоким разрешением</string>
+    <string name="site_planner_invalid_latitude">Введите от -90 до 90</string>
+    <string name="site_planner_invalid_longitude">Введите от −180 до 180</string>
+    <string name="site_planner_invalid_positive">Должно быть больше 0</string>
+    <string name="site_planner_invalid_rx_sensitivity">Введите от -150 до -30 дБм</string>
+    <string name="site_planner_max_range_km">Дальнобойность (км)</string>
+    <string name="site_planner_rx_height_meters">Высота приёмника (м)</string>
+    <string name="site_planner_rx_sensitivity_dbm">Чувствительность приемника (дБм)</string>
     <string name="site_planner_section_display">Дисплей</string>
+    <string name="site_planner_section_receiver">Приемник</string>
+    <string name="site_planner_section_simulation">Варианты моделирования</string>
+    <string name="site_planner_section_transmitter">Место / Передатчик</string>
+    <string name="site_planner_subtitle">Оценка покрытия RF для передатчика</string>
+    <string name="site_planner_tx_power_watts">Мощность TX (Вт)</string>
+    <string name="site_planner_use_current_location">Использовать текущее местоположение</string>
+    <string name="site_planner_use_map_center">Использовать центр карты</string>
+    <string name="site_planner_use_node_location">Использовать текущее местоположение</string>
     <string name="skip">Пропустить</string>
     <string name="slot">Слот</string>
     <string name="smart_position">Умная позиция</string>

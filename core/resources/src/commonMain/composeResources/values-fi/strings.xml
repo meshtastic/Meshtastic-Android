@@ -141,6 +141,7 @@
     <string name="bluetooth_feature_discovery">Haku</string>
     <string name="bluetooth_feature_discovery_description">Etsi ja tunnista lähelläsi olevia Meshtastic-laitteita.</string>
     <string name="bluetooth_permission">Bluetooth</string>
+    <string name="bluetooth_scan_missing_permission">Bluetooth-laitteiden haku edellyttää käyttöoikeutta. Myönnä lähistön laitteet (tai sijainti) käyttöoikeus, jotta laitteita voidaan etsiä.</string>
     <string name="bluetooth_scan_start_failed">Bluetooth-skannaus ei onnistunut. Yritä uudelleen tai ota bluetooth-yhteys uudelleen käyttöön jos ongelma jatkuu.</string>
     <string name="bold_heading">Lihavoitu otsikko</string>
     <string name="bonding_failed_permissions">Pariliitos epäonnistui. Myönnä lupa lähellä olevien laitteiden käyttöön ja yritä uudelleen.</string>
@@ -564,6 +565,7 @@
     <string name="ethernet_config">Verkon asetukset</string>
     <string name="ethernet_enabled">Ethernet käytössä</string>
     <string name="ethernet_ip">Ethernet-verkon IP:</string>
+    <string name="event_use_event_theme">Käytä tapahtuman teemaa</string>
     <string name="exchange_position">Tarkastele sijaintia</string>
     <string name="expand_chart">Laajenna kaavio</string>
     <string name="expanded">Avattu</string>
@@ -602,6 +604,8 @@
     <!-- FIRMWARE -->
     <string name="firmware">Laiteohjelmisto</string>
     <string name="firmware_edition">Laiteohjelmistoversio</string>
+    <string name="firmware_event_ended_banner">%1$s on päättynyt. Palaa tavalliseen Meshtastic-laiteohjelmistoon palauttaaksesi normaalit ominaisuudet.</string>
+    <string name="firmware_event_ended_button">Päivitä laiteohjelmisto</string>
     <string name="firmware_old">Radion laiteohjelmisto on liian vanha toimiakseen tämän sovelluksen kanssa. Lisätietoja löydät <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">ohjelmiston asennusoppaasta</a>.</string>
     <string name="firmware_recovery_banner">Päivitys valmistuu %1$s kuluttua</string>
     <string name="firmware_recovery_ble_failed">Päivitystä ei voitu viimeistellä Bluetoothin kautta. Tämän laitteen vakiokäynnistyslatain ei pysty luotettavasti jatkamaan keskeytynyttä OTA-päivitystä. Liitä laite tietokoneeseen USB:llä ja kirjoita laiteohjelmisto uudelleen valmistajan sarjamuotoisella DFU-työkalulla (esimerkiksi adafruit-nrfutil), jotta laite voidaan palauttaa toimintakuntoon.</string>
@@ -611,9 +615,14 @@
     <string name="firmware_too_old">Laiteohjelmistopäivitys vaaditaan.</string>
     <string name="firmware_update_almost_there">Melkein valmista...</string>
     <string name="firmware_update_alpha">Alpha</string>
+    <string name="firmware_update_archive_missing_target">Laiteohjelmistoa kohteelle %2$s (%3$s) ei löytynyt arkistosta \"%1$s\".</string>
     <string name="firmware_update_battery_low">Akun varaus liian alhainen (%1$d%). Lataa laite ennen päivitystä.</string>
     <string name="firmware_update_checking">Tarkistetaan päivityksiä...</string>
+    <string name="firmware_update_confirm_file_button">Aloita päivitys</string>
+    <string name="firmware_update_confirm_file_message">Tarkista valitsemasi tiedoston koko nimi ennen päivityksen aloittamista. Päivitys alkaa vasta vahvistuksesi jälkeen.</string>
+    <string name="firmware_update_confirm_file_title">Vahvista laiteohjelmistotiedosto</string>
     <string name="firmware_update_connecting_attempt">Yhdistetään laitteeseen (yritys %1$d/%2$d)...</string>
+    <string name="firmware_update_context_changed">Laitteen yhteys muuttui vahvistuksen aikana. Valitse laiteohjelmistotiedosto uudelleen.</string>
     <string name="firmware_update_copying">Ylävitonen! Odota, laiteohjelmistoa kopioidaan…</string>
     <string name="firmware_update_currently_installed">Nyt asennettu: %1$s</string>
     <string name="firmware_update_device">Laite: %1$s</string>
@@ -629,9 +638,11 @@
     <string name="firmware_update_error">Virhe: %1$s</string>
     <string name="firmware_update_extracting">Puretaan laiteohjainta...</string>
     <string name="firmware_update_failed">Päivitys epäonnistui</string>
+    <string name="firmware_update_filename_unavailable">Valitun tiedoston nimeä ei voitu lukea. Valitse paikallinen laiteohjelmistotiedosto, jonka tiedostonimi on näkyvissä.</string>
     <string name="firmware_update_flashing">Ohjelmoidaan laitetta. Odota...</string>
     <string name="firmware_update_hang_tight">Odota, prosessi on käynnissä...</string>
     <string name="firmware_update_hash_rejected">Laiteohjelmiston tarkistussumma hylättiin. Laite saattaa vaatia tiivisteen alustamisen tai käynnistyslataimen päivityksen.</string>
+    <string name="firmware_update_invalid_local_file_detail">Valittu tiedosto \"%1$s\" ei vastaa kohdetta %2$s (%3$s). Valitse tälle kohteelle tarkoitettu laiteohjelmistotiedosto.</string>
     <string name="firmware_update_keep_device_close">Pidä laitteesi lähellä puhelinta.</string>
     <string name="firmware_update_latest">Päivitä versioon %1$s</string>
     <string name="firmware_update_local_file">Paikallinen tiedosto</string>
@@ -639,16 +650,22 @@
     <string name="firmware_update_method_detail">Päivitä %1$s kautta</string>
     <string name="firmware_update_method_usb">USB-tiedonsiirto</string>
     <string name="firmware_update_method_wifi">WiFi OTA</string>
+    <string name="firmware_update_missing_target">Laiteohjelmistoston tiedot eivät ole saatavilla tälle laitteelle.</string>
     <string name="firmware_update_no_device">Ei laitetta kytkettynä</string>
     <string name="firmware_update_node_info_missing">Laitteen käyttäjätiedot puuttuvat.</string>
     <string name="firmware_update_not_found_in_release">Ei löytynyt firmwarea kohteelle %1$s julkaisusta.</string>
     <string name="firmware_update_ota_failed">OTA-päivitys epäonnistui: %1$s</string>
+    <string name="firmware_update_ota_unsupported_reason">Tämän laitteen OTA-käynnistyslatain ei tue pyydettyä päivitystapaa: %1$s</string>
     <string name="firmware_update_rak4631_bootloader_hint">Käytä RAK WisBlock RAK4631 -laitteelle valmistajan sarjamuotoista DFU-työkalua (esimerkiksi adafruit-nrfutil dfu serial toimitetun bootloader .zip -tiedoston kanssa). Pelkän .uf2-tiedoston kopiointi ei päivitä bootloaderia.</string>
     <string name="firmware_update_rebooting">Käynnistetään DFU-tilaan...</string>
     <string name="firmware_update_release_notes">Julkaisutiedot</string>
+    <string name="firmware_update_requires_bin">%1$s edellyttää kohteeseen sopivaa .bin-tiedostoa.</string>
+    <string name="firmware_update_requires_ota_zip">%1$s edellyttää kohteeseen sopivaa OTA .zip-tiedostoa.</string>
+    <string name="firmware_update_requires_uf2">%1$s edellyttää kohteeseen sopivaa .uf2-tiedostoa.</string>
     <string name="firmware_update_retrieval_failed">Laiteohjelmistotiedostoa ei voitu noutaa.</string>
     <string name="firmware_update_retry">Yritä uudelleen</string>
     <string name="firmware_update_save_dfu_file">Tallenna .uf2-tiedosto laitteesi DFU-asemaan.</string>
+    <string name="firmware_update_searching_device">Etsitään OTA-laitetta verkosta...</string>
     <string name="firmware_update_select_file">Valitse paikallinen tiedosto</string>
     <string name="firmware_update_slow_bootloader_hint">Päivitykset ovat hitaita tämän laitteen käynnistyslataimella. OTAFIX-käynnistyslataimen asentaminen mahdollistaa huomattavasti nopeammat bluetooth-päivitykset.</string>
     <string name="firmware_update_source_local">Lähde: Paikallinen tiedosto</string>
@@ -663,6 +680,7 @@
     <string name="firmware_update_unknown_hardware">Tuntematon laitemalli: %1$d</string>
     <string name="firmware_update_unknown_release">Tuntematon etäjulkaisu</string>
     <string name="firmware_update_unsupported_transport">Laiteohjelmiston päivityksiä ei tueta tällä yhteystavalla kyseiselle laitteelle. Muodosta yhteys toisella tavalla (esim. Bluetoothin kautta) päivittääksesi laitteen.</string>
+    <string name="firmware_update_unsupported_update_method">Paikallisia laiteohjelmistotiedostoja ei tueta tällä päivitystavalla.</string>
     <string name="firmware_update_uploading">Lähetetään laiteohjelmistostoa...</string>
     <string name="firmware_update_usb_bootloader_warning">%1$s toimitetaan yleensä bootloaderilla, joka ei tue OTA-päivityksiä. Sinun täytyy ehkä ohjelmoida OTA-yhteensopiva bootloader USB:n kautta ennen kuin voit tehdä OTA-päivityksiä.</string>
     <string name="firmware_update_usb_failed">USB-päivitys epäonnistui</string>

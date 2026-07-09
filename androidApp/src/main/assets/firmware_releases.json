@@ -189,6 +189,18 @@
   },
   "pullRequests": [
     {
+      "id": "10950",
+      "title": "esp32: fix NimBLE use-after-free crash when disabling bluetooth while connected",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10950",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "10949",
+      "title": "Make Safe File actually safe",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10949",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
       "id": "10948",
       "title": "fix(router): null-check packetPool/clientNotificationPool allocations",
       "page_url": "https://github.com/meshtastic/firmware/pull/10948",
