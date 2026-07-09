@@ -203,9 +203,12 @@ private fun ChannelSettings.isPlaceholder(): Boolean = name.isNullOrBlank() && p
  * expensive persist/reload path runs once at commit.) Writing LoRa inside the same session mirrors
  * `InstallProfileUseCase` and is why the old pre/post settle delays are gone: the begin/commit boundary is the settle.
  *
- * The local cache is commit-shaped: transactional channel writes deliberately do not mirror per slot (see
+ * The local channel cache is commit-shaped: transactional channel writes deliberately do not mirror per slot (see
  * `AdminControllerImpl.EditSettingsSession.setChannel`), and this function replaces the cached channel list once, after
- * the session succeeds. An import interrupted before that point leaves the local channel cache untouched.
+ * the session succeeds — so an import interrupted before that point leaves the local channel cache untouched. (The
+ * imported LoRa config is the one exception: it still writes through the cache-mirroring `setConfig`, so its local
+ * cache update is not itself deferred to commit — a single trailing write that self-heals on the device's next config
+ * re-send. Making `setConfig` transaction-aware is future work.)
  *
  * Imported settings are normalized via [normalizeReplacementSettings] before any write or bounds check, so blank
  * placeholder secondaries and semantic duplicates never reach the radio or the local cache.

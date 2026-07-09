@@ -379,9 +379,10 @@ class RadioControllerImplTest {
         }
         testScope.advanceUntilIdle()
 
-        // The channel writes go out as admin packets inside the begin/commit transaction...
-        verifySuspend(atLeast(2)) { commandSender.sendAdmin(any(), any(), any(), any()) }
-        // ...but a transactional channel write must NOT eagerly mirror to the local cache the way one-shot
+        // Exactly 4 admin packets: begin + 2 channel writes + commit. The tight count also catches a duplicated
+        // begin/commit or an accidental double-write per channel.
+        verifySuspend(exactly(4)) { commandSender.sendAdmin(any(), any(), any(), any()) }
+        // A transactional channel write must NOT eagerly mirror to the local cache the way one-shot
         // setRemoteChannel does for the local node. importChannelSet owns the cache and writes it once after commit
         // (replaceAllSettings), so an interrupted import can't leave partial channels cached. A regression to
         // per-slot mirroring inside the session would make this call count non-zero.
