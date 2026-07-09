@@ -36,6 +36,11 @@ import org.meshtastic.feature.settings.component.SampleNodeCompleteFahrenheitPre
 import org.meshtastic.feature.settings.component.SampleNodeCompleteImperialPreview
 import org.meshtastic.feature.settings.component.SampleNodeCompletePreview
 import org.meshtastic.feature.settings.component.SampleNodeCompleteToggleMatrixPreview
+import org.meshtastic.feature.settings.radio.component.PacketAuthenticityBalancedPreview
+import org.meshtastic.feature.settings.radio.component.PacketAuthenticityCompatiblePreview
+import org.meshtastic.feature.settings.radio.component.PacketAuthenticityStrictConfirmationPreview
+import org.meshtastic.feature.settings.radio.component.PacketAuthenticityStrictPreview
+import org.meshtastic.feature.settings.radio.component.PacketAuthenticityUnsupportedPreview
 import org.meshtastic.feature.settings.radio.component.TakConfigCardPreview
 import org.meshtastic.feature.settings.radio.component.TakServerSectionDisabledPreview
 import org.meshtastic.feature.settings.radio.component.TakServerSectionEnabledPreview
@@ -111,6 +116,41 @@ fun ScreenshotTakTestCardRunning() {
 @Composable
 fun ScreenshotTakTestCardResults() {
     TakTestCardResultsPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotPacketAuthenticityCompatible() {
+    PacketAuthenticityCompatiblePreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotPacketAuthenticityBalanced() {
+    PacketAuthenticityBalancedPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotPacketAuthenticityStrict() {
+    PacketAuthenticityStrictPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotPacketAuthenticityUnsupported() {
+    PacketAuthenticityUnsupportedPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotPacketAuthenticityStrictConfirmation() {
+    PacketAuthenticityStrictConfirmationPreview()
 }
 
 // ---------------------------------------------------------------------------

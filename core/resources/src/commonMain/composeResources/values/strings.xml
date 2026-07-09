@@ -1247,6 +1247,19 @@
     <string name="override_duty_cycle">Override Duty Cycle</string>
     <string name="override_frequency_mhz">Frequency Override</string>
     <string name="pa_fan_disabled">PA fan disabled</string>
+    <!-- PACKET -->
+    <string name="packet_authenticity">Packet authenticity</string>
+    <string name="packet_authenticity_balanced">Balanced — Prefer authenticated</string>
+    <string name="packet_authenticity_balanced_summary">Recommended. Reject unsigned downgrade attempts from nodes known to sign.</string>
+    <string name="packet_authenticity_compatible">Compatible — Accept unsigned</string>
+    <string name="packet_authenticity_compatible_summary">Authenticate packets when possible, but accept unsigned traffic for maximum compatibility.</string>
+    <string name="packet_authenticity_level">Protection level</string>
+    <string name="packet_authenticity_strict">Strict — Require authentication</string>
+    <string name="packet_authenticity_strict_confirm">Enable Strict</string>
+    <string name="packet_authenticity_strict_confirmation">Strict ignores every remote mesh packet that is not cryptographically authenticated. Older firmware, licensed or ham nodes without PKI keys, and oversized packets may disappear. PKI-authenticated direct messages remain available.</string>
+    <string name="packet_authenticity_strict_summary">Only show and process cryptographically authenticated mesh packets. Older nodes and oversized packets may disappear.</string>
+    <string name="packet_authenticity_strict_title">Enable Strict authentication?</string>
+    <string name="packet_authenticity_unsupported">This connected device does not support packet signature verification.</string>
     <string name="pairing_mode">Pairing mode</string>
     <string name="password">Password</string>
     <!-- PAX -->
@@ -1836,4 +1849,3 @@
     <string name="zh_CN" translatable="false">简体中文</string>
     <string name="zh_TW" translatable="false">繁體中文</string>
 </resources>
-

@@ -1217,6 +1217,19 @@ override_console_serial_port
 override_duty_cycle
 override_frequency_mhz
 pa_fan_disabled
+### PACKET ###
+packet_authenticity
+packet_authenticity_balanced
+packet_authenticity_balanced_summary
+packet_authenticity_compatible
+packet_authenticity_compatible_summary
+packet_authenticity_level
+packet_authenticity_strict
+packet_authenticity_strict_confirm
+packet_authenticity_strict_confirmation
+packet_authenticity_strict_summary
+packet_authenticity_strict_title
+packet_authenticity_unsupported
 pairing_mode
 password
 ### PAX ###
