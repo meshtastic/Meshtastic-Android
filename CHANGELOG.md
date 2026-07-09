@@ -9,12 +9,24 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
+#### 🛠️ Fixes
+* fix(database): recover firmware metadata reads after DB pool churn by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6177
+
+### Internal (v2.8.0-internal.21)
+Changes since [`v2.8.0-closed.7`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.0-closed.7):
+
 #### 🏗️ Features
 * feat(firmware): Confirm local firmware files before flashing by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6083
+* feat(messaging): split Conversations into collapsible Channels/DM sections by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6169
+* perf(mqtt): drop payload-less client-proxy downlinks before forwarding by @thebentern in https://github.com/meshtastic/Meshtastic-Android/pull/6171
+#### 🖥️ Desktop
+* fix(ble): refresh GATT cache around ESP32 OTA profile changes by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6166
 #### 🛠️ Fixes
 * fix(firmware): Keep bundled release discovery available by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6082
 * fix(dfu): Detect legacy bootloaders before secure fallback by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6079
 * fix(firmware): Retry ESP32 OTA service connections cleanly by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6081
+#### 📝 Other Changes
+* refactor(qr): apply channel imports atomically via edit-settings transaction by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6170
 
 ### Closed Beta (v2.8.0-closed.7)
 Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14):
@@ -147,6 +159,7 @@ Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/relea
 * @LesterCheng made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/5752
 * @dubsector made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/5986
 * @garthvh made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/6088
+* @coderabbitai[bot] made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/6180
 <!-- UNRELEASED_END -->
 
 <!-- RELEASED_START -->
