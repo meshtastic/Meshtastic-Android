@@ -22,6 +22,10 @@ enum class BleScanStartFailureReason(val androidCode: String, val description: S
         androidCode = "SCAN_FAILED_APPLICATION_REGISTRATION_FAILED(2)",
         description = "Android could not register the app for BLE scanning",
     ),
+    MissingScanPermission(
+        androidCode = "MISSING_SCAN_PERMISSION",
+        description = "A runtime permission required for BLE scanning is not granted",
+    ),
 }
 
 /** A discovery scan-start failure. No advertisements can be delivered until a future scan starts successfully. */

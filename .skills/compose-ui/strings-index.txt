@@ -123,6 +123,7 @@ bluetooth_feature_config_description
 bluetooth_feature_discovery
 bluetooth_feature_discovery_description
 bluetooth_permission
+bluetooth_scan_missing_permission
 bluetooth_scan_start_failed
 bold_heading
 bonding_failed_permissions

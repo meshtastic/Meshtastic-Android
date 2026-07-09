@@ -40,6 +40,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.meshtastic.core.ble.BleDevice
 import org.meshtastic.core.ble.BleScanStartException
+import org.meshtastic.core.ble.BleScanStartFailureReason
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.MeshtasticBleConstants
 import org.meshtastic.core.common.util.safeCatchingAll
@@ -58,6 +59,7 @@ import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.bluetooth_scan_missing_permission
 import org.meshtastic.core.resources.bluetooth_scan_start_failed
 import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.ui.viewmodel.safeLaunch
@@ -396,9 +398,13 @@ open class ScannerViewModel(
         Logger.w(exception) {
             "BLE scan could not start: ${exception.reason.androidCode} (${exception.reason.description})"
         }
+        val messageRes =
+            when (exception.reason) {
+                BleScanStartFailureReason.MissingScanPermission -> Res.string.bluetooth_scan_missing_permission
+                BleScanStartFailureReason.ApplicationRegistrationFailed -> Res.string.bluetooth_scan_start_failed
+            }
         val errorMessage =
-            safeCatchingAll { getStringSuspend(Res.string.bluetooth_scan_start_failed) }
-                .getOrDefault(BLE_SCAN_START_FAILURE_MESSAGE_FALLBACK)
+            safeCatchingAll { getStringSuspend(messageRes) }.getOrDefault(BLE_SCAN_START_FAILURE_MESSAGE_FALLBACK)
         serviceRepository.setErrorMessage(text = errorMessage, severity = Severity.Warn)
     }
 
