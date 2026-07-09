@@ -420,10 +420,11 @@ private const val PKI_CHANNEL_ID = "PKI"
  * Returns true when a downlink [ServiceEnvelope] is provably un-usable by the node and should be dropped before
  * forwarding over BLE (MQTT client-proxy mode).
  *
- * Fails open — returns false (forward) for anything it cannot positively prove undeliverable: unparseable bytes, PKI
- * traffic (the node accepts PKC direct messages without decrypting), our own echoed-back packets (used as implicit
- * ACKs), a packet-less envelope, or any packet that actually carries a payload. The only drop case is Tier 1: a
- * [MeshPacket] with neither `decoded` nor `encrypted` set — no legitimate Meshtastic packet is payload-less.
+ * Fails open — returns false (forward) for anything it cannot positively prove undeliverable: unparseable bytes,
+ * traffic on the `PKI` channel (public-key-encrypted direct messages the node accepts without first decrypting), our
+ * own echoed-back packets (used as implicit ACKs), a packet-less envelope, or any packet that actually carries a
+ * payload. The only drop case is Tier 1: a [MeshPacket] with neither `decoded` nor `encrypted` set — no legitimate
+ * Meshtastic packet is payload-less.
  *
  * Extracted as an internal top-level function so [MQTTRepositoryImplTest] can exercise every branch without spinning up
  * the full repository.
@@ -432,8 +433,10 @@ private const val PKI_CHANNEL_ID = "PKI"
  * @param myId this device's node id in `!xxxxxxxx` hex form, or null before the local node loads.
  */
 internal fun isUndeliverableDownlink(payload: ByteArray, myId: String?): Boolean {
-    val envelope = ServiceEnvelope.ADAPTER.decodeOrNull(payload, Logger) ?: return false // fail open on garbage
-    // Guards — never drop: PKI traffic (accepted without decryption) or our own echoed-back
+    // Decode without a logger: this is fail-open and, on a public broker, may see arbitrary bytes on the binary
+    // topic. Passing Logger would emit an error log per unparseable downlink — expensive noise for an expected case.
+    val envelope = ServiceEnvelope.ADAPTER.decodeOrNull(payload) ?: return false // fail open on garbage
+    // Guards — never drop: PKI-channel traffic (accepted without decryption) or our own echoed-back
     // packets (used as implicit ACKs).
     val isGuarded = envelope.channel_id == PKI_CHANNEL_ID || (myId != null && envelope.gateway_id == myId)
     // Tier 1: a packet with neither `decoded` nor `encrypted` carries nothing the node can use.
