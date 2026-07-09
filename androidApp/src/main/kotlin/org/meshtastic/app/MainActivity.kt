@@ -37,6 +37,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.core.content.IntentCompat
 import androidx.core.net.toUri
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -50,6 +51,7 @@ import kotlinx.coroutines.launch
 import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 import org.meshtastic.app.intro.AnalyticsIntro
@@ -68,6 +70,11 @@ import org.meshtastic.core.resources.channel_invalid
 import org.meshtastic.core.service.MeshService
 import org.meshtastic.core.service.startService
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.ui.theme.EventFontResolver
+import org.meshtastic.core.ui.theme.EventTheme
+import org.meshtastic.core.ui.theme.EventThemeToggle
+import org.meshtastic.core.ui.theme.LocalEventTheme
+import org.meshtastic.core.ui.theme.LocalEventThemeToggle
 import org.meshtastic.core.ui.theme.MODE_DYNAMIC
 import org.meshtastic.core.ui.util.LocalAnalyticsIntroProvider
 import org.meshtastic.core.ui.util.LocalBarcodeScannerProvider
@@ -86,6 +93,7 @@ import org.meshtastic.core.ui.util.LocalSitePlannerAvailable
 import org.meshtastic.core.ui.util.LocalTracerouteMapOverlayInsetsProvider
 import org.meshtastic.core.ui.util.LocalTracerouteMapProvider
 import org.meshtastic.core.ui.util.LocalTracerouteMapScreenProvider
+import org.meshtastic.core.ui.util.accentColorOrNull
 import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.feature.connections.NO_DEVICE_SELECTED
@@ -192,8 +200,23 @@ class MainActivity : AppCompatActivity() {
     @Composable
     private fun AppCompositionLocals(content: @Composable () -> Unit) {
         val eventEdition by model.eventEdition.collectAsStateWithLifecycle()
+        val eventThemeEnabled by model.eventThemeEnabled.collectAsStateWithLifecycle()
+        val eventFontResolver = koinInject<EventFontResolver>()
+        // Resolve the ambient event theme once per edition: an accent wash (works on any flavor) and/or downloadable
+        // fonts (Google flavor only). Applied app-wide only while on event firmware and not opted out.
+        val eventAccent = eventEdition?.accentColorOrNull()
+        val resolvedEventFonts =
+            remember(eventEdition, eventFontResolver) { eventFontResolver.resolve(eventEdition?.theme?.fonts) }
         CompositionLocalProvider(
             LocalEventBranding provides eventEdition,
+            LocalEventTheme provides
+                if (eventThemeEnabled && eventEdition != null) {
+                    EventTheme(accent = eventAccent, fonts = resolvedEventFonts)
+                } else {
+                    null
+                },
+            LocalEventThemeToggle provides
+                EventThemeToggle(enabled = eventThemeEnabled, onChange = model::setEventThemeEnabled),
             LocalBarcodeScannerProvider provides { onResult -> rememberBarcodeScanner(onResult) },
             LocalNfcScannerProvider provides { onResult, onDisabled -> NfcScannerEffect(onResult, onDisabled) },
             LocalNfcWriterProvider provides { url, onResult, onDisabled -> NfcWriterEffect(url, onResult, onDisabled) },

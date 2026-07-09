@@ -128,6 +128,11 @@ class UIViewModel(
 
     val theme: StateFlow<Int> = uiPrefs.theme
 
+    /** Opt-out for applying an event edition's ambient theme (accent + typeface) app-wide. */
+    val eventThemeEnabled: StateFlow<Boolean> = uiPrefs.eventThemeEnabled
+
+    fun setEventThemeEnabled(enabled: Boolean) = uiPrefs.setEventThemeEnabled(enabled)
+
     val firmwareEdition = meshLogRepository.getMyNodeInfo().map { nodeInfo -> nodeInfo?.firmware_edition }
 
     val eventEdition: StateFlow<EventFirmwareEdition?> =

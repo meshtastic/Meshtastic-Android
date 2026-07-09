@@ -19,7 +19,10 @@
 package org.meshtastic.app.di
 
 import org.koin.core.annotation.Module
+import org.koin.core.annotation.Single
 import org.meshtastic.app.map.prefs.di.GoogleMapsKoinModule
+import org.meshtastic.app.theme.GoogleFontsEventFontResolver
+import org.meshtastic.core.ui.theme.EventFontResolver
 import org.meshtastic.feature.car.di.FeatureCarModule
 
 @Module(
@@ -32,4 +35,7 @@ import org.meshtastic.feature.car.di.FeatureCarModule
         FeatureCarModule::class,
     ],
 )
-class FlavorModule
+class FlavorModule {
+    /** Downloadable Google Fonts for event branding — Google flavor only. */
+    @Single fun eventFontResolver(): EventFontResolver = GoogleFontsEventFontResolver()
+}

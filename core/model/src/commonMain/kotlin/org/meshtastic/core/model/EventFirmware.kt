@@ -81,10 +81,7 @@ data class EventFirmwareEdition(
 @JsonIgnoreUnknownKeys
 data class EventFirmwareLink(val label: String = "", val url: String = "")
 
-/**
- * Richer event branding beyond a single accent color. `fonts` is intentionally omitted — it is `null` in the current
- * feed and its shape is unspecified, so it is left to [JsonIgnoreUnknownKeys] rather than modeled prematurely.
- */
+/** Richer event branding beyond a single accent color. Not all editions carry a full theme. */
 @Serializable
 @OptIn(ExperimentalSerializationApi::class)
 @JsonIgnoreUnknownKeys
@@ -93,7 +90,18 @@ data class EventFirmwareTheme(
     val tagline: String? = null,
     val colors: EventFirmwareThemeColors? = null,
     val palette: List<String> = emptyList(),
+    val fonts: EventFirmwareFonts? = null,
 )
+
+/**
+ * Font-family names for event branding — Google Font family names (e.g. `Lato` / `Atkinson Hyperlegible`), not URLs.
+ * Captured so the data is available; actually rendering with these fonts is a separate, platform-specific concern (a
+ * downloadable-font provider is Google-flavor only), so consumers may ignore them and fall back to the app typeface.
+ */
+@Serializable
+@OptIn(ExperimentalSerializationApi::class)
+@JsonIgnoreUnknownKeys
+data class EventFirmwareFonts(val heading: String? = null, val body: String? = null)
 
 /** Named brand colors (`#RRGGBB`) for an event theme; any may be absent. */
 @Serializable

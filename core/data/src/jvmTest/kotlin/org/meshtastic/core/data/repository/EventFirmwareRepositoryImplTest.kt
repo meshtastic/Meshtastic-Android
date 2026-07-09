@@ -26,6 +26,7 @@ import org.meshtastic.core.data.datasource.EventFirmwareEditionLocalDataSource
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.EventFirmwareBuild
 import org.meshtastic.core.model.EventFirmwareEdition
+import org.meshtastic.core.model.EventFirmwareFonts
 import org.meshtastic.core.model.EventFirmwareResponse
 import org.meshtastic.core.model.EventFirmwareTheme
 import org.meshtastic.core.model.EventFirmwareThemeColors
@@ -187,6 +188,7 @@ class EventFirmwareRepositoryImplTest {
                         name = "Radio Adventure",
                         palette = listOf("#BF1E2E"),
                         colors = EventFirmwareThemeColors(primary = "#BF1E2E"),
+                        fonts = EventFirmwareFonts(heading = "Lato", body = "Atkinson Hyperlegible"),
                     ),
                     firmware = EventFirmwareBuild(version = "2.7.23.07741e6", zipUrl = "https://example/f.zip"),
                 ),
@@ -199,6 +201,8 @@ class EventFirmwareRepositoryImplTest {
         assertEquals("Radio Adventure", got.theme?.name)
         assertEquals("#BF1E2E", got.theme?.colors?.primary)
         assertEquals(listOf("#BF1E2E"), got.theme?.palette)
+        assertEquals("Lato", got.theme?.fonts?.heading)
+        assertEquals("Atkinson Hyperlegible", got.theme?.fonts?.body)
         assertEquals("2.7.23.07741e6", got.firmware?.version)
         assertEquals("https://example/f.zip", got.firmware?.zipUrl)
     }

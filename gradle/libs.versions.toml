@@ -165,6 +165,7 @@ androidx-compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-mani
 # maps-compose-widgets (google), declared explicitly so the version propagates to consumers of the
 # app's graph (e.g. :baselineprofile); see androidApp/build.gradle.kts.
 androidx-compose-material = { module = "androidx.compose.material:material", version.ref = "androidx-compose-bom-aligned" }
+androidx-compose-ui-text-google-fonts = { module = "androidx.compose.ui:ui-text-google-fonts", version.ref = "androidx-compose-bom-aligned" }
 
 # Compose Multiplatform
 compose-multiplatform-animation = { module = "org.jetbrains.compose.animation:animation", version.ref = "compose-multiplatform" }
