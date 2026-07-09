@@ -220,6 +220,7 @@
     <string name="device_sleeping">Urządzenie uśpione</string>
     <string name="dew_point">Punkt rosy</string>
     <string name="direct_message">Bezpośrednia wiadomość</string>
+    <string name="direct_messages">Bezpośrednie Wiadomości</string>
     <string name="discard_changes">Odrzuć</string>
     <string name="disconnect">Rozłącz</string>
     <string name="disconnected">Rozłączono</string>

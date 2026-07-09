@@ -120,7 +120,7 @@ The app supports multiple map tile sources:
 
 - OpenStreetMap (default)
 - Satellite imagery (where available)
-- Offline tiles (download map areas for offline use)
+- Võrguühenduseta paanid (laadige kaardialad alla võrguühenduseta kasutamiseks)
 
 ## Related Topics
 

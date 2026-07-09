@@ -383,6 +383,7 @@
     <string name="dew_point">Kastepunkt</string>
     <string name="direct_message">Otsesõnum</string>
     <string name="direct_message_key">Otsesõnumi võti</string>
+    <string name="direct_messages">Otsesõnumid</string>
     <string name="discard_changes">Tühista</string>
     <string name="disconnect">Katkesta ühendus</string>
     <string name="disconnected">Ühendus katkenud</string>
@@ -483,7 +484,7 @@
     <string name="doc_keywords_debug_logs">arendaja,logid,logcat,eksport,veateade,probleem,tõrkeotsing,diagnostika</string>
     <string name="doc_keywords_desktop">desktop,linux,macos,windows,serial</string>
     <string name="doc_keywords_discovery">avastamine,topoloogia,võrk,skaneerimine,naaber</string>
-    <string name="doc_keywords_firmware">püsivara,värskendus,ota,välkmälu,versioon,taastamine</string>
+    <string name="doc_keywords_firmware">püsivara,värskendus,ota,püsivarauuendus,versioon,taastamine</string>
     <string name="doc_keywords_help">abi,dokumentatsioon,dokumendid,chirpy,assistent,otsing,võrguühenduseta</string>
     <string name="doc_keywords_map">kaart,teekonnapunkt,gps,asukoht,marker</string>
     <string name="doc_keywords_measurement">vormindaja,mõõdik,arv,lokaat,temperatuur,teisendus,api</string>
@@ -602,18 +603,25 @@
     <!-- FIRMWARE -->
     <string name="firmware">Püsivara</string>
     <string name="firmware_edition">Püsivara versioon</string>
+    <string name="firmware_event_ended_banner">%1$s on lõppenud. Tavapäraste funktsioonide taastamiseks naaske standardse Meshtastic püsivara juurde.</string>
+    <string name="firmware_event_ended_button">Värskenda püsivara</string>
     <string name="firmware_old">Raadio püsivara on selle rakenduse kasutamiseks liiga vana. Lisateabe saamiseks vaata meie <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">püsivara paigaldusjuhendit</a>.</string>
     <string name="firmware_recovery_banner">Lõpeta värskendamine: %1$s</string>
-    <string name="firmware_recovery_ble_failed">Sinihamba ​​kaudu värskendust ei õnnestunud lõpule viia. Selle seadme alglaadur ei suuda katkenud värskendust õhu kaudu usaldusväärselt lõpule viia. Ühenda see USB kaudu arvutiga ja flashi see uuesti tootja jadapordi DFU-tööriista (näiteks adafruit-nrfutil) abil, et seade taastada.</string>
+    <string name="firmware_recovery_ble_failed">Sinihamba ​​kaudu värskendust ei õnnestunud lõpule viia. Selle seadme alglaadur ei suuda katkenud värskendust õhu kaudu usaldusväärselt lõpule viia. Ühenda see USB kaudu arvutiga ja püsivarauuenda see uuesti tootja jadapordi DFU-tööriista (näiteks adafruit-nrfutil) abil, et seade taastada.</string>
     <string name="firmware_recovery_button">Jätka püsivara värskendamist</string>
     <string name="firmware_recovery_dismiss">Keela püsivara taastamine</string>
-    <string name="firmware_recovery_explanation">See seade on püsivara värskenduse tõttu alglaaduri režiimis, mis ei ole lõppenud. Hoidke seda läheduses ja see flashitakse uuesti värskenduse lõpuleviimiseks.</string>
+    <string name="firmware_recovery_explanation">See seade on püsivara värskenduse tõttu alglaaduri režiimis, mis ei ole lõppenud. Hoidke seda läheduses ja see püsivarauuendatakse uuesti värskenduse lõpuleviimiseks.</string>
     <string name="firmware_too_old">Püsivara värskendus on vajalik.</string>
     <string name="firmware_update_almost_there">Kohe lõpetan...</string>
     <string name="firmware_update_alpha">Alfa</string>
+    <string name="firmware_update_archive_missing_target">Püsivara %2$s (%3$s) jaoks, ei leitud \"%1$s\".</string>
     <string name="firmware_update_battery_low">Aku liiga tühi (%1$d%). Palun lae seade enne uuendamist.</string>
     <string name="firmware_update_checking">Otsin uuendusi...</string>
+    <string name="firmware_update_confirm_file_button">Alusta püsivarauuendust</string>
+    <string name="firmware_update_confirm_file_message">Enne püsivarauuendust vaata valitud failinimi kogu pikkuses üle. Uuendus algab peale sinu kinnitust.</string>
+    <string name="firmware_update_confirm_file_title">Kinnitage püsivara fail</string>
     <string name="firmware_update_connecting_attempt">Seadmega ühenduse loomine (katse %1$d/%2$d)...</string>
+    <string name="firmware_update_context_changed">Seadme ühendus muutus kinnitamise ajal. Palun vali püsivara fail uuesti.</string>
     <string name="firmware_update_copying">Löö patsu! Oota veidi, püsivara laetakse...</string>
     <string name="firmware_update_currently_installed">Praegu paigaldatud: %1$s</string>
     <string name="firmware_update_device">Seade: %1$s</string>
@@ -629,9 +637,11 @@
     <string name="firmware_update_error">Viga: %1$s</string>
     <string name="firmware_update_extracting">Püsivara lahtipakkimine...</string>
     <string name="firmware_update_failed">Värskendus ebaõnnestus</string>
+    <string name="firmware_update_filename_unavailable">Valitud failinime lugemine ebaõnnestus. Vali kohalik püsivara fail nähtava failinimega.</string>
     <string name="firmware_update_flashing">Seadme värskendamine, palun oota...</string>
     <string name="firmware_update_hang_tight">Pea vastu, me töötame selle kallal...</string>
     <string name="firmware_update_hash_rejected">Püsivara räsi tagasi lükatud. Seade võib vajada räsi kontrollimist või alglaaduri värskendamist.</string>
+    <string name="firmware_update_invalid_local_file_detail">Valitud fail \"%1$s\" ei vasta failile %2$s (%3$s). Vali selle sihtmärgi jaoks püsivara fail.</string>
     <string name="firmware_update_keep_device_close">Hoia seade telefoni lähedal.</string>
     <string name="firmware_update_latest">Uuenda: %1$s' le</string>
     <string name="firmware_update_local_file">Lokaalne</string>
@@ -639,18 +649,24 @@
     <string name="firmware_update_method_detail">Uuenda %1$s' abil</string>
     <string name="firmware_update_method_usb">USB failiedastus</string>
     <string name="firmware_update_method_wifi">Üle WiFi</string>
+    <string name="firmware_update_missing_target">Selle seadme püsivara teave pole saadaval.</string>
     <string name="firmware_update_no_device">Ühtegi seadet pole ühendatud</string>
     <string name="firmware_update_node_info_missing">Sõlmel puudub kasutajateave.</string>
     <string name="firmware_update_not_found_in_release">Selles versioonis ei leitud püsivara %1$s'le.</string>
     <string name="firmware_update_ota_failed">Üle-õhu värskendus ebaõnnestus: %1$s</string>
+    <string name="firmware_update_ota_unsupported_reason">Selle seadme OTA laadur lükkas tagasi taotletud värskendusmeetodi: %1$s</string>
     <string name="firmware_update_rak4631_bootloader_hint">RAK WisBlock RAK4631 puhul kasuta tootja jadapordi DFU-tööriista (näiteks adafruit-nrfutil dfu jadapordi oma koos alglaaduri .zip-failiga). Ainult .uf2-faili kopeerimine ei värskenda alglaadurit.</string>
     <string name="firmware_update_rebooting">Taaskäivitamine DFU reziimi...</string>
     <string name="firmware_update_release_notes">Väljalaske märkmed</string>
+    <string name="firmware_update_requires_bin">%1$s nõuab sihtmärgile vastavat .bin faili.</string>
+    <string name="firmware_update_requires_ota_zip">%1$s nõuab sihtmärgile vastavat OTA .zip faili.</string>
+    <string name="firmware_update_requires_uf2">%1$s nõuab sihtmärgile vastavat .uf2 faili.</string>
     <string name="firmware_update_retrieval_failed">Püsivara faili ei õnnestunud hankida.</string>
     <string name="firmware_update_retry">Proovi uuesti</string>
     <string name="firmware_update_save_dfu_file">Palun salvesta .uf2-fail oma seadme DFU-kettale.</string>
+    <string name="firmware_update_searching_device">Otsin võrgust OTA seadet...</string>
     <string name="firmware_update_select_file">Vali kohalik fail</string>
-    <string name="firmware_update_slow_bootloader_hint">Seadme alglaaduri värskendused on aeglased. OTAFIX alglaaduri flash võimaldab palju kiiremaid BLE värskendusi.</string>
+    <string name="firmware_update_slow_bootloader_hint">Seadme alglaaduri värskendused on aeglased. OTAFIX alglaaduri püsivarauuendus võimaldab palju kiiremaid BLE värskendusi.</string>
     <string name="firmware_update_source_local">Allikas: kohalik fail</string>
     <string name="firmware_update_stable">Stabiilne</string>
     <string name="firmware_update_starting_dfu">DFU käivitamine...</string>
@@ -663,6 +679,7 @@
     <string name="firmware_update_unknown_hardware">Tundmatu riistvaramudel: %1$d</string>
     <string name="firmware_update_unknown_release">Tundmatu väljalase</string>
     <string name="firmware_update_unsupported_transport">Selle seadme püsivara värskendus ei toetata üle selle ühenduse. Värskendamiseks loo ühendus muul viisil (nt sinihamba ​​kaudu).</string>
+    <string name="firmware_update_unsupported_update_method">See värskendusmeetod ei toeta kohalikke püsivara faile.</string>
     <string name="firmware_update_uploading">Laen püsivara...</string>
     <string name="firmware_update_usb_bootloader_warning">%1$s on tavaliselt varustatud alglaaduriga, mis ei toeta OTA värskendusi. Enne OTA värskendamist pead võib-olla USB kaudu OTA-toega alglaaduri käivitama.</string>
     <string name="firmware_update_usb_failed">USB-värskendus ebaõnnestus</string>
@@ -1600,7 +1617,11 @@
     <string name="traffic_management_unknown_packet_threshold">Tundmatu pakettide lävi</string>
     <string name="translate">Tõlgi</string>
     <!-- TRANSLATION -->
+    <string name="translation_download_message">Sõnumite tõlkimiseks on vaja ühekordset keelemudeli allalaadimist (umbes %1$d MB).</string>
+    <string name="translation_download_title">Kas allalaadida tõlkemudel?</string>
+    <string name="translation_downloading">Tõlkemudeli allalaadimine…</string>
     <string name="translation_failed">Sõnumit ei õnnestunud tõlkida</string>
+    <string name="translation_model_download_failed">Tõlkemudeli allalaadimine ebaõnnestus</string>
     <string name="transmit_over_lora">Saada LoRa kaudu</string>
     <!-- TRANSPORT -->
     <string name="transport_ble">BLE</string>

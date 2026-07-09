@@ -374,6 +374,7 @@
     <string name="dew_point">结露点</string>
     <string name="direct_message">私信</string>
     <string name="direct_message_key">私信密钥</string>
+    <string name="direct_messages">私聊</string>
     <string name="discard_changes">忽略</string>
     <string name="disconnect">断开</string>
     <string name="disconnected">已断开连接</string>

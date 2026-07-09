@@ -263,6 +263,7 @@
     <string name="dew_point">Punto Di Rugiada</string>
     <string name="direct_message">Messaggio diretto</string>
     <string name="direct_message_key">Chiave per Messaggi Diretti</string>
+    <string name="direct_messages">Messaggi Diretti</string>
     <string name="discard_changes">Annulla</string>
     <string name="disconnect">Disconnetti</string>
     <string name="disconnected">Disconnesso</string>
