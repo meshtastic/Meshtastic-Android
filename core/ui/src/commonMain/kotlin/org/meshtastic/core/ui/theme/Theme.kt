@@ -27,8 +27,10 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFontFamilyResolver
 
 private val lightScheme =
     lightColorScheme(
@@ -133,6 +135,16 @@ fun AppTheme(
     // event typeface. Null everywhere else (desktop, F-Droid, non-event) → default typography.
     val eventFonts = LocalEventTypographyFonts.current
     val typography = remember(eventFonts) { eventFonts?.let { AppTypography.withEventFonts(it) } ?: AppTypography }
+
+    // Downloadable (Google) fonts referenced only through the theme's Typography are NOT auto-fetched during text
+    // layout — Compose silently renders the fallback. Preloading them into the font cache is the documented way to make
+    // them actually apply; once cached, the themed Text re-resolves to the real typeface. No-op when there are no event
+    // fonts (desktop / F-Droid / non-event / opted out).
+    val fontResolver = LocalFontFamilyResolver.current
+    LaunchedEffect(eventFonts, fontResolver) {
+        val fonts = eventFonts ?: return@LaunchedEffect
+        listOfNotNull(fonts.heading, fonts.body).forEach { family -> runCatching { fontResolver.preload(family) } }
+    }
 
     MaterialExpressiveTheme(colorScheme = colorScheme, typography = typography, motionScheme = expressive()) {
         content()
