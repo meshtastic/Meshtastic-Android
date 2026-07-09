@@ -19,6 +19,7 @@ package org.meshtastic.core.repository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
 data class FirmwareUpdateStatus(val isOtaUpdateActive: Boolean = false, val isAwaitingOtaStatus: Boolean = false)
 
@@ -35,7 +36,7 @@ class FirmwareUpdateStatusRepository {
     }
 
     fun finishOtaPreflight() {
-        _status.value = _status.value.copy(isAwaitingOtaStatus = false)
+        _status.update { it.copy(isAwaitingOtaStatus = false) }
     }
 
     fun endOtaUpdate() {
