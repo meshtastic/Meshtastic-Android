@@ -325,8 +325,12 @@ jobs:
             work=$(mktemp -d)
             dpkg-deb -R "$deb" "$work"
             echo "$(basename "$deb") before: $(grep '^Depends:' "$work/DEBIAN/control")"
-            sed -i -E '/^Depends:/ s/(lib[a-z0-9.+-]*)t64([, (]|$)/\1\2/g' "$work/DEBIAN/control"
+            sed -i -E '/^(Depends|Pre-Depends|Recommends):/ s/(lib[a-z0-9.+-]*)t64([, (]|$)/\1\2/g' "$work/DEBIAN/control"
             echo "$(basename "$deb") after:  $(grep '^Depends:' "$work/DEBIAN/control")"
+            if grep -nE '^[A-Za-z-]+:.*\blib[a-z0-9.+-]*t64\b' "$work/DEBIAN/control"; then
+              echo "::error::t64 dependency name survived rewrite in $(basename "$deb") — extend the sed above"
+              exit 1
+            fi
             dpkg-deb -b --root-owner-group "$work" "$deb"
             rm -rf "$work"
           done
