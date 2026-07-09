@@ -51,6 +51,8 @@ import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.proto.AdminMessage
+import org.meshtastic.proto.Channel
+import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.HamParameters
@@ -365,6 +367,25 @@ class RadioControllerImplTest {
         controller.refreshMetadata(destNum = 101)
 
         verifySuspend { commandSender.sendAdmin(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun editLocalSettingsChannelWritesDoNotMirrorToLocalCache() = runTest {
+        val controller = createController(myNodeNum = 1234)
+
+        controller.editLocalSettings {
+            setChannel(Channel(index = 0, role = Channel.Role.PRIMARY, settings = ChannelSettings(name = "A")))
+            setChannel(Channel(index = 1, role = Channel.Role.SECONDARY, settings = ChannelSettings(name = "B")))
+        }
+        testScope.advanceUntilIdle()
+
+        // The channel writes go out as admin packets inside the begin/commit transaction...
+        verifySuspend(atLeast(2)) { commandSender.sendAdmin(any(), any(), any(), any()) }
+        // ...but a transactional channel write must NOT eagerly mirror to the local cache the way one-shot
+        // setRemoteChannel does for the local node. importChannelSet owns the cache and writes it once after commit
+        // (replaceAllSettings), so an interrupted import can't leave partial channels cached. A regression to
+        // per-slot mirroring inside the session would make this call count non-zero.
+        verifySuspend(exactly(0)) { radioConfigRepository.updateChannelSettings(any()) }
     }
 
     @Test

@@ -196,11 +196,16 @@ private fun ChannelSettings.isPlaceholder(): Boolean = name.isNullOrBlank() && p
  * channel cache.
  *
  * Reads the current LoRa config and channel set from [radioConfigRepository]'s flows (avoiding the StateFlow
- * placeholder window) and builds the authoritative replacement list via [getChannelReplacementList]. Firmware defers
- * persisting/reconfiguring until the closing commit, so the whole import applies atomically: an interruption before
- * commit leaves the node's existing config untouched (no cache reconciliation needed), and channels + LoRa land in a
- * single reboot. Writing LoRa inside the same session — mirroring `InstallProfileUseCase` — is why the old pre/post
- * settle delays are gone: the begin/commit boundary is the settle.
+ * placeholder window) and builds the authoritative replacement list via [getChannelReplacementList]. The edit-settings
+ * transaction defers disk persistence, radio reload/reconfiguration, and reboot until the closing commit, so channels +
+ * LoRa land in a single reboot with no per-slot reconfigure to pace against. (Firmware still writes each `set_channel`
+ * into its in-memory channel table as it arrives — the transaction is not a full staging of channel state — but the
+ * expensive persist/reload path runs once at commit.) Writing LoRa inside the same session mirrors
+ * `InstallProfileUseCase` and is why the old pre/post settle delays are gone: the begin/commit boundary is the settle.
+ *
+ * The local cache is commit-shaped: transactional channel writes deliberately do not mirror per slot (see
+ * `AdminControllerImpl.EditSettingsSession.setChannel`), and this function replaces the cached channel list once, after
+ * the session succeeds. An import interrupted before that point leaves the local channel cache untouched.
  *
  * Imported settings are normalized via [normalizeReplacementSettings] before any write or bounds check, so blank
  * placeholder secondaries and semantic duplicates never reach the radio or the local cache.
