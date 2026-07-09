@@ -460,13 +460,13 @@ class MQTTRepositoryImplTest {
     }
 
     @Test
-    fun `PKI payload-less packet is deliverable (guard)`() {
+    fun `PKI payload-less packet is deliverable - guard`() {
         val bytes = envelopeBytes(channelId = "PKI", packet = MeshPacket(from = 1))
         assertFalse(isUndeliverableDownlink(bytes, myId = "!12345678"))
     }
 
     @Test
-    fun `own echo payload-less packet is deliverable (guard)`() {
+    fun `own echo payload-less packet is deliverable - guard`() {
         val bytes = envelopeBytes(gatewayId = "!12345678", packet = MeshPacket(from = 1))
         assertFalse(isUndeliverableDownlink(bytes, myId = "!12345678"))
     }
@@ -484,13 +484,13 @@ class MQTTRepositoryImplTest {
     }
 
     @Test
-    fun `packet-less envelope is deliverable (fail open)`() {
+    fun `packet-less envelope is deliverable - fail open`() {
         val bytes = envelopeBytes(packet = null)
         assertFalse(isUndeliverableDownlink(bytes, myId = "!12345678"))
     }
 
     @Test
-    fun `garbage bytes are deliverable (fail open)`() {
+    fun `garbage bytes are deliverable - fail open`() {
         // Non-protobuf bytes must never be dropped.
         val bytes = byteArrayOf(0xFF.toByte(), 0xFF.toByte(), 0xFF.toByte(), 0x42)
         assertFalse(isUndeliverableDownlink(bytes, myId = "!12345678"))
