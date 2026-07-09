@@ -282,9 +282,11 @@ open class DatabaseManager(
     }
 
     /**
-     * Reopens the active database under [mutex], but only if it hasn't switched since the caller snapshotted it. Emits
-     * the replacement DB BEFORE closing the old pool so [currentDb] Flow collectors can move to the new instance
-     * without seeing a closed-pool error.
+     * Reopens the active database under [mutex], but only if it hasn't switched since the caller snapshotted it.
+     *
+     * The replaced Room instance is intentionally left open for the rest of the process. [currentDb] is a derived
+     * StateFlow, so there is no deterministic handoff point where every app-wide collector has stopped using the old
+     * instance.
      *
      * Returns the reopened DB, or null if another coroutine already switched to a different device.
      */
@@ -300,24 +302,19 @@ open class DatabaseManager(
             return null
         }
 
-        // Remove from cache without closing so getDatabaseBuilder builds a fresh instance.
-        dbCache.remove(expectedDbName)
-
+        // Build a fresh instance directly (not through getOrPut) before touching the cache,
+        // so a failed or cancelled build leaves the existing cache entry and _currentDb consistent.
         val reopened = withContext(dispatchers.io) { getDatabaseBuilder(expectedDbName).build() }
         dbCache[expectedDbName] = reopened
         _currentDb.value = reopened
 
-        // Close the replaced instance AFTER emitting the replacement so flatMapLatest collectors
-        // have already moved to the new DB before the old pool closes.
-        managerScope.launch(dispatchers.io) {
-            runCatching { expectedDb.close() }
-                .onFailure {
-                    Logger.w(it) { "Failed to close replaced active database ${anonymizeDbName(expectedDbName)}" }
-                }
-                .onSuccess {
-                    Logger.d { "Closed replaced active database ${anonymizeDbName(expectedDbName)} after reopen" }
-                }
-        }
+        // Intentionally do not close expectedDb here. The public currentDb Flow is derived from
+        // _currentDb through stateIn, so downstream flatMapLatest collectors may still be using the
+        // replaced Room instance after this function emits the reopened DB. Closing the old pool here
+        // can surface "Connection pool is closed" to app-wide DB observers that do not have closed-pool
+        // recovery. This mirrors switchActiveDatabase's no-sync-close discipline; the leaked pool is
+        // bounded by rare active-DB reopen recovery events and is reclaimed on process death. Revisit
+        // once switching DB observers have explicit closed-pool resubscribe/retry handling.
 
         reopened
     }
@@ -355,7 +352,7 @@ open class DatabaseManager(
         }
     }
 
-    @Suppress("ReturnCount", "ThrowsCount", "TooGenericExceptionCaught")
+    @Suppress("ReturnCount", "ThrowsCount", "TooGenericExceptionCaught", "CyclomaticComplexMethod")
     private suspend fun <T> withCurrentDb(block: suspend (MeshtasticDatabase) -> T): T? {
         val db = _currentDb.value ?: return null
         val active = currentDbName
@@ -380,12 +377,19 @@ open class DatabaseManager(
                 }
             }
 
-            // Same active DB but Room's connection pool is wedged — close and reopen once.
+            // Same active DB but Room's connection pool is wedged — reopen onto a fresh active instance once.
             if (retryDb === db && isDbPoolAcquireTimeoutException(e)) {
-                val reopened = reopenActiveDatabaseIfStillCurrent(db, active) ?: throw e
-                Logger.w { "withDb: reopened active DB after transient Room connection-pool timeout" }
+                val reopened = reopenActiveDatabaseIfStillCurrent(db, active)
+                val recoveredDb = reopened ?: _currentDb.value?.takeIf { it !== db } ?: throw e
+                Logger.w {
+                    if (reopened != null) {
+                        "withDb: reopened active DB after transient Room connection-pool timeout"
+                    } else {
+                        "withDb: active DB switched during timeout recovery; retrying with current DB"
+                    }
+                }
                 return try {
-                    runCancellableDbBlock(reopened, block)
+                    runCancellableDbBlock(recoveredDb, block)
                 } catch (retryCancel: CancellationException) {
                     throw retryCancel
                 } catch (retryEx: Exception) {
@@ -406,20 +410,18 @@ open class DatabaseManager(
         return result
     }
 
-    private fun isDbClosedException(e: Exception): Boolean = generateSequence<Throwable>(e) { it.cause }
-        .any { throwable ->
-            val msg = throwable.message?.lowercase() ?: return@any false
-            val hasDbContext = DB_TERMS.any { it in msg }
-            // Room can surface switched/pool-churn failures as SQLite BUSY/acquire timeout, not only "closed".
-            ("closed" in msg && hasDbContext) || (TRANSIENT_DB_POOL_TERMS.any { it in msg } && hasDbContext)
-        }
+    private fun isDbClosedException(e: Exception): Boolean = isDbPoolAcquireTimeoutException(e) ||
+        generateSequence<Throwable>(e) { it.cause }
+            .any { throwable ->
+                val msg = throwable.message?.lowercase() ?: return@any false
+                val hasDbContext = DB_TERMS.any { it in msg }
+                ("closed" in msg && hasDbContext) || "database is locked" in msg || "sqlite_busy" in msg
+            }
 
     internal companion object {
         private const val BACKFILL_COLD_START_DELAY_MS = 2_000L
         private const val WITH_DB_SLOW_OPERATION_MS = 1_000L
         val DB_TERMS = listOf("pool", "database", "connection", "sqlite")
-        val TRANSIENT_DB_POOL_TERMS =
-            listOf("timed out attempting to acquire", "error code: 5", "database is locked", "sqlite_busy")
 
         private const val ROOM_POOL_ACQUIRE_TIMEOUT_PHRASE = "timed out attempting to acquire"
         private const val ROOM_READER_CONNECTION_PHRASE = "reader connection"
@@ -431,8 +433,7 @@ open class DatabaseManager(
          */
         private fun isRoomPoolAcquireTimeoutMessage(message: String): Boolean =
             ROOM_POOL_ACQUIRE_TIMEOUT_PHRASE in message &&
-                (ROOM_READER_CONNECTION_PHRASE in message || ROOM_WRITER_CONNECTION_PHRASE in message) &&
-                DB_TERMS.any { it in message }
+                (ROOM_READER_CONNECTION_PHRASE in message || ROOM_WRITER_CONNECTION_PHRASE in message)
 
         fun isDbPoolAcquireTimeoutException(e: Exception): Boolean = generateSequence<Throwable>(e) { it.cause }
             .any { throwable ->
