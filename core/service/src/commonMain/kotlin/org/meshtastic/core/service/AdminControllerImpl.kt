@@ -224,6 +224,8 @@ internal class AdminControllerImpl(
         commandSender.sendAdmin(destNum) { AdminMessage(commit_edit_settings = true) }
     }
 
+    override suspend fun editLocalSettings(block: suspend AdminEditScope.() -> Unit) = editSettings(myNodeNum, block)
+
     /** Binds the [AdminEditScope] operations to a fixed destination, delegating to this controller's set* methods. */
     private inner class EditSettingsSession(private val destNum: Int) : AdminEditScope {
         override suspend fun setOwner(user: User) = setOwner(destNum, user, commandSender.generatePacketId())
@@ -233,8 +235,12 @@ internal class AdminControllerImpl(
         override suspend fun setModuleConfig(config: ModuleConfig) =
             setModuleConfig(destNum, config, commandSender.generatePacketId())
 
+        // Unlike the one-shot setRemoteChannel, a transactional channel write does NOT mirror to the local cache per
+        // slot: importChannelSet owns the cache and writes it once after commit (replaceAllSettings), so an import
+        // interrupted before commit leaves the local channel cache untouched. (Firmware still writes each set_channel
+        // into its in-memory channel table on arrival; only disk persist/reload/reboot is deferred to commit.)
         override suspend fun setChannel(channel: Channel) =
-            setRemoteChannel(destNum, channel, commandSender.generatePacketId())
+            commandSender.sendAdmin(destNum) { AdminMessage(set_channel = channel) }
 
         override suspend fun setFixedPosition(position: Position) =
             this@AdminControllerImpl.setFixedPosition(destNum, position)

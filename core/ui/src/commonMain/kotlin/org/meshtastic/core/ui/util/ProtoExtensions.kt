@@ -19,7 +19,6 @@ package org.meshtastic.core.ui.util
 import androidx.compose.runtime.Composable
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import okio.ByteString
@@ -36,19 +35,13 @@ import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.Position
-import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
-import kotlin.time.Duration.Companion.seconds
 import org.meshtastic.core.model.Channel as ModelChannel
 
 private const val SECONDS_TO_MILLIS = 1000L
 
 // Firmware channel files expose eight slots: one primary plus up to seven secondary channels.
 private const val CHANNEL_REPLACEMENT_SLOT_COUNT = 8
-
-// Full channel replacement writes need conservative settle windows so hardware can persist each slot.
-private val CHANNEL_REPLACEMENT_WRITE_DELAY = 1.seconds
-private val LORA_CONFIG_SETTLE_DELAY = 2.seconds
 
 @Composable
 fun Position.formatPositionTime(): String {
@@ -198,37 +191,38 @@ fun normalizeReplacementSettings(
 private fun ChannelSettings.isPlaceholder(): Boolean = name.isNullOrBlank() && psk.size == 0
 
 /**
- * Applies an imported [ChannelSet] as an authoritative replacement to the radio and local cache.
+ * Imports a [ChannelSet] as an authoritative REPLACE: writes every channel and — when present and actually different —
+ * the imported LoRa config, all inside one [RadioController.editLocalSettings] transaction, then replaces the local
+ * channel cache.
  *
  * Reads the current LoRa config and channel set from [radioConfigRepository]'s flows (avoiding the StateFlow
- * placeholder window), builds the authoritative replacement list via [getChannelReplacementList], enqueues each channel
- * write to the radio via [radioController], pauses between writes so the radio can persist and reconfigure each slot,
- * then atomically replaces the local cached settings.
+ * placeholder window) and builds the authoritative replacement list via [getChannelReplacementList]. The edit-settings
+ * transaction defers disk persistence, radio reload/reconfiguration, and reboot until the closing commit, so channels +
+ * LoRa land in a single reboot with no per-slot reconfigure to pace against. (Firmware still writes each `set_channel`
+ * into its in-memory channel table as it arrives — the transaction is not a full staging of channel state — but the
+ * expensive persist/reload path runs once at commit.) Writing LoRa inside the same session mirrors
+ * `InstallProfileUseCase` and is why the old pre/post settle delays are gone: the begin/commit boundary is the settle.
  *
- * setLocalChannel returns once the packet is enqueued, not after firmware ACK. The pacing avoids enqueueing a complete
- * channel replacement plus LoRa reconfiguration faster than real hardware can materialize the later channel slots. If
- * the sequence is interrupted after one or more successful writes, the local cache is reconciled to the successfully
- * enqueued channel settings before the original cancellation or failure continues.
+ * The local channel cache is commit-shaped: transactional channel writes deliberately do not mirror per slot (see
+ * `AdminControllerImpl.EditSettingsSession.setChannel`), and this function replaces the cached channel list once, after
+ * the session succeeds — so an import interrupted before that point leaves the local channel cache untouched. (The
+ * imported LoRa config is the one exception: it still writes through the cache-mirroring `setConfig`, so its local
+ * cache update is not itself deferred to commit — a single trailing write that self-heals on the device's next config
+ * re-send. Making `setConfig` transaction-aware is future work.)
  *
  * Imported settings are normalized via [normalizeReplacementSettings] before any write or bounds check, so blank
  * placeholder secondaries and semantic duplicates never reach the radio or the local cache.
  *
- * Does NOT handle LoRa config — callers are responsible for comparing and sending `lora_config` if present.
- *
- * @param channelSet The imported [ChannelSet] to apply as a replacement.
- * @param radioController The [RadioController] used to enqueue channel writes.
- * @param radioConfigRepository The [RadioConfigRepository] providing the current channel flow and cache.
- * @param writeDelay Delay after each channel write. Exposed for fast unit tests.
- * @param delayFn Delay implementation. Exposed for fast unit tests.
- * @return The device's current LoRa config snapshot used by callers to compare against an imported LoRa config.
+ * @param channelSet The imported [ChannelSet] to apply as a replacement. Its `lora_config`, if present and different
+ *   from the device's current LoRa config, is written inside the same transaction.
+ * @param radioController The [RadioController] used to run the edit transaction.
+ * @param radioConfigRepository The [RadioConfigRepository] providing the current channel/LoRa flows and cache.
  */
-suspend fun applyReplacementChannelSet(
+suspend fun importChannelSet(
     channelSet: ChannelSet,
     radioController: RadioController,
     radioConfigRepository: RadioConfigRepository,
-    writeDelay: Duration = CHANNEL_REPLACEMENT_WRITE_DELAY,
-    delayFn: suspend (Duration) -> Unit = { delay(it) },
-): Config.LoRaConfig? {
+) {
     // Resolve the LoRa preset used for semantic identity: prefer the imported config, fall back to the device's current
     // local config so duplicate detection stays correct when the import omits lora_config (e.g. a non-default preset).
     val currentLoraConfig = radioConfigRepository.localConfigFlow.first().lora
@@ -245,82 +239,25 @@ suspend fun applyReplacementChannelSet(
             minimumSlotCount = CHANNEL_REPLACEMENT_SLOT_COUNT,
             maximumSlotCount = CHANNEL_REPLACEMENT_SLOT_COUNT,
         )
+    // Only write LoRa when the import carries one that actually differs from the device — avoids a redundant
+    // reconfigure.
+    val importedLoraConfig = channelSet.lora_config?.takeIf { it != currentLoraConfig }
     Logger.i {
         "Applying imported channel replacement writes=${replacements.size} " +
-            "importedSettings=${channelSet.settings.size} normalizedSettings=${normalizedSettings.size}"
+            "importedSettings=${channelSet.settings.size} normalizedSettings=${normalizedSettings.size} " +
+            "writesLora=${importedLoraConfig != null}"
     }
-    val appliedSettings = currentSettings.take(CHANNEL_REPLACEMENT_SLOT_COUNT).toMutableList()
-    var appliedWriteCount = 0
-    var replacementComplete = false
-    try {
+    radioController.editLocalSettings {
         for (channel in replacements) {
             Logger.i {
                 "Writing imported channel index=${channel.index} role=${channel.role} " +
                     "hasName=${channel.settings?.name?.isNotBlank() == true}"
             }
-            radioController.setLocalChannel(channel)
-            while (appliedSettings.size <= channel.index) {
-                appliedSettings.add(ChannelSettings())
-            }
-            appliedSettings[channel.index] =
-                if (channel.role == Channel.Role.DISABLED) {
-                    ChannelSettings()
-                } else {
-                    channel.settings ?: ChannelSettings()
-                }
-            appliedWriteCount++
-            delayFn(writeDelay)
+            setChannel(channel)
         }
-        replacementComplete = true
-    } finally {
-        if (!replacementComplete) {
-            radioConfigRepository.reconcileInterruptedReplacement(
-                appliedWriteCount = appliedWriteCount,
-                totalWriteCount = replacements.size,
-                appliedSettings = appliedSettings,
-                normalizedSettings = normalizedSettings,
-            )
-        }
+        importedLoraConfig?.let { setConfig(Config(lora = it)) }
     }
     withContext(NonCancellable) { radioConfigRepository.replaceAllSettings(normalizedSettings) }
-    return currentLoraConfig
-}
-
-private suspend fun RadioConfigRepository.reconcileInterruptedReplacement(
-    appliedWriteCount: Int,
-    totalWriteCount: Int,
-    appliedSettings: List<ChannelSettings>,
-    normalizedSettings: List<ChannelSettings>,
-) {
-    if (appliedWriteCount == 0) return
-    val replacementSettings = if (appliedWriteCount == totalWriteCount) normalizedSettings else appliedSettings
-    Logger.w {
-        "Reconciling interrupted channel replacement appliedWrites=$appliedWriteCount totalWrites=$totalWriteCount"
-    }
-    withContext(NonCancellable) { replaceAllSettings(replacementSettings) }
-}
-
-/**
- * Applies an imported LoRa config after channel replacement writes have had time to settle.
- *
- * LoRa reconfiguration is expensive on firmware and can race with channel persistence if sent immediately after a full
- * channel replacement. The pre/post settle delays give the radio time to materialize the imported channels before and
- * after the LoRa write.
- */
-suspend fun applyImportedLoraConfigAfterChannelReplacement(
-    importedLoraConfig: Config.LoRaConfig?,
-    currentLoraConfig: Config.LoRaConfig?,
-    radioController: RadioController,
-    settleDelay: Duration = LORA_CONFIG_SETTLE_DELAY,
-    delayFn: suspend (Duration) -> Unit = { delay(it) },
-) {
-    if (importedLoraConfig == null || currentLoraConfig == importedLoraConfig) return
-
-    Logger.i { "Settling before imported LoRa config write" }
-    delayFn(settleDelay)
-    radioController.setLocalConfig(Config(lora = importedLoraConfig))
-    Logger.i { "Settling after imported LoRa config write" }
-    delayFn(settleDelay)
 }
 
 /**
