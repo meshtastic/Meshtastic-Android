@@ -202,6 +202,8 @@ class SharedRadioInterfaceService(
      */
     @Volatile private var connectionRequested = false
 
+    private val gattCacheInvalidationRequested = atomic(false)
+
     /** Prevents concurrent liveness-induced transport restarts from stacking. */
     private val isRestarting = atomic(false)
 
@@ -466,6 +468,13 @@ class SharedRadioInterfaceService(
             isRestarting.value = false
         }
     }
+
+    override fun requestGattCacheInvalidationOnNextConnect() {
+        gattCacheInvalidationRequested.value = true
+        Logger.d { "GATT cache invalidation requested for next BLE connect" }
+    }
+
+    override fun consumeGattCacheInvalidationRequest(): Boolean = gattCacheInvalidationRequested.getAndSet(false)
 
     override fun isMockTransport(): Boolean = transportFactory.isMockTransport()
 
