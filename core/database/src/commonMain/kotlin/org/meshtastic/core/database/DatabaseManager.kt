@@ -282,8 +282,11 @@ open class DatabaseManager(
     }
 
     /**
-     * Closes and reopens the active database under [mutex], but only if it hasn't switched since the caller snapshotted
-     * it. Returns the reopened DB, or null if another coroutine already switched to a different device.
+     * Reopens the active database under [mutex], but only if it hasn't switched since the caller snapshotted it. Emits
+     * the replacement DB BEFORE closing the old pool so [currentDb] Flow collectors can move to the new instance
+     * without seeing a closed-pool error.
+     *
+     * Returns the reopened DB, or null if another coroutine already switched to a different device.
      */
     private suspend fun reopenActiveDatabaseIfStillCurrent(
         expectedDb: MeshtasticDatabase,
@@ -291,10 +294,31 @@ open class DatabaseManager(
     ): MeshtasticDatabase? = mutex.withLock {
         if (_currentDb.value !== expectedDb || currentDbName != expectedDbName) return null
 
-        closeCachedDatabase(expectedDbName)
-        val reopened = withContext(dispatchers.io) { getOrOpenDatabase(expectedDbName) }
+        val cached = dbCache[expectedDbName]
+        if (cached !== expectedDb) {
+            Logger.w { "withDb: active DB cache entry changed before reopen; skipping active DB reopen" }
+            return null
+        }
+
+        // Remove from cache without closing so getDatabaseBuilder builds a fresh instance.
+        dbCache.remove(expectedDbName)
+
+        val reopened = withContext(dispatchers.io) { getDatabaseBuilder(expectedDbName).build() }
+        dbCache[expectedDbName] = reopened
         _currentDb.value = reopened
-        currentDbName = expectedDbName
+
+        // Close the replaced instance AFTER emitting the replacement so flatMapLatest collectors
+        // have already moved to the new DB before the old pool closes.
+        managerScope.launch(dispatchers.io) {
+            runCatching { expectedDb.close() }
+                .onFailure {
+                    Logger.w(it) { "Failed to close replaced active database ${anonymizeDbName(expectedDbName)}" }
+                }
+                .onSuccess {
+                    Logger.d { "Closed replaced active database ${anonymizeDbName(expectedDbName)} after reopen" }
+                }
+        }
+
         reopened
     }
 
@@ -397,12 +421,23 @@ open class DatabaseManager(
         val TRANSIENT_DB_POOL_TERMS =
             listOf("timed out attempting to acquire", "error code: 5", "database is locked", "sqlite_busy")
 
+        private const val ROOM_POOL_ACQUIRE_TIMEOUT_PHRASE = "timed out attempting to acquire"
+        private const val ROOM_READER_CONNECTION_PHRASE = "reader connection"
+        private const val ROOM_WRITER_CONNECTION_PHRASE = "writer connection"
+
+        /**
+         * Room KMP currently exposes pool-acquire timeouts as exception message text instead of a stable common typed
+         * signal. Keep this fallback narrow so BLE/GATT/transport connection errors do not trigger DB reopen recovery.
+         */
+        private fun isRoomPoolAcquireTimeoutMessage(message: String): Boolean =
+            ROOM_POOL_ACQUIRE_TIMEOUT_PHRASE in message &&
+                (ROOM_READER_CONNECTION_PHRASE in message || ROOM_WRITER_CONNECTION_PHRASE in message) &&
+                DB_TERMS.any { it in message }
+
         fun isDbPoolAcquireTimeoutException(e: Exception): Boolean = generateSequence<Throwable>(e) { it.cause }
             .any { throwable ->
                 val msg = throwable.message?.lowercase() ?: return@any false
-                "timed out attempting to acquire" in msg &&
-                    ("reader connection" in msg || "writer connection" in msg) &&
-                    DB_TERMS.any { it in msg }
+                isRoomPoolAcquireTimeoutMessage(msg)
             }
     }
 
