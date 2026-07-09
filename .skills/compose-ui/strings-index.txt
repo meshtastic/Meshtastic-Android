@@ -362,6 +362,7 @@ device_theme_language
 dew_point
 direct_message
 direct_message_key
+direct_messages
 discard_changes
 disconnect
 disconnected

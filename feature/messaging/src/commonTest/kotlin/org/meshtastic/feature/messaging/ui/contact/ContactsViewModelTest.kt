@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.messaging.ui.contact
 
+import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
@@ -60,6 +61,7 @@ class ContactsViewModelTest {
 
         viewModel =
             ContactsViewModel(
+                savedStateHandle = SavedStateHandle(),
                 nodeRepository = nodeRepository,
                 packetRepository = packetRepository,
                 radioConfigRepository = radioConfigRepository,
@@ -84,7 +86,13 @@ class ContactsViewModelTest {
 
         // Re-init VM
         viewModel =
-            ContactsViewModel(nodeRepository, packetRepository, radioConfigRepository, connectionStateProvider)
+            ContactsViewModel(
+                SavedStateHandle(),
+                nodeRepository,
+                packetRepository,
+                radioConfigRepository,
+                connectionStateProvider,
+            )
 
         viewModel.unreadCountTotal.test {
             assertEquals(0, awaitItem())

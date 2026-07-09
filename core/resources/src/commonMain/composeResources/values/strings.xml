@@ -386,6 +386,7 @@
     <string name="dew_point">Dew Point</string>
     <string name="direct_message">Direct Message</string>
     <string name="direct_message_key">Direct Message Key</string>
+    <string name="direct_messages">Direct Messages</string>
     <string name="discard_changes">Discard</string>
     <string name="disconnect">Disconnect</string>
     <string name="disconnected">Disconnected</string>
