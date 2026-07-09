@@ -12,6 +12,9 @@ on:
       run_coverage:
         type: boolean
         default: true
+      run_desktop_builds:
+        type: boolean
+        default: false
       run_desktop_flatpak_src:
         type: boolean
         default: false

@@ -17,14 +17,18 @@ concurrency:
 jobs:
   # Every commit on main arrives via the merge queue, which already ran lint, tests,
   # screenshot validation, and rb-check on this exact merge commit. Re-running them here
-  # would be pure duplication — this workflow only needs to build the debug APKs for the
-  # snapshot release below (run_lint: false also skips screenshot-check and rb-check).
+  # would be pure duplication — this workflow builds the debug APKs for the snapshot
+  # release below (run_lint: false also skips screenshot-check and rb-check) plus the
+  # desktop distributables. Desktop packaging runs here post-merge rather than in the
+  # merge queue: :desktopApp:test in the queue's shard-app already covers compilation,
+  # and the 4-OS matrix (macos/windows queue times) would slow every merge.
   validate-and-build:
     if: github.repository == 'meshtastic/Meshtastic-Android'
     uses: ./.github/workflows/reusable-check.yml
     with:
       run_lint: false
       run_unit_tests: false
+      run_desktop_builds: true
       upload_artifacts: true
     secrets: inherit
 
@@ -34,7 +38,10 @@ jobs:
   # expire after 7 days).
   publish-snapshot:
     needs: validate-and-build
-    if: github.repository == 'meshtastic/Meshtastic-Android'
+    # !cancelled(): a desktop-matrix failure fails validate-and-build as a whole, but the
+    # Android APKs may still have built fine — attempt the snapshot regardless. If the
+    # APK build itself failed, the artifact download below fails and this job goes red.
+    if: github.repository == 'meshtastic/Meshtastic-Android' && !cancelled()
     runs-on: ubuntu-24.04-arm
     permissions:
       contents: write

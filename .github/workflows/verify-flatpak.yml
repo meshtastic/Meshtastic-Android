@@ -8,6 +8,11 @@ on:
       - 'build.gradle.kts'
       - 'settings.gradle.kts'
       - '.github/workflows/verify-flatpak.yml'
+      # The desktop module's build config shapes the uber jar the flatpak wraps.
+      - 'desktopApp/**'
+      # The offline manifest pins the Gradle distribution independently of the wrapper —
+      # a wrapper bump without a manifest update breaks the offline build silently.
+      - 'gradle/wrapper/**'
   workflow_dispatch:
 
 permissions:
