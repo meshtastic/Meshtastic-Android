@@ -26,9 +26,11 @@ import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.repository.FirmwareUpdateStatusRepository
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.RadioPrefs
+import org.meshtastic.feature.firmware.ota.DefaultEsp32OtaUpdateEnvironment
 import org.meshtastic.feature.firmware.ota.Esp32OtaUpdateHandler
 import org.meshtastic.feature.firmware.ota.dfu.SecureDfuHandler
 import kotlin.test.Test
@@ -91,6 +93,8 @@ class DefaultFirmwareUpdateManagerTest {
             firmwareFileHandler = fileHandler,
             radioController = radioController,
             nodeRepository = nodeRepository,
+            firmwareUpdateStatusRepository = FirmwareUpdateStatusRepository(),
+            environment = DefaultEsp32OtaUpdateEnvironment(),
             bleScanner = bleScanner,
             bleConnectionFactory = bleConnectionFactory,
             dispatchers = dispatchers,

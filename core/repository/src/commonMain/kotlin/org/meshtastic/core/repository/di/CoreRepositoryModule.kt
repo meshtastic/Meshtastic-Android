@@ -20,6 +20,7 @@ import org.koin.core.annotation.Module
 import org.koin.core.annotation.Provided
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.di.ApplicationCoroutineScope
+import org.meshtastic.core.repository.FirmwareUpdateStatusRepository
 import org.meshtastic.core.repository.HomoglyphPrefs
 import org.meshtastic.core.repository.MeshBeaconPrefs
 import org.meshtastic.core.repository.MeshBeaconRepository
@@ -37,6 +38,9 @@ class CoreRepositoryModule {
         @Provided meshBeaconPrefs: MeshBeaconPrefs,
         @Provided applicationScope: ApplicationCoroutineScope,
     ): MeshBeaconRepository = MeshBeaconRepository(meshBeaconPrefs, applicationScope)
+
+    @Single
+    fun provideFirmwareUpdateStatusRepository(): FirmwareUpdateStatusRepository = FirmwareUpdateStatusRepository()
 
     @Single
     fun provideSendMessageUseCase(
