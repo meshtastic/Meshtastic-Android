@@ -50,9 +50,9 @@ import org.meshtastic.core.resources.ic_meshtastic
 import org.meshtastic.core.resources.navigate_back
 import org.meshtastic.core.ui.icon.ArrowBack
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.theme.LocalEventTheme
 import org.meshtastic.core.ui.util.EventBrandingIcon
 import org.meshtastic.core.ui.util.LocalEventBranding
-import org.meshtastic.core.ui.util.accentColorOrNull
 
 /** Alpha for the ambient event accent wash over the app bar — subtle enough to keep title text legible. */
 private const val EVENT_ACCENT_ALPHA = 0.12f
@@ -71,8 +71,9 @@ fun MainAppBar(
     onClickChip: (Node) -> Unit,
     brandingContent: @Composable () -> Unit = { EventAwareBranding() },
 ) {
-    // Ambient event theming: when connected to event firmware, tint the bar with a faint wash of its accent color.
-    val accent = LocalEventBranding.current?.accentColorOrNull()
+    // Ambient event theming: when connected to event firmware (and not opted out), tint the bar with a faint wash of
+    // the edition's accent color. Gated with the app-wide fonts via LocalEventTheme / the "Use event theme" toggle.
+    val accent = LocalEventTheme.current?.accent
     val colors =
         if (accent != null) {
             TopAppBarDefaults.topAppBarColors(

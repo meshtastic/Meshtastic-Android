@@ -18,6 +18,7 @@ package org.meshtastic.core.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import org.meshtastic.core.model.EventFirmwareFonts
@@ -28,33 +29,37 @@ import org.meshtastic.core.model.EventFirmwareFonts
 data class EventFonts(val heading: FontFamily? = null, val body: FontFamily? = null)
 
 /**
+ * The ambient event branding to apply **app-wide** — a subtle [accent] wash and/or the event [fonts]. Populated at the
+ * composition root only when a device is on event firmware and the user hasn't opted out via [LocalEventThemeToggle];
+ * `null` everywhere else. [AppTheme] reads [fonts] to swap [AppTypography]; the app bar reads [accent] for its wash.
+ * The event info sheet and branding icon are driven separately by
+ * [LocalEventBranding][org.meshtastic.core.ui.util.LocalEventBranding] so they stay available even when opted out.
+ */
+data class EventTheme(val accent: Color? = null, val fonts: EventFonts? = null)
+
+/**
  * Resolves an edition's [EventFirmwareFonts] (Google Font *family names*, e.g. `Lato`) into loadable [FontFamily]s.
  *
  * The default binding returns `null` (no custom fonts). The **Google** flavor binds a downloadable-fonts
  * implementation; **F-Droid** keeps the null default (no Play font provider). Resolved via Koin and applied at the app
- * theme via [LocalEventTypographyFonts].
+ * theme via [LocalEventTheme].
  */
 fun interface EventFontResolver {
     fun resolve(fonts: EventFirmwareFonts?): EventFonts?
 }
 
+/** The applied ambient event theme, or `null` for the default look. See [EventTheme]. */
+@Suppress("CompositionLocalAllowlist")
+val LocalEventTheme = compositionLocalOf<EventTheme?> { null }
+
 /**
- * The event typeface to apply app-wide, or `null` for the default typography. Populated at the composition root only
- * when a device is on event firmware, the fonts resolved, and the user hasn't opted out via [LocalEventFontsToggle].
- * [AppTheme] reads this to swap [AppTypography].
+ * Sheet-level opt-out for the ambient event theme (accent wash + fonts). Shown whenever the event info sheet is open
+ * (which only happens for an active event, and every event carries an accent), so no availability gating is needed.
  */
-@Suppress("CompositionLocalAllowlist")
-val LocalEventTypographyFonts = compositionLocalOf<EventFonts?> { null }
-
-/** Sheet-level opt-out for event fonts. [available] gates whether the toggle is shown at all (false on F-Droid). */
-data class EventFontsToggle(
-    val available: Boolean = false,
-    val enabled: Boolean = true,
-    val onChange: (Boolean) -> Unit = {},
-)
+data class EventThemeToggle(val enabled: Boolean = true, val onChange: (Boolean) -> Unit = {})
 
 @Suppress("CompositionLocalAllowlist")
-val LocalEventFontsToggle = compositionLocalOf { EventFontsToggle() }
+val LocalEventThemeToggle = compositionLocalOf { EventThemeToggle() }
 
 private fun TextStyle.family(family: FontFamily?): TextStyle = if (family != null) copy(fontFamily = family) else this
 

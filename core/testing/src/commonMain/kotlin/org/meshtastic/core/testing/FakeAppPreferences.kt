@@ -151,10 +151,10 @@ class FakeUiPrefs : UiPrefs {
         showQuickChat.value = show
     }
 
-    override val eventFontsEnabled = MutableStateFlow(true)
+    override val eventThemeEnabled = MutableStateFlow(true)
 
-    override fun setEventFontsEnabled(enabled: Boolean) {
-        eventFontsEnabled.value = enabled
+    override fun setEventThemeEnabled(enabled: Boolean) {
+        eventThemeEnabled.value = enabled
     }
 
     override val bleAutoScan = MutableStateFlow(false)

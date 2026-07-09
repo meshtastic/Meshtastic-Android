@@ -543,7 +543,7 @@ establishing_session
 ethernet_config
 ethernet_enabled
 ethernet_ip
-event_use_event_fonts
+event_use_event_theme
 exchange_position
 expand_chart
 expanded

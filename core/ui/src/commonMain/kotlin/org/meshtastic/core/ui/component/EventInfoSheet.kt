@@ -51,13 +51,13 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.EventFirmwareEdition
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.event_use_event_fonts
+import org.meshtastic.core.resources.event_use_event_theme
 import org.meshtastic.core.ui.icon.CalendarMonth
 import org.meshtastic.core.ui.icon.ChevronRight
 import org.meshtastic.core.ui.icon.LinkIcon
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Place
-import org.meshtastic.core.ui.theme.LocalEventFontsToggle
+import org.meshtastic.core.ui.theme.LocalEventThemeToggle
 import org.meshtastic.core.ui.util.EventBrandingIcon
 import org.meshtastic.core.ui.util.accentColorOrNull
 
@@ -98,29 +98,28 @@ fun EventInfoSheet(edition: EventFirmwareEdition, onDismiss: () -> Unit) {
                     }
                 }
 
-                // Only shown when the event actually ships custom fonts and the platform can load them (Google flavor).
-                val fontsToggle = LocalEventFontsToggle.current
-                if (fontsToggle.available) {
-                    HorizontalDivider()
-                    Row(
-                        modifier =
-                        Modifier.fillMaxWidth()
-                            .toggleable(
-                                value = fontsToggle.enabled,
-                                onValueChange = fontsToggle.onChange,
-                                role = Role.Switch,
-                            ),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.event_use_event_fonts),
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.weight(1f),
-                        )
-                        // Row owns the toggle; null keeps the Switch visual-only (no double-fire).
-                        Switch(checked = fontsToggle.enabled, onCheckedChange = null)
-                    }
+                // Opt-out for the ambient event theme (accent wash + app-wide fonts). Always shown — the sheet only
+                // opens for an active event, so there's always a theme to govern.
+                val themeToggle = LocalEventThemeToggle.current
+                HorizontalDivider()
+                Row(
+                    modifier =
+                    Modifier.fillMaxWidth()
+                        .toggleable(
+                            value = themeToggle.enabled,
+                            onValueChange = themeToggle.onChange,
+                            role = Role.Switch,
+                        ),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = stringResource(Res.string.event_use_event_theme),
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.weight(1f),
+                    )
+                    // Row owns the toggle; null keeps the Switch visual-only (no double-fire).
+                    Switch(checked = themeToggle.enabled, onCheckedChange = null)
                 }
             }
         }

@@ -71,9 +71,10 @@ import org.meshtastic.core.service.MeshService
 import org.meshtastic.core.service.startService
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.EventFontResolver
-import org.meshtastic.core.ui.theme.EventFontsToggle
-import org.meshtastic.core.ui.theme.LocalEventFontsToggle
-import org.meshtastic.core.ui.theme.LocalEventTypographyFonts
+import org.meshtastic.core.ui.theme.EventTheme
+import org.meshtastic.core.ui.theme.EventThemeToggle
+import org.meshtastic.core.ui.theme.LocalEventTheme
+import org.meshtastic.core.ui.theme.LocalEventThemeToggle
 import org.meshtastic.core.ui.theme.MODE_DYNAMIC
 import org.meshtastic.core.ui.util.LocalAnalyticsIntroProvider
 import org.meshtastic.core.ui.util.LocalBarcodeScannerProvider
@@ -92,6 +93,7 @@ import org.meshtastic.core.ui.util.LocalSitePlannerAvailable
 import org.meshtastic.core.ui.util.LocalTracerouteMapOverlayInsetsProvider
 import org.meshtastic.core.ui.util.LocalTracerouteMapProvider
 import org.meshtastic.core.ui.util.LocalTracerouteMapScreenProvider
+import org.meshtastic.core.ui.util.accentColorOrNull
 import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.feature.connections.NO_DEVICE_SELECTED
@@ -198,20 +200,23 @@ class MainActivity : AppCompatActivity() {
     @Composable
     private fun AppCompositionLocals(content: @Composable () -> Unit) {
         val eventEdition by model.eventEdition.collectAsStateWithLifecycle()
-        val eventFontsEnabled by model.eventFontsEnabled.collectAsStateWithLifecycle()
+        val eventThemeEnabled by model.eventThemeEnabled.collectAsStateWithLifecycle()
         val eventFontResolver = koinInject<EventFontResolver>()
-        // Resolve once per edition; null on F-Droid / non-event / editions without fonts.
+        // Resolve the ambient event theme once per edition: an accent wash (works on any flavor) and/or downloadable
+        // fonts (Google flavor only). Applied app-wide only while on event firmware and not opted out.
+        val eventAccent = eventEdition?.accentColorOrNull()
         val resolvedEventFonts =
             remember(eventEdition, eventFontResolver) { eventFontResolver.resolve(eventEdition?.theme?.fonts) }
         CompositionLocalProvider(
             LocalEventBranding provides eventEdition,
-            LocalEventTypographyFonts provides resolvedEventFonts?.takeIf { eventFontsEnabled },
-            LocalEventFontsToggle provides
-                EventFontsToggle(
-                    available = resolvedEventFonts != null,
-                    enabled = eventFontsEnabled,
-                    onChange = model::setEventFontsEnabled,
-                ),
+            LocalEventTheme provides
+                if (eventThemeEnabled && eventEdition != null) {
+                    EventTheme(accent = eventAccent, fonts = resolvedEventFonts)
+                } else {
+                    null
+                },
+            LocalEventThemeToggle provides
+                EventThemeToggle(enabled = eventThemeEnabled, onChange = model::setEventThemeEnabled),
             LocalBarcodeScannerProvider provides { onResult -> rememberBarcodeScanner(onResult) },
             LocalNfcScannerProvider provides { onResult, onDisabled -> NfcScannerEffect(onResult, onDisabled) },
             LocalNfcWriterProvider provides { url, onResult, onDisabled -> NfcWriterEffect(url, onResult, onDisabled) },

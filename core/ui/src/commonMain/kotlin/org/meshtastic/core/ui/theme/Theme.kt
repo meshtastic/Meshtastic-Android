@@ -133,9 +133,9 @@ fun AppTheme(
             null
         } ?: if (darkTheme) darkScheme else lightScheme
 
-    // When a device is on event firmware (and fonts are available + not opted out), swap the whole typescale to the
-    // event typeface. Null everywhere else (desktop, F-Droid, non-event) → default typography.
-    val eventFonts = LocalEventTypographyFonts.current
+    // When a device is on event firmware (and the event theme isn't opted out), swap the whole typescale to the event
+    // typeface. Null everywhere else (desktop, F-Droid, non-event, opted out) → default typography.
+    val eventFonts = LocalEventTheme.current?.fonts
     val typography = remember(eventFonts) { eventFonts?.let { AppTypography.withEventFonts(it) } ?: AppTypography }
 
     // Downloadable (Google) fonts referenced only through the theme's Typography are NOT auto-fetched during text
