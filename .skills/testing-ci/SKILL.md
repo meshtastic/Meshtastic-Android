@@ -131,6 +131,7 @@ CI is defined in `.github/workflows/reusable-check.yml` and structured as parall
 - **`fail-fast: false`:** Test sharding does not cancel other shards on failure.
 - **Explicit Gradle task paths:** Prefer `app:lintFdroidDebug` over shorthand `lintDebug` in CI.
 - **Pull request CI:** Main-only (`.github/workflows/pull-request.yml` targets `main`).
+- **Merge queue hygiene:** `merge-queue.yml` cancels superseded runs for the same PR (GitHub does not auto-cancel destroyed merge-group runs) and skips the heavy pipeline for docs-only entries (`docs/**`, `*.md`). `rb-check` runs ONLY in the merge queue. `main-check.yml` passes `run_lint: false` — every main commit is a merge-queue-verified merge commit, so main pushes only rebuild the debug APKs for the snapshot release.
 - **Cache writes:** Trusted on `main` and merge queue runs; other refs use read-only cache.
 - **Path filtering:** `check-changes` in `pull-request.yml` must include module dirs plus build/workflow entrypoints (`build-logic/**`, `gradle/**`, `.github/workflows/**`, `gradlew`, `settings.gradle.kts`, etc.).
 - **AboutLibraries:** Runs in `offlineMode` by default (no GitHub/SPDX API calls). Release builds pass `-PaboutLibraries.release=true` via Fastlane/Gradle CLI to enable remote license fetching. Do NOT re-gate on `CI` or `GITHUB_TOKEN` alone.

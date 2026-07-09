@@ -264,7 +264,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-22.04, ubuntu-22.04-arm]
+        os: [macos-latest, windows-latest, ubuntu-24.04, ubuntu-24.04-arm]
     env:
       GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
       GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
@@ -286,7 +286,7 @@ jobs:
 
       - name: Install dependencies for AppImage
         if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y libfuse2
+        run: sudo apt-get update && sudo apt-get install -y libfuse2t64
 
       - name: Package Native Distributions
         env:
@@ -307,6 +307,33 @@ jobs:
           ./gradlew :desktopApp:packageReleaseDistributionForCurrentOS
           ${{ contains(runner.os, 'macOS') && ':desktopApp:packageReleaseUberJarForCurrentOS' || '' }}
           '-PaboutLibraries.release=true' --no-daemon
+
+      # jpackage computes the .deb Depends: line from the build host's package names.
+      # Ubuntu 24.04 records time_t64 transition names (libasound2t64, libpng16-16t64)
+      # that don't exist on Debian 12 Bookworm / Raspberry Pi OS, making the .deb
+      # uninstallable there (#5233 pinned ubuntu-22.04 for this; those runners retire
+      # 2027-04, brownouts from 2026-09). Strip the t64 suffix instead: Bookworm ships
+      # the plain names, and on Trixie / Ubuntu 24.04+ the t64 packages Provide them.
+      # Rewriting the control file is the only host-independent fix — jpackage's
+      # --linux-package-deps is additive-only, and the Compose plugin clears its
+      # --resource-dir during the task, so a custom control template can't be injected.
+      - name: Rewrite t64 dependency names in .deb (Debian Bookworm / Pi OS compatibility)
+        if: runner.os == 'Linux'
+        run: |
+          shopt -s nullglob
+          for deb in desktopApp/build/compose/binaries/main-release/deb/*.deb; do
+            work=$(mktemp -d)
+            dpkg-deb -R "$deb" "$work"
+            echo "$(basename "$deb") before: $(grep '^Depends:' "$work/DEBIAN/control")"
+            sed -i -E '/^(Depends|Pre-Depends|Recommends):/ s/(lib[a-z0-9.+-]*)t64([, (]|$)/\1\2/g' "$work/DEBIAN/control"
+            echo "$(basename "$deb") after:  $(grep '^Depends:' "$work/DEBIAN/control")"
+            if grep -nE '^[A-Za-z-]+:.*\blib[a-z0-9.+-]*t64\b' "$work/DEBIAN/control"; then
+              echo "::error::t64 dependency name survived rewrite in $(basename "$deb") — extend the sed above"
+              exit 1
+            fi
+            dpkg-deb -b --root-owner-group "$work" "$deb"
+            rm -rf "$work"
+          done
 
       - name: List Desktop Binaries
         if: runner.os == 'Linux' || runner.os == 'macOS'
@@ -348,7 +375,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, ubuntu-22.04-arm]
+        # No .deb host-coupling here (pure-Java uber jar + URL manifest) — free to track
+        # the current LTS image.
+        os: [ubuntu-24.04, ubuntu-24.04-arm]
     env:
       GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
       GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
