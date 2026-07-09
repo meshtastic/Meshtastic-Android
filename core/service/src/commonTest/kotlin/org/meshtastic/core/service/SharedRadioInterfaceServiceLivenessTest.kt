@@ -1683,4 +1683,127 @@ class SharedRadioInterfaceServiceLivenessTest {
             advanceTimeBy(1_000L)
         }
     }
+
+    // ─── Post-OTA GATT cache invalidation flag lifecycle ───────────────────────────────────────
+
+    /**
+     * The one-shot cache-invalidation flag is armed by
+     * [SharedRadioInterfaceService.requestGattCacheInvalidationOnNextConnect] and consumed exactly once by
+     * [SharedRadioInterfaceService.consumeGattCacheInvalidationRequest] (atomic getAndSet).
+     * [SharedRadioInterfaceService.disconnect] must clear any still-pending flag so a later reconnect does not silently
+     * trigger a stale invalidation.
+     */
+    @Test
+    fun `gatt cache invalidation flag is consumed once and cleared on disconnect`() = runTest(testDispatcher) {
+        val service = createConnectedService("xAA:BB:CC:DD:EE:FF")
+        try {
+            assertFalse(
+                service.consumeGattCacheInvalidationRequest(),
+                "flag must default to unset before any request",
+            )
+
+            service.requestGattCacheInvalidationOnNextConnect()
+            assertTrue(
+                service.consumeGattCacheInvalidationRequest(),
+                "first consume after request must return true",
+            )
+            assertFalse(
+                service.consumeGattCacheInvalidationRequest(),
+                "second consume must return false (one-shot getAndSet)",
+            )
+
+            // Re-arm; disconnect below must clear it.
+            service.requestGattCacheInvalidationOnNextConnect()
+        } finally {
+            service.disconnect()
+            advanceTimeBy(1_000L)
+        }
+
+        assertFalse(
+            service.consumeGattCacheInvalidationRequest(),
+            "disconnect must clear the pending GATT cache invalidation flag",
+        )
+    }
+
+    /**
+     * Rebinding to a DIFFERENT device address must drop the pending flag — the cache invalidation was requested for the
+     * previous device's post-OTA reboot and must not bleed into the new device's connection.
+     * ([SharedRadioInterfaceService.setDeviceAddress] clears `gattCacheInvalidationRequested` when the address
+     * changes.)
+     */
+    @Test
+    fun `setDeviceAddress with a different address clears the pending gatt cache invalidation flag`() =
+        runTest(testDispatcher) {
+            val service = createConnectedService("xAA:BB:CC:DD:EE:FF")
+            try {
+                service.requestGattCacheInvalidationOnNextConnect()
+
+                assertTrue(service.setDeviceAddress("xBB:11:22:33:44:55"), "setDeviceAddress must accept a new address")
+                // The clear happens inside the launched transportMutex.withLock; flush it.
+                testDispatcher.scheduler.runCurrent()
+                advanceTimeBy(1_000L)
+
+                assertFalse(
+                    service.consumeGattCacheInvalidationRequest(),
+                    "switching to a different device address must clear the pending flag",
+                )
+            } finally {
+                service.disconnect()
+                advanceTimeBy(1_000L)
+            }
+        }
+
+    /**
+     * Counterpart: rebinding to the SAME address is a documented no-op ([SharedRadioInterfaceService.setDeviceAddress]
+     * early-returns when already Connected to that address), so it must NOT touch the pending flag.
+     */
+    @Test
+    fun `setDeviceAddress with the same address preserves the pending gatt cache invalidation flag`() =
+        runTest(testDispatcher) {
+            val address = "xAA:BB:CC:DD:EE:FF"
+            val service = createConnectedService(address)
+            try {
+                service.requestGattCacheInvalidationOnNextConnect()
+
+                assertFalse(
+                    service.setDeviceAddress(address),
+                    "setDeviceAddress with the same connected address is a documented no-op (returns false)",
+                )
+                testDispatcher.scheduler.runCurrent()
+
+                assertTrue(
+                    service.consumeGattCacheInvalidationRequest(),
+                    "same-address rebind must preserve the pending GATT cache invalidation flag",
+                )
+            } finally {
+                service.disconnect()
+                advanceTimeBy(1_000L)
+            }
+        }
+
+    @Test
+    fun `setDeviceAddress after deselect preserves pending gatt cache invalidation flag`() = runTest(testDispatcher) {
+        val address = "xAA:BB:CC:DD:EE:FF"
+        val service = createConnectedService(address)
+        try {
+            // OTA handler deselects to free the GATT
+            assertTrue(service.setDeviceAddress("n"), "deselect must succeed")
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+
+            // Post-OTA: arm flag, then re-select the SAME device
+            service.requestGattCacheInvalidationOnNextConnect()
+            assertTrue(service.setDeviceAddress(address), "re-select must start transport")
+            testDispatcher.scheduler.runCurrent()
+            advanceTimeBy(1_000L)
+
+            assertTrue(
+                service.consumeGattCacheInvalidationRequest(),
+                "post-OTA re-select (null to address) must preserve the pending flag",
+            )
+        } finally {
+            service.disconnect()
+            advanceTimeBy(1_000L)
+        }
+    }
 }

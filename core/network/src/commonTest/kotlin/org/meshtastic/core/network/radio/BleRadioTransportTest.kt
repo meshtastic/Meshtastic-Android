@@ -38,12 +38,15 @@ import org.meshtastic.core.testing.FakeBleConnectionFactory
 import org.meshtastic.core.testing.FakeBleDevice
 import org.meshtastic.core.testing.FakeBleScanner
 import org.meshtastic.core.testing.FakeBluetoothRepository
+import org.meshtastic.core.testing.FakeRadioInterfaceService
 import org.meshtastic.core.testing.failBondAfterRecording
 import org.meshtastic.core.testing.failBondWith
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class BleRadioTransportTest {
@@ -385,6 +388,60 @@ class BleRadioTransportTest {
                 "bond() must be called exactly once — cancellation, not retry",
             )
             assertEquals(0, connection.connectAndAwaitCalls, "connectAndAwait must not be called after cancellation")
+        } finally {
+            bleTransport.close()
+        }
+    }
+
+    /**
+     * Post-OTA GATT cache invalidation: when the service-layer one-shot flag is armed
+     * ([RadioInterfaceService.requestGattCacheInvalidationOnNextConnect]), [BleRadioTransport.attemptConnection] must
+     * consume it and call [BleConnection.invalidateServiceCache]. When the cache refresh succeeds it disconnects and
+     * reconnects once to force fresh service discovery.
+     *
+     * Uses [FakeRadioInterfaceService] as the callback so the flag's real atomic getAndSet semantics drive the
+     * consume-once behavior under test.
+     */
+    @Test
+    fun `post-OTA cache invalidation flag is consumed during connect and triggers reconnect`() = runTest {
+        val device = FakeBleDevice(address = address, name = "Test Device")
+        bluetoothRepository.bond(device)
+        scanner.emitDevice(device)
+        connection.service.addCharacteristic(FROMNUM_CHARACTERISTIC)
+        connection.service.addCharacteristic(FROMRADIO_CHARACTERISTIC)
+        connection.invalidateServiceCacheResult = true
+
+        val radioService = FakeRadioInterfaceService()
+        radioService.requestGattCacheInvalidationOnNextConnect()
+
+        val bleTransport =
+            BleRadioTransport(
+                scope = this,
+                scanner = scanner,
+                bluetoothRepository = bluetoothRepository,
+                connectionFactory = connectionFactory,
+                callback = radioService,
+                address = address,
+            )
+        bleTransport.start()
+        try {
+            // 3s settle + connectAndAwait + 500ms reconnect delay + reconnect connectAndAwait, then profile setup
+            // bounded by CONNECTED_GATE_TIMEOUT / SUBSCRIPTION_READY_TIMEOUT (5s each).
+            advanceTimeBy(20_000)
+
+            // The transport consumed the flag during its first connect cycle: a second consume must return false.
+            assertFalse(
+                radioService.consumeGattCacheInvalidationRequest(),
+                "GATT cache invalidation flag must have been consumed by the transport",
+            )
+            assertTrue(
+                connection.invalidateServiceCacheCalls >= 1,
+                "invalidateServiceCache must be called after consuming the flag",
+            )
+            assertTrue(
+                connection.connectAndAwaitCalls >= 2,
+                "transport must reconnect after cache invalidation (got ${connection.connectAndAwaitCalls} calls)",
+            )
         } finally {
             bleTransport.close()
         }
