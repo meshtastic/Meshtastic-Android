@@ -278,6 +278,8 @@ class CommandSenderImplTest {
                 DEST_NODE to node(DEST_NODE, licensed = false, publicKey = DESTINATION_PUBLIC_KEY),
             )
         configureNodes(nodes)
+        val passkey = "await-session-passkey".encodeUtf8()
+        every { sessionManager.getPasskey(DEST_NODE) } returns passkey
         var capturedPacket: MeshPacket? = null
         everySuspend { packetHandler.sendToRadioAndAwait(any<MeshPacket>()) } calls
             { call ->
@@ -291,8 +293,11 @@ class CommandSenderImplTest {
             }
 
         assertTrue(accepted)
-        assertPlaintextAdminPacket(requireNotNull(capturedPacket), expectedDestination = DEST_NODE)
-        assertTrue(requireNotNull(capturedPacket).decoded?.want_response == true)
+        val packet = requireNotNull(capturedPacket)
+        assertPlaintextAdminPacket(packet, expectedDestination = DEST_NODE)
+        assertTrue(packet.decoded?.want_response == true)
+        val adminMessage = AdminMessage.ADAPTER.decode(requireNotNull(packet.decoded).payload)
+        assertEquals(passkey, adminMessage.session_passkey)
     }
 
     // --- requestTraceroute ---
