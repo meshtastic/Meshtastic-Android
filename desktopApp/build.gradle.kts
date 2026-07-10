@@ -112,6 +112,8 @@ compose.desktop {
         val desktopJvmArgs =
             listOf(
                 "-Xmx2G",
+                // Let the macOS title bar follow the system light/dark theme (ignored on other OSes).
+                "-Dapple.awt.application.appearance=system",
                 "-Dapple.awt.application.name=Meshtastic Desktop",
                 "-Dcom.apple.mrj.application.apple.menu.about.name=Meshtastic Desktop",
                 "-Dcom.apple.bundle.identifier=org.meshtastic.MeshtasticDesktop",

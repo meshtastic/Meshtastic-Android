@@ -30,7 +30,10 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isAltPressed
+import androidx.compose.ui.input.key.isCtrlPressed
 import androidx.compose.ui.input.key.isMetaPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.type
@@ -86,6 +89,7 @@ import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.desktop.data.DesktopPreferencesDataSource
 import org.meshtastic.desktop.di.desktopModule
 import org.meshtastic.desktop.di.desktopPlatformModule
+import org.meshtastic.desktop.notification.DesktopOS
 import org.meshtastic.desktop.ui.DesktopMainScreen
 import java.awt.Desktop
 import java.util.Locale
@@ -232,8 +236,10 @@ private fun ApplicationScope.MeshtasticDesktopApp(uiViewModel: UIViewModel, isDa
         },
     )
 
-    if (isWindowReady && isAppVisible) {
-        MeshtasticWindow(uiViewModel, isDarkTheme, appIcon, windowState) {
+    if (isWindowReady) {
+        // Hide via `visible` rather than dropping the Window from composition so the UI tree
+        // (navigation backstack, scroll positions) survives a hide-to-tray round trip.
+        MeshtasticWindow(uiViewModel, isDarkTheme, appIcon, windowState, visible = isAppVisible) {
             // Minimize to the tray on close — but only where a tray exists. On platforms without a
             // system tray (e.g. some Linux desktop environments) there's nowhere to minimize to, so
             // quit instead; otherwise the process would be stranded with no window and no tray icon.
@@ -293,6 +299,7 @@ private fun ApplicationScope.MeshtasticWindow(
     isDarkTheme: Boolean,
     appIcon: Painter,
     windowState: WindowState,
+    visible: Boolean,
     onCloseRequest: () -> Unit,
 ) {
     val multiBackstack =
@@ -310,6 +317,7 @@ private fun ApplicationScope.MeshtasticWindow(
         title = "Meshtastic Desktop",
         icon = appIcon,
         state = windowState,
+        visible = visible,
         onPreviewKeyEvent = { event -> handleKeyboardShortcut(event, multiBackstack, ::exitApplication) },
     ) {
         val eventEdition by uiViewModel.eventEdition.collectAsState()
@@ -352,13 +360,23 @@ private fun CoilImageLoaderSetup() {
 
 // ----- Keyboard shortcuts -----
 
-/** Handles Cmd-key shortcuts. Returns `true` if the event was consumed. */
+private val isMacOS = DesktopOS.current() == DesktopOS.MacOS
+
+/**
+ * Platform-conventional shortcut modifier: Cmd on macOS, Ctrl on Windows/Linux. Alt must be up on the Ctrl path because
+ * Windows reports AltGr as Ctrl+Alt — otherwise typing AltGr characters (e.g. @ on German layouts, which is AltGr+Q)
+ * would trigger shortcuts like quit.
+ */
+private val KeyEvent.isShortcutModifierPressed: Boolean
+    get() = if (isMacOS) isMetaPressed else isCtrlPressed && !isAltPressed
+
+/** Handles Cmd/Ctrl-key shortcuts. Returns `true` if the event was consumed. */
 private fun handleKeyboardShortcut(
-    event: androidx.compose.ui.input.key.KeyEvent,
+    event: KeyEvent,
     multiBackstack: MultiBackstack,
     exitApplication: () -> Unit,
 ): Boolean {
-    if (event.type != KeyEventType.KeyDown || !event.isMetaPressed) return false
+    if (event.type != KeyEventType.KeyDown || !event.isShortcutModifierPressed) return false
     val backStack = multiBackstack.activeBackStack
     return when (event.key) {
         Key.Q -> {
