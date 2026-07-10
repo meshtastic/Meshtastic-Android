@@ -55,7 +55,7 @@ WORK="$REPO_ROOT/build/flatpak-verify"
 OVERLAY="$REPO_ROOT/scripts/verify-flatpak/desktop-offline.yaml"
 SOURCES_JSON="$REPO_ROOT/flatpak-sources.json"
 GRADLE_HOME_ISOLATED="$REPO_ROOT/build/flatpak-gradle-home"
-VID_REPO="https://github.com/flathub/org.meshtastic.MeshtasticDesktop.git"
+FLATHUB_REPO="https://github.com/flathub/org.meshtastic.MeshtasticDesktop.git"
 
 # bilelmoussaoui's image is what the upstream flatpak CI uses; freedesktop-24.08 is the latest
 # tag available. The 25.08 runtime declared in the manifest is pulled from
@@ -94,7 +94,7 @@ else
     step "Preparing workspace at $WORK"
     mkdir -p "$WORK"
     if [[ ! -d "$WORK/org.meshtastic.MeshtasticDesktop/.git" ]]; then
-        git clone --depth 1 --recurse-submodules "$VID_REPO" "$WORK/org.meshtastic.MeshtasticDesktop"
+        git clone --depth 1 --recurse-submodules "$FLATHUB_REPO" "$WORK/org.meshtastic.MeshtasticDesktop"
     else
         git -C "$WORK/org.meshtastic.MeshtasticDesktop" fetch --depth 1 origin master
         git -C "$WORK/org.meshtastic.MeshtasticDesktop" reset --hard origin/master
