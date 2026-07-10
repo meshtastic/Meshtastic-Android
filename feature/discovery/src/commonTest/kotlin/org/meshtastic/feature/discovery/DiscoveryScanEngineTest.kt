@@ -603,6 +603,27 @@ class DiscoveryScanEngineTest {
 
     // region Interrupted-session detection and restore (crash / BLE-loss recovery)
 
+    /** Seeds a prior-process interrupted session directly into the fake DAO (keyed by its own id). */
+    private fun seedInterruptedSession(
+        id: Long = 1L,
+        deviceAddress: String,
+        homePreset: String = "LONG_FAST",
+        completionStatus: String = "in_progress",
+        homeLoraConfig: Config.LoRaConfig? =
+            Config.LoRaConfig(use_preset = true, modem_preset = ChannelOption.LONG_FAST.modemPreset),
+    ) {
+        discoveryDao.sessions[id] =
+            DiscoverySessionEntity(
+                id = id,
+                timestamp = 1L,
+                presetsScanned = "SHORT_FAST",
+                homePreset = homePreset,
+                completionStatus = completionStatus,
+                deviceAddress = deviceAddress,
+                homeLoraConfig = homeLoraConfig,
+            )
+    }
+
     @Test
     fun startScanCapturesDeviceAddressAndHomeConfigForLaterRestore() = runTest {
         meshPrefs.setDeviceAddress("x:AA:BB:CC:DD:EE:FF")
@@ -621,17 +642,7 @@ class DiscoveryScanEngineTest {
         val address = "x:AA:BB:CC:DD:EE:FF"
         meshPrefs.setDeviceAddress(address)
         // A previous process's scan died mid-flight and never reached restoreHomePreset/finalizeSession.
-        discoveryDao.sessions[1] =
-            DiscoverySessionEntity(
-                id = 1,
-                timestamp = 1L,
-                presetsScanned = "SHORT_FAST",
-                homePreset = "LONG_FAST",
-                completionStatus = "in_progress",
-                deviceAddress = address,
-                homeLoraConfig =
-                Config.LoRaConfig(use_preset = true, modem_preset = ChannelOption.LONG_FAST.modemPreset),
-            )
+        seedInterruptedSession(deviceAddress = address)
 
         val restored = mutableListOf<String>()
         val engine = createEngine(this)
@@ -648,17 +659,7 @@ class DiscoveryScanEngineTest {
     @Test
     fun restoreInterruptedSessionsOnReconnectIgnoresDifferentDevice() = runTest {
         meshPrefs.setDeviceAddress("x:CURRENT")
-        discoveryDao.sessions[1] =
-            DiscoverySessionEntity(
-                id = 1,
-                timestamp = 1L,
-                presetsScanned = "SHORT_FAST",
-                homePreset = "LONG_FAST",
-                completionStatus = "in_progress",
-                deviceAddress = "x:OTHER-DEVICE",
-                homeLoraConfig =
-                Config.LoRaConfig(use_preset = true, modem_preset = ChannelOption.LONG_FAST.modemPreset),
-            )
+        seedInterruptedSession(deviceAddress = "x:OTHER-DEVICE")
 
         val restored = mutableListOf<String>()
         val engine = createEngine(this)
@@ -683,17 +684,7 @@ class DiscoveryScanEngineTest {
 
         // A stale session from a *different*, already-dead process — seeded at a key the active scan's own
         // insertSession call (id=1) won't collide with, so this row's fate isolates what the watcher itself does.
-        discoveryDao.sessions[999] =
-            DiscoverySessionEntity(
-                id = 999,
-                timestamp = 1L,
-                presetsScanned = "SHORT_FAST",
-                homePreset = "LONG_FAST",
-                completionStatus = "in_progress",
-                deviceAddress = address,
-                homeLoraConfig =
-                Config.LoRaConfig(use_preset = true, modem_preset = ChannelOption.LONG_FAST.modemPreset),
-            )
+        seedInterruptedSession(id = 999, deviceAddress = address)
 
         // The connection is already Connected, so the watcher fires on its very first emission — while this engine's
         // own scan is still active. runCurrent (not advanceUntilIdle) drains that emission WITHOUT advancing virtual
@@ -717,17 +708,7 @@ class DiscoveryScanEngineTest {
     fun restoreWatcherSurvivesWriteFailureAndRetriesOnNextReconnect() = runTest {
         val address = "x:AA:BB:CC:DD:EE:FF"
         meshPrefs.setDeviceAddress(address)
-        discoveryDao.sessions[1] =
-            DiscoverySessionEntity(
-                id = 1,
-                timestamp = 1L,
-                presetsScanned = "SHORT_FAST",
-                homePreset = "LONG_FAST",
-                completionStatus = "in_progress",
-                deviceAddress = address,
-                homeLoraConfig =
-                Config.LoRaConfig(use_preset = true, modem_preset = ChannelOption.LONG_FAST.modemPreset),
-            )
+        seedInterruptedSession(deviceAddress = address)
 
         // The link drops right after Connected, so the restore's config write fails.
         radioController.throwOnSetLocalConfig = true
@@ -760,16 +741,7 @@ class DiscoveryScanEngineTest {
         val address = "x:AA:BB:CC:DD:EE:FF"
         meshPrefs.setDeviceAddress(address)
         // Config was null at scan start (nothing to restore), so this session can never be recovered.
-        discoveryDao.sessions[1] =
-            DiscoverySessionEntity(
-                id = 1,
-                timestamp = 1L,
-                presetsScanned = "SHORT_FAST",
-                homePreset = "CUSTOM",
-                completionStatus = "in_progress",
-                deviceAddress = address,
-                homeLoraConfig = null,
-            )
+        seedInterruptedSession(deviceAddress = address, homePreset = "CUSTOM", homeLoraConfig = null)
 
         val restored = mutableListOf<String>()
         val engine = createEngine(this)
