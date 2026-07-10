@@ -20,12 +20,15 @@
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">От %1$s: %2$s</string>
     <string name="a11y_node_battery">заряд батареи %1$d%%</string>
+    <string name="a11y_node_distance_away">%1$s away</string>
     <string name="a11y_node_favorite">избранный</string>
+    <string name="a11y_node_hops_away">%1$d hops away</string>
     <string name="a11y_node_last_heard">последний раз услышан %1$s</string>
     <string name="a11y_node_offline">оффлайн</string>
     <string name="a11y_node_online">онлайн</string>
     <string name="a11y_node_role">роль %1$s</string>
     <string name="a11y_node_signal">сигнал %1$s</string>
+    <string name="a11y_nodes_at_hop">Хоп %1$d: %2$d нод</string>
     <string name="accept">Принять</string>
     <string name="acknowledgements">Подтверждения</string>
     <!-- ACTION -->
@@ -381,6 +384,7 @@
     <string name="dew_point">Точка росы</string>
     <string name="direct_message">Прямое сообщение</string>
     <string name="direct_message_key">Ключ прямого сообщения</string>
+    <string name="direct_messages">Личные сообщения</string>
     <string name="discard_changes">Отмена</string>
     <string name="disconnect">Отключиться</string>
     <string name="disconnected">Отключено</string>
