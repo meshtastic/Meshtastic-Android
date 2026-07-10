@@ -30,7 +30,9 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isAltPressed
 import androidx.compose.ui.input.key.isCtrlPressed
 import androidx.compose.ui.input.key.isMetaPressed
 import androidx.compose.ui.input.key.key
@@ -360,13 +362,17 @@ private fun CoilImageLoaderSetup() {
 
 private val isMacOS = DesktopOS.current() == DesktopOS.MacOS
 
-/** Platform-conventional shortcut modifier: Cmd on macOS, Ctrl on Windows/Linux. */
-private val androidx.compose.ui.input.key.KeyEvent.isShortcutModifierPressed: Boolean
-    get() = if (isMacOS) isMetaPressed else isCtrlPressed
+/**
+ * Platform-conventional shortcut modifier: Cmd on macOS, Ctrl on Windows/Linux. Alt must be up on the Ctrl path because
+ * Windows reports AltGr as Ctrl+Alt — otherwise typing AltGr characters (e.g. @ on German layouts, which is AltGr+Q)
+ * would trigger shortcuts like quit.
+ */
+private val KeyEvent.isShortcutModifierPressed: Boolean
+    get() = if (isMacOS) isMetaPressed else isCtrlPressed && !isAltPressed
 
 /** Handles Cmd/Ctrl-key shortcuts. Returns `true` if the event was consumed. */
 private fun handleKeyboardShortcut(
-    event: androidx.compose.ui.input.key.KeyEvent,
+    event: KeyEvent,
     multiBackstack: MultiBackstack,
     exitApplication: () -> Unit,
 ): Boolean {
