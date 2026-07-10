@@ -189,12 +189,6 @@
   },
   "pullRequests": [
     {
-      "id": "10973",
-      "title": "tlora-t3s3-epaper: e-ink startup and build cleanup",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10973",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
       "id": "10969",
       "title": "Sign plaintext packets in licensed mode",
       "page_url": "https://github.com/meshtastic/firmware/pull/10969",
