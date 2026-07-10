@@ -18,7 +18,6 @@ package org.meshtastic.core.data.repository
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.Json
@@ -71,16 +70,13 @@ open class FirmwareReleaseRepositoryImpl(
 
     override val stableRelease: Flow<FirmwareRelease?> = getLatestFirmware(FirmwareReleaseType.STABLE)
 
-    override val alphaRelease: Flow<FirmwareRelease?> =
-        getLatestFirmware(FirmwareReleaseType.ALPHA).combine(stableRelease) { alpha, stable ->
-            // After a stable promotion the alpha channel lags behind stable — never offer a downgrade.
-            if (alpha != null && stable != null && alpha.asDeviceVersion() < stable.asDeviceVersion()) stable else alpha
-        }
+    override val alphaRelease: Flow<FirmwareRelease?> = getLatestFirmware(FirmwareReleaseType.ALPHA)
 
     private fun getLatestFirmware(releaseType: FirmwareReleaseType): Flow<FirmwareRelease?> = staleWhileRevalidateFlow(
         loadFromCache = {
             ensureSeeded()
-            localDataSource.getLatestRelease(releaseType)?.asExternalModel()
+            val latest = localDataSource.getLatestRelease(releaseType)?.asExternalModel()
+            if (releaseType == FirmwareReleaseType.ALPHA) latest.notBelowStable() else latest
         },
         shouldFetch = { cached ->
             cached == null || localDataSource.getLatestRelease(releaseType)?.isStale() != false
@@ -96,6 +92,17 @@ open class FirmwareReleaseRepositoryImpl(
 
     override suspend fun invalidateCache() {
         localDataSource.deleteAllFirmwareReleases()
+    }
+
+    /**
+     * After a stable promotion the alpha channel lags behind stable — never offer a downgrade. Reads the cached stable
+     * row (every refresh writes both types together, so it is as fresh as the alpha row) rather than combining with
+     * [stableRelease], which would run a second revalidate pipeline — and potentially a duplicate network refresh — for
+     * every alpha collector.
+     */
+    private suspend fun FirmwareRelease?.notBelowStable(): FirmwareRelease? {
+        val stable = localDataSource.getLatestRelease(FirmwareReleaseType.STABLE)?.asExternalModel()
+        return if (this != null && stable != null && asDeviceVersion() < stable.asDeviceVersion()) stable else this
     }
 
     /**
