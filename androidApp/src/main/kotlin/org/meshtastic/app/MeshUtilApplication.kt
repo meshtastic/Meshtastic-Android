@@ -26,6 +26,7 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import co.touchlab.kermit.Logger
+import co.touchlab.kermit.Severity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -42,7 +43,12 @@ import org.meshtastic.app.di.AndroidKoinApp
 import org.meshtastic.core.common.ContextServices
 import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.repository.MeshPrefs
+import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.discovery_interrupted_scan_restored
+import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.service.worker.MeshLogCleanupWorker
+import org.meshtastic.feature.discovery.DiscoveryScanEngine
 import org.meshtastic.feature.widget.LocalStatsWidgetReceiver
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.seconds
@@ -111,6 +117,20 @@ open class MeshUtilApplication :
             val dbManager: DatabaseManager = get()
             val meshPrefs: MeshPrefs = get()
             dbManager.init(meshPrefs.deviceAddress.value)
+        }
+
+        // Restore a radio left detuned by a discovery scan that was interrupted (crash, BLE loss, process death)
+        // before it could restore the home LoRa config itself. Never returns; watches reconnects for the app's life.
+        // The engine stays UI-free — we localize the "restored" notice here and push it through the app-wide alert.
+        applicationScope.launch {
+            val scanEngine: DiscoveryScanEngine = get()
+            val serviceRepository: ServiceRepository = get()
+            scanEngine.restoreInterruptedSessionsOnReconnect { homePreset ->
+                serviceRepository.setErrorMessage(
+                    getStringSuspend(Res.string.discovery_interrupted_scan_restored, homePreset),
+                    Severity.Warn,
+                )
+            }
         }
     }
 

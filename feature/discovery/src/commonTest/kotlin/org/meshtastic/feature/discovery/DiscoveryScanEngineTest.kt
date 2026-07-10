@@ -23,9 +23,11 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
@@ -43,6 +45,7 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.repository.DiscoveryPacketCollector
 import org.meshtastic.core.repository.DiscoveryPacketCollectorRegistry
+import org.meshtastic.core.testing.FakeMeshPrefs
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioConfigRepository
 import org.meshtastic.core.testing.FakeRadioController
@@ -167,6 +170,10 @@ private class FakeDiscoveryDao : DiscoveryDao {
             }
         }
     }
+
+    override suspend fun getInterruptedSession(deviceAddress: String): DiscoverySessionEntity? = sessions.values
+        .filter { it.deviceAddress == deviceAddress && it.completionStatus in setOf("in_progress", "interrupted") }
+        .maxByOrNull { it.timestamp }
 }
 
 /** Simple fake collector registry that tracks registration. */
@@ -204,6 +211,7 @@ class DiscoveryScanEngineTest {
     private val collectorRegistry = FakeCollectorRegistry()
     private val discoveryDao = FakeDiscoveryDao()
     private val aiProvider = FakeAiProvider()
+    private val meshPrefs = FakeMeshPrefs()
 
     /** Creates a [DiscoveryScanEngine] wired to test dispatchers sharing the given [testScope]'s scheduler. */
     private fun createEngine(testScope: TestScope): DiscoveryScanEngine {
@@ -223,6 +231,7 @@ class DiscoveryScanEngineTest {
             aiProvider = aiProvider,
             applicationScope = appScope,
             dispatchers = dispatchers,
+            meshPrefs = meshPrefs,
         )
     }
 
@@ -588,6 +597,162 @@ class DiscoveryScanEngineTest {
         assertEquals(DiscoveryScanState.CompletionOutcome.Success, (state as DiscoveryScanState.Complete).outcome)
         assertEquals("complete", discoveryDao.sessions.values.first().completionStatus)
         assertEquals(ChannelOption.LONG_FAST.modemPreset, radioController.lastLocalConfig?.lora?.modem_preset)
+    }
+
+    // endregion
+
+    // region Interrupted-session detection and restore (crash / BLE-loss recovery)
+
+    @Test
+    fun startScanCapturesDeviceAddressAndHomeConfigForLaterRestore() = runTest {
+        meshPrefs.setDeviceAddress("x:AA:BB:CC:DD:EE:FF")
+        val engine = createEngine(this)
+        engine.startScan(testPresets, dwellDurationSeconds = 10)
+
+        val session = discoveryDao.sessions.values.first()
+        assertEquals("x:AA:BB:CC:DD:EE:FF", session.deviceAddress)
+        assertEquals(ChannelOption.LONG_FAST.modemPreset, session.homeLoraConfig?.modem_preset)
+
+        engine.stopScan()
+    }
+
+    @Test
+    fun restoreInterruptedSessionsOnReconnectRestoresMatchingDevice() = runTest {
+        val address = "x:AA:BB:CC:DD:EE:FF"
+        meshPrefs.setDeviceAddress(address)
+        // A previous process's scan died mid-flight and never reached restoreHomePreset/finalizeSession.
+        discoveryDao.sessions[1] =
+            DiscoverySessionEntity(
+                id = 1,
+                timestamp = 1L,
+                presetsScanned = "SHORT_FAST",
+                homePreset = "LONG_FAST",
+                completionStatus = "in_progress",
+                deviceAddress = address,
+                homeLoraConfig =
+                Config.LoRaConfig(use_preset = true, modem_preset = ChannelOption.LONG_FAST.modemPreset),
+            )
+
+        val restored = mutableListOf<String>()
+        val engine = createEngine(this)
+        val watcherJob = launch { engine.restoreInterruptedSessionsOnReconnect { restored += it } }
+        advanceUntilIdle() // serviceRepository is already Connected, so the watcher's first collection fires now
+
+        assertEquals(ChannelOption.LONG_FAST.modemPreset, radioController.lastLocalConfig?.lora?.modem_preset)
+        assertEquals("restored", discoveryDao.sessions.getValue(1).completionStatus)
+        assertEquals(listOf("LONG_FAST"), restored, "Caller should be notified with the restored home preset")
+
+        watcherJob.cancel()
+    }
+
+    @Test
+    fun restoreInterruptedSessionsOnReconnectIgnoresDifferentDevice() = runTest {
+        meshPrefs.setDeviceAddress("x:CURRENT")
+        discoveryDao.sessions[1] =
+            DiscoverySessionEntity(
+                id = 1,
+                timestamp = 1L,
+                presetsScanned = "SHORT_FAST",
+                homePreset = "LONG_FAST",
+                completionStatus = "in_progress",
+                deviceAddress = "x:OTHER-DEVICE",
+                homeLoraConfig =
+                Config.LoRaConfig(use_preset = true, modem_preset = ChannelOption.LONG_FAST.modemPreset),
+            )
+
+        val restored = mutableListOf<String>()
+        val engine = createEngine(this)
+        val watcherJob = launch { engine.restoreInterruptedSessionsOnReconnect { restored += it } }
+        advanceUntilIdle()
+
+        assertNull(radioController.lastLocalConfig, "Should not touch the radio for a session from another device")
+        assertEquals("in_progress", discoveryDao.sessions.getValue(1).completionStatus)
+        assertTrue(restored.isEmpty(), "No notification for a session from another device")
+
+        watcherJob.cancel()
+    }
+
+    @Test
+    fun restoreInterruptedSessionsOnReconnectSkipsWhileScanActive() = runTest {
+        val address = "x:AA:BB:CC:DD:EE:FF"
+        meshPrefs.setDeviceAddress(address)
+
+        val engine = createEngine(this)
+        engine.startScan(testPresets, dwellDurationSeconds = 60)
+        assertScanActive(engine)
+
+        // A stale session from a *different*, already-dead process — seeded at a key the active scan's own
+        // insertSession call (id=1) won't collide with, so this row's fate isolates what the watcher itself does.
+        discoveryDao.sessions[999] =
+            DiscoverySessionEntity(
+                id = 999,
+                timestamp = 1L,
+                presetsScanned = "SHORT_FAST",
+                homePreset = "LONG_FAST",
+                completionStatus = "in_progress",
+                deviceAddress = address,
+                homeLoraConfig =
+                Config.LoRaConfig(use_preset = true, modem_preset = ChannelOption.LONG_FAST.modemPreset),
+            )
+
+        // The connection is already Connected, so the watcher fires on its very first emission — while this engine's
+        // own scan is still active. runCurrent (not advanceUntilIdle) drains that emission WITHOUT advancing virtual
+        // time, so the scan's dwell delays never elapse and it stays active for the duration of the check.
+        val restored = mutableListOf<String>()
+        val watcherJob = launch { engine.restoreInterruptedSessionsOnReconnect { restored += it } }
+        runCurrent()
+
+        assertEquals(
+            "in_progress",
+            discoveryDao.sessions.getValue(999).completionStatus,
+            "Stale row must not be touched while this engine's own scan is active",
+        )
+        assertTrue(restored.isEmpty(), "No restore notification while this engine's own scan is active")
+
+        watcherJob.cancel()
+        engine.stopScan()
+    }
+
+    @Test
+    fun restoreWatcherSurvivesWriteFailureAndRetriesOnNextReconnect() = runTest {
+        val address = "x:AA:BB:CC:DD:EE:FF"
+        meshPrefs.setDeviceAddress(address)
+        discoveryDao.sessions[1] =
+            DiscoverySessionEntity(
+                id = 1,
+                timestamp = 1L,
+                presetsScanned = "SHORT_FAST",
+                homePreset = "LONG_FAST",
+                completionStatus = "in_progress",
+                deviceAddress = address,
+                homeLoraConfig =
+                Config.LoRaConfig(use_preset = true, modem_preset = ChannelOption.LONG_FAST.modemPreset),
+            )
+
+        // The link drops right after Connected, so the restore's config write fails.
+        radioController.throwOnSetLocalConfig = true
+        val restored = mutableListOf<String>()
+        val engine = createEngine(this)
+        val watcherJob = launch { engine.restoreInterruptedSessionsOnReconnect { restored += it } }
+        advanceUntilIdle()
+
+        assertEquals("in_progress", discoveryDao.sessions.getValue(1).completionStatus, "Failed restore must not mark")
+        assertTrue(restored.isEmpty(), "No notification when the restore write failed")
+
+        // Next reconnect succeeds — the watcher must still be alive to retry. A real reconnect always passes through
+        // Disconnected first; the intermediate advanceUntilIdle lets the watcher observe the drop, so the return to
+        // Connected is a genuine transition rather than a conflated no-op the StateFlow would dedupe away.
+        radioController.throwOnSetLocalConfig = false
+        serviceRepository.setConnectionState(ConnectionState.Disconnected)
+        advanceUntilIdle()
+        serviceRepository.setConnectionState(ConnectionState.Connected)
+        advanceUntilIdle()
+
+        assertEquals("restored", discoveryDao.sessions.getValue(1).completionStatus)
+        assertEquals(ChannelOption.LONG_FAST.modemPreset, radioController.lastLocalConfig?.lora?.modem_preset)
+        assertEquals(listOf("LONG_FAST"), restored, "Caller notified once the retry succeeded")
+
+        watcherJob.cancel()
     }
 
     // endregion

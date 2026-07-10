@@ -19,6 +19,8 @@ package org.meshtastic.core.database.entity
 import androidx.room3.ColumnInfo
 import androidx.room3.Entity
 import androidx.room3.PrimaryKey
+import org.meshtastic.proto.ChannelSettings
+import org.meshtastic.proto.Config
 
 @Entity(tableName = "discovery_session")
 data class DiscoverySessionEntity(
@@ -36,4 +38,10 @@ data class DiscoverySessionEntity(
     @ColumnInfo(name = "user_latitude", defaultValue = "0.0") val userLatitude: Double = 0.0,
     @ColumnInfo(name = "user_longitude", defaultValue = "0.0") val userLongitude: Double = 0.0,
     @ColumnInfo(name = "total_dwell_seconds", defaultValue = "0") val totalDwellSeconds: Long = 0,
+    /** The radio address this session ran against — lets a later reconnect confirm it's the same device. */
+    @ColumnInfo(name = "device_address") val deviceAddress: String? = null,
+    /** The radio's full pre-scan LoRa config, so an interrupted scan can restore it exactly. */
+    @ColumnInfo(name = "home_lora_config") val homeLoraConfig: Config.LoRaConfig? = null,
+    /** The radio's pre-scan primary channel, only non-null when a custom-channel target retuned it. */
+    @ColumnInfo(name = "home_primary_channel") val homePrimaryChannel: ChannelSettings? = null,
 )

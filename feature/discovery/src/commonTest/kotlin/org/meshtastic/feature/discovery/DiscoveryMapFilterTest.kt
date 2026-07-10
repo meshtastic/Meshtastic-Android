@@ -245,6 +245,10 @@ private class MapTestDao : DiscoveryDao {
             }
         }
     }
+
+    override suspend fun getInterruptedSession(deviceAddress: String): DiscoverySessionEntity? = sessions.values
+        .filter { it.deviceAddress == deviceAddress && it.completionStatus in setOf("in_progress", "interrupted") }
+        .maxByOrNull { it.timestamp }
 }
 
 // endregion

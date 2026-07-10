@@ -404,6 +404,7 @@
     <string name="discovery_empty_history">No discovery sessions yet</string>
     <string name="discovery_export_report">Export report</string>
     <string name="discovery_history">Discovery History</string>
+    <string name="discovery_interrupted_scan_restored">Restored radio to home config (%1$s) after an interrupted discovery scan</string>
     <string name="discovery_keep_screen_awake">Keep screen awake</string>
     <string name="discovery_keep_screen_awake_description">Prevents Android Doze mode from dropping radio packets during long scans. Recommended.</string>
     <string name="discovery_local_mesh">Local Mesh Discovery</string>
