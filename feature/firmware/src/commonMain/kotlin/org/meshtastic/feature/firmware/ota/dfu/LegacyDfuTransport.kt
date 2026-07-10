@@ -349,13 +349,12 @@ internal constructor(
                 LegacyDfuException.MidStreamDisconnect(
                     bytesSent = streamOffset,
                     totalBytes = firmware.size,
-                    connectionState = state.toString(),
+                    connectionState = state,
                     lastConfirmedBytes = streamLastPrnOffset,
                 )
             },
         ) {
             var packetsSincePrn = 0
-            var bytesAtLastPrn = 0L
             bleConnection.profile(LegacyDfuUuids.SERVICE, timeout = STREAM_TIMEOUT) { service ->
                 val packetChar = service.characteristic(LEGACY_DFU_PACKET_UUID)
                 while (streamOffset < firmware.size) {
@@ -374,9 +373,26 @@ internal constructor(
                             "Legacy DFU: Write CANCELLED at offset $streamOffset/${firmware.size} cause=${e.cause}"
                         }
                         throw e
-                    } catch (@Suppress("TooGenericExceptionCaught") e: Throwable) {
+                    } catch (e: Exception) {
+                        // The outer stream tripwire watches `connectionState` for Disconnected, but `service.write()`
+                        // can throw BEFORE the state-flow watcher processes the Disconnected emission. In that ordering
+                        // the raw write exception would escape without typed MidStreamDisconnect classification, so
+                        // later retries would not switch to the RECOVERY profile. Re-check the typed state here: if the
+                        // link is already Disconnected, classify as MidStreamDisconnect so the retry coordinator can
+                        // react. Error subtypes are NOT caught here — they propagate unchanged.
+                        val state = bleConnection.connectionState.value
+                        if (state is BleConnectionState.Disconnected) {
+                            throw LegacyDfuException.MidStreamDisconnect(
+                                bytesSent = streamOffset,
+                                totalBytes = firmware.size,
+                                connectionState = state,
+                                lastConfirmedBytes = streamLastPrnOffset,
+                                cause = e,
+                            )
+                        }
                         Logger.w(e) {
-                            "Legacy DFU: Write FAILED at offset $streamOffset/${firmware.size}: ${e.message}"
+                            "Legacy DFU: Write FAILED for chunk ending at host in-flight offset $streamOffset/" +
+                                "${firmware.size}: ${e.message}"
                         }
                         throw e
                     }
@@ -412,13 +428,12 @@ internal constructor(
                         // not be reported as the last successful checkpoint in the link-drop log.
                         streamLastPrnOffset = streamOffset
                         streamLastPrnLatencyMs = latencyMs
-                        bytesAtLastPrn = receipt.bytesReceived
                         packetsSincePrn = 0
                         onProgress(streamOffset.toFloat() / firmware.size)
                     }
                 }
             }
-            Logger.d { "Legacy DFU: Streamed $streamOffset/${firmware.size} bytes (lastPRN=$bytesAtLastPrn)" }
+            Logger.d { "Legacy DFU: Streamed $streamOffset/${firmware.size} bytes (lastPRN=$streamLastPrnOffset)" }
         }
     }
 

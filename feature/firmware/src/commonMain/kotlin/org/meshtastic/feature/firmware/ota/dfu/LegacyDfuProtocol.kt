@@ -18,6 +18,7 @@
 
 package org.meshtastic.feature.firmware.ota.dfu
 
+import org.meshtastic.core.ble.BleConnectionState
 import kotlin.uuid.Uuid
 
 // ---------------------------------------------------------------------------
@@ -258,15 +259,24 @@ sealed class LegacyDfuException(message: String, cause: Throwable? = null) : Dfu
      * PRN-confirmed checkpoint (the last byte the bootloader explicitly acknowledged); `-1` means no PRN was received
      * before the drop. Do not treat [bytesSent] as confirmed device progress.
      *
+     * [connectionState] is the typed [BleConnectionState] observed at the moment of the drop (always
+     * [BleConnectionState.Disconnected]); the message renders it via `toString()` only for human-readable logging.
+     *
+     * The optional [cause] carries the underlying operational write exception when classification was triggered by a
+     * failed BLE write on an already-disconnected link. Watcher-originated disconnects (where the state-flow watcher
+     * detected the drop independently) may have no cause.
+     *
      * Typed — callers must NOT parse the message to detect a mid-stream drop.
      */
     class MidStreamDisconnect(
         val bytesSent: Int,
         val totalBytes: Int,
-        val connectionState: String,
+        val connectionState: BleConnectionState,
         val lastConfirmedBytes: Int,
+        cause: Throwable? = null,
     ) : LegacyDfuException(
         "BLE link dropped mid-upload at host in-flight offset $bytesSent/$totalBytes " +
             "(lastConfirmed=$lastConfirmedBytes, state=$connectionState)",
+        cause,
     )
 }
