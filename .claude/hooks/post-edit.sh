@@ -84,4 +84,41 @@ $out"
     ;;
 esac
 
+# --- Advisory Compose-pitfall checks for Kotlin edits (warn-only, never block) ---
+case "$file_path" in
+  *.kt) : ;;
+  *) exit 0 ;;
+esac
+case "$file_path" in
+  *Preview*|*commonTest*|*androidUnitTest*|*/test/*|*/androidTest/*) exit 0 ;;
+esac
+
+notes=""
+
+# Lazy-list duplicate-key crash — shipped TWICE (bare telemetry.time; bare
+# node.num). Flag key lambdas built on those exact fields.
+risky=$(grep -nE 'key[[:space:]]*=[[:space:]]*\{[[:space:]]*[A-Za-z_][A-Za-z0-9_.]*\.(num|time)[[:space:]]*\}' "$file_path" 2>/dev/null)
+if [ -n "$risky" ]; then
+  notes="Lazy-list key built on .num/.time — this exact pattern shipped two production dup-key crashes (bare telemetry.time, fixed with \"\${time}_\$index\"; bare node.num, fixed with distinctBy since _\$index breaks animateItem). Keys must be unique across the submitted list — dedupe the source list or compose the key:
+$risky"
+fi
+
+# Hardcoded user-facing strings — Crowdin never sees literals (caught on PR
+# #6143). Main source sets only; matching surrounding hardcoded code is not
+# an excuse (that's a latent bug, not a pattern).
+case "$file_path" in
+  */commonMain/*|*/androidMain/*)
+    hardcoded=$(grep -nE 'Text\([[:space:]]*(text[[:space:]]*=[[:space:]]*)?"[A-Za-z]' "$file_path" 2>/dev/null)
+    if [ -n "$hardcoded" ]; then
+      [ -n "$notes" ] && notes="$notes
+
+"
+      notes="${notes}Possible hardcoded user-facing string(s) — user-facing text must use stringResource(Res.string.x) or Crowdin never sees it (PR #6143). Check .skills/compose-ui/strings-index.txt for an existing string first:
+$hardcoded"
+    fi
+    ;;
+esac
+
+[ -n "$notes" ] && emit_context "$notes"
+
 exit 0

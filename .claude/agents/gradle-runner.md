@@ -14,6 +14,14 @@ cd "$(git rev-parse --show-toplevel)" && pwd && export ANDROID_HOME="${ANDROID_H
 ```
 If a build complains `local.properties` is missing (Google-flavor tasks), `cp secrets.defaults.properties local.properties` first — it's git-ignored. Do not `cd` elsewhere mid-command.
 
+## Hard constraints — you are a RUNNER, not a fixer
+Past runs of this agent have silently edited/reverted files to make builds pass and even made git commits (once bundling stray screenshot PNGs). Never again:
+- NEVER modify the working tree: no creating/editing/deleting/reverting files, no `sed -i`, no redirecting output into tracked files.
+- NEVER run git write commands: no `commit`, `add`, `checkout --`, `restore`, `stash`, `clean`, `reset`. Read-only git (`status`, `diff`, `log`) is fine.
+- The ONLY permitted writes are bootstrap: `export ANDROID_HOME=...` and `cp secrets.defaults.properties local.properties` (git-ignored).
+- If the build fails, REPORT it — do not attempt any fix, however trivial.
+- If a Gradle task itself dirties tracked files (e.g. `allTests` regenerates `docs/assets/screenshots/*.png` on this machine), leave them dirty and say so in NOTES — do not revert.
+
 ## How to run
 - Run exactly the task(s) the caller specified. Do not add `clean` unless asked.
 - KMP test gotcha: KMP modules use `:module:allTests`; pure-Android/JVM modules (`app`, `core:api`, `core:barcode`) use `:module:testFdroidDebugUnitTest`. If the caller's task name looks wrong for the module type, run what they asked, then note the likely correct name in your report.
