@@ -40,6 +40,14 @@
 -dontwarn org.bouncycastle.**
 -dontwarn org.openjsse.**
 
+# ---- BLE (Kable) -------------------------------------------------------------
+# Kable annotates ScanResultAndroidAdvertisement with @Parcelize but doesn't
+# ship the parcelize runtime in its POM; the app doesn't apply the parcelize
+# plugin (no @Parcelize usage of our own), so the annotation class is absent.
+# Annotation classes aren't needed at runtime — Kable's generated CREATOR
+# works without it.
+-dontwarn kotlinx.parcelize.Parcelize
+
 # ---- AppSearch / AppFunctions generated document factories ------------------
 # AppSearch's DocumentClassFactoryRegistry loads the generated
 # `$$__AppSearch__*` factory classes by name and instantiates them via their
