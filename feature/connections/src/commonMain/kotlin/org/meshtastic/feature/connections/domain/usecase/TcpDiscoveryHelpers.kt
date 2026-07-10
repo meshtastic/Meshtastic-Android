@@ -52,6 +52,9 @@ internal fun processTcpServices(
             }
             DeviceListEntry.Tcp(displayName, address)
         }
+        // mDNS can resolve two services to one host:port (e.g. re-announce before the old record expires). The device
+        // list keys on fullAddress, and duplicate LazyColumn keys are a hard crash.
+        .distinctBy { it.fullAddress }
         .sortedBy { it.name }
 }
 

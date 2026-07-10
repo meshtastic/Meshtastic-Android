@@ -32,7 +32,7 @@ import coil3.svg.SvgDecoder
 import coil3.util.DebugLogger
 import coil3.util.Logger
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.android.Android
+import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.DefaultRequest
 import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.HttpTimeout
@@ -95,9 +95,15 @@ class NetworkModule {
         .crossfade(enable = true)
         .build()
 
+    /**
+     * Uses the OkHttp engine, not `Android`. The `Android` engine is backed by [java.net.HttpURLConnection], which on
+     * device routes through the platform's bundled OkHttp 2.x fork (`com.android.okhttp`). Cancelling a request while
+     * its gzip/chunked response body is still being read trips a re-entrant `AsyncTimeout.enter()` in that fork and
+     * crashes with "Unbalanced enter/exit" (Crashlytics 97ae5ea1, 2.8.0 only). Square's OkHttp has no such bug.
+     */
     @Single
     fun provideHttpClient(json: Json, buildConfigProvider: BuildConfigProvider): HttpClient =
-        HttpClient(engineFactory = Android) {
+        HttpClient(engineFactory = OkHttp) {
             install(plugin = ContentNegotiation) { json(json) }
             install(DefaultRequest) { url(HttpClientDefaults.API_BASE_URL) }
             install(plugin = HttpTimeout) {

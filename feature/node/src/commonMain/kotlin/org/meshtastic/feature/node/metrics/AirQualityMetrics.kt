@@ -63,9 +63,11 @@ import org.meshtastic.core.resources.air_quality_metrics_log
 import org.meshtastic.core.resources.co2
 import org.meshtastic.core.resources.co2_humidity
 import org.meshtastic.core.resources.co2_temperature
+import org.meshtastic.core.resources.micrograms_per_cubic_meter
 import org.meshtastic.core.resources.pm10
 import org.meshtastic.core.resources.pm1_0
 import org.meshtastic.core.resources.pm2_5
+import org.meshtastic.core.resources.ppm
 import org.meshtastic.core.ui.component.Co2Severity
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.GraphColors.Blue
@@ -304,18 +306,25 @@ private fun AirQualityMetricsCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(modifier = Modifier.height(4.dp))
+            val ugm3 = stringResource(Res.string.micrograms_per_cubic_meter)
+            val ppmUnit = stringResource(Res.string.ppm)
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Column {
                     // Present-and-zero is a valid clean-air reading; only `?.` (absent field) hides a row.
-                    aq.pm10_standard?.let { Text("PM1.0: $it µg/m³", style = MaterialTheme.typography.bodySmall) }
-                    aq.pm25_standard?.let { Text("PM2.5: $it µg/m³", style = MaterialTheme.typography.bodySmall) }
-                    aq.pm100_standard?.let { Text("PM10: $it µg/m³", style = MaterialTheme.typography.bodySmall) }
+                    listOfNotNull(
+                        aq.pm10_standard?.let { Res.string.pm1_0 to it },
+                        aq.pm25_standard?.let { Res.string.pm2_5 to it },
+                        aq.pm100_standard?.let { Res.string.pm10 to it },
+                    )
+                        .forEach { (label, value) ->
+                            Text("${stringResource(label)}: $value $ugm3", style = MaterialTheme.typography.bodySmall)
+                        }
                 }
                 Column {
                     aq.co2?.let { co2 ->
                         val severity = Co2Severity.fromPpm(co2)
                         Text(
-                            text = "CO₂: $co2 ppm",
+                            text = "${stringResource(Res.string.co2)}: $co2 $ppmUnit",
                             style = MaterialTheme.typography.bodySmall,
                             fontWeight = FontWeight.Medium,
                             color = severity?.color ?: MaterialTheme.colorScheme.onSurface,
