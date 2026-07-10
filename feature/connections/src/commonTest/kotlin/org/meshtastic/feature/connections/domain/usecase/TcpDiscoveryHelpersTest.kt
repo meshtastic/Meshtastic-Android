@@ -117,6 +117,23 @@ class TcpDiscoveryHelpersTest {
     }
 
     @Test
+    fun `processTcpServices dedupes services resolving to the same address`() {
+        // Duplicate mDNS announcements (multi-interface, re-resolution) yield the same host/port twice
+        val service =
+            DiscoveredService(
+                name = "Meshtastic_abcd",
+                hostAddress = "192.168.1.10",
+                port = 4403,
+                txt = mapOf("shortname" to "Mesh".encodeToByteArray(), "id" to "!abcd".encodeToByteArray()),
+            )
+
+        val result = processTcpServices(listOf(service, service.copy(name = "Meshtastic_abcd (2)")), emptyList())
+
+        result.size shouldBe 1
+        result[0].fullAddress shouldBe "t192.168.1.10"
+    }
+
+    @Test
     fun `matchDiscoveredTcpNodes matches node by device id`() {
         val node = TestDataFactory.createTestNode(num = 1, userId = "!1234")
         val nodeDb = mapOf(1 to node)
