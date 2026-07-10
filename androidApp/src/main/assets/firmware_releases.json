@@ -207,6 +207,12 @@
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
+      "id": "10961",
+      "title": "stm32wl: add hardware RTC support (rak3172)",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10961",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
       "id": "10954",
       "title": "Flatpak: rename Meshtastic -> MeshtasticD",
       "page_url": "https://github.com/meshtastic/firmware/pull/10954",
@@ -300,12 +306,6 @@
       "id": "10893",
       "title": "nrf52: add rotary encoder press pin as deep sleep wake source",
       "page_url": "https://github.com/meshtastic/firmware/pull/10893",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10878",
-      "title": "fixed tlora-v2-1-1_16 led heartbeat not blinking and stuck at single s…",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10878",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     }
   ]

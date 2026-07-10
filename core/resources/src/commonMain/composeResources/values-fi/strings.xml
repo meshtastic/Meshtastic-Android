@@ -332,6 +332,10 @@
     <string name="debug_store_logs_title">Tallenna mesh-verkon lokitiedot</string>
     <string name="debug_tab_app_logs">Sovelluslokitiedot</string>
     <string name="debug_tab_packets">Paketit</string>
+    <string name="deep_link_connect_message">Linkki osoitteessa %1$s pyytää tätä sovellusta muodostamaan yhteyden laitteeseen. Jatka vain, jos luotat linkin lähteeseen.</string>
+    <string name="deep_link_connect_title">Muodostetaanko yhteys tähän laitteeseen?</string>
+    <string name="deep_link_disconnect_message">Linkki pyytää tätä sovellusta katkaisemaan yhteyden laitteeseesi. Jatka vain, jos luotat linkin lähteeseen.</string>
+    <string name="deep_link_disconnect_title">Katkaistaanko yhteys tähän laitteeseen?</string>
     <string name="default_">Oletus</string>
     <!-- DELETE -->
     <string name="delete">Poista</string>
@@ -402,6 +406,7 @@
     <string name="discovery_empty_history">Ei vielä skannaussessioita</string>
     <string name="discovery_export_report">Vie raportti</string>
     <string name="discovery_history">Skannaushistoria</string>
+    <string name="discovery_interrupted_scan_restored">Radio palautettiin kotiasetukseen (%1$s) keskeytyneen etsinnän jälkeen</string>
     <string name="discovery_keep_screen_awake">Pidä näyttö päällä</string>
     <string name="discovery_keep_screen_awake_description">Estää Androidin Doze-tilan aiheuttamaa radiopakettien katoamista pitkien skannausten aikana. Suositeltu asetus.</string>
     <string name="discovery_local_mesh">Paikallisen mesh-verkon skannaus</string>

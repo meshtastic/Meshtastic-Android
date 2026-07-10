@@ -437,6 +437,7 @@
     <string name="firmware_update_currently_installed">Наразі встановлено: %1$s</string>
     <string name="firmware_update_device">Пристрій: %1$s</string>
     <string name="firmware_update_disclaimer_chirpy_says">Chirpy каже: \"Тримайся напоготові!\"</string>
+    <string name="firmware_update_disclaimer_text">Ви збираєтеся встановити нову прошивку на свій пристрій. Цей процес несе ризики.\n\n• Переконайтеся, що ваш пристрій заряджений.\n• Тримайте пристрій поруч із телефоном.\n• Не закривайте програму під час оновлення.\n\nПереконайтеся, що ви вибрали правильну прошивку для вашого обладнання.</string>
     <string name="firmware_update_disclaimer_title">Попередження про оновлення</string>
     <string name="firmware_update_disconnect_warning">Примітка: це тимчасово від'єднає ваш пристрій на час оновлення.</string>
     <string name="firmware_update_do_not_close">Не закривайте застосунок.</string>
@@ -520,11 +521,12 @@
     <string name="hardware_model">Модель обладнання</string>
     <string name="heading">Курс/Напрямок</string>
     <string name="heartbeat">Пульсація</string>
+    <string name="help_and_documentation">Довідка &amp; Документація</string>
     <string name="hide_layer">Сховати шар</string>
     <string name="hide_password">Приховати пароль</string>
     <string name="history_return_max">Максимальний обсяг історії</string>
     <string name="history_return_window">Максимальне вікно історії</string>
-    <string name="hop_limit">Кількість стрибків</string>
+    <string name="hop_limit">К-ть стрибків</string>
     <string name="hops_away">Стрибків</string>
     <string name="host">Хост</string>
     <string name="host_metrics_log">Показники хоста</string>
@@ -794,6 +796,7 @@
     <string name="node_id">ID вузла</string>
     <string name="node_layout_channel">Канал</string>
     <string name="node_layout_compact">Компактний</string>
+    <string name="node_layout_complete">Повний</string>
     <string name="node_layout_device_role">Пристрій &amp; Роль</string>
     <string name="node_layout_help_signal_bad">Сигнал поганий. SNR вище −18 dB і RSSI вище −125 dBm.</string>
     <string name="node_layout_help_signal_fair">Сигнал задовільний. SNR вище −12 dB і RSSI вище −120 dBm.</string>
@@ -802,6 +805,7 @@
     <string name="node_layout_hops_away">Кількість стрибків повідомлення</string>
     <string name="node_layout_log_icons">Показники довкілля</string>
     <string name="node_layout_power">Живлення</string>
+    <string name="node_layout_preview">Попередній перегляд</string>
     <string name="node_layout_signal_quality_indicator">Індикатор якості сигналу</string>
     <string name="node_list_click_label">Відкрити деталі вузла</string>
     <string name="node_list_help_node_details">Деталі вузла</string>
@@ -1307,6 +1311,7 @@
     <string name="wifi_ip">Wi-Fi IP:</string>
     <string name="wifi_provision_available_networks">Доступні мережі</string>
     <string name="wifi_provision_hidden_network">Прихована мережа</string>
+    <string name="wifi_provision_mpwrd_disclaimer">Дізнайтесь більше про проєкт mPWRD-OS \nhttps://github.com/mPWRD-OS</string>
     <string name="wifi_provision_no_networks">Не знайдено жодної мережі</string>
     <string name="wifi_provision_scan_networks">Сканувати мережі</string>
     <string name="wifi_provision_scanning_ble">Пошук пристрою…</string>
