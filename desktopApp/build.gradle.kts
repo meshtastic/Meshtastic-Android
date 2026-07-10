@@ -86,18 +86,18 @@ val generateBuildConfig =
 sourceSets.main { kotlin.srcDir(generateBuildConfig.map { buildConfigOutputDir }) }
 
 // ── ProGuard configuration ───────────────────────────────────────────────────
-// compose-jb's standalone ProGuard 7.7 task does NOT auto-include
+// compose-jb's standalone ProGuard task does NOT auto-include
 // `META-INF/proguard/*.pro` consumer rules from dependency jars (only R8 on
 // Android does). We therefore inline every keep rule we need into the two
 // static .pro files referenced below.
 
 kotlin {
     jvmToolchain {
-        languageVersion.set(JavaLanguageVersion.of(21))
+        languageVersion.set(JavaLanguageVersion.of(25))
         vendor.set(JvmVendorSpec.JETBRAINS)
     }
     compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_21)
+        jvmTarget.set(JvmTarget.JVM_25)
         freeCompilerArgs.add("-jvm-default=no-compatibility")
     }
 }
@@ -119,6 +119,8 @@ compose.desktop {
         jvmArgs(*desktopJvmArgs.toTypedArray())
 
         buildTypes.release.proguard {
+            // CMP's default ProGuard (7.7.0) can't parse Java 25 class files in the JBR 25 jmods
+            version.set("7.9.1")
             isEnabled.set(true)
             obfuscate.set(false) // Open-source project — obfuscation adds no value
             optimize.set(true)
