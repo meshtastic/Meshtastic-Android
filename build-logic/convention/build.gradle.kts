@@ -129,6 +129,10 @@ gradlePlugin {
             id = "meshtastic.android.library.compose"
             implementationClass = "AndroidLibraryComposeConventionPlugin"
         }
+        register("androidScreenshot") {
+            id = "meshtastic.android.screenshot"
+            implementationClass = "AndroidScreenshotConventionPlugin"
+        }
         register("androidApplicationCompose") {
             id = "meshtastic.android.application.compose"
             implementationClass = "AndroidApplicationComposeConventionPlugin"

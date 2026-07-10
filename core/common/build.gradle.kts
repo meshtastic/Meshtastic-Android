@@ -17,8 +17,8 @@
 
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
-    id("meshtastic.kmp.jvm.android")
-    id("meshtastic.koin")
+    alias(libs.plugins.meshtastic.kmp.jvm.android)
+    alias(libs.plugins.meshtastic.koin)
 }
 
 kotlin {
@@ -34,7 +34,5 @@ kotlin {
             implementation(libs.kermit)
         }
         androidMain.dependencies { api(libs.androidx.core.ktx) }
-
-        commonTest.dependencies { implementation(libs.kotlinx.coroutines.test) }
     }
 }

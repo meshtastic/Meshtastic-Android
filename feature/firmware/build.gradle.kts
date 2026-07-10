@@ -49,7 +49,5 @@ kotlin {
         }
 
         androidMain.dependencies { implementation(libs.markdown.renderer.android) }
-
-        commonTest.dependencies { implementation(projects.core.testing) }
     }
 }

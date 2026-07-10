@@ -51,7 +51,8 @@ fun Project.configureDokka() {
 
                 // Standardized repo-root based source links
                 localDirectory.set(project.projectDir)
-                val relativePath = project.projectDir.relativeTo(rootProject.projectDir).path.replace("\\", "/")
+                val rootDir = project.isolated.rootProject.projectDirectory.asFile
+                val relativePath = project.projectDir.relativeTo(rootDir).path.replace("\\", "/")
                 remoteUrl.set(URI("https://github.com/meshtastic/Meshtastic-Android/blob/main/$relativePath"))
                 remoteLineSuffix.set("#L")
             }

@@ -46,7 +46,7 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                         isShrinkResources = true
                         proguardFiles(
                             getDefaultProguardFile("proguard-android-optimize.txt"),
-                            rootProject.file("config/proguard/shared-rules.pro"),
+                            isolated.rootProject.projectDirectory.file("config/proguard/shared-rules.pro").asFile,
                             "proguard-rules.pro",
                         )
                     }

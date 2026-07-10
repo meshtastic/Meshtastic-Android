@@ -49,7 +49,7 @@ private val LOCALE_PATTERN = Regex("^[a-z]{2,3}(-r[A-Z]{2})?$")
  */
 class DocsTasks : Plugin<Project> {
     override fun apply(project: Project) {
-        val docsDir = project.rootProject.layout.projectDirectory.dir("docs")
+        val docsDir = project.isolated.rootProject.projectDirectory.dir("docs")
         val outputDir = project.layout.buildDirectory.dir("generated/docs")
 
         project.tasks.register<GenerateDocsBundleTask>("generateDocsBundle") {
@@ -67,7 +67,7 @@ class DocsTasks : Plugin<Project> {
             dependsOn("generateDocsBundle")
             bundleDir.set(outputDir.map { it.dir("common") })
             schemaFile.set(
-                project.rootProject.layout.projectDirectory.file(
+                project.isolated.rootProject.projectDirectory.file(
                     "specs/20260507-161858-app-docs-markdown/contracts/keyword-index-schema.json",
                 ),
             )

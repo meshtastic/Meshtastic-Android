@@ -18,8 +18,8 @@
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
-    id("meshtastic.kmp.jvm.android")
-    id("meshtastic.koin")
+    alias(libs.plugins.meshtastic.kmp.jvm.android)
+    alias(libs.plugins.meshtastic.koin)
 }
 
 kotlin {
@@ -67,7 +67,6 @@ kotlin {
 
         commonTest.dependencies {
             implementation(projects.core.testing)
-            implementation(libs.kotlinx.coroutines.test)
             implementation(libs.kable.core) // Kable exception types for BLE failure-injection tests
         }
     }

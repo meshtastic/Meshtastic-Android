@@ -185,6 +185,7 @@ internal fun Project.configureKmpTestDependencies() {
                 implementation(libs.library("kotest-assertions"))
                 implementation(libs.library("kotest-property"))
                 implementation(libs.library("turbine"))
+                implementation(libs.library("kotlinx-coroutines-test"))
             }
 
             // Configure androidHostTest lazily — the source set is created when the
@@ -203,6 +204,7 @@ internal fun Project.configureKmpTestDependencies() {
                         implementation(libs.library("turbine"))
                         implementation(libs.library("robolectric"))
                         implementation(libs.library("androidx-test-core"))
+                        implementation(libs.library("androidx-test-ext-junit"))
                     }
                 }
 
