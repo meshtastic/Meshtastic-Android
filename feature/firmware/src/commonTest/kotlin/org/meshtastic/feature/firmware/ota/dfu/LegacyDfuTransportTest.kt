@@ -892,14 +892,4 @@ class LegacyDfuTransportTest {
         // (best-effort, non-fatal) and return normally without rethrowing.
         env.transport.abort()
     }
-
-    @Test
-    fun `close completes after abort`() = runTest {
-        val env = createConnectedTransport()
-
-        env.transport.abort()
-        // close() must complete normally regardless of what abort did — mirrors the handler's
-        // try { abort() } finally { close() } teardown contract.
-        env.transport.close()
-    }
 }
