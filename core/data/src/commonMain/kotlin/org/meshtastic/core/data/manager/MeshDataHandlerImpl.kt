@@ -415,11 +415,13 @@ class MeshDataHandlerImpl(
     ) {
         val conversationMuted = packetRepository.value.getContactSettings(contactKey).isMuted
         val nodeMuted = nodeManager.getNodeById(dataPacket.from.orEmpty())?.isMuted == true
-        // A mention of our own id is a targeted ping, so it should still notify even in a muted channel/contact.
+        // A mention of our own id is a targeted ping, so it breaks through a muted channel/conversation
+        // (per meshtastic/design#21). Node mute is a stronger, per-sender signal and stays authoritative:
+        // a muted node cannot force a notification by spamming @-mentions.
         val mentionsMe =
             dataPacket.dataType == PortNum.TEXT_MESSAGE_APP.value &&
                 textMentionsNode(dataPacket.text, nodeManager.getMyId())
-        val isSilent = (conversationMuted || nodeMuted) && !mentionsMe
+        val isSilent = nodeMuted || (conversationMuted && !mentionsMe)
         if (dataPacket.dataType == PortNum.ALERT_APP.value && !isSilent) {
             scope.launch {
                 notificationManager.dispatch(
