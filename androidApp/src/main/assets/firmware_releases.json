@@ -189,9 +189,9 @@
   },
   "pullRequests": [
     {
-      "id": "10983",
-      "title": "fix: SPI1 instances",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10983",
+      "id": "10984",
+      "title": "Draft: Restore XEdDSA material in keygen-excluded identity loads",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10984",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
@@ -301,6 +301,12 @@
       "title": "feat: Support Elecrow ThinkNode M9",
       "page_url": "https://github.com/meshtastic/firmware/pull/10908",
       "zip_url": "+454.1 KB"
+    },
+    {
+      "id": "10902",
+      "title": "BLE lifecycle memory: true BLE-off on nRF52, NimBLE host pools to PSRAM on S3",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10902",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     }
   ]
 }
