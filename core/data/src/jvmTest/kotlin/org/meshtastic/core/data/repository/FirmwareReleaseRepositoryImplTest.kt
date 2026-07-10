@@ -229,6 +229,18 @@ class FirmwareReleaseRepositoryImplTest {
     }
 
     @Test
+    fun alphaChannelNeverOffersVersionBelowStable() = runBlocking {
+        // After a promotion the newest alpha (2.7.25) is older than stable (2.7.26) — offer stable instead.
+        dao.insert(FirmwareReleaseEntity(id = "v2.7.26.54e0d8d", releaseType = FirmwareReleaseType.STABLE))
+        dao.insert(FirmwareReleaseEntity(id = "v2.7.25.104df5f", releaseType = FirmwareReleaseType.ALPHA))
+        assertEquals("v2.7.26.54e0d8d", repository.alphaRelease.toList().last()?.id)
+
+        // A genuinely newer alpha is still offered.
+        dao.insert(FirmwareReleaseEntity(id = "v2.7.27.abc1234", releaseType = FirmwareReleaseType.ALPHA))
+        assertEquals("v2.7.27.abc1234", repository.alphaRelease.toList().last()?.id)
+    }
+
+    @Test
     fun olderBundledSnapshotNeverRegressesCache() = runBlocking {
         // A successful network refresh left the cache newer than the (weekly) bundle.
         dao.insert(FirmwareReleaseEntity(id = "v2.8.0.abc1234", releaseType = FirmwareReleaseType.STABLE))

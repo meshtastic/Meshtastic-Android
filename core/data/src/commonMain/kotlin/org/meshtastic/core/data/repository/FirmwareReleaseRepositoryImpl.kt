@@ -18,6 +18,7 @@ package org.meshtastic.core.data.repository
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.Json
@@ -70,7 +71,11 @@ open class FirmwareReleaseRepositoryImpl(
 
     override val stableRelease: Flow<FirmwareRelease?> = getLatestFirmware(FirmwareReleaseType.STABLE)
 
-    override val alphaRelease: Flow<FirmwareRelease?> = getLatestFirmware(FirmwareReleaseType.ALPHA)
+    override val alphaRelease: Flow<FirmwareRelease?> =
+        getLatestFirmware(FirmwareReleaseType.ALPHA).combine(stableRelease) { alpha, stable ->
+            // After a stable promotion the alpha channel lags behind stable — never offer a downgrade.
+            if (alpha != null && stable != null && alpha.asDeviceVersion() < stable.asDeviceVersion()) stable else alpha
+        }
 
     private fun getLatestFirmware(releaseType: FirmwareReleaseType): Flow<FirmwareRelease?> = staleWhileRevalidateFlow(
         loadFromCache = {
