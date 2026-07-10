@@ -36,6 +36,13 @@ ask() {  # $1 = reason; prompt the user to confirm
   exit 0
 }
 
+# Gradle gates apply ONLY to this project. Without this, pushes/commits in
+# OTHER repos got blocked by a failing ./gradlew (bit us: had to evade with
+# `git -C <path> push`). $1 = repo root; false -> caller should fail open.
+is_this_repo() {
+  [ -x "$1/gradlew" ] && grep -qi meshtastic "$1/settings.gradle.kts" 2>/dev/null
+}
+
 # --- 2. Destructive-op confirmation (cheap checks first) --------------------
 if printf '%s' "$cmd" | grep -q 'git push' \
    && printf '%s' "$cmd" | grep -Eq -- '(--force([^-]|$)|[[:space:]]-f([[:space:]]|$))'; then
@@ -51,6 +58,7 @@ if printf '%s' "$cmd" | grep -q 'git push'; then
   cwd=$(printf '%s' "$input" | jq -r '.cwd // empty' 2>/dev/null)
   [ -z "$cwd" ] && cwd="$PWD"
   repo_root=$(git -C "$cwd" rev-parse --show-toplevel 2>/dev/null) || exit 0
+  is_this_repo "$repo_root" || exit 0
   export ANDROID_HOME="${ANDROID_HOME:-$HOME/Library/Android/sdk}"
   # ponytail: detekt-only gate — test/allTests deliberately NOT run here (minutes
   # per push is too costly; baseline stays the developer's job). Ceiling: detekt
@@ -76,6 +84,17 @@ cwd=$(printf '%s' "$input" | jq -r '.cwd // empty' 2>/dev/null)
 [ -z "$cwd" ] && cwd="$PWD"
 repo_root=$(git -C "$cwd" rev-parse --show-toplevel 2>/dev/null) || exit 0
 [ -n "$repo_root" ] || exit 0
+is_this_repo "$repo_root" || exit 0
+
+# Staged screenshot PNGs: allTests regenerates docs/assets/screenshots/*.png on
+# this machine (host-render diff), and gradle-runner once auto-committed strays.
+# Confirm they are intentional UI-change screenshots before they ride along.
+shots=$(git -C "$repo_root" diff --cached --name-only -- 'docs/assets/screenshots/*.png' 2>/dev/null)
+if [ -n "$shots" ]; then
+  ask "Staged screenshot PNGs detected:
+$shots
+allTests regenerates these on this machine — if they are NOT intentional UI-change screenshots, unstage and restore them (git restore --staged --worktree -- docs/assets/screenshots) before committing. Flagged by .claude/hooks/pre-bash-guard.sh"
+fi
 
 # Staged Kotlin files (added/copied/modified/renamed). Nothing staged -> no-op.
 staged=$(git -C "$repo_root" diff --cached --name-only --diff-filter=ACMR -- '*.kt' '*.kts' 2>/dev/null)
