@@ -41,6 +41,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.withTimeoutOrNull
 import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleConnectionState
 import org.meshtastic.core.ble.BleDevice
@@ -428,13 +429,33 @@ internal constructor(
     /**
      * Send `RESET` to the device, instructing it to discard any in-progress transfer and reboot. Best-effort — the
      * device may disconnect before the write ACK lands; that's expected.
+     *
+     * The RESET op remains a `WITH_RESPONSE` write (the bootloader is contractually allowed to act on it before the
+     * GATT ACK lands, but we still request one so the link-layer queues it reliably), but we bound the wait with a
+     * short timeout. A missing acknowledgement is ambiguous: the device may have accepted RESET and rebooted, become
+     * unresponsive, disconnected, or simply failed to receive or complete the write. We report the outcome
+     * (acknowledged, unacknowledged, or operational failure) without claiming the RESET landed. Operational Exceptions
+     * are best-effort and non-fatal; structured-concurrency cancellation and Error subtypes propagate. The caller
+     * (`SecureDfuHandler`) tears the connection down afterwards regardless.
+     *
+     * Parent cancellation is preserved: a [CancellationException] that escapes `withTimeoutOrNull` is propagated.
      */
     override suspend fun abort() {
-        safeCatching {
-            writeControlPoint(byteArrayOf(LegacyDfuOpcode.RESET))
-            Logger.i { "Legacy DFU: RESET sent." }
+        val write =
+            try {
+                withTimeoutOrNull(RESET_WRITE_TIMEOUT) { writeControlPoint(byteArrayOf(LegacyDfuOpcode.RESET)) }
+            } catch (e: CancellationException) {
+                Logger.w(e) { "Legacy DFU: RESET write cancelled; disconnecting" }
+                throw e
+            } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                Logger.w(e) { "Legacy DFU: RESET write failed; disconnecting" }
+                return
+            }
+        if (write != null) {
+            Logger.i { "Legacy DFU: RESET write acknowledged; disconnecting" }
+        } else {
+            Logger.w { "Legacy DFU: RESET write unacknowledged within the timeout; disconnecting" }
         }
-            .onFailure { Logger.w(it) { "Legacy DFU: Failed to send RESET (device may already be disconnected)" } }
     }
 
     override suspend fun close() {
@@ -537,11 +558,11 @@ internal constructor(
      * transfer state and rejects a fresh `START_DFU` with `INVALID_STATE` until it is reset. This is the common case
      * when *recovering* a device stranded in the bootloader.
      *
-     * We do NOT try to RESET on this connection: the stock Adafruit bootloader goes unresponsive immediately after
-     * emitting INVALID_STATE (the link dies by supervision timeout ~5 s later), so a write here never lands. Instead we
-     * fast-fail with [LegacyDfuException.StaleSessionReset]; [SecureDfuHandler] then resets the bootloader over a
-     * *fresh* connection (which is responsive up until START) before retrying. Mirrors the intent of Nordic
-     * `LegacyDfuImpl.resetAndRestart()`.
+     * We do NOT try to RESET on this connection: some Legacy bootloader variants become unresponsive after returning
+     * INVALID_STATE. Skip a potentially blocking same-connection RESET and use the bounded fresh-connection reset-prime
+     * path instead. We fast-fail with [LegacyDfuException.StaleSessionReset]; [SecureDfuHandler] then resets the
+     * bootloader over a *fresh* connection (which is responsive up until START) before retrying. Mirrors the intent of
+     * Nordic `LegacyDfuImpl.resetAndRestart()`.
      */
     private fun handleStartResponse(response: LegacyDfuResponse) {
         if (response is LegacyDfuResponse.Failure && response.status == LegacyDfuStatus.INVALID_STATE) {
@@ -590,6 +611,15 @@ internal constructor(
     companion object {
         private val CONNECT_TIMEOUT = 15.seconds
         private val COMMAND_TIMEOUT = 30.seconds
+
+        /**
+         * Best-effort timeout around the Legacy `RESET` (`0x06`) Control-Point write. Legacy bootloaders may disconnect
+         * before the RESET write acknowledgement returns. A missing acknowledgement is ambiguous: the device may have
+         * accepted RESET and rebooted, become unresponsive, disconnected, or failed to receive/complete the write.
+         * Bound the acknowledgement wait to one second, report it as unacknowledged, then rely on connection teardown
+         * and the subsequent retry/re-advertisement flow.
+         */
+        internal val RESET_WRITE_TIMEOUT = 1.seconds
 
         /**
          * Time to wait for the START_DFU response notification.

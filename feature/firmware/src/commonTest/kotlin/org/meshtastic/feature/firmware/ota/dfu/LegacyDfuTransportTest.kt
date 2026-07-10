@@ -18,13 +18,17 @@
 
 package org.meshtastic.feature.firmware.ota.dfu
 
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.ble.BleCharacteristic
@@ -43,6 +47,7 @@ import org.meshtastic.core.testing.FakeBleWrite
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
 import kotlin.time.Duration
@@ -397,6 +402,26 @@ class LegacyDfuTransportTest {
     private class AutoRespondingLegacyService(val delegate: FakeBleService) : BleService {
         val responder = LegacyResponder()
 
+        /**
+         * When `true`, the next `write()` to the Legacy Control Point characteristic suspends forever (via
+         * [awaitCancellation]) instead of completing. Used to prove the bounded abort returns within
+         * [LegacyDfuTransport.RESET_WRITE_TIMEOUT] when the device never ACKs the RESET.
+         */
+        var hangOnControlPointWrites: Boolean = false
+
+        /**
+         * When `true`, the next `write()` to the Legacy Control Point characteristic throws an [AssertionError]. Used
+         * to prove [LegacyDfuTransport.abort] (which catches [Exception], not [Throwable]) does not swallow [Error]
+         * subtypes.
+         */
+        var throwErrorOnControlPointWrites: Boolean = false
+
+        /**
+         * When `true`, the next `write()` to the Legacy Control Point characteristic throws a [RuntimeException]. Used
+         * to prove [LegacyDfuTransport.abort] swallows operational [Exception] subtypes (best-effort / non-fatal).
+         */
+        var throwExceptionOnControlPointWrites: Boolean = false
+
         override fun hasCharacteristic(c: BleCharacteristic) = delegate.hasCharacteristic(c)
 
         override fun observe(c: BleCharacteristic): Flow<ByteArray> = delegate.observe(c)
@@ -406,6 +431,15 @@ class LegacyDfuTransportTest {
         override fun preferredWriteType(c: BleCharacteristic): BleWriteType = delegate.preferredWriteType(c)
 
         override suspend fun write(c: BleCharacteristic, data: ByteArray, writeType: BleWriteType) {
+            if (throwErrorOnControlPointWrites && c.uuid == LegacyDfuUuids.CONTROL_POINT) {
+                throw AssertionError("Simulated assertion failure during control point write")
+            }
+            if (throwExceptionOnControlPointWrites && c.uuid == LegacyDfuUuids.CONTROL_POINT) {
+                throw RuntimeException("Simulated link failure during control point write")
+            }
+            if (hangOnControlPointWrites && c.uuid == LegacyDfuUuids.CONTROL_POINT) {
+                awaitCancellation()
+            }
             delegate.write(c, data, writeType)
             val response = responder.onWrite(c.uuid, data) ?: return
             response.forEach { delegate.emitNotification(LegacyDfuUuids.CONTROL_POINT, it) }
@@ -779,5 +813,93 @@ class LegacyDfuTransportTest {
         // ConnectionFailed that an inner handshake-style tripwire would have produced, and NOT a local Timeout.
         assertEquals(200, ex.bytesSent)
         assertEquals(220, ex.totalBytes)
+    }
+
+    // -----------------------------------------------------------------------
+    // Bounded RESET (abort)
+    // -----------------------------------------------------------------------
+
+    @Test
+    fun `RESET is written WITH_RESPONSE`() = runTest {
+        val env = createConnectedTransport()
+
+        env.transport.abort()
+
+        val resetWrite = env.controlPointWrites().single { it.data.isNotEmpty() && it.data[0] == LegacyDfuOpcode.RESET }
+        assertEquals(BleWriteType.WITH_RESPONSE, resetWrite.writeType)
+    }
+
+    @Test
+    fun `acknowledged RESET completes and logs acknowledgement`() = runTest {
+        val env = createConnectedTransport()
+
+        env.transport.abort()
+
+        // An acknowledged RESET means the write completed within the timeout; abort must return normally.
+        val resetWrite = env.controlPointWrites().single { it.data.isNotEmpty() && it.data[0] == LegacyDfuOpcode.RESET }
+        assertTrue(resetWrite.data.size == 1, "RESET payload is a single opcode byte")
+    }
+
+    @Test
+    fun `abort returns within RESET_WRITE_TIMEOUT when the RESET write hangs`() = runTest {
+        val env = createConnectedTransport()
+        env.service.hangOnControlPointWrites = true
+
+        // Run abort on the test dispatcher so virtual time advances past RESET_WRITE_TIMEOUT. The hanging write
+        // never completes; withTimeoutOrNull inside abort must return null and abort must return normally.
+        val abortJob = async { env.transport.abort() }
+        advanceUntilIdle()
+        abortJob.await()
+
+        // No RESET write should have been recorded on the delegate — the hang prevented the write from reaching
+        // FakeBleService.write, so an "acknowledged" log would be a lie.
+        val resetWrites =
+            env.controlPointWrites().filter { it.data.isNotEmpty() && it.data[0] == LegacyDfuOpcode.RESET }
+        assertTrue(resetWrites.isEmpty(), "RESET write should not have been recorded when the link hung")
+    }
+
+    @Test
+    fun `abort propagates parent cancellation rather than reporting success`() = runTest {
+        val env = createConnectedTransport()
+        env.service.hangOnControlPointWrites = true
+
+        // parentJob stands in for the caller's scope; cancelling it must propagate through withTimeoutOrNull
+        // (which only swallows its own TimeoutCancellationException, not parent cancellation) and out of abort.
+        val parentJob = Job()
+        val abortDeferred = async(parentJob) { env.transport.abort() }
+
+        // Let abort reach the hanging RESET write.
+        runCurrent()
+        parentJob.cancel()
+        assertFailsWith<CancellationException> { abortDeferred.await() }
+    }
+
+    @Test
+    fun `abort does not swallow Error subtypes from the RESET write`() = runTest {
+        val env = createConnectedTransport()
+        env.service.throwErrorOnControlPointWrites = true
+
+        // abort catches Exception (operational link failures) but lets Error subtypes propagate.
+        assertFailsWith<AssertionError> { env.transport.abort() }
+    }
+
+    @Test
+    fun `abort swallows operational Exception from the RESET write`() = runTest {
+        val env = createConnectedTransport()
+        env.service.throwExceptionOnControlPointWrites = true
+
+        // A RuntimeException from the control-point write is an operational Exception — abort must catch it
+        // (best-effort, non-fatal) and return normally without rethrowing.
+        env.transport.abort()
+    }
+
+    @Test
+    fun `close completes after abort`() = runTest {
+        val env = createConnectedTransport()
+
+        env.transport.abort()
+        // close() must complete normally regardless of what abort did — mirrors the handler's
+        // try { abort() } finally { close() } teardown contract.
+        env.transport.close()
     }
 }
