@@ -8,7 +8,7 @@ inputs:
     description: 'JDK distribution (temurin or jetbrains)'
     default: 'temurin'
   install_jetbrains_jdk:
-    description: 'Also install JetBrains JDK 21 for Compose Desktop toolchain resolution'
+    description: 'Also install JetBrains JDK 25 for Compose Desktop toolchain resolution'
     default: 'false'
   gradle_encryption_key:
     description: 'Encryption key for Gradle remote cache'
@@ -30,21 +30,21 @@ runs:
         distribution: ${{ inputs.jdk_distribution }}
         token: ${{ github.token }}
 
-    - name: Restore cached JetBrains JDK 21
+    - name: Restore cached JetBrains JDK 25
       if: inputs.install_jetbrains_jdk == 'true'
       id: cache-jbr
       uses: actions/cache@v6
       with:
         path: ${{ runner.tool_cache }}/Java_JetBrains_jdk
-        key: jbr-21-${{ runner.os }}-${{ runner.arch }}
+        key: jbr-25-${{ runner.os }}-${{ runner.arch }}
 
-    - name: Set up JetBrains JDK 21 (for Compose Desktop)
+    - name: Set up JetBrains JDK 25 (for Compose Desktop)
       if: inputs.install_jetbrains_jdk == 'true' && steps.cache-jbr.outputs.cache-hit != 'true'
       id: setup-jbr
       continue-on-error: true
       uses: actions/setup-java@v5
       with:
-        java-version: '21'
+        java-version: '25'
         distribution: 'jetbrains'
         check-latest: false
         token: ${{ github.token }}
