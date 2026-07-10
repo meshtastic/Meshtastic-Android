@@ -57,6 +57,10 @@ buildCache {
             url = cacheUrl.endsWith("/") ? cacheUrl : "${cacheUrl}/"
 
             if (cacheUsername && cachePassword) {
+                if (cacheUrl.startsWith("http://")) {
+                    logger.warn "Meshtastic: GRADLE_CACHE_URL uses http:// with credentials set; " +
+                            "credentials will be sent in cleartext."
+                }
                 credentials {
                     username = cacheUsername
                     password = cachePassword

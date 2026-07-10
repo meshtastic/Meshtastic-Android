@@ -27,8 +27,8 @@ import org.meshtastic.buildlogic.libs
 /**
  * Convention for Compose Screenshot Testing modules (`:screenshot-tests`, `:docs-screenshots`).
  *
- * Owns the shared CST configuration: the `enableScreenshotTest` experimental flag, the test-retry opt-out (CST's
- * custom runner is incompatible with test-retry), and the Compose Multiplatform + screenshot-validation dependencies.
+ * Owns the shared CST configuration: the `enableScreenshotTest` experimental flag, the test-retry opt-out (CST's custom
+ * runner is incompatible with test-retry), and the Compose Multiplatform + screenshot-validation dependencies.
  * Configuration-only: apply it ALONGSIDE `meshtastic.android.library[.compose]` and `com.android.compose.screenshot`,
  * which the module declares itself. The `screenshotTests { imageDifferenceThreshold }` block stays in the module
  * scripts — it is a DSL extension of the screenshot plugin, reachable there via generated accessors only.
@@ -42,9 +42,11 @@ class AndroidScreenshotConventionPlugin : Plugin<Project> {
                 }
 
                 // CST screenshot tests use a custom runner incompatible with test-retry
-                tasks.withType<Test>().configureEach {
-                    if (name.contains("ScreenshotTest", ignoreCase = true)) {
-                        extensions.configure<TestRetryTaskExtension> { maxRetries.set(0) }
+                pluginManager.withPlugin("org.gradle.test-retry") {
+                    tasks.withType<Test>().configureEach {
+                        if (name.contains("ScreenshotTest", ignoreCase = true)) {
+                            extensions.configure<TestRetryTaskExtension> { maxRetries.set(0) }
+                        }
                     }
                 }
 
