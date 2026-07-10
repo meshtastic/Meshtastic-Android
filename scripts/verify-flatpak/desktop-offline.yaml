@@ -1,5 +1,5 @@
 # Local offline verification of org.meshtastic.MeshtasticDesktop.
-# Differences from vid's upstream manifest (vidplace7/org.meshtastic.MeshtasticDesktop):
+# Differences from the official Flathub manifest (flathub/org.meshtastic.MeshtasticDesktop):
 #   1. Meshtastic-Android source: `type: dir` pointing at our local checkout instead of `type: git`.
 #   2. flatpak-sources.json is INCLUDED (uncommented) so Gradle resolves from the offline-repository.
 #   3. Build uses `--offline` for Gradle — true Flathub-style offline compilation.
@@ -68,7 +68,7 @@ modules:
         # Point Gradle at the offline mirror produced by flatpak-sources.json
         GRADLE_USER_HOME: /run/build/meshtastic-desktop/.gradle
     build-commands:
-      # Install desktop metadata from the in-repo packaging sources (mirrors vid's upstream manifest,
+      # Install desktop metadata from the in-repo packaging sources (mirrors the upstream Flathub manifest,
       # which stopped shipping standalone root-level copies as of 2026-05-30).
       - install -Dm644 desktopApp/packaging/icons/icon.svg /app/share/icons/hicolor/scalable/apps/org.meshtastic.MeshtasticDesktop.svg
       - install -Dm644 -t /app/share/applications desktopApp/packaging/linux/org.meshtastic.MeshtasticDesktop.desktop

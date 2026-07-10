@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
-# Local replica of vid's flatpak CI (vidplace7/org.meshtastic.MeshtasticDesktop,
-# .github/workflows/build-flatpak.yml) but flipped to true-offline mode: our
-# flatpak-sources.json is included and --share=network is removed from the
-# build phase.
+# Local replica of the official Flathub packaging build (flathub/org.meshtastic.MeshtasticDesktop)
+# but flipped to true-offline mode: our flatpak-sources.json is included and
+# --share=network is removed from the build phase.
 #
 # Goal: validate flatpak-sources.json end-to-end (download + verify sha256s +
-# offline Gradle build) without bugging vid to push & re-run his workflow.
+# offline Gradle build) without round-tripping through the Flathub repo's CI.
 #
 # Requirements:
 #   - Docker (Docker Desktop on macOS works for --download-only mode; full builds
@@ -18,12 +17,12 @@
 #   scripts/verify-flatpak/verify.sh --download-only   # URLs+sha256 only (works on macOS)
 #   scripts/verify-flatpak/verify.sh --arch aarch64    # cross-arch via QEMU emulation
 #   scripts/verify-flatpak/verify.sh --shell           # drop into builder container shell
-#   scripts/verify-flatpak/verify.sh --skip-regen      # reuse flatpak-sources.json; still re-clone vid + re-rsync source
+#   scripts/verify-flatpak/verify.sh --skip-regen      # reuse flatpak-sources.json; still re-clone upstream + re-rsync source
 #   scripts/verify-flatpak/verify.sh --rebuild-only    # tight loop: refresh overlay+manifest only, then re-run flatpak-builder
 #
 # Iteration tip: after a build fails partway, fix the overlay YAML (or the
 # Meshtastic-Android source) and re-run with --rebuild-only — Gradle regen,
-# vid-repo fetch, and full source rsync are all skipped, so you get straight
+# upstream-repo fetch, and full source rsync are all skipped, so you get straight
 # back to flatpak-builder in seconds.
 
 set -euo pipefail
@@ -56,9 +55,9 @@ WORK="$REPO_ROOT/build/flatpak-verify"
 OVERLAY="$REPO_ROOT/scripts/verify-flatpak/desktop-offline.yaml"
 SOURCES_JSON="$REPO_ROOT/flatpak-sources.json"
 GRADLE_HOME_ISOLATED="$REPO_ROOT/build/flatpak-gradle-home"
-VID_REPO="https://github.com/vidplace7/org.meshtastic.MeshtasticDesktop.git"
+VID_REPO="https://github.com/flathub/org.meshtastic.MeshtasticDesktop.git"
 
-# bilelmoussaoui's image is what vid's CI uses; freedesktop-24.08 is the latest
+# bilelmoussaoui's image is what the upstream flatpak CI uses; freedesktop-24.08 is the latest
 # tag available. The 25.08 runtime declared in the manifest is pulled from
 # flathub at build time inside the container.
 BUILDER_IMAGE="bilelmoussaoui/flatpak-github-actions:freedesktop-24.08"
@@ -97,8 +96,8 @@ else
     if [[ ! -d "$WORK/org.meshtastic.MeshtasticDesktop/.git" ]]; then
         git clone --depth 1 --recurse-submodules "$VID_REPO" "$WORK/org.meshtastic.MeshtasticDesktop"
     else
-        git -C "$WORK/org.meshtastic.MeshtasticDesktop" fetch --depth 1 origin main
-        git -C "$WORK/org.meshtastic.MeshtasticDesktop" reset --hard origin/main
+        git -C "$WORK/org.meshtastic.MeshtasticDesktop" fetch --depth 1 origin master
+        git -C "$WORK/org.meshtastic.MeshtasticDesktop" reset --hard origin/master
         git -C "$WORK/org.meshtastic.MeshtasticDesktop" submodule update --init --recursive --depth 1
     fi
 fi

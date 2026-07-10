@@ -74,10 +74,10 @@ jobs:
         with:
           name: flatpak-sources
 
-      - name: Clone vid's flatpak repo
+      - name: Clone the Flathub packaging repo
         run: |
           git clone --depth 1 --recurse-submodules \
-            https://github.com/vidplace7/org.meshtastic.MeshtasticDesktop.git \
+            https://github.com/flathub/org.meshtastic.MeshtasticDesktop.git \
             "$RUNNER_TEMP/org.meshtastic.MeshtasticDesktop"
 
       - name: Wire overlay manifest + sources
