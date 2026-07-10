@@ -189,6 +189,30 @@
   },
   "pullRequests": [
     {
+      "id": "10973",
+      "title": "tlora-t3s3-epaper: e-ink startup and build cleanup",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10973",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "10969",
+      "title": "Sign plaintext packets in licensed mode",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10969",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "10968",
+      "title": "Update LovyanGFX to v1.2.25",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10968",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "10962",
+      "title": "Extra repeats",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10962",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
       "id": "10954",
       "title": "Flatpak: rename Meshtastic -> MeshtasticD",
       "page_url": "https://github.com/meshtastic/firmware/pull/10954",
@@ -289,30 +313,6 @@
       "title": "fixed tlora-v2-1-1_16 led heartbeat not blinking and stuck at single s…",
       "page_url": "https://github.com/meshtastic/firmware/pull/10878",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10870",
-      "title": "Fix message scroll being reset every frame on E-Ink displays",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10870",
-      "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "10845",
-      "title": "Fix ESP32-S2 nugget build",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10845",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10844",
-      "title": "Fix audio module availability",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10844",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10807",
-      "title": "Add DeltaPlusProto Edict board variant",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10807",
-      "zip_url": "https://discord.com/invite/meshtastic"
     }
   ]
 }
