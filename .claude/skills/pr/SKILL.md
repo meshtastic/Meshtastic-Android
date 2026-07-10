@@ -26,8 +26,9 @@ Pin to the SHA that contains the image, not the branch name.
 ## 3. Push and open
 ```bash
 git push -u origin HEAD
-gh pr create --draft --title "<type>: <summary>" --body-file <(printf '%s' "$BODY")
+gh pr create --draft --base <target> --title "<type>: <summary>" --body-file <(printf '%s' "$BODY")
 ```
+- `--base` is the target branch chosen in pre-flight (`main` unless told otherwise) — always pass it explicitly; omitting it silently uses the repo default.
 - Draft by default; only `--ready` if explicitly asked.
 - End the body with: `🤖 Generated with [Claude Code](https://claude.com/claude-code)`
 - Report the PR URL as a markdown link.

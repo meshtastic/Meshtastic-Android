@@ -97,7 +97,7 @@ notes=""
 
 # Lazy-list duplicate-key crash — shipped TWICE (bare telemetry.time; bare
 # node.num). Flag key lambdas built on those exact fields.
-risky=$(grep -nE 'key[[:space:]]*=[[:space:]]*\{[[:space:]]*[A-Za-z_][A-Za-z0-9_.]*\.(num|time)[[:space:]]*\}' "$file_path" 2>/dev/null)
+risky=$(grep -nE 'key[[:space:]]*=[[:space:]]*\{[[:space:]]*([A-Za-z_][A-Za-z0-9_]*[[:space:]]*->[[:space:]]*)?[A-Za-z_][A-Za-z0-9_.]*\.(num|time)[[:space:]]*\}' "$file_path" 2>/dev/null)
 if [ -n "$risky" ]; then
   notes="Lazy-list key built on .num/.time — this exact pattern shipped two production dup-key crashes (bare telemetry.time, fixed with \"\${time}_\$index\"; bare node.num, fixed with distinctBy since _\$index breaks animateItem). Keys must be unique across the submitted list — dedupe the source list or compose the key:
 $risky"
@@ -108,7 +108,9 @@ fi
 # an excuse (that's a latent bug, not a pattern).
 case "$file_path" in
   */commonMain/*|*/androidMain/*)
-    hardcoded=$(grep -nE 'Text\([[:space:]]*(text[[:space:]]*=[[:space:]]*)?"[A-Za-z]' "$file_path" 2>/dev/null)
+    # Two shapes: inline Text("...") / Text(text = "..."), and the multiline
+    # form where 'text = "..."' sits on its own line inside a formatted call.
+    hardcoded=$(grep -nE '(Text\(|text[[:space:]]*=)[[:space:]]*"[A-Za-z]' "$file_path" 2>/dev/null)
     if [ -n "$hardcoded" ]; then
       [ -n "$notes" ] && notes="$notes
 

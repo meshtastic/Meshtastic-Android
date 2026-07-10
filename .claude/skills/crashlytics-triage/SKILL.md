@@ -6,16 +6,16 @@ disable-model-invocation: true
 
 # crashlytics-triage
 
-Crashlytics sweep for the **meshutil** Firebase project (`484268767777`), prod app id `1:484268767777:android:70d9bffeca6efe05334160`. Datadog RUM is the *other* backend (high-volume logged errors — use `datadog-rum-investigator` there); Crashlytics is the low-volume real-crash signal. If Firebase MCP auth fails, the account is james.a.rich@gmail.com.
+Crashlytics sweep for the **meshutil** Firebase project (`484268767777`), prod app id `1:484268767777:android:70d9bffeca6efe05334160`. Datadog RUM is the *other* backend (high-volume logged errors — use `datadog-rum-investigator` there); Crashlytics is the low-volume real-crash signal. If Firebase MCP auth fails, repair the local Firebase MCP authentication (the configured session account has access).
 
 ## 1. Version context first — never guess the filter string
-Call `crashlytics_get_report` for **topVersions with NO filter**. This yields the exact display names — the version filter format is `"X.Y.Z (versionCode)"` and hand-built strings silently match nothing. Pick the target version(s): the argument if given, else the newest prod version with meaningful session volume.
+Call `crashlytics_get_report` for **topVersions with NO filter**. This yields the exact display names — the version filter format is `"X.Y.Z (versionCode)"` and hand-built strings silently match nothing. Pick the target version(s): the argument if given, else the newest **production** version with meaningful session volume. topVersions doesn't say which track a versionCode shipped on — map candidate versionCodes to releases via `gh release list` (release names embed the versionCode; never hand-arithmetic) before picking, then use the exact topVersions display name as the filter.
 
 ## 2. Top issues for that version
 `crashlytics_get_report` topIssues filtered to the exact display name from step 1. Take the top ~5 (or the requested count) by event count. Note event counts and affected-user counts.
 
 ## 3. Fan out — one crash-investigator per issue, in parallel
-Dispatch the `crash-investigator` agent for each issue **in a single message** so they run concurrently. Give each: the issue id, the version display name, and the ask (root-cause hypothesis + fix area + whether it's already fixed/known). Known residuals to cross-check before calling anything "new": cluster-renderer lifecycle (fixed ≥29321034), MQTT/TLS ktor write (fixed, old 2.7.14 users), LazyColumn dup-key (two prior instances).
+Dispatch the `crash-investigator` agent for each issue **in a single message** so they run concurrently. Give each: the issue id, the version display name, and the ask (root-cause hypothesis + fix area + whether it's already fixed/known). Historical patterns to investigate — hints, not automatic classifications: cluster-renderer lifecycle (fix shipped in 29321034), MQTT/TLS ktor write (fixed, lingering 2.7.14 users), LazyColumn dup-key (two prior instances). Each investigator must verify the crashing versionCode against the fix's release before reporting "known-fixed-residual".
 
 ## 4. Verdict
 One table: issue → crash count/users → root-cause hypothesis → status (NEW / known-fixed-residual / regression) → fix area. Flag anything that warrants a hotfix vs. next-release. No raw stack traces in the summary.
