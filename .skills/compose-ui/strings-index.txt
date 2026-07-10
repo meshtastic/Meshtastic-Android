@@ -384,6 +384,7 @@ discovery_dwell_time_description
 discovery_empty_history
 discovery_export_report
 discovery_history
+discovery_interrupted_scan_restored
 discovery_keep_screen_awake
 discovery_keep_screen_awake_description
 discovery_local_mesh

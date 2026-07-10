@@ -55,6 +55,19 @@ interface DiscoveryDao {
     @Query("UPDATE discovery_session SET completion_status = 'interrupted' WHERE completion_status = 'in_progress'")
     suspend fun markInterruptedSessions()
 
+    /**
+     * The most recent session left mid-scan by a prior process (crash, BLE loss, or force-quit) for [deviceAddress] —
+     * "in_progress" if the process died before [markInterruptedSessions] ever ran, "interrupted" otherwise.
+     */
+    @Query(
+        """
+        SELECT * FROM discovery_session
+        WHERE device_address = :deviceAddress AND completion_status IN ('in_progress', 'interrupted')
+        ORDER BY timestamp DESC LIMIT 1
+        """,
+    )
+    suspend fun getInterruptedSession(deviceAddress: String): DiscoverySessionEntity?
+
     // endregion
 
     // region Preset result operations

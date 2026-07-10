@@ -25,6 +25,8 @@ import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.util.decodeOrNull
+import org.meshtastic.proto.ChannelSettings
+import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.Paxcount
@@ -97,6 +99,22 @@ class Converters {
     @ColumnTypeConverter fun bytesToByteString(bytes: ByteArray?): ByteString? = bytes?.toByteString()
 
     @ColumnTypeConverter fun byteStringToBytes(value: ByteString?): ByteArray? = value?.toByteArray()
+
+    /** Discovery scans capture the radio's pre-scan LoRa config so an interrupted scan can restore it later. */
+    @ColumnTypeConverter
+    fun bytesToLoRaConfig(bytes: ByteArray?): Config.LoRaConfig? =
+        bytes?.let { Config.LoRaConfig.ADAPTER.decodeOrNull(it, Logger) }
+
+    @ColumnTypeConverter
+    fun loRaConfigToBytes(value: Config.LoRaConfig?): ByteArray? = value?.let { Config.LoRaConfig.ADAPTER.encode(it) }
+
+    /** Discovery scans capture the radio's pre-scan primary channel to restore after a custom-channel target. */
+    @ColumnTypeConverter
+    fun bytesToChannelSettings(bytes: ByteArray?): ChannelSettings? =
+        bytes?.let { ChannelSettings.ADAPTER.decodeOrNull(it, Logger) }
+
+    @ColumnTypeConverter
+    fun channelSettingsToBytes(value: ChannelSettings?): ByteArray? = value?.let { ChannelSettings.ADAPTER.encode(it) }
 
     @ColumnTypeConverter
     fun messageStatusToInt(value: MessageStatus?): Int = value?.ordinal ?: MessageStatus.UNKNOWN.ordinal

@@ -86,6 +86,51 @@ abstract class CommonDiscoveryDaoTest {
 
     // endregion
 
+    // region Interrupted-session lookup (crash / BLE-loss recovery)
+
+    @Test
+    fun getInterruptedSession_returnsInProgressSessionForDevice() = runTest {
+        dao.insertSession(testSession().copy(deviceAddress = "x:AA:BB:CC:DD:EE:FF", completionStatus = "in_progress"))
+        val found = dao.getInterruptedSession("x:AA:BB:CC:DD:EE:FF")
+        assertNotNull(found)
+        assertEquals("in_progress", found.completionStatus)
+    }
+
+    @Test
+    fun getInterruptedSession_returnsInterruptedSessionToo() = runTest {
+        dao.insertSession(testSession().copy(deviceAddress = "x:AA:BB:CC:DD:EE:FF", completionStatus = "interrupted"))
+        val found = dao.getInterruptedSession("x:AA:BB:CC:DD:EE:FF")
+        assertNotNull(found)
+        assertEquals("interrupted", found.completionStatus)
+    }
+
+    @Test
+    fun getInterruptedSession_returnsNullForDifferentDevice() = runTest {
+        dao.insertSession(testSession().copy(deviceAddress = "x:OTHER-DEVICE", completionStatus = "in_progress"))
+        assertNull(dao.getInterruptedSession("x:AA:BB:CC:DD:EE:FF"))
+    }
+
+    @Test
+    fun getInterruptedSession_returnsNullForCompletedSession() = runTest {
+        dao.insertSession(testSession().copy(deviceAddress = "x:AA:BB:CC:DD:EE:FF", completionStatus = "complete"))
+        assertNull(dao.getInterruptedSession("x:AA:BB:CC:DD:EE:FF"))
+    }
+
+    @Test
+    fun getInterruptedSession_returnsMostRecentWhenMultipleMatch() = runTest {
+        dao.insertSession(
+            testSession(timestamp = 1L).copy(deviceAddress = "x:AA:BB:CC:DD:EE:FF", completionStatus = "interrupted"),
+        )
+        dao.insertSession(
+            testSession(timestamp = 2L).copy(deviceAddress = "x:AA:BB:CC:DD:EE:FF", completionStatus = "in_progress"),
+        )
+        val found = dao.getInterruptedSession("x:AA:BB:CC:DD:EE:FF")
+        assertNotNull(found)
+        assertEquals(2L, found.timestamp)
+    }
+
+    // endregion
+
     // region Session sort order (getAllSessions returns newest-first)
 
     @Test

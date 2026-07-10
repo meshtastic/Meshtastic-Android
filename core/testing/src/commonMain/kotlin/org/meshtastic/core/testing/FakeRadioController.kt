@@ -58,6 +58,9 @@ class FakeRadioController :
 
     var throwOnSend: Boolean = false
 
+    /** When true, [setLocalConfig] throws — simulates the radio link dropping mid config write. */
+    var throwOnSetLocalConfig: Boolean = false
+
     /**
      * When set, a channel write throws once [localChannels] has reached this many entries — simulates a mid-write
      * failure.
@@ -79,6 +82,7 @@ class FakeRadioController :
             localConfigs.clear()
             localChannels.clear()
             throwOnSend = false
+            throwOnSetLocalConfig = false
             failChannelWriteAfter = null
             lastSetDeviceAddress = null
             lastSetOwnerUser = null
@@ -118,6 +122,7 @@ class FakeRadioController :
     override suspend fun refreshMetadata(destNum: Int) {}
 
     override suspend fun setLocalConfig(config: Config) {
+        if (throwOnSetLocalConfig) error("Fake local config write failure")
         localConfigs.add(config)
     }
 
