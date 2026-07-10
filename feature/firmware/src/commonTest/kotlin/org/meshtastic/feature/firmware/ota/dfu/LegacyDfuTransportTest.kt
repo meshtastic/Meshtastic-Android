@@ -27,6 +27,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
@@ -49,6 +50,7 @@ import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 import kotlin.time.Duration
 
@@ -378,14 +380,19 @@ class LegacyDfuTransportTest {
     private suspend fun createConnectedTransport(
         mtu: Int? = null,
         profile: LegacyDfuStreamProfile = LegacyDfuStreamProfile.NORMAL,
+        suppressDisconnectEmissions: Boolean = false,
     ): TestEnv {
         val scanner = FakeBleScanner()
         val fakeConnection = FakeBleConnection().apply { maxWriteValueLength = mtu }
         val autoService = AutoRespondingLegacyService(fakeConnection.service)
-        val wrappedConnection = AutoRespondingBleConnection(fakeConnection, autoService)
         val factory =
             object : BleConnectionFactory {
-                override fun create(scope: CoroutineScope, tag: String): BleConnection = wrappedConnection
+                override fun create(scope: CoroutineScope, tag: String): BleConnection = AutoRespondingBleConnection(
+                    delegate = fakeConnection,
+                    autoService = autoService,
+                    profileScope = scope,
+                    suppressDisconnectEmissions = suppressDisconnectEmissions,
+                )
             }
         val transport = LegacyDfuTransport(scanner, factory, address, Dispatchers.Unconfined, profile)
 
@@ -630,10 +637,35 @@ class LegacyDfuTransportTest {
             byteArrayOf(LegacyDfuOpcode.RESPONSE_CODE, opcode, LegacyDfuStatus.SUCCESS)
     }
 
+    /**
+     * [StateFlow] wrapper that exposes the delegate's [value][StateFlow.value] but filters
+     * [BleConnectionState.Disconnected] emissions from collectors. Used by the write-throws-on-disconnect race tests:
+     * the outer stream tripwire's `connectionState.first { Disconnected }` watcher stays suspended (modelling the race
+     * where the write throws before the watcher processes the emission), while `bleConnection.connectionState.value`
+     * still reads as Disconnected for the write-catch classification.
+     */
+    private class DisconnectEmissionsSuppressedStateFlow(private val delegate: StateFlow<BleConnectionState>) :
+        StateFlow<BleConnectionState> {
+        override val value: BleConnectionState
+            get() = delegate.value
+
+        override val replayCache: List<BleConnectionState>
+            get() = delegate.replayCache
+
+        override suspend fun collect(collector: FlowCollector<BleConnectionState>): Nothing {
+            delegate.collect { state ->
+                if (state is BleConnectionState.Disconnected) return@collect
+                collector.emit(state)
+            }
+        }
+    }
+
     /** BleConnection wrapper that swaps in the auto-responding service for `profile()` calls. */
     private class AutoRespondingBleConnection(
         private val delegate: FakeBleConnection,
         val autoService: AutoRespondingLegacyService,
+        private val profileScope: CoroutineScope,
+        suppressDisconnectEmissions: Boolean = false,
     ) : BleConnection {
         override val device: BleDevice?
             get() = delegate.device
@@ -641,8 +673,12 @@ class LegacyDfuTransportTest {
         override val deviceFlow: StateFlow<BleDevice?>
             get() = delegate.deviceFlow
 
-        override val connectionState: StateFlow<BleConnectionState>
-            get() = delegate.connectionState
+        override val connectionState: StateFlow<BleConnectionState> =
+            if (suppressDisconnectEmissions) {
+                DisconnectEmissionsSuppressedStateFlow(delegate.connectionState)
+            } else {
+                delegate.connectionState
+            }
 
         override suspend fun connect(device: BleDevice) = delegate.connect(device)
 
@@ -655,7 +691,7 @@ class LegacyDfuTransportTest {
             serviceUuid: kotlin.uuid.Uuid,
             timeout: Duration,
             setup: suspend CoroutineScope.(BleService) -> T,
-        ): T = CoroutineScope(Dispatchers.Unconfined).setup(autoService)
+        ): T = profileScope.setup(autoService)
 
         override fun maximumWriteValueLength(writeType: BleWriteType): Int? =
             delegate.maximumWriteValueLength(writeType)
@@ -770,7 +806,7 @@ class LegacyDfuTransportTest {
         assertEquals(200, error.totalBytes)
         // No PRN was received before the drop (first PRN would be at byte 200), so lastConfirmedBytes is -1.
         assertEquals(-1, error.lastConfirmedBytes)
-        assertTrue(error.connectionState.isNotBlank())
+        assertIs<BleConnectionState.Disconnected>(error.connectionState)
     }
 
     /**
@@ -815,6 +851,75 @@ class LegacyDfuTransportTest {
         assertEquals(220, ex.totalBytes)
     }
 
+    /**
+     * Race: `service.write()` throws BEFORE the outer stream tripwire's state-flow watcher processes the Disconnected
+     * emission. The write-catch re-check must classify the disconnect as [LegacyDfuException.MidStreamDisconnect] so
+     * the retry coordinator can switch to the RECOVERY profile — the raw write exception must NOT escape.
+     *
+     * [DisconnectEmissionsSuppressedStateFlow] models the race window: the tripwire watcher never sees Disconnected
+     * (its collector filters it), while `connectionState.value` still reads as Disconnected for the write-catch.
+     */
+    @Test
+    fun `failed write with disconnected connection classifies as MidStreamDisconnect`() = runTest {
+        val env = createConnectedTransport(suppressDisconnectEmissions = true)
+        env.responder.scheme = LegacyResponderScheme.HappyPath
+
+        val writeFailure = RuntimeException("simulated write failure on dead link")
+        env.responder.onFirmwarePacketWrite = { bytes ->
+            if (bytes >= 20L) {
+                env.connection.simulateRemoteDisconnect()
+                throw writeFailure
+            }
+        }
+
+        env.transport.transferInitPacket(ByteArray(14)).getOrThrow()
+        val result = env.transport.transferFirmware(ByteArray(200)) {}
+
+        val error =
+            assertIs<LegacyDfuException.MidStreamDisconnect>(
+                result.exceptionOrNull(),
+                "expected the write-catch to classify the disconnect that beat the tripwire watcher",
+            )
+        // streamOffset was published as 20 before the first firmware-packet write, so bytesSent == 20.
+        assertEquals(20, error.bytesSent)
+        assertEquals(200, error.totalBytes)
+        // No PRN was received before the drop (first PRN would be at byte 200), so lastConfirmedBytes is -1.
+        assertEquals(-1, error.lastConfirmedBytes)
+        assertIs<BleConnectionState.Disconnected>(error.connectionState)
+        assertSame(writeFailure, error.cause)
+    }
+
+    /**
+     * When the link is still Connected, a failed write must NOT be reclassified as
+     * [LegacyDfuException.MidStreamDisconnect] — the original exception must escape unchanged so the caller can react
+     * to the real cause instead of mistaking it for a link drop.
+     */
+    @Test
+    fun `failed write with active connection is not reclassified`() = runTest {
+        val env = createConnectedTransport()
+        env.responder.scheme = LegacyResponderScheme.HappyPath
+
+        val writeFailure = RuntimeException("simulated write failure on live link")
+        env.responder.onFirmwarePacketWrite = { bytes ->
+            if (bytes >= 20L) {
+                throw writeFailure
+            }
+        }
+
+        env.transport.transferInitPacket(ByteArray(14)).getOrThrow()
+        val result = env.transport.transferFirmware(ByteArray(200)) {}
+
+        // The write failure must NOT be classified as MidStreamDisconnect while the connection is active.
+        // assertIs<RuntimeException> proves it was not reclassified; message equality confirms it's the
+        // same failure (coroutine stack-trace recovery may copy the exception across coroutineScope boundaries).
+        val error =
+            assertIs<RuntimeException>(
+                result.exceptionOrNull(),
+                "a write failure on an active connection must not become MidStreamDisconnect",
+            )
+        assertEquals(writeFailure.message, error.message)
+    }
+
     // -----------------------------------------------------------------------
     // Bounded RESET (abort)
     // -----------------------------------------------------------------------
@@ -830,7 +935,7 @@ class LegacyDfuTransportTest {
     }
 
     @Test
-    fun `acknowledged RESET completes and logs acknowledgement`() = runTest {
+    fun `acknowledged RESET completes after response`() = runTest {
         val env = createConnectedTransport()
 
         env.transport.abort()

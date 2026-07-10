@@ -19,6 +19,7 @@
 package org.meshtastic.feature.firmware.ota.dfu
 
 import kotlinx.coroutines.test.runTest
+import org.meshtastic.core.ble.BleConnectionState
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -61,7 +62,7 @@ class LegacyDfuRetryPolicyTest {
                                 LegacyDfuException.MidStreamDisconnect(
                                     20,
                                     200,
-                                    "Disconnected",
+                                    BleConnectionState.Disconnected(),
                                     lastConfirmedBytes = -1,
                                 ),
                                 false,
@@ -111,7 +112,7 @@ class LegacyDfuRetryPolicyTest {
                                 LegacyDfuException.MidStreamDisconnect(
                                     20,
                                     200,
-                                    "Disconnected",
+                                    BleConnectionState.Disconnected(),
                                     lastConfirmedBytes = -1,
                                 ),
                                 false,
@@ -245,7 +246,12 @@ class LegacyDfuRetryPolicyTest {
 
                     2 ->
                         DfuUploadResult.Failure(
-                            LegacyDfuException.MidStreamDisconnect(20, 200, "Disconnected", lastConfirmedBytes = -1),
+                            LegacyDfuException.MidStreamDisconnect(
+                                20,
+                                200,
+                                BleConnectionState.Disconnected(),
+                                lastConfirmedBytes = -1,
+                            ),
                             false,
                         )
 
@@ -308,7 +314,7 @@ class LegacyDfuRetryPolicyTest {
                                 LegacyDfuException.MidStreamDisconnect(
                                     50,
                                     200,
-                                    "Disconnected",
+                                    BleConnectionState.Disconnected(),
                                     lastConfirmedBytes = -1,
                                 ),
                                 false,
@@ -425,7 +431,12 @@ class LegacyDfuRetryPolicyTest {
                     if (sessions.size == 1) {
                         // First attempt: engages, then drops mid-stream.
                         DfuUploadResult.Failure(
-                            LegacyDfuException.MidStreamDisconnect(50, 200, "Disconnected", lastConfirmedBytes = -1),
+                            LegacyDfuException.MidStreamDisconnect(
+                                50,
+                                200,
+                                BleConnectionState.Disconnected(),
+                                lastConfirmedBytes = -1,
+                            ),
                             true,
                         )
                     } else {
@@ -465,7 +476,7 @@ class LegacyDfuRetryPolicyTest {
                                 LegacyDfuException.MidStreamDisconnect(
                                     50,
                                     200,
-                                    "Disconnected",
+                                    BleConnectionState.Disconnected(),
                                     lastConfirmedBytes = -1,
                                 ),
                                 true,
@@ -607,7 +618,13 @@ class LegacyDfuRetryPolicyTest {
         cleanupDfuSessionTransport(
             transport,
             completed = false,
-            sessionFailure = LegacyDfuException.MidStreamDisconnect(20, 200, "Disconnected", lastConfirmedBytes = -1),
+            sessionFailure =
+            LegacyDfuException.MidStreamDisconnect(
+                20,
+                200,
+                BleConnectionState.Disconnected(),
+                lastConfirmedBytes = -1,
+            ),
         )
         assertFalse(transport.abortCalled, "abort must be skipped after MidStreamDisconnect")
         assertTrue(transport.closeCalled, "close must always run")
