@@ -235,7 +235,11 @@ fun NodeListScreen(
                     )
                 }
 
-                items(nodes, key = { it.num }) { node ->
+                // Dedup by num: it's the LazyColumn key (must be unique) but the upstream flow can
+                // momentarily emit two entries with the same num (e.g. a num=0 unknown-node placeholder,
+                // or a brief double-emission during an active-DB switch). Composite "num_index" keys would
+                // fix the crash but break animateItem() reorder animations, so dedup instead.
+                items(nodes.distinctBy { it.num }, key = { it.num }) { node ->
                     var expanded by remember { mutableStateOf(false) }
 
                     Box(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
