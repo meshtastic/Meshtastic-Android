@@ -106,7 +106,12 @@ fun NodeListScreen(
     val scope = rememberCoroutineScope()
     val state by viewModel.nodesUiState.collectAsStateWithLifecycle()
 
-    val nodes by viewModel.nodeList.collectAsStateWithLifecycle()
+    // Dedup by num: it's the LazyColumn key (must be unique) but the upstream flow can momentarily emit
+    // two entries with the same num (a num=0 unknown-node placeholder, or a brief double-emission during
+    // an active-DB switch). Dedup once here so the count in the app bar and the rendered rows agree.
+    // Composite "num_index" keys would also fix the crash but break animateItem() reorder animations.
+    val allNodes by viewModel.nodeList.collectAsStateWithLifecycle()
+    val nodes = remember(allNodes) { allNodes.distinctBy { it.num } }
     val ourNode by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val onlineNodeCount by viewModel.onlineNodeCount.collectAsStateWithLifecycle(0)
     val totalNodeCount by viewModel.totalNodeCount.collectAsStateWithLifecycle(0)

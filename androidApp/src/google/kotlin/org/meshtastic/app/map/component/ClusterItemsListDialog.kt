@@ -48,7 +48,9 @@ fun ClusterItemsListDialog(
         text = {
             // Use a LazyColumn for potentially long lists of items
             LazyColumn(contentPadding = PaddingValues(vertical = 8.dp)) {
-                items(items, key = { it.node.num }) { item ->
+                // Dedup by node.num: it's the LazyColumn key and must be unique, but filteredNodes can
+                // contain the same node from two sources (or a num=0 placeholder). See NodeListScreen.
+                items(items.distinctBy { it.node.num }, key = { it.node.num }) { item ->
                     ClusterDialogListItem(item = item, onClick = { onItemClick(item) })
                 }
             }
