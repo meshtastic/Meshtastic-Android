@@ -11,12 +11,10 @@ runtime: org.freedesktop.Platform
 runtime-version: '25.08'
 sdk: org.freedesktop.Sdk
 sdk-extensions:
-  # Dual JDKs, both required: openjdk21 runs the Gradle daemon (gradle/gradle-daemon-jvm.properties
-  # pins toolchainVersion=21) and openjdk25 satisfies desktopApp's jvmToolchain (languageVersion=25).
-  # The offline build disables toolchain auto-provisioning, so bumping either pin means updating
-  # these extensions and the /usr/lib/sdk/openjdk* paths below — a miss fails at daemon startup (21)
-  # or compileJava (25).
-  - org.freedesktop.Sdk.Extension.openjdk21
+  # Single JDK: openjdk25 runs the Gradle daemon (gradle/gradle-daemon-jvm.properties pins
+  # toolchainVersion=25) and satisfies every module's jvmToolchain (25). The offline build
+  # disables toolchain auto-provisioning, so bumping either pin means updating this extension
+  # and the /usr/lib/sdk/openjdk* paths below — a miss fails at daemon startup or compileJava.
   - org.freedesktop.Sdk.Extension.openjdk25
 command: meshtastic-wrapper.sh
 
@@ -62,9 +60,9 @@ modules:
   - name: meshtastic-desktop
     buildsystem: simple
     build-options:
-      append-path: "/usr/lib/sdk/openjdk21/bin"
+      append-path: "/usr/lib/sdk/openjdk25/bin"
       env:
-        JAVA_HOME: /usr/lib/sdk/openjdk21/jvm/openjdk-21
+        JAVA_HOME: /usr/lib/sdk/openjdk25/jvm/openjdk-25
         # Point Gradle at the offline mirror produced by flatpak-sources.json
         GRADLE_USER_HOME: /run/build/meshtastic-desktop/.gradle
     build-commands:
@@ -79,7 +77,7 @@ modules:
       - sed -i 's|distributionUrl=.*|distributionUrl=gradle-all.zip|' gradle/wrapper/gradle-wrapper.properties
       - echo "org.gradle.java.installations.auto-detect=false" >> gradle.properties
       - echo "org.gradle.java.installations.auto-download=false" >> gradle.properties
-      - echo "org.gradle.java.installations.paths=/usr/lib/sdk/openjdk21/jvm/openjdk-21,/usr/lib/sdk/openjdk25/jvm/openjdk-25" >> gradle.properties
+      - echo "org.gradle.java.installations.paths=/usr/lib/sdk/openjdk25/jvm/openjdk-25" >> gradle.properties
       - >
         sed -i
         's/^\(\s*\)vendor\.set(JvmVendorSpec\.JETBRAINS)/\1\/\/ vendor.set(JvmVendorSpec.JETBRAINS)/'

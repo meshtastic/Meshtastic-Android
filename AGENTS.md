@@ -6,7 +6,7 @@ You are an expert Android/KMP engineer. Maintain architectural boundaries, use M
 
 <context_and_memory>
 - **Project Goal:** Decouple business logic from Android for multi-platform (Android, Desktop, iOS).
-- **Tech:** Kotlin 2.4+ (JDK 21), Ktor, Okio, Room KMP, Koin 4.2+.
+- **Tech:** Kotlin 2.4+ (JDK 25), Ktor, Okio, Room KMP, Koin 4.2+.
 - **Agent Memory:** `.agent_memory/` is local-only scratch (git-ignored) — never stage or commit it. Skim the top (most recent) entry of `.agent_memory/session_context.md` for current state — it is capped at ~5 entries; older handovers live in `session_context.archive.md` (read only if you need historical detail).
 - **Skills Directory (CONSULT THESE FIRST):** 
   - `.skills/project-overview/` - Codebase map, namespacing, **Bootstrap Steps**.
