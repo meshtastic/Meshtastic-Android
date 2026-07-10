@@ -18,11 +18,18 @@
 
 package org.meshtastic.feature.firmware.ota.dfu
 
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.ble.BleCharacteristic
 import org.meshtastic.core.ble.BleConnection
@@ -40,6 +47,7 @@ import org.meshtastic.core.testing.FakeBleWrite
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
 import kotlin.time.Duration
@@ -308,7 +316,7 @@ class LegacyDfuTransportTest {
         env.transport.transferInitPacket(ByteArray(14)).getOrThrow()
         // Send (PRN_INTERVAL_PACKETS + 1) packets of 20 bytes — guarantees a PRN window fires
         // before the firmware completes, so the under-reported byte count surfaces as a mismatch.
-        val firmwareSize = (LegacyDfuTransport.PRN_INTERVAL_PACKETS + 1) * 20
+        val firmwareSize = (PRN_INTERVAL_PACKETS + 1) * 20
         val result = env.transport.transferFirmware(ByteArray(firmwareSize)) {}
 
         assertTrue(result.isFailure)
@@ -353,7 +361,11 @@ class LegacyDfuTransportTest {
     // Test infrastructure
     // -----------------------------------------------------------------------
 
-    private class TestEnv(val transport: LegacyDfuTransport, val service: AutoRespondingLegacyService) {
+    private class TestEnv(
+        val transport: LegacyDfuTransport,
+        val service: AutoRespondingLegacyService,
+        val connection: FakeBleConnection,
+    ) {
         val responder = service.responder
 
         fun controlPointWrites(): List<FakeBleWrite> =
@@ -363,7 +375,10 @@ class LegacyDfuTransportTest {
             service.delegate.writes.filter { it.characteristic.uuid == LEGACY_DFU_PACKET_UUID }
     }
 
-    private suspend fun createConnectedTransport(mtu: Int? = null): TestEnv {
+    private suspend fun createConnectedTransport(
+        mtu: Int? = null,
+        profile: LegacyDfuStreamProfile = LegacyDfuStreamProfile.NORMAL,
+    ): TestEnv {
         val scanner = FakeBleScanner()
         val fakeConnection = FakeBleConnection().apply { maxWriteValueLength = mtu }
         val autoService = AutoRespondingLegacyService(fakeConnection.service)
@@ -372,20 +387,40 @@ class LegacyDfuTransportTest {
             object : BleConnectionFactory {
                 override fun create(scope: CoroutineScope, tag: String): BleConnection = wrappedConnection
             }
-        val transport = LegacyDfuTransport(scanner, factory, address, Dispatchers.Unconfined)
+        val transport = LegacyDfuTransport(scanner, factory, address, Dispatchers.Unconfined, profile)
 
         scanner.emitDevice(FakeBleDevice(dfuAddress))
         transport.connectToDfuMode().getOrThrow()
-        return TestEnv(transport, autoService)
+        return TestEnv(transport, autoService, fakeConnection)
     }
 
     /**
      * Drives the simulated bootloader response stream. After each `write()` to control point or packet, this service
      * synthesises the appropriate notification(s) on the control-point characteristic so the transport's pending
-     * `awaitResponse` / `awaitPacketReceipt` calls unblock.
+     * `awaitResponse` / `awaitPacketReceiptDuringStream` calls unblock.
      */
     private class AutoRespondingLegacyService(val delegate: FakeBleService) : BleService {
         val responder = LegacyResponder()
+
+        /**
+         * When `true`, the next `write()` to the Legacy Control Point characteristic suspends forever (via
+         * [awaitCancellation]) instead of completing. Used to prove the bounded abort returns within
+         * [LegacyDfuTransport.RESET_WRITE_TIMEOUT] when the device never ACKs the RESET.
+         */
+        var hangOnControlPointWrites: Boolean = false
+
+        /**
+         * When `true`, the next `write()` to the Legacy Control Point characteristic throws an [AssertionError]. Used
+         * to prove [LegacyDfuTransport.abort] (which catches [Exception], not [Throwable]) does not swallow [Error]
+         * subtypes.
+         */
+        var throwErrorOnControlPointWrites: Boolean = false
+
+        /**
+         * When `true`, the next `write()` to the Legacy Control Point characteristic throws a [RuntimeException]. Used
+         * to prove [LegacyDfuTransport.abort] swallows operational [Exception] subtypes (best-effort / non-fatal).
+         */
+        var throwExceptionOnControlPointWrites: Boolean = false
 
         override fun hasCharacteristic(c: BleCharacteristic) = delegate.hasCharacteristic(c)
 
@@ -396,6 +431,15 @@ class LegacyDfuTransportTest {
         override fun preferredWriteType(c: BleCharacteristic): BleWriteType = delegate.preferredWriteType(c)
 
         override suspend fun write(c: BleCharacteristic, data: ByteArray, writeType: BleWriteType) {
+            if (throwErrorOnControlPointWrites && c.uuid == LegacyDfuUuids.CONTROL_POINT) {
+                throw AssertionError("Simulated assertion failure during control point write")
+            }
+            if (throwExceptionOnControlPointWrites && c.uuid == LegacyDfuUuids.CONTROL_POINT) {
+                throw RuntimeException("Simulated link failure during control point write")
+            }
+            if (hangOnControlPointWrites && c.uuid == LegacyDfuUuids.CONTROL_POINT) {
+                awaitCancellation()
+            }
             delegate.write(c, data, writeType)
             val response = responder.onWrite(c.uuid, data) ?: return
             response.forEach { delegate.emitNotification(LegacyDfuUuids.CONTROL_POINT, it) }
@@ -426,13 +470,33 @@ class LegacyDfuTransportTest {
         var scheme: LegacyResponderScheme = LegacyResponderScheme.HappyPath
         var failOnActivateWrite: Boolean = false
 
+        /**
+         * Optional suspend hook invoked after each firmware-packet write with the cumulative byte count, while
+         * [AutoRespondingLegacyService.write] is still in progress. Tests use this to hold a write in flight (e.g. via
+         * [awaitCancellation]) while another coroutine changes connection state to simulate a mid-stream link drop at a
+         * deterministic offset.
+         */
+        var onFirmwarePacketWrite: (suspend (bytesReceived: Long) -> Unit)? = null
+
+        /**
+         * When `true`, packet-receipt notifications are NOT emitted by the simulated bootloader. Used to suspend the
+         * transport inside the PRN wait so a test can drive a disconnect while the wait is in flight.
+         */
+        var suppressPrnNotifications: Boolean = false
+
         private var packetBytesReceived = 0L
         private var packetsSinceLastPrn = 0
         private var firmwareTransferStarted = false
         private var imageSizesWritten = false
         private var expectedFirmwareSize: Int = 0
 
-        fun onWrite(uuid: kotlin.uuid.Uuid, data: ByteArray): List<ByteArray>? = when (uuid) {
+        /**
+         * Effective PRN cadence. Defaults to the NORMAL profile value; updated from the `PACKET_RECEIPT_NOTIF_REQ`
+         * control write so the responder matches whatever interval the transport requested (NORMAL=10, RECOVERY=5).
+         */
+        private var prnInterval: Int = PRN_INTERVAL_PACKETS
+
+        suspend fun onWrite(uuid: kotlin.uuid.Uuid, data: ByteArray): List<ByteArray>? = when (uuid) {
             LegacyDfuUuids.CONTROL_POINT -> handleControlWrite(data)
             LEGACY_DFU_PACKET_UUID -> handlePacketWrite(data)
             else -> null
@@ -454,7 +518,13 @@ class LegacyDfuTransportTest {
                     }
                 }
 
-                LegacyDfuOpcode.PACKET_RECEIPT_NOTIF_REQ -> null
+                LegacyDfuOpcode.PACKET_RECEIPT_NOTIF_REQ -> {
+                    if (data.size >= 3) {
+                        // Parse uint16-LE PRN value the transport just wrote and follow it for receipt cadence.
+                        prnInterval = (data[1].toInt() and 0xFF) or ((data[2].toInt() and 0xFF) shl 8)
+                    }
+                    null
+                }
 
                 LegacyDfuOpcode.RECEIVE_FIRMWARE_IMAGE -> {
                     firmwareTransferStarted = true
@@ -476,7 +546,7 @@ class LegacyDfuTransportTest {
             }
         }
 
-        private fun handlePacketWrite(data: ByteArray): List<ByteArray>? {
+        private suspend fun handlePacketWrite(data: ByteArray): List<ByteArray>? {
             // First packet write is the 12-byte image sizes payload (after START_DFU).
             if (!imageSizesWritten) {
                 imageSizesWritten = true
@@ -494,17 +564,22 @@ class LegacyDfuTransportTest {
             if (firmwareTransferStarted) {
                 packetBytesReceived += data.size
                 packetsSinceLastPrn++
+                onFirmwarePacketWrite?.invoke(packetBytesReceived)
                 val responses = mutableListOf<ByteArray>()
                 val firmwareDone = packetBytesReceived >= expectedFirmwareSize
-                if (packetsSinceLastPrn >= LegacyDfuTransport.PRN_INTERVAL_PACKETS && !firmwareDone) {
+                // Use the cadence the transport actually requested via PACKET_RECEIPT_NOTIF_REQ so a RECOVERY
+                // (prnInterval=5) upload receives receipts at the smaller interval.
+                if (packetsSinceLastPrn >= prnInterval && !firmwareDone) {
                     packetsSinceLastPrn = 0
-                    val reported =
-                        if (scheme == LegacyResponderScheme.PrnUnderReport) {
-                            packetBytesReceived - 1
-                        } else {
-                            packetBytesReceived
-                        }
-                    responses += packetReceipt(reported)
+                    if (!suppressPrnNotifications) {
+                        val reported =
+                            if (scheme == LegacyResponderScheme.PrnUnderReport) {
+                                packetBytesReceived - 1
+                            } else {
+                                packetBytesReceived
+                            }
+                        responses += packetReceipt(reported)
+                    }
                 }
                 if (firmwareDone) {
                     responses += success(LegacyDfuOpcode.RECEIVE_FIRMWARE_IMAGE)
@@ -584,5 +659,237 @@ class LegacyDfuTransportTest {
 
         override fun maximumWriteValueLength(writeType: BleWriteType): Int? =
             delegate.maximumWriteValueLength(writeType)
+    }
+
+    // -----------------------------------------------------------------------
+    // Stream profile selection
+    // -----------------------------------------------------------------------
+
+    @Test
+    fun `NORMAL profile writes PRN request value 10`() = runTest {
+        val env = createConnectedTransport(profile = LegacyDfuStreamProfile.NORMAL)
+        env.responder.scheme = LegacyResponderScheme.HappyPath
+
+        env.transport.transferInitPacket(ByteArray(14)).getOrThrow()
+        env.transport.transferFirmware(ByteArray(40)) {}
+
+        val prnWrite = env.controlPointWrites().single { it.data[0] == LegacyDfuOpcode.PACKET_RECEIPT_NOTIF_REQ }
+        val requested = (prnWrite.data[1].toInt() and 0xFF) or ((prnWrite.data[2].toInt() and 0xFF) shl 8)
+        assertEquals(PRN_INTERVAL_PACKETS, requested)
+    }
+
+    @Test
+    fun `RECOVERY profile writes PRN request value 5`() = runTest {
+        val env = createConnectedTransport(profile = LegacyDfuStreamProfile.RECOVERY)
+        env.responder.scheme = LegacyResponderScheme.HappyPath
+
+        env.transport.transferInitPacket(ByteArray(14)).getOrThrow()
+        env.transport.transferFirmware(ByteArray(40)) {}
+
+        val prnWrite = env.controlPointWrites().single { it.data[0] == LegacyDfuOpcode.PACKET_RECEIPT_NOTIF_REQ }
+        val requested = (prnWrite.data[1].toInt() and 0xFF) or ((prnWrite.data[2].toInt() and 0xFF) shl 8)
+        assertEquals(RECOVERY_PRN_INTERVAL_PACKETS, requested)
+    }
+
+    @Test
+    fun `RECOVERY profile awaits packet receipts at the smaller interval`() = runTest {
+        // RECOVERY prnInterval = 5, so a 100-byte firmware at 20-byte packets fires a PRN exactly once at byte 100
+        // (5 packets × 20B) — but offset == firmware.size at that point means the `offset < firmware.size` gate
+        // suppresses the wait. Use 110 bytes (would need 6 packets at NORMAL=10 to hit the first PRN) so the
+        // first PRN at 100B fires under RECOVERY but never fires under NORMAL within the 110B upload.
+        val env = createConnectedTransport(profile = LegacyDfuStreamProfile.RECOVERY)
+        env.responder.scheme = LegacyResponderScheme.HappyPath
+
+        env.transport.transferInitPacket(ByteArray(14)).getOrThrow()
+        val progress = mutableListOf<Float>()
+        val result = env.transport.transferFirmware(ByteArray(110)) { progress += it }
+
+        assertTrue(result.isSuccess, "transferFirmware failed: ${result.exceptionOrNull()}")
+        // A PRN fires at offset 100 (5 packets × 20B under RECOVERY prnInterval=5); progress must record it during
+        // streaming, then the final 1f at completion. This proves the PRN was consumed mid-stream, not just drained
+        // by the final response wait.
+        assertEquals(listOf(100f / 110f, 1f), progress)
+    }
+
+    @Test
+    fun `NORMAL profile does not await a PRN for a sub-interval upload`() = runTest {
+        // 110-byte firmware at 20-byte packets = 6 packets. NORMAL prnInterval = 10, so no PRN is due before the
+        // upload completes — the auto-responder must NOT emit a PRN, and the transport must NOT call
+        // awaitPacketReceiptDuringStream.
+        val env = createConnectedTransport(profile = LegacyDfuStreamProfile.NORMAL)
+        env.responder.scheme = LegacyResponderScheme.HappyPath
+
+        env.transport.transferInitPacket(ByteArray(14)).getOrThrow()
+        val result = env.transport.transferFirmware(ByteArray(110)) {}
+
+        assertTrue(result.isSuccess, "transferFirmware failed: ${result.exceptionOrNull()}")
+    }
+
+    // -----------------------------------------------------------------------
+    // Mid-stream disconnect
+    // -----------------------------------------------------------------------
+
+    @Test
+    fun `mid-stream disconnect returns typed MidStreamDisconnect with correct byte counts`() = runTest {
+        val env = createConnectedTransport()
+        env.responder.scheme = LegacyResponderScheme.HappyPath
+
+        // Hold the first firmware-packet write in flight so the transfer cannot run through all 200 bytes before
+        // the test injects the disconnect. Production streamOffset has already published 20 before the write, so
+        // the tripwire observer will read bytesSent == 20 when the link drops.
+        val firstPacketWriteInFlight = CompletableDeferred<Unit>()
+        env.responder.onFirmwarePacketWrite = { bytes ->
+            if (bytes >= 20L) {
+                firstPacketWriteInFlight.complete(Unit)
+                awaitCancellation()
+            }
+        }
+
+        env.transport.transferInitPacket(ByteArray(14)).getOrThrow()
+
+        val transferDeferred = async { env.transport.transferFirmware(ByteArray(200)) {} }
+        firstPacketWriteInFlight.await()
+        runCurrent()
+
+        assertTrue(
+            !transferDeferred.isCompleted,
+            "transfer must remain suspended inside the first firmware-packet write",
+        )
+
+        env.connection.simulateRemoteDisconnect()
+        runCurrent()
+
+        val result = transferDeferred.await()
+        val error =
+            assertIs<LegacyDfuException.MidStreamDisconnect>(
+                result.exceptionOrNull(),
+                "expected the outer stream tripwire to classify the disconnect while the first write was in flight",
+            )
+        // First packet write was in flight (streamOffset published as 20 before service.write), so bytesSent == 20.
+        assertEquals(20, error.bytesSent)
+        assertEquals(200, error.totalBytes)
+        // No PRN was received before the drop (first PRN would be at byte 200), so lastConfirmedBytes is -1.
+        assertEquals(-1, error.lastConfirmedBytes)
+        assertTrue(error.connectionState.isNotBlank())
+    }
+
+    /**
+     * A drop during a stream PRN wait must be classified by the OUTER stream-level tripwire as
+     * [LegacyDfuException.MidStreamDisconnect] — NOT as a generic handshake-style [DfuException.ConnectionFailed]. The
+     * stream PRN wait uses [awaitPacketReceiptDuringStream], which deliberately does NOT install its own disconnect
+     * tripwire, so the outer watcher is the sole classifier.
+     */
+    @Test
+    fun `stream-level tripwire classifies a drop during a PRN wait as MidStreamDisconnect`() = runTest {
+        val env = createConnectedTransport()
+        env.responder.scheme = LegacyResponderScheme.HappyPath
+        // Suppress PRNs so the transport suspends inside awaitPacketReceiptDuringStream at the first PRN boundary.
+        env.responder.suppressPrnNotifications = true
+
+        env.transport.transferInitPacket(ByteArray(14)).getOrThrow()
+
+        // First NORMAL PRN boundary = prnInterval (10) × default packet size (20B, MTU not negotiated) = byte 200.
+        // The responder fires this hook synchronously after accounting the 10th packet write, so completing the
+        // deferred proves the stream has written bytes 0..200 and is about to enter awaitPacketReceiptDuringStream —
+        // long before virtual time can reach the 30s COMMAND_TIMEOUT that would otherwise mask the tripwire path.
+        val reachedPrnBoundary = CompletableDeferred<Unit>()
+        env.responder.onFirmwarePacketWrite = { bytes -> if (bytes >= 200L) reachedPrnBoundary.complete(Unit) }
+
+        // Run the transfer asynchronously so the test body can synchronize the disconnect to the suspended PRN wait.
+        val transferDeferred = async { env.transport.transferFirmware(ByteArray(220)) {} }
+        // Wait for the 10th packet write to land, then flush dispatched continuations so the stream coroutine reaches
+        // the suspended receive() inside awaitPacketReceiptDuringStream — without advancing virtual time.
+        reachedPrnBoundary.await()
+        runCurrent()
+
+        // Simulate remote disconnect while the transport is suspended in awaitPacketReceiptDuringStream.
+        env.connection.simulateRemoteDisconnect()
+        runCurrent()
+
+        val result = transferDeferred.await()
+        assertTrue(result.isFailure)
+        val ex = assertIs<LegacyDfuException.MidStreamDisconnect>(result.exceptionOrNull())
+        // Must be the typed MidStreamDisconnect from the outer stream-level tripwire — NOT the generic
+        // ConnectionFailed that an inner handshake-style tripwire would have produced, and NOT a local Timeout.
+        assertEquals(200, ex.bytesSent)
+        assertEquals(220, ex.totalBytes)
+    }
+
+    // -----------------------------------------------------------------------
+    // Bounded RESET (abort)
+    // -----------------------------------------------------------------------
+
+    @Test
+    fun `RESET is written WITH_RESPONSE`() = runTest {
+        val env = createConnectedTransport()
+
+        env.transport.abort()
+
+        val resetWrite = env.controlPointWrites().single { it.data.isNotEmpty() && it.data[0] == LegacyDfuOpcode.RESET }
+        assertEquals(BleWriteType.WITH_RESPONSE, resetWrite.writeType)
+    }
+
+    @Test
+    fun `acknowledged RESET completes and logs acknowledgement`() = runTest {
+        val env = createConnectedTransport()
+
+        env.transport.abort()
+
+        // An acknowledged RESET means the write completed within the timeout; abort must return normally.
+        val resetWrite = env.controlPointWrites().single { it.data.isNotEmpty() && it.data[0] == LegacyDfuOpcode.RESET }
+        assertTrue(resetWrite.data.size == 1, "RESET payload is a single opcode byte")
+    }
+
+    @Test
+    fun `abort returns within RESET_WRITE_TIMEOUT when the RESET write hangs`() = runTest {
+        val env = createConnectedTransport()
+        env.service.hangOnControlPointWrites = true
+
+        // Run abort on the test dispatcher so virtual time advances past RESET_WRITE_TIMEOUT. The hanging write
+        // never completes; withTimeoutOrNull inside abort must return null and abort must return normally.
+        val abortJob = async { env.transport.abort() }
+        advanceUntilIdle()
+        abortJob.await()
+
+        // No RESET write should have been recorded on the delegate — the hang prevented the write from reaching
+        // FakeBleService.write, so an "acknowledged" log would be a lie.
+        val resetWrites =
+            env.controlPointWrites().filter { it.data.isNotEmpty() && it.data[0] == LegacyDfuOpcode.RESET }
+        assertTrue(resetWrites.isEmpty(), "RESET write should not have been recorded when the link hung")
+    }
+
+    @Test
+    fun `abort propagates parent cancellation rather than reporting success`() = runTest {
+        val env = createConnectedTransport()
+        env.service.hangOnControlPointWrites = true
+
+        // parentJob stands in for the caller's scope; cancelling it must propagate through withTimeoutOrNull
+        // (which only swallows its own TimeoutCancellationException, not parent cancellation) and out of abort.
+        val parentJob = Job()
+        val abortDeferred = async(parentJob) { env.transport.abort() }
+
+        // Let abort reach the hanging RESET write.
+        runCurrent()
+        parentJob.cancel()
+        assertFailsWith<CancellationException> { abortDeferred.await() }
+    }
+
+    @Test
+    fun `abort does not swallow Error subtypes from the RESET write`() = runTest {
+        val env = createConnectedTransport()
+        env.service.throwErrorOnControlPointWrites = true
+
+        // abort catches Exception (operational link failures) but lets Error subtypes propagate.
+        assertFailsWith<AssertionError> { env.transport.abort() }
+    }
+
+    @Test
+    fun `abort swallows operational Exception from the RESET write`() = runTest {
+        val env = createConnectedTransport()
+        env.service.throwExceptionOnControlPointWrites = true
+
+        // A RuntimeException from the control-point write is an operational Exception — abort must catch it
+        // (best-effort, non-fatal) and return normally without rethrowing.
+        env.transport.abort()
     }
 }
