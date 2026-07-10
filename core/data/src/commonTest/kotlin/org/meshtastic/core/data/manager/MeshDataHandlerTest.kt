@@ -797,4 +797,64 @@ class MeshDataHandlerTest {
 
         verifySuspend { packetRepository.insert(any(), 123, any(), any(), any(), filtered = true) }
     }
+
+    // --- Mention / mute interaction (meshtastic/design#21) ---
+
+    private val myId = "!abcd1234"
+
+    private fun mentionPacket() = MeshPacket(
+        id = 101,
+        from = 456,
+        decoded =
+        Data(portnum = PortNum.TEXT_MESSAGE_APP, payload = "hey @$myId".encodeToByteArray().toByteString()),
+    )
+
+    private fun mentionDataPacket() = DataPacket(
+        id = 101,
+        from = "!remote",
+        to = NodeAddress.ID_BROADCAST,
+        bytes = "hey @$myId".encodeToByteArray().toByteString(),
+        dataType = PortNum.TEXT_MESSAGE_APP.value,
+    )
+
+    @Test
+    fun `mention from a muted node does not notify`() = testScope.runTest {
+        val packet = mentionPacket()
+        every { dataMapper.toDataPacket(packet) } returns mentionDataPacket()
+        everySuspend { packetRepository.findPacketsWithId(101) } returns emptyList()
+        everySuspend { packetRepository.getContactSettings(any()) } returns ContactSettings(contactKey = "test")
+        every { messageFilter.shouldFilter(any(), any()) } returns false
+        every { nodeManager.getMyId() } returns myId
+        // Node mute is authoritative: a mention must NOT break through it.
+        every { nodeManager.getNodeById("!remote") } returns
+            Node(num = 456, user = User(id = "!remote", long_name = "Remote User"), isMuted = true)
+
+        handler.handleReceivedData(packet, 123)
+        advanceUntilIdle()
+
+        verifySuspend(mode = dev.mokkery.verify.VerifyMode.not) {
+            serviceNotifications.updateMessageNotification(any(), any(), any(), any(), any(), any())
+        }
+    }
+
+    @Test
+    fun `mention from an unmuted node in a muted channel still notifies`() = testScope.runTest {
+        val packet = mentionPacket()
+        every { dataMapper.toDataPacket(packet) } returns mentionDataPacket()
+        everySuspend { packetRepository.findPacketsWithId(101) } returns emptyList()
+        // Channel/conversation muted — a mention breaks through it (design#21).
+        everySuspend { packetRepository.getContactSettings(any()) } returns
+            ContactSettings(contactKey = "test", isMuted = true)
+        every { messageFilter.shouldFilter(any(), any()) } returns false
+        every { nodeManager.getMyId() } returns myId
+        every { nodeManager.getNodeById("!remote") } returns
+            Node(num = 456, user = User(id = "!remote", long_name = "Remote User"))
+
+        handler.handleReceivedData(packet, 123)
+        advanceUntilIdle()
+
+        verifySuspend {
+            serviceNotifications.updateMessageNotification(any(), any(), any(), any(), any(), isSilent = false)
+        }
+    }
 }
