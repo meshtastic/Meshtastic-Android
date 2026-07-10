@@ -153,41 +153,25 @@ abstract class MeshtasticDatabase : RoomDatabase() {
         /**
          * Configures a [RoomDatabase.Builder] with standard settings for this project.
          *
-         * @param multiConnection when `true` (default), opens a multi-reader connection pool (`maxNumOfReaders = 4`,
-         *   `maxNumOfWriters = 1`) so reads can run concurrently. Pass `false` to explicitly force
-         *   [setSingleConnectionPool], serializing all reads and writes through one connection.
+         * All platforms force [setSingleConnectionPool]. Without it, Room defaults to a 4-reader pool for named
+         * databases, and under coroutine cancellation churn (e.g. DB switches via `flatMapLatest`) the reader-pool
+         * permit semaphore can wedge: all reader connections report `Free` but `permits=0`, so every read acquisition
+         * times out indefinitely ("Error code: 5, Timed out attempting to acquire a reader connection"). Android hit
+         * this first; desktop (Flathub, 2026-07-10) reproduced the identical wedge in field logs, so JVM/iOS were moved
+         * off the multi-reader pool too. Single-connection eliminates the separate reader permit pool entirely.
          *
-         * **Android production passes `false`.** Without the explicit `setSingleConnectionPool()` call, Room defaults
-         * to a 4-reader pool for named databases regardless of whether `setMultipleConnectionPool` was called. Under
-         * coroutine cancellation churn (e.g. DB switches via `flatMapLatest`), the reader-pool permit semaphore can
-         * wedge: all reader connections report `Free` but `permits=0`, so every read acquisition times out
-         * indefinitely. Forcing single-connection eliminates the separate reader permit pool entirely.
-         *
-         * **In-memory databases (tests) pass `false`.** Room already serves an in-memory database (`name == null`) from
-         * a single connection regardless of the pool configuration, so this only makes the single-connection intent
-         * explicit and serializes the query dispatcher; it is not load-bearing for read-after-write.
-         * (`DeviceLinkRepositoryImplTest` is deterministic because it runs on the wall clock, not because of this flag;
-         * see that test's comments.)
-         *
-         * **JVM/iOS production uses `true`** (the default). Revisit if desktop/iOS field logs show similar
-         * pool-exhaustion patterns under cancellation churn.
+         * For in-memory databases (tests) this is a no-op for pooling — Room already serves `name == null` databases
+         * from a single connection — it just serializes the query dispatcher.
          */
         @OptIn(ExperimentalCoroutinesApi::class)
-        fun <T : RoomDatabase> RoomDatabase.Builder<T>.configureCommon(
-            multiConnection: Boolean = true,
-        ): RoomDatabase.Builder<T> = this.fallbackToDestructiveMigration(dropAllTables = false)
-            .apply {
-                if (multiConnection) {
-                    setMultipleConnectionPool(maxNumOfReaders = 4, maxNumOfWriters = 1)
-                } else {
-                    setSingleConnectionPool()
-                }
-            }
-            .setQueryCoroutineContext(
-                // limitedParallelism(1) has the same throughput ceiling as the single-connection pool
-                // (already serialized), so this only blocks the cancellation pileup — not real I/O concurrency.
-                if (multiConnection) ioDispatcher else ioDispatcher.limitedParallelism(1),
-            )
+        fun <T : RoomDatabase> RoomDatabase.Builder<T>.configureCommon(): RoomDatabase.Builder<T> =
+            this.fallbackToDestructiveMigration(dropAllTables = false)
+                .setSingleConnectionPool()
+                .setQueryCoroutineContext(
+                    // limitedParallelism(1) has the same throughput ceiling as the single-connection pool
+                    // (already serialized), so this only blocks the cancellation pileup — not real I/O concurrency.
+                    ioDispatcher.limitedParallelism(1),
+                )
     }
 }
 
