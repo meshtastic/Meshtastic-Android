@@ -18,7 +18,7 @@
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
-    id("meshtastic.kmp.jvm.android")
+    alias(libs.plugins.meshtastic.kmp.jvm.android)
 }
 
 kotlin {
@@ -50,6 +50,8 @@ kotlin {
             // the app's single protobufs version (api above) is authoritative. Otherwise the older
             // transitive pin out-ranks our snapshot on the host-test classpath and breaks proto ABI
             // (NoSuchMethodError on post-2.7.25 messages). Drop once takpacket stops exporting protobufs.
+            // .toString() is load-bearing: catalog deps are immutable ("Minimal dependencies are
+            // immutable"), so the exclude{} below only works on the string-notation copy.
             api(libs.takpacket.sdk.kmp.get().toString()) {
                 exclude(group = "org.meshtastic", module = "protobufs")
                 exclude(group = "org.meshtastic", module = "protobufs-jvm")

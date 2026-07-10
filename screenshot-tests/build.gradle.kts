@@ -15,50 +15,34 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 import com.android.build.api.dsl.LibraryExtension
-import org.gradle.testretry.TestRetryTaskExtension
 
 plugins {
     alias(libs.plugins.meshtastic.android.library)
     alias(libs.plugins.meshtastic.android.library.compose)
     alias(libs.plugins.compose.screenshot)
+    alias(libs.plugins.meshtastic.android.screenshot)
 }
 
 configure<LibraryExtension> {
     namespace = "org.meshtastic.screenshot.tests"
 
-    experimentalProperties["android.experimental.enableScreenshotTest"] = true
-
     testOptions { screenshotTests { imageDifferenceThreshold = 0.0005f } }
 }
 
-// CST screenshot tests use a custom runner incompatible with test-retry
-tasks.withType<Test>().configureEach {
-    if (name.contains("ScreenshotTest", ignoreCase = true)) {
-        extensions.configure<TestRetryTaskExtension> { maxRetries.set(0) }
-    }
-}
-
 dependencies {
-    implementation(project(":core:ui"))
-    implementation(project(":core:resources"))
-    implementation(project(":core:model"))
-    implementation(project(":core:common"))
-    implementation(project(":feature:messaging"))
-    implementation(project(":feature:node"))
-    implementation(project(":feature:wifi-provision"))
-    implementation(project(":feature:connections"))
-    implementation(project(":feature:settings"))
-    implementation(project(":feature:intro"))
-    implementation(project(":feature:map"))
-    implementation(project(":feature:docs"))
-    implementation(project(":feature:discovery"))
-
-    implementation(libs.compose.multiplatform.foundation)
-    implementation(libs.compose.multiplatform.material3)
-    implementation(libs.compose.multiplatform.runtime)
-    implementation(libs.compose.multiplatform.ui)
-
-    screenshotTestImplementation(libs.screenshot.validation.api)
+    implementation(projects.core.ui)
+    implementation(projects.core.resources)
+    implementation(projects.core.model)
+    implementation(projects.core.common)
+    implementation(projects.feature.messaging)
+    implementation(projects.feature.node)
+    implementation(projects.feature.wifiProvision)
+    implementation(projects.feature.connections)
+    implementation(projects.feature.settings)
+    implementation(projects.feature.intro)
+    implementation(projects.feature.map)
+    implementation(projects.feature.docs)
+    implementation(projects.feature.discovery)
 }
 
 tasks.register<Copy>("copyDocsScreenshots") {
@@ -68,10 +52,11 @@ tasks.register<Copy>("copyDocsScreenshots") {
 
     val referenceDir = layout.projectDirectory.dir("src/screenshotTestDebug/reference")
     // Doc-framed compositions live in the generate-only :docs-screenshots module; aggregate its references too.
-    val docsReferenceDir = rootProject.layout.projectDirectory.dir("docs-screenshots/src/screenshotTestDebug/reference")
+    val docsReferenceDir =
+        isolated.rootProject.projectDirectory.dir("docs-screenshots/src/screenshotTestDebug/reference")
     val manifestFile = layout.projectDirectory.file("docs-screenshots-manifest.txt")
     val aliasFile = layout.projectDirectory.file("docs-screenshot-aliases.properties")
-    val outputDir = rootProject.layout.projectDirectory.dir("docs/assets/screenshots")
+    val outputDir = isolated.rootProject.projectDirectory.dir("docs/assets/screenshots")
 
     // Read manifest patterns at configuration time so Copy task can resolve includes
     val manifestPatterns =

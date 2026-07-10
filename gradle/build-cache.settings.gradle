@@ -57,14 +57,21 @@ buildCache {
             url = cacheUrl.endsWith("/") ? cacheUrl : "${cacheUrl}/"
 
             if (cacheUsername && cachePassword) {
+                if (cacheUrl.startsWith("http://")) {
+                    logger.warn "Meshtastic: GRADLE_CACHE_URL uses http:// with credentials set; " +
+                            "credentials will be sent in cleartext."
+                }
                 credentials {
                     username = cacheUsername
                     password = cachePassword
                 }
             }
 
-            allowInsecureProtocol = true
-            allowUntrustedServer = true
+            // A cache serves compiled task outputs, so TLS matters: validate certs by default.
+            // Plain-http (e.g. a LAN cache) is opted into by the URL scheme itself; accepting a
+            // self-signed/untrusted https cert requires GRADLE_CACHE_ALLOW_UNTRUSTED=true.
+            allowInsecureProtocol = cacheUrl.startsWith("http://")
+            allowUntrustedServer = getMeshProperty("GRADLE_CACHE_ALLOW_UNTRUSTED") == "true"
 
             // Keep push enabled if credentials are provided.
             // This naturally disables push for fork PRs which don't have access to secrets.

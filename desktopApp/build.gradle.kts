@@ -28,8 +28,8 @@ plugins {
     alias(libs.plugins.meshtastic.detekt)
     alias(libs.plugins.meshtastic.spotless)
     alias(libs.plugins.meshtastic.koin)
-    id("meshtastic.kover")
-    id("meshtastic.aboutlibraries")
+    alias(libs.plugins.meshtastic.kover)
+    alias(libs.plugins.meshtastic.aboutlibraries)
 }
 
 configureGraphTasks()
@@ -314,7 +314,6 @@ dependencies {
     implementation(libs.androidx.datastore)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.sqlite.bundled)
-    implementation(libs.koin.annotations)
     implementation(libs.kotlinx.collections.immutable)
 
     implementation(libs.jna)

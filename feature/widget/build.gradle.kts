@@ -18,7 +18,7 @@
 plugins {
     alias(libs.plugins.meshtastic.android.library)
     alias(libs.plugins.meshtastic.android.library.compose)
-    id("meshtastic.koin")
+    alias(libs.plugins.meshtastic.koin)
 }
 
 android {
@@ -42,5 +42,4 @@ dependencies {
 
     implementation(libs.compose.multiplatform.resources)
     implementation(libs.kermit)
-    implementation(libs.koin.annotations)
 }

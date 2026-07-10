@@ -17,7 +17,7 @@
 
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
-    id("meshtastic.kmp.library.compose")
+    alias(libs.plugins.meshtastic.kmp.library.compose)
 }
 
 kotlin {
