@@ -325,7 +325,7 @@ private fun PowerMetricsChart(
                 if (voltageData.isNotEmpty()) {
                     VerticalAxis.rememberEnd(
                         label = ChartStyling.rememberAxisLabel(color = voltageColor),
-                        valueFormatter = { _, value, _ -> "${NumberFormatter.format(value.toFloat(), 1)} V" },
+                        valueFormatter = { _, value, _ -> MetricFormatter.voltage(value.toFloat(), 1) },
                     )
                 } else {
                     null
