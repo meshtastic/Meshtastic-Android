@@ -189,6 +189,12 @@
   },
   "pullRequests": [
     {
+      "id": "10983",
+      "title": "fix: SPI1 instances",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10983",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
       "id": "10969",
       "title": "Sign plaintext packets in licensed mode",
       "page_url": "https://github.com/meshtastic/firmware/pull/10969",
@@ -295,18 +301,6 @@
       "title": "feat: Support Elecrow ThinkNode M9",
       "page_url": "https://github.com/meshtastic/firmware/pull/10908",
       "zip_url": "+454.1 KB"
-    },
-    {
-      "id": "10902",
-      "title": "BLE lifecycle memory: true BLE-off on nRF52, NimBLE host pools to PSRAM on S3",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10902",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10893",
-      "title": "nrf52: add rotary encoder press pin as deep sleep wake source",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10893",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     }
   ]
 }
