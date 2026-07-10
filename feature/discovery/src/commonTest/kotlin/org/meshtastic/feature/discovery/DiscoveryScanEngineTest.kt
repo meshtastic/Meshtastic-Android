@@ -755,5 +755,34 @@ class DiscoveryScanEngineTest {
         watcherJob.cancel()
     }
 
+    @Test
+    fun restoreInterruptedSessionsOnReconnectTerminalizesUnrestorableSession() = runTest {
+        val address = "x:AA:BB:CC:DD:EE:FF"
+        meshPrefs.setDeviceAddress(address)
+        // Config was null at scan start (nothing to restore), so this session can never be recovered.
+        discoveryDao.sessions[1] =
+            DiscoverySessionEntity(
+                id = 1,
+                timestamp = 1L,
+                presetsScanned = "SHORT_FAST",
+                homePreset = "CUSTOM",
+                completionStatus = "in_progress",
+                deviceAddress = address,
+                homeLoraConfig = null,
+            )
+
+        val restored = mutableListOf<String>()
+        val engine = createEngine(this)
+        val watcherJob = launch { engine.restoreInterruptedSessionsOnReconnect { restored += it } }
+        advanceUntilIdle()
+
+        // Marked terminal so it stops re-matching getInterruptedSession forever; radio untouched, no notification.
+        assertEquals("unrestorable", discoveryDao.sessions.getValue(1).completionStatus)
+        assertNull(radioController.lastLocalConfig, "Nothing to write to the radio without a captured config")
+        assertTrue(restored.isEmpty(), "No notification for an unrestorable session")
+
+        watcherJob.cancel()
+    }
+
     // endregion
 }

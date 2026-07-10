@@ -664,11 +664,14 @@ class DiscoveryScanEngine(
         return avgChannel to avgAirRate
     }
 
-    private suspend fun finalizeSession(status: String) {
-        if (sessionId == 0L) return
+    // Guarded by [mutex] so the session-row read-modify-write can't interleave with restoreInterruptedSessionIfAny().
+    // pauseAndAbort() flips isActive to false before finalizing, so without this a reconnect-triggered restore could
+    // race this write on the same row. No caller (runScanLoop, pauseAndAbort, stopScan) holds the mutex here.
+    private suspend fun finalizeSession(status: String) = mutex.withLock {
+        if (sessionId == 0L) return@withLock
         val uniqueCount = discoveryDao.getUniqueNodeCount(sessionId)
         val presetResults = discoveryDao.getPresetResults(sessionId)
-        val session = discoveryDao.getSession(sessionId) ?: return
+        val session = discoveryDao.getSession(sessionId) ?: return@withLock
         val totalDwell = presetResults.sumOf { it.dwellDurationSeconds }
         val totalMsgs = presetResults.sumOf { it.messageCount }
         val totalSensor = presetResults.sumOf { it.sensorPacketCount }
@@ -754,7 +757,14 @@ class DiscoveryScanEngine(
         return mutex.withLock {
             if (isActive) return@withLock null
             val session = discoveryDao.getInterruptedSession(address) ?: return@withLock null
-            val loraConfig = session.homeLoraConfig ?: return@withLock null
+            // A session with no captured config can never be restored (the radio config was null at scan start).
+            // Terminalize it so it stops re-matching getInterruptedSession on every future reconnect.
+            val loraConfig =
+                session.homeLoraConfig
+                    ?: run {
+                        discoveryDao.updateSession(session.copy(completionStatus = "unrestorable"))
+                        return@withLock null
+                    }
             Logger.w { "DiscoveryScanEngine: restoring home config after interrupted session ${session.id}" }
             session.homePrimaryChannel?.let {
                 radioController.setLocalChannel(Channel(index = 0, role = Channel.Role.PRIMARY, settings = it))
