@@ -129,7 +129,11 @@ internal fun isValidFirmwareFile(filename: String, target: String, fileExtension
 
     val targetToken = Regex.escape(target)
     val extensionToken = Regex.escape(fileExtension)
-    val targetPattern = Regex("(^|.*[\\-_])$targetToken(([\\-_.](v?\\d|firmware)).*$extensionToken$|$extensionToken$)")
+    // What follows the target must be a dotted version (`-2.7.17`, `-v2.7.17`), the literal `firmware`, or the
+    // extension itself. Accepting a bare digit here let digit-led sibling variants through — `tlora-v2` matched
+    // `firmware-tlora-v2-1-1_6-2.7.14.bin`, which belongs to `tlora-v2-1-1_6` — and flashed the wrong variant.
+    val versionOrFirmware = "([\\-_]v?\\d+\\.\\d+|[\\-_.]firmware)"
+    val targetPattern = Regex("(^|.*[\\-_])$targetToken($versionOrFirmware.*$extensionToken$|$extensionToken$)")
     return targetPattern.matches(filename)
 }
 

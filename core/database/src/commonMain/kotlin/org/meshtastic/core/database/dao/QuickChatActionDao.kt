@@ -29,6 +29,10 @@ interface QuickChatActionDao {
     @Query("Select * from quick_chat order by position asc")
     fun getAll(): Flow<List<QuickChatAction>>
 
+    /** Snapshot used by DatabaseMerger to fold one transport's DB into another for the same node. */
+    @Query("Select * from quick_chat order by position asc")
+    suspend fun getAllSnapshot(): List<QuickChatAction>
+
     @Upsert suspend fun upsert(action: QuickChatAction)
 
     @Query("Delete from quick_chat")

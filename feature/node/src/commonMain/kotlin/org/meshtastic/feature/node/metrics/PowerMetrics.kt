@@ -246,13 +246,16 @@ private fun PowerMetricsChart(
         ->
         val currentColor = PowerMetric.CURRENT.color
         val voltageColor = PowerMetric.VOLTAGE.color
+        // The formatter runs outside composition, so resolve the labels here.
+        val currentLabel = stringResource(Res.string.current)
+        val voltageLabel = stringResource(Res.string.voltage)
         val marker =
             ChartStyling.rememberMarker(
                 valueFormatter =
                 ChartStyling.createColoredMarkerValueFormatter { value, color ->
                     when (color) {
-                        currentColor -> "Current: ${MetricFormatter.current(value.toFloat(), 0)}"
-                        voltageColor -> "Voltage: ${NumberFormatter.format(value.toFloat(), 1)} V"
+                        currentColor -> "$currentLabel: ${MetricFormatter.current(value.toFloat(), 0)}"
+                        voltageColor -> "$voltageLabel: ${MetricFormatter.voltage(value.toFloat(), 1)}"
                         else -> NumberFormatter.format(value.toFloat(), 1)
                     }
                 },

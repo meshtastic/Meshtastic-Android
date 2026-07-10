@@ -312,6 +312,10 @@ debug_store_logs_summary
 debug_store_logs_title
 debug_tab_app_logs
 debug_tab_packets
+deep_link_connect_message
+deep_link_connect_title
+deep_link_disconnect_message
+deep_link_disconnect_title
 default_
 default_mqtt_address
 ### DELETE ###

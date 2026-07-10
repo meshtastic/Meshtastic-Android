@@ -16,13 +16,26 @@
  */
 package org.meshtastic.feature.connections.navigation
 
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.navigation.ConnectionsRoute
 import org.meshtastic.core.navigation.NodesRoute
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.cancel
+import org.meshtastic.core.resources.connect
+import org.meshtastic.core.resources.deep_link_connect_message
+import org.meshtastic.core.resources.deep_link_connect_title
+import org.meshtastic.core.resources.deep_link_disconnect_message
+import org.meshtastic.core.resources.deep_link_disconnect_title
+import org.meshtastic.core.resources.disconnect
+import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.feature.connections.NO_DEVICE_SELECTED
 import org.meshtastic.feature.connections.ScannerViewModel
 import org.meshtastic.feature.connections.ui.ConnectionsScreen
@@ -32,13 +45,33 @@ import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 fun EntryProviderScope<NavKey>.connectionsGraph(backStack: NavBackStack<NavKey>) {
     entry<ConnectionsRoute.Connections> { key ->
         val scanModel = koinViewModel<ScannerViewModel>()
-        // Lets a deep link (e.g. from AI/automation tooling) trigger a connection, or a disconnect via `n`, without
-        // manual device selection.
-        LaunchedEffect(key.address) {
-            key.address?.takeIf(String::isNotBlank)?.let { address ->
-                if (address == NO_DEVICE_SELECTED) scanModel.disconnect() else scanModel.changeDeviceAddress(address)
-            }
+
+        // A deep link (e.g. from AI/automation tooling) may name a device address, or `n` to disconnect. The
+        // `connections` path is a verified https://meshtastic.org app link, so any web page can fire one at us —
+        // always confirm before re-pointing or dropping the radio connection.
+        var pendingAddress by rememberSaveable(key.address) { mutableStateOf(key.address?.takeIf(String::isNotBlank)) }
+
+        pendingAddress?.let { address ->
+            val isDisconnect = address == NO_DEVICE_SELECTED
+            MeshtasticDialog(
+                titleRes =
+                if (isDisconnect) Res.string.deep_link_disconnect_title else Res.string.deep_link_connect_title,
+                message =
+                if (isDisconnect) {
+                    stringResource(Res.string.deep_link_disconnect_message)
+                } else {
+                    stringResource(Res.string.deep_link_connect_message, address)
+                },
+                confirmTextRes = if (isDisconnect) Res.string.disconnect else Res.string.connect,
+                onConfirm = {
+                    if (isDisconnect) scanModel.disconnect() else scanModel.changeDeviceAddress(address)
+                    pendingAddress = null
+                },
+                dismissTextRes = Res.string.cancel,
+                onDismiss = { pendingAddress = null },
+            )
         }
+
         ConnectionsScreen(
             scanModel = scanModel,
             radioConfigViewModel = koinViewModel<RadioConfigViewModel>(),

@@ -42,10 +42,14 @@ abstract class BaseRadioTransportFactory(
             InterfaceId.TCP.id,
             InterfaceId.SERIAL.id,
             InterfaceId.BLUETOOTH.id,
-            InterfaceId.MOCK.id,
-            InterfaceId.REPLAY.id,
             '!',
             -> true
+
+            // Virtual transports are development aids. A release build must never bind one: `connections?address=m` is
+            // reachable from any web page through the verified meshtastic.org app link.
+            InterfaceId.MOCK.id,
+            InterfaceId.REPLAY.id,
+            -> isMockTransport()
 
             else -> isPlatformAddressValid(address)
         }

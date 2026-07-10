@@ -124,6 +124,21 @@ class IsValidFirmwareFileTest {
     }
 
     @Test
+    fun `rejects digit-led sibling variants`() {
+        // The variant suffix starts with a digit, so it used to be mistaken for the version and flash the wrong board.
+        assertFalse(isValidFirmwareFile("firmware-tlora-v2-1-1_6-2.7.14.bin", "tlora-v2", ".bin"))
+        assertFalse(isValidFirmwareFile("firmware-tlora-v1-3-2.7.17.bin", "tlora-v1", ".bin"))
+        // The variants' own targets still match.
+        assertTrue(isValidFirmwareFile("firmware-tlora-v2-1-1_6-2.7.14.bin", "tlora-v2-1-1_6", ".bin"))
+        assertTrue(isValidFirmwareFile("firmware-tlora-v1-3-2.7.17.bin", "tlora-v1-3", ".bin"))
+    }
+
+    @Test
+    fun `accepts a v-prefixed version after the target`() {
+        assertTrue(isValidFirmwareFile("firmware-heltec-v3-v2.7.17.bin", "heltec-v3", ".bin"))
+    }
+
+    @Test
     fun `accepts older local firmware filename shapes`() {
         // Older naming where "firmware" appears as a segment after the target.
         assertTrue(isValidFirmwareFile("heltec-v3-firmware-2.7.17.bin", "heltec-v3", ".bin"))
