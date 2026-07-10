@@ -1,15 +1,15 @@
 # Local Flatpak Verification
 
-Replicates vid's `org.meshtastic.MeshtasticDesktop` GHA flatpak build on your machine so you
-can validate `flatpak-sources.json` end-to-end without round-tripping through his repo.
+Replicates the official `flathub/org.meshtastic.MeshtasticDesktop` flatpak build on your machine
+so you can validate `flatpak-sources.json` end-to-end without round-tripping through that repo's CI.
 
 ## What it tests that our CI doesn't
 
 Our CI (`:desktopApp:packageUberJarForCurrentOS :captureFlatpakSources`) only proves the manifest can be *generated*.
-Vid's CI is where the manifest actually gets *consumed* by `flatpak-builder`. This script
+Flathub's CI is where the manifest actually gets *consumed* by `flatpak-builder`. This script
 runs that step locally:
 
-1. Clones `vidplace7/org.meshtastic.MeshtasticDesktop`.
+1. Clones `flathub/org.meshtastic.MeshtasticDesktop` (the official Flathub packaging repo).
 2. Overlays a patched manifest that:
    - Swaps the `meshtastic/Meshtastic-Android.git` source for a `type: dir` pointing at
      **your local checkout** (so you can test uncommitted changes).
@@ -17,10 +17,10 @@ runs that step locally:
    - Drops `--share=network` from the build-args (true offline — what Flathub requires).
    - Adds `--offline` to the Gradle invocation (belt + suspenders).
 3. Runs `flatpak-builder` in a Docker container with the same Freedesktop 25.08 SDK
-   vid's GHA image uses.
+   the upstream flatpak CI image uses.
 
 If your `flatpak-sources.json` has the wrong URL, wrong sha256, or a missing entry,
-the build fails with the same error vid would see. You can iterate in ~5–15 min loops
+the build fails with the same error Flathub CI would see. You can iterate in ~5–15 min loops
 instead of waiting on cross-repo CI.
 
 ## Prerequisites
@@ -45,7 +45,7 @@ scripts/verify-flatpak/verify.sh --download-only
 scripts/verify-flatpak/verify.sh --skip-regen
 
 # Tight iteration loop after a failed run: refresh overlay yaml + manifest
-# only, then re-run flatpak-builder. Skips Gradle regen, vid-repo fetch,
+# only, then re-run flatpak-builder. Skips Gradle regen, upstream-repo fetch,
 # and Meshtastic-Android rsync. Use when you've just patched the YAML
 # overlay or regenerated flatpak-sources.json by hand.
 scripts/verify-flatpak/verify.sh --rebuild-only
@@ -76,6 +76,6 @@ executing the Gradle build, or run the full script on a Linux host.
 ## Files
 
 - `verify.sh` — entry point. Idempotent: re-running just re-syncs the overlay and re-runs flatpak-builder.
-- `desktop-offline.yaml` — patched manifest. Kept in sync manually with vid's upstream;
-  diff against `https://raw.githubusercontent.com/vidplace7/org.meshtastic.MeshtasticDesktop/main/org.meshtastic.MeshtasticDesktop.yaml`
-  if vid changes something material.
+- `desktop-offline.yaml` — patched manifest. Kept in sync manually with the upstream packaging;
+  diff against `https://raw.githubusercontent.com/flathub/org.meshtastic.MeshtasticDesktop/master/org.meshtastic.MeshtasticDesktop.yaml`
+  if upstream changes something material.

@@ -228,7 +228,7 @@ private val SHARED_COMPILER_ARGS =
         // No -Xbackend-threads: parallel codegen races and crashes release builds (KT-83578).
     )
 
-private const val JDK_VERSION = 21
+private const val JDK_VERSION = 25
 
 /** Configure base Kotlin options */
 private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() {

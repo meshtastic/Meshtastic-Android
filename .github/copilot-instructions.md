@@ -4,7 +4,7 @@
 
 ## Build, Test & Lint (essentials)
 
-Requires JDK 21 and `ANDROID_HOME`. Per fresh clone:
+Requires JDK 25 and `ANDROID_HOME`. Per fresh clone:
 ```bash
 [ -f local.properties ] || cp secrets.defaults.properties local.properties
 ```
