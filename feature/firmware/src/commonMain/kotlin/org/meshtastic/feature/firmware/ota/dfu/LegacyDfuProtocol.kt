@@ -167,6 +167,43 @@ internal fun legacyPrnRequestPayload(packets: Int): ByteArray = byteArrayOf(
 )
 
 // ---------------------------------------------------------------------------
+// Stream profiles
+// ---------------------------------------------------------------------------
+
+/**
+ * Default packet-receipt-notification interval (packets between flow-control ACKs). Higher values mean fewer
+ * notification round-trips per byte and therefore faster throughput, at the cost of a slightly longer recovery window
+ * if a packet is dropped.
+ *
+ * Capped at 10 to match Nordic's own Legacy DFU implementation, which force-limits legacy PRN to ≤10 with the comment:
+ * "DFU bootloaders from SDK 6.0.0 or older were unable to save incoming data to flash as fast as they are being sent …
+ * PRN = 10 may be the highest supported value" and treats status 6 (OPERATION_FAILED) as "data sent too fast — reduce
+ * PRN to 10 or less." The stock Adafruit bootloader shares this SDK11 flash-write path, so a higher value risks
+ * OPERATION_FAILED mid-stream on stock bootloaders. 10 is the safe ceiling that still batches flow-control ACKs.
+ */
+internal const val PRN_INTERVAL_PACKETS = 10
+
+/**
+ * Tighter PRN interval used only on a recovery upload that follows a mid-stream disconnect. Halving the interval
+ * reduces the burst depth between flow-control checkpoints. Used exclusively by [LegacyDfuStreamProfile.RECOVERY] as a
+ * recovery heuristic; it does not by itself prevent a bootloader-side stall.
+ */
+internal const val RECOVERY_PRN_INTERVAL_PACKETS = 5
+
+/**
+ * Legacy upload profile. Selects the PRN interval used in BOTH the `PACKET_RECEIPT_NOTIF_REQ` request and the
+ * receipt-await threshold inside [org.meshtastic.feature.firmware.ota.dfu.LegacyDfuTransport.streamFirmware].
+ * - [NORMAL]: the healthy first-attempt transfer profile — fewer PRN round-trips, higher throughput.
+ * - [RECOVERY]: selected after a [LegacyDfuException.MidStreamDisconnect] so subsequent attempts on the same run use
+ *   the tighter interval. A [LegacyDfuException.StaleSessionReset] alone does NOT switch the profile, since the link
+ *   did not actually drop mid-upload.
+ */
+internal enum class LegacyDfuStreamProfile(val prnIntervalPackets: Int) {
+    NORMAL(PRN_INTERVAL_PACKETS),
+    RECOVERY(RECOVERY_PRN_INTERVAL_PACKETS),
+}
+
+// ---------------------------------------------------------------------------
 // Exceptions
 // ---------------------------------------------------------------------------
 
@@ -200,12 +237,36 @@ sealed class LegacyDfuException(message: String, cause: Throwable? = null) : Dfu
         LegacyDfuException("Packet receipt mismatch: expected $expected bytes received, device reports $actual")
 
     /**
-     * START_DFU was rejected with `INVALID_STATE` because the bootloader still holds a previous, interrupted DFU
-     * session. The transport has issued a RESET; retrying the whole session (fresh reconnect) will start over on the
-     * now-clean bootloader. Retryable — distinct from a hard [ProtocolError].
+     * START_DFU was rejected with INVALID_STATE because the bootloader still holds state from an interrupted session.
+     * The current connection is closed without attempting RESET; SecureDfuHandler performs a bounded reset-prime over a
+     * fresh connection before retrying.
      */
     class StaleSessionReset :
         LegacyDfuException(
             "Bootloader rejected START with INVALID_STATE (leftover from an interrupted flash); reset and retrying.",
         )
+
+    /**
+     * The BLE link dropped while firmware bytes were in flight. Carries the host in-flight offset (the end of the write
+     * the host had dispatched or was in flight at the moment of the drop) so the retry coordinator can distinguish a
+     * mid-stream failure (which switches subsequent Legacy uploads to [LegacyDfuStreamProfile.RECOVERY]) from a
+     * handshake/connect failure (which does not).
+     *
+     * [bytesSent] is the end offset of the host write currently dispatched or in flight. It may include the current
+     * chunk when the disconnect occurs during `service.write()`. It does NOT prove the host stack accepted the chunk,
+     * and it does NOT prove the bootloader received or committed it. [lastConfirmedBytes] is the authoritative
+     * PRN-confirmed checkpoint (the last byte the bootloader explicitly acknowledged); `-1` means no PRN was received
+     * before the drop. Do not treat [bytesSent] as confirmed device progress.
+     *
+     * Typed — callers must NOT parse the message to detect a mid-stream drop.
+     */
+    class MidStreamDisconnect(
+        val bytesSent: Int,
+        val totalBytes: Int,
+        val connectionState: String,
+        val lastConfirmedBytes: Int,
+    ) : LegacyDfuException(
+        "BLE link dropped mid-upload at host in-flight offset $bytesSent/$totalBytes " +
+            "(lastConfirmed=$lastConfirmedBytes, state=$connectionState)",
+    )
 }

@@ -34,7 +34,9 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -48,10 +50,12 @@ import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.feature.firmware.ota.calculateMacPlusOne
 import org.meshtastic.feature.firmware.ota.scanForBleDevice
 import org.meshtastic.feature.firmware.ota.withDisconnectTripwire
+import kotlin.concurrent.Volatile
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.TimeSource
 
 /**
  * Kable-based transport for the Nordic **Legacy DFU** protocol (Nordic SDK 11/12 / Adafruit `BLEDfu`).
@@ -66,20 +70,40 @@ import kotlin.time.Duration.Companion.seconds
  *
  * Phase-1 buttonless trigger is shared with [SecureDfuTransport] (see `triggerButtonlessDfu` there).
  */
-class LegacyDfuTransport(
+class LegacyDfuTransport
+internal constructor(
     private val scanner: BleScanner,
     connectionFactory: BleConnectionFactory,
     private val address: String,
     dispatcher: CoroutineDispatcher,
+    private val streamProfile: LegacyDfuStreamProfile = LegacyDfuStreamProfile.NORMAL,
 ) : DfuUploadTransport {
     private val transportScope = CoroutineScope(SupervisorJob() + dispatcher)
     private val bleConnection = connectionFactory.create(transportScope, "Legacy DFU")
+
+    /**
+     * Stream progress captured by the disconnect-tripwire callback. The disconnect watcher runs in a child coroutine on
+     * the caller's dispatcher, which is IO in production but may differ in tests. These fields provide visible
+     * diagnostic snapshots between the streaming and watcher coroutines. A fresh transport is created per upload
+     * attempt, so these never leak across sessions.
+     */
+    @Volatile private var streamOffset: Int = 0
+
+    @Volatile private var streamLastPrnOffset: Int = -1
+
+    @Volatile private var streamLastPrnLatencyMs: Long = -1
 
     /** Receives parsed responses from the Control Point characteristic. */
     private val notificationChannel = Channel<LegacyDfuResponse>(Channel.UNLIMITED)
 
     /** Name advertised by the device in DFU mode (e.g. `4631_DFU`). Captured in [connectToDfuMode]. */
     private var dfuAdvertisedName: String? = null
+
+    /**
+     * DFU Version reported by the optional DFU Version characteristic during [connectToDfuMode]. `-1` when the
+     * characteristic is absent or unreadable. Captured here so the stream-start log can include it without re-reading.
+     */
+    private var dfuVersion: Int = -1
 
     // ---------------------------------------------------------------------------
     // Phase 2: Connect to device in DFU mode
@@ -144,6 +168,7 @@ class LegacyDfuTransport(
                         if (bytes.size >= 2) (bytes[0].toInt() and 0xFF) or ((bytes[1].toInt() and 0xFF) shl 8) else -1
                     }
                     .getOrElse { -1 }
+            dfuVersion = version
             Logger.i { "Legacy DFU: DFU Version characteristic = $version (-1 ⇒ absent / unreadable)" }
             if (version in 1..MIN_SUPPORTED_DFU_VERSION - 1) {
                 throw LegacyDfuException.UnsupportedBootloader(version)
@@ -204,7 +229,9 @@ class LegacyDfuTransport(
      * 7. Stream firmware in MTU-sized chunks. Every PRN packets, await `PacketReceipt(bytesReceived)` and verify count.
      * 8. After last byte, await final response for `RECEIVE_FIRMWARE_IMAGE`.
      * 9. `VALIDATE`, await response.
-     * 10. `ACTIVATE_AND_RESET` — device reboots; write may fail with disconnect, treat as success.
+     * 10. `ACTIVATE_AND_RESET` — an ordinary disconnect/write Exception may occur because the device resets before the
+     *     acknowledgement; treat that operational Exception as expected success (structured cancellation and Error
+     *     subtypes still propagate).
      */
     @Suppress("LongMethod")
     override suspend fun transferFirmware(firmware: ByteArray, onProgress: suspend (Float) -> Unit): Result<Unit> =
@@ -232,7 +259,7 @@ class LegacyDfuTransport(
             Logger.i { "Legacy DFU: requestHighConnectionPriority -> $highPriorityRequested" }
 
             // ── 3. PRN setup ────────────────────────────────────────────────────
-            writeControlPoint(legacyPrnRequestPayload(PRN_INTERVAL_PACKETS))
+            writeControlPoint(legacyPrnRequestPayload(streamProfile.prnIntervalPackets))
 
             // ── 4. RECEIVE_FIRMWARE_IMAGE ──────────────────────────────────────
             writeControlPoint(byteArrayOf(LegacyDfuOpcode.RECEIVE_FIRMWARE_IMAGE))
@@ -248,23 +275,16 @@ class LegacyDfuTransport(
             requireSuccess(LegacyDfuOpcode.VALIDATE, awaitResponse(VALIDATE_TIMEOUT))
 
             // ── 8. ACTIVATE_AND_RESET ──────────────────────────────────────────
-            // Device may reset before the GATT write ACK lands — treat any write failure / disconnect as success.
+            // The device may reset before the GATT write ACK lands; an ordinary disconnect/write Exception is expected
+            // because of that reset — safeCatching treats it as success. Structured cancellation and Error subtypes
+            // still propagate.
             Logger.i { "Legacy DFU: Sending ACTIVATE_AND_RESET (disconnect during write is expected)" }
-            runCatching { writeControlPoint(byteArrayOf(LegacyDfuOpcode.ACTIVATE_AND_RESET)) }
+            safeCatching { writeControlPoint(byteArrayOf(LegacyDfuOpcode.ACTIVATE_AND_RESET)) }
                 .onFailure { Logger.i(it) { "Legacy DFU: ACTIVATE write reported failure (expected on reset)" } }
 
             onProgress(1f)
             Logger.i { "Legacy DFU: Upload complete, device rebooting into new firmware." }
         }
-
-    /**
-     * Stream [firmware] to the Packet characteristic, awaiting a [LegacyDfuResponse.PacketReceipt] every
-     * [PRN_INTERVAL_PACKETS] packets and verifying the bytes-received count.
-     *
-     * Watches the connection state in parallel with the write loop; if the link drops mid-stream we cancel the write
-     * coroutine and surface a [DfuException.ConnectionFailed] immediately rather than waiting indefinitely for a write
-     * that will never complete.
-     */
 
     /**
      * Low-speed when the bootloader did not negotiate a larger MTU, leaving us on the 20-byte packet floor. Valid once
@@ -291,66 +311,113 @@ class LegacyDfuTransport(
         return sized - (sized % DFU_PACKET_WORD_ALIGNMENT)
     }
 
+    /**
+     * Stream [firmware] to the Packet characteristic under a single outer disconnect tripwire. The outer watcher is the
+     * sole streaming disconnect classifier — PRN waits inside the loop intentionally do NOT install another tripwire,
+     * so a link drop during a PRN wait surfaces as a typed [LegacyDfuException.MidStreamDisconnect] carrying host-side
+     * and confirmed-progress diagnostics, not a generic handshake-style [DfuException.ConnectionFailed].
+     *
+     * Every [streamProfile.prnIntervalPackets] packets the loop awaits a [LegacyDfuResponse.PacketReceipt] and verifies
+     * the bootloader's bytes-received count. The [streamOffset], [streamLastPrnOffset], and [streamLastPrnLatencyMs]
+     * snapshots give the watcher's onDrop callback visible diagnostic values.
+     */
     @Suppress("CyclomaticComplexMethod", "NestedBlockDepth", "LongMethod")
     private suspend fun streamFirmware(firmware: ByteArray, onProgress: suspend (Float) -> Unit) {
         // Packet size = negotiated ATT MTU − 3, word-aligned and capped at 244 (see computeStreamPacketSize). Falls
         // back to 20 bytes when the bootloader did not negotiate a larger MTU, which is the self-gating safety against
         // bootloaders that can't accept large DFU writes — the 20-byte path is the slow but universally-safe default.
         val mtu = computeStreamPacketSize()
-        var offset = 0
+        val prnInterval = streamProfile.prnIntervalPackets
+        // Reset stream progress for this attempt. These are @Volatile instance properties so the disconnect-tripwire
+        // callback (running in a child coroutine on the caller's dispatcher) has a visible snapshot.
+        streamOffset = 0
+        streamLastPrnOffset = -1
+        streamLastPrnLatencyMs = -1
         Logger.i {
             "Legacy DFU: Streaming ${firmware.size} bytes with packet size $mtu " +
-                "(advertised='${dfuAdvertisedName ?: "?"}')"
+                "(advertised='${dfuAdvertisedName ?: "?"}', dfuVersion=$dfuVersion, " +
+                "profile=$streamProfile, prnInterval=$prnInterval)"
         }
 
         bleConnection.withDisconnectTripwire(
             onDrop = { state ->
-                Logger.w { "Legacy DFU: Link dropped mid-stream at offset $offset/${firmware.size} (state=$state)" }
-                DfuException.ConnectionFailed("BLE link dropped mid-upload at byte $offset/${firmware.size}")
+                Logger.w {
+                    "Legacy DFU: Link dropped mid-stream at host in-flight offset $streamOffset/${firmware.size} " +
+                        "(state=$state, lastConfirmedPrn=$streamLastPrnOffset, lastPrnLatencyMs=$streamLastPrnLatencyMs)"
+                }
+                LegacyDfuException.MidStreamDisconnect(
+                    bytesSent = streamOffset,
+                    totalBytes = firmware.size,
+                    connectionState = state.toString(),
+                    lastConfirmedBytes = streamLastPrnOffset,
+                )
             },
         ) {
             var packetsSincePrn = 0
             var bytesAtLastPrn = 0L
             bleConnection.profile(LegacyDfuUuids.SERVICE, timeout = STREAM_TIMEOUT) { service ->
                 val packetChar = service.characteristic(LEGACY_DFU_PACKET_UUID)
-                while (offset < firmware.size) {
-                    val end = minOf(offset + mtu, firmware.size)
+                while (streamOffset < firmware.size) {
+                    val end = minOf(streamOffset + mtu, firmware.size)
+                    // Publish the in-flight boundary BEFORE invoking service.write() so the disconnect watcher
+                    // observes the current attempted chunk when a disconnect fires synchronously inside the write
+                    // (e.g. a test harness or a real bootloader that drops on receive). The write may not complete
+                    // and the host stack may not accept it; this boundary is the dispatched boundary, not a
+                    // confirmed one — the authoritative checkpoint is the PRN-confirmed offset (streamLastPrnOffset).
+                    val chunk = firmware.copyOfRange(streamOffset, end)
+                    streamOffset = end
                     try {
-                        service.write(packetChar, firmware.copyOfRange(offset, end), BleWriteType.WITHOUT_RESPONSE)
+                        service.write(packetChar, chunk, BleWriteType.WITHOUT_RESPONSE)
                     } catch (e: CancellationException) {
                         Logger.w(e) {
-                            "Legacy DFU: Write CANCELLED at offset $offset/${firmware.size} cause=${e.cause}"
+                            "Legacy DFU: Write CANCELLED at offset $streamOffset/${firmware.size} cause=${e.cause}"
                         }
                         throw e
                     } catch (@Suppress("TooGenericExceptionCaught") e: Throwable) {
-                        Logger.w(e) { "Legacy DFU: Write FAILED at offset $offset/${firmware.size}: ${e.message}" }
+                        Logger.w(e) {
+                            "Legacy DFU: Write FAILED at offset $streamOffset/${firmware.size}: ${e.message}"
+                        }
                         throw e
                     }
-                    offset = end
                     packetsSincePrn++
 
-                    if (packetsSincePrn >= PRN_INTERVAL_PACKETS && offset < firmware.size) {
-                        Logger.d { "Legacy DFU: Awaiting PRN at offset $offset" }
+                    if (packetsSincePrn >= prnInterval && streamOffset < firmware.size) {
+                        val awaitMark = TimeSource.Monotonic.markNow()
+                        Logger.d { "Legacy DFU: Awaiting PRN at offset $streamOffset" }
                         val receipt =
                             try {
-                                awaitPacketReceipt()
+                                awaitPacketReceiptDuringStream()
                             } catch (e: CancellationException) {
                                 Logger.w(e) {
-                                    "Legacy DFU: awaitPacketReceipt CANCELLED at offset $offset cause=${e.cause}"
+                                    "Legacy DFU: awaitPacketReceiptDuringStream CANCELLED at offset $streamOffset " +
+                                        "cause=${e.cause}"
                                 }
                                 throw e
                             }
-                        val expected = offset.toLong()
+                        val latencyMs = awaitMark.elapsedNow().inWholeMilliseconds
+                        if (latencyMs >= PRN_LATENCY_WARN_THRESHOLD_MS) {
+                            Logger.w {
+                                "Legacy DFU: PRN receipt latency ${latencyMs}ms at offset $streamOffset " +
+                                    "(>= ${PRN_LATENCY_WARN_THRESHOLD_MS}ms — possible bootloader backpressure or BLE scheduling delay)"
+                            }
+                        } else {
+                            Logger.d { "Legacy DFU: PRN receipt at offset $streamOffset latency=${latencyMs}ms" }
+                        }
+                        val expected = streamOffset.toLong()
                         if (receipt.bytesReceived != expected) {
                             throw LegacyDfuException.PacketReceiptMismatch(expected, receipt.bytesReceived)
                         }
+                        // Record the checkpoint only after the receipt validates — a mismatched PRN must
+                        // not be reported as the last successful checkpoint in the link-drop log.
+                        streamLastPrnOffset = streamOffset
+                        streamLastPrnLatencyMs = latencyMs
                         bytesAtLastPrn = receipt.bytesReceived
                         packetsSincePrn = 0
-                        onProgress(offset.toFloat() / firmware.size)
+                        onProgress(streamOffset.toFloat() / firmware.size)
                     }
                 }
             }
-            Logger.d { "Legacy DFU: Streamed $offset/${firmware.size} bytes (lastPRN=$bytesAtLastPrn)" }
+            Logger.d { "Legacy DFU: Streamed $streamOffset/${firmware.size} bytes (lastPRN=$bytesAtLastPrn)" }
         }
     }
 
@@ -408,12 +475,11 @@ class LegacyDfuTransport(
 
     private suspend fun awaitResponse(timeout: Duration): LegacyDfuResponse = try {
         withTimeout(timeout) {
-            // Fail fast + accurately if the bootloader drops the link mid-handshake instead of answering. The stock
-            // same-MAC nRF Legacy bootloader (e.g. AdaDFU) commonly disconnects on the first Control Point command
-            // (stale-bond encryption mismatch); without this the receive() below just blocks until `timeout`, so
-            // the
-            // user waited the full 30s and saw a misleading "No response from Control Point" for what was really an
-            // immediate disconnect.
+            // Fail fast + accurately if the bootloader drops the link mid-handshake instead of answering.
+            // Some Legacy bootloader variants disconnect on the first Control Point command
+            // (e.g. stale-bond encryption mismatch); without this the receive() below just blocks until
+            // `timeout`, so the user waited for the full command timeout and saw a misleading
+            // "No response from Control Point" for what was really an immediate disconnect.
             bleConnection.withDisconnectTripwire(onDrop = ::handshakeDropError) {
                 // Drain any stray PRNs that arrive before the response we want.
                 while (true) {
@@ -425,32 +491,43 @@ class LegacyDfuTransport(
             }
         }
     } catch (_: TimeoutCancellationException) {
+        currentCoroutineContext().ensureActive()
         throw DfuException.Timeout("No response from Legacy DFU Control Point after $timeout")
     }
 
-    private suspend fun awaitPacketReceipt(): LegacyDfuResponse.PacketReceipt = try {
+    /**
+     * PRN wait used inside [streamFirmware]. Deliberately does NOT install its own [withDisconnectTripwire]:
+     * [streamFirmware] owns the sole disconnect watcher during PRN waits, and a nested tripwire here would race it and
+     * could surface a generic [DfuException.ConnectionFailed] from [handshakeDropError] instead of the typed
+     * [LegacyDfuException.MidStreamDisconnect] that drives the recovery profile. The handshake-level disconnect watcher
+     * lives in [awaitResponse] (its [withDisconnectTripwire] classifies link drops during Control Point responses).
+     *
+     * A [TimeoutCancellationException] may be raised by an outer [withTimeout] (structured cancellation) rather than
+     * the local 30 s missing-PRN timeout. We re-check [ensureActive] first so parent/outer cancellation is rethrown,
+     * and only then surface the local [DfuException.Timeout].
+     */
+    private suspend fun awaitPacketReceiptDuringStream(): LegacyDfuResponse.PacketReceipt = try {
         withTimeout(COMMAND_TIMEOUT) {
-            bleConnection.withDisconnectTripwire(onDrop = ::handshakeDropError) {
-                while (true) {
-                    val r = notificationChannel.receive()
-                    if (r is LegacyDfuResponse.PacketReceipt) return@withDisconnectTripwire r
-                    if (r is LegacyDfuResponse.Failure) {
-                        throw LegacyDfuException.ProtocolError(r.requestOpcode, r.status)
-                    }
-                    // Stray Success or Unknown → ignore.
+            while (true) {
+                val r = notificationChannel.receive()
+                if (r is LegacyDfuResponse.PacketReceipt) return@withTimeout r
+                if (r is LegacyDfuResponse.Failure) {
+                    throw LegacyDfuException.ProtocolError(r.requestOpcode, r.status)
                 }
-                @Suppress("UNREACHABLE_CODE")
-                error("unreachable")
+                // Stray Success or Unknown → ignore.
             }
+            @Suppress("UNREACHABLE_CODE")
+            error("unreachable")
         }
     } catch (_: TimeoutCancellationException) {
+        currentCoroutineContext().ensureActive()
         throw DfuException.Timeout("No packet receipt notification after $COMMAND_TIMEOUT")
     }
 
     /** Error for a link drop while awaiting a Control Point response — distinguishes a disconnect from a true stall. */
     private fun handshakeDropError(state: BleConnectionState): Throwable = DfuException.ConnectionFailed(
-        "BLE link dropped during DFU handshake (state=$state). The device disconnected before answering a DFU " +
-            "command — most often the stock Adafruit bootloader rebooting to the app. Retry, or use USB recovery.",
+        "BLE link dropped during DFU handshake (state=$state). The device disconnected before answering a Legacy DFU " +
+            "command; some bootloader variants reboot to the app or drop the link in this state.",
     )
 
     /**
@@ -537,18 +614,13 @@ class LegacyDfuTransport(
         private val STREAM_TIMEOUT = 15.minutes
 
         /**
-         * Packet-receipt-notification interval (packets between flow-control ACKs). Higher values mean fewer
-         * notification round-trips per byte and therefore faster throughput, at the cost of a slightly longer recovery
-         * window if a packet is dropped (we have to wait until the next PRN boundary to detect the gap).
-         *
-         * Capped at 10 to match Nordic's own Legacy DFU implementation, which force-limits legacy PRN to ≤10 with the
-         * comment: "DFU bootloaders from SDK 6.0.0 or older were unable to save incoming data to flash as fast as they
-         * are being sent … PRN = 10 may be the highest supported value" and treats status 6 (OPERATION_FAILED) as "data
-         * sent too fast — reduce PRN to 10 or less." The stock Adafruit bootloader shares this SDK11 flash-write path,
-         * so a higher value (we previously used 30, tuned for the faster OTAFIX fork) risks OPERATION_FAILED mid-stream
-         * on stock bootloaders. 10 is the safe ceiling that still batches flow-control ACKs.
+         * Per-receipt latency threshold above which a PRN wait is logged at WARN. The Legacy bootloader normally ACKs
+         * each PRN window inside a few tens of milliseconds. A latency at or above this threshold is diagnostic only —
+         * it may indicate bootloader backpressure, flash activity, BLE scheduling delay, or degraded link conditions.
+         * It is not by itself a definite precursor to a supervision-timeout drop. Below this threshold receipts log at
+         * DEBUG.
          */
-        internal const val PRN_INTERVAL_PACKETS = 10
+        internal const val PRN_LATENCY_WARN_THRESHOLD_MS = 1_000L
 
         /**
          * Universally-safe Legacy DFU packet size (20 bytes — the original ATT_MTU minus the 3-byte ATT header). Used
