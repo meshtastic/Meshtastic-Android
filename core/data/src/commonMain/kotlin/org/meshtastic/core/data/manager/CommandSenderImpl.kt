@@ -103,9 +103,9 @@ class CommandSenderImpl(
      * Resolves the correct channel index for sending a packet to [toNum].
      *
      * PKI encryption ([NodeAddress.PKC_CHANNEL_INDEX]) is only used for **admin** packets, where end-to-end encryption
-     * is appropriate. Protocol-level requests (traceroute, telemetry, position, nodeinfo, neighborinfo) must NOT use
-     * PKI because relay nodes need to read and/or modify the inner payload (e.g. traceroute appends each hop's node
-     * number). These requests fall back to the node's heard-on channel.
+     * is appropriate, except licensed local nodes use signed plaintext on channel 0. Protocol-level requests
+     * Protocol-level requests must NOT use PKI. Relay nodes need to read or modify the inner payload. For example,
+     * traceroute appends each hop's node number. These requests fall back to the node's heard-on channel.
      */
     private fun getAdminChannelIndex(toNum: Int): Int {
         val myNum = nodeManager.myNodeNum.value ?: return 0
@@ -114,6 +114,8 @@ class CommandSenderImpl(
 
         return when {
             myNum == toNum -> 0
+
+            myNode?.user?.is_licensed == true -> 0
 
             myNode?.hasPKC == true && destNode?.hasPKC == true -> NodeAddress.PKC_CHANNEL_INDEX
 
