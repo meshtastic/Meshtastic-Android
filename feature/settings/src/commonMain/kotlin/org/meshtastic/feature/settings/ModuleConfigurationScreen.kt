@@ -43,7 +43,7 @@ import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 @Composable
 fun ModuleConfigurationScreen(
     viewModel: RadioConfigViewModel,
-    excludedModulesUnlocked: Boolean,
+    hiddenFeaturesUnlocked: Boolean,
     onBack: () -> Unit,
     onNavigate: (Route) -> Unit,
 ) {
@@ -52,8 +52,8 @@ fun ModuleConfigurationScreen(
 
     val deviceRole = state.radioConfig.device?.role
     val modules =
-        remember(state.metadata, deviceRole, excludedModulesUnlocked) {
-            if (excludedModulesUnlocked) {
+        remember(state.metadata, deviceRole, hiddenFeaturesUnlocked) {
+            if (hiddenFeaturesUnlocked) {
                 ModuleRoute.entries
             } else {
                 ModuleRoute.filterExcludedFrom(state.metadata, deviceRole)

@@ -228,6 +228,19 @@ abstract class CommonFirmwareRetrieverTest {
     }
 
     @Test
+    fun `retrieveEsp32Firmware returns null when the zip download throws`() = runTest {
+        val handler = FakeFirmwareFileHandler()
+        val retriever = FirmwareRetriever(handler)
+
+        // No manifest, no direct downloads; the zip fallback fails with a transient network error
+        handler.zipDownloadException = IllegalStateException("connection reset")
+
+        val result = retriever.retrieveEsp32Firmware(TEST_RELEASE, TEST_HARDWARE) {}
+
+        assertNull(result, "A failed zip download must resolve to null, not propagate")
+    }
+
+    @Test
     fun `retrieveEsp32Firmware returns null when all strategies fail`() = runTest {
         val handler = FakeFirmwareFileHandler()
         val retriever = FirmwareRetriever(handler)
@@ -453,6 +466,9 @@ abstract class CommonFirmwareRetrieverTest {
         /** Result returned by [downloadFile] when the filename is "firmware_release.zip". */
         var zipDownloadResult: FirmwareArtifact? = null
 
+        /** When set, [downloadFile] throws this for the "firmware_release.zip" download instead of returning. */
+        var zipDownloadException: Exception? = null
+
         /** Result returned by [extractFirmwareFromZip]. */
         var zipExtractionResult: FirmwareArtifact? = null
 
@@ -486,6 +502,7 @@ abstract class CommonFirmwareRetrieverTest {
 
             // Zip download path
             if (fileName == "firmware_release.zip") {
+                zipDownloadException?.let { throw it }
                 return zipDownloadResult
             }
 

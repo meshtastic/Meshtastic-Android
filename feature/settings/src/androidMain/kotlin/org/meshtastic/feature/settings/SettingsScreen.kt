@@ -99,7 +99,7 @@ fun SettingsScreen(
     onBack: (() -> Unit)? = null,
 ) {
     val appFunctionsAvailable: Boolean = koinInject(qualifier = named("googleServicesAvailable"))
-    val excludedModulesUnlocked by settingsViewModel.excludedModulesUnlocked.collectAsStateWithLifecycle()
+    val hiddenFeaturesUnlocked by settingsViewModel.hiddenFeaturesUnlocked.collectAsStateWithLifecycle()
     val localConfig by settingsViewModel.localConfig.collectAsStateWithLifecycle()
     val ourNode by settingsViewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val isConnected by settingsViewModel.isConnected.collectAsStateWithLifecycle(false)
@@ -322,8 +322,8 @@ fun SettingsScreen(
 
                 AppInfoSection(
                     appVersionName = settingsViewModel.appVersionName,
-                    excludedModulesUnlocked = excludedModulesUnlocked,
-                    onUnlockExcludedModules = { settingsViewModel.unlockExcludedModules() },
+                    hiddenFeaturesUnlocked = hiddenFeaturesUnlocked,
+                    onUnlockHiddenFeatures = { settingsViewModel.unlockHiddenFeatures() },
                     onShowAppIntro = { settingsViewModel.showAppIntro() },
                     onNavigateToAbout = { onNavigate(SettingsRoute.About) },
                 )

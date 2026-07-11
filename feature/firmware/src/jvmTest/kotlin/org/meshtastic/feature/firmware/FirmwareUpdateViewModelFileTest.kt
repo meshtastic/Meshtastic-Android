@@ -38,7 +38,7 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import org.meshtastic.core.common.state.ExcludedModulesUnlock
+import org.meshtastic.core.common.state.HiddenFeaturesUnlock
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.datastore.BootloaderWarningDataSource
@@ -136,7 +136,7 @@ class FirmwareUpdateViewModelFileTest {
         usbManager,
         fileHandler,
         TestApplicationCoroutineScope(testDispatcher),
-        ExcludedModulesUnlock(),
+        HiddenFeaturesUnlock(),
     )
 
     private fun firmwareUri(fileName: String): CommonUri = CommonUri.parse("file:///downloads/$fileName")

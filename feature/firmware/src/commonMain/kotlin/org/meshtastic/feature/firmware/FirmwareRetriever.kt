@@ -244,7 +244,12 @@ class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
                 null
             } else {
                 val zipUrl = resolveZipUrl(release.zipUrl, hardware.architecture)
-                fileHandler.downloadFile(zipUrl, "firmware_release.zip", onProgress)
+                try {
+                    fileHandler.downloadFile(zipUrl, "firmware_release.zip", onProgress)
+                } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                    Logger.w(e) { "Release zip download failed for ${release.id}" }
+                    null
+                }
             }
         return downloadedZip?.let {
             fileHandler.extractFirmwareFromZip(it, hardware, internalFileExtension, preferredFilename)

@@ -28,7 +28,7 @@ import okio.BufferedSink
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.common.database.DatabaseManager
-import org.meshtastic.core.common.state.ExcludedModulesUnlock
+import org.meshtastic.core.common.state.HiddenFeaturesUnlock
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.domain.usecase.settings.ExportDataUseCase
 import org.meshtastic.core.domain.usecase.settings.IsOtaCapableUseCase
@@ -63,7 +63,7 @@ class SettingsViewModel(
     private val exportDataUseCase: ExportDataUseCase,
     private val isOtaCapableUseCase: IsOtaCapableUseCase,
     private val fileService: FileService,
-    private val excludedModulesUnlock: ExcludedModulesUnlock,
+    private val hiddenFeaturesUnlock: HiddenFeaturesUnlock,
 ) : ViewModel() {
     val myNodeInfo: StateFlow<MyNodeInfo?> = nodeRepository.myNodeInfo
 
@@ -101,7 +101,7 @@ class SettingsViewModel(
     }
 
     // Process-scoped shared state so other features (e.g. the nightly firmware channel) see the same unlock.
-    val excludedModulesUnlocked: StateFlow<Boolean> = excludedModulesUnlock.unlocked
+    val hiddenFeaturesUnlocked: StateFlow<Boolean> = hiddenFeaturesUnlock.unlocked
 
     val appVersionName
         get() = buildConfigProvider.versionName
@@ -160,8 +160,8 @@ class SettingsViewModel(
         uiPrefs.setAppIntroCompleted(false)
     }
 
-    fun unlockExcludedModules() {
-        excludedModulesUnlock.unlock()
+    fun unlockHiddenFeatures() {
+        hiddenFeaturesUnlock.unlock()
     }
 
     /**

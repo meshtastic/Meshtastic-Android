@@ -27,7 +27,7 @@ import org.koin.core.annotation.Single
  * screens and the nightly firmware preview channel.
  */
 @Single
-class ExcludedModulesUnlock {
+class HiddenFeaturesUnlock {
     private val _unlocked = MutableStateFlow(false)
     val unlocked: StateFlow<Boolean> = _unlocked.asStateFlow()
 

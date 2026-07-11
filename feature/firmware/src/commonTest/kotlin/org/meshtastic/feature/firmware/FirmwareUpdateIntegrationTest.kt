@@ -32,7 +32,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import org.meshtastic.core.common.state.ExcludedModulesUnlock
+import org.meshtastic.core.common.state.HiddenFeaturesUnlock
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.datastore.BootloaderWarningDataSource
 import org.meshtastic.core.datastore.FirmwareRecoveryDataSource
@@ -114,7 +114,7 @@ class FirmwareUpdateIntegrationTest {
         usbManager,
         fileHandler,
         TestApplicationCoroutineScope(testDispatcher),
-        ExcludedModulesUnlock(),
+        HiddenFeaturesUnlock(),
     )
 
     @Test

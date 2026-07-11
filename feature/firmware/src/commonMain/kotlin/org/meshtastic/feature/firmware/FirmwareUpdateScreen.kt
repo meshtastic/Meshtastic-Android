@@ -777,7 +777,7 @@ private fun ReleaseTypeSelector(
     val types = buildList {
         add(FirmwareReleaseType.STABLE to Res.string.firmware_update_stable)
         add(FirmwareReleaseType.ALPHA to Res.string.firmware_update_alpha)
-        // Hidden behind the excluded-modules unlock, mirroring the web flasher's konami-gated nightly.
+        // Hidden behind the hidden-features unlock, mirroring the web flasher's konami-gated nightly.
         if (showNightly) add(FirmwareReleaseType.NIGHTLY to Res.string.firmware_update_nightly)
         add(FirmwareReleaseType.LOCAL to Res.string.firmware_update_local_file)
     }
