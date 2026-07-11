@@ -230,30 +230,8 @@ private fun ApplicationScope.MeshtasticDesktopApp(uiViewModel: UIViewModel, isDa
         notificationManager.fallbackNotifications.collect { notification -> trayState.sendNotification(notification) }
     }
 
-    val buildConfig = koinInject<BuildConfigProvider>()
-    val httpClient = koinInject<HttpClient>()
     val openUrl = rememberOpenUrl()
-    // Update discovery: one check per launch against the latest published GitHub release. Release builds only —
-    // dev builds carry the bare base version and would match or trail every published release. Flatpak installs
-    // (FLATPAK_ID is set inside the sandbox) update through Flathub instead, so don't point them at GitHub.
-    val updateInfo by
-        produceState<UpdateChecker.UpdateInfo?>(initialValue = null) {
-            if (!buildConfig.isDebug && System.getenv("FLATPAK_ID") == null) {
-                value = UpdateChecker(httpClient).check(buildConfig.versionName)
-            }
-        }
-
-    LaunchedEffect(updateInfo) {
-        updateInfo?.let { update ->
-            notificationManager.dispatch(
-                Notification(
-                    title = getString(Res.string.desktop_update_available_title),
-                    message = getString(Res.string.desktop_update_available_message, update.versionName),
-                    category = Notification.Category.Service,
-                ),
-            )
-        }
-    }
+    val updateInfo = rememberAvailableUpdate(notificationManager)
 
     WindowBoundsManager(desktopPrefs, windowState) { isWindowReady = true }
 
@@ -288,6 +266,39 @@ private fun ApplicationScope.MeshtasticDesktopApp(uiViewModel: UIViewModel, isDa
             }
         }
     }
+}
+
+// ----- Update discovery -----
+
+/**
+ * Checks once per launch whether a newer release is published on GitHub and surfaces it via a native notification.
+ * Release builds only — dev builds carry the bare base version and would match or trail every published release.
+ * Flatpak installs (FLATPAK_ID is set inside the sandbox) update through Flathub instead, so don't point them at
+ * GitHub.
+ */
+@Composable
+private fun rememberAvailableUpdate(notificationManager: DesktopNotificationManager): UpdateChecker.UpdateInfo? {
+    val buildConfig = koinInject<BuildConfigProvider>()
+    val httpClient = koinInject<HttpClient>()
+    val updateInfo by
+        produceState<UpdateChecker.UpdateInfo?>(initialValue = null) {
+            if (!buildConfig.isDebug && System.getenv("FLATPAK_ID") == null) {
+                value = UpdateChecker(httpClient).check(buildConfig.versionName)
+            }
+        }
+
+    LaunchedEffect(updateInfo) {
+        updateInfo?.let { update ->
+            notificationManager.dispatch(
+                Notification(
+                    title = getString(Res.string.desktop_update_available_title),
+                    message = getString(Res.string.desktop_update_available_message, update.versionName),
+                    category = Notification.Category.Service,
+                ),
+            )
+        }
+    }
+    return updateInfo
 }
 
 // ----- Window bounds persistence -----
