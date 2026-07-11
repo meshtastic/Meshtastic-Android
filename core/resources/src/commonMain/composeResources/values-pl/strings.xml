@@ -206,6 +206,7 @@
     <string name="delivery_confirmed">Dostarczono</string>
     <string name="desc_node_filter_clear">Wyczyść filtr</string>
     <string name="description">Opis</string>
+    <!-- DESKTOP -->
     <string name="desktop_notification_title">Meshtastic</string>
     <string name="details">Szczegóły</string>
     <string name="detection_sensor">Czujnik detekcji</string>

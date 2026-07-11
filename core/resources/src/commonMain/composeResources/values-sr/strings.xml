@@ -132,6 +132,7 @@
     <string name="delivery_confirmed">Испорука потврђена</string>
     <string name="desc_node_filter_clear">očisti filter čvorova</string>
     <string name="description">Опис</string>
+    <!-- DESKTOP -->
     <string name="detection_sensor">Сензор откривања</string>
     <string name="detection_sensor_config">Подешавања ензора откривања</string>
     <!-- DEVICE -->

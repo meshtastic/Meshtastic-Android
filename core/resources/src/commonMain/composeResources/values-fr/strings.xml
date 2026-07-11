@@ -328,6 +328,7 @@
     <string name="demo_mode_replay">Mode démo (Rejouer)</string>
     <string name="desc_node_filter_clear">Effacer le filtre de nœud</string>
     <string name="description">Description</string>
+    <!-- DESKTOP -->
     <string name="desktop_notification_title">Meshtastic</string>
     <string name="desktop_tray_quit">Quitter</string>
     <string name="desktop_tray_show">Afficher Meshtastic</string>

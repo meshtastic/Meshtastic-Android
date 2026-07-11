@@ -74,6 +74,7 @@
         <item quantity="other">Διαγραφή %1$s μηνυμάτων;</item>
     </plurals>
     <string name="description">Περιγραφή</string>
+    <!-- DESKTOP -->
     <string name="details">Λεπτομέρειες</string>
     <!-- DEVICE -->
     <string name="device">Συσκευή</string>

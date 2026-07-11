@@ -76,6 +76,7 @@
     <string name="delete_for_me">Прыбраць для мяне</string>
     <string name="desc_node_filter_clear">скінуць фільтр</string>
     <string name="description">Апісанне</string>
+    <!-- DESKTOP -->
     <string name="desktop_notification_title">Meshtastic</string>
     <!-- DEVICE -->
     <string name="device">Прылада</string>

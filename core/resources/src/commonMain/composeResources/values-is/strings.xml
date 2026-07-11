@@ -56,6 +56,7 @@
         <item quantity="other">Eyða %1$s skilaboðum?</item>
     </plurals>
     <string name="description">Lýsing</string>
+    <!-- DESKTOP -->
     <!-- DEVICE -->
     <string name="device_sleeping">Radíó er í svefnham</string>
     <string name="direct_message">Bein skilaboð</string>

@@ -64,6 +64,7 @@
     <!-- DELETE -->
     <string name="desc_node_filter_clear">عربي</string>
     <string name="description">الوصف</string>
+    <!-- DESKTOP -->
     <!-- DEVICE -->
     <string name="device">الجهاز</string>
     <string name="device_sleeping">الجهاز في وضعية السكون</string>

@@ -62,6 +62,7 @@
     <string name="delivery_confirmed">Entrega confirmada</string>
     <string name="desc_node_filter_clear">quitar filtro de nodo</string>
     <string name="description">Descrición</string>
+    <!-- DESKTOP -->
     <!-- DEVICE -->
     <string name="device_sleeping">Dispositivo durmindo</string>
     <string name="direct_message">Mensaxe directa</string>

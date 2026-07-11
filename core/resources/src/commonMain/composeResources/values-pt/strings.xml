@@ -133,6 +133,7 @@
     <string name="delivery_confirmed">Entrega confirmada</string>
     <string name="desc_node_filter_clear">limpar filtro de nodes</string>
     <string name="description">Descrição</string>
+    <!-- DESKTOP -->
     <string name="desktop_notification_title">Nome do nó de alternativo</string>
     <string name="details">Detalhes</string>
     <string name="detection_sensor">Sensor de deteção</string>

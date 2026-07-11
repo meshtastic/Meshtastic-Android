@@ -356,10 +356,14 @@
     <string name="demo_mode_replay">Demotila (toisto)</string>
     <string name="desc_node_filter_clear">tyhjennä suodatukset</string>
     <string name="description">Kuvaus</string>
+    <!-- DESKTOP -->
     <string name="desktop_notification_title">Meshtastic</string>
     <string name="desktop_tray_quit">Lopeta</string>
     <string name="desktop_tray_show">Näytä Meshtastic</string>
     <string name="desktop_tray_tooltip">Meshtastic työpöytä</string>
+    <string name="desktop_update_available_message">Meshtastic työpöytä %1$s on valmis ladattavaksi.</string>
+    <string name="desktop_update_available_title">Sovelluksen päivitys on saatavilla</string>
+    <string name="desktop_update_download">Lataa päivitys %1$s</string>
     <string name="details">Tiedot</string>
     <string name="detection_sensor">Havaitsemisanturi</string>
     <string name="detection_sensor_config">Tunnistinsensorin asetukset</string>
