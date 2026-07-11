@@ -10,9 +10,18 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 ### Unreleased (not yet in any build)
 
 #### 🛠️ Fixes
-* fix(database): recover firmware metadata reads after DB pool churn by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6177
+* fix: address 2.8.0 release-audit findings by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6189
+* fix: keep node-mute authoritative over @mentions by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6190
+* fix: dedup node lists to prevent LazyColumn duplicate-key crash by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6193
+* fix(discovery): restore radio home config after an interrupted scan by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6192
+* fix(service): route notification quick-replies through the send pipeline; drop dead parcelize plugin by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6196
+* fix(firmware): never offer an alpha release older than current stable by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6198
+* fix(settings): keep the Debug Panel accessible while disconnected by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6199
+* fix(database): force Room single-connection pool on all platforms by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6202
+* fix(dfu): harden Legacy nRF52 recovery after BLE stalls by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6201
+* fix(dfu): classify disconnects from failed Legacy writes by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6209
 
-### Internal (v2.8.0-internal.21)
+### Internal (v2.8.0-internal.23)
 Changes since [`v2.8.0-closed.7`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.0-closed.7):
 
 #### 🏗️ Features
@@ -25,6 +34,7 @@ Changes since [`v2.8.0-closed.7`](https://github.com/meshtastic/Meshtastic-Andro
 * fix(firmware): Keep bundled release discovery available by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6082
 * fix(dfu): Detect legacy bootloaders before secure fallback by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6079
 * fix(firmware): Retry ESP32 OTA service connections cleanly by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6081
+* fix(database): recover firmware metadata reads after DB pool churn by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6177
 #### 📝 Other Changes
 * refactor(qr): apply channel imports atomically via edit-settings transaction by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6170
 
@@ -160,6 +170,7 @@ Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/relea
 * @dubsector made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/5986
 * @garthvh made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/6088
 * @coderabbitai[bot] made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/6180
+* @madeofstown made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/6210
 <!-- UNRELEASED_END -->
 
 <!-- RELEASED_START -->
