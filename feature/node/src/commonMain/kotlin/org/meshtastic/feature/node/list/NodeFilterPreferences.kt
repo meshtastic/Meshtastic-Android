@@ -43,8 +43,7 @@ open class NodeFilterPreferences constructor(private val uiPrefs: UiPrefs) {
     open val shouldShowRole = uiPrefs.shouldShowRole
     open val shouldShowTelemetry = uiPrefs.shouldShowTelemetry
 
-    open val nodeSortOption =
-        uiPrefs.nodeSort.map { NodeSortOption.entries.getOrElse(it) { NodeSortOption.VIA_FAVORITE } }
+    open val nodeSortOption = uiPrefs.nodeSort.map { NodeSortOption.fromOrdinal(it) }
 
     open fun setNodeSort(option: NodeSortOption) {
         uiPrefs.setNodeSort(option.ordinal)

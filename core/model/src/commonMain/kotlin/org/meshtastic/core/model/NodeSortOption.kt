@@ -34,4 +34,10 @@ enum class NodeSortOption(val sqlValue: String, val stringRes: StringResource) {
     CHANNEL("channel", Res.string.node_sort_channel),
     VIA_MQTT("via_mqtt", Res.string.node_sort_via_mqtt),
     VIA_FAVORITE("via_favorite", Res.string.node_sort_via_favorite),
+    ;
+
+    companion object {
+        /** Maps a persisted preference ordinal (e.g. `UiPrefs.nodeSort`) back to its option. */
+        fun fromOrdinal(ordinal: Int): NodeSortOption = entries.getOrElse(ordinal) { VIA_FAVORITE }
+    }
 }

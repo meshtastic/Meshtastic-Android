@@ -290,6 +290,17 @@ fun EditWaypointDialog(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
+                        Text(stringResource(Res.string.waypoint_send_to))
+                        TextButton(onClick = { showRecipientPicker = true }) {
+                            Text(recipientLabel(selectedContactKey, nodes, ourNode, channelSet))
+                        }
+                    }
+                    Spacer(modifier = Modifier.size(8.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Image(
                                 imageVector = MeshtasticIcons.Lock,
@@ -302,17 +313,6 @@ fun EditWaypointDialog(
                             checked = waypointInput.locked_to != 0,
                             onCheckedChange = { waypointInput = waypointInput.copy(locked_to = if (it) 1 else 0) },
                         )
-                    }
-                    Spacer(modifier = Modifier.size(8.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                    ) {
-                        Text(stringResource(Res.string.waypoint_send_to))
-                        TextButton(onClick = { showRecipientPicker = true }) {
-                            Text(recipientLabel(selectedContactKey, nodes, ourNode, channelSet))
-                        }
                     }
                     Spacer(modifier = Modifier.size(8.dp))
                     Row(

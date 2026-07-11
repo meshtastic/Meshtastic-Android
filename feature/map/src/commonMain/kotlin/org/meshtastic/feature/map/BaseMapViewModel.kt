@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import org.jetbrains.compose.resources.StringResource
@@ -31,6 +32,7 @@ import org.meshtastic.core.model.ContactKey
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
+import org.meshtastic.core.model.NodeSortOption
 import org.meshtastic.core.model.TracerouteOverlay
 import org.meshtastic.core.model.geofence.activeWaypointPackets
 import org.meshtastic.core.model.isFromLocal
@@ -41,6 +43,7 @@ import org.meshtastic.core.repository.NotificationPrefs
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioController
+import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.any
 import org.meshtastic.core.resources.eight_hours
@@ -68,6 +71,7 @@ open class BaseMapViewModel(
     private val radioController: RadioController,
     private val radioConfigRepository: RadioConfigRepository,
     private val notificationPrefs: NotificationPrefs,
+    private val uiPrefs: UiPrefs,
 ) : ViewModel() {
 
     val myNodeInfo = nodeRepository.myNodeInfo
@@ -97,9 +101,14 @@ open class BaseMapViewModel(
             .map { it is org.meshtastic.core.model.ConnectionState.Connected }
             .stateInWhileSubscribed(initialValue = false)
 
+    /**
+     * Nodes sorted per the user's current Nodes-tab sort preference (re-queried live whenever that preference changes,
+     * e.g. via the waypoint recipient picker staying in sync with the Nodes tab).
+     */
     val nodes: StateFlow<List<Node>> =
-        nodeRepository
-            .getNodes()
+        uiPrefs.nodeSort
+            .map { NodeSortOption.fromOrdinal(it) }
+            .flatMapLatest { sort -> nodeRepository.getNodes(sort = sort) }
             .map { nodes -> nodes.filterNot { node -> node.isIgnored } }
             .stateInWhileSubscribed(initialValue = emptyList())
 
