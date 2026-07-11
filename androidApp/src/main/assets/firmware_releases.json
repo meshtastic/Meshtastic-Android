@@ -195,6 +195,12 @@
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
+      "id": "10976",
+      "title": "Fix serial protobuf corruption on short USB CDC writes",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10976",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
       "id": "10972",
       "title": "Authorize signed plaintext remote admin in licensed mode",
       "page_url": "https://github.com/meshtastic/firmware/pull/10972",
