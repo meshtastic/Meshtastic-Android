@@ -356,6 +356,10 @@ abstract class CommonFirmwareRetrieverTest {
         assertNotNull(result, "Nightly should resolve from firmware-nightly/, not firmware-<version>/")
         assertEquals("firmware-heltec-v3-2.8.0.f52e2ea.bin", result.fileName)
         assertTrue(handler.checkedUrls.none { "firmware-2.8.0.f52e2ea/" in it }, "versioned folder must not be used")
+        assertTrue(
+            "$BASE_URL/firmware-nightly/firmware-heltec-v3-2.8.0.f52e2ea.mt.json" in handler.fetchedTextUrls,
+            "manifest must be fetched from firmware-nightly/",
+        )
     }
 
     @Test
