@@ -125,10 +125,6 @@ internal fun AirQualityInfoCards(
     val ugm3 = stringResource(Res.string.micrograms_per_cubic_meter)
     val ppmUnit = stringResource(Res.string.ppm)
 
-    // Not remembered on pm25History alone: NowCast depends on nowSeconds, so a value cached until new telemetry
-    // arrives would keep showing after its most recent reading ages out of the 12h window. Recomputing per
-    // recomposition (cheap) reads fresh nowSeconds; the equal-by-value Pair keeps `cards` below from churning.
-    // ponytail: no dedicated wall-clock ticker — the node-detail screen already stops recomposing with the node.
     val aqi = nowCastAqi(pm25History)
     val icon = MeshtasticIcons.AirQuality
     val tempIcon = MeshtasticIcons.Temperature

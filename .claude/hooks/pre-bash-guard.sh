@@ -60,9 +60,6 @@ if printf '%s' "$cmd" | grep -q 'git push'; then
   repo_root=$(git -C "$cwd" rev-parse --show-toplevel 2>/dev/null) || exit 0
   is_this_repo "$repo_root" || exit 0
   export ANDROID_HOME="${ANDROID_HOME:-$HOME/Library/Android/sdk}"
-  # ponytail: detekt-only gate — test/allTests deliberately NOT run here (minutes
-  # per push is too costly; baseline stays the developer's job). Ceiling: detekt
-  # scans all 39 modules each push; scope to changed modules if it ever drags.
   out=$( (cd "$repo_root" && ./gradlew detekt --console=plain -q) 2>&1 )
   if [ $? -ne 0 ]; then
     {

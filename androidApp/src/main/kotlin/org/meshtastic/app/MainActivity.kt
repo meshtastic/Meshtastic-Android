@@ -115,9 +115,6 @@ class MainActivity : AppCompatActivity() {
 
         super.onCreate(savedInstanceState)
 
-        // ponytail: debug-only test affordance so CI/agent tooling can skip onboarding on a fresh
-        // install: `adb shell am start -n <pkg>/.MainActivity --ez skip_onboarding true`. Pair with
-        // `adb shell pm grant <pkg> <permission>` to pre-grant runtime permissions (native, no app code).
         if (BuildConfig.DEBUG && intent.getBooleanExtra(EXTRA_SKIP_ONBOARDING, false)) {
             model.onAppIntroCompleted()
         }

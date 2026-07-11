@@ -129,9 +129,7 @@ class CarStateCoordinator(
 
     /**
      * Emits an [EmergencyAlert] for each new incoming ALERT_APP packet. Sourced from the contacts flow (last packet per
-     * contact), deduped by packet id so the same alert isn't re-raised. ponytail: an alert immediately superseded by a
-     * newer message in the same contact within one emission can be missed — acceptable for the in-car overlay; the core
-     * alert notification still fires regardless.
+     * contact), deduped by packet id so the same alert isn't re-raised.
      */
     val emergencyAlerts: kotlinx.coroutines.flow.Flow<EmergencyAlert> =
         packetRepository

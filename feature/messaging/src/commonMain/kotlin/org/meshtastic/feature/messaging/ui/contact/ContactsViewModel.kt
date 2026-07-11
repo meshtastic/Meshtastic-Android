@@ -51,8 +51,6 @@ class ContactsViewModel(
 ) : ViewModel() {
     val ourNodeInfo = nodeRepository.ourNodeInfo
 
-    // ponytail: stored as a comma-joined String (not a Set) — savedstate on all KMP targets only
-    // guarantees primitive types, and there are only ever two section keys.
     private val collapsedSectionsCsv = savedStateHandle.getStateFlow(KEY_COLLAPSED_SECTIONS, "")
 
     /** Collapsed conversation-list section keys (see [ContactSection]), persisted across process death. */
@@ -79,11 +77,6 @@ class ContactsViewModel(
     /**
      * Flat contact list (channels + DMs) with empty-channel placeholders merged in, consumed by both ContactsScreen and
      * ShareScreen. ContactsScreen groups it into collapsible Channels/DirectMessages sections at render time.
-     *
-     * ponytail: not paged. Contact counts on a mesh are bounded (channels ≤ 8, DMs = nodes you've messaged), and a
-     * LazyColumn only composes visible rows regardless. If a mesh ever grows large enough that recomputing per-row
-     * unread/message counts on every emission hurts, restore paging via [PacketRepository.getContactsPaged] and inject
-     * the two section headers with PagingData.insertSeparators over a query ordered channels-first.
      */
     val contactList =
         combine(identityFlow, packetRepository.getContacts(), channels, packetRepository.getContactSettings()) {

@@ -51,9 +51,6 @@ internal fun parseDfuZipEntries(entries: Map<String, ByteArray>): DfuZipPackage 
     val entry =
         manifest.manifest.primaryEntry ?: throw DfuException.InvalidPackage("No firmware entry found in manifest.json")
 
-    // ponytail: app-only Meshtastic OTA zips carry a single image, so we transfer only the primary. A combined
-    // app+SoftDevice+bootloader package would need sequential DFU sessions we don't implement — warn loudly rather
-    // than silently flash one image of several. Upgrade path: multi-image sequencing if such packages ever ship.
     if (manifest.manifest.imageCount > 1) {
         Logger.w {
             "DFU: package declares ${manifest.manifest.imageCount} images; flashing only the primary " +
