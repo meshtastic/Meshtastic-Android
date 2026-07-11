@@ -43,20 +43,25 @@ class TracerouteSnapshotRepositoryImpl(
         .flowOn(dispatchers.io)
         .conflate()
 
-    override suspend fun upsertSnapshotPositions(logUuid: String, requestId: Int, positions: Map<Int, Position>) =
+    // The delete+insert pair runs in one withDb block so both land on the same DB instance and stay visible to the
+    // cross-transport merge drain barrier (see DatabaseProvider).
+    override suspend fun upsertSnapshotPositions(logUuid: String, requestId: Int, positions: Map<Int, Position>) {
         withContext(dispatchers.io) {
-            val dao = dbManager.currentDb.value.tracerouteNodePositionDao()
-            dao.deleteByLogUuid(logUuid)
-            if (positions.isEmpty()) return@withContext
-            val entities =
-                positions.map { (nodeNum, position) ->
-                    TracerouteNodePositionEntity(
-                        logUuid = logUuid,
-                        requestId = requestId,
-                        nodeNum = nodeNum,
-                        position = position,
-                    )
-                }
-            dao.insertAll(entities)
+            dbManager.withDb {
+                val dao = it.tracerouteNodePositionDao()
+                dao.deleteByLogUuid(logUuid)
+                if (positions.isEmpty()) return@withDb
+                val entities =
+                    positions.map { (nodeNum, position) ->
+                        TracerouteNodePositionEntity(
+                            logUuid = logUuid,
+                            requestId = requestId,
+                            nodeNum = nodeNum,
+                            position = position,
+                        )
+                    }
+                dao.insertAll(entities)
+            }
         }
+    }
 }

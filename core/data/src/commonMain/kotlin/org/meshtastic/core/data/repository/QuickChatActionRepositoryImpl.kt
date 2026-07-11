@@ -34,21 +34,20 @@ class QuickChatActionRepositoryImpl(
     override fun getAllActions(): Flow<List<QuickChatAction>> =
         dbManager.currentDb.flatMapLatest { it.quickChatActionDao().getAll() }.flowOn(dispatchers.io)
 
+    // Writes go through withDb so they register with the cross-transport merge drain barrier (see DatabaseProvider).
     override suspend fun upsert(action: QuickChatAction) {
-        withContext(dispatchers.io) { dbManager.currentDb.value.quickChatActionDao().upsert(action) }
+        withContext(dispatchers.io) { dbManager.withDb { it.quickChatActionDao().upsert(action) } }
     }
 
     override suspend fun deleteAll() {
-        withContext(dispatchers.io) { dbManager.currentDb.value.quickChatActionDao().deleteAll() }
+        withContext(dispatchers.io) { dbManager.withDb { it.quickChatActionDao().deleteAll() } }
     }
 
     override suspend fun delete(action: QuickChatAction) {
-        withContext(dispatchers.io) { dbManager.currentDb.value.quickChatActionDao().delete(action) }
+        withContext(dispatchers.io) { dbManager.withDb { it.quickChatActionDao().delete(action) } }
     }
 
     override suspend fun setItemPosition(uuid: Long, newPos: Int) {
-        withContext(dispatchers.io) {
-            dbManager.currentDb.value.quickChatActionDao().updateActionPosition(uuid, newPos)
-        }
+        withContext(dispatchers.io) { dbManager.withDb { it.quickChatActionDao().updateActionPosition(uuid, newPos) } }
     }
 }

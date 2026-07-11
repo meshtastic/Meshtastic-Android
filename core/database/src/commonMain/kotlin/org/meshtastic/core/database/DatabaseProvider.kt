@@ -21,6 +21,14 @@ import kotlinx.coroutines.flow.StateFlow
 /**
  * Provides multiplatform access to the current [MeshtasticDatabase] and a safe transactional helper. Platform
  * implementations manage the concrete lifecycle (Room on Android, etc.).
+ *
+ * **Write policy:** every one-shot DAO *write* (insert/upsert/update/delete/clear) must go through [withDb], never
+ * `currentDb.value` directly. [withDb] registers the write with the cross-transport merge drain barrier (see
+ * [DatabaseManager.associateDevice]) so a merge can't snapshot a database while the write is still in flight and lose
+ * it when that database is retired — and it retries once if the pool closes under a concurrent DB switch. Direct
+ * `currentDb.value` is fine for one-shot *reads* (a torn read against a just-retired DB is recoverable and reads don't
+ * need drain visibility), and `currentDb` itself is the right latch for Flow/Paging factories, which must re-latch on
+ * DB switch and must stay out of [withDb]'s containment lane.
  */
 interface DatabaseProvider {
     /** Reactive stream of the currently active database instance. */

@@ -383,9 +383,15 @@ open class DatabaseManager(
         }
     }
 
-    /** Atomically snapshots the active DB and registers a writer against it. Returns null if none is open. */
-    private suspend fun beginWrite(): MeshtasticDatabase? = writerTrackerMutex.withLock {
-        val db = _currentDb.value ?: return@withLock null
+    /**
+     * Atomically snapshots the active DB and registers a writer against it. Before the first [switchActiveDatabase]
+     * `_currentDb` is still null, so fall back to the public [currentDb] view — the eagerly-opened default DB — giving
+     * withDb the exact DB-resolution semantics of a direct `currentDb.value` caller. Desktop never calls [init] until a
+     * device is selected, so without the fallback pre-connection writes (quick-chat actions, firmware/hardware cache
+     * refreshes) would silently no-op there instead of landing in the default DB the pre-connection flows read from.
+     */
+    private suspend fun beginWrite(): MeshtasticDatabase = writerTrackerMutex.withLock {
+        val db = _currentDb.value ?: currentDb.value
         activeWriters[db] = (activeWriters[db] ?: 0) + 1
         db
     }
@@ -433,7 +439,7 @@ open class DatabaseManager(
 
     @Suppress("ReturnCount", "ThrowsCount", "TooGenericExceptionCaught", "CyclomaticComplexMethod")
     private suspend fun <T> withCurrentDb(block: suspend (MeshtasticDatabase) -> T): T? {
-        val db = beginWrite() ?: return null
+        val db = beginWrite()
         val active = currentDbName
         markLastUsed(active)
         try {
