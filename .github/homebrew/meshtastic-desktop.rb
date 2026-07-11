@@ -7,7 +7,7 @@
 # The download URL depends on the jpackage DMG being named
 # "Meshtastic Desktop-<version>.dmg" (GitHub rewrites the space to a dot).
 #
-# ponytail: arm64-only — CI has no Intel macOS runner, so no x86_64 DMG exists.
+# NOTE: arm64-only — CI has no Intel macOS runner, so no x86_64 DMG exists.
 # When one is added, switch to `arch arm: ..., intel: ...` with per-arch sha256.
 cask "meshtastic-desktop" do
   version "{{VERSION}}"

@@ -29,7 +29,7 @@ A Compose Desktop application target — the first full non-Android target for t
 brew install --cask meshtastic/tap/meshtastic-desktop
 ```
 
-The cask lives in the [meshtastic/homebrew-tap](https://github.com/meshtastic/homebrew-tap) tap (alongside the `meshtasticd` formula) and is regenerated from the template at `.github/homebrew/meshtastic-desktop.rb` by the `update-homebrew-cask` job in `promote.yml`, which opens a PR against the tap on every production release.
+The cask lives in the [meshtastic/homebrew-tap](https://github.com/meshtastic/homebrew-tap) tap (alongside the `meshtasticd` formula) and is regenerated from the template at `.github/homebrew/meshtastic-desktop.rb` by the `update-homebrew-cask` job in `promote.yml`, which opens a PR against the tap for production releases when `HOMEBREW_TAP_TOKEN` is configured.
 
 ## ProGuard / Minification
 
