@@ -74,7 +74,8 @@ class UpdateChecker(private val httpClient: HttpClient) {
 
         private fun parse(raw: String): Triple<Int, Int, Int>? =
             VERSION_REGEX.find(raw)?.destructured?.let { (major, minor, patch) ->
-                Triple(major.toInt(), minor.toInt(), patch.toInt())
+                // runCatching: \d+ can match components too large for Int; treat those as unparseable.
+                runCatching { Triple(major.toInt(), minor.toInt(), patch.toInt()) }.getOrNull()
             }
     }
 }

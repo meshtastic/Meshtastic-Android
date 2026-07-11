@@ -54,4 +54,9 @@ class UpdateCheckerTest {
         assertFalse(UpdateChecker.isNewer(latest = "snapshot", current = "2.8.0"))
         assertFalse(UpdateChecker.isNewer(latest = "v2.8.1", current = "unknown"))
     }
+
+    @Test
+    fun `oversized version components never trigger an update`() {
+        assertFalse(UpdateChecker.isNewer(latest = "v99999999999999999999.0.0", current = "2.8.0"))
+    }
 }
