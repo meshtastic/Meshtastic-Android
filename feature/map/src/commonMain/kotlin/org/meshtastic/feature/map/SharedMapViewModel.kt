@@ -23,6 +23,7 @@ import org.meshtastic.core.repository.NotificationPrefs
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioController
+import org.meshtastic.core.repository.UiPrefs
 
 @KoinViewModel
 class SharedMapViewModel(
@@ -32,6 +33,7 @@ class SharedMapViewModel(
     radioController: RadioController,
     radioConfigRepository: RadioConfigRepository,
     notificationPrefs: NotificationPrefs,
+    uiPrefs: UiPrefs,
 ) : BaseMapViewModel(
     mapPrefs,
     nodeRepository,
@@ -39,4 +41,5 @@ class SharedMapViewModel(
     radioController,
     radioConfigRepository,
     notificationPrefs,
+    uiPrefs,
 )

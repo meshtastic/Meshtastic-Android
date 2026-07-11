@@ -17,10 +17,12 @@
 package org.meshtastic.feature.map
 
 import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import org.jetbrains.compose.resources.StringResource
@@ -32,6 +34,7 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.TracerouteOverlay
 import org.meshtastic.core.model.geofence.activeWaypointPackets
+import org.meshtastic.core.model.isBroadcast
 import org.meshtastic.core.model.isFromLocal
 import org.meshtastic.core.model.util.DistanceUnit
 import org.meshtastic.core.repository.MapPrefs
@@ -40,6 +43,8 @@ import org.meshtastic.core.repository.NotificationPrefs
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioController
+import org.meshtastic.core.repository.UiPrefs
+import org.meshtastic.core.repository.nodeSortOption
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.any
 import org.meshtastic.core.resources.eight_hours
@@ -67,6 +72,7 @@ open class BaseMapViewModel(
     private val radioController: RadioController,
     private val radioConfigRepository: RadioConfigRepository,
     private val notificationPrefs: NotificationPrefs,
+    private val uiPrefs: UiPrefs,
 ) : ViewModel() {
 
     val myNodeInfo = nodeRepository.myNodeInfo
@@ -96,9 +102,13 @@ open class BaseMapViewModel(
             .map { it is org.meshtastic.core.model.ConnectionState.Connected }
             .stateInWhileSubscribed(initialValue = false)
 
+    /**
+     * Nodes sorted per the user's current Nodes-tab sort preference (re-queried live whenever that preference changes,
+     * e.g. via the waypoint recipient picker staying in sync with the Nodes tab).
+     */
     val nodes: StateFlow<List<Node>> =
-        nodeRepository
-            .getNodes()
+        uiPrefs.nodeSortOption
+            .flatMapLatest { sort -> nodeRepository.getNodes(sort = sort) }
             .map { nodes -> nodes.filterNot { node -> node.isIgnored } }
             .stateInWhileSubscribed(initialValue = emptyList())
 
@@ -176,16 +186,25 @@ open class BaseMapViewModel(
     fun deleteWaypoint(id: Int) =
         safeLaunch(context = ioDispatcher, tag = "deleteWaypoint") { packetRepository.deleteWaypoint(id) }
 
-    fun sendWaypoint(wpt: Waypoint, contactKey: String = "0${NodeAddress.ID_BROADCAST}") {
+    /**
+     * Contact key a waypoint packet was exchanged on: its destination for packets we sent (or broadcasts), otherwise
+     * its sender — the same derivation as MeshDataHandlerImpl.rememberDataPacket, so edits and expiries route back to
+     * the conversation the waypoint actually lives in (a raw `to` would self-address a waypoint someone DM'd to us).
+     */
+    fun waypointContactKey(packet: DataPacket): String {
+        val contact = if (packet.isFromLocal(myNodeNum) || packet.isBroadcast) packet.to else packet.from
+        return "${packet.channel}$contact"
+    }
+
+    fun sendWaypoint(wpt: Waypoint, contactKey: String = "0${NodeAddress.ID_BROADCAST}"): Job? {
         // contactKey: unique contact key filter (channel)+(nodeId)
         val parsedKey = ContactKey(contactKey)
         val p = DataPacket(parsedKey.addressString, parsedKey.channel, wpt)
-        if (wpt.id != 0) sendDataPacket(p)
+        return if (wpt.id != 0) sendDataPacket(p) else null
     }
 
-    private fun sendDataPacket(p: DataPacket) {
+    private fun sendDataPacket(p: DataPacket): Job =
         safeLaunch(context = ioDispatcher, tag = "sendDataPacket") { radioController.sendMessage(p) }
-    }
 
     fun generatePacketId(): Int = radioController.generatePacketId()
 

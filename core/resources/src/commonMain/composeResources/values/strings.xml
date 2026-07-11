@@ -1753,10 +1753,14 @@
     <string name="wait_for_bluetooth_duration_seconds">Wait for Bluetooth duration</string>
     <string name="wake_on_tap_or_motion">Wake on tap or motion</string>
     <string name="warning">Warning</string>
+    <!-- WAYPOINT -->
     <string name="waypoint_delete">Delete waypoint?</string>
     <string name="waypoint_edit">Edit waypoint</string>
     <string name="waypoint_new">New waypoint</string>
     <string name="waypoint_received">Received waypoint: %1$s</string>
+    <string name="waypoint_recipient_broadcast">Broadcast (all nodes)</string>
+    <string name="waypoint_recipient_channel">Channel %1$d</string>
+    <string name="waypoint_send_to">Send to</string>
     <string name="weight">Weight</string>
     <!-- WIFI -->
     <string name="wifi_config">WiFi Options</string>

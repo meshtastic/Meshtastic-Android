@@ -97,6 +97,7 @@ class MapViewModel(
     radioController,
     radioConfigRepository,
     notificationPrefs,
+    uiPrefs,
 ) {
 
     private val _selectedWaypointId = MutableStateFlow(savedStateHandle.get<Int>("waypointId"))
