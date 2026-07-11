@@ -24,6 +24,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -66,6 +67,7 @@ import io.ktor.client.HttpClient
 import kotlinx.coroutines.flow.first
 import okio.Path.Companion.toPath
 import org.jetbrains.compose.resources.decodeToSvgPainter
+import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.core.context.startKoin
@@ -77,14 +79,19 @@ import org.meshtastic.core.navigation.MultiBackstack
 import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.navigation.TopLevelDestination
 import org.meshtastic.core.navigation.rememberMultiBackstack
+import org.meshtastic.core.repository.Notification
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.desktop_tray_quit
 import org.meshtastic.core.resources.desktop_tray_show
 import org.meshtastic.core.resources.desktop_tray_tooltip
+import org.meshtastic.core.resources.desktop_update_available_message
+import org.meshtastic.core.resources.desktop_update_available_title
+import org.meshtastic.core.resources.desktop_update_download
 import org.meshtastic.core.service.MeshServiceOrchestrator
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.LocalEventBranding
+import org.meshtastic.core.ui.util.rememberOpenUrl
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.desktop.data.DesktopPreferencesDataSource
 import org.meshtastic.desktop.di.desktopModule
@@ -223,6 +230,9 @@ private fun ApplicationScope.MeshtasticDesktopApp(uiViewModel: UIViewModel, isDa
         notificationManager.fallbackNotifications.collect { notification -> trayState.sendNotification(notification) }
     }
 
+    val openUrl = rememberOpenUrl()
+    val updateInfo = rememberAvailableUpdate(notificationManager)
+
     WindowBoundsManager(desktopPrefs, windowState) { isWindowReady = true }
 
     Tray(
@@ -231,6 +241,12 @@ private fun ApplicationScope.MeshtasticDesktopApp(uiViewModel: UIViewModel, isDa
         tooltip = stringResource(Res.string.desktop_tray_tooltip),
         onAction = { isAppVisible = true },
         menu = {
+            updateInfo?.let { update ->
+                Item(
+                    stringResource(Res.string.desktop_update_download, update.versionName),
+                    onClick = { openUrl(update.releaseUrl) },
+                )
+            }
             Item(stringResource(Res.string.desktop_tray_show), onClick = { isAppVisible = true })
             Item(stringResource(Res.string.desktop_tray_quit), onClick = ::exitApplication)
         },
@@ -250,6 +266,39 @@ private fun ApplicationScope.MeshtasticDesktopApp(uiViewModel: UIViewModel, isDa
             }
         }
     }
+}
+
+// ----- Update discovery -----
+
+/**
+ * Checks once per launch whether a newer release is published on GitHub and surfaces it via a native notification.
+ * Release builds only — dev builds carry the bare base version and would match or trail every published release.
+ * Flatpak installs (FLATPAK_ID is set inside the sandbox) update through Flathub instead, so don't point them at
+ * GitHub.
+ */
+@Composable
+private fun rememberAvailableUpdate(notificationManager: DesktopNotificationManager): UpdateChecker.UpdateInfo? {
+    val buildConfig = koinInject<BuildConfigProvider>()
+    val httpClient = koinInject<HttpClient>()
+    val updateInfo by
+        produceState<UpdateChecker.UpdateInfo?>(initialValue = null) {
+            if (!buildConfig.isDebug && System.getenv("FLATPAK_ID") == null) {
+                value = UpdateChecker(httpClient).check(buildConfig.versionName)
+            }
+        }
+
+    LaunchedEffect(updateInfo) {
+        updateInfo?.let { update ->
+            notificationManager.dispatch(
+                Notification(
+                    title = getString(Res.string.desktop_update_available_title),
+                    message = getString(Res.string.desktop_update_available_message, update.versionName),
+                    category = Notification.Category.Service,
+                ),
+            )
+        }
+    }
+    return updateInfo
 }
 
 // ----- Window bounds persistence -----

@@ -334,10 +334,14 @@ demo_mode
 demo_mode_replay
 desc_node_filter_clear
 description
+### DESKTOP ###
 desktop_notification_title
 desktop_tray_quit
 desktop_tray_show
 desktop_tray_tooltip
+desktop_update_available_message
+desktop_update_available_title
+desktop_update_download
 details
 detection_sensor
 detection_sensor_config
