@@ -206,7 +206,13 @@ class MeshConfigFlowManagerImpl(
 
         scope.handledLaunch {
             try {
-                nodeRepository.installConfig(info, entities)
+                val removedNums = nodeRepository.installConfig(info, entities)
+                if (removedNums.isNotEmpty()) {
+                    // Identity migration dropped stale rows (e.g. the device renumbered after a firmware
+                    // 2.8 upgrade); evict them from the in-memory index so lookups can't resurrect them.
+                    Logger.i { "Config install migrated ${removedNums.size} stale node identit(y/ies)" }
+                    removedNums.forEach(nodeManager::removeByNodenum)
+                }
             } catch (e: CancellationException) {
                 throw e
             } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
@@ -238,6 +244,9 @@ class MeshConfigFlowManagerImpl(
 
         // Transition to Stage 1, discarding any stale data from a prior interrupted handshake.
         handshakeState.value = HandshakeState.ReceivingConfig(rawMyNodeInfo = myInfo)
+        // Device id before node num: RadioControllerImpl gates its DB association on a non-null num,
+        // so ordering this way guarantees the association never fires with a stale device id.
+        nodeManager.setMyDeviceId(myInfo.device_id.utf8().takeIf { it.isNotBlank() })
         nodeManager.setMyNodeNum(myInfo.my_node_num)
         nodeManager.setFirmwareEdition(myInfo.firmware_edition)
         applyEventFirmwareNotificationDefaults(myInfo.firmware_edition)

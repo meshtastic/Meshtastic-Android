@@ -74,8 +74,6 @@ open class DatabaseManager(
     private fun addrDbKey(address: String?) =
         stringPreferencesKey("${DatabaseConstants.ADDR_DB_FOR_PREFIX}${normalizeAddress(address)}")
 
-    private fun nodeDbKey(nodeNum: Int) = stringPreferencesKey("${DatabaseConstants.NODE_DB_FOR_PREFIX}$nodeNum")
-
     private var backfillJob: Job? = null
 
     @Volatile private var hasDelayedFirstDeviceBackfill = false
@@ -114,7 +112,7 @@ open class DatabaseManager(
 
     /**
      * Name of the currently active database. Tracked explicitly rather than recomputed from the address, because
-     * cross-transport aliasing ([associateNode]) decouples the two: a secondary transport's address maps to the DB
+     * cross-transport aliasing ([associateDevice]) decouples the two: a secondary transport's address maps to the DB
      * claimed by the first transport, which `buildDbName(address)` would never produce. Written under [mutex].
      */
     @Volatile private var currentDbName: String = DatabaseConstants.DEFAULT_DB_NAME
@@ -136,7 +134,7 @@ open class DatabaseManager(
      * Resolves the DB name to use for [address], honoring a cross-transport alias when one exists. A secondary
      * transport (e.g. TCP) that has been unified with a node points at the DB the first transport (e.g. BLE) claimed;
      * without an alias this falls back to the address-hashed name — today's default — for a first-time or primary
-     * connection. See [associateNode].
+     * connection. See [associateDevice].
      */
     private suspend fun resolveDbName(address: String?): String {
         val fallback = buildDbName(address)
@@ -195,24 +193,41 @@ open class DatabaseManager(
     }
 
     @Suppress("TooGenericExceptionCaught")
-    override suspend fun associateNode(nodeNum: Int) {
+    override suspend fun associateDevice(nodeNum: Int, deviceId: String?) {
         mutex.withLock {
             val sourceName = currentDbName
             // Never claim or merge into the sentinel "no device" DB.
             if (sourceName == DatabaseConstants.DEFAULT_DB_NAME) return@withLock
 
-            val claimed = datastore.data.first()[nodeDbKey(nodeNum)]
+            // The device-id claim is the durable one (node numbers renumber under firmware 2.8); the
+            // node-num claim stays as the fallback for hardware without a device id, for lockdown
+            // sessions (device_id zeroed), and for claims written by older app versions. Writes always
+            // refresh both keys so either lookup path resolves on the next connection.
+            val deviceKey = validDeviceIdOrNull(deviceId)?.let(::deviceDbPrefKey)
+            val nodeKey = nodeDbPrefKey(nodeNum)
+            val prefs = datastore.data.first()
+            val claimed = resolveDbClaim(prefs, deviceKey, nodeKey)
+            suspend fun writeClaims(dbName: String) = datastore.edit {
+                deviceKey?.let { key -> it[key] = dbName }
+                it[nodeKey] = dbName
+            }
+
             when {
                 claimed == null -> {
-                    // First transport to learn this node: its current DB becomes the node's canonical DB.
+                    // First transport to learn this device: its current DB becomes the device's canonical DB.
                     // No address alias is needed — a primary connection already resolves to this DB via buildDbName.
-                    datastore.edit { it[nodeDbKey(nodeNum)] = sourceName }
+                    writeClaims(sourceName)
                     Logger.i { "Claimed ${anonymizeDbName(sourceName)} as canonical DB for node $nodeNum" }
                 }
 
-                claimed == sourceName -> Unit
-
-                // Already unified — nothing to do.
+                claimed == sourceName -> {
+                    // Already unified — just backfill/refresh any claim key that is missing or stale
+                    // (e.g. the first connect after this device renumbered, or after an app update
+                    // introduced device-id claims).
+                    if ((deviceKey != null && prefs[deviceKey] != sourceName) || prefs[nodeKey] != sourceName) {
+                        writeClaims(sourceName)
+                    }
+                }
 
                 else -> {
                     // Secondary transport reached an already-known node: fold this DB into the canonical one,
@@ -243,6 +258,9 @@ open class DatabaseManager(
                     }
 
                     markLastUsed(claimed)
+                    // Refresh both claim keys (migrates a legacy nodeNum-only claim forward to the
+                    // device-id key) and alias this transport's address to the canonical DB.
+                    writeClaims(claimed)
                     datastore.edit { it[addrDbKey(_currentAddress.value)] = claimed }
                     Logger.i {
                         "Unified ${anonymizeDbName(sourceName)} into ${anonymizeDbName(claimed)} for node $nodeNum"

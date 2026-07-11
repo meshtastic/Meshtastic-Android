@@ -34,9 +34,8 @@ class SwitchingNodeInfoWriteDataSource(
         withContext(dispatchers.io) { dbManager.withDb { it.nodeInfoDao().upsert(node) } }
     }
 
-    override suspend fun installConfig(mi: MyNodeEntity, nodes: List<NodeEntity>) {
-        withContext(dispatchers.io) { dbManager.withDb { it.nodeInfoDao().installConfig(mi, nodes) } }
-    }
+    override suspend fun installConfig(mi: MyNodeEntity, nodes: List<NodeEntity>): List<Int> =
+        withContext(dispatchers.io) { dbManager.withDb { it.nodeInfoDao().installConfig(mi, nodes) } ?: emptyList() }
 
     override suspend fun clearNodeDB(preserveFavorites: Boolean) {
         withContext(dispatchers.io) { dbManager.withDb { it.nodeInfoDao().clearNodeInfo(preserveFavorites) } }

@@ -124,6 +124,12 @@ class NodeManagerImpl(
         myNodeNum.value = num
     }
 
+    override val myDeviceId = MutableStateFlow<String?>(null)
+
+    override fun setMyDeviceId(id: String?) {
+        myDeviceId.value = id
+    }
+
     override val firmwareEdition = MutableStateFlow<FirmwareEdition?>(null)
 
     override fun setFirmwareEdition(edition: FirmwareEdition?) {
@@ -149,6 +155,7 @@ class NodeManagerImpl(
         isNodeDbReady.value = false
         allowNodeDbWrites.value = false
         myNodeNum.value = null
+        myDeviceId.value = null
         firmwareEdition.value = null
     }
 

@@ -91,14 +91,18 @@ class RadioControllerImpl(
     QueryController by QueryControllerImpl(commandSender, nodeManager, uiPrefs) {
 
     init {
-        // Unify per-node databases across transports. When the handshake reports our node number, tell the
-        // DatabaseManager to claim (or merge into) that node's canonical DB, so the same node reached over BLE, TCP,
-        // or USB shares one stored history. Keyed on (address, node) so a second transport for the same node re-fires
-        // even though the node number itself is unchanged.
+        // Unify per-device databases across transports. When the handshake reports our node number, tell the
+        // DatabaseManager to claim (or merge into) that device's canonical DB, so the same device reached over BLE,
+        // TCP, or USB shares one stored history. The hardware device id (when reported) is the durable claim key —
+        // firmware 2.8 renumbers devices (num = crc32(public_key)) on upgrade/erase/re-key — with the node number as
+        // fallback. Keyed on (address, node, device) so a second transport for the same device re-fires even though
+        // the identity itself is unchanged.
         scope.launch {
-            combine(meshPrefs.deviceAddress, nodeManager.myNodeNum) { address, nodeNum -> address to nodeNum }
+            combine(meshPrefs.deviceAddress, nodeManager.myNodeNum, nodeManager.myDeviceId) { address, nodeNum, devId ->
+                Triple(address, nodeNum, devId)
+            }
                 .distinctUntilChanged()
-                .collect { (_, nodeNum) -> nodeNum?.let { databaseManager.associateNode(it) } }
+                .collect { (_, nodeNum, deviceId) -> nodeNum?.let { databaseManager.associateDevice(it, deviceId) } }
         }
     }
 

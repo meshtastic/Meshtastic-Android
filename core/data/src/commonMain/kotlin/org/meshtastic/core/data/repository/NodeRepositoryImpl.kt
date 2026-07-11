@@ -198,7 +198,7 @@ class NodeRepositoryImpl(
         withContext(dispatchers.io) { nodeInfoWriteDataSource.upsert(node.toEntity()) }
 
     /** Installs initial configuration data (local info and remote nodes) into the database. */
-    override suspend fun installConfig(mi: MyNodeInfo, nodes: List<Node>) = withContext(dispatchers.io) {
+    override suspend fun installConfig(mi: MyNodeInfo, nodes: List<Node>): List<Int> = withContext(dispatchers.io) {
         nodeInfoWriteDataSource.installConfig(mi.toEntity(), nodes.map { it.toEntity() })
     }
 

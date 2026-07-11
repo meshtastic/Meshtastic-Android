@@ -102,6 +102,9 @@ class MeshConfigFlowManagerImplTest {
         every { nodeManager.myNodeNum } returns MutableStateFlow(null)
         every { notificationPrefs.nodeEventsAutoDisabledForEvent } returns MutableStateFlow(false)
         every { notificationPrefs.nodeEventsEnabled } returns MutableStateFlow(true)
+        // autofill returns null for List<Int>, which would NPE the non-null return; individual
+        // tests override this stub where they exercise install failures or migration results.
+        everySuspend { nodeRepository.installConfig(any(), any()) } returns emptyList()
 
         manager =
             MeshConfigFlowManagerImpl(
@@ -737,7 +740,11 @@ class MeshConfigFlowManagerImplTest {
         // async DB install entry point are observed. The order is the invariant under test.
         val callOrder = mutableListOf<String>()
         every { connectionManager.onHandshakeComplete() } calls { callOrder.add("handshakeComplete") }
-        everySuspend { nodeRepository.installConfig(any(), any()) } calls { callOrder.add("installConfig") }
+        everySuspend { nodeRepository.installConfig(any(), any()) } calls
+            {
+                callOrder.add("installConfig")
+                emptyList()
+            }
 
         manager.handleMyInfo(protoMyNodeInfo)
         advanceUntilIdle()

@@ -22,7 +22,7 @@ import co.touchlab.kermit.Logger
 
 /**
  * Folds the contents of one device database ([source]) into another ([dest]) when both turn out to belong to the same
- * physical node reached over different transports (BLE / TCP / USB). Called once, by [DatabaseManager.associateNode],
+ * physical node reached over different transports (BLE / TCP / USB). Called once, by [DatabaseManager.associateDevice],
  * the first time a secondary transport learns a `myNodeNum` that another transport already claimed.
  *
  * Every per-device table is unified so switching transport is seamless: messages (+FTS), reactions, contact mute/read
@@ -39,7 +39,7 @@ object DatabaseMerger {
     suspend fun merge(source: MeshtasticDatabase, dest: MeshtasticDatabase) {
         // All destination writes run in a single transaction so a crash or exception mid-merge rolls
         // back cleanly instead of leaving `dest` half-merged. This also makes a retried merge safe: if
-        // associateNode re-runs (e.g. a crash before the address alias is persisted), the rolled-back
+        // associateDevice re-runs (e.g. a crash before the address alias is persisted), the rolled-back
         // partial writes never happened, so the fresh-id packet/discovery re-inserts can't duplicate.
         // Reads from `source` use its own connection pool and don't participate in this transaction.
         var packets = 0

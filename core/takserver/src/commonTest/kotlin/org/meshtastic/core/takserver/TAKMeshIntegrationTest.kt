@@ -322,7 +322,7 @@ class TAKMeshIntegrationTest {
 
         override suspend fun upsert(node: Node) {}
 
-        override suspend fun installConfig(mi: MyNodeInfo, nodes: List<Node>) {}
+        override suspend fun installConfig(mi: MyNodeInfo, nodes: List<Node>): List<Int> = emptyList()
 
         override suspend fun insertMetadata(nodeNum: Int, metadata: DeviceMetadata) {}
 
