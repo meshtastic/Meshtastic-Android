@@ -1,0 +1,42 @@
+name: Publish to winget
+
+# The `released` type fires when a release is published as a full release OR
+# when an existing pre-release is flipped to a full release — the latter is
+# exactly what promote.yml's production promotion does (`gh release edit
+# --prerelease=false` on the already-published release object). It never fires
+# for drafts or pre-releases, so internal/closed/open promotions are ignored.
+on:
+  release:
+    types: [released]
+
+# The WINGET_TOKEN PAT does all the work against microsoft/winget-pkgs;
+# nothing in this repo is written.
+permissions: {}
+
+jobs:
+  winget:
+    # Belt and braces — `released` should already exclude these.
+    if: ${{ !github.event.release.prerelease && !github.event.release.draft }}
+    runs-on: ubuntu-latest
+    env:
+      # Secrets aren't readable in step `if:` expressions; skip cleanly until
+      # the token is configured.
+      HAS_WINGET_TOKEN: ${{ secrets.WINGET_TOKEN != '' && 'true' || 'false' }}
+    steps:
+      # Prerequisites (both manual, one-time):
+      #   1. Meshtastic.MeshtasticDesktop must already exist in
+      #      microsoft/winget-pkgs — winget-releaser only updates existing
+      #      packages. Submit the first version by hand with `wingetcreate new
+      #      <MSI release asset URL>`.
+      #   2. WINGET_TOKEN secret: a *classic* PAT with the public_repo scope
+      #      (fine-grained PATs are not supported), owned by an account that
+      #      has (or can create) a fork of microsoft/winget-pkgs.
+      # The version is derived from the release tag with the leading `v`
+      # stripped (v2.8.0 -> 2.8.0), matching the MSI's ProductVersion.
+      - name: Submit MSI manifest to microsoft/winget-pkgs
+        if: env.HAS_WINGET_TOKEN == 'true'
+        uses: vedantmgoyal9/winget-releaser@v2
+        with:
+          identifier: Meshtastic.MeshtasticDesktop
+          installers-regex: '\.msi$'
+          token: ${{ secrets.WINGET_TOKEN }}

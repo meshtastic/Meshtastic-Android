@@ -62,6 +62,20 @@ on:
         required: false
       APPLE_TEAM_ID:
         required: false
+      # Windows Authenticode signing via Azure Trusted Signing (now "Artifact Signing").
+      # All optional: the signing step skips cleanly when absent, like macOS above.
+      AZURE_TENANT_ID:
+        required: false
+      AZURE_CLIENT_ID:
+        required: false
+      AZURE_CLIENT_SECRET:
+        required: false
+      AZURE_TRUSTED_SIGNING_ENDPOINT:
+        required: false
+      AZURE_TRUSTED_SIGNING_ACCOUNT:
+        required: false
+      AZURE_TRUSTED_SIGNING_CERT_PROFILE:
+        required: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ inputs.tag_name }}
@@ -269,6 +283,8 @@ jobs:
       GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
       GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
       GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}
+      # Secrets aren't readable in step `if:` expressions, so surface presence here.
+      SIGN_WINDOWS: ${{ secrets.AZURE_TRUSTED_SIGNING_ENDPOINT != '' && 'true' || 'false' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v7.0.0
@@ -307,6 +323,39 @@ jobs:
           ./gradlew :desktopApp:packageReleaseDistributionForCurrentOS
           ${{ contains(runner.os, 'macOS') && ':desktopApp:packageReleaseUberJarForCurrentOS' || '' }}
           '-PaboutLibraries.release=true' --no-daemon
+
+      # Authenticode-signs the MSI/EXE installers via Azure Trusted Signing
+      # (rebranded "Artifact Signing"). Skips cleanly when the secrets are
+      # absent, mirroring SIGN_MACOS. Required repository secrets:
+      #   AZURE_TENANT_ID                    – Entra tenant ID
+      #   AZURE_CLIENT_ID                    – app registration (service principal) client ID
+      #   AZURE_CLIENT_SECRET                – client secret for that app registration
+      #   AZURE_TRUSTED_SIGNING_ENDPOINT     – e.g. https://eus.codesigning.azure.net
+      #   AZURE_TRUSTED_SIGNING_ACCOUNT      – Trusted Signing account name
+      #   AZURE_TRUSTED_SIGNING_CERT_PROFILE – public-trust certificate profile name
+      # The service principal needs the "Trusted Signing Certificate Profile
+      # Signer" role on the account. Presence is gated on the ENDPOINT secret;
+      # a half-configured set fails here loudly rather than shipping unsigned.
+      # Note: only the installers are signed, not the launcher .exe packaged
+      # inside them — SmartScreen reputation attaches to the downloaded file.
+      # Sign the inner .exe between createReleaseDistributable and packaging
+      # if that ever becomes necessary.
+      - name: Sign Windows installers (Azure Trusted Signing)
+        if: runner.os == 'Windows' && env.SIGN_WINDOWS == 'true'
+        uses: azure/artifact-signing-action@v2.0.0
+        with:
+          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          endpoint: ${{ secrets.AZURE_TRUSTED_SIGNING_ENDPOINT }}
+          signing-account-name: ${{ secrets.AZURE_TRUSTED_SIGNING_ACCOUNT }}
+          certificate-profile-name: ${{ secrets.AZURE_TRUSTED_SIGNING_CERT_PROFILE }}
+          files-folder: desktopApp/build/compose/binaries/main-release
+          files-folder-filter: msi,exe
+          files-folder-recurse: true
+          file-digest: SHA256
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
 
       # jpackage computes the .deb Depends: line from the build host's package names.
       # Ubuntu 24.04 records time_t64 transition names (libasound2t64, libpng16-16t64)
