@@ -30,6 +30,7 @@ import org.meshtastic.core.database.dao.DeviceLinkDao
 import org.meshtastic.core.database.dao.DiscoveryDao
 import org.meshtastic.core.database.dao.EventFirmwareEditionDao
 import org.meshtastic.core.database.dao.FirmwareReleaseDao
+import org.meshtastic.core.database.dao.MergeMarkerDao
 import org.meshtastic.core.database.dao.MeshLogDao
 import org.meshtastic.core.database.dao.NodeInfoDao
 import org.meshtastic.core.database.dao.PacketDao
@@ -43,6 +44,7 @@ import org.meshtastic.core.database.entity.DiscoveryPresetResultEntity
 import org.meshtastic.core.database.entity.DiscoverySessionEntity
 import org.meshtastic.core.database.entity.EventFirmwareEditionEntity
 import org.meshtastic.core.database.entity.FirmwareReleaseEntity
+import org.meshtastic.core.database.entity.MergeMarkerEntity
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.database.entity.MetadataEntity
 import org.meshtastic.core.database.entity.MyNodeEntity
@@ -73,6 +75,7 @@ import org.meshtastic.core.database.entity.TracerouteNodePositionEntity
         DiscoveryPresetResultEntity::class,
         DiscoveredNodeEntity::class,
         EventFirmwareEditionEntity::class,
+        MergeMarkerEntity::class,
     ],
     autoMigrations =
     [
@@ -121,8 +124,9 @@ import org.meshtastic.core.database.entity.TracerouteNodePositionEntity
         AutoMigration(from = 45, to = 46),
         AutoMigration(from = 46, to = 47),
         AutoMigration(from = 47, to = 48),
+        AutoMigration(from = 48, to = 49),
     ],
-    version = 48,
+    version = 49,
     exportSchema = true,
 )
 @androidx.room3.ConstructedBy(MeshtasticDatabaseConstructor::class)
@@ -148,6 +152,8 @@ abstract class MeshtasticDatabase : RoomDatabase() {
     abstract fun discoveryDao(): DiscoveryDao
 
     abstract fun eventFirmwareEditionDao(): EventFirmwareEditionDao
+
+    abstract fun mergeMarkerDao(): MergeMarkerDao
 
     companion object {
         /**

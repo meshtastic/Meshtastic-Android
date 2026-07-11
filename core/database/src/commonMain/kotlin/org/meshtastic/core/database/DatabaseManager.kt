@@ -243,7 +243,7 @@ open class DatabaseManager(
                     _currentDb.value = dest
                     currentDbName = claimed
                     try {
-                        withContext(dispatchers.io) { DatabaseMerger.merge(source, dest) }
+                        withContext(dispatchers.io) { DatabaseMerger.merge(source, dest, sourceName) }
                     } catch (e: CancellationException) {
                         throw e
                     } catch (e: Exception) {
