@@ -33,9 +33,14 @@ open class MyNodeEntity(
     val minAppVersion: Int,
     val maxChannels: Int,
     val hasWifi: Boolean,
-    val deviceId: String? = "unknown",
+    val deviceId: String? = DEVICE_ID_UNKNOWN,
     val pioEnv: String? = null,
 ) {
+    companion object {
+        /** Placeholder for hardware that doesn't report a factory-burned device id. */
+        const val DEVICE_ID_UNKNOWN = "unknown"
+    }
+
     /** A human readable description of the software/hardware version */
     val firmwareString: String
         get() = "$model $firmwareVersion"

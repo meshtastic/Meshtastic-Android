@@ -56,6 +56,16 @@ interface NodeManager : NodeIdLookup {
     /** Sets the local node number. */
     fun setMyNodeNum(num: Int?)
 
+    /**
+     * The connected device's factory-burned hardware id from MyNodeInfo, as a thread-safe [StateFlow]. Null when not
+     * connected or when the hardware/firmware doesn't report one. Unlike [myNodeNum] (which firmware 2.8 re-derives
+     * from the public key), this survives upgrades, erases, and key changes.
+     */
+    val myDeviceId: StateFlow<String?>
+
+    /** Sets the connected device's hardware id. */
+    fun setMyDeviceId(id: String?)
+
     /** The firmware edition reported by the connected device. */
     val firmwareEdition: StateFlow<FirmwareEdition?>
 

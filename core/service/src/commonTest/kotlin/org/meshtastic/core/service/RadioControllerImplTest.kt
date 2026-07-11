@@ -89,6 +89,7 @@ class RadioControllerImplTest {
         myNodeNum: Int? = 1234,
     ): RadioControllerImpl {
         every { nodeManager.myNodeNum } returns MutableStateFlow(myNodeNum)
+        every { nodeManager.myDeviceId } returns MutableStateFlow(null)
         every { meshPrefs.deviceAddress } returns MutableStateFlow(null)
         return RadioControllerImpl(
             serviceRepository = serviceRepository,

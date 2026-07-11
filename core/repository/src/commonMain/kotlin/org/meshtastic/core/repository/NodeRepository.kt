@@ -173,9 +173,14 @@ interface NodeRepository {
     /**
      * Installs initial configuration data (local info and remote nodes) into the database.
      *
-     * Used during the initial connection handshake.
+     * Used during the initial connection handshake. When the connected device's identity changed since the last session
+     * (firmware 2.8 derives the node number from the public key, and an erase-and-reflash mints new keys), the stale
+     * identity is migrated or removed as part of the install.
+     *
+     * @return node numbers whose rows were removed by that identity migration, so callers can evict them from in-memory
+     *   caches.
      */
-    suspend fun installConfig(mi: MyNodeInfo, nodes: List<Node>)
+    suspend fun installConfig(mi: MyNodeInfo, nodes: List<Node>): List<Int>
 
     /**
      * Persists hardware metadata for a node.

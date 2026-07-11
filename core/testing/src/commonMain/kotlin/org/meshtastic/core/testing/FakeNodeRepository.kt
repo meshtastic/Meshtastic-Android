@@ -166,9 +166,10 @@ class FakeNodeRepository :
         _nodeDBbyNum.value = _nodeDBbyNum.value + (node.num to node)
     }
 
-    override suspend fun installConfig(mi: MyNodeInfo, nodes: List<Node>) {
+    override suspend fun installConfig(mi: MyNodeInfo, nodes: List<Node>): List<Int> {
         _myNodeInfo.value = mi
         _nodeDBbyNum.value = nodes.associateBy { it.num }
+        return emptyList()
     }
 
     override suspend fun insertMetadata(nodeNum: Int, metadata: DeviceMetadata) {
