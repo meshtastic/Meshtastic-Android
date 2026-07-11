@@ -23,6 +23,15 @@ A Compose Desktop application target — the first full non-Android target for t
 ./gradlew :desktopApp:packageReleaseDistributionForCurrentOS
 ```
 
+## Install via Homebrew (macOS, Apple Silicon)
+
+```bash
+brew tap meshtastic/meshtastic
+brew install --cask meshtastic-desktop
+```
+
+The cask lives in the [meshtastic/homebrew-meshtastic](https://github.com/meshtastic/homebrew-meshtastic) tap and is regenerated from the template at `.github/homebrew/meshtastic-desktop.rb` by the `update-homebrew-cask` job in `promote.yml` on every production release.
+
 ## ProGuard / Minification
 
 Release builds use ProGuard for tree-shaking (unused code removal), significantly reducing distribution size. Obfuscation is disabled since the project is open-source. Rules are aligned with the Android R8 rules in `androidApp/proguard-rules.pro` — both targets share the same anti-class-merging philosophy.

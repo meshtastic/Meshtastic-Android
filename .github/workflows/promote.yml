@@ -52,6 +52,8 @@ on:
         required: true
       DISCORD_WEBHOOK_ANDROID:
         required: false
+      HOMEBREW_TAP_TOKEN:
+        required: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ inputs.tag_name }}
@@ -305,3 +307,49 @@ jobs:
           )
 
           curl -H "Content-Type: application/json" -d "$PAYLOAD" "$DISCORD_WEBHOOK"
+
+  # Runs in-workflow rather than on `release: published` because the undraft above
+  # uses github.token, whose events never trigger other workflows. Once the cask is
+  # promoted to homebrew/cask, replace the tap push with `brew bump-cask-pr`.
+  update-homebrew-cask:
+    if: ${{ inputs.channel == 'production' }}
+    runs-on: ubuntu-24.04-arm
+    needs: [ update-github-release ]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7.0.0
+        with:
+          ref: ${{ inputs.commit_sha || inputs.tag_name }}
+
+      - name: Render cask and push to meshtastic/homebrew-meshtastic
+        env:
+          TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          TAG: ${{ inputs.final_tag }}
+        run: |
+          if [[ -z "$TAP_TOKEN" ]]; then
+            echo "HOMEBREW_TAP_TOKEN not set; skipping Homebrew cask update."
+            exit 0
+          fi
+
+          VERSION=${TAG#v}
+          # GitHub rewrites spaces in asset names to dots:
+          # "Meshtastic Desktop-X.dmg" is served as "Meshtastic.Desktop-X.dmg".
+          # --retry-all-errors covers the brief 404 window while the undraft propagates.
+          curl -fsSL --retry 5 --retry-delay 30 --retry-all-errors -o /tmp/app.dmg \
+            "https://github.com/${{ github.repository }}/releases/download/${TAG}/Meshtastic.Desktop-${VERSION}.dmg"
+          SHA256=$(sha256sum /tmp/app.dmg | cut -d' ' -f1)
+
+          sed -e "s/{{VERSION}}/${VERSION}/" -e "s/{{SHA256}}/${SHA256}/" \
+            .github/homebrew/meshtastic-desktop.rb > /tmp/meshtastic-desktop.rb
+
+          git clone "https://x-access-token:${TAP_TOKEN}@github.com/meshtastic/homebrew-meshtastic.git" /tmp/tap
+          mkdir -p /tmp/tap/Casks
+          cp /tmp/meshtastic-desktop.rb /tmp/tap/Casks/meshtastic-desktop.rb
+          cd /tmp/tap
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Casks/meshtastic-desktop.rb
+          git diff --cached --quiet || {
+            git commit -m "meshtastic-desktop ${VERSION}"
+            git push
+          }
