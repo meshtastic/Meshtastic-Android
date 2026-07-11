@@ -43,6 +43,7 @@ import okio.Buffer
 import okio.BufferedSink
 import okio.ByteString.Companion.encodeUtf8
 import org.meshtastic.core.common.BuildConfigProvider
+import org.meshtastic.core.common.state.ExcludedModulesUnlock
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.domain.usecase.settings.ExportDataUseCase
 import org.meshtastic.core.domain.usecase.settings.IsOtaCapableUseCase
@@ -120,6 +121,7 @@ class SettingsViewModelTest {
                 exportDataUseCase = exportDataUseCase,
                 isOtaCapableUseCase = isOtaCapableUseCase,
                 fileService = fileService,
+                excludedModulesUnlock = ExcludedModulesUnlock(),
             )
     }
 

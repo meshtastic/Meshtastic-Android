@@ -21,6 +21,7 @@ package org.meshtastic.feature.firmware
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.database.entity.FirmwareRelease
+import org.meshtastic.core.database.entity.FirmwareReleaseType
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.feature.firmware.ota.FirmwareHashUtil
 import kotlin.test.Test
@@ -321,6 +322,55 @@ abstract class CommonFirmwareRetrieverTest {
 
         assertNotNull(result, "Should resolve using hwModelSlug fallback")
         assertEquals("firmware-CUSTOM_BOARD-2.7.17.bin", result.fileName)
+    }
+
+    // -----------------------------------------------------------------------
+    // Nightly channel (fixed firmware-nightly/ folder, no release zip)
+    // -----------------------------------------------------------------------
+
+    @Test
+    fun `nightly release resolves from the fixed firmware-nightly folder`() = runTest {
+        val handler = FakeFirmwareFileHandler()
+        val retriever = FirmwareRetriever(handler)
+        val nightly = FirmwareRelease(id = "v2.8.0.f52e2ea", zipUrl = "", releaseType = FirmwareReleaseType.NIGHTLY)
+
+        handler.textResponses["$BASE_URL/firmware-nightly/firmware-heltec-v3-2.8.0.f52e2ea.mt.json"] =
+            """{"files":[{"name":"firmware-heltec-v3-2.8.0.f52e2ea.bin","md5":"","bytes":0,"part_name":"app0"}]}"""
+        handler.existingUrls.add("$BASE_URL/firmware-nightly/firmware-heltec-v3-2.8.0.f52e2ea.bin")
+
+        val result = retriever.retrieveEsp32Firmware(nightly, TEST_HARDWARE) {}
+
+        assertNotNull(result, "Nightly should resolve from firmware-nightly/, not firmware-<version>/")
+        assertEquals("firmware-heltec-v3-2.8.0.f52e2ea.bin", result.fileName)
+        assertTrue(handler.checkedUrls.none { "firmware-2.8.0.f52e2ea/" in it }, "versioned folder must not be used")
+    }
+
+    @Test
+    fun `nightly ota zip resolves from the fixed firmware-nightly folder`() = runTest {
+        val handler = FakeFirmwareFileHandler()
+        val retriever = FirmwareRetriever(handler)
+        val hardware = DeviceHardware(hwModelSlug = "RAK4631", platformioTarget = "rak4631", architecture = "nrf52840")
+        val nightly = FirmwareRelease(id = "v2.8.0.f52e2ea", zipUrl = "", releaseType = FirmwareReleaseType.NIGHTLY)
+
+        handler.existingUrls.add("$BASE_URL/firmware-nightly/firmware-rak4631-2.8.0.f52e2ea-ota.zip")
+
+        val result = retriever.retrieveOtaFirmware(nightly, hardware) {}
+
+        assertNotNull(result)
+        assertEquals("firmware-rak4631-2.8.0.f52e2ea-ota.zip", result.fileName)
+    }
+
+    @Test
+    fun `nightly release without zip skips the zip fallback entirely`() = runTest {
+        val handler = FakeFirmwareFileHandler()
+        val retriever = FirmwareRetriever(handler)
+        val nightly = FirmwareRelease(id = "v2.8.0.f52e2ea", zipUrl = "", releaseType = FirmwareReleaseType.NIGHTLY)
+
+        // Nothing published — every strategy fails.
+        val result = retriever.retrieveEsp32Firmware(nightly, TEST_HARDWARE) {}
+
+        assertNull(result)
+        assertTrue(handler.downloadedUrls.isEmpty(), "no zip download may be attempted when zipUrl is blank")
     }
 
     // -----------------------------------------------------------------------

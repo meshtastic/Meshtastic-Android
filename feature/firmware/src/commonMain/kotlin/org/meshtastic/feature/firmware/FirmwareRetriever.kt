@@ -21,6 +21,7 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import org.koin.core.annotation.Single
 import org.meshtastic.core.database.entity.FirmwareRelease
+import org.meshtastic.core.database.entity.FirmwareReleaseType
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.feature.firmware.ota.FirmwareHashUtil
 
@@ -150,7 +151,7 @@ class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
         hardware: DeviceHardware,
         onProgress: (Float) -> Unit,
     ): FirmwareArtifact? {
-        val manifestUrl = "$FIRMWARE_BASE_URL/firmware-$version/firmware-$target-$version.mt.json"
+        val manifestUrl = "$FIRMWARE_BASE_URL/${release.artifactFolder}/firmware-$target-$version.mt.json"
 
         val text = fileHandler.fetchText(manifestUrl)
         if (text == null) {
@@ -224,7 +225,7 @@ class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
         val version = release.id.removePrefix("v")
         val target = hardware.platformioTarget.ifEmpty { hardware.hwModelSlug }
         val filename = preferredFilename ?: "firmware-$target-$version$fileSuffix"
-        val directUrl = "$FIRMWARE_BASE_URL/firmware-$version/$filename"
+        val directUrl = "$FIRMWARE_BASE_URL/${release.artifactFolder}/$filename"
 
         if (fileHandler.checkUrlExists(directUrl)) {
             try {
@@ -236,12 +237,27 @@ class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
             }
         }
 
-        val zipUrl = resolveZipUrl(release.zipUrl, hardware.architecture)
-        val downloadedZip = fileHandler.downloadFile(zipUrl, "firmware_release.zip", onProgress)
+        // Nightly builds publish no release zip, so a failed direct download is terminal for them.
+        val downloadedZip =
+            if (release.zipUrl.isBlank()) {
+                Logger.w { "No release zip for ${release.id}; direct download of $filename was the only source" }
+                null
+            } else {
+                val zipUrl = resolveZipUrl(release.zipUrl, hardware.architecture)
+                fileHandler.downloadFile(zipUrl, "firmware_release.zip", onProgress)
+            }
         return downloadedZip?.let {
             fileHandler.extractFirmwareFromZip(it, hardware, internalFileExtension, preferredFilename)
         }
     }
+
+    /**
+     * The meshtastic.github.io folder holding this release's artifacts. Nightly builds live in the fixed
+     * `firmware-nightly/` folder (mirroring the web flasher); everything else uses the versioned folder.
+     */
+    private val FirmwareRelease.artifactFolder: String
+        get() =
+            if (releaseType == FirmwareReleaseType.NIGHTLY) "firmware-nightly" else "firmware-${id.removePrefix("v")}"
 
     private fun resolveZipUrl(url: String, targetArch: String): String {
         for (arch in KNOWN_ARCHS) {

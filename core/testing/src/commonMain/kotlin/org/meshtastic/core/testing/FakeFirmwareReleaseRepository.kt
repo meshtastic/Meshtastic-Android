@@ -21,10 +21,10 @@ import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.repository.FirmwareReleaseRepository
 
 /**
- * A test double for [FirmwareReleaseRepository] that exposes stable and alpha releases as
+ * A test double for [FirmwareReleaseRepository] that exposes stable, alpha, and nightly releases as
  * [kotlinx.coroutines.flow.MutableStateFlow]s.
  *
- * Use [setStableRelease] and [setAlphaRelease] to drive the emitted values.
+ * Use [setStableRelease], [setAlphaRelease], and [setNightlyRelease] to drive the emitted values.
  */
 class FakeFirmwareReleaseRepository :
     BaseFake(),
@@ -32,9 +32,11 @@ class FakeFirmwareReleaseRepository :
 
     private val _stableRelease = mutableStateFlow<FirmwareRelease?>(null)
     private val _alphaRelease = mutableStateFlow<FirmwareRelease?>(null)
+    private val _nightlyRelease = mutableStateFlow<FirmwareRelease?>(null)
 
     override val stableRelease: Flow<FirmwareRelease?> = _stableRelease
     override val alphaRelease: Flow<FirmwareRelease?> = _alphaRelease
+    override val nightlyRelease: Flow<FirmwareRelease?> = _nightlyRelease
 
     var invalidateCacheCalls: Int = 0
         private set
@@ -53,5 +55,9 @@ class FakeFirmwareReleaseRepository :
 
     fun setAlphaRelease(release: FirmwareRelease?) {
         _alphaRelease.value = release
+    }
+
+    fun setNightlyRelease(release: FirmwareRelease?) {
+        _nightlyRelease.value = release
     }
 }

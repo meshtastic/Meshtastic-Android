@@ -116,6 +116,7 @@ import org.meshtastic.core.resources.firmware_update_keep_device_close
 import org.meshtastic.core.resources.firmware_update_latest
 import org.meshtastic.core.resources.firmware_update_local_file
 import org.meshtastic.core.resources.firmware_update_method_detail
+import org.meshtastic.core.resources.firmware_update_nightly
 import org.meshtastic.core.resources.firmware_update_rak4631_bootloader_hint
 import org.meshtastic.core.resources.firmware_update_release_notes
 import org.meshtastic.core.resources.firmware_update_retry
@@ -177,6 +178,7 @@ fun FirmwareUpdateScreen(onNavigateUp: () -> Unit, viewModel: FirmwareUpdateView
     val currentVersion by viewModel.currentFirmwareVersion.collectAsStateWithLifecycle()
     val selectedRelease by viewModel.selectedRelease.collectAsStateWithLifecycle()
     val pendingLocalFirmwareFile by viewModel.pendingLocalFirmwareFile.collectAsStateWithLifecycle()
+    val nightlyUnlocked by viewModel.nightlyUnlocked.collectAsStateWithLifecycle()
 
     var showExitConfirmation by remember { mutableStateOf(false) }
 
@@ -243,6 +245,7 @@ fun FirmwareUpdateScreen(onNavigateUp: () -> Unit, viewModel: FirmwareUpdateView
         onNavigateUp = onNavigateUp,
         state = state,
         selectedReleaseType = selectedReleaseType,
+        showNightly = nightlyUnlocked,
         actions = actions,
         deviceHardware = deviceHardware,
         currentVersion = currentVersion,
@@ -299,6 +302,7 @@ private fun FirmwareUpdateScaffold(
     onNavigateUp: () -> Unit,
     state: FirmwareUpdateState,
     selectedReleaseType: FirmwareReleaseType,
+    showNightly: Boolean,
     actions: FirmwareUpdateActions,
     deviceHardware: DeviceHardware?,
     currentVersion: String?,
@@ -339,7 +343,7 @@ private fun FirmwareUpdateScaffold(
                         (state as? FirmwareUpdateState.Ready)?.isRecovery != true
                 AnimatedVisibility(visible = showReleaseSelector) {
                     Column {
-                        ReleaseTypeSelector(selectedReleaseType, actions.onReleaseTypeSelect)
+                        ReleaseTypeSelector(selectedReleaseType, showNightly, actions.onReleaseTypeSelect)
                         Spacer(Modifier.height(16.dp))
                     }
                 }
@@ -767,29 +771,25 @@ private fun BootloaderWarningCard(deviceHardware: DeviceHardware, onDismissForDe
 @Composable
 private fun ReleaseTypeSelector(
     selectedReleaseType: FirmwareReleaseType,
+    showNightly: Boolean,
     onReleaseTypeSelect: (FirmwareReleaseType) -> Unit,
 ) {
+    val types = buildList {
+        add(FirmwareReleaseType.STABLE to Res.string.firmware_update_stable)
+        add(FirmwareReleaseType.ALPHA to Res.string.firmware_update_alpha)
+        // Hidden behind the excluded-modules unlock, mirroring the web flasher's konami-gated nightly.
+        if (showNightly) add(FirmwareReleaseType.NIGHTLY to Res.string.firmware_update_nightly)
+        add(FirmwareReleaseType.LOCAL to Res.string.firmware_update_local_file)
+    }
     SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-        SegmentedButton(
-            selected = selectedReleaseType == FirmwareReleaseType.STABLE,
-            onClick = { onReleaseTypeSelect(FirmwareReleaseType.STABLE) },
-            shape = SegmentedButtonDefaults.itemShape(index = 0, count = 3),
-        ) {
-            Text(stringResource(Res.string.firmware_update_stable))
-        }
-        SegmentedButton(
-            selected = selectedReleaseType == FirmwareReleaseType.ALPHA,
-            onClick = { onReleaseTypeSelect(FirmwareReleaseType.ALPHA) },
-            shape = SegmentedButtonDefaults.itemShape(index = 1, count = 3),
-        ) {
-            Text(stringResource(Res.string.firmware_update_alpha))
-        }
-        SegmentedButton(
-            selected = selectedReleaseType == FirmwareReleaseType.LOCAL,
-            onClick = { onReleaseTypeSelect(FirmwareReleaseType.LOCAL) },
-            shape = SegmentedButtonDefaults.itemShape(index = 2, count = 3),
-        ) {
-            Text(stringResource(Res.string.firmware_update_local_file))
+        types.forEachIndexed { index, (type, label) ->
+            SegmentedButton(
+                selected = selectedReleaseType == type,
+                onClick = { onReleaseTypeSelect(type) },
+                shape = SegmentedButtonDefaults.itemShape(index = index, count = types.size),
+            ) {
+                Text(stringResource(label))
+            }
         }
     }
 }

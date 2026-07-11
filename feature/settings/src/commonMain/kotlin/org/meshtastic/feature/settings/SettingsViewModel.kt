@@ -24,11 +24,11 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.update
 import okio.BufferedSink
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.common.database.DatabaseManager
+import org.meshtastic.core.common.state.ExcludedModulesUnlock
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.domain.usecase.settings.ExportDataUseCase
 import org.meshtastic.core.domain.usecase.settings.IsOtaCapableUseCase
@@ -63,6 +63,7 @@ class SettingsViewModel(
     private val exportDataUseCase: ExportDataUseCase,
     private val isOtaCapableUseCase: IsOtaCapableUseCase,
     private val fileService: FileService,
+    private val excludedModulesUnlock: ExcludedModulesUnlock,
 ) : ViewModel() {
     val myNodeInfo: StateFlow<MyNodeInfo?> = nodeRepository.myNodeInfo
 
@@ -99,8 +100,8 @@ class SettingsViewModel(
         radioController.stopProvideLocation()
     }
 
-    private val _excludedModulesUnlocked = MutableStateFlow(false)
-    val excludedModulesUnlocked: StateFlow<Boolean> = _excludedModulesUnlocked.asStateFlow()
+    // Process-scoped shared state so other features (e.g. the nightly firmware channel) see the same unlock.
+    val excludedModulesUnlocked: StateFlow<Boolean> = excludedModulesUnlock.unlocked
 
     val appVersionName
         get() = buildConfigProvider.versionName
@@ -160,7 +161,7 @@ class SettingsViewModel(
     }
 
     fun unlockExcludedModules() {
-        _excludedModulesUnlocked.update { true }
+        excludedModulesUnlock.unlock()
     }
 
     /**

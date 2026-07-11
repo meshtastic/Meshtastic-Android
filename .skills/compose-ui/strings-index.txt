@@ -641,6 +641,7 @@ firmware_update_method_detail
 firmware_update_method_usb
 firmware_update_method_wifi
 firmware_update_missing_target
+firmware_update_nightly
 firmware_update_no_device
 firmware_update_node_info_missing
 firmware_update_not_found_in_release

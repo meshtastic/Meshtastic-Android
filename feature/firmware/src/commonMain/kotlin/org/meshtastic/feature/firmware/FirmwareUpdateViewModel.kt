@@ -39,6 +39,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.di.ApplicationCoroutineScope
+import org.meshtastic.core.common.state.ExcludedModulesUnlock
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.database.entity.FirmwareRelease
@@ -111,12 +112,16 @@ class FirmwareUpdateViewModel(
     private val usbManager: FirmwareUsbManager,
     private val fileHandler: FirmwareFileHandler,
     private val applicationScope: ApplicationCoroutineScope,
+    excludedModulesUnlock: ExcludedModulesUnlock,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<FirmwareUpdateState>(FirmwareUpdateState.Idle)
     val state: StateFlow<FirmwareUpdateState> = _state.asStateFlow()
 
     val connectionState = radioController.connectionState
+
+    /** The excluded-modules easter egg also unlocks the nightly preview channel, like the web flasher's konami code. */
+    val nightlyUnlocked: StateFlow<Boolean> = excludedModulesUnlock.unlocked
 
     private val _selectedReleaseType = MutableStateFlow(FirmwareReleaseType.STABLE)
     val selectedReleaseType: StateFlow<FirmwareReleaseType> = _selectedReleaseType.asStateFlow()
@@ -922,6 +927,7 @@ private fun isBluetoothInterfaceAddress(address: String): Boolean =
 private fun FirmwareReleaseRepository.getReleaseFlow(type: FirmwareReleaseType): Flow<FirmwareRelease?> = when (type) {
     FirmwareReleaseType.STABLE -> stableRelease
     FirmwareReleaseType.ALPHA -> alphaRelease
+    FirmwareReleaseType.NIGHTLY -> nightlyRelease
     FirmwareReleaseType.LOCAL -> flowOf(null)
 }
 

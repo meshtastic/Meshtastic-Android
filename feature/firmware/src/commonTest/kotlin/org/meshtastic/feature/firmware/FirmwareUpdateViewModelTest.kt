@@ -33,6 +33,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.meshtastic.core.common.state.ExcludedModulesUnlock
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.FirmwareReleaseType
 import org.meshtastic.core.datastore.BootloaderWarningDataSource
@@ -134,6 +135,7 @@ class FirmwareUpdateViewModelTest {
         usbManager,
         fileHandler,
         TestApplicationCoroutineScope(testDispatcher),
+        ExcludedModulesUnlock(),
     )
 
     @Test
