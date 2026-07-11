@@ -136,7 +136,6 @@ feature:connections
 ```mermaid
 graph TB
   :feature:connections[connections]:::kmp-feature
-  :feature:connections -.-> :core:testing
   :feature:connections -.-> :core:common
   :feature:connections -.-> :core:data
   :feature:connections -.-> :core:database
@@ -152,6 +151,7 @@ graph TB
   :feature:connections -.-> :core:ble
   :feature:connections -.-> :core:network
   :feature:connections -.-> :feature:settings
+  :feature:connections -.-> :core:testing
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

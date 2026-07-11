@@ -15,7 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 import com.android.build.api.dsl.LibraryExtension
-import org.gradle.testretry.TestRetryTaskExtension
 
 // Documentation screenshots — GENERATE-ONLY, intentionally NOT gated in CI.
 //
@@ -28,35 +27,20 @@ plugins {
     alias(libs.plugins.meshtastic.android.library)
     alias(libs.plugins.meshtastic.android.library.compose)
     alias(libs.plugins.compose.screenshot)
+    alias(libs.plugins.meshtastic.android.screenshot)
 }
 
 configure<LibraryExtension> {
     namespace = "org.meshtastic.screenshot.docs"
 
-    experimentalProperties["android.experimental.enableScreenshotTest"] = true
-
     testOptions { screenshotTests { imageDifferenceThreshold = 0.0005f } }
 }
 
-// CST screenshot tests use a custom runner incompatible with test-retry
-tasks.withType<Test>().configureEach {
-    if (name.contains("ScreenshotTest", ignoreCase = true)) {
-        extensions.configure<TestRetryTaskExtension> { maxRetries.set(0) }
-    }
-}
-
 dependencies {
-    implementation(project(":core:ui"))
-    implementation(project(":core:resources"))
-    implementation(project(":core:model"))
-    implementation(project(":core:common"))
-    implementation(project(":feature:connections"))
-    implementation(project(":feature:firmware"))
-
-    implementation(libs.compose.multiplatform.foundation)
-    implementation(libs.compose.multiplatform.material3)
-    implementation(libs.compose.multiplatform.runtime)
-    implementation(libs.compose.multiplatform.ui)
-
-    screenshotTestImplementation(libs.screenshot.validation.api)
+    implementation(projects.core.ui)
+    implementation(projects.core.resources)
+    implementation(projects.core.model)
+    implementation(projects.core.common)
+    implementation(projects.feature.connections)
+    implementation(projects.feature.firmware)
 }

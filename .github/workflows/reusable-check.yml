@@ -546,7 +546,10 @@ jobs:
           install_jetbrains_jdk: 'true'
 
       - name: Build Desktop
-        run: ./gradlew :desktopApp:createDistributable -Pci=true
+        # proguardReleaseJars is included because it is otherwise only exercised by the
+        # release workflow: jlink tolerates a jmods-less JDK (JEP 493) but ProGuard does
+        # not, so a broken packaging JDK would surface at release time instead of here.
+        run: ./gradlew :desktopApp:createDistributable :desktopApp:proguardReleaseJars -Pci=true
 
       - name: Upload Desktop artifact
         if: ${{ inputs.upload_artifacts }}

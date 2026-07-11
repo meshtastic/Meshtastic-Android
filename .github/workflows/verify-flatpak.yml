@@ -34,12 +34,16 @@ jobs:
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: 21
+          java-version: 25
+          token: ${{ github.token }}
 
+      # JBR resolves its version list via the GitHub API — unauthenticated requests
+      # rate-limit on the shared runner IPs, so the token is required, not optional.
       - uses: actions/setup-java@v5
         with:
           distribution: jetbrains
-          java-version: 21
+          java-version: 25
+          token: ${{ github.token }}
 
       - uses: gradle/actions/setup-gradle@v6
 
@@ -74,10 +78,10 @@ jobs:
         with:
           name: flatpak-sources
 
-      - name: Clone vid's flatpak repo
+      - name: Clone the Flathub packaging repo
         run: |
           git clone --depth 1 --recurse-submodules \
-            https://github.com/vidplace7/org.meshtastic.MeshtasticDesktop.git \
+            https://github.com/flathub/org.meshtastic.MeshtasticDesktop.git \
             "$RUNNER_TEMP/org.meshtastic.MeshtasticDesktop"
 
       - name: Wire overlay manifest + sources

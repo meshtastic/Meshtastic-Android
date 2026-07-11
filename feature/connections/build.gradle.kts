@@ -41,13 +41,5 @@ kotlin {
         }
 
         androidMain.dependencies { implementation(libs.usb.serial.android) }
-
-        getByName("androidHostTest") {
-            dependencies {
-                implementation(projects.core.testing)
-                implementation(libs.kotlinx.coroutines.test)
-                implementation(libs.androidx.test.ext.junit)
-            }
-        }
     }
 }

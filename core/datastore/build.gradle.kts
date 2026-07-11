@@ -17,7 +17,7 @@
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
-    id("meshtastic.koin")
+    alias(libs.plugins.meshtastic.koin)
 }
 
 kotlin {
@@ -34,10 +34,6 @@ kotlin {
             implementation(libs.kermit)
         }
 
-        commonTest.dependencies {
-            implementation(kotlin("test"))
-            implementation(libs.kotlinx.coroutines.test)
-            implementation(libs.okio)
-        }
+        commonTest.dependencies { implementation(libs.okio) }
     }
 }

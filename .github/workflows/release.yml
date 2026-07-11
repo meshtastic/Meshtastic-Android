@@ -306,7 +306,7 @@ jobs:
         run: >
           ./gradlew :desktopApp:packageReleaseDistributionForCurrentOS
           ${{ contains(runner.os, 'macOS') && ':desktopApp:packageReleaseUberJarForCurrentOS' || '' }}
-          '-PaboutLibraries.release=true' --no-daemon
+          '-PaboutLibraries.release=true' '-Pdesktop.release=true' --no-daemon
 
       # jpackage computes the .deb Depends: line from the build host's package names.
       # Ubuntu 24.04 records time_t64 transition names (libasound2t64, libpng16-16t64)

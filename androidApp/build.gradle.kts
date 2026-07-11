@@ -27,15 +27,18 @@ plugins {
     alias(libs.plugins.meshtastic.android.application.flavors)
     alias(libs.plugins.meshtastic.android.application.compose)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
-    id("meshtastic.koin")
+    alias(libs.plugins.meshtastic.koin)
     alias(libs.plugins.secrets)
     alias(libs.plugins.androidx.baselineprofile)
-    id("meshtastic.aboutlibraries")
+    alias(libs.plugins.meshtastic.aboutlibraries)
+    // Version-less on purpose: mokkery is embedded in the convention-plugin jar (build-logic
+    // `implementation`), so a versioned alias(libs.plugins.mokkery) request is rejected by Gradle.
     id("dev.mokkery")
     alias(libs.plugins.devtools.ksp)
 }
 
-val keystorePropertiesFile = rootProject.file("keystore.properties")
+// Isolated-Projects-safe root access — never reach through `rootProject`.
+val keystorePropertiesFile = isolated.rootProject.projectDirectory.file("keystore.properties").asFile
 val keystoreProperties = Properties()
 
 if (keystorePropertiesFile.exists()) {
@@ -49,7 +52,7 @@ if (keystorePropertiesFile.exists()) {
 // Build a Closed-track templated AAB with: -PenableCarTemplates=true
 // ponytail: gated by a gradle property + res override, not a full build flavor — templated is
 // parked until it leaves Google's beta. Promote to a flavor dimension only if CI must ship both.
-val enableCarTemplates = (findProperty("enableCarTemplates") as String?)?.toBoolean() ?: false
+val enableCarTemplates = providers.gradleProperty("enableCarTemplates").map { it.toBoolean() }.getOrElse(false)
 
 configure<ApplicationExtension> {
     namespace = "org.meshtastic.app"
@@ -282,7 +285,6 @@ dependencies {
     implementation(libs.koin.android)
     implementation(libs.koin.compose.viewmodel)
     implementation(libs.koin.androidx.workmanager)
-    implementation(libs.koin.annotations)
     implementation(libs.kermit)
     implementation(libs.kotlinx.datetime)
 
@@ -306,12 +308,7 @@ dependencies {
     googleImplementation(libs.androidx.compose.material)
     // Downloadable Google Fonts for event-firmware branding (Play Services font provider — Google flavor only).
     googleImplementation(libs.androidx.compose.ui.text.google.fonts)
-    googleImplementation(libs.dd.sdk.android.logs)
-    googleImplementation(libs.dd.sdk.android.rum)
-    googleImplementation(libs.dd.sdk.android.session.replay)
-    googleImplementation(libs.dd.sdk.android.timber)
-    googleImplementation(libs.dd.sdk.android.trace)
-    googleImplementation(libs.dd.sdk.android.trace.otel)
+    googleImplementation(libs.bundles.dd.sdk.android)
     googleImplementation(platform(libs.firebase.bom))
     googleImplementation(libs.firebase.analytics)
     googleImplementation(libs.firebase.crashlytics)
@@ -339,7 +336,7 @@ dependencies {
     testImplementation(libs.androidx.test.ext.junit)
     testImplementation(libs.androidx.glance.appwidget)
     // JVM variant provides the host-platform native library for BundledSQLiteDriver under Robolectric
-    testRuntimeOnly("androidx.sqlite:sqlite-bundled-jvm:2.7.0")
+    testRuntimeOnly(libs.androidx.sqlite.bundled.jvm)
 
     // Producer of the baseline profile consumed by the release build. The androidx.baselineprofile
     // plugin merges the generated rules into src/<variant>/generated/baselineProfiles at build time.

@@ -18,7 +18,9 @@
 plugins {
     alias(libs.plugins.meshtastic.android.library)
     alias(libs.plugins.meshtastic.android.library.flavors)
-    id("meshtastic.koin")
+    alias(libs.plugins.meshtastic.koin)
+    // Version-less on purpose: mokkery is embedded in the convention-plugin jar (build-logic
+    // `implementation`), so a versioned alias(libs.plugins.mokkery) request is rejected by Gradle.
     id("dev.mokkery")
 }
 
@@ -34,7 +36,7 @@ android {
         // placeholder in its OWN manifest, so it must read the property directly (the app's value does
         // not override a library's own placeholder). Default false → production ships it disabled.
         manifestPlaceholders["carTemplatesEnabled"] =
-            ((findProperty("enableCarTemplates") as String?)?.toBoolean() ?: false).toString()
+            providers.gradleProperty("enableCarTemplates").map { it.toBoolean() }.getOrElse(false).toString()
     }
 
     // Robolectric provides the Android context that androidx.car.app TestCarContext/ScreenController need.
@@ -53,7 +55,6 @@ dependencies {
     implementation(libs.androidx.car.app.projected)
 
     implementation(libs.koin.android)
-    implementation(libs.koin.annotations)
 
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.crashlytics)
