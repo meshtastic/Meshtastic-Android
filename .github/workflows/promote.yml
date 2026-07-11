@@ -330,6 +330,11 @@ jobs:
             echo "HOMEBREW_TAP_TOKEN not set; skipping Homebrew cask update."
             exit 0
           fi
+          # Tags cut before the template landed check out without it — skip, don't fail.
+          if [[ ! -f .github/homebrew/meshtastic-desktop.rb ]]; then
+            echo "Cask template not present at this tag; skipping Homebrew cask update."
+            exit 0
+          fi
 
           VERSION=${TAG#v}
           # GitHub rewrites spaces in asset names to dots:
