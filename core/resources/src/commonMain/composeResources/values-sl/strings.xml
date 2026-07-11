@@ -72,6 +72,7 @@
     <string name="delivery_confirmed">Prejem potrjen</string>
     <string name="desc_node_filter_clear">Počisti filtre vozlišča</string>
     <string name="description">Opis</string>
+    <!-- DESKTOP -->
     <!-- DEVICE -->
     <string name="device_sleeping">Naprava je v \"spanju\"</string>
     <string name="direct_message">Direktno sporočilo</string>

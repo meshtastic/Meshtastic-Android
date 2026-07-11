@@ -195,12 +195,6 @@
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
-      "id": "10976",
-      "title": "Fix serial protobuf corruption on short USB CDC writes",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10976",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
       "id": "10972",
       "title": "Authorize signed plaintext remote admin in licensed mode",
       "page_url": "https://github.com/meshtastic/firmware/pull/10972",
@@ -318,6 +312,18 @@
       "id": "10902",
       "title": "BLE lifecycle memory: true BLE-off on nRF52, NimBLE host pools to PSRAM on S3",
       "page_url": "https://github.com/meshtastic/firmware/pull/10902",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "10893",
+      "title": "nrf52: add rotary encoder press pin as deep sleep wake source",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10893",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "10878",
+      "title": "fixed tlora-v2-1-1_16 led heartbeat not blinking and stuck at single s…",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10878",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     }
   ]

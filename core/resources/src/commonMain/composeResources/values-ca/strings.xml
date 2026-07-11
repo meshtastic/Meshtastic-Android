@@ -59,6 +59,7 @@
     <string name="delivery_confirmed">Entrega confirmada</string>
     <string name="desc_node_filter_clear">netejar filtre de node</string>
     <string name="description">Descripció</string>
+    <!-- DESKTOP -->
     <string name="desktop_notification_title">Meshtastic</string>
     <!-- DEVICE -->
     <string name="device_sleeping">Dispositiu hivernant</string>

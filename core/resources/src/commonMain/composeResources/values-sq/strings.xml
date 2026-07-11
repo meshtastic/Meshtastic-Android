@@ -65,6 +65,7 @@
     <string name="delivery_confirmed">Dërgimi i konfirmuar</string>
     <string name="desc_node_filter_clear">pastro filtrin e nyjës</string>
     <string name="description">Përshkrimi</string>
+    <!-- DESKTOP -->
     <!-- DEVICE -->
     <string name="device_sleeping">Pajisja po fle</string>
     <string name="direct_message">Mesazh i drejtpërdrejtë</string>

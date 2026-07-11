@@ -278,6 +278,7 @@
     <string name="demo_mode">Демо режим</string>
     <string name="desc_node_filter_clear">очистити фільтр вузлів</string>
     <string name="description">Опис</string>
+    <!-- DESKTOP -->
     <string name="desktop_notification_title">Meshtastic</string>
     <string name="desktop_tray_quit">Вийти</string>
     <string name="details">Подробиці</string>

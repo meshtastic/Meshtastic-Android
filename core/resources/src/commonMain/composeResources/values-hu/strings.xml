@@ -223,6 +223,7 @@
     <string name="delivery_confirmed">Kézbesítés sikeres</string>
     <string name="desc_node_filter_clear">állomás filter törlése</string>
     <string name="description">Leírás</string>
+    <!-- DESKTOP -->
     <string name="desktop_notification_title">Meshtastic</string>
     <string name="details">Részletek</string>
     <string name="detection_sensor">Érzékelő szenzor</string>

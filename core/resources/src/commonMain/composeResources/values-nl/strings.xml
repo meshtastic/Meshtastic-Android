@@ -107,6 +107,7 @@
     <string name="delivery_confirmed">Aflevering bevestigd</string>
     <string name="desc_node_filter_clear">wis node filter</string>
     <string name="description">Beschrijving</string>
+    <!-- DESKTOP -->
     <string name="details">Details</string>
     <string name="detection_sensor">Detectie Sensor</string>
     <string name="detection_sensor_config">Bewegingssensor Configuratie</string>

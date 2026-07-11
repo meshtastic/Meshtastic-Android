@@ -68,6 +68,7 @@
     <string name="delivery_confirmed">Seachadadh deimhnithe</string>
     <string name="desc_node_filter_clear">Cuir scagaire na nóid in áirithe</string>
     <string name="description">Cur síos</string>
+    <!-- DESKTOP -->
     <!-- DEVICE -->
     <string name="device_sleeping">Gléas ina chodladh</string>
     <string name="direct_message">Teachtaireacht dhíreach</string>

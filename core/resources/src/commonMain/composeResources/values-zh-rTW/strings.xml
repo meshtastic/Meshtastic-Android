@@ -307,6 +307,7 @@
     <string name="demo_mode">展示模式</string>
     <string name="desc_node_filter_clear">清除節點過濾器</string>
     <string name="description">描述說明</string>
+    <!-- DESKTOP -->
     <string name="desktop_notification_title">Meshtastic</string>
     <string name="desktop_tray_quit">離開</string>
     <string name="desktop_tray_show">顯示 Meshtastic</string>

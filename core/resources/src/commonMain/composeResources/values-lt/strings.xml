@@ -69,6 +69,7 @@
     <string name="delivery_confirmed">Nustatymas įkeltas</string>
     <string name="desc_node_filter_clear">išvalyti įtaisų filtrą</string>
     <string name="description">Aprašymas</string>
+    <!-- DESKTOP -->
     <!-- DEVICE -->
     <string name="device_sleeping">Įrenginys miega</string>
     <string name="direct_message">Tiesioginė žinutė</string>

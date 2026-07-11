@@ -65,6 +65,7 @@
     <string name="delivery_confirmed">Livrezon konfime</string>
     <string name="desc_node_filter_clear">klarifye filtè nœud</string>
     <string name="description">Deskripsyon</string>
+    <!-- DESKTOP -->
     <!-- DEVICE -->
     <string name="device_sleeping">Aparèy ap dòmi</string>
     <string name="direct_message">Mesaj dirèk</string>

@@ -61,6 +61,7 @@
         <item quantity="other">מחק %1$s הודעות?</item>
     </plurals>
     <string name="description">תיאור</string>
+    <!-- DESKTOP -->
     <!-- DEVICE -->
     <string name="device_sleeping">מכשיר במצב שינה</string>
     <string name="direct_message">הודעה ישירה</string>

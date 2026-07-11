@@ -351,6 +351,7 @@
     <string name="demo_mode_replay">Demorežiim (kordus)</string>
     <string name="desc_node_filter_clear">eemalda sõlmefilter</string>
     <string name="description">Kirjeldus</string>
+    <!-- DESKTOP -->
     <string name="desktop_notification_title">Kärgvõrgustik</string>
     <string name="desktop_tray_quit">Sule</string>
     <string name="desktop_tray_show">Näita Meshtastic</string>
