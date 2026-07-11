@@ -24,9 +24,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
  * Meshtastic Site Planner's "Send to App" share). The shared [MainActivity] receives the intent; only the Google-flavor
  * map renders overlays, so its `MapViewModel` drains this and imports the layer while the activity still holds the URI
  * read grant.
- *
- * ponytail: process-global single slot — fine for one shared file at a time; promote to a Koin single if this ever
- * needs a second consumer or unit testing.
  */
 object MapFileImportBus {
     val pending = MutableStateFlow<Uri?>(null)

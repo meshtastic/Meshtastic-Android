@@ -47,10 +47,6 @@ internal object WifiOtaDiscovery {
         // limited broadcasts (255.255.255.255) are typically delivered without it; if a specific device filters
         // them, add an expect/actual multicast-lock wrapper and acquire it for the duration of [receive].
         safeCatching {
-            // ponytail: var accumulator + loop-on-condition. withTimeoutOrNull's block type comes from its
-            // terminal expression; an infinite `while(true){...}` whose body ends in Logger.d (Unit) makes
-            // the whole block Unit, which clashes with any explicit <T> param. Accumulating into `discovered`
-            // gives the block a concrete String? terminal and lets inference handle the rest.
             withTimeoutOrNull(timeoutMs) {
                 val selector = SelectorManager(ioDispatcher)
                 var discovered: String? = null

@@ -95,13 +95,6 @@ tasks
     }
     .configureEach { dependsOn(syncDocsToComposeResources) }
 
-// ponytail: do NOT wire copyDocsScreenshots into the build. It writes into the tracked
-// docs/assets/screenshots/, so a build-time dependsOn rewrote those PNGs on every assemble/test
-// run and churned the working tree. The app bundles the committed copies as-is; regenerate on
-// demand for local viewing (./gradlew :screenshot-tests:copyDocsScreenshots) and `git checkout` to
-// clean, or commit deliberately when refreshing the docs/Jekyll image set. Add a CI staleness gate
-// if drift becomes a problem.
-
 val syncTranslatedDocsToComposeResources =
     tasks.register<Copy>("syncTranslatedDocsToComposeResources") {
         description = "Syncs Crowdin-translated docs into locale-qualified composeResources"

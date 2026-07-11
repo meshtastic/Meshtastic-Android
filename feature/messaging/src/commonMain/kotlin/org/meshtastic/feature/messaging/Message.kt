@@ -530,8 +530,6 @@ private fun Node.matchesMention(query: String): Boolean {
 /** Displays `@!<hex>` tokens as `@FriendlyName` while typing; the stored buffer keeps the hex wire form. */
 private fun mentionOutputTransformation(nodesById: Map<String, Node>) = OutputTransformation {
     val source = toString()
-    // ponytail: replace back-to-front so earlier offsets stay valid; editing inside a substituted token is imperfect
-    // but the caret sits outside tokens in normal use.
     for (match in MENTION_TOKEN_REGEX.findAll(source).toList().asReversed()) {
         val node = nodesById[match.groupValues[1]] ?: continue
         replace(match.range.first, match.range.last + 1, "@" + node.user.long_name.ifEmpty { node.user.short_name })

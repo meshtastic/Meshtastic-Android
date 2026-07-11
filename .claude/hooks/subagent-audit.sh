@@ -9,10 +9,6 @@
 # tree, or a HEAD commit younger than 15 minutes (possibly made by the subagent
 # that just finished).
 #
-# ponytail: stateless — can't diff against pre-subagent state, so your own
-# in-progress edits show up too; the note says so. Snapshot-before/after if the
-# noise ever matters.
-#
 # FAILS OPEN: any error -> exit 0 with no output.
 
 input=$(cat)

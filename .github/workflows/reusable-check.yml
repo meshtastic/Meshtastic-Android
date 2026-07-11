@@ -488,8 +488,6 @@ jobs:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           cache_read_only: ${{ needs.setup.outputs.cache_read_only }}
 
-      # ponytail: -SNAPSHOT only on main pushes, so PR/merge-queue debug builds keep the plain
-      # base version. Publishing the resulting APKs is main-check.yml's job, not this one.
       - name: Tag main-branch builds as -SNAPSHOT
         if: github.event_name == 'push'
         run: |
