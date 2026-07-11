@@ -83,7 +83,9 @@ modules:
         's/^\(\s*\)vendor\.set(JvmVendorSpec\.JETBRAINS)/\1\/\/ vendor.set(JvmVendorSpec.JETBRAINS)/'
         desktopApp/build.gradle.kts
       # Force Gradle to resolve from the bundled offline-repository ONLY (true offline test).
-      - ./gradlew --offline :desktopApp:packageUberJarForCurrentOS
+      # -Pdesktop.release=true: shipped builds must have IS_DEBUG=false (no debug HTTP
+      # logging, enables the in-app update check). Mirror this in the upstream Flathub manifest.
+      - ./gradlew --offline -Pdesktop.release=true :desktopApp:packageUberJarForCurrentOS
       - >
         JAR_FILE=$(find desktopApp/build/compose/jars/ -name "*.jar" -type f | head -1)
         && install -Dm755 "$JAR_FILE" /app/lib/meshtastic-desktop.jar

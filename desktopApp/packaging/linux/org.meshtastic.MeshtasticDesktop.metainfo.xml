@@ -92,6 +92,11 @@
   </screenshots>
 
   <releases>
+    <release version="2.8.0" date="2026-07-10">
+      <description>
+        <p>In-app update notifications, native OS notifications, deep-link handling, keyboard shortcuts, window-state persistence, and many stability fixes.</p>
+      </description>
+    </release>
     <release version="2.7.14" date="2026-06-03">
       <description>
         <p>Initial release of Meshtastic Desktop.</p>
