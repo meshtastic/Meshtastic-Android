@@ -19,6 +19,8 @@ package org.meshtastic.core.database
 import androidx.room3.immediateTransaction
 import androidx.room3.useWriterConnection
 import co.touchlab.kermit.Logger
+import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.database.entity.MergeMarkerEntity
 
 /**
  * Folds the contents of one device database ([source]) into another ([dest]) when both turn out to belong to the same
@@ -36,15 +38,26 @@ import co.touchlab.kermit.Logger
  */
 object DatabaseMerger {
 
-    suspend fun merge(source: MeshtasticDatabase, dest: MeshtasticDatabase) {
+    /**
+     * Folds [source] into [dest], skipping the work if [sourceName] was already merged into [dest]. [sourceName] is the
+     * source database's file name — the stable key under which the merge is recorded (see [MergeMarkerEntity]).
+     */
+    suspend fun merge(source: MeshtasticDatabase, dest: MeshtasticDatabase, sourceName: String) {
         // All destination writes run in a single transaction so a crash or exception mid-merge rolls
-        // back cleanly instead of leaving `dest` half-merged. This also makes a retried merge safe: if
-        // associateDevice re-runs (e.g. a crash before the address alias is persisted), the rolled-back
-        // partial writes never happened, so the fresh-id packet/discovery re-inserts can't duplicate.
-        // Reads from `source` use its own connection pool and don't participate in this transaction.
+        // back cleanly instead of leaving `dest` half-merged. The merge marker is written inside that
+        // same transaction, so it commits atomically with the copied rows: on a retried merge (e.g. a
+        // crash after commit but before associateDevice persisted the address alias) the marker is already
+        // present and the whole merge is skipped, so the fresh-id packet/discovery re-inserts — which are
+        // NOT idempotent on their own — can never duplicate. Reads from `source` use its own connection
+        // pool and don't participate in this transaction.
         var packets = 0
+        var skipped = false
         dest.useWriterConnection { transactor ->
             transactor.immediateTransaction {
+                if (dest.mergeMarkerDao().isMerged(sourceName)) {
+                    skipped = true
+                    return@immediateTransaction
+                }
                 packets = mergePackets(source, dest)
                 mergeReactions(source, dest)
                 mergeContactSettings(source, dest)
@@ -55,9 +68,14 @@ object DatabaseMerger {
                 mergeLogs(source, dest)
                 mergeTraceroutePositions(source, dest)
                 mergeDiscovery(source, dest)
+                dest.mergeMarkerDao().insertMarker(MergeMarkerEntity(sourceDbName = sourceName, mergedAt = nowMillis))
             }
         }
-        Logger.i { "Merged $packets packets across transports into unified node DB" }
+        if (skipped) {
+            Logger.i { "Source ${anonymizeDbName(sourceName)} already merged; skipped duplicate merge" }
+        } else {
+            Logger.i { "Merged $packets packets across transports into unified node DB" }
+        }
     }
 
     /**

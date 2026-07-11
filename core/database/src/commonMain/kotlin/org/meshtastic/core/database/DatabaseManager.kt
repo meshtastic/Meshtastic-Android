@@ -25,6 +25,7 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -45,6 +46,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.normalizeAddress
@@ -65,6 +67,16 @@ open class DatabaseManager(
 
     private val managerScope = CoroutineScope(SupervisorJob() + dispatchers.default)
     private val mutex = Mutex()
+
+    // Per-source write barrier for merges. `withDb` deliberately does NOT take [mutex] (hot path), so a merge under
+    // [mutex] must still drain any in-flight writer that captured the source DB before folding it away — otherwise a
+    // late-committing write is lost when the source is retired. This dedicated lock (never held across a drain await,
+    // so it can't deadlock the merge) tracks live `withDb` blocks per captured DB instance. It also guards the merge's
+    // active-DB swap so a writer either registers against `source` before the swap and is drained, or captures `dest`
+    // after it and is safe — it can never slip through the gap between the two.
+    private val writerTrackerMutex = Mutex()
+    private val activeWriters = mutableMapOf<MeshtasticDatabase, Int>()
+    private val drainWaiters = mutableMapOf<MeshtasticDatabase, MutableList<CompletableDeferred<Unit>>>()
 
     private val cacheLimitKey = intPreferencesKey(DatabaseConstants.CACHE_LIMIT_KEY)
     private val legacyCleanedKey = booleanPreferencesKey(DatabaseConstants.LEGACY_DB_CLEANED_KEY)
@@ -235,22 +247,23 @@ open class DatabaseManager(
                     val source = _currentDb.value ?: return@withLock
                     val dest = withContext(dispatchers.io) { getOrOpenDatabase(claimed) }
 
-                    // Redirect live writers to the canonical DB BEFORE merging. Otherwise a concurrent withDb
-                    // write (connect triggers a full NodeDB re-dump) could land in `source` after the merge has
-                    // already snapshotted it, then be lost when `source` is retired — and withDb's closed-pool
-                    // retry can't recover it because the write itself succeeded. New writers now capture `dest`;
-                    // any still holding `source` are covered by that retry once retireDatabase closes it.
-                    _currentDb.value = dest
-                    currentDbName = claimed
+                    // Redirect live writers to the canonical DB BEFORE merging (a connect triggers a full NodeDB
+                    // re-dump). The swap is published under the writer lock so a concurrent withDb write registers
+                    // against `source` before it — and is drained below — or captures `dest` after it and is safe.
+                    // New writers now capture `dest`; drainWriters then waits out any still writing to `source` so
+                    // the merge can't snapshot `source` mid-write and lose it when `source` is later retired.
+                    publishActiveDb(dest, claimed)
                     try {
-                        withContext(dispatchers.io) { DatabaseMerger.merge(source, dest) }
+                        withContext(dispatchers.io) {
+                            drainWriters(source, sourceName)
+                            DatabaseMerger.merge(source, dest, sourceName)
+                        }
                     } catch (e: CancellationException) {
                         throw e
                     } catch (e: Exception) {
                         // merge() is atomic, so on failure `dest` is unchanged. Roll the active DB back to
                         // `source` so the address still resolves consistently and the merge retries next connect.
-                        _currentDb.value = source
-                        currentDbName = sourceName
+                        publishActiveDb(source, sourceName)
                         Logger.w(e) {
                             "Merge into ${anonymizeDbName(claimed)} failed; kept ${anonymizeDbName(sourceName)} active"
                         }
@@ -370,9 +383,57 @@ open class DatabaseManager(
         }
     }
 
+    /** Atomically snapshots the active DB and registers a writer against it. Returns null if none is open. */
+    private suspend fun beginWrite(): MeshtasticDatabase? = writerTrackerMutex.withLock {
+        val db = _currentDb.value ?: return@withLock null
+        activeWriters[db] = (activeWriters[db] ?: 0) + 1
+        db
+    }
+
+    /**
+     * Registers a writer against a specific [db] — used by the withDb retry paths, whose target is a recovered/new
+     * instance rather than the snapshotted active DB, so their writes stay visible to a concurrent drain too.
+     */
+    private suspend fun registerWriter(db: MeshtasticDatabase) =
+        writerTrackerMutex.withLock { activeWriters[db] = (activeWriters[db] ?: 0) + 1 }
+
+    /** Deregisters a writer and releases any merge waiting for [db] to quiesce. Cancellation-safe (see call site). */
+    private suspend fun endWrite(db: MeshtasticDatabase) = writerTrackerMutex.withLock {
+        val remaining = (activeWriters[db] ?: 1) - 1
+        if (remaining <= 0) {
+            activeWriters.remove(db)
+            drainWaiters.remove(db)?.forEach { it.complete(Unit) }
+        } else {
+            activeWriters[db] = remaining
+        }
+    }
+
+    /** Publishes [db]/[name] as active under the writer lock so concurrent [beginWrite]s order against the swap. */
+    private suspend fun publishActiveDb(db: MeshtasticDatabase, name: String) = writerTrackerMutex.withLock {
+        _currentDb.value = db
+        currentDbName = name
+    }
+
+    /**
+     * Suspends until every writer that captured [db] before this call has finished, so a merge never snapshots [db]
+     * while a write is still in flight (and then loses it when [db] is retired). Bounded by [WRITER_DRAIN_TIMEOUT_MS]
+     * so a wedged writer can't pin the merge — and [mutex] — forever; falling through on timeout is no worse than the
+     * old barrier-less behavior for that rare case.
+     */
+    private suspend fun drainWriters(db: MeshtasticDatabase, dbName: String) {
+        val waiter =
+            writerTrackerMutex.withLock {
+                if ((activeWriters[db] ?: 0) == 0) return
+                CompletableDeferred<Unit>().also { drainWaiters.getOrPut(db) { mutableListOf() }.add(it) }
+            }
+        if (withTimeoutOrNull(WRITER_DRAIN_TIMEOUT_MS) { waiter.await() } == null) {
+            Logger.w { "Timed out draining writers on ${anonymizeDbName(dbName)} before merge" }
+        }
+    }
+
     @Suppress("ReturnCount", "ThrowsCount", "TooGenericExceptionCaught", "CyclomaticComplexMethod")
     private suspend fun <T> withCurrentDb(block: suspend (MeshtasticDatabase) -> T): T? {
-        val db = _currentDb.value ?: return null
+        val db = beginWrite() ?: return null
         val active = currentDbName
         markLastUsed(active)
         try {
@@ -385,14 +446,7 @@ open class DatabaseManager(
             val retryDb = _currentDb.value
             if (retryDb != null && retryDb !== db && isDbClosedException(e)) {
                 Logger.w { "withDb: database closed during switch (${e.message}), retrying with current DB" }
-                return try {
-                    runCancellableDbBlock(retryDb, block)
-                } catch (retryCancel: CancellationException) {
-                    throw retryCancel
-                } catch (retryEx: Exception) {
-                    retryEx.addSuppressed(e)
-                    throw retryEx
-                }
+                return retryRegisteredDbBlock(retryDb, e, block)
             }
 
             // Same active DB but Room's connection pool is wedged — reopen onto a fresh active instance once.
@@ -406,17 +460,40 @@ open class DatabaseManager(
                         "withDb: active DB switched during timeout recovery; retrying with current DB"
                     }
                 }
-                return try {
-                    runCancellableDbBlock(recoveredDb, block)
-                } catch (retryCancel: CancellationException) {
-                    throw retryCancel
-                } catch (retryEx: Exception) {
-                    retryEx.addSuppressed(e)
-                    throw retryEx
-                }
+                return retryRegisteredDbBlock(recoveredDb, e, block)
             }
 
             throw e
+        } finally {
+            // NonCancellable so a cancelled withDb still deregisters — a leaked +1 would make every future
+            // drain on this DB instance time out.
+            withContext(NonCancellable) { endWrite(db) }
+        }
+    }
+
+    /**
+     * Retries [block] against [db] — the recovered/new instance a withDb retry targets instead of the DB it originally
+     * registered against. Registers a writer on [db] for the duration so the retry write stays visible to a concurrent
+     * merge draining [db], with the same NonCancellable deregistration guarantee as [withCurrentDb]'s outer
+     * registration (which remains held on the original DB until that finally runs — the overlap is harmless, counts
+     * balance per instance). Any retry failure carries the original failure [cause] as a suppressed exception.
+     */
+    @Suppress("TooGenericExceptionCaught")
+    private suspend fun <T> retryRegisteredDbBlock(
+        db: MeshtasticDatabase,
+        cause: Exception,
+        block: suspend (MeshtasticDatabase) -> T,
+    ): T {
+        registerWriter(db)
+        try {
+            return runCancellableDbBlock(db, block)
+        } catch (retryCancel: CancellationException) {
+            throw retryCancel
+        } catch (retryEx: Exception) {
+            retryEx.addSuppressed(cause)
+            throw retryEx
+        } finally {
+            withContext(NonCancellable) { endWrite(db) }
         }
     }
 
@@ -439,6 +516,11 @@ open class DatabaseManager(
     internal companion object {
         private const val BACKFILL_COLD_START_DELAY_MS = 2_000L
         private const val WITH_DB_SLOW_OPERATION_MS = 1_000L
+
+        /**
+         * Upper bound on how long a merge waits for in-flight writers on the source DB to drain (see [drainWriters]).
+         */
+        private const val WRITER_DRAIN_TIMEOUT_MS = 5_000L
         val DB_TERMS = listOf("pool", "database", "connection", "sqlite")
 
         private const val ROOM_POOL_ACQUIRE_TIMEOUT_PHRASE = "timed out attempting to acquire"
