@@ -128,9 +128,9 @@ class CarStateCoordinator(
     }
 
     /**
-     * Emits the latest ALERT_APP packet present in each contacts-flow snapshot. Because the flow retains only the
-     * last packet per contact, a newer packet may supersede an earlier alert before it is emitted; packet IDs
-     * prevent repeats.
+     * Emits the latest ALERT_APP packet present in each contacts-flow snapshot. Because the flow retains only the last
+     * packet per contact, a newer packet may supersede an earlier alert before it is emitted; packet IDs prevent
+     * repeats.
      */
     val emergencyAlerts: kotlinx.coroutines.flow.Flow<EmergencyAlert> =
         packetRepository
