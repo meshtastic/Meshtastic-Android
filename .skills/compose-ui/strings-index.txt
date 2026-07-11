@@ -687,6 +687,12 @@ fixed_pin
 fixed_position
 flip_screen
 for_more_information_see_our_privacy_policy
+### FORMAT ###
+format_bold
+format_code
+format_italic
+format_link
+format_strikethrough
 fr_HT
 free_memory
 free_memory_description
@@ -775,6 +781,10 @@ indoor_air_quality_iaq
 info
 input_channel_url
 input_shared_contact_url
+insert
+insert_link_message
+insert_link_title
+insert_link_url_hint
 installed_firmware_version
 internal
 interval_always_on

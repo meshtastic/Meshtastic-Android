@@ -19,6 +19,7 @@
 package org.meshtastic.feature.messaging
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
@@ -58,6 +59,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.isShiftPressed
@@ -66,11 +68,15 @@ import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
@@ -91,7 +97,9 @@ import org.meshtastic.core.resources.message_input_label
 import org.meshtastic.core.resources.send
 import org.meshtastic.core.resources.type_a_message
 import org.meshtastic.core.resources.unknown_channel
+import org.meshtastic.core.ui.component.InlineStyle
 import org.meshtastic.core.ui.component.SharedContactDialog
+import org.meshtastic.core.ui.component.inlineMarkdownStyleRanges
 import org.meshtastic.core.ui.component.smartScrollToIndex
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Send
@@ -99,6 +107,7 @@ import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.createClipEntry
 import org.meshtastic.feature.messaging.component.ActionModeTopBar
 import org.meshtastic.feature.messaging.component.DeleteMessageDialog
+import org.meshtastic.feature.messaging.component.FormattingToolbar
 import org.meshtastic.feature.messaging.component.MESSAGE_CHARACTER_LIMIT_BYTES
 import org.meshtastic.feature.messaging.component.MessageMenuAction
 import org.meshtastic.feature.messaging.component.MessageSearchBar
@@ -110,6 +119,9 @@ import org.meshtastic.feature.messaging.component.TranslationModelDownloadDialog
 
 private const val ROUNDED_CORNER_PERCENT = 100
 private const val MAX_LINES = 3
+
+// Minimum draft length before the markdown formatting toolbar appears (matches the iOS client).
+private const val FORMATTING_TOOLBAR_MIN_CHARS = 3
 
 /**
  * The main screen for displaying and sending messages to a contact or channel.
@@ -527,12 +539,28 @@ private fun Node.matchesMention(query: String): Boolean {
         user.id.lowercase().contains(q)
 }
 
-/** Displays `@!<hex>` tokens as `@FriendlyName` while typing; the stored buffer keeps the hex wire form. */
+/**
+ * Displays `@!<hex>` tokens as `@FriendlyName` and applies live inline-markdown styling (bold/italic/strikethrough/
+ * code) while typing. Both are presentation-only via [OutputTransformation]: the stored buffer keeps the hex wire form
+ * and the raw markdown delimiters, so the bytes sent are unchanged.
+ */
+@OptIn(ExperimentalFoundationApi::class)
 private fun mentionOutputTransformation(nodesById: Map<String, Node>) = OutputTransformation {
-    val source = toString()
-    for (match in MENTION_TOKEN_REGEX.findAll(source).toList().asReversed()) {
+    for (match in MENTION_TOKEN_REGEX.findAll(toString()).toList().asReversed()) {
         val node = nodesById[match.groupValues[1]] ?: continue
         replace(match.range.first, match.range.last + 1, "@" + node.user.long_name.ifEmpty { node.user.short_name })
+    }
+    // Live markdown styling over the (mention-substituted) buffer. Delimiters stay visible; only spans are added.
+    for (span in inlineMarkdownStyleRanges(toString())) {
+        val spanStyle =
+            when (span.style) {
+                InlineStyle.Bold -> SpanStyle(fontWeight = FontWeight.Bold)
+                InlineStyle.Italic -> SpanStyle(fontStyle = FontStyle.Italic)
+                InlineStyle.Strikethrough -> SpanStyle(textDecoration = TextDecoration.LineThrough)
+                InlineStyle.Code -> SpanStyle(fontFamily = FontFamily.Monospace)
+                InlineStyle.Link -> continue
+            }
+        addStyle(spanStyle, span.range.first, span.range.last + 1)
     }
 }
 
@@ -605,21 +633,26 @@ private fun MessageInput(
         }
     }
 
+    var isFocused by remember { mutableStateOf(false) }
+
     Column(modifier = modifier.fillMaxWidth()) {
         if (mentionActive) {
             MentionSuggestions(suggestions = suggestions, onPick = ::insertMention)
         }
         OutlinedTextField(
             modifier =
-            Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp).onKeyEvent { keyEvent ->
-                val isEnterNoShift = keyEvent.key == Key.Enter && !keyEvent.isShiftPressed
-                if (isEnterNoShift) {
-                    if (keyEvent.type == KeyEventType.KeyUp) onSendAction()
-                    true // consume both KeyDown and KeyUp to prevent newline insertion
-                } else {
-                    false
-                }
-            },
+            Modifier.fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 4.dp)
+                .onFocusChanged { isFocused = it.isFocused }
+                .onKeyEvent { keyEvent ->
+                    val isEnterNoShift = keyEvent.key == Key.Enter && !keyEvent.isShiftPressed
+                    if (isEnterNoShift) {
+                        if (keyEvent.type == KeyEventType.KeyUp) onSendAction()
+                        true // consume both KeyDown and KeyUp to prevent newline insertion
+                    } else {
+                        false
+                    }
+                },
             state = textFieldState,
             outputTransformation = mentionOutput,
             lineLimits = TextFieldLineLimits.MultiLine(1, MAX_LINES),
@@ -657,6 +690,10 @@ private fun MessageInput(
                 }
             },
         )
+        // Markdown formatting toolbar — shown once the field is focused and holds enough text to format (iOS parity).
+        if (isEnabled && isFocused && currentText.length >= FORMATTING_TOOLBAR_MIN_CHARS) {
+            FormattingToolbar(state = textFieldState, modifier = Modifier.padding(horizontal = 8.dp))
+        }
     }
 }
 

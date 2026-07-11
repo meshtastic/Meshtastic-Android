@@ -89,6 +89,54 @@ fun MessageItemSignedPreview() {
 @Suppress("PreviewPublic")
 @PreviewLightDark
 @Composable
+fun MessageItemMarkdownPreview() {
+    // Mixed inline markdown covering all five styles — bold, strikethrough, italic, code, and a link — as it arrives
+    // over the mesh (raw delimiters). The bubble should render styling with the delimiters removed (iOS parity).
+    val markdown =
+        Message(
+            text = "Meet at **noon** by the ~~old~~ new *bridge* — `README` and [map](https://example.com)",
+            time = "09:41",
+            fromLocal = false,
+            status = MessageStatus.RECEIVED,
+            snr = 7.0f,
+            rssi = 92,
+            hopsAway = 0,
+            uuid = 20L,
+            receivedTime = nowMillis,
+            node = NodePreviewParameterProvider().minnieMouse,
+            read = false,
+            routingError = 0,
+            packetId = 6001,
+            emojis = listOf(),
+            replyId = null,
+            viaMqtt = false,
+        )
+    AppTheme {
+        Column(
+            modifier =
+            Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.background).padding(vertical = 16.dp),
+        ) {
+            MessageItem(
+                message = markdown,
+                node = markdown.node,
+                selected = false,
+                ourNode = NodePreviewParameterProvider().mickeyMouse,
+                onReply = {},
+                sendReaction = {},
+                onShowReactions = {},
+                onClick = {},
+                onLongClick = {},
+                onDoubleClick = {},
+                onClickChip = {},
+                onNavigateToOriginalMessage = {},
+            )
+        }
+    }
+}
+
+@Suppress("PreviewPublic")
+@PreviewLightDark
+@Composable
 fun MessageItemStatusStatesPreview() {
     val ourNode = NodePreviewParameterProvider().mickeyMouse
     val messages =
