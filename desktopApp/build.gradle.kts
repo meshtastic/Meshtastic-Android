@@ -109,6 +109,24 @@ compose.desktop {
     application {
         mainClass = "org.meshtastic.desktop.MainKt"
 
+        // CMP resolves javaHome from the JVM running Gradle, not the Kotlin toolchain. On CI
+        // that's Temurin 25, which ships without jmods (JEP 493): jlink still works, but the
+        // ProGuard task derives -libraryjars from $javaHome/jmods and fails with ~857k
+        // unresolved java.* references. Pin packaging to the JBR SDK toolchain (jmods
+        // included) so ProGuard sees the platform classes and the bundled runtime is
+        // deterministically JBR 25 on every machine.
+        javaHome =
+            javaToolchains
+                .launcherFor {
+                    languageVersion.set(JavaLanguageVersion.of(25))
+                    vendor.set(JvmVendorSpec.JETBRAINS)
+                }
+                .get()
+                .metadata
+                .installationPath
+                .asFile
+                .absolutePath
+
         val desktopJvmArgs =
             listOf(
                 "-Xmx2G",
