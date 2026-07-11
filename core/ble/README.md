@@ -65,10 +65,10 @@ The module includes unit tests for key components, utilizing Kable's architectur
 ```mermaid
 graph TB
   :core:ble[ble]:::kmp-library
-  :core:ble -.-> :core:testing
   :core:ble -.-> :core:common
   :core:ble -.-> :core:di
   :core:ble -.-> :core:model
+  :core:ble -.-> :core:testing
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
