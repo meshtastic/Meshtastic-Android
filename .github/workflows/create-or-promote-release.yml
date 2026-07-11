@@ -27,6 +27,7 @@ permissions:
   statuses: write
   id-token: write
   attestations: write
+  actions: write # promote.yml dispatches winget-publish.yml; a called workflow's token is capped by the caller's grants
 
 jobs:
   determine-tags:

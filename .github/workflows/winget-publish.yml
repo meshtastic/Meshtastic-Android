@@ -2,12 +2,24 @@ name: Publish to winget
 
 # The `released` type fires when a release is published as a full release OR
 # when an existing pre-release is flipped to a full release — the latter is
-# exactly what promote.yml's production promotion does (`gh release edit
+# what promote.yml's production promotion does (`gh release edit
 # --prerelease=false` on the already-published release object). It never fires
 # for drafts or pre-releases, so internal/closed/open promotions are ignored.
+#
+# CAVEAT: promote.yml performs that edit with the workflow's own GITHUB_TOKEN,
+# and events caused by GITHUB_TOKEN never start workflow runs — so promote.yml
+# also dispatches this workflow explicitly (workflow_dispatch is exempt from
+# that suppression). The release trigger stays for manually-published releases;
+# workflow_dispatch doubles as the manual retry/seed path.
 on:
   release:
     types: [released]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Production release tag to publish (e.g., v2.8.0)'
+        required: true
+        type: string
 
 # The WINGET_TOKEN PAT does all the work against microsoft/winget-pkgs;
 # nothing in this repo is written.
@@ -15,7 +27,8 @@ permissions: {}
 
 jobs:
   winget:
-    # Belt and braces — `released` should already exclude these.
+    # Belt and braces for release events — `released` should already exclude
+    # these. workflow_dispatch has no release payload and passes through.
     if: ${{ !github.event.release.prerelease && !github.event.release.draft }}
     runs-on: ubuntu-latest
     env:
@@ -39,4 +52,5 @@ jobs:
         with:
           identifier: Meshtastic.MeshtasticDesktop
           installers-regex: '\.msi$'
+          release-tag: ${{ inputs.tag || github.event.release.tag_name }}
           token: ${{ secrets.WINGET_TOKEN }}

@@ -63,6 +63,7 @@ permissions:
   statuses: write
   id-token: write
   attestations: write
+  actions: write # dispatch winget-publish.yml on production promotion
 
 jobs:
   prepare-build-info:
@@ -166,6 +167,19 @@ jobs:
             --title "${{ inputs.release_name }} (${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }})" \
             --draft=false \
             --prerelease=${{ inputs.channel != 'production' }}
+
+      # The edit above is made with GITHUB_TOKEN, and GITHUB_TOKEN-caused
+      # events never start workflow runs — winget-publish.yml's `released`
+      # trigger will not fire from it. workflow_dispatch is exempt from that
+      # suppression, so dispatch it explicitly. Soft-fail: a winget hiccup
+      # must not block the changelog stamp or Discord notification.
+      - name: Dispatch winget publish
+        if: ${{ inputs.channel == 'production' }}
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.final_tag }}
+        run: gh workflow run winget-publish.yml --ref main -f "tag=$TAG"
 
       - name: Stamp CHANGELOG.md for release
         if: ${{ inputs.channel == 'production' }}
