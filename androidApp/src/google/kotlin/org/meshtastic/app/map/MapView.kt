@@ -114,6 +114,7 @@ import org.meshtastic.app.map.component.WaypointMarkers
 import org.meshtastic.app.map.model.NodeClusterItem
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.TracerouteOverlay
 import org.meshtastic.core.model.geofence.toGeofence
 import org.meshtastic.core.model.util.GeoConstants.DEG_D
@@ -262,6 +263,9 @@ fun MapView(
     // --- Geofence box authoring (Main mode) ---
     // When non-null, the user is defining a bounding box for [boxAuthoringDraft] by tapping two corners.
     var boxAuthoringDraft by remember { mutableStateOf<Waypoint?>(null) }
+    // The recipient selected in EditWaypointDialog before box authoring tore it down — carried across the round trip
+    // so re-opening the dialog with the drawn box doesn't silently reset the destination back to Broadcast.
+    var boxAuthoringDraftContactKey by remember { mutableStateOf<String?>(null) }
     var boxAuthoringFirstCorner by remember { mutableStateOf<LatLng?>(null) }
     var boxAuthoringSecondCorner by remember { mutableStateOf<LatLng?>(null) }
 
@@ -346,6 +350,7 @@ fun MapView(
     DisposableEffect(Unit) { onDispose { fusedLocationClient.removeLocationUpdates(locationCallback) } }
 
     // --- Node & waypoint data ---
+    val nodes by mapViewModel.nodes.collectAsStateWithLifecycle()
     val allNodes by mapViewModel.nodesWithPosition.collectAsStateWithLifecycle(listOf())
     val waypoints by mapViewModel.waypoints.collectAsStateWithLifecycle(emptyMap())
     val displayableWaypoints = waypoints.values.mapNotNull { it.waypoint }
@@ -598,6 +603,7 @@ fun MapView(
             },
             onMapLongClick = { latLng ->
                 if (isMainMode && isConnected && boxAuthoringDraft == null) {
+                    boxAuthoringDraftContactKey = null
                     editingWaypoint =
                         Waypoint(
                             latitude_i = (latLng.latitude / DEG_D).toInt(),
@@ -656,7 +662,10 @@ fun MapView(
                         displayableWaypoints = displayableWaypoints,
                         myNodeNum = myNodeNum,
                         isConnected = isConnected,
-                        onEditWaypointRequest = { editingWaypoint = it },
+                        onEditWaypointRequest = {
+                            boxAuthoringDraftContactKey = null
+                            editingWaypoint = it
+                        },
                         onShowGeofenceInfo = { geofenceInfoWaypoint = it },
                         selectedWaypointId = selectedWaypointId,
                         mapLayers = mapLayers,
@@ -702,7 +711,11 @@ fun MapView(
                 EditWaypointDialog(
                     waypoint = waypointToEdit,
                     displayUnits = displayUnits,
-                    onSend = { updatedWp ->
+                    nodes = nodes,
+                    ourNode = ourNodeInfo,
+                    channelSet = channelSet,
+                    initialContactKey = boxAuthoringDraftContactKey ?: "0${NodeAddress.ID_BROADCAST}",
+                    onSend = { updatedWp, contactKey ->
                         var finalWp = updatedWp
                         if (updatedWp.id == 0) {
                             finalWp = finalWp.copy(id = mapViewModel.generatePacketId())
@@ -710,19 +723,26 @@ fun MapView(
                         if (updatedWp.icon == 0) {
                             finalWp = finalWp.copy(icon = 0x1F4CD)
                         }
-                        mapViewModel.sendWaypoint(finalWp)
+                        mapViewModel.sendWaypoint(finalWp, contactKey)
                         editingWaypoint = null
                     },
                     onDelete = { wpToDelete ->
                         if (wpToDelete.locked_to == 0 && isConnected && wpToDelete.id != 0) {
-                            mapViewModel.sendWaypoint(wpToDelete.copy(expire = 1))
+                            // Route the expiry to wherever the waypoint was originally sent (a DM or a secondary
+                            // channel), not the default broadcast — otherwise a DM'd waypoint's deletion never
+                            // reaches its actual recipient.
+                            val originalContactKey =
+                                waypoints[wpToDelete.id]?.let { "${it.channel}${it.to}" }
+                                    ?: "0${NodeAddress.ID_BROADCAST}"
+                            mapViewModel.sendWaypoint(wpToDelete.copy(expire = 1), originalContactKey)
                         }
                         mapViewModel.deleteWaypoint(wpToDelete.id)
                         editingWaypoint = null
                     },
                     onDismissRequest = { editingWaypoint = null },
-                    onBeginBoxAuthoring = { draft ->
+                    onBeginBoxAuthoring = { draft, contactKey ->
                         boxAuthoringDraft = draft
+                        boxAuthoringDraftContactKey = contactKey
                         boxAuthoringFirstCorner = null
                         boxAuthoringSecondCorner = null
                         editingWaypoint = null
@@ -744,6 +764,7 @@ fun MapView(
                     if (waypoint.locked_to == 0 && isConnected) {
                         {
                             geofenceInfoWaypoint = null
+                            boxAuthoringDraftContactKey = null
                             editingWaypoint = waypoint
                         }
                     } else {

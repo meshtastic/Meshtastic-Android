@@ -135,6 +135,26 @@ class BaseMapViewModelTest {
     }
 
     @Test
+    fun testSendWaypointDefaultsToBroadcast() = runTest(testDispatcher) {
+        viewModel.sendWaypoint(Waypoint(id = 1, name = "Broadcast Waypoint"))?.join()
+
+        val sent = radioController.sentPackets.single()
+        assertEquals(NodeAddress.ID_BROADCAST, sent.to)
+        assertEquals(0, sent.channel)
+    }
+
+    @Test
+    fun testSendWaypointWithContactKeyRoutesToNode() = runTest(testDispatcher) {
+        val contactKey = "8!a1b2c3d4"
+
+        viewModel.sendWaypoint(Waypoint(id = 2, name = "DM Waypoint"), contactKey)?.join()
+
+        val sent = radioController.sentPackets.single()
+        assertEquals("!a1b2c3d4", sent.to)
+        assertEquals(8, sent.channel)
+    }
+
+    @Test
     fun testWaypointsIncludeFutureExpirations() = runTest(testDispatcher) {
         val now = nowSeconds.toInt()
         val futureWaypoint = waypointPacket(id = 1, expire = now + 60)

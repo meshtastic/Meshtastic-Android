@@ -29,9 +29,12 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
@@ -47,6 +50,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -55,6 +59,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -74,7 +79,11 @@ import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.systemTimeZone
+import org.meshtastic.core.model.ContactKey
+import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.geofence.GeofenceRadiusPresets
+import org.meshtastic.core.model.util.getChannel
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.cancel
@@ -97,19 +106,79 @@ import org.meshtastic.core.resources.send
 import org.meshtastic.core.resources.time
 import org.meshtastic.core.resources.waypoint_edit
 import org.meshtastic.core.resources.waypoint_new
+import org.meshtastic.core.resources.waypoint_recipient_broadcast
+import org.meshtastic.core.resources.waypoint_recipient_channel
+import org.meshtastic.core.resources.waypoint_send_to
 import org.meshtastic.core.ui.emoji.EmojiPickerDialog
 import org.meshtastic.core.ui.icon.CalendarMonth
 import org.meshtastic.core.ui.icon.Lock
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.Config.DisplayConfig.DisplayUnits
 import org.meshtastic.proto.Waypoint
 import kotlin.time.Duration.Companion.hours
 
+/** Contact key for the broadcast destination on the primary channel — the historical default for waypoints. */
+private val BROADCAST_CONTACT_KEY = ContactKey.broadcast(0).value
+
+/**
+ * Direct-message contact key for sending to [node]. Uses the PKC channel index only when both ends support it — mirrors
+ * [org.meshtastic.feature.node.list.NodeListViewModel.getDirectMessageRoute], the app's other DM-key builder —
+ * otherwise falls back to the node's own channel, matching how a DM would actually route on the mesh.
+ */
+private fun dmContactKey(node: Node, ourNode: Node?): String {
+    val hasPKC = ourNode?.hasPKC == true && node.hasPKC
+    val channel = if (hasPKC) NodeAddress.PKC_CHANNEL_INDEX else node.channel
+    return "$channel${node.user.id}"
+}
+
+/**
+ * Number of selectable channel slots in [channelSet]: at least 1, so a channel-less/disconnected state still offers
+ * Broadcast.
+ */
+private fun channelCount(channelSet: ChannelSet?): Int = channelSet?.settings?.size?.takeIf { it > 0 } ?: 1
+
+/**
+ * Display name for channel [index] in [channelSet]: its configured name, or "Broadcast" (index 0) / "Channel N" as a
+ * fallback.
+ */
+@Composable
+private fun channelLabel(channelSet: ChannelSet?, index: Int): String {
+    val configuredName = channelSet?.getChannel(index)?.name
+    return configuredName
+        ?: if (index == 0) {
+            stringResource(Res.string.waypoint_recipient_broadcast)
+        } else {
+            stringResource(Res.string.waypoint_recipient_channel, index)
+        }
+}
+
+/**
+ * Display name for the recipient identified by [contactKey]: the destination channel's configured name (including the
+ * primary channel, e.g. "LongFast" — falling back to "Broadcast" only when no channel info is available at all, such as
+ * while disconnected), a DM node's long/short name, or — if that node is no longer in [nodes] — its raw id, so a stale
+ * selection never misreports itself as "Broadcast".
+ */
+@Composable
+private fun recipientLabel(contactKey: String, nodes: List<Node>, ourNode: Node?, channelSet: ChannelSet?): String {
+    val parsed = ContactKey(contactKey)
+    return if (parsed.address is NodeAddress.Broadcast) {
+        channelLabel(channelSet, parsed.channel)
+    } else {
+        val node = nodes.find { dmContactKey(it, ourNode) == contactKey }
+        node?.user?.long_name?.ifBlank { node.user.short_name }
+            ?: (parsed.address as? NodeAddress.ById)?.id
+            ?: stringResource(Res.string.waypoint_recipient_broadcast)
+    }
+}
+
 /**
  * Shared waypoint editor used by both the google and fdroid map flavors (DRY — replaces the two drifted per-flavor
  * copies). Map-engine-specific concerns stay outside: drawing the box overlay and the drag-to-define gesture are
- * triggered via [onBeginBoxAuthoring], which hands the current draft back to the flavor's map so the user can define
- * the bounding box there; the flavor re-opens this dialog with the drawn box applied.
+ * triggered via [onBeginBoxAuthoring], which hands the current draft *and the selected recipient* back to the flavor's
+ * map so the user can define the bounding box there; the flavor re-opens this dialog (passing the same recipient back
+ * as [initialContactKey]) with the drawn box applied — otherwise the recipient choice would silently reset to Broadcast
+ * every time the user draws a geofence area.
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod", "MagicNumber")
@@ -117,17 +186,23 @@ import kotlin.time.Duration.Companion.hours
 fun EditWaypointDialog(
     waypoint: Waypoint,
     displayUnits: DisplayUnits,
-    onSend: (Waypoint) -> Unit,
+    nodes: List<Node>,
+    ourNode: Node?,
+    channelSet: ChannelSet?,
+    onSend: (Waypoint, contactKey: String) -> Unit,
     onDelete: (Waypoint) -> Unit,
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
-    onBeginBoxAuthoring: (Waypoint) -> Unit = {},
+    initialContactKey: String = BROADCAST_CONTACT_KEY,
+    onBeginBoxAuthoring: (Waypoint, contactKey: String) -> Unit = { _, _ -> },
 ) {
     var waypointInput by remember { mutableStateOf(waypoint) }
     val title = if (waypoint.id == 0) Res.string.waypoint_new else Res.string.waypoint_edit
     val defaultEmoji = 0x1F4CD // 📍 Round Pushpin
     val currentEmojiCodepoint = if (waypointInput.icon == 0) defaultEmoji else waypointInput.icon
     var showEmojiPickerView by remember { mutableStateOf(false) }
+    var showRecipientPicker by rememberSaveable { mutableStateOf(false) }
+    var selectedContactKey by rememberSaveable { mutableStateOf(initialContactKey) }
 
     val context = LocalContext.current
     val tz = systemTimeZone
@@ -227,6 +302,17 @@ fun EditWaypointDialog(
                             checked = waypointInput.locked_to != 0,
                             onCheckedChange = { waypointInput = waypointInput.copy(locked_to = if (it) 1 else 0) },
                         )
+                    }
+                    Spacer(modifier = Modifier.size(8.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Text(stringResource(Res.string.waypoint_send_to))
+                        TextButton(onClick = { showRecipientPicker = true }) {
+                            Text(recipientLabel(selectedContactKey, nodes, ourNode, channelSet))
+                        }
                     }
                     Spacer(modifier = Modifier.size(8.dp))
                     Row(
@@ -371,7 +457,7 @@ fun EditWaypointDialog(
                         waypoint = waypointInput,
                         displayUnits = displayUnits,
                         onWaypointChange = { waypointInput = it },
-                        onBeginBoxAuthoring = { onBeginBoxAuthoring(waypointInput) },
+                        onBeginBoxAuthoring = { onBeginBoxAuthoring(waypointInput, selectedContactKey) },
                     )
                 }
             },
@@ -389,7 +475,10 @@ fun EditWaypointDialog(
                     TextButton(onClick = onDismissRequest, modifier = Modifier.padding(end = 8.dp)) {
                         Text(stringResource(Res.string.cancel))
                     }
-                    Button(onClick = { onSend(waypointInput) }, enabled = (waypointInput.name).isNotBlank()) {
+                    Button(
+                        onClick = { onSend(waypointInput, selectedContactKey) },
+                        enabled = (waypointInput.name).isNotBlank(),
+                    ) {
                         Text(stringResource(Res.string.send))
                     }
                 }
@@ -402,6 +491,85 @@ fun EditWaypointDialog(
             showEmojiPickerView = false
             waypointInput = waypointInput.copy(icon = selectedEmoji.codePointAt(0))
         }
+    }
+
+    if (showRecipientPicker) {
+        WaypointRecipientPickerDialog(
+            nodes = nodes,
+            ourNode = ourNode,
+            channelSet = channelSet,
+            selectedContactKey = selectedContactKey,
+            onSelect = {
+                selectedContactKey = it
+                showRecipientPicker = false
+            },
+            onDismissRequest = { showRecipientPicker = false },
+        )
+    }
+}
+
+/**
+ * Lists the primary channel (labelled with its configured name, e.g. "LongFast") plus any secondary channels, then
+ * every known [nodes] entry — letting the user pick a waypoint destination the same way the Python Meshtastic CLI/API
+ * can target a channel or a specific node.
+ */
+@Composable
+private fun WaypointRecipientPickerDialog(
+    nodes: List<Node>,
+    ourNode: Node?,
+    channelSet: ChannelSet?,
+    selectedContactKey: String,
+    onSelect: (String) -> Unit,
+    onDismissRequest: () -> Unit,
+) {
+    val distinctNodes = nodes.distinctBy { it.num }
+
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        title = { Text(stringResource(Res.string.waypoint_send_to)) },
+        text = {
+            LazyColumn(modifier = Modifier.heightIn(max = 400.dp)) {
+                items(count = channelCount(channelSet), key = { "channel_$it" }) { channelIndex ->
+                    val contactKey = ContactKey.broadcast(channelIndex).value
+                    RecipientRow(
+                        label = channelLabel(channelSet, channelIndex),
+                        selected = selectedContactKey == contactKey,
+                        onClick = { onSelect(contactKey) },
+                    )
+                }
+                if (distinctNodes.isNotEmpty()) {
+                    item {
+                        Spacer(modifier = Modifier.size(8.dp))
+                        HorizontalDivider()
+                        Spacer(modifier = Modifier.size(8.dp))
+                    }
+                }
+                items(distinctNodes, key = { it.num }) { node ->
+                    val contactKey = dmContactKey(node, ourNode)
+                    RecipientRow(
+                        label = node.user.long_name.ifBlank { node.user.short_name },
+                        selected = selectedContactKey == contactKey,
+                        onClick = { onSelect(contactKey) },
+                    )
+                }
+            }
+        },
+        confirmButton = { TextButton(onClick = onDismissRequest) { Text(stringResource(Res.string.cancel)) } },
+        dismissButton = null,
+    )
+}
+
+@Composable
+private fun RecipientRow(label: String, selected: Boolean, onClick: () -> Unit) {
+    Row(
+        modifier =
+        Modifier.fillMaxWidth()
+            .toggleable(value = selected, role = Role.RadioButton, onValueChange = { onClick() }),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        RadioButton(selected = selected, onClick = null)
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(label)
     }
 }
 

@@ -17,6 +17,7 @@
 package org.meshtastic.feature.map
 
 import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -176,16 +177,15 @@ open class BaseMapViewModel(
     fun deleteWaypoint(id: Int) =
         safeLaunch(context = ioDispatcher, tag = "deleteWaypoint") { packetRepository.deleteWaypoint(id) }
 
-    fun sendWaypoint(wpt: Waypoint, contactKey: String = "0${NodeAddress.ID_BROADCAST}") {
+    fun sendWaypoint(wpt: Waypoint, contactKey: String = "0${NodeAddress.ID_BROADCAST}"): Job? {
         // contactKey: unique contact key filter (channel)+(nodeId)
         val parsedKey = ContactKey(contactKey)
         val p = DataPacket(parsedKey.addressString, parsedKey.channel, wpt)
-        if (wpt.id != 0) sendDataPacket(p)
+        return if (wpt.id != 0) sendDataPacket(p) else null
     }
 
-    private fun sendDataPacket(p: DataPacket) {
+    private fun sendDataPacket(p: DataPacket): Job =
         safeLaunch(context = ioDispatcher, tag = "sendDataPacket") { radioController.sendMessage(p) }
-    }
 
     fun generatePacketId(): Int = radioController.generatePacketId()
 
