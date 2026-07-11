@@ -21,7 +21,7 @@ import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.ui.theme.EventFontResolver
 
-@Module(includes = [FDroidNetworkModule::class, FdroidAiModule::class])
+@Module(includes = [FdroidAiModule::class])
 class FlavorModule {
     @Single
     @Named("googleServicesAvailable")

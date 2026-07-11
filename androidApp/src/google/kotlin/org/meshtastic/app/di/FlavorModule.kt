@@ -26,14 +26,7 @@ import org.meshtastic.core.ui.theme.EventFontResolver
 import org.meshtastic.feature.car.di.FeatureCarModule
 
 @Module(
-    includes =
-    [
-        GoogleNetworkModule::class,
-        GoogleMapsKoinModule::class,
-        GoogleAiModule::class,
-        AppFunctionsModule::class,
-        FeatureCarModule::class,
-    ],
+    includes = [GoogleMapsKoinModule::class, GoogleAiModule::class, AppFunctionsModule::class, FeatureCarModule::class],
 )
 class FlavorModule {
     /** Downloadable Google Fonts for event branding — Google flavor only. */
