@@ -310,7 +310,7 @@ jobs:
 
   # Runs in-workflow rather than on `release: published` because the undraft above
   # uses github.token, whose events never trigger other workflows. Once the cask is
-  # promoted to homebrew/cask, replace the tap push with `brew bump-cask-pr`.
+  # promoted to homebrew/cask, replace the tap PR with `brew bump-cask-pr`.
   update-homebrew-cask:
     if: ${{ inputs.channel == 'production' }}
     runs-on: ubuntu-24.04-arm
@@ -321,7 +321,7 @@ jobs:
         with:
           ref: ${{ inputs.commit_sha || inputs.tag_name }}
 
-      - name: Render cask and push to meshtastic/homebrew-meshtastic
+      - name: Render cask and open PR against meshtastic/homebrew-tap
         env:
           TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
           TAG: ${{ inputs.final_tag }}
@@ -342,14 +342,24 @@ jobs:
           sed -e "s/{{VERSION}}/${VERSION}/" -e "s/{{SHA256}}/${SHA256}/" \
             .github/homebrew/meshtastic-desktop.rb > /tmp/meshtastic-desktop.rb
 
-          git clone "https://x-access-token:${TAP_TOKEN}@github.com/meshtastic/homebrew-meshtastic.git" /tmp/tap
-          mkdir -p /tmp/tap/Casks
-          cp /tmp/meshtastic-desktop.rb /tmp/tap/Casks/meshtastic-desktop.rb
+          # PR (not a direct push to main) so the tap's brew test-bot CI validates the bump.
+          git clone "https://x-access-token:${TAP_TOKEN}@github.com/meshtastic/homebrew-tap.git" /tmp/tap
           cd /tmp/tap
+          BRANCH="meshtastic-desktop-${VERSION}"
+          git checkout -b "$BRANCH"
+          mkdir -p Casks
+          cp /tmp/meshtastic-desktop.rb Casks/meshtastic-desktop.rb
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add Casks/meshtastic-desktop.rb
-          git diff --cached --quiet || {
-            git commit -m "meshtastic-desktop ${VERSION}"
-            git push
-          }
+          if git diff --cached --quiet; then
+            echo "Cask already up to date."
+            exit 0
+          fi
+          git commit -m "meshtastic-desktop ${VERSION}"
+          git push -fu origin "$BRANCH"
+          GH_TOKEN="$TAP_TOKEN" gh pr create --repo meshtastic/homebrew-tap \
+            --head "$BRANCH" --base main \
+            --title "meshtastic-desktop ${VERSION}" \
+            --body "Automated cask bump for the ${TAG} production release of [Meshtastic-Android](https://github.com/${{ github.repository }}/releases/tag/${TAG})." \
+            || echo "PR already exists for $BRANCH; branch updated."

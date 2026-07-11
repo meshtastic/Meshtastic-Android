@@ -1,8 +1,9 @@
 # Homebrew Cask template for Meshtastic Desktop.
 #
-# Source of truth for the cask published to the meshtastic/homebrew-meshtastic tap.
-# The `update-homebrew-cask` job in promote.yml substitutes {{VERSION}} and
-# {{SHA256}} and pushes the rendered file to the tap on every production release.
+# Source of truth for the cask published to the meshtastic/homebrew-tap tap
+# (alongside the meshtasticd formula). The `update-homebrew-cask` job in
+# promote.yml substitutes {{VERSION}} and {{SHA256}} and opens a PR against the
+# tap on every production release, so its brew test-bot CI validates the bump.
 # The download URL depends on the jpackage DMG being named
 # "Meshtastic Desktop-<version>.dmg" (GitHub rewrites the space to a dot).
 #
