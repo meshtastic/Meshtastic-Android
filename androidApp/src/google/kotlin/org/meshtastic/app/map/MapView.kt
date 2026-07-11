@@ -714,7 +714,10 @@ fun MapView(
                     nodes = nodes,
                     ourNode = ourNodeInfo,
                     channelSet = channelSet,
-                    initialContactKey = boxAuthoringDraftContactKey ?: "0${NodeAddress.ID_BROADCAST}",
+                    initialContactKey =
+                    boxAuthoringDraftContactKey
+                        ?: waypoints[waypointToEdit.id]?.let { mapViewModel.waypointContactKey(it) }
+                        ?: "0${NodeAddress.ID_BROADCAST}",
                     onSend = { updatedWp, contactKey ->
                         var finalWp = updatedWp
                         if (updatedWp.id == 0) {
@@ -732,7 +735,7 @@ fun MapView(
                             // channel), not the default broadcast — otherwise a DM'd waypoint's deletion never
                             // reaches its actual recipient.
                             val originalContactKey =
-                                waypoints[wpToDelete.id]?.let { "${it.channel}${it.to}" }
+                                waypoints[wpToDelete.id]?.let { mapViewModel.waypointContactKey(it) }
                                     ?: "0${NodeAddress.ID_BROADCAST}"
                             mapViewModel.sendWaypoint(wpToDelete.copy(expire = 1), originalContactKey)
                         }

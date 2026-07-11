@@ -29,12 +29,9 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
@@ -50,7 +47,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -122,28 +118,17 @@ import kotlin.time.Duration.Companion.hours
 private val BROADCAST_CONTACT_KEY = ContactKey.broadcast(0).value
 
 /**
- * Direct-message contact key for sending to [node]. Uses the PKC channel index only when both ends support it — mirrors
- * [org.meshtastic.feature.node.list.NodeListViewModel.getDirectMessageRoute], the app's other DM-key builder —
- * otherwise falls back to the node's own channel, matching how a DM would actually route on the mesh.
- */
-private fun dmContactKey(node: Node, ourNode: Node?): String {
-    val hasPKC = ourNode?.hasPKC == true && node.hasPKC
-    val channel = if (hasPKC) NodeAddress.PKC_CHANNEL_INDEX else node.channel
-    return "$channel${node.user.id}"
-}
-
-/**
  * Number of selectable channel slots in [channelSet]: at least 1, so a channel-less/disconnected state still offers
  * Broadcast.
  */
-private fun channelCount(channelSet: ChannelSet?): Int = channelSet?.settings?.size?.takeIf { it > 0 } ?: 1
+internal fun channelCount(channelSet: ChannelSet?): Int = channelSet?.settings?.size?.takeIf { it > 0 } ?: 1
 
 /**
  * Display name for channel [index] in [channelSet]: its configured name, or "Broadcast" (index 0) / "Channel N" as a
  * fallback.
  */
 @Composable
-private fun channelLabel(channelSet: ChannelSet?, index: Int): String {
+internal fun channelLabel(channelSet: ChannelSet?, index: Int): String {
     val configuredName = channelSet?.getChannel(index)?.name
     return configuredName
         ?: if (index == 0) {
@@ -166,7 +151,8 @@ private fun recipientLabel(contactKey: String, nodes: List<Node>, ourNode: Node?
         channelLabel(channelSet, parsed.channel)
     } else {
         val node = nodes.find { dmContactKey(it, ourNode) == contactKey }
-        node?.user?.long_name?.ifBlank { node.user.short_name }
+        node?.user?.long_name?.takeIf { it.isNotBlank() }
+            ?: node?.user?.short_name?.takeIf { it.isNotBlank() }
             ?: (parsed.address as? NodeAddress.ById)?.id
             ?: stringResource(Res.string.waypoint_recipient_broadcast)
     }
@@ -196,13 +182,13 @@ fun EditWaypointDialog(
     initialContactKey: String = BROADCAST_CONTACT_KEY,
     onBeginBoxAuthoring: (Waypoint, contactKey: String) -> Unit = { _, _ -> },
 ) {
-    var waypointInput by remember { mutableStateOf(waypoint) }
+    var waypointInput by remember(waypoint.id) { mutableStateOf(waypoint) }
     val title = if (waypoint.id == 0) Res.string.waypoint_new else Res.string.waypoint_edit
     val defaultEmoji = 0x1F4CD // 📍 Round Pushpin
     val currentEmojiCodepoint = if (waypointInput.icon == 0) defaultEmoji else waypointInput.icon
     var showEmojiPickerView by remember { mutableStateOf(false) }
     var showRecipientPicker by rememberSaveable { mutableStateOf(false) }
-    var selectedContactKey by rememberSaveable { mutableStateOf(initialContactKey) }
+    var selectedContactKey by rememberSaveable(waypoint.id) { mutableStateOf(initialContactKey) }
 
     val context = LocalContext.current
     val tz = systemTimeZone
@@ -505,71 +491,6 @@ fun EditWaypointDialog(
             },
             onDismissRequest = { showRecipientPicker = false },
         )
-    }
-}
-
-/**
- * Lists the primary channel (labelled with its configured name, e.g. "LongFast") plus any secondary channels, then
- * every known [nodes] entry — letting the user pick a waypoint destination the same way the Python Meshtastic CLI/API
- * can target a channel or a specific node.
- */
-@Composable
-private fun WaypointRecipientPickerDialog(
-    nodes: List<Node>,
-    ourNode: Node?,
-    channelSet: ChannelSet?,
-    selectedContactKey: String,
-    onSelect: (String) -> Unit,
-    onDismissRequest: () -> Unit,
-) {
-    val distinctNodes = nodes.distinctBy { it.num }
-
-    AlertDialog(
-        onDismissRequest = onDismissRequest,
-        title = { Text(stringResource(Res.string.waypoint_send_to)) },
-        text = {
-            LazyColumn(modifier = Modifier.heightIn(max = 400.dp)) {
-                items(count = channelCount(channelSet), key = { "channel_$it" }) { channelIndex ->
-                    val contactKey = ContactKey.broadcast(channelIndex).value
-                    RecipientRow(
-                        label = channelLabel(channelSet, channelIndex),
-                        selected = selectedContactKey == contactKey,
-                        onClick = { onSelect(contactKey) },
-                    )
-                }
-                if (distinctNodes.isNotEmpty()) {
-                    item {
-                        Spacer(modifier = Modifier.size(8.dp))
-                        HorizontalDivider()
-                        Spacer(modifier = Modifier.size(8.dp))
-                    }
-                }
-                items(distinctNodes, key = { it.num }) { node ->
-                    val contactKey = dmContactKey(node, ourNode)
-                    RecipientRow(
-                        label = node.user.long_name.ifBlank { node.user.short_name },
-                        selected = selectedContactKey == contactKey,
-                        onClick = { onSelect(contactKey) },
-                    )
-                }
-            }
-        },
-        confirmButton = { TextButton(onClick = onDismissRequest) { Text(stringResource(Res.string.cancel)) } },
-        dismissButton = null,
-    )
-}
-
-@Composable
-private fun RecipientRow(label: String, selected: Boolean, onClick: () -> Unit) {
-    Row(
-        modifier =
-        Modifier.fillMaxWidth()
-            .toggleable(value = selected, role = Role.RadioButton, onValueChange = { onClick() }),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        RadioButton(selected = selected, onClick = null)
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(label)
     }
 }
 

@@ -903,7 +903,12 @@ fun MapView(
             nodes = nodes,
             ourNode = ourNodeInfo,
             channelSet = channelSet,
-            initialContactKey = geofenceBoxDraftContactKey ?: "0${NodeAddress.ID_BROADCAST}",
+            initialContactKey =
+            geofenceBoxDraftContactKey
+                ?: showEditWaypointDialog
+                    ?.let { wp -> waypoints[wp.id] }
+                    ?.let { mapViewModel.waypointContactKey(it) }
+                ?: "0${NodeAddress.ID_BROADCAST}",
             onSend = { waypoint, contactKey ->
                 Logger.d { "User clicked send waypoint ${waypoint.id}" }
                 showEditWaypointDialog = null
@@ -996,7 +1001,7 @@ fun MapView(
                                 // channel), not the default broadcast — otherwise a DM'd waypoint's "delete for
                                 // everyone" never reaches its actual recipient.
                                 val originalContactKey =
-                                    waypoints[waypoint.id]?.let { "${it.channel}${it.to}" }
+                                    waypoints[waypoint.id]?.let { mapViewModel.waypointContactKey(it) }
                                         ?: "0${NodeAddress.ID_BROADCAST}"
                                 mapViewModel.sendWaypoint(waypoint.copy(expire = 1), originalContactKey)
                                 mapViewModel.deleteWaypoint(waypoint.id)

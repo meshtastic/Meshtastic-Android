@@ -34,6 +34,7 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.TracerouteOverlay
 import org.meshtastic.core.model.geofence.activeWaypointPackets
+import org.meshtastic.core.model.isBroadcast
 import org.meshtastic.core.model.isFromLocal
 import org.meshtastic.core.model.util.DistanceUnit
 import org.meshtastic.core.repository.MapPrefs
@@ -184,6 +185,16 @@ open class BaseMapViewModel(
 
     fun deleteWaypoint(id: Int) =
         safeLaunch(context = ioDispatcher, tag = "deleteWaypoint") { packetRepository.deleteWaypoint(id) }
+
+    /**
+     * Contact key a waypoint packet was exchanged on: its destination for packets we sent (or broadcasts), otherwise
+     * its sender — the same derivation as MeshDataHandlerImpl.rememberDataPacket, so edits and expiries route back to
+     * the conversation the waypoint actually lives in (a raw `to` would self-address a waypoint someone DM'd to us).
+     */
+    fun waypointContactKey(packet: DataPacket): String {
+        val contact = if (packet.isFromLocal(myNodeNum) || packet.isBroadcast) packet.to else packet.from
+        return "${packet.channel}$contact"
+    }
 
     fun sendWaypoint(wpt: Waypoint, contactKey: String = "0${NodeAddress.ID_BROADCAST}"): Job? {
         // contactKey: unique contact key filter (channel)+(nodeId)

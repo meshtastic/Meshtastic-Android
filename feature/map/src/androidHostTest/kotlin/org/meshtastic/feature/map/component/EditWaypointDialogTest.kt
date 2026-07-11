@@ -17,9 +17,12 @@
 package org.meshtastic.feature.map.component
 
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.v2.runComposeUiTest
 import okio.ByteString.Companion.encodeUtf8
 import org.junit.Test
@@ -27,6 +30,7 @@ import org.junit.runner.RunWith
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.getString
+import org.meshtastic.core.resources.node_filter_placeholder
 import org.meshtastic.core.resources.send
 import org.meshtastic.core.resources.waypoint_recipient_broadcast
 import org.meshtastic.core.testing.TestDataFactory
@@ -211,5 +215,38 @@ class EditWaypointDialogTest {
         onNodeWithText(getString(Res.string.send)).performClick()
 
         assertEquals("1${NodeAddress.ID_BROADCAST}", sentContactKey)
+    }
+
+    @Test
+    fun filteringRecipientPickerNarrowsNodesButKeepsChannelsVisible() = runComposeUiTest {
+        val bob = TestDataFactory.createTestNode(num = 43, userId = "!b1c2d3e4", longName = "Bob", shortName = "B")
+        setContent {
+            EditWaypointDialog(
+                waypoint = waypoint,
+                displayUnits = DisplayUnits.METRIC,
+                nodes = listOf(node, bob),
+                ourNode = null,
+                channelSet = channelSet,
+                onSend = { _, _ -> },
+                onDelete = {},
+                onDismissRequest = {},
+            )
+        }
+
+        onNodeWithText("Primary").performClick()
+        onNodeWithText("Alice").assertIsDisplayed()
+        onNodeWithText("Bob").assertIsDisplayed()
+
+        onNodeWithText(getString(Res.string.node_filter_placeholder)).performTextInput("Bob")
+
+        // Filtering by node name narrows the node list. "Bob" now matches two elements — the filter field's own
+        // typed-in value, and the surviving node row — so assert the count directly rather than picking an
+        // arbitrary match by index, which would risk silently checking the wrong element.
+        onAllNodesWithText("Bob").assertCountEquals(2)
+        onAllNodesWithText("Alice").assertCountEquals(0)
+        // ...but channel rows are never filtered out. "Primary" also matches the (now-covered) "Send to" button
+        // behind the dialog, so likewise assert the count (button + picker row) instead of an arbitrary index.
+        onAllNodesWithText("Primary").assertCountEquals(2)
+        onNodeWithText("Secondary").assertIsDisplayed()
     }
 }
