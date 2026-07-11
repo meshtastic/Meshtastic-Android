@@ -827,6 +827,7 @@
     <string name="label_long_turbo">Long Range - Turbo</string>
     <string name="label_medium_fast">Medium Range - Fast</string>
     <string name="label_medium_slow">Medium Range - Slow</string>
+    <string name="label_medium_turbo">Medium Range - Turbo</string>
     <string name="label_narrow_fast">Narrow - Fast</string>
     <string name="label_narrow_slow">Narrow - Slow</string>
     <string name="label_short_fast">Short Range - Fast</string>
