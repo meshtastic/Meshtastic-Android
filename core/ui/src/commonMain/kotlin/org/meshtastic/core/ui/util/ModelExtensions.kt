@@ -28,6 +28,7 @@ import org.meshtastic.core.resources.label_long_slow
 import org.meshtastic.core.resources.label_long_turbo
 import org.meshtastic.core.resources.label_medium_fast
 import org.meshtastic.core.resources.label_medium_slow
+import org.meshtastic.core.resources.label_medium_turbo
 import org.meshtastic.core.resources.label_narrow_fast
 import org.meshtastic.core.resources.label_narrow_slow
 import org.meshtastic.core.resources.label_short_fast
@@ -49,6 +50,7 @@ val ChannelOption.labelRes: StringResource
             ChannelOption.LONG_SLOW -> Res.string.label_long_slow
             ChannelOption.MEDIUM_FAST -> Res.string.label_medium_fast
             ChannelOption.MEDIUM_SLOW -> Res.string.label_medium_slow
+            ChannelOption.MEDIUM_TURBO -> Res.string.label_medium_turbo
             ChannelOption.SHORT_FAST -> Res.string.label_short_fast
             ChannelOption.SHORT_SLOW -> Res.string.label_short_slow
             ChannelOption.SHORT_TURBO -> Res.string.label_short_turbo

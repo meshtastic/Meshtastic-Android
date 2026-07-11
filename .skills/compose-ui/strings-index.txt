@@ -803,6 +803,7 @@ label_long_slow
 label_long_turbo
 label_medium_fast
 label_medium_slow
+label_medium_turbo
 label_narrow_fast
 label_narrow_slow
 label_short_fast

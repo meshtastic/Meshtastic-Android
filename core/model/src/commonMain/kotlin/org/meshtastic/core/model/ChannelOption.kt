@@ -320,6 +320,7 @@ enum class ChannelOption(val modemPreset: ModemPreset, val bandwidth: Float, val
     LONG_SLOW(ModemPreset.LONG_SLOW, 0.125f, snrLimit = -20f), // SF12
     MEDIUM_FAST(ModemPreset.MEDIUM_FAST, 0.250f, snrLimit = -12.5f), // SF9
     MEDIUM_SLOW(ModemPreset.MEDIUM_SLOW, 0.250f, snrLimit = -15f), // SF10
+    MEDIUM_TURBO(ModemPreset.MEDIUM_TURBO, 0.500f, snrLimit = -12.5f), // SF9
     SHORT_FAST(ModemPreset.SHORT_FAST, 0.250f, snrLimit = -7.5f), // SF7
     SHORT_SLOW(ModemPreset.SHORT_SLOW, 0.250f, snrLimit = -10f), // SF8
     SHORT_TURBO(ModemPreset.SHORT_TURBO, 0.500f, snrLimit = -7.5f), // SF7
