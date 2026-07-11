@@ -49,6 +49,8 @@ import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.network.HttpClientDefaults
 import org.meshtastic.core.network.KermitHttpLogger
 import org.meshtastic.core.network.configureDefaultRetry
+import org.meshtastic.core.network.service.ApiService
+import org.meshtastic.core.network.service.ApiServiceImpl
 
 private const val DISK_CACHE_PERCENT = 0.02
 private const val MEMORY_CACHE_PERCENT = 0.25
@@ -56,6 +58,8 @@ private const val MEMORY_CACHE_BACKGROUND_PERCENT = 0.1
 
 @Module
 class NetworkModule {
+
+    @Single fun bindApiService(apiServiceImpl: ApiServiceImpl): ApiService = apiServiceImpl
 
     @Single
     fun provideConnectivityManager(application: Application): ConnectivityManager =
