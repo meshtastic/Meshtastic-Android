@@ -390,6 +390,13 @@ open class DatabaseManager(
         db
     }
 
+    /**
+     * Registers a writer against a specific [db] — used by the withDb retry paths, whose target is a recovered/new
+     * instance rather than the snapshotted active DB, so their writes stay visible to a concurrent drain too.
+     */
+    private suspend fun registerWriter(db: MeshtasticDatabase) =
+        writerTrackerMutex.withLock { activeWriters[db] = (activeWriters[db] ?: 0) + 1 }
+
     /** Deregisters a writer and releases any merge waiting for [db] to quiesce. Cancellation-safe (see call site). */
     private suspend fun endWrite(db: MeshtasticDatabase) = writerTrackerMutex.withLock {
         val remaining = (activeWriters[db] ?: 1) - 1
@@ -439,14 +446,7 @@ open class DatabaseManager(
             val retryDb = _currentDb.value
             if (retryDb != null && retryDb !== db && isDbClosedException(e)) {
                 Logger.w { "withDb: database closed during switch (${e.message}), retrying with current DB" }
-                return try {
-                    runCancellableDbBlock(retryDb, block)
-                } catch (retryCancel: CancellationException) {
-                    throw retryCancel
-                } catch (retryEx: Exception) {
-                    retryEx.addSuppressed(e)
-                    throw retryEx
-                }
+                return retryRegisteredDbBlock(retryDb, e, block)
             }
 
             // Same active DB but Room's connection pool is wedged — reopen onto a fresh active instance once.
@@ -460,20 +460,39 @@ open class DatabaseManager(
                         "withDb: active DB switched during timeout recovery; retrying with current DB"
                     }
                 }
-                return try {
-                    runCancellableDbBlock(recoveredDb, block)
-                } catch (retryCancel: CancellationException) {
-                    throw retryCancel
-                } catch (retryEx: Exception) {
-                    retryEx.addSuppressed(e)
-                    throw retryEx
-                }
+                return retryRegisteredDbBlock(recoveredDb, e, block)
             }
 
             throw e
         } finally {
             // NonCancellable so a cancelled withDb still deregisters — a leaked +1 would make every future
             // drain on this DB instance time out.
+            withContext(NonCancellable) { endWrite(db) }
+        }
+    }
+
+    /**
+     * Retries [block] against [db] — the recovered/new instance a withDb retry targets instead of the DB it originally
+     * registered against. Registers a writer on [db] for the duration so the retry write stays visible to a concurrent
+     * merge draining [db], with the same NonCancellable deregistration guarantee as [withCurrentDb]'s outer
+     * registration (which remains held on the original DB until that finally runs — the overlap is harmless, counts
+     * balance per instance). Any retry failure carries the original failure [cause] as a suppressed exception.
+     */
+    @Suppress("TooGenericExceptionCaught")
+    private suspend fun <T> retryRegisteredDbBlock(
+        db: MeshtasticDatabase,
+        cause: Exception,
+        block: suspend (MeshtasticDatabase) -> T,
+    ): T {
+        registerWriter(db)
+        try {
+            return runCancellableDbBlock(db, block)
+        } catch (retryCancel: CancellationException) {
+            throw retryCancel
+        } catch (retryEx: Exception) {
+            retryEx.addSuppressed(cause)
+            throw retryEx
+        } finally {
             withContext(NonCancellable) { endWrite(db) }
         }
     }

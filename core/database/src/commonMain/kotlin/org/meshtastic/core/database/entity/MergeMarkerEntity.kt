@@ -23,9 +23,11 @@ import androidx.room3.PrimaryKey
 /**
  * A durable record, in the canonical (destination) database, that a given source database has already been folded in by
  * [org.meshtastic.core.database.DatabaseMerger]. Written inside the same merge transaction as the copied rows, so it
- * commits atomically with them. On the next connection [org.meshtastic.core.database.DatabaseManager.associateNode] can
- * consult this marker and skip a source that is already merged — closing the crash window between the merge commit and
- * the datastore alias write, where a retried merge would otherwise duplicate the fresh-id packet/discovery rows.
+ * commits atomically with them. When [org.meshtastic.core.database.DatabaseManager.associateDevice] re-runs the merge
+ * on the next connection, `DatabaseMerger.merge` finds the marker at the top of its transaction and skips the whole
+ * merge — closing the crash window between the merge commit and the datastore alias write, where a retry would
+ * otherwise duplicate the fresh-id packet/discovery rows. Markers share the destination DB's lifecycle: if the
+ * canonical DB is LRU-evicted and later recreated empty, its markers vanish with the merged data they describe.
  */
 @Entity(tableName = "merge_marker")
 data class MergeMarkerEntity(
