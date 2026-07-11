@@ -32,7 +32,6 @@ import org.meshtastic.core.model.ContactKey
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
-import org.meshtastic.core.model.NodeSortOption
 import org.meshtastic.core.model.TracerouteOverlay
 import org.meshtastic.core.model.geofence.activeWaypointPackets
 import org.meshtastic.core.model.isFromLocal
@@ -44,6 +43,7 @@ import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.UiPrefs
+import org.meshtastic.core.repository.nodeSortOption
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.any
 import org.meshtastic.core.resources.eight_hours
@@ -106,8 +106,7 @@ open class BaseMapViewModel(
      * e.g. via the waypoint recipient picker staying in sync with the Nodes tab).
      */
     val nodes: StateFlow<List<Node>> =
-        uiPrefs.nodeSort
-            .map { NodeSortOption.fromOrdinal(it) }
+        uiPrefs.nodeSortOption
             .flatMapLatest { sort -> nodeRepository.getNodes(sort = sort) }
             .map { nodes -> nodes.filterNot { node -> node.isIgnored } }
             .stateInWhileSubscribed(initialValue = emptyList())

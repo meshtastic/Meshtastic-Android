@@ -16,10 +16,10 @@
  */
 package org.meshtastic.feature.node.list
 
-import kotlinx.coroutines.flow.map
 import org.koin.core.annotation.Single
 import org.meshtastic.core.model.NodeSortOption
 import org.meshtastic.core.repository.UiPrefs
+import org.meshtastic.core.repository.nodeSortOption
 
 @Single
 @Suppress("TooManyFunctions")
@@ -43,7 +43,7 @@ open class NodeFilterPreferences constructor(private val uiPrefs: UiPrefs) {
     open val shouldShowRole = uiPrefs.shouldShowRole
     open val shouldShowTelemetry = uiPrefs.shouldShowTelemetry
 
-    open val nodeSortOption = uiPrefs.nodeSort.map { NodeSortOption.fromOrdinal(it) }
+    open val nodeSortOption = uiPrefs.nodeSortOption
 
     open fun setNodeSort(option: NodeSortOption) {
         uiPrefs.setNodeSort(option.ordinal)
