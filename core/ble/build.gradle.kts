@@ -17,7 +17,7 @@
 
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
-    id("meshtastic.koin")
+    alias(libs.plugins.meshtastic.koin)
 }
 
 kotlin {
@@ -39,17 +39,6 @@ kotlin {
             implementation(libs.jetbrains.lifecycle.runtime)
         }
 
-        commonTest.dependencies {
-            implementation(libs.kotlinx.coroutines.test)
-            implementation(projects.core.testing)
-        }
-
-        getByName("androidHostTest") {
-            dependencies {
-                implementation(projects.core.testing)
-                implementation(libs.kotlinx.coroutines.test)
-                implementation(libs.androidx.test.ext.junit)
-            }
-        }
+        commonTest.dependencies { implementation(projects.core.testing) }
     }
 }

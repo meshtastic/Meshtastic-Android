@@ -37,7 +37,7 @@ plugins {
     alias(libs.plugins.dokka)
     alias(libs.plugins.test.retry) apply false
     alias(libs.plugins.meshtastic.root)
-    id("meshtastic.docs")
+    alias(libs.plugins.meshtastic.docs)
 }
 
 plugins.withId("org.meshtastic.flatpak.sources") {

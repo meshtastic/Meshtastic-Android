@@ -185,6 +185,7 @@ internal fun Project.configureKmpTestDependencies() {
                 implementation(libs.library("kotest-assertions"))
                 implementation(libs.library("kotest-property"))
                 implementation(libs.library("turbine"))
+                implementation(libs.library("kotlinx-coroutines-test"))
             }
 
             // Configure androidHostTest lazily — the source set is created when the
@@ -203,6 +204,7 @@ internal fun Project.configureKmpTestDependencies() {
                         implementation(libs.library("turbine"))
                         implementation(libs.library("robolectric"))
                         implementation(libs.library("androidx-test-core"))
+                        implementation(libs.library("androidx-test-ext-junit"))
                     }
                 }
 
@@ -226,7 +228,7 @@ private val SHARED_COMPILER_ARGS =
         // No -Xbackend-threads: parallel codegen races and crashes release builds (KT-83578).
     )
 
-private const val JDK_VERSION = 21
+private const val JDK_VERSION = 25
 
 /** Configure base Kotlin options */
 private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() {

@@ -60,19 +60,19 @@ does **not** apply to it.
 ### Open beta
 
 - **Include prereleases:** on
-- **Filter release titles by regular expression:** `-open\.`
+- **Filter release titles by regular expression:** `-open`
 - **Filter APKs by regular expression:** see [Picking the APK](#picking-the-apk)
 
 ### Closed beta
 
 - **Include prereleases:** on
-- **Filter release titles by regular expression:** `-closed\.`
+- **Filter release titles by regular expression:** `-closed`
 - **Filter APKs by regular expression:** see [Picking the APK](#picking-the-apk)
 
 ### Bleeding edge (newest promoted test build, any channel)
 
 - **Include prereleases:** on
-- **Filter release titles by regular expression:** `-(closed|open)\.`
+- **Filter release titles by regular expression:** `-(closed|open)`
 - **Filter APKs by regular expression:** see [Picking the APK](#picking-the-apk)
 
 Obtainium installs the newest promoted prerelease — whatever is currently in

@@ -40,15 +40,16 @@ fun Project.resolveVersionInfo(): VersionInfo {
     val gitVersionProvider = providers.of(GitVersionValueSource::class.java) {}
     val vcOffset = configProperties.getProperty("VERSION_CODE_OFFSET")?.toInt() ?: 0
 
+    // Providers (not findProperty/System.getenv) so the config cache tracks these as build inputs.
     val versionCode =
-        findProperty("android.injected.version.code")?.toString()?.toInt()
-            ?: System.getenv("VERSION_CODE")?.toInt()
+        providers.gradleProperty("android.injected.version.code").orNull?.toInt()
+            ?: providers.environmentVariable("VERSION_CODE").orNull?.toInt()
             ?: (gitVersionProvider.get().toInt() + vcOffset)
 
     val versionName =
-        findProperty("android.injected.version.name")?.toString()
-            ?: findProperty("appVersionName")?.toString()
-            ?: System.getenv("VERSION_NAME")
+        providers.gradleProperty("android.injected.version.name").orNull
+            ?: providers.gradleProperty("appVersionName").orNull
+            ?: providers.environmentVariable("VERSION_NAME").orNull
             ?: configProperties.getProperty("VERSION_NAME_BASE")
             ?: "1.0.0"
 

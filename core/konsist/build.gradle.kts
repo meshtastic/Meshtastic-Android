@@ -21,7 +21,7 @@
 // Runs under the existing `allTests` baseline gate via :core:konsist:allTests.
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
-    id("meshtastic.kmp.jvm.android")
+    alias(libs.plugins.meshtastic.kmp.jvm.android)
 }
 
 kotlin {

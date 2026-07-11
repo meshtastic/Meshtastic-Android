@@ -358,10 +358,14 @@
     <string name="demo_mode_replay">Demo Mode (Replay)</string>
     <string name="desc_node_filter_clear">clear node filter</string>
     <string name="description">Description</string>
+    <!-- DESKTOP -->
     <string name="desktop_notification_title">Meshtastic</string>
     <string name="desktop_tray_quit">Quit</string>
     <string name="desktop_tray_show">Show Meshtastic</string>
     <string name="desktop_tray_tooltip">Meshtastic Desktop</string>
+    <string name="desktop_update_available_message">Meshtastic Desktop %1$s is ready to download.</string>
+    <string name="desktop_update_available_title">App update available</string>
+    <string name="desktop_update_download">Download update %1$s</string>
     <string name="details">Details</string>
     <string name="detection_sensor">Detection Sensor</string>
     <string name="detection_sensor_config">Detection Sensor Config</string>

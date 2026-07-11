@@ -63,11 +63,11 @@ class DfuFallbackCoordinatorTest {
     fun `Unknown falls back from Legacy to Secure on pre-engagement failure`() = runTest {
         val coordinator = DfuFallbackCoordinator(BootloaderDetection.Unknown)
         val protocols = mutableListOf<DfuProtocolKind>()
-        val attemptCounts = mutableListOf<Int>()
+        val budgets = mutableListOf<DfuAttemptBudget>()
         assertFailsWith<RuntimeException> {
-            coordinator.execute { protocol, attempts ->
+            coordinator.execute { protocol, budget ->
                 protocols.add(protocol)
-                attemptCounts.add(attempts)
+                budgets.add(budget)
                 if (protocol == DfuProtocolKind.LEGACY) {
                     DfuUploadResult.Failure(RuntimeException("connect failed"), protocolEngaged = false)
                 } else {
@@ -81,7 +81,9 @@ class DfuFallbackCoordinatorTest {
                 assertEquals("also failed", thrown.suppressedExceptions.first().message)
             }
         assertEquals(listOf(DfuProtocolKind.LEGACY, DfuProtocolKind.SECURE), protocols)
-        assertEquals(listOf(1, 1), attemptCounts)
+        // Unknown Legacy primary budget shape: pre=1 probe, engaged=3; promotion is not exercised because this test
+        // fails before engagement. Secure remains 1/1.
+        assertEquals(listOf(DfuAttemptBudget(1, 3), DfuAttemptBudget(1, 1)), budgets)
     }
 
     @Test
@@ -98,14 +100,17 @@ class DfuFallbackCoordinatorTest {
     }
 
     @Test
-    fun `LegacyObserved gives Legacy 3 session attempts`() = runTest {
+    fun `LegacyObserved gives Legacy 3 upload attempts`() = runTest {
         val coordinator = DfuFallbackCoordinator(BootloaderDetection.LegacyObserved)
-        val attemptCounts = mutableListOf<Int>()
-        coordinator.execute { _, attempts ->
-            attemptCounts.add(attempts)
+        val budgets = mutableListOf<DfuAttemptBudget>()
+        coordinator.execute { _, budget ->
+            budgets.add(budget)
             DfuUploadResult.Success
         }
-        assertEquals(listOf(3), attemptCounts) // LEGACY_SESSION_ATTEMPTS
+        assertEquals(
+            listOf(DfuAttemptBudget(3, 3)),
+            budgets,
+        ) // LEGACY_SESSION_ATTEMPTS — upload-attempt budget; stale cleanup is separate
     }
 
     @Test
@@ -123,11 +128,11 @@ class DfuFallbackCoordinatorTest {
     }
 
     @Test
-    fun `LegacyObserved gives Secure fallback 1 session attempt after Legacy engages`() = runTest {
+    fun `LegacyObserved gives Secure fallback budget of 1 upload attempt after Legacy engages`() = runTest {
         val coordinator = DfuFallbackCoordinator(BootloaderDetection.LegacyObserved)
-        val attemptCounts = mutableListOf<Int>()
-        coordinator.execute { protocol, attempts ->
-            attemptCounts.add(attempts)
+        val budgets = mutableListOf<DfuAttemptBudget>()
+        coordinator.execute { protocol, budget ->
+            budgets.add(budget)
             if (protocol == DfuProtocolKind.LEGACY) {
                 DfuUploadResult.Failure(RuntimeException("legacy protocol failed"), protocolEngaged = true)
             } else {
@@ -135,20 +140,23 @@ class DfuFallbackCoordinatorTest {
             }
         }
         assertEquals(
-            listOf(3, 1),
-            attemptCounts,
-        ) // Legacy primary=LEGACY_SESSION_ATTEMPTS, Secure fallback=LIMITED_SESSION_ATTEMPTS
+            listOf(DfuAttemptBudget(3, 3), DfuAttemptBudget(1, 1)),
+            budgets,
+        ) // Legacy primary=LEGACY_SESSION_ATTEMPTS (upload attempts), Secure fallback=LIMITED_SESSION_ATTEMPTS
     }
 
     @Test
-    fun `Unknown gives Legacy primary 1 session attempt`() = runTest {
+    fun `Unknown gives Legacy primary a pre-engagement probe budget of 1 with engaged promotion to 3`() = runTest {
         val coordinator = DfuFallbackCoordinator(BootloaderDetection.Unknown)
-        val attemptCounts = mutableListOf<Int>()
-        coordinator.execute { _, attempts ->
-            attemptCounts.add(attempts)
+        val budgets = mutableListOf<DfuAttemptBudget>()
+        coordinator.execute { _, budget ->
+            budgets.add(budget)
             DfuUploadResult.Success
         }
-        assertEquals(listOf(1), attemptCounts) // LIMITED_SESSION_ATTEMPTS keeps speculative Unknown probes bounded
+        assertEquals(
+            listOf(DfuAttemptBudget(1, 3)),
+            budgets,
+        ) // LIMITED_SESSION_ATTEMPTS keeps speculative Unknown probes bounded; engagement promotes to 3
     }
 
     @Test
