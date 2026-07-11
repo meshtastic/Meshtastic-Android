@@ -33,6 +33,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.meshtastic.core.common.state.HiddenFeaturesUnlock
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.FirmwareReleaseType
 import org.meshtastic.core.datastore.BootloaderWarningDataSource
@@ -122,6 +123,8 @@ class FirmwareUpdateViewModelTest {
         Dispatchers.resetMain()
     }
 
+    private val hiddenFeaturesUnlock = HiddenFeaturesUnlock()
+
     private fun createViewModel() = FirmwareUpdateViewModel(
         firmwareReleaseRepository,
         deviceHardwareRepository,
@@ -134,6 +137,7 @@ class FirmwareUpdateViewModelTest {
         usbManager,
         fileHandler,
         TestApplicationCoroutineScope(testDispatcher),
+        hiddenFeaturesUnlock,
     )
 
     @Test
@@ -442,6 +446,35 @@ class FirmwareUpdateViewModelTest {
         assertTrue(state.isRecovery, "Expected recovery Ready but was $state")
         assertEquals("1234abcd", state.address) // fullAddress.drop(1)
         assertIs<FirmwareUpdateMethod.Ble>(state.updateMethod)
+    }
+
+    @Test
+    fun `nightly recovery record re-asserts the hidden-features unlock`() = runTest {
+        // A NIGHTLY record can only have been written while unlocked; recovery after a process restart
+        // (unlock re-locked) must restore the unlock so the nightly channel is visible and re-fetchable.
+        every { radioPrefs.devAddr } returns MutableStateFlow(null)
+        every { firmwareReleaseRepository.nightlyRelease } returns
+            flowOf(FirmwareRelease(id = "v2.8.0.f52e2ea", title = "2.8.0 nightly", zipUrl = ""))
+        every { firmwareRecoveryDataSource.pending } returns
+            flowOf(
+                PendingFirmwareRecovery(
+                    fullAddress = "x1234abcd",
+                    hwModel = 1,
+                    pioEnv = "tbeam",
+                    releaseType = "NIGHTLY",
+                    deviceName = "My Node",
+                ),
+            )
+
+        assertEquals(false, hiddenFeaturesUnlock.unlocked.value)
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        val state = viewModel.state.value
+        assertIs<FirmwareUpdateState.Ready>(state)
+        assertTrue(state.isRecovery, "Expected recovery Ready but was $state")
+        assertEquals(FirmwareReleaseType.NIGHTLY, viewModel.selectedReleaseType.value)
+        assertTrue(hiddenFeaturesUnlock.unlocked.value, "Nightly recovery must re-assert the unlock")
     }
 
     @Test

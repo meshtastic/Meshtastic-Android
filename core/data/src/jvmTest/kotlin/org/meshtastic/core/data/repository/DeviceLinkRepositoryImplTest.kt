@@ -28,6 +28,7 @@ import org.meshtastic.core.model.EventFirmwareResponse
 import org.meshtastic.core.model.NetworkDeviceHardware
 import org.meshtastic.core.model.NetworkDeviceLink
 import org.meshtastic.core.model.NetworkDeviceLinksResponse
+import org.meshtastic.core.model.NetworkFirmwareNightly
 import org.meshtastic.core.model.NetworkFirmwareReleases
 import org.meshtastic.core.network.DeviceLinksRemoteDataSource
 import org.meshtastic.core.network.service.ApiService
@@ -47,6 +48,8 @@ class DeviceLinkRepositoryImplTest {
         override suspend fun getDeviceLinks(): NetworkDeviceLinksResponse = response
 
         override suspend fun getFirmwareReleases(): NetworkFirmwareReleases = error("unused")
+
+        override suspend fun getNightlyFirmware(): NetworkFirmwareNightly? = error("unused")
 
         override suspend fun getEventFirmware(): EventFirmwareResponse = error("unused")
     }

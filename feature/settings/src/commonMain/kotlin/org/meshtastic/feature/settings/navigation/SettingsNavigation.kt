@@ -108,10 +108,10 @@ fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
 
     entry<SettingsRoute.ModuleConfiguration> {
         val settingsViewModel: SettingsViewModel = koinViewModel()
-        val excludedModulesUnlocked by settingsViewModel.excludedModulesUnlocked.collectAsStateWithLifecycle()
+        val hiddenFeaturesUnlocked by settingsViewModel.hiddenFeaturesUnlocked.collectAsStateWithLifecycle()
         ModuleConfigurationScreen(
             viewModel = getRadioConfigViewModel(backStack),
-            excludedModulesUnlocked = excludedModulesUnlocked,
+            hiddenFeaturesUnlocked = hiddenFeaturesUnlocked,
             onBack = dropUnlessResumed { backStack.removeLastOrNull() },
             onNavigate = { route -> backStack.add(route) },
         )

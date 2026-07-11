@@ -26,6 +26,12 @@ interface FirmwareReleaseRepository {
     /** A flow that provides the latest ALPHA firmware release. */
     val alphaRelease: Flow<FirmwareRelease?>
 
+    /**
+     * A flow that provides the current NIGHTLY preview build, or null when none is published. Sourced from
+     * meshtastic.github.io rather than the API server, and surfaced only behind the hidden-features unlock.
+     */
+    val nightlyRelease: Flow<FirmwareRelease?>
+
     /** Invalidates the local cache of firmware releases. */
     suspend fun invalidateCache()
 }

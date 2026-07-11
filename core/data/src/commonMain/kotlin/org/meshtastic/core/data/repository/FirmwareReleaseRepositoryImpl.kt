@@ -37,6 +37,7 @@ import org.meshtastic.core.database.entity.asExternalModel
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.NetworkFirmwareRelease
 import org.meshtastic.core.model.NetworkFirmwareReleases
+import org.meshtastic.core.model.asFirmwareRelease
 import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.network.FirmwareReleaseRemoteDataSource
 import org.meshtastic.core.repository.FirmwareReleaseRepository
@@ -72,16 +73,21 @@ open class FirmwareReleaseRepositoryImpl(
 
     override val alphaRelease: Flow<FirmwareRelease?> = getLatestFirmware(FirmwareReleaseType.ALPHA)
 
+    override val nightlyRelease: Flow<FirmwareRelease?> = getLatestFirmware(FirmwareReleaseType.NIGHTLY)
+
     private fun getLatestFirmware(releaseType: FirmwareReleaseType): Flow<FirmwareRelease?> = staleWhileRevalidateFlow(
         loadFromCache = {
             ensureSeeded()
             val latest = localDataSource.getLatestRelease(releaseType)?.asExternalModel()
+            // NIGHTLY is exempt from the below-stable guard: it is an explicit opt-in preview channel.
             if (releaseType == FirmwareReleaseType.ALPHA) latest.notBelowStable() else latest
         },
         shouldFetch = { cached ->
             cached == null || localDataSource.getLatestRelease(releaseType)?.isStale() != false
         },
-        fetch = { singleFlightRefresh() },
+        // Nightly lives on meshtastic.github.io, not in the API's release list, so it refreshes on its own
+        // path — regular (locked) users never hit the nightly URL because only unlocked UI collects that flow.
+        fetch = { if (releaseType == FirmwareReleaseType.NIGHTLY) refreshNightly() else singleFlightRefresh() },
         context = dispatchers.default,
         // No collector blocks on the fetch (cache is emitted first), so let the HttpClient's own
         // timeout/retry policy bound it — api.meshtastic.org routinely takes 20-60s to serve this list,
@@ -173,6 +179,16 @@ open class FirmwareReleaseRepositoryImpl(
                     mapOf(FirmwareReleaseType.STABLE to releases.stable, FirmwareReleaseType.ALPHA to releases.alpha),
                 )
             }
+        }
+    }
+
+    private suspend fun refreshNightly() {
+        refreshMutex.withLock {
+            Logger.d { "FirmwareReleaseRepository: fetching nightly index" }
+            // A 404 (nothing currently published) returns null and clears any stale nightly row; transport and
+            // server errors throw before the write and leave the cache untouched.
+            val nightly = remoteDataSource.getNightlyFirmware()?.asFirmwareRelease()
+            localDataSource.replaceFirmwareReleases(mapOf(FirmwareReleaseType.NIGHTLY to listOfNotNull(nightly)))
         }
     }
 

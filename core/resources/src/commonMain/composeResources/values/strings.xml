@@ -665,6 +665,7 @@
     <string name="firmware_update_method_usb">USB File Transfer</string>
     <string name="firmware_update_method_wifi">WiFi OTA</string>
     <string name="firmware_update_missing_target">Firmware target information is unavailable for this device.</string>
+    <string name="firmware_update_nightly">Nightly</string>
     <string name="firmware_update_no_device">No device connected</string>
     <string name="firmware_update_node_info_missing">Node user information is missing.</string>
     <string name="firmware_update_not_found_in_release">Could not find firmware for %1$s in release.</string>

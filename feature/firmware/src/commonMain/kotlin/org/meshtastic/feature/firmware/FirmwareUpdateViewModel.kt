@@ -39,6 +39,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.di.ApplicationCoroutineScope
+import org.meshtastic.core.common.state.HiddenFeaturesUnlock
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.database.entity.FirmwareRelease
@@ -111,12 +112,16 @@ class FirmwareUpdateViewModel(
     private val usbManager: FirmwareUsbManager,
     private val fileHandler: FirmwareFileHandler,
     private val applicationScope: ApplicationCoroutineScope,
+    private val hiddenFeaturesUnlock: HiddenFeaturesUnlock,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<FirmwareUpdateState>(FirmwareUpdateState.Idle)
     val state: StateFlow<FirmwareUpdateState> = _state.asStateFlow()
 
     val connectionState = radioController.connectionState
+
+    /** The version-row easter egg also unlocks the nightly preview channel, like the web flasher's konami code. */
+    val nightlyUnlocked: StateFlow<Boolean> = hiddenFeaturesUnlock.unlocked
 
     private val _selectedReleaseType = MutableStateFlow(FirmwareReleaseType.STABLE)
     val selectedReleaseType: StateFlow<FirmwareReleaseType> = _selectedReleaseType.asStateFlow()
@@ -290,6 +295,12 @@ class FirmwareUpdateViewModel(
         _currentFirmwareVersion.value = null
         val type =
             runCatching { FirmwareReleaseType.valueOf(recovery.releaseType) }.getOrDefault(FirmwareReleaseType.STABLE)
+        // A nightly recovery record can only exist if the user had unlocked the hidden channel and deliberately
+        // flashed nightly before the interruption; re-assert the (process-scoped) unlock so the recovery UI can
+        // show and re-fetch that channel instead of leaving the stranded device unrecoverable.
+        if (type == FirmwareReleaseType.NIGHTLY) {
+            hiddenFeaturesUnlock.unlock()
+        }
         _selectedReleaseType.value = type
 
         firmwareReleaseRepository.getReleaseFlow(type).collectLatest { release ->
@@ -375,7 +386,8 @@ class FirmwareUpdateViewModel(
     /**
      * Persist a [PendingFirmwareRecovery] for the current BLE nRF-DFU update, so an interrupted flash that strands the
      * device in bootloader mode can be recovered later. Scoped to BLE + non-ESP32 + a re-fetchable release channel
-     * (STABLE/ALPHA); ESP32 OTA and local-file flashes are intentionally not recoverable in this flow.
+     * (STABLE/ALPHA/NIGHTLY); ESP32 OTA and local-file flashes are intentionally not recoverable in this flow. A
+     * NIGHTLY record re-asserts the hidden-features unlock on recovery (see [enterRecoveryModeOrError]).
      */
     private suspend fun maybeRecordRecovery(state: FirmwareUpdateState.Ready) {
         val type = _selectedReleaseType.value
@@ -922,6 +934,7 @@ private fun isBluetoothInterfaceAddress(address: String): Boolean =
 private fun FirmwareReleaseRepository.getReleaseFlow(type: FirmwareReleaseType): Flow<FirmwareRelease?> = when (type) {
     FirmwareReleaseType.STABLE -> stableRelease
     FirmwareReleaseType.ALPHA -> alphaRelease
+    FirmwareReleaseType.NIGHTLY -> nightlyRelease
     FirmwareReleaseType.LOCAL -> flowOf(null)
 }
 

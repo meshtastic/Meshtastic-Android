@@ -104,7 +104,7 @@ fun DesktopSettingsScreen(
     val destNode by radioConfigViewModel.destNode.collectAsStateWithLifecycle()
     val localConfig by settingsViewModel.localConfig.collectAsStateWithLifecycle()
     val homoglyphEnabled by radioConfigViewModel.homoglyphEncodingEnabledFlow.collectAsStateWithLifecycle(false)
-    val excludedModulesUnlocked by settingsViewModel.excludedModulesUnlocked.collectAsStateWithLifecycle()
+    val hiddenFeaturesUnlocked by settingsViewModel.hiddenFeaturesUnlocked.collectAsStateWithLifecycle()
     val cacheLimit by settingsViewModel.dbCacheLimit.collectAsStateWithLifecycle()
     val isOtaCapable by settingsViewModel.isOtaCapable.collectAsStateWithLifecycle()
 
@@ -259,8 +259,8 @@ fun DesktopSettingsScreen(
 
                 DesktopAppInfoSection(
                     appVersionName = settingsViewModel.appVersionName,
-                    excludedModulesUnlocked = excludedModulesUnlocked,
-                    onUnlockExcludedModules = { settingsViewModel.unlockExcludedModules() },
+                    hiddenFeaturesUnlocked = hiddenFeaturesUnlocked,
+                    onUnlockHiddenFeatures = { settingsViewModel.unlockHiddenFeatures() },
                     onNavigateToAbout = { onNavigate(SettingsRoute.About) },
                 )
             }
@@ -268,12 +268,12 @@ fun DesktopSettingsScreen(
     }
 }
 
-/** Desktop App Info section: About link and version with excluded-modules unlock easter egg. */
+/** Desktop App Info section: About link and version with hidden-features unlock easter egg. */
 @Composable
 private fun DesktopAppInfoSection(
     appVersionName: String,
-    excludedModulesUnlocked: Boolean,
-    onUnlockExcludedModules: () -> Unit,
+    hiddenFeaturesUnlocked: Boolean,
+    onUnlockHiddenFeatures: () -> Unit,
     onNavigateToAbout: () -> Unit,
 ) {
     ExpressiveSection(title = stringResource(Res.string.info)) {
@@ -286,9 +286,9 @@ private fun DesktopAppInfoSection(
         }
 
         DesktopAppVersionButton(
-            excludedModulesUnlocked = excludedModulesUnlocked,
+            hiddenFeaturesUnlocked = hiddenFeaturesUnlocked,
             appVersionName = appVersionName,
-            onUnlockExcludedModules = onUnlockExcludedModules,
+            onUnlockHiddenFeatures = onUnlockHiddenFeatures,
         )
     }
 }
@@ -299,9 +299,9 @@ private const val UNLOCK_TIMEOUT_SECONDS = 1
 
 @Composable
 private fun DesktopAppVersionButton(
-    excludedModulesUnlocked: Boolean,
+    hiddenFeaturesUnlocked: Boolean,
     appVersionName: String,
-    onUnlockExcludedModules: () -> Unit,
+    onUnlockHiddenFeatures: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val showToast = rememberShowToastResource()
@@ -323,14 +323,14 @@ private fun DesktopAppVersionButton(
         clickCount = clickCount.inc().coerceIn(0, UNLOCK_CLICK_COUNT)
 
         when {
-            clickCount == UNLOCKED_CLICK_COUNT && excludedModulesUnlocked -> {
+            clickCount == UNLOCKED_CLICK_COUNT && hiddenFeaturesUnlocked -> {
                 clickCount = 0
                 scope.launch { showToast(Res.string.modules_already_unlocked) }
             }
 
             clickCount == UNLOCK_CLICK_COUNT -> {
                 clickCount = 0
-                onUnlockExcludedModules()
+                onUnlockHiddenFeatures()
                 scope.launch { showToast(Res.string.modules_unlocked) }
             }
         }
