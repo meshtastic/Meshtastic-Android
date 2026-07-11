@@ -21,14 +21,19 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import okio.ByteString.Companion.encodeUtf8
 import org.meshtastic.core.database.entity.MyNodeEntity
 
+/** Ingestion hex-encodes the 16-byte `device_id`; require that shape so lossy legacy values can't be compared. */
+private val HEX_DEVICE_ID = Regex("[0-9a-fA-F]{16,64}")
+
 /**
- * A device id usable for hardware-identity comparison; null when absent, blank, or the legacy placeholder. The id is
- * the factory-burned silicon identifier from `MyNodeInfo.device_id` — stable across firmware upgrades, erases, and key
- * changes — but not reported by all hardware (e.g. classic ESP32) and deliberately zeroed for unauthenticated clients
- * in lockdown mode, so callers must always tolerate null.
+ * A device id usable for hardware-identity comparison; null when absent, blank, the legacy placeholder, or not in the
+ * hex form current ingestion produces (older app versions persisted a lossy utf8 decode of the raw bytes — those values
+ * can collide across devices, so they are treated as absent rather than compared). The id is the factory-burned silicon
+ * identifier from `MyNodeInfo.device_id` — stable across firmware upgrades, erases, and key changes — but not reported
+ * by all hardware (e.g. classic ESP32) and deliberately zeroed for unauthenticated clients in lockdown mode, so callers
+ * must always tolerate null.
  */
 internal fun validDeviceIdOrNull(id: String?): String? =
-    id?.takeIf { it.isNotBlank() && it != MyNodeEntity.DEVICE_ID_UNKNOWN }
+    id?.takeIf { it != MyNodeEntity.DEVICE_ID_UNKNOWN && it.matches(HEX_DEVICE_ID) }
 
 /** Datastore key mapping a node number to its canonical DB. Legacy: node numbers renumber under firmware 2.8. */
 internal fun nodeDbPrefKey(nodeNum: Int): Preferences.Key<String> =

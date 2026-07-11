@@ -53,6 +53,10 @@ abstract class CommonNodeIdentityMigrationDaoTest {
     private lateinit var dao: NodeInfoDao
     private lateinit var packetDao: PacketDao
 
+    // Ingestion hex-encodes device_id, and validDeviceIdOrNull requires that shape.
+    private val deviceIdA = "a1b2c3d4e5f60718a9b0c1d2e3f40516"
+    private val deviceIdB = "ffeeddccbbaa99887766554433221100"
+
     private val keyA = ByteArray(32) { 1 }.toByteString()
     private val keyB = ByteArray(32) { 2 }.toByteString()
 
@@ -169,12 +173,12 @@ abstract class CommonNodeIdentityMigrationDaoTest {
 
     @Test
     fun sameHardwareEraseMigratesAcrossKeyChange() = runTest {
-        createDb(myNodeEntity(oldNum, deviceId = "hw-A"))
+        createDb(myNodeEntity(oldNum, deviceId = deviceIdA))
         dao.upsert(nodeEntity(oldNum, keyA, notes = "keep me"))
         packetDao.insert(packet(oldNum, contactKey = "1!deadbeef"))
 
         val newNum = 300
-        val removed = dao.installConfig(myNodeEntity(newNum, deviceId = "hw-A"), listOf(nodeEntity(newNum, keyB)))
+        val removed = dao.installConfig(myNodeEntity(newNum, deviceId = deviceIdA), listOf(nodeEntity(newNum, keyB)))
 
         assertEquals(listOf(oldNum), removed)
         assertNull(dao.getNodeByNum(oldNum))
@@ -184,12 +188,12 @@ abstract class CommonNodeIdentityMigrationDaoTest {
 
     @Test
     fun differentHardwareVetoesHistoryMigration() = runTest {
-        createDb(myNodeEntity(oldNum, deviceId = "hw-A"))
+        createDb(myNodeEntity(oldNum, deviceId = deviceIdA))
         dao.upsert(nodeEntity(oldNum, keyA, notes = "old device"))
         packetDao.insert(packet(oldNum, contactKey = "1!deadbeef"))
 
         val newNum = 300
-        val removed = dao.installConfig(myNodeEntity(newNum, deviceId = "hw-B"), listOf(nodeEntity(newNum, keyB)))
+        val removed = dao.installConfig(myNodeEntity(newNum, deviceId = deviceIdB), listOf(nodeEntity(newNum, keyB)))
 
         assertEquals(listOf(oldNum), removed)
         assertNull(dao.getNodeByNum(oldNum), "stale self row is dropped even when history is not migrated")
@@ -263,15 +267,17 @@ abstract class CommonNodeIdentityMigrationDaoTest {
     }
 
     @Test
-    fun canonicalRenumberMigratesOnSingleUpsert() = runTest {
+    fun singleUpsertNeverMigratesEvenForCanonicalNum() = runTest {
         createDb(myNodeEntity(oldNum))
         val peerOldNum = 500
         dao.upsert(nodeEntity(peerOldNum, keyB, isFavorite = true))
 
+        // Mesh-time upserts are unauthenticated: even a canonical crc32(key) num must not migrate
+        // identity — that only happens through installConfig (trusted local link).
         val peerNewNum = keyB.crc32().toInt()
         dao.upsert(nodeEntity(peerNewNum, keyB))
 
-        assertNull(dao.getNodeByNum(peerOldNum))
-        assertTrue(assertNotNull(dao.getNodeByNum(peerNewNum)).node.isFavorite)
+        assertNotNull(dao.getNodeByNum(peerOldNum), "existing identity must be kept on mesh-time conflicts")
+        assertNull(dao.getNodeByNum(peerNewNum), "mesh-time claimant must not be inserted")
     }
 }

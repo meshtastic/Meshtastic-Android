@@ -246,7 +246,9 @@ class MeshConfigFlowManagerImpl(
         handshakeState.value = HandshakeState.ReceivingConfig(rawMyNodeInfo = myInfo)
         // Device id before node num: RadioControllerImpl gates its DB association on a non-null num,
         // so ordering this way guarantees the association never fires with a stale device id.
-        nodeManager.setMyDeviceId(myInfo.device_id.utf8().takeIf { it.isNotBlank() })
+        // Hex, not utf8: device_id is raw hardware bytes, and a lossy decode could collapse two
+        // distinct devices into the same id.
+        nodeManager.setMyDeviceId(myInfo.device_id.hex().takeIf { it.isNotBlank() })
         nodeManager.setMyNodeNum(myInfo.my_node_num)
         nodeManager.setFirmwareEdition(myInfo.firmware_edition)
         applyEventFirmwareNotificationDefaults(myInfo.firmware_edition)
@@ -344,7 +346,8 @@ class MeshConfigFlowManagerImpl(
                 hasWifi = metadata?.hasWifi == true,
                 channelUtilization = 0f,
                 airUtilTx = 0f,
-                deviceId = device_id.utf8(),
+                // Hex, not utf8: device_id is raw hardware bytes (see setMyDeviceId above).
+                deviceId = device_id.hex().ifEmpty { null },
                 pioEnv = pio_env.ifEmpty { null },
             )
         }

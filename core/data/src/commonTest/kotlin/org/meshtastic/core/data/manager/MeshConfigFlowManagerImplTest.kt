@@ -35,6 +35,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.encodeUtf8
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.HandshakeConstants
@@ -129,6 +130,25 @@ class MeshConfigFlowManagerImplTest {
         advanceUntilIdle()
 
         verify { nodeManager.setMyNodeNum(myNodeNum) }
+    }
+
+    @Test
+    fun `handleMyInfo hex-encodes raw device_id bytes losslessly`() = testScope.runTest {
+        // device_id is raw hardware bytes, not text: a lossy utf8 decode would collapse distinct
+        // ids into the same replacement-character string. 0xFF bytes are invalid UTF-8 on purpose.
+        val rawId = byteArrayOf(0xFF.toByte(), 0x00, 0xA1.toByte(), 0xB2.toByte()).toByteString()
+        manager.handleMyInfo(protoMyNodeInfo.copy(device_id = rawId))
+        advanceUntilIdle()
+
+        verify { nodeManager.setMyDeviceId("ff00a1b2") }
+    }
+
+    @Test
+    fun `handleMyInfo reports an absent device_id as null`() = testScope.runTest {
+        manager.handleMyInfo(protoMyNodeInfo.copy(device_id = okio.ByteString.EMPTY))
+        advanceUntilIdle()
+
+        verify { nodeManager.setMyDeviceId(null) }
     }
 
     @Test

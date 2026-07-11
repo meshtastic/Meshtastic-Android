@@ -77,23 +77,20 @@ interface NodeInfoDao {
         }
     }
 
-    /** Validates a new node before it is inserted into the database. */
+    /**
+     * Validates a new node before it is inserted into the database. This is the mesh-time (single upsert) path: anyone
+     * can broadcast a NodeInfo, so a known key arriving under a different num is conservatively mapped back to the
+     * existing identity — even when the num is the canonical crc32-derived one. Renumber migration happens only in
+     * [installConfig], where the entries come from the connected device's own vetted node DB over the local link.
+     */
     private suspend fun handleNewNodeUpsertValidation(newNode: NodeEntity): NodeEntity {
         // Check if the new node's public key (if present and not empty)
         // is already claimed by another existing node.
         if ((newNode.publicKey?.size ?: 0) > 0) {
             val nodeWithSamePK = findNodeByPublicKey(newNode.publicKey)
             if (nodeWithSamePK != null && nodeWithSamePK.num != newNode.num) {
-                // Firmware 2.8+ derives the node number from the public key (num = crc32(key)),
-                // so a known key arriving under its canonical num is that node renumbering itself
-                // (e.g. after a 2.7→2.8 upgrade), not impersonation — migrate the old identity.
-                return if (newNode.hasCanonicalNum()) {
-                    migrateNodeIdentity(from = nodeWithSamePK, to = newNode)
-                    newNode
-                } else {
-                    // This is a potential impersonation attempt.
-                    nodeWithSamePK
-                }
+                // This is a potential impersonation attempt.
+                return nodeWithSamePK
             }
         }
         // If no conflicting public key is found, or if the impersonation check is not active,
@@ -104,7 +101,8 @@ interface NodeInfoDao {
     /**
      * True when this node's num is the canonical pubkey-derived number introduced by firmware 2.8 (`my_node_num =
      * crc32(public_key)`, see NodeDB::createNewIdentity). A canonical num proves the num/key pairing was not chosen
-     * independently of the key, so a same-key-new-num sighting is a renumber rather than a spoof.
+     * independently of the key, so a same-key-new-num sighting is a renumber rather than a spoof. Only consulted for
+     * entries streamed by the connected device during a config install (trusted local link), never for mesh packets.
      */
     private fun NodeEntity.hasCanonicalNum(): Boolean {
         val key = publicKey ?: user.public_key

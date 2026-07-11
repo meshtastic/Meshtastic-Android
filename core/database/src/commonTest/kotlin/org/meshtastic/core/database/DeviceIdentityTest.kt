@@ -27,12 +27,17 @@ import kotlin.test.assertTrue
 class DeviceIdentityTest {
 
     @Test
-    fun validDeviceIdRejectsAbsentBlankAndPlaceholder() {
+    fun validDeviceIdRejectsAbsentBlankPlaceholderAndNonHexForms() {
         assertNull(validDeviceIdOrNull(null))
         assertNull(validDeviceIdOrNull(""))
         assertNull(validDeviceIdOrNull("   "))
         assertNull(validDeviceIdOrNull(MyNodeEntity.DEVICE_ID_UNKNOWN))
-        assertEquals("hw-A", validDeviceIdOrNull("hw-A"))
+        // Legacy app versions persisted a lossy utf8 decode of the raw bytes — such values can
+        // collide across devices and must be treated as absent, not compared.
+        assertNull(validDeviceIdOrNull("��legacy id"))
+        assertNull(validDeviceIdOrNull("abcdef")) // too short to be a real 16-byte id
+        val hexId = "a1b2c3d4e5f60718a9b0c1d2e3f40516"
+        assertEquals(hexId, validDeviceIdOrNull(hexId))
     }
 
     @Test
