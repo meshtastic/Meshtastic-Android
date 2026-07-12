@@ -384,6 +384,17 @@ jobs:
             rm -rf "$work"
           done
 
+      # CMP's TargetFormat.AppImage is jpackage's "app-image" — an unpacked
+      # directory, not a Linux .AppImage. Wrap it into a real AppImage so
+      # Linux users get a portable no-install binary alongside .deb/.rpm.
+      # This is what the libfuse2t64 install above is for: appimagetool is
+      # itself an AppImage (APPIMAGE_EXTRACT_AND_RUN is the no-FUSE fallback).
+      - name: Build AppImage from jpackage app-image
+        if: runner.os == 'Linux'
+        env:
+          APP_VERSION_NAME: ${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}
+        run: scripts/build-appimage.sh
+
       - name: List Desktop Binaries
         if: runner.os == 'Linux' || runner.os == 'macOS'
         run: ls -R desktopApp/build/compose/binaries/main-release
