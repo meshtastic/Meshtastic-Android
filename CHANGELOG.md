@@ -7,12 +7,7 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 <!-- UNRELEASED_START -->
 ## [Unreleased]
 
-### Unreleased (not yet in any build)
-
-#### 🛠️ Fixes
-* fix(agents): datadog-rum-investigator blocked by Datadog MCP UUID mount prefix by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6241
-
-### Internal (v2.8.0-internal.25)
+### Internal (v2.8.0-internal.26)
 Changes since [`v2.8.0-closed.8`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.0-closed.8):
 
 #### 🏗️ Features
@@ -23,6 +18,7 @@ Changes since [`v2.8.0-closed.8`](https://github.com/meshtastic/Meshtastic-Andro
 * fix(database): make completed cross-transport merges retry-idempotent by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6231
 * fix(database): route all one-shot DB writes through the merge drain barrier by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6233
 * fix(database): make the injected DiscoveryDao follow the active database by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6236
+* fix(agents): datadog-rum-investigator blocked by Datadog MCP UUID mount prefix by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6241
 #### 📝 Other Changes
 * refactor(di): drop the F-Droid ApiService stub, use the real API client in both flavors by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6226
 
