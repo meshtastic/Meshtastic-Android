@@ -27,7 +27,6 @@ permissions:
   statuses: write
   id-token: write
   attestations: write
-  actions: write # promote.yml dispatches winget-publish.yml; a called workflow's token is capped by the caller's grants
 
 jobs:
   determine-tags:
@@ -133,6 +132,18 @@ jobs:
   call-promote-workflow:
     if: ${{ !inputs.dry_run && inputs.channel != 'internal' }}
     needs: determine-tags
+    # promote.yml's token is capped by this job's grants, and a called
+    # workflow requesting more than its caller grants fails at startup —
+    # so this must cover promote.yml's declared workflow-level set, plus
+    # actions: write for its publish-workflow dispatch. Scoped to this job
+    # so call-release-workflow doesn't carry it.
+    permissions:
+      contents: write
+      pull-requests: write
+      statuses: write
+      id-token: write
+      attestations: write
+      actions: write
     uses: ./.github/workflows/promote.yml
     with:
       tag_name: ${{ needs.determine-tags.outputs.tag_to_process }}

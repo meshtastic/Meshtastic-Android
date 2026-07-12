@@ -63,7 +63,6 @@ permissions:
   statuses: write
   id-token: write
   attestations: write
-  actions: write # dispatch winget-publish.yml on production promotion
 
 jobs:
   prepare-build-info:
@@ -144,6 +143,15 @@ jobs:
   update-github-release:
     runs-on: ubuntu-24.04-arm
     needs: [ prepare-build-info, promote-release ]
+    # actions: write is scoped here — only this job's publish-workflow
+    # dispatch needs it, and the other jobs must not get it. Job-level
+    # permissions replace the workflow-level block, so the full set this
+    # job uses is listed.
+    permissions:
+      contents: write
+      pull-requests: write
+      statuses: write
+      actions: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v7.0.0
