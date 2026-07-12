@@ -914,6 +914,7 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="wait_for_bluetooth_duration_seconds">Esperar Bluetooth durante</string>
     <string name="wake_on_tap_or_motion">Despertar al tocar o al mover</string>
     <string name="warning">Advertencia</string>
+    <!-- WAYPOINT -->
     <string name="waypoint_delete">¿Eliminar punto de referencia?</string>
     <string name="waypoint_edit">Editar punto de referencia</string>
     <string name="waypoint_new">Nuevo punto de referencia</string>

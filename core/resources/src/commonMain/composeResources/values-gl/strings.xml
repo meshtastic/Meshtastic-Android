@@ -226,6 +226,7 @@
     <!-- USE -->
     <!-- USER -->
     <string name="via_mqtt">vía MQTT</string>
+    <!-- WAYPOINT -->
     <string name="waypoint_delete">Eliminar punto de ruta?</string>
     <string name="waypoint_edit">Editar punto de ruta</string>
     <string name="waypoint_new">Novo punto de ruta</string>

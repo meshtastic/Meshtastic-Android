@@ -1409,6 +1409,7 @@
     <string name="wait_for_bluetooth_duration_seconds">藍牙等待持續時間</string>
     <string name="wake_on_tap_or_motion">輕觸或移動喚醒</string>
     <string name="warning">警告</string>
+    <!-- WAYPOINT -->
     <string name="waypoint_delete">刪除航點？</string>
     <string name="waypoint_edit">編輯航點</string>
     <string name="waypoint_new">新建航點</string>

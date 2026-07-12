@@ -1627,6 +1627,7 @@
     <string name="wait_for_bluetooth_duration_seconds">等待蓝牙持续时间 </string>
     <string name="wake_on_tap_or_motion">点击或移动时唤醒屏幕</string>
     <string name="warning">警告</string>
+    <!-- WAYPOINT -->
     <string name="waypoint_delete">删除航点?</string>
     <string name="waypoint_edit">编辑航点</string>
     <string name="waypoint_new">新建航点</string>

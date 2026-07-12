@@ -661,6 +661,7 @@
     <string name="firmware_update_method_usb">USB-tiedonsiirto</string>
     <string name="firmware_update_method_wifi">WiFi OTA</string>
     <string name="firmware_update_missing_target">Laiteohjelmistoston tiedot eivät ole saatavilla tälle laitteelle.</string>
+    <string name="firmware_update_nightly">Kehitysversio</string>
     <string name="firmware_update_no_device">Ei laitetta kytkettynä</string>
     <string name="firmware_update_node_info_missing">Laitteen käyttäjätiedot puuttuvat.</string>
     <string name="firmware_update_not_found_in_release">Ei löytynyt firmwarea kohteelle %1$s julkaisusta.</string>
@@ -823,6 +824,7 @@
     <string name="label_long_turbo">Long Range - Turbo</string>
     <string name="label_medium_fast">Medium Range - Fast</string>
     <string name="label_medium_slow">Medium Range - Slow</string>
+    <string name="label_medium_turbo">Medium Range - Turbo</string>
     <string name="label_narrow_fast">Narrow - Fast</string>
     <string name="label_narrow_slow">Narrow - Slow</string>
     <string name="label_short_fast">Short Range - Fast</string>
@@ -1743,10 +1745,14 @@
     <string name="wait_for_bluetooth_duration_seconds">Bluetoothin odotusaika</string>
     <string name="wake_on_tap_or_motion">Herätä napautuksesta tai liikkeestä</string>
     <string name="warning">Varoitus</string>
+    <!-- WAYPOINT -->
     <string name="waypoint_delete">Poista reittipiste?</string>
     <string name="waypoint_edit">Muokkaa reittipistettä</string>
     <string name="waypoint_new">Uusi reittipiste</string>
     <string name="waypoint_received">Vastaanotettu reittipiste: %1$s</string>
+    <string name="waypoint_recipient_broadcast">Yleislähetys (kaikki radiot)</string>
+    <string name="waypoint_recipient_channel">Kanava %1$d</string>
+    <string name="waypoint_send_to">Lähetä</string>
     <string name="weight">Paino</string>
     <!-- WIFI -->
     <string name="wifi_config">WiFi:n asetukset</string>
