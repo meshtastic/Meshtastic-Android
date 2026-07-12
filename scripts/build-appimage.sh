@@ -102,12 +102,12 @@ EOF
 tools_dir="$(mktemp -d)"
 trap 'rm -rf "$tools_dir"' EXIT
 
-curl -fsSL --retry 5 --retry-delay 10 -o "${tools_dir}/appimagetool" \
+curl -fsSL --retry 5 --retry-delay 10 --connect-timeout 10 --max-time 300 -o "${tools_dir}/appimagetool" \
   "https://github.com/AppImage/appimagetool/releases/download/${APPIMAGETOOL_VERSION}/appimagetool-${ARCH}.AppImage"
 echo "${APPIMAGETOOL_SHA256}  ${tools_dir}/appimagetool" | sha256sum -c -
 chmod +x "${tools_dir}/appimagetool"
 
-curl -fsSL --retry 5 --retry-delay 10 -o "${tools_dir}/runtime" \
+curl -fsSL --retry 5 --retry-delay 10 --connect-timeout 10 --max-time 300 -o "${tools_dir}/runtime" \
   "https://github.com/AppImage/type2-runtime/releases/download/${RUNTIME_VERSION}/runtime-${ARCH}"
 echo "${RUNTIME_SHA256}  ${tools_dir}/runtime" | sha256sum -c -
 
