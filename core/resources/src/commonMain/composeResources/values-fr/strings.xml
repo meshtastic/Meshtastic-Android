@@ -572,6 +572,7 @@
     <string name="fixed_position">Position fixe</string>
     <string name="flip_screen">Inverser l'écran</string>
     <string name="for_more_information_see_our_privacy_policy">Pour plus d'informations, consultez notre politique de confidentialité.</string>
+    <!-- FORMAT -->
     <string name="free_memory">Mémoire libre</string>
     <string name="free_memory_description">Mémoire système disponible en octets</string>
     <string name="freq">Fréq</string>

@@ -336,6 +336,7 @@
     <string name="fixed_position">Posición Fijada</string>
     <string name="flip_screen">Girar la pantalla 180º</string>
     <string name="for_more_information_see_our_privacy_policy">Para más información, consulte nuestra política de privacidad.</string>
+    <!-- FORMAT -->
     <string name="free_memory">Memoria disponible</string>
     <string name="freq">Frecuencia</string>
     <string name="frequency_slot">Slot de frecuencia</string>

@@ -546,6 +546,7 @@
     <string name="fixed_position">固定位置</string>
     <string name="flip_screen">翻轉畫面</string>
     <string name="for_more_information_see_our_privacy_policy">如欲了解更多資訊，請查閱我們的隱私權政策。</string>
+    <!-- FORMAT -->
     <string name="free_memory">可用記憶體</string>
     <string name="free_memory_description">可用系統記憶體（位元組）</string>
     <string name="freq">頻率</string>

@@ -2,7 +2,7 @@
 title: Viestit ja kanavat
 parent: Käyttöopas
 nav_order: 3
-last_updated: 2026-07-08
+last_updated: 2026-07-11
 description: Lähetä ja vastaanota viestejä, hallitse kanavia, määritä salaus, hae keskusteluja sekä käytä pikachatia, reaktioita ja viestitoimintoja.
 aliases:
   - kanavat
@@ -123,6 +123,22 @@ Voit hakea koko keskusteluhistorian suoraan chat-näkymästä:
 ### Viestikuplat
 
 Viestit näkyvät chat-kuplina — lähetetyt viestit oikealla, vastaanotetut vasemmalla. Jokainen kupla näyttää lähettäjän, aikaleiman ja toimitustilan. Vastaukselliset viestit sisältävät alkuperäisen viestin esikatselun vastauksen yläpuolella.
+
+### Tekstin muotoilu
+
+Viestit tukevat kevyttä rivinsisäistä **Markdown**-muotoilua. Vastaanotetut viestit näyttävät muotoilun ilman Markdown-syntaksimerkkejä:
+
+| Kirjoita            | Syntaksi                      | Näkyy muodossa        |
+| ------------------- | ----------------------------- | --------------------- |
+| Lihavoitu           | **lihavoitu**                 | **lihavoitu**         |
+| Kursivoitu          | `*kursivoitu*`                | _kursivoitu_          |
+| Yliviivattu         | `~~yliviivattu~~`             | ~~yliviivattu~~       |
+| Rivinsisäinen koodi | `` `koodi` ``                 | tasalevyinen `koodi`  |
+| Linkki              | `[nimi](https://example.com)` | napautettava **nimi** |
+
+Kun kirjoitat viestiä, napauta viestikenttää ja kirjoita vähintään kolme merkkiä, niin kentän alle avautuu **muotoilutyökalurivi**. Valitse teksti ja napauta muotoilua lisätäksesi sen ympärille merkinnät (napauta uudelleen poistaaksesi ne). Jos tekstiä ei ole valittuna, muotoilu lisää tyhjän merkkiparin ja sijoittaa kohdistimen niiden väliin. Linkkipainike avaa valintaikkunan URL-osoitteen syöttämistä varten. Kirjoittaessasi luonnoksen muotoilu näkyy kentässä, vaikka taustalla oleva teksti säilyttää Markdown-merkit.
+
+> 💡 **Vinkki:** Muotoilu välitetään mesh-verkossa kirjaimellisina merkkeinä – samoina tavuina, jotka iOS lähettää. Sovellukset, jotka eivät tue Markdownia (vanhemmat sovellukset ja pelkkää laiteohjelmistoa käyttävät laitteet), näyttävät alkuperäiset `**`- ja `~~`-merkit. URL-osoitteet, sähköpostiosoitteet ja puhelinnumerot muutetaan edelleen automaattisesti linkeiksi riippumatta siitä, käytätkö Markdownia.
 
 ### Maininnat
 

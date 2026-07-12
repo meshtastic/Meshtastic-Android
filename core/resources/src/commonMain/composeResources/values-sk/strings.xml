@@ -170,6 +170,7 @@
     <string name="fixed_pin">Pevný PIN</string>
     <string name="fixed_position">Fixná Pozícia</string>
     <string name="flip_screen">Otoč Obrazovku</string>
+    <!-- FORMAT -->
     <!-- GEOFENCE -->
     <string name="good">Dobrý</string>
     <!-- GPIO -->

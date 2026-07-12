@@ -201,6 +201,7 @@
     <string name="firmware_update_failed">업데이트 실패</string>
     <string name="fixed_pin">고정 PIN</string>
     <string name="flip_screen">화면 뒤집기</string>
+    <!-- FORMAT -->
     <string name="freq">주파수</string>
     <string name="frequency_slot">주파수 슬롯</string>
     <string name="friendly_name">식별 이름</string>

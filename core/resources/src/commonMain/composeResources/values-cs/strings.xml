@@ -447,6 +447,7 @@
     <string name="fixed_position">Pevná poloha</string>
     <string name="flip_screen">Překlopit obrazovku</string>
     <string name="for_more_information_see_our_privacy_policy">Další informace naleznete v našich zásadách ochrany osobních údajů.</string>
+    <!-- FORMAT -->
     <string name="free_memory">Volná paměť</string>
     <string name="frequency_slot">Frekvenční slot</string>
     <string name="friendly_name">Přezdívka</string>

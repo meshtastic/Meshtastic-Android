@@ -307,12 +307,6 @@
       "title": "Update TDK InvenSense ICM42670P to v1.0.9",
       "page_url": "https://github.com/meshtastic/firmware/pull/10915",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10910",
-      "title": "Add Meshnology W12 (WiFi LoRa 32 V5) LR2021 board support",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10910",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     }
   ]
 }

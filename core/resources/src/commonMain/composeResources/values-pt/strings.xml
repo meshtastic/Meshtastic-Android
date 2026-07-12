@@ -201,6 +201,7 @@
     <string name="fixed_pin">PIN fixo</string>
     <string name="fixed_position">Posição fixa</string>
     <string name="flip_screen">Inverter ecrã</string>
+    <!-- FORMAT -->
     <string name="free_memory">Memória livre</string>
     <string name="freq">Freq</string>
     <string name="friendly_name">Nome amigável</string>

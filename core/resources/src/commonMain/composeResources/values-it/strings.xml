@@ -390,6 +390,7 @@
     <string name="fixed_position">Posizione Fissa</string>
     <string name="flip_screen">Capovolgi schermo</string>
     <string name="for_more_information_see_our_privacy_policy">Per ulteriori informazioni, consulta la nostra informativa sulla privacy.</string>
+    <!-- FORMAT -->
     <string name="free_memory">Memoria libera</string>
     <string name="freq">Freq</string>
     <string name="frequency_slot">Slot di Frequenza</string>

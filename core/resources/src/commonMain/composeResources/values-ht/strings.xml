@@ -93,6 +93,7 @@
     <string name="firmware_old">Mikwo lojisyèl radyo a twò ansyen pou li kominike ak aplikasyon sa a. Pou plis enfòmasyon sou sa, gade <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">gid enstalasyon mikwo lojisyèl nou an</a>.</string>
     <string name="firmware_too_old">Nouvo mizajou mikwo lojisyèl obligatwa.</string>
     <string name="firmware_update_failed">Mizajou echwe</string>
+    <!-- FORMAT -->
     <!-- GEOFENCE -->
     <string name="good">Bon</string>
     <!-- GPIO -->

@@ -163,6 +163,7 @@
     <string name="firmware_update_failed">Bijwerken mislukt</string>
     <string name="fixed_pin">Vaste PIN</string>
     <string name="flip_screen">Scherm omdraaien</string>
+    <!-- FORMAT -->
     <string name="freq">Freq</string>
     <string name="friendly_name">Weergavenaam</string>
     <string name="gateway">Gateway</string>

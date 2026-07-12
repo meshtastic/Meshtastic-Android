@@ -490,6 +490,7 @@
     <string name="fixed_position">Фіксована позиція</string>
     <string name="flip_screen">Перевернути екран</string>
     <string name="for_more_information_see_our_privacy_policy">Для додаткової інформації, перегляньте нашу політику конфіденційності.</string>
+    <!-- FORMAT -->
     <string name="free_memory">Вільна пам'ять</string>
     <string name="free_memory_description">Доступно системної пам'яті в байтах</string>
     <string name="freq">Част</string>

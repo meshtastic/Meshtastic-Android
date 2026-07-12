@@ -106,6 +106,7 @@
     <string name="firmware_old">Το λογισμικό του πομποδεκτη είναι πολύ παλιό για να μιλήσει σε αυτήν την εφαρμογή. Για περισσότερες πληροφορίες σχετικά με αυτό ανατρέξτε στον <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">οδηγό εγκατάστασης του Firmware</a>.</string>
     <string name="firmware_too_old">Απαιτείται ενημέρωση υλικολογισμικού.</string>
     <string name="firmware_update_failed">Αποτυχία ενημέρωσης</string>
+    <!-- FORMAT -->
     <!-- GEOFENCE -->
     <!-- GPIO -->
     <string name="green">Πράσινο</string>
