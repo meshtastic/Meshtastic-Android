@@ -143,6 +143,15 @@ jobs:
   update-github-release:
     runs-on: ubuntu-24.04-arm
     needs: [ prepare-build-info, promote-release ]
+    # actions: write is scoped here — only this job's publish-workflow
+    # dispatch needs it, and the other jobs must not get it. Job-level
+    # permissions replace the workflow-level block, so the full set this
+    # job uses is listed.
+    permissions:
+      contents: write
+      pull-requests: write
+      statuses: write
+      actions: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v7.0.0
@@ -166,6 +175,19 @@ jobs:
             --title "${{ inputs.release_name }} (${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }})" \
             --draft=false \
             --prerelease=${{ inputs.channel != 'production' }}
+
+      # The edit above is made with GITHUB_TOKEN, and GITHUB_TOKEN-caused
+      # events never start workflow runs — winget-publish.yml's `released`
+      # trigger will not fire from it. workflow_dispatch is exempt from that
+      # suppression, so dispatch it explicitly. Soft-fail: a winget hiccup
+      # must not block the changelog stamp or Discord notification.
+      - name: Dispatch winget publish
+        if: ${{ inputs.channel == 'production' }}
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.final_tag }}
+        run: gh workflow run winget-publish.yml --ref main -f "tag=$TAG"
 
       - name: Stamp CHANGELOG.md for release
         if: ${{ inputs.channel == 'production' }}
