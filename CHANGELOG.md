@@ -7,22 +7,7 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 <!-- UNRELEASED_START -->
 ## [Unreleased]
 
-### Internal (v2.8.0-internal.26)
-Changes since [`v2.8.0-closed.8`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.0-closed.8):
-
-#### 🏗️ Features
-* feat(map): send a waypoint as a DM or to a specific channel by @joeyleake in https://github.com/meshtastic/Meshtastic-Android/pull/6218
-* feat(firmware): nightly preview channel behind the hidden-features unlock by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6225
-#### 🛠️ Fixes
-* fix(database): migrate device identity across firmware 2.8 renumbering by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6228
-* fix(database): make completed cross-transport merges retry-idempotent by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6231
-* fix(database): route all one-shot DB writes through the merge drain barrier by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6233
-* fix(database): make the injected DiscoveryDao follow the active database by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6236
-* fix(agents): datadog-rum-investigator blocked by Datadog MCP UUID mount prefix by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6241
-#### 📝 Other Changes
-* refactor(di): drop the F-Droid ApiService stub, use the real API client in both flavors by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6226
-
-### Closed Beta (v2.8.0-closed.8)
+### Closed Beta (v2.8.0-closed.9)
 Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14):
 
 #### 🏗️ Features
@@ -72,6 +57,8 @@ Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/relea
 * feat(firmware): Confirm local firmware files before flashing by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6083
 * feat(messaging): split Conversations into collapsible Channels/DM sections by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6169
 * perf(mqtt): drop payload-less client-proxy downlinks before forwarding by @thebentern in https://github.com/meshtastic/Meshtastic-Android/pull/6171
+* feat(map): send a waypoint as a DM or to a specific channel by @joeyleake in https://github.com/meshtastic/Meshtastic-Android/pull/6218
+* feat(firmware): nightly preview channel behind the hidden-features unlock by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6225
 #### 🖥️ Desktop
 * fix(data): stale firmware/hardware caches — stop cancelling slow API refreshes, prune pulled releases, seed from newer bundles by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6060
 * fix(geofence): restrict crossing alerts to creator, add per-geofence opt-in by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6117
@@ -156,6 +143,11 @@ Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/relea
 * fix(database): force Room single-connection pool on all platforms by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6202
 * fix(dfu): harden Legacy nRF52 recovery after BLE stalls by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6201
 * fix(dfu): classify disconnects from failed Legacy writes by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6209
+* fix(database): migrate device identity across firmware 2.8 renumbering by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6228
+* fix(database): make completed cross-transport merges retry-idempotent by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6231
+* fix(database): route all one-shot DB writes through the merge drain barrier by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6233
+* fix(database): make the injected DiscoveryDao follow the active database by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6236
+* fix(agents): datadog-rum-investigator blocked by Datadog MCP UUID mount prefix by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6241
 #### 📝 Other Changes
 * refactor(takserver): commonize TAK SDK pipeline, drop redundant zstd/xpp3 deps by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5871
 * refactor(settings): remove Traffic Management module config by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5878
@@ -167,6 +159,7 @@ Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/relea
 * refactor(settings): replace SimpleDateFormat with kotlinx-datetime by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5992
 * refactor(car): drop dead FuzzyNodeNameResolver duplicate by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5994
 * refactor(qr): apply channel imports atomically via edit-settings transaction by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6170
+* refactor(di): drop the F-Droid ApiService stub, use the real API client in both flavors by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6226
 
 ## New Contributors
 * @LesterCheng made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/5752
