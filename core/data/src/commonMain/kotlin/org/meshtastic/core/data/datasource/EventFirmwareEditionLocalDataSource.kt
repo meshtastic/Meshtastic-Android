@@ -27,20 +27,23 @@ class EventFirmwareEditionLocalDataSource(
     private val dbManager: DatabaseProvider,
     private val dispatchers: CoroutineDispatchers,
 ) {
+    // Reads may use the direct accessor; writes go through withDb so they register with the cross-transport merge
+    // drain barrier (see DatabaseProvider).
     private val dao
         get() = dbManager.currentDb.value.eventFirmwareEditionDao()
 
     suspend fun getByEdition(edition: String): EventFirmwareEditionEntity? =
         withContext(dispatchers.io) { dao.getByEdition(edition) }
 
-    suspend fun upsertAll(editions: List<EventFirmwareEditionEntity>) =
-        withContext(dispatchers.io) { dao.upsertAll(editions) }
+    suspend fun upsertAll(editions: List<EventFirmwareEditionEntity>) {
+        withContext(dispatchers.io) { dbManager.withDb { it.eventFirmwareEditionDao().upsertAll(editions) } }
+    }
 
     // No-op on empty: `NOT IN ()` is always true in SQLite, so forwarding an empty list would wipe the whole table.
     // Callers only prune against a non-empty upstream payload; an empty list means "keep everything".
     suspend fun deleteNotIn(keep: List<String>) {
         if (keep.isEmpty()) return
-        withContext(dispatchers.io) { dao.deleteNotIn(keep) }
+        withContext(dispatchers.io) { dbManager.withDb { it.eventFirmwareEditionDao().deleteNotIn(keep) } }
     }
 
     suspend fun count(): Int = withContext(dispatchers.io) { dao.count() }
