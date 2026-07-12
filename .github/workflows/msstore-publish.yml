@@ -1,0 +1,119 @@
+name: Publish to Microsoft Store
+
+# The `released` type fires when a release is published as a full release OR
+# when an existing pre-release is flipped to a full release — the latter is
+# what promote.yml's production promotion does (`gh release edit
+# --prerelease=false` on the already-published release object). It never fires
+# for drafts or pre-releases, so internal/closed/open promotions are ignored.
+#
+# CAVEAT: promote.yml performs that edit with the workflow's own GITHUB_TOKEN,
+# and events caused by GITHUB_TOKEN never start workflow runs — so promote.yml
+# also dispatches this workflow explicitly (workflow_dispatch is exempt from
+# that suppression). The release trigger stays for manually-published releases;
+# workflow_dispatch doubles as the manual retry path.
+on:
+  release:
+    types: [released]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Production release tag to publish (e.g., v2.8.0)'
+        required: true
+        type: string
+
+# The submission happens entirely through the Partner Center API using the
+# MSSTORE_* secrets; this repo is only read (public release assets).
+permissions:
+  contents: read
+
+jobs:
+  msstore:
+    # Belt and braces for release events — `released` should already exclude
+    # these. workflow_dispatch has no release payload and passes through.
+    if: ${{ !github.event.release.prerelease && !github.event.release.draft }}
+    runs-on: ubuntu-latest
+    env:
+      # Secrets aren't readable in step `if:` expressions; skip cleanly until
+      # Partner Center is configured. Presence is gated on PRODUCT_ID alone so
+      # a half-configured secret set fails loudly in the configure step rather
+      # than silently skipping.
+      HAS_MSSTORE_CREDS: ${{ secrets.MSSTORE_PRODUCT_ID != '' && 'true' || 'false' }}
+    steps:
+      # The Store requires a versioned, immutable installer URL — per-tag
+      # GitHub release asset URLs are exactly that. Fails loudly if the
+      # release carries no MSI (e.g. the Windows build leg failed) rather
+      # than submitting nothing.
+      - name: Resolve MSI release asset URL
+        id: msi
+        if: env.HAS_MSSTORE_CREDS == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag || github.event.release.tag_name }}
+        run: |
+          URL=$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${TAG}" \
+            --jq '[.assets[] | select(.name | endswith(".msi"))][0].browser_download_url // empty')
+          if [ -z "$URL" ]; then
+            echo "::error::No .msi asset found on release ${TAG}"
+            exit 1
+          fi
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+
+      # Prerequisites (all manual, one-time):
+      #   1. A Partner Center account with the app already created and its
+      #      first submission live — the submission API can only UPDATE
+      #      existing Store products. The initial submission (listing copy,
+      #      screenshots, first MSI URL) must be made by hand in Partner
+      #      Center, and only with a Trusted-Signing-signed MSI: Partner
+      #      Center rejects Win32 installers whose binaries don't chain to a
+      #      Microsoft-trusted CA, so Windows signing is a hard prerequisite.
+      #   2. An Entra app registration added under Partner Center → Account
+      #      settings → User management → Microsoft Entra applications, with
+      #      the Manager role.
+      #   3. Repository secrets:
+      #        MSSTORE_TENANT_ID     – Entra tenant ID (linked to Partner Center)
+      #        MSSTORE_SELLER_ID     – Partner Center → Account settings → Seller ID
+      #        MSSTORE_PRODUCT_ID    – Partner Center app overview → Store Product ID
+      #        MSSTORE_CLIENT_ID     – app registration client ID
+      #        MSSTORE_CLIENT_SECRET – client secret for that app registration
+      # microsoft/store-submission is a thin wrapper over the stable Store
+      # submission API v1; it declares node16 and the runner transparently
+      # executes it on a current Node with a deprecation warning.
+      - name: Configure Store credentials
+        if: env.HAS_MSSTORE_CREDS == 'true'
+        uses: microsoft/store-submission@v1
+        with:
+          command: configure
+          type: win32
+          seller-id: ${{ secrets.MSSTORE_SELLER_ID }}
+          product-id: ${{ secrets.MSSTORE_PRODUCT_ID }}
+          tenant-id: ${{ secrets.MSSTORE_TENANT_ID }}
+          client-id: ${{ secrets.MSSTORE_CLIENT_ID }}
+          client-secret: ${{ secrets.MSSTORE_CLIENT_SECRET }}
+
+      # Full replace of the draft submission's package set (PUT semantics):
+      # the listing always points at exactly the current production MSI.
+      # Field values follow Microsoft's documented MSI example — silent
+      # install via msiexec flags; genericDocUrl/errorDetails are EXE-only.
+      - name: Update draft submission with new MSI
+        if: env.HAS_MSSTORE_CREDS == 'true'
+        uses: microsoft/store-submission@v1
+        with:
+          command: update
+          product-update: >-
+            {"packages":[{
+            "packageUrl":"${{ steps.msi.outputs.url }}",
+            "languages":["en-us"],
+            "architectures":["X64"],
+            "isSilentInstall":true,
+            "installerParameters":"/quiet /norestart",
+            "packageType":"msi"
+            }]}
+
+      # Fire-and-forget: this starts Store certification, which takes 1–3
+      # business days. Track progress in Partner Center; a rejection there
+      # does not surface here.
+      - name: Publish submission
+        if: env.HAS_MSSTORE_CREDS == 'true'
+        uses: microsoft/store-submission@v1
+        with:
+          command: publish

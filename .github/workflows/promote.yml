@@ -191,6 +191,15 @@ jobs:
           TAG: ${{ inputs.final_tag }}
         run: gh workflow run winget-publish.yml --ref main -f "tag=$TAG"
 
+      # Same GITHUB_TOKEN-suppression story as the winget dispatch above.
+      - name: Dispatch Microsoft Store publish
+        if: ${{ inputs.channel == 'production' }}
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.final_tag }}
+        run: gh workflow run msstore-publish.yml --ref main -f "tag=$TAG"
+
       - name: Stamp CHANGELOG.md for release
         if: ${{ inputs.channel == 'production' }}
         env:
