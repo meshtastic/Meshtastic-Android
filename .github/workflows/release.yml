@@ -510,6 +510,92 @@ jobs:
         with:
           subject-path: flatpak-sources.json
 
+  # Builds installable .flatpak bundles the same way verify-flatpak.yml does:
+  # the shared offline overlay manifest (scripts/verify-flatpak/desktop-offline.yaml)
+  # over the Flathub packaging repo, compiling the tag checkout with the
+  # combined offline sources. Sideloadable via `flatpak install ./<file>` —
+  # the runtime resolves from Flathub via --runtime-repo, and a later Flathub
+  # install of the same app id supersedes the sideload. Note: this job pulls
+  # the runtime/SDK from Flathub at build time, so Flathub availability is a
+  # release-cut dependency; a failed cut is retried as a fresh dispatch.
+  build-flatpak-bundle:
+    if: ${{ inputs.build_flatpak_src }}
+    runs-on: ${{ matrix.arch == 'aarch64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    needs: [prepare-build-info, release-flatpak-src]
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x86_64, aarch64]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7.0.0
+        with:
+          ref: ${{ inputs.tag_name }}
+          submodules: 'recursive'
+
+      - name: Download combined Flatpak sources
+        uses: actions/download-artifact@v8
+        with:
+          name: flatpak-sources
+
+      - name: Clone the Flathub packaging repo
+        run: |
+          git clone --depth 1 --recurse-submodules \
+            https://github.com/flathub/org.meshtastic.MeshtasticDesktop.git \
+            "$RUNNER_TEMP/org.meshtastic.MeshtasticDesktop"
+
+      - name: Wire overlay manifest + sources
+        run: |
+          cp scripts/verify-flatpak/desktop-offline.yaml \
+            "$RUNNER_TEMP/org.meshtastic.MeshtasticDesktop/org.meshtastic.MeshtasticDesktop.yaml"
+          cp flatpak-sources.json \
+            "$RUNNER_TEMP/org.meshtastic.MeshtasticDesktop/flatpak-sources.json"
+          rsync -a --delete \
+            --exclude='/build/' --exclude='/.gradle/' \
+            --exclude='*/build/' --exclude='*/.gradle/' \
+            --exclude='/.idea/' --exclude='/local.properties' \
+            ./ "$RUNNER_TEMP/org.meshtastic.MeshtasticDesktop/meshtastic-android/"
+
+      - name: Install flatpak-builder
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq flatpak flatpak-builder
+          flatpak remote-add --user --if-not-exists flathub \
+            https://dl.flathub.org/repo/flathub.flatpakrepo
+
+      - name: Build flatpak offline
+        working-directory: ${{ runner.temp }}/org.meshtastic.MeshtasticDesktop
+        run: |
+          flatpak-builder --user --repo=repo --install-deps-from=flathub \
+            --force-clean builddir org.meshtastic.MeshtasticDesktop.yaml
+
+      - name: Export versioned .flatpak bundle
+        working-directory: ${{ runner.temp }}/org.meshtastic.MeshtasticDesktop
+        env:
+          ARCH: ${{ matrix.arch }}
+          VERSION: ${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}
+        run: |
+          flatpak build-bundle repo \
+            "org.meshtastic.MeshtasticDesktop-${VERSION}-${ARCH}.flatpak" \
+            org.meshtastic.MeshtasticDesktop \
+            --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo
+
+      - name: Upload Flatpak bundle artifact
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: desktop-flatpak-${{ matrix.arch }}
+          path: ${{ runner.temp }}/org.meshtastic.MeshtasticDesktop/org.meshtastic.MeshtasticDesktop-*.flatpak
+          retention-days: 1
+          if-no-files-found: ignore
+
+      - name: Attest Flatpak bundle provenance
+        if: success()
+        uses: actions/attest-build-provenance@v4
+        with:
+          subject-path: ${{ runner.temp }}/org.meshtastic.MeshtasticDesktop/org.meshtastic.MeshtasticDesktop-*.flatpak
+
   github-release:
     if: ${{ !cancelled() && !failure() }}
     runs-on: ubuntu-24.04-arm
@@ -519,6 +605,7 @@ jobs:
       - release-fdroid
       - release-desktop
       - release-flatpak-src
+      - build-flatpak-bundle
     permissions:
       contents: write
       id-token: write
