@@ -19,6 +19,7 @@ package org.meshtastic.core.database.dao
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.database.DatabaseProvider
 import org.meshtastic.core.database.MeshtasticDatabase
@@ -27,6 +28,7 @@ import org.meshtastic.core.database.getInMemoryDatabaseBuilder
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 /**
  * Regression for #6235: the DAO Koin hands to `feature:discovery` used to be pinned to the injection-time database, so
@@ -65,11 +67,23 @@ class SwitchingDiscoveryDaoTest {
     @Test
     fun flowsRelatchOntoTheCurrentDb() = runTest {
         dao.insertSession(session(timestamp = 1))
-        assertEquals(1, dao.getAllSessions().first().size, "flow observes the active DB (A)")
 
-        provider.switchTo(dbB)
+        // One live collection end-to-end: the first emission (DB A's session) triggers the switch, and the SAME
+        // collector must then receive DB B's empty state. A delegate that resolved currentDb only at flow creation
+        // would never emit the empty list, and the test would fail on runTest's timeout.
+        var sawDbA = false
+        val relatched =
+            dao.getAllSessions()
+                .onEach { sessions ->
+                    if (sessions.isNotEmpty()) {
+                        sawDbA = true
+                        provider.switchTo(dbB)
+                    }
+                }
+                .first { it.isEmpty() }
 
-        assertEquals(0, dao.getAllSessions().first().size, "flow re-latches onto the new (empty) DB after switch")
+        assertTrue(sawDbA, "collector observed DB A's session before the switch")
+        assertEquals(0, relatched.size, "the same collector re-latched onto the new (empty) DB")
     }
 
     /** Minimal [DatabaseProvider] whose active DB the test can swap, mirroring a device/DB switch. */
