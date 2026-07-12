@@ -45,6 +45,7 @@ All providers are injected via `CompositionLocal` in `MainActivity.kt` and consu
 ```mermaid
 graph TB
   :feature:map[map]:::kmp-feature
+  :feature:map -.-> :core:testing
   :feature:map -.-> :core:data
   :feature:map -.-> :core:database
   :feature:map -.-> :core:datastore
@@ -55,7 +56,6 @@ graph TB
   :feature:map -.-> :core:resources
   :feature:map -.-> :core:ui
   :feature:map -.-> :core:di
-  :feature:map -.-> :core:testing
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
