@@ -305,6 +305,7 @@
     <!-- USE -->
     <!-- USER -->
     <string name="via_mqtt">Preko MQTT</string>
+    <!-- WAYPOINT -->
     <string name="waypoint_delete">Izbriši točko poti?</string>
     <string name="waypoint_edit">Uredi točko poti</string>
     <string name="waypoint_new">Nova točka poti</string>

@@ -620,6 +620,7 @@
     <string name="username">Kullanıcı adı</string>
     <string name="via_mqtt">MQTT yoluyla</string>
     <string name="voltage">Voltaj</string>
+    <!-- WAYPOINT -->
     <string name="waypoint_delete">Yer işaretini sil?</string>
     <string name="waypoint_edit">Yer işareti düzenle</string>
     <string name="waypoint_new">Yeni yer işareti</string>

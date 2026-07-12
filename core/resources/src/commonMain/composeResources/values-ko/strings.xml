@@ -610,6 +610,7 @@
     <string name="username">사용자명</string>
     <string name="via_mqtt">MQTT 경유</string>
     <string name="voltage">전압</string>
+    <!-- WAYPOINT -->
     <string name="waypoint_delete">웨이포인트 삭제?</string>
     <string name="waypoint_edit">웨이포인트 편집</string>
     <string name="waypoint_new">새 웨이포인트</string>

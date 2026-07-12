@@ -1123,6 +1123,7 @@
     <string name="wait_for_bluetooth_duration_seconds">Doba čekání na Bluetooth</string>
     <string name="wake_on_tap_or_motion">Probuzení klepnutím nebo pohybem</string>
     <string name="warning">Varování</string>
+    <!-- WAYPOINT -->
     <string name="waypoint_delete">Smazat waypoint?</string>
     <string name="waypoint_edit">Upravit waypoint</string>
     <string name="waypoint_new">Nový waypoint</string>

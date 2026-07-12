@@ -485,6 +485,7 @@
     <string name="username">Gebruikersnaam</string>
     <string name="via_mqtt">via MQTT</string>
     <string name="voltage">Spanning</string>
+    <!-- WAYPOINT -->
     <string name="waypoint_delete">Waypoint verwijderen?</string>
     <string name="waypoint_edit">Wijzig waypoint</string>
     <string name="waypoint_new">Nieuw waypoint</string>

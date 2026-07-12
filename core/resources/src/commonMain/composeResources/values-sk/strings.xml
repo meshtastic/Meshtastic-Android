@@ -495,6 +495,7 @@
     <string name="username">Používateľské meno</string>
     <string name="via_mqtt">cez MQTT</string>
     <string name="voltage">Napätie</string>
+    <!-- WAYPOINT -->
     <string name="waypoint_delete">Vymazať cieľový bod?</string>
     <string name="waypoint_edit">Editovať cieľový bod</string>
     <string name="waypoint_new">Nový cieľový bod</string>

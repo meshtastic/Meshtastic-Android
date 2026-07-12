@@ -210,6 +210,7 @@
     <!-- URL -->
     <!-- USE -->
     <!-- USER -->
+    <!-- WAYPOINT -->
     <string name="waypoint_delete">מחק נקודת ציון?</string>
     <string name="waypoint_edit">ערוך נקודת ציון</string>
     <string name="waypoint_new">נקודת ציון חדשה</string>

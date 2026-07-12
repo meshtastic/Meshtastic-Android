@@ -262,6 +262,7 @@
     <!-- USE -->
     <!-- USER -->
     <string name="via_mqtt">via MQTT</string>
+    <!-- WAYPOINT -->
     <string name="waypoint_delete">Esborrar punt de pas?</string>
     <string name="waypoint_edit">Editar punt de pas</string>
     <string name="waypoint_new">Nou punt de pas</string>

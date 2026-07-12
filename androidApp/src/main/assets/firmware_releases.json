@@ -189,6 +189,18 @@
   },
   "pullRequests": [
     {
+      "id": "10995",
+      "title": "feat: populate MyNodeInfo.device_id on all platforms",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10995",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
+      "id": "10994",
+      "title": "Remove UA_868 as obsolete",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10994",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
       "id": "10984",
       "title": "Draft: Restore XEdDSA material in keygen-excluded identity loads",
       "page_url": "https://github.com/meshtastic/firmware/pull/10984",
@@ -301,12 +313,6 @@
       "title": "Add Meshnology W12 (WiFi LoRa 32 V5) LR2021 board support",
       "page_url": "https://github.com/meshtastic/firmware/pull/10910",
       "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10908",
-      "title": "feat: Support Elecrow ThinkNode M9",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10908",
-      "zip_url": "+454.1 KB"
     }
   ]
 }

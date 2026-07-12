@@ -1162,6 +1162,7 @@
     <string name="voltage">Напрежение</string>
     <string name="wake_on_tap_or_motion">Събуждане при докосване или движение</string>
     <string name="warning">Предупреждение</string>
+    <!-- WAYPOINT -->
     <string name="waypoint_delete">Изтриване на пътна точка?</string>
     <string name="waypoint_edit">Редактиране на пътна точка</string>
     <string name="waypoint_new">Нова пътна точка</string>
