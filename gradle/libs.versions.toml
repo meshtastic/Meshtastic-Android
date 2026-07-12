@@ -87,6 +87,7 @@ dokka = "2.2.0"
 devtools-ksp = "2.3.10"
 firebase-crashlytics-gradle = "3.0.7"
 google-services-gradle = "4.5.0"
+markdown = "0.7.5"
 markdownRenderer = "0.43.0"
 okio = "3.17.0"
 uri-kmp = "0.0.21"
@@ -265,6 +266,7 @@ dd-sdk-android-timber = { module = "com.datadoghq:dd-sdk-android-timber", versio
 dd-sdk-android-trace = { module = "com.datadoghq:dd-sdk-android-trace", version.ref = "dd-sdk-android" }
 dd-sdk-android-trace-otel = { module = "com.datadoghq:dd-sdk-android-trace-otel", version.ref = "dd-sdk-android" }
 dokka-android-documentation-plugin = { module = "org.jetbrains.dokka:android-documentation-plugin", version.ref = "dokka" }
+jetbrains-markdown = { module = "org.jetbrains:markdown", version.ref = "markdown" }
 markdown-renderer = { module = "com.mikepenz:multiplatform-markdown-renderer", version.ref = "markdownRenderer" }
 markdown-renderer-m3 = { module = "com.mikepenz:multiplatform-markdown-renderer-m3", version.ref = "markdownRenderer" }
 markdown-renderer-android = { module = "com.mikepenz:multiplatform-markdown-renderer-android", version.ref = "markdownRenderer" }

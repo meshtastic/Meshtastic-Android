@@ -22,6 +22,7 @@ import com.android.tools.screenshot.PreviewTest
 import org.meshtastic.feature.messaging.EditQuickChatDialogPreview
 import org.meshtastic.feature.messaging.MessageInputPreview
 import org.meshtastic.feature.messaging.QuickChatItemPreview
+import org.meshtastic.feature.messaging.component.MessageItemMarkdownPreview
 import org.meshtastic.feature.messaging.component.MessageItemSignedPreview
 import org.meshtastic.feature.messaging.component.MessageItemStatusStatesPreview
 import org.meshtastic.feature.messaging.component.MessageSearchBarPreview
@@ -74,4 +75,11 @@ fun ScreenshotMessageItemSigned() {
 @Composable
 fun ScreenshotMessageItemStatusStates() {
     MessageItemStatusStatesPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotMessageItemMarkdown() {
+    MessageItemMarkdownPreview()
 }

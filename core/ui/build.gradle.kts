@@ -49,6 +49,7 @@ kotlin {
             api(libs.compose.multiplatform.ui.tooling.preview)
 
             implementation(libs.coil)
+            implementation(libs.jetbrains.markdown)
             implementation(libs.kermit)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.koin.compose.viewmodel)

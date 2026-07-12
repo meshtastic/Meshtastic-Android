@@ -711,6 +711,12 @@
     <string name="fixed_position">Fixed Position</string>
     <string name="flip_screen">Flip screen</string>
     <string name="for_more_information_see_our_privacy_policy">For more information, see our privacy policy.</string>
+    <!-- FORMAT -->
+    <string name="format_bold">Bold</string>
+    <string name="format_code">Code</string>
+    <string name="format_italic">Italic</string>
+    <string name="format_link">Link</string>
+    <string name="format_strikethrough">Strikethrough</string>
     <string name="fr_HT" translatable="false">Kreyòl ayisyen</string>
     <string name="free_memory">Free Memory</string>
     <string name="free_memory_description">Available system memory in bytes</string>
@@ -799,6 +805,10 @@
     <string name="info">Information</string>
     <string name="input_channel_url">Input Shared Channels URL</string>
     <string name="input_shared_contact_url">Input Shared Contact URL</string>
+    <string name="insert">Insert</string>
+    <string name="insert_link_message">Enter the URL for the selected text</string>
+    <string name="insert_link_title">Insert Link</string>
+    <string name="insert_link_url_hint">https://</string>
     <string name="installed_firmware_version">Currently Installed</string>
     <string name="internal">Internal</string>
     <string name="interval_always_on">Always On</string>
