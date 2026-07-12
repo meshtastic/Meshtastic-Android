@@ -24,6 +24,7 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.database.DatabaseProvider
 import org.meshtastic.core.database.createDatabaseDataStore
 import org.meshtastic.core.database.dao.DiscoveryDao
+import org.meshtastic.core.database.dao.SwitchingDiscoveryDao
 
 @Module
 @ComponentScan("org.meshtastic.core.database")
@@ -32,7 +33,11 @@ class CoreDatabaseModule {
     @Named("DatabaseDataStore")
     fun provideDatabaseDataStore() = createDatabaseDataStore("db-manager-prefs")
 
+    /**
+     * Long-lived consumers (discovery ViewModels, the scan engine) hold this DAO across device/DB switches, so hand
+     * them the switch-aware delegate — never a DAO pinned to the injection-time `currentDb.value`, which would keep
+     * reading a stale DB and crash once a cross-transport merge retires it. See [SwitchingDiscoveryDao].
+     */
     @Factory
-    fun provideDiscoveryDao(databaseProvider: DatabaseProvider): DiscoveryDao =
-        databaseProvider.currentDb.value.discoveryDao()
+    fun provideDiscoveryDao(databaseProvider: DatabaseProvider): DiscoveryDao = SwitchingDiscoveryDao(databaseProvider)
 }
