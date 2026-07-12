@@ -676,6 +676,7 @@
     <string name="fixed_position">固定位置</string>
     <string name="flip_screen">画面反転</string>
     <string name="for_more_information_see_our_privacy_policy">詳細については、プライバシーポリシーをご覧ください。</string>
+    <!-- FORMAT -->
     <string name="free_memory">空きメモリ</string>
     <string name="free_memory_description">利用可能なシステムメモリ（バイト単位）</string>
     <string name="freq">周波数</string>

@@ -696,6 +696,7 @@
     <string name="fixed_position">Määratud asukoht</string>
     <string name="flip_screen">Keera ekraani</string>
     <string name="for_more_information_see_our_privacy_policy">Lisateabe saamiseks vaata privaatsuspoliitikat.</string>
+    <!-- FORMAT -->
     <string name="free_memory">Vaba mälumaht</string>
     <string name="free_memory_description">Saadaolev süsteemimälu baitides</string>
     <string name="freq">Sagedus</string>

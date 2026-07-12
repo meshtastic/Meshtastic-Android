@@ -215,6 +215,7 @@
     <string name="firmware_update_failed">Güncelleme başarısız</string>
     <string name="fixed_pin">Sabit PIN</string>
     <string name="flip_screen">Ekranı Çevir</string>
+    <!-- FORMAT -->
     <string name="free_memory">Boş Hafıza</string>
     <string name="freq">Frekans</string>
     <string name="friendly_name">Arkadaşça isim</string>

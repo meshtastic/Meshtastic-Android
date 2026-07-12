@@ -2,7 +2,7 @@
 title: メッセージとチャンネル
 parent: User Guide
 nav_order: 3
-last_updated: 2026-07-08
+last_updated: 2026-07-11
 description: メッセージの送受信、チャンネルの管理、暗号化の設定、会話の検索、クイックチャット・リアクション・メッセージ操作の使い方を説明します。
 aliases:
   - channels
@@ -123,6 +123,22 @@ Meshtastic は、**チャンネルブロードキャスト**と**ダイレクト
 ### メッセージの吹き出し
 
 メッセージはチャットの吹き出しとして表示され、送信メッセージは右側、受信メッセージは左側に並びます。 各吹き出しには、送信者・タイムスタンプ・配信状況が表示されます。 返信付きのメッセージでは、応答の上に元メッセージの引用プレビューが表示されます。
+
+### Text Formatting
+
+Messages support lightweight inline **Markdown**. Received messages render the styling with the syntax characters removed:
+
+| 種別            | Syntax                         | Renders as           |
+| ------------- | ------------------------------ | -------------------- |
+| Bold          | `**bold**`                     | **bold**             |
+| Italic        | `*italic*`                     | _italic_             |
+| Strikethrough | `~~strike~~`                   | ~~strike~~           |
+| Inline code   | `` `code` ``                   | monospace `code`     |
+| Link          | `[label](https://example.com)` | a tappable **label** |
+
+When composing, focus the message field and type at least three characters to reveal a **formatting toolbar** below the input. Select text and tap a style to wrap it (tap again to remove it); with no selection, a style inserts an empty pair with the cursor between the markers. The link button opens a dialog to enter a URL. As you type, the draft styles live in the field while the underlying text keeps its Markdown characters.
+
+> 💡 **Tip:** Formatting is carried as literal characters on the mesh — the same bytes iOS sends. Clients that don't support Markdown (older apps, plain firmware clients) will show the raw `**`/`~~` characters. URLs, email addresses, and phone numbers are still auto-linked whether or not you use Markdown.
 
 ### メンション
 

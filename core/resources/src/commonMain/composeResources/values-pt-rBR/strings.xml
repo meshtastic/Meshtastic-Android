@@ -246,6 +246,7 @@
     <string name="firmware_version">Versão do firmware: %1$s</string>
     <string name="fixed_pin">PIN fixo</string>
     <string name="flip_screen">Inverter tela</string>
+    <!-- FORMAT -->
     <string name="free_memory">Memória Livre</string>
     <string name="freq">Freq</string>
     <string name="friendly_name">Nome amigável</string>

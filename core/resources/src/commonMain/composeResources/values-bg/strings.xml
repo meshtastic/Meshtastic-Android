@@ -470,6 +470,7 @@
     <string name="fixed_position">Фиксирана позиция</string>
     <string name="flip_screen">Обръщане на екрана</string>
     <string name="for_more_information_see_our_privacy_policy">За повече информация вижте нашата политика за поверителност.</string>
+    <!-- FORMAT -->
     <string name="free_memory">Свободна памет</string>
     <string name="free_memory_description">Налична системна памет в байтове</string>
     <string name="freq">Чест.</string>

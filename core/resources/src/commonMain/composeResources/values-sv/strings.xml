@@ -452,6 +452,7 @@
     <string name="fixed_position">Fast plats</string>
     <string name="flip_screen">Vänd skärmen</string>
     <string name="for_more_information_see_our_privacy_policy">För mer information, se vår integritetspolicy.</string>
+    <!-- FORMAT -->
     <string name="free_memory">Ledigt minne</string>
     <string name="free_memory_description">Tillgängligt systemminne som byte</string>
     <string name="freq">Frekv.</string>

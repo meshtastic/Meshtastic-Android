@@ -708,6 +708,12 @@
     <string name="fixed_position">Kiinteä sijainti</string>
     <string name="flip_screen">Käännä näyttö</string>
     <string name="for_more_information_see_our_privacy_policy">Lisätietoja saat tietosuojakäytännöstämme.</string>
+    <!-- FORMAT -->
+    <string name="format_bold">Lihavoitu</string>
+    <string name="format_code">Koodi</string>
+    <string name="format_italic">Kursivoitu</string>
+    <string name="format_link">Linkki</string>
+    <string name="format_strikethrough">Yliviivattu</string>
     <string name="free_memory">Vapaa muisti</string>
     <string name="free_memory_description">Käytettävissä oleva järjestelmämuisti tavuina</string>
     <string name="freq">Taajuus</string>
@@ -795,6 +801,10 @@
     <string name="info">Tiedot</string>
     <string name="input_channel_url">Anna jaettujen kanavien URL-osoite</string>
     <string name="input_shared_contact_url">Syötä jaetun yhteystiedon URL-osoite</string>
+    <string name="insert">Lisää</string>
+    <string name="insert_link_message">Syötä valitun tekstin URL-osoite</string>
+    <string name="insert_link_title">Lisää linkki</string>
+    <string name="insert_link_url_hint">https://</string>
     <string name="installed_firmware_version">Asennettu</string>
     <string name="internal">Sisäinen</string>
     <string name="interval_always_on">Aina päällä</string>

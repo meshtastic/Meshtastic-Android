@@ -326,6 +326,7 @@
     <string name="fixed_pin">Stały PIN</string>
     <string name="fixed_position">Położenie stałe</string>
     <string name="flip_screen">Odwróć ekran</string>
+    <!-- FORMAT -->
     <string name="frequency_slot">Slot częstotliwości</string>
     <string name="friendly_name">Przyjazna nazwa</string>
     <string name="gas_resistance">Rezystancja gazu</string>

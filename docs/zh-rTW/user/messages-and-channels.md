@@ -2,7 +2,7 @@
 title: 訊息與頻道
 parent: 使用者指南
 nav_order: 3
-last_updated: 2026-07-08
+last_updated: 2026-07-11
 description: Send and receive messages, manage channels, configure encryption, search conversations, and use quick chat, reactions, and message actions.
 aliases:
   - 頻道
@@ -123,6 +123,22 @@ You can search the full history of any conversation directly from the chat scree
 ### 訊息泡泡
 
 訊息以對話泡泡的形式顯示 — 已傳送的訊息在右側，收到的訊息在左側。 每個泡泡顯示傳送者、時間戳記及傳遞狀態。 含有回覆的訊息，會在回覆內容上方顯示原始訊息的引用預覽。
+
+### Text Formatting
+
+Messages support lightweight inline **Markdown**. Received messages render the styling with the syntax characters removed:
+
+| 類型            | Syntax                         | Renders as           |
+| ------------- | ------------------------------ | -------------------- |
+| Bold          | `**bold**`                     | **bold**             |
+| Italic        | `*italic*`                     | _italic_             |
+| Strikethrough | `~~strike~~`                   | ~~strike~~           |
+| Inline code   | `` `code` ``                   | monospace `code`     |
+| Link          | `[label](https://example.com)` | a tappable **label** |
+
+When composing, focus the message field and type at least three characters to reveal a **formatting toolbar** below the input. Select text and tap a style to wrap it (tap again to remove it); with no selection, a style inserts an empty pair with the cursor between the markers. The link button opens a dialog to enter a URL. As you type, the draft styles live in the field while the underlying text keeps its Markdown characters.
+
+> 💡 **Tip:** Formatting is carried as literal characters on the mesh — the same bytes iOS sends. Clients that don't support Markdown (older apps, plain firmware clients) will show the raw `**`/`~~` characters. URLs, email addresses, and phone numbers are still auto-linked whether or not you use Markdown.
 
 ### Mentions
 

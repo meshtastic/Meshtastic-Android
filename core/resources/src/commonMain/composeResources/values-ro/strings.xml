@@ -449,6 +449,7 @@
     <string name="fixed_position">Poziție fixă</string>
     <string name="flip_screen">Rotire ecran</string>
     <string name="for_more_information_see_our_privacy_policy">Pentru mai multe informații, consultați politica noastră de confidențialitate.</string>
+    <!-- FORMAT -->
     <string name="free_memory">Memorie Liberă</string>
     <string name="freq">Frecvență</string>
     <string name="frequency_slot">Slot pentru frecvenţă</string>

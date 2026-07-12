@@ -593,6 +593,7 @@
     <string name="fixed_position">Fester Standort</string>
     <string name="flip_screen">Bildschirm spiegeln</string>
     <string name="for_more_information_see_our_privacy_policy">Weitere Informationen finden Sie in unserer Datenschutzrichtlinie.</string>
+    <!-- FORMAT -->
     <string name="free_memory">Freier Speicher</string>
     <string name="free_memory_description">Verfügbarer Systemspeicher in Bytes</string>
     <string name="freq">Frequenz</string>

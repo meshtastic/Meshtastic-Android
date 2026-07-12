@@ -96,6 +96,7 @@
     <string name="firmware_old">Tá an firmware raidió ró-aoiseach chun cumarsáid a dhéanamh leis an aip seo. Chun tuilleadh eolais a fháil, féach <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">ár gCúnamh Suiteála Firmware</a>.</string>
     <string name="firmware_too_old">Nuashonrú teastaíonn ar an gcórais.</string>
     <string name="firmware_update_failed">Nuacht nuashonraithe</string>
+    <!-- FORMAT -->
     <!-- GEOFENCE -->
     <string name="good">Maith</string>
     <!-- GPIO -->

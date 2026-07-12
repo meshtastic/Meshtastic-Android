@@ -677,6 +677,7 @@
     <string name="fixed_position">固定位置</string>
     <string name="flip_screen">翻转屏幕</string>
     <string name="for_more_information_see_our_privacy_policy">欲了解更多信息，请参阅我们的隐私政策。</string>
+    <!-- FORMAT -->
     <string name="free_memory">可用内存</string>
     <string name="free_memory_description">可用系统内存</string>
     <string name="freq">频率</string>
