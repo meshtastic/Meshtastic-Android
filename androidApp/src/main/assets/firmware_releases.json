@@ -189,6 +189,12 @@
   },
   "pullRequests": [
     {
+      "id": "10996",
+      "title": "Reduce flash usage of GPS variants by deferring unused GeoCoord conversions",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10996",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+    },
+    {
       "id": "10995",
       "title": "feat: populate MyNodeInfo.device_id on all platforms",
       "page_url": "https://github.com/meshtastic/firmware/pull/10995",
@@ -199,6 +205,12 @@
       "title": "Remove UA_868 as obsolete",
       "page_url": "https://github.com/meshtastic/firmware/pull/10994",
       "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
+      "id": "10990",
+      "title": "Auto-enable nanopb PB_NO_ERRMSG when DEBUG_MUTE is set",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10990",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     },
     {
       "id": "10984",
@@ -301,6 +313,12 @@
       "title": "Firmware for Seeed XIAO ESP32C6 and WIO-SX1262 for XIAO",
       "page_url": "https://github.com/meshtastic/firmware/pull/10917",
       "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
+      "id": "10915",
+      "title": "Update TDK InvenSense ICM42670P to v1.0.9",
+      "page_url": "https://github.com/meshtastic/firmware/pull/10915",
+      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
     }
   ]
 }

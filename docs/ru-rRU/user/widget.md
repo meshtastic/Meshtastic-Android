@@ -1,46 +1,46 @@
 ---
-title: Home Screen Widget
+title: Виджет на главный экран
 parent: Руководство пользователя
 nav_order: 20
 last_updated: 2026-06-25
-description: Add the Meshtastic home screen widget to glance at your connected radio's local stats without opening the app.
+description: Добавь виджет главного экрана Meshtastic, чтобы видеть местную статистику своего подключенного радио без открытия приложения.
 aliases:
   - widget
   - home-screen-widget
   - local-stats-widget
 ---
 
-# Home Screen Widget
+# Виджет на главный экран
 
-On Android, Meshtastic provides a home screen **widget** that shows live local statistics from your connected radio at a glance — no need to open the app.
+На Android, Meshtastic предоставляет **виджет** главного экрана, который показывает статистику по живым локальным каналам с подключенного устройства без необходимости открывать приложение.
 
-## What It Shows
+## Что он покажет
 
-The widget displays the **connected radio's** current local stats:
+Виджет показывает текущую локальную статистику **подключённого радиоустройства**:
 
-- **Battery** — the radio's battery level, or _Powered_ when running on external power
-- **ChUtil** — channel utilization (how busy the LoRa channel is, as a percentage)
-- **AirUtil** — airtime utilization (how much of the duty cycle your radio is transmitting)
-- **Traffic** — packets transmitted / received, and duplicates seen
-- **Relays** — packets relayed and relay cancellations (shown when the radio is relaying)
+- **Батарея** — уровень заряда батареи радиоустройства или _Питание от сети_, когда работает от внешнего источника
+- **ChUtil** — использование канала (насколько занят канал LoRa, в процентах)
+- **AirUtil** — использование времени передачи (сколько рабочих циклов передаёт вашего радиоустройство)
+- **Трафик** — пакеты, переданные / полученные, и дубликаты
+- **Relays** — пересылаемые пакеты и отмены пересылки (показаны, когда радио действует как ретранслятор)
 
-Tap the widget to open the app, or use its refresh control to request fresh stats.
+Нажми на виджет, чтобы открыть приложение, или используй его кнопку обновления для запроса свежей статистики.
 
-> 💡 **Tip:** The values reflect the radio you are currently connected to. If the app isn't connected to a radio, the widget shows the last known stats until it reconnects.
+> 💡 **Совет:** значения отражают радиоустройство, к которому ты подключен в данный момент. Если приложение не подключено к радиоустройству, виджет покажет последнюю известную статистику до переподключения.
 
-## Adding the Widget
+## Добавление виджета
 
-1. Long-press an empty area of your Android home screen.
-2. Tap **Widgets**.
-3. Find **Meshtastic** in the list and drag the **Local Stats** widget to your home screen.
-4. Resize it as needed — the layout adapts to the available space.
+1. Долгое нажатие на пустой области твоего рабочего стола Android.
+2. Нажми **Виджет**.
+3. Найди **Meshtastic** в списке и перетащи виджет **Local Stats** на домашний экран.
+4. Изменение размера по мере необходимости — макет адаптируется к доступному пространству.
 
-> ⚠️ **Note:** The widget is Android-only. It is not available on the Desktop or iOS builds.
+> ⚠️ **Примечание:** Виджет только для Android. Он недоступен для ПК или сборках для iOS.
 
 ## Связанные темы
 
-- [Node Metrics](node-metrics) — the full Signal Quality and Local Stats history inside the app
-- [Connections](connections) — connect to a radio so the widget has stats to show
-- [Discovery](discovery) — channel and airtime utilization across the mesh
+- [Метрики нод](node-metrics) — полная статистика сигнала и локальная статистика внутри приложения
+- [Подключения](connections) — подключиться к радиоустройству, чтобы виджет показывал статистику
+- [Discovery](discovery) — использование канала и времени передачи через сеть
 
 ---

@@ -17,11 +17,11 @@ Meshtastic интегрируется с Android Auto, так что ты мож
 
 > ⚠️ **Примечание:** поддержка Android Auto доступна только на **Android-сборках от Google**. Она не включена в сборку F-Droid и недоступна на ПК или iOS.
 
-> ℹ️ **What ships today:** The Google Play build provides **notification-only** car messaging — incoming messages are announced on the head unit and you reply through its notification controls. The full tabbed **Messages / Nodes / Status** experience described below is a beta built on the Android Car App Library (Google's templated car UI is currently restricted to Closed/Internal Play tracks), so it appears only in builds compiled with `-PenableCarTemplates=true`. The rest of this page documents that beta experience.
+> ℹ️ **Что сегодня нового:** Сборка для Google Play предоставляет **только уведомления** для сообщений в машине — входящие сообщения объявляются на головном устройстве, а ответ даётся через его элементы управления уведомлениями. Полная вкладка **Сообщения / Ноды / Статус**, описанная ниже, является бета-версией, построенной на библиотеке Android Car App (шаблонный интерфейс Google для автомобилей в настоящее время ограничен закрытыми/внутренними треками Play), поэтому он появляется только в сборках, скомпилированных с `-PenableCarTemplates=true`. Остальная часть этой страницы документирует бета-тестирование.
 
 ## Обзор
 
-When your phone is connected to an Android Auto head unit (or the Desktop Head Unit emulator used for development), the beta build presents Meshtastic as a messaging app built with the Android Car App Library, with a tabbed Home screen optimized for driving-safe, glanceable use:
+Когда твой телефон подключен к головному устройству Android Auto (или к эмулятору Desktop Head Unit, используемому для разработки), бета-версия показывает Meshtastic как приложение для обмена сообщениями, созданное с помощью библиотеки Android Car App, с вкладочной главной страницей, оптимизированной для безопасного вождения и удобного быстрого просмотра:
 
 - **Сообщения** — недавние разговоры с возможностью чтения и ответов без рук.
 - **Узлы** — список нод сети с подробным просмотром каждой ноды.
