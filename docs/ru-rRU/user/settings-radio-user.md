@@ -74,7 +74,7 @@ aliases:
 | ~~Long Slow~~      | ~30 км  | 0.18 кб/с | −20 дБ                   | ⚠️ **Устарел** — всё ещё доступен для выбора, но может быть удален в будущих версиях прошивки                     |
 | ~~Very Long Slow~~ | ~40+ км | 0.09 кб/с | −20 дБ                   | ⚠️ **Устарел** — всё ещё доступен для выбора, но может быть удален в будущих версиях прошивки                     |
 
-> ℹ️ **Note:** This table uses the common short names. In the app's preset dropdown they read as **Short Range - Fast**, **Long Range - Fast**, **Lite - Fast**, **Narrow - Fast**, and so on.
+> i **Примечание:** В этой таблице используются общие короткие имена. В выпадающем меню пресетов приложения они читаются как **Short Range - Fast**, **Long Range - Fast**, **Lite - Fast**, **Narrow - Fast** и так далее.
 
 #### Выбор предустановки модема
 

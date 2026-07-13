@@ -16,14 +16,14 @@ aliases:
 
 Инструменты обнаружения помогают понять, **как** твоя mesh-сетевая структура соединена — какие ноды могут слышать друг друга, по каким путям проходят сообщения и где существуют узкие места или слабые звенья.
 
-The app offers two complementary approaches:
+Приложение предлагает два дополнительных подхода:
 
 - **Local Mesh Discovery (Scanner)** — an automated mode that cycles your connected radio through different LoRa presets, listens on each, and ranks which preset performs best at your location.
 - **Manual exploration** — traceroute, Neighbor Info, and the node list, which you can use at any time to investigate specific paths and topology.
 
 ---
 
-## Local Mesh Discovery (Scanner)
+## Обнаружение локальной сети (Сканер)
 
 Local Mesh Discovery is a dedicated scanning mode that helps you find the best LoRa modem preset for your location and see which nodes are active on each preset. It cycles your connected radio through one or more presets you choose, listens (or "dwells") on each one for a set time to collect packets, then analyzes and ranks the results.
 
@@ -31,15 +31,15 @@ Open it from **Settings → Local Mesh Discovery**.
 
 > ⚠️ **Note:** Discovery temporarily changes your radio's LoRa settings while it scans, then restores your original configuration when it finishes. Your device must be connected to run a scan.
 
-### Setting Up a Scan
+### Настройка сканирования
 
 Before starting, configure these controls:
 
-| Управление             | Описание                                                                                                                                                                                                                       |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **LoRa preset picker** | Select one or more presets to scan. Discovery dwells on each selected preset in turn.                                                                                                          |
-| **Dwell time**         | Time to listen on each preset. Choose from 1, 5, 15, 30, 45, 60, 90, 120, or 180 minutes. Longer dwell times collect more packets and give a clearer picture, but take longer. |
-| **Keep screen awake**  | Optional toggle that prevents the screen from sleeping during a long scan.                                                                                                                                     |
+| Управление                  | Описание                                                                                                                                                                                                                                                    |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| \*\*Выбор пресета LoRa \*\* | Select one or more presets to scan. Discovery dwells on each selected preset in turn.                                                                                                                                       |
+| **Dwell time**              | Время послушки каждого пресета. Выбери один из вариантов: 1, 5, 15, 30, 45, 60, 90, 120 или 180 минут. Longer dwell times collect more packets and give a clearer picture, but take longer. |
+| **Не выключать экран**      | Optional toggle that prevents the screen from sleeping during a long scan.                                                                                                                                                                  |
 
 The **Start** button stays disabled — with an explanation of why — until the scan can run. Common reasons it's disabled:
 
@@ -47,13 +47,13 @@ The **Start** button stays disabled — with an explanation of why — until the
 - **No presets** have been selected to scan.
 - The selected preset uses **2.4 GHz**, which your hardware doesn't support.
 
-### Live Progress
+### Текущий прогресс
 
 While a scan runs, Discovery shows its current stage:
 
-| Stage                                                 | What's happening                                                                                       |
+| Этап                                                  | What's happening                                                                                       |
 | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| **Preparing**                                         | Saving your current configuration and getting ready to scan.                           |
+| **Подготовка**                                        | Saving your current configuration and getting ready to scan.                           |
 | **Shifting to \<preset\>** | Switching the radio to the next preset to test.                                        |
 | **Reconnecting**                                      | Re-establishing the connection after the preset change.                                |
 | **Dwell**                                             | Listening on the current preset to collect packets, with a countdown to the next step. |

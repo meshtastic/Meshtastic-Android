@@ -14,7 +14,7 @@ description: Как приложение отображает температу
 
 ## Как это работает
 
-Meshtastic radios always transmit data in **metric units** (meters, °C, m/s, hPa, etc.). When the app receives this data, it converts and displays values in whatever unit system your device's locale specifies.
+Радиостанции Meshtastic всегда передают данные в **метрических единицах** (метры, °C, м/с, гПа и т.д.). Когда приложение получает эти данные, оно преобразует их и показывает значения в той системе единиц, которую задает локаль устройства.
 
 На Android твои предпочтения единиц измерений определяются настройками системы **Язык и регион**. На настольном компьютере (JVM) приложение использует стандартную `Locale` JVM.
 
@@ -115,13 +115,13 @@ Meshtastic radios always transmit data in **metric units** (meters, °C, m/s, hP
 2. Измените свои предпочтения в **Регион** или **Единицы измерения**
 3. Вернуться к Meshtastic — значения обновляются немедленно
 
-> 💡 **Tip:** All measurement formatting is handled centrally and respects your platform's locale, so units stay consistent everywhere in the app.
+> 💡 **Совет:** Все форматирование производится в централизованном порядке и уважает локаль платформы, поэтому единицы измерения всегда в приложении.
 
 ## Связанные темы
 
 - [Метрики ноды](node-metrics) — здесь отображаются температура, расстояние и значения датчиков
 - [Телеметрия и датчики](telemetry-and-sensors) — датчики, производящие эти измерения
-- [Measurement & Formatting](../developer/measurement) — developer reference for the formatting utilities
+- [Измерение и форматирование](../developer/measurement) — ссылка на разработчика утилит форматирования
 - [Настройки — Радио и Пользователь](settings-radio-user) — настройка региона, управляющая выбором единиц
 
 ---

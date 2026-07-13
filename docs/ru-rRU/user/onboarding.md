@@ -65,10 +65,10 @@ Meshtastic также использует местоположение для:
 Уведомления оповещают тебя о:
 
 - Входящие сообщения из каналов и личных сообщений
-- New nodes joining the mesh
-- Low battery on a remote node
+- Новые ноды, присоединившиеся к сети
+- Низкий заряд на удаленной ноде
 
-> 💡 **Tip:** You can fine-tune notification preferences later in Android system settings — the app creates a separate notification channel per category (plus a few internal ones, like the background service), so you can enable or silence them individually.
+> 💡 **Совет:** Ты можешь тонко настроить уведомления позже в настройках системы — приложение создает отдельный канал уведомлений по категориям (плюс несколько внутренних, как фоновая служба), поэтому ты можешь включить или заглушить их по отдельности.
 
 ### Разрешение на критические уведомления
 
