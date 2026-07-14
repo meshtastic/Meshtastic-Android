@@ -99,6 +99,7 @@
     <string name="app_functions_get_node_details">Получить сведения о ноде</string>
     <string name="app_functions_get_node_list">Получить список нод</string>
     <string name="app_functions_get_recent_messages">Получать последние сообщения</string>
+    <string name="app_functions_get_unread_summary">Получить сводку о непрочитанных</string>
     <string name="app_functions_master_summary">Позвольте системным ИИ-ассистентам (например, Gemini) обнаруживать и использовать функции сети</string>
     <string name="app_functions_master_toggle">Разрешить ИИ доступ</string>
     <string name="app_functions_read_section">Функции чтения</string>
@@ -147,6 +148,7 @@
     <string name="bonding_failed_retry">Сопряжение не завершилось. Попробуй снова.</string>
     <string name="bottom_nav_settings">Настройки</string>
     <string name="broadcast_interval">Период рассылки</string>
+    <string name="busy_noise_floor">Busy floor</string>
     <string name="button_gpio">Кнопка GPIO</string>
     <string name="buzzer_gpio">Зуммер GPIO</string>
     <string name="calculating">Вычисление…</string>
@@ -330,6 +332,10 @@
     <string name="debug_store_logs_title">Хранить журналы mesh-сети</string>
     <string name="debug_tab_app_logs">Журналы приложения</string>
     <string name="debug_tab_packets">Пакеты</string>
+    <string name="deep_link_connect_message">Ссылка запрашивает у этого приложения подключение к устройству по адресу %1$s. Продолжай только если доверяешь источнику ссылки.</string>
+    <string name="deep_link_connect_title">Подключиться к этому устройству?</string>
+    <string name="deep_link_disconnect_message">Ссылка просит это приложение отключиться от устройства. Продолжай только если доверяешь источнику ссылки.</string>
+    <string name="deep_link_disconnect_title">Отключиться от устройства?</string>
     <string name="default_">По умолчанию</string>
     <!-- DELETE -->
     <string name="delete">Удалить</string>
@@ -357,6 +363,9 @@
     <string name="desktop_tray_quit">Выход</string>
     <string name="desktop_tray_show">Показать Meshtastic</string>
     <string name="desktop_tray_tooltip">Meshtastic Desktop</string>
+    <string name="desktop_update_available_message">Meshtastic Desktop %1$s готов к загрузке.</string>
+    <string name="desktop_update_available_title">Доступно обновление приложения</string>
+    <string name="desktop_update_download">Загрузить обновление %1$s</string>
     <string name="details">Подробности</string>
     <string name="detection_sensor">Датчик обнаружения</string>
     <string name="detection_sensor_config">Настройка датчика обнаружения</string>
@@ -397,11 +406,13 @@
     <string name="discovery_delete_session">Удалить сессию</string>
     <string name="discovery_delete_session_confirm">Ты уверен что хочешь удалить эту сессию обнаружения? Это действие нельзя отменить.</string>
     <string name="discovery_dwell_minutes">%1$d минут</string>
+    <string name="discovery_dwell_progress">Рассчитываю на %1$s, %2$s осталось</string>
     <string name="discovery_dwell_time">Время задержки</string>
     <string name="discovery_dwell_time_description">Время послушки каждого пресета</string>
     <string name="discovery_empty_history">Пока сессий обнаружения нет</string>
     <string name="discovery_export_report">Экспортировать отчет</string>
     <string name="discovery_history">История обнаружения</string>
+    <string name="discovery_interrupted_scan_restored">Восстановлено радиоустройство до домашней конфигурации (%1$s) после прерванного обнаружения</string>
     <string name="discovery_keep_screen_awake">Не гасить экран</string>
     <string name="discovery_keep_screen_awake_description">Предотвращает потерю радиопакетов в режиме Doze на Android во время долгих сканирований. Рекомендуется.</string>
     <string name="discovery_local_mesh">Локальное обнаружение сети</string>
@@ -437,6 +448,7 @@
     <string name="discovery_stat_date">Дата</string>
     <string name="discovery_stat_direct">Прямой</string>
     <string name="discovery_stat_duplicate_packets">Дублированные пакеты</string>
+    <string name="discovery_stat_dwelling_on">Рассчитываю на %1$s</string>
     <string name="discovery_stat_failure_rate">Уровень неудачи</string>
     <string name="discovery_stat_home_preset">Домашний пресет</string>
     <string name="discovery_stat_mesh">Меш</string>
@@ -651,6 +663,7 @@
     <string name="firmware_update_method_usb">Передача файлов через USB</string>
     <string name="firmware_update_method_wifi">WiFi OTA</string>
     <string name="firmware_update_missing_target">Информация о целевой прошивке недоступна для этого устройства.</string>
+    <string name="firmware_update_nightly">Ночные сборки</string>
     <string name="firmware_update_no_device">Нет подключенных устройств</string>
     <string name="firmware_update_node_info_missing">Отсутствует информация о пользователе ноды.</string>
     <string name="firmware_update_not_found_in_release">Не удалось найти в релизе прошивку для %1$s.</string>
@@ -697,6 +710,11 @@
     <string name="flip_screen">Повернуть экран</string>
     <string name="for_more_information_see_our_privacy_policy">Дополнительная информация доступна в нашей политике конфиденциальности.</string>
     <!-- FORMAT -->
+    <string name="format_bold">Полужирный</string>
+    <string name="format_code">Код</string>
+    <string name="format_italic">Курсив</string>
+    <string name="format_link">Ссылка</string>
+    <string name="format_strikethrough">Зачёркнутый</string>
     <string name="free_memory">Свободная память</string>
     <string name="free_memory_description">Доступная оперативная память в байтах</string>
     <string name="freq">Частота</string>
@@ -784,6 +802,10 @@
     <string name="info">Информация</string>
     <string name="input_channel_url">Введи URL общих каналов</string>
     <string name="input_shared_contact_url">Введите URL контакта</string>
+    <string name="insert">Вставить</string>
+    <string name="insert_link_message">Введи URL для выделенного текста</string>
+    <string name="insert_link_title">Вставить ссылку</string>
+    <string name="insert_link_url_hint">https://</string>
     <string name="installed_firmware_version">Текущая версия:</string>
     <string name="internal">Внутренний</string>
     <string name="interval_always_on">Всегда включено</string>
@@ -813,6 +835,7 @@
     <string name="label_long_turbo">Большая дальность - Турбо</string>
     <string name="label_medium_fast">Средняя дальность - Быстро</string>
     <string name="label_medium_slow">Средняя дальность - Медленно</string>
+    <string name="label_medium_turbo">Medium Range - Turbo</string>
     <string name="label_narrow_fast">Узкий - Быстро</string>
     <string name="label_narrow_slow">Узкий - Медленно</string>
     <string name="label_short_fast">Малая дальность - Быстро</string>
@@ -1752,6 +1775,9 @@
     <string name="waypoint_edit">Редактировать путевую точку</string>
     <string name="waypoint_new">Установить путевую точку</string>
     <string name="waypoint_received">Принята путевая точка: %1$s</string>
+    <string name="waypoint_recipient_broadcast">Трансляция (все ноды)</string>
+    <string name="waypoint_recipient_channel">Канал %1$d</string>
+    <string name="waypoint_send_to">Отправить</string>
     <string name="weight">Вес</string>
     <!-- WIFI -->
     <string name="wifi_config">Настройки WiFi</string>
