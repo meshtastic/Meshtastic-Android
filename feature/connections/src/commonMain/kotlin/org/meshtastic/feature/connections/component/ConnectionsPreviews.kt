@@ -30,6 +30,7 @@ import org.meshtastic.core.ble.BleConnectionState
 import org.meshtastic.core.ble.BleDevice
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Search
 import org.meshtastic.core.ui.theme.AppTheme
@@ -43,6 +44,7 @@ import org.meshtastic.feature.connections.ui.components.DeviceSectionHeader
 import org.meshtastic.feature.connections.ui.components.DisconnectButton
 import org.meshtastic.feature.connections.ui.components.EmptyStateContent
 import org.meshtastic.feature.connections.ui.components.TransportSelector
+import org.meshtastic.proto.User
 
 private const val PREVIEW_BLE_RSSI = -60
 
@@ -50,6 +52,16 @@ private const val PREVIEW_BLE_RSSI = -60
 @Composable
 fun DeviceListItemPreview() {
     val device = DeviceListEntry.Tcp(name = "Meshtastic_abcd", fullAddress = "s192.168.1.100")
+    AppTheme { DeviceListItem(connectionState = ConnectionState.Disconnected, device = device, onSelect = {}) }
+}
+
+// Previously-connected device: shows the short-name NodeChip alongside the unique long name (#5808), which wraps to a
+// second line rather than truncating.
+@PreviewLightDark
+@Composable
+private fun DeviceListItemWithLongNamePreview() {
+    val node = Node(num = 13444, user = User(short_name = "AB12", long_name = "James' Rooftop Solar Repeater"))
+    val device = DeviceListEntry.Tcp(name = "Meshtastic_ab12", fullAddress = "s192.168.1.101", node = node)
     AppTheme { DeviceListItem(connectionState = ConnectionState.Disconnected, device = device, onSelect = {}) }
 }
 

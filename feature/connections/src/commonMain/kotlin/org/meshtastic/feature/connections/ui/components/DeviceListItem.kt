@@ -174,20 +174,30 @@ fun DeviceListItem(
 
 /**
  * Headline for a device row. When we have a [DeviceListEntry.node] in the local DB (i.e. we've previously connected and
- * learned the device's mesh identity), render the colored [NodeChip] + the node's long name so users can visually
- * identify the device at a glance. Otherwise fall back to the raw advertised device name.
+ * learned the device's mesh identity), render the colored [NodeChip] alongside the node's **long name** so users can
+ * distinguish devices that share a similar short/advertised name (see #5808). Otherwise fall back to the raw advertised
+ * name. The name is allowed to wrap to two lines so long names are legible rather than truncated at a single line.
  */
 @Composable
 private fun DeviceHeadline(device: DeviceListEntry) {
     val node = device.node
     if (node != null) {
-        NodeChip(node = node)
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            NodeChip(node = node)
+            DeviceName(text = node.user.long_name.ifEmpty { device.name }, modifier = Modifier.weight(1f))
+        }
     } else {
-        Text(
-            text = device.name,
-            style = MaterialTheme.typography.titleLarge,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
+        DeviceName(text = device.name)
     }
+}
+
+@Composable
+private fun DeviceName(text: String, modifier: Modifier = Modifier) {
+    Text(
+        modifier = modifier,
+        text = text,
+        style = MaterialTheme.typography.titleLarge,
+        maxLines = 2,
+        overflow = TextOverflow.Ellipsis,
+    )
 }
