@@ -99,7 +99,7 @@
     <string name="app_functions_get_node_details">Получить сведения о ноде</string>
     <string name="app_functions_get_node_list">Получить список нод</string>
     <string name="app_functions_get_recent_messages">Получать последние сообщения</string>
-    <string name="app_functions_get_unread_summary">Получить сводку о непрочитанных</string>
+    <string name="app_functions_get_unread_summary">Получить обзор непрочитанного</string>
     <string name="app_functions_master_summary">Позвольте системным ИИ-ассистентам (например, Gemini) обнаруживать и использовать функции сети</string>
     <string name="app_functions_master_toggle">Разрешить ИИ доступ</string>
     <string name="app_functions_read_section">Функции чтения</string>

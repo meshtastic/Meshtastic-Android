@@ -17,26 +17,26 @@ aliases:
 
 ## Список узлов
 
-The node list shows every node your radio has heard, including:
+Список нод показывает все ноды, которые услышало твоё радиоустройство, включая:
 
-- **Node name** — user-configured long name
-- **Short name** — 4-character identifier
-- **Signal quality** — last heard signal strength
-- **Last heard** — time since last communication
-- **Distance** — estimated distance (if positions are shared)
-- **Battery** — remote node battery level (if telemetry is enabled)
+- **Имя ноды** — длинное имя, настроенное пользователем
+- **Короткое имя** — 4-символьный идентификатор
+- **Качество сигнала** — последний уровень принимаемого сигнала
+- **Последнее услышанное** — время с последнего общения
+- **Расстояние** — предполагаемое расстояние (если позиции общие)
+- **Батарея** — уровень заряда батареи удалённой ноды (если включена телеметрия)
 
-### Node Status Indicators
+### Индикаторы состояния ноды
 
-| Badge       | Meaning                             |
-| ----------- | ----------------------------------- |
-| 🟢 Онлайн   | Node heard within the last 2 hours  |
-| ⚪ Offline   | Node not heard for over 2 hours     |
-| ⭐ Избранный | Node marked as favorite by the user |
+| Значок      | Значение                                  |
+| ----------- | ----------------------------------------- |
+| 🟢 Онлайн   | Нода слышна за последние 2 часа           |
+| ⚪ Оффлайн   | Нода не отвечала больше 2 часов           |
+| ⭐ Избранный | Нода отмечена пользователем как избранная |
 
 A node is considered **online** if it was heard within the last 2 hours, and **offline** otherwise — there is no separate "away" tier.
 
-### Node Roles
+### Роли ноды
 
 Nodes can be configured with different roles that affect their mesh behavior:
 
@@ -60,7 +60,7 @@ Nodes can be configured with different roles that affect their mesh behavior:
 
 Most users should keep the default **Client** role. Consider a different role when:
 
-- **Router** — You have a node in a fixed, elevated location with reliable power (rooftop, hilltop). Routers stay awake continuously to relay messages for others and are essential for extending mesh coverage. Don't use Router on battery-powered handheld devices.
+- **Router** — У тебя есть узел в фиксированном, высоком месте с надежным источником питания (крыша, вершина холма). Routers stay awake continuously to relay messages for others and are essential for extending mesh coverage. Don't use Router on battery-powered handheld devices.
 - **Router Late** — An infrastructure node that always rebroadcasts packets once but only after all other routing modes have had their turn. Provides supplemental coverage for local clusters without competing with primary routers.
 - **Client Base** — Treats traffic from/to your favorited nodes with Router Late priority (ensuring those messages get extra relay coverage) while handling everything else as a normal Client.
 - **Client Mute** — You want to receive mesh traffic but not contribute to relaying. Useful for monitoring-only devices or to reduce congestion in dense areas.
