@@ -76,10 +76,7 @@ fun CleanNodeDatabaseScreen(viewModel: CleanNodeDatabaseViewModel, onBack: () ->
         },
     ) { paddingValues ->
         Column(modifier = Modifier.padding(paddingValues).padding(16.dp).verticalScroll(rememberScrollState())) {
-            Text(
-                stringResource(Res.string.clean_node_database_description),
-                style = MaterialTheme.typography.bodySmall,
-            )
+            Text(stringResource(Res.string.clean_node_database_description), style = MaterialTheme.typography.bodySmall)
             Spacer(modifier = Modifier.height(16.dp))
 
             DaysThresholdFilter(

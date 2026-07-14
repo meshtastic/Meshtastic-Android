@@ -126,10 +126,7 @@ fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
 
     entry<SettingsRoute.CleanNodeDb> {
         val viewModel: CleanNodeDatabaseViewModel = koinViewModel()
-        CleanNodeDatabaseScreen(
-            viewModel = viewModel,
-            onBack = dropUnlessResumed { backStack.removeLastOrNull() },
-        )
+        CleanNodeDatabaseScreen(viewModel = viewModel, onBack = dropUnlessResumed { backStack.removeLastOrNull() })
     }
 
     ConfigRoute.entries.forEach { routeInfo ->
