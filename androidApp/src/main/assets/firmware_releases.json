@@ -189,16 +189,10 @@
   },
   "pullRequests": [
     {
-      "id": "10996",
-      "title": "Reduce flash usage of GPS variants by deferring unused GeoCoord conversions",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10996",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
-    },
-    {
-      "id": "10995",
-      "title": "feat: populate MyNodeInfo.device_id on all platforms",
-      "page_url": "https://github.com/meshtastic/firmware/pull/10995",
-      "zip_url": "https://img.shields.io/badge/Flash_this_PR_in_the_Web_Flasher-2C2D3C?style=for-the-badge"
+      "id": "11005",
+      "title": "Double-press: fall back to first channel with position enabled when primary precision == 0",
+      "page_url": "https://github.com/meshtastic/firmware/pull/11005",
+      "zip_url": "https://discord.com/invite/meshtastic"
     },
     {
       "id": "10994",

@@ -1,9 +1,9 @@
 ---
-title: App Functions
+title: Функции приложения
 parent: Руководство пользователя
 nav_order: 19
 last_updated: 2026-06-11
-description: Expose mesh capabilities to the Android system and on-device AI assistants (e.g. Gemini) so they can run mesh workflows without opening the app.
+description: Предоставьте возможности mesh системе Android и помощникам с ИИ на устройстве (например, Gemini), чтобы они могли выполнять mesh-воркфлоу без открытия приложения.
 aliases:
   - app-functions
   - system-ai
@@ -11,47 +11,47 @@ aliases:
   - assistant-functions
 ---
 
-# App Functions
+# Функции приложения
 
-App Functions expose Meshtastic capabilities to the Android system and to on-device AI assistants (such as Gemini) through the Android App Functions API. With them enabled, an assistant can discover and trigger mesh workflows for you — for example sending a message or checking your mesh status — without you opening the app.
+Функции приложения предоставляют возможности Meshtastic системе Android и встроенным AI-помощникам (таким как Gemini) через API функций приложения Android. С их включением помощник может находить и запускать сетевые рабочие процессы за тебя — например, отправлять сообщение или проверять статус сети — не утруждая тебя открытием приложения.
 
-> ⚠️ **Note:** App Functions are available on **Google-flavor Android builds only**.
+> ⚠️ **Примечание:** Функции приложения доступны только на **Android-версиях от Google**.
 
-> ⚠️ **Note:** This is separate from the in-app **Chirpy** assistant. App Functions let the _system_ AI assistant act on your mesh; Chirpy is a conversational assistant inside the Meshtastic app itself.
+> ⚠️ **Примечание:** Это отдельно от встроенного в приложении помощника **Chirpy**. Функции приложения позволяют _системному_ AI-помощнику действовать с вашей сетью; Chirpy — это голосовой помощник прямо внутри приложения Meshtastic.
 
-## Enabling App Functions
+## Включение функций приложения
 
-App Functions are controlled from **Settings → System AI** (the in-app screen is labeled "System AI"). The screen has:
+Функции приложения управляются через **Настройки → Системный ИИ** (на экране в приложении указано "Системный ИИ"). Экран содержит:
 
-- A **master toggle** labeled **"Allow AI access"**, with the subtitle _"Let system AI assistants (e.g. Gemini) discover and use mesh functions"_. When off, no functions are exposed to the system.
+- A **master toggle** labeled **"Allow AI access"**, with the subtitle _"Let system AI assistants (e.g. Gemini) discover and use mesh functions"_. Когда выключено, системе не доступны никакие функции.
 - An **individual toggle for each function**, so you can expose only the capabilities you want.
 
 The functions are grouped into a **Write** section (functions that change something or send data to your mesh) and a **Read** section (functions that only return information).
 
 ![App Functions screen with master and per-function toggles](../../assets/screenshots/app-functions_settings.png)
 
-### Write Functions
+### Функции записи
 
-| Function         | What it does                                                                                                            |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| **Send Message** | Sends a text message to a contact (direct message) or to a channel, up to 237 bytes. |
+| Функция                 | Что она делает                                                                                                                 |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| **Отправить сообщение** | Отправляет текстовое сообщение контакту (личное сообщение) или каналу размером до 237 байт. |
 
-### Read Functions
+### Функции записи
 
-| Function                | What it returns                                             |
-| ----------------------- | ----------------------------------------------------------- |
-| **Get Mesh Status**     | Overall mesh status.                        |
-| **Get Node List**       | The list of nodes on your mesh.             |
-| **Get Channel Info**    | Information about your channels.            |
-| **Get Device Status**   | Status of your connected radio.             |
-| **Get Node Details**    | Detailed information about a specific node. |
-| **Get Recent Messages** | Recent messages from your conversations.    |
-| **Get Unread Summary**  | A summary of unread messages.               |
-| **Get Mesh Metrics**    | Telemetry and metrics from your mesh.       |
+| Функция                           | Что она возвращает                                       |
+| --------------------------------- | -------------------------------------------------------- |
+| **Проверить состояние сети**      | Общее состояние сети.                    |
+| **Получить список нод**           | Список узлов в твоей сети.               |
+| **Получить информацию о канале**  | Информация о твоих каналах.              |
+| **Получить состояние устройства** | Состояние подключенного радиоустройства. |
+| **Получить детали ноды**          | Подробная информация о конкретной ноде.  |
+| **Получить последние сообщения**  | Последние сообщения из твоих разговоров. |
+| **Получить обзор непрочитанного** | Сводка непрочитанных сообщений.          |
+| **Получить метрики сети**         | Телеметрия и метрики твоей сети.         |
 
-## Privacy
+## Приватность
 
-> 🔒 **Privacy:** The **Send Message** function lets an assistant send messages to your mesh on your behalf. Only enable functions you trust the assistant to use. The read functions expose node, message, and metric data to the assistant — enable only what you're comfortable sharing. Each function has its own toggle, and the master toggle turns all of them off at once.
+> 🔒 **Приватность:** Функция **Отправить сообщение** позволяет помощнику отправлять сообщения в твоей сети от твоего имени. Включай только те функции, по которым ты доверяешь ассистенту. The read functions expose node, message, and metric data to the assistant — enable only what you're comfortable sharing. Each function has its own toggle, and the master toggle turns all of them off at once.
 
 ## Связанные темы
 

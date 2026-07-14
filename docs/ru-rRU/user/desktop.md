@@ -3,7 +3,7 @@ title: Настольное приложение
 parent: Руководство пользователя
 nav_order: 14
 last_updated: 2026-07-07
-description: Install and use the Meshtastic Desktop app on Linux, macOS, and Windows — connections, feature parity, and keyboard shortcuts.
+description: Установка и использование приложения Meshtastic Desktop на Linux, macOS и Windows — подключения, функционал и сочетания клавиш.
 aliases:
   - desktop
   - linux
@@ -14,30 +14,30 @@ aliases:
 
 # Настольное приложение
 
-The Meshtastic Desktop application shares its core codebase with Android via Kotlin Multiplatform. Most features work identically on Linux, macOS, and Windows.
+Настольное приложение Meshtastic использует общий код с Android через Kotlin Multiplatform. Большинство функций работают одинаково на Linux, macOS и Windows.
 
 ## Установка
 
 ### Linux
 
-- Download the `.deb` or `.AppImage` package from the releases page
+- Скачайте пакет `.deb` или `.AppImage` со страницы релизов
 - Or build from source using `./gradlew :desktopApp:run`
 
 ### macOS
 
-- Download the `.dmg` package from releases
-- Or build from source
+- Скачайте пакет `.dmg` из релизов
+- Или соберите из исходных кодов
 
 ### Windows
 
 - Download the `.msi` installer from releases
-- Or build from source
+- Или соберите из исходных кодов
 
-## Connecting Your Radio
+## Подключение твоей радиостанции
 
-### USB Serial (Primary)
+### Последовательная USB (Основной)
 
-The most reliable connection method on Desktop:
+Наиболее надежный способ подключения к компьютеру:
 
 1. Connect your Meshtastic radio via USB cable.
 2. The app should detect the serial port automatically.
