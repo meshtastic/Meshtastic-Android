@@ -1,9 +1,9 @@
 ---
-title: Messages & Channels
+title: Сообщения и каналы
 parent: Руководство пользователя
 nav_order: 3
 last_updated: 2026-07-11
-description: Send and receive messages, manage channels, configure encryption, search conversations, and use quick chat, reactions, and message actions.
+description: Отправляйте и получайте сообщения, управляйте каналами, настраивайте шифрование, ищите по перепискам, а также используйте быстрый чат, реакции и действия с сообщениями.
 aliases:
   - channels
   - direct-messages
@@ -11,47 +11,47 @@ aliases:
   - conversations
 ---
 
-# Messages & Channels
+# Сообщения и каналы
 
-Meshtastic supports two communication modes: **channel broadcasts** and **direct messages**.
+Meshtastic поддерживает два режима связи: **вещание по каналам** и **личные сообщения**.
 
 ## Каналы
 
-Channels are shared communication groups. All nodes configured with the same channel key can read and send messages on that channel.
+Каналы - это общие группы для связи. Все узлы, настроенные с одинаковым ключом канала, могут читать и отправлять сообщения в этом канале.
 
-### Default Channel
+### Канал по умолчанию
 
-Every Meshtastic device comes with a default **LongFast** channel. This is an unencrypted channel used for general mesh communication.
+Каждое устройство Meshtastic имеет канал **LongFast** по умолчанию. Это незашифрованный канал, используемый для общей связи в ячеистой сети.
 
 ### Безопасность канала
 
-Channels support multiple encryption levels:
+Каналы поддерживают несколько уровней шифрования:
 
-| Icon | Security Level                       | Описание                                                                                                                               |
-| ---- | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
-| 🔒   | PSK (256-bit AES) | Fully encrypted with a strong pre-shared key. Only nodes with the matching key can read messages.      |
-| 🔐   | PSK (128-bit AES) | Encrypted with a shorter key. Secure for most uses but 256-bit is preferred for sensitive data.        |
-| 🔓   | Default / Open                       | Uses the well-known default key. **Any Meshtastic device** on the same preset can read these messages. |
-| ⚠️   | Insecure + Position                  | Open channel that also broadcasts your GPS position. Use with caution in public meshes.                |
+| Иконка | Уровень безопасности                 | Описание                                                                                                                                                                  |
+| ------ | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 🔒     | PSK (256-bit AES) | Полностью зашифрован надёжным предварительно согласованным ключом. Только узлы с соответствующим ключом могут читать сообщения.           |
+| 🔐     | PSK (128-bit AES) | Зашифрован более коротким ключом. Безопасен для большинства задач, но 256-битное шифрование предпочтительнее для конфиденциальных данных. |
+| 🔓     | По умолчанию / Открытый              | Использует общеизвестный ключ по умолчанию. **Любое устройство Meshtastic** с той же пред установкой может читать эти сообщения.          |
+| ⚠️     | Незащищённый + Местоположение        | Открытый канал, который также передаёт ваше GPS-местоположение. Используйте с осторожностью в общественных ячеистых сетях.                |
 
-> 🔒 **Security Tip:** Always configure a unique PSK for private communications. The default channel is intentionally open so new users can discover the mesh — but you should create a separate encrypted channel for anything sensitive.
+> 🔒 **Совет по безопасности:** Всегда настраивайте уникальный PSK для личных сообщений. Канал по умолчанию намеренно открыт, чтобы новые пользователи могли обнаружить mesh-сеть — но вам следует создать отдельный зашифрованный канал для любой конфиденциальной информации.
 
-### Adding a Channel
+### Добавление канала
 
-1. Navigate to **Settings → Channels**.
-2. Tap **Add Channel** or scan a QR code.
-3. Configure the channel name and encryption key.
-4. Share the channel URL/QR code with others who need access.
+1. Перейдите в **Настройки → Каналы**.
+2. Нажмите **Добавить канал** или сканируйте QR-код.
+3. Настройте имя канала и ключ шифрования.
+4. Поделитесь URL-адресом/QR-кодом канала с теми, кому нужен доступ.
 
-Tapping a channel shows its details and sharing options.
+При нажатии на канал отображаются его сведения и опции для отправки приглашения.
 
-## Direct Messages
+## Личные сообщения
 
-Direct messages (DMs) are point-to-point encrypted communications between two specific nodes.
+Личные сообщения (DMs) — это зашифрованная связь точка - к - точке между двумя конкретными узлами.
 
-### Sending a Direct Message
+### Отправка личного сообщения
 
-1. Open the **Messages** tab.
+1. Откройте вкладку **Сообщения**.
 2. Select a node from your contacts list or tap a node in the node list.
 3. Type your message and tap **Send**.
 

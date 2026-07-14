@@ -1,9 +1,9 @@
 ---
-title: Debug Logs
+title: Отладочные журналы
 parent: Инструкция пользователя
 nav_order: 22
 last_updated: 2026-07-08
-description: View and export the app's own debug logs from inside the app, and attach a capture to a GitHub issue to help diagnose bugs — no adb required.
+description: Просматривайте и экспортируйте отладочные журналы приложения из самого приложения, а также прикрепляйте их к задаче на GitHub для помощи в диагностике ошибок — без необходимости в adb.
 aliases:
   - debug-logs
   - logcat
@@ -11,48 +11,48 @@ aliases:
   - bug-report
 ---
 
-# Debug Logs
+# Отладочные журналы
 
-When something misbehaves, the app's debug logs are the single most useful thing you can attach to a bug report. Meshtastic can capture them **for you, from inside the app** — you no longer need `adb` or any desktop tooling to collect them.
+Когда что-то работает неправильно, отладочные журналы приложения — это самое полезное, что вы можете приложить к отчёту об ошибке. Meshtastic может захватить их **за вас, прямо из приложения** — вам больше не нужен adb или какие-либо инструменты на компьютере для их сбора.
 
-Open the **Debug Panel** from **Settings → Advanced → Debug Panel**.
+Откройте **Панель отладки** через **Настройки → Дополнительно → Панель отладки**.
 
-> 📎 **Filing an issue?** Export your logs (see below) and attach the `.txt` file to your report at [github.com/meshtastic/Meshtastic-Android/issues](https://github.com/meshtastic/Meshtastic-Android/issues). A log capture that covers the moment the problem happened turns "it doesn't work" into something a developer can actually track down.
+> 📎 **Создаёте задачу?** Экспортируйте свои журналы (см. ниже) и прикрепите файл `.txt` к отчёту на [github.com/meshtastic/Meshtastic-Android/issues]. Захват журнала, охватывающий момент возникновения проблемы, превращает «это не работает» в то, что разработчик действительно может отследить.
 
-## The two tabs
+## Две вкладки
 
-The Debug Panel has two tabs:
+Панель отладки содержит две вкладки:
 
-- **Packets** — the decoded mesh traffic your radio has sent and received (protocol-level messages). Useful for diagnosing mesh and routing behavior.
-- **App logs** — the app's own diagnostic log (Android _logcat_), including warnings, errors, and stack traces from the app itself. This is usually what a bug report needs.
+- **Пакеты** — декодированный трафик mesh-сети, который ваше радио отправило и получило (сообщения уровня протокола). Полезно для диагностики поведения mesh-сети и маршрутизации.
+- **Журналы приложения** — собственный диагностический журнал приложения (Android _logcat_), включая предупреждения, ошибки и трассировки стека самого приложения. Обычно именно это требуется для отчёта об ошибке.
 
-Each tab has its own **export** button and produces its own file, so you can grab whichever is relevant — or both.
+Каждая вкладка имеет собственную кнопку **экспорта** и создаёт отдельный файл, поэтому вы можете сохранить тот, который нужен — или сразу оба.
 
-## Viewing app logs
+## Просмотр журналов приложения
 
-The **App logs** tab shows the most recent log lines from **this app only** — never other apps on your device.
+Вкладка **Журналы приложения** показывает самые последние строки журнала **только из этого приложения** — но не из других приложений на вашем устройстве.
 
-- **Search** — type in the search box to filter to matching lines.
-- **Level filter** — the **V / D / I / W / E** chips toggle Verbose, Debug, Info, Warn, and Error lines. Tap a level to hide it; tap again to bring it back. Fatal lines are always shown.
-- **Refresh** — the refresh icon re-reads the latest logs.
+- **Поиск** — введите текст в поле поиска, чтобы отфильтровать строки по совпадению.
+- **Фильтр по уровню** — кнопки V / D / I / W / E переключают отображение строк с уровнями Verbose (Подробный), Debug (Отладка), Info (Информация), Warn (Предупреждение) и Error (Ошибка). Нажмите на уровень, чтобы скрыть его; нажмите ещё раз, чтобы вернуть обратно. Строки с фатальными ошибками отображаются всегда.
+- **Обновить** — значок обновления заново считывает последние записи журнала.
 
-Error and warning lines are tinted so problems stand out.
+Строки с ошибками и предупреждениями подсвечиваются цветом, чтобы проблемы выделялись.
 
-## Exporting
+## Экспорт
 
-Tap the **download** icon to save the current logs to a file. You choose where it goes through the system file picker, and the file is named with a timestamp (for example `meshtastic_logcat_20260701_143312.txt`) so repeated exports never overwrite each other.
+Нажмите на значок **загрузки**, чтобы сохранить текущие журналы в файл. Вы выбираете расположение через системное окно выбора файлов, а файл получает имя с меткой времени (например, `meshtastic_logcat_20260701_143312.txt`), поэтому повторные экспорты никогда не перезаписывают друг друга.
 
-Attach that file to your GitHub issue.
+Прикрепите этот файл к своей задаче на GitHub.
 
-> 🔒 **Privacy:** Exports automatically **redact** private keys, admin keys, and session passkeys before writing the file. Channel PSKs are **not** redacted, and logs can also contain node names, positions, and other identifying details — glance through the file before sharing it publicly, and share privately if you have any doubt.
+> 🔒 **Приватность**: Экспорты автоматически **удаляют** приватные ключи, ключи администратора и сеансовые ключи доступа перед записью в файл. Ключи каналов (PSKs) **не** удаляются, а журналы также могут содержать имена узлов, координаты и другие идентифицирующие данные — бегло просмотрите файл перед публикацией и, если сомневаетесь, делитесь им конфиденциально.
 
 ## Desktop
 
-The desktop app has no system logcat, so the **App logs** tab shows the app's own captured log output instead. Search, filtering, and export work the same way.
+У компьютерного приложения нет системного logcat, поэтому вкладка **Журналы приложения** вместо этого показывает собственный захваченный вывод журнала приложения. Поиск, фильтрация и экспорт работают точно так же.
 
 ## Связанные темы
 
-- [Help & In-App Docs](help-and-docs) — reading this documentation offline inside the app
-- [Connections](connections) — if the problem is getting connected to your radio in the first place
+- [Справка и встроенная документация](help-and-docs) — чтение этой документации офлайн внутри приложения
+- [Подключения](connections) — если проблема в первую очередь связана с подключением к вашему радио
 
 ---

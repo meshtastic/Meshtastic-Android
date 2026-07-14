@@ -23,12 +23,12 @@ aliases:
 
 Функции приложения управляются через **Настройки → Системный ИИ** (на экране в приложении указано "Системный ИИ"). Экран содержит:
 
-- A **master toggle** labeled **"Allow AI access"**, with the subtitle _"Let system AI assistants (e.g. Gemini) discover and use mesh functions"_. Когда выключено, системе не доступны никакие функции.
-- An **individual toggle for each function**, so you can expose only the capabilities you want.
+- **Главный переключатель** с надписью **"Разрешить доступ ИИ"** и подзаголовком _"Позволь системным ИИ-ассистентам (например, Gemini) обнаруживать и использовать функции сети"_. Когда выключено, системе не доступны никакие функции.
+- **Отдельный переключатель для каждой функции**, чтобы включать только те возможности, которые хочешь.
 
-The functions are grouped into a **Write** section (functions that change something or send data to your mesh) and a **Read** section (functions that only return information).
+Функции разделены на секцию **Запись** (функции, которые что-то меняют или отправляют данные в сеть) и **Чтение** (только возвращают информацию).
 
-![App Functions screen with master and per-function toggles](../../assets/screenshots/app-functions_settings.png)
+![Экран функций приложения с переключателями для всех функций и отдельных функций](../../assets/screenshots/app-functions_settings.png)
 
 ### Функции записи
 
@@ -40,7 +40,7 @@ The functions are grouped into a **Write** section (functions that change someth
 
 | Функция                           | Что она возвращает                                       |
 | --------------------------------- | -------------------------------------------------------- |
-| **Проверить состояние сети**      | Общее состояние сети.                    |
+| **Получить состояние сети**       | Общее состояние сети.                    |
 | **Получить список нод**           | Список узлов в твоей сети.               |
 | **Получить информацию о канале**  | Информация о твоих каналах.              |
 | **Получить состояние устройства** | Состояние подключенного радиоустройства. |
@@ -51,13 +51,13 @@ The functions are grouped into a **Write** section (functions that change someth
 
 ## Приватность
 
-> 🔒 **Приватность:** Функция **Отправить сообщение** позволяет помощнику отправлять сообщения в твоей сети от твоего имени. Включай только те функции, по которым ты доверяешь ассистенту. The read functions expose node, message, and metric data to the assistant — enable only what you're comfortable sharing. Each function has its own toggle, and the master toggle turns all of them off at once.
+> 🔒 **Приватность:** Функция **Отправить сообщение** позволяет помощнику отправлять сообщения в твоей сети от твоего имени. Включай только те функции, по которым ты доверяешь ассистенту. Функции чтения предоставляют ассистенту данные о ноде, сообщениях и метриках — включай только то, чем готов делиться. У каждой функции есть свой переключатель, а главный переключатель выключает их все сразу.
 
 ## Связанные темы
 
-- [Messages & Channels](messages-and-channels) — sending messages directly in the app
-- [Nodes](nodes) — the node list the read functions draw from
-- [Node Metrics](node-metrics) — the telemetry behind Get Mesh Metrics
+- [Сообщения и каналы](messages-and-channels) — отправка сообщений прямо в приложении
+- [Ноды](nodes) — список нод, из которого берут данные функции чтения
+- [Метрики нод](node-metrics) — телеметрия за Получение метрик сети
 
 ---
 
