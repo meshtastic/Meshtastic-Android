@@ -7,6 +7,11 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 <!-- UNRELEASED_START -->
 ## [Unreleased]
 
+### Unreleased (not yet in any build)
+
+#### 🛠️ Fixes
+* Fix: add back navigation to Clean Node Database screen by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6264
+
 ### Closed Beta (v2.8.0-closed.9)
 Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14):
 
