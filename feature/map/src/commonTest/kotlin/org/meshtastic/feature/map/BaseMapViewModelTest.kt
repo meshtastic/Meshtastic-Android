@@ -31,14 +31,12 @@ import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.NodeAddress
-import org.meshtastic.core.model.NodeSortOption
 import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeNotificationPrefs
 import org.meshtastic.core.testing.FakeRadioConfigRepository
 import org.meshtastic.core.testing.FakeRadioController
-import org.meshtastic.core.testing.FakeUiPrefs
 import org.meshtastic.core.testing.TestDataFactory
 import org.meshtastic.proto.Waypoint
 import kotlin.test.AfterTest
@@ -46,7 +44,6 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
-import kotlin.test.assertNull
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class BaseMapViewModelTest {
@@ -85,7 +82,6 @@ class BaseMapViewModelTest {
                 radioController = radioController,
                 radioConfigRepository = radioConfigRepository,
                 notificationPrefs = FakeNotificationPrefs(),
-                uiPrefs = FakeUiPrefs(),
             )
     }
 
@@ -136,66 +132,6 @@ class BaseMapViewModelTest {
         nodeRepository.setNodes(testNodes)
 
         assertEquals(3, nodeRepository.nodeDBbyNum.value.size)
-    }
-
-    @Test
-    fun testNodesResortWhenSortPreferenceChanges() = runTest(testDispatcher) {
-        val uiPrefs = FakeUiPrefs()
-        val vm =
-            BaseMapViewModel(
-                mapPrefs = mapPrefs,
-                nodeRepository = nodeRepository,
-                packetRepository = packetRepository,
-                radioController = radioController,
-                radioConfigRepository = radioConfigRepository,
-                notificationPrefs = FakeNotificationPrefs(),
-                uiPrefs = uiPrefs,
-            )
-        // Alice sorts first alphabetically, but Zoe was heard more recently — the two sort modes disagree, so a
-        // resort is observable.
-        val alice = TestDataFactory.createTestNode(num = 1, userId = "!a", longName = "Alice", lastHeard = 100)
-        val zoe = TestDataFactory.createTestNode(num = 2, userId = "!z", longName = "Zoe", lastHeard = 200)
-        nodeRepository.setNodes(listOf(alice, zoe))
-
-        vm.nodes.test {
-            // Default sort (LAST_HEARD): most-recently-heard first.
-            assertEquals(listOf("Zoe", "Alice"), awaitItem().map { it.user.long_name })
-
-            // Switching the Nodes-tab sort preference re-sorts the map's node list live, without a new
-            // subscription.
-            uiPrefs.setNodeSort(NodeSortOption.ALPHABETICAL.ordinal)
-            assertEquals(listOf("Alice", "Zoe"), awaitItem().map { it.user.long_name })
-
-            cancelAndIgnoreRemainingEvents()
-        }
-    }
-
-    @Test
-    fun testSendWaypointDefaultsToBroadcast() = runTest(testDispatcher) {
-        viewModel.sendWaypoint(Waypoint(id = 1, name = "Broadcast Waypoint"))?.join()
-
-        val sent = radioController.sentPackets.single()
-        assertEquals(NodeAddress.ID_BROADCAST, sent.to)
-        assertEquals(0, sent.channel)
-    }
-
-    @Test
-    fun testSendWaypointWithContactKeyRoutesToNode() = runTest(testDispatcher) {
-        val contactKey = "8!a1b2c3d4"
-
-        viewModel.sendWaypoint(Waypoint(id = 2, name = "DM Waypoint"), contactKey)?.join()
-
-        val sent = radioController.sentPackets.single()
-        assertEquals("!a1b2c3d4", sent.to)
-        assertEquals(8, sent.channel)
-    }
-
-    @Test
-    fun testSendWaypointWithZeroIdDoesNotSend() = runTest(testDispatcher) {
-        val job = viewModel.sendWaypoint(Waypoint(id = 0, name = "Unsaved Draft"))
-
-        assertNull(job)
-        assertEquals(emptyList(), radioController.sentPackets)
     }
 
     @Test

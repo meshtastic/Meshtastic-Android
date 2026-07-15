@@ -37,16 +37,5 @@ kotlin {
             implementation(projects.core.ui)
             implementation(projects.core.di)
         }
-
-        getByName("androidHostTest") {
-            dependencies {
-                implementation(projects.core.testing)
-                implementation(libs.kotlinx.coroutines.test)
-                implementation(libs.compose.multiplatform.ui.test)
-                // Registers a ComponentActivity in the test manifest so Robolectric's runComposeUiTest has a host
-                // activity to attach to (feature/map is a library module with no launcher activity of its own).
-                implementation(libs.androidx.compose.ui.test.manifest)
-            }
-        }
     }
 }

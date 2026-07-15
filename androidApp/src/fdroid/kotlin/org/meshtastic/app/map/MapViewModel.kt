@@ -31,7 +31,6 @@ import org.meshtastic.core.repository.NotificationPrefs
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioController
-import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.map.BaseMapViewModel
 import java.io.InputStream
@@ -45,7 +44,6 @@ class MapViewModel(
     radioController: RadioController,
     radioConfigRepository: RadioConfigRepository,
     notificationPrefs: NotificationPrefs,
-    uiPrefs: UiPrefs,
     buildConfigProvider: BuildConfigProvider,
     private val mapLayersManager: MapLayersManager,
     savedStateHandle: SavedStateHandle,
@@ -56,7 +54,6 @@ class MapViewModel(
     radioController,
     radioConfigRepository,
     notificationPrefs,
-    uiPrefs,
 ) {
 
     private val _selectedWaypointId = MutableStateFlow(savedStateHandle.get<Int>("waypointId"))
