@@ -1033,7 +1033,6 @@ open class DatabaseManager(
         val admission = beginWrite()
         val db = admission.database
         val active = admission.name
-        markLastUsed(active)
         try {
             return runCancellableDbBlock(db, block)
         } catch (e: CancellationException) {
