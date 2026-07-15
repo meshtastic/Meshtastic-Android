@@ -74,6 +74,11 @@ class FakeRadioController :
     var gattCacheInvalidationRequested = false
         private set
 
+    /** Deterministic test hook invoked inside every [requestRebootOta] call with the request parameters. */
+    var onRequestRebootOta: suspend (requestId: Int, destNum: Int, mode: Int, hash: ByteArray?) -> Unit =
+        { _, _, _, _ ->
+        }
+
     init {
         registerResetAction {
             sentPackets.clear()
@@ -89,6 +94,7 @@ class FakeRadioController :
             editSettingsCalled = false
             startProvideLocationCalled = false
             stopProvideLocationCalled = false
+            onRequestRebootOta = { _, _, _, _ -> }
             gattCacheInvalidationRequested = false
         }
     }
@@ -173,7 +179,9 @@ class FakeRadioController :
 
     override suspend fun rebootToDfu(nodeNum: Int) {}
 
-    override suspend fun requestRebootOta(requestId: Int, destNum: Int, mode: Int, hash: ByteArray?) {}
+    override suspend fun requestRebootOta(requestId: Int, destNum: Int, mode: Int, hash: ByteArray?) {
+        onRequestRebootOta(requestId, destNum, mode, hash)
+    }
 
     override suspend fun shutdown(destNum: Int, packetId: Int) {}
 
