@@ -16,11 +16,8 @@
  */
 package org.meshtastic.core.repository
 
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
 import org.meshtastic.core.model.DeviceType
-import org.meshtastic.core.model.NodeSortOption
 
 /** Reactive interface for analytics-related preferences. */
 interface AnalyticsPrefs {
@@ -196,10 +193,6 @@ interface UiPrefs {
 
     fun setShouldShowTelemetry(value: Boolean)
 }
-
-/** Maps the persisted [UiPrefs.nodeSort] ordinal to its [NodeSortOption], the single source every consumer shares. */
-val UiPrefs.nodeSortOption: Flow<NodeSortOption>
-    get() = nodeSort.map { NodeSortOption.fromOrdinal(it) }
 
 /** Reactive interface for notification preferences. */
 interface NotificationPrefs {

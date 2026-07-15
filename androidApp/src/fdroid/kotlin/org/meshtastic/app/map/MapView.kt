@@ -263,9 +263,6 @@ fun MapView(
     // tile-download rectangle machinery) that becomes the draft's bounding box on confirm. Kept distinct from the
     // tile-download box (downloadRegionBoundingBox) so the two rectangle modes never collide.
     var geofenceBoxDraft by remember { mutableStateOf<Waypoint?>(null) }
-    // The recipient selected in EditWaypointDialog before "Set area" tore it down — carried across the round trip
-    // so re-opening the dialog with the drawn box doesn't silently reset the destination back to Broadcast.
-    var geofenceBoxDraftContactKey by remember { mutableStateOf<String?>(null) }
     var geofenceBoxBoundingBox: BoundingBox? by remember { mutableStateOf(null) }
 
     var showDownloadButton: Boolean by remember { mutableStateOf(false) }
@@ -483,10 +480,8 @@ fun MapView(
             waypoint.toGeofence() != null && !mapViewModel.isMyWaypoint(id) -> showGeofenceInfoDialog = waypoint
 
             // edit only when unlocked or lockedTo myNodeNum
-            waypoint.locked_to in setOf(0, mapViewModel.myNodeNum ?: 0) && isConnected -> {
-                geofenceBoxDraftContactKey = null
+            waypoint.locked_to in setOf(0, mapViewModel.myNodeNum ?: 0) && isConnected ->
                 showEditWaypointDialog = waypoint
-            }
 
             else -> showDeleteWaypointDialog = waypoint
         }
@@ -588,7 +583,6 @@ fun MapView(
                 val enabled = isConnected && downloadRegionBoundingBox == null && geofenceBoxDraft == null
 
                 if (enabled) {
-                    geofenceBoxDraftContactKey = null
                     showEditWaypointDialog =
                         Waypoint(latitude_i = (p.latitude * 1e7).toInt(), longitude_i = (p.longitude * 1e7).toInt())
                 }
@@ -900,16 +894,7 @@ fun MapView(
         EditWaypointDialog(
             waypoint = showEditWaypointDialog ?: return, // Safe call
             displayUnits = displayUnits,
-            nodes = nodes,
-            ourNode = ourNodeInfo,
-            channelSet = channelSet,
-            initialContactKey =
-            geofenceBoxDraftContactKey
-                ?: showEditWaypointDialog
-                    ?.let { wp -> waypoints[wp.id] }
-                    ?.let { mapViewModel.waypointContactKey(it) }
-                ?: "0${NodeAddress.ID_BROADCAST}",
-            onSend = { waypoint, contactKey ->
+            onSend = { waypoint ->
                 Logger.d { "User clicked send waypoint ${waypoint.id}" }
                 showEditWaypointDialog = null
 
@@ -927,7 +912,6 @@ fun MapView(
                         locked_to = newLockedTo,
                         icon = newIcon,
                     ),
-                    contactKey,
                 )
             },
             onDelete = { waypoint ->
@@ -939,11 +923,10 @@ fun MapView(
                 Logger.d { "User clicked cancel marker edit dialog" }
                 showEditWaypointDialog = null
             },
-            onBeginBoxAuthoring = { draft, contactKey ->
+            onBeginBoxAuthoring = { draft ->
                 Logger.d { "User began geofence box authoring for waypoint ${draft.id}" }
                 showEditWaypointDialog = null
                 geofenceBoxDraft = draft
-                geofenceBoxDraftContactKey = contactKey
                 map.generateGeofenceBoxOverlay()
             },
         )
@@ -963,7 +946,6 @@ fun MapView(
             if (waypoint.locked_to == 0 && isConnected) {
                 {
                     showGeofenceInfoDialog = null
-                    geofenceBoxDraftContactKey = null
                     showEditWaypointDialog = waypoint
                 }
             } else {
@@ -997,13 +979,7 @@ fun MapView(
                         TextButton(
                             onClick = {
                                 Logger.d { "User deleted waypoint ${waypoint.id} for everyone" }
-                                // Route the expiry to wherever the waypoint was originally sent (a DM or a secondary
-                                // channel), not the default broadcast — otherwise a DM'd waypoint's "delete for
-                                // everyone" never reaches its actual recipient.
-                                val originalContactKey =
-                                    waypoints[waypoint.id]?.let { mapViewModel.waypointContactKey(it) }
-                                        ?: "0${NodeAddress.ID_BROADCAST}"
-                                mapViewModel.sendWaypoint(waypoint.copy(expire = 1), originalContactKey)
+                                mapViewModel.sendWaypoint(waypoint.copy(expire = 1))
                                 mapViewModel.deleteWaypoint(waypoint.id)
                                 showDeleteWaypointDialog = null
                             },

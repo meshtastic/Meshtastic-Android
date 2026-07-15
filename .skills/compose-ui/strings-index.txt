@@ -1720,14 +1720,10 @@ voltage
 wait_for_bluetooth_duration_seconds
 wake_on_tap_or_motion
 warning
-### WAYPOINT ###
 waypoint_delete
 waypoint_edit
 waypoint_new
 waypoint_received
-waypoint_recipient_broadcast
-waypoint_recipient_channel
-waypoint_send_to
 weight
 ### WIFI ###
 wifi_config
