@@ -892,6 +892,18 @@ open class DatabaseManager(
     }
 
     /**
+     * Executes one bounded read without writer admission or the serialized write-containment lane. Active database
+     * publication is synchronous and published pools are logically retired, so a captured instance remains valid for
+     * the lifetime of this manager. The read is never replayed automatically.
+     */
+    override suspend fun <T> withReadDb(block: suspend (MeshtasticDatabase) -> T): T = withContext(dispatchers.io) {
+        currentCoroutineContext().ensureActive()
+        val result = block(currentDb.value)
+        currentCoroutineContext().ensureActive()
+        result
+    }
+
+    /**
      * Atomically snapshots the canonical active DB (held by [_currentDb], which initializes lazily to the default DB)
      * and registers a writer against it.
      *
