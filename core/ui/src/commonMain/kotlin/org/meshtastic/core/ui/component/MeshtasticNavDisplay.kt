@@ -88,7 +88,7 @@ fun MeshtasticNavDisplay(
     // No-op when [analytics] is null (fdroid/desktop hosts and the intro flow pass nothing).
     if (analytics != null) {
         val currentKey = backStack.lastOrNull()
-        DisposableEffect(currentKey) {
+        DisposableEffect(currentKey, analytics) {
             val name = currentKey?.rumViewName()
             if (name != null) analytics.startScreenView(key = name, name = name)
             onDispose { if (name != null) analytics.stopScreenView(key = name) }
