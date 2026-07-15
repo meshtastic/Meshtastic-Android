@@ -9,8 +9,17 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
+#### 🏗️ Features
+* perf(r8): enable optimization for release builds (keep unobfuscated) by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6275
+* feat(analytics): restore RUM view tracking on Nav3 (Google flavor) by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6281
+* perf(analytics): match iOS Datadog RUM monitoring, drop dead timber dep by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6278
 #### 🛠️ Fixes
 * Fix: add back navigation to Clean Node Database screen by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6264
+* fix: stabilize traceroute map node identity & fix log metric alignment by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6270
+* fix(connections): show device long names in the connection manager (#5808) by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6271
+* fix: adopt 2024 EPA PM2.5 AQI breakpoints for cross-platform alignment by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6273
+* fix(analytics): restore Datadog RUM network tracking (google) & unify service name by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6280
+* fix(connections): use a segmented button for transport selection by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6285
 
 ### Closed Beta (v2.8.0-closed.9)
 Changes since [`v2.7.14`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14):
