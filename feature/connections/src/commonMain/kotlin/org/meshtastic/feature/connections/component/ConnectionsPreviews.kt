@@ -16,8 +16,11 @@
  */
 package org.meshtastic.feature.connections.component
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -133,10 +136,18 @@ fun DeviceSectionHeaderPreview() {
     AppTheme { DeviceSectionHeader(title = "Bluetooth Devices", showProgress = true) }
 }
 
+// Bounded width so the reference reflects the full-width segmented control as it renders on the Connections screen —
+// a fillMaxWidth control has no width to fill under the unbounded default preview constraint.
 @PreviewLightDark
 @Composable
 fun TransportSelectorPreview() {
-    AppTheme { TransportSelector(activeTransport = DeviceType.BLE, onSelectTransport = {}) }
+    AppTheme {
+        Surface {
+            Box(modifier = Modifier.width(360.dp).padding(16.dp)) {
+                TransportSelector(activeTransport = DeviceType.BLE, onSelectTransport = {})
+            }
+        }
+    }
 }
 
 @PreviewLightDark
