@@ -30,6 +30,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import co.touchlab.kermit.Logger
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.app.BuildConfig
 import org.meshtastic.core.model.ConnectionState
@@ -37,6 +38,7 @@ import org.meshtastic.core.model.service.LockdownState
 import org.meshtastic.core.navigation.NodesRoute
 import org.meshtastic.core.navigation.TopLevelDestination
 import org.meshtastic.core.navigation.rememberMultiBackstack
+import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.app_too_old
 import org.meshtastic.core.resources.must_update
@@ -59,8 +61,7 @@ import org.meshtastic.feature.wifiprovision.navigation.wifiProvisionGraph
 @Composable
 fun MainScreen() {
     val viewModel: UIViewModel = koinViewModel()
-    // Land on Connections for first-run / no-device-selected; otherwise on Nodes. Read synchronously
-    // from the StateFlow (seeded from persisted prefs) so the initial tab is set in one shot.
+    // Land on Connections for first-run / no-device-selected; otherwise on Nodes (seeded from prefs).
     val initialTab = remember {
         if (viewModel.currentDeviceAddressFlow.value.isNullOrSelectedNone()) {
             TopLevelDestination.Connect.route
@@ -95,7 +96,9 @@ fun MainScreen() {
             uiViewModel = viewModel,
             modifier = Modifier.fillMaxSize(),
         ) {
-            val provider =
+            MeshtasticNavDisplay(
+                multiBackstack = multiBackstack,
+                entryProvider =
                 entryProvider<NavKey> {
                     contactsGraph(backStack, scrollToTopEvents, onHandleDeepLink = viewModel::handleDeepLink)
                     nodesGraph(
@@ -114,11 +117,9 @@ fun MainScreen() {
                     docsEntries(backStack)
                     firmwareGraph(backStack)
                     wifiProvisionGraph(backStack)
-                }
-            MeshtasticNavDisplay(
-                multiBackstack = multiBackstack,
-                entryProvider = provider,
+                },
                 modifier = Modifier.fillMaxSize().recalculateWindowInsets().safeDrawingPadding(),
+                analytics = koinInject<PlatformAnalytics>(),
             )
         }
     }
