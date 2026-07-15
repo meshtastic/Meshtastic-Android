@@ -131,6 +131,8 @@ class FakeNodeRepository :
 
     override suspend fun getUnknownNodes(): List<Node> = _nodeDBbyNum.value.values.filter { it.isUnknownUser }
 
+    override suspend fun getNodeDbSnapshot(): Map<Int, Node> = _nodeDBbyNum.value
+
     override suspend fun clearNodeDB(preserveFavorites: Boolean) {
         if (preserveFavorites) {
             _nodeDBbyNum.value = _nodeDBbyNum.value.filter { it.value.isFavorite }

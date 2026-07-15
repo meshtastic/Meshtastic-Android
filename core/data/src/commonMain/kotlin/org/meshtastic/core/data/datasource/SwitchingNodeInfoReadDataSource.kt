@@ -55,4 +55,7 @@ class SwitchingNodeInfoReadDataSource(private val dbManager: DatabaseProvider) :
 
     override suspend fun getUnknownNodes(): List<NodeEntity> =
         dbManager.withReadDb { it.nodeInfoDao().getUnknownNodes() }
+
+    override suspend fun getNodeDbSnapshot(): Map<Int, NodeWithRelations> =
+        dbManager.withReadDb { it.nodeInfoDao().nodeDBbyNumSnapshot() }
 }

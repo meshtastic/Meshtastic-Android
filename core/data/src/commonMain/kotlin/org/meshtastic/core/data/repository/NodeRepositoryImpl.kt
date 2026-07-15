@@ -227,6 +227,9 @@ class NodeRepositoryImpl(
     override suspend fun getUnknownNodes(): List<Node> =
         withContext(dispatchers.io) { nodeInfoReadDataSource.getUnknownNodes().map { it.toModel() } }
 
+    override suspend fun getNodeDbSnapshot(): Map<Int, Node> =
+        withContext(dispatchers.io) { nodeInfoReadDataSource.getNodeDbSnapshot().mapValues { (_, it) -> it.toModel() } }
+
     /** Persists hardware metadata for a node. */
     override suspend fun insertMetadata(nodeNum: Int, metadata: DeviceMetadata) =
         withContext(dispatchers.io) { nodeInfoWriteDataSource.upsert(MetadataEntity(nodeNum, metadata)) }

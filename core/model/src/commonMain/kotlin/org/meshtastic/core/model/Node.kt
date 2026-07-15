@@ -189,7 +189,10 @@ data class Node(
         private const val DEFAULT_ID_SUFFIX_LENGTH = 4
         private const val RELAY_NODE_SUFFIX_MASK = 0xFF
 
-        val ERROR_BYTE_STRING: ByteString = ByteArray(32) { 0 }.toByteString()
+        /** Size (in bytes) of a Curve25519 public key as used by meshtastic firmware. */
+        const val PUBLIC_KEY_SIZE: Int = 32
+
+        val ERROR_BYTE_STRING: ByteString = ByteArray(PUBLIC_KEY_SIZE) { 0 }.toByteString()
 
         fun getRelayNode(relayNodeId: Int, nodes: List<Node>, ourNodeNum: Int?): Node? {
             val relayNodeIdSuffix = relayNodeId and RELAY_NODE_SUFFIX_MASK

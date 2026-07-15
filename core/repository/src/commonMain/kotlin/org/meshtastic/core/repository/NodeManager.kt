@@ -184,6 +184,12 @@ interface NodeManager : NodeIdLookup {
     fun removeByNodenum(nodeNum: Int)
 
     /**
+     * Applies node-number removals returned by the trusted configuration install. Removed numbers stay retired for the
+     * current device/database session so delayed field packets cannot recreate migrated identities.
+     */
+    fun applyTrustedIdentityMigrations(removedNums: Collection<Int>)
+
+    /**
      * Installs node information in memory. Callers that require an immediate standalone write use
      * [installNodeInfoAndPersist]; configuration handshakes batch the resulting snapshot through the repository.
      */
