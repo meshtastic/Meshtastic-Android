@@ -1512,7 +1512,7 @@
     "architecture": "nrf52840",
     "activelySupported": false,
     "supportLevel": 1,
-    "displayName": "Seeed SenseCap Mesh Tracker X1",
+    "displayName": "Seeed Mesh Tracker X1",
     "tags": [
       "Seeed"
     ]

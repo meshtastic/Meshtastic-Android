@@ -226,8 +226,8 @@
     <string name="collapsed">Развален</string>
     <string name="communicate_off_the_grid">Общайтесь вне сети со своими друзьями и сообществом без использования сотовой связи.</string>
     <!-- COMPASS -->
-    <string name="compass_bearing">Граница: %1$s</string>
-    <string name="compass_bearing_na">Граница: не доступна</string>
+    <string name="compass_bearing">Азимут: %1$s</string>
+    <string name="compass_bearing_na">Азимут: Н/Д</string>
     <string name="compass_distance">Расстояние: %1$s</string>
     <string name="compass_location_disabled">Поставщик услуг определения местоположения отключен. Включите службы определения местоположения.</string>
     <string name="compass_no_location_fix">Ждем сигнала GPS, чтобы рассчитать расстояние и азимут.</string>
@@ -968,7 +968,7 @@
     <string name="map_select_download_region">Выберите регион загрузки</string>
     <string name="map_start_download">Начать скачивание</string>
     <string name="map_style_selection">Выбор стиля карты</string>
-    <string name="map_subDescription">курс: %1$d° расстояние: %2$s</string>
+    <string name="map_subDescription">азимут: %1$d° расстояние: %2$s</string>
     <string name="map_tile_download_estimate">Предполагаемое время загрузки файла:</string>
     <string name="map_tile_source">Источник файла</string>
     <string name="map_type_hybrid">Смешанный</string>

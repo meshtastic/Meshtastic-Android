@@ -52,120 +52,120 @@ Meshtastic поддерживает два режима связи: **вещан
 ### Отправка личного сообщения
 
 1. Откройте вкладку **Сообщения**.
-2. Select a node from your contacts list or tap a node in the node list.
-3. Type your message and tap **Send**.
+2. Выберите ноду из списка контактов или нажмите на ноду в списке нод.
+3. Введите сообщение и нажмите **"Отправить"**.
 
-### Message States
+### Состояние сообщения
 
-A status label appears under **your own** outgoing messages only (incoming messages from others show no status label):
+Метка статуса отображается только **под твоими** исходящими сообщениями (входящие сообщения от других не имеют метки статуса):
 
-| State                                 | Значение                                                                                                                             |
-| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| Sending…                              | Queued or already handed to the radio, not yet resolved either way (queued and en-route both show this same text) |
-| Доставлено получателю                 | The strongest confirmation for a direct message — an acknowledgment came back                                                        |
-| Отправлено в сеть                     | For a channel broadcast, the message reached the mesh (broadcasts have no per-recipient ack)                      |
-| Передано, не подтверждено получателем | For a direct message, shown in a warning color — the message was relayed but no acknowledgment has come back yet                     |
-| Маршрутизация по SF++ цепочке…        | Being routed/buffered by the Store & Forward Plus Plus chain                                                     |
-| Подтверждено в цепочке SF++           | Confirmed delivered via the SF++ chain                                                                                               |
-| Ошибки                                | Delivery failed — tap the status for the specific reason (see Delivery Errors below)                              |
+| Состояние                             | Значение                                                                                                                                                             |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Отправка…                             | В очереди или уже передано на радио, результат ещё не определён (для статусов "в очереди" и "в пути»" отображается одинаковый текст)              |
+| Доставлено получателю                 | Самое надёжное подтверждение для личного сообщения — получено подтверждение о доставке                                                                               |
+| Отправлено в сеть                     | Для широковещательного сообщения в канале — сообщение достигло mesh-сети (у широковещательных сообщений нет подтверждений для каждого получателя) |
+| Передано, не подтверждено получателем | Для личного сообщения, отображается предупреждающим цветом — сообщение было ретранслировано, но подтверждение ещё не получено                                        |
+| Маршрутизация по SF++ цепочке…        | Находится в процессе маршрутизации/буферизации в цепочке Store & Forward Plus Plus                                                               |
+| Подтверждено в цепочке SF++           | Подтверждена доставка через цепочку SF++                                                                                                                             |
+| Ошибки                                | Ошибка доставки — нажмите на статус, чтобы узнать конкретную причину (см. раздел «Ошибки доставки» ниже)                          |
 
-### Delivery Errors
+### Ошибки доставки
 
-When a message fails to deliver, the error indicator shows what went wrong:
+Когда сообщение не удаётся доставить, индикатор ошибки показывает, что пошло не так:
 
-| Ошибки                 | Meaning                                  | What to Do                                                                                                                                                                  |
-| ---------------------- | ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| No Route               | No path exists to the destination node   | The recipient may be offline or out of mesh range. Try later or move closer.                                                                |
-| Got NAK                | The next-hop node refused to relay       | The relay node may be congested. Wait and retry.                                                                                            |
-| Время ожидания истекло | No acknowledgment within retry window    | The recipient may be just out of range. Try increasing hop limit or moving to a better position.                                            |
-| Нет интерфейса         | No radio interface available to send     | Check that your radio is connected and the channel is configured.                                                                                           |
-| Max Retransmit         | All retry attempts exhausted             | The mesh path is unreliable. Try a different channel or wait for conditions to improve.                                                     |
-| Нет канала             | The destination channel doesn't exist    | Verify both nodes share the same channel configuration.                                                                                                     |
-| Too Large              | Message exceeds maximum payload size     | Shorten your message (max ~200 characters).                                                                              |
-| Без ответа             | Node received message but didn't respond | The recipient's radio may be busy or in low-power sleep mode.                                                                                               |
-| Duty Cycle Limit       | Regional airtime limit reached           | Your radio has used its allowed transmit time. Wait for the duty cycle window to reset (typically 1 hour in EU regions). |
-| Неверный запрос        | Malformed or invalid message             | This usually indicates a software bug. Try restarting the app.                                                                              |
+| Ошибки                       | Значение                                                  | Что делать                                                                                                                                                                          |
+| ---------------------------- | --------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Нет маршрута                 | Путь к целевой ноде отсутствует                           | Получатель может быть не в сети или вне зоны действия mesh-сети. Повторите попытку позже или подойдите ближе.                                       |
+| Получен NAK                  | Следующая нода отказалась ретранслировать                 | Ретранслирующая нода может быть перегружена. Подождите и повторите попытку.                                                                         |
+| Время ожидания истекло       | Нет подтверждения в пределах окна повторных попыток       | Получатель, возможно, находится сразу за пределами зоны досягаемости. Попробуйте увеличить лимит хопов или переместиться в место с лучшим сигналом. |
+| Нет интерфейса               | Нет доступного радиоинтерфейса для отправки               | Проверь, подключено ли твоё радио и настроен ли канал.                                                                                                              |
+| Исчерпаны повторные передачи | Все попытки повторной отправки исчерпаны                  | Путь в mesh-сети ненадёжен. Попробуйте другой канал или дождитесь улучшения условий.                                                                |
+| Нет канала                   | Канал назначения не существует                            | Убедитесь, что обе ноды используют одинаковую конфигурацию канала.                                                                                                  |
+| Слишком большое              | Сообщение превышает максимальный размер полезной нагрузки | Сократите сообщение (максимум ~200 символов).                                                                                    |
+| Без ответа                   | Нода получила сообщение, но не ответила                   | Радио получателя может быть занято или находиться в спящем режиме с низким энергопотреблением.                                                                      |
+| Ограничение рабочего цикла   | Достигнут региональный лимит эфирного времени             | Твоё радио исчерпало разрешённое время передачи. Дождитесь сброса окна рабочего цикла (обычно 1 час в регионах ЕС).              |
+| Неверный запрос              | Повреждённое или недействительное сообщение               | Обычно это указывает на программную ошибку. Попробуйте перезапустить приложение.                                                                    |
 
-> 💡 **Tip:** Most delivery errors resolve themselves. If a node is intermittently reachable, the mesh will retry. For persistent "No Route" errors, check that intermediate Router nodes are online.
+> 💡 **Совет:** Большинство ошибок доставки разрешаются сами собой. Если нода доступна с перебоями, mesh-сеть будет повторять попытки. При постоянных ошибках «Нет маршрута» проверьте, что промежуточные ноды-роутеры находятся в сети.
 
-## Message Features
+## Функции сообщений
 
-### Quick Chat
+### Быстрый чат
 
-Pre-configured messages for rapid communication:
+Заранее подготовленные сообщения для быстрой связи:
 
-- Access via the Quick Chat button in the message input area
-- Choose from built-in phrases or custom messages
-- Customize quick chat messages in **Settings → Quick Chat**
-- Useful when typing is impractical (gloves, small screen, urgent)
+- Доступ через кнопку "Быстрый чат" в области ввода сообщения
+- Выберите из встроенных фраз или собственных сообщений
+- Настройте сообщения быстрого чата в **Настройки → Быстрый чат**
+- Полезно, когда набирать текст неудобно (перчатки, маленький экран, срочность)
 
-![Quick chat option](../../assets/screenshots/messages_quick_chat.png)
+![Опция быстрого чата](../../assets/screenshots/messages_quick_chat.png)
 
-Each quick chat entry has a short **Name** (the button label), the **Message** it inserts, and an **Instantly send** toggle — when enabled, tapping the button sends the message immediately instead of placing it in the input field for editing:
+Каждая запись быстрого чата имеет короткое **Имя** (надпись на кнопке), **Сообщение**, которое она вставляет, и переключатель **"Отправить сразу"** — когда он включён, нажатие кнопки немедленно отправляет сообщение, а не помещает его в поле ввода для редактирования:
 
-![New quick chat dialog with name, message, and instantly-send toggle](../../assets/screenshots/messages_edit_quick_chat.png)
+![Диалог создания быстрого чата с именем, сообщением и переключателем мгновенной отправки](../../assets/screenshots/messages_edit_quick_chat.png)
 
-The channel list shows each channel with its latest message preview.
+Список каналов показывает каждый канал с предпросмотром последнего сообщения.
 
-### Searching Messages
+### Поиск сообщений
 
-You can search the full history of any conversation directly from the chat screen:
+Ты можешь искать по всей истории любой переписки прямо на экране чата:
 
-1. Open a conversation (a channel or a direct message).
-2. Tap the **search icon** in the top bar.
-3. Type into the **Search messages…** field. The search runs as you type, across all stored messages in that conversation.
-4. Use the **N / M** result counter and the **previous / next arrows** to jump between matches, which are highlighted in the conversation.
+1. Откройте переписку (канал или личное сообщение).
+2. Нажмите **значок поиска** в верхней панели.
+3. Введите текст в поле **"Поиск сообщений…"**. Поиск выполняется по мере твоего ввода по всем сохранённым сообщениям в этой переписке.
+4. Используйте счётчик результатов **N / M** и стрелки **вперёд / назад** для перехода между совпадениями, которые подсвечиваются в переписке.
 
-![Message search bar with result counter and previous/next arrows](../../assets/screenshots/messages_search_bar.png)
+![Панель поиска сообщений со счётчиком результатов и стрелками вперёд/назад](../../assets/screenshots/messages_search_bar.png)
 
-> 💡 **Tip:** Search is full-text and stays within the conversation you opened it from — it doesn't search across other channels or contacts. It matches against the messages already stored on your device, so it works fully offline.
+> 💡 **Совет:** Поиск полнотекстовый и ограничивается перепиской, из которого ты его открыл — он не ищет по другим каналам или контактам. Он сопоставляет текст с сообщениями, уже сохранёнными на твоём устройстве, поэтому работает полностью офлайн.
 
-### Message Bubbles
+### Пузырьки сообщения
 
-Messages appear as chat bubbles — sent messages on the right, received messages on the left. Each bubble shows the sender, timestamp, and delivery status. Messages with replies include a quoted preview of the original message above the response.
+Сообщения отображаются в виде пузырьков чата — отправленные справа, полученные слева. В каждом пузырьке отображаются отправитель, время и статус доставки. Сообщения с ответами содержат цитируемый предпросмотр исходного сообщения над ответом.
 
-### Text Formatting
+### Форматирование текста
 
-Messages support lightweight inline **Markdown**. Received messages render the styling with the syntax characters removed:
+Сообщения поддерживают облегчённую встроенную разметку Markdown. Полученные сообщения отображают оформление со скрытыми символами синтаксиса:
 
-| Тип           | Syntax                         | Renders as           |
-| ------------- | ------------------------------ | -------------------- |
-| Bold          | `**bold**`                     | **bold**             |
-| Italic        | `*italic*`                     | _italic_             |
-| Strikethrough | `~~strike~~`                   | ~~strike~~           |
-| Inline code   | `` `code` ``                   | monospace `code`     |
-| Link          | `[label](https://example.com)` | a tappable **label** |
+| Тип            | Синтаксис                      | Отображается как      |
+| -------------- | ------------------------------ | --------------------- |
+| Жирный         | `**жирный**`                   | **жирный**            |
+| Курсив         | `*курсив*`                     | _курсив_              |
+| Зачёркнутый    | `~~зачёркнутый~~`              | ~~зачёркнутый~~       |
+| Встроенный код | `` `код` ``                    | моноширинный `код`    |
+| Ссылка         | `[текст](https://example.com)` | нажимаемая **ссылка** |
 
-When composing, focus the message field and type at least three characters to reveal a **formatting toolbar** below the input. Select text and tap a style to wrap it (tap again to remove it); with no selection, a style inserts an empty pair with the cursor between the markers. The link button opens a dialog to enter a URL. As you type, the draft styles live in the field while the underlying text keeps its Markdown characters.
+При создании сообщения установите фокус на поле ввода и введите не менее трёх символов — под полем появится **панель форматирования**. Выделите текст и нажмите на стиль, чтобы применить его (повторное нажатие убирает форматирование); если текст не выделен, будет вставлена пустая пара символов разметки, а курсор окажется между ними. Кнопка вставки ссылки открывает диалог для ввода URL-адреса. В процессе твоего набора черновые стили отображаются в поле, но в самом тексте сохраняются символы Markdown.
 
-> 💡 **Tip:** Formatting is carried as literal characters on the mesh — the same bytes iOS sends. Clients that don't support Markdown (older apps, plain firmware clients) will show the raw `**`/`~~` characters. URLs, email addresses, and phone numbers are still auto-linked whether or not you use Markdown.
+> 💡 **Совет:** Форматирование передаётся по mesh-сети как есть — теми же байтами, что и iOS. Клиенты, не поддерживающие Markdown (старые приложения, простые клиенты на прошивке), отобразят сырые символы `**`/`~~`. URL-адреса, адреса электронной почты и номера телефонов всё равно автоматически становятся ссылками независимо от того, используете ли вы Markdown.
 
-### Mentions
+### Упоминания
 
-Type `@` while composing to mention a node — a picker suggests matching contacts as you type. In a received message, a mention appears as a highlighted chip showing the node's name; tap it to jump straight to that node's detail page.
+Введите `@` при написании сообщения, чтобы упомянуть ноду — по мере твоего ввода будет появляться список подходящих контактов. В полученном сообщении упоминание отображается как выделенный элемент с именем ноды; нажмите на него, чтобы сразу перейти на страницу сведений о ноде.
 
-### Reactions
+### Реакции
 
-React to messages with emoji:
+Реагируйте на сообщения с помощью эмодзи:
 
-- **Long-press** a message to open the actions menu
-- Tap **Add Reaction** to choose an emoji
-- Reactions appear below the message bubble
-- Multiple users can react to the same message
-- React to your own messages or others' messages
+- **Нажмите и удерживайте** сообщение, чтобы открыть меню действий
+- Нажмите **"Добавить реакцию"**, чтобы выбрать эмодзи
+- Реакции появляются под пузырьком сообщения
+- Несколько пользователей могут отреагировать на одно и то же сообщение
+- Реагируйте на свои сообщения или сообщения других
 
-![Emoji reaction badges displayed beneath a message](../../assets/screenshots/messages_reaction.png)
+![Значки реакций-эмодзи, отображаемые под сообщением](../../assets/screenshots/messages_reaction.png)
 
-> 💡 **Tip:** Reactions are lightweight — they use minimal mesh bandwidth compared to full text messages.
+> 💡 **Совет:** Реакции очень лёгкие — они потребляют гораздо меньше трафика mesh-сети по сравнению с полными текстовыми сообщениями.
 
-### Message Actions
+### Действия с сообщениями
 
-Long-press any message to access:
+Нажмите и удерживайте любое сообщение, чтобы получить доступ к:
 
-- **Copy** — copy message text to clipboard
-- **Reply** — quote the message in your response
-- **React** — add an emoji reaction
-- **Translate** — translate a received message into your device language and toggle between the original and translated text (Google Play build only; uses on-device translation)
+- **Копировать** — скопировать текст сообщения в буфер обмена
+- **Ответить** — процитировать сообщение в твоём ответе
+- **Реагировать** — добавить реакцию-эмодзи
+- **Перевести** — перевести полученное сообщение на язык твоего устройства и переключаться между оригиналом и переводом (только в сборке Google Play; используется встроенный перевод)
 - **Delete** — remove a message you sent (local deletion)
 
 ### Message Priority
@@ -173,7 +173,7 @@ Long-press any message to access:
 Messages are queued and transmitted based on priority:
 
 1. Emergency/alert messages (highest)
-2. Direct messages
+2. Личные сообщения
 3. Channel broadcasts (lowest)
 
 ### Message Limits

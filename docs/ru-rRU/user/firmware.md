@@ -3,7 +3,7 @@ title: Обновления прошивки
 parent: Руководство пользователя
 nav_order: 13
 last_updated: 2026-07-07
-description: Update your radio firmware over Bluetooth or USB — OTA process, version channels, pre-flight checks, and recovery.
+description: Обновляйте прошивку своего радио по Bluetooth или USB — процесс OTA, каналы версий, предполётные проверки и восстановление.
 aliases:
   - firmware
   - update
@@ -13,114 +13,114 @@ aliases:
 
 # Обновления прошивки
 
-Keep your Meshtastic radio up to date with the latest firmware for new features, bug fixes, and security improvements.
+Поддерживайте своё радио Meshtastic в актуальном состоянии с помощью последней прошивки для получения новых функций, исправлений ошибок и улучшений безопасности.
 
-## Checking for Updates
+## Проверка обновлений
 
-1. Open the connected radio's configuration and, under **Advanced**, tap **Firmware Update**. The entry appears only for OTA-capable devices.
-2. The app checks for available firmware versions.
-3. Available updates show the version number and changelog summary.
+1. Откройте конфигурацию подключённого радио и в разделе **"Дополнительно"** нажмите **"Обновление прошивки"**. Этот пункт появляется только для устройств, поддерживающих OTA.
+2. Приложение проверяет доступные версии прошивки.
+3. Доступные обновления показывают номер версии и сводку изменений.
 
-## Update Methods
+## Методы обновления
 
-### OTA (Over-The-Air) via Bluetooth
+### OTA (беспроводное обновление) через Bluetooth
 
-The most common update method for Android users:
+Наиболее распространённый способ обновления для пользователей Android:
 
-1. Ensure your radio is connected via Bluetooth.
-2. Navigate to the Firmware Update screen.
-3. Select the desired firmware version.
-4. Tap **Update** to begin the OTA process.
-5. Wait for the update to complete — **do not disconnect** during the update.
+1. Убедитесь, что твоё радио подключено по Bluetooth.
+2. Перейдите на экран "Обновление прошивки".
+3. Выберите нужную версию прошивки.
+4. Нажмите **"Обновить"**, чтобы начать процесс OTA.
+5. Дождитесь завершения обновления — **не отключайте устройство** во время обновления.
 
-![Firmware checking for updates](../../assets/screenshots/firmware_checking.png)
+![Проверка обновлений прошивки](../../assets/screenshots/firmware_checking.png)
 
-> ⚠️ **Warning:** Interrupting a firmware update can brick your device. Ensure your radio has sufficient battery (>50% recommended) and maintain Bluetooth proximity during the entire process.
+> ⚠️ **Предупреждение:** Прерывание обновления прошивки может вывести твоё устройство из строя. Убедись, что твоё радио имеет достаточный заряд батареи (рекомендуется >50%) и сохраняйте близость Bluetooth на протяжении всего процесса.
 
-![Firmware disclaimer](../../assets/screenshots/firmware_disclaimer.png)
+![Предупреждение о прошивке](../../assets/screenshots/firmware_disclaimer.png)
 
-### In-App USB Update
+### Обновление внутри приложения по USB
 
-When your radio is connected over **USB/serial** (rather than Bluetooth), the Firmware Update screen offers **USB File Transfer**. The app reboots the device into DFU mode, then prompts you to save the `.uf2` file to the device's DFU drive using the system file picker. This option appears only on a USB/serial connection — it is not available over Bluetooth.
+Когда твоё радио подключено по **USB/seria**l (а не по Bluetooth), на экране обновления прошивки появляется опция **"Передача файла по USB"**. Приложение перезагружает устройство в режим DFU, а затем предлагает сохранить файл `.uf2` на DFU-диск устройства с помощью системного выбора файлов. Эта опция появляется только при подключении по USB/serial — она недоступна по Bluetooth.
 
-> ℹ️ **nRF bootloader note:** Some devices (e.g. RAK WisBlock RAK4631) need their bootloader flashed with the vendor's serial DFU tool (such as `adafruit-nrfutil`) — copying the `.uf2` alone won't update the bootloader. The app surfaces a hint when this applies.
+> ℹ️ **Примечание о загрузчике nRF:** Некоторым устройствам (например, RAK WisBlock RAK4631) требуется прошить загрузчик с помощью фирменной последовательной утилиты DFU (такой как `adafruit-nrfutil`) — простое копирование `.uf2` не обновит загрузчик. Приложение покажет подсказку, когда это необходимо.
 
-### Other Flashing Options
+### Другие способы прошивки
 
-For recovery or when neither OTA nor in-app USB is available:
+Для восстановления или когда ни OTA, ни внутри приложение USB недоступны:
 
-- Use the [Meshtastic Web Flasher](https://flasher.meshtastic.org)
-- Or the [Meshtastic CLI tool](https://meshtastic.org/docs/getting-started/flashing-firmware) on desktop
+- Используйте [Meshtastic Web Flasher](https://flasher.meshtastic.org)
+- Или инструмент командной строки [Meshtastic CLI](https://meshtastic.org/docs/getting-started/flashing-firmware) на компьютере
 
-## Version Channels
+## Каналы версий
 
-| Канал          | Описание                                                                   |
-| -------------- | -------------------------------------------------------------------------- |
-| Стабильная     | Recommended for most users; tested releases                                |
-| Альфа          | Preview releases; may contain bugs                                         |
-| Локальный файл | Flash a firmware file you select yourself, instead of a downloaded release |
+| Канал          | Описание                                                                    |
+| -------------- | --------------------------------------------------------------------------- |
+| Стабильная     | Рекомендуется для большинства пользователей; протестированные релизы        |
+| Альфа          | Предварительные релизы; могут содержать ошибки                              |
+| Локальный файл | Прошить файл прошивки, который ты выбираешь сам, вместо загруженного релиза |
 
-## Pre-Update Checklist
+## Предполётная проверка
 
-Before updating:
+Перед обновлением:
 
-- [ ] Battery > 50%
-- [ ] Stable Bluetooth connection
-- [ ] Note your current settings (they may reset on major version changes)
-- [ ] Check the release notes for breaking changes
+- [ ] Заряд батареи > 50%
+- [ ] Стабильное соединение Bluetooth
+- [ ] Запишите свои текущие настройки (они могут сброситься при смене мажорной версии)
+- [ ] Проверьте примечания к релизу на наличие критических изменений
 
-## Post-Update
+## После обновления
 
-After the firmware is written, the app verifies the update and waits for the device to come back online:
+После записи прошивки приложение проверяет обновление и ждёт, пока устройство снова станет доступным:
 
-![Verifying update and waiting for the device to reconnect](../../assets/screenshots/firmware_verifying.png)
+![Проверка обновления и ожидание переподключения устройства](../../assets/screenshots/firmware_verifying.png)
 
-Once the update succeeds:
+После успешного обновления:
 
-- The radio will reboot automatically
-- Bluetooth connection will re-establish
-- Verify your settings are intact
-- Confirm the new version under **Currently Installed** on the Firmware Update screen — it's also shown on the node's detail page and the Connections screen
+- Радио перезагрузится автоматически
+- Соединение Bluetooth восстановится
+- Убедись, что твои настройки сохранились
+- Проверьте новую версию в разделе **"Установленная версия"** на экране обновления прошивки — она также отображается на странице сведений о ноде и на экране "Подключения"
 
-![Firmware update success](../../assets/screenshots/firmware_success.png)
+![Успешное обновление прошивки](../../assets/screenshots/firmware_success.png)
 
-## Troubleshooting
+## Устранение неполадок
 
-### Update Stuck
+### Обновление зависло
 
-If the update appears frozen:
+Если обновление кажется зависшим:
 
-- Wait at least 5 minutes before intervening
-- If truly stuck, power-cycle the radio
-- Attempt the update again
+- Подождите не менее 5 минут, прежде чем предпринимать действия
+- Если действительно зависло, перезагрузите радио выключением и включением питания
+- Попробуйте обновление снова
 
-![Firmware update error](../../assets/screenshots/firmware_error.png)
+![Ошибка обновления прошивки](../../assets/screenshots/firmware_error.png)
 
-### Device Won't Boot After Update
+### Устройство не загружается после обновления
 
-If your device fails to boot:
+Если твоё устройство не загружается:
 
-1. Try connecting via USB to a computer
-2. Use the web flasher in recovery/DFU mode
-3. Flash a known-good firmware version
-4. Check the Meshtastic Discord for device-specific recovery steps
+1. Попробуйте подключиться по USB к компьютеру
+2. Используйте Web Flasher в режиме восстановления/DFU
+3. Прошивайте заведомо рабочую версию прошивки
+4. Обратитесь к Discord-серверу Meshtastic для получения инструкций по восстановлению, специфичных для твоего устройства
 
-### Compatibility Warnings
+### Предупреждения о совместимости
 
-The app may show warnings when:
+Приложение может показывать предупреждения, когда:
 
-- Connected radio firmware is below minimum supported version
-- Major version mismatch between app and firmware
-- Deprecated features need migration
+- Прошивка подключённого радио ниже минимально поддерживаемой версии
+- Несовпадение мажорных версий приложения и прошивки
+- Устаревшие функции требуют миграции
 
-> ⚠️ **Important:** Always update the Meshtastic app before or alongside firmware updates to ensure compatibility.
+> ⚠️ **Важно:** Всегда обновляйте приложение Meshtastic до или одновременно с обновлением прошивки, чтобы обеспечить совместимость.
 
-## Related Topics
+## Связанные темы
 
-- [Connections](connections) — reconnecting after a firmware update
-- [Flashing firmware guide](https://meshtastic.org/docs/getting-started/flashing-firmware) — full firmware flashing walkthrough on meshtastic.org
-- [Supported devices](https://meshtastic.org/docs/hardware/devices) — check firmware compatibility by device
-- [FAQ](https://meshtastic.org/docs/about/faq) — common questions on meshtastic.org
+- [Подключения](connections) — восстановление соединения после обновления прошивки
+- [Руководство по прошивке](https://meshtastic.org/docs/getting-started/flashing-firmware)— полное пошаговое руководство по полной прошивке на meshtastic.org
+- [Поддерживаемые устройства](https://meshtastic.org/docs/hardware/devices) — проверьте совместимость прошивки с устройством
+- [Часто задаваемые вопросы](https://meshtastic.org/docs/about/faq) — распространённые вопросы на meshtastic.org
 
 ---
 
