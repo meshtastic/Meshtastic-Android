@@ -177,8 +177,8 @@ class PacketHandlerImpl(
         }
     }
 
-    override fun removeResponse(dataRequestId: Int, complete: Boolean) {
-        scope.launch { responseMutex.withLock { queueResponse.remove(dataRequestId)?.complete(complete) } }
+    override suspend fun removeResponse(dataRequestId: Int, complete: Boolean) {
+        responseMutex.withLock { queueResponse.remove(dataRequestId)?.complete(complete) }
     }
 
     /**

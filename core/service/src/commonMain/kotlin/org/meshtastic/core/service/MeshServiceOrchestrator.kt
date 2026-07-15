@@ -166,9 +166,14 @@ class MeshServiceOrchestrator(
         radioInterfaceService.receivedData
             // This loop is the single lifeline for every inbound packet. handleFromRadio is already total, but guard
             // here too so nothing — now or later — can cancel the collection and leave the radio permanently deaf.
-            .onEach { bytes ->
-                safeCatching { messageProcessor.handleFromRadio(bytes, nodeManager.myNodeNum.value) }
-                    .onFailure { Logger.e(it) { "Dropped inbound bytes after a receive-loop error" } }
+            .onEach { frame ->
+                val session = frame.session
+                if (!radioInterfaceService.isSessionActive(session)) {
+                    Logger.d { "Dropping queued frame from stale transport session gen=${session.generation}" }
+                    return@onEach
+                }
+                safeCatching { messageProcessor.handleFromRadio(frame, nodeManager.myNodeNum.value) }
+                    .onFailure { Logger.e(it) { "Dropped inbound frame after a receive-loop error" } }
             }
             .launchIn(newScope)
 

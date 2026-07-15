@@ -148,6 +148,34 @@ class MeshLogDaoTest {
     }
 
     @Test
+    fun testGetLogsSnapshotPageTraversesEqualTimestampsWithoutDuplicates() = runTest {
+        meshLogDao.insert(logEntry("log-a", time = 300))
+        meshLogDao.insert(logEntry("log-c", time = 200))
+        meshLogDao.insert(logEntry("log-b", time = 200))
+        meshLogDao.insert(logEntry("log-a2", time = 100))
+
+        val first =
+            meshLogDao.getLogsSnapshotPage(
+                testFromNum,
+                PortNum.TELEMETRY_APP.value,
+                beforeReceivedDate = null,
+                beforeUuid = null,
+                pageSize = 2,
+            )
+        val cursor = first.last()
+        val second =
+            meshLogDao.getLogsSnapshotPage(
+                testFromNum,
+                PortNum.TELEMETRY_APP.value,
+                beforeReceivedDate = cursor.received_date,
+                beforeUuid = cursor.uuid,
+                pageSize = 2,
+            )
+
+        assertEquals(listOf("log-a", "log-c", "log-b", "log-a2"), (first + second).map { it.uuid })
+    }
+
+    @Test
     fun testGetLogsSnapshotReturnsMatchingLogs() = runTest {
         meshLogDao.insert(logEntry("log-1", portNum = PortNum.TELEMETRY_APP.value, time = 300))
         meshLogDao.insert(logEntry("log-2", portNum = PortNum.TELEMETRY_APP.value, time = 100))

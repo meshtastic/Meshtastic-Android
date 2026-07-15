@@ -17,8 +17,12 @@
 package org.meshtastic.core.testing
 
 import kotlinx.atomicfu.atomic
+import kotlinx.atomicfu.locks.SynchronizedObject
+import kotlinx.atomicfu.locks.synchronized
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -26,11 +30,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.MeshActivity
 import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioSessionContext
+import org.meshtastic.core.repository.RadioSessionLease
+import org.meshtastic.core.repository.ReceivedRadioFrame
 import org.meshtastic.core.repository.TransportDisconnectReason
 
 /**
@@ -39,7 +50,8 @@ import org.meshtastic.core.repository.TransportDisconnectReason
  * The [connectionState] here mirrors the transport-level semantics of the real implementation. In production, only
  * [MeshConnectionManager][org.meshtastic.core.repository.MeshConnectionManager] observes this flow; tests should verify
  * that bridging behavior rather than consuming it directly from UI/feature test code (use
- * [FakeServiceRepository.connectionState] instead).
+ * [FakeServiceRepository.connectionState] instead). Address selection remains separate from transport admission:
+ * [connect] and an in-flight [restartTransport] publish a fresh monotonically increasing session generation.
  */
 @Suppress("TooManyFunctions")
 class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = MainScope()) : RadioInterfaceService {
@@ -53,10 +65,79 @@ class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = Main
     private val _currentDeviceAddressFlow = MutableStateFlow<String?>(null)
     override val currentDeviceAddressFlow: StateFlow<String?> = _currentDeviceAddressFlow
 
+    private val _sessionGeneration = MutableStateFlow(0L)
+    override val sessionGeneration: StateFlow<Long> = _sessionGeneration
+
+    private val _activeSession = MutableStateFlow<RadioSessionContext?>(null)
+    override val activeSession: StateFlow<RadioSessionContext?> = _activeSession
+
+    private val sessionAdmissionLock = SynchronizedObject()
+    private var sessionAdmissionOpen = false
+    private var admittedSessionOperations = 0
+    private var sessionDrainWaiter: CompletableDeferred<Unit>? = null
+    private val sessionOperationMutex = Mutex()
+
+    override fun isSessionActive(session: RadioSessionContext): Boolean =
+        synchronized(sessionAdmissionLock) { sessionAdmissionOpen && _activeSession.value == session }
+
+    override fun runIfSessionActive(session: RadioSessionContext, block: () -> Unit): Boolean =
+        synchronized(sessionAdmissionLock) {
+            if (!sessionAdmissionOpen || _activeSession.value != session) return@synchronized false
+            block()
+            true
+        }
+
+    override suspend fun runWithSessionLease(
+        session: RadioSessionContext,
+        block: suspend (RadioSessionLease) -> Unit,
+    ): Boolean {
+        val admittedSession =
+            synchronized(sessionAdmissionLock) {
+                val active = _activeSession.value
+                if (!sessionAdmissionOpen || active != session) {
+                    null
+                } else {
+                    admittedSessionOperations++
+                    active
+                }
+            } ?: return false
+
+        val lease =
+            object : RadioSessionLease {
+                override val session: RadioSessionContext = session
+
+                override fun isCurrent(): Boolean =
+                    synchronized(sessionAdmissionLock) { _activeSession.value == admittedSession }
+            }
+
+        try {
+            block(lease)
+            return true
+        } finally {
+            val waiter =
+                synchronized(sessionAdmissionLock) {
+                    check(_activeSession.value == admittedSession) {
+                        "Fake session changed before an admitted operation released its lease"
+                    }
+                    check(admittedSessionOperations > 0) { "Session operation count underflow" }
+                    admittedSessionOperations--
+                    if (admittedSessionOperations == 0) {
+                        sessionDrainWaiter.also { sessionDrainWaiter = null }
+                    } else {
+                        null
+                    }
+                }
+            waiter?.complete(Unit)
+        }
+    }
+
+    override suspend fun runWhileSessionActive(session: RadioSessionContext, block: suspend () -> Unit): Boolean =
+        sessionOperationMutex.withLock { runWithSessionLease(session) { block() } }
+
     // Use an unbounded Channel to mirror SharedRadioInterfaceService semantics. A MutableSharedFlow would
     // hide the stop/start backlog bug that motivated the resetReceivedBuffer() API.
-    private val _receivedData = Channel<ByteArray>(Channel.UNLIMITED)
-    override val receivedData: Flow<ByteArray> = _receivedData.receiveAsFlow()
+    private val _receivedData = Channel<ReceivedRadioFrame>(Channel.UNLIMITED)
+    override val receivedData: Flow<ReceivedRadioFrame> = _receivedData.receiveAsFlow()
 
     private val _meshActivity = MutableSharedFlow<MeshActivity>()
     override val meshActivity: Flow<MeshActivity> = _meshActivity.asFlow()
@@ -77,14 +158,20 @@ class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = Main
 
     override fun connect() {
         connectCalled = true
+        if (_activeSession.value == null) admitSelectedSession()
     }
 
     override suspend fun disconnect() {
         connectCalled = false
+        revokeActiveSession()
     }
 
     override suspend fun restartTransport() {
         restartTransportCalled = true
+        if (connectCalled && _activeSession.value != null) {
+            revokeActiveSession()
+            admitSelectedSession()
+        }
     }
 
     override fun getDeviceAddress(): String? = _currentDeviceAddressFlow.value
@@ -92,6 +179,47 @@ class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = Main
     override fun setDeviceAddress(deviceAddr: String?): Boolean {
         _currentDeviceAddressFlow.value = deviceAddr
         return true
+    }
+
+    private fun admitSelectedSession() {
+        val address = _currentDeviceAddressFlow.value
+        synchronized(sessionAdmissionLock) {
+            check(_activeSession.value == null && admittedSessionOperations == 0) {
+                "Cannot admit a fake transport while the previous session is still draining"
+            }
+            if (address == null) {
+                sessionAdmissionOpen = false
+                return
+            }
+            val generation = _sessionGeneration.value + 1
+            _sessionGeneration.value = generation
+            _activeSession.value = RadioSessionContext(generation, address)
+            sessionAdmissionOpen = true
+        }
+    }
+
+    private suspend fun revokeActiveSession() {
+        val session = synchronized(sessionAdmissionLock) { _activeSession.value } ?: return
+        withContext(NonCancellable) {
+            val waiter =
+                synchronized(sessionAdmissionLock) {
+                    if (_activeSession.value != session) return@synchronized null
+                    sessionAdmissionOpen = false
+                    if (admittedSessionOperations == 0) {
+                        null
+                    } else {
+                        sessionDrainWaiter ?: CompletableDeferred<Unit>().also { sessionDrainWaiter = it }
+                    }
+                }
+            waiter?.await()
+            synchronized(sessionAdmissionLock) {
+                if (_activeSession.value == session) {
+                    check(admittedSessionOperations == 0) { "Fake session revoked before admitted operations drained" }
+                    _activeSession.value = null
+                    sessionDrainWaiter = null
+                }
+            }
+        }
     }
 
     override fun toInterfaceAddress(interfaceId: InterfaceId, rest: String): String = "$interfaceId:$rest"
@@ -105,7 +233,8 @@ class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = Main
     }
 
     override fun handleFromRadio(bytes: ByteArray) {
-        _receivedData.trySend(bytes)
+        val session = _activeSession.value ?: return
+        runIfSessionActive(session) { emitFromRadio(bytes, session) }
     }
 
     override fun resetReceivedBuffer() {
@@ -115,8 +244,8 @@ class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = Main
 
     // --- Helper methods for testing ---
 
-    fun emitFromRadio(bytes: ByteArray) {
-        _receivedData.trySend(bytes)
+    fun emitFromRadio(bytes: ByteArray, session: RadioSessionContext) {
+        _receivedData.trySend(ReceivedRadioFrame(bytes.toByteString(), session))
     }
 
     fun setConnectionState(state: ConnectionState) {

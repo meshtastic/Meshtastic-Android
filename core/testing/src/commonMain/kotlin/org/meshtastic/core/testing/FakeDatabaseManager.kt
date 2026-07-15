@@ -29,6 +29,7 @@ class FakeDatabaseManager :
     override val cacheLimit: StateFlow<Int> = _cacheLimit
 
     var lastSwitchedAddress: String? = null
+    var lastAssociatedAddress: String? = null
     var lastAssociatedNode: Int? = null
     var lastAssociatedDeviceId: String? = null
     val existingDatabases = mutableSetOf<String>()
@@ -37,6 +38,7 @@ class FakeDatabaseManager :
         registerResetAction {
             _cacheLimit.value = DEFAULT_CACHE_LIMIT
             lastSwitchedAddress = null
+            lastAssociatedAddress = null
             lastAssociatedNode = null
             lastAssociatedDeviceId = null
             existingDatabases.clear()
@@ -53,7 +55,14 @@ class FakeDatabaseManager :
         lastSwitchedAddress = address
     }
 
-    override suspend fun associateDevice(nodeNum: Int, deviceId: String?) {
+    override suspend fun associateDevice(
+        address: String,
+        nodeNum: Int,
+        deviceId: String?,
+        isSessionActive: () -> Boolean,
+    ) {
+        if (lastSwitchedAddress != address || !isSessionActive()) return
+        lastAssociatedAddress = address
         lastAssociatedNode = nodeNum
         lastAssociatedDeviceId = deviceId
     }

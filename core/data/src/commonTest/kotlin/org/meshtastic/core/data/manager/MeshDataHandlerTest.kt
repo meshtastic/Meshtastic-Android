@@ -17,12 +17,14 @@
 package org.meshtastic.core.data.manager
 
 import dev.mokkery.MockMode
+import dev.mokkery.answering.calls
 import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify
+import dev.mokkery.verify.VerifyMode.Companion.exactly
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -52,6 +54,9 @@ import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioSessionContext
+import org.meshtastic.core.repository.RadioSessionLease
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.StoreForwardPacketHandler
 import org.meshtastic.core.repository.TelemetryPacketHandler
@@ -94,6 +99,18 @@ class MeshDataHandlerTest {
     private val storeForwardHandler: StoreForwardPacketHandler = mock(MockMode.autofill)
     private val telemetryHandler: TelemetryPacketHandler = mock(MockMode.autofill)
     private val adminPacketHandler: AdminPacketHandler = mock(MockMode.autofill)
+    private val radioInterfaceService: RadioInterfaceService = mock(MockMode.autofill)
+    private val session = RadioSessionContext(generation = 7L, address = "tcp:test")
+
+    private fun testLease(session: RadioSessionContext): RadioSessionLease = object : RadioSessionLease {
+        override val session: RadioSessionContext = session
+
+        override fun isCurrent(): Boolean = true
+    }
+
+    private fun MeshDataHandlerImpl.handleReceivedData(packet: MeshPacket, myNodeNum: Int) {
+        handleReceivedData(packet, myNodeNum, session)
+    }
 
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
@@ -149,12 +166,23 @@ class MeshDataHandlerTest {
                     serviceNotifications = serviceNotifications,
                     crossingStore = GeofenceCrossingStore(),
                     notificationPrefs = FakeNotificationPrefs(),
+                    radioInterfaceService = radioInterfaceService,
                     scope = geofenceScope,
                 ),
                 meshBeaconRepository = meshBeaconRepository,
+                radioInterfaceService = radioInterfaceService,
                 scope = testScope,
             )
 
+        everySuspend { radioInterfaceService.runWithSessionLease(any(), any()) } calls
+            {
+                val requestedSession = it.args[0] as RadioSessionContext
+
+                @Suppress("UNCHECKED_CAST")
+                val block = it.args[1] as (suspend (RadioSessionLease) -> Unit)
+                block(testLease(requestedSession))
+                true
+            }
         // Default: mapper returns null for empty packets, which is the safe default
         every { dataMapper.toDataPacket(any()) } returns null
         // Stub commonly accessed properties to avoid NPE from autofill
@@ -262,7 +290,7 @@ class MeshDataHandlerTest {
 
         handler.handleReceivedData(packet, myNodeNum)
 
-        verify { nodeManager.handleReceivedPosition(remoteNum, myNodeNum, any(), 1000L) }
+        verify { nodeManager.handleReceivedPosition(remoteNum, myNodeNum, any(), 1000L, session) }
     }
 
     // --- NodeInfo handling ---
@@ -288,7 +316,7 @@ class MeshDataHandlerTest {
 
         handler.handleReceivedData(packet, myNodeNum)
 
-        verify { nodeManager.handleReceivedUser(remoteNum, any(), any(), any()) }
+        verify { nodeManager.handleReceivedUser(remoteNum, any(), any(), any(), session) }
     }
 
     @Test
@@ -311,7 +339,9 @@ class MeshDataHandlerTest {
 
         handler.handleReceivedData(packet, myNodeNum)
 
-        verify(mode = dev.mokkery.verify.VerifyMode.not) { nodeManager.handleReceivedUser(any(), any(), any(), any()) }
+        verify(mode = dev.mokkery.verify.VerifyMode.not) {
+            nodeManager.handleReceivedUser(any(), any(), any(), any(), any())
+        }
     }
 
     // --- Paxcounter handling ---
@@ -336,7 +366,7 @@ class MeshDataHandlerTest {
 
         handler.handleReceivedData(packet, 123)
 
-        verify { nodeManager.handleReceivedPaxcounter(remoteNum, any()) }
+        verify { nodeManager.handleReceivedPaxcounter(remoteNum, any(), session) }
     }
 
     // --- Traceroute handling ---
@@ -359,7 +389,7 @@ class MeshDataHandlerTest {
 
         handler.handleReceivedData(packet, 123)
 
-        verify { tracerouteHandler.handleTraceroute(packet, any(), any()) }
+        verify { tracerouteHandler.handleTraceroute(packet, any(), any(), session) }
     }
 
     // --- NeighborInfo handling ---
@@ -468,13 +498,13 @@ class MeshDataHandlerTest {
 
         handler.handleReceivedData(packet, 123)
 
-        verify { storeForwardHandler.handleStoreAndForward(packet, any(), 123) }
+        verify { storeForwardHandler.handleStoreAndForward(packet, any(), 123, session) }
     }
 
     // --- Routing/ACK-NAK handling ---
 
     @Test
-    fun `routing packet with successful ack broadcasts and removes response`() {
+    fun `routing packet with successful ack broadcasts and removes response`() = testScope.runTest {
         val routing = Routing(error_reason = Routing.Error.NONE)
         val packet =
             MeshPacket(
@@ -493,8 +523,37 @@ class MeshDataHandlerTest {
         every { nodeManager.toNodeID(456) } returns "!remote"
 
         handler.handleReceivedData(packet, 123)
+        advanceUntilIdle()
 
-        verify { packetHandler.removeResponse(99, complete = true) }
+        verifySuspend { packetHandler.removeResponse(99, complete = true) }
+    }
+
+    @Test
+    fun `routing ack from a retired generation cannot update the replacement database`() = testScope.runTest {
+        val routing = Routing(error_reason = Routing.Error.NONE)
+        val packet =
+            MeshPacket(
+                from = 456,
+                decoded =
+                Data(portnum = PortNum.ROUTING_APP, payload = routing.encode().toByteString(), request_id = 99),
+            )
+        val dataPacket =
+            DataPacket(
+                from = "!remote",
+                to = NodeAddress.ID_BROADCAST,
+                bytes = routing.encode().toByteString(),
+                dataType = PortNum.ROUTING_APP.value,
+            )
+        every { dataMapper.toDataPacket(packet) } returns dataPacket
+        every { nodeManager.toNodeID(456) } returns "!remote"
+        everySuspend { radioInterfaceService.runWithSessionLease(session, any()) } returns false
+
+        handler.handleReceivedData(packet, 123)
+        advanceUntilIdle()
+
+        verifySuspend(exactly(0)) { packetRepository.getPacketByPacketId(any()) }
+        verifySuspend(exactly(0)) { packetRepository.update(any(), any()) }
+        verifySuspend(exactly(0)) { packetHandler.removeResponse(any(), any()) }
     }
 
     @Test
@@ -545,7 +604,7 @@ class MeshDataHandlerTest {
 
         handler.handleReceivedData(packet, 123)
 
-        verify { telemetryHandler.handleTelemetry(packet, any(), 123) }
+        verify { telemetryHandler.handleTelemetry(packet, any(), 123, session) }
     }
 
     @Test
@@ -573,7 +632,7 @@ class MeshDataHandlerTest {
 
         handler.handleReceivedData(packet, myNodeNum)
 
-        verify { telemetryHandler.handleTelemetry(packet, any(), myNodeNum) }
+        verify { telemetryHandler.handleTelemetry(packet, any(), myNodeNum, session) }
     }
 
     // --- Text message handling ---
@@ -607,6 +666,33 @@ class MeshDataHandlerTest {
         advanceUntilIdle()
 
         verifySuspend { packetRepository.insert(any(), 123, any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun `text persistence from a retired session is rejected before database access`() = testScope.runTest {
+        val packet =
+            MeshPacket(
+                id = 45,
+                from = 456,
+                decoded =
+                Data(portnum = PortNum.TEXT_MESSAGE_APP, payload = "late".encodeToByteArray().toByteString()),
+            )
+        val dataPacket =
+            DataPacket(
+                id = 45,
+                from = "!remote",
+                to = NodeAddress.ID_BROADCAST,
+                bytes = "late".encodeToByteArray().toByteString(),
+                dataType = PortNum.TEXT_MESSAGE_APP.value,
+            )
+        every { dataMapper.toDataPacket(packet) } returns dataPacket
+        everySuspend { radioInterfaceService.runWithSessionLease(session, any()) } returns false
+
+        handler.handleReceivedData(packet, 123)
+        advanceUntilIdle()
+
+        verifySuspend(exactly(0)) { packetRepository.findPacketsWithId(any()) }
+        verifySuspend(exactly(0)) { packetRepository.insert(any(), any(), any(), any(), any(), any()) }
     }
 
     @Test
@@ -731,7 +817,7 @@ class MeshDataHandlerTest {
 
         handler.handleReceivedData(packet, 123)
 
-        verify { adminPacketHandler.handleAdminMessage(packet, 123) }
+        verify { adminPacketHandler.handleAdminMessage(packet, 123, session) }
     }
 
     // --- Message filtering ---

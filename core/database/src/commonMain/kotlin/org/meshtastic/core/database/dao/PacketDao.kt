@@ -619,8 +619,8 @@ interface PacketDao {
     @Transaction
     suspend fun updatePacketByKey(data: DataPacket, routingError: Int) {
         findPacketsWithId(data.id)
-            .find { it.data.id == data.id && it.data.from == data.from && it.data.to == data.to }
-            ?.let { existing ->
+            .filter { it.data.id == data.id && it.data.from == data.from && it.data.to == data.to }
+            .forEach { existing ->
                 val updated =
                     if (routingError >= 0) {
                         existing.copy(data = data, routingError = routingError)
@@ -632,18 +632,25 @@ interface PacketDao {
     }
 
     /**
-     * Atomically finds a reaction by [replacement]'s packetId + userId + emoji and updates it, borrowing
-     * [myNodeNum][ReactionEntity.myNodeNum] from the existing row. No-op if no match is found.
+     * Atomically finds reactions by [replacement]'s packetId + userId + emoji and updates every ownership-scoped copy,
+     * borrowing [myNodeNum][ReactionEntity.myNodeNum] from each existing row. No-op if no match is found.
      */
     @Transaction
     suspend fun updateReactionByKey(replacement: ReactionEntity) {
-        val existing =
-            findReactionsWithId(replacement.packetId).find {
-                it.userId == replacement.userId && it.emoji == replacement.emoji
-            } ?: return
-        // myNodeNum is part of the composite PK and must come from the existing row.
-        update(replacement.copy(myNodeNum = existing.myNodeNum))
+        findReactionsWithId(replacement.packetId)
+            .filter { it.userId == replacement.userId && it.emoji == replacement.emoji }
+            .forEach { existing ->
+                // myNodeNum is part of the composite PK and must come from each existing row.
+                update(replacement.copy(myNodeNum = existing.myNodeNum))
+            }
     }
+
+    // ── SFPP helpers: shared no-downgrade guard + timestamp resolution used by both applySFPPStatus and
+    //     applySFPPStatusByHash. Extracted so a future status-guard change only touches one predicate.
+    private fun MessageStatus.isDowngradeFrom(current: MessageStatus?) =
+        current == MessageStatus.SFPP_CONFIRMED && this == MessageStatus.SFPP_ROUTING
+
+    private fun resolveNewTime(rxTime: Long, fallback: Long) = if (rxTime > 0) rxTime * MILLIS_PER_SECOND else fallback
 
     /**
      * Atomically applies an SFPP delivery-status transition to every packet and reaction matching [packetId] + address
@@ -677,10 +684,8 @@ interface PacketDao {
             val fromMatches =
                 packet.data.from == fromId || (isFromLocalNode && packet.data.from == NodeAddress.ID_LOCAL)
             if (fromMatches && packet.data.to == toId) {
-                if (packet.data.status == MessageStatus.SFPP_CONFIRMED && status == MessageStatus.SFPP_ROUTING) {
-                    return@forEach
-                }
-                val newTime = if (rxTime > 0) rxTime * MILLIS_PER_SECOND else packet.received_time
+                if (status.isDowngradeFrom(packet.data.status)) return@forEach
+                val newTime = resolveNewTime(rxTime, packet.received_time)
                 val updatedData = packet.data.copy(status = status, sfppHash = hash, time = newTime)
                 update(packet.copy(data = updatedData, sfpp_hash = hash, received_time = newTime))
             }
@@ -689,10 +694,8 @@ interface PacketDao {
         reactions.forEach { reaction ->
             val fromMatches = reaction.userId == fromId || (isFromLocalNode && reaction.userId == NodeAddress.ID_LOCAL)
             if (fromMatches && (reaction.to == null || reaction.to == toId)) {
-                if (reaction.status == MessageStatus.SFPP_CONFIRMED && status == MessageStatus.SFPP_ROUTING) {
-                    return@forEach
-                }
-                val newTime = if (rxTime > 0) rxTime * MILLIS_PER_SECOND else reaction.timestamp
+                if (status.isDowngradeFrom(reaction.status)) return@forEach
+                val newTime = resolveNewTime(rxTime, reaction.timestamp)
                 update(reaction.copy(status = status, sfpp_hash = hash, timestamp = newTime))
             }
         }
@@ -705,18 +708,14 @@ interface PacketDao {
     @Transaction
     suspend fun applySFPPStatusByHash(hash: ByteString, status: MessageStatus, rxTime: Long) {
         findPacketBySfppHash(hash)?.let { packet ->
-            if (packet.data.status == MessageStatus.SFPP_CONFIRMED && status == MessageStatus.SFPP_ROUTING) {
-                return@let
-            }
-            val newTime = if (rxTime > 0) rxTime * MILLIS_PER_SECOND else packet.received_time
+            if (status.isDowngradeFrom(packet.data.status)) return@let
+            val newTime = resolveNewTime(rxTime, packet.received_time)
             val updatedData = packet.data.copy(status = status, sfppHash = hash, time = newTime)
             update(packet.copy(data = updatedData, sfpp_hash = hash, received_time = newTime))
         }
         findReactionBySfppHash(hash)?.let { reaction ->
-            if (reaction.status == MessageStatus.SFPP_CONFIRMED && status == MessageStatus.SFPP_ROUTING) {
-                return@let
-            }
-            val newTime = if (rxTime > 0) rxTime * MILLIS_PER_SECOND else reaction.timestamp
+            if (status.isDowngradeFrom(reaction.status)) return@let
+            val newTime = resolveNewTime(rxTime, reaction.timestamp)
             update(reaction.copy(status = status, sfpp_hash = hash, timestamp = newTime))
         }
     }

@@ -32,6 +32,7 @@ kotlin {
         commonMain.dependencies {
             implementation(libs.androidx.sqlite.bundled)
             implementation(libs.androidx.datastore.preferences)
+            implementation(libs.kotlinx.atomicfu)
             implementation(libs.okio)
 
             api(projects.core.common)

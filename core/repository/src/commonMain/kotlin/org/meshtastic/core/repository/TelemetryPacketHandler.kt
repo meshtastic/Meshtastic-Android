@@ -27,6 +27,7 @@ interface TelemetryPacketHandler {
      * @param packet The received mesh packet.
      * @param dataPacket The decoded data packet.
      * @param myNodeNum The local node number.
+     * @param session The immutable transport session that admitted [packet].
      */
-    fun handleTelemetry(packet: MeshPacket, dataPacket: DataPacket, myNodeNum: Int)
+    fun handleTelemetry(packet: MeshPacket, dataPacket: DataPacket, myNodeNum: Int, session: RadioSessionContext)
 }

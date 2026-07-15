@@ -17,25 +17,34 @@
 package org.meshtastic.core.data.manager
 
 import dev.mokkery.MockMode
+import dev.mokkery.answering.calls
 import dev.mokkery.answering.returns
 import dev.mokkery.answering.throws
 import dev.mokkery.every
+import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify
 import dev.mokkery.verify.VerifyMode
 import dev.mokkery.verifySuspend
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import okio.ByteString
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.repository.FromRadioPacketHandler
 import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.NodeManager
+import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioSessionContext
+import org.meshtastic.core.repository.RadioSessionLease
+import org.meshtastic.core.repository.ReceivedRadioFrame
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.FromRadio
@@ -44,6 +53,9 @@ import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class MeshMessageProcessorImplTest {
@@ -53,18 +65,73 @@ class MeshMessageProcessorImplTest {
     private val meshLogRepository = mock<MeshLogRepository>(MockMode.autofill)
     private val fromRadioDispatcher = mock<FromRadioPacketHandler>(MockMode.autofill)
     private val dataHandler = mock<MeshDataHandler>(MockMode.autofill)
+    private val radioInterfaceService = mock<RadioInterfaceService>(MockMode.autofill)
 
     private val testDispatcher = UnconfinedTestDispatcher()
 
     private lateinit var processor: MeshMessageProcessorImpl
 
     private val myNodeNum = 12345
+    private val session = RadioSessionContext(generation = 3L, address = "tcp:test")
+    private val activeSession = MutableStateFlow<RadioSessionContext?>(session)
     private val isNodeDbReady = MutableStateFlow(false)
+
+    private fun testLease(session: RadioSessionContext): RadioSessionLease = object : RadioSessionLease {
+        override val session: RadioSessionContext = session
+
+        override fun isCurrent(): Boolean = activeSession.value == session
+    }
 
     @BeforeTest
     fun setUp() {
+        activeSession.value = session
+        isNodeDbReady.value = false
         every { nodeManager.isNodeDbReady } returns isNodeDbReady
         every { nodeManager.myNodeNum } returns MutableStateFlow<Int?>(myNodeNum)
+        every { radioInterfaceService.activeSession } returns activeSession
+        every { radioInterfaceService.isSessionActive(any()) } calls
+            {
+                activeSession.value == (it.args[0] as RadioSessionContext)
+            }
+        every { radioInterfaceService.runIfSessionActive(any(), any()) } calls
+            {
+                val requestedSession = it.args[0] as RadioSessionContext
+
+                @Suppress("UNCHECKED_CAST")
+                val block = it.args[1] as () -> Unit
+                if (activeSession.value == requestedSession) {
+                    block()
+                    true
+                } else {
+                    false
+                }
+            }
+        everySuspend { radioInterfaceService.runWhileSessionActive(any(), any()) } calls
+            {
+                val requestedSession = it.args[0] as RadioSessionContext
+
+                @Suppress("UNCHECKED_CAST")
+                val block = it.args[1] as (suspend () -> Unit)
+                if (activeSession.value == requestedSession) {
+                    block()
+                    true
+                } else {
+                    false
+                }
+            }
+        everySuspend { radioInterfaceService.runWithSessionLease(any(), any()) } calls
+            {
+                val requestedSession = it.args[0] as RadioSessionContext
+
+                @Suppress("UNCHECKED_CAST")
+                val block = it.args[1] as (suspend (RadioSessionLease) -> Unit)
+                if (activeSession.value == requestedSession) {
+                    block(testLease(requestedSession))
+                    true
+                } else {
+                    false
+                }
+            }
     }
 
     private fun createProcessor(scope: CoroutineScope): MeshMessageProcessorImpl = MeshMessageProcessorImpl(
@@ -73,8 +140,16 @@ class MeshMessageProcessorImplTest {
         meshLogRepository = lazy { meshLogRepository },
         dataHandler = lazy { dataHandler },
         fromRadioDispatcher = fromRadioDispatcher,
+        radioInterfaceService = radioInterfaceService,
         scope = scope,
     )
+
+    private fun frame(bytes: ByteArray, frameSession: RadioSessionContext = session) =
+        ReceivedRadioFrame(bytes.toByteString(), frameSession)
+
+    private suspend fun MeshMessageProcessorImpl.handleReceivedMeshPacket(packet: MeshPacket, myNodeNum: Int?) {
+        handleReceivedMeshPacket(packet, myNodeNum, session)
+    }
 
     // ---------- handleFromRadio: non-packet variants ----------
 
@@ -85,10 +160,10 @@ class MeshMessageProcessorImplTest {
         val fromRadio = FromRadio(log_record = logRecord)
         val bytes = fromRadio.encode()
 
-        processor.handleFromRadio(bytes, myNodeNum)
+        processor.handleFromRadio(frame(bytes), myNodeNum)
         advanceUntilIdle()
 
-        verify { fromRadioDispatcher.handleFromRadio(any()) }
+        verify { fromRadioDispatcher.handleFromRadio(any(), session) }
     }
 
     @Test
@@ -99,11 +174,11 @@ class MeshMessageProcessorImplTest {
         val logRecord = LogRecord(message = "fallback log")
         val bytes = logRecord.encode()
 
-        processor.handleFromRadio(bytes, myNodeNum)
+        processor.handleFromRadio(frame(bytes), myNodeNum)
         advanceUntilIdle()
 
         // Should have been dispatched as a FromRadio with log_record set
-        verify { fromRadioDispatcher.handleFromRadio(any()) }
+        verify { fromRadioDispatcher.handleFromRadio(any(), session) }
     }
 
     @Test
@@ -112,10 +187,115 @@ class MeshMessageProcessorImplTest {
         // Invalid protobuf bytes — both parses should fail
         val garbage = byteArrayOf(0xFF.toByte(), 0xFE.toByte(), 0xFD.toByte())
 
-        processor.handleFromRadio(garbage, myNodeNum)
+        processor.handleFromRadio(frame(garbage), myNodeNum)
         advanceUntilIdle()
         // No crash
     }
+
+    @Test
+    fun `stale session frame is dropped before dispatch or persistence`() = runTest(testDispatcher) {
+        processor = createProcessor(backgroundScope)
+        activeSession.value = RadioSessionContext(generation = 4L, address = session.address)
+        val fromRadio = FromRadio(log_record = LogRecord(message = "stale"))
+
+        processor.handleFromRadio(frame(fromRadio.encode()), myNodeNum)
+        advanceUntilIdle()
+
+        verify(mode = VerifyMode.exactly(0)) { fromRadioDispatcher.handleFromRadio(any(), any()) }
+        verifySuspend(mode = VerifyMode.exactly(0)) { nodeManager.updateNodeAndPersist(any(), any(), any()) }
+        verifySuspend(mode = VerifyMode.exactly(0)) { meshLogRepository.insert(any()) }
+    }
+
+    @Test
+    fun `session revoked after decode cannot reach packet handlers`() = runTest(testDispatcher) {
+        processor = createProcessor(backgroundScope)
+        val fromRadio = FromRadio(log_record = LogRecord(message = "revoked"))
+        everySuspend { radioInterfaceService.runWhileSessionActive(session, any()) } returns false
+
+        processor.handleFromRadio(frame(fromRadio.encode()), myNodeNum)
+        advanceUntilIdle()
+
+        verify(mode = VerifyMode.exactly(0)) { fromRadioDispatcher.handleFromRadio(any(), any()) }
+        verifySuspend(mode = VerifyMode.exactly(0)) { nodeManager.updateNodeAndPersist(any(), any(), any()) }
+        verifySuspend(mode = VerifyMode.exactly(0)) { meshLogRepository.insert(any()) }
+    }
+
+    @Test
+    fun `packet processing awaits node persistence before releasing session authority`() = runTest(testDispatcher) {
+        isNodeDbReady.value = true
+        every { nodeManager.myNodeNum } returns MutableStateFlow(null)
+        var authorityDepth = 0
+        everySuspend { radioInterfaceService.runWhileSessionActive(session, any()) } calls
+            {
+                @Suppress("UNCHECKED_CAST")
+                val block = it.args[1] as (suspend () -> Unit)
+                authorityDepth += 1
+                try {
+                    block()
+                    true
+                } finally {
+                    authorityDepth -= 1
+                }
+            }
+        processor = createProcessor(backgroundScope)
+        val persistenceStarted = CompletableDeferred<Unit>()
+        val releasePersistence = CompletableDeferred<Unit>()
+        everySuspend { nodeManager.updateNodeAndPersist(any(), any(), any()) } calls
+            {
+                assertTrue(authorityDepth > 0, "node persistence must begin while session authority is held")
+                persistenceStarted.complete(Unit)
+                releasePersistence.await()
+            }
+        val packet =
+            MeshPacket(
+                id = 9,
+                from = 999,
+                decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP, payload = ByteString.EMPTY),
+                rx_time = 1000,
+            )
+
+        val processing = async { processor.handleFromRadio(frame(FromRadio(packet = packet).encode()), myNodeNum) }
+        persistenceStarted.await()
+
+        assertFalse(processing.isCompleted, "session authority must remain held until node persistence finishes")
+        releasePersistence.complete(Unit)
+        processing.await()
+    }
+
+    @Test
+    fun `local sender packet persists one combined node update`() = runTest(testDispatcher) {
+        isNodeDbReady.value = true
+        every { nodeManager.myNodeNum } returns MutableStateFlow(myNodeNum)
+        processor = createProcessor(backgroundScope)
+        val packet =
+            MeshPacket(
+                id = 10,
+                from = myNodeNum,
+                decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP, payload = ByteString.EMPTY),
+                rx_time = 1,
+            )
+
+        processor.handleFromRadio(frame(FromRadio(packet = packet).encode()), myNodeNum)
+        advanceUntilIdle()
+
+        verifySuspend(mode = VerifyMode.exactly(1)) { nodeManager.updateNodeAndPersist(myNodeNum, any(), any()) }
+    }
+
+    @Test
+    fun `replacement generation refreshes the local node without waiting for the prior throttle`() =
+        runTest(testDispatcher) {
+            processor = createProcessor(backgroundScope)
+            val fromRadio = FromRadio(log_record = LogRecord(message = "alive"))
+
+            processor.handleFromRadio(frame(fromRadio.encode()), myNodeNum)
+            advanceUntilIdle()
+            val replacementSession = RadioSessionContext(generation = 4L, address = session.address)
+            activeSession.value = replacementSession
+            processor.handleFromRadio(frame(fromRadio.encode(), replacementSession), myNodeNum)
+            advanceUntilIdle()
+
+            verifySuspend(mode = VerifyMode.exactly(2)) { nodeManager.updateNodeAndPersist(myNodeNum, any(), any()) }
+        }
 
     @Test
     fun `a throwing handler does not propagate out of handleFromRadio`() = runTest(testDispatcher) {
@@ -123,13 +303,15 @@ class MeshMessageProcessorImplTest {
         // A malformed-but-decodable packet can make a downstream handler throw. That must NOT escape to the
         // receivedData collector, which would cancel the collection and silently deafen the radio (a remote DoS).
         // Regression guard for the safeCatching in processFromRadio: before that fix this call rethrew and failed.
-        every { fromRadioDispatcher.handleFromRadio(any()) } throws RuntimeException("hostile packet")
+        every { fromRadioDispatcher.handleFromRadio(any(), any()) } throws RuntimeException("hostile packet")
         val fromRadio = FromRadio(log_record = LogRecord(message = "boom")) // routes to fromRadioDispatcher
 
-        processor.handleFromRadio(fromRadio.encode(), myNodeNum) // must return normally, not throw
+        processor.handleFromRadio(frame(fromRadio.encode()), myNodeNum) // must return normally, not throw
         advanceUntilIdle()
 
-        verify { fromRadioDispatcher.handleFromRadio(any()) } // handler ran and threw, yet we are still here
+        verify {
+            fromRadioDispatcher.handleFromRadio(any(), session)
+        } // handler ran and threw, yet we are still here
     }
 
     // ---------- handleReceivedMeshPacket: early buffering ----------
@@ -179,6 +361,96 @@ class MeshMessageProcessorImplTest {
     }
 
     @Test
+    fun `buffer replay pauses without losing order when node DB readiness regresses`() = runTest(testDispatcher) {
+        processor = createProcessor(backgroundScope)
+        isNodeDbReady.value = false
+        val handledIds = mutableListOf<Int>()
+        every { dataHandler.handleReceivedData(any(), any(), any(), any(), any()) } calls
+            {
+                val packet = it.args[0] as MeshPacket
+                handledIds += packet.id
+                if (packet.id == 1) isNodeDbReady.value = false
+            }
+
+        listOf(1, 2).forEach { id ->
+            processor.handleReceivedMeshPacket(
+                MeshPacket(
+                    id = id,
+                    from = 999,
+                    decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP, payload = ByteString.EMPTY),
+                    rx_time = 1000 + id,
+                ),
+                myNodeNum,
+            )
+        }
+        advanceUntilIdle()
+
+        isNodeDbReady.value = true
+        advanceUntilIdle()
+        assertEquals(listOf(1), handledIds)
+
+        // Handling packet 1 regressed readiness to false, so this true transition rearms the replay collector.
+        isNodeDbReady.value = true
+        advanceUntilIdle()
+        assertEquals(listOf(1, 2), handledIds)
+    }
+
+    @Test
+    fun `packet audit work is rejected when session lease admission closes`() = runTest(testDispatcher) {
+        processor = createProcessor(backgroundScope)
+        isNodeDbReady.value = true
+        everySuspend { radioInterfaceService.runWithSessionLease(session, any()) } returns false
+        val packet =
+            MeshPacket(
+                id = 6,
+                from = 999,
+                decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP, payload = ByteString.EMPTY),
+                rx_time = 1000,
+            )
+
+        processor.handleFromRadio(frame(FromRadio(packet = packet).encode()), myNodeNum)
+        advanceUntilIdle()
+
+        verifySuspend(mode = VerifyMode.exactly(0)) { meshLogRepository.insert(any()) }
+        verifySuspend(mode = VerifyMode.exactly(0)) { serviceRepository.emitMeshPacket(any()) }
+    }
+
+    @Test
+    fun `buffered packet from retired session is not replayed into replacement session`() = runTest(testDispatcher) {
+        processor = createProcessor(backgroundScope)
+        isNodeDbReady.value = false
+        val processedIds = mutableListOf<Int>()
+        every { dataHandler.handleReceivedData(any(), any(), any(), any(), any()) } calls
+            {
+                processedIds += (it.args[0] as MeshPacket).id
+            }
+        val oldPacket =
+            MeshPacket(
+                id = 7,
+                from = 999,
+                decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP, payload = ByteString.EMPTY),
+                rx_time = 1000,
+            )
+
+        processor.handleFromRadio(frame(FromRadio(packet = oldPacket).encode()), myNodeNum)
+        advanceUntilIdle()
+
+        val replacementSession = RadioSessionContext(generation = 4L, address = session.address)
+        activeSession.value = replacementSession
+        val replacementPacket = oldPacket.copy(id = 8, rx_time = 1001)
+        processor.handleFromRadio(
+            frame(FromRadio(packet = replacementPacket).encode(), replacementSession),
+            myNodeNum,
+        )
+        advanceUntilIdle()
+
+        isNodeDbReady.value = true
+        advanceUntilIdle()
+
+        assertEquals(listOf(8), processedIds)
+    }
+
+    @Test
     fun `early buffer overflow drops oldest packet`() = runTest(testDispatcher) {
         processor = createProcessor(backgroundScope)
         isNodeDbReady.value = false
@@ -220,7 +492,7 @@ class MeshMessageProcessorImplTest {
         // escaped the bare `scope.launch` in flushEarlyReceivedPackets and crashed the whole app process
         // (observed live: "FATAL EXCEPTION" at MeshMessageProcessorImpl.kt:214, PID killed, "keeps
         // stopping" dialog on device). Fixed by wrapping each buffered packet's processing in safeCatching.
-        every { dataHandler.handleReceivedData(any(), any(), any(), any()) } throws
+        every { dataHandler.handleReceivedData(any(), any(), any(), any(), any()) } throws
             RuntimeException("corrupted NodeInfo")
 
         val poisoned =
@@ -246,8 +518,8 @@ class MeshMessageProcessorImplTest {
         advanceUntilIdle() // must not throw -- this is the crash repro point
 
         // Both packets were attempted -- the poisoned packet's throw did not stop the rest of the batch.
-        verify { nodeManager.updateNode(999, any(), any()) }
-        verify { nodeManager.updateNode(998, any(), any()) }
+        verifySuspend { nodeManager.updateNodeAndPersist(999, any(), any()) }
+        verifySuspend { nodeManager.updateNodeAndPersist(998, any(), any()) }
     }
 
     // ---------- handleReceivedMeshPacket: rx_time normalization ----------
@@ -309,7 +581,7 @@ class MeshMessageProcessorImplTest {
         advanceUntilIdle()
 
         // Should have called updateNode for myNodeNum (lastHeard update)
-        verify { nodeManager.updateNode(myNodeNum, any(), any()) }
+        verifySuspend { nodeManager.updateNodeAndPersist(myNodeNum, any(), any()) }
     }
 
     @Test
@@ -331,7 +603,7 @@ class MeshMessageProcessorImplTest {
         advanceUntilIdle()
 
         // Should have called updateNode for the sender
-        verify { nodeManager.updateNode(senderNode, any(), any()) }
+        verifySuspend { nodeManager.updateNodeAndPersist(senderNode, any(), any()) }
     }
 
     // ---------- handleReceivedMeshPacket: null decoded ----------
@@ -438,7 +710,7 @@ class MeshMessageProcessorImplTest {
         isNodeDbReady.value = true
         advanceUntilIdle()
 
-        // emitMeshPacket should NOT have been called (buffer was cleared)
+        verifySuspend(mode = VerifyMode.exactly(0)) { serviceRepository.emitMeshPacket(any()) }
     }
 
     // ---------- logVariant ----------
@@ -450,7 +722,7 @@ class MeshMessageProcessorImplTest {
         val fromRadio = FromRadio(log_record = logRecord)
         val bytes = fromRadio.encode()
 
-        processor.handleFromRadio(bytes, myNodeNum)
+        processor.handleFromRadio(frame(bytes), myNodeNum)
         advanceUntilIdle()
 
         verifySuspend { meshLogRepository.insert(any()) }

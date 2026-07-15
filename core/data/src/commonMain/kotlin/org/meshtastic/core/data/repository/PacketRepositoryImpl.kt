@@ -91,8 +91,9 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
     override fun getUnreadCountTotal(): Flow<Int> =
         dbManager.currentDb.flatMapLatest { db -> db.packetDao().getUnreadCountTotal() }
 
-    // One-shot writes go through withDb so they register with the cross-transport merge drain barrier and pick up
-    // its closed-pool retry (see DatabaseProvider). Reads and Flow/Paging factories stay on currentDb by design.
+    // One-shot writes go through withDb so they register with the cross-transport merge drain barrier. The callback
+    // is never replayed after it starts; callers needing retries must make that policy explicit where idempotency is
+    // known. Reads and Flow/Paging factories stay on currentDb by design.
 
     override suspend fun clearUnreadCount(contact: String, timestamp: Long) {
         withContext(dispatchers.io + NonCancellable) {
@@ -326,22 +327,22 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
         status: MessageStatus,
         rxTime: Long,
         myNodeNum: Int?,
-    ) = withContext(dispatchers.io) {
-        dbManager.withDb {
-            it.packetDao().applySFPPStatus(packetId, from, to, hash.toByteString(), status, rxTime, myNodeNum)
+    ) {
+        withContext(dispatchers.io) {
+            dbManager.withDb {
+                it.packetDao().applySFPPStatus(packetId, from, to, hash.toByteString(), status, rxTime, myNodeNum)
+            }
         }
-        Unit
     }
 
-    override suspend fun updateSFPPStatusByHash(hash: ByteArray, status: MessageStatus, rxTime: Long): Unit =
+    override suspend fun updateSFPPStatusByHash(hash: ByteArray, status: MessageStatus, rxTime: Long) {
         withContext(dispatchers.io) {
             dbManager.withDb { it.packetDao().applySFPPStatusByHash(hash.toByteString(), status, rxTime) }
-            Unit
         }
+    }
 
-    override suspend fun deleteMessages(uuidList: List<Long>) = withContext(dispatchers.io) {
-        dbManager.withDb { it.packetDao().deleteMessagesAtomic(uuidList) }
-        Unit
+    override suspend fun deleteMessages(uuidList: List<Long>) {
+        withContext(dispatchers.io) { dbManager.withDb { it.packetDao().deleteMessagesAtomic(uuidList) } }
     }
 
     override suspend fun deleteContacts(contactList: List<String>) {

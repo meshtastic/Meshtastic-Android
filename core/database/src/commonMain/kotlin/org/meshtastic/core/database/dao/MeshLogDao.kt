@@ -89,6 +89,32 @@ interface MeshLogDao {
     suspend fun getLogsSnapshot(fromNum: Int, portNum: Int, maxItem: Int): List<MeshLog>
 
     /**
+     * Returns one deterministic keyset page for bounded snapshot processing. [beforeReceivedDate] and [beforeUuid]
+     * identify the last row of the previous page; null values start from the newest row.
+     */
+    @Query(
+        """
+        SELECT * FROM log
+        WHERE from_num = :fromNum
+          AND (:portNum = -1 OR port_num = :portNum)
+          AND (
+            :beforeReceivedDate IS NULL
+            OR received_date < :beforeReceivedDate
+            OR (received_date = :beforeReceivedDate AND uuid < :beforeUuid)
+          )
+        ORDER BY received_date DESC, uuid DESC
+        LIMIT :pageSize
+        """,
+    )
+    suspend fun getLogsSnapshotPage(
+        fromNum: Int,
+        portNum: Int,
+        beforeReceivedDate: Long?,
+        beforeUuid: String?,
+        pageSize: Int,
+    ): List<MeshLog>
+
+    /**
      * Atomically deletes all logs matching [uuids], chunking internally to stay under SQLite's bind-parameter limit.
      * The entire batch is all-or-nothing: a failure rolls back every chunk.
      */

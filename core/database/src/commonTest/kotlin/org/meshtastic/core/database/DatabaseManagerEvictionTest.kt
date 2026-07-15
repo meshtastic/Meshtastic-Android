@@ -16,6 +16,8 @@
  */
 package org.meshtastic.core.database
 
+import androidx.datastore.preferences.core.preferencesOf
+import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -52,6 +54,37 @@ class DatabaseManagerEvictionTest {
         val victims = selectEvictionVictims(names, activeDbName = d, limit = 2, lastUsedMsByDb = lastUsed)
         // Need to evict 2; oldest are a, then b
         assertEquals(listOf(a, b), victims)
+    }
+
+    @Test
+    fun `pending route endpoints are excluded from eviction candidates`() {
+        val names = listOf(a, b, c, d)
+        val lastUsed = mapOf(a to 1L, b to 2L, c to 3L, d to 4L)
+        val victims =
+            selectEvictionVictims(
+                dbNames = names,
+                activeDbName = d,
+                limit = 2,
+                lastUsedMsByDb = lastUsed,
+                protectedDbNames = setOf(a, b),
+            )
+
+        // The cache remains one over its configured limit because recovery evidence outranks eviction.
+        assertEquals(listOf(c), victims)
+    }
+
+    @Test
+    fun `extracts both sides of every persisted pending route`() {
+        val prefs =
+            preferencesOf(
+                stringPreferencesKey("${DatabaseConstants.PENDING_SOURCE_DB_FOR_PREFIX}ble:a") to a,
+                stringPreferencesKey("${DatabaseConstants.PENDING_DESTINATION_DB_FOR_PREFIX}ble:a") to b,
+                stringPreferencesKey("${DatabaseConstants.PENDING_SOURCE_DB_FOR_PREFIX}tcp:b") to c,
+                stringPreferencesKey("${DatabaseConstants.PENDING_DESTINATION_DB_FOR_PREFIX}tcp:b") to d,
+                stringPreferencesKey("unrelated") to "not-a-database",
+            )
+
+        assertEquals(setOf(a, b, c, d), pendingRouteDbNames(prefs))
     }
 
     @Test

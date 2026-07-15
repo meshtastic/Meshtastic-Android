@@ -26,5 +26,5 @@ interface AdminPacketHandler {
      * @param packet The received mesh packet.
      * @param myNodeNum The local node number.
      */
-    fun handleAdminMessage(packet: MeshPacket, myNodeNum: Int)
+    fun handleAdminMessage(packet: MeshPacket, myNodeNum: Int, session: RadioSessionContext)
 }

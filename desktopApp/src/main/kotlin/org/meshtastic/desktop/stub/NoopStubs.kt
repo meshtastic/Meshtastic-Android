@@ -25,6 +25,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
@@ -39,6 +40,9 @@ import org.meshtastic.core.repository.MeshLocationManager
 import org.meshtastic.core.repository.MeshWorkerManager
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioSessionContext
+import org.meshtastic.core.repository.RadioSessionLease
+import org.meshtastic.core.repository.ReceivedRadioFrame
 import org.meshtastic.core.repository.TransportDisconnectReason
 import org.meshtastic.proto.MqttClientProxyMessage
 import org.meshtastic.mqtt.ConnectionState as MqttConnectionState
@@ -67,10 +71,21 @@ class NoopRadioInterfaceService : RadioInterfaceService {
 
     override val connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
     override val currentDeviceAddressFlow = MutableStateFlow<String?>(null)
+    override val sessionGeneration: StateFlow<Long> = MutableStateFlow(0L)
+    override val activeSession: StateFlow<RadioSessionContext?> = MutableStateFlow(null)
+
+    override fun isSessionActive(session: RadioSessionContext): Boolean = false
+
+    override fun runIfSessionActive(session: RadioSessionContext, block: () -> Unit): Boolean = false
+
+    override suspend fun runWithSessionLease(
+        session: RadioSessionContext,
+        block: suspend (RadioSessionLease) -> Unit,
+    ): Boolean = false
 
     override fun isMockTransport(): Boolean = false
 
-    override val receivedData = MutableSharedFlow<ByteArray>()
+    override val receivedData = MutableSharedFlow<ReceivedRadioFrame>()
     override val meshActivity: Flow<MeshActivity> = MutableSharedFlow<MeshActivity>()
     override val connectionError: Flow<String> = MutableSharedFlow<String>()
 

@@ -103,9 +103,10 @@ class PacketDaoAtomicTransactionTest {
         status: MessageStatus = MessageStatus.UNKNOWN,
         routingError: Int = -1,
         sfppHash: ByteString? = null,
+        ownerNodeNum: Int = myNodeNum,
     ) = Packet(
         uuid = 0L,
-        myNodeNum = myNodeNum,
+        myNodeNum = ownerNodeNum,
         port_num = PortNum.TEXT_MESSAGE_APP.value,
         contact_key = contact,
         received_time = time,
@@ -135,8 +136,9 @@ class PacketDaoAtomicTransactionTest {
         to: String? = null,
         status: MessageStatus = MessageStatus.UNKNOWN,
         sfppHash: ByteString? = null,
+        ownerNodeNum: Int = myNodeNum,
     ) = ReactionEntity(
-        myNodeNum = myNodeNum,
+        myNodeNum = ownerNodeNum,
         replyId = replyId,
         userId = userId,
         emoji = emoji,
@@ -164,7 +166,7 @@ class PacketDaoAtomicTransactionTest {
 
         val settings = packetDao.getContactSettings(contact)
         assertNotNull(settings)
-        assertEquals(42L, settings!!.lastReadMessageUuid)
+        assertEquals(42L, settings.lastReadMessageUuid)
         assertEquals(1000L, settings.lastReadMessageTimestamp)
     }
 
@@ -200,7 +202,7 @@ class PacketDaoAtomicTransactionTest {
 
         val settings = packetDao.getContactSettings(contact)
         assertNotNull(settings)
-        assertEquals(99L, settings!!.lastReadMessageUuid)
+        assertEquals(99L, settings.lastReadMessageUuid)
         assertEquals(3000L, settings.lastReadMessageTimestamp)
     }
 
@@ -213,7 +215,7 @@ class PacketDaoAtomicTransactionTest {
 
         val settings = packetDao.getContactSettings(contact)
         assertNotNull(settings)
-        assertEquals(42L, settings!!.lastReadMessageUuid)
+        assertEquals(42L, settings.lastReadMessageUuid)
         assertEquals(2000L, settings.lastReadMessageTimestamp)
     }
 
@@ -262,7 +264,7 @@ class PacketDaoAtomicTransactionTest {
 
         val settings = packetDao.getContactSettings(contact)
         assertNotNull(settings)
-        assertEquals(42L, settings!!.lastReadMessageUuid, "lastReadMessageUuid should be updated")
+        assertEquals(42L, settings.lastReadMessageUuid, "lastReadMessageUuid should be updated")
         assertEquals(3000L, settings.lastReadMessageTimestamp, "lastReadMessageTimestamp should be updated")
         assertEquals(999_999_999L, settings.muteUntil, "muteUntil must be preserved")
         assertTrue(settings.filteringDisabled, "filteringDisabled must be preserved")
@@ -281,12 +283,12 @@ class PacketDaoAtomicTransactionTest {
 
         val settingsA = packetDao.getContactSettings(contactA)
         assertNotNull(settingsA)
-        assertEquals(30L, settingsA!!.lastReadMessageUuid, "contact A updated to 30")
+        assertEquals(30L, settingsA.lastReadMessageUuid, "contact A updated to 30")
         assertEquals(3000L, settingsA.lastReadMessageTimestamp)
 
         val settingsB = packetDao.getContactSettings(contactB)
         assertNotNull(settingsB)
-        assertEquals(20L, settingsB!!.lastReadMessageUuid, "contact B unchanged at 20")
+        assertEquals(20L, settingsB.lastReadMessageUuid, "contact B unchanged at 20")
         assertEquals(2000L, settingsB.lastReadMessageTimestamp)
     }
 
@@ -299,7 +301,7 @@ class PacketDaoAtomicTransactionTest {
 
         val settings = packetDao.getContactSettings(contact)
         assertNotNull(settings)
-        assertEquals(42L, settings!!.lastReadMessageUuid)
+        assertEquals(42L, settings.lastReadMessageUuid)
         assertEquals(2000L, settings.lastReadMessageTimestamp)
     }
 
@@ -325,6 +327,24 @@ class PacketDaoAtomicTransactionTest {
         assertEquals(MessageStatus.DELIVERED, updated?.data?.status)
         assertEquals(MessageStatus.UNKNOWN, untouchedFrom?.data?.status)
         assertEquals(MessageStatus.UNKNOWN, untouchedTo?.data?.status)
+    }
+
+    @Test
+    fun updatePacketByKeyUpdatesEveryOwnershipScopedCopy() = runTest {
+        seedMyNodeInfo()
+        val canonical = textPacket("contact", "canonical", time = 100, packetId = 55, from = "!aa", to = "^all")
+        val legacy =
+            textPacket("contact", "legacy", time = 101, packetId = 55, from = "!aa", to = "^all", ownerNodeNum = 0)
+        packetDao.insert(canonical)
+        packetDao.insert(legacy)
+
+        packetDao.updatePacketByKey(canonical.data.copy(status = MessageStatus.DELIVERED), routingError = 4)
+
+        val matching = packetDao.findPacketsWithId(55).filter { it.data.from == "!aa" && it.data.to == "^all" }
+        assertEquals(2, matching.size)
+        assertTrue(matching.all { it.data.status == MessageStatus.DELIVERED })
+        assertTrue(matching.all { it.routingError == 4 })
+        assertEquals(setOf(0, myNodeNum), matching.map { it.myNodeNum }.toSet())
     }
 
     @Test
@@ -377,9 +397,28 @@ class PacketDaoAtomicTransactionTest {
 
         val updated = packetDao.findReactionsWithId(80).find { it.userId == "!u" && it.emoji == "👍" }
         assertNotNull(updated)
-        assertEquals(999, updated!!.timestamp)
+        assertEquals(999, updated.timestamp)
         assertEquals(MessageStatus.SFPP_CONFIRMED, updated.status)
         assertEquals(sfppHash, updated.sfpp_hash)
+    }
+
+    @Test
+    fun updateReactionByKeyUpdatesEveryOwnershipScopedCopy() = runTest {
+        seedMyNodeInfo()
+        packetDao.insert(textPacket("contact", "msg", time = 100, packetId = 84))
+        packetDao.insert(reaction(replyId = 84, userId = "!u", emoji = "👍", timestamp = 1, packetId = 84))
+        packetDao.insert(
+            reaction(replyId = 84, userId = "!u", emoji = "👍", timestamp = 2, packetId = 84, ownerNodeNum = 0),
+        )
+
+        packetDao.updateReactionByKey(
+            reaction(replyId = 84, userId = "!u", emoji = "👍", timestamp = 999, packetId = 84, ownerNodeNum = 0),
+        )
+
+        val matching = packetDao.findReactionsWithId(84).filter { it.userId == "!u" && it.emoji == "👍" }
+        assertEquals(2, matching.size)
+        assertTrue(matching.all { it.timestamp == 999L })
+        assertEquals(setOf(0, myNodeNum), matching.map { it.myNodeNum }.toSet())
     }
 
     @Test
@@ -401,7 +440,7 @@ class PacketDaoAtomicTransactionTest {
 
         val updated = packetDao.findReactionsWithId(81).find { it.userId == "!u" && it.emoji == "❤️" }
         assertNotNull(updated)
-        assertEquals(myNodeNum, updated!!.myNodeNum, "myNodeNum must be borrowed from existing row, not 0")
+        assertEquals(myNodeNum, updated.myNodeNum, "myNodeNum must be borrowed from existing row, not 0")
         assertEquals(555, updated.timestamp)
     }
 
@@ -743,11 +782,11 @@ class PacketDaoAtomicTransactionTest {
 
         val packet = packetDao.findPacketBySfppHash(fullHash)
         assertNotNull(packet)
-        assertEquals(MessageStatus.SFPP_ROUTING, packet!!.data.status)
+        assertEquals(MessageStatus.SFPP_ROUTING, packet.data.status)
 
         val reaction = packetDao.findReactionBySfppHash(fullHash)
         assertNotNull(reaction)
-        assertEquals(MessageStatus.SFPP_ROUTING, reaction!!.status)
+        assertEquals(MessageStatus.SFPP_ROUTING, reaction.status)
     }
 
     @Test
@@ -810,7 +849,7 @@ class PacketDaoAtomicTransactionTest {
 
         val packet = packetDao.findPacketBySfppHash(sfppHash)
         assertNotNull(packet)
-        assertEquals(MessageStatus.SFPP_CONFIRMED, packet!!.data.status, "confirmed packet must not be downgraded")
+        assertEquals(MessageStatus.SFPP_CONFIRMED, packet.data.status, "confirmed packet must not be downgraded")
     }
 
     @Test
@@ -824,7 +863,7 @@ class PacketDaoAtomicTransactionTest {
 
         val packet = packetDao.findPacketBySfppHash(sfppHash)
         assertNotNull(packet)
-        assertEquals(MessageStatus.UNKNOWN, packet!!.data.status, "unrelated hash should be untouched")
+        assertEquals(MessageStatus.UNKNOWN, packet.data.status, "unrelated hash should be untouched")
     }
 
     // ── deleteMessagesAtomic ─────────────────────────────────────────────────────

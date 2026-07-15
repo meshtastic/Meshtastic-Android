@@ -181,28 +181,42 @@ open class MeshLogRepositoryImpl(
     }
 
     /**
-     * Deletes only local stats telemetry logs for [nodeNum], preserving other telemetry types. Selection and deletion
-     * retain one admitted database while protobuf parsing runs on the compute dispatcher; deletion of the selected UUID
-     * set is atomic.
+     * Deletes only local stats telemetry logs for [nodeNum], preserving other telemetry types. The bounded keyset scan
+     * and atomic deletion remain under one manager-tracked database lease, while protobuf parsing runs on the compute
+     * dispatcher.
      */
     override suspend fun deleteLocalStatsLogs(nodeNum: Int) = withContext(dispatchers.io) {
         val myNodeNum = nodeInfoReadDataSource.myNodeInfoFlow().firstOrNull()?.myNodeNum
         val logId = if (nodeNum == myNodeNum) MeshLog.NODE_NUM_LOCAL else nodeNum
-        dbManager.withDb { db ->
-            val dao = db.meshLogDao()
-            // Snapshot read outside the transaction — the selection requires Kotlin protobuf parsing
-            // (parseTelemetryLog), so it cannot be a single SQL operation. The delete targets stable UUIDs,
-            // so a concurrent insert between snapshot and delete is simply not in the delete set.
-            val logs = dao.getLogsSnapshot(logId, PortNum.TELEMETRY_APP.value, Int.MAX_VALUE)
-            val uuidsToDelete =
-                withContext(dispatchers.default) {
-                    logs
-                        .map { it.asExternalModel() }
-                        .filter { parseTelemetryLog(it)?.local_stats != null }
-                        .map { it.uuid }
+        dbManager.withDb { selectedDb ->
+            val dao = selectedDb.meshLogDao()
+            val uuidsToDelete = mutableListOf<String>()
+            var beforeReceivedDate: Long? = null
+            var beforeUuid: String? = null
+            do {
+                val page =
+                    dao.getLogsSnapshotPage(
+                        fromNum = logId,
+                        portNum = PortNum.TELEMETRY_APP.value,
+                        beforeReceivedDate = beforeReceivedDate,
+                        beforeUuid = beforeUuid,
+                        pageSize = TELEMETRY_SNAPSHOT_PAGE_SIZE,
+                    )
+                uuidsToDelete +=
+                    withContext(dispatchers.default) {
+                        page
+                            .asSequence()
+                            .map { it.asExternalModel() }
+                            .filter { parseTelemetryLog(it)?.local_stats != null }
+                            .map { it.uuid }
+                            .toList()
+                    }
+                page.lastOrNull()?.let { last ->
+                    beforeReceivedDate = last.received_date
+                    beforeUuid = last.uuid
                 }
-            // The chunked delete runs inside one Room transaction — all-or-nothing. Avoid opening an empty write
-            // transaction when the snapshot contains no local-stats telemetry.
+            } while (page.size == TELEMETRY_SNAPSHOT_PAGE_SIZE)
+
             if (uuidsToDelete.isNotEmpty()) {
                 dao.deleteLogsByUuidAtomic(uuidsToDelete)
             }
@@ -220,5 +234,6 @@ open class MeshLogRepositoryImpl(
 
     companion object {
         private const val MILLIS_PER_SEC = 1000L
+        private const val TELEMETRY_SNAPSHOT_PAGE_SIZE = 512
     }
 }

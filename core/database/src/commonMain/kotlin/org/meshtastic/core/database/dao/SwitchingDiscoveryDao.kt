@@ -31,8 +31,8 @@ import org.meshtastic.core.database.entity.DiscoverySessionEntity
  * - Flow methods re-latch via `currentDb.flatMapLatest`, so an open discovery screen follows a device/DB switch instead
  *   of watching the old database forever.
  * - Suspend methods go through [DatabaseProvider.withDb], so writes register with the cross-transport merge drain
- *   barrier (a mid-scan merge can't snapshot-then-retire the DB underneath an in-flight session write) and every call
- *   picks up withDb's closed-pool retry — a pinned DAO used to throw unrecoverably once its DB was retired.
+ *   barrier (a mid-scan merge can't snapshot-then-retire the DB underneath an in-flight session write). A callback is
+ *   never replayed after it starts, so higher layers must make any retry policy explicit where idempotency is known.
  *
  * `withDb` only returns null when no database is open, which [DatabaseProvider] guarantees can't happen (the default DB
  * is the floor), so the non-null coercions below are structural, not behavioral.

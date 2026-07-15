@@ -37,6 +37,7 @@ import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NotificationPrefs
 import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.Waypoint
 import kotlin.test.Test
@@ -119,6 +120,7 @@ class GeofenceMonitorTest {
                 m.notifications,
                 GeofenceCrossingStore(),
                 m.notificationPrefs,
+                mock<RadioInterfaceService>(MockMode.autofill),
                 scope,
             )
         scope.advanceUntilIdle() // collect the active-geofence snapshot

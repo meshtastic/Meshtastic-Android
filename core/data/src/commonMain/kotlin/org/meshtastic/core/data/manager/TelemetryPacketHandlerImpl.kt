@@ -18,7 +18,6 @@ package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.koin.core.annotation.Named
@@ -32,6 +31,8 @@ import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.Notification
 import org.meshtastic.core.repository.NotificationManager
+import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.TelemetryPacketHandler
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.getStringSuspend
@@ -50,81 +51,71 @@ class TelemetryPacketHandlerImpl(
     private val nodeManager: NodeManager,
     private val connectionManager: Lazy<MeshConnectionManager>,
     private val notificationManager: NotificationManager,
+    private val radioInterfaceService: RadioInterfaceService,
     @Named("ServiceScope") private val scope: CoroutineScope,
 ) : TelemetryPacketHandler {
 
     private val batteryMutex = Mutex()
     private val notifiedNodes = mutableSetOf<Int>()
 
-    @Suppress("LongMethod", "CyclomaticComplexMethod")
-    override fun handleTelemetry(packet: MeshPacket, dataPacket: DataPacket, myNodeNum: Int) {
+    @Suppress("LongMethod", "CyclomaticComplexMethod", "ReturnCount")
+    override fun handleTelemetry(
+        packet: MeshPacket,
+        dataPacket: DataPacket,
+        myNodeNum: Int,
+        session: RadioSessionContext,
+    ) {
         val payload = packet.decoded?.payload ?: return
-        val t =
+        val telemetry =
             (Telemetry.ADAPTER.decodeOrNull(payload, Logger) ?: return).let {
                 if (it.time == 0) it.copy(time = (dataPacket.time.milliseconds.inWholeSeconds).toInt()) else it
             }
-        Logger.d { "Telemetry from ${packet.from}: ${Telemetry.ADAPTER.toOneLiner(t)}" }
+        Logger.d { "Telemetry from ${packet.from}: ${Telemetry.ADAPTER.toOneLiner(telemetry)}" }
         val fromNum = packet.from
-        val isRemote = (fromNum != myNodeNum)
-        if (!isRemote) {
-            connectionManager.value.updateTelemetry(t)
-        }
+        val isRemote = fromNum != myNodeNum
+        if (!isRemote) connectionManager.value.updateTelemetry(telemetry)
 
-        nodeManager.updateNode(fromNum) { node: Node ->
-            val metrics = t.device_metrics
-            val environment = t.environment_metrics
-            val power = t.power_metrics
-
+        val transform: (Node) -> Node = { node ->
             var nextNode = node
-            when {
-                metrics != null -> {
-                    nextNode = nextNode.copy(deviceMetrics = metrics)
-                    if (fromNum == myNodeNum || (isRemote && node.isFavorite)) {
-                        if (
-                            (metrics.voltage ?: 0f) > BATTERY_PERCENT_UNSUPPORTED &&
-                            (metrics.battery_level ?: 0) <= BATTERY_PERCENT_LOW_THRESHOLD
-                        ) {
-                            scope.launch {
-                                if (shouldBatteryNotificationShow(fromNum, t, myNodeNum)) {
-                                    notificationManager.dispatch(
-                                        Notification(
-                                            title =
-                                            getStringSuspend(
-                                                Res.string.low_battery_title,
-                                                nextNode.user.short_name,
-                                            ),
-                                            message =
-                                            getStringSuspend(
-                                                Res.string.low_battery_message,
-                                                nextNode.user.long_name,
-                                                nextNode.deviceMetrics.battery_level ?: 0,
-                                            ),
-                                            category = Notification.Category.Battery,
-                                        ),
-                                    )
-                                }
-                            }
-                        } else {
-                            scope.launch {
-                                batteryMutex.withLock { notifiedNodes.remove(fromNum) }
-                                notificationManager.cancel(nextNode.num)
-                            }
-                        }
-                    }
-                }
-
-                environment != null -> nextNode = nextNode.copy(environmentMetrics = environment)
-
-                power != null -> nextNode = nextNode.copy(powerMetrics = power)
-
-                t.air_quality_metrics != null -> {
-                    t.air_quality_metrics?.let { aq -> nextNode = nextNode.copy(airQualityMetrics = aq) }
-                }
-            }
-
-            val telemetryTime = if (t.time != 0) t.time else nextNode.lastHeard
+            telemetry.device_metrics?.let { nextNode = nextNode.copy(deviceMetrics = it) }
+            telemetry.environment_metrics?.let { nextNode = nextNode.copy(environmentMetrics = it) }
+            telemetry.power_metrics?.let { nextNode = nextNode.copy(powerMetrics = it) }
+            telemetry.air_quality_metrics?.let { nextNode = nextNode.copy(airQualityMetrics = it) }
+            val telemetryTime = if (telemetry.time != 0) telemetry.time else nextNode.lastHeard
             val newLastHeard = clampTimestampToNow(maxOf(nextNode.lastHeard, telemetryTime))
             nextNode.copy(lastHeard = newLastHeard)
+        }
+        nodeManager.updateNodeForSession(fromNum, session, transform = transform)
+
+        val metrics = telemetry.device_metrics ?: return
+        val updatedNode = nodeManager.nodeDBbyNodeNum[fromNum] ?: return
+        if (fromNum != myNodeNum && !updatedNode.isFavorite) return
+
+        if (
+            (metrics.voltage ?: 0f) > BATTERY_PERCENT_UNSUPPORTED &&
+            (metrics.battery_level ?: 0) <= BATTERY_PERCENT_LOW_THRESHOLD
+        ) {
+            radioInterfaceService.launchSessionWork(scope, session) {
+                if (shouldBatteryNotificationShow(fromNum, telemetry, myNodeNum)) {
+                    notificationManager.dispatch(
+                        Notification(
+                            title = getStringSuspend(Res.string.low_battery_title, updatedNode.user.short_name),
+                            message =
+                            getStringSuspend(
+                                Res.string.low_battery_message,
+                                updatedNode.user.long_name,
+                                updatedNode.deviceMetrics.battery_level ?: 0,
+                            ),
+                            category = Notification.Category.Battery,
+                        ),
+                    )
+                }
+            }
+        } else {
+            radioInterfaceService.launchSessionWork(scope, session) {
+                batteryMutex.withLock { notifiedNodes.remove(fromNum) }
+                notificationManager.cancel(updatedNode.num)
+            }
         }
     }
 

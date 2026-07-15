@@ -17,11 +17,21 @@
 package org.meshtastic.core.data.manager
 
 import dev.mokkery.MockMode
+import dev.mokkery.answering.calls
 import dev.mokkery.answering.returns
 import dev.mokkery.every
+import dev.mokkery.everySuspend
+import dev.mokkery.matcher.any
 import dev.mokkery.mock
+import dev.mokkery.verify.VerifyMode.Companion.exactly
+import dev.mokkery.verifySuspend
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.MyNodeInfo
@@ -29,6 +39,8 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NotificationManager
+import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.proto.DeviceMetrics
 import org.meshtastic.proto.EnvironmentMetrics
 import org.meshtastic.proto.HardwareModel
@@ -37,6 +49,7 @@ import org.meshtastic.proto.User
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -47,13 +60,14 @@ class NodeManagerImplTest {
 
     private val nodeRepository: NodeRepository = mock(MockMode.autofill)
     private val notificationManager: NotificationManager = mock(MockMode.autofill)
+    private val radioInterfaceService: RadioInterfaceService = mock(MockMode.autofill)
     private val testScope = TestScope()
 
     private lateinit var nodeManager: NodeManagerImpl
 
     @BeforeTest
     fun setUp() {
-        nodeManager = NodeManagerImpl(nodeRepository, notificationManager, testScope)
+        nodeManager = NodeManagerImpl(nodeRepository, notificationManager, radioInterfaceService, testScope)
     }
 
     @Test
@@ -65,6 +79,101 @@ class NodeManagerImplTest {
         assertEquals(nodeNum, result.num)
         assertTrue(result.user.long_name.startsWith("Meshtastic"))
         assertEquals(NodeAddress.numToDefaultId(nodeNum), result.user.id)
+    }
+
+    @Test
+    fun `updateNodeAndPersist awaits the repository write`() = testScope.runTest {
+        val nodeNum = 1234
+        nodeManager.setNodeDbReady(true)
+        nodeManager.setAllowNodeDbWrites(true)
+        val writeStarted = CompletableDeferred<Unit>()
+        val releaseWrite = CompletableDeferred<Unit>()
+        everySuspend { nodeRepository.upsert(any()) } calls
+            {
+                writeStarted.complete(Unit)
+                releaseWrite.await()
+            }
+
+        val update = async { nodeManager.updateNodeAndPersist(nodeNum) { node -> node.copy(lastHeard = 42) } }
+        writeStarted.await()
+        assertFalse(update.isCompleted)
+        releaseWrite.complete(Unit)
+        update.await()
+
+        verifySuspend { nodeRepository.upsert(any()) }
+        assertEquals(42, nodeManager.nodeDBbyNodeNum[nodeNum]?.lastHeard)
+    }
+
+    @Test
+    fun `same-node persistence cannot finish with an older snapshot`() = testScope.runTest {
+        val nodeNum = 1234
+        nodeManager.setNodeDbReady(true)
+        nodeManager.setAllowNodeDbWrites(true)
+        val firstWriteStarted = CompletableDeferred<Unit>()
+        val secondWriteStarted = CompletableDeferred<Unit>()
+        val releaseFirstWrite = CompletableDeferred<Unit>()
+        val persisted = mutableListOf<Node>()
+        var invocation = 0
+        everySuspend { nodeRepository.upsert(any()) } calls
+            {
+                val node = it.arg<Node>(0)
+                invocation++
+                when (invocation) {
+                    1 -> {
+                        firstWriteStarted.complete(Unit)
+                        releaseFirstWrite.await()
+                    }
+
+                    2 -> secondWriteStarted.complete(Unit)
+                }
+                persisted += node
+            }
+
+        val first = async { nodeManager.updateNodeAndPersist(nodeNum) { node -> node.copy(lastHeard = 1) } }
+        firstWriteStarted.await()
+        val second =
+            async(start = CoroutineStart.UNDISPATCHED) {
+                nodeManager.updateNodeAndPersist(nodeNum) { node -> node.copy(lastHeard = 2) }
+            }
+        runCurrent()
+        assertFalse(
+            secondWriteStarted.isCompleted,
+            "the second upsert must not enter while the first owns its lane",
+        )
+
+        releaseFirstWrite.complete(Unit)
+        first.await()
+        second.await()
+
+        assertEquals(listOf(1, 2), persisted.map(Node::lastHeard))
+        assertEquals(2, nodeManager.nodeDBbyNodeNum[nodeNum]?.lastHeard)
+    }
+
+    @Test
+    fun `session-bound node persistence from a retired generation is rejected`() = testScope.runTest {
+        val nodeNum = 1234
+        val oldSession = RadioSessionContext(generation = 7L, address = "ble:same")
+        nodeManager.setNodeDbReady(true)
+        nodeManager.setAllowNodeDbWrites(true)
+        everySuspend { radioInterfaceService.runWithSessionLease(oldSession, any()) } returns false
+
+        nodeManager.updateNodeForSession(nodeNum, oldSession) { node -> node.copy(lastHeard = 42) }
+        runCurrent()
+
+        assertEquals(42, nodeManager.nodeDBbyNodeNum[nodeNum]?.lastHeard)
+        verifySuspend(exactly(0)) { nodeRepository.upsert(any()) }
+    }
+
+    @Test
+    fun `node persistence is suppressed while database writes are disabled`() = testScope.runTest {
+        val nodeNum = 1234
+        nodeManager.setNodeDbReady(true)
+        nodeManager.setAllowNodeDbWrites(false)
+
+        nodeManager.updateNodeAndPersist(nodeNum) { node -> node.copy(lastHeard = 42) }
+
+        verifySuspend(exactly(0)) { nodeRepository.upsert(any()) }
+        assertEquals(42, nodeManager.nodeDBbyNodeNum[nodeNum]?.lastHeard)
     }
 
     @Test

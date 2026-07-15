@@ -22,6 +22,7 @@ import org.meshtastic.core.repository.AdminPacketHandler
 import org.meshtastic.core.repository.MeshConfigFlowManager
 import org.meshtastic.core.repository.MeshConfigHandler
 import org.meshtastic.core.repository.NodeManager
+import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.SessionManager
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.MeshPacket
@@ -38,7 +39,7 @@ class AdminPacketHandlerImpl(
     private val sessionManager: SessionManager,
 ) : AdminPacketHandler {
 
-    override fun handleAdminMessage(packet: MeshPacket, myNodeNum: Int) {
+    override fun handleAdminMessage(packet: MeshPacket, myNodeNum: Int, session: RadioSessionContext) {
         val payload = packet.decoded?.payload ?: return
         val u = AdminMessage.ADAPTER.decode(payload)
         Logger.d { "Admin message from=${packet.from} fields=${u.summarize()}" }
@@ -52,22 +53,26 @@ class AdminPacketHandlerImpl(
         val fromNum = packet.from
         u.get_module_config_response?.let {
             if (fromNum == myNodeNum) {
-                configHandler.value.handleModuleConfig(it)
+                configHandler.value.handleModuleConfig(it, session)
             } else {
-                it.statusmessage?.node_status?.let { nodeManager.updateNodeStatus(fromNum, it) }
+                it.statusmessage?.node_status?.let { status ->
+                    nodeManager.updateNodeForSession(fromNum, session) { node ->
+                        node.copy(nodeStatus = status.takeIf(String::isNotEmpty))
+                    }
+                }
             }
         }
 
         if (fromNum == myNodeNum) {
-            u.get_config_response?.let { configHandler.value.handleDeviceConfig(it) }
-            u.get_channel_response?.let { configHandler.value.handleChannel(it) }
+            u.get_config_response?.let { configHandler.value.handleDeviceConfig(it, session) }
+            u.get_channel_response?.let { configHandler.value.handleChannel(it, session) }
         }
 
         u.get_device_metadata_response?.let {
             if (fromNum == myNodeNum) {
-                configFlowManager.value.handleLocalMetadata(it)
+                configFlowManager.value.handleLocalMetadata(it, session)
             } else {
-                nodeManager.insertMetadata(fromNum, it)
+                nodeManager.insertMetadata(fromNum, it, session)
             }
         }
     }
