@@ -35,6 +35,7 @@ import com.datadog.android.rum.GlobalRumMonitor
 import com.datadog.android.rum.Rum
 import com.datadog.android.rum.RumActionType
 import com.datadog.android.rum.RumConfiguration
+import com.datadog.android.rum.configuration.VitalsUpdateFrequency
 import com.datadog.android.sessionreplay.SessionReplay
 import com.datadog.android.sessionreplay.SessionReplayConfiguration
 import com.datadog.android.sessionreplay.TextAndInputPrivacy
@@ -157,8 +158,11 @@ class GooglePlatformAnalytics(private val context: Context, private val analytic
                 .trackAnonymousUser(true)
                 .trackBackgroundEvents(true) // Match Apple: track background events for cross-platform parity
                 .trackFrustrations(false) // Disable click-tracking based frustration detection
-                .trackLongTasks()
-                .trackNonFatalAnrs(true)
+                // Match Apple: disable long-task detection and continuous vitals monitoring to cut idle
+                // CPU/battery drain (~15% savings). This app runs a 24/7 foreground service, so the same
+                // concern applies. iOS sets longTaskThreshold = nil and vitalsUpdateFrequency = nil.
+                .setVitalsUpdateFrequency(VitalsUpdateFrequency.NEVER)
+                .trackNonFatalAnrs(true) // Android-specific; no iOS equivalent
                 .setSessionSampleRate(sampleRate)
                 .build()
         Rum.enable(rumConfiguration)
@@ -169,8 +173,8 @@ class GooglePlatformAnalytics(private val context: Context, private val analytic
         val traceConfig = TraceConfiguration.Builder().setNetworkInfoEnabled(true).build()
         Trace.enable(traceConfig)
 
-        // Session Replay for debug builds only, matching Apple's TestFlight-only gating.
-        // Masks all text inputs to protect message content.
+        // Session Replay is Android-only debug tooling — iOS ships no Session Replay at all. Enabled for
+        // debug builds only, and masks all text inputs to protect message content.
         if (BuildConfig.DEBUG) {
             val sessionReplayConfig =
                 SessionReplayConfiguration.Builder(sampleRate)
