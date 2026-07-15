@@ -140,10 +140,15 @@ class GooglePlatformAnalytics(private val context: Context, private val analytic
 
     private fun initDatadog(application: Application) {
         val configuration =
+            // Pin RUM/crash/trace to the same service as the Logger and OpenTelemetry (SERVICE_NAME). The core SDK
+            // otherwise defaults `service` to the applicationId (com.geeksville.mesh), splitting the app across two
+            // Datadog services. On dd-sdk-android v2+ the service name is a Configuration.Builder constructor argument
+            // (there is no setService() on the builder). See the PR description: this renames RUM/crash going forward.
             Configuration.Builder(
                 clientToken = BuildConfig.datadogClientToken,
                 env = if (BuildConfig.DEBUG) "Local" else "Production",
                 variant = BuildConfig.FLAVOR,
+                service = SERVICE_NAME,
             )
                 .useSite(DatadogSite.US5)
                 .setCrashReportsEnabled(true)
