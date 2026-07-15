@@ -27,21 +27,28 @@ private const val EPSILON = 0.001
 
 class AirQualityIndexTest {
 
-    // EPA PM2.5 breakpoint table reference values (concentration -> AQI).
+    // Current (2024) EPA PM2.5 24-hour breakpoint table reference values (concentration -> AQI).
     @Test
     fun pm25ToAqi_matches_epa_breakpoint_table() {
         assertEquals(0, AirQualityIndex.pm25ToAqi(0.0))
-        assertEquals(50, AirQualityIndex.pm25ToAqi(12.0))
-        assertEquals(51, AirQualityIndex.pm25ToAqi(12.1))
+        assertEquals(50, AirQualityIndex.pm25ToAqi(9.0))
+        assertEquals(51, AirQualityIndex.pm25ToAqi(9.1))
         assertEquals(100, AirQualityIndex.pm25ToAqi(35.4))
         assertEquals(101, AirQualityIndex.pm25ToAqi(35.5))
         assertEquals(150, AirQualityIndex.pm25ToAqi(55.4))
         assertEquals(151, AirQualityIndex.pm25ToAqi(55.5))
-        assertEquals(200, AirQualityIndex.pm25ToAqi(150.4))
-        assertEquals(201, AirQualityIndex.pm25ToAqi(150.5))
-        assertEquals(300, AirQualityIndex.pm25ToAqi(250.4))
-        assertEquals(301, AirQualityIndex.pm25ToAqi(250.5))
-        assertEquals(500, AirQualityIndex.pm25ToAqi(500.4))
+        assertEquals(200, AirQualityIndex.pm25ToAqi(125.4))
+        assertEquals(201, AirQualityIndex.pm25ToAqi(125.5))
+        assertEquals(300, AirQualityIndex.pm25ToAqi(225.4))
+        assertEquals(301, AirQualityIndex.pm25ToAqi(225.5))
+        assertEquals(500, AirQualityIndex.pm25ToAqi(325.4))
+    }
+
+    // Regression for meshtastic/design#54: PM2.5 = 10 µg/m³ was "42, Good" on the legacy table;
+    // on the 2024 table it must be "53, Moderate", matching iOS (meshtastic/Meshtastic-Apple#2075).
+    @Test
+    fun pm25ToAqi_uses_2024_breakpoints_for_low_concentrations() {
+        assertEquals(53, AirQualityIndex.pm25ToAqi(10.0))
     }
 
     @Test

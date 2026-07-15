@@ -84,15 +84,17 @@ object AirQualityIndex {
         val aqiHigh: Int,
     )
 
-    // Standard EPA PM2.5 (µg/m³) breakpoint table.
+    // Current (2024) EPA PM2.5 24-hour breakpoint table (AQS parameter 88101), µg/m³.
+    // Kept in lockstep with iOS (meshtastic/Meshtastic-Apple#2075) for cross-platform AQI alignment
+    // (meshtastic/design#54).
     private val BREAKPOINTS =
         listOf(
-            Breakpoint(0.0, 12.0, 0, 50),
-            Breakpoint(12.1, 35.4, 51, 100),
+            Breakpoint(0.0, 9.0, 0, 50),
+            Breakpoint(9.1, 35.4, 51, 100),
             Breakpoint(35.5, 55.4, 101, 150),
-            Breakpoint(55.5, 150.4, 151, 200),
-            Breakpoint(150.5, 250.4, 201, 300),
-            Breakpoint(250.5, 500.4, 301, 500),
+            Breakpoint(55.5, 125.4, 151, 200),
+            Breakpoint(125.5, 225.4, 201, 300),
+            Breakpoint(225.5, 325.4, 301, 500),
         )
 
     /**
