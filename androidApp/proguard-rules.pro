@@ -1,8 +1,8 @@
 # ============================================================================
 # Meshtastic Android — ProGuard / R8 rules for release minification
 # ============================================================================
-# Open-source project: obfuscation and optimization are disabled. We rely on
-# tree-shaking (unused code removal) for APK size reduction.
+# Open-source project: obfuscation is disabled (readable stack traces). We rely
+# on R8 optimization + tree-shaking (unused code removal) for APK size reduction.
 #
 # Cross-platform library rules (Koin, kotlinx-serialization, Wire, Room,
 # Ktor, Coil, Kable, Kermit, Okio, DataStore, Paging, Lifecycle, Navigation 3,
